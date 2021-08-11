@@ -224,9 +224,9 @@ class PhyloTreeCreationModal extends React.Component {
           ...(numContigs === 0 && {
             shouldDisable: true,
             tooltipInfo: {
-              position: "right center",
+              position: "top center",
               content:
-                "There must be at least 1 contig in the sample for it to be included in the tree.",
+                "There must be at least 1 contig in the sample for it to be selected for inclusion in the tree.",
             },
           }),
           ...formattedSample,

@@ -177,44 +177,56 @@ class DataTable extends React.Component {
               />
             );
 
-            return (
-              <tr
-                key={row.__originalIndex}
-                className={shouldDisable && cs.disabled}
-              >
-                {this.props.onSelectedRowsChanged && (
-                  <td className="data-table__data column-reserved-selectable">
-                    {shouldDisable ? (
-                      <ColumnHeaderTooltip
-                        trigger={
-                          <span>
-                            {React.cloneElement(checkbox, { disabled: true })}
-                          </span>
-                        }
-                        content={get(["tooltipInfo", "content"], row)}
-                        position={get(["tooltipInfo", "position"], row)}
-                      />
-                    ) : (
-                      checkbox
-                    )}
-                  </td>
+            const columns = this.props.columns.map((column, colIdx) => (
+              <td
+                className={cx(
+                  `data-table__data column-${column}`,
+                  shouldDisable && cs.disabled
                 )}
-                {this.props.columns.map((column, colIdx) => (
-                  <td
-                    className={cx(
-                      `data-table__data column-${column}`,
-                      shouldDisable && cs.disabled
-                    )}
-                    style={this.getCellStyle(column)}
-                    key={colIdx}
+                style={this.getCellStyle(column)}
+                key={colIdx}
+              >
+                {/* If we want to display an object (e.g. location object), provide a 'name' field */}
+                {isObject(row[column]) && row[column].name !== undefined
+                  ? row[column].name
+                  : row[column]}
+              </td>
+            ));
+
+            return (
+              <>
+                {shouldDisable ? (
+                  <ColumnHeaderTooltip
+                    trigger={
+                      <tr
+                        key={row.__originalIndex}
+                        className={shouldDisable && cs.disabled}
+                      >
+                        {this.props.onSelectedRowsChanged && (
+                          <td className="data-table__data column-reserved-selectable">
+                            {React.cloneElement(checkbox, { disabled: true })}
+                          </td>
+                        )}
+                        {columns}
+                      </tr>
+                    }
+                    content={get(["tooltipInfo", "content"], row)}
+                    position={get(["tooltipInfo", "position"], row)}
+                  />
+                ) : (
+                  <tr
+                    key={row.__originalIndex}
+                    className={shouldDisable && cs.disabled}
                   >
-                    {/* If we want to display an object (e.g. location object), provide a 'name' field */}
-                    {isObject(row[column]) && row[column].name !== undefined
-                      ? row[column].name
-                      : row[column]}
-                  </td>
-                ))}
-              </tr>
+                    {this.props.onSelectedRowsChanged && (
+                      <td className="data-table__data column-reserved-selectable">
+                        {checkbox}
+                      </td>
+                    )}
+                    {columns}
+                  </tr>
+                )}
+              </>
             );
           })}
         </tbody>
