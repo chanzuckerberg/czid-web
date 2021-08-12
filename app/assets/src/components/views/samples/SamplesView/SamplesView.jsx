@@ -47,6 +47,7 @@ import { SARS_COV_2, TRIGGERS, WORKFLOW_TRIGGERS } from "./constants";
 import cs from "./samples_view.scss";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
+const MAX_TAXON_HEATMAP_SAMPLES = 500;
 
 class SamplesView extends React.Component {
   constructor(props, context) {
@@ -157,45 +158,54 @@ class SamplesView extends React.Component {
     ];
 
     const heatmapIcon = <IconHeatmap className={cs.icon} />;
-
-    return selectedIds.size < 2 ? (
+    const disabledToolbarIcon = subtitle => (
       <ToolbarIcon
         className={cx(cs.action, cs.heatmap)}
         disabled
         icon={heatmapIcon}
         popupText="Heatmap"
-        popupSubtitle="Select at least 2 samples"
-      />
-    ) : (
-      <BareDropdown
-        hideArrow
-        className={cx(cs.action)}
-        items={heatmapOptions.map(option => {
-          const params = getURLParamString({
-            sampleIds: Array.from(selectedIds),
-          });
-          const log = () =>
-            logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
-              option,
-              selectedIds: selectedIds.size,
-            });
-          return (
-            <BareDropdown.Item
-              key={option.text}
-              text={<a href={`${option.value}?${params}`}>{option.text}</a>}
-              onClick={log}
-            />
-          );
-        })}
-        trigger={
-          <ToolbarIcon
-            className={cs.heatmap}
-            icon={heatmapIcon}
-            popupText="Heatmap"
-          />
-        }
+        popupSubtitle={subtitle}
       />
     );
+
+    if (selectedIds.size < 2) {
+      return disabledToolbarIcon("Select at least 2 samples");
+    } else if (selectedIds.size > MAX_TAXON_HEATMAP_SAMPLES) {
+      return disabledToolbarIcon(
+        `Select at most ${MAX_TAXON_HEATMAP_SAMPLES} samples`
+      );
+    } else {
+      return (
+        <BareDropdown
+          hideArrow
+          className={cx(cs.action)}
+          items={heatmapOptions.map(option => {
+            const params = getURLParamString({
+              sampleIds: Array.from(selectedIds),
+            });
+            const log = () =>
+              logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
+                option,
+                selectedIds: selectedIds.size,
+              });
+            return (
+              <BareDropdown.Item
+                key={option.text}
+                text={<a href={`${option.value}?${params}`}>{option.text}</a>}
+                onClick={log}
+              />
+            );
+          })}
+          trigger={
+            <ToolbarIcon
+              className={cs.heatmap}
+              icon={heatmapIcon}
+              popupText="Heatmap"
+            />
+          }
+        />
+      );
+    }
   };
 
   renderPhyloTreeTrigger = () => {
