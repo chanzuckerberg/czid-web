@@ -15,7 +15,7 @@ SimpleCov.start 'rails' do
   #
   # Line coverage measures % of lines executed.
   # Branch coverage measures % of conditional branches executed.
-  minimum_coverage line: 60, branch: 45
+  minimum_coverage line: 61, branch: 46
 
   # Exclude mostly manual tasks for now:
   add_filter "/lib/tasks"

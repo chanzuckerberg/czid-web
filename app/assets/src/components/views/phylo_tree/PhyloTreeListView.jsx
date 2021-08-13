@@ -41,14 +41,15 @@ import cs from "./phylo_tree_list_view.scss";
 
 // Old PhyloTree statuses:
 const STATUS_INITIALIZED = 0;
-// Unused: const STATUS_READY = 1;
+const STATUS_READY = 1;
 const STATUS_FAILED = 2;
 const STATUS_IN_PROGRESS = 3;
 
 // PhyloTreeNg statuses:
 const NG_STATUS_CREATED = "CREATED";
-const NG_STATUS_RUNNING = "RUNNING";
 const NG_STATUS_FAILED = "FAILED";
+const NG_STATUS_RUNNING = "RUNNING";
+const NG_STATUS_SUCCEEDED = "SUCCEEDED";
 
 class PhyloTreeListView extends React.Component {
   constructor(props) {
@@ -462,12 +463,16 @@ class PhyloTreeListView extends React.Component {
               )}
               className={cs.controlElement}
             />
-            <PhyloTreeDownloadButton
-              className={cs.controlElement}
-              showPhyloTreeNgOptions={!!selectedPhyloTreeNgId}
-              tree={currentTree}
-              treeContainer={treeContainer}
-            />
+            {[STATUS_READY, NG_STATUS_SUCCEEDED].includes(
+              currentTree.status
+            ) && (
+              <PhyloTreeDownloadButton
+                className={cs.controlElement}
+                showPhyloTreeNgOptions={!!selectedPhyloTreeNgId}
+                tree={currentTree}
+                treeContainer={treeContainer}
+              />
+            )}
           </ViewHeader.Controls>
         </ViewHeader>
       </NarrowContainer>

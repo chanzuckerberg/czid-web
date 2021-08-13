@@ -35,7 +35,7 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
 - **Recommended**: Usually you can pull the latest image from AWS ECR (if working off `main`) and downloading is likely faster than rebuilding:
   - `ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')`
   - `aws ecr get-login-password | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web`
-  - `docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:compose`
+  - `docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:branch-main`
   - `aws-oidc exec -- docker-compose up web`
 
 ### Avoiding Docker

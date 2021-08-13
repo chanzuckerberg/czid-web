@@ -415,6 +415,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     before do
       sign_in @joe
       create(:phylo_tree_ng, name: "existing_name")
+      create(:phylo_tree_ng, name: "Phylo tree ng 1")
     end
 
     context "with unique name" do
@@ -426,11 +427,9 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(valid: true, sanitizedName: name)
       end
-    end
 
-    context "with duplicate name" do
-      it "is valid" do
-        name = "existing_name"
+      it "is case sensitive" do
+        name = "Unique_name"
 
         get :validate_name, params: { format: "json", name: name }
 
@@ -439,15 +438,41 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       end
     end
 
+    context "with same name as an existing phylo tree NG" do
+      it "is invalid" do
+        name = "existing_name"
+
+        get :validate_name, params: { format: "json", name: name }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(valid: false, sanitizedName: name)
+      end
+    end
+
+    context "with same name as an existing old phylo tree" do
+      before do
+        create(:phylo_tree, name: "existing_old_tree")
+      end
+
+      it "is invalid" do
+        name = "existing_old_tree"
+
+        get :validate_name, params: { format: "json", name: name }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(valid: false, sanitizedName: name)
+      end
+    end
+
     context "with duplicate name after sanitization" do
-      it "is valid" do
-        unsanitized_name = "sanitize/ name'"
-        sanitized_name = "sanitize  name"
+      it "is invalid" do
+        unsanitized_name = "Phylo/tree'ng 1"
+        sanitized_name = "Phylo tree ng 1"
 
         get :validate_name, params: { format: "json", name: unsanitized_name }
 
         json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(valid: true, sanitizedName: sanitized_name)
+        expect(json_response).to include_json(valid: false, sanitizedName: sanitized_name)
       end
     end
 

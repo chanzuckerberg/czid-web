@@ -224,12 +224,12 @@ class PhyloTreeNgsController < ApplicationController
 
   # GET /phylo_tree_ngs/validate_name
   def validate_name
-    # This just checks if a sanitized name would have an ActiveRecord name error:
     name = sanitize_title_name(collection_params[:name])
     pt = PhyloTreeNg.new(name: name)
     pt.valid?
+    valid = !(pt.errors.key?(:name) || PhyloTreeNg.exists?(name: name) || PhyloTree.exists?(name: name))
     render json: {
-      valid: !pt.errors.key?(:name),
+      valid: valid,
       sanitizedName: name,
     }
   end
