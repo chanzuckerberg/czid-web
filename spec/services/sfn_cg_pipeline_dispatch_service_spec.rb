@@ -116,7 +116,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
             Input: {
               Run: {
                 docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:v#{fake_wdl_version}",
-                sample: sample.name,
+                sample: sample.name.tr(" ", "_"),
                 ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
                 ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
                 kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",
