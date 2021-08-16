@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_614_220_919) do
+ActiveRecord::Schema.define(version: 20_210_804_175_504) do
   create_table "alignment_configs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"

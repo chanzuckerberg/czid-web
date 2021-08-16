@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { fromPairs, set, find } from "lodash/fp";
+import { set, find } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -28,9 +28,12 @@ import {
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import PhyloTreeHeatmapErrorModal from "~/components/views/phylo_tree/PhyloTreeHeatmapErrorModal";
+import ToolbarIcon from "~/components/views/samples/SamplesView/ToolbarIcon";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
+import Link from "~ui/controls/Link";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import { IconAlert } from "~ui/icons";
+import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 import Notification from "~ui/notifications/Notification";
 
 import Divider from "../../layout/Divider";
@@ -58,11 +61,9 @@ class PhyloTreeListView extends React.Component {
     const urlParams = parseUrlParams();
 
     this.state = {
+      adminToolsOpen: false,
       currentTree: null,
       heatmapErrorModalOpen: false,
-      phyloTreeMap: fromPairs(
-        (props.phyloTrees || []).map(tree => [tree.id, tree])
-      ),
       phyloTrees: props.phyloTrees || [],
       selectedPipelineRunId: null,
       selectedSampleId: null,
@@ -318,26 +319,26 @@ class PhyloTreeListView extends React.Component {
   };
 
   renderAdminPanel = () => {
-    const { currentTree, phyloTreeMap } = this.state;
+    const { currentTree, phyloTrees } = this.state;
+    const nextGeneration = find({ id: currentTree.id }, phyloTrees)
+      .nextGeneration;
     return (
       <div className={cs.adminPanel}>
-        <div className={cs.header}>Admin panel:</div>
+        <div className={cs.header}>Admin Tools</div>
         <PrimaryButton
-          text="Retry Phylo Tree"
+          text="Rerun Tree"
           onClick={() => {
-            retryPhyloTree(currentTree.id);
-            location.reload();
-          }}
-        />
-        <PrimaryButton
-          text="Retry Phylo Tree NG"
-          onClick={() => {
-            rerunPhyloTreeNg(currentTree.id);
+            nextGeneration
+              ? rerunPhyloTreeNg(currentTree.id)
+              : retryPhyloTree(currentTree.id);
             location.reload();
           }}
         />
         <div>
-          <pre>{JSON.stringify(phyloTreeMap[currentTree.id], null, 2)}</pre>
+          <Link href={currentTree.log_url}>Link to Pipeline</Link>
+        </div>
+        <div>
+          <pre>{JSON.stringify(currentTree, null, 2)}</pre>
         </div>
       </div>
     );
@@ -513,6 +514,7 @@ class PhyloTreeListView extends React.Component {
 
   render() {
     const {
+      adminToolsOpen,
       currentTree,
       heatmapErrorModalOpen,
       selectedPhyloTreeId,
@@ -555,10 +557,17 @@ class PhyloTreeListView extends React.Component {
             allowedFeatures.includes(PHYLO_TREE_NG_FEATURE) &&
             this.renderOldTreeWarning()}
           {this.renderVisualization()}
+          {admin && (
+            <ToolbarIcon
+              onClick={() => {
+                this.setState({ adminToolsOpen: !adminToolsOpen });
+              }}
+              icon={<ImgMicrobePrimary />}
+              popupText="Admin Tools"
+            />
+          )}
+          {adminToolsOpen && this.renderAdminPanel()}
         </NarrowContainer>
-        {admin &&
-          currentTree.status === STATUS_FAILED &&
-          this.renderAdminPanel()}
         {heatmapErrorModalOpen && (
           <PhyloTreeHeatmapErrorModal
             open

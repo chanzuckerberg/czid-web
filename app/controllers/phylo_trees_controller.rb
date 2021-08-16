@@ -85,6 +85,7 @@ class PhyloTreesController < ApplicationController
     # &.name helps in local dev in case users are missing:
     pt["user"] = @phylo_tree.user&.name
     pt["parent_taxid"] = TaxonLineage.where(taxid: @phylo_tree.taxid).last.genus_taxid if @phylo_tree.tax_level == 1
+    pt["log_url"] = @phylo_tree.log_url if current_user.admin?
 
     nodes = {}
     # populate metadata for sample nodes

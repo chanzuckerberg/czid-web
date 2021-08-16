@@ -581,6 +581,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         pt = JSON.parse(response.body)
 
         expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "parent_taxid", "sampleDetailsByNodeName")
+        expect(pt.keys).not_to include("log_url", "sfn_execution_arn", "s3_output_prefix")
         expect(pt["tax_level"]).to eq(1)
       end
     end
@@ -635,6 +636,22 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
           "status" => tree.status,
           "tax_name" => fake_species
         )
+      end
+    end
+
+    context "with admin user" do
+      before do
+        sign_in @admin
+      end
+
+      it "shows admin-only fields" do
+        expect_any_instance_of(PhyloTreeNg).to receive(:results).and_return(@pt_mock_results)
+        get :show, params: { id: @phylo_tree_one.id, format: "json" }
+
+        expect(response).to have_http_status :ok
+        pt = JSON.parse(response.body)
+
+        expect(pt.keys).to include("log_url", "sfn_execution_arn", "s3_output_prefix")
       end
     end
   end

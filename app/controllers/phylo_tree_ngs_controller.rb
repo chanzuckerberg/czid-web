@@ -65,7 +65,12 @@ class PhyloTreeNgsController < ApplicationController
       end
 
       format.json do
-        pt = @phylo_tree_ng.as_json(only: ["id", "name", "tax_id", "status"])
+        if current_user.admin?
+          pt = @phylo_tree_ng.as_json
+          pt["log_url"] = AwsUtil.get_sfn_execution_url(@phylo_tree_ng.sfn_execution_arn)
+        else
+          pt = @phylo_tree_ng.as_json(only: ["id", "name", "tax_id", "status"])
+        end
 
         taxon_lineage = TaxonLineage.where(taxid: pt["tax_id"]).last
         pt["tax_name"] = taxon_lineage.tax_name
