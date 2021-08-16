@@ -1,6 +1,6 @@
 // These are the buttons that appear on a Report table row when hovered.
 import cx from "classnames";
-import { filter, size } from "lodash/fp";
+import { filter, pick, size } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
@@ -246,11 +246,24 @@ class HoverActions extends React.Component {
         position="top center"
         key={hoverAction.key}
         trigger={React.cloneElement(trigger, {
-          onMouseEnter: () =>
+          onMouseEnter: () => {
+            const { enabled, key, params } = hoverAction;
+
             logAnalyticsEvent(
               ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HOVER_ACTION_HOVERED,
-              { hoverAction, sampleId }
-            ),
+              {
+                enabled,
+                key,
+                sampleId,
+                ...(params
+                  ? pick(
+                      ["taxId", "taxLevel", "taxName", "pipelineVersion"],
+                      params
+                    )
+                  : {}),
+              }
+            );
+          },
         })}
         content={tooltipMessage}
       />
