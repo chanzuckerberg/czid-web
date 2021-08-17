@@ -24,6 +24,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     ampliseq: "ampliseq",
     # See: https://artic.network/resources/ncov/ncov-amplicon-v3.pdf
     artic: "artic",
+    # See: https://raw.githubusercontent.com/artic-network/artic-ncov2019/master/primer_schemes/nCoV-2019/V4/SARS-CoV-2.primer.bed
+    artic_v4: "artic_v4",
     # Artic v3 with short amplicons (275 bp) from Biohub
     artic_short_amplicons: "artic_short_amplicons",
     # MSSPE + ARTIC concatenated

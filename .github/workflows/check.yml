@@ -40,13 +40,17 @@ jobs:
           MYSQL_PASSWORD: test_password
     steps:
     - uses: actions/checkout@v2
+    - name: Determine Kernel Version
+      run: |
+        echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
     - name: Cache Ruby Dependencies
       uses: actions/cache@v2
       with:
         path: vendor/bundle
-        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+        # Include kernel version for under-the-hood gem changes:
+        key: ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems-${{ hashFiles('**/Gemfile.lock') }}
         restore-keys: |
-          ${{ runner.os }}-gems
+          ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems
     - name: Install Ruby Dependencies
       run: |
         gem install bundler
@@ -93,13 +97,17 @@ jobs:
     - uses: actions/setup-ruby@v1
       with:
         ruby-version: "2.7"
+    - name: Determine Kernel Version
+      run: |
+        echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
     - name: Cache Ruby Dependencies
       uses: actions/cache@v2
       with:
         path: vendor/bundle
-        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+        # Include kernel version for under-the-hood gem changes:
+        key: ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems-${{ hashFiles('**/Gemfile.lock') }}
         restore-keys: |
-          ${{ runner.os }}-gem
+          ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems
     - name: Install Ruby Dependencies
       run: |
         gem install bundler

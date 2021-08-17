@@ -7,6 +7,10 @@ export const SELECT_ID_KEY = "_selectId";
 
 export const CG_WETLAB_OPTIONS = [
   {
+    text: "ARTIC v4",
+    value: "artic_v4",
+  },
+  {
     text: "ARTIC v3",
     value: "artic",
   },
@@ -39,6 +43,7 @@ export const CG_WETLAB_OPTIONS = [
 export const CG_WETLAB_DISPLAY_NAMES = {
   ampliseq: "AmpliSeq",
   artic_short_amplicons: "ARTIC v3 - Short Amplicons (275 bp)",
+  artic_v4: "ARTIC v4",
   artic: "ARTIC v3",
   combined_msspe_artic: "Combined MSSPE & ARTIC v3",
   covidseq: "COVIDseq",
@@ -65,6 +70,10 @@ export const CG_NANOPORE_WETLAB_OPTIONS = [
   {
     text: "Midnight",
     value: "midnight",
+  },
+  {
+    text: "ARTIC v4",
+    value: "artic_v4",
   },
 ];
 

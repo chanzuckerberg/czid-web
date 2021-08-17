@@ -263,6 +263,28 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
         end
       end
 
+      context "when ARTIC v4 protocol is chosen" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic_v4] }.to_json)
+        end
+
+        it "returns sfn input with ARTIC short amplicons primer" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v4_primers.bed",
+                },
+              },
+            }
+          )
+        end
+      end
+
       context "when COVIDseq wetlab protocol is chosen" do
         let(:workflow_run) do
           create(:workflow_run,
@@ -415,6 +437,31 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                   medaka_model: medaka_model,
                   vadr_options: vadr_options,
                   primer_set: "nCoV-2019/V1200",
+                },
+              },
+            }
+          )
+        end
+      end
+
+      context "when Artic V4 primers are chosen with ONT" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+
+          it "returns sfn input with artic v4 primer set"
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  apply_length_filter: true,
+                  technology: nanopore_technology,
+                  medaka_model: medaka_model,
+                  vadr_options: vadr_options,
+                  primer_set: "nCoV-2019/V4",
                 },
               },
             }
