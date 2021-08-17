@@ -8,8 +8,6 @@ class HandleSfnNotifications
   shoryuken_options queue: ENV["SFN_NOTIFICATIONS_QUEUE_ARN"], body_parser: :json
 
   def perform(sqs_msg, body)
-    return unless AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
-
     if body && body["Message"]
       parsed_message = JSON.parse(body["Message"])
       detail_type = parsed_message["detail-type"]

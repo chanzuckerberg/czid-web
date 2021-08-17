@@ -44,54 +44,37 @@ RSpec.describe HandleSfnNotifications, type: :job do
   subject { HandleSfnNotifications.new }
 
   describe "#perform" do
-    context "when the feature is not enabled" do
-      it "does nothing" do
-        _ = workflow_run  # Force it to be loaded
-        expect(WorkflowRun).not_to receive(:find_by)
+    it "processes notification messages, updates WorkflowRun status, and deletes the message" do
+      _ = workflow_run  # Force it to be loaded
+      expect(WorkflowRun).to receive(:find_by).with(sfn_execution_arn: known_execution_arn).and_call_original
+      expect(sqs_msg).to receive(:delete)
 
-        expect(subject.perform(sqs_msg, valid_message)).to eq(nil)
+      expect(subject.perform(sqs_msg, valid_message)).to be_truthy
 
-        expect(workflow_run.reload.status).to eq(old_status)
-      end
+      expect(workflow_run.reload.status).to eq(new_status)
     end
 
-    context "when the feature is enabled" do
-      before do
-        expect(AppConfigHelper).to receive(:get_app_config).with(AppConfig::ENABLE_SFN_NOTIFICATIONS).and_return("1")
-      end
+    it "ignores other kinds of event messages" do
+      expect(WorkflowRun).not_to receive(:find_by)
+      expect(sqs_msg).not_to receive(:delete)
 
-      it "processes notification messages, updates WorkflowRun status, and deletes the message" do
-        _ = workflow_run  # Force it to be loaded
-        expect(WorkflowRun).to receive(:find_by).with(sfn_execution_arn: known_execution_arn).and_call_original
-        expect(sqs_msg).to receive(:delete)
+      expect(subject.perform(sqs_msg, other_event_message)).to eq(nil)
+    end
 
-        expect(subject.perform(sqs_msg, valid_message)).to be_truthy
+    it "ignores SFN executions that it does not know about" do
+      expect(workflow_run).not_to receive(:update_status)
+      expect(sqs_msg).not_to receive(:delete)
 
-        expect(workflow_run.reload.status).to eq(new_status)
-      end
+      expect(subject.perform(sqs_msg, other_execution_message)).to eq(nil)
+    end
 
-      it "ignores other kinds of event messages" do
-        expect(WorkflowRun).not_to receive(:find_by)
-        expect(sqs_msg).not_to receive(:delete)
+    it "reports runtime exceptions" do
+      expect(WorkflowRun).to receive(:find_by).and_raise("Something went wrong!")
+      expect(sqs_msg).not_to receive(:delete)
 
-        expect(subject.perform(sqs_msg, other_event_message)).to eq(nil)
-      end
+      expect(LogUtil).to receive(:log_error)
 
-      it "ignores SFN executions that it does not know about" do
-        expect(workflow_run).not_to receive(:update_status)
-        expect(sqs_msg).not_to receive(:delete)
-
-        expect(subject.perform(sqs_msg, other_execution_message)).to eq(nil)
-      end
-
-      it "reports runtime exceptions" do
-        expect(WorkflowRun).to receive(:find_by).and_raise("Something went wrong!")
-        expect(sqs_msg).not_to receive(:delete)
-
-        expect(LogUtil).to receive(:log_error)
-
-        subject.perform(sqs_msg, valid_message)
-      end
+      subject.perform(sqs_msg, valid_message)
     end
   end
 end

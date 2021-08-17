@@ -52,6 +52,4 @@ class AppConfig < ApplicationRecord
   WORKFLOW_VERSION_TEMPLATE = "%<workflow_name>s-version".freeze
   # SSRF flag configures the app to use SSRFs-Up to send requests
   ENABLE_SSRFS_UP = "enabled_ssrfs_up".freeze
-  # When this is "1", CG status updates will be in HandleSfnNotifications instead of PipelineMonitor.
-  ENABLE_SFN_NOTIFICATIONS = "enable_sfn_notifications".freeze
 end

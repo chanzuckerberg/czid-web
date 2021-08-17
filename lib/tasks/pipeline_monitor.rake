@@ -31,12 +31,11 @@ class CheckPipelineRuns
     attr_accessor :shutdown_requested
   end
 
-  def self.update_jobs(num_shards, shard_id, pr_ids, pt_ids, wr_ids)
+  def self.update_jobs(num_shards, shard_id, pr_ids, pt_ids)
     ActiveRecord::Base.connection.reconnect! if shard_id > 0
     num_pr = pr_ids.count
     num_pt = pt_ids.count
-    num_wr = wr_ids.count
-    Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr, #{num_pt} pt, and #{num_wr} wr. shard #{shard_id} out of #{num_shards}")
+    Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt. shard #{shard_id} out of #{num_shards}")
     pr_ids.each do |prid|
       next unless prid % num_shards == shard_id
 
@@ -70,26 +69,6 @@ class CheckPipelineRuns
           exception: exception,
           phylo_tree_id: pt.id
         )
-      end
-    end
-
-    if num_wr > 0 && AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) != "1"
-      wr_ids.each do |wrid|
-        next unless wrid % num_shards == shard_id
-
-        wr = WorkflowRun.find(wrid)
-        begin
-          break if @shutdown_requested
-
-          Rails.logger.info("  Checking WorkflowRun #{wrid} for sample #{wr.sample_id}")
-          wr.update_status
-        rescue StandardError => exception
-          LogUtil.log_error(
-            "Updating Workflow #{wrid} failed with exception: #{exception.message}",
-            exception: exception,
-            workflow_run_id: wrid
-          )
-        end
       end
     end
   end
@@ -296,13 +275,12 @@ class CheckPipelineRuns
         t_iter_start = t_now
         pr_ids = PipelineRun.in_progress.pluck(:id)
         pt_ids = PhyloTree.in_progress.pluck(:id)
-        wr_ids = WorkflowRun.in_progress.pluck(:id)
         num_shards = ((pr_ids.count + pt_ids.count) / MIN_JOBS_PER_SHARD).to_i
         num_shards = [[num_shards, MAX_SHARDS].min, 1].max
         fork_pids = []
         shard_id = 0
         while shard_id < num_shards
-          pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids, wr_ids) }
+          pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids) }
           fork_pids << pid
           shard_id += 1
         end
@@ -315,7 +293,6 @@ class CheckPipelineRuns
           duration: (after_iter_timestamp - before_iter_timestamp),
           pr_id_count: pr_ids.count,
           pt_id_count: pt_ids.count,
-          wr_id_count: wr_ids.count,
           num_shards: num_shards,
         }
         payload[:args] = { duration: duration, min_refresh_interval: min_refresh_interval }
@@ -323,7 +300,6 @@ class CheckPipelineRuns
         payload[:extra_metrics] = [
           CloudWatchUtil.create_metric_datum("Pipeline Run Count", logger_iteration_data[:pr_id_count], "Count"),
           CloudWatchUtil.create_metric_datum("Phylo Tree Run Count", logger_iteration_data[:pt_id_count], "Count"),
-          CloudWatchUtil.create_metric_datum("Consensus Genome Run Count", logger_iteration_data[:wr_id_count], "Count"),
           CloudWatchUtil.create_metric_datum("Number of Shards", logger_iteration_data[:num_shards], "Count"),
         ]
         # HACK: This logger isn't really meant to deal with nested json
