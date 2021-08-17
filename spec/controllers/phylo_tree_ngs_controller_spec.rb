@@ -580,7 +580,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "parent_taxid", "sampleDetailsByNodeName")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "parent_taxid", "sampleDetailsByNodeName", "nextGeneration")
         expect(pt.keys).not_to include("log_url", "sfn_execution_arn", "s3_output_prefix")
         expect(pt["tax_level"]).to eq(1)
       end
@@ -594,7 +594,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName", "nextGeneration")
         expect(pt["tax_level"]).to eq(2)
       end
     end
@@ -617,7 +617,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "status", "tax_name", "clustermap_svg_url")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "status", "tax_name", "clustermap_svg_url", "nextGeneration")
       end
     end
 
@@ -683,6 +683,8 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         put :rerun, params: { id: phylo_tree.id }
 
         expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include("id", "status" => "success")
       end
 
       it "returns an error if the phylo tree is not found" do

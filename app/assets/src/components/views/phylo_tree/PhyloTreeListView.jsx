@@ -318,22 +318,23 @@ class PhyloTreeListView extends React.Component {
     });
   };
 
+  handleRerunClick = async () => {
+    const { currentTree } = this.state;
+    if (currentTree.nextGeneration) {
+      const { id } = await rerunPhyloTreeNg(currentTree.id);
+      this.handleTreeChange(id, true);
+    } else {
+      retryPhyloTree(currentTree.id);
+      location.reload();
+    }
+  };
+
   renderAdminPanel = () => {
-    const { currentTree, phyloTrees } = this.state;
-    const nextGeneration = find({ id: currentTree.id }, phyloTrees)
-      .nextGeneration;
+    const { currentTree } = this.state;
     return (
       <div className={cs.adminPanel}>
         <div className={cs.header}>Admin Tools</div>
-        <PrimaryButton
-          text="Rerun Tree"
-          onClick={() => {
-            nextGeneration
-              ? rerunPhyloTreeNg(currentTree.id)
-              : retryPhyloTree(currentTree.id);
-            location.reload();
-          }}
-        />
+        <PrimaryButton text="Rerun Tree" onClick={this.handleRerunClick} />
         <div>
           <Link href={currentTree.log_url}>Link to Pipeline</Link>
         </div>

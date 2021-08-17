@@ -74,6 +74,7 @@ class PhyloTreeNgsController < ApplicationController
 
         taxon_lineage = TaxonLineage.where(taxid: pt["tax_id"]).last
         pt["tax_name"] = taxon_lineage.tax_name
+        pt["nextGeneration"] = true
 
         # If the tree didn't succeed, everything below the next block is not
         # used for display:
@@ -242,8 +243,8 @@ class PhyloTreeNgsController < ApplicationController
   # PUT /phylo_tree_ngs/:id/rerun
   def rerun
     phylo_tree = current_power.updatable_phylo_tree_ngs.find(member_params[:id])
-    phylo_tree.rerun
-    render json: { status: "success" }, status: :ok
+    new_tree = phylo_tree.rerun
+    render json: { status: "success", id: new_tree.id }, status: :ok
   rescue StandardError => e
     LogUtil.log_error("Rerun trigger failed", exception: e, phylo_tree_id: phylo_tree&.id)
     render json: {
