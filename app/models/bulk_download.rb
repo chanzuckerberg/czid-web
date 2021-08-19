@@ -568,7 +568,7 @@ class BulkDownload < ApplicationRecord
       # Add the accession ids to the fasta headers
       headers = {}
       workflow_runs_ordered.includes(:sample).map do |run|
-        headers[run.id] = ">#{run.sample.name} #{get_accession_id(run)}\n"
+        headers[run.id] = ">#{run.sample.name}_#{get_accession_id(run)}\n"
       end
 
       Rails.logger.info("Starting concatenation...")

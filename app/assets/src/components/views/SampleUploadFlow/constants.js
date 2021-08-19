@@ -5,6 +5,7 @@ export const NO_VALID_SAMPLES_FOUND_ERROR = "No valid samples were found.";
 
 export const SELECT_ID_KEY = "_selectId";
 
+// WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/idseq-cli-v2
 export const CG_WETLAB_OPTIONS = [
   {
     text: "ARTIC v4",
@@ -62,6 +63,7 @@ export const CG_TECHNOLOGY_DISPLAY_NAMES = {
   ONT: "Nanopore",
 };
 
+// WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/idseq-cli-v2
 export const CG_NANOPORE_WETLAB_OPTIONS = [
   {
     text: "ARTIC v3",
