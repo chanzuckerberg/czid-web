@@ -175,6 +175,61 @@ function EventDictionary() {
   /** The user clicked the BackgroundModelFilter in the SamplesHeatmapControls */
   this.SAMPLES_HEATMAP_CONTROLS_BACKGROUND_MODEL_FILTER_CLICKED =
     "SAMPLES_HEATMAP_CONTROLS_BACKGROUND_MODEL_FILTER_CLICKED";
+
+  /** The user clicked the "+ Create new tree" button from the phylo tree list view in the PhyloTreeCreationModal to begin the tree creation flow */
+  this.PHYLO_TREE_CREATION_MODAL_CREATE_NEW_TREE_BUTTON_CLICKED =
+    "PHYLO_TREE_CREATION_MODAL_CREATE_NEW_TREE_BUTTON_CLICKED";
+
+  /** The user selected a project during step 1 of the PhyloTreeCreationModal process */
+  this.PHYLO_TREE_CREATION_MODAL_PROJECT_SELECTED =
+    "PHYLO_TREE_CREATION_MODAL_PROJECT_SELECTED";
+
+  /** The user selected a taxon during step 1 of the PhyloTreeCreationModal process */
+  this.PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED =
+    "PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED";
+
+  /** The user entered a name for their phylo tree during step 2 of the PhyloTreeCreationModal process */
+  this.PHYLO_TREE_CREATION_MODAL_TREE_NAME_ENTERED =
+    "PHYLO_TREE_CREATION_MODAL_TREE_NAME_ENTERED";
+
+  /** The user changed their selection of samples within the table containing samples from their project that contain the specified taxonName during step 2 of the PhyloTreeCreationModal process */
+  this.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED =
+    "PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED";
+
+  /** The user changed their selection of samples within the table containing all IDseq samples the specified taxonName during step 3 of the PhyloTreeCreationModal process */
+  this.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED =
+    "PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED";
+
+  /** The user searched for a sample during step 3 of the PhyloTreeCreationModal process */
+  this.PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED =
+    "PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED";
+
+  /** The user selected an invalid amount of samples to create a PhyloTree in the last step of the PhyloTreeCreationModal process */
+  this.PHYLO_TREE_CREATION_MODAL_INVALID_AMOUNT_OF_SAMPLES_SELECTED_FOR_CREATION =
+    "PHYLO_TREE_CREATION_MODAL_INVALID_AMOUNT_OF_SAMPLES_SELECTED_FOR_CREATION";
+
+  /** The user clicked the "Create Tree" button on the last step of the PhyloTreeCreationModal process to actually kickoff the phylo tree pipeline */
+  this.PHYLO_TREE_CREATION_MODAL_CREATE_TREE_BUTTON_CLICKED =
+    "PHYLO_TREE_CREATION_MODAL_CREATE_TREE_BUTTON_CLICKED";
+
+  /** The user successfully created a PhyloTree */
+  this.PHYLO_TREE_CREATION_MODAL_CREATION_SUCCESSFUL =
+    "PHYLO_TREE_CREATION_MODAL_CREATION_SUCCESSFUL";
+
+  /** The user successfully created a PhyloTreeNg */
+  this.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL =
+    "PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL";
+
+  /** PhyloTree creation failed */
+  this.PHYLO_TREE_CREATION_MODAL_CREATION_FAILED =
+    "PHYLO_TREE_CREATION_MODAL_CREATION_FAILED";
+
+  /** PhyloTreeNG creation failed */
+  this.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED =
+    "PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED";
+
+  /** The user advanced the onto the next page in the Wizard */
+  this.WIZARD_PAGE_ADVANCED = "WIZARD_PAGE_ADVANCED";
 }
 
 const eventNames = new EventDictionary();

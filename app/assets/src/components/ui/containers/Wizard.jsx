@@ -1,6 +1,7 @@
 import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
 import PrimaryButton from "../controls/buttons/PrimaryButton";
 import SecondaryButton from "../controls/buttons/SecondaryButton";
 
@@ -105,8 +106,17 @@ class Wizard extends React.Component {
   };
 
   advancePage = () => {
-    if (this.state.currentPage < this.props.children.length - 1) {
-      this.setState({ currentPage: this.state.currentPage + 1 });
+    const { children, wizardType } = this.props;
+    const { currentPage } = this.state;
+
+    if (currentPage < children.length - 1) {
+      this.setState({ currentPage: currentPage + 1 }, () =>
+        logAnalyticsEvent(ANALYTICS_EVENT_NAMES.WIZARD_PAGE_ADVANCED, {
+          wizard: wizardType,
+          previousPage: this.state.currentPage - 1,
+          currentPage: this.state.currentPage,
+        })
+      );
       this.resetPageState();
     }
   };
@@ -209,6 +219,7 @@ Wizard.propTypes = {
   skipPageInfoNPages: PropTypes.number,
   title: PropTypes.string,
   className: PropTypes.string,
+  wizardType: PropTypes.string,
 };
 
 // You can use the Page component for basic use cases, or create your own custom page class.

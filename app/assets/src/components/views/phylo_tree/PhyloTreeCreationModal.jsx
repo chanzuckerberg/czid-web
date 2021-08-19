@@ -11,10 +11,16 @@ import {
   getProjectsToChooseFrom,
   validatePhyloTreeName,
 } from "~/api";
+import {
+  ANALYTICS_EVENT_NAMES,
+  logAnalyticsEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
 import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
+import { openUrl } from "~utils/links";
 import Modal from "../../ui/containers/Modal";
 import Wizard from "../../ui/containers/Wizard";
 import Input from "../../ui/controls/Input";
@@ -159,7 +165,18 @@ class PhyloTreeCreationModal extends React.Component {
       view: row.nextGeneration ? (
         <RouterLink to={`/phylo_tree_ngs/${row.id}`}>View</RouterLink>
       ) : (
-        <a href={`/phylo_trees/index?treeId=${row.id}`}>View</a>
+        <span
+          // Used inline styling here since using the existing styling pattern via loader.scss is tricky to add new styling.
+          // #3867fa is the code for our $primary
+          style={{ color: "#3867fa", cursor: "pointer" }}
+          onClick={withAnalytics(
+            () => openUrl(`/phylo_trees/index?treeId=${row.id}`),
+            "PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_LINK_CLICKED",
+            { treeId: row.id }
+          )}
+        >
+          View
+        </span>
       ),
     }));
   };
@@ -253,45 +270,115 @@ class PhyloTreeCreationModal extends React.Component {
     this.setState({ projectList, projectsLoaded: true });
 
   handleSelectProject = (_, { result }) => {
-    this.setState({
-      projectId: result.project_id,
-      projectName: result.title,
-      // Reset sample lists (in case user went back and changed project selection after they had been loaded)
-      samplesLoaded: false,
-      projectSamples: [],
-      selectedProjectSamples: new Set(),
-      otherSamples: [],
-      selectedOtherSamples: new Set(),
-      otherSamplesFilter: "",
-    });
+    this.setState(
+      {
+        projectId: result.project_id,
+        projectName: result.title,
+        // Reset sample lists (in case user went back and changed project selection after they had been loaded)
+        samplesLoaded: false,
+        projectSamples: [],
+        selectedProjectSamples: new Set(),
+        otherSamples: [],
+        selectedOtherSamples: new Set(),
+        otherSamplesFilter: "",
+      },
+      () =>
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SELECTED,
+          {
+            projectId: result.project_id,
+            projectName: result.title,
+          }
+        )
+    );
   };
 
   handleSelectTaxon = (_, { result }) => {
-    this.setState({
-      taxonId: result.taxid,
-      taxonName: result.title,
-      // Reset sample lists (in case user went back and changed taxon selection after they had been loaded)
-      samplesLoaded: false,
-      projectSamples: [],
-      selectedProjectSamples: new Set(),
-      otherSamples: [],
-      selectedOtherSamples: new Set(),
-      otherSamplesFilter: "",
-    });
+    this.setState(
+      {
+        taxonId: result.taxid,
+        taxonName: result.title,
+        // Reset sample lists (in case user went back and changed taxon selection after they had been loaded)
+        samplesLoaded: false,
+        projectSamples: [],
+        selectedProjectSamples: new Set(),
+        otherSamples: [],
+        selectedOtherSamples: new Set(),
+        otherSamplesFilter: "",
+      },
+      () =>
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED,
+          {
+            taxonId: result.taxid,
+            taxonName: result.title,
+          }
+        )
+    );
   };
 
   setPage = defaultPage => this.setState({ defaultPage });
 
-  handleChangedProjectSamples = selectedProjectSamples =>
-    this.setState({ selectedProjectSamples });
+  handleChangedProjectSamples = newSelectedProjectSamples => {
+    const {
+      selectedProjectSamples: previousSelectedProjectSamples,
+    } = this.state;
 
-  handleChangedOtherSamples = selectedOtherSamples =>
-    this.setState({ selectedOtherSamples });
+    this.setState(
+      {
+        selectedProjectSamples: newSelectedProjectSamples,
+      },
+      () => {
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
+          {
+            previousSelectedProjectSamples: Array.from(
+              previousSelectedProjectSamples
+            ),
+            newSelectedProjectSamples: Array.from(newSelectedProjectSamples),
+          }
+        );
+      }
+    );
+  };
+
+  handleChangedOtherSamples = newSelectedOtherSamples => {
+    const { selectedOtherSamples: previousSelectedOtherSamples } = this.state;
+
+    this.setState(
+      {
+        selectedOtherSamples: newSelectedOtherSamples,
+      },
+      () => {
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
+          {
+            previousSelectedOtherSamples: Array.from(
+              previousSelectedOtherSamples
+            ),
+            newSelectedOtherSamples: Array.from(newSelectedOtherSamples),
+          }
+        );
+      }
+    );
+  };
 
   handleFilterChange = newFilter => {
     clearTimeout(this.inputTimeout);
     this.inputTimeout = setTimeout(() => {
-      this.setState({ otherSamplesFilter: newFilter });
+      this.setState(
+        {
+          otherSamplesFilter: newFilter,
+        },
+        () => {
+          logAnalyticsEvent(
+            ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED,
+            {
+              sampleSearchString: newFilter,
+            }
+          );
+        }
+      );
     }, this.inputDelay);
   };
 
@@ -310,14 +397,38 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   handleCreation = () => {
-    const { treeName, projectId, taxonId, taxonName } = this.state;
+    const {
+      treeName,
+      projectId,
+      selectedProjectSamples,
+      selectedOtherSamples,
+      taxonId,
+      taxonName,
+    } = this.state;
     const { dagBranch, dagVars } = this;
     const { allowedFeatures = [] } = this.context || {};
 
-    if (!this.isNumberOfSamplesValid()) {
-      this.setState({
-        showErrorSamples: true,
-      });
+    const totalNumberOfSamplesSelected =
+      selectedProjectSamples.size + selectedOtherSamples.size;
+    const numberOfSamplesIsValid = PhyloTreeChecks.isNumberOfSamplesValid(
+      totalNumberOfSamplesSelected
+    );
+
+    if (!numberOfSamplesIsValid) {
+      this.setState(
+        {
+          showErrorSamples: true,
+        },
+        () =>
+          logAnalyticsEvent(
+            ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_INVALID_AMOUNT_OF_SAMPLES_SELECTED_FOR_CREATION,
+            {
+              totalNumberOfSamplesSelected,
+              maxSamplesAllowed: PhyloTreeChecks.MAX_SAMPLES,
+              minSamplesNeeded: PhyloTreeChecks.MIN_SAMPLES,
+            }
+          )
+      );
       return false;
     }
 
@@ -329,6 +440,7 @@ class PhyloTreeCreationModal extends React.Component {
       pipelineRunIds.push(this.state.otherSamples[rowIndex].pipelineRunId);
     });
 
+    const nextGeneration = allowedFeatures.includes(PHYLO_TREE_NG_FEATURE);
     createPhyloTree({
       treeName,
       dagBranch,
@@ -337,15 +449,39 @@ class PhyloTreeCreationModal extends React.Component {
       taxId: taxonId,
       taxName: taxonName,
       pipelineRunIds,
-      nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
+      nextGeneration,
     }).then(({ phylo_tree_id: phyloTreeId }) => {
+      const sharedAnalyticsPayload = {
+        treeName,
+        projectId,
+        taxonId,
+        taxonName,
+        pipelineRunIds,
+        ...(!nextGeneration ? { dagBranch, dagVars } : {}),
+      };
+
       if (phyloTreeId) {
-        if (allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)) {
+        const analyticEventName = nextGeneration
+          ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL
+          : ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATION_SUCCESSFUL;
+
+        logAnalyticsEvent(analyticEventName, {
+          treeId: phyloTreeId,
+          ...sharedAnalyticsPayload,
+        });
+
+        if (nextGeneration) {
           location.href = `/phylo_tree_ngs/${phyloTreeId}`;
         } else {
           location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
         }
       } else {
+        const analyticEventName = nextGeneration
+          ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED
+          : ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATION_FAILED;
+
+        logAnalyticsEvent(analyticEventName, sharedAnalyticsPayload);
+
         // TODO: properly handle error
         // eslint-disable-next-line no-console
         console.error("Error creating tree");
@@ -396,8 +532,20 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   canContinueWithTreeName = () => {
+    const { treeName, treeNameValid } = this.state;
+
     this.setState({ showErrorName: true });
-    return this.isTreeNameValid();
+    const isTreeNameValid = this.isTreeNameValid();
+
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TREE_NAME_ENTERED,
+      {
+        treeNameValid,
+        treeName,
+      }
+    );
+
+    return isTreeNameValid;
   };
 
   getTotalPageRendering() {
@@ -464,7 +612,16 @@ class PhyloTreeCreationModal extends React.Component {
             )}
           </div>
           <div className="wizard__page-1__action">
-            <Wizard.Action action="continue">+ Create new tree</Wizard.Action>
+            <Wizard.Action
+              action="continue"
+              onAfterAction={() =>
+                logAnalyticsEvent(
+                  ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_NEW_TREE_BUTTON_CLICKED
+                )
+              }
+            >
+              + Create new tree
+            </Wizard.Action>
           </div>
         </Wizard.Page>
       ),
@@ -645,11 +802,15 @@ class PhyloTreeCreationModal extends React.Component {
           <Wizard
             className="phylo-tree-creation-wizard"
             skipPageInfoNPages={skipListTrees ? 0 : 1}
-            onComplete={this.handleComplete}
+            onComplete={withAnalytics(
+              this.handleComplete,
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_TREE_BUTTON_CLICKED
+            )}
             defaultPage={defaultPage}
             labels={{
               finish: "Create Tree",
             }}
+            wizardType="PhyloTreeCreationWizard"
           >
             {this.getPages()}
           </Wizard>

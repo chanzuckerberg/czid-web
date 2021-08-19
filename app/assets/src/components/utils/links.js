@@ -11,7 +11,7 @@ const openUrl = (link, currentEvent) => {
   if (openInNewTab) {
     openUrlInNewTab(link);
   } else {
-    location.href = link;
+    window.open(link, "_self");
   }
 };
 
