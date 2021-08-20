@@ -18,9 +18,9 @@ import {
 } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
+import Link from "~ui/controls/Link";
 import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
-import { openUrl } from "~utils/links";
 import Modal from "../../ui/containers/Modal";
 import Wizard from "../../ui/containers/Wizard";
 import Input from "../../ui/controls/Input";
@@ -163,20 +163,27 @@ class PhyloTreeCreationModal extends React.Component {
       user: (row.user || {}).name,
       last_update: <Moment fromNow date={row.updated_at} />,
       view: row.nextGeneration ? (
-        <RouterLink to={`/phylo_tree_ngs/${row.id}`}>View</RouterLink>
-      ) : (
-        <span
-          // Used inline styling here since using the existing styling pattern via loader.scss is tricky to add new styling.
-          // #3867fa is the code for our $primary
-          style={{ color: "#3867fa", cursor: "pointer" }}
-          onClick={withAnalytics(
-            () => openUrl(`/phylo_trees/index?treeId=${row.id}`),
-            "PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_LINK_CLICKED",
-            { treeId: row.id }
-          )}
+        <RouterLink
+          onClick={() => {
+            logAnalyticsEvent(
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_NG_LINK_CLICKED,
+              { treeId: row.id }
+            );
+          }}
+          to={`/phylo_tree_ngs/${row.id}`}
         >
           View
-        </span>
+        </RouterLink>
+      ) : (
+        <Link
+          analyticsEventData={{ treeId: row.id }}
+          analyticsEventName={
+            ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_LINK_CLICKED
+          }
+          href={`/phylo_trees/index?treeId=${row.id}`}
+        >
+          View
+        </Link>
       ),
     }));
   };

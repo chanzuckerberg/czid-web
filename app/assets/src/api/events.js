@@ -228,6 +228,14 @@ function EventDictionary() {
   this.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED =
     "PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED";
 
+  /** The user clicked on an existing old phylo tree in the PhyloTreeCreationModal list */
+  this.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_LINK_CLICKED =
+    "PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_LINK_CLICKED";
+
+  /** The user clicked on an existing phylo tree NG in the PhyloTreeCreationModal list */
+  this.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_NG_LINK_CLICKED =
+    "PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_NG_LINK_CLICKED";
+
   /** The user advanced the onto the next page in the Wizard */
   this.WIZARD_PAGE_ADVANCED = "WIZARD_PAGE_ADVANCED";
 }
