@@ -34,6 +34,7 @@ class PipelineRun < ApplicationRecord
   has_many :ercc_counts, dependent: :destroy
   has_many :amr_counts, dependent: :destroy
   has_many :contigs, dependent: :destroy
+  has_many :accession_coverage_stats, dependent: :destroy
   has_one :insert_size_metric_set, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
@@ -41,6 +42,7 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :ercc_counts
   accepts_nested_attributes_for :amr_counts
   accepts_nested_attributes_for :contigs
+  accepts_nested_attributes_for :accession_coverage_stats
   accepts_nested_attributes_for :insert_size_metric_set
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
