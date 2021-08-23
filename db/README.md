@@ -1,3 +1,9 @@
+## Guidelines for new tables and columns
+
+- Use `null: false` wherever possible, unless you need the empty state. This saves you from needing to check for presence with every use. It also saves you from `null` comparison gotchas (e.g. `= NULL`, needing `IS NULL` or `IS NOT NULL`).
+- Include a schema `comment` on everything but the simplest columns. Even a short explanation can provide context.
+- If you will be querying two or more fields together frequently, make sure to include a composite or compound index. The left-prefix rule means that prefix subsets can be used standalone (e.g. `t.index ["host_genome_id", "metadata_field_id"]` also functions as an index just for `host_genome_id`.)
+
 ## Migration safety
 
 - Writing safe, zero-downtime DB migrations requires special attention, particularly on large tables such as `taxon_counts` or frequently accessed fields. This is because there could be a mismatch between the old and new versions of the code during the deployment, or a migration could lock columns/tables that are needed to fulfill requests.
