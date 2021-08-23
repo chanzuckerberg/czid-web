@@ -2,7 +2,13 @@ module AppConfigHelper
   module_function
 
   def get_app_config(key, default_value = nil)
-    AppConfig.find_by(key: key).presence&.value || default_value
+    # Flags are accessed frequently but don't change that often so we should
+    # cache. Value is invalidated by 'after_save :clear_cached_record' but
+    # expires_in is set just in case.
+    value = Rails.cache.fetch("app_config-#{key}", expires_in: 5.minutes) do
+      AppConfig.find_by(key: key).presence&.value
+    end
+    value || default_value
   end
 
   def set_app_config(key, value)

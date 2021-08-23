@@ -52,4 +52,10 @@ class AppConfig < ApplicationRecord
   WORKFLOW_VERSION_TEMPLATE = "%<workflow_name>s-version".freeze
   # SSRF flag configures the app to use SSRFs-Up to send requests
   ENABLE_SSRFS_UP = "enabled_ssrfs_up".freeze
+
+  after_save :clear_cached_record
+
+  def clear_cached_record
+    Rails.cache.delete("app_config-#{key}")
+  end
 end

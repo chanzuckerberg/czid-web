@@ -99,6 +99,11 @@ RSpec.configure do |config|
   # =end
 
   Aws.config.update(stub_responses: true)
+
+  # Clear the cache between tests since it is stateful (like the db)
+  config.before(:each) do
+    Rails.cache.clear
+  end
 end
 
 require 'rspec/json_expectations'

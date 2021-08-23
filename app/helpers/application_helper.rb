@@ -31,7 +31,8 @@ module ApplicationHelper
   end
 
   def user_context
-    {
+    # Memoize for the duration of the request:
+    @user_context ||= {
       admin: current_user ? current_user.role == 1 : false,
       allowedFeatures: current_user ? current_user.allowed_feature_list : [],
       appConfig: AppConfigHelper.configs_for_context(),

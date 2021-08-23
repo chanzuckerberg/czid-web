@@ -228,53 +228,54 @@ class User < ApplicationRecord
   # Make sure you use any reserved names as intended by Segment!
   # See https://segment.com/docs/spec/identify/#traits .
   def traits_for_segment(include_pii: false)
-    traits = {
-      # DB fields
-      created_at: created_at,
-      updated_at: updated_at,
-      role: role,
-      allowed_features: allowed_feature_list,
-      # Derived fields
-      admin: admin?,
-      # Has-some (this is important for Google Custom Dimensions, which require
-      # categorical values--there is no way to derive them from raw counts.) See
-      # https://segment.com/docs/destinations/google-analytics/#custom-dimensions
-      has_projects: !projects.empty?,
-      has_samples: !samples.empty?,
-      has_favorite_projects: !favorite_projects.empty?,
-      has_favorites: !favorites.empty?,
-      has_visualizations: !visualizations.empty?,
-      has_phylo_trees: !phylo_trees.empty?,
-      # Segment special fields
-      createdAt: created_at.iso8601, # currently same as created_at
-      # Login trackable fields (see User#update_tracked_fields!)
-      sign_in_count: sign_in_count,
-      current_sign_in_at: current_sign_in_at,
-      last_sign_in_at: last_sign_in_at,
-    }
-
-    if include_pii
-      pii_traits = {
+    # Caching because this method does a lot of queries but does not need per-second accuracy.
+    Rails.cache.fetch("traits_for_segment-user-#{id}-#{include_pii}", expires_in: 1.minute) do
+      traits = {
         # DB fields
-        email: email,
-        name: name,
-        institution: institution,
-        biohub_user: biohub_user?,
-        czi_user: czi_user?,
-        projects: projects.size, # projects counter is NOT cached because has_and_belongs_to_many
-        samples: samples.size,
-        favorite_projects: favorite_projects.size,
-        favorites: favorites.size,
-        visualizations: visualizations.size,
-        phylo_trees: phylo_trees.size,
-        firstName: first_name,
-        lastName: last_name,
-        current_sign_in_ip: current_sign_in_ip,
-        last_sign_in_ip: last_sign_in_ip,
+        created_at: created_at,
+        updated_at: updated_at,
+        role: role,
+        allowed_features: allowed_feature_list,
+        # Derived fields
+        admin: admin?,
+        # Has-some (this is important for Google Custom Dimensions, which require
+        # categorical values--there is no way to derive them from raw counts.) See
+        # https://segment.com/docs/destinations/google-analytics/#custom-dimensions
+        has_projects: !projects.empty?,
+        has_samples: !samples.empty?,
+        has_favorite_projects: !favorite_projects.empty?,
+        has_favorites: !favorites.empty?,
+        has_visualizations: !visualizations.empty?,
+        has_phylo_trees: !phylo_trees.empty?,
+        # Segment special fields
+        createdAt: created_at.iso8601, # currently same as created_at
+        # Login trackable fields (see User#update_tracked_fields!)
+        sign_in_count: sign_in_count,
+        current_sign_in_at: current_sign_in_at,
+        last_sign_in_at: last_sign_in_at,
       }
-      traits.merge!(pii_traits)
-    end
 
-    return traits
+      if include_pii
+        pii_traits = {
+          # DB fields
+          email: email,
+          name: name,
+          institution: institution,
+          biohub_user: biohub_user?,
+          czi_user: czi_user?,
+          projects: projects.size, # projects counter is NOT cached because has_and_belongs_to_many
+          samples: samples.size,
+          favorite_projects: favorite_projects.size,
+          favorites: favorites.size,
+          visualizations: visualizations.size,
+          phylo_trees: phylo_trees.size,
+          firstName: first_name,
+          lastName: last_name,
+          current_sign_in_ip: current_sign_in_ip,
+          last_sign_in_ip: last_sign_in_ip,
+        }
+        traits.merge!(pii_traits)
+      end
+    end
   end
 end
