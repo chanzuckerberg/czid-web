@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_818_003_650) do
+ActiveRecord::Schema.define(version: 20_210_820_214_926) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -396,6 +396,8 @@ ActiveRecord::Schema.define(version: 20_210_818_003_650) do
     t.string "name"
     t.text "failed_jobs"
     t.text "dag_json"
+    t.datetime "executed_at", comment: "When the pipeline run stage was actually dispatched for processing."
+    t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing."
     t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
   end
 
@@ -428,6 +430,9 @@ ActiveRecord::Schema.define(version: 20_210_818_003_650) do
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, pipeline processing will filter for a whitelist of taxons."
     t.string "wdl_version"
     t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/samples/subpath/results' Never allow users to set this."
+    t.datetime "executed_at", comment: "When the pipeline run was actually dispatched for processing."
+    t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing, not including results loading."
+    t.integer "time_to_results_finalized", comment: "Seconds from executed_at to marked as finished with processing and results loading."
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
