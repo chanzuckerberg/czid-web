@@ -162,12 +162,12 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def duration_hrs
-    (run_time / 60 / 60).round(2) if run_time
+    (run_time.to_f / 60 / 60).round(2) if run_time
   end
 
   def run_time
     if completed?
-      updated_at - created_at
+      time_to_finalized || (updated_at - created_at)
     elsif started?
       Time.current - created_at
     end
@@ -178,47 +178,19 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def update_job_status
-    if pipeline_run.step_function?
-      # this logic will be replaced soon by step functions async notifications (IDSEQ-2310)
-
-      if !id || !pipeline_run.sfn_execution_arn
-        LogUtil.log_error(
-          "Invalid precondition for PipelineRunStage.update_job_status step_function #{id} #{pipeline_run.sfn_execution_arn} #{job_status}.",
-          step_function_id: id,
-          sfn_execution_arn: pipeline_run.sfn_execution_arn,
-          job_status: job_status
-        )
-        return
-      end
-      self.job_status, self.job_log_id = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
-      save!
-      return
-    end
-
-    if !id || !started?
+    # Only pipeline_execution_strategy=step_function is supported.
+    # this logic will be replaced soon by step functions async notifications (IDSEQ-2310)
+    if !id || !pipeline_run.sfn_execution_arn
       LogUtil.log_error(
-        "Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.",
+        "Invalid precondition for PipelineRunStage.update_job_status step_function #{id} #{pipeline_run.sfn_execution_arn} #{job_status}.",
         step_function_id: id,
-        job_id: job_id,
+        sfn_execution_arn: pipeline_run.sfn_execution_arn,
         job_status: job_status
       )
       return
     end
-    check_status_file_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)
-    check_status_file_and_update(JOB_FAILED_FILE_SUFFIX, STATUS_FAILED)
-    if failed? || succeeded?
-      unless job_log_id
-        # set log id if not set
-        _job_status, self.job_log_id, self.job_description = job_info(job_id, id)
-        save
-      end
-      return
-    end
-    # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
-    return unless due_for_aegea_check?
-
-    self.job_status, self.job_log_id, self.job_description = job_info(job_id, id)
-    save
+    self.job_status, self.job_log_id = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
+    save!
   end
 
   def log_url

@@ -53,7 +53,6 @@ Rails.application.routes.draw do
 
       put :reupload_source
       put :kickoff_pipeline
-      put :retry_pipeline
 
       post :save_metadata
       post :save_metadata_v2

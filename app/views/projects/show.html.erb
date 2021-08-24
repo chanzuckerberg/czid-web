@@ -62,7 +62,6 @@
                 &nbsp;
                 <% if run.completed? %>
                   <%= button_to 'rerun from top', kickoff_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
-                  <%= button_to "rerun failed stage", retry_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
                 <% end %>
               <% elsif run.class == WorkflowRun %>
                 <%= run.status %>

@@ -25,7 +25,7 @@ class SamplesController < ApplicationController
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials,].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline,
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow,].freeze
 
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
@@ -39,7 +39,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
-  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
+  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs]
   before_action :login_required, only: [:bulk_import]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
@@ -1206,21 +1206,6 @@ class SamplesController < ApplicationController
         format.json { head :no_content }
       else
         format.html { redirect_to pipeline_runs_sample_path(@sample), notice: 'No pipeline run in progress.' }
-        format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # PUT /samples/:id/kickoff_pipeline
-  def retry_pipeline
-    @sample.status = Sample::STATUS_RETRY_PR
-    @sample.save
-    respond_to do |format|
-      if !@sample.pipeline_runs.empty?
-        format.html { redirect_to @sample, notice: 'A pipeline run is in progress.' }
-        format.json { head :no_content }
-      else
-        format.html { redirect_to @sample, notice: 'No pipeline run in progress.' }
         format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
       end
     end
