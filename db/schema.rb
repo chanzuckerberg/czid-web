@@ -10,11 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_820_214_926) do
+ActiveRecord::Schema.define(version: 20_210_824_231_350) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
-    t.string "accession_name", null: false, comment: "The NCBI GenBank name of the accession the coverage stats were created for"
+    t.text "accession_name", null: false, comment: "The NCBI GenBank name of the accession the coverage stats were created for"
     t.integer "taxid", null: false, comment: "The id of the taxon the accession belongs to"
     t.integer "num_contigs", null: false, comment: "Number of contigs for which this accession was the best match"
     t.integer "num_reads", null: false, comment: "Number of reads for which this accession was the best match"

@@ -184,7 +184,8 @@ class PipelineRun < ApplicationRecord
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts",
-                        "insert_size_metrics" => "db_load_insert_size_metrics", }.freeze
+                        "insert_size_metrics" => "db_load_insert_size_metrics",
+                        "accession_coverage_stats" => "db_load_accession_coverage_stats", }.freeze
   # Functions for checking if an optional output should have been generated
   # Don't include optional outputs
   CHECKERS_BY_OUTPUT = { "insert_size_metrics" => "should_have_insert_size_metrics" }.freeze
@@ -304,7 +305,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metrics]
+    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metrics accession_coverage_stats]
 
     # Then, generate output_states
     output_state_entries = []
@@ -698,6 +699,53 @@ class PipelineRun < ApplicationRecord
     update(assembled: 1)
   end
 
+  def db_load_accession_coverage_stats
+    coverage_viz_summary = S3Util.get_s3_file(coverage_viz_summary_s3_path)
+    return if coverage_viz_summary.blank?
+
+    coverage_viz_summary = JSON.parse(coverage_viz_summary)
+
+    accession_coverage_stats_array = []
+    coverage_viz_summary.each do |taxid, stats|
+      best_accessions = stats["best_accessions"]
+      top_accession = best_accessions&.first
+      if top_accession
+        accession_coverage_stats_array << format_accession_coverage_stats(top_accession, taxid)
+      end
+    end
+    update(accession_coverage_stats_attributes: accession_coverage_stats_array) unless accession_coverage_stats_array.empty?
+  end
+
+  def format_accession_coverage_stats(accession, taxid)
+    accession_stats = {
+      accession_id: accession["id"],
+      accession_name: accession["name"],
+      taxid: taxid,
+      num_contigs: accession["num_contigs"],
+      num_reads: accession["num_reads"],
+      score: accession["score"],
+      coverage_depth: accession["coverage_depth"],
+    }
+    if accession["coverage_breadth"]
+      accession_stats[:coverage_breadth] = accession["coverage_breadth"]
+    else
+      # coverage_breadth is not included in the coverage_viz_summary file for pipeline runs before v6.8.3,
+      # so we must fetch the value from the specific accession's file.
+      accession_coverage_viz = S3Util.get_s3_file(coverage_viz_data_s3_path(accession["id"]))
+
+      if accession_coverage_viz.blank?
+        Rails.logger.error("No coverage viz file found for PipelineRun ##{id}, Accession #{accession['id']}.")
+        return
+      end
+
+      accession_coverage_viz = JSON.parse(accession_coverage_viz)
+      unless accession_coverage_viz.empty?
+        accession_stats[:coverage_breadth] = accession_coverage_viz["coverage_breadth"]
+      end
+    end
+    accession_stats
+  end
+
   def db_load_amr_counts
     amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
     if amr_results.nil?
@@ -879,6 +927,8 @@ class PipelineRun < ApplicationRecord
       "#{assembly_s3_path}/#{CONTIG_SUMMARY_JSON_NAME}"
     when "insert_size_metrics"
       "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
+    when "accession_coverage_stats"
+      coverage_viz_summary_s3_path
     end
   end
 
