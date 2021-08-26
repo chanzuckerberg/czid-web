@@ -418,18 +418,6 @@ class PipelineRun < ApplicationRecord
     return additional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
   end
 
-  private def extract_int_metric(metrics, metric_name)
-    return nil unless metrics[metric_name]
-
-    return metrics[metric_name].to_i
-  end
-
-  private def extract_float_metric(metrics, metric_name)
-    return nil unless metrics[metric_name]
-
-    return metrics[metric_name].to_f
-  end
-
   def db_load_insert_size_metrics
     insert_size_metrics_s3_path = "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", insert_size_metrics_s3_path)
@@ -1037,7 +1025,10 @@ class PipelineRun < ApplicationRecord
     if all_output_states_terminal?
 
       if all_output_states_loaded? && !compiling_stats_failed
-        update(results_finalized: FINALIZED_SUCCESS)
+        update(
+          results_finalized: FINALIZED_SUCCESS,
+          time_to_results_finalized: time_since_executed_at
+        )
 
         # Precache reports for all backgrounds.
         if ready_for_cache?
@@ -1052,7 +1043,10 @@ class PipelineRun < ApplicationRecord
         MetricUtil.put_metric_now("samples.succeeded.run_time", run_time, tags, "gauge")
         event = EventDictionary::PIPELINE_RUN_SUCCEEDED
       else
-        update(results_finalized: FINALIZED_FAIL)
+        update(
+          results_finalized: FINALIZED_FAIL,
+          time_to_results_finalized: time_since_executed_at
+        )
         event = EventDictionary::PIPELINE_RUN_FAILED
       end
 
@@ -1110,7 +1104,8 @@ class PipelineRun < ApplicationRecord
     if sfn_service_result[:sfn_execution_arn].blank?
       update(
         job_status: STATUS_FAILED,
-        finalized: 1
+        finalized: 1,
+        time_to_finalized: time_since_executed_at
       )
     end
   end
@@ -1121,11 +1116,13 @@ class PipelineRun < ApplicationRecord
     if prs.nil?
       # all stages succeeded
       self.finalized = 1
+      self.time_to_finalized = time_since_executed_at
       self.job_status = STATUS_CHECKED
     else
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
+        self.time_to_finalized = time_since_executed_at
         self.known_user_error, self.error_message = check_for_user_error(prs)
         automatic_restart = automatic_restart_allowed? unless known_user_error
         report_failed_pipeline_run_stage(prs, known_user_error, automatic_restart)
@@ -1153,10 +1150,6 @@ class PipelineRun < ApplicationRecord
     enqueue_new_pipeline_run if automatic_restart
   end
 
-  private def format_job_status_text(step_number, name, job_status, report_ready_flag)
-    "#{step_number}.#{name}-#{job_status}" + (report_ready_flag ? "|#{STATUS_READY}" : "")
-  end
-
   # This method should be renamed to update_job_status after fully transitioning to step functions
   # and completely removing the polling mechanism and DAG pipeline_execution_strategy
   def async_update_job_status
@@ -1164,34 +1157,19 @@ class PipelineRun < ApplicationRecord
     if prs.nil?
       # all stages succeeded
       self.finalized = 1
+      self.time_to_finalized = time_since_executed_at
       self.job_status = STATUS_CHECKED
     else
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
+        self.time_to_finalized = time_since_executed_at
         self.known_user_error, self.error_message = check_for_user_error(prs)
         report_failed_pipeline_run_stage(prs, known_user_error)
       end
       self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status || PipelineRunStage::STATUS_STARTED, report_ready?)
     end
     save!
-  end
-
-  private def pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
-    reads_remaining_text = adjusted_remaining_reads ? "with #{adjusted_remaining_reads} reads remaining " : ""
-    automatic_restart_text = automatic_restart ? "Automatic restart is being triggered. " : "** Manual action required **. "
-    known_user_error = known_user_error ? "Known user error #{known_user_error}. " : ""
-
-    "SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
-      "after #{duration_hrs} hours. #{automatic_restart_text}#{known_user_error}"\
-      "See: #{status_url}"
-  end
-
-  private def report_failed_pipeline_run_stage(prs, known_user_error, automatic_restart = false)
-    log_message = pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
-    Rails.logger.error(log_message)
-    tags = ["sample_id:#{sample.id}", "automatic_restart:#{automatic_restart}", "known_user_error:#{known_user_error ? true : false}"]
-    MetricUtil.put_metric_now("samples.failed", 1, tags)
   end
 
   def automatic_restart_allowed?
@@ -1964,13 +1942,54 @@ class PipelineRun < ApplicationRecord
     raw_read_count / ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
   end
 
-  private def supports_assembly?
-    pipeline_version_has_assembly(pipeline_version)
-  end
-
   # Given a list of samples, returns a list of the latest pipeline run for each of the samples.
   def self.latest_by_sample(samples)
     dates = PipelineRun.select("sample_id, MAX(created_at) as created_at").where(sample: samples).group(:sample_id)
     return where("(sample_id, created_at) IN (?)", dates)
+  end
+
+  private
+
+  def extract_float_metric(metrics, metric_name)
+    return nil unless metrics[metric_name]
+
+    return metrics[metric_name].to_f
+  end
+
+  def extract_int_metric(metrics, metric_name)
+    return nil unless metrics[metric_name]
+
+    return metrics[metric_name].to_i
+  end
+
+  def format_job_status_text(step_number, name, job_status, report_ready_flag)
+    "#{step_number}.#{name}-#{job_status}" + (report_ready_flag ? "|#{STATUS_READY}" : "")
+  end
+
+  def pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
+    reads_remaining_text = adjusted_remaining_reads ? "with #{adjusted_remaining_reads} reads remaining " : ""
+    automatic_restart_text = automatic_restart ? "Automatic restart is being triggered. " : "** Manual action required **. "
+    known_user_error = known_user_error ? "Known user error #{known_user_error}. " : ""
+
+    "SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
+      "after #{duration_hrs} hours. #{automatic_restart_text}#{known_user_error}"\
+      "See: #{status_url}"
+  end
+
+  def report_failed_pipeline_run_stage(prs, known_user_error, automatic_restart = false)
+    log_message = pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
+    Rails.logger.error(log_message)
+    tags = ["sample_id:#{sample.id}", "automatic_restart:#{automatic_restart}", "known_user_error:#{known_user_error ? true : false}"]
+    MetricUtil.put_metric_now("samples.failed", 1, tags)
+  end
+
+  def supports_assembly?
+    pipeline_version_has_assembly(pipeline_version)
+  end
+
+  def time_since_executed_at
+    if executed_at
+      Time.now.utc - executed_at  # seconds
+    end
   end
 end

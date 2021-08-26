@@ -40,6 +40,7 @@ class SfnPipelineDispatchService
 
   def call
     @pipeline_run.update(
+      executed_at: Time.now.utc,
       pipeline_version: @wdl_version[/\d+\.\d+/],
       s3_output_prefix: output_prefix,
       wdl_version: @wdl_version

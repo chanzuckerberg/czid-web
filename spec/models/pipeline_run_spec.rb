@@ -97,7 +97,7 @@ describe PipelineRun, type: :model do
   context "#update_job_status" do
     let(:user) { build_stubbed(:user) }
     let(:sample) { build_stubbed(:sample, user: user) }
-    let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_version: "3.7") }
+    let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_version: "3.7", executed_at: 1.minute.ago) }
     before { expect(pipeline_run).to receive(:save!) }
 
     context "when all stages complete successfully" do
@@ -107,6 +107,7 @@ describe PipelineRun, type: :model do
         pipeline_run.update_job_status
 
         expect(pipeline_run).to have_attributes(finalized: 1, job_status: "CHECKED")
+        expect(pipeline_run.time_to_finalized).to be > 0
       end
     end
 
@@ -123,6 +124,7 @@ describe PipelineRun, type: :model do
           expect(pipeline_run).to have_attributes(finalized: 1,
                                                   job_status: "1.Host Filtering-FAILED",
                                                   **mutates_model_attributes)
+          expect(pipeline_run.time_to_finalized).to be > 0
         end
 
         if reports_error
@@ -447,7 +449,8 @@ describe PipelineRun, type: :model do
       pipeline_run = create(:pipeline_run,
                             id: pipeline_run_id,
                             sample_id: sample.id,
-                            pipeline_execution_strategy: pipeline_execution_strategy)
+                            pipeline_execution_strategy: pipeline_execution_strategy,
+                            executed_at: 1.minute.ago)
       pipeline_run.pipeline_run_stages.order(step_number: :asc).zip(pipeline_run_stages_statuses).each do |prs, st|
         prs.update!(job_status: st) unless st.nil?
       end
@@ -494,7 +497,10 @@ describe PipelineRun, type: :model do
       end
       context "and all stages reported success" do
         let(:pipeline_run_stages_statuses) { ["SUCCEEDED", "SUCCEEDED", "SUCCEEDED", "SUCCEEDED"] }
-        it { is_expected.to have_attributes(job_status: "CHECKED", finalized: 1) }
+        it {
+          is_expected.to have_attributes(job_status: "CHECKED", finalized: 1)
+          expect(subject.time_to_finalized).to be > 0
+        }
       end
       context "and stages 1/2 reported success and stage 3 reported failure" do
         let(:pipeline_run_stages_statuses) { ["SUCCEEDED", "SUCCEEDED", "FAILED", nil] }

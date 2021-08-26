@@ -158,6 +158,7 @@ class PipelineRunStage < ApplicationRecord
       self.job_status = STATUS_FAILED
     end
     self.created_at = Time.now.utc
+    self.executed_at = Time.now.utc
     save
   end
 
@@ -190,6 +191,7 @@ class PipelineRunStage < ApplicationRecord
       return
     end
     self.job_status, self.job_log_id = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
+    self.time_to_finalized = time_since_executed_at if completed?
     save!
   end
 
@@ -218,6 +220,14 @@ class PipelineRunStage < ApplicationRecord
     job_hash = JSON.parse(job_description)
     if job_hash
       job_hash['statusReason']
+    end
+  end
+
+  private
+
+  def time_since_executed_at
+    if executed_at
+      Time.now.utc - executed_at  # seconds
     end
   end
 end
