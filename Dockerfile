@@ -6,10 +6,18 @@ FROM ruby:2.7-buster
 RUN apt-get update && \
     apt-get install -y \
       build-essential \
-      default-mysql-client \
       python3-dev \
       python3-pip \
+      lsb-release \
       apt-transport-https
+
+# This section is for the purpose of installing the non-MariaDB mysql-client /
+# mysqldump utility. The default-mysql-client package is actually
+# mariadb-client, and we found some incompatibility with virtual generated
+# columns when importing into non-MariaDB MySQL Community Server.
+RUN wget https://dev.mysql.com/get/mysql-apt-config_0.8.18-1_all.deb
+RUN DEBIAN_FRONTEND=noninteractive apt install ./mysql-apt-config_0.8.18-1_all.deb
+RUN apt-get update && apt-get install -y mysql-client
 
 # Install node + npm
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
