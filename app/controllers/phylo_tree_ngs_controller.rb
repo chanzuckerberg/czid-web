@@ -339,7 +339,7 @@ class PhyloTreeNgsController < ApplicationController
         if coverage_viz_summary
           coverage_viz_summary = JSON.parse(coverage_viz_summary)
           top_accession = get_top_accession_from_coverage_viz_summary(coverage_viz_summary, tax_id)
-          additional_reference_accession_ids.add(top_accession)
+          additional_reference_accession_ids.add(top_accession) if top_accession.present?
         end
       end
     end
