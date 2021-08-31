@@ -1,5 +1,6 @@
 import deepEqual from "fast-deep-equal";
 import {
+  all,
   compact,
   every,
   filter,
@@ -585,12 +586,12 @@ class SampleView extends React.Component {
     }
 
     // taxon's category was selected and its subcategories were not excluded
+    let allSubcategoriesIncluded = all(
+      subcategory => subcategories.has(subcategory),
+      row.subcategories || []
+    );
     if (
-      (categories.has(row.category) &&
-        !some(
-          subcategory => subcategories.has(subcategory),
-          row.subcategories || []
-        )) ||
+      (categories.has(row.category) && allSubcategoriesIncluded) ||
       (categories.has("uncategorized") && row.category === null)
     ) {
       return true;
