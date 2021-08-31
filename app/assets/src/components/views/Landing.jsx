@@ -110,6 +110,29 @@ class Landing extends React.Component {
       );
     }
 
+    let announcementBanner;
+    if (this.props.showAnnouncementBanner) {
+      announcementBanner = (
+        <div className={cs.announcementBanner}>
+          <BasicPopup
+            content={
+              "Some users are currently seeing slow performance on IDseq due to an AWS outage. We’re aware of the issue and are working to fix it urgently. We apologize for any inconvenience this is causing!"
+            }
+            position="bottom center"
+            wide="very"
+            trigger={
+              <span className={cs.content}>
+                <IconAlert className={cs.icon} />
+                Some users are currently seeing slow performance on IDseq due to
+                an AWS outage. We’re aware of the issue and are working to fix
+                it urgently. We apologize for any inconvenience this is causing!
+              </span>
+            }
+          />
+        </div>
+      );
+    }
+
     const topTitle = (
       <div className="top-title">
         IDseq is a hypothesis-free global software platform that helps
@@ -345,6 +368,7 @@ class Landing extends React.Component {
     return (
       <div>
         <LandingHeader browserInfo={this.props.browserInfo} />
+        {announcementBanner}
         {publicSiteBanner}
         {firstBlock}
         {paperReference}
@@ -361,6 +385,7 @@ Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
   showBulletin: PropTypes.bool,
   browserInfo: PropTypes.object,
+  showAnnouncementBanner: PropTypes.bool,
   showPublicSite: PropTypes.bool,
 };
 

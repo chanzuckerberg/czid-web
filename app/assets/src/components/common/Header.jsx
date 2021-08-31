@@ -179,24 +179,16 @@ const AnnouncementBanner = ({ onClose }) => {
     <div className={cs.announcementBanner}>
       <BasicPopup
         content={
-          "Low-Support Mode: We will only be responding to highly urgent issues from 12/24–1/3. For now, check out our Help Center. Happy Holidays!"
+          "Some users are currently seeing slow performance on IDseq due to an AWS outage. We’re aware of the issue and are working to fix it urgently. We apologize for any inconvenience this is causing!"
         }
         position="bottom center"
         wide="very"
         trigger={
           <span className={cs.content}>
             <IconAlert className={cs.icon} />
-            <span className={cs.title}>Low-Support Mode:</span>
-            We will only be responding to highly urgent issues from 12/24–1/3.
-            For now, check out our
-            <ExternalLink
-              className={cs.link}
-              href="https://help.idseq.net"
-              analyticsEventName={"AnnouncementBanner_link_clicked"}
-            >
-              Help Center
-            </ExternalLink>
-            . Happy Holidays!
+            Some users are currently seeing slow performance on IDseq due to an
+            AWS outage. We’re aware of the issue and are working to fix it
+            urgently. We apologize for any inconvenience this is causing!
           </span>
         }
       />

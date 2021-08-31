@@ -26,6 +26,11 @@ class HomeController < ApplicationController
         end
       end
 
+      @show_announcement_banner = false
+      if get_app_config(AppConfig::SHOW_ANNOUNCEMENT_BANNER) == "1"
+        @show_announcement_banner = true
+      end
+
       @show_public_site = false
       if get_app_config(AppConfig::SHOW_LANDING_PUBLIC_SITE_BANNER) == "1"
         @show_public_site = true
