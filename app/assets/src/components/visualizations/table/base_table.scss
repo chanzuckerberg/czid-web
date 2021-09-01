@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .tableContainer {
   flex: 1 0 auto;
@@ -28,79 +29,6 @@
   }
 }
 
-.header {
-  @include font-body-s;
-
-  color: $gray-dark;
-  font-weight: $font-weight-semibold;
-  outline: 0;
-  text-transform: none;
-
-  align-self: center;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  &.draggableHeader {
-    display: flex;
-    flex-direction: row;
-    padding: 0;
-    justify-content: space-between !important;
-  }
-
-  .sortableHeader {
-    max-width: 100%;
-    display: flex;
-    flex: 1 0 auto;
-    align-items: inherit;
-    justify-content: inherit;
-
-    .label {
-      // Shrink once you're at the maximum width (e.g. don't overflow). Do not grow unless needed.
-      flex: 0 1 auto;
-      min-width: 0;
-
-      &:hover {
-        color: $black;
-        cursor: pointer;
-      }
-    }
-
-    .sortIcon {
-      // Make the sort icon slightly bigger than the text.
-      margin-left: 4px;
-      fill: currentColor;
-      width: 12px;
-
-      &.active {
-        display: flex;
-      }
-    }
-    // Display sortIcon when sortableHeader label is hovered over
-    .label:hover + .sortIcon {
-      display: flex;
-    }
-  }
-
-  .label {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    max-width: 100%;
-    display: inline-block;
-    vertical-align: middle;
-
-    &:hover {
-      color: $black;
-      cursor: default;
-    }
-  }
-}
-
-.actionsHeader {
-  overflow: visible;
-}
-
 .cell {
   @include font-body-xs;
 
@@ -113,6 +41,18 @@
 .row {
   &:global(.ReactVirtualized__Table__headerRow) {
     border-bottom: 3px solid $gray-lightest;
+
+    &:hover {
+      .dragHandleIcon {
+        background: $gray-light;
+        width: $space-xxxxs;
+        height: $space-m;
+
+        &:hover {
+          width: $space-xxxs;
+        }
+      }
+    }
   }
 
   &:global(.ReactVirtualized__Table__row) {
@@ -130,6 +70,98 @@
       cursor: pointer;
     }
   }
+
+  .header {
+    @include font-body-s;
+
+    color: $gray-dark;
+    font-weight: $font-weight-semibold;
+    outline: 0;
+    text-transform: none;
+
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    &.draggableHeader {
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      padding: 0;
+      justify-content: space-between !important;
+
+      .draggableArea {
+        height: inherit;
+        width: $space-xxs;
+        // Increase the clickable area
+        padding: 25px 0px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .ruler {
+          position: fixed;
+          background-color: $primary-light;
+          width: $space-xxxs;
+          z-index: 1;
+        }
+
+        &:hover {
+          cursor: ew-resize;
+        }
+      }
+    }
+
+    .sortableHeader {
+      max-width: 100%;
+      display: flex;
+      flex: 1 0 auto;
+      align-items: inherit;
+      justify-content: inherit;
+
+      .label {
+        // Shrink once you're at the maximum width (e.g. don't overflow). Do not grow unless needed.
+        flex: 0 1 auto;
+        min-width: 0;
+
+        &:hover {
+          color: $black;
+          cursor: pointer;
+        }
+      }
+
+      .sortIcon {
+        // Make the sort icon slightly bigger than the text.
+        margin-left: 4px;
+        fill: currentColor;
+        width: 12px;
+
+        &.active {
+          display: flex;
+        }
+      }
+      // Display sortIcon when sortableHeader label is hovered over
+      .label:hover + .sortIcon {
+        display: flex;
+      }
+    }
+
+    .label {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 100%;
+      display: inline-block;
+      vertical-align: middle;
+
+      &:hover {
+        color: $black;
+        cursor: default;
+      }
+    }
+  }
 }
 
 .grid {
@@ -141,27 +173,5 @@
 
   &:hover::-webkit-scrollbar {
     display: block;
-  }
-}
-
-.dragHandle {
-  flex: 0 0 16px;
-  z-index: 2;
-  cursor: col-resize;
-  color: #0085ff;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
-}
-
-.dragHandleIcon {
-  flex: 0 0 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  &:hover {
-    cursor: grab;
   }
 }

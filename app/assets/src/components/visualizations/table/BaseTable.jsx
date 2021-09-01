@@ -40,6 +40,8 @@ class BaseTable extends React.Component {
         this.props.defaultColumnWidth
       ),
       columnWidthPercentages: {},
+      columnCurrentlyDragged: null,
+      mouseOverDraggableAreaForColumn: null,
     };
   }
 
@@ -97,16 +99,23 @@ class BaseTable extends React.Component {
     columnData,
     label,
     totalTableWidth,
+    totalTableHeight,
+    isFirstColumn,
   }) => {
     const { headerLabelClassName } = this.props;
+    const {
+      columnCurrentlyDragged,
+      mouseOverDraggableAreaForColumn,
+    } = this.state;
 
     return (
       <React.Fragment key={dataKey}>
         {/* 
-          We need this empty div so we can properly position the column name in the middle
-          and the draggable component to the far right.
+          If the column is not the first column, add the empty div first so we can
+          properly position the column name in the middle and the draggable component
+          to the far right (alignment done via justify-content: space-between).
         */}
-        <div />
+        {!isFirstColumn && <div />}
         {columnData ? (
           <ColumnHeaderTooltip
             trigger={
@@ -121,9 +130,13 @@ class BaseTable extends React.Component {
         ) : (
           <span className={cx(cs.label, headerLabelClassName)}>{label}</span>
         )}
+        {/*
+          If the column is the first column, align the header to the far left by putting an empty div
+          in the middle of the label and draggable icon (alginment done via justify-content: space-between).
+        */}
+        {isFirstColumn && <div />}
         <Draggable
           axis="x"
-          defaultClassName={cs.dragHandle}
           onDrag={(_, { deltaX }) =>
             this.resizeRow({
               dataKey,
@@ -133,10 +146,41 @@ class BaseTable extends React.Component {
             })
           }
           position={{ x: 0 }}
+          onStart={() => this.setState({ columnCurrentlyDragged: dataKey })}
+          onStop={() => this.setState({ columnCurrentlyDragged: null })}
         >
-          <div className={cs.dragHandleIcon}>|</div>
+          <div
+            className={cs.draggableArea}
+            onMouseOver={() =>
+              this.setState({ mouseOverDraggableAreaForColumn: dataKey })
+            }
+            onMouseLeave={() =>
+              this.setState({ mouseOverDraggableAreaForColumn: null })
+            }
+          >
+            <div className={cs.dragHandleIcon} />
+            {(columnCurrentlyDragged === dataKey ||
+              mouseOverDraggableAreaForColumn === dataKey) &&
+              // The ruler is naturally centered in the draggableArea and does not start at the top of the table
+              // and end at the bottom of the table by default.
+              // To make the ruler start at the top of the table and end at the bottom of the table we must
+              // transform/translate the Y cooridnate by half of the height (table height) minus the height of
+              // the header cell (21px).
+              this.displayRuler({
+                height: totalTableHeight,
+                additionalStyling: {
+                  transform: `translate(0, ${totalTableHeight / 2 - 21}px)`,
+                },
+              })}
+          </div>
         </Draggable>
       </React.Fragment>
+    );
+  };
+
+  displayRuler = ({ height, additionalStyling = {} }) => {
+    return (
+      <div className={cs.ruler} style={{ height, ...additionalStyling }} />
     );
   };
 
@@ -382,7 +426,10 @@ class BaseTable extends React.Component {
                 ) {
                   headerRenderer = args =>
                     this.draggableHeaderRenderer({
+                      // Columns first in the order are aligned left, all others are aligned in the center
+                      isFirstColumn: index === 0,
                       totalTableWidth: width,
+                      totalTableHeight: height,
                       nextDataKey: columnOrder[index + 1],
                       ...args,
                     });
