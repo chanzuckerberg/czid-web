@@ -30,11 +30,17 @@ class VisualizationsController < ApplicationController
                        current_power.visualizations
                      end
 
+    # TODO: this is a temporary quick fix to filter out deprecated PhyloTreeNgs, but will
+    # not scale as the number of PhyloTreeNgs increase.
+    # We have a ticket to rework the Visualizations model to address this.
+    deprecated_phylo_tree_ngs = PhyloTreeNg.where(deprecated: true).ids
+    deprecated_visualizations_data = deprecated_phylo_tree_ngs.map { |id| { "treeNgId" => id } }
+
     visualizations = visualizations
                      .joins(:user, :samples)
                      .select("DISTINCT visualizations.id AS id, users.id AS user_id, visualization_type, users.name AS user_name, visualizations.name, visualizations.updated_at") \
-                     # filter out legacy data
-                     .where.not(visualization_type: [nil, 'undefined'], name: nil)
+                     .where.not(data: deprecated_visualizations_data) # filter out deprecated PhyloTreeNgs
+                     .where.not(visualization_type: [nil, 'undefined'], name: nil) # filter out legacy data
                      .order(updated_at: :desc)
                      .includes(samples: [:project])
                      .db_search(search)

@@ -132,6 +132,7 @@ class PhyloTreeNg < ApplicationRecord
     phylo_tree = PhyloTreeNg.create(
       inputs_json: inputs_json,
       name: name,
+      pipeline_run_ids: pipeline_run_ids,
       project_id: project_id,
       rerun_from: id,
       user_id: user_id
