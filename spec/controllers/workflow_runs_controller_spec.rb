@@ -784,6 +784,39 @@ RSpec.describe WorkflowRunsController, type: :controller do
       end
     end
 
+    describe "POST /workflow_runs_info" do
+      before do
+        project = create(:project, users: [@joe])
+        @sample1 = create(:sample, name: "Joe's good sample", project: project, user: @joe)
+        @workflow_run1 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded], inputs_json: { taxon_name: "fake taxon" }.to_json)
+        @workflow_run2 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded], inputs_json: { taxon_name: "fake taxon" }.to_json)
+      end
+
+      it "should return additional workflow information" do
+        post :workflow_runs_info, params: { workflowRunIds: [@workflow_run1.id, @workflow_run2.id] }, as: :json
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        workflow_run1_info = {
+          "id" => @workflow_run1.id,
+          "name" => @sample1.name,
+          "projectId" => @sample1.project_id,
+          "taxonName" => "fake taxon",
+          "userId" => @joe.id,
+        }
+        workflow_run2_info = {
+          "id" => @workflow_run2.id,
+          "name" => @sample1.name,
+          "projectId" => @sample1.project_id,
+          "taxonName" => "fake taxon",
+          "userId" => @joe.id,
+        }
+
+        expect(json_response["workflowRunInfo"]).to contain_exactly(workflow_run1_info, workflow_run2_info)
+      end
+    end
+
     describe "POST /created_by_current_user" do
       before do
         project = create(:project, users: [@joe])

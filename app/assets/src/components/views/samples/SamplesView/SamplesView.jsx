@@ -6,7 +6,6 @@ import {
   get,
   isEmpty,
   union,
-  pickBy,
   values,
 } from "lodash/fp";
 import React from "react";
@@ -564,7 +563,6 @@ class SamplesView extends React.Component {
   render() {
     const {
       currentDisplay,
-      objects,
       selectedIds,
       snapshotShareId,
       workflow,
@@ -614,7 +612,7 @@ class SamplesView extends React.Component {
               this.handleNextcladeModalClose,
               "SamplesView_nextclade-modal_closed"
             )}
-            objects={pickBy(o => selectedIds.has(o.id), objects.entries)}
+            selectedIds={selectedIds}
             workflowEntity={workflowEntity}
           />
         )}

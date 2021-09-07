@@ -368,6 +368,9 @@ const getCoverageVizData = ({ sampleId, accessionId, snapshotShareId } = {}) =>
       `/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`
   );
 
+const getWorkflowRunsInfo = workflowRunIds =>
+  postWithCSRF("/workflow_runs/workflow_runs_info", { workflowRunIds });
+
 const getWorkflowRunResults = workflowRunId =>
   get(`/workflow_runs/${workflowRunId}/results`);
 
@@ -629,6 +632,7 @@ export {
   getUserSettingMetadataByCategory,
   getVisualizations,
   getWorkflowRuns,
+  getWorkflowRunsInfo,
   getWorkflowRunResults,
   kickoffConsensusGenome,
   markSampleUploaded,

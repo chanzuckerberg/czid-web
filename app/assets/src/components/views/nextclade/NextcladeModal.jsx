@@ -1,18 +1,9 @@
 import cx from "classnames";
-import {
-  compact,
-  difference,
-  filter,
-  keys,
-  map,
-  size,
-  uniq,
-  values,
-} from "lodash/fp";
+import { difference, size } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { createConsensusGenomeCladeExport } from "~/api";
+import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
 import { validateWorkflowRunIds } from "~/api/access_control";
 import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
@@ -50,62 +41,62 @@ export default class NextcladeModal extends React.Component {
       selectedTreeType: "global",
       validationError: null,
       validWorkflowRunIds: new Set(),
+      validWorkflowInfo: [],
     };
   }
 
   componentDidMount() {
-    const { objects } = this.props;
-    const { admin } = this.context || {};
-
-    this.fetchValidationInfo({ ids: keys(objects).map(Number) });
-
-    if (admin) this.checkAdminSelections();
+    this.fetchValidationInfo();
   }
 
-  fetchValidationInfo = async ({ ids }) => {
-    const { objects } = this.props;
+  fetchValidationInfo = async () => {
+    const { selectedIds } = this.props;
 
     const {
       validIds,
       invalidSampleNames,
       error,
     } = await validateWorkflowRunIds({
-      workflowRunIds: ids,
+      basic: false,
+      workflowRunIds: Array.from(selectedIds),
       workflow: WORKFLOWS.CONSENSUS_GENOME.value,
     });
 
-    const validConsensusGenomes = filter(
-      o => validIds.includes(o.id),
-      values(objects)
+    const { workflowRunInfo } = await getWorkflowRunsInfo(validIds);
+
+    const projectIds = workflowRunInfo.map(workflow => workflow.projectId);
+
+    const nonSarsCov2SampleNames = workflowRunInfo
+      .filter(cg => cg.taxonName !== SARS_COV_2)
+      .map(cg => cg.name);
+
+    this.setState(
+      {
+        invalidSampleNames,
+        loading: false,
+        nonSarsCov2SampleNames,
+        validationError: error,
+        validWorkflowRunIds: new Set(validIds),
+        validWorkflowInfo: workflowRunInfo,
+        projectIds: projectIds,
+      },
+      this.checkAdminSelections
     );
-
-    const projectIds = map("projectId", validConsensusGenomes);
-
-    const nonSarsCov2SampleNames = values(validConsensusGenomes)
-      .filter(cg => cg.referenceGenome.taxonName !== SARS_COV_2)
-      .map(cg => cg.sample.name);
-
-    this.setState({
-      invalidSampleNames,
-      loading: false,
-      nonSarsCov2SampleNames,
-      validationError: error,
-      validWorkflowRunIds: new Set(validIds),
-      projectIds: projectIds,
-    });
   };
 
-  checkAdminSelections = async () => {
-    const { userId } = this.context || {};
-    const { objects } = this.props;
+  checkAdminSelections = () => {
+    const { admin, userId } = this.context || {};
+    const { validWorkflowInfo } = this.state;
 
-    const selectedOwnerIds = compact(
-      uniq(map("sample.userId", values(objects)))
-    );
-    if (difference(selectedOwnerIds, [userId]).length) {
-      window.alert(
-        "Admin warning: You have selected consensus genomes that belong to other users. Double-check that you have permission to send to Nextclade for production consensus genomes."
+    if (admin) {
+      const selectedOwnerIds = validWorkflowInfo.map(
+        workflow => workflow.userId
       );
+      if (difference(selectedOwnerIds, [userId]).length) {
+        window.alert(
+          "Admin warning: You have selected consensus genomes that belong to other users. Double-check that you have permission to send to Nextclade for production consensus genomes."
+        );
+      }
     }
   };
 
@@ -272,7 +263,7 @@ export default class NextcladeModal extends React.Component {
   };
 
   render() {
-    const { open, onClose, objects } = this.props;
+    const { open, onClose, selectedIds } = this.props;
     const {
       confirmationModalOpen,
       errorModalOpen,
@@ -299,8 +290,8 @@ export default class NextcladeModal extends React.Component {
               })}
             </div>
             <div className={cs.tagline}>
-              {size(objects)} Consensus Genome
-              {size(objects) !== 1 ? "s" : ""} selected
+              {size(selectedIds)} Consensus Genome
+              {size(selectedIds) !== 1 ? "s" : ""} selected
             </div>
           </div>
           <div className={cs.nextcladeDescription}>
@@ -385,7 +376,7 @@ export default class NextcladeModal extends React.Component {
 NextcladeModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
-  objects: PropTypes.object.isRequired,
+  selectedIds: PropTypes.instanceOf(Set),
   workflowEntity: PropTypes.string,
 };
 

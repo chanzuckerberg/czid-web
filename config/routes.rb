@@ -244,6 +244,7 @@ Rails.application.routes.draw do
       post :validate_workflow_run_ids
       post :created_by_current_user
       post :consensus_genome_clade_export
+      post :workflow_runs_info
     end
   end
 

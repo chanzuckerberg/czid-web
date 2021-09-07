@@ -115,6 +115,36 @@ class WorkflowRunsController < ApplicationController
     end
   end
 
+  # POST /workflow_runs/workflow_runs_info
+  # Returns sample and taxon information for the given workflow runs.
+  # This method uses POST because hundreds of workflowRunIds can be passed.
+  def workflow_runs_info
+    permitted_params = params.permit(workflowRunIds: [])
+    workflow_run_ids = permitted_params[:workflowRunIds]
+
+    workflow_run_info = current_power.workflow_runs.joins(:sample).select(
+      "samples.project_id as project_id,
+      samples.name as name,
+      samples.user_id as user_id,
+      workflow_runs.id as id,
+      workflow_runs.inputs_json"
+    )
+                                     .where(id: workflow_run_ids).map do |workflow_run|
+      { id: workflow_run.id,
+        name: workflow_run.name,
+        projectId: workflow_run.project_id,
+        taxonName: JSON.parse(workflow_run.inputs_json)["taxon_name"],
+        userId: workflow_run.user_id, }
+    end
+
+    render(
+      json: {
+        workflowRunInfo: workflow_run_info,
+      },
+      status: :ok
+    )
+  end
+
   # POST /workflow_runs/created_by_current_user
   # Returns whether all workflow runs were created by the current user.
   # This method uses POST because hundreds of workflowRunIds can be passed.
