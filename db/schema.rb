@@ -310,6 +310,15 @@ ActiveRecord::Schema.define(version: 20_210_824_231_350) do
     t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
   end
 
+  create_table "persisted_backgrounds", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false, comment: "The id of the user that has the persisted_background"
+    t.bigint "project_id", null: false, comment: "The id of the project that the persisted background is persisted for"
+    t.bigint "background_id", comment: "The id of the background that is being persisted. Will be set to null if the user selects a background with an incompatible sample."
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id", "project_id"], name: "index_user_id_project_id", unique: true
+  end
+
   create_table "phylo_tree_ngs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.json "inputs_json", comment: "Generic JSON field for recording execution inputs."
     t.string "status", default: "CREATED", null: false, comment: "A soft enum (string) describing the execution status."
