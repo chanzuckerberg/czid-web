@@ -3,16 +3,16 @@
 <div id="landing_page">
   <%= javascript_tag do %>
     react_component(
-      'Landing',
+      'DiscoveryViewRouter',
       {
         contactEmail: "accounts@idseq.net",
-        showBulletin: <%= @show_bulletin %>,
+        showBulletin: <%= !!@show_bulletin %>,
         browserInfo: <%= @browser_info.to_json.html_safe %>,
-        signInStrategy: <%= @sign_in_strategy.to_json.html_safe %>,
-        showAnnouncementBanner: <%= @show_announcement_banner %>,
-        showPublicSite: <%= @show_public_site %>
+        showAnnouncementBanner: <%= !!@show_announcement_banner %>,
+        showPublicSite: <%= !!@show_public_site %>
       },
-      'landing_page'
+      'landing_page',
+      JSON.parse('<%= raw escape_json(user_context)%>')
       );
   <% end %>
 </div>

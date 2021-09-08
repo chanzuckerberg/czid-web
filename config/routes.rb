@@ -102,6 +102,7 @@ Rails.application.routes.draw do
   get 'page_not_found', to: 'home#page_not_found'
 
   get 'maintenance', to: 'home#maintenance'
+  get 'landing_v2', to: 'home#landing_v2'
 
   resources :projects do
     member do

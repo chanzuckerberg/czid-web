@@ -1,5 +1,7 @@
 <div id="page_header">
-  <% if @show_blank_header %>
+  <% if @hide_header %>
+    <%# Don't render anything %>
+  <% elsif @show_blank_header %>
     <%= javascript_tag do %>
       react_component('Header', {
         userSignedIn: false,

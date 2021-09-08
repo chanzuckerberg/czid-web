@@ -4,11 +4,11 @@ import Landing from "~/components/views/Landing";
 
 export default {
   title: "Pages",
-  component: LandingPageDemo,
+  component: LegacyLandingPageDemo,
   argTypes: {},
 };
 
-export const LandingPageDemo = () => {
+export const LegacyLandingPageDemo = () => {
   console.log(navigator);
   return (
     <div>

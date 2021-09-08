@@ -42,6 +42,11 @@ class HomeController < ApplicationController
     end
   end
 
+  def landing_v2
+    @hide_header = true
+    render 'landing'
+  end
+
   def page_not_found
     if current_user
       @show_landing_header = false

@@ -7,9 +7,12 @@
 // - See https://reactrouter.com/web/api/match for the properties you can get from 'match' (params, isExact, path, and url).
 
 import PropTypes from "prop-types";
-import React from "react";
-import { Switch, Route } from "react-router-dom";
+import React, { useContext } from "react";
+import { Route, Switch } from "react-router-dom";
 
+import { UserContext } from "~/components/common/UserContext";
+import Landing from "~/components/views/Landing";
+import LandingV2 from "~/components/views/LandingV2";
 import SampleView from "~/components/views/SampleView/SampleView";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import { DISCOVERY_DOMAINS } from "~/components/views/discovery/discovery_api";
@@ -18,14 +21,20 @@ import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
 const DiscoveryViewRouter = ({
   admin,
   allowedFeatures,
+  browserInfo,
+  contactEmail,
   domain,
   mapTilerKey,
   projectId,
+  showAnnouncementBanner,
+  showBulletin,
+  showPublicSite,
   snapshotProjectDescription,
   snapshotProjectName,
   snapshotShareId,
   updateDiscoveryProjectId,
 }) => {
+  const { userSignedIn } = useContext(UserContext);
   return (
     <Switch>
       <Route
@@ -51,19 +60,36 @@ const DiscoveryViewRouter = ({
           />
         )}
       />
-      <Route>
-        <DiscoveryView
-          admin={admin}
-          allowedFeatures={allowedFeatures}
-          domain={domain}
-          mapTilerKey={mapTilerKey}
-          projectId={projectId}
-          snapshotProjectDescription={snapshotProjectDescription}
-          snapshotProjectName={snapshotProjectName}
-          snapshotShareId={snapshotShareId}
-          updateDiscoveryProjectId={updateDiscoveryProjectId}
-        />
-      </Route>
+      {userSignedIn && (
+        <Route exact path="/landing_v2">
+          <LandingV2 />
+        </Route>
+      )}
+      {userSignedIn ? (
+        <Route>
+          <DiscoveryView
+            admin={admin}
+            allowedFeatures={allowedFeatures}
+            domain={domain}
+            mapTilerKey={mapTilerKey}
+            projectId={projectId}
+            snapshotProjectDescription={snapshotProjectDescription}
+            snapshotProjectName={snapshotProjectName}
+            snapshotShareId={snapshotShareId}
+            updateDiscoveryProjectId={updateDiscoveryProjectId}
+          />
+        </Route>
+      ) : (
+        <Route>
+          <Landing
+            browserInfo={browserInfo}
+            contactEmail={contactEmail}
+            showAnnouncementBanner={showAnnouncementBanner}
+            showBulletin={showBulletin}
+            showPublicSite={showPublicSite}
+          />
+        </Route>
+      )}
     </Switch>
   );
 };
@@ -71,11 +97,16 @@ const DiscoveryViewRouter = ({
 DiscoveryViewRouter.propTypes = {
   admin: PropTypes.bool,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
+  browserInfo: PropTypes.object,
+  contactEmail: PropTypes.string,
+  domain: PropTypes.oneOf(DISCOVERY_DOMAINS),
   mapTilerKey: PropTypes.string,
   projectId: PropTypes.number,
-  snapshotProjectName: PropTypes.string,
+  showAnnouncementBanner: PropTypes.bool,
+  showBulletin: PropTypes.bool,
+  showPublicSite: PropTypes.bool,
   snapshotProjectDescription: PropTypes.string,
+  snapshotProjectName: PropTypes.string,
   snapshotShareId: PropTypes.string,
   updateDiscoveryProjectId: PropTypes.func,
 };
