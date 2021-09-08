@@ -535,6 +535,8 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         ncbi_metadata: "{\"NCBI_NT_accession_LM9974131\": {\"name\": \"Pseudomonas sp. 12M76_air genome assembly PRJEB5504_assembly_1, scaffold CONTIG000001\", \"accession\": \"LM997413.1\"}}",
       }
 
+      create(:accession_coverage_stat, pipeline_run: pr_one, coverage_breadth: 0.5, taxid: 2)
+
       @phylo_tree_two = create(:phylo_tree_ng,
                                user: @joe,
                                project: project_one,
@@ -543,6 +545,8 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
                                sfn_execution_arn: fake_sfn_execution_arn,
                                status: WorkflowRun::STATUS[:succeeded],
                                inputs_json: { pipeline_run_ids: [pr_two.id], tax_id: 2 })
+
+      create(:accession_coverage_stat, pipeline_run: pr_two, coverage_breadth: 0.0, taxid: 2)
 
       @created_tree = create(:phylo_tree_ng,
                              user: @joe,
@@ -580,7 +584,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "parent_taxid", "sampleDetailsByNodeName", "nextGeneration")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "parent_taxid", "sampleDetailsByNodeName", "nextGeneration", "has_low_coverage")
         expect(pt.keys).not_to include("log_url", "sfn_execution_arn", "s3_output_prefix")
         expect(pt["tax_level"]).to eq(1)
       end
@@ -594,7 +598,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName", "nextGeneration")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName", "nextGeneration", "has_low_coverage")
         expect(pt["tax_level"]).to eq(2)
       end
     end
@@ -617,7 +621,29 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "status", "tax_name", "clustermap_svg_url", "nextGeneration")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "status", "tax_name", "clustermap_svg_url", "nextGeneration", "has_low_coverage")
+        expect(pt["has_low_coverage"]).to eq(false)
+      end
+
+      it "returns if the samples had low coverage breadth" do
+        @mock_aws_clients = {
+          s3: Aws::S3::Client.new(stub_responses: true),
+          states: Aws::States::Client.new(stub_responses: true),
+        }
+        allow(AwsClient).to receive(:[]) { |client|
+          @mock_aws_clients[client]
+        }
+
+        expect_any_instance_of(PhyloTreeNg).to receive(:results).and_raise(SfnExecution::OutputNotFoundError.new(PhyloTreeNg::OUTPUT_NEWICK, PhyloTreeNg::DOWNLOADABLE_OUTPUTS))
+        expect_any_instance_of(SfnExecution).to receive(:sfn_archive_from_s3).and_return(fake_sfn_execution_description)
+
+        get :show, params: { id: @phylo_tree_two.id, format: "json" }
+
+        expect(response).to have_http_status :ok
+        pt = JSON.parse(response.body)
+
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "status", "tax_name", "clustermap_svg_url", "nextGeneration", "has_low_coverage")
+        expect(pt["has_low_coverage"]).to eq(true)
       end
     end
 

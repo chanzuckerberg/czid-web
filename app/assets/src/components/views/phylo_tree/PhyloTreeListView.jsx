@@ -71,6 +71,7 @@ class PhyloTreeListView extends React.Component {
         urlParams,
         props.phyloTrees
       ),
+      showLowCoverageWarning: false,
       showOldTreeWarning: true,
       selectedPhyloTreeNgId: props.selectedPhyloTreeNgId,
       sidebarConfig: null,
@@ -104,6 +105,7 @@ class PhyloTreeListView extends React.Component {
         currentTree,
         showOldTreeWarning: false,
         heatmapErrorModalOpen: currentTree.clustermap_svg_url,
+        showLowCoverageWarning: currentTree.has_low_coverage,
       });
     } else if (selectedPhyloTreeId) {
       this.setState({ currentTree: await getPhyloTree(selectedPhyloTreeId) });
@@ -520,6 +522,7 @@ class PhyloTreeListView extends React.Component {
       heatmapErrorModalOpen,
       selectedPhyloTreeId,
       selectedPhyloTreeNgId,
+      showLowCoverageWarning,
       showOldTreeWarning,
     } = this.state;
 
@@ -573,6 +576,7 @@ class PhyloTreeListView extends React.Component {
           <PhyloTreeHeatmapErrorModal
             open
             onContinue={this.handleCloseHeatmapErrorModal}
+            showLowCoverageWarning={showLowCoverageWarning}
           />
         )}
       </div>

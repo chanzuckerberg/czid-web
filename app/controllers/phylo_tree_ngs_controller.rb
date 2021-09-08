@@ -82,6 +82,7 @@ class PhyloTreeNgsController < ApplicationController
           render json: pt and return
         end
 
+        pt["has_low_coverage"] = false
         begin
           results = @phylo_tree_ng.results
           pt["user"] = @phylo_tree_ng.user.name
@@ -122,6 +123,11 @@ class PhyloTreeNgsController < ApplicationController
           # clustermap to display instead. We use "image/svg+xml" to override S3
           # default "binary/octet-stream" for SVGs.
           pt["clustermap_svg_url"] = get_presigned_s3_url(s3_path: @phylo_tree_ng.output_path(PhyloTreeNg::OUTPUT_CLUSTERMAP_SVG), content_type: "image/svg+xml")
+
+          # Check if the any of the samples had low coverage (coverage breadth < 25%).
+          pipeline_runs = @phylo_tree_ng.pipeline_runs
+          coverage_breadths = AccessionCoverageStat.where(pipeline_run: pipeline_runs, taxid: pt["tax_id"]).pluck(:coverage_breadth)
+          pt["has_low_coverage"] = coverage_breadths.any? { |coverage| coverage < 0.25 }
         end
 
         render json: pt
