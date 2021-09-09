@@ -11,6 +11,7 @@ class Background < ApplicationRecord
   has_and_belongs_to_many :pipeline_runs
   has_many :samples, through: :pipeline_runs
   has_many :taxon_summaries, dependent: :destroy
+  has_many :persisted_backgrounds, dependent: :destroy
   belongs_to :user, optional: true
 
   validate :validate_size

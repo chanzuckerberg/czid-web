@@ -41,6 +41,7 @@ class User < ApplicationRecord
   has_many :backgrounds, dependent: :destroy
   has_many :bulk_downloads, dependent: :destroy
   has_many :user_settings, dependent: :destroy
+  has_many :persisted_backgrounds, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true, format: {
     # Auth0 converts all emails to lowercase. Let's raise this at creation time
