@@ -18,7 +18,7 @@ class ProjectsController < ApplicationController
   READ_ACTIONS = [
     :show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status,
     :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status,
-    :send_project_reports_csv, :validate_sample_names,
+    :send_project_reports_csv, :validate_project_name, :validate_sample_names,
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility, :upload_metadata, :validate_metadata_csv].freeze
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
@@ -458,6 +458,26 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # GET /projects/1/validate_project_name.json
+  def validate_project_name
+    permitted_params = params.permit(:name)
+    name = ProjectsHelper.sanitize_project_name(permitted_params[:name])
+    @project.name = name
+    @project.valid?
+    if @project.errors.key?(:name)
+      render json: {
+        valid: false,
+        sanitizedName: name,
+        message: "This project name is already taken. Please enter another name.",
+      }
+    else
+      render json: {
+        valid: true,
+        sanitizedName: name,
+      }
+    end
+  end
+
   # DELETE /projects/1
   # DELETE /projects/1.json
   def destroy
@@ -622,8 +642,8 @@ class ProjectsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
     result = params.require(:project).permit(:name, :public_access, :description, user_ids: [])
-    result[:name] = sanitize_project_name(result[:name]) if result[:name]
-    result[:description] = sanitize_project_description(result[:description]) if result[:description]
+    result[:name] = ProjectsHelper.sanitize_project_name(result[:name]) if result[:name]
+    result[:description] = ProjectsHelper.sanitize_project_description(result[:description]) if result[:description]
     result
   end
 

@@ -639,6 +639,41 @@ RSpec.describe ProjectsController, type: :controller do
         end
       end
 
+      describe "GET validate_project_name" do
+        before do
+          @project_one = create(:project, :with_sample, users: [@joe])
+          @project_two = create(:project, :with_sample, users: [@joe])
+        end
+
+        it "returns true and sanitized name for a valid project name" do
+          unsanitized_name = "test-name!"
+
+          get :validate_project_name, params: {
+            format: "json",
+            id: @project_one.id,
+            name: unsanitized_name,
+          }
+          expect(response).to have_http_status(:success)
+
+          json_response = JSON.parse(response.body)
+          sanitized_name = ProjectsHelper.sanitize_project_name(unsanitized_name)
+          expect(json_response).to eq({ "valid" => true, "sanitizedName" => sanitized_name })
+        end
+
+        it "returns false, sanitized name, and message for a duplicate project name" do
+          get :validate_project_name, params: {
+            format: "json",
+            id: @project_one.id,
+            name: @project_two.name,
+          }
+          expect(response).to have_http_status(:success)
+
+          json_response = JSON.parse(response.body)
+          sanitized_name = ProjectsHelper.sanitize_project_name(@project_two.name)
+          expect(json_response).to eq({ "valid" => false, "sanitizedName" => sanitized_name, "message" => "This project name is already taken. Please enter another name." })
+        end
+      end
+
       describe "POST validate_sample_names" do
         before do
           @project = create(:project, :with_sample, users: [@joe])

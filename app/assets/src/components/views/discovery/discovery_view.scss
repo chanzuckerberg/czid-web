@@ -10,7 +10,7 @@
 
   .headerContainer {
     flex: 0 0 auto;
-    margin: 2px 20px 0 20px;
+    margin: 0px 20px;
   }
 
   .mainContainer {
@@ -21,7 +21,7 @@
     .leftPane:not(:empty) {
       border-right: 2px solid $gray-lightest;
       flex: 0 0 auto;
-      padding: 10px 20px 10px 20px;
+      padding: $space-m 20px;
       overflow-x: visible;
     }
 
@@ -43,7 +43,7 @@
       border-left: 2px solid $gray-lightest;
       flex: 0 0 auto;
       overflow: overlay;
-      padding: 0 5px 0 10px;
+      padding: 0 5px 0 $space-m;
 
       &::-webkit-scrollbar {
         display: none;
@@ -58,7 +58,7 @@
 
 .tabLabel {
   @include font-header-s;
-  margin-right: 10px;
+  margin-right: $space-m;
 }
 
 .tabCounter {

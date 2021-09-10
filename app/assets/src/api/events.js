@@ -137,6 +137,9 @@ function EventDictionary() {
   this.SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED =
     "SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED";
 
+  /** The user renamed a project from the project header. */
+  this.PROJECT_HEADER_PROJECT_RENAMED = "PROJECT_HEADER_PROJECT_RENAMED";
+
   /** The user clicked on the Learn More link in the project visibility tooltip. */
   this.PROJECT_VISIBILITY_HELP_LINK_CLICKED =
     "PROJECT_VISIBILITY_HELP_LINK_CLICKED";

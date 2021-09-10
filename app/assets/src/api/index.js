@@ -301,6 +301,16 @@ const createProject = params =>
     project: params,
   });
 
+const saveProjectName = (projectId, projectName) =>
+  putWithCSRF(`/projects/${projectId}.json`, {
+    name: projectName,
+  });
+
+const validateProjectName = (projectId, projectName) =>
+  get(`/projects/${projectId}/validate_project_name.json`, {
+    params: { name: projectName },
+  });
+
 const saveProjectDescription = (projectId, description) =>
   putWithCSRF(`/projects/${projectId}.json`, {
     description: description,
@@ -638,6 +648,7 @@ export {
   markSampleUploaded,
   retryPhyloTree,
   saveProjectDescription,
+  saveProjectName,
   saveSampleName,
   saveSampleNotes,
   saveVisualization,
@@ -647,6 +658,7 @@ export {
   uploadFileToUrl,
   uploadFileToUrlWithRetries,
   validatePhyloTreeName,
+  validateProjectName,
   validateSampleFiles,
   validateSampleNames,
   workflowRunsCreatedByCurrentUser,

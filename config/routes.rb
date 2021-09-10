@@ -113,6 +113,7 @@ Rails.application.routes.draw do
       get :host_gene_counts_status
       get :send_host_gene_counts
       get :all_users
+      get :validate_project_name
 
       put :add_favorite
       put :remove_favorite

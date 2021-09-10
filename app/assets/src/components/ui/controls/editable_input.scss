@@ -1,0 +1,46 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.editableInput {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  .editableText {
+    border-bottom: 1px dashed $gray-dark;
+  }
+
+  .editIcon {
+    flex: 1 0 auto;
+    height: $icon-s;
+    fill: $gray-dark;
+    margin-left: $space-m;
+
+    &:hover {
+      fill: $primary;
+    }
+  }
+}
+
+.alertContainer {
+  @include font-body-xxxs;
+  display: flex;
+  margin-top: $space-xxs;
+
+  &.warning {
+    color: $warning-dark;
+  }
+
+  &.error {
+    color: $error-dark;
+  }
+
+  .alertIcon {
+    width: $icon-s;
+    height: $icon-s;
+    margin-right: $space-xxs;
+    // Vertical-align the svg element with the text.
+    transform: translateY(1px);
+  }
+}

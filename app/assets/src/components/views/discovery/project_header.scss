@@ -4,7 +4,7 @@
 
 .projectHeader {
   display: flex;
-  margin-bottom: 20px;
+  margin: $space-xxs 0px $space-l 0px;
 
   .name {
     @include font-header-xl;
@@ -21,6 +21,7 @@
     color: $gray-dark;
     display: flex;
     align-items: center;
+    white-space: nowrap;
 
     &:not(:first-child) {
       margin-left: $space-l;
@@ -34,6 +35,6 @@
   fill: $gray-dark;
 
   .userIcon {
-    height: 14px;
+    height: $icon-s;
   }
 }

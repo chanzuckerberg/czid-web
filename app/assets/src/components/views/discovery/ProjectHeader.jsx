@@ -3,7 +3,10 @@ import { assign, find, min } from "lodash/fp";
 import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
+import { validateProjectName, saveProjectName } from "~/api";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
+import EditableInput from "~/components/ui/controls/EditableInput";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
 import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
 import { IconMemberSmall, IconPrivateSmall, IconPublicSmall } from "~ui/icons";
@@ -45,9 +48,54 @@ const ProjectHeader = ({
     ? nextPublicSampleTimestamp.format("MMM Do, YYYY")
     : null;
 
+  const handleProjectRename = async name => {
+    if (name === project.name) return "";
+
+    const { valid, sanitizedName, message } = await validateProjectName(
+      project.id,
+      name
+    );
+
+    if (!valid) {
+      return message;
+    }
+
+    let error = "";
+
+    try {
+      await saveProjectName(project.id, sanitizedName);
+      onMetadataUpdated();
+      logAnalyticsEvent(ANALYTICS_EVENT_NAMES.PROJECT_HEADER_PROJECT_RENAMED, {
+        projectId: project.id,
+        projectName: sanitizedName,
+      });
+    } catch (e) {
+      error = "There was an error renaming your project.";
+    }
+    return [error, sanitizedName];
+  };
+
+  const getWarningMessage = inputText => {
+    const specialCharacters = /[^A-Za-z0-9_\- ]/g;
+    if (specialCharacters.test(inputText)) {
+      return 'The special character(s) you entered will be converted to "-"';
+    } else {
+      return "";
+    }
+  };
+
   return (
     <div className={cs.projectHeader}>
-      <div className={cs.name}>{project.name || snapshotProjectName}</div>
+      {project.editable ? (
+        <EditableInput
+          value={project.name || snapshotProjectName}
+          className={cs.name}
+          onDoneEditing={handleProjectRename}
+          getWarningMessage={getWarningMessage}
+        />
+      ) : (
+        <div className={cs.name}>{project.name || snapshotProjectName}</div>
+      )}
       <div className={cs.fillIn} />
       {snapshotProjectName ? (
         <div className={cs.item}>

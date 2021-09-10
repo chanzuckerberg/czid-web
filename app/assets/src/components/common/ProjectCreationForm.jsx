@@ -96,7 +96,8 @@ class ProjectCreationForm extends React.Component {
     } catch (e) {
       if (e.data[0] === "Name has already been taken") {
         this.setState({
-          error: "Project name is already taken.",
+          error:
+            "This project name is already taken. Please enter another name.",
         });
       } else {
         this.setState({
