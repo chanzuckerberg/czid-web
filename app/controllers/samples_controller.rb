@@ -1149,17 +1149,29 @@ class SamplesController < ApplicationController
   # PATCH/PUT /samples/1.json
   def update
     old_status = @sample.status
+
+    if old_status == Sample::STATUS_CREATED && sample_params[:status] == Sample::STATUS_UPLOADED
+      # If any files are not seen on S3, return an error. This is to catch any
+      # S3 consistency lag bugs. Web uploader should retry up to
+      # MAX_MARK_SAMPLE_RETRIES.
+      if @sample.input_files.any? { |f| !f.s3_presence_check }
+        render(
+          json: { error: "An input file is not yet available on S3" },
+          status: :bad_request
+        ) and return
+      end
+
+      MetricUtil.log_analytics_event(
+        EventDictionary::SAMPLE_UPLOAD_SUCCEEDED,
+        current_user,
+        {
+          sample_id: @sample.id,
+        }
+      )
+    end
+
     respond_to do |format|
       if @sample.update(sample_params)
-        if old_status == Sample::STATUS_CREATED && @sample.status == Sample::STATUS_UPLOADED
-          MetricUtil.log_analytics_event(
-            EventDictionary::SAMPLE_UPLOAD_SUCCEEDED,
-            current_user,
-            {
-              sample_id: @sample.id,
-            }
-          )
-        end
         format.html { redirect_to @sample, notice: 'Sample was successfully updated.' }
         format.json { render :show, status: :ok, location: @sample }
       else

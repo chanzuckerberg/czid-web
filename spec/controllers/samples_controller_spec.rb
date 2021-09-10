@@ -723,6 +723,36 @@ RSpec.describe SamplesController, type: :controller do
         expect(response).to have_http_status :unauthorized
       end
     end
+
+    describe "PUT #update" do
+      before do
+        project = create(:project, users: [@joe])
+        @sample = create(:sample, project: project)
+
+        sign_in @joe
+      end
+
+      context "Marking Sample as uploaded" do
+        it "marks the Sample as uploaded" do
+          expect(@sample.status).to eq(Sample::STATUS_CREATED)
+
+          put :update, format: :json, params: { id: @sample.id, sample: { status: Sample::STATUS_UPLOADED } }
+
+          expect(response).to have_http_status :success
+          expect(@sample.reload.status).to eq(Sample::STATUS_CHECKED)
+        end
+
+        it "returns an error if not all input files appear on S3" do
+          expect(@sample.status).to eq(Sample::STATUS_CREATED)
+          expect(S3_CLIENT).to receive(:head_object).and_raise(Aws::S3::Errors::NotFound.new(nil, nil))
+
+          put :update, format: :json, params: { id: @sample.id, sample: { status: Sample::STATUS_UPLOADED } }
+
+          expect(response).to have_http_status :bad_request
+          expect(@sample.status).to eq(Sample::STATUS_CREATED)
+        end
+      end
+    end
   end
 
   context "Admin user" do

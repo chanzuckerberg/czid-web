@@ -1,5 +1,6 @@
 require 'aws-sdk-s3'
 require 'open3'
+
 class InputFile < ApplicationRecord
   belongs_to :sample
 
@@ -59,5 +60,12 @@ class InputFile < ApplicationRecord
 
   def file_type
     FILE_REGEX.match(name)[1] if FILE_REGEX.match(name)
+  end
+
+  def s3_presence_check
+    S3_CLIENT.head_object(bucket: SAMPLES_BUCKET_NAME, key: file_path)
+    true
+  rescue Aws::S3::Errors::NotFound
+    false
   end
 end
