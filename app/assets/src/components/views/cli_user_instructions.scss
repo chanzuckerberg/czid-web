@@ -1,89 +1,36 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 
-.deprecationBanner {
-  background-color: $error-light;
-  padding: 16px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  text-align: center;
-  font-size: 16px;
-}
-
 .instructionContainer {
-  .title {
-    font-size: 25px;
-    margin-bottom: 50px;
+  h1 {
+    font-size: 24px;
   }
 
-  margin: 5%;
-}
-
-.instructionHeading {
-  margin-top: 2.2rem;
-  font-weight: $font-weight-bold;
-  font-size: 1.2rem;
-}
-
-.instructionMediumMarginTop {
-  margin-top: 1rem;
-}
-
-.firstIndent {
-  margin-left: 20px;
-  margin-bottom: 5px;
-}
-
-.codeBullet {
-  width: fit-content;
-  background-color: $primary-lightest;
-  white-space: nowrap;
-  font-family: monospace;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
-.code {
-  background-color: $primary-lightest;
-  white-space: nowrap;
-  font-family: monospace;
-  &.center {
-    width: -webkit-fit-content;
-    width: fit-content;
+  h2 {
+    font-size: 22px;
   }
-  p {
+
+  h3 {
+    font-size: 20px;
+  }
+
+  h4 {
+    font-size: 18px;
+  }
+
+  h5 {
+    font-size: 16px;
+  }
+
+  margin: 1% 5%;
+
+  pre {
+    background-color: $primary-lightest;
     font-family: monospace;
   }
-}
 
-.codeToEdit {
-  color: $primary-light;
-  font-family: monospace;
-  font-weight: $font-weight-bold;
-}
-
-.codePersonal {
-  font-family: monospace;
-  font-weight: $font-weight-bold;
-}
-
-.uploadQuestion {
-  @include font-body-xxs;
-  color: $gray-darkest;
-  margin-top: 20px;
-  margin-bottom: 25px;
-
-  .link {
-    font-weight: $font-weight-semibold;
-
-    &:hover {
-      // Important due to a { color: inherit !important; } in header.scss.
-      color: $primary !important;
-    }
+  a {
+    color: $primary !important;
+    cursor: pointer;
   }
-}
-
-.link {
-  color: $primary;
-  cursor: pointer;
 }

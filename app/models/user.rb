@@ -12,21 +12,7 @@ class User < ApplicationRecord
     include ElasticsearchCallbacksHelper
   end
 
-  def self.encrypt_token(data)
-    cipher = OpenSSL::Cipher::AES256.new(:CBC).encrypt
-    cipher.key = Base64.decode64(ENV["AUTH_TOKEN_SECRET"])
-    iv = cipher.random_iv
-    cipher.update(data) + cipher.final + iv
-  end
-
-  def self.decrypt_token(data)
-    decipher = OpenSSL::Cipher::AES256.new(:CBC).decrypt
-    decipher.key = Base64.decode64(ENV["AUTH_TOKEN_SECRET"])
-    decipher.iv = data[-decipher.iv_len..-1]
-    decipher.update(data[0..-(decipher.iv_len + 1)]) + decipher.final
-  end
-
-  before_create { send("authentication_token_encrypted=", User.encrypt_token(SecureRandom.base58(24))) unless send("authentication_token_encrypted?") }
+  before_create { self.salt ||= SecureRandom.base58(24) }
 
   # NOTE: counter_cache is not supported for has_and_belongs_to_many.
   has_and_belongs_to_many :projects
@@ -62,17 +48,11 @@ class User < ApplicationRecord
     ROLE_ADMIN,
   ] }, allow_nil: true
 
-  validates :authentication_token_encrypted, presence: true, allow_nil: true
-
   IDSEQ_BUCKET_PREFIXES = ['idseq-'].freeze
   CZBIOHUB_BUCKET_PREFIXES = ['czb-', 'czbiohub-'].freeze
 
   def as_json(options = {})
-    super({ except: [:authentication_token_encrypted], methods: [:admin] }.merge(options))
-  end
-
-  def authentication_token
-    authentication_token_encrypted && User.decrypt_token(authentication_token_encrypted)
+    super({ methods: [:admin] }.merge(options))
   end
 
   def admin

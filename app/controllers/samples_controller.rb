@@ -57,7 +57,7 @@ class SamplesController < ApplicationController
 
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
-  MIN_CLI_VERSION = '0.8.14'.freeze
+  MIN_CLI_VERSION = '2.2.1'.freeze
   CLI_DEPRECATION_MSG = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git` or with sudo + pip2/pip3 depending on your setup to update and try again.\nThis version of the CLI will be deprecated entirely soon. Consider installing the new client at https://github.com/chanzuckerberg/idseq-cli-v2".freeze
 
   SAMPLE_DEFAULT_FIELDS = [
@@ -538,18 +538,6 @@ class SamplesController < ApplicationController
       return
     end
 
-    # TODO: this ensures users of cli v2 use at least 2.1.1, remove this when the old version is deprecated and go back to
-    # using MIN_CLI_VERSION
-    if client && client != "web" && version_obj >= Gem::Version.new("2.0.0") && version_obj < Gem::Version.new("2.1.1")
-      render json: {
-        message: CLI_DEPRECATION_MSG,
-        # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
-        errors: [CLI_DEPRECATION_MSG],
-        status: :upgrade_required,
-      }, status: :upgrade_required
-      return
-    end
-
     editable_project_ids = current_power.updatable_projects.pluck(:id)
 
     samples_to_upload, samples_invalid_projects = samples_to_upload.partition { |sample| editable_project_ids.include?(Integer(sample[:project_id])) }
@@ -621,8 +609,7 @@ class SamplesController < ApplicationController
     warn_if_large_bulk_upload(samples)
 
     resp = { samples: samples, sample_ids: samples.pluck(:id), errors: errors }
-    # TODO: remove this 2.0.0 requirement once we discontinue support for < 2.0.0 higher up
-    if client != "web" && Gem::Version.new(version_number) >= Gem::Version.new("2.0.0") && samples.any?
+    if client != "web" && samples.any?
       v2_samples = samples.map do |sample|
         input_files = sample.input_files.map do |input_file|
           {

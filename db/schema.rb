@@ -702,7 +702,7 @@ ActiveRecord::Schema.define(version: 20_210_824_231_350) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip", collation: "utf8_general_ci"
     t.string "last_sign_in_ip", collation: "utf8_general_ci"
-    t.binary "authentication_token_encrypted", limit: 48
+    t.string "salt", limit: 24
     t.integer "role"
     t.text "allowed_features"
     t.string "institution", limit: 100
@@ -714,7 +714,6 @@ ActiveRecord::Schema.define(version: 20_210_824_231_350) do
     t.bigint "created_by_user_id", comment: "The user_id that created/invited this user."
     t.text "archetypes"
     t.string "segments"
-    t.index ["authentication_token_encrypted"], name: "index_users_on_authentication_token_encrypted", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

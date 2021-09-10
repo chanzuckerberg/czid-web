@@ -122,22 +122,6 @@ class ApplicationController < ActionController::Base
       bearer_token = request.headers['Authorization'].split(' ').last
       authorized = auth0_authenticate_with_bearer_token({ "id_token" => bearer_token })
       @token_based_login_request = authorized
-      return
-    end
-
-    # TODO: remove legacy token login support
-    user_email = request.headers['X-User-Email'] || params[:user_email]
-    user_token = request.headers['X-User-Token'] || params[:user_token]
-
-    if user_email.present? && user_token.present?
-      user = User.find_by(email: user_email)
-
-      # secure_compare is used to mitigate timing attacks
-      if user && ActiveSupport::SecurityUtils.secure_compare(user.authentication_token, user_token)
-        warden.set_user(user, scope: :auth0_user)
-        @token_based_login_request = true
-        return
-      end
     end
   end
 

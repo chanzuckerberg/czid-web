@@ -34,8 +34,8 @@ describe User, type: :model do
     end
   end
 
-  context "#authentication_token" do
-    subject { user.authentication_token }
+  context "#salt" do
+    subject { user.salt }
 
     before do
       @user = create(:user)
@@ -43,14 +43,8 @@ describe User, type: :model do
 
     let!(:user) { @user }
 
-    it "generates an encrypted authentication_token for the user" do
+    it "generates a salt for the user" do
       expect(subject.length).to eq(24)
-    end
-
-    it "uses the AUTH_TOKEN_SECRET to decrypt" do
-      # values are manually computed based on the expected encryption logic and key located in .github/workflows/check.yml and chamber
-      @user.authentication_token_encrypted = Base64.decode64("+GO6lyPBZw2xe2H6uTzdvVBbTKOd3/I1wM4Os9xjPQs8WnCwnTgG+gdtPaurq5Fi")
-      expect(subject).to eq("V1tn563D3KaVXnEyEoe1TNGd")
     end
   end
 end

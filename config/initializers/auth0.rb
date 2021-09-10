@@ -8,16 +8,16 @@ Warden::Manager.serialize_into_session do |user|
   # convert to warden_session_obj
   serialized = user.slice("id", "role")
   # extra field to improve security
-  serialized["authentication_token_hash"] = Digest::SHA1.hexdigest(user.authentication_token || "")
+  serialized["salt_hash"] = Digest::SHA1.hexdigest(user.salt || "")
   serialized
 end
 
 Warden::Manager.serialize_from_session do |warden_session_obj|
   return nil unless warden_session_obj.instance_of?(Hash)
 
-  id, role, authentication_token_hash = warden_session_obj.values_at("id", "role", "authentication_token_hash")
+  id, role, salt_hash = warden_session_obj.values_at("id", "role", "salt_hash")
   user = User.find_by(id: id, role: role)
-  if user && authentication_token_hash == Digest::SHA1.hexdigest(user.authentication_token || "")
+  if user && salt_hash == Digest::SHA1.hexdigest(user.salt || "")
     user
   end
 end

@@ -13,8 +13,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     @deletable_sample = samples(:deletable_sample)
     @project = projects(:one)
     @user = users(:admin_one)
-    # decrypts to a authentication_token
-    @user.authentication_token_encrypted = Base64.decode64("+GO6lyPBZw2xe2H6uTzdvVBbTKOd3/I1wM4Os9xjPQs8WnCwnTgG+gdtPaurq5Fi")
+    @user.salt = SecureRandom.base58(24)
     @user.save
     @user_nonadmin = users(:joe)
   end
