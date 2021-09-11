@@ -200,7 +200,11 @@ Rails.application.routes.draw do
 
   resources :host_genomes
 
+  resources :persisted_backgrounds, only: [:index, :create]
+  resources :persisted_backgrounds, only: [:update, :show], param: :projectId
+
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
+
   get 'users/:id', to: 'users#edit'
 
   resources :benchmarks, only: [:index]

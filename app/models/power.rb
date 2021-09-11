@@ -106,4 +106,8 @@ class Power
   power :updatable_phylo_tree_ngs do
     PhyloTreeNg.editable(@user)
   end
+
+  power :persisted_backgrounds do
+    PersistedBackground.viewable(@user)
+  end
 end
