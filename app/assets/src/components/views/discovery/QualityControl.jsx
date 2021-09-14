@@ -24,6 +24,7 @@ import { IconInfoSmall } from "~/components/ui/icons";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import PropTypes from "~/components/utils/propTypes";
 import { getTooltipStyle } from "~/components/utils/tooltip";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
 import Histogram from "~/components/visualizations/Histogram";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
@@ -149,6 +150,7 @@ class QualityControl extends React.Component {
       projectId: projectId,
       filters: filters,
       limit: project.total_sample_count,
+      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
     });
 
     let data = this.extractData(projectSamples.samples);

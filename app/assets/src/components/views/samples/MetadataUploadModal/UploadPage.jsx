@@ -69,6 +69,8 @@ class UploadPage extends React.Component {
   };
 
   render() {
+    const { workflow } = this.props;
+
     return (
       <div className={cs.uploadPage}>
         <MetadataUpload
@@ -79,6 +81,7 @@ class UploadPage extends React.Component {
           issues={this.state.wasManual ? this.state.issues : null}
           metadata={this.state.metadata}
           withinModal
+          workflows={new Set([workflow])}
         />
       </div>
     );
@@ -95,6 +98,7 @@ UploadPage.propTypes = {
   wizardSetOnContinueValidation: PropTypes.func,
   wizardSetOverlay: PropTypes.func,
   samples: PropTypes.arrayOf(PropTypes.Sample),
+  workflow: PropTypes.string,
 };
 
 export default UploadPage;

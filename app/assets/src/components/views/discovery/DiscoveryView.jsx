@@ -1879,6 +1879,7 @@ class DiscoveryView extends React.Component {
               fetchedSamples={this.samples.loaded}
               onProjectUpdated={this.handleProjectUpdated}
               onMetadataUpdated={this.refreshDataFromProjectChange}
+              workflow={workflow}
             />
           )}
           <DiscoveryHeader

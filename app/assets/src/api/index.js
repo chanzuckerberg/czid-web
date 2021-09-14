@@ -4,7 +4,6 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
 
-import { WORKFLOWS } from "~/components/utils/workflows";
 import { getURLParamString } from "~/helpers/url";
 
 import {
@@ -152,6 +151,7 @@ const getSamples = ({
   sampleIds,
   snapshotShareId,
   basic = false,
+  workflow,
 } = {}) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
@@ -168,7 +168,7 @@ const getSamples = ({
         basic, // if true, then don't include extra details (ex: metadata) for each sample
         // &sampleIds=[1,2] instead of default &sampleIds[]=1&sampleIds[]=2 format.
         sampleIds: JSON.stringify(sampleIds),
-        workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+        workflow,
         ...filters,
       },
     }

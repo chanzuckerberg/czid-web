@@ -99,6 +99,7 @@ class MetadataUploadModal extends React.Component {
   };
 
   getPages = () => {
+    const { workflow } = this.props;
     const uploadTitle = (
       <span>
         Edit Metadata for{" "}
@@ -119,6 +120,7 @@ class MetadataUploadModal extends React.Component {
         onMetadataChange={this.handleMetadataChange}
         project={this.props.project}
         samples={this.state.projectSamples}
+        workflow={workflow}
       />
     );
 
@@ -154,6 +156,7 @@ MetadataUploadModal.propTypes = {
     id: PropTypes.number,
     name: PropTypes.string,
   }),
+  workflow: PropTypes.string,
 };
 
 export default MetadataUploadModal;

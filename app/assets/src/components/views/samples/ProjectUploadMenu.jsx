@@ -21,7 +21,7 @@ class ProjectUploadMenu extends React.Component {
   closeModal = () => this.setState({ modalOpen: false });
 
   render() {
-    const { onMetadataUpdated, project } = this.props;
+    const { onMetadataUpdated, project, workflow } = this.props;
     const { modalOpen } = this.state;
 
     const trigger = (
@@ -58,6 +58,7 @@ class ProjectUploadMenu extends React.Component {
             onClose={this.closeModal}
             onComplete={onMetadataUpdated}
             project={project}
+            workflow={workflow}
           />
         )}
       </div>
@@ -71,6 +72,7 @@ ProjectUploadMenu.propTypes = {
     id: PropTypes.number,
     name: PropTypes.string,
   }),
+  workflow: PropTypes.workflow,
 };
 
 export default ProjectUploadMenu;

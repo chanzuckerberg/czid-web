@@ -317,6 +317,7 @@ const getDiscoverySamples = async ({
     offset,
     listAllIds,
     sampleIds,
+    workflow: WORKFLOWS.SHORT_READ_MNGS.value,
   });
   return {
     samples: map(processRawSample, sampleResults.samples),

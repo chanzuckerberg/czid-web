@@ -19,6 +19,7 @@ const ProjectHeader = ({
   fetchedSamples,
   onProjectUpdated,
   onMetadataUpdated,
+  workflow,
 }) => {
   const handleProjectUserAdded = (username, email) => {
     const userFound = find({ email }, project.users);
@@ -143,6 +144,7 @@ const ProjectHeader = ({
           <ProjectUploadMenu
             project={project}
             onMetadataUpdated={onMetadataUpdated}
+            workflow={workflow}
           />
         </div>
       )}
@@ -156,6 +158,7 @@ ProjectHeader.propTypes = {
   onProjectUpdated: PropTypes.func,
   project: PropTypes.object.isRequired,
   snapshotProjectName: PropTypes.string,
+  workflow: PropTypes.string,
 };
 
 export default ProjectHeader;
