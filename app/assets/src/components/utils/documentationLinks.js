@@ -30,3 +30,7 @@ export const VADR_ANCHOR_LINK =
 export const MAIL_TO_HELP_LINK = "mailto:help@idseq.net";
 export const PHYLO_TREE_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/4404223662228";
+
+// TODO: Update to a different article if needed for Improved Background Models:
+export const BACKGROUND_MODELS_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054-Background-Models";

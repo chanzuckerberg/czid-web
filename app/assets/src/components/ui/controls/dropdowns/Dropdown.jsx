@@ -51,10 +51,14 @@ class Dropdown extends React.Component {
   };
 
   renderTrigger = () => {
-    const text = !isNil(this.state.value)
-      ? this.state.labels[this.state.value.toString()]
-      : null;
+    const { nullLabel } = this.props;
 
+    let text;
+    if (!isNil(this.state.value)) {
+      text = this.state.labels[this.state.value.toString()];
+    } else if (nullLabel) {
+      text = nullLabel;
+    }
     const labelText =
       this.props.label && text ? this.props.label + ":" : this.props.label;
 
@@ -147,6 +151,7 @@ Dropdown.propTypes = {
   // TODO(mark): Visually indicate that search options are loading even if
   // there are old search results to display.
   isLoadingSearchOptions: PropTypes.bool,
+  nullLabel: PropTypes.string,
 };
 
 export default Dropdown;

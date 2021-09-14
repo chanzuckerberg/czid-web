@@ -48,6 +48,7 @@ const BackgroundModelFilter = React.memo(
         disabled={disabled}
         onChange={onChange}
         onClick={onClick}
+        nullLabel="None"
       />
     );
   }

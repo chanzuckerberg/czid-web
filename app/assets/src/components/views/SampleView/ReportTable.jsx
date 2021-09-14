@@ -11,7 +11,9 @@ import {
 import { getCsrfToken } from "~/api/utils";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
+import { BACKGROUND_MODELS_LINK } from "~/components/utils/documentationLinks";
 import {
   isPipelineFeatureAvailable,
   ASSEMBLY_FEATURE,
@@ -85,9 +87,7 @@ class ReportTable extends React.Component {
           }),
       },
       {
-        cellRenderer: displayMergedNtNrValue
-          ? () => "-"
-          : this.renderAggregateScore,
+        cellRenderer: this.renderAggregateScore,
         columnData: displayMergedNtNrValue
           ? REPORT_TABLE_COLUMNS["unavailable"]
           : REPORT_TABLE_COLUMNS["NT_aggregatescore"],
@@ -113,11 +113,7 @@ class ReportTable extends React.Component {
                 defaultValue: 0,
                 countTypes: countTypes,
               }),
-        cellRenderer: ({ cellData }) => {
-          return cellData
-            ? this.renderCellValue({ cellData, decimalPlaces: 1 })
-            : "-";
-        },
+        cellRenderer: this.renderZscore,
         columnData: displayMergedNtNrValue
           ? REPORT_TABLE_COLUMNS["unavailable"]
           : REPORT_TABLE_COLUMNS["zscore"],
@@ -316,18 +312,48 @@ class ReportTable extends React.Component {
   }
 
   renderAggregateScore = ({ cellData, rowData }) => {
-    return (
-      <div className={cs.annotatedData}>
-        <div className={cs.icon}>
-          {rowData.highlighted && (
-            <IconInsightSmall tooltip="Highest-scoring organisms satisfying certain thresholds" />
-          )}
+    const { displayNoBackground, displayMergedNtNrValue } = this.props;
+    if (displayNoBackground || displayMergedNtNrValue) {
+      return (
+        <ColumnHeaderTooltip
+          trigger={<div className={cs.noData}>-</div>}
+          content={
+            "To see the Aggregate Score, first choose a background model above."
+          }
+          link={BACKGROUND_MODELS_LINK}
+        />
+      );
+    } else {
+      return (
+        <div className={cs.annotatedData}>
+          <div className={cs.icon}>
+            {rowData.highlighted && (
+              <IconInsightSmall tooltip="Highest-scoring organisms satisfying certain thresholds" />
+            )}
+          </div>
+          <div className={cs.data}>
+            {TableRenderers.formatNumberWithCommas(Number(cellData).toFixed(0))}
+          </div>
         </div>
-        <div className={cs.data}>
-          {TableRenderers.formatNumberWithCommas(Number(cellData).toFixed(0))}
-        </div>
-      </div>
-    );
+      );
+    }
+  };
+
+  renderZscore = ({ cellData }) => {
+    const { displayNoBackground } = this.props;
+    if (displayNoBackground) {
+      return (
+        <ColumnHeaderTooltip
+          trigger={<div className={cs.noData}>-</div>}
+          content={"To see the Z Score, first choose a background model above."}
+          link={BACKGROUND_MODELS_LINK}
+        />
+      );
+    } else {
+      return cellData
+        ? this.renderCellValue({ cellData, decimalPlaces: 1 })
+        : "-";
+    }
   };
 
   renderName = ({ cellData, rowData }) => {
@@ -881,6 +907,7 @@ ReportTable.defaultProps = {
 ReportTable.propTypes = {
   data: PropTypes.array,
   displayMergedNtNrValue: PropTypes.bool,
+  displayNoBackground: PropTypes.bool,
   initialDbType: PropTypes.oneOf(["nt", "nr", "merged_nt_nr"]),
   onTaxonNameClick: PropTypes.func,
   rowHeight: PropTypes.number,

@@ -65,6 +65,10 @@
   padding: $space-m 0;
   text-align: right;
   margin-right: $space-l;
+
+  .noData {
+    text-align: center;
+  }
 }
 
 .stack {

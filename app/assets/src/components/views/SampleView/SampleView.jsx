@@ -1914,6 +1914,7 @@ class SampleView extends React.Component {
                 consensusGenomeEnabled={sample && sample.editable}
                 data={filteredReportData}
                 displayMergedNtNrValue={displayMergedNtNrValue}
+                displayNoBackground={isNil(selectedOptions.background)}
                 fastaDownloadEnabled={
                   !!(reportMetadata && reportMetadata.hasByteRanges)
                 }

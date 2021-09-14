@@ -58,6 +58,7 @@ class SubtextDropdown extends React.Component {
       initialSelectedValue,
       menuClassName,
       onChange,
+      nullLabel,
       ...props
     } = this.props;
 
@@ -69,6 +70,7 @@ class SubtextDropdown extends React.Component {
         options={renderedMenuItems}
         value={initialSelectedValue}
         onChange={onChange}
+        nullLabel={nullLabel}
       />
     );
   }
@@ -91,6 +93,7 @@ SubtextDropdown.propTypes = {
     PropTypes.string,
     PropTypes.number,
   ]),
+  nullLabel: PropTypes.string,
 };
 
 export default SubtextDropdown;
