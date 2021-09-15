@@ -50,16 +50,13 @@ const ProjectHeader = ({
     : null;
 
   const handleProjectRename = async name => {
-    if (name === project.name) return "";
+    if (name === project.name) return ["", name];
 
     const { valid, sanitizedName, message } = await validateProjectName(
       project.id,
       name
     );
-
-    if (!valid) {
-      return message;
-    }
+    if (!valid) return [message, name];
 
     let error = "";
 
