@@ -1,0 +1,68 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.tabContainer {
+  height: 132px;
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  background: $gray-off-white;
+
+  &:hover {
+    cursor: pointer;
+
+    .tabIndicator {
+      background: $primary;
+    }
+
+    .tabCheckIcon {
+      fill: $primary;
+
+      & .outerCircle {
+        stroke: $primary;
+      }
+
+      & .checkMark {
+        stroke: $white;
+      }
+    }
+
+    .circle {
+      fill: $white;
+    }
+  }
+}
+
+.tabIndicator {
+  height: 100%;
+  width: 7px;
+  background: $gray-lightest;
+}
+
+.tabContent {
+  width: 100%;
+  padding: 7px;
+  border-bottom: 1px solid $gray-lightest;
+  font-family: $font-family-sans-serif;
+  display: flex;
+}
+
+.tabCheckIcon {
+  align-self: flex-start;
+}
+
+.tabContentText {
+  margin-left: 1rem;
+  max-width: 300px;
+}
+
+.tabTitle {
+  color: $black;
+  @include font-header-l;
+}
+
+.tabDescription {
+  color: $gray-darkest;
+  @include font-body-xs;
+}

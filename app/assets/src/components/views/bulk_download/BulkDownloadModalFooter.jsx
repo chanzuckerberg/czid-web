@@ -93,7 +93,7 @@ export default class BulkDownloadModalFooter extends React.Component {
       <div>
         <span className={cs.highlight}>
           {invalidSampleNames.length} sample
-          {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
+          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in the
           bulk download
         </span>
         , because they either failed or are still processing:

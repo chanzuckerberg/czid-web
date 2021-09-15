@@ -1,0 +1,36 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.hero {
+  font-family: $font-family-sans-serif;
+  background-color: $black;
+  background: url("../../../images/landing_page/idseq-hero.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center 85%;
+  width: 100%;
+  height: 434px;
+  padding-top: 2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  h1 {
+    color: $white;
+    font-weight: $font-weight-semibold;
+    margin: 0;
+    @include font-header-marketing-xl;
+
+    span {
+      transition: all 0.4s;
+    }
+  }
+
+  p {
+    color: $white;
+    margin-bottom: 40px;
+    margin-top: 6px;
+    @include font-body-m;
+  }
+}

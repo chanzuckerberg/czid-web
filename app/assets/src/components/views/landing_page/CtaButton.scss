@@ -1,0 +1,21 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.ctaButton {
+  display: inline-block;
+  color: $primary;
+  font-family: $font-family-sans-serif;
+  border: 1px solid $primary;
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 999px;
+  text-align: center;
+  @include font-body-xs;
+  font-weight: $font-weight-semibold;
+
+  &:hover {
+    background-color: lighten($primary, 2.5);
+    border-color: lighten($primary, 2.5);
+  }
+}

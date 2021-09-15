@@ -1,0 +1,107 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.contentContainer {
+  font-family: $font-family-sans-serif;
+  h2 {
+    @include font-header-marketing-l;
+  }
+
+  p {
+    @include font-body-m;
+  }
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -8%;
+
+  p {
+    @include font-body-m;
+    margin-top: 30px;
+  }
+
+  a {
+    margin-top: 30px;
+  }
+
+  div {
+    max-width: 487px;
+    padding: 4rem 0 0 8rem;
+  }
+
+  img {
+    width: 55%;
+  }
+}
+
+.healthQuestions {
+  text-align: center;
+  margin: 4rem auto 5rem auto;
+
+  figure {
+    display: inline-block;
+    margin-top: 2rem;
+
+    img {
+      width: 100%;
+      max-width: 979px;
+    }
+  }
+}
+
+.howItWorks {
+  margin-top: 5rem;
+  text-align: center;
+
+  p {
+    max-width: 765px;
+    margin: 0 auto;
+  }
+}
+
+.howItWorksProcess {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 3rem;
+
+  img {
+    height: 100px;
+    width: auto;
+  }
+
+  h3 {
+    @include font-header-m;
+  }
+
+  p {
+    @include font-body-xs;
+    max-width: 250px;
+    color: $gray-darkest;
+  }
+}
+
+.tabbedGallery {
+  margin-top: 5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.questions {
+  margin-top: 8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  h2 {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  a {
+    margin: 3rem auto;
+  }
+}

@@ -1,0 +1,21 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.ctaButton {
+  display: inline-block;
+  color: $white;
+  background: $primary;
+  font-family: $font-family-sans-serif;
+  border: 1px solid $primary;
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 999px;
+  text-align: center;
+  @include font-body-xs;
+  font-weight: $font-weight-semibold;
+
+  &:hover {
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,27 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.header {
+  background: $black;
+  padding: 2rem 3rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.textLink,
+.buttonLink {
+  color: $white;
+  text-decoration: none;
+  font-family: $font-family-sans-serif;
+  padding: 7px 14px;
+  margin: 0 5px;
+}
+
+.buttonLink {
+  display: inline-block;
+  text-align: center;
+  min-width: 120px;
+  border: 1px solid $white;
+  border-radius: 999px;
+}

@@ -954,7 +954,7 @@ class UploadSampleStep extends React.Component {
               </span>
             }
           >
-            Click "Create Project" above to finish project creation and continue
+            Click &ldquo;Create Project&rdquo; above to finish project creation and continue
           </BasicPopup>
           <a href="/home">
             <SecondaryButton

@@ -1,0 +1,73 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+/* Style the buttons that are used to open and close the accordion panel */
+
+.accordion {
+  background-color: $white;
+  font-family: $font-family-sans-serif;
+  color: $black;
+  cursor: pointer;
+  padding: 1rem 0 1rem 1rem;
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+  border-bottom: 1px solid $gray-light;
+  border-top: none;
+  border-left: 1px solid $gray-light;
+  border-right: 1px solid $gray-light;
+  outline: none;
+  transition: 0.4s;
+  position: relative;
+
+  &:hover {
+    color: $primary;
+
+    svg {
+      .plusStroke {
+        stroke: $primary;
+      }
+    }
+  }
+
+  p {
+    color: $gray-darkest;
+  }
+
+  &:first-of-type {
+    border-top: 1px solid $gray-light;
+  }
+
+  svg {
+    position: absolute;
+    top: 1.1rem;
+
+    circle,
+    path {
+      transition: 0.4s;
+    }
+  }
+}
+
+.accordionTitle,
+.accordionText {
+  margin-left: 2rem;
+}
+
+.accordionTitle {
+  @include font-header-l;
+}
+
+.accordionText {
+  @include font-body-m;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+  padding: 0;
+  background-color: $white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}

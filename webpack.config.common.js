@@ -119,7 +119,7 @@ const config = {
         ],
       },
       {
-        test: /\.(png|eot|ttf|svg)$/,
+        test: /\.(png|eot|ttf|svg|gif)$/,
         loader: "url-loader",
         options: {
           limit: 10000,

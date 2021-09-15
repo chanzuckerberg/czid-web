@@ -65,7 +65,7 @@ class NextcladeReferenceTreeOptions extends React.Component {
               <ExternalLink href={NEXTCLADE_TREE_FORMAT_LINK}>
                 Auspice JSON
               </ExternalLink>{" "}
-              format. For compatibility, make sure your tree's root is{" "}
+              format. For compatibility, make sure your tree&apos;s root is{" "}
               <ExternalLink href={NEXTCLADE_TREE_ROOT_LINK}>
                 Wuhan/Hu-1/2019.
               </ExternalLink>

@@ -1,0 +1,61 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.footer {
+  background: $black;
+  color: $white;
+  padding: 3rem 4rem;
+  font-family: $font-family-sans-serif;
+  @include font-body-s;
+  a {
+    color: $white;
+    text-decoration: none;
+  }
+}
+
+.topNavContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5rem;
+
+  a + a {
+    margin-left: 40px;
+  }
+}
+
+.bottomNavContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.bottomNavMenu {
+  display: flex;
+  align-items: center;
+
+  p {
+    margin-right: 10px;
+  }
+
+  span {
+    margin: 0 10px;
+  }
+}
+
+.czLogoContainer {
+  display: flex;
+  align-items: center;
+
+  img {
+    max-width: 100px;
+  }
+
+  .separator {
+    background: $white;
+    opacity: 0.3;
+    height: 100%;
+    width: 1px;
+    margin: 0 22px;
+  }
+}

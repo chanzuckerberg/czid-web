@@ -1,0 +1,72 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.whitePaper {
+  position: relative;
+  margin-top: 2em;
+
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: calc(100% - 2em);
+    background-color: $gray-off-white;
+  }
+
+  &__Inner {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 2;
+    margin: 0 auto;
+    overflow: hidden;
+    padding: 0 4%;
+
+    @media (min-width: 769px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1024px;
+    }
+
+    &_Image {
+      flex-shrink: 0;
+      background-color: $white;
+      max-width: 311px;
+      box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, 0.1);
+
+      @media (max-width: 768px) {
+        margin: 0 auto 3em auto;
+      }
+    }
+
+    img {
+      display: block;
+    }
+
+    &_Copy {
+      padding: 0 0 3em 0;
+
+      @media (min-width: 769px) {
+        padding: calc(4% + 2em) 0 4% 8%;
+      }
+
+      h2 {
+        @include font-header-xl;
+        margin: 0;
+      }
+
+      p {
+        color: $gray-darkest;
+        margin: 2em 0;
+
+        @media (max-width: 768px) {
+          margin: 1em 0 2em 0;
+        }
+      }
+    }
+  }
+}
