@@ -77,7 +77,7 @@ class PersistedBackgroundsController < ApplicationController
   rescue ActiveRecord::RecordNotFound
     @persisted_background = nil
     render(
-      json: { status: "Persisted background not found" },
+      json: { error: "Persisted background not found" },
       status: :not_found
     )
   end
