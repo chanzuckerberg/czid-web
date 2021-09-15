@@ -17,7 +17,14 @@ import {
   withAnalytics,
 } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
+import { formatPercent } from "~/components/utils/format";
+import {
+  isPipelineFeatureAvailable,
+  ACCESSION_COVERAGE_STATS_FEATURE,
+} from "~/components/utils/pipeline_versions";
 import Link from "~ui/controls/Link";
 import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
@@ -60,6 +67,7 @@ class PhyloTreeCreationModal extends React.Component {
       showErrorTaxonAndProject: false,
       showErrorName: false,
       showErrorSamples: false,
+      showLowCoverageWarning: false,
       treeName: "",
     };
 
@@ -78,6 +86,7 @@ class PhyloTreeCreationModal extends React.Component {
       date: "Date",
       ...(allowedFeatures.includes(PHYLO_TREE_NG_FEATURE) && {
         numContigs: "Contigs",
+        coverageBreadth: "Coverage Breadth",
       }),
     };
 
@@ -251,6 +260,31 @@ class PhyloTreeCreationModal extends React.Component {
               position: "top center",
               content:
                 "There must be at least 1 contig in the sample for it to be selected for inclusion in the tree.",
+            },
+          }),
+          ...formattedSample,
+        };
+
+        const coverageBreadth = get("coverage_breadth", sample);
+        const pipelineVersion = get("pipeline_version", sample);
+        const hasCoverageBreadth = isPipelineFeatureAvailable(
+          ACCESSION_COVERAGE_STATS_FEATURE,
+          pipelineVersion
+        );
+
+        formattedSample = {
+          coverageBreadth:
+            hasCoverageBreadth || numContigs === 0
+              ? formatPercent(coverageBreadth)
+              : "-",
+          ...(!hasCoverageBreadth && {
+            columnTooltips: {
+              coverageBreadth: {
+                position: "top center",
+                offset: [-5, 0],
+                content:
+                  "Not shown for samples on pipeline versions older than 6.0.",
+              },
             },
           }),
           ...formattedSample,
@@ -563,7 +597,38 @@ class PhyloTreeCreationModal extends React.Component {
   }
 
   renderNotifications() {
-    const { treeNameValid, showErrorSamples, showErrorName } = this.state;
+    const {
+      treeNameValid,
+      showErrorSamples,
+      showErrorName,
+      selectedProjectSamples,
+      selectedOtherSamples,
+      projectSamples,
+      otherSamples,
+    } = this.state;
+
+    const lowCoverageBreadths = [];
+    selectedProjectSamples.forEach(sampleIndex => {
+      const coverageBreadthPercentage =
+        projectSamples[sampleIndex].coverageBreadth;
+      const coverageBreadth = parseFloat(
+        coverageBreadthPercentage.slice(0, coverageBreadthPercentage.length)
+      );
+      if (coverageBreadth < 25) {
+        lowCoverageBreadths.push(coverageBreadth);
+      }
+    });
+    selectedOtherSamples.forEach(sampleIndex => {
+      const coverageBreadthPercentage =
+        otherSamples[sampleIndex].coverageBreadth;
+      const coverageBreadth = parseFloat(
+        coverageBreadthPercentage.slice(0, coverageBreadthPercentage.length)
+      );
+      if (coverageBreadth < 25) {
+        lowCoverageBreadths.push(coverageBreadth);
+      }
+    });
+    const showLowCoverageWarning = lowCoverageBreadths.length > 0;
 
     if (showErrorName && !treeNameValid) {
       return (
@@ -579,6 +644,22 @@ class PhyloTreeCreationModal extends React.Component {
           samples.
         </Notification>
       );
+    } else if (showLowCoverageWarning) {
+      return (
+        <Notification type="warning" displayStyle="flat">
+          Some of the samples you have selected have low coverage breadth, under
+          25%. This may reduce the quality of the output results.{" "}
+          <ExternalLink
+            coloredBackground={true}
+            href={PHYLO_TREE_LINK}
+            analyticsEventName={
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_LOW_COVERAGE_WARNING_BANNER_HELP_LINK_CLICKED
+            }
+          >
+            Learn more
+          </ExternalLink>
+        </Notification>
+      );
     }
     return null;
   }
@@ -591,11 +672,9 @@ class PhyloTreeCreationModal extends React.Component {
       "tissue",
       "location",
       "date",
+      "numContigs",
+      "coverageBreadth",
     ];
-
-    if (allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)) {
-      projectSamplesColumns.push("numContigs");
-    }
 
     const otherSamplesColumns = ["project", ...projectSamplesColumns];
 

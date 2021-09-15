@@ -203,7 +203,9 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     before do
       sign_in @joe
 
-      @species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", superkingdom_taxid: 2)
+      @species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", genus_taxid: 10, superkingdom_taxid: 2)
+      @species_b = create(:taxon_lineage, tax_name: "species a", taxid: 2, species_taxid: 2, species_name: "species b", genus_taxid: 10, superkingdom_taxid: 2)
+      @genus = create(:taxon_lineage, tax_name: "test genus", taxid: 10, genus_taxid: 10, superkingdom_taxid: 2)
       @project = create(:project, users: [@joe], name: "new tree project")
       @sample_one = create(:sample, project: @project, name: "sample_one", metadata_fields: {
                              collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab",
@@ -213,10 +215,15 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
                        job_status: "CHECKED",
                        taxon_counts_data: [
                          { taxon_name: @species_a.tax_name, tax_level: 1, nt: 70 },
-                         { taxon_name: @species_a.tax_name, tax_level: 1, nr: 10 },
-                       ])
-      create(:contig, pipeline_run_id: @pr_one.id, species_taxid_nt: @species_a.species_taxid)
-      create(:contig, pipeline_run_id: @pr_one.id, species_taxid_nt: @species_a.species_taxid)
+                         { taxon_name: @species_b.tax_name, tax_level: 1, nr: 100 },
+                       ],
+                       wdl_version: "6.0.0")
+      2.times do
+        create(:contig, pipeline_run_id: @pr_one.id, species_taxid_nt: @species_a.species_taxid, genus_taxid_nt: @species_a.genus_taxid)
+      end
+      5.times do
+        create(:contig, pipeline_run_id: @pr_one.id, species_taxid_nt: @species_b.species_taxid, genus_taxid_nt: @species_b.genus_taxid)
+      end
 
       create(:taxon_byterange,
              taxid: 1,
@@ -225,22 +232,22 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
              last_byte: 70,
              pipeline_run_id: @pr_one.id)
 
-      @sample_two = create(:sample, project: @project, name: "sample_two", metadata_fields: {
-                             collection_location_v2: "Los Angeles, USA", sample_type: "Brain",
-                           })
-      @pr_two = create(:pipeline_run,
-                       sample: @sample_two,
-                       job_status: "CHECKED",
-                       taxon_counts_data: [
-                         { taxon_name: @species_a.tax_name, tax_level: 1, nt: 30 },
-                         { taxon_name: @species_a.tax_name, tax_level: 1, nr: 50 },
-                       ])
       create(:taxon_byterange,
-             taxid: 1,
+             taxid: 2,
              hit_type: TaxonCount::COUNT_TYPE_NT,
              first_byte: 0,
-             last_byte: 50,
-             pipeline_run_id: @pr_two.id)
+             last_byte: 100,
+             pipeline_run_id: @pr_one.id)
+
+      create(:taxon_byterange,
+             taxid: 10,
+             hit_type: TaxonCount::COUNT_TYPE_NT,
+             first_byte: 0,
+             last_byte: 100,
+             pipeline_run_id: @pr_one.id)
+
+      create(:accession_coverage_stat, pipeline_run: @pr_one, coverage_breadth: 0.5, taxid: 1, num_contigs: 2)
+      create(:accession_coverage_stat, pipeline_run: @pr_one, coverage_breadth: 0.1, taxid: 2, num_contigs: 5)
     end
 
     context "fetching eligible sample info given new phylo tree parameters" do
@@ -261,17 +268,19 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(json_response[:project][:id]).to eq(@project.id)
       end
 
-      it "includes correct sample info in response" do
+      it "includes correct sample info in response to a species taxId" do
         expected_samples_info = {
           name: "sample_one",
           project_id: @project.id,
           host: @sample_one.host_genome_name,
           project_name: "new tree project",
           pipeline_run_id: @pr_one.id,
+          pipeline_version: @pr_one.wdl_version,
           sample_id: @sample_one.id,
           tissue: "Nasopharyngeal Swab",
           location: "New York, USA",
           num_contigs: 2,
+          coverage_breadth: 0.5,
         }
 
         get :new, format: :json, params: { projectId: @project.id, taxId: 1 }
@@ -282,6 +291,34 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
 
         expect(json_response.keys).to contain_exactly(:project, :samples)
         expect(sample_info.except(:created_at)).to eq(expected_samples_info)
+        # Workaround to compare two timestamps
+        expect(Time.parse(sample_info[:created_at]).to_i).to eq(Time.parse(@sample_one.created_at.to_s).to_i)
+      end
+
+      it "includes correct sample info in response to a genus taxId" do
+        expected_samples_info = {
+          name: "sample_one",
+          project_id: @project.id,
+          host: @sample_one.host_genome_name,
+          project_name: "new tree project",
+          pipeline_run_id: @pr_one.id,
+          pipeline_version: @pr_one.wdl_version,
+          sample_id: @sample_one.id,
+          tissue: "Nasopharyngeal Swab",
+          location: "New York, USA",
+          num_contigs: 7,
+        }
+
+        get :new, format: :json, params: { projectId: @project.id, taxId: 10 }
+
+        expect(response).to have_http_status :ok
+        json_response = JSON.parse(response.body, symbolize_names: true)
+        sample_info = json_response[:samples][0]
+
+        expect(json_response.keys).to contain_exactly(:project, :samples)
+        expect(sample_info.except(:created_at, :coverage_breadth)).to eq(expected_samples_info)
+        # Float precision testing quirk; we round to the nearest tenth of a percent for display.
+        expect(sample_info[:coverage_breadth]).to be_within(0.0001).of(0.1)
         # Workaround to compare two timestamps
         expect(Time.parse(sample_info[:created_at]).to_i).to eq(Time.parse(@sample_one.created_at.to_s).to_i)
       end

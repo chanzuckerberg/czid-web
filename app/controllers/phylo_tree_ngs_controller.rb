@@ -126,6 +126,7 @@ class PhyloTreeNgsController < ApplicationController
 
           # Check if the any of the samples had low coverage (coverage breadth < 25%).
           pipeline_runs = @phylo_tree_ng.pipeline_runs
+          # TODO: If taxid is genus level, then check the coverage breadth for the species with the highest number of contigs
           coverage_breadths = AccessionCoverageStat.where(pipeline_run: pipeline_runs, taxid: pt["tax_id"]).pluck(:coverage_breadth)
           pt["has_low_coverage"] = coverage_breadths.any? { |coverage| coverage < 0.25 }
         end
@@ -338,6 +339,7 @@ class PhyloTreeNgsController < ApplicationController
 
   def get_additional_reference_accession_ids(pipeline_run_ids, tax_id)
     additional_reference_accession_ids = Set.new()
+    # TODO: refactor this to query AccessionCoverageStats instead of fetching from s3
     pipeline_run_ids.each do |pipeline_run_id|
       coverage_viz_summary_s3_path = current_power.pipeline_runs.find(pipeline_run_id).coverage_viz_summary_s3_path
       if coverage_viz_summary_s3_path
@@ -383,13 +385,53 @@ class PhyloTreeNgsController < ApplicationController
       )",
                                                                           tax_id: tax_id,])
 
+    # Get the pipeline run's coverage breadth for the specified taxon, if available.
+    accession_coverage_stats_query = ActiveRecord::Base.sanitize_sql_array(["
+                      LEFT JOIN accession_coverage_stats AS stats ON (
+                        pipeline_runs.id = stats.pipeline_run_id AND
+                        stats.taxid = :tax_id
+                      )
+                    ", tax_id: tax_id,])
+
+    # If the taxon of interest is at the genus level, get the coverage breadth of species with the highest number of contigs within that genus,
+    # similar to how selecting coverage viz from the genus row works on the sample report.
+    tax_level = TaxonLineage.where(taxid: tax_id).last.tax_level
+    if tax_level == TaxonCount::TAX_LEVEL_GENUS
+      species_taxids = TaxonLineage.where(genus_taxid: tax_id).distinct.pluck(:species_taxid).filter { |species_taxid| species_taxid > 0 }
+
+      # For each pipeline_run_id, select the AccessionCoverageStat with the highest number of contigs where the taxid is in species_taxids.
+      # Join this to the query below so we can get the coverage_breadth for the pipeline run.
+      accession_coverage_stats_query = ActiveRecord::Base.sanitize_sql_array(["
+        LEFT JOIN (
+          SELECT coverage_stats.pipeline_run_id, coverage_stats.coverage_breadth
+          FROM (
+            SELECT pipeline_run_id, MAX(num_contigs) as maxcontigs
+            FROM accession_coverage_stats
+            WHERE taxid IN (:species_taxids)
+            GROUP BY pipeline_run_id
+          ) AS top_stats
+          INNER JOIN (
+            SELECT pipeline_run_id, coverage_breadth, num_contigs
+            FROM accession_coverage_stats
+            WHERE taxid IN (:species_taxids)
+          ) AS coverage_stats ON (
+            coverage_stats.pipeline_run_id = top_stats.pipeline_run_id AND
+            coverage_stats.num_contigs = top_stats.maxcontigs
+            )
+        ) AS stats ON (
+            pipeline_runs.id = stats.pipeline_run_id
+          )", species_taxids: species_taxids,])
+    end
+
     # Retrieve information for displaying the tree's sample list.
     # Expose it as an array of hashes containing
     # - sample name
     # - project id and name
-    # - pipeline run id to be used for the sample.
+    # - pipeline run id to be used for the sample
+    # - the pipeline run's version
     # - number of contigs that contain the specified taxon
-    samples_projects = current_power.pipeline_runs.joins(sample: [:project, :host_genome]).joins(Arel.sql(sanitized_join_sql_statement)).where(
+    # - the sample's coverage breadth for the taxon
+    samples_projects = current_power.pipeline_runs.joins(sample: [:project, :host_genome]).joins(Arel.sql(accession_coverage_stats_query)).joins(Arel.sql(sanitized_join_sql_statement)).where(
       id: pipeline_run_ids
     ).group("id").pluck(Arel.sql("
       samples.name,
@@ -398,9 +440,11 @@ class PhyloTreeNgsController < ApplicationController
       host_genomes.name as host,
       projects.name as project_name,
       pipeline_runs.id as pipeline_run_id,
+      pipeline_runs.wdl_version as pipeline_version,
       samples.id as sample_id,
-      COUNT(DISTINCT(contigs.id)) as num_contigs
-    ")).map do |name, project_id, created_at, host, project_name, pipeline_run_id, sample_id, num_contigs|
+      COUNT(DISTINCT(contigs.id)) as num_contigs,
+      MAX(stats.coverage_breadth)
+    ")).map do |name, project_id, created_at, host, project_name, pipeline_run_id, pipeline_version, sample_id, num_contigs, coverage_breadth|
       {
         "name" => name,
         "project_id" => project_id,
@@ -408,8 +452,10 @@ class PhyloTreeNgsController < ApplicationController
         "host" => host,
         "project_name" => project_name,
         "pipeline_run_id" => pipeline_run_id,
+        "pipeline_version" => pipeline_version,
         "sample_id" => sample_id,
         "num_contigs" => num_contigs,
+        "coverage_breadth" => coverage_breadth,
       }
     end
 

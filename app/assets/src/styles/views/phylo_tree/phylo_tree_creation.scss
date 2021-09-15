@@ -1,4 +1,5 @@
 @import "../../themes/colors";
+@import "~styles/themes/elements";
 
 .phylo-tree-creation-wizard {
   min-height: 440px;
@@ -155,7 +156,8 @@
 
     &__notifications {
       max-height: 40px;
-      margin-bottom: 20px;
+      margin-top: $space-xl;
+      margin-bottom: $space-xxl;
     }
   }
 

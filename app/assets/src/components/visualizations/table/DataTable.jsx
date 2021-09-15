@@ -177,21 +177,35 @@ class DataTable extends React.Component {
               />
             );
 
-            const columns = this.props.columns.map((column, colIdx) => (
-              <td
-                className={cx(
-                  `data-table__data column-${column}`,
-                  shouldDisable && cs.disabled
-                )}
-                style={this.getCellStyle(column)}
-                key={colIdx}
-              >
-                {/* If we want to display an object (e.g. location object), provide a 'name' field */}
-                {isObject(row[column]) && row[column].name !== undefined
-                  ? row[column].name
-                  : row[column]}
-              </td>
-            ));
+            const columnTooltips = get("columnTooltips", row);
+            const columns = this.props.columns.map((column, colIdx) => {
+              const col = (
+                <td
+                  className={cx(
+                    `data-table__data column-${column}`,
+                    shouldDisable && cs.disabled
+                  )}
+                  style={this.getCellStyle(column)}
+                  key={colIdx}
+                >
+                  {/* If we want to display an object (e.g. location object), provide a 'name' field */}
+                  {isObject(row[column]) && row[column].name !== undefined
+                    ? row[column].name
+                    : row[column]}
+                </td>
+              );
+
+              return columnTooltips && columnTooltips[column] ? (
+                <ColumnHeaderTooltip
+                  trigger={col}
+                  content={get("content", columnTooltips[column])}
+                  offset={get("offset", columnTooltips[column])}
+                  position={get("position", columnTooltips[column])}
+                />
+              ) : (
+                col
+              );
+            });
 
             return (
               <>
