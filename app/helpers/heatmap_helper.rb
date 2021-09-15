@@ -10,10 +10,6 @@ module HeatmapHelper
   READ_SPECIFICITY = true
   MINIMUM_READ_THRESHOLD = 5
   DEFAULT_NUM_RESULTS = 1_000_000
-  # Note: this is activated from the heatmap page by selecting "Viruses -
-  # Phages". The default categories are all BUT phages, though the UI does not
-  # indicate this.
-  INCLUDE_PHAGE = false
 
   # The number of taxa per sample to load
   # this should be high enough to compensate for any filters and thresholds
@@ -156,7 +152,6 @@ module HeatmapHelper
   )
     categories_clause = ""
     read_specificity_clause = ""
-    phage_clause = ""
 
     tax_level_clause = " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_SPECIES}', '#{TaxonCount::TAX_LEVEL_GENUS}')"
 
@@ -215,8 +210,7 @@ module HeatmapHelper
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{tax_level_clause}
       #{categories_clause}
-      #{read_specificity_clause}
-      #{phage_clause}"
+      #{read_specificity_clause}"
 
     sort = CLIENT_FILTERING_SORT_VALUES
 

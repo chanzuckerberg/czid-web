@@ -12,7 +12,6 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     @categories = nil
     @threshold_filters = []
     @read_specificity = true
-    @include_phage = false
     @species_selected = true
 
     @params = {
