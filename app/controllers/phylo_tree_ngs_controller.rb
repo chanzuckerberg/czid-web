@@ -126,8 +126,39 @@ class PhyloTreeNgsController < ApplicationController
 
           # Check if the any of the samples had low coverage (coverage breadth < 25%).
           pipeline_runs = @phylo_tree_ng.pipeline_runs
-          # TODO: If taxid is genus level, then check the coverage breadth for the species with the highest number of contigs
-          coverage_breadths = AccessionCoverageStat.where(pipeline_run: pipeline_runs, taxid: pt["tax_id"]).pluck(:coverage_breadth)
+          tax_level = TaxonLineage.where(taxid: pt["tax_id"]).last.tax_level
+          if tax_level == TaxonCount::TAX_LEVEL_SPECIES
+            coverage_breadths = AccessionCoverageStat.where(pipeline_run: pipeline_runs, taxid: pt["tax_id"]).pluck(:coverage_breadth)
+          else
+            # If the taxon of interest is at the genus level, get the coverage breadth of species with the highest number of contigs within that genus,
+            # similar to how selecting coverage viz from the genus row works on the sample report.
+            species_taxids = TaxonLineage.where(genus_taxid: pt["tax_id"]).distinct.pluck(:species_taxid).filter { |species_taxid| species_taxid > 0 }
+
+            # For each pipeline_run_id, select the AccessionCoverageStat with the highest number of contigs where the taxid is in species_taxids,
+            # and get the coverage_breadth.
+            accession_coverage_stats_query = ActiveRecord::Base.sanitize_sql_array(["
+              LEFT JOIN (
+                SELECT coverage_stats.pipeline_run_id, coverage_stats.coverage_breadth
+                FROM (
+                  SELECT pipeline_run_id, MAX(num_contigs) as maxcontigs
+                  FROM accession_coverage_stats
+                  WHERE taxid IN (:species_taxids)
+                  GROUP BY pipeline_run_id
+                ) AS top_stats
+                INNER JOIN (
+                  SELECT pipeline_run_id, coverage_breadth, num_contigs
+                  FROM accession_coverage_stats
+                  WHERE taxid IN (:species_taxids)
+                ) AS coverage_stats ON (
+                  coverage_stats.pipeline_run_id = top_stats.pipeline_run_id AND
+                  coverage_stats.num_contigs = top_stats.maxcontigs
+                  )
+              ) AS stats ON (
+                  pipeline_runs.id = stats.pipeline_run_id
+                )", species_taxids: species_taxids,])
+
+            coverage_breadths = pipeline_runs.joins(Arel.sql(accession_coverage_stats_query)).pluck(Arel.sql("stats.coverage_breadth"))
+          end
           pt["has_low_coverage"] = coverage_breadths.any? { |coverage| coverage < 0.25 }
         end
 

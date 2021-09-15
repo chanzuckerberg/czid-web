@@ -542,19 +542,21 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       }
     end
     let(:fake_species) { "some species" }
+    let(:fake_genus) { "some genus" }
 
     before do
       sign_in @joe
 
+      create(:taxon_lineage, taxid: 1, tax_name: fake_species, species_taxid: 1, genus_taxid: 2)
+      create(:taxon_lineage, taxid: 2, tax_name: fake_genus, genus_taxid: 2)
+
       project_one = create(:project, users: [@joe])
       sample_one = create(:sample, project: project_one)
       pr_one = create(:pipeline_run, sample: sample_one)
-      create(:taxon_lineage, taxid: 1, tax_name: fake_species)
       create(:taxon_count, tax_id: 1, pipeline_run_id: pr_one.id, tax_level: 1)
 
       sample_two = create(:sample, project: project_one)
       pr_two = create(:pipeline_run, sample: sample_two)
-      create(:taxon_lineage, taxid: 2, tax_name: "some genus")
       create(:taxon_count, tax_id: 2, pipeline_run_id: pr_two.id, tax_level: 2)
 
       @phylo_tree_one = create(:phylo_tree_ng,
@@ -572,7 +574,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         ncbi_metadata: "{\"NCBI_NT_accession_LM9974131\": {\"name\": \"Pseudomonas sp. 12M76_air genome assembly PRJEB5504_assembly_1, scaffold CONTIG000001\", \"accession\": \"LM997413.1\"}}",
       }
 
-      create(:accession_coverage_stat, pipeline_run: pr_one, coverage_breadth: 0.5, taxid: 2)
+      create(:accession_coverage_stat, pipeline_run: pr_one, coverage_breadth: 0.5, taxid: 1)
 
       @phylo_tree_two = create(:phylo_tree_ng,
                                user: @joe,
@@ -583,7 +585,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
                                status: WorkflowRun::STATUS[:succeeded],
                                inputs_json: { pipeline_run_ids: [pr_two.id], tax_id: 2 })
 
-      create(:accession_coverage_stat, pipeline_run: pr_two, coverage_breadth: 0.0, taxid: 2)
+      create(:accession_coverage_stat, pipeline_run: pr_two, coverage_breadth: 0.0, taxid: 1)
 
       @created_tree = create(:phylo_tree_ng,
                              user: @joe,
