@@ -872,7 +872,7 @@ class SampleView extends React.Component {
     const { project, selectedOptions } = this.state;
 
     let newBackground;
-    const persistBackgroundApi = isEmpty(selectedOptions.background)
+    const persistBackgroundApi = !selectedOptions.background
       ? createPersistedBackground
       : updatePersistedBackground;
 
