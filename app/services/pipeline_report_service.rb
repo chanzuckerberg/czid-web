@@ -103,7 +103,7 @@ class PipelineReportService
 
   def initialize(pipeline_run, background_id, csv: false, min_contig_reads: PipelineRun::MIN_CONTIG_READS, parallel: true, merge_nt_nr: false)
     @pipeline_run = pipeline_run
-    @background = Background.find(background_id)
+    @background = background_id ? Background.find(background_id) : nil
     @csv = csv
     @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS
     @parallel = parallel
@@ -129,7 +129,7 @@ class PipelineReportService
       )
     end
 
-    if @background.mass_normalized? && @pipeline_run.total_reads.zero?
+    if @background&.mass_normalized? && @pipeline_run.total_reads.zero?
       raise MassNormalizedBackgroundError.new(@background.id, @pipeline_run.id)
     end
 
@@ -140,8 +140,8 @@ class PipelineReportService
     if @parallel
       parallel_steps = [
         -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads) },
-        -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background.id) },
-        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background.id) },
+        -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id) },
+        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id) },
       ]
       parallel_steps << -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_MERGED]) } if @merge_nt_nr
       results = nil
@@ -165,10 +165,10 @@ class PipelineReportService
       contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads)
       @timer.split("get_contig_summary")
 
-      taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background.id)
+      taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id)
       @timer.split("fetch_taxon_counts_and_summaries")
 
-      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background.id)
+      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id)
       @timer.split("fetch_taxons_absent_from_sample")
 
       if @merge_nt_nr
@@ -212,7 +212,7 @@ class PipelineReportService
       @timer.split("generate_downloadable_csv")
       return csv_output
     else
-      metadata = metadata.merge(backgroundId: @background.id,
+      metadata = metadata.merge(backgroundId: @background&.id,
                                 truncatedReadsCount: @pipeline_run.truncated,
                                 adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
                                 subsampledReadsCount: @pipeline_run.subsampled_reads,
@@ -559,7 +559,7 @@ class PipelineReportService
 
   def compute_z_scores(taxa_counts)
     taxa_counts.each_value do |taxon_counts|
-      if @background.mass_normalized?
+      if @background&.mass_normalized?
         nt_z_score = compute_z_score_mass_normalized(taxon_counts[:nt][:count], taxon_counts[:nt][:bg_mean_mass_normalized], taxon_counts[:nt][:bg_stdev_mass_normalized], @pipeline_run.total_ercc_reads) if taxon_counts[:nt].present?
         nr_z_score = compute_z_score_mass_normalized(taxon_counts[:nr][:count], taxon_counts[:nr][:bg_mean_mass_normalized], taxon_counts[:nr][:bg_stdev_mass_normalized], @pipeline_run.total_ercc_reads) if taxon_counts[:nr].present?
       else

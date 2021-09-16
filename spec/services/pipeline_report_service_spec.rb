@@ -607,4 +607,68 @@ RSpec.describe PipelineReportService, type: :service do
       expect(JSON.parse(@report)["counts"]["1"]["5"]).to include_json("pathogenTag" => "categoryB")
     end
   end
+
+  context "with no background model to use" do
+    before do
+      create(:taxon_lineage, tax_name: "Streptococcus pneumoniae", taxid: 1313, genus_taxid: 1301, superkingdom_taxid: 2)
+      create(:taxon_lineage, tax_name: "Streptococcus", taxid: 1301, genus_taxid: 1301, superkingdom_taxid: 2)
+      create(:taxon_lineage, tax_name: "Streptococcus mitis", taxid: 28_037, genus_taxid: 1301, superkingdom_taxid: 2)
+
+      @pipeline_run = create(:pipeline_run,
+                             sample: create(:sample, project: create(:project)),
+                             sfn_execution_arn: fake_sfn_execution_arn,
+                             job_status: "CHECKED",
+                             finalized: 1,
+                             total_reads: 1122,
+                             adjusted_remaining_reads: 316,
+                             subsample: 1_000_000,
+                             taxon_counts_data: [{
+                               tax_level: 1,
+                               taxon_name: "Streptococcus pneumoniae",
+                               nr: 2,
+                               percent_identity: 96.9,
+                               alignment_length: 32.0,
+                               e_value: -9.3,
+                             }, {
+                               tax_level: 2,
+                               nr: 2,
+                               taxon_name: "Streptococcus",
+                               percent_identity: 96.9,
+                               alignment_length: 32.0,
+                               e_value: -9.3,
+                             }, {
+                               tax_level: 2,
+                               nt: 4,
+                               taxon_name: "Streptococcus",
+                               percent_identity: 95.65,
+                               alignment_length: 149.75,
+                               e_value: -81.478,
+                             }, {
+                               tax_id: 28_037,
+                               tax_level: 1,
+                               nt: 4,
+                               taxon_name: "Streptococcus mitis",
+                               percent_identity: 95.65,
+                               alignment_length: 149.75,
+                               e_value: -81.478,
+                             },])
+      @report = PipelineReportService.call(@pipeline_run, nil)
+    end
+
+    it "loads successfully and returns results" do
+      species_result = {
+        "genus_tax_id" => 1301,
+        "name" => "Streptococcus pneumoniae",
+        "nr" => {
+          "count" => 2.0,
+          "rpm" => 1782.5311942959001,
+          "z_score" => 100,
+          "e_value" => -9.3,
+        },
+        "agg_score" => 17_825_311.942959003,
+      }
+
+      expect(JSON.parse(@report)["counts"]["1"]["1313"]).to include_json(species_result)
+    end
+  end
 end

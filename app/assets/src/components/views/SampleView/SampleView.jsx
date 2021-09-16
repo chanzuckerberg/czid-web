@@ -57,6 +57,7 @@ import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import {
   AMR_TABLE_FEATURE,
+  IMPROVED_BG_MODEL_SELECTION_FEATURE,
   MERGED_NT_NR_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
@@ -276,6 +277,8 @@ class SampleView extends React.Component {
 
   fetchSample = async () => {
     this.setState({ loadingReport: true });
+
+    const { allowedFeatures = [] } = this.context || {};
     const { snapshotShareId, sampleId, updateDiscoveryProjectId } = this.props;
     const {
       backgrounds,
@@ -307,9 +310,12 @@ class SampleView extends React.Component {
     const selectedBackground = backgrounds.find(
       background => selectedOptions.background === background.id
     );
+
     if (
-      isEmpty(selectedBackground) ||
-      (!enableMassNormalizedBackgrounds && selectedBackground.mass_normalized)
+      !allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) &&
+      (isEmpty(selectedBackground) ||
+        (!enableMassNormalizedBackgrounds &&
+          selectedBackground.mass_normalized))
     ) {
       newSelectedOptions.background = sample.default_background_id;
     }
@@ -1694,11 +1700,14 @@ class SampleView extends React.Component {
   createCSVRowForAppliedFilters = appliedFilters => {
     const { backgrounds, selectedOptions } = this.state;
 
-    const selectedBackgroundName = find(
-      { id: selectedOptions.background },
-      backgrounds
-    ).name;
-    const filterRow = [`\nBackground:, "${selectedBackgroundName}"`];
+    const filterRow = [];
+    if (selectedOptions.background) {
+      const selectedBackgroundName = find(
+        { id: selectedOptions.background },
+        backgrounds
+      ).name;
+      filterRow.push(`\nBackground:, "${selectedBackgroundName}"`);
+    }
 
     let numberOfFilters = 0;
     for (const [optionName, optionVal] of Object.entries(appliedFilters)) {

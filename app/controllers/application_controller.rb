@@ -96,7 +96,9 @@ class ApplicationController < ActionController::Base
 
   def get_background_id(sample, background_id = nil, share_id = nil)
     background_id = (background_id || params[:background_id]).to_i
-    if background_id > 0
+    if background_id == 0 && current_user.allowed_feature?("improved_bg_model_selection")
+      return nil
+    else
       if share_id
         snapshot = SnapshotLink.find_by(share_id: share_id)
         viewable_background_ids = snapshot ? snapshot.fetch_snapshot_backgrounds.pluck(:id) : []
@@ -107,6 +109,7 @@ class ApplicationController < ActionController::Base
         return background_id
       end
     end
+
     sample.default_background_id
   end
 
