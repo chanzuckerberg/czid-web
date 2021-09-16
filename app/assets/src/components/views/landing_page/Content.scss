@@ -15,29 +15,45 @@
 
 .summary {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-top: -8%;
+
+  a {
+    margin-top: 30px;
+  }
+}
+
+.summaryText {
+  h2 {
+    margin: 0;
+  }
 
   p {
     @include font-body-m;
     margin-top: 30px;
   }
 
-  a {
-    margin-top: 30px;
-  }
+  width: 33%;
+  margin-left: auto;
+  margin-top: 65px;
 
-  div {
-    max-width: 487px;
-    padding: 4rem 0 0 8rem;
-  }
-
-  img {
-    width: 55%;
+  @media (max-width: 768px) {
+    width: 100%;
   }
 }
 
+.summaryImage {
+  width: 55%;
+  position: relative;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  img {
+    margin-top: -15%;
+    max-width: 100%;
+  }
+}
 .healthQuestions {
   text-align: center;
   margin: 4rem auto 5rem auto;

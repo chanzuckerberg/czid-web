@@ -5,7 +5,9 @@ import Lander from "~/components/views/landing_page/Lander";
 export default {
   title: "Pages",
   component: KurtNobleLandingPage,
-  argTypes: {},
+  parameters: {
+    layout: "fullscreen",
+},
 };
 
 export const KurtNobleLandingPage = () => {

@@ -5,7 +5,9 @@ import Footer from "~/components/views/landing_page/Footer";
 export default {
   title: "Kurt Noble Lander/Sections",
   component: KurtNobleFooter,
-  argTypes: {},
+  parameters: {
+    layout: "fullscreen",
+},
 };
 
 export const KurtNobleFooter = () => {

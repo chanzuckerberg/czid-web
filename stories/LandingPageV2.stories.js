@@ -5,7 +5,9 @@ import LandingV2 from "~/components/views/LandingV2";
 export default {
   title: "Pages",
   component: LandingPageDemo,
-  argTypes: {},
+  parameters: {
+    layout: "fullscreen",
+},
 };
 
 export const LandingPageDemo = () => {

@@ -5,7 +5,9 @@ import Content from "~/components/views/landing_page/Content";
 export default {
   title: "Kurt Noble Lander/Sections",
   component: KurtNobleContent,
-  argTypes: {},
+  parameters: {
+    layout: "fullscreen",
+  },
 };
 
 export const KurtNobleContent = () => {

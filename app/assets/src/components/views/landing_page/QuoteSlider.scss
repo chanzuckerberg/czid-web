@@ -1,34 +1,3 @@
-@import "~styles/themes/colors";
-@import "~styles/themes/typography";
-@import "~styles/themes/elements";
-
-.carouselCell {
-  width: 100%;
-  background-color: $primary;
-  color: $white;
-}
-
-.quoteContainer {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 5rem 0;
-  position: relative;
-  @include font-header-xl;
-}
-
-.quoteCitation {
-  width: 50%;
-  margin-left: auto;
-  @include font-body-xs;
-}
-
-.startQuotation {
-  font-size: 80px;
-  position: absolute;
-  left: -4rem;
-  top: 6rem;
-}
-
 .mainCarousel:hover {
   cursor: grab;
 }

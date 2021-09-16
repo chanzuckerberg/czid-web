@@ -6,15 +6,17 @@ const LandingHeaderV2 = () => {
   return (
     <div className={cs.header}>
       <a href="/">
-        <LogoReversed />
+        <LogoReversed className={cs.headerLogo} />
       </a>
       <nav className={cs.nav}>
-        <a className={cs.textLink} href="/">
-          Resources
-        </a>
-        <a className={cs.buttonLink} href="/">
-          Request Access
-        </a>
+        <span className={cs.hideMobile}>
+          <a className={cs.textLink} href="/">
+            Resources
+          </a>
+          <a className={cs.buttonLink} href="/">
+            Request Access
+          </a>
+        </span>
         <a className={cs.buttonLink} href="/">
           Sign in
         </a>

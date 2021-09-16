@@ -5,7 +5,9 @@ import HeroEmailForm from "~/components/views/landing_page/HeroEmailForm";
 export default {
   title: "Kurt Noble Lander/Components",
   component: KurtNobleHeroEmailForm,
-  argTypes: {},
+  parameters: {
+    layout: "fullscreen",
+},
 };
 
 export const KurtNobleHeroEmailForm = () => {

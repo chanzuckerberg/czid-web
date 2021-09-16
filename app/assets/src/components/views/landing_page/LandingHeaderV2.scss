@@ -7,6 +7,11 @@
   padding: 2rem 3rem;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+  }
 }
 
 .textLink,
@@ -16,12 +21,23 @@
   font-family: $font-family-sans-serif;
   padding: 7px 14px;
   margin: 0 5px;
+  @include font-body-xs;
 }
 
 .buttonLink {
   display: inline-block;
   text-align: center;
-  min-width: 120px;
+  width: 120px;
   border: 1px solid $white;
   border-radius: 999px;
+
+  @media (max-width: 768px) {
+    width: 112px;
+  }
+}
+
+.hideMobile {
+  @media (max-width: 768px) {
+    display: none;
+  }
 }

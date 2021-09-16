@@ -19,7 +19,7 @@ const Content = () => {
   return (
     <div className={cs.contentContainer}>
       <section className={cs.summary}>
-        <div>
+        <div className={cs.summaryText}>
           <h2>Detect and track emerging infectious diseases worldwide</h2>
           <p>
             IDseq accepts sequencing data from researchers around the world and
@@ -32,7 +32,9 @@ const Content = () => {
           </p>
           <CtaButton text="See it in action" />
         </div>
-        <img src={LaptopImg} alt="" />
+        <div className={cs.summaryImage}>
+          <img src={LaptopImg} alt="" />
+        </div>
       </section>
       <section className={cs.healthQuestions}>
         <h2>Investigate the world&apos;s biggest health questions</h2>
