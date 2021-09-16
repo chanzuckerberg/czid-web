@@ -14,7 +14,7 @@ end
 # A user can only create/update persisted backgrounds when they have both read access to the project and background.
 class PersistedBackgroundReadAccessValidator < ActiveModel::Validator
   def validate(record)
-    if Background.viewable(record.user).where(id: record.background_id).empty?
+    if record.background_id.present? && Background.viewable(record.user).where(id: record.background_id).empty?
       # Errors added to record.errors[:base] relate to the state of the record as a whole, and not to a specific attribute.
       record.errors.add :base, "User #{record.user_id} does not have read access to Background #{record.background_id}"
     end
@@ -28,11 +28,10 @@ end
 class PersistedBackground < ApplicationRecord
   belongs_to :user
   belongs_to :project
-  belongs_to :background
+  belongs_to :background, optional: true
 
   validates :user_id, presence: true
   validates :project_id, presence: true
-  validates :background_id, presence: true
   validates_with UniquePersistedBackgroundValidator, PersistedBackgroundReadAccessValidator, on: :create
   validates_with PersistedBackgroundReadAccessValidator, on: :update
 

@@ -119,6 +119,10 @@ function EventDictionary() {
   this.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED =
     "SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED";
 
+  /** The user selected a new background model in a Sample Report */
+  this.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED =
+    "SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED";
+
   /** The user clicked the help button in the Consensus Genome report page. */
   this.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED =
     "SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED";

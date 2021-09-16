@@ -45,6 +45,11 @@ import {
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
+import {
+  getPersistedBackground,
+  createPersistedBackground,
+  updatePersistedBackground,
+} from "~/api/persisted_backgrounds";
 import AMRView from "~/components/AMRView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -288,6 +293,9 @@ class SampleView extends React.Component {
     } = this.state;
     const sample = await getSample({ snapshotShareId, sampleId });
 
+    const hasImprovedBackgroundModelSelectionFeature = allowedFeatures.includes(
+      IMPROVED_BG_MODEL_SELECTION_FEATURE
+    );
     sample.id = sampleId;
 
     const pipelineRun = find(
@@ -312,7 +320,7 @@ class SampleView extends React.Component {
     );
 
     if (
-      !allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) &&
+      !hasImprovedBackgroundModelSelectionFeature &&
       (isEmpty(selectedBackground) ||
         (!enableMassNormalizedBackgrounds &&
           selectedBackground.mass_normalized))
@@ -343,8 +351,44 @@ class SampleView extends React.Component {
         this.fetchSampleReportData();
         this.fetchProjectSamples();
         this.fetchCoverageVizData();
+        if (hasImprovedBackgroundModelSelectionFeature) {
+          this.fetchPersistedBackground();
+        }
       }
     );
+  };
+
+  fetchPersistedBackground = async () => {
+    const { project, selectedOptions } = this.state;
+
+    if (project) {
+      let newBackground;
+
+      await getPersistedBackground(project.id)
+        .then(
+          ({ background_id: persistedBackground }) =>
+            (newBackground = persistedBackground)
+        )
+        .catch(error => {
+          newBackground = null;
+          console.error(error);
+        });
+
+      const newSelectedOptions = Object.assign({}, selectedOptions, {
+        background: newBackground,
+      });
+
+      this.setState(
+        {
+          selectedOptions: newSelectedOptions,
+        },
+        () =>
+          this.refreshDataFromOptionsChange({
+            key: "background",
+            newSelectedOptions,
+          })
+      );
+    }
   };
 
   fetchProjectSamples = async () => {
@@ -364,6 +408,7 @@ class SampleView extends React.Component {
   };
 
   processRawSampleReportData = rawReportData => {
+    const { allowedFeatures = [] } = this.context || {};
     const { selectedOptions } = this.state;
 
     const reportData = [];
@@ -415,8 +460,10 @@ class SampleView extends React.Component {
       reportData,
       reportMetadata: rawReportData.metadata,
       prevousSelectedOptions: selectedOptions,
-      selectedOptions: Object.assign({}, selectedOptions, {
-        background: rawReportData.metadata.backgroundId,
+      ...(!allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) && {
+        selectedOptions: Object.assign({}, selectedOptions, {
+          background: rawReportData.metadata.backgroundId,
+        }),
       }),
     });
   };
@@ -795,7 +842,8 @@ class SampleView extends React.Component {
   };
 
   handleOptionChanged = ({ key, value }) => {
-    const { selectedOptions } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+    const { sample, project, selectedOptions } = this.state;
     if (deepEqual(selectedOptions[key], value)) {
       return;
     }
@@ -804,7 +852,45 @@ class SampleView extends React.Component {
       [key]: value,
     });
 
+    if (key === "background") {
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED,
+        {
+          sampleId: sample.id,
+          projectId: project.id,
+          backgroundId: value,
+        }
+      );
+      allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) &&
+        this.persistNewBackgroundModelSelection({ newBackgroundId: value });
+    }
+
     this.refreshDataFromOptionsChange({ key, newSelectedOptions });
+  };
+
+  persistNewBackgroundModelSelection = ({ newBackgroundId }) => {
+    const { project, selectedOptions } = this.state;
+
+    let newBackground;
+    const persistBackgroundApi = isEmpty(selectedOptions.background)
+      ? createPersistedBackground
+      : updatePersistedBackground;
+
+    persistBackgroundApi({
+      projectId: project.id,
+      backgroundId: newBackgroundId,
+    })
+      .then(() => (newBackground = newBackgroundId))
+      .catch(error => {
+        newBackground = null;
+        console.error(error);
+      });
+
+    this.setState({
+      selectedOptions: Object.assign({}, selectedOptions, {
+        background: newBackground,
+      }),
+    });
   };
 
   handleFilterRemoved = ({ key, subpath, value }) => {
