@@ -1,3 +1,7 @@
-.mainCarousel:hover {
-  cursor: grab;
+.mainCarousel {
+  overflow: hidden;
+
+  &:hover {
+    cursor: grab;
+  }
 }

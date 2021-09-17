@@ -1,7 +1,28 @@
 .tabbedGalleryContainer {
   display: flex;
 
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+
   img {
     transition: all 0.4s;
+  }
+}
+
+.tabContainer {
+  width: 50%;
+  max-width: 440px;
+
+  @media (max-width: 768px) {
+    display: flex;
+    width: 100%;
+    max-width: unset;
+  }
+}
+
+.galleryImage {
+  img {
+    width: 100%;
   }
 }

@@ -9,7 +9,7 @@ const TabbedGallery = () => {
 
   return (
     <section className={`${cs.tabbedGalleryContainer} tabbedGalleryContainer`}>
-      <div>
+      <div className={cs.tabContainer}>
         <TabbedGalleryTab
           tabTitle="Push button pipelines & results"
           tabDescription="Discover potentially infectious organisms with an easy-to-use GUI&#8212;no coding required."
@@ -43,7 +43,7 @@ const TabbedGallery = () => {
           }}
         />
       </div>
-      <figure>
+      <div className={cs.galleryImage}>
         {activeTab === 0 ? (
           <img className="fadeUp" src={PipelineImg} alt="" />
         ) : null}
@@ -56,7 +56,7 @@ const TabbedGallery = () => {
         {activeTab === 3 ? (
           <img className="fadeUp" src={PipelineImg} alt="" />
         ) : null}
-      </figure>
+      </div>
     </section>
   );
 };

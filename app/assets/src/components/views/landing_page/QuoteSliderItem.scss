@@ -11,20 +11,50 @@
 .quoteContainer {
   max-width: 800px;
   margin: 0 auto;
-  padding: 5rem 0;
+  padding: 6rem;
   position: relative;
   @include font-header-xl;
+  font-family: $font-family-sans-serif;
+
+  @media (max-width: 768px) {
+    @include font-header-m;
+    padding: 3rem;
+  }
 }
 
 .quoteCitation {
   width: 50%;
   margin-left: auto;
   @include font-body-xs;
+
+  span {
+    font-weight: $font-weight-semibold;
+    margin-left: -17px;
+  }
+
+  p {
+    margin-top: 5px;
+  }
+
+  @media (max-width: 768px) {
+    width: 75%;
+    @include font-body-xxs
+  }
 }
 
 .startQuotation {
-  font-size: 80px;
   position: absolute;
-  left: -4rem;
+  left: 2rem;
   top: 6rem;
+
+  @media (max-width: 768px) {
+    left: 0.75rem;
+    top: 3.5rem;
+  }
+
+  img {
+    @media (max-width: 768px) {
+      width: 24px;
+    }
+  }
 }
