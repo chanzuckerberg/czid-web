@@ -52,7 +52,7 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 # Generate the app's static resources using npm/webpack
-# Increase memory available to node to 6GB (from default 1.5GB). At this Travis runs on 7.5GB instances.
+# Increase memory available to node to 6GB (from default 1.5GB). At this time, our self-hosted Github runner has ~16GB.
 ENV NODE_OPTIONS "--max_old_space_size=6144"
 # Only copy what is required so we don't need to rebuild when we are only updating the api
 COPY app/assets app/assets

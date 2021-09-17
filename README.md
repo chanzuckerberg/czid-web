@@ -1,4 +1,4 @@
-# [IDseq](https://idseq.net/) &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/chanzuckerberg/idseq-web/blob/master/LICENSE) [![Build Status](https://travis-ci.org/chanzuckerberg/idseq-web.svg?branch=master)](https://travis-ci.org/chanzuckerberg/idseq-web) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+# [IDseq](https://idseq.net/) &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/chanzuckerberg/idseq-web/blob/master/LICENSE) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 ![logo](app/assets/images/Logo_Black.png)
 
