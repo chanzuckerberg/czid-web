@@ -46,20 +46,35 @@ class ReportTable extends React.Component {
   constructor(props) {
     super(props);
 
-    const { displayMergedNtNrValue, pipelineVersion } = props;
-
     this.state = {
       expandAllOpened: false,
       expandedGenusIds: new Set(),
       dbType: this.props.initialDbType,
     };
 
+    this.columns = this.computeColumns();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { displayNoBackground } = this.props;
+    if (displayNoBackground !== prevProps.displayNoBackground) {
+      this.columns = this.computeColumns();
+    }
+  }
+
+  computeColumns = () => {
+    const {
+      displayMergedNtNrValue,
+      displayNoBackground,
+      pipelineVersion,
+    } = this.props;
+
     const countTypes = displayMergedNtNrValue ? ["merged_nt_nr"] : ["nt", "nr"];
     const assemblyEnabled = isPipelineFeatureAvailable(
       ASSEMBLY_FEATURE,
       pipelineVersion
     );
-    this.columns = compact([
+    return compact([
       {
         cellRenderer: this.renderExpandIcon,
         className: cs.expandHeader,
@@ -102,6 +117,7 @@ class ReportTable extends React.Component {
             nullValue: NUMBER_NULL_VALUES[0],
             limits: NUMBER_NULL_VALUES,
           }),
+        disableSort: displayNoBackground,
       },
       {
         cellDataGetter: ({ rowData }) =>
@@ -126,6 +142,7 @@ class ReportTable extends React.Component {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
+        disableSort: displayNoBackground,
         width: 65,
       },
       {
@@ -309,7 +326,7 @@ class ReportTable extends React.Component {
             width: 40,
           },
     ]);
-  }
+  };
 
   renderAggregateScore = ({ cellData, rowData }) => {
     const { displayNoBackground, displayMergedNtNrValue } = this.props;
@@ -857,6 +874,7 @@ class ReportTable extends React.Component {
   render = () => {
     const {
       displayMergedNtNrValue,
+      displayNoBackground,
       projectId,
       projectName,
       rowHeight,
@@ -869,7 +887,9 @@ class ReportTable extends React.Component {
           columns={this.columns}
           data={this.getTableRows()}
           defaultRowHeight={rowHeight}
-          defaultSortBy={displayMergedNtNrValue ? "rpm" : "agg_score"}
+          defaultSortBy={
+            displayNoBackground || displayMergedNtNrValue ? "rpm" : "agg_score"
+          }
           defaultSortDirection={SortDirection.DESC}
           headerClassName={cs.header}
           onColumnSort={this.handleColumnSort}
