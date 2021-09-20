@@ -159,7 +159,7 @@ class PhyloTreeNgsController < ApplicationController
 
             coverage_breadths = pipeline_runs.joins(Arel.sql(accession_coverage_stats_query)).pluck(Arel.sql("stats.coverage_breadth"))
           end
-          pt["has_low_coverage"] = coverage_breadths.any? { |coverage| coverage < 0.25 }
+          pt["has_low_coverage"] = coverage_breadths.any? { |coverage| coverage && coverage < 0.25 }
         end
 
         render json: pt
