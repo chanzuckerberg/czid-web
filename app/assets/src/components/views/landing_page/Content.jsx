@@ -1,11 +1,11 @@
 import React from "react";
+import IconAnalyzeFigure from "~/components/ui/icons/IconAnalyzeFigure";
+import IconMatchesFigure from "~/components/ui/icons/IconMatchesFigure";
+import IconSampleFigure from "~/components/ui/icons/IconSampleFigure";
+import IconUploadFigure from "~/components/ui/icons/IconUploadFigure";
 import CtaButton from "~/components/views/landing_page/CtaButton";
 import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure.svg";
 import LaptopImg from "~/images/landing_page/idseq-laptop.svg";
-import VisualizeIcon from "~/images/landing_page/process-analyze.svg";
-import MatchesIcon from "~/images/landing_page/process-matches.svg";
-import CountsIcon from "~/images/landing_page/process-sample.svg";
-import UploadIcon from "~/images/landing_page/process-upload.svg";
 import KniAccordion from "./Accordion";
 import cs from "./Content.scss";
 import { Publications, News } from "./PublicationsAndNews";
@@ -24,13 +24,16 @@ const Content = () => {
           <p>
             IDseq accepts sequencing data from researchers around the world and
             quickly processes the results to provide actionable information on
-            the state of pathogens in the given set of samples. This allows
+            the state of pathogens in a given set of samples. This allows
             scientists to make data-driven decisions about when to deploy
             antibiotics, where to prioritize immunization campaigns, how to
             shape vector-borne disease surveillance and control efforts, and
             more.
           </p>
-          <CtaButton text="See it in action" />
+          <CtaButton 
+            text="See it in action" 
+            linkUrl="https://public.idseq.net/"
+            />
         </div>
         <div className={cs.summaryImage}>
           <img src={LaptopImg} alt="" />
@@ -50,42 +53,37 @@ const Content = () => {
         <p>
           Finding out what&apos;s in your sample is as easy as uploading your
           data to IDseq and clicking a button. Our pipeline immediately gets to
-          work in the cloud, delivering you results in hours, not days. Take a
-          look at taxon counts at the sample-level, or in aggregate with our
-          suite of visualization tools.
+          work in the cloud, delivering you results in hours, not days.
         </p>
 
         <div className={cs.howItWorksProcess}>
           <div className={cs.howItWorksProcessStep}>
-            <img src={UploadIcon} alt="" />
+            <IconUploadFigure />
             <h3>Upload</h3>
             <p>
-              Upload FASTA/FASTQ files from your computer, or use direct
-              integration with Illumina&apos;s Basespace.
+              Upload FASTA/FASTQ files from your computer, or import from Illumina&apos;s Basespace.
             </p>
           </div>
 
           <div className={cs.howItWorksProcessStep}>
-            <img src={MatchesIcon} alt="" />
+            <IconMatchesFigure />
             <h3>Find matches in NCBI</h3>
             <p>
               The pipeline searches against the nucleotide and protein databases
-              in the National Center for Biotechnology Information (NCBI) for
-              plant viruses, parasitic worms, bacteria, etc.
+              in NCBI for plant viruses, parasitic worms, bacteria, etc.
             </p>
           </div>
 
           <div className={cs.howItWorksProcessStep}>
-            <img src={CountsIcon} alt="" />
+            <IconSampleFigure />
             <h3>View Per-Sample Taxon Counts</h3>
             <p>
-              Our report page provides insights into all microorganisms found in
-              your sample
+              Check out the auto-generated results page to see the microorganisms found in each sample.
             </p>
           </div>
 
           <div className={cs.howItWorksProcessStep}>
-            <img src={VisualizeIcon} alt="" />
+            <IconAnalyzeFigure />
             <h3>Analyze & Visualize</h3>
             <p>
               Generate heatmaps, phylogenetic trees, or quality control charts
@@ -102,7 +100,10 @@ const Content = () => {
       <section className={cs.questions}>
         <h2>Frequently Asked Questions</h2>
         <KniAccordion className={cs.accordion} />
-        <CtaButton text="View All Questions" />
+        <CtaButton 
+          text="View All Questions" 
+          linkUrl="https://idseq.net/faqs"
+          />
       </section>
 
       <section className={WhitePaperStyles.whitePaper}>

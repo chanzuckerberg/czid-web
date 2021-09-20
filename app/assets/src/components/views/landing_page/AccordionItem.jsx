@@ -83,7 +83,10 @@ const AccordionItem = props => {
 
 AccordionItem.propTypes = {
   accordionTitle: PropTypes.string.isRequired,
-  accordionText: PropTypes.string.isRequired,
+  accordionText: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
+  ]),
 };
 
 export default AccordionItem;

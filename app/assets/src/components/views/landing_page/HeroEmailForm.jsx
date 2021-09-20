@@ -1,5 +1,5 @@
 import React from "react";
-import ArrowRight from "~/images/landing_page/submit-arrow-icon.svg";
+import ArrowSubmit from "~/components/ui/icons/IconSubmitArrow";
 import cs from "./HeroEmailForm.scss";
 
 const HeroEmailForm = () => {
@@ -10,7 +10,7 @@ const HeroEmailForm = () => {
         <button type="submit">
           Request Access
           <span>
-            <img src={ArrowRight} alt="" />
+            <ArrowSubmit />
           </span>
         </button>
       </form>

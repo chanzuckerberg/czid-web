@@ -24,26 +24,14 @@ const QuoteSlider = () => {
   return (
     <Slider {...settings} className={`${cs.mainCarousel} slider`}>
       <QuoteSliderItem
-        quoteAuthor="Dr Ki Wook Kim"
-        quoteCredentials="Lecturer & Juvenile Diabetes Research Foundation (JDRF)"
-        quoteText="Lorem ipsum dolor sit amet consectetur adipisicing elit. Error fuga
-        sunt recusandae vitae ipsa nesciunt quod quae maiores eos nobis
-        debitis earum officiis consequatur architecto, suscipit, amet,
-        ratione eligendi voluptate minus nostrum. Consectetur rem
-        consequatur error nam expedita provident! Vitae nobis voluptatem
-        deleniti aliquam deserunt? Laudantium tempore possimus adipisci
-        eligendi?"
+        quoteAuthor="Dr. Ki Wook Kim"
+        quoteCredentials="Lecturer & Juvenile Diabetes Research Foundation (JDRF) Postdoctoral Fellow, University of New South Wales, Sydney, Australia"
+        quoteText="As someone who has completed metagenomic sequencing on more than 1,500 clinical specimens to date, IDseq is by far the easiest and one of the most sensitive pipelines we've tested. I am not a computational scientist by training, so it has been helpful having a trustworthy pipeline validated by metagenomic experts and accessible over a web browser."
       />
       <QuoteSliderItem
-        quoteAuthor="Dr Ki Wook Kim"
-        quoteCredentials="Lecturer & Juvenile Diabetes Research Foundation (JDRF)"
-        quoteText="Lorem ipsum dolor sit amet consectetur adipisicing elit. Error fuga
-        sunt recusandae vitae ipsa nesciunt quod quae maiores eos nobis
-        debitis earum officiis consequatur architecto, suscipit, amet,
-        ratione eligendi voluptate minus nostrum. Consectetur rem
-        consequatur error nam expedita provident! Vitae nobis voluptatem
-        deleniti aliquam deserunt? Laudantium tempore possimus adipisci
-        eligendi?"
+        quoteAuthor="Rebecca Brennan"
+        quoteCredentials="Mayo Clinic"
+        quoteText="Support staff responsiveness is quick and helpful. IDseq is accessible from any computer system, is user-friendly, and clearly defines results with minimal effort."
       />
     </Slider>
   );

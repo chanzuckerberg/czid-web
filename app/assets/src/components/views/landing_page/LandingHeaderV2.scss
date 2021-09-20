@@ -16,7 +16,7 @@
 
 .textLink,
 .buttonLink {
-  color: $white;
+  color: $white !important;
   text-decoration: none;
   font-family: $font-family-sans-serif;
   padding: 7px 14px;
@@ -27,7 +27,7 @@
 .buttonLink {
   display: inline-block;
   text-align: center;
-  width: 120px;
+  width: 130px;
   border: 1px solid $white;
   border-radius: 999px;
 

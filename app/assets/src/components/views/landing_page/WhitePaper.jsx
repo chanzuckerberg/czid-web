@@ -6,7 +6,12 @@ import cs from "./WhitePaper.scss";
 
 const WhitePaper = () => {
   return (
-    <div className={cs.whitePaper__Inner}>
+    <a
+      className={cs.whitePaper__Inner}
+      href="https://academic.oup.com/gigascience/article/doi/10.1093/gigascience/giaa111/5918865"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <div className={cs.whitePaper__Inner_Image}>
         <img src={WhitePaperImage} alt="" />
       </div>
@@ -21,7 +26,7 @@ const WhitePaper = () => {
         </p>
         <CtaButton className={CtaButtonStyles.filled} text="Read the Paper" />
       </div>
-    </div>
+    </a>
   );
 };
 

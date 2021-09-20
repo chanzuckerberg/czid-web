@@ -50,6 +50,7 @@ import IconSamplePublic from "./IconSamplePublic";
 import IconSave from "./IconSave";
 import IconSearch from "./IconSearch";
 import IconShare from "./IconShare";
+import IconSubmitArrow from "./IconSubmitArrow";
 import IconSuccess from "./IconSuccess";
 import IconSuccessSmall from "./IconSuccessSmall";
 import IconTableSmall from "./IconTableSmall";
@@ -116,6 +117,7 @@ export const ICONS_TAXONOMY = {
     IconSave,
     IconSearch,
     IconShare,
+    IconSubmitArrow,
     IconSuccess,
     IconSuccessSmall,
     IconTableSmall,

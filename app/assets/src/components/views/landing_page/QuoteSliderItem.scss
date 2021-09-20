@@ -20,6 +20,10 @@
     @include font-header-m;
     padding: 3rem;
   }
+
+  p {
+    color: $white;
+  }
 }
 
 .quoteCitation {
@@ -34,6 +38,11 @@
 
   p {
     margin-top: 5px;
+    @include font-body-xs;
+
+    @media (max-width: 768px) {
+      @include font-body-xxs
+    }
   }
 
   @media (max-width: 768px) {

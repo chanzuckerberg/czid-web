@@ -10,14 +10,14 @@ const LandingHeaderV2 = () => {
       </a>
       <nav className={cs.nav}>
         <span className={cs.hideMobile}>
-          <a className={cs.textLink} href="/">
+          <a className={cs.textLink} href="http://help.idseq.net">
             Resources
           </a>
-          <a className={cs.buttonLink} href="/">
+          <a className={cs.buttonLink} href="https://airtable.com/shrBGT42xVBR6JAVv">
             Request Access
           </a>
         </span>
-        <a className={cs.buttonLink} href="/">
+        <a className={cs.buttonLink} href="https://idseq.net/auth0/login">
           Sign in
         </a>
       </nav>

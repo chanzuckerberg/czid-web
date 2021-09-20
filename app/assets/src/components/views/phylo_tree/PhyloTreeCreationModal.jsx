@@ -16,7 +16,6 @@ import {
   logAnalyticsEvent,
   withAnalytics,
 } from "~/api/analytics";
-import { showPhyloTreeNotification } from "~/components/views/phylo_tree/PhyloTreeNotification";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
@@ -26,6 +25,7 @@ import {
   isPipelineFeatureAvailable,
   ACCESSION_COVERAGE_STATS_FEATURE,
 } from "~/components/utils/pipeline_versions";
+import { showPhyloTreeNotification } from "~/components/views/phylo_tree/PhyloTreeNotification";
 import Link from "~ui/controls/Link";
 import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";

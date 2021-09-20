@@ -12,6 +12,7 @@
   @media (max-width: 768px) {
     flex-direction: column;
     min-height: unset;
+    width: 25%;
   }
 
   &:hover {
@@ -60,6 +61,8 @@
 
   @media (max-width: 768px) {
     border-bottom: none;
+    padding: 0;
+    height: 100%;
   }
 }
 
@@ -76,6 +79,11 @@
 .tabContentText {
   margin-left: 1rem;
   max-width: 300px;
+
+  @media (max-width: 768px) {
+    padding: 4px;
+    margin-left: 0;
+  }
 }
 
 .tabTitle {
@@ -87,7 +95,11 @@
   }
 
   @media (max-width: 768px) {
-    @include font-header-xs;
+    @include font-header-xxs;
+  }
+
+  @media (max-width: 400px) {
+    @include font-body-xxxs;
   }
 }
 
