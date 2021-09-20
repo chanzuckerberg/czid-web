@@ -172,6 +172,10 @@ function EventDictionary() {
   this.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED =
     "PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED";
 
+  /** The user clicked the help button on a phylo tree page.  */
+  this.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED";
+
   /** The user hovered over a hoverAction in a mNGS sample report */
   this.SAMPLE_VIEW_HOVER_ACTION_HOVERED = "SAMPLE_VIEW_HOVER_ACTION_HOVERED";
 

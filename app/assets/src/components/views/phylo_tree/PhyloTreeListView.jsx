@@ -31,7 +31,7 @@ import PhyloTreeHeatmapErrorModal from "~/components/views/phylo_tree/PhyloTreeH
 import ToolbarIcon from "~/components/views/samples/SamplesView/ToolbarIcon";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import Link from "~ui/controls/Link";
-import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import { IconAlert } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 import Notification from "~ui/notifications/Notification";
@@ -408,6 +408,8 @@ class PhyloTreeListView extends React.Component {
       selectedPhyloTreeNgId,
       treeContainer,
     } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+
     return (
       <NarrowContainer>
         <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
@@ -475,6 +477,20 @@ class PhyloTreeListView extends React.Component {
                 showPhyloTreeNgOptions={!!selectedPhyloTreeNgId}
                 tree={currentTree}
                 treeContainer={treeContainer}
+              />
+            )}
+            {allowedFeatures.includes("phylo_tree_appcue") && (
+              <HelpButton
+                className={cs.controlElement}
+                onClick={
+                  // TODO: Uncomment and insert appcue flow ID when it's ready.
+                  {
+                    /* showAppcue({
+                  flowId: PHYLO_TREE_HEADER_HELP_SIDEBAR,
+                  analyticsEventName: ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
+                  }) */
+                  }
+                }
               />
             )}
           </ViewHeader.Controls>
