@@ -49,7 +49,7 @@ RUN gem install bundler && bundle install --jobs 20 --retry 5
 # Do the same for node packages, allowing them to be cached
 RUN npm update -g
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --no-optional
 
 # Generate the app's static resources using npm/webpack
 # Increase memory available to node to 6GB (from default 1.5GB). At this time, our self-hosted Github runner has ~16GB.

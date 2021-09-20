@@ -4,7 +4,7 @@
   "repository": "https://github.com/chanzuckerberg/idseq-web",
   "scripts": {
     "preinstall": "npm_config_yes=true npx npm-force-resolutions",
-    "start": "npm install --no-optional && webpack --config webpack.config.dev.js --watch",
+    "start": "npm install && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx",
     "precommit": "lint-staged",
@@ -152,5 +152,9 @@
   },
   "resolutions": {
     "//": "Add forced resolutions here for temporary package workarounds."
-  }
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.1.3"
+  },
+  "//": "fsevents helps with webpack watch cpu usage on Mac"
 }
