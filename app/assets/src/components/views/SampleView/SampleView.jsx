@@ -1737,6 +1737,7 @@ class SampleView extends React.Component {
       <Notification
         className={cs.notificationBody}
         closeWithDismiss={false}
+        closeWithIcon={true}
         type="info"
       >
         We&apos;re creating your requested consensus genome, you&apos;ll be able

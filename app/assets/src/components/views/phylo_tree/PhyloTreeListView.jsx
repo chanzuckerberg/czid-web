@@ -492,6 +492,7 @@ class PhyloTreeListView extends React.Component {
         displayStyle="flat"
         onClose={this.hideOldTreeWarning}
         closeWithDismiss={false}
+        closeWithIcon={true}
       >
         <div className={cs.notificationContent}>
           <span className={cs.warning}>

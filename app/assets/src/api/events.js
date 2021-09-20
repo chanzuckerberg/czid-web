@@ -247,6 +247,10 @@ function EventDictionary() {
   this.PHYLO_TREE_CREATION_MODAL_LOW_COVERAGE_WARNING_BANNER_HELP_LINK_CLICKED =
     "PHYLO_TREE_CREATION_MODAL_LOW_COVERAGE_WARNING_BANNER_HELP_LINK_CLICKED";
 
+  /** The user clicked the View Visualizations link in the PhyloTreeNotification. */
+  this.PHYLO_TREE_NOTIFICATION_VIEW_VISUALIZATIONS_LINK_CLICKED =
+    "PHYLO_TREE_NOTIFICATION_VIEW_VISUALIZATIONS_LINK_CLICKED";
+
   /** The user advanced the onto the next page in the Wizard */
   this.WIZARD_PAGE_ADVANCED = "WIZARD_PAGE_ADVANCED";
 }

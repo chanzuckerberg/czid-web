@@ -28,6 +28,7 @@ class Notification extends React.Component {
       onClose,
       type,
       closeWithDismiss,
+      closeWithIcon,
     } = this.props;
     return (
       <div
@@ -42,7 +43,7 @@ class Notification extends React.Component {
             </div>
           )}
         </div>
-        {onClose && !closeWithDismiss && (
+        {onClose && closeWithIcon && (
           <IconCloseSmall className={cs.removeIcon} onClick={onClose} />
         )}
       </div>
@@ -53,6 +54,7 @@ class Notification extends React.Component {
 Notification.defaultProps = {
   displayStyle: "elevated",
   closeWithDismiss: true,
+  closeWithIcon: false,
 };
 
 Notification.propTypes = {
@@ -62,6 +64,7 @@ Notification.propTypes = {
   onClose: PropTypes.func,
   type: PropTypes.oneOf(["success", "info", "warning", "error"]).isRequired,
   closeWithDismiss: PropTypes.bool,
+  closeWithIcon: PropTypes.bool,
 };
 
 export default Notification;

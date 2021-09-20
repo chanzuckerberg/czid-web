@@ -16,6 +16,7 @@ import {
   logAnalyticsEvent,
   withAnalytics,
 } from "~/api/analytics";
+import { showPhyloTreeNotification } from "~/components/views/phylo_tree/PhyloTreeNotification";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
@@ -446,6 +447,7 @@ class PhyloTreeCreationModal extends React.Component {
       taxonId,
       taxonName,
     } = this.state;
+    const { onClose } = this.props;
     const { dagBranch, dagVars } = this;
     const { allowedFeatures = [] } = this.context || {};
 
@@ -500,7 +502,6 @@ class PhyloTreeCreationModal extends React.Component {
         pipelineRunIds,
         ...(!nextGeneration ? { dagBranch, dagVars } : {}),
       };
-
       if (phyloTreeId) {
         const analyticEventName = nextGeneration
           ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL
@@ -512,7 +513,8 @@ class PhyloTreeCreationModal extends React.Component {
         });
 
         if (nextGeneration) {
-          location.href = `/phylo_tree_ngs/${phyloTreeId}`;
+          showPhyloTreeNotification();
+          onClose();
         } else {
           location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
         }

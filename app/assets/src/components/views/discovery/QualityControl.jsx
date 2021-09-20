@@ -1054,6 +1054,7 @@ class QualityControl extends React.Component {
             displayStyle="flat"
             onClose={this.hideprocessingSamplesMessage}
             closeWithDismiss={false}
+            closeWithIcon={true}
           >
             {runningSamples.length}{" "}
             {runningSamples.length === 1 ? "sample is" : "samples are"} still
