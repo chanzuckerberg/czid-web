@@ -10,8 +10,6 @@
   color: $black;
   cursor: pointer;
   padding: 1rem 0 1rem 1rem;
-  width: 100%;
-  max-width: 800px;
   text-align: left;
   border-bottom: 1px solid $gray-light;
   border-top: none;
@@ -20,6 +18,8 @@
   outline: none;
   transition: 0.4s;
   position: relative;
+  margin-left: 15px;
+  margin-right: 15px;
 
   &:hover {
     color: $primary;
@@ -57,10 +57,18 @@
 
 .accordionTitle {
   @include font-header-l;
+
+  @media (max-width: 768px) {
+    @include font-header-s;
+  }
 }
 
 .accordionText {
   @include font-body-m;
+
+  @media (max-width: 768px) {
+    @include font-body-xxxs;
+  }
 }
 
 /* Style the accordion panel. Note: hidden by default */

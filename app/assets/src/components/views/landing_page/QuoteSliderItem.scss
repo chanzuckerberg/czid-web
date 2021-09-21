@@ -23,6 +23,7 @@
 
   p {
     color: $white;
+    @include font-body-m;
   }
 }
 
@@ -61,7 +62,7 @@
     top: 3.5rem;
   }
 
-  img {
+  svg {
     @media (max-width: 768px) {
       width: 24px;
     }

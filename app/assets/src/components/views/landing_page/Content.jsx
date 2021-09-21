@@ -5,6 +5,7 @@ import IconSampleFigure from "~/components/ui/icons/IconSampleFigure";
 import IconUploadFigure from "~/components/ui/icons/IconUploadFigure";
 import CtaButton from "~/components/views/landing_page/CtaButton";
 import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure.svg";
+import HealthQuestionsMobileFigure from "~/images/landing_page/health-questions-mobile.svg";
 import LaptopImg from "~/images/landing_page/idseq-laptop.svg";
 import KniAccordion from "./Accordion";
 import cs from "./Content.scss";
@@ -42,7 +43,8 @@ const Content = () => {
       <section className={cs.healthQuestions}>
         <h2>Investigate the world&apos;s biggest health questions</h2>
         <figure>
-          <img src={HealthQuestionsFigure} alt="" />
+          <img className={cs.healthQuestionsFigure} src={HealthQuestionsFigure} alt="" />
+          <img className={cs.healthQuestionsMobileFigure} src={HealthQuestionsMobileFigure} alt="" />
         </figure>
       </section>
 

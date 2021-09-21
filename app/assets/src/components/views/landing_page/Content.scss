@@ -12,10 +12,6 @@
       @include font-header-xxl;
     }
   }
-
-  p {
-    @include font-body-m;
-  }
 }
 
 .summary {
@@ -97,6 +93,20 @@
       max-width: 979px;
     }
   }
+
+  .healthQuestionsFigure {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .healthQuestionsMobileFigure {
+    display: none;
+    
+    @media (max-width: 768px) {
+      display: block;
+    }
+  }
 }
 
 .howItWorks {
@@ -111,6 +121,7 @@
   p {
     max-width: 765px;
     margin: 0 auto;
+    @include font-body-m;
 
     @media (max-width: 768px) {
       @include font-body-s;

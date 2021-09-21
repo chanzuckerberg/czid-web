@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
-import QuoteMark from "~/images/landing_page/idseq-quote-mark.svg";
+import IconDoubleQuotes from "~/components/ui/icons/IconDoubleQuotes";
 import cs from "./QuoteSliderItem.scss";
 
 const QuoteSliderItem = props => {
@@ -8,7 +8,7 @@ const QuoteSliderItem = props => {
     <div className={cs.carouselCell}>
       <div className={cs.quoteContainer}>
         <span className={cs.startQuotation}>
-          <img src={QuoteMark} alt="" />
+          <IconDoubleQuotes />
         </span>
         <p>{props.quoteText} &rdquo;</p>
         <div className={cs.quoteCitation}>

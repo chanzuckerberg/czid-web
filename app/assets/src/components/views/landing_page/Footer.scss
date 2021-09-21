@@ -8,9 +8,19 @@
   padding: 3rem 4rem;
   font-family: $font-family-sans-serif;
   @include font-body-s;
+
   a {
     color: $white;
     text-decoration: none;
+  }
+
+  @media (max-width: 768px) {
+    @include font-body-xs;
+    padding: 0.75rem;
+  }
+
+  @media (max-width: 400px) {
+    @include font-body-xxs;
   }
 }
 
@@ -22,20 +32,46 @@
 
   a + a {
     margin-left: 40px;
+
+    @media (max-width: 768px) {
+      margin-left: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 40px;
+  }
+}
+
+.topNavMenu {
+  @media (max-width: 768px) {
+    margin-top: 30px;
   }
 }
 
 .bottomNavContainer {
   display: flex;
   justify-content: space-between;
+
+  @media (max-width: 900px) {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
 }
 
 .bottomNavMenu {
   display: flex;
   align-items: center;
 
+  @media (max-width: 900px) {
+    margin-top: 30px;
+  }
+
   p {
     margin-right: 10px;
+    color: $white;
   }
 
   span {
@@ -57,5 +93,9 @@
     height: 100%;
     width: 1px;
     margin: 0 22px;
+
+    @media (max-width: 900px) {
+      height: 45px;
+    }
   }
 }

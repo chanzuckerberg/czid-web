@@ -1,5 +1,5 @@
 import React from "react";
-import BiohubLogo from "~/images/landing_page/biohub-logo.svg";
+import IconBiohubLogo from "~/components/ui/icons/IconBiohubLogo";
 import CZILogo from "~/images/landing_page/czi-logo-white.png";
 import { LogoReversed } from "~ui/icons";
 import cs from "./Footer.scss";
@@ -12,31 +12,31 @@ const Footer = () => {
           <LogoReversed />
         </a>
         <div className={cs.topNavMenu}>
-          <a href="/">Video Tour</a>
-          <a href="/">Github</a>
-          <a href="/">Careers</a>
-          <a href="/">Help Center</a>
+          <a href="https://discoveridseq.com/vr">Video Tour</a>
+          <a href="https://github.com/chanzuckerberg/idseq-workflows">Github</a>
+          <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2215049">Careers</a>
+          <a href="http://help.idseq.net">Help Center</a>
         </div>
       </div>
       <div className={cs.bottomNavContainer}>
         <div className={cs.bottomNavMenu}>
           <p>&copy; Copyright Lorem ipsum.</p>
-          <a href="/">Privacy</a>
+          <a href="http://idseq.net/privacy">Privacy</a>
           <span>|</span>
-          <a href="/">Terms</a>
+          <a href="http://idseq.net/terms">Terms</a>
           <span>|</span>
-          <a href="/">Contact us</a>
+          <a href="mailto:help@idseq.net">Contact us</a>
         </div>
         <div className={cs.czLogoContainer}>
           <div>
-            <a href="/">
+            <a href="https://chanzuckerberg.com/">
               <img src={CZILogo} alt="" />
             </a>
           </div>
           <div className={cs.separator}></div>
           <div>
-            <a href="/">
-              <img src={BiohubLogo} alt="" />
+            <a href="https://www.czbiohub.org/">
+              <IconBiohubLogo />
             </a>
           </div>
         </div>

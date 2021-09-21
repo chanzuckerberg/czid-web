@@ -3,17 +3,10 @@
 @import "~styles/themes/elements";
 
 .tabContainer {
-  min-height: 132px;
   max-width: 440px;
   width: 100%;
   display: flex;
   background: $gray-off-white;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    min-height: unset;
-    width: 25%;
-  }
 
   &:hover {
     cursor: pointer;
@@ -38,18 +31,16 @@
       fill: $white;
     }
   }
+
+  @media (max-width: 990px) {
+    max-width: unset;
+  }
 }
 
 .tabIndicator {
   min-height: 100%;
   width: 7px;
   background: $gray-lightest;
-
-  @media (max-width: 768px) {
-    min-height: unset;
-    height: 7px;
-    width: 100%;
-  }
 }
 
 .tabContent {
@@ -58,31 +49,21 @@
   border-bottom: 1px solid $gray-lightest;
   font-family: $font-family-sans-serif;
   display: flex;
-
-  @media (max-width: 768px) {
-    border-bottom: none;
-    padding: 0;
-    height: 100%;
-  }
+  padding-top: 15px;
 }
 
 .tabCheckIcon {
   align-self: flex-start;
   width: 22px;
   flex-shrink: 0;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
 }
 
 .tabContentText {
   margin-left: 1rem;
   max-width: 300px;
 
-  @media (max-width: 768px) {
-    padding: 4px;
-    margin-left: 0;
+  @media (max-width: 990px) {
+    max-width: unset;
   }
 }
 
@@ -90,16 +71,8 @@
   color: $black;
   @include font-header-l;
 
-  @media (max-width: 998px) {
-    @include font-header-m;
-  }
-
-  @media (max-width: 768px) {
-    @include font-header-xxs;
-  }
-
-  @media (max-width: 400px) {
-    @include font-body-xxxs;
+  @media (max-width: 1024px) {
+    @include font-header-s;
   }
 }
 
@@ -107,11 +80,7 @@
   color: $gray-darkest;
   @include font-body-xs;
 
-  @media (max-width: 998px) {
+  @media (max-width: 1024px) {
     @include font-body-xxxs;
-  }
-
-  @media (max-width: 768px) {
-    display: none;
   }
 }
