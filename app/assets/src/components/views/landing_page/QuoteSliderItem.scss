@@ -35,6 +35,10 @@
   span {
     font-weight: $font-weight-semibold;
     margin-left: -17px;
+
+    @media (max-width: 768px) {
+      margin-left: 0;
+    }
   }
 
   p {
@@ -47,7 +51,7 @@
   }
 
   @media (max-width: 768px) {
-    width: 75%;
+    width: 100%;
     @include font-body-xxs
   }
 }

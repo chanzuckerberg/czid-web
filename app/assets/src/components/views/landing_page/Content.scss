@@ -25,13 +25,17 @@
   a {
     margin-top: 30px;
   }
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+  }
 }
 
 .summaryText {
 
   @media (max-width: 768px) {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
+    padding-left: 15px;
+    padding-right: 15px;
   }
   
   h2 {
@@ -44,6 +48,7 @@
 
     @media (max-width: 768px) {
       @include font-body-s;
+      padding-right: 15px;
     }
   }
 
@@ -53,6 +58,7 @@
 
   @media (max-width: 768px) {
     width: 100%;
+    margin-top: 20px;
   }
 }
 
@@ -61,12 +67,17 @@
   max-width: 998px;
 
   @media (max-width: 768px) {
-    display: none;
+    align-self: flex-end;
+    width: 100%;
   }
 
   img {
     margin-top: -15%;
     width: 100%;
+
+    @media (max-width: 768px) {
+      margin-top: -20%;
+    }
   }
 }
 

@@ -61,6 +61,7 @@
 .tabContentText {
   margin-left: 1rem;
   max-width: 300px;
+  margin-bottom: 10px;
 
   @media (max-width: 990px) {
     max-width: unset;

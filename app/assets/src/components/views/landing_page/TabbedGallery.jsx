@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import PipelineImg from "~/images/landing_page/pipeline-image.svg";
+import PipelineImg2x from "~/images/landing_page/pipeline-image-2x.png";
+import PipelineImg1x from "~/images/landing_page/pipeline-image.png";
 import cs from "./TabbedGallery.scss";
 import "./transitions.css";
 import TabbedGalleryTab from "./TabbedGalleryTab";
@@ -19,7 +20,12 @@ const TabbedGallery = () => {
           }}
         />
         {activeTab === 0 ? (
-          <img className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} src={PipelineImg} alt="" />
+          <img 
+            className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} 
+            src={PipelineImg1x} 
+            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            alt="" 
+            />
         ) : null}
         <TabbedGalleryTab
           tabTitle="Global pathogen datasets"
@@ -30,7 +36,12 @@ const TabbedGallery = () => {
           }}
         />
         {activeTab === 1 ? (
-          <img className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} src={PipelineImg} alt="" />
+          <img 
+            className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} 
+            src={PipelineImg1x} 
+            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            alt="" 
+            />
         ) : null}
         <TabbedGalleryTab
           tabTitle="Downstream Visualizations"
@@ -41,7 +52,12 @@ const TabbedGallery = () => {
           }}
         />
         {activeTab === 2 ? (
-          <img className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} src={PipelineImg} alt="" />
+          <img 
+            className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} 
+            src={PipelineImg1x} 
+            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            alt="" 
+            />
         ) : null}
         <TabbedGalleryTab
           tabTitle="SARS-CoV-2 Support"
@@ -52,21 +68,46 @@ const TabbedGallery = () => {
           }}
         />
         {activeTab === 3 ? (
-          <img className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} src={PipelineImg} alt="" />
+          <img 
+            className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} 
+            src={PipelineImg1x} 
+            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            alt="" 
+            />
         ) : null}
       </div>
       <div className={cs.galleryImage}>
         {activeTab === 0 ? (
-          <img className={cs.fadeUp} src={PipelineImg} alt="" />
+          <img 
+            className={cs.fadeUp} 
+            src={PipelineImg1x}
+            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            alt="" 
+            />
         ) : null}
         {activeTab === 1 ? (
-          <img className={cs.fadeUp} src={PipelineImg} alt="" />
+          <img 
+            className={cs.fadeUp} 
+            src={PipelineImg1x}
+            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            alt="" 
+            />
         ) : null}
         {activeTab === 2 ? (
-          <img className={cs.fadeUp} src={PipelineImg} alt="" />
+          <img 
+            className={cs.fadeUp} 
+            src={PipelineImg1x}
+            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            alt="" 
+            />
         ) : null}
         {activeTab === 3 ? (
-          <img className={cs.fadeUp} src={PipelineImg} alt="" />
+          <img 
+            className={cs.fadeUp} 
+            src={PipelineImg1x}
+            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            alt="" 
+            />
         ) : null}
       </div>
     </section>

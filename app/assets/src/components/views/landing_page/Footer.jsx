@@ -1,6 +1,6 @@
 import React from "react";
 import IconBiohubLogo from "~/components/ui/icons/IconBiohubLogo";
-import CZILogo from "~/images/landing_page/czi-logo-white.png";
+import IconCziLogo from "~/components/ui/icons/IconCziLogo";
 import { LogoReversed } from "~ui/icons";
 import cs from "./Footer.scss";
 
@@ -21,16 +21,18 @@ const Footer = () => {
       <div className={cs.bottomNavContainer}>
         <div className={cs.bottomNavMenu}>
           <p>&copy; Copyright Lorem ipsum.</p>
-          <a href="http://idseq.net/privacy">Privacy</a>
-          <span>|</span>
-          <a href="http://idseq.net/terms">Terms</a>
-          <span>|</span>
-          <a href="mailto:help@idseq.net">Contact us</a>
+          <div>
+            <a href="http://idseq.net/privacy">Privacy</a>
+            <span>|</span>
+            <a href="http://idseq.net/terms">Terms</a>
+            <span>|</span>
+            <a href="mailto:help@idseq.net">Contact us</a>
+          </div>
         </div>
         <div className={cs.czLogoContainer}>
           <div>
             <a href="https://chanzuckerberg.com/">
-              <img src={CZILogo} alt="" />
+              <IconCziLogo />
             </a>
           </div>
           <div className={cs.separator}></div>
