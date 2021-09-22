@@ -1148,6 +1148,9 @@ class SamplesController < ApplicationController
         ) and return
       end
 
+      # Unset possible LOCAL_UPLOAD_STALLED
+      @sample.update(upload_error: nil) if @sample.upload_error
+
       MetricUtil.log_analytics_event(
         EventDictionary::SAMPLE_UPLOAD_SUCCEEDED,
         current_user,

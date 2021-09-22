@@ -751,6 +751,17 @@ RSpec.describe SamplesController, type: :controller do
           expect(response).to have_http_status :bad_request
           expect(@sample.status).to eq(Sample::STATUS_CREATED)
         end
+
+        it "removes previously set upload errors" do
+          @sample.update(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED)
+
+          put :update, format: :json, params: { id: @sample.id, sample: { status: Sample::STATUS_UPLOADED } }
+
+          sample = @sample.reload
+          expect(response).to have_http_status :success
+          expect(sample.status).to eq(Sample::STATUS_CHECKED)
+          expect(sample.upload_error).to_not eq(Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED)
+        end
       end
     end
   end
