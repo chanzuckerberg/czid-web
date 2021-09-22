@@ -176,6 +176,14 @@ function EventDictionary() {
   this.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED =
     "PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED";
 
+  /** The user clicked the tools attribution link to view the SKA repo on a phylo tree page. */
+  this.PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED";
+
+  /** The user clicked the tools attribution link to view the IQTree repo on a phylo tree page. */
+  this.PHYLO_TREE_LIST_VIEW_IQTREE_LINK_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_IQTREE_LINK_CLICKED";
+
   /** The user hovered over a hoverAction in a mNGS sample report */
   this.SAMPLE_VIEW_HOVER_ACTION_HOVERED = "SAMPLE_VIEW_HOVER_ACTION_HOVERED";
 

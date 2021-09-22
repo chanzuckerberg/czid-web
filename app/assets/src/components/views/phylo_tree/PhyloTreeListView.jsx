@@ -32,7 +32,7 @@ import ToolbarIcon from "~/components/views/samples/SamplesView/ToolbarIcon";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import Link from "~ui/controls/Link";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
-import { IconAlert } from "~ui/icons";
+import { IconAlert, IconInfoSmall } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 import Notification from "~ui/notifications/Notification";
 
@@ -532,6 +532,38 @@ class PhyloTreeListView extends React.Component {
     );
   };
 
+  renderToolsAttributionBanner = () => {
+    const { currentTree } = this.state;
+    const onlyHeatmapAvailable = currentTree && currentTree.clustermap_svg_url;
+    return (
+      <div className={cs.attributionsBanner}>
+        <IconInfoSmall className={cs.infoIcon} />
+        <ExternalLink
+          href={"https://github.com/simonrharris/SKA"}
+          analyticsEventName={
+            ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED
+          }
+        >
+          SKA v1.0
+        </ExternalLink>
+        {!onlyHeatmapAvailable && (
+          <span>
+            {" "}
+            and{" "}
+            <ExternalLink
+              href={"https://github.com/Cibiv/IQ-TREE"}
+              analyticsEventName={
+                ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IQTREE_LINK_CLICKED
+              }
+            >
+              IQTree v1.6.1
+            </ExternalLink>
+          </span>
+        )}
+      </div>
+    );
+  };
+
   render() {
     const {
       adminToolsOpen,
@@ -544,7 +576,6 @@ class PhyloTreeListView extends React.Component {
     } = this.state;
 
     const { admin } = this.context || {};
-    const { allowedFeatures = [] } = this.context || {};
 
     if (!selectedPhyloTreeId && !selectedPhyloTreeNgId) {
       return (
@@ -574,10 +605,9 @@ class PhyloTreeListView extends React.Component {
           params={this.state.sidebarConfig}
         />
         <NarrowContainer>
-          {showOldTreeWarning &&
-            allowedFeatures.includes(PHYLO_TREE_NG_FEATURE) &&
-            this.renderOldTreeWarning()}
+          {showOldTreeWarning && this.renderOldTreeWarning()}
           {this.renderVisualization()}
+          {selectedPhyloTreeNgId && this.renderToolsAttributionBanner()}
           {admin && (
             <ToolbarIcon
               onClick={() => {

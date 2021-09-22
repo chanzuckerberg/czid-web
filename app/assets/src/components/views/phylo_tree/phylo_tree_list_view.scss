@@ -67,3 +67,23 @@
 .iconAlert {
   width: $icon-l;
 }
+
+.attributionsBanner {
+  background-color: $white;
+  color: $gray-dark;
+  border-radius: $border-radius-m;
+  box-shadow: $box-shadow-s;
+  padding: $space-xxxs $space-s;
+  margin: $space-m;
+  // Ensures it appears on top of the phylo tree if they overlap.
+  z-index: 1;
+  // Always position at the bottom right hand corner of the viewport.
+  position: fixed;
+  bottom: 0;
+  right: 0;
+
+  .infoIcon {
+    fill: $gray-medium;
+    margin-right: $space-xxs;
+  }
+}
