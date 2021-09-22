@@ -24,6 +24,10 @@
   p {
     color: $white;
     @include font-header-xl;
+
+    @media (max-width: 768px) {
+      @include font-header-m;
+    }
   }
 }
 
