@@ -133,6 +133,7 @@
     max-width: 765px;
     margin: 0 auto;
     @include font-body-m;
+    color: $gray-darkest;
 
     @media (max-width: 768px) {
       @include font-body-s;
@@ -144,15 +145,19 @@
   display: flex;
   justify-content: space-evenly;
   margin-top: 3rem;
-  max-width: 1400px;
+  max-width: 1152px;
   margin-left: auto;
   margin-right: auto;
+  position: relative;
+  padding-right: 40px;
+  padding-left: 40px;
+
 
   @media (max-width: 768px) {
     flex-direction: column;
   }
 
-  img {
+  svg {
     height: 100px;
     width: auto;
   }
@@ -163,14 +168,23 @@
 
   p {
     @include font-body-xs;
-    max-width: 250px;
+    max-width: 225px;
     color: $gray-darkest;
   }
 }
 
-.howItWorksProcessStep {
+.howItWorksSeparator {
+  width: 121px;
+  height: 0px;
+  border-bottom: 2px dotted #DDD;
+  margin-top: 45px;
 
-  padding: 0 20px;
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.howItWorksProcessStep {
 
   @media (max-width: 768px) {
     margin-bottom: 50px;

@@ -66,7 +66,7 @@ const Content = () => {
               Upload FASTA/FASTQ files from your computer, or import from Illumina&apos;s Basespace.
             </p>
           </div>
-
+          <div className={cs.howItWorksSeparator}></div>
           <div className={cs.howItWorksProcessStep}>
             <IconMatchesFigure />
             <h3>Find matches in NCBI</h3>
@@ -75,7 +75,7 @@ const Content = () => {
               in NCBI for plant viruses, parasitic worms, bacteria, etc.
             </p>
           </div>
-
+          <div className={cs.howItWorksSeparator}></div>
           <div className={cs.howItWorksProcessStep}>
             <IconSampleFigure />
             <h3>View Per-Sample Taxon Counts</h3>
@@ -83,7 +83,7 @@ const Content = () => {
               Check out the auto-generated results page to see the microorganisms found in each sample.
             </p>
           </div>
-
+          <div className={cs.howItWorksSeparator}></div>
           <div className={cs.howItWorksProcessStep}>
             <IconAnalyzeFigure />
             <h3>Analyze & Visualize</h3>

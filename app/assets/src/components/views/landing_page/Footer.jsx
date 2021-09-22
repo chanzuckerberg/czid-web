@@ -31,13 +31,13 @@ const Footer = () => {
         </div>
         <div className={cs.czLogoContainer}>
           <div>
-            <a href="https://chanzuckerberg.com/">
+            <a className={cs.cziLogo} href="https://chanzuckerberg.com/">
               <IconCziLogo />
             </a>
           </div>
           <div className={cs.separator}></div>
           <div>
-            <a href="https://www.czbiohub.org/">
+            <a className={cs.biohubLogo} href="https://www.czbiohub.org/">
               <IconBiohubLogo />
             </a>
           </div>

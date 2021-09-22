@@ -45,11 +45,14 @@
 
 .tabContent {
   width: 100%;
-  padding: 7px;
   border-bottom: 1px solid $gray-lightest;
   font-family: $font-family-sans-serif;
   display: flex;
-  padding-top: 15px;
+  padding: 30px 35px;
+
+  @media (max-width: 1100px) {
+    padding: 6%;
+  }
 }
 
 .tabCheckIcon {
@@ -59,9 +62,8 @@
 }
 
 .tabContentText {
-  margin-left: 1rem;
+  margin-left: 25px;
   max-width: 300px;
-  margin-bottom: 10px;
 
   @media (max-width: 990px) {
     max-width: unset;
@@ -72,8 +74,8 @@
   color: $black;
   @include font-header-l;
 
-  @media (max-width: 1024px) {
-    @include font-header-s;
+  @media (max-width: 1200px) {
+    @include font-header-m;
   }
 }
 
@@ -81,7 +83,7 @@
   color: $gray-darkest;
   @include font-body-xs;
 
-  @media (max-width: 1024px) {
-    @include font-body-xxxs;
+  @media (max-width: 1200px) {
+    @include font-body-xxs;
   }
 }

@@ -9,7 +9,7 @@
   font-family: $font-family-sans-serif;
   color: $black;
   cursor: pointer;
-  padding: 1rem 0 1rem 1rem;
+  padding: 26px 45px;
   text-align: left;
   border-bottom: 1px solid $gray-light;
   border-top: none;
@@ -41,7 +41,7 @@
 
   svg {
     position: absolute;
-    top: 1.1rem;
+    top: 28px;
 
     circle,
     path {
@@ -52,7 +52,7 @@
 
 .accordionTitle,
 .accordionText {
-  margin-left: 2rem;
+  margin-left: 38px;
 }
 
 .accordionTitle {

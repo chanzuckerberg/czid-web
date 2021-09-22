@@ -10,7 +10,7 @@
   align-items: center;
 
   @media (max-width: 768px) {
-    padding: 0.75rem;
+    padding: 17px 20px;
   }
 }
 
@@ -40,4 +40,69 @@
   @media (max-width: 768px) {
     display: none;
   }
+}
+
+.hamburgerIcon {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: inline-block;
+    cursor: pointer;
+  }
+}
+
+.bar1, .bar2, .bar3 {
+  width: 17px;
+  height: 1px;
+  background-color: $white;
+  margin: 5px 0;
+}
+
+.mobileNav {
+  height: 100vh;
+  width: 90%;
+  max-width: 260px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  background-color: $white;
+  z-index: 10;
+  transition: all 0.4s;
+}
+
+.mobileNavCloseContainer {
+  width: 100%;
+  text-align: right;
+  padding-top: 24px;
+}
+
+.mobileNavClose {
+  cursor: pointer;
+  padding-right: 26px;
+}
+
+.mobileNavLinkContainer {
+  padding-top: 30px;
+  padding-left: 40px;
+}
+
+.mobileNavLink {
+  display: block;
+  text-decoration: none;
+  font-family: $font-family-sans-serif;
+  color: $black;
+  @include font-body-xs;
+  font-weight: $font-weight-semibold;
+  margin: 22px 0;
+  transition: opacity 0.2s;
+
+  &:nth-of-type(2) {
+    margin-top: 27px;
+  }
+}
+
+.mobileNavSeparator {
+  width: 60px;
+  height: 1px;
+  background-color: $gray-light;
 }

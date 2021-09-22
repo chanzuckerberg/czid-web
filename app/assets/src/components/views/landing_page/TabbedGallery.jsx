@@ -1,6 +1,16 @@
 import React, { useState } from "react";
-import PipelineImg2x from "~/images/landing_page/pipeline-image-2x.png";
-import PipelineImg1x from "~/images/landing_page/pipeline-image.png";
+import GlobalDatasetsImg1x from "~/images/landing_page/global-datasets-1x.png";
+import GlobalDatasetsImg2x from "~/images/landing_page/global-datasets-2x.png";
+import HeatmapImg1x from "~/images/landing_page/heatmap-1x.png";
+import HeatmapImg2x from "~/images/landing_page/heatmap-2x.png";
+import PipelineImg1x from "~/images/landing_page/pipeline-visualization-1x.png";
+import PipelineImg2x from "~/images/landing_page/pipeline-visualization-2x.png";
+
+
+
+import SarsImg1x from "~/images/landing_page/sars-cov-2-1x.png";
+import SarsImg2x from "~/images/landing_page/sars-cov-2-2x.png";
+
 import cs from "./TabbedGallery.scss";
 import "./transitions.css";
 import TabbedGalleryTab from "./TabbedGalleryTab";
@@ -38,8 +48,8 @@ const TabbedGallery = () => {
         {activeTab === 1 ? (
           <img 
             className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} 
-            src={PipelineImg1x} 
-            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            src={GlobalDatasetsImg1x} 
+            srcSet={`${GlobalDatasetsImg1x}, ${GlobalDatasetsImg2x} 2x`}
             alt="" 
             />
         ) : null}
@@ -54,8 +64,8 @@ const TabbedGallery = () => {
         {activeTab === 2 ? (
           <img 
             className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} 
-            src={PipelineImg1x} 
-            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            src={HeatmapImg1x} 
+            srcSet={`${HeatmapImg1x}, ${HeatmapImg2x} 2x`}
             alt="" 
             />
         ) : null}
@@ -70,8 +80,8 @@ const TabbedGallery = () => {
         {activeTab === 3 ? (
           <img 
             className={`${cs.fadeUp} ${cs.mobileGalleryImage}`} 
-            src={PipelineImg1x} 
-            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            src={SarsImg1x} 
+            srcSet={`${SarsImg1x}, ${SarsImg2x} 2x`}
             alt="" 
             />
         ) : null}
@@ -88,24 +98,24 @@ const TabbedGallery = () => {
         {activeTab === 1 ? (
           <img 
             className={cs.fadeUp} 
-            src={PipelineImg1x}
-            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            src={GlobalDatasetsImg1x}
+            srcSet={`${GlobalDatasetsImg1x}, ${GlobalDatasetsImg2x} 2x`}
             alt="" 
             />
         ) : null}
         {activeTab === 2 ? (
           <img 
             className={cs.fadeUp} 
-            src={PipelineImg1x}
-            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            src={HeatmapImg1x}
+            srcSet={`${HeatmapImg1x}, ${HeatmapImg2x} 2x`}
             alt="" 
             />
         ) : null}
         {activeTab === 3 ? (
           <img 
             className={cs.fadeUp} 
-            src={PipelineImg1x}
-            srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+            src={SarsImg1x}
+            srcSet={`${SarsImg1x}, ${SarsImg2x} 2x`}
             alt="" 
             />
         ) : null}
