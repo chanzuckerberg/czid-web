@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React from "react";
 import BasicPopup from "../../BasicPopup";
 import Label from "./Label";
@@ -49,6 +50,10 @@ const PathogenLabel = ({ type }) => {
       basic={false}
     />
   );
+};
+
+PathogenLabel.propTypes = {
+  type: PropTypes.string,
 };
 
 export default PathogenLabel;

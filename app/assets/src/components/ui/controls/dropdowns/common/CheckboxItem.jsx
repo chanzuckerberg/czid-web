@@ -28,10 +28,11 @@ const CheckboxItem = ({ value, label, checked, onOptionClick, boxed }) => (
 );
 
 CheckboxItem.propTypes = {
-  value: PropTypes.any,
-  label: PropTypes.string,
+  boxed: PropTypes.bool,
   checked: PropTypes.bool,
+  label: PropTypes.string,
   onOptionClick: PropTypes.func,
+  value: PropTypes.any,
 };
 
 export default CheckboxItem;

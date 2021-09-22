@@ -19,7 +19,7 @@ import PropTypes from "~/components/utils/propTypes";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
-import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
+import { parseUrlParams } from "~/helpers/url";
 import {
   DownloadButton,
   HelpButton,
@@ -49,6 +49,7 @@ export default function SampleViewHeader({
   sample,
   snapshotShareId,
   view,
+  onShareClick,
 }) {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
@@ -73,15 +74,7 @@ export default function SampleViewHeader({
       <>
         <BasicPopup
           trigger={
-            <ShareButton
-              className={cs.controlElement}
-              onClick={() => {
-                copyShortUrlToClipboard();
-                logAnalyticsEvent("SampleView_share-button_clicked", {
-                  sampleId: sample && sample.id,
-                });
-              }}
-            />
+            <ShareButton className={cs.controlElement} onClick={onShareClick} />
           }
           content="A shareable URL was copied to your clipboard!"
           on="click"
@@ -285,14 +278,15 @@ SampleViewHeader.defaultProps = {
 
 SampleViewHeader.propTypes = {
   backgroundId: PropTypes.number,
-  currentTab: PropTypes.string,
   currentRun: PropTypes.object,
+  currentTab: PropTypes.string,
   deletable: PropTypes.bool,
   editable: PropTypes.bool.isRequired,
   getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
   hasAppliedFilters: PropTypes.bool.isRequired,
   onDetailsClick: PropTypes.func.isRequired,
   onPipelineVersionChange: PropTypes.func.isRequired,
+  onShareClick: PropTypes.func,
   pipelineRun: PropTypes.PipelineRun,
   pipelineVersions: PropTypes.arrayOf(PropTypes.string),
   project: PropTypes.Project,

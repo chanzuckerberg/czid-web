@@ -82,6 +82,7 @@ import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
 import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/ConsensusGenomePreviousModal";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
+import { copyShortUrlToClipboard } from "~/helpers/url";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
@@ -172,6 +173,9 @@ class SampleView extends React.Component {
         workflowRun: null,
         workflowRunId: workflowRunIdFromUrl || null,
         workflowRunResults: null,
+        sharedWithNoBackground: !!(
+          selectedOptionsFromUrl && !selectedOptionsFromUrl.background
+        ),
       },
       nonNestedLocalState,
       nonNestedUrlState
@@ -359,7 +363,9 @@ class SampleView extends React.Component {
   };
 
   fetchPersistedBackground = async () => {
-    const { project, selectedOptions } = this.state;
+    const { project, selectedOptions, sharedWithNoBackground } = this.state;
+
+    if (sharedWithNoBackground) return;
 
     if (project) {
       let newBackground;
@@ -826,10 +832,18 @@ class SampleView extends React.Component {
   };
 
   updateHistoryAndPersistOptions = () => {
+    const { allowedFeatures = [] } = this.context || {};
+
     const urlState = pick(keys(URL_FIELDS), this.state);
+
+    // After feature release, add "background" to the constant excludePaths:
+    let localStorageFields = LOCAL_STORAGE_FIELDS;
+    if (allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE)) {
+      localStorageFields.selectedOptions.excludePaths.push("background");
+    }
     let localState = mapValuesWithKey((options, key) => {
       return omit(options.excludePaths || [], this.state[key]);
-    }, LOCAL_STORAGE_FIELDS);
+    }, localStorageFields);
 
     // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
@@ -1945,6 +1959,16 @@ class SampleView extends React.Component {
     );
   };
 
+  handleShareClick = () => {
+    const { sample } = this.state;
+    // Ensure Share recipient sees report with the same options:
+    this.updateHistoryAndPersistOptions();
+    copyShortUrlToClipboard();
+    logAnalyticsEvent("SampleView_share-button_clicked", {
+      sampleId: sample && sample.id,
+    });
+  };
+
   renderReport = ({ displayMergedNtNrValue = false } = {}) => {
     const {
       backgrounds,
@@ -2108,6 +2132,7 @@ class SampleView extends React.Component {
                   ? null
                   : selectedOptions.background
               }
+              currentRun={currentRun}
               currentTab={currentTab}
               deletable={sample ? sample.deletable : false}
               editable={sample ? sample.editable : false}
@@ -2117,7 +2142,7 @@ class SampleView extends React.Component {
               hasAppliedFilters={this.hasAppliedFilters()}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
-              currentRun={currentRun}
+              onShareClick={this.handleShareClick}
               project={project}
               projectSamples={projectSamples}
               reportMetadata={reportMetadata}

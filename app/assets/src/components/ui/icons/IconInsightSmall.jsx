@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React from "react";
 import BasicPopup from "../../BasicPopup";
 
@@ -14,6 +15,10 @@ const IconInsightSmall = ({ tooltip }) => {
     </svg>
   );
   return <BasicPopup trigger={icon} content={tooltip} basic={false} />;
+};
+
+IconInsightSmall.propTypes = {
+  tooltip: PropTypes.string,
 };
 
 export default IconInsightSmall;
