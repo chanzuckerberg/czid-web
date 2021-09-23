@@ -1,19 +1,58 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import cs from "./Accordion.scss";
 import AccordionItem from "./AccordionItem";
 
 const Accordion = () => {
+
+  const [openAccordion, setOpenAccordion] = useState(0);
+
+  useEffect(() => {
+    var accordions = document.querySelectorAll(".accordionItem");
+
+    // accordions.forEach(accordion => {
+    //   accordion.addEventListener("click", function() {
+    //     /* Toggle between hiding and showing the active panel */
+    //     var panel = this.children[2];
+    //     if (panel.style.maxHeight) {
+    //       panel.style.maxHeight = null;
+    //     } else {
+    //       panel.style.maxHeight = panel.scrollHeight + "px";
+    //     }
+    //   });
+    // });
+    accordions.forEach( accordion => {
+      var panel = accordion.children[2];
+      panel.style.maxHeight = null;
+    });
+
+    accordions[openAccordion].children[2].style.maxHeight = accordions[openAccordion].children[2].scrollHeight + "px";
+  }, [openAccordion]);
+
+  function clickHandler(clickedAccordion) {
+
+
+    setOpenAccordion(clickedAccordion);
+
+   
+  }
+
   return (
     <section className={cs.accordionContainer}>
       <AccordionItem
+        onClick={()=>{clickHandler(0);}}
+        isOpen={openAccordion === 0 }
         accordionTitle="How much data can I upload"
         accordionText="There is no limit on the amount of data that you can upload to IDseq."
       />
       <AccordionItem
+        onClick={()=>{clickHandler(1);}}
+        isOpen={openAccordion === 1 }
         accordionTitle="Will IDseq remain free to use?"
         accordionText="Yes, IDseq is committed to remaining a free tool."
       />
       <AccordionItem
+        onClick={()=>{clickHandler(2);}}
+        isOpen={openAccordion === 2 }
         accordionTitle="Will my raw data ever become public?"
         accordionText={
           <>
@@ -22,6 +61,8 @@ const Accordion = () => {
         }
       />
       <AccordionItem
+        onClick={()=>{clickHandler(3);}}
+        isOpen={openAccordion === 3 }
         accordionTitle="How is human genomic data protected?"
         accordionText={
           <>
@@ -30,6 +71,8 @@ const Accordion = () => {
         }
       />
       <AccordionItem
+        onClick={()=>{clickHandler(4);}}
+        isOpen={openAccordion === 4 }
         accordionTitle="Will my account last indefinitely?"
         accordionText={
           <>

@@ -61,6 +61,7 @@
   @media (max-width: 768px) {
     flex-direction: column-reverse;
     align-items: center;
+    width: 100%;
   }
 }
 
@@ -104,6 +105,8 @@
 
   @media (max-width: 768px) {
     border-bottom: 1px solid $gray-darkest;
+    width: 100%;
+    justify-content: center;
   }
 }
 

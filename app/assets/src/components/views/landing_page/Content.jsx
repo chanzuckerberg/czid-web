@@ -6,9 +6,9 @@ import IconUploadFigure from "~/components/ui/icons/IconUploadFigure";
 import CtaButton from "~/components/views/landing_page/CtaButton";
 import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure.svg";
 import HealthQuestionsMobileFigure from "~/images/landing_page/health-questions-mobile.svg";
-import LaptopImg from "~/images/landing_page/idseq-laptop.svg";
 import KniAccordion from "./Accordion";
 import cs from "./Content.scss";
+import LaptopRotator from "./LaptopRotator";
 import { Publications, News } from "./PublicationsAndNews";
 import PublicationStyles from "./PublicationsAndNews.scss";
 import QuoteSlider from "./QuoteSlider";
@@ -37,7 +37,8 @@ const Content = () => {
             />
         </div>
         <div className={cs.summaryImage}>
-          <img src={LaptopImg} alt="" />
+          {/* <img src={LaptopImg} alt="" /> */}
+          <LaptopRotator />
         </div>
       </section>
       <section className={cs.healthQuestions}>
@@ -48,6 +49,9 @@ const Content = () => {
         </figure>
       </section>
 
+      <style dangerouslySetInnerHTML={{__html: `
+        .slick-dots{position:absolute;bottom:-25px;display:block;width:100%;padding:0;margin:0;list-style:none;text-align:center}.slick-dots li{position:relative;display:inline-block;width:20px;height:20px;padding:0;cursor:pointer;margin:0!important;}.slick-dots li button{font-size:0;line-height:0;display:block;width:20px;height:20px;padding:5px;cursor:pointer;color:transparent;border:0;outline:0;background:0 0}.slick-dots li button:focus,.slick-dots li button:hover{outline:0}.slick-dots li button:focus:before,.slick-dots li button:hover:before{opacity:1!important;color:#fff!important}.slick-dots li button:before{font-family:slick;font-size:10px!important;line-height:20px;position:absolute;top:0;left:0;width:20px;height:20px;content:'•';text-align:center;opacity:.4!important;color:#000!important;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.slick-dots li.slick-active button:before{opacity:1!important;color:#fff!important}
+      `}} />
       <QuoteSlider />
 
       <section className={cs.howItWorks}>

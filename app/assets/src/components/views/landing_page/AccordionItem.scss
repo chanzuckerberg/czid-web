@@ -21,6 +21,12 @@
   margin-left: 15px;
   margin-right: 15px;
 
+  @media (max-width: 768px) {
+    padding-left: 65px;
+    text-indent: -38px;
+
+  }
+
   &:hover {
     color: $primary;
 
@@ -68,6 +74,7 @@
 
   @media (max-width: 768px) {
     @include font-body-xxxs;
+    text-indent: 0px;
   }
 }
 
@@ -78,4 +85,9 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
+  margin-top: 1em;
+
+  @media (max-width: 768px) {
+    margin-left: -37px;
+  }
 }

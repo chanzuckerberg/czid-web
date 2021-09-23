@@ -63,11 +63,11 @@
 .startQuotation {
   position: absolute;
   left: 2rem;
-  top: 6rem;
+  top: 5.5rem;
 
   @media (max-width: 768px) {
     left: 0.75rem;
-    top: 3.5rem;
+    top: 2.5rem;
   }
 
   svg {

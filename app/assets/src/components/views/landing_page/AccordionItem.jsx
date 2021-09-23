@@ -1,34 +1,17 @@
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import cs from "./AccordionItem.scss";
 
 const AccordionItem = props => {
-  useEffect(() => {
-    var accordions = document.querySelectorAll(".accordionItem");
-
-    accordions.forEach(accordion => {
-      accordion.addEventListener("click", function() {
-        /* Toggle between hiding and showing the active panel */
-        var panel = this.children[2];
-        if (panel.style.maxHeight) {
-          panel.style.maxHeight = null;
-        } else {
-          panel.style.maxHeight = panel.scrollHeight + "px";
-        }
-      });
-    });
-  }, []);
-
-  const [open, setOpen] = useState(false);
 
   return (
     <div
       onClick={() => {
-        setOpen(!open);
+        props.onClick();
       }}
       className={`${cs.accordion} accordionItem`}
     >
-      {open ? (
+      {props.isOpen ? (
         <svg
           className="icon"
           width="20"
@@ -70,7 +53,7 @@ const AccordionItem = props => {
       )}
       <span
         className={cs.accordionTitle}
-        style={open ? { color: "#3867FA" } : null}
+        style={props.isOpen ? { color: "#3867FA" } : null}
       >
         {props.accordionTitle}
       </span>
@@ -87,6 +70,8 @@ AccordionItem.propTypes = {
     PropTypes.string,
     PropTypes.object,
   ]),
+  isOpen: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default AccordionItem;

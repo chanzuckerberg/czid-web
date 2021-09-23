@@ -11,6 +11,10 @@
     @media (max-width: 768px) {
       @include font-header-xxl;
     }
+
+    @media (max-width: 576px) {
+      @include font-header-m;
+    }
   }
 }
 
@@ -64,20 +68,16 @@
 
 .summaryImage {
   width: 55%;
-  max-width: 998px;
+  margin-top: -8%;
 
   @media (max-width: 768px) {
     align-self: flex-end;
     width: 100%;
+    margin-top: -15%;
   }
 
   img {
-    margin-top: -15%;
     width: 100%;
-
-    @media (max-width: 768px) {
-      margin-top: -20%;
-    }
   }
 }
 
@@ -206,6 +206,10 @@
   h2 {
     text-align: center;
     margin-bottom: 3rem;
+
+    @media (max-width: 576px) {
+      margin-bottom: 1rem;
+    }
   }
 
   a {
