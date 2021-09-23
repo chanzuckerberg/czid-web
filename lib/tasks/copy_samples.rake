@@ -1,9 +1,14 @@
+# NOTE(2021-09-23): This script is somewhat brittle and there may be future
+# incompatible changes, so treat this as a last resort option. Dig into why the
+# user is requesting samples copied. There may be alternatives we can provide
+# the user, such as the link sharing beta feature.
+#
 # ------------------------------------------------------------------------------
 # Goal: Copy samples to a new project
 #
 # How to use:
-#   1. Run `rake copy_samples['<project_name>']`.
-#   2. On prompt copy/paste a CSV with the following fields "Source Project Name, Source Sample Name, Sample Name Source"
+#   1. Run `rake copy_samples['<project_name>']`. Where project_name is the destination project.
+#   2. On prompt copy/paste a CSV with the following fields "Source Project Name, Source Sample Name, Sample Name"
 #      Extra fields will be discarded.
 #      Make sure to end on a new line and press CTRL+D.
 #   3. Verify changes described and the desired changes
@@ -14,6 +19,16 @@
 #     a recursive copy for the AWS Ruby SDK, or for sync command, at the moment).
 #   * You might want to consider copying the S3 files yourself using `aws s3 sync`
 #   * The task duplicates samples, pipeline runs and all results but keeps same user and stage configurations.
+#
+# Tips:
+#   * The CSV should not have extra spaces or quotations. Ex:
+#     Source Project Name,Source Sample Name,Sample Name
+#     My_Favorite_Project,Sample_L004,Sample_L004
+#   * For long-running remote jobs, remember to use a tool like 'screen' in case of disconnects.
+#   * You can invoke from Rails console like this:
+#     require 'rake'
+#     Rails.application.load_tasks
+#     Rake::Task['copy_samples'].invoke('Destination_Project')
 # ------------------------------------------------------------------------------
 
 require "aws-sdk-s3"
@@ -59,6 +74,7 @@ def duplicate_sample_db(old_sample, target_project, new_sample_fields)
   puts "\t- Setting input files source to #{InputFile::SOURCE_TYPE_LOCAL}"
   duplicate_sample.input_files.each do |input_file|
     input_file.source_type = InputFile::SOURCE_TYPE_LOCAL
+    input_file.upload_client = InputFile::UPLOAD_CLIENT_WEB
   end
 
   if duplicate_sample.valid?
@@ -66,7 +82,8 @@ def duplicate_sample_db(old_sample, target_project, new_sample_fields)
     puts "\t- Saved sample: #{duplicate_sample.id}"
   else
     puts "\t- Invalid sample when duplicating: #{duplicate_sample.name}"
-    raise InvalidDuplicateSampleError, "Invalid sample: #{duplicate_sample}"
+    puts "\t- Errors: #{duplicate_sample.errors.full_messages}"
+    raise "Invalid sample: #{duplicate_sample}"
   end
 
   old_sample.pipeline_runs.to_a.sort_by(&:id).each do |pr|
@@ -119,6 +136,8 @@ end
 task :copy_samples, [:project_name] => :environment do |_, args|
   puts "Environment: #{Rails.env}"
   puts "Please paste you CSV and press CTRL+D in the end:"
+  # Alternative to read from file:
+  # csv_rows = CSV.read("/app/lib/tasks/my_sheet.csv", headers: true)
   csv_rows = []
   read_input do |filename|
     csv_rows = CSV.read(filename, headers: true)
@@ -133,9 +152,10 @@ task :copy_samples, [:project_name] => :environment do |_, args|
   csv_rows.each do |row|
     source_sample_name = row["Source Sample Name"]
     # find sample
-    sample = Sample.find_by(name: source_sample_name)
+    source_project = Project.find_by(name: row["Source Project Name"])
+    sample = Sample.find_by(name: source_sample_name, project: source_project)
     if sample
-      new_sample = Sample.find_by(name: row["Sample Name"])
+      new_sample = Sample.find_by(name: row["Sample Name"], project: project)
       if new_sample
         samples_duplicated << { old_sample: sample, new_sample: new_sample }
       else
