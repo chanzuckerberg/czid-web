@@ -27,12 +27,13 @@ import {
 } from "~/components/utils/documentationLinks";
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
+import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
 import PhyloTreeHeatmapErrorModal from "~/components/views/phylo_tree/PhyloTreeHeatmapErrorModal";
 import ToolbarIcon from "~/components/views/samples/SamplesView/ToolbarIcon";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import Link from "~ui/controls/Link";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
-import { IconAlert, IconInfoSmall } from "~ui/icons";
+import { IconAlert, IconInfoSmall, IconLoading } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 import Notification from "~ui/notifications/Notification";
 
@@ -388,6 +389,30 @@ class PhyloTreeListView extends React.Component {
           onClick={() =>
             logAnalyticsEvent(
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED
+            )
+          }
+        />
+      );
+    } else if (
+      [
+        NG_STATUS_CREATED,
+        NG_STATUS_RUNNING,
+        STATUS_INITIALIZED,
+        STATUS_IN_PROGRESS,
+      ].includes(currentTree.status)
+    ) {
+      return (
+        <SampleMessage
+          icon={<IconLoading className={csSampleMessage.icon} />}
+          link={PHYLO_TREE_LINK}
+          linkText="Learn about Phylogenetic Analysis"
+          message="Your tree is being created."
+          status="Generating Tree"
+          subtitle="Hang tight and grab a cup of coffee while we generate your tree!"
+          type="inProgress"
+          onClick={() =>
+            logAnalyticsEvent(
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED
             )
           }
         />

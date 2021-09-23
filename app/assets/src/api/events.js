@@ -172,6 +172,10 @@ function EventDictionary() {
   this.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED =
     "PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED";
 
+  /** The phylo tree is being generated and the user clicked on the link on the report to learn more about the creation process. */
+  this.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED";
+
   /** The user clicked the help button on a phylo tree page.  */
   this.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED =
     "PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED";

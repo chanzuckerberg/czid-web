@@ -9,7 +9,16 @@ import cs from "./sample_message.scss";
 
 class SampleMessage extends React.Component {
   render() {
-    const { icon, link, linkText, message, status, type, onClick } = this.props;
+    const {
+      icon,
+      link,
+      linkText,
+      message,
+      status,
+      subtitle,
+      type,
+      onClick,
+    } = this.props;
     return (
       <div className={cs.sampleMessage}>
         <div className={cs.textContainer}>
@@ -18,6 +27,7 @@ class SampleMessage extends React.Component {
             <span className={cs.text}>{status}</span>
           </div>
           <div className={cs.message}>{message}</div>
+          <div className={cs.subtitle}>{subtitle}</div>
           <a className={cs.actionLink} href={link} onClick={onClick}>
             {linkText}
             {linkText && <IconArrowRight />}
@@ -35,6 +45,7 @@ SampleMessage.propTypes = {
   linkText: PropTypes.string,
   message: PropTypes.string,
   status: PropTypes.string,
+  subtitle: PropTypes.string,
   type: PropTypes.string,
   onClick: PropTypes.func,
 };

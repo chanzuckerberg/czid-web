@@ -62,6 +62,11 @@
       margin-left: $space-xxxs;
     }
 
+    .subtitle {
+      @include font-body-xxs;
+      margin-bottom: $space-s;
+    }
+
     .actionLink {
       @include font-header-xxs;
       color: $primary !important;
