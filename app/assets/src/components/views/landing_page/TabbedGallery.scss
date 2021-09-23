@@ -41,10 +41,6 @@
   }
 }
 
-.fadeUp {
-  animation: fadeUp 0.4s ease 0s 1 forwards;
-}
-
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -70,4 +66,12 @@
   @media (max-width: 990px) {
     display: block;
   }
+}
+
+.fadeUp {
+  animation: fadeUp 0.4s ease 0s 1 forwards;
+}
+
+.hideImage {
+  display: none;
 }
