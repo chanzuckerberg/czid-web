@@ -34,5 +34,38 @@ end
 ```
 
 Inspired by:
+
 - https://rails.rubystyle.guide/#macro-style-methods
 - https://www.rubydoc.info/gems/rubocop/RuboCop/Cop/Layout/ClassStructure
+
+### Powers
+
+Consider using `require_power_check` on new controllers to ensure that a power is always checked. For example, even unrestricted models could return `Model.all`.
+
+```ruby
+class NotesController < ActionController::Base
+  include Consul::Controller
+  require_power_check
+end
+```
+
+You can map powers to different controller actions.
+
+Examples:
+
+```ruby
+class NotesController < ApplicationController
+  power :notes, :map => {
+    [:edit, :update] => :updatable_notes,
+    [:new, :create] => :creatable_notes,
+    [:destroy] => :destroyable_notes
+  }, :as => :note_scope
+end
+
+class SamplesController < ApplicationController
+  EDIT_ACTIONS = [...]
+  power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
+end
+```
+
+- More info: https://github.com/makandra/consul
