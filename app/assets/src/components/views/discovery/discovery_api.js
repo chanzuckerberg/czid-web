@@ -1,4 +1,4 @@
-import { get, map, toLower, upperCase } from "lodash/fp";
+import { get, map, toLower, toUpper, replace } from "lodash/fp";
 import {
   getProjectDimensions,
   getProjects,
@@ -141,7 +141,7 @@ const processRawSample = sample => {
       [WORKFLOWS.CONSENSUS_GENOME.value, "technology"],
       sample.details
     ),
-    wetlabProtocol: upperCase(
+    wetlabProtocol: formatWetlabProtocol(
       get([WORKFLOWS.CONSENSUS_GENOME.value, "wetlab_protocol"], sample.details)
     ),
   };
@@ -218,6 +218,8 @@ const processRawSample = sample => {
   return row;
 };
 
+const formatWetlabProtocol = str => replace(/_/g, " ", toUpper(str));
+
 const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
   const getCachedResult = resultPath =>
     get(["cached_results", ...resultPath], cgWorkflowRun);
@@ -226,7 +228,7 @@ const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
   return {
     medakaModel: getInput(["medaka_model"]),
     technology: getInput(["technology"]),
-    wetlabProtocol: upperCase(getInput(["wetlab_protocol"])),
+    wetlabProtocol: formatWetlabProtocol(getInput(["wetlab_protocol"])),
     referenceGenome: {
       accessionName: getInput(["accession_name"]),
       referenceGenomeId: getInput(["accession_id"]),
