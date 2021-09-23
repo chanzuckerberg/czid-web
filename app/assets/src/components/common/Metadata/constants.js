@@ -11,3 +11,7 @@ export const FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT = new Set([
   "host_age",
   "sample_unit",
 ]);
+
+export const FIELDS_THAT_HAVE_MAX_INPUT = {
+  host_age: 90,
+};

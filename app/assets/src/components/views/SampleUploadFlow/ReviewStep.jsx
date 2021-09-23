@@ -27,6 +27,7 @@ import DataTable from "~/components/visualizations/table/DataTable";
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { IconProjectPrivate, IconProjectPublic, IconSample } from "~ui/icons";
+import { returnHipaaCompliantMetadata } from "~utils/metadata";
 import AdminUploadOptions from "./AdminUploadOptions";
 import HostOrganismMessage from "./HostOrganismMessage";
 import UploadProgressModal from "./UploadProgressModal";
@@ -127,10 +128,23 @@ class ReviewStep extends React.Component {
     const hostGenomesById = keyBy("id", this.props.hostGenomes);
 
     const assembleDataForSample = sample => {
+      const sampleHostName = get(
+        "name",
+        hostGenomesById[sample.host_genome_id]
+      );
+      let sampleMetadata = metadataBySample[sample.name];
+
+      if (sampleHostName === "Human" && "Host Age" in sampleMetadata) {
+        sampleMetadata["Host Age"] = returnHipaaCompliantMetadata(
+          "host_age",
+          sampleMetadata["Host Age"]
+        );
+      }
+
       const sampleData = {
-        ...metadataBySample[sample.name],
+        ...sampleMetadata,
         "Sample Name": <div className={cs.sampleName}>{sample.name}</div>,
-        "Host Organism": get("name", hostGenomesById[sample.host_genome_id]),
+        "Host Organism": sampleHostName,
       };
 
       // We display different columns if the uploadType is basespace.

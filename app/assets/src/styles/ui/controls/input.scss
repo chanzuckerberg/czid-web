@@ -35,14 +35,15 @@
   &.error {
     input[type="header"],
     input[type="text"] {
-      border: $border-error;
+      border: $border-error !important;
     }
   }
 
   &.warning {
     input[type="header"],
+    input[type="number"],
     input[type="text"] {
-      border: $border-warning;
+      border: $border-warning !important;
     }
   }
 }

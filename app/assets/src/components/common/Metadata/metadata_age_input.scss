@@ -14,3 +14,10 @@
     margin-right: 7px;
   }
 }
+
+// Only used for the human host age input.
+.darkPlaceholder {
+  :global(input::placeholder) {
+    color: $black !important;
+  }
+}

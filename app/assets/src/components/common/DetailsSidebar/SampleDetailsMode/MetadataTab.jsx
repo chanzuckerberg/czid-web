@@ -9,6 +9,7 @@ import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
 import PropTypes from "~/components/utils/propTypes";
 
+import { returnHipaaCompliantMetadata } from "~utils/metadata";
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_mode.scss";
@@ -130,8 +131,18 @@ class MetadataTab extends React.Component {
   };
 
   renderMetadataType = metadataType => {
-    const { metadata } = this.props;
-    return MetadataTab.renderMetadataValue(metadata[metadataType.key]);
+    const { metadata, additionalInfo } = this.props;
+    let metadataValue = metadata[metadataType.key];
+
+    const isHuman = additionalInfo.host_genome_taxa_category === "human";
+    if (isHuman) {
+      metadataValue = returnHipaaCompliantMetadata(
+        metadataType.key,
+        metadataValue
+      );
+    }
+
+    return MetadataTab.renderMetadataValue(metadataValue);
   };
 
   renderMetadataSectionContent = section => {
@@ -239,6 +250,7 @@ MetadataTab.propTypes = {
     project_name: PropTypes.string.isRequired,
     upload_date: PropTypes.string,
     host_genome_name: PropTypes.string,
+    host_genome_taxa_category: PropTypes.string,
     editable: PropTypes.bool,
   }).isRequired,
   metadataErrors: PropTypes.objectOf(PropTypes.string),

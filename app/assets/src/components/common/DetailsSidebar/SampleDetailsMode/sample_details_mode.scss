@@ -11,7 +11,7 @@
 .title,
 .loadingMsg {
   @include font-header-xl;
-  margin: 0 10px;
+  margin: 0 $space-m;
   margin-right: 60px;
   word-break: break-all;
   line-height: 1.4em;
@@ -71,6 +71,10 @@
       }
     }
 
+    :global(.warning) {
+      margin-bottom: $space-s;
+    }
+
     .error {
       @include font-body-xxs;
       color: $error-medium;
@@ -106,13 +110,13 @@
 
     .rightArrow {
       font-size: 0.75em;
-      margin-left: 4px;
+      margin-left: $space-xxs;
     }
   }
 }
 
 .readsRemainingRow {
-  padding: 10px 0;
+  padding: $space-m 0;
   display: flex;
   align-items: center;
 
@@ -125,7 +129,7 @@
     width: 160px;
     flex-shrink: 0;
     margin-right: 20px;
-    margin-left: 10px;
+    margin-left: $space-m;
 
     .labelText {
       width: 120px;
@@ -160,7 +164,7 @@
 }
 
 .reportLink {
-  margin: 5px 10px;
+  margin: 5px $space-m;
 
   a {
     /* overwrite header.scss */
@@ -176,7 +180,7 @@
 .erccScatterplotSection {
   .graphContainer {
     margin-top: 20px;
-    margin-right: 10px;
+    margin-right: $space-m;
   }
 }
 
@@ -184,7 +188,7 @@
   padding-top: 5px;
 
   .downloadLink {
-    padding: 5px 10px;
+    padding: 5px $space-m;
     display: block;
     margin: 5px 0;
     /* overwrite header.scss */
@@ -202,16 +206,16 @@
     line-height: 23px;
     white-space: pre-wrap;
     word-break: break-word;
-    margin: 15px 10px;
+    margin: 15px $space-m;
   }
 
   .noData {
     color: $gray-light;
-    margin: 20px 10px;
+    margin: 20px $space-m;
   }
 
   .textareaContainer {
-    margin: 15px 10px 0 10px;
+    margin: 15px $space-m 0 $space-m;
   }
 
   .textarea {

@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { isUndefined, isNaN, isNull, isArray, max } from "lodash/fp";
+import { isUndefined, isNaN, isNull, isArray, max, min } from "lodash/fp";
 import React from "react";
 
 import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
@@ -13,7 +13,11 @@ import Input from "~ui/controls/Input";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import { IconAlertSmall } from "~ui/icons";
-import { FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT } from "./constants";
+import MetadataAgeInput from "./MetadataAgeInput";
+import {
+  FIELDS_THAT_HAVE_MAX_INPUT,
+  FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT,
+} from "./constants";
 
 import cs from "./metadata_input.scss";
 
@@ -22,20 +26,26 @@ import cs from "./metadata_input.scss";
 // a particular metadata field, undefined will be passed to the MetadataInput for that field
 // and the first sample's metadata value will contain to be shown.
 // To avoid this, we explicitly pass in the empty string whenever the field is undefined or null.
-const ensureDefinedValue = ({ key = "", value, type }) => {
+const ensureDefinedValue = ({ key = "", value, type, taxaCategory }) => {
   let safeValue = isUndefined(value) || isNull(value) ? "" : value;
 
   if (
     FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT.has(key) &&
-    type === "number"
+    type === "number" &&
+    safeValue
   ) {
     const parsedValue = Number.parseInt(value);
     if (!isNaN(parsedValue)) {
       // Do not let the user select values less than 0
       safeValue = max([parsedValue, 0]);
     }
-  }
 
+    // Numbers that exceed maxValue will be stored as maxValue + 1
+    if (key in FIELDS_THAT_HAVE_MAX_INPUT && taxaCategory === "human") {
+      const maxValue = FIELDS_THAT_HAVE_MAX_INPUT[key];
+      safeValue = min([safeValue, maxValue + 1]);
+    }
+  }
   return safeValue;
 };
 
@@ -71,6 +81,7 @@ class MetadataInput extends React.Component {
       className,
       taxaCategory,
       sampleTypes,
+      isHuman,
     } = this.props;
     const { warning } = this.state;
 
@@ -126,6 +137,7 @@ class MetadataInput extends React.Component {
             key: metadataType.key,
             value,
             type: metadataType.dataType,
+            taxaCategory,
           })}
           placeholder={taxaCategory === "human" ? "YYYY-MM" : "YYYY-MM-DD"}
           type="text"
@@ -133,7 +145,7 @@ class MetadataInput extends React.Component {
       );
     } else if (metadataType.dataType === "location") {
       return (
-        <React.Fragment>
+        <>
           <GeoSearchInputBox
             className={className}
             // .warning reference in old .idseq-ui.input file
@@ -156,7 +168,26 @@ class MetadataInput extends React.Component {
               <div>{warning}</div>
             </div>
           )}
-        </React.Fragment>
+        </>
+      );
+    } else if (
+      metadataType.key === "host_age" &&
+      (isHuman || taxaCategory === "human")
+    ) {
+      return (
+        <MetadataAgeInput
+          className={className}
+          value={ensureDefinedValue({
+            key: metadataType.key,
+            value,
+            type: metadataType.dataType,
+            taxaCategory,
+          })}
+          metadataType={metadataType}
+          onChange={onChange}
+          onSave={onSave}
+          ensureDefinedValue={ensureDefinedValue}
+        />
       );
     } else {
       return (
@@ -168,6 +199,7 @@ class MetadataInput extends React.Component {
             key: metadataType.key,
             value,
             type: metadataType.dataType,
+            taxaCategory,
           })}
           type={metadataType.dataType === "number" ? "number" : "text"}
         />
@@ -195,6 +227,7 @@ MetadataInput.propTypes = {
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
   taxaCategory: PropTypes.string,
+  isHuman: PropTypes.bool,
   warning: PropTypes.string,
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
