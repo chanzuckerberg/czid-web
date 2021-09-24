@@ -30,8 +30,10 @@
     background-position: center 100%;
   }
 
-  @media (max-width: 350px) {
+  @media (max-width: 450px) {
     background-size: contain;
+    background-position: center 102%;
+    height: 485px
   }
 
   h1 {
@@ -45,7 +47,8 @@
     }
 
     @media (max-width: 768px) {
-      @include font-header-marketing-l;
+      @include font-header-xxl;
+      line-height: 44px;
     }
   }
 
@@ -56,7 +59,8 @@
     @include font-body-m;
 
     @media (max-width: 768px) {
-      @include font-body-xs;
+      @include font-body-s;
+      line-height: 23px;
     }
   }
 }
