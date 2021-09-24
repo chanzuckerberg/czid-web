@@ -12,15 +12,14 @@ const Footer = () => {
           <LogoReversed />
         </a>
         <div className={cs.topNavMenu}>
-          <a href="https://discoveridseq.com/vr">Video Tour</a>
+          <a href="https://discoveridseq.com/vr">Experience IDseq&apos;s Impact</a>
           <a href="https://github.com/chanzuckerberg/idseq-workflows">Github</a>
           <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2215049">Careers</a>
-          <a href="http://help.idseq.net">Help Center</a>
+          <a href="http://help.idseq.net">Resources</a>
         </div>
       </div>
       <div className={cs.bottomNavContainer}>
         <div className={cs.bottomNavMenu}>
-          <p>&copy; Copyright Lorem ipsum.</p>
           <div>
             <a href="http://idseq.net/privacy">Privacy</a>
             <span>|</span>
@@ -30,16 +29,19 @@ const Footer = () => {
           </div>
         </div>
         <div className={cs.czLogoContainer}>
-          <div>
-            <a className={cs.cziLogo} href="https://chanzuckerberg.com/">
-              <IconCziLogo />
-            </a>
-          </div>
-          <div className={cs.separator}></div>
-          <div>
-            <a className={cs.biohubLogo} href="https://www.czbiohub.org/">
-              <IconBiohubLogo />
-            </a>
+          <p>In partnership with:</p>
+          <div className={cs.czLogoInnerContainer}>
+            <div>
+              <a className={cs.cziLogo} href="https://chanzuckerberg.com/">
+                <IconCziLogo />
+              </a>
+            </div>
+            <div className={cs.separator}></div>
+            <div>
+              <a className={cs.biohubLogo} href="https://www.czbiohub.org/">
+                <IconBiohubLogo />
+              </a>
+            </div>
           </div>
         </div>
       </div>

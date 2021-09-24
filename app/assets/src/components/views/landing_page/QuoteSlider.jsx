@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React, { useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -19,6 +20,7 @@ const QuoteSlider = () => {
     cssEase: "ease",
     prevArrow: false,
     nextArrow: false,
+    adaptiveHeight: false,
   };
 
   return (
@@ -32,9 +34,14 @@ const QuoteSlider = () => {
         quoteAuthor="Rebecca Brennan"
         quoteCredentials="Mayo Clinic"
         quoteText="Support staff responsiveness is quick and helpful. IDseq is accessible from any computer system, is user-friendly, and clearly defines results with minimal effort."
+        customStyles={{transform: "translateY(25%)"}}
       />
     </Slider>
   );
 };
 
 export default QuoteSlider;
+
+QuoteSlider.propTypes = {
+  customStyles: PropTypes.object,
+};

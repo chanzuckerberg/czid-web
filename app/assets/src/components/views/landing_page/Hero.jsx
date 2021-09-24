@@ -44,7 +44,7 @@ const Hero = () => {
           // style={fade ? cs.fade : ""}
           >Real-time Pathogen Detection</span>
       </h1>
-      <p>IDseq: The Free, cloud-based metagenomics platform for researchers</p>
+      <p>IDseq: The free, cloud-based metagenomics platform for researchers</p>
       <HeroEmailForm />
     </div>
   );

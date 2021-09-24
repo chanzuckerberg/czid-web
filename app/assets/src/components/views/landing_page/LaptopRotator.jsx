@@ -21,7 +21,7 @@ const LaptopRotator = () => {
     prevArrow: false,
     nextArrow: false,
     autoplay: true,
-    autoplaySpeed: 4500,
+    autoplaySpeed: 3500,
   };
 
   return (

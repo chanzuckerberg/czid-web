@@ -30,7 +30,7 @@ const TabbedGallery = () => {
           }}
         />
         <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 0 ? cs.fadeUp : cs.hideImage}`}
+          className={`${cs.mobileGalleryImage} ${activeTab === 0 ? cs.fadeUp : cs.hideImage} ${activeTab === 0 ? cs.mobileDropShadow : ""}`}
           src={PipelineImg1x} 
           srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
           alt="" 
@@ -44,13 +44,13 @@ const TabbedGallery = () => {
           }}
         />
         <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 1 ? cs.fadeUp : cs.hideImage}`}
+          className={`${cs.mobileGalleryImage} ${activeTab === 1 ? cs.fadeUp : cs.hideImage} ${activeTab === 1 ? cs.mobileDropShadow : ""}`}
           src={GlobalDatasetsImg1x} 
           srcSet={`${GlobalDatasetsImg1x}, ${GlobalDatasetsImg2x} 2x`}
           alt="" 
           />
         <TabbedGalleryTab
-          tabTitle="Downstream Visualizations"
+          tabTitle="Downstream visualizations"
           tabDescription="Visualize your samples in aggregate using the heatmap and phylogenetic tree modules."
           activeClass={activeTab === 2 ? "active" : ""}
           onClick={() => {
@@ -58,13 +58,13 @@ const TabbedGallery = () => {
           }}
         />
         <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 2 ? cs.fadeUp : cs.hideImage}`}
+          className={`${cs.mobileGalleryImage} ${activeTab === 2 ? cs.fadeUp : cs.hideImage} ${activeTab === 2 ? cs.mobileDropShadow : ""}`}
           src={HeatmapImg1x} 
           srcSet={`${HeatmapImg1x}, ${HeatmapImg2x} 2x`}
           alt="" 
           />
         <TabbedGalleryTab
-          tabTitle="SARS-CoV-2 Support"
+          tabTitle="SARS-CoV-2 support"
           tabDescription="Use our new pipeline to generate SARS-CoV-2 consensus genomes and QC in Nextclade."
           activeClass={activeTab === 3 ? "active" : ""}
           onClick={() => {
@@ -72,7 +72,7 @@ const TabbedGallery = () => {
           }}
         />
         <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 3 ? cs.fadeUp : cs.hideImage}`} 
+          className={`${cs.mobileGalleryImage} ${activeTab === 3 ? cs.fadeUp : cs.hideImage} ${activeTab === 3 ? cs.mobileDropShadow : ""}`} 
           src={SarsImg1x} 
           srcSet={`${SarsImg1x}, ${SarsImg2x} 2x`}
           alt="" 

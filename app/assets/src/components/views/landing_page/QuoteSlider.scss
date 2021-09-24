@@ -1,10 +1,6 @@
 @import "~styles/themes/colors";
 
 .mainCarousel {
-  overflow: hidden;
+  cursor: grab;
   background: $primary;
-
-  &:hover {
-    cursor: grab;
-  }
 }

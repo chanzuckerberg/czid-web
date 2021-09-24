@@ -87,6 +87,11 @@
   transition: max-height 0.2s ease-out;
   margin-top: 1em;
 
+  a {
+    color: $primary !important;
+    text-decoration: underline !important;
+  }
+
   @media (max-width: 768px) {
     margin-left: -37px;
   }

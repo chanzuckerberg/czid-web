@@ -9,17 +9,6 @@ const Accordion = () => {
   useEffect(() => {
     var accordions = document.querySelectorAll(".accordionItem");
 
-    // accordions.forEach(accordion => {
-    //   accordion.addEventListener("click", function() {
-    //     /* Toggle between hiding and showing the active panel */
-    //     var panel = this.children[2];
-    //     if (panel.style.maxHeight) {
-    //       panel.style.maxHeight = null;
-    //     } else {
-    //       panel.style.maxHeight = panel.scrollHeight + "px";
-    //     }
-    //   });
-    // });
     accordions.forEach( accordion => {
       var panel = accordion.children[2];
       panel.style.maxHeight = null;
@@ -41,7 +30,7 @@ const Accordion = () => {
       <AccordionItem
         onClick={()=>{clickHandler(0);}}
         isOpen={openAccordion === 0 }
-        accordionTitle="How much data can I upload"
+        accordionTitle="How much data can I upload?"
         accordionText="There is no limit on the amount of data that you can upload to IDseq."
       />
       <AccordionItem

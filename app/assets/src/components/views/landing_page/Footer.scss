@@ -54,6 +54,10 @@
   }
 }
 
+.topNavMenuTop {
+  background: black;
+}
+
 .bottomNavContainer {
   display: flex;
   justify-content: space-between;
@@ -93,7 +97,15 @@
 .czLogoContainer {
   display: flex;
   align-items: center;
-  padding-bottom: 30px;
+  justify-content: flex-end;
+
+  p {
+    font-style: italic;
+
+    @media (max-width: 768px) {
+      align-self: flex-start;
+    }
+  }
 
   .separator {
     background: $white;
@@ -107,6 +119,18 @@
     border-bottom: 1px solid $gray-darkest;
     width: 100%;
     justify-content: center;
+    flex-direction: column;
+  }
+}
+
+.czLogoInnerContainer {
+  display: flex;
+  align-items: center;
+  margin-left: 32px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    margin-bottom: 22px;
   }
 }
 
