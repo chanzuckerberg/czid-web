@@ -1,15 +1,20 @@
 import React, { useState } from "react";
+import GlobalMobileImg1x from "~/images/landing_page/global-dataset-mobile-1x.png";
+import GlobalMobileImg2x from "~/images/landing_page/global-dataset-mobile-2x.png";
 import GlobalDatasetsImg1x from "~/images/landing_page/global-datasets-1x.png";
 import GlobalDatasetsImg2x from "~/images/landing_page/global-datasets-2x.png";
 import HeatmapImg1x from "~/images/landing_page/heatmap-1x.png";
 import HeatmapImg2x from "~/images/landing_page/heatmap-2x.png";
+import HeatmapMobileImg1x from "~/images/landing_page/heatmap-mobile-1x.png";
+import HeatmapMobileImg2x from "~/images/landing_page/heatmap-mobile-2x.png";
+import PipelineMobileImg1x from "~/images/landing_page/pipeline-mobile-1x.png";
+import PipelineMobileImg2x from "~/images/landing_page/pipeline-mobile-2x.png";
 import PipelineImg1x from "~/images/landing_page/pipeline-visualization-1x.png";
 import PipelineImg2x from "~/images/landing_page/pipeline-visualization-2x.png";
-
-
-
 import SarsImg1x from "~/images/landing_page/sars-cov-2-1x.png";
 import SarsImg2x from "~/images/landing_page/sars-cov-2-2x.png";
+import SarsMobileImg1x from "~/images/landing_page/sars-cov-2-mobile-1x.png";
+import SarsMobileImg2x from "~/images/landing_page/sars-cov-2-mobile-2x.png";
 
 import cs from "./TabbedGallery.scss";
 import "./transitions.css";
@@ -31,8 +36,8 @@ const TabbedGallery = () => {
         />
         <img 
           className={`${cs.mobileGalleryImage} ${activeTab === 0 ? cs.fadeUp : cs.hideImage} ${activeTab === 0 ? cs.mobileDropShadow : ""}`}
-          src={PipelineImg1x} 
-          srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
+          src={PipelineMobileImg1x}
+          srcSet={`${PipelineMobileImg1x}, ${PipelineMobileImg2x} 2x`}
           alt="" 
           />
         <TabbedGalleryTab
@@ -45,8 +50,8 @@ const TabbedGallery = () => {
         />
         <img 
           className={`${cs.mobileGalleryImage} ${activeTab === 1 ? cs.fadeUp : cs.hideImage} ${activeTab === 1 ? cs.mobileDropShadow : ""}`}
-          src={GlobalDatasetsImg1x} 
-          srcSet={`${GlobalDatasetsImg1x}, ${GlobalDatasetsImg2x} 2x`}
+          src={GlobalMobileImg1x} 
+          srcSet={`${GlobalMobileImg1x}, ${GlobalMobileImg2x} 2x`}
           alt="" 
           />
         <TabbedGalleryTab
@@ -59,8 +64,8 @@ const TabbedGallery = () => {
         />
         <img 
           className={`${cs.mobileGalleryImage} ${activeTab === 2 ? cs.fadeUp : cs.hideImage} ${activeTab === 2 ? cs.mobileDropShadow : ""}`}
-          src={HeatmapImg1x} 
-          srcSet={`${HeatmapImg1x}, ${HeatmapImg2x} 2x`}
+          src={HeatmapMobileImg1x} 
+          srcSet={`${HeatmapMobileImg1x}, ${HeatmapMobileImg2x} 2x`}
           alt="" 
           />
         <TabbedGalleryTab
@@ -73,8 +78,8 @@ const TabbedGallery = () => {
         />
         <img 
           className={`${cs.mobileGalleryImage} ${activeTab === 3 ? cs.fadeUp : cs.hideImage} ${activeTab === 3 ? cs.mobileDropShadow : ""}`} 
-          src={SarsImg1x} 
-          srcSet={`${SarsImg1x}, ${SarsImg2x} 2x`}
+          src={SarsMobileImg1x} 
+          srcSet={`${SarsMobileImg1x}, ${SarsMobileImg2x} 2x`}
           alt="" 
           />
       </div>

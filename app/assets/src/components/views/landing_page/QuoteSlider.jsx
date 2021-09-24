@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React, { useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -41,7 +40,3 @@ const QuoteSlider = () => {
 };
 
 export default QuoteSlider;
-
-QuoteSlider.propTypes = {
-  customStyles: PropTypes.object,
-};

@@ -6,7 +6,7 @@ import cs from "./QuoteSliderItem.scss";
 const QuoteSliderItem = props => {
   return (
     <div className={cs.carouselCell}>
-      <div className={cs.quoteContainer}>
+      <div className={cs.quoteContainer} style={props.customStyles}>
         <span className={cs.startQuotation}>
           <IconDoubleQuotes />
         </span>
@@ -24,6 +24,7 @@ QuoteSliderItem.propTypes = {
   quoteText: PropTypes.string,
   quoteAuthor: PropTypes.string,
   quoteCredentials: PropTypes.string,
+  customStyles: PropTypes.object,
 };
 
 export default QuoteSliderItem;
