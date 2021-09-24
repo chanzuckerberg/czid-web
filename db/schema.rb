@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_907_164_213) do
+ActiveRecord::Schema.define(version: 20_210_921_193_227) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -308,6 +308,34 @@ ActiveRecord::Schema.define(version: 20_210_907_164_213) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
+  end
+
+  create_table "pathogen_list_versions", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "pathogen_list_id"
+    t.string "version", null: false, comment: "Use semantic versioning numbers."
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["pathogen_list_id"], name: "index_pathogen_list_versions_on_pathogen_list_id"
+  end
+
+  create_table "pathogen_list_versions_pathogens", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "pathogen_id", null: false
+    t.bigint "pathogen_list_version_id", null: false
+    t.index ["pathogen_id"], name: "index_pathogen_pathogen_list_version_on_pathogen_id"
+    t.index ["pathogen_list_version_id"], name: "index_pathogen_pathogen_list_version_on_pathogen_list_version_id"
+  end
+
+  create_table "pathogen_lists", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "creator_id", comment: "The user_id that created the pathogen list. Null if the list is admin-managed."
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "pathogens", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.integer "tax_id", null: false, comment: "The taxon id of the pathogen."
+    t.string "source", null: false, comment: "A constant representing the pathogen source (ie. NIAID_2019)."
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "persisted_backgrounds", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
