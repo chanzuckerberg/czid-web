@@ -13,6 +13,12 @@
  * - This is in a JS function mostly so that JSDoc can parse it.<br>
  */
 function EventDictionary() {
+  /** The bulk download creation failed */
+  this.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED =
+    "BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED";
+  /** The bulk download creation was successful */
+  this.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL =
+    "BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL";
   /** The user closed the confirmation modal before sending their samples to Nextclade. */
   this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED =
     "NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED";

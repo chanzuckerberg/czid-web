@@ -14,7 +14,7 @@ import {
   validateSampleIds,
   validateWorkflowRunIds,
 } from "~/api/access_control";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
 import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
@@ -305,6 +305,14 @@ class BulkDownloadModal extends React.Component {
   createBulkDownload = async selectedDownload => {
     const { onGenerate, workflow } = this.props;
 
+    let objectIds;
+
+    if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
+      objectIds = { sampleIds: selectedDownload.validObjectIds };
+    } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+      objectIds = { workflowRunIds: selectedDownload.validObjectIds };
+    }
+
     this.setState({
       waitingForCreate: true,
     });
@@ -316,15 +324,25 @@ class BulkDownloadModal extends React.Component {
         createStatus: "error",
         createError: e.error || DEFAULT_CREATION_ERROR,
       });
-      logAnalyticsEvent("BulkDownloadModal_bulk-download-creation_failed", {
-        workflow,
-      });
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED,
+        {
+          workflow,
+          downloadType: selectedDownload.downloadType,
+          ...objectIds,
+        }
+      );
       return;
     }
 
-    logAnalyticsEvent("BulkDownloadModal_bulk-download-creation_successful", {
-      workflow,
-    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL,
+      {
+        workflow,
+        downloadType: selectedDownload.downloadType,
+        ...objectIds,
+      }
+    );
 
     onGenerate();
   };
