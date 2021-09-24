@@ -35,7 +35,7 @@ const TabbedGallery = () => {
           }}
         />
         <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 0 ? cs.fadeUp : cs.hideImage} ${activeTab === 0 ? cs.mobileDropShadow : ""}`}
+          className={`${cs.mobileGalleryImage} ${activeTab === 0 ? cs.fadeUp : cs.hideImage}`}
           src={PipelineMobileImg1x}
           srcSet={`${PipelineMobileImg1x}, ${PipelineMobileImg2x} 2x`}
           alt="" 
@@ -49,7 +49,7 @@ const TabbedGallery = () => {
           }}
         />
         <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 1 ? cs.fadeUp : cs.hideImage} ${activeTab === 1 ? cs.mobileDropShadow : ""}`}
+          className={`${cs.mobileGalleryImage} ${activeTab === 1 ? cs.fadeUp : cs.hideImage}`}
           src={GlobalMobileImg1x} 
           srcSet={`${GlobalMobileImg1x}, ${GlobalMobileImg2x} 2x`}
           alt="" 
@@ -63,7 +63,7 @@ const TabbedGallery = () => {
           }}
         />
         <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 2 ? cs.fadeUp : cs.hideImage} ${activeTab === 2 ? cs.mobileDropShadow : ""}`}
+          className={`${cs.mobileGalleryImage} ${activeTab === 2 ? cs.fadeUp : cs.hideImage}`}
           src={HeatmapMobileImg1x} 
           srcSet={`${HeatmapMobileImg1x}, ${HeatmapMobileImg2x} 2x`}
           alt="" 
@@ -77,7 +77,7 @@ const TabbedGallery = () => {
           }}
         />
         <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 3 ? cs.fadeUp : cs.hideImage} ${activeTab === 3 ? cs.mobileDropShadow : ""}`} 
+          className={`${cs.mobileGalleryImage} ${activeTab === 3 ? cs.fadeUp : cs.hideImage}`} 
           src={SarsMobileImg1x} 
           srcSet={`${SarsMobileImg1x}, ${SarsMobileImg2x} 2x`}
           alt="" 
