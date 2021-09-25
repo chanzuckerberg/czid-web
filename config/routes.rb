@@ -12,6 +12,10 @@
 # or /photos/create.json (use GET /photos.json and POST /photos.json).
 
 Rails.application.routes.draw do
+  if Rails.env.development?
+    mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql"
+  end
+  post "/graphql", to: "graphql#execute"
   resources :backgrounds do
     get :show_taxon_dist, on: :member
   end

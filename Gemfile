@@ -164,3 +164,7 @@ gem "ssrfs-up", "~> 0.0.19" # https://github.com/chanzuckerberg/SSRFs-Up
 
 # Background processing based on AWS SQS
 gem "shoryuken"
+
+# GraphQL-related
+gem 'graphiql-rails', group: :development
+gem "graphql"
