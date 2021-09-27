@@ -1,5 +1,5 @@
 import querystring from "querystring";
-import { isEmpty } from "lodash/fp";
+import { isEmpty, isNull } from "lodash/fp";
 import React from "react";
 import SvgSaver from "svgsaver";
 
@@ -8,11 +8,13 @@ import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadB
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
 import PropTypes from "~/components/utils/propTypes";
+import { showToast } from "~/components/utils/toast";
 import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
   logDownloadOption,
 } from "~/components/views/report/utils/download";
+import Notification from "~ui/notifications/Notification";
 import { TABS } from "./constants";
 
 const PipelineRunSampleViewControls = ({
@@ -47,9 +49,11 @@ const PipelineRunSampleViewControls = ({
   const handleDownload = option => {
     switch (option) {
       case "download_csv":
+        isNull(backgroundId) && renderNoBackgroundSelectedNotification();
         downloadCSV();
         break;
       case "download_csv_with_filters":
+        isNull(backgroundId) && renderNoBackgroundSelectedNotification();
         triggerFileDownload({
           downloadUrl: getDownloadReportTableWithAppliedFiltersLink(),
           fileName: `${sample.name}_report_with_applied_filters.csv`,
@@ -90,6 +94,22 @@ const PipelineRunSampleViewControls = ({
       },
     });
   };
+
+  const renderNoBackgroundSelectedNotification = () =>
+    showToast(
+      ({ closeToast }) => (
+        <Notification
+          type="info"
+          displayStyle="elevated"
+          onClose={closeToast}
+          closeWithIcon
+        >
+          The downloaded report will not contain the aggregate and z-score
+          columns because a background model was not selected.
+        </Notification>
+      ),
+      { autoClose: 12000 }
+    );
 
   // TODO (gdingle): should we pass in a reference with React somehow?
   const getTaxonTreeNode = () => {

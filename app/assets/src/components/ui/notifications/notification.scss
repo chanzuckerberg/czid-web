@@ -12,6 +12,7 @@
   align-items: center;
   font-family: $font-family-default;
   padding: 14px 14px 14px 9px;
+  cursor: default;
 
   &.flat {
     border: 0;
@@ -44,7 +45,6 @@
   }
 
   .removeIcon {
-    cursor: pointer;
     height: 14px;
     width: 14px;
     fill: $gray-dark;
@@ -52,12 +52,20 @@
     margin-top: $space-xxs;
     margin-left: auto;
     align-self: flex-start;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 
   .actions {
     @include font-caps-xxs;
     font-weight: 600;
     margin-top: 14px;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 
   &.error {
