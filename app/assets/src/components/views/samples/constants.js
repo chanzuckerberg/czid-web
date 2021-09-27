@@ -96,3 +96,5 @@ export const BACKGROUND_CORRECTION_METHODS = {
       "For samples with ERCCs, background correction done using estimates of relative microbe mass.",
   },
 };
+
+export const PROHIBITED_BACKGROUND_MODEL_NAMES = new Set(["none"]);

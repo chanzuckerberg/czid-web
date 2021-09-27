@@ -6,28 +6,48 @@
   @include font-body-s;
 
   .form {
-    .label {
-      @include font-header-s;
+    .sectionHeader {
+      display: flex;
+      align-items: center;
       margin-top: $space-xl;
+
+      .label {
+        @include font-header-s;
+        margin-right: $space-xxs;
+      }
 
       .optional {
         @include font-body-xxs;
 
         color: $gray-light;
-        margin-left: $space-m;
+      }
+    }
+
+    .infoIcon {
+      height: $space-l;
+      width: $space-l;
+      fill: $gray-dark;
+      vertical-align: text-top;
+
+      &.error {
+        fill: $error-dark;
       }
 
-      .infoIcon {
-        margin-top: $space-xxxs;
-        margin-left: $space-s;
-        height: 15px;
-        width: 15px;
-        fill: $gray-dark;
-        vertical-align: text-top;
+      &:hover {
+        fill: $primary;
+      }
+    }
 
-        &:hover {
-          fill: $primary;
-        }
+    .errorMessageContainer {
+      display: flex;
+      align-items: center;
+      margin-top: $space-xxs;
+
+      .errorMessage {
+        @include font-body-xxxs;
+
+        margin-left: $space-s;
+        color: $error-dark;
       }
     }
 

@@ -1,3 +1,5 @@
+import cx from "classnames";
+import { isNull, toLower, trim } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -6,7 +8,11 @@ import {
   getMassNormalizedBackgroundAvailability,
 } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
-import { withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  logAnalyticsEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { IconInfoSmall } from "~/components/ui/icons";
@@ -21,7 +27,10 @@ import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 
 import cs from "./collection_modal.scss";
-import { BACKGROUND_CORRECTION_METHODS } from "./constants";
+import {
+  BACKGROUND_CORRECTION_METHODS,
+  PROHIBITED_BACKGROUND_MODEL_NAMES,
+} from "./constants";
 
 /**
  * NOTE: "Collections" were an unrealized generalization of the background concept.
@@ -35,6 +44,7 @@ class CollectionModal extends React.Component {
       backgroundCreationResponse: null,
       backgroundDescription: null,
       backgroundName: "",
+      invalidBackgroundName: null,
       invalidSampleNames: [],
       modalOpen: false,
     };
@@ -98,8 +108,8 @@ class CollectionModal extends React.Component {
       <div>
         <span className={cs.highlight}>
           {invalidSampleNames.length} sample
-          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in the
-          background model
+          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in
+          the background model
         </span>
         , because they either failed or are still processing:
       </div>
@@ -124,7 +134,15 @@ class CollectionModal extends React.Component {
   }
 
   handleNameChange = backgroundName => {
-    this.setState({ backgroundName });
+    const { invalidBackgroundName } = this.state;
+
+    this.setState({
+      backgroundName,
+      invalidBackgroundName:
+        invalidBackgroundName && backgroundName !== invalidBackgroundName
+          ? null
+          : invalidBackgroundName,
+    });
   };
 
   handleDescriptionChange = backgroundDescription => {
@@ -138,6 +156,19 @@ class CollectionModal extends React.Component {
   handleCreateBackground = async () => {
     const { selectedSampleIds } = this.props;
     const { backgroundName, backgroundDescription, appliedMethod } = this.state;
+
+    const normalizedBackgroundName = toLower(trim(backgroundName));
+    if (PROHIBITED_BACKGROUND_MODEL_NAMES.has(normalizedBackgroundName)) {
+      this.setState({ invalidBackgroundName: normalizedBackgroundName }, () => {
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED,
+          {
+            backgroundName,
+          }
+        );
+      });
+      return;
+    }
 
     let backgroundCreationResponse = null;
     try {
@@ -183,6 +214,7 @@ class CollectionModal extends React.Component {
     const {
       appliedMethod,
       enableMassNormalizedBackgrounds,
+      invalidBackgroundName,
       invalidSampleNames,
     } = this.state;
 
@@ -198,14 +230,25 @@ class CollectionModal extends React.Component {
 
     return (
       <div className={cs.form}>
-        <div className={cs.label}>Name</div>
+        <div className={cs.sectionHeader}>
+          <div className={cs.label}>Name</div>
+        </div>
         <Input
           fluid
           onChange={this.handleNameChange}
           value={this.state.backgroundName}
         />
-        <div className={cs.label}>
-          Description
+        {!isNull(invalidBackgroundName) && (
+          <div className={cs.errorMessageContainer}>
+            <IconInfoSmall className={cx(cs.infoIcon, cs.error)} />
+            <div className={cs.errorMessage}>
+              Background model cannot be named &quot;{invalidBackgroundName}
+              &quot;, please enter a different name.
+            </div>
+          </div>
+        )}
+        <div className={cs.sectionHeader}>
+          <div className={cs.label}>Description</div>
           <span className={cs.optional}>Optional</span>
         </div>
         <Textarea
@@ -213,30 +256,28 @@ class CollectionModal extends React.Component {
           rows={numDescriptionRows}
           onChange={this.handleDescriptionChange}
         />
-        <div>
-          <div className={cs.label}>
-            Applied Correction Method
-            <ColumnHeaderTooltip
-              trigger={
-                <span>
-                  <IconInfoSmall className={cs.infoIcon} />
-                </span>
-              }
-              content="Applied Correction Method is the method used when comparing a chosen set of samples against a background model."
-              link="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054#h_01ECWXA46KAHRF7N61D7SE1M1F"
-            />
-          </div>
-          <SubtextDropdown
-            fluid
-            className={cs.dropdown}
-            options={Object.values(dropdownOptions)}
-            initialSelectedValue={appliedMethod}
-            onChange={withAnalytics(
-              this.handleMethodChange,
-              "CollectionModal_applied-correction-method_changed"
-            )}
+        <div className={cs.sectionHeader}>
+          <div className={cs.label}>Applied Correction Method</div>
+          <ColumnHeaderTooltip
+            trigger={
+              <span>
+                <IconInfoSmall className={cx(cs.infoIcon, cs.extraSpacing)} />
+              </span>
+            }
+            content="Applied Correction Method is the method used when comparing a chosen set of samples against a background model."
+            link="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054#h_01ECWXA46KAHRF7N61D7SE1M1F"
           />
         </div>
+        <SubtextDropdown
+          fluid
+          className={cs.dropdown}
+          options={Object.values(dropdownOptions)}
+          initialSelectedValue={appliedMethod}
+          onChange={withAnalytics(
+            this.handleMethodChange,
+            "CollectionModal_applied-correction-method_changed"
+          )}
+        />
         {this.renderSampleList()}
         {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
         <div className={cs.buttons}>

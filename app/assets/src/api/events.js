@@ -42,6 +42,10 @@ function EventDictionary() {
   this.NEXTCLADE_MODAL_ERROR_MODAL_HELP_LINK_CLICKED =
     "NEXTCLADE_MODAL_ERROR_MODAL_HELP_LINK_CLICKED";
 
+  /** The user entered a prohibited background model name and attempted to create the background model. */
+  this.COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED =
+    "COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED";
+
   /** The user changed their selected accession in the Consensus Genome Creation modal. */
   this.CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED =
     "CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED";
