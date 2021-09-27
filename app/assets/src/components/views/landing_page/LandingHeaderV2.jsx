@@ -13,7 +13,7 @@ const LandingHeaderV2 = () => {
 
   return (
     <div className={cs.header}>
-      <a href="/">
+      <a aria-label="Go to the IDseq homepage" href="/">
         <LogoReversed className={cs.headerLogo} />
       </a>
       <nav className={cs.nav}>

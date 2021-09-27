@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <div className={cs.footer}>
       <div className={cs.topNavContainer}>
-        <a href="/">
+        <a aria-label="Go to the IDseq homepage" href="/">
           <LogoReversed />
         </a>
         <div className={cs.topNavMenu}>
@@ -32,13 +32,13 @@ const Footer = () => {
           <p>In partnership with:</p>
           <div className={cs.czLogoInnerContainer}>
             <div>
-              <a className={cs.cziLogo} href="https://chanzuckerberg.com/">
+              <a aria-label="View the Chan Zuckerberg Initiative website (opens in new window)" target="_blank" rel="noreferrer" className={cs.cziLogo} href="https://chanzuckerberg.com/">
                 <IconCziLogo />
               </a>
             </div>
             <div className={cs.separator}></div>
             <div>
-              <a className={cs.biohubLogo} href="https://www.czbiohub.org/">
+              <a aria-label="View the Chan Zuckerberg Biohub website (opens in new window)" target="_blank" rel="noreferrer" className={cs.biohubLogo} href="https://www.czbiohub.org/">
                 <IconBiohubLogo />
               </a>
             </div>
