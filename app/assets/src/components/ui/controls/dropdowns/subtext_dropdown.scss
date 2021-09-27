@@ -59,14 +59,26 @@
   }
 }
 
-.header {
-  @include font-caps-xxxxs;
-  color: $gray-dark;
-  margin-top: $space-m;
-  padding: 0 $space-l;
+// override semantic ui Dropdown.Header and Dropdown.Divider styling
+:global(.ui.dropdown .menu) {
+  :global(.header) {
+    @include font-caps-xxxxs;
+    color: $gray-dark;
+
+    margin: $space-m 0 0;
+  }
+
+  :global(.divider) {
+    border-top: $border-gray-lightest;
+    margin: 0 $space-l;
+  }
 }
 
-.divider {
-  border-top: $border-gray-lightest;
-  margin: 0 $space-l;
+.emptySection {
+  margin: $space-l 0 $space-l $space-l;
+
+  .message {
+    @include font-body-xxs;
+    color: $gray-dark;
+  }
 }

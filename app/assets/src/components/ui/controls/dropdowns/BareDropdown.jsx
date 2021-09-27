@@ -12,7 +12,19 @@
 // redundant with props.items.customNode and props.children.
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
-import { identity, omit, zip, filter, map, nth, sortBy } from "lodash/fp";
+import {
+  compact,
+  get,
+  identity,
+  isEmpty,
+  omit,
+  zip,
+  filter,
+  map,
+  nth,
+  sortBy,
+} from "lodash/fp";
+import { nanoid } from "nanoid";
 import PropTypes from "prop-types";
 import React from "react";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
@@ -83,16 +95,27 @@ class BareDropdown extends React.Component {
     option.toLowerCase().startsWith(prefix.toLowerCase()) ? 0 : 1;
 
   getFilteredItems = filterString => {
-    if (!this.props.items && !this.props.options) return;
+    const { items, itemSearchStrings, options, sections } = this.props;
+    if (!items && !options) return;
 
     if (filterString === "") {
       // If options are provided, render them as dropdown items the default way.
-      return this.props.items || this.renderItemsDefault(this.props.options);
+      return items || this.renderItemsDefault(options);
     }
 
-    if (this.props.items) {
+    if (items) {
+      // Exclude Headers, Dividers, and unsearchable items from being zipped up with the itemSearchStrings
+      let itemsToZip = !isEmpty(sections)
+        ? items.filter(
+            item =>
+              item.type !== BareDropdown.Header &&
+              item.type !== BareDropdown.Divider &&
+              get("props.flag", item) !== "unsearchable"
+          )
+        : items;
+
       // Use the separate itemSearchStrings array to filter the items.
-      const pairs = zip(this.props.itemSearchStrings, this.props.items);
+      const pairs = zip(itemSearchStrings, itemsToZip);
       const filteredPairs = filter(
         pair => this.matchesFilter(pair[0], filterString),
         pairs
@@ -101,9 +124,14 @@ class BareDropdown extends React.Component {
         pair => this.prioritizePrefixMatches(pair[0], filterString),
         filteredPairs
       );
-      return map(nth(1), sortedPairs);
+
+      return !isEmpty(sections)
+        ? // If the items are in sections, categorize the search results back into their sections.
+          // Otherwise just return the items (uncategorized).
+          this.categorizeSearchResults(sortedPairs)
+        : map(nth(1), sortedPairs);
     } else {
-      const filteredOptions = this.props.options.filter(option =>
+      const filteredOptions = options.filter(option =>
         this.matchesFilter(option.text, filterString)
       );
       const sortedOptions = sortBy(
@@ -113,6 +141,45 @@ class BareDropdown extends React.Component {
       return this.renderItemsDefault(sortedOptions);
     }
   };
+
+  categorizeSearchResults = uncategorizedItemPairs => {
+    const { sections } = this.props;
+    const categorizedItems = [];
+
+    Object.entries(sections).forEach(([sectionName, itemStringsInSection]) => {
+      const sectionItems = compact(
+        uncategorizedItemPairs.map(
+          ([itemSearchResultString, item]) =>
+            itemStringsInSection.has(itemSearchResultString) && item
+        )
+      );
+
+      if (isEmpty(sectionItems)) {
+        sectionItems.push(this.renderNoResultsFoundInSection());
+      }
+
+      const header = (
+        <BareDropdown.Header
+          content={sectionName}
+          key={`${sectionName}_header`}
+        />
+      );
+      const divider = <BareDropdown.Divider key={`${sectionName}_divider`} />;
+      categorizedItems.push(header, ...sectionItems, divider);
+    });
+
+    // Remove the last divider
+    categorizedItems.pop();
+    return categorizedItems;
+  };
+
+  renderNoResultsFoundInSection = () => (
+    <BareDropdown.Item className={cs.emptySection} key={nanoid()}>
+      <div className={cs.message}>
+        There are no results matching your search.
+      </div>
+    </BareDropdown.Item>
+  );
 
   handleMenuClick = e => {
     const { closeOnClick, search } = this.props;
@@ -318,6 +385,10 @@ BareDropdown.propTypes = forbidExtraProps({
   // If search is true, and you provide pre-rendered "items" instead of "options",
   // you must also provide a list of strings to search by.
   itemSearchStrings: PropTypes.arrayOf(PropTypes.string),
+  // Custom prop for rendering items within sections.
+  // It is a mapping between the section and the itemSearchStrings in that section.
+  // Mainly used to put searched/filtered items back into their respective sections.
+  sections: PropTypes.object,
   // If search is true, but you want to customize behavior of search function, e.g. async search,
   // you should provide your own handler
   onFilterChange: PropTypes.func,

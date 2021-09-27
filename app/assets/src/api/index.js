@@ -353,18 +353,20 @@ const createBackground = ({ description, name, sampleIds, massNormalized }) =>
     mass_normalized: massNormalized || null,
   });
 
-const getBackgrounds = async ({
+const getBackgrounds = ({
   snapshotShareId,
   ownedOrPublicBackgroundsOnly,
-} = {}) => {
-  const response = await get(
+  categorizeBackgrounds,
+} = {}) =>
+  get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") + "/backgrounds.json",
     {
-      params: { ownedOrPublicBackgroundsOnly },
+      params: {
+        ownedOrPublicBackgroundsOnly,
+        ...(!snapshotShareId && { categorizeBackgrounds }),
+      },
     }
   );
-  return response.backgrounds;
-};
 
 const getCoverageVizSummary = ({ sampleId, snapshotShareId } = {}) =>
   get(

@@ -191,7 +191,7 @@ class BulkDownloadModal extends React.Component {
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
   async fetchBackgrounds() {
-    const backgrounds = await getBackgrounds();
+    const { backgrounds } = await getBackgrounds();
 
     const backgroundOptions = backgrounds.map(background => ({
       text: background.name,

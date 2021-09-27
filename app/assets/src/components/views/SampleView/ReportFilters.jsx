@@ -109,6 +109,8 @@ class ReportFilters extends React.Component {
     const {
       backgrounds,
       enableMassNormalizedBackgrounds,
+      ownedBackgrounds,
+      otherBackgrounds,
       sampleId,
       selected,
       selectedInvalidBackground,
@@ -120,7 +122,7 @@ class ReportFilters extends React.Component {
     const sharedFilterProps = { disabled: shouldDisableFilters };
 
     return (
-      <React.Fragment>
+      <>
         <div className={cs.filterList}>
           {/* TODO(ihan): expose the Taxon search box */}
           {!snapshotShareId && (
@@ -164,12 +166,14 @@ class ReportFilters extends React.Component {
           {/* from server */}
           <div className={cs.filterListElement}>
             <BackgroundModelFilter
+              allBackgrounds={backgrounds}
               onClick={() =>
                 logAnalyticsEvent(
                   ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED
                 )
               }
-              allBackgrounds={backgrounds}
+              ownedBackgrounds={ownedBackgrounds}
+              otherBackgrounds={otherBackgrounds}
               erred={selectedInvalidBackground}
               value={selected.background}
               onChange={value =>
@@ -273,7 +277,7 @@ class ReportFilters extends React.Component {
           )}
           {this.renderCategoryFilterTags()}
         </div>
-      </React.Fragment>
+      </>
     );
   };
 }
@@ -282,6 +286,8 @@ ReportFilters.propTypes = {
   backgrounds: PropTypes.array,
   onFilterChanged: PropTypes.func,
   onFilterRemoved: PropTypes.func,
+  otherBackgrounds: PropTypes.array,
+  ownedBackgrounds: PropTypes.array,
   sampleId: PropTypes.number,
   selected: PropTypes.object,
   view: PropTypes.oneOf(["tree", "table"]),

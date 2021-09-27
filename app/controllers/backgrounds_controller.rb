@@ -1,5 +1,6 @@
 class BackgroundsController < ApplicationController
   include BackgroundsHelper
+
   before_action :login_required
   before_action :admin_required, except: [:create, :show_taxon_dist, :index]
   before_action :set_background, only: [:show, :edit, :update, :destroy, :show_taxon_dist]
@@ -7,11 +8,22 @@ class BackgroundsController < ApplicationController
   # GET /backgrounds
   # GET /backgrounds.json
   def index
-    @backgrounds = params[:ownedOrPublicBackgroundsOnly] ? current_power.owned_and_public_backgrounds : current_power.backgrounds
+    permitted_params = index_params
+    json_response = {}.tap do |h|
+      if permitted_params[:categorizeBackgrounds]
+        # Categorize backgrounds into background the user owns and all other viewable backgrounds that do not belong to the user.
+        h[:other_backgrounds] = current_power.backgrounds.where.not(user: current_user).or(current_power.backgrounds.created_by_idseq).order(created_at: :desc)
+        h[:owned_backgrounds] = current_power.owned_backgrounds.order(created_at: :desc)
+      else
+        @backgrounds = permitted_params[:ownedOrPublicBackgroundsOnly] ? current_power.owned_backgrounds.or(current_power.public_backgrounds) : current_power.backgrounds
+        @backgrounds = @backgrounds.order(created_at: :desc)
+        h[:backgrounds] = @backgrounds
+      end
+    end
 
     respond_to do |format|
       format.html { render :index }
-      format.json { render json: { backgrounds: @backgrounds } }
+      format.json { render json: json_response }
     end
   end
 
@@ -121,6 +133,10 @@ class BackgroundsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_background
     @background = Background.find(params[:id])
+  end
+
+  def index_params
+    params.permit(:ownedOrPublicBackgroundsOnly, :categorizeBackgrounds)
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

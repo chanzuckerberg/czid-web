@@ -26,6 +26,8 @@ class Background < ApplicationRecord
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
 
+  scope :created_by_idseq, -> { where(user: nil, public_access: 1) }
+
   def mass_normalized_has_ercc
     if mass_normalized &&
        PipelineRun.where('id in (?) AND (total_ercc_reads = 0 OR total_ercc_reads IS NULL)', pipeline_run_ids).count > 0

@@ -9,8 +9,12 @@ class Power
     Background.viewable(@user)
   end
 
-  power :owned_and_public_backgrounds do
-    Background.where(user_id: @user.id).or(Background.where(public_access: 1))
+  power :owned_backgrounds do
+    Background.where(user: @user)
+  end
+
+  power :public_backgrounds do
+    Background.where(public_access: 1)
   end
 
   power :projects do

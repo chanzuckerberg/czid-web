@@ -72,7 +72,7 @@ class ViewOnlyLinkForm extends React.Component {
   };
 
   fetchBackgrounds = async () => {
-    const backgrounds = await getBackgrounds({
+    const { backgrounds } = await getBackgrounds({
       ownedOrPublicBackgroundsOnly: true,
     });
     const backgroundOptions = backgrounds.map(background => ({

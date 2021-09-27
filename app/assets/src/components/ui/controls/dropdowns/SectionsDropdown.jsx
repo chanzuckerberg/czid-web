@@ -1,4 +1,6 @@
 import cx from "classnames";
+import { isEmpty, isNil } from "lodash/fp";
+import { nanoid } from "nanoid";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -12,8 +14,11 @@ const SectionsDropdown = ({
   className,
   menuClassName,
   categories,
+  itemIdToName,
+  nullLabel,
   onChange,
   selectedValue,
+  search,
   ...props
 }) => {
   const renderMenuItem = option => {
@@ -56,37 +61,74 @@ const SectionsDropdown = ({
     }
   };
 
-  const renderDropdownItems = () => {
-    let dropdownItems = [];
+  const prepareSectionItems = () => {
+    const items = [];
+    const itemSearchStrings = [];
+    const sections = {};
 
     Object.entries(categories).forEach(([category, categoryDetails]) => {
-      dropdownItems.push(
-        <div className={cs.header} key={`${category}_header`}>
-          {categoryDetails.displayName}
-        </div>
-      );
+      const categoryName = categoryDetails.displayName;
+      // Creates a mapping between the section and the itemsSearchStrings in that section.
+      sections[categoryName] = new Set([]);
 
-      categoryDetails.options.map(option =>
-        dropdownItems.push(renderMenuItem(option))
-      );
+      const sectionItems = categoryDetails.options.map(option => {
+        if (search) {
+          sections[categoryName].add(option.text);
+          itemSearchStrings.push(option.text);
+        }
+        return renderMenuItem(option);
+      });
 
-      dropdownItems.push(
-        <div className={cs.divider} key={`${category}_divider`} />
+      if (isEmpty(sectionItems)) {
+        sectionItems.push(
+          renderEmptySectionMessage(categoryDetails.emptySectionMessage)
+        );
+      }
+
+      const header = (
+        <BareDropdown.Header
+          content={categoryName}
+          key={`${category}_header`}
+        />
       );
+      const divider = <BareDropdown.Divider key={`${category}_divider`} />;
+      items.push(header, ...sectionItems, divider);
     });
 
     // Remove the last divider.
-    dropdownItems.pop();
+    items.pop();
 
-    return dropdownItems;
+    return { items, itemSearchStrings, sections };
   };
 
+  const renderEmptySectionMessage = message => (
+    <BareDropdown.Item
+      className={cs.emptySection}
+      flag="unsearchable"
+      key={nanoid()}
+    >
+      <div className={cs.message}>{message}</div>
+    </BareDropdown.Item>
+  );
+
   const renderDropdownTrigger = () => {
+    let { label, ...restProps } = props;
+
+    let text;
+    if (!isNil(selectedValue)) {
+      const value = selectedValue.toString();
+      // If there is a mapping from the item's id to its name, lookup the name - otherwise use the value itself.
+      text = !isEmpty(itemIdToName) ? itemIdToName[value] : value;
+    } else if (nullLabel) {
+      text = nullLabel;
+    }
+
     return (
       <DropdownTrigger
-        {...props}
+        {...restProps}
+        label={label + ":"}
         className={cs.dropdownTrigger}
-        value={selectedValue}
+        value={text}
       />
     );
   };
@@ -97,8 +139,9 @@ const SectionsDropdown = ({
       arrowInsideTrigger={true}
       className={className}
       trigger={renderDropdownTrigger()}
-      items={renderDropdownItems()}
       menuClassName={menuClassName}
+      search={search}
+      {...prepareSectionItems()}
     />
   );
 };
@@ -108,6 +151,7 @@ SectionsDropdown.propTypes = {
   menuClassName: PropTypes.string,
   categories: PropTypes.shape({
     displayName: PropTypes.string,
+    emptyMessage: PropTypes.string,
     options: PropTypes.arrayOf(
       PropTypes.shape({
         default: PropTypes.bool,
@@ -119,8 +163,15 @@ SectionsDropdown.propTypes = {
       })
     ),
   }).isRequired,
+  // Used to map the item to the item's name whenever the value of the item is not text.
+  // e.g. BackgroundModel items' values are their numerical IDs however we want to display the names of the backgrounds,
+  // so we do a lookup in itemIdToName to find the name of the background to display in the DropdownTrigger.
+  itemIdToName: PropTypes.object,
+  label: PropTypes.string,
+  nullLabel: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   selectedValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  search: PropTypes.bool,
 };
 
 export default SectionsDropdown;

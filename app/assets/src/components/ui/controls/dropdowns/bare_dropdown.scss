@@ -84,6 +84,15 @@
     }
   }
 
+  .emptySection {
+    margin: $space-l;
+
+    .message {
+      @include font-body-xxs;
+      color: $gray-dark;
+    }
+  }
+
   .item {
     cursor: pointer;
 

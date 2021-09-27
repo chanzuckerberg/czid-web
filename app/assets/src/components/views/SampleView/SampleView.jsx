@@ -147,6 +147,8 @@ class SampleView extends React.Component {
         filteredReportData: [],
         loadingReport: false,
         loadingWorkflowRunResults: false,
+        ownedBackgrounds: null,
+        otherBackgrounds: null,
         pipelineRun: null,
         pipelineVersion: null,
         previousSelectedOptions: this.getDefaultSelectedOptions(),
@@ -570,12 +572,24 @@ class SampleView extends React.Component {
   };
 
   fetchBackgrounds = async () => {
+    const { allowedFeatures = [] } = this.context || {};
     const { snapshotShareId } = this.props;
     this.setState({ loadingReport: true });
-    const backgrounds = await getBackgrounds({ snapshotShareId });
+    const {
+      owned_backgrounds: ownedBackgrounds,
+      other_backgrounds: otherBackgrounds,
+    } = await getBackgrounds({
+      snapshotShareId,
+      categorizeBackgrounds:
+        allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) &&
+        !snapshotShareId,
+    });
+
     this.setState(
       {
-        backgrounds,
+        backgrounds: [...ownedBackgrounds, ...otherBackgrounds],
+        ownedBackgrounds,
+        otherBackgrounds,
       },
       () => {
         this.fetchSample();
@@ -1975,6 +1989,8 @@ class SampleView extends React.Component {
       enableMassNormalizedBackgrounds,
       filteredReportData,
       lineageData,
+      ownedBackgrounds,
+      otherBackgrounds,
       pipelineRun,
       project,
       reportMetadata,
@@ -1994,6 +2010,8 @@ class SampleView extends React.Component {
           <div className={cs.reportFilters}>
             <ReportFilters
               backgrounds={backgrounds}
+              ownedBackgrounds={ownedBackgrounds}
+              otherBackgrounds={otherBackgrounds}
               shouldDisableFilters={displayMergedNtNrValue}
               selectedInvalidBackground={selectedInvalidBackground}
               onFilterChanged={this.handleOptionChanged}
