@@ -237,6 +237,7 @@ class CollectionModal extends React.Component {
           fluid
           onChange={this.handleNameChange}
           value={this.state.backgroundName}
+          className={!isNull(invalidBackgroundName) && "error"}
         />
         {!isNull(invalidBackgroundName) && (
           <div className={cs.errorMessageContainer}>

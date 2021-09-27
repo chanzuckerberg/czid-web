@@ -172,6 +172,7 @@ class ReportFilters extends React.Component {
                   ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED
                 )
               }
+              categorizeBackgrounds
               ownedBackgrounds={ownedBackgrounds}
               otherBackgrounds={otherBackgrounds}
               erred={selectedInvalidBackground}

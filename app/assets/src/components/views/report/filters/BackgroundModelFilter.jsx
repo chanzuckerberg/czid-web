@@ -15,6 +15,7 @@ const BackgroundModelFilter = React.memo(
     otherBackgrounds,
     onChange,
     value,
+    categorizeBackgrounds = false,
     ...props
   }) => {
     const userContext = useContext(UserContext);
@@ -47,7 +48,10 @@ const BackgroundModelFilter = React.memo(
       disabled = true;
     }
 
-    if (allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE)) {
+    if (
+      allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) &&
+      categorizeBackgrounds
+    ) {
       const backgroundSections = {
         MY_BACKGROUNDS: {
           displayName: "My Backgrounds",
@@ -95,6 +99,7 @@ const BackgroundModelFilter = React.memo(
           onChange={onChange}
           onClick={onClick}
           nullLabel="None"
+          search
         />
       );
     }
@@ -108,6 +113,7 @@ BackgroundModelFilter.defaultProps = {
 
 BackgroundModelFilter.propTypes = {
   allBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
+  categorizeBackgrounds: PropTypes.bool,
   otherBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
   ownedBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
   disabled: PropTypes.bool,
