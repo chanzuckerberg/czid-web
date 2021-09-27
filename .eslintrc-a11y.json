@@ -5,6 +5,7 @@
     "camelcase": "off",
     "no-prototype-builtins": "off",
     "react/jsx-key": "off",
+    "react/no-danger": "off",
     "react/no-unescaped-entities": "off",
     "react/prop-types": "off",
     "standard/computed-property-even-spacing": "off"

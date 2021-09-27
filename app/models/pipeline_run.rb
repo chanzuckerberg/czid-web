@@ -1033,14 +1033,7 @@ class PipelineRun < ApplicationRecord
         # Precache reports for all backgrounds.
         if ready_for_cache?
           Resque.enqueue(PrecacheReportInfo, id)
-        else
-          MetricUtil.put_metric_now("samples.cache.not_precached", 1, ["pipeline_run_id:#{id}"])
         end
-
-        # Send to Datadog and Segment
-        tags = ["sample_id:#{sample.id}"]
-        # DEPRECATED. Use log_analytics_event.
-        MetricUtil.put_metric_now("samples.succeeded.run_time", run_time, tags, "gauge")
         event = EventDictionary::PIPELINE_RUN_SUCCEEDED
       else
         update(
@@ -1205,10 +1198,6 @@ class PipelineRun < ApplicationRecord
 
   def check_and_log_long_run
     # Check for long-running pipeline runs and log/alert if needed:
-    tags = ["sample_id:#{sample.id}"]
-    # DEPRECATED. Use log_analytics_event.
-    MetricUtil.put_metric_now("samples.running.run_time", run_time, tags, "gauge")
-
     if alert_sent.zero?
       # NOTE (2020-12-16): Based on the last 3000 pipeline runs, only 1 took longer than 18 hours.
       threshold = 18.hours
@@ -1979,8 +1968,6 @@ class PipelineRun < ApplicationRecord
   def report_failed_pipeline_run_stage(prs, known_user_error, automatic_restart = false)
     log_message = pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
     Rails.logger.error(log_message)
-    tags = ["sample_id:#{sample.id}", "automatic_restart:#{automatic_restart}", "known_user_error:#{known_user_error ? true : false}"]
-    MetricUtil.put_metric_now("samples.failed", 1, tags)
   end
 
   def supports_assembly?

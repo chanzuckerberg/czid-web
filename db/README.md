@@ -36,3 +36,12 @@
 - Focus on this line and alternative ways to write the migration operations that may work around the issue. It may help to place any `update` calls in a separate migration so that it is in a different database transaction.
 - There may sometimes be hidden issues in the migration history (e.g. your column was deleted) or in the callbacks/validations on setting some values.
 - If you get errors about columns/indexes involved in your migration not existing, this may mean that your migration ran but was not recorded as having run (e.g. the column was already renamed so the old name does not exist). If this is just a local issue, you could comment out the lines and then run `migrate` anyway so that the migration is marked as recorded but it skips that operation.
+- If one part of a migration fails, the lines above it in the migration will likely still have been applied. You may need to manually drop tables or indexes to try again. Example:
+```
+# Open mysql console:
+aws-oidc exec -- docker-compose run web "mysql -h db -u root"
+
+show databases;
+use idseq_development;   # or idseq_test
+drop table table_to_drop;
+```

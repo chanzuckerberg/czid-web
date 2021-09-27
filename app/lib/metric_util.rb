@@ -3,7 +3,6 @@ require "net/http"
 
 # MetricUtil is currently used for:
 #  * tracking user initiated actions with Segment
-#  * posting metrics to Datadog's metrics endpoints (DEPRECATED)
 # See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 class MetricUtil
   SEGMENT_ANALYTICS = if ENV["SEGMENT_RUBY_ID"]
@@ -14,11 +13,6 @@ class MetricUtil
                           end
                         )
                       end
-
-  # Use for system monitoring (e.g. performance) metrics. Sends to DataDog.
-  def self.put_metric_now(name, value, tags = [], type = "count")
-    put_metric(name, value, Time.now.to_i, tags, type)
-  end
 
   # This should never block on error.
 
@@ -94,35 +88,6 @@ class MetricUtil
         userAgent: request.user_agent,
         ip: request.remote_ip(),
       }
-    end
-
-    def put_metric(name, value, time, tags = [], type = "count")
-      # Time = POSIX time with just seconds
-      points = [[time, value]]
-      put_metric_point_series(name, points, tags, type)
-    end
-
-    def put_metric_point_series(name, points, tags = [], type = "count")
-      # Tags look like: ["environment:test", "type:bulk"]
-      name = "idseq.web.#{Rails.env}.#{name}"
-      data = JSON.dump("series" => [{
-                         "metric" => name,
-                         "points" => points,
-                         "type" => type,
-                         "tags" => tags,
-                       }])
-      post_to_datadog(data)
-    end
-
-    def post_to_datadog(data)
-      if ENV["DATADOG_API_KEY"]
-        endpoint = "https://api.datadoghq.com/api/v1/series"
-        api_key = ENV["DATADOG_API_KEY"]
-        uri = URI.parse("#{endpoint}?api_key=#{api_key}")
-        https_post(uri, data)
-      else
-        Rails.logger.warn("Cannot send metrics data. No Datadog API key set.")
-      end
     end
 
     def https_post(uri, data)
