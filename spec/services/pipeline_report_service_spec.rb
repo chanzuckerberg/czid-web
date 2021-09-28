@@ -655,17 +655,17 @@ RSpec.describe PipelineReportService, type: :service do
       @report = PipelineReportService.call(@pipeline_run, nil)
     end
 
-    it "loads successfully and returns results" do
+    it "loads successfully and returns results with nil z_score and agg_score" do
       species_result = {
         "genus_tax_id" => 1301,
         "name" => "Streptococcus pneumoniae",
         "nr" => {
           "count" => 2.0,
           "rpm" => 1782.5311942959001,
-          "z_score" => 100,
+          "z_score" => nil,
           "e_value" => -9.3,
         },
-        "agg_score" => 17_825_311.942959003,
+        "agg_score" => nil,
       }
 
       expect(JSON.parse(@report)["counts"]["1"]["1313"]).to include_json(species_result)

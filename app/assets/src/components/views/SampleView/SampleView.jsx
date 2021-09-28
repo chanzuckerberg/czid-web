@@ -681,13 +681,15 @@ class SampleView extends React.Component {
 
   adjustMetricPrecision = species => {
     Object.entries(species).forEach(([key, metricValue]) => {
-      if (key in METRIC_DECIMAL_PLACES) {
+      if (isNil(metricValue)) {
+        // Do nothing
+      } else if (key in METRIC_DECIMAL_PLACES) {
         species[key] = parseFloat(
           metricValue.toFixed(METRIC_DECIMAL_PLACES[key])
         );
       } else if (["nt", "nr", "merged_nt_nr"].includes(key)) {
         Object.entries(species[key]).forEach(([metricKey, metricValue]) => {
-          if (metricKey in METRIC_DECIMAL_PLACES) {
+          if (metricKey in METRIC_DECIMAL_PLACES && metricValue) {
             species[key][metricKey] = parseFloat(
               metricValue.toFixed(METRIC_DECIMAL_PLACES[metricKey])
             );
