@@ -186,9 +186,13 @@ function EventDictionary() {
   this.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED =
     "PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED";
 
-  /** The user clicked the help button on a phylo tree page.  */
+  /** The user clicked the help button on a phylo tree page. */
   this.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED =
     "PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED";
+
+  /** The user clicked the help button on a phylo tree page while the heatmap was displayed. */
+  this.PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_BUTTON_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_BUTTON_CLICKED";
 
   /** The user clicked the tools attribution link to view the SKA repo on a phylo tree page. */
   this.PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED =

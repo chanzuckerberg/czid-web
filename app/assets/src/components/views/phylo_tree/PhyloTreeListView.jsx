@@ -22,6 +22,11 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
+  showAppcue,
+  PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
+  PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_SIDEBAR,
+} from "~/components/utils/appcues";
+import {
   PHYLO_TREE_LINK,
   MAIL_TO_HELP_LINK,
 } from "~/components/utils/documentationLinks";
@@ -434,6 +439,9 @@ class PhyloTreeListView extends React.Component {
       treeContainer,
     } = this.state;
     const { allowedFeatures = [] } = this.context || {};
+    const clustermapSvgUrl = currentTree
+      ? currentTree.clustermap_svg_url
+      : false;
 
     return (
       <NarrowContainer>
@@ -507,15 +515,14 @@ class PhyloTreeListView extends React.Component {
             {allowedFeatures.includes("phylo_tree_appcue") && (
               <HelpButton
                 className={cs.controlElement}
-                onClick={
-                  // TODO: Uncomment and insert appcue flow ID when it's ready.
-                  {
-                    /* showAppcue({
-                  flowId: PHYLO_TREE_HEADER_HELP_SIDEBAR,
-                  analyticsEventName: ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
-                  }) */
-                  }
-                }
+                onClick={showAppcue({
+                  flowId: clustermapSvgUrl
+                    ? PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_SIDEBAR
+                    : PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
+                  analyticsEventName: clustermapSvgUrl
+                    ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_BUTTON_CLICKED
+                    : ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
+                })}
               />
             )}
           </ViewHeader.Controls>
