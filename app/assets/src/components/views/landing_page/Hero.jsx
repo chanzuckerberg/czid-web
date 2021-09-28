@@ -7,9 +7,9 @@ const Hero = () => {
   const [fade, setFade] = useState(false);
 
   let rotatingHeroText = [
-    "Real Time Pathogen Detection",
-    "Real Time Microbiome Characterization",
-    "Real Time Outbreak Detection",
+    "Real-Time Pathogen Detection",
+    "Real-Time Microbiome Characterization",
+    "Real-Time Outbreak Detection",
   ];
 
   let i = 0;

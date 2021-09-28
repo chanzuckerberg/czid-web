@@ -18,10 +18,18 @@ const LandingHeaderV2 = () => {
       </a>
       <nav className={cs.nav}>
         <span className={cs.hideMobile}>
-          <a className={cs.textLink} href="http://help.idseq.net">
+          <a className={cs.textLink}
+            href="http://help.idseq.net"
+            target="_blank" rel="noreferrer"
+            aria-label="View the IDseq help page (opens in new window)"
+            >
             Resources
           </a>
-          <a className={cs.buttonLink} href="https://airtable.com/shrBGT42xVBR6JAVv">
+          <a className={cs.buttonLink} 
+            href="https://airtable.com/shrBGT42xVBR6JAVv"
+            target="_blank" rel="noreferrer"
+            aria-label="View the IDseq intro survey (opens in new window)"
+            >
             Request Access
           </a>
           <a className={cs.buttonLink} href="https://idseq.net/auth0/login">
@@ -47,6 +55,8 @@ const LandingHeaderV2 = () => {
               className={cs.mobileNavLink} 
               href="http://help.idseq.net"
               style={menuOpen ? {opacity: "1"} : {opacity: "0"}}
+              target="_blank" rel="noreferrer"
+              aria-label="View the IDseq help page (opens in new window)"
               >Resources</a>
             <div 
               className={cs.mobileNavSeparator}
@@ -61,6 +71,8 @@ const LandingHeaderV2 = () => {
               className={cs.mobileNavLink} 
               href="https://airtable.com/shrBGT42xVBR6JAVv"
               style={menuOpen ? {opacity: "1"} : {opacity: "0"}}
+              target="_blank" rel="noreferrer"
+              aria-label="View the IDseq intro survey (opens in new window)"
               >Request Access</a>
           </div>
         </div>

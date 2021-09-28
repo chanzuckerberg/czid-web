@@ -31,7 +31,7 @@ const QuoteSlider = () => {
       />
       <QuoteSliderItem
         quoteAuthor="Rebecca Brennan"
-        quoteCredentials="Mayo Clinic"
+        quoteCredentials="Senior Research Fellow in Neurogenetics, Mayo Clinic"
         quoteText="Support staff responsiveness is quick and helpful. IDseq is accessible from any computer system, is user-friendly, and clearly defines results with minimal effort."
         customStyles={{transform: "translateY(25%)"}}
       />

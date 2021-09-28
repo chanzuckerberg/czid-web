@@ -21,9 +21,23 @@ const Footer = () => {
       <div className={cs.bottomNavContainer}>
         <div className={cs.bottomNavMenu}>
           <div>
-            <a href="http://idseq.net/privacy">Privacy</a>
+            <a 
+              href="http://idseq.net/privacy" 
+              aria-label="View the IDseq privacy policy (opens in new window)" 
+              target="_blank" 
+              rel="noreferrer"
+              >
+              Privacy
+            </a>
             <span>|</span>
-            <a href="http://idseq.net/terms">Terms</a>
+            <a 
+              href="http://idseq.net/terms"
+              aria-label="View the IDseq terms of use (opens in new window)" 
+              target="_blank" 
+              rel="noreferrer"
+              >
+              Terms
+            </a>
             <span>|</span>
             <a href="mailto:help@idseq.net">Contact us</a>
           </div>
@@ -32,13 +46,25 @@ const Footer = () => {
           <p>In partnership with:</p>
           <div className={cs.czLogoInnerContainer}>
             <div>
-              <a aria-label="View the Chan Zuckerberg Initiative website (opens in new window)" target="_blank" rel="noreferrer" className={cs.cziLogo} href="https://chanzuckerberg.com/">
+              <a 
+                href="https://chanzuckerberg.com/"
+                className={cs.cziLogo} 
+                aria-label="View the Chan Zuckerberg Initiative website (opens in new window)" 
+                target="_blank" 
+                rel="noreferrer" 
+                >
                 <IconCziLogo />
               </a>
             </div>
             <div className={cs.separator}></div>
             <div>
-              <a aria-label="View the Chan Zuckerberg Biohub website (opens in new window)" target="_blank" rel="noreferrer" className={cs.biohubLogo} href="https://www.czbiohub.org/">
+              <a 
+                href="https://www.czbiohub.org/"
+                className={cs.biohubLogo} 
+                aria-label="View the Chan Zuckerberg Biohub website (opens in new window)" 
+                target="_blank" 
+                rel="noreferrer" 
+                >
                 <IconBiohubLogo />
               </a>
             </div>
