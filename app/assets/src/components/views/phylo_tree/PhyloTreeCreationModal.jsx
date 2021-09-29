@@ -1,4 +1,4 @@
-import { debounce, get, isEmpty, forEach } from "lodash/fp";
+import { debounce, get, isEmpty, isUndefined, forEach } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 import Moment from "react-moment";
@@ -108,6 +108,8 @@ class PhyloTreeCreationModal extends React.Component {
       this.inputDelay,
       this.isTreeNameValid
     );
+
+    this.wizard = React.createRef();
   }
 
   componentDidMount() {
@@ -199,14 +201,19 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   loadNewTreeContext = () => {
-    const { taxonId, projectId } = this.state;
+    const { taxonId, projectId, treeName } = this.state;
     const { allowedFeatures = [] } = this.context || {};
+
+    this.setState({ showErrorName: false });
 
     getNewPhyloTree({
       taxId: taxonId,
       projectId,
       nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
     }).then(({ samples }) => this.handleNewTreeContextResponse(samples));
+
+    const continueEnabled = !isEmpty(treeName);
+    this.wizard.current.handleContinueEnabled(continueEnabled);
   };
 
   handleNewTreeContextResponse = samples => {
@@ -303,10 +310,14 @@ class PhyloTreeCreationModal extends React.Component {
     return { projectSamples, otherSamples };
   };
 
-  loadProjectSearchContext = () =>
+  loadProjectSearchContext = () => {
     getProjectsToChooseFrom().then(projectList =>
       this.handleProjectSearchContextResponse(projectList)
     );
+
+    const continueEnabled = this.state.taxonId && this.state.projectId;
+    this.wizard.current.handleContinueEnabled(continueEnabled);
+  };
 
   handleProjectSearchContextResponse = projectList =>
     this.setState({ projectList, projectsLoaded: true });
@@ -333,6 +344,8 @@ class PhyloTreeCreationModal extends React.Component {
           }
         )
     );
+    const taxonSelected = !isUndefined(this.state.taxonId);
+    this.wizard.current.handleContinueEnabled(taxonSelected);
   };
 
   handleSelectTaxon = (_, { result }) => {
@@ -357,6 +370,8 @@ class PhyloTreeCreationModal extends React.Component {
           }
         )
     );
+    const projectSelected = !isUndefined(this.state.projectId);
+    this.wizard.current.handleContinueEnabled(projectSelected);
   };
 
   setPage = defaultPage => this.setState({ defaultPage });
@@ -555,6 +570,9 @@ class PhyloTreeCreationModal extends React.Component {
       treeNameValid: valid,
     });
 
+    const continueEnabled = !isEmpty(sanitizedName);
+    this.wizard.current.handleContinueEnabled(continueEnabled);
+
     return valid;
   };
 
@@ -600,6 +618,7 @@ class PhyloTreeCreationModal extends React.Component {
 
   renderNotifications() {
     const {
+      treeName,
       treeNameValid,
       showErrorSamples,
       showErrorName,
@@ -632,7 +651,7 @@ class PhyloTreeCreationModal extends React.Component {
     });
     const showLowCoverageWarning = lowCoverageBreadths.length > 0;
 
-    if (showErrorName && !treeNameValid) {
+    if (showErrorName && !treeNameValid && treeName) {
       return (
         <Notification type="error" displayStyle="flat">
           The current tree name is taken. Please choose a different name.
@@ -775,12 +794,15 @@ class PhyloTreeCreationModal extends React.Component {
               <div className="wizard__page-3__form__label-name">Name</div>
               <Input
                 className={
-                  this.state.showErrorName && !this.state.treeNameValid
+                  this.state.showErrorName &&
+                  !this.state.treeNameValid &&
+                  !isEmpty(this.state.treeName)
                     ? "error"
                     : ""
                 }
                 placeholder="Tree Name"
                 onChange={this.handleNameChange}
+                defaultValue={this.state.treeName}
               />
             </div>
             {this.props.admin === 1 && (
@@ -899,6 +921,7 @@ class PhyloTreeCreationModal extends React.Component {
               finish: "Create Tree",
             }}
             wizardType="PhyloTreeCreationWizard"
+            ref={this.wizard}
           >
             {this.getPages()}
           </Wizard>
