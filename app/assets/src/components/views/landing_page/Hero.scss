@@ -30,6 +30,10 @@
     background-position: center 100%;
   }
 
+  @media (max-width: 526px) {
+    align-items: flex-start;
+  }
+
   @media (max-width: 450px) {
     background-size: contain;
     background-position: center 102%;
@@ -41,14 +45,47 @@
     font-weight: $font-weight-semibold;
     margin: 0;
     @include font-header-marketing-xl;
+    transform: translateX(11%);
+    transition: all 0.4s;
 
     span {
-      transition: all 0.4s;
+      transition: opacity 0.4s;
+      display: inline-block;
+      min-width: 600px;
+      text-align: left;
+
+      @media (max-width: 905px) {
+        min-width: 450px;
+      }
+
+      @media (max-width: 768px) {
+        min-width: 365px;
+      }
+
+      @media (max-width: 526px) {
+        min-width: unset;
+      }
+    }
+
+    @media (max-width: 905px) {
+      @include font-header-marketing-l;
     }
 
     @media (max-width: 768px) {
       @include font-header-xxl;
       line-height: 44px;
+    }
+
+    @media (max-width: 526px) {
+      transform: translateX(0px) !important;
+    }
+
+    @media (max-width: 397px) {
+      @include font-header-xl;
+    }
+
+    @media (max-width: 341px) {
+      font-size: 20px;
     }
   }
 
@@ -62,9 +99,41 @@
       @include font-body-s;
       line-height: 23px;
     }
+
+    @media (max-width: 526px) {
+      @include font-header-xs;
+    }
   }
 }
 
+.heroLineBreak {
+  display: none;
+
+  @media (max-width: 526px) {
+    display: inline;
+  }
+}
+
+// Animations for rotating hero text
+
 .fade {
   opacity: 0;
+}
+
+.moveUp {
+  animation: moveUp 0.4s ease forwards;
+}
+
+.shiftLeft {
+  transform: translateX(0px) !important;
+}
+
+@keyframes moveUp {
+  from {
+    transform: translateY(30px);
+  }
+
+  to {
+    transform: translateY(0px);
+  }
 }

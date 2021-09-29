@@ -12,10 +12,38 @@ const Footer = () => {
           <LogoReversed />
         </a>
         <div className={cs.topNavMenu}>
-          <a href="https://discoveridseq.com/vr">Experience IDseq&apos;s Impact</a>
-          <a href="https://github.com/chanzuckerberg/idseq-workflows">Github</a>
-          <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2215049">Careers</a>
-          <a href="http://help.idseq.net">Resources</a>
+          <a 
+            href="https://discoveridseq.com/vr"
+            aria-label="Take a 360° Video Tour to see how a local researcher quickly detects the source of a meningitis outbreak in Dhaka, Bangladesh, using IDseq technology. (opens in new window)" 
+            target="_blank" 
+            rel="noreferrer"
+            >
+              Experience IDseq&apos;s Impact
+          </a>
+          <a 
+            href="https://github.com/chanzuckerberg/idseq-workflows"
+            aria-label="View the repo for idseq-workflows on GitHub (opens in new window)"
+            target="_blank" 
+            rel="noreferrer"
+            >
+              Github
+          </a>
+          <a 
+            href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2215049"
+            aria-label="View the Chan Zuckerberg Initiative careers page (opens in new window)"
+            target="_blank" 
+            rel="noreferrer"
+            >
+              Careers
+          </a>
+          <a 
+            href="http://help.idseq.net"
+            aria-label="View the IDseq help page (opens in new window)"
+            target="_blank" 
+            rel="noreferrer"
+            >
+              Resources
+          </a>
         </div>
       </div>
       <div className={cs.bottomNavContainer}>

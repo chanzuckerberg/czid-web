@@ -45,7 +45,7 @@ const Accordion = () => {
         accordionTitle="Will my raw data ever become public?"
         accordionText={
           <>
-            Raw sample data (genetic sequence files (ex: FASTA/FASTQ)) is not shared with any other IDseq user, nor is it ever accessed by anyone working on IDseq unless specifically requested by a user, such as to debug an issue. Read more in IDseq’s <a href="https://idseq.net/privacy">Privacy Policy</a>.
+            Raw sample data (genetic sequence files (ex: FASTA/FASTQ)) is not shared with any other IDseq user, nor is it ever accessed by anyone working on IDseq unless specifically requested by a user, such as to debug an issue. Read more in IDseq’s <a href="https://idseq.net/privacy" aria-label="View the IDseq privacy policy (opens in new window)" target="_blank" rel="noreferrer">Privacy Policy</a>.
           </>
         }
       />
@@ -55,7 +55,7 @@ const Accordion = () => {
         accordionTitle="How is human genomic data protected?"
         accordionText={
           <>
-            Upon upload, raw sample data (genetic sequence files (ex: FASTA/FASTQ)) is processed through our data pipeline and all host (ex: human, mosquito) genetic information is filtered out. We always filter out all human genetic information, regardless of host. Read more in IDseq’s <a href="https://idseq.net/privacy">Privacy Policy</a>.
+            Upon upload, raw sample data (genetic sequence files (ex: FASTA/FASTQ)) is processed through our data pipeline and all host (ex: human, mosquito) genetic information is filtered out. We always filter out all human genetic information, regardless of host. Read more in IDseq’s <a href="https://idseq.net/privacy" aria-label="View the IDseq privacy policy (opens in new window)" target="_blank" rel="noreferrer">Privacy Policy</a>.
           </>
         }
       />
@@ -65,7 +65,7 @@ const Accordion = () => {
         accordionTitle="Will my account last indefinitely?"
         accordionText={
           <>
-            Once created, your account will be maintained in accordance with our <a href="https://idseq.net/terms">Terms of Use</a>. You can request to delete your account at any time by <a href="mailto:help@idseq.net">contacting our team</a>.
+            Once created, your account will be maintained in accordance with our <a href="https://idseq.net/terms" aria-label="View the IDseq terms of use (opens in new window)" target="_blank" rel="noreferrer">Terms of Use</a>. You can request to delete your account at any time by <a href="mailto:help@idseq.net">contacting our team</a>.
           </>
         }
       />

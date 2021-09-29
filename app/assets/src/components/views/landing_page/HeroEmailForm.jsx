@@ -23,7 +23,7 @@ const HeroEmailForm = () => {
     <div className={cs.heroEmailForm}>
       <form action="#">
         <input placeholder="Your email address" value={enteredEmail} onChange={(e)=>{setEnteredEmail(e.target.value);}} />
-        <button onClick={(e)=>{submitEmail(e);}} >
+        <button aria-label="Request access to IDseq via the IDseq intro survey (opens in new window)" onClick={(e)=>{submitEmail(e);}} >
           Request Access
           <span>
             <ArrowSubmit />

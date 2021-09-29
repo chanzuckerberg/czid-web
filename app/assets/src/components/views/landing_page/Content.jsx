@@ -34,6 +34,7 @@ const Content = () => {
           <CtaButton 
             text="See it in action" 
             linkUrl="https://public.idseq.net/"
+            aria-label="View the IDseq COVID-19 public dataset example (opens in new window)"
             />
         </div>
         <div className={cs.summaryImage}>
@@ -109,6 +110,7 @@ const Content = () => {
         <CtaButton 
           text="View All Questions" 
           linkUrl="https://idseq.net/faqs"
+          aria-label="View the IDseq FAQ page (opens in new window)"
           />
       </section>
 

@@ -5,11 +5,13 @@ import cs from "./Hero.scss";
 const Hero = () => {
 
   const [fade, setFade] = useState(false);
+  const [moveUp, setMoveUp] = useState(false);
+  const [shiftLeft, setShiftLeft] = useState(false);
 
   let rotatingHeroText = [
-    "Real-Time Pathogen Detection",
-    "Real-Time Microbiome Characterization",
-    "Real-Time Outbreak Detection",
+    "Pathogen Detection",
+    "Microbiome Characterization",
+    "Outbreak Detection",
   ];
 
   let i = 0;
@@ -25,24 +27,31 @@ const Hero = () => {
       }
   
       setFade(true);
+      setMoveUp(false);
   
       setTimeout(function() {
+        if (i === 1) {
+          setShiftLeft(true);
+        } else {
+          setShiftLeft(false);
+        }
         textTarget.textContent = rotatingHeroText[i];
       }, 500);
   
       setTimeout(function() {
         setFade(false);
+        setMoveUp(true);
       }, 800);
     }, 5000);
   }, []);
 
   return (
     <div className={cs.hero}>
-      <h1>
+      <h1 className={shiftLeft? cs.shiftLeft : ""}>Real-time&nbsp;<br className={cs.heroLineBreak}/>
         <span 
-          className={`rotating-text ${fade ? cs.fade : ""}`}
+          className={`rotating-text ${fade ? cs.fade : ""} ${moveUp? cs.moveUp : ""}`}
           // style={fade ? cs.fade : ""}
-          >Real-time Pathogen Detection</span>
+          >Pathogen Detection</span>
       </h1>
       <p>IDseq: The free, cloud-based metagenomics platform for researchers</p>
       <HeroEmailForm />

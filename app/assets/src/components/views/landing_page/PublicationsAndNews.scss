@@ -30,7 +30,11 @@
     letter-spacing: 0.01875em;
     text-transform: uppercase;
     margin: 6px 0 0 0;
-    @include font-header-xxs;
+    @include font-header-l;
+
+    @media (max-width: 768px) {
+      @include font-header-m;
+    }
   }
 
   .publications,

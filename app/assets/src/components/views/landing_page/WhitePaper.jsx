@@ -24,7 +24,7 @@ const WhitePaper = () => {
           See how scientists, clinicians, and bioinformaticians can gain insight
           from mNGS datasets for both known and novel pathogens.
         </p>
-        <CtaButton className={CtaButtonStyles.filled} text="Read the Paper" />
+        <CtaButton className={CtaButtonStyles.filled} text="Read the Paper" aria-label="Read the IDseq white paper (opens in new window)" />
       </div>
     </a>
   );
