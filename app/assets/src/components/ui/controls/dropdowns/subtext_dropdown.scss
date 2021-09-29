@@ -76,9 +76,14 @@
 
 .emptySection {
   margin: $space-l 0 $space-l $space-l;
+  cursor: default !important;
 
   .message {
     @include font-body-xxs;
     color: $gray-dark;
+  }
+
+  &:hover {
+    background-color: transparent !important;
   }
 }

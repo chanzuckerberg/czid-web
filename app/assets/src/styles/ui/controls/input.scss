@@ -1,6 +1,12 @@
 @import "../../themes/colors";
 @import "~styles/themes/typography";
 
+// Override semaantic ui error styling
+:global(.ui.input.error > input) {
+  background-color: transparent;
+  color: $black;
+}
+
 .idseq-ui.input {
   input {
     border-radius: $border-radius-m;

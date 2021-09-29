@@ -1,44 +1,44 @@
 import { difference, find, isEmpty, map, orderBy } from "lodash/fp";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SortDirection } from "react-virtualized";
 
 import BaseTable from "./BaseTable";
 
-class Table extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      sortBy: this.props.defaultSortBy,
-      sortDirection: this.props.defaultSortDirection || SortDirection.ASC,
-    };
-  }
+const Table = ({
+  columns,
+  data = [],
+  draggableColumns,
+  onColumnSort,
+  onSelectRow,
+  onSelectAllRows,
+  selectableKey,
+  selected = new Set(),
+  sortable,
+  defaultSortBy,
+  defaultSortDirection,
+  ...props
+}) => {
+  const [sortBy, setSortBy] = useState(defaultSortBy);
+  const [sortDirection, setSortDirection] = useState(
+    defaultSortDirection || SortDirection.ASC
+  );
 
-  handleSort = ({ sortBy, sortDirection }) => {
-    const { onColumnSort } = this.props;
+  useEffect(() => {
+    defaultSortBy && setSortBy(defaultSortBy);
+  }, [defaultSortBy]);
 
-    this.setState(
-      {
+  const handleSort = ({ sortBy, sortDirection }) => {
+    setSortBy(sortBy);
+    setSortDirection(sortDirection);
+    onColumnSort &&
+      onColumnSort({
         sortBy,
         sortDirection,
-      },
-      () => {
-        onColumnSort &&
-          onColumnSort({
-            sortBy,
-            sortDirection,
-          });
-      }
-    );
+      });
   };
 
-  handleGetRow = ({ index }) => {
-    return this.sortedData[index];
-  };
-
-  isSelectAllChecked = () => {
-    const { data, selectableKey, selected } = this.props;
-
+  const isSelectAllChecked = () => {
     if (!selectableKey || !selected) return false;
 
     return (
@@ -47,61 +47,41 @@ class Table extends React.Component {
     );
   };
 
-  render() {
-    const {
-      columns,
-      data,
-      onSelectRow,
-      onSelectAllRows,
-      selected,
-      sortable,
-      ...tableProps
-    } = this.props;
-
-    const { sortBy, sortDirection } = this.state;
-
-    let sortedData = data;
-    if (sortable && sortBy) {
-      const sortColumn = find({ dataKey: sortBy }, columns) || {};
-      const sortDirectionStr =
-        sortDirection === SortDirection.ASC ? "asc" : "desc";
-      if (sortColumn.sortFunction) {
-        sortedData = sortColumn.sortFunction({
-          data,
-          sortDirection: sortDirectionStr,
-        });
-      } else {
-        sortedData = orderBy(
-          sortColumn.sortKey || sortBy,
-          [sortDirectionStr],
-          data
-        );
-      }
+  let sortedData = data;
+  if (sortable && sortBy) {
+    const sortColumn = find({ dataKey: sortBy }, columns) || {};
+    const sortDirectionStr =
+      sortDirection === SortDirection.ASC ? "asc" : "desc";
+    if (sortColumn.sortFunction) {
+      sortedData = sortColumn.sortFunction({
+        data,
+        sortDirection: sortDirectionStr,
+      });
+    } else {
+      sortedData = orderBy(
+        sortColumn.sortKey || sortBy,
+        [sortDirectionStr],
+        data
+      );
     }
-
-    const selectAllChecked = this.isSelectAllChecked();
-    return (
-      <BaseTable
-        columns={columns}
-        onSelectAllRows={onSelectAllRows}
-        onSelectRow={onSelectRow}
-        onSort={this.handleSort}
-        rowCount={sortedData.length}
-        rowGetter={({ index }) => sortedData[index]}
-        selectAllChecked={selectAllChecked}
-        selected={selected}
-        sortable={sortable}
-        sortBy={sortBy}
-        sortDirection={sortDirection}
-        {...tableProps}
-      />
-    );
   }
-}
 
-Table.defaultProps = {
-  data: [],
-  selected: new Set(),
+  return (
+    <BaseTable
+      columns={columns}
+      onSelectAllRows={onSelectAllRows}
+      onSelectRow={onSelectRow}
+      onSort={handleSort}
+      rowCount={sortedData.length}
+      rowGetter={({ index }) => sortedData[index]}
+      selectAllChecked={isSelectAllChecked()}
+      selected={selected}
+      sortable={sortable}
+      sortBy={sortBy}
+      sortDirection={sortDirection}
+      {...props}
+    />
+  );
 };
 
 Table.propTypes = {

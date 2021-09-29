@@ -881,7 +881,7 @@ class ReportTable extends React.Component {
     } = this.props;
     const { phyloTreeModalParams } = this.state;
     return (
-      <React.Fragment>
+      <>
         <Table
           cellClassName={cs.cell}
           columns={this.columns}
@@ -913,7 +913,7 @@ class ReportTable extends React.Component {
             )}
           </UserContext.Consumer>
         )}
-      </React.Fragment>
+      </>
     );
   };
 }
