@@ -4,7 +4,7 @@ import IconMatchesFigure from "~/components/ui/icons/IconMatchesFigure";
 import IconSampleFigure from "~/components/ui/icons/IconSampleFigure";
 import IconUploadFigure from "~/components/ui/icons/IconUploadFigure";
 import CtaButton from "~/components/views/landing_page/CtaButton";
-import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure.svg";
+import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure-2x.png";
 import HealthQuestionsMobileFigure from "~/images/landing_page/health-questions-mobile.svg";
 import KniAccordion from "./Accordion";
 import cs from "./Content.scss";
