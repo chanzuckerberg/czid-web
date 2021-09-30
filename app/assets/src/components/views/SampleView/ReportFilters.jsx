@@ -113,7 +113,6 @@ class ReportFilters extends React.Component {
       otherBackgrounds,
       sampleId,
       selected,
-      selectedInvalidBackground,
       shouldDisableFilters,
       snapshotShareId,
       view,
@@ -175,7 +174,6 @@ class ReportFilters extends React.Component {
               categorizeBackgrounds
               ownedBackgrounds={ownedBackgrounds}
               otherBackgrounds={otherBackgrounds}
-              erred={selectedInvalidBackground}
               value={selected.background}
               onChange={value =>
                 this.handleFilterChange({
@@ -293,7 +291,6 @@ ReportFilters.propTypes = {
   selected: PropTypes.object,
   view: PropTypes.oneOf(["tree", "table"]),
   enableMassNormalizedBackgrounds: PropTypes.bool,
-  selectedInvalidBackground: PropTypes.bool,
   shouldDisableFilters: PropTypes.bool,
   snapshotShareId: PropTypes.string,
 };

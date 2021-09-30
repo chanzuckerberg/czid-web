@@ -123,7 +123,6 @@ BackgroundModelFilter.propTypes = {
   onClick: PropTypes.func,
   placeholder: PropTypes.string,
   rounded: PropTypes.bool,
-  selectedInvalidBackground: PropTypes.bool,
   value: PropTypes.number,
 };
 
