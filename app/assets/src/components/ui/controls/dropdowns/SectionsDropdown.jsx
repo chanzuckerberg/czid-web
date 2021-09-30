@@ -126,7 +126,7 @@ const SectionsDropdown = ({
     return (
       <DropdownTrigger
         {...restProps}
-        label={label + ":"}
+        label={label ? label + ":" : ""}
         className={cs.dropdownTrigger}
         value={text}
       />
