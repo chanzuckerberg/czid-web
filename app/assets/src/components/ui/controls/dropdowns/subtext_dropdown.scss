@@ -23,7 +23,7 @@
 
   // for SectionsDropdown, the menu items already have padding that can't be overridden
   &.noMargins {
-    margin: 0;
+    margin: 0 0 0 $space-xxs;
   }
 
   .optionText {
@@ -37,6 +37,11 @@
   .optionSubtext {
     @include font-body-xxs;
     color: $gray-dark;
+  }
+
+  &:hover {
+    // override background color from BareDropdown
+    background-color: $gray-off-white !important;
   }
 }
 
@@ -65,7 +70,7 @@
     @include font-caps-xxxxs;
     color: $gray-dark;
 
-    margin: $space-m 0 0;
+    margin: $space-m 0;
   }
 
   :global(.divider) {
