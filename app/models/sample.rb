@@ -60,6 +60,8 @@ class Sample < ApplicationRecord
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
   after_create :initiate_input_file_upload
+  before_destroy :cleanup_relations
+  after_destroy :cleanup_s3
 
   delegate :consensus_genomes, to: :workflow_runs
 
@@ -588,7 +590,7 @@ class Sample < ApplicationRecord
       .distinct
   end
 
-  def destroy
+  def cleanup_relations
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
     Contig.where(pipeline_run_id: pipeline_run_ids).delete_all
@@ -597,7 +599,10 @@ class Sample < ApplicationRecord
     JobStat.where(pipeline_run_id: pipeline_run_ids).delete_all
     input_files.delete_all
     metadata.delete_all
-    super
+  end
+
+  def cleanup_s3
+    S3Util.delete_s3_prefix("s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/")
   end
 
   def self.viewable(user)

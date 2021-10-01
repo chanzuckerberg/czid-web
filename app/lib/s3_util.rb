@@ -75,4 +75,18 @@ module S3Util
     )
     resp.uploads.map(&:upload_id).first
   end
+
+  def self.delete_s3_prefix(s3_prefix)
+    bucket, prefix = parse_s3_path(s3_prefix)
+    pages = AwsClient[:s3].list_objects_v2({
+                                             bucket: bucket,
+                                             prefix: prefix,
+                                           })
+    pages.each do |resp|
+      objects = resp[:contents].map { |object| { key: object[:key] } }
+      next unless objects
+
+      AwsClient[:s3].delete_objects({ bucket: bucket, delete: { objects: objects } })
+    end
+  end
 end

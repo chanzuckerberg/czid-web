@@ -42,6 +42,7 @@ class WorkflowRun < ApplicationRecord
   include PipelineOutputsHelper
 
   belongs_to :sample
+  before_destroy :cleanup
 
   WORKFLOW = {
     # NOTE: 'main' is not yet supported in WorkflowRuns.
@@ -184,6 +185,16 @@ class WorkflowRun < ApplicationRecord
   end
 
   private
+
+  def cleanup
+    prefix = s3_output_prefix || sample.sample_output_s3_path
+    return if prefix.blank?
+
+    # wait until finalized so we can be confident that we won't write to s3 again after this
+    #   this allows us to delete from s3 after calling this
+    sfn_execution.stop_execution(true)
+    S3Util.delete_s3_prefix(prefix)
+  end
 
   def sfn_execution
     s3_path = s3_output_prefix || sample.sample_output_s3_path

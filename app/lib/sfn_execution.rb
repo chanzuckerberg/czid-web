@@ -31,6 +31,14 @@ class SfnExecution
     end
   end
 
+  def stop_execution(wait = false)
+    return if @execution_arn.blank?
+
+    AwsClient[:states].stop_execution(execution_arn: @execution_arn)
+
+    wait_until_finalized if wait
+  end
+
   def output_path(output_key)
     map = workflow_result_mapping
     path = map[output_key]
@@ -40,6 +48,18 @@ class SfnExecution
   end
 
   private
+
+  def wait_until_finalized
+    start = Time.now.to_i
+    desc = sfn_archive_from_s3("sfn-desc")
+    hist = sfn_archive_from_s3("sfn-hist")
+    until (desc && desc[:status] == "ABORTED" && hist && hist[:events].last && hist[:events].last[:type] == "ExecutionAborted") || Time.now.to_i > 120 + start
+      sleep(0.1)
+      desc = sfn_archive_from_s3("sfn-desc")
+      hist = sfn_archive_from_s3("sfn-hist")
+    end
+    @finalized = true
+  end
 
   def description_from_aws
     return if @execution_arn.blank?

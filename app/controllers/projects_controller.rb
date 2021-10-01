@@ -477,7 +477,7 @@ class ProjectsController < ApplicationController
   # DELETE /projects/1
   # DELETE /projects/1.json
   def destroy
-    deletable = Sample.where(project_id: @project.id).empty?
+    deletable = current_user.admin? || Sample.where(project_id: @project.id).empty?
     @project.destroy if deletable
     respond_to do |format|
       if deletable

@@ -1177,10 +1177,11 @@ class SamplesController < ApplicationController
     # Will also delete from job_stats, ercc_counts, backgrounds_pipeline_runs, pipeline_runs, input_files, and backgrounds_samples
     deletable = @sample.deletable?(current_user)
     success = false
+    project = @sample.project
     success = @sample.destroy if deletable
     respond_to do |format|
       if success
-        format.html { redirect_to samples_url, notice: 'Sample was successfully destroyed.' }
+        format.html { redirect_to project, notice: 'Sample was successfully destroyed.' }
         format.json { head :no_content }
       else
         format.html { render :edit }

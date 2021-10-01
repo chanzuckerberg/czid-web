@@ -244,6 +244,7 @@ class PipelineRun < ApplicationRecord
   # Triggers a run for new samples by defining output states and run stages configurations.
   # *Exception* for cloned pipeline runs that already have results and finalized status
   before_create :create_output_states, :create_run_stages, unless: :results_finalized?
+  before_destroy :cleanup
 
   delegate :status_url, to: :sample
 
@@ -851,7 +852,18 @@ class PipelineRun < ApplicationRecord
   end
 
   def sfn_error
-    SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sample_output_s3_path).error
+    return unless sfn_output_path
+
+    SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_output_path).error
+  end
+
+  def cleanup
+    return if sfn_output_path.blank?
+
+    # wait until finalized so we can be confident that we won't write to s3 again after this
+    #   this allows us to delete from s3 after calling this
+    SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_output_path).stop_execution(true)
+    S3Util.delete_s3_prefix(sfn_output_path)
   end
 
   def workflow_version_tag
@@ -872,19 +884,23 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def sfn_results_path
+  def sfn_output_path
     return "" if sfn_execution_arn.blank?
 
-    if s3_output_prefix
-      return File.join(s3_output_prefix, version_key_subpath)
-    elsif pipeline_version_at_least(pipeline_version, "5.0.0")
-      return File.join(sample_output_s3_path, version_key_subpath)
+    return s3_output_prefix || sample_output_s3_path
+  end
+
+  def sfn_results_path
+    return "" unless sfn_output_path
+
+    if s3_output_prefix || pipeline_version_at_least(pipeline_version, "5.0.0")
+      return File.join(sfn_output_path, version_key_subpath)
     else
       return "" unless pipeline_version.present? && wdl_version.present?
 
       sfn_name = sfn_execution_arn.split(':')[-2]
       return File.join(
-        sample_output_s3_path,
+        sfn_output_path,
         sfn_name,
         "wdl-#{wdl_version}",
         "dag-#{pipeline_version}"

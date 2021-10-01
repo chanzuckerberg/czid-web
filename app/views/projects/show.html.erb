@@ -17,6 +17,7 @@
   <%= @project.users[0].name %>
   (<%= @project.users[0].email %>)
 </p>
+<%= button_to 'delete project', project_path(@project), method: :delete %>
 <% end %>
 
 <h1>Samples</h1>

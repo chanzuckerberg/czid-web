@@ -99,7 +99,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_difference('Sample.count', -1) do
       delete sample_url(@deletable_sample)
     end
-    assert_redirected_to samples_url
+    assert_redirected_to @project
   end
 
   test 'joe can fetch metadata for a public sample' do

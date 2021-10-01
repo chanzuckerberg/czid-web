@@ -10,7 +10,7 @@ class Project < ApplicationRecord
   include ReportHelper
 
   has_and_belongs_to_many :users
-  has_many :samples, dependent: :restrict_with_exception
+  has_many :samples, dependent: :destroy
   has_many :favorite_projects, dependent: :destroy
   has_many :favorited_by, through: :favorite_projects, source: :user
   has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :restrict_with_exception
@@ -159,12 +159,6 @@ class Project < ApplicationRecord
 
   def self.public_projects
     where("projects.id in (?)", Sample.public_samples.distinct.pluck(:project_id))
-  end
-
-  def destroy
-    samples = Sample.find(sample_ids)
-    samples.each(&:destroy)
-    super
   end
 
   def add_default_metadata_fields

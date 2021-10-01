@@ -22,6 +22,13 @@ class AdminControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should destroy user' do
+    @mock_aws_clients = {
+      s3: Aws::S3::Client.new(stub_responses: true),
+      states: Aws::States::Client.new(stub_responses: true),
+    }
+    allow(AwsClient).to receive(:[]) { |client|
+      @mock_aws_clients[client]
+    }
     expect(@auth0_management_client_double)
       .to(receive(:users_by_email)
           .with(@user_to_modify.email, fields: "identities")
