@@ -23,13 +23,21 @@
     padding-top: $space-l;
   }
 
+  .description {
+    @include font-body-xxs;
+    color: $gray-dark;
+    margin-top: $space-s;
+    margin-bottom: $space-l;
+  }
+
   .section {
     display: flex;
     flex-direction: column;
-    padding: $space-l 0;
+    margin: $space-l 0;
 
-    &:not(:last-child) {
-      border-bottom: $border-gray-lightest;
+    &:not(:first-child) {
+      border-top: $border-gray-lightest;
+      padding-top: $space-l;
     }
 
     &.disabled {

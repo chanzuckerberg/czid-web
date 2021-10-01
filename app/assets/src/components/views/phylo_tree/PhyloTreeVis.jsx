@@ -161,31 +161,38 @@ class PhyloTreeVis extends React.Component {
 
   getTooltipData() {
     if (this.state.hoveredNode.data.accession) {
-      return [
-        {
-          name: "NCBI Reference",
-          data: this.ncbiFields.map(f => [
-            f.label,
-            this.getFieldValue(f) || "-",
-          ]),
-        },
-      ];
-    }
-
-    return [
-      {
-        name: "Sample",
+      const referenceInfo =
+        "Reference samples are chosen from NCBI using our heuristic outlined in the Help Center.";
+      return {
         data: [
-          ...SAMPLE_FIELDS.map(f => [f.label, this.getFieldValue(f) || "-"]),
-          ...SAMPLE_METADATA_FIELDS.map(key => {
-            return [
-              get("name", find(["key", key], this.state.metadataFields)) || key,
-              this.getMetadataFieldValue(key) || "-",
-            ];
-          }),
+          {
+            name: "NCBI Reference",
+            data: this.ncbiFields.map(f => [
+              f.label,
+              this.getFieldValue(f) || "-",
+            ]),
+          },
         ],
-      },
-    ];
+        description: referenceInfo,
+      };
+    }
+    return {
+      data: [
+        {
+          name: "Sample",
+          data: [
+            ...SAMPLE_FIELDS.map(f => [f.label, this.getFieldValue(f) || "-"]),
+            ...SAMPLE_METADATA_FIELDS.map(key => {
+              return [
+                get("name", find(["key", key], this.state.metadataFields)) ||
+                  key,
+                this.getMetadataFieldValue(key) || "-",
+              ];
+            }),
+          ],
+        },
+      ],
+    };
   }
 
   getMetadataDropdownOptions = () => {
@@ -229,7 +236,10 @@ class PhyloTreeVis extends React.Component {
           }}
         >
           {this.state.hoveredNode && (
-            <TooltipVizTable data={this.getTooltipData()} />
+            <TooltipVizTable
+              data={this.getTooltipData().data}
+              description={this.getTooltipData().description}
+            />
           )}
         </div>
       </div>

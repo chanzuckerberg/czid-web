@@ -5,7 +5,7 @@ import React from "react";
 
 import cs from "./tooltip_viz_table.scss";
 
-const TooltipVizTable = ({ data, subtitle, title }) => {
+const TooltipVizTable = ({ data, description, subtitle, title }) => {
   const shouldCompactLabel = data.length === 1;
 
   const renderLabel = label => {
@@ -52,6 +52,7 @@ const TooltipVizTable = ({ data, subtitle, title }) => {
       {title && <div className={cs.title}>{title}</div>}
       {subtitle && <div className={cs.subtitle}>{subtitle}</div>}
       {renderSections()}
+      {description && <div className={cs.description}>{description}</div>}
     </div>
   );
 };
@@ -65,6 +66,7 @@ TooltipVizTable.propTypes = {
       disabled: PropTypes.bool,
     })
   ),
+  description: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
   subtitle: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
   title: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
 };
