@@ -12,6 +12,7 @@ import {
   has,
   head,
   isEmpty,
+  isNull,
   isNil,
   keys,
   map,
@@ -173,7 +174,7 @@ class SampleView extends React.Component {
         workflowRunId: workflowRunIdFromUrl || null,
         workflowRunResults: null,
         sharedWithNoBackground: !!(
-          selectedOptionsFromUrl && !selectedOptionsFromUrl.background
+          selectedOptionsFromUrl && isNull(selectedOptionsFromUrl.background)
         ),
       },
       nonNestedLocalState,
@@ -293,6 +294,7 @@ class SampleView extends React.Component {
       currentTab,
       pipelineVersion,
       selectedOptions,
+      sharedWithNoBackground,
     } = this.state;
     const sample = await getSample({ snapshotShareId, sampleId });
 
@@ -323,8 +325,9 @@ class SampleView extends React.Component {
     );
 
     if (
-      isEmpty(selectedBackground) ||
-      (!enableMassNormalizedBackgrounds && selectedBackground.mass_normalized)
+      (!sharedWithNoBackground && isEmpty(selectedBackground)) ||
+      (!enableMassNormalizedBackgrounds &&
+        get("mass_normalized", selectedBackground))
     ) {
       // When the selectedBackground is incompatible with the sample, set it to "None"
       // and show a popup about why it is not compatible.
@@ -357,9 +360,12 @@ class SampleView extends React.Component {
         selectedOptions: newSelectedOptions,
       },
       () => {
-        hasImprovedBackgroundModelSelectionFeature
-          ? this.fetchPersistedBackground({ projectId: sample.project.id })
-          : this.fetchSampleReportData({ selectedOptions: newSelectedOptions });
+        if (hasImprovedBackgroundModelSelectionFeature) {
+          this.fetchPersistedBackground({ projectId: sample.project.id });
+        } else {
+          this.fetchSampleReportData();
+        }
+
         // Updates the projectId in the Redux store to add global context in our analytic events
         updateDiscoveryProjectId(sample.project.id);
         this.fetchProjectSamples();
@@ -369,36 +375,45 @@ class SampleView extends React.Component {
   };
 
   fetchPersistedBackground = async ({ projectId }) => {
-    const { selectedOptions, sharedWithNoBackground } = this.state;
-    if (sharedWithNoBackground) return;
+    const { sharedWithNoBackground, selectedOptions } = this.state;
 
     if (projectId) {
-      let newBackground;
+      let persistedBackground;
       let hasPersistedBackground = false;
 
       await getPersistedBackground(projectId)
-        .then(({ background_id: persistedBackground }) => {
-          newBackground = persistedBackground;
+        .then(({ background_id: persistedBackgroundFetched }) => {
+          persistedBackground = persistedBackgroundFetched;
           hasPersistedBackground = true;
         })
         .catch(error => {
-          newBackground = null;
+          persistedBackground = null;
           console.error(error);
         });
 
       const newSelectedOptions = Object.assign({}, selectedOptions, {
-        background: newBackground,
+        background: persistedBackground,
       });
+
       this.setState(
         {
-          selectedOptions: newSelectedOptions,
+          ...(!sharedWithNoBackground && {
+            selectedOptions: newSelectedOptions,
+          }),
           hasPersistedBackground,
         },
-        () =>
-          this.refreshDataFromOptionsChange({
-            key: "background",
-            newSelectedOptions,
-          })
+        () => {
+          if (sharedWithNoBackground) {
+            this.fetchSampleReportData({
+              backgroundId: selectedOptions.background,
+            });
+          } else {
+            this.refreshDataFromOptionsChange({
+              key: "background",
+              newSelectedOptions,
+            });
+          }
+        }
       );
     }
   };
@@ -486,24 +501,20 @@ class SampleView extends React.Component {
       background => invalidBackgroundId === background.id
     );
 
-    this.setState(
-      {
-        selectedInvalidBackground: true,
-      },
-      () => {
-        this.handleOptionChanged({ key: "background", value: null });
-        this.showNotification(NOTIFICATION_TYPES.invalidBackground, {
-          backgroundName: invalidBackground.name,
-        });
-      }
-    );
+    this.handleOptionChanged({ key: "background", value: null });
+    this.showNotification(NOTIFICATION_TYPES.invalidBackground, {
+      backgroundName: invalidBackground.name,
+    });
   };
 
-  fetchSampleReportData = async ({ selectedOptions } = {}) => {
+  // backgroundId is an optional parameter here that can be omitted.
+  // If omitted, the sample report data will be fetched with the selectedOptions.background
+  fetchSampleReportData = async ({ backgroundId } = {}) => {
     const { snapshotShareId, sampleId } = this.props;
     const { allowedFeatures = [] } = this.context || {};
-    const { currentTab, pipelineVersion } = this.state;
+    const { currentTab, selectedOptions, pipelineVersion } = this.state;
 
+    const backgroundIdUsed = backgroundId || selectedOptions.background;
     let successfullyFetchedSampleReportData = false;
     const mergeNtNr =
       allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
@@ -513,27 +524,30 @@ class SampleView extends React.Component {
     await getSampleReportData({
       snapshotShareId,
       sampleId,
-      background: selectedOptions.background,
+      background: backgroundIdUsed,
       pipelineVersion,
       mergeNtNr,
     })
       .then(rawReportData => {
-        if (rawReportData) {
-          this.processRawSampleReportData(rawReportData);
-          successfullyFetchedSampleReportData = true;
-        }
-
-        this.setState(({ selectedOptions: prevSelectedOptions }) => ({
-          loadingReport: false,
-          // If the fetching of the sample report was triggered by a background model change,
-          // then update the background if the report loaded successfully.
-          ...(prevSelectedOptions.background !== selectedOptions.background && {
-            selectedOptions: {
-              ...selectedOptions,
-              background: selectedOptions.background,
-            },
+        this.setState(
+          ({ selectedOptions: prevSelectedOptions }) => ({
+            loadingReport: false,
+            // If the fetching of the sample report was triggered by a background model change,
+            // then update the background if the report loaded successfully.
+            ...(prevSelectedOptions.background !== backgroundIdUsed && {
+              selectedOptions: {
+                ...selectedOptions,
+                background: backgroundIdUsed,
+              },
+            }),
           }),
-        }));
+          () => {
+            if (rawReportData) {
+              this.processRawSampleReportData(rawReportData);
+              successfullyFetchedSampleReportData = true;
+            }
+          }
+        );
       })
       .catch(err => console.error(err));
 
@@ -761,7 +775,7 @@ class SampleView extends React.Component {
   };
 
   handlePipelineVersionSelect = newPipelineVersion => {
-    const { currentTab, pipelineVersion, sample, selectedOptions } = this.state;
+    const { currentTab, pipelineVersion, sample } = this.state;
 
     if (newPipelineVersion === pipelineVersion) {
       return;
@@ -781,7 +795,7 @@ class SampleView extends React.Component {
         },
         () => {
           this.updateHistoryAndPersistOptions();
-          this.fetchSampleReportData({ selectedOptions });
+          this.fetchSampleReportData();
           this.fetchCoverageVizData();
         }
       );
@@ -875,7 +889,7 @@ class SampleView extends React.Component {
   };
 
   persistNewBackgroundModelSelection = async ({ newBackgroundId }) => {
-    const { hasPersistedBackground, project } = this.state;
+    const { hasPersistedBackground, project, selectedOptions } = this.state;
 
     const persistBackgroundApi = !hasPersistedBackground
       ? createPersistedBackground
@@ -900,6 +914,7 @@ class SampleView extends React.Component {
     this.setState(
       {
         hasPersistedBackground: true,
+        selectedOptions: { ...selectedOptions, background: newBackgroundId },
       },
       () => this.updateHistoryAndPersistOptions()
     );
@@ -1045,8 +1060,10 @@ class SampleView extends React.Component {
       case "background":
         // Only update the background in the selectedOptions if the report loaded successfully.
         updateSelectedOptions = false;
-        this.setState({ reportData: [] }, () => {
-          this.fetchSampleReportData({ selectedOptions: newSelectedOptions })
+        this.setState({ sharedWithNoBackground: false, reportData: [] }, () => {
+          this.fetchSampleReportData({
+            backgroundId: newSelectedOptions.background,
+          })
             .then(successfullyFetchedSampleReportData => {
               if (
                 allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE)
