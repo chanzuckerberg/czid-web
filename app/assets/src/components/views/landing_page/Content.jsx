@@ -4,11 +4,11 @@ import IconMatchesFigure from "~/components/ui/icons/IconMatchesFigure";
 import IconSampleFigure from "~/components/ui/icons/IconSampleFigure";
 import IconUploadFigure from "~/components/ui/icons/IconUploadFigure";
 import CtaButton from "~/components/views/landing_page/CtaButton";
-import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure-2x.png";
+import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure.svg";
 import HealthQuestionsMobileFigure from "~/images/landing_page/health-questions-mobile.svg";
+import LaptopImg from "~/images/landing_page/idseq-laptop-2x.png";
 import KniAccordion from "./Accordion";
 import cs from "./Content.scss";
-import LaptopRotator from "./LaptopRotator";
 import { Publications, News } from "./PublicationsAndNews";
 import PublicationStyles from "./PublicationsAndNews.scss";
 import QuoteSlider from "./QuoteSlider";
@@ -38,8 +38,7 @@ const Content = () => {
             />
         </div>
         <div className={cs.summaryImage}>
-          {/* <img src={LaptopImg} alt="" /> */}
-          <LaptopRotator />
+          <img src={LaptopImg} alt="" />
         </div>
       </section>
       <section className={cs.healthQuestions}>

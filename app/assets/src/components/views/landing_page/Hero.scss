@@ -20,9 +20,7 @@
 
   @media (max-width: 768px) {
     text-align: left;
-    padding-top: 40px;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
+    padding: 40px $space-xl 0;
     background: url("../../../images/landing_page/idseq-hero-mobile.svg");
     background-color: $black;
     background-repeat: no-repeat;

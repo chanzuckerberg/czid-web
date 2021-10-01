@@ -18,6 +18,7 @@
 
   input,
   button {
+    font-family: $font-family-sans-serif;
     @include font-body-m;
     border: none;
 
@@ -27,7 +28,7 @@
       max-width: 350px;
       padding: unset;
       text-align: center;
-      padding: 0.75rem 0;
+      padding: $space-xl 0;
     }
   }
 
@@ -37,11 +38,11 @@
     padding: 13px 0 13px 38px;
 
     &::placeholder {
-      color: $gray-darkest;
+      color: $gray-dark;
     }
 
     @media (max-width: 768px) {
-      border-radius: 826px;
+      border-radius: $border-radius-m;
       margin-bottom: 7px;
       width: 100%;
       padding: 13px;
@@ -60,7 +61,7 @@
     }
 
     @media (max-width: 768px) {
-      border-radius: 826px;
+      border-radius: $border-radius-m;
       width: 100%;
     }
 

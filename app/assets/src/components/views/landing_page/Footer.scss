@@ -23,6 +23,16 @@
   }
 }
 
+.footerLogo {
+  width: 113px;
+  height: 32px;
+
+  @media (max-width: 768px) {
+    width: 92px;
+    height: 26px;
+  }
+}
+
 .topNavContainer {
   display: flex;
   align-items: center;

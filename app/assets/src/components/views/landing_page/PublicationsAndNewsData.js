@@ -3,7 +3,7 @@ const publicationsData = [
     publicationLink: `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7941666/`,
     publicationDate: `03.03.21`,
     publicationTitle: `Peng J et al.: Estimation of secondary household attack rates for emergent SARS-CoV-2 variants detected by genomic surveillance at a community-based testing site in San Francisco.`,
-    publicationSource: `medRxiv, 2021 doi:10.1101/2021.03.01.21252705`,
+    publicationSource: `doi:10.1101/2021.03.01.21252705`,
     publicationCompany: `medRxiv`,
   },
   {
@@ -14,11 +14,11 @@ const publicationsData = [
     publicationCompany: `Nature`,
   },
   {
-    publicationLink: `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7941666/`,
-    publicationDate: `03.03.21`,
+    publicationLink: `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7217139/`,
+    publicationDate: `03.05.20`,
     publicationTitle: `Manning JE et al.: Rapid metagenomic characterization of a case of imported COVID-19 in Cambodia.`,
-    publicationSource: `medRxiv, 2021 doi:10.1101/2021.03.01.21252705`,
-    publicationCompany: `medRxiv`,
+    publicationSource: `doi:10.1101/2020.03.02.968818`,
+    publicationCompany: `bioRxiv`,
   },
 ];
 

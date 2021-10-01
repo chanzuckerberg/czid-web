@@ -26,9 +26,6 @@ const LaptopRotator = () => {
 
   return (
     <div className={cs.laptopImage}>
-        <style dangerouslySetInnerHTML={{__html: ` 
-            .laptop-slider .slick-list,.laptop-slider .slick-track{transform:translate3d(7.8%,-137.3%,0)}@media (max-width:1600px){.laptop-slider .slick-list,.laptop-slider .slick-track{transform:translate3d(7.7%,-136.9%,0)}}@media (max-width:576px){.laptop-slider .slick-list,.laptop-slider .slick-track{transform:translate3d(7.7%,-136.2%,0)}}@media (max-width:450px){.laptop-slider .slick-list,.laptop-slider .slick-track{transform:translate3d(7.7%,-135.7%,0)}}@media (max-width:350px){.laptop-slider .slick-list,.laptop-slider .slick-track{transform:translate3d(7.7%,-135.3%,0)}}button.slick-arrow.slick-next,button.slick-arrow.slick-prev{display:none!important}.slick-slide div{outline:0}
-        `}}/>
         <Slider {...settings} className={`laptop-slider ${cs.slider}`} >
             <div className={cs.carouselCell}>
                 <img 

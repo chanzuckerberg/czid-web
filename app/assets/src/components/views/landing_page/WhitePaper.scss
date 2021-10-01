@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .whitePaper {
   position: relative;
@@ -24,7 +25,7 @@
     z-index: 2;
     margin: 0 auto;
     overflow: hidden;
-    padding: 0 20px;
+    padding: 0 $space-xl;
     text-decoration: none;
 
     @media (min-width: 769px) {
@@ -60,12 +61,13 @@
       h2 {
         color: $black;
         @include font-header-xl;
-        margin: 0;
+        margin-bottom: $space-l;
       }
 
       p {
         color: $gray-darkest;
-        margin: 2em 0;
+        margin-bottom: $space-xl;
+        @include font-body-s;
 
         @media (max-width: 768px) {
           margin: 1em 0 2em 0;

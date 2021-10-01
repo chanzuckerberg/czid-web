@@ -13,7 +13,7 @@
     }
 
     @media (max-width: 576px) {
-      @include font-header-m;
+      @include font-header-xl;
     }
   }
 }
@@ -27,7 +27,7 @@
   }
   
   a {
-    margin-top: 30px;
+    margin-top: $space-xl;
   }
 
   @media (max-width: 768px) {
@@ -38,17 +38,19 @@
 .summaryText {
 
   @media (max-width: 768px) {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: $space-xl;
+    padding-right: $space-xl;
   }
   
   h2 {
     margin: 0;
+    margin-bottom: $space-l;
   }
 
   p {
     @include font-body-m;
-    margin-top: 30px;
+    margin: 0px;
+    color: $gray-darkest;
 
     @media (max-width: 768px) {
       @include font-body-s;
@@ -86,13 +88,16 @@
   margin: 4rem auto 5rem auto;
 
   @media (max-width: 768px) {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
+    padding-left: $space-xl;
+    padding-right: $space-xl;
+  }
+
+  h2 {
+    margin-bottom: $space-l;
   }
 
   figure {
     display: inline-block;
-    margin-top: 2rem;
 
     @media (max-width: 768px) {
       margin-left: 0;
@@ -125,8 +130,12 @@
   text-align: center;
 
   @media (max-width: 768px) {
-    padding-right: 0.75rem;
-    padding-left: 0.75rem;
+    padding-right: $space-xl;
+    padding-left: $space-xl;
+  }
+
+  h2 {
+    margin-bottom: $space-l;
   }
 
   p {
@@ -208,14 +217,10 @@
 
   h2 {
     text-align: center;
-    margin-bottom: 3rem;
-
-    @media (max-width: 576px) {
-      margin-bottom: 1rem;
-    }
+    margin-bottom: $space-l;
   }
 
   a {
-    margin: 3rem auto;
+    margin: $space-xl auto 3rem;
   }
 }

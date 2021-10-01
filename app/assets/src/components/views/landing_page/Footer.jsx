@@ -9,7 +9,7 @@ const Footer = () => {
     <div className={cs.footer}>
       <div className={cs.topNavContainer}>
         <a aria-label="Go to the IDseq homepage" href="/">
-          <LogoReversed />
+          <LogoReversed className={cs.footerLogo} />
         </a>
         <div className={cs.topNavMenu}>
           <a
@@ -72,7 +72,6 @@ const Footer = () => {
           </div>
         </div>
         <div className={cs.czLogoContainer}>
-          <p>In partnership with:</p>
           <div className={cs.czLogoInnerContainer}>
             <div>
               <a

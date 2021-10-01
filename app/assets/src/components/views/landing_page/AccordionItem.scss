@@ -18,8 +18,6 @@
   outline: none;
   transition: 0.4s;
   position: relative;
-  margin-left: 15px;
-  margin-right: 15px;
 
   @media (max-width: 768px) {
     padding-left: 65px;
@@ -39,6 +37,7 @@
 
   p {
     color: $gray-darkest;
+    margin-top: 1em;
   }
 
   &:first-of-type {
@@ -70,10 +69,10 @@
 }
 
 .accordionText {
-  @include font-body-m;
+  @include font-body-s;
 
   @media (max-width: 768px) {
-    @include font-body-xxxs;
+    @include font-body-xs;
     text-indent: 0px;
   }
 }
@@ -85,11 +84,15 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
-  margin-top: 1em;
 
   a {
     color: $primary !important;
-    text-decoration: underline !important;
+    text-decoration: none !important;
+
+    &:hover,
+    &:active {
+      color: $primary-darkest !important;
+    }
   }
 
   @media (max-width: 768px) {

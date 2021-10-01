@@ -10,7 +10,17 @@
   align-items: center;
 
   @media (max-width: 768px) {
-    padding: 17px 20px;
+    padding: 17px $space-xl;
+  }
+}
+
+.headerLogo {
+  width: 140px;
+  height: 40px;
+  
+  @media (max-width: 768px) {
+    width: 92px;
+    height: 26px;
   }
 }
 
