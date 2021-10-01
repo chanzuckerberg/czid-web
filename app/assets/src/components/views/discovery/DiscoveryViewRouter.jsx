@@ -24,6 +24,7 @@ const DiscoveryViewRouter = ({
   browserInfo,
   contactEmail,
   domain,
+  landingV2,
   mapTilerKey,
   projectId,
   showAnnouncementBanner,
@@ -60,6 +61,18 @@ const DiscoveryViewRouter = ({
           />
         )}
       />
+      <Route
+        path="/pub/:snapshotShareId"
+        render={({ match }) => (
+          <DiscoveryView
+            domain={domain}
+            projectId={projectId}
+            snapshotProjectDescription={snapshotProjectDescription}
+            snapshotProjectName={snapshotProjectName}
+            snapshotShareId={match.params.snapshotShareId}
+          />
+        )}
+      />
       {userSignedIn && (
         <Route exact path="/landing_v2">
           <LandingV2 />
@@ -81,13 +94,17 @@ const DiscoveryViewRouter = ({
         </Route>
       ) : (
         <Route>
-          <Landing
-            browserInfo={browserInfo}
-            contactEmail={contactEmail}
-            showAnnouncementBanner={showAnnouncementBanner}
-            showBulletin={showBulletin}
-            showPublicSite={showPublicSite}
-          />
+          {landingV2 ? (
+            <LandingV2 />
+          ) : (
+            <Landing
+              browserInfo={browserInfo}
+              contactEmail={contactEmail}
+              showAnnouncementBanner={showAnnouncementBanner}
+              showBulletin={showBulletin}
+              showPublicSite={showPublicSite}
+            />
+          )}
         </Route>
       )}
     </Switch>
@@ -100,6 +117,7 @@ DiscoveryViewRouter.propTypes = {
   browserInfo: PropTypes.object,
   contactEmail: PropTypes.string,
   domain: PropTypes.oneOf(DISCOVERY_DOMAINS),
+  landingV2: PropTypes.bool,
   mapTilerKey: PropTypes.string,
   projectId: PropTypes.number,
   showAnnouncementBanner: PropTypes.bool,

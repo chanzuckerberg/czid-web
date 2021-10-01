@@ -12,58 +12,59 @@ const Footer = () => {
           <LogoReversed />
         </a>
         <div className={cs.topNavMenu}>
-          <a 
+          <a
             href="https://discoveridseq.com/vr"
-            aria-label="Take a 360° Video Tour to see how a local researcher quickly detects the source of a meningitis outbreak in Dhaka, Bangladesh, using IDseq technology. (opens in new window)" 
-            target="_blank" 
+            aria-label="Take a 360° Video Tour to see how a local researcher quickly detects the source of a meningitis outbreak in Dhaka, Bangladesh, using IDseq technology. (opens in new window)"
+            target="_blank"
             rel="noreferrer"
-            >
-              Experience IDseq&apos;s Impact
+          >
+            Experience IDseq&apos;s Impact
           </a>
-          <a 
+          <a
             href="https://github.com/chanzuckerberg/idseq-workflows"
             aria-label="View the repo for idseq-workflows on GitHub (opens in new window)"
-            target="_blank" 
+            target="_blank"
             rel="noreferrer"
-            >
-              Github
+          >
+            Github
           </a>
-          <a 
-            href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2215049"
+          <a
+            // NOTE(2021-09-30): Alternatively there is https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2931482 as of now.
+            href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/3293983"
             aria-label="View the Chan Zuckerberg Initiative careers page (opens in new window)"
-            target="_blank" 
+            target="_blank"
             rel="noreferrer"
-            >
-              Careers
+          >
+            Careers
           </a>
-          <a 
+          <a
             href="http://help.idseq.net"
             aria-label="View the IDseq help page (opens in new window)"
-            target="_blank" 
+            target="_blank"
             rel="noreferrer"
-            >
-              Resources
+          >
+            Resources
           </a>
         </div>
       </div>
       <div className={cs.bottomNavContainer}>
         <div className={cs.bottomNavMenu}>
           <div>
-            <a 
-              href="http://idseq.net/privacy" 
-              aria-label="View the IDseq privacy policy (opens in new window)" 
-              target="_blank" 
+            <a
+              href="http://idseq.net/privacy"
+              aria-label="View the IDseq privacy policy (opens in new window)"
+              target="_blank"
               rel="noreferrer"
-              >
+            >
               Privacy
             </a>
             <span>|</span>
-            <a 
+            <a
               href="http://idseq.net/terms"
-              aria-label="View the IDseq terms of use (opens in new window)" 
-              target="_blank" 
+              aria-label="View the IDseq terms of use (opens in new window)"
+              target="_blank"
               rel="noreferrer"
-              >
+            >
               Terms
             </a>
             <span>|</span>
@@ -74,25 +75,25 @@ const Footer = () => {
           <p>In partnership with:</p>
           <div className={cs.czLogoInnerContainer}>
             <div>
-              <a 
+              <a
                 href="https://chanzuckerberg.com/"
-                className={cs.cziLogo} 
-                aria-label="View the Chan Zuckerberg Initiative website (opens in new window)" 
-                target="_blank" 
-                rel="noreferrer" 
-                >
+                className={cs.cziLogo}
+                aria-label="View the Chan Zuckerberg Initiative website (opens in new window)"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <IconCziLogo />
               </a>
             </div>
             <div className={cs.separator}></div>
             <div>
-              <a 
+              <a
                 href="https://www.czbiohub.org/"
-                className={cs.biohubLogo} 
-                aria-label="View the Chan Zuckerberg Biohub website (opens in new window)" 
-                target="_blank" 
-                rel="noreferrer" 
-                >
+                className={cs.biohubLogo}
+                aria-label="View the Chan Zuckerberg Biohub website (opens in new window)"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <IconBiohubLogo />
               </a>
             </div>

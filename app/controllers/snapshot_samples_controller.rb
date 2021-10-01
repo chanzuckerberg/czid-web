@@ -109,7 +109,7 @@ class SnapshotSamplesController < SamplesController
   def backgrounds
     @snapshot = SnapshotLink.find_by(share_id: snapshot_sample_params[:share_id])
     @backgrounds = @snapshot.fetch_snapshot_backgrounds
-    render json: { backgrounds: @backgrounds }
+    render json: { backgrounds: @backgrounds, other_backgrounds: @backgrounds, owned_backgrounds: [] }
   end
 
   # GET /pub/:share_id/samples/stats.json

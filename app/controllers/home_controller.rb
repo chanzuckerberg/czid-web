@@ -14,6 +14,12 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
+      launched = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
+      if launched.include?("landing_v2")
+        @hide_header = true
+        @landing_v2 = true
+      end
+
       @show_bulletin = false
       if get_app_config(AppConfig::SHOW_LANDING_VIDEO_BANNER) == "1"
         @show_bulletin = true

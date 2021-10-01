@@ -9,7 +9,8 @@
         showBulletin: <%= !!@show_bulletin %>,
         browserInfo: <%= @browser_info.to_json.html_safe %>,
         showAnnouncementBanner: <%= !!@show_announcement_banner %>,
-        showPublicSite: <%= !!@show_public_site %>
+        showPublicSite: <%= !!@show_public_site %>,
+        landingV2: <%= !!@landing_v2 %>
       },
       'landing_page',
       JSON.parse('<%= raw escape_json(user_context)%>')
