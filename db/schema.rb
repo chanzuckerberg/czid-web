@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_921_193_227) do
+ActiveRecord::Schema.define(version: 20_210_930_202_445) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -129,6 +129,14 @@ ActiveRecord::Schema.define(version: 20_210_921_193_227) do
     t.bigint "workflow_run_id", null: false
     t.index ["bulk_download_id"], name: "index_bulk_downloads_workflow_runs_on_bulk_download_id"
     t.index ["workflow_run_id"], name: "index_bulk_downloads_workflow_runs_on_workflow_run_id"
+  end
+
+  create_table "citations", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.string "key", null: false, comment: "Key used to identify the citation (ie. niaid_2020)."
+    t.string "footnote", null: false, comment: "Use MLA footnote citation style."
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["key"], name: "index_citations_on_key", unique: true
   end
 
   create_table "contigs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -329,13 +337,15 @@ ActiveRecord::Schema.define(version: 20_210_921_193_227) do
     t.bigint "creator_id", comment: "The user_id that created the pathogen list. Null if the list is admin-managed."
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "is_global", default: false, null: false
   end
 
   create_table "pathogens", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.integer "tax_id", null: false, comment: "The taxon id of the pathogen."
-    t.string "source", null: false, comment: "A constant representing the pathogen source (ie. NIAID_2019)."
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "citation_id"
+    t.index ["citation_id"], name: "index_pathogens_on_citation_id"
   end
 
   create_table "persisted_backgrounds", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -795,6 +805,8 @@ ActiveRecord::Schema.define(version: 20_210_921_193_227) do
   add_foreign_key "metadata_fields_projects", "metadata_fields", name: "metadata_fields_projects_metadata_field_id_fk"
   add_foreign_key "metadata_fields_projects", "projects", name: "metadata_fields_projects_project_id_fk"
   add_foreign_key "output_states", "pipeline_runs", name: "output_states_pipeline_run_id_fk"
+  add_foreign_key "pathogen_list_versions", "pathogen_lists"
+  add_foreign_key "pathogens", "citations"
   add_foreign_key "phylo_trees", "projects", name: "phylo_trees_project_id_fk"
   add_foreign_key "phylo_trees", "users", name: "phylo_trees_user_id_fk"
   add_foreign_key "phylo_trees_pipeline_runs", "phylo_trees", name: "phylo_trees_pipeline_runs_phylo_tree_id_fk"
