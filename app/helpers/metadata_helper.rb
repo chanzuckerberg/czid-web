@@ -347,7 +347,7 @@ module MetadataHelper
 
         host_age_index = metadata["headers"].find_index { |header| "Host Age".include?(header) }
 
-        if host_genome.name == "Human" && host_age_index.present?
+        if host_genome.name == "Human" && !host_age_index.nil?
           human_age = row[host_age_index].to_i
 
           # Maximum human age is specified in FIELDS_THAT_HAVE_MAX_INPUT
