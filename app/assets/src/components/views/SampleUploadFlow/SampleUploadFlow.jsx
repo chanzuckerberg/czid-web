@@ -1,7 +1,8 @@
 import cx from "classnames";
-import { get, without, flow, omit, set, find } from "lodash/fp";
+import { get, without, flow, omit, set, find, min } from "lodash/fp";
 import React from "react";
 
+import { FIELDS_THAT_HAVE_MAX_INPUT } from "~/components/common/Metadata/constants";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 
@@ -102,6 +103,18 @@ class SampleUploadFlow extends React.Component {
         },
         updatedHostGenomes
       ).id;
+
+      // Enforce hipaa compliant host age
+      if (hostGenomeName.toLowerCase() === "human") {
+        const maxValue = FIELDS_THAT_HAVE_MAX_INPUT["host_age"];
+        metadata.rows.map(row => {
+          if ("Host Age" in row) {
+            const parsedValue = Number.parseInt(row["host_age"]);
+            const hipaaCompliantVal = min([parsedValue, maxValue + 1]);
+            row["host_age"] = hipaaCompliantVal.toString();
+          }
+        });
+      }
 
       return {
         ...sample,

@@ -164,6 +164,10 @@ module ErrorHelper
         headers: ["Column #", "Field"],
         title: ->(num_cols, _) { "#{num_cols} new custom fields will be created. Please check our metadata dictionary to see if your fields are listed under different names." },
       },
+      human_age_hipaa_compliance: {
+        headers: ["Row #", "Sample Name", "Host Age"],
+        title: ->(num_rows, _) { "The host age of #{num_rows} samples will be updated to ≥ 90 to comply with HIPAA indentifier age rule." },
+      },
     }.freeze
 
     def initialize

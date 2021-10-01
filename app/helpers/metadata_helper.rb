@@ -345,6 +345,17 @@ module MetadataHelper
           next
         end
 
+        host_age_index = metadata["headers"].find_index { |header| "Host Age".include?(header) }
+
+        if host_genome.name == "Human" && host_age_index.present?
+          human_age = row[host_age_index].to_i
+
+          # Maximum human age is specified in FIELDS_THAT_HAVE_MAX_INPUT
+          if human_age >= 90
+            warning_aggregator.add_error(:human_age_hipaa_compliance, [index + 1, sample.name, "≥ 90"])
+          end
+        end
+
         sample.host_genome = host_genome
       end
 
