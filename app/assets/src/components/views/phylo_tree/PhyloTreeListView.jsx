@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { set, find } from "lodash/fp";
+import { set, find, isUndefined } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -35,7 +35,11 @@ import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
 import PhyloTreeHeatmapErrorModal from "~/components/views/phylo_tree/PhyloTreeHeatmapErrorModal";
 import ToolbarIcon from "~/components/views/samples/SamplesView/ToolbarIcon";
-import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
+import {
+  copyShortUrlToClipboard,
+  getURLParamString,
+  parseUrlParams,
+} from "~/helpers/url";
 import Link from "~ui/controls/Link";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import { IconAlert, IconInfoSmall, IconLoading } from "~ui/icons";
@@ -107,6 +111,18 @@ class PhyloTreeListView extends React.Component {
 
     if (selectedPhyloTreeNgId) {
       const currentTree = await getPhyloTreeNg(selectedPhyloTreeNgId);
+
+      // Add a parameter to the URL to indicate whether or not a heatmap is being displayed
+      // for Appcue survey purposes.
+      const heatmapURLParam = getURLParamString({
+        heatmap: !isUndefined(currentTree.clustermap_svg_url),
+      });
+      window.history.replaceState(
+        window.history.state,
+        document.title,
+        `/phylo_tree_ngs/${selectedPhyloTreeNgId}?${heatmapURLParam}`
+      );
+
       this.setState({
         currentTree,
         showOldTreeWarning: false,
@@ -136,6 +152,7 @@ class PhyloTreeListView extends React.Component {
   handleTreeChange = async (newPhyloTreeId, nextGeneration = false) => {
     if (nextGeneration) {
       const currentTree = await getPhyloTreeNg(newPhyloTreeId);
+
       this.setState({
         currentTree,
         selectedPhyloTreeId: null,
@@ -144,10 +161,16 @@ class PhyloTreeListView extends React.Component {
         sidebarVisible: false,
       });
 
+      // Add a parameter to the URL to indicate whether or not a heatmap is being displayed
+      // for Appcue survey purposes.
+      const heatmapURLParam = getURLParamString({
+        heatmap: !isUndefined(currentTree.clustermap_svg_url),
+      });
+
       window.history.replaceState(
         window.history.state,
         document.title,
-        `/phylo_tree_ngs/${newPhyloTreeId}`
+        `/phylo_tree_ngs/${newPhyloTreeId}?${heatmapURLParam}`
       );
       // NG isn't using the sessionStorage 'default tree' functionality
 
