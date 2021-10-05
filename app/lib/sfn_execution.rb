@@ -35,8 +35,10 @@ class SfnExecution
     return if @execution_arn.blank?
 
     AwsClient[:states].stop_execution(execution_arn: @execution_arn)
-
     wait_until_finalized if wait
+    true
+  rescue Aws::States::Errors::ExecutionDoesNotExist
+    false
   end
 
   def output_path(output_key)
