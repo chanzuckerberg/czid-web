@@ -74,6 +74,7 @@ const Table = ({
       onSort={handleSort}
       rowCount={sortedData.length}
       rowGetter={({ index }) => sortedData[index]}
+      selectableKey={selectableKey}
       selectAllChecked={isSelectAllChecked()}
       selected={selected}
       sortable={sortable}
