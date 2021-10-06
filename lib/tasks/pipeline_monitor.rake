@@ -39,7 +39,10 @@ class CheckPipelineRuns
     pr_ids.each do |prid|
       next unless prid % num_shards == shard_id
 
-      pr = PipelineRun.find(prid)
+      pr = PipelineRun.find_by(id: prid)
+      next unless pr
+      next if pr.sample.destroyed?
+
       begin
         break if @shutdown_requested
 
