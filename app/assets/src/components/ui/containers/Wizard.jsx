@@ -176,7 +176,7 @@ class Wizard extends React.Component {
                 <SecondaryButton
                   text={this.labels.back}
                   onClick={this.handleBackClick}
-                  rounded={false}
+                  rounded={true}
                 />
               )}
               {this.state.currentPage < this.props.children.length - 1 && (
@@ -184,14 +184,14 @@ class Wizard extends React.Component {
                   text={this.labels.continue}
                   onClick={this.handleContinueClick}
                   disabled={!this.state.continueEnabled}
-                  rounded={false}
+                  rounded={true}
                 />
               )}
               {this.state.currentPage === this.props.children.length - 1 && (
                 <PrimaryButton
                   text={this.labels.finish}
                   onClick={this.handleFinishClick}
-                  rounded={false}
+                  rounded={true}
                 />
               )}
             </div>

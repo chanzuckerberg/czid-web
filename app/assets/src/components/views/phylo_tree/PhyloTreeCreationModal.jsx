@@ -919,7 +919,7 @@ class PhyloTreeCreationModal extends React.Component {
     const { defaultPage, phyloTreesLoaded, skipListTrees } = this.state;
 
     return (
-      <Modal open tall onClose={onClose}>
+      <Modal open tall onClose={onClose} xlCloseIcon={true}>
         {phyloTreesLoaded ? (
           <Wizard
             className="phylo-tree-creation-wizard"

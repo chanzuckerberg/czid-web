@@ -16,6 +16,7 @@ class Modal extends React.Component {
       tall,
       wide,
       className,
+      xlCloseIcon,
       ...extraProps
     } = this.props;
 
@@ -39,13 +40,20 @@ class Modal extends React.Component {
           <SemanticModal.Header>{this.props.title}</SemanticModal.Header>
         )}
         {this.props.onClose && (
-          <IconClose className={cs.closeIcon} onClick={this.props.onClose} />
+          <IconClose
+            className={cx(cs.closeIcon, xlCloseIcon && cs.xl)}
+            onClick={this.props.onClose}
+          />
         )}
         <SemanticModal.Content>{this.props.children}</SemanticModal.Content>
       </SemanticModal>
     );
   }
 }
+
+Modal.defaultProps = {
+  xlCloseIcon: false,
+};
 
 Modal.propTypes = forbidExtraProps({
   children: PropTypes.oneOfType([
@@ -62,6 +70,7 @@ Modal.propTypes = forbidExtraProps({
   wide: PropTypes.bool, // Increase the width of the Modal for the wider modals.
   tall: PropTypes.bool, // Increase the max-height of the Modal for tall content.
   title: PropTypes.string,
+  xlCloseIcon: PropTypes.bool,
 });
 
 export default Modal;

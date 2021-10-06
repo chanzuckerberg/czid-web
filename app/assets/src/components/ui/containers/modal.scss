@@ -12,10 +12,15 @@
     right: 20px;
     top: 20px;
     cursor: pointer;
-    width: 20px;
-    height: 20px;
+    width: $icon-l;
+    height: $icon-l;
     opacity: 0.3;
     fill: $gray-darkest;
+
+    &.xl {
+      width: $icon-xl;
+      height: $icon-xl;
+    }
 
     &:hover {
       opacity: 1;
