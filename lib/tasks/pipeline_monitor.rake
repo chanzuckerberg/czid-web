@@ -41,7 +41,7 @@ class CheckPipelineRuns
 
       pr = PipelineRun.find_by(id: prid)
       next unless pr
-      next if pr.sample.destroyed?
+      next if !pr.sample || pr.sample.destroyed?
 
       begin
         break if @shutdown_requested
