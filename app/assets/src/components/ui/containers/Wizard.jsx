@@ -16,7 +16,7 @@ class Wizard extends React.Component {
 
     this.state = {
       currentPage: 0,
-      continueEnabled: true,
+      continueEnabled: false,
       overlay: null,
     };
 

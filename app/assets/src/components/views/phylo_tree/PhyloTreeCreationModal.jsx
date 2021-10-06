@@ -212,8 +212,10 @@ class PhyloTreeCreationModal extends React.Component {
       nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
     }).then(({ samples }) => this.handleNewTreeContextResponse(samples));
 
-    const continueEnabled = !isEmpty(treeName);
-    this.wizard.current.handleContinueEnabled(continueEnabled);
+    if (this.wizard.current) {
+      const continueEnabled = !isEmpty(treeName);
+      this.wizard.current.handleContinueEnabled(continueEnabled);
+    }
   };
 
   handleNewTreeContextResponse = samples => {
@@ -315,8 +317,10 @@ class PhyloTreeCreationModal extends React.Component {
       this.handleProjectSearchContextResponse(projectList)
     );
 
-    const continueEnabled = this.state.taxonId && this.state.projectId;
-    this.wizard.current.handleContinueEnabled(continueEnabled);
+    if (this.wizard.current) {
+      const continueEnabled = this.state.taxonId && this.state.projectId;
+      this.wizard.current.handleContinueEnabled(continueEnabled);
+    }
   };
 
   handleProjectSearchContextResponse = projectList =>
@@ -344,8 +348,11 @@ class PhyloTreeCreationModal extends React.Component {
           }
         )
     );
-    const taxonSelected = !isUndefined(this.state.taxonId);
-    this.wizard.current.handleContinueEnabled(taxonSelected);
+
+    if (this.wizard.current) {
+      const taxonSelected = !isUndefined(this.state.taxonId);
+      this.wizard.current.handleContinueEnabled(taxonSelected);
+    }
   };
 
   handleSelectTaxon = (_, { result }) => {
@@ -370,8 +377,11 @@ class PhyloTreeCreationModal extends React.Component {
           }
         )
     );
-    const projectSelected = !isUndefined(this.state.projectId);
-    this.wizard.current.handleContinueEnabled(projectSelected);
+
+    if (this.wizard.current) {
+      const projectSelected = !isUndefined(this.state.projectId);
+      this.wizard.current.handleContinueEnabled(projectSelected);
+    }
   };
 
   setPage = defaultPage => this.setState({ defaultPage });
@@ -570,8 +580,10 @@ class PhyloTreeCreationModal extends React.Component {
       treeNameValid: valid,
     });
 
-    const continueEnabled = !isEmpty(sanitizedName);
-    this.wizard.current.handleContinueEnabled(continueEnabled);
+    if (this.wizard.current) {
+      const continueEnabled = !isEmpty(sanitizedName);
+      this.wizard.current.handleContinueEnabled(continueEnabled);
+    }
 
     return valid;
   };
