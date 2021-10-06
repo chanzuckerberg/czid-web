@@ -31,6 +31,7 @@ class SfnExecution
     end
   end
 
+  # Not currently in use but keeping for future admin controls
   def stop_execution(wait = false)
     return if @execution_arn.blank?
 

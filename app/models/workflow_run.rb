@@ -190,9 +190,6 @@ class WorkflowRun < ApplicationRecord
     prefix = s3_output_prefix || sample.sample_output_s3_path
     return if prefix.blank?
 
-    # wait until finalized so we can be confident that we won't write to s3 again after this
-    #   this allows us to delete from s3 after calling this
-    sfn_execution.stop_execution(true)
     S3Util.delete_s3_prefix(prefix)
   end
 

@@ -17,7 +17,6 @@ class MonitorPipelineResults
       Instrument.snippet(name: "Pipeline Run Loop", cloudwatch_namespace: instrumentation_namespace) do
         PipelineRun.results_in_progress.each do |pr|
           break if @shutdown_requested
-          next if !pr.sample || pr.sample.destroyed?
 
           Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
           pr.monitor_results

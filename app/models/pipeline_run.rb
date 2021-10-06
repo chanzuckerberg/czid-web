@@ -860,9 +860,6 @@ class PipelineRun < ApplicationRecord
   def cleanup
     return if sfn_output_path.blank?
 
-    # wait until finalized so we can be confident that we won't write to s3 again after this
-    #   this allows us to delete from s3 after calling this
-    SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_output_path).stop_execution(true)
     S3Util.delete_s3_prefix(sfn_output_path)
   end
 

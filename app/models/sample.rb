@@ -637,7 +637,7 @@ class Sample < ApplicationRecord
 
   def deletable?(user)
     if user.admin?
-      return true
+      return pipeline_runs.all? { |pr| pr.report_failed? || pr.succeeded? }
     elsif user_id == user.id
       # Sample belongs to the user
       # Allow deletion if no pipeline runs, or report failed.
