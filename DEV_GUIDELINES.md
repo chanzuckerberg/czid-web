@@ -183,6 +183,19 @@ Table.propTypes = {
 };
 ```
 
+### Accessibility (a11y)
+
+We have some accessibility rules defined in `.eslintrc-a11y.json` (you can run `./node_modules/.bin/eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx`).
+
+#### _Visible, non-interactive elements with click handlers must have at least one keyboard listener_
+
+- Try adding an `onKeyDown` with the same handler as the `onClick`. When the element is focused, this gives non-mouse users a keyboard option.
+  - Example: `onClick={this.handleClick} onKeyDown={this.handleClick}`
+
+#### _Static HTML elements with event handlers require a role_
+
+- You can add an [ARIA role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques), although there may be other warnings resulting from the rule addition.
+
 ### Other Best Practices
 
 - **Don't Mutate Objects:** Always create a new object/array when modifying component state, instead of modifying the original object (even if you call `setState` afterward). This allows React to figure out if props have changed by via shallow comparison, and allows for future rendering optimizations using `React.PureComponent`. `lodash/fp` functions are immutable and do this by default.
@@ -215,7 +228,6 @@ This makes it easier to add/remove arguments, reason about long lists of argumen
 
 ## _React-D3 integration_
 
-_WIP_
 D3 code should be created in plain JS (no JSX) and should be placed in separate files for React code.
 
 ## Icons
