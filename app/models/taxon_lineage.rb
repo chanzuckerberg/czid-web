@@ -160,6 +160,10 @@ class TaxonLineage < ApplicationRecord
       .where('? BETWEEN version_start AND version_end', lineage_version)
   end
 
+  def self.fetch_category_by_taxid(taxids)
+    TaxonLineage.where(taxid: taxids).pluck(:taxid, :superkingdom_name).to_h
+  end
+
   def self.fetch_lineage_by_taxid(tax_map, pipeline_run_id)
     t0 = Time.now.to_f
     # Get list of tax_ids to look up in TaxonLineage rows. Include family_taxids.
