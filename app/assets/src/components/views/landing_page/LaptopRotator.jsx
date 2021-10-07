@@ -8,9 +8,7 @@ import LaptopImageTwo1x from "~/images/landing_page/laptop-image-2-1x.png";
 import LaptopImageTwo2x from "~/images/landing_page/laptop-image-2-2x.png";
 import cs from "./LaptopRotator.scss";
 
-
 const LaptopRotator = () => {
-
   let settings = {
     dots: false,
     infinite: true,
@@ -26,24 +24,24 @@ const LaptopRotator = () => {
 
   return (
     <div className={cs.laptopImage}>
-        <Slider {...settings} className={`laptop-slider ${cs.slider}`} >
-            <div className={cs.carouselCell}>
-                <img 
-                    className={cs.innerImage} 
-                    src={LaptopImageOne2x} 
-                    srcSet={`${LaptopImageOne1x}, ${LaptopImageOne2x} 2x`}
-                    alt="" 
-                    />
-            </div>
-            <div className={cs.carouselCell}>
-                <img 
-                    className={cs.innerImage} 
-                    src={LaptopImageTwo2x} 
-                    srcSet={`${LaptopImageTwo1x}, ${LaptopImageTwo2x} 2x`}
-                    alt="" 
-                    />
-            </div>
-        </Slider>
+      <Slider {...settings} className={`laptop-slider ${cs.slider}`}>
+        <div className={cs.carouselCell}>
+          <img
+            className={cs.innerImage}
+            src={LaptopImageOne2x}
+            srcSet={`${LaptopImageOne1x}, ${LaptopImageOne2x} 2x`}
+            alt=""
+          />
+        </div>
+        <div className={cs.carouselCell}>
+          <img
+            className={cs.innerImage}
+            src={LaptopImageTwo2x}
+            srcSet={`${LaptopImageTwo1x}, ${LaptopImageTwo2x} 2x`}
+            alt=""
+          />
+        </div>
+      </Slider>
     </div>
   );
 };

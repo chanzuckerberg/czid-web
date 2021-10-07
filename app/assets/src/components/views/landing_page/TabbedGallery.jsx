@@ -34,12 +34,14 @@ const TabbedGallery = () => {
             setActiveTab(0);
           }}
         />
-        <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 0 ? cs.fadeUp : cs.hideImage}`}
+        <img
+          className={`${cs.mobileGalleryImage} ${
+            activeTab === 0 ? cs.fadeUp : cs.hideImage
+          }`}
           src={PipelineMobileImg1x}
           srcSet={`${PipelineMobileImg1x}, ${PipelineMobileImg2x} 2x`}
-          alt="" 
-          />
+          alt=""
+        />
         <TabbedGalleryTab
           tabTitle="Global pathogen datasets"
           tabDescription="Explore datasets from researchers across the globe."
@@ -48,12 +50,14 @@ const TabbedGallery = () => {
             setActiveTab(1);
           }}
         />
-        <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 1 ? cs.fadeUp : cs.hideImage}`}
-          src={GlobalMobileImg1x} 
+        <img
+          className={`${cs.mobileGalleryImage} ${
+            activeTab === 1 ? cs.fadeUp : cs.hideImage
+          }`}
+          src={GlobalMobileImg1x}
           srcSet={`${GlobalMobileImg1x}, ${GlobalMobileImg2x} 2x`}
-          alt="" 
-          />
+          alt=""
+        />
         <TabbedGalleryTab
           tabTitle="Downstream visualizations"
           tabDescription="Visualize your samples in aggregate using the heatmap and phylogenetic tree modules."
@@ -62,12 +66,14 @@ const TabbedGallery = () => {
             setActiveTab(2);
           }}
         />
-        <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 2 ? cs.fadeUp : cs.hideImage}`}
-          src={HeatmapMobileImg1x} 
+        <img
+          className={`${cs.mobileGalleryImage} ${
+            activeTab === 2 ? cs.fadeUp : cs.hideImage
+          }`}
+          src={HeatmapMobileImg1x}
           srcSet={`${HeatmapMobileImg1x}, ${HeatmapMobileImg2x} 2x`}
-          alt="" 
-          />
+          alt=""
+        />
         <TabbedGalleryTab
           tabTitle="SARS-CoV-2 support"
           tabDescription="Use our new pipeline to generate SARS-CoV-2 consensus genomes and QC in Nextclade."
@@ -76,38 +82,40 @@ const TabbedGallery = () => {
             setActiveTab(3);
           }}
         />
-        <img 
-          className={`${cs.mobileGalleryImage} ${activeTab === 3 ? cs.fadeUp : cs.hideImage}`} 
-          src={SarsMobileImg1x} 
+        <img
+          className={`${cs.mobileGalleryImage} ${
+            activeTab === 3 ? cs.fadeUp : cs.hideImage
+          }`}
+          src={SarsMobileImg1x}
           srcSet={`${SarsMobileImg1x}, ${SarsMobileImg2x} 2x`}
-          alt="" 
-          />
+          alt=""
+        />
       </div>
       <div className={cs.galleryImage}>
-        <img 
-          className={activeTab === 0 ? cs.fadeUp : cs.hideImage} 
+        <img
+          className={activeTab === 0 ? cs.fadeUp : cs.hideImage}
           src={PipelineImg1x}
           srcSet={`${PipelineImg1x}, ${PipelineImg2x} 2x`}
-          alt="" 
-          />
-        <img 
-          className={activeTab === 1 ? cs.fadeUp : cs.hideImage} 
+          alt=""
+        />
+        <img
+          className={activeTab === 1 ? cs.fadeUp : cs.hideImage}
           src={GlobalDatasetsImg1x}
           srcSet={`${GlobalDatasetsImg1x}, ${GlobalDatasetsImg2x} 2x`}
-          alt="" 
-          />
-        <img 
-          className={activeTab === 2 ? cs.fadeUp : cs.hideImage} 
+          alt=""
+        />
+        <img
+          className={activeTab === 2 ? cs.fadeUp : cs.hideImage}
           src={HeatmapImg1x}
           srcSet={`${HeatmapImg1x}, ${HeatmapImg2x} 2x`}
-          alt="" 
-          />
-        <img 
-          className={activeTab === 3 ? cs.fadeUp : cs.hideImage} 
+          alt=""
+        />
+        <img
+          className={activeTab === 3 ? cs.fadeUp : cs.hideImage}
           src={SarsImg1x}
           srcSet={`${SarsImg1x}, ${SarsImg2x} 2x`}
-          alt="" 
-          />
+          alt=""
+        />
       </div>
     </section>
   );

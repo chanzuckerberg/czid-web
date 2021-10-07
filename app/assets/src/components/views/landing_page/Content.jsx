@@ -31,11 +31,11 @@ const Content = () => {
             shape vector-borne disease surveillance and control efforts, and
             more.
           </p>
-          <CtaButton 
-            text="See it in action" 
+          <CtaButton
+            text="See it in action"
             linkUrl="https://public.idseq.net/"
             aria-label="View the IDseq COVID-19 public dataset example (opens in new window)"
-            />
+          />
         </div>
         <div className={cs.summaryImage}>
           <img src={LaptopImg} alt="" />
@@ -44,14 +44,19 @@ const Content = () => {
       <section className={cs.healthQuestions}>
         <h2>Investigate the world&apos;s biggest health questions</h2>
         <figure>
-          <img className={cs.healthQuestionsFigure} src={HealthQuestionsFigure} alt="" />
-          <img className={cs.healthQuestionsMobileFigure} src={HealthQuestionsMobileFigure} alt="" />
+          <img
+            className={cs.healthQuestionsFigure}
+            src={HealthQuestionsFigure}
+            alt=""
+          />
+          <img
+            className={cs.healthQuestionsMobileFigure}
+            src={HealthQuestionsMobileFigure}
+            alt=""
+          />
         </figure>
       </section>
 
-      <style dangerouslySetInnerHTML={{__html: `
-        .slick-dots{position:absolute;bottom:15px;display:block;width:100%;padding:0;margin:0;list-style:none;text-align:center}@media (max-width:768px){.slick-dots{bottom:12px}}.slick-dots li{position:relative;display:inline-block;width:20px;height:20px;padding:0;cursor:pointer;margin:0!important}.slick-dots li button{font-size:0;line-height:0;display:block;width:20px;height:20px;padding:5px;cursor:pointer;color:transparent;border:0;outline:0;background:0 0}.slick-dots li button:focus,.slick-dots li button:hover{outline:0}.slick-dots li button:focus:before,.slick-dots li button:hover:before{opacity:1!important;color:#fff!important}.slick-dots li button:before{font-family:slick;font-size:10px!important;line-height:20px;position:absolute;top:0;left:0;width:20px;height:20px;content:"•";text-align:center;opacity:.4!important;color:#000!important;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.slick-dots li.slick-active button:before{opacity:1!important;color:#fff!important}
-      `}} />
       <QuoteSlider />
 
       <section className={cs.howItWorks}>
@@ -67,7 +72,8 @@ const Content = () => {
             <IconUploadFigure />
             <h3>Upload</h3>
             <p>
-              Upload FASTA/FASTQ files from your computer, or import from Illumina&apos;s Basespace.
+              Upload FASTA/FASTQ files from your computer, or import from
+              Illumina&apos;s Basespace.
             </p>
           </div>
           <div className={cs.howItWorksSeparator}></div>
@@ -84,7 +90,8 @@ const Content = () => {
             <IconSampleFigure />
             <h3>View Per-Sample Taxon Counts</h3>
             <p>
-              Check out the auto-generated results page to see the microorganisms found in each sample.
+              Check out the auto-generated results page to see the
+              microorganisms found in each sample.
             </p>
           </div>
           <div className={cs.howItWorksSeparator}></div>
@@ -106,11 +113,11 @@ const Content = () => {
       <section className={cs.questions}>
         <h2>Frequently Asked Questions</h2>
         <KniAccordion className={cs.accordion} />
-        <CtaButton 
-          text="View All Questions" 
+        <CtaButton
+          text="View All Questions"
           linkUrl="https://idseq.net/faqs"
           aria-label="View the IDseq FAQ page (opens in new window)"
-          />
+        />
       </section>
 
       <section className={WhitePaperStyles.whitePaper}>

@@ -50,13 +50,13 @@
     @include font-body-xs;
 
     @media (max-width: 768px) {
-      @include font-body-xxs
+      @include font-body-xxs;
     }
   }
 
   @media (max-width: 768px) {
     width: 100%;
-    @include font-body-xxs
+    @include font-body-xxs;
   }
 }
 

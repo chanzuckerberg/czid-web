@@ -47,7 +47,7 @@
     "react/no-unescaped-entities": "warn",
     "react/no-string-refs": "warn",
     "react/prop-types": "warn",
-    "react/no-danger": "warn",
+    "react/no-danger": "error",
     "semi": ["error", "always"],
     "space-before-function-paren": [
       "error",

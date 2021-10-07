@@ -40,9 +40,8 @@ const LandingHeaderV2 = () => {
           </a>
         </span>
         <div
-          onClick={() => {
-            toggleMobileNav();
-          }}
+          onClick={toggleMobileNav}
+          onKeyDown={toggleMobileNav}
           className={cs.hamburgerIcon}
         >
           <div className={cs.bar1}></div>
@@ -56,9 +55,8 @@ const LandingHeaderV2 = () => {
           <div className={cs.mobileNavCloseContainer}>
             <span
               className={cs.mobileNavClose}
-              onClick={() => {
-                toggleMobileNav();
-              }}
+              onClick={toggleMobileNav}
+              onKeyDown={toggleMobileNav}
             >
               <IconMobileNavClose />
             </span>

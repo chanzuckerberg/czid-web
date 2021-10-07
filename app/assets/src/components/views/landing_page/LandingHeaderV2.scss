@@ -17,7 +17,7 @@
 .headerLogo {
   width: 140px;
   height: 40px;
-  
+
   @media (max-width: 768px) {
     width: 92px;
     height: 26px;
@@ -67,7 +67,9 @@
   }
 }
 
-.bar1, .bar2, .bar3 {
+.bar1,
+.bar2,
+.bar3 {
   width: 17px;
   height: 1px;
   background-color: $white;

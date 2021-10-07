@@ -4,7 +4,12 @@ import cs from "./CtaButton.scss";
 
 const CtaButton = props => {
   return (
-    <a className={`${cs.ctaButton} ${props.className}`} href={props.linkUrl} target="_blank" rel="noreferrer" >
+    <a
+      className={`${cs.ctaButton} ${props.className}`}
+      href={props.linkUrl}
+      target="_blank"
+      rel="noreferrer"
+    >
       {props.text}
     </a>
   );

@@ -1,9 +1,8 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import HeroEmailForm from "~/components/views/landing_page/HeroEmailForm";
 import cs from "./Hero.scss";
 
 const Hero = () => {
-
   const [fade, setFade] = useState(false);
   const [moveUp, setMoveUp] = useState(false);
   const [shiftLeft, setShiftLeft] = useState(false);
@@ -16,19 +15,19 @@ const Hero = () => {
 
   let i = 0;
 
-  useEffect(()=>{
+  useEffect(() => {
     setInterval(function() {
       let textTarget = document.querySelector(".rotating-text");
-  
+
       if (i === 2) {
         i = 0;
       } else {
         i++;
       }
-  
+
       setFade(true);
       setMoveUp(false);
-  
+
       setTimeout(function() {
         if (i === 1) {
           setShiftLeft(true);
@@ -37,7 +36,7 @@ const Hero = () => {
         }
         textTarget.textContent = rotatingHeroText[i];
       }, 500);
-  
+
       setTimeout(function() {
         setFade(false);
         setMoveUp(true);
@@ -47,11 +46,16 @@ const Hero = () => {
 
   return (
     <div className={cs.hero}>
-      <h1 className={shiftLeft? cs.shiftLeft : ""}>Real-time&nbsp;<br className={cs.heroLineBreak}/>
-        <span 
-          className={`rotating-text ${fade ? cs.fade : ""} ${moveUp? cs.moveUp : ""}`}
-          // style={fade ? cs.fade : ""}
-          >Pathogen Detection</span>
+      <h1 className={shiftLeft ? cs.shiftLeft : ""}>
+        Real-time&nbsp;
+        <br className={cs.heroLineBreak} />
+        <span
+          className={`rotating-text ${fade ? cs.fade : ""} ${
+            moveUp ? cs.moveUp : ""
+          }`}
+        >
+          Pathogen Detection
+        </span>
       </h1>
       <p>IDseq: The free, cloud-based metagenomics platform for researchers</p>
       <HeroEmailForm />

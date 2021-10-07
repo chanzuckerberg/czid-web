@@ -4,7 +4,7 @@
 
 .contentContainer {
   font-family: $font-family-sans-serif;
-  
+
   h2 {
     @include font-header-marketing-l;
 
@@ -25,7 +25,7 @@
   @media (max-width: 1200px) {
     align-items: center;
   }
-  
+
   a {
     margin-top: $space-xl;
   }
@@ -36,12 +36,11 @@
 }
 
 .summaryText {
-
   @media (max-width: 768px) {
     padding-left: $space-xl;
     padding-right: $space-xl;
   }
-  
+
   h2 {
     margin: 0;
     margin-bottom: $space-l;
@@ -118,7 +117,7 @@
 
   .healthQuestionsMobileFigure {
     display: none;
-    
+
     @media (max-width: 768px) {
       display: block;
     }
@@ -161,7 +160,6 @@
   padding-right: 40px;
   padding-left: 40px;
 
-
   @media (max-width: 768px) {
     flex-direction: column;
   }
@@ -185,7 +183,7 @@
 .howItWorksSeparator {
   width: 121px;
   height: 0px;
-  border-bottom: 2px dotted #DDD;
+  border-bottom: 2px dotted #ddd;
   margin-top: 45px;
 
   @media (max-width: 768px) {
@@ -194,7 +192,6 @@
 }
 
 .howItWorksProcessStep {
-
   @media (max-width: 768px) {
     margin-bottom: 50px;
   }

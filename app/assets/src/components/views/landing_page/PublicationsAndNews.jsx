@@ -6,7 +6,7 @@ import { publicationsData, newsData } from "./PublicationsAndNewsData";
 
 const PublicationEntry = props => {
   return (
-    <li className={cs.publication} key={props.key}>
+    <li className={cs.publication} key={props.index}>
       <a href={props.publicationLink} target="_blank" rel="noopener noreferrer">
         <time className={cs.date}>
           {props.publicationDate} - {props.publicationCompany}
@@ -23,7 +23,7 @@ const PublicationEntry = props => {
 
 const NewsEntry = props => {
   return (
-    <li className={cs.publication} key={props.key}>
+    <li className={cs.publication} key={props.index}>
       <a href={props.publicationLink} target="_blank" rel="noopener noreferrer">
         <time className={cs.date}>
           {props.publicationDate} - {props.publicationCompany}
@@ -38,7 +38,6 @@ const NewsEntry = props => {
 };
 
 const PublicationsAndNewsPropTypes = {
-  key: PropTypes.string.isRequired,
   publicationLink: PropTypes.string,
   publicationDate: PropTypes.string,
   publicationTitle: PropTypes.string,

@@ -27,6 +27,7 @@
     overflow: hidden;
     padding: 0 $space-xl;
     text-decoration: none;
+    cursor: pointer;
 
     @media (min-width: 769px) {
       flex-direction: row;

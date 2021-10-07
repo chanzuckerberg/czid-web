@@ -1,16 +1,19 @@
 import React from "react";
 import WhitePaperImage from "~/images/landing_page/white-paper.svg";
+import { openUrlInNewTab } from "~utils/links";
 import CtaButton from "./CtaButton";
 import CtaButtonStyles from "./CtaButton.scss";
 import cs from "./WhitePaper.scss";
 
 const WhitePaper = () => {
   return (
-    <a
+    <div
       className={cs.whitePaper__Inner}
-      href="https://academic.oup.com/gigascience/article/doi/10.1093/gigascience/giaa111/5918865"
-      target="_blank"
-      rel="noopener noreferrer"
+      onClick={() =>
+        openUrlInNewTab(
+          "https://academic.oup.com/gigascience/article/doi/10.1093/gigascience/giaa111/5918865"
+        )
+      }
     >
       <div className={cs.whitePaper__Inner_Image}>
         <img src={WhitePaperImage} alt="" />
@@ -24,9 +27,13 @@ const WhitePaper = () => {
           See how scientists, clinicians, and bioinformaticians can gain insight
           from mNGS datasets for both known and novel pathogens.
         </p>
-        <CtaButton className={CtaButtonStyles.filled} text="Read the Paper" aria-label="Read the IDseq white paper (opens in new window)" />
+        <CtaButton
+          className={CtaButtonStyles.filled}
+          text="Read the Paper"
+          aria-label="Read the IDseq white paper (opens in new window)"
+        />
       </div>
-    </a>
+    </div>
   );
 };
 

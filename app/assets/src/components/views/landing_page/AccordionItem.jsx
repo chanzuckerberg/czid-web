@@ -3,12 +3,10 @@ import React from "react";
 import cs from "./AccordionItem.scss";
 
 const AccordionItem = props => {
-
   return (
     <div
-      onClick={() => {
-        props.onClick();
-      }}
+      onClick={props.onClick}
+      onKeyDown={props.onClick}
       className={`${cs.accordion} accordionItem`}
     >
       {props.isOpen ? (
@@ -66,10 +64,7 @@ const AccordionItem = props => {
 
 AccordionItem.propTypes = {
   accordionTitle: PropTypes.string.isRequired,
-  accordionText: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object,
-  ]),
+  accordionText: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   isOpen: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
 };
