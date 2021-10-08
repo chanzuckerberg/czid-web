@@ -275,10 +275,10 @@ export default class CoverageVizBottomSidebar extends React.Component {
           </div>
           <div className={cs.optionSubtext}>
             {summary.num_contigs} contigs, {summary.num_reads} reads,{" "}
-            {summary.coverage_depth}x coverage
-            {params.taxonLevel === "genus" ? (
-              <span> - {this.getAccessionTaxonName(summary)}</span>
-            ) : null}
+            {summary.coverage_depth}x coverage depth
+            {summary.coverage_breadth
+              ? `, ${summary.coverage_breadth}% coverage breadth `
+              : ""}
           </div>
         </div>
       ),
