@@ -84,7 +84,7 @@ module S3Util
                                            })
     pages.each do |resp|
       objects = resp[:contents].map { |object| { key: object[:key] } }
-      next unless objects
+      next if objects.blank?
 
       AwsClient[:s3].delete_objects({ bucket: bucket, delete: { objects: objects } })
     end
