@@ -35,6 +35,15 @@ const MetadataAgeInput = ({
     onChange(metadataType.key, safeHumanAge.toString());
   }, [safeHumanAge]);
 
+  const handleKeyDown = keyEvent => {
+    if (
+      hipaaWarning &&
+      (keyEvent.key === "Backspace" || keyEvent.key === "Delete")
+    ) {
+      setSafeHumanAge("");
+    }
+  };
+
   return (
     <>
       <Input
@@ -53,6 +62,7 @@ const MetadataAgeInput = ({
           setAgeChanged(true);
           setSafeHumanAge(definedVal);
         }}
+        onKeyDown={e => handleKeyDown(e)}
         onBlur={() => onSave && onSave(metadataType.key)}
         value={hipaaWarning ? "" : safeHumanAge}
         type={"number"}

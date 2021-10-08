@@ -109,9 +109,9 @@ class SampleUploadFlow extends React.Component {
         const maxValue = FIELDS_THAT_HAVE_MAX_INPUT["host_age"];
         metadata.rows.map(row => {
           if ("Host Age" in row) {
-            const parsedValue = Number.parseInt(row["host_age"]);
+            const parsedValue = Number.parseInt(row["Host Age"]);
             const hipaaCompliantVal = min([parsedValue, maxValue + 1]);
-            row["host_age"] = hipaaCompliantVal.toString();
+            row["Host Age"] = hipaaCompliantVal.toString();
           }
         });
       }
