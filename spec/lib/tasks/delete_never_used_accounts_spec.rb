@@ -1,7 +1,5 @@
 require "rails_helper"
 
-Rails.application.load_tasks
-
 describe "delete_never_used_accounts" do
   before do
     allow($stdout).to receive(:puts)
