@@ -129,6 +129,19 @@ class SampleView extends React.Component {
       ...nonNestedLocalState
     } = this.loadState(localStorage, "SampleViewOptions");
 
+    if (
+      !get("background", selectedOptionsFromLocal) &&
+      get("metric", selectedOptionsFromLocal) === "aggregatescore"
+    ) {
+      // If the user does not have a background and has metric 'aggregatescore', overwrite the selected option
+      // 'metric' from 'aggregatescore' to 'NT r (total reads)' because the aggregatescore
+      // is computed once the user selects a background.
+      selectedOptionsFromLocal["metric"] = find(
+        { value: "nt_r" },
+        TREE_METRICS
+      ).value;
+    }
+
     this.state = Object.assign(
       {
         amrData: null,
@@ -252,7 +265,8 @@ class SampleView extends React.Component {
     return {
       background: null,
       categories: { categories: [], subcategories: { Viruses: [] } },
-      metric: TREE_METRICS[0].value,
+      // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.
+      metric: find({ value: "nt_r" }, TREE_METRICS).value,
       nameType: "Scientific name",
       readSpecificity: 0,
       taxon: null,

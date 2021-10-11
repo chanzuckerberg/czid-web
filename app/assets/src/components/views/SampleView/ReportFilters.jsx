@@ -1,4 +1,12 @@
-import { flatten, forEach, getOr, map, transform, values } from "lodash/fp";
+import {
+  filter,
+  flatten,
+  forEach,
+  getOr,
+  map,
+  transform,
+  values,
+} from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -16,10 +24,20 @@ import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropd
 import { CATEGORIES, THRESHOLDS, TREE_METRICS } from "./constants";
 import cs from "./report_filters.scss";
 
-class ReportFilters extends React.Component {
-  handleFilterChange = ({ key, value }) => {
-    const { onFilterChanged } = this.props;
-
+const ReportFilters = ({
+  backgrounds,
+  onFilterChanged,
+  onFilterRemoved,
+  otherBackgrounds,
+  ownedBackgrounds,
+  sampleId,
+  selected,
+  view,
+  enableMassNormalizedBackgrounds,
+  shouldDisableFilters,
+  snapshotShareId,
+}) => {
+  const handleFilterChange = ({ key, value }) => {
     logAnalyticsEvent("SampleView_filter_changed", {
       key,
       value,
@@ -27,8 +45,7 @@ class ReportFilters extends React.Component {
     onFilterChanged({ key, value });
   };
 
-  handleRemoveFilter = ({ key, subpath, value }) => {
-    const { onFilterRemoved } = this.props;
+  const handleRemoveFilter = ({ key, subpath, value }) => {
     logAnalyticsEvent("SampleView_filter_removed", {
       key,
       subpath,
@@ -37,7 +54,7 @@ class ReportFilters extends React.Component {
     onFilterRemoved({ key, subpath, value });
   };
 
-  renderFilterTag = ({ key, label, subpath, value, idx }) => {
+  const renderFilterTag = ({ key, label, subpath, value, idx }) => {
     label = label || value;
     return (
       <FilterTag
@@ -45,7 +62,7 @@ class ReportFilters extends React.Component {
         key={`${label}_filter_tag_${idx}`}
         text={label}
         onClose={() =>
-          this.handleRemoveFilter({
+          handleRemoveFilter({
             key,
             subpath,
             value,
@@ -55,24 +72,21 @@ class ReportFilters extends React.Component {
     );
   };
 
-  renderThresholdFilterTag = ({ threshold, idx }) => {
-    return (
-      <ThresholdFilterTag
-        className={cs.filterTag}
-        key={`threshold_filter_tag_${idx}`}
-        threshold={threshold}
-        onClose={() =>
-          this.handleRemoveFilter({
-            key: "thresholds",
-            value: threshold,
-          })
-        }
-      />
-    );
-  };
+  const renderThresholdFilterTag = ({ threshold, idx }) => (
+    <ThresholdFilterTag
+      className={cs.filterTag}
+      key={`threshold_filter_tag_${idx}`}
+      threshold={threshold}
+      onClose={() =>
+        handleRemoveFilter({
+          key: "thresholds",
+          value: threshold,
+        })
+      }
+    />
+  );
 
-  renderCategoryFilterTags = () => {
-    const { selected } = this.props;
+  const renderCategoryFilterTags = () => {
     return flatten(
       map("name", CATEGORIES).map((category, i) => {
         const categoryTags = [];
@@ -80,7 +94,7 @@ class ReportFilters extends React.Component {
           getOr([], ["categories", "categories"], selected).includes(category)
         ) {
           categoryTags.push(
-            this.renderFilterTag({
+            renderFilterTag({
               key: "categories",
               subpath: "categories",
               value: category,
@@ -91,7 +105,7 @@ class ReportFilters extends React.Component {
         getOr([], ["categories", "subcategories", category], selected).map(
           (subcategory, j) => {
             categoryTags.push(
-              this.renderFilterTag({
+              renderFilterTag({
                 key: "categories",
                 subpath: `subcategories.${category}`,
                 value: subcategory,
@@ -105,181 +119,172 @@ class ReportFilters extends React.Component {
     );
   };
 
-  render = () => {
-    const {
-      backgrounds,
-      enableMassNormalizedBackgrounds,
-      ownedBackgrounds,
-      otherBackgrounds,
-      sampleId,
-      selected,
-      shouldDisableFilters,
-      snapshotShareId,
-      view,
-    } = this.props;
+  const sharedFilterProps = { disabled: shouldDisableFilters };
+  // Only show aggregate score metric as a selectable option if the user has a background selected.
+  // The aggregate score is computed by having background model applied.
+  const treeMetrics = !selected.background
+    ? filter(metric => metric.value !== "aggregatescore", TREE_METRICS)
+    : TREE_METRICS;
 
-    const sharedFilterProps = { disabled: shouldDisableFilters };
-
-    return (
-      <>
-        <div className={cs.filterList}>
-          {/* TODO(ihan): expose the Taxon search box */}
-          {!snapshotShareId && (
-            <div className={cs.filterListElement}>
-              <SearchBox
-                clearOnSelect
-                rounded
-                levelLabel
-                serverSearchAction="choose_taxon"
-                serverSearchActionArgs={{
-                  // TODO (gdingle): change backend to support filter by sampleId
-                  args: "species,genus",
-                  sampleId,
-                }}
-                onResultSelect={(_, { result }) => {
-                  return this.handleFilterChange({
-                    key: "taxon",
-                    value: {
-                      taxId: result.taxid,
-                      taxLevel: result.level,
-                      name: result.title,
-                    },
-                  });
-                }}
-                placeholder="Taxon name"
-              />
-            </div>
-          )}
+  return (
+    <>
+      <div className={cs.filterList}>
+        {/* TODO(ihan): expose the Taxon search box */}
+        {!snapshotShareId && (
           <div className={cs.filterListElement}>
-            <NameTypeFilter
-              value={selected.nameType}
-              onChange={value =>
-                this.handleFilterChange({
-                  key: "nameType",
-                  value,
-                })
-              }
-              {...sharedFilterProps}
-            />
-          </div>
-          {/* from server */}
-          <div className={cs.filterListElement}>
-            <BackgroundModelFilter
-              allBackgrounds={backgrounds}
-              onClick={() =>
-                logAnalyticsEvent(
-                  ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED
-                )
-              }
-              categorizeBackgrounds
-              ownedBackgrounds={ownedBackgrounds}
-              otherBackgrounds={otherBackgrounds}
-              value={selected.background}
-              onChange={value =>
-                this.handleFilterChange({
-                  key: "background",
-                  value,
-                })
-              }
-              enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
-              {...sharedFilterProps}
-            />
-          </div>
-          {/* from server */}
-          <div className={cs.filterListElement}>
-            <CategoryFilter
-              allCategories={CATEGORIES}
-              categoryParentChild={transform((result, category) => {
-                if (category.children) {
-                  result[category.name] = category.children;
-                }
-              }, {})(CATEGORIES)}
-              categoryChildParent={transform((result, category) => {
-                forEach(
-                  subcat => (result[subcat] = category.name),
-                  category.children || []
-                );
-              }, {})(CATEGORIES)}
-              disableMarginRight
-              selectedCategories={getOr(
-                [],
-                ["categories", "categories"],
-                selected
-              )}
-              selectedSubcategories={flatten(
-                values(getOr({}, ["categories", "subcategories"], selected))
-              )}
-              onChange={(categories, subcategories) =>
-                this.handleFilterChange({
-                  key: "categories",
-                  value: {
-                    categories,
-                    subcategories,
-                  },
-                })
-              }
-              {...sharedFilterProps}
-            />
-          </div>
-          <div className={cs.filterListElement}>
-            <ThresholdFilterDropdown
-              options={{
-                targets: THRESHOLDS,
-                operators: [">=", "<="],
+            <SearchBox
+              clearOnSelect
+              rounded
+              levelLabel
+              serverSearchAction="choose_taxon"
+              serverSearchActionArgs={{
+                // TODO (gdingle): change backend to support filter by sampleId
+                args: "species,genus",
+                sampleId,
               }}
-              thresholds={selected.thresholds}
-              onApply={value =>
-                this.handleFilterChange({
-                  key: "thresholds",
-                  value,
-                })
-              }
-              {...sharedFilterProps}
+              onResultSelect={(_, { result }) => {
+                return handleFilterChange({
+                  key: "taxon",
+                  value: {
+                    taxId: result.taxid,
+                    taxLevel: result.level,
+                    name: result.title,
+                  },
+                });
+              }}
+              placeholder="Taxon name"
             />
           </div>
+        )}
+        <div className={cs.filterListElement}>
+          <NameTypeFilter
+            value={selected.nameType}
+            onChange={value =>
+              handleFilterChange({
+                key: "nameType",
+                value,
+              })
+            }
+            {...sharedFilterProps}
+          />
+        </div>
+        {/* from server */}
+        <div className={cs.filterListElement}>
+          <BackgroundModelFilter
+            allBackgrounds={backgrounds}
+            onClick={() =>
+              logAnalyticsEvent(
+                ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED
+              )
+            }
+            categorizeBackgrounds
+            ownedBackgrounds={ownedBackgrounds}
+            otherBackgrounds={otherBackgrounds}
+            value={selected.background}
+            onChange={value =>
+              handleFilterChange({
+                key: "background",
+                value,
+              })
+            }
+            enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+            {...sharedFilterProps}
+          />
+        </div>
+        {/* from server */}
+        <div className={cs.filterListElement}>
+          <CategoryFilter
+            allCategories={CATEGORIES}
+            categoryParentChild={transform((result, category) => {
+              if (category.children) {
+                result[category.name] = category.children;
+              }
+            }, {})(CATEGORIES)}
+            categoryChildParent={transform((result, category) => {
+              forEach(
+                subcat => (result[subcat] = category.name),
+                category.children || []
+              );
+            }, {})(CATEGORIES)}
+            disableMarginRight
+            selectedCategories={getOr(
+              [],
+              ["categories", "categories"],
+              selected
+            )}
+            selectedSubcategories={flatten(
+              values(getOr({}, ["categories", "subcategories"], selected))
+            )}
+            onChange={(categories, subcategories) =>
+              handleFilterChange({
+                key: "categories",
+                value: {
+                  categories,
+                  subcategories,
+                },
+              })
+            }
+            {...sharedFilterProps}
+          />
+        </div>
+        <div className={cs.filterListElement}>
+          <ThresholdFilterDropdown
+            options={{
+              targets: THRESHOLDS,
+              operators: [">=", "<="],
+            }}
+            thresholds={selected.thresholds}
+            onApply={value =>
+              handleFilterChange({
+                key: "thresholds",
+                value,
+              })
+            }
+            {...sharedFilterProps}
+          />
+        </div>
+        <div className={cs.filterListElement}>
+          <SpecificityFilter
+            value={selected.readSpecificity}
+            onChange={value =>
+              handleFilterChange({
+                key: "readSpecificity",
+                value,
+              })
+            }
+            {...sharedFilterProps}
+          />
+        </div>
+        {view === "tree" && (
           <div className={cs.filterListElement}>
-            <SpecificityFilter
-              value={selected.readSpecificity}
+            <MetricPicker
+              options={treeMetrics}
+              value={selected.metric || treeMetrics[0].value}
               onChange={value =>
-                this.handleFilterChange({
-                  key: "readSpecificity",
+                handleFilterChange({
+                  key: "metric",
                   value,
                 })
               }
-              {...sharedFilterProps}
             />
           </div>
-          {view === "tree" && (
-            <div className={cs.filterListElement}>
-              <MetricPicker
-                options={TREE_METRICS}
-                value={selected.metric || TREE_METRICS[0].value}
-                onChange={value =>
-                  this.handleFilterChange({
-                    key: "metric",
-                    value,
-                  })
-                }
-              />
-            </div>
-          )}
-        </div>
-        <div className={cs.tagList}>
-          {selected.taxon &&
-            this.renderFilterTag({
-              key: "taxon",
-              label: selected.taxon.name,
-              value: selected.taxon,
-            })}
-          {selected.thresholds.map((threshold, i) =>
-            this.renderThresholdFilterTag({ threshold, idx: i })
-          )}
-          {this.renderCategoryFilterTags()}
-        </div>
-      </>
-    );
-  };
-}
+        )}
+      </div>
+      <div className={cs.tagList}>
+        {selected.taxon &&
+          renderFilterTag({
+            key: "taxon",
+            label: selected.taxon.name,
+            value: selected.taxon,
+          })}
+        {selected.thresholds.map((threshold, i) =>
+          renderThresholdFilterTag({ threshold, idx: i })
+        )}
+        {renderCategoryFilterTags()}
+      </div>
+    </>
+  );
+};
 
 ReportFilters.propTypes = {
   backgrounds: PropTypes.array,
