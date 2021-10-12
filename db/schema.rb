@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_930_202_445) do
+ActiveRecord::Schema.define(version: 20_211_011_233_133) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -763,6 +763,7 @@ ActiveRecord::Schema.define(version: 20_210_930_202_445) do
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
     t.string "name"
+    t.string "status", comment: "A soft enum (string) describing the execution status. Currently only applicable to phylo trees."
     t.index ["user_id"], name: "index_visualizations_on_user_id"
   end
 
