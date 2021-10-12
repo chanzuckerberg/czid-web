@@ -8,6 +8,10 @@ import QuoteSliderItem from "./QuoteSliderItem";
 const QuoteSlider = () => {
   useEffect(() => {
     document.querySelector(".slick-dots").style.transform = "translateY(-40px)";
+    const slickArrows = document.querySelectorAll(".slick-arrow");
+    slickArrows.forEach( arrow => {
+      arrow.style.display = "none";
+    });
   }, []);
 
   let settings = {
