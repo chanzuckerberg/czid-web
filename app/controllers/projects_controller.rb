@@ -275,9 +275,9 @@ class ProjectsController < ApplicationController
 
   def choose_project
     project_search = current_power.updatable_projects.index_by(&:name).map do |name, record|
-      { "title" => name,
+      { "name" => name,
         "description" => record.description,
-        "project_id" => record.id, }
+        "id" => record.id, }
     end
     render json: JSON.dump(project_search)
   end

@@ -452,6 +452,7 @@ const getNewPhyloTree = ({ taxId, projectId, nextGeneration = false }) => {
   });
 };
 
+// Consider consolidating with ProjectsController#index:
 const getProjectsToChooseFrom = () => get("/choose_project.json");
 
 const validatePhyloTreeName = ({ treeName, nextGeneration = false }) => {

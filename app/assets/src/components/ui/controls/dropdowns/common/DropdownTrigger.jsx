@@ -1,5 +1,6 @@
 import cx from "classnames";
 
+import { isNil } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 import cs from "./dropdown_trigger.scss";
@@ -56,7 +57,7 @@ class DropdownTrigger extends React.Component {
           <span
             className={cx(
               this.state.hideDropdownLabel && cs.hide,
-              value === null && cs.placeholder
+              isNil(value) && cs.placeholder
             )}
           >
             {value || placeholder}

@@ -17,7 +17,7 @@ class ProjectSelect extends React.Component {
   };
 
   render() {
-    const { disabled, erred } = this.props;
+    const { disabled, erred, showSelectedItemSubtext } = this.props;
     return (
       <SubtextDropdown
         fluid
@@ -28,7 +28,7 @@ class ProjectSelect extends React.Component {
         search
         disabled={disabled}
         erred={erred}
-        showSelectedItemSubtext={true}
+        showSelectedItemSubtext={showSelectedItemSubtext}
       />
     );
   }
@@ -40,6 +40,11 @@ ProjectSelect.propTypes = {
   onChange: PropTypes.func.isRequired, // the entire project object is returned
   disabled: PropTypes.bool,
   erred: PropTypes.bool,
+  showSelectedItemSubtext: PropTypes.bool, // Subtext in selected state
+};
+
+ProjectSelect.defaultProps = {
+  showSelectedItemSubtext: true,
 };
 
 export default ProjectSelect;

@@ -1,4 +1,12 @@
-import { debounce, get, isEmpty, isUndefined, forEach } from "lodash/fp";
+import {
+  debounce,
+  find,
+  forEach,
+  get,
+  isEmpty,
+  isUndefined,
+  map,
+} from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 import Moment from "react-moment";
@@ -16,6 +24,8 @@ import {
   logAnalyticsEvent,
   withAnalytics,
 } from "~/api/analytics";
+import { chooseTaxon } from "~/api/phylo_tree_ngs";
+import ProjectSelect from "~/components/common/ProjectSelect";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
@@ -27,14 +37,16 @@ import {
 } from "~/components/utils/pipeline_versions";
 import { showPhyloTreeNotification } from "~/components/views/phylo_tree/PhyloTreeNotification";
 import Link from "~ui/controls/Link";
+import { SubtextDropdown } from "~ui/controls/dropdowns";
 import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import Modal from "../../ui/containers/Modal";
 import Wizard from "../../ui/containers/Wizard";
 import Input from "../../ui/controls/Input";
-import SearchBox from "../../ui/controls/SearchBox";
 import DataTable from "../../visualizations/table/DataTable";
 import PhyloTreeChecks from "./PhyloTreeChecks";
+
+import cs from "./phylo_tree_creation_modal.scss";
 
 class PhyloTreeCreationModal extends React.Component {
   constructor(props, context) {
@@ -70,6 +82,7 @@ class PhyloTreeCreationModal extends React.Component {
       showErrorSamples: false,
       showLowCoverageWarning: false,
       treeName: "",
+      taxonQuery: null,
     };
 
     this.phyloTreeHeaders = {
@@ -102,11 +115,15 @@ class PhyloTreeCreationModal extends React.Component {
     this.dagVars = "{}";
 
     this.inputTimeout = null;
-    this.inputDelay = 500;
+    this.inputDelay = 200;
 
     this.isTreeNameValidDebounced = debounce(
       this.inputDelay,
       this.isTreeNameValid
+    );
+    this.handleTaxonSearchActionDebounced = debounce(
+      this.inputDelay,
+      this.handleTaxonSearchAction
     );
 
     this.wizard = React.createRef();
@@ -326,11 +343,11 @@ class PhyloTreeCreationModal extends React.Component {
   handleProjectSearchContextResponse = projectList =>
     this.setState({ projectList, projectsLoaded: true });
 
-  handleSelectProject = (_, { result }) => {
+  handleSelectProject = result => {
     this.setState(
       {
-        projectId: result.project_id,
-        projectName: result.title,
+        projectId: result.id,
+        projectName: result.name,
         // Reset sample lists (in case user went back and changed project selection after they had been loaded)
         samplesLoaded: false,
         projectSamples: [],
@@ -343,8 +360,8 @@ class PhyloTreeCreationModal extends React.Component {
         logAnalyticsEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SELECTED,
           {
-            projectId: result.project_id,
-            projectName: result.title,
+            projectId: result.id,
+            projectName: result.name,
           }
         )
     );
@@ -355,11 +372,14 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  handleSelectTaxon = (_, { result }) => {
+  handleSelectTaxon = taxonId => {
+    const { taxonList } = this.state;
+    const taxonName = find({ value: taxonId }, taxonList).title;
+
     this.setState(
       {
-        taxonId: result.taxid,
-        taxonName: result.title,
+        taxonId,
+        taxonName,
         // Reset sample lists (in case user went back and changed taxon selection after they had been loaded)
         samplesLoaded: false,
         projectSamples: [],
@@ -372,8 +392,8 @@ class PhyloTreeCreationModal extends React.Component {
         logAnalyticsEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED,
           {
-            taxonId: result.taxid,
-            taxonName: result.title,
+            taxonId,
+            taxonName,
           }
         )
     );
@@ -567,6 +587,35 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
+  handleTaxonInputChange = async value => {
+    this.setState({ taxonQuery: value }, this.handleTaxonSearchActionDebounced);
+  };
+
+  handleTaxonSearchAction = async () => {
+    const { taxonQuery, projectId } = this.state;
+
+    if (isEmpty(taxonQuery)) {
+      this.setState({
+        taxonList: [],
+        taxonId: null,
+      });
+      return;
+    }
+
+    const searchResults = await chooseTaxon({
+      query: taxonQuery,
+      projectId,
+    });
+    // SubtextDropdown needs text, value, subtext:
+    const taxonList = map(t => {
+      return { text: t.title, value: t.taxid, subtext: t.description, ...t };
+    }, searchResults);
+
+    this.setState({
+      taxonList,
+    });
+  };
+
   isTreeNameValid = async () => {
     const { allowedFeatures = [] } = this.context || {};
     const { treeName } = this.state;
@@ -698,7 +747,8 @@ class PhyloTreeCreationModal extends React.Component {
   }
 
   page = action => {
-    const { allowedFeatures = [] } = this.context || {};
+    const { projectList, projectId } = this.state;
+
     const projectSamplesColumns = [
       "name",
       "host",
@@ -708,7 +758,6 @@ class PhyloTreeCreationModal extends React.Component {
       "numContigs",
       "coverageBreadth",
     ];
-
     const otherSamplesColumns = ["project", ...projectSamplesColumns];
 
     let options = {
@@ -747,20 +796,20 @@ class PhyloTreeCreationModal extends React.Component {
       selectTaxonAndProject: (
         <Wizard.Page
           key="wizard__page_2"
-          title="Select organism and project"
+          title="Select project and taxon"
           onLoad={this.loadProjectSearchContext}
           onContinue={this.canContinueWithTaxonAndProject}
         >
           <div className="wizard__page-2__subtitle" />
           <div className="wizard__page-2__searchbar">
-            <div className="wizard__page-2__searchbar__container">Project</div>
+            <div className={cs.searchTitle}>Project</div>
             <div className="wizard__page-2__searchbar__container">
               {this.state.projectsLoaded ? (
-                <SearchBox
-                  clientSearchSource={this.state.projectList}
-                  onResultSelect={this.handleSelectProject}
-                  initialValue={this.state.projectName}
-                  placeholder="Existing project name"
+                <ProjectSelect
+                  onChange={this.handleSelectProject}
+                  projects={projectList}
+                  showSelectedItemSubtext={false}
+                  value={projectId}
                 />
               ) : (
                 <IconLoading />
@@ -768,21 +817,16 @@ class PhyloTreeCreationModal extends React.Component {
             </div>
           </div>
           <div className="wizard__page-2__searchbar">
-            <div className="wizard__page-2__searchbar__container">Organism</div>
+            <div className={cs.searchTitle}>Taxon</div>
             <div className="wizard__page-2__searchbar__container">
-              <SearchBox
-                serverSearchAction={
-                  allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)
-                    ? "phylo_tree_ngs/choose_taxon"
-                    : "choose_taxon"
-                }
-                serverSearchActionArgs={{
-                  args: "species,genus",
-                  projectId: this.state.projectId,
-                }}
-                onResultSelect={this.handleSelectTaxon}
-                initialValue={this.state.taxonName}
-                placeholder="Taxon name"
+              <SubtextDropdown
+                fluid
+                initialSelectedValue={this.state.taxonId}
+                onChange={this.handleSelectTaxon}
+                onFilterChange={this.handleTaxonInputChange}
+                options={this.state.taxonList}
+                placeholder="Select taxon"
+                search
               />
             </div>
           </div>
