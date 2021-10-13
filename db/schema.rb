@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_211_011_233_133) do
+ActiveRecord::Schema.define(version: 20_211_013_002_644) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -781,6 +781,7 @@ ActiveRecord::Schema.define(version: 20_211_011_233_133) do
     t.text "cached_results", comment: "JSON-string of cached results for generic loading. Use for simple outputs."
     t.text "inputs_json", comment: "Generic JSON-string field for recording execution inputs."
     t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/samples/subpath/results' Never allow users to set this."
+    t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing."
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
 
