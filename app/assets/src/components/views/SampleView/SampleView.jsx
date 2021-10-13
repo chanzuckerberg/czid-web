@@ -196,6 +196,10 @@ class SampleView extends React.Component {
   }
 
   componentDidMount = () => {
+    // When we navigate to the SampleView via React Router, let Appcues know we are on this page.
+    if (window.analytics) {
+      window.analytics.page();
+    }
     // fetchBackgrounds will subsequently call fetchSample and fetchSampleReportData.
     this.fetchBackgrounds();
   };
