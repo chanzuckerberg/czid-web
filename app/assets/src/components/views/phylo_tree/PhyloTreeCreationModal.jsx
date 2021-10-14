@@ -803,7 +803,7 @@ class PhyloTreeCreationModal extends React.Component {
           <div className="wizard__page-2__subtitle" />
           <div className="wizard__page-2__searchbar">
             <div className={cs.searchTitle}>Project</div>
-            <div className="wizard__page-2__searchbar__container">
+            <div>
               {this.state.projectsLoaded ? (
                 <ProjectSelect
                   onChange={this.handleSelectProject}
@@ -818,7 +818,7 @@ class PhyloTreeCreationModal extends React.Component {
           </div>
           <div className="wizard__page-2__searchbar">
             <div className={cs.searchTitle}>Taxon</div>
-            <div className="wizard__page-2__searchbar__container">
+            <div>
               <SubtextDropdown
                 fluid
                 initialSelectedValue={this.state.taxonId}

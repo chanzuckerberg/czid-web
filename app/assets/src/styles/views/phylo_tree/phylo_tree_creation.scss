@@ -115,9 +115,15 @@
       margin-bottom: $space-xxl;
 
       &__container {
+        float: left;
+        font-weight: 700;
         height: 50px;
         line-height: 50px;
         vertical-align: middle;
+
+        &:not(:first-child) {
+          margin-left: 20px;
+        }
       }
 
       &:after {
