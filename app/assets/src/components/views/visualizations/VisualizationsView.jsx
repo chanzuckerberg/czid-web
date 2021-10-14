@@ -12,9 +12,27 @@ import {
   IconPhyloTreePrivate,
   IconPhyloTreePublic,
 } from "~ui/icons";
+import StatusLabel from "~ui/labels/StatusLabel";
 import { openUrl } from "~utils/links";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import cs from "./visualizations_view.scss";
+
+// Maps SFN execution statuses to classic frontend statuses
+const STATUS_MAPPING = {
+  CREATED: "CREATED",
+  RUNNING: "RUNNING",
+  SUCCEEDED: "COMPLETE",
+  SUCCEEDED_WITH_ISSUE: "COMPLETE",
+  FAILED: "FAILED",
+};
+
+const STATUS_TYPE = {
+  CREATED: "default",
+  RUNNING: "default",
+  SUCCEEDED: "success",
+  SUCCEEDED_WITH_ISSUE: "success",
+  FAILED: "error",
+};
 
 // See also ProjectsView which is very similar
 class VisualizationsView extends React.Component {
@@ -27,12 +45,13 @@ class VisualizationsView extends React.Component {
         flexGrow: 1,
         width: 350,
         cellRenderer: ({ cellData }) =>
-          TableRenderers.renderItemDetails(
+          TableRenderers.renderVisualization(
             merge(
               { cellData },
               {
                 nameRenderer: this.nameRenderer,
                 detailsRenderer: this.detailsRenderer,
+                statusRenderer: this.statusRenderer,
                 visibilityIconRenderer: this.visibilityIconRenderer,
               }
             )
@@ -65,6 +84,20 @@ class VisualizationsView extends React.Component {
         {visualization
           ? visualization.name || humanize(visualization.visualization_type)
           : ""}
+      </div>
+    );
+  };
+
+  statusRenderer = visualization => {
+    return (
+      <div>
+        {visualization && visualization.status && (
+          <StatusLabel
+            className={cs.sampleStatus}
+            status={STATUS_MAPPING[visualization.status]}
+            type={STATUS_TYPE[visualization.status]}
+          />
+        )}
       </div>
     );
   };
@@ -116,7 +149,13 @@ class VisualizationsView extends React.Component {
       return merge(
         {
           visualization: pick(
-            ["user_name", "visualization_type", "name", "publicAccess"],
+            [
+              "user_name",
+              "visualization_type",
+              "name",
+              "publicAccess",
+              "status",
+            ],
             visualization
           ),
         },

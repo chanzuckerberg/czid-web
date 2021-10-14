@@ -98,6 +98,10 @@ class PhyloTreeNg < ApplicationRecord
 
     if remote_status != status
       update(status: remote_status)
+
+      # Update the status of the corresponding visualization as well.
+      visualization = Visualization.where(data: { "treeNgId" => id }).last
+      visualization.update(status: remote_status)
     end
   end
 
@@ -152,6 +156,7 @@ class PhyloTreeNg < ApplicationRecord
         visualization_type: "phylo_tree_ng",
         data: { treeNgId: id },
         name: name,
+        status: status,
         samples: Sample.viewable(user).joins(:pipeline_runs)
           .where(pipeline_runs: { id: [pipeline_run_ids] })
           .distinct

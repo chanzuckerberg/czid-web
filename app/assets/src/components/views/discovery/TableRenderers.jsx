@@ -253,6 +253,38 @@ class TableRenderers extends React.Component {
     );
   };
 
+  static renderVisualization = ({
+    cellData: item,
+    detailsRenderer,
+    nameRenderer,
+    statusRenderer,
+    visibilityIconRenderer,
+  }) => {
+    let icon = visibilityIconRenderer(item);
+    return (
+      <div className={cs.visualization}>
+        <div className={cs.visibility}>
+          {icon &&
+            React.cloneElement(icon, {
+              className: `${cx(cs.icon, icon.props.className)}`,
+            })}
+        </div>
+        <div className={cs.vizRightPane}>
+          <div className={cs.vizNameAndStatus}>
+            <BasicPopup
+              trigger={<div className={cs.vizName}>{nameRenderer(item)}</div>}
+              content={nameRenderer(item)}
+            />
+            {statusRenderer && item && item.status && (
+              <div className={cs.vizStatus}>{statusRenderer(item)}</div>
+            )}
+          </div>
+          <div className={cs.vizDetails}>{detailsRenderer(item)}</div>
+        </div>
+      </div>
+    );
+  };
+
   static formatNumberWithCommas = value => {
     return numberWithCommas(value);
   };

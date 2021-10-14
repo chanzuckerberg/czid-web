@@ -40,6 +40,9 @@ class SfnPhyloTreeNgDispatchService
       @phylo_tree.update(
         status: WorkflowRun::STATUS[:failed]
       )
+
+      visualization = Visualization.where(data: { "treeNgId" => @phylo_tree.id }).last
+      visualization.update(status: WorkflowRun::STATUS[:failed])
     else
       @phylo_tree.update(
         executed_at: Time.now.utc,
@@ -47,6 +50,10 @@ class SfnPhyloTreeNgDispatchService
         sfn_execution_arn: sfn_execution_arn,
         status: WorkflowRun::STATUS[:running]
       )
+
+      visualization = Visualization.where(data: { "treeNgId" => @phylo_tree.id }).last
+      visualization.update(status: WorkflowRun::STATUS[:running])
+
       Rails.logger.info("PhyloTreeNg: id=#{@phylo_tree.id} sfn_execution_arn=#{sfn_execution_arn}")
     end
 
@@ -57,6 +64,10 @@ class SfnPhyloTreeNgDispatchService
   rescue StandardError => err
     # Set to failed and re-raise
     @phylo_tree.update(status: WorkflowRun::STATUS[:failed])
+
+    visualization = Visualization.where(data: { "treeNgId" => @phylo_tree.id }).last
+    visualization.update(status: WorkflowRun::STATUS[:failed])
+
     LogUtil.log_error(
       "Error starting Phylo Tree SFN pipeline for tree #{@phylo_tree.id}: #{err}",
       exception: err,
