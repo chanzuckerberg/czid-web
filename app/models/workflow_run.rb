@@ -120,8 +120,10 @@ class WorkflowRun < ApplicationRecord
         Rails.logger.error("SampleFailedEvent: Sample #{sample.id} by " \
         "#{sample.user.role_name} failed WorkflowRun #{id} (#{workflow}). See: #{sample.status_url}")
       end
+      update(time_to_finalized: time_since_executed_at)
     elsif remote_status == STATUS[:succeeded]
       load_cached_results
+      update(time_to_finalized: time_since_executed_at)
     end
 
     if remote_status != status
@@ -222,6 +224,12 @@ class WorkflowRun < ApplicationRecord
         workflow_run_id: id
       )
       return nil
+    end
+  end
+
+  def time_since_executed_at
+    if executed_at
+      Time.now.utc - executed_at  # seconds
     end
   end
 end

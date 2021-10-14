@@ -54,15 +54,16 @@ describe WorkflowRun, type: :model do
       sfn_execution_arn: fake_sfn_execution_arn,
     }
   end
+  let(:fake_runtime) { 10.minutes }
 
   before do
     project = create(:project)
     @sample = create(:sample, project: project)
     inputs_json = { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json
-    @workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @sample, sfn_execution_arn: fake_sfn_execution_arn, inputs_json: inputs_json)
+    @workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @sample, sfn_execution_arn: fake_sfn_execution_arn, inputs_json: inputs_json, executed_at: fake_runtime.ago)
 
     @second_sample = create(:sample, project: project)
-    @second_workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @second_sample, sfn_execution_arn: fake_sfn_execution_arn, inputs_json: inputs_json)
+    @second_workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @second_sample, sfn_execution_arn: fake_sfn_execution_arn, inputs_json: inputs_json, executed_at: fake_runtime.ago)
 
     @workflow_failed = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:failed], sample: @sample, sfn_execution_arn: fake_sfn_execution_arn)
 
@@ -110,6 +111,7 @@ describe WorkflowRun, type: :model do
 
       @workflow_running.update_status
       expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:failed])
+      expect(@workflow_running.time_to_finalized).to be_within(5.seconds).of fake_runtime
     end
 
     it "detects input errors and does not report error" do
@@ -127,6 +129,7 @@ describe WorkflowRun, type: :model do
 
       @workflow_running.update_status
       expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded])
+      expect(@workflow_running.time_to_finalized).to be_within(5.seconds).of fake_runtime
     end
   end
 
