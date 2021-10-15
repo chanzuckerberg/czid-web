@@ -8,6 +8,12 @@
     min-height: 10px;
     -webkit-transform: scale(0.65);
   }
+
+  .ui.red.label {
+    background-color: $error-dark !important;
+    border-color: $error-dark !important;
+  }
+
   .pathogen-count {
     margin-left: 3px;
     font-size: 12px;

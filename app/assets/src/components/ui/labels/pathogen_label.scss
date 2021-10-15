@@ -1,13 +1,37 @@
-// Use .ui to make selector higher precedence than semantic-ui.
-:global(.ui).pathogenLabel {
-  margin-left: 10px;
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
-  &:first-child {
-    margin-left: 10px;
+// Use .ui to make selector higher precedence than semantic-ui.
+:global(.ui) {
+  &.pathogenLabel {
+    margin-left: $space-m;
+
+    &:first-child {
+      margin-left: $space-m;
+    }
+
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: lighter;
+    font-size: 9px;
   }
 
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: lighter;
-  font-size: 9px;
+  &.newPathogenLabel {
+    @include font-body-xxxs;
+    padding: $space-xxxs $space-xs;
+
+    &:first-child {
+      margin-left: $space-m;
+    }
+
+    &:global(.red.label) {
+      background-color: $error-dark !important;
+      border-color: $error-dark !important;
+    }
+  }
+
+  &.popup {
+    @include font-body-xxs;
+    width: 230px;
+  }
 }
