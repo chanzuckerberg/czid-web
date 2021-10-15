@@ -200,6 +200,8 @@ Rails.application.routes.draw do
   get 'pub/:share_id/samples/:id/coverage_viz_summary', to: 'snapshot_samples#coverage_viz_summary'
   get 'pub/:share_id/samples/:id/coverage_viz_data', to: 'snapshot_samples#coverage_viz_data'
 
+  get 'pathogen_list(/:version)', to: 'pathogen_lists#show'
+
   resources :frontend_metrics, only: :create
 
   resources :host_genomes
