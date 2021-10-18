@@ -277,7 +277,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
             {summary.num_contigs} contigs, {summary.num_reads} reads,{" "}
             {summary.coverage_depth}x coverage depth
             {summary.coverage_breadth
-              ? `, ${summary.coverage_breadth}% coverage breadth `
+              ? // Converts a float into a percentage. e.g: 0.037 => 3.7%
+                `, ${new Intl.NumberFormat("en-US", {
+                  style: "percent",
+                  maximumFractionDigits: 2,
+                }).format(summary.coverage_breadth)} coverage breadth `
               : ""}
           </div>
         </div>
