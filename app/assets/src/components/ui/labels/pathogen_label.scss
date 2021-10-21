@@ -28,10 +28,9 @@
       background-color: $error-dark !important;
       border-color: $error-dark !important;
     }
-  }
 
-  &.popup {
-    @include font-body-xxs;
-    width: 230px;
+    &:hover {
+      cursor: pointer;
+    }
   }
 }

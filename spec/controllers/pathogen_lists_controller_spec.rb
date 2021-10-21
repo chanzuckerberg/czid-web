@@ -17,7 +17,7 @@ RSpec.describe PathogenListsController, type: :controller do
 
     describe "GET show" do
       it "should return not found error if no list version exists" do
-        get :show
+        get :show, format: :json
         expect(response).to have_http_status :not_found
 
         json_response = JSON.parse(response.body)
@@ -30,11 +30,13 @@ RSpec.describe PathogenListsController, type: :controller do
         list_version.pathogens << @pathogen_b
 
         expected = {
+          version: list_version.version,
+          updated_at: list_version.updated_at.strftime("%b %d, %Y"),
           pathogens: list_version.fetch_pathogens_info,
           citations: list_version.fetch_citation_footnotes,
         }
 
-        get :show
+        get :show, format: :json
         expect(response).to have_http_status :ok
 
         json_response = JSON.parse(response.body, { symbolize_names: true })
@@ -47,11 +49,13 @@ RSpec.describe PathogenListsController, type: :controller do
         old_list_version.pathogens << @pathogen_a
 
         expected = {
+          version: old_list_version.version,
+          updated_at: old_list_version.updated_at.strftime("%b %d, %Y"),
           pathogens: old_list_version.fetch_pathogens_info,
           citations: old_list_version.fetch_citation_footnotes,
         }
 
-        get :show, params: { version: "0.1.0" }
+        get :show, format: :json, params: { version: "0.1.0" }
         expect(response).to have_http_status :ok
 
         json_response = JSON.parse(response.body, { symbolize_names: true })
@@ -63,7 +67,7 @@ RSpec.describe PathogenListsController, type: :controller do
   context "when the feature is not launched" do
     describe "GET show" do
       it "should redirect to page not found path" do
-        get :show
+        get :show, format: :json
         expect(response).to redirect_to page_not_found_path
       end
     end

@@ -16,6 +16,7 @@ import LandingV2 from "~/components/views/LandingV2";
 import SampleView from "~/components/views/SampleView/SampleView";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import { DISCOVERY_DOMAINS } from "~/components/views/discovery/discovery_api";
+import PathogenListView from "~/components/views/pathogen_list/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
 
 const DiscoveryViewRouter = ({
@@ -38,6 +39,7 @@ const DiscoveryViewRouter = ({
   const { userSignedIn } = useContext(UserContext);
   return (
     <Switch>
+      <Route path="/pathogen_list" render={() => <PathogenListView />} />
       <Route
         path="/phylo_tree_ngs/:id"
         render={({ match }) => (

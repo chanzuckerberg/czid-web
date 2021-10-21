@@ -1,0 +1,34 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.pathogenListView {
+  margin-top: 90px;
+
+  .title {
+    h1 {
+      @include font-header-xxl;
+      margin: 0px;
+    }
+
+    h4.subtitle {
+      @include font-body-xxs;
+      margin: $space-xxs 0px $space-xl 0px;
+      color: $gray-dark;
+    }
+  }
+
+  .intro {
+    border-bottom: $border-gray-lightest;
+
+    a {
+      // Override _header.scss
+      color: $primary !important;
+    }
+
+    p {
+      @include font-body-s;
+      margin-bottom: $space-l;
+    }
+  }
+}

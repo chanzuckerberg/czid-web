@@ -1,9 +1,9 @@
 <%= javascript_tag do %>
   react_component('DiscoveryViewRouter', {
     domain: "my_data",
-    admin: <%= current_user.admin %>,
+    admin: <%= current_user ? current_user.admin : "null" %>,
     projectId: <%= params[:project_id] || "null" %>,
-    allowedFeatures: JSON.parse('<%= raw escape_json(current_user.allowed_feature_list) %>'),
+    allowedFeatures: JSON.parse('<%= raw escape_json(current_user && current_user.allowed_feature_list) %>'),
     mapTilerKey: '<%= ENV["MAPTILER_API_KEY"] %>',
   }, 'page_content', JSON.parse('<%= raw escape_json(user_context)%>'));
 <% end %>

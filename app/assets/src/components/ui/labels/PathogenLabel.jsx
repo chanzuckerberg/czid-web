@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PATHOGEN_LIST_V0_FEATURE } from "~/components/utils/features";
 import BasicPopup from "../../BasicPopup";
 import Label from "./Label";
@@ -39,35 +40,44 @@ const PathogenLabel = ({ type }) => {
   if (!CATEGORIES.hasOwnProperty(type)) {
     return null;
   }
-  let label = (
+  let label = allowedFeatures.includes(PATHOGEN_LIST_V0_FEATURE) ? (
+    <a>
+      <Label
+        text="Known Pathogen"
+        color="red"
+        size="medium"
+        className={cs.newPathogenLabel}
+      />
+    </a>
+  ) : (
     <a href={CATEGORIES[type]["url"]} target="_blank" rel="noopener noreferrer">
-      {allowedFeatures.includes(PATHOGEN_LIST_V0_FEATURE) ? (
-        <Label
-          text="Known Pathogen"
-          color="red"
-          size="medium"
-          className={cs.newPathogenLabel}
-        />
-      ) : (
-        <Label
-          text={CATEGORIES[type]["text"]}
-          color={CATEGORIES[type]["color"]}
-          size="medium"
-          className={cs.pathogenLabel}
-        />
-      )}
+      <Label
+        text={CATEGORIES[type]["text"]}
+        color={CATEGORIES[type]["color"]}
+        size="medium"
+        className={cs.pathogenLabel}
+      />
     </a>
   );
   return allowedFeatures.includes(PATHOGEN_LIST_V0_FEATURE) ? (
     <BasicPopup
       trigger={label}
       content={
-        "Organism with known human pathogenicity. See the full list of pathogens."
+        <>
+          {"Organism with known human pathogenicity. See the "}
+          <ExternalLink
+            href={"/pathogen_list"}
+            analyticsEventName={`PathogenLabel_pathogen-list-link_clicked`}
+          >
+            full list
+          </ExternalLink>
+          {" of pathogens."}
+        </>
       }
       basic={false}
+      hoverable={true}
       inverted={false}
       position="top center"
-      className={cs.popup}
     />
   ) : (
     <BasicPopup
