@@ -247,7 +247,7 @@ export default class MapPreviewSidebar extends React.Component {
   handleSampleRowClick = ({ event, rowData }) => {
     const { onSampleClicked, samples } = this.props;
     const sample = samples.get(rowData.id);
-    onSampleClicked && onSampleClicked({ sample, currentEvent: event });
+    onSampleClicked && onSampleClicked({ object: sample, currentEvent: event });
     logAnalyticsEvent("MapPreviewSidebar_sample-row_clicked", {
       sampleId: sample.id,
       sampleName: sample.name,
