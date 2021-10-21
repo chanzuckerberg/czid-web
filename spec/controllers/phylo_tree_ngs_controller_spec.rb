@@ -623,7 +623,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "parent_taxid", "sampleDetailsByNodeName", "nextGeneration", "has_low_coverage")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "parent_taxid", "sampleDetailsByNodeName", "nextGeneration")
         expect(pt.keys).not_to include("log_url", "sfn_execution_arn", "s3_output_prefix")
         expect(pt["tax_level"]).to eq(1)
       end
@@ -637,7 +637,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName", "nextGeneration", "has_low_coverage")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName", "nextGeneration")
         expect(pt["tax_level"]).to eq(2)
       end
     end

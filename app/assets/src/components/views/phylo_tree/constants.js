@@ -1,5 +1,6 @@
 import React from "react";
 import Moment from "react-moment";
+import { formatPercent } from "~/components/utils/format";
 
 function DateParser(date) {
   return <Moment fromNow date={date} />;
@@ -20,4 +21,13 @@ export const SAMPLE_METADATA_FIELDS = [
   "collection_date",
   "sample_type",
   "nucleotide_type",
+];
+
+export const SAMPLE_METRIC_FIELDS = [
+  {
+    default: "See coverage viz",
+    name: "coverage_breadth",
+    label: "Coverage Breadth",
+    parser: formatPercent,
+  },
 ];

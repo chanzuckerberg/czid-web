@@ -2,11 +2,16 @@ import { get, compact, pluck, values, sortBy, concat, find } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 import { getSampleMetadataFields } from "~/api/metadata";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import TooltipVizTable from "../../ui/containers/TooltipVizTable";
 import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
-import { SAMPLE_FIELDS, SAMPLE_METADATA_FIELDS } from "./constants";
+import {
+  SAMPLE_FIELDS,
+  SAMPLE_METADATA_FIELDS,
+  SAMPLE_METRIC_FIELDS,
+} from "./constants";
 
 const getAbsentName = attribute =>
   attribute === "project_name" ? "NCBI References" : "No data";
@@ -35,6 +40,7 @@ class PhyloTreeVis extends React.Component {
       metadataFields: [],
       selectedMetadataType:
         props.defaultMetadata || EXTRA_DROPDOWN_OPTIONS[0].value,
+      showWarningTooltip: false,
     };
 
     this.newick = props.newick;
@@ -60,6 +66,9 @@ class PhyloTreeVis extends React.Component {
       // Name for the legend when the attribute is missing / other
       colorGroupAbsentName: getAbsentName(EXTRA_DROPDOWN_OPTIONS[0].value),
       tooltipContainer: this.tooltipContainer,
+      warningTooltipContainer: this.warningTooltipContainer,
+      onWarningIconHover: this.handleWarningIconHover,
+      onWarningIconExit: this.handleWarningIconExit,
       onNodeTextClick: this.handleNodeClick,
       onNodeHover: this.handleNodeHover,
       scaleLabel: "Relative distance",
@@ -104,6 +113,14 @@ class PhyloTreeVis extends React.Component {
 
   handleNodeHover = node => {
     this.setState({ hoveredNode: node });
+  };
+
+  handleWarningIconHover = () => {
+    this.setState({ showWarningTooltip: true });
+  };
+
+  handleWarningIconExit = () => {
+    this.setState({ showWarningTooltip: false });
   };
 
   handleNodeClick = node => {
@@ -153,7 +170,7 @@ class PhyloTreeVis extends React.Component {
         console.error(`Error parsing: ${field.name}`);
       }
     }
-    return value || "-";
+    return value || field.default || "-";
   }
 
   getMetadataFieldValue = field =>
@@ -179,7 +196,7 @@ class PhyloTreeVis extends React.Component {
     return {
       data: [
         {
-          name: "Sample",
+          name: "Info",
           data: [
             ...SAMPLE_FIELDS.map(f => [f.label, this.getFieldValue(f) || "-"]),
             ...SAMPLE_METADATA_FIELDS.map(key => {
@@ -189,6 +206,15 @@ class PhyloTreeVis extends React.Component {
                 this.getMetadataFieldValue(key) || "-",
               ];
             }),
+          ],
+        },
+        {
+          name: "Metrics",
+          data: [
+            ...SAMPLE_METRIC_FIELDS.map(f => [
+              f.label,
+              this.getFieldValue(f) || f.default,
+            ]),
           ],
         },
       ],
@@ -235,10 +261,24 @@ class PhyloTreeVis extends React.Component {
             this.tooltipContainer = tooltip;
           }}
         >
-          {this.state.hoveredNode && (
+          {this.state.hoveredNode && !this.state.showWarningTooltip && (
             <TooltipVizTable
               data={this.getTooltipData().data}
               description={this.getTooltipData().description}
+            />
+          )}
+        </div>
+        <div
+          className="phylo-tree-vis__tooltip-container"
+          ref={tooltip => {
+            this.warningTooltipContainer = tooltip;
+          }}
+        >
+          {this.state.showWarningTooltip && (
+            <ColumnHeaderTooltip
+              content="Coverage breadth is less than 25%. This is low and may affect analysis quality. Learn more in our Help Center."
+              open // Make sure the tooltip is visible as long as the container is visible.
+              trigger={<div />} // Pass in an empty div because the tooltip requires a trigger element.
             />
           )}
         </div>

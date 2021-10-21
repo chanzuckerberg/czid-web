@@ -1,5 +1,21 @@
+@import "~styles/themes/colors";
+:export {
+  warningMedium: $warning-medium;
+  warningDark: $warning-dark;
+}
+
 .scaleLabel {
   letter-spacing: 0.4px;
   font-size: 13px;
   font-weight: 600;
+}
+
+.warningIcon {
+  // The filter is defined in dendrogram.js
+  filter: url("#warning-medium");
+
+  &:hover {
+    cursor: default;
+    filter: url("#warning-dark");
+  }
 }

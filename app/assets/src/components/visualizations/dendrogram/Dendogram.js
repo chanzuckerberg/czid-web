@@ -1,10 +1,16 @@
+import d3 from "d3";
 import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
 import "d3-transition";
 import { select, event as currentEvent } from "d3-selection";
 import { timeout } from "d3-timer";
 import { get, isObject } from "lodash/fp";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
+import addSvgColorFilter from "../../utils/d3/svg.js";
 import cs from "./dendrogram.scss";
+
+// used for filter to make warning icon orange
+const WARNING_ICON_COLOR = cs.warningMedium;
+const WARNING_ICON_HOVER_COLOR = cs.warningDark;
 
 // Margins around the main Dendogram
 const VIZ_MARGINS = {
@@ -45,8 +51,11 @@ export default class Dendogram {
         colorGroupAttribute: null,
         colorGroupLegendTitle: null,
         colorGroupAbsentName: null,
+        iconPath: "/assets/icons",
         legendX: LEGEND_POS.left,
         legendY: LEGEND_POS.top,
+        onWarningExit: null,
+        onWarningHover: null,
         onNodeTextClick: null,
         onNodeClick: null,
         onNodeHover: null,
@@ -54,6 +63,7 @@ export default class Dendogram {
         scaleLabel: null,
         // This is needed for downloading PNG and SVG on solid background
         svgBackgroundColor: "white",
+        warningTooltipContainer: null,
       },
       options || {}
     );
@@ -107,6 +117,7 @@ export default class Dendogram {
       );
 
     this.tooltipContainer = select(this.options.tooltipContainer);
+    this.warningTooltipContainer = select(this.options.warningTooltipContainer);
   }
 
   adjustHeight(treeHeight) {
@@ -683,6 +694,50 @@ export default class Dendogram {
         "click",
         d => this.options.onNodeTextClick && this.options.onNodeTextClick(d)
       );
+
+    // Create a orange color filters to match $warning-medium and $warning-dark
+    // in order to apply color to the warning icon.
+    const defs = this.svg.append("defs");
+    addSvgColorFilter(defs, "warning-medium", WARNING_ICON_COLOR);
+    addSvgColorFilter(defs, "warning-dark", WARNING_ICON_HOVER_COLOR);
+
+    nodeEnter
+      .append("svg:image")
+      .attr("xlink:href", `${this.options.iconPath}/IconAlertSmall.svg`)
+      .attr("class", cs.warningIcon)
+      .attr("y", -7)
+      .attr("x", function(d) {
+        // Get the width of the label and its offset to properly set the position of the icon
+        const labelWidth = d3
+          .select(this.previousSibling)
+          .node()
+          .getBBox().width;
+        const labelOffset = d.children ? -8 : 15;
+        return labelWidth + labelOffset + 4;
+      })
+      // Only display the warning icon if coverage_breadth < 0.25 for this node
+      .attr("display", function(d) {
+        if (d.data.coverage_breadth) {
+          return d.data.coverage_breadth < 0.25 ? "default" : "none";
+        } else {
+          return "none";
+        }
+      })
+      .on("mouseenter", node => {
+        if (!node.children) {
+          this.options.onWarningIconHover && this.options.onWarningIconHover();
+          this.warningTooltipContainer
+            .style("left", currentEvent.pageX + "px")
+            .style("top", currentEvent.pageY - 10 + "px");
+          this.warningTooltipContainer.classed("visible", true);
+        }
+      })
+      .on("mouseleave", () => {
+        if (!node.children) {
+          this.options.onWarningIconExit && this.options.onWarningIconExit();
+          this.warningTooltipContainer.classed("visible", false);
+        }
+      });
 
     if (this.options.colorGroupAttribute && !this.skipColoring) {
       // Apply colors to the nodes from data.colorIndex
