@@ -89,6 +89,14 @@
     text-decoration: underline;
   }
 
+  .italics {
+    font-style: italic;
+  }
+
+  .nestedList {
+    margin-left: 40px;
+  }
+
   b {
     font-weight: $font-weight-semibold;
   }

@@ -7,8 +7,7 @@ class PathogenListsController < ApplicationController
   def show
     respond_to do |format|
       format.html do
-        # This sends it to DiscoveryViewRouter. See app/views/home/my_data.html.erb.
-        render 'home/my_data'
+        render "home/discovery_view_router"
       end
 
       format.json do

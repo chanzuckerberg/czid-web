@@ -18,6 +18,7 @@ import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import { DISCOVERY_DOMAINS } from "~/components/views/discovery/discovery_api";
 import PathogenListView from "~/components/views/pathogen_list/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
+import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoticeForUserResearch";
 
 const DiscoveryViewRouter = ({
   admin,
@@ -39,7 +40,12 @@ const DiscoveryViewRouter = ({
   const { userSignedIn } = useContext(UserContext);
   return (
     <Switch>
-      <Route path="/pathogen_list" render={() => <PathogenListView />} />
+      <Route exact path="/pathogen_list">
+        <PathogenListView />
+      </Route>
+      <Route exact path="/privacy_notice_for_user_research">
+        <PrivacyNoticeForUserResearch />
+      </Route>
       <Route
         path="/phylo_tree_ngs/:id"
         render={({ match }) => (

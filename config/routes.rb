@@ -91,22 +91,26 @@ Rails.application.routes.draw do
   get 'samples/heatmap', to: redirect(path: "visualizations/heatmap", status: 301)
 
   get 'cli_user_instructions', to: 'samples#cli_user_instructions'
-  get 'select', to: 'home#index'
-  get 'home', to: 'home#index'
-  get 'taxon_descriptions', to: 'home#taxon_descriptions'
-  get 'public', to: 'home#public'
-  get 'my_data', to: 'home#my_data'
+
+  # HomeController:
   get 'all_data', to: 'home#all_data'
+  get 'home', to: 'home#index'
+  get 'landing_v2', to: 'home#landing_v2'
+  get 'maintenance', to: 'home#maintenance'
+  get 'my_data', to: 'home#my_data'
+  get 'page_not_found', to: 'home#page_not_found'
+  get 'public', to: 'home#public'
+  get 'select', to: 'home#index'
+  get 'taxon_descriptions', to: 'home#taxon_descriptions'
   post 'feedback', to: 'home#feedback'
   post 'sign_up', to: 'home#sign_up'
-  get 'privacy', to: 'support#privacy'
-  get 'terms', to: 'support#terms'
-  get 'terms_changes', to: 'support#terms_changes'
-  get 'faqs', to: 'support#faqs'
-  get 'page_not_found', to: 'home#page_not_found'
 
-  get 'maintenance', to: 'home#maintenance'
-  get 'landing_v2', to: 'home#landing_v2'
+  # SupportController:
+  get 'faqs', to: 'support#faqs'
+  get 'privacy_notice_for_user_research', to: "support#privacy_notice_for_user_research"
+  get 'privacy', to: 'support#privacy'
+  get 'terms_changes', to: 'support#terms_changes'
+  get 'terms', to: 'support#terms'
 
   resources :projects do
     member do

@@ -1,0 +1,3 @@
+<%= javascript_tag do %>
+  react_component('DiscoveryViewRouter', {}, 'page_content', JSON.parse('<%= raw escape_json(user_context)%>'));
+<% end %>
