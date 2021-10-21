@@ -11,8 +11,25 @@
 - CZI blog post describing the problem: https://medium.com/czi-technology/db-migrations-and-push-safety-in-rails-508bc877dd7e
 - See potentially dangerous operations here and recommmendations: https://github.com/ankane/strong_migrations#checks (We may adopt this Gem!)
 - Related IDseq post-mortem: https://czi.quip.com/SZigAbUTTNGa
+- If you use `change_column`, please define `def up` and `def down` or a `reversible` block instead of just `def change`. Otherwise reverting it will trigger: `This migration uses change_column, which is not automatically reversible.`
 
 ## Tips and tricks
+
+### Production
+- Please AVOID manually reverting and re-applying migrations in production. The tips in `Applying migrations` and `Rolling back migrations` are meant for non-prod.
+- If you need to unblock a deploy, please hotfix the troubled migration to make it runnable.
+- If you revert migrations in production, the `health_check` will fail with this error and the servers will be taken out of rotation:
+```
+health_check failed: 
+
+Migrations are pending. To resolve this issue, run:
+
+        bin/rails db:migrate RAILS_ENV=prod
+
+You have 3 pending migrations:
+...
+```
+- If a migration fails to complete, you need to do manual cleanup of any partial changes (e.g. drop column in MySQL Workbench). If you run rollback, it tries to undo the last _successful_ migration.
 
 ### Applying migrations
 
@@ -29,6 +46,7 @@
 - Example: To undo the last migration:
   - `aws-oidc exec -- docker-compose run web "rake db:rollback STEP=1"`
 - It can be useful to apply-undo-apply a new migration you are adding to verify it is safe.
+- `db:migrate:redo` will do a rollback and then migrate back up again.
 
 ### Debugging migration issues in development (locally or GitHub Actions)
 

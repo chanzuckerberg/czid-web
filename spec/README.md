@@ -10,3 +10,8 @@
 - To reset the test database:
   - `aws-oidc exec -- docker-compose run -e RAILS_ENV=test web rake db:drop db:create db:migrate`
   - See also: `bin/setup-shared`
+- You can debug controller/request spec responses by printing out the `response.body`.
+- If you're getting 302 Redirect controller/request responses:
+  - Don't forget to `sign_in` the user. Ex: `before do { sign_in @user }`
+- Note on `let` definitions:
+  - `let` is lazily-evaluated, so it doesn't execute until the first time the variable is used. You can use `let!` instead to force invocation, or call the variables in your spec with an unused variable `_`. Ex: `_ = [run1, run2, run3, run4]`
