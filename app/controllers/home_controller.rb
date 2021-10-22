@@ -14,11 +14,7 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
-      launched = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
-      if launched.include?("landing_v2")
-        @hide_header = true
-        @landing_v2 = true
-      end
+      @hide_header = true
 
       @show_bulletin = false
       if get_app_config(AppConfig::SHOW_LANDING_VIDEO_BANNER) == "1"
@@ -46,11 +42,6 @@ class HomeController < ApplicationController
       # :text is included to avoid errors with bot crawlers
       render 'landing', formats: [:html, :text]
     end
-  end
-
-  def landing_v2
-    @hide_header = true
-    render 'landing'
   end
 
   def page_not_found

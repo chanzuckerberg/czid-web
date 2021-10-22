@@ -11,7 +11,6 @@ import React, { useContext } from "react";
 import { Route, Switch } from "react-router-dom";
 
 import { UserContext } from "~/components/common/UserContext";
-import Landing from "~/components/views/Landing";
 import LandingV2 from "~/components/views/LandingV2";
 import SampleView from "~/components/views/SampleView/SampleView";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
@@ -23,15 +22,9 @@ import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoti
 const DiscoveryViewRouter = ({
   admin,
   allowedFeatures,
-  browserInfo,
-  contactEmail,
   domain,
-  landingV2,
   mapTilerKey,
   projectId,
-  showAnnouncementBanner,
-  showBulletin,
-  showPublicSite,
   snapshotProjectDescription,
   snapshotProjectName,
   snapshotShareId,
@@ -81,11 +74,6 @@ const DiscoveryViewRouter = ({
           />
         )}
       />
-      {userSignedIn && (
-        <Route exact path="/landing_v2">
-          <LandingV2 />
-        </Route>
-      )}
       {userSignedIn ? (
         <Route>
           <DiscoveryView
@@ -102,17 +90,7 @@ const DiscoveryViewRouter = ({
         </Route>
       ) : (
         <Route>
-          {landingV2 ? (
-            <LandingV2 />
-          ) : (
-            <Landing
-              browserInfo={browserInfo}
-              contactEmail={contactEmail}
-              showAnnouncementBanner={showAnnouncementBanner}
-              showBulletin={showBulletin}
-              showPublicSite={showPublicSite}
-            />
-          )}
+          <LandingV2 />
         </Route>
       )}
     </Switch>
@@ -122,15 +100,9 @@ const DiscoveryViewRouter = ({
 DiscoveryViewRouter.propTypes = {
   admin: PropTypes.bool,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  browserInfo: PropTypes.object,
-  contactEmail: PropTypes.string,
   domain: PropTypes.oneOf(DISCOVERY_DOMAINS),
-  landingV2: PropTypes.bool,
   mapTilerKey: PropTypes.string,
   projectId: PropTypes.number,
-  showAnnouncementBanner: PropTypes.bool,
-  showBulletin: PropTypes.bool,
-  showPublicSite: PropTypes.bool,
   snapshotProjectDescription: PropTypes.string,
   snapshotProjectName: PropTypes.string,
   snapshotShareId: PropTypes.string,

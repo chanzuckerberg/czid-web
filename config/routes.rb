@@ -95,7 +95,6 @@ Rails.application.routes.draw do
   # HomeController:
   get 'all_data', to: 'home#all_data'
   get 'home', to: 'home#index'
-  get 'landing_v2', to: 'home#landing_v2'
   get 'maintenance', to: 'home#maintenance'
   get 'my_data', to: 'home#my_data'
   get 'page_not_found', to: 'home#page_not_found'
