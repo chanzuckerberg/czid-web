@@ -136,10 +136,9 @@ const PrivacyNoticeForUserResearch = () => {
         by law.
       </p>
       <p>
-        We may share certain data you may voluntarily provide to comply with
-        government reporting requirements. We may also share your data with the
-        following types of service providers, and as a result of the use case,
-        they may be able to access this data in providing these services:
+        We may also share your data with the following types of service
+        providers, and as a result of the use case, they may be able to access
+        this data in providing these services:
         <List
           listItems={[
             "Providers of the tools and services we use to manage our research process. For example, we use Google Forms, Qualtrics, and AppCues to collect survey responses.",
@@ -158,9 +157,7 @@ const PrivacyNoticeForUserResearch = () => {
         <a href="mailto:privacy@chanzuckerberg.com">
           privacy@chanzuckerberg.com
         </a>
-        . For EEA Research Participants, please note that your personal data is
-        being transferred to, and stored and used outside your country and into
-        the US.
+        .
       </p>
 
       <h2>EEA Research Participants</h2>
