@@ -15,13 +15,14 @@ class PathogenListVersion < ApplicationRecord
   # }
   def fetch_pathogens_info
     taxids = pathogens.pluck(:tax_id)
-    taxid_to_category = TaxonLineage.fetch_category_by_taxid(taxids)
+    taxid_to_category = TaxonLineage.where(taxid: taxids).pluck(:taxid, :superkingdom_name).to_h
+    taxid_to_species_name = TaxonLineage.where(taxid: taxids).pluck(:taxid, :species_name).to_h
     info = []
     pathogens.each do |pathogen|
       taxid = pathogen.tax_id
       pathogen_info = {
         category: taxid_to_category[taxid],
-        name: TaxonLineage.where(taxid: taxid).last.species_name,
+        name: taxid_to_species_name[taxid],
         tax_id: taxid,
       }
       info << pathogen_info

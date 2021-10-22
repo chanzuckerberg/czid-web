@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useContext } from "react";
+
+import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PATHOGEN_LIST_V0_FEATURE } from "~/components/utils/features";
@@ -67,7 +69,9 @@ const PathogenLabel = ({ type }) => {
           {"Organism with known human pathogenicity. See the "}
           <ExternalLink
             href={"/pathogen_list"}
-            analyticsEventName={`PathogenLabel_pathogen-list-link_clicked`}
+            analyticsEventName={
+              ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
+            }
           >
             full list
           </ExternalLink>

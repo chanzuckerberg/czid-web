@@ -1,17 +1,24 @@
+import { groupBy, sortBy } from "lodash/fp";
 import React, { useState, useEffect } from "react";
+import { Grid } from "semantic-ui-react";
 
+import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { getPathogenList } from "~/api/pathogen_lists";
 import { NarrowContainer } from "~/components/layout";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./pathogen_list_view.scss";
 
 const PathogenListView = () => {
   const [pathogenList, setPathogenList] = useState(null);
+  const [categorizedPathogens, setCategorizedPathogens] = useState([]);
 
   useEffect(async () => {
     const result = await getPathogenList();
-
+    const alphabetizedPathogens = sortBy("name", result["pathogens"]);
+    const categorizedPathogens = groupBy("category", alphabetizedPathogens);
     setPathogenList(result);
+    setCategorizedPathogens(categorizedPathogens);
   }, []);
 
   const renderIntro = () => (
@@ -44,11 +51,38 @@ const PathogenListView = () => {
     </>
   );
 
+  const renderPathogenList = () => (
+    <div className={cs.pathogenList}>
+      {Object.keys(categorizedPathogens).map((category, key) => (
+        <div key={key}>
+          <div className={cs.category}>{category}</div>
+          <Grid className={cs.pathogensContainer} columns={3}>
+            {categorizedPathogens[category].map((pathogen, index) => (
+              <Grid.Column className={cs.pathogen} key={index}>
+                <div className={cs.pathogenName}>{pathogen.name}</div>
+                <ExternalLink
+                  className={cs.pathogenTaxid}
+                  href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${pathogen.tax_id}`}
+                  analyticsEventName={
+                    ANALYTICS_EVENT_NAMES.PATHOGEN_LIST_VIEW_NCBI_LINK_CLICKED
+                  }
+                >
+                  Tax ID: {pathogen.tax_id}
+                </ExternalLink>
+              </Grid.Column>
+            ))}
+          </Grid>
+        </div>
+      ))}
+    </div>
+  );
+
   if (!pathogenList) return null;
 
   return (
     <NarrowContainer className={cs.pathogenListView} size="small">
       {renderIntro()}
+      {renderPathogenList()}
     </NarrowContainer>
   );
 };

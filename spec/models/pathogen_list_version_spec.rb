@@ -23,7 +23,7 @@ describe PathogenListVersion, type: :model do
 
   context "#fetch_pathogens_info" do
     it "should return an empty array if the list version is empty" do
-      expect(@list_version.fetch_citation_footnotes).to eq([])
+      expect(@list_version.fetch_pathogens_info).to eq([])
     end
 
     it "should return the correct pathogens information" do

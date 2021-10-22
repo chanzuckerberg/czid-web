@@ -4,6 +4,7 @@
 
 .pathogenListView {
   margin-top: 90px;
+  padding-bottom: $space-xxl;
 
   .title {
     h1 {
@@ -20,6 +21,7 @@
 
   .intro {
     border-bottom: $border-gray-lightest;
+    padding-bottom: $space-l;
 
     a {
       // Override _header.scss
@@ -29,6 +31,44 @@
     p {
       @include font-body-s;
       margin-bottom: $space-l;
+    }
+  }
+
+  .pathogenList {
+    margin-top: $space-xxl;
+
+    .category {
+      @include font-header-l;
+    }
+
+    .pathogensContainer {
+      margin: $space-l 0px $space-xl 0px;
+
+      .pathogen {
+        max-width: 240px;
+        padding: 0px;
+        margin: 0px $space-xxl $space-m 0px;
+
+        .pathogenName {
+          @include font-body-xs;
+          font-weight: $font-weight-semibold;
+        }
+
+        .pathogenTaxid {
+          @include font-body-xxs;
+          color: $gray-dark !important;
+
+          &:hover {
+            text-decoration: underline;
+            text-decoration-style: dashed;
+            cursor: default;
+          }
+        }
+      }
+
+      .pathogen:nth-child(3n) {
+        margin-right: 0px;
+      }
     }
   }
 }

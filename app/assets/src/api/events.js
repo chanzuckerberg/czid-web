@@ -283,6 +283,14 @@ function EventDictionary() {
 
   /** The user advanced the onto the next page in the Wizard */
   this.WIZARD_PAGE_ADVANCED = "WIZARD_PAGE_ADVANCED";
+
+  /** The user clicked the pathogen list link in the PathogenLabel popup. */
+  this.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED =
+    "PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED";
+
+  /** The user clicked the ncbi link in the PathogenListView. */
+  this.PATHOGEN_LIST_VIEW_NCBI_LINK_CLICKED =
+    "PATHOGEN_LIST_VIEW_NCBI_LINK_CLICKED";
 }
 
 const eventNames = new EventDictionary();
