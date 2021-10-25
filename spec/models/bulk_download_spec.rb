@@ -454,8 +454,8 @@ describe BulkDownload, type: :model do
     end
 
     it "returns the correct task command for consensus genomes download type" do
-      fake_path = "s3://consensus.fa"
-      allow_any_instance_of(SfnExecution).to receive(:output_path).and_return(fake_path)
+      fake_output_path = "s3://consensus.fa"
+      allow_any_instance_of(SfnExecution).to receive(:output_path).and_return(fake_output_path)
 
       @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE, workflow_run_ids: [
                                 @workflow_run_one.id,
@@ -473,15 +473,51 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        fake_path,
-        fake_path,
-        fake_path,
+        fake_output_path,
+        fake_output_path,
+        fake_output_path,
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "#{@workflow_run_three.inputs['accession_id']}_consensus.fa"),
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_one.inputs['accession_id']}_consensus.fa"),
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_two.inputs['accession_id']}_consensus.fa"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Consensus Genome.tar.gz",
+        "--progress-delay",
+        15,
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
+
+    it "returns the correct task command for consensus genome intermediate output files download type" do
+      fake_output_path = "s3://outputs.zip"
+      allow_any_instance_of(SfnExecution).to receive(:output_path).and_return(fake_output_path)
+
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_TYPE, workflow_run_ids: [
+                                @workflow_run_one.id,
+                                @workflow_run_two.id,
+                                @workflow_run_three.id,
+                              ])
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        fake_output_path,
+        fake_output_path,
+        fake_output_path,
+        "--tar-names",
+        get_expected_tar_name(@project, @sample_one, "#{@workflow_run_three.inputs['accession_id']}/"),
+        get_expected_tar_name(@project, @sample_three, "#{@workflow_run_one.inputs['accession_id']}/"),
+        get_expected_tar_name(@project, @sample_three, "#{@workflow_run_two.inputs['accession_id']}/"),
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Intermediate Output Files.tar.gz",
         "--progress-delay",
         15,
         "--success-url",

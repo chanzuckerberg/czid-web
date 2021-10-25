@@ -3,9 +3,11 @@ import { filter, get, orderBy } from "lodash/fp";
 import memoize from "memoize-one";
 import React from "react";
 
+import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
@@ -17,7 +19,10 @@ import StatusLabel from "~ui/labels/StatusLabel";
 
 import TaxonHitSelect from "./TaxonHitSelect";
 import cs from "./bulk_download_modal_options.scss";
-import { CONDITIONAL_FIELDS } from "./constants.js";
+import {
+  BULK_DOWNLOAD_DOCUMENTATION_LINKS,
+  CONDITIONAL_FIELDS,
+} from "./constants.js";
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
   conditionalField.triggerValues.includes(
@@ -296,7 +301,21 @@ class BulkDownloadModalOptions extends React.Component {
               <StatusLabel inline status="Beta" />
             )}
           </div>
-          <div className={cs.description}>{downloadType.description}</div>
+          <div className={cs.description}>
+            {downloadType.description}{" "}
+            {downloadType.type in BULK_DOWNLOAD_DOCUMENTATION_LINKS ? (
+              <ExternalLink
+                href={BULK_DOWNLOAD_DOCUMENTATION_LINKS[downloadType.type]}
+                analyticsEventName={
+                  ANALYTICS_EVENT_NAMES.CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED
+                }
+              >
+                Learn more
+              </ExternalLink>
+            ) : (
+              ""
+            )}
+          </div>
           {downloadType.fields && selected && (
             <div className={cs.fields}>
               {downloadType.fields.map(field =>

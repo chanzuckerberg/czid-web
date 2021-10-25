@@ -284,6 +284,10 @@ function EventDictionary() {
   /** The user advanced the onto the next page in the Wizard */
   this.WIZARD_PAGE_ADVANCED = "WIZARD_PAGE_ADVANCED";
 
+  /** The user clicked the "Learn more" link under the Consensus Genome Intermediate Output Files bulk download option. */
+  this.CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED =
+    "CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED";
+
   /** The user clicked the pathogen list link in the PathogenLabel popup. */
   this.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED =
     "PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED";

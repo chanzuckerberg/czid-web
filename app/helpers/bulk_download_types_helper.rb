@@ -20,6 +20,7 @@ module BulkDownloadTypesHelper
   # Specific to consensus genome workflows
   CONSENSUS_GENOME_DOWNLOAD_TYPE = "consensus_genome".freeze
   CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE = "consensus_genome_overview".freeze
+  CONSENSUS_GENOME_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_TYPE = "consensus_genome_intermediate_output_files".freeze
   SEPARATE_FILES_DOWNLOAD = "Separate Files".freeze
   SINGLE_FILE_CONCATENATED_DOWNLOAD = "Single File (Concatenated)".freeze
 
@@ -227,6 +228,14 @@ module BulkDownloadTypesHelper
           },
         },
       ],
+      workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
+    },
+    {
+      type: CONSENSUS_GENOME_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_TYPE,
+      display_name: "Intermediate Output Files",
+      description: "Intermediate output files (e.g. Bam files, coverage plots, QUAST report) and other output files.",
+      category: "reports",
+      execution_type: ECS_EXECUTION_TYPE,
       workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
     },
   ].freeze

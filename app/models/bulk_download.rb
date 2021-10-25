@@ -315,10 +315,10 @@ class BulkDownload < ApplicationRecord
     end
   end
 
-  def get_accession_id_prefix(workflow_run)
+  def get_accession_id_prefix(workflow_run, include_ending_underscore: true)
     accession_id = get_accession_id(workflow_run)
-    if accession_id
-      accession_id + "_"
+    if accession_id.present?
+      include_ending_underscore ? accession_id + "_" : accession_id
     end
   end
 
@@ -425,7 +425,16 @@ class BulkDownload < ApplicationRecord
       end
     end
 
-    if !download_src_urls.nil? && !download_tar_names.nil?
+    if download_type == CONSENSUS_GENOME_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_TYPE
+      download_src_urls = workflow_runs_ordered.map { |run| run.output_path(ConsensusGenomeWorkflowRun::OUTPUT_ZIP) }
+
+      download_tar_names = workflow_runs_ordered.map do |run|
+        "#{get_output_file_prefix(run.sample, cleaned_project_names)}" \
+        "#{get_accession_id_prefix(run, include_ending_underscore: false)}/"
+      end
+    end
+
+    if download_src_urls.present? && download_tar_names.present?
       return s3_tar_writer_command(
         download_src_urls,
         download_tar_names,

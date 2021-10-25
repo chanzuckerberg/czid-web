@@ -1,3 +1,5 @@
+import { CG_QUALITY_CONTROL_LINK } from "~/components/utils/documentationLinks";
+
 // Stores information about conditional fields for bulk downloads.
 export const CONDITIONAL_FIELDS = [
   // Note: This first field is referenced directly in renderOption, as
@@ -21,4 +23,10 @@ export const CONDITIONAL_FIELDS = [
 
 export const BULK_DOWNLOAD_TYPES = {
   SAMPLE_METADATA: "sample_metadata",
+  CONSENSUS_GENOME_INTERMEDIATE_OUTPUT_FILES:
+    "consensus_genome_intermediate_output_files",
+};
+
+export const BULK_DOWNLOAD_DOCUMENTATION_LINKS = {
+  [BULK_DOWNLOAD_TYPES.CONSENSUS_GENOME_INTERMEDIATE_OUTPUT_FILES]: CG_QUALITY_CONTROL_LINK,
 };

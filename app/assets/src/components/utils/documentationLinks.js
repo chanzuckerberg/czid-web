@@ -32,3 +32,5 @@ export const PHYLO_TREE_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/4404223662228";
 export const BACKGROUND_MODELS_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054-Background-Models";
+export const CG_QUALITY_CONTROL_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360049787632-Building-and-analyzing-a-SARS-CoV-2-consensus-genome#Quality-control";
