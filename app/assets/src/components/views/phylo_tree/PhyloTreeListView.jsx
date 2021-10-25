@@ -677,7 +677,10 @@ class PhyloTreeListView extends React.Component {
         {heatmapErrorModalOpen && (
           <PhyloTreeHeatmapErrorModal
             open
-            onContinue={this.handleCloseHeatmapErrorModal}
+            onContinue={withAnalytics(
+              this.handleCloseHeatmapErrorModal,
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_HEATMAP_ERROR_MODAL_CONTINUE_BUTTON_CLICKED
+            )}
             showLowCoverageWarning={showLowCoverageWarning}
           />
         )}

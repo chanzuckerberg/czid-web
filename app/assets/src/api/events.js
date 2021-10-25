@@ -174,6 +174,12 @@ function EventDictionary() {
   this.PHYLO_TREE_HEATMAP_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED =
     "PHYLO_TREE_HEATMAP_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED";
 
+  /** The user clicked on the Continue button to dismiss the error modal explaining why a heatmap is shown when samples are
+   * too divergent to display a phylo tree.
+   */
+  this.PHYLO_TREE_HEATMAP_ERROR_MODAL_CONTINUE_BUTTON_CLICKED =
+    "PHYLO_TREE_HEATMAP_ERROR_MODAL_CONTINUE_BUTTON_CLICKED";
+
   /** The user clicked the Learn More link in the old Phylo Tree warning banner. */
   this.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED =
     "OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED";
