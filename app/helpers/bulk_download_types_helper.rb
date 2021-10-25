@@ -233,7 +233,7 @@ module BulkDownloadTypesHelper
     {
       type: CONSENSUS_GENOME_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_TYPE,
       display_name: "Intermediate Output Files",
-      description: "Intermediate output files (e.g. Bam files, coverage plots, QUAST report) and other output files.",
+      description: "Intermediate output files including BAM files, coverage plots, QUAST report and more.",
       category: "reports",
       execution_type: ECS_EXECUTION_TYPE,
       workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
