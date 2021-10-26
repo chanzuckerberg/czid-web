@@ -39,6 +39,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     msspe: "msspe",
     # See: https://swiftbiosci.com/swift-normalase-amplicon-panels
     snap: "snap",
+    # See: https://github.com/nebiolabs/VarSkip
+    varskip: "varskip",
   }.freeze
 
   DEFAULT_MEDAKA_MODEL = "r941_min_high_g360".freeze

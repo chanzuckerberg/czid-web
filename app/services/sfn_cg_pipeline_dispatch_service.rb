@@ -153,6 +153,8 @@ class SfnCgPipelineDispatchService
       "artic_v3_short_275_primers.bed"
     when protocols[:artic_v4]
       "artic_v4_primers.bed"
+    when protocols[:varskip]
+      "neb_vss1a.primer.bed"
     when protocols[:midnight]
       raise InvalidWetlabProtocolError(@workflow_run.inputs&.[]("wetlab_protocol"), technology)
     else
@@ -170,6 +172,8 @@ class SfnCgPipelineDispatchService
       "nCoV-2019/V1200"
     when protocols[:artic_v4]
       "nCoV-2019/V4"
+    when protocols[:varskip]
+      "NEB_VarSkip/V1a"
     else
       if @workflow_run.inputs&.[]("wetlab_protocol")
         raise InvalidWetlabProtocolError.new(@workflow_run.inputs&.[]("wetlab_protocol"), technology)
@@ -194,7 +198,7 @@ class SfnCgPipelineDispatchService
                             # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
                             primer_set: nanopore_primer_set,
-                            primer_schemes: "s3://idseq-public-references/consensus-genome/artic-primer-schemes_v3.tar.gz",
+                            primer_schemes: "s3://idseq-public-references/consensus-genome/artic-primer-schemes_v4.tar.gz",
                           }
                         elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
                           # illumina sars-cov-2 cg

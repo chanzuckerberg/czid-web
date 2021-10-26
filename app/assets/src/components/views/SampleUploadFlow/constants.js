@@ -39,6 +39,10 @@ export const CG_WETLAB_OPTIONS = [
     text: "COVIDseq",
     value: "covidseq",
   },
+  {
+    text: "VarSkip",
+    value: "varskip",
+  },
 ];
 
 export const CG_WETLAB_DISPLAY_NAMES = {
@@ -51,6 +55,7 @@ export const CG_WETLAB_DISPLAY_NAMES = {
   midnight: "Midnight",
   msspe: "MSSPE",
   snap: "SNAP",
+  varskip: "varskip",
 };
 
 export const CG_TECHNOLOGY_OPTIONS = {
@@ -76,6 +81,10 @@ export const CG_NANOPORE_WETLAB_OPTIONS = [
   {
     text: "ARTIC v4",
     value: "artic_v4",
+  },
+  {
+    text: "VarSkip",
+    value: "varskip",
   },
 ];
 
