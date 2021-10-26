@@ -96,7 +96,7 @@ class ApplicationController < ActionController::Base
 
   def get_background_id(sample, background_id = nil, share_id = nil)
     background_id = (background_id || params[:background_id]).to_i
-    if background_id == 0 && current_user&.allowed_feature?("improved_bg_model_selection")
+    if background_id == 0
       return nil
     else
       if share_id

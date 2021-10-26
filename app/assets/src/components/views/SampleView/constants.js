@@ -29,7 +29,7 @@ export const CG_HISTOGRAM_FILL_COLOR = "#A9BDFC";
 export const CG_HISTOGRAM_HOVER_FILL_COLOR = "#3867FA";
 
 export const LOCAL_STORAGE_FIELDS = {
-  selectedOptions: { excludePaths: ["taxon"] },
+  selectedOptions: { excludePaths: ["background", "taxon"] },
 };
 
 export const METRIC_DECIMAL_PLACES = {

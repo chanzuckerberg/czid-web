@@ -62,7 +62,6 @@ import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import {
   AMR_TABLE_FEATURE,
-  IMPROVED_BG_MODEL_SELECTION_FEATURE,
   MERGED_NT_NR_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
@@ -305,7 +304,6 @@ class SampleView extends React.Component {
   fetchSample = async () => {
     this.setState({ loadingReport: true });
 
-    const { allowedFeatures = [] } = this.context || {};
     const { snapshotShareId, sampleId, updateDiscoveryProjectId } = this.props;
     const {
       backgrounds,
@@ -314,11 +312,8 @@ class SampleView extends React.Component {
       selectedOptions,
       sharedWithNoBackground,
     } = this.state;
-    const sample = await getSample({ snapshotShareId, sampleId });
 
-    const hasImprovedBackgroundModelSelectionFeature = allowedFeatures.includes(
-      IMPROVED_BG_MODEL_SELECTION_FEATURE
-    );
+    const sample = await getSample({ snapshotShareId, sampleId });
     sample.id = sampleId;
 
     const pipelineRun = find(
@@ -349,15 +344,11 @@ class SampleView extends React.Component {
     ) {
       // When the selectedBackground is incompatible with the sample, set it to "None"
       // and show a popup about why it is not compatible.
-      if (hasImprovedBackgroundModelSelectionFeature) {
-        newSelectedOptions.background = null;
-        selectedBackground &&
-          this.showNotification(NOTIFICATION_TYPES.invalidBackground, {
-            backgroundName: selectedBackground.name,
-          });
-      } else {
-        newSelectedOptions.background = sample.default_background_id;
-      }
+      newSelectedOptions.background = null;
+      selectedBackground &&
+        this.showNotification(NOTIFICATION_TYPES.invalidBackground, {
+          backgroundName: selectedBackground.name,
+        });
     }
 
     const workflowCount = this.getWorkflowCount(sample);
@@ -378,11 +369,8 @@ class SampleView extends React.Component {
         selectedOptions: newSelectedOptions,
       },
       () => {
-        if (hasImprovedBackgroundModelSelectionFeature) {
-          this.fetchPersistedBackground({ projectId: sample.project.id });
-        } else {
-          this.fetchSampleReportData();
-        }
+        // Fetches persisted background, then loads sample report
+        this.fetchPersistedBackground({ projectId: sample.project.id });
 
         // Updates the projectId in the Redux store to add global context in our analytic events
         updateDiscoveryProjectId(sample.project.id);
@@ -453,7 +441,6 @@ class SampleView extends React.Component {
   };
 
   processRawSampleReportData = rawReportData => {
-    const { allowedFeatures = [] } = this.context || {};
     const { selectedOptions } = this.state;
 
     const reportData = [];
@@ -504,10 +491,8 @@ class SampleView extends React.Component {
       lineageData: rawReportData.lineage,
       reportData,
       reportMetadata: rawReportData.metadata,
-      ...(!allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) && {
-        selectedOptions: Object.assign({}, selectedOptions, {
-          background: rawReportData.metadata.backgroundId,
-        }),
+      selectedOptions: Object.assign({}, selectedOptions, {
+        background: rawReportData.metadata.backgroundId,
       }),
     });
   };
@@ -583,17 +568,15 @@ class SampleView extends React.Component {
   };
 
   fetchBackgrounds = async () => {
-    const { allowedFeatures = [] } = this.context || {};
     const { snapshotShareId } = this.props;
+
     this.setState({ loadingReport: true });
     const {
       owned_backgrounds: ownedBackgrounds,
       other_backgrounds: otherBackgrounds,
     } = await getBackgrounds({
       snapshotShareId,
-      categorizeBackgrounds:
-        allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) &&
-        !snapshotShareId,
+      categorizeBackgrounds: !snapshotShareId,
     });
 
     this.setState(
@@ -859,15 +842,11 @@ class SampleView extends React.Component {
   };
 
   updateHistoryAndPersistOptions = () => {
-    const { allowedFeatures = [] } = this.context || {};
-
     const urlState = pick(keys(URL_FIELDS), this.state);
 
     // After feature release, add "background" to the constant excludePaths:
     let localStorageFields = LOCAL_STORAGE_FIELDS;
-    if (allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE)) {
-      localStorageFields.selectedOptions.excludePaths.push("background");
-    }
+
     let localState = mapValuesWithKey((options, key) => {
       return omit(options.excludePaths || [], this.state[key]);
     }, localStorageFields);
@@ -1062,7 +1041,6 @@ class SampleView extends React.Component {
   };
 
   refreshDataFromOptionsChange = ({ key, newSelectedOptions }) => {
-    const { allowedFeatures = [] } = this.context || {};
     const { reportData } = this.state;
 
     let updateSelectedOptions = true;
@@ -1083,18 +1061,14 @@ class SampleView extends React.Component {
             backgroundId: newSelectedOptions.background,
           })
             .then(successfullyFetchedSampleReportData => {
-              if (
-                allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE)
-              ) {
-                if (successfullyFetchedSampleReportData) {
-                  this.persistNewBackgroundModelSelection({
-                    newBackgroundId: newSelectedOptions.background,
-                  });
-                } else {
-                  this.handleInvalidBackgroundSelection({
-                    invalidBackgroundId: newSelectedOptions.background,
-                  });
-                }
+              if (successfullyFetchedSampleReportData) {
+                this.persistNewBackgroundModelSelection({
+                  newBackgroundId: newSelectedOptions.background,
+                });
+              } else {
+                this.handleInvalidBackgroundSelection({
+                  invalidBackgroundId: newSelectedOptions.background,
+                });
               }
             })
             .catch(err => console.error(err));

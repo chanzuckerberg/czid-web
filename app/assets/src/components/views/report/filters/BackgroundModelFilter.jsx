@@ -1,7 +1,5 @@
-import React, { useContext } from "react";
+import React from "react";
 
-import { UserContext } from "~/components/common/UserContext";
-import { IMPROVED_BG_MODEL_SELECTION_FEATURE } from "~/components/utils/features";
 import SectionsDropdown from "~ui/controls/dropdowns/SectionsDropdown";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 import PropTypes from "~utils/propTypes";
@@ -18,9 +16,6 @@ const BackgroundModelFilter = React.memo(
     categorizeBackgrounds = false,
     ...props
   }) => {
-    const userContext = useContext(UserContext);
-    const { allowedFeatures } = userContext || {};
-
     let disabled = props.disabled || false;
 
     const formatBackgroundOptions = backgrounds =>
@@ -48,10 +43,7 @@ const BackgroundModelFilter = React.memo(
       disabled = true;
     }
 
-    if (
-      allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE) &&
-      categorizeBackgrounds
-    ) {
+    if (categorizeBackgrounds) {
       const backgroundSections = {
         MY_BACKGROUNDS: {
           displayName: "My Backgrounds",
