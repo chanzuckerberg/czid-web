@@ -61,13 +61,34 @@
           &:hover {
             text-decoration: underline;
             text-decoration-style: dashed;
-            cursor: default;
+            cursor: pointer;
           }
         }
       }
 
       .pathogen:nth-child(3n) {
         margin-right: 0px;
+      }
+    }
+  }
+
+  .citations {
+    h3 {
+      @include font-header-xxs;
+      margin-bottom: $space-xs;
+    }
+
+    .list {
+      padding-inline-start: $space-xl;
+      margin: 0px;
+
+      li {
+        @include font-body-xxs;
+        margin-bottom: $space-xs;
+      }
+
+      li:last-child {
+        margin-bottom: 0px;
       }
     }
   }
