@@ -71,6 +71,8 @@ class SubtextDropdown extends React.Component {
         value={initialSelectedValue}
         onChange={onChange}
         nullLabel={nullLabel}
+        usePortal
+        withinModal={true}
       />
     );
   }

@@ -69,6 +69,7 @@
 }
 
 .attributionsBanner {
+  @include font-body-xxs;
   background-color: $white;
   color: $gray-dark;
   border-radius: $border-radius-m;
@@ -83,7 +84,8 @@
   right: 0;
 
   .infoIcon {
+    margin: $space-xxxxs $space-xxs 0 0; // top margin is to align the icon with the text
+    vertical-align: text-top;
     fill: $gray-medium;
-    margin-right: $space-xxs;
   }
 }

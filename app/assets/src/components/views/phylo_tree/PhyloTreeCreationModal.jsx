@@ -1,3 +1,4 @@
+import { reverse } from "lodash";
 import {
   debounce,
   find,
@@ -326,7 +327,10 @@ class PhyloTreeCreationModal extends React.Component {
       }
     }, samples);
 
-    return { projectSamples, otherSamples };
+    return {
+      projectSamples: reverse(projectSamples),
+      otherSamples: reverse(otherSamples),
+    };
   };
 
   loadProjectSearchContext = () => {

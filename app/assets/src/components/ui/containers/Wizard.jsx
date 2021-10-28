@@ -172,13 +172,6 @@ class Wizard extends React.Component {
           </div>
           {!currentPage.props.skipDefaultButtons && (
             <div className="wizard__nav">
-              {this.state.currentPage > 0 && (
-                <SecondaryButton
-                  text={this.labels.back}
-                  onClick={this.handleBackClick}
-                  rounded={true}
-                />
-              )}
               {this.state.currentPage < this.props.children.length - 1 && (
                 <PrimaryButton
                   text={this.labels.continue}
@@ -191,6 +184,13 @@ class Wizard extends React.Component {
                 <PrimaryButton
                   text={this.labels.finish}
                   onClick={this.handleFinishClick}
+                  rounded={true}
+                />
+              )}
+              {this.state.currentPage > 0 && (
+                <SecondaryButton
+                  text={this.labels.back}
+                  onClick={this.handleBackClick}
                   rounded={true}
                 />
               )}

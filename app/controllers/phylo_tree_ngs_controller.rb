@@ -151,22 +151,19 @@ class PhyloTreeNgsController < ApplicationController
     # Retrieve the top (most recent) pipeline runs from samples that contains the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
     pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: tax_id).order(id: :desc).limit(PIPELINE_RUN_IDS_WITH_TAXID_LIMIT).pluck(:pipeline_run_id)
-    eligible_pipeline_run_ids_with_taxid =
-      eligible_pipeline_runs.where(id: pipeline_run_ids_with_taxid)
-                            .order(id: :desc).limit(ELIGIBLE_PIPELINE_RUNS_LIMIT).pluck(:id)
+    eligible_pipeline_run_ids_with_taxid = eligible_pipeline_runs.where(id: pipeline_run_ids_with_taxid).order(id: :desc).pluck(:id)
     # Always include the project's top pipeline runs (in case they were excluded due to the ELIGIBLE_PIPELINE_RUNS_LIMIT)
     project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: tax_id, samples: { project_id: project_id }).pluck(:pipeline_run_id)
     top_project_pipeline_run_ids_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs.pluck(:id)
 
     # Retrieve information for displaying the tree's sample list.
-    samples = sample_details_json(
-      (eligible_pipeline_run_ids_with_taxid | top_project_pipeline_run_ids_with_taxid).uniq,
-      tax_id
-    )
+    project_samples = sample_details_json(top_project_pipeline_run_ids_with_taxid, tax_id, contigs_only: false)
+    additional_samples = sample_details_json(eligible_pipeline_run_ids_with_taxid - top_project_pipeline_run_ids_with_taxid, tax_id, contigs_only: true)
+    all_samples = project_samples + additional_samples
 
     render json: {
       project: project,
-      samples: samples,
+      samples: all_samples,
     }
   end
 
@@ -368,21 +365,33 @@ class PhyloTreeNgsController < ApplicationController
     end
   end
 
-  def sample_details_json(pipeline_run_ids, tax_id)
+  def sample_details_json(pipeline_run_ids, tax_id, contigs_only: true)
     return [] if pipeline_run_ids.blank?
     return [] if ApplicationHelper::HUMAN_TAX_IDS.include? tax_id.to_i
 
-    # Need left join here so we can capture contigs that contain the specified taxon, or 0 if there are no matches.
-    sanitized_join_sql_statement = ActiveRecord::Base.sanitize_sql_array(["
-      LEFT JOIN contigs ON (
-        pipeline_runs.id = contigs.pipeline_run_id AND (
-          contigs.species_taxid_nt = :tax_id OR
-          contigs.species_taxid_nr = :tax_id OR
-          contigs.genus_taxid_nt = :tax_id OR
-          contigs.genus_taxid_nr = :tax_id
-        )
-      )",
-                                                                          tax_id: tax_id,])
+    sanitized_join_sql_statement = if contigs_only
+                                     # Only capture contigs that contain the specified taxon.
+                                     ActiveRecord::Base.sanitize_sql_array(["
+        JOIN contigs ON (
+          pipeline_runs.id = contigs.pipeline_run_id AND (
+            contigs.species_taxid_nt = :tax_id OR
+            contigs.species_taxid_nr = :tax_id OR
+            contigs.genus_taxid_nt = :tax_id OR
+            contigs.genus_taxid_nr = :tax_id
+          )
+        )", tax_id: tax_id,])
+                                   else
+                                     # Need left join here so we can capture contigs that contain the specified taxon, or 0 if there are no matches.
+                                     ActiveRecord::Base.sanitize_sql_array(["
+        LEFT JOIN contigs ON (
+          pipeline_runs.id = contigs.pipeline_run_id AND (
+            contigs.species_taxid_nt = :tax_id OR
+            contigs.species_taxid_nr = :tax_id OR
+            contigs.genus_taxid_nt = :tax_id OR
+            contigs.genus_taxid_nr = :tax_id
+          )
+        )", tax_id: tax_id,])
+                                   end
 
     # Get the pipeline run's coverage breadth for the specified taxon, if available.
     coverage_stats_query = ActiveRecord::Base.sanitize_sql_array(["
@@ -403,6 +412,14 @@ class PhyloTreeNgsController < ApplicationController
       coverage_stats_query = accession_coverage_stats_query(species_taxids)
     end
 
+    # We limit how many rows will be displayed in "additional samples" to prevent
+    # the modal from timing out for admins, but we still want to maximize the number of
+    # relevant samples displayed for users, so we filter out samples with 0 contigs and display
+    # up to the ELIGIBLE_PIPELINE_RUNS_LIMIT.
+    # However, we still want to ensure that all project samples are visible in the "project samples"
+    # step, so we do not filter out samples with 0 contigs and want to ensure that all are included.
+    runs_limit = contigs_only ? ELIGIBLE_PIPELINE_RUNS_LIMIT : pipeline_run_ids.length
+
     # Retrieve information for displaying the tree's sample list.
     # Expose it as an array of hashes containing
     # - sample name
@@ -413,7 +430,7 @@ class PhyloTreeNgsController < ApplicationController
     # - the sample's coverage breadth for the taxon
     samples_projects = current_power.pipeline_runs.joins(sample: [:project, :host_genome]).joins(Arel.sql(coverage_stats_query)).joins(Arel.sql(sanitized_join_sql_statement)).where(
       id: pipeline_run_ids
-    ).group("id").pluck(Arel.sql("
+    ).group("id").limit(runs_limit).pluck(Arel.sql("
       samples.name,
       samples.project_id,
       samples.created_at,
