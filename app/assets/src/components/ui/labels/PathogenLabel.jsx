@@ -4,7 +4,7 @@ import React, { useContext } from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { PATHOGEN_LIST_V0_FEATURE } from "~/components/utils/features";
+import { PATHOGEN_LABEL_V0_FEATURE } from "~/components/utils/features";
 import BasicPopup from "../../BasicPopup";
 import Label from "./Label";
 
@@ -42,15 +42,15 @@ const PathogenLabel = ({ type }) => {
   if (!CATEGORIES.hasOwnProperty(type)) {
     return null;
   }
-  let label = allowedFeatures.includes(PATHOGEN_LIST_V0_FEATURE) ? (
-    <a>
+  let label = allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
+    <span>
       <Label
         text="Known Pathogen"
         color="red"
         size="medium"
         className={cs.newPathogenLabel}
       />
-    </a>
+    </span>
   ) : (
     <a href={CATEGORIES[type]["url"]} target="_blank" rel="noopener noreferrer">
       <Label
@@ -61,7 +61,7 @@ const PathogenLabel = ({ type }) => {
       />
     </a>
   );
-  return allowedFeatures.includes(PATHOGEN_LIST_V0_FEATURE) ? (
+  return allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
     <BasicPopup
       trigger={label}
       content={

@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
-import { PATHOGEN_LIST_V0_FEATURE } from "~/components/utils/features";
+import { PATHOGEN_LABEL_V0_FEATURE } from "~/components/utils/features";
 import BasicPopup from "../../BasicPopup";
 import Label from "../../ui/labels/Label";
 import { CATEGORIES } from "../../ui/labels/PathogenLabel";
@@ -17,7 +17,7 @@ const PathogenPreview = ({ tag2Count }) => {
     let display = (
       <span className="idseq-ui pathogen-preview">
         {tags.map(type => {
-          return allowedFeatures.includes(PATHOGEN_LIST_V0_FEATURE) ? (
+          return allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
             <Label circular color="red" key={type} />
           ) : (
             <Label circular color={CATEGORIES[type]["color"]} key={type} />
@@ -26,7 +26,7 @@ const PathogenPreview = ({ tag2Count }) => {
         <span className="pathogen-count">{totalCount}</span>
       </span>
     );
-    return allowedFeatures.includes(PATHOGEN_LIST_V0_FEATURE) ? (
+    return allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
       <BasicPopup
         trigger={display}
         content="Contains flagged pathogen species."
