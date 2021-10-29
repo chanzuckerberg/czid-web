@@ -1,23 +1,34 @@
 import { groupBy, sortBy } from "lodash/fp";
-import React, { useState, useEffect } from "react";
-import { Grid } from "semantic-ui-react";
+import throttle from "lodash/throttle";
+import React, { useState, useEffect, useMemo } from "react";
 
-import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { getPathogenList } from "~/api/pathogen_lists";
+import SectionNavigation from "~/components/common/AnchorMenu/SectionNavigation";
+import Sections from "~/components/common/AnchorMenu/Sections";
 import { NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./pathogen_list_view.scss";
 
 const PathogenListView = () => {
   const [pathogenList, setPathogenList] = useState(null);
   const [categorizedPathogens, setCategorizedPathogens] = useState([]);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+
+  // Pauses setCurrentSectionIndex while page-scroll in-progress
+  const throttledSetCurrentIndex = useMemo(
+    () =>
+      throttle(index => {
+        setCurrentSectionIndex(index);
+      }, 600),
+    [setCurrentSectionIndex]
+  );
 
   useEffect(async () => {
     const result = await getPathogenList();
     const alphabetizedPathogens = sortBy("name", result["pathogens"]);
     const categorizedPathogens = groupBy("category", alphabetizedPathogens);
+
     setPathogenList(result);
     setCategorizedPathogens(categorizedPathogens);
   }, []);
@@ -56,29 +67,10 @@ const PathogenListView = () => {
   );
 
   const renderPathogenList = () => (
-    <div className={cs.pathogenList}>
-      {Object.keys(categorizedPathogens).map((category, key) => (
-        <div key={key}>
-          <div className={cs.category}>{category}</div>
-          <Grid className={cs.pathogensContainer} columns={3}>
-            {categorizedPathogens[category].map((pathogen, index) => (
-              <Grid.Column className={cs.pathogen} key={index}>
-                <div className={cs.pathogenName}>{pathogen.name}</div>
-                <ExternalLink
-                  className={cs.pathogenTaxid}
-                  href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${pathogen.tax_id}`}
-                  analyticsEventName={
-                    ANALYTICS_EVENT_NAMES.PATHOGEN_LIST_VIEW_NCBI_LINK_CLICKED
-                  }
-                >
-                  Tax ID: {pathogen.tax_id}
-                </ExternalLink>
-              </Grid.Column>
-            ))}
-          </Grid>
-        </div>
-      ))}
-    </div>
+    <Sections
+      sectionContentByHeader={categorizedPathogens}
+      setCurrentSectionIndex={throttledSetCurrentIndex}
+    />
   );
 
   const renderCitations = () => (
@@ -95,11 +87,23 @@ const PathogenListView = () => {
   if (!pathogenList) return null;
 
   return (
-    <NarrowContainer className={cs.pathogenListView} size="small">
-      {renderIntro()}
-      {renderPathogenList()}
-      {renderCitations()}
-    </NarrowContainer>
+    <div className={cs.pathogenListViewContainer}>
+      <div className={cs.margin} />
+      <NarrowContainer className={cs.pathogenListView} size="small">
+        {renderIntro()}
+        {renderPathogenList()}
+        {renderCitations()}
+      </NarrowContainer>
+      <div className={cs.margin}>
+        <div className={cs.anchorMenu}>
+          <SectionNavigation
+            currentSectionIndex={currentSectionIndex}
+            setCurrentSectionIndex={setCurrentSectionIndex}
+            sectionContentByHeader={categorizedPathogens}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

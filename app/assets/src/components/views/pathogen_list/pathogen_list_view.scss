@@ -2,94 +2,71 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 
-.pathogenListView {
-  margin-top: 90px;
-  padding-bottom: $space-xxl;
+.pathogenListViewContainer {
+  display: flex;
+  flex-direction: row;
 
-  .title {
-    h1 {
-      @include font-header-xxl;
-      margin: 0px;
-    }
-
-    h4.subtitle {
-      @include font-body-xxs;
-      margin: $space-xxs 0px $space-xl 0px;
-      color: $gray-dark;
-    }
+  .margin {
+    flex: 1;
   }
 
-  .intro {
-    border-bottom: $border-gray-lightest;
-    padding-bottom: $space-l;
+  .pathogenListView {
+    margin-top: 90px;
+    padding-bottom: $space-xxl;
 
-    a {
-      // Override _header.scss
-      color: $primary !important;
-    }
-
-    p {
-      @include font-body-s;
-      margin-bottom: $space-l;
-    }
-  }
-
-  .pathogenList {
-    margin-top: $space-xxl;
-
-    .category {
-      @include font-header-l;
-    }
-
-    .pathogensContainer {
-      margin: $space-l 0px $space-xl 0px;
-
-      .pathogen {
-        max-width: 240px;
-        padding: 0px;
-        margin: 0px $space-xxl $space-m 0px;
-
-        .pathogenName {
-          @include font-body-xs;
-          font-weight: $font-weight-semibold;
-        }
-
-        .pathogenTaxid {
-          @include font-body-xxs;
-          color: $gray-dark !important;
-
-          &:hover {
-            text-decoration: underline;
-            text-decoration-style: dashed;
-            cursor: pointer;
-          }
-        }
+    .title {
+      h1 {
+        @include font-header-xxl;
+        margin: 0px;
       }
 
-      .pathogen:nth-child(3n) {
-        margin-right: 0px;
-      }
-    }
-  }
-
-  .citations {
-    h3 {
-      @include font-header-xxs;
-      margin-bottom: $space-xs;
-    }
-
-    .list {
-      padding-inline-start: $space-xl;
-      margin: 0px;
-
-      li {
+      h4.subtitle {
         @include font-body-xxs;
+        margin: $space-xxs 0px $space-xl 0px;
+        color: $gray-dark;
+      }
+    }
+
+    .intro {
+      border-bottom: $border-gray-lightest;
+      padding-bottom: $space-l;
+
+      a {
+        // Override _header.scss
+        color: $primary !important;
+      }
+
+      p {
+        @include font-body-s;
+        margin-bottom: $space-l;
+      }
+    }
+
+    .citations {
+      h3 {
+        @include font-header-xxs;
         margin-bottom: $space-xs;
       }
-
-      li:last-child {
-        margin-bottom: 0px;
+  
+      .list {
+        padding-inline-start: $space-xl;
+        margin: 0px;
+  
+        li {
+          @include font-body-xxs;
+          margin-bottom: $space-xs;
+        }
+  
+        li:last-child {
+          margin-bottom: 0px;
+        }
       }
     }
+  }
+
+  .anchorMenu {
+    position: sticky;
+    top: 0;
+    margin: 90px 0 0 $space-xl;
   }
 }

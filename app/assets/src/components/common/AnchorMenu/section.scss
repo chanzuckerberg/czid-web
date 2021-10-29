@@ -1,0 +1,11 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.section {
+  min-height: 100px;
+
+  h2 {
+    @include font-header-l;
+  }
+}

@@ -1,0 +1,31 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+li.navLink {
+  @include font-body-xs;
+  padding-left: $space-l;
+  max-width: 180px;
+  height: 20px;
+  margin-left: -2px;
+
+  &.currentNavItem {
+    border-left: 2px solid $primary;
+    color: $black;
+    font-weight: $font-weight-semibold;
+  }
+
+  &.navItem {
+    border-left: 2px solid $gray-lightest;
+    color: $gray-dark !important;
+  }
+
+  &:hover {
+    border-left: 2px solid $gray-medium;
+    color: $black !important;
+  }
+
+  &:not(:last-child) {
+    margin-bottom: $space-m;
+  }
+}

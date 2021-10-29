@@ -1,0 +1,33 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.pathogensContainer {
+  margin: $space-l 0px $space-xl 0px !important;
+
+  .pathogen {
+    max-width: 240px;
+    padding: 0px !important;
+    margin: 0px $space-xxl $space-m 0px;
+
+    .pathogenName {
+      @include font-body-xs;
+      font-weight: $font-weight-semibold;
+    }
+
+    .pathogenTaxid {
+      @include font-body-xxs;
+      color: $gray-dark !important;
+
+      &:hover {
+        text-decoration: underline;
+        text-decoration-style: dashed;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .pathogen:nth-child(3n) {
+    margin-right: 0px;
+  }
+}
