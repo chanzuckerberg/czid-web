@@ -3,7 +3,7 @@ import React from "react";
 import { NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
 
-import cs from "./support.scss";
+import cs from "./privacy_notice_for_user_research.scss";
 
 const PrivacyNoticeForUserResearch = () => {
   const renderIntro = () => (
@@ -55,14 +55,14 @@ const PrivacyNoticeForUserResearch = () => {
   const renderUserDataSection = () => (
     <>
       <h2>User Data</h2>
-      <h3>How we collect data</h3>
+      <h3 className={cs.first}>How we collect data</h3>
       <p>
         When you choose to participate in User Research, we collect information
         about you on behalf of CZI Science. We will gather informed consent
         through an opt-in approach from each individual prior to their
         participation in a research study.
       </p>
-      <p>Examples of studies include:</p>
+      <p className={cs.list}>Examples of studies include:</p>
       <List
         listItems={[
           "Remote or in person interviews",
@@ -71,7 +71,7 @@ const PrivacyNoticeForUserResearch = () => {
           "Surveys",
         ]}
       />
-      <p>Examples of the data we could collect include:</p>
+      <p className={cs.list}>Examples of the data we could collect include:</p>
       <List
         listItems={[
           "Name",
@@ -86,7 +86,7 @@ const PrivacyNoticeForUserResearch = () => {
       />
 
       <h3>How we use your data</h3>
-      <p>
+      <p className={cs.list}>
         We use only your user data, outlined above, to answer a question or
         understand an experience, workflow, or problem. This may help us better
         understand user experience and improve our programs and services.
@@ -135,7 +135,7 @@ const PrivacyNoticeForUserResearch = () => {
         possible and will only be disclosed with your permission or as required
         by law.
       </p>
-      <p>
+      <p className={cs.providers}>
         We may also share your data with the following types of service
         providers, and as a result of the use case, they may be able to access
         this data in providing these services:
@@ -176,7 +176,7 @@ const PrivacyNoticeForUserResearch = () => {
         on consent, you have the right to withdraw that consent. Where we rely
         on legitimate interest, you have the right to object.
       </p>
-      <p>
+      <p className={cs.list}>
         You have choices about our use of your personal data. You have the
         right:
         <div className={cs.nestedList}>
@@ -191,7 +191,7 @@ const PrivacyNoticeForUserResearch = () => {
           />
         </div>
       </p>
-      <p>
+      <p className={cs.last}>
         Contact us at{" "}
         <a href="mailto:privacy@chanzuckerberg.com">
           privacy@chanzuckerberg.com
@@ -203,7 +203,7 @@ const PrivacyNoticeForUserResearch = () => {
   );
 
   return (
-    <NarrowContainer className={cs.privacyPolicy} size="small">
+    <NarrowContainer className={cs.privacyNoticeForUserResearch} size="small">
       {renderIntro()}
       {renderAboutSurveys()}
       {renderUserDataSection()}
