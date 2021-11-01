@@ -16,13 +16,15 @@ const PathogenPreview = ({ tag2Count }) => {
     let totalCount = Object.values(tag2Count).reduce((a, b) => a + b);
     let display = (
       <span className="idseq-ui pathogen-preview">
-        {tags.map(type => {
-          return allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
-            <Label circular color="red" key={type} />
-          ) : (
-            <Label circular color={CATEGORIES[type]["color"]} key={type} />
-          );
-        })}
+        {allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
+          <Label circular color="red" />
+        ) : (
+          tags.map(type => {
+            return (
+              <Label circular color={CATEGORIES[type]["color"]} key={type} />
+            );
+          })
+        )}
         <span className="pathogen-count">{totalCount}</span>
       </span>
     );
