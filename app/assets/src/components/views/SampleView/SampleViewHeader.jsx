@@ -1,5 +1,5 @@
 import { get, isEmpty, size } from "lodash/fp";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 
 import { deleteSample, saveVisualization } from "~/api";
 import {
@@ -29,10 +29,12 @@ import {
 } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import PipelineRunSampleViewControls from "./PipelineRunSampleViewControls";
+import SampleDeletionConfirmationModal from "./SampleDeletionConfirmationModal";
 import WorkflowVersionHeader from "./WorkflowVersionHeader";
 import { PIPELINE_RUN_TABS } from "./constants";
 
 import cs from "./sample_view_header.scss";
+
 export default function SampleViewHeader({
   backgroundId,
   currentTab,
@@ -51,6 +53,11 @@ export default function SampleViewHeader({
   view,
   onShareClick,
 }) {
+  const [
+    sampleDeletionConfirmationModalOpen,
+    setSampleDeletionConfirmationModalOpen,
+  ] = useState(false);
+
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -141,7 +148,7 @@ export default function SampleViewHeader({
             isEmpty(sample.pipeline_runs) && ( // wouldn't want to delete mngs report
                 <PrimaryButton
                   className={cs.controlElement}
-                  onClick={handleDeleteSample}
+                  onClick={() => setSampleDeletionConfirmationModalOpen(true)}
                   text="Delete Sample"
                 />
               )}
@@ -176,7 +183,7 @@ export default function SampleViewHeader({
             getDownloadReportTableWithAppliedFiltersLink={
               getDownloadReportTableWithAppliedFiltersLink
             }
-            onDeleteSample={handleDeleteSample}
+            onDeleteSample={() => setSampleDeletionConfirmationModalOpen(true)}
             hasAppliedFilters={hasAppliedFilters}
             pipelineRun={currentRun}
             project={project}
@@ -263,10 +270,19 @@ export default function SampleViewHeader({
   );
 
   return (
-    <ViewHeader className={cs.viewHeader}>
-      {renderViewHeaderContent()}
-      {!snapshotShareId && renderViewHeaderControls()}
-    </ViewHeader>
+    <>
+      <ViewHeader className={cs.viewHeader}>
+        {renderViewHeaderContent()}
+        {!snapshotShareId && renderViewHeaderControls()}
+      </ViewHeader>
+      {sampleDeletionConfirmationModalOpen && (
+        <SampleDeletionConfirmationModal
+          open
+          onCancel={() => setSampleDeletionConfirmationModalOpen(false)}
+          onConfirm={handleDeleteSample}
+        />
+      )}
+    </>
   );
 }
 

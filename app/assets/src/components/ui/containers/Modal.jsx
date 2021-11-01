@@ -16,6 +16,7 @@ class Modal extends React.Component {
       tall,
       wide,
       className,
+      sCloseIcon,
       xlCloseIcon,
       ...extraProps
     } = this.props;
@@ -41,7 +42,11 @@ class Modal extends React.Component {
         )}
         {this.props.onClose && (
           <IconClose
-            className={cx(cs.closeIcon, xlCloseIcon && cs.xl)}
+            className={cx(
+              cs.closeIcon,
+              xlCloseIcon && cs.xl,
+              sCloseIcon && cs.s
+            )}
             onClick={this.props.onClose}
           />
         )}
@@ -52,6 +57,7 @@ class Modal extends React.Component {
 }
 
 Modal.defaultProps = {
+  sCloseIcon: false,
   xlCloseIcon: false,
 };
 
@@ -70,6 +76,7 @@ Modal.propTypes = forbidExtraProps({
   wide: PropTypes.bool, // Increase the width of the Modal for the wider modals.
   tall: PropTypes.bool, // Increase the max-height of the Modal for tall content.
   title: PropTypes.string,
+  sCloseIcon: PropTypes.bool,
   xlCloseIcon: PropTypes.bool,
 });
 

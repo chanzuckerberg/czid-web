@@ -14,8 +14,12 @@
     cursor: pointer;
     width: $icon-l;
     height: $icon-l;
-    opacity: 0.3;
-    fill: $gray-darkest;
+    fill: $gray-dark;
+
+    &.s {
+      width: $icon-s;
+      height: $icon-s;
+    }
 
     &.xl {
       width: $icon-xl;

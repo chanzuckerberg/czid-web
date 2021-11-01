@@ -1,0 +1,32 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.sampleDeletionConfirmation {
+  .title {
+    @include font-header-xl;
+    color: $black;
+  }
+
+  .text {
+    @include font-body-s;
+    margin-top: $space-s;
+    margin-bottom: 28px;
+    color: $gray-darkest;
+  }
+
+  .actions {
+    margin-top: $space-m;
+    display: flex;
+
+    .item {
+      &:not(:first-child) {
+        margin-left: 5px;
+      }
+
+      &:not(:last-child) {
+        margin-right: 5px;
+      }
+    }
+  }
+}
