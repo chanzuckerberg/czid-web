@@ -197,8 +197,9 @@ RSpec.describe ProjectsController, type: :controller do
           other_user = create(:user)
           expected_projects = []
           create(:project, users: [@user], samples_data: [{ created_at: 6.months.ago }])
-          expected_projects << create(:project, users: [other_user], samples_data: [{ created_at: 1.year.ago }])
-          expected_projects << create(:project, users: [@user], samples_data: [{ created_at: 1.year.ago }])
+          # Add 1.day to avoid borderline timing error:
+          expected_projects << create(:project, users: [other_user], samples_data: [{ created_at: (1.year + 1.day).ago }])
+          expected_projects << create(:project, users: [@user], samples_data: [{ created_at: (1.year + 1.day).ago }])
 
           get :index, params: { format: "json", domain: "public" }
 
