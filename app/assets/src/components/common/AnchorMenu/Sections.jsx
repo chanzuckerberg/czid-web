@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useState } from "react";
 
 import Section from "~/components/common/AnchorMenu/Section";
-import Pathogens from "../../views/pathogen_list/Pathogens";
+import Pathogens from "~/components/views/pathogen_list/Pathogens";
 
 import cs from "./sections.scss";
 

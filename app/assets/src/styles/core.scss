@@ -3,3 +3,7 @@
 * {
   @include scrollable();
 }
+
+html {
+  scroll-behavior: smooth;
+}

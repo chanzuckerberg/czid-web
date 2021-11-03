@@ -294,6 +294,12 @@ function EventDictionary() {
   this.CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED =
     "CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED";
 
+  /** The user hovered on the PathogenPreview circular label in a ReportTable row. */
+  this.PATHOGEN_PREVIEW_HOVERED = "PATHOGEN_PREVIEW_HOVERED";
+
+  /** The user hovered on the "Known Pathogen" PathogenLabel in a ReportTable row or TaxonTreeVis. */
+  this.PATHOGEN_LABEL_HOVERED = "PATHOGEN_LABEL_HOVERED";
+
   /** The user clicked the pathogen list link in the PathogenLabel popup. */
   this.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED =
     "PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED";

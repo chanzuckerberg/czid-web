@@ -33,15 +33,18 @@ const PathogenListView = () => {
     setCategorizedPathogens(categorizedPathogens);
   }, []);
 
+  const renderTitle = () => (
+    <div className={cs.title}>
+      <h1>IDseq Pathogen List</h1>
+      <h4 className={cs.subtitle}>
+        Last Updated: {pathogenList["updated_at"]}. IDseq Pathogen List v
+        {pathogenList["version"]}.
+      </h4>
+    </div>
+  );
+
   const renderIntro = () => (
     <>
-      <div className={cs.title}>
-        <h1>IDseq Pathogen List</h1>
-        <h4 className={cs.subtitle}>
-          Last Updated: {pathogenList["updated_at"]}. IDseq Pathogen List v
-          {pathogenList["version"]}.
-        </h4>
-      </div>
       <div className={cs.intro}>
         <p>
           This list includes pathogens with known pathogenicity in
@@ -88,19 +91,22 @@ const PathogenListView = () => {
 
   return (
     <div className={cs.pathogenListViewContainer}>
-      <div className={cs.margin} />
-      <NarrowContainer className={cs.pathogenListView} size="small">
-        {renderIntro()}
-        {renderPathogenList()}
-        {renderCitations()}
-      </NarrowContainer>
-      <div className={cs.margin}>
-        <div className={cs.anchorMenu}>
-          <SectionNavigation
-            currentSectionIndex={currentSectionIndex}
-            setCurrentSectionIndex={setCurrentSectionIndex}
-            sectionContentByHeader={categorizedPathogens}
-          />
+      <NarrowContainer size="small">{renderTitle()}</NarrowContainer>
+      <div className={cs.content}>
+        <div className={cs.marginLeft} />
+        <NarrowContainer size="small">
+          {renderIntro()}
+          {renderPathogenList()}
+          {renderCitations()}
+        </NarrowContainer>
+        <div className={cs.marginRight}>
+          <div className={cs.anchorMenu}>
+            <SectionNavigation
+              currentSectionIndex={currentSectionIndex}
+              setCurrentSectionIndex={setCurrentSectionIndex}
+              sectionContentByHeader={categorizedPathogens}
+            />
+          </div>
         </div>
       </div>
     </div>

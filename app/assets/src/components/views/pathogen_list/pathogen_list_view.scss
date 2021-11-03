@@ -4,27 +4,30 @@
 
 .pathogenListViewContainer {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  margin-top: 90px;
+  padding-bottom: $space-xxl;
 
-  .margin {
-    flex: 1;
+  .title {
+    h1 {
+      @include font-header-xxl;
+      margin: 0px;
+    }
+
+    h4.subtitle {
+      @include font-body-xxs;
+      margin: $space-xxs 0px $space-xl 0px;
+      color: $gray-dark;
+    }
   }
 
-  .pathogenListView {
-    margin-top: 90px;
-    padding-bottom: $space-xxl;
+  .content {
+    display: flex;
+    flex-direction: row;
 
-    .title {
-      h1 {
-        @include font-header-xxl;
-        margin: 0px;
-      }
-
-      h4.subtitle {
-        @include font-body-xxs;
-        margin: $space-xxs 0px $space-xl 0px;
-        color: $gray-dark;
-      }
+    .marginLeft,
+    .marginRight {
+      flex: 1;
     }
 
     .intro {
@@ -47,16 +50,16 @@
         @include font-header-xxs;
         margin-bottom: $space-xs;
       }
-  
+
       .list {
         padding-inline-start: $space-xl;
         margin: 0px;
-  
+
         li {
           @include font-body-xxs;
           margin-bottom: $space-xs;
         }
-  
+
         li:last-child {
           margin-bottom: 0px;
         }
@@ -66,7 +69,7 @@
 
   .anchorMenu {
     position: sticky;
-    top: 0;
-    margin: 90px 0 0 $space-xl;
+    top: $space-xxl;
+    margin-left: $space-xxl;
   }
 }

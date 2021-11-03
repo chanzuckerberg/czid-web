@@ -1,9 +1,10 @@
 import React, { useContext } from "react";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
+import Label from "~/components/ui/labels/Label";
+import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
 import { PATHOGEN_LABEL_V0_FEATURE } from "~/components/utils/features";
-import BasicPopup from "../../BasicPopup";
-import Label from "../../ui/labels/Label";
-import { CATEGORIES } from "../../ui/labels/PathogenLabel";
 
 const PathogenPreview = ({ tag2Count }) => {
   const userContext = useContext(UserContext);
@@ -30,7 +31,10 @@ const PathogenPreview = ({ tag2Count }) => {
     );
     return allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
       <BasicPopup
-        trigger={display}
+        trigger={React.cloneElement(display, {
+          onMouseEnter: () =>
+            logAnalyticsEvent(ANALYTICS_EVENT_NAMES.PATHOGEN_PREVIEW_HOVERED),
+        })}
         content="Contains flagged pathogen species."
         basic={false}
         inverted={false}
