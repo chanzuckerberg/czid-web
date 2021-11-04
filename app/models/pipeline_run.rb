@@ -913,24 +913,26 @@ class PipelineRun < ApplicationRecord
       LogUtil.log_error("s3_file_for was called without a pipeline_version for PR #{id}", pipeline_run_id: id)
     end
 
-    case output
-    when "ercc_counts"
-      "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
-    when "amr_counts"
-      "#{postprocess_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
-    when "taxon_counts"
-      "#{assembly_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
-    when "taxon_byteranges"
-      "#{assembly_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
-    when "contigs"
-      "#{assembly_s3_path}/#{ASSEMBLED_STATS_NAME}"
-    when "contig_counts"
-      "#{assembly_s3_path}/#{CONTIG_SUMMARY_JSON_NAME}"
-    when "insert_size_metrics"
-      "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
-    when "accession_coverage_stats"
-      coverage_viz_summary_s3_path
-    end
+    full_path = case output
+                when "ercc_counts"
+                  "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+                when "amr_counts"
+                  "#{postprocess_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
+                when "taxon_counts"
+                  "#{assembly_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
+                when "taxon_byteranges"
+                  "#{assembly_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
+                when "contigs"
+                  "#{assembly_s3_path}/#{ASSEMBLED_STATS_NAME}"
+                when "contig_counts"
+                  "#{assembly_s3_path}/#{CONTIG_SUMMARY_JSON_NAME}"
+                when "insert_size_metrics"
+                  "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
+                when "accession_coverage_stats"
+                  coverage_viz_summary_s3_path
+                end
+    # Extra check in case prefix was nil/invalid:
+    full_path.start_with?("/") ? nil : full_path
   end
 
   def output_ready?(output)
@@ -1383,7 +1385,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def file_generated(s3_path)
-    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
+    s3_path = s3_path.to_s
+    return false if s3_path.blank? || s3_path.start_with?("/")
+
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path)
     status.exitstatus.zero?
   end
 
