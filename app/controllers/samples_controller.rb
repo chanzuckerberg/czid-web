@@ -793,6 +793,7 @@ class SamplesController < ApplicationController
     permitted_params = params.permit(:id, :pipeline_version, :background, :skip_cache, :share_id, :merge_nt_nr)
     pipeline_run = select_pipeline_run(@sample, permitted_params[:pipeline_version])
     background_id = get_background_id(@sample, permitted_params[:background], permitted_params[:share_id])
+    priority_pathogens = fetch_priority_pathogens()
 
     if pipeline_run
       # Don't cache the response until all results for the pipeline run are available
@@ -819,10 +820,10 @@ class SamplesController < ApplicationController
 
       json =
         fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate) do
-          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr])
+          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], priority_pathogens: priority_pathogens)
         end
     else
-      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr])
+      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], priority_pathogens: priority_pathogens)
     end
     render json: json
   rescue PipelineReportService::MassNormalizedBackgroundError => e
@@ -1421,5 +1422,14 @@ class SamplesController < ApplicationController
       uploader: uploader,
       samples_count: samples.length
     )
+  end
+
+  def fetch_priority_pathogens
+    if current_user && current_user.allowed_feature?("pathogen_label_v0")
+      pathogen_list_version = PathogenList.find_by(is_global: true).fetch_list_version()
+      { "knownPathogen" => pathogen_list_version.fetch_pathogen_names() }
+    else
+      TaxonLineage::PRIORITY_PATHOGENS
+    end
   end
 end

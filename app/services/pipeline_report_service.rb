@@ -101,13 +101,14 @@ class PipelineReportService
     "species_tax_ids",
   ].freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: PipelineRun::MIN_CONTIG_READS, parallel: true, merge_nt_nr: false)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: PipelineRun::MIN_CONTIG_READS, parallel: true, merge_nt_nr: false, priority_pathogens: TaxonLineage::PRIORITY_PATHOGENS)
     @pipeline_run = pipeline_run
     @background = background_id ? Background.find(background_id) : nil
     @csv = csv
     @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS
     @parallel = parallel
     @merge_nt_nr = merge_nt_nr
+    @priority_pathogens = priority_pathogens
   end
 
   def call
@@ -698,7 +699,7 @@ class PipelineReportService
         lineage = lineage_by_tax_id[tax_info[:genus_tax_id]]
       end
 
-      TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
+      @priority_pathogens.each do |category, pathogen_list|
         if lineage
           name_columns = lineage.keys.select { |cn| cn.include?("_name") }
           name_columns.each do |col|

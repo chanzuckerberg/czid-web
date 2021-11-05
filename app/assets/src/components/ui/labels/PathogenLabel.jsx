@@ -39,7 +39,10 @@ const PathogenLabel = ({ type }) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
-  if (!CATEGORIES.hasOwnProperty(type)) {
+  if (
+    !CATEGORIES.hasOwnProperty(type) &&
+    !allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE)
+  ) {
     return null;
   }
   let label = allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (

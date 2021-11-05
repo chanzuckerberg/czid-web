@@ -29,4 +29,11 @@ class PathogenListVersion < ApplicationRecord
     end
     info
   end
+
+  def fetch_pathogen_names
+    taxids = pathogens.pluck(:tax_id)
+    taxid_to_species_name = TaxonLineage.where(taxid: taxids).pluck(:taxid, :species_name).to_h
+    pathogen_names = pathogens.map { |pathogen| taxid_to_species_name[pathogen.tax_id] }
+    pathogen_names.to_set
+  end
 end
