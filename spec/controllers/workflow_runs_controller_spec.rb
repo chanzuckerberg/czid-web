@@ -892,7 +892,24 @@ RSpec.describe WorkflowRunsController, type: :controller do
           expect(response).to have_http_status(:success)
           expect(body).to include("external_url")
           expect(body["external_url"]).to include("https://clades.nextstrain.org")
-          expect(body["external_url"]).to include("input-fasta", "X-Amz-Credential")
+          expect(body["external_url"]).to include("?input-fasta", "X-Amz-Credential")
+        end
+      end
+
+      context "when there is a custom reference tree" do
+        it "creates a properly formatted external link with presigned inputs" do
+          expect(ConsensusGenomeConcatService).to receive(:call).and_return(@fasta)
+          expect(S3Util).to receive(:upload_to_s3).twice.and_call_original
+          expect(controller).to receive(:get_presigned_s3_url).twice.and_call_original
+
+          post :consensus_genome_clade_export, params: { workflowRunIds: [@workflow_run1.id, @workflow_run2.id], referenceTree: "fake-tree" }
+          body = JSON.parse(response.body)
+
+          expect(response).to have_http_status(:success)
+          expect(body).to include("external_url")
+          expect(body["external_url"]).to include("https://clades.nextstrain.org")
+          expect(body["external_url"]).to include("?input-fasta=", "X-Amz-Credential", "&input-tree=")
+          expect(body["external_url"]).to_not include("\\u0026input-tree=")
         end
       end
 

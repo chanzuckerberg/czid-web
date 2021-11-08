@@ -216,8 +216,10 @@ class WorkflowRunsController < ApplicationController
     MetricUtil.log_analytics_event(event_name, current_user, { sample_ids: workflow_runs&.pluck(:sample_id)&.uniq || [], workflow_run_ids: workflow_run_ids || [] }, request)
     Rails.logger.info("#{event_name} by user #{current_user.id} for workflow runs (#{workflow_run_ids})")
 
+    # We call JSON.generate explicitly here so that "&input-tree=" doesn't get
+    # encoded into "\u0026input-tree=" by .to_json.
     render(
-      json: { external_url: external_url },
+      json: JSON.generate({ external_url: external_url }),
       status: :ok
     )
   rescue StandardError => e
