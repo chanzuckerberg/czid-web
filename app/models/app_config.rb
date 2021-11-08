@@ -52,6 +52,8 @@ class AppConfig < ApplicationRecord
   WORKFLOW_VERSION_TEMPLATE = "%<workflow_name>s-version".freeze
   # SSRF flag configures the app to use SSRFs-Up to send requests
   ENABLE_SSRFS_UP = "enabled_ssrfs_up".freeze
+  # When enabled, we should use the new samples bucket for bulk downloads and the new task role name
+  ENABLE_BULK_DOWNLOADS_V1 = "enable_bulk_downloads_v1".freeze
 
   after_save :clear_cached_record
 
