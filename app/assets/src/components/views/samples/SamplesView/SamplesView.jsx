@@ -10,12 +10,17 @@ import {
 } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  logAnalyticsEvent,
+  withAnalytics,
+  ANALYTICS_EVENT_NAMES,
+} from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
+import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import QualityControl from "~/components/views/discovery/QualityControl";
@@ -47,6 +52,7 @@ import cs from "./samples_view.scss";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
+const TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM = 50;
 
 class SamplesView extends React.Component {
   constructor(props, context) {
@@ -55,6 +61,7 @@ class SamplesView extends React.Component {
     this.state = {
       phyloTreeCreationModalOpen: false,
       bulkDownloadModalOpen: false,
+      heatmapCreationModalOpen: false,
       nextcladeModalOpen: false,
       // This tooltip is reset whenever the selectedIds changes.
       bulkDownloadButtonTempTooltip: null,
@@ -150,6 +157,7 @@ class SamplesView extends React.Component {
 
   renderHeatmapTrigger = () => {
     const { selectedIds } = this.props;
+    const { allowedFeatures = {} } = this.context || {};
 
     const heatmapOptions = [
       { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
@@ -179,21 +187,38 @@ class SamplesView extends React.Component {
           hideArrow
           className={cx(cs.action)}
           items={heatmapOptions.map(option => {
-            const params = getURLParamString({
-              sampleIds: Array.from(selectedIds),
-            });
-            const log = () =>
-              logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
-                option,
-                selectedIds: selectedIds.size,
+            if (
+              allowedFeatures.includes("taxon_heatmap_presets") &&
+              option.text === "Taxon Heatmap" &&
+              selectedIds.size > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM
+            ) {
+              return (
+                <BareDropdown.Item
+                  key={option.text}
+                  text={option.text}
+                  onClick={withAnalytics(
+                    this.handleHeatmapCreationModalOpen,
+                    ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_OPENED
+                  )}
+                />
+              );
+            } else {
+              const params = getURLParamString({
+                sampleIds: Array.from(selectedIds),
               });
-            return (
-              <BareDropdown.Item
-                key={option.text}
-                text={<a href={`${option.value}?${params}`}>{option.text}</a>}
-                onClick={log}
-              />
-            );
+              const log = () =>
+                logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
+                  option,
+                  selectedIds: selectedIds.size,
+                });
+              return (
+                <BareDropdown.Item
+                  key={option.text}
+                  text={<a href={`${option.value}?${params}`}>{option.text}</a>}
+                  onClick={log}
+                />
+              );
+            }
           })}
           trigger={
             <ToolbarIcon
@@ -537,6 +562,14 @@ class SamplesView extends React.Component {
     showBulkDownloadNotification();
   };
 
+  handleHeatmapCreationModalOpen = () => {
+    this.setState({ heatmapCreationModalOpen: true });
+  };
+
+  handleHeatmapCreationModalClose = () => {
+    this.setState({ heatmapCreationModalOpen: false });
+  };
+
   handleNextcladeModalOpen = () => {
     this.setState({ nextcladeModalOpen: true });
   };
@@ -569,9 +602,10 @@ class SamplesView extends React.Component {
       workflowEntity,
     } = this.props;
     const {
-      phyloTreeCreationModalOpen,
       bulkDownloadModalOpen,
+      heatmapCreationModalOpen,
       nextcladeModalOpen,
+      phyloTreeCreationModalOpen,
     } = this.state;
 
     return (
@@ -603,6 +637,16 @@ class SamplesView extends React.Component {
             selectedIds={selectedIds}
             workflow={workflow}
             workflowEntity={workflowEntity}
+          />
+        )}
+        {heatmapCreationModalOpen && (
+          <HeatmapCreationModal
+            open
+            onClose={withAnalytics(
+              this.handleHeatmapCreationModalClose,
+              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED
+            )}
+            selectedIds={selectedIds}
           />
         )}
         {nextcladeModalOpen && (

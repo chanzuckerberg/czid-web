@@ -22,7 +22,6 @@ class ThresholdFilterDropdown extends React.Component {
 
     this.metrics = (this.props.options || {}).targets || [];
     this.operators = (this.props.options || {}).operators || [];
-    this.label = this.props.label || "Threshold Filters";
 
     this.state = {
       popupIsOpen: false,
@@ -139,9 +138,17 @@ class ThresholdFilterDropdown extends React.Component {
   };
 
   renderLabel() {
-    const { thresholds, disabled, disableMarginRight } = this.props;
+    const {
+      disabled,
+      disableMarginRight,
+      label,
+      placeholder,
+      rounded,
+      thresholds,
+      useDropdownLabelCounter,
+    } = this.props;
 
-    const label = thresholds.length > 0 && (
+    const labelCounter = thresholds.length > 0 && (
       <DropdownLabel
         className={cs.dropdownLabel}
         disabled={disabled}
@@ -150,23 +157,27 @@ class ThresholdFilterDropdown extends React.Component {
       />
     );
 
-    const labelText =
-      this.label && thresholds.length > 0 ? this.label + ":" : this.label;
+    const labelText = label && thresholds.length > 0 ? label + ":" : label;
+
+    const numSelectedText =
+      !useDropdownLabelCounter && thresholds.length > 0
+        ? `${String(thresholds.length)} selected`
+        : null;
 
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
         disabled={disabled}
         label={labelText}
-        rounded
-        value={label}
+        placeholder={placeholder}
+        rounded={rounded}
+        value={useDropdownLabelCounter ? labelCounter : numSelectedText}
       />
     );
   }
 
   render() {
     const { disabled } = this.props;
-
     return (
       <BareDropdown
         trigger={this.renderLabel()}
@@ -231,6 +242,9 @@ class ThresholdFilterDropdown extends React.Component {
 }
 
 ThresholdFilterDropdown.defaultProps = {
+  label: "Threshold filters",
+  placeholder: null,
+  rounded: true,
   thresholds: [],
 };
 
@@ -241,6 +255,12 @@ ThresholdFilterDropdown.propTypes = forbidExtraProps({
   onApply: PropTypes.func,
   options: PropTypes.object,
   disableMarginRight: PropTypes.bool,
+  rounded: PropTypes.bool,
+  placeholder: PropTypes.string,
+  useDropdownLabelCounter: PropTypes.bool,
+
+  // TODO: Refactor ThresholdFilterDropdown to be compatible with PortalDropdown,
+  // so we can use usePortal and withinModal
 });
 
 const ThresholdFilter = ({
@@ -320,9 +340,5 @@ ThresholdFilter.propTypes = forbidExtraProps({
   operators: PropTypes.array,
   threshold: PropTypes.object,
 });
-
-ThresholdFilterDropdown.defaultProps = {
-  thresholds: [],
-};
 
 export default ThresholdFilterDropdown;

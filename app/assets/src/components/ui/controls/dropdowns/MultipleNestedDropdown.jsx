@@ -218,28 +218,41 @@ class MultipleNestedDropdown extends React.Component {
   }
 
   renderLabel() {
+    const {
+      disabled,
+      disableMarginRight,
+      label,
+      placeholder,
+      rounded,
+      useDropdownLabelCounter,
+    } = this.props;
+
     const numberOfSelectedOptions = this.getNumberOfSelectedOptions();
 
     const labelText =
-      numberOfSelectedOptions > 0 && this.props.label
-        ? this.props.label + ":"
-        : this.props.label;
+      numberOfSelectedOptions > 0 && label ? label + ":" : label;
 
-    const label = numberOfSelectedOptions > 0 && (
+    const labelCounter = numberOfSelectedOptions > 0 && (
       <DropdownLabel
         className={cs.dropdownLabel}
-        disabled={this.props.disabled}
+        disabled={disabled}
         text={String(numberOfSelectedOptions)}
       />
     );
 
+    const numSelectedText =
+      !useDropdownLabelCounter && numberOfSelectedOptions > 0
+        ? `${String(numberOfSelectedOptions)} selected`
+        : null;
+
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
+        disableMarginRight={disableMarginRight}
         label={labelText}
-        value={label}
-        rounded={this.props.rounded}
-        disableMarginRight={this.props.disableMarginRight}
+        rounded={rounded}
+        placeholder={placeholder}
+        value={useDropdownLabelCounter ? labelCounter : numSelectedText}
       />
     );
   }
@@ -258,6 +271,8 @@ class MultipleNestedDropdown extends React.Component {
         // Manually disable the search prop for now.
         "search",
         "disableMarginRight",
+        "placeholder",
+        "useDropdownLabelCounter",
       ],
       this.props
     );
@@ -280,6 +295,7 @@ MultipleNestedDropdown.defaultProps = {
   disableMarginRight: false,
   selectedOptions: [],
   selectedSuboptions: {},
+  useDropdownLabelCounter: true,
 };
 
 MultipleNestedDropdown.propTypes = {
@@ -292,6 +308,8 @@ MultipleNestedDropdown.propTypes = {
   disabled: PropTypes.bool,
   rounded: PropTypes.bool,
   disableMarginRight: PropTypes.bool,
+  placeholder: PropTypes.string,
+  useDropdownLabelCounter: PropTypes.bool,
 };
 
 export default MultipleNestedDropdown;

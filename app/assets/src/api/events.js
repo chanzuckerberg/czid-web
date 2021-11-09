@@ -307,6 +307,18 @@ function EventDictionary() {
   /** The user clicked the ncbi link in the PathogenListView. */
   this.PATHOGEN_LIST_VIEW_NCBI_LINK_CLICKED =
     "PATHOGEN_LIST_VIEW_NCBI_LINK_CLICKED";
+
+  /** The user opened the HeatmapCreationModal from SamplesView. */
+  this.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_OPENED =
+    "SAMPLES_VIEW_HEATMAP_CREATION_MODAL_OPENED";
+
+  /** The user closed the HeatmapCreationModal on SamplesView. */
+  this.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED =
+    "SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED";
+
+  /** The user clicked the Continue button in the HeatmapCreationModal to generate a heatmap, possibly with presets. */
+  this.HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED =
+    "HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED";
 }
 
 const eventNames = new EventDictionary();

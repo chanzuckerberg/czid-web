@@ -1,0 +1,51 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+
+.header {
+  margin-bottom: $space-xl;
+
+  .title {
+    @include font-header-xl;
+  }
+
+  .subtitle {
+    @include font-body-xxs;
+    color: $gray-dark;
+  }
+}
+
+.presets {
+  .title {
+    @include font-header-m;
+    margin-bottom: $space-xxs;
+  }
+
+  .description {
+    margin-bottom: $space-l;
+  }
+
+  .filter {
+    margin-bottom: $space-xl;
+
+    .label {
+      @include font-body-xs;
+      font-weight: $font-weight-semibold;
+      margin-bottom: $space-s;
+
+      .optionalLabel {
+        @include font-body-xxs;
+        margin-bottom: $space-xl;
+        color: $gray-dark;
+      }
+    }
+  }
+}
+
+.footer {
+  .button {
+    &:not(:last-child) {
+      margin-right: $space-default !important; // override PrimaryButton's 0 margin-right
+    }
+  }
+}
