@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
+import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { showToast } from "~/components/utils/toast";
@@ -16,7 +16,7 @@ import {
 } from "~/components/views/discovery/discovery_api";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { IconAlert, LogoReversed, IconCloseSmall } from "~ui/icons";
+import { LogoReversed } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import { postToUrlWithCSRF } from "~utils/links";
 
@@ -58,25 +58,10 @@ const showPrivacyUpdateNotification = () => {
 };
 
 class Header extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showAnnouncementBanner: false,
-    };
-  }
-
   componentDidMount() {
-    const { userSignedIn, announcementBannerEnabled } = this.props;
+    const { userSignedIn } = this.props;
     if (userSignedIn) {
       this.displayPrivacyUpdateNotification();
-    }
-    if (announcementBannerEnabled) {
-      const dismissedAnnouncementBanner = localStorage.getItem(
-        "dismissedAnnouncementBanner"
-      );
-      if (dismissedAnnouncementBanner !== "true") {
-        this.setState({ showAnnouncementBanner: true });
-      }
     }
   }
 
@@ -90,11 +75,6 @@ class Header extends React.Component {
     }
   };
 
-  handleAnnouncementBannerClose = () => {
-    this.setState({ showAnnouncementBanner: false });
-    localStorage.setItem("dismissedAnnouncementBanner", "true");
-  };
-
   render() {
     const {
       adminUser,
@@ -104,7 +84,6 @@ class Header extends React.Component {
       userSignedIn,
       ...userMenuProps
     } = this.props;
-    const { showAnnouncementBanner } = this.state;
 
     const { allowedFeatures } = this.context || {};
 
@@ -120,14 +99,12 @@ class Header extends React.Component {
 
     return (
       <div>
-        {showAnnouncementBanner && (
-          <AnnouncementBanner
-            onClose={withAnalytics(
-              this.handleAnnouncementBannerClose,
-              "AnnouncementBanner_close_clicked"
-            )}
-          />
-        )}
+        <AnnouncementBanner
+          visible={announcementBannerEnabled}
+          // TODO: add announcement banner message
+          message="Lorem ipsum"
+          inverted={true}
+        />
         <div className={cs.header}>
           <div className={cs.logo}>
             <a href="/">
@@ -173,36 +150,6 @@ Header.propTypes = {
 };
 
 Header.contextType = UserContext;
-
-const AnnouncementBanner = ({ onClose }) => {
-  return (
-    <div className={cs.announcementBanner}>
-      <BasicPopup
-        content={
-          "Some users are currently seeing slow performance on IDseq due to an AWS outage. We’re aware of the issue and are working to fix it urgently. We apologize for any inconvenience this is causing!"
-        }
-        position="bottom center"
-        wide="very"
-        trigger={
-          <span className={cs.content}>
-            <IconAlert className={cs.icon} />
-            Some users are currently seeing slow performance on IDseq due to an
-            AWS outage. We’re aware of the issue and are working to fix it
-            urgently. We apologize for any inconvenience this is causing!
-          </span>
-        }
-      />
-      <IconCloseSmall
-        className={cs.close}
-        onClick={() => onClose && onClose()}
-      />
-    </div>
-  );
-};
-
-AnnouncementBanner.propTypes = {
-  onClose: PropTypes.func,
-};
 
 const TermsDropdownItem = (
   <BareDropdown.Item

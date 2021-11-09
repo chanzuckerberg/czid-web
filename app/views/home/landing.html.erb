@@ -3,10 +3,9 @@
 <div id="landing_page">
   <%= javascript_tag do %>
     react_component(
-      'DiscoveryViewRouter',
-      {},
-      'landing_page',
-      JSON.parse('<%= raw escape_json(user_context)%>')
-      );
+      'DiscoveryViewRouter', {
+        announcementBannerEnabled: <%= @announcement_banner_enabled %>,
+      }, 'landing_page', JSON.parse('<%= raw escape_json(user_context)%>')
+    );
   <% end %>
 </div>
