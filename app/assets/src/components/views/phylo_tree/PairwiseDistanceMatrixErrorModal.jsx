@@ -7,11 +7,11 @@ import AccordionNotification from "~/components/ui/notifications/AccordionNotifi
 import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton } from "~ui/controls/buttons";
-import ImgHeatmapPrimary from "~ui/illustrations/ImgHeatmapPrimary";
+import ImgMatrixPrimary from "~ui/illustrations/ImgMatrixPrimary";
 
-import cs from "./phylo_tree_heatmap_error_modal.scss";
+import cs from "./pairwise_distance_matrix_error_modal.scss";
 
-const PhyloTreeHeatmapErrorModal = ({
+const PairwiseDistanceMatrixErrorModal = ({
   onContinue,
   open,
   showLowCoverageWarning,
@@ -27,7 +27,7 @@ const PhyloTreeHeatmapErrorModal = ({
       {showLowCoverageWarning ? lowCoverageWarning : defaultWarning}{" "}
       <ExternalLink
         analyticsEventName={
-          ANALYTICS_EVENT_NAMES.PHYLO_TREE_HEATMAP_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED
+          ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED
         }
         coloredBackground={true}
         href={PHYLO_TREE_LINK}
@@ -53,16 +53,18 @@ const PhyloTreeHeatmapErrorModal = ({
       <div className={cs.textContainer}>
         <div className={cs.title}>
           <div className={cs.text}>
-            Instead, view genomic distances between samples in a heatmap
+            Instead, view genomic distances between samples in a pairwise
+            distance matrix
           </div>
-          <ImgHeatmapPrimary className={cs.imgHeatmap} />
+          <ImgMatrixPrimary className={cs.imgMatrix} />
         </div>
         <div className={cs.message}>
-          The heatmap provides kmer-based estimates of genomic distance that can
-          be used to show general relationships between the samples.{" "}
+          The pairwise distance matrix provides kmer-based estimates of genomic
+          distance that can be used to show general relationships between the
+          samples.{" "}
           <ExternalLink
             analyticsEventName={
-              ANALYTICS_EVENT_NAMES.PHYLO_TREE_HEATMAP_ERROR_MODAL_HELP_LINK_CLICKED
+              ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_HELP_LINK_CLICKED
             }
             href={PHYLO_TREE_LINK}
           >
@@ -79,14 +81,14 @@ const PhyloTreeHeatmapErrorModal = ({
   );
 };
 
-PhyloTreeHeatmapErrorModal.propTypes = {
+PairwiseDistanceMatrixErrorModal.propTypes = {
   onContinue: PropTypes.func.isRequired,
   open: PropTypes.bool,
   showLowCoverageWarning: PropTypes.bool,
 };
 
-PhyloTreeHeatmapErrorModal.defaultProps = {
+PairwiseDistanceMatrixErrorModal.defaultProps = {
   showLowCoverageWarning: false,
 };
 
-export default PhyloTreeHeatmapErrorModal;
+export default PairwiseDistanceMatrixErrorModal;

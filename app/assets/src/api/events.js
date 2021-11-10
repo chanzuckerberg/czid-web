@@ -162,23 +162,23 @@ function EventDictionary() {
   this.SAMPLES_HEATMAP_VIEW_LOADING_ERROR =
     "SAMPLES_HEATMAP_VIEW_LOADING_ERROR";
 
-  /** The user clicked on the Learn More link in the error modal explaining why a heatmap is shown when the samples are
+  /** The user clicked on the Learn More link in the error modal explaining why a matrix is shown when the samples are
    * too divergent to display a phylo tree.
    */
-  this.PHYLO_TREE_HEATMAP_ERROR_MODAL_HELP_LINK_CLICKED =
-    "PHYLO_TREE_HEATMAP_ERROR_MODAL_HELP_LINK_CLICKED";
+  this.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_HELP_LINK_CLICKED =
+    "PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_HELP_LINK_CLICKED";
 
-  /** The user clicked on the Learn More link in the AccordionNotification of the error modal explaining why a heatmap is
+  /** The user clicked on the Learn More link in the AccordionNotification of the error modal explaining why a matrix is
    * shown when the samples are too divergent to display a phylo tree.
    */
-  this.PHYLO_TREE_HEATMAP_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED =
-    "PHYLO_TREE_HEATMAP_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED";
+  this.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED =
+    "PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED";
 
-  /** The user clicked on the Continue button to dismiss the error modal explaining why a heatmap is shown when samples are
+  /** The user clicked on the Continue button to dismiss the error modal explaining why a matrix is shown when samples are
    * too divergent to display a phylo tree.
    */
-  this.PHYLO_TREE_HEATMAP_ERROR_MODAL_CONTINUE_BUTTON_CLICKED =
-    "PHYLO_TREE_HEATMAP_ERROR_MODAL_CONTINUE_BUTTON_CLICKED";
+  this.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_CONTINUE_BUTTON_CLICKED =
+    "PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_CONTINUE_BUTTON_CLICKED";
 
   /** The user clicked the Learn More link in the old Phylo Tree warning banner. */
   this.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED =
@@ -196,9 +196,9 @@ function EventDictionary() {
   this.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED =
     "PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED";
 
-  /** The user clicked the help button on a phylo tree page while the heatmap was displayed. */
-  this.PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_BUTTON_CLICKED =
-    "PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_BUTTON_CLICKED";
+  /** The user clicked the help button on a phylo tree page while the matrix was displayed. */
+  this.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED";
 
   /** The user clicked the tools attribution link to view the SKA repo on a phylo tree page. */
   this.PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED =

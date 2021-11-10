@@ -24,7 +24,7 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
   showAppcue,
   PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
-  PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_SIDEBAR,
+  PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
 import {
   PHYLO_TREE_LINK,
@@ -33,7 +33,7 @@ import {
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
-import PhyloTreeHeatmapErrorModal from "~/components/views/phylo_tree/PhyloTreeHeatmapErrorModal";
+import PairwiseDistanceMatrixErrorModal from "~/components/views/phylo_tree/PairwiseDistanceMatrixErrorModal";
 import ToolbarIcon from "~/components/views/samples/SamplesView/ToolbarIcon";
 import {
   copyShortUrlToClipboard,
@@ -73,7 +73,7 @@ class PhyloTreeListView extends React.Component {
     this.state = {
       adminToolsOpen: false,
       currentTree: null,
-      heatmapErrorModalOpen: false,
+      matrixErrorModalOpen: false,
       phyloTrees: props.phyloTrees || [],
       selectedPipelineRunId: null,
       selectedSampleId: null,
@@ -112,21 +112,21 @@ class PhyloTreeListView extends React.Component {
     if (selectedPhyloTreeNgId) {
       const currentTree = await getPhyloTreeNg(selectedPhyloTreeNgId);
 
-      // Add a parameter to the URL to indicate whether or not a heatmap is being displayed
+      // Add a parameter to the URL to indicate whether or not a matrix is being displayed
       // for Appcue survey purposes.
-      const heatmapURLParam = getURLParamString({
-        heatmap: !isUndefined(currentTree.clustermap_svg_url),
+      const matrixURLParam = getURLParamString({
+        matrix: !isUndefined(currentTree.clustermap_svg_url),
       });
       window.history.replaceState(
         window.history.state,
         document.title,
-        `/phylo_tree_ngs/${selectedPhyloTreeNgId}?${heatmapURLParam}`
+        `/phylo_tree_ngs/${selectedPhyloTreeNgId}?${matrixURLParam}`
       );
 
       this.setState({
         currentTree,
         showOldTreeWarning: false,
-        heatmapErrorModalOpen: currentTree.clustermap_svg_url,
+        matrixErrorModalOpen: currentTree.clustermap_svg_url,
         showLowCoverageWarning: currentTree.has_low_coverage,
       });
     } else if (selectedPhyloTreeId) {
@@ -161,16 +161,16 @@ class PhyloTreeListView extends React.Component {
         sidebarVisible: false,
       });
 
-      // Add a parameter to the URL to indicate whether or not a heatmap is being displayed
+      // Add a parameter to the URL to indicate whether or not a matrix is being displayed
       // for Appcue survey purposes.
-      const heatmapURLParam = getURLParamString({
-        heatmap: !isUndefined(currentTree.clustermap_svg_url),
+      const matrixURLParam = getURLParamString({
+        matrix: !isUndefined(currentTree.clustermap_svg_url),
       });
 
       window.history.replaceState(
         window.history.state,
         document.title,
-        `/phylo_tree_ngs/${newPhyloTreeId}?${heatmapURLParam}`
+        `/phylo_tree_ngs/${newPhyloTreeId}?${matrixURLParam}`
       );
       // NG isn't using the sessionStorage 'default tree' functionality
 
@@ -380,8 +380,8 @@ class PhyloTreeListView extends React.Component {
     this.setState({ showOldTreeWarning: false });
   };
 
-  handleCloseHeatmapErrorModal = () => {
-    this.setState({ heatmapErrorModalOpen: false });
+  handleCloseMatrixErrorModal = () => {
+    this.setState({ matrixErrorModalOpen: false });
   };
 
   renderVisualization = () => {
@@ -404,7 +404,7 @@ class PhyloTreeListView extends React.Component {
         />
       );
     } else if (clustermapSvgUrl) {
-      return <img className={cs.heatmap} src={clustermapSvgUrl} />;
+      return <img className={cs.matrix} src={clustermapSvgUrl} />;
     } else if ([STATUS_FAILED, NG_STATUS_FAILED].includes(currentTree.status)) {
       return (
         <SampleMessage
@@ -540,10 +540,10 @@ class PhyloTreeListView extends React.Component {
                 className={cs.controlElement}
                 onClick={showAppcue({
                   flowId: clustermapSvgUrl
-                    ? PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_SIDEBAR
+                    ? PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR
                     : PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
                   analyticsEventName: clustermapSvgUrl
-                    ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HEATMAP_HELP_BUTTON_CLICKED
+                    ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED
                     : ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
                 })}
               />
@@ -589,7 +589,7 @@ class PhyloTreeListView extends React.Component {
 
   renderToolsAttributionBanner = () => {
     const { currentTree } = this.state;
-    const onlyHeatmapAvailable = currentTree && currentTree.clustermap_svg_url;
+    const onlyMatrixAvailable = currentTree && currentTree.clustermap_svg_url;
     return (
       <div className={cs.attributionsBanner}>
         <IconInfoSmall className={cs.infoIcon} />
@@ -601,7 +601,7 @@ class PhyloTreeListView extends React.Component {
         >
           SKA v1.0
         </ExternalLink>
-        {!onlyHeatmapAvailable && (
+        {!onlyMatrixAvailable && (
           <span>
             {" "}
             and{" "}
@@ -623,7 +623,7 @@ class PhyloTreeListView extends React.Component {
     const {
       adminToolsOpen,
       currentTree,
-      heatmapErrorModalOpen,
+      matrixErrorModalOpen,
       selectedPhyloTreeId,
       selectedPhyloTreeNgId,
       showLowCoverageWarning,
@@ -674,12 +674,12 @@ class PhyloTreeListView extends React.Component {
           )}
           {adminToolsOpen && this.renderAdminPanel()}
         </NarrowContainer>
-        {heatmapErrorModalOpen && (
-          <PhyloTreeHeatmapErrorModal
+        {matrixErrorModalOpen && (
+          <PairwiseDistanceMatrixErrorModal
             open
             onContinue={withAnalytics(
-              this.handleCloseHeatmapErrorModal,
-              ANALYTICS_EVENT_NAMES.PHYLO_TREE_HEATMAP_ERROR_MODAL_CONTINUE_BUTTON_CLICKED
+              this.handleCloseMatrixErrorModal,
+              ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_CONTINUE_BUTTON_CLICKED
             )}
             showLowCoverageWarning={showLowCoverageWarning}
           />

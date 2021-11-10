@@ -20,9 +20,9 @@ class PhyloTreeDownloadButton extends React.Component {
       { text: "Tree Image (.svg)", value: "svg" },
       { text: "Tree Image (.png)", value: "png" },
     ];
-    this.heatmapImageOptions = [
-      { text: "Heatmap Image (.svg)", value: "phylotree.clustermap_svg" },
-      { text: "Heatmap Image (.png)", value: "phylotree.clustermap_png" },
+    this.matrixImageOptions = [
+      { text: "Matrix Image (.svg)", value: "phylotree.clustermap_svg" },
+      { text: "Matrix Image (.png)", value: "phylotree.clustermap_png" },
     ];
     this.skaOptions = [
       { text: "SKA Distances (.tsv)", value: "phylotree.ska_distances" },
@@ -35,7 +35,7 @@ class PhyloTreeDownloadButton extends React.Component {
       "phylotree.ska_distances",
       "phylotree.variants",
     ];
-    this.heatmapOnlyOptions = [
+    this.matrixOnlyOptions = [
       "phylotree.clustermap_svg",
       "phylotree.clustermap_png",
       "phylotree.ska_distances",
@@ -84,7 +84,7 @@ class PhyloTreeDownloadButton extends React.Component {
   };
 
   getPhyloTreeNgItems = () => {
-    let readyOptions = this.treeOptions.concat(this.heatmapImageOptions);
+    let readyOptions = this.treeOptions.concat(this.matrixImageOptions);
 
     // Convert the options to BareDropdown Items and add the Divider.
     let dropdownItems = readyOptions.map(option => {
@@ -111,8 +111,8 @@ class PhyloTreeDownloadButton extends React.Component {
     return dropdownItems;
   };
 
-  getHeatmapItems = () => {
-    let dropdownItems = this.heatmapImageOptions.map(option => {
+  getMatrixItems = () => {
+    let dropdownItems = this.matrixImageOptions.map(option => {
       return (
         <BareDropdown.Item
           key={option.value}
@@ -124,7 +124,7 @@ class PhyloTreeDownloadButton extends React.Component {
     dropdownItems.push(<BareDropdown.Divider key="divider_one" />);
     dropdownItems = dropdownItems.concat(
       this.skaOptions.map(option => {
-        if (this.heatmapOnlyOptions.includes(option.value)) {
+        if (this.matrixOnlyOptions.includes(option.value)) {
           return (
             <BareDropdown.Item
               key={option.value}
@@ -148,7 +148,7 @@ class PhyloTreeDownloadButton extends React.Component {
 
     if (showPhyloTreeNgOptions) {
       const downloadItems = tree.clustermap_svg_url
-        ? this.getHeatmapItems()
+        ? this.getMatrixItems()
         : this.getPhyloTreeNgItems();
       return (
         <DownloadButtonDropdown

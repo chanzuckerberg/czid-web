@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "~utils/propTypes";
 
-const ImgHeatmapPrimary = ({ className }) => {
+const ImgMatrixPrimary = ({ className }) => {
   return (
     <svg fill="#3867FA" className={className} viewBox="0 0 150 150">
       <rect width="150" height="150" fill="white" />
@@ -13,8 +13,8 @@ const ImgHeatmapPrimary = ({ className }) => {
   );
 };
 
-ImgHeatmapPrimary.propTypes = {
+ImgMatrixPrimary.propTypes = {
   className: PropTypes.string,
 };
 
-export default ImgHeatmapPrimary;
+export default ImgMatrixPrimary;
