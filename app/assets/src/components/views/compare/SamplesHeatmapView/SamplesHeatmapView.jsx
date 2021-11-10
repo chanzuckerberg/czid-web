@@ -49,6 +49,7 @@ import { showToast } from "~/components/utils/toast";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
+import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
@@ -113,6 +114,7 @@ class SamplesHeatmapView extends React.Component {
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 10),
         readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1),
       },
+      heatmapCreationModalOpen: false,
       loading: false,
       loadingFailed: false,
       selectedMetadata: this.urlParams.selectedMetadata || [
@@ -484,6 +486,14 @@ class SamplesHeatmapView extends React.Component {
   handleDownloadPng = () => {
     // TODO (gdingle): pass in filename per sample?
     this.heatmapVis.downloadAsPng();
+  };
+
+  handleHeatmapCreationModalOpen = () => {
+    this.setState({ heatmapCreationModalOpen: true });
+  };
+
+  handleHeatmapCreationModalClose = () => {
+    this.setState({ heatmapCreationModalOpen: false });
   };
 
   metricToSortField(metric) {
@@ -1796,6 +1806,7 @@ class SamplesHeatmapView extends React.Component {
       allSpeciesIds,
       data,
       enableMassNormalizedBackgrounds,
+      heatmapCreationModalOpen,
       hideFilters,
       loading,
       sampleIds,
@@ -1825,6 +1836,7 @@ class SamplesHeatmapView extends React.Component {
                   this.getDownloadCurrentViewHeatmapCSVLink
                 }
                 onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
+                onNewPresetsClick={this.handleHeatmapCreationModalOpen}
                 onShareClick={this.handleShareClick}
                 onSaveClick={this.handleSaveClick}
               />
@@ -1878,6 +1890,17 @@ class SamplesHeatmapView extends React.Component {
           )}
           params={this.getSidebarParams()}
         />
+        {heatmapCreationModalOpen && (
+          <HeatmapCreationModal
+            continueInNewTab={true}
+            open
+            onClose={withAnalytics(
+              this.handleHeatmapCreationModalClose,
+              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED
+            )}
+            selectedIds={sampleIds}
+          />
+        )}
       </div>
     );
   }

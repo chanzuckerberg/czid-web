@@ -23,7 +23,7 @@ import {
   MultipleNestedDropdown,
   ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
-import { openUrl } from "~utils/links";
+import { openUrl, openUrlInNewTab } from "~utils/links";
 
 import cs from "./heatmap_creation_modal.scss";
 
@@ -258,7 +258,7 @@ export default class HeatmapCreationModal extends React.Component {
     );
   }
   render() {
-    const { open, onClose, selectedIds } = this.props;
+    const { continueInNewTab, open, onClose, selectedIds } = this.props;
 
     const {
       selectedBackground,
@@ -273,6 +273,7 @@ export default class HeatmapCreationModal extends React.Component {
     const params = getURLParamString({
       sampleIds: Array.from(selectedIds),
     });
+    const url = `/visualizations/heatmap?${params}`;
 
     return (
       <Modal narrow open={open} tall onClose={onClose}>
@@ -284,7 +285,7 @@ export default class HeatmapCreationModal extends React.Component {
             text="Continue"
             onClick={() => {
               withAnalytics(
-                openUrl(`/visualizations/heatmap?${params}`),
+                continueInNewTab ? openUrlInNewTab(url) : openUrl(url),
                 ANALYTICS_EVENT_NAMES.HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED,
                 {
                   selectedBackground,
@@ -308,10 +309,18 @@ export default class HeatmapCreationModal extends React.Component {
   }
 }
 
+HeatmapCreationModal.defaultProps = {
+  continueInNewTab: false,
+};
+
 HeatmapCreationModal.propTypes = {
+  continueInNewTab: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
-  selectedIds: PropTypes.instanceOf(Set),
+  selectedIds: PropTypes.oneOfType([
+    PropTypes.instanceOf(Set),
+    PropTypes.array,
+  ]),
 };
 
 HeatmapCreationModal.contextType = UserContext;

@@ -5,6 +5,7 @@ import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader } from "~/components/layout";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import {
   showAppcue,
   SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
@@ -12,9 +13,19 @@ import {
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
 import { logDownloadOption } from "~/components/views/report/utils/download";
-import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
+import {
+  PrimaryButton,
+  HelpButton,
+  SaveButton,
+  ShareButton,
+} from "~ui/controls/buttons";
+
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { DOWNLOAD_OPTIONS } from "./constants";
+import { IconFilters } from "~ui/icons";
+import {
+  DOWNLOAD_OPTIONS,
+  TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM,
+} from "./constants";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -25,6 +36,7 @@ const SamplesHeatmapHeader = ({
   onDownloadCurrentHeatmapViewCsv,
   onDownloadSvg,
   onDownloadPng,
+  onNewPresetsClick,
   onShareClick,
   onSaveClick,
 }) => {
@@ -67,6 +79,10 @@ const SamplesHeatmapHeader = ({
     });
   };
 
+  const showNewPresetsButton =
+    allowedFeatures.includes("taxon_heatmap_presets") &&
+    sampleIds.length > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM;
+
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
@@ -78,9 +94,25 @@ const SamplesHeatmapHeader = ({
         />
       </ViewHeader.Content>
       <ViewHeader.Controls className={cs.controls}>
+        {showNewPresetsButton && (
+          <ColumnHeaderTooltip
+            trigger={
+              <PrimaryButton
+                text="New Presets"
+                icon={<IconFilters />}
+                onClick={withAnalytics(
+                  onNewPresetsClick,
+                  ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_NEW_PRESETS_BUTTON_CLICKED
+                )}
+              />
+            }
+            content="Create a new heatmap for the same sample set."
+          />
+        )}
         <BasicPopup
           trigger={
             <ShareButton
+              className={cs.controlElement}
               onClick={withAnalytics(
                 onShareClick,
                 "SamplesHeatmapHeader_share-button_clicked",
@@ -88,7 +120,7 @@ const SamplesHeatmapHeader = ({
                   sampleIds: sampleIds.length,
                 }
               )}
-              className={cs.controlElement}
+              primary={!showNewPresetsButton}
             />
           }
           content="A shareable URL was copied to your clipboard!"
@@ -112,16 +144,14 @@ const SamplesHeatmapHeader = ({
           onClick={handleDownloadClick}
           disabled={!data}
         />
-        {allowedFeatures.includes("appcues") && (
-          <HelpButton
-            className={cs.controlElement}
-            onClick={showAppcue({
-              flowId: SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
-              analyticEventName:
-                ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED,
-            })}
-          />
-        )}
+        <HelpButton
+          className={cs.controlElement}
+          onClick={showAppcue({
+            flowId: SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
+            analyticEventName:
+              ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED,
+          })}
+        />
       </ViewHeader.Controls>
     </ViewHeader>
   );
@@ -136,6 +166,7 @@ SamplesHeatmapHeader.propTypes = {
   onDownloadPng: PropTypes.func.isRequired,
   onDownloadAllHeatmapMetricsCsv: PropTypes.func.isRequired,
   onDownloadCurrentHeatmapViewCsv: PropTypes.func.isRequired,
+  onNewPresetsClick: PropTypes.func,
   onShareClick: PropTypes.func.isRequired,
   onSaveClick: PropTypes.func.isRequired,
 };

@@ -21,6 +21,7 @@ import PropTypes from "~/components/utils/propTypes";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
+import { TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import QualityControl from "~/components/views/discovery/QualityControl";
@@ -52,7 +53,6 @@ import cs from "./samples_view.scss";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
-const TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM = 50;
 
 class SamplesView extends React.Component {
   constructor(props, context) {

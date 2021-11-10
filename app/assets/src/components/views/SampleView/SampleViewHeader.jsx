@@ -191,7 +191,7 @@ export default function SampleViewHeader({
             sample={sample}
             view={view}
           />
-          {!isEmpty(reportMetadata) && allowedFeatures.includes("appcues") && (
+          {!isEmpty(reportMetadata) && (
             <HelpButton
               className={cs.controlElement}
               onClick={showAppcue({

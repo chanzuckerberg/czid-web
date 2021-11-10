@@ -141,6 +141,10 @@ function EventDictionary() {
   this.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED =
     "SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED";
 
+  /** The user clicked the New Presets button in a heatmap to open the Heatmap Creation Modal. */
+  this.SAMPLES_HEATMAP_HEADER_NEW_PRESETS_BUTTON_CLICKED =
+    "SAMPLES_HEATMAP_HEADER_NEW_PRESETS_BUTTON_CLICKED";
+
   /** The user clicked the sortable column headers on the mngs report page. */
   this.REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED =
     "REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED";
