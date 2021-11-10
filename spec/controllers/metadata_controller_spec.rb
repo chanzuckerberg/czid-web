@@ -76,7 +76,7 @@ RSpec.describe MetadataController, type: :controller do
         sample_name = "foo"
         host_genome_name = "Titled"
         mf = create(:metadata_field)
-        create(:host_genome, name: host_genome_name, metadata_fields: [mf.name])
+        create(:host_genome, name: host_genome_name, metadata_fields: [mf.name], user_id: nil)
         get :metadata_template_csv, params: { new_sample_names: [sample_name], host_genomes: [host_genome_name.downcase] }
         expect(response).to have_http_status :success
 

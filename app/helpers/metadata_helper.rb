@@ -110,7 +110,7 @@ module MetadataHelper
 
     field_names = ["Sample Name"] + (include_host_genome ? ["Host Organism"] : []) + fields.pluck(:display_name)
 
-    host_genomes_by_name = HostGenome.all.includes(:metadata_fields).reject { |x| x.metadata_fields.empty? }.index_by { |x| x.name.downcase }
+    host_genomes_by_name = HostGenome.all.includes(:metadata_fields).select(&:show_as_option?).reject { |x| x.metadata_fields.empty? }.index_by { |x| x.name.downcase }
 
     # Assemble sample objects based on params.
     samples = if samples_are_new
