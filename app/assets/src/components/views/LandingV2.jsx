@@ -6,10 +6,13 @@ import Footer from "~/components/views/landing_page/Footer";
 import Hero from "~/components/views/landing_page/Hero";
 import Header from "~/components/views/landing_page/LandingHeaderV2";
 
-const LandingV2 = ({ announcementBannerEnabled }) => {
+const LandingV2 = ({ announcementBannerEnabled, emergencyBannerMessage }) => {
   return (
     <div>
-      <Header announcementBannerEnabled={announcementBannerEnabled} />
+      <Header
+        announcementBannerEnabled={announcementBannerEnabled}
+        emergencyBannerMessage={emergencyBannerMessage}
+      />
       <Hero />
       <Content />
       <Footer />
@@ -19,6 +22,7 @@ const LandingV2 = ({ announcementBannerEnabled }) => {
 
 LandingV2.propTypes = {
   announcementBannerEnabled: PropTypes.bool,
+  emergencyBannerMessage: PropTypes.string,
 };
 
 export default LandingV2;

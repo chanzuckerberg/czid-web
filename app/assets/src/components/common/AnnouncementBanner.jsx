@@ -7,13 +7,13 @@ import BasicPopup from "~/components/BasicPopup";
 import { IconAlert, IconCloseSmall } from "~ui/icons";
 import cs from "./announcement_banner.scss";
 
-const AnnouncementBanner = ({ visible, message, inverted }) => {
+const AnnouncementBanner = ({ visible, message, inverted, id }) => {
   const [showAnnouncementBanner, setShowAnnouncmentBanner] = useState(false);
 
   useEffect(() => {
     if (visible) {
       const dismissedAnnouncementBanner = localStorage.getItem(
-        "dismissedAnnouncementBanner"
+        `dismissedAnnouncementBanner-${id}`
       );
       if (dismissedAnnouncementBanner !== "true") {
         setShowAnnouncmentBanner(true);
@@ -23,7 +23,7 @@ const AnnouncementBanner = ({ visible, message, inverted }) => {
 
   const handleAnnouncementBannerClose = () => {
     setShowAnnouncmentBanner(false);
-    localStorage.setItem("dismissedAnnouncementBanner", "true");
+    localStorage.setItem(`dismissedAnnouncementBanner-${id}`, "true");
   };
 
   if (!showAnnouncementBanner) return null;
@@ -56,6 +56,7 @@ AnnouncementBanner.propTypes = {
   visible: PropTypes.bool,
   message: PropTypes.string.isRequired,
   inverted: PropTypes.bool,
+  id: PropTypes.string.isRequired,
 };
 
 AnnouncementBanner.defaultProps = {

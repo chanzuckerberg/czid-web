@@ -5,6 +5,7 @@
     react_component(
       'DiscoveryViewRouter', {
         announcementBannerEnabled: <%= @announcement_banner_enabled %>,
+        emergencyBannerMessage: '<%= @emergency_banner_message %>',
       }, 'landing_page', JSON.parse('<%= raw escape_json(user_context)%>')
     );
   <% end %>

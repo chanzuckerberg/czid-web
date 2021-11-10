@@ -14,6 +14,7 @@
         userSignedIn: false,
         disableNavigation: <%= @disable_header_navigation %>,
         announcementBannerEnabled: <%= @announcement_banner_enabled %>,
+        emergencyBannerMessage: '<%= @emergency_banner_message %>', 
       }, 'page_header')
     <% end %>
   <% elsif current_user && current_user.id && !@show_landing_header %>
@@ -27,6 +28,7 @@
         userSignedIn: true,
         disableNavigation: <%= @disable_header_navigation %>,
         announcementBannerEnabled: <%= @announcement_banner_enabled %>,
+        emergencyBannerMessage: '<%= @emergency_banner_message %>',
       }, 'page_header', JSON.parse('<%= raw escape_json(user_context)%>'))
 
 

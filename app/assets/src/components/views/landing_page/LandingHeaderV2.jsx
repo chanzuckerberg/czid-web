@@ -1,3 +1,4 @@
+import { isEmpty } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
@@ -5,7 +6,10 @@ import IconMobileNavClose from "~/components/ui/icons/IconMobileNavClose";
 import { LogoReversed } from "~ui/icons";
 import cs from "./LandingHeaderV2.scss";
 
-const LandingHeaderV2 = ({ announcementBannerEnabled }) => {
+const LandingHeaderV2 = ({
+  announcementBannerEnabled,
+  emergencyBannerMessage,
+}) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   function toggleMobileNav() {
@@ -15,8 +19,14 @@ const LandingHeaderV2 = ({ announcementBannerEnabled }) => {
   return (
     <>
       <AnnouncementBanner
+        id="emergency"
+        visible={!isEmpty(emergencyBannerMessage)}
+        message={emergencyBannerMessage}
+      />
+      <AnnouncementBanner
+        id="rebrand"
         visible={announcementBannerEnabled}
-        // TODO: add announcement banner message
+        // TODO: add rebrand announcement banner message
         message="Lorem ipsum"
         inverted={true}
       />
@@ -112,6 +122,7 @@ const LandingHeaderV2 = ({ announcementBannerEnabled }) => {
 
 LandingHeaderV2.propTypes = {
   announcementBannerEnabled: PropTypes.bool,
+  emergencyBannerMessage: PropTypes.string,
 };
 
 export default LandingHeaderV2;

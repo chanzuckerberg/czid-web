@@ -1,5 +1,6 @@
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
+import { isEmpty } from "lodash/fp";
 import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
@@ -79,6 +80,7 @@ class Header extends React.Component {
     const {
       adminUser,
       announcementBannerEnabled,
+      emergencyBannerMessage,
       disableNavigation,
       showBlank,
       userSignedIn,
@@ -100,8 +102,14 @@ class Header extends React.Component {
     return (
       <div>
         <AnnouncementBanner
+          id="emergency"
+          visible={!isEmpty(emergencyBannerMessage)}
+          message={emergencyBannerMessage}
+        />
+        <AnnouncementBanner
+          id="rebrand"
           visible={announcementBannerEnabled}
-          // TODO: add announcement banner message
+          // TODO: add rebrand announcement banner message
           message="Lorem ipsum"
           inverted={true}
         />
@@ -144,6 +152,7 @@ class Header extends React.Component {
 Header.propTypes = {
   adminUser: PropTypes.bool,
   announcementBannerEnabled: PropTypes.bool,
+  emergencyBannerMessage: PropTypes.string,
   disableNavigation: PropTypes.bool,
   showBlank: PropTypes.bool,
   userSignedIn: PropTypes.bool,

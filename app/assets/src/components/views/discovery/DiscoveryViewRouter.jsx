@@ -30,6 +30,7 @@ const DiscoveryViewRouter = ({
   snapshotShareId,
   updateDiscoveryProjectId,
   announcementBannerEnabled,
+  emergencyBannerMessage,
 }) => {
   const { userSignedIn } = useContext(UserContext);
   return (
@@ -91,7 +92,10 @@ const DiscoveryViewRouter = ({
         </Route>
       ) : (
         <Route>
-          <LandingV2 announcementBannerEnabled={announcementBannerEnabled} />
+          <LandingV2
+            announcementBannerEnabled={announcementBannerEnabled}
+            emergencyBannerMessage={emergencyBannerMessage}
+          />
         </Route>
       )}
     </Switch>
@@ -109,6 +113,7 @@ DiscoveryViewRouter.propTypes = {
   snapshotShareId: PropTypes.string,
   updateDiscoveryProjectId: PropTypes.func,
   announcementBannerEnabled: PropTypes.bool,
+  emergencyBannerMessage: PropTypes.string,
 };
 
 export default DiscoveryViewRouter;

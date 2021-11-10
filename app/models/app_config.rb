@@ -18,6 +18,9 @@ class AppConfig < ApplicationRecord
   # When this is "1", the announcement banner on the top of the site header will be enabled.
   # Other conditions may check a time constraint.
   SHOW_ANNOUNCEMENT_BANNER = 'show_announcement_banner'.freeze
+  # When this is not "", the emergency announcement banner on the top of the site header will be enabled.
+  # The emergency announcement banner with display the specified message.
+  SHOW_EMERGENCY_BANNER_MESSAGE = 'show_emergency_banner_message'.freeze
   # The ARN of the mNGS pipeline's Step Function
   SFN_MNGS_ARN = 'sfn_mngs_arn'.freeze
   SFN_ARN = 'sfn_arn'.freeze
