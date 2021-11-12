@@ -1469,7 +1469,7 @@ class SampleView extends React.Component {
       subsampledReadsCount &&
       adjustedRemainingReadsCount &&
       subsampledReadsCount !== adjustedRemainingReadsCount &&
-      `Report values are computed from ${subsampledReadsCount} reads subsampled \
+      `Report values are computed from ${subsampledReadsCount} unique reads subsampled \
         randomly from the ${adjustedRemainingReadsCount} reads passing host and quality filters.`
     );
   };
