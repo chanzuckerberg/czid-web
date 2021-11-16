@@ -1,7 +1,11 @@
 <p><b>You have been invited to join IDseq!</b></p>
 <p/>
 <p><b><%= link_to 'Activate Your Account', @reset_password_url %></b></p>
-<p>Please note that this activation link expires after 48 hours. If the link has expired, please <%= link_to 'click here to request a new one', root_url + "users/password/new", style: 'color: black' %>.</p>
+
+<p>If you do not see an activation link, copy and paste the following into a browser: <%= "#{@reset_password_url}" %> </p>
+
+<p>Please note that this activation link expires after 48 hours. If the link has expired, please <%= link_to 'click here to request a new one', root_url + "users/password/new", style: 'color: black' %>,
+or copy and paste the following into a browser: <%= "#{root_url}" + "users/password/new" %>.</p>
 <p>
   Thanks,<br/> The IDseq Team
 </p>
