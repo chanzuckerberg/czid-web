@@ -31,6 +31,10 @@ const ADMIN_OPTIONS = {
       "The contents of this s3 folder will be copied to the sample result folder prior to pipeline start.",
     placeholder: "s3://yunfang-workdir/id-rr004/RR004_water_2_S23/",
   },
+  alignment_scalability: {
+    helpText: "Use the new alignment scalability flow (true|false)",
+    placeholder: "false",
+  },
 };
 
 export default class AdminUploadOptions extends React.Component {

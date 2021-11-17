@@ -106,6 +106,12 @@ class SfnPipelineDispatchService
       },
       OutputPrefix: output_prefix,
     }
+    sfn_extra_inputs = @pipeline_run.parse_dag_vars
+    sfn_pipeline_input_json[:Input].keys.each do |step|
+      if sfn_extra_inputs.key?(step.to_s)
+        sfn_pipeline_input_json[:Input][step].merge!(sfn_extra_inputs[step.to_s])
+      end
+    end
     return sfn_pipeline_input_json
   end
 

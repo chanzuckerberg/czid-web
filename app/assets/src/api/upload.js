@@ -43,6 +43,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
   const processedSamples = map(
     pick([
       "alignment_config_name",
+      "alignment_scalability",
       "clearlabs",
       "client",
       "dag_vars",
@@ -63,6 +64,18 @@ export const initiateBulkUploadLocalWithMetadata = async ({
     ]),
     samples
   );
+
+  // Process extra options
+  processedSamples.forEach(processedSample => {
+    if (
+      "alignment_scalability" in processedSample &&
+      processedSample["alignment_scalability"] === "true"
+    ) {
+      processedSample["dag_vars"] = JSON.stringify({
+        NonHostAlignment: { alignment_scalability: true },
+      });
+    }
+  });
 
   let response;
 
