@@ -39,7 +39,7 @@ class UsersController < ApplicationController
             UserMailer.account_activation(email, reset_url).deliver_now
           rescue Net::SMTPAuthenticationError
             render(
-              json: ["User was successfully created but SMTP email is not configured. Try manual password reset at #{request.base_url}#{users_password_new_path}"],
+              json: ["User was successfully created but SMTP email is not configured. Try manual password reset at #{request.base_url}#{users_password_new_path} To enable SMTP, set environment variables for SMTP_USER and SMTP_PASSWORD."],
               status: :internal_server_error
             ) and return
           end
