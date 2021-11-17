@@ -22,6 +22,10 @@ const MetadataAgeInput = ({
   const [ageChanged, setAgeChanged] = useState(false);
 
   useEffect(() => {
+    setSafeHumanAge(value);
+  }, [value]);
+
+  useEffect(() => {
     if (hipaaWarning) {
       if (safeHumanAge === 0) {
         // User pressed down arrow or scrolled to decrement age
@@ -32,7 +36,6 @@ const MetadataAgeInput = ({
       }
     }
     setHipaaWarning(safeHumanAge >= maxAge);
-    onChange(metadataType.key, safeHumanAge.toString());
   }, [safeHumanAge]);
 
   const handleKeyDown = keyEvent => {
@@ -61,6 +64,7 @@ const MetadataAgeInput = ({
           });
           setAgeChanged(true);
           setSafeHumanAge(definedVal);
+          onChange(metadataType.key, definedVal.toString());
         }}
         onKeyDown={e => handleKeyDown(e)}
         onBlur={() => onSave && onSave(metadataType.key)}
