@@ -2,12 +2,15 @@ import cx from "classnames";
 import { max } from "d3-array";
 import { scaleLinear, scaleBand, scaleOrdinal } from "d3-scale";
 import { stack } from "d3-shape";
-import { maxBy } from "lodash";
+import { maxBy, round } from "lodash";
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
+import { normalizeData } from "~/components/visualizations/utils";
+import { numberWithPercent, numberWithSiPrefix } from "~/helpers/strings";
 
 import XAxis from "./XAxis";
 import YAxis from "./YAxis";
+
 import cs from "./horizontal_stacked_bar_chart.scss";
 
 // Data passed into this chart should be an array of objects in the form:
@@ -70,24 +73,30 @@ export default class HorizontalStackedBarChart extends React.Component {
   constructor(props) {
     super(props);
 
-    const { data, keys, options, yAxisKey } = props;
+    const { data, keys, options, yAxisKey, normalize } = props;
 
     const mergedOptions = this.mergeOptionsWithDefaults(defaults, options);
 
-    const stateData = data;
+    // Pre-process raw and normalized data
+    this.data = data;
+    this.normalizedData = normalizeData(data, keys);
 
-    if (mergedOptions.sort) {
-      stateData.sort(mergedOptions.sort);
+    const sortedMergedOptions = mergedOptions.sort;
+    if (sortedMergedOptions) {
+      this.data.sort(sortedMergedOptions);
+      this.normalizedData.sort(sortedMergedOptions);
     }
 
+    const stateData = normalize ? this.normalizedData : this.data;
+
+    // Create stack generator
     const dataKeys = keys.filter(key => key !== yAxisKey);
-    const stackGenerator = stack().keys(dataKeys);
-    const stackedData = stackGenerator(stateData);
+    this.stackGenerator = stack().keys(dataKeys);
 
     this.state = {
       data: stateData,
       options: mergedOptions,
-      stackedData,
+      stackedData: this.stackGenerator(stateData),
       keys,
       dataKeys,
       mouseOverBar: null,
@@ -109,9 +118,10 @@ export default class HorizontalStackedBarChart extends React.Component {
     window.addEventListener("resize", this.handleWindowResize);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     const { redrawNeeded } = this.state;
-    if (redrawNeeded) {
+    const scaleChanged = this.props.normalize !== prevProps.normalize;
+    if (redrawNeeded || scaleChanged) {
       this.updateChartDimensions();
       this.setState({ redrawNeeded: false });
     }
@@ -162,8 +172,9 @@ export default class HorizontalStackedBarChart extends React.Component {
   /* --- post-mount functions --- */
 
   updateChartDimensions() {
-    const { yAxisKey } = this.props;
-    const { data, dataKeys } = this.state;
+    const { yAxisKey, normalize } = this.props;
+    const { dataKeys } = this.state;
+    const stateData = normalize ? this.normalizedData : this.data;
 
     // allow for autoselection of width
     // 98% container width to account for floating point math rounding
@@ -178,19 +189,26 @@ export default class HorizontalStackedBarChart extends React.Component {
     const { x, y, z } = this.createDimensions(barCanvasWidth, barCanvasHeight);
 
     y.domain(
-      data.map(d => {
+      stateData.map(d => {
         return d[yAxisKey];
       })
     );
 
-    const xDomainMax = max(data, d => d.total);
-    x.domain([0, xDomainMax + 0.1 * xDomainMax]).nice();
+    const xDomainMax = max(stateData, d => d.total);
+    if (normalize) {
+      x.domain([0, xDomainMax]);
+    } else {
+      // Leave extra space to render invisible bar
+      x.domain([0, xDomainMax * 1.1]).nice();
+    }
 
     z.domain(dataKeys);
 
     const labels = truncatedLabels.length > 0 ? truncatedLabels : y.domain();
 
     this.setState({
+      data: stateData,
+      stackedData: this.stackGenerator(stateData),
       xAxisHeight,
       barCanvasHeight,
       barCanvasWidth,
@@ -380,7 +398,7 @@ export default class HorizontalStackedBarChart extends React.Component {
   /* --- rendering --- */
 
   renderVisibleStackedBars() {
-    const { events, yAxisKey } = this.props;
+    const { events, normalize, yAxisKey } = this.props;
     const {
       options,
       data,
@@ -393,6 +411,8 @@ export default class HorizontalStackedBarChart extends React.Component {
       z,
     } = this.state;
 
+    const strokeWidth = normalize ? 0 : options.bars.strokeWidth;
+
     const coloredBars = dataKeys.map((key, keyIndex) => {
       const color = z(key);
       const colorStackComponent = stackedData[keyIndex].map(
@@ -402,7 +422,7 @@ export default class HorizontalStackedBarChart extends React.Component {
           const xRight = stackPieceRange[1];
           const yPosition = y(yAttribute);
           const xPosition = x(xLeft);
-          let width = x(xRight - xLeft) - options.bars.strokeWidth;
+          let width = x(xRight - xLeft) - strokeWidth;
 
           // keep bars at least 1 pixel wide so they're visible
           if (width < 1) {
@@ -438,7 +458,7 @@ export default class HorizontalStackedBarChart extends React.Component {
         <g
           fill={color}
           stroke={color}
-          strokeWidth={options.bars.strokeWidth}
+          strokeWidth={strokeWidth}
           key={`${color}+${keyIndex}`}
         >
           {colorStackComponent}
@@ -450,7 +470,7 @@ export default class HorizontalStackedBarChart extends React.Component {
   }
 
   renderInvisibleStackedBars() {
-    const { events, yAxisKey } = this.props;
+    const { events, normalize, yAxisKey } = this.props;
     const {
       data,
       options,
@@ -461,6 +481,8 @@ export default class HorizontalStackedBarChart extends React.Component {
       x,
       y,
     } = this.state;
+
+    if (normalize) return null;
 
     // Insert a last, transparent bar component for each y-item stack; fill-opacity = 0
     // consists of a stack of two bars; one covers the visible bar, the other the empty space
@@ -541,8 +563,11 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   renderXGrid() {
     const { options, x, barCanvasWidth, barCanvasHeight } = this.state;
+    const { normalize } = this.props;
 
-    const tickCount = Math.floor(barCanvasWidth / options.x.tickSpacing);
+    const tickCount = normalize
+      ? round(barCanvasWidth / options.x.tickSpacing, -1)
+      : Math.floor(barCanvasWidth / options.x.tickSpacing);
     const xOffsets = x.ticks(tickCount, "s").map(value => x(value));
 
     const xGrid = xOffsets.map(xOffset => {
@@ -559,7 +584,7 @@ export default class HorizontalStackedBarChart extends React.Component {
   }
 
   render() {
-    const { className, events } = this.props;
+    const { className, events, normalize } = this.props;
     const {
       x,
       y,
@@ -573,6 +598,13 @@ export default class HorizontalStackedBarChart extends React.Component {
       yAxisWidth,
       redrawNeeded,
     } = this.state;
+
+    const xAxisTitle =
+      (normalize ? "Percentage" : "Number") + " of " + options.x.axisTitle;
+    const tickFormat = normalize ? numberWithPercent : numberWithSiPrefix;
+    const tickCount = normalize
+      ? round(barCanvasWidth / options.x.tickSpacing, -1)
+      : Math.floor(barCanvasWidth / options.x.tickSpacing);
 
     if (!redrawNeeded) {
       return (
@@ -592,10 +624,11 @@ export default class HorizontalStackedBarChart extends React.Component {
             width={width}
             height={xAxisHeight}
             marginLeft={yAxisWidth}
-            title={options.x.axisTitle}
+            title={xAxisTitle}
             tickSize={options.x.tickSize}
-            tickSpacing={options.x.tickSpacing}
+            tickCount={tickCount}
             ticksVisible={options.x.ticksVisible}
+            tickFormat={d => tickFormat(d)}
             pathVisible={options.x.pathVisible}
             titleClassName={cx(options.x.axisTitleClassName, cs.xAxisTitle)}
             textClassName={cx(options.x.textClassName, cs.xAxisText)}
@@ -664,4 +697,5 @@ HorizontalStackedBarChart.propTypes = {
   }),
   yAxisKey: PropTypes.string,
   className: PropTypes.string,
+  normalize: PropTypes.bool,
 };

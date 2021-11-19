@@ -86,3 +86,11 @@ export function numberWithSiPrefix(value) {
   }
   return formatted;
 }
+
+/**
+ * @param {String|Number} value
+ * @returns {String}
+ */
+export function numberWithPercent(value) {
+  return `${value}%`;
+}

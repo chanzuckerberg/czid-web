@@ -16,7 +16,7 @@ import memoize from "memoize-one";
 import React from "react";
 
 import { getProject, getSamples, getSamplesReadStats } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -27,8 +27,10 @@ import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
 import Histogram from "~/components/visualizations/Histogram";
+import BarChartToggle from "~/components/visualizations/bar_charts/BarChartToggle";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
 import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
+import { numberWithPercent } from "~/helpers/strings";
 import { TooltipVizTable } from "~ui/containers";
 import Notification from "~ui/notifications/Notification";
 import InfoBanner from "./InfoBanner";
@@ -61,6 +63,7 @@ class QualityControl extends React.Component {
       histogramTooltipData: null,
       readsLostTooltipData: null,
       redrawNeeded: true,
+      normalize: false,
     };
   }
 
@@ -115,9 +118,7 @@ class QualityControl extends React.Component {
         data: qcPercentBins,
         labelX: "Percentage",
         labelY: "Number of Samples",
-        tickFormat: d => {
-          return d + "%";
-        },
+        tickFormat: d => numberWithPercent(d),
       });
       this.dcrHistogram = this.renderHistogram({
         container: this.dcrHistogramContainer,
@@ -450,9 +451,12 @@ class QualityControl extends React.Component {
     } else if (data === meanInsertSizeBins) {
       bin = samplesByInsertSize[binIndex];
     }
-    logAnalyticsEvent(`QualityControl_histogram-bar_clicked`, {
-      bin,
-    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_CLICKED,
+      {
+        bin,
+      }
+    );
     handleBarClick(bin);
   };
 
@@ -481,9 +485,7 @@ class QualityControl extends React.Component {
       histogramTooltipData = this.getHistogramTooltipData({
         bin: bin,
         label: "Passed QC",
-        format: d => {
-          return d + "%";
-        },
+        format: d => numberWithPercent(d),
       });
     } else if (data === dcrBins) {
       histogramTooltipData = this.getHistogramTooltipData({
@@ -497,9 +499,12 @@ class QualityControl extends React.Component {
       });
     }
 
-    logAnalyticsEvent(`QualityControl_histogram-bar_hovered`, {
-      bin,
-    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_HOVEREED,
+      {
+        bin,
+      }
+    );
     this.setState({
       histogramTooltipData,
     });
@@ -525,7 +530,9 @@ class QualityControl extends React.Component {
   handleChartElementHover = (clientX, clientY) => {
     const tooltipLocation =
       clientX && clientY ? { left: clientX, top: clientY } : null;
-    logAnalyticsEvent(`QualityControl_stacked-bar-chart-bar_hovered`);
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED
+    );
     this.setState({ tooltipLocation });
   };
 
@@ -539,16 +546,20 @@ class QualityControl extends React.Component {
 
   handleHistogramEmptyClick = () => {
     const { handleBarClick } = this.props;
-    logAnalyticsEvent(`QualityControl_histogram-empty-space_clicked`);
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTOGRAM_EMPTY_SPACE_CLICKED
+    );
     handleBarClick([]);
   };
 
   handleSingleBarStackEnter = (stepName, readsLost) => {
-    const { readsLostLegendColors } = this.state;
+    const { normalize, readsLostLegendColors } = this.state;
 
     const stepLegend = readsLostLegendColors.find(
       legendData => legendData.label === stepName
     );
+
+    const readsLostStr = readsLost.toLocaleString();
 
     const histogramTooltipData = [
       {
@@ -559,7 +570,7 @@ class QualityControl extends React.Component {
               className={cs.inlineLegend}
               data={[stepLegend]}
             />,
-            readsLost.toLocaleString(),
+            normalize ? numberWithPercent(readsLostStr) : readsLostStr,
           ],
         ],
         disabled: false,
@@ -637,9 +648,12 @@ class QualityControl extends React.Component {
       },
     ];
 
-    logAnalyticsEvent(`QualityControl_stacked-bar-chart-label_hovered`, {
-      sampleName,
-    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_HOVERED,
+      {
+        sampleName,
+      }
+    );
 
     this.setState({
       histogramTooltipData,
@@ -656,9 +670,12 @@ class QualityControl extends React.Component {
       return;
     }
 
-    logAnalyticsEvent(`QualityControl_stacked-bar-chart-label_clicked`, {
-      sampleName,
-    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_CLICKED,
+      {
+        sampleName,
+      }
+    );
 
     this.setState({
       sidebarVisible: true,
@@ -760,7 +777,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            "QualityControl_total-reads-info-icon_hovered"
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED
                           );
                         }}
                       />
@@ -793,7 +810,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            "QualityControl_passed-qc-info-icon_hovered"
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED
                           );
                         }}
                       />
@@ -826,7 +843,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            "QualityControl_dcr-info-icon_hovered"
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED
                           );
                         }}
                       />
@@ -866,7 +883,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            "QualityControl_mean-insert-size-info-icon_hovered"
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED
                           );
                         }}
                       />
@@ -887,7 +904,7 @@ class QualityControl extends React.Component {
                             className={cs.infoIcon}
                             onMouseOver={() => {
                               logAnalyticsEvent(
-                                "QualityControl_mean-insert-size-info-icon_hovered"
+                                ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED
                               );
                             }}
                           />
@@ -919,6 +936,7 @@ class QualityControl extends React.Component {
 
   renderReadsLostChart() {
     const {
+      normalize,
       readsLostData,
       readsLostCategories,
       readsLostChartColors,
@@ -930,7 +948,7 @@ class QualityControl extends React.Component {
       x: {
         pathVisible: false,
         ticksVisible: false,
-        axisTitle: "Number of reads",
+        axisTitle: "reads",
       },
       y: {
         pathVisible: false,
@@ -955,6 +973,20 @@ class QualityControl extends React.Component {
               How were my samples processed through the pipeline?
             </div>
             <div className={cs.histogramContainer}>
+              <div className={cs.toggleContainer}>
+                <BarChartToggle
+                  currentDisplay={normalize ? "percentage" : "count"}
+                  onDisplaySwitch={display => {
+                    this.setState({ normalize: !normalize });
+                    logAnalyticsEvent(
+                      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED,
+                      {
+                        display,
+                      }
+                    );
+                  }}
+                />
+              </div>
               <div className={cs.subtitle}>
                 Reads Lost
                 <ColumnHeaderTooltip
@@ -964,7 +996,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            "QualityControl_stacked-bar-chart-info-icon_hovered"
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED
                           );
                         }}
                       />
@@ -988,6 +1020,7 @@ class QualityControl extends React.Component {
                     events={events}
                     yAxisKey={"name"}
                     className={cs.stackedBarChart}
+                    normalize={normalize}
                   />
                 </React.Fragment>
               ) : (

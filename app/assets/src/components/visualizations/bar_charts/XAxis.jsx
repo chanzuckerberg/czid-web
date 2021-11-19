@@ -2,29 +2,26 @@ import cx from "classnames";
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
 
-import { numberWithSiPrefix } from "~/helpers/strings";
-
 import cs from "./x_axis.scss";
 
 export default function XAxis({
   x,
   width,
   marginLeft,
+  tickFormat,
   tickSize,
-  tickSpacing,
+  tickCount,
   ticksVisible,
   pathVisible,
   title,
   titleClassName,
   textClassName,
-  barCanvasWidth,
   height,
 }) {
   const renderAxis = () => {
-    const tickCount = Math.floor(barCanvasWidth / tickSpacing);
     const ticks = x.ticks(tickCount, "s").map(value => ({
       value,
-      formatted: numberWithSiPrefix(value),
+      formatted: tickFormat(value),
       xOffset: x(value),
     }));
 
@@ -83,13 +80,13 @@ XAxis.propTypes = {
   x: PropTypes.func,
   width: PropTypes.number,
   marginLeft: PropTypes.number,
+  tickFormat: PropTypes.func,
   tickSize: PropTypes.number,
-  tickSpacing: PropTypes.number,
+  tickCount: PropTypes.number,
   ticksVisible: PropTypes.bool,
   pathVisible: PropTypes.bool,
   title: PropTypes.string,
   titleClassName: PropTypes.string,
   textClassName: PropTypes.string,
-  barCanvasWidth: PropTypes.number,
   height: PropTypes.number,
 };

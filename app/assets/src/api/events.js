@@ -323,6 +323,56 @@ function EventDictionary() {
   /** The user clicked the Continue button in the HeatmapCreationModal to generate a heatmap, possibly with presets. */
   this.HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED =
     "HEATMAP_CREATION_MODAL_CONTINUE_BUTTON_CLICKED";
+
+  /** The user hovered over the Duplicate Compression Ratio info icon on a QualityControl histogram. */
+  this.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED =
+    "QUALITY_CONTROL_DCR_INFO_ICON_HOVERED";
+
+  /** The user clicked a histogram bar on a QualityControl histogram. */
+  this.QUALITY_CONTROL_HISTOGRAM_BAR_CLICKED =
+    "QUALITY_CONTROL_HISTOGRAM_BAR_CLICKED";
+
+  /** The user clicked the empty space on a QualityControl histogram. This unseelects previously-selected histogram bars. */
+  this.QUALITY_CONTROL_HISTOGRAM_EMPTY_SPACE_CLICKED =
+    "QUALITY_CONTROL_HISTOGRAM_EMPTY_SPACE_CLICKED";
+
+  /** The user hovered over a histogram bar on a QualityControl histogram. */
+  this.QUALITY_CONTROL_HISTOGRAM_BAR_HOVERED =
+    "QUALITY_CONTROL_HISTOGRAM_BAR_HOVERED";
+
+  /** The user hovered over the Mean Insert Size info icon on a QualityControl histogram. */
+  this.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED =
+    "QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED";
+
+  /** The user hovered over the Passed QC info icon on a QualityControl histogram. */
+  this.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED =
+    "QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED";
+
+  /** The user hovered over a bar on a QualityControl stacked bar chart. */
+
+  this.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED =
+    "QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED";
+
+  /** The user hovered over the Reads Lost info icon on a QualityControl stacked bar chart. */
+  this.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED =
+    "QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED";
+
+  /** The user clicked a label on a QualityControl stacked bar chart. */
+  this.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_CLICKED =
+    "QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_CLICKED";
+
+  /** The user hovered over a label on a QualityControl stacked bar chart. */
+
+  this.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_HOVERED =
+    "QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_HOVERED";
+
+  /** The user clicked the BarChartToggle on a Quality Control chart. */
+  this.QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED =
+    "QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED";
+
+  /** The user hovered over the Total Reads info icon on a QualityControl chart. */
+  this.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED =
+    "QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED";
 }
 
 const eventNames = new EventDictionary();

@@ -65,6 +65,13 @@
       box-shadow: 0 2px 4px 0 $gray-light;
       display: flex;
       flex-direction: column;
+      position: relative;
+
+      .toggleContainer {
+        position: absolute;
+        top: $space-l;
+        right: $space-xl;
+      }
 
       .subtitle {
         @include font-header-s;
