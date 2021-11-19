@@ -64,9 +64,37 @@ module HeatmapHelper
 
     background_id = background_id && background_id > 0 ? background_id : samples.first.default_background_id
 
+    # We only want to apply these filters on the backend if they are presets for the heatmap.
+    # Otherwise, the backend will supply the unfiltered data, and the filters will be applied on the frontend.
+    presets = params[:presets]
+    categories = nil
+    subcategories = nil
+    include_phage = nil
+    read_specificity = nil
+    taxon_level = nil
+    if presets
+      if presets.include?("categories")
+        categories = params[:categories]
+      end
+      if presets.include?("subcategories")
+        subcategories = JSON.parse(params[:subcategories])
+        include_phage = subcategories && subcategories["Viruses"] && subcategories["Viruses"].include?("Phage")
+      end
+      if presets.include?("species")
+        taxon_level = params[:species] == TaxonCount::TAX_LEVEL_SPECIES ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
+      end
+      if presets.include?("readSpecificity")
+        read_specificity = params[:readSpecificity]
+      end
+    end
+
     results_by_pr = fetch_top_taxons(
       samples,
       background_id,
+      categories: categories,
+      include_phage: include_phage,
+      read_specificity: read_specificity,
+      taxon_level: taxon_level,
       min_reads: min_reads,
       threshold_filters: threshold_filters
     )
@@ -147,13 +175,42 @@ module HeatmapHelper
   def self.fetch_top_taxons(
     samples,
     background_id,
+    categories: [],
+    include_phage: false,
+    read_specificity: false,
+    taxon_level: nil,
     min_reads: MINIMUM_READ_THRESHOLD,
     threshold_filters: []
   )
     categories_clause = ""
+    if categories.present?
+      categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| ReportHelper::CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
+    elsif include_phage
+      # if only the Phage subcategory and no other categories were selected, we still need to fetch Phage's parent category, Viruses
+      categories_clause = " AND taxon_counts.superkingdom_taxid = #{ReportHelper::CATEGORIES_TAXID_BY_NAME['Viruses']}"
+    end
+    phage_clause = ""
+    if !include_phage && categories.present?
+      # explicitly filter out phages
+      phage_clause = " AND taxon_counts.is_phage != 1"
+    elsif include_phage && categories.blank?
+      # only fetch phages
+      phage_clause = " AND taxon_counts.is_phage = 1"
+    end
+
     read_specificity_clause = ""
+    if read_specificity
+      read_specificity_clause = " AND taxon_counts.tax_id > 0"
+    end
 
     tax_level_clause = " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_SPECIES}', '#{TaxonCount::TAX_LEVEL_GENUS}')"
+    if taxon_level
+      if taxon_level == TaxonCount::TAX_LEVEL_SPECIES
+        tax_level_clause = " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_SPECIES}')"
+      elsif taxon_level == TaxonCount::TAX_LEVEL_GENUS
+        tax_level_clause = " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_GENUS}')"
+      end
+    end
 
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
     # fraction_subsampled = 1.0.
@@ -210,6 +267,7 @@ module HeatmapHelper
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{tax_level_clause}
       #{categories_clause}
+      #{phage_clause}
       #{read_specificity_clause}"
 
     sort = CLIENT_FILTERING_SORT_VALUES

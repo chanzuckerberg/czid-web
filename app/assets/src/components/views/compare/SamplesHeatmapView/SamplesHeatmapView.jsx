@@ -113,6 +113,7 @@ class SamplesHeatmapView extends React.Component {
         // decided on 10 as the best default number of taxons to show per sample.
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 10),
         readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1),
+        presets: this.urlParams.presets || [],
       },
       heatmapCreationModalOpen: false,
       loading: false,
@@ -517,6 +518,7 @@ class SamplesHeatmapView extends React.Component {
       {
         sampleIds: this.state.sampleIds,
         removedTaxonIds: removedTaxonIds,
+        presets: this.state.selectedOptions.presets,
         species: this.state.selectedOptions.species,
         categories: this.state.selectedOptions.categories,
         subcategories: this.state.selectedOptions.subcategories,
@@ -538,7 +540,10 @@ class SamplesHeatmapView extends React.Component {
 
   async fetchViewData() {
     const { allowedFeatures = [] } = this.context || {};
-    const { sampleIds } = this.state;
+    const { sampleIds, selectedOptions } = this.state;
+    const presets = selectedOptions.presets;
+    const useHeatmapService =
+      allowedFeatures.includes("heatmap_service") && presets.length === 0;
 
     this.setState({ loading: true }); // Gets false from this.updateFilters
 
@@ -570,7 +575,7 @@ class SamplesHeatmapView extends React.Component {
     }
 
     let pipelineVersions = [];
-    if (allowedFeatures.includes("heatmap_service")) {
+    if (useHeatmapService) {
       pipelineVersions = compact(
         map(
           property("pipeline_run.pipeline_version"),
@@ -595,9 +600,10 @@ class SamplesHeatmapView extends React.Component {
 
     let newState = {};
     if (!isEmpty(heatmapData)) {
-      newState = allowedFeatures.includes("heatmap_service")
-        ? this.extractDataFromService(heatmapData)
-        : this.extractData(heatmapData);
+      newState =
+        useHeatmapService && !this.s
+          ? this.extractDataFromService(heatmapData)
+          : this.extractData(heatmapData);
     }
 
     // Only calculate the metadataTypes once.
@@ -892,6 +898,10 @@ class SamplesHeatmapView extends React.Component {
 
   async fetchBackground() {
     const { allowedFeatures = [] } = this.context || {};
+    const { selectedOptions } = this.state;
+    const presets = selectedOptions.presets;
+    const useHeatmapService =
+      allowedFeatures.includes("heatmap_service") && presets.length === 0;
 
     this.setState({ loading: true }); // Gets false from this.updateFilters
     let backgroundData;
@@ -902,7 +912,7 @@ class SamplesHeatmapView extends React.Component {
       return; // Return early so that loadingFailed is not set to false later
     }
 
-    let newState = allowedFeatures.includes("heatmap_service")
+    let newState = useHeatmapService
       ? this.extractBackgroundMetricsFromService(backgroundData)
       : this.extractBackgroundMetrics(backgroundData);
     newState.loadingFailed = false;
@@ -1234,13 +1244,17 @@ class SamplesHeatmapView extends React.Component {
 
   async updateTaxa(taxaMissingInfo) {
     const { allowedFeatures = [] } = (this.context = {});
+    const { selectedOptions } = this.state;
+    const presets = selectedOptions.presets;
+    const useHeatmapService =
+      allowedFeatures.includes("heatmap_service") && presets.length === 0;
     // Given a list of taxa for which details are currently missing,
     // fetch the information for those taxa from the server and
     // update the appropriate data structures to include the new taxa.
     this.setState({ loading: true }); // Gets false from this.updateFilters
 
     const newTaxaInfo = await this.fetchNewTaxa(taxaMissingInfo);
-    const extractedData = allowedFeatures.includes("heatmap_service")
+    const extractedData = useHeatmapService
       ? this.extractDataFromService(newTaxaInfo)
       : this.extractData(newTaxaInfo);
 

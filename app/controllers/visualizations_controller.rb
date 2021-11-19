@@ -203,7 +203,7 @@ class VisualizationsController < ApplicationController
   def samples_taxons
     if samples_for_heatmap.blank?
       render json: {}
-    elsif current_user.allowed_feature?("heatmap_service")
+    elsif current_user.allowed_feature?("heatmap_service") && params[:presets].blank?
       pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
       heatmap_dict = TaxonCountsHeatmapService.call(
         pipeline_run_ids: pr_id_to_sample_id.keys,
@@ -225,7 +225,7 @@ class VisualizationsController < ApplicationController
   # If update_background_only is true, then returned object will only include
   # metrics affected by the background (e.g. z-score).
   def taxa_details
-    if current_user.allowed_feature?("heatmap_service")
+    if current_user.allowed_feature?("heatmap_service") && params[:presets].blank?
       pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
       taxon_ids = params[:taxonIds] || []
 

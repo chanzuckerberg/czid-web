@@ -1,4 +1,4 @@
-import { isEqual, startCase } from "lodash/fp";
+import { isEqual, isNull, size, startCase } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -7,13 +7,11 @@ import { withAnalytics, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import {
-  CATEGORIES,
-  THRESHOLDS,
-} from "~/components/views/SampleView/constants";
+import { CATEGORIES } from "~/components/views/SampleView/constants";
 import {
   SPECIFICITY_OPTIONS,
-  TAXON_LEVEL_OPTIONS,
+  SPECIES_SELECTION_OPTIONS,
+  THRESHOLDS,
 } from "~/components/views/compare/SamplesHeatmapView/constants";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { getURLParamString } from "~/helpers/url";
@@ -140,12 +138,12 @@ export default class HeatmapCreationModal extends React.Component {
   }
 
   onTaxonLevelChange = taxonLevel => {
-    this.setState({ selectedTaxonlevel: taxonLevel });
+    this.setState({ selectedTaxonLevel: taxonLevel });
   };
 
   renderTaxonLevelSelect() {
     const taxonLevels = [];
-    Object.entries(TAXON_LEVEL_OPTIONS).forEach(([text, value]) =>
+    Object.entries(SPECIES_SELECTION_OPTIONS).forEach(([text, value]) =>
       taxonLevels.push({ text: startCase(text), value })
     );
 
@@ -212,10 +210,11 @@ export default class HeatmapCreationModal extends React.Component {
 
   renderModalHeader() {
     const { selectedIds } = this.props;
+
     return (
       <div className={cs.header}>
         <div className={cs.title}>Create a Taxon Heatmap</div>
-        <div className={cs.subtitle}>{selectedIds.size} samples selected</div>
+        <div className={cs.subtitle}>{size(selectedIds)} samples selected</div>
       </div>
     );
   }
@@ -257,9 +256,9 @@ export default class HeatmapCreationModal extends React.Component {
       </div>
     );
   }
-  render() {
-    const { continueInNewTab, open, onClose, selectedIds } = this.props;
 
+  getHeatmapUrl() {
+    const { selectedIds } = this.props;
     const {
       selectedBackground,
       selectedCategories,
@@ -269,11 +268,51 @@ export default class HeatmapCreationModal extends React.Component {
       selectedThresholdFilters,
     } = this.state;
 
-    // TODO: Update heatmap query to filter results on the backend based on these parameters.
+    let presets = [];
+    if (selectedBackground !== 26) {
+      presets.push("background");
+    }
+    if (selectedCategories.length > 0) {
+      presets.push("categories");
+    }
+    if (!isNull(selectedSpecificity)) {
+      presets.push("readSpecificity");
+    }
+    if (Object.keys(selectedSubcategories).length > 0) {
+      presets.push("subcategories");
+    }
+    if (!isNull(selectedTaxonLevel)) {
+      presets.push("species");
+    }
+    if (selectedThresholdFilters.length > 0) {
+      presets.push("thresholdFilters");
+    }
+
     const params = getURLParamString({
+      background: selectedBackground,
+      categories: selectedCategories,
+      subcategories: JSON.stringify(selectedSubcategories),
+      readSpecificity: selectedSpecificity,
       sampleIds: Array.from(selectedIds),
+      species: selectedTaxonLevel,
+      thresholdFilters: JSON.stringify(selectedThresholdFilters),
+      presets: presets,
     });
-    const url = `/visualizations/heatmap?${params}`;
+
+    return `/visualizations/heatmap?${params}`;
+  }
+
+  render() {
+    const { continueInNewTab, open, onClose } = this.props;
+    const {
+      selectedBackground,
+      selectedCategories,
+      selectedSpecificity,
+      selectedSubcategories,
+      selectedTaxonLevel,
+      selectedThresholdFilters,
+    } = this.state;
+    const url = this.getHeatmapUrl();
 
     return (
       <Modal narrow open={open} tall onClose={onClose}>
