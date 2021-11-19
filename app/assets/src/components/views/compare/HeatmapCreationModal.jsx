@@ -204,6 +204,7 @@ export default class HeatmapCreationModal extends React.Component {
         rounded={false}
         thresholds={selectedThresholdFilters}
         // Note: Portal currently doesn't work properly for ThresholdFilterDropdown.
+        useDropdownLabelCounter={false}
       />
     );
   }

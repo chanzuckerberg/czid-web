@@ -246,6 +246,7 @@ ThresholdFilterDropdown.defaultProps = {
   placeholder: null,
   rounded: true,
   thresholds: [],
+  useDropdownLabelCounter: true,
 };
 
 ThresholdFilterDropdown.propTypes = forbidExtraProps({

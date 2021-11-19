@@ -31,6 +31,15 @@ import { IconInfoSmall } from "~ui/icons";
 import cs from "./samples_heatmap_view.scss";
 
 export default class SamplesHeatmapControls extends React.Component {
+  renderPreset = dropdown => {
+    return (
+      <ColumnHeaderTooltip
+        trigger={<span>{dropdown}</span>} // need include a span for the tooltip to appear on hover
+        content={`Presets cannot be modified. Click "New Presets" to adjust this filter.`}
+      />
+    );
+  };
+
   onTaxonLevelChange = taxonLevel => {
     if (this.props.selectedOptions.species === taxonLevel) {
       return;
@@ -43,17 +52,27 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   renderTaxonLevelSelect() {
-    return (
+    const { data, loading, options, selectedOptions } = this.props;
+    const isPreset = selectedOptions.presets.includes("species");
+    const disabled = loading || !data || isPreset;
+
+    const taxonLevelSelect = (
       <Dropdown
         fluid
         rounded
-        options={this.props.options.taxonLevels}
-        value={this.props.selectedOptions.species}
+        options={options.taxonLevels}
+        value={selectedOptions.species}
         onChange={this.onTaxonLevelChange}
         label="Taxon Level"
-        disabled={this.props.loading || !this.props.data}
+        disabled={disabled}
       />
     );
+
+    if (isPreset) {
+      return this.renderPreset(taxonLevelSelect);
+    } else {
+      return taxonLevelSelect;
+    }
   }
 
   onCategoryChange = (categories, subcategories) => {
@@ -65,9 +84,15 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   renderCategoryFilter() {
-    let options = this.props.options.categories.map(category => {
+    const { data, loading, options, selectedOptions } = this.props;
+    const isPreset =
+      selectedOptions.presets.includes("categories") ||
+      selectedOptions.presets.includes("subcategories");
+    const disabled = loading || !data || isPreset;
+
+    let categoryOptions = options.categories.map(category => {
       let option = { text: category, value: category };
-      let subcategories = this.props.options.subcategories[category];
+      let subcategories = options.subcategories[category];
       if (Array.isArray(subcategories)) {
         option.suboptions = subcategories.map(subcategory => {
           return { text: subcategory, value: subcategory };
@@ -76,20 +101,26 @@ export default class SamplesHeatmapControls extends React.Component {
       return option;
     });
 
-    return (
+    const categorySelect = (
       <MultipleNestedDropdown
         boxed
         fluid
         rounded
-        options={options}
+        options={categoryOptions}
         onChange={this.onCategoryChange}
-        selectedOptions={this.props.selectedOptions.categories}
-        selectedSuboptions={this.props.selectedOptions.subcategories}
+        selectedOptions={selectedOptions.categories}
+        selectedSuboptions={selectedOptions.subcategories}
         label="Categories"
-        disabled={this.props.loading || !this.props.data}
+        disabled={disabled}
         disableMarginRight
       />
     );
+
+    if (isPreset) {
+      return this.renderPreset(categorySelect);
+    } else {
+      return categorySelect;
+    }
   }
 
   onMetricChange = metric => {
@@ -130,15 +161,19 @@ export default class SamplesHeatmapControls extends React.Component {
 
   renderBackgroundSelect() {
     const {
+      data,
       enableMassNormalizedBackgrounds,
+      loading,
       options,
       selectedOptions,
     } = this.props;
+    const isPreset = selectedOptions.presets.includes("background");
+    const disabled = loading || !data || isPreset;
 
-    return (
+    const backgroundSelect = (
       <BackgroundModelFilter
         allBackgrounds={options.backgrounds}
-        disabled={this.props.loading || !this.props.data}
+        disabled={disabled}
         enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
         onChange={this.onBackgroundChange}
         onClick={() =>
@@ -149,6 +184,12 @@ export default class SamplesHeatmapControls extends React.Component {
         value={selectedOptions.background}
       />
     );
+
+    if (isPreset) {
+      return this.renderPreset(backgroundSelect);
+    } else {
+      return backgroundSelect;
+    }
   }
 
   onThresholdFilterApply = filters => {
@@ -166,16 +207,25 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   renderThresholdFilterSelect() {
-    const { options, selectedOptions } = this.props;
-    return (
+    const { data, loading, options, selectedOptions } = this.props;
+    const isPreset = selectedOptions.presets.includes("thresholdFilters");
+    const disabled = loading || !data || isPreset;
+
+    const thresholdSelect = (
       <ThresholdFilterDropdown
         options={options.thresholdFilters}
         thresholds={selectedOptions.thresholdFilters}
         onApply={this.onThresholdFilterApply}
-        disabled={this.props.loading || !this.props.data}
+        disabled={disabled}
         disableMarginRight
       />
     );
+
+    if (isPreset) {
+      return this.renderPreset(thresholdSelect);
+    } else {
+      return thresholdSelect;
+    }
   }
 
   onSpecificityChange = specificity => {
@@ -190,17 +240,27 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   renderSpecificityFilter() {
-    return (
+    const { data, loading, options, selectedOptions } = this.props;
+    const isPreset = selectedOptions.presets.includes("readSpecificity");
+    const disabled = loading || !data || isPreset;
+
+    const readSpecificitySelect = (
       <Dropdown
         fluid
         rounded
-        options={this.props.options.specificityOptions}
-        value={this.props.selectedOptions.readSpecificity}
+        options={options.specificityOptions}
+        value={selectedOptions.readSpecificity}
         label="Read Specificity"
         onChange={this.onSpecificityChange}
-        disabled={this.props.loading || !this.props.data}
+        disabled={disabled}
       />
     );
+
+    if (isPreset) {
+      return this.renderPreset(readSpecificitySelect);
+    } else {
+      return readSpecificitySelect;
+    }
   }
 
   onSortSamplesChange = selectedSortType => {
@@ -592,6 +652,7 @@ SamplesHeatmapControls.propTypes = {
     taxaSortType: PropTypes.string,
     dataScaleIdx: PropTypes.number,
     taxonsPerSample: PropTypes.number,
+    presets: PropTypes.arrayOf(PropTypes.string),
   }),
   onSelectedOptionsChange: PropTypes.func.isRequired,
   loading: PropTypes.bool,
