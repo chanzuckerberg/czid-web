@@ -78,7 +78,9 @@ export function numberWithPlusOrMinus(x, y) {
 // either thousands ("K") or millions ("M")
 export function numberWithSiPrefix(value) {
   let formatted = "NaN";
-  if (value < 1000000) {
+  if (value < 1000) {
+    formatted = value.toString();
+  } else if (value < 1000000) {
     // display value in thousands, without decimals
     formatted = ((value / 1000) >>> 0).toString().concat("K");
   } else {
