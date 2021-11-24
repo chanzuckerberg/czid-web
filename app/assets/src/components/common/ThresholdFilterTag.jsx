@@ -18,7 +18,7 @@ export default class ThresholdFilterTag extends React.Component {
 }
 
 ThresholdFilterTag.propTypes = {
-  onClose: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
   threshold: PropTypes.shape({
     metric: PropTypes.string,
     value: PropTypes.string,

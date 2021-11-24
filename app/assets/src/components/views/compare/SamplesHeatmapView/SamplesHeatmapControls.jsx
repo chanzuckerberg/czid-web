@@ -31,10 +31,11 @@ import { IconInfoSmall } from "~ui/icons";
 import cs from "./samples_heatmap_view.scss";
 
 export default class SamplesHeatmapControls extends React.Component {
-  renderPreset = dropdown => {
+  renderPresetTooltip = ({ component, className, key }) => {
     return (
       <ColumnHeaderTooltip
-        trigger={<span>{dropdown}</span>} // need include a span for the tooltip to appear on hover
+        key={key}
+        trigger={<span className={className}>{component}</span>} // need include a span for the tooltip to appear on hover
         content={`Presets cannot be modified. Click "New Presets" to adjust this filter.`}
       />
     );
@@ -69,7 +70,7 @@ export default class SamplesHeatmapControls extends React.Component {
     );
 
     if (isPreset) {
-      return this.renderPreset(taxonLevelSelect);
+      return this.renderPresetTooltip({ component: taxonLevelSelect });
     } else {
       return taxonLevelSelect;
     }
@@ -117,7 +118,7 @@ export default class SamplesHeatmapControls extends React.Component {
     );
 
     if (isPreset) {
-      return this.renderPreset(categorySelect);
+      return this.renderPresetTooltip({ component: categorySelect });
     } else {
       return categorySelect;
     }
@@ -186,7 +187,7 @@ export default class SamplesHeatmapControls extends React.Component {
     );
 
     if (isPreset) {
-      return this.renderPreset(backgroundSelect);
+      return this.renderPresetTooltip({ component: backgroundSelect });
     } else {
       return backgroundSelect;
     }
@@ -222,7 +223,7 @@ export default class SamplesHeatmapControls extends React.Component {
     );
 
     if (isPreset) {
-      return this.renderPreset(thresholdSelect);
+      return this.renderPresetTooltip({ component: thresholdSelect });
     } else {
       return thresholdSelect;
     }
@@ -257,7 +258,7 @@ export default class SamplesHeatmapControls extends React.Component {
     );
 
     if (isPreset) {
-      return this.renderPreset(readSpecificitySelect);
+      return this.renderPresetTooltip({ component: readSpecificitySelect });
     } else {
       return readSpecificitySelect;
     }
@@ -411,49 +412,68 @@ export default class SamplesHeatmapControls extends React.Component {
   renderFilterTags = () => {
     let filterTags = [];
     const { selectedOptions } = this.props;
+    const { presets } = selectedOptions;
 
     if (selectedOptions.thresholdFilters) {
       filterTags = filterTags.concat(
-        selectedOptions.thresholdFilters.map((threshold, i) => (
-          <ThresholdFilterTag
-            className={cs.filterTag}
-            key={`threshold_filter_tag_${i}`}
-            threshold={threshold}
-            onClose={() => {
-              this.handleRemoveThresholdFilter(threshold);
-              logAnalyticsEvent(
-                "SamplesHeatmapControls_threshold-filter_removed",
-                {
-                  value: threshold.value,
-                  operator: threshold.operator,
-                  metric: threshold.metric,
-                }
-              );
-            }}
-          />
-        ))
+        selectedOptions.thresholdFilters.map((threshold, i) => {
+          if (presets.includes("thresholdFilters")) {
+            return this.renderPresetTooltip({
+              component: <ThresholdFilterTag threshold={threshold} />,
+              className: `${cs.filterTag}`,
+              key: `threshold_filter_tag_${i}`,
+            });
+          } else {
+            return (
+              <ThresholdFilterTag
+                className={cs.filterTag}
+                key={`threshold_filter_tag_${i}`}
+                threshold={threshold}
+                onClose={() => {
+                  this.handleRemoveThresholdFilter(threshold);
+                  logAnalyticsEvent(
+                    "SamplesHeatmapControls_threshold-filter_removed",
+                    {
+                      value: threshold.value,
+                      operator: threshold.operator,
+                      metric: threshold.metric,
+                    }
+                  );
+                }}
+              />
+            );
+          }
+        })
       );
     }
 
     if (selectedOptions.categories) {
       filterTags = filterTags.concat(
         selectedOptions.categories.map((category, i) => {
-          return (
-            <FilterTag
-              className={cs.filterTag}
-              key={`category_filter_tag_${i}`}
-              text={category}
-              onClose={() => {
-                this.handleRemoveCategory(category);
-                logAnalyticsEvent(
-                  "SamplesHeatmapControl_categories-filter_removed",
-                  {
-                    category,
-                  }
-                );
-              }}
-            />
-          );
+          if (presets.includes("categories")) {
+            return this.renderPresetTooltip({
+              component: <FilterTag text={category} />,
+              className: cs.filterTag,
+              key: `category_filter_tag_${i}`,
+            });
+          } else {
+            return (
+              <FilterTag
+                className={cs.filterTag}
+                key={`category_filter_tag_${i}`}
+                text={category}
+                onClose={() => {
+                  this.handleRemoveCategory(category);
+                  logAnalyticsEvent(
+                    "SamplesHeatmapControl_categories-filter_removed",
+                    {
+                      category,
+                    }
+                  );
+                }}
+              />
+            );
+          }
         })
       );
     }
@@ -462,22 +482,30 @@ export default class SamplesHeatmapControls extends React.Component {
       const subcategoryList = flatten(values(selectedOptions.subcategories));
       filterTags = filterTags.concat(
         subcategoryList.map((subcat, i) => {
-          return (
-            <FilterTag
-              className={cs.filterTag}
-              key={`subcat_filter_tag_${i}`}
-              text={subcat}
-              onClose={() => {
-                this.handleRemoveSubcategory(subcat);
-                logAnalyticsEvent(
-                  "SamplesHeatmapControl_categories-filter_removed",
-                  {
-                    subcat,
-                  }
-                );
-              }}
-            />
-          );
+          if (presets.includes("subcategories")) {
+            return this.renderPresetTooltip({
+              component: <FilterTag text={subcat} />,
+              className: cs.filterTag,
+              key: `subcat_filter_tag_${i}`,
+            });
+          } else {
+            return (
+              <FilterTag
+                className={cs.filterTag}
+                key={`subcat_filter_tag_${i}`}
+                text={subcat}
+                onClose={() => {
+                  this.handleRemoveSubcategory(subcat);
+                  logAnalyticsEvent(
+                    "SamplesHeatmapControl_categories-filter_removed",
+                    {
+                      subcat,
+                    }
+                  );
+                }}
+              />
+            );
+          }
         })
       );
     }

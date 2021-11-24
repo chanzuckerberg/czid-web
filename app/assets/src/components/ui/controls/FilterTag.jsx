@@ -11,7 +11,7 @@ const FilterTag = ({ text, onClose, className }) => {
   const labelText = (
     <>
       {text}
-      <Icon name="close" onClick={onClose} />
+      {onClose && <Icon name="close" onClick={onClose} />}
     </>
   );
 
@@ -26,7 +26,7 @@ const FilterTag = ({ text, onClose, className }) => {
 
 FilterTag.propTypes = {
   text: PropTypes.string,
-  onClose: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
   className: PropTypes.string,
 };
 
