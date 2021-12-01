@@ -567,6 +567,7 @@ const getTaxaDetails = params =>
     removedTaxonIds: params.removedTaxonIds,
     updateBackgroundOnly: params.updateBackgroundOnly,
     background: params.background,
+    presets: params.presets,
   });
 
 const getMassNormalizedBackgroundAvailability = sampleIds =>

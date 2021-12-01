@@ -81,7 +81,7 @@ module HeatmapHelper
         include_phage = subcategories && subcategories["Viruses"] && subcategories["Viruses"].include?("Phage")
       end
       if presets.include?("species")
-        taxon_level = params[:species] == TaxonCount::TAX_LEVEL_SPECIES ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
+        taxon_level = params[:species].to_i == TaxonCount::TAX_LEVEL_SPECIES ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
       end
       if presets.include?("readSpecificity")
         read_specificity = params[:readSpecificity]

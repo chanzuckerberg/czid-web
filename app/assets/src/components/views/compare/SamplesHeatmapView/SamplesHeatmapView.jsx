@@ -893,6 +893,7 @@ class SamplesHeatmapView extends React.Component {
       background: this.state.selectedOptions.background,
       updateBackgroundOnly: true,
       heatmapTs: this.props.heatmapTs,
+      presets: this.state.selectedOptions.presets,
     });
   }
 
@@ -961,18 +962,20 @@ class SamplesHeatmapView extends React.Component {
       let sample = rawData[i];
       let sampleIndex = sampleDetails[sample.sample_id].index;
 
-      for (let j = 0; j < sample.taxons.length; j++) {
-        let taxon = sample.taxons[j];
-        let taxonIndex = allTaxonDetails[taxon.tax_id].index;
+      if (sample.taxons) {
+        for (let j = 0; j < sample.taxons.length; j++) {
+          let taxon = sample.taxons[j];
+          let taxonIndex = allTaxonDetails[taxon.tax_id].index;
 
-        BACKGROUND_METRICS.forEach(metric => {
-          let [metricType, metricName] = metric.value.split(".");
-          allData[metric.value] = allData[metric.value] || [];
-          allData[metric.value][taxonIndex] =
-            allData[metric.value][taxonIndex] || [];
-          allData[metric.value][taxonIndex][sampleIndex] =
-            taxon[metricType][metricName];
-        });
+          BACKGROUND_METRICS.forEach(metric => {
+            let [metricType, metricName] = metric.value.split(".");
+            allData[metric.value] = allData[metric.value] || [];
+            allData[metric.value][taxonIndex] =
+              allData[metric.value][taxonIndex] || [];
+            allData[metric.value][taxonIndex][sampleIndex] =
+              taxon[metricType][metricName];
+          });
+        }
       }
     }
 
