@@ -67,6 +67,8 @@ class SfnPipelineDispatchService
       NON_HOST_ALIGNMENT_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/non_host_alignment.wdl",
       POSTPROCESS_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/postprocess.wdl",
       EXPERIMENTAL_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/experimental.wdl",
+      # This name format is different on purpose to communicate that this is a swipe input
+      StagesWDLURI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/local_driver.wdl",
       Input: {
         HostFilter: {
           fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
