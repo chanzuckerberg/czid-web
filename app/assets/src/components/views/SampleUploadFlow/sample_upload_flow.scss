@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .sampleUploadFlow {
   .inner {
@@ -32,12 +33,12 @@
   .controls {
     .helpText {
       @include font-body-xxs;
-      margin-bottom: 10px;
+      margin-bottom: $sds-spaces-m;
       color: $gray-dark;
     }
 
     .continueButton {
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
     }
   }
 
@@ -52,7 +53,7 @@
 
   .infoLink {
     @include font-caps-xxxs;
-    margin-left: 10px;
+    margin-left: $sds-spaces-m;
     color: $primary;
     cursor: pointer;
   }
@@ -119,7 +120,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 6px;
+      margin-bottom: $sds-spaces-xs;
       // Disable semantic-ui transition.
       transition: none;
     }
@@ -137,14 +138,14 @@
 
     .header {
       @include font-header-xl;
-      margin-bottom: $space-default;
+      margin-bottom: $sds-spaces-default;
     }
 
     .createProjectButton {
       @include font-caps-xxxs;
       color: $primary;
       cursor: pointer;
-      margin-top: 4px;
+      margin-top: $sds-spaces-xxs;
     }
 
     .projectCreationContainer {
@@ -156,7 +157,7 @@
 
   .fileUpload {
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
 
     .title {
       @include font-header-xl;
@@ -181,14 +182,14 @@
   .info {
     background-color: $gray-off-white;
     padding: 20px;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
 
     .title {
       @include font-header-xs;
     }
 
     ul {
-      margin: 5px 0 10px 20px;
+      margin: 5px 0 $sds-spaces-m 20px;
 
       &:last-child {
         margin-bottom: 0;
@@ -205,7 +206,7 @@
     display: flex;
 
     .connectButton {
-      margin-left: 10px;
+      margin-left: $sds-spaces-m;
     }
 
     .input {
@@ -215,7 +216,7 @@
   }
 
   .notification {
-    margin-top: 10px;
+    margin-top: $sds-spaces-m;
   }
 }
 
@@ -223,14 +224,14 @@
   .info {
     background-color: $gray-off-white;
     padding: 20px;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
 
     .title {
       @include font-header-xs;
     }
 
     ul {
-      margin: 5px 0 10px 20px;
+      margin: 5px 0 $sds-spaces-m 20px;
 
       &:last-child {
         margin-bottom: 0;
@@ -249,11 +250,11 @@
     font-size: 26px;
     font-weight: 600;
     letter-spacing: 0.4px;
-    margin-bottom: 8px;
+    margin-bottom: $sds-spaces-s;
   }
 
   .uploadInstructions {
-    margin-top: 10px;
+    margin-top: $sds-spaces-m;
   }
 
   .hide {
@@ -273,7 +274,7 @@
   }
 
   .reviewHeader {
-    margin-bottom: $space-xl;
+    margin-bottom: $sds-spaces-xl;
     display: flex;
 
     .text {
@@ -283,7 +284,7 @@
     .links {
       @include font-body-xs;
       display: flex;
-      margin-left: 10px;
+      margin-left: $sds-spaces-m;
       align-items: center;
       margin-top: 5px;
 
@@ -312,12 +313,12 @@
   .icon {
     height: $icon-xl;
     width: $icon-xl;
-    margin-right: $space-l;
+    margin-right: $sds-spaces-l;
   }
 
   .section {
     background-color: $gray-off-white;
-    padding: $space-xl;
+    padding: $sds-spaces-xl;
     display: flex;
 
     .name {
@@ -327,7 +328,7 @@
     .publicAccess {
       @include font-body-s;
       color: $gray-darkest;
-      margin-left: 10px;
+      margin-left: $sds-spaces-m;
     }
 
     .text {
@@ -356,7 +357,7 @@
         text-transform: uppercase;
         display: inline-block;
         margin-top: 5px;
-        margin-bottom: 10px;
+        margin-bottom: $sds-spaces-m;
         color: $primary;
         cursor: pointer;
       }
@@ -366,23 +367,23 @@
       @include font-body-s;
       color: $gray-dark;
       white-space: pre-wrap;
-      margin: $space-m 0;
+      margin: $sds-spaces-m 0;
     }
   }
 
   .analysisTypeContent {
     display: flex;
-    margin-top: $space-l;
+    margin-top: $sds-spaces-l;
 
     .item {
       min-width: 180px;
-      margin-right: $space-xl;
+      margin-right: $sds-spaces-xl;
       color: $gray-dark;
       flex: 1 0 0;
 
       .subheader {
         @include font-header-s;
-        margin-bottom: $space-xs;
+        margin-bottom: $sds-spaces-xs;
       }
 
       .description {
@@ -397,7 +398,7 @@
 
     .loadingMsg {
       @include font-body-s;
-      margin-top: 10px;
+      margin-top: $sds-spaces-m;
     }
   }
 
@@ -414,7 +415,7 @@
   }
 
   .files {
-    padding: 10px 0;
+    padding: $sds-spaces-m 0;
 
     .file {
       padding: 5px 0;
@@ -434,7 +435,7 @@
   .uploadMessage {
     @include font-body-xs;
     margin-top: 30px;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
   }
 
   .uploadMessage,
@@ -447,7 +448,7 @@
   }
 
   .sampleProcessingOption {
-    margin-top: $space-xl;
+    margin-top: $sds-spaces-xl;
     align-items: left;
     justify-content: left;
 
@@ -455,7 +456,7 @@
     :global(.label) {
       font-size: 12px;
       line-height: 20px;
-      margin-left: 10px;
+      margin-left: $sds-spaces-m;
     }
   }
 }

@@ -1,5 +1,6 @@
 @import "../themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .view-header {
   padding: 20px;
@@ -15,7 +16,7 @@
       font-size: 12px;
       height: 20px;
       line-height: 20px;
-      margin-bottom: 10px;
+      margin-bottom: $sds-spaces-m;
       text-transform: uppercase;
       vertical-align: middle;
     }
@@ -33,7 +34,7 @@
       font-size: 12px;
       height: 20px;
       line-height: 20px;
-      margin-top: 10px;
+      margin-top: $sds-spaces-m;
       vertical-align: middle;
     }
   }
@@ -53,7 +54,7 @@
       transform: translate(0, -50%);
 
       &:not(:first-child) {
-        margin-right: 10px;
+        margin-right: $sds-spaces-m;
       }
     }
   }

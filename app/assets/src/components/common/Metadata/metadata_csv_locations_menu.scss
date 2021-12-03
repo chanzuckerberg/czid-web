@@ -1,10 +1,11 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .title {
   @include font-header-m;
   margin-top: 25px;
-  margin-bottom: 10px;
+  margin-bottom: $sds-spaces-m;
 }
 
 .input {

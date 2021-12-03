@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .phyloTreeListView {
   .viewHeader {
@@ -13,7 +14,7 @@
   display: flex;
 
   .controlElement {
-    margin-left: 10px;
+    margin-left: $sds-spaces-m;
     margin-right: 0;
   }
 }
@@ -40,10 +41,10 @@
 }
 
 .notification {
-  margin: $space-m 0;
+  margin: $sds-spaces-m 0;
 
   .notificationContent {
-    margin-right: $space-l;
+    margin-right: $sds-spaces-l;
     .warning {
       font-weight: $font-weight-bold;
     }
@@ -59,7 +60,7 @@
 }
 
 .matrix {
-  margin-top: $space-s;
+  margin-top: $sds-spaces-s;
   width: inherit;
   height: inherit;
 }
@@ -74,8 +75,8 @@
   color: $gray-dark;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-s;
-  padding: $space-xxxs $space-s;
-  margin: $space-m;
+  padding: $sds-spaces-xxxs $sds-spaces-s;
+  margin: $sds-spaces-m;
   // Ensures it appears on top of the phylo tree if they overlap.
   z-index: 1;
   // Always position at the bottom right hand corner of the viewport.
@@ -84,7 +85,7 @@
   right: 0;
 
   .infoIcon {
-    margin: $space-xxxxs $space-xxs 0 0; // top margin is to align the icon with the text
+    margin: 1px $sds-spaces-xxs 0 0; // top margin is to align the icon with the text
     vertical-align: text-top;
     fill: $gray-medium;
   }

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 /* Style the buttons that are used to open and close the accordion panel */
 
@@ -56,7 +57,7 @@
 
 .accordionTitle,
 .accordionText {
-  margin-left: 38px;
+  margin-left: $sds-spaces-xxl;
 }
 
 .accordionTitle {

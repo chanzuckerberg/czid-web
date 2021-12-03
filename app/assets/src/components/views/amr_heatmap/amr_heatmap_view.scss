@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .AMRHeatmapView {
   .viewHeader {
@@ -10,7 +11,7 @@
       display: flex;
 
       .controlElement {
-        margin-left: 10px;
+        margin-left: $sds-spaces-m;
       }
     }
   }
@@ -20,12 +21,12 @@
 
     .filterRow {
       margin: 20px 0;
-      height: $space-xxl;
+      height: $sds-spaces-xxl;
 
       .filterControl {
         float: left;
         margin-left: auto;
-        padding: 0 $space-default;
+        padding: 0 $sds-spaces-default;
         width: 25%;
       }
     }

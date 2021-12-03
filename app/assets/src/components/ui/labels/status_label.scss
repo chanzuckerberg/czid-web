@@ -1,13 +1,14 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .statusLabel {
   @include font-caps-xxxxs;
   line-height: 9px;
   border-radius: $border-radius-l;
-  margin-left: $space-xs;
-  padding: $space-xxs $space-xs;
+  margin-left: $sds-spaces-xs;
+  padding: $sds-spaces-xxs $sds-spaces-xs;
 
   &.default {
     background-color: $gray-lightest;

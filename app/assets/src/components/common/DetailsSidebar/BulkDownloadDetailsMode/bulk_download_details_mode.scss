@@ -1,23 +1,24 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .content {
-  padding: $space-xxl $space-xl;
+  padding: $sds-spaces-xxl $sds-spaces-xl;
   position: relative;
 }
 
 .title,
 .loadingMsg {
   @include font-header-xl;
-  margin: 0 $space-m;
+  margin: 0 $sds-spaces-m;
   // Leave room for the close button.
   margin-right: 60px;
   word-break: break-all;
 }
 
 .adminDetails {
-  margin: 0 $space-m;
+  margin: 0 $sds-spaces-m;
   color: $gray-dark;
 
   .logUrl {
@@ -30,59 +31,59 @@
 }
 
 .tabs {
-  margin: $space-xl $space-m;
+  margin: $sds-spaces-xl $sds-spaces-m;
 }
 
 .notification {
-  margin: 14px 10px -4px 10px;
+  margin: 14px $sds-spaces-m -4px $sds-spaces-m;
 }
 
 .accordion {
-  border-bottom: $space-xxxxs solid $gray-light;
+  border-bottom: 1px solid $gray-light;
 
   .header {
     @include font-caps-xxs;
 
     color: $black;
-    padding: $space-m;
+    padding: $sds-spaces-m;
     height: 40px;
   }
 }
 
 .detailsTab {
   .description {
-    padding: 0 $space-m $space-m;
+    padding: 0 $sds-spaces-m $sds-spaces-m;
     @include font-body-s;
   }
   .samplesList {
     max-height: 360px;
     overflow: auto;
-    padding: 0 $space-l;
+    padding: 0 $sds-spaces-l;
 
     .sampleName {
       @include font-body-xs;
-      padding: $space-xxs 0;
+      padding: $sds-spaces-xxs 0;
       word-break: break-word;
     }
   }
 }
 
 .advancedDownloadTab {
-  margin: 0 $space-m;
+  margin: 0 $sds-spaces-m;
 
   .header {
     @include font-header-xs;
-    margin-bottom: $space-xxs;
+    margin-bottom: $sds-spaces-xxs;
   }
 
   .description {
     @include font-body-xs;
-    margin-bottom: $space-m;
+    margin-bottom: $sds-spaces-m;
   }
 
   .cloudCommandContainer {
     background-color: $gray-off-white;
-    padding: $space-m;
+    padding: $sds-spaces-m;
     display: flex;
     align-items: center;
 
@@ -106,7 +107,7 @@
       width: 24px;
       color: $gray-medium;
       margin-left: 16px;
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
     }
   }
 }

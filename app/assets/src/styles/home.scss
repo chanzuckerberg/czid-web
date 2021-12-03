@@ -3,6 +3,7 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 @import "typography";
 @import "themes/colors";
+@import "~czifui/dist/variables";
 
 body {
   color: $black;
@@ -66,7 +67,7 @@ body {
 
 .content-wrapper {
   .scroll {
-    margin: 10px;
+    margin: $sds-spaces-m;
     width: 100%;
     text-align: center !important;
   }

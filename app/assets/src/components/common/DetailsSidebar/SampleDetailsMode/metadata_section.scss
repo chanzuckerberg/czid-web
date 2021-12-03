@@ -4,7 +4,7 @@
 @import "~styles/themes/elements";
 
 .metadataSection {
-  border-bottom: $space-xxxxs solid $gray-light;
+  border-bottom: 1px solid $gray-light;
 
   .title {
     @include font-caps-xxs;

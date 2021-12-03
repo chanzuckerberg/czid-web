@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .layout {
   display: flex;
@@ -21,7 +22,7 @@
     .leftPane:not(:empty) {
       border-right: 2px solid $gray-lightest;
       flex: 0 0 auto;
-      padding: $space-m 20px;
+      padding: $sds-spaces-m 20px;
       overflow-x: visible;
     }
 
@@ -43,7 +44,7 @@
       border-left: 2px solid $gray-lightest;
       flex: 0 0 auto;
       overflow: overlay;
-      padding: 0 5px 0 $space-m;
+      padding: 0 5px 0 $sds-spaces-m;
 
       &::-webkit-scrollbar {
         display: none;
@@ -58,7 +59,7 @@
 
 .tabLabel {
   @include font-header-s;
-  margin-right: $space-m;
+  margin-right: $sds-spaces-m;
 }
 
 .tabCounter {
@@ -82,8 +83,8 @@
     }
 
     .workflowTabs {
-      margin-top: $space-xs;
-      margin-bottom: $space-xs;
+      margin-top: $sds-spaces-xs;
+      margin-bottom: $sds-spaces-xs;
 
       .tabLabel {
         @include font-header-xs;

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .whitePaper {
   position: relative;
@@ -25,7 +26,7 @@
     z-index: 2;
     margin: 0 auto;
     overflow: hidden;
-    padding: 0 $space-xl;
+    padding: 0 $sds-spaces-xl;
     text-decoration: none;
     cursor: pointer;
 
@@ -62,12 +63,12 @@
       h2 {
         color: $black;
         @include font-header-xl;
-        margin-bottom: $space-l;
+        margin-bottom: $sds-spaces-l;
       }
 
       p {
         color: $gray-darkest;
-        margin-bottom: $space-xl;
+        margin-bottom: $sds-spaces-xl;
         @include font-body-s;
 
         @media (max-width: 768px) {

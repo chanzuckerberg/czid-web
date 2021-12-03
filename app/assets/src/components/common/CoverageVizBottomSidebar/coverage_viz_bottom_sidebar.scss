@@ -1,13 +1,14 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 // These variables help to keep the loading and no data screens the same height as the viz screen.
 $body-height: 248px;
 $accession-label-height: 22px;
 $accession-count-label-height: 20px;
 $genome-viz-height: 18px;
-$genome-viz-spacing: $space-xs;
+$genome-viz-spacing: $sds-spaces-xs;
 
 .contents {
   margin-top: 30px;
@@ -42,7 +43,7 @@ $genome-viz-spacing: $space-xs;
     .accessionLabel {
       @include font-header-m;
       max-width: 550px;
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
@@ -77,7 +78,7 @@ $genome-viz-spacing: $space-xs;
 
     .vizLinkContainer {
       text-align: right;
-      margin-top: 2px;
+      margin-top: $sds-spaces-xxxs;
       margin-right: 12px;
     }
   }
@@ -91,7 +92,7 @@ $genome-viz-spacing: $space-xs;
 
   .rightArrow {
     font-size: 0.75em;
-    margin-left: 4px;
+    margin-left: $sds-spaces-xxs;
   }
 }
 
@@ -113,7 +114,7 @@ $genome-viz-spacing: $space-xs;
     .column {
       flex: 1 1 0;
       min-width: 0;
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
 
       &:last-child {
         margin-right: 0;
@@ -124,7 +125,7 @@ $genome-viz-spacing: $space-xs;
       display: flex;
       align-items: center;
       height: 30px;
-      padding: 0 10px;
+      padding: 0 $sds-spaces-m;
 
       &:first-child {
         background-color: $gray-off-white;
@@ -171,7 +172,7 @@ $genome-viz-spacing: $space-xs;
       @include font-body-xxs;
       width: 170px;
       text-align: right;
-      padding-right: 8px;
+      padding-right: $sds-spaces-s;
       color: $gray-darkest;
     }
 
@@ -204,17 +205,17 @@ $genome-viz-spacing: $space-xs;
   }
 
   .text {
-    margin-top: $space-xl;
-    margin-right: $space-xl;
+    margin-top: $sds-spaces-xl;
+    margin-right: $sds-spaces-xl;
     width: 350px;
 
     .message {
       @include font-header-m;
-      margin-bottom: 8px;
+      margin-bottom: $sds-spaces-s;
     }
 
     .vizLink {
-      margin-top: 10px;
+      margin-top: $sds-spaces-m;
     }
   }
 
@@ -264,7 +265,7 @@ $genome-viz-spacing: $space-xs;
   box-shadow: $box-shadow-m;
   border: $border-gray-light;
   border-radius: $border-radius-m;
-  padding: 5px 10px;
+  padding: 5px $sds-spaces-m;
   display: flex;
   align-items: center;
 
@@ -296,7 +297,7 @@ $genome-viz-spacing: $space-xs;
 // TODO(mark):
 // If text-subtext options become more common, add this to BareDropdown as an official alternative option.
 .option {
-  padding: 6px 16px;
+  padding: $sds-spaces-xs 16px;
 
   .optionText {
     @include font-body-xs;

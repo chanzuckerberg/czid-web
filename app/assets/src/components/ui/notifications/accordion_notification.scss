@@ -1,9 +1,10 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .listContainer {
-  margin-bottom: $space-xs;
+  margin-bottom: $sds-spaces-xs;
   &.error {
     border-color: $error-medium;
     background-color: $error-off-white;
@@ -27,12 +28,12 @@
 
 .notificationContainer {
   @include font-body-xxs;
-  margin: $space-xs 0;
+  margin: $sds-spaces-xs 0;
 }
 
 .messageContainer {
   max-height: 150px;
   overflow: auto;
-  margin-top: $space-l;
+  margin-top: $sds-spaces-l;
   word-break: break-word;
 }

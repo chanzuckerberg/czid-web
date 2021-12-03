@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .metadataUploadModal {
   min-height: 500px;
@@ -46,7 +47,7 @@
     line-height: 25px;
 
     li {
-      padding-left: 2px;
+      padding-left: $sds-spaces-xxxs;
     }
 
     .link {

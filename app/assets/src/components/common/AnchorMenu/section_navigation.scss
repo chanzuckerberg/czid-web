@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .navWrapper {
   display: flex;
@@ -13,7 +14,7 @@
 .navTitle {
   @include font-header-xs;
   color: $gray-dark;
-  margin-bottom: $space-xl;
+  margin-bottom: $sds-spaces-xl;
   min-width: 110px;
 }
 

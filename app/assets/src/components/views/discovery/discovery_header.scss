@@ -1,12 +1,13 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .header {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: $sds-spaces-m;
 
   .icon {
     fill: $primary;
@@ -67,7 +68,7 @@
 
   .tabs {
     flex: 1 0 auto;
-    margin-top: 10px;
+    margin-top: $sds-spaces-m;
   }
 
   .searchContainer {

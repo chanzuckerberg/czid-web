@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .searchBoxList {
   background-color: $white;
@@ -10,11 +11,11 @@
   display: inline-block;
   font-size: 13px;
   min-width: 240px;
-  padding: 10px;
+  padding: $sds-spaces-m;
   text-align: left;
 
   .searchBox {
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
 
     .searchBoxIcon {
       margin: 0;
@@ -30,7 +31,7 @@
 
   .title {
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
   }
 
   .listBox {
@@ -52,7 +53,7 @@
 
     .listColumnTitles {
       height: 24px;
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
       white-space: nowrap;
       display: flex;
       flex-direction: row;
@@ -69,7 +70,7 @@
     .listElement {
       cursor: pointer;
       height: 24px;
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
       white-space: nowrap;
       display: flex;
       flex-direction: row;
@@ -93,7 +94,7 @@
       color: $gray-medium;
       display: inline-block;
       margin-left: auto;
-      padding-left: $space-xxl;
+      padding-left: $sds-spaces-xxl;
     }
   }
 }

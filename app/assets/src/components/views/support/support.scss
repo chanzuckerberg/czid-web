@@ -1,6 +1,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .privacyPolicy,
 .termsOfUse,
@@ -21,7 +22,7 @@
     .number {
       position: absolute;
       right: 100%;
-      margin-right: 8px;
+      margin-right: $sds-spaces-s;
     }
   }
 
@@ -33,7 +34,7 @@
     .number {
       position: absolute;
       right: 100%;
-      margin-right: 8px;
+      margin-right: $sds-spaces-s;
     }
   }
 
@@ -70,7 +71,7 @@
     li {
       @include font-body-s;
       list-style-type: disc;
-      margin-bottom: $space-m;
+      margin-bottom: $sds-spaces-m;
 
       .listItemLabel {
         font-weight: 600;
@@ -104,13 +105,13 @@
   .privacySummaryTable {
     margin: 25px 0px;
     border-style: solid;
-    border-width: $space-xxxxs;
+    border-width: 1px;
     width: 840px;
     height: 2458px;
 
     td {
-      padding: $space-m 15px;
-      border: $space-xxxxs solid $gray-light;
+      padding: $sds-spaces-m 15px;
+      border: 1px solid $gray-light;
       text-align: left;
     }
 
@@ -142,12 +143,12 @@
 }
 
 .faqPage .question {
-  border-bottom: $space-xxxxs solid $gray-light;
+  border-bottom: 1px solid $gray-light;
 
   h3 {
     margin-top: 0;
     margin-bottom: 0;
-    padding: 0 $space-m;
+    padding: 0 $sds-spaces-m;
     min-height: 50px;
     display: flex;
     align-items: center;
@@ -163,11 +164,11 @@
   }
 
   p {
-    margin: 0px 50px $space-m $space-m;
+    margin: 0px 50px $sds-spaces-m $sds-spaces-m;
   }
 
   .innerListItem {
-    margin-top: $space-m;
+    margin-top: $sds-spaces-m;
     margin-left: 20px;
   }
 }

@@ -1,16 +1,17 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .termsAgreement {
-  margin-top: $space-xl;
-  margin-bottom: $space-xl;
+  margin-top: $sds-spaces-xl;
+  margin-bottom: $sds-spaces-xl;
   color: $gray-darkest;
 
   // Global because Checkbox does not use CSS modules
   :global(.label) {
     font-size: 12px;
     line-height: 20px;
-    margin-left: 10px;
+    margin-left: $sds-spaces-m;
 
     span {
       cursor: default;

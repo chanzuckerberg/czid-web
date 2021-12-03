@@ -2,6 +2,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .content {
   @include font-body-xxs;
@@ -9,7 +10,7 @@
 }
 
 .accordion {
-  border-bottom: $space-xxxxs solid $gray-light;
+  border-bottom: 1px solid $gray-light;
 }
 
 .accordionContent {
@@ -24,20 +25,20 @@
 }
 
 .statusBox {
-  padding: $space-l;
+  padding: $sds-spaces-l;
   display: flex;
   border-radius: $border-radius-m;
-  margin-bottom: $space-l;
+  margin-bottom: $sds-spaces-l;
 
   .statusIcon {
     height: 20px;
     width: 20px;
-    margin-top: $space-xs;
+    margin-top: $sds-spaces-xs;
     flex-shrink: 0;
   }
 
   .statusText {
-    margin-left: $space-m;
+    margin-left: $sds-spaces-m;
   }
 
   .statusTitle {
@@ -125,13 +126,13 @@
 .fileLink {
   color: $primary;
   cursor: pointer;
-  margin-bottom: 8px;
+  margin-bottom: $sds-spaces-s;
 }
 
 .disabledFileLink {
   color: $gray-dark;
   cursor: default;
-  margin-bottom: 8px;
+  margin-bottom: $sds-spaces-s;
 }
 
 .fileGroup {
@@ -144,7 +145,7 @@
 
   .fileGroupHeader {
     @include font-header-xs;
-    margin-bottom: 8px;
+    margin-bottom: $sds-spaces-s;
   }
 }
 
@@ -155,7 +156,7 @@
   span {
     width: 50%;
     padding-right: 12px;
-    margin-bottom: 8px;
+    margin-bottom: $sds-spaces-s;
   }
 
   a {

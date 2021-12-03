@@ -2,6 +2,7 @@
 @import "~styles/themes/typography";
 @import "~styles/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .viewHeader {
   margin-bottom: 5px;
@@ -9,7 +10,7 @@
   .legacyLink {
     @include font-body-xxxs;
     color: $gray-dark;
-    padding-left: 2px;
+    padding-left: $sds-spaces-xxxs;
     &:hover {
       color: $primary;
     }
@@ -30,12 +31,12 @@
   }
 
   .warningIcon {
-    margin-left: 2px;
+    margin-left: $sds-spaces-xxxs;
     transform: translateY(1px);
   }
 
   .controlElement {
-    margin-left: $space-m;
+    margin-left: $sds-spaces-m;
 
     &:not(:last-child) {
       margin-right: 0;

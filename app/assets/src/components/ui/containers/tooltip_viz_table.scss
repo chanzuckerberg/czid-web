@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .table {
   @include font-body-xxs;
@@ -9,35 +10,35 @@
   border: $border-gray-light;
   box-shadow: $box-shadow-m;
   pointer-events: none;
-  padding: 0 $space-m;
+  padding: 0 $sds-spaces-m;
 
   .title {
     @include font-caps-xxxxs;
     border-bottom: $border-gray-lightest;
     color: $gray-dark;
-    margin-bottom: $space-m;
+    margin-bottom: $sds-spaces-m;
   }
 
   .subtitle {
     @include font-body-xxs;
-    padding-top: $space-l;
+    padding-top: $sds-spaces-l;
   }
 
   .description {
     @include font-body-xxs;
     color: $gray-dark;
-    margin-top: $space-s;
-    margin-bottom: $space-l;
+    margin-top: $sds-spaces-s;
+    margin-bottom: $sds-spaces-l;
   }
 
   .section {
     display: flex;
     flex-direction: column;
-    margin: $space-l 0;
+    margin: $sds-spaces-l 0;
 
     &:not(:first-child) {
       border-top: $border-gray-lightest;
-      padding-top: $space-l;
+      padding-top: $sds-spaces-l;
     }
 
     &.disabled {
@@ -47,7 +48,7 @@
     .name {
       @include font-caps-xxxxs;
       color: $gray-dark;
-      margin-bottom: $space-m;
+      margin-bottom: $sds-spaces-m;
 
       &.disabled {
         color: $gray-light;
@@ -67,7 +68,7 @@
         .label {
           @include font-header-xs;
           width: auto;
-          margin-right: $space-l;
+          margin-right: $sds-spaces-l;
           flex-grow: 1;
         }
 

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .editableInput {
   display: flex;
@@ -15,7 +16,7 @@
     flex: 1 0 auto;
     height: $icon-s;
     fill: $gray-dark;
-    margin-left: $space-m;
+    margin-left: $sds-spaces-m;
 
     &:hover {
       fill: $primary;
@@ -26,7 +27,7 @@
 .alertContainer {
   @include font-body-xxxs;
   display: flex;
-  margin-top: $space-xxs;
+  margin-top: $sds-spaces-xxs;
 
   &.warning {
     color: $warning-dark;
@@ -39,7 +40,7 @@
   .alertIcon {
     width: $icon-s;
     height: $icon-s;
-    margin-right: $space-xxs;
+    margin-right: $sds-spaces-xxs;
     // Vertical-align the svg element with the text.
     transform: translateY(1px);
   }

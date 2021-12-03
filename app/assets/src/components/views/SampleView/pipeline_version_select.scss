@@ -1,6 +1,8 @@
+@import "~czifui/dist/variables";
+
 .pipelineVersionSelectContainer {
   display: inline-block;
-  padding-left: 2px;
+  padding-left: $sds-spaces-xxxs;
 
   .pipelineVersionSelect {
     display: flex;

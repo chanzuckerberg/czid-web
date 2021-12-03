@@ -1,6 +1,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .text {
   @include font-body-xxs;
@@ -15,7 +16,7 @@
 .xAxisTitle {
   @include font-body-xxs;
   color: $black;
-  margin-bottom: $space-s;
+  margin-bottom: $sds-spaces-s;
 
   div {
     display: inline-block;

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .announcementBanner {
   @include font-body-xs;
@@ -23,7 +24,7 @@
     .icon {
       fill: $primary;
       height: 20px;
-      margin-right: $space-s;
+      margin-right: $sds-spaces-s;
       vertical-align: text-bottom;
     }
   }

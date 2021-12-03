@@ -1,4 +1,5 @@
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .accordionContainer {
   border-bottom: none;
@@ -7,7 +8,7 @@
   margin: 0 auto;
 
   @media (max-width: 768px) {
-    padding: 0 $space-xl;
+    padding: 0 $sds-spaces-xl;
     width: fit-content;
   }
 }

@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .publicationsAndNews {
-  padding: 0 $space-xl;
+  padding: 0 $sds-spaces-xl;
   margin: 3em auto;
   max-width: 1280px;
 
@@ -30,7 +31,7 @@
     color: $gray-darkest;
     letter-spacing: 0.01875em;
     text-transform: uppercase;
-    margin: 6px 0 0 0;
+    margin: $sds-spaces-xs 0 0 0;
     @include font-header-l;
 
     @media (max-width: 768px) {
@@ -87,7 +88,7 @@
 
     .title {
       color: $black;
-      margin: 6px 0 0 0;
+      margin: $sds-spaces-xs 0 0 0;
       @include font-header-l;
     }
 
@@ -117,6 +118,6 @@
   }
 
   li {
-    margin: $space-xxl 0;
+    margin: $sds-spaces-xxl 0;
   }
 }

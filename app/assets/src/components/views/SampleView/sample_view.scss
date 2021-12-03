@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .sampleViewContainer {
   display: flex;
@@ -21,7 +22,7 @@
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  margin-top: $space-xl;
+  margin-top: $sds-spaces-xl;
 
   .reportFilters {
     flex: 0 0 auto;
@@ -44,12 +45,12 @@
 
       .reportInfoMsg {
         &:not(:first-child) {
-          margin-left: $space-xxs;
+          margin-left: $sds-spaces-xxs;
         }
       }
 
       .clearAllFilters {
-        margin-left: $space-xxs;
+        margin-left: $sds-spaces-xxs;
         font-weight: $font-weight-semibold;
         white-space: nowrap;
         cursor: pointer;
@@ -78,7 +79,7 @@
 
   .consensusGenomeLink {
     @include font-caps-xxxs;
-    margin-top: $space-s;
+    margin-top: $sds-spaces-s;
     color: $primary;
     cursor: pointer;
   }
@@ -88,9 +89,9 @@
   margin: 25px 0;
 
   .statusLabel {
-    margin-left: $space-xs;
+    margin-left: $sds-spaces-xs;
     // To center without offsetting "indicator" line
-    margin-top: $space-xxxs;
+    margin-top: $sds-spaces-xxxs;
     vertical-align: text-top;
   }
 }

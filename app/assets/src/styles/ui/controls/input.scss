@@ -1,5 +1,6 @@
 @import "../../themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 // Override semaantic ui error styling
 :global(.ui.input.error > input) {
@@ -30,7 +31,7 @@
 
   input[type="header"] {
     @include font-header-xl;
-    padding: 7px $space-l;
+    padding: 7px $sds-spaces-l;
     text-overflow: ellipsis;
     background-color: transparent;
     color: $black;

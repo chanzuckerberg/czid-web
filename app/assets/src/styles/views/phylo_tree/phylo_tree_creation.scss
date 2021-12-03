@@ -1,5 +1,6 @@
 @import "../../themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .phylo-tree-creation-wizard {
   min-height: 440px;
@@ -69,7 +70,7 @@
 
   &__page-3 {
     &__form {
-      margin-bottom: 10px;
+      margin-bottom: $sds-spaces-m;
       height: 50px;
 
       div {
@@ -108,11 +109,11 @@
 
   &__page-2,
   &__page-4 {
-    padding-top: 10px;
+    padding-top: $sds-spaces-m;
 
     &__searchbar {
       height: 50px;
-      margin-bottom: $space-xxl;
+      margin-bottom: $sds-spaces-xxl;
 
       &__container {
         float: left;
@@ -156,8 +157,8 @@
 
     &__notifications {
       max-height: 40px;
-      margin-top: $space-xl;
-      margin-bottom: $space-xxl;
+      margin-top: $sds-spaces-xl;
+      margin-bottom: $sds-spaces-xxl;
     }
   }
 

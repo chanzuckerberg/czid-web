@@ -1,10 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/typography";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .tabs {
   height: 30px;
-  padding-bottom: 10px;
+  padding-bottom: $sds-spaces-m;
 
   .tab {
     @include font-header-s;

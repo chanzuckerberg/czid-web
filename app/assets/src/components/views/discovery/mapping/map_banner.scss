@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .bannerContainer {
   text-align: center;
@@ -13,8 +14,8 @@
     box-shadow: $box-shadow-s;
     cursor: default;
     display: inline-block;
-    margin: 8px auto auto;
-    padding: 6px 8px;
+    margin: $sds-spaces-s auto auto;
+    padding: 6px $sds-spaces-s;
     text-align: center;
 
     .clearAll {

@@ -1,6 +1,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 // these defaults can be overridden by passing in your
 // own class names and css to the component.
@@ -17,7 +18,7 @@
 .xAxisTitle {
   @include font-body-xxs;
   color: $black;
-  margin-bottom: $space-s;
+  margin-bottom: $sds-spaces-s;
 
   div {
     display: inline-block;

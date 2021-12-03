@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 :global(.ui):global(.dropdown).dropdown {
   &:global(.active) {
@@ -17,13 +18,13 @@
   display: block !important;
 
   white-space: normal;
-  margin-top: $space-m;
-  margin-bottom: $space-m;
+  margin-top: $sds-spaces-m;
+  margin-bottom: $sds-spaces-m;
   cursor: pointer;
 
   // for SectionsDropdown, the menu items already have padding that can't be overridden
   &.noMargins {
-    margin: 0 0 0 $space-xxs;
+    margin: 0 0 0 $sds-spaces-xxs;
   }
 
   .optionText {
@@ -70,17 +71,17 @@
     @include font-caps-xxxxs;
     color: $gray-dark;
 
-    margin: $space-m 0;
+    margin: $sds-spaces-m 0;
   }
 
   :global(.divider) {
     border-top: $border-gray-lightest;
-    margin: 0 $space-l;
+    margin: 0 $sds-spaces-l;
   }
 }
 
 .emptySection {
-  margin: $space-l 0 $space-l $space-l;
+  margin: $sds-spaces-l 0 $sds-spaces-l $sds-spaces-l;
   cursor: default !important;
 
   .message {

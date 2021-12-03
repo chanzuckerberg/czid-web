@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .footer {
   background: $black;
@@ -90,17 +91,17 @@
   }
 
   p {
-    margin-right: 10px;
+    margin-right: $sds-spaces-m;
     margin-bottom: 0px;
     color: $white;
 
     @media (max-width: 768px) {
-      margin-bottom: 10px;
+      margin-bottom: $sds-spaces-m;
     }
   }
 
   span {
-    margin: 0 8px;
+    margin: 0 $sds-spaces-s;
   }
 }
 
@@ -123,7 +124,7 @@
     opacity: 0.3;
     height: 42px;
     width: 1px;
-    margin: 0 22px;
+    margin: 0 $sds-spaces-xl;
   }
 
   @media (max-width: 768px) {
@@ -141,7 +142,7 @@
 
   @media (max-width: 768px) {
     margin-left: 0;
-    margin-bottom: 22px;
+    margin-bottom: $sds-spaces-xl;
   }
 }
 

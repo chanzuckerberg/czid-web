@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 :global(.ui):global(.dropdown).bareDropdown,
 .portalDropdown {
@@ -59,8 +60,8 @@
     display: flex;
     align-items: center;
     /* Overwrite semantic ui */
-    padding-left: 14px !important;
-    padding-right: 14px !important;
+    padding-left: $sds-spaces-l !important;
+    padding-right: $sds-spaces-l !important;
     color: black !important;
     cursor: pointer;
 
@@ -85,7 +86,7 @@
   }
 
   .emptySection {
-    margin: $space-l;
+    margin: $sds-spaces-l;
     cursor: default !important;
 
     .message {
@@ -125,8 +126,8 @@
     }
 
     &.extraPadding {
-      padding-top: 14px;
-      padding-bottom: 10px;
+      padding-top: $sds-spaces-l;
+      padding-bottom: $sds-spaces-m;
     }
 
     .menuLabel {
@@ -135,21 +136,21 @@
       font-weight: 600;
       letter-spacing: 0.4px;
       margin-bottom: 12px;
-      padding: 0 14px;
+      padding: 0 $sds-spaces-l;
     }
 
     .searchContainer {
-      margin: 0 14px 10px 14px;
+      margin: 0 $sds-spaces-l $sds-spaces-m $sds-spaces-l;
     }
   }
 
   .dropdownMenu {
-    padding: 6px 0;
+    padding: $sds-spaces-xs 0;
   }
 
   .noResultsMessage {
     @include font-body-xxs;
-    padding: $space-xs $space-l;
+    padding: $sds-spaces-xs $sds-spaces-l;
     color: $gray-dark;
   }
 

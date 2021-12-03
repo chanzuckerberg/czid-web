@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .heatmap {
   margin-top: -$header-margin-bottom;
@@ -13,7 +14,7 @@
       display: flex;
 
       .controlElement {
-        margin-left: $space-m;
+        margin-left: $sds-spaces-m;
       }
     }
   }
@@ -22,22 +23,22 @@
     background-color: $white;
 
     .filterRow {
-      margin-top: $space-l;
-      margin-bottom: $space-l;
-      height: $space-xxl;
+      margin-top: $sds-spaces-l;
+      margin-bottom: $sds-spaces-l;
+      height: $sds-spaces-xxl;
 
       .filterControl {
         float: left;
         margin-left: auto;
-        padding: 0 $space-default;
+        padding: 0 $sds-spaces-default;
         width: calc(100% / 6);
       }
     }
 
     .filterTagsList {
-      margin-bottom: $space-l;
+      margin-bottom: $sds-spaces-l;
       .filterTag {
-        margin-right: $space-xs;
+        margin-right: $sds-spaces-xs;
 
         &:last-child {
           margin-right: 0;
@@ -48,14 +49,14 @@
     .statsRow {
       @include font-body-xs;
       color: $gray-dark;
-      height: $space-xxl;
-      margin-left: $space-xxs;
-      padding: 0 $space-default;
+      height: $sds-spaces-xxl;
+      margin-left: $sds-spaces-xxs;
+      padding: 0 $sds-spaces-default;
 
       .infoIcon {
-        margin-top: $space-xxxs;
-        margin-left: $space-xxxs;
-        margin-right: $space-xxxs;
+        margin-top: $sds-spaces-xxxs;
+        margin-left: $sds-spaces-xxxs;
+        margin-right: $sds-spaces-xxxs;
         height: 15px;
         width: 15px;
         fill: $gray-dark;
@@ -85,7 +86,7 @@
       cursor: pointer;
       color: $gray-dark;
       background-color: $white;
-      padding: 0 $space-l;
+      padding: 0 $sds-spaces-l;
       border-radius: 0 0 $border-radius-m $border-radius-m;
       box-shadow: $box-shadow-s;
     }
@@ -108,17 +109,17 @@
 }
 
 .notificationContainer {
-  margin: $space-l 0 $space-l;
+  margin: $sds-spaces-l 0 $sds-spaces-l;
 }
 
 .messageLine {
   @include font-body-xxs;
-  padding: $space-xxs 0;
-  margin-right: $space-xl;
+  padding: $sds-spaces-xxs 0;
+  margin-right: $sds-spaces-xl;
 }
 
 .conditionList {
-  margin-left: $space-xl;
+  margin-left: $sds-spaces-xl;
 }
 
 .iconAlert {

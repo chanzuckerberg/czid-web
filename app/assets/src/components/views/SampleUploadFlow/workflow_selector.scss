@@ -1,20 +1,21 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .workflowSelector {
-  margin-bottom: $space-xxl;
+  margin-bottom: $sds-spaces-xxl;
 
   .header {
     @include font-header-xl;
-    margin-bottom: $space-default;
+    margin-bottom: $sds-spaces-default;
   }
 
   .selectableOption {
     border-radius: $border-radius-m;
     cursor: pointer;
     display: flex;
-    padding: $space-l;
+    padding: $sds-spaces-l;
 
     &:hover {
       background-color: $gray-off-white;
@@ -25,10 +26,10 @@
     }
 
     .technologyOptions {
-      margin-top: $space-xxxs;
+      margin-top: $sds-spaces-xxxs;
 
       .technology {
-        padding: $space-m;
+        padding: $sds-spaces-m;
 
         &:hover {
           background-color: $gray-lightest;
@@ -42,18 +43,18 @@
 
     .radioButton {
       flex-shrink: 0;
-      margin: $space-l;
+      margin: $sds-spaces-l;
 
       &.alignTitle {
-        margin-top: $space-xxs;
+        margin-top: $sds-spaces-xxs;
       }
     }
 
     .iconSample {
       flex-shrink: 0;
       height: 35px;
-      margin-top: $space-xxs;
-      margin-right: $space-default;
+      margin-top: $sds-spaces-xxs;
+      margin-right: $sds-spaces-default;
       width: 35px;
     }
 
@@ -62,15 +63,15 @@
         @include font-header-s;
 
         &.technologyTitle {
-          padding-top: $space-l;
+          padding-top: $sds-spaces-l;
         }
 
         .infoIcon {
           fill: $gray-dark;
           height: $icon-s;
           width: $icon-s;
-          margin-left: $space-xs;
-          vertical-align: -$space-xxxs;
+          margin-left: $sds-spaces-xs;
+          vertical-align: -$sds-spaces-xxxs;
 
           &:hover {
             fill: $primary;
@@ -99,21 +100,21 @@
 
       .technologyContent {
         display: flex;
-        margin-top: $space-l;
+        margin-top: $sds-spaces-l;
 
         .item {
           display: flex;
           flex-direction: column;
           min-width: 160px;
-          margin-right: $space-xl;
+          margin-right: $sds-spaces-xl;
 
           .subheader {
             @include font-header-xs;
-            margin-bottom: $space-xs;
+            margin-bottom: $sds-spaces-xs;
           }
 
           .text {
-            margin-top: $space-xs; // align plaintext with text in toggle and dropdown menus
+            margin-top: $sds-spaces-xs; // align plaintext with text in toggle and dropdown menus
           }
 
           .dropdown {

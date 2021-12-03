@@ -1,6 +1,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .downloadCell {
   display: flex;
@@ -9,7 +10,7 @@
   .downloadIcon {
     width: 30px;
     height: 22px;
-    margin-right: $space-l;
+    margin-right: $sds-spaces-l;
     fill: $gray-light;
   }
 
@@ -24,7 +25,7 @@
     }
 
     .downloadStatus {
-      margin-left: $space-xs;
+      margin-left: $sds-spaces-xs;
     }
 
     .metadata {
@@ -33,7 +34,7 @@
 
       .detailsLink {
         cursor: pointer;
-        margin-right: $space-xxs;
+        margin-right: $sds-spaces-xxs;
 
         &:hover {
           color: $black;
@@ -41,7 +42,7 @@
       }
 
       .userName {
-        margin-left: $space-xxs;
+        margin-left: $sds-spaces-xxs;
       }
     }
   }
@@ -53,7 +54,7 @@
 }
 
 .statusCell {
-  margin-bottom: 2px;
+  margin-bottom: $sds-spaces-xxxs;
 
   .messageContainer,
   .links {
@@ -62,12 +63,12 @@
   }
 
   .messageContainer {
-    margin-bottom: $space-s;
+    margin-bottom: $sds-spaces-s;
   }
 
   .icon {
     width: 16px;
-    margin-right: $space-xs;
+    margin-right: $sds-spaces-xs;
     fill: $success-medium;
 
     &.warning {
@@ -81,13 +82,13 @@
 
     &.loading {
       color: $primary;
-      margin-right: 4px;
+      margin-right: $sds-spaces-xxs;
     }
   }
 
   .separator {
     @include font-body-xxs;
-    margin: 0 $space-s;
+    margin: 0 $sds-spaces-s;
     color: $gray-dark;
   }
 

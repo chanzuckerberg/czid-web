@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .publicProjectConfirmation {
   .title {
@@ -15,11 +16,11 @@
 
   .text {
     @include font-body-xs;
-    margin-top: $space-m;
+    margin-top: $sds-spaces-m;
     margin-bottom: 30px;
 
     p:not(:first-child) {
-      margin-top: $space-m;
+      margin-top: $sds-spaces-m;
     }
 
     .link {
@@ -30,16 +31,16 @@
   }
 
   .actions {
-    margin-top: $space-m;
+    margin-top: $sds-spaces-m;
     display: flex;
 
     .item {
       &:not(:first-child) {
-        margin-left: $space-xs;
+        margin-left: $sds-spaces-xs;
       }
 
       &:not(:last-child) {
-        margin-right: $space-xs;
+        margin-right: $sds-spaces-xs;
       }
     }
   }

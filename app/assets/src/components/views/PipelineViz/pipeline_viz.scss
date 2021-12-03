@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 // Exporting strings to style nodes and edges in vis.js
 :export {
@@ -88,7 +89,7 @@
   @include font-caps-xxs;
   background-color: $white;
   border-radius: $border-radius-m;
-  padding: 6px 8px;
+  padding: $sds-spaces-xs $sds-spaces-s;
   cursor: pointer;
   box-shadow: $box-shadow-s;
   display: flex;
@@ -163,7 +164,7 @@
   // Only give the stage name a margin-left if there is
   // an icon preceding it.
   & > .stageName:nth-child(2) {
-    margin-left: 4px;
+    margin-left: $sds-spaces-xxs;
   }
 }
 
@@ -212,7 +213,7 @@
 
 .graphLabel {
   @include font-caps-xxs;
-  padding: 14px 14px 0;
+  padding: $sds-spaces-l $sds-spaces-l 0;
   display: flex;
   justify-content: space-between;
   align-items: center;

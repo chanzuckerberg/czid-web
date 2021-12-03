@@ -1,17 +1,18 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .content {
   @include scrollable;
   // window height minus the header and toolbars
   max-height: calc(100vh - #{$header-total-height} - 172px);
   overflow: scroll;
-  padding-left: $space-l;
+  padding-left: $sds-spaces-l;
 
   .notification {
-    margin-bottom: $space-s;
-    margin-right: $space-xl;
+    margin-bottom: $sds-spaces-s;
+    margin-right: $sds-spaces-xl;
 
     &.show {
       display: flex;
@@ -34,8 +35,8 @@
 
     .halfPageChart {
       color: $black;
-      padding-right: $space-xl;
-      padding-bottom: $space-xl;
+      padding-right: $sds-spaces-xl;
+      padding-bottom: $sds-spaces-xl;
       display: flex;
       flex-direction: column;
       flex: 0 0 50%;
@@ -43,8 +44,8 @@
 
     .fullPageChart {
       color: $black;
-      padding-right: $space-xl;
-      padding-bottom: $space-xl;
+      padding-right: $sds-spaces-xl;
+      padding-bottom: $sds-spaces-xl;
       display: flex;
       flex-direction: column;
       flex: 0 0 100%;
@@ -55,7 +56,7 @@
     }
 
     .histogramContainer {
-      padding: $space-xl;
+      padding: $sds-spaces-xl;
       border: $border-gray-light;
       border-radius: $border-radius-m;
       width: 100%;
@@ -75,7 +76,7 @@
 
       .subtitle {
         @include font-header-s;
-        margin-bottom: $space-xxl;
+        margin-bottom: $sds-spaces-xxl;
         height: 10%;
 
         .message {
@@ -84,12 +85,12 @@
 
         .information {
           @include font-body-xs;
-          margin-top: $space-xxl;
+          margin-top: $sds-spaces-xxl;
           color: $gray-dark;
         }
 
         &.messageIncluded {
-          margin-bottom: $space-xl;
+          margin-bottom: $sds-spaces-xl;
         }
       }
 
@@ -101,19 +102,19 @@
 
     .title {
       @include font-header-l;
-      margin-bottom: $space-l;
-      margin-top: $space-l;
+      margin-bottom: $sds-spaces-l;
+      margin-top: $sds-spaces-l;
       height: max-content;
     }
 
     .legend {
       @include font-body-xxs;
-      margin-bottom: $space-l;
+      margin-bottom: $sds-spaces-l;
     }
   }
 
   .infoIcon {
-    margin: $space-xxxs $space-xxs 0 $space-xxs;
+    margin: $sds-spaces-xxxs $sds-spaces-xxs 0 $sds-spaces-xxs;
     height: 14px;
     width: 14px;
     fill: $gray-dark;
@@ -136,7 +137,7 @@
 }
 
 .statusList {
-  margin: 0 0 0 $space-l; // override list margins and move bullets inside tooltip
+  margin: 0 0 0 $sds-spaces-l; // override list margins and move bullets inside tooltip
 }
 
 // see discovery_view.scss

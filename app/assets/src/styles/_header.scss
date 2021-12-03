@@ -1,6 +1,7 @@
 @import "typography";
 @import "themes/colors";
 @import "themes/elements";
+@import "~czifui/dist/variables";
 
 .tooltip {
   &.in {
@@ -10,7 +11,7 @@
     font-size: 0.8rem;
     text-align: left;
     max-width: 200px;
-    padding: 10px 15px;
+    padding: $sds-spaces-m 15px;
     color: $gray-off-white !important;
     background: $gray-darkest;
     border-radius: $border-radius-s;

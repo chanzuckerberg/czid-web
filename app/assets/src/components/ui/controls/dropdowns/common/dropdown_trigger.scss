@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .dropdownTrigger {
   border: $border-gray-light;
@@ -10,7 +11,7 @@
   letter-spacing: 0.4px;
   height: 34px;
   line-height: 24px;
-  padding: 4px 26px 4px 14px;
+  padding: $sds-spaces-xxs 26px $sds-spaces-xxs $sds-spaces-l;
   font-size: 13px;
   overflow: hidden;
 
@@ -45,7 +46,7 @@
   .itemSubtext {
     @include font-body-xxs;
     color: $gray-dark;
-    margin-left: $space-xs;
+    margin-left: $sds-spaces-xs;
   }
 
   .placeholder {

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .errorModal {
   .accordionHeader {
@@ -8,7 +9,7 @@
   }
 
   .accordionNotification {
-    margin-bottom: $space-xl;
+    margin-bottom: $sds-spaces-xl;
   }
 
   .notification {
@@ -16,7 +17,7 @@
   }
 
   .textContainer {
-    margin-bottom: $space-xl;
+    margin-bottom: $sds-spaces-xl;
 
     .title {
       @include font-header-xl;
@@ -24,7 +25,7 @@
       align-items: flex-start;
 
       .text {
-        margin-right: $space-l;
+        margin-right: $sds-spaces-l;
       }
 
       .imgMatrix {
@@ -36,13 +37,13 @@
 
     .message {
       @include font-body-s;
-      margin-top: $space-s;
+      margin-top: $sds-spaces-s;
       color: $gray-darkest;
     }
   }
 
   .actions {
-    margin-top: $space-m;
+    margin-top: $sds-spaces-m;
     display: flex;
   }
 }

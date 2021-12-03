@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .liveSearchPopBox {
   &:not(.rectangular) {
@@ -16,7 +17,7 @@
   }
 
   :global(.menu) {
-    margin-top: 6px;
+    margin-top: $sds-spaces-xs;
     max-width: 400px;
   }
 
@@ -29,8 +30,8 @@
 
     background-color: transparent;
     color: $gray-light;
-    margin: $space-l $space-l 0;
-    padding: $space-xxs 0;
+    margin: $sds-spaces-l $sds-spaces-l 0;
+    padding: $sds-spaces-xxs 0;
     text-transform: uppercase;
     border-top: 2px solid $gray-lightest;
   }

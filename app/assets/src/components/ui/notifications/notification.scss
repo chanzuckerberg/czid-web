@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .notification {
   @include font-body-xs;
@@ -11,7 +12,7 @@
   display: flex;
   align-items: center;
   font-family: $font-family-default;
-  padding: 14px 14px 14px 9px;
+  padding: $sds-spaces-l $sds-spaces-l $sds-spaces-l 9px;
   cursor: default;
 
   &.flat {
@@ -22,8 +23,8 @@
 
   .icon {
     flex-grow: 0;
-    margin-left: $space-xxs;
-    margin-right: $space-l;
+    margin-left: $sds-spaces-xxs;
+    margin-right: $sds-spaces-l;
     align-self: flex-start;
 
     svg {
@@ -48,8 +49,8 @@
     height: 14px;
     width: 14px;
     fill: $gray-dark;
-    margin-right: $space-l;
-    margin-top: $space-xxs;
+    margin-right: $sds-spaces-l;
+    margin-top: $sds-spaces-xxs;
     margin-left: auto;
     align-self: flex-start;
 
@@ -61,7 +62,7 @@
   .actions {
     @include font-caps-xxs;
     font-weight: 600;
-    margin-top: 14px;
+    margin-top: $sds-spaces-l;
 
     &:hover {
       cursor: pointer;

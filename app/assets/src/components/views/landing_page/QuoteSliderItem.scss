@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .carouselCell {
   width: 100%;
@@ -66,7 +67,7 @@
   top: 5.5rem;
 
   @media (max-width: 768px) {
-    left: $space-xl;
+    left: $sds-spaces-xl;
     top: 2.5rem;
   }
 

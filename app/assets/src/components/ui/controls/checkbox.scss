@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .checkbox {
   display: flex;
@@ -66,6 +67,6 @@
 
   .label {
     line-height: 18px;
-    padding: 0 10px 0 10px;
+    padding: 0 $sds-spaces-m 0 $sds-spaces-m;
   }
 }

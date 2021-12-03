@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .heroEmailForm {
   max-width: 489px;
@@ -28,7 +29,7 @@
       max-width: 350px;
       padding: unset;
       text-align: center;
-      padding: $space-xl 0;
+      padding: $sds-spaces-xl 0;
     }
   }
 

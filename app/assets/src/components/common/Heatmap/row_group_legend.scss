@@ -5,6 +5,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .tooltip {
   position: absolute;
@@ -15,7 +16,7 @@
   z-index: 0;
 
   .legend {
-    padding: $space-s 12px;
+    padding: $sds-spaces-s 12px;
     border-radius: $border-radius-m; // so that corners to do not cover parent corners
     background-color: $white;
     z-index: 1;

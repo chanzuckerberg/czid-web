@@ -2,6 +2,7 @@
 @import "~styles/typography";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .viewHeader {
   display: flex;
@@ -34,7 +35,7 @@
   }
 
   .trigger {
-    margin-right: 10px;
+    margin-right: $sds-spaces-m;
     user-select: none;
     display: inline-block;
 

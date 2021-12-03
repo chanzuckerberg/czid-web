@@ -2,6 +2,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .content {
   padding: 30px 20px;
@@ -11,18 +12,18 @@
 .title,
 .loadingMsg {
   @include font-header-xl;
-  margin: 0 $space-m;
+  margin: 0 $sds-spaces-m;
   margin-right: 60px;
   word-break: break-all;
   line-height: 1.4em;
 }
 
 .tabs {
-  margin: 30px $space-m $space-l;
+  margin: 30px $sds-spaces-m $sds-spaces-l;
 }
 
 .workflowTabs {
-  margin: 0 $space-m;
+  margin: 0 $sds-spaces-m;
 }
 
 .tabLabels {
@@ -34,17 +35,17 @@
 
 .dropdownContainer {
   width: 340px;
-  margin: $space-l $space-m $space-xl;
+  margin: $sds-spaces-l $sds-spaces-m $sds-spaces-xl;
 }
 
 .noData {
   color: $gray-light;
-  margin-left: $space-m;
+  margin-left: $sds-spaces-m;
 }
 
 .loading {
   @include font-body-s;
-  padding: 0 0 0 $space-default;
+  padding: 0 0 0 $sds-spaces-default;
   color: $gray-dark;
   display: inline-block;
 
@@ -72,7 +73,7 @@
     }
 
     :global(.warning) {
-      margin-bottom: $space-s;
+      margin-bottom: $sds-spaces-s;
     }
 
     .error {
@@ -110,13 +111,13 @@
 
     .rightArrow {
       font-size: 0.75em;
-      margin-left: $space-xxs;
+      margin-left: $sds-spaces-xxs;
     }
   }
 }
 
 .readsRemainingRow {
-  padding: $space-m 0;
+  padding: $sds-spaces-m 0;
   display: flex;
   align-items: center;
 
@@ -129,7 +130,7 @@
     width: 160px;
     flex-shrink: 0;
     margin-right: 20px;
-    margin-left: $space-m;
+    margin-left: $sds-spaces-m;
 
     .labelText {
       width: 120px;
@@ -164,7 +165,7 @@
 }
 
 .reportLink {
-  margin: 5px $space-m;
+  margin: 5px $sds-spaces-m;
 
   a {
     /* overwrite header.scss */
@@ -180,7 +181,7 @@
 .erccScatterplotSection {
   .graphContainer {
     margin-top: 20px;
-    margin-right: $space-m;
+    margin-right: $sds-spaces-m;
   }
 }
 
@@ -188,7 +189,7 @@
   padding-top: 5px;
 
   .downloadLink {
-    padding: 5px $space-m;
+    padding: 5px $sds-spaces-m;
     display: block;
     margin: 5px 0;
     /* overwrite header.scss */
@@ -206,16 +207,16 @@
     line-height: 23px;
     white-space: pre-wrap;
     word-break: break-word;
-    margin: 15px $space-m;
+    margin: 15px $sds-spaces-m;
   }
 
   .noData {
     color: $gray-light;
-    margin: 20px $space-m;
+    margin: 20px $sds-spaces-m;
   }
 
   .textareaContainer {
-    margin: 15px $space-m 0 $space-m;
+    margin: 15px $sds-spaces-m 0 $sds-spaces-m;
   }
 
   .textarea {

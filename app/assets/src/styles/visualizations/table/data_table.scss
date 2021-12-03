@@ -1,5 +1,6 @@
 @import "../../themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .data-table {
   max-height: 300px;
@@ -14,7 +15,7 @@
     th {
       line-height: normal;
       padding: 0;
-      padding-right: 10px;
+      padding-right: $sds-spaces-m;
       height: 40px;
 
       &:first-child {
@@ -39,7 +40,7 @@
       border-bottom: 1px solid $gray-lightest;
       word-wrap: break-word;
       line-height: normal;
-      padding: 5px 10px 5px 0;
+      padding: 5px $sds-spaces-m 5px 0;
       height: 40px;
 
       &:first-child {

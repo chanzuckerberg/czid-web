@@ -1,6 +1,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .privacyNoticeForUserResearch {
   margin-top: 90px;
@@ -14,12 +15,12 @@
   h2 {
     @include font-header-xl;
     position: relative;
-    margin-top: $space-l;
+    margin-top: $sds-spaces-l;
   }
 
   h3 {
     @include font-header-m;
-    margin-top: $space-l;
+    margin-top: $sds-spaces-l;
     position: relative;
 
     &.first {
@@ -29,27 +30,27 @@
 
   h4.subtitle {
     @include font-body-xxs;
-    margin-top: $space-xxs;
+    margin-top: $sds-spaces-xxs;
     color: $gray-dark;
   }
 
   .title {
-    margin-bottom: $space-l;
+    margin-bottom: $sds-spaces-l;
   }
 
   p {
     @include font-body-s;
 
     &.last {
-      padding-bottom: $space-xxl;
+      padding-bottom: $sds-spaces-xxl;
     }
 
     &.list {
-      margin-bottom: $space-xxs;
+      margin-bottom: $sds-spaces-xxs;
     }
 
     &.providers {
-      margin-bottom: $space-l;
+      margin-bottom: $sds-spaces-l;
     }
   }
 
@@ -65,7 +66,7 @@
     li {
       @include font-body-s;
       list-style-type: disc;
-      margin-bottom: $space-m;
+      margin-bottom: $sds-spaces-m;
     }
   }
 
@@ -73,7 +74,7 @@
     margin: 0 0 20px 40px;
 
     ol {
-      margin-top: $space-xxs;
+      margin-top: $sds-spaces-xxs;
     }
   }
 

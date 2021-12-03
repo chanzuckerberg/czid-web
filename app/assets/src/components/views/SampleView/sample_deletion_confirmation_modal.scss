@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .sampleDeletionConfirmation {
   .title {
@@ -10,13 +11,13 @@
 
   .text {
     @include font-body-s;
-    margin-top: $space-s;
+    margin-top: $sds-spaces-s;
     margin-bottom: 28px;
     color: $gray-darkest;
   }
 
   .actions {
-    margin-top: $space-m;
+    margin-top: $sds-spaces-m;
     display: flex;
 
     .item {

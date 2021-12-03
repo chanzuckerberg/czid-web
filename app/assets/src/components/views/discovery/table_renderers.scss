@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .item {
   text-align: left;
@@ -17,7 +18,7 @@
   .itemName {
     @include font-header-m;
     color: $black;
-    margin-bottom: 2px;
+    margin-bottom: $sds-spaces-xxxs;
   }
 
   .itemDescription {
@@ -25,7 +26,7 @@
     color: $gray-dark;
     font-weight: $font-weight-regular;
     line-height: 20px;
-    margin: 0 0 8px 0;
+    margin: 0 0 $sds-spaces-s 0;
     vertical-align: middle;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -42,11 +43,11 @@
     font-weight: $font-weight-regular;
 
     span:not(:last-child) {
-      margin-right: 8px;
+      margin-right: $sds-spaces-s;
     }
 
     span:not(:first-child) {
-      margin-left: 8px;
+      margin-left: $sds-spaces-s;
     }
   }
 }
@@ -107,7 +108,7 @@
       .vizName {
         @include font-header-m;
         color: $black;
-        margin-bottom: $space-xxxs;
+        margin-bottom: $sds-spaces-xxxs;
 
         min-width: 0;
         text-align: left;
@@ -117,7 +118,7 @@
       }
 
       .vizStatus {
-        margin-left: $space-xs;
+        margin-left: $sds-spaces-xs;
       }
     }
   }
@@ -167,7 +168,7 @@
       }
 
       .sampleStatus {
-        margin-left: $space-xs;
+        margin-left: $sds-spaces-xs;
       }
     }
 
@@ -179,11 +180,11 @@
       text-align: left;
 
       span:not(:first-child) {
-        margin-left: $space-xxs;
+        margin-left: $sds-spaces-xxs;
       }
 
       span:not(:last-child) {
-        margin-right: $space-xxs;
+        margin-right: $sds-spaces-xxs;
       }
     }
 
@@ -205,7 +206,7 @@
 
   .analysesCounts {
     @include font-body-xxxs;
-    margin-top: $space-xxxs;
+    margin-top: $sds-spaces-xxxs;
     color: $gray-dark;
   }
 }
@@ -232,7 +233,7 @@
 
   .accessionId {
     text-decoration: underline;
-    margin-right: $space-xxs;
+    margin-right: $sds-spaces-xxs;
   }
 }
 
@@ -277,7 +278,7 @@
     @include loadingAnimation;
 
     background-clip: content-box;
-    padding: 4px 0;
+    padding: $sds-spaces-xxs 0;
     height: 20px;
   }
 
@@ -287,7 +288,7 @@
 
       background-clip: content-box;
       height: 16px;
-      padding: 2px 15%;
+      padding: $sds-spaces-xxxs 15%;
     }
 
     .percentage {
@@ -295,7 +296,7 @@
 
       background-clip: content-box;
       height: 15px;
-      padding: 2px 20%;
+      padding: $sds-spaces-xxxs 20%;
     }
   }
 
@@ -319,7 +320,7 @@
       @include loadingAnimation;
 
       background-clip: content-box;
-      padding: 4px 0;
+      padding: $sds-spaces-xxs 0;
       height: 20px;
       width: 365px;
     }
@@ -328,7 +329,7 @@
       @include loadingAnimation;
 
       background-clip: content-box;
-      padding: 4px 0;
+      padding: $sds-spaces-xxs 0;
       height: 17px;
       width: 315px;
     }
@@ -341,7 +342,7 @@
       @include loadingAnimation;
 
       background-clip: content-box;
-      padding: 4px 0;
+      padding: $sds-spaces-xxs 0;
       height: 20px;
       flex: 1 0 auto;
     }
@@ -350,7 +351,7 @@
       @include loadingAnimation;
 
       background-clip: content-box;
-      padding: 4px 0;
+      padding: $sds-spaces-xxs 0;
       height: 17px;
       flex: 1 0 auto;
     }
@@ -362,7 +363,7 @@
 
       background-clip: content-box;
       height: 12px;
-      margin: 4px 20%;
+      margin: $sds-spaces-xxs 20%;
     }
   }
 }

@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .sampleUploadTable {
   flex: 1 1 0;
@@ -11,7 +12,7 @@
   .detectedMsg {
     @include font-body-xs;
     margin-top: 20px;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
     color: $gray-dark;
 
     .count {

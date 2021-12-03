@@ -1,13 +1,14 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .metadataUpload {
   position: relative;
   margin-bottom: 20px;
 
   .tabs {
-    margin: 20px 0 10px;
+    margin: 20px 0 $sds-spaces-m;
   }
 
   .link {
@@ -18,16 +19,16 @@
 
   .metadataCSVUpload {
     margin-top: 40px;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
   }
 
   .loadingMsg {
     @include font-body-s;
-    margin-top: 10px;
+    margin-top: $sds-spaces-m;
   }
 
   .details {
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
 
     .label {
       font-weight: 600;
@@ -36,9 +37,9 @@
 
   .info {
     background-color: $gray-off-white;
-    padding: 20px 20px 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    padding: 20px 20px $sds-spaces-m;
+    margin-top: $sds-spaces-m;
+    margin-bottom: $sds-spaces-m;
   }
 
   .validationMessage {
@@ -57,7 +58,7 @@
 }
 
 .issueGroup {
-  margin-top: 6px;
+  margin-top: $sds-spaces-xs;
   border-radius: $border-radius-m;
 
   &:first-child {
@@ -83,7 +84,7 @@
 
   .header {
     @include font-header-s;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
     display: flex;
     align-items: flex-start;
   }
@@ -92,9 +93,9 @@
 .issue {
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: $sds-spaces-m;
   border-radius: $border-radius-m;
-  margin-top: 6px;
+  margin-top: $sds-spaces-xs;
 
   &:first-child {
     margin-top: 0;
@@ -111,6 +112,6 @@
   .icon {
     width: 20px;
     height: 20px;
-    margin-right: 10px;
+    margin-right: $sds-spaces-m;
   }
 }

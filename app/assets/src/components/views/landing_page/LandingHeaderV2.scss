@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .header {
   background: $black;
@@ -10,7 +11,7 @@
   align-items: center;
 
   @media (max-width: 768px) {
-    padding: 17px $space-xl;
+    padding: 17px $sds-spaces-xl;
   }
 }
 
@@ -29,7 +30,7 @@
   color: $white !important;
   text-decoration: none;
   font-family: $font-family-sans-serif;
-  padding: 7px 14px;
+  padding: 7px $sds-spaces-l;
   margin: 0 5px;
   @include font-body-xs;
   font-weight: $font-weight-semibold;

@@ -1,17 +1,18 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .listNotification {
   .accordion {
     background-color: $gray-lightest;
     border-radius: $border-radius-m;
-    margin-top: 10px;
+    margin-top: $sds-spaces-m;
 
     .title {
       font-size: 12px;
       text-transform: uppercase;
       font-weight: 600;
-      padding: 10px;
+      padding: $sds-spaces-m;
     }
 
     .content {
@@ -21,7 +22,7 @@
 
       .listItem {
         line-height: 22px;
-        padding: 10px;
+        padding: $sds-spaces-m;
 
         &:nth-child(odd) {
           background-color: $gray-lightest;

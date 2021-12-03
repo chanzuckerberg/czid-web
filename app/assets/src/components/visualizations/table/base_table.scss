@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .tableContainer {
   flex: 1 0 auto;
@@ -45,11 +46,11 @@
     &:hover {
       .dragHandleIcon {
         background: $gray-light;
-        width: $space-xxxxs;
-        height: $space-m;
+        width: 1px;
+        height: $sds-spaces-m;
 
         &:hover {
-          width: $space-xxxs;
+          width: $sds-spaces-xxxs;
         }
       }
     }
@@ -93,7 +94,7 @@
 
       .draggableArea {
         height: inherit;
-        width: $space-xxs;
+        width: $sds-spaces-xxs;
         // Increase the clickable area
         padding: 25px 0px;
 
@@ -104,7 +105,7 @@
         .ruler {
           position: fixed;
           background-color: $primary-light;
-          width: $space-xxxs;
+          width: $sds-spaces-xxxs;
           z-index: 1;
         }
 
@@ -134,7 +135,7 @@
 
       .sortIcon {
         // Make the sort icon slightly bigger than the text.
-        margin-left: 4px;
+        margin-left: $sds-spaces-xxs;
         fill: currentColor;
         width: 12px;
 

@@ -1,12 +1,13 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .centerSpan {
   align-self: center;
 
   .projectInfoIcon {
-    margin: 5px $space-xxs 5px $space-xxs;
+    margin: 5px $sds-spaces-xxs 5px $sds-spaces-xxs;
     height: 14px;
     width: 14px;
     fill: $gray-dark;

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .sidebar {
   font-size: 12px;
@@ -14,12 +15,12 @@
 }
 
 .metadataSection {
-  border-bottom: $space-xxxxs solid $gray-light;
+  border-bottom: 1px solid $gray-light;
 }
 
 .metadataContainer {
   .hasBackground {
-    padding-left: 10px;
+    padding-left: $sds-spaces-m;
     padding-right: 5px;
 
     &:not(.statsRow) {
@@ -37,7 +38,7 @@
     @include font-caps-xxs;
     line-height: 40px;
     color: $black;
-    padding: 0 10px;
+    padding: 0 $sds-spaces-m;
     height: 40px;
   }
 
@@ -49,9 +50,9 @@
 }
 
 .histogramContainer {
-  margin-top: 10px;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-top: $sds-spaces-m;
+  margin-left: $sds-spaces-m;
+  margin-right: $sds-spaces-m;
 
   .dateHistogram {
     display: flex;
@@ -75,7 +76,7 @@
     align-items: flex-end;
 
     .label {
-      margin: 4px 0;
+      margin: $sds-spaces-xxs 0;
       flex: 0 0;
       white-space: nowrap;
       font-size: smaller;
@@ -152,7 +153,7 @@
     @include font-body-xxxs;
     text-transform: uppercase;
     margin-top: 5px;
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
     color: $primary;
     cursor: pointer;
   }

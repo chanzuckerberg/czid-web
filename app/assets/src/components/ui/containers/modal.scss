@@ -1,7 +1,8 @@
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .modal {
-  padding: $space-xxl;
+  padding: $sds-spaces-xxl;
   max-height: 70vh;
   left: auto;
   right: auto;

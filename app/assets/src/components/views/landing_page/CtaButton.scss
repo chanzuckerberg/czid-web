@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .ctaButton {
   display: inline-block;
@@ -8,7 +9,7 @@
   font-family: $font-family-sans-serif;
   border: 1px solid $primary;
   text-decoration: none;
-  padding: 7px 14px;
+  padding: 7px $sds-spaces-l;
   border-radius: 999px;
   text-align: center;
   @include font-body-xs;

@@ -1,6 +1,7 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .bulkDownloadList {
   display: flex;
@@ -20,7 +21,7 @@
   }
 
   .loadingMessage {
-    margin: $space-xxl auto 0;
+    margin: $sds-spaces-xxl auto 0;
   }
 
   .lightCell {
@@ -30,7 +31,7 @@
 }
 
 .autoUpdateWarning {
-  margin-bottom: $space-xxs;
+  margin-bottom: $sds-spaces-xxs;
 
   .link {
     text-decoration: underline;
@@ -39,8 +40,8 @@
 }
 
 .viewHeader {
-  margin-top: $space-xxl;
-  margin-bottom: $space-xxl;
+  margin-top: $sds-spaces-xxl;
+  margin-bottom: $sds-spaces-xxl;
 }
 
 .downloadNameHeader {
@@ -48,9 +49,9 @@
 }
 
 .tableContainer {
-  padding-top: $space-xl;
+  padding-top: $sds-spaces-xl;
 }
 
 .tableRow {
-  padding: 0 $space-xl !important;
+  padding: 0 $sds-spaces-xl !important;
 }

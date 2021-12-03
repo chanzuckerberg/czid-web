@@ -1,6 +1,7 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .modal {
   display: flex;
@@ -10,15 +11,15 @@
     fill: $gray-dark;
     height: $icon-s;
     width: $icon-s;
-    margin-left: $space-xxs;
-    margin-top: $space-xxxs;
+    margin-left: $sds-spaces-xxs;
+    margin-top: $sds-spaces-xxxs;
 
     &:hover {
       fill: $primary;
     }
 
     &.lower {
-      vertical-align: -$space-xxxs;
+      vertical-align: -$sds-spaces-xxxs;
     }
   }
 
@@ -26,7 +27,7 @@
     .title {
       @include font-header-xl;
       color: $black;
-      vertical-align: -$space-s;
+      vertical-align: -$sds-spaces-s;
     }
 
     .tagline {
@@ -36,7 +37,7 @@
   }
 
   .nextcladeDescription {
-    margin-top: $space-xl;
+    margin-top: $sds-spaces-xl;
 
     .title {
       @include font-header-m;
@@ -44,8 +45,8 @@
     }
 
     ul {
-      margin-left: $space-xl;
-      margin-top: $space-xxs;
+      margin-left: $sds-spaces-xl;
+      margin-top: $sds-spaces-xxs;
       margin-bottom: 0;
 
       li {
@@ -57,7 +58,7 @@
   }
 
   .referenceTree {
-    margin-top: $space-xl;
+    margin-top: $sds-spaces-xl;
 
     .title {
       @include font-header-s;
@@ -70,6 +71,6 @@
   }
 
   .footer {
-    margin-top: $space-l;
+    margin-top: $sds-spaces-l;
   }
 }

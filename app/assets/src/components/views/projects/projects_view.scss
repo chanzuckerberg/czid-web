@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .projectHeader {
   justify-content: left;
@@ -13,7 +14,7 @@
   flex: 1 0 auto;
 
   .toggleContainer {
-    margin-bottom: 10px;
+    margin-bottom: $sds-spaces-m;
   }
 
   .table {

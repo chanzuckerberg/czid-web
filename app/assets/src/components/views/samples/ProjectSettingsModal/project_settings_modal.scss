@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .projectSettingsModal {
   max-height: 80vh;
@@ -31,14 +32,14 @@
   }
 
   .projectVisibility {
-    margin-top: $space-xl;
-    margin-bottom: $space-xl;
+    margin-top: $sds-spaces-xl;
+    margin-bottom: $sds-spaces-xl;
 
     .visibility {
       display: flex;
       align-items: center;
       position: relative;
-      padding: $space-l;
+      padding: $sds-spaces-l;
 
       .icon {
         width: 32px;
@@ -48,7 +49,7 @@
 
       .text {
         flex-grow: 100;
-        margin-left: $space-l;
+        margin-left: $sds-spaces-l;
 
         .label {
           @include font-header-s;
@@ -69,7 +70,7 @@
 
         .note {
           @include font-body-xs;
-          margin-top: $space-xxs;
+          margin-top: $sds-spaces-xxs;
           color: $gray-dark;
         }
       }
@@ -77,12 +78,12 @@
   }
 
   .formContainer {
-    margin-top: $space-xl;
+    margin-top: $sds-spaces-xl;
     flex: 1;
     display: flex;
   }
 
   .formContainer:not(:last-child) {
-    margin-bottom: $space-xl;
+    margin-bottom: $sds-spaces-xl;
   }
 }

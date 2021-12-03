@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .container {
   display: flex;
@@ -22,14 +23,14 @@
       @include font-body-s;
 
       color: $black;
-      margin-top: $space-xxs;
+      margin-top: $sds-spaces-xxs;
     }
 
     .suggestion {
       @include font-header-xs;
 
       color: $gray-dark;
-      margin-top: $space-m;
+      margin-top: $sds-spaces-m;
     }
 
     .link {
@@ -37,11 +38,11 @@
       // Override color: inherit in _header.scss.
       color: $primary !important;
       display: block;
-      margin-top: $space-m;
+      margin-top: $sds-spaces-m;
 
       .rightArrow {
         font-size: 0.75em;
-        margin-left: $space-xs;
+        margin-left: $sds-spaces-xs;
       }
 
       &:hover {
@@ -51,7 +52,7 @@
   }
   .icon {
     flex: 0 0 auto;
-    margin-right: $space-m;
+    margin-right: $sds-spaces-m;
 
     svg {
       height: $img-l;

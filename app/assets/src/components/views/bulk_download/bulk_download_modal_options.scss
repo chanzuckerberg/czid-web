@@ -1,15 +1,16 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .downloadTypeContainer {
-  margin-top: $space-l;
+  margin-top: $sds-spaces-l;
   flex: 1 1 0;
   min-height: 0;
 
   .category {
     &:not(:first-child) {
-      margin-top: $space-xl;
+      margin-top: $sds-spaces-xl;
     }
 
     .title {
@@ -24,7 +25,7 @@
 
   .taxaWithReadsOptionsHeader {
     display: flex;
-    padding: $space-xs $space-l;
+    padding: $sds-spaces-xs $sds-spaces-l;
 
     .header {
       @include font-header-xs;
@@ -39,7 +40,7 @@
 
   .taxaWithReadsOption {
     display: flex;
-    padding: $space-xs $space-l;
+    padding: $sds-spaces-xs $sds-spaces-l;
 
     .taxonName {
       @include font-body-xxs;
@@ -62,9 +63,9 @@
 }
 
 .downloadType {
-  padding: $space-s $space-m;
-  margin-bottom: $space-xxs;
-  margin-right: $space-m;
+  padding: $sds-spaces-s $sds-spaces-m;
+  margin-bottom: $sds-spaces-xxs;
+  margin-right: $sds-spaces-m;
   border-radius: $border-radius-m;
   display: flex;
   cursor: pointer;
@@ -89,8 +90,8 @@
   }
 
   .radioButton {
-    margin-right: $space-m;
-    margin-top: $space-xxs;
+    margin-right: $sds-spaces-m;
+    margin-top: $sds-spaces-xxs;
   }
 
   .content {
@@ -114,21 +115,21 @@
 }
 
 .fields {
-  margin-top: $space-m;
-  margin-bottom: $space-xxs;
+  margin-top: $sds-spaces-m;
+  margin-bottom: $sds-spaces-xxs;
   display: flex;
   flex-wrap: wrap;
 
   .field {
-    width: calc(50% - #{$space-xl / 2});
+    width: calc(50% - #{$sds-spaces-xl / 2});
 
     &:nth-child(odd) {
-      margin-right: $space-xl;
+      margin-right: $sds-spaces-xl;
     }
 
     .label {
       @include font-body-xs;
-      margin-bottom: 2px;
+      margin-bottom: $sds-spaces-xxxs;
     }
 
     .forcedOption {

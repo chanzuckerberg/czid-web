@@ -1,12 +1,13 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .radioButton {
   width: 15px;
   height: 15px;
   border-radius: $border-radius-l;
   border: $border-gray-medium;
-  padding: 2px;
+  padding: $sds-spaces-xxxs;
   cursor: pointer;
 
   &:hover {

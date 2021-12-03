@@ -4,6 +4,7 @@
 @import "themes/typography";
 @import "themes/colors";
 @import "themes/elements";
+@import "~czifui/dist/variables";
 
 $break-large: 1460px;
 
@@ -43,7 +44,7 @@ $break-large: 1460px;
     border-radius: $border-radius-m;
     color: $error-medium;
     margin: 0 auto;
-    padding: 10px 5px;
+    padding: $sds-spaces-m 5px;
     border: $border-error;
     transition: 0.2s width ease-out;
     text-align: center;
@@ -55,7 +56,7 @@ $break-large: 1460px;
     border-radius: $border-radius-m;
     color: $success-medium;
     margin: 0 auto;
-    padding: 10px 5px;
+    padding: $sds-spaces-m 5px;
     border: $border-success;
     transition: 0.2s width ease-out;
     text-align: center;
@@ -79,11 +80,11 @@ $break-large: 1460px;
   }
 
   .section {
-    margin-bottom: $space-m;
+    margin-bottom: $sds-spaces-m;
     padding: 0;
     .header {
       @include font-header-s;
-      margin: $space-xxs 0;
+      margin: $sds-spaces-xxs 0;
     }
   }
 }

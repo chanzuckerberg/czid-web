@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .sampleMessage {
   display: flex;
@@ -8,8 +9,8 @@
   margin-top: 100px;
 
   .textContainer {
-    margin-top: $space-s;
-    margin-right: $space-xl;
+    margin-top: $sds-spaces-s;
+    margin-right: $sds-spaces-xl;
     width: 330px;
 
     .reportStatus {
@@ -17,7 +18,7 @@
       align-items: center;
       background-color: $error-lightest;
       border-radius: $border-radius-l;
-      padding: $space-xxs $space-s;
+      padding: $sds-spaces-xxs $sds-spaces-s;
 
       .icon {
         width: $icon-l;
@@ -25,8 +26,8 @@
 
       .text {
         @include font-caps-xxxs;
-        margin-left: $space-s;
-        margin-top: $space-xxxs;
+        margin-left: $sds-spaces-s;
+        margin-top: $sds-spaces-xxxs;
       }
 
       &.warning {
@@ -57,25 +58,25 @@
 
     .message {
       @include font-header-m;
-      margin-bottom: $space-s;
-      margin-top: $space-s;
-      margin-left: $space-xxxs;
+      margin-bottom: $sds-spaces-s;
+      margin-top: $sds-spaces-s;
+      margin-left: $sds-spaces-xxxs;
     }
 
     .subtitle {
       @include font-body-xxs;
-      margin-bottom: $space-s;
+      margin-bottom: $sds-spaces-s;
     }
 
     .actionLink {
       @include font-header-xxs;
       color: $primary !important;
-      margin-top: $space-m;
-      margin-left: $space-xxxs;
+      margin-top: $sds-spaces-m;
+      margin-left: $sds-spaces-xxxs;
 
       .rightArrow {
         font-size: 8px;
-        margin-left: $space-xxs;
+        margin-left: $sds-spaces-xxs;
       }
     }
   }

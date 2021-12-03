@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 // NOTE: Classname .toggle is repeated here as .toggle.toggle.toggle to increase
 // specificity and always override semantic-ui.
@@ -12,12 +13,12 @@
 // https://react.semantic-ui.com/modules/checkbox/#types-toggle
 .toggle.toggle.toggle label:after {
   transform: scale(1) !important;
-  margin: 4px;
+  margin: $sds-spaces-xxs;
 }
 
 .toggle.toggle.toggle label:before {
-  margin-top: 4px;
-  margin-bottom: 4px;
+  margin-top: $sds-spaces-xxs;
+  margin-bottom: $sds-spaces-xxs;
   height: 28px;
   line-height: 28px;
   width: 68px;
@@ -26,7 +27,7 @@
 .toggle.toggle.toggle label {
   @include font-body-xxs;
   line-height: 25px;
-  padding-top: 6px; // vertical align text
+  padding-top: $sds-spaces-xs; // vertical align text
   min-height: 34px;
   min-width: 58px; // enough space for text
   z-index: 1; // place label text on top of the toggle
@@ -48,7 +49,7 @@
   background-color: $white !important; // override semantic-ui
   z-index: -1; // make sure the white background color is behind the text label
   border: $border-primary;
-  padding-left: 4px;
+  padding-left: $sds-spaces-xxs;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {

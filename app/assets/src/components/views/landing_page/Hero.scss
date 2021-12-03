@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .hero {
   font-family: $font-family-sans-serif;
@@ -20,7 +21,7 @@
 
   @media (max-width: 768px) {
     text-align: left;
-    padding: 40px $space-xl 0;
+    padding: 40px $sds-spaces-xl 0;
     background: url("../../../images/landing_page/idseq-hero-mobile.svg");
     background-color: $black;
     background-repeat: no-repeat;
@@ -90,7 +91,7 @@
   p {
     color: $white;
     margin-bottom: 40px;
-    margin-top: 6px;
+    margin-top: $sds-spaces-xs;
     @include font-body-m;
 
     @media (max-width: 768px) {
