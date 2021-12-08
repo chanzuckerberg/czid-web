@@ -57,7 +57,10 @@ const Hero = () => {
           Pathogen Detection
         </span>
       </h1>
-      <p>IDseq: The free, cloud-based metagenomics platform for researchers</p>
+      <p>
+        Chan Zuckerberg ID: The free, cloud-based metagenomics platform for
+        researchers
+      </p>
       <HeroEmailForm />
     </div>
   );

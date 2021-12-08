@@ -80,9 +80,9 @@ const TermsChanges = () => {
               after 1 year of it being uploaded unless you take action to remove
               it
             </b>
-            . Making this Report Data available to others is important IDseq’s
-            success as a research tool to advance the study of infectious
-            diseases.
+            . Making this Report Data available to others is important
+            IDseq&apos;s success as a research tool to advance the study of
+            infectious diseases.
           </React.Fragment>,
           `We added that the representations and warranties you make about the
         data you upload, extend not just to us, but also the service
@@ -250,9 +250,9 @@ const TermsChanges = () => {
               after 1 year of it being uploaded unless you take action to remove
               it
             </b>
-            . Making this Report Data available to others is important IDseq’s
-            success as a research tool to advance the study of infectious
-            diseases.
+            . Making this Report Data available to others is important
+            IDseq&apos;s success as a research tool to advance the study of
+            infectious diseases.
           </React.Fragment>,
           `We added that the representations and warranties you make about the
         data you upload, extend not just to us, but also the service
@@ -393,8 +393,8 @@ const TermsChanges = () => {
           `To help make the document easier to understand, we’ve created a Summary Table at
           the top of our Privacy Policy that explains the key aspects of our data practices in a concise way.`,
           <React.Fragment key={nanoid()}>
-            <i>Chan Zuckerberg Initiative Foundation.</i> ID IDseq, as of April
-            1, 2021, will be provided by the Chan Zuckerberg Biohub in close
+            <i>Chan Zuckerberg Initiative Foundation.</i> IDseq, as of April 1,
+            2021, will be provided by the Chan Zuckerberg Biohub in close
             collaboration with the Chan Zuckerberg Initiative Foundation. This
             is part of the Chan Zuckerberg Initiative’s shifting of its Science
             employees, projects, and activities to live within the existing CZI
@@ -421,8 +421,24 @@ const TermsChanges = () => {
     </>
   );
 
+  const termsUpdateForDecember2021 = () => (
+    <>
+      <div className={cs.title}>
+        <h1>IDseq Terms and Privacy Notice Update for December 2021</h1>
+      </div>
+      <p className={cx(cs.large, cs.last)}>
+        Effective December 7, 2021, we are changing our product name to Chan
+        Zuckerberg ID. As a result, we have updated our{" "}
+        <a href="/terms">Terms of Use</a> and{" "}
+        <a href="/privacy">Privacy Policy</a> to reflect this name change. No
+        additional changes were made to our terms in this update.
+      </p>
+    </>
+  );
+
   return (
     <NarrowContainer className={cs.termsOfUse} size="small">
+      {termsUpdateForDecember2021()}
       {termsUpdateForApril2021()}
       {termsUpdateForJune2019()}
     </NarrowContainer>

@@ -38,11 +38,11 @@ export default class BasespaceIntegration extends React.Component {
           {accessToken ? (
             <div>
               <div className={cs.message}>
-                You&apos;ve successfully authorized IDseq to connect to
+                You&apos;ve successfully authorized CZ ID to connect to
                 Basespace!
               </div>
               <div className={cs.smallMessage}>
-                You can now return to the IDseq Upload page.
+                You can now return to the CZ ID Upload page.
               </div>
             </div>
           ) : (

@@ -92,7 +92,7 @@ begin
 
   puts 'running migrations'
   system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json")
-  system!("/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} #{cluster} idseq-#{env}-web")
+  system!("/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} #{cluster} czid-#{Rails.env}-web")
 
   # Resque workers
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque --set rake_command=resque:workers --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque czecs-resque.json")

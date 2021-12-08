@@ -1116,7 +1116,7 @@ class QualityControl extends React.Component {
           className={cs.noDataBannerContainer}
           icon={<ImgVizSecondary />}
           link={{
-            href: "https://help.idseq.net",
+            href: "https://help.czid.org",
             text: "Learn about sample QC",
           }}
           message="You can visually check your QC metrics after your samples have successfully processed."

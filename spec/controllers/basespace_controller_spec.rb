@@ -60,9 +60,9 @@ RSpec.describe BasespaceController, type: :controller do
 
       before do
         allow(HttpHelper).to receive(:post_json).and_return("access_token" => access_token)
-        stub_const('ENV', ENV.to_hash.merge("BASESPACE_OAUTH_REDIRECT_URI" => "MOCK_URI",
-                                            "BASESPACE_CLIENT_ID" => "MOCK_ID",
-                                            "BASESPACE_CLIENT_SECRET" => "MOCK_SECRET"))
+        stub_const('ENV', ENV.to_hash.merge("CZID_BASESPACE_OAUTH_REDIRECT_URI" => "MOCK_URI",
+                                            "CZID_BASESPACE_CLIENT_ID" => "MOCK_ID",
+                                            "CZID_BASESPACE_CLIENT_SECRET" => "MOCK_SECRET"))
       end
 
       it "renders the oauth template" do

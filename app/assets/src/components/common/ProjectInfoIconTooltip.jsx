@@ -18,11 +18,11 @@ const ProjectInfoIconTooltip = props => {
     <>
       {description}
       <ExternalLink
-        href={"https://help.idseq.net"}
+        href={"https://help.czid.org"}
         analyticsEventName={
           ANALYTICS_EVENT_NAMES.PROJECT_VISIBILITY_HELP_LINK_CLICKED
         }
-        analyticsEventData={{ link: "https://help.idseq.net" }}
+        analyticsEventData={{ link: "https://help.czid.org" }}
       >
         Learn more.
       </ExternalLink>

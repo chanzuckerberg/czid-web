@@ -72,7 +72,7 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: 'idseq.net' }
 
   # We configure IDseq to use cloudfront CDN when available.
-  config.action_controller.asset_host = ENV['CLOUDFRONT_ENDPOINT'] || 'idseq.net'
+  config.action_controller.asset_host = ENV['CZID_CLOUDFRONT_ENDPOINT'] || 'czid.org'
   # Custom config for idseq to enable CORS headers by environment. See rack_cors.rb.
   config.allowed_cors_origins = [
     "https://idseq.net",
@@ -80,9 +80,15 @@ Rails.application.configure do
     "https://assets.idseq.net",
     "https://prod.idseq.net",
     "https://assets.prod.idseq.net",
+    "https://czid.org",
+    "https://www.czid.org",
+    "https://assets.czid.org",
+    "https://prod.czid.org",
+    "https://assets.prod.czid.org",
   ]
 
   config.middleware.use Rack::HostRedirect, 'www.idseq.net' => 'idseq.net'
+  config.middleware.use Rack::HostRedirect, 'www.czid.org' => 'czid.org'
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

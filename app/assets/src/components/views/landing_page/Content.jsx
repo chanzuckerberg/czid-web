@@ -4,9 +4,9 @@ import IconMatchesFigure from "~/components/ui/icons/IconMatchesFigure";
 import IconSampleFigure from "~/components/ui/icons/IconSampleFigure";
 import IconUploadFigure from "~/components/ui/icons/IconUploadFigure";
 import CtaButton from "~/components/views/landing_page/CtaButton";
+import LaptopImg from "~/images/landing_page/czid-laptop-2x.png";
 import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure.svg";
 import HealthQuestionsMobileFigure from "~/images/landing_page/health-questions-mobile.svg";
-import LaptopImg from "~/images/landing_page/idseq-laptop-2x.png";
 import KniAccordion from "./Accordion";
 import cs from "./Content.scss";
 import { Publications, News } from "./PublicationsAndNews";
@@ -23,18 +23,18 @@ const Content = () => {
         <div className={cs.summaryText}>
           <h2>Detect and track emerging infectious diseases worldwide</h2>
           <p>
-            IDseq accepts sequencing data from researchers around the world and
-            quickly processes the results to provide actionable information on
-            the state of pathogens in a given set of samples. This allows
-            scientists to make data-driven decisions about when to deploy
-            antibiotics, where to prioritize immunization campaigns, how to
-            shape vector-borne disease surveillance and control efforts, and
+            Chan Zuckerberg ID accepts sequencing data from researchers around
+            the world and quickly processes the results to provide actionable
+            information on the state of pathogens in a given set of samples.
+            This allows scientists to make data-driven decisions about when to
+            deploy antibiotics, where to prioritize immunization campaigns, how
+            to shape vector-borne disease surveillance and control efforts, and
             more.
           </p>
           <CtaButton
             text="See it in action"
-            linkUrl="https://public.idseq.net/"
-            aria-label="View the IDseq COVID-19 public dataset example (opens in new window)"
+            linkUrl="https://public.czid.org/"
+            aria-label="View the CZ ID COVID-19 public dataset example (opens in new window)"
           />
         </div>
         <div className={cs.summaryImage}>
@@ -63,7 +63,7 @@ const Content = () => {
         <h2>How It Works</h2>
         <p>
           Finding out what&apos;s in your sample is as easy as uploading your
-          data to IDseq and clicking a button. Our pipeline immediately gets to
+          data to CZ ID and clicking a button. Our pipeline immediately gets to
           work in the cloud, delivering you results in hours, not days.
         </p>
 
@@ -115,8 +115,8 @@ const Content = () => {
         <KniAccordion className={cs.accordion} />
         <CtaButton
           text="View All Questions"
-          linkUrl="https://idseq.net/faqs"
-          aria-label="View the IDseq FAQ page (opens in new window)"
+          linkUrl="https://czid.org/faqs"
+          aria-label="View the CZ ID FAQ page (opens in new window)"
         />
       </section>
 

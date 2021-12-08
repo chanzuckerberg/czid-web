@@ -8,9 +8,9 @@ export default function TermsOfUse() {
   const renderIntro = () => (
     <>
       <div className={cs.title}>
-        <h1>IDseq Terms of Use</h1>
+        <h1>Chan Zuckerberg ID (formerly IDseq) Terms of Use</h1>
         <h4 className={cs.subtitle}>
-          Last Updated: April 1, 2021.{" "}
+          Last Updated: December 7, 2021.{" "}
           <a href="/terms_changes">See Recent Changes</a>
         </h4>
       </div>
@@ -29,20 +29,21 @@ export default function TermsOfUse() {
         CLASS-WIDE ARBITRATION, OR ANY OTHER REPRESENTATIVE ACTION.
       </p>
       <p>
-        Please read these Terms of Use (“Terms”) before using IDseq (“ Services”
-        or “IDseq”). These Terms are entered into between the Chan Zuckerberg
-        Biohub, Inc. (“CZ Biohub”, “ we”, “us” or “our”) and you (“User” or “
-        you”) and govern your use of IDseq. IDseq is comprised of our research
-        portal, any associated online services or platforms that link to or
-        refer to these Terms, and any databases or data accessible through the
-        portal, associated services or platforms. IDseq is designed to enable
-        the research community to investigate pathogens using metagenomic
-        sequencing data and to help further the study of infectious diseases.
+        Please read these Terms of Use (“Terms”) before using Chan Zuckerberg ID
+        (“Services” or “CZ ID”). These Terms are entered into between the Chan
+        Zuckerberg Biohub, Inc. (“CZ Biohub”, “ we”, “us” or “our”) and you
+        (“User” or “ you”) and govern your use of CZ ID. CZ ID is comprised of
+        our research portal, any associated online services or platforms that
+        link to or refer to these Terms, and any databases or data accessible
+        through the portal, associated services or platforms. CZ ID is designed
+        to enable the research community to investigate pathogens using
+        metagenomic sequencing data and to help further the study of infectious
+        diseases.
       </p>
       <p>
         Please carefully read these terms and indicate your acceptance by
-        registering for IDseq. If you do not agree to these Terms, do not
-        register for an account or use IDseq and do not use it. For more
+        registering for CZ ID. If you do not agree to these Terms, do not
+        register for an account or use CZ ID and do not use it. For more
         information about our privacy practices, please see our{" "}
         <a href="/privacy">Privacy Notice</a>.
       </p>
@@ -58,7 +59,7 @@ export default function TermsOfUse() {
         <List
           listItems={[
             <React.Fragment key={nanoid()}>
-              IDseq does not provide medical advice. The output from IDseq does
+              CZ ID does not provide medical advice. The output from CZ ID does
               not constitute and should not be relied upon to provide medical
               advice, diagnosis or treatment. It is intended for research,
               educational, or informational purposes only.
@@ -66,25 +67,25 @@ export default function TermsOfUse() {
             <React.Fragment key={nanoid()}>
               You must ensure that all personally-identifying information and
               Protected Health Information is fully removed from Sample Metadata
-              before it is uploaded to IDseq.
+              before it is uploaded to CZ ID.
             </React.Fragment>,
             <React.Fragment key={nanoid()}>
               You are responsible for obtaining the permissions necessary to
               collect and submit the Upload Data. You represent that you have
               obtained, and will maintain, all consents, permissions, and
               authorizations needed to collect, share, and export Upload Data
-              with IDseq, and for IDseq to use and share the information as
+              with CZ ID, and for CZ ID to use and share the information as
               described in its <a href="/privacy">Privacy Notice</a>.
             </React.Fragment>,
             <React.Fragment key={nanoid()}>
-              You may not attempt to re-identify Upload Data. By using IDseq,
+              You may not attempt to re-identify Upload Data. By using CZ ID,
               you agree that you will not attempt to re-identify any Upload Data
               with a person, and you will not disclose any Upload Data of other
               Users downloaded from the Database except for the limited purposes
               described in these Terms.
             </React.Fragment>,
             <React.Fragment key={nanoid()}>
-              IDseq does not own any research outputs you create with your
+              CZ ID does not own any research outputs you create with your
               Report Data, such as consensus genomes and phylogenetic trees for
               pathogens of interest. This is your data and you control it.
             </React.Fragment>,
@@ -94,25 +95,25 @@ export default function TermsOfUse() {
     );
   };
 
-  const renderAboutIDseq = () => {
+  const renderAboutCZID = () => {
     return (
       <>
-        <h3>About IDseq</h3>
+        <h3>About CZ ID</h3>
         <p>
-          Here’s how IDseq works: Users submit Upload Data (as described below).
-          This data may contain human and non-human genetic sequences (“ Sample
+          Here’s how CZ ID works: Users submit Upload Data (as described below).
+          This data may contain human and non-human genetic sequences (“Sample
           Data” as further defined below), as well as information about those
           sequences, such as the date the sample was collected and the species
           it was collected from (“Sample Metadata” as further defined below).
           For example, a researcher might upload genetic information from
           mosquitoes, which are often a source of infectious disease, or from
-          humans, who can be infected by such diseases. IDseq then processes
+          humans, who can be infected by such diseases. CZ ID then processes
           this Upload Data in order to identify pathogens found within the
           genetic sequence (e.g., the mosquito may be carrying the chikungunya
           virus).
         </p>
         <p>
-          “Upload Data” is data that Users upload to IDseq (other than the
+          “Upload Data” is data that Users upload to CZ ID (other than the
           information Users provide during registration to create an account).
           Upload Data consists of genetic sequence information (human or
           non-human) and metadata about those genetic sequences (such as time
@@ -124,7 +125,7 @@ export default function TermsOfUse() {
           sequence data contains genetic information about pathogens in the
           sample and of the host from which the sample was taken. The host could
           be a human or non-human (e.g., mosquito). You should not be able to
-          find any human sequence data in IDseq other than those embedded in
+          find any human sequence data in CZ ID other than those embedded in
           samples you yourself have uploaded. This is because we filter out and
           discard host sequence data in order to generate Reports.
         </p>
@@ -136,9 +137,9 @@ export default function TermsOfUse() {
           the individual to whom the Sample Data relates.
         </p>
         <p>
-          “Report Data” is information IDseq produced from Upload Data. We
+          “Report Data” is information CZ ID produced from Upload Data. We
           generate Report Data by processing Upload Data through our Data
-          Pipeline. IDseq’s “Data Pipeline” cleans (e.g., by removing duplicate
+          Pipeline. CZ ID’s “Data Pipeline” cleans (e.g., by removing duplicate
           nucleotides) and analyzes (e.g., by matching Sample Data nucleotide
           sequences with known pathogen sequences) the Upload Data. Report Data
           may include, for example, data about the pathogen sequences identified
@@ -147,7 +148,7 @@ export default function TermsOfUse() {
           expression profiles that were found in the Sample Data (“Gene
           Counts”).
         </p>
-        <p>“Database” refers to both the data and database(s) of IDseq.</p>
+        <p>“Database” refers to both the data and database(s) of CZ ID.</p>
       </>
     );
   };
@@ -161,39 +162,40 @@ export default function TermsOfUse() {
         listItems={[
           <React.Fragment key={nanoid()}>
             1.1 Use of Your Upload Data. We need limited rights to your Upload
-            Data solely in order to offer IDseq for you and other Users.
+            Data solely in order to offer CZ ID for you and other Users.
             Specifically, you grant to us a worldwide, non-exclusive,
             royalty-free, transferable (in accordance with Section 9.2 below),
             perpetual and irrevocable (except as set forth herein), license
             (with the right to grant further licenses) to use, reproduce,
             distribute, display, and create derivative works (e.g. phylogenetic
             trees) from Upload Data in connection with providing, developing and
-            improving IDseq. You may request deletion of your Upload Data from
-            IDseq by emailing privacy@idseq.net and including a description of
-            your Upload Data that you wish to have removed. We will delete the
-            requested Upload Data within 60 days of your request. Please note,
-            that our removal from IDseq will not impact any use of Upload Data
-            by others you may have chosen to share it with prior to the
-            effective date of removal and we are not able to require others
-            Users to stop using Upload Data they accessed or downloaded prior to
-            removal. More information about Upload Data can be found in our{" "}
-            <a href="/privacy">Privacy Notice</a>.
+            improving CZ ID. You may request deletion of your Upload Data from
+            CZ ID by emailing{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and
+            including a description of your Upload Data that you wish to have
+            removed. We will delete the requested Upload Data within 60 days of
+            your request. Please note, that our removal from CZ ID will not
+            impact any use of Upload Data by others you may have chosen to share
+            it with prior to the effective date of removal and we are not able
+            to require others Users to stop using Upload Data they accessed or
+            downloaded prior to removal. More information about Upload Data can
+            be found in our <a href="/privacy">Privacy Notice</a>.
           </React.Fragment>,
           <React.Fragment key={nanoid()}>
             1.2 Use and Visibility of Your Report Data. You understand that your
-            Report Data is data generated by IDseq, does not contain
+            Report Data is data generated by CZ ID, does not contain
             personally-identifying information (i.e. personal data) and may be
-            shared with other IDseq Users in order to further IDseq’s mission
+            shared with other CZ ID Users in order to further CZ ID’s mission
             and advance the study of infectious diseases.
           </React.Fragment>,
           <React.Fragment key={nanoid()}>
             1.3 You represent and warrant to us and our service partners that
-            (A) your provision of the Upload Data to IDseq complies with all
+            (A) your provision of the Upload Data to CZ ID complies with all
             applicable laws, rules, and regulations, including the Nagoya
             Protocol and relevant export laws (“Applicable Law”) and industry
             guidelines and ethical standards that apply to you (e.g. CIOMS or
             GA4GH) (“Applicable Standards”), and you will otherwise comply with
-            all Applicable Law in connection with IDseq; (B) you have all
+            all Applicable Law in connection with CZ ID; (B) you have all
             consents, permissions, and authorizations necessary and sufficient
             to provide and export the Upload Data to us for the purposes
             described in these Terms and in our{" "}
@@ -221,12 +223,12 @@ export default function TermsOfUse() {
             subject, you also specifically represent and warrant to us and our
             service partners that (A) you have provided any required notice to,
             and obtained any necessary informed consent of, any such person for
-            the collection, use, and provision to IDseq of the Research Data;
-            and (B) your provision of the Upload Data to IDseq is covered under
+            the collection, use, and provision to CZ ID of the Research Data;
+            and (B) your provision of the Upload Data to CZ ID is covered under
             all such notices and consents, as well as Applicable Standards and
             Applicable Law. Please note that we filter out and discard human
             sequence data as part of generating Report Data because we don’t
-            need this data for IDseq. See <a href="/faqs">here</a> for more
+            need this data for CZ ID. See <a href="/faqs">here</a> for more
             details.
           </React.Fragment>,
         ]}
@@ -234,18 +236,18 @@ export default function TermsOfUse() {
     </>
   );
 
-  const renderAuthorizationToUseIdseq = () => (
+  const renderAuthorizationToUseCZID = () => (
     <>
       <h2>
-        <span className={cs.number}>2.</span>Authorization To Use IDseq.
+        <span className={cs.number}>2.</span>Authorization To Use CZ ID.
       </h2>
       <List
         listItems={[
-          `2.1 Subject to and conditioned on your compliance with these Terms, we grant you permission to access and use IDseq in accordance with Applicable Law, solely for your own internal academic or internal scientific research purposes. You may not permit any third party to access or use or “share” your Account or IDseq. All persons wishing to access the Service must create their own separate account and agree to these Terms.`,
-          `2.2 IDseq may not be used to provide medical or other services to any third party (for instance, to inform or provide disease diagnoses). IDseq is not intended to diagnose, treat, cure, or prevent any disease and is not a substitute for medical advice.`,
+          `2.1 Subject to and conditioned on your compliance with these Terms, we grant you permission to access and use CZ ID in accordance with Applicable Law, solely for your own internal academic or internal scientific research purposes. You may not permit any third party to access or use or “share” your Account or CZ ID. All persons wishing to access the Service must create their own separate account and agree to these Terms.`,
+          `2.2 CZ ID may not be used to provide medical or other services to any third party (for instance, to inform or provide disease diagnoses). CZ ID is not intended to diagnose, treat, cure, or prevent any disease and is not a substitute for medical advice.`,
           `2.3 You shall not disclose or distribute the Database, in whole or in part, or any works derived from the Database to any third party for any purpose, except for the following:`,
-          `You may disclose the documents that you download from the Database using IDseq’s intended functionality to your employees and agents who are registered Users of the Service and who are engaged in conducting your research (“Research Associates”) for the sole purpose of carrying out your internal research. Your Research Associates must also agree to use IDseq and Database in accordance with these Terms.`,
-          `You may share research findings derived from use of IDseq to others, including with the public, so long as these findings include no personally-identifying information and you comply with Applicable Law and these Terms.`,
+          `You may disclose the documents that you download from the Database using CZ ID’s intended functionality to your employees and agents who are registered Users of the Service and who are engaged in conducting your research (“Research Associates”) for the sole purpose of carrying out your internal research. Your Research Associates must also agree to use CZ ID and Database in accordance with these Terms.`,
+          `You may share research findings derived from use of CZ ID to others, including with the public, so long as these findings include no personally-identifying information and you comply with Applicable Law and these Terms.`,
           `You may disclose the Database to the minimum extent necessary to comply with Applicable Law or court order, so long as you promptly notify us prior to making such disclosure (to the extent Applicable Law and court order permit you to so notify us).`,
         ]}
       />
@@ -260,9 +262,9 @@ export default function TermsOfUse() {
       <List
         listItems={[
           `3.1 You shall not re-identify or attempt to re-identify any Database records or content for any purpose other than responding to a request from the individual whom the record within your Upload Data is about, including without limitation to make employment decisions or to make eligibility, coverage, underwriting, premium-setting or other decisions with respect to insurance.`,
-          `3.2 You shall not otherwise access or use, or attempt to access or use, IDseq to take any action that could harm us, IDseq or its Users, or any third party, or use IDseq in any manner that violates Applicable Law or infringes or otherwise violates third party rights.`,
-          `3.3 You represent and warrant that you are a natural person of legal age who is competent and able to enter into and carry out these Terms, and, if you are using IDseq on behalf of any entity, that you are authorized to enter into these Terms on such entity’s behalf and that such entity agrees to be responsible to us if you or that entity violates these Terms.`,
-          `3.4 We may restrict or terminate your access to IDseq at any time, including for breach of these Terms. In such case we will attempt to provide you notice through the contact information we have for you.`,
+          `3.2 You shall not otherwise access or use, or attempt to access or use, CZ ID to take any action that could harm us, CZ ID or its Users, or any third party, or use CZ ID in any manner that violates Applicable Law or infringes or otherwise violates third party rights.`,
+          `3.3 You represent and warrant that you are a natural person of legal age who is competent and able to enter into and carry out these Terms, and, if you are using CZ ID on behalf of any entity, that you are authorized to enter into these Terms on such entity’s behalf and that such entity agrees to be responsible to us if you or that entity violates these Terms.`,
+          `3.4 We may restrict or terminate your access to CZ ID at any time, including for breach of these Terms. In such case we will attempt to provide you notice through the contact information we have for you.`,
         ]}
       />
     </>
@@ -276,12 +278,12 @@ export default function TermsOfUse() {
       </h2>
       <List
         listItems={[
-          `4.1 To access IDseq you will need to be a registered “User.” At registration, you will be asked to provide certain information (“Account Information”) to create an individual user account (an “Account”). You agree that you will not create more than one Account, or create an Account for anyone other than yourself. You may not share your Account credentials.`,
+          `4.1 To access CZ ID you will need to be a registered “User.” At registration, you will be asked to provide certain information (“Account Information”) to create an individual user account (an “Account”). You agree that you will not create more than one Account, or create an Account for anyone other than yourself. You may not share your Account credentials.`,
           <>
             4.2 You agree to keep your Account Information accurate and
             up-to-date. You agree that we may send to the e-mail address you
             provide us or otherwise electronically deliver notices or
-            communications regarding IDseq, including notices of updates to
+            communications regarding CZ ID, including notices of updates to
             these terms and the <a href="/privacy">Privacy Notice</a>.
           </>,
         ]}
@@ -289,17 +291,17 @@ export default function TermsOfUse() {
     </>
   );
 
-  const renderChangesToIdseqOrTerms = () => (
+  const renderChangesToCZIDOrTerms = () => (
     <>
       <h2>
-        <span className={cs.number}>5.</span>Changes To IDseq Or These Terms.
+        <span className={cs.number}>5.</span>Changes To CZ ID Or These Terms.
       </h2>
       <List
         listItems={[
-          `5.1 Changes to IDseq.We may, from time to time, withdraw, suspend, change or update IDseq (including the Database) or its features without notice, subject to Applicable Law. Neither we, nor our service providers, will be liable if all or any part of IDseq is unavailable or changes at any time.`,
-          `5.2 Changes to these Terms.We may update these Terms from time to time and will notify you of material changes to the Terms, prior to their becoming effective. If you do not agree to the updated Terms, your remedy will be to close your Account prior to the effective date of those changes.`,
+          `5.1 Changes to CZ ID. We may, from time to time, withdraw, suspend, change or update CZ ID (including the Database) or its features without notice, subject to Applicable Law. Neither we, nor our service providers, will be liable if all or any part of CZ ID is unavailable or changes at any time.`,
+          `5.2 Changes to these Terms. We may update these Terms from time to time and will notify you of material changes to the Terms, prior to their becoming effective. If you do not agree to the updated Terms, your remedy will be to close your Account prior to the effective date of those changes.`,
           <>
-            5.3 Closing Your Account.You can close your Account at any time.
+            5.3 Closing Your Account. You can close your Account at any time.
             Just contact us at{" "}
             <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
           </>,
@@ -315,9 +317,26 @@ export default function TermsOfUse() {
       </h2>
       <List
         listItems={[
-          `6.1 Intellectual Property Rights.Just because you upload data to IDseq, you are not giving us any ownership of your intellectual property rights (see Section 1.1 above). Subject to these Terms, we grant you a limited right to access IDseq, and we reserve all other of our intellectual property rights in IDseq. Using IDseq does not give you any ownership in our IDseq, our services or the content or information made available through IDseq that is not already yours. Trademarks and logos used in connection with IDseq are the trademarks of their respective owners. Our logos and other trademarks, service marks, graphics, and logos used for our services are trademarks or registered trademarks of ours and these Terms do not grant you any rights to use them.`,
-          `6.2 Feedback.We’d love your feedback about how to improve IDseq at help@idseq.net. That said, by giving us feedback, you agree that we can use and share it for any purpose without compensation to you. You agree that we are not required to use your feedback.`,
-          `6.3 Security.You will establish, implement, and maintain appropriate physical, technical and organizational measures that are designed to: (a) protect the security and integrity of any network or system used to access IDseq, including any Database records; and (b) guard against the accidental or unauthorized access, use, alteration or disclosure of IDseq through your Account. Please notify us immediately at security@idseq.net if you suspect your Account has been compromised or are aware of any other security issues relating to IDseq.`,
+          `6.1 Intellectual Property Rights. Just because you upload data to CZ ID, you are not giving us any ownership of your intellectual property rights (see Section 1.1 above). Subject to these Terms, we grant you a limited right to access CZ ID, and we reserve all other of our intellectual property rights in CZ ID. Using CZ ID does not give you any ownership in our CZ ID, our services or the content or information made available through CZ ID that is not already yours. Trademarks and logos used in connection with CZ ID are the trademarks of their respective owners. Our logos and other trademarks, service marks, graphics, and logos used for our services are trademarks or registered trademarks of ours and these Terms do not grant you any rights to use them.`,
+          <>
+            6.2 Feedback. We’d love your feedback about how to improve CZ ID at{" "}
+            {<a href="mailto:help@idseq.net">help@idseq.net</a>}. That said, by
+            giving us feedback, you agree that we can use and share it for any
+            purpose without compensation to you. You agree that we are not
+            required to use your feedback.
+          </>,
+          <>
+            6.3 Security. You will establish, implement, and maintain
+            appropriate physical, technical and organizational measures that are
+            designed to: (a) protect the security and integrity of any network
+            or system used to access CZ ID, including any Database records; and
+            (b) guard against the accidental or unauthorized access, use,
+            alteration or disclosure of CZ ID through your Account. Please
+            notify us immediately at{" "}
+            {<a href="mailto:security@idseq.net">security@idseq.net</a>} if you
+            suspect your Account has been compromised or are aware of any other
+            security issues relating to CZ ID.
+          </>,
         ]}
       />
     </>
@@ -330,11 +349,19 @@ export default function TermsOfUse() {
       </h2>
       <List
         listItems={[
-          `7.1 In order to further infectious disease research, we rely upon Users to upload data to the Database. We and our service providers do not review or correct any data uploaded into IDseq. If you would like to report any issue with IDseq or the Database please contact us at help@idseq.net. IDseq is not intended as a storage service, so please back up your Upload Data using a secure service of your choice.`,
+          <>
+            7.1 In order to further infectious disease research, we rely upon
+            Users to upload data to the Database. We and our service providers
+            do not review or correct any data uploaded into CZ ID. If you would
+            like to report any issue with CZ ID or the Database please contact
+            us at {<a href="mailto:help@idseq.net">help@idseq.net</a>}. CZ ID is
+            not intended as a storage service, so please back up your Upload
+            Data using a secure service of your choice.
+          </>,
           `7.2 TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:`,
-          `7.2.1 YOUR ACCESS AND USE IDSEQ AT YOUR SOLE RISK AND AGREE THAT WE AND OUR SERVICE PROVIDERS WILL NOT BE RESPONSIBLE FOR ANY ACTIONS YOU TAKE BASED ON IDSEQ OR FOR ANY INACCURATE DATA OR OUTPUTS OF IDSEQ (INCLUDING MISIDENTIFICATION OF -- OR THE FAILURE TO IDENTIFY -- DISEASE SEQUENCES).`,
-          `7.2.2 IDSEQ IS PROVIDED “AS IS” WITH ALL FAULTS, AND WE AND OUR SERVICE PROVIDERS HEREBY DISCLAIM ALL REPRESENTATIONS AND WARRANTIES, EXPRESS, STATUTORY, OR IMPLIED (INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND ALL WARRANTIES ARISING FROM THE COURSE OF DEALING, USAGE, OR TRADE PRACTICE) WITH RESPECT TO IDSEQ. IDSEQ IS NOT INTENDED TO BE USED AND SHOULD NOT BE USED AS A MEDICAL DEVICE OR FOR PURPOSES OF MEDICAL DIAGNOSIS OR TREATMENT.`,
-          `7.2.3 FOR CLARITY AND WITHOUT LIMITING THE FOREGOING, WE AND OUR SERVICE PROVIDERS DO NOT MAKE ANY GUARANTEES (I) REGARDING THE ACCURACY, COMPLETENESS, TIMELINESS, SECURITY, AVAILABILITY OR INTEGRITY OF IDSEQ, (II) THAT IDSEQ WILL BE UNINTERRUPTED OR OPERATE IN COMBINATION WITH ANY SOFTWARE, SERVICE, SYSTEM OR OTHER DATA, OR (III) THAT IDSEQ WILL MEET ANY REQUIREMENTS OF ANY PERSON OR ENTITY, OR ANY REGULATORY APPROVALS OR REQUIREMENTS. WITHOUT LIMITATION, YOU ACKNOWLEDGE THAT IDSEQ IS NOT A BUSINESS ASSOCIATE FOR PURPOSES OF HIPAA.`,
+          `7.2.1 YOUR ACCESS AND USE CZ ID AT YOUR SOLE RISK AND AGREE THAT WE AND OUR SERVICE PROVIDERS WILL NOT BE RESPONSIBLE FOR ANY ACTIONS YOU TAKE BASED ON CZ ID OR FOR ANY INACCURATE DATA OR OUTPUTS OF CZ ID (INCLUDING MISIDENTIFICATION OF -- OR THE FAILURE TO IDENTIFY -- DISEASE SEQUENCES).`,
+          `7.2.2 CZ ID IS PROVIDED “AS IS” WITH ALL FAULTS, AND WE AND OUR SERVICE PROVIDERS HEREBY DISCLAIM ALL REPRESENTATIONS AND WARRANTIES, EXPRESS, STATUTORY, OR IMPLIED (INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND ALL WARRANTIES ARISING FROM THE COURSE OF DEALING, USAGE, OR TRADE PRACTICE) WITH RESPECT TO CZ ID. CZ ID IS NOT INTENDED TO BE USED AND SHOULD NOT BE USED AS A MEDICAL DEVICE OR FOR PURPOSES OF MEDICAL DIAGNOSIS OR TREATMENT.`,
+          `7.2.3 FOR CLARITY AND WITHOUT LIMITING THE FOREGOING, WE AND OUR SERVICE PROVIDERS DO NOT MAKE ANY GUARANTEES (I) REGARDING THE ACCURACY, COMPLETENESS, TIMELINESS, SECURITY, AVAILABILITY OR INTEGRITY OF CZ ID, (II) THAT CZ ID WILL BE UNINTERRUPTED OR OPERATE IN COMBINATION WITH ANY SOFTWARE, SERVICE, SYSTEM OR OTHER DATA, OR (III) THAT CZ ID WILL MEET ANY REQUIREMENTS OF ANY PERSON OR ENTITY, OR ANY REGULATORY APPROVALS OR REQUIREMENTS. WITHOUT LIMITATION, YOU ACKNOWLEDGE THAT CZ ID IS NOT A BUSINESS ASSOCIATE FOR PURPOSES OF HIPAA.`,
         ]}
       />
     </>
@@ -348,8 +375,8 @@ export default function TermsOfUse() {
       </h2>
       <List
         listItems={[
-          `8.1 To the maximum extent permitted by Applicable Law, you agree to indemnify and hold harmless CZ Biohub, its affiliates (including without limitation the Chan Zuckerberg Initiative Foundation (CZIF), the Chan Zuckerberg Initiative, LLC (CZI LLC), and their successors, assigns, officers, directors, employees, and agents (collectively, the “CZ Biohub Protected Parties”)) from and against any and all liabilities, costs, damages, charges, losses, penalties, judgments, settlements, and expenses (including reasonable attorney’s fees) (“Losses”) arising out of or related to any suit, demand, action, proceeding, or other claim by a third party (“Claims”) arising out of or relating to: (a) your actual or alleged failure to comply with Applicable Law or these Terms, (b) your Research Data, or (c) your actual or alleged violation of any third party rights.`,
-          `8.2 LIMITATION OF LIABILITY.TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE CZ BIOHUB PROTECTED PARTIES WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, PUNITIVE, OR CONSEQUENTIAL DAMAGES OF ANY KIND (INCLUDING LOST PROFITS, LOST DATA, BUSINESS INTERRUPTION, OR LOSS OF GOODWILL) IRRESPECTIVE OF WHETHER SUCH DAMAGES ARISE FROM CLAIMS BROUGHT IN CONTRACT, TORT, NEGLIGENCE, WARRANTY, STRICT LIABILITY, OR ANY OTHER THEORY AT LAW OR IN EQUITY, AND EVEN IF ANY CZ BIOHUB PROTECTED PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. WITHOUT LIMITING THE FOREGOING, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL THE CZ BIOHUB PROTECTED PARTIES’ AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THESE TERMS OR IDSEQ EXCEED USD $100. THE EXCLUSIONS AND LIMITATIONS SET FORTH IN THIS SECTION 9 DO NOT APPLY TO LOSSES ARISING FROM A CZ BIOHUB PROTECTED PARTY’S GROSS NEGLIGENCE OR WILLFUL MISCONDUCT. IF ANY LIMITATION IN THIS SECTION 9 IS UNENFORCEABLE IN ANY INSTANCE, THEN SUCH LIMITATION WILL APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.`,
+          `8.1 To the maximum extent permitted by Applicable Law, you agree to indemnify and hold harmless CZ Biohub, its affiliates (including without limitation the Chan Zuckerberg Initiative Foundation (CZIF), the Chan Zuckerberg Initiative, LLC (CZI LLC), and their successors, assigns, officers, directors, employees, and agents (collectively, the “CZ Biohub Protected Parties”) from and against any and all liabilities, costs, damages, charges, losses, penalties, judgments, settlements, and expenses (including reasonable attorney’s fees) (“Losses”) arising out of or related to any suit, demand, action, proceeding, or other claim by a third party (“Claims”) arising out of or relating to: (a) your actual or alleged failure to comply with Applicable Law or these Terms, (b) your Research Data, or (c) your actual or alleged violation of any third party rights.`,
+          `8.2 LIMITATION OF LIABILITY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE CZ BIOHUB PROTECTED PARTIES WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, PUNITIVE, OR CONSEQUENTIAL DAMAGES OF ANY KIND (INCLUDING LOST PROFITS, LOST DATA, BUSINESS INTERRUPTION, OR LOSS OF GOODWILL) IRRESPECTIVE OF WHETHER SUCH DAMAGES ARISE FROM CLAIMS BROUGHT IN CONTRACT, TORT, NEGLIGENCE, WARRANTY, STRICT LIABILITY, OR ANY OTHER THEORY AT LAW OR IN EQUITY, AND EVEN IF ANY CZ BIOHUB PROTECTED PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. WITHOUT LIMITING THE FOREGOING, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL THE CZ BIOHUB PROTECTED PARTIES’ AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THESE TERMS OR CZ ID EXCEED USD $100. THE EXCLUSIONS AND LIMITATIONS SET FORTH IN THIS SECTION 9 DO NOT APPLY TO LOSSES ARISING FROM A CZ BIOHUB PROTECTED PARTY’S GROSS NEGLIGENCE OR WILLFUL MISCONDUCT. IF ANY LIMITATION IN THIS SECTION 9 IS UNENFORCEABLE IN ANY INSTANCE, THEN SUCH LIMITATION WILL APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.`,
           `SOME LAWS DO NOT ALLOW THE LIMITATION OR EXCLUSION OF LIABILITY, SO THESE LIMITS MAY NOT APPLY TO YOU.`,
           `Choice of Law / Jurisdiction / Venue. These Terms, and all matters arising out of or relating to these Terms, whether sounding in contract, tort, or statute, will be governed by, and construed in accordance with, the laws of the State of California and/or applicable federal law (including the Federal Arbitration Act), without regard to conflict of law provisions. Subject to and without waiver of the arbitration provisions below, and unless prohibited by the laws of your country, you agree that any judicial proceedings (other than small claims actions as discussed above) will be brought in and you hereby consent to the exclusive jurisdiction and venue in the state courts in the City and County of San Mateo, California, or federal court for the Northern District of California. For countries where this is not permissible, this won’t deprive you of any protection you have under the law of the country where you live, or access to the courts in that country.`,
         ]}
@@ -370,7 +397,7 @@ export default function TermsOfUse() {
           <>
             9.4 Entire Agreement. These Terms (along with the{" "}
             <a href="/privacy">Privacy Notice</a>) constitute the entire
-            agreement between you and us regarding IDseq. If you wish to modify
+            agreement between you and us regarding CZ ID. If you wish to modify
             these Terms, any amendment must be provided to us in writing and
             signed by our authorized representative.
           </>,
@@ -402,7 +429,10 @@ export default function TermsOfUse() {
             2682 Middlefield Road, Suite i<br />
             Redwood City, CA 94063
             <br />
-            With a courtesy copy via email to: legalczi1@chanzuckerberg.com
+            With a courtesy copy via email to:{" "}
+            <a href="mailto:legalczi1@chanzuckerberg.com">
+              legalczi1@chanzuckerberg.com
+            </a>
             <br />
           </p>,
         ]}
@@ -495,7 +525,7 @@ export default function TermsOfUse() {
                 ordered
                 listItems={[
                   `To initiate a Dispute, a party must send to the other party written notice of that Dispute containing: (a) the name, address, and contact information of the party giving notice; (b) the facts giving rise to the Dispute; and (c) the relief requested.`,
-                  `You and we agree that we shall (in good faith) meet and attempt to resolve the Dispute within 30 days. If the Dispute is not resolved during that time period, then you and a representative of the applicable IDseq Party shall (in good faith) meet and attempt to resolve the Dispute through non-binding mediation with a mutually agreed-upon mediator within 30 additional days. If you and we do not reach an agreement to resolve the dispute within that 60-day period, you or we may commence an arbitration proceeding or file a claim in small claims court.`,
+                  `You and we agree that we shall (in good faith) meet and attempt to resolve the Dispute within 30 days. If the Dispute is not resolved during that time period, then you and a representative of the applicable CZ ID Party shall (in good faith) meet and attempt to resolve the Dispute through non-binding mediation with a mutually agreed-upon mediator within 30 additional days. If you and we do not reach an agreement to resolve the dispute within that 60-day period, you or we may commence an arbitration proceeding or file a claim in small claims court.`,
                 ]}
               />
             </div>
@@ -576,12 +606,12 @@ export default function TermsOfUse() {
     <NarrowContainer className={cs.termsOfUse} size="small">
       {renderIntro()}
       {renderSummaryOfKeyThingsToKnow()}
-      {renderAboutIDseq()}
+      {renderAboutCZID()}
       {renderUploadAndReportDataTerms()}
-      {renderAuthorizationToUseIdseq()}
+      {renderAuthorizationToUseCZID()}
       {renderLimitationsOnUse()}
       {renderRegistrationAndContactInfo()}
-      {renderChangesToIdseqOrTerms()}
+      {renderChangesToCZIDOrTerms()}
       {renderIntellectualPropertyAndSecurityTerms()}
       {renderDisclaimerTerms()}
       {renderLawTerms()}

@@ -1,24 +1,24 @@
 import React from "react";
 import IconBiohubLogo from "~/components/ui/icons/IconBiohubLogo";
 import IconCziLogo from "~/components/ui/icons/IconCziLogo";
-import { LogoReversed } from "~ui/icons";
+import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./Footer.scss";
 
 const Footer = () => {
   return (
     <div className={cs.footer}>
       <div className={cs.topNavContainer}>
-        <a aria-label="Go to the IDseq homepage" href="/">
-          <LogoReversed className={cs.footerLogo} />
+        <a aria-label="Go to the CZ ID homepage" href="/">
+          <CZIDLogoReversed className={cs.footerLogo} />
         </a>
         <div className={cs.topNavMenu}>
           <a
-            href="https://discoveridseq.com/vr"
-            aria-label="Take a 360° Video Tour to see how a local researcher quickly detects the source of a meningitis outbreak in Dhaka, Bangladesh, using IDseq technology. (opens in new window)"
+            href="https://discoveridseq.com"
+            aria-label="See how a local researcher quickly detects the source of a meningitis outbreak in Dhaka, Bangladesh, using CZ ID technology. (opens in new window)"
             target="_blank"
             rel="noreferrer"
           >
-            Experience IDseq&apos;s Impact
+            Experience CZ ID&apos;s Impact
           </a>
           <a
             href="https://github.com/chanzuckerberg/idseq-workflows"
@@ -38,8 +38,8 @@ const Footer = () => {
             Careers
           </a>
           <a
-            href="http://help.idseq.net"
-            aria-label="View the IDseq help page (opens in new window)"
+            href="http://help.czid.org"
+            aria-label="View the CZ ID help page (opens in new window)"
             target="_blank"
             rel="noreferrer"
           >
@@ -51,8 +51,8 @@ const Footer = () => {
         <div className={cs.bottomNavMenu}>
           <div>
             <a
-              href="http://idseq.net/privacy"
-              aria-label="View the IDseq privacy policy (opens in new window)"
+              href="http://czid.org/privacy"
+              aria-label="View the CZ ID privacy policy (opens in new window)"
               target="_blank"
               rel="noreferrer"
             >
@@ -60,8 +60,8 @@ const Footer = () => {
             </a>
             <span>|</span>
             <a
-              href="http://idseq.net/terms"
-              aria-label="View the IDseq terms of use (opens in new window)"
+              href="http://czid.org/terms"
+              aria-label="View the CZ ID terms of use (opens in new window)"
               target="_blank"
               rel="noreferrer"
             >

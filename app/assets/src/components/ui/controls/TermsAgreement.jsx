@@ -17,11 +17,11 @@ class TermsAgreement extends React.Component {
             <span>
               <span>
                 {
-                  "I agree that the data I am uploading to IDseq has been lawfully collected and that I have all the necessary consents, permissions, and authorizations needed to collect, share, and export data to IDseq as outlined in the "
+                  "I agree that the data I am uploading to CZ ID has been lawfully collected and that I have all the necessary consents, permissions, and authorizations needed to collect, share, and export data to CZ ID as outlined in the "
                 }
               </span>
               <a
-                href="https://idseq.net/terms"
+                href="https://czid.org/terms"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -29,7 +29,7 @@ class TermsAgreement extends React.Component {
               </a>
               {" and "}
               <a
-                href="https://idseq.net/privacy"
+                href="https://czid.org/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
               >

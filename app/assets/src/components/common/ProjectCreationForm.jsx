@@ -160,7 +160,7 @@ class ProjectCreationForm extends React.Component {
                 This project is viewable and searchable by anyone in IDseq.
                 They’ll be able to perform actions like create heatmaps and
                 download results. Public projects can’t be changed to Private.
-                <ExternalLink href="https://help.idseq.net">
+                <ExternalLink href="https://help.czid.org">
                   {" "}
                   Learn more.
                 </ExternalLink>
@@ -187,7 +187,7 @@ class ProjectCreationForm extends React.Component {
                 visible only to you and other project members. Private samples
                 will become public 1 year after their upload date. You can
                 change a Private project to Public at any time.
-                <ExternalLink href="https://help.idseq.net">
+                <ExternalLink href="https://help.czid.org">
                   {" "}
                   Learn more.
                 </ExternalLink>

@@ -1,4 +1,4 @@
-const DOC_BASE_LINK = "https://help.idseq.net/hc/en-us/articles/";
+const DOC_BASE_LINK = "https://help.czid.org/hc/en-us/articles/";
 
 export const SAMPLE_TABLE_COLUMNS_V2 = {
   sample: {

@@ -1,4 +1,5 @@
 import BacteriaCultureIcon from "./BacteriaCultureIcon";
+import CZIDLogoReversed from "./CZIDLogoReversed";
 import IconAlert from "./IconAlert";
 import IconAlertSmall from "./IconAlertSmall";
 import IconAlignmentSmall from "./IconAlignmentSmall";
@@ -133,6 +134,7 @@ export const ICONS_TAXONOMY = {
     LogoLockupColor,
   },
   LOGO_REVERSED: {
+    CZIDLogoReversed,
     LogoReversed,
     LogoMarkReversed,
     LogoLockupReversed,

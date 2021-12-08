@@ -13,39 +13,39 @@ export default class FAQPage extends React.Component {
         </div>
         <Accordion
           className={cs.question}
-          header={<h3>Does IDseq own any of the data I upload to the tool?</h3>}
+          header={<h3>Does CZ ID own any of the data I upload to the tool?</h3>}
         >
           <p>
-            No. The data you upload into IDseq is yours and so is any research
+            No. The data you upload into CZ ID is yours and so is any research
             you create with it. We don’t own it and will never sell it. You do,
-            however, give us limited rights to use it for the IDseq service.
+            however, give us limited rights to use it for the CZ ID service.
           </p>
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Does IDseq sell the data I upload?</h3>}
+          header={<h3>Does CZ ID sell the data I upload?</h3>}
         >
           <p>No.</p>
         </Accordion>
         <Accordion
           className={cs.question}
           header={
-            <h3>How does IDseq share the data I upload with other users?</h3>
+            <h3>How does CZ ID share the data I upload with other users?</h3>
           }
         >
           <List
             listItems={[
               <React.Fragment key={nanoid()}>
-                When you upload data to IDseq, you control who the data is
-                shared with. IDseq relies on three key categories of data, and
+                When you upload data to CZ ID, you control who the data is
+                shared with. CZ ID relies on three key categories of data, and
                 we want you to understand how each is treated.{" "}
                 <b>Upload Data</b> refers to the original fastq sequence files
-                you upload into IDseq-- this data will only be available to you,
+                you upload into CZ ID-- this data will only be available to you,
                 the uploader, no matter who you add to the project.{" "}
                 <b>Sample Metadata</b> includes details about the sample that
                 researchers manually enter, such as when and where a sample was
                 collected and its type (e.g. synovial fluid or cerebrospinal
-                fluid). <b>Report Data</b> includes the pathogen report IDseq
+                fluid). <b>Report Data</b> includes the pathogen report CZ ID
                 generates from the Upload Data, Sample Metadata, and other data
                 derived from the Upload, such as phylogenetic trees.
               </React.Fragment>,
@@ -56,7 +56,7 @@ export default class FAQPage extends React.Component {
               <React.Fragment key={nanoid()}>
                 Unless you choose to remove it <b>one year</b> after you
                 uploaded your sample, Report Data and the Sample Metadata
-                uploaded alongside it will be shared with <b>all IDseq users</b>
+                uploaded alongside it will be shared with <b>all CZ ID users</b>
                 . We will notify and remind you of this sharing of the Report
                 Data and Sample Metadata before the one year anniversary of your
                 upload by sending you a message to the contact information you
@@ -68,7 +68,7 @@ export default class FAQPage extends React.Component {
         <Accordion
           className={cs.question}
           header={
-            <h3>Will IDseq use my Upload Data to write research papers?</h3>
+            <h3>Will CZ ID use my Upload Data to write research papers?</h3>
           }
         >
           <p>No, we will not.</p>
@@ -80,11 +80,11 @@ export default class FAQPage extends React.Component {
           <List
             listItems={[
               <React.Fragment key={nanoid()}>
-                You should not be able to find any human sequence data in IDseq
+                You should not be able to find any human sequence data in CZ ID
                 other than the original fastq files you yourself have uploaded.
                 This is because we have a multi-step process in place to filter
                 out and remove host sequence data in order to generate Reports.
-                If you are able to find human sequence data elsewhere in IDseq,
+                If you are able to find human sequence data elsewhere in CZ ID,
                 please let us know at{" "}
                 <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>, and we
                 will remove it. The fastq files you uploaded are only available
@@ -106,22 +106,22 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Can I use IDseq for clinical diagnostic purposes?</h3>}
+          header={<h3>Can I use CZ ID for clinical diagnostic purposes?</h3>}
         >
           <p>
-            No. IDseq is for research use only. It is not for diagnostic,
+            No. CZ ID is for research use only. It is not for diagnostic,
             clinical or commercial use.
           </p>
         </Accordion>
         <Accordion
           className={cs.question}
           header={
-            <h3>What should I think about before uploading data to IDseq?</h3>
+            <h3>What should I think about before uploading data to CZ ID?</h3>
           }
         >
           <p>
             You should make sure you have any permissions or consents necessary
-            in order to upload the samples to IDseq. Please check with your
+            in order to upload the samples to CZ ID. Please check with your
             institution or organization if you have questions about meeting this
             responsibility.
           </p>
@@ -159,7 +159,7 @@ export default class FAQPage extends React.Component {
                 maintain the anonymity of the uploaded data.
               </React.Fragment>,
               <React.Fragment key={nanoid()}>
-                Other metadata can be uploaded to IDseq but is not required and
+                Other metadata can be uploaded to CZ ID but is not required and
                 may be deleted at any point. We have put together a metadata
                 ontology that you can find{" "}
                 <a href="/metadata/dictionary">here</a> that does not include
@@ -173,13 +173,13 @@ export default class FAQPage extends React.Component {
           className={cs.question}
           header={
             <h3 className={cs.multiLine}>
-              Under what circumstances would IDseq transfer rights to the data?
+              Under what circumstances would CZ ID transfer rights to the data?
               Why, and what choices would I have?
             </h3>
           }
         >
           <p>
-            If we can no longer keep operating IDseq (which we hope won’t
+            If we can no longer keep operating CZ ID (which we hope won’t
             happen) or believe the community is better served by someone else
             operating it, we will transfer the project and all existing data in
             the tool so that the community can continue to be served. We will
@@ -214,18 +214,18 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Do you use Cookies in IDseq?</h3>}
+          header={<h3>Do you use Cookies in CZ ID?</h3>}
         >
           <p>
             Yes, we use cookies and similar technologies to provide and improve
-            the IDseq service. We do not use cookies for advertising purposes.
+            the CZ ID service. We do not use cookies for advertising purposes.
           </p>
           <p>
             Cookies are small text files sent by your computer or device each
             time you visit our website. They are stored in your browser’s cache
             or mobile device and allow a website or a third party to recognize
-            your browser. Some of the cookies we use are associated with your
-            IDseq account (including information about you, such as the email
+            your browser. Some of the cookies we use are associated with your CZ
+            ID account (including information about you, such as the email
             address you gave us) and other cookies are not. We use three
             different types of cookies:
           </p>
@@ -233,17 +233,17 @@ export default class FAQPage extends React.Component {
             listItems={[
               <React.Fragment key={nanoid()}>
                 <span className={cs.listItemLabel}>Session cookies</span> are
-                specific to a particular visit you make to IDseq and hold
+                specific to a particular visit you make to CZ ID and hold
                 certain information as you browse different pages so you don’t
                 have to re-enter information every time you change pages.
                 Session cookies expire and delete themselves automatically in a
-                short period of time like after you leave IDseq or when you
+                short period of time like after you leave CZ ID or when you
                 close your web browser.
               </React.Fragment>,
               <React.Fragment key={nanoid()}>
                 <span className={cs.listItemLabel}>Persistent cookies</span>{" "}
                 remember certain information about your preferences for viewing
-                IDseq and allow us to recognize you each time you return.
+                CZ ID and allow us to recognize you each time you return.
                 Persistent cookies are stored on your browser cache or mobile
                 device until you choose to delete them, and otherwise delete
                 themselves in a standard period of time.
@@ -415,13 +415,13 @@ export default class FAQPage extends React.Component {
           <p>
             We have described in fuller detail in our{" "}
             <a href="/privacy">Privacy Policy</a> our collection and use of
-            personal information in connection with IDseq, including: (a){" "}
+            personal information in connection with CZ ID, including: (a){" "}
             <b>Information we collect</b> (e.g. uploaded data, user profile
             information, etc.); (b) <b>Sources of information</b> (e.g. data you
-            upload to IDseq and your use of IDseq), and (c){" "}
+            upload to CZ ID and your use of CZ ID), and (c){" "}
             <b>Purposes of disclosure of this information</b> (e.g. with service
             providers to help operate and improve the service as described in
-            detail in the IDseq Privacy Policy). To request any of your
+            detail in the CZ ID Privacy Policy). To request any of your
             information described above, email{" "}
             <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. Please
             include in your request sufficient information that allows us to
@@ -432,7 +432,7 @@ export default class FAQPage extends React.Component {
             <b>Please note</b>: (1) CZI does not sell your personal data, and
             CZI will not discriminate against you in any way based on your
             exercise of the rights described above, and (2) this{" "}
-            <b>notice relates only to the IDseq services</b> and not other
+            <b>notice relates only to the CZ ID services</b> and not other
             services or programs offered, or supported, by CZI. Contact{" "}
             <a href="mailto:privacy@chanzuckerberg.com">
               privacy@chanzuckerberg.com

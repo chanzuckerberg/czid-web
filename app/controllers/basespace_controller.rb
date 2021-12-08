@@ -9,17 +9,17 @@ class BasespaceController < ApplicationController
     @access_token = nil
 
     if params[:code] &&
-       ENV["BASESPACE_OAUTH_REDIRECT_URI"] &&
-       ENV["BASESPACE_CLIENT_ID"] &&
-       ENV["BASESPACE_CLIENT_SECRET"]
+       ENV["CZID_BASESPACE_OAUTH_REDIRECT_URI"] &&
+       ENV["CZID_BASESPACE_CLIENT_ID"] &&
+       ENV["CZID_BASESPACE_CLIENT_SECRET"]
 
       begin
         response = HttpHelper.post_json(
           "https://api.basespace.illumina.com/v1pre3/oauthv2/token",
           "code" => params[:code],
-          "redirect_uri" => ENV["BASESPACE_OAUTH_REDIRECT_URI"],
-          "client_id" => ENV["BASESPACE_CLIENT_ID"],
-          "client_secret" => ENV["BASESPACE_CLIENT_SECRET"],
+          "redirect_uri" => ENV["CZID_BASESPACE_OAUTH_REDIRECT_URI"],
+          "client_id" => ENV["CZID_BASESPACE_CLIENT_ID"],
+          "client_secret" => ENV["CZID_BASESPACE_CLIENT_SECRET"],
           "grant_type" => "authorization_code"
         )
         @access_token = response["access_token"]

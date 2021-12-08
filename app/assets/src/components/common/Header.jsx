@@ -17,7 +17,7 @@ import {
 } from "~/components/views/discovery/discovery_api";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { LogoReversed } from "~ui/icons";
+import { CZIDLogoReversed } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import { postToUrlWithCSRF } from "~utils/links";
 
@@ -93,7 +93,7 @@ class Header extends React.Component {
       return (
         <div className={cs.header}>
           <div className={cs.logo}>
-            <LogoReversed className={cs.icon} />
+            <CZIDLogoReversed className={cs.icon} />
           </div>
         </div>
       );
@@ -109,14 +109,13 @@ class Header extends React.Component {
         <AnnouncementBanner
           id="rebrand"
           visible={announcementBannerEnabled}
-          // TODO: add rebrand announcement banner message
-          message="Lorem ipsum"
+          message="Looking for IDseq? You're in the right spot. As of December, our new name is Chan Zuckerberg ID."
           inverted={true}
         />
         <div className={cs.header}>
           <div className={cs.logo}>
             <a href="/">
-              <LogoReversed className={cs.icon} />
+              <CZIDLogoReversed className={cs.icon} />
             </a>
           </div>
           <div className={cs.fill} />
@@ -267,7 +266,7 @@ const UserMenuDropDown = ({
         text={
           <ExternalLink
             className={cs.option}
-            href="https://help.idseq.net"
+            href="https://help.czid.org"
             analyticsEventName={"Header_dropdown-help-option_clicked"}
           >
             Help Center
@@ -352,7 +351,7 @@ const MainMenu = ({ adminUser, userSignedIn }) => {
         {/* Keep referrer links */}
         <a
           className={cs.item}
-          href="https://help.idseq.net"
+          href="https://help.czid.org"
           rel="noopener noreferrer"
           /* eslint-disable-next-line react/jsx-no-target-blank */
           target="_blank"

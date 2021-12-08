@@ -74,7 +74,7 @@ const Publications = () => {
 const News = () => {
   return (
     <div className={cs.news}>
-      <h2>IDseq in the News</h2>
+      <h2>CZ ID in the News</h2>
       <ul>
         {newsData &&
           newsData.map((entry, index) => {

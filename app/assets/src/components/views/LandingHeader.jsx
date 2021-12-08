@@ -25,14 +25,14 @@ const LandingHeader = ({ browserInfo }) => {
         <div className={cs.links}>
           <ExternalLink
             className={cs.headerLink}
-            href="https://help.idseq.net"
+            href="https://help.czid.org"
             analyticsEventName="Landing_help-center-link_clicked"
           >
             Help Center
           </ExternalLink>
           <ExternalLink
             className={cs.headerLink}
-            href="https://www.discoveridseq.com/vr"
+            href="https://www.discoveridseq.com"
             analyticsEventName="Landing_video-tour-link_clicked"
           >
             Video Tour

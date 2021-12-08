@@ -100,7 +100,7 @@ export const CATEGORIES = [
 ];
 
 const DOC_BASE_LINK =
-  "https://help.idseq.net/hc/en-us/articles/360034790574-Single-Sample-Report-Table";
+  "https://help.czid.org/hc/en-us/articles/360034790574-Single-Sample-Report-Table";
 
 export const REPORT_TABLE_COLUMNS = {
   NT_aggregatescore: {

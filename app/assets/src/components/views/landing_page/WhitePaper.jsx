@@ -20,7 +20,7 @@ const WhitePaper = () => {
       </div>
       <div className={cs.whitePaper__Inner_Copy}>
         <h2>
-          Read the paper on how IDseq reduces the barrier of entry to
+          Read the paper on how CZ ID reduces the barrier of entry to
           metagenomics
         </h2>
         <p>
@@ -30,7 +30,7 @@ const WhitePaper = () => {
         <CtaButton
           className={CtaButtonStyles.filled}
           text="Read the Paper"
-          aria-label="Read the IDseq white paper (opens in new window)"
+          aria-label="Read the CZ ID white paper (opens in new window)"
         />
       </div>
     </div>

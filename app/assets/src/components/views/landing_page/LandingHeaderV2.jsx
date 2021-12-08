@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import IconMobileNavClose from "~/components/ui/icons/IconMobileNavClose";
-import { LogoReversed } from "~ui/icons";
+import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./LandingHeaderV2.scss";
 
 const LandingHeaderV2 = ({
@@ -26,22 +26,21 @@ const LandingHeaderV2 = ({
       <AnnouncementBanner
         id="rebrand"
         visible={announcementBannerEnabled}
-        // TODO: add rebrand announcement banner message
-        message="Lorem ipsum"
+        message="Looking for IDseq? You're in the right spot. As of December, our new name is Chan Zuckerberg ID."
         inverted={true}
       />
       <div className={cs.header}>
-        <a aria-label="Go to the IDseq homepage" href="/">
-          <LogoReversed className={cs.headerLogo} />
+        <a aria-label="Go to the CZ ID homepage" href="/">
+          <CZIDLogoReversed className={cs.headerLogo} />
         </a>
         <nav className={cs.nav}>
           <span className={cs.hideMobile}>
             <a
               className={cs.textLink}
-              href="http://help.idseq.net"
+              href="http://help.czid.org"
               target="_blank"
               rel="noreferrer"
-              aria-label="View the IDseq help page (opens in new window)"
+              aria-label="View the CZ ID help page (opens in new window)"
             >
               Resources
             </a>
@@ -50,7 +49,7 @@ const LandingHeaderV2 = ({
               href="https://airtable.com/shrBGT42xVBR6JAVv"
               target="_blank"
               rel="noreferrer"
-              aria-label="View the IDseq intro survey (opens in new window)"
+              aria-label="View the CZ ID intro survey (opens in new window)"
             >
               Request Access
             </a>
@@ -83,11 +82,11 @@ const LandingHeaderV2 = ({
             <div className={cs.mobileNavLinkContainer}>
               <a
                 className={cs.mobileNavLink}
-                href="http://help.idseq.net"
+                href="http://help.czid.org"
                 style={menuOpen ? { opacity: "1" } : { opacity: "0" }}
                 target="_blank"
                 rel="noreferrer"
-                aria-label="View the IDseq help page (opens in new window)"
+                aria-label="View the CZ ID help page (opens in new window)"
               >
                 Resources
               </a>
@@ -108,7 +107,7 @@ const LandingHeaderV2 = ({
                 style={menuOpen ? { opacity: "1" } : { opacity: "0" }}
                 target="_blank"
                 rel="noreferrer"
-                aria-label="View the IDseq intro survey (opens in new window)"
+                aria-label="View the CZ ID intro survey (opens in new window)"
               >
                 Request Access
               </a>

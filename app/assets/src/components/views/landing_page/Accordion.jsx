@@ -29,15 +29,15 @@ const Accordion = () => {
         }}
         isOpen={openAccordion === 0}
         accordionTitle="How much data can I upload?"
-        accordionText="There is no limit on the amount of data that you can upload to IDseq."
+        accordionText="There is no limit on the amount of data that you can upload to CZ ID."
       />
       <AccordionItem
         onClick={() => {
           clickHandler(1);
         }}
         isOpen={openAccordion === 1}
-        accordionTitle="Will IDseq remain free to use?"
-        accordionText="Yes, IDseq is committed to remaining a free tool."
+        accordionTitle="Will CZ ID remain free to use?"
+        accordionText="Yes, CZ ID is committed to remaining a free tool."
       />
       <AccordionItem
         onClick={() => {
@@ -48,12 +48,12 @@ const Accordion = () => {
         accordionText={
           <>
             Raw sample data (genetic sequence files (ex: FASTA/FASTQ)) is not
-            shared with any other IDseq user, nor is it ever accessed by anyone
-            working on IDseq unless specifically requested by a user, such as to
-            debug an issue. Read more in IDseq’s{" "}
+            shared with any other CZ ID user, nor is it ever accessed by anyone
+            working on CZ ID unless specifically requested by a user, such as to
+            debug an issue. Read more in CZ ID’s{" "}
             <a
-              href="https://idseq.net/privacy"
-              aria-label="View the IDseq privacy policy (opens in new window)"
+              href="https://czid.org/privacy"
+              aria-label="View the CZ ID privacy policy (opens in new window)"
               target="_blank"
               rel="noreferrer"
             >
@@ -75,10 +75,10 @@ const Accordion = () => {
             FASTA/FASTQ)) is processed through our data pipeline and all host
             (ex: human, mosquito) genetic information is filtered out. We always
             filter out all human genetic information, regardless of host. Read
-            more in IDseq’s{" "}
+            more in CZ ID’s{" "}
             <a
-              href="https://idseq.net/privacy"
-              aria-label="View the IDseq privacy policy (opens in new window)"
+              href="https://czid.org/privacy"
+              aria-label="View the CZ ID privacy policy (opens in new window)"
               target="_blank"
               rel="noreferrer"
             >
@@ -98,8 +98,8 @@ const Accordion = () => {
           <>
             Once created, your account will be maintained in accordance with our{" "}
             <a
-              href="https://idseq.net/terms"
-              aria-label="View the IDseq terms of use (opens in new window)"
+              href="https://czid.org/terms"
+              aria-label="View the CZ ID terms of use (opens in new window)"
               target="_blank"
               rel="noreferrer"
             >
