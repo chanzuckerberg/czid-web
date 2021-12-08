@@ -29,8 +29,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_OBJECTS_BULK_DOWNLOAD, 100)
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
-        stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
-                                            "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
+        stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://czid.org",
+                                            "SAMPLES_BUCKET_NAME" => "czid-samples-prod"))
       end
 
       def get_expected_tar_name(project, sample, suffix)
@@ -561,8 +561,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_OBJECTS_BULK_DOWNLOAD, 100)
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
-        stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
-                                            "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
+        stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://czid.org",
+                                            "SAMPLES_BUCKET_NAME" => "czid-samples-prod"))
         Aws.config[:states] = {
           stub_responses: {
             describe_execution: fake_sfn_execution_description,
@@ -692,8 +692,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
           error_type: "FailedSrcUrlError",
           # Should count this as 2 samples even though it's 4 files.
           error_data: [
-            "s3://idseq-samples-test/samples/1/100/path-to-file", "s3://idseq-samples-test/samples/1/100/path-to-file-2",
-            "s3://idseq-samples-test/samples/1/101/path-to-file", "s3://idseq-samples-test/samples/1/101/path-to-file-2",
+            "s3://czid-samples-test/samples/1/100/path-to-file", "s3://czid-samples-test/samples/1/100/path-to-file-2",
+            "s3://czid-samples-test/samples/1/101/path-to-file", "s3://czid-samples-test/samples/1/101/path-to-file-2",
           ],
         }
 

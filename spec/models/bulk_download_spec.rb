@@ -14,13 +14,13 @@ describe BulkDownload, type: :model do
     end
 
     it "returns correct success url for prod" do
-      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net"))
-      expect(@bulk_download.success_url).to eq("https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://czid.org"))
+      expect(@bulk_download.success_url).to eq("https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}")
     end
 
     it "returns correct success url for staging" do
-      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.idseq.net"))
-      expect(@bulk_download.success_url).to eq("https://staging.idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.czid.org"))
+      expect(@bulk_download.success_url).to eq("https://staging.czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}")
     end
 
     it "returns nil if nothing set" do
@@ -35,13 +35,13 @@ describe BulkDownload, type: :model do
     end
 
     it "returns correct error url for prod" do
-      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net"))
-      expect(@bulk_download.error_url).to eq("https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://czid.org"))
+      expect(@bulk_download.error_url).to eq("https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}")
     end
 
     it "returns correct error url for staging" do
-      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.idseq.net"))
-      expect(@bulk_download.error_url).to eq("https://staging.idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.czid.org"))
+      expect(@bulk_download.error_url).to eq("https://staging.czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}")
     end
 
     it "returns nil if nothing set" do
@@ -58,13 +58,13 @@ describe BulkDownload, type: :model do
     end
 
     it "returns correct progress url for prod" do
-      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net"))
-      expect(@bulk_download.progress_url).to eq("https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://czid.org"))
+      expect(@bulk_download.progress_url).to eq("https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}")
     end
 
     it "returns correct progress url for staging" do
-      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.idseq.net"))
-      expect(@bulk_download.progress_url).to eq("https://staging.idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.czid.org"))
+      expect(@bulk_download.progress_url).to eq("https://staging.czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}")
     end
 
     it "returns nil if nothing set" do
@@ -104,8 +104,8 @@ describe BulkDownload, type: :model do
       @workflow_run_two = create(:workflow_run, sample: @sample_three, inputs_json: { accession_id: "XYZ5432.1" }.to_json)
       @workflow_run_three = create(:workflow_run, sample: @sample_one, inputs_json: { accession_id: "IJK5432.1" }.to_json)
 
-      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net",
-                                          "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://czid.org",
+                                          "SAMPLES_BUCKET_NAME" => "czid-samples-prod"))
     end
 
     it "returns the correct task command for original_input_file download type" do
@@ -118,25 +118,25 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[0].name}",
-        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[1].name}",
-        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
-        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
+        "s3://czid-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[0].name}",
+        "s3://czid-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[1].name}",
+        "s3://czid-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
+        "s3://czid-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "original_R1.fastq.gz"),
         get_expected_tar_name(@project, @sample_one, "original_R2.fastq.gz"),
         get_expected_tar_name(@project, @sample_two, "original_R1.fastq.gz"),
         get_expected_tar_name(@project, @sample_two, "original_R2.fastq.gz"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -158,15 +158,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_one, "unmapped.fasta"),
         get_expected_tar_name(@project, @sample_two, "unmapped.fasta"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Unmapped Reads.tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Unmapped Reads.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -197,15 +197,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_one, "reads_nh.fasta"),
         get_expected_tar_name(@project, @sample_two, "reads_nh.fasta"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -240,15 +240,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -275,15 +275,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_one, "contigs_nh.fasta"),
         get_expected_tar_name(@project, @sample_two, "contigs_nh.fasta"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Contigs (Non-host).tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Contigs (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -305,15 +305,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_one, "reads_per_gene.star.tab"),
         get_expected_tar_name(@project, @sample_two, "reads_per_gene.star.tab"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Host Gene Counts.tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Host Gene Counts.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -349,15 +349,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -397,15 +397,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -439,15 +439,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -481,15 +481,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_one.inputs['accession_id']}_consensus.fa"),
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_two.inputs['accession_id']}_consensus.fa"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Consensus Genome.tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Consensus Genome.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -517,15 +517,15 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_one.inputs['accession_id']}/"),
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_two.inputs['accession_id']}/"),
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Intermediate Output Files.tar.gz",
+        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Intermediate Output Files.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
         "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
@@ -577,7 +577,7 @@ describe BulkDownload, type: :model do
 
     it "outputs correct command in development" do
       allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new("development"))
-      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-development"))
+      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "czid-samples-development"))
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
