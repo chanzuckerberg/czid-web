@@ -69,6 +69,7 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: "#{Rails.env}.idseq.net" }
 
+  config.hosts << "staging.czid.org"
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # We configure IDseq to use cloudfront CDN when available.
   config.action_controller.asset_host = ENV['CZID_CLOUDFRONT_ENDPOINT'] || "#{Rails.env}.czid.org"

@@ -40,6 +40,7 @@ module Idseq
     # curl -i -H $'Host: www.google.com' 'localhost:3000/auth0/login'
     config.hosts << '.idseq.net'
     config.hosts << '.czid.org'
+    config.hosts << 'czid.org'
     # Exclude health_check so that load balancer checks are allowed:
     config.host_authorization = { exclude: ->(request) { request.path =~ /health_check/ } }
   end
