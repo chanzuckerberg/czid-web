@@ -13,7 +13,7 @@
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
     cursor: pointer;
   }
 
@@ -36,7 +36,7 @@
   }
 
   .info {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     padding: 20px 20px $sds-spaces-m;
     margin-top: $sds-spaces-m;
     margin-bottom: $sds-spaces-m;
@@ -44,7 +44,7 @@
 
   .validationMessage {
     @include font-body-s;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin-top: 25px;
 
     .loadingIcon {
@@ -67,11 +67,11 @@
 }
 
 .errors .header {
-  color: $error-medium;
+  color: $sds-color-error-400;
 }
 
 .warnings .header {
-  color: $warning-dark;
+  color: $sds-color-warning-600;
 }
 
 .errors,
@@ -102,11 +102,11 @@
   }
 
   &.warning {
-    background-color: $warning-off-white;
+    background-color: $sds-color-warning-100;
   }
 
   &.error {
-    background-color: $error-off-white;
+    background-color: $sds-color-error-100;
   }
 
   .icon {

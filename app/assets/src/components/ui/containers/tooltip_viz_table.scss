@@ -5,7 +5,7 @@
 
 .table {
   @include font-body-xxs;
-  background-color: $white;
+  background-color: $sds-color-gray-white;
   border-radius: $border-radius-m;
   border: $border-gray-light;
   box-shadow: $box-shadow-m;
@@ -15,7 +15,7 @@
   .title {
     @include font-caps-xxxxs;
     border-bottom: $border-gray-lightest;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin-bottom: $sds-spaces-m;
   }
 
@@ -26,7 +26,7 @@
 
   .description {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin-top: $sds-spaces-s;
     margin-bottom: $sds-spaces-l;
   }
@@ -42,16 +42,16 @@
     }
 
     &.disabled {
-      color: $gray-light;
+      color: $sds-color-gray-300;
     }
 
     .name {
       @include font-caps-xxxxs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       margin-bottom: $sds-spaces-m;
 
       &.disabled {
-        color: $gray-light;
+        color: $sds-color-gray-300;
       }
     }
 

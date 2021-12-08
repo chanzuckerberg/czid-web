@@ -4,14 +4,14 @@
 @import "~czifui/dist/variables";
 
 .footer {
-  background: $black;
-  color: $white;
+  background: $sds-color-gray-black;
+  color: $sds-color-gray-white;
   padding: 3rem 4rem;
   font-family: $font-family-sans-serif;
   @include font-body-s;
 
   a {
-    color: $white;
+    color: $sds-color-gray-white;
     text-decoration: none;
   }
 
@@ -93,7 +93,7 @@
   p {
     margin-right: $sds-spaces-m;
     margin-bottom: 0px;
-    color: $white;
+    color: $sds-color-gray-white;
 
     @media (max-width: 768px) {
       margin-bottom: $sds-spaces-m;
@@ -120,7 +120,7 @@
   }
 
   .separator {
-    background: $white;
+    background: $sds-color-gray-white;
     opacity: 0.3;
     height: 42px;
     width: 1px;
@@ -128,7 +128,7 @@
   }
 
   @media (max-width: 768px) {
-    border-bottom: 1px solid $gray-darkest;
+    border-bottom: 1px solid $sds-color-gray-600;
     width: 100%;
     justify-content: center;
     flex-direction: column;

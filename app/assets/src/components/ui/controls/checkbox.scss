@@ -23,7 +23,7 @@
 
   &.disabled {
     cursor: default !important;
-    border: $gray-lightest;
+    border: $sds-color-gray-200;
     pointer-events: none;
   }
 
@@ -48,7 +48,7 @@
       top: 1px;
       width: 6px;
       height: 9px;
-      border: solid $white;
+      border: solid $sds-color-gray-white;
       border-radius: $border-radius-s;
       border-width: 0 2px 2px 0;
       -webkit-transform: rotate(40deg);
@@ -58,7 +58,7 @@
   }
 
   & input:checked ~ .checkmark {
-    background-color: $primary;
+    background-color: $sds-color-primary-400;
 
     &:after {
       display: block;

@@ -1,7 +1,8 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .hotspot > div > .apc-spotlight {
-  background: $white !important;
+  background: $sds-color-gray-white !important;
   opacity: 0.9;
 }
 

@@ -1,7 +1,8 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 :export {
-  warningMedium: $warning-medium;
-  warningDark: $warning-dark;
+  warningMedium: $sds-color-warning-400;
+  warningDark: $sds-color-warning-600;
 }
 
 .scaleLabel {

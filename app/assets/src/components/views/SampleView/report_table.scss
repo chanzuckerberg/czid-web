@@ -6,7 +6,7 @@
 .header {
   @include font-header-xs;
 
-  color: $gray-dark;
+  color: $sds-color-gray-500;
   justify-content: flex-end;
   text-align: right;
   margin-right: $sds-spaces-l;
@@ -15,7 +15,7 @@
 }
 
 .sortedHeader {
-  color: $primary;
+  color: $sds-color-primary-400;
 }
 
 .taxonHeader {
@@ -51,7 +51,7 @@
 }
 
 .ntnrSelectorHeader {
-  color: $gray-darkest;
+  color: $sds-color-gray-600;
   text-align: center;
   cursor: pointer;
   // Don't push down the text so "NR" is aligned with the other headers.
@@ -61,7 +61,7 @@
 .cell {
   @include font-body-s;
 
-  color: $gray-darkest;
+  color: $sds-color-gray-600;
   font-weight: $font-weight-bold;
   padding: $sds-spaces-m 0;
   text-align: right;
@@ -83,7 +83,7 @@
     &.lowlightValue {
       @include font-body-xxs;
 
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
   }
 }
@@ -103,21 +103,21 @@
     }
 
     .missingName {
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
 
     .countInfo {
       font-style: italic;
       font-weight: $font-weight-regular;
       margin-left: $sds-spaces-xs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       white-space: normal;
     }
   }
 
   &:hover {
     .taxonName {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
   }
 }
@@ -135,7 +135,7 @@
 }
 
 .genusRow {
-  background-color: $gray-off-white;
+  background-color: $sds-color-gray-100;
 }
 
 .genusRow,
@@ -149,8 +149,8 @@
   // selector can be used for the scrollbar.
   padding-right: 0px !important;
   &.highlighted {
-    background-color: $primary-lightest;
-    border-left: 5px solid $primary;
+    background-color: $sds-color-primary-200;
+    border-left: 5px solid $sds-color-primary-400;
     padding-left: 0px;
   }
 

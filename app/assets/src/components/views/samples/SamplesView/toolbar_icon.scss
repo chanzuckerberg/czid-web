@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .iconWrapper {
   display: flex;
@@ -12,20 +13,20 @@
   // The child icon will contain an <svg>.
   // The 'fill' rule only works when applied on the svg itself, not the parent.
   svg {
-    color: $gray-light;
-    fill: $gray-light;
+    color: $sds-color-gray-300;
+    fill: $sds-color-gray-300;
   }
 
   &:not(.disabled) {
     cursor: pointer;
 
     &:hover {
-      background-color: $gray-lightest;
+      background-color: $sds-color-gray-200;
     }
 
     svg {
-      color: $primary;
-      fill: $primary;
+      color: $sds-color-primary-400;
+      fill: $sds-color-primary-400;
     }
   }
 }
@@ -35,6 +36,6 @@
   text-align: center;
 
   .popupSubtitle {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }

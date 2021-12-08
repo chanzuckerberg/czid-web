@@ -31,7 +31,7 @@
   h4.subtitle {
     @include font-body-xxs;
     margin-top: $sds-spaces-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .title {
@@ -56,7 +56,7 @@
 
   a {
     // Override _header.scss
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
   }
 
   ul {

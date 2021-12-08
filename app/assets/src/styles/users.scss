@@ -19,7 +19,7 @@ $break-large: 1460px;
     p.signup {
       @include font-header-xxl;
       font-weight: $font-weight-bold;
-      color: $gray-darkest;
+      color: $sds-color-gray-600;
       margin-top: 9px;
       text-align: left;
     }
@@ -28,11 +28,11 @@ $break-large: 1460px;
     padding: 40px 50px;
   }
   .login-wrapper {
-    background-color: $primary;
+    background-color: $sds-color-primary-400;
     padding: 15px;
     border-bottom-right-radius: 4px;
     border-bottom-left-radius: 4px;
-    color: $white;
+    color: $sds-color-gray-white;
     font-size: $font-size-large;
     cursor: pointer;
   }
@@ -40,9 +40,9 @@ $break-large: 1460px;
   .error-info {
     @include font-body-xxs;
     width: 80%;
-    background: $error-lightest;
+    background: $sds-color-error-200;
     border-radius: $border-radius-m;
-    color: $error-medium;
+    color: $sds-color-error-400;
     margin: 0 auto;
     padding: $sds-spaces-m 5px;
     border: $border-error;
@@ -52,9 +52,9 @@ $break-large: 1460px;
   .success-info {
     @include font-body-xxs;
     width: 80%;
-    background: $success-lightest;
+    background: $sds-color-success-200;
     border-radius: $border-radius-m;
-    color: $success-medium;
+    color: $sds-color-success-400;
     margin: 0 auto;
     padding: $sds-spaces-m 5px;
     border: $border-success;
@@ -69,10 +69,10 @@ $break-large: 1460px;
       float: right;
     }
     input:focus {
-      border-bottom-color: $primary !important;
+      border-bottom-color: $sds-color-primary-400 !important;
     }
     input:focus + label {
-      color: $primary !important;
+      color: $sds-color-primary-400 !important;
     }
   }
   p .error {
@@ -95,7 +95,7 @@ $break-large: 1460px;
   .form-title {
     font-size: 17px;
     font-weight: 700;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
     margin-top: 9px;
     text-align: left;
   }

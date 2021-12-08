@@ -1,7 +1,9 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
 :export {
-  primaryLight: $primary;
+  primaryLight: $sds-color-primary-400;
 }
 
 .heatmap {
@@ -10,7 +12,7 @@
       cursor: pointer;
 
       &:hover {
-        stroke: $primary;
+        stroke: $sds-color-primary-400;
         stroke-width: 1px;
       }
 
@@ -35,12 +37,12 @@
       }
 
       &.highlighted {
-        fill: $primary;
+        fill: $sds-color-primary-400;
       }
 
       &:hover {
         text {
-          fill: $primary;
+          fill: $sds-color-primary-400;
           cursor: pointer;
         }
 
@@ -54,7 +56,7 @@
     }
 
     .genusBorder {
-      stroke: $gray-light;
+      stroke: $sds-color-gray-300;
       stroke-width: 1;
     }
 
@@ -63,7 +65,7 @@
     }
 
     .rowLabelHover rect {
-      fill: $gray-lightest;
+      fill: $sds-color-gray-200;
     }
   }
 
@@ -80,13 +82,13 @@
     .link {
       .linkPath {
         fill: transparent;
-        stroke: $gray-light;
+        stroke: $sds-color-gray-300;
         stroke-width: 1px;
       }
 
       &.highlighted {
         path {
-          stroke: $primary;
+          stroke: $sds-color-primary-400;
         }
       }
     }
@@ -102,7 +104,7 @@
 
       &:hover {
         text {
-          fill: $primary;
+          fill: $sds-color-primary-400;
         }
       }
     }
@@ -134,7 +136,7 @@
         }
 
         .metadataAddLabel {
-          fill: $primary;
+          fill: $sds-color-primary-400;
         }
       }
     }
@@ -143,7 +145,7 @@
   .captionContainer {
     .caption {
       font-size: 12px;
-      fill: $gray-medium;
+      fill: $sds-color-gray-400;
       opacity: 0;
     }
   }

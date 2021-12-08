@@ -41,7 +41,7 @@
   h4.subtitle {
     @include font-body-xxs;
     margin-top: 5px;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .title {
@@ -62,7 +62,7 @@
 
   a {
     // Override _header.scss
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
   }
 
   ul {
@@ -117,7 +117,7 @@
 
     .topRow {
       @include font-header-s;
-      background-color: $gray-lightest;
+      background-color: $sds-color-gray-200;
 
       td {
         text-align: center;
@@ -126,7 +126,7 @@
 
     .sectionRow {
       @include font-header-s;
-      background-color: $gray-off-white;
+      background-color: $sds-color-gray-100;
 
       td {
         text-align: center;
@@ -154,7 +154,7 @@
     align-items: center;
 
     &:hover {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
 
     &.multiLine {

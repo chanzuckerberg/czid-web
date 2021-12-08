@@ -15,7 +15,7 @@
     bottom: 0;
     right: 0;
     height: calc(100% - 2em);
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   &__Inner {
@@ -39,7 +39,7 @@
 
     &_Image {
       flex-shrink: 0;
-      background-color: $white;
+      background-color: $sds-color-gray-white;
       max-width: 311px;
       box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, 0.1);
 
@@ -61,13 +61,13 @@
       }
 
       h2 {
-        color: $black;
+        color: $sds-color-gray-black;
         @include font-header-xl;
         margin-bottom: $sds-spaces-l;
       }
 
       p {
-        color: $gray-darkest;
+        color: $sds-color-gray-600;
         margin-bottom: $sds-spaces-xl;
         @include font-body-s;
 

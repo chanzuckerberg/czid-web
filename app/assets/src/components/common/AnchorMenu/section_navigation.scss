@@ -13,12 +13,12 @@
 
 .navTitle {
   @include font-header-xs;
-  color: $gray-dark;
+  color: $sds-color-gray-500;
   margin-bottom: $sds-spaces-xl;
   min-width: 110px;
 }
 
 .navLinksContainer {
   display: block;
-  border-left: 2px solid $gray-lightest;
+  border-left: 2px solid $sds-color-gray-200;
 }

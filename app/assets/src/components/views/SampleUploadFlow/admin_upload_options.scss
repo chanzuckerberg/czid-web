@@ -9,7 +9,7 @@
 
   .toggleLink {
     @include font-caps-xxxs;
-    color: $primary;
+    color: $sds-color-primary-400;
     cursor: pointer;
     margin-left: $sds-spaces-xs;
   }
@@ -21,7 +21,7 @@
   margin-top: $sds-spaces-xs;
   padding: $sds-spaces-l;
   padding-bottom: 0;
-  background-color: $gray-off-white;
+  background-color: $sds-color-gray-100;
 }
 
 .field {

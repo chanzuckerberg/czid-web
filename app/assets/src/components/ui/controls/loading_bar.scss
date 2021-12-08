@@ -3,13 +3,13 @@
 @import "~czifui/dist/variables";
 
 .loadingBarBackground {
-  background-color: $gray-lightest;
+  background-color: $sds-color-gray-200;
   height: $sds-spaces-s;
   border-radius: $border-radius-m;
   overflow: hidden;
 
   .loadingBar {
-    background-color: $primary;
+    background-color: $sds-color-primary-400;
     height: $sds-spaces-s;
     width: 0px;
     border-radius: $border-radius-m;
@@ -19,7 +19,7 @@
     }
 
     &.error {
-      background-color: $error-medium;
+      background-color: $sds-color-error-400;
     }
   }
 

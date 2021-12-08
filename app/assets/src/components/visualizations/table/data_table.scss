@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .disabled {
-  color: $gray-light !important;
+  color: $sds-color-gray-300 !important;
 }

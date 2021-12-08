@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .sign-in {
   margin-top: 0.4rem;
@@ -7,7 +8,7 @@
 }
 
 .alert-browser-support {
-  color: $gray-dark;
+  color: $sds-color-gray-500;
   margin-right: 0.75rem;
   margin-top: 15px;
 
@@ -16,6 +17,6 @@
   }
 
   @media only screen and (max-width: 748px) {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }

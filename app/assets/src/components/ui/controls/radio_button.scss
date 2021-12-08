@@ -11,14 +11,14 @@
   cursor: pointer;
 
   &:hover {
-    border: 5px solid $gray-light;
+    border: 5px solid $sds-color-gray-300;
   }
 
   &.selected {
-    border: 5px solid $primary;
+    border: 5px solid $sds-color-primary-400;
 
     &:hover {
-      border: 5px solid $primary-light;
+      border: 5px solid $sds-color-primary-300;
     }
   }
 

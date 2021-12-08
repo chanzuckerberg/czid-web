@@ -4,7 +4,7 @@
 @import "~czifui/dist/variables";
 
 .searchBoxList {
-  background-color: $white;
+  background-color: $sds-color-gray-white;
   border: $border-gray-light;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-s;
@@ -43,12 +43,12 @@
     }
 
     &::-webkit-scrollbar-track {
-      background-color: $gray-lightest;
+      background-color: $sds-color-gray-200;
       border-radius: $border-radius-m;
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: $gray-medium;
+      background-color: $sds-color-gray-400;
     }
 
     .listColumnTitles {
@@ -63,7 +63,7 @@
 
     .listColumnTitle {
       display: inline-block;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       font-weight: $font-weight-semibold;
     }
 
@@ -86,12 +86,12 @@
       display: inline-block;
 
       &:hover {
-        color: $primary;
+        color: $sds-color-primary-400;
       }
     }
 
     .listElementCount {
-      color: $gray-medium;
+      color: $sds-color-gray-400;
       display: inline-block;
       margin-left: auto;
       padding-left: $sds-spaces-xxl;

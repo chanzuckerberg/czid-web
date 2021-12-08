@@ -28,7 +28,7 @@
   }
 
   h2 {
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
     letter-spacing: 0.01875em;
     text-transform: uppercase;
     margin: $sds-spaces-xs 0 0 0;
@@ -83,11 +83,11 @@
 
     .date,
     .source {
-      color: $gray-darkest;
+      color: $sds-color-gray-600;
     }
 
     .title {
-      color: $black;
+      color: $sds-color-gray-black;
       margin: $sds-spaces-xs 0 0 0;
       @include font-header-l;
     }
@@ -102,12 +102,12 @@
     }
 
     .readMore {
-      color: $primary;
+      color: $sds-color-primary-400;
       margin: 12px 0 0 0;
 
       &:hover,
       &:active {
-        color: $primary-darkest;
+        color: $sds-color-primary-600;
       }
     }
 

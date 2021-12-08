@@ -26,8 +26,8 @@
     }
 
     &:global(.red.label) {
-      background-color: $error-dark !important;
-      border-color: $error-dark !important;
+      background-color: $sds-color-error-600 !important;
+      border-color: $sds-color-error-600 !important;
     }
 
     &:hover {

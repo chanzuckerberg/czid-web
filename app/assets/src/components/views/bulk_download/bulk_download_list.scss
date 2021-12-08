@@ -17,7 +17,7 @@
   .largeDownloadIcon {
     width: 150px;
     height: 150px;
-    fill: $gray-lightest;
+    fill: $sds-color-gray-200;
   }
 
   .loadingMessage {
@@ -26,7 +26,7 @@
 
   .lightCell {
     font-weight: $font-weight-regular;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }
 

@@ -40,7 +40,7 @@
     .statsRow {
       @include font-body-xxs;
 
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       flex: 1 0 auto;
 
       .reportInfoMsg {
@@ -80,7 +80,7 @@
   .consensusGenomeLink {
     @include font-caps-xxxs;
     margin-top: $sds-spaces-s;
-    color: $primary;
+    color: $sds-color-primary-400;
     cursor: pointer;
   }
 }
@@ -98,7 +98,7 @@
 
 .divider {
   height: 3px;
-  background-color: $gray-lightest;
+  background-color: $sds-color-gray-200;
   position: absolute;
   left: 0;
   right: 0;

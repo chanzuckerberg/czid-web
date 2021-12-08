@@ -6,8 +6,8 @@
 .dropdownTrigger {
   border: $border-gray-light;
   border-radius: $border-radius-m;
-  background-color: $white;
-  color: $black;
+  background-color: $sds-color-gray-white;
+  color: $sds-color-gray-black;
   letter-spacing: 0.4px;
   height: 34px;
   line-height: 24px;
@@ -25,7 +25,7 @@
 
   &.disabled {
     border: $border-gray-light;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     opacity: 1 !important;
   }
 
@@ -45,19 +45,19 @@
 
   .itemSubtext {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin-left: $sds-spaces-xs;
   }
 
   .placeholder {
-    color: $gray-light;
+    color: $sds-color-gray-300;
   }
 
   &.erred {
     border: $border-error;
 
     .placeholder {
-      color: $error-medium;
+      color: $sds-color-error-400;
     }
   }
 }

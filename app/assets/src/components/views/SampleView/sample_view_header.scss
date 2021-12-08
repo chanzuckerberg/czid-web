@@ -9,10 +9,10 @@
 
   .legacyLink {
     @include font-body-xxxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     padding-left: $sds-spaces-xxxs;
     &:hover {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
   }
 
@@ -21,7 +21,7 @@
   }
 
   .sampleDetailsLink {
-    color: $primary;
+    color: $sds-color-primary-400;
     font-weight: $font-weight-semibold;
     cursor: pointer;
 

@@ -11,14 +11,14 @@
 
   .title {
     @include font-header-xl;
-    color: $black;
+    color: $sds-color-gray-black;
   }
 
   .text {
     @include font-body-s;
     margin-top: $sds-spaces-s;
     margin-bottom: $sds-spaces-xl;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 
   .actions {
@@ -36,7 +36,7 @@
     }
 
     .loadingIcon {
-      fill: $gray-dark;
+      fill: $sds-color-gray-500;
       width: $icon-l;
       height: $icon-l;
       vertical-align: middle;
@@ -45,7 +45,7 @@
 
     .loading {
       @include font-body-s;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       vertical-align: middle;
     }
   }

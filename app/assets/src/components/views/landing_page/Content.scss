@@ -49,7 +49,7 @@
   p {
     @include font-body-m;
     margin: 0px;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
 
     @media (max-width: 768px) {
       @include font-body-s;
@@ -139,7 +139,7 @@
     max-width: 765px;
     margin: 0 auto;
     @include font-body-m;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
 
     @media (max-width: 768px) {
       @include font-body-s;
@@ -174,7 +174,7 @@
   p {
     @include font-body-xs;
     max-width: 225px;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 }
 

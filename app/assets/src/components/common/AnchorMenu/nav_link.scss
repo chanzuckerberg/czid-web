@@ -11,19 +11,19 @@ li.navLink {
   margin-left: -$sds-spaces-xxxs;
 
   &.currentNavItem {
-    border-left: 2px solid $primary;
-    color: $black;
+    border-left: 2px solid $sds-color-primary-400;
+    color: $sds-color-gray-black;
     font-weight: $font-weight-semibold;
   }
 
   &.navItem {
-    border-left: 2px solid $gray-lightest;
-    color: $gray-dark !important;
+    border-left: 2px solid $sds-color-gray-200;
+    color: $sds-color-gray-500 !important;
   }
 
   &:hover {
-    border-left: 2px solid $gray-medium;
-    color: $black !important;
+    border-left: 2px solid $sds-color-gray-400;
+    color: $sds-color-gray-black !important;
   }
 
   &:not(:last-child) {

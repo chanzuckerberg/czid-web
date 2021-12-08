@@ -9,7 +9,7 @@
 
   .note {
     @include font-body-xs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .noteContainer {
@@ -18,21 +18,21 @@
   }
 
   .background {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     border-radius: $border-radius-m;
   }
 
   .helpIcon {
-    fill: $gray-light;
+    fill: $sds-color-gray-300;
     margin-left: $sds-spaces-xs;
     display: inline-flex;
     vertical-align: middle;
 
     &:hover {
-      fill: $primary;
+      fill: $sds-color-primary-400;
 
       svg {
-        fill: $primary;
+        fill: $sds-color-primary-400;
       }
     }
   }
@@ -78,7 +78,7 @@
 
     .label {
       @include font-header-s;
-      color: $black;
+      color: $sds-color-gray-black;
       margin-bottom: $sds-spaces-xxs;
     }
 
@@ -87,7 +87,7 @@
       text-decoration-style: dashed;
 
       &:hover {
-        color: $primary;
+        color: $sds-color-primary-400;
         cursor: default;
       }
     }
@@ -108,10 +108,10 @@
 
         .dropdown {
           width: 190px;
-          color: $primary;
+          color: $sds-color-primary-400;
 
           span {
-            color: $gray-dark;
+            color: $sds-color-gray-500;
           }
         }
       }
@@ -146,7 +146,7 @@
 
       .input {
         input[type="text"] {
-          color: $gray-dark;
+          color: $sds-color-gray-500;
         }
       }
 
@@ -157,7 +157,7 @@
 
     .staticWarning {
       @include font-body-xxs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       margin-left: $sds-spaces-xxxs;
       margin-top: $sds-spaces-s;
       margin-right: 100px;

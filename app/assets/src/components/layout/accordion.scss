@@ -28,7 +28,7 @@
 
   .toggleIcon {
     font-size: 22px;
-    fill: $gray-dark;
+    fill: $sds-color-gray-500;
 
     &.topRight {
       margin: -$sds-spaces-xxs 0 0 $sds-spaces-default;
@@ -36,7 +36,7 @@
     }
 
     &:hover {
-      fill: $black;
+      fill: $sds-color-gray-black;
     }
   }
 }

@@ -27,10 +27,10 @@
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
-    border-top: 2px solid $gray-lightest;
+    border-top: 2px solid $sds-color-gray-200;
   }
 
   .projectDescription {
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 }

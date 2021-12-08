@@ -3,14 +3,14 @@
 
 .scatterplot {
   .trendline {
-    stroke: $primary;
+    stroke: $sds-color-primary-400;
     stroke-width: 2;
     fill: none;
   }
   .axis path,
   .axis line {
     fill: none;
-    stroke: $black;
+    stroke: $sds-color-gray-black;
     shape-rendering: crispEdges;
   }
 
@@ -23,11 +23,11 @@
   }
 
   .point {
-    stroke: $black;
+    stroke: $sds-color-gray-black;
     stroke-width: 1px;
-    fill: $white;
+    fill: $sds-color-gray-white;
     &:hover {
-      fill: $primary;
+      fill: $sds-color-primary-400;
     }
   }
 }
@@ -53,7 +53,7 @@
   }
   .sub-menu {
     padding: $sds-spaces-m;
-    background: $white;
+    background: $sds-color-gray-white;
     margin: 0;
   }
   .visualization-content {

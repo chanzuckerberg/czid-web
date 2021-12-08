@@ -6,7 +6,7 @@
 @import "~czifui/dist/variables";
 
 body {
-  color: $black;
+  color: $sds-color-gray-black;
   font-size: $font-size-body;
   font-family: $font-family-sans-serif;
 }
@@ -17,7 +17,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 2147483647;
-  background: $white no-repeat center center;
+  background: $sds-color-gray-white no-repeat center center;
   top: 0;
   left: 0;
   width: 100%;
@@ -47,8 +47,8 @@ body {
         border-radius: $border-radius-m;
         padding: 5px;
         margin: 0 13px;
-        color: $white;
-        background-color: $primary;
+        color: $sds-color-gray-white;
+        background-color: $sds-color-primary-400;
         cursor: pointer;
       }
       i.fa.fa-flask {
@@ -78,7 +78,7 @@ table {
     th {
       font-style: thin;
       font-size: 14px;
-      color: $gray-light;
+      color: $sds-color-gray-300;
     }
   }
 }

@@ -8,7 +8,7 @@
 }
 
 .projectSettingsTrigger {
-  color: $primary;
+  color: $sds-color-primary-400;
   cursor: pointer;
 }
 
@@ -27,7 +27,7 @@
   }
 
   .background {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     border-radius: $border-radius-m;
   }
 
@@ -63,7 +63,7 @@
 
           .toggle {
             @include font-caps-xxxs;
-            color: $primary;
+            color: $sds-color-primary-400;
             cursor: pointer;
           }
         }
@@ -71,7 +71,7 @@
         .note {
           @include font-body-xs;
           margin-top: $sds-spaces-xxs;
-          color: $gray-dark;
+          color: $sds-color-gray-500;
         }
       }
     }

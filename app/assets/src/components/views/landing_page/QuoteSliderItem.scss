@@ -5,8 +5,8 @@
 
 .carouselCell {
   width: 100%;
-  background-color: $primary;
-  color: $white;
+  background-color: $sds-color-primary-400;
+  color: $sds-color-gray-white;
 }
 
 .quoteContainer {
@@ -23,7 +23,7 @@
   }
 
   p {
-    color: $white;
+    color: $sds-color-gray-white;
     @include font-header-xl;
 
     @media (max-width: 768px) {

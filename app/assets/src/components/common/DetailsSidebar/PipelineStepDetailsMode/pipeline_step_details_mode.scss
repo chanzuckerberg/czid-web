@@ -51,40 +51,40 @@
 
   a {
     // Use border-bottom instead of text-decoration: underline to give space under text
-    border-bottom: 1px dashed $gray-medium;
+    border-bottom: 1px dashed $sds-color-gray-400;
   }
 
   &.inProgress {
-    background-color: $primary-lightest;
+    background-color: $sds-color-primary-200;
 
     .statusIcon {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: $primary;
+      color: $sds-color-primary-400;
       font-size: 20px;
     }
   }
 
   &.pipelineErrored {
-    background-color: $error-off-white;
+    background-color: $sds-color-error-100;
 
     .statusIcon {
-      fill: $error-medium;
+      fill: $sds-color-error-400;
     }
   }
 
   &.userErrored {
-    background-color: $warning-off-white;
+    background-color: $sds-color-warning-100;
     .statusIcon {
-      fill: $warning-medium;
+      fill: $sds-color-warning-400;
     }
   }
 
   &.finished {
-    background-color: $success-off-white;
+    background-color: $sds-color-success-100;
     .statusIcon {
-      fill: $success-medium;
+      fill: $sds-color-success-400;
     }
   }
 }
@@ -108,29 +108,29 @@
 
   pre {
     padding: 12px 12px 18px;
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     margin-left: 15px;
   }
 
   code {
     @include font-code;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 
   a {
     // Override color: inherit in _header.scss.
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
   }
 }
 
 .fileLink {
-  color: $primary;
+  color: $sds-color-primary-400;
   cursor: pointer;
   margin-bottom: $sds-spaces-s;
 }
 
 .disabledFileLink {
-  color: $gray-dark;
+  color: $sds-color-gray-500;
   cursor: default;
   margin-bottom: $sds-spaces-s;
 }
@@ -161,6 +161,6 @@
 
   a {
     // Override color: inherit in _header.scss.
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
   }
 }

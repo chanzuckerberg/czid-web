@@ -16,7 +16,7 @@
   }
 
   &__tooltip {
-    background-color: $white;
+    background-color: $sds-color-gray-white;
     border: $border-gray-light;
     border-radius: $border-radius-m;
     box-shadow: $box-shadow-s;
@@ -60,7 +60,7 @@
 
       &__title {
         text-transform: uppercase;
-        color: $gray-dark;
+        color: $sds-color-gray-500;
         border-bottom: 1px solid $gray-lightest;
         margin-bottom: 0.5em;
       }

@@ -16,27 +16,27 @@
     .title {
       @include font-header-l;
 
-      color: $black;
+      color: $sds-color-gray-black;
     }
 
     .message {
       @include font-body-s;
 
-      color: $black;
+      color: $sds-color-gray-black;
       margin-top: $sds-spaces-xxs;
     }
 
     .suggestion {
       @include font-header-xs;
 
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       margin-top: $sds-spaces-m;
     }
 
     .link {
       @include font-header-xs;
       // Override color: inherit in _header.scss.
-      color: $primary !important;
+      color: $sds-color-primary-400 !important;
       display: block;
       margin-top: $sds-spaces-m;
 

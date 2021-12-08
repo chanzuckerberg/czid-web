@@ -6,14 +6,14 @@
 .uploadConfirmationModal {
   .title {
     @include font-header-xl;
-    color: $black;
+    color: $sds-color-gray-black;
   }
 
   .body {
     @include font-body-s;
     margin-top: $sds-spaces-s;
     margin-bottom: $sds-spaces-xl;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 
   .actions {

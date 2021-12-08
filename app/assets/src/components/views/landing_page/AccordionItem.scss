@@ -6,9 +6,9 @@
 /* Style the buttons that are used to open and close the accordion panel */
 
 .accordion {
-  background-color: $white;
+  background-color: $sds-color-gray-white;
   font-family: $font-family-sans-serif;
-  color: $black;
+  color: $sds-color-gray-black;
   cursor: pointer;
   padding: 26px 45px;
   text-align: left;
@@ -26,17 +26,17 @@
   }
 
   &:hover {
-    color: $primary;
+    color: $sds-color-primary-400;
 
     svg {
       .plusStroke {
-        stroke: $primary;
+        stroke: $sds-color-primary-400;
       }
     }
   }
 
   p {
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
     margin-top: 1em;
   }
 
@@ -80,18 +80,18 @@
 /* Style the accordion panel. Note: hidden by default */
 .panel {
   padding: 0;
-  background-color: $white;
+  background-color: $sds-color-gray-white;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
 
   a {
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
     text-decoration: none !important;
 
     &:hover,
     &:active {
-      color: $primary-darkest !important;
+      color: $sds-color-primary-600 !important;
     }
   }
 

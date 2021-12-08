@@ -9,12 +9,12 @@
 
   .tab {
     @include font-header-s;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin-right: 30px;
     cursor: pointer;
 
     &.selected {
-      color: $black;
+      color: $sds-color-gray-black;
     }
   }
 
@@ -26,7 +26,7 @@
   .indicator {
     position: absolute;
     height: 3px;
-    background-color: $primary;
+    background-color: $sds-color-primary-400;
     transition: all 0.2s;
     transform: translateY(22px);
     z-index: 1;
@@ -39,6 +39,6 @@
     left: 0;
     right: 0;
     margin-top: 3px;
-    background-color: $gray-lightest;
+    background-color: $sds-color-gray-200;
   }
 }

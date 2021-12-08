@@ -13,7 +13,7 @@
 
   .description {
     @include font-body-s;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 
   .label {
@@ -24,7 +24,7 @@
     }
 
     .infoIcon {
-      fill: $gray-dark;
+      fill: $sds-color-gray-500;
       height: $icon-s;
       width: $icon-s;
       margin-left: $sds-spaces-xxs;
@@ -32,7 +32,7 @@
       vertical-align: -$sds-spaces-xxxs;
 
       &:hover {
-        fill: $primary;
+        fill: $sds-color-primary-400;
       }
     }
   }

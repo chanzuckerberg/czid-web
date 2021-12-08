@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 $tooltip-border-width: 1px;
-$tooltip-border-color: $gray-light;
+$tooltip-border-color: $sds-color-gray-300;
 $tooltip-tip-size: 8px;
 
 .mapTooltip {
@@ -30,7 +31,7 @@ $tooltip-tip-size: 8px;
     }
 
     &:after {
-      border-top-color: $white;
+      border-top-color: $sds-color-gray-white;
       border-width: $tooltip-tip-size;
       margin-left: -$tooltip-tip-size;
     }
@@ -50,7 +51,7 @@ $tooltip-tip-size: 8px;
 
         &.hoverable {
           &:hover {
-            color: $primary;
+            color: $sds-color-primary-400;
           }
         }
       }

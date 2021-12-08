@@ -1,13 +1,14 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .error {
-  fill: $error-medium;
+  fill: $sds-color-error-400;
 }
 
 .warning {
-  fill: $warning-medium;
+  fill: $sds-color-warning-400;
 }
 
 .info {
-  fill: $primary;
+  fill: $sds-color-primary-400;
 }

@@ -47,12 +47,12 @@
   }
 
   .link {
-    color: $primary;
+    color: $sds-color-primary-400;
     cursor: pointer;
   }
 
   .expandLink {
-    color: $primary;
+    color: $sds-color-primary-400;
     margin-top: $sds-spaces-m;
     cursor: pointer;
   }
@@ -61,10 +61,10 @@
 .cardLicense {
   @include font-body-xxs;
   padding-top: $sds-spaces-m;
-  color: $gray-dark;
+  color: $sds-color-gray-500;
 
   .cardLink {
-    color: $black;
+    color: $sds-color-gray-black;
     cursor: pointer;
 
     &:hover {

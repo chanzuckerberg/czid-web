@@ -93,8 +93,8 @@
 
     .bannerText {
       @include font-body-xxs;
-      color: $gray-dark;
-      background: $white;
+      color: $sds-color-gray-500;
+      background: $sds-color-gray-white;
       border-radius: $border-radius-m;
       box-shadow: $box-shadow-m;
       cursor: default;

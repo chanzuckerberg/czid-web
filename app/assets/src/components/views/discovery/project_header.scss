@@ -19,7 +19,7 @@
 
   .item {
     @include font-body-s;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     display: flex;
     align-items: center;
     white-space: nowrap;
@@ -33,7 +33,7 @@
 .smallIcon {
   height: 16px;
   margin-right: $sds-spaces-xxxs;
-  fill: $gray-dark;
+  fill: $sds-color-gray-500;
 
   .userIcon {
     height: $icon-s;

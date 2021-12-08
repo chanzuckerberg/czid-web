@@ -1,4 +1,5 @@
 @import "../../themes/colors.scss";
+@import "~czifui/dist/variables";
 
 .wizard {
   font-size: 13px;
@@ -30,7 +31,7 @@
     }
 
     &__page {
-      color: $gray-light;
+      color: $sds-color-gray-300;
       letter-spacing: 0.4px;
     }
   }

@@ -25,7 +25,7 @@
     .headerLabel {
       @include font-header-xs;
 
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
 
     .primaryHeader {
@@ -49,7 +49,7 @@
 
       .subtext {
         @include font-body-xs;
-        color: $gray-light;
+        color: $sds-color-gray-300;
       }
     }
 
@@ -60,6 +60,6 @@
 
   .icon {
     height: 10px !important; // Override .idseq-ui.button
-    fill: $primary;
+    fill: $sds-color-primary-400;
   }
 }

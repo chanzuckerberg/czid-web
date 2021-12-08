@@ -1,8 +1,9 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .mainCarousel {
   cursor: grab;
-  background: $primary;
+  background: $sds-color-primary-400;
 
   :global(.slick-dots) {
     position: absolute;

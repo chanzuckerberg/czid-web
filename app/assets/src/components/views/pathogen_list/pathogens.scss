@@ -18,7 +18,7 @@
 
     .pathogenTaxid {
       @include font-body-xxs;
-      color: $gray-dark !important;
+      color: $sds-color-gray-500 !important;
 
       &:hover {
         text-decoration: underline;

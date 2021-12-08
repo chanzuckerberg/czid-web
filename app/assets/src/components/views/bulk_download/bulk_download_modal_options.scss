@@ -15,7 +15,7 @@
 
     .title {
       @include font-caps-xxxs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
   }
 }
@@ -29,7 +29,7 @@
 
     .header {
       @include font-header-xs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
 
     .fill {
@@ -57,7 +57,7 @@
 
     .sampleCount {
       @include font-body-xxs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
   }
 }
@@ -72,7 +72,7 @@
 
   &:hover,
   &.selected {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   &.disabled {
@@ -85,7 +85,7 @@
     .name,
     .description,
     .fileType {
-      color: $gray-light;
+      color: $sds-color-gray-300;
     }
   }
 
@@ -105,12 +105,12 @@
 
   .description {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .fileType {
     @include font-body-xs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }
 
@@ -140,12 +140,12 @@
 
     .info {
       @include font-body-xxs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
   }
 
   .checkboxField {
     @include font-body-xxs;
-    color: $black;
+    color: $sds-color-gray-black;
   }
 }

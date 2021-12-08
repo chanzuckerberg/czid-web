@@ -22,12 +22,12 @@
 .noTreeBanner {
   margin-top: 50px;
   text-align: center;
-  color: $gray-dark;
+  color: $sds-color-gray-500;
 }
 
 .taxonName {
   &:hover {
-    color: $primary;
+    color: $sds-color-primary-400;
     cursor: pointer;
   }
 }
@@ -71,8 +71,8 @@
 
 .attributionsBanner {
   @include font-body-xxs;
-  background-color: $white;
-  color: $gray-dark;
+  background-color: $sds-color-gray-white;
+  color: $sds-color-gray-500;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-s;
   padding: $sds-spaces-xxxs $sds-spaces-s;
@@ -87,6 +87,6 @@
   .infoIcon {
     margin: 1px $sds-spaces-xxs 0 0; // top margin is to align the icon with the text
     vertical-align: text-top;
-    fill: $gray-medium;
+    fill: $sds-color-gray-400;
   }
 }

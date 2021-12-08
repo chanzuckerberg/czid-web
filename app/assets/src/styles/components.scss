@@ -9,15 +9,15 @@
   &.primary {
     border: $border-primary;
     background: $primary-blue !important;
-    color: $white !important;
+    color: $sds-color-gray-white !important;
     &:hover {
-      background: $white !important;
+      background: $sds-color-gray-white !important;
       color: $primary-blue !important;
     }
   }
   &.secondary {
     border: $border-primary;
-    background: $white !important;
+    background: $sds-color-gray-white !important;
     color: $primary-blue !important;
   }
 }
@@ -61,7 +61,7 @@
     height: 20px;
     line-height: 20px;
     border-radius: $border-radius-l;
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     color: $primary-blue;
     font-weight: normal;
     font-size: inherit;

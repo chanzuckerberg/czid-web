@@ -16,7 +16,7 @@
   }
 
   .map {
-    border-top: 2px solid $gray-lightest;
+    border-top: 2px solid $sds-color-gray-200;
   }
 
   .note {
@@ -48,7 +48,7 @@
     flex: 0 0 auto;
 
     .counter {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
 
     .label {

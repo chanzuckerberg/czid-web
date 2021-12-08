@@ -21,11 +21,11 @@
   .plusIcon {
     flex: 1 0 auto;
     width: 14px;
-    fill: $gray-medium;
+    fill: $sds-color-gray-400;
     vertical-align: center;
 
     &:hover {
-      fill: $primary;
+      fill: $sds-color-primary-400;
     }
   }
 }
@@ -33,7 +33,7 @@
 .cell {
   @include font-body-xs;
 
-  color: $black;
+  color: $sds-color-gray-black;
   font-weight: $font-weight-semibold;
   text-align: center;
   overflow: hidden;
@@ -41,11 +41,11 @@
 
 .row {
   &:global(.ReactVirtualized__Table__headerRow) {
-    border-bottom: 3px solid $gray-lightest;
+    border-bottom: 3px solid $sds-color-gray-200;
 
     &:hover {
       .dragHandleIcon {
-        background: $gray-light;
+        background: $sds-color-gray-300;
         width: 1px;
         height: $sds-spaces-m;
 
@@ -60,7 +60,7 @@
     border-bottom: 1px solid $gray-lightest;
 
     &:hover {
-      background-color: $primary-off-white;
+      background-color: $sds-color-primary-100;
     }
 
     &:focus {
@@ -75,7 +75,7 @@
   .header {
     @include font-body-s;
 
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     font-weight: $font-weight-semibold;
     outline: 0;
     text-transform: none;
@@ -104,7 +104,7 @@
 
         .ruler {
           position: fixed;
-          background-color: $primary-light;
+          background-color: $sds-color-primary-300;
           width: $sds-spaces-xxxs;
           z-index: 1;
         }
@@ -128,7 +128,7 @@
         min-width: 0;
 
         &:hover {
-          color: $black;
+          color: $sds-color-gray-black;
           cursor: pointer;
         }
       }
@@ -158,7 +158,7 @@
       vertical-align: middle;
 
       &:hover {
-        color: $black;
+        color: $sds-color-gray-black;
         cursor: default;
       }
     }

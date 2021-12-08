@@ -19,7 +19,7 @@
 .subTitle {
   @include font-body-xs;
 
-  color: $gray-dark;
+  color: $sds-color-gray-500;
   margin: 0 $sds-spaces-m;
 }
 
@@ -37,7 +37,7 @@
       margin-top: $sds-spaces-xxs;
       height: 15px;
       width: 15px;
-      fill: $gray-medium;
+      fill: $sds-color-gray-400;
     }
   }
 
@@ -71,13 +71,13 @@
   }
 
   .link {
-    color: $primary;
+    color: $sds-color-primary-400;
     line-height: 30px;
     cursor: pointer;
   }
 
   .expandLink {
-    color: $primary;
+    color: $sds-color-primary-400;
     margin-top: $sds-spaces-m;
     cursor: pointer;
   }
@@ -87,10 +87,10 @@
   @include font-body-xxs;
 
   padding-top: $sds-spaces-m;
-  color: $gray-dark;
+  color: $sds-color-gray-500;
 
   .wikiLink {
-    color: $black !important;
+    color: $sds-color-gray-black !important;
     cursor: pointer;
 
     &:hover {

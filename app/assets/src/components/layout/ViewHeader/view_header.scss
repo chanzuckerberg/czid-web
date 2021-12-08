@@ -27,7 +27,7 @@
 
   .sampleName {
     @include font-header-xl;
-    color: $black;
+    color: $sds-color-gray-black;
     max-width: 800px;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -40,13 +40,13 @@
     display: inline-block;
 
     &:hover {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
   }
 
   .pretitle {
     @include font-header-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin-bottom: 3px;
     margin-left: 1px;
     display: flex;
@@ -59,7 +59,7 @@
 
       &:hover {
         /* Overwrite header.scss */
-        color: $primary !important;
+        color: $sds-color-primary-400 !important;
       }
     }
 

@@ -14,13 +14,13 @@
   }
 
   .hasBackground:nth-child(odd) {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   .title {
     @include font-caps-xxs;
 
-    color: $black;
+    color: $sds-color-gray-black;
     padding: 0 $sds-spaces-m;
     height: 40px;
   }

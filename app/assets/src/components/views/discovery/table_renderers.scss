@@ -17,13 +17,13 @@
 
   .itemName {
     @include font-header-m;
-    color: $black;
+    color: $sds-color-gray-black;
     margin-bottom: $sds-spaces-xxxs;
   }
 
   .itemDescription {
     @include font-body-s;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     font-weight: $font-weight-regular;
     line-height: 20px;
     margin: 0 0 $sds-spaces-s 0;
@@ -39,7 +39,7 @@
   .itemDetails {
     @include font-body-xxs;
 
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     font-weight: $font-weight-regular;
 
     span:not(:last-child) {
@@ -65,14 +65,14 @@
 }
 
 .icon {
-  fill: $primary;
+  fill: $sds-color-primary-400;
   height: 100%;
   justify-content: center;
   width: $icon-xl;
 }
 
 .iconSample {
-  fill: $gray-light;
+  fill: $sds-color-gray-300;
   width: 30px;
 }
 
@@ -107,7 +107,7 @@
 
       .vizName {
         @include font-header-m;
-        color: $black;
+        color: $sds-color-gray-black;
         margin-bottom: $sds-spaces-xxxs;
 
         min-width: 0;
@@ -124,7 +124,7 @@
   }
   .vizDetails {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     font-weight: $font-weight-regular;
   }
 }
@@ -140,7 +140,7 @@
     margin-right: 12px;
 
     .icon {
-      fill: $primary;
+      fill: $sds-color-primary-400;
       width: 36px;
     }
   }
@@ -161,7 +161,7 @@
 
         min-width: 0;
         text-align: left;
-        color: $black;
+        color: $sds-color-gray-black;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
@@ -176,7 +176,7 @@
       @include font-body-xxs;
 
       font-weight: $font-weight-regular;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       text-align: left;
 
       span:not(:first-child) {
@@ -190,7 +190,7 @@
 
     .consensusGenomeCount {
       @include font-body-xxxs;
-      color: $primary;
+      color: $sds-color-primary-400;
     }
   }
 }
@@ -207,7 +207,7 @@
   .analysesCounts {
     @include font-body-xxxs;
     margin-top: $sds-spaces-xxxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }
 
@@ -243,7 +243,7 @@
 
     min-width: 0;
     text-align: left;
-    color: $black;
+    color: $sds-color-gray-black;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -253,7 +253,7 @@
     @include font-body-xxs;
 
     font-weight: $font-weight-regular;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     text-align: left;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -263,13 +263,13 @@
 .referenceGenomeTooltip {
   .title {
     @include font-header-xs;
-    color: $white;
+    color: $sds-color-gray-white;
   }
 
   .details {
     @include font-header-xxs;
     font-weight: $font-weight-regular;
-    color: $gray-medium;
+    color: $sds-color-gray-400;
   }
 }
 
@@ -310,7 +310,7 @@
     margin-right: 12px;
 
     .icon {
-      fill: $primary;
+      fill: $sds-color-primary-400;
       width: 36px;
     }
   }

@@ -9,17 +9,17 @@
   cursor: pointer;
 
   .editableText {
-    border-bottom: 1px dashed $gray-dark;
+    border-bottom: 1px dashed $sds-color-gray-500;
   }
 
   .editIcon {
     flex: 1 0 auto;
     height: $icon-s;
-    fill: $gray-dark;
+    fill: $sds-color-gray-500;
     margin-left: $sds-spaces-m;
 
     &:hover {
-      fill: $primary;
+      fill: $sds-color-primary-400;
     }
   }
 }
@@ -30,11 +30,11 @@
   margin-top: $sds-spaces-xxs;
 
   &.warning {
-    color: $warning-dark;
+    color: $sds-color-warning-600;
   }
 
   &.error {
-    color: $error-dark;
+    color: $sds-color-error-600;
   }
 
   .alertIcon {

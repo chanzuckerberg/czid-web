@@ -28,7 +28,7 @@
   }
 
   .optionText {
-    color: $black;
+    color: $sds-color-gray-black;
 
     &.selectedOption {
       font-weight: $font-weight-semibold;
@@ -37,31 +37,31 @@
 
   .optionSubtext {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   &:hover {
     // override background color from BareDropdown
-    background-color: $gray-off-white !important;
+    background-color: $sds-color-gray-100 !important;
   }
 }
 
 .disabledOption {
-  color: $gray-light;
+  color: $sds-color-gray-300;
   // override cursor from BareDropdown
   cursor: default !important;
 
   .optionText {
-    color: $gray-light;
+    color: $sds-color-gray-300;
   }
 
   .optionSubtext {
-    color: $gray-light;
+    color: $sds-color-gray-300;
   }
 
   &:hover {
     // override background color from BareDropdown
-    background-color: $white !important;
+    background-color: $sds-color-gray-white !important;
   }
 }
 
@@ -69,7 +69,7 @@
 :global(.ui.dropdown .menu) {
   :global(.header) {
     @include font-caps-xxxxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
 
     margin: $sds-spaces-m 0;
   }
@@ -86,7 +86,7 @@
 
   .message {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   &:hover {

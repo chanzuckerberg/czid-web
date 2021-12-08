@@ -66,7 +66,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $gray-lightest;
+      background-color: $sds-color-gray-200;
     }
   }
 
@@ -91,7 +91,7 @@
 
     .message {
       @include font-body-xxs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
 
     &:hover {
@@ -103,7 +103,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $gray-lightest;
+      background-color: $sds-color-gray-200;
     }
 
     &.active {
@@ -113,7 +113,7 @@
 
   .menu {
     min-width: 100%;
-    background-color: $white;
+    background-color: $sds-color-gray-white;
     box-shadow: $box-shadow-m;
     border: $border-gray-light;
     border-radius: $border-radius-m;
@@ -151,7 +151,7 @@
   .noResultsMessage {
     @include font-body-xxs;
     padding: $sds-spaces-xs $sds-spaces-l;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .innerMenu {
@@ -182,13 +182,13 @@
 
   &:global(.active) {
     & > i:global(.dropdown):global(.icon):before {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
   }
 }
 
 .searchInputIcon {
-  fill: $gray-medium;
+  fill: $sds-color-gray-400;
   margin: 0;
   padding: 0;
   position: absolute;

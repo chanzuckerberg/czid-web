@@ -5,10 +5,10 @@
 
 .ctaButton {
   display: inline-block;
-  color: $white;
-  background: $primary;
+  color: $sds-color-gray-white;
+  background: $sds-color-primary-400;
   font-family: $font-family-sans-serif;
-  border: 1px solid $primary;
+  border: 1px solid $sds-color-primary-400;
   text-decoration: none;
   padding: 7px $sds-spaces-l;
   border-radius: 999px;

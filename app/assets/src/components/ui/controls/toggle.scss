@@ -42,18 +42,18 @@
 // Place text to the right
 .toggle.toggle.toggle input:indeterminate ~ label {
   padding-left: 34px;
-  color: $gray-darkest !important;
+  color: $sds-color-gray-600 !important;
 }
 
 .toggle.toggle.toggle input:checked ~ label:before {
-  background-color: $white !important; // override semantic-ui
+  background-color: $sds-color-gray-white !important; // override semantic-ui
   z-index: -1; // make sure the white background color is behind the text label
   border: $border-primary;
   padding-left: $sds-spaces-xxs;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {
-  background-color: $white !important; // override semantic-ui
+  background-color: $sds-color-gray-white !important; // override semantic-ui
   z-index: -1; // make sure the white background color is behind the text label
   border: $border-gray-light;
 }
@@ -68,13 +68,13 @@
 }
 
 .toggle.toggle.toggle input:checked ~ label:after {
-  background-color: $primary;
+  background-color: $sds-color-primary-400;
   left: calc(
     68px - 9px - 18px
   ); // inner width of toggle minus inner padding minus width of circle
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:after {
-  background: $gray-lightest;
+  background: $sds-color-gray-200;
   left: 2px;
 }

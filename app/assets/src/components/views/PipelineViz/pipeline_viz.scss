@@ -5,28 +5,28 @@
 
 // Exporting strings to style nodes and edges in vis.js
 :export {
-  defaultNodeText: $black;
+  defaultNodeText: $sds-color-gray-black;
 
-  notStartedBg: $white;
-  notStartedText: scale-color($black, $alpha: -50%);
+  notStartedBg: $sds-color-gray-white;
+  notStartedText: scale-color($sds-color-gray-black, $alpha: -50%);
   notStartedShadow: scale-color($box-shadow-light, $alpha: -50%);
 
-  inProgressBg: $primary-lightest;
-  inProgressHoverBg: hover-state($primary-lightest);
+  inProgressBg: $sds-color-primary-200;
+  inProgressHoverBg: hover-state($sds-color-primary-200);
 
-  finishedBg: $success-off-white;
-  finishedHoverBg: hover-state($success-off-white);
+  finishedBg: $sds-color-success-100;
+  finishedHoverBg: hover-state($sds-color-success-100);
 
-  pipelineErroredBg: $error-off-white;
-  pipelineEroredHoverBg: hover-state($error-off-white);
+  pipelineErroredBg: $sds-color-error-100;
+  pipelineEroredHoverBg: hover-state($sds-color-error-100);
 
-  userErroredBg: $warning-off-white;
-  userErroredHoverBg: hover-state($warning-off-white);
+  userErroredBg: $sds-color-warning-100;
+  userErroredHoverBg: hover-state($sds-color-warning-100);
 
-  stageBg: $gray-off-white;
-  defaultEdgeColor: $gray-medium;
-  outputEdgeColor: $primary;
-  inputEdgeColor: $black;
+  stageBg: $sds-color-gray-100;
+  defaultEdgeColor: $sds-color-gray-400;
+  outputEdgeColor: $sds-color-primary-400;
+  inputEdgeColor: $sds-color-gray-black;
 
   nodeShadowColor: $box-shadow-light;
 }
@@ -87,7 +87,7 @@
 
 .stageButton {
   @include font-caps-xxs;
-  background-color: $white;
+  background-color: $sds-color-gray-white;
   border-radius: $border-radius-m;
   padding: $sds-spaces-xs $sds-spaces-s;
   cursor: pointer;
@@ -102,24 +102,24 @@
   }
 
   &.finished {
-    background-color: $success-lightest;
+    background-color: $sds-color-success-200;
   }
 
   &.notStarted {
-    background-color: $white;
-    color: $gray-dark;
+    background-color: $sds-color-gray-white;
+    color: $sds-color-gray-500;
   }
 
   &.inProgress {
-    background-color: $primary-lightest;
+    background-color: $sds-color-primary-200;
   }
 
   &.pipelineErrored {
-    background-color: $error-lightest;
+    background-color: $sds-color-error-200;
   }
 
   &.userErrored {
-    background-color: $warning-off-white;
+    background-color: $sds-color-warning-100;
   }
 }
 
@@ -137,7 +137,7 @@
   }
 
   .inProgressIcon {
-    color: $primary;
+    color: $sds-color-primary-400;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,15 +146,15 @@
   }
 
   .pipelineErroredIcon {
-    fill: $error-medium;
+    fill: $sds-color-error-400;
   }
 
   .userErroredIcon {
-    fill: $warning-medium;
+    fill: $sds-color-warning-400;
   }
 
   .finishedIcon {
-    fill: $success-medium;
+    fill: $sds-color-success-400;
   }
 
   .stageName {
@@ -182,15 +182,15 @@
     position: relative;
     width: calc(100% - 8px);
     padding: 0.5px 0;
-    background-color: $gray-medium;
+    background-color: $sds-color-gray-400;
 
     &.fromColoring {
-      background-color: $black;
+      background-color: $sds-color-gray-black;
       padding: 1px 0;
     }
 
     &.toColoring {
-      background-color: $primary;
+      background-color: $sds-color-primary-400;
       padding: 1px 0;
     }
   }
@@ -199,14 +199,14 @@
     position: absolute;
     right: 0;
     height: 75%;
-    fill: $gray-medium;
+    fill: $sds-color-gray-400;
 
     &.fromColoring {
-      fill: $black;
+      fill: $sds-color-gray-black;
     }
 
     &.toColoring {
-      fill: $primary-dark;
+      fill: $sds-color-primary-500;
     }
   }
 }
@@ -224,10 +224,10 @@
 
   .closeIcon {
     box-sizing: content-box;
-    fill: $gray-light;
+    fill: $sds-color-gray-300;
 
     &:hover {
-      fill: $black;
+      fill: $sds-color-gray-black;
     }
   }
 }
@@ -241,7 +241,7 @@
 }
 
 .openedStage {
-  background-color: $gray-off-white;
+  background-color: $sds-color-gray-100;
   border-radius: $border-radius-m;
   padding: 16px 0;
   display: flex;
@@ -273,14 +273,14 @@
 
 .pipelineInfo {
   @include font-body-xxxs;
-  color: $gray-medium;
+  color: $sds-color-gray-400;
   margin-top: 24px;
   margin-bottom: 18px;
 }
 
 .headerDivider {
   height: 3px;
-  background-color: $gray-lightest;
+  background-color: $sds-color-gray-200;
   position: absolute;
   left: 0;
   right: 0;

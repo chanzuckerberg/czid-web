@@ -12,7 +12,7 @@
   &__page-3,
   &__page-4 {
     &__subtitle {
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       font-weight: 700;
       height: 16px;
       line-height: 16px;
@@ -49,7 +49,7 @@
           }
 
           &.column-view {
-            color: $primary;
+            color: $sds-color-primary-400;
             font-weight: 700;
           }
         }
@@ -63,7 +63,7 @@
 
   &__page-1 {
     &__action {
-      color: $primary;
+      color: $sds-color-primary-400;
       font-weight: 700;
     }
   }
@@ -163,6 +163,6 @@
   }
 
   &__error {
-    color: $error-medium;
+    color: $sds-color-error-400;
   }
 }

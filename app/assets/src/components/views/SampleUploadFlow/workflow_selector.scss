@@ -18,11 +18,11 @@
     padding: $sds-spaces-l;
 
     &:hover {
-      background-color: $gray-off-white;
+      background-color: $sds-color-gray-100;
     }
 
     &.selected {
-      background-color: $gray-off-white;
+      background-color: $sds-color-gray-100;
     }
 
     .technologyOptions {
@@ -32,11 +32,11 @@
         padding: $sds-spaces-m;
 
         &:hover {
-          background-color: $gray-lightest;
+          background-color: $sds-color-gray-200;
         }
 
         &.selected {
-          background-color: $gray-lightest;
+          background-color: $sds-color-gray-200;
         }
       }
     }
@@ -67,14 +67,14 @@
         }
 
         .infoIcon {
-          fill: $gray-dark;
+          fill: $sds-color-gray-500;
           height: $icon-s;
           width: $icon-s;
           margin-left: $sds-spaces-xs;
           vertical-align: -$sds-spaces-xxxs;
 
           &:hover {
-            fill: $primary;
+            fill: $sds-color-primary-400;
           }
         }
       }
@@ -85,7 +85,7 @@
 
       .technologyDescription {
         @include font-body-xxs;
-        color: $gray-darkest;
+        color: $sds-color-gray-600;
 
         .externalLink {
           color: black !important;

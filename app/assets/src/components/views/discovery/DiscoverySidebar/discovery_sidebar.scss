@@ -9,7 +9,7 @@
   overflow-y: scroll;
 
   .noData {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin: 20px;
   }
 }
@@ -30,14 +30,14 @@
   }
 
   .hasBackground:nth-child(odd) {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   // See SampleDetailsMode/metadata_section.scss
   .title {
     @include font-caps-xxs;
     line-height: 40px;
-    color: $black;
+    color: $sds-color-gray-black;
     padding: 0 $sds-spaces-m;
     height: 40px;
   }
@@ -64,7 +64,7 @@
     .bar {
       margin: 0 1px;
       flex: 1 0;
-      background-color: $primary-light;
+      background-color: $sds-color-primary-300;
       max-width: 14px;
     }
   }
@@ -91,7 +91,7 @@
 .descriptionContainer {
   @include font-body-xxs;
   white-space: pre-wrap;
-  color: $gray-dark;
+  color: $sds-color-gray-500;
 }
 
 .dataList {
@@ -138,7 +138,7 @@
   }
 
   .bar {
-    background-color: $primary-light;
+    background-color: $sds-color-primary-300;
     color: white;
     cursor: pointer;
     display: inline-block;
@@ -154,12 +154,12 @@
     text-transform: uppercase;
     margin-top: 5px;
     margin-bottom: $sds-spaces-m;
-    color: $primary;
+    color: $sds-color-primary-400;
     cursor: pointer;
   }
 
   .count {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     font-weight: 600;
     vertical-align: top;
   }

@@ -1,4 +1,5 @@
 @import "themes/colors";
+@import "~czifui/dist/variables";
 
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i,800");
 
@@ -80,13 +81,13 @@ h6,
   font-family: $font-family-sans-serif;
   font-weight: $headings-font-weight;
   line-height: $headings-line-height;
-  color: $black;
+  color: $sds-color-gray-black;
 
   small,
   .small {
     font-weight: normal;
     line-height: 1;
-    color: $error-medium;
+    color: $sds-color-error-400;
   }
 }
 
@@ -102,7 +103,7 @@ h3,
   margin-top: $line-height-computed;
   margin-bottom: ($line-height-computed / 2);
   font-family: $font-family-sans-serif;
-  color: $black;
+  color: $sds-color-gray-black;
 
   small,
   .small {
@@ -173,11 +174,11 @@ p,
 .body-text {
   margin: 0 0 ($line-height-computed / 2);
   font-size: $font-size-body;
-  color: $black;
+  color: $sds-color-gray-black;
   font-family: $font-family-sans-serif;
 
   .subdued {
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 }
 .caption {
@@ -185,7 +186,7 @@ p,
   font-family: $font-family-sans-serif;
 
   .subdued {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }
 // Emphasis & misc
@@ -226,5 +227,5 @@ small,
 
 //Contextual colors
 .text-muted {
-  color: $gray-dark;
+  color: $sds-color-gray-500;
 }

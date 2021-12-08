@@ -20,12 +20,12 @@
 
   .note {
     @include font-body-xs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin-bottom: $sds-spaces-l;
   }
 
   .background {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     border-radius: $border-radius-m;
   }
 
@@ -82,15 +82,15 @@
       height: 16px;
 
       &.errorMessage {
-        color: $error-medium;
+        color: $sds-color-error-400;
       }
 
       &.infoMessage {
-        color: $gray-dark;
+        color: $sds-color-gray-500;
       }
 
       &.successMessage {
-        color: $success-medium;
+        color: $sds-color-success-400;
       }
     }
   }

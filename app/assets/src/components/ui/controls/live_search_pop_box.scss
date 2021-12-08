@@ -29,11 +29,11 @@
     @include font-caps-xxxs;
 
     background-color: transparent;
-    color: $gray-light;
+    color: $sds-color-gray-300;
     margin: $sds-spaces-l $sds-spaces-l 0;
     padding: $sds-spaces-xxs 0;
     text-transform: uppercase;
-    border-top: 2px solid $gray-lightest;
+    border-top: 2px solid $sds-color-gray-200;
   }
 
   // skip divider line
@@ -48,14 +48,14 @@
     .title {
       @include font-header-xs;
 
-      color: $black;
+      color: $sds-color-gray-black;
       font-weight: $font-weight-semibold;
     }
 
     .description {
       @include font-body-xxs;
 
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
   }
 }

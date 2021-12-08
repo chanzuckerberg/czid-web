@@ -1,15 +1,16 @@
 @import "../themes/colors";
+@import "~czifui/dist/variables";
 
 .tidy-tree {
   .node {
     circle {
-      stroke: $primary;
+      stroke: $sds-color-primary-400;
       stroke-width: 2px;
       fill: white;
 
       &:hover {
         cursor: pointer;
-        fill: $primary-lightest;
+        fill: $sds-color-primary-200;
       }
     }
 
@@ -17,12 +18,12 @@
       font-size: 8px;
 
       &.name-missing {
-        fill: $gray-medium;
+        fill: $sds-color-gray-400;
       }
 
       &:hover {
         cursor: pointer;
-        fill: $primary;
+        fill: $sds-color-primary-400;
       }
     }
 
@@ -30,10 +31,10 @@
     &__internal {
       &--collapsed {
         circle {
-          fill: $primary;
+          fill: $sds-color-primary-400;
 
           &:hover {
-            fill: $primary-light;
+            fill: $sds-color-primary-300;
           }
         }
 
@@ -47,10 +48,10 @@
     &__leaf {
       &--collapsed {
         circle {
-          fill: $primary;
+          fill: $sds-color-primary-400;
 
           &:hover {
-            fill: $primary-light;
+            fill: $sds-color-primary-300;
           }
         }
       }
@@ -59,10 +60,10 @@
 
   .link {
     fill: none;
-    stroke: $gray-medium;
+    stroke: $sds-color-gray-400;
 
     &.highlighted {
-      stroke: $primary;
+      stroke: $sds-color-primary-400;
     }
   }
 }

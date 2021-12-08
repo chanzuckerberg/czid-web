@@ -17,7 +17,7 @@
 
 .xAxisTitle {
   @include font-body-xxs;
-  color: $black;
+  color: $sds-color-gray-black;
   margin-bottom: $sds-spaces-s;
 
   div {
@@ -33,7 +33,7 @@
 
 .xGrid {
   fill: none;
-  stroke: $gray-lightest;
+  stroke: $sds-color-gray-200;
 }
 
 .canvas {
@@ -63,11 +63,11 @@
 
 .emptyBarSpace {
   &:hover {
-    fill: $gray-off-white;
+    fill: $sds-color-gray-100;
     fill-opacity: 0.9;
   }
   &:hover ~ .fullBar {
-    stroke: $primary;
+    stroke: $sds-color-primary-400;
   }
 }
 
@@ -77,7 +77,7 @@
 
 .barPiece {
   &:hover {
-    stroke: $primary;
+    stroke: $sds-color-primary-400;
   }
 }
 

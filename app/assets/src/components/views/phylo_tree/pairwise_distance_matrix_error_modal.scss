@@ -29,7 +29,7 @@
       }
 
       .imgMatrix {
-        fill: $primary;
+        fill: $sds-color-primary-400;
         width: $img-s;
         flex-shrink: 0;
       }
@@ -38,7 +38,7 @@
     .message {
       @include font-body-s;
       margin-top: $sds-spaces-s;
-      color: $gray-darkest;
+      color: $sds-color-gray-600;
     }
   }
 

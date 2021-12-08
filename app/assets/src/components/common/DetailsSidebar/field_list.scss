@@ -9,12 +9,12 @@
   align-items: center;
 
   &:nth-child(even) {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   .label {
     font-weight: $font-weight-semibold;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
     width: 160px;
     flex-shrink: 0;
     margin-right: $sds-spaces-xl;

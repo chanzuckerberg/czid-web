@@ -6,7 +6,7 @@
 .sampleUploadFlow {
   .inner {
     padding: 0 60px;
-    background-color: $white;
+    background-color: $sds-color-gray-white;
   }
 
   &.narrow .inner {
@@ -34,7 +34,7 @@
     .helpText {
       @include font-body-xxs;
       margin-bottom: $sds-spaces-m;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
 
     .continueButton {
@@ -54,13 +54,13 @@
   .infoLink {
     @include font-caps-xxxs;
     margin-left: $sds-spaces-m;
-    color: $primary;
+    color: $sds-color-primary-400;
     cursor: pointer;
   }
 }
 
 .headerWrapper {
-  border-bottom: 4px solid $gray-off-white;
+  border-bottom: 4px solid $sds-color-gray-100;
 }
 
 .sampleUploadFlowHeader {
@@ -78,12 +78,12 @@
 
   .subtitle {
     margin-top: 5px;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary;
+    color: $sds-color-primary-400;
     cursor: pointer;
     margin-left: 5px;
   }
@@ -98,16 +98,16 @@
       width: 110px;
 
       &.active .circle {
-        color: $white;
-        background-color: $primary;
+        color: $sds-color-gray-white;
+        background-color: $sds-color-primary-400;
       }
 
       &.enabled {
         cursor: pointer;
 
         .circle {
-          color: $white;
-          background-color: $primary;
+          color: $sds-color-gray-white;
+          background-color: $sds-color-primary-400;
           opacity: 0.3;
         }
       }
@@ -127,7 +127,7 @@
 
     .text {
       @include font-header-xxs;
-      color: $black;
+      color: $sds-color-gray-black;
     }
   }
 }
@@ -143,13 +143,13 @@
 
     .createProjectButton {
       @include font-caps-xxxs;
-      color: $primary;
+      color: $sds-color-primary-400;
       cursor: pointer;
       margin-top: $sds-spaces-xxs;
     }
 
     .projectCreationContainer {
-      background-color: $gray-off-white;
+      background-color: $sds-color-gray-100;
       padding: 20px;
       margin-top: 20px;
     }
@@ -180,7 +180,7 @@
 
 .remoteFileUpload {
   .info {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     padding: 20px;
     margin-bottom: $sds-spaces-m;
 
@@ -222,7 +222,7 @@
 
 .localFileUpload {
   .info {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     padding: 20px;
     margin-bottom: $sds-spaces-m;
 
@@ -270,7 +270,7 @@
   .uploadMsg {
     @include font-body-m;
     margin-bottom: 40px;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .reviewHeader {
@@ -290,7 +290,7 @@
 
       &.enabled {
         .link {
-          color: $primary;
+          color: $sds-color-primary-400;
           cursor: pointer;
         }
       }
@@ -300,7 +300,7 @@
       }
 
       .link {
-        color: $gray-light;
+        color: $sds-color-gray-300;
         cursor: default;
       }
     }
@@ -317,7 +317,7 @@
   }
 
   .section {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     padding: $sds-spaces-xl;
     display: flex;
 
@@ -327,7 +327,7 @@
 
     .publicAccess {
       @include font-body-s;
-      color: $gray-darkest;
+      color: $sds-color-gray-600;
       margin-left: $sds-spaces-m;
     }
 
@@ -341,7 +341,7 @@
 
       .existingSamples {
         @include font-body-xs;
-        color: $gray-dark;
+        color: $sds-color-gray-500;
       }
 
       .truncated {
@@ -358,14 +358,14 @@
         display: inline-block;
         margin-top: 5px;
         margin-bottom: $sds-spaces-m;
-        color: $primary;
+        color: $sds-color-primary-400;
         cursor: pointer;
       }
     }
 
     .descriptionContainer {
       @include font-body-s;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       white-space: pre-wrap;
       margin: $sds-spaces-m 0;
     }
@@ -378,7 +378,7 @@
     .item {
       min-width: 180px;
       margin-right: $sds-spaces-xl;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       flex: 1 0 0;
 
       .subheader {
@@ -407,11 +407,11 @@
   }
 
   .error {
-    color: $error-medium;
+    color: $sds-color-error-400;
   }
 
   .link {
-    color: $primary;
+    color: $sds-color-primary-400;
   }
 
   .files {
@@ -440,7 +440,7 @@
 
   .uploadMessage,
   .successMessage {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .loadingIcon {

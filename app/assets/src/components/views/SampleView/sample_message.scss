@@ -16,7 +16,7 @@
     .reportStatus {
       display: inline-flex;
       align-items: center;
-      background-color: $error-lightest;
+      background-color: $sds-color-error-200;
       border-radius: $border-radius-l;
       padding: $sds-spaces-xxs $sds-spaces-s;
 
@@ -31,28 +31,28 @@
       }
 
       &.warning {
-        background-color: $warning-off-white;
-        color: $warning-medium;
+        background-color: $sds-color-warning-100;
+        color: $sds-color-warning-400;
       }
 
       &.error {
-        background-color: $error-off-white;
-        color: $error-medium;
+        background-color: $sds-color-error-100;
+        color: $sds-color-error-400;
       }
 
       &.inProgress {
-        background-color: $primary-lightest;
-        color: $primary;
+        background-color: $sds-color-primary-200;
+        color: $sds-color-primary-400;
 
         .icon {
-          fill: $primary;
+          fill: $sds-color-primary-400;
           font-size: 20px;
         }
       }
 
       &.info {
-        background-color: $info-off-white;
-        color: $info-medium;
+        background-color: $sds-color-primary-200;
+        color: $sds-color-primary-400;
       }
     }
 
@@ -70,7 +70,7 @@
 
     .actionLink {
       @include font-header-xxs;
-      color: $primary !important;
+      color: $sds-color-primary-400 !important;
       margin-top: $sds-spaces-m;
       margin-left: $sds-spaces-xxxs;
 

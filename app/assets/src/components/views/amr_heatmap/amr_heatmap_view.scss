@@ -17,7 +17,7 @@
   }
 
   .menu {
-    background-color: $white;
+    background-color: $sds-color-gray-white;
 
     .filterRow {
       margin: 20px 0;
@@ -36,6 +36,6 @@
   .noDataMsg {
     margin: 50px;
     text-align: center;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }

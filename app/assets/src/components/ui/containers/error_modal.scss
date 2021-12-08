@@ -13,17 +13,17 @@
 
       .error {
         display: inline-flex;
-        background-color: $error-lightest;
+        background-color: $sds-color-error-200;
         border-radius: $border-radius-l;
         padding: $sds-spaces-xxs $sds-spaces-s;
-        background-color: $error-off-white;
-        color: $error-medium;
+        background-color: $sds-color-error-100;
+        color: $sds-color-error-400;
         margin-bottom: $sds-spaces-l;
         margin-left: -$sds-spaces-xxs;
 
         .icon {
           width: $icon-l;
-          fill: $error-medium;
+          fill: $sds-color-error-400;
         }
 
         .text {
@@ -40,16 +40,16 @@
       .message {
         @include font-body-s;
         margin-top: $sds-spaces-s;
-        color: $gray-darkest;
+        color: $sds-color-gray-600;
 
         .actionLink {
-          color: $primary !important;
+          color: $sds-color-primary-400 !important;
         }
       }
     }
 
     .imgMicrobe {
-      fill: $gray-lightest;
+      fill: $sds-color-gray-200;
       width: $img-l;
       margin: -$sds-spaces-l;
     }

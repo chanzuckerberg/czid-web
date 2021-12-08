@@ -6,10 +6,10 @@
 .listContainer {
   margin: $sds-spaces-m 0;
 
-  background-color: $info-off-white;
+  background-color: $sds-color-primary-200;
 
   &.warning {
-    background-color: $warning-off-white;
+    background-color: $sds-color-warning-100;
   }
 }
 
@@ -32,16 +32,16 @@
   margin: 0 calc(#{$sds-spaces-m} + #{$sds-spaces-l} + 20px);
 
   &:nth-child(odd) {
-    background-color: $info-light;
+    background-color: $sds-color-info-100-overlay;
     &.warning {
-      background-color: $warning-light;
+      background-color: $sds-color-warning-100-overlay;
     }
   }
 
   &:nth-child(even) {
-    background-color: $info-off-white;
+    background-color: $sds-color-primary-200;
     &.warning {
-      background-color: $warning-off-white;
+      background-color: $sds-color-warning-100;
     }
   }
 
@@ -52,6 +52,6 @@
 
 .link {
   // Overwrite <a> inherit rule in header.scss
-  color: $primary !important;
+  color: $sds-color-primary-400 !important;
   cursor: pointer;
 }

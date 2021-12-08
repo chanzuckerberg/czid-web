@@ -18,7 +18,7 @@
 
   &:hover,
   &.selected {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   .radioButton {
@@ -37,7 +37,7 @@
 
   .description {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }
 

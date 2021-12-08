@@ -9,7 +9,7 @@
     // remove scrollbar width
     display: table;
     width: calc(100% - 10px);
-    border-bottom: 2px solid $gray-lightest;
+    border-bottom: 2px solid $sds-color-gray-200;
     text-align: left;
 
     th {
@@ -53,13 +53,13 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: $gray-dark;
+      background-color: $sds-color-gray-500;
     }
   }
 
   &__header {
     @include font-header-s;
-    color: $black;
+    color: $sds-color-gray-black;
 
     &.column-reserved-selectable {
       width: 30px;
@@ -90,7 +90,7 @@
     }
 
     tr:nth-child(even) {
-      background-color: $gray-off-white;
+      background-color: $sds-color-gray-100;
     }
 
     td {

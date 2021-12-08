@@ -1,8 +1,9 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .helpIcon {
-  fill: $gray-medium;
+  fill: $sds-color-gray-400;
 }
 
 .tooltip {

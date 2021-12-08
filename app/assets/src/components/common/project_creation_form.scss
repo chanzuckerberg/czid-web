@@ -11,19 +11,19 @@
     .infoLink {
       @include font-caps-xxxs;
       margin-left: $sds-spaces-xxs;
-      color: $primary;
+      color: $sds-color-primary-400;
       cursor: pointer;
     }
   }
 
   .optionalLabel {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .descriptionTextArea {
     @include font-body-xs;
-    background-color: $white;
+    background-color: $sds-color-gray-white;
     height: 100px;
     margin-top: 5px;
     padding: $sds-spaces-l;
@@ -34,7 +34,7 @@
 
   .charCounter {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     text-align: right;
   }
 
@@ -42,7 +42,7 @@
     margin-bottom: $sds-spaces-s;
 
     .info {
-      background-color: $gray-lightest;
+      background-color: $sds-color-gray-200;
       padding: 20px;
       margin-bottom: $sds-spaces-default;
       border-radius: $border-radius-m;
@@ -78,7 +78,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $gray-lightest;
+      background-color: $sds-color-gray-200;
     }
 
     .radioButtonAndProjectIcon {
@@ -114,7 +114,7 @@
   }
 
   .error {
-    color: $error-medium;
+    color: $sds-color-error-400;
     margin-left: $sds-spaces-m;
     margin-bottom: $sds-spaces-m;
   }
