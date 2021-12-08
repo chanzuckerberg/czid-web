@@ -12,7 +12,7 @@ const postToFrontendMetrics = async (url, resp, duration) =>
       http_method: resp.config.method,
       http_status: resp.status,
     })
-    .catch(e => Promise.reject(e.response.data));
+    .catch(e => Promise.reject(new Error(e?.response?.data)));
 
 const instrument = func => {
   const wrapper = async (url, ...args) => {
