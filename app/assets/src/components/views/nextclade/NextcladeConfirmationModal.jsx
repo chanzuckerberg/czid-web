@@ -17,7 +17,7 @@ const NextcladeConfirmationModal = ({ onCancel, onConfirm, open, loading }) => {
         You’re ready to send your consensus genomes to Nextclade.
       </div>
       <div className={cs.text}>
-        Once you click Confirm, you will leave IDseq and send your sequence(s)
+        Once you click Confirm, you will leave CZ ID and send your sequence(s)
         and reference tree to Nextclade. Please ensure that your Reference Tree
         does not contain any personally identifiable information. Nextclade is a
         third-party tool and has its own policies. You can learn more at {}

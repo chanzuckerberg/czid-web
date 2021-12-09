@@ -1,5 +1,5 @@
 export const NO_TARGET_PROJECT_ERROR =
-  "Please select an IDseq project to upload your samples to.";
+  "Please select a CZ ID project to upload your samples to.";
 
 export const NO_VALID_SAMPLES_FOUND_ERROR = "No valid samples were found.";
 

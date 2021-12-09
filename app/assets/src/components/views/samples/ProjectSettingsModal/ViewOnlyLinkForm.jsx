@@ -295,7 +295,7 @@ class ViewOnlyLinkForm extends React.Component {
           </div>
           <div className={cs.noteContainer}>
             <div className={cs.note}>
-              Anyone, including non-IDseq users, can use this link to access a
+              Anyone, including non-CZ ID users, can use this link to access a
               View-Only version of your project.
             </div>
             <ColumnHeaderTooltip

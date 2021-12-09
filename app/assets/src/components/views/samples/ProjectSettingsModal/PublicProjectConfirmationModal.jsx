@@ -35,24 +35,24 @@ class PublicProjectConfirmationModal extends React.Component {
             </div>
             <div className={cs.text}>
               <p>
-                By making this project public, anyone who has access to IDseq
+                By making this project public, anyone who has access to CZ ID
                 will be able to see your project and the included samples. When
                 you upload a new sample to this project, it will automatically
-                be available for all IDseq users. This action is{" "}
+                be available for all CZ ID users. This action is{" "}
                 <span className={cs.highlight}>not reversible</span>.
               </p>
               <p>
                 For more information, view our{" "}
                 <span
                   className={cs.link}
-                  onClick={() => window.open("https://idseq.net/privacy")}
+                  onClick={() => window.open("https://czid.org/privacy")}
                 >
                   privacy policy
                 </span>{" "}
                 or{" "}
                 <span
                   className={cs.link}
-                  onClick={() => window.open("https://idseq.net/terms")}
+                  onClick={() => window.open("https://czid.org/terms")}
                 >
                   terms of service
                 </span>

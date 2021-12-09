@@ -92,7 +92,9 @@ class RemoteSampleFileUpload extends React.Component {
         // Use error message provided by the backend if it exists
         this.setState({ error: e.data.status });
       } else if (e.status) {
-        this.setState({ error: `Encountered an unexpected error with status code: ${e.status}` });
+        this.setState({
+          error: `Encountered an unexpected error with status code: ${e.status}`,
+        });
       } else {
         // Otherwise fallback to a generic error message
         this.setState({ error: NO_VALID_SAMPLES_FOUND_ERROR });
@@ -120,7 +122,7 @@ class RemoteSampleFileUpload extends React.Component {
             <div className={cs.title}>S3 Bucket Instructions</div>
             <List
               listItems={[
-                `Please ensure that IDseq has permissions to read/list your S3
+                `Please ensure that CZ ID has permissions to read/list your S3
                 bucket. Contact us for help getting set up.`,
                 `Also convert links like
                 "https://s3-us-west-2.amazonaws.com/your_s3_bucket/rawdata/fastqs"

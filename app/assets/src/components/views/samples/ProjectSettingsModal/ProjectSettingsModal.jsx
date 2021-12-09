@@ -89,9 +89,9 @@ class ProjectSettingsModal extends React.Component {
                     <div className={cs.text}>
                       <div className={cs.label}>Public Project</div>
                       <div className={cs.note}>
-                        This project is viewable and searchable to anyone in
-                        IDseq, and they’ll be able to perform actions like
-                        create heatmaps and download.
+                        This project is viewable and searchable to anyone in CZ
+                        ID, and they’ll be able to perform actions like create
+                        heatmaps and download.
                       </div>
                     </div>
                   </div>
@@ -115,7 +115,7 @@ class ProjectSettingsModal extends React.Component {
                             trigger={
                               <ColumnHeaderTooltip
                                 trigger={<span>Change to public</span>}
-                                content="Changing this project to Public will allow anyone signed into IDseq to view and use your samples."
+                                content="Changing this project to Public will allow anyone signed into CZ ID to view and use your samples."
                               />
                             }
                           />
