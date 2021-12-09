@@ -10,8 +10,8 @@ const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
 
 class CanceledPromiseError extends Error {
-  constructor(promise, ...params) {
-    super(...params);
+  constructor(promise) {
+    super("cancelled promise");
     this.promise = promise;
   }
 }
@@ -66,7 +66,7 @@ class InfiniteTable extends React.Component {
     return !!this.loadedRowsMap[index];
   };
 
-  loadMoreRows = async ({ startIndex, stopIndex }) => {
+  loadMoreRows = ({ startIndex, stopIndex }) => {
     const { onLoadRows, minimumBatchSize } = this.props;
 
     for (let i = startIndex; i <= stopIndex; i++) {
@@ -95,9 +95,11 @@ class InfiniteTable extends React.Component {
         return true;
       })
       .catch(error => {
-        // eslint-disable-next-line no-console
-        console.error("Error loading rows", error);
-      });
+        if (!(error instanceof CanceledPromiseError)) {
+          // eslint-disable-next-line no-console
+          console.error("Error loading rows", error);
+        }
+      }); 
     return this.cancelableLoadRowsPromise.promise;
   };
 
