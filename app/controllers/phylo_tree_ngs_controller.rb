@@ -127,7 +127,7 @@ class PhyloTreeNgsController < ApplicationController
           pt["clustermap_svg_url"] = get_presigned_s3_url(s3_path: @phylo_tree_ng.output_path(PhyloTreeNg::OUTPUT_CLUSTERMAP_SVG), content_type: "image/svg+xml")
 
           # Check if the any of the samples had low coverage (coverage breadth < 25%).
-          pt["has_low_coverage"] = pr_to_coverage_breadth.values.any? { |coverage| coverage < 0.25 }
+          pt["has_low_coverage"] = pr_to_coverage_breadth.values.any? { |coverage| coverage.present? && coverage < 0.25 }
         end
 
         render json: pt
