@@ -1,20 +1,19 @@
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .circle {
   cursor: pointer;
-  fill: $sds-color-secondary-400;
+  fill: $secondary;
   fill-opacity: 0.85;
 
   &.hoverable {
     &:hover {
-      fill: $sds-color-primary-500;
+      fill: $primary-dark;
       fill-opacity: 1;
     }
   }
 
   &.active {
-    fill: $sds-color-primary-500;
+    fill: $primary-dark;
     fill-opacity: 1;
   }
 }

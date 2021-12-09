@@ -1,35 +1,34 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .tabContainer {
   max-width: 440px;
   width: 100%;
   display: flex;
-  background: $sds-color-gray-100;
+  background: $gray-off-white;
 
   &:hover {
     cursor: pointer;
 
     .tabIndicator {
-      background: $sds-color-primary-400;
+      background: $primary;
     }
 
     .tabCheckIcon {
-      fill: $sds-color-primary-400;
+      fill: $primary;
 
       & .outerCircle {
-        stroke: $sds-color-primary-400;
+        stroke: $primary;
       }
 
       & .checkMark {
-        stroke: $sds-color-gray-white;
+        stroke: $white;
       }
     }
 
     .circle {
-      fill: $sds-color-gray-white;
+      fill: $white;
     }
   }
 
@@ -41,7 +40,7 @@
 .tabIndicator {
   min-height: 100%;
   width: 7px;
-  background: $sds-color-gray-200;
+  background: $gray-lightest;
 }
 
 .tabContent {
@@ -72,7 +71,7 @@
 }
 
 .tabTitle {
-  color: $sds-color-gray-black;
+  color: $black;
   @include font-header-l;
 
   @media (max-width: 1200px) {
@@ -81,7 +80,7 @@
 }
 
 .tabDescription {
-  color: $sds-color-gray-600;
+  color: $gray-darkest;
   @include font-body-xs;
 
   @media (max-width: 1200px) {

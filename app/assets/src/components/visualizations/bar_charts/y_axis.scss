@@ -1,13 +1,12 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .text {
   @include font-body-xxs;
-  fill: $sds-color-gray-black;
+  fill: $black;
 
   &:hover {
-    fill: $sds-color-primary-400;
+    fill: $primary;
     cursor: pointer;
   }
 }

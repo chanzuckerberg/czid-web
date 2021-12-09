@@ -1,34 +1,33 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .uploadConfirmationModal {
   .title {
     @include font-header-xl;
-    color: $sds-color-gray-black;
+    color: $black;
   }
 
   .body {
     @include font-body-s;
-    margin-top: $sds-spaces-s;
-    margin-bottom: $sds-spaces-xl;
-    color: $sds-color-gray-600;
+    margin-top: $space-s;
+    margin-bottom: $space-xl;
+    color: $gray-darkest;
   }
 
   .actions {
-    margin-top: $sds-spaces-m;
+    margin-top: $space-m;
     display: flex;
 
     .item {
       cursor: pointer;
 
       &:not(:first-child) {
-        margin-left: $sds-spaces-xs;
+        margin-left: $space-xs;
       }
 
       &:not(:last-child) {
-        margin-right: $sds-spaces-xs;
+        margin-right: $space-xs;
       }
     }
   }

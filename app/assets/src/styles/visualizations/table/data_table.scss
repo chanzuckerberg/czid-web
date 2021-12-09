@@ -1,6 +1,5 @@
 @import "../../themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .data-table {
   max-height: 300px;
@@ -9,13 +8,13 @@
     // remove scrollbar width
     display: table;
     width: calc(100% - 10px);
-    border-bottom: 2px solid $sds-color-gray-200;
+    border-bottom: 2px solid $gray-lightest;
     text-align: left;
 
     th {
       line-height: normal;
       padding: 0;
-      padding-right: $sds-spaces-m;
+      padding-right: 10px;
       height: 40px;
 
       &:first-child {
@@ -40,7 +39,7 @@
       border-bottom: 1px solid $gray-lightest;
       word-wrap: break-word;
       line-height: normal;
-      padding: 5px $sds-spaces-m 5px 0;
+      padding: 5px 10px 5px 0;
       height: 40px;
 
       &:first-child {
@@ -53,13 +52,13 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: $sds-color-gray-500;
+      background-color: $gray-dark;
     }
   }
 
   &__header {
     @include font-header-s;
-    color: $sds-color-gray-black;
+    color: $black;
 
     &.column-reserved-selectable {
       width: 30px;
@@ -90,7 +89,7 @@
     }
 
     tr:nth-child(even) {
-      background-color: $sds-color-gray-100;
+      background-color: $gray-off-white;
     }
 
     td {

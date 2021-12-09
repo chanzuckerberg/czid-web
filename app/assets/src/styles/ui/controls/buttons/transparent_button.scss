@@ -1,32 +1,31 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .idseq-ui.button.transparent-btn {
-  border: 1px solid $sds-color-gray-white;
+  border: 1px solid $white;
   background-color: transparent;
-  color: $sds-color-gray-white;
+  color: $white;
   height: 2rem;
   min-width: 8rem;
   margin-top: 0.4rem;
 
   .icon-label {
     svg {
-      fill: $sds-color-gray-white;
+      fill: $white;
     }
   }
 
   &:hover {
-    background: $sds-color-primary-400;
+    background: $primary;
     border: $border-primary-dark;
-    color: $sds-color-gray-white;
+    color: $white;
   }
 
   &:active,
   &:focus {
     border: $border-primary-dark;
-    background-color: $sds-color-primary-500;
-    color: $sds-color-gray-white;
+    background-color: $primary-dark;
+    color: $white;
   }
 
   &:disabled {
@@ -35,7 +34,7 @@
 
     .icon-label {
       svg {
-        fill: $sds-color-gray-400;
+        fill: $gray-medium;
       }
     }
   }

@@ -1,6 +1,5 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .projectHeader {
   justify-content: left;
@@ -14,7 +13,7 @@
   flex: 1 0 auto;
 
   .toggleContainer {
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
   }
 
   .table {
@@ -27,10 +26,10 @@
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
-    border-top: 2px solid $sds-color-gray-200;
+    border-top: 2px solid $gray-lightest;
   }
 
   .projectDescription {
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
   }
 }

@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .heatmap {
   margin-top: -$header-margin-bottom;
@@ -14,31 +13,31 @@
       display: flex;
 
       .controlElement {
-        margin-left: $sds-spaces-m;
+        margin-left: $space-m;
       }
     }
   }
 
   .menu {
-    background-color: $sds-color-gray-white;
+    background-color: $white;
 
     .filterRow {
-      margin-top: $sds-spaces-l;
-      margin-bottom: $sds-spaces-l;
-      height: $sds-spaces-xxl;
+      margin-top: $space-l;
+      margin-bottom: $space-l;
+      height: $space-xxl;
 
       .filterControl {
         float: left;
         margin-left: auto;
-        padding: 0 $sds-spaces-default;
+        padding: 0 $space-default;
         width: calc(100% / 6);
       }
     }
 
     .filterTagsList {
-      margin-bottom: $sds-spaces-l;
+      margin-bottom: $space-l;
       .filterTag {
-        margin-right: $sds-spaces-xs;
+        margin-right: $space-xs;
 
         &:last-child {
           margin-right: 0;
@@ -48,22 +47,22 @@
 
     .statsRow {
       @include font-body-xs;
-      color: $sds-color-gray-500;
-      height: $sds-spaces-xxl;
-      margin-left: $sds-spaces-xxs;
-      padding: 0 $sds-spaces-default;
+      color: $gray-dark;
+      height: $space-xxl;
+      margin-left: $space-xxs;
+      padding: 0 $space-default;
 
       .infoIcon {
-        margin-top: $sds-spaces-xxxs;
-        margin-left: $sds-spaces-xxxs;
-        margin-right: $sds-spaces-xxxs;
+        margin-top: $space-xxxs;
+        margin-left: $space-xxxs;
+        margin-right: $space-xxxs;
         height: 15px;
         width: 15px;
-        fill: $sds-color-gray-500;
+        fill: $gray-dark;
         vertical-align: text-top;
 
         &:hover {
-          fill: $sds-color-primary-400;
+          fill: $primary;
         }
       }
     }
@@ -75,7 +74,7 @@
 
     .filterLine {
       height: 0px;
-      border-bottom: 10px solid $sds-color-gray-white;
+      border-bottom: 10px solid $white;
       box-shadow: $box-shadow-m;
     }
 
@@ -84,9 +83,9 @@
       line-height: unset;
       display: inline-block;
       cursor: pointer;
-      color: $sds-color-gray-500;
-      background-color: $sds-color-gray-white;
-      padding: 0 $sds-spaces-l;
+      color: $gray-dark;
+      background-color: $white;
+      padding: 0 $space-l;
       border-radius: 0 0 $border-radius-m $border-radius-m;
       box-shadow: $box-shadow-s;
     }
@@ -96,7 +95,7 @@
   .noDataMsg {
     margin: 50px;
     text-align: center;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 }
 
@@ -105,21 +104,21 @@
 }
 
 .listContainer {
-  background-color: $sds-color-warning-100;
+  background-color: $warning-off-white;
 }
 
 .notificationContainer {
-  margin: $sds-spaces-l 0 $sds-spaces-l;
+  margin: $space-l 0 $space-l;
 }
 
 .messageLine {
   @include font-body-xxs;
-  padding: $sds-spaces-xxs 0;
-  margin-right: $sds-spaces-xl;
+  padding: $space-xxs 0;
+  margin-right: $space-xl;
 }
 
 .conditionList {
-  margin-left: $sds-spaces-xl;
+  margin-left: $space-xl;
 }
 
 .iconAlert {

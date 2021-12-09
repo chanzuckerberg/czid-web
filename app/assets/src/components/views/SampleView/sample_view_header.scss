@@ -2,17 +2,16 @@
 @import "~styles/themes/typography";
 @import "~styles/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .viewHeader {
   margin-bottom: 5px;
 
   .legacyLink {
     @include font-body-xxxs;
-    color: $sds-color-gray-500;
-    padding-left: $sds-spaces-xxxs;
+    color: $gray-dark;
+    padding-left: 2px;
     &:hover {
-      color: $sds-color-primary-400;
+      color: $primary;
     }
   }
 
@@ -21,7 +20,7 @@
   }
 
   .sampleDetailsLink {
-    color: $sds-color-primary-400;
+    color: $primary;
     font-weight: $font-weight-semibold;
     cursor: pointer;
 
@@ -31,12 +30,12 @@
   }
 
   .warningIcon {
-    margin-left: $sds-spaces-xxxs;
+    margin-left: 2px;
     transform: translateY(1px);
   }
 
   .controlElement {
-    margin-left: $sds-spaces-m;
+    margin-left: $space-m;
 
     &:not(:last-child) {
       margin-right: 0;

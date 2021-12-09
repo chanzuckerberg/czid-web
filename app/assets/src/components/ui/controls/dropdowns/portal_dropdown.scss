@@ -1,5 +1,4 @@
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .triggerContainer {
   outline: none;
@@ -57,7 +56,7 @@
   }
 
   &.active {
-    color: $sds-color-primary-400;
+    color: $primary;
   }
 }
 

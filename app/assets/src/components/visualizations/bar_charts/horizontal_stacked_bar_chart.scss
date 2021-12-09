@@ -1,7 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 // these defaults can be overridden by passing in your
 // own class names and css to the component.
@@ -17,8 +16,8 @@
 
 .xAxisTitle {
   @include font-body-xxs;
-  color: $sds-color-gray-black;
-  margin-bottom: $sds-spaces-s;
+  color: $black;
+  margin-bottom: $space-s;
 
   div {
     display: inline-block;
@@ -33,7 +32,7 @@
 
 .xGrid {
   fill: none;
-  stroke: $sds-color-gray-200;
+  stroke: $gray-lightest;
 }
 
 .canvas {
@@ -63,11 +62,11 @@
 
 .emptyBarSpace {
   &:hover {
-    fill: $sds-color-gray-100;
+    fill: $gray-off-white;
     fill-opacity: 0.9;
   }
   &:hover ~ .fullBar {
-    stroke: $sds-color-primary-400;
+    stroke: $primary;
   }
 }
 
@@ -77,7 +76,7 @@
 
 .barPiece {
   &:hover {
-    stroke: $sds-color-primary-400;
+    stroke: $primary;
   }
 }
 

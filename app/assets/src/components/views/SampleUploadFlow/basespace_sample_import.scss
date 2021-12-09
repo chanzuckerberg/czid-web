@@ -1,6 +1,5 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .basespaceSampleImport {
   .projectSelectContainer {
@@ -9,13 +8,13 @@
 
   .helpText {
     @include font-body-xxs;
-    margin-bottom: $sds-spaces-m;
-    color: $sds-color-gray-500;
+    margin-bottom: 10px;
+    color: $gray-dark;
   }
 
   .connectProjectButton {
     width: 180px;
-    margin-left: $sds-spaces-m;
+    margin-left: 10px;
   }
 
   .label {
@@ -25,9 +24,9 @@
 
   .loadingMessage {
     @include font-body-xxs;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     margin-top: 5px;
-    margin-left: $sds-spaces-xxxs;
+    margin-left: 2px;
 
     span {
       margin-left: 5px;
@@ -35,6 +34,6 @@
   }
 
   .notification {
-    margin-top: $sds-spaces-m;
+    margin-top: 10px;
   }
 }

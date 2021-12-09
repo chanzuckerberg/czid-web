@@ -1,8 +1,7 @@
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .fileName {
   @include font-body-xs;
-  margin-top: $sds-spaces-m;
-  margin-bottom: $sds-spaces-m;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }

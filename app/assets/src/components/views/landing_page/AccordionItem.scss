@@ -1,14 +1,13 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 /* Style the buttons that are used to open and close the accordion panel */
 
 .accordion {
-  background-color: $sds-color-gray-white;
+  background-color: $white;
   font-family: $font-family-sans-serif;
-  color: $sds-color-gray-black;
+  color: $black;
   cursor: pointer;
   padding: 26px 45px;
   text-align: left;
@@ -26,17 +25,17 @@
   }
 
   &:hover {
-    color: $sds-color-primary-400;
+    color: $primary;
 
     svg {
       .plusStroke {
-        stroke: $sds-color-primary-400;
+        stroke: $primary;
       }
     }
   }
 
   p {
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
     margin-top: 1em;
   }
 
@@ -57,7 +56,7 @@
 
 .accordionTitle,
 .accordionText {
-  margin-left: $sds-spaces-xxl;
+  margin-left: 38px;
 }
 
 .accordionTitle {
@@ -80,18 +79,18 @@
 /* Style the accordion panel. Note: hidden by default */
 .panel {
   padding: 0;
-  background-color: $sds-color-gray-white;
+  background-color: $white;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
 
   a {
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
     text-decoration: none !important;
 
     &:hover,
     &:active {
-      color: $sds-color-primary-600 !important;
+      color: $primary-darkest !important;
     }
   }
 

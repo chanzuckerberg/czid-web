@@ -1,6 +1,5 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .basespaceIntegration {
   display: flex;
@@ -19,7 +18,7 @@
 
     .smallMessage {
       @include font-body-xxs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
       margin-bottom: 15px;
       max-width: 350px;
     }
@@ -32,7 +31,7 @@
 
     .helpLink {
       // Override header.scss.
-      color: $sds-color-primary-400 !important;
+      color: $primary !important;
     }
   }
 }

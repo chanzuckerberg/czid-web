@@ -1,15 +1,14 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .pathogensContainer {
-  margin: $sds-spaces-l 0px $sds-spaces-xl 0px !important;
+  margin: $space-l 0px $space-xl 0px !important;
 
   .pathogen {
     max-width: 240px;
     padding: 0px !important;
-    margin: 0px $sds-spaces-xxl $sds-spaces-m 0px;
+    margin: 0px $space-xxl $space-m 0px;
 
     .pathogenName {
       @include font-body-xs;
@@ -18,7 +17,7 @@
 
     .pathogenTaxid {
       @include font-body-xxs;
-      color: $sds-color-gray-500 !important;
+      color: $gray-dark !important;
 
       &:hover {
         text-decoration: underline;

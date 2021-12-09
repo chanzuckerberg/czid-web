@@ -1,6 +1,5 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .content {
   padding: 30px 20px;
@@ -10,18 +9,18 @@
 .title,
 .loadingMsg {
   @include font-header-xl;
-  margin: 0 $sds-spaces-m;
+  margin: 0 10px;
   margin-right: 60px;
   word-break: break-all;
 }
 
 .geneContents {
-  padding: 0 $sds-spaces-m;
+  padding: 0 10px;
 
   .subtitle {
     @include font-header-s;
     padding-top: 25px;
-    padding-bottom: $sds-spaces-m;
+    padding-bottom: 10px;
   }
 
   .text {
@@ -47,24 +46,24 @@
   }
 
   .link {
-    color: $sds-color-primary-400;
+    color: $primary;
     cursor: pointer;
   }
 
   .expandLink {
-    color: $sds-color-primary-400;
-    margin-top: $sds-spaces-m;
+    color: $primary;
+    margin-top: 10px;
     cursor: pointer;
   }
 }
 
 .cardLicense {
   @include font-body-xxs;
-  padding-top: $sds-spaces-m;
-  color: $sds-color-gray-500;
+  padding-top: 10px;
+  color: $gray-dark;
 
   .cardLink {
-    color: $sds-color-gray-black;
+    color: $black;
     cursor: pointer;
 
     &:hover {

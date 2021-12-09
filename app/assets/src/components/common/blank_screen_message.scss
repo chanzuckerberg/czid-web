@@ -1,7 +1,6 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .blankScreenMessage {
   width: 100%;
@@ -18,12 +17,12 @@
   }
 
   .text {
-    margin-right: $sds-spaces-xl;
+    margin-right: $space-xl;
   }
 
   .message {
     @include font-header-l;
-    margin-bottom: $sds-spaces-xxs;
+    margin-bottom: $space-xxs;
   }
 
   .tagline {

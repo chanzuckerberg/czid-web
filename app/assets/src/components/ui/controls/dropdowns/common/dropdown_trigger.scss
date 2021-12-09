@@ -1,17 +1,16 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .dropdownTrigger {
   border: $border-gray-light;
   border-radius: $border-radius-m;
-  background-color: $sds-color-gray-white;
-  color: $sds-color-gray-black;
+  background-color: $white;
+  color: $black;
   letter-spacing: 0.4px;
   height: 34px;
   line-height: 24px;
-  padding: $sds-spaces-xxs 26px $sds-spaces-xxs $sds-spaces-l;
+  padding: 4px 26px 4px 14px;
   font-size: 13px;
   overflow: hidden;
 
@@ -25,7 +24,7 @@
 
   &.disabled {
     border: $border-gray-light;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     opacity: 1 !important;
   }
 
@@ -45,19 +44,19 @@
 
   .itemSubtext {
     @include font-body-xxs;
-    color: $sds-color-gray-500;
-    margin-left: $sds-spaces-xs;
+    color: $gray-dark;
+    margin-left: $space-xs;
   }
 
   .placeholder {
-    color: $sds-color-gray-300;
+    color: $gray-light;
   }
 
   &.erred {
     border: $border-error;
 
     .placeholder {
-      color: $sds-color-error-400;
+      color: $error-medium;
     }
   }
 }

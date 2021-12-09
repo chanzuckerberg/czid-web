@@ -1,9 +1,8 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .searchTitle {
   @include font-header-s;
-  margin-bottom: $sds-spaces-xs;
+  margin-bottom: $space-xs;
 }

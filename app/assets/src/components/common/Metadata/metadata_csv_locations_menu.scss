@@ -1,11 +1,10 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .title {
   @include font-header-m;
   margin-top: 25px;
-  margin-bottom: $sds-spaces-m;
+  margin-bottom: 10px;
 }
 
 .input {
@@ -14,6 +13,6 @@
 }
 
 .applyToAll {
-  color: $sds-color-primary-400;
+  color: $primary;
   cursor: pointer;
 }

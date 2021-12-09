@@ -1,6 +1,5 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .listElement {
   display: flex;
@@ -8,7 +7,7 @@
 
   .listCheckmark {
     height: 16px;
-    margin-right: $sds-spaces-m;
+    margin-right: 10px;
     text-align: center;
     width: 16px;
 
@@ -24,7 +23,7 @@
 
     &.checked {
       .icon {
-        color: $sds-color-primary-400;
+        color: $primary;
       }
     }
   }

@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .contentContainer {
   font-family: $font-family-sans-serif;
@@ -28,7 +27,7 @@
   }
 
   a {
-    margin-top: $sds-spaces-xl;
+    margin-top: $space-xl;
   }
 
   @media (max-width: 768px) {
@@ -43,13 +42,13 @@
 
   h2 {
     margin: 0;
-    margin-bottom: $sds-spaces-l;
+    margin-bottom: $space-l;
   }
 
   p {
     @include font-body-m;
     margin: 0px;
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
 
     @media (max-width: 768px) {
       @include font-body-s;
@@ -60,8 +59,8 @@
   @media (max-width: 768px) {
     width: fit-content;
     margin-top: 20px;
-    padding-left: $sds-spaces-xl;
-    padding-right: $sds-spaces-xl;
+    padding-left: $space-xl;
+    padding-right: $space-xl;
   }
 }
 
@@ -85,12 +84,12 @@
   margin: 4rem auto 5rem auto;
 
   @media (max-width: 768px) {
-    padding-left: $sds-spaces-xl;
-    padding-right: $sds-spaces-xl;
+    padding-left: $space-xl;
+    padding-right: $space-xl;
   }
 
   h2 {
-    margin-bottom: $sds-spaces-l;
+    margin-bottom: $space-l;
   }
 
   figure {
@@ -127,19 +126,19 @@
   text-align: center;
 
   @media (max-width: 768px) {
-    padding-right: $sds-spaces-xl;
-    padding-left: $sds-spaces-xl;
+    padding-right: $space-xl;
+    padding-left: $space-xl;
   }
 
   h2 {
-    margin-bottom: $sds-spaces-l;
+    margin-bottom: $space-l;
   }
 
   p {
     max-width: 765px;
     margin: 0 auto;
     @include font-body-m;
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
 
     @media (max-width: 768px) {
       @include font-body-s;
@@ -174,7 +173,7 @@
   p {
     @include font-body-xs;
     max-width: 225px;
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
   }
 }
 
@@ -212,10 +211,10 @@
 
   h2 {
     text-align: center;
-    margin-bottom: $sds-spaces-l;
+    margin-bottom: $space-l;
   }
 
   a {
-    margin: $sds-spaces-xl auto 3rem;
+    margin: $space-xl auto 3rem;
   }
 }

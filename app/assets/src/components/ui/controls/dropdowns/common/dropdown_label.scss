@@ -1,15 +1,14 @@
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .dropdownLabel {
   /* Override semantic ui */
-  background-color: $sds-color-gray-100 !important;
-  color: $sds-color-primary-400 !important;
+  background-color: $gray-off-white !important;
+  color: $primary !important;
   font-weight: 600 !important;
   float: right;
   font-size: 12px;
 
   &.disabled {
-    color: $sds-color-gray-500 !important;
+    color: $gray-dark !important;
   }
 }

@@ -1,19 +1,18 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .announcementBanner {
   @include font-body-xs;
-  background: $sds-color-primary-200;
+  background: $primary-lightest;
   height: 40px;
   position: relative;
   text-align: center;
   z-index: 900;
 
   &.inverted {
-    background: $sds-color-primary-400;
-    color: $sds-color-gray-white;
+    background: $primary;
+    color: $white;
   }
 
   .content {
@@ -27,19 +26,19 @@
     white-space: nowrap;
 
     .icon {
-      fill: $sds-color-primary-400;
+      fill: $primary;
       height: 20px;
-      margin-right: $sds-spaces-s;
+      margin-right: $space-s;
       vertical-align: text-bottom;
 
       &.inverted {
-        fill: $sds-color-gray-white;
+        fill: $white;
       }
     }
 
     .title {
       @include font-header-xs;
-      margin-right: $sds-spaces-xxs;
+      margin-right: $space-xxs;
     }
 
     .link {
@@ -50,17 +49,17 @@
 
   .close {
     cursor: pointer;
-    fill: $sds-color-gray-500;
+    fill: $gray-dark;
     position: absolute;
-    right: $sds-spaces-l;
-    top: $sds-spaces-l;
+    right: $space-l;
+    top: $space-l;
 
     &.inverted {
-      fill: $sds-color-gray-white;
+      fill: $white;
     }
 
     &:hover {
-      fill: $sds-color-gray-black;
+      fill: $black;
     }
   }
 }

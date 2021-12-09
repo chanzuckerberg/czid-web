@@ -1,40 +1,39 @@
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .ul {
   list-style-type: disc;
   padding-left: 0;
-  margin-top: $sds-spaces-l;
+  margin-top: $space-l;
 
   .li {
     list-style: disc outside none !important; // override browser-default's list-style-type: none
   }
   .xxsmallSpacing {
-    margin-bottom: $sds-spaces-xxs;
+    margin-bottom: $space-xxs;
   }
 
   .xsmallSpacing {
-    margin-bottom: $sds-spaces-xs;
+    margin-bottom: $space-xs;
   }
 
   .smallSpacing {
-    margin-bottom: $sds-spaces-s;
+    margin-bottom: $space-s;
   }
 }
 
 .ol {
   padding-left: 0;
-  margin-top: $sds-spaces-l;
+  margin-top: $space-l;
 
   .xxsmallSpacing {
-    margin-bottom: $sds-spaces-xxs;
+    margin-bottom: $space-xxs;
   }
 
   .xsmallSpacing {
-    margin-bottom: $sds-spaces-xs;
+    margin-bottom: $space-xs;
   }
 
   .smallSpacing {
-    margin-bottom: $sds-spaces-s;
+    margin-bottom: $space-s;
   }
 }

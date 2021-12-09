@@ -1,6 +1,5 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .tooltip {
   position: absolute;
@@ -12,8 +11,8 @@
 }
 
 .legend {
-  padding: $sds-spaces-m;
-  background-color: $sds-color-gray-white;
+  padding: 10px;
+  background-color: $white;
   border: $border-gray-light;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-m;
@@ -23,14 +22,14 @@
     vertical-align: middle;
 
     &:not(:last-child) {
-      margin-bottom: $sds-spaces-m;
+      margin-bottom: 10px;
     }
 
     .legendEntryColor {
       width: 10px;
       height: 10px;
       display: inline-block;
-      margin-right: $sds-spaces-m;
+      margin-right: 10px;
     }
   }
 }

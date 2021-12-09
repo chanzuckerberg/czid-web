@@ -1,25 +1,24 @@
 @import "typography";
 @import "themes/colors";
-@import "~czifui/dist/variables";
 
 .complete,
 .succeeded,
 .succeeded_with_issue {
-  color: $sds-color-success-400 !important;
+  color: $success-medium !important;
 }
 
 .failed {
-  color: $sds-color-error-400 !important;
+  color: $error-medium !important;
 }
 
 .waiting {
-  color: $sds-color-primary-400 !important;
+  color: $primary !important;
 }
 
 .initializing {
-  color: $sds-color-gray-500 !important;
+  color: $gray-dark !important;
 }
 
 .uploading {
-  color: $sds-color-warning-400 !important;
+  color: $warning-medium !important;
 }

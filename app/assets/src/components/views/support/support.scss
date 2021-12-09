@@ -1,7 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .privacyPolicy,
 .termsOfUse,
@@ -22,7 +21,7 @@
     .number {
       position: absolute;
       right: 100%;
-      margin-right: $sds-spaces-s;
+      margin-right: 8px;
     }
   }
 
@@ -34,14 +33,14 @@
     .number {
       position: absolute;
       right: 100%;
-      margin-right: $sds-spaces-s;
+      margin-right: 8px;
     }
   }
 
   h4.subtitle {
     @include font-body-xxs;
     margin-top: 5px;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 
   .title {
@@ -62,7 +61,7 @@
 
   a {
     // Override _header.scss
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
   }
 
   ul {
@@ -71,7 +70,7 @@
     li {
       @include font-body-s;
       list-style-type: disc;
-      margin-bottom: $sds-spaces-m;
+      margin-bottom: $space-m;
 
       .listItemLabel {
         font-weight: 600;
@@ -105,19 +104,19 @@
   .privacySummaryTable {
     margin: 25px 0px;
     border-style: solid;
-    border-width: 1px;
+    border-width: $space-xxxxs;
     width: 840px;
     height: 2458px;
 
     td {
-      padding: $sds-spaces-m 15px;
-      border: 1px solid $gray-light;
+      padding: $space-m 15px;
+      border: $space-xxxxs solid $gray-light;
       text-align: left;
     }
 
     .topRow {
       @include font-header-s;
-      background-color: $sds-color-gray-200;
+      background-color: $gray-lightest;
 
       td {
         text-align: center;
@@ -126,7 +125,7 @@
 
     .sectionRow {
       @include font-header-s;
-      background-color: $sds-color-gray-100;
+      background-color: $gray-off-white;
 
       td {
         text-align: center;
@@ -143,18 +142,18 @@
 }
 
 .faqPage .question {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 
   h3 {
     margin-top: 0;
     margin-bottom: 0;
-    padding: 0 $sds-spaces-m;
+    padding: 0 $space-m;
     min-height: 50px;
     display: flex;
     align-items: center;
 
     &:hover {
-      color: $sds-color-primary-400;
+      color: $primary;
     }
 
     &.multiLine {
@@ -164,11 +163,11 @@
   }
 
   p {
-    margin: 0px 50px $sds-spaces-m $sds-spaces-m;
+    margin: 0px 50px $space-m $space-m;
   }
 
   .innerListItem {
-    margin-top: $sds-spaces-m;
+    margin-top: $space-m;
     margin-left: 20px;
   }
 }

@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .tooltip {
   @include font-body-xs;
@@ -9,6 +8,6 @@
 
   .title {
     font-weight: bold;
-    margin-right: $sds-spaces-xs;
+    margin-right: $space-xs;
   }
 }

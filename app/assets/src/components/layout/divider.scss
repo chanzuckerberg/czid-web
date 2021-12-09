@@ -1,15 +1,14 @@
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .divider {
   height: 0px;
-  border-bottom: 2px solid $sds-color-gray-100;
+  border-bottom: 2px solid $gray-off-white;
 
   &.thin {
     border-bottom: 1px solid $gray-lightest;
   }
 
   &.medium {
-    border-bottom: 2px solid $sds-color-gray-200;
+    border-bottom: 2px solid $gray-lightest;
   }
 }

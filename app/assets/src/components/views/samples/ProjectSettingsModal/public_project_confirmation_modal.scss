@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .publicProjectConfirmation {
   .title {
@@ -16,31 +15,31 @@
 
   .text {
     @include font-body-xs;
-    margin-top: $sds-spaces-m;
+    margin-top: $space-m;
     margin-bottom: 30px;
 
     p:not(:first-child) {
-      margin-top: $sds-spaces-m;
+      margin-top: $space-m;
     }
 
     .link {
       // important to override _header.scss
-      color: $sds-color-primary-400 !important;
+      color: $primary !important;
       cursor: pointer;
     }
   }
 
   .actions {
-    margin-top: $sds-spaces-m;
+    margin-top: $space-m;
     display: flex;
 
     .item {
       &:not(:first-child) {
-        margin-left: $sds-spaces-xs;
+        margin-left: $space-xs;
       }
 
       &:not(:last-child) {
-        margin-right: $sds-spaces-xs;
+        margin-right: $space-xs;
       }
     }
   }

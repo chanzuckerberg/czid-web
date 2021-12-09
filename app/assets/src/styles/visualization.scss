@@ -1,16 +1,15 @@
 @import "themes/colors";
-@import "~czifui/dist/variables";
 
 .scatterplot {
   .trendline {
-    stroke: $sds-color-primary-400;
+    stroke: $primary;
     stroke-width: 2;
     fill: none;
   }
   .axis path,
   .axis line {
     fill: none;
-    stroke: $sds-color-gray-black;
+    stroke: $black;
     shape-rendering: crispEdges;
   }
 
@@ -23,11 +22,11 @@
   }
 
   .point {
-    stroke: $sds-color-gray-black;
+    stroke: $black;
     stroke-width: 1px;
-    fill: $sds-color-gray-white;
+    fill: $white;
     &:hover {
-      fill: $sds-color-primary-400;
+      fill: $primary;
     }
   }
 }
@@ -39,10 +38,10 @@
 #project-visualization {
   .heatmap-legend {
     padding: 5px 0 0 0;
-    margin-bottom: -$sds-spaces-m;
+    margin-bottom: -10px;
   }
   .heatmap-header {
-    padding: $sds-spaces-m 2em 30px 2em;
+    padding: 10px 2em 30px 2em;
     .button {
       margin-top: 20px;
       float: right;
@@ -52,8 +51,8 @@
     }
   }
   .sub-menu {
-    padding: $sds-spaces-m;
-    background: $sds-color-gray-white;
+    padding: 10px;
+    background: $white;
     margin: 0;
   }
   .visualization-content {

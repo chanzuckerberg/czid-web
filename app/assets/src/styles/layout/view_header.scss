@@ -1,6 +1,5 @@
 @import "../themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .view-header {
   padding: 20px;
@@ -12,11 +11,11 @@
     max-width: 80%;
 
     &__pre-title {
-      color: $sds-color-gray-500;
+      color: $gray-dark;
       font-size: 12px;
       height: 20px;
       line-height: 20px;
-      margin-bottom: $sds-spaces-m;
+      margin-bottom: 10px;
       text-transform: uppercase;
       vertical-align: middle;
     }
@@ -30,11 +29,11 @@
     }
 
     &__sub-title {
-      color: $sds-color-gray-500;
+      color: $gray-dark;
       font-size: 12px;
       height: 20px;
       line-height: 20px;
-      margin-top: $sds-spaces-m;
+      margin-top: 10px;
       vertical-align: middle;
     }
   }
@@ -54,7 +53,7 @@
       transform: translate(0, -50%);
 
       &:not(:first-child) {
-        margin-right: $sds-spaces-m;
+        margin-right: 10px;
       }
     }
   }

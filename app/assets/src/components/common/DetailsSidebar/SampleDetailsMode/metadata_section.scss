@@ -2,22 +2,21 @@
 @import "~styles/typography";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .metadataSection {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 
   .title {
     @include font-caps-xxs;
     line-height: 40px;
-    color: $sds-color-gray-black;
+    color: $black;
     padding: 0 10px;
     height: 40px;
   }
 
   .editLink {
     @include font-body-xxs;
-    color: $sds-color-gray-300;
+    color: $gray-light;
     text-decoration: underline;
     display: none;
     cursor: pointer;
@@ -27,13 +26,13 @@
     }
 
     &:hover {
-      color: $sds-color-gray-black;
+      color: $black;
     }
   }
 
   .status {
     @include font-body-xxs;
-    color: $sds-color-gray-300;
+    color: $gray-light;
     margin-top: 1px;
   }
 

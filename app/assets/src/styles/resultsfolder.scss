@@ -1,16 +1,15 @@
 @import "themes/typography";
 @import "themes/colors";
-@import "~czifui/dist/variables";
 
 .results-folder {
   .header {
     margin: 25px 75px;
     .title {
       @include font-header-xxl;
-      color: $sds-color-primary-400;
+      color: $primary;
       .path {
         margin: 20px;
-        color: $sds-color-gray-black;
+        color: $black;
         font-weight: $font-weight-thin;
       }
       .back {
@@ -21,25 +20,25 @@
       }
     }
     th {
-      color: $sds-color-gray-600;
+      color: $gray-darkest;
     }
   }
 }
 .fileLink {
   cursor: pointer;
   td {
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
     &:hover {
-      color: $sds-color-primary-400;
+      color: $primary;
     }
   }
 }
 .disabledFileLink {
-  color: $sds-color-gray-500;
+  color: $gray-dark;
 }
 i.fa-file {
   margin-right: 15px;
 }
 .size-tag {
-  color: $sds-color-gray-300;
+  color: $gray-light;
 }

@@ -1,24 +1,23 @@
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .filterList {
   .filterListElement {
     display: inline-block;
-    margin: $sds-spaces-xxs 0;
+    margin: $space-xxs 0;
     vertical-align: top;
 
     &:not(:last-child) {
-      margin-right: $sds-spaces-m;
+      margin-right: $space-m;
     }
   }
 }
 
 .tagList {
-  margin-top: $sds-spaces-l;
-  margin-bottom: $sds-spaces-l;
+  margin-top: $space-l;
+  margin-bottom: $space-l;
 
   .filterTag {
-    margin-right: $sds-spaces-xs;
+    margin-right: $space-xs;
 
     &:last-child {
       margin-right: 0;

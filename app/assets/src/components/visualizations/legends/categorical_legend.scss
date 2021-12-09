@@ -1,12 +1,11 @@
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .legendContainer {
-  margin-bottom: $sds-spaces-l;
+  margin-bottom: $space-l;
 
   .category {
     display: inline-block;
-    margin-right: $sds-spaces-xl;
+    margin-right: $space-xl;
 
     svg {
       vertical-align: middle;
@@ -19,7 +18,7 @@
     }
 
     .label {
-      margin-left: $sds-spaces-xxs;
+      margin-left: $space-xxs;
     }
   }
 }

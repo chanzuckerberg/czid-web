@@ -1,11 +1,10 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .text {
   @include font-body-xxs;
-  fill: $sds-color-gray-black;
+  fill: $black;
 }
 
 .xAxis {
@@ -15,8 +14,8 @@
 
 .xAxisTitle {
   @include font-body-xxs;
-  color: $sds-color-gray-black;
-  margin-bottom: $sds-spaces-s;
+  color: $black;
+  margin-bottom: $space-s;
 
   div {
     display: inline-block;

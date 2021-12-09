@@ -1,6 +1,5 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .plusMinusContainer {
   display: flex;
@@ -28,5 +27,5 @@
 }
 
 .icon {
-  fill: $sds-color-gray-600;
+  fill: $gray-darkest;
 }

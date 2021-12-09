@@ -1,18 +1,17 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .taxaWithHitsDropdown {
   width: 300px;
 
   .optionsHeader {
     display: flex;
-    padding: $sds-spaces-xs $sds-spaces-l;
+    padding: $space-xs $space-l;
 
     .header {
       @include font-header-xs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
 
     .fill {
@@ -23,7 +22,7 @@
 
   .option {
     display: flex;
-    padding: $sds-spaces-xs $sds-spaces-l;
+    padding: $space-xs $space-l;
 
     .taxonName {
       @include font-body-xxs;
@@ -40,7 +39,7 @@
 
     .sampleCount {
       @include font-body-xxs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
   }
 }

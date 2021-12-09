@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .sidebar {
   font-size: 12px;
@@ -9,18 +8,18 @@
   overflow-y: scroll;
 
   .noData {
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     margin: 20px;
   }
 }
 
 .metadataSection {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 }
 
 .metadataContainer {
   .hasBackground {
-    padding-left: $sds-spaces-m;
+    padding-left: 10px;
     padding-right: 5px;
 
     &:not(.statsRow) {
@@ -30,15 +29,15 @@
   }
 
   .hasBackground:nth-child(odd) {
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
   }
 
   // See SampleDetailsMode/metadata_section.scss
   .title {
     @include font-caps-xxs;
     line-height: 40px;
-    color: $sds-color-gray-black;
-    padding: 0 $sds-spaces-m;
+    color: $black;
+    padding: 0 10px;
     height: 40px;
   }
 
@@ -50,9 +49,9 @@
 }
 
 .histogramContainer {
-  margin-top: $sds-spaces-m;
-  margin-left: $sds-spaces-m;
-  margin-right: $sds-spaces-m;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
 
   .dateHistogram {
     display: flex;
@@ -64,7 +63,7 @@
     .bar {
       margin: 0 1px;
       flex: 1 0;
-      background-color: $sds-color-primary-300;
+      background-color: $primary-light;
       max-width: 14px;
     }
   }
@@ -76,7 +75,7 @@
     align-items: flex-end;
 
     .label {
-      margin: $sds-spaces-xxs 0;
+      margin: 4px 0;
       flex: 0 0;
       white-space: nowrap;
       font-size: smaller;
@@ -91,7 +90,7 @@
 .descriptionContainer {
   @include font-body-xxs;
   white-space: pre-wrap;
-  color: $sds-color-gray-500;
+  color: $gray-dark;
 }
 
 .dataList {
@@ -138,7 +137,7 @@
   }
 
   .bar {
-    background-color: $sds-color-primary-300;
+    background-color: $primary-light;
     color: white;
     cursor: pointer;
     display: inline-block;
@@ -153,13 +152,13 @@
     @include font-body-xxxs;
     text-transform: uppercase;
     margin-top: 5px;
-    margin-bottom: $sds-spaces-m;
-    color: $sds-color-primary-400;
+    margin-bottom: 10px;
+    color: $primary;
     cursor: pointer;
   }
 
   .count {
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     font-weight: 600;
     vertical-align: top;
   }

@@ -1,8 +1,7 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .icon {
   @include font-caps-xxxxs;
-  margin-left: $sds-spaces-xxxs;
+  margin-left: $space-xxxs;
 }

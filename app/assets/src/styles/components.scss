@@ -1,5 +1,4 @@
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .ui.button {
   padding: 7px 30px;
@@ -9,15 +8,15 @@
   &.primary {
     border: $border-primary;
     background: $primary-blue !important;
-    color: $sds-color-gray-white !important;
+    color: $white !important;
     &:hover {
-      background: $sds-color-gray-white !important;
+      background: $white !important;
       color: $primary-blue !important;
     }
   }
   &.secondary {
     border: $border-primary;
-    background: $sds-color-gray-white !important;
+    background: $white !important;
     color: $primary-blue !important;
   }
 }
@@ -27,10 +26,10 @@
   padding: 5px 1.75em 5px 1em;
   border-radius: $border-radius-l;
   &.custom-dropdown {
-    padding: 5px $sds-spaces-m;
+    padding: 5px 10px;
   }
   .menu {
-    margin-top: $sds-spaces-xxxs;
+    margin-top: 2px;
     width: 100%;
   }
   .text {
@@ -61,7 +60,7 @@
     height: 20px;
     line-height: 20px;
     border-radius: $border-radius-l;
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
     color: $primary-blue;
     font-weight: normal;
     font-size: inherit;

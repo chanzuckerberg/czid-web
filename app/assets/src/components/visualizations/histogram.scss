@@ -1,25 +1,24 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .xAxis {
-  stroke: $sds-color-gray-300;
+  stroke: $gray-light;
 }
 
 .xAxisTickText,
 .yAxisTickText {
   @include font-body-xxxs;
-  color: $sds-color-gray-500;
+  color: $gray-dark;
 }
 
 .yAxisTickLine,
 .xAxisTickLine {
-  color: $sds-color-gray-300;
+  color: $gray-light;
 }
 
 .labelX,
 .labelY {
-  color: $sds-color-gray-black;
+  color: $black;
   font-family: $font-family-sans-serif;
   font-weight: $font-weight-regular;
 
@@ -37,7 +36,7 @@
   @include font-body-xxs;
 
   font-family: $font-family-sans-serif;
-  fill: $sds-color-gray-600;
+  fill: $gray-darkest;
 }
 
 .hoverRect {

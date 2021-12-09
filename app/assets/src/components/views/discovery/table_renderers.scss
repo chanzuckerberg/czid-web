@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .item {
   text-align: left;
@@ -17,16 +16,16 @@
 
   .itemName {
     @include font-header-m;
-    color: $sds-color-gray-black;
-    margin-bottom: $sds-spaces-xxxs;
+    color: $black;
+    margin-bottom: 2px;
   }
 
   .itemDescription {
     @include font-body-s;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     font-weight: $font-weight-regular;
     line-height: 20px;
-    margin: 0 0 $sds-spaces-s 0;
+    margin: 0 0 8px 0;
     vertical-align: middle;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -39,15 +38,15 @@
   .itemDetails {
     @include font-body-xxs;
 
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     font-weight: $font-weight-regular;
 
     span:not(:last-child) {
-      margin-right: $sds-spaces-s;
+      margin-right: 8px;
     }
 
     span:not(:first-child) {
-      margin-left: $sds-spaces-s;
+      margin-left: 8px;
     }
   }
 }
@@ -65,14 +64,14 @@
 }
 
 .icon {
-  fill: $sds-color-primary-400;
+  fill: $primary;
   height: 100%;
   justify-content: center;
   width: $icon-xl;
 }
 
 .iconSample {
-  fill: $sds-color-gray-300;
+  fill: $gray-light;
   width: 30px;
 }
 
@@ -107,8 +106,8 @@
 
       .vizName {
         @include font-header-m;
-        color: $sds-color-gray-black;
-        margin-bottom: $sds-spaces-xxxs;
+        color: $black;
+        margin-bottom: $space-xxxs;
 
         min-width: 0;
         text-align: left;
@@ -118,13 +117,13 @@
       }
 
       .vizStatus {
-        margin-left: $sds-spaces-xs;
+        margin-left: $space-xs;
       }
     }
   }
   .vizDetails {
     @include font-body-xxs;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     font-weight: $font-weight-regular;
   }
 }
@@ -140,7 +139,7 @@
     margin-right: 12px;
 
     .icon {
-      fill: $sds-color-primary-400;
+      fill: $primary;
       width: 36px;
     }
   }
@@ -161,14 +160,14 @@
 
         min-width: 0;
         text-align: left;
-        color: $sds-color-gray-black;
+        color: $black;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
       }
 
       .sampleStatus {
-        margin-left: $sds-spaces-xs;
+        margin-left: $space-xs;
       }
     }
 
@@ -176,21 +175,21 @@
       @include font-body-xxs;
 
       font-weight: $font-weight-regular;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
       text-align: left;
 
       span:not(:first-child) {
-        margin-left: $sds-spaces-xxs;
+        margin-left: $space-xxs;
       }
 
       span:not(:last-child) {
-        margin-right: $sds-spaces-xxs;
+        margin-right: $space-xxs;
       }
     }
 
     .consensusGenomeCount {
       @include font-body-xxxs;
-      color: $sds-color-primary-400;
+      color: $primary;
     }
   }
 }
@@ -206,8 +205,8 @@
 
   .analysesCounts {
     @include font-body-xxxs;
-    margin-top: $sds-spaces-xxxs;
-    color: $sds-color-gray-500;
+    margin-top: $space-xxxs;
+    color: $gray-dark;
   }
 }
 
@@ -233,7 +232,7 @@
 
   .accessionId {
     text-decoration: underline;
-    margin-right: $sds-spaces-xxs;
+    margin-right: $space-xxs;
   }
 }
 
@@ -243,7 +242,7 @@
 
     min-width: 0;
     text-align: left;
-    color: $sds-color-gray-black;
+    color: $black;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -253,7 +252,7 @@
     @include font-body-xxs;
 
     font-weight: $font-weight-regular;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     text-align: left;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -263,13 +262,13 @@
 .referenceGenomeTooltip {
   .title {
     @include font-header-xs;
-    color: $sds-color-gray-white;
+    color: $white;
   }
 
   .details {
     @include font-header-xxs;
     font-weight: $font-weight-regular;
-    color: $sds-color-gray-400;
+    color: $gray-medium;
   }
 }
 
@@ -278,7 +277,7 @@
     @include loadingAnimation;
 
     background-clip: content-box;
-    padding: $sds-spaces-xxs 0;
+    padding: 4px 0;
     height: 20px;
   }
 
@@ -288,7 +287,7 @@
 
       background-clip: content-box;
       height: 16px;
-      padding: $sds-spaces-xxxs 15%;
+      padding: 2px 15%;
     }
 
     .percentage {
@@ -296,7 +295,7 @@
 
       background-clip: content-box;
       height: 15px;
-      padding: $sds-spaces-xxxs 20%;
+      padding: 2px 20%;
     }
   }
 
@@ -310,7 +309,7 @@
     margin-right: 12px;
 
     .icon {
-      fill: $sds-color-primary-400;
+      fill: $primary;
       width: 36px;
     }
   }
@@ -320,7 +319,7 @@
       @include loadingAnimation;
 
       background-clip: content-box;
-      padding: $sds-spaces-xxs 0;
+      padding: 4px 0;
       height: 20px;
       width: 365px;
     }
@@ -329,7 +328,7 @@
       @include loadingAnimation;
 
       background-clip: content-box;
-      padding: $sds-spaces-xxs 0;
+      padding: 4px 0;
       height: 17px;
       width: 315px;
     }
@@ -342,7 +341,7 @@
       @include loadingAnimation;
 
       background-clip: content-box;
-      padding: $sds-spaces-xxs 0;
+      padding: 4px 0;
       height: 20px;
       flex: 1 0 auto;
     }
@@ -351,7 +350,7 @@
       @include loadingAnimation;
 
       background-clip: content-box;
-      padding: $sds-spaces-xxs 0;
+      padding: 4px 0;
       height: 17px;
       flex: 1 0 auto;
     }
@@ -363,7 +362,7 @@
 
       background-clip: content-box;
       height: 12px;
-      margin: $sds-spaces-xxs 20%;
+      margin: 4px 20%;
     }
   }
 }

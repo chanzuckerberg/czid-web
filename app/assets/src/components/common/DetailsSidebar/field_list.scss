@@ -1,23 +1,22 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .field {
-  padding: $sds-spaces-m 0;
+  padding: $space-m 0;
   display: flex;
   align-items: center;
 
   &:nth-child(even) {
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
   }
 
   .label {
     font-weight: $font-weight-semibold;
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
     width: 160px;
     flex-shrink: 0;
-    margin-right: $sds-spaces-xl;
-    margin-left: $sds-spaces-m;
+    margin-right: $space-xl;
+    margin-left: $space-m;
   }
 }

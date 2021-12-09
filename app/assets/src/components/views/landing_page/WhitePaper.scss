@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .whitePaper {
   position: relative;
@@ -15,7 +14,7 @@
     bottom: 0;
     right: 0;
     height: calc(100% - 2em);
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
   }
 
   &__Inner {
@@ -26,7 +25,7 @@
     z-index: 2;
     margin: 0 auto;
     overflow: hidden;
-    padding: 0 $sds-spaces-xl;
+    padding: 0 $space-xl;
     text-decoration: none;
     cursor: pointer;
 
@@ -39,7 +38,7 @@
 
     &_Image {
       flex-shrink: 0;
-      background-color: $sds-color-gray-white;
+      background-color: $white;
       max-width: 311px;
       box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, 0.1);
 
@@ -61,14 +60,14 @@
       }
 
       h2 {
-        color: $sds-color-gray-black;
+        color: $black;
         @include font-header-xl;
-        margin-bottom: $sds-spaces-l;
+        margin-bottom: $space-l;
       }
 
       p {
-        color: $sds-color-gray-600;
-        margin-bottom: $sds-spaces-xl;
+        color: $gray-darkest;
+        margin-bottom: $space-xl;
         @include font-body-s;
 
         @media (max-width: 768px) {

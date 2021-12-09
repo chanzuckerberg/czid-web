@@ -1,55 +1,54 @@
 @import "../../../themes/colors";
 @import "../../../themes/typography";
-@import "~czifui/dist/variables";
 
 .idseq-ui.button.primary {
   border: $border-primary;
-  background-color: $sds-color-primary-400;
-  color: $sds-color-gray-white;
-  fill: $sds-color-gray-white;
+  background-color: $primary;
+  color: $white;
+  fill: $white;
   margin-right: 0;
 
   .icon-label {
     position: relative;
     svg {
-      fill: $sds-color-gray-white;
+      fill: $white;
     }
   }
 
   &:hover,
   &.hover {
     border: $border-primary-dark;
-    background: $sds-color-primary-500;
-    color: $sds-color-gray-white;
-    fill: $sds-color-gray-white;
+    background: $primary-dark;
+    color: $white;
+    fill: $white;
   }
 
   &:active,
   &.active {
     border: $border-primary-darkest;
-    background-color: $sds-color-primary-600;
-    color: $sds-color-gray-white;
-    fill: $sds-color-gray-white;
+    background-color: $primary-darkest;
+    color: $white;
+    fill: $white;
   }
 
   &:focus,
   &.focus {
     border: $border-primary-darkest;
-    background-color: $sds-color-primary-600;
-    color: $sds-color-gray-white;
-    fill: $sds-color-gray-white;
+    background-color: $primary-darkest;
+    color: $white;
+    fill: $white;
   }
 
   &:disabled,
   &.disabled {
     border: 0;
-    background-color: $sds-color-gray-300;
-    color: $sds-color-gray-500;
-    fill: $sds-color-gray-500;
+    background-color: $gray-light;
+    color: $gray-dark;
+    fill: $gray-dark;
 
     .icon-label {
       svg {
-        fill: $sds-color-gray-400;
+        fill: $gray-medium;
       }
     }
   }

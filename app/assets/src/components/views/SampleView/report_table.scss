@@ -1,21 +1,20 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .header {
   @include font-header-xs;
 
-  color: $sds-color-gray-500;
+  color: $gray-dark;
   justify-content: flex-end;
   text-align: right;
-  margin-right: $sds-spaces-l;
+  margin-right: $space-l;
   // Push all the headers down except nt/nr selector so the text is aligned.
-  margin-top: $sds-spaces-l;
+  margin-top: $space-l;
 }
 
 .sortedHeader {
-  color: $sds-color-primary-400;
+  color: $primary;
 }
 
 .taxonHeader {
@@ -51,7 +50,7 @@
 }
 
 .ntnrSelectorHeader {
-  color: $sds-color-gray-600;
+  color: $gray-darkest;
   text-align: center;
   cursor: pointer;
   // Don't push down the text so "NR" is aligned with the other headers.
@@ -61,11 +60,11 @@
 .cell {
   @include font-body-s;
 
-  color: $sds-color-gray-600;
+  color: $gray-darkest;
   font-weight: $font-weight-bold;
-  padding: $sds-spaces-m 0;
+  padding: $space-m 0;
   text-align: right;
-  margin-right: $sds-spaces-l;
+  margin-right: $space-l;
 
   .noData {
     text-align: center;
@@ -77,13 +76,13 @@
 
   .stackElement {
     @include font-body-s;
-    line-height: $sds-spaces-xl;
+    line-height: $space-xl;
     font-weight: $font-weight-bold;
 
     &.lowlightValue {
       @include font-body-xxs;
 
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
   }
 }
@@ -103,21 +102,21 @@
     }
 
     .missingName {
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
 
     .countInfo {
       font-style: italic;
       font-weight: $font-weight-regular;
-      margin-left: $sds-spaces-xs;
-      color: $sds-color-gray-500;
+      margin-left: $space-xs;
+      color: $gray-dark;
       white-space: normal;
     }
   }
 
   &:hover {
     .taxonName {
-      color: $sds-color-primary-400;
+      color: $primary;
     }
   }
 }
@@ -129,13 +128,13 @@
 .speciesRow {
   .nameCell {
     font-weight: $font-weight-regular;
-    margin-left: $sds-spaces-m;
-    margin-right: $sds-spaces-xxs;
+    margin-left: $space-m;
+    margin-right: $space-xxs;
   }
 }
 
 .genusRow {
-  background-color: $sds-color-gray-100;
+  background-color: $gray-off-white;
 }
 
 .genusRow,
@@ -149,8 +148,8 @@
   // selector can be used for the scrollbar.
   padding-right: 0px !important;
   &.highlighted {
-    background-color: $sds-color-primary-200;
-    border-left: 5px solid $sds-color-primary-400;
+    background-color: $primary-lightest;
+    border-left: 5px solid $primary;
     padding-left: 0px;
   }
 
@@ -173,7 +172,7 @@
 
   .icon {
     flex: 0 0 auto;
-    margin-right: $sds-spaces-xs;
+    margin-right: $space-xs;
     height: $icon-l;
     vertical-align: middle;
   }

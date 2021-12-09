@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .editableInput {
   display: flex;
@@ -9,17 +8,17 @@
   cursor: pointer;
 
   .editableText {
-    border-bottom: 1px dashed $sds-color-gray-500;
+    border-bottom: 1px dashed $gray-dark;
   }
 
   .editIcon {
     flex: 1 0 auto;
     height: $icon-s;
-    fill: $sds-color-gray-500;
-    margin-left: $sds-spaces-m;
+    fill: $gray-dark;
+    margin-left: $space-m;
 
     &:hover {
-      fill: $sds-color-primary-400;
+      fill: $primary;
     }
   }
 }
@@ -27,20 +26,20 @@
 .alertContainer {
   @include font-body-xxxs;
   display: flex;
-  margin-top: $sds-spaces-xxs;
+  margin-top: $space-xxs;
 
   &.warning {
-    color: $sds-color-warning-600;
+    color: $warning-dark;
   }
 
   &.error {
-    color: $sds-color-error-600;
+    color: $error-dark;
   }
 
   .alertIcon {
     width: $icon-s;
     height: $icon-s;
-    margin-right: $sds-spaces-xxs;
+    margin-right: $space-xxs;
     // Vertical-align the svg element with the text.
     transform: translateY(1px);
   }

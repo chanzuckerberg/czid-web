@@ -1,11 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .header {
   align-items: center;
-  background-color: $sds-color-gray-black;
+  background-color: $black;
   display: flex;
   flex-direction: row;
   // Header height might influence layout on other pages that use calc to compute available height.
@@ -31,7 +30,7 @@
 
   .userDropdown {
     flex: 0 0 auto;
-    color: $sds-color-gray-white;
+    color: $white;
 
     .userName {
       @include font-body-xs;
@@ -47,13 +46,13 @@
     .option {
       display: block;
       width: 100%;
-      color: $sds-color-gray-black !important;
+      color: $black !important;
     }
   }
 
   .termsDropdown {
     flex: 0 0 auto;
-    color: $sds-color-gray-white;
+    color: $white;
 
     .terms {
       @include font-body-xs;
@@ -61,7 +60,7 @@
       align-items: center;
       display: flex;
       font-weight: $font-weight-semibold;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
       margin-right: 5px;
       height: 36px;
       vertical-align: middle;
@@ -70,25 +69,25 @@
     .option {
       display: block;
       width: 100%;
-      color: $sds-color-gray-black !important;
+      color: $black !important;
     }
   }
 
   .termsDropdown i:before {
-    color: $sds-color-gray-500 !important;
+    color: $gray-dark !important;
   }
 
   .mainMenu {
     @include font-body-xs;
     margin-right: 100px;
     display: flex;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
 
     .item {
       font-weight: $font-weight-semibold;
 
       &.selected {
-        color: $sds-color-gray-white !important;
+        color: $white !important;
       }
     }
 
@@ -100,14 +99,14 @@
   .loggedOutMainMenu {
     @include font-body-xs;
     display: flex;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
 
     .item {
       font-weight: $font-weight-semibold;
       margin-right: 25px;
 
       &.selected {
-        color: $sds-color-gray-white !important;
+        color: $white !important;
       }
     }
   }

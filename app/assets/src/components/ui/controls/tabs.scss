@@ -1,20 +1,19 @@
 @import "~styles/themes/colors";
 @import "~styles/typography";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .tabs {
   height: 30px;
-  padding-bottom: $sds-spaces-m;
+  padding-bottom: 10px;
 
   .tab {
     @include font-header-s;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     margin-right: 30px;
     cursor: pointer;
 
     &.selected {
-      color: $sds-color-gray-black;
+      color: $black;
     }
   }
 
@@ -26,7 +25,7 @@
   .indicator {
     position: absolute;
     height: 3px;
-    background-color: $sds-color-primary-400;
+    background-color: $primary;
     transition: all 0.2s;
     transform: translateY(22px);
     z-index: 1;
@@ -39,6 +38,6 @@
     left: 0;
     right: 0;
     margin-top: 3px;
-    background-color: $sds-color-gray-200;
+    background-color: $gray-lightest;
   }
 }

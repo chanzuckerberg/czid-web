@@ -1,5 +1,4 @@
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .publicSampleNotification {
   .highlight {
@@ -8,6 +7,6 @@
 
   .policyLink,
   .emailLink {
-    border-bottom: 1px dashed $sds-color-gray-400;
+    border-bottom: 1px dashed $gray-medium;
   }
 }

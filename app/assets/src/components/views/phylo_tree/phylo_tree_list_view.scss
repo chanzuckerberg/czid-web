@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .phyloTreeListView {
   .viewHeader {
@@ -14,7 +13,7 @@
   display: flex;
 
   .controlElement {
-    margin-left: $sds-spaces-m;
+    margin-left: 10px;
     margin-right: 0;
   }
 }
@@ -22,12 +21,12 @@
 .noTreeBanner {
   margin-top: 50px;
   text-align: center;
-  color: $sds-color-gray-500;
+  color: $gray-dark;
 }
 
 .taxonName {
   &:hover {
-    color: $sds-color-primary-400;
+    color: $primary;
     cursor: pointer;
   }
 }
@@ -41,10 +40,10 @@
 }
 
 .notification {
-  margin: $sds-spaces-m 0;
+  margin: $space-m 0;
 
   .notificationContent {
-    margin-right: $sds-spaces-l;
+    margin-right: $space-l;
     .warning {
       font-weight: $font-weight-bold;
     }
@@ -60,7 +59,7 @@
 }
 
 .matrix {
-  margin-top: $sds-spaces-s;
+  margin-top: $space-s;
   width: inherit;
   height: inherit;
 }
@@ -71,12 +70,12 @@
 
 .attributionsBanner {
   @include font-body-xxs;
-  background-color: $sds-color-gray-white;
-  color: $sds-color-gray-500;
+  background-color: $white;
+  color: $gray-dark;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-s;
-  padding: $sds-spaces-xxxs $sds-spaces-s;
-  margin: $sds-spaces-m;
+  padding: $space-xxxs $space-s;
+  margin: $space-m;
   // Ensures it appears on top of the phylo tree if they overlap.
   z-index: 1;
   // Always position at the bottom right hand corner of the viewport.
@@ -85,8 +84,8 @@
   right: 0;
 
   .infoIcon {
-    margin: 1px $sds-spaces-xxs 0 0; // top margin is to align the icon with the text
+    margin: $space-xxxxs $space-xxs 0 0; // top margin is to align the icon with the text
     vertical-align: text-top;
-    fill: $sds-color-gray-400;
+    fill: $gray-medium;
   }
 }

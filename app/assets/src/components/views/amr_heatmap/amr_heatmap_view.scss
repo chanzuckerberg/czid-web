@@ -1,6 +1,5 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .AMRHeatmapView {
   .viewHeader {
@@ -11,22 +10,22 @@
       display: flex;
 
       .controlElement {
-        margin-left: $sds-spaces-m;
+        margin-left: 10px;
       }
     }
   }
 
   .menu {
-    background-color: $sds-color-gray-white;
+    background-color: $white;
 
     .filterRow {
       margin: 20px 0;
-      height: $sds-spaces-xxl;
+      height: $space-xxl;
 
       .filterControl {
         float: left;
         margin-left: auto;
-        padding: 0 $sds-spaces-default;
+        padding: 0 $space-default;
         width: 25%;
       }
     }
@@ -36,6 +35,6 @@
   .noDataMsg {
     margin: 50px;
     text-align: center;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 }

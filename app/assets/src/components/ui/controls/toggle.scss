@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 // NOTE: Classname .toggle is repeated here as .toggle.toggle.toggle to increase
 // specificity and always override semantic-ui.
@@ -13,12 +12,12 @@
 // https://react.semantic-ui.com/modules/checkbox/#types-toggle
 .toggle.toggle.toggle label:after {
   transform: scale(1) !important;
-  margin: $sds-spaces-xxs;
+  margin: 4px;
 }
 
 .toggle.toggle.toggle label:before {
-  margin-top: $sds-spaces-xxs;
-  margin-bottom: $sds-spaces-xxs;
+  margin-top: 4px;
+  margin-bottom: 4px;
   height: 28px;
   line-height: 28px;
   width: 68px;
@@ -27,7 +26,7 @@
 .toggle.toggle.toggle label {
   @include font-body-xxs;
   line-height: 25px;
-  padding-top: $sds-spaces-xs; // vertical align text
+  padding-top: 6px; // vertical align text
   min-height: 34px;
   min-width: 58px; // enough space for text
   z-index: 1; // place label text on top of the toggle
@@ -42,18 +41,18 @@
 // Place text to the right
 .toggle.toggle.toggle input:indeterminate ~ label {
   padding-left: 34px;
-  color: $sds-color-gray-600 !important;
+  color: $gray-darkest !important;
 }
 
 .toggle.toggle.toggle input:checked ~ label:before {
-  background-color: $sds-color-gray-white !important; // override semantic-ui
+  background-color: $white !important; // override semantic-ui
   z-index: -1; // make sure the white background color is behind the text label
   border: $border-primary;
-  padding-left: $sds-spaces-xxs;
+  padding-left: 4px;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {
-  background-color: $sds-color-gray-white !important; // override semantic-ui
+  background-color: $white !important; // override semantic-ui
   z-index: -1; // make sure the white background color is behind the text label
   border: $border-gray-light;
 }
@@ -68,13 +67,13 @@
 }
 
 .toggle.toggle.toggle input:checked ~ label:after {
-  background-color: $sds-color-primary-400;
+  background-color: $primary;
   left: calc(
     68px - 9px - 18px
   ); // inner width of toggle minus inner padding minus width of circle
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:after {
-  background: $sds-color-gray-200;
+  background: $gray-lightest;
   left: 2px;
 }

@@ -1,21 +1,20 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .emptyStateBanner {
   height: 380px;
 
   .iconClassName {
     svg {
-      fill: $sds-color-primary-400;
+      fill: $primary;
       height: 150px;
       width: 150px;
     }
   }
 
   .content {
-    margin-right: $sds-spaces-xxl;
+    margin-right: $space-xxl;
   }
 }
 

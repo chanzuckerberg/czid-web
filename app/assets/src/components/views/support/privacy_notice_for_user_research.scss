@@ -1,7 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .privacyNoticeForUserResearch {
   margin-top: 90px;
@@ -15,12 +14,12 @@
   h2 {
     @include font-header-xl;
     position: relative;
-    margin-top: $sds-spaces-l;
+    margin-top: $space-l;
   }
 
   h3 {
     @include font-header-m;
-    margin-top: $sds-spaces-l;
+    margin-top: $space-l;
     position: relative;
 
     &.first {
@@ -30,33 +29,33 @@
 
   h4.subtitle {
     @include font-body-xxs;
-    margin-top: $sds-spaces-xxs;
-    color: $sds-color-gray-500;
+    margin-top: $space-xxs;
+    color: $gray-dark;
   }
 
   .title {
-    margin-bottom: $sds-spaces-l;
+    margin-bottom: $space-l;
   }
 
   p {
     @include font-body-s;
 
     &.last {
-      padding-bottom: $sds-spaces-xxl;
+      padding-bottom: $space-xxl;
     }
 
     &.list {
-      margin-bottom: $sds-spaces-xxs;
+      margin-bottom: $space-xxs;
     }
 
     &.providers {
-      margin-bottom: $sds-spaces-l;
+      margin-bottom: $space-l;
     }
   }
 
   a {
     // Override _header.scss
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
   }
 
   ul {
@@ -66,7 +65,7 @@
     li {
       @include font-body-s;
       list-style-type: disc;
-      margin-bottom: $sds-spaces-m;
+      margin-bottom: $space-m;
     }
   }
 
@@ -74,7 +73,7 @@
     margin: 0 0 20px 40px;
 
     ol {
-      margin-top: $sds-spaces-xxs;
+      margin-top: $space-xxs;
     }
   }
 

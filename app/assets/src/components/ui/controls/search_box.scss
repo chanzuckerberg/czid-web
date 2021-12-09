@@ -1,5 +1,4 @@
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .searchBox {
   &.rounded {
@@ -10,7 +9,7 @@
 }
 
 .searchIcon {
-  fill: $sds-color-gray-400;
+  fill: $gray-medium;
   margin: 0;
   padding: 0;
   position: absolute;

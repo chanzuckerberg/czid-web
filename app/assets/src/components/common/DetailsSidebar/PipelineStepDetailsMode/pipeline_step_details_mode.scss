@@ -2,7 +2,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .content {
   @include font-body-xxs;
@@ -10,7 +9,7 @@
 }
 
 .accordion {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 }
 
 .accordionContent {
@@ -25,20 +24,20 @@
 }
 
 .statusBox {
-  padding: $sds-spaces-l;
+  padding: $space-l;
   display: flex;
   border-radius: $border-radius-m;
-  margin-bottom: $sds-spaces-l;
+  margin-bottom: $space-l;
 
   .statusIcon {
     height: 20px;
     width: 20px;
-    margin-top: $sds-spaces-xs;
+    margin-top: $space-xs;
     flex-shrink: 0;
   }
 
   .statusText {
-    margin-left: $sds-spaces-m;
+    margin-left: $space-m;
   }
 
   .statusTitle {
@@ -51,40 +50,40 @@
 
   a {
     // Use border-bottom instead of text-decoration: underline to give space under text
-    border-bottom: 1px dashed $sds-color-gray-400;
+    border-bottom: 1px dashed $gray-medium;
   }
 
   &.inProgress {
-    background-color: $sds-color-primary-200;
+    background-color: $primary-lightest;
 
     .statusIcon {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: $sds-color-primary-400;
+      color: $primary;
       font-size: 20px;
     }
   }
 
   &.pipelineErrored {
-    background-color: $sds-color-error-100;
+    background-color: $error-off-white;
 
     .statusIcon {
-      fill: $sds-color-error-400;
+      fill: $error-medium;
     }
   }
 
   &.userErrored {
-    background-color: $sds-color-warning-100;
+    background-color: $warning-off-white;
     .statusIcon {
-      fill: $sds-color-warning-400;
+      fill: $warning-medium;
     }
   }
 
   &.finished {
-    background-color: $sds-color-success-100;
+    background-color: $success-off-white;
     .statusIcon {
-      fill: $sds-color-success-400;
+      fill: $success-medium;
     }
   }
 }
@@ -108,31 +107,31 @@
 
   pre {
     padding: 12px 12px 18px;
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
     margin-left: 15px;
   }
 
   code {
     @include font-code;
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
   }
 
   a {
     // Override color: inherit in _header.scss.
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
   }
 }
 
 .fileLink {
-  color: $sds-color-primary-400;
+  color: $primary;
   cursor: pointer;
-  margin-bottom: $sds-spaces-s;
+  margin-bottom: 8px;
 }
 
 .disabledFileLink {
-  color: $sds-color-gray-500;
+  color: $gray-dark;
   cursor: default;
-  margin-bottom: $sds-spaces-s;
+  margin-bottom: 8px;
 }
 
 .fileGroup {
@@ -145,7 +144,7 @@
 
   .fileGroupHeader {
     @include font-header-xs;
-    margin-bottom: $sds-spaces-s;
+    margin-bottom: 8px;
   }
 }
 
@@ -156,11 +155,11 @@
   span {
     width: 50%;
     padding-right: 12px;
-    margin-bottom: $sds-spaces-s;
+    margin-bottom: 8px;
   }
 
   a {
     // Override color: inherit in _header.scss.
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
   }
 }

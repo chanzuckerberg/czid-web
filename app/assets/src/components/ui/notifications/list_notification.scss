@@ -1,18 +1,17 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .listNotification {
   .accordion {
-    background-color: $sds-color-gray-200;
+    background-color: $gray-lightest;
     border-radius: $border-radius-m;
-    margin-top: $sds-spaces-m;
+    margin-top: 10px;
 
     .title {
       font-size: 12px;
       text-transform: uppercase;
       font-weight: 600;
-      padding: $sds-spaces-m;
+      padding: 10px;
     }
 
     .content {
@@ -22,10 +21,10 @@
 
       .listItem {
         line-height: 22px;
-        padding: $sds-spaces-m;
+        padding: 10px;
 
         &:nth-child(odd) {
-          background-color: $sds-color-gray-200;
+          background-color: $gray-lightest;
         }
       }
     }

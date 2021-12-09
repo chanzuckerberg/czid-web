@@ -1,24 +1,23 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .radioButton {
   width: 15px;
   height: 15px;
   border-radius: $border-radius-l;
   border: $border-gray-medium;
-  padding: $sds-spaces-xxxs;
+  padding: 2px;
   cursor: pointer;
 
   &:hover {
-    border: 5px solid $sds-color-gray-300;
+    border: 5px solid $gray-light;
   }
 
   &.selected {
-    border: 5px solid $sds-color-primary-400;
+    border: 5px solid $primary;
 
     &:hover {
-      border: 5px solid $sds-color-primary-300;
+      border: 5px solid $primary-light;
     }
   }
 

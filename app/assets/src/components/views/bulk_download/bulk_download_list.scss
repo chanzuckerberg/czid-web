@@ -1,7 +1,6 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .bulkDownloadList {
   display: flex;
@@ -17,21 +16,21 @@
   .largeDownloadIcon {
     width: 150px;
     height: 150px;
-    fill: $sds-color-gray-200;
+    fill: $gray-lightest;
   }
 
   .loadingMessage {
-    margin: $sds-spaces-xxl auto 0;
+    margin: $space-xxl auto 0;
   }
 
   .lightCell {
     font-weight: $font-weight-regular;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 }
 
 .autoUpdateWarning {
-  margin-bottom: $sds-spaces-xxs;
+  margin-bottom: $space-xxs;
 
   .link {
     text-decoration: underline;
@@ -40,8 +39,8 @@
 }
 
 .viewHeader {
-  margin-top: $sds-spaces-xxl;
-  margin-bottom: $sds-spaces-xxl;
+  margin-top: $space-xxl;
+  margin-bottom: $space-xxl;
 }
 
 .downloadNameHeader {
@@ -49,9 +48,9 @@
 }
 
 .tableContainer {
-  padding-top: $sds-spaces-xl;
+  padding-top: $space-xl;
 }
 
 .tableRow {
-  padding: 0 $sds-spaces-xl !important;
+  padding: 0 $space-xl !important;
 }

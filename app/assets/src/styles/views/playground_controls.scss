@@ -1,27 +1,26 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .playground {
   .playground-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-    grid-gap: $sds-spaces-m;
-    margin: $sds-spaces-m;
+    grid-gap: 10px;
+    margin: 10px;
 
     .component-card {
       border: $border-gray-lightest;
-      padding: $sds-spaces-m;
+      padding: 10px;
       float: left;
 
       .component {
-        padding-top: $sds-spaces-m;
+        padding-top: 10px;
         text-align: center;
       }
 
       .title {
         border-bottom: 1px solid $gray-lightest;
-        padding: $sds-spaces-m;
+        padding: 10px;
         text-align: center;
         white-space: nowrap;
       }
@@ -29,7 +28,7 @@
   }
 
   .playground-console {
-    padding: $sds-spaces-m;
+    padding: 10px;
 
     .playground-console-label {
       font-weight: 700;

@@ -1,10 +1,9 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .filterLabel {
   @include font-caps-xxxs;
   line-height: 24px;
-  color: $sds-color-gray-500;
-  margin-right: $sds-spaces-m;
+  color: $gray-dark;
+  margin-right: 10px;
 }

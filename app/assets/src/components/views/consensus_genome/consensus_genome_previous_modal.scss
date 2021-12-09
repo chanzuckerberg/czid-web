@@ -1,17 +1,16 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .modal {
   .title {
     @include font-header-xxl;
-    margin-bottom: $sds-spaces-xxs;
+    margin-bottom: $space-xxs;
   }
 
   .label {
     @include font-header-xs;
-    margin-bottom: $sds-spaces-xl;
+    margin-bottom: $space-xl;
 
     .taxonName {
       @include font-body-xs;
@@ -20,12 +19,12 @@
 
   .table {
     height: 200px;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: $space-m;
 
     .headerLabel {
       @include font-header-xs;
 
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
 
     .primaryHeader {
@@ -49,7 +48,7 @@
 
       .subtext {
         @include font-body-xs;
-        color: $sds-color-gray-300;
+        color: $gray-light;
       }
     }
 
@@ -60,6 +59,6 @@
 
   .icon {
     height: 10px !important; // Override .idseq-ui.button
-    fill: $sds-color-primary-400;
+    fill: $primary;
   }
 }

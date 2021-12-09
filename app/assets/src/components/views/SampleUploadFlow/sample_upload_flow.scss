@@ -1,12 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .sampleUploadFlow {
   .inner {
     padding: 0 60px;
-    background-color: $sds-color-gray-white;
+    background-color: $white;
   }
 
   &.narrow .inner {
@@ -33,12 +32,12 @@
   .controls {
     .helpText {
       @include font-body-xxs;
-      margin-bottom: $sds-spaces-m;
-      color: $sds-color-gray-500;
+      margin-bottom: 10px;
+      color: $gray-dark;
     }
 
     .continueButton {
-      margin-right: $sds-spaces-m;
+      margin-right: 10px;
     }
   }
 
@@ -53,14 +52,14 @@
 
   .infoLink {
     @include font-caps-xxxs;
-    margin-left: $sds-spaces-m;
-    color: $sds-color-primary-400;
+    margin-left: 10px;
+    color: $primary;
     cursor: pointer;
   }
 }
 
 .headerWrapper {
-  border-bottom: 4px solid $sds-color-gray-100;
+  border-bottom: 4px solid $gray-off-white;
 }
 
 .sampleUploadFlowHeader {
@@ -78,12 +77,12 @@
 
   .subtitle {
     margin-top: 5px;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $sds-color-primary-400;
+    color: $primary;
     cursor: pointer;
     margin-left: 5px;
   }
@@ -98,16 +97,16 @@
       width: 110px;
 
       &.active .circle {
-        color: $sds-color-gray-white;
-        background-color: $sds-color-primary-400;
+        color: $white;
+        background-color: $primary;
       }
 
       &.enabled {
         cursor: pointer;
 
         .circle {
-          color: $sds-color-gray-white;
-          background-color: $sds-color-primary-400;
+          color: $white;
+          background-color: $primary;
           opacity: 0.3;
         }
       }
@@ -120,14 +119,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: $sds-spaces-xs;
+      margin-bottom: 6px;
       // Disable semantic-ui transition.
       transition: none;
     }
 
     .text {
       @include font-header-xxs;
-      color: $sds-color-gray-black;
+      color: $black;
     }
   }
 }
@@ -138,18 +137,18 @@
 
     .header {
       @include font-header-xl;
-      margin-bottom: $sds-spaces-default;
+      margin-bottom: $space-default;
     }
 
     .createProjectButton {
       @include font-caps-xxxs;
-      color: $sds-color-primary-400;
+      color: $primary;
       cursor: pointer;
-      margin-top: $sds-spaces-xxs;
+      margin-top: 4px;
     }
 
     .projectCreationContainer {
-      background-color: $sds-color-gray-100;
+      background-color: $gray-off-white;
       padding: 20px;
       margin-top: 20px;
     }
@@ -157,7 +156,7 @@
 
   .fileUpload {
     position: relative;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
 
     .title {
       @include font-header-xl;
@@ -180,16 +179,16 @@
 
 .remoteFileUpload {
   .info {
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
     padding: 20px;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
 
     .title {
       @include font-header-xs;
     }
 
     ul {
-      margin: 5px 0 $sds-spaces-m 20px;
+      margin: 5px 0 10px 20px;
 
       &:last-child {
         margin-bottom: 0;
@@ -206,7 +205,7 @@
     display: flex;
 
     .connectButton {
-      margin-left: $sds-spaces-m;
+      margin-left: 10px;
     }
 
     .input {
@@ -216,22 +215,22 @@
   }
 
   .notification {
-    margin-top: $sds-spaces-m;
+    margin-top: 10px;
   }
 }
 
 .localFileUpload {
   .info {
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
     padding: 20px;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
 
     .title {
       @include font-header-xs;
     }
 
     ul {
-      margin: 5px 0 $sds-spaces-m 20px;
+      margin: 5px 0 10px 20px;
 
       &:last-child {
         margin-bottom: 0;
@@ -250,11 +249,11 @@
     font-size: 26px;
     font-weight: 600;
     letter-spacing: 0.4px;
-    margin-bottom: $sds-spaces-s;
+    margin-bottom: 8px;
   }
 
   .uploadInstructions {
-    margin-top: $sds-spaces-m;
+    margin-top: 10px;
   }
 
   .hide {
@@ -270,11 +269,11 @@
   .uploadMsg {
     @include font-body-m;
     margin-bottom: 40px;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 
   .reviewHeader {
-    margin-bottom: $sds-spaces-xl;
+    margin-bottom: $space-xl;
     display: flex;
 
     .text {
@@ -284,13 +283,13 @@
     .links {
       @include font-body-xs;
       display: flex;
-      margin-left: $sds-spaces-m;
+      margin-left: 10px;
       align-items: center;
       margin-top: 5px;
 
       &.enabled {
         .link {
-          color: $sds-color-primary-400;
+          color: $primary;
           cursor: pointer;
         }
       }
@@ -300,7 +299,7 @@
       }
 
       .link {
-        color: $sds-color-gray-300;
+        color: $gray-light;
         cursor: default;
       }
     }
@@ -313,12 +312,12 @@
   .icon {
     height: $icon-xl;
     width: $icon-xl;
-    margin-right: $sds-spaces-l;
+    margin-right: $space-l;
   }
 
   .section {
-    background-color: $sds-color-gray-100;
-    padding: $sds-spaces-xl;
+    background-color: $gray-off-white;
+    padding: $space-xl;
     display: flex;
 
     .name {
@@ -327,8 +326,8 @@
 
     .publicAccess {
       @include font-body-s;
-      color: $sds-color-gray-600;
-      margin-left: $sds-spaces-m;
+      color: $gray-darkest;
+      margin-left: 10px;
     }
 
     .text {
@@ -341,7 +340,7 @@
 
       .existingSamples {
         @include font-body-xs;
-        color: $sds-color-gray-500;
+        color: $gray-dark;
       }
 
       .truncated {
@@ -357,33 +356,33 @@
         text-transform: uppercase;
         display: inline-block;
         margin-top: 5px;
-        margin-bottom: $sds-spaces-m;
-        color: $sds-color-primary-400;
+        margin-bottom: 10px;
+        color: $primary;
         cursor: pointer;
       }
     }
 
     .descriptionContainer {
       @include font-body-s;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
       white-space: pre-wrap;
-      margin: $sds-spaces-m 0;
+      margin: $space-m 0;
     }
   }
 
   .analysisTypeContent {
     display: flex;
-    margin-top: $sds-spaces-l;
+    margin-top: $space-l;
 
     .item {
       min-width: 180px;
-      margin-right: $sds-spaces-xl;
-      color: $sds-color-gray-500;
+      margin-right: $space-xl;
+      color: $gray-dark;
       flex: 1 0 0;
 
       .subheader {
         @include font-header-s;
-        margin-bottom: $sds-spaces-xs;
+        margin-bottom: $space-xs;
       }
 
       .description {
@@ -398,7 +397,7 @@
 
     .loadingMsg {
       @include font-body-s;
-      margin-top: $sds-spaces-m;
+      margin-top: 10px;
     }
   }
 
@@ -407,15 +406,15 @@
   }
 
   .error {
-    color: $sds-color-error-400;
+    color: $error-medium;
   }
 
   .link {
-    color: $sds-color-primary-400;
+    color: $primary;
   }
 
   .files {
-    padding: $sds-spaces-m 0;
+    padding: 10px 0;
 
     .file {
       padding: 5px 0;
@@ -435,12 +434,12 @@
   .uploadMessage {
     @include font-body-xs;
     margin-top: 30px;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
   }
 
   .uploadMessage,
   .successMessage {
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 
   .loadingIcon {
@@ -448,7 +447,7 @@
   }
 
   .sampleProcessingOption {
-    margin-top: $sds-spaces-xl;
+    margin-top: $space-xl;
     align-items: left;
     justify-content: left;
 
@@ -456,7 +455,7 @@
     :global(.label) {
       font-size: 12px;
       line-height: 20px;
-      margin-left: $sds-spaces-m;
+      margin-left: 10px;
     }
   }
 }

@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .liveSearchBox {
   input[type="text"] {
@@ -35,11 +34,11 @@
     > :global(.results) {
       > :global(.category) {
         background-color: transparent;
-        margin-top: $sds-spaces-m;
+        margin-top: 10px;
         padding: 0 16px;
 
         &:last-child {
-          margin-bottom: $sds-spaces-m;
+          margin-bottom: 10px;
         }
 
         > :global(.name) {
@@ -83,7 +82,7 @@
 }
 
 .searchIcon {
-  fill: $sds-color-gray-400;
+  fill: $gray-medium;
   margin: 0;
   padding: 0;
   position: absolute;

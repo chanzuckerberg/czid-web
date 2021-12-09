@@ -1,12 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .carouselCell {
   width: 100%;
-  background-color: $sds-color-primary-400;
-  color: $sds-color-gray-white;
+  background-color: $primary;
+  color: $white;
 }
 
 .quoteContainer {
@@ -23,7 +22,7 @@
   }
 
   p {
-    color: $sds-color-gray-white;
+    color: $white;
     @include font-header-xl;
 
     @media (max-width: 768px) {
@@ -67,7 +66,7 @@
   top: 5.5rem;
 
   @media (max-width: 768px) {
-    left: $sds-spaces-xl;
+    left: $space-xl;
     top: 2.5rem;
   }
 

@@ -1,35 +1,34 @@
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .issueGroup {
   border-bottom: none !important;
 
   &.warning {
-    background-color: $sds-color-warning-100;
+    background-color: $warning-off-white;
 
     tbody {
       tr:nth-child(odd) {
-        background-color: $sds-color-warning-100-overlay;
+        background-color: $warning-light;
       }
     }
   }
 
   &.error {
-    background-color: $sds-color-error-100;
+    background-color: $error-off-white;
 
     tbody {
       tr:nth-child(odd) {
-        background-color: #f2e4e4;
+        background-color: $error-light;
       }
     }
   }
 
   &.info {
-    background-color: $sds-color-primary-200;
+    background-color: $info-off-white;
 
     tbody {
       tr:nth-child(odd) {
-        background-color: $sds-color-info-100-overlay;
+        background-color: $info-light;
       }
     }
   }
@@ -38,23 +37,23 @@
 .header {
   display: flex;
   align-items: center;
-  padding: $sds-spaces-m;
+  padding: 10px;
 
   .icon {
     width: 20px;
     height: 20px;
-    margin-right: $sds-spaces-m;
+    margin-right: 10px;
 
     &.warning {
-      fill: $sds-color-warning-400;
+      fill: $warning-medium;
     }
 
     &.error {
-      fill: $sds-color-error-400;
+      fill: $error-medium;
     }
 
     &.info {
-      fill: $sds-color-primary-400;
+      fill: $info-medium;
     }
   }
 }
@@ -72,6 +71,6 @@
   }
 
   th {
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
   }
 }

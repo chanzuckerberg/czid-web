@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .userManagementForm {
   display: flex;
@@ -15,25 +14,25 @@
     display: flex;
     align-items: center;
     min-height: 20px;
-    margin-bottom: $sds-spaces-xxs;
+    margin-bottom: $space-xxs;
   }
 
   .note {
     @include font-body-xs;
-    color: $sds-color-gray-500;
-    margin-bottom: $sds-spaces-l;
+    color: $gray-dark;
+    margin-bottom: $space-l;
   }
 
   .background {
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
     border-radius: $border-radius-m;
   }
 
   .userManagementBody {
-    padding: $sds-spaces-l;
+    padding: $space-l;
 
     .userList {
-      margin-top: $sds-spaces-l;
+      margin-top: $space-l;
       width: 100%;
       max-height: 150px;
       display: flex;
@@ -45,7 +44,7 @@
       }
 
       .userEntry:not(:first-child) {
-        margin-top: $sds-spaces-xs;
+        margin-top: $space-xs;
       }
     }
 
@@ -54,7 +53,7 @@
 
       .label {
         @include font-header-s;
-        margin-bottom: $sds-spaces-xxs;
+        margin-bottom: $space-xxs;
       }
 
       .button {
@@ -62,7 +61,7 @@
       }
 
       .addMemberFormField:not(:first-child) {
-        margin-left: $sds-spaces-m;
+        margin-left: $space-m;
       }
 
       .addMemberFormField:not(:last-child) {
@@ -78,19 +77,19 @@
 
     .statusMessage {
       @include font-body-xxs;
-      margin-top: $sds-spaces-m;
+      margin-top: $space-m;
       height: 16px;
 
       &.errorMessage {
-        color: $sds-color-error-400;
+        color: $error-medium;
       }
 
       &.infoMessage {
-        color: $sds-color-gray-500;
+        color: $gray-dark;
       }
 
       &.successMessage {
-        color: $sds-color-success-400;
+        color: $success-medium;
       }
     }
   }

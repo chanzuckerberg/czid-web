@@ -1,13 +1,12 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .tableHeader {
-  padding: $sds-spaces-l $sds-spaces-xs;
+  padding: $space-l $space-xs;
   text-align: left;
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 }
 
 .tableData {
-  padding: $sds-spaces-l $sds-spaces-xs;
+  padding: $space-l $space-xs;
 }

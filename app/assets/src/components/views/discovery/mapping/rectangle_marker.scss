@@ -1,28 +1,27 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .rectangle {
   @include font-header-s;
-  background-color: $sds-color-gray-white;
+  background-color: $white;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-m;
   cursor: pointer;
-  padding: $sds-spaces-xxxs 7px;
+  padding: 2px 7px;
   text-align: center;
   // Center horizontal/vertical midpoints
   transform: translate(-50%, -50%);
 
   &.hoverable {
     &:hover {
-      background-color: $sds-color-primary-500;
-      color: $sds-color-gray-white;
+      background-color: $primary-dark;
+      color: $white;
     }
   }
 
   &.active {
-    background-color: $sds-color-primary-500;
-    color: $sds-color-gray-white;
+    background-color: $primary-dark;
+    color: $white;
   }
 }

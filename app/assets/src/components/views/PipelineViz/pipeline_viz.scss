@@ -1,32 +1,31 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 // Exporting strings to style nodes and edges in vis.js
 :export {
-  defaultNodeText: $sds-color-gray-black;
+  defaultNodeText: $black;
 
-  notStartedBg: $sds-color-gray-white;
-  notStartedText: scale-color($sds-color-gray-black, $alpha: -50%);
+  notStartedBg: $white;
+  notStartedText: scale-color($black, $alpha: -50%);
   notStartedShadow: scale-color($box-shadow-light, $alpha: -50%);
 
-  inProgressBg: $sds-color-primary-200;
-  inProgressHoverBg: hover-state($sds-color-primary-200);
+  inProgressBg: $primary-lightest;
+  inProgressHoverBg: hover-state($primary-lightest);
 
-  finishedBg: $sds-color-success-100;
-  finishedHoverBg: hover-state($sds-color-success-100);
+  finishedBg: $success-off-white;
+  finishedHoverBg: hover-state($success-off-white);
 
-  pipelineErroredBg: $sds-color-error-100;
-  pipelineEroredHoverBg: hover-state($sds-color-error-100);
+  pipelineErroredBg: $error-off-white;
+  pipelineEroredHoverBg: hover-state($error-off-white);
 
-  userErroredBg: $sds-color-warning-100;
-  userErroredHoverBg: hover-state($sds-color-warning-100);
+  userErroredBg: $warning-off-white;
+  userErroredHoverBg: hover-state($warning-off-white);
 
-  stageBg: $sds-color-gray-100;
-  defaultEdgeColor: $sds-color-gray-400;
-  outputEdgeColor: $sds-color-primary-400;
-  inputEdgeColor: $sds-color-gray-black;
+  stageBg: $gray-off-white;
+  defaultEdgeColor: $gray-medium;
+  outputEdgeColor: $primary;
+  inputEdgeColor: $black;
 
   nodeShadowColor: $box-shadow-light;
 }
@@ -87,9 +86,9 @@
 
 .stageButton {
   @include font-caps-xxs;
-  background-color: $sds-color-gray-white;
+  background-color: $white;
   border-radius: $border-radius-m;
-  padding: $sds-spaces-xs $sds-spaces-s;
+  padding: 6px 8px;
   cursor: pointer;
   box-shadow: $box-shadow-s;
   display: flex;
@@ -102,24 +101,24 @@
   }
 
   &.finished {
-    background-color: $sds-color-success-200;
+    background-color: $success-lightest;
   }
 
   &.notStarted {
-    background-color: $sds-color-gray-white;
-    color: $sds-color-gray-500;
+    background-color: $white;
+    color: $gray-dark;
   }
 
   &.inProgress {
-    background-color: $sds-color-primary-200;
+    background-color: $primary-lightest;
   }
 
   &.pipelineErrored {
-    background-color: $sds-color-error-200;
+    background-color: $error-lightest;
   }
 
   &.userErrored {
-    background-color: $sds-color-warning-100;
+    background-color: $warning-off-white;
   }
 }
 
@@ -137,7 +136,7 @@
   }
 
   .inProgressIcon {
-    color: $sds-color-primary-400;
+    color: $primary;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,15 +145,15 @@
   }
 
   .pipelineErroredIcon {
-    fill: $sds-color-error-400;
+    fill: $error-medium;
   }
 
   .userErroredIcon {
-    fill: $sds-color-warning-400;
+    fill: $warning-medium;
   }
 
   .finishedIcon {
-    fill: $sds-color-success-400;
+    fill: $success-medium;
   }
 
   .stageName {
@@ -164,7 +163,7 @@
   // Only give the stage name a margin-left if there is
   // an icon preceding it.
   & > .stageName:nth-child(2) {
-    margin-left: $sds-spaces-xxs;
+    margin-left: 4px;
   }
 }
 
@@ -182,15 +181,15 @@
     position: relative;
     width: calc(100% - 8px);
     padding: 0.5px 0;
-    background-color: $sds-color-gray-400;
+    background-color: $gray-medium;
 
     &.fromColoring {
-      background-color: $sds-color-gray-black;
+      background-color: $black;
       padding: 1px 0;
     }
 
     &.toColoring {
-      background-color: $sds-color-primary-400;
+      background-color: $primary;
       padding: 1px 0;
     }
   }
@@ -199,21 +198,21 @@
     position: absolute;
     right: 0;
     height: 75%;
-    fill: $sds-color-gray-400;
+    fill: $gray-medium;
 
     &.fromColoring {
-      fill: $sds-color-gray-black;
+      fill: $black;
     }
 
     &.toColoring {
-      fill: $sds-color-primary-500;
+      fill: $primary-dark;
     }
   }
 }
 
 .graphLabel {
   @include font-caps-xxs;
-  padding: $sds-spaces-l $sds-spaces-l 0;
+  padding: 14px 14px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -224,10 +223,10 @@
 
   .closeIcon {
     box-sizing: content-box;
-    fill: $sds-color-gray-300;
+    fill: $gray-light;
 
     &:hover {
-      fill: $sds-color-gray-black;
+      fill: $black;
     }
   }
 }
@@ -241,7 +240,7 @@
 }
 
 .openedStage {
-  background-color: $sds-color-gray-100;
+  background-color: $gray-off-white;
   border-radius: $border-radius-m;
   padding: 16px 0;
   display: flex;
@@ -273,14 +272,14 @@
 
 .pipelineInfo {
   @include font-body-xxxs;
-  color: $sds-color-gray-400;
+  color: $gray-medium;
   margin-top: 24px;
   margin-bottom: 18px;
 }
 
 .headerDivider {
   height: 3px;
-  background-color: $sds-color-gray-200;
+  background-color: $gray-lightest;
   position: absolute;
   left: 0;
   right: 0;

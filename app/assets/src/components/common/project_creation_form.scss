@@ -1,7 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .projectCreationForm {
   .label {
@@ -10,41 +9,41 @@
 
     .infoLink {
       @include font-caps-xxxs;
-      margin-left: $sds-spaces-xxs;
-      color: $sds-color-primary-400;
+      margin-left: $space-xxs;
+      color: $primary;
       cursor: pointer;
     }
   }
 
   .optionalLabel {
     @include font-body-xxs;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 
   .descriptionTextArea {
     @include font-body-xs;
-    background-color: $sds-color-gray-white;
+    background-color: $white;
     height: 100px;
     margin-top: 5px;
-    padding: $sds-spaces-l;
+    padding: $space-l;
     resize: vertical;
-    text-indent: $sds-spaces-xs;
+    text-indent: $space-xs;
     width: 100%;
   }
 
   .charCounter {
     @include font-body-xxs;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     text-align: right;
   }
 
   .field {
-    margin-bottom: $sds-spaces-s;
+    margin-bottom: $space-s;
 
     .info {
-      background-color: $sds-color-gray-200;
+      background-color: $gray-lightest;
       padding: 20px;
-      margin-bottom: $sds-spaces-default;
+      margin-bottom: $space-default;
       border-radius: $border-radius-m;
 
       .title {
@@ -52,7 +51,7 @@
       }
 
       ul {
-        margin: $sds-spaces-l 0 $sds-spaces-m 20px;
+        margin: $space-l 0 $space-m 20px;
 
         &:last-child {
           margin-bottom: 0;
@@ -73,12 +72,12 @@
   .sharingOption {
     display: flex;
     align-items: flex-start;
-    padding: $sds-spaces-m 0;
+    padding: 10px 0;
     border-radius: $border-radius-m;
     cursor: pointer;
 
     &:hover {
-      background-color: $sds-color-gray-200;
+      background-color: $gray-lightest;
     }
 
     .radioButtonAndProjectIcon {
@@ -86,7 +85,7 @@
       align-items: center;
 
       .radioButton {
-        margin: $sds-spaces-m 15px;
+        margin: 10px 15px;
         flex: 1 0 auto;
       }
 
@@ -94,7 +93,7 @@
         flex: 1 0 auto;
         height: 32px;
         width: 32px;
-        margin-right: $sds-spaces-m;
+        margin-right: 10px;
       }
     }
 
@@ -114,12 +113,12 @@
   }
 
   .error {
-    color: $sds-color-error-400;
-    margin-left: $sds-spaces-m;
-    margin-bottom: $sds-spaces-m;
+    color: $error-medium;
+    margin-left: 10px;
+    margin-bottom: 10px;
   }
 
   .cancelButton {
-    margin-left: $sds-spaces-default;
+    margin-left: $space-default;
   }
 }

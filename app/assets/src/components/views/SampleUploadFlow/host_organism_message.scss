@@ -1,22 +1,21 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .listContainer {
-  margin: $sds-spaces-m 0;
+  margin: $space-m 0;
 
-  background-color: $sds-color-primary-200;
+  background-color: $info-off-white;
 
   &.warning {
-    background-color: $sds-color-warning-100;
+    background-color: $warning-off-white;
   }
 }
 
 .messageContainer {
   @include font-body-xs;
 
-  margin: $sds-spaces-m 0;
+  margin: $space-m 0;
 
   strong {
     font-weight: $font-weight-bold;
@@ -26,32 +25,32 @@
 .messageLine {
   @include font-body-xs;
 
-  margin: 0 $sds-spaces-m;
-  padding: $sds-spaces-m;
+  margin: 0 $space-m;
+  padding: $space-m;
   // .messageContainer margin + .icon margin + .icon width (see notification.scss)
-  margin: 0 calc(#{$sds-spaces-m} + #{$sds-spaces-l} + 20px);
+  margin: 0 calc(#{$space-m} + #{$space-l} + 20px);
 
   &:nth-child(odd) {
-    background-color: $sds-color-info-100-overlay;
+    background-color: $info-light;
     &.warning {
-      background-color: $sds-color-warning-100-overlay;
+      background-color: $warning-light;
     }
   }
 
   &:nth-child(even) {
-    background-color: $sds-color-primary-200;
+    background-color: $info-off-white;
     &.warning {
-      background-color: $sds-color-warning-100;
+      background-color: $warning-off-white;
     }
   }
 
   &:last-child {
-    margin-bottom: $sds-spaces-l;
+    margin-bottom: $space-l;
   }
 }
 
 .link {
   // Overwrite <a> inherit rule in header.scss
-  color: $sds-color-primary-400 !important;
+  color: $primary !important;
   cursor: pointer;
 }

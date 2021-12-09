@@ -1,18 +1,17 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .notification {
   @include font-body-xs;
-  border-left: 5px solid $sds-color-gray-black;
+  border-left: 5px solid $black;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-s;
-  color: $sds-color-gray-black;
+  color: $black;
   display: flex;
   align-items: center;
   font-family: $font-family-default;
-  padding: $sds-spaces-l $sds-spaces-l $sds-spaces-l 9px;
+  padding: 14px 14px 14px 9px;
   cursor: default;
 
   &.flat {
@@ -23,8 +22,8 @@
 
   .icon {
     flex-grow: 0;
-    margin-left: $sds-spaces-xxs;
-    margin-right: $sds-spaces-l;
+    margin-left: $space-xxs;
+    margin-right: $space-l;
     align-self: flex-start;
 
     svg {
@@ -34,7 +33,7 @@
 
     .successIcon {
       font-size: 16px;
-      color: $sds-color-success-400;
+      color: $success-medium;
     }
   }
 
@@ -48,9 +47,9 @@
   .removeIcon {
     height: 14px;
     width: 14px;
-    fill: $sds-color-gray-500;
-    margin-right: $sds-spaces-l;
-    margin-top: $sds-spaces-xxs;
+    fill: $gray-dark;
+    margin-right: $space-l;
+    margin-top: $space-xxs;
     margin-left: auto;
     align-self: flex-start;
 
@@ -62,7 +61,7 @@
   .actions {
     @include font-caps-xxs;
     font-weight: 600;
-    margin-top: $sds-spaces-l;
+    margin-top: 14px;
 
     &:hover {
       cursor: pointer;
@@ -70,30 +69,30 @@
   }
 
   &.error {
-    border-color: $sds-color-error-400;
-    background-color: $sds-color-error-100;
+    border-color: $error-medium;
+    background-color: $error-off-white;
   }
 
   &.warning {
-    border-color: $sds-color-warning-400;
-    background-color: $sds-color-warning-100;
+    border-color: $warning-medium;
+    background-color: $warning-off-white;
   }
 
   &.info {
-    border-color: $sds-color-primary-400;
-    background-color: $sds-color-primary-200;
+    border-color: $info-medium;
+    background-color: $info-off-white;
 
     .icon {
-      fill: $sds-color-primary-400;
+      fill: $info-medium;
     }
   }
 
   &.success {
-    border-color: $sds-color-success-400;
-    background-color: $sds-color-success-100;
+    border-color: $success-medium;
+    background-color: $success-off-white;
 
     .icon {
-      fill: $sds-color-success-400;
+      fill: $success-medium;
     }
   }
 }

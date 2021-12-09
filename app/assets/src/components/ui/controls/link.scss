@@ -1,24 +1,23 @@
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 // !important uses needed to override materialize.css
 .linkDefault {
-  color: $sds-color-primary-400 !important;
+  color: $primary !important;
 
   &:hover,
   &:active {
-    color: $sds-color-primary-600 !important;
+    color: $primary-darkest !important;
   }
 }
 
 .linkBlack {
-  color: $sds-color-gray-black !important;
+  color: $black !important;
   text-decoration-line: underline;
   text-decoration-style: dashed;
 
   &:hover,
   &:active {
-    color: $sds-color-gray-black !important;
+    color: $black !important;
     text-decoration-line: underline;
     text-decoration-style: solid;
   }

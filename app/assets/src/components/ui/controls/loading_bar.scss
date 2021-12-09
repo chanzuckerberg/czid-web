@@ -1,38 +1,37 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .loadingBarBackground {
-  background-color: $sds-color-gray-200;
-  height: $sds-spaces-s;
+  background-color: $gray-lightest;
+  height: $space-s;
   border-radius: $border-radius-m;
   overflow: hidden;
 
   .loadingBar {
-    background-color: $sds-color-primary-400;
-    height: $sds-spaces-s;
+    background-color: $primary;
+    height: $space-s;
     width: 0px;
     border-radius: $border-radius-m;
 
     &.showHint {
-      min-width: $sds-spaces-xxs;
+      min-width: $space-xxs;
     }
 
     &.error {
-      background-color: $sds-color-error-400;
+      background-color: $error-medium;
     }
   }
 
   &.tiny {
-    height: $sds-spaces-xs;
+    height: $space-xs;
 
     .loadingBar {
-      height: $sds-spaces-xs;
+      height: $space-xs;
       border-radius: $border-radius-m;
     }
   }
 
   &.loading {
-    margin-top: $sds-spaces-xxs;
+    margin-top: $space-xxs;
   }
 }

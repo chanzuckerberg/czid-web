@@ -1,6 +1,5 @@
 @import "typography";
 @import "themes/colors";
-@import "~czifui/dist/variables";
 
 .instruction-container {
   margin: 5%;
@@ -18,7 +17,7 @@
 
 .code-bullet {
   width: fit-content;
-  background-color: $sds-color-primary-200;
+  background-color: $primary-lightest;
   white-space: nowrap;
   font-family: monospace;
   margin-top: 1rem;

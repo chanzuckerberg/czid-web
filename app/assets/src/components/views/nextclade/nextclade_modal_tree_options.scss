@@ -1,29 +1,28 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .treeTypeContainer {
-  margin-top: $sds-spaces-s;
+  margin-top: $space-s;
   flex: 1 1 0;
   min-height: 0;
 }
 
 .treeType {
-  padding: $sds-spaces-s $sds-spaces-m;
-  margin-bottom: $sds-spaces-xxs;
+  padding: $space-s $space-m;
+  margin-bottom: $space-xxs;
   border-radius: $border-radius-m;
   display: flex;
   cursor: pointer;
 
   &:hover,
   &.selected {
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
   }
 
   .radioButton {
-    margin-right: $sds-spaces-m;
-    margin-top: $sds-spaces-xxs;
+    margin-right: $space-m;
+    margin-top: $space-xxs;
   }
 
   .content {
@@ -37,18 +36,18 @@
 
   .description {
     @include font-body-xxs;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 }
 
 .fields {
   display: flex;
   flex-wrap: wrap;
-  margin-top: $sds-spaces-s;
-  margin-right: $sds-spaces-xl;
+  margin-top: $space-s;
+  margin-right: $space-xl;
 
   .localFilePicker {
-    margin: $sds-spaces-xs 0;
+    margin: $space-xs 0;
     height: 120px;
 
     &.short {

@@ -1,5 +1,4 @@
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .metadataUploadModal {
   min-height: 500px;
@@ -17,14 +16,14 @@
 .uploadPage {
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
     cursor: pointer;
   }
 }
 
 .uploadInstructions {
   .backButton {
-    color: $sds-color-primary-400;
+    color: $primary;
     letter-spacing: 0.4px;
     font-size: 13px;
     cursor: pointer;
@@ -47,12 +46,12 @@
     line-height: 25px;
 
     li {
-      padding-left: $sds-spaces-xxxs;
+      padding-left: 2px;
     }
 
     .link {
       // Overwrite <a> inherit rule in header.scss
-      color: $sds-color-primary-400 !important;
+      color: $primary !important;
       cursor: pointer;
     }
   }

@@ -1,5 +1,4 @@
 @import "../themes/colors";
-@import "~czifui/dist/variables";
 
 .taxon-tree-vis {
   &__container {
@@ -16,14 +15,14 @@
   }
 
   &__tooltip {
-    background-color: $sds-color-gray-white;
+    background-color: $white;
     border: $border-gray-light;
     border-radius: $border-radius-m;
     box-shadow: $box-shadow-s;
     display: none;
     height: auto;
     min-width: 200px;
-    padding: $sds-spaces-m;
+    padding: 10px;
     pointer-events: none;
     position: absolute;
 
@@ -60,7 +59,7 @@
 
       &__title {
         text-transform: uppercase;
-        color: $sds-color-gray-500;
+        color: $gray-dark;
         border-bottom: 1px solid $gray-lightest;
         margin-bottom: 0.5em;
       }

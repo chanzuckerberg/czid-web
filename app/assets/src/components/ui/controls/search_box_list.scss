@@ -1,21 +1,20 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .searchBoxList {
-  background-color: $sds-color-gray-white;
+  background-color: $white;
   border: $border-gray-light;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-s;
   display: inline-block;
   font-size: 13px;
   min-width: 240px;
-  padding: $sds-spaces-m;
+  padding: 10px;
   text-align: left;
 
   .searchBox {
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
 
     .searchBoxIcon {
       margin: 0;
@@ -31,7 +30,7 @@
 
   .title {
     font-weight: 700;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
   }
 
   .listBox {
@@ -43,17 +42,17 @@
     }
 
     &::-webkit-scrollbar-track {
-      background-color: $sds-color-gray-200;
+      background-color: $gray-lightest;
       border-radius: $border-radius-m;
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: $sds-color-gray-400;
+      background-color: $gray-medium;
     }
 
     .listColumnTitles {
       height: 24px;
-      margin-right: $sds-spaces-m;
+      margin-right: 10px;
       white-space: nowrap;
       display: flex;
       flex-direction: row;
@@ -63,14 +62,14 @@
 
     .listColumnTitle {
       display: inline-block;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
       font-weight: $font-weight-semibold;
     }
 
     .listElement {
       cursor: pointer;
       height: 24px;
-      margin-right: $sds-spaces-m;
+      margin-right: 10px;
       white-space: nowrap;
       display: flex;
       flex-direction: row;
@@ -86,15 +85,15 @@
       display: inline-block;
 
       &:hover {
-        color: $sds-color-primary-400;
+        color: $primary;
       }
     }
 
     .listElementCount {
-      color: $sds-color-gray-400;
+      color: $gray-medium;
       display: inline-block;
       margin-left: auto;
-      padding-left: $sds-spaces-xxl;
+      padding-left: $space-xxl;
     }
   }
 }

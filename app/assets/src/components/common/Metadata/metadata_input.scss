@@ -4,7 +4,7 @@
 
 .warning {
   @include font-body-xxxs;
-  color: $sds-color-warning-600;
+  color: $warning-dark;
   display: flex;
 
   .icon {

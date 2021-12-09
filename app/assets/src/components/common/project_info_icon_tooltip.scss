@@ -1,20 +1,19 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .centerSpan {
   align-self: center;
 
   .projectInfoIcon {
-    margin: 5px $sds-spaces-xxs 5px $sds-spaces-xxs;
+    margin: 5px $space-xxs 5px $space-xxs;
     height: 14px;
     width: 14px;
-    fill: $sds-color-gray-500;
+    fill: $gray-dark;
     vertical-align: text-top;
 
     &:hover {
-      fill: $sds-color-primary-400;
+      fill: $primary;
     }
   }
 }

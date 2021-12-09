@@ -1,89 +1,88 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .content {
-  padding: $sds-spaces-xxl $sds-spaces-xl;
+  padding: $space-xxl $space-xl;
   position: relative;
 }
 
 .title,
 .loadingMsg {
   @include font-header-xl;
-  margin: 0 $sds-spaces-m;
+  margin: 0 $space-m;
   // Leave room for the close button.
   margin-right: 60px;
   word-break: break-all;
 }
 
 .adminDetails {
-  margin: 0 $sds-spaces-m;
-  color: $sds-color-gray-500;
+  margin: 0 $space-m;
+  color: $gray-dark;
 
   .logUrl {
     text-decoration: underline;
 
     &:hover {
-      color: $sds-color-gray-black;
+      color: $black;
     }
   }
 }
 
 .tabs {
-  margin: $sds-spaces-xl $sds-spaces-m;
+  margin: $space-xl $space-m;
 }
 
 .notification {
-  margin: 14px $sds-spaces-m -4px $sds-spaces-m;
+  margin: 14px 10px -4px 10px;
 }
 
 .accordion {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 
   .header {
     @include font-caps-xxs;
 
-    color: $sds-color-gray-black;
-    padding: $sds-spaces-m;
+    color: $black;
+    padding: $space-m;
     height: 40px;
   }
 }
 
 .detailsTab {
   .description {
-    padding: 0 $sds-spaces-m $sds-spaces-m;
+    padding: 0 $space-m $space-m;
     @include font-body-s;
   }
   .samplesList {
     max-height: 360px;
     overflow: auto;
-    padding: 0 $sds-spaces-l;
+    padding: 0 $space-l;
 
     .sampleName {
       @include font-body-xs;
-      padding: $sds-spaces-xxs 0;
+      padding: $space-xxs 0;
       word-break: break-word;
     }
   }
 }
 
 .advancedDownloadTab {
-  margin: 0 $sds-spaces-m;
+  margin: 0 $space-m;
 
   .header {
     @include font-header-xs;
-    margin-bottom: $sds-spaces-xxs;
+    margin-bottom: $space-xxs;
   }
 
   .description {
     @include font-body-xs;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: $space-m;
   }
 
   .cloudCommandContainer {
-    background-color: $sds-color-gray-100;
-    padding: $sds-spaces-m;
+    background-color: $gray-off-white;
+    padding: $space-m;
     display: flex;
     align-items: center;
 
@@ -91,7 +90,7 @@
       cursor: pointer;
 
       &:hover {
-        background-color: $sds-color-gray-200;
+        background-color: $gray-lightest;
       }
     }
 
@@ -105,9 +104,9 @@
 
     .icon {
       width: 24px;
-      color: $sds-color-gray-400;
+      color: $gray-medium;
       margin-left: 16px;
-      margin-right: $sds-spaces-m;
+      margin-right: 10px;
     }
   }
 }

@@ -1,60 +1,59 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .workflowSelector {
-  margin-bottom: $sds-spaces-xxl;
+  margin-bottom: $space-xxl;
 
   .header {
     @include font-header-xl;
-    margin-bottom: $sds-spaces-default;
+    margin-bottom: $space-default;
   }
 
   .selectableOption {
     border-radius: $border-radius-m;
     cursor: pointer;
     display: flex;
-    padding: $sds-spaces-l;
+    padding: $space-l;
 
     &:hover {
-      background-color: $sds-color-gray-100;
+      background-color: $gray-off-white;
     }
 
     &.selected {
-      background-color: $sds-color-gray-100;
+      background-color: $gray-off-white;
     }
 
     .technologyOptions {
-      margin-top: $sds-spaces-xxxs;
+      margin-top: $space-xxxs;
 
       .technology {
-        padding: $sds-spaces-m;
+        padding: $space-m;
 
         &:hover {
-          background-color: $sds-color-gray-200;
+          background-color: $gray-lightest;
         }
 
         &.selected {
-          background-color: $sds-color-gray-200;
+          background-color: $gray-lightest;
         }
       }
     }
 
     .radioButton {
       flex-shrink: 0;
-      margin: $sds-spaces-l;
+      margin: $space-l;
 
       &.alignTitle {
-        margin-top: $sds-spaces-xxs;
+        margin-top: $space-xxs;
       }
     }
 
     .iconSample {
       flex-shrink: 0;
       height: 35px;
-      margin-top: $sds-spaces-xxs;
-      margin-right: $sds-spaces-default;
+      margin-top: $space-xxs;
+      margin-right: $space-default;
       width: 35px;
     }
 
@@ -63,18 +62,18 @@
         @include font-header-s;
 
         &.technologyTitle {
-          padding-top: $sds-spaces-l;
+          padding-top: $space-l;
         }
 
         .infoIcon {
-          fill: $sds-color-gray-500;
+          fill: $gray-dark;
           height: $icon-s;
           width: $icon-s;
-          margin-left: $sds-spaces-xs;
-          vertical-align: -$sds-spaces-xxxs;
+          margin-left: $space-xs;
+          vertical-align: -$space-xxxs;
 
           &:hover {
-            fill: $sds-color-primary-400;
+            fill: $primary;
           }
         }
       }
@@ -85,7 +84,7 @@
 
       .technologyDescription {
         @include font-body-xxs;
-        color: $sds-color-gray-600;
+        color: $gray-darkest;
 
         .externalLink {
           color: black !important;
@@ -100,21 +99,21 @@
 
       .technologyContent {
         display: flex;
-        margin-top: $sds-spaces-l;
+        margin-top: $space-l;
 
         .item {
           display: flex;
           flex-direction: column;
           min-width: 160px;
-          margin-right: $sds-spaces-xl;
+          margin-right: $space-xl;
 
           .subheader {
             @include font-header-xs;
-            margin-bottom: $sds-spaces-xs;
+            margin-bottom: $space-xs;
           }
 
           .text {
-            margin-top: $sds-spaces-xs; // align plaintext with text in toggle and dropdown menus
+            margin-top: $space-xs; // align plaintext with text in toggle and dropdown menus
           }
 
           .dropdown {

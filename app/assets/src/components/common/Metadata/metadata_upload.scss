@@ -1,34 +1,33 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .metadataUpload {
   position: relative;
   margin-bottom: 20px;
 
   .tabs {
-    margin: 20px 0 $sds-spaces-m;
+    margin: 20px 0 10px;
   }
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
     cursor: pointer;
   }
 
   .metadataCSVUpload {
     margin-top: 40px;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
   }
 
   .loadingMsg {
     @include font-body-s;
-    margin-top: $sds-spaces-m;
+    margin-top: 10px;
   }
 
   .details {
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
 
     .label {
       font-weight: 600;
@@ -36,15 +35,15 @@
   }
 
   .info {
-    background-color: $sds-color-gray-100;
-    padding: 20px 20px $sds-spaces-m;
-    margin-top: $sds-spaces-m;
-    margin-bottom: $sds-spaces-m;
+    background-color: $gray-off-white;
+    padding: 20px 20px 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
   }
 
   .validationMessage {
     @include font-body-s;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
     margin-top: 25px;
 
     .loadingIcon {
@@ -58,7 +57,7 @@
 }
 
 .issueGroup {
-  margin-top: $sds-spaces-xs;
+  margin-top: 6px;
   border-radius: $border-radius-m;
 
   &:first-child {
@@ -67,11 +66,11 @@
 }
 
 .errors .header {
-  color: $sds-color-error-400;
+  color: $error-medium;
 }
 
 .warnings .header {
-  color: $sds-color-warning-600;
+  color: $warning-dark;
 }
 
 .errors,
@@ -84,7 +83,7 @@
 
   .header {
     @include font-header-s;
-    margin-bottom: $sds-spaces-m;
+    margin-bottom: 10px;
     display: flex;
     align-items: flex-start;
   }
@@ -93,25 +92,25 @@
 .issue {
   display: flex;
   align-items: center;
-  padding: $sds-spaces-m;
+  padding: 10px;
   border-radius: $border-radius-m;
-  margin-top: $sds-spaces-xs;
+  margin-top: 6px;
 
   &:first-child {
     margin-top: 0;
   }
 
   &.warning {
-    background-color: $sds-color-warning-100;
+    background-color: $warning-off-white;
   }
 
   &.error {
-    background-color: $sds-color-error-100;
+    background-color: $error-off-white;
   }
 
   .icon {
     width: 20px;
     height: 20px;
-    margin-right: $sds-spaces-m;
+    margin-right: 10px;
   }
 }

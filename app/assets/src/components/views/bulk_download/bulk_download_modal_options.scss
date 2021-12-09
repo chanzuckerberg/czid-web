@@ -1,21 +1,20 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .downloadTypeContainer {
-  margin-top: $sds-spaces-l;
+  margin-top: $space-l;
   flex: 1 1 0;
   min-height: 0;
 
   .category {
     &:not(:first-child) {
-      margin-top: $sds-spaces-xl;
+      margin-top: $space-xl;
     }
 
     .title {
       @include font-caps-xxxs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
   }
 }
@@ -25,11 +24,11 @@
 
   .taxaWithReadsOptionsHeader {
     display: flex;
-    padding: $sds-spaces-xs $sds-spaces-l;
+    padding: $space-xs $space-l;
 
     .header {
       @include font-header-xs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
 
     .fill {
@@ -40,7 +39,7 @@
 
   .taxaWithReadsOption {
     display: flex;
-    padding: $sds-spaces-xs $sds-spaces-l;
+    padding: $space-xs $space-l;
 
     .taxonName {
       @include font-body-xxs;
@@ -57,22 +56,22 @@
 
     .sampleCount {
       @include font-body-xxs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
   }
 }
 
 .downloadType {
-  padding: $sds-spaces-s $sds-spaces-m;
-  margin-bottom: $sds-spaces-xxs;
-  margin-right: $sds-spaces-m;
+  padding: $space-s $space-m;
+  margin-bottom: $space-xxs;
+  margin-right: $space-m;
   border-radius: $border-radius-m;
   display: flex;
   cursor: pointer;
 
   &:hover,
   &.selected {
-    background-color: $sds-color-gray-100;
+    background-color: $gray-off-white;
   }
 
   &.disabled {
@@ -85,13 +84,13 @@
     .name,
     .description,
     .fileType {
-      color: $sds-color-gray-300;
+      color: $gray-light;
     }
   }
 
   .radioButton {
-    margin-right: $sds-spaces-m;
-    margin-top: $sds-spaces-xxs;
+    margin-right: $space-m;
+    margin-top: $space-xxs;
   }
 
   .content {
@@ -105,31 +104,31 @@
 
   .description {
     @include font-body-xxs;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 
   .fileType {
     @include font-body-xs;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 }
 
 .fields {
-  margin-top: $sds-spaces-m;
-  margin-bottom: $sds-spaces-xxs;
+  margin-top: $space-m;
+  margin-bottom: $space-xxs;
   display: flex;
   flex-wrap: wrap;
 
   .field {
-    width: calc(50% - #{$sds-spaces-xl / 2});
+    width: calc(50% - #{$space-xl / 2});
 
     &:nth-child(odd) {
-      margin-right: $sds-spaces-xl;
+      margin-right: $space-xl;
     }
 
     .label {
       @include font-body-xs;
-      margin-bottom: $sds-spaces-xxxs;
+      margin-bottom: 2px;
     }
 
     .forcedOption {
@@ -140,12 +139,12 @@
 
     .info {
       @include font-body-xxs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
   }
 
   .checkboxField {
     @include font-body-xxs;
-    color: $sds-color-gray-black;
+    color: $black;
   }
 }

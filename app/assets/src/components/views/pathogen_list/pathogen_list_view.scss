@@ -1,13 +1,12 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .pathogenListViewContainer {
   display: flex;
   flex-direction: column;
   margin-top: 90px;
-  padding-bottom: $sds-spaces-xxl;
+  padding-bottom: $space-xxl;
 
   .title {
     h1 {
@@ -17,8 +16,8 @@
 
     h4.subtitle {
       @include font-body-xxs;
-      margin: $sds-spaces-xxs 0px $sds-spaces-xl 0px;
-      color: $sds-color-gray-500;
+      margin: $space-xxs 0px $space-xl 0px;
+      color: $gray-dark;
     }
   }
 
@@ -33,32 +32,32 @@
 
     .intro {
       border-bottom: $border-gray-lightest;
-      padding-bottom: $sds-spaces-l;
+      padding-bottom: $space-l;
 
       a {
         // Override _header.scss
-        color: $sds-color-primary-400 !important;
+        color: $primary !important;
       }
 
       p {
         @include font-body-s;
-        margin-bottom: $sds-spaces-l;
+        margin-bottom: $space-l;
       }
     }
 
     .citations {
       h3 {
         @include font-header-xxs;
-        margin-bottom: $sds-spaces-xs;
+        margin-bottom: $space-xs;
       }
 
       .list {
-        padding-inline-start: $sds-spaces-xl;
+        padding-inline-start: $space-xl;
         margin: 0px;
 
         li {
           @include font-body-xxs;
-          margin-bottom: $sds-spaces-xs;
+          margin-bottom: $space-xs;
         }
 
         li:last-child {
@@ -70,7 +69,7 @@
 
   .anchorMenu {
     position: sticky;
-    top: $sds-spaces-xxl;
-    margin-left: $sds-spaces-xxl;
+    top: $space-xxl;
+    margin-left: $space-xxl;
   }
 }

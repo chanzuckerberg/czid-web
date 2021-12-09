@@ -1,23 +1,22 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .ctaButton {
   display: inline-block;
-  color: $sds-color-primary-400 !important;
+  color: $primary !important;
   font-family: $font-family-sans-serif;
-  border: 1px solid $sds-color-primary-400;
+  border: 1px solid $primary;
   text-decoration: none;
-  padding: 7px $sds-spaces-l;
+  padding: 7px 14px;
   border-radius: 999px;
   text-align: center;
   @include font-body-xs;
   font-weight: $font-weight-semibold;
 
   &:hover {
-    background-color: lighten($sds-color-primary-400, 2.5);
-    border-color: lighten($sds-color-primary-400, 2.5);
+    background-color: lighten($primary, 2.5);
+    border-color: lighten($primary, 2.5);
     color: white !important;
     cursor: pointer;
   }

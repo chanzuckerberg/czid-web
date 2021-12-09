@@ -1,5 +1,4 @@
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .filtersContainer {
   width: 150px;
@@ -19,14 +18,14 @@
       .filterTag {
         margin: 0;
 
-        margin-right: $sds-spaces-xs;
+        margin-right: 6px;
 
         &:last-child {
           margin-right: 0;
         }
 
         &:not(:first-child) {
-          margin-top: $sds-spaces-xxxs;
+          margin-top: 2px;
         }
       }
     }

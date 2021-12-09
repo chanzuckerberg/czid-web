@@ -1,8 +1,7 @@
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .inputField {
   width: 100%;
-  margin-top: $sds-spaces-default;
-  margin-bottom: $sds-spaces-default;
+  margin-top: $space-default;
+  margin-bottom: $space-default;
 }

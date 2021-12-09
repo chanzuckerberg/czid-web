@@ -1,6 +1,5 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 :global(.ui):global(.sidebar).sidebar {
   background-color: white;
@@ -28,7 +27,7 @@
     width: 20px;
     height: 20px;
     cursor: pointer;
-    fill: $sds-color-gray-600;
+    fill: $gray-darkest;
 
     &:hover {
       opacity: 1;

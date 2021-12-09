@@ -1,38 +1,37 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .statusLabel {
   @include font-caps-xxxxs;
   line-height: 9px;
   border-radius: $border-radius-l;
-  margin-left: $sds-spaces-xs;
-  padding: $sds-spaces-xxs $sds-spaces-xs;
+  margin-left: $space-xs;
+  padding: $space-xxs $space-xs;
 
   &.default {
-    background-color: $sds-color-gray-200;
-    color: $sds-color-gray-500;
+    background-color: $gray-lightest;
+    color: $gray-dark;
   }
 
   &.success {
-    background-color: $sds-color-success-100;
-    color: $sds-color-success-400;
+    background-color: $success-off-white;
+    color: $success-medium;
   }
 
   &.error {
-    background-color: $sds-color-error-100;
-    color: $sds-color-error-400;
+    background-color: $error-off-white;
+    color: $error-medium;
   }
 
   &.info {
-    background-color: $sds-color-primary-200;
-    color: $sds-color-primary-400;
+    background-color: $info-off-white;
+    color: $info-medium;
   }
 
   &.warning {
-    background-color: $sds-color-warning-100;
-    color: $sds-color-warning-400;
+    background-color: $warning-off-white;
+    color: $warning-medium;
   }
 
   &.inline {
@@ -40,7 +39,7 @@
   }
 
   &.beta {
-    background-color: $sds-color-beta-200;
-    color: $sds-color-beta-600;
+    background-color: $beta-lightest;
+    color: $beta-dark;
   }
 }

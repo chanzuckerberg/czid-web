@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 :global(.ui):global(.dropdown).bareDropdown,
 .portalDropdown {
@@ -60,13 +59,13 @@
     display: flex;
     align-items: center;
     /* Overwrite semantic ui */
-    padding-left: $sds-spaces-l !important;
-    padding-right: $sds-spaces-l !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
     color: black !important;
     cursor: pointer;
 
     &:hover {
-      background-color: $sds-color-gray-200;
+      background-color: $gray-lightest;
     }
   }
 
@@ -86,12 +85,12 @@
   }
 
   .emptySection {
-    margin: $sds-spaces-l;
+    margin: $space-l;
     cursor: default !important;
 
     .message {
       @include font-body-xxs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
 
     &:hover {
@@ -103,7 +102,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $sds-color-gray-200;
+      background-color: $gray-lightest;
     }
 
     &.active {
@@ -113,7 +112,7 @@
 
   .menu {
     min-width: 100%;
-    background-color: $sds-color-gray-white;
+    background-color: $white;
     box-shadow: $box-shadow-m;
     border: $border-gray-light;
     border-radius: $border-radius-m;
@@ -126,8 +125,8 @@
     }
 
     &.extraPadding {
-      padding-top: $sds-spaces-l;
-      padding-bottom: $sds-spaces-m;
+      padding-top: 14px;
+      padding-bottom: 10px;
     }
 
     .menuLabel {
@@ -136,22 +135,22 @@
       font-weight: 600;
       letter-spacing: 0.4px;
       margin-bottom: 12px;
-      padding: 0 $sds-spaces-l;
+      padding: 0 14px;
     }
 
     .searchContainer {
-      margin: 0 $sds-spaces-l $sds-spaces-m $sds-spaces-l;
+      margin: 0 14px 10px 14px;
     }
   }
 
   .dropdownMenu {
-    padding: $sds-spaces-xs 0;
+    padding: 6px 0;
   }
 
   .noResultsMessage {
     @include font-body-xxs;
-    padding: $sds-spaces-xs $sds-spaces-l;
-    color: $sds-color-gray-500;
+    padding: $space-xs $space-l;
+    color: $gray-dark;
   }
 
   .innerMenu {
@@ -182,13 +181,13 @@
 
   &:global(.active) {
     & > i:global(.dropdown):global(.icon):before {
-      color: $sds-color-primary-400;
+      color: $primary;
     }
   }
 }
 
 .searchInputIcon {
-  fill: $sds-color-gray-400;
+  fill: $gray-medium;
   margin: 0;
   padding: 0;
   position: absolute;

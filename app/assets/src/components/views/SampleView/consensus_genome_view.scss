@@ -1,28 +1,27 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .resultsContainer {
-  color: $sds-color-gray-black;
+  color: $black;
 
   .section {
     margin-bottom: 45px;
 
     .title {
       @include font-header-l;
-      margin-bottom: $sds-spaces-l;
+      margin-bottom: $space-l;
 
       .helpIcon {
         display: inline;
-        margin-left: $sds-spaces-xxs;
+        margin-left: $space-xxs;
 
         &.lower {
-          vertical-align: -1px;
+          vertical-align: -$space-xxxxs;
         }
 
         svg:hover {
-          fill: $sds-color-primary-400;
+          fill: $primary;
         }
       }
     }
@@ -33,13 +32,13 @@
 
     .body {
       @include font-body-s;
-      margin-bottom: $sds-spaces-l;
+      margin-bottom: $space-l;
     }
 
     .offsetBody {
       @include font-body-s;
-      margin-bottom: $sds-spaces-l;
-      margin-left: $sds-spaces-xl;
+      margin-bottom: $space-l;
+      margin-left: $space-xl;
 
       .emphasis {
         font-weight: $font-weight-semibold;
@@ -47,14 +46,14 @@
     }
 
     .helpIcon {
-      margin-bottom: $sds-spaces-xxs;
+      margin-bottom: 4px;
       margin-left: 5px;
       height: 14px;
     }
 
     .metricsTable {
       height: 110px;
-      padding: $sds-spaces-xl;
+      padding: $space-xl;
 
       .tableHeader {
         border-bottom: 1px solid $gray-lightest;
@@ -105,16 +104,16 @@
 
   .coverageContainer {
     height: 370px;
-    padding: $sds-spaces-xl;
+    padding: $space-xl;
 
     .metrics {
       display: flex;
-      margin-bottom: $sds-spaces-m;
+      margin-bottom: $space-m;
 
       .column {
         flex: 1 1 0;
         min-width: 0;
-        margin-right: $sds-spaces-m;
+        margin-right: $space-m;
 
         &:last-child {
           margin-right: 0;
@@ -125,10 +124,10 @@
         display: flex;
         align-items: center;
         height: 30px;
-        padding: 0 $sds-spaces-m;
+        padding: 0 $space-m;
 
         &:first-child {
-          background-color: $sds-color-gray-100;
+          background-color: $gray-off-white;
         }
 
         .label,
@@ -150,7 +149,7 @@
 
     .coverageVizHistogram {
       height: 285px;
-      background-color: $sds-color-gray-100;
+      background-color: $gray-off-white;
       overflow-x: auto;
       overflow-y: hidden;
     }
@@ -160,7 +159,7 @@
 .headerContainer {
   display: flex;
   justify-content: space-between;
-  margin: $sds-spaces-xs 0 $sds-spaces-xl 0;
+  margin: $space-xs 0 $space-xl 0;
 
   .dropdownContainer {
     width: 340px;
@@ -181,7 +180,7 @@
 
 .hoverTooltip {
   position: fixed;
-  background-color: $sds-color-gray-white;
+  background-color: $white;
   z-index: 100;
   // So the tooltip appears on the top-right instead of bottom-right of mouse.
   transform: translateY(-100%);

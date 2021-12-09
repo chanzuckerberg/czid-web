@@ -1,6 +1,5 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .content {
   padding: 30px 20px;
@@ -11,7 +10,7 @@
 .loadingMsg {
   @include font-header-xl;
 
-  margin: 0 $sds-spaces-m;
+  margin: 0 10px;
   margin-right: 60px;
   word-break: break-all;
 }
@@ -19,25 +18,25 @@
 .subTitle {
   @include font-body-xs;
 
-  color: $sds-color-gray-500;
-  margin: 0 $sds-spaces-m;
+  color: $gray-dark;
+  margin: 0 10px;
 }
 
 .taxonContents {
-  padding: 0 $sds-spaces-m;
+  padding: 0 10px;
 
   .subtitle {
     padding-top: 25px;
-    padding-bottom: $sds-spaces-m;
+    padding-bottom: 10px;
     font-size: 14px;
     font-weight: 700;
 
     .infoIcon {
-      margin-left: $sds-spaces-xxs;
-      margin-top: $sds-spaces-xxs;
+      margin-left: 4px;
+      margin-top: 4px;
       height: 15px;
       width: 15px;
-      fill: $sds-color-gray-400;
+      fill: $gray-medium;
     }
   }
 
@@ -71,14 +70,14 @@
   }
 
   .link {
-    color: $sds-color-primary-400;
+    color: $primary;
     line-height: 30px;
     cursor: pointer;
   }
 
   .expandLink {
-    color: $sds-color-primary-400;
-    margin-top: $sds-spaces-m;
+    color: $primary;
+    margin-top: 10px;
     cursor: pointer;
   }
 }
@@ -86,11 +85,11 @@
 .wikiLicense {
   @include font-body-xxs;
 
-  padding-top: $sds-spaces-m;
-  color: $sds-color-gray-500;
+  padding-top: 10px;
+  color: $gray-dark;
 
   .wikiLink {
-    color: $sds-color-gray-black !important;
+    color: $black !important;
     cursor: pointer;
 
     &:hover {

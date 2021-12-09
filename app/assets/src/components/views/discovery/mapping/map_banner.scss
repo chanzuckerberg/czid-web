@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .bannerContainer {
   text-align: center;
@@ -9,17 +8,17 @@
   .banner {
     @include font-body-xxxs;
 
-    background: $sds-color-gray-white;
+    background: $white;
     border-radius: $border-radius-m;
     box-shadow: $box-shadow-s;
     cursor: default;
     display: inline-block;
-    margin: $sds-spaces-s auto auto;
-    padding: 6px $sds-spaces-s;
+    margin: 8px auto auto;
+    padding: 6px 8px;
     text-align: center;
 
     .clearAll {
-      color: $sds-color-primary-400;
+      color: $primary;
       cursor: pointer;
     }
 
@@ -29,7 +28,7 @@
 
     .infoIcon {
       cursor: pointer;
-      fill: $sds-color-gray-500;
+      fill: $gray-dark;
       height: 15px;
       margin-left: 5px;
       vertical-align: top;

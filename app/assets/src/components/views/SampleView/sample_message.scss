@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .sampleMessage {
   display: flex;
@@ -9,16 +8,16 @@
   margin-top: 100px;
 
   .textContainer {
-    margin-top: $sds-spaces-s;
-    margin-right: $sds-spaces-xl;
+    margin-top: $space-s;
+    margin-right: $space-xl;
     width: 330px;
 
     .reportStatus {
       display: inline-flex;
       align-items: center;
-      background-color: $sds-color-error-200;
+      background-color: $error-lightest;
       border-radius: $border-radius-l;
-      padding: $sds-spaces-xxs $sds-spaces-s;
+      padding: $space-xxs $space-s;
 
       .icon {
         width: $icon-l;
@@ -26,57 +25,57 @@
 
       .text {
         @include font-caps-xxxs;
-        margin-left: $sds-spaces-s;
-        margin-top: $sds-spaces-xxxs;
+        margin-left: $space-s;
+        margin-top: $space-xxxs;
       }
 
       &.warning {
-        background-color: $sds-color-warning-100;
-        color: $sds-color-warning-400;
+        background-color: $warning-off-white;
+        color: $warning-medium;
       }
 
       &.error {
-        background-color: $sds-color-error-100;
-        color: $sds-color-error-400;
+        background-color: $error-off-white;
+        color: $error-medium;
       }
 
       &.inProgress {
-        background-color: $sds-color-primary-200;
-        color: $sds-color-primary-400;
+        background-color: $primary-lightest;
+        color: $primary;
 
         .icon {
-          fill: $sds-color-primary-400;
+          fill: $primary;
           font-size: 20px;
         }
       }
 
       &.info {
-        background-color: $sds-color-primary-200;
-        color: $sds-color-primary-400;
+        background-color: $info-off-white;
+        color: $info-medium;
       }
     }
 
     .message {
       @include font-header-m;
-      margin-bottom: $sds-spaces-s;
-      margin-top: $sds-spaces-s;
-      margin-left: $sds-spaces-xxxs;
+      margin-bottom: $space-s;
+      margin-top: $space-s;
+      margin-left: $space-xxxs;
     }
 
     .subtitle {
       @include font-body-xxs;
-      margin-bottom: $sds-spaces-s;
+      margin-bottom: $space-s;
     }
 
     .actionLink {
       @include font-header-xxs;
-      color: $sds-color-primary-400 !important;
-      margin-top: $sds-spaces-m;
-      margin-left: $sds-spaces-xxxs;
+      color: $primary !important;
+      margin-top: $space-m;
+      margin-left: $space-xxxs;
 
       .rightArrow {
         font-size: 8px;
-        margin-left: $sds-spaces-xxs;
+        margin-left: $space-xxs;
       }
     }
   }

@@ -1,7 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 // NOTE: Omit px so value can be exported for parseInt
 $metadata-input-width: 110;
@@ -21,7 +20,7 @@ $metadata-input-extra-width: 225;
 
     .plusIcon {
       width: 14px;
-      fill: $sds-color-gray-400;
+      fill: $gray-medium;
     }
   }
 
@@ -36,7 +35,7 @@ $metadata-input-extra-width: 225;
 
   .requiredMessage {
     @include font-header-xs;
-    color: $sds-color-gray-500;
+    color: $gray-dark;
   }
 
   .inputTable {
@@ -47,16 +46,16 @@ $metadata-input-extra-width: 225;
     }
 
     .sampleName {
-      padding: $sds-spaces-l 0; // align vertically with inputs
+      padding: $space-l 0; // align vertically with inputs
       font-weight: $font-weight-semibold;
     }
 
     .requiredStar {
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
 
     .input {
-      margin: $sds-spaces-xs $sds-spaces-l $sds-spaces-xs 0;
+      margin: $space-xs $space-l $space-xs 0;
       width: $metadata-input-width + 0px;
       vertical-align: top; // for host organism to align to others
 
@@ -66,19 +65,19 @@ $metadata-input-extra-width: 225;
     }
 
     .noInput {
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
 
     .applyToAll {
-      color: $sds-color-primary-400;
+      color: $primary;
       cursor: pointer;
     }
   }
 
   .autoPopulateButton {
     @include font-caps-xxxs;
-    color: $sds-color-primary-400;
+    color: $primary;
     cursor: pointer;
-    margin-top: $sds-spaces-xxs;
+    margin-top: $space-xxs;
   }
 }

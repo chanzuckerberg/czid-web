@@ -1,7 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .downloadCell {
   display: flex;
@@ -10,8 +9,8 @@
   .downloadIcon {
     width: 30px;
     height: 22px;
-    margin-right: $sds-spaces-l;
-    fill: $sds-color-gray-300;
+    margin-right: $space-l;
+    fill: $gray-light;
   }
 
   .downloadRightPane {
@@ -25,24 +24,24 @@
     }
 
     .downloadStatus {
-      margin-left: $sds-spaces-xs;
+      margin-left: $space-xs;
     }
 
     .metadata {
       @include font-body-xxs;
-      color: $sds-color-gray-500;
+      color: $gray-dark;
 
       .detailsLink {
         cursor: pointer;
-        margin-right: $sds-spaces-xxs;
+        margin-right: $space-xxs;
 
         &:hover {
-          color: $sds-color-gray-black;
+          color: $black;
         }
       }
 
       .userName {
-        margin-left: $sds-spaces-xxs;
+        margin-left: $space-xxs;
       }
     }
   }
@@ -54,7 +53,7 @@
 }
 
 .statusCell {
-  margin-bottom: $sds-spaces-xxxs;
+  margin-bottom: 2px;
 
   .messageContainer,
   .links {
@@ -63,39 +62,39 @@
   }
 
   .messageContainer {
-    margin-bottom: $sds-spaces-s;
+    margin-bottom: $space-s;
   }
 
   .icon {
     width: 16px;
-    margin-right: $sds-spaces-xs;
-    fill: $sds-color-success-400;
+    margin-right: $space-xs;
+    fill: $success-medium;
 
     &.warning {
-      fill: $sds-color-warning-400;
+      fill: $warning-medium;
     }
 
     &.error {
-      fill: $sds-color-error-400;
+      fill: $error-medium;
       margin-bottom: 1px;
     }
 
     &.loading {
-      color: $sds-color-primary-400;
-      margin-right: $sds-spaces-xxs;
+      color: $primary;
+      margin-right: 4px;
     }
   }
 
   .separator {
     @include font-body-xxs;
-    margin: 0 $sds-spaces-s;
-    color: $sds-color-gray-500;
+    margin: 0 $space-s;
+    color: $gray-dark;
   }
 
   .link {
     @include font-caps-xxxs;
     /* overwrite header.scss */
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
     cursor: pointer;
   }
 }

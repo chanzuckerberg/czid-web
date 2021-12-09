@@ -1,23 +1,22 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .sampleDeletionConfirmation {
   .title {
     @include font-header-xl;
-    color: $sds-color-gray-black;
+    color: $black;
   }
 
   .text {
     @include font-body-s;
-    margin-top: $sds-spaces-s;
+    margin-top: $space-s;
     margin-bottom: 28px;
-    color: $sds-color-gray-600;
+    color: $gray-darkest;
   }
 
   .actions {
-    margin-top: $sds-spaces-m;
+    margin-top: $space-m;
     display: flex;
 
     .item {

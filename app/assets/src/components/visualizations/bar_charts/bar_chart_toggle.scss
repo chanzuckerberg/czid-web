@@ -1,6 +1,5 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .displaySwitcher {
   .switcherMenu {
@@ -13,11 +12,11 @@
       padding: 5px 15px;
 
       .icon {
-        fill: $sds-color-gray-600;
+        fill: $gray-darkest;
         height: $icon-s;
 
         &.active {
-          fill: $sds-color-primary-400;
+          fill: $primary;
         }
       }
     }

@@ -1,12 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .loading {
   .cellContent {
     @include loadingAnimation;
 
     height: 12px;
-    margin: $sds-spaces-xxs 20%;
+    margin: 4px 20%;
   }
 }

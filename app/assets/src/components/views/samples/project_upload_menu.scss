@@ -1,8 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .trigger {
-  color: $sds-color-primary-400;
+  color: $primary;
   cursor: pointer;
 }

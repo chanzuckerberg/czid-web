@@ -1,6 +1,5 @@
 @import "../../themes/colors";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .phylo-tree-creation-wizard {
   min-height: 440px;
@@ -12,7 +11,7 @@
   &__page-3,
   &__page-4 {
     &__subtitle {
-      color: $sds-color-gray-500;
+      color: $gray-dark;
       font-weight: 700;
       height: 16px;
       line-height: 16px;
@@ -49,7 +48,7 @@
           }
 
           &.column-view {
-            color: $sds-color-primary-400;
+            color: $primary;
             font-weight: 700;
           }
         }
@@ -63,14 +62,14 @@
 
   &__page-1 {
     &__action {
-      color: $sds-color-primary-400;
+      color: $primary;
       font-weight: 700;
     }
   }
 
   &__page-3 {
     &__form {
-      margin-bottom: $sds-spaces-m;
+      margin-bottom: 10px;
       height: 50px;
 
       div {
@@ -109,11 +108,11 @@
 
   &__page-2,
   &__page-4 {
-    padding-top: $sds-spaces-m;
+    padding-top: 10px;
 
     &__searchbar {
       height: 50px;
-      margin-bottom: $sds-spaces-xxl;
+      margin-bottom: $space-xxl;
 
       &__container {
         float: left;
@@ -157,12 +156,12 @@
 
     &__notifications {
       max-height: 40px;
-      margin-top: $sds-spaces-xl;
-      margin-bottom: $sds-spaces-xxl;
+      margin-top: $space-xl;
+      margin-bottom: $space-xxl;
     }
   }
 
   &__error {
-    color: $sds-color-error-400;
+    color: $error-medium;
   }
 }

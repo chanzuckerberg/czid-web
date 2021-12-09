@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .liveSearchPopBox {
   &:not(.rectangular) {
@@ -17,7 +16,7 @@
   }
 
   :global(.menu) {
-    margin-top: $sds-spaces-xs;
+    margin-top: 6px;
     max-width: 400px;
   }
 
@@ -29,11 +28,11 @@
     @include font-caps-xxxs;
 
     background-color: transparent;
-    color: $sds-color-gray-300;
-    margin: $sds-spaces-l $sds-spaces-l 0;
-    padding: $sds-spaces-xxs 0;
+    color: $gray-light;
+    margin: $space-l $space-l 0;
+    padding: $space-xxs 0;
     text-transform: uppercase;
-    border-top: 2px solid $sds-color-gray-200;
+    border-top: 2px solid $gray-lightest;
   }
 
   // skip divider line
@@ -48,14 +47,14 @@
     .title {
       @include font-header-xs;
 
-      color: $sds-color-gray-black;
+      color: $black;
       font-weight: $font-weight-semibold;
     }
 
     .description {
       @include font-body-xxs;
 
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
   }
 }

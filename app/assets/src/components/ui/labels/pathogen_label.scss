@@ -1,14 +1,13 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 // Use .ui to make selector higher precedence than semantic-ui.
 :global(.ui) {
   &.pathogenLabel {
-    margin-left: $sds-spaces-m;
+    margin-left: $space-m;
 
     &:first-child {
-      margin-left: $sds-spaces-m;
+      margin-left: $space-m;
     }
 
     text-transform: uppercase;
@@ -19,15 +18,15 @@
 
   &.newPathogenLabel {
     @include font-body-xxxs;
-    padding: $sds-spaces-xxxs $sds-spaces-xs;
+    padding: $space-xxxs $space-xs;
 
     &:first-child {
-      margin-left: $sds-spaces-m;
+      margin-left: $space-m;
     }
 
     &:global(.red.label) {
-      background-color: $sds-color-error-600 !important;
-      border-color: $sds-color-error-600 !important;
+      background-color: $error-dark !important;
+      border-color: $error-dark !important;
     }
 
     &:hover {

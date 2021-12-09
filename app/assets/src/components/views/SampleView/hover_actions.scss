@@ -1,9 +1,8 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~czifui/dist/variables";
 
 .hoverActions {
-  color: $sds-color-primary-400;
+  color: $primary;
   font-size: 14px;
 
   .actionDot {
@@ -15,9 +14,9 @@
       @include font-body-xxs;
 
       // This makes a circle with a number in it
-      background: $sds-color-primary-400;
+      background: $primary;
       border-radius: 50%;
-      color: $sds-color-gray-white;
+      color: $white;
       cursor: pointer;
       float: right;
       font-size: 9px;
@@ -30,20 +29,20 @@
   }
 
   .disabled {
-    color: $sds-color-gray-300;
+    color: $gray-light;
   }
 
   .icon {
     height: 14px;
     width: 14px;
-    fill: $sds-color-primary-400;
+    fill: $primary;
 
     &:hover {
-      fill: $sds-color-primary-600;
+      fill: $primary-darkest;
     }
 
     &.disabled {
-      fill: $sds-color-gray-300;
+      fill: $gray-light;
     }
 
     &:not(.disabled) {

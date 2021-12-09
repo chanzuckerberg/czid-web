@@ -1,7 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
-@import "~czifui/dist/variables";
 
 .heroEmailForm {
   max-width: 489px;
@@ -29,7 +28,7 @@
       max-width: 350px;
       padding: unset;
       text-align: center;
-      padding: $sds-spaces-xl 0;
+      padding: $space-xl 0;
     }
   }
 
@@ -39,7 +38,7 @@
     padding: 13px 0 13px 38px;
 
     &::placeholder {
-      color: $sds-color-gray-500;
+      color: $gray-dark;
     }
 
     @media (max-width: 768px) {
@@ -52,8 +51,8 @@
 
   button {
     border-radius: 0 999px 999px 0;
-    color: $sds-color-gray-white;
-    background: $sds-color-primary-400;
+    color: $white;
+    background: $primary;
     width: 215px;
     padding: 13px 38px 13px 30px;
 

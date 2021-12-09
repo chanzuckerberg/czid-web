@@ -1,7 +1,6 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "~czifui/dist/variables";
 
 .auth0Error {
   height: calc(100vh - #{$header-total-height});
@@ -13,6 +12,6 @@
 
   .helpLink {
     // Override header.scss.
-    color: $sds-color-primary-400 !important;
+    color: $primary !important;
   }
 }
