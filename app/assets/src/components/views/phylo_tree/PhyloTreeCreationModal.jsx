@@ -904,7 +904,7 @@ class PhyloTreeCreationModal extends React.Component {
       addIdseqSamples: (
         <Wizard.Page
           key="wizard__page_4"
-          title={`Add additional samples from IDseq that contain ${this.state.taxonName}?`}
+          title={`Add additional samples from CZ ID that contain ${this.state.taxonName}?`}
         >
           <div className="wizard__page-4__subtitle" />
           <div className="wizard__page-4__searchbar">
@@ -915,7 +915,7 @@ class PhyloTreeCreationModal extends React.Component {
               {this.state.selectedProjectSamples.size} Project Samples
             </div>
             <div className="wizard__page-4__searchbar__container">
-              {this.state.selectedOtherSamples.size} IDseq Samples
+              {this.state.selectedOtherSamples.size} CZ ID Samples
             </div>
             <div className="wizard__page-4__searchbar__container">
               {this.getTotalPageRendering()}

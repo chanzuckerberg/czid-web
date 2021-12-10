@@ -7,7 +7,7 @@ export const PROJECT_TABLE_COLUMNS = {
     tooltip: "User-defined project name, description, and author.",
   },
   created_at: {
-    tooltip: "Date project was created in IDseq.",
+    tooltip: "Date project was created in CZ ID.",
   },
   hosts: {
     tooltip:

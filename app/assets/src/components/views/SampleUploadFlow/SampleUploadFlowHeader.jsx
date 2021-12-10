@@ -58,7 +58,7 @@ class SampleUploadFlowHeader extends React.Component {
               {currentStep === "uploadMetadata" && (
                 <div className={cs.subtitle}>
                   This metadata will provide context around your samples and
-                  results in IDseq.
+                  results in CZ ID.
                 </div>
               )}
               {currentStep === "review" && (
