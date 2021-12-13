@@ -43,6 +43,10 @@ export const CG_WETLAB_OPTIONS = [
     text: "VarSkip",
     value: "varskip",
   },
+  {
+    text: "Midnight",
+    value: "midnight",
+  },
 ];
 
 export const CG_WETLAB_DISPLAY_NAMES = {

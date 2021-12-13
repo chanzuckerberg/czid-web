@@ -219,6 +219,28 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
         end
       end
 
+      context "when midnight primers wetlab protocol is chosen with illumina" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:midnight] }.to_json)
+        end
+
+        it "returns sfn input with midnight primers and min + max lengths" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/midnight_primers.bed",
+                },
+              },
+            }
+          )
+        end
+      end
+
       context "when AmpliSeq wetlab protocol is chosen" do
         let(:workflow_run) do
           create(:workflow_run,

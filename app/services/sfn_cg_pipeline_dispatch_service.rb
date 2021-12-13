@@ -156,7 +156,7 @@ class SfnCgPipelineDispatchService
     when protocols[:varskip]
       "neb_vss1a.primer.bed"
     when protocols[:midnight]
-      raise InvalidWetlabProtocolError(@workflow_run.inputs&.[]("wetlab_protocol"), technology)
+      "midnight_primers.bed"
     else
       raise WetlabProtocolMissingError
     end
