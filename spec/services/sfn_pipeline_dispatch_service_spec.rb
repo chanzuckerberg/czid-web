@@ -98,7 +98,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         travel_to DateTime.current
 
         Aws.config[:stub_responses] = true
-        @mock_aws_clients = { states: FAKE_STATES_CLIENT }
+        @mock_aws_clients = { states: FAKE_STATES_CLIENT, sts: Aws::STS::Client.new(stub_responses: true) }
         allow(AwsClient).to receive(:[]) { |client|
           @mock_aws_clients[client]
         }
@@ -169,7 +169,6 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
                 file_ext: "fastq",
               },
             },
-            dag_branch: nil,
           }
         )
       end

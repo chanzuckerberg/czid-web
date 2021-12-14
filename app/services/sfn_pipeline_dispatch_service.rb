@@ -62,13 +62,11 @@ class SfnPipelineDispatchService
 
   def generate_wdl_input
     sfn_pipeline_input_json = {
-      dag_branch: @pipeline_run.pipeline_branch != "master" ? @pipeline_run.pipeline_branch : nil,
       HOST_FILTER_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/host_filter.wdl",
       NON_HOST_ALIGNMENT_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/non_host_alignment.wdl",
       POSTPROCESS_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/postprocess.wdl",
       EXPERIMENTAL_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/experimental.wdl",
-      # This name format is different on purpose to communicate that this is a swipe input
-      StagesWDLURI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/local_driver.wdl",
+      STAGES_IO_MAP_JSON: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/stage_io_map.json",
       Input: {
         HostFilter: {
           fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
@@ -100,6 +98,8 @@ class SfnPipelineDispatchService
           use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
           deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
         }, Experimental: {
+          fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
+          fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
           nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
           nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
           file_ext: @sample.fasta_input? ? "fasta" : "fastq",
@@ -109,9 +109,13 @@ class SfnPipelineDispatchService
       OutputPrefix: output_prefix,
     }
     sfn_extra_inputs = @pipeline_run.parse_dag_vars
+    resp = AwsClient[:sts].get_caller_identity
+    docker_image_id = "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/#{WorkflowRun::WORKFLOW[:short_read_mngs]}:v#{@pipeline_run.wdl_version}"
     sfn_pipeline_input_json[:Input].keys.each do |step|
       if sfn_extra_inputs.key?(step.to_s)
         sfn_pipeline_input_json[:Input][step].merge!(sfn_extra_inputs[step.to_s])
+        sfn_pipeline_input_json[:Input][step][:s3_wd_uri] = @pipeline_run.sfn_results_path
+        sfn_pipeline_input_json[:Input][step][:docker_image_id] = docker_image_id
       end
     end
     return sfn_pipeline_input_json

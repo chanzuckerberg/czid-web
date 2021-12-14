@@ -93,11 +93,14 @@ class SfnPhyloTreeNgDispatchService
   end
 
   def generate_wdl_input
+    resp = AwsClient[:sts].get_caller_identity
+    docker_image_id = "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/phylotree-ng:v#{@wdl_version}"
     run_inputs = {
       additional_reference_accession_ids: @phylo_tree.inputs_json&.[]("additional_reference_accession_ids"),
       reference_taxon_id: @phylo_tree.inputs_json&.[]("tax_id"),
       samples: @phylo_tree.pipeline_runs.map { |pipeline_run| sample_input(pipeline_run) },
       superkingdom_name: @phylo_tree.inputs_json&.[]("superkingdom_name"),
+      docker_image_id: docker_image_id,
     }
 
     sfn_pipeline_input_json = {

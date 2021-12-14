@@ -647,6 +647,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         @mock_aws_clients = {
           s3: Aws::S3::Client.new(stub_responses: true),
           states: Aws::States::Client.new(stub_responses: true),
+          sts: Aws::STS::Client.new(stub_responses: true),
         }
         allow(AwsClient).to receive(:[]) { |client|
           @mock_aws_clients[client]
@@ -668,6 +669,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         @mock_aws_clients = {
           s3: Aws::S3::Client.new(stub_responses: true),
           states: Aws::States::Client.new(stub_responses: true),
+          sts: Aws::STS::Client.new(stub_responses: true),
         }
         allow(AwsClient).to receive(:[]) { |client|
           @mock_aws_clients[client]
