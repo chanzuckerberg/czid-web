@@ -1,7 +1,7 @@
 <div id="cli_user_instructions">
   <%= javascript_tag do %>
     react_component('CliUserInstructions', {
-    readme: '<%= URI.open('https://raw.githubusercontent.com/chanzuckerberg/idseq-cli-v2/main/README.md').read.gsub(/\\\n/, "\\ \\n").gsub(/\n/, "\\n")  %>',
+    readme: '<%= URI.open('https://raw.githubusercontent.com/chanzuckerberg/czid-cli/main/README.md').read.gsub(/\\\n/, "\\ \\n").gsub(/\n/, "\\n")  %>',
     }, 'cli_user_instructions');
   <% end %>
 </div>
