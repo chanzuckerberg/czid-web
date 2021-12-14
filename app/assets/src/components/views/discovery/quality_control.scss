@@ -4,8 +4,9 @@
 
 .content {
   @include scrollable;
-  // window height minus the header and toolbars
-  max-height: calc(100vh - #{$header-total-height} - 172px);
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
   overflow: scroll;
   padding-left: $space-l;
 

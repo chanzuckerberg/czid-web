@@ -495,15 +495,13 @@ class SamplesView extends React.Component {
       sampleStatsSidebarOpen,
     } = this.props;
     return (
-      <div className={cs.table}>
-        <QualityControl
-          projectId={projectId}
-          handleBarClick={onPLQCHistogramBarClick}
-          filters={filters}
-          filtersSidebarOpen={filtersSidebarOpen}
-          sampleStatsSidebarOpen={sampleStatsSidebarOpen}
-        />
-      </div>
+      <QualityControl
+        projectId={projectId}
+        handleBarClick={onPLQCHistogramBarClick}
+        filters={filters}
+        filtersSidebarOpen={filtersSidebarOpen}
+        sampleStatsSidebarOpen={sampleStatsSidebarOpen}
+      />
     );
   };
 
