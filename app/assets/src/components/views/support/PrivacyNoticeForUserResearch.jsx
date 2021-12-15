@@ -16,7 +16,7 @@ const PrivacyNoticeForUserResearch = () => {
         This Privacy Notice describes the data that CZI, LLC and CZIF
         (collectively, “Chan Zuckerberg Initiative” or “CZI”) collects from
         individuals participating in research with the Chan Zuckerberg
-        Initiative. For more information about IDseq specific privacy practices,
+        Initiative. For more information about CZ ID specific privacy practices,
         please see our <a href="/privacy">Privacy Notice</a>.
       </p>
     </>
@@ -28,7 +28,7 @@ const PrivacyNoticeForUserResearch = () => {
       <p>
         The Chan Zuckerberg Initiative (“CZI,” which includes the Chan
         Zuckerberg Initiative Foundation (a 501(c)(3) non-profit and the Chan
-        Zuckerberg Initiative, LLC) is conducting a survey to improve the IDseq
+        Zuckerberg Initiative, LLC) is conducting a survey to improve the CZ ID
         experience.
       </p>
       <p>
@@ -109,7 +109,7 @@ const PrivacyNoticeForUserResearch = () => {
       <p>
         <div className={cs.italics}>
           Note: Any output resulting from this research does not include data
-          you uploaded or created in IDseq, such as raw sample data, sample
+          you uploaded or created in CZ ID, such as raw sample data, sample
           metadata, or report data.
         </div>
       </p>

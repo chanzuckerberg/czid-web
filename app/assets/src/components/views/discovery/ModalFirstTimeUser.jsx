@@ -36,7 +36,7 @@ const ModalFirstTimeUser = ({ onClose }) => {
             .
           </React.Fragment>
         }
-        title="Welcome to IDseq!"
+        title="Welcome to CZ ID!"
         titleClassName={cs.titleClassName}
         type="initial-modal"
       />

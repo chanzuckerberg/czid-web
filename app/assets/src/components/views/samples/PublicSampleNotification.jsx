@@ -21,7 +21,7 @@ class PublicSampleNotification extends React.Component {
         <span className={cs.highlight}>
           {moment(minTimestamp.private_until).format("MMM Do, YYYY")}
         </span>
-        . If you have any questions, please refer to IDseq&apos;s&nbsp;
+        . If you have any questions, please refer to CZ ID&apos;s&nbsp;
         <a
           className={cs.policyLink}
           onClick={() => window.open("https://idseq.net/privacy")}

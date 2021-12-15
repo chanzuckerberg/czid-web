@@ -35,9 +35,9 @@ const PathogenListView = () => {
 
   const renderTitle = () => (
     <div className={cs.title}>
-      <h1>IDseq Pathogen List</h1>
+      <h1>CZ ID Pathogen List</h1>
       <h4 className={cs.subtitle}>
-        Last Updated: {pathogenList["updated_at"]}. IDseq Pathogen List v
+        Last Updated: {pathogenList["updated_at"]}. CZ ID Pathogen List v
         {pathogenList["version"]}.
       </h4>
     </div>

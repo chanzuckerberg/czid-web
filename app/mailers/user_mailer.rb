@@ -26,7 +26,7 @@ class UserMailer < ApplicationMailer
   def account_request_reply(request_email)
     mail(
       to: request_email,
-      subject: "Thank you for contacting the IDseq Team"
+      subject: "Thank you for contacting The CZ ID Team"
     )
   end
 
@@ -39,7 +39,7 @@ class UserMailer < ApplicationMailer
     @sharing_user_name = sharing_user.name
     mail(
       to: new_user_email,
-      subject: "You have been invited to IDseq"
+      subject: "You have been invited to CZ ID"
     )
   end
 
@@ -48,7 +48,7 @@ class UserMailer < ApplicationMailer
     @reset_password_url = reset_password_url
     mail(
       to: new_user_email,
-      subject: "You have been invited to IDseq"
+      subject: "You have been invited to CZ ID"
     )
   end
 
@@ -56,7 +56,7 @@ class UserMailer < ApplicationMailer
   def no_account_found(email)
     mail(
       to: email,
-      subject: "IDseq | Could not locate an account with this email"
+      subject: "CZ ID | Could not locate an account with this email"
     )
   end
 
@@ -75,7 +75,7 @@ class UserMailer < ApplicationMailer
     @samples_by_project_id = samples_by_project_id
     mail(
       to: email,
-      subject: "Reminder: #{total_count} IDseq samples will soon be visible to other users!"
+      subject: "Reminder: #{total_count} CZ ID samples will soon be visible to other users!"
     )
   end
 end

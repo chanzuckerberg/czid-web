@@ -134,7 +134,7 @@ class UploadSampleStep extends React.Component {
 
   // *** Basespace-related functions ***
 
-  // Handle the message from the Basespace OAuth popup that authorizes IDseq to read (i.e. download files) from user projects.
+  // Handle the message from the Basespace OAuth popup that authorizes CZ ID to read (i.e. download files) from user projects.
   handleBasespaceOAuthMessageEvent = async event => {
     const {
       selectedProject,
@@ -935,7 +935,7 @@ class UploadSampleStep extends React.Component {
         <div className={cs.controls}>
           {readyForBasespaceAuth && (
             <div className={cs.helpText}>
-              Please authorize IDseq to fetch your selected samples from
+              Please authorize CZ ID to fetch your selected samples from
               Basespace.
             </div>
           )}
@@ -954,7 +954,8 @@ class UploadSampleStep extends React.Component {
               </span>
             }
           >
-            Click &ldquo;Create Project&rdquo; above to finish project creation and continue
+            Click &ldquo;Create Project&rdquo; above to finish project creation
+            and continue
           </BasicPopup>
           <a href="/home">
             <SecondaryButton

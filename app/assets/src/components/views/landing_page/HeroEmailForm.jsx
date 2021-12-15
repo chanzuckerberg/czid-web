@@ -31,7 +31,7 @@ const HeroEmailForm = () => {
           }}
         />
         <button
-          aria-label="Request access to CZ ID via the IDseq intro survey (opens in new window)"
+          aria-label="Request access to CZ ID via the CZ ID intro survey (opens in new window)"
           onClick={e => {
             submitEmail(e);
           }}

@@ -74,8 +74,8 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     link: DOC_BASE_LINK + "360035296613-Project-Page#metrics-meanings",
   },
   totalRuntime: {
-    tooltip: `The total time required by the IDseq pipeline to process .fastq files into
-    IDseq reports.`,
+    tooltip: `The total time required by the CZ ID pipeline to process .fastq files into
+    CZ ID reports.`,
   },
   waterControl: {
     tooltip: "Whether a sample is water-only as a control.",

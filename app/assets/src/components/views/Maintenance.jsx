@@ -10,7 +10,7 @@ class Maintenance extends React.Component {
     return (
       <div className={cs.maintenance}>
         <BlankScreenMessage
-          message={`IDseq is currently undergoing some scheduled maintenance. Sorry
+          message={`CZ ID is currently undergoing some scheduled maintenance. Sorry
           for the inconvenience!`}
           textWidth={300}
           tagline={`We'll be back online soon.`}

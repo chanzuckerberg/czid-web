@@ -63,7 +63,7 @@ module BulkDownloadTypesHelper
     {
       type: ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE,
       display_name: "Original Input Files",
-      description: "Original files you submitted to IDseq",
+      description: "Original files you submitted to CZ ID",
       category: "raw_data",
       execution_type: ECS_EXECUTION_TYPE,
       uploader_only: true,

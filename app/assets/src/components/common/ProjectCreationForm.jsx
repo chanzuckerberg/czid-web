@@ -157,7 +157,7 @@ class ProjectCreationForm extends React.Component {
             <div className={cs.optionText}>
               <div className={cs.title}>Public Project</div>
               <div className={cs.description}>
-                This project is viewable and searchable by anyone in IDseq.
+                This project is viewable and searchable by anyone in CZ ID.
                 They’ll be able to perform actions like create heatmaps and
                 download results. Public projects can’t be changed to Private.
                 <ExternalLink href="https://help.czid.org">
