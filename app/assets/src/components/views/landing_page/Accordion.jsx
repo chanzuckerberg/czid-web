@@ -53,11 +53,11 @@ const Accordion = () => {
             debug an issue. Read more in CZ ID’s{" "}
             <a
               href="https://czid.org/privacy"
-              aria-label="View the CZ ID privacy policy (opens in new window)"
+              aria-label="View the CZ ID privacy notice (opens in new window)"
               target="_blank"
               rel="noreferrer"
             >
-              Privacy Policy
+              Privacy Notice
             </a>
             .
           </>
@@ -78,11 +78,11 @@ const Accordion = () => {
             more in CZ ID’s{" "}
             <a
               href="https://czid.org/privacy"
-              aria-label="View the CZ ID privacy policy (opens in new window)"
+              aria-label="View the CZ ID privacy notice (opens in new window)"
               target="_blank"
               rel="noreferrer"
             >
-              Privacy Policy
+              Privacy Notice
             </a>
             .
           </>

@@ -47,7 +47,7 @@ class PublicProjectConfirmationModal extends React.Component {
                   className={cs.link}
                   onClick={() => window.open("https://czid.org/privacy")}
                 >
-                  privacy policy
+                  privacy notice
                 </span>{" "}
                 or{" "}
                 <span

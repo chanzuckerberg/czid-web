@@ -8,11 +8,11 @@ import { NEXTCLADE_APP_LINK } from "~/components/utils/documentationLinks";
 
 import cs from "./support.scss";
 
-const PrivacyPolicy = () => {
+const PrivacyNotice = () => {
   const renderIntro = () => (
     <>
       <div className={cs.title}>
-        <h1>Chan Zuckerberg ID (formerly IDseq) Data Privacy</h1>
+        <h1>Chan Zuckerberg ID (formerly IDseq) Privacy Notice</h1>
         <h4 className={cs.subtitle}>
           Last Updated: December 7, 2021.{" "}
           <a href="/terms_changes">See Recent Changes</a>
@@ -31,7 +31,7 @@ const PrivacyPolicy = () => {
       <p>
         For ease of understanding, we’ve created the below Summary Table, which
         pulls out some key points. More details can be found in our{" "}
-        <a href="/faqs">FAQ</a>, as well as the full Privacy Policy below and
+        <a href="/faqs">FAQ</a>, as well as the full Privacy Notice below and
         the <a href="/terms">Terms of Use</a> (“Terms”) that applies to your use
         of CZ ID.
       </p>
@@ -102,7 +102,7 @@ const PrivacyPolicy = () => {
                   This data is also shared with technical partners (Chan
                   Zuckerberg Initiative, LLC - CZI LLC) and Service Providers
                   (ex: AWS) that help operate and secure CZ ID. CZI LLC and
-                  Service Providers are limited by this Privacy Policy and will
+                  Service Providers are limited by this Privacy Notice and will
                   not use any data shared with them for any purpose beyond
                   operating and securing CZ ID.
                 </p>
@@ -171,7 +171,7 @@ const PrivacyPolicy = () => {
                 <br />
                 <p>
                   CZI LLC and Service Providers are limited by this Privacy
-                  Policy and will not use any data shared with them for any
+                  Notice and will not use any data shared with them for any
                   purpose beyond operating and securing CZ ID.
                 </p>
                 <br />
@@ -479,7 +479,7 @@ const PrivacyPolicy = () => {
       <p>
         We (along with CZI LLC) have a legitimate interest in using personal
         data within Visitor Data and User Data in the ways described in this
-        Privacy Policy operate, secure, and improve CZ ID. This allows us to
+        Privacy Notice operate, secure, and improve CZ ID. This allows us to
         improve the service that we provide to Users which, in turn, supports
         research regarding the study of infectious disease with the potential to
         benefit global public health.
@@ -498,7 +498,7 @@ const PrivacyPolicy = () => {
         the public health community. CZI LLC is our primary technology partner,
         focusing on CZ ID infrastructure, security, and compliance. The three
         parties are all data controllers for data within CZ ID and will use data
-        only as described in this Privacy Policy.
+        only as described in this Privacy Notice.
       </p>
       <p>
         We also share Upload Data, Report Data, Visitor Data, and User Data with
@@ -759,4 +759,4 @@ const PrivacyPolicy = () => {
   );
 };
 
-export default PrivacyPolicy;
+export default PrivacyNotice;

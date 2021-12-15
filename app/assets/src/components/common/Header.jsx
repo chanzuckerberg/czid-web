@@ -44,7 +44,7 @@ const showPrivacyUpdateNotification = () => {
           closeToast();
         }}
       >
-        Our Terms of Use and Privacy Policy will be updating in {daysLeft}{" "}
+        Our Terms of Use and Privacy Notice will be updating in {daysLeft}{" "}
         {daysLeft === 1 ? "day" : "days"}.{" "}
         <a
           href="/terms_changes"
@@ -180,7 +180,7 @@ const TermsDropdownItem = (
 
 const PrivacyDropdownItem = (
   <BareDropdown.Item
-    key="privacy_policy"
+    key="privacy_notice"
     text={
       <a
         className={cs.option}
@@ -188,10 +188,10 @@ const PrivacyDropdownItem = (
         rel="noopener noreferrer"
         href="/privacy"
         onClick={() =>
-          logAnalyticsEvent("Header_dropdown-privacy-policy-option_clicked")
+          logAnalyticsEvent("Header_dropdown-privacy-notice-option_clicked")
         }
       >
-        Privacy Policy
+        Privacy Notice
       </a>
     }
   />

@@ -414,14 +414,14 @@ export default class FAQPage extends React.Component {
           />
           <p>
             We have described in fuller detail in our{" "}
-            <a href="/privacy">Privacy Policy</a> our collection and use of
+            <a href="/privacy">Privacy Notice</a> our collection and use of
             personal information in connection with CZ ID, including: (a){" "}
             <b>Information we collect</b> (e.g. uploaded data, user profile
             information, etc.); (b) <b>Sources of information</b> (e.g. data you
             upload to CZ ID and your use of CZ ID), and (c){" "}
             <b>Purposes of disclosure of this information</b> (e.g. with service
             providers to help operate and improve the service as described in
-            detail in the CZ ID Privacy Policy). To request any of your
+            detail in the CZ ID Privacy Notice). To request any of your
             information described above, email{" "}
             <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. Please
             include in your request sufficient information that allows us to

@@ -26,7 +26,7 @@ class PublicSampleNotification extends React.Component {
           className={cs.policyLink}
           onClick={() => window.open("https://idseq.net/privacy")}
         >
-          privacy policy
+          privacy notice
         </a>
         &nbsp;or{" "}
         <a className={cs.emailLink} href="mailto:help@idseq.net">
