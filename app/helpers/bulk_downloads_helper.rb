@@ -245,6 +245,11 @@ module BulkDownloadsHelper
       csv << ["sample_name"] + metadata_headers
       samples.each do |sample|
         metadata = metadata_by_sample_id[sample.id] || {}
+        sample_host_is_human = sample.host_genome_name == "Human"
+        host_age_above_max = metadata.key?(:host_age) && metadata[:host_age].to_i >= MetadataField::MAX_HUMAN_AGE
+        if sample_host_is_human && host_age_above_max
+          metadata[:host_age] = "≥ #{MetadataField::MAX_HUMAN_AGE}"
+        end
         csv << [sample.name] + metadata.values_at(*metadata_keys)
       end
     end

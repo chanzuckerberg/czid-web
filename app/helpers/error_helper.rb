@@ -166,7 +166,7 @@ module ErrorHelper
       },
       human_age_hipaa_compliance: {
         headers: ["Row #", "Sample Name", "Host Age"],
-        title: ->(num_rows, _) { "The host age of #{num_rows} samples will be updated to ≥ 90 to comply with HIPAA identifier age rule." },
+        title: ->(num_rows, _) { "The host age of #{num_rows} samples will be updated to ≥ #{MetadataField::MAX_HUMAN_AGE} to comply with HIPAA identifier age rule." },
       },
     }.freeze
 

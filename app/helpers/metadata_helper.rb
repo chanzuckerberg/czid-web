@@ -350,9 +350,8 @@ module MetadataHelper
         if host_genome.name == "Human" && !host_age_index.nil?
           human_age = row[host_age_index].to_i
 
-          # Maximum human age is specified in FIELDS_THAT_HAVE_MAX_INPUT
-          if human_age >= 90
-            warning_aggregator.add_error(:human_age_hipaa_compliance, [index + 1, sample.name, "≥ 90"])
+          if human_age >= MetadataField::MAX_HUMAN_AGE
+            warning_aggregator.add_error(:human_age_hipaa_compliance, [index + 1, sample.name, "≥ #{MetadataField::MAX_HUMAN_AGE}"])
           end
         end
 

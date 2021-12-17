@@ -193,16 +193,19 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1, default_for_new_host_genome: 1)
       # while normally required, this field is expected to be not required here
       MetadataField.where(name: "collection_location_v2").update(is_required: 0)
-      @sample_one = create(:sample, project: @project, name: "Test Sample 1",
+      @sample_one = create(:sample, project: @project, name: "Test Sample 1", host_genome_name: "Human",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
-                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", custom_field_one: "Value One" })
-      @sample_two = create(:sample, project: @project, name: "Test Sample 2",
+                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", host_age: MetadataField::MAX_HUMAN_AGE.to_s, custom_field_one: "Value One" })
+      @sample_two = create(:sample, project: @project, name: "Test Sample 2", host_genome_name: "Mosquito",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
-                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", custom_field_two: "Value Two" })
+                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", host_age: MetadataField::MAX_HUMAN_AGE.to_s, custom_field_two: "Value Two" })
+      @sample_three = create(:sample, project: @project, name: "Test Sample 3", host_genome_name: "Human",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
+                                      metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", host_age: (MetadataField::MAX_HUMAN_AGE - 1).to_s, custom_field_one: "Value One" })
     end
 
     it "returns correct values in basic case" do
-      samples = Sample.where(id: [@sample_one.id, @sample_two.id])
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
 
       csv_string = BulkDownloadsHelper.generate_metadata_csv(samples)
 
@@ -210,11 +213,13 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       # 1) Metadata is returned properly.
       # 2) The required field is listed first.
       # 3) collection_location is displayed in the header instead of collection_location_v2.
+      # 4) Human metadata (ie. host_age) is HIPAA compliant
       expect(csv_string).to eq(
         generate_expected_csv_str([
-                                    ["sample_name", "sample_type", "collection_location", "custom_field_one", "custom_field_two"],
-                                    ["Test Sample 1", "Serum", "San Francisco, USA", "Value One", nil],
-                                    ["Test Sample 2", "CSF", "Los Angeles, USA", nil, "Value Two"],
+                                    ["sample_name", "sample_type", "collection_location", "host_age", "custom_field_one", "custom_field_two"],
+                                    ["Test Sample 1", "Serum", "San Francisco, USA", "≥ #{MetadataField::MAX_HUMAN_AGE}", "Value One", nil],
+                                    ["Test Sample 2", "CSF", "Los Angeles, USA", MetadataField::MAX_HUMAN_AGE.to_s, nil, "Value Two"],
+                                    ["Test Sample 3", "Serum", "San Francisco, USA", (MetadataField::MAX_HUMAN_AGE - 1).to_s, "Value One", nil],
                                   ])
       )
     end
@@ -225,7 +230,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       MetadataField.where(name: "sample_type").update(is_required: 0)
 
       # Create a sample with no metadata.
-      sample_no_metadata = create(:sample, project: @project, name: "Test Sample 3",
+      sample_no_metadata = create(:sample, project: @project, name: "Test Sample 4",
                                            pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
       samples = Sample.where(id: [sample_no_metadata.id])
 
@@ -234,7 +239,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       expect(csv_string).to eq(
         generate_expected_csv_str([
                                     ["sample_name"],
-                                    ["Test Sample 3"],
+                                    ["Test Sample 4"],
                                   ])
       )
     end

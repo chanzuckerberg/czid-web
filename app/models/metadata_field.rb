@@ -118,6 +118,10 @@ class MetadataField < ApplicationRecord
     # see also boolean? method
   ] }
 
+  # Ensure human metadata is HIPAA compliant
+  # The equivalent frontend constant is specified in FIELDS_THAT_HAVE_MAX_INPUT
+  MAX_HUMAN_AGE = 90
+
   # NOTE: not sure why these columns were not created as booleans
   validates :force_options, inclusion: { in: [0, 1] }
   validates :is_core, inclusion: { in: [0, 1] }
