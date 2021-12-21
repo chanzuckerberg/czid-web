@@ -2,6 +2,7 @@ import cx from "classnames";
 import React from "react";
 
 import PropTypes from "~/components/utils/propTypes";
+import ExternalLink from "~ui/controls/ExternalLink";
 import { IconArrowRight } from "~ui/icons";
 import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 
@@ -18,7 +19,6 @@ class SampleMessage extends React.Component {
       subtitle,
       type,
       onClick,
-      openLinkInNewTab,
     } = this.props;
     return (
       <div className={cs.sampleMessage}>
@@ -29,16 +29,10 @@ class SampleMessage extends React.Component {
           </div>
           <div className={cs.message}>{message}</div>
           <div className={cs.subtitle}>{subtitle}</div>
-          <a
-            className={cs.actionLink}
-            href={link}
-            onClick={onClick}
-            rel="noopener noreferrer"
-            target={openLinkInNewTab ? "_blank" : null}
-          >
+          <ExternalLink className={cs.actionLink} href={link} onClick={onClick}>
             {linkText}
             {linkText && <IconArrowRight />}
-          </a>
+          </ExternalLink>
         </div>
         <ImgMicrobeSecondary className={cs.imgMicrobe} />
       </div>
@@ -46,16 +40,11 @@ class SampleMessage extends React.Component {
   }
 }
 
-SampleMessage.defaultProps = {
-  openLinkInNewTab: false,
-};
-
 SampleMessage.propTypes = {
   icon: PropTypes.element,
   link: PropTypes.string,
   linkText: PropTypes.string,
   message: PropTypes.string,
-  openLinkInNewTab: PropTypes.bool,
   status: PropTypes.string,
   subtitle: PropTypes.string,
   type: PropTypes.string,
