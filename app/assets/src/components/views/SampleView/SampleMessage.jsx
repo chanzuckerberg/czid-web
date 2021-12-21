@@ -18,6 +18,7 @@ class SampleMessage extends React.Component {
       subtitle,
       type,
       onClick,
+      openLinkInNewTab,
     } = this.props;
     return (
       <div className={cs.sampleMessage}>
@@ -28,7 +29,13 @@ class SampleMessage extends React.Component {
           </div>
           <div className={cs.message}>{message}</div>
           <div className={cs.subtitle}>{subtitle}</div>
-          <a className={cs.actionLink} href={link} onClick={onClick}>
+          <a
+            className={cs.actionLink}
+            href={link}
+            onClick={onClick}
+            rel="noopener noreferrer"
+            target={openLinkInNewTab ? "_blank" : null}
+          >
             {linkText}
             {linkText && <IconArrowRight />}
           </a>
@@ -39,11 +46,16 @@ class SampleMessage extends React.Component {
   }
 }
 
+SampleMessage.defaultProps = {
+  openLinkInNewTab: false,
+};
+
 SampleMessage.propTypes = {
   icon: PropTypes.element,
   link: PropTypes.string,
   linkText: PropTypes.string,
   message: PropTypes.string,
+  openLinkInNewTab: PropTypes.bool,
   status: PropTypes.string,
   subtitle: PropTypes.string,
   type: PropTypes.string,

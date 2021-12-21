@@ -435,6 +435,7 @@ class PhyloTreeListView extends React.Component {
           link={PHYLO_TREE_LINK}
           linkText="Learn about Phylogenetic Analysis"
           message="Your tree is being created."
+          openLinkInNewTab={true}
           status="Generating Tree"
           subtitle="Hang tight and grab a cup of coffee while we generate your tree!"
           type="inProgress"
