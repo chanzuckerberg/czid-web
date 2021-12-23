@@ -13,10 +13,11 @@ RSpec.describe MetadataController, type: :controller do
 
       loc = create(:metadata_field, name: "collection_location_v2", display_name: "Collection Location", is_core: 1, is_default: 1, is_required: 1, default_for_new_host_genome: 1)
       water = create(:metadata_field, name: "water_control", display_name: "Water Control", is_core: 1, is_default: 1, is_required: 1, default_for_new_host_genome: 1)
+      @age = create(:metadata_field, name: "host_age", display_name: "Host Age", is_core: 1, is_default: 1, is_required: 0, default_for_new_host_genome: 1)
 
-      human = HostGenome.find_by(name: "Human")
-      [mf, loc, water].each do |field|
-        hg.metadata_fields << field unless human.metadata_fields.include?(field)
+      @human = HostGenome.find_by(name: "Human")
+      [mf, loc, water, @age].each do |field|
+        hg.metadata_fields << field unless @human.metadata_fields.include?(field)
       end
     end
 
@@ -43,6 +44,19 @@ RSpec.describe MetadataController, type: :controller do
         csv = CSV.new(response.body).read
         expect(csv.length).to be(2)
         expect(csv[1][0]).to eq(sample.name)
+      end
+
+      it "generates HIPAA compliant CSV from project" do
+        project = create(:project, users: [@joe])
+        sample = create(:sample, project: project, user: @joe, host_genome: @human)
+        create(:metadatum, key: @age.name, sample: sample, raw_value: MetadataField::MAX_HUMAN_AGE.to_s, metadata_field: @age)
+        post :metadata_template_csv, params: { project_id: project.id }
+        expect(response).to have_http_status :success
+
+        csv = CSV.new(response.body).read
+        expect(csv.length).to be >= 1
+        sample_metadata = csv[1]
+        expect(sample_metadata).to include("≥ #{MetadataField::MAX_HUMAN_AGE}")
       end
 
       it "generates CSV with sample names from params" do

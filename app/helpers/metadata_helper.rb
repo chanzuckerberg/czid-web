@@ -158,7 +158,14 @@ module MetadataHelper
             elsif project.nil?
               generate_metadata_default_value(field, hg.name)
             else
-              sample[:metadata][field.name]&.csv_compatible_value
+              metadata_value = sample[:metadata][field.name]&.csv_compatible_value
+              sample_host_is_human = hg.name == "Human"
+              field_is_host_age_and_above_max = field.name == "host_age" && metadata_value.to_i >= MetadataField::MAX_HUMAN_AGE
+              if sample_host_is_human && field_is_host_age_and_above_max
+                "≥ #{MetadataField::MAX_HUMAN_AGE}"
+              else
+                metadata_value
+              end
             end
           end
         end
