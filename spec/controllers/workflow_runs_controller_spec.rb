@@ -892,7 +892,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           expect(response).to have_http_status(:success)
           expect(body).to include("external_url")
           expect(body["external_url"]).to include("https://clades.nextstrain.org")
-          expect(body["external_url"]).to include("?input-fasta", "X-Amz-Credential")
+          expect(body["external_url"]).to include("?dataset-name=", "&input-fasta", "X-Amz-Credential")
         end
       end
 
@@ -908,7 +908,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           expect(response).to have_http_status(:success)
           expect(body).to include("external_url")
           expect(body["external_url"]).to include("https://clades.nextstrain.org")
-          expect(body["external_url"]).to include("?input-fasta=", "X-Amz-Credential", "&input-tree=")
+          expect(body["external_url"]).to include("?dataset-name=", "&input-fasta=", "X-Amz-Credential", "&input-tree=")
           expect(body["external_url"]).to_not include("\\u0026input-tree=")
         end
       end

@@ -200,7 +200,7 @@ class WorkflowRunsController < ApplicationController
     fasta_url = get_presigned_s3_url(bucket_name: SAMPLES_BUCKET_NAME, key: key, duration: 300)
 
     # Generate the external URL.
-    options = { "input-fasta": fasta_url }
+    options = { "input-fasta": fasta_url, "dataset-name": "sars-cov-2" }
     # If a reference tree file was provided, upload to s3 and generate a presigned link.
     if permitted_params[:referenceTree].present?
       tree_key = format(CLADE_REFERENCE_TREE_S3_KEY, path: SecureRandom.alphanumeric(5))
