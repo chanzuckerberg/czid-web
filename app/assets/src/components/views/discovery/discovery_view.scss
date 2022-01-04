@@ -5,8 +5,6 @@
 .layout {
   display: flex;
   flex-direction: column;
-  // Header size: 60px. Make sure to change this if header height is changed.
-  height: calc(100vh - 60px);
 
   .headerContainer {
     flex: 0 0 auto;

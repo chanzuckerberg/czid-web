@@ -3,7 +3,7 @@
     return confirm("Do you want to delete user " + user + "?");
   }
 </script>
-<div id='user_create_page' style="height: calc(100vh - 60px); display: flex; flex-direction: column">
+<div id='user_create_page' style="height: 100%; display: flex; flex-direction: column">
   <% if current_user && current_user.admin %>
     <div style="flex: 0 0 auto">
       <p id="notice"><%= notice %></p>

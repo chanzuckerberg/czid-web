@@ -3,12 +3,13 @@
 @import "~styles/themes/elements";
 
 .samplesHeatmapVis {
+  height: 100%;
+  position: relative;
+
   .plusMinusControl {
     z-index: 1;
     position: absolute;
-    // Offset from the viewport to line up with the filter controls. This will
-    // need to be adjusted if the position of the controls changes.
-    top: 360px;
+    top: $space-xxxs;
     right: 40px;
     box-shadow: $box-shadow-m;
 
@@ -20,18 +21,7 @@
 
   .heatmapContainer {
     overflow: hidden;
-    // Set the height so the heatmap takes up the rest of the screen.
-    // 358px is the height of the elements above the heatmapContainer.
-    // It *will* need to change if the height of the elements above ever change.
-    height: calc(100vh - #{$header-height} - 284px);
-
-    &.filtersApplied {
-      height: calc(100vh - #{$header-height} - 307px);
-    }
-
-    &.fullScreen {
-      height: calc(100vh - #{$header-height} - 33px);
-    }
+    height: 100%;
 
     svg {
       display: block;
@@ -55,9 +45,9 @@
       display: flex;
 
       .warningIcon {
-        height: 14px;
-        width: 14px;
-        margin-right: 6px;
+        height: $icon-s;
+        width: $icon-s;
+        margin-right: $space-xs;
         // Vertical-align the svg element with the text.
         transform: translateY(1px);
       }

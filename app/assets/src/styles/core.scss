@@ -7,3 +7,23 @@
 html {
   scroll-behavior: smooth;
 }
+
+// Each page contains a page_header and page_content:
+// The page_header height varies depending on the number of enabled banners.
+// The page_content expands to fill up the remaining height of the browser window.
+.page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .page_content {
+    flex: 1;
+    overflow: auto;
+
+    // All child components, titled `{name}_page` and defined in html.erb files,
+    // should span the full height of page_content and should not have vertical overflow.
+    & > div {
+      height: 100%;
+    }
+  }
+}

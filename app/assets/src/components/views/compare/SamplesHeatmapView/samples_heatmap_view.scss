@@ -4,6 +4,11 @@
 
 .heatmap {
   margin-top: -$header-margin-bottom;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 
   .viewHeader {
     margin-top: 40px;
@@ -89,6 +94,10 @@
       border-radius: 0 0 $border-radius-m $border-radius-m;
       box-shadow: $box-shadow-s;
     }
+  }
+
+  .heatmapVisContent {
+    overflow: hidden;
   }
 
   .loadingIndicator,

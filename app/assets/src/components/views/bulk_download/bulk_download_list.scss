@@ -5,7 +5,6 @@
 .bulkDownloadList {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - #{$header-total-height});
 
   .blankScreenContainer,
   .tableContainer {

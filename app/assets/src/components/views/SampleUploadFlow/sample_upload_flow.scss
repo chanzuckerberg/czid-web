@@ -14,10 +14,6 @@
 }
 
 .uploadFlowStep {
-  // In order to make the flex-content take up the remaining height on the page,
-  // we need to place it in a parent container that expands to fill up the page height.
-  // This min-height takes up the remaining viewport height besides the header and the sample upload flow header.
-  min-height: calc(100vh - 160px);
   padding-top: 20px;
   padding-bottom: 20px;
   display: none;

@@ -1,4 +1,5 @@
 import axios from "axios";
+import cx from "classnames";
 import DeepEqual from "fast-deep-equal";
 import {
   assign,
@@ -1614,7 +1615,7 @@ class SamplesHeatmapView extends React.Component {
 
   renderVisualization() {
     return (
-      <div className="visualization-content">
+      <div className={cx("visualization-content", cs.heatmapVisContent)}>
         {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
       </div>
     );
@@ -1703,7 +1704,6 @@ class SamplesHeatmapView extends React.Component {
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
           sampleSortType={this.state.selectedOptions.sampleSortType}
-          fullScreen={this.state.hideFilters}
           taxaSortType={this.state.selectedOptions.taxaSortType}
         />
       </ErrorBoundary>
