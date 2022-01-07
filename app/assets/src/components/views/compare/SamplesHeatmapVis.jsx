@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { size, map, keyBy } from "lodash/fp";
+import { size, map, keyBy, isEmpty } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -540,7 +540,13 @@ class SamplesHeatmapVis extends React.Component {
           className={cs.plusMinusControl}
         />
         <div
-          className={cs.heatmapContainer}
+          className={cx(
+            cs.heatmapContainer,
+            (!isEmpty(this.props.thresholdFilters) ||
+              !isEmpty(this.props.taxonCategories)) &&
+              cs.filtersApplied,
+            this.props.fullScreen && cs.fullScreen
+          )}
           ref={container => {
             this.heatmapContainer = container;
           }}
@@ -641,6 +647,7 @@ SamplesHeatmapVis.propTypes = {
   selectedTaxa: PropTypes.object,
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
+  fullScreen: PropTypes.bool,
   taxaSortType: PropTypes.string,
 };
 

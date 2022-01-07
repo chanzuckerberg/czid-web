@@ -2,7 +2,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
-.imgMicrobe {
-  width: $img-m;
-  height: $img-m;
+.maintenance {
+  height: calc(100vh - #{$header-total-height});
+
+  .imgMicrobe {
+    width: $img-m;
+    height: $img-m;
+  }
 }
