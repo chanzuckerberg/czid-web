@@ -11,14 +11,6 @@ RUN apt-get update && \
       lsb-release \
       apt-transport-https
 
-# This section is for the purpose of installing the non-MariaDB mysql-client /
-# mysqldump utility. The default-mysql-client package is actually
-# mariadb-client, and we found some incompatibility with virtual generated
-# columns when importing into non-MariaDB MySQL Community Server.
-RUN wget https://dev.mysql.com/get/mysql-apt-config_0.8.18-1_all.deb
-RUN DEBIAN_FRONTEND=noninteractive apt install ./mysql-apt-config_0.8.18-1_all.deb
-RUN apt-get update && apt-get install -y mysql-client
-
 # Install node + npm
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
@@ -44,7 +36,11 @@ WORKDIR /app
 # will be cached unless changes to one of those two files
 # are made.
 COPY Gemfile Gemfile.lock ./
-RUN gem install bundler && bundle install --jobs 20 --retry 5
+RUN gem install bundler
+
+# allow nokogiri to install on arm / M1 macks
+RUN bundle config set force_ruby_platform true
+RUN bundle install --jobs 20 --retry 5
 
 # Do the same for node packages, allowing them to be cached
 RUN npm update -g
@@ -62,6 +58,22 @@ RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
 
 # Copy the main application.
 COPY . ./
+
+# This section is for the purpose of installing the non-MariaDB mysql-client /
+# mysqldump utility. The default-mysql-client package is actually
+# mariadb-client, and we found some incompatibility with virtual generated
+# columns when importing into non-MariaDB MySQL Community Server.
+# More info about mysql apt repository: https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
+ARG MYSQL_APT_DEB=mysql-apt-config_0.8.18-1_all.deb
+RUN wget https://dev.mysql.com/get/${MYSQL_APT_DEB}
+RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections && \
+  DEBIAN_FRONTEND=noninteractive apt install ./${MYSQL_APT_DEB}
+
+# mysql-client does not exist for M1 Macs / arm64, so force debian to install an amd64 version
+RUN DPKG_ARCH=$(dpkg --print-architecture ) && if [ $DPKG_ARCH = arm64 ]; then dpkg --add-architecture amd64; fi
+
+RUN apt-get update && \
+  apt-get install -y mysql-client
 
 ARG GIT_COMMIT
 ENV GIT_VERSION ${GIT_COMMIT}

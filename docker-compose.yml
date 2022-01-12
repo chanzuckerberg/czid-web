@@ -69,6 +69,7 @@ services:
       - ./docker_data/elasticsearch/data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+    platform: linux/amd64
   db:
     image: mysql:5.7
     container_name: mysql
@@ -78,6 +79,7 @@ services:
     ports:
       - 3306:3306
     command: ['--character-set-server=utf8', '--collation-server=utf8_unicode_ci', '--group_concat_max_len=1073741824', '--show_compatibility_56=ON']
+    platform: linux/amd64
   redis:
     image: redis:5.0.3
     container_name: redis
