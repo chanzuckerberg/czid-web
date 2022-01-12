@@ -8,7 +8,7 @@ export const SELECT_ID_KEY = "_selectId";
 // WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/czid-cli
 export const CG_WETLAB_OPTIONS = [
   {
-    text: "ARTIC v4",
+    text: "ARTIC v4/ARTIC v4.1",
     value: "artic_v4",
   },
   {
@@ -52,7 +52,7 @@ export const CG_WETLAB_OPTIONS = [
 export const CG_WETLAB_DISPLAY_NAMES = {
   ampliseq: "AmpliSeq",
   artic_short_amplicons: "ARTIC v3 - Short Amplicons (275 bp)",
-  artic_v4: "ARTIC v4",
+  artic_v4: "ARTIC v4/ARTIC v4.1",
   artic: "ARTIC v3",
   combined_msspe_artic: "Combined MSSPE & ARTIC v3",
   covidseq: "COVIDseq",
@@ -83,7 +83,7 @@ export const CG_NANOPORE_WETLAB_OPTIONS = [
     value: "midnight",
   },
   {
-    text: "ARTIC v4",
+    text: "ARTIC v4/ARTIC v4.1",
     value: "artic_v4",
   },
   {
