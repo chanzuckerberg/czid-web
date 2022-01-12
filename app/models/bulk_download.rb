@@ -213,22 +213,24 @@ class BulkDownload < ApplicationRecord
     progress_url: self.progress_url
   )
     command = ["python", "s3_tar_writer.py",
-               "--src-urls", *src_urls.map { |s| "'#{s}'" },
-               "--tar-names", *tar_names.map { |s| "'#{s}'" },
-               "--dest-url", "'#{dest_url}'",
+               "--src-urls", *src_urls,
+               # these can be based on user generated strings so we need to strip leading - to prevent
+               # them from being interpreted as flags
+               "--tar-names", *tar_names.map { |s| s.sub(/^-*/, '') },
+               "--dest-url", dest_url,
                "--progress-delay", PROGRESS_UPDATE_DELAY,]
 
     # The success url is mandatory.
     if success_url
-      command += ["--success-url", "'#{success_url}'"]
+      command += ["--success-url", success_url]
     else
       raise BulkDownloadsHelper::SUCCESS_URL_REQUIRED
     end
     if error_url
-      command += ["--error-url", "'#{error_url}'"]
+      command += ["--error-url", error_url]
     end
     if progress_url
-      command += ["--progress-url", "'#{progress_url}'"]
+      command += ["--progress-url", progress_url]
     end
     command
   end
