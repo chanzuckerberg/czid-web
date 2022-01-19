@@ -125,7 +125,12 @@ class MetadataUploadModal extends React.Component {
     );
 
     const reviewMetadataPage = (
-      <ReviewPage title={reviewTitle} key="2" metadata={this.state.metadata} />
+      <ReviewPage
+        title={reviewTitle}
+        key="2"
+        metadata={this.state.metadata}
+        samples={this.state.projectSamples}
+      />
     );
 
     return [uploadMetadataPage, reviewMetadataPage];

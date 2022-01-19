@@ -8,6 +8,16 @@ import { FIELDS_THAT_HAVE_MAX_INPUT } from "./constants";
 
 import cs from "./metadata_age_input.scss";
 
+// Description: This is a MetadataInput component for the "Host Age" field and is only surfaced when the sample host is human.
+// This component enforces a max value to ensure that users enter HIPAA-complaint host ages.
+// User-entered ages above the max will be stored as maxAge + 1 in the backend (see ensureDefinedValue)
+// and will be displayed as "≥ {maxAge}" on the frontend (see returnHipaaCompliantMetadata).
+//  - Note: The MetadataAgeInput is a numerical input box. To display the string "≥ {max value}",
+//    the input box is zeroed out and "≥ {maxAge}" is shown as the placeholder value.
+//    For this reason, there are custom react hooks that handle user interactions (ie. up/down input box arrows,
+//    backspace/delete key) while input box is zeroed and displays the "≥ {max value}" placeholder.
+// A warning message is surfaced when the user changes the host age to a value which exceeds the max.
+
 const MetadataAgeInput = ({
   className,
   value,
@@ -30,9 +40,11 @@ const MetadataAgeInput = ({
       if (safeHumanAge === 0) {
         // User pressed down arrow or scrolled to decrement age
         setSafeHumanAge(maxAge - 1);
+        onChange(metadataType.key, (maxAge - 1).toString());
       } else if (safeHumanAge === 1) {
         // User pressed up arrow or scrolled to increment age
         setSafeHumanAge(maxAge + 1);
+        onChange(metadataType.key, (maxAge + 1).toString());
       }
     }
     setHipaaWarning(safeHumanAge >= maxAge);

@@ -482,6 +482,7 @@ class MetadataManualInput extends React.Component {
                   }}
                   withinModal={this.props.withinModal}
                   taxaCategory={hostGenome.taxa_category}
+                  isHuman={sampleHostGenomeId === 1}
                   sampleTypes={this.props.sampleTypes}
                 />
                 {this.props.samples.length > 1 &&
