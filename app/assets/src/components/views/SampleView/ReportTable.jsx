@@ -652,6 +652,8 @@ class ReportTable extends React.Component {
       );
     const percentIdentity = get("nt.percent_identity", rowData);
     const previousConsensusGenomeRuns = get(rowData.taxId, consensusGenomeData);
+    const ntContigsAvailable = !!get("nt.contigs", rowData);
+    const ntReadsAvailable = !!get("nt.count", rowData);
 
     const analyticsContext = {
       projectId: projectId,
@@ -668,9 +670,9 @@ class ReportTable extends React.Component {
         taxName={rowData.name}
         taxCommonName={rowData.common_name}
         taxSpecies={rowData.species}
-        taxCategory={rowData.category}
+        blastEnabled={ntReadsAvailable}
         ncbiEnabled={validTaxId}
-        ntContigsAvailable={!!get("nt.contigs", rowData)}
+        ntContigsAvailable={ntContigsAvailable}
         onNcbiActionClick={withAnalytics(
           this.linkToNCBI,
           "PipelineSampleReport_ncbi-link_clicked",

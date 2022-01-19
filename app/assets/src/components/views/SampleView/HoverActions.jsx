@@ -8,6 +8,7 @@ import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
+import { BLAST_FEATURE } from "~/components/utils/features";
 import {
   isPipelineFeatureAvailable,
   COVERAGE_VIZ_FEATURE,
@@ -81,6 +82,8 @@ class HoverActions extends React.Component {
       COVERAGE_VIZ_FEATURE,
       pipelineVersion
     );
+    const { allowedFeatures = [] } = this.context || {};
+    const hasBlast = allowedFeatures.includes(BLAST_FEATURE);
 
     const params = {
       pipelineVersion,
@@ -177,6 +180,17 @@ class HoverActions extends React.Component {
           disabledMessage: this.getConsensusGenomeError(),
         });
       }
+    }
+
+    if (hasBlast) {
+      hoverActions.push({
+        key: `blast_${params.taxId}`,
+        message: "BLASTN",
+        iconComponentClass: IconBrowserSmall, // TODO: replace this icon
+        enabled: this.props.blastEnabled,
+        disabledMessage:
+          "BLAST is not available - requires at least 1 contig or read in NT.",
+      });
     }
 
     return snapshotShareId
@@ -282,6 +296,7 @@ class HoverActions extends React.Component {
 }
 
 HoverActions.propTypes = {
+  blastEnabled: PropTypes.bool,
   className: PropTypes.string,
   consensusGenomeEnabled: PropTypes.bool,
   contigVizEnabled: PropTypes.bool,
