@@ -64,7 +64,7 @@ COPY . ./
 # mariadb-client, and we found some incompatibility with virtual generated
 # columns when importing into non-MariaDB MySQL Community Server.
 # More info about mysql apt repository: https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
-ARG MYSQL_APT_DEB=mysql-apt-config_0.8.18-1_all.deb
+ARG MYSQL_APT_DEB=mysql-apt-config_0.8.22-1_all.deb
 RUN wget https://dev.mysql.com/get/${MYSQL_APT_DEB}
 RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections && \
   DEBIAN_FRONTEND=noninteractive apt install ./${MYSQL_APT_DEB}
