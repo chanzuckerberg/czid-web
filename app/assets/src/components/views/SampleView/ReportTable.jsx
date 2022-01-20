@@ -12,8 +12,10 @@ import { getCsrfToken } from "~/api/utils";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import AnnotationLabel from "~/components/ui/labels/AnnotationLabel";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import { BACKGROUND_MODELS_LINK } from "~/components/utils/documentationLinks";
+import { ANNOTATION_FEATURE } from "~/components/utils/features";
 import {
   isPipelineFeatureAvailable,
   ASSEMBLY_FEATURE,
@@ -27,7 +29,6 @@ import PathogenPreview from "~/components/views/report/PathogenPreview";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { Table } from "~/components/visualizations/table";
 import { IconInsightSmall } from "~ui/icons";
-
 import HoverActions from "./HoverActions";
 import { REPORT_TABLE_COLUMNS } from "./constants";
 import cs from "./report_table.scss";
@@ -374,6 +375,7 @@ class ReportTable extends React.Component {
   };
 
   renderName = ({ cellData, rowData }) => {
+    const { allowedFeatures = [] } = this.context || {};
     const { displayMergedNtNrValue, onTaxonNameClick } = this.props;
 
     let childrenCount = 0;
@@ -386,6 +388,11 @@ class ReportTable extends React.Component {
     return (
       rowData && (
         <div className={cs.taxonContainer}>
+          {allowedFeatures.includes(ANNOTATION_FEATURE) && (
+            <span className={cs.annotationLabel}>
+              <AnnotationLabel />
+            </span>
+          )}
           <span
             className={cx(cs.taxonName, !!cellData || cs.missingName)}
             onClick={() => onTaxonNameClick({ ...rowData })}
@@ -950,5 +957,7 @@ ReportTable.propTypes = {
   sampleId: PropTypes.number,
   snapshotShareId: PropTypes.string,
 };
+
+ReportTable.contextType = UserContext;
 
 export default ReportTable;

@@ -373,6 +373,9 @@ function EventDictionary() {
   /** The user hovered over the Total Reads info icon on a QualityControl chart. */
   this.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED =
     "QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED";
+
+  /** The user hovered over the Annotations Label on a samples view ReportTable */
+  this.ANNOTATION_LABEL_HOVERED = "ANNOTATION_LABEL_HOVERED";
 }
 
 const eventNames = new EventDictionary();

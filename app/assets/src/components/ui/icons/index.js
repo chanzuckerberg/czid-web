@@ -55,6 +55,7 @@ import IconSubmitArrow from "./IconSubmitArrow";
 import IconSuccess from "./IconSuccess";
 import IconSuccessSmall from "./IconSuccessSmall";
 import IconTableSmall from "./IconTableSmall";
+import IconTempSmall from "./IconTempSmall";
 import IconTreeSmall from "./IconTreeSmall";
 import LogoColor from "./LogoColor";
 import LogoLockupColor from "./LogoLockupColor";
@@ -122,6 +123,7 @@ export const ICONS_TAXONOMY = {
     IconSuccess,
     IconSuccessSmall,
     IconTableSmall,
+    IconTempSmall,
     IconTreeSmall,
     SortIcon,
   },

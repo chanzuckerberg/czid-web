@@ -26,14 +26,14 @@
   // reactVirtualized sets margin-left to 10px for the first column by default,
   // so we need to override it.
   margin-left: 0px !important;
-  margin-right: 2px !important;
+  margin-right: 0px !important;
 }
 
 .expandCell {
   // reactVirtualized sets margin-left to 10px for the first column by default,
   // so we need to override it.
   margin-left: 0px !important;
-  margin-right: 2px !important;
+  margin-right: 0px !important;
 }
 
 .expandIcon {
@@ -94,6 +94,14 @@
   text-align: left;
 
   .taxonContainer {
+    margin-left: $space-l;
+
+    .annotationLabel {
+      width: $icon-s;
+      height: $icon-xs;
+      margin-right: $space-s;
+    }
+
     .taxonName {
       white-space: normal;
       &:hover {

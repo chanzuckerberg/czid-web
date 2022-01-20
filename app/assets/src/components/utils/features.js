@@ -6,3 +6,4 @@ export const DRAGGABLE_COLUMNS_FEATURE = "draggable_columns";
 export const PATHOGEN_LIST_V0_FEATURE = "pathogen_list_v0";
 export const PATHOGEN_LABEL_V0_FEATURE = "pathogen_label_v0";
 export const BLAST_FEATURE = "blast";
+export const ANNOTATION_FEATURE = "annotation";
