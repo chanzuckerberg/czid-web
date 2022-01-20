@@ -1,14 +1,15 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .loadingMessage {
-  color: $gray-dark;
+  color: $sds-color-gray-500;
   display: flex;
   align-items: center;
 
   .loadingIcon {
-    margin-right: $space-xxs;
+    margin-right: $sds-spaces-xxs;
   }
 
   .text {

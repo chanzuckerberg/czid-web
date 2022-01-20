@@ -1,19 +1,20 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .viewHeader {
-  margin-top: $space-xxl;
-  margin-bottom: $space-xxl;
+  margin-top: $sds-spaces-xxl;
+  margin-bottom: $sds-spaces-xxl;
 }
 
 .error {
-  color: $error-medium;
-  margin-bottom: $space-m;
+  color: $sds-color-error-400;
+  margin-bottom: $sds-spaces-m;
 }
 
 .noResultsMessage {
-  color: $gray-dark;
+  color: $sds-color-gray-500;
 }
 
 .category {
@@ -22,7 +23,7 @@
   }
 
   .field {
-    padding: $space-m;
+    padding: $sds-spaces-m;
 
     .preference {
       justify-content: left;

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .sampleViewContainer {
   display: flex;
@@ -21,7 +22,7 @@
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  margin-top: $space-xl;
+  margin-top: $sds-spaces-xl;
 
   .reportFilters {
     flex: 0 0 auto;
@@ -39,17 +40,17 @@
     .statsRow {
       @include font-body-xxs;
 
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       flex: 1 0 auto;
 
       .reportInfoMsg {
         &:not(:first-child) {
-          margin-left: $space-xxs;
+          margin-left: $sds-spaces-xxs;
         }
       }
 
       .clearAllFilters {
-        margin-left: $space-xxs;
+        margin-left: $sds-spaces-xxs;
         font-weight: $font-weight-semibold;
         white-space: nowrap;
         cursor: pointer;
@@ -78,8 +79,8 @@
 
   .consensusGenomeLink {
     @include font-caps-xxxs;
-    margin-top: $space-s;
-    color: $primary;
+    margin-top: $sds-spaces-s;
+    color: $sds-color-primary-400;
     cursor: pointer;
   }
 }
@@ -88,16 +89,16 @@
   margin: 25px 0;
 
   .statusLabel {
-    margin-left: $space-xs;
+    margin-left: $sds-spaces-xs;
     // To center without offsetting "indicator" line
-    margin-top: $space-xxxs;
+    margin-top: $sds-spaces-xxxs;
     vertical-align: text-top;
   }
 }
 
 .divider {
   height: 3px;
-  background-color: $gray-lightest;
+  background-color: $sds-color-gray-200;
   position: absolute;
   left: 0;
   right: 0;

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .container {
   display: flex;
@@ -15,7 +16,7 @@
   }
 
   .map {
-    border-top: 2px solid $gray-lightest;
+    border-top: 2px solid $sds-color-gray-200;
   }
 
   .note {
@@ -31,7 +32,7 @@
 .basicCell {
   // this is adjusted to align the baseline of
   // content of basic cells with the sample name.
-  margin-top: 2px;
+  margin-top: $sds-spaces-xxxs;
 }
 
 .samplesToolbar {
@@ -47,7 +48,7 @@
     flex: 0 0 auto;
 
     .counter {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
 
     .label {
@@ -62,7 +63,7 @@
   .separator {
     flex: 0 0 auto;
     height: 27px;
-    margin: 0 10px 0 20px;
+    margin: 0 $sds-spaces-m 0 20px;
     border-right: 1px solid $gray-medium;
   }
 
@@ -72,7 +73,7 @@
 
     .action {
       &:not(:first-child) {
-        margin-left: 2px;
+        margin-left: $sds-spaces-xxxs;
       }
     }
 
@@ -95,7 +96,7 @@
       }
 
       &.phyloTree {
-        margin-right: 4px;
+        margin-right: $sds-spaces-xxs;
       }
     }
   }
@@ -115,7 +116,8 @@
   overflow: visible;
   height: 100%;
   width: 50px;
-  margin: -11px -10px -10px -10px;
+  margin: -$sds-spaces-m;
+  margin-top: -11px;
   padding-left: 0px;
   justify-content: center;
 }

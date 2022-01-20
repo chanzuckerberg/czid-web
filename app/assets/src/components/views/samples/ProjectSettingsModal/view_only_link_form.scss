@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .viewOnlyLinkForm {
   display: flex;
@@ -8,30 +9,30 @@
 
   .note {
     @include font-body-xs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .noteContainer {
-    margin-top: $space-xxs;
+    margin-top: $sds-spaces-xxs;
     margin-right: 100px;
   }
 
   .background {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
     border-radius: $border-radius-m;
   }
 
   .helpIcon {
-    fill: $gray-light;
-    margin-left: $space-xs;
+    fill: $sds-color-gray-300;
+    margin-left: $sds-spaces-xs;
     display: inline-flex;
     vertical-align: middle;
 
     &:hover {
-      fill: $primary;
+      fill: $sds-color-primary-400;
 
       svg {
-        fill: $primary;
+        fill: $sds-color-primary-400;
       }
     }
   }
@@ -49,11 +50,11 @@
     }
 
     .linkToggle {
-      margin-right: $space-m;
+      margin-right: $sds-spaces-m;
     }
 
     .automaticUpdateToggle {
-      margin-right: $space-xl;
+      margin-right: $sds-spaces-xl;
     }
   }
 
@@ -72,13 +73,13 @@
   }
 
   .viewOnlyLinkBody {
-    padding: $space-l;
-    margin-top: $space-l;
+    padding: $sds-spaces-l;
+    margin-top: $sds-spaces-l;
 
     .label {
       @include font-header-s;
-      color: $black;
-      margin-bottom: $space-xxs;
+      color: $sds-color-gray-black;
+      margin-bottom: $sds-spaces-xxs;
     }
 
     .pipelineVersionTooltip {
@@ -86,31 +87,31 @@
       text-decoration-style: dashed;
 
       &:hover {
-        color: $primary;
+        color: $sds-color-primary-400;
         cursor: default;
       }
     }
 
     .settingsForm {
-      margin-left: $space-xl;
+      margin-left: $sds-spaces-xl;
 
       .settingsFormDropdown {
-        margin-top: $space-l;
+        margin-top: $sds-spaces-l;
 
         .backgroundModelLabel {
           @include font-header-s;
-          margin-top: $space-l;
-          margin-bottom: $space-xxs;
+          margin-top: $sds-spaces-l;
+          margin-bottom: $sds-spaces-xxs;
           display: flex;
           align-items: center;
         }
 
         .dropdown {
           width: 190px;
-          color: $primary;
+          color: $sds-color-primary-400;
 
           span {
-            color: $gray-dark;
+            color: $sds-color-gray-500;
           }
         }
       }
@@ -118,7 +119,7 @@
       .settingsFormField {
         display: flex;
         flex-direction: column;
-        margin-top: $space-l;
+        margin-top: $sds-spaces-l;
 
         .formFieldLabelContainer {
           height: 24px; // formFieldLabel height
@@ -132,7 +133,7 @@
 
     .shareableLink {
       display: flex;
-      margin-top: $space-xl;
+      margin-top: $sds-spaces-xl;
 
       .shareableLinkField:first-child {
         flex: 1;
@@ -140,12 +141,12 @@
 
       .shareableLinkField:last-child {
         flex: 0 0 auto;
-        margin-left: $space-m;
+        margin-left: $sds-spaces-m;
       }
 
       .input {
         input[type="text"] {
-          color: $gray-dark;
+          color: $sds-color-gray-500;
         }
       }
 
@@ -156,11 +157,11 @@
 
     .staticWarning {
       @include font-body-xxs;
-      color: $gray-dark;
-      margin-left: $space-xxxs;
-      margin-top: $space-s;
+      color: $sds-color-gray-500;
+      margin-left: $sds-spaces-xxxs;
+      margin-top: $sds-spaces-s;
       margin-right: 100px;
-      margin-bottom: $space-s;
+      margin-bottom: $sds-spaces-s;
     }
   }
 }
@@ -172,5 +173,5 @@
 // Override materialize.css
 .conditionList {
   @include font-body-xs;
-  margin-left: $space-xl;
+  margin-left: $sds-spaces-xl;
 }

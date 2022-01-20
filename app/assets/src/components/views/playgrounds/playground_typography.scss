@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .header {
   margin-top: 40px;
@@ -10,14 +11,14 @@
 
   .controls {
     @include font-body-s;
-    color: $gray-dark;
-    margin-top: 10px;
+    color: $sds-color-gray-500;
+    margin-top: $sds-spaces-m;
     display: flex;
     align-items: center;
 
     .checkbox {
       &:not(:first-child) {
-        margin-left: 8px;
+        margin-left: $sds-spaces-s;
       }
     }
   }

@@ -1,13 +1,14 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 // These variables help to keep the loading and no data screens the same height as the viz screen.
 $body-height: 248px;
 $accession-label-height: 22px;
 $accession-count-label-height: 20px;
 $genome-viz-height: 18px;
-$genome-viz-spacing: $space-xs;
+$genome-viz-spacing: $sds-spaces-xs;
 
 .contents {
   margin-top: 30px;
@@ -28,7 +29,7 @@ $genome-viz-spacing: $space-xs;
   .headerText {
     .taxonLabel {
       @include font-header-xs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
       display: flex;
       align-items: center;
     }
@@ -42,7 +43,7 @@ $genome-viz-spacing: $space-xs;
     .accessionLabel {
       @include font-header-m;
       max-width: 550px;
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
@@ -51,7 +52,7 @@ $genome-viz-spacing: $space-xs;
 
     .accessionCountLabel {
       @include font-body-xs;
-      color: $gray-light;
+      color: $sds-color-gray-300;
       height: $accession-count-label-height;
       display: flex;
       align-items: center;
@@ -77,7 +78,7 @@ $genome-viz-spacing: $space-xs;
 
     .vizLinkContainer {
       text-align: right;
-      margin-top: 2px;
+      margin-top: $sds-spaces-xxxs;
       margin-right: 12px;
     }
   }
@@ -87,11 +88,11 @@ $genome-viz-spacing: $space-xs;
 .linkWithArrow {
   @include font-header-xxs;
   // Override color: inherit in _header.scss.
-  color: $primary !important;
+  color: $sds-color-primary-400 !important;
 
   .rightArrow {
     font-size: 0.75em;
-    margin-left: 4px;
+    margin-left: $sds-spaces-xxs;
   }
 }
 
@@ -113,7 +114,7 @@ $genome-viz-spacing: $space-xs;
     .column {
       flex: 1 1 0;
       min-width: 0;
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
 
       &:last-child {
         margin-right: 0;
@@ -124,10 +125,10 @@ $genome-viz-spacing: $space-xs;
       display: flex;
       align-items: center;
       height: 30px;
-      padding: 0 10px;
+      padding: 0 $sds-spaces-m;
 
       &:first-child {
-        background-color: $gray-off-white;
+        background-color: $sds-color-gray-100;
       }
 
       .label,
@@ -152,14 +153,14 @@ $genome-viz-spacing: $space-xs;
 
       .ncbiLink {
         // Override color: inherit in _header.scss.
-        color: $primary !important;
+        color: $sds-color-primary-400 !important;
       }
     }
   }
 
   .coverageVizHistogram {
     height: 110px;
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   .genomeVizRow {
@@ -171,8 +172,8 @@ $genome-viz-spacing: $space-xs;
       @include font-body-xxs;
       width: 170px;
       text-align: right;
-      padding-right: 8px;
-      color: $gray-darkest;
+      padding-right: $sds-spaces-s;
+      color: $sds-color-gray-600;
     }
 
     .genomeViz {
@@ -187,7 +188,7 @@ $genome-viz-spacing: $space-xs;
   }
 
   .referenceAccession {
-    background-color: $gray-lightest;
+    background-color: $sds-color-gray-200;
   }
 }
 
@@ -204,22 +205,22 @@ $genome-viz-spacing: $space-xs;
   }
 
   .text {
-    margin-top: $space-xl;
-    margin-right: $space-xl;
+    margin-top: $sds-spaces-xl;
+    margin-right: $sds-spaces-xl;
     width: 350px;
 
     .message {
       @include font-header-m;
-      margin-bottom: 8px;
+      margin-bottom: $sds-spaces-s;
     }
 
     .vizLink {
-      margin-top: 10px;
+      margin-top: $sds-spaces-m;
     }
   }
 
   .icon {
-    fill: $gray-lightest;
+    fill: $sds-color-gray-200;
     width: $img-m;
     height: $img-m;
   }
@@ -231,7 +232,7 @@ $genome-viz-spacing: $space-xs;
   align-items: center;
   justify-content: center;
   height: $body-height;
-  color: $gray-dark;
+  color: $sds-color-gray-500;
 
   .loadingMessage,
   .unknownErrorMessage {
@@ -239,7 +240,7 @@ $genome-viz-spacing: $space-xs;
   }
 
   .helpLink {
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
   }
 
   .loadingIcon {
@@ -260,11 +261,11 @@ $genome-viz-spacing: $space-xs;
   z-index: 105;
   // So the tooltip appears on the top-left instead of bottom-right of the top-right corner of bar.
   transform: translate(-100%, -100%);
-  background-color: $white;
+  background-color: $sds-color-gray-white;
   box-shadow: $box-shadow-m;
   border: $border-gray-light;
   border-radius: $border-radius-m;
-  padding: 5px 10px;
+  padding: 5px $sds-spaces-m;
   display: flex;
   align-items: center;
 
@@ -276,14 +277,14 @@ $genome-viz-spacing: $space-xs;
     svg {
       width: 100%;
       height: 100%;
-      color: $gray-medium;
-      fill: $gray-medium;
+      color: $sds-color-gray-400;
+      fill: $sds-color-gray-400;
     }
 
     &:hover {
       svg {
-        color: $primary;
-        fill: $primary;
+        color: $sds-color-primary-400;
+        fill: $sds-color-primary-400;
       }
     }
   }
@@ -296,16 +297,16 @@ $genome-viz-spacing: $space-xs;
 // TODO(mark):
 // If text-subtext options become more common, add this to BareDropdown as an official alternative option.
 .option {
-  padding: 6px 16px;
+  padding: $sds-spaces-xs 16px;
 
   .optionText {
     @include font-body-xs;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 
   .optionSubtext {
     @include font-body-xxs;
-    color: $gray-light;
+    color: $sds-color-gray-300;
     font-weight: $font-weight-regular;
   }
 

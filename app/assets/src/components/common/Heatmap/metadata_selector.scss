@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .metadataContainer {
   .hasBackground {
-    padding-left: 10px;
+    padding-left: $sds-spaces-m;
     padding-right: 5px;
 
     &:not(.statsRow) {
@@ -13,14 +14,14 @@
   }
 
   .hasBackground:nth-child(odd) {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   .title {
     @include font-caps-xxs;
 
-    color: $black;
-    padding: 0 10px;
+    color: $sds-color-gray-black;
+    padding: 0 $sds-spaces-m;
     height: 40px;
   }
 

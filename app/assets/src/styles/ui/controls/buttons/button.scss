@@ -1,3 +1,5 @@
+@import "~czifui/dist/variables";
+
 .idseq-ui.button {
   position: relative;
   border-radius: $border-radius-l;
@@ -10,7 +12,7 @@
   height: 34px;
   letter-spacing: 0.4px;
   min-width: 120px;
-  padding: 4px 14px;
+  padding: $sds-spaces-xxs $sds-spaces-l;
   vertical-align: middle;
 
   &.rectangular {
@@ -19,7 +21,7 @@
 
   &.circular {
     min-width: 34px;
-    padding: 4px 0;
+    padding: $sds-spaces-xxs 0;
   }
 
   div.icon-label {
@@ -30,7 +32,7 @@
     i.icon,
     svg {
       height: 22px;
-      margin-right: 8px;
+      margin-right: $sds-spaces-s;
       vertical-align: middle;
     }
 

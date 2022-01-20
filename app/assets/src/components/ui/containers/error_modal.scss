@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .errorModal {
   .errorMessage {
@@ -8,27 +9,27 @@
 
     .textContainer {
       width: 315px;
-      margin-bottom: $space-l;
+      margin-bottom: $sds-spaces-l;
 
       .error {
         display: inline-flex;
-        background-color: $error-lightest;
+        background-color: $sds-color-error-200;
         border-radius: $border-radius-l;
-        padding: $space-xxs $space-s;
-        background-color: $error-off-white;
-        color: $error-medium;
-        margin-bottom: $space-l;
-        margin-left: -$space-xxs;
+        padding: $sds-spaces-xxs $sds-spaces-s;
+        background-color: $sds-color-error-100;
+        color: $sds-color-error-400;
+        margin-bottom: $sds-spaces-l;
+        margin-left: -$sds-spaces-xxs;
 
         .icon {
           width: $icon-l;
-          fill: $error-medium;
+          fill: $sds-color-error-400;
         }
 
         .text {
           @include font-caps-xxxs;
-          margin-left: $space-s;
-          margin-top: $space-xxxs;
+          margin-left: $sds-spaces-s;
+          margin-top: $sds-spaces-xxxs;
         }
       }
 
@@ -38,33 +39,33 @@
 
       .message {
         @include font-body-s;
-        margin-top: $space-s;
-        color: $gray-darkest;
+        margin-top: $sds-spaces-s;
+        color: $sds-color-gray-600;
 
         .actionLink {
-          color: $primary !important;
+          color: $sds-color-primary-400 !important;
         }
       }
     }
 
     .imgMicrobe {
-      fill: $gray-lightest;
+      fill: $sds-color-gray-200;
       width: $img-l;
-      margin: -$space-l;
+      margin: -$sds-spaces-l;
     }
   }
 
   .actions {
-    margin-top: $space-m;
+    margin-top: $sds-spaces-m;
     display: flex;
 
     .item {
       &:not(:first-child) {
-        margin-left: $space-xs;
+        margin-left: $sds-spaces-xs;
       }
 
       &:not(:last-child) {
-        margin-right: $space-xs;
+        margin-right: $sds-spaces-xs;
       }
     }
   }

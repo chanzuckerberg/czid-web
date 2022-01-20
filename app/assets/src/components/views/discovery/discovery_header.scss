@@ -1,23 +1,24 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .header {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: $sds-spaces-m;
 
   .icon {
-    fill: $primary;
+    fill: $sds-color-primary-400;
     width: 30px;
 
     &.closed {
-      fill: $gray-light;
+      fill: $sds-color-gray-300;
     }
 
     &:hover {
-      fill: $primary-light;
+      fill: $sds-color-primary-300;
     }
   }
 
@@ -26,7 +27,7 @@
   }
 
   .disabledIcon {
-    fill: $gray-light;
+    fill: $sds-color-gray-300;
     width: 30px;
   }
 
@@ -39,8 +40,8 @@
     margin-right: 25px;
 
     .filtersCounter {
-      background-color: $gray-lightest;
-      color: $primary;
+      background-color: $sds-color-gray-200;
+      color: $sds-color-primary-400;
       font-size: 11px;
       min-height: 18px;
       min-width: 18px;
@@ -67,7 +68,7 @@
 
   .tabs {
     flex: 1 0 auto;
-    margin-top: 10px;
+    margin-top: $sds-spaces-m;
   }
 
   .searchContainer {
@@ -83,6 +84,6 @@
   @include font-body-xxs;
 
   .popupSubtitle {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }

@@ -1,10 +1,11 @@
 @import "../../themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 // Override semaantic ui error styling
 :global(.ui.input.error > input) {
   background-color: transparent;
-  color: $black;
+  color: $sds-color-gray-black;
 }
 
 .idseq-ui.input {
@@ -30,10 +31,10 @@
 
   input[type="header"] {
     @include font-header-xl;
-    padding: 7px $space-l;
+    padding: 7px $sds-spaces-l;
     text-overflow: ellipsis;
     background-color: transparent;
-    color: $black;
+    color: $sds-color-gray-black;
     height: 44px;
     width: 600px;
   }

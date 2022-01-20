@@ -1,14 +1,13 @@
 @import "~styles/themes/colors";
-@import "~styles/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .textarea {
   border-radius: $border-radius-m;
   box-sizing: border-box;
   border: $border-gray-light;
   outline: none;
-  font-family: $font-family-sans-serif;
-  font-size: $font-size-body;
+  font: $sds-font-body-s-400-font;
   line-height: 23px;
 
   &:focus {

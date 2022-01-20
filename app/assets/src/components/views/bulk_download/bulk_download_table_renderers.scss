@@ -1,6 +1,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .downloadCell {
   display: flex;
@@ -9,8 +10,8 @@
   .downloadIcon {
     width: 30px;
     height: 22px;
-    margin-right: $space-l;
-    fill: $gray-light;
+    margin-right: $sds-spaces-l;
+    fill: $sds-color-gray-300;
   }
 
   .downloadRightPane {
@@ -24,24 +25,24 @@
     }
 
     .downloadStatus {
-      margin-left: $space-xs;
+      margin-left: $sds-spaces-xs;
     }
 
     .metadata {
       @include font-body-xxs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
 
       .detailsLink {
         cursor: pointer;
-        margin-right: $space-xxs;
+        margin-right: $sds-spaces-xxs;
 
         &:hover {
-          color: $black;
+          color: $sds-color-gray-black;
         }
       }
 
       .userName {
-        margin-left: $space-xxs;
+        margin-left: $sds-spaces-xxs;
       }
     }
   }
@@ -53,7 +54,7 @@
 }
 
 .statusCell {
-  margin-bottom: 2px;
+  margin-bottom: $sds-spaces-xxxs;
 
   .messageContainer,
   .links {
@@ -62,39 +63,39 @@
   }
 
   .messageContainer {
-    margin-bottom: $space-s;
+    margin-bottom: $sds-spaces-s;
   }
 
   .icon {
     width: 16px;
-    margin-right: $space-xs;
-    fill: $success-medium;
+    margin-right: $sds-spaces-xs;
+    fill: $sds-color-success-400;
 
     &.warning {
-      fill: $warning-medium;
+      fill: $sds-color-warning-400;
     }
 
     &.error {
-      fill: $error-medium;
+      fill: $sds-color-error-400;
       margin-bottom: 1px;
     }
 
     &.loading {
-      color: $primary;
-      margin-right: 4px;
+      color: $sds-color-primary-400;
+      margin-right: $sds-spaces-xxs;
     }
   }
 
   .separator {
     @include font-body-xxs;
-    margin: 0 $space-s;
-    color: $gray-dark;
+    margin: 0 $sds-spaces-s;
+    color: $sds-color-gray-500;
   }
 
   .link {
     @include font-caps-xxxs;
     /* overwrite header.scss */
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
     cursor: pointer;
   }
 }

@@ -1,31 +1,32 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 li.navLink {
   @include font-body-xs;
-  padding-left: $space-l;
+  padding-left: $sds-spaces-l;
   max-width: 180px;
   height: 20px;
-  margin-left: -2px;
+  margin-left: -$sds-spaces-xxxs;
 
   &.currentNavItem {
-    border-left: 2px solid $primary;
-    color: $black;
+    border-left: 2px solid $sds-color-primary-400;
+    color: $sds-color-gray-black;
     font-weight: $font-weight-semibold;
   }
 
   &.navItem {
-    border-left: 2px solid $gray-lightest;
-    color: $gray-dark !important;
+    border-left: 2px solid $sds-color-gray-200;
+    color: $sds-color-gray-500 !important;
   }
 
   &:hover {
-    border-left: 2px solid $gray-medium;
-    color: $black !important;
+    border-left: 2px solid $sds-color-gray-400;
+    color: $sds-color-gray-black !important;
   }
 
   &:not(:last-child) {
-    margin-bottom: $space-m;
+    margin-bottom: $sds-spaces-m;
   }
 }

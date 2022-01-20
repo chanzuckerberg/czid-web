@@ -1,5 +1,6 @@
 @import "~rc-slider/assets/index.css";
 @import "../../themes/colors.scss";
+@import "~czifui/dist/variables";
 
 .idseq-ui.slider {
   font-family: $font-family-default;
@@ -15,33 +16,33 @@
   }
 
   &.disabled {
-    color: $gray-medium;
+    color: $sds-color-gray-400;
   }
 
   .rc-slider {
     background-color: transparent;
 
     .rc-slider-rail {
-      background-color: $gray-lightest;
+      background-color: $sds-color-gray-200;
     }
 
     .rc-slider-track {
-      background-color: $primary;
+      background-color: $sds-color-primary-400;
     }
 
     .rc-slider-handle {
-      border: solid 4px $primary;
+      border: solid 4px $sds-color-primary-400;
     }
 
     &.rc-slider-disabled {
-      color: $gray-medium;
+      color: $sds-color-gray-400;
 
       .rc-slider-track {
-        background-color: $gray-light;
+        background-color: $sds-color-gray-300;
       }
 
       .rc-slider-handle {
-        border: solid 4px $gray-light;
+        border: solid 4px $sds-color-gray-300;
       }
     }
   }

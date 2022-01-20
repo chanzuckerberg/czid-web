@@ -1,7 +1,7 @@
-@import "~styles/typography";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .content {
   padding: 30px 20px;
@@ -11,45 +11,45 @@
 .title,
 .loadingMsg {
   @include font-header-xl;
-  margin: 0 $space-m;
+  margin: 0 $sds-spaces-m;
   margin-right: 60px;
   word-break: break-all;
   line-height: 1.4em;
 }
 
 .tabs {
-  margin: 30px $space-m $space-l;
+  margin: 30px $sds-spaces-m $sds-spaces-l;
 }
 
 .workflowTabs {
-  margin: 0 $space-m;
+  margin: 0 $sds-spaces-m;
 }
 
 .tabLabels {
   @include font-header-xs;
-  color: $gray-dark;
+  color: $sds-color-gray-500;
   margin-right: 30px;
   cursor: pointer;
 }
 
 .dropdownContainer {
   width: 340px;
-  margin: $space-l $space-m $space-xl;
+  margin: $sds-spaces-l $sds-spaces-m $sds-spaces-xl;
 }
 
 .noData {
-  color: $gray-light;
-  margin-left: $space-m;
+  color: $sds-color-gray-300;
+  margin-left: $sds-spaces-m;
 }
 
 .loading {
   @include font-body-s;
-  padding: 0 0 0 $space-default;
-  color: $gray-dark;
+  padding: 0 0 0 $sds-spaces-default;
+  color: $sds-color-gray-500;
   display: inline-block;
 
   .loadingIcon {
-    fill: $gray-dark;
+    fill: $sds-color-gray-500;
     width: $icon-s;
     height: $icon-s;
     vertical-align: -0.1em;
@@ -72,29 +72,29 @@
     }
 
     :global(.warning) {
-      margin-bottom: $space-s;
+      margin-bottom: $sds-spaces-s;
     }
 
     .error {
       @include font-body-xxs;
-      color: $error-medium;
+      color: $sds-color-error-400;
       margin-top: 5px;
     }
   }
 
   .metadataValue {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     word-break: break-all;
   }
 
   .emptyValue {
-    color: $gray-light;
+    color: $sds-color-gray-300;
     font-weight: $font-weight-regular;
   }
 
   .projectLink {
     /* overwrite header.scss */
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
 
     &:hover {
       /* overwrite header.scss */
@@ -105,23 +105,23 @@
   .vizLink {
     @include font-header-xxs;
     // Override color: inherit in _header.scss.
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
     margin-left: 15px;
 
     .rightArrow {
       font-size: 0.75em;
-      margin-left: $space-xxs;
+      margin-left: $sds-spaces-xxs;
     }
   }
 }
 
 .readsRemainingRow {
-  padding: $space-m 0;
+  padding: $sds-spaces-m 0;
   display: flex;
   align-items: center;
 
   &:nth-child(even) {
-    background-color: $gray-off-white;
+    background-color: $sds-color-gray-100;
   }
 
   .label {
@@ -129,18 +129,18 @@
     width: 160px;
     flex-shrink: 0;
     margin-right: 20px;
-    margin-left: $space-m;
+    margin-left: $sds-spaces-m;
 
     .labelText {
       width: 120px;
       &:hover {
-        color: $primary;
+        color: $sds-color-primary-400;
         cursor: default;
       }
     }
 
     .header {
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
   }
 
@@ -153,22 +153,22 @@
 
     .labelText {
       font-weight: $font-weight-semibold;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
   }
 
   .metadataValue {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     word-break: break-all;
   }
 }
 
 .reportLink {
-  margin: 5px $space-m;
+  margin: 5px $sds-spaces-m;
 
   a {
     /* overwrite header.scss */
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
 
     &:hover {
       /* overwrite header.scss */
@@ -180,7 +180,7 @@
 .erccScatterplotSection {
   .graphContainer {
     margin-top: 20px;
-    margin-right: $space-m;
+    margin-right: $sds-spaces-m;
   }
 }
 
@@ -188,11 +188,11 @@
   padding-top: 5px;
 
   .downloadLink {
-    padding: 5px $space-m;
+    padding: 5px $sds-spaces-m;
     display: block;
     margin: 5px 0;
     /* overwrite header.scss */
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
 
     &:hover {
       opacity: 0.5;
@@ -202,20 +202,20 @@
 
 .notesSection {
   .note {
-    font-size: $font-size-body;
+    font: $sds-font-body-s-400-font;
     line-height: 23px;
     white-space: pre-wrap;
     word-break: break-word;
-    margin: 15px $space-m;
+    margin: 15px $sds-spaces-m;
   }
 
   .noData {
-    color: $gray-light;
-    margin: 20px $space-m;
+    color: $sds-color-gray-300;
+    margin: 20px $sds-spaces-m;
   }
 
   .textareaContainer {
-    margin: 15px $space-m 0 $space-m;
+    margin: 15px $sds-spaces-m 0 $sds-spaces-m;
   }
 
   .textarea {

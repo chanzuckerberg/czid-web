@@ -1,16 +1,17 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .uploadProgressModal {
-  padding: 0 0 $space-xxl + $space-xl 0;
+  padding: 0 0 $sds-spaces-xxl + $sds-spaces-xl 0;
 
   &.uploadComplete {
-    padding-bottom: $space-xxl;
+    padding-bottom: $sds-spaces-xxl;
   }
 
   .header {
-    margin-top: $space-xxl;
+    margin-top: $sds-spaces-xxl;
     text-align: center;
 
     .uploadImg {
@@ -24,13 +25,13 @@
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
-      margin-bottom: $space-s;
+      margin-bottom: $sds-spaces-s;
       padding: 0 40px;
     }
 
     .titleWithIcon {
       @include font-header-xl;
-      margin-bottom: $space-s;
+      margin-bottom: $sds-spaces-s;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -38,14 +39,14 @@
       .alertIcon {
         width: 18px;
         height: 18px;
-        margin-right: $space-xs;
+        margin-right: $sds-spaces-xs;
       }
 
       .checkmarkIcon {
         width: 25px;
         height: 25px;
-        margin-right: $space-xs;
-        fill: $success-medium;
+        margin-right: $sds-spaces-xs;
+        fill: $sds-color-success-400;
       }
     }
 
@@ -54,7 +55,7 @@
       padding: 0 40px;
 
       .helpLink {
-        color: $primary !important;
+        color: $sds-color-primary-400 !important;
 
         &:hover {
           cursor: pointer;
@@ -65,11 +66,11 @@
     .instructions {
       @include font-body-s;
       max-width: 500px;
-      margin: $space-s auto $space-xxl;
+      margin: $sds-spaces-s auto $sds-spaces-xxl;
     }
 
     .notificationContainer {
-      margin: $space-l $space-xxl $space-s $space-xxl;
+      margin: $sds-spaces-l $sds-spaces-xxl $sds-spaces-s $sds-spaces-xxl;
 
       .content {
         display: flex;
@@ -82,7 +83,7 @@
   }
 
   .sampleList {
-    margin: $space-xxl $space-xxl 0;
+    margin: $sds-spaces-xxl $sds-spaces-xxl 0;
     max-height: 200px;
     overflow: auto;
 
@@ -108,33 +109,33 @@
 
       .sampleStatus {
         @include font-body-xxs;
-        color: $gray-darkest;
+        color: $sds-color-gray-600;
         display: flex;
         align-items: center;
-        margin-left: $space-m;
+        margin-left: $sds-spaces-m;
         white-space: nowrap;
 
         .alertIcon {
-          fill: $error-medium;
+          fill: $sds-color-error-400;
           width: 14px;
           height: 14px;
           margin-right: 5px;
-          margin-bottom: 2px;
+          margin-bottom: $sds-spaces-xxxs;
         }
 
         .checkmarkIcon {
           width: 16px;
           height: 16px;
-          margin-bottom: -$space-xxs;
+          margin-bottom: -$sds-spaces-xxs;
           margin-right: 5px;
-          fill: $success-medium;
+          fill: $sds-color-success-400;
         }
       }
 
       .verticalDivider {
         @include font-body-l;
-        color: $gray-light;
-        padding: 0 4px 4px;
+        color: $sds-color-gray-300;
+        padding: 0 $sds-spaces-xxs $sds-spaces-xxs;
       }
     }
   }
@@ -142,14 +143,14 @@
   .failedSamples {
     @include font-body-s;
     max-width: 500px;
-    margin: $space-s auto 40px;
+    margin: $sds-spaces-s auto 40px;
     text-align: center;
   }
 
   .footer {
     text-align: center;
     height: 34px;
-    margin-top: $space-xxl;
+    margin-top: $sds-spaces-xxl;
 
     .completeMessage {
       @include font-body-xxs;
@@ -161,21 +162,21 @@
 
 .sampleRetry {
   @include font-caps-xxxs;
-  color: $primary;
+  color: $sds-color-primary-400;
   text-transform: uppercase;
   align-self: center;
 
   &.retryAll {
-    color: $error-medium;
+    color: $sds-color-error-400;
 
     &:hover {
-      color: $error-dark !important;
+      color: $sds-color-error-600 !important;
     }
   }
 
   &:hover {
     cursor: pointer;
-    color: $primary-dark;
+    color: $sds-color-primary-500;
   }
 }
 

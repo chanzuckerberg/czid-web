@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .sampleUploadTable {
   flex: 1 1 0;
@@ -11,12 +12,12 @@
   .detectedMsg {
     @include font-body-xs;
     margin-top: 20px;
-    margin-bottom: 10px;
-    color: $gray-dark;
+    margin-bottom: $sds-spaces-m;
+    color: $sds-color-gray-500;
 
     .count {
       @include font-header-xs;
-      color: $black;
+      color: $sds-color-gray-black;
     }
   }
 
@@ -32,7 +33,7 @@
   }
 
   .removeLink {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     text-decoration: underline;
     cursor: pointer;
   }

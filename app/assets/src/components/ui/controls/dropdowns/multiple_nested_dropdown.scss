@@ -1,11 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~styles/typography";
+@import "~czifui/dist/variables";
 
 :global(.ui):global(.dropdown).multipleNestedDropdown {
   :global(.item) {
     /* override semantic-ui */
-    padding: 6px 14px 6px 9px !important;
+    padding: $sds-spaces-xs $sds-spaces-l $sds-spaces-xs 9px !important;
   }
 
   &:global(.active) {

@@ -1,10 +1,11 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .button {
   background: none !important; // Override Semantic UI
-  color: $primary;
+  color: $sds-color-primary-400;
   padding: 0 !important; // Override .idseq-ui.button
 }
 
@@ -12,6 +13,6 @@
   @include font-caps-xxxs;
 
   align-items: center;
-  color: $primary;
+  color: $sds-color-primary-400;
   display: flex;
 }

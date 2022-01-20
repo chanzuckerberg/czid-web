@@ -1,6 +1,7 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .vizContainer {
   margin-top: 100px;
@@ -13,7 +14,7 @@
 .barChartContainer {
   display: flex;
   flex-direction: column;
-  margin-top: $space-s;
+  margin-top: $sds-spaces-s;
 
   .canvas {
     @include scrollable;

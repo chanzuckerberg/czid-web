@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .content {
   @include scrollable;
@@ -8,11 +9,11 @@
   flex: 1 1 0;
   flex-direction: column;
   overflow: scroll;
-  padding-left: $space-l;
+  padding-left: $sds-spaces-l;
 
   .notification {
-    margin-bottom: $space-s;
-    margin-right: $space-xl;
+    margin-bottom: $sds-spaces-s;
+    margin-right: $sds-spaces-xl;
 
     &.show {
       display: flex;
@@ -25,7 +26,7 @@
 
   .statsRow {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 
   .chartsContainer {
@@ -34,18 +35,18 @@
     height: 100%;
 
     .halfPageChart {
-      color: $black;
-      padding-right: $space-xl;
-      padding-bottom: $space-xl;
+      color: $sds-color-gray-black;
+      padding-right: $sds-spaces-xl;
+      padding-bottom: $sds-spaces-xl;
       display: flex;
       flex-direction: column;
       flex: 0 0 50%;
     }
 
     .fullPageChart {
-      color: $black;
-      padding-right: $space-xl;
-      padding-bottom: $space-xl;
+      color: $sds-color-gray-black;
+      padding-right: $sds-spaces-xl;
+      padding-bottom: $sds-spaces-xl;
       display: flex;
       flex-direction: column;
       flex: 0 0 100%;
@@ -56,14 +57,14 @@
     }
 
     .histogramContainer {
-      padding: $space-xl;
+      padding: $sds-spaces-xl;
       border: $border-gray-light;
       border-radius: $border-radius-m;
       width: 100%;
       height: 100%;
       min-height: calc(#{$img-l} * 2.5);
       min-width: calc(#{$img-l} * 2.5);
-      box-shadow: 0 2px 4px 0 $gray-light;
+      box-shadow: 0 2px 4px 0 $sds-color-gray-300;
       display: flex;
       flex-direction: column;
       position: relative;
@@ -76,7 +77,7 @@
 
       .subtitle {
         @include font-header-s;
-        margin-bottom: $space-xxl;
+        margin-bottom: $sds-spaces-xxl;
         height: 10%;
 
         .message {
@@ -85,12 +86,12 @@
 
         .information {
           @include font-body-xs;
-          margin-top: $space-xxl;
-          color: $gray-dark;
+          margin-top: $sds-spaces-xxl;
+          color: $sds-color-gray-500;
         }
 
         &.messageIncluded {
-          margin-bottom: $space-xl;
+          margin-bottom: $sds-spaces-xl;
         }
       }
 
@@ -102,26 +103,26 @@
 
     .title {
       @include font-header-l;
-      margin-bottom: $space-l;
-      margin-top: $space-l;
+      margin-bottom: $sds-spaces-l;
+      margin-top: $sds-spaces-l;
       height: max-content;
     }
 
     .legend {
       @include font-body-xxs;
-      margin-bottom: $space-l;
+      margin-bottom: $sds-spaces-l;
     }
   }
 
   .infoIcon {
-    margin: $space-xxxs $space-xxs 0 $space-xxs;
+    margin: $sds-spaces-xxxs $sds-spaces-xxs 0 $sds-spaces-xxs;
     height: 14px;
     width: 14px;
-    fill: $gray-dark;
+    fill: $sds-color-gray-500;
     vertical-align: text-top;
 
     &:hover {
-      fill: $primary;
+      fill: $sds-color-primary-400;
     }
   }
 
@@ -137,7 +138,7 @@
 }
 
 .statusList {
-  margin: 0 0 0 $space-l; // override list margins and move bullets inside tooltip
+  margin: 0 0 0 $sds-spaces-l; // override list margins and move bullets inside tooltip
 }
 
 // see discovery_view.scss

@@ -1,7 +1,8 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .sections {
-  margin-top: $space-xxl;
+  margin-top: $sds-spaces-xxl;
 }

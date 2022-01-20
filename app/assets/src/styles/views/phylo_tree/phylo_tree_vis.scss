@@ -1,4 +1,5 @@
 @import "../../themes/colors";
+@import "~czifui/dist/variables";
 
 .phylo-tree-vis {
   font-size: 13px;
@@ -24,13 +25,13 @@
     }
 
     .node-internal text {
-      text-shadow: 0 1px 0 $white, 0 -1px 0 $white, 1px 0 0 $white,
-        -1px 0 0 $white;
+      text-shadow: 0 1px 0 $sds-color-gray-white, 0 -1px 0 $sds-color-gray-white,
+        1px 0 0 $sds-color-gray-white, -1px 0 0 $sds-color-gray-white;
     }
 
     .link {
       fill: none;
-      stroke: $gray-light;
+      stroke: $sds-color-gray-300;
       stroke-width: 2px;
     }
 
@@ -53,16 +54,16 @@
       .scale-line,
       .scale-tick path {
         fill: none;
-        stroke: $gray-light;
+        stroke: $sds-color-gray-300;
         stroke-width: 2px;
       }
     }
 
     .legend {
-      background-color: $white;
+      background-color: $sds-color-gray-white;
 
       .legend-background {
-        fill: $white;
+        fill: $sds-color-gray-white;
         fill-opacity: 0.8;
       }
 

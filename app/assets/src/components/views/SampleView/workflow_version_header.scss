@@ -1,13 +1,14 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .pipelineInfo {
   @include font-body-xxxs;
   display: inline-block;
 
-  color: $gray-dark;
-  margin: $space-l 0 $space-l 0;
+  color: $sds-color-gray-500;
+  margin: $sds-spaces-l 0 $sds-spaces-l 0;
 
   .warning {
     text-align: left;
@@ -23,6 +24,6 @@
   cursor: pointer;
 
   &:hover {
-    color: $primary;
+    color: $sds-color-primary-400;
   }
 }

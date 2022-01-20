@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .svgIcons {
   display: flex;
   flex-wrap: wrap;
-  margin-top: 10px;
+  margin-top: $sds-spaces-m;
   margin-bottom: 40px;
 }
 
@@ -13,19 +14,19 @@
   align-items: center;
   width: 200px;
   height: 100px;
-  padding: 10px;
+  padding: $sds-spaces-m;
 
   .icon {
     border: 1px dashed lightgray;
     width: 50px;
     height: 50px;
-    fill: $gray-darkest;
+    fill: $sds-color-gray-600;
   }
 
   .iconLabel {
     font-size: 16px;
     margin-top: 5px;
     letter-spacing: 0.4px;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }

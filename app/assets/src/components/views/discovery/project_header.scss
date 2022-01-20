@@ -1,10 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .projectHeader {
   display: flex;
-  margin: $space-xxs 0px $space-l 0px;
+  margin: $sds-spaces-xxs 0px $sds-spaces-l 0px;
 
   .name {
     @include font-header-xl;
@@ -18,21 +19,21 @@
 
   .item {
     @include font-body-s;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     display: flex;
     align-items: center;
     white-space: nowrap;
 
     &:not(:first-child) {
-      margin-left: $space-l;
+      margin-left: $sds-spaces-l;
     }
   }
 }
 
 .smallIcon {
   height: 16px;
-  margin-right: $space-xxxs;
-  fill: $gray-dark;
+  margin-right: $sds-spaces-xxxs;
+  fill: $sds-color-gray-500;
 
   .userIcon {
     height: $icon-s;

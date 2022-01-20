@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .filePicker {
   width: 100%;
@@ -11,13 +12,13 @@
   align-items: center;
 
   &.active {
-    background-color: $primary-lightest;
+    background-color: $sds-color-primary-200;
     border: $border-dashed-primary;
   }
 
   &:hover,
   &.accepted {
-    background-color: $primary-lightest;
+    background-color: $sds-color-primary-200;
     border: $border-dashed-primary;
   }
 
@@ -33,7 +34,7 @@
       font-size: 13px;
 
       .checkmarkIcon {
-        color: $primary;
+        color: $sds-color-primary-400;
       }
 
       &.noTitle {
@@ -46,17 +47,17 @@
     }
 
     .instructions {
-      color: $gray-darkest;
+      color: $sds-color-gray-600;
       font-size: 13px;
     }
 
     .message {
       margin-top: 1rem;
-      color: $primary;
+      color: $sds-color-primary-400;
     }
 
     .browserLink {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
   }
 }

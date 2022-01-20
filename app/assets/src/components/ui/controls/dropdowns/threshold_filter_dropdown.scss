@@ -1,6 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
-@import "~styles/typography";
+@import "~czifui/dist/variables";
 
 :global(.ui):global(.dropdown).thresholdFilterDropdown {
   &:global(.active) {
@@ -11,7 +11,7 @@
 
   .container {
     width: 412px;
-    padding: 6px;
+    padding: $sds-spaces-xs;
 
     .thresholdButtons {
       /* Override row css */
@@ -19,7 +19,7 @@
       text-align: center;
 
       .button {
-        margin-left: 10px;
+        margin-left: $sds-spaces-m;
 
         &:first-child {
           margin-left: 0;
@@ -44,7 +44,7 @@
       cursor: pointer;
 
       &:hover {
-        color: $primary;
+        color: $sds-color-primary-400;
       }
     }
 
@@ -56,7 +56,7 @@
         padding: 0;
 
         :global(.column) {
-          padding: 6px;
+          padding: $sds-spaces-xs;
         }
       }
     }

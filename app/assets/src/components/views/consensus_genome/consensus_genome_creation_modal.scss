@@ -1,48 +1,49 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .modal {
   overflow-y: visible; // allow dropdown menu to extend past the modal
 
   .title {
     @include font-header-xxl;
-    margin-bottom: $space-s;
+    margin-bottom: $sds-spaces-s;
   }
 
   .description {
     @include font-body-s;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 
   .label {
     @include font-header-xs;
-    margin-top: $space-xl;
+    margin-top: $sds-spaces-xl;
     .taxonName {
       @include font-body-xs;
     }
 
     .infoIcon {
-      fill: $gray-dark;
+      fill: $sds-color-gray-500;
       height: $icon-s;
       width: $icon-s;
-      margin-left: $space-xxs;
-      margin-top: $space-xxxs;
-      vertical-align: -$space-xxxs;
+      margin-left: $sds-spaces-xxs;
+      margin-top: $sds-spaces-xxxs;
+      vertical-align: -$sds-spaces-xxxs;
 
       &:hover {
-        fill: $primary;
+        fill: $sds-color-primary-400;
       }
     }
   }
 
   .dropdown {
-    margin-top: $space-s;
+    margin-top: $sds-spaces-s;
   }
 
   .button {
-    margin-top: $space-xl;
-    margin-bottom: $space-xxl;
+    margin-top: $sds-spaces-xl;
+    margin-bottom: $sds-spaces-xxl;
     position: absolute;
     bottom: 0;
   }

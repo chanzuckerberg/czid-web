@@ -1,4 +1,5 @@
 @import "../../themes/colors";
+@import "~czifui/dist/variables";
 
 .taxon-info {
   &__modal {
@@ -17,7 +18,7 @@
 
   &__subtitle {
     padding-top: 25px;
-    padding-bottom: 10px;
+    padding-bottom: $sds-spaces-m;
     font-size: 14px;
     font-weight: 700;
   }
@@ -37,7 +38,7 @@
   }
 
   &__link {
-    color: $primary;
+    color: $sds-color-primary-400;
     line-height: 30px;
     cursor: pointer;
   }

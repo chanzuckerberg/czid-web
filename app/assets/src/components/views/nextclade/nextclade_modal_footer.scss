@@ -1,12 +1,13 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .footer {
   .downloadDisclaimer {
     @include font-body-xxs;
-    color: $gray-dark;
-    margin-top: $space-xs;
+    color: $sds-color-gray-500;
+    margin-top: $sds-spaces-xs;
   }
 }
 
@@ -15,12 +16,12 @@
 }
 
 .listContainer {
-  background-color: $warning-off-white;
-  margin-bottom: $space-l;
+  background-color: $sds-color-warning-100;
+  margin-bottom: $sds-spaces-l;
 }
 
 .notificationContainer {
-  margin: $space-l 0 $space-l;
+  margin: $sds-spaces-l 0 $sds-spaces-l;
 
   .errorMessage {
     @include font-header-xxs;
@@ -29,22 +30,22 @@
 
 .messageLine {
   @include font-body-xxs;
-  padding: $space-xxs 0;
-  margin-right: $space-xl;
+  padding: $sds-spaces-xxs 0;
+  margin-right: $sds-spaces-xl;
 }
 
 .notifications {
-  margin-bottom: $space-xl;
+  margin-bottom: $sds-spaces-xl;
 }
 
 .loading {
   @include font-body-s;
-  padding: 0 0 0 $space-default;
-  color: $gray-dark;
+  padding: 0 0 0 $sds-spaces-default;
+  color: $sds-color-gray-500;
   display: inline-block;
 
   .loadingIcon {
-    fill: $gray-dark;
+    fill: $sds-color-gray-500;
     width: $icon-s;
     height: $icon-s;
     vertical-align: -0.1em;

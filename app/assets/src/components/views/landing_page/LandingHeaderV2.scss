@@ -1,16 +1,17 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .header {
-  background: $black;
+  background: $sds-color-gray-black;
   padding: 2rem 3rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   @media (max-width: 768px) {
-    padding: 17px $space-xl;
+    padding: 17px $sds-spaces-xl;
   }
 }
 
@@ -26,10 +27,10 @@
 
 .textLink,
 .buttonLink {
-  color: $white !important;
+  color: $sds-color-gray-white !important;
   text-decoration: none;
-  font-family: $font-family-sans-serif;
-  padding: 7px 14px;
+  font-family: $sds-font-font-family;
+  padding: 7px $sds-spaces-l;
   margin: 0 5px;
   @include font-body-xs;
   font-weight: $font-weight-semibold;
@@ -39,7 +40,7 @@
   display: inline-block;
   text-align: center;
   width: 131px;
-  border: 1px solid $white;
+  border: 1px solid $sds-color-gray-white;
   border-radius: 999px;
 
   @media (max-width: 768px) {
@@ -47,8 +48,8 @@
   }
 
   &:hover {
-    background: $white;
-    color: $black !important;
+    background: $sds-color-gray-white;
+    color: $sds-color-gray-black !important;
   }
 }
 
@@ -72,7 +73,7 @@
 .bar3 {
   width: 17px;
   height: 1px;
-  background-color: $white;
+  background-color: $sds-color-gray-white;
   margin: 5px 0;
 }
 
@@ -83,7 +84,7 @@
   position: fixed;
   right: 0;
   top: 0;
-  background-color: $white;
+  background-color: $sds-color-gray-white;
   z-index: 10;
   transition: all 0.4s;
 }
@@ -107,8 +108,8 @@
 .mobileNavLink {
   display: block;
   text-decoration: none;
-  font-family: $font-family-sans-serif;
-  color: $black;
+  font-family: $sds-font-font-family;
+  color: $sds-color-gray-black;
   @include font-body-xs;
   font-weight: $font-weight-semibold;
   margin: 22px 0;
@@ -122,5 +123,5 @@
 .mobileNavSeparator {
   width: 60px;
   height: 1px;
-  background-color: $gray-light;
+  background-color: $sds-color-gray-300;
 }

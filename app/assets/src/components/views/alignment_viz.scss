@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .heading {
   /* override semantic-ui */
@@ -11,7 +12,7 @@
 
 .warningIcon {
   font-size: 24px;
-  color: $gray-light;
+  color: $sds-color-gray-300;
   margin-left: 5px;
   transform: translateY(-1px);
 }

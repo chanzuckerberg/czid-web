@@ -1,10 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .announcementBanner {
   @include font-body-xs;
-  background: $primary-lightest;
+  background: $sds-color-primary-200;
   height: 40px;
   position: relative;
   text-align: center;
@@ -21,9 +22,9 @@
     white-space: nowrap;
 
     .icon {
-      fill: $primary;
+      fill: $sds-color-primary-400;
       height: 20px;
-      margin-right: $space-s;
+      margin-right: $sds-spaces-s;
       vertical-align: text-bottom;
     }
   }
@@ -37,7 +38,7 @@
   margin-top: 1.1rem;
 
   .headerLink {
-    color: $gray-medium !important;
+    color: $sds-color-gray-400 !important;
     margin-right: 2.6rem;
   }
 }
@@ -50,7 +51,7 @@
     line-height: unset;
     letter-spacing: unset;
     height: 50px;
-    background-color: $black;
+    background-color: $sds-color-gray-black;
     position: relative;
     z-index: 1000;
     display: flex;

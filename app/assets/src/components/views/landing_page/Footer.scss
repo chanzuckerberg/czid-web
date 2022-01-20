@@ -1,16 +1,17 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .footer {
-  background: $black;
-  color: $white;
+  background: $sds-color-gray-black;
+  color: $sds-color-gray-white;
   padding: 3rem 4rem;
-  font-family: $font-family-sans-serif;
+  font-family: $sds-font-font-family;
   @include font-body-s;
 
   a {
-    color: $white;
+    color: $sds-color-gray-white;
     text-decoration: none;
   }
 
@@ -90,17 +91,17 @@
   }
 
   p {
-    margin-right: 10px;
+    margin-right: $sds-spaces-m;
     margin-bottom: 0px;
-    color: $white;
+    color: $sds-color-gray-white;
 
     @media (max-width: 768px) {
-      margin-bottom: 10px;
+      margin-bottom: $sds-spaces-m;
     }
   }
 
   span {
-    margin: 0 8px;
+    margin: 0 $sds-spaces-s;
   }
 }
 
@@ -119,15 +120,15 @@
   }
 
   .separator {
-    background: $white;
+    background: $sds-color-gray-white;
     opacity: 0.3;
     height: 42px;
     width: 1px;
-    margin: 0 22px;
+    margin: 0 $sds-spaces-xl;
   }
 
   @media (max-width: 768px) {
-    border-bottom: 1px solid $gray-darkest;
+    border-bottom: 1px solid $sds-color-gray-600;
     width: 100%;
     justify-content: center;
     flex-direction: column;
@@ -141,7 +142,7 @@
 
   @media (max-width: 768px) {
     margin-left: 0;
-    margin-bottom: 22px;
+    margin-bottom: $sds-spaces-xl;
   }
 }
 

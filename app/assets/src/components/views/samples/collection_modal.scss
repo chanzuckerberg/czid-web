@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .collectionModal {
   @include font-body-s;
@@ -9,45 +10,45 @@
     .sectionHeader {
       display: flex;
       align-items: center;
-      margin-top: $space-xl;
+      margin-top: $sds-spaces-xl;
 
       .label {
         @include font-header-s;
-        margin-right: $space-xxs;
+        margin-right: $sds-spaces-xxs;
       }
 
       .optional {
         @include font-body-xxs;
 
-        color: $gray-light;
+        color: $sds-color-gray-300;
       }
     }
 
     .infoIcon {
-      height: $space-l;
-      width: $space-l;
-      fill: $gray-dark;
+      height: $sds-spaces-l;
+      width: $sds-spaces-l;
+      fill: $sds-color-gray-500;
       vertical-align: text-top;
 
       &.error {
-        fill: $error-dark;
+        fill: $sds-color-error-600;
       }
 
       &:hover {
-        fill: $primary;
+        fill: $sds-color-primary-400;
       }
     }
 
     .errorMessageContainer {
       display: flex;
       align-items: center;
-      margin-top: $space-xxs;
+      margin-top: $sds-spaces-xxs;
 
       .errorMessage {
         @include font-body-xxxs;
 
-        margin-left: $space-s;
-        color: $error-dark;
+        margin-left: $sds-spaces-s;
+        color: $sds-color-error-600;
       }
     }
 
@@ -56,7 +57,7 @@
     }
 
     .dropdown {
-      margin-bottom: $space-xxl;
+      margin-bottom: $sds-spaces-xxl;
     }
 
     .buttons {
@@ -64,15 +65,15 @@
 
       button {
         &:not(:first-child) {
-          margin-left: $space-default;
+          margin-left: $sds-spaces-default;
         }
       }
     }
 
     .details {
       @include font-body-xs;
-      color: $gray-dark;
-      margin-top: $space-default;
+      color: $sds-color-gray-500;
+      margin-top: $sds-spaces-default;
     }
 
     .highlight {
@@ -80,18 +81,18 @@
     }
 
     .notificationContainer {
-      margin-bottom: $space-xxl;
+      margin-bottom: $sds-spaces-xxl;
 
       .messageLine {
         @include font-body-xxs;
-        padding: $space-xxs 0;
-        margin-right: $space-xl;
+        padding: $sds-spaces-xxs 0;
+        margin-right: $sds-spaces-xl;
       }
     }
   }
 
   .sampleList {
-    margin-bottom: $space-xxl;
+    margin-bottom: $sds-spaces-xxl;
 
     .selectedSamples {
       margin-bottom: 0;
@@ -103,8 +104,8 @@
       .sampleDetails {
         @include font-body-xxs;
 
-        color: $gray-dark;
-        margin-left: $space-m;
+        color: $sds-color-gray-500;
+        margin-left: $sds-spaces-m;
       }
     }
 
@@ -126,7 +127,7 @@
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
     cursor: pointer;
   }
 }

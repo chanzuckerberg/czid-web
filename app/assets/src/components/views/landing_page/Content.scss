@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .contentContainer {
-  font-family: $font-family-sans-serif;
+  font-family: $sds-font-font-family;
 
   h2 {
     @include font-header-marketing-l;
@@ -27,7 +28,7 @@
   }
 
   a {
-    margin-top: $space-xl;
+    margin-top: $sds-spaces-xl;
   }
 
   @media (max-width: 768px) {
@@ -42,13 +43,13 @@
 
   h2 {
     margin: 0;
-    margin-bottom: $space-l;
+    margin-bottom: $sds-spaces-l;
   }
 
   p {
     @include font-body-m;
     margin: 0px;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
 
     @media (max-width: 768px) {
       @include font-body-s;
@@ -59,8 +60,8 @@
   @media (max-width: 768px) {
     width: fit-content;
     margin-top: 20px;
-    padding-left: $space-xl;
-    padding-right: $space-xl;
+    padding-left: $sds-spaces-xl;
+    padding-right: $sds-spaces-xl;
   }
 }
 
@@ -84,12 +85,12 @@
   margin: 4rem auto 5rem auto;
 
   @media (max-width: 768px) {
-    padding-left: $space-xl;
-    padding-right: $space-xl;
+    padding-left: $sds-spaces-xl;
+    padding-right: $sds-spaces-xl;
   }
 
   h2 {
-    margin-bottom: $space-l;
+    margin-bottom: $sds-spaces-l;
   }
 
   figure {
@@ -126,19 +127,19 @@
   text-align: center;
 
   @media (max-width: 768px) {
-    padding-right: $space-xl;
-    padding-left: $space-xl;
+    padding-right: $sds-spaces-xl;
+    padding-left: $sds-spaces-xl;
   }
 
   h2 {
-    margin-bottom: $space-l;
+    margin-bottom: $sds-spaces-l;
   }
 
   p {
     max-width: 765px;
     margin: 0 auto;
     @include font-body-m;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
 
     @media (max-width: 768px) {
       @include font-body-s;
@@ -173,7 +174,7 @@
   p {
     @include font-body-xs;
     max-width: 225px;
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
   }
 }
 
@@ -211,10 +212,10 @@
 
   h2 {
     text-align: center;
-    margin-bottom: $space-l;
+    margin-bottom: $sds-spaces-l;
   }
 
   a {
-    margin: $space-xl auto 3rem;
+    margin: $sds-spaces-xl auto 3rem;
   }
 }

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .noData {
-  color: $gray-light;
-  margin-left: 10px;
+  color: $sds-color-gray-300;
+  margin-left: $sds-spaces-m;
 }

@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .publicationsAndNews {
-  padding: 0 $space-xl;
+  padding: 0 $sds-spaces-xl;
   margin: 3em auto;
   max-width: 1280px;
 
@@ -27,10 +28,10 @@
   }
 
   h2 {
-    color: $gray-darkest;
+    color: $sds-color-gray-600;
     letter-spacing: 0.01875em;
     text-transform: uppercase;
-    margin: 6px 0 0 0;
+    margin: $sds-spaces-xs 0 0 0;
     @include font-header-l;
 
     @media (max-width: 768px) {
@@ -82,12 +83,12 @@
 
     .date,
     .source {
-      color: $gray-darkest;
+      color: $sds-color-gray-600;
     }
 
     .title {
-      color: $black;
-      margin: 6px 0 0 0;
+      color: $sds-color-gray-black;
+      margin: $sds-spaces-xs 0 0 0;
       @include font-header-l;
     }
 
@@ -101,12 +102,12 @@
     }
 
     .readMore {
-      color: $primary;
+      color: $sds-color-primary-400;
       margin: 12px 0 0 0;
 
       &:hover,
       &:active {
-        color: $primary-darkest;
+        color: $sds-color-primary-600;
       }
     }
 
@@ -117,6 +118,6 @@
   }
 
   li {
-    margin: $space-xxl 0;
+    margin: $sds-spaces-xxl 0;
   }
 }

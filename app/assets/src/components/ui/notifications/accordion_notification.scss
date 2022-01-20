@@ -1,38 +1,39 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .listContainer {
-  margin-bottom: $space-xs;
+  margin-bottom: $sds-spaces-xs;
   &.error {
-    border-color: $error-medium;
-    background-color: $error-off-white;
+    border-color: $sds-color-error-400;
+    background-color: $sds-color-error-100;
   }
 
   &.warning {
-    border-color: $warning-medium;
-    background-color: $warning-off-white;
+    border-color: $sds-color-warning-400;
+    background-color: $sds-color-warning-100;
   }
 
   &.info {
-    border-color: $info-medium;
-    background-color: $info-off-white;
+    border-color: $sds-color-primary-400;
+    background-color: $sds-color-primary-200;
   }
 
   &.success {
-    border-color: $success-medium;
-    background-color: $success-off-white;
+    border-color: $sds-color-success-400;
+    background-color: $sds-color-success-100;
   }
 }
 
 .notificationContainer {
   @include font-body-xxs;
-  margin: $space-xs 0;
+  margin: $sds-spaces-xs 0;
 }
 
 .messageContainer {
   max-height: 150px;
   overflow: auto;
-  margin-top: $space-l;
+  margin-top: $sds-spaces-l;
   word-break: break-word;
 }

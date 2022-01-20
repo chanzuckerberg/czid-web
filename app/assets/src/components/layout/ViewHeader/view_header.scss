@@ -1,7 +1,7 @@
 @import "~styles/themes/colors";
-@import "~styles/typography";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .viewHeader {
   display: flex;
@@ -26,7 +26,7 @@
 
   .sampleName {
     @include font-header-xl;
-    color: $black;
+    color: $sds-color-gray-black;
     max-width: 800px;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -34,18 +34,18 @@
   }
 
   .trigger {
-    margin-right: 10px;
+    margin-right: $sds-spaces-m;
     user-select: none;
     display: inline-block;
 
     &:hover {
-      color: $primary;
+      color: $sds-color-primary-400;
     }
   }
 
   .pretitle {
     @include font-header-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin-bottom: 3px;
     margin-left: 1px;
     display: flex;
@@ -58,7 +58,7 @@
 
       &:hover {
         /* Overwrite header.scss */
-        color: $primary !important;
+        color: $sds-color-primary-400 !important;
       }
     }
 

@@ -1,7 +1,8 @@
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i,800");
+@import "~czifui/dist/variables";
 
-$font-family-sans-serif: "Open Sans", "Helvetica Neue", Arial, Helvetica,
-  sans-serif !default;
+$font-family-sans-serif: $sds-font-font-family, "Helvetica Neue", Arial,
+  Helvetica, sans-serif !default;
 $font-family-serif: Georgia, "Times New Roman", Times, serif !default;
 $font-family-monospace: "Andale Mono", Menlo, Monaco, Consolas, "Courier New",
   monospace !default;
@@ -15,117 +16,259 @@ $font-weight-semibold: 600;
 $font-weight-bold: 700;
 $font-weight-heavy: 800;
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+.display-xlarge,
+.display-large,
+.display-medium,
+.display-small,
+.heading,
+.subheading {
+  font-family: $font-family-sans-serif;
+  font-weight: $font-weight-semibold;
+  line-height: 1.1;
+  color: $sds-font-color;
+
+  small,
+  .small {
+    font-weight: normal;
+    line-height: 1;
+    color: $sds-color-error-400;
+  }
+}
+
+h1,
+.h1,
+.display-xlarge,
+h2,
+.h2,
+.display-large,
+h3,
+.h3,
+.display-medium {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-family: $font-family-sans-serif;
+  color: $sds-color-gray-black;
+
+  small,
+  .small {
+    font-size: 65%;
+  }
+}
+h4,
+.h4,
+.display-small,
+h5,
+.h5,
+.heading,
+h6,
+.h6,
+.subheading {
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  small,
+  .small {
+    font-size: 75%;
+  }
+}
+
+h1,
+.h1,
+.display-xlarge {
+  font-size: 42px;
+  font-weight: $font-weight-semibold;
+}
+h2,
+.h2,
+.display-large {
+  font-size: 35px;
+  font-weight: $font-weight-semibold;
+}
+h3,
+.h3,
+.display-medium {
+  font-size: 26px;
+  font-weight: $font-weight-regular;
+}
+h4,
+.h4,
+.display-small {
+  font-size: 20px;
+  font-weight: $font-weight-regular;
+}
+h5,
+.h5,
+.heading {
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+}
+h6,
+.h6,
+.subheading {
+  font-size: 12px;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+}
+
+// Body text
+// -------------------------
+
+p,
+.p,
+.body-text {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: $sds-font-color;
+  font-family: $font-family-sans-serif;
+
+  .subdued {
+    color: $sds-color-gray-600;
+  }
+}
+.caption {
+  font-size: 12px;
+  font-family: $font-family-sans-serif;
+
+  .subdued {
+    color: $sds-color-gray-500;
+  }
+}
+// Emphasis & misc
+// -------------------------
+// Ex: (12px small font / 14px base font) * 100% = about 85%
+small,
+.small {
+  font-size: floor((100% * 12px / 14px));
+}
+
+// Alignment
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.text-center {
+  text-align: center;
+}
+.text-justify {
+  text-align: justify;
+}
+.text-nowrap {
+  white-space: nowrap;
+}
+
+// Transformation
+.text-lowercase {
+  text-transform: lowercase;
+}
+.text-uppercase {
+  text-transform: uppercase;
+}
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+//Contextual colors
+.text-muted {
+  color: $sds-color-gray-500;
+}
+
 // Font mixins. Use the cropped versions whenever possible.
 @mixin font-header-marketing-xl {
   font-size: 42px;
   line-height: 58px;
   font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-marketing-l {
   font-size: 32px;
   line-height: 44px;
   font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-xxl {
-  font-size: 26px;
-  line-height: 34px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  font: $sds-font-header-xxl-600-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-xl {
-  font-size: 22px;
-  line-height: 30px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  font: $sds-font-header-xl-600-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-l {
-  font-size: 18px;
-  line-height: 24px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  font: $sds-font-header-l-600-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-m {
-  font-size: 16px;
-  line-height: 22px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  font: $sds-font-header-m-600-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-s {
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  font: $sds-font-header-s-600-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-xs {
-  font-size: 13px;
-  line-height: 18px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  font: $sds-font-header-xs-600-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-xxs {
-  font-size: 12px;
-  line-height: 18px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  font: $sds-font-header-xxs-600-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-header-xxxs {
-  font-size: 11px;
-  line-height: 16px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.3px;
+  font: $sds-font-header-xxxs-600-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-body-l {
-  font-size: 18px;
-  line-height: 28px;
-  letter-spacing: 0.3px;
-  font-weight: $font-weight-regular;
+  font: $sds-font-body-l-400-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-body-m {
-  font-size: 16px;
-  line-height: 26px;
-  letter-spacing: 0.3px;
-  font-weight: $font-weight-regular;
+  font: $sds-font-body-m-400-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-body-s {
-  font-size: 14px;
-  line-height: 24px;
-  letter-spacing: 0.3px;
-  font-weight: $font-weight-regular;
+  font: $sds-font-body-s-400-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-body-xs {
-  font-size: 13px;
-  line-height: 20px;
-  letter-spacing: 0.3px;
-  font-weight: $font-weight-regular;
+  font: $sds-font-body-xs-400-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-body-xxs {
-  font-size: 12px;
-  line-height: 18px;
-  letter-spacing: 0.3px;
-  font-weight: $font-weight-regular;
+  font: $sds-font-body-xxs-400-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-body-xxxs {
-  font-size: 11px;
-  line-height: 16px;
-  letter-spacing: 0.3px;
-  font-weight: $font-weight-regular;
+  font: $sds-font-body-xxxs-400-font;
+  letter-spacing: $sds-font-letter-spacing-default;
 }
 
 @mixin font-code {
@@ -135,25 +278,20 @@ $font-weight-heavy: 800;
 }
 
 @mixin font-caps-xxs {
-  font-size: 12px;
-  line-height: 18px;
-  letter-spacing: 1px;
-  font-weight: $font-weight-semibold;
+  font: $sds-font-body-xxs-600-font;
+  letter-spacing: $sds-font-letter-spacing-caps;
   text-transform: uppercase;
 }
 
 @mixin font-caps-xxxs {
-  font-size: 11px;
-  line-height: 16px;
-  letter-spacing: 1px;
-  font-weight: $font-weight-semibold;
+  font: $sds-font-body-xxxs-600-font;
+  letter-spacing: $sds-font-letter-spacing-caps;
   text-transform: uppercase;
 }
 
 @mixin font-caps-xxxxs {
   font-size: 10px;
   line-height: 14px;
-  letter-spacing: 1px;
-  font-weight: $font-weight-semibold;
+  letter-spacing: $sds-font-letter-spacing-caps;
   text-transform: uppercase;
 }

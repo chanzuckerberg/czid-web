@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .tableContainer {
   flex: 1 0 auto;
@@ -20,11 +21,11 @@
   .plusIcon {
     flex: 1 0 auto;
     width: 14px;
-    fill: $gray-medium;
+    fill: $sds-color-gray-400;
     vertical-align: center;
 
     &:hover {
-      fill: $primary;
+      fill: $sds-color-primary-400;
     }
   }
 }
@@ -32,7 +33,7 @@
 .cell {
   @include font-body-xs;
 
-  color: $black;
+  color: $sds-color-gray-black;
   font-weight: $font-weight-semibold;
   text-align: center;
   overflow: hidden;
@@ -40,16 +41,16 @@
 
 .row {
   &:global(.ReactVirtualized__Table__headerRow) {
-    border-bottom: 3px solid $gray-lightest;
+    border-bottom: 3px solid $sds-color-gray-200;
 
     &:hover {
       .dragHandleIcon {
-        background: $gray-light;
-        width: $space-xxxxs;
-        height: $space-m;
+        background: $sds-color-gray-300;
+        width: 1px;
+        height: $sds-spaces-m;
 
         &:hover {
-          width: $space-xxxs;
+          width: $sds-spaces-xxxs;
         }
       }
     }
@@ -59,7 +60,7 @@
     border-bottom: 1px solid $gray-lightest;
 
     &:hover {
-      background-color: $primary-off-white;
+      background-color: $sds-color-primary-100;
     }
 
     &:focus {
@@ -74,7 +75,7 @@
   .header {
     @include font-body-s;
 
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     font-weight: $font-weight-semibold;
     outline: 0;
     text-transform: none;
@@ -82,7 +83,7 @@
     align-self: center;
     align-items: center;
     justify-content: center;
-    text-align: center;
+    text-align: center !important;
 
     &.draggableHeader {
       height: 100%;
@@ -93,7 +94,7 @@
 
       .draggableArea {
         height: inherit;
-        width: $space-xxs;
+        width: $sds-spaces-xxs;
         // Increase the clickable area
         padding: 25px 0px;
 
@@ -103,8 +104,8 @@
 
         .ruler {
           position: fixed;
-          background-color: $primary-light;
-          width: $space-xxxs;
+          background-color: $sds-color-primary-300;
+          width: $sds-spaces-xxxs;
           z-index: 1;
         }
 
@@ -127,14 +128,14 @@
         min-width: 0;
 
         &:hover {
-          color: $black;
+          color: $sds-color-gray-black;
           cursor: pointer;
         }
       }
 
       .sortIcon {
         // Make the sort icon slightly bigger than the text.
-        margin-left: 4px;
+        margin-left: $sds-spaces-xxs;
         fill: currentColor;
         width: 12px;
 
@@ -157,7 +158,7 @@
       vertical-align: middle;
 
       &:hover {
-        color: $black;
+        color: $sds-color-gray-black;
         cursor: default;
       }
     }

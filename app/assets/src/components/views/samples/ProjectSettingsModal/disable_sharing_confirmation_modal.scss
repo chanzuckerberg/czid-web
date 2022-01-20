@@ -1,31 +1,32 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .confirmationModal {
   .title {
     @include font-header-xl;
-    color: $black;
+    color: $sds-color-gray-black;
   }
 
   .body {
     @include font-body-s;
-    margin-top: $space-s;
-    margin-bottom: $space-xl;
-    color: $gray-darkest;
+    margin-top: $sds-spaces-s;
+    margin-bottom: $sds-spaces-xl;
+    color: $sds-color-gray-600;
   }
 
   .actions {
-    margin-top: $space-m;
+    margin-top: $sds-spaces-m;
     display: flex;
 
     .item {
       &:not(:first-child) {
-        margin-left: $space-xs;
+        margin-left: $sds-spaces-xs;
       }
 
       &:not(:last-child) {
-        margin-right: $space-xs;
+        margin-right: $sds-spaces-xs;
       }
     }
   }

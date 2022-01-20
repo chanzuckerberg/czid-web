@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 :global(.ui):global(.label).filterTag {
   @include font-body-xxxs;
-  background: $primary !important;
-  border-color: $primary !important;
-  color: $white !important;
+  background: $sds-color-primary-400 !important;
+  border-color: $sds-color-primary-400 !important;
+  color: $sds-color-gray-white !important;
 }

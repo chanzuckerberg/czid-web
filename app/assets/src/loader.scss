@@ -1,5 +1,8 @@
 @charset 'utf-8';
 
+// sds variables
+@import "~czifui/dist/variables";
+
 // legacy
 @import "styles/header";
 @import "styles/home";
@@ -8,7 +11,6 @@
 @import "styles/users";
 @import "styles/resultsfolder";
 @import "styles/visualization";
-@import "styles/typography";
 @import "styles/variables";
 @import "styles/edit_password";
 @import "styles/cli_user_instructions";

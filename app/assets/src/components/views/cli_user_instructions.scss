@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .instructionContainer {
   h1 {
@@ -25,12 +26,12 @@
   margin: 1% 5%;
 
   pre {
-    background-color: $primary-lightest;
+    background-color: $sds-color-primary-200;
     font-family: monospace;
   }
 
   a {
-    color: $primary !important;
+    color: $sds-color-primary-400 !important;
     cursor: pointer;
   }
 }

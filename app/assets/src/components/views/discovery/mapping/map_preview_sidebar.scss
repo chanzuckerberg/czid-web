@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .sidebar {
   font-size: 12px;
@@ -22,23 +23,23 @@
   }
 
   .noData {
-    color: $gray-dark;
+    color: $sds-color-gray-500;
     margin: 20px;
     text-align: center;
   }
 
   .tabs {
-    margin: 15px 10px 5px;
+    margin: 15px $sds-spaces-m 5px;
     flex: 0 0 auto;
 
     .tabLabel {
       @include font-header-xs;
-      margin-right: 10px;
+      margin-right: $sds-spaces-m;
     }
 
     .tabCounter {
       @include font-body-xs;
-      color: $gray-dark;
+      color: $sds-color-gray-500;
     }
   }
 
@@ -54,7 +55,7 @@
 
 .sampleRow {
   align-items: flex-start;
-  padding: 10px 0;
+  padding: $sds-spaces-m 0;
   margin-left: 0;
 
   .sample,
@@ -68,7 +69,7 @@
 .basicCell {
   // this is adjusted to align the baseline of
   // content of basic cells with the sample name.
-  margin-top: 2px;
+  margin-top: $sds-spaces-xxxs;
 }
 
 .sampleHeader,

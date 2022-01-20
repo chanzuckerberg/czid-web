@@ -1,7 +1,8 @@
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .modal {
-  padding: $space-xxl;
+  padding: $sds-spaces-xxl;
   max-height: 70vh;
   left: auto;
   right: auto;
@@ -14,7 +15,7 @@
     cursor: pointer;
     width: $icon-l;
     height: $icon-l;
-    fill: $gray-dark;
+    fill: $sds-color-gray-500;
 
     &.s {
       width: $icon-s;

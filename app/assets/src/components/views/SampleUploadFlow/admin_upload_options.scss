@@ -1,32 +1,33 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~czifui/dist/variables";
 
 .subheader {
   @include font-header-s;
-  margin-top: $space-l;
+  margin-top: $sds-spaces-l;
 
   .toggleLink {
     @include font-caps-xxxs;
-    color: $primary;
+    color: $sds-color-primary-400;
     cursor: pointer;
-    margin-left: $space-xs;
+    margin-left: $sds-spaces-xs;
   }
 }
 
 .adminUploadOptions {
   display: flex;
   flex-wrap: wrap;
-  margin-top: $space-xs;
-  padding: $space-l;
+  margin-top: $sds-spaces-xs;
+  padding: $sds-spaces-l;
   padding-bottom: 0;
-  background-color: $gray-off-white;
+  background-color: $sds-color-gray-100;
 }
 
 .field {
-  width: calc(33.3% - #{$space-xl * 2 / 3});
-  margin-right: $space-xl;
-  margin-bottom: $space-l;
+  width: calc(33.3% - #{$sds-spaces-xl * 2 / 3});
+  margin-right: $sds-spaces-xl;
+  margin-bottom: $sds-spaces-l;
 
   &:nth-child(3n) {
     margin-right: 0;
@@ -34,7 +35,7 @@
 
   .label {
     @include font-body-xs;
-    margin-bottom: 2px;
+    margin-bottom: $sds-spaces-xxxs;
     display: flex;
     align-items: center;
   }
@@ -44,7 +45,7 @@
   }
 
   .helpIcon {
-    margin-left: $space-xxs;
+    margin-left: $sds-spaces-xxs;
     height: 14px;
   }
 }

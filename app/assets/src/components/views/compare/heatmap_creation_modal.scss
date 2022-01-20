@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
+@import "~czifui/dist/variables";
 
 .header {
-  margin-bottom: $space-xl;
+  margin-bottom: $sds-spaces-xl;
 
   .title {
     @include font-header-xl;
@@ -11,32 +12,32 @@
 
   .subtitle {
     @include font-body-xxs;
-    color: $gray-dark;
+    color: $sds-color-gray-500;
   }
 }
 
 .presets {
   .title {
     @include font-header-m;
-    margin-bottom: $space-xxs;
+    margin-bottom: $sds-spaces-xxs;
   }
 
   .description {
-    margin-bottom: $space-l;
+    margin-bottom: $sds-spaces-l;
   }
 
   .filter {
-    margin-bottom: $space-xl;
+    margin-bottom: $sds-spaces-xl;
 
     .label {
       @include font-body-xs;
       font-weight: $font-weight-semibold;
-      margin-bottom: $space-s;
+      margin-bottom: $sds-spaces-s;
 
       .optionalLabel {
         @include font-body-xxs;
-        margin-bottom: $space-xl;
-        color: $gray-dark;
+        margin-bottom: $sds-spaces-xl;
+        color: $sds-color-gray-500;
       }
     }
   }
@@ -45,7 +46,7 @@
 .footer {
   .button {
     &:not(:last-child) {
-      margin-right: $space-default !important; // override PrimaryButton's 0 margin-right
+      margin-right: $sds-spaces-default !important; // override PrimaryButton's 0 margin-right
     }
   }
 }

@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .samplesHeatmapVis {
   .plusMinusControl {
@@ -57,7 +58,7 @@
       .warningIcon {
         height: 14px;
         width: 14px;
-        margin-right: 6px;
+        margin-right: $sds-spaces-xs;
         // Vertical-align the svg element with the text.
         transform: translateY(1px);
       }
@@ -71,7 +72,7 @@
 
   .bannerContainer {
     width: 500px;
-    bottom: $space-m;
+    bottom: $sds-spaces-m;
     left: 50%;
     margin-left: -250px;
     text-align: center;
@@ -92,21 +93,21 @@
 
     .bannerText {
       @include font-body-xxs;
-      color: $gray-dark;
-      background: $white;
+      color: $sds-color-gray-500;
+      background: $sds-color-gray-white;
       border-radius: $border-radius-m;
       box-shadow: $box-shadow-m;
       cursor: default;
       display: inline-block;
-      margin: $space-s auto auto;
-      padding: $space-xxs $space-s;
+      margin: $sds-spaces-s auto auto;
+      padding: $sds-spaces-xxs $sds-spaces-s;
       text-align: center;
     }
 
     .removeIcon {
       cursor: pointer;
       height: 8px;
-      margin-left: $space-xs;
+      margin-left: $sds-spaces-xs;
     }
   }
 }

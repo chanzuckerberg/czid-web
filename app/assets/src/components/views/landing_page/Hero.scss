@@ -1,10 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .hero {
-  font-family: $font-family-sans-serif;
-  background-color: $black;
+  font-family: $sds-font-font-family;
+  background-color: $sds-color-gray-black;
   background: url("../../../images/landing_page/idseq-hero.svg");
   background-repeat: no-repeat;
   background-size: cover;
@@ -20,9 +21,9 @@
 
   @media (max-width: 768px) {
     text-align: left;
-    padding: 40px $space-xl 0;
+    padding: 40px $sds-spaces-xl 0;
     background: url("../../../images/landing_page/idseq-hero-mobile.svg");
-    background-color: $black;
+    background-color: $sds-color-gray-black;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center 100%;
@@ -39,7 +40,7 @@
   }
 
   h1 {
-    color: $white;
+    color: $sds-color-gray-white;
     font-weight: $font-weight-semibold;
     margin: 0;
     @include font-header-marketing-xl;
@@ -88,9 +89,9 @@
   }
 
   p {
-    color: $white;
+    color: $sds-color-gray-white;
     margin-bottom: 40px;
-    margin-top: 6px;
+    margin-top: $sds-spaces-xs;
     @include font-body-m;
 
     @media (max-width: 768px) {
