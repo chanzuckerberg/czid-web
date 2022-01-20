@@ -38,6 +38,20 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
   - `docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:branch-main`
   - `aws-oidc exec -- docker-compose up web`
 
+### Container environment variables and overrides
+
+- docker-compose overrides can be specified in a `docker-compose.override.yml` file located in the same directory as `docker-compose.yml`.  For more details, see the [docker-compose documentation](https://docs.docker.com/compose/extends/#example-use-case).
+- Example of setting environment variables in `docker-compose.override.yml`, useful for API keys or other settings that cannot be committed
+
+```yml
+services:
+  web:
+    environment:
+      - ENV_VAR_NAME=env_var_value
+```
+
+## Troubleshooting
+
 ### Avoiding Docker
 
 - We practice container-based development locally for reproducibility (if the Docker app works locally it should work everywhere else). However, you can avoid Docker if you want a lighter setup.
@@ -63,7 +77,7 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
   - Check if your containers are exiting with `Write error saving DB on disk: No space left on device`
   - Try `docker system prune` or `docker system prune --all`
 
-## Debugging AWS credentials issues
+### AWS credentials issues
 
 - There are a variety of AWS credentials issues that could occur. The first step is to figure out at which level the credentials are broken (your local shell or just inside Docker, or awscli vs AWS SDK Gem API calls).
 - `aws sts get-caller-identity` lists your current identity config. See if it's broken in your main shell or only within Docker. Try it within `aws-oidc exec -- docker-compose run container-name-here bash`.
@@ -71,7 +85,7 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
 - `aws configure list` is very useful for showing the currently detected settings and their source.
 - Use `printenv` or `echo` to see a env variable value, or `env | grep AWS` to list all AWS related variables. For example, there may be some interfering variables such as `AWS_SDK_LOAD_CONFIG` or `AWS_DEFAULT_REGION`.
 
-### You must specify a region. You can also configure your region by running "aws configure"
+#### You must specify a region. You can also configure your region by running "aws configure"
 
 - `awscli` is especially picky about credentials, which might be the source of your error if the code invokes `Open3.capture3("aws ...")` (not recommended). `awscli` seems to ignore any `AWS_REGION` env variable.
 - Make sure your `~/.aws/config` file has a default profile and default region like this at the top (replace the `...`):

@@ -74,3 +74,6 @@ __pycache__/
 
 # Ignore Solargraph
 .solargraph.yml
+
+# Docker Compose override
+docker-compose.override.yml
