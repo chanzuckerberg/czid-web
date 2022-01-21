@@ -470,14 +470,18 @@ RSpec.describe SamplesHelper, type: :helper do
       @joe = create(:joe)
       @project = create(:project, users: [@joe])
       create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1, default_for_new_host_genome: 1)
+      create(:metadata_field, name: "host_age", is_required: 0, is_default: 1, is_core: 1, default_for_new_host_genome: 1)
       # while normally required, this field is expected to be not required here
       MetadataField.where(name: "collection_location_v2").update(is_required: 0)
-      @sample_one = create(:sample, project: @project, name: "Test Sample 1",
+      @sample_one = create(:sample, project: @project, name: "Test Sample 1", host_genome_name: "Human",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
-                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", custom_field_one: "Value One" })
-      @sample_two = create(:sample, project: @project, name: "Test Sample 2",
+                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", custom_field_one: "Value One", host_age: MetadataField::MAX_HUMAN_AGE.to_s })
+      @sample_two = create(:sample, project: @project, name: "Test Sample 2", host_genome_name: "Mosquito",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
-                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", custom_field_two: "Value Two" })
+                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", custom_field_two: "Value Two", host_age: MetadataField::MAX_HUMAN_AGE.to_s })
+      @sample_three = create(:sample, project: @project, name: "Test Sample 3", host_genome_name: "Human",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
+                                      metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", custom_field_two: "Value Two", host_age: (MetadataField::MAX_HUMAN_AGE - 1).to_s })
     end
 
     it "includes specific metadata fields in basic case" do
@@ -493,7 +497,7 @@ RSpec.describe SamplesHelper, type: :helper do
     end
 
     it "includes specific metadata fields in basic case" do
-      samples = Sample.where(id: [@sample_one.id, @sample_two.id])
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
       csv_string = helper.generate_sample_list_csv(samples, include_all_metadata: true)
       headers = csv_string.split("\n")[0]
       expect(headers.include?("sample_type")).to be true
@@ -503,6 +507,14 @@ RSpec.describe SamplesHelper, type: :helper do
       # Includes custom metadata
       expect(headers.include?("custom_field_one")).to be true
       expect(headers.include?("custom_field_two")).to be true
+      # Metadata is converted to HIPAA-compliant values
+      expect(headers.include?("host_age")).to be true
+      sample1_metadata = csv_string.split("\n")[1]
+      sample2_metadata = csv_string.split("\n")[2]
+      sample3_metadata = csv_string.split("\n")[3]
+      expect(sample1_metadata).to include("≥ #{MetadataField::MAX_HUMAN_AGE}")
+      expect(sample2_metadata).to include(MetadataField::MAX_HUMAN_AGE.to_s)
+      expect(sample3_metadata).to include((MetadataField::MAX_HUMAN_AGE - 1).to_s)
     end
   end
 

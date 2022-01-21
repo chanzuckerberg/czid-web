@@ -373,21 +373,24 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
         @sample1 = create(:sample,
                           name: "Test Sample 1",
                           project: project,
-                          metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No" })
+                          host_genome_name: "Human",
+                          metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", host_age: MetadataField::MAX_HUMAN_AGE.to_s })
         @workflow_run1 = create(:workflow_run, sample: @sample1, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
         @workflow_run2 = create(:workflow_run, sample: @sample1, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
 
         @sample2 = create(:sample,
                           name: "Test Sample 2",
                           project: project,
-                          metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No" })
+                          host_genome_name: "Mosquito",
+                          metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", host_age: MetadataField::MAX_HUMAN_AGE.to_s })
         @workflow_run3 = create(:workflow_run, sample: @sample2, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
         @workflow_run4 = create(:workflow_run, sample: @sample2, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
 
         @sample3 = create(:sample,
                           name: "Test Sample 3",
                           project: project,
-                          metadata_fields: { collection_location_v2: "Indio, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No" })
+                          host_genome_name: "Human",
+                          metadata_fields: { collection_location_v2: "Indio, USA", sample_type: "CSF", nucleotide_type: "DNA", collection_date: "2021-04", water_control: "No", host_age: (MetadataField::MAX_HUMAN_AGE - 1).to_s })
         @workflow_run5 = create(:workflow_run, sample: @sample3, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
         @workflow_run6 = create(:workflow_run, sample: @sample3, cached_results: cached_results, inputs_json: inputs_json.to_json, executed_at: Time.current)
 
@@ -407,6 +410,9 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
                                                                                        ["Test Sample 3", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, [@workflow_run5.inputs["wetlab_protocol"], @workflow_run5.executed_at], @metadata_by_sample_id[@sample3.id].values_at(*@metadata_keys)),
                                                                                        ["Test Sample 3", "Test Accession Name", "OV123456.7"].concat(quality_metrics.values, [@workflow_run6.inputs["wetlab_protocol"], @workflow_run6.executed_at], @metadata_by_sample_id[@sample3.id].values_at(*@metadata_keys)),
                                                                                      ]))
+        expect(@metadata_by_sample_id[@sample1.id][:host_age]).to eq("≥ #{MetadataField::MAX_HUMAN_AGE}")
+        expect(@metadata_by_sample_id[@sample2.id][:host_age]).to eq(MetadataField::MAX_HUMAN_AGE.to_s)
+        expect(@metadata_by_sample_id[@sample3.id][:host_age]).to eq((MetadataField::MAX_HUMAN_AGE - 1).to_s)
       end
     end
   end

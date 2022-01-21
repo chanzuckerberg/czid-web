@@ -159,9 +159,10 @@ module MetadataHelper
               generate_metadata_default_value(field, hg.name)
             else
               metadata_value = sample[:metadata][field.name]&.csv_compatible_value
-              sample_host_is_human = hg.name == "Human"
-              field_is_host_age_and_above_max = field.name == "host_age" && metadata_value.to_i >= MetadataField::MAX_HUMAN_AGE
-              if sample_host_is_human && field_is_host_age_and_above_max
+              host_is_human = hg.name == "Human"
+              host_age_above_max = field.name == "host_age" && metadata_value.to_i >= MetadataField::MAX_HUMAN_AGE
+              if host_is_human && host_age_above_max
+                # Convert metadata to HIPAA-compliant values
                 "≥ #{MetadataField::MAX_HUMAN_AGE}"
               else
                 metadata_value

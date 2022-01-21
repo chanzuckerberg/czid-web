@@ -245,11 +245,6 @@ module BulkDownloadsHelper
       csv << ["sample_name"] + metadata_headers
       samples.each do |sample|
         metadata = metadata_by_sample_id[sample.id] || {}
-        sample_host_is_human = sample.host_genome_name == "Human"
-        host_age_above_max = metadata.key?(:host_age) && metadata[:host_age].to_i >= MetadataField::MAX_HUMAN_AGE
-        if sample_host_is_human && host_age_above_max
-          metadata[:host_age] = "≥ #{MetadataField::MAX_HUMAN_AGE}"
-        end
         csv << [sample.name] + metadata.values_at(*metadata_keys)
       end
     end
@@ -305,6 +300,16 @@ module BulkDownloadsHelper
 
     sample_ids = samples.pluck(:id)
     metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_csv_compatible_values: true)
+    host_genome_by_sample_id = samples.map { |sample| [sample.id, sample.host_genome_name] }.to_h
+
+    # Convert metadata to HIPAA-compliant values
+    metadata_by_sample_id.each do |sample_id, sample_metadata|
+      host_is_human = host_genome_by_sample_id[sample_id] == "Human"
+      host_age_above_max = sample_metadata.key?(:host_age) && sample_metadata[:host_age].to_i >= MetadataField::MAX_HUMAN_AGE
+      if host_is_human && host_age_above_max
+        sample_metadata[:host_age] = "≥ #{MetadataField::MAX_HUMAN_AGE}"
+      end
+    end
 
     return [metadata_headers, metadata_keys, metadata_by_sample_id]
   end

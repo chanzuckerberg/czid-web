@@ -84,7 +84,14 @@ module SamplesHelper
                         insert_size_mean: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.mean ? pipeline_run.insert_size_metric_set.mean : '',
                         insert_size_standard_deviation: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.standard_deviation ? pipeline_run.insert_size_metric_set.standard_deviation : '',
                         insert_size_read_pairs: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.read_pairs ? pipeline_run.insert_size_metric_set.read_pairs : '', }
+
+        # Convert metadata to HIPAA-compliant values
         metadata = sample_info[:metadata] || {}
+        host_is_human = db_sample.host_genome_name == "Human"
+        host_age_above_max = metadata.key?(:host_age) && metadata[:host_age].to_i >= MetadataField::MAX_HUMAN_AGE
+        if host_is_human && host_age_above_max
+          metadata[:host_age] = "≥ #{MetadataField::MAX_HUMAN_AGE}"
+        end
 
         csv << data_values.values_at(*attributes.map(&:to_sym)) + metadata.values_at(*metadata_keys.map(&:to_sym))
       end
