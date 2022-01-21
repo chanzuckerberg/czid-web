@@ -114,7 +114,7 @@ class SfnPipelineDispatchService
     sfn_pipeline_input_json[:Input].keys.each do |step|
       if sfn_extra_inputs.key?(step.to_s)
         sfn_pipeline_input_json[:Input][step].merge!(sfn_extra_inputs[step.to_s])
-        sfn_pipeline_input_json[:Input][step][:s3_wd_uri] = @pipeline_run.sfn_results_path
+        sfn_pipeline_input_json[:Input][step][:s3_wd_uri] = "#{output_prefix}/#{@pipeline_run.version_key_subpath}"
         sfn_pipeline_input_json[:Input][step][:docker_image_id] = docker_image_id
       end
     end
