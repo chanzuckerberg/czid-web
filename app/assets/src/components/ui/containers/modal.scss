@@ -10,12 +10,12 @@
 
   .closeIcon {
     position: absolute;
-    right: 20px;
-    top: 20px;
+    right: $sds-spaces-xxl;
+    top: $sds-spaces-xxl;
     cursor: pointer;
     width: $icon-l;
     height: $icon-l;
-    fill: $sds-color-gray-500;
+    fill: $sds-color-gray-400;
 
     &.s {
       width: $icon-s;

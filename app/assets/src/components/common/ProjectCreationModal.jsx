@@ -1,12 +1,13 @@
+import { Tooltip } from "czifui";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import { createProject } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
+import Modal from "~ui/containers/Modal";
 import Input from "~ui/controls/Input";
 import RadioButton from "~ui/controls/RadioButton";
 import Textarea from "~ui/controls/Textarea";
@@ -14,7 +15,7 @@ import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 
-import cs from "./project_creation_form.scss";
+import cs from "./project_creation_modal.scss";
 
 const ACCESS_LEVEL = Object.freeze({
   publicAccess: 1,
@@ -22,69 +23,32 @@ const ACCESS_LEVEL = Object.freeze({
   noSelection: -1,
 });
 
-class ProjectCreationForm extends React.Component {
-  state = {
-    name: "",
-    accessLevel: ACCESS_LEVEL.noSelection, // No selection by default
-    error: "",
-    description: "",
-    showInfo: false,
-    disableCreateButton: true,
-  };
+const ProjectCreationModal = ({ modalOpen, onCancel, onCreate }) => {
+  const [name, setName] = useState("");
+  const [accessLevel, setAccessLevel] = useState(ACCESS_LEVEL.noSelection); // No selection by default
+  const [error, setError] = useState("");
+  const [description, setDescription] = useState("");
+  const [showInfo, setShowInfo] = useState(false);
+  const [disableCreateButton, setDisableCreateButton] = useState(true);
 
-  areCreationReqsMet(changed = {}) {
-    const reqs = {
-      name: this.state.name,
-      accessLevel: this.state.accessLevel,
-      description: this.state.description,
-    };
+  useEffect(() => {
+    let anyFieldInvalid =
+      name === "" ||
+      accessLevel === ACCESS_LEVEL.noSelection ||
+      description.length < 1;
 
-    Object.keys(changed).forEach(requirement => {
-      reqs[requirement] = changed[requirement];
+    setDisableCreateButton(anyFieldInvalid);
+  }, [name, accessLevel, description]);
+
+  useEffect(() => {
+    logAnalyticsEvent("ProjectCreationModal_more-info-toggle_clicked", {
+      showInfo,
     });
+  }, [showInfo]);
 
-    if (
-      reqs.name === "" ||
-      reqs.accessLevel === ACCESS_LEVEL.noSelection ||
-      reqs.description.length < 1
-    ) {
-      return false;
-    }
+  const handleCreateProject = async () => {
+    setError("");
 
-    return true;
-  }
-
-  handleNameChange = name => {
-    const disableCreateButton = !this.areCreationReqsMet({ name });
-    this.setState({
-      name,
-      disableCreateButton,
-    });
-  };
-
-  handleAccessLevelChange = accessLevel => {
-    const disableCreateButton = !this.areCreationReqsMet({ accessLevel });
-    this.setState({
-      accessLevel,
-      disableCreateButton,
-    });
-  };
-
-  handleDescriptionChange = description => {
-    const disableCreateButton = !this.areCreationReqsMet({ description });
-    this.setState({
-      description,
-      disableCreateButton,
-    });
-  };
-
-  handleCreateProject = async () => {
-    const { onCreate } = this.props;
-    const { name, accessLevel, description } = this.state;
-
-    this.setState({
-      error: "",
-    });
     try {
       const newProject = await createProject({
         name: name,
@@ -94,58 +58,28 @@ class ProjectCreationForm extends React.Component {
 
       onCreate(newProject);
     } catch (e) {
-      if (e.data[0] === "Name has already been taken") {
-        this.setState({
-          error:
-            "This project name is already taken. Please enter another name.",
-        });
-      } else {
-        this.setState({
-          error: "There was an error creating your project.",
-        });
-      }
+      const receivedNameTakenError =
+        e.data[0] === "Name has already been taken";
+      const errorMsg = receivedNameTakenError
+        ? "This project name is already taken. Please enter another name."
+        : "There was an error creating your project.";
+      setError(errorMsg);
     }
   };
 
-  toggleInfo = () => {
-    const { showInfo } = this.state;
-
-    this.setState(
-      {
-        showInfo: !showInfo,
-      },
-      () => {
-        logAnalyticsEvent("ProjectCreationForm_more-info-toggle_clicked", {
-          showInfo: this.state.showInfo,
-        });
-      }
-    );
-  };
-
-  render() {
-    const { onCancel } = this.props;
-    const {
-      showInfo,
-      name,
-      accessLevel,
-      description,
-      error,
-      disableCreateButton,
-    } = this.state;
-
-    return (
-      <div className={cs.projectCreationForm}>
+  return (
+    <Modal tall open={modalOpen} onClose={onCancel} xlCloseIcon>
+      <div className={cs.projectCreationModal}>
+        <div className={cs.modalTitle}>New Project</div>
         <div className={cs.field}>
-          <div className={cs.label}>New Project Name</div>
-          <Input fluid value={name} onChange={this.handleNameChange} />
+          <div className={cs.label}>Project Name</div>
+          <Input fluid value={name} onChange={setName} />
         </div>
         <div className={cs.field}>
           <div className={cs.label}>Project Sharing</div>
           <div
             className={cs.sharingOption}
-            onClick={() =>
-              this.handleAccessLevelChange(ACCESS_LEVEL.publicAccess)
-            }
+            onClick={() => setAccessLevel(ACCESS_LEVEL.publicAccess)}
           >
             <div className={cs.radioButtonAndProjectIcon}>
               <RadioButton
@@ -159,19 +93,16 @@ class ProjectCreationForm extends React.Component {
               <div className={cs.description}>
                 This project is viewable and searchable by anyone in CZ ID.
                 They’ll be able to perform actions like create heatmaps and
-                download results. Public projects can’t be changed to Private.
+                download results. Public projects can’t be changed to Private.{" "}
                 <ExternalLink href="https://help.czid.org">
-                  {" "}
-                  Learn more.
+                  Learn more
                 </ExternalLink>
               </div>
             </div>
           </div>
           <div
             className={cs.sharingOption}
-            onClick={() =>
-              this.handleAccessLevelChange(ACCESS_LEVEL.privateAccess)
-            }
+            onClick={() => setAccessLevel(ACCESS_LEVEL.privateAccess)}
           >
             <div className={cs.radioButtonAndProjectIcon}>
               <RadioButton
@@ -186,10 +117,9 @@ class ProjectCreationForm extends React.Component {
                 Samples added to this project will be private by default,
                 visible only to you and other project members. Private samples
                 will become public 1 year after their upload date. You can
-                change a Private project to Public at any time.
+                change a Private project to Public at any time.{" "}
                 <ExternalLink href="https://help.czid.org">
-                  {" "}
-                  Learn more.
+                  Learn more
                 </ExternalLink>
               </div>
             </div>
@@ -198,7 +128,10 @@ class ProjectCreationForm extends React.Component {
         <div className={cs.field}>
           <div className={cs.label}>
             Project Description{" "}
-            <span className={cs.infoLink} onClick={this.toggleInfo}>
+            <span
+              className={cs.infoLink}
+              onClick={() => setShowInfo(!showInfo)}
+            >
               {showInfo ? "Less Info" : "More Info"}
             </span>
           </div>
@@ -208,12 +141,12 @@ class ProjectCreationForm extends React.Component {
               <List
                 listItems={[
                   `The project goal (benchmarking, identifying an unknown
-                  pathogen, microbiome, etc.)`,
+                    pathogen, microbiome, etc.)`,
                   `If this work is part of a larger study, the aim of that study`,
                   `A summary of where the samples came from (geographically and
-                collection date) and preparation techniques, if relevant`,
+                  collection date) and preparation techniques, if relevant`,
                   `Any other context that might be helpful in interpreting the
-                data`,
+                  data`,
                 ]}
               />
               <p>
@@ -225,7 +158,7 @@ class ProjectCreationForm extends React.Component {
             </div>
           )}
           <Textarea
-            onChange={this.handleDescriptionChange}
+            onChange={setDescription}
             value={description}
             className={cs.descriptionTextArea}
             maxLength={MAX_DESCRIPTION_LENGTH}
@@ -238,24 +171,22 @@ class ProjectCreationForm extends React.Component {
         </div>
         {error && <div className={cs.error}>{error}</div>}
         <div className={cs.controls}>
-          <BasicPopup
-            trigger={
-              <PrimaryButton
-                disabled={disableCreateButton}
-                onClick={
-                  disableCreateButton ? () => {} : this.handleCreateProject
-                }
-                text="Create Project"
-              />
-            }
-            disabled={!disableCreateButton} // enable the popup when create button is disabled and vice versa
-            inverted={false}
-            position="top center"
-            basic={false}
-            style={{ maxWidth: "175px" }}
-          >
-            Please complete all fields to create a project.
-          </BasicPopup>
+          {disableCreateButton ? (
+            <Tooltip
+              arrow
+              placement="top"
+              title="Fill in all fields to continue."
+            >
+              <span>
+                <PrimaryButton disabled text="Create Project" />
+              </span>
+            </Tooltip>
+          ) : (
+            <PrimaryButton
+              onClick={handleCreateProject}
+              text="Create Project"
+            />
+          )}
           <SecondaryButton
             className={cs.cancelButton}
             onClick={onCancel}
@@ -263,13 +194,14 @@ class ProjectCreationForm extends React.Component {
           />
         </div>
       </div>
-    );
-  }
-}
+    </Modal>
+  );
+};
 
-ProjectCreationForm.propTypes = {
+ProjectCreationModal.propTypes = {
+  modalOpen: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
 };
 
-export default ProjectCreationForm;
+export default ProjectCreationModal;

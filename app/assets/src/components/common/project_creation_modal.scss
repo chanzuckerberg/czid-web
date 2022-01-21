@@ -3,10 +3,16 @@
 @import "~styles/themes/elements";
 @import "~czifui/dist/variables";
 
-.projectCreationForm {
+.projectCreationModal {
+  .modalTitle {
+    @include font-header-xl;
+    color: $black;
+  }
+
   .label {
     @include font-header-s;
-    margin-bottom: 5px;
+    margin-top: $sds-spaces-xl;
+    margin-bottom: $sds-spaces-s;
 
     .infoLink {
       @include font-caps-xxxs;
@@ -25,7 +31,6 @@
     @include font-body-xs;
     background-color: $sds-color-gray-white;
     height: 100px;
-    margin-top: 5px;
     padding: $sds-spaces-l;
     resize: vertical;
     text-indent: $sds-spaces-xs;
@@ -39,12 +44,10 @@
   }
 
   .field {
-    margin-bottom: $sds-spaces-s;
-
     .info {
-      background-color: $sds-color-gray-200;
-      padding: 20px;
-      margin-bottom: $sds-spaces-default;
+      background-color: $sds-color-gray-100;
+      padding: $sds-spaces-l;
+      margin-bottom: $sds-spaces-l;
       border-radius: $border-radius-m;
 
       .title {
@@ -73,12 +76,17 @@
   .sharingOption {
     display: flex;
     align-items: flex-start;
-    padding: $sds-spaces-m 0;
+    padding: $sds-spaces-l 0;
+    margin-bottom: $sds-spaces-xxs;
     border-radius: $border-radius-m;
     cursor: pointer;
 
     &:hover {
-      background-color: $sds-color-gray-200;
+      background-color: $sds-color-gray-100;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
     }
 
     .radioButtonAndProjectIcon {
@@ -111,6 +119,7 @@
 
   .controls {
     display: flex;
+    margin-top: $sds-spaces-xxl;
   }
 
   .error {

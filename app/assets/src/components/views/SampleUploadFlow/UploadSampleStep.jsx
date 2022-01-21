@@ -36,7 +36,7 @@ import {
   withAnalytics,
 } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import ProjectCreationForm from "~/components/common/ProjectCreationForm";
+import ProjectCreationModal from "~/components/common/ProjectCreationModal";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import { UserContext } from "~/components/common/UserContext";
 import Tabs from "~/components/ui/controls/Tabs";
@@ -866,10 +866,11 @@ class UploadSampleStep extends React.Component {
             />
             {this.state.createProjectOpen ? (
               <div className={cs.projectCreationContainer}>
-                <ProjectCreationForm
+                <ProjectCreationModal
+                  modalOpen
                   onCancel={withAnalytics(
                     this.closeCreateProject,
-                    "UploadSampleStep_project-creation-form_closed"
+                    ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED
                   )}
                   onCreate={this.handleProjectCreate}
                 />

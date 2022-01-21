@@ -376,6 +376,10 @@ function EventDictionary() {
 
   /** The user hovered over the Annotations Label on a samples view ReportTable */
   this.ANNOTATION_LABEL_HOVERED = "ANNOTATION_LABEL_HOVERED";
+
+  /** The user closed the Project Creation modal in the Upload Sample Step. */
+  this.UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED =
+    "UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED";
 }
 
 const eventNames = new EventDictionary();
