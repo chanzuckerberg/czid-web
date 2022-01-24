@@ -61,6 +61,16 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
   end
 
+  create_table "annotations", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "pipeline_run_id", null: false, comment: "The pipeline run id associated with the annotated sample report."
+    t.integer "tax_id", null: false, comment: "The id of the annotated taxon."
+    t.integer "content", comment: "An enum describing the annotation content. Will be set to null if an existing annotation is cleared."
+    t.bigint "creator_id", comment: "The id of the user that created the annotation."
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["pipeline_run_id", "tax_id"], name: "index_annotations_on_pipeline_run_id_and_tax_id"
+  end
+
   create_table "app_configs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "key"
     t.text "value"
