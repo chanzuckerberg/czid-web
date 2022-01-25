@@ -307,7 +307,7 @@ module SamplesHelper
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
       pipeline_run_entry[:created_at] = pipeline_run.created_at
     else
-      pipeline_run_entry[:result_status_description] = 'WAITING'
+      pipeline_run_entry[:result_status_description] = 'QUEUED FOR PROCESSING'
       pipeline_run_entry[:finalized] = 0
       pipeline_run_entry[:report_ready] = 0
     end

@@ -1646,6 +1646,7 @@ class SampleView extends React.Component {
       sample &&
       !sample.upload_error
     ) {
+      // Note that the pipeline status "WAITING" is obtained from the API at `app/services/pipeline_report_service.rb`
       status = "IN PROGRESS";
       message = jobStatus;
       icon = <IconLoading className={csSampleMessage.icon} />;
