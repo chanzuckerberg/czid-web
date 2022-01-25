@@ -1,10 +1,20 @@
 module StringUtil
   # Humanize step name and remove "_out", "Run", and " Out"
-  # e.g. "validate_input_out" -> "Validate Input"
-  # && "runValidateInput" -> "Validate Input"
-  # The carat "^" matches the beginning of a string, and
-  # the dollar sign "$" the end of a string.
-  def self.humanize_step_name(step_name)
+  # e.g. "validate_input_out" -> "Validate Input", "runValidateInput" -> "Validate Input"
+  def self.humanize_step_name(step_name, stage_name = nil)
+    # Support custom pipeline step names (e.g. "RunStar" becomes "STAR" instead of "Star")
+    unless stage_name.nil?
+      stage_contains_custom_step_names = PipelineRunsHelper::STEP_DESCRIPTIONS[stage_name].key?("step_names")
+      if stage_contains_custom_step_names
+        dag_name = SfnPipelineDataService::SFN_STEP_TO_DAG_STEP_NAME[stage_name][step_name]
+        custom_step_names = PipelineRunsHelper::STEP_DESCRIPTIONS[stage_name]["step_names"]
+        if custom_step_names.key?(dag_name)
+          return custom_step_names[dag_name]
+        end
+      end
+    end
+
+    # Otherwise, infer name with regex (^=matches string start, $=matches string end)
     strip_regex = /(^Run )|(_out$)|( Out$)/
     return step_name.split("_").join(" ").titleize.gsub(strip_regex, "")
   end

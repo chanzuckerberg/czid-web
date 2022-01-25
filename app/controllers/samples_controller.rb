@@ -1061,6 +1061,7 @@ class SamplesController < ApplicationController
     render template: "samples/raw_folder"
   end
 
+  # GET samples/:id/results_folder.json
   def results_folder
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     can_see_stage1_results = (current_user.id == @sample.user_id)

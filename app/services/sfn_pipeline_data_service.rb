@@ -199,6 +199,7 @@ class SfnPipelineDataService
       end
 
       {
+        name: stage_name,
         steps: steps,
         # mark stage as finished if pipeline run stage has been mark as succeed, otherwise infer from steps
         jobStatus: @stage_job_statuses[stage_index] == PipelineRunStage::STATUS_SUCCEEDED ? "finished" : stage_job_status(all_redefined_statuses),

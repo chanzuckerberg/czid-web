@@ -1,6 +1,18 @@
 require "rails_helper"
 
 RSpec.describe StringUtil do
+  describe "#humanize_step_name" do
+    it "should humanize step names" do
+      expect(StringUtil.humanize_step_name("validate_input_out")).to eq("Validate Input")
+      expect(StringUtil.humanize_step_name("runValidateInput")).to eq("Validate Input")
+    end
+
+    it "should use custom names if a stage name is provided" do
+      expect(StringUtil.humanize_step_name("RunStar")).to eq("Star")
+      expect(StringUtil.humanize_step_name("RunStar", PipelineRunStage::HOST_FILTERING_STAGE_NAME)).to eq("STAR")
+    end
+  end
+
   describe "#canonicalize_url" do
     it "should replace the id with an X in a PUT request" do
       url = "/projects/123.json"

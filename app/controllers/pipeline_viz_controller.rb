@@ -22,7 +22,7 @@ class PipelineVizController < ApplicationController
         if pipeline_run.step_function?
           @results = SfnPipelineDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
           # Give step names spaces between words and strip "out" from them
-          @results[:stages].each { |stage| stage[:steps].each { |step| step[:name] = StringUtil.humanize_step_name(step[:name]) } }
+          @results[:stages].each { |stage| stage[:steps].each { |step| step[:name] = StringUtil.humanize_step_name(step[:name], stage[:name]) } }
         elsif pipeline_run.directed_acyclic_graph?
           @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
         else

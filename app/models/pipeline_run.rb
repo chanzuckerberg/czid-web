@@ -1805,8 +1805,8 @@ class PipelineRun < ApplicationRecord
         # Trying not to rely on pipeline_run_stages for stage names, to make future development easier
         dag_name = SfnPipelineDataService::SFN_STEP_TO_DAG_STEP_NAME[stage_name][step[:name]]
         step_dict = {
-          name: StringUtil.humanize_step_name(step[:name]),
-          stepDescription: step[:description],
+          name: StringUtil.humanize_step_name(step[:name], stage_name),
+          stepDescription: STEP_DESCRIPTIONS[stage_name]["steps"][dag_name],
           fileList: step[:outputFiles],
           readsAfter: (job_stats_by_task[dag_name] || {})["reads_after"],
         }
