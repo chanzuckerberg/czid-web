@@ -22,8 +22,8 @@ import { getWorkflowRunZipLink } from "~/components/views/report/utils/download"
 import { parseUrlParams } from "~/helpers/url";
 import {
   DownloadButton,
+  ErrorButton,
   HelpButton,
-  PrimaryButton,
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
@@ -146,7 +146,7 @@ export default function SampleViewHeader({
             editable &&
             deletable &&
             isEmpty(sample.pipeline_runs) && ( // wouldn't want to delete mngs report
-                <PrimaryButton
+                <ErrorButton
                   className={cs.controlElement}
                   onClick={() => setSampleDeletionConfirmationModalOpen(true)}
                   text="Delete Sample"

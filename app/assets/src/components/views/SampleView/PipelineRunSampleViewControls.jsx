@@ -3,7 +3,6 @@ import { isEmpty, isNull } from "lodash/fp";
 import React from "react";
 import SvgSaver from "svgsaver";
 
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
@@ -14,6 +13,7 @@ import {
   getLinkInfoForDownloadOption,
   logDownloadOption,
 } from "~/components/views/report/utils/download";
+import { ErrorButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
 import { TABS } from "./constants";
 
@@ -156,7 +156,7 @@ const PipelineRunSampleViewControls = ({
     return renderDownloadButtonDropdown();
   } else if (!isEmpty(reportMetadata) && editable && deletable) {
     return (
-      <PrimaryButton
+      <ErrorButton
         className={className}
         onClick={onDeleteSample}
         text="Delete Sample"
