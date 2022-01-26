@@ -77,8 +77,7 @@
 
       .subtitle {
         @include font-header-s;
-        margin-bottom: $sds-spaces-xxl;
-        height: 10%;
+        margin-bottom: $sds-spaces-l;
 
         .message {
           @include font-body-xxs;
