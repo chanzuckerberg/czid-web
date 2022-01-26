@@ -205,6 +205,8 @@ Rails.application.routes.draw do
 
   get 'pathogen_list(/:version)', to: 'pathogen_lists#show'
 
+  resources :annotations, only: :create
+
   resources :frontend_metrics, only: :create
 
   resources :host_genomes
