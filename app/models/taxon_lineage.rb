@@ -28,7 +28,7 @@
 # * What does it mean if there's a negative taxid that isn't -100, -200,
 #   -300...? See docstring for _fill_missing_calls in the lineage.py link below.
 # * More notes and a second example here:
-#   https://github.com/chanzuckerberg/idseq-workflows/blob/main/short-read-mngs/idseq-dag/idseq_dag/util/lineage.py
+#   https://github.com/chanzuckerberg/czid-workflows/blob/main/short-read-mngs/idseq-dag/idseq_dag/util/lineage.py
 
 require 'elasticsearch/model'
 

@@ -357,13 +357,13 @@ module PipelineRunsHelper
     if file_generated_since_run(failed_stage, user_input_validation_file)
       # Case where validation of user input format fails.
       # The code that produces user_input_validation_file lives here:
-      # https://github.com/chanzuckerberg/idseq-workflows/blob/a922fa8986715d30a06e20beaa3c92033c799f32/short-read-mngs/idseq-dag/idseq_dag/steps/run_validate_input.py#L117
+      # https://github.com/chanzuckerberg/czid-workflows/blob/a922fa8986715d30a06e20beaa3c92033c799f32/short-read-mngs/idseq-dag/idseq_dag/steps/run_validate_input.py#L117
       validation_error = get_key_from_s3_json(user_input_validation_file, "Validation error")
       return ["FAULTY_INPUT", validation_error] if validation_error
     end
     if file_generated_since_run(failed_stage, invalid_step_input_file)
       # Case where an intermediate output does not meet the requirements for the next step's inputs.
-      # Possible error codes defined here: https://github.com/chanzuckerberg/idseq-workflows/blob/a922fa8986715d30a06e20beaa3c92033c799f32/short-read-mngs/idseq-dag/idseq_dag/exceptions.py
+      # Possible error codes defined here: https://github.com/chanzuckerberg/czid-workflows/blob/a922fa8986715d30a06e20beaa3c92033c799f32/short-read-mngs/idseq-dag/idseq_dag/exceptions.py
       error_code = get_key_from_s3_json(invalid_step_input_file, "error")
       return [error_code, nil]
     end

@@ -8,7 +8,7 @@ New to Redux and Redux-Toolkit? Visit Redux [essentials](https://redux.js.org/tu
 
 For each unique feature within IDseq that ulitizes Redux, create a module if it does not exist already. A module represents all Redux functionality pertaining to a feature. See:
 
-- [Example](https://github.com/chanzuckerberg/idseq-web-private/blob/main/app/assets/src/redux/modules/disovery)
+- [Example](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/redux/modules/discovery)
 
 
 ## Slices
@@ -17,14 +17,14 @@ Our Redux state is typically organized into "slices" and those slices being dedi
 
  See:
 
-- [Example](https://github.com/chanzuckerberg/idseq-web-private/blob/main/app/assets/src/redux/modules/disovery/discoverySlice.js)
+- [Example](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/redux/modules/discovery/slice.js)
 
 
 ## Selectors
 
 Selectors are used to select certain information from the Redux global state tree. Redux Toolkit re-exports the [createSelector](https://redux-toolkit.js.org/api/createSelector) utility from the [Reselect](https://github.com/reduxjs/reselect) library for ease of use. 
 
-- [Example](https://github.com/chanzuckerberg/idseq-web-private/blob/main/app/assets/src/redux/modules/disovery/selectors.js)
+- [Example](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/redux/modules/discovery/selectors.js)
 
 
 ## Reducers 

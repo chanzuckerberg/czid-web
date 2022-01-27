@@ -47,7 +47,7 @@ const LandingHeader = ({ browserInfo }) => {
           </ExternalLink>
           <ExternalLink
             className={cs.headerLink}
-            href="https://github.com/chanzuckerberg/idseq-workflows"
+            href="https://github.com/chanzuckerberg/czid-workflows"
             analyticsEventName="Landing_github-link_clicked"
           >
             GitHub

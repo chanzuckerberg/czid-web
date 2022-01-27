@@ -54,7 +54,7 @@ To balance browser compatibility with ease of development, avoid using language 
 
 ## Imports
 
-- **Import Aliases:** Be aware of our [Webpack aliases](https://github.com/chanzuckerberg/idseq-web-private/blob/main/webpack.config.common.js). Use them to avoid long relative paths (`../../../..`) in imports.
+- **Import Aliases:** Be aware of our [Webpack aliases](https://github.com/chanzuckerberg/czid-web-private/blob/main/webpack.config.common.js). Use them to avoid long relative paths (`../../../..`) in imports.
 
 - Group top-of-file imports into external libs, internal shared libs, and internal un-shared libs. For example
 
@@ -109,7 +109,7 @@ For example, if you need a specially styled button, try to wrap `<Button>` from 
 - Pull business logic out of the component and into pure utility functions whenever possible. Better readability, and easier to unit-test further down the line. Also keeps the component slim and focused on the core business logic and rendering.
 - If you find yourself passing a ton of props into a component, consider combining related props into a single object with a descriptive name. For example, if you have a bunch of sample-related props that you're passing into a phylo creation modal, combine them into a single object prop called phyloCreationSampleProps.
   - You can also use this approach to reduce the number of top-level this.state variables.
-- See <SampleDetailsSidebar> (https://github.com/chanzuckerberg/idseq-web-private/tree/main/app/assets/src/components/views/report/SampleDetailsSidebar) for a real-life example.
+- See <SampleDetailsSidebar> (https://github.com/chanzuckerberg/czid-web-private/tree/main/app/assets/src/components/views/report/SampleDetailsSidebar) for a real-life example.
 
 Resources:
 [Thinking in React](https://reactjs.org/docs/thinking-in-react.html)
@@ -155,7 +155,7 @@ Views content should be inside of a `NarrowContainer` for standard width.
 ### Shared Files
 
 **API calls**
-Put API calls in [`/api`](https://github.com/chanzuckerberg/idseq-web-private/tree/main/app/assets/src/api). Use and build upon the provided api methods like `postWithCSRF` and `get` instead of directly using `axios`. This layer of indirection allows us to do things like standardized error handling and converting snake case to camel case for all our API endpoints further down the line.
+Put API calls in [`/api`](https://github.com/chanzuckerberg/czid-web-private/tree/main/app/assets/src/api). Use and build upon the provided api methods like `postWithCSRF` and `get` instead of directly using `axios`. This layer of indirection allows us to do things like standardized error handling and converting snake case to camel case for all our API endpoints further down the line.
 
 Start putting fetch methods like `fetchSampleMetadata` in `/api`, so that it's easy to see all the back-end endpoints the front-end is using.
 
@@ -163,7 +163,7 @@ The main `index.js` file is quite large, so prefer putting methods in a more spe
 
 ### PropTypes
 
-When passing complex objects as props, add the structure of the object to a `propTypes.js` file. If the object is ad-hoc and very specific to the component, put the propTypes file inside the component directory. If the object will be used widely across the app, put it in [`utils/propTypes.js`](https://github.com/chanzuckerberg/idseq-web-private/blob/main/app/assets/src/components/utils/propTypes.js)
+When passing complex objects as props, add the structure of the object to a `propTypes.js` file. If the object is ad-hoc and very specific to the component, put the propTypes file inside the component directory. If the object will be used widely across the app, put it in [`utils/propTypes.js`](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/components/utils/propTypes.js)
 
 Proptypes should be alphabetized unless there is a natural grouping, in which case you should add a comment explaining the grouping. For example:
 
@@ -261,11 +261,11 @@ Icons should follow the Design System and be stored in `~/components/ui/icons/` 
   - The choice for this notation is driven by our decision to use CSS Modules (see next bullet). Legacy code uses `dash-case` typically.
 - We use **CSS Modules** to modularize our CSS. This allows us to use short class names without fear of collisions with 3rd party libraries or classes from other components.
   - Our CSS is still in the process of being refactored. All files that are inside the styles directory still use global classes. All new CSS should use CSS modules.
-  - See [`Tabs.jsx`](https://github.com/chanzuckerberg/idseq-web-private/blob/main/app/assets/src/components/ui/controls/Tabs.jsx) and [`tabs.scss`](https://github.com/chanzuckerberg/idseq-web-private/blob/main/app/assets/src/components/ui/controls/tabs.scss) for an example of current best practices.
+  - See [`Tabs.jsx`](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/components/ui/controls/Tabs.jsx) and [`tabs.scss`](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/components/ui/controls/tabs.scss) for an example of current best practices.
 
 ### Shared Files
 
-Be aware of shared style files, particularly [`_color.scss`](https://github.com/chanzuckerberg/idseq-web-private/blob/main/app/assets/src/styles/themes/_colors.scss). Only use color hex values from `_color.scss` and when you need a new color, add it to the file.
+Be aware of shared style files, particularly [`_color.scss`](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/styles/themes/_colors.scss). Only use color hex values from `_color.scss` and when you need a new color, add it to the file.
 
 ### Other Best Practices
 

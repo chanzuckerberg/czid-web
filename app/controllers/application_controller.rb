@@ -144,7 +144,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Disabled by default. Add param ?pp=enable to enable or ?pp=disable to disable for your session.
-  # See https://github.com/chanzuckerberg/idseq-web/wiki/%5BDev%5D-Profiling-and-performance-optimization
+  # See https://github.com/chanzuckerberg/czid-web-private/wiki/%5BDev%5D-Profiling-and-performance-optimization
   def check_rack_mini_profiler
     if current_user && current_user.admin?
       Rack::MiniProfiler.authorize_request

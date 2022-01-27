@@ -21,8 +21,8 @@ const Footer = () => {
             Experience CZ ID&apos;s Impact
           </a>
           <a
-            href="https://github.com/chanzuckerberg/idseq-workflows"
-            aria-label="View the repo for idseq-workflows on GitHub (opens in new window)"
+            href="https://github.com/chanzuckerberg/czid-workflows"
+            aria-label="View the repo for czid-workflows on GitHub (opens in new window)"
             target="_blank"
             rel="noreferrer"
           >
