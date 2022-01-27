@@ -91,7 +91,7 @@
   border-radius: $border-radius-m;
   padding: $sds-spaces-xs $sds-spaces-s;
   cursor: pointer;
-  box-shadow: $box-shadow-s;
+  box-shadow: $sds-drop-shadows-shadow-s;
   display: flex;
   align-items: center;
   white-space: nowrap;
@@ -257,7 +257,7 @@
   position: fixed;
   bottom: 50px;
   right: 15px;
-  box-shadow: $box-shadow-m;
+  box-shadow: $sds-drop-shadows-shadow-m;
   svg:hover {
     background-color: darken(white, 5%);
   }

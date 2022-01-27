@@ -262,7 +262,7 @@ $genome-viz-spacing: $sds-spaces-xs;
   // So the tooltip appears on the top-left instead of bottom-right of the top-right corner of bar.
   transform: translate(-100%, -100%);
   background-color: $sds-color-gray-white;
-  box-shadow: $box-shadow-m;
+  box-shadow: $sds-drop-shadows-shadow-m;
   border: $border-gray-light;
   border-radius: $border-radius-m;
   padding: 5px $sds-spaces-m;

@@ -7,7 +7,7 @@
   transition: transform 0.5s ease;
 
   &:global(.visible) {
-    box-shadow: $box-shadow-l;
+    box-shadow: $sds-drop-shadows-shadow-l;
   }
 
   &.left,

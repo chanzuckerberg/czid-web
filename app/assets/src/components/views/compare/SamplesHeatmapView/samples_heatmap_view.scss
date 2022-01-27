@@ -76,7 +76,7 @@
     .filterLine {
       height: 0px;
       border-bottom: 10px solid $sds-color-gray-white;
-      box-shadow: $box-shadow-m;
+      box-shadow: $sds-drop-shadows-shadow-m;
     }
 
     .arrowIcon {
@@ -88,7 +88,7 @@
       background-color: $sds-color-gray-white;
       padding: 0 $sds-spaces-l;
       border-radius: 0 0 $border-radius-m $border-radius-m;
-      box-shadow: $box-shadow-s;
+      box-shadow: $sds-drop-shadows-shadow-s;
     }
   }
 
