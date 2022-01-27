@@ -1,5 +1,3 @@
-@import "~styles/themes/colors";
-@import "~styles/themes/elements";
 @import "~czifui/dist/variables";
 
 :global(.ui):global(.dropdown).multipleNestedDropdown {
@@ -10,7 +8,7 @@
 
   &:global(.active) {
     .dropdownTrigger {
-      border: $border-primary;
+      border: $sds-borders-primary-400;
     }
   }
 }

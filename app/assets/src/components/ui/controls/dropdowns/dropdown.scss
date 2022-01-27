@@ -1,9 +1,9 @@
-@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 :global(.ui):global(.dropdown).dropdown {
   &:global(.active) {
     .dropdownTrigger {
-      border: $border-primary;
+      border: $sds-borders-primary-400;
     }
   }
 }

@@ -6,7 +6,7 @@
 :global(.ui):global(.dropdown).dropdown {
   &:global(.active) {
     .dropdownTrigger {
-      border: $border-primary;
+      border: $sds-borders-primary-400;
     }
   }
 }
@@ -75,7 +75,7 @@
   }
 
   :global(.divider) {
-    border-top: $border-gray-lightest;
+    border-top: $sds-borders-gray-200;
     margin: 0 $sds-spaces-l;
   }
 }

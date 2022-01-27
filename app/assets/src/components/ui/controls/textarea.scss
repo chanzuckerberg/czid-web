@@ -5,13 +5,13 @@
 .textarea {
   border-radius: $border-radius-m;
   box-sizing: border-box;
-  border: $border-gray-light;
+  border: $sds-borders-gray-300;
   outline: none;
   font: $sds-font-body-s-400-font;
   line-height: 23px;
 
   &:focus {
-    border: $border-primary;
+    border: $sds-borders-primary-400;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;

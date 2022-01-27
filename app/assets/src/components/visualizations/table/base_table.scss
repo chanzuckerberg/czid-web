@@ -57,7 +57,7 @@
   }
 
   &:global(.ReactVirtualized__Table__row) {
-    border-bottom: 1px solid $gray-lightest;
+    border-bottom: $sds-borders-gray-200;
 
     &:hover {
       background-color: $sds-color-primary-100;

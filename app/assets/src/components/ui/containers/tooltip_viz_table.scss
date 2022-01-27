@@ -7,14 +7,14 @@
   @include font-body-xxs;
   background-color: $sds-color-gray-white;
   border-radius: $border-radius-m;
-  border: $border-gray-light;
+  border: $sds-borders-gray-300;
   box-shadow: $sds-drop-shadows-shadow-m;
   pointer-events: none;
   padding: 0 $sds-spaces-m;
 
   .title {
     @include font-caps-xxxxs;
-    border-bottom: $border-gray-lightest;
+    border-bottom: $sds-borders-gray-200;
     color: $sds-color-gray-500;
     margin-bottom: $sds-spaces-m;
   }
@@ -37,7 +37,7 @@
     margin: $sds-spaces-l 0;
 
     &:not(:first-child) {
-      border-top: $border-gray-lightest;
+      border-top: $sds-borders-gray-200;
       padding-top: $sds-spaces-l;
     }
 

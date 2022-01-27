@@ -48,14 +48,14 @@
 .toggle.toggle.toggle input:checked ~ label:before {
   background-color: $sds-color-gray-white !important; // override semantic-ui
   z-index: -1; // make sure the white background color is behind the text label
-  border: $border-primary;
+  border: $sds-borders-primary-400;
   padding-left: $sds-spaces-xxs;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {
   background-color: $sds-color-gray-white !important; // override semantic-ui
   z-index: -1; // make sure the white background color is behind the text label
-  border: $border-gray-light;
+  border: $sds-borders-gray-300;
 }
 
 .toggle.toggle.toggle label:after {

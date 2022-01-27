@@ -12,10 +12,10 @@
   cursor: pointer;
   padding: 26px 45px;
   text-align: left;
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $sds-borders-gray-300;
   border-top: none;
-  border-left: 1px solid $gray-light;
-  border-right: 1px solid $gray-light;
+  border-left: $sds-borders-gray-300;
+  border-right: $sds-borders-gray-300;
   outline: none;
   transition: 0.4s;
   position: relative;
@@ -41,7 +41,7 @@
   }
 
   &:first-of-type {
-    border-top: 1px solid $gray-light;
+    border-top: $sds-borders-gray-300;
   }
 
   svg {

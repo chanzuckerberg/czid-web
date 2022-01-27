@@ -45,7 +45,7 @@ $break-large: 1460px;
     color: $sds-color-error-400;
     margin: 0 auto;
     padding: $sds-spaces-m 5px;
-    border: $border-error;
+    border: $sds-borders-error-400;
     transition: 0.2s width ease-out;
     text-align: center;
   }
@@ -57,7 +57,7 @@ $break-large: 1460px;
     color: $sds-color-success-400;
     margin: 0 auto;
     padding: $sds-spaces-m 5px;
-    border: $border-success;
+    border: $sds-borders-success-400;
     transition: 0.2s width ease-out;
     text-align: center;
   }

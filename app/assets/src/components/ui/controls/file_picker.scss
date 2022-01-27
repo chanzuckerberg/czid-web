@@ -5,7 +5,7 @@
 
 .filePicker {
   width: 100%;
-  border: $border-dashed-gray-medium;
+  border: $sds-borders-gray-dashed;
   border-radius: $border-radius-m;
   cursor: pointer;
   display: flex;
@@ -13,13 +13,13 @@
 
   &.active {
     background-color: $sds-color-primary-200;
-    border: $border-dashed-primary;
+    border: $sds-borders-primary-dashed;
   }
 
   &:hover,
   &.accepted {
     background-color: $sds-color-primary-200;
-    border: $border-dashed-primary;
+    border: $sds-borders-primary-dashed;
   }
 
   .inner {

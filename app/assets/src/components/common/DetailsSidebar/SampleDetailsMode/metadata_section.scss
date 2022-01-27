@@ -4,7 +4,7 @@
 @import "~czifui/dist/variables";
 
 .metadataSection {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $sds-borders-gray-300;
 
   .title {
     @include font-caps-xxs;

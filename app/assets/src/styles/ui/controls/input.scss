@@ -11,11 +11,11 @@
 .idseq-ui.input {
   input {
     border-radius: $border-radius-m;
-    border: $border-gray-light;
+    border: $sds-borders-gray-300;
     box-sizing: border-box;
 
     &:focus {
-      border: $border-primary;
+      border: $sds-borders-primary-400;
       -webkit-box-shadow: none;
       -moz-box-shadow: none;
       box-shadow: none;
@@ -42,7 +42,7 @@
   &.error {
     input[type="header"],
     input[type="text"] {
-      border: $border-error !important;
+      border: $sds-borders-error-400 !important;
     }
   }
 
@@ -50,7 +50,7 @@
     input[type="header"],
     input[type="number"],
     input[type="text"] {
-      border: $border-warning !important;
+      border: $sds-borders-warning-400 !important;
     }
   }
 }

@@ -15,7 +15,7 @@
 }
 
 .metadataSection {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $sds-borders-gray-300;
 }
 
 .metadataContainer {
@@ -59,7 +59,7 @@
     flex-flow: row nowrap;
     justify-content: space-evenly;
     align-items: flex-end;
-    border-bottom: 1px solid $gray-lightest;
+    border-bottom: $sds-borders-gray-200;
 
     .bar {
       margin: 0 1px;

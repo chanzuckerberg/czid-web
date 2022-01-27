@@ -3,7 +3,7 @@
 @import "~czifui/dist/variables";
 
 .idseq-ui.button.secondary {
-  border: $border-primary;
+  border: $sds-borders-primary-400;
   background-color: $sds-color-gray-white;
   color: $sds-color-primary-400;
   fill: $sds-color-primary-400;
@@ -29,7 +29,7 @@
 
   &:active,
   &.active {
-    border: $border-primary-dark;
+    border: $sds-borders-primary-500;
     background-color: $sds-color-primary-500;
     color: $sds-color-gray-white;
     fill: $sds-color-gray-white;
@@ -43,7 +43,7 @@
 
   &:focus,
   &.focus {
-    border: $border-primary-dark;
+    border: $sds-borders-primary-500;
     background-color: $sds-color-primary-500;
     color: $sds-color-gray-white;
     fill: $sds-color-gray-white;
@@ -57,7 +57,7 @@
 
   &:disabled,
   &.disabled {
-    border: $border-gray-light;
+    border: $sds-borders-gray-300;
     background-color: $sds-color-gray-100;
     color: $sds-color-gray-300;
     fill: $sds-color-gray-300;

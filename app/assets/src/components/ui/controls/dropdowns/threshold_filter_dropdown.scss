@@ -5,7 +5,7 @@
 :global(.ui):global(.dropdown).thresholdFilterDropdown {
   &:global(.active) {
     .dropdownTrigger {
-      border: $border-primary;
+      border: $sds-borders-primary-400;
     }
   }
 

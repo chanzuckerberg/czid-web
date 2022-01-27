@@ -6,7 +6,7 @@
   width: 15px;
   height: 15px;
   border-radius: $border-radius-l;
-  border: $border-gray-medium;
+  border: $sds-borders-gray-400;
   padding: $sds-spaces-xxxs;
   cursor: pointer;
 
@@ -24,11 +24,11 @@
 
   &.disabled {
     cursor: default;
-    border: $border-gray-light;
+    border: $sds-borders-gray-300;
 
     &:hover,
     &.selected {
-      border: $border-gray-light;
+      border: $sds-borders-gray-300;
     }
   }
 }

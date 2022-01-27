@@ -46,7 +46,7 @@
 
 .tabContent {
   width: 100%;
-  border-bottom: 1px solid $gray-lightest;
+  border-bottom: $sds-borders-gray-200;
   font-family: $sds-font-font-family;
   display: flex;
   padding: 30px 35px;

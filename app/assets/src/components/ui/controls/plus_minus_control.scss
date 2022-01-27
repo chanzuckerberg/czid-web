@@ -18,7 +18,7 @@
     box-sizing: border-box;
 
     &:first-child {
-      border-bottom: 1px solid $gray-lightest;
+      border-bottom: $sds-borders-gray-200;
     }
 
     &:focus {

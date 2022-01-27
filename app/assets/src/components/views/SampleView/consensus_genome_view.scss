@@ -57,10 +57,10 @@
       padding: $sds-spaces-xl;
 
       .tableHeader {
-        border-bottom: 1px solid $gray-lightest;
+        border-bottom: $sds-borders-gray-200;
 
         .tableHeaderRow {
-          border-bottom: 1px solid $gray-lightest;
+          border-bottom: $sds-borders-gray-200;
         }
 
         .tableHeaderLabel {
@@ -79,7 +79,7 @@
 
         // Override base_table.scss
         &:global(.ReactVirtualized__Table__headerRow) {
-          border-bottom: 1px solid $gray-lightest;
+          border-bottom: $sds-borders-gray-200;
         }
 
         &:hover {
@@ -189,7 +189,7 @@
 
 .raisedContainer {
   border-radius: $border-radius-m;
-  border: 1px solid $gray-lightest;
+  border: $sds-borders-gray-200;
   box-shadow: $sds-drop-shadows-shadow-s;
 }
 

@@ -6,7 +6,7 @@
   border-bottom: 2px solid $sds-color-gray-100;
 
   &.thin {
-    border-bottom: 1px solid $gray-lightest;
+    border-bottom: $sds-borders-gray-200;
   }
 
   &.medium {

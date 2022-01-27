@@ -18,13 +18,13 @@
 
   &:hover {
     background: $sds-color-primary-400;
-    border: $border-primary-dark;
+    border: $sds-borders-gray-500;
     color: $sds-color-gray-white;
   }
 
   &:active,
   &:focus {
-    border: $border-primary-dark;
+    border: $sds-borders-gray-500;
     background-color: $sds-color-primary-500;
     color: $sds-color-gray-white;
   }
