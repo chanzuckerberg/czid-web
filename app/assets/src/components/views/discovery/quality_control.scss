@@ -32,7 +32,6 @@
   .chartsContainer {
     display: flex;
     flex-flow: row wrap;
-    height: 100%;
 
     .halfPageChart {
       color: $sds-color-gray-black;
@@ -61,7 +60,6 @@
       border: $sds-borders-gray-300;
       border-radius: $border-radius-m;
       width: 100%;
-      height: 100%;
       min-height: calc(#{$img-l} * 2.5);
       min-width: calc(#{$img-l} * 2.5);
       box-shadow: 0 2px 4px 0 $sds-color-gray-300;
