@@ -3,9 +3,9 @@ name: idseq-web build Docker image
 on:
   push:
     branches:
-      - '**'
+      - "**"
     tags-ignore:
-      - '**'
+      - "**"
 
 env:
   AWS_DEFAULT_OUTPUT: json
@@ -14,7 +14,7 @@ env:
   LANG: C.UTF-8
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   IMDS_URL: http://169.254.169.254/latest
-  
+
 jobs:
   cancel_outdated_builds:
     runs-on: ubuntu-latest
@@ -36,7 +36,8 @@ jobs:
       - name: Build and push Docker images
         run: |
           sudo apt-get -q install --yes awscli
-          export AWS_REGION=$(curl -s $IMDS_URL/dynamic/instance-identity/document | jq -r .region)
+          export token=$(curl -s -X PUT $IMDS_URL/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+          export AWS_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" $IMDS_URL/dynamic/instance-identity/document | jq -r .region)
           export AWS_ACCOUNT_ID=$(aws sts get-caller-identity | jq -r .Account)
           $(aws ecr get-login --no-include-email)
           bin/build-docker $(basename $GITHUB_REF) ${GITHUB_SHA::8}
@@ -53,7 +54,8 @@ jobs:
       - name: Build and push Docker images
         run: |
           sudo apt-get -q install --yes awscli
-          export AWS_REGION=$(curl -s $IMDS_URL/dynamic/instance-identity/document | jq -r .region)
+          export token=$(curl -s -X PUT $IMDS_URL/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+          export AWS_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" $IMDS_URL/dynamic/instance-identity/document | jq -r .region)
           export AWS_ACCOUNT_ID=$(aws sts get-caller-identity | jq -r .Account)
           $(aws ecr get-login --no-include-email)
           bin/build-docker $(basename $GITHUB_REF) ${GITHUB_SHA::8}
