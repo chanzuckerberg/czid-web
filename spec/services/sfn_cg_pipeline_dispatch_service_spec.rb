@@ -115,7 +115,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
           sfn_input_json: {
             Input: {
               Run: {
-                docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:v#{fake_wdl_version}",
+                docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/consensus-genome:v#{fake_wdl_version}",
                 sample: sample.name.tr(" ", "_"),
                 ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
                 ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",

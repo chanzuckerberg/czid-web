@@ -104,7 +104,7 @@ class SfnCgPipelineDispatchService
   def retrieve_docker_image_id
     resp = AwsClient[:sts].get_caller_identity
     # TODO(JIRA:IDSEQ-3164): do not use hardcoded docker image
-    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/idseq-consensus-genome:v#{@workflow_run.wdl_version}"
+    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/consensus-genome:v#{@workflow_run.wdl_version}"
   end
 
   def technology
