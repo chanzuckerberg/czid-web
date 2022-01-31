@@ -28,6 +28,10 @@
       "black --line-length 120",
       "flake8 --show-source",
       "git add"
+    ],
+    "app/assets/src/components/ui/icons/*.jsx": [
+      "./bin/update_icons.sh -f",
+      "git add ./app/assets/src/components/ui/icons/index.js"
     ]
   },
   "devDependencies": {
