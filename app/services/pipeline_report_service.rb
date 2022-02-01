@@ -101,7 +101,7 @@ class PipelineReportService
     "species_tax_ids",
   ].freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: PipelineRun::MIN_CONTIG_READS, parallel: true, merge_nt_nr: false, priority_pathogens: TaxonLineage::PRIORITY_PATHOGENS)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: PipelineRun::MIN_CONTIG_READS, parallel: true, merge_nt_nr: false, priority_pathogens: TaxonLineage::PRIORITY_PATHOGENS, show_annotations: false)
     @pipeline_run = pipeline_run
     @background = background_id ? Background.find(background_id) : nil
     @csv = csv
@@ -109,6 +109,7 @@ class PipelineReportService
     @parallel = parallel
     @merge_nt_nr = merge_nt_nr
     @priority_pathogens = priority_pathogens
+    @show_annotations = show_annotations
   end
 
   def call
@@ -332,6 +333,9 @@ class PipelineReportService
 
     highlighted_tax_ids = find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_species_to_highlight")
+
+    flag_annotations(sorted_genus_tax_ids, counts_by_tax_level)
+    @timer.split("flag_annotations")
 
     return [structured_lineage, sorted_genus_tax_ids, highlighted_tax_ids]
   end
@@ -682,6 +686,40 @@ class PipelineReportService
       end
     end
     return highlighted_tax_ids
+  end
+
+  def flag_annotations(sorted_genus_tax_ids, counts_by_tax_level)
+    return unless @show_annotations
+
+    genus_tax_map = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
+    species_tax_map = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES]
+    tax_ids = genus_tax_map.keys + species_tax_map.keys
+
+    annotations_by_tax_id = Annotation.fetch_annotations_by_tax_id(tax_ids, @pipeline_run.id)
+
+    # Empty hash mapping annotation content => count, ie. { hit: 0, not_a_hit: 0, inconclusive: 0 }
+    empty_annotation_counts = Annotation.contents.keys.index_with { |_c| 0 }
+
+    sorted_genus_tax_ids.each do |genus_tax_id|
+      species_annotation_counts = empty_annotation_counts.dup
+
+      # Store genus-level annotation (or null if genus is not annotated)
+      genus_taxon = genus_tax_map[genus_tax_id]
+      genus_taxon['annotation'] = annotations_by_tax_id[genus_tax_id]
+
+      genus_taxon[:species_tax_ids].each do |species_tax_id|
+        # Store species-level annotation (or null if species is not annotated)
+        species_taxon = species_tax_map[species_tax_id]
+        species_annotation_content = annotations_by_tax_id[species_tax_id]
+        species_taxon['annotation'] = species_annotation_content
+
+        if species_annotation_content.present?
+          species_annotation_counts[species_annotation_content] += 1
+        end
+      end
+      # Store species annotation counts, ie. { hit: 1, not_a_hit: 0, inconclusive: 0 }
+      genus_taxon['species_annotations'] = species_annotation_counts
+    end
   end
 
   def tag_pathogens(counts_by_tax_level, lineage_by_tax_id)

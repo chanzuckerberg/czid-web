@@ -671,4 +671,70 @@ RSpec.describe PipelineReportService, type: :service do
       expect(JSON.parse(@report)["counts"]["1"]["1313"]).to include_json(species_result)
     end
   end
+
+  context "with annotations" do
+    before do
+      create(:taxon_lineage, tax_name: "Escherichia", taxid: 1, genus_taxid: 1, genus_name: "Escherichia")
+      create(:taxon_lineage, tax_name: "Escherichia albertii", taxid: 2, genus_taxid: 1, genus_name: "Escherichia")
+      create(:taxon_lineage, tax_name: "Escherichia coli", taxid: 3, genus_taxid: 1, genus_name: "Escherichia")
+
+      @pipeline_run = create(:pipeline_run,
+                             sample: create(:sample, project: create(:project)),
+                             sfn_execution_arn: fake_sfn_execution_arn,
+                             finalized: 1,
+                             total_reads: 100,
+                             adjusted_remaining_reads: 100,
+                             taxon_counts_data: [{
+                               tax_level: 2,
+                               taxon_name: "Escherichia", # annotated genus
+                               e_value: 0,
+                             }, {
+                               tax_level: 1,
+                               taxon_name: "Escherichia albertii", # annotated species
+                               e_value: 0,
+                             }, {
+                               tax_level: 1,
+                               taxon_name: "Escherichia coli",
+                               e_value: 0,
+                             },])
+
+      create(:annotation, pipeline_run_id: @pipeline_run.id, tax_id: 1, content: "hit")
+      create(:annotation, pipeline_run_id: @pipeline_run.id, tax_id: 2, content: "hit")
+
+      @background = create(:background,
+                           pipeline_run_ids: [
+                             create(:pipeline_run,
+                                    sample: create(:sample, project: create(:project))).id,
+                             create(:pipeline_run,
+                                    sample: create(:sample, project: create(:project))).id,
+                           ])
+      @report = PipelineReportService.call(@pipeline_run, @background.id, show_annotations: true)
+    end
+
+    it "should correctly flag annotated genera" do
+      expect(JSON.parse(@report)["counts"]["2"]["1"]["annotation"]).to eq("hit")
+    end
+
+    it "should correctly flag annotated species" do
+      expect(JSON.parse(@report)["counts"]["1"]["2"]["annotation"]).to eq("hit")
+      expect(JSON.parse(@report)["counts"]["1"]["2"]).not_to include("species_annotations")
+    end
+
+    it "should correctly flag non-annotated taxa" do
+      expect(JSON.parse(@report)["counts"]["1"]["3"]["annotation"]).to be_nil
+    end
+
+    it "should correctly flag annotations belonging to a genus' subspecies" do
+      expected_species_annotations = { "hit" => 1, "inconclusive" => 0, "not_a_hit" => 0 }
+      expect(JSON.parse(@report)["counts"]["2"]["1"]["species_annotations"]).to eq(expected_species_annotations)
+    end
+
+    it "should not flag annotations if show_annotations is false" do
+      report2 = PipelineReportService.call(@pipeline_run, @background.id, show_annotations: false)
+      expect(JSON.parse(report2)["counts"]["2"]["1"]).not_to include("annotations")
+      expect(JSON.parse(report2)["counts"]["2"]["1"]).not_to include("species_annotations")
+      expect(JSON.parse(report2)["counts"]["1"]["2"]).not_to include("annotations")
+      expect(JSON.parse(report2)["counts"]["1"]["3"]).not_to include("annotations")
+    end
+  end
 end

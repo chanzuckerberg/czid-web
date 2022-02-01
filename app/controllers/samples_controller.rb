@@ -795,6 +795,10 @@ class SamplesController < ApplicationController
     background_id = get_background_id(@sample, permitted_params[:background], permitted_params[:share_id])
     priority_pathogens = fetch_priority_pathogens()
 
+    editable_sample = current_power.updatable_sample?(@sample)
+    annotation_allowed = current_user && current_user.allowed_feature?("annotation")
+    show_annotations = editable_sample && annotation_allowed
+
     if pipeline_run
       # Don't cache the response until all results for the pipeline run are available
       # so the displayed pipeline run status and report hover actions will be updated correctly.
@@ -820,10 +824,10 @@ class SamplesController < ApplicationController
 
       json =
         fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate) do
-          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], priority_pathogens: priority_pathogens)
+          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], priority_pathogens: priority_pathogens, show_annotations: show_annotations)
         end
     else
-      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], priority_pathogens: priority_pathogens)
+      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], priority_pathogens: priority_pathogens, show_annotations: show_annotations)
     end
     render json: json
   rescue PipelineReportService::MassNormalizedBackgroundError => e
