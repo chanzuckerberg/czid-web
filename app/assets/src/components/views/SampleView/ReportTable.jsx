@@ -620,7 +620,7 @@ class ReportTable extends React.Component {
 
   downloadContigUrl = ({ taxId }) => {
     const { pipelineVersion, sampleId } = this.props;
-    location.href = `/samples/${sampleId}/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
+    location.href = `/samples/${sampleId}/taxid_contigs_download?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
   };
 
   handleCoverageVizClick = ({
@@ -665,6 +665,7 @@ class ReportTable extends React.Component {
       consensusGenomeData,
       consensusGenomeEnabled,
       fastaDownloadEnabled,
+      onBlastClick,
       onConsensusGenomeClick,
       onPreviousConsensusGenomeClick,
       phyloTreeAllowed,
@@ -690,8 +691,8 @@ class ReportTable extends React.Component {
       );
     const percentIdentity = get("nt.percent_identity", rowData);
     const previousConsensusGenomeRuns = get(rowData.taxId, consensusGenomeData);
-    const ntContigsAvailable = !!get("nt.contigs", rowData);
-    const ntReadsAvailable = !!get("nt.count", rowData);
+    const ntContigs = get("nt.contigs", rowData);
+    const ntReads = get("nt.count", rowData);
 
     const analyticsContext = {
       projectId: projectId,
@@ -712,9 +713,14 @@ class ReportTable extends React.Component {
         taxName={rowData.name}
         taxCommonName={rowData.common_name}
         taxSpecies={rowData.species}
-        blastEnabled={ntReadsAvailable}
         ncbiEnabled={validTaxId}
-        ntContigsAvailable={ntContigsAvailable}
+        ntContigs={ntContigs}
+        ntReads={ntReads}
+        onBlastClick={withAnalytics(
+          onBlastClick,
+          ANALYTICS_EVENT_NAMES.REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED,
+          analyticsContext
+        )}
         onNcbiActionClick={withAnalytics(
           this.linkToNCBI,
           "PipelineSampleReport_ncbi-link_clicked",
@@ -982,6 +988,7 @@ ReportTable.propTypes = {
   consensusGenomeData: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.object)),
   consensusGenomeEnabled: PropTypes.bool.isRequired,
   fastaDownloadEnabled: PropTypes.bool.isRequired,
+  onBlastClick: PropTypes.func.isRequired,
   onConsensusGenomeClick: PropTypes.func.isRequired,
   onCoverageVizClick: PropTypes.func.isRequired,
   onPreviousConsensusGenomeClick: PropTypes.func.isRequired,

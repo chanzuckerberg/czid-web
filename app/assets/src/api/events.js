@@ -13,12 +13,22 @@
  * - This is in a JS function mostly so that JSDoc can parse it.<br>
  */
 function EventDictionary() {
+  /** The user clicked "Learn more" in the Blast Contigs Modal */
+  this.BLAST_CONTIGS_MODAL_LEARN_MORE_CLICKED =
+    "BLAST_CONTIGS_MODAL_LEARN_MORE_CLICKED";
+
+  /** The user clicked "Learn more" in the Blast Reads Modal */
+  this.BLAST_READS_MODAL_LEARN_MORE_CLICKED =
+    "BLAST_READS_MODAL_LEARN_MORE_CLICKED";
+
   /** The bulk download creation failed */
   this.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED =
     "BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED";
+
   /** The bulk download creation was successful */
   this.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL =
     "BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL";
+
   /** The user closed the confirmation modal before sending their samples to Nextclade. */
   this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED =
     "NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED";
@@ -380,6 +390,10 @@ function EventDictionary() {
   /** The user closed the Project Creation modal in the Upload Sample Step. */
   this.UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED =
     "UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED";
+
+  /** The user clicked the BLAST button on the HoverActions within a species or genus row. */
+  this.REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED =
+    "REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED";
 }
 
 const eventNames = new EventDictionary();

@@ -1,0 +1,42 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.header {
+  font: $sds-font-body-xxxs-600-font !important;
+  text-align: right !important;
+
+  &.contigNameHeader {
+    text-align: left !important;
+  }
+}
+
+.cell {
+  font: $sds-font-body-xxs-400-font !important;
+  margin: $sds-spaces-m $sds-spaces-m $sds-spaces-m 0 !important;
+  text-align: right;
+
+  &.contigName {
+    text-align: left;
+  }
+}
+
+.tableDataRow {
+  border-bottom: 1px;
+
+  // Make every even table row except the header gray
+  &:not(:first-child):nth-child(even) {
+    background-color: $sds-color-gray-100;
+  }
+}
+
+// We pass in the "selectableCell" className to
+// our checkbox to modify the enclosing div as follows;
+// this creates a large, invisible "button" the height of
+// the row, making samples easier to select.
+.selectableCell {
+  flex-shrink: 0 !important;
+  padding-left: 0px;
+  justify-content: center;
+}

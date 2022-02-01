@@ -8,6 +8,7 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   include ReportsHelper
+  include ParameterSanitization
 
   ########################################
   # Note to developers:
@@ -23,7 +24,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_v2, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
-                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary,
+                  :contig_taxid_list, :taxid_contigs, :taxid_contigs_download, :summary_contig_counts, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow,].freeze
@@ -876,7 +877,7 @@ class SamplesController < ApplicationController
     render json: pr.get_taxid_list_with_contigs
   end
 
-  def taxid_contigs
+  def taxid_contigs_download
     taxid = params[:taxid]
     return if HUMAN_TAX_IDS.include? taxid.to_i
 
@@ -885,6 +886,41 @@ class SamplesController < ApplicationController
     output_fasta = ''
     contigs.each { |contig| output_fasta += contig.to_fa }
     send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
+  end
+
+  # GET /samples/:id/taxid_contigs.json?taxid=:taxid&pipeline_version=:pipeline_version
+  def taxid_contigs
+    permitted_params = params.permit(:taxid, :pipeline_version)
+
+    taxid = permitted_params[:taxid]
+    return if HUMAN_TAX_IDS.include? taxid.to_i
+
+    pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
+    contigs = pr.get_contigs_for_taxid(taxid.to_i)
+
+    order_by = sanitize_order_by(Contig, order_by, :read_count)
+    order_dir = sanitize_order_dir(order_dir, :desc)
+    # Only return up to the 3 longest contigs
+    contigs = contigs.order(Hash[order_by => order_dir]).limit(3)
+
+    formatted_contigs = contigs.reduce([]) do |result, contig|
+      result << {}.tap do |formatted_contig|
+        formatted_contig[:contig_id] = contig.id
+        formatted_contig[:contig_name] = contig.name
+        formatted_contig[:fasta_sequence] = contig.to_fa
+        formatted_contig[:num_reads] = contig.read_count
+        formatted_contig[:contig_length] = contig.sequence.length
+      end
+    end
+
+    response = {
+      contigs: formatted_contigs,
+    }
+
+    render(
+      json: response.to_json,
+      status: :ok
+    )
   end
 
   def summary_contig_counts

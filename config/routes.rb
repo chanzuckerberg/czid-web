@@ -50,6 +50,7 @@ Rails.application.routes.draw do
       get :upload_credentials
       get :metadata
       get :contig_taxid_list
+      get :taxid_contigs_download
       get :taxid_contigs
       get :summary_contig_counts
       get :coverage_viz_summary

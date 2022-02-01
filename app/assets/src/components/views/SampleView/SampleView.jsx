@@ -78,6 +78,8 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
+import BlastContigsModal from "~/components/views/blastn/BlastContigsModal";
+import BlastReadsModal from "~/components/views/blastn/BlastReadsModal";
 import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
 import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/ConsensusGenomePreviousModal";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
@@ -147,6 +149,9 @@ class SampleView extends React.Component {
       {
         amrData: null,
         backgrounds: [],
+        blastData: {},
+        blastContigsModalVisible: false,
+        blastReadsModalVisible: false,
         consensusGenomeData: {},
         consensusGenomeCreationParams: {},
         consensusGenomePreviousParams: {},
@@ -1239,6 +1244,26 @@ class SampleView extends React.Component {
     });
   };
 
+  handleBlastClick = ({
+    pipelineVersion,
+    sampleId,
+    shouldBlastContigs,
+    taxName,
+    taxId,
+  }) => {
+    this.setState({
+      ...(shouldBlastContigs
+        ? { blastContigsModalVisible: true }
+        : { blastReadsModalVisible: true }),
+      blastData: {
+        pipelineVersion,
+        sampleId,
+        taxName,
+        taxId,
+      },
+    });
+  };
+
   onConsensusGenomeCreation = async ({
     accessionId,
     accessionName,
@@ -2035,6 +2060,7 @@ class SampleView extends React.Component {
                   !!(reportMetadata && reportMetadata.hasByteRanges)
                 }
                 initialDbType={displayMergedNtNrValue ? "merged_nt_nr" : "nt"}
+                onBlastClick={this.handleBlastClick}
                 onConsensusGenomeClick={this.handleConsensusGenomeClick}
                 onCoverageVizClick={this.handleCoverageVizClick}
                 onPreviousConsensusGenomeClick={
@@ -2094,9 +2120,18 @@ class SampleView extends React.Component {
     );
   };
 
+  handleBlastContigsModalClose = () =>
+    this.setState({ blastContigsModalVisible: false });
+
+  handleBlastReadsModalClose = () =>
+    this.setState({ blastReadsModalVisible: false });
+
   render = () => {
     const {
       amrData,
+      blastData,
+      blastContigsModalVisible,
+      blastReadsModalVisible,
       consensusGenomeData,
       consensusGenomePreviousParams,
       consensusGenomeCreationModalVisible,
@@ -2235,6 +2270,26 @@ class SampleView extends React.Component {
             title={
               "Sorry! There was an error starting your consensus genome run."
             }
+          />
+        )}
+        {blastContigsModalVisible && (
+          <BlastContigsModal
+            open
+            onClose={this.handleBlastContigsModalClose}
+            pipelineVersion={get("pipelineVersion", blastData)}
+            sampleId={get("sampleId", blastData)}
+            taxonName={get("taxName", blastData)}
+            taxonId={get("taxId", blastData)}
+          />
+        )}
+        {blastReadsModalVisible && (
+          <BlastReadsModal
+            open
+            onClose={this.handleBlastReadsModalClose}
+            pipelineVersion={get("pipelineVersion", blastData)}
+            sampleId={get("sampleId", blastData)}
+            taxonName={get("taxName", blastData)}
+            taxonId={get("taxId", blastData)}
           />
         )}
       </React.Fragment>

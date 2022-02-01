@@ -764,6 +764,61 @@ RSpec.describe SamplesController, type: :controller do
         end
       end
     end
+
+    describe "GET #taxid_contigs" do
+      before do
+        create(:taxon_lineage, tax_name: "Klebsiella pneumoniae", taxid: 573, genus_taxid: 570, superkingdom_taxid: 2)
+        create(:taxon_lineage, tax_name: "Klebsiella", taxid: 570, genus_taxid: 570, superkingdom_taxid: 2)
+
+        project = create(:project, users: [@joe])
+        @sample = create(:sample, project: project)
+        contig_lineage_json = "{\"NT\":[573, 570]}"
+
+        # This sample has reads in NT for species taxid 573,
+        # which belongs to genus 570.
+        @pipeline_run = create(:pipeline_run,
+                               sample: @sample,
+                               sfn_execution_arn: "fake_sfn_execution_arn",
+                               job_status: "CHECKED",
+                               pipeline_version: 6.7,
+                               contigs_data: [{
+                                 species_taxid_nt: 573,
+                                 genus_taxid_nt: 570,
+                                 read_count: 101,
+                                 lineage_json: contig_lineage_json,
+                               }, {
+                                 species_taxid_nt: 573,
+                                 genus_taxid_nt: 570,
+                                 read_count: 102,
+                                 lineage_json: contig_lineage_json,
+                               }, {
+                                 species_taxid_nt: 573,
+                                 genus_taxid_nt: 570,
+                                 read_count: 103,
+                                 lineage_json: contig_lineage_json,
+                               }, {
+                                 species_taxid_nt: 570,
+                                 genus_taxid_nt: 570,
+                                 read_count: 104,
+                                 lineage_json: contig_lineage_json,
+                               },])
+
+        sign_in @joe
+      end
+
+      it "returns up to the 3 longest contigs" do
+        get :taxid_contigs, format: :json, params: { id: @sample.id, taxid: 573, pipeline_version: @pipeline_run.pipeline_version }
+
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        contigs = json_response["contigs"]
+        read_counts = contigs.map { |c| c["num_reads"] }
+
+        expect(contigs.count).to eq(3)
+        expect(read_counts).to contain_exactly(104, 103, 102)
+      end
+    end
   end
 
   context "Admin user" do

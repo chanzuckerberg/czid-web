@@ -1,7 +1,7 @@
 // These are the buttons that appear on a Report table row when hovered.
 import cx from "classnames";
 import { filter, pick, size } from "lodash/fp";
-import React from "react";
+import React, { useContext } from "react";
 
 import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
@@ -27,10 +27,40 @@ import {
 } from "~ui/icons";
 import cs from "./hover_actions.scss";
 
-class HoverActions extends React.Component {
-  handlePhyloModalOpen = () => {
-    const { taxId, taxName, onPhyloTreeModalOpened } = this.props;
+const HoverActions = ({
+  className,
+  consensusGenomeEnabled,
+  contigVizEnabled,
+  coverageVizEnabled,
+  fastaEnabled,
+  ncbiEnabled,
+  ntContigs,
+  ntReads,
+  onBlastClick,
+  onConsensusGenomeClick,
+  onContigVizClick,
+  onCoverageVizClick,
+  onFastaActionClick,
+  onNcbiActionClick,
+  onPhyloTreeModalOpened,
+  onPreviousConsensusGenomeClick,
+  percentIdentity,
+  phyloTreeEnabled,
+  pipelineVersion,
+  previousConsensusGenomeRuns,
+  sampleId,
+  snapshotShareId,
+  taxCategory,
+  taxCommonName,
+  taxId,
+  taxLevel,
+  taxName,
+  taxSpecies,
+}) => {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
 
+  const handlePhyloModalOpen = () => {
     onPhyloTreeModalOpened &&
       onPhyloTreeModalOpened({
         taxId,
@@ -38,14 +68,7 @@ class HoverActions extends React.Component {
       });
   };
 
-  handleConsensusGenomeClick = () => {
-    const {
-      percentIdentity,
-      taxId,
-      taxName,
-      onConsensusGenomeClick,
-    } = this.props;
-
+  const handleConsensusGenomeClick = () => {
     onConsensusGenomeClick &&
       onConsensusGenomeClick({
         percentIdentity,
@@ -54,14 +77,7 @@ class HoverActions extends React.Component {
       });
   };
 
-  handlePreviousConsensusGenomeClick = () => {
-    const {
-      onPreviousConsensusGenomeClick,
-      taxId,
-      taxName,
-      percentIdentity,
-    } = this.props;
-
+  const handlePreviousConsensusGenomeClick = () => {
     onPreviousConsensusGenomeClick &&
       onPreviousConsensusGenomeClick({
         percentIdentity,
@@ -70,28 +86,33 @@ class HoverActions extends React.Component {
       });
   };
 
+  const handleBlastClick = () => {
+    // If there are contigs, then BLAST contigs, otherwise BLAST reads.
+    onBlastClick &&
+      onBlastClick({
+        pipelineVersion,
+        sampleId,
+        shouldBlastContigs: ntContigs > 0,
+        taxName,
+        taxId,
+      });
+  };
+
   // Metadata for each of the hover actions.
-  getHoverActions = () => {
-    const {
-      consensusGenomeEnabled,
-      pipelineVersion,
-      previousConsensusGenomeRuns,
-      snapshotShareId,
-    } = this.props;
+  const getHoverActions = () => {
     const hasCoverageViz = isPipelineFeatureAvailable(
       COVERAGE_VIZ_FEATURE,
       pipelineVersion
     );
-    const { allowedFeatures = [] } = this.context || {};
-    const hasBlast = allowedFeatures.includes(BLAST_FEATURE);
+    const hasBlastFeature = allowedFeatures.includes(BLAST_FEATURE);
 
     const params = {
       pipelineVersion,
-      taxCommonName: this.props.taxCommonName,
-      taxId: this.props.taxId,
-      taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
-      taxName: this.props.taxName,
-      taxSpecies: this.props.taxSpecies,
+      taxCommonName: taxCommonName,
+      taxId: taxId,
+      taxLevel: taxLevel === 1 ? "species" : "genus",
+      taxName: taxName,
+      taxSpecies: taxSpecies,
     };
 
     const hoverActions = [
@@ -99,8 +120,8 @@ class HoverActions extends React.Component {
         key: `taxonomy_browser_${params.taxId}`,
         message: "NCBI Taxonomy Browser",
         iconComponentClass: IconBrowserSmall,
-        handleClick: this.props.onNcbiActionClick,
-        enabled: this.props.ncbiEnabled,
+        handleClick: onNcbiActionClick,
+        enabled: ncbiEnabled,
         disabledMessage: "NCBI Taxonomy Not Found",
         params,
         snapshotEnabled: true,
@@ -109,8 +130,8 @@ class HoverActions extends React.Component {
         key: `fasta_download_${params.taxId}`,
         message: "FASTA Download",
         iconComponentClass: IconDownloadSmall,
-        handleClick: this.props.onFastaActionClick,
-        enabled: this.props.fastaEnabled,
+        handleClick: onFastaActionClick,
+        enabled: fastaEnabled,
         disabledMessage: "FASTA Download Not Available",
         params,
       },
@@ -118,8 +139,8 @@ class HoverActions extends React.Component {
         key: `contigs_download_${params.taxId}`,
         message: "Contigs Download",
         iconComponentClass: IconContigSmall,
-        handleClick: this.props.onContigVizClick,
-        enabled: this.props.contigVizEnabled,
+        handleClick: onContigVizClick,
+        enabled: contigVizEnabled,
         disabledMessage: "No Contigs Available",
         params,
       },
@@ -128,8 +149,8 @@ class HoverActions extends React.Component {
             key: `coverage_viz_${params.taxId}`,
             message: "Coverage Visualization",
             iconComponentClass: IconCoverage,
-            handleClick: this.props.onCoverageVizClick,
-            enabled: this.props.coverageVizEnabled,
+            handleClick: onCoverageVizClick,
+            enabled: coverageVizEnabled,
             disabledMessage:
               "Coverage Visualization Not Available - requires reads in NT",
             params,
@@ -139,8 +160,8 @@ class HoverActions extends React.Component {
             key: `alignment_viz_${params.taxId}`,
             message: "Alignment Visualization",
             iconComponentClass: IconAlignmentSmall,
-            handleClick: this.props.onCoverageVizClick,
-            enabled: this.props.coverageVizEnabled,
+            handleClick: onCoverageVizClick,
+            enabled: coverageVizEnabled,
             disabledMessage:
               "Alignment Visualization Not Available - requires reads in NT",
             params,
@@ -153,8 +174,8 @@ class HoverActions extends React.Component {
           </div>
         ),
         iconComponentClass: IconPhyloTreeSmall,
-        handleClick: this.handlePhyloModalOpen,
-        enabled: this.props.phyloTreeEnabled,
+        handleClick: handlePhyloModalOpen,
+        enabled: phyloTreeEnabled,
         disabledMessage:
           "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR",
       },
@@ -167,7 +188,7 @@ class HoverActions extends React.Component {
           message: `Consensus Genome`,
           iconComponentClass: IconConsensusSmall,
           count: size(previousConsensusGenomeRuns),
-          handleClick: this.handlePreviousConsensusGenomeClick,
+          handleClick: handlePreviousConsensusGenomeClick,
           enabled: true,
         });
       } else {
@@ -175,19 +196,20 @@ class HoverActions extends React.Component {
           key: `consensus_genome_${params.taxId}`,
           message: "Consensus Genome",
           iconComponentClass: IconConsensusSmall,
-          handleClick: this.handleConsensusGenomeClick,
-          enabled: !this.getConsensusGenomeError(),
-          disabledMessage: this.getConsensusGenomeError(),
+          handleClick: handleConsensusGenomeClick,
+          enabled: !getConsensusGenomeError(),
+          disabledMessage: getConsensusGenomeError(),
         });
       }
     }
 
-    if (hasBlast) {
+    if (hasBlastFeature) {
       hoverActions.push({
         key: `blast_${params.taxId}`,
         message: "BLASTN",
         iconComponentClass: IconBrowserSmall, // TODO: replace this icon
-        enabled: this.props.blastEnabled,
+        handleClick: handleBlastClick,
+        enabled: !!ntContigs || !!ntReads,
         disabledMessage:
           "BLAST is not available - requires at least 1 contig or read in NT.",
       });
@@ -198,15 +220,7 @@ class HoverActions extends React.Component {
       : hoverActions;
   };
 
-  getConsensusGenomeError = () => {
-    const {
-      coverageVizEnabled,
-      ntContigsAvailable,
-      pipelineVersion,
-      taxCategory,
-      taxLevel,
-    } = this.props;
-
+  const getConsensusGenomeError = () => {
     if (
       !isPipelineFeatureAvailable(CONSENSUS_GENOME_FEATURE, pipelineVersion)
     ) {
@@ -215,7 +229,7 @@ class HoverActions extends React.Component {
       return "Consensus genome pipeline is currently available for viruses only.";
     } else if (taxLevel !== 1) {
       return "Consensus genome pipeline only available at the species level.";
-    } else if (!ntContigsAvailable) {
+    } else if (ntContigs <= 0) {
       return "Please select a virus with at least 1 contig that aligned to the NT database to run the consensus genome pipeline.";
     } else if (!coverageVizEnabled) {
       return "Consensus genome pipeline only available when coverage visualization is available.";
@@ -223,9 +237,7 @@ class HoverActions extends React.Component {
   };
 
   // Render the hover action according to metadata.
-  renderHoverAction = hoverAction => {
-    const { sampleId } = this.props;
-
+  const renderHoverAction = hoverAction => {
     let trigger, tooltipMessage;
     const IconComponent = hoverAction.iconComponentClass;
 
@@ -284,26 +296,23 @@ class HoverActions extends React.Component {
     );
   };
 
-  render() {
-    const { className } = this.props;
-
-    return (
-      <span className={cx(cs.hoverActions, className)}>
-        {this.getHoverActions().map(this.renderHoverAction)}
-      </span>
-    );
-  }
-}
+  return (
+    <span className={cx(cs.hoverActions, className)}>
+      {getHoverActions().map(renderHoverAction)}
+    </span>
+  );
+};
 
 HoverActions.propTypes = {
-  blastEnabled: PropTypes.bool,
   className: PropTypes.string,
   consensusGenomeEnabled: PropTypes.bool,
   contigVizEnabled: PropTypes.bool,
   coverageVizEnabled: PropTypes.bool,
   fastaEnabled: PropTypes.bool,
   ncbiEnabled: PropTypes.bool,
-  ntContigsAvailable: PropTypes.bool,
+  ntContigs: PropTypes.number,
+  ntReads: PropTypes.number,
+  onBlastClick: PropTypes.func.isRequired,
   onConsensusGenomeClick: PropTypes.func.isRequired,
   onContigVizClick: PropTypes.func.isRequired,
   onCoverageVizClick: PropTypes.func.isRequired,
@@ -324,7 +333,5 @@ HoverActions.propTypes = {
   taxName: PropTypes.string,
   taxSpecies: PropTypes.array,
 };
-
-HoverActions.contextType = UserContext;
 
 export default HoverActions;
