@@ -30,7 +30,17 @@ import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { Table } from "~/components/visualizations/table";
 import { IconInsightSmall } from "~ui/icons";
 import HoverActions from "./HoverActions";
-import { REPORT_TABLE_COLUMNS } from "./constants";
+import {
+  REPORT_TABLE_COLUMNS,
+  TAX_LEVEL_GENUS,
+  TAX_LEVEL_SPECIES,
+  SPECIES_LEVEL_INDEX,
+  GENUS_LEVEL_INDEX,
+  ANNOTATION_HIT,
+  ANNOTATION_NOT_A_HIT,
+  ANNOTATION_INCONCLUSIVE,
+  ANNOTATION_NONE,
+} from "./constants";
 import cs from "./report_table.scss";
 
 // Values for null values when sorting ascending and descending
@@ -377,21 +387,19 @@ class ReportTable extends React.Component {
   renderName = ({ cellData, rowData }) => {
     const { allowedFeatures = [] } = this.context || {};
     const { displayMergedNtNrValue, onTaxonNameClick } = this.props;
-
     let childrenCount = 0;
-    if (rowData.taxLevel === "genus") {
+    if (rowData.taxLevel === TAX_LEVEL_GENUS) {
       childrenCount = displayMergedNtNrValue
         ? filter(species => species["merged_nt_nr"], rowData.filteredSpecies)
             .length
         : rowData.filteredSpecies.length;
     }
+
     return (
       rowData && (
         <div className={cs.taxonContainer}>
           {allowedFeatures.includes(ANNOTATION_FEATURE) && (
-            <span className={cs.annotationLabel}>
-              <AnnotationLabel />
-            </span>
+            <AnnotationLabel type={ANNOTATION_NONE} />
           )}
           <span
             className={cx(cs.taxonName, !!cellData || cs.missingName)}
@@ -399,22 +407,45 @@ class ReportTable extends React.Component {
           >
             {cellData || rowData.name}
           </span>
-          {rowData.taxLevel === "genus" &&
+          {rowData.taxLevel === TAX_LEVEL_GENUS &&
             (rowData.category ? (
-              <span
-                className={cs.countInfo}
-              >{`(${childrenCount} ${getCategoryAdjective(
-                rowData.category
-              )} species)`}</span>
+              <span className={cs.countInfo}>
+                {`(${childrenCount} ${getCategoryAdjective(
+                  rowData.category
+                )} species`}
+                {/* Only show a colon if needed */}
+                {(rowData.pathogens ||
+                  allowedFeatures.includes(ANNOTATION_FEATURE)) && (
+                  <span>:</span>
+                )}
+                {/* Show pathogen and annotation counts */}
+                {rowData.pathogens && (
+                  <PathogenPreview tag2Count={rowData.pathogens} />
+                )}
+                {allowedFeatures.includes(ANNOTATION_FEATURE) && (
+                  <span>
+                    {/* FIXME: hardcoded for now */}
+                    <AnnotationLabel type={ANNOTATION_HIT} isSmall={true} />1
+                    <AnnotationLabel
+                      type={ANNOTATION_NOT_A_HIT}
+                      isSmall={true}
+                    />
+                    1
+                    <AnnotationLabel
+                      type={ANNOTATION_INCONCLUSIVE}
+                      isSmall={true}
+                    />
+                    1
+                  </span>
+                )}
+                {`)`}
+              </span>
             ) : (
               <span className={cs.countInfo}>
                 {`(${childrenCount} species)`}
               </span>
             ))}
           <span>
-            {rowData.pathogens && (
-              <PathogenPreview tag2Count={rowData.pathogens} />
-            )}
             {rowData.pathogenTag && (
               <PathogenLabel type={rowData.pathogenTag} />
             )}
@@ -429,7 +460,7 @@ class ReportTable extends React.Component {
     const { expandedGenusIds } = this.state;
     return (
       <div className={cs.expandIcon}>
-        {rowData.taxLevel === "genus" ? (
+        {rowData.taxLevel === TAX_LEVEL_GENUS ? (
           <i
             className={cx(
               "fa",
@@ -673,7 +704,11 @@ class ReportTable extends React.Component {
       <HoverActions
         className={cs.hoverActions}
         taxId={rowData.taxId}
-        taxLevel={rowData.taxLevel === "species" ? 1 : 2}
+        taxLevel={
+          rowData.taxLevel === TAX_LEVEL_SPECIES
+            ? SPECIES_LEVEL_INDEX
+            : GENUS_LEVEL_INDEX
+        }
         taxName={rowData.name}
         taxCommonName={rowData.common_name}
         taxSpecies={rowData.species}
@@ -767,7 +802,7 @@ class ReportTable extends React.Component {
         // note: a species row has a field .genus that points to their genus
         rowData =>
           rowData.genus
-            ? getOr(nullValue, ["genus"].concat(path), rowData)
+            ? getOr(nullValue, [TAX_LEVEL_GENUS].concat(path), rowData)
             : getOr(nullValue, path, rowData),
         // 2nd value: the genus tax id
         // this value guarantees that we keep species within their genus, even if the first value is duplicated

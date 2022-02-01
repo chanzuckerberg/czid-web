@@ -6,6 +6,10 @@ import IconAlert from "./IconAlert";
 import IconAlertSmall from "./IconAlertSmall";
 import IconAlignmentSmall from "./IconAlignmentSmall";
 import IconAnalyzeFigure from "./IconAnalyzeFigure";
+import IconAnnotationCheck from "./IconAnnotationCheck";
+import IconAnnotationCross from "./IconAnnotationCross";
+import IconAnnotationOutline from "./IconAnnotationOutline";
+import IconAnnotationQuestion from "./IconAnnotationQuestion";
 import IconArrowDownSmall from "./IconArrowDownSmall";
 import IconArrowPipelineStage from "./IconArrowPipelineStage";
 import IconArrowRight from "./IconArrowRight";
@@ -87,6 +91,10 @@ export const ICONS_TAXONOMY = {
     IconAlertSmall,
     IconAlignmentSmall,
     IconAnalyzeFigure,
+    IconAnnotationCheck,
+    IconAnnotationCross,
+    IconAnnotationOutline,
+    IconAnnotationQuestion,
     IconArrowDownSmall,
     IconArrowPipelineStage,
     IconArrowUpSmall,

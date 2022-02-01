@@ -105,6 +105,8 @@ import {
   TAXON_GENERAL_FIELDS,
   TREE_METRICS,
   URL_FIELDS,
+  TAX_LEVEL_GENUS,
+  TAX_LEVEL_SPECIES,
 } from "./constants";
 import csSampleMessage from "./sample_message.scss";
 import cs from "./sample_view.scss";
@@ -465,7 +467,7 @@ class SampleView extends React.Component {
           return merge(speciesWithAdjustedMetricPrecision, {
             highlighted: isHighlighted,
             taxId: speciesTaxId,
-            taxLevel: "species",
+            taxLevel: TAX_LEVEL_SPECIES,
           });
         });
         reportData.push(
@@ -473,7 +475,7 @@ class SampleView extends React.Component {
             highlightedChildren: hasHighlightedChildren,
             pathogens: generaPathogenCounts[genusTaxId],
             taxId: genusTaxId,
-            taxLevel: "genus",
+            taxLevel: TAX_LEVEL_GENUS,
             species: speciesData,
           })
         );

@@ -190,3 +190,13 @@ export const SARS_COV_2_ACCESSION_ID = "MN908947.3";
 export const CREATED_STATE = "CREATED";
 export const RUNNING_STATE = "RUNNING";
 export const SUCCEEDED_STATE = "SUCCEEDED";
+
+// Taxonomy levels
+export const TAX_LEVEL_GENUS = "genus";
+export const TAX_LEVEL_SPECIES = "species";
+
+// Annotation types
+export const ANNOTATION_HIT = "hit";
+export const ANNOTATION_NOT_A_HIT = "cross";
+export const ANNOTATION_INCONCLUSIVE = "inconclusive";
+export const ANNOTATION_NONE = "none";

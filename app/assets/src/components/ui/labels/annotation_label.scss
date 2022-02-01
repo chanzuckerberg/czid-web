@@ -1,7 +1,23 @@
 @import "~styles/themes/elements";
+@import "~czifui/dist/variables";
 
 .annotationIcon {
   &:hover {
     cursor: pointer;
   }
+}
+
+.annotationIconLarge {
+  height: $sds-icon-sizes-s-height;
+  width: $sds-icon-sizes-s-height;
+  margin-right: $sds-spaces-s;
+  vertical-align: -10%;
+}
+
+.annotationIconSmall {
+  height: $sds-icon-sizes-xs-height;
+  width: $sds-icon-sizes-xs-height;
+  margin-left: $sds-spaces-s;
+  margin-right: $sds-spaces-xxxs;
+  vertical-align: -4%;
 }
