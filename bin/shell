@@ -46,12 +46,25 @@ ec2_client = Aws::EC2::Client.new(region: 'us-west-2')
 iam_client = Aws::IAM::Client.new(region: 'us-west-2')
 aws_account_alias = iam_client.list_account_aliases().account_aliases[0]
 
+# Custom settings depending on environment
 cluster = if env == "sandbox" or aws_account_alias == "idseq-prod"
             "idseq-#{env}-ecs"
           else
             # TODO(2020-01-23): Rename staging clusters to new format (IDSEQ-2155).
             env
           end
+
+service = if env == "sandbox"
+            "czid-sandbox-web"
+          else
+            service
+          end
+
+service_ecs = if env == "sandbox"
+                "idseq-sandbox-web"
+              else
+                service
+              end
 
 task = ecs_client.list_tasks(cluster: cluster, service_name: service).task_arns.first
 
@@ -63,4 +76,4 @@ resp = ec2_client.describe_instances(instance_ids: [instances.container_instance
 
 private_ip = resp.reservations.first.instances.first.private_ip_address
 
-exec %(ssh #{keep_alive ? "-o ServerAliveInterval=60" : ""} -t #{private_ip} "sudo docker exec -it \\`sudo docker ps | grep ecs-#{service} | head -1 | awk '{print \\$NF}'\\` bin/entrypoint.sh #{command} ")
+exec %(ssh #{keep_alive ? "-o ServerAliveInterval=60" : ""} -t #{private_ip} "sudo docker exec -it \\`sudo docker ps | grep ecs-#{service_ecs} | head -1 | awk '{print \\$NF}'\\` bin/entrypoint.sh #{command} ")
