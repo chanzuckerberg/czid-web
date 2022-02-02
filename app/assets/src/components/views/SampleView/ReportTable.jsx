@@ -713,6 +713,7 @@ class ReportTable extends React.Component {
         taxName={rowData.name}
         taxCommonName={rowData.common_name}
         taxSpecies={rowData.species}
+        taxCategory={rowData.category}
         ncbiEnabled={validTaxId}
         ntContigs={ntContigs}
         ntReads={ntReads}
