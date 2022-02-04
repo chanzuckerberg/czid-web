@@ -95,31 +95,31 @@
   text-align: left;
 
   .taxonContainer {
-    margin-left: $space-l;
-
+    display: flex;
+    margin-left: $sds-spaces-l;
     .annotationLabel {
-      width: $icon-s;
-      height: $icon-xs;
-      margin-right: $space-s;
+      margin-right: $sds-spaces-s;
     }
 
-    .taxonName {
-      white-space: normal;
-      &:hover {
-        cursor: pointer;
+    .taxonInfo {
+      .taxonName {
+        white-space: normal;
+        &:hover {
+          cursor: pointer;
+        }
       }
-    }
 
-    .missingName {
-      color: $sds-color-gray-500;
-    }
+      .missingName {
+        color: $sds-color-gray-500;
+      }
 
-    .countInfo {
-      font-style: italic;
-      font-weight: $font-weight-regular;
-      margin-left: $sds-spaces-xs;
-      color: $sds-color-gray-500;
-      white-space: normal;
+      .countInfo {
+        font-style: italic;
+        font-weight: $font-weight-regular;
+        margin-left: $sds-spaces-xs;
+        color: $sds-color-gray-500;
+        white-space: normal;
+      }
     }
   }
 

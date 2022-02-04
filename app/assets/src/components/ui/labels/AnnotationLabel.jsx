@@ -50,6 +50,7 @@ const AnnotationLabel = ({ type, isSmall = false }) => {
 
   return (
     <BasicPopup
+      className={!isSmall && cs.annotationPopup}
       trigger={label}
       content={description}
       basic={false}
@@ -60,7 +61,12 @@ const AnnotationLabel = ({ type, isSmall = false }) => {
 };
 
 AnnotationLabel.propTypes = {
-  type: PropTypes.string,
+  type: PropTypes.oneOf([
+    ANNOTATION_HIT,
+    ANNOTATION_NOT_A_HIT,
+    ANNOTATION_INCONCLUSIVE,
+    ANNOTATION_NONE,
+  ]),
   isSmall: PropTypes.bool,
 };
 

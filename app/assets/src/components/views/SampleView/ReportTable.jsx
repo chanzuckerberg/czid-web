@@ -25,6 +25,7 @@ import PropTypes from "~/components/utils/propTypes";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import AnnotationPreview from "~/components/views/report/AnnotationPreview";
 import PathogenPreview from "~/components/views/report/PathogenPreview";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { Table } from "~/components/visualizations/table";
@@ -394,63 +395,64 @@ class ReportTable extends React.Component {
             .length
         : rowData.filteredSpecies.length;
     }
+    const displayAnnotations =
+      allowedFeatures.includes(ANNOTATION_FEATURE) && "annotation" in rowData;
+
+    const displayAnnotationPreviews =
+      allowedFeatures.includes(ANNOTATION_FEATURE) &&
+      "species_annotations" in rowData &&
+      (rowData.species_annotations[ANNOTATION_HIT] > 0 ||
+        rowData.species_annotations[ANNOTATION_NOT_A_HIT] > 0 ||
+        rowData.species_annotations[ANNOTATION_INCONCLUSIVE] > 0);
 
     return (
       rowData && (
         <div className={cs.taxonContainer}>
-          {allowedFeatures.includes(ANNOTATION_FEATURE) && (
-            <AnnotationLabel type={ANNOTATION_NONE} />
+          {displayAnnotations && (
+            <div className={cs.annotationLabel}>
+              <AnnotationLabel type={rowData.annotation || ANNOTATION_NONE} />
+            </div>
           )}
-          <span
-            className={cx(cs.taxonName, !!cellData || cs.missingName)}
-            onClick={() => onTaxonNameClick({ ...rowData })}
-          >
-            {cellData || rowData.name}
-          </span>
-          {rowData.taxLevel === TAX_LEVEL_GENUS &&
-            (rowData.category ? (
-              <span className={cs.countInfo}>
-                {`(${childrenCount} ${getCategoryAdjective(
-                  rowData.category
-                )} species`}
-                {/* Only show a colon if needed */}
-                {(rowData.pathogens ||
-                  allowedFeatures.includes(ANNOTATION_FEATURE)) && (
-                  <span>:</span>
-                )}
-                {/* Show pathogen and annotation counts */}
-                {rowData.pathogens && (
-                  <PathogenPreview tag2Count={rowData.pathogens} />
-                )}
-                {allowedFeatures.includes(ANNOTATION_FEATURE) && (
-                  <span>
-                    {/* FIXME: hardcoded for now */}
-                    <AnnotationLabel type={ANNOTATION_HIT} isSmall={true} />1
-                    <AnnotationLabel
-                      type={ANNOTATION_NOT_A_HIT}
-                      isSmall={true}
+          <div className={cs.taxonInfo}>
+            <span
+              className={cx(cs.taxonName, !!cellData || cs.missingName)}
+              onClick={() => onTaxonNameClick({ ...rowData })}
+            >
+              {cellData || rowData.name}
+            </span>
+            {rowData.taxLevel === TAX_LEVEL_GENUS &&
+              (rowData.category ? (
+                <span className={cs.countInfo}>
+                  {`( ${childrenCount} ${getCategoryAdjective(
+                    rowData.category
+                  )} species`}
+                  {/* Only show a colon if needed */}
+                  {(rowData.pathogens || displayAnnotationPreviews) && (
+                    <span>:</span>
+                  )}
+                  {/* Show pathogen and annotation counts */}
+                  {rowData.pathogens && (
+                    <PathogenPreview tag2Count={rowData.pathogens} />
+                  )}
+                  {displayAnnotations && (
+                    <AnnotationPreview
+                      tag2Count={rowData.species_annotations}
                     />
-                    1
-                    <AnnotationLabel
-                      type={ANNOTATION_INCONCLUSIVE}
-                      isSmall={true}
-                    />
-                    1
-                  </span>
-                )}
-                {`)`}
-              </span>
-            ) : (
-              <span className={cs.countInfo}>
-                {`(${childrenCount} species)`}
-              </span>
-            ))}
-          <span>
-            {rowData.pathogenTag && (
-              <PathogenLabel type={rowData.pathogenTag} />
-            )}
-          </span>
-          <span>{this.renderHoverActions({ rowData })}</span>
+                  )}
+                  {` )`}
+                </span>
+              ) : (
+                <span className={cs.countInfo}>
+                  {`(${childrenCount} species)`}
+                </span>
+              ))}
+            <span>
+              {rowData.pathogenTag && (
+                <PathogenLabel type={rowData.pathogenTag} />
+              )}
+            </span>
+            <span>{this.renderHoverActions({ rowData })}</span>
+          </div>
         </div>
       )
     );

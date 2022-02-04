@@ -1,0 +1,17 @@
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.previewContainer {
+  white-space: nowrap;
+
+  .tagContainer {
+    @include font-body-xxs;
+    color: $sds-color-gray-black;
+    font-style: normal;
+    margin-left: $sds-spaces-s;
+
+    .count {
+      margin-left: $sds-spaces-xxxs;
+    }
+  }
+}

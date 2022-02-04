@@ -1,5 +1,9 @@
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
 .idseq-ui.pathogen-preview {
-  margin-left: 7px;
+  margin-left: $sds-spaces-xs;
+
   .ui.circular {
     margin-left: -1px;
     margin-right: -1px;
@@ -15,8 +19,8 @@
   }
 
   .pathogen-count {
+    @include font-body-xxs;
+    color: $sds-color-gray-black;
     margin-left: 3px;
-    font-size: 12px;
-    font-weight: bold;
   }
 }

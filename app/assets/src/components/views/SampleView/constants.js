@@ -197,6 +197,6 @@ export const TAX_LEVEL_SPECIES = "species";
 
 // Annotation types
 export const ANNOTATION_HIT = "hit";
-export const ANNOTATION_NOT_A_HIT = "cross";
+export const ANNOTATION_NOT_A_HIT = "not_a_hit";
 export const ANNOTATION_INCONCLUSIVE = "inconclusive";
 export const ANNOTATION_NONE = "none";
