@@ -198,7 +198,7 @@ class SfnCgPipelineDispatchService
                             # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
                             primer_set: nanopore_primer_set,
-                            primer_schemes: "s3://idseq-public-references/consensus-genome/artic-primer-schemes_v4.tar.gz",
+                            primer_schemes: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic-primer-schemes_v4.tar.gz",
                           }
                         elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
                           # illumina sars-cov-2 cg

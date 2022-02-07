@@ -2,7 +2,7 @@
 # Goal: Update the global pathogen list
 #
 # How to use:
-#   1. Upload the global pathogen list csv to idseq-public-references/pathogen-list in idseq-prod.
+#   1. Upload the global pathogen list csv to czid-public-references/pathogen-list in idseq-prod.
 #      CSV name: global_list_{version}.csv
 #      Required CSV headers: Species, taxID, Source, Footnote
 #   2. Run `rake update_pathogen_list'.

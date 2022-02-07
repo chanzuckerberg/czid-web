@@ -6,8 +6,8 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
   let(:s3_samples_key_prefix) { "samples/%<project_id>s/%<sample_id>s" }
   let(:s3_sample_input_files_path) { "s3://#{fake_samples_bucket}/#{s3_samples_key_prefix}/fastqs/%<input_file_name>s" }
   let(:fake_alignment_config) { AlignmentConfig::DEFAULT_NAME }
-  let(:s3_nr_db_path) { "s3://idseq-public-references/ncbi-sources/#{fake_alignment_config}/nr" }
-  let(:s3_nr_loc_db_path) { "s3://idseq-public-references/alignment_data/#{fake_alignment_config}/nr_loc.db" }
+  let(:s3_nr_db_path) { "s3://czid-public-references/ncbi-sources/#{fake_alignment_config}/nr" }
+  let(:s3_nr_loc_db_path) { "s3://czid-public-references/alignment_data/#{fake_alignment_config}/nr_loc.db" }
   let(:sfn_name) { "idseq-test-%<project_id>s-%<sample_id>s-cg-%<time>s" }
   let(:fake_account_id) { "123456789012" }
   let(:fake_samples_bucket) { "fake-samples-bucket" }
