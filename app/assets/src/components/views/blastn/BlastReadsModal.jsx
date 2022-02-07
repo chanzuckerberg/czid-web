@@ -1,11 +1,12 @@
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
 
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
+import BlastRedirectionModal from "./BlastRedirectionModal";
 
 import cs from "./blast_reads_modal.scss";
 
@@ -16,6 +17,10 @@ const BlastReadsModal = ({
   longestReadAlignmentLength,
   taxonName,
 }) => {
+  const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
+    false
+  );
+
   const renderReadsIdentificationSection = () => (
     <div className={cs.readsIdentification}>
       <div className={cs.description}>
@@ -34,9 +39,7 @@ const BlastReadsModal = ({
         <PrimaryButton
           text="Continue"
           rounded
-          onClick={() =>
-            console.error("Need to implement BlastRedirectionModal")
-          }
+          onClick={() => setShowBlastRedirectModal(true)}
         />
       </div>
       <div className={cs.item}>
@@ -76,6 +79,12 @@ const BlastReadsModal = ({
         {renderReadsIdentificationSection()}
         {renderActions()}
       </div>
+      {showBlastRedirectionModal && (
+        <BlastRedirectionModal
+          sequences={["still need the reads"]}
+          onClose={() => setShowBlastRedirectModal(false)}
+        />
+      )}
     </Modal>
   );
 };

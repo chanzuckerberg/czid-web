@@ -13,13 +13,37 @@
  * - This is in a JS function mostly so that JSDoc can parse it.<br>
  */
 function EventDictionary() {
-  /** The user clicked "Learn more" in the Blast Contigs Modal */
+  /** The user clicked "Learn more" in the BLAST Contigs Modal */
   this.BLAST_CONTIGS_MODAL_LEARN_MORE_CLICKED =
     "BLAST_CONTIGS_MODAL_LEARN_MORE_CLICKED";
+
+  /** The user clicked "Continue" in the BLAST Contigs Modal */
+  this.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED =
+    "BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED";
+
+  /** The user clicked "Close" in the BLAST Contigs Modal */
+  this.BLAST_CONTIGS_MODAL_CLOSE_BUTTON_CLICKED =
+    "BLAST_CONTIGS_MODAL_CLOSE_BUTTON_CLICKED";
 
   /** The user clicked "Learn more" in the Blast Reads Modal */
   this.BLAST_READS_MODAL_LEARN_MORE_CLICKED =
     "BLAST_READS_MODAL_LEARN_MORE_CLICKED";
+
+  /** The user clicked the "Conditions of Use" link in the BLAST redirection modal */
+  this.BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED =
+    "BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED";
+
+  /** The user clicked the checkbox to automatically redirect them to NCBI in the future (for the current session)  */
+  this.BLAST_REDIRECTION_MODAL_AUTO_REDIRECT_CHECKBOX_CHECKED =
+    "BLAST_REDIRECTION_MODAL_AUTO_REDIRECT_CHECKBOX_CHECKED";
+
+  /** The user clicked "Continue" in the BLAST Redirection Modal */
+  this.BLAST_REDIRECTION_MODAL_CONTINUE_BUTTON_CLICKED =
+    "BLAST_REDIRECTION_MODAL_CONTINUE_BUTTON_CLICKED";
+
+  /** The user clicked "Cancel" in the BLAST Redirection Modal */
+  this.BLAST_REDIRECTION_MODAL_CANCEL_BUTTON_CLICKED =
+    "BLAST_REDIRECTION_MODAL_CANCEL_BUTTON_CLICKED";
 
   /** The bulk download creation failed */
   this.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED =

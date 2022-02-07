@@ -1,0 +1,61 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.blastRedirectionModal {
+  .logo {
+    margin-bottom: $sds-spaces-l;
+    height: 45px;
+    width: 90px;
+  }
+
+  .title {
+    font: $sds-font-header-xl-600-font;
+    margin-bottom: $sds-spaces-xl;
+    color: $sds-color-gray-black;
+  }
+
+  .text {
+    font: $sds-font-body-s-400-font;
+    margin-bottom: $sds-spaces-l;
+    color: $sds-color-gray-500;
+  }
+
+  .autoRedirect {
+    font: $sds-font-body-xs-400-font;
+    display: flex;
+    gap: $sds-spaces-s;
+    align-items: center;
+    color: $sds-color-gray-500;
+  }
+
+  .actions {
+    margin-top: $sds-spaces-m;
+    display: flex;
+
+    .item {
+      &:not(:first-child) {
+        margin-left: $sds-spaces-xs;
+      }
+
+      &:not(:last-child) {
+        margin-right: $sds-spaces-xs;
+      }
+    }
+
+    .loadingIcon {
+      fill: $sds-color-gray-500;
+      width: $icon-l;
+      height: $icon-l;
+      vertical-align: middle;
+      margin-right: $sds-spaces-xxs;
+    }
+
+    .loading {
+      @include font-body-s;
+      color: $sds-color-gray-500;
+      vertical-align: middle;
+    }
+  }
+}

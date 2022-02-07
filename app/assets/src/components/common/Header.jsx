@@ -218,7 +218,10 @@ const UserMenuDropDown = ({
   userName,
   allowedFeatures,
 }) => {
-  const signOut = () => postToUrlWithCSRF(signOutEndpoint);
+  const signOut = () => {
+    sessionStorage.clear();
+    postToUrlWithCSRF(signOutEndpoint);
+  };
 
   const renderItems = adminUser => {
     let userDropdownItems = [];

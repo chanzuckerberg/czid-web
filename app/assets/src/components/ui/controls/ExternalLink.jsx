@@ -15,6 +15,7 @@ ExternalLink.propTypes = forbidExtraProps({
   children: PropTypes.node,
   className: PropTypes.string,
   href: PropTypes.string,
+  onClick: PropTypes.func,
 });
 
 export default ExternalLink;

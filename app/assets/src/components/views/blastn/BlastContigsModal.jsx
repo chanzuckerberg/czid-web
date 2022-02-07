@@ -1,21 +1,29 @@
 import { Tooltip } from "czifui";
-import { map, size } from "lodash/fp";
+import { compact, map, size } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
-import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import {
+  withAnalytics,
+  logAnalyticsEvent,
+  ANALYTICS_EVENT_NAMES,
+} from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import BlastContigsTable from "./BlastContigsTable";
+import BlastRedirectionModal from "./BlastRedirectionModal";
 
 import cs from "./blast_contigs_modal.scss";
 import {
   BLAST_CONTIG_ROW_WIDTH,
   BLAST_CONTIG_HEADER_ROW_WIDTH,
+  SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY,
 } from "./constants";
+import { prepareBlastQuery } from "./utils";
 
 const BlastContigsModal = ({
   onClose,
@@ -27,6 +35,10 @@ const BlastContigsModal = ({
 }) => {
   const [contigs, setContigs] = useState([]);
   const [selectedContigIds, setSelectedContigIds] = useState(new Set());
+  const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
+    false
+  );
+  const [blastUrl, setBlastUrl] = useState("");
 
   useEffect(async () => {
     const { contigs } = await fetchLongestContigsForTaxonId({
@@ -37,6 +49,21 @@ const BlastContigsModal = ({
 
     setContigs(contigs);
   }, []);
+
+  useEffect(() => {
+    const contigSequences = compact(
+      map(
+        contig =>
+          selectedContigIds.has(contig["contig_id"]) &&
+          contig["fasta_sequence"],
+        contigs
+      )
+    ).join("");
+
+    const blastUrl = prepareBlastQuery({ sequences: contigSequences });
+
+    setBlastUrl(blastUrl);
+  }, [selectedContigIds]);
 
   const handleAllContigsSelected = isChecked =>
     setSelectedContigIds(
@@ -81,6 +108,79 @@ const BlastContigsModal = ({
     );
   };
 
+  const handleContinue = () => {
+    const shouldAutoRedirectBlast =
+      JSON.parse(
+        sessionStorage.getItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY)
+      ) || false;
+
+    if (shouldAutoRedirectBlast) {
+      // Do not show the BlastRedirectionModal if the user selected the
+      // "Automatically redirect in the future." option. Instead, automatically
+      // redirect them to the BLAST page.
+      openUrlInNewTab(blastUrl);
+      logBlastEvent({
+        analyticEventName:
+          ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED,
+        automaticallyRedirectedToNCBI: true,
+      });
+      onClose();
+    } else {
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED,
+        {
+          automaticallyRedirectedToNCBI: false,
+          numberOfContigs: size(selectedContigIds),
+        }
+      );
+      setShowBlastRedirectModal(true);
+    }
+  };
+
+  const handleRedirectionModalClose = () => setShowBlastRedirectModal(false);
+
+  const handleRedirectionModalContinue = shouldAutoRedirectBlastForCurrentSession => {
+    shouldAutoRedirectBlastForCurrentSession &&
+      autoRedirectBlastForCurrentSession();
+
+    openUrlInNewTab(blastUrl);
+
+    logBlastEvent({
+      analyticEventName:
+        ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONTINUE_BUTTON_CLICKED,
+      automaticallyRedirectedToNCBI: shouldAutoRedirectBlastForCurrentSession,
+    });
+    setShowBlastRedirectModal(false);
+    onClose();
+  };
+
+  const logBlastEvent = ({
+    analyticEventName,
+    automaticallyRedirectedToNCBI,
+  }) => {
+    const totalSequenceLengthBlasted = size(
+      compact(
+        map(
+          contig =>
+            selectedContigIds.has(contig["contig_id"]) &&
+            contig["fasta_sequence"],
+          contigs
+        )
+      ).join()
+    );
+
+    logAnalyticsEvent(analyticEventName, {
+      automaticallyRedirectedToNCBI,
+      sequenceLength: totalSequenceLengthBlasted,
+      numberOfContigs: size(selectedContigIds),
+      blastUrlLength: size(blastUrl),
+    });
+  };
+
+  const autoRedirectBlastForCurrentSession = () => {
+    sessionStorage.setItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY, true);
+  };
+
   const renderActions = () => (
     <div className={cs.actions}>
       <div className={cs.item}>
@@ -98,9 +198,7 @@ const BlastContigsModal = ({
           <PrimaryButton
             text="Continue"
             rounded
-            onClick={() =>
-              console.error("Need to implement BlastRedirectionModal")
-            }
+            onClick={() => handleContinue()}
           />
         )}
       </div>
@@ -111,7 +209,16 @@ const BlastContigsModal = ({
   );
 
   return (
-    <Modal open={open} onClose={onClose} tall narrow xlCloseIcon>
+    <Modal
+      open={open}
+      onClose={withAnalytics(
+        onClose,
+        ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CLOSE_BUTTON_CLICKED
+      )}
+      tall
+      narrow
+      xlCloseIcon
+    >
       <div className={cs.blastContigsModal}>
         <div className={cs.header}>BLASTN Contig</div>
         <div className={cs.taxonName}>{taxonName}</div>
@@ -148,6 +255,13 @@ const BlastContigsModal = ({
         {renderContigsTable()}
         {renderActions()}
       </div>
+      {showBlastRedirectionModal && (
+        <BlastRedirectionModal
+          open
+          onClose={handleRedirectionModalClose}
+          onContinue={handleRedirectionModalContinue}
+        />
+      )}
     </Modal>
   );
 };
