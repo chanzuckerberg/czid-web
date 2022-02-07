@@ -6,6 +6,7 @@ class ScatterPlot extends React.Component {
     this.renderD3(this.props);
   }
 
+  // eslint-disable-next-line camelcase
   UNSAFE_componentWillReceiveProps(nextProps) {
     d3.select(this.container)
       .select("svg")

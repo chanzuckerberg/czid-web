@@ -88,6 +88,7 @@ export default class TaxonSelector extends React.Component {
 TaxonSelector.propTypes = {
   addTaxonTrigger: PropTypes.object,
   availableTaxa: PropTypes.array,
+  sampleIds: PropTypes.array,
   selectedTaxa: PropTypes.object,
   onTaxonSelectionChange: PropTypes.func,
   onTaxonSelectionClose: PropTypes.func,

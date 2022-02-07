@@ -40,7 +40,7 @@ const PathogenLabel = ({ type }) => {
   const { allowedFeatures } = userContext || {};
 
   if (
-    !CATEGORIES.hasOwnProperty(type) &&
+    !(type in CATEGORIES) &&
     !allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE)
   ) {
     return null;

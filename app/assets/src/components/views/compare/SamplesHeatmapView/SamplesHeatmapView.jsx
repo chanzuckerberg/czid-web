@@ -1054,6 +1054,7 @@ class SamplesHeatmapView extends React.Component {
       Object.values(allTaxonDetails).forEach(taxon => {
         taxonFilterState[taxon["index"]] =
           taxonFilterState[taxon["index"]] || {};
+        // eslint-disable-next-line standard/computed-property-even-spacing
         taxonFilterState[taxon["index"]][
           sample["index"]
         ] = this.taxonThresholdFiltersCheck(sample["index"], taxon, allData);
@@ -1721,8 +1722,8 @@ class SamplesHeatmapView extends React.Component {
       <div>
         <span className={cs.highlight}>
           {invalidSampleNames.length} sample
-          {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
-          heatmap
+          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in
+          the heatmap
         </span>
         , because they either failed or are still processing:
       </div>
@@ -1931,12 +1932,14 @@ SamplesHeatmapView.propTypes = {
   metrics: PropTypes.array,
   prefilterConstants: PropTypes.object,
   removedTaxonIds: PropTypes.array,
+  projectIds: PropTypes.array,
   sampleIds: PropTypes.array,
   sampleIdsToProjectIds: PropTypes.array,
   savedParamValues: PropTypes.object,
   subcategories: PropTypes.object,
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object,
+  updateDiscoveryProjectIds: PropTypes.func,
 };
 
 SamplesHeatmapView.contextType = UserContext;

@@ -38,6 +38,7 @@ const NewsEntry = props => {
 };
 
 const PublicationsAndNewsPropTypes = {
+  index: PropTypes.number,
   publicationLink: PropTypes.string,
   publicationDate: PropTypes.string,
   publicationTitle: PropTypes.string,

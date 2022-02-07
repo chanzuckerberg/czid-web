@@ -91,6 +91,10 @@ class RawResultsFolder extends React.Component {
 
 RawResultsFolder.propTypes = {
   samplePath: PropTypes.string,
+  sampleName: PropTypes.string,
+  projectName: PropTypes.string,
+  filePath: PropTypes.string,
+  fileList: PropTypes.array,
 };
 
 export default RawResultsFolder;

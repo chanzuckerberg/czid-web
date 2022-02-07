@@ -456,7 +456,7 @@ const ConsensusGenomeView = ({
 
       // TODO: Convert to send in camelCase from the backend.
       const key = camelCase(col["dataKey"]);
-      if (FIELDS_METADATA.hasOwnProperty(key)) {
+      if (key in FIELDS_METADATA) {
         col["columnData"] = FIELDS_METADATA[key];
         col["label"] = FIELDS_METADATA[key].label;
       }

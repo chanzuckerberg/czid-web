@@ -167,10 +167,7 @@ class TaxonTreeVis extends React.Component {
 
       for (let metric in this.metrics) {
         node.data.values || (node.data.values = {});
-        if (
-          this.metrics.hasOwnProperty(metric) &&
-          !node.data.values.hasOwnProperty(metric)
-        ) {
+        if (!(metric in node.data.values)) {
           node.data.values[metric] = this.metrics[metric].agg(
             node.children
               .filter(child => child.data.values[metric])
@@ -277,23 +274,21 @@ class TaxonTreeVis extends React.Component {
     }
     let rows = [];
     for (let metric in this.metrics) {
-      if (this.metrics.hasOwnProperty(metric)) {
-        rows.push(
-          <span
-            key={`tt_${metric}`}
-            className={`taxon_tooltip__row ${
-              this.props.metric === metric ? "taxon_tooltip__row--active" : ""
-            }`}
-          >
-            <div className="taxon_tooltip__row__label">
-              {this.metrics[metric].label}:
-            </div>
-            <div className="taxon_tooltip__row__value">
-              {Math.round(node.data.values[metric]).toLocaleString()}
-            </div>
-          </span>
-        );
-      }
+      rows.push(
+        <span
+          key={`tt_${metric}`}
+          className={`taxon_tooltip__row ${
+            this.props.metric === metric ? "taxon_tooltip__row--active" : ""
+          }`}
+        >
+          <div className="taxon_tooltip__row__label">
+            {this.metrics[metric].label}:
+          </div>
+          <div className="taxon_tooltip__row__value">
+            {Math.round(node.data.values[metric]).toLocaleString()}
+          </div>
+        </span>
+      );
     }
 
     let name =

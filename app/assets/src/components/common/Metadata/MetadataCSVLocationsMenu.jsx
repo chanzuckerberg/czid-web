@@ -48,7 +48,7 @@ export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
       isRowHuman(row)
     );
 
-    if (matchedLocations.hasOwnProperty(locationName)) {
+    if (locationName in matchedLocations) {
       newMetadata.rows[rowIndex][locationMetadataType.name] = result;
     }
   });
@@ -88,6 +88,7 @@ class MetadataCSVLocationsMenu extends React.Component {
   applyToAll = sample => {
     const { metadata, locationMetadataType, onMetadataChange } = this.props;
 
+    // eslint-disable-next-line standard/computed-property-even-spacing
     const newValue = (find({ [NAME_COLUMN]: sample }, metadata.rows) || {})[
       locationMetadataType.name
     ];

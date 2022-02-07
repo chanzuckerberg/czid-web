@@ -417,7 +417,7 @@ export default function TermsOfUse() {
             If you have any questions, comments, or concerns with Terms, you may
             contact us at <a href="mailto:help@idseq.net">help@idseq.net</a>
           </React.Fragment>,
-          <p>
+          <p key={nanoid()}>
             Our mailing address is:
             <br />
             Chan Zuckerberg Initiative Foundation

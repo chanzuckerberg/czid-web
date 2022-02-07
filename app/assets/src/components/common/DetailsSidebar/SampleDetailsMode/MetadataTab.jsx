@@ -36,7 +36,7 @@ class MetadataTab extends React.Component {
     values(this.props.metadataTypes).forEach(field => {
       const name =
         field.group === null ? "Custom Metadata" : field.group + " Info";
-      if (nameToFields.hasOwnProperty(name)) {
+      if (name in nameToFields) {
         nameToFields[name].push(field.key);
       } else {
         nameToFields[name] = [field.key];

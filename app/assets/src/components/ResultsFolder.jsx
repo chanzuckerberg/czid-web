@@ -201,7 +201,7 @@ class ResultsFolder extends React.Component {
               <thead>
                 <tr>
                   <th className={cs.tableHeader}>
-                    Need an output that's not listed here?
+                    Need an output that&apos;s not listed here?
                   </th>
                 </tr>
               </thead>
@@ -221,8 +221,29 @@ class ResultsFolder extends React.Component {
   }
 }
 
+ConfigFile.propTypes = {
+  stageDagJson: PropTypes.object,
+};
+
+OutputFile.propTypes = {
+  file: PropTypes.object,
+};
+
+ResultsFolderStep.propTypes = {
+  step: PropTypes.object,
+};
+
+ResultsFolderStepList.propTypes = {
+  stepDict: PropTypes.object,
+};
+
 ResultsFolder.propTypes = {
+  filePath: PropTypes.string,
+  fileList: PropTypes.array,
   samplePath: PropTypes.string,
+  sampleName: PropTypes.string,
+  projectName: PropTypes.string,
+  rawResultsUrl: PropTypes.string,
 };
 
 export default ResultsFolder;

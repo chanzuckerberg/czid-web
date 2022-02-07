@@ -398,6 +398,7 @@ class MetadataManualInput extends React.Component {
     this.props.samplesAreNew
       ? get(
           "id",
+          // eslint-disable-next-line standard/computed-property-even-spacing
           this.state.hostGenomesByName[
             this.getMetadataValue(sample, "Host Organism")
           ]
@@ -405,6 +406,7 @@ class MetadataManualInput extends React.Component {
       : sample.host_genome_id;
 
   getSampleHostGenome = sample =>
+    // eslint-disable-next-line standard/computed-property-even-spacing
     this.state.hostGenomesByName[
       this.getMetadataValue(sample, "Host Organism")
     ];

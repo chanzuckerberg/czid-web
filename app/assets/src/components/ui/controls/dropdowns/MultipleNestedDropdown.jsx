@@ -65,7 +65,7 @@ class MultipleNestedDropdown extends React.Component {
     if (!suboptions1 || !suboptions2) return suboptions1 === suboptions2;
     if (Object.keys(suboptions1) !== Object.keys(suboptions2)) return false;
     for (let key in suboptions1) {
-      if (!suboptions2.hasOwnProperty(key)) return false;
+      if (!(key in suboptions2)) return false;
       if (!ArrayUtils.equal(suboptions1[key], suboptions2[key])) return false;
     }
     return true;

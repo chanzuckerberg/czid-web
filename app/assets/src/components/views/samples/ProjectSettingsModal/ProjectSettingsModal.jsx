@@ -168,6 +168,7 @@ ProjectSettingsModal.propTypes = {
   onProjectPublished: PropTypes.func,
   project: PropTypes.shape({
     id: PropTypes.number,
+    creator_id: PropTypes.number,
     name: PropTypes.string,
     public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
   }).isRequired,

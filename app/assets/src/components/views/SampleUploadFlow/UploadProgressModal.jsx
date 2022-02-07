@@ -145,6 +145,7 @@ export default class UploadProgressModal extends React.Component {
       workflows,
     } = this.props;
 
+    // eslint-disable-next-line camelcase
     const pipeline_execution_strategy = useStepFunctionPipeline
       ? PIPELINE_EXECUTION_STRATEGIES.step_function
       : PIPELINE_EXECUTION_STRATEGIES.directed_acyclic_graph;

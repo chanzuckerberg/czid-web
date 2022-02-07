@@ -1,4 +1,5 @@
 import _ from "lodash";
+import PropTypes from "prop-types";
 import React from "react";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
@@ -84,4 +85,9 @@ class AMRView extends React.Component {
     );
   }
 }
+
+AMRView.propTypes = {
+  amr: PropTypes.object,
+};
+
 export default AMRView;

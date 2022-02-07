@@ -13,6 +13,7 @@ import {
   sortBy,
 } from "lodash/fp";
 import memoize from "memoize-one";
+import { nanoid } from "nanoid";
 import React from "react";
 
 import { getProject, getSamples, getSamplesReadStats } from "~/api";
@@ -569,6 +570,7 @@ class QualityControl extends React.Component {
             <CategoricalLegend
               className={cs.inlineLegend}
               data={[stepLegend]}
+              key={nanoid()}
             />,
             normalize ? numberWithPercent(readsLostStr) : readsLostStr,
           ],
