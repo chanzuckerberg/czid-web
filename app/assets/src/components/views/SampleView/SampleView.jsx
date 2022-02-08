@@ -141,7 +141,7 @@ class SampleView extends React.Component {
       // is computed once the user selects a background.
       selectedOptionsFromLocal["metric"] = find(
         { value: "nt_r" },
-        TREE_METRICS
+        TREE_METRICS,
       ).value;
     }
 
@@ -182,8 +182,8 @@ class SampleView extends React.Component {
             : Object.assign(
                 {},
                 selectedOptionsFromLocal,
-                selectedOptionsFromUrl
-              )
+                selectedOptionsFromUrl,
+              ),
         ),
         sidebarMode: null,
         sidebarVisible: false,
@@ -197,7 +197,7 @@ class SampleView extends React.Component {
         ),
       },
       nonNestedLocalState,
-      nonNestedUrlState
+      nonNestedUrlState,
     );
   }
 
@@ -327,7 +327,7 @@ class SampleView extends React.Component {
       pipelineVersion
         ? { pipeline_version: pipelineVersion }
         : { id: sample.default_pipeline_run_id },
-      sample.pipeline_runs
+      sample.pipeline_runs,
     );
 
     const enableMassNormalizedBackgrounds =
@@ -335,13 +335,13 @@ class SampleView extends React.Component {
       pipelineRun.total_ercc_reads > 0 &&
       isPipelineFeatureAvailable(
         MASS_NORMALIZED_FEATURE,
-        pipelineRun.pipeline_version
+        pipelineRun.pipeline_version,
       );
     // If the currently selected background is mass normalized and the sample is incompatible,
     // then load the report with the default background instead.
     let newSelectedOptions = { ...selectedOptions };
     const selectedBackground = backgrounds.find(
-      background => selectedOptions.background === background.id
+      background => selectedOptions.background === background.id,
     );
 
     if (
@@ -383,7 +383,7 @@ class SampleView extends React.Component {
         updateDiscoveryProjectId(sample.project.id);
         this.fetchProjectSamples();
         this.fetchCoverageVizData();
-      }
+      },
     );
   };
 
@@ -426,7 +426,7 @@ class SampleView extends React.Component {
               newSelectedOptions,
             });
           }
-        }
+        },
       );
     }
   };
@@ -454,7 +454,7 @@ class SampleView extends React.Component {
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     if (rawReportData.sortedGenus) {
       const generaPathogenCounts = getGeneraPathogenCounts(
-        rawReportData.counts[SPECIES_LEVEL_INDEX]
+        rawReportData.counts[SPECIES_LEVEL_INDEX],
       );
 
       rawReportData.sortedGenus.forEach(genusTaxId => {
@@ -467,7 +467,7 @@ class SampleView extends React.Component {
           const speciesInfo =
             rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId];
           const speciesWithAdjustedMetricPrecision = this.adjustMetricPrecision(
-            speciesInfo
+            speciesInfo,
           );
           return merge(speciesWithAdjustedMetricPrecision, {
             highlighted: isHighlighted,
@@ -482,7 +482,7 @@ class SampleView extends React.Component {
             taxId: genusTaxId,
             taxLevel: TAX_LEVEL_GENUS,
             species: speciesData,
-          })
+          }),
         );
       });
     }
@@ -508,7 +508,7 @@ class SampleView extends React.Component {
     const { backgrounds } = this.state;
 
     const invalidBackground = backgrounds.find(
-      background => invalidBackgroundId === background.id
+      background => invalidBackgroundId === background.id,
     );
 
     this.handleOptionChanged({ key: "background", value: null });
@@ -556,7 +556,7 @@ class SampleView extends React.Component {
               this.processRawSampleReportData(rawReportData);
               successfullyFetchedSampleReportData = true;
             }
-          }
+          },
         );
       })
       .catch(err => console.error(err));
@@ -594,7 +594,7 @@ class SampleView extends React.Component {
       },
       () => {
         this.fetchSample();
-      }
+      },
     );
   };
 
@@ -605,7 +605,7 @@ class SampleView extends React.Component {
     if (
       isPipelineFeatureAvailable(
         COVERAGE_VIZ_FEATURE,
-        get("pipeline_version", pipelineRun)
+        get("pipeline_version", pipelineRun),
       )
     ) {
       const coverageVizSummary = await getCoverageVizSummary({
@@ -653,7 +653,7 @@ class SampleView extends React.Component {
     if (
       some(
         subcategory => subcategories.has(subcategory),
-        row.subcategories || []
+        row.subcategories || [],
       )
     ) {
       return true;
@@ -662,7 +662,7 @@ class SampleView extends React.Component {
     // taxon's category was selected and its subcategories were not excluded
     let allSubcategoriesIncluded = all(
       subcategory => subcategories.has(subcategory),
-      row.subcategories || []
+      row.subcategories || [],
     );
     if (
       (categories.has(row.category) && allSubcategoriesIncluded) ||
@@ -686,13 +686,13 @@ class SampleView extends React.Component {
         // Do nothing
       } else if (key in METRIC_DECIMAL_PLACES) {
         species[key] = parseFloat(
-          metricValue.toFixed(METRIC_DECIMAL_PLACES[key])
+          metricValue.toFixed(METRIC_DECIMAL_PLACES[key]),
         );
       } else if (["nt", "nr", "merged_nt_nr"].includes(key)) {
         Object.entries(species[key]).forEach(([metricKey, metricValue]) => {
           if (metricKey in METRIC_DECIMAL_PLACES && metricValue) {
             species[key][metricKey] = parseFloat(
-              metricValue.toFixed(METRIC_DECIMAL_PLACES[metricKey])
+              metricValue.toFixed(METRIC_DECIMAL_PLACES[metricKey]),
             );
           }
         });
@@ -747,10 +747,10 @@ class SampleView extends React.Component {
     filters: { categories, thresholds, readSpecificity, taxon },
   }) => {
     const categoriesSet = new Set(
-      map(c => c.toLowerCase(), categories.categories || [])
+      map(c => c.toLowerCase(), categories.categories || []),
     );
     const subcategoriesSet = new Set(
-      map(sc => sc.toLowerCase(), flatten(values(categories.subcategories)))
+      map(sc => sc.toLowerCase(), flatten(values(categories.subcategories))),
     );
 
     const filteredData = [];
@@ -772,7 +772,7 @@ class SampleView extends React.Component {
           thresholds,
           readSpecificity,
           taxon,
-        })
+        }),
       );
       if (genusRow.passedFilters || genusRow.filteredSpecies.length) {
         filteredData.push(genusRow);
@@ -792,7 +792,7 @@ class SampleView extends React.Component {
     if (currentTab === TABS.SHORT_READ_MNGS) {
       const newRun = find(
         { pipeline_version: newPipelineVersion },
-        sample.pipeline_runs
+        sample.pipeline_runs,
       );
       this.setState(
         {
@@ -805,19 +805,19 @@ class SampleView extends React.Component {
           this.updateHistoryAndPersistOptions();
           this.fetchSampleReportData();
           this.fetchCoverageVizData();
-        }
+        },
       );
     } else if (currentTab === TABS.CONSENSUS_GENOME) {
       const newRun = find(
         { wdl_version: newPipelineVersion },
-        sample.workflow_runs
+        sample.workflow_runs,
       );
       this.setState(
         {
           workflowRun: newRun,
           pipelineVersion: newPipelineVersion,
         },
-        () => this.updateHistoryAndPersistOptions()
+        () => this.updateHistoryAndPersistOptions(),
       );
     }
   };
@@ -826,16 +826,16 @@ class SampleView extends React.Component {
     const updatedQueryParameters = this.urlParser.updateQueryStringParameter(
       location.search,
       "workflowRunId",
-      workflowRun.id
+      workflowRun.id,
     );
     const stringifiedQueryParams = this.urlParser.stringify(
-      updatedQueryParameters
+      updatedQueryParameters,
     );
 
     history.replaceState(
       updatedQueryParameters,
       `SampleView`,
-      `${location.pathname + "?" + stringifiedQueryParams}`
+      `${location.pathname + "?" + stringifiedQueryParams}`,
     );
     this.setState({ workflowRun, workflowRunId: workflowRun.id });
   };
@@ -885,7 +885,7 @@ class SampleView extends React.Component {
           sampleId: sample.id,
           projectId: project.id,
           backgroundId: value,
-        }
+        },
       );
     }
 
@@ -920,7 +920,7 @@ class SampleView extends React.Component {
         hasPersistedBackground: true,
         selectedOptions: { ...selectedOptions, background: newBackgroundId },
       },
-      () => this.updateHistoryAndPersistOptions()
+      () => this.updateHistoryAndPersistOptions(),
     );
   };
 
@@ -933,7 +933,7 @@ class SampleView extends React.Component {
         newSelectedOptions.categories = set(
           subpath,
           pull(value, get(subpath, newSelectedOptions.categories)),
-          newSelectedOptions.categories
+          newSelectedOptions.categories,
         );
         break;
       case "taxon":
@@ -942,7 +942,7 @@ class SampleView extends React.Component {
       case "thresholds":
         newSelectedOptions.thresholds = pull(
           value,
-          newSelectedOptions.thresholds
+          newSelectedOptions.thresholds,
         );
         break;
       default:
@@ -991,7 +991,7 @@ class SampleView extends React.Component {
     const getSpeciesBestAccessions = taxon => {
       const speciesBestAccessions = get(
         [taxon.taxId, "best_accessions"],
-        coverageVizDataByTaxon
+        coverageVizDataByTaxon,
       );
       // Add the species taxon name to each accession.
       return map(
@@ -1001,7 +1001,7 @@ class SampleView extends React.Component {
           taxon_name: taxon.name,
           taxon_common_name: taxon.commonName,
         }),
-        speciesBestAccessions
+        speciesBestAccessions,
       );
     };
 
@@ -1009,13 +1009,13 @@ class SampleView extends React.Component {
 
     return {
       best_accessions: flatten(
-        compact(map(getSpeciesBestAccessions, speciesTaxons))
+        compact(map(getSpeciesBestAccessions, speciesTaxons)),
       ),
       num_accessions: sum(
         map(
           taxId => get([taxId, "num_accessions"], coverageVizDataByTaxon),
-          speciesTaxIds
-        )
+          speciesTaxIds,
+        ),
       ),
     };
   };
@@ -1032,7 +1032,7 @@ class SampleView extends React.Component {
     // For genus-level taxons, we aggregate all the available species-level taxons for that genus.
     if (coverageVizParams.taxLevel === "genus") {
       accessionData = this.getCombinedAccessionDataForSpecies(
-        coverageVizParams.taxSpecies
+        coverageVizParams.taxSpecies,
       );
     } else {
       accessionData = get(coverageVizParams.taxId, coverageVizDataByTaxon);
@@ -1112,7 +1112,7 @@ class SampleView extends React.Component {
         },
         () => {
           this.updateHistoryAndPersistOptions();
-        }
+        },
       );
     }
   };
@@ -1212,7 +1212,7 @@ class SampleView extends React.Component {
 
     const accessionData = get(taxId, coverageVizDataByTaxon);
     const usedAccessions = uniq(
-      map("inputs.accession_id", get(taxId, this.getConsensusGenomeData()))
+      map("inputs.accession_id", get(taxId, this.getConsensusGenomeData())),
     );
     this.setState({
       consensusGenomeData: {
@@ -1303,9 +1303,9 @@ class SampleView extends React.Component {
               accessionName,
               taxonId,
               taxonName,
-            }
+            },
           );
-        }
+        },
       );
     }
   };
@@ -1341,7 +1341,7 @@ class SampleView extends React.Component {
           taxonId,
           taxonName,
           sampleId: sample.id,
-        }
+        },
       );
     } catch (error) {
       console.error(error);
@@ -1354,7 +1354,7 @@ class SampleView extends React.Component {
           accessionName,
           taxonId,
           taxonName,
-        }
+        },
       );
     }
   };
@@ -1376,7 +1376,7 @@ class SampleView extends React.Component {
         workflowRun: rowData,
         consensusGenomePreviousModalVisible: false,
       },
-      () => this.handleTabChange(TABS.CONSENSUS_GENOME)
+      () => this.handleTabChange(TABS.CONSENSUS_GENOME),
     );
   };
 
@@ -1542,7 +1542,7 @@ class SampleView extends React.Component {
       },
       () => {
         this.updateHistoryAndPersistOptions();
-      }
+      },
     );
     logAnalyticsEvent("PipelineSampleReport_clear-filters-link_clicked");
   };
@@ -1556,7 +1556,7 @@ class SampleView extends React.Component {
     numFilters += thresholds.length;
     numFilters += (categories.categories || []).length;
     numFilters += sum(
-      map(v => v.length, values(categories.subcategories || {}))
+      map(v => v.length, values(categories.subcategories || {})),
     );
     return numFilters;
   };
@@ -1580,7 +1580,7 @@ class SampleView extends React.Component {
       }
 
       const workflowType = Object.values(WORKFLOWS).find(
-        workflow => workflow.label === currentTab
+        workflow => workflow.label === currentTab,
       ).value;
 
       if (workflowRun && workflowRun.workflow === workflowType) {
@@ -1598,7 +1598,7 @@ class SampleView extends React.Component {
         return currentRun;
       } else {
         return head(
-          sample.workflow_runs.filter(run => run.workflow === workflowType)
+          sample.workflow_runs.filter(run => run.workflow === workflowType),
         );
       }
     }
@@ -1715,7 +1715,7 @@ class SampleView extends React.Component {
         onClick={() =>
           logAnalyticsEvent(
             ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED,
-            { status }
+            { status },
           )
         }
       />
@@ -1737,7 +1737,7 @@ class SampleView extends React.Component {
             this.renderIncompatibleBackgroundError(closeToast, params),
           {
             autoClose: 12000,
-          }
+          },
         );
         break;
       }
@@ -1746,7 +1746,7 @@ class SampleView extends React.Component {
           ({ closeToast }) => this.renderConsensusGenomeCreated(closeToast),
           {
             autoClose: 12000,
-          }
+          },
         );
         break;
       }
@@ -1813,7 +1813,7 @@ class SampleView extends React.Component {
     // Only Taxon, Category, Subcategories, Read Specifity, and Threshold Filters are considered "Applied Filters"
     return omit(
       ["nameType", "metric", "background"],
-      diff(selectedOptions, this.getDefaultSelectedOptions())
+      diff(selectedOptions, this.getDefaultSelectedOptions()),
     );
   };
 
@@ -1824,7 +1824,7 @@ class SampleView extends React.Component {
     if (selectedOptions.background) {
       const selectedBackgroundName = find(
         { id: selectedOptions.background },
-        backgrounds
+        backgrounds,
       ).name;
       filterRow.push(`\nBackground:, "${selectedBackgroundName}"`);
     }
@@ -1845,11 +1845,11 @@ class SampleView extends React.Component {
           if (has("subcategories", optionVal)) {
             const subcategories = [];
             for (const [subcategoryName, subcategoryVal] of Object.entries(
-              get("subcategories", optionVal)
+              get("subcategories", optionVal),
             )) {
               if (!isEmpty(subcategoryVal)) {
                 subcategories.push(
-                  `${subcategoryName} - ${subcategoryVal.join()}`
+                  `${subcategoryName} - ${subcategoryVal.join()}`,
                 );
               }
             }
@@ -1873,7 +1873,7 @@ class SampleView extends React.Component {
         case "thresholds": {
           const thresholdFilters = optionVal.reduce((result, threshold) => {
             result.push(
-              `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`
+              `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
             );
             return result;
           }, []);
@@ -1891,7 +1891,7 @@ class SampleView extends React.Component {
           };
 
           filterRow.push(
-            `Read Specificity:, "${readSpecificityOptions[optionVal]}"`
+            `Read Specificity:, "${readSpecificityOptions[optionVal]}"`,
           );
           numberOfFilters += 1;
           break;
@@ -1910,7 +1910,7 @@ class SampleView extends React.Component {
     filterRow.splice(
       1,
       0,
-      `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`
+      `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`,
     );
     return [sanitizeCSVRow(filterRow).join()];
   };
@@ -1953,7 +1953,7 @@ class SampleView extends React.Component {
 
     if (this.hasAppliedFilters()) {
       csvRows.push(
-        this.createCSVRowForAppliedFilters(this.getAppliedFilters())
+        this.createCSVRowForAppliedFilters(this.getAppliedFilters()),
       );
     }
 
@@ -1973,8 +1973,8 @@ class SampleView extends React.Component {
       "inputs.taxon_id",
       filter(
         { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
-        get("workflow_runs", sample)
-      )
+        get("workflow_runs", sample),
+      ),
     );
   };
 
@@ -2068,7 +2068,7 @@ class SampleView extends React.Component {
                 }
                 onTaxonNameClick={withAnalytics(
                   this.handleTaxonClick,
-                  "PipelineSampleReport_taxon-sidebar-link_clicked"
+                  "PipelineSampleReport_taxon-sidebar-link_clicked",
                 )}
                 phyloTreeAllowed={sample ? sample.editable : false}
                 pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
@@ -2213,14 +2213,14 @@ class SampleView extends React.Component {
               {
                 sampleId: sample.id,
                 sampleName: sample.name,
-              }
+              },
             )}
             params={this.getSidebarParams()}
           />
         )}
         {isPipelineFeatureAvailable(
           COVERAGE_VIZ_FEATURE,
-          get("pipeline_version", pipelineRun)
+          get("pipeline_version", pipelineRun),
         ) && (
           <CoverageVizBottomSidebar
             nameType={selectedOptions.nameType}
@@ -2230,7 +2230,7 @@ class SampleView extends React.Component {
               {
                 sampleId: sample.id,
                 sampleName: sample.name,
-              }
+              },
             )}
             params={this.getCoverageVizParams()}
             pipelineVersion={pipelineRun.pipeline_version}

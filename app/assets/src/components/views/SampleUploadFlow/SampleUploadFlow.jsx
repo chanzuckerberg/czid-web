@@ -89,11 +89,11 @@ class SampleUploadFlow extends React.Component {
         row =>
           get("sample_name", row) === sample.name ||
           get("Sample Name", row) === sample.name,
-        metadata.rows
+        metadata.rows,
       );
       const hostGenomeName = HOST_GENOME_SYNONYMS.reduce(
         (match, name) => metadataRow[name] || match,
-        null
+        null,
       );
       const hostGenomeId = find(
         // Lowercase to allow for 'human' to match 'Human'. The same logic
@@ -101,7 +101,7 @@ class SampleUploadFlow extends React.Component {
         hg => {
           return hg.name.toLowerCase() === hostGenomeName.toLowerCase();
         },
-        updatedHostGenomes
+        updatedHostGenomes,
       ).id;
 
       // Enforce hipaa compliant host age
@@ -127,7 +127,7 @@ class SampleUploadFlow extends React.Component {
     // Remove host_genome from metadata.
     const newMetadata = flow(
       set("rows", metadata.rows.map(omit(HOST_GENOME_SYNONYMS))),
-      set("headers", without(HOST_GENOME_SYNONYMS, metadata.headers))
+      set("headers", without(HOST_GENOME_SYNONYMS, metadata.headers)),
     )(metadata);
 
     this.setState({

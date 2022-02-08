@@ -33,7 +33,7 @@ export default function WorkflowVersionHeader({
     if (!currentRun[versionKey]) return;
 
     let workflowKey = Object.keys(WORKFLOWS).find(
-      flow => WORKFLOWS[flow].value === workflowType
+      flow => WORKFLOWS[flow].value === workflowType,
     );
     let versionString = `${WORKFLOWS[workflowKey].label} Pipeline v${currentRun[versionKey]}`;
 
@@ -50,7 +50,7 @@ export default function WorkflowVersionHeader({
         !snapshotShareId &&
           mngsWorkflow &&
           get(versionKey, currentRun) &&
-          cs.linkToPipelineViz
+          cs.linkToPipelineViz,
       )}
       onClick={() =>
         !snapshotShareId &&
@@ -58,7 +58,7 @@ export default function WorkflowVersionHeader({
         get(versionKey, currentRun) &&
         openUrl(
           `/samples/${sampleId}/pipeline_viz/${get(versionKey, currentRun)}`,
-          event
+          event,
         )
       }
     >

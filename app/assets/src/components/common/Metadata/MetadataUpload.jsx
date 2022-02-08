@@ -73,7 +73,7 @@ class MetadataUpload extends React.Component {
     this.setState({
       allProjectMetadataFields: projectMetadataFields,
       projectMetadataFields: this.processProjectMetadataFields(
-        projectMetadataFields
+        projectMetadataFields,
       ),
       hostGenomes,
       sampleTypes,
@@ -89,13 +89,13 @@ class MetadataUpload extends React.Component {
       });
 
       const projectMetadataFields = await getProjectMetadataFields(
-        this.props.project.id
+        this.props.project.id,
       );
 
       this.setState({
         allProjectMetadataFields: projectMetadataFields,
         projectMetadataFields: this.processProjectMetadataFields(
-          projectMetadataFields
+          projectMetadataFields,
         ),
       });
     }
@@ -108,7 +108,7 @@ class MetadataUpload extends React.Component {
     ) {
       this.setState({
         projectMetadataFields: this.processProjectMetadataFields(
-          this.state.allProjectMetadataFields
+          this.state.allProjectMetadataFields,
         ),
       });
     }
@@ -123,21 +123,21 @@ class MetadataUpload extends React.Component {
     return remove(
       metadataField =>
         METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW[workflow].has(
-          get("key", metadataField)
+          get("key", metadataField),
         ),
-      projectMetadataFields
+      projectMetadataFields,
     );
   };
 
   processProjectMetadataFields = projectMetadataFields => {
     if (!isEmpty(projectMetadataFields)) {
       const filteredProjectMetadataFields = this.filterMetadataFieldsByWorkflow(
-        projectMetadataFields
+        projectMetadataFields,
       );
       const sorted = sortBy(
         metadataField =>
           this.ordering[metadataField.key] || Number.MAX_SAFE_INTEGER,
-        filteredProjectMetadataFields
+        filteredProjectMetadataFields,
       );
 
       return keyBy("key", sorted);
@@ -207,7 +207,7 @@ class MetadataUpload extends React.Component {
       });
       const newMetadata = await geosearchCSVLocations(
         metadata,
-        this.getRequiredLocationMetadataType()
+        this.getRequiredLocationMetadataType(),
       );
       // Here we set issues to null on the assumption that getCSVLocationMatches
       // is called only when warnings and errors have been dealt with.
@@ -273,7 +273,7 @@ class MetadataUpload extends React.Component {
     // Use the first required location MetadataField
     return find(
       { dataType: "location", is_required: 1 },
-      Object.values(projectMetadataFields)
+      Object.values(projectMetadataFields),
     );
   };
 
@@ -323,11 +323,11 @@ class MetadataUpload extends React.Component {
               className={cs.link}
               onClick={withAnalytics(
                 onShowCSVInstructions,
-                "MetadataUpload_instruction-link_clicked"
+                "MetadataUpload_instruction-link_clicked",
               )}
               onKeyDown={withAnalytics(
                 onShowCSVInstructions,
-                "MetadataUpload_instruction-link_clicked"
+                "MetadataUpload_instruction-link_clicked",
               )}
             >
               View CSV Upload Instructions
@@ -351,7 +351,7 @@ class MetadataUpload extends React.Component {
                 {
                   projectId: project.id,
                   projectName: project.name,
-                }
+                },
               );
             }}
             onKeyDown={() => {
@@ -361,7 +361,7 @@ class MetadataUpload extends React.Component {
                 {
                   projectId: project.id,
                   projectName: project.name,
-                }
+                },
               );
             }}
           >
@@ -431,7 +431,7 @@ class MetadataUpload extends React.Component {
             <div className={cs.header}>{error}</div>
             <div>
               {issues.errors.map((error, index) =>
-                this.renderIssue(error, "error", index)
+                this.renderIssue(error, "error", index),
               )}
             </div>
           </div>
@@ -441,7 +441,7 @@ class MetadataUpload extends React.Component {
             <div className={cs.header}>Warnings</div>
             <div>
               {issues.warnings.map((warning, index) =>
-                this.renderIssue(warning, "warning", index)
+                this.renderIssue(warning, "warning", index),
               )}
             </div>
           </div>
@@ -473,7 +473,7 @@ class MetadataUpload extends React.Component {
     const { samplesAreNew, workflows } = this.props;
     const requiredFields = concat(
       "Host Organism",
-      map("name", filter(["is_required", 1], projectMetadataFields))
+      map("name", filter(["is_required", 1], projectMetadataFields)),
     );
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
@@ -495,7 +495,7 @@ class MetadataUpload extends React.Component {
                     {
                       projectId: this.props.project.id,
                       projectName: this.props.project.name,
-                    }
+                    },
                   )
                 }
               >

@@ -34,7 +34,7 @@ class ShapeMarker extends React.Component {
       clamp(
         minSize,
         maxSize,
-        (pointCount / (pointCount + divisorConst)) * sizeMultiple * zoom
+        (pointCount / (pointCount + divisorConst)) * sizeMultiple * zoom,
       );
 
     return (

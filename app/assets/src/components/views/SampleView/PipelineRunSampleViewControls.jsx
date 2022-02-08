@@ -42,7 +42,7 @@ const PipelineRunSampleViewControls = ({
       ...(minContigReads && { min_contig_reads: minContigReads }),
     };
     location.href = `/samples/${sample.id}/report_csv?${querystring.stringify(
-      resParams
+      resParams,
     )}`;
   };
 
@@ -69,7 +69,7 @@ const PipelineRunSampleViewControls = ({
         const linkInfo = getLinkInfoForDownloadOption(
           option,
           sample.id,
-          pipelineRun
+          pipelineRun,
         );
 
         if (linkInfo) {
@@ -108,7 +108,7 @@ const PipelineRunSampleViewControls = ({
           columns because a background model was not selected.
         </Notification>
       ),
-      { autoClose: 12000 }
+      { autoClose: 12000 },
     );
 
   // TODO (gdingle): should we pass in a reference with React somehow?

@@ -14,7 +14,7 @@ import { CONDITIONAL_FIELDS } from "./constants.js";
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
   conditionalField.triggerValues.includes(
-    get(conditionalField.dependentField, selectedFields)
+    get(conditionalField.dependentField, selectedFields),
   );
 
 export default class BulkDownloadModalFooter extends React.Component {
@@ -26,7 +26,7 @@ export default class BulkDownloadModalFooter extends React.Component {
     }
 
     return downloadTypes.find(
-      item => item["type"] === selectedDownloadTypeName
+      item => item["type"] === selectedDownloadTypeName,
     );
   };
 
@@ -75,8 +75,8 @@ export default class BulkDownloadModalFooter extends React.Component {
           Boolean,
           map(
             field => isUndefined(get(field.type, selectedFieldsForType)),
-            requiredFields
-          )
+            requiredFields,
+          ),
         )
       ) {
         return false;
@@ -93,8 +93,8 @@ export default class BulkDownloadModalFooter extends React.Component {
       <div>
         <span className={cs.highlight}>
           {invalidSampleNames.length} sample
-          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in the
-          bulk download
+          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in
+          the bulk download
         </span>
         , because they either failed or are still processing:
       </div>
@@ -173,7 +173,7 @@ export default class BulkDownloadModalFooter extends React.Component {
           "BulkDownloadModalFooter_start-generating-button_clicked",
           {
             workflow,
-          }
+          },
         )}
       />
     );

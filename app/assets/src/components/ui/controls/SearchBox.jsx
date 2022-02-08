@@ -32,7 +32,7 @@ class SearchBox extends React.Component {
     // (clientSearchSource) also does not need debouncing:
     this.handleServerSearchActionDebounced = debounce(
       this.handleServerSearchAction,
-      this.waitHandleSearchChange
+      this.waitHandleSearchChange,
     );
 
     this.state = {
@@ -123,7 +123,7 @@ class SearchBox extends React.Component {
         className={cx(
           "idseq-ui input search",
           cs.searchBox,
-          this.props.rounded && cs.rounded
+          this.props.rounded && cs.rounded,
         )}
         icon={<IconSearch className={cs.searchIcon} />}
         loading={isLoading}

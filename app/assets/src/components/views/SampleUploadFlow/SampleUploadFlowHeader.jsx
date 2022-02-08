@@ -77,7 +77,7 @@ class SampleUploadFlowHeader extends React.Component {
                     currentStep === val.step && cs.active,
                     currentStep !== val.step &&
                       this.isStepEnabled(val.step) &&
-                      cs.enabled
+                      cs.enabled,
                   )}
                   key={val.text}
                   onClick={() => {
@@ -87,7 +87,7 @@ class SampleUploadFlowHeader extends React.Component {
                       {
                         step: val.step,
                         text: val.text,
-                      }
+                      },
                     );
                   }}
                 >

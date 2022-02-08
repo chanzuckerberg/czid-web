@@ -84,12 +84,12 @@ export default class Heatmap {
         printCaption: [],
         captionLineHeight: 18,
       },
-      options
+      options,
     );
     if (!this.options.colors) {
       let defaultColorScale = scaleSequential(interpolateYlOrRd);
       this.options.colors = this.range(this.options.numberOfLevels).map(i =>
-        defaultColorScale(i / (this.options.numberOfLevels - 1))
+        defaultColorScale(i / (this.options.numberOfLevels - 1)),
       );
     }
 
@@ -213,11 +213,11 @@ export default class Heatmap {
       let label = this.columnLabels[j].label;
       this.columnLabelsHeight = Math.max(
         this.columnLabelsHeight,
-        labelWidth(label)
+        labelWidth(label),
       );
     }
     this.columnLabelsHeight *= Math.abs(
-      Math.cos((90 + this.options.textRotation) * (Math.PI / 180))
+      Math.cos((90 + this.options.textRotation) * (Math.PI / 180)),
     );
 
     // 2x'spacing' pixels for the 'x': replace by proper size
@@ -229,11 +229,11 @@ export default class Heatmap {
     this.limits = {
       min: Math.min(
         d3.min(this.data.values, array => d3.min(array)),
-        this.options.nullValue
+        this.options.nullValue,
       ),
       max: Math.max(
         d3.max(this.data.values, array => d3.max(array)),
-        this.options.nullValue
+        this.options.nullValue,
       ),
     };
 
@@ -265,13 +265,13 @@ export default class Heatmap {
 
   filterData() {
     this.filteredCells = this.cells.filter(
-      cell => !this.rowLabels[cell.rowIndex].hidden
+      cell => !this.rowLabels[cell.rowIndex].hidden,
     );
 
     // Initially sort so that genus seperators are placed correctly
     this.filteredRowLabels = orderBy(
       this.rowLabels.filter(row => !row.hidden),
-      label => label.sortKey || label.label
+      label => label.sortKey || label.label,
     );
   }
 
@@ -286,7 +286,7 @@ export default class Heatmap {
     // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
     this.svg.attr(
       "style",
-      `background-color: ${this.options.svgBackgroundColor}`
+      `background-color: ${this.options.svgBackgroundColor}`,
     );
 
     const defs = this.svg.append("defs");
@@ -329,26 +329,26 @@ export default class Heatmap {
     this.rowClusterWidth = Math.min(
       this.getDepth(this.rowClustering) * this.options.defaultClusterStep +
         this.options.spacing,
-      this.options.maxRowClusterWidth
+      this.options.maxRowClusterWidth,
     );
     this.columnClusterHeight = Math.min(
       this.getDepth(this.columnClustering) * this.options.defaultClusterStep +
         this.options.spacing,
-      this.options.maxColumnClusterHeight
+      this.options.maxColumnClusterHeight,
     );
 
     this.cell = {
       width: Math.max(
         (this.options.minWidth - this.rowLabelsWidth - this.rowClusterWidth) /
           this.columnLabels.length,
-        this.options.minCellWidth
+        this.options.minCellWidth,
       ),
       height: Math.max(
         (this.options.minHeight -
           this.columnLabelsHeight -
           this.columnClusterHeight) /
           this.rowLabels.length,
-        this.options.minCellHeight
+        this.options.minCellHeight,
       ),
     };
 
@@ -401,7 +401,7 @@ export default class Heatmap {
 
     this.g.attr(
       "transform",
-      `translate(${this.options.marginLeft},${this.options.marginTop})`
+      `translate(${this.options.marginLeft},${this.options.marginTop})`,
     );
     this.rowLabelsBackground
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
@@ -413,13 +413,13 @@ export default class Heatmap {
         this.rowLabelsWidth +
           totalCellWidth +
           totalRowClusterWidth +
-          this.options.marginRight
+          this.options.marginRight,
       )
       .attr(
         "height",
         totalColumnLabelsHeight +
           this.totalMetadataHeight +
-          this.options.marginTop
+          this.options.marginTop,
       );
     this.metadataLabelsBackground
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
@@ -432,11 +432,11 @@ export default class Heatmap {
         this.rowLabelsWidth +
           totalCellWidth +
           totalRowClusterWidth +
-          this.options.marginRight
+          this.options.marginRight,
       )
       .attr(
         "height",
-        this.totalRowAddLinkHeight + this.options.metadataAddLinkHeight
+        this.totalRowAddLinkHeight + this.options.metadataAddLinkHeight,
       );
     this.placeAddRowLinkContainer(this.columnLabelsHeight);
 
@@ -445,7 +445,7 @@ export default class Heatmap {
       `translate(${this.rowLabelsWidth},
         ${totalColumnLabelsHeight +
           this.totalMetadataHeight +
-          this.totalRowAddLinkHeight})`
+          this.totalRowAddLinkHeight})`,
     );
     this.gRowDendogram.attr(
       "transform",
@@ -454,7 +454,7 @@ export default class Heatmap {
         ${totalColumnLabelsHeight +
           this.totalMetadataHeight +
           this.totalRowAddLinkHeight}
-      )`
+      )`,
     );
     this.gColumnDendogram.attr(
       "transform",
@@ -464,7 +464,7 @@ export default class Heatmap {
           this.totalMetadataHeight +
           this.totalRowAddLinkHeight +
           totalCellHeight}
-      )`
+      )`,
     );
     this.gCaption.attr(
       "transform",
@@ -475,7 +475,7 @@ export default class Heatmap {
           totalCellHeight +
           totalColumnClusterHeight +
           this.options.spacing}
-      )`
+      )`,
     );
 
     // Set up space bar+click to pan behavior.
@@ -547,7 +547,7 @@ export default class Heatmap {
       }
       this.updateLabelHighlights(
         this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-        this.rowLabels
+        this.rowLabels,
       );
       this.updateCellHighlights();
 
@@ -560,7 +560,7 @@ export default class Heatmap {
         this.updateCellHighlights();
         this.updateLabelHighlights(
           this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-          this.rowLabels
+          this.rowLabels,
         );
       }, 2750);
     }
@@ -582,11 +582,11 @@ export default class Heatmap {
     // Limit translation by the boundaries set for the svg.
     let dx = Math.min(
       this.options.marginLeft,
-      Math.max(deltaX + gCurrentTranslate[0], xScrollMax)
+      Math.max(deltaX + gCurrentTranslate[0], xScrollMax),
     );
     let dy = Math.min(
       this.options.marginTop,
-      Math.max(deltaY + gCurrentTranslate[1], yScrollMax)
+      Math.max(deltaY + gCurrentTranslate[1], yScrollMax),
     );
 
     if (transition) {
@@ -604,7 +604,7 @@ export default class Heatmap {
     let labelsDx = clamp(
       0,
       -xScrollMax + this.options.marginLeft,
-      rowLabelsCurrent[0] - deltaX
+      rowLabelsCurrent[0] - deltaX,
     );
     this.placeRowLabelContainers(labelsDx);
 
@@ -620,7 +620,7 @@ export default class Heatmap {
     let labelsDy = clamp(
       this.columnLabelsHeight,
       this.columnLabelsHeight + this.options.marginTop - yScrollMax,
-      columnLabelsCurrent[1] - deltaY
+      columnLabelsCurrent[1] - deltaY,
     );
     this.placeColumnLabelAndMetadataContainers(labelsDy, transition);
     this.placeAddRowLinkContainer(labelsDy, transition);
@@ -634,7 +634,7 @@ export default class Heatmap {
       "transform",
       `translate(${x}, ${this.columnLabelsHeight +
         totalMetadataHeight +
-        totalRowAddLinkHeight})`
+        totalRowAddLinkHeight})`,
     );
     // Placing the white background rectangle behind the row labels.
     this.rowLabelsBackground
@@ -675,7 +675,7 @@ export default class Heatmap {
       .duration(transition ? this.options.transitionDuration : 0)
       .attr(
         "y",
-        y + this.options.columnMetadata.length * this.options.minCellHeight
+        y + this.options.columnMetadata.length * this.options.minCellHeight,
       );
   }
 
@@ -724,7 +724,7 @@ export default class Heatmap {
             "ZZZ"
           );
         },
-        this.columnMetadataSortAsc ? "asc" : "desc"
+        this.columnMetadataSortAsc ? "asc" : "desc",
       ).forEach((label, idx) => {
         label.pos = idx;
       });
@@ -786,7 +786,7 @@ export default class Heatmap {
             columns[i].idx = i;
           }
           columns[i].push(
-            scale(this.data.values[j][i] || this.options.nullValue)
+            scale(this.data.values[j][i] || this.options.nullValue),
           );
         }
       }
@@ -890,7 +890,7 @@ export default class Heatmap {
     orderBy(this.columnLabels, label => label.label, direction).forEach(
       (label, idx) => {
         label.pos = idx;
-      }
+      },
     );
   }
 
@@ -902,7 +902,7 @@ export default class Heatmap {
     orderBy(
       this.filteredRowLabels,
       label => label.sortKey || label.label,
-      direction
+      direction,
     );
     this.filteredRowLabels.forEach((label, idx) => {
       label.pos = idx;
@@ -940,7 +940,7 @@ export default class Heatmap {
       csvRows.push([
         row.label,
         ...(headers.includes("Genus") ? [row.genusName] : []),
-      ])
+      ]),
     );
 
     sortedColumns.forEach(column => {
@@ -949,7 +949,7 @@ export default class Heatmap {
       sortedRows.forEach(row => {
         const cell = find(
           { columnIndex: column.columnIndex, rowIndex: row.rowIndex },
-          this.filteredCells
+          this.filteredCells,
         );
         csvRows[row.pos].push(cell.value || 0);
       });
@@ -969,7 +969,7 @@ export default class Heatmap {
     // soon as the printing is done.
     this.svg.attr(
       "height",
-      (this.height + totalCaptionHeight) * this.options.zoom
+      (this.height + totalCaptionHeight) * this.options.zoom,
     );
     this.renderCaption();
   };
@@ -996,7 +996,7 @@ export default class Heatmap {
     }
     this.updateLabelHighlights(
       this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-      this.rowLabels
+      this.rowLabels,
     );
     this.updateCellHighlights();
 
@@ -1008,11 +1008,11 @@ export default class Heatmap {
       .selectAll(`.${cs.rowLabel}`)
       .classed(
         cs.rowLabelHover,
-        row => row.sortKey && row.sortKey === rowLabelEntered.sortKey
+        row => row.sortKey && row.sortKey === rowLabelEntered.sortKey,
       );
 
     const currentGroup = this.gRowLabels.selectAll(
-      `.${cs.rowLabel}.${cs.rowLabelHover}`
+      `.${cs.rowLabel}.${cs.rowLabelHover}`,
     );
     const firstElem = currentGroup[0][0];
 
@@ -1023,7 +1023,7 @@ export default class Heatmap {
       this.options.onRowGroupEnter(
         rowLabelEntered,
         firstElem.getBoundingClientRect(),
-        this.gColumnMetadata.node().getBoundingClientRect().bottom
+        this.gColumnMetadata.node().getBoundingClientRect().bottom,
       );
   };
 
@@ -1033,7 +1033,7 @@ export default class Heatmap {
     }
     this.updateLabelHighlights(
       this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-      this.rowLabels
+      this.rowLabels,
     );
     this.updateCellHighlights();
 
@@ -1052,7 +1052,7 @@ export default class Heatmap {
     }
     this.updateLabelHighlights(
       this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
-      this.columnLabels
+      this.columnLabels,
     );
     this.updateCellHighlights();
   };
@@ -1063,7 +1063,7 @@ export default class Heatmap {
     }
     this.updateLabelHighlights(
       this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
-      this.columnLabels
+      this.columnLabels,
     );
     this.updateCellHighlights();
   };
@@ -1086,7 +1086,7 @@ export default class Heatmap {
     onColumnMetadataSortChange &&
       onColumnMetadataSortChange(
         this.columnMetadataSortField,
-        this.columnMetadataSortAsc
+        this.columnMetadataSortAsc,
       );
   }
 
@@ -1110,7 +1110,7 @@ export default class Heatmap {
         .attr("height", this.cell.height - 2)
         .attr(
           "x",
-          d => this.columnLabels[d.columnIndex].pos * this.cell.width + 1
+          d => this.columnLabels[d.columnIndex].pos * this.cell.width + 1,
         )
         .attr("y", d => this.cellYPosition(this.rowLabels[d.rowIndex]) + 1)
         .style("fill", d => {
@@ -1121,7 +1121,7 @@ export default class Heatmap {
             colorScale,
             d.value,
             this.scaleLimits.min,
-            this.scaleLimits.max
+            this.scaleLimits.max,
           );
           let color = this.options.customColorCallback
             ? this.options.customColorCallback(
@@ -1129,7 +1129,7 @@ export default class Heatmap {
                 d,
                 this.options.colors[colorIndex],
                 this.options.colors,
-                this.options.colorNoValue
+                this.options.colorNoValue,
               )
             : this.options.colors[colorIndex];
           return color;
@@ -1157,18 +1157,18 @@ export default class Heatmap {
       .enter()
       .append("rect")
       .attr("class", d =>
-        cx(cs.cell, `cellColumn_${d.columnIndex}`, `cellRow_${d.rowIndex}`)
+        cx(cs.cell, `cellColumn_${d.columnIndex}`, `cellRow_${d.rowIndex}`),
       )
       .on("mouseover", d => {
         this.rowLabels[d.rowIndex].highlighted = true;
         this.columnLabels[d.columnIndex].highlighted = true;
         this.updateLabelHighlights(
           this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-          this.rowLabels
+          this.rowLabels,
         );
         this.updateLabelHighlights(
           this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
-          this.columnLabels
+          this.columnLabels,
         );
 
         this.options.onNodeHover && this.options.onNodeHover(d);
@@ -1178,11 +1178,11 @@ export default class Heatmap {
         this.columnLabels[d.columnIndex].highlighted = false;
         this.updateLabelHighlights(
           this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-          this.rowLabels
+          this.rowLabels,
         );
         this.updateLabelHighlights(
           this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
-          this.columnLabels
+          this.columnLabels,
         );
 
         this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
@@ -1193,7 +1193,7 @@ export default class Heatmap {
       })
       .on(
         "click",
-        d => this.options.onCellClick && this.options.onCellClick(d, d3.event)
+        d => this.options.onCellClick && this.options.onCellClick(d, d3.event),
       );
     applyFormat(cellsEnter);
   }
@@ -1244,7 +1244,7 @@ export default class Heatmap {
       .attr(
         "transform",
         `translate(${this.rowLabelsWidth - this.options.spacing}, ${this.cell
-          .height / 2})`
+          .height / 2})`,
       )
       .style("dominant-baseline", "central")
       .style("text-anchor", "end")
@@ -1252,7 +1252,7 @@ export default class Heatmap {
         "click",
         d =>
           this.options.onRowLabelClick &&
-          this.options.onRowLabelClick(d.label, d3.event)
+          this.options.onRowLabelClick(d.label, d3.event),
       );
 
     rowLabelEnter
@@ -1280,7 +1280,7 @@ export default class Heatmap {
       .attr(
         "transform",
         `translate(${this.options.spacing},
-        ${(this.cell.height - this.options.spacing) / 2})`
+        ${(this.cell.height - this.options.spacing) / 2})`,
       )
       .attr("xlink:href", `${this.options.iconPath}/IconCloseSmall.svg`)
       .on("click", this.removeRow);
@@ -1340,14 +1340,14 @@ export default class Heatmap {
       addLink.attr(
         "transform",
         `translate(${dx}, ${(1 + this.options.columnMetadata.length) *
-          this.options.minCellHeight})`
+          this.options.minCellHeight})`,
       );
 
       addLink
         .select("rect")
         .attr(
           "width",
-          this.rowLabelsWidth + this.columnLabels.length * this.cell.width
+          this.rowLabelsWidth + this.columnLabels.length * this.cell.width,
         )
         .attr("height", this.options.metadataAddLinkHeight);
     }
@@ -1384,7 +1384,7 @@ export default class Heatmap {
         "transform",
         `translate(${this.cell.width / 2},-${this.options.spacing}) rotate (${
           this.options.textRotation
-        })`
+        })`,
       )
       .on("mousein", this.options.onColumnLabelMouseIn)
       .on("mouseout", this.options.onColumnLabelMouseOut)
@@ -1400,7 +1400,7 @@ export default class Heatmap {
         "click",
         d =>
           this.options.onColumnLabelClick &&
-          this.options.onColumnLabelClick(d.id, d3.event)
+          this.options.onColumnLabelClick(d.id, d3.event),
       );
 
     applyFormat(columnLabelEnter);
@@ -1487,7 +1487,7 @@ export default class Heatmap {
       .attr(
         "transform",
         `translate(${this.rowLabelsWidth - this.options.spacing}, ${this.options
-          .minCellHeight / 2})`
+          .minCellHeight / 2})`,
       )
       .style("dominant-baseline", "central")
       .style("text-anchor", "end")
@@ -1511,7 +1511,7 @@ export default class Heatmap {
         "transform",
         `translate(${this.rowLabelsWidth},${(this.options.minCellHeight +
           this.options.metadataSortIconSize) /
-          2})`
+          2})`,
       )
       .append("svg:image")
       .attr("class", "metadataSortIcon")
@@ -1529,7 +1529,7 @@ export default class Heatmap {
           ? `${this.options.iconPath}/sort_${
               this.columnMetadataSortAsc ? "asc" : "desc"
             }.svg`
-          : ""
+          : "",
       );
   }
 
@@ -1541,7 +1541,9 @@ export default class Heatmap {
         .attr(
           "transform",
           d =>
-            `translate(${d.pos * this.cell.width + this.rowLabelsWidth + 1}, 0)`
+            `translate(${d.pos * this.cell.width +
+              this.rowLabelsWidth +
+              1}, 0)`,
         );
     };
 
@@ -1550,7 +1552,7 @@ export default class Heatmap {
         "transform",
         (_, i) =>
           `translate(0, ${this.options.metadataAddLinkHeight +
-            this.options.minCellHeight * i})`
+            this.options.minCellHeight * i})`,
       );
     };
 
@@ -1575,7 +1577,7 @@ export default class Heatmap {
       .enter()
       .append("g")
       .attr("class", d =>
-        cx("columnMetadataCells", d.value.replace(/ /g, "_"))
+        cx("columnMetadataCells", d.value.replace(/ /g, "_")),
       );
     applyFormatForRows(rowsEnter);
 
@@ -1583,8 +1585,8 @@ export default class Heatmap {
       let columnMetadataCell = this.gColumnMetadata
         .select(
           `.columnMetadataCells.${CSS.escape(
-            metadata.value.replace(/ /g, "_")
-          )}`
+            metadata.value.replace(/ /g, "_"),
+          )}`,
         )
         .selectAll(".columnMetadataCell")
         .data(this.columnLabels, d => d.label);
@@ -1685,7 +1687,7 @@ export default class Heatmap {
         .select("rect")
         .attr(
           "width",
-          this.rowLabelsWidth + this.columnLabels.length * this.cell.width
+          this.rowLabelsWidth + this.columnLabels.length * this.cell.width,
         )
         .attr("height", this.options.metadataAddLinkHeight);
     }
@@ -1704,11 +1706,11 @@ export default class Heatmap {
         this.columnClustering,
         this.columnLabels,
         width,
-        height
+        height,
       );
       container.attr(
         "transform",
-        `rotate(-90) translate(-${height + this.options.spacing},0)`
+        `rotate(-90) translate(-${height + this.options.spacing},0)`,
       );
     }
   }
@@ -1725,11 +1727,11 @@ export default class Heatmap {
         this.rowClustering,
         this.rowLabels,
         width,
-        height
+        height,
       );
       container.attr(
         "transform",
-        `scale(-1,1) translate(-${this.rowClusterWidth},0)`
+        `scale(-1,1) translate(-${this.rowClusterWidth},0)`,
       );
     }
   }
@@ -1746,7 +1748,7 @@ export default class Heatmap {
       .text(d => d)
       .attr(
         "transform",
-        (_, idx) => `translate(0, ${idx * this.options.captionLineHeight})`
+        (_, idx) => `translate(0, ${idx * this.options.captionLineHeight})`,
       );
   }
 
@@ -1758,7 +1760,7 @@ export default class Heatmap {
         cs.shaded,
         d =>
           this.columnLabels[d.columnIndex].shaded ||
-          this.rowLabels[d.rowIndex].shaded
+          this.rowLabels[d.rowIndex].shaded,
       );
   }
 
@@ -1867,7 +1869,7 @@ export default class Heatmap {
     if (
       some(
         this.columnLabels,
-        label => !label.metadata || !label.metadata[value]
+        label => !label.metadata || !label.metadata[value],
       )
     ) {
       return Object.assign({}, this.metadataColors[value], {

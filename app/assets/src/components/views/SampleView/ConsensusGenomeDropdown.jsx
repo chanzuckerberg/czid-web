@@ -34,7 +34,7 @@ const ConsensusGenomeDropdown = ({
         onConsensusGenomeSelection(workflowRunId);
         logAnalyticsEvent(
           ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_DROPDOWN_CONSENSUS_GENOME_SELECTED,
-          { workflowRunId }
+          { workflowRunId },
         );
       }}
       {...props}

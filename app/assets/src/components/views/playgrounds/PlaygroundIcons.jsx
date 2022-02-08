@@ -12,7 +12,7 @@ class PlaygroundIcons extends React.Component {
       <IconComponent key={IconComponent.name} className={cs.icon} />
     ));
     const fontAwesomeIcons = values(
-      ICONS_TAXONOMY.FONT_AWESOME
+      ICONS_TAXONOMY.FONT_AWESOME,
     ).map(IconComponent => (
       <IconComponent key={IconComponent.name} className={cs.icon} />
     ));
@@ -20,7 +20,7 @@ class PlaygroundIcons extends React.Component {
       <IconComponent key={IconComponent.name} className={cs.logoIcon} />
     ));
     const logoReversedIcons = values(
-      ICONS_TAXONOMY.LOGO_REVERSED
+      ICONS_TAXONOMY.LOGO_REVERSED,
     ).map(IconComponent => (
       <IconComponent
         key={IconComponent.name}

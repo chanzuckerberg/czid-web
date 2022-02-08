@@ -140,7 +140,7 @@ class MetadataManualInput extends React.Component {
         // Default to the required fields.
         selectedFieldNames: map(
           "key",
-          filter(["is_required", 1], projectMetadataFields)
+          filter(["is_required", 1], projectMetadataFields),
         ),
         hostGenomesByName: keyBy("name", hostGenomes),
         headers: {
@@ -149,7 +149,7 @@ class MetadataManualInput extends React.Component {
           ...mapValues("name", keyBy("key", projectMetadataFields)),
         },
       },
-      samplesAreNew ? this.setDefaultWaterControl : null
+      samplesAreNew ? this.setDefaultWaterControl : null,
     );
   };
 
@@ -183,7 +183,7 @@ class MetadataManualInput extends React.Component {
     samples.forEach(sample => {
       newMetadataFieldsToEdit[sample.name] = merge(
         AUTO_POPULATE_FIELDS,
-        metadataFieldsToEdit[sample.name] || {}
+        metadataFieldsToEdit[sample.name] || {},
       );
     });
 
@@ -207,7 +207,7 @@ class MetadataManualInput extends React.Component {
     const newFields = set(
       [sample.name, key],
       value,
-      this.state.metadataFieldsToEdit
+      this.state.metadataFieldsToEdit,
     );
     this.setState({
       metadataFieldsToEdit: newFields,
@@ -229,7 +229,7 @@ class MetadataManualInput extends React.Component {
       if (
         (this.isHostGenomeIdValidForField(
           this.getSampleHostGenomeId(curSample),
-          column
+          column,
         ) &&
           overrideExistingValue) ||
         get([curSample.name, column], newFields) === undefined
@@ -273,7 +273,7 @@ class MetadataManualInput extends React.Component {
     const sampleNames = map("name", samples);
     const sampleMetadataFields = map(
       sampleName => newFields[sampleName] || {},
-      sampleNames
+      sampleNames,
     );
 
     let fieldsForSamples = zipObject(sampleNames, sampleMetadataFields);
@@ -293,7 +293,7 @@ class MetadataManualInput extends React.Component {
             ...mapValues(value => value || "", fields),
             sample_name: sampleName,
           }),
-          fieldsForSamples
+          fieldsForSamples,
         ),
       },
     });
@@ -311,7 +311,7 @@ class MetadataManualInput extends React.Component {
     // Return the manually edited value, or the original value fetched from the server.
     const editedValue = get(
       [sample.name, key],
-      this.state.metadataFieldsToEdit
+      this.state.metadataFieldsToEdit,
     );
 
     if (editedValue !== undefined) return editedValue;
@@ -334,7 +334,7 @@ class MetadataManualInput extends React.Component {
         text: hostGenome.name,
         value: hostGenome.id,
         count: hostGenome.samples_count,
-      }))
+      })),
     );
 
   renderColumnSelector = () => {
@@ -365,13 +365,13 @@ class MetadataManualInput extends React.Component {
   updateHostGenome = (hostGenomeIdOrNewName, sample) => {
     const hostGenome = find(
       ["id", hostGenomeIdOrNewName],
-      this.props.hostGenomes
+      this.props.hostGenomes,
     );
     this.updateMetadataField(
       "Host Organism",
       // Convert the id to a name.
       hostGenome ? hostGenome.name : hostGenomeIdOrNewName,
-      sample
+      sample,
     );
   };
 
@@ -401,7 +401,7 @@ class MetadataManualInput extends React.Component {
           // eslint-disable-next-line standard/computed-property-even-spacing
           this.state.hostGenomesByName[
             this.getMetadataValue(sample, "Host Organism")
-          ]
+          ],
         )
       : sample.host_genome_id;
 
@@ -417,7 +417,7 @@ class MetadataManualInput extends React.Component {
     get([field, "is_required"], this.props.projectMetadataFields) ||
     includes(
       hostGenomeId,
-      get([field, "host_genome_ids"], this.props.projectMetadataFields)
+      get([field, "host_genome_ids"], this.props.projectMetadataFields),
     );
 
   // Create form fields for the table.
@@ -443,7 +443,7 @@ class MetadataManualInput extends React.Component {
           const inputClasses = cx(
             cs.input,
             // Add extra width to location inputs for long names.
-            column.startsWith("collection_location") && cs.extraWidth
+            column.startsWith("collection_location") && cs.extraWidth,
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
@@ -497,7 +497,7 @@ class MetadataManualInput extends React.Component {
               {"--"}
             </div>
           );
-        })
+        }),
       );
     });
   };
@@ -539,7 +539,7 @@ class MetadataManualInput extends React.Component {
           );
         }
         return label;
-      })
+      }),
     );
   };
 

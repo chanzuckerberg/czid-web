@@ -53,7 +53,7 @@ class BareDropdown extends React.Component {
           onClick={() => this.props.onChange(option.value)}
           className={cx(
             cs.item,
-            this.props.value === option.value && cs.active
+            this.props.value === option.value && cs.active,
           )}
         >
           {option.customNode}
@@ -68,7 +68,7 @@ class BareDropdown extends React.Component {
         >
           {option.text}
         </BaseDropdown.Item>
-      )
+      ),
     );
   };
 
@@ -81,7 +81,7 @@ class BareDropdown extends React.Component {
       },
       () => {
         onFilterChange && onFilterChange(filterString);
-      }
+      },
     );
   };
 
@@ -110,7 +110,7 @@ class BareDropdown extends React.Component {
             item =>
               item.type !== BareDropdown.Header &&
               item.type !== BareDropdown.Divider &&
-              get("props.flag", item) !== "unsearchable"
+              get("props.flag", item) !== "unsearchable",
           )
         : items;
 
@@ -118,11 +118,11 @@ class BareDropdown extends React.Component {
       const pairs = zip(itemSearchStrings, itemsToZip);
       const filteredPairs = filter(
         pair => this.matchesFilter(pair[0], filterString),
-        pairs
+        pairs,
       );
       const sortedPairs = sortBy(
         pair => this.prioritizePrefixMatches(pair[0], filterString),
-        filteredPairs
+        filteredPairs,
       );
 
       return !isEmpty(sections)
@@ -132,11 +132,11 @@ class BareDropdown extends React.Component {
         : map(nth(1), sortedPairs);
     } else {
       const filteredOptions = options.filter(option =>
-        this.matchesFilter(option.text, filterString)
+        this.matchesFilter(option.text, filterString),
       );
       const sortedOptions = sortBy(
         option => this.prioritizePrefixMatches(option.text, filterString),
-        filteredOptions
+        filteredOptions,
       );
       return this.renderItemsDefault(sortedOptions);
     }
@@ -150,8 +150,8 @@ class BareDropdown extends React.Component {
       const sectionItems = compact(
         uncategorizedItemPairs.map(
           ([itemSearchResultString, item]) =>
-            itemStringsInSection.has(itemSearchResultString) && item
-        )
+            itemStringsInSection.has(itemSearchResultString) && item,
+        ),
       );
 
       if (isEmpty(sectionItems)) {
@@ -223,7 +223,7 @@ class BareDropdown extends React.Component {
       !hideArrow &&
         (arrowInsideTrigger ? cs.arrowInsideTrigger : cs.arrowOutsideTrigger),
       className,
-      smallArrow && cs.smallArrow
+      smallArrow && cs.smallArrow,
     );
 
     const { filterString } = this.state;
@@ -276,13 +276,13 @@ class BareDropdown extends React.Component {
 
     if (this.props.options && this.props.items) {
       throw new Error(
-        "Only one of options or items should be provided to <BareDropdown>"
+        "Only one of options or items should be provided to <BareDropdown>",
       );
     }
 
     const baseDropdownProps = omit(
       ["options", "value", "onChange", "items"],
-      otherProps
+      otherProps,
     );
 
     const filteredItems = this.getFilteredItems(filterString);
@@ -293,7 +293,7 @@ class BareDropdown extends React.Component {
           cs.menu,
           cs.dropdownMenu,
           (menuLabel || search) && cs.extraPadding,
-          menuClassName
+          menuClassName,
         )}
         onClick={this.handleMenuClick}
       >
@@ -406,7 +406,7 @@ BareDropdown.propTypes = forbidExtraProps({
       disabled: PropTypes.bool,
       // Custom node to render for the option.
       customNode: PropTypes.node,
-    })
+    }),
   ),
   value: PropTypes.any,
   onChange: PropTypes.func,

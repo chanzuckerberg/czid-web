@@ -24,23 +24,23 @@ class PlaygroundTypography extends React.Component {
     // Display all the CSS classes starting with "font".
     const fontClasses = filter(
       cssClass => cssClass.startsWith("font"),
-      keys(cs)
+      keys(cs),
     );
 
     const fontHeaderClasses = filter(
       cssClass => cssClass.startsWith("font-header"),
-      fontClasses
+      fontClasses,
     );
     const fontBodyClasses = filter(
       cssClass => cssClass.startsWith("font-body"),
-      fontClasses
+      fontClasses,
     );
     const fontOtherClasses = filter(
       cssClass =>
         !(
           cssClass.startsWith("font-header") || cssClass.startsWith("font-body")
         ),
-      fontClasses
+      fontClasses,
     );
 
     return (
@@ -66,7 +66,7 @@ class PlaygroundTypography extends React.Component {
                       className={cx(
                         cs.container,
                         cs[fontClass],
-                        upperCase && cs.upperCase
+                        upperCase && cs.upperCase,
                       )}
                     >
                       {fontClass}
@@ -74,7 +74,7 @@ class PlaygroundTypography extends React.Component {
                   </div>
                 ))}
               </div>
-            )
+            ),
           )}
         </div>
       </NarrowContainer>

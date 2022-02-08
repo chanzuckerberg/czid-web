@@ -120,11 +120,11 @@ class PhyloTreeCreationModal extends React.Component {
 
     this.isTreeNameValidDebounced = debounce(
       this.inputDelay,
-      this.isTreeNameValid
+      this.isTreeNameValid,
     );
     this.handleTaxonSearchActionDebounced = debounce(
       this.inputDelay,
-      this.handleTaxonSearchAction
+      this.handleTaxonSearchAction,
     );
 
     this.wizard = React.createRef();
@@ -161,7 +161,7 @@ class PhyloTreeCreationModal extends React.Component {
           // NOTE: This shows NG first so it may seem out-of-order if user has a
           // mix of old and new trees. Could sort by updated_at.
           phyloTrees: this.parsePhyloTreeData(phyloTreeNgs).concat(
-            this.parsePhyloTreeData(phyloTrees)
+            this.parsePhyloTreeData(phyloTrees),
           ),
           phyloTreesLoaded: true,
           taxonName: taxonNameNg,
@@ -197,7 +197,7 @@ class PhyloTreeCreationModal extends React.Component {
           onClick={() => {
             logAnalyticsEvent(
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_NG_LINK_CLICKED,
-              { treeId: row.id }
+              { treeId: row.id },
             );
           }}
           to={`/phylo_tree_ngs/${row.id}`}
@@ -247,7 +247,7 @@ class PhyloTreeCreationModal extends React.Component {
       });
     } else {
       const { projectSamples, otherSamples } = this.parseProjectSamplesData(
-        samples
+        samples,
       );
 
       this.setState({
@@ -262,7 +262,7 @@ class PhyloTreeCreationModal extends React.Component {
     const { allowedFeatures = [] } = this.context || {};
 
     const hasPhyloTreeNgFeature = allowedFeatures.includes(
-      PHYLO_TREE_NG_FEATURE
+      PHYLO_TREE_NG_FEATURE,
     );
     const projectSamples = [];
     const otherSamples = [];
@@ -297,7 +297,7 @@ class PhyloTreeCreationModal extends React.Component {
         const pipelineVersion = get("pipeline_version", sample);
         const hasCoverageBreadth = isPipelineFeatureAvailable(
           ACCESSION_COVERAGE_STATS_FEATURE,
-          pipelineVersion
+          pipelineVersion,
         );
 
         formattedSample = {
@@ -335,7 +335,7 @@ class PhyloTreeCreationModal extends React.Component {
 
   loadProjectSearchContext = () => {
     getProjectsToChooseFrom().then(projectList =>
-      this.handleProjectSearchContextResponse(projectList)
+      this.handleProjectSearchContextResponse(projectList),
     );
 
     if (this.wizard.current) {
@@ -366,8 +366,8 @@ class PhyloTreeCreationModal extends React.Component {
           {
             projectId: result.id,
             projectName: result.name,
-          }
-        )
+          },
+        ),
     );
 
     if (this.wizard.current) {
@@ -398,8 +398,8 @@ class PhyloTreeCreationModal extends React.Component {
           {
             taxonId,
             taxonName,
-          }
-        )
+          },
+        ),
     );
 
     if (this.wizard.current) {
@@ -424,12 +424,12 @@ class PhyloTreeCreationModal extends React.Component {
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
           {
             previousSelectedProjectSamples: Array.from(
-              previousSelectedProjectSamples
+              previousSelectedProjectSamples,
             ),
             newSelectedProjectSamples: Array.from(newSelectedProjectSamples),
-          }
+          },
         );
-      }
+      },
     );
   };
 
@@ -445,12 +445,12 @@ class PhyloTreeCreationModal extends React.Component {
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
           {
             previousSelectedOtherSamples: Array.from(
-              previousSelectedOtherSamples
+              previousSelectedOtherSamples,
             ),
             newSelectedOtherSamples: Array.from(newSelectedOtherSamples),
-          }
+          },
         );
-      }
+      },
     );
   };
 
@@ -466,9 +466,9 @@ class PhyloTreeCreationModal extends React.Component {
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED,
             {
               sampleSearchString: newFilter,
-            }
+            },
           );
-        }
+        },
       );
     }, this.inputDelay);
   };
@@ -503,7 +503,7 @@ class PhyloTreeCreationModal extends React.Component {
     const totalNumberOfSamplesSelected =
       selectedProjectSamples.size + selectedOtherSamples.size;
     const numberOfSamplesIsValid = PhyloTreeChecks.isNumberOfSamplesValid(
-      totalNumberOfSamplesSelected
+      totalNumberOfSamplesSelected,
     );
 
     if (!numberOfSamplesIsValid) {
@@ -518,8 +518,8 @@ class PhyloTreeCreationModal extends React.Component {
               totalNumberOfSamplesSelected,
               maxSamplesAllowed: PhyloTreeChecks.MAX_SAMPLES,
               minSamplesNeeded: PhyloTreeChecks.MIN_SAMPLES,
-            }
-          )
+            },
+          ),
       );
       return false;
     }
@@ -668,7 +668,7 @@ class PhyloTreeCreationModal extends React.Component {
       {
         treeNameValid,
         treeName,
-      }
+      },
     );
 
     return isTreeNameValid;
@@ -698,7 +698,7 @@ class PhyloTreeCreationModal extends React.Component {
       const coverageBreadthPercentage =
         projectSamples[sampleIndex].coverageBreadth;
       const coverageBreadth = parseFloat(
-        coverageBreadthPercentage.slice(0, coverageBreadthPercentage.length)
+        coverageBreadthPercentage.slice(0, coverageBreadthPercentage.length),
       );
       if (coverageBreadth < 25) {
         lowCoverageBreadths.push(coverageBreadth);
@@ -708,7 +708,7 @@ class PhyloTreeCreationModal extends React.Component {
       const coverageBreadthPercentage =
         otherSamples[sampleIndex].coverageBreadth;
       const coverageBreadth = parseFloat(
-        coverageBreadthPercentage.slice(0, coverageBreadthPercentage.length)
+        coverageBreadthPercentage.slice(0, coverageBreadthPercentage.length),
       );
       if (coverageBreadth < 25) {
         lowCoverageBreadths.push(coverageBreadth);
@@ -788,7 +788,7 @@ class PhyloTreeCreationModal extends React.Component {
               action="continue"
               onAfterAction={() =>
                 logAnalyticsEvent(
-                  ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_NEW_TREE_BUTTON_CLICKED
+                  ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_NEW_TREE_BUTTON_CLICKED,
                 )
               }
             >
@@ -957,7 +957,7 @@ class PhyloTreeCreationModal extends React.Component {
     }
     chosenPages.push(
       this.page("selectNameAndProjectSamples"),
-      this.page("addIdseqSamples")
+      this.page("addIdseqSamples"),
     );
     return chosenPages;
   };
@@ -974,7 +974,7 @@ class PhyloTreeCreationModal extends React.Component {
             skipPageInfoNPages={skipListTrees ? 0 : 1}
             onComplete={withAnalytics(
               this.handleComplete,
-              ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_TREE_BUTTON_CLICKED
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_TREE_BUTTON_CLICKED,
             )}
             defaultPage={defaultPage}
             labels={{

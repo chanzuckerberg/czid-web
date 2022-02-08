@@ -51,7 +51,7 @@ class DiscoveryFilters extends React.Component {
         "timeSelected",
         "tissueSelected",
         "visibilitySelected",
-      ]
+      ],
     );
 
     return newState;
@@ -69,7 +69,7 @@ class DiscoveryFilters extends React.Component {
         "tissueSelected",
         "visibilitySelected",
       ],
-      this.state
+      this.state,
     );
     onFilterChange && onFilterChange(selected);
   };
@@ -88,7 +88,7 @@ class DiscoveryFilters extends React.Component {
 
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
-        option => (option.value || option) !== valueToRemove
+        option => (option.value || option) !== valueToRemove,
       );
     }
 
@@ -113,7 +113,7 @@ class DiscoveryFilters extends React.Component {
           : find({ value: option }, options) || {
               text: option,
               value: option,
-            }
+            },
       )
       // create the filter tag
       .map(option => {
@@ -132,7 +132,7 @@ class DiscoveryFilters extends React.Component {
               {
                 value: option.value,
                 text: option.text,
-              }
+              },
             )}
           />
         );

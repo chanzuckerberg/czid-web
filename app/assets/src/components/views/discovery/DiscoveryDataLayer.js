@@ -20,7 +20,7 @@ class ObjectCollection {
     //   a list of all possible IDs
     fetchDataCallback,
     // name of the view: mostly used for debug
-    displayName = ""
+    displayName = "",
   ) {
     this.domain = domain;
     this.entries = {};
@@ -51,7 +51,7 @@ class ObjectCollectionView {
       onViewChange = null,
       // name of the view: mostly used for debug
       displayName = "",
-    }
+    },
   ) {
     this._orderedIds = null;
     this._loading = true;
@@ -147,7 +147,7 @@ class ObjectCollectionView {
     let missingIdxs = range(startIndex, minStopIndex + 1);
     if (this._orderedIds) {
       missingIdxs = missingIdxs.filter(
-        idx => !(this._orderedIds[idx] in this._collection.entries)
+        idx => !(this._orderedIds[idx] in this._collection.entries),
       );
     }
     if (missingIdxs.length > 0) {
@@ -198,7 +198,7 @@ class DiscoveryDataLayer {
     this.samples = new ObjectCollection(domain, this.fetchSamples);
     this.visualizations = new ObjectCollection(
       domain,
-      this.fetchVisualizations
+      this.fetchVisualizations,
     );
     this.workflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
   }

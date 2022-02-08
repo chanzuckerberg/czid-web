@@ -33,7 +33,7 @@ class Wizard extends React.Component {
         continue: "Continue",
         finish: "Finish",
       },
-      this.props.labels
+      this.props.labels,
     );
   }
 
@@ -115,7 +115,7 @@ class Wizard extends React.Component {
           wizard: wizardType,
           previousPage: this.state.currentPage - 1,
           currentPage: this.state.currentPage,
-        })
+        }),
       );
       this.resetPageState();
     }
@@ -153,7 +153,7 @@ class Wizard extends React.Component {
           className={cx(
             "wizard",
             this.props.className,
-            this.state.overlay && "wizard__hidden"
+            this.state.overlay && "wizard__hidden",
           )}
         >
           <div className="wizard__header">
@@ -210,7 +210,7 @@ Wizard.propTypes = {
     PropTypes.arrayOf(
       PropTypes.shape({
         type: Wizard.Page,
-      })
+      }),
     ),
   ]).isRequired,
   labels: PropTypes.objectOf(PropTypes.string),

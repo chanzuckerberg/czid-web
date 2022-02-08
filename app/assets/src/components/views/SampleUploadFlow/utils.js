@@ -18,7 +18,7 @@ export const openBasespaceOAuthPopup = params => {
     `${BASESPACE_OAUTH_URL}?${urlParams}`,
     BASESPACE_OAUTH_WINDOW_NAME,
     BASESPACE_OAUTH_WINDOW_WIDTH,
-    BASESPACE_OAUTH_WINDOW_HEIGHT
+    BASESPACE_OAUTH_WINDOW_HEIGHT,
   );
 };
 
@@ -43,7 +43,7 @@ export const sortResults = (matchedResults, query, func) => {
   if (query !== "") {
     sortedResults = sortBy(
       result => sortResultsByMatch(result, query),
-      sortedResults
+      sortedResults,
     );
   }
   return sortedResults;

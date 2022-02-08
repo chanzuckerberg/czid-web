@@ -23,7 +23,7 @@ class HostOrganismSearchBox extends React.Component {
         // options for new samples until the team gets a chance to review this
         // policy in light of the data. See HostGenome.rb.
         // See https://jira.czi.team/browse/IDSEQ-2193.
-        hostGenome.showAsOption && doesResultMatch(hostGenome, query)
+        hostGenome.showAsOption && doesResultMatch(hostGenome, query),
     );
 
     return sortResults(matchedHostGenomes, query, t => t.samples_count * -1);

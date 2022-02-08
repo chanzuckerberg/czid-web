@@ -37,7 +37,7 @@ class Link extends React.Component {
         href={href}
         className={cx(
           coloredBackground ? cs.linkBlack : cs.linkDefault,
-          className
+          className,
         )}
         target={external ? "_blank" : null}
         rel="noopener noreferrer"

@@ -13,7 +13,7 @@ export default class DetailsTab extends React.Component {
     const fields = [];
 
     const allRuns = bulkDownload.pipeline_runs.concat(
-      bulkDownload.workflow_runs
+      bulkDownload.workflow_runs,
     );
 
     if (bulkDownload.num_samples) {
@@ -34,7 +34,7 @@ export default class DetailsTab extends React.Component {
       downloadType.fields.forEach(field => {
         const fieldValue = get(
           ["params", field.type, "displayName"],
-          bulkDownload
+          bulkDownload,
         );
 
         if (fieldValue) {

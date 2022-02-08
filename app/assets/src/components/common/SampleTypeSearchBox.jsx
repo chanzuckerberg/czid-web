@@ -19,13 +19,13 @@ class SampleTypeSearchBox extends React.Component {
 
   getMatchesByCategory(query) {
     const matchedSampleTypes = this.props.sampleTypes.filter(sampleType =>
-      doesResultMatch(sampleType, query)
+      doesResultMatch(sampleType, query),
     );
 
     const sortedSampleTypes = sortResults(
       matchedSampleTypes,
       query,
-      sampleType => sampleType.name
+      sampleType => sampleType.name,
     );
 
     // Sample types are grouped differently based on whether the current

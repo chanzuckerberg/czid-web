@@ -9,7 +9,5 @@ export default {
 };
 
 export const KurtNobleAccordion = () => {
-    return (
-        <Accordion text="example text" />
-    )
-}
+  return <Accordion text="example text" />;
+};

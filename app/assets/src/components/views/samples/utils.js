@@ -21,32 +21,32 @@ export const getSampleTableData = sample => {
   const meanInsertSize = get("summary_stats.insert_size_mean", derivedOutput);
   const insertSizeStandardDeviation = get(
     "summary_stats.insert_size_standard_deviation",
-    derivedOutput
+    derivedOutput,
   );
   const meanInsertSizeString = numberWithPlusOrMinus(
     meanInsertSize,
-    insertSizeStandardDeviation
+    insertSizeStandardDeviation,
   );
 
   const data = {
     total_reads: numberWithCommas(
-      get("pipeline_run.total_reads", derivedOutput)
+      get("pipeline_run.total_reads", derivedOutput),
     ),
     nonhost_reads: numberWithCommas(
-      get("summary_stats.adjusted_remaining_reads", derivedOutput)
+      get("summary_stats.adjusted_remaining_reads", derivedOutput),
     ),
     nonhost_reads_percent: toPercent(
-      get("summary_stats.percent_remaining", derivedOutput)
+      get("summary_stats.percent_remaining", derivedOutput),
     ),
     total_ercc_reads: numberWithCommas(
-      get("pipeline_run.total_ercc_reads", derivedOutput)
+      get("pipeline_run.total_ercc_reads", derivedOutput),
     ),
     fraction_subsampled: roundToTwo(
-      get("pipeline_run.fraction_subsampled", derivedOutput)
+      get("pipeline_run.fraction_subsampled", derivedOutput),
     ),
     quality_control: toPercent(get("summary_stats.qc_percent", derivedOutput)),
     compression_ratio: roundToTwo(
-      get("summary_stats.compression_ratio", derivedOutput)
+      get("summary_stats.compression_ratio", derivedOutput),
     ),
     sample_type: get("sample_type", metadata),
     nucleotide_type: get("nucleotide_type", metadata),

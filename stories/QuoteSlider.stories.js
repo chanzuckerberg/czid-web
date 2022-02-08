@@ -11,9 +11,9 @@ export default {
 };
 
 export const KurtNobleQuoteSlider = () => {
-    return (
-        <div>
-            <QuoteSlider />
-        </div>
-    )
-}
+  return (
+    <div>
+      <QuoteSlider />
+    </div>
+  );
+};

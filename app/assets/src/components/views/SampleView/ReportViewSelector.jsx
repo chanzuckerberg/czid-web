@@ -32,7 +32,7 @@ const ReportViewSelector = ({ view, onViewClick }) => {
             onClick={() => {
               onViewClick({ view: "tree" });
               logAnalyticsEvent(
-                "ReportViewSelector_taxonomic-tree-view_selected"
+                "ReportViewSelector_taxonomic-tree-view_selected",
               );
             }}
           >

@@ -80,7 +80,7 @@ export default class NextcladeModal extends React.Component {
         validWorkflowInfo: workflowRunInfo,
         projectIds: projectIds,
       },
-      this.checkAdminSelections
+      this.checkAdminSelections,
     );
   };
 
@@ -90,11 +90,11 @@ export default class NextcladeModal extends React.Component {
 
     if (admin) {
       const selectedOwnerIds = validWorkflowInfo.map(
-        workflow => workflow.userId
+        workflow => workflow.userId,
       );
       if (difference(selectedOwnerIds, [userId]).length) {
         window.alert(
-          "Admin warning: You have selected consensus genomes that belong to other users. Double-check that you have permission to send to Nextclade for production consensus genomes."
+          "Admin warning: You have selected consensus genomes that belong to other users. Double-check that you have permission to send to Nextclade for production consensus genomes.",
         );
       }
     }
@@ -178,7 +178,7 @@ export default class NextcladeModal extends React.Component {
         workflowRunIds: Array.from(validWorkflowRunIds),
         selectedTreeType,
         projectIds,
-      }
+      },
     );
 
     this.setState({ confirmationModalOpen: false });
@@ -196,7 +196,7 @@ export default class NextcladeModal extends React.Component {
             workflowRunIds: Array.from(validWorkflowRunIds),
             selectedTreeType,
             projectIds,
-          }
+          },
         );
       });
 
@@ -220,9 +220,9 @@ export default class NextcladeModal extends React.Component {
               workflowRunIds: Array.from(validWorkflowRunIds),
               selectedTreeType,
               projectIds,
-            }
+            },
           );
-        }
+        },
       );
     }
   };
@@ -241,7 +241,7 @@ export default class NextcladeModal extends React.Component {
             workflowRunIds: Array.from(validWorkflowRunIds),
             selectedTreeType,
             projectIds,
-          }
+          },
         );
       });
     } catch (error) {
@@ -253,7 +253,7 @@ export default class NextcladeModal extends React.Component {
           workflowRunIds: Array.from(validWorkflowRunIds),
           selectedTreeType,
           projectIds,
-        }
+        },
       );
     }
   };

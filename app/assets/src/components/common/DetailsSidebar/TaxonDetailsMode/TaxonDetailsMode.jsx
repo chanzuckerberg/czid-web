@@ -150,7 +150,7 @@ export default class TaxonDetailsMode extends React.Component {
     this.histogram = null;
     return getTaxonDistributionForBackground(
       this.props.background.id,
-      this.props.taxonId
+      this.props.taxonId,
     )
       .then(data => {
         if (
@@ -203,7 +203,7 @@ export default class TaxonDetailsMode extends React.Component {
         ],
         showStatistics: false,
         xScaleType: HISTOGRAM_SCALE.SYM_LOG,
-      }
+      },
     );
     this.histogram.update();
   };
@@ -248,7 +248,7 @@ export default class TaxonDetailsMode extends React.Component {
             <div
               className={cx(
                 cs.text,
-                this.state.collapseTaxonDescription && cs.collapsed
+                this.state.collapseTaxonDescription && cs.collapsed,
               )}
             >
               <div
@@ -258,7 +258,7 @@ export default class TaxonDetailsMode extends React.Component {
                 {this.state.taxonDescription}
                 {this.renderWikipediaLicense(
                   this.props.taxonName,
-                  this.state.wikiUrl
+                  this.state.wikiUrl,
                 )}
               </div>
             </div>
@@ -273,7 +273,7 @@ export default class TaxonDetailsMode extends React.Component {
                       taxonId: this.props.taxonId,
                       taxonName: this.props.taxonName,
                       parentTaxonId: this.props.parentTaxonId,
-                    }
+                    },
                   )}
                 >
                   Show More
@@ -289,7 +289,7 @@ export default class TaxonDetailsMode extends React.Component {
             <div
               className={cx(
                 cs.text,
-                this.state.collapseParentDescription && cs.collapsed
+                this.state.collapseParentDescription && cs.collapsed,
               )}
             >
               <div
@@ -299,7 +299,7 @@ export default class TaxonDetailsMode extends React.Component {
                 {this.state.taxonParentDescription}
                 {this.renderWikipediaLicense(
                   this.state.taxonParentName,
-                  this.state.parentWikiUrl
+                  this.state.parentWikiUrl,
                 )}
               </div>
             </div>
@@ -314,7 +314,7 @@ export default class TaxonDetailsMode extends React.Component {
                       taxonId: this.props.taxonId,
                       taxonName: this.props.taxonName,
                       parentTaxonId: this.props.parentTaxonId,
-                    }
+                    },
                   )}
                 >
                   Show More

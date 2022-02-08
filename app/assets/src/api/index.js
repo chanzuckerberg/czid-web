@@ -28,7 +28,7 @@ const saveSampleNotes = (id, sampleNotes) =>
 
 const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
   get(
-    `/samples/${sampleId}/alignment_viz/${alignmentQuery}.json?pipeline_version=${pipelineVersion}`
+    `/samples/${sampleId}/alignment_viz/${alignmentQuery}.json?pipeline_version=${pipelineVersion}`,
   );
 
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
@@ -50,12 +50,12 @@ const getSampleReportData = ({
         background: background,
         merge_nt_nr: mergeNtNr,
       },
-    }
+    },
   );
 
 const getSummaryContigCounts = (id, minContigReads) =>
   get(
-    `/samples/${id}/summary_contig_counts?min_contig_reads=${minContigReads}`
+    `/samples/${id}/summary_contig_counts?min_contig_reads=${minContigReads}`,
   );
 
 const getAllHostGenomes = () => get("/host_genomes.json");
@@ -90,7 +90,7 @@ const markSampleUploaded = sampleId =>
 const uploadFileToUrl = async (
   file,
   url,
-  { onUploadProgress, onSuccess, onError }
+  { onUploadProgress, onSuccess, onError },
 ) => {
   const config = {
     onUploadProgress,
@@ -106,7 +106,7 @@ const uploadFileToUrl = async (
 const uploadFileToUrlWithRetries = async (
   file,
   url,
-  { onUploadProgress, onSuccess, onError }
+  { onUploadProgress, onSuccess, onError },
 ) => {
   const config = {
     onUploadProgress,
@@ -171,7 +171,7 @@ const getSamples = ({
         workflow,
         ...filters,
       },
-    }
+    },
   );
 
 const getWorkflowRuns = ({
@@ -221,7 +221,7 @@ const getSampleDimensions = ({
         sampleIds,
         ...filters,
       },
-    }
+    },
   );
 
 const getSampleStats = ({
@@ -243,13 +243,13 @@ const getSampleStats = ({
         sampleIds: JSON.stringify(sampleIds),
         ...filters,
       },
-    }
+    },
   );
 
 const getSample = ({ snapshotShareId, sampleId }) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
-      `/samples/${sampleId}.json`
+      `/samples/${sampleId}.json`,
   );
 
 const getProjectDimensions = ({ domain, filters, projectId, search }) =>
@@ -365,19 +365,19 @@ const getBackgrounds = ({
         ownedOrPublicBackgroundsOnly,
         ...(!snapshotShareId && { categorizeBackgrounds }),
       },
-    }
+    },
   );
 
 const getCoverageVizSummary = ({ sampleId, snapshotShareId } = {}) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
-      `/samples/${sampleId}/coverage_viz_summary`
+      `/samples/${sampleId}/coverage_viz_summary`,
   );
 
 const getCoverageVizData = ({ sampleId, accessionId, snapshotShareId } = {}) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
-      `/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`
+      `/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`,
   );
 
 const getWorkflowRunsInfo = workflowRunIds =>
@@ -389,7 +389,7 @@ const getWorkflowRunResults = workflowRunId =>
 const getContigsSequencesByByteranges = (
   sampleId,
   byteranges,
-  pipelineVersion
+  pipelineVersion,
 ) => {
   const params = getURLParamString({
     byteranges: byteranges.map(byterange => byterange.join(",")),
@@ -503,7 +503,7 @@ const getSamplesReadStats = async sampleIds => {
       params: {
         sampleIds: bin,
       },
-    })
+    }),
   );
 
   const response = await Promise.all(requests);

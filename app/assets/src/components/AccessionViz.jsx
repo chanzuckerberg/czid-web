@@ -27,7 +27,7 @@ class AccessionViz extends React.Component {
     const numReads = this.state.reads.length;
     let nextPageReads = this.allReads.slice(
       numReads,
-      numReads + this.readsPerPage
+      numReads + this.readsPerPage,
     );
     this.setState(prevState => ({
       reads: [...prevState.reads, ...nextPageReads],
@@ -100,7 +100,7 @@ class AccessionViz extends React.Component {
               {
                 reads: this.state.reads.length,
                 allReads: this.allReads.length,
-              }
+              },
             )}
             style={{ cursor: "pointer" }}
           >
@@ -151,8 +151,8 @@ AccessionViz.propTypes = {
         PropTypes.string,
         PropTypes.arrayOf(PropTypes.number),
         PropTypes.arrayOf(PropTypes.string),
-      ])
-    )
+      ]),
+    ),
   ),
   readsPerPage: PropTypes.number,
   ref_link: PropTypes.string,

@@ -61,7 +61,7 @@ class ProjectSettingsModal extends React.Component {
             {
               projectId: project.id,
               projectName: project.name,
-            }
+            },
           )}
         />
         {this.state.modalOpen && (
@@ -74,7 +74,7 @@ class ProjectSettingsModal extends React.Component {
               {
                 projectId: project.id,
                 projectName: project.name,
-              }
+              },
             )}
             className={cs.projectSettingsModal}
           >
@@ -109,7 +109,7 @@ class ProjectSettingsModal extends React.Component {
                               {
                                 projectId: project.id,
                                 projectName: project.name,
-                              }
+                              },
                             )}
                             project={project}
                             trigger={

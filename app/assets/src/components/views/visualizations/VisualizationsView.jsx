@@ -53,8 +53,8 @@ class VisualizationsView extends React.Component {
                 detailsRenderer: this.detailsRenderer,
                 statusRenderer: this.statusRenderer,
                 visibilityIconRenderer: this.visibilityIconRenderer,
-              }
-            )
+              },
+            ),
           ),
         headerClassName: cs.visualizationHeader,
         sortKey: p => p && p.updated_at,
@@ -156,13 +156,13 @@ class VisualizationsView extends React.Component {
               "publicAccess",
               "status",
             ],
-            visualization
+            visualization,
           ),
         },
         pick(
           ["id", "updated_at", "project_name", "samples_count"],
-          visualization
-        )
+          visualization,
+        ),
       );
     });
   };

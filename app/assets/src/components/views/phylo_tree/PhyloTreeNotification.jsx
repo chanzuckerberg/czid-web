@@ -18,7 +18,7 @@ const PhyloTreeNotification = ({ onClose }) => {
             onClick={() => {
               onClose();
               logAnalyticsEvent(
-                ANALYTICS_EVENT_NAMES.PHYLO_TREE_NOTIFICATION_VIEW_VISUALIZATIONS_LINK_CLICKED
+                ANALYTICS_EVENT_NAMES.PHYLO_TREE_NOTIFICATION_VIEW_VISUALIZATIONS_LINK_CLICKED,
               );
             }}
           >
@@ -52,6 +52,6 @@ export const showPhyloTreeNotification = () => {
     ({ closeToast }) => <PhyloTreeNotification onClose={closeToast} />,
     {
       autoClose: 12000,
-    }
+    },
   );
 };

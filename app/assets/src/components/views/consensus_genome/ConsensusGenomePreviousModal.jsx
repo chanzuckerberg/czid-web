@@ -26,7 +26,7 @@ export default function ConsensusGenomePreviousModal({
     const coverage = get("coverage_viz.coverage_depth", results);
     const percentId = get("quality_metrics.percent_identity", results);
     const referenceLength = numberWithCommas(
-      get("quality_metrics.reference_genome_length", results)
+      get("quality_metrics.reference_genome_length", results),
     );
     const title = `${inputs.accession_id} - ${inputs.accession_name}`;
     return (
@@ -74,7 +74,7 @@ export default function ConsensusGenomePreviousModal({
       minimumHeight
       onClose={withAnalytics(
         onClose,
-        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED
+        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED,
       )}
     >
       <div className={cs.title}>Consensus Genome</div>
@@ -92,7 +92,7 @@ export default function ConsensusGenomePreviousModal({
           rowClassName={cs.row}
           onRowClick={withAnalytics(
             onRowClick,
-            ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_ROW_CLICKED
+            ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_ROW_CLICKED,
           )}
         />
       </div>
@@ -101,7 +101,7 @@ export default function ConsensusGenomePreviousModal({
         label="Create a New Consensus Genome"
         onClick={withAnalytics(
           () => onNew && onNew(consensusGenomeData),
-          ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED
+          ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED,
         )}
       />
     </Modal>

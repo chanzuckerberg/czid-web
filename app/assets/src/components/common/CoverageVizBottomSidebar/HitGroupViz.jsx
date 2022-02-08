@@ -124,7 +124,7 @@ export default class HitGroupViz extends React.Component {
   renderGenomeViz = (accessionData, hitGroups) => {
     const hitGroupVizData = generateContigReadVizData(
       hitGroups,
-      accessionData.coverage_bin_size
+      accessionData.coverage_bin_size,
     );
 
     this.hitGroupViz = new GenomeViz(
@@ -138,7 +138,7 @@ export default class HitGroupViz extends React.Component {
         onGenomeVizBarExit: this.handleGenomeVizBarExit,
         onGenomeVizBarClick: this.handleGenomeVizBarClick,
         hoverDarkenFactor: 0.4,
-      }
+      },
     );
     this.hitGroupViz.update();
   };
@@ -149,7 +149,7 @@ export default class HitGroupViz extends React.Component {
     if (contigDownloaderData.contigByteranges) {
       const params = getURLParamString({
         byteranges: contigDownloaderData.contigByteranges.map(byterange =>
-          byterange.join(",")
+          byterange.join(","),
         ),
         pipelineVersion: this.props.pipelineVersion,
       });
@@ -163,7 +163,7 @@ export default class HitGroupViz extends React.Component {
     const data = await getContigsSequencesByByteranges(
       this.props.sampleId,
       contigDownloaderData.contigByteranges,
-      this.props.pipelineVersion
+      this.props.pipelineVersion,
     );
 
     copy(Object.values(data).join("\n"));
@@ -189,7 +189,7 @@ export default class HitGroupViz extends React.Component {
       >
         <TooltipVizTable data={genomeVizTooltipData} />
       </div>,
-      document.body
+      document.body,
     );
   };
 
@@ -215,15 +215,15 @@ export default class HitGroupViz extends React.Component {
                 "HitGroupViz_contig-download-button_clicked",
                 {
                   numBytes: totalByterangeLength(
-                    get("contigByteranges", contigDownloaderData)
+                    get("contigByteranges", contigDownloaderData),
                   ),
                   numContigs: size(
-                    get("contigByteranges", contigDownloaderData)
+                    get("contigByteranges", contigDownloaderData),
                   ),
                   accessionId: accessionData.id,
                   taxonId,
                   sampleId,
-                }
+                },
               )}
             >
               <IconDownloadSmall />
@@ -242,15 +242,15 @@ export default class HitGroupViz extends React.Component {
                 "HitGroupViz_contig-copy-button_clicked",
                 {
                   numBytes: totalByterangeLength(
-                    get("contigByteranges", contigDownloaderData)
+                    get("contigByteranges", contigDownloaderData),
                   ),
                   numContigs: size(
-                    get("contigByteranges", contigDownloaderData)
+                    get("contigByteranges", contigDownloaderData),
                   ),
                   accessionId: accessionData.id,
                   taxonId,
                   sampleId,
-                }
+                },
               )}
               onMouseEnter={this.restoreCopyIconMessage}
             >
@@ -262,7 +262,7 @@ export default class HitGroupViz extends React.Component {
           content={this.state.currentCopyIconMessage}
         />
       </div>,
-      document.body
+      document.body,
     );
   };
 
@@ -303,8 +303,8 @@ HitGroupViz.propTypes = {
       PropTypes.oneOfType([
         PropTypes.number,
         PropTypes.arrayOf(PropTypes.number),
-      ])
-    )
+      ]),
+    ),
   ),
   accessionData: PropTypes.shape({
     avg_prop_mismatch: PropTypes.number,

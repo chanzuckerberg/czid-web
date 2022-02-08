@@ -87,7 +87,7 @@ export default class AdminUploadOptions extends React.Component {
         {showOptions && (
           <div className={cs.adminUploadOptions}>
             {Object.keys(ADMIN_OPTIONS).map(option =>
-              this.renderAdminOption(option)
+              this.renderAdminOption(option),
             )}
           </div>
         )}

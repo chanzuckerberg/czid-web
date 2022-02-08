@@ -78,7 +78,7 @@ export default class PlaygroundViz extends React.Component {
       {
         marginLeft: 0,
         marginRight: 0,
-      }
+      },
     );
 
     this.viz.start();

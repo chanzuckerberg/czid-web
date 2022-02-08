@@ -14,7 +14,7 @@ const publicSampleNotification = (samples, projectName, onClose) => {
     ),
     {
       onClose,
-    }
+    },
   );
 };
 
@@ -38,11 +38,11 @@ const publicSampleNotificationsByProject = samples => {
           JSON.stringify(
             union(
               JSON.parse(localStorage.getItem("dismissedPublicSamples")),
-              projectSamples.map(sample => sample.id)
-            )
-          )
+              projectSamples.map(sample => sample.id),
+            ),
+          ),
         );
-      }
+      },
     );
   }
 };

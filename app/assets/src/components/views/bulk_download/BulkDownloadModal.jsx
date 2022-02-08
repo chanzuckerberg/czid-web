@@ -33,12 +33,12 @@ const assembleSelectedDownload = memoize(
     allSelectedFieldsDisplay,
     objectIds,
     workflow,
-    workflowEntity
+    workflowEntity,
   ) => {
     const fieldValues = get(selectedDownloadTypeName, allSelectedFields);
     const fieldDisplayNames = get(
       selectedDownloadTypeName,
-      allSelectedFieldsDisplay
+      allSelectedFieldsDisplay,
     );
 
     const fields = {};
@@ -59,7 +59,7 @@ const assembleSelectedDownload = memoize(
       workflow,
       workflowEntity,
     };
-  }
+  },
 );
 
 class BulkDownloadModal extends React.Component {
@@ -114,7 +114,7 @@ class BulkDownloadModal extends React.Component {
         ? workflow
         : WORKFLOWS.CONSENSUS_GENOME.value;
     const bulkDownloadTypesRequest = getBulkDownloadTypes(
-      tempBulkDownloadWorkflow
+      tempBulkDownloadWorkflow,
     );
     const validationInfoRequest = this.fetchValidationInfo({
       ids: Array.from(selectedIds),
@@ -146,12 +146,12 @@ class BulkDownloadModal extends React.Component {
             newSelectedFields = set(
               [type.type, field.type],
               field.default_value.value,
-              newSelectedFields
+              newSelectedFields,
             );
             newSelectedFieldsDisplay = set(
               [type.type, field.type],
               field.default_value.display_name,
-              newSelectedFieldsDisplay
+              newSelectedFieldsDisplay,
             );
           }
         });
@@ -241,7 +241,7 @@ class BulkDownloadModal extends React.Component {
       selectedFieldsDisplay,
       validObjectIds,
       workflow,
-      workflowEntity
+      workflowEntity,
     );
 
     this.createBulkDownload(selectedDownload);
@@ -256,7 +256,7 @@ class BulkDownloadModal extends React.Component {
 
     logAnalyticsEvent(
       "BulkDownloadModal_radio-button-for-download-type_selected",
-      { downloadType: newSelectedDownloadTypeName, workflow }
+      { downloadType: newSelectedDownloadTypeName, workflow },
     );
     this.setState({
       selectedDownloadTypeName: newSelectedDownloadTypeName,
@@ -274,7 +274,7 @@ class BulkDownloadModal extends React.Component {
           fieldValue: value,
           displayName,
           workflow,
-        }
+        },
       );
       // If the value is undefined, delete it from selectedFields.
       // This allows us to support cases where certain fields are conditionally required;
@@ -289,7 +289,7 @@ class BulkDownloadModal extends React.Component {
           ? set(
               [downloadType, fieldType],
               displayName,
-              prevState.selectedFieldsDisplay
+              prevState.selectedFieldsDisplay,
             )
           : unset([downloadType, fieldType], prevState.selectedFieldsDisplay);
 
@@ -330,7 +330,7 @@ class BulkDownloadModal extends React.Component {
           workflow,
           downloadType: selectedDownload.downloadType,
           ...objectIds,
-        }
+        },
       );
       return;
     }
@@ -341,7 +341,7 @@ class BulkDownloadModal extends React.Component {
         workflow,
         downloadType: selectedDownload.downloadType,
         ...objectIds,
-      }
+      },
     );
 
     onGenerate();

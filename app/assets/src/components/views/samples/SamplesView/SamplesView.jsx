@@ -137,7 +137,7 @@ class SamplesView extends React.Component {
     let newSelected = new Set(
       checked
         ? union(Array.from(selectedIds), selectableIds)
-        : difference(Array.from(selectedIds), selectableIds)
+        : difference(Array.from(selectedIds), selectableIds),
     );
     onUpdateSelectedIds(newSelected);
   };
@@ -179,7 +179,7 @@ class SamplesView extends React.Component {
       return disabledToolbarIcon("Select at least 2 samples");
     } else if (selectedIds.size > MAX_TAXON_HEATMAP_SAMPLES) {
       return disabledToolbarIcon(
-        `Select at most ${MAX_TAXON_HEATMAP_SAMPLES} samples`
+        `Select at most ${MAX_TAXON_HEATMAP_SAMPLES} samples`,
       );
     } else {
       return (
@@ -198,7 +198,7 @@ class SamplesView extends React.Component {
                   text={option.text}
                   onClick={withAnalytics(
                     this.handleHeatmapCreationModalOpen,
-                    ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_OPENED
+                    ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_OPENED,
                   )}
                 />
               );
@@ -243,7 +243,7 @@ class SamplesView extends React.Component {
         popupText="Phylogenetic Tree"
         onClick={withAnalytics(
           this.handlePhyloModalOpen,
-          "SamplesView_phylo-tree-modal-open_clicked"
+          "SamplesView_phylo-tree-modal-open_clicked",
         )}
       />
     );
@@ -264,7 +264,7 @@ class SamplesView extends React.Component {
         onClick={withAnalytics(
           this.handleBulkDownloadModalOpen,
           "SamplesView_bulk-download-modal-open_clicked",
-          { workflow }
+          { workflow },
         )}
       />
     );
@@ -298,7 +298,7 @@ class SamplesView extends React.Component {
         }
         selectedSampleIds={selectedIds}
         fetchedSamples={targetSamples.filter(sample =>
-          selectedIds.has(sample.id)
+          selectedIds.has(sample.id),
         )}
         workflow={workflow}
       />
@@ -309,7 +309,7 @@ class SamplesView extends React.Component {
     const { objects, selectedIds } = this.props;
 
     const selectedObjects = objects.loaded.filter(object =>
-      selectedIds.has(object.id)
+      selectedIds.has(object.id),
     );
 
     const sarsCov2Count = selectedObjects
@@ -339,7 +339,7 @@ class SamplesView extends React.Component {
         disabled={sarsCov2Count === 0 || sarsCov2Count > MAX_NEXTCLADE_SAMPLES}
         onClick={withAnalytics(
           this.handleNextcladeModalOpen,
-          "SamplesView_nextclade-modal-open_clicked"
+          "SamplesView_nextclade-modal-open_clicked",
         )}
       />
     );
@@ -419,7 +419,7 @@ class SamplesView extends React.Component {
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
             this.handleSelectAllRows,
-            "SamplesView_select-all-rows_clicked"
+            "SamplesView_select-all-rows_clicked",
           )}
           onSelectRow={this.handleSelectRow}
           onRowClick={this.handleRowClick}
@@ -620,7 +620,7 @@ class SamplesView extends React.Component {
             csrf={document.getElementsByName("csrf-token")[0].content}
             onClose={withAnalytics(
               this.handlePhyloModalClose,
-              "SamplesView_phylo-tree-modal_closed"
+              "SamplesView_phylo-tree-modal_closed",
             )}
           />
         )}
@@ -629,7 +629,7 @@ class SamplesView extends React.Component {
             open
             onClose={withAnalytics(
               this.handleBulkDownloadModalClose,
-              "SamplesView_bulk-download-modal_closed"
+              "SamplesView_bulk-download-modal_closed",
             )}
             onGenerate={this.handleBulkDownloadGenerate}
             selectedIds={selectedIds}
@@ -642,7 +642,7 @@ class SamplesView extends React.Component {
             open
             onClose={withAnalytics(
               this.handleHeatmapCreationModalClose,
-              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED
+              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED,
             )}
             selectedIds={selectedIds}
           />
@@ -652,7 +652,7 @@ class SamplesView extends React.Component {
             open
             onClose={withAnalytics(
               this.handleNextcladeModalClose,
-              "SamplesView_nextclade-modal_closed"
+              "SamplesView_nextclade-modal_closed",
             )}
             selectedIds={selectedIds}
             workflowEntity={workflowEntity}

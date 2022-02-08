@@ -13,7 +13,7 @@ class FilePicker extends React.Component {
   // Default handler for dropped files being rejected
   onRejected = () => {
     window.alert(
-      "Invalid file. File size must be under 5GB for local uploads."
+      "Invalid file. File size must be under 5GB for local uploads.",
     );
   };
 

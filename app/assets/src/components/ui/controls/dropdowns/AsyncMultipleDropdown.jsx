@@ -32,7 +32,7 @@ class AsyncMultipleDropdown extends React.Component {
     const selectedSet = new Set(selected);
     // remove if not in selected
     const newSelectedOptions = selectedOptions.filter(option =>
-      selectedSet.has(option.value)
+      selectedSet.has(option.value),
     );
     // get newly selected
     selectedOptions.forEach(option => selectedSet.delete(option.value));
@@ -45,7 +45,7 @@ class AsyncMultipleDropdown extends React.Component {
       {
         selectedOptions: newSelectedOptions,
       },
-      () => onChange(this.state.selectedOptions)
+      () => onChange(this.state.selectedOptions),
     );
   };
 

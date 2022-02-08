@@ -33,7 +33,7 @@ const BarChartToggle = ({ currentDisplay, onDisplaySwitch }) => {
                   <IconBarChartHorizontal3Small
                     className={cx(
                       cs.icon,
-                      currentDisplay === display && cs.active
+                      currentDisplay === display && cs.active,
                     )}
                   />
                 )}
@@ -41,7 +41,7 @@ const BarChartToggle = ({ currentDisplay, onDisplaySwitch }) => {
                   <IconPercentageSmall
                     className={cx(
                       cs.icon,
-                      currentDisplay === display && cs.active
+                      currentDisplay === display && cs.active,
                     )}
                   />
                 )}

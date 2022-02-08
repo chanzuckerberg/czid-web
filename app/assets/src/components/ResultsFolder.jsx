@@ -154,7 +154,7 @@ class ResultsFolder extends React.Component {
               className="back"
               onClick={this.gotoPath.bind(
                 this,
-                `/home?project_id=${this.filePath[1]}`
+                `/home?project_id=${this.filePath[1]}`,
               )}
             >
               {this.projectName}

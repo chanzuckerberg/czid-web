@@ -92,7 +92,7 @@ class PortalDropdown extends React.Component {
                   !this.props.hideArrow &&
                     (this.props.arrowInsideTrigger
                       ? cs.arrowInsideTrigger
-                      : cs.arrowOutsideTrigger)
+                      : cs.arrowOutsideTrigger),
                 )}
                 ref={c => {
                   ref(c);
@@ -145,7 +145,7 @@ class PortalDropdown extends React.Component {
                       this.props.menuClassName,
                       cs.popperMenu,
                       this.props.floating && cs.floating,
-                      this.props.withinModal && cs.withinModal
+                      this.props.withinModal && cs.withinModal,
                     )}
                     onClick={this.close}
                     ref={c => {
@@ -164,7 +164,7 @@ class PortalDropdown extends React.Component {
                 );
               }}
             </Popper>,
-            document.body
+            document.body,
           )}
       </Manager>
     );

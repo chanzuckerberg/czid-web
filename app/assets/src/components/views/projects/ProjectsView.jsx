@@ -40,8 +40,8 @@ class ProjectsView extends React.Component {
                 detailsRenderer: this.detailsRenderer,
                 descriptionRenderer: this.descriptionRenderer,
                 visibilityIconRenderer: this.visibilityIconRenderer,
-              }
-            )
+              },
+            ),
           ),
         headerClassName: cs.projectHeader,
         sortKey: p => (p.name || "").toLowerCase(),
@@ -155,11 +155,14 @@ class ProjectsView extends React.Component {
         {
           project: pick(
             ["name", "description", "owner", "public_access"],
-            project
+            project,
           ),
         },
-        pick(["id", "created_at", "hosts", "tissues", "sample_counts"], project)
-      )
+        pick(
+          ["id", "created_at", "hosts", "tissues", "sample_counts"],
+          project,
+        ),
+      ),
     );
   };
 

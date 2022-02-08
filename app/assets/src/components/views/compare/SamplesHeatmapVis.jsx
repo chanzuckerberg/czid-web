@@ -98,7 +98,7 @@ class SamplesHeatmapVis extends React.Component {
         shouldSortRows: this.props.taxaSortType === "genus", // else cluster
         // Shrink to fit the viewport width
         maxWidth: this.heatmapContainer.offsetWidth,
-      }
+      },
     );
     this.heatmap.start();
 
@@ -200,7 +200,7 @@ class SamplesHeatmapVis extends React.Component {
 
     const filterStrings = map(
       filter => `${filter.metricDisplay} ${filter.operator} ${filter.value}`,
-      thresholdFilters
+      thresholdFilters,
     );
 
     const fullString = `${numFilters} filter${
@@ -325,7 +325,7 @@ class SamplesHeatmapVis extends React.Component {
     let taxonDetails = this.props.taxonDetails[taxonId];
 
     let nodeHasData = this.metrics.some(
-      metric => !!data[metric.key][node.rowIndex][node.columnIndex]
+      metric => !!data[metric.key][node.rowIndex][node.columnIndex],
     );
 
     const isFiltered =
@@ -336,7 +336,7 @@ class SamplesHeatmapVis extends React.Component {
       values = this.metrics.map(metric => {
         const data = this.props.data[metric.key];
         const value = parseFloat(
-          (data[node.rowIndex][node.columnIndex] || 0).toFixed(4)
+          (data[node.rowIndex][node.columnIndex] || 0).toFixed(4),
         );
         return [
           metric.label,
@@ -446,7 +446,7 @@ class SamplesHeatmapVis extends React.Component {
   scrollToRow() {
     if (this.props.newTaxon) {
       this.heatmap.scrollToRow(
-        this.props.taxonDetails[this.props.newTaxon].name
+        this.props.taxonDetails[this.props.newTaxon].name,
       );
     }
   }
@@ -465,8 +465,8 @@ class SamplesHeatmapVis extends React.Component {
 
     let intersection = new Set(
       [...this.state.selectedMetadata].filter(metadatum =>
-        selectedMetadata.has(metadatum)
-      )
+        selectedMetadata.has(metadatum),
+      ),
     );
     const current = new Set([...intersection, ...selectedMetadata]);
     this.setState(
@@ -479,7 +479,7 @@ class SamplesHeatmapVis extends React.Component {
         logAnalyticsEvent("SamplesHeatmapVis_selected-metadata_changed", {
           selectedMetadata: current.length,
         });
-      }
+      },
     );
   };
 
@@ -507,7 +507,7 @@ class SamplesHeatmapVis extends React.Component {
   handleZoom(increment) {
     const newZoom = Math.min(
       3, // max zoom factor
-      Math.max(0.2, this.heatmap.options.zoom + increment)
+      Math.max(0.2, this.heatmap.options.zoom + increment),
     );
     this.heatmap.updateZoom(newZoom);
   }
@@ -531,11 +531,11 @@ class SamplesHeatmapVis extends React.Component {
         <PlusMinusControl
           onPlusClick={withAnalytics(
             () => this.handleZoom(0.25),
-            "SamplesHeatmapVis_zoom-in-control_clicked"
+            "SamplesHeatmapVis_zoom-in-control_clicked",
           )}
           onMinusClick={withAnalytics(
             () => this.handleZoom(-0.25),
-            "SamplesHeatmapVis_zoom-out-control_clicked"
+            "SamplesHeatmapVis_zoom-out-control_clicked",
           )}
           className={cs.plusMinusControl}
         />
@@ -545,7 +545,7 @@ class SamplesHeatmapVis extends React.Component {
             (!isEmpty(this.props.thresholdFilters) ||
               !isEmpty(this.props.taxonCategories)) &&
               cs.filtersApplied,
-            this.props.fullScreen && cs.fullScreen
+            this.props.fullScreen && cs.fullScreen,
           )}
           ref={container => {
             this.heatmapContainer = container;
@@ -600,7 +600,7 @@ class SamplesHeatmapVis extends React.Component {
         <div
           className={cx(
             cs.bannerContainer,
-            this.state.displayControlsBanner ? cs.show : cs.hide
+            this.state.displayControlsBanner ? cs.show : cs.hide,
           )}
         >
           <div className={cs.bannerText}>

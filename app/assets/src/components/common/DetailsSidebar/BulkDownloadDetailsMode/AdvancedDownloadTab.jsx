@@ -76,7 +76,7 @@ export default class AdvancedDownloadTab extends React.Component {
           {
             bulkDownloadId: bulkDownload.id,
             fileSize: bulkDownload.file_size,
-          }
+          },
         )
       : null;
 
@@ -84,7 +84,7 @@ export default class AdvancedDownloadTab extends React.Component {
       <div
         className={cx(
           cs.cloudCommandContainer,
-          this.hasCLICommand() && cs.enabled
+          this.hasCLICommand() && cs.enabled,
         )}
         onClick={handleCLICommandClick}
         onMouseLeave={this.resetTooltip}

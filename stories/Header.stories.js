@@ -6,14 +6,14 @@ export default {
   title: "Kurt Noble Lander/Sections",
   component: KurtNobleHeader,
   parameters: {
-      layout: "fullscreen",
+    layout: "fullscreen",
   },
 };
 
 export const KurtNobleHeader = () => {
-    return (
-        <div>
-            <Header />
-        </div>
-    )
-}
+  return (
+    <div>
+      <Header />
+    </div>
+  );
+};

@@ -33,7 +33,7 @@ const openUrlInPopupWindow = (url, windowName, windowWidth, windowHeight) => {
   return window.open(
     url,
     windowName,
-    `left=${left},top=${top},width=${windowWidth},height=${windowHeight},menubar=no,toolbar=no`
+    `left=${left},top=${top},width=${windowWidth},height=${windowHeight},menubar=no,toolbar=no`,
   );
 };
 

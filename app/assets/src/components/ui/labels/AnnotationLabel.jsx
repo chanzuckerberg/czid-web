@@ -42,7 +42,7 @@ const AnnotationLabel = ({ type, isSmall = false }) => {
       <IconAnnotation
         className={cx(
           cs.annotationIcon,
-          isSmall ? cs.annotationIconSmall : cs.annotationIconLarge
+          isSmall ? cs.annotationIconSmall : cs.annotationIconLarge,
         )}
       />
     </span>

@@ -66,7 +66,7 @@ class Title extends React.Component {
     if (multipleOptions) {
       const filteredOptions = filter(
         options,
-        option => String(option.id) !== String(id)
+        option => String(option.id) !== String(id),
       );
 
       const items = filteredOptions.map(option => (
@@ -96,7 +96,7 @@ Title.propTypes = {
       label: PropTypes.string.isRequired,
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
       onClick: PropTypes.func.isRequired,
-    })
+    }),
   ),
   label: PropTypes.string,
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

@@ -55,7 +55,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
         ? `Sample`
         : get(
             "label",
-            find({ value: get("analysis_type", rowData) }, WORKFLOWS)
+            find({ value: get("analysis_type", rowData) }, WORKFLOWS),
           );
 
     return <div>{`${count} ${analysisType}${count > 1 ? "s" : ""}`}</div>;

@@ -41,7 +41,7 @@ class MultipleNestedDropdown extends React.Component {
         {
           selectedOptions: props.selectedOptions,
           oldSelectedOptions: props.selectedOptions,
-        }
+        },
       );
     }
 
@@ -49,7 +49,7 @@ class MultipleNestedDropdown extends React.Component {
       props.selectedSuboptions !== state.oldSelectedSuboptions ||
       !MultipleNestedDropdown.areSuboptionsEqual(
         props.selectedSuboptions,
-        state.oldSelectedSuboptions
+        state.oldSelectedSuboptions,
       )
     ) {
       newState = Object.assign(newState || {}, {
@@ -80,11 +80,11 @@ class MultipleNestedDropdown extends React.Component {
             selectedOptions: [...prevState.selectedOptions, optionValue],
           };
           const optionClicked = this.props.options.find(
-            option => option.value === optionValue
+            option => option.value === optionValue,
           );
           if (optionClicked.suboptions) {
             let selectedSuboptions = optionClicked.suboptions.map(
-              suboption => suboption.value
+              suboption => suboption.value,
             );
             prevState.selectedSuboptions[optionValue] = selectedSuboptions;
             stateUpdate.selectedSuboptions = prevState.selectedSuboptions;
@@ -94,24 +94,24 @@ class MultipleNestedDropdown extends React.Component {
         () => {
           this.props.onChange(
             this.state.selectedOptions,
-            this.state.selectedSuboptions
+            this.state.selectedSuboptions,
           );
-        }
+        },
       );
     } else {
       this.setState(
         prevState => {
           return {
             selectedOptions: prevState.selectedOptions.filter(
-              value => value !== optionValue
+              value => value !== optionValue,
             ),
           };
         },
         () =>
           this.props.onChange(
             this.state.selectedOptions,
-            this.state.selectedSuboptions
-          )
+            this.state.selectedSuboptions,
+          ),
       );
     }
   }
@@ -130,15 +130,15 @@ class MultipleNestedDropdown extends React.Component {
         () =>
           this.props.onChange(
             this.state.selectedOptions,
-            this.state.selectedSuboptions
-          )
+            this.state.selectedSuboptions,
+          ),
       );
     } else {
       this.setState(
         prevState => {
           if (prevState.selectedSuboptions[optionValue]) {
             let suboptions = prevState.selectedSuboptions[optionValue].filter(
-              value => value !== suboptionValue
+              value => value !== suboptionValue,
             );
             prevState.selectedSuboptions[optionValue] = suboptions;
           }
@@ -147,8 +147,8 @@ class MultipleNestedDropdown extends React.Component {
         () =>
           this.props.onChange(
             this.state.selectedOptions,
-            this.state.selectedSuboptions
-          )
+            this.state.selectedSuboptions,
+          ),
       );
     }
   }
@@ -187,7 +187,7 @@ class MultipleNestedDropdown extends React.Component {
   isSuboptionChecked(optionValue, suboptionValue) {
     return (
       (this.state.selectedSuboptions[optionValue] || []).indexOf(
-        suboptionValue
+        suboptionValue,
       ) > -1
     );
   }
@@ -200,8 +200,8 @@ class MultipleNestedDropdown extends React.Component {
           option.value,
           option.text,
           this.isOptionChecked(option.value),
-          this.handleOptionClicked
-        )
+          this.handleOptionClicked,
+        ),
       );
       (option.suboptions || []).forEach(suboption => {
         items.push(
@@ -209,8 +209,8 @@ class MultipleNestedDropdown extends React.Component {
             suboption.value,
             `${option.text} - ${suboption.text}`,
             this.isSuboptionChecked(option.value, suboption.value),
-            this.handleSuboptionClicked
-          )
+            this.handleSuboptionClicked,
+          ),
         );
       });
     });
@@ -274,7 +274,7 @@ class MultipleNestedDropdown extends React.Component {
         "placeholder",
         "useDropdownLabelCounter",
       ],
-      this.props
+      this.props,
     );
 
     return (

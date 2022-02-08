@@ -111,7 +111,7 @@ const HoverActions = ({
   const getHoverActions = () => {
     const hasCoverageViz = isPipelineFeatureAvailable(
       COVERAGE_VIZ_FEATURE,
-      pipelineVersion
+      pipelineVersion,
     );
     const hasBlastFeature = allowedFeatures.includes(BLAST_FEATURE);
     const params = {
@@ -357,10 +357,10 @@ const HoverActions = ({
                 ...(params
                   ? pick(
                       ["taxId", "taxLevel", "taxName", "pipelineVersion"],
-                      params
+                      params,
                     )
                   : {}),
-              }
+              },
             );
           },
         })}

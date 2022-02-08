@@ -31,7 +31,7 @@ export default class GenomeViz {
         hoverBuffer: 5,
         hoverDarkenFactor: 0.25,
       },
-      options
+      options,
     );
 
     this.lastHoveredDataIndex = null;
@@ -134,7 +134,7 @@ export default class GenomeViz {
     if (closestDataIndex !== null && this.options.onGenomeVizBarHover) {
       this.options.onGenomeVizBarHover(
         currentEvent.clientX,
-        currentEvent.clientY
+        currentEvent.clientY,
       );
     }
   };
@@ -158,7 +158,7 @@ export default class GenomeViz {
         this.options.onGenomeVizBarClick(
           closestDataIndex,
           barBBox.right,
-          barBBox.top
+          barBBox.top,
         );
         this.outlineBar(closestDataIndex, true);
       } else {
@@ -188,7 +188,7 @@ export default class GenomeViz {
       }
       const d = this.data[barIndex];
       const highlightColor = color(this.options.color).darker(
-        this.options.hoverDarkenFactor
+        this.options.hoverDarkenFactor,
       );
 
       this.svg

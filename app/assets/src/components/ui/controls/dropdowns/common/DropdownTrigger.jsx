@@ -39,7 +39,7 @@ class DropdownTrigger extends React.Component {
           rounded && cs.rounded,
           active && cs.active,
           disabled && cs.disabled,
-          erred && cs.erred
+          erred && cs.erred,
         )}
         onClick={onClick}
       >
@@ -48,7 +48,7 @@ class DropdownTrigger extends React.Component {
             <span
               className={cx(
                 cs.label,
-                disableMarginRight && cs.disableMarginRight
+                disableMarginRight && cs.disableMarginRight,
               )}
             >
               {label}
@@ -57,7 +57,7 @@ class DropdownTrigger extends React.Component {
           <span
             className={cx(
               this.state.hideDropdownLabel && cs.hide,
-              isNil(value) && cs.placeholder
+              isNil(value) && cs.placeholder,
             )}
           >
             {value || placeholder}

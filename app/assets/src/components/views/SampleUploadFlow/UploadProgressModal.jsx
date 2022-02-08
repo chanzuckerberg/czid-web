@@ -87,11 +87,11 @@ export default class UploadProgressModal extends React.Component {
       if (!isEmpty(this.getLocalSamplesFailed())) {
         const failedSamples = filter(
           sample => sampleUploadStatuses[sample.name] === "error",
-          samples
+          samples,
         );
         this.logUploadFailed(
           failedSamples.length,
-          samples.length - failedSamples.length
+          samples.length - failedSamples.length,
         );
       } else {
         this.logUploadSucceeded(samples.length);
@@ -227,7 +227,7 @@ export default class UploadProgressModal extends React.Component {
 
           const uploadStatuses = zipObject(
             erroredSampleNames,
-            times(constant("error"), erroredSampleNames.length)
+            times(constant("error"), erroredSampleNames.length),
           );
 
           this.setState(prevState => ({
@@ -250,8 +250,8 @@ export default class UploadProgressModal extends React.Component {
           uploadSampleFilesToPresignedURL({
             samples: createdSamples,
             callbacks: this.getUploadProgressCallbacks(),
-          })
-      )
+          }),
+      ),
     );
   };
 
@@ -300,7 +300,7 @@ export default class UploadProgressModal extends React.Component {
     if (response.errors.length > 0) {
       this.logUploadFailed(
         response.errored_sample_names.length,
-        response.sample_ids.length
+        response.sample_ids.length,
       );
     } else {
       this.logUploadSucceeded(response.sample_ids.length);
@@ -360,7 +360,7 @@ export default class UploadProgressModal extends React.Component {
       sample =>
         sampleUploadStatuses[sample.name] === undefined ||
         sampleUploadStatuses[sample.name] === "in progress",
-      samples
+      samples,
     );
   };
 
@@ -369,7 +369,7 @@ export default class UploadProgressModal extends React.Component {
     const { sampleUploadStatuses } = this.state;
     return filter(
       sample => sampleUploadStatuses[sample.name] === "error",
-      samples
+      samples,
     );
   };
 
@@ -396,7 +396,7 @@ export default class UploadProgressModal extends React.Component {
           samples: failedSamplesWithPresignedURLs,
           callbacks: this.getUploadProgressCallbacks(),
         });
-      }
+      },
     );
   };
 
@@ -413,7 +413,7 @@ export default class UploadProgressModal extends React.Component {
               "UploadProgressModal_retry_clicked",
               {
                 sampleName: sample.name,
-              }
+              },
             )}
             className={cs.sampleRetry}
           >
@@ -440,7 +440,7 @@ export default class UploadProgressModal extends React.Component {
     const totalSize = this.getSampleTotalSize(sample);
 
     return `Uploaded ${formatFileSize(
-      totalSize * uploadPercentage
+      totalSize * uploadPercentage,
     )} of ${formatFileSize(totalSize)}`;
   };
 
@@ -576,7 +576,7 @@ export default class UploadProgressModal extends React.Component {
               "UploadProgressModal_retry-all-failed_clicked",
               {
                 numberOfLocalSamplesFailed,
-              }
+              },
             )}
           >
             Retry all failed
@@ -649,7 +649,7 @@ export default class UploadProgressModal extends React.Component {
         narrow
         className={cx(
           cs.uploadProgressModal,
-          uploadComplete && cs.uploadComplete
+          uploadComplete && cs.uploadComplete,
         )}
       >
         <div className={cs.header}>
@@ -724,7 +724,7 @@ UploadProgressModal.propTypes = {
       file_type: PropTypes.string,
       basespace_project_name: PropTypes.string,
       files: PropTypes.objectOf(PropTypes.instanceOf(File)),
-    })
+    }),
   ),
   adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
   clearlabs: PropTypes.bool,

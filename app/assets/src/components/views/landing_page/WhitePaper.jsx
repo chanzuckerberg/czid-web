@@ -11,7 +11,7 @@ const WhitePaper = () => {
       className={cs.whitePaper__Inner}
       onClick={() =>
         openUrlInNewTab(
-          "https://academic.oup.com/gigascience/article/doi/10.1093/gigascience/giaa111/5918865"
+          "https://academic.oup.com/gigascience/article/doi/10.1093/gigascience/giaa111/5918865",
         )
       }
     >

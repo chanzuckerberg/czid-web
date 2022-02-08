@@ -18,7 +18,7 @@ const BlastReadsModal = ({
   taxonName,
 }) => {
   const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
-    false
+    false,
   );
 
   const renderReadsIdentificationSection = () => (

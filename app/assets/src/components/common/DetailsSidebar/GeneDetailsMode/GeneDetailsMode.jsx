@@ -133,7 +133,7 @@ export default class GeneDetailsMode extends React.Component {
           rel="noopener noreferrer"
           onClick={() =>
             logAnalyticsEvent(
-              "GeneDetailsMode_card-ontology-attribution_clicked"
+              "GeneDetailsMode_card-ontology-attribution_clicked",
             )
           }
         >
@@ -147,7 +147,7 @@ export default class GeneDetailsMode extends React.Component {
           rel="noopener noreferrer"
           onClick={() =>
             logAnalyticsEvent(
-              "GeneDetailsMode_creative-commons-license_clicked"
+              "GeneDetailsMode_creative-commons-license_clicked",
             )
           }
         >
@@ -283,7 +283,7 @@ export default class GeneDetailsMode extends React.Component {
                     pubmedId: pubmedId,
                     ontologyLabel: label,
                     geneName,
-                  }
+                  },
                 )
               }
             >

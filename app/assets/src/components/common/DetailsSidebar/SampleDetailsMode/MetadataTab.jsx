@@ -138,7 +138,7 @@ class MetadataTab extends React.Component {
     if (isHuman) {
       metadataValue = returnHipaaCompliantMetadata(
         metadataType.key,
-        metadataValue
+        metadataValue,
       );
     }
 
@@ -156,7 +156,7 @@ class MetadataTab extends React.Component {
     const { sectionEditing } = this.state;
 
     const validKeys = filter(section.keys, key =>
-      includes(Object.keys(metadataTypes), key)
+      includes(Object.keys(metadataTypes), key),
     );
     const isSectionEditing = sectionEditing[section.name];
 
@@ -238,7 +238,7 @@ class MetadataTab extends React.Component {
 
 MetadataTab.propTypes = {
   metadata: PropTypes.objectOf(
-    PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   ).isRequired,
   metadataTypes: PropTypes.objectOf(PropTypes.MetadataType).isRequired,
   onMetadataChange: PropTypes.func.isRequired,

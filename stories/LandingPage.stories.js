@@ -7,13 +7,13 @@ export default {
   component: KurtNobleLandingPage,
   parameters: {
     layout: "fullscreen",
-},
+  },
 };
 
 export const KurtNobleLandingPage = () => {
-    return (
-        <div>
-            <Lander />
-        </div>
-    )
-}
+  return (
+    <div>
+      <Lander />
+    </div>
+  );
+};

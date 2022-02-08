@@ -27,7 +27,7 @@ const dictionaryHeaders = {
 
 const getExamplesForHostGenome = (field, hostGenomeId) =>
   compact(get(hostGenomeId, field.examples) || get("all", field.examples)).join(
-    ", "
+    ", ",
   ) || "--";
 
 class MetadataDictionary extends React.Component {
@@ -46,7 +46,7 @@ class MetadataDictionary extends React.Component {
     officialFields = map(
       field =>
         set("options", field.options ? field.options.join(", ") : "", field),
-      officialFields
+      officialFields,
     );
 
     hostGenomes = hostGenomes.filter(hg => hg.showAsOption);
@@ -64,22 +64,22 @@ class MetadataDictionary extends React.Component {
         set(
           "examples",
           getExamplesForHostGenome(field, this.state.currentHostGenome),
-          field
+          field,
         ),
-      fields
+      fields,
     );
 
     // Move required fields to the front, and alphabetically sort both sets.
     const [requiredFields, nonrequiredFields] = partition(
       "is_required",
-      processedFields
+      processedFields,
     );
 
     return [
       ...map(
         field =>
           set("name", <div className={cs.required}>{field.name}*</div>, field),
-        sortBy("name", requiredFields)
+        sortBy("name", requiredFields),
       ),
       ...sortBy("name", nonrequiredFields),
     ];
@@ -91,7 +91,7 @@ class MetadataDictionary extends React.Component {
 
     const fieldsForHostGenome = filter(
       field => field.host_genome_ids.includes(this.state.currentHostGenome),
-      this.state.officialFields
+      this.state.officialFields,
     );
 
     const groups = map(
@@ -99,7 +99,7 @@ class MetadataDictionary extends React.Component {
         name,
         fields: this.processFields(fields),
       }),
-      groupBy("group", fieldsForHostGenome)
+      groupBy("group", fieldsForHostGenome),
     );
 
     return sortBy(group => getGroupIndex(group.name), groups);
@@ -117,7 +117,7 @@ class MetadataDictionary extends React.Component {
       this.state.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
         value: hostGenome.id,
-      }))
+      })),
     );
 
   getColumnWidth = column => (column === "name" ? 250 : "");
@@ -154,7 +154,7 @@ class MetadataDictionary extends React.Component {
                 />
               </div>
             ),
-            fieldGroupsToDisplay
+            fieldGroupsToDisplay,
           )}
       </NarrowContainer>
     );

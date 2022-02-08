@@ -24,7 +24,9 @@ const makeCancelable = promise => {
       val =>
         hasCanceled_ ? reject(new CanceledPromiseError(promise)) : resolve(val),
       error =>
-        hasCanceled_ ? reject(new CanceledPromiseError(promise)) : reject(error)
+        hasCanceled_
+          ? reject(new CanceledPromiseError(promise))
+          : reject(error),
     );
   });
 
@@ -74,7 +76,7 @@ class InfiniteTable extends React.Component {
     }
 
     this.cancelableLoadRowsPromise = makeCancelable(
-      onLoadRows({ startIndex, stopIndex })
+      onLoadRows({ startIndex, stopIndex }),
     );
     this.cancelableLoadRowsPromise.promise
       .then(newRows => {
@@ -99,7 +101,7 @@ class InfiniteTable extends React.Component {
           // eslint-disable-next-line no-console
           console.error("Error loading rows", error);
         }
-      }); 
+      });
     return this.cancelableLoadRowsPromise.promise;
   };
 
@@ -147,7 +149,7 @@ class InfiniteTable extends React.Component {
     this.setState(
       { rowCount },
       // reset infinite loader cache with autoReload
-      () => this.infiniteLoader.resetLoadMoreRowsCache(true)
+      () => this.infiniteLoader.resetLoadMoreRowsCache(true),
     );
   };
 

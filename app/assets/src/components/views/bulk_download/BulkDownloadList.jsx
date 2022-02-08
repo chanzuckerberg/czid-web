@@ -183,7 +183,7 @@ class BulkDownloadList extends React.Component {
     // TODO(mark): Handle error case.
     if (bulkDownload.status === "success") {
       const outputFilePresignedUrl = await getPresignedOutputUrl(
-        bulkDownload.id
+        bulkDownload.id,
       );
       openUrl(outputFilePresignedUrl);
     }
@@ -263,7 +263,7 @@ class BulkDownloadList extends React.Component {
         className={cx(
           cs.bulkDownloadList,
           this.isEmpty() && cs.empty,
-          this.isLoading() && cs.loading
+          this.isLoading() && cs.loading,
         )}
       >
         <NarrowContainer>
@@ -286,7 +286,7 @@ class BulkDownloadList extends React.Component {
             "BulkDownloadList_details-sidebar_closed",
             {
               bulkDownloadId: selectedBulkDownload && selectedBulkDownload.id,
-            }
+            },
           )}
           params={this.getSidebarParams()}
         />

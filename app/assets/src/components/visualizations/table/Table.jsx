@@ -21,7 +21,7 @@ const Table = ({
 }) => {
   const [sortBy, setSortBy] = useState(defaultSortBy);
   const [sortDirection, setSortDirection] = useState(
-    defaultSortDirection || SortDirection.ASC
+    defaultSortDirection || SortDirection.ASC,
   );
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const Table = ({
       sortedData = orderBy(
         sortColumn.sortKey || sortBy,
         [sortDirectionStr],
-        data
+        data,
       );
     }
   }
@@ -91,7 +91,7 @@ Table.propTypes = {
       dataKey: PropTypes.string.isRequired,
       // sortFunction should have the following signature: sortFunction({ data, sortDirection }) => sortedData
       sortFunction: PropTypes.function,
-    })
+    }),
   ).isRequired,
   data: PropTypes.array,
   draggableColumns: PropTypes.bool,

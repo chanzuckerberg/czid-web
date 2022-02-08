@@ -12,14 +12,14 @@ const LoadingBar = ({ error = false, percentage, showHint, tiny }) => {
       className={cx(
         cs.loadingBarBackground,
         tiny && cs.tiny,
-        error || cs.loading
+        error || cs.loading,
       )}
     >
       <div
         className={cx(
           cs.loadingBar,
           showHint && cs.showHint,
-          error && cs.error
+          error && cs.error,
         )}
         style={{ width: `${clamp(0, 1, percentage) * 100}%` }}
       />

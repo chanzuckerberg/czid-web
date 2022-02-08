@@ -30,7 +30,7 @@ const BlastRedirectionModal = ({ open, onClose, onContinue }) => {
             rounded
             onClick={withAnalytics(
               onClose,
-              ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CANCEL_BUTTON_CLICKED
+              ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CANCEL_BUTTON_CLICKED,
             )}
           />
         </div>
@@ -62,7 +62,7 @@ const BlastRedirectionModal = ({ open, onClose, onContinue }) => {
             checked={shouldRedirectBlast}
             onChange={withAnalytics(
               () => setShouldRedirectBlast(true),
-              ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_AUTO_REDIRECT_CHECKBOX_CHECKED
+              ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_AUTO_REDIRECT_CHECKBOX_CHECKED,
             )}
           />
           Automatically redirect in the future.

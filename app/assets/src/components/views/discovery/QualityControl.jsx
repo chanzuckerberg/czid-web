@@ -162,10 +162,10 @@ class QualityControl extends React.Component {
       data.failedSamples.length;
 
     const samplesReadsStats = await getSamplesReadStats(
-      data.validSamples.map(sample => sample.id)
+      data.validSamples.map(sample => sample.id),
     );
     const { categories, legendColors, readsLostData } = this.stackReadsLostData(
-      samplesReadsStats
+      samplesReadsStats,
     );
     const chartColors = legendColors.map(({ color, label }) => color);
 
@@ -187,7 +187,7 @@ class QualityControl extends React.Component {
   stackReadsLostData(samplesReadsStats) {
     const sampleIds = Object.keys(samplesReadsStats);
     const samplesWithInitialReads = sampleIds.filter(sampleId =>
-      Number.isInteger(samplesReadsStats[sampleId].initialReads)
+      Number.isInteger(samplesReadsStats[sampleId].initialReads),
     );
 
     // Filter out Idseq Dedup step from samples run on pipeline versions >= 4.0
@@ -364,8 +364,8 @@ class QualityControl extends React.Component {
               value: fetchMetric(samplesDict[sampleId]),
             };
           }
-        })
-      )
+        }),
+      ),
     );
   };
 
@@ -376,7 +376,7 @@ class QualityControl extends React.Component {
     // data is an array of {id, value} pairs, sorted by value
     const minVal = 0;
     const maxVal = ceil(
-      max([last(data).value, minVal + numBins * minBinWidth])
+      max([last(data).value, minVal + numBins * minBinWidth]),
     );
     let binWidth = (maxVal - minVal) / numBins;
     // if binWidth is not an integer, round it up to the next multiple of 0.5
@@ -456,7 +456,7 @@ class QualityControl extends React.Component {
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_CLICKED,
       {
         bin,
-      }
+      },
     );
     handleBarClick(bin);
   };
@@ -504,7 +504,7 @@ class QualityControl extends React.Component {
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_HOVEREED,
       {
         bin,
-      }
+      },
     );
     this.setState({
       histogramTooltipData,
@@ -532,7 +532,7 @@ class QualityControl extends React.Component {
     const tooltipLocation =
       clientX && clientY ? { left: clientX, top: clientY } : null;
     logAnalyticsEvent(
-      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED
+      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED,
     );
     this.setState({ tooltipLocation });
   };
@@ -548,7 +548,7 @@ class QualityControl extends React.Component {
   handleHistogramEmptyClick = () => {
     const { handleBarClick } = this.props;
     logAnalyticsEvent(
-      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTOGRAM_EMPTY_SPACE_CLICKED
+      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTOGRAM_EMPTY_SPACE_CLICKED,
     );
     handleBarClick([]);
   };
@@ -557,7 +557,7 @@ class QualityControl extends React.Component {
     const { normalize, readsLostLegendColors } = this.state;
 
     const stepLegend = readsLostLegendColors.find(
-      legendData => legendData.label === stepName
+      legendData => legendData.label === stepName,
     );
 
     const readsLostStr = readsLost.toLocaleString();
@@ -588,7 +588,7 @@ class QualityControl extends React.Component {
     const { readsLostLegendColors, readsLostCategories } = this.state;
 
     const readsRemainingLegend = readsLostLegendColors.find(
-      legendData => legendData.label === READS_REMAINING
+      legendData => legendData.label === READS_REMAINING,
     );
     const readsLostSummary = [];
     readsLostCategories.forEach(category => {
@@ -596,7 +596,7 @@ class QualityControl extends React.Component {
         return;
       }
       const categoryLegend = readsLostLegendColors.find(
-        legendData => legendData.label === category
+        legendData => legendData.label === category,
       );
       readsLostSummary.push([
         <CategoricalLegend
@@ -654,7 +654,7 @@ class QualityControl extends React.Component {
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_HOVERED,
       {
         sampleName,
-      }
+      },
     );
 
     this.setState({
@@ -676,7 +676,7 @@ class QualityControl extends React.Component {
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_CLICKED,
       {
         sampleName,
-      }
+      },
     );
 
     this.setState({
@@ -779,7 +779,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
                           );
                         }}
                       />
@@ -812,7 +812,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
                           );
                         }}
                       />
@@ -845,7 +845,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
                           );
                         }}
                       />
@@ -874,7 +874,7 @@ class QualityControl extends React.Component {
               <div
                 className={cx(
                   cs.subtitle,
-                  showMeanInsertSizeWarning && cs.messageIncluded
+                  showMeanInsertSizeWarning && cs.messageIncluded,
                 )}
               >
                 Mean Insert Size
@@ -885,7 +885,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
                           );
                         }}
                       />
@@ -906,7 +906,7 @@ class QualityControl extends React.Component {
                             className={cs.infoIcon}
                             onMouseOver={() => {
                               logAnalyticsEvent(
-                                ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED
+                                ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
                               );
                             }}
                           />
@@ -984,7 +984,7 @@ class QualityControl extends React.Component {
                       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED,
                       {
                         display,
-                      }
+                      },
                     );
                   }}
                 />
@@ -998,7 +998,7 @@ class QualityControl extends React.Component {
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED
+                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
                           );
                         }}
                       />
@@ -1083,7 +1083,7 @@ class QualityControl extends React.Component {
           <Notification
             className={cx(
               cs.notification,
-              showProcessingSamplesMessage ? cs.show : cs.hide
+              showProcessingSamplesMessage ? cs.show : cs.hide,
             )}
             type="info"
             displayStyle="flat"

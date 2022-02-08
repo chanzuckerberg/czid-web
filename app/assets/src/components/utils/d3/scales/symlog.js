@@ -67,7 +67,7 @@ function rescale(range, domain) {
         part
           .type()
           .domain(part.domain)
-          .range([rangeStart, next])
+          .range([rangeStart, next]),
       );
       rangeStart = next;
     }

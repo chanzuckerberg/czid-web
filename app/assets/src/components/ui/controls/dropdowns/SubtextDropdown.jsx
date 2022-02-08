@@ -88,7 +88,7 @@ SubtextDropdown.propTypes = {
       subtext: PropTypes.string.isRequired,
       disabled: PropTypes.bool,
       tooltip: PropTypes.string,
-    })
+    }),
   ).isRequired,
   onChange: PropTypes.func.isRequired,
   initialSelectedValue: PropTypes.oneOfType([

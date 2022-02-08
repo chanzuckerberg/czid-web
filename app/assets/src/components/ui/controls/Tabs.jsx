@@ -68,7 +68,7 @@ class Tabs extends React.Component {
               onClick={() => onChange(tab.value)}
               className={cx(
                 tabStyling || cs.tab,
-                value === tab.value && cs.selected
+                value === tab.value && cs.selected,
               )}
             >
               {tab.label}
@@ -93,7 +93,7 @@ Tabs.propTypes = {
         value: PropTypes.string.isRequired,
         label: PropTypes.node.isRequired,
       }),
-    ])
+    ]),
   ).isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,

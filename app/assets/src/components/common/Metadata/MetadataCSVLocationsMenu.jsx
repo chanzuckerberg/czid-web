@@ -45,7 +45,7 @@ export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
 
     const result = processLocationSelection(
       matchedLocations[locationName] || locationName,
-      isRowHuman(row)
+      isRowHuman(row),
     );
 
     if (locationName in matchedLocations) {
@@ -77,7 +77,7 @@ class MetadataCSVLocationsMenu extends React.Component {
           "MetadataCsvLocationsMenu_apply-all_clicked",
           {
             sampleName: applyToAllSample,
-          }
+          },
         )}
       >
         Apply to All
@@ -150,7 +150,7 @@ class MetadataCSVLocationsMenu extends React.Component {
   getHostGenomeForRow = row =>
     find(
       ["name", row["Host Organism"] || row["Host Genome"]],
-      this.props.hostGenomes
+      this.props.hostGenomes,
     );
 
   render() {

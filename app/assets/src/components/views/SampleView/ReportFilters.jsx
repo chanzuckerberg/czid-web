@@ -99,7 +99,7 @@ const ReportFilters = ({
               subpath: "categories",
               value: category,
               idx: i,
-            })
+            }),
           );
         }
         getOr([], ["categories", "subcategories", category], selected).map(
@@ -110,12 +110,12 @@ const ReportFilters = ({
                 subpath: `subcategories.${category}`,
                 value: subcategory,
                 idx: `${i}.${j}`,
-              })
+              }),
             );
-          }
+          },
         );
         return categoryTags;
-      })
+      }),
     );
   };
 
@@ -174,7 +174,7 @@ const ReportFilters = ({
             allBackgrounds={backgrounds}
             onClick={() =>
               logAnalyticsEvent(
-                ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED
+                ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED,
               )
             }
             categorizeBackgrounds
@@ -203,17 +203,17 @@ const ReportFilters = ({
             categoryChildParent={transform((result, category) => {
               forEach(
                 subcat => (result[subcat] = category.name),
-                category.children || []
+                category.children || [],
               );
             }, {})(CATEGORIES)}
             disableMarginRight
             selectedCategories={getOr(
               [],
               ["categories", "categories"],
-              selected
+              selected,
             )}
             selectedSubcategories={flatten(
-              values(getOr({}, ["categories", "subcategories"], selected))
+              values(getOr({}, ["categories", "subcategories"], selected)),
             )}
             onChange={(categories, subcategories) =>
               handleFilterChange({
@@ -278,7 +278,7 @@ const ReportFilters = ({
             value: selected.taxon,
           })}
         {selected.thresholds.map((threshold, i) =>
-          renderThresholdFilterTag({ threshold, idx: i })
+          renderThresholdFilterTag({ threshold, idx: i }),
         )}
         {renderCategoryFilterTags()}
       </div>

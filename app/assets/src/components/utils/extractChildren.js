@@ -9,7 +9,7 @@ const extractChildren = (children, componentTypes) => {
   const components = React.Children.toArray(children);
 
   return componentTypes.map(type =>
-    first(filter(components, ["type.name", type]))
+    first(filter(components, ["type.name", type])),
   );
 };
 

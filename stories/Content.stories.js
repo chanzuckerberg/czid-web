@@ -11,9 +11,9 @@ export default {
 };
 
 export const KurtNobleContent = () => {
-    return (
-        <div>
-            <Content />
-        </div>
-    )
-}
+  return (
+    <div>
+      <Content />
+    </div>
+  );
+};

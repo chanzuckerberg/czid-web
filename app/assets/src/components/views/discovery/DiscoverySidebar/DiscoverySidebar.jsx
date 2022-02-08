@@ -49,13 +49,13 @@ export default class DiscoverySidebar extends React.Component {
       stats: {
         numSamples: DiscoverySidebar.formatNumber((sampleStats || {}).count),
         numProjects: DiscoverySidebar.formatNumber(
-          projectStats.count || sampleStats.projectCount || 0
+          projectStats.count || sampleStats.projectCount || 0,
         ),
         avgTotalReads: DiscoverySidebar.formatNumber(
-          (sampleStats || {}).avgTotalReads
+          (sampleStats || {}).avgTotalReads,
         ),
         avgAdjustedRemainingReads: DiscoverySidebar.formatNumber(
-          (sampleStats || {}).avgAdjustedRemainingReads
+          (sampleStats || {}).avgAdjustedRemainingReads,
         ),
       },
       metadata: {
@@ -127,7 +127,7 @@ export default class DiscoverySidebar extends React.Component {
             );
             const text = entry.interval
               ? `${DiscoverySidebar.formatDate(
-                  entry.interval.start
+                  entry.interval.start,
                 )} - ${DiscoverySidebar.formatDate(entry.interval.end)}`
               : `${DiscoverySidebar.formatDate(entry.value)}`;
             const tooltipMessage = (
@@ -223,7 +223,7 @@ export default class DiscoverySidebar extends React.Component {
                   count,
                   percent,
                   rows: rows.length,
-                }
+                },
               )}
             >
               {value === "not_set" ? <i>{text}</i> : text}
@@ -240,7 +240,7 @@ export default class DiscoverySidebar extends React.Component {
                   count,
                   percent,
                   rows: rows.length,
-                }
+                },
               )}
               style={{ width: percent * 1.4 + "px" }}
             />

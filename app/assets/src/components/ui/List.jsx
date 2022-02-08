@@ -25,7 +25,7 @@ const List = ({
           itemClassName,
           smallSpacing && cs.smallSpacing,
           xsmallSpacing && cs.xsmallSpacing,
-          xxsmallSpacing && cs.xxsmallSpacing
+          xxsmallSpacing && cs.xxsmallSpacing,
         )}
         key={dynamic ? nanoid() : index}
       >

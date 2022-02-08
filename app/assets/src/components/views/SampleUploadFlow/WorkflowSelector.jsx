@@ -79,7 +79,7 @@ const WorkflowSelector = ({
 
   const renderMngsAnalysisType = () => {
     const mngsWorkflowSelected = selectedWorkflows.has(
-      WORKFLOWS.SHORT_READ_MNGS.value
+      WORKFLOWS.SHORT_READ_MNGS.value,
     );
     return (
       <div
@@ -104,7 +104,7 @@ const WorkflowSelector = ({
 
   const renderCGAnalysisType = () => {
     const cgWorkflowSelected = selectedWorkflows.has(
-      WORKFLOWS.CONSENSUS_GENOME.value
+      WORKFLOWS.CONSENSUS_GENOME.value,
     );
     return (
       <div
@@ -148,7 +148,7 @@ const WorkflowSelector = ({
         className={cx(
           cs.selectableOption,
           cs.technology,
-          illuminaTechnologyOptionSelected && cs.selected
+          illuminaTechnologyOptionSelected && cs.selected,
         )}
         onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA)}
       >
@@ -263,7 +263,7 @@ const WorkflowSelector = ({
         className={cx(
           cs.selectableOption,
           cs.technology,
-          nanoporeTechnologyOptionSelected && cs.selected
+          nanoporeTechnologyOptionSelected && cs.selected,
         )}
         onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE)}
       >

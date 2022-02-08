@@ -56,8 +56,8 @@ class MetadataUploadModal extends React.Component {
       this.props.project.id,
       flow(
         keyBy(row => row.sample_name || row["Sample Name"]),
-        mapValues(omit(["sample_name", "Sample Name"]))
-      )(this.state.metadata.rows)
+        mapValues(omit(["sample_name", "Sample Name"])),
+      )(this.state.metadata.rows),
     );
 
     if (response.errors && response.errors.length > 0) {
@@ -86,7 +86,7 @@ class MetadataUploadModal extends React.Component {
         ),
         {
           autoClose: 3000,
-        }
+        },
       );
 
       logAnalyticsEvent("MetadataUploadModal_modal_success", {
@@ -144,7 +144,7 @@ class MetadataUploadModal extends React.Component {
         wide
         onClose={withAnalytics(
           this.props.onClose,
-          "MetadataUploadModal_modal_closed"
+          "MetadataUploadModal_modal_closed",
         )}
         className={cs.metadataUploadModal}
       >

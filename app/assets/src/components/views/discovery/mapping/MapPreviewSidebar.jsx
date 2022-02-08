@@ -161,8 +161,8 @@ export default class MapPreviewSidebar extends React.Component {
                   ) : (
                     ""
                   ),
-              }
-            )
+              },
+            ),
           );
         },
         headerClassName: cs.projectHeader,
@@ -279,7 +279,7 @@ export default class MapPreviewSidebar extends React.Component {
     let newSelected = new Set(
       checked
         ? union(Array.from(selectedSampleIds), samples.getIds())
-        : difference(Array.from(selectedSampleIds), samples.getIds())
+        : difference(Array.from(selectedSampleIds), samples.getIds()),
     );
     onSelectionUpdate(newSelected);
 
@@ -386,13 +386,13 @@ export default class MapPreviewSidebar extends React.Component {
         {
           project: pick(
             ["name", "description", "owner", "public_access"],
-            project
+            project,
           ),
         },
         pick(
           ["id", "created_at", "hosts", "tissues", "number_of_samples"],
-          project
-        )
+          project,
+        ),
       );
     });
   };

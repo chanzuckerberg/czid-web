@@ -21,7 +21,7 @@ const PathogenListView = () => {
       throttle(index => {
         setCurrentSectionIndex(index);
       }, 600),
-    [setCurrentSectionIndex]
+    [setCurrentSectionIndex],
   );
 
   useEffect(async () => {

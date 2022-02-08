@@ -44,7 +44,7 @@ class TaxonHitSelect extends React.Component {
 
     const searchResults = await suggestionsEndpoint(
       query,
-      Array.from(sampleIds)
+      Array.from(sampleIds),
     );
 
     // If the query has since changed, discard the response.
@@ -73,7 +73,7 @@ class TaxonHitSelect extends React.Component {
   });
 
   sortOptions = memoize(options =>
-    orderBy(["sampleCount", "text"], ["desc", "asc"], options)
+    orderBy(["sampleCount", "text"], ["desc", "asc"], options),
   );
 
   render() {

@@ -75,10 +75,10 @@ AMRHeatmapControls.propTypes = {
         PropTypes.shape({
           text: PropTypes.string,
           value: PropTypes.string,
-        })
+        }),
       ),
       label: PropTypes.string,
-    })
+    }),
   ),
   selectedOptions: PropTypes.shape({
     metric: PropTypes.string,

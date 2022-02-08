@@ -169,16 +169,16 @@ export default class AMRHeatmapVis extends React.Component {
     switch (selectedOptions.viewLevel) {
       case VIEW_LEVEL_ALLELES: {
         return sample.amrCounts.find(
-          amrCount => amrCount["allele"] === rowName
+          amrCount => amrCount["allele"] === rowName,
         );
       }
       case VIEW_LEVEL_GENES: {
         let amrCountForRow = sample.amrCounts.find(
-          amrCount => amrCount["annotation_gene"] === rowName
+          amrCount => amrCount["annotation_gene"] === rowName,
         );
         if (amrCountForRow === undefined) {
           amrCountForRow = sample.amrCounts.find(
-            amrCount => amrCount["gene"] === rowName
+            amrCount => amrCount["gene"] === rowName,
           );
         }
         return amrCountForRow;
@@ -251,7 +251,7 @@ export default class AMRHeatmapVis extends React.Component {
         onColumnMetadataLabelOut: this.onMetadataLabelOut,
         onAddColumnMetadataClick: this.onMetadataAddButtonClick,
         marginLeft: 50, // our gene names are very short, so this is to prevent metadata names from disappearing
-      }
+      },
     );
     this.heatmap.start();
   }
@@ -407,7 +407,7 @@ AMRHeatmapVis.propTypes = {
       metadata: PropTypes.array,
       amrCounts: PropTypes.array,
       error: PropTypes.string,
-    })
+    }),
   ),
   selectedOptions: PropTypes.shape({
     metric: PropTypes.string,
@@ -422,7 +422,7 @@ AMRHeatmapVis.propTypes = {
       label: PropTypes.string,
       id: PropTypes.number,
       metadata: PropTypes.object,
-    })
+    }),
   ),
   geneLabels: PropTypes.shape({ label: PropTypes.string }),
   alleleLabels: PropTypes.shape({ label: PropTypes.string }),
@@ -431,6 +431,6 @@ AMRHeatmapVis.propTypes = {
     PropTypes.shape({
       text: PropTypes.string,
       value: PropTypes.string,
-    })
+    }),
   ),
 };

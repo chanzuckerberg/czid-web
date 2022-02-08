@@ -39,7 +39,7 @@ FieldList.propTypes = {
     PropTypes.shape({
       label: PropTypes.string,
       value: PropTypes.node,
-    })
+    }),
   ),
 };
 

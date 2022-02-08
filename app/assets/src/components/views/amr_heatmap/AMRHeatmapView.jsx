@@ -74,20 +74,20 @@ export default class AMRHeatmapView extends React.Component {
       getSampleMetadataFields(sampleIds),
     ]);
     const filteredSamples = rawSampleData.filter(
-      sampleData => sampleData.error === ""
+      sampleData => sampleData.error === "",
     );
     const samplesWithKeyedMetadata = filteredSamples.map(sample => ({
       ...sample,
       metadata: processMetadata({ metadata: sample.metadata, flatten: true }),
     }));
     const samplesWithAMRCounts = this.correctSampleAndGeneNames(
-      samplesWithKeyedMetadata
+      samplesWithKeyedMetadata,
     );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
     const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
     const sampleLabels = this.extractSampleLabels(samplesWithAMRCounts);
     const [geneLabels, alleleLabels] = this.extractGeneAndAlleleLabels(
-      samplesWithAMRCounts
+      samplesWithAMRCounts,
     );
     const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
     this.setState({
@@ -151,12 +151,12 @@ export default class AMRHeatmapView extends React.Component {
           accum.dpm = Math.max(accum.dpm, amrCount.dpm || 0);
           accum.total_reads = Math.max(
             accum.total_reads,
-            amrCount.total_reads || 0
+            amrCount.total_reads || 0,
           );
         });
         return accum;
       },
-      { depth: 0, coverage: 0, rpm: 0, dpm: 0, total_reads: 0 }
+      { depth: 0, coverage: 0, rpm: 0, dpm: 0, total_reads: 0 },
     );
     return maxValues;
   }
@@ -391,7 +391,7 @@ export default class AMRHeatmapView extends React.Component {
               options={this.getDownloadOptions()}
               onClick={() =>
                 logAnalyticsEvent(
-                  "AMRHeatmapView_download-button-dropdown_clicked"
+                  "AMRHeatmapView_download-button-dropdown_clicked",
                 )
               }
               disabled={loading}

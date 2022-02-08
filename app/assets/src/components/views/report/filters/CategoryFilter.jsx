@@ -57,7 +57,7 @@ CategoryFilter.propTypes = {
   allCategories: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
-    })
+    }),
   ).isRequired,
   categoryParentChild: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string))
     .isRequired,

@@ -25,7 +25,7 @@ const processCSVMetadata = csv => {
       // (from the other metadata field with the same name), since precedence is based on the order.
       // The below code makes sure this case is handled correctly by filtering before converting to an object.
       row => fromPairs(filter(pair => pair[1] !== "", zip(headers, row))),
-      rows
+      rows,
     ),
   };
 };
@@ -49,7 +49,7 @@ class MetadataCSVUpload extends React.Component {
       this.state.metadata &&
       (!isEqual(
         map("name", this.props.samples),
-        this.state.lastSampleNamesValidated
+        this.state.lastSampleNamesValidated,
       ) ||
         this.props.project.id !== this.state.lastProjectIdValidated)
     ) {
@@ -88,13 +88,13 @@ class MetadataCSVUpload extends React.Component {
 
       serverResponse = await validateMetadataCSVForNewSamples(
         this.props.samples,
-        csv
+        csv,
       );
       // For uploading metadata to existing samples in a project.
     } else {
       serverResponse = await validateMetadataCSVForProject(
         this.props.project.id,
-        csv
+        csv,
       );
     }
 
@@ -133,7 +133,7 @@ MetadataCSVUpload.propTypes = {
       name: PropTypes.string,
       project_id: PropTypes.number,
       host_genome_id: PropTypes.number,
-    })
+    }),
   ),
   className: PropTypes.string,
   onMetadataChange: PropTypes.func.isRequired,

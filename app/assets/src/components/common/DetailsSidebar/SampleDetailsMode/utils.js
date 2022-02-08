@@ -87,7 +87,7 @@ export const processPipelineInfo = additionalInfo => {
 
       const meanInsertSize = numberWithPlusOrMinus(
         summaryStats.insert_size_mean,
-        summaryStats.insert_size_standard_deviation
+        summaryStats.insert_size_standard_deviation,
       );
 
       if (meanInsertSize) {
@@ -102,7 +102,7 @@ export const processPipelineInfo = additionalInfo => {
 export const processCGWorkflowRunInfo = workflowRun => {
   const qualityMetrics = get(
     "parsed_cached_results.quality_metrics",
-    workflowRun
+    workflowRun,
   );
   const erccMappedReads = get("ercc_mapped_reads", qualityMetrics);
   const mappedReads = get("mapped_reads", qualityMetrics);
@@ -113,7 +113,7 @@ export const processCGWorkflowRunInfo = workflowRun => {
       ? ""
       : numberWithCommas(erccMappedReads),
     lastProcessedAt: moment(get("executed_at", workflowRun)).format(
-      "YYYY-MM-DD"
+      "YYYY-MM-DD",
     ),
     hostSubtracted: "Human",
     mappedReads: isUndefined(mappedReads) ? "" : numberWithCommas(mappedReads),
@@ -126,8 +126,8 @@ export const processCGWorkflowRunInfo = workflowRun => {
       "text",
       find(
         { value: get("inputs.wetlab_protocol", workflowRun) },
-        CG_WETLAB_OPTIONS
-      )
+        CG_WETLAB_OPTIONS,
+      ),
     ),
     workflow: get("label", find({ value: workflowRun.workflow }, WORKFLOWS)),
   };

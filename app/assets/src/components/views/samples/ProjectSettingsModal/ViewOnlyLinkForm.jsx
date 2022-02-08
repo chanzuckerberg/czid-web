@@ -366,7 +366,7 @@ class ViewOnlyLinkForm extends React.Component {
                           {
                             snapshotShareId: snapshotShareId,
                             projectId: project.id,
-                          }
+                          },
                         );
                       }}
                     />

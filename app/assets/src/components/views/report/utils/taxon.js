@@ -43,7 +43,7 @@ export const isTaxonIncluded = (
   taxon,
   includedCategories,
   includedSubcategoryColumns,
-  excludedSubcategoryColumns
+  excludedSubcategoryColumns,
 ) => {
   // returns if taxon is in either the included categories / subcategories AND
   // the taxon is not in an excluded subcategory
@@ -68,7 +68,7 @@ export const getTaxonMetric = (taxon, type, metric) => {
 export const getTaxonSortComparator = (
   primarySortParams,
   secondarySortParams,
-  genusMap
+  genusMap,
 ) => {
   const [ptype, pmetric] = primarySortParams;
   const [stype, smetric] = secondarySortParams;
@@ -79,14 +79,14 @@ export const getTaxonSortComparator = (
 
     const genusAPrimaryVal = parseFloat(getTaxonMetric(genusA, ptype, pmetric));
     const genusASecondaryVal = parseFloat(
-      getTaxonMetric(genusA, stype, smetric)
+      getTaxonMetric(genusA, stype, smetric),
     );
     const aPrimaryVal = parseFloat(getTaxonMetric(a, ptype, pmetric));
     const aSecondaryVal = parseFloat(getTaxonMetric(a, stype, smetric));
 
     const genusBPrimaryVal = parseFloat(getTaxonMetric(genusB, ptype, pmetric));
     const genusBSecondaryVal = parseFloat(
-      getTaxonMetric(genusB, stype, smetric)
+      getTaxonMetric(genusB, stype, smetric),
     );
     const bPrimaryVal = parseFloat(getTaxonMetric(b, ptype, pmetric));
     const bSecondaryVal = parseFloat(getTaxonMetric(b, stype, smetric));
@@ -154,7 +154,7 @@ export const getCategoryAdjective = category => {
 
 export const addContigCountsToTaxonomyDetails = (
   baseTaxonomyDetails,
-  summaryContigCounts
+  summaryContigCounts,
 ) => {
   let contigCountsMap = {};
 
@@ -165,7 +165,7 @@ export const addContigCountsToTaxonomyDetails = (
         contigs: contigCount.contigs,
         contigreads: contigCount.contig_reads,
       },
-      contigCountsMap
+      contigCountsMap,
     );
   });
 
@@ -176,6 +176,6 @@ export const addContigCountsToTaxonomyDetails = (
           ...detail,
           summaryContigCounts: contigCountsMap[detail.tax_id],
         }
-      : omit("summaryContigCounts", detail)
+      : omit("summaryContigCounts", detail),
   );
 };

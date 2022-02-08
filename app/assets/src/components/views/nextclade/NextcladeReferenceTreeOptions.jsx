@@ -75,7 +75,7 @@ class NextcladeReferenceTreeOptions extends React.Component {
                 <FilePicker
                   className={cx(
                     cs.localFilePicker,
-                    !filePickerTitle && cs.short
+                    !filePickerTitle && cs.short,
                   )}
                   title={filePickerTitle}
                   accept=".json"

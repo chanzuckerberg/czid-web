@@ -45,7 +45,7 @@ class PipelineViz extends React.Component {
     this.state = {
       // Set stages that can be rendered to open, and others to closed.
       stagesOpened: this.stageNames.map(
-        (_, i) => i < this.props.graphData.stages.length
+        (_, i) => i < this.props.graphData.stages.length,
       ),
       interStageArrows: ["", "", ""],
       sidebarVisible: false,
@@ -77,13 +77,13 @@ class PipelineViz extends React.Component {
     const oldGraphData = graphData;
     const newGraphData = await getGraph(
       sample.id,
-      pipelineRun.version.pipeline
+      pipelineRun.version.pipeline,
     );
     this.setState(
       {
         graphData: newGraphData,
       },
-      () => this.pipelineIsFinished() && clearInterval(this.updateLoop)
+      () => this.pipelineIsFinished() && clearInterval(this.updateLoop),
     );
     const updates = diff(oldGraphData, newGraphData);
     if (updates.stages) {
@@ -119,7 +119,7 @@ class PipelineViz extends React.Component {
 
             this.drawStageGraph(stageIndex);
           }
-        }
+        },
       );
     }
   }
@@ -162,7 +162,7 @@ class PipelineViz extends React.Component {
     const { x, y } = inverseTransformDOMCoordinates(
       this.panZoomContainer.current.dragContainer.current,
       xCoord,
-      yCoord
+      yCoord,
     );
     return graph.getNodeAt(x, y);
   }
@@ -173,7 +173,7 @@ class PipelineViz extends React.Component {
     const clickedNodeId = this.getNodeIdAtCoords(
       graph,
       info.pointer.DOM.x,
-      info.pointer.DOM.y
+      info.pointer.DOM.y,
     );
 
     if (clickedNodeId == null) {
@@ -194,7 +194,7 @@ class PipelineViz extends React.Component {
     const inputEdgesInfo = this.getEdgeInfoFor(
       stageIndex,
       clickedNodeId,
-      "input"
+      "input",
     );
     const inputInfo = inputEdgesInfo.map(edgeInfo => {
       const fromStepName = edgeInfo.from
@@ -212,7 +212,7 @@ class PipelineViz extends React.Component {
     const outputEdgesInfo = this.getEdgeInfoFor(
       stageIndex,
       clickedNodeId,
-      "output"
+      "output",
     );
     const outputInfo = outputEdgesInfo
       .map(edgeInfo => {
@@ -253,7 +253,7 @@ class PipelineViz extends React.Component {
     const { minMouseMoveUpdateDistance } = this.props;
     const distance = Math.sqrt(
       Math.pow(x - this.lastMouseMoveInfo.x, 2) +
-        Math.pow(y - this.lastMouseMoveInfo.y, 2)
+        Math.pow(y - this.lastMouseMoveInfo.y, 2),
     );
     return distance >= minMouseMoveUpdateDistance;
   }
@@ -268,7 +268,7 @@ class PipelineViz extends React.Component {
     const nodeId = this.getNodeIdAtCoords(
       graph,
       e.clientX - rect.left,
-      e.clientY - rect.top
+      e.clientY - rect.top,
     );
 
     if (
@@ -308,7 +308,7 @@ class PipelineViz extends React.Component {
         stageIndex: stageIndex,
         stepIndex: nodeId,
       }).status,
-      true
+      true,
     );
     graph.updateNodes([nodeId], hoveredNodeColoring);
     this.lastMouseMoveInfo.alteredGraphs.add(stageIndex);
@@ -383,7 +383,7 @@ class PipelineViz extends React.Component {
         }
         return edgeIds;
       },
-      []
+      [],
     );
     graph.updateEdges(intraStageOutputEdges, outputColorOptions);
 
@@ -403,7 +403,7 @@ class PipelineViz extends React.Component {
       this.getStepDataAtIndices({
         stageIndex: graphIndex,
         stepIndex: nodeId,
-      }).status
+      }).status,
     );
     this.graphs[graphIndex].updateNodes([nodeId], origNodeColor);
 
@@ -437,7 +437,7 @@ class PipelineViz extends React.Component {
       history.replaceState(
         updatedStagesOpened,
         null,
-        this.urlWithStagesOpenedState(updatedStagesOpened)
+        this.urlWithStagesOpenedState(updatedStagesOpened),
       );
   }
 
@@ -533,7 +533,7 @@ class PipelineViz extends React.Component {
             if (toNodeId !== END_NODE_ID) {
               nodeToCurrentLevel[END_NODE_ID] = Math.max(
                 nodeToCurrentLevel[END_NODE_ID],
-                newLevel + 1
+                newLevel + 1,
               );
             }
           }
@@ -599,7 +599,7 @@ class PipelineViz extends React.Component {
         const outputEdgeInfo = this.getEdgeInfoFor(
           stageIndex,
           currStepIndex,
-          "output"
+          "output",
         );
         const outputEdges = outputEdgeInfo.reduce((edges, edgeInfo) => {
           if (edgeInfo.isIntraStage) {
@@ -625,7 +625,7 @@ class PipelineViz extends React.Component {
         const inputEdgeInfo = this.getEdgeInfoFor(
           stageIndex,
           currStepIndex,
-          "input"
+          "input",
         );
         const inputEdges = inputEdgeInfo.reduce((edges, edgeInfo) => {
           if (!edgeInfo.isIntraStage && !connectedToStartNode) {
@@ -651,13 +651,13 @@ class PipelineViz extends React.Component {
           id: `${edge.from}-${edge.to}-colored`,
           hidden: true,
           color: null,
-        }
+        },
       );
     });
 
     return regularColoringEdgeData.concat(
       coloringEdgeData,
-      this.generateHiddenEdges(stageIndex)
+      this.generateHiddenEdges(stageIndex),
     );
   }
 
@@ -710,7 +710,7 @@ class PipelineViz extends React.Component {
     history.replaceState(
       this.state.stagesOpened,
       null,
-      this.urlWithStagesOpenedState(this.state.stagesOpened)
+      this.urlWithStagesOpenedState(this.state.stagesOpened),
     );
   }
 
@@ -837,7 +837,7 @@ class PipelineViz extends React.Component {
       container,
       nodeData,
       edgeData,
-      options
+      options,
     );
     this.graphs.push(currStageGraph);
     currStageGraph.minimizeSizeGivenScale(1.0);
@@ -877,7 +877,7 @@ class PipelineViz extends React.Component {
             onClick={withAnalytics(
               () => this.toggleStage(i),
               "PipelineViz_stage-collapse-button_clicked",
-              { stage: this.stageNames[i] }
+              { stage: this.stageNames[i] },
             )}
             className={cs.closeIcon}
           />
@@ -898,12 +898,12 @@ class PipelineViz extends React.Component {
           className={cx(
             isOpened && toggleable ? cs.hidden : cs.stageButton,
             cs[jobStatus],
-            !toggleable && cs.disabled
+            !toggleable && cs.disabled,
           )}
           onClick={withAnalytics(
             () => this.toggleStage(i),
             "PipelineViz_stage-expand-button_clicked",
-            { stage: this.stageNames[i] }
+            { stage: this.stageNames[i] },
           )}
         >
           {stageNameAndIcon}
@@ -988,11 +988,11 @@ class PipelineViz extends React.Component {
           <PlusMinusControl
             onPlusClick={withAnalytics(
               this.handleZoom(true),
-              "PipelineViz_zoom-in-control_clicked"
+              "PipelineViz_zoom-in-control_clicked",
             )}
             onMinusClick={withAnalytics(
               this.handleZoom(false),
-              "PipelineViz_zoom-out-control_clicked"
+              "PipelineViz_zoom-out-control_clicked",
             )}
             className={cs.plusMinusControl}
           />
@@ -1003,7 +1003,7 @@ class PipelineViz extends React.Component {
           params={sidebarParams}
           onClose={withAnalytics(
             this.closeSidebar,
-            "PipelineViz_sidebar-close-button_clicked"
+            "PipelineViz_sidebar-close-button_clicked",
           )}
         />
       </div>

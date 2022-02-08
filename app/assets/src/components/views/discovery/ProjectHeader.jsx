@@ -43,7 +43,7 @@ const ProjectHeader = ({
   const nextPublicSampleTimestamp = min(
     fetchedSamples
       .map(sample => moment(sample.privateUntil))
-      .filter(timestamp => timestamp >= currentTimestamp)
+      .filter(timestamp => timestamp >= currentTimestamp),
   );
   const nextPublicSampleDate = nextPublicSampleTimestamp
     ? nextPublicSampleTimestamp.format("MMM Do, YYYY")
@@ -54,7 +54,7 @@ const ProjectHeader = ({
 
     const { valid, sanitizedName, message } = await validateProjectName(
       project.id,
-      name
+      name,
     );
     if (!valid) return [message, name];
 

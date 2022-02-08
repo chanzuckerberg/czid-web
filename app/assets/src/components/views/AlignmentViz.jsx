@@ -66,7 +66,7 @@ class AlignmentViz extends React.Component {
             {pipelineRun &&
               isPipelineFeatureAvailable(
                 ASSEMBLY_FEATURE,
-                pipelineRun.pipeline_version
+                pipelineRun.pipeline_version,
               ) && (
                 <Popup
                   trigger={

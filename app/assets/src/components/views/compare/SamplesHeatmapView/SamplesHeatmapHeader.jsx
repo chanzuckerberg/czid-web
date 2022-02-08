@@ -102,7 +102,7 @@ const SamplesHeatmapHeader = ({
                 icon={<IconFilters />}
                 onClick={withAnalytics(
                   onNewPresetsClick,
-                  ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_NEW_PRESETS_BUTTON_CLICKED
+                  ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_NEW_PRESETS_BUTTON_CLICKED,
                 )}
               />
             }
@@ -118,7 +118,7 @@ const SamplesHeatmapHeader = ({
                 "SamplesHeatmapHeader_share-button_clicked",
                 {
                   sampleIds: sampleIds.length,
-                }
+                },
               )}
               primary={!showNewPresetsButton}
             />
@@ -134,7 +134,7 @@ const SamplesHeatmapHeader = ({
             {
               sampleIds: sampleIds.length,
               path: window.location.pathname,
-            }
+            },
           )}
           className={cs.controlElement}
         />
@@ -160,7 +160,7 @@ const SamplesHeatmapHeader = ({
 SamplesHeatmapHeader.propTypes = {
   sampleIds: PropTypes.arrayOf(PropTypes.number),
   data: PropTypes.objectOf(
-    PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
+    PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
   ),
   onDownloadSvg: PropTypes.func.isRequired,
   onDownloadPng: PropTypes.func.isRequired,

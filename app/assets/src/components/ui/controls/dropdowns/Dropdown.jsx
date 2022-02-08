@@ -127,7 +127,7 @@ Dropdown.propTypes = {
       // Optional node element will be rendered instead of text.
       // Text will still be used in the <DropdownTrigger>
       customNode: PropTypes.node,
-    })
+    }),
   ).isRequired,
   // Custom props for rendering items
   items: PropTypes.arrayOf(PropTypes.node),

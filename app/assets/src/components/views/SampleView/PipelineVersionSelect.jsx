@@ -23,7 +23,7 @@ class PipelineVersionSelect extends React.Component {
       onPipelineVersionSelect,
     } = this.props;
     const otherVersions = pipelineVersions.filter(
-      v => v !== pipelineRun[versionKey]
+      v => v !== pipelineRun[versionKey],
     );
 
     const trigger = (

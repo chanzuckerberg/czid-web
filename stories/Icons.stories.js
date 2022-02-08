@@ -1,7 +1,7 @@
 import React from "react";
 
-import { ICONS_TAXONOMY } from "~ui/icons";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import { ICONS_TAXONOMY } from "~ui/icons";
 import cs from "./Icons.stories.scss";
 
 export default {

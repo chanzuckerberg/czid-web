@@ -88,7 +88,7 @@ class DiscoveryHeader extends React.Component {
                   className={cx(
                     cs.filtersIcon,
                     disableSidebars ? cs.disabledIcon : cs.icon,
-                    !showFilters && cs.closed
+                    !showFilters && cs.closed,
                   )}
                 />
                 {!disableSidebars && (
@@ -149,7 +149,7 @@ class DiscoveryHeader extends React.Component {
                   className={cx(
                     cs.statsIcon,
                     disableSidebars ? cs.disabledIcon : cs.icon,
-                    !showStats && cs.closed
+                    !showStats && cs.closed,
                   )}
                 />
               </div>
@@ -202,7 +202,7 @@ DiscoveryHeader.propTypes = {
         value: PropTypes.string.isRequired,
         label: PropTypes.node.isRequired,
       }),
-    ])
+    ]),
   ).isRequired,
 };
 

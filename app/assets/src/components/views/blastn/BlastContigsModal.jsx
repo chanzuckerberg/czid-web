@@ -36,7 +36,7 @@ const BlastContigsModal = ({
   const [contigs, setContigs] = useState([]);
   const [selectedContigIds, setSelectedContigIds] = useState(new Set());
   const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
-    false
+    false,
   );
   const [blastUrl, setBlastUrl] = useState("");
 
@@ -56,8 +56,8 @@ const BlastContigsModal = ({
         contig =>
           selectedContigIds.has(contig["contig_id"]) &&
           contig["fasta_sequence"],
-        contigs
-      )
+        contigs,
+      ),
     ).join("");
 
     const blastUrl = prepareBlastQuery({ sequences: contigSequences });
@@ -67,7 +67,7 @@ const BlastContigsModal = ({
 
   const handleAllContigsSelected = isChecked =>
     setSelectedContigIds(
-      isChecked ? new Set(map("contig_id", contigs)) : new Set()
+      isChecked ? new Set(map("contig_id", contigs)) : new Set(),
     );
 
   const handleContigSelection = (value, isChecked) => {
@@ -111,7 +111,7 @@ const BlastContigsModal = ({
   const handleContinue = () => {
     const shouldAutoRedirectBlast =
       JSON.parse(
-        sessionStorage.getItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY)
+        sessionStorage.getItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY),
       ) || false;
 
     if (shouldAutoRedirectBlast) {
@@ -131,7 +131,7 @@ const BlastContigsModal = ({
         {
           automaticallyRedirectedToNCBI: false,
           numberOfContigs: size(selectedContigIds),
-        }
+        },
       );
       setShowBlastRedirectModal(true);
     }
@@ -164,9 +164,9 @@ const BlastContigsModal = ({
           contig =>
             selectedContigIds.has(contig["contig_id"]) &&
             contig["fasta_sequence"],
-          contigs
-        )
-      ).join()
+          contigs,
+        ),
+      ).join(),
     );
 
     logAnalyticsEvent(analyticEventName, {
@@ -213,7 +213,7 @@ const BlastContigsModal = ({
       open={open}
       onClose={withAnalytics(
         onClose,
-        ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CLOSE_BUTTON_CLICKED
+        ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CLOSE_BUTTON_CLICKED,
       )}
       tall
       narrow

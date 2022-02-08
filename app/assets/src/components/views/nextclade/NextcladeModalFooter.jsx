@@ -90,7 +90,7 @@ const NextcladeModalFooter = ({
         text="View QC in Nextclade"
         onClick={withAnalytics(
           onClick,
-          "NextcladeModalFooter_view-qc-in-nextclade-button_clicked"
+          "NextcladeModalFooter_view-qc-in-nextclade-button_clicked",
         )}
       />
     );

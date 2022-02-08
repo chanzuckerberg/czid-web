@@ -29,7 +29,7 @@ export default class TaxonSelector extends React.Component {
     const searchResults = await getTaxaWithReadsSuggestions(
       query,
       Array.from(sampleIds),
-      taxLevel
+      taxLevel,
     );
 
     // If the query has since changed, discard the response.

@@ -7,13 +7,13 @@ export default {
   component: KurtNobleFooter,
   parameters: {
     layout: "fullscreen",
-},
+  },
 };
 
 export const KurtNobleFooter = () => {
-    return (
-        <div>
-            <Footer />
-        </div>
-    )
-}
+  return (
+    <div>
+      <Footer />
+    </div>
+  );
+};

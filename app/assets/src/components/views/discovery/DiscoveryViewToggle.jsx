@@ -31,7 +31,7 @@ class DiscoveryViewToggle extends React.Component {
                 <IconMapSmall
                   className={cx(
                     cs.icon,
-                    currentDisplay === display && cs.active
+                    currentDisplay === display && cs.active,
                   )}
                 />
               )}
@@ -39,7 +39,7 @@ class DiscoveryViewToggle extends React.Component {
                 <IconListSmall
                   className={cx(
                     cs.icon,
-                    currentDisplay === display && cs.active
+                    currentDisplay === display && cs.active,
                   )}
                 />
               )}
@@ -47,7 +47,7 @@ class DiscoveryViewToggle extends React.Component {
                 <IconChartSmall
                   className={cx(
                     cs.icon,
-                    currentDisplay === display && cs.active
+                    currentDisplay === display && cs.active,
                   )}
                 />
               )}

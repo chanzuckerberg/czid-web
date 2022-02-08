@@ -154,7 +154,7 @@ class MetadataInput extends React.Component {
             onResultSelect={({ result: selection }) => {
               const result = processLocationSelection(
                 selection,
-                taxaCategory === "human"
+                taxaCategory === "human",
               );
               onChange(metadataType.key, result, true);
             }}

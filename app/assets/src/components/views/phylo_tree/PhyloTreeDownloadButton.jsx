@@ -77,8 +77,8 @@ class PhyloTreeDownloadButton extends React.Component {
     // Don't include the newick file unless it's a phyloTreeNg.
     readyOptions = readyOptions.concat(
       this.treeOptions.filter(
-        opt => !this.phyloTreeNgOptions.includes(opt.value)
-      )
+        opt => !this.phyloTreeNgOptions.includes(opt.value),
+      ),
     );
     return readyOptions;
   };
@@ -106,7 +106,7 @@ class PhyloTreeDownloadButton extends React.Component {
             text={option.text}
           />
         );
-      })
+      }),
     );
     return dropdownItems;
   };
@@ -133,7 +133,7 @@ class PhyloTreeDownloadButton extends React.Component {
             />
           );
         }
-      })
+      }),
     );
     return dropdownItems;
   };

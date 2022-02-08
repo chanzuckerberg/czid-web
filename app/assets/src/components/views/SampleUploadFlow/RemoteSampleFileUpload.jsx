@@ -42,7 +42,7 @@ class RemoteSampleFileUpload extends React.Component {
         logAnalyticsEvent("RemoteSampleFileUpload_more-info-toggle_clicked", {
           showInfo: this.state.showInfo,
         });
-      }
+      },
     );
   };
 

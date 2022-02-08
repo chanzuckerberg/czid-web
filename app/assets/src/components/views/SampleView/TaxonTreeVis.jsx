@@ -47,7 +47,7 @@ class TaxonTreeVis extends React.Component {
       tooltipContainer: this.treeTooltip,
       onCollapsedStateChange: withAnalytics(
         this.persistCollapsedInUrl,
-        "TaxonTreeVis_node-collapsed-state_changed"
+        "TaxonTreeVis_node-collapsed-state_changed",
       ),
       collapsed: this.getCollapsedInUrl() || new Set(),
     });
@@ -147,7 +147,7 @@ class TaxonTreeVis extends React.Component {
         for (let i = 1; i < ancestors.length; i++) {
           let ancestor = ancestors[i];
           ancestor.children = ancestor.children.filter(
-            child => child.id !== ancestors[i - 1].id
+            child => child.id !== ancestors[i - 1].id,
           );
           if (ancestor.children && ancestor.children.length > 0) {
             // stop if ancestor still has children
@@ -171,7 +171,7 @@ class TaxonTreeVis extends React.Component {
           node.data.values[metric] = this.metrics[metric].agg(
             node.children
               .filter(child => child.data.values[metric])
-              .map(child => child.data.values[metric])
+              .map(child => child.data.values[metric]),
           );
         }
       }
@@ -287,7 +287,7 @@ class TaxonTreeVis extends React.Component {
           <div className="taxon_tooltip__row__value">
             {Math.round(node.data.values[metric]).toLocaleString()}
           </div>
-        </span>
+        </span>,
       );
     }
 
@@ -332,13 +332,16 @@ class TaxonTreeVis extends React.Component {
     taxa.forEach(genusData => {
       if (genusData.pathogenTag) {
         labels.push(
-          this.renderPathogenLabel(genusData.taxId, genusData.pathogenTag)
+          this.renderPathogenLabel(genusData.taxId, genusData.pathogenTag),
         );
       }
       genusData.filteredSpecies.forEach(speciesData => {
         if (speciesData.pathogenTag) {
           labels.push(
-            this.renderPathogenLabel(speciesData.taxId, speciesData.pathogenTag)
+            this.renderPathogenLabel(
+              speciesData.taxId,
+              speciesData.pathogenTag,
+            ),
           );
         }
       });

@@ -68,7 +68,7 @@ export default class Histogram {
         xScaleType: HISTOGRAM_SCALE.LINEAR,
         yScaleType: HISTOGRAM_SCALE.LINEAR,
       },
-      options
+      options,
     );
 
     // The x-center of the last bar that was hovered over.
@@ -101,7 +101,7 @@ export default class Histogram {
 
     g.attr(
       "transform",
-      `translate(0,${this.size.height - this.margins.bottom})`
+      `translate(0,${this.size.height - this.margins.bottom})`,
     ).call(axis.tickSizeOuter(0));
 
     // if using log10 scale, set the number of ticks according to the size of
@@ -129,8 +129,8 @@ export default class Histogram {
         cx(
           cs.labelX,
           this.options.labelsLarge && cs.large,
-          this.options.labelsBold && cs.bold
-        )
+          this.options.labelsBold && cs.bold,
+        ),
       )
       .text(this.options.labelX);
 
@@ -190,8 +190,8 @@ export default class Histogram {
         cx(
           cs.labelY,
           this.options.labelsLarge && cs.large,
-          this.options.labelsBold && cs.bold
-        )
+          this.options.labelsBold && cs.bold,
+        ),
       )
       .text(this.options.labelY);
   }
@@ -278,7 +278,7 @@ export default class Histogram {
   onBarMouseMove = () => {
     this.options.onHistogramBarHover(
       currentEvent.clientX,
-      currentEvent.clientY
+      currentEvent.clientY,
     );
   };
 
@@ -327,7 +327,7 @@ export default class Histogram {
     const svgX = mouse(this.svg.node())[0];
     const closestBarCenters = ArrayUtils.findClosestNeighbors(
       this.sortedBarCenters,
-      svgX
+      svgX,
     );
 
     let closestX = null;
@@ -384,7 +384,7 @@ export default class Histogram {
       // Coordinates with respect to the viewport.
       this.options.onHistogramBarHover(
         currentEvent.clientX,
-        currentEvent.clientY
+        currentEvent.clientY,
       );
     }
   };
@@ -441,20 +441,20 @@ export default class Histogram {
       // * ticks all shorter than domain (returns -1), in which case we want to use all ticks
       // * more ticks than necessary (for domains <= 10), in which case we want to remove unnecessary ticks
       const firstIndexHigherThanMax = logTicks.findIndex(
-        v => v >= this.domain()[1]
+        v => v >= this.domain()[1],
       );
       const trimmedLogTicks = logTicks.slice(
         0,
         firstIndexHigherThanMax === -1
           ? logTicks.length
-          : firstIndexHigherThanMax + 1
+          : firstIndexHigherThanMax + 1,
       );
       // reset the domain to include the min/max axis - including the case where max tick is lower than max of
       this.domain([
         0,
         Math.max(
           trimmedLogTicks[trimmedLogTicks.length - 1],
-          scale.domain()[1]
+          scale.domain()[1],
         ),
       ]).nice();
 
@@ -577,7 +577,7 @@ export default class Histogram {
           .attr("y", this.margins.top)
           .attr(
             "height",
-            this.size.height - this.margins.top - this.margins.bottom
+            this.size.height - this.margins.top - this.margins.bottom,
           )
           .lower();
       }
@@ -620,12 +620,12 @@ export default class Histogram {
         .attr("class", cs.hoverRect)
         .attr(
           "transform",
-          `translate(${this.margins.left}, ${this.margins.top})`
+          `translate(${this.margins.left}, ${this.margins.top})`,
         )
         .attr("width", this.size.width - this.margins.right - this.margins.left)
         .attr(
           "height",
-          this.size.height - this.margins.top - this.margins.bottom
+          this.size.height - this.margins.top - this.margins.bottom,
         )
         .on("mousemove", this.onMouseMove)
         .on("mouseleave", this.onMouseLeave);

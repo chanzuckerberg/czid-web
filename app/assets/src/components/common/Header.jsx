@@ -32,7 +32,7 @@ const setPrivacyUpdateNotificationViewed = () => {
 
 const showPrivacyUpdateNotification = () => {
   const daysLeft = Math.ceil(
-    moment.duration(PRIVACY_UPDATE_DATE.diff(moment())).asDays()
+    moment.duration(PRIVACY_UPDATE_DATE.diff(moment())).asDays(),
   );
 
   if (daysLeft > 0) {
@@ -68,7 +68,7 @@ class Header extends React.Component {
 
   displayPrivacyUpdateNotification = () => {
     const dismissedPrivacyUpdateNotification = localStorage.getItem(
-      "dismissedPrivacyUpdateNotification"
+      "dismissedPrivacyUpdateNotification",
     );
 
     if (dismissedPrivacyUpdateNotification !== "true") {
@@ -240,7 +240,7 @@ const UserMenuDropDown = ({
             Downloads
           </a>
         }
-      />
+      />,
     );
 
     adminUser &&
@@ -253,14 +253,14 @@ const UserMenuDropDown = ({
               href="/user_settings"
               onClick={() =>
                 logAnalyticsEvent(
-                  "Header_dropdown-user-settings-option_clicked"
+                  "Header_dropdown-user-settings-option_clicked",
                 )
               }
             >
               Settings
             </a>
           }
-        />
+        />,
       );
 
     userDropdownItems.push(
@@ -289,7 +289,7 @@ const UserMenuDropDown = ({
             Contact Us
           </a>
         }
-      />
+      />,
     );
 
     adminUser &&
@@ -301,13 +301,13 @@ const UserMenuDropDown = ({
               Create User
             </a>
           }
-        />
+        />,
       );
 
     userDropdownItems.push(
       <BareDropdown.Divider key="divider_one" />,
       TermsDropdownItem,
-      PrivacyDropdownItem
+      PrivacyDropdownItem,
     );
 
     userDropdownItems.push(
@@ -317,9 +317,9 @@ const UserMenuDropDown = ({
         text="Logout"
         onClick={withAnalytics(
           signOut,
-          "Header_dropdown-logout-option_clicked"
+          "Header_dropdown-logout-option_clicked",
         )}
-      />
+      />,
     );
     return userDropdownItems;
   };
@@ -371,7 +371,7 @@ const MainMenu = ({ adminUser, userSignedIn }) => {
       <a
         className={cx(
           cs.item,
-          isSelected(DISCOVERY_DOMAIN_MY_DATA) && cs.selected
+          isSelected(DISCOVERY_DOMAIN_MY_DATA) && cs.selected,
         )}
         href={`/${DISCOVERY_DOMAIN_MY_DATA}`}
       >
@@ -380,7 +380,7 @@ const MainMenu = ({ adminUser, userSignedIn }) => {
       <a
         className={cx(
           cs.item,
-          isSelected(DISCOVERY_DOMAIN_PUBLIC) && cs.selected
+          isSelected(DISCOVERY_DOMAIN_PUBLIC) && cs.selected,
         )}
         href={`/${DISCOVERY_DOMAIN_PUBLIC}`}
       >
@@ -390,7 +390,7 @@ const MainMenu = ({ adminUser, userSignedIn }) => {
         <a
           className={cx(
             cs.item,
-            isSelected(DISCOVERY_DOMAIN_ALL_DATA) && cs.selected
+            isSelected(DISCOVERY_DOMAIN_ALL_DATA) && cs.selected,
           )}
           href={`/${DISCOVERY_DOMAIN_ALL_DATA}`}
         >

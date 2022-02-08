@@ -55,7 +55,7 @@ class UploadMetadataStep extends React.Component {
 
       result = await validateManualMetadataForNewSamples(
         this.props.samples,
-        metadata
+        metadata,
       );
 
       this.setState({
@@ -108,7 +108,7 @@ class UploadMetadataStep extends React.Component {
           className={cx(
             cs.uploadFlowStep,
             showInstructions && cs.hide,
-            visible && cs.visible
+            visible && cs.visible,
           )}
         >
           <div className={cs.flexContent}>
@@ -141,7 +141,7 @@ class UploadMetadataStep extends React.Component {
                     {
                       projectId: project.id,
                       projectName: project.name,
-                    }
+                    },
                   )
                 }
               />
@@ -159,7 +159,7 @@ UploadMetadataStep.propTypes = {
     PropTypes.shape({
       name: PropTypes.string,
       host_genome_id: PropTypes.number,
-    })
+    }),
   ),
   project: PropTypes.shape({
     id: PropTypes.number,

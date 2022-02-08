@@ -11,7 +11,7 @@ const getSampleMetadata = ({
 }) => {
   if (snapshotShareId) {
     return get(
-      `/pub/${snapshotShareId}/samples/${id}/metadata?pipeline_version=${pipelineVersion}`
+      `/pub/${snapshotShareId}/samples/${id}/metadata?pipeline_version=${pipelineVersion}`,
     );
   } else {
     return get(`/samples/${id}/metadata`, {
@@ -31,7 +31,7 @@ const getSampleMetadataFields = (ids, snapshotShareId) =>
       params: {
         sampleIds: flatten([ids]),
       },
-    }
+    },
   );
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
@@ -60,7 +60,7 @@ const validateManualMetadataForProject = (id, metadata) => {
   const metadataAsCSV = set(
     "rows",
     metadata.rows.map(row => metadata.headers.map(header => row[header] || "")),
-    metadata
+    metadata,
   );
 
   return validateMetadataCSVForProject(id, metadataAsCSV);
@@ -80,7 +80,7 @@ const validateManualMetadataForNewSamples = (samples, metadata) => {
   const metadataAsCSV = set(
     "rows",
     metadata.rows.map(row => metadata.headers.map(header => row[header] || "")),
-    metadata
+    metadata,
   );
 
   return validateMetadataCSVForNewSamples(samples, metadataAsCSV);

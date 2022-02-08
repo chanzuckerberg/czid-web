@@ -16,7 +16,7 @@ const Sections = ({ sectionContentByHeader, setCurrentSectionIndex }) => {
   const setIndex = useCallback(
     entries => {
       const currentIntersections = entries.filter(
-        entry => entry?.isIntersecting
+        entry => entry?.isIntersecting,
       );
 
       if (currentIntersections.length > 0) {
@@ -24,12 +24,12 @@ const Sections = ({ sectionContentByHeader, setCurrentSectionIndex }) => {
         const orderedSections = Object.keys(sectionContentByHeader);
         const index = orderedSections.findIndex(
           section =>
-            getSectionId(section) === currentIntersections[0]?.target?.id
+            getSectionId(section) === currentIntersections[0]?.target?.id,
         );
         setCurrentSectionIndex(index);
       }
     },
-    [setCurrentSectionIndex, sectionContentByHeader]
+    [setCurrentSectionIndex, sectionContentByHeader],
   );
 
   // TODO: add comment clarifying rootMargin percentages

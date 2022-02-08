@@ -169,7 +169,7 @@ class DiscoveryView extends React.Component {
       },
       localState,
       sessionState,
-      urlState
+      urlState,
     );
 
     // If a user had previously selected the PLQC view for a specific project,
@@ -184,7 +184,7 @@ class DiscoveryView extends React.Component {
 
     this.workflowEntity = find(
       { value: this.state.workflow },
-      values(WORKFLOWS)
+      values(WORKFLOWS),
     ).entity;
 
     this.dataLayer = new DiscoveryDataLayer(domain);
@@ -271,11 +271,11 @@ class DiscoveryView extends React.Component {
     const { domain, snapshotShareId, updateDiscoveryProjectId } = this.props;
     const { updatedAt: updatedAtFromLocalStorage } = this.loadState(
       localStorage,
-      "DiscoveryViewOptions"
+      "DiscoveryViewOptions",
     );
     const { updatedAt: updatedAtFromSessionStorage } = this.loadState(
       sessionStorage,
-      "DiscoveryViewOptions"
+      "DiscoveryViewOptions",
     );
 
     const localFields = [
@@ -339,20 +339,20 @@ class DiscoveryView extends React.Component {
       history.pushState(
         historyState,
         `DiscoveryView:${domain}`,
-        `${prefix}${urlQuery}`
+        `${prefix}${urlQuery}`,
       );
     } else {
       history.replaceState(
         historyState,
         `DiscoveryView:${domain}`,
-        `${prefix}${urlQuery}`
+        `${prefix}${urlQuery}`,
       );
     }
 
     // We want to persist all options when user navigates to other pages within the same session
     sessionStorage.setItem(
       "DiscoveryViewOptions",
-      JSON.stringify(sessionState)
+      JSON.stringify(sessionState),
     );
 
     // We want to persist some options when user returns to the page on a different session
@@ -436,7 +436,7 @@ class DiscoveryView extends React.Component {
         this.samplesView && this.samplesView.reset();
         this.projectsView && this.projectsView.reset();
         callback && callback();
-      }
+      },
     );
   };
 
@@ -625,7 +625,7 @@ class DiscoveryView extends React.Component {
       () => {
         this.refreshMapPreviewedData();
         this.handleMapLevelChange(mapLevel);
-      }
+      },
     );
   };
 
@@ -634,7 +634,7 @@ class DiscoveryView extends React.Component {
       {
         plqcPreviewedSamples: null,
       },
-      this.refreshPLQCPreviewedSamples
+      this.refreshPLQCPreviewedSamples,
     );
   };
 
@@ -655,12 +655,12 @@ class DiscoveryView extends React.Component {
     const numOfCgSamples = getOr(
       0,
       WORKFLOWS.CONSENSUS_GENOME.value,
-      sampleStats.countByWorkflow
+      sampleStats.countByWorkflow,
     );
     const numOfMngsSamples = getOr(
       0,
       WORKFLOWS.SHORT_READ_MNGS.value,
-      sampleStats.countByWorkflow
+      sampleStats.countByWorkflow,
     );
     if (numOfMngsSamples === 0 && numOfCgSamples > 0) {
       workflow = WORKFLOWS.CONSENSUS_GENOME.value;
@@ -681,7 +681,7 @@ class DiscoveryView extends React.Component {
       },
       () => {
         this.updateBrowsingHistory("replace");
-      }
+      },
     );
   };
 
@@ -790,7 +790,7 @@ class DiscoveryView extends React.Component {
         newFilters[selectedKey] = xorBy(
           "value",
           [{ value, text }],
-          newFilters[selectedKey]
+          newFilters[selectedKey],
         );
         filtersChanged = true;
         break;
@@ -827,7 +827,7 @@ class DiscoveryView extends React.Component {
         () => {
           this.updateBrowsingHistory("replace");
           this.resetDataFromFilterChange();
-        }
+        },
       );
     }
     logAnalyticsEvent("DiscoveryView_search_selected", {
@@ -902,7 +902,7 @@ class DiscoveryView extends React.Component {
         this.clearMapPreview();
         this.updateBrowsingHistory();
         this.refreshDataFromProjectChange();
-      }
+      },
     );
   };
 
@@ -1029,7 +1029,7 @@ class DiscoveryView extends React.Component {
     const { filters } = this.state;
     return sumBy(
       filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
-      values(filters)
+      values(filters),
     );
   };
 
@@ -1049,7 +1049,7 @@ class DiscoveryView extends React.Component {
       },
       () => {
         this.refreshMapPreviewedData();
-      }
+      },
     );
   };
 
@@ -1061,7 +1061,7 @@ class DiscoveryView extends React.Component {
       },
       () => {
         this.refreshMapPreviewedData();
-      }
+      },
     );
   };
 
@@ -1115,7 +1115,7 @@ class DiscoveryView extends React.Component {
       },
       () => {
         this.refreshPLQCPreviewedSamples();
-      }
+      },
     );
   };
 
@@ -1246,7 +1246,7 @@ class DiscoveryView extends React.Component {
       if (ancestorId && rawMapLocationData[ancestorId]) {
         if (!clusteredData[ancestorId]) {
           clusteredData[ancestorId] = copyLocation(
-            rawMapLocationData[ancestorId]
+            rawMapLocationData[ancestorId],
           );
         }
         const ancestor = clusteredData[ancestorId];
@@ -1293,7 +1293,7 @@ class DiscoveryView extends React.Component {
     let previouslyDismissedSamples = new Set();
     try {
       previouslyDismissedSamples = new Set(
-        JSON.parse(localStorage.getItem("dismissedPublicSamples"))
+        JSON.parse(localStorage.getItem("dismissedPublicSamples")),
       );
     } catch (_) {
       // catch and ignore possible old formats
@@ -1301,14 +1301,14 @@ class DiscoveryView extends React.Component {
 
     let [dismissedSamples, newSamples] = partition(
       sample => previouslyDismissedSamples.has(sample.id),
-      samplesGoingPublic
+      samplesGoingPublic,
     );
     if (newSamples.length > 0) {
       // The purpose of setItem here is to keep the dismissed list from growing indefinitely. The
       // value here will no longer include samples that went public in the past.
       localStorage.setItem(
         "dismissedPublicSamples",
-        JSON.stringify(map("id", dismissedSamples))
+        JSON.stringify(map("id", dismissedSamples)),
       );
       publicSampleNotificationsByProject(newSamples);
     }
@@ -1549,7 +1549,7 @@ class DiscoveryView extends React.Component {
       () => {
         this.updateBrowsingHistory("replace");
         this.samplesView && this.samplesView.reset();
-      }
+      },
     );
     logAnalyticsEvent(`DiscoveryView_${workflow}-tab_clicked`);
   };
@@ -1906,7 +1906,7 @@ class DiscoveryView extends React.Component {
               <DiscoveryFilters
                 {...mapValues(
                   dim => dim.values,
-                  keyBy("dimension", dimensions)
+                  keyBy("dimension", dimensions),
                 )}
                 {...filters}
                 domain={domain}

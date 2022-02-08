@@ -8,7 +8,7 @@ export const showAppcue = ({
   withAnalytics(
     () => window.Appcues && window.Appcues.show(flowId),
     analyticEventName,
-    analyticEventProperties
+    analyticEventProperties,
   );
 
 // Appcues Flows - Follow naming convention: Component/Appcue Flow

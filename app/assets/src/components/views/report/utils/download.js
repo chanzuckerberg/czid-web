@@ -91,6 +91,6 @@ export const logDownloadOption = ({ component, option, details = {} }) => {
       .replace(/_/g, "-")
       .replace("-_", "_")
       .toLowerCase()}_clicked`,
-    details
+    details,
   );
 };

@@ -64,7 +64,7 @@ TooltipVizTable.propTypes = {
       // Array of key-value pairs
       data: PropTypes.arrayOf(PropTypes.array),
       disabled: PropTypes.bool,
-    })
+    }),
   ),
   description: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
   subtitle: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),

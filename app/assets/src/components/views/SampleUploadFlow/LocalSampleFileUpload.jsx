@@ -36,9 +36,9 @@ class LocalSampleFileUpload extends React.Component {
       mapValues(
         flow(
           sortBy(file => file.name.toLowerCase()),
-          slice(0, 2)
-        )
-      )
+          slice(0, 2),
+        ),
+      ),
     )(acceptedFiles);
 
     // Create local samples.
@@ -59,7 +59,7 @@ class LocalSampleFileUpload extends React.Component {
         status: "created",
         client: "web",
       }),
-      sampleNamesToFiles
+      sampleNamesToFiles,
     );
 
     this.props.onChange(localSamples);
@@ -76,7 +76,7 @@ class LocalSampleFileUpload extends React.Component {
     }
     if (bigFiles.length > 0) {
       msg += `- Too large: ${mapNames(
-        bigFiles
+        bigFiles,
       )}\nSize must be under 5GB for local uploads. For larger files, please try our CLI.`;
     }
     if (invalidFiles.length > 0) {
@@ -95,7 +95,7 @@ class LocalSampleFileUpload extends React.Component {
         logAnalyticsEvent("LocalSampleFileUpload_more-info-toggle_clicked", {
           showInfo: this.state.showInfo,
         });
-      }
+      },
     );
   };
 
@@ -104,7 +104,7 @@ class LocalSampleFileUpload extends React.Component {
 
     const fileCount = sumBy(
       s => size(s.input_files_attributes),
-      this.props.samples
+      this.props.samples,
     );
 
     if (fileCount) {

@@ -29,7 +29,7 @@ export default class TidyTree {
         collapsed: new Set(),
         svgBackgroundColor: "white",
       },
-      options || {}
+      options || {},
     );
 
     this.margins = {
@@ -54,21 +54,21 @@ export default class TidyTree {
         "style",
         // Not standard but it works for downloads and svgsaver. See
         // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
-        `background-color: ${this.options.svgBackgroundColor}`
+        `background-color: ${this.options.svgBackgroundColor}`,
       );
 
     this.pathContainer = this.svg
       .append("g")
       .attr(
         "transform",
-        "translate(" + this.margins.left + "," + this.margins.top + ")"
+        "translate(" + this.margins.left + "," + this.margins.top + ")",
       );
 
     this.nodeContainer = this.svg
       .append("g")
       .attr(
         "transform",
-        "translate(" + this.margins.left + "," + this.margins.top + ")"
+        "translate(" + this.margins.left + "," + this.margins.top + ")",
       );
 
     this.tooltipContainer = select(this.options.tooltipContainer);
@@ -116,12 +116,12 @@ export default class TidyTree {
     this.root.sort(
       (a, b) =>
         b.data.values[this.options.attribute] -
-        a.data.values[this.options.attribute]
+        a.data.values[this.options.attribute],
     );
 
     this.range = [
       Math.min(
-        ...this.root.leaves().map(l => l.data.values[this.options.attribute])
+        ...this.root.leaves().map(l => l.data.values[this.options.attribute]),
       ),
       this.root.data.values[this.options.attribute],
     ];
@@ -145,7 +145,7 @@ export default class TidyTree {
           child =>
             !child.data.highlight &&
             collapsedScale(child.data.values[this.options.attribute]) <
-              this.options.collapseThreshold
+              this.options.collapseThreshold,
         );
         if (
           d.collapsedChildren.length <= this.options.minNonCollapsableChildren
@@ -156,7 +156,7 @@ export default class TidyTree {
             child =>
               child.data.highlight ||
               collapsedScale(child.data.values[this.options.attribute]) >=
-                this.options.collapseThreshold
+                this.options.collapseThreshold,
           );
           d.children.length || (d.children = null);
 
@@ -170,7 +170,7 @@ export default class TidyTree {
               data: {
                 commonName: `(${d.collapsedChildren.length})`,
                 highlight: d.collapsedChildren.some(
-                  child => child.data.highlight
+                  child => child.data.highlight,
                 ),
                 scientificName: `(${d.collapsedChildren.length})`,
                 lineageRank: d.collapsedChildren[0].data.lineageRank,
@@ -219,7 +219,7 @@ export default class TidyTree {
       Object.assign(node, {
         x0: node.x,
         y0: node.y,
-      })
+      }),
     );
     this.options.onCollapsedStateChange &&
       this.options.onCollapsedStateChange(node);
@@ -317,7 +317,7 @@ export default class TidyTree {
         // TODO: figure out how to align: hacky 1.5px added to dy
         text.attr(
           "dy",
-          `${(textHeight + (lineNumber - 1) * lineHeight - 3) / 2}px`
+          `${(textHeight + (lineNumber - 1) * lineHeight - 3) / 2}px`,
         );
       }
     });
@@ -338,7 +338,7 @@ export default class TidyTree {
     let width = this.options.minWidth;
     let height = Math.max(
       this.options.minHeight,
-      this.options.leafNodeHeight * this.root.leaves().length
+      this.options.leafNodeHeight * this.root.leaves().length,
     );
 
     // if (!this.root.x0) {
@@ -379,7 +379,7 @@ export default class TidyTree {
       .append("path")
       .attr(
         "class",
-        d => `link ${d.target.data.highlight ? "highlighted" : ""}`
+        d => `link ${d.target.data.highlight ? "highlighted" : ""}`,
       )
       .attr("d", () => {
         let startPoint = { x: source.x0, y: source.y0 };
@@ -394,7 +394,7 @@ export default class TidyTree {
       .duration(this.options.transitionDuration)
       .attr(
         "class",
-        d => `link ${d.target.data.highlight ? "highlighted" : ""}`
+        d => `link ${d.target.data.highlight ? "highlighted" : ""}`,
       )
       .attr("d", d => this.curvedPath(d.source, d.target))
       .attr("stroke-width", d => {
@@ -485,10 +485,10 @@ export default class TidyTree {
         );
       })
       .style("text-anchor", d =>
-        this.hasVisibleChildren(d) ? "middle" : "start"
+        this.hasVisibleChildren(d) ? "middle" : "start",
       )
       .style("alignment-baseline", d =>
-        this.hasVisibleChildren(d) ? "baseline" : "middle"
+        this.hasVisibleChildren(d) ? "baseline" : "middle",
       )
       .style("font-size", d => fontScale(d.data.values[this.options.attribute]))
       .style("font-weight", 600)
@@ -496,12 +496,12 @@ export default class TidyTree {
       .attr("dy", d =>
         this.hasVisibleChildren(d)
           ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
-          : 0
+          : 0,
       )
       .attr("x", d =>
         this.hasVisibleChildren(d)
           ? 0
-          : 4 + 1.3 * nodeScale(d.data.values[this.options.attribute])
+          : 4 + 1.3 * nodeScale(d.data.values[this.options.attribute]),
       )
       .call(this.wrap.bind(this), 110);
 
@@ -525,7 +525,7 @@ export default class TidyTree {
       d =>
         !d.parent || d.data.scientificName || this.hasHiddenChildren(d)
           ? nodeScale(d.data.values[this.options.attribute])
-          : 0
+          : 0,
     );
 
     nodeUpdate.select("path.cross").attr("d", d => {

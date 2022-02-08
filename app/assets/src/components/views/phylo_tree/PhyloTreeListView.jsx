@@ -79,7 +79,7 @@ class PhyloTreeListView extends React.Component {
       selectedSampleId: null,
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
         urlParams,
-        props.phyloTrees
+        props.phyloTrees,
       ),
       showLowCoverageWarning: false,
       showOldTreeWarning: true,
@@ -120,7 +120,7 @@ class PhyloTreeListView extends React.Component {
       window.history.replaceState(
         window.history.state,
         document.title,
-        `/phylo_tree_ngs/${selectedPhyloTreeNgId}?${matrixURLParam}`
+        `/phylo_tree_ngs/${selectedPhyloTreeNgId}?${matrixURLParam}`,
       );
 
       this.setState({
@@ -170,7 +170,7 @@ class PhyloTreeListView extends React.Component {
       window.history.replaceState(
         window.history.state,
         document.title,
-        `/phylo_tree_ngs/${newPhyloTreeId}?${matrixURLParam}`
+        `/phylo_tree_ngs/${newPhyloTreeId}?${matrixURLParam}`,
       );
       // NG isn't using the sessionStorage 'default tree' functionality
 
@@ -191,7 +191,7 @@ class PhyloTreeListView extends React.Component {
       window.history.replaceState(
         window.history.state,
         document.title,
-        `/phylo_trees/index?treeId=${newPhyloTreeId}`
+        `/phylo_trees/index?treeId=${newPhyloTreeId}`,
       );
       // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
       window.sessionStorage.setItem("treeId", newPhyloTreeId);
@@ -229,7 +229,7 @@ class PhyloTreeListView extends React.Component {
           key,
         ],
         newValue,
-        this.state.currentTree
+        this.state.currentTree,
       ),
     });
   };
@@ -242,7 +242,7 @@ class PhyloTreeListView extends React.Component {
     // TODO (gdingle): add analytics tracking?
     let params = parseUrlParams();
     const sampleIds = Object.values(
-      this.state.currentTree.sampleDetailsByNodeName
+      this.state.currentTree.sampleDetailsByNodeName,
     )
       .map(details => details.sample_id)
       .filter(s => !!s);
@@ -416,7 +416,7 @@ class PhyloTreeListView extends React.Component {
           type="error"
           onClick={() =>
             logAnalyticsEvent(
-              ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED,
             )
           }
         />
@@ -440,7 +440,7 @@ class PhyloTreeListView extends React.Component {
           type="inProgress"
           onClick={() =>
             logAnalyticsEvent(
-              ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED,
             )
           }
         />
@@ -505,7 +505,7 @@ class PhyloTreeListView extends React.Component {
                     {
                       treeName: currentTree.name,
                       treeId: currentTree.id,
-                    }
+                    },
                   )}
                   className={cs.controlElement}
                 />
@@ -521,12 +521,12 @@ class PhyloTreeListView extends React.Component {
                 {
                   treeName: currentTree.name,
                   treeId: currentTree.id,
-                }
+                },
               )}
               className={cs.controlElement}
             />
             {[STATUS_READY, NG_STATUS_SUCCEEDED].includes(
-              currentTree.status
+              currentTree.status,
             ) && (
               <PhyloTreeDownloadButton
                 className={cs.controlElement}
@@ -655,7 +655,7 @@ class PhyloTreeListView extends React.Component {
             {
               treeName: currentTree.name,
               treeId: currentTree.id,
-            }
+            },
           )}
           params={this.state.sidebarConfig}
         />
@@ -679,7 +679,7 @@ class PhyloTreeListView extends React.Component {
             open
             onContinue={withAnalytics(
               this.handleCloseMatrixErrorModal,
-              ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_CONTINUE_BUTTON_CLICKED
+              ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_CONTINUE_BUTTON_CLICKED,
             )}
             showLowCoverageWarning={showLowCoverageWarning}
           />

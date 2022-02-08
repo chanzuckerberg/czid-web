@@ -21,7 +21,7 @@ const ReviewPage = ({ metadata, samples }) => {
     if (isHuman && containsHostAge) {
       sample["host_age"] = returnHipaaCompliantMetadata(
         "host_age",
-        sample["host_age"]
+        sample["host_age"],
       );
     }
     return sample;

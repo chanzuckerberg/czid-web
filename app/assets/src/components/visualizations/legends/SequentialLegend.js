@@ -23,13 +23,13 @@ export default class HeatmapLegend {
         cellWidth: null,
         fontSize: "9pt",
       },
-      options
+      options,
     );
 
     if (!this.options.colors) {
       let defaultColorScale = scaleSequential(interpolateYlOrRd);
       this.options.colors = this.range(this.options.numberOfLevels).map(i =>
-        defaultColorScale(i / (this.options.numberOfLevels - 1))
+        defaultColorScale(i / (this.options.numberOfLevels - 1)),
       );
     }
 

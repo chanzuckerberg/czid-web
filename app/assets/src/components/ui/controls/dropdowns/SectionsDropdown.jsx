@@ -27,7 +27,7 @@ const SectionsDropdown = ({
         className={cx(
           cs.option,
           cs.noMargins,
-          option.disabled && cs.disabledOption
+          option.disabled && cs.disabledOption,
         )}
         key={option.value}
         onClick={() => {
@@ -39,7 +39,7 @@ const SectionsDropdown = ({
         <div
           className={cx(
             cs.optionText,
-            option.value === selectedValue && cs.selectedOption
+            option.value === selectedValue && cs.selectedOption,
           )}
         >
           {option.text}
@@ -81,7 +81,7 @@ const SectionsDropdown = ({
 
       if (isEmpty(sectionItems)) {
         sectionItems.push(
-          renderEmptySectionMessage(categoryDetails.emptySectionMessage)
+          renderEmptySectionMessage(categoryDetails.emptySectionMessage),
         );
       }
 
@@ -160,7 +160,7 @@ SectionsDropdown.propTypes = {
         text: PropTypes.string.isRequired,
         tooltip: PropTypes.string,
         value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      })
+      }),
     ),
   }).isRequired,
   // Used to map the item to the item's name whenever the value of the item is not text.

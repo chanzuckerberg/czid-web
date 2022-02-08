@@ -85,7 +85,7 @@ export default class BasespaceSampleImport extends React.Component {
         value: project.id,
         text: project.name,
       }),
-      basespaceProjects
+      basespaceProjects,
     );
   };
 
@@ -128,14 +128,14 @@ export default class BasespaceSampleImport extends React.Component {
 
     let samples = await getSamplesForBasespaceProject(
       accessToken,
-      selectedProjectId
+      selectedProjectId,
     );
 
     this.setState({ loadingSamples: false });
 
     const currentProjectName = get(
       "name",
-      find(["id", selectedProjectId], basespaceProjects)
+      find(["id", selectedProjectId], basespaceProjects),
     );
 
     if (samples.error) {
@@ -172,7 +172,7 @@ export default class BasespaceSampleImport extends React.Component {
           onClick={withAnalytics(
             this.requestBasespaceBrowseGlobalPermissions,
             "BasespaceSampleImport_connect-btn_clicked",
-            {}
+            {},
           )}
         />
       </React.Fragment>
@@ -216,7 +216,7 @@ export default class BasespaceSampleImport extends React.Component {
             onClick={withAnalytics(
               this.fetchSamplesForBasespaceProject,
               "BasespaceSampleImport_connect-project-btn_clicked",
-              {}
+              {},
             )}
             className={cs.connectProjectButton}
           />

@@ -1,9 +1,9 @@
+import { storiesOf } from "@storybook/react";
 import React from "react";
 
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
 import SubtextDropdown from "~/components/ui/controls/dropdowns/SubtextDropdown";
-import { storiesOf } from "@storybook/react";
 import {
   DEFAULT_MEDAKA_MODEL_OPTION,
   MEDAKA_MODEL_OPTIONS,

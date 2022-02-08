@@ -136,7 +136,7 @@ export default function SampleViewHeader({
                       "SampleViewHeader_consensus-genome-download-all-button_clicked",
                       {
                         sampleId: sample.id,
-                      }
+                      },
                     );
                   }}
                 />
@@ -170,7 +170,7 @@ export default function SampleViewHeader({
                 "SampleView_save-button_clicked",
                 {
                   sampleId: sample && sample.id,
-                }
+                },
               )}
             />
           )}
@@ -244,7 +244,7 @@ export default function SampleViewHeader({
               generateUrlToSampleView({
                 sampleId: sample.id,
                 snapshotShareId,
-              })
+              }),
             );
             logAnalyticsEvent("SampleView_header-title_clicked", {
               sampleId: sample.id,
@@ -260,7 +260,7 @@ export default function SampleViewHeader({
             "SampleView_sample-details-link_clicked",
             {
               sampleId: sample && sample.id,
-            }
+            },
           )}
         >
           Sample Details

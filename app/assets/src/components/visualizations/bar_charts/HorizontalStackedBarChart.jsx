@@ -183,7 +183,7 @@ export default class HorizontalStackedBarChart extends React.Component {
 
     const { barCanvasHeight, xAxisHeight } = this.measureHeights();
     let { barCanvasWidth, yAxisWidth, truncatedLabels } = this.measureWidths(
-      width
+      width,
     );
 
     const { x, y, z } = this.createDimensions(barCanvasWidth, barCanvasHeight);
@@ -191,7 +191,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     y.domain(
       stateData.map(d => {
         return d[yAxisKey];
-      })
+      }),
     );
 
     const xDomainMax = max(stateData, d => d.total);
@@ -247,7 +247,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     const canvasWidth = width - measurements.xTextWidth;
     let yAxisWidth = Math.min(
       longestLabelLength,
-      canvasWidth * MAX_Y_AXIS_AREA_RATIO
+      canvasWidth * MAX_Y_AXIS_AREA_RATIO,
     );
 
     if (longestLabelLength > yAxisWidth) {
@@ -259,7 +259,7 @@ export default class HorizontalStackedBarChart extends React.Component {
         if (labelWidth > yAxisWidth) {
           const lengthToTruncate = Math.ceil(
             (labelWidth - (yAxisWidth + measurements.ellipsisTextWidth)) /
-              measurements.wideGlyphTextWidth
+              measurements.wideGlyphTextWidth,
           );
           const truncatedLabelSliceIndex = label.length - lengthToTruncate - 1;
           modifiedLabel = label.slice(0, truncatedLabelSliceIndex) + "...";
@@ -305,7 +305,7 @@ export default class HorizontalStackedBarChart extends React.Component {
           key={yAttribute}
           ref={ref => {
             const refLocation = this.references.yRef.findIndex(
-              ref => ref[0] === yAttribute
+              ref => ref[0] === yAttribute,
             );
             if (refLocation >= 0 && ref !== null) {
               this.references.yRef[refLocation][1] = ref;
@@ -351,7 +351,7 @@ export default class HorizontalStackedBarChart extends React.Component {
         }}
       >
         {"..."}
-      </div>
+      </div>,
     );
 
     return elements;
@@ -366,7 +366,7 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   measureYAxisText() {
     const yAxisRefs = this.references.yRef.filter(
-      refPair => refPair[1] !== null
+      refPair => refPair[1] !== null,
     );
     const measured = yAxisRefs.map(keyRefPair => [
       keyRefPair[0],
@@ -452,7 +452,7 @@ export default class HorizontalStackedBarChart extends React.Component {
               />
             </g>
           );
-        }
+        },
       );
       return (
         <g
@@ -525,13 +525,13 @@ export default class HorizontalStackedBarChart extends React.Component {
               onMouseEnter={() =>
                 this.setState(
                   { mouseOverBar: yAttribute },
-                  events.onBarEmptySpaceEnter(dataForStack)
+                  events.onBarEmptySpaceEnter(dataForStack),
                 )
               }
               onMouseLeave={() =>
                 this.setState(
                   { mouseOverBar: null },
-                  events.onChartElementExit()
+                  events.onChartElementExit(),
                 )
               }
             />
@@ -547,7 +547,7 @@ export default class HorizontalStackedBarChart extends React.Component {
             )}
           </g>
         );
-      }
+      },
     );
 
     return (

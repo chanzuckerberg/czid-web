@@ -20,7 +20,7 @@ export default class BulkDownloadNotification extends React.Component {
             href="bulk_downloads"
             onClick={() =>
               logAnalyticsEvent(
-                "BulkDownloadNotification_downloads-page-link-clicked"
+                "BulkDownloadNotification_downloads-page-link-clicked",
               )
             }
           >
@@ -49,7 +49,7 @@ export const showBulkDownloadNotification = () => {
     ({ closeToast }) => <BulkDownloadNotification onClose={closeToast} />,
     {
       autoClose: 12000,
-    }
+    },
   );
 };
 

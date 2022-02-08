@@ -18,7 +18,7 @@ export const getHistogramTooltipData = memoize(
             "Base Pair Range",
             // \u2013 is en-dash
             `${Math.round(coverageObj[0] * binSize)}\u2013${Math.round(
-              (coverageObj[0] + 1) * binSize
+              (coverageObj[0] + 1) * binSize,
             )}`,
           ],
           ["Coverage Depth", `${coverageObj[1]}x`],
@@ -28,7 +28,7 @@ export const getHistogramTooltipData = memoize(
         ],
       },
     ];
-  }
+  },
 );
 
 // Gets called on every mouse move, so need to memoize.
@@ -93,12 +93,12 @@ export const getGenomeVizTooltipData = memoize((hitGroups, dataIndex) => {
 
 // Select all hit groups with at least one aggregated contig.
 export const selectContigsFromHitGroups = memoize(hitGroups =>
-  filter(hitGroup => hitGroup[0] > 0, hitGroups)
+  filter(hitGroup => hitGroup[0] > 0, hitGroups),
 );
 
 // Select all hit groups with at least one aggregated read.
 export const selectReadsFromHitGroups = memoize(hitGroups =>
-  filter(hitGroup => hitGroup[1] > 0, hitGroups)
+  filter(hitGroup => hitGroup[1] > 0, hitGroups),
 );
 
 export const generateCoverageVizData = (coverageData, coverageBinSize) =>

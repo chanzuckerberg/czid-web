@@ -11,9 +11,9 @@ export default {
 };
 
 export const KurtNobleLaptopRotator = () => {
-    return (
-        <div>
-            <LaptopRotator />
-        </div>
-    )
-}
+  return (
+    <div>
+      <LaptopRotator />
+    </div>
+  );
+};

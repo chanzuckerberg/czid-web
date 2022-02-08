@@ -71,7 +71,7 @@ const react_component = (componentName, props, target, userContext) => {
           </UserContext.Provider>
         </BrowserRouter>
       </Sentry.ErrorBoundary>,
-      document.getElementById(target)
+      document.getElementById(target),
     );
     if (userContext && userContext.userId) {
       Sentry.setUser({ id: userContext.userId });
@@ -81,7 +81,7 @@ const react_component = (componentName, props, target, userContext) => {
     console.error(
       "Couldn't find component for",
       componentName,
-      foundComponents
+      foundComponents,
     );
   }
 };

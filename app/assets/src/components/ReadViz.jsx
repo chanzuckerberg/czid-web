@@ -82,7 +82,7 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
 
     let alignedPortion = sequence.slice(
       readInfo.metrics[4] - 1,
-      readInfo.metrics[5]
+      readInfo.metrics[5],
     );
     let leftPortion =
       readInfo.metrics[4] - 2 >= 0
@@ -94,7 +94,7 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
     if (readInfo.refInfo[0].length > leftPortion.length) {
       // trim refInfo[0]
       readInfo.refInfo[0] = readInfo.refInfo[0].slice(
-        readInfo.refInfo[0].length - leftPortion.length
+        readInfo.refInfo[0].length - leftPortion.length,
       );
     } else {
       // pad refInfo[0]
@@ -113,11 +113,11 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
     }
     let [qualityString1, misMatches1] = generateQualityString(
       readInfo.refInfo[1],
-      alignedPortion
+      alignedPortion,
     );
     let [qualityString2, misMatches2] = generateQualityString(
       readInfo.refInfo[1],
-      complementSeq(alignedPortion)
+      complementSeq(alignedPortion),
     );
     let qualityString =
       misMatches1 < misMatches2 ? qualityString1 : qualityString2;
@@ -181,7 +181,7 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
 
 ReadViz.propTypes = {
   metrics: PropTypes.arrayOf(
-    PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+    PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   ),
   name: PropTypes.string,
   refInfo: PropTypes.arrayOf(PropTypes.string),

@@ -60,7 +60,7 @@ const BlastContigsTable = ({
       onRowClick={({ rowData }) =>
         onContigSelection(
           rowData.contig_id,
-          !selectedContigs.has(rowData.contig_id)
+          !selectedContigs.has(rowData.contig_id),
         )
       }
       onSelectAllRows={onAllContigsSelected}

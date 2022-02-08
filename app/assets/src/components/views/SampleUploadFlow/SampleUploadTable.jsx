@@ -80,7 +80,7 @@ export default class SampleUploadTable extends React.Component {
     const { samples, onSamplesRemove, selectedSampleIds } = this.props;
     const unselectedSampleIds = difference(
       map(SELECT_ID_KEY, samples),
-      Array.from(selectedSampleIds)
+      Array.from(selectedSampleIds),
     );
 
     onSamplesRemove(unselectedSampleIds);
@@ -150,7 +150,7 @@ SampleUploadTable.propTypes = {
       file_names: PropTypes.arrayOf(PropTypes.string),
       basespace_project_name: PropTypes.string,
       _selectId: PropTypes.string,
-    })
+    }),
   ),
   selectedSampleIds: PropTypes.instanceOf(Set),
   onSamplesRemove: PropTypes.func.isRequired,

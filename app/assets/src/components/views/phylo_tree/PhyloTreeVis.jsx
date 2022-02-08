@@ -89,7 +89,7 @@ class PhyloTreeVis extends React.Component {
       this.newick = this.props.newick;
       this.nodeData = this.props.nodeData;
       this.treeVis.setTree(
-        Tree.fromNewickString(this.props.newick, this.props.nodeData)
+        Tree.fromNewickString(this.props.newick, this.props.nodeData),
       );
       this.treeVis.update();
       this.fetchMetadataTypes();
@@ -130,7 +130,7 @@ class PhyloTreeVis extends React.Component {
     } else if (node.data.sample_id) {
       this.props.onSampleNodeClick(
         node.data.sample_id,
-        node.data.pipeline_run_id
+        node.data.pipeline_run_id,
       );
     }
   };
@@ -230,7 +230,7 @@ class PhyloTreeVis extends React.Component {
     return sortBy(
       "text",
       concat(EXTRA_DROPDOWN_OPTIONS, metadataOptions),
-      metadataOptions
+      metadataOptions,
     );
   };
 

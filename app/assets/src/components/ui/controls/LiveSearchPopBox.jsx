@@ -103,7 +103,7 @@ class LiveSearchPopBox extends React.Component {
           className={cx(
             cs.searchInput,
             rectangular && cs.rectangular,
-            inputClassName
+            inputClassName,
           )}
           icon={icon}
           loading={isLoading}
@@ -198,7 +198,7 @@ class LiveSearchPopBox extends React.Component {
         className={cx(
           cs.liveSearchPopBox,
           rectangular && cs.rectangular,
-          className
+          className,
         )}
         fluid
         hideArrow

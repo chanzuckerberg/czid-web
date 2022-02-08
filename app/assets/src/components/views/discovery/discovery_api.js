@@ -45,7 +45,7 @@ const getDiscoveryDimensions = async ({
     ];
     if (!snapshotShareId)
       actions.push(
-        getProjectDimensions({ domain, filters, projectId, search })
+        getProjectDimensions({ domain, filters, projectId, search }),
       );
     const [sampleDimensions, projectDimensions] = await Promise.all(actions);
     return { sampleDimensions, projectDimensions };
@@ -84,22 +84,22 @@ const getDiscoveryStats = async ({
 const processRawSample = sample => {
   const meanInsertSize = get(
     "derived_sample_output.summary_stats.insert_size_mean",
-    sample.details
+    sample.details,
   );
   const insertSizeStandardDeviation = get(
     "derived_sample_output.summary_stats.insert_size_standard_deviation",
-    sample.details
+    sample.details,
   );
 
   const meanInsertSizeString = numberWithPlusOrMinus(
     meanInsertSize,
-    insertSizeStandardDeviation
+    insertSizeStandardDeviation,
   );
 
   const getConsensusGenomeField = path =>
     get(
       [WORKFLOWS.CONSENSUS_GENOME.value, "cached_results", ...path],
-      sample.details
+      sample.details,
     );
   const consensusGenomeFields = {
     coverageDepth: getConsensusGenomeField(["coverage_viz", "coverage_depth"]),
@@ -112,7 +112,7 @@ const processRawSample = sample => {
     ]),
     medakaModel: get(
       [WORKFLOWS.CONSENSUS_GENOME.value, "medaka_model"],
-      sample.details
+      sample.details,
     ),
     nActg: getConsensusGenomeField(["quality_metrics", "n_actg"]),
     percentGenomeCalled: getConsensusGenomeField([
@@ -139,10 +139,13 @@ const processRawSample = sample => {
     ]),
     technology: get(
       [WORKFLOWS.CONSENSUS_GENOME.value, "technology"],
-      sample.details
+      sample.details,
     ),
     wetlabProtocol: formatWetlabProtocol(
-      get([WORKFLOWS.CONSENSUS_GENOME.value, "wetlab_protocol"], sample.details)
+      get(
+        [WORKFLOWS.CONSENSUS_GENOME.value, "wetlab_protocol"],
+        sample.details,
+      ),
     ),
   };
 
@@ -153,11 +156,11 @@ const processRawSample = sample => {
       project: get("derived_sample_output.project_name", sample.details),
       publicAccess: !!sample.public,
       pipelineRunStatus: toLower(
-        get("mngs_run_info.result_status_description", sample.details)
+        get("mngs_run_info.result_status_description", sample.details),
       ),
       pipelineRunCreatedAt: get("mngs_run_info.created_at", sample.details),
       uploadError: toLower(
-        get("upload_error.result_status_description", sample.details)
+        get("upload_error.result_status_description", sample.details),
       ),
       user: get("uploader.name", sample.details),
       userId: get("uploader.id", sample.details),
@@ -165,17 +168,17 @@ const processRawSample = sample => {
     collectionLocation: get("metadata.collection_location", sample.details),
     collectionLocationV2: get(
       "metadata.collection_location_v2",
-      sample.details
+      sample.details,
     ),
     ctValue: get("metadata.ct_value", sample.details),
     createdAt: sample.created_at,
     duplicateCompressionRatio: get(
       "derived_sample_output.summary_stats.compression_ratio",
-      sample.details
+      sample.details,
     ),
     erccReads: get(
       "derived_sample_output.pipeline_run.total_ercc_reads",
-      sample.details
+      sample.details,
     ),
     host: get("derived_sample_output.host_genome_name", sample.details),
     id: sample.id,
@@ -183,33 +186,33 @@ const processRawSample = sample => {
     nonHostReads: {
       value: get(
         "derived_sample_output.summary_stats.adjusted_remaining_reads",
-        sample.details
+        sample.details,
       ),
       percent: get(
         "derived_sample_output.summary_stats.percent_remaining",
-        sample.details
+        sample.details,
       ),
     },
     notes: get("db_sample.sample_notes", sample.details),
     nucleotideType: get("metadata.nucleotide_type", sample.details),
     pipelineVersion: get(
       "derived_sample_output.pipeline_run.pipeline_version",
-      sample.details
+      sample.details,
     ),
     privateUntil: sample.private_until,
     projectId: sample.project_id,
     qcPercent: get(
       "derived_sample_output.summary_stats.qc_percent",
-      sample.details
+      sample.details,
     ),
     sampleType: get("metadata.sample_type", sample.details),
     subsampledFraction: get(
       "derived_sample_output.pipeline_run.fraction_subsampled",
-      sample.details
+      sample.details,
     ),
     totalReads: get(
       "derived_sample_output.pipeline_run.total_reads",
-      sample.details
+      sample.details,
     ),
     totalRuntime: get("mngs_run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
@@ -276,7 +279,7 @@ const processRawWorkflowRun = workflowRun => {
       project: getSampleField(["project_name"]),
       publicAccess: !!getSampleField(["info", "public"]),
       uploadError: toLower(
-        getSampleField(["info", "result_status_description"])
+        getSampleField(["info", "result_status_description"]),
       ),
       user: getSampleField(["uploader", "name"]),
       userId: getSampleField(["uploader", "id"]),

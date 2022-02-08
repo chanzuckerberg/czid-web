@@ -113,7 +113,7 @@ const SampleDetailsMode = ({
     setMetadataTypes(
       fetchedMetadataTypes
         ? processMetadataTypes(fetchedMetadataTypes)
-        : metadataTypes
+        : metadataTypes,
     );
     setSampleTypes(fetchedSampleTypes);
     setLoading(false);
@@ -230,7 +230,7 @@ const SampleDetailsMode = ({
               initialSelectedValue={currentRun.id}
               onConsensusGenomeSelection={workflowRunId =>
                 onWorkflowRunSelect(
-                  find({ id: workflowRunId }, sample.workflow_runs)
+                  find({ id: workflowRunId }, sample.workflow_runs),
                 )
               }
             />

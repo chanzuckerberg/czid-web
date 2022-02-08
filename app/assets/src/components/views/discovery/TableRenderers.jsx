@@ -67,7 +67,7 @@ class TableRenderers extends React.Component {
   static renderSampleCounts = ({ cellData: counts }) => {
     const [numberOfSamples, mngsAnalysisRunsCount, cgAnlaysisRunsCount] = at(
       ["number_of_samples", "mngs_runs_count", "cg_runs_count"],
-      counts
+      counts,
     );
 
     const hasAllCounts =
@@ -94,7 +94,7 @@ class TableRenderers extends React.Component {
 
   static renderList = ({ cellData: list }) => {
     return TableRenderers.baseRenderer(
-      list && list.length > 0 ? list.join(", ") : ""
+      list && list.length > 0 ? list.join(", ") : "",
     );
   };
 

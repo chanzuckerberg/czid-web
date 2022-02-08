@@ -70,7 +70,7 @@ export function numberWithPlusOrMinus(x, y) {
     return null;
   }
   return `${numberWithCommas(Math.round(x))}±${numberWithCommas(
-    Math.round(y)
+    Math.round(y),
   )}`;
 }
 

@@ -99,7 +99,7 @@ class LiveSearchBox extends React.Component {
       this.lastestTimerId = setTimeout(
         this.triggerSearch,
         delayTriggerSearch,
-        value
+        value,
       );
     }
   };
@@ -118,7 +118,7 @@ class LiveSearchBox extends React.Component {
         className={cx(
           cs.liveSearchBox,
           rectangular && cs.rectangular,
-          className
+          className,
         )}
         icon={<IconSearch className={cs.searchIcon} />}
         loading={isLoading}

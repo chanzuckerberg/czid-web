@@ -40,7 +40,7 @@ export const getURLParamString = params => {
   // Use isPlainObject to remove objects, but keep arrays.
   const filtered = pickBy(
     (v, k) => !isPlainObject(v) && !isUndefined(v),
-    params
+    params,
   );
   return flow(
     toPairs,
@@ -51,12 +51,12 @@ export const getURLParamString = params => {
       ([key, value]) =>
         isArray(value)
           ? filter(val => !isObject(val), value).map(
-              eachValue => `${key}[]=${eachValue}`
+              eachValue => `${key}[]=${eachValue}`,
             )
-          : `${key}=${value}`
+          : `${key}=${value}`,
     ),
     flatten,
-    join("&")
+    join("&"),
   )(filtered);
 };
 

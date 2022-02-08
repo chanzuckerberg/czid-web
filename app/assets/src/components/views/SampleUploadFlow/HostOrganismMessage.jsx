@@ -18,10 +18,10 @@ export default class HostOrganismMessage extends React.Component {
   // get duplicates.
   hasMatch = host => {
     const filtered = this.props.hostGenomes.filter(
-      hg => this.isERCC(hg.name) || !(hg.ercc_only || hg["ercc_only?"])
+      hg => this.isERCC(hg.name) || !(hg.ercc_only || hg["ercc_only?"]),
     );
     return map(hg => hg.name.toLowerCase(), filtered).includes(
-      host.toLowerCase()
+      host.toLowerCase(),
     );
   };
 
@@ -153,7 +153,7 @@ HostOrganismMessage.propTypes = {
     PropTypes.shape({
       host_genome_id: PropTypes.number,
       host_genome_name: PropTypes.string,
-    })
+    }),
   ).isRequired,
   hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
 };

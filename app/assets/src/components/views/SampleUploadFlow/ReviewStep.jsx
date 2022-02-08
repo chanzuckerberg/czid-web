@@ -42,7 +42,7 @@ import cs from "./sample_upload_flow.scss";
 const processMetadataRows = metadataRows =>
   flow(
     keyBy(row => row.sample_name || row["Sample Name"]),
-    mapValues(omit(["sample_name", "Sample Name"]))
+    mapValues(omit(["sample_name", "Sample Name"])),
   )(metadataRows);
 
 class ReviewStep extends React.Component {
@@ -91,7 +91,7 @@ class ReviewStep extends React.Component {
     // Omit sample name, which is the first header.
     const metadataHeaders = without(
       ["Sample Name", "sample_name"],
-      metadata.headers.map(this.getFieldDisplayName)
+      metadata.headers.map(this.getFieldDisplayName),
     );
 
     if (uploadType !== "basespace") {
@@ -117,12 +117,12 @@ class ReviewStep extends React.Component {
     const { uploadType, metadata } = this.props;
 
     const metadataRows = metadata.rows.map(r =>
-      mapKeys(this.getFieldDisplayName, r)
+      mapKeys(this.getFieldDisplayName, r),
     );
 
     const metadataBySample = keyBy(
       row => row["Sample Name"] || row.sample_name,
-      metadataRows
+      metadataRows,
     );
 
     const hostGenomesById = keyBy("id", this.props.hostGenomes);
@@ -130,14 +130,14 @@ class ReviewStep extends React.Component {
     const assembleDataForSample = sample => {
       const sampleHostName = get(
         "name",
-        hostGenomesById[sample.host_genome_id]
+        hostGenomesById[sample.host_genome_id],
       );
       let sampleMetadata = metadataBySample[sample.name];
 
       if (sampleHostName === "Human" && "Host Age" in sampleMetadata) {
         sampleMetadata["Host Age"] = returnHipaaCompliantMetadata(
           "host_age",
-          sampleMetadata["Host Age"]
+          sampleMetadata["Host Age"],
         );
       }
 
@@ -288,7 +288,7 @@ class ReviewStep extends React.Component {
                   className={cx(
                     shouldTruncateDescription &&
                       showLessDescription &&
-                      cs.truncated
+                      cs.truncated,
                   )}
                 >
                   {project.description}
@@ -342,7 +342,7 @@ class ReviewStep extends React.Component {
                     projectId: project.id,
                     projectName: project.name,
                     uploadType,
-                  }
+                  },
                 );
               }}
             >
@@ -518,7 +518,7 @@ class ReviewStep extends React.Component {
                 () =>
                   logAnalyticsEvent("ReviewStep_consent-checkbox_checked", {
                     consentChecked: consentChecked,
-                  })
+                  }),
               )
             }
           />
@@ -532,7 +532,7 @@ class ReviewStep extends React.Component {
                 {
                   samples: samples.length,
                   uploadType: uploadType,
-                }
+                },
               )}
             />
           )}
@@ -582,7 +582,7 @@ ReviewStep.propTypes = {
       file_type: PropTypes.string,
       basespace_project_name: PropTypes.string,
       files: PropTypes.objectOf(PropTypes.instanceOf(File)),
-    })
+    }),
   ),
   uploadType: PropTypes.string.isRequired,
   hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),

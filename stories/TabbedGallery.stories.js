@@ -9,9 +9,9 @@ export default {
 };
 
 export const KurtNobleTabbedGallery = () => {
-    return (
-        <div>
-            <TabbedGallery />
-        </div>
-    )
-}
+  return (
+    <div>
+      <TabbedGallery />
+    </div>
+  );
+};

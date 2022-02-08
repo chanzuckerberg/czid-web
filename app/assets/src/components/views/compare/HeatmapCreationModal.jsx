@@ -144,7 +144,7 @@ export default class HeatmapCreationModal extends React.Component {
   renderTaxonLevelSelect() {
     const taxonLevels = [];
     Object.entries(SPECIES_SELECTION_OPTIONS).forEach(([text, value]) =>
-      taxonLevels.push({ text: startCase(text), value })
+      taxonLevels.push({ text: startCase(text), value }),
     );
 
     return (
@@ -189,7 +189,7 @@ export default class HeatmapCreationModal extends React.Component {
 
     // We don't use the aggregate score filter on heatmaps.
     const thresholdOptions = THRESHOLDS.filter(
-      threshold => threshold.value !== "agg_score"
+      threshold => threshold.value !== "agg_score",
     );
 
     return (
@@ -334,7 +334,7 @@ export default class HeatmapCreationModal extends React.Component {
                   selectedSubcategories,
                   selectedTaxonLevel,
                   selectedThresholdFilters,
-                }
+                },
               );
             }}
           />

@@ -63,7 +63,7 @@ class MapPlayground extends React.Component {
     // Log1.5 of the count looked nice visually for not getting too large with many points.
     const markerSize = Math.max(
       (Math.log(pointCount) / Math.log(1.5)) * (get("zoom", viewport) || 3),
-      minSize
+      minSize,
     );
 
     return (

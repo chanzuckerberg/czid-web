@@ -13,7 +13,7 @@ const AnnouncementBanner = ({ visible, message, inverted, id }) => {
   useEffect(() => {
     if (visible) {
       const dismissedAnnouncementBanner = localStorage.getItem(
-        `dismissedAnnouncementBanner-${id}`
+        `dismissedAnnouncementBanner-${id}`,
       );
       if (dismissedAnnouncementBanner !== "true") {
         setShowAnnouncmentBanner(true);
@@ -45,7 +45,7 @@ const AnnouncementBanner = ({ visible, message, inverted, id }) => {
         className={cx(cs.close, inverted && cs.inverted)}
         onClick={withAnalytics(
           handleAnnouncementBannerClose,
-          "AnnouncementBanner_close_clicked"
+          "AnnouncementBanner_close_clicked",
         )}
       />
     </div>

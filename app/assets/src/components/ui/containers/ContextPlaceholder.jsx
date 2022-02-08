@@ -66,7 +66,7 @@ export default class ContextPlaceholder extends React.PureComponent {
         clientWidth -
           (contextRect.right + pageXOffset) +
           contextRect.width / 2 -
-          horizontalOffset
+          horizontalOffset,
       );
       // If the placeholder is wider than how far to the right its trigger is positioned,
       // then add an offset so that the placeholder doesn't run off the screen.
@@ -80,14 +80,14 @@ export default class ContextPlaceholder extends React.PureComponent {
         contextRect.left +
           pageXOffset +
           contextRect.width / 2 +
-          horizontalOffset
+          horizontalOffset,
       );
       right = "auto";
     } else {
       // center
       const xOffset = (contextRect.width - placeholderRect.width) / 2;
       left = Math.round(
-        contextRect.left + xOffset + pageXOffset + horizontalOffset
+        contextRect.left + xOffset + pageXOffset + horizontalOffset,
       );
       right = "auto";
     }
@@ -97,7 +97,7 @@ export default class ContextPlaceholder extends React.PureComponent {
         clientHeight -
           (contextRect.top + pageYOffset) -
           contextRect.height / 2 +
-          verticalOffset
+          verticalOffset,
       );
       top = "auto";
     } else if (position.includes("bottom")) {
@@ -105,14 +105,14 @@ export default class ContextPlaceholder extends React.PureComponent {
         contextRect.bottom +
           pageYOffset -
           contextRect.height / 2 +
-          verticalOffset
+          verticalOffset,
       );
       bottom = "auto";
     } else {
       // middle
       const yOffset = (contextRect.height + placeholderRect.height) / 2;
       top = Math.round(
-        contextRect.bottom + pageYOffset - yOffset + verticalOffset
+        contextRect.bottom + pageYOffset - yOffset + verticalOffset,
       );
       bottom = "auto";
     }

@@ -10,13 +10,13 @@ export const processMetadata = ({ metadata, flatten = false }) => {
       val.base_type === "date"
         ? val.raw_value
         : val[`${val.base_type}_validated_value`],
-    newMetadata
+    newMetadata,
   );
   // If flatten, simplify objects (e.g. location objects) to .name
   if (flatten) {
     newMetadata = mapValues(
       val => (isObject(val) ? val.name : val),
-      newMetadata
+      newMetadata,
     );
   }
   return newMetadata;

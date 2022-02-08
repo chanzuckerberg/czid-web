@@ -62,7 +62,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
       "wetlab_protocol",
       "workflows",
     ]),
-    samples
+    samples,
   );
 
   // Process extra options
@@ -93,7 +93,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
     callbacks.onCreateSamplesError &&
       callbacks.onCreateSamplesError(
         response.errors,
-        response.errored_sample_names
+        response.errored_sample_names,
       );
   }
 
@@ -105,8 +105,8 @@ export const initiateBulkUploadLocalWithMetadata = async ({
     createdSample =>
       (createdSample["filesToUpload"] = get(
         "files",
-        find({ name: createdSample.name }, samples)
-      ))
+        find({ name: createdSample.name }, samples),
+      )),
   );
   return response.samples;
 };
@@ -168,18 +168,18 @@ export const uploadSampleFilesToPresignedURL = ({
         percentage: fileNamesToProgress[file.name] || null,
         size: file.size,
       }),
-      sampleFiles
+      sampleFiles,
     );
 
     const uploadedSize = sum(
       map(
         progress => (progress.percentage || 0) * progress.size,
-        sampleFileUploadProgress
-      )
+        sampleFileUploadProgress,
+      ),
     );
 
     const totalSize = sum(
-      map(progress => progress.size, sampleFileUploadProgress)
+      map(progress => progress.size, sampleFileUploadProgress),
     );
 
     return uploadedSize / totalSize;
@@ -244,14 +244,14 @@ const bulkUploadWithMetadata = async (samples, metadata) => {
       samples,
       metadata,
       client: "web",
-    }
+    },
   );
 
   // Add the errored sample names to the response.
   if (response.errors.length > 0) {
     const erroredSampleNames = difference(
       map("name", samples),
-      map("name", response.samples)
+      map("name", response.samples),
     );
 
     return {

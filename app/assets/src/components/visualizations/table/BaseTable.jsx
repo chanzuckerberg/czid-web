@@ -37,7 +37,7 @@ class BaseTable extends React.Component {
       activeColumns: this.props.initialActiveColumns,
       columns: BaseTable.setColumnDefaults(
         this.props.columns,
-        this.props.defaultColumnWidth
+        this.props.defaultColumnWidth,
       ),
       columnWidthPercentages: {},
       columnCurrentlyDragged: null,
@@ -53,7 +53,7 @@ class BaseTable extends React.Component {
         activeColumns: props.initialActiveColumns,
         columns: BaseTable.setColumnDefaults(
           props.columns,
-          props.defaultColumnWidth
+          props.defaultColumnWidth,
         ),
         prevPropsColumns: props.columns,
       };
@@ -225,7 +225,7 @@ class BaseTable extends React.Component {
       <div
         className={cx(
           cs.sortableHeader,
-          sortBy === dataKey && sortedHeaderClassName
+          sortBy === dataKey && sortedHeaderClassName,
         )}
       >
         {columnData ? (
@@ -254,7 +254,8 @@ class BaseTable extends React.Component {
     this.setState(
       { activeColumns: concat(protectedColumns, selectedColumns) },
       () =>
-        onActiveColumnsChange && onActiveColumnsChange(this.state.activeColumns)
+        onActiveColumnsChange &&
+        onActiveColumnsChange(this.state.activeColumns),
     );
     logAnalyticsEvent("BaseTable_column-selector_changed", {
       selectedColumns: selectedColumns.length,
@@ -372,7 +373,7 @@ class BaseTable extends React.Component {
               rowClassName={cx(
                 rowClassName,
                 cs.row,
-                onRowClick && cs.clickable
+                onRowClick && cs.clickable,
               )}
               rowCount={rowCount}
               rowGetter={rowGetter}
@@ -399,7 +400,7 @@ class BaseTable extends React.Component {
                 const columnProps = find({ dataKey }, columns);
                 if (!columnProps) {
                   console.error(
-                    `${dataKey} was expected but not found in column config. Skipping.`
+                    `${dataKey} was expected but not found in column config. Skipping.`,
                   );
                   return null;
                 }
@@ -454,7 +455,7 @@ class BaseTable extends React.Component {
                       headerClassName,
                       draggableColumnsFeatureEnabled && !isLastColumn
                         ? cs.draggableHeader
-                        : ""
+                        : "",
                     )}
                     {...extraProps}
                   />
@@ -476,7 +477,7 @@ class BaseTable extends React.Component {
             className={cx(
               cs.columnSelector,
               cs.row,
-              "ReactVirtualized__Table__headerRow"
+              "ReactVirtualized__Table__headerRow",
             )}
           >
             {this.renderColumnSelector()}
@@ -501,7 +502,7 @@ BaseTable.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       dataKey: PropTypes.string.isRequired,
-    })
+    }),
   ).isRequired,
   defaultCellRenderer: PropTypes.func,
   defaultColumnWidth: PropTypes.number,

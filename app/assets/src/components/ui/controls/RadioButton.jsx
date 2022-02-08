@@ -11,7 +11,7 @@ class RadioButton extends React.Component {
           cs.radioButton,
           this.props.className,
           this.props.selected && cs.selected,
-          this.props.disabled && cs.disabled
+          this.props.disabled && cs.disabled,
         )}
         onClick={this.props.disabled ? undefined : this.props.onClick}
       />

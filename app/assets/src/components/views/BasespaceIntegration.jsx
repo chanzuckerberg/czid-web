@@ -14,7 +14,7 @@ export default class BasespaceIntegration extends React.Component {
         {
           basespaceAccessToken: this.props.accessToken,
         },
-        window.location.origin
+        window.location.origin,
       );
     }
 

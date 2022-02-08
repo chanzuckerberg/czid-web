@@ -17,7 +17,7 @@ const CheckboxItem = ({ value, label, checked, onOptionClick, boxed }) => (
         className={cx(
           checked && cs.checked,
           cs.listCheckmark,
-          boxed && cs.boxed
+          boxed && cs.boxed,
         )}
       >
         <IconCheckSmall className={cs.icon} />

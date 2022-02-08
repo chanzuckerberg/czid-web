@@ -65,7 +65,7 @@ export default class Dendogram {
         svgBackgroundColor: "white",
         warningTooltipContainer: null,
       },
-      options || {}
+      options || {},
     );
 
     // sizes
@@ -95,17 +95,17 @@ export default class Dendogram {
       .append("svg")
       .attr(
         "width",
-        this.minTreeSize.width + this.margins.left + this.margins.right
+        this.minTreeSize.width + this.margins.left + this.margins.right,
       )
       .attr(
         "height",
-        this.minTreeSize.height + this.margins.top + this.margins.bottom
+        this.minTreeSize.height + this.margins.top + this.margins.bottom,
       )
       .attr(
         "style",
         // Not standard but it works for downloads and svgsaver. See
         // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
-        `background-color: ${this.options.svgBackgroundColor}`
+        `background-color: ${this.options.svgBackgroundColor}`,
       );
 
     this.viz = this.svg
@@ -113,7 +113,7 @@ export default class Dendogram {
       .attr("class", "viz")
       .attr(
         "transform",
-        `translate(${this.margins.left}, ${this.margins.top})`
+        `translate(${this.margins.left}, ${this.margins.top})`,
       );
 
     this.tooltipContainer = select(this.options.tooltipContainer);
@@ -125,7 +125,7 @@ export default class Dendogram {
       "height",
       Math.max(treeHeight, this.minTreeSize.height) +
         this.margins.top +
-        this.margins.bottom
+        this.margins.bottom,
     );
   }
 
@@ -161,7 +161,7 @@ export default class Dendogram {
       for (let i = 0; i < node.children.length; i++) {
         maxDistance = Math.max(
           this.computeDistanceToRoot(node.children[i], node.distanceToRoot),
-          maxDistance
+          maxDistance,
         );
       }
     }
@@ -482,7 +482,7 @@ export default class Dendogram {
       .text(tick =>
         tick.multiplier === undefined
           ? ""
-          : this.formatBase10(tick.multiplier, power)
+          : this.formatBase10(tick.multiplier, power),
       );
 
     ticks
@@ -560,7 +560,7 @@ export default class Dendogram {
       SCALE_POS.top,
       SCALE_POS.left,
       this.minTreeSize.width,
-      maxDistance
+      maxDistance,
     );
 
     let link = this.viz
@@ -675,7 +675,7 @@ export default class Dendogram {
       .on("click", node => {
         this.clickHandler(
           () => this.markAsHighlight(node),
-          () => this.rerootOriginalTree(node)
+          () => this.rerootOriginalTree(node),
         );
       });
 
@@ -692,7 +692,7 @@ export default class Dendogram {
       })
       .on(
         "click",
-        d => this.options.onNodeTextClick && this.options.onNodeTextClick(d)
+        d => this.options.onNodeTextClick && this.options.onNodeTextClick(d),
       );
 
     // Create a orange color filters to match $warning-medium and $warning-dark

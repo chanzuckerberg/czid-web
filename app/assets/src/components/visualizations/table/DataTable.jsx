@@ -49,7 +49,7 @@ class DataTable extends React.Component {
     if (this.state.filter) {
       const filters = this.state.filter.split(/ +/);
       return data.filter(row =>
-        filters.every(filter => this.filterRow(row, filter))
+        filters.every(filter => this.filterRow(row, filter)),
       );
     }
     return data;
@@ -107,7 +107,7 @@ class DataTable extends React.Component {
     }
 
     this.setState(stateUpdate, () =>
-      this.props.onSelectedRowsChanged(this.state.selectedRows)
+      this.props.onSelectedRowsChanged(this.state.selectedRows),
     );
   }
 
@@ -129,7 +129,7 @@ class DataTable extends React.Component {
     const allChecked =
       filteredData.length > 0 &&
       filteredData.every(row =>
-        this.state.selectedRows.has(row.__originalIndex)
+        this.state.selectedRows.has(row.__originalIndex),
       );
 
     return (
@@ -138,7 +138,7 @@ class DataTable extends React.Component {
           "idseq-ui data-table",
           this.props.striped && "striped",
           this.props.className,
-          this.props.onSelectedRowsChanged && "selectable"
+          this.props.onSelectedRowsChanged && "selectable",
         )}
       >
         <thead>
@@ -183,7 +183,7 @@ class DataTable extends React.Component {
                 <td
                   className={cx(
                     `data-table__data column-${column}`,
-                    shouldDisable && cs.disabled
+                    shouldDisable && cs.disabled,
                   )}
                   style={this.getCellStyle(column)}
                   key={colIdx}

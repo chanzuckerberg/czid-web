@@ -18,7 +18,7 @@ class PhyloTreeChecks {
   static hasSamplesWithFewReads(nReadsArray) {
     return some(
       nReads => nReads < PhyloTreeChecks.RECOMMENDED_MIN_READS,
-      nReadsArray
+      nReadsArray,
     );
   }
 
@@ -26,7 +26,7 @@ class PhyloTreeChecks {
   static countSamplesWithFewReads(ntReadsArray, nrReadsArray) {
     return filter(
       nReads => PhyloTreeChecks.hasSamplesWithFewReads(nReads),
-      zip(ntReadsArray, nrReadsArray)
+      zip(ntReadsArray, nrReadsArray),
     ).length;
   }
 }

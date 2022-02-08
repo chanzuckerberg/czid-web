@@ -26,7 +26,7 @@ export default function compound() {
       [],
       scales.map(function(s) {
         return s.domain();
-      })
+      }),
     );
     var domain = [Math.min.apply(null, values), Math.max.apply(null, values)];
     if (values[0] > values[1]) domain = domain.slice().reverse();
@@ -41,7 +41,7 @@ export default function compound() {
       [],
       scales.map(function(s) {
         return s.range();
-      })
+      }),
     );
     var range = [Math.min.apply(null, values), Math.max.apply(null, values)];
     if (values[0] > values[1]) range = range.slice().reverse();
@@ -53,7 +53,7 @@ export default function compound() {
       null,
       scales.map(function(s) {
         return s.copy();
-      })
+      }),
     );
   };
 

@@ -9,7 +9,5 @@ export default {
 };
 
 export const KurtNobleCtaButton = () => {
-    return (
-        <CtaButton text="example text" />
-    )
-}
+  return <CtaButton text="example text" />;
+};

@@ -42,7 +42,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
     return accessionData.best_accessions.map((data, index) => {
       const disabled = usedAccessions.includes(data.id);
       const subtext = `${percentIdentity} %id, ${this.getSequenceCompleteness(
-        data.name
+        data.name,
       )}, ${data.coverage_depth}x coverage`;
 
       return {
@@ -85,7 +85,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
           accessionData.best_accessions[selectedAccessionIndex],
         selectedAccession: accessionData.best_accessions[accessionIndex],
         sampleId: sample.id,
-      }
+      },
     );
   };
 
@@ -111,7 +111,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
         taxonId: taxId,
         taxonName: taxName,
         sampleId: sample.id,
-      }
+      },
     );
   };
 
@@ -126,7 +126,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
         minimumHeight
         onClose={withAnalytics(
           onClose,
-          ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_CLOSED
+          ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_CLOSED,
         )}
       >
         <div className={cs.title}>Generate Consensus Genome</div>

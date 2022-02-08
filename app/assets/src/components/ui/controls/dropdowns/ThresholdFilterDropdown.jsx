@@ -31,12 +31,12 @@ class ThresholdFilterDropdown extends React.Component {
 
   static getDerivedStateFromProps(props, state) {
     let newThresholds = props.thresholds.filter(
-      ThresholdFilterDropdown.isThresholdValid
+      ThresholdFilterDropdown.isThresholdValid,
     );
     if (
       !ThresholdFilterDropdown.areThresholdsFiltersEqual(
         newThresholds,
-        state.oldThresholds
+        state.oldThresholds,
       )
     ) {
       return {
@@ -114,7 +114,7 @@ class ThresholdFilterDropdown extends React.Component {
 
     if (shouldApply) {
       let newThresholds = this.state.thresholds.filter(
-        ThresholdFilterDropdown.isThresholdValid
+        ThresholdFilterDropdown.isThresholdValid,
       );
       this.setState({ thresholds: newThresholds });
       this.props.onApply(newThresholds);
@@ -334,7 +334,7 @@ ThresholdFilter.propTypes = forbidExtraProps({
       value: PropTypes.string,
       operator: PropTypes.string,
       metricDisplay: PropTypes.string,
-    })
+    }),
   ),
   onChange: PropTypes.func,
   onRemove: PropTypes.func,

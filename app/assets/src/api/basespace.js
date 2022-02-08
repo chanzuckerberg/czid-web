@@ -9,7 +9,7 @@ export const getBasespaceProjects = accessToken =>
 
 export const getSamplesForBasespaceProject = (
   accessToken,
-  basespaceProjectId
+  basespaceProjectId,
 ) =>
   get("/basespace/samples_for_project", {
     params: {

@@ -56,7 +56,7 @@ class ProjectDescription extends React.Component {
         () => {
           this._save(this.props.project.id, this.state.description);
           onProjectDescriptionSave(this.state.description);
-        }
+        },
       );
     }
   };
@@ -127,7 +127,7 @@ class ProjectDescription extends React.Component {
               <div>
                 <div
                   className={cx(
-                    shouldTruncateDescription && showLess && cs.truncated
+                    shouldTruncateDescription && showLess && cs.truncated,
                   )}
                 >
                   {description}

@@ -39,13 +39,13 @@ export class CategoricalColormap {
 
     if (colors.length < n) {
       let colorsPerInterval = Math.floor(
-        (n - this.gradients.length) / (this.gradients.length - 1)
+        (n - this.gradients.length) / (this.gradients.length - 1),
       );
       let extraColors =
         (n - this.gradients.length) % (this.gradients.length - 1);
       for (let i = colors.length; i < n; i++) {
         let sequenceColor = Math.floor(
-          (i - this.gradients.length) / (this.gradients.length - 1)
+          (i - this.gradients.length) / (this.gradients.length - 1),
         );
         let interval =
           (i - this.gradients.length) % (this.gradients.length - 1);
@@ -58,9 +58,9 @@ export class CategoricalColormap {
             this.getLinearColor(
               this.gradients[interval],
               this.gradients[interval + 1],
-              step
-            )
-          )
+              step,
+            ),
+          ),
         );
       }
     }
@@ -71,7 +71,7 @@ export class CategoricalColormap {
     let decColor = [];
     for (let j = 0; j < 3; j++) {
       decColor.push(
-        Math.floor(startColor[j] + k * (endColor[j] - startColor[j]))
+        Math.floor(startColor[j] + k * (endColor[j] - startColor[j])),
       );
     }
     return decColor;

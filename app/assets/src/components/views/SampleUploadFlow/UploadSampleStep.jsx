@@ -128,7 +128,7 @@ class UploadSampleStep extends React.Component {
   componentWillUnmount() {
     window.removeEventListener(
       "message",
-      this.handleBasespaceOAuthMessageEvent
+      this.handleBasespaceOAuthMessageEvent,
     );
   }
 
@@ -160,7 +160,7 @@ class UploadSampleStep extends React.Component {
           ...sample,
           basespace_access_token: accessToken,
         }),
-        basespaceSamples
+        basespaceSamples,
       );
 
       this.props.onUploadSamples({
@@ -182,11 +182,11 @@ class UploadSampleStep extends React.Component {
 
     // Request permissions to read (i.e. download files) from all source projects.
     const uniqueBasespaceProjectIds = uniq(
-      map("basespace_project_id", basespaceSamples)
+      map("basespace_project_id", basespaceSamples),
     );
     const projectReadPermissions = map(
       projectId => `,read+project+${projectId}`,
-      uniqueBasespaceProjectIds
+      uniqueBasespaceProjectIds,
     ).join("");
 
     this._window = openBasespaceOAuthPopup({
@@ -376,7 +376,7 @@ class UploadSampleStep extends React.Component {
 
       logAnalyticsEvent(
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
-        { technology }
+        { technology },
       );
     }
   };
@@ -392,7 +392,7 @@ class UploadSampleStep extends React.Component {
     this.setState({ selectedMedakaModel: selected });
     logAnalyticsEvent(
       ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED,
-      { selected }
+      { selected },
     );
   };
 
@@ -410,7 +410,7 @@ class UploadSampleStep extends React.Component {
     });
     logAnalyticsEvent(
       ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED,
-      { usedClearLabs }
+      { usedClearLabs },
     );
   };
 
@@ -429,7 +429,7 @@ class UploadSampleStep extends React.Component {
     const samplesKey = this.getSamplesKey(sampleType);
     return filter(
       sample => selectedSampleIds.has(sample._selectId),
-      this.state[samplesKey]
+      this.state[samplesKey],
     );
   };
 
@@ -446,7 +446,7 @@ class UploadSampleStep extends React.Component {
         ...pick(["name", SELECT_ID_KEY], sample),
         file_names: map(
           file => file.name || file.source,
-          sample.input_files_attributes
+          sample.input_files_attributes,
         ).sort(),
       }));
     }
@@ -474,9 +474,9 @@ class UploadSampleStep extends React.Component {
                 "source",
                 concat(
                   newSample.input_files_attributes,
-                  sample.input_files_attributes
-                )
-              )
+                  sample.input_files_attributes,
+                ),
+              ),
             ),
             set(
               "files",
@@ -484,13 +484,13 @@ class UploadSampleStep extends React.Component {
               {
                 ...newSample.files,
                 ...sample.files,
-              }
-            )
+              },
+            ),
           )(sample);
         }
       },
       newSamplesByName,
-      samplesByName
+      samplesByName,
     );
 
     return values(mergedSamples);
@@ -507,12 +507,12 @@ class UploadSampleStep extends React.Component {
 
     const validatedSampleNames = await validateSampleNames(
       get("id", selectedProject),
-      map("name", samples)
+      map("name", samples),
     );
 
     const validatedNameMap = zipObject(
       map("name", samples),
-      validatedSampleNames
+      validatedSampleNames,
     );
 
     // Replace samples name with their de-duped names.
@@ -558,30 +558,30 @@ class UploadSampleStep extends React.Component {
       set(
         "files",
         pickBy((_file, fileName) => fileNamesValidMap[fileName], sample.files),
-        sample
-      )
+        sample,
+      ),
     );
     validatedSamples = validatedSamples.map(sample =>
       set(
         "input_files_attributes",
         filter(
           inputFileAttributes => fileNamesValidMap[inputFileAttributes.source],
-          sample.input_files_attributes
+          sample.input_files_attributes,
         ),
-        sample
-      )
+        sample,
+      ),
     );
 
     // Filter out samples with no valid files.
     const filteredSamples = filter(
       sample => size(sample.files) > 0,
-      validatedSamples
+      validatedSamples,
     );
 
     return {
       samples: filteredSamples,
       removedLocalFiles: keys(
-        pickBy(fileValid => !fileValid, fileNamesValidMap)
+        pickBy(fileValid => !fileValid, fileNamesValidMap),
       ),
     };
   };
@@ -638,7 +638,7 @@ class UploadSampleStep extends React.Component {
     // This de-dupes the newly added samples using the sample name. The older sample's selectId is used.
     const mergedSamples = this.mergeSamples(
       this.state[samplesKey],
-      validatedNewSamples
+      validatedNewSamples,
     );
 
     const mergedSampleIds = map(SELECT_ID_KEY, mergedSamples);
@@ -646,12 +646,12 @@ class UploadSampleStep extends React.Component {
     // Get the selectIds of all newly added samples that weren't already added.
     const newlyAddedSampleIds = intersection(
       map(SELECT_ID_KEY, validatedNewSamples),
-      mergedSampleIds
+      mergedSampleIds,
     );
 
     // Automatically select all newly added samples that weren't already added.
     const mergedSelectedSampleIds = new Set(
-      union(Array.from(this.state[selectedSampleIdsKey]), newlyAddedSampleIds)
+      union(Array.from(this.state[selectedSampleIdsKey]), newlyAddedSampleIds),
     );
 
     this.setState({
@@ -679,13 +679,13 @@ class UploadSampleStep extends React.Component {
 
     const newSamples = reject(
       sample => includes(sample[SELECT_ID_KEY], sampleSelectIds),
-      this.state[samplesKey]
+      this.state[samplesKey],
     );
     const newSelectedSampleIds = new Set(
       difference(
         Array.from(this.getSelectedSampleIds(sampleType)),
-        sampleSelectIds
-      )
+        sampleSelectIds,
+      ),
     );
 
     const newState = {
@@ -845,7 +845,7 @@ class UploadSampleStep extends React.Component {
         className={cx(
           cs.uploadSampleStep,
           cs.uploadFlowStep,
-          this.props.visible && cs.visible
+          this.props.visible && cs.visible,
         )}
       >
         <div className={cs.flexContent}>
@@ -870,7 +870,7 @@ class UploadSampleStep extends React.Component {
                   modalOpen
                   onCancel={withAnalytics(
                     this.closeCreateProject,
-                    ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED
+                    ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED,
                   )}
                   onCreate={this.handleProjectCreate}
                 />
@@ -880,7 +880,7 @@ class UploadSampleStep extends React.Component {
                 className={cs.createProjectButton}
                 onClick={withAnalytics(
                   this.openCreateProject,
-                  "UploadSampleStep_create-project_opened"
+                  "UploadSampleStep_create-project_opened",
                 )}
               >
                 + Create Project

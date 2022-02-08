@@ -21,7 +21,7 @@ class PipelineStepDetailsMode extends React.Component {
       case "inProgress":
         statusTitle = "Current step";
         statusDescription = `Running for ${moment(
-          Math.floor(startTime * 1000) // Convert seconds to milliseconds
+          Math.floor(startTime * 1000), // Convert seconds to milliseconds
         ).fromNow(true)}`;
         break;
       case "userErrored":
@@ -44,7 +44,7 @@ class PipelineStepDetailsMode extends React.Component {
           endTime &&
           `Finished in ${moment(Math.floor(startTime * 1000)).from(
             endTime * 1000,
-            true
+            true,
           )}.`;
         break;
       default:
@@ -135,7 +135,7 @@ class PipelineStepDetailsMode extends React.Component {
           onClick={withAnalytics(
             () => openUrl(file.url),
             "PipelineStepDetailsMode_file-link_clicked",
-            { fileName: file.fileName, url: file.url }
+            { fileName: file.fileName, url: file.url },
           )}
         >
           {file.fileName}
@@ -166,7 +166,7 @@ class PipelineStepDetailsMode extends React.Component {
               onClick={withAnalytics(
                 () => {},
                 "PipelineStepDetailsMode_resource-link_clicked",
-                { linkName: linkInfo.name, linkUrl: linkInfo.url }
+                { linkName: linkInfo.name, linkUrl: linkInfo.url },
               )}
             >
               {linkInfo.name}
@@ -208,7 +208,7 @@ const FileList = PropTypes.arrayOf(
   PropTypes.shape({
     fileName: PropTypes.string.isRequired,
     url: PropTypes.string,
-  }).isRequired
+  }).isRequired,
 );
 
 PipelineStepDetailsMode.propTypes = {
@@ -218,7 +218,7 @@ PipelineStepDetailsMode.propTypes = {
     PropTypes.shape({
       fromStepName: PropTypes.string,
       files: FileList.isRequired,
-    }).isRequired
+    }).isRequired,
   ).isRequired,
   outputFiles: FileList.isRequired,
   status: PropTypes.string,
@@ -228,7 +228,7 @@ PipelineStepDetailsMode.propTypes = {
     PropTypes.shape({
       name: PropTypes.string,
       url: PropTypes.string,
-    })
+    }),
   ),
   sample: PropTypes.Sample,
   pipelineRun: PropTypes.PipelineRun,

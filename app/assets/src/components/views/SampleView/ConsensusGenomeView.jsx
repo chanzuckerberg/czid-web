@@ -47,7 +47,7 @@ const ConsensusGenomeView = ({
   const coverageVizContainerRef = useRef();
   const [histogramTooltipData, setHistogramTooltipData] = useState(null);
   const [histogramTooltipLocation, setHistogramTooltipLocation] = useState(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const ConsensusGenomeView = ({
           initialSelectedValue={workflowRun.id}
           onConsensusGenomeSelection={workflowRunId =>
             onWorkflowRunSelect(
-              find({ id: workflowRunId }, sample.workflow_runs)
+              find({ id: workflowRunId }, sample.workflow_runs),
             )
           }
         />
@@ -81,7 +81,7 @@ const ConsensusGenomeView = ({
       <div
         className={cx(
           cs.headerContainer,
-          !shouldRenderCGDropdown && cs.removeBottomMargin
+          !shouldRenderCGDropdown && cs.removeBottomMargin,
         )}
       >
         {shouldRenderCGDropdown && renderConsensusGenomeDropdown()}
@@ -89,7 +89,7 @@ const ConsensusGenomeView = ({
           <ExternalLink
             className={cx(
               cs.learnMoreLink,
-              !shouldRenderCGDropdown && cs.alignRight
+              !shouldRenderCGDropdown && cs.alignRight,
             )}
             href={computeHelpLink()}
             analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
@@ -149,7 +149,7 @@ const ConsensusGenomeView = ({
             "Base Pair Range",
             // \u2013 is en-dash
             `${Math.round(coverageObj[0] * binSize)}\u2013${Math.round(
-              (coverageObj[0] + 1) * binSize
+              (coverageObj[0] + 1) * binSize,
             )}`,
           ],
           ["Coverage Depth", `${coverageObj[1]}x`],
@@ -163,7 +163,7 @@ const ConsensusGenomeView = ({
     if (hoverData && hoverData[0] === 0) {
       const tooltipData = getHistogramTooltipData(
         workflowRunResults.coverage_viz,
-        hoverData[1]
+        hoverData[1],
       );
 
       setHistogramTooltipData(tooltipData);
@@ -188,7 +188,7 @@ const ConsensusGenomeView = ({
         valueArr => ({
           x0: valueArr[0] * workflowRunResults.coverage_viz.coverage_bin_size,
           length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
-        })
+        }),
       );
       const subtext = `${workflowRunResults.taxon_info.accession_id} - ${workflowRunResults.taxon_info.accession_name}`;
 
@@ -213,7 +213,7 @@ const ConsensusGenomeView = ({
         },
         numBins: Math.round(
           workflowRunResults.coverage_viz.total_length /
-            workflowRunResults.coverage_viz.coverage_bin_size
+            workflowRunResults.coverage_viz.coverage_bin_size,
         ),
         numTicksY: 2,
         showStatistics: false,
@@ -320,7 +320,7 @@ const ConsensusGenomeView = ({
             ref={coverageVizContainerRef}
             onMouseEnter={() =>
               logAnalyticsEvent(
-                "ConsensusGenomeView_coverage-viz-histogram_hovered"
+                "ConsensusGenomeView_coverage-viz-histogram_hovered",
               )
             }
           />
@@ -490,7 +490,7 @@ const ConsensusGenomeView = ({
           type={"inProgress"}
           onClick={() =>
             logAnalyticsEvent(
-              "ConsensusGenomeView_consenus-genome-doc-link_clicked"
+              "ConsensusGenomeView_consenus-genome-doc-link_clicked",
             )
           }
         />
@@ -520,7 +520,7 @@ const ConsensusGenomeView = ({
           type={type}
           onClick={() =>
             logAnalyticsEvent(
-              "ConsensusGenomeView_sample-error-info-link_clicked"
+              "ConsensusGenomeView_sample-error-info-link_clicked",
             )
           }
         />

@@ -65,7 +65,7 @@ const MetadataAgeInput = ({
         className={cx(
           className,
           cs.darkPlaceholder,
-          hipaaWarning && ageChanged && "warning"
+          hipaaWarning && ageChanged && "warning",
         )}
         onChange={val => {
           const definedVal = ensureDefinedValue({

@@ -13,7 +13,7 @@ const HeroEmailForm = () => {
     if (emailRegex.test(enteredEmail)) {
       window.open(
         `https://airtable.com/shrBGT42xVBR6JAVv?prefill_Email=${enteredEmail}`,
-        "_blank"
+        "_blank",
       );
     } else {
       alert("Please enter a valid email address.");

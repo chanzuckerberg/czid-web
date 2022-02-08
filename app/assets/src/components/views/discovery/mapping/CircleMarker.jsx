@@ -19,7 +19,7 @@ class CircleMarker extends React.Component {
           className={cx(
             cs.circle,
             onMouseEnter && cs.hoverable,
-            active && cs.active
+            active && cs.active,
           )}
           // Circle in the center of the viewBox
           cx="50%"

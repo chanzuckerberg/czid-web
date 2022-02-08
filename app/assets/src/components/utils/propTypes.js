@@ -65,7 +65,7 @@ const ERCCComparison = PropTypes.arrayOf(
     name: PropTypes.string,
     actual: PropTypes.number,
     expected: PropTypes.number,
-  })
+  }),
 );
 
 // TODO(mark): Expand signature as more fields of PipelineRun are used in the app.
@@ -120,7 +120,7 @@ const DownloadType = PropTypes.shape({
     PropTypes.shape({
       type: PropTypes.string,
       display_name: PropTypes.string,
-    })
+    }),
   ),
   uploader_only: PropTypes.bool,
   file_type_display: PropTypes.string,

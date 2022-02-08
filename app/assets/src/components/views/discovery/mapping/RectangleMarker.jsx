@@ -13,7 +13,7 @@ class RectangleMarker extends React.Component {
         className={cx(
           cs.rectangle,
           onMouseEnter && cs.hoverable,
-          active && cs.active
+          active && cs.active,
         )}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}

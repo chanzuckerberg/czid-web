@@ -164,7 +164,7 @@ class CollectionModal extends React.Component {
           ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED,
           {
             backgroundName,
-          }
+          },
         );
       });
       return;
@@ -190,7 +190,7 @@ class CollectionModal extends React.Component {
   fetchBackgroundAvailability = async () => {
     const { selectedSampleIds } = this.props;
     let enableMassNormalizedBackgrounds = await getMassNormalizedBackgroundAvailability(
-      Array.from(selectedSampleIds)
+      Array.from(selectedSampleIds),
     );
 
     this.setState({
@@ -276,7 +276,7 @@ class CollectionModal extends React.Component {
           initialSelectedValue={appliedMethod}
           onChange={withAnalytics(
             this.handleMethodChange,
-            "CollectionModal_applied-correction-method_changed"
+            "CollectionModal_applied-correction-method_changed",
           )}
         />
         {this.renderSampleList()}
@@ -289,14 +289,14 @@ class CollectionModal extends React.Component {
               "CollectionModal_create-collection-button_clicked",
               {
                 selectedSampleIds: this.props.selectedSampleIds.length,
-              }
+              },
             )}
           />
           <SecondaryButton
             text="Cancel"
             onClick={withAnalytics(
               this.closeModal,
-              "CollectionModal_cancel-button_clicked"
+              "CollectionModal_cancel-button_clicked",
             )}
           />
         </div>
@@ -334,7 +334,7 @@ class CollectionModal extends React.Component {
         <div
           onClick={withAnalytics(
             this.openModal,
-            "CollectionModal_open-link_clicked"
+            "CollectionModal_open-link_clicked",
           )}
         >
           {trigger}
@@ -345,7 +345,7 @@ class CollectionModal extends React.Component {
             narrow
             onClose={withAnalytics(
               this.closeModal,
-              "CollectionModal_close-link_clicked"
+              "CollectionModal_close-link_clicked",
             )}
             className={cs.collectionModal}
           >

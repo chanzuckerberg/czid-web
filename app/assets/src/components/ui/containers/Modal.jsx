@@ -32,7 +32,7 @@ class Modal extends React.Component {
           tall && cs.tall,
           wide && cs.wide,
           fixedHeight && cs.fixedHeight,
-          minimumHeight && cs.minimumHeight
+          minimumHeight && cs.minimumHeight,
         )}
         dimmer={"inverted"}
         trigger={<span />}
@@ -45,7 +45,7 @@ class Modal extends React.Component {
             className={cx(
               cs.closeIcon,
               xlCloseIcon && cs.xl,
-              sCloseIcon && cs.s
+              sCloseIcon && cs.s,
             )}
             onClick={this.props.onClose}
           />

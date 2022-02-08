@@ -118,7 +118,7 @@ class UserManagementForm extends React.Component {
                 rounded={false}
                 onClick={withAnalytics(
                   this.handleAddUser,
-                  "UserManagementForm_add-member-button_clicked"
+                  "UserManagementForm_add-member-button_clicked",
                 )}
               />
             </div>

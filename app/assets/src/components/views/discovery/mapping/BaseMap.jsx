@@ -33,17 +33,17 @@ class BaseMap extends React.Component {
     viewport.latitude = limitToRange(
       viewport.latitude,
       viewBounds.minLatitude,
-      viewBounds.maxLatitude
+      viewBounds.maxLatitude,
     );
     viewport.longitude = limitToRange(
       viewport.longitude,
       viewBounds.minLongitude,
-      viewBounds.maxLongitude
+      viewBounds.maxLongitude,
     );
     viewport.zoom = limitToRange(
       viewport.zoom,
       viewBounds.minZoom,
-      viewBounds.maxZoom
+      viewBounds.maxZoom,
     );
 
     this.setState({ viewport }, () => this.setCompactAttribution());

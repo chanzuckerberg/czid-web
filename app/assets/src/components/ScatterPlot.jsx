@@ -80,7 +80,7 @@ class ScatterPlot extends React.Component {
           this.margin.left +
           "," +
           (this.height + this.margin.top) +
-          ")"
+          ")",
       )
       .call(xAxis)
       .append("text")
@@ -103,7 +103,7 @@ class ScatterPlot extends React.Component {
       .attr("class", "y axis")
       .attr(
         "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
+        "translate(" + this.margin.left + "," + this.margin.top + ")",
       )
       .call(yAxis)
       .append("text")
@@ -119,7 +119,7 @@ class ScatterPlot extends React.Component {
       .attr("class", "points")
       .attr(
         "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
+        "translate(" + this.margin.left + "," + this.margin.top + ")",
       )
       .selectAll(".point")
       .data(this.data)
@@ -152,7 +152,7 @@ class ScatterPlot extends React.Component {
       .append("g")
       .attr(
         "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
+        "translate(" + this.margin.left + "," + this.margin.top + ")",
       )
       .append("line")
       .attr("x1", this.xScale(x1))

@@ -47,7 +47,7 @@ class UrlQueryParser {
       default:
         // eslint-disable-next-line no-console
         console.warn(
-          `[UrlQueryParser] Type not supported (${type}). You might not need to specify this value`
+          `[UrlQueryParser] Type not supported (${type}). You might not need to specify this value`,
         );
         return value;
     }

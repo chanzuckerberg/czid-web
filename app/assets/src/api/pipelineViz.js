@@ -4,5 +4,5 @@ export const getGraph = (sampleId, pipelineVersion) =>
   get(
     `/samples/${sampleId}/pipeline_viz${
       pipelineVersion ? `/${pipelineVersion}` : ""
-    }.json`
+    }.json`,
   );

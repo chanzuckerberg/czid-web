@@ -22,7 +22,7 @@ MetricPicker.propTypes = {
     PropTypes.shape({
       text: PropTypes.string,
       value: PropTypes.string,
-    })
+    }),
   ),
 };
 

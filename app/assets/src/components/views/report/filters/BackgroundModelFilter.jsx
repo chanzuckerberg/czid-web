@@ -95,7 +95,7 @@ const BackgroundModelFilter = React.memo(
         />
       );
     }
-  }
+  },
 );
 
 BackgroundModelFilter.defaultProps = {

@@ -84,7 +84,7 @@ class ReportTable extends React.Component {
     const countTypes = displayMergedNtNrValue ? ["merged_nt_nr"] : ["nt", "nr"];
     const assemblyEnabled = isPipelineFeatureAvailable(
       ASSEMBLY_FEATURE,
-      pipelineVersion
+      pipelineVersion,
     );
     return compact([
       {
@@ -424,7 +424,7 @@ class ReportTable extends React.Component {
               (rowData.category ? (
                 <span className={cs.countInfo}>
                   {`( ${childrenCount} ${getCategoryAdjective(
-                    rowData.category
+                    rowData.category,
                   )} species`}
                   {/* Only show a colon if needed */}
                   {(rowData.pathogens || displayAnnotationPreviews) && (
@@ -468,12 +468,12 @@ class ReportTable extends React.Component {
               "fa",
               expandedGenusIds.has(rowData.taxId)
                 ? "fa-angle-down"
-                : "fa-angle-right"
+                : "fa-angle-right",
             )}
             onClick={withAnalytics(
               () => this.toggleExpandGenus({ taxId: rowData.taxId }),
               "PipelineSampleReport_expand-genus_clicked",
-              { tax_id: rowData.taxId }
+              { tax_id: rowData.taxId },
             )}
           />
         ) : (
@@ -490,11 +490,11 @@ class ReportTable extends React.Component {
         <i
           className={cx(
             "fa",
-            expandAllOpened ? "fa-angle-down" : "fa-angle-right"
+            expandAllOpened ? "fa-angle-down" : "fa-angle-right",
           )}
           onClick={withAnalytics(
             () => this.toggleExpandAll(),
-            "PipelineSampleReport_expand-all_clicked"
+            "PipelineSampleReport_expand-all_clicked",
           )}
         />
       </div>
@@ -508,7 +508,7 @@ class ReportTable extends React.Component {
     const mergedNtNrValue = (
       <div>
         {TableRenderers.formatNumberWithCommas(
-          Number(cellData[0]).toFixed(decimalPlaces || 0)
+          Number(cellData[0]).toFixed(decimalPlaces || 0),
         )}
       </div>
     );
@@ -518,8 +518,8 @@ class ReportTable extends React.Component {
       : this.renderNtNrStack({
           cellData: cellData.map(val =>
             TableRenderers.formatNumberWithCommas(
-              Number(val).toFixed(decimalPlaces || 0)
-            )
+              Number(val).toFixed(decimalPlaces || 0),
+            ),
           ),
         });
   };
@@ -536,7 +536,7 @@ class ReportTable extends React.Component {
       ? mergedNtNrValue
       : this.renderNtNrStack({
           cellData: cellData.map(val =>
-            TableRenderers.format10BaseExponent(val)
+            TableRenderers.format10BaseExponent(val),
           ),
         });
   };
@@ -552,14 +552,14 @@ class ReportTable extends React.Component {
               "ReportTable_count-type_clicked",
               {
                 countType: "nt",
-              }
+              },
             ),
             withAnalytics(
               () => this.handleNtNrChange("nr"),
               "ReportTable_count-type_clicked",
               {
                 countType: "nr",
-              }
+              },
             ),
           ],
         })}
@@ -689,7 +689,7 @@ class ReportTable extends React.Component {
       rowData.taxId > 0 &&
       PhyloTreeChecks.passesCreateCondition(
         getOr(0, "nt.count", rowData),
-        getOr(0, "nr.count", rowData)
+        getOr(0, "nr.count", rowData),
       );
     const percentIdentity = get("nt.percent_identity", rowData);
     const previousConsensusGenomeRuns = get(rowData.taxId, consensusGenomeData);
@@ -722,47 +722,47 @@ class ReportTable extends React.Component {
         onBlastClick={withAnalytics(
           onBlastClick,
           ANALYTICS_EVENT_NAMES.REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED,
-          analyticsContext
+          analyticsContext,
         )}
         onNcbiActionClick={withAnalytics(
           this.linkToNCBI,
           "PipelineSampleReport_ncbi-link_clicked",
-          analyticsContext
+          analyticsContext,
         )}
         fastaEnabled={fastaDownloadEnabled}
         onFastaActionClick={withAnalytics(
           this.downloadFastaUrl,
           "PipelineSampleReport_taxon-fasta-link_clicked",
-          analyticsContext
+          analyticsContext,
         )}
         onConsensusGenomeClick={withAnalytics(
           onConsensusGenomeClick,
           ANALYTICS_EVENT_NAMES.REPORT_TABLE_CONSENSUS_GENOME_HOVER_ACTION_CLICKED,
-          analyticsContext
+          analyticsContext,
         )}
         onPreviousConsensusGenomeClick={withAnalytics(
           onPreviousConsensusGenomeClick,
           ANALYTICS_EVENT_NAMES.REPORT_TABLE_PREVIOUS_CONSENSUS_GENOME_HOVER_ACTION_CLICKED,
-          analyticsContext
+          analyticsContext,
         )}
         previousConsensusGenomeRuns={previousConsensusGenomeRuns}
         coverageVizEnabled={coverageVizEnabled}
         onCoverageVizClick={withAnalytics(
           this.handleCoverageVizClick,
           "PipelineSampleReport_coverage-viz-link_clicked",
-          analyticsContext
+          analyticsContext,
         )}
         contigVizEnabled={contigVizEnabled}
         onContigVizClick={withAnalytics(
           this.downloadContigUrl,
           "PipelineSampleReport_contig-download-link_clicked",
-          analyticsContext
+          analyticsContext,
         )}
         phyloTreeEnabled={phyloTreeEnabled}
         onPhyloTreeModalOpened={withAnalytics(
           this.handlePhyloTreeModalOpen,
           "PipelineSampleReport_phylotree-link_clicked",
-          analyticsContext
+          analyticsContext,
         )}
         percentIdentity={percentIdentity}
         pipelineVersion={pipelineVersion}
@@ -779,7 +779,7 @@ class ReportTable extends React.Component {
       rowProps.className = cx(
         rowProps.className,
         cs[`${data.taxLevel}Row`],
-        (data.highlighted || data.highlightedChildren) && cs.highlighted
+        (data.highlighted || data.highlightedChildren) && cs.highlighted,
       );
     }
     return defaultTableRowRenderer(rowProps);
@@ -797,7 +797,7 @@ class ReportTable extends React.Component {
         return result;
       },
       [],
-      countTypes
+      countTypes,
     );
   }
 
@@ -833,7 +833,7 @@ class ReportTable extends React.Component {
             : limits[1],
       ],
       [sortDirection, sortDirection, sortDirection],
-      data
+      data,
     );
   };
 
@@ -848,7 +848,7 @@ class ReportTable extends React.Component {
       {
         sortBy,
         sortDirection,
-      }
+      },
     );
   };
 

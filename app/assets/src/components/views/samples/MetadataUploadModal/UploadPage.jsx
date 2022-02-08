@@ -31,7 +31,7 @@ class UploadPage extends React.Component {
 
       const result = await validateManualMetadataForProject(
         this.props.project.id,
-        this.state.metadata
+        this.state.metadata,
       );
 
       this.setState({
@@ -63,7 +63,7 @@ class UploadPage extends React.Component {
   showInstructions = () => {
     if (this.props.wizardSetOverlay) {
       this.props.wizardSetOverlay(
-        <Instructions onClose={() => this.props.wizardSetOverlay(null)} />
+        <Instructions onClose={() => this.props.wizardSetOverlay(null)} />,
       );
     }
   };

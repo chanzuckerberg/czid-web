@@ -66,7 +66,7 @@ const EditableInput = ({
       <div
         className={cx(
           cs.alertContainer,
-          isEmpty(error) ? cs.warning : cs.error
+          isEmpty(error) ? cs.warning : cs.error,
         )}
       >
         <IconAlertSmall

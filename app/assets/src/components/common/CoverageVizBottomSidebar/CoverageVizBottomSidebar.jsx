@@ -109,7 +109,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       params.accessionData
     ) {
       this.setCurrentAccession(
-        get([0, "id"], getSortedAccessionSummaries(params.accessionData))
+        get([0, "id"], getSortedAccessionSummaries(params.accessionData)),
       );
     }
 
@@ -187,7 +187,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       this.setState({
         histogramTooltipData: getHistogramTooltipData(
           currentAccessionData,
-          hoverData[1]
+          hoverData[1],
         ),
       });
     }
@@ -212,7 +212,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
   renderHistogram = data => {
     const coverageVizData = generateCoverageVizData(
       data.coverage,
-      data.coverage_bin_size
+      data.coverage_bin_size,
     );
 
     this.coverageViz = new Histogram(
@@ -239,7 +239,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
         onHistogramBarHover: this.handleHistogramBarHover,
         onHistogramBarEnter: this.handleHistogramBarEnter,
         onHistogramBarExit: this.handleHistogramBarExit,
-      }
+      },
     );
     this.coverageViz.update();
   };
@@ -251,7 +251,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       {
         domain: [0, data.total_length],
         color: REF_ACC_COLOR,
-      }
+      },
     );
     this.refAccesssionViz.update();
   };
@@ -260,7 +260,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     getTaxonName(
       accessionSummary.taxon_name,
       accessionSummary.taxon_common_name,
-      this.props.nameType
+      this.props.nameType,
     );
 
   getAccessionOptions = () => {
@@ -313,7 +313,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                     accessionId: currentAccessionSummary.id,
                     taxonId: params.taxonId,
                     sampleId,
-                  }
+                  },
                 )
               }
             >
@@ -336,7 +336,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       coverageBreadth: formatPercent(currentAccessionData.coverage_breadth),
       alignedReads: currentAccessionSummary.num_reads,
       avgMismatchedPercent: formatPercent(
-        currentAccessionData.avg_prop_mismatch
+        currentAccessionData.avg_prop_mismatch,
       ),
     };
   };
@@ -348,12 +348,12 @@ export default class CoverageVizBottomSidebar extends React.Component {
     const taxonName = getTaxonName(
       params.taxonName,
       params.taxonCommonName,
-      this.props.nameType
+      this.props.nameType,
     );
 
     if (params.taxonLevel === "genus" && currentAccessionSummary) {
       const speciesTaxonName = this.getAccessionTaxonName(
-        currentAccessionSummary
+        currentAccessionSummary,
       );
       const helpText =
         currentAccessionSummary &&
@@ -408,7 +408,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   accessionId,
                   taxonId: params.taxonId,
                   sampleId,
-                }
+                },
               );
               this.setCurrentAccession(accessionId);
             }}
@@ -441,7 +441,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                       accessionId: currentAccessionSummary.id,
                       taxonId: params.taxonId,
                       sampleId,
-                    }
+                    },
                   )
                 }
               >
@@ -489,7 +489,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                       accessionId: currentAccessionSummary.id,
                       taxonId: params.taxonId,
                       sampleId,
-                    }
+                    },
                   )
                 }
               >
@@ -505,10 +505,10 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     const metrics = this.getAccessionMetrics();
     const contigHitGroups = selectContigsFromHitGroups(
-      currentAccessionData.hit_groups
+      currentAccessionData.hit_groups,
     );
     const readHitGroups = selectReadsFromHitGroups(
-      currentAccessionData.hit_groups
+      currentAccessionData.hit_groups,
     );
 
     const totalContigs = sum(contigHitGroups.map(hitGroup => hitGroup[0]));
@@ -557,7 +557,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                       accessionId: currentAccessionSummary.id,
                       taxonId: params.taxonId,
                       sampleId,
-                    }
+                    },
                   )
                 }
               >
@@ -617,7 +617,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
             >
               <TooltipVizTable data={histogramTooltipData} />
             </div>,
-            document.body
+            document.body,
           )}
       </NarrowContainer>
     );
@@ -651,7 +651,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                       {
                         taxonId: params.taxonId,
                         sampleId,
-                      }
+                      },
                     )
                   }
                 >
@@ -705,7 +705,7 @@ CoverageVizBottomSidebar.propTypes = {
           coverage_depth: PropTypes.number,
           taxon_name: PropTypes.string,
           taxon_common_name: PropTypes.string,
-        })
+        }),
       ),
       num_accessions: PropTypes.number,
     }),

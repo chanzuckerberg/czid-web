@@ -97,7 +97,7 @@ class PipelineTab extends React.Component {
             className={cs.metadataValue}
             onClick={() =>
               logAnalyticsEvent(
-                "PipelineTab_pipeline-visualization-link_clicked"
+                "PipelineTab_pipeline-visualization-link_clicked",
               )
             }
           >
@@ -113,18 +113,18 @@ class PipelineTab extends React.Component {
     const { sampleId, pipelineRun } = this.props;
     const pipelineResults = await getSamplePipelineResults(
       sampleId,
-      pipelineRun && pipelineRun.pipeline_version
+      pipelineRun && pipelineRun.pipeline_version,
     );
 
     if (pipelineResults && pipelineResults[RESULTS_FOLDER_ROOT_KEY]) {
       const hostFilteringStageKey = Object.keys(
-        pipelineResults[RESULTS_FOLDER_ROOT_KEY]
+        pipelineResults[RESULTS_FOLDER_ROOT_KEY],
       )[0];
       this.setState(prevState => ({
         pipelineStepDict:
           pipelineResults[RESULTS_FOLDER_ROOT_KEY][hostFilteringStageKey],
         loading: prevState.loading.filter(
-          section => section !== READ_COUNTS_TABLE
+          section => section !== READ_COUNTS_TABLE,
         ),
       }));
     }
@@ -197,7 +197,7 @@ class PipelineTab extends React.Component {
 
     const stepInformationPresent = Object.prototype.hasOwnProperty.call(
       pipelineStepDict,
-      "steps"
+      "steps",
     );
     if (!stepInformationPresent) {
       return;
@@ -210,7 +210,7 @@ class PipelineTab extends React.Component {
         }
         return accum;
       },
-      false
+      false,
     );
 
     return stepDictPresent && stepInformationPresent && readsPresent;
@@ -258,7 +258,7 @@ class PipelineTab extends React.Component {
           </div>
         </div>
         {Object.keys(pipelineStepDict[stepsKey]).map(
-          this.renderReadCountsTable
+          this.renderReadCountsTable,
         )}
       </div>
     );
@@ -380,7 +380,7 @@ PipelineTab.propTypes = {
       text: PropTypes.string,
       link: PropTypes.string,
       linkLabel: PropTypes.string,
-    })
+    }),
   ).isRequired,
   sampleId: PropTypes.number.isRequired,
   snapshotShareId: PropTypes.string,

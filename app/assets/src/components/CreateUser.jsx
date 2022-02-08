@@ -45,19 +45,19 @@ class CreateUser extends React.Component {
       institution: this.selectedUser.institution || "",
       isMedicalDetective: includes(
         MEDICAL_DETECTIVE,
-        this.selectedUser.archetypes
+        this.selectedUser.archetypes,
       ),
       isLandscapeExplorer: includes(
         LANDSCAPE_EXPLORER,
-        this.selectedUser.archetypes
+        this.selectedUser.archetypes,
       ),
       isOutbreakSurveyor: includes(
         OUTBREAK_SURVEYOR,
-        this.selectedUser.archetypes
+        this.selectedUser.archetypes,
       ),
       isMicrobiomeInvestigator: includes(
         MICROBIOME_INVESTIGATOR,
-        this.selectedUser.archetypes
+        this.selectedUser.archetypes,
       ),
       isAfricaCDC: includes(AFRICA_CDC, this.selectedUser.segments),
       isBiohub: includes(BIOHUB, this.selectedUser.segments),
@@ -181,7 +181,7 @@ class CreateUser extends React.Component {
         },
         () => {
           openUrl("/users");
-        }
+        },
       );
     } catch (err) {
       this.setState({
@@ -214,7 +214,7 @@ class CreateUser extends React.Component {
         },
         () => {
           openUrl("/users");
-        }
+        },
       );
     } catch (err) {
       this.setState({
@@ -292,12 +292,12 @@ class CreateUser extends React.Component {
           onDPHChange={() => this.setState({ isDPH: !isDPH })}
           onEmailChange={withAnalytics(
             this.handleEmailChange,
-            "CreateUser_email_changed"
+            "CreateUser_email_changed",
           )}
           onGCEChange={() => this.setState({ isGCE: !isGCE })}
           onInstitutionChange={withAnalytics(
             this.handleInstitutionChange,
-            "CreateUser_institution_changed"
+            "CreateUser_institution_changed",
           )}
           onLandscapeExplorerChange={() =>
             this.setState({ isLandscapeExplorer: !isLandscapeExplorer })
@@ -313,7 +313,7 @@ class CreateUser extends React.Component {
           }
           onNameChange={withAnalytics(
             this.handleNameChange,
-            "CreateUser_name_changed"
+            "CreateUser_name_changed",
           )}
           onOutbreakSurveyorChange={() =>
             this.setState({ isOutbreakSurveyor: !isOutbreakSurveyor })

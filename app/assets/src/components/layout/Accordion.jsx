@@ -37,7 +37,7 @@ class Accordion extends React.Component {
             cs.header,
             toggleable && cs.toggleable,
             cs[toggleArrowAlignment],
-            headerClassName && headerClassName
+            headerClassName && headerClassName,
           )}
           onClick={this.props.onToggle || this.onToggle}
         >
@@ -50,7 +50,7 @@ class Accordion extends React.Component {
                   className={cx(
                     cs.toggleIcon,
                     iconClassName,
-                    cs[toggleArrowAlignment]
+                    cs[toggleArrowAlignment],
                   )}
                 />
               ) : (
@@ -58,7 +58,7 @@ class Accordion extends React.Component {
                   className={cx(
                     cs.toggleIcon,
                     iconClassName,
-                    cs[toggleArrowAlignment]
+                    cs[toggleArrowAlignment],
                   )}
                 />
               )}

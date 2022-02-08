@@ -22,7 +22,7 @@ class MapBanner extends React.Component {
                 "MapBanner_clear-filters-link_clicked",
                 {
                   currentTab: item,
-                }
+                },
               )}
             >
               Clear all

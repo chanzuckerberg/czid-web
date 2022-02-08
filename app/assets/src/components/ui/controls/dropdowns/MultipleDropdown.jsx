@@ -66,19 +66,19 @@ class MultipleDropdown extends React.Component {
         .map(optionValue =>
           this.renderMenuItem(
             find({ value: optionValue }, options),
-            includes(optionValue, checkedOptions)
-          )
+            includes(optionValue, checkedOptions),
+          ),
         );
       const unchecked = options
         .filter(option => !includes(option.value, valueOnOpen))
         .map(option =>
-          this.renderMenuItem(option, includes(option.value, checkedOptions))
+          this.renderMenuItem(option, includes(option.value, checkedOptions)),
         );
 
       return checked.concat(unchecked);
     } else {
       return options.map(option =>
-        this.renderMenuItem(option, includes(option.value, checkedOptions))
+        this.renderMenuItem(option, includes(option.value, checkedOptions)),
       );
     }
   }

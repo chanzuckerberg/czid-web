@@ -7,13 +7,13 @@ export default {
   component: KurtNobleHeroEmailForm,
   parameters: {
     layout: "fullscreen",
-},
+  },
 };
 
 export const KurtNobleHeroEmailForm = () => {
-    return (
-        <div>
-            <HeroEmailForm />
-        </div>
-    )
-}
+  return (
+    <div>
+      <HeroEmailForm />
+    </div>
+  );
+};

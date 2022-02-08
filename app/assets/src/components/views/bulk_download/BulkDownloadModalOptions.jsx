@@ -26,12 +26,12 @@ import {
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
   conditionalField.triggerValues.includes(
-    get(conditionalField.dependentField, selectedFields)
+    get(conditionalField.dependentField, selectedFields),
   );
 
 class BulkDownloadModalOptions extends React.Component {
   sortTaxaWithReadsOptions = memoize(options =>
-    orderBy(["sampleCount", "text"], ["desc", "asc"], options)
+    orderBy(["sampleCount", "text"], ["desc", "asc"], options),
   );
 
   renderOption = (downloadType, field) => {
@@ -58,7 +58,7 @@ class BulkDownloadModalOptions extends React.Component {
       downloadType.type === fileFormatConditionalField.downloadType &&
       !triggersConditionalField(
         fileFormatConditionalField,
-        selectedFieldsForType
+        selectedFieldsForType,
       )
     ) {
       return (
@@ -76,7 +76,7 @@ class BulkDownloadModalOptions extends React.Component {
         conditionalField =>
           field.type === conditionalField.field &&
           downloadType.type === conditionalField.downloadType &&
-          !triggersConditionalField(conditionalField, selectedFieldsForType)
+          !triggersConditionalField(conditionalField, selectedFieldsForType),
       )
     ) {
       return;
@@ -94,7 +94,7 @@ class BulkDownloadModalOptions extends React.Component {
                 downloadType.type,
                 field.type,
                 isChecked /* value */,
-                isChecked ? "Yes" : "No" /* display name */
+                isChecked ? "Yes" : "No" /* display name */,
               )
             }
             checked={selectedField}
@@ -119,7 +119,7 @@ class BulkDownloadModalOptions extends React.Component {
                   downloadType.type,
                   field.type,
                   value,
-                  displayName
+                  displayName,
                 );
               }}
               value={selectedField}
@@ -138,7 +138,7 @@ class BulkDownloadModalOptions extends React.Component {
                   downloadType.type,
                   field.type,
                   value,
-                  displayName
+                  displayName,
                 );
               }}
               value={selectedField}
@@ -190,7 +190,7 @@ class BulkDownloadModalOptions extends React.Component {
                     downloadType.type,
                     conditionalField.field,
                     undefined,
-                    undefined
+                    undefined,
                   );
                 }
               });
@@ -221,7 +221,7 @@ class BulkDownloadModalOptions extends React.Component {
                     downloadType.type,
                     conditionalField.field,
                     undefined,
-                    undefined
+                    undefined,
                   );
                 }
               });
@@ -276,7 +276,7 @@ class BulkDownloadModalOptions extends React.Component {
         className={cx(
           cs.downloadType,
           selected && cs.selected,
-          disabled && cs.disabled
+          disabled && cs.disabled,
         )}
         key={downloadType.type}
         onClick={() => !disabled && onSelect(downloadType.type)}
@@ -319,7 +319,7 @@ class BulkDownloadModalOptions extends React.Component {
           {downloadType.fields && selected && (
             <div className={cs.fields}>
               {downloadType.fields.map(field =>
-                this.renderOption(downloadType, field)
+                this.renderOption(downloadType, field),
               )}
             </div>
           )}
@@ -350,7 +350,7 @@ class BulkDownloadModalOptions extends React.Component {
     const visibleTypes = downloadTypes.filter(
       type =>
         Object.prototype.hasOwnProperty.call(type, "category") &&
-        !type.hide_in_creation_modal
+        !type.hide_in_creation_modal,
     );
 
     const designatedOrder = ["results", "reports", "raw_data"];
@@ -358,13 +358,13 @@ class BulkDownloadModalOptions extends React.Component {
     // for CG bulk downloads v0, just don't display any categories
     if (
       visibleTypes.some(
-        type => type.display_name === WORKFLOWS.CONSENSUS_GENOME.label
+        type => type.display_name === WORKFLOWS.CONSENSUS_GENOME.label,
       )
     ) {
       visibleTypes.sort(
         (typeA, typeB) =>
           designatedOrder.indexOf(typeA.category) -
-          designatedOrder.indexOf(typeB.category)
+          designatedOrder.indexOf(typeB.category),
       );
       return (
         <div className={cs.category}>
@@ -377,7 +377,7 @@ class BulkDownloadModalOptions extends React.Component {
       ...new Set(visibleTypes.map(type => type.category)),
     ];
     const additionalCategories = backendCategories.filter(
-      category => !designatedOrder.includes(category)
+      category => !designatedOrder.includes(category),
     );
     const categories = designatedOrder.concat(additionalCategories);
 
