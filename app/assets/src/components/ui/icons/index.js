@@ -17,6 +17,8 @@ import IconArrowUpSmall from "./IconArrowUpSmall";
 import IconBackgroundModel from "./IconBackgroundModel";
 import IconBarChartHorizontal3Small from "./IconBarChartHorizontal3Small";
 import IconBiohubLogo from "./IconBiohubLogo";
+import IconBlast from "./IconBlast";
+import IconBlastSmall from "./IconBlastSmall";
 import IconBrowserSmall from "./IconBrowserSmall";
 import IconChartSmall from "./IconChartSmall";
 import IconCheckSmall from "./IconCheckSmall";
@@ -100,6 +102,8 @@ export const ICONS_TAXONOMY = {
     IconArrowUpSmall,
     IconBackgroundModel,
     IconBarChartHorizontal3Small,
+    IconBlast,
+    IconBlastSmall,
     IconBrowserSmall,
     IconChartSmall,
     IconCheckSmall,

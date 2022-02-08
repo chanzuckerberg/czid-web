@@ -60,6 +60,7 @@
 
 .cell {
   @include font-body-s;
+  overflow: visible !important; // Make sure the download dropdowns don't get truncated
 
   color: $sds-color-gray-600;
   font-weight: $font-weight-bold;

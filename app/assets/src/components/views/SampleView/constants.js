@@ -200,3 +200,7 @@ export const ANNOTATION_HIT = "hit";
 export const ANNOTATION_NOT_A_HIT = "not_a_hit";
 export const ANNOTATION_INCONCLUSIVE = "inconclusive";
 export const ANNOTATION_NONE = "none";
+
+// Supported downloads
+export const DOWNLOAD_CONTIGS = "download-contigs";
+export const DOWNLOAD_READS = "download-reads";

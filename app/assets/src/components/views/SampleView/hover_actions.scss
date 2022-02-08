@@ -29,6 +29,11 @@
     }
   }
 
+  .divider {
+    margin-left: $sds-spaces-s;
+    border-left: 1px solid $sds-color-gray-300;
+  }
+
   .disabled {
     color: $sds-color-gray-300;
   }

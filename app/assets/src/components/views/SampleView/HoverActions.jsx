@@ -7,6 +7,7 @@ import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
+import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
 import { BLAST_FEATURE } from "~/components/utils/features";
 import {
@@ -18,6 +19,7 @@ import {
 import PropTypes from "~/components/utils/propTypes";
 import {
   IconAlignmentSmall,
+  IconBlastSmall,
   IconBrowserSmall,
   IconConsensusSmall,
   IconContigSmall,
@@ -25,6 +27,13 @@ import {
   IconDownloadSmall,
   IconPhyloTreeSmall,
 } from "~ui/icons";
+import {
+  DOWNLOAD_CONTIGS,
+  DOWNLOAD_READS,
+  TAX_LEVEL_GENUS,
+  TAX_LEVEL_SPECIES,
+  SPECIES_LEVEL_INDEX,
+} from "./constants";
 import cs from "./hover_actions.scss";
 
 const HoverActions = ({
@@ -105,115 +114,174 @@ const HoverActions = ({
       pipelineVersion
     );
     const hasBlastFeature = allowedFeatures.includes(BLAST_FEATURE);
-
     const params = {
       pipelineVersion,
       taxCommonName: taxCommonName,
       taxId: taxId,
-      taxLevel: taxLevel === 1 ? "species" : "genus",
+      taxLevel:
+        taxLevel === SPECIES_LEVEL_INDEX ? TAX_LEVEL_SPECIES : TAX_LEVEL_GENUS,
       taxName: taxName,
       taxSpecies: taxSpecies,
     };
 
-    const hoverActions = [
-      {
-        key: `taxonomy_browser_${params.taxId}`,
-        message: "NCBI Taxonomy Browser",
-        iconComponentClass: IconBrowserSmall,
-        handleClick: onNcbiActionClick,
-        enabled: ncbiEnabled,
-        disabledMessage: "NCBI Taxonomy Not Found",
-        params,
-        snapshotEnabled: true,
-      },
-      {
-        key: `fasta_download_${params.taxId}`,
-        message: "FASTA Download",
-        iconComponentClass: IconDownloadSmall,
-        handleClick: onFastaActionClick,
-        enabled: fastaEnabled,
-        disabledMessage: "FASTA Download Not Available",
-        params,
-      },
-      {
-        key: `contigs_download_${params.taxId}`,
-        message: "Contigs Download",
-        iconComponentClass: IconContigSmall,
-        handleClick: onContigVizClick,
-        enabled: contigVizEnabled,
-        disabledMessage: "No Contigs Available",
-        params,
-      },
-      hasCoverageViz
-        ? {
-            key: `coverage_viz_${params.taxId}`,
-            message: "Coverage Visualization",
-            iconComponentClass: IconCoverage,
-            handleClick: onCoverageVizClick,
-            enabled: coverageVizEnabled,
-            disabledMessage:
-              "Coverage Visualization Not Available - requires reads in NT",
-            params,
-            snapshotEnabled: true,
-          }
-        : {
-            key: `alignment_viz_${params.taxId}`,
-            message: "Alignment Visualization",
-            iconComponentClass: IconAlignmentSmall,
-            handleClick: onCoverageVizClick,
-            enabled: coverageVizEnabled,
-            disabledMessage:
-              "Alignment Visualization Not Available - requires reads in NT",
-            params,
-          },
-      {
-        key: `phylo_tree_${params.taxId}`,
-        message: (
-          <div>
-            Phylogenetic Analysis <BetaLabel />
-          </div>
-        ),
-        iconComponentClass: IconPhyloTreeSmall,
-        handleClick: handlePhyloModalOpen,
-        enabled: phyloTreeEnabled,
-        disabledMessage:
-          "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR",
-      },
-    ];
+    // Define all available icons (but don't display them)
+    const HOVER_ACTIONS_VIZ = hasCoverageViz
+      ? {
+          key: `coverage_viz_${params.taxId}`,
+          message: "Coverage Visualization",
+          iconComponentClass: IconCoverage,
+          handleClick: onCoverageVizClick,
+          enabled: coverageVizEnabled,
+          disabledMessage:
+            "Coverage Visualization Not Available - requires reads in NT",
+          params,
+          snapshotEnabled: true,
+        }
+      : {
+          key: `alignment_viz_${params.taxId}`,
+          message: "Alignment Visualization",
+          iconComponentClass: IconAlignmentSmall,
+          handleClick: onCoverageVizClick,
+          enabled: coverageVizEnabled,
+          disabledMessage:
+            "Alignment Visualization Not Available - requires reads in NT",
+          params,
+        };
 
+    const HOVER_ACTIONS_BLAST = {
+      key: `blast_${params.taxId}`,
+      message: "BLASTN",
+      iconComponentClass: IconBlastSmall,
+      handleClick: handleBlastClick,
+      enabled: !!ntContigs || !!ntReads,
+      disabledMessage:
+        "BLAST is not available - requires at least 1 contig or read in NT.",
+    };
+
+    const HOVER_ACTIONS_PHYLO = {
+      key: `phylo_tree_${params.taxId}`,
+      message: (
+        <div>
+          Phylogenetic Analysis <BetaLabel />
+        </div>
+      ),
+      iconComponentClass: IconPhyloTreeSmall,
+      handleClick: handlePhyloModalOpen,
+      enabled: phyloTreeEnabled,
+      disabledMessage:
+        "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR",
+    };
+
+    let HOVER_ACTIONS_CONSENSUS = null;
     if (consensusGenomeEnabled) {
       if (previousConsensusGenomeRuns) {
-        hoverActions.push({
+        HOVER_ACTIONS_CONSENSUS = {
           key: `consensus_genome_${params.taxId}`,
           message: `Consensus Genome`,
           iconComponentClass: IconConsensusSmall,
           count: size(previousConsensusGenomeRuns),
           handleClick: handlePreviousConsensusGenomeClick,
           enabled: true,
-        });
+        };
       } else {
-        hoverActions.push({
+        HOVER_ACTIONS_CONSENSUS = {
           key: `consensus_genome_${params.taxId}`,
           message: "Consensus Genome",
           iconComponentClass: IconConsensusSmall,
           handleClick: handleConsensusGenomeClick,
           enabled: !getConsensusGenomeError(),
           disabledMessage: getConsensusGenomeError(),
-        });
+        };
       }
     }
 
+    const HOVER_ACTIONS_DOWNLOAD = {
+      key: `download_${params.taxId}`,
+      message: "Download Options",
+      iconComponentClass: function DropdownDownload({ className }) {
+        return (
+          <BareDropdown
+            trigger={<IconDownloadSmall className={className} />}
+            options={[
+              {
+                text: "Contigs FASTA",
+                value: DOWNLOAD_CONTIGS,
+                disabled: !contigVizEnabled,
+              },
+              {
+                text: "Reads FASTA",
+                value: DOWNLOAD_READS,
+                disabled: !fastaEnabled,
+              },
+            ]}
+            onChange={value => {
+              if (value === DOWNLOAD_CONTIGS) onContigVizClick(params || {});
+              else if (value === DOWNLOAD_READS)
+                onFastaActionClick(params || {});
+              else console.error("Unexpected dropdown value:", value);
+            }}
+            hideArrow
+          />
+        );
+      },
+      enabled: contigVizEnabled || fastaEnabled,
+      disabledMessage: "Downloads Not Available",
+      params,
+    };
+
+    // Hover actions not used with Blast feature flag
+    const HOVER_ACTIONS_NCBI_TAXONOMY = {
+      key: `taxonomy_browser_${params.taxId}`,
+      message: "NCBI Taxonomy Browser",
+      iconComponentClass: IconBrowserSmall,
+      handleClick: onNcbiActionClick,
+      enabled: ncbiEnabled,
+      disabledMessage: "NCBI Taxonomy Not Found",
+      params,
+      snapshotEnabled: true,
+    };
+    const HOVER_ACTIONS_DOWNLOAD_FASTA = {
+      key: `fasta_download_${params.taxId}`,
+      message: "FASTA Download",
+      iconComponentClass: IconDownloadSmall,
+      handleClick: onFastaActionClick,
+      enabled: fastaEnabled,
+      disabledMessage: "FASTA Download Not Available",
+      params,
+    };
+    const HOVER_ACTIONS_DOWNLOAD_CONTIGS = {
+      key: `contigs_download_${params.taxId}`,
+      message: "Contigs Download",
+      iconComponentClass: IconContigSmall,
+      handleClick: onContigVizClick,
+      enabled: contigVizEnabled,
+      disabledMessage: "No Contigs Available",
+      params,
+    };
+
+    // Build up the list of hover actions
+    let hoverActions = [];
     if (hasBlastFeature) {
-      hoverActions.push({
-        key: `blast_${params.taxId}`,
-        message: "BLASTN",
-        iconComponentClass: IconBrowserSmall, // TODO: replace this icon
-        handleClick: handleBlastClick,
-        enabled: !!ntContigs || !!ntReads,
-        disabledMessage:
-          "BLAST is not available - requires at least 1 contig or read in NT.",
-      });
+      hoverActions = [
+        HOVER_ACTIONS_VIZ,
+        HOVER_ACTIONS_BLAST,
+        { divider: true },
+        HOVER_ACTIONS_PHYLO,
+        HOVER_ACTIONS_CONSENSUS,
+        HOVER_ACTIONS_DOWNLOAD,
+      ];
+    } else {
+      hoverActions = [
+        HOVER_ACTIONS_NCBI_TAXONOMY,
+        HOVER_ACTIONS_DOWNLOAD_FASTA,
+        HOVER_ACTIONS_DOWNLOAD_CONTIGS,
+        HOVER_ACTIONS_VIZ,
+        HOVER_ACTIONS_PHYLO,
+        HOVER_ACTIONS_CONSENSUS,
+      ];
     }
+    // Remove null actions (could happen with HOVER_ACTIONS_CONSENSUS)
+    hoverActions = hoverActions.filter(d => d !== null);
 
     return snapshotShareId
       ? filter("snapshotEnabled", hoverActions)
@@ -240,6 +308,11 @@ const HoverActions = ({
   const renderHoverAction = hoverAction => {
     let trigger, tooltipMessage;
     const IconComponent = hoverAction.iconComponentClass;
+
+    // Show a vertical divider
+    if (hoverAction.divider) {
+      return <span className={cs.divider} />;
+    }
 
     if (hoverAction.enabled) {
       const onClickFn = () => hoverAction.handleClick(hoverAction.params || {});

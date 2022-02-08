@@ -176,3 +176,12 @@
     display: block;
   }
 }
+
+// This is needed to ensure that dropdowns within a row in a ReactVirtualized table do not get truncated.
+// Note that applying this to `ReactVirtualized__Grid__innerScrollContainer` is necessary, otherwise if
+// you have a table that doesn't take up the whole viewport height and you open the dropdown on the last
+// row, it will be truncated. Details: <https://github.com/bvaughn/react-virtualized/issues/876>.
+:global(.ReactVirtualized__Table__row),
+:global(.ReactVirtualized__Grid__innerScrollContainer) {
+  overflow: visible !important;
+}
