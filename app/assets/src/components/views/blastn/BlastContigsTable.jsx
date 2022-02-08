@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Table } from "~/components/visualizations/table";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import cs from "./blast_contigs_table.scss";
 import {
   BLAST_CONTIG_ROW_WIDTH,
@@ -15,12 +16,22 @@ const BlastContigsTable = ({
   onAllContigsSelected,
   selectedContigs,
 }) => {
+  const contigNameCellRenderer = ({ contigName }) => (
+    <ColumnHeaderTooltip
+      trigger={<div className={cx(cs.cell, cs.contigName)}>{contigName}</div>}
+      content={contigName}
+      position="bottom center"
+      inverted
+    />
+  );
+
   const CONTIG_COLUMNS = [
     {
       dataKey: "contig_name",
       width: 300,
       label: "Contig name",
-      className: cx(cs.cell, cs.contigName),
+      cellRenderer: ({ cellData }) =>
+        contigNameCellRenderer({ contigName: cellData }),
       headerClassName: cx(cs.header, cs.contigNameHeader),
     },
     {
