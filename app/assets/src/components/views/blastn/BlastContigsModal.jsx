@@ -15,6 +15,7 @@ import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import BlastContigsTable from "./BlastContigsTable";
+import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
 
 import cs from "./blast_contigs_modal.scss";
@@ -124,6 +125,7 @@ const BlastContigsModal = ({
           ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED,
         automaticallyRedirectedToNCBI: true,
       });
+      showBlastNotification();
       onClose();
     } else {
       logAnalyticsEvent(
@@ -151,6 +153,7 @@ const BlastContigsModal = ({
       automaticallyRedirectedToNCBI: shouldAutoRedirectBlastForCurrentSession,
     });
     setShowBlastRedirectModal(false);
+    showBlastNotification();
     onClose();
   };
 

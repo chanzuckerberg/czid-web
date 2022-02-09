@@ -29,6 +29,10 @@ function EventDictionary() {
   this.BLAST_READS_MODAL_LEARN_MORE_CLICKED =
     "BLAST_READS_MODAL_LEARN_MORE_CLICKED";
 
+  /** The user clicked the NCBI Support Center link in the Blast Notification */
+  this.BLAST_NOTIFICATION_NCBI_SUPPORT_CENTER_LINK_CLICKED =
+    "BLAST_NOTIFICATION_NCBI_SUPPORT_CENTER_LINK_CLICKED";
+
   /** The user clicked the "Conditions of Use" link in the BLAST redirection modal */
   this.BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED =
     "BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED";

@@ -1,0 +1,14 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.label {
+  @include font-body-xs;
+
+  .message {
+    a {
+      text-decoration: underline;
+      text-decoration-style: dashed;
+    }
+  }
+}
