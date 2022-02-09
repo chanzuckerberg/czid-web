@@ -1,7 +1,7 @@
 // These are the buttons that appear on a Report table row when hovered.
 import cx from "classnames";
 import { filter, pick, size } from "lodash/fp";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 
 import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
@@ -68,6 +68,7 @@ const HoverActions = ({
 }) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
+  const [showHoverActions, setShowHoverActions] = useState(false);
 
   const handlePhyloModalOpen = () => {
     onPhyloTreeModalOpened &&
@@ -201,6 +202,9 @@ const HoverActions = ({
       iconComponentClass: function DropdownDownload({ className }) {
         return (
           <BareDropdown
+            hideArrow
+            onMouseEnter={() => setShowHoverActions(true)}
+            onClose={() => setShowHoverActions(false)}
             trigger={<IconDownloadSmall className={className} />}
             options={[
               {
@@ -220,7 +224,6 @@ const HoverActions = ({
                 onFastaActionClick(params || {});
               else console.error("Unexpected dropdown value:", value);
             }}
-            hideArrow
           />
         );
       },
@@ -369,8 +372,17 @@ const HoverActions = ({
     );
   };
 
+  // If the user clicks the download icon while hovering on a row, we want to
+  // make sure the resulting dropdown is still visible even if the user has to
+  // move away from the row in order to reach the dropdown--this happens when
+  // opening a dropdown on the last row of a table.
   return (
-    <span className={cx(cs.hoverActions, className)}>
+    <span
+      className={cx(
+        cs.hoverActions,
+        showHoverActions ? cs.hoverActionsDropdown : className,
+      )}
+    >
       {getHoverActions().map(renderHoverAction)}
     </span>
   );

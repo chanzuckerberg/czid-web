@@ -2,6 +2,10 @@
 @import "~styles/themes/colors";
 @import "~czifui/dist/variables";
 
+.hoverActionsDropdown {
+  display: inline-block !important; // even if hover outside the row, if the dropdown is open, keep it open
+}
+
 .hoverActions {
   color: $sds-color-primary-400;
   font-size: 14px;
