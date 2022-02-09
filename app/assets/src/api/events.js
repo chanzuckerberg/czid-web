@@ -422,6 +422,9 @@ function EventDictionary() {
   /** The user clicked the BLAST button on the HoverActions within a species or genus row. */
   this.REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED =
     "REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED";
+
+  this.REPORT_TABLE_ANNOTATION_MENU_OPENED =
+    "REPORT_TABLE_ANNOTATION_MENU_OPENED";
 }
 
 const eventNames = new EventDictionary();

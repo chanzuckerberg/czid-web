@@ -1,4 +1,4 @@
-import { get } from "./core";
+import { get, postWithCSRF } from "./core";
 
 export const fetchLongestContigsForTaxonId = ({
   sampleId,
@@ -10,4 +10,11 @@ export const fetchLongestContigsForTaxonId = ({
       taxid: taxonId,
       pipeline_version: pipelineVersion,
     },
+  });
+
+export const createAnnotation = ({ pipelineRunId, taxId, annotationType }) =>
+  postWithCSRF(`/annotations.json`, {
+    pipeline_run_id: pipelineRunId,
+    tax_id: taxId,
+    content: annotationType,
   });

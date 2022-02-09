@@ -1244,6 +1244,10 @@ class SampleView extends React.Component {
     });
   };
 
+  handleAnnotationUpdate = () => {
+    this.fetchSampleReportData();
+  };
+
   handleBlastClick = ({
     pipelineVersion,
     sampleId,
@@ -2060,6 +2064,7 @@ class SampleView extends React.Component {
                   !!(reportMetadata && reportMetadata.hasByteRanges)
                 }
                 initialDbType={displayMergedNtNrValue ? "merged_nt_nr" : "nt"}
+                onAnnotationUpdate={this.handleAnnotationUpdate}
                 onBlastClick={this.handleBlastClick}
                 onConsensusGenomeClick={this.handleConsensusGenomeClick}
                 onCoverageVizClick={this.handleCoverageVizClick}
@@ -2072,6 +2077,7 @@ class SampleView extends React.Component {
                 )}
                 phyloTreeAllowed={sample ? sample.editable : false}
                 pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
+                pipelineRunId={pipelineRun && pipelineRun.id}
                 projectId={project && project.id}
                 projectName={project && project.name}
                 sampleId={sample && sample.id}

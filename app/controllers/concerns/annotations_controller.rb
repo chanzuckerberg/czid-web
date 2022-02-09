@@ -5,6 +5,7 @@ class AnnotationsController < ApplicationController
     allowed_feature_required("annotation")
   end
 
+  # POST /annotations
   def create
     pipeline_run_id = annotations_params[:pipeline_run_id]
     tax_id = annotations_params[:tax_id]

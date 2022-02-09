@@ -19,7 +19,13 @@ import BasicPopup from "../../BasicPopup";
 
 import cs from "./annotation_label.scss";
 
-const AnnotationLabel = ({ type, isSmall = false }) => {
+const AnnotationLabel = ({
+  className,
+  type,
+  isSmall = false,
+  hideTooltip = false,
+  ...props
+}) => {
   const IconAnnotation = {
     [ANNOTATION_HIT]: IconAnnotationCheck,
     [ANNOTATION_NOT_A_HIT]: IconAnnotationCross,
@@ -35,12 +41,14 @@ const AnnotationLabel = ({ type, isSmall = false }) => {
       }[type];
   const label = (
     <span
+      {...props}
       onMouseEnter={() =>
         logAnalyticsEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_LABEL_HOVERED)
       }
     >
       <IconAnnotation
         className={cx(
+          className,
           cs.annotationIcon,
           isSmall ? cs.annotationIconSmall : cs.annotationIconLarge,
         )}
@@ -48,9 +56,11 @@ const AnnotationLabel = ({ type, isSmall = false }) => {
     </span>
   );
 
-  return (
+  return hideTooltip ? (
+    label
+  ) : (
     <BasicPopup
-      className={!isSmall && cs.annotationPopup}
+      className={isSmall ? "" : cs.annotationPopup} // Bold large label tooltips
       trigger={label}
       content={description}
       basic={false}
@@ -61,6 +71,7 @@ const AnnotationLabel = ({ type, isSmall = false }) => {
 };
 
 AnnotationLabel.propTypes = {
+  className: PropTypes.string,
   type: PropTypes.oneOf([
     ANNOTATION_HIT,
     ANNOTATION_NOT_A_HIT,
@@ -68,6 +79,8 @@ AnnotationLabel.propTypes = {
     ANNOTATION_NONE,
   ]),
   isSmall: PropTypes.bool,
+  hideTooltip: PropTypes.bool,
+  onClick: PropTypes.func,
 };
 
 export default AnnotationLabel;

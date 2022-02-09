@@ -8,11 +8,11 @@ import {
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
+import { createAnnotation } from "~/api/blast";
 import { getCsrfToken } from "~/api/utils";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import AnnotationLabel from "~/components/ui/labels/AnnotationLabel";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import { BACKGROUND_MODELS_LINK } from "~/components/utils/documentationLinks";
 import { ANNOTATION_FEATURE } from "~/components/utils/features";
@@ -25,6 +25,7 @@ import PropTypes from "~/components/utils/propTypes";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import AnnotationMenu from "~/components/views/report/AnnotationMenu";
 import AnnotationPreview from "~/components/views/report/AnnotationPreview";
 import PathogenPreview from "~/components/views/report/PathogenPreview";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
@@ -405,13 +406,21 @@ class ReportTable extends React.Component {
         rowData.species_annotations[ANNOTATION_NOT_A_HIT] > 0 ||
         rowData.species_annotations[ANNOTATION_INCONCLUSIVE] > 0);
 
+    const analyticsContext = this.getAnalyticsContext({ rowData });
+
     return (
       rowData && (
         <div className={cs.taxonContainer}>
           {displayAnnotations && (
-            <div className={cs.annotationLabel}>
-              <AnnotationLabel type={rowData.annotation || ANNOTATION_NONE} />
-            </div>
+            <span className={cs.annotationLabel}>
+              <AnnotationMenu
+                currentLabelType={rowData.annotation || ANNOTATION_NONE}
+                onAnnotationSelected={annotationType =>
+                  this.handleAnnotationCreation(rowData.taxId, annotationType)
+                }
+                analyticsContext={analyticsContext}
+              />
+            </span>
           )}
           <div className={cs.taxonInfo}>
             <span
@@ -456,6 +465,17 @@ class ReportTable extends React.Component {
         </div>
       )
     );
+  };
+
+  handleAnnotationCreation = (taxId, annotationType) => {
+    const { onAnnotationUpdate, pipelineRunId } = this.props;
+    createAnnotation({
+      pipelineRunId,
+      taxId,
+      annotationType,
+    }).then(() => {
+      onAnnotationUpdate();
+    });
   };
 
   renderExpandIcon = ({ rowData }) => {
@@ -661,6 +681,17 @@ class ReportTable extends React.Component {
     });
   };
 
+  getAnalyticsContext = ({ rowData }) => {
+    const { projectId, sampleId } = this.props;
+    return {
+      projectId: projectId,
+      sampleId: sampleId,
+      taxId: rowData.taxId,
+      taxLevel: rowData.taxLevel,
+      taxName: rowData.name,
+    };
+  };
+
   renderHoverActions = ({ rowData }) => {
     const {
       alignVizAvailable,
@@ -672,7 +703,6 @@ class ReportTable extends React.Component {
       onPreviousConsensusGenomeClick,
       phyloTreeAllowed,
       pipelineVersion,
-      projectId,
       sampleId,
       snapshotShareId,
     } = this.props;
@@ -696,13 +726,7 @@ class ReportTable extends React.Component {
     const ntContigs = get("nt.contigs", rowData);
     const ntReads = get("nt.count", rowData);
 
-    const analyticsContext = {
-      projectId: projectId,
-      sampleId: sampleId,
-      taxId: rowData.taxId,
-      taxLevel: rowData.taxLevel,
-      taxName: rowData.name,
-    };
+    const analyticsContext = this.getAnalyticsContext({ rowData });
     return (
       <HoverActions
         className={cs.hoverActions}
@@ -991,11 +1015,13 @@ ReportTable.propTypes = {
   consensusGenomeData: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.object)),
   consensusGenomeEnabled: PropTypes.bool.isRequired,
   fastaDownloadEnabled: PropTypes.bool.isRequired,
+  onAnnotationUpdate: PropTypes.func.isRequired,
   onBlastClick: PropTypes.func.isRequired,
   onConsensusGenomeClick: PropTypes.func.isRequired,
   onCoverageVizClick: PropTypes.func.isRequired,
   onPreviousConsensusGenomeClick: PropTypes.func.isRequired,
   phyloTreeAllowed: PropTypes.bool.isRequired,
+  pipelineRunId: PropTypes.number,
   pipelineVersion: PropTypes.string,
   projectId: PropTypes.number,
   projectName: PropTypes.string,
