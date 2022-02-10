@@ -406,6 +406,10 @@ class ReportTable extends React.Component {
         rowData.species_annotations[ANNOTATION_NOT_A_HIT] > 0 ||
         rowData.species_annotations[ANNOTATION_INCONCLUSIVE] > 0);
 
+    const isDimmed =
+      rowData.taxLevel === TAX_LEVEL_SPECIES &&
+      rowData.annotation === ANNOTATION_NOT_A_HIT;
+
     const analyticsContext = this.getAnalyticsContext({ rowData });
 
     return (
@@ -457,7 +461,10 @@ class ReportTable extends React.Component {
               ))}
             <span>
               {rowData.pathogenTag && (
-                <PathogenLabel type={rowData.pathogenTag} />
+                <PathogenLabel
+                  type={rowData.pathogenTag}
+                  color={isDimmed ? "dimRed" : "red"}
+                />
               )}
             </span>
             <span>{this.renderHoverActions({ rowData })}</span>
@@ -799,11 +806,15 @@ class ReportTable extends React.Component {
 
   rowRenderer = rowProps => {
     const data = rowProps.rowData;
+    const isDimmed =
+      data.taxLevel === TAX_LEVEL_SPECIES &&
+      data.annotation === ANNOTATION_NOT_A_HIT;
     if (data) {
       rowProps.className = cx(
         rowProps.className,
         cs[`${data.taxLevel}Row`],
         (data.highlighted || data.highlightedChildren) && cs.highlighted,
+        isDimmed && cs.dimmed,
       );
     }
     return defaultTableRowRenderer(rowProps);

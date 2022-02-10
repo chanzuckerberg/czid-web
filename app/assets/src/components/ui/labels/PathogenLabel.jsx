@@ -35,7 +35,7 @@ export const CATEGORIES = {
   },
 };
 
-const PathogenLabel = ({ type }) => {
+const PathogenLabel = ({ type, color }) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -49,7 +49,7 @@ const PathogenLabel = ({ type }) => {
     <span>
       <Label
         text="Known Pathogen"
-        color="red"
+        color={color}
         size="medium"
         className={cs.newPathogenLabel}
       />
@@ -100,6 +100,9 @@ const PathogenLabel = ({ type }) => {
 
 PathogenLabel.propTypes = {
   type: PropTypes.string,
+  // TODO: make this prop required after deprecating legacy pathogen tags
+  // legacy pathogen label colors are defined in CATEGORIES, not via this prop
+  color: PropTypes.string,
 };
 
 export default PathogenLabel;

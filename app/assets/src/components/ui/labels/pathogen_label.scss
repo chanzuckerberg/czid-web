@@ -30,6 +30,12 @@
       border-color: $sds-color-error-600 !important;
     }
 
+    &:global(.dimRed.label) {
+      color: white !important; // Override gray color applied to dimmed row text
+      background-color: $sds-color-error-200 !important;
+      border-color: $sds-color-error-200 !important;
+    }
+
     &:hover {
       cursor: pointer;
     }
