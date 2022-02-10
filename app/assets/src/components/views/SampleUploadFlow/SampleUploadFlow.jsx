@@ -2,7 +2,10 @@ import cx from "classnames";
 import { get, without, flow, omit, set, find, min } from "lodash/fp";
 import React from "react";
 
-import { FIELDS_THAT_HAVE_MAX_INPUT } from "~/components/common/Metadata/constants";
+import {
+  FIELDS_THAT_HAVE_MAX_INPUT,
+  HOST_GENOME_SYNONYMS,
+} from "~/components/common/Metadata/constants";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 
@@ -11,14 +14,6 @@ import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 import UploadMetadataStep from "./UploadMetadataStep";
 import UploadSampleStep from "./UploadSampleStep";
 import cs from "./sample_upload_flow.scss";
-
-// See HOST_GENOME_SYNONYMS in MetadataField
-const HOST_GENOME_SYNONYMS = [
-  "host_genome",
-  "Host Genome",
-  "host_organism",
-  "Host Organism",
-];
 
 class SampleUploadFlow extends React.Component {
   state = {

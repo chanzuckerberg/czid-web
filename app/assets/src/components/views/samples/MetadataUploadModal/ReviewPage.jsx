@@ -1,8 +1,9 @@
 // TODO(mark): Add information about the sample input files and host genome into the table.
 // TODO(mark): Add UI for upload progress and status.
-import { cloneDeep, isUndefined, keyBy } from "lodash/fp";
+import { cloneDeep, isUndefined } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
+import { HOST_GENOME_SYNONYMS } from "~/components/common/Metadata/constants";
 import { returnHipaaCompliantMetadata } from "~/components/utils/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
 import cs from "./metadata_upload_modal.scss";
@@ -10,18 +11,20 @@ import cs from "./metadata_upload_modal.scss";
 const ReviewPage = ({ metadata, samples }) => {
   if (isUndefined(metadata) || isUndefined(samples)) return null;
 
-  const samplesByName = keyBy("name", samples);
-
   // Create a copy of metadata that hides hipaa sensitive data
   const metadataRows = cloneDeep(metadata.rows);
   const cleanMetadataRows = metadataRows.map(sample => {
-    const sampleName = sample["sample_name"];
-    const isHuman = samplesByName[sampleName]["host_genome_id"] === 1;
-    const containsHostAge = "host_age" in sample;
+    const hostGenomeName = HOST_GENOME_SYNONYMS.reduce(
+      (match, hostGenome) => sample[hostGenome] || match,
+      null,
+    );
+    const isHuman = hostGenomeName.toLowerCase() === "human";
+    const containsHostAge = "Host Age" in sample;
     if (isHuman && containsHostAge) {
-      sample["host_age"] = returnHipaaCompliantMetadata(
+      // returnHipaaCompliantMetadata requires metadataType to be defined using underscore notation
+      sample["Host Age"] = returnHipaaCompliantMetadata(
         "host_age",
-        sample["host_age"],
+        sample["Host Age"],
       );
     }
     return sample;

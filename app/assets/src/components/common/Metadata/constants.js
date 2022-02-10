@@ -15,3 +15,11 @@ export const FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT = new Set([
 export const FIELDS_THAT_HAVE_MAX_INPUT = {
   host_age: 90,
 };
+
+// See HOST_GENOME_SYNONYMS in MetadataField
+export const HOST_GENOME_SYNONYMS = [
+  "host_genome",
+  "Host Genome",
+  "host_organism",
+  "Host Organism",
+];
