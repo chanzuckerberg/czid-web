@@ -3,7 +3,7 @@ require 'will_paginate/array'
 class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required, except: [:landing, :sign_up, :maintenance, :page_not_found]
-  before_action :admin_required, only: [:all_data] # rubocop:disable Rails/LexicallyScopedActionFilter
+  before_action :admin_required, only: [:all_data]
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance, :page_not_found]
   skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
   power :projects, except: [:landing, :sign_up, :maintenance, :page_not_found]
@@ -68,6 +68,21 @@ class HomeController < ApplicationController
     else
       redirect_to my_data_path
     end
+  end
+
+  def all_data
+    @project_id = sanitized_project_id
+    render 'all_data', formats: [:html]
+  end
+
+  def my_data
+    @project_id = sanitized_project_id
+    render 'my_data', formats: [:html]
+  end
+
+  def public
+    @project_id = sanitized_project_id
+    render 'public', formats: [:html]
   end
 
   def taxon_descriptions
@@ -137,6 +152,16 @@ class HomeController < ApplicationController
 
   def home_params
     params.require(:signUp).permit(:firstName, :lastName, :email, :institution, :usage)
+  end
+
+  def data_params
+    params.permit(:project_id)
+  end
+
+  def sanitized_project_id
+    Project.find(data_params[:project_id]).id.to_s
+  rescue ActiveRecord::RecordNotFound
+    nil
   end
 
   def send_sign_up_to_airtable(params)

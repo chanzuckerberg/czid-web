@@ -70,6 +70,9 @@ RSpec.configure do |config|
 
   # Time helpers
   config.include ActiveSupport::Testing::TimeHelpers
+
+  # Rails URL helpers
+  config.include Rails.application.routes.url_helpers
 end
 
 # This will load all the Rake tasks for any Rake tests. You should only have this once:
