@@ -81,6 +81,21 @@ $genome-viz-spacing: $sds-spaces-xs;
       margin-top: $sds-spaces-xxxs;
       margin-right: 12px;
     }
+
+    .actionIcons {
+      margin-top: $sds-spaces-l;
+      margin-right: 12px;
+
+      .iconButton {
+        .icon {
+          height: $sds-icon-sizes-xl-height;
+          width: $sds-icon-sizes-xl-height;
+        }
+        &:not(:first-child) {
+          margin-left: $sds-spaces-xl;
+        }
+      }
+    }
   }
 }
 

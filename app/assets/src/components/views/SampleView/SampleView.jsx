@@ -2230,6 +2230,7 @@ class SampleView extends React.Component {
         ) && (
           <CoverageVizBottomSidebar
             nameType={selectedOptions.nameType}
+            onBlastClick={this.handleBlastClick}
             onClose={withAnalytics(
               this.closeCoverageViz,
               "SampleView_coverage-viz-sidebar_closed",

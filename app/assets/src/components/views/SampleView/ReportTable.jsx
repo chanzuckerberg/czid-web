@@ -28,6 +28,7 @@ import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreat
 import AnnotationMenu from "~/components/views/report/AnnotationMenu";
 import AnnotationPreview from "~/components/views/report/AnnotationPreview";
 import PathogenPreview from "~/components/views/report/PathogenPreview";
+import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { Table } from "~/components/visualizations/table";
 import { IconInsightSmall } from "~ui/icons";
@@ -649,7 +650,11 @@ class ReportTable extends React.Component {
 
   downloadContigUrl = ({ taxId }) => {
     const { pipelineVersion, sampleId } = this.props;
-    location.href = `/samples/${sampleId}/taxid_contigs_download?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
+    location.href = getDownloadContigUrl({
+      pipelineVersion,
+      sampleId,
+      taxId,
+    });
   };
 
   handleCoverageVizClick = ({

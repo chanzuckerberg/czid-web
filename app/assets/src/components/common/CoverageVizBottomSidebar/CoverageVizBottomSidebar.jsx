@@ -1,15 +1,19 @@
 import cx from "classnames";
+import { Icon, IconButton } from "czifui";
 import { sum, find, get, isEmpty } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
 
 import { getCoverageVizData } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import { BLAST_FEATURE } from "~/components/utils/features";
 import { formatPercent } from "~/components/utils/format";
 import PropTypes from "~/components/utils/propTypes";
 import { getTooltipStyle } from "~/components/utils/tooltip";
+import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import Histogram from "~/components/visualizations/Histogram";
 import { getTaxonName } from "~/helpers/taxon";
@@ -19,6 +23,7 @@ import Sidebar from "~ui/containers/Sidebar";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { IconLoading, IconArrowRight } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
+import { openUrl } from "~utils/links";
 
 import HitGroupViz from "./HitGroupViz";
 import cs from "./coverage_viz_bottom_sidebar.scss";
@@ -372,8 +377,18 @@ export default class CoverageVizBottomSidebar extends React.Component {
   };
 
   renderContentHeader = () => {
-    const { params, sampleId, snapshotShareId } = this.props;
+    const {
+      onBlastClick,
+      params,
+      pipelineVersion,
+      sampleId,
+      snapshotShareId,
+    } = this.props;
     const { currentAccessionSummary } = this.state;
+    const { taxonId, taxonName } = params;
+
+    const { allowedFeatures = [] } = this.context || {};
+    const hasBlastFeature = allowedFeatures.includes(BLAST_FEATURE);
 
     const numBestAccessions = params.accessionData.best_accessions.length;
     const numAccessions = params.accessionData.num_accessions;
@@ -449,6 +464,72 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 <IconArrowRight />
               </a>
             </div>
+            {hasBlastFeature && (
+              <div className={cs.actionIcons}>
+                <BasicPopup
+                  basic={false}
+                  content="BLASTN"
+                  position="top center"
+                  inverted
+                  trigger={
+                    <IconButton
+                      className={cs.iconButton}
+                      onClick={() =>
+                        logAnalyticsEvent(
+                          ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_BLAST_BUTTON_CLICKED,
+                          onBlastClick({
+                            pipelineVersion,
+                            sampleId,
+                            shouldBlastContigs: true,
+                            taxName: taxonName,
+                            taxId: taxonId,
+                          }),
+                        )
+                      }
+                      sdsSize="large"
+                      sdsType="secondary"
+                    >
+                      <Icon
+                        sdsIcon="searchLinesHorizontal"
+                        sdsSize="xl"
+                        sdsType="iconButton"
+                      />
+                    </IconButton>
+                  }
+                />
+                <BasicPopup
+                  basic={false}
+                  content="Download Contig FASTA"
+                  position="top center"
+                  inverted
+                  trigger={
+                    <IconButton
+                      className={cs.iconButton}
+                      onClick={() =>
+                        logAnalyticsEvent(
+                          ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_DOWNLOAD_CONTIG_BUTTON_CLICKED,
+                          openUrl(
+                            getDownloadContigUrl({
+                              pipelineVersion,
+                              sampleId,
+                              taxId: taxonId,
+                            }),
+                          ),
+                        )
+                      }
+                      sdsSize="large"
+                      sdsType="secondary"
+                    >
+                      <Icon
+                        sdsIcon="download"
+                        sdsSize="xl"
+                        sdsType="iconButton"
+                      />
+                    </IconButton>
+                  }
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -688,6 +769,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
 CoverageVizBottomSidebar.propTypes = {
   visible: PropTypes.bool,
+  onBlastClick: PropTypes.func,
   onClose: PropTypes.func.isRequired,
   params: PropTypes.shape({
     taxonId: PropTypes.number,
@@ -717,3 +799,5 @@ CoverageVizBottomSidebar.propTypes = {
   nameType: PropTypes.string,
   snapshotShareId: PropTypes.string,
 };
+
+CoverageVizBottomSidebar.contextType = UserContext;

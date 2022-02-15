@@ -94,3 +94,7 @@ export const logDownloadOption = ({ component, option, details = {} }) => {
     details,
   );
 };
+
+export const getDownloadContigUrl = ({ pipelineVersion, sampleId, taxId }) => {
+  return `/samples/${sampleId}/taxid_contigs_download?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
+};
