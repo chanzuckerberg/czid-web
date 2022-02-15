@@ -121,6 +121,7 @@ launch_command() {
         --tags LaunchedBy="$email"
         --subnet "$subnet_id"
         --security-groups "$security_groups"
+        --no-provision-user
         --no-dns
     )
 
@@ -148,7 +149,7 @@ HERE_DOC
 
 ssh_command() {
     INPUT_VALUES=(${INPUT_VALUES[@]}) \
-    OPTIONS_ACCEPTED=(--instance-id= --dry-run) \
+    OPTIONS_ACCEPTED=(--instance-id= --dry-run --ssh-user=) \
         parse_options
 
     local instance_id
