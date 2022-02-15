@@ -15,6 +15,7 @@ development:
 test:
   <<: *default
   host: <%= ENV['DB_HOST'] || "db" %>
+  database: idseq_test
 
 deployed: &deployed
   <<: *default
