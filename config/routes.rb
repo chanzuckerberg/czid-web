@@ -111,6 +111,7 @@ Rails.application.routes.draw do
   get 'privacy', to: 'support#privacy'
   get 'terms_changes', to: 'support#terms_changes'
   get 'terms', to: 'support#terms'
+  get 'security_white_paper', to: 'support#security_white_paper'
 
   resources :projects do
     member do

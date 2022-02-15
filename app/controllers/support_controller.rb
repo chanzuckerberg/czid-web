@@ -5,6 +5,7 @@ class SupportController < ApplicationController
     :privacy,
     :terms_changes,
     :terms,
+    :security_white_paper,
   ].freeze
 
   before_action :login_required, except: PUBLIC_ACTIONS
@@ -24,5 +25,11 @@ class SupportController < ApplicationController
 
   def privacy_notice_for_user_research
     render "home/discovery_view_router"
+  end
+
+  def security_white_paper
+    # Use `inline` disposition to make sure the PDF is shown inline and not downloaded
+    filename = File.join(Rails.root, "app/assets/pdfs/security_white_paper.pdf")
+    send_file(filename, disposition: "inline", type: "application/pdf")
   end
 end
