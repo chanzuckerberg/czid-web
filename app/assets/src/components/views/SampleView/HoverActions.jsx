@@ -204,7 +204,10 @@ const HoverActions = ({
           <BareDropdown
             hideArrow
             onMouseEnter={() => setShowHoverActions(true)}
+            onMouseLeave={() => setShowHoverActions(false)}
             onClose={() => setShowHoverActions(false)}
+            onBlur={() => setShowHoverActions(false)}
+            onClick={() => setShowHoverActions(false)}
             trigger={<IconDownloadSmall className={className} />}
             options={[
               {
