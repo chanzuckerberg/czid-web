@@ -18,7 +18,7 @@ class UserMailer < ApplicationMailer
   end
 
   def landing_sign_up_email(body)
-    account_email = "accounts@idseq.net"
+    account_email = "accounts@czid.org"
     mail(to: account_email, subject: "New sign up from landing page", body: body)
   end
 

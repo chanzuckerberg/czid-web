@@ -9,7 +9,7 @@ These guidelines should be enforced for any new PRs.
 
 When in doubt, follow the [Airbnb JS Style Guide](https://github.com/airbnb/javascript).
 
-The following rules are particularly relevant to `idseq-web`.
+The following rules are particularly relevant to `czid-web`.
 
 ### References
 
@@ -280,7 +280,7 @@ Be aware of shared style files, particularly [`_color.scss`](https://github.com/
 
 When in doubt, follow the [Airbnb Ruby Style Guide](https://github.com/airbnb/ruby).
 
-The following rules are particularly relevant to `idseq-web`.
+The following rules are particularly relevant to `czid-web`.
 
 ### Use keyword arguments with 3 or more parameters to a function.
 
@@ -426,7 +426,7 @@ params.permit(:name, :projectId, :taxId, :superkingdomName, { additionalReferenc
 
 ## Feature flags
 
-- `idseq-web` uses a lightweight custom feature flag system. Feature flags are stored in a string-array on the `allowed_features` column of `Users`.
+- `czid-web` uses a lightweight custom feature flag system. Feature flags are stored in a string-array on the `allowed_features` column of `Users`.
 - Not every change needs a feature flag, but it is encouraged if you are less sure about a new refactor or need to decouple feature release from code deployment for testing.
 - We use feature flags instead of long lived feature branches to promote smaller diffs, continuous code integration, continuous QA testing, and dynamic changes without re-deploys.
 

@@ -61,9 +61,9 @@ const PathogenListView = () => {
           infection), and should be interpreted with respect to the literature.
         </p>
         <p>
-          Reach out to <a href="mailto:help@idseq.net">help@idseq.net</a> to
-          help us make the list better, or if there is any questions or
-          comments. We are excited to hear from you!
+          Reach out to <a href="mailto:help@czid.org">help@czid.org</a> to help
+          us make the list better, or if there is any questions or comments. We
+          are excited to hear from you!
         </p>
       </div>
     </>

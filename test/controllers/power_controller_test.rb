@@ -16,7 +16,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
       .to(receive(:create_user)
           .with(
             "Username-Password-Authentication",
-            email: "help@idseq.net",
+            email: "help@czid.org",
             name: "User invited from Power Controller test",
             password: instance_of(String),
             app_metadata: { roles: [] }
@@ -29,7 +29,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
           .and_return(
             "ticket" => "https://fake_idseq_test.idseq.net/fake_auth0_response_ticket_url?"
           ))
-    put add_user_project_url(@joe_project), params: { user_email_to_add: "help@idseq.net", user_name_to_add: "User invited from Power Controller test" }
+    put add_user_project_url(@joe_project), params: { user_email_to_add: "help@czid.org", user_name_to_add: "User invited from Power Controller test" }
     assert_response :success
     assert_equal User.last.created_by_user_id, users(:joe).id
   end

@@ -80,7 +80,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
       return (
         <div className={cs.statusCell}>
           <div className={cs.links}>
-            <a className={cs.link} href="mailto:help@idseq.net">
+            <a className={cs.link} href="mailto:help@czid.org">
               Contact us
             </a>
           </div>

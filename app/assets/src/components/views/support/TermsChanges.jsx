@@ -416,7 +416,7 @@ const TermsChanges = () => {
       />
       <p className={cx(cs.large, cs.last)}>
         For questions about these changes, please contact us at{" "}
-        <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
+        <a href="mailto:privacy@czid.org">privacy@czid.org</a>.
       </p>
     </>
   );

@@ -106,7 +106,7 @@ const Accordion = () => {
               Terms of Use
             </a>
             . You can request to delete your account at any time by{" "}
-            <a href="mailto:help@idseq.net">contacting our team</a>.
+            <a href="mailto:help@czid.org">contacting our team</a>.
           </>
         }
       />

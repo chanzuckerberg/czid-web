@@ -10,7 +10,7 @@ RSpec.describe BenchmarksController, type: :controller do
     "defaults": {
       "how_to_use_these_defaults": "These properties may be overridden in each entry of active_benchmarks below.",
       "project_name": DEFAULT_BENCHMARK_PROJECT,
-      "user_email": "sample@idseq.net",
+      "user_email": "sample@czid.org",
       "frequency_hours": 24,
       "trigger_on_webapp_change": true,
       "trigger_on_pipeline_change": true,
@@ -61,7 +61,7 @@ RSpec.describe BenchmarksController, type: :controller do
           "project_name": DEFAULT_BENCHMARK_PROJECT,
           "trigger_on_pipeline_change": true,
           "trigger_on_webapp_change": true,
-          "user_email": "sample@idseq.net",
+          "user_email": "sample@czid.org",
         },
       ],
       "retired_benchmarks": [
@@ -72,7 +72,7 @@ RSpec.describe BenchmarksController, type: :controller do
           "project_name": "IDSeq Bench Test",
           "trigger_on_pipeline_change": true,
           "trigger_on_webapp_change": true,
-          "user_email": "sample@idseq.net",
+          "user_email": "sample@czid.org",
         },
       ]
     )

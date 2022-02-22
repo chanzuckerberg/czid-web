@@ -68,7 +68,7 @@ const Footer = () => {
               Terms
             </a>
             <span>|</span>
-            <a href="mailto:help@idseq.net">Contact us</a>
+            <a href="mailto:help@czid.org">Contact us</a>
           </div>
         </div>
         <div className={cs.czLogoContainer}>

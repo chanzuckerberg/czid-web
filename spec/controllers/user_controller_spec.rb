@@ -18,7 +18,7 @@ RSpec.describe UsersController, type: :controller do
     describe "create user" do
       let(:fake_user_data) do
         { user: {  role: 0,
-                   email: "test_user@idseq.net",
+                   email: "test_user@czid.org",
                    institution: "Test institution",
                    name: "Test User Name", } }
       end

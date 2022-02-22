@@ -48,7 +48,7 @@ export default class BasespaceIntegration extends React.Component {
           ) : (
             <div className={cs.error}>
               Something went wrong when trying to connect to Basespace. Please
-              <a className={cs.helpLink} href="mailto:help@idseq.net">
+              <a className={cs.helpLink} href="mailto:help@czid.org">
                 &nbsp;contact us
               </a>{" "}
               for help.

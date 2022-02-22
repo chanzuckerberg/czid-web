@@ -171,13 +171,13 @@ export default function TermsOfUse() {
             trees) from Upload Data in connection with providing, developing and
             improving CZ ID. You may request deletion of your Upload Data from
             CZ ID by emailing{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and
-            including a description of your Upload Data that you wish to have
-            removed. We will delete the requested Upload Data within 60 days of
-            your request. Please note, that our removal from CZ ID will not
-            impact any use of Upload Data by others you may have chosen to share
-            it with prior to the effective date of removal and we are not able
-            to require others Users to stop using Upload Data they accessed or
+            <a href="mailto:privacy@czid.org">privacy@czid.org</a> and including
+            a description of your Upload Data that you wish to have removed. We
+            will delete the requested Upload Data within 60 days of your
+            request. Please note, that our removal from CZ ID will not impact
+            any use of Upload Data by others you may have chosen to share it
+            with prior to the effective date of removal and we are not able to
+            require others Users to stop using Upload Data they accessed or
             downloaded prior to removal. More information about Upload Data can
             be found in our <a href="/privacy">Privacy Notice</a>.
           </React.Fragment>,
@@ -303,7 +303,7 @@ export default function TermsOfUse() {
           <>
             5.3 Closing Your Account. You can close your Account at any time.
             Just contact us at{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
+            <a href="mailto:privacy@czid.org">privacy@czid.org</a>.
           </>,
         ]}
       />
@@ -320,7 +320,7 @@ export default function TermsOfUse() {
           `6.1 Intellectual Property Rights. Just because you upload data to CZ ID, you are not giving us any ownership of your intellectual property rights (see Section 1.1 above). Subject to these Terms, we grant you a limited right to access CZ ID, and we reserve all other of our intellectual property rights in CZ ID. Using CZ ID does not give you any ownership in our CZ ID, our services or the content or information made available through CZ ID that is not already yours. Trademarks and logos used in connection with CZ ID are the trademarks of their respective owners. Our logos and other trademarks, service marks, graphics, and logos used for our services are trademarks or registered trademarks of ours and these Terms do not grant you any rights to use them.`,
           <>
             6.2 Feedback. We’d love your feedback about how to improve CZ ID at{" "}
-            {<a href="mailto:help@idseq.net">help@idseq.net</a>}. That said, by
+            {<a href="mailto:help@czid.org">help@czid.org</a>}. That said, by
             giving us feedback, you agree that we can use and share it for any
             purpose without compensation to you. You agree that we are not
             required to use your feedback.
@@ -333,7 +333,7 @@ export default function TermsOfUse() {
             (b) guard against the accidental or unauthorized access, use,
             alteration or disclosure of CZ ID through your Account. Please
             notify us immediately at{" "}
-            {<a href="mailto:security@idseq.net">security@idseq.net</a>} if you
+            {<a href="mailto:security@czid.org">security@czid.org</a>} if you
             suspect your Account has been compromised or are aware of any other
             security issues relating to CZ ID.
           </>,
@@ -354,7 +354,7 @@ export default function TermsOfUse() {
             Users to upload data to the Database. We and our service providers
             do not review or correct any data uploaded into CZ ID. If you would
             like to report any issue with CZ ID or the Database please contact
-            us at {<a href="mailto:help@idseq.net">help@idseq.net</a>}. CZ ID is
+            us at {<a href="mailto:help@czid.org">help@czid.org</a>}. CZ ID is
             not intended as a storage service, so please back up your Upload
             Data using a secure service of your choice.
           </>,
@@ -415,7 +415,7 @@ export default function TermsOfUse() {
         listItems={[
           <React.Fragment key={nanoid()}>
             If you have any questions, comments, or concerns with Terms, you may
-            contact us at <a href="mailto:help@idseq.net">help@idseq.net</a>
+            contact us at <a href="mailto:help@czid.org">help@czid.org</a>
           </React.Fragment>,
           <p key={nanoid()}>
             Our mailing address is:

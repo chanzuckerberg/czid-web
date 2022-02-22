@@ -29,7 +29,7 @@ class PublicSampleNotification extends React.Component {
           privacy notice
         </a>
         &nbsp;or{" "}
-        <a className={cs.emailLink} href="mailto:help@idseq.net">
+        <a className={cs.emailLink} href="mailto:help@czid.org">
           email us
         </a>
       </React.Fragment>

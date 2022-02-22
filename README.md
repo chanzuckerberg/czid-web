@@ -16,6 +16,6 @@ Check out our repositories:
 - [czid-web](https://github.com/chanzuckerberg/czid-web) - Frontend portal (here)
 - [czid-workflows](https://github.com/chanzuckerberg/czid-workflows) - Bioinformatics workflows
 - [czid-cli](https://github.com/chanzuckerberg/czid-cli) - Command line upload interface
-- [idseq-bench](https://github.com/chanzuckerberg/idseq-bench) - Pipeline benchmarking tools
+- [czid-bench](https://github.com/chanzuckerberg/czid-bench) - Pipeline benchmarking tools
 
 Check out our [wiki](https://github.com/chanzuckerberg/czid-web/wiki) for getting started with development in this repository and in CZ ID in general.

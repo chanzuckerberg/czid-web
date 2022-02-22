@@ -463,7 +463,7 @@ export default class UploadProgressModal extends React.Component {
           <div className={cs.subtitle}>
             <a
               className={cs.helpLink}
-              href="mailto:help@idseq.net"
+              href="mailto:help@czid.org"
               onClick={() =>
                 logAnalyticsEvent("UploadProgressModal_contact-us-link_clicked")
               }

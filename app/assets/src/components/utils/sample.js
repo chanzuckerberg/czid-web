@@ -71,7 +71,7 @@ export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
           ? `?pipeline_version=${pipelineRun.pipeline_version}`
           : "";
       link = isEmpty(pipelineRun)
-        ? "mailto:help@idseq.net"
+        ? "mailto:help@czid.org"
         : `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
       break;
     case "BrokenReadPairError":
@@ -89,21 +89,21 @@ export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
         "Oh no! There was an issue uploading your sample file from Basespace.";
       linkText = "Contact us for help.";
       type = "error";
-      link = "mailto:help@idseq.net";
+      link = "mailto:help@czid.org";
       break;
     case "S3_UPLOAD_FAILED":
       status = "SAMPLE FAILED";
       message = "Oh no! There was an issue uploading your sample file from S3.";
       linkText = "Contact us for help.";
       type = "error";
-      link = "mailto:help@idseq.net";
+      link = "mailto:help@czid.org";
       break;
     case "LOCAL_UPLOAD_FAILED":
       status = "SAMPLE FAILED";
       message = "Oh no! It took too long to upload your sample file.";
       linkText = "Contact us for help.";
       type = "error";
-      link = "mailto:help@idseq.net";
+      link = "mailto:help@czid.org";
       break;
     case "LOCAL_UPLOAD_STALLED":
       status = "INCOMPLETE - ISSUE";
@@ -111,7 +111,7 @@ export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
         "It looks like it is taking a long time to upload your sample file.";
       linkText = "Contact us for help.";
       type = "warning";
-      link = "mailto:help@idseq.net";
+      link = "mailto:help@czid.org";
       break;
     case "DO_NOT_PROCESS":
       status = "PROCESSING SKIPPED";
@@ -155,7 +155,7 @@ export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
       message = "Oh no! There was an issue processing your sample.";
       linkText = "Contact us for help re-running your sample.";
       type = "error";
-      link = "mailto:help@idseq.net";
+      link = "mailto:help@czid.org";
       break;
   }
 

@@ -86,7 +86,7 @@ export default class FAQPage extends React.Component {
                 out and remove host sequence data in order to generate Reports.
                 If you are able to find human sequence data elsewhere in CZ ID,
                 please let us know at{" "}
-                <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>, and we
+                <a href="mailto:privacy@czid.org">privacy@czid.org</a>, and we
                 will remove it. The fastq files you uploaded are only available
                 to you, the uploader.
               </React.Fragment>,
@@ -99,7 +99,7 @@ export default class FAQPage extends React.Component {
                 assessments, data loss prevention systems, and working to ensure
                 that only authorized staff have access to the data. If you need
                 more information about our security practices please contact us
-                at <a href="mailto:security@idseq.net">security@idseq.net</a>.
+                at <a href="mailto:security@czid.org">security@czid.org</a>.
               </React.Fragment>,
             ]}
           />
@@ -193,9 +193,9 @@ export default class FAQPage extends React.Component {
         >
           <p>
             Please contact{" "}
-            <a href="mailto:security@idseq.net">security@idseq.net</a> if you
-            have any security-related questions or concerns, and{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> if you have
+            <a href="mailto:security@czid.org">security@czid.org</a> if you have
+            any security-related questions or concerns, and{" "}
+            <a href="mailto:privacy@czid.org">privacy@czid.org</a> if you have
             any other questions about our practices or legal documents.
           </p>
         </Accordion>
@@ -363,7 +363,7 @@ export default class FAQPage extends React.Component {
             use and limit their use of data to providing and improving relevant
             services that we use. If you have more questions about our service
             providers, please contact us at{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
+            <a href="mailto:privacy@czid.org">privacy@czid.org</a>.
           </p>
         </Accordion>
         <Accordion
@@ -423,7 +423,7 @@ export default class FAQPage extends React.Component {
             providers to help operate and improve the service as described in
             detail in the CZ ID Privacy Notice). To request any of your
             information described above, email{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. Please
+            <a href="mailto:privacy@czid.org">privacy@czid.org</a>. Please
             include in your request sufficient information that allows us to
             reasonably verify that you are the person about whom we collected
             personal information.

@@ -16,7 +16,7 @@ class Auth0Error extends React.Component {
           message={upperFirst(message)}
           textWidth={300}
           tagline={
-            <a className={cs.helpLink} href="mailto:help@idseq.net">
+            <a className={cs.helpLink} href="mailto:help@czid.org">
               Contact us for help
             </a>
           }

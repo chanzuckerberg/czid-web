@@ -76,8 +76,8 @@ const PrivacyNotice = () => {
             <td rowSpan="4">
               Users can request deletion of Raw Sample Data or their CZ ID
               account data by contacting us at{" "}
-              <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we
-              will fulfill the request within 60 days.
+              <a href="mailto:privacy@czid.org">privacy@czid.org</a> and we will
+              fulfill the request within 60 days.
             </td>
           </tr>
           <tr className={cs.contentRow}>
@@ -184,8 +184,8 @@ const PrivacyNotice = () => {
             <td rowSpan="2">
               Users can request deletion of their CZ ID account data by
               contacting us at{" "}
-              <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we
-              will fulfill the request within 60 days.
+              <a href="mailto:privacy@czid.org">privacy@czid.org</a> and we will
+              fulfill the request within 60 days.
             </td>
           </tr>
           <tr className={cs.contentRow}>
@@ -332,7 +332,7 @@ const PrivacyNotice = () => {
       <p>
         If you have questions about how this 1-year anniversary policy impacts
         your data, then please reach out to{" "}
-        <a href="mailto:help@idseq.net">help@idseq.net</a>.
+        <a href="mailto:help@czid.org">help@czid.org</a>.
       </p>
       <p>
         <div className={cs.underlineHeader}>
@@ -375,7 +375,7 @@ const PrivacyNotice = () => {
         data, and is not personal data, and does not, on its own, permit
         association with any specific individual. If you are able to find human
         sequence data in any Reports in CZ ID, please let us know at{" "}
-        <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we will
+        <a href="mailto:privacy@czid.org">privacy@czid.org</a> and we will
         address it.
       </p>
       <p>
@@ -507,7 +507,7 @@ const PrivacyNotice = () => {
         providers like Zendesk. We may also share Visitor and User data with
         analytics vendors that assist us to improve and optimize CZ ID. To learn
         more about our vendors we use, please see our <a href="/faqs">FAQ</a> or
-        contact us at <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
+        contact us at <a href="mailto:privacy@czid.org">privacy@czid.org</a>.
       </p>
       <p>
         If we can no longer keep operating CZ ID or believe that its purpose is
@@ -552,9 +552,9 @@ const PrivacyNotice = () => {
       <p>
         Security takes ongoing work and we will continue to monitor and adjust
         our security measures as CZ ID develops. Please notify us immediately at{" "}
-        <a href="mailto:security@idseq.net">security@idseq.net</a> if you
-        suspect your account has been compromised or are aware of any other
-        security issues relating to CZ ID.
+        <a href="mailto:security@czid.org">security@czid.org</a> if you suspect
+        your account has been compromised or are aware of any other security
+        issues relating to CZ ID.
       </p>
     </>
   );
@@ -573,16 +573,16 @@ const PrivacyNotice = () => {
           <>
             Raw Sample Data and Sample Metadata is retained until Users delete
             it from CZ ID. Users may submit deletion requests by emailing{" "}
-            {<a href="mailto:privacy@idseq.net">privacy@idseq.net</a>} and we
-            will delete the requested Raw Sample Data and corresponding Report
-            Data (including Sample Metadata) within 60 days.
+            {<a href="mailto:privacy@czid.org">privacy@czid.org</a>} and we will
+            delete the requested Raw Sample Data and corresponding Report Data
+            (including Sample Metadata) within 60 days.
           </>,
           `Report Data produced by CZ ID will be retained on CZ ID.`,
           <>
             User Data is retained until Users delete their CZ ID account as such
             data is required to manage the service. Users may submit account
             deletion requests by emailing{" "}
-            {<a href="mailto:privacy@idseq.net">privacy@idseq.net</a>}. We will
+            {<a href="mailto:privacy@czid.org">privacy@czid.org</a>}. We will
             delete personal data within 60 days following close of your account.
           </>,
         ]}
@@ -607,16 +607,16 @@ const PrivacyNotice = () => {
           <>
             Users may also object to the processing of User Data in certain
             circumstances by emailing{" "}
-            {<a href="mailto:privacy@idseq.net">privacy@idseq.net</a>}. In such
+            {<a href="mailto:privacy@czid.org">privacy@czid.org</a>}. In such
             cases, we will stop processing that data unless we have legitimate
             grounds to continue processing it -- for example, it is needed for
             legal reasons.
           </>,
           <>
             Users can also contact us by emailing{" "}
-            {<a href="mailto:privacy@idseq.net">privacy@idseq.net</a>} should
-            they wish to access, restrict the processing of, or rectify their
-            User Data.
+            {<a href="mailto:privacy@czid.org">privacy@czid.org</a>} should they
+            wish to access, restrict the processing of, or rectify their User
+            Data.
           </>,
         ]}
       />
@@ -632,13 +632,13 @@ const PrivacyNotice = () => {
       />
       <p>
         Please contact us at{" "}
-        <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> if you would
-        like to exercise the privacy choices discussed above or if you have any
+        <a href="mailto:privacy@czid.org">privacy@czid.org</a> if you would like
+        to exercise the privacy choices discussed above or if you have any
         questions. If your data is subject to the EU data protection law (e.g.,
         GDPR) and you wish to raise a concern about our use of your information
         (and without prejudice to any other rights you may have), you have the
         right to do so with your local supervisory authority or by emailing us
-        at <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
+        at <a href="mailto:privacy@czid.org">privacy@czid.org</a>.
       </p>
     </>
   );
@@ -680,7 +680,7 @@ const PrivacyNotice = () => {
       <p>
         If you have any questions, comments, or concerns with this Privacy
         Notice, you may contact our Data Protection Officer (DPO) by email at{" "}
-        <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> or by physical
+        <a href="mailto:privacy@czid.org">privacy@czid.org</a> or by physical
         mail at the addresses below.
       </p>
       <p>

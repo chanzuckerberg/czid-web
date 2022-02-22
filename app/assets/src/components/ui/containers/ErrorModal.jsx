@@ -30,7 +30,7 @@ const ErrorModal = ({
             If you continue to have issues, please {}
             <ExternalLink
               className={cs.actionLink}
-              href="mailto:help@idseq.net"
+              href="mailto:help@czid.org"
               analyticsEventName={helpLinkEvent}
             >
               contact us

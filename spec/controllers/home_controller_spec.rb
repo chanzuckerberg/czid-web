@@ -19,7 +19,7 @@ RSpec.describe HomeController, type: :controller do
         expect(UserMailer).to receive(:account_request_reply).and_call_original
         expect(UserMailer).to receive(:landing_sign_up_email).and_call_original
 
-        params = { signUp: { firstName: "Joe", lastName: "Schmoe", email: "fake@idseq.net", institution: "Fake Institution", usage: "I love metagenomics" } }
+        params = { signUp: { firstName: "Joe", lastName: "Schmoe", email: "fake@czid.org", institution: "Fake Institution", usage: "I love metagenomics" } }
         post :sign_up, params: params
 
         expect(response).to have_http_status :success

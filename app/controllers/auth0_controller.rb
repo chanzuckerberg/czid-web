@@ -93,7 +93,7 @@ class Auth0Controller < ApplicationController
       if current_user.nil?
         LogUtil.log_error("User logged in on Auth0 but entry is missing from database.")
         render(
-          json: "Your account does not exist on this server. Please contact help@idseq.net for assistance.",
+          json: "Your account does not exist on this server. Please contact help@czid.org for assistance.",
           status: :bad_request
         ) and return
       end

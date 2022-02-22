@@ -562,7 +562,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
               </div>
               <a
                 className={cs.linkWithArrow}
-                href="mailto:help@idseq.net"
+                href="mailto:help@czid.org"
                 onClick={() =>
                   logAnalyticsEvent(
                     "CoverageVizBottomSidebar_accession-data-invalid-contact-us_clicked",
