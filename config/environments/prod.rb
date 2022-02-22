@@ -69,7 +69,7 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "idseq-#{Rails.env}"
 
-  config.action_mailer.default_url_options = { host: 'idseq.net' }
+  config.action_mailer.default_url_options = { host: 'czid.org' }
 
   # We configure IDseq to use cloudfront CDN when available.
   config.action_controller.asset_host = ENV['CZID_CLOUDFRONT_ENDPOINT'] || 'czid.org'

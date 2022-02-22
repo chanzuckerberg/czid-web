@@ -70,7 +70,7 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "idseq-#{Rails.env}"
 
-  config.action_mailer.default_url_options = { host: "#{Rails.env}.idseq.net" }
+  config.action_mailer.default_url_options = { host: "#{Rails.env}.czid.org" }
 
   config.hosts << "sandbox.czid.org"
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
