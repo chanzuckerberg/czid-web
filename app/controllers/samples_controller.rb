@@ -24,7 +24,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_v2, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
-                  :contig_taxid_list, :taxid_contigs, :taxid_contigs_download, :taxon_five_longest_reads, :summary_contig_counts, :coverage_viz_summary,
+                  :contig_taxid_list, :taxid_contigs_for_blast, :taxid_contigs_download, :taxon_five_longest_reads, :summary_contig_counts, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow,].freeze
@@ -888,8 +888,8 @@ class SamplesController < ApplicationController
     send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
   end
 
-  # GET /samples/:id/taxid_contigs.json?taxid=:taxid&pipeline_version=:pipeline_version
-  def taxid_contigs
+  # GET /samples/:id/taxid_contigs_for_blast.json?taxid=:taxid&pipeline_version=:pipeline_version
+  def taxid_contigs_for_blast
     permitted_params = params.permit(:taxid, :pipeline_version)
 
     taxid = permitted_params[:taxid]
@@ -907,9 +907,16 @@ class SamplesController < ApplicationController
       result << {}.tap do |formatted_contig|
         formatted_contig[:contig_id] = contig.id
         formatted_contig[:contig_name] = contig.name
-        formatted_contig[:fasta_sequence] = contig.to_fa
         formatted_contig[:num_reads] = contig.read_count
-        formatted_contig[:contig_length] = contig.sequence.length
+
+        contig_length = contig.sequence.length
+        formatted_contig[:contig_length] = contig_length
+
+        formatted_contig[:fasta_sequence] = if contig_length > Contig::BLAST_SEQUENCE_CHARACTER_LIMIT
+                                              contig.fa_header + contig.middle_n_base_pairs(Contig::BLAST_SEQUENCE_CHARACTER_LIMIT)
+                                            else
+                                              contig.to_fa
+                                            end
       end
     end
 

@@ -5,7 +5,7 @@ export const fetchLongestContigsForTaxonId = ({
   pipelineVersion,
   taxonId,
 }) =>
-  get(`/samples/${sampleId}/taxid_contigs.json`, {
+  get(`/samples/${sampleId}/taxid_contigs_for_blast.json`, {
     params: {
       taxid: taxonId,
       pipeline_version: pipelineVersion,

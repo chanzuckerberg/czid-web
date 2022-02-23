@@ -1,5 +1,5 @@
 import { Tooltip } from "czifui";
-import { compact, map, size } from "lodash/fp";
+import { filter, map, reduce, size } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
@@ -15,6 +15,7 @@ import { BLASTN_HELP_LINK } from "~/components/utils/documentationLinks";
 import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
+import Notification from "~ui/notifications/Notification";
 import BlastContigsTable from "./BlastContigsTable";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
@@ -23,6 +24,7 @@ import cs from "./blast_contigs_modal.scss";
 import {
   BLAST_CONTIG_ROW_WIDTH,
   BLAST_CONTIG_HEADER_ROW_WIDTH,
+  BLAST_SEQUENCE_CHARACTER_LIMIT,
   SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY,
 } from "./constants";
 import { prepareBlastQuery } from "./utils";
@@ -40,7 +42,8 @@ const BlastContigsModal = ({
   const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
     false,
   );
-  const [blastUrl, setBlastUrl] = useState("");
+  const [blastUrls, setBlastUrls] = useState([]);
+  const [sequencesAreTooLong, setSequencesAreTooLong] = useState(false);
 
   useEffect(async () => {
     const { contigs } = await fetchLongestContigsForTaxonId({
@@ -53,18 +56,40 @@ const BlastContigsModal = ({
   }, []);
 
   useEffect(() => {
-    const contigSequences = compact(
-      map(
-        contig =>
-          selectedContigIds.has(contig["contig_id"]) &&
-          contig["fasta_sequence"],
-        contigs,
-      ),
-    ).join("");
+    const contigSequences = filter(
+      contig => selectedContigIds.has(contig["contig_id"]),
+      contigs,
+    );
 
-    const blastUrl = prepareBlastQuery({ sequences: contigSequences });
+    const sumOfSequenceLengths = reduce(
+      (sum, contig) => sum + contig["contig_length"],
+      0,
+      contigSequences,
+    );
+    const sequencesAreTooLong =
+      sumOfSequenceLengths > BLAST_SEQUENCE_CHARACTER_LIMIT;
+    setSequencesAreTooLong(sequencesAreTooLong);
 
-    setBlastUrl(blastUrl);
+    // Prepare the BLAST URL(s) for the selected contig sequences
+    let blastUrls = [];
+    if (sequencesAreTooLong) {
+      // SamplesController#taxid_contigs_for_blast will get the middle 7500 base pairs of a sequence if it is longer than 7500 (the NBCI BLAST character limit)
+      blastUrls = map(
+        contig => prepareBlastQuery({ sequences: contig["fasta_sequence"] }),
+        contigSequences,
+      );
+    } else {
+      blastUrls = [
+        prepareBlastQuery({
+          sequences: map(
+            contig => contig["fasta_sequence"],
+            contigSequences,
+          ).join(""),
+        }),
+      ];
+    }
+
+    setBlastUrls(blastUrls);
   }, [selectedContigIds]);
 
   const handleAllContigsSelected = isChecked =>
@@ -120,7 +145,7 @@ const BlastContigsModal = ({
       // Do not show the BlastRedirectionModal if the user selected the
       // "Automatically redirect in the future." option. Instead, automatically
       // redirect them to the BLAST page.
-      openUrlInNewTab(blastUrl);
+      blastUrls.forEach(url => openUrlInNewTab(url));
       logBlastEvent({
         analyticEventName:
           ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED,
@@ -146,7 +171,7 @@ const BlastContigsModal = ({
     shouldAutoRedirectBlastForCurrentSession &&
       autoRedirectBlastForCurrentSession();
 
-    openUrlInNewTab(blastUrl);
+    blastUrls.forEach(url => openUrlInNewTab(url));
 
     logBlastEvent({
       analyticEventName:
@@ -162,28 +187,37 @@ const BlastContigsModal = ({
     analyticEventName,
     automaticallyRedirectedToNCBI,
   }) => {
-    const totalSequenceLengthBlasted = size(
-      compact(
-        map(
-          contig =>
-            selectedContigIds.has(contig["contig_id"]) &&
-            contig["fasta_sequence"],
-          contigs,
-        ),
-      ).join(),
+    const contigsBlasted = filter(
+      contig => selectedContigIds.has(contig["contig_id"]),
+      contigs,
+    );
+    const lengthsOfSequencesBlasted = map(
+      contig => size(contig["fasta_sequence"]),
+      contigsBlasted,
     );
 
     logAnalyticsEvent(analyticEventName, {
       automaticallyRedirectedToNCBI,
-      sequenceLength: totalSequenceLengthBlasted,
+      lengthsOfSequencesBlasted,
       numberOfContigs: size(selectedContigIds),
-      blastUrlLength: size(blastUrl),
+      blastUrlLengths: map(url => size(url), blastUrls),
     });
   };
 
   const autoRedirectBlastForCurrentSession = () => {
     sessionStorage.setItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY, true);
   };
+
+  const renderLongContigNotification = () => (
+    <Notification
+      type="info"
+      displayStyle="flat"
+      className={cs.longContigNotification}
+    >
+      For selected contig(s) that exceeds ~8000 base pairs (bp), up to the
+      middle 8000 bp will be used due to NCBI{`'`}s server limitation.
+    </Notification>
+  );
 
   const renderActions = () => (
     <div className={cs.actions}>
@@ -257,6 +291,7 @@ const BlastContigsModal = ({
           </div>
         </div>
         {renderContigsTable()}
+        {sequencesAreTooLong && renderLongContigNotification()}
         {renderActions()}
       </div>
       {showBlastRedirectionModal && (
@@ -264,6 +299,7 @@ const BlastContigsModal = ({
           open
           onClose={handleRedirectionModalClose}
           onContinue={handleRedirectionModalContinue}
+          shouldOpenMultipleTabs={sequencesAreTooLong}
         />
       )}
     </Modal>

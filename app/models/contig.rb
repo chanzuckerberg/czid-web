@@ -17,7 +17,21 @@ class Contig < ApplicationRecord
   validates :sequence, presence: true
   validates :lineage_json, presence: true
 
+  BLAST_SEQUENCE_CHARACTER_LIMIT = 7500
+
   def to_fa
-    ">#{name}:#{read_count}:#{lineage_json}\n#{sequence}"
+    "#{fa_header}#{sequence}"
+  end
+
+  def fa_header
+    ">#{name}:#{read_count}:#{lineage_json}\n"
+  end
+
+  # Returns the middle n base pairs of a sequence
+  # If n > sequence.length, the sequence is returned
+  def middle_n_base_pairs(n)
+    difference = sequence.length - n
+
+    sequence.slice((difference + 1) / 2, sequence.length - (difference + 1 / 2))
   end
 end

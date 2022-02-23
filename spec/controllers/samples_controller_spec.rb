@@ -765,7 +765,7 @@ RSpec.describe SamplesController, type: :controller do
       end
     end
 
-    describe "GET #taxid_contigs" do
+    describe "GET #taxid_contigs_for_blast" do
       before do
         create(:taxon_lineage, tax_name: "Klebsiella pneumoniae", taxid: 573, genus_taxid: 570, superkingdom_taxid: 2)
         create(:taxon_lineage, tax_name: "Klebsiella", taxid: 570, genus_taxid: 570, superkingdom_taxid: 2)
@@ -807,7 +807,7 @@ RSpec.describe SamplesController, type: :controller do
       end
 
       it "returns up to the 3 longest contigs" do
-        get :taxid_contigs, format: :json, params: { id: @sample.id, taxid: 573, pipeline_version: @pipeline_run.pipeline_version }
+        get :taxid_contigs_for_blast, format: :json, params: { id: @sample.id, taxid: 573, pipeline_version: @pipeline_run.pipeline_version }
 
         expect(response).to have_http_status :success
 

@@ -51,7 +51,7 @@ Rails.application.routes.draw do
       get :metadata
       get :contig_taxid_list
       get :taxid_contigs_download
-      get :taxid_contigs
+      get :taxid_contigs_for_blast
       get :taxon_five_longest_reads
       get :summary_contig_counts
       get :coverage_viz_summary
