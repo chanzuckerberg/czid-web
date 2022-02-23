@@ -400,13 +400,6 @@ class ReportTable extends React.Component {
     const displayAnnotations =
       allowedFeatures.includes(ANNOTATION_FEATURE) && "annotation" in rowData;
 
-    const displayAnnotationPreviews =
-      allowedFeatures.includes(ANNOTATION_FEATURE) &&
-      "species_annotations" in rowData &&
-      (rowData.species_annotations[ANNOTATION_HIT] > 0 ||
-        rowData.species_annotations[ANNOTATION_NOT_A_HIT] > 0 ||
-        rowData.species_annotations[ANNOTATION_INCONCLUSIVE] > 0);
-
     const isDimmed =
       rowData.taxLevel === TAX_LEVEL_SPECIES &&
       rowData.annotation === ANNOTATION_NOT_A_HIT;
@@ -437,27 +430,23 @@ class ReportTable extends React.Component {
             {rowData.taxLevel === TAX_LEVEL_GENUS &&
               (rowData.category ? (
                 <span className={cs.countInfo}>
-                  {`( ${childrenCount} ${getCategoryAdjective(
-                    rowData.category,
-                  )} species`}
-                  {/* Only show a colon if needed */}
-                  {(rowData.pathogens || displayAnnotationPreviews) && (
-                    <span>:</span>
-                  )}
-                  {/* Show pathogen and annotation counts */}
-                  {rowData.pathogens && (
-                    <PathogenPreview tag2Count={rowData.pathogens} />
-                  )}
-                  {displayAnnotations && (
-                    <AnnotationPreview
-                      tag2Count={rowData.species_annotations}
-                    />
-                  )}
+                  {`( `}
+                  <span className={cs.italics}>
+                    {`${childrenCount} ${getCategoryAdjective(
+                      rowData.category,
+                    )} species`}
+                  </span>
+                  {this.renderGenusLevelPreviews({ rowData })}
                   {` )`}
                 </span>
               ) : (
                 <span className={cs.countInfo}>
-                  {`(${childrenCount} species)`}
+                  {`( `}
+                  <span className={cs.italics}>
+                    {`${childrenCount} species`}
+                  </span>
+                  {this.renderGenusLevelPreviews({ rowData })}
+                  {` )`}
                 </span>
               ))}
             <span>
@@ -472,6 +461,30 @@ class ReportTable extends React.Component {
           </div>
         </div>
       )
+    );
+  };
+
+  renderGenusLevelPreviews = ({ rowData }) => {
+    const { allowedFeatures = [] } = this.context || {};
+    const displayAnnotationPreviews =
+      allowedFeatures.includes(ANNOTATION_FEATURE) &&
+      "species_annotations" in rowData &&
+      (rowData.species_annotations[ANNOTATION_HIT] > 0 ||
+        rowData.species_annotations[ANNOTATION_NOT_A_HIT] > 0 ||
+        rowData.species_annotations[ANNOTATION_INCONCLUSIVE] > 0);
+
+    return (
+      <>
+        {/* Only show a colon if needed */}
+        <span className={cs.italics}>
+          {(rowData.pathogens || displayAnnotationPreviews) && <span>:</span>}
+        </span>
+        {/* Show pathogen and annotation counts */}
+        {rowData.pathogens && <PathogenPreview tag2Count={rowData.pathogens} />}
+        {displayAnnotationPreviews && (
+          <AnnotationPreview tag2Count={rowData.species_annotations} />
+        )}
+      </>
     );
   };
 

@@ -41,7 +41,6 @@
   font-size: 18px;
   padding-left: 5px;
   text-align: center;
-  margin-bottom: 3px;
 }
 
 .header {
@@ -115,11 +114,14 @@
       }
 
       .countInfo {
-        font-style: italic;
         font-weight: $font-weight-regular;
         margin-left: $sds-spaces-xs;
         color: $sds-color-gray-500;
         white-space: normal;
+
+        .italics {
+          font-style: italic;
+        }
       }
     }
   }
@@ -175,6 +177,16 @@
   &:hover {
     .hoverActions {
       display: inline-block;
+    }
+
+    // Undim rows on hover
+    &.dimmed * {
+      color: $sds-color-gray-600 !important;
+
+      &:global(.dimRed.label) {
+        background-color: $sds-color-error-600 !important;
+        border-color: $sds-color-error-600 !important;
+      }
     }
   }
 }
