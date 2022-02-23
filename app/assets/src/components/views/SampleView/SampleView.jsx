@@ -1253,6 +1253,7 @@ class SampleView extends React.Component {
     sampleId,
     shouldBlastContigs,
     taxName,
+    taxLevel,
     taxId,
   }) => {
     this.setState({
@@ -1263,6 +1264,7 @@ class SampleView extends React.Component {
         pipelineVersion,
         sampleId,
         taxName,
+        taxLevel,
         taxId,
       },
     });
@@ -2296,6 +2298,7 @@ class SampleView extends React.Component {
             pipelineVersion={get("pipelineVersion", blastData)}
             sampleId={get("sampleId", blastData)}
             taxonName={get("taxName", blastData)}
+            taxonLevel={get("taxLevel", blastData)}
             taxonId={get("taxId", blastData)}
           />
         )}

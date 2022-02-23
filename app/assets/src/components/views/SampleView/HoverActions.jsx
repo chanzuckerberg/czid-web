@@ -104,6 +104,7 @@ const HoverActions = ({
         sampleId,
         shouldBlastContigs: ntContigs > 0,
         taxName,
+        taxLevel,
         taxId,
       });
   };

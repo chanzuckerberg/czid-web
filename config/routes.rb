@@ -52,6 +52,7 @@ Rails.application.routes.draw do
       get :contig_taxid_list
       get :taxid_contigs_download
       get :taxid_contigs
+      get :taxon_five_longest_reads
       get :summary_contig_counts
       get :coverage_viz_summary
       get :coverage_viz_data

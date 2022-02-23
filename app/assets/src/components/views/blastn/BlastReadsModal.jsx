@@ -1,26 +1,119 @@
+import { size } from "lodash/fp";
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { BLASTN_HELP_LINK } from "~/components/utils/documentationLinks";
+import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
+import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
 
 import cs from "./blast_reads_modal.scss";
+import { SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY } from "./constants";
+import { prepareBlastQuery } from "./utils";
 
 const BlastReadsModal = ({
-  open,
   onClose,
-  shortestReadAlignmentLength,
-  longestReadAlignmentLength,
+  open,
+  sampleId,
+  pipelineVersion,
   taxonName,
+  taxonLevel,
+  taxonId,
 }) => {
+  const [shortestAlignmentLength, setShortestAlignmentLength] = useState();
+  const [longestAlignmentLength, setLongestAlignmentLength] = useState();
+  const [reads, setReads] = useState([]);
   const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
     false,
   );
+  const [blastUrl, setBlastUrl] = useState("");
+
+  useEffect(async () => {
+    const {
+      reads,
+      shortestAlignmentLength,
+      longestAlignmentLength,
+    } = await fetchLongestReadsForTaxonId({
+      sampleId,
+      pipelineVersion,
+      taxonId,
+      taxonLevel,
+    });
+    const blastUrl = prepareBlastQuery({ sequences: reads.join("") });
+
+    setShortestAlignmentLength(shortestAlignmentLength);
+    setLongestAlignmentLength(longestAlignmentLength);
+    setReads(reads);
+    setBlastUrl(blastUrl);
+  }, []);
+
+  const handleContinue = () => {
+    const shouldAutoRedirectBlast =
+      JSON.parse(
+        sessionStorage.getItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY),
+      ) || false;
+
+    if (shouldAutoRedirectBlast) {
+      // Do not show the BlastRedirectionModal if the user selected the
+      // "Automatically redirect in the future." option. Instead, automatically
+      // redirect them to the BLAST page.
+      openUrlInNewTab(blastUrl);
+      logBlastEvent({
+        analyticsEventName:
+          ANALYTICS_EVENT_NAMES.BLAST_READS_MODAL_CONTINUE_BUTTON_CLICKED,
+        automaticallyRedirectedToNCBI: true,
+      });
+      showBlastNotification();
+      onClose();
+    } else {
+      logBlastEvent({
+        analyticsEventName:
+          ANALYTICS_EVENT_NAMES.BLAST_READS_MODAL_CONTINUE_BUTTON_CLICKED,
+        automaticallyRedirectedToNCBI: false,
+      });
+      setShowBlastRedirectModal(true);
+    }
+  };
+
+  const logBlastEvent = ({
+    analyticsEventName,
+    automaticallyRedirectedToNCBI,
+  }) => {
+    logAnalyticsEvent(analyticsEventName, {
+      automaticallyRedirectedToNCBI,
+      numberOfReads: size(reads),
+      shortestAlignmentLength,
+      longestAlignmentLength,
+      blastUrlSize: size(blastUrl),
+    });
+  };
+
+  const autoRedirectBlastForCurrentSession = () => {
+    sessionStorage.setItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY, true);
+  };
+
+  const handleRedirectionModalClose = () => setShowBlastRedirectModal(false);
+
+  const handleRedirectionModalContinue = shouldAutoRedirectBlastForCurrentSession => {
+    shouldAutoRedirectBlastForCurrentSession &&
+      autoRedirectBlastForCurrentSession();
+
+    openUrlInNewTab(blastUrl);
+
+    logBlastEvent({
+      analyticsEventName:
+        ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONTINUE_BUTTON_CLICKED,
+      automaticallyRedirectedToNCBI: shouldAutoRedirectBlastForCurrentSession,
+    });
+    showBlastNotification();
+    onClose();
+  };
 
   const renderReadsIdentificationSection = () => (
     <div className={cs.readsIdentification}>
@@ -28,8 +121,8 @@ const BlastReadsModal = ({
         Up to 5 of the longest reads have been identified.
       </div>
       <div className={cs.alignmentRange}>
-        Range of alignment lengths: {shortestReadAlignmentLength}-
-        {longestReadAlignmentLength}
+        Range of alignment lengths: {shortestAlignmentLength}-
+        {longestAlignmentLength}
       </div>
     </div>
   );
@@ -37,11 +130,7 @@ const BlastReadsModal = ({
   const renderActions = () => (
     <div className={cs.actions}>
       <div className={cs.item}>
-        <PrimaryButton
-          text="Continue"
-          rounded
-          onClick={() => setShowBlastRedirectModal(true)}
-        />
+        <PrimaryButton text="Continue" rounded onClick={handleContinue} />
       </div>
       <div className={cs.item}>
         <SecondaryButton text="Cancel" rounded onClick={onClose} />
@@ -82,8 +171,9 @@ const BlastReadsModal = ({
       </div>
       {showBlastRedirectionModal && (
         <BlastRedirectionModal
-          sequences={["still need the reads"]}
-          onClose={() => setShowBlastRedirectModal(false)}
+          open
+          onClose={handleRedirectionModalClose}
+          onContinue={handleRedirectionModalContinue}
         />
       )}
     </Modal>
@@ -93,8 +183,10 @@ const BlastReadsModal = ({
 BlastReadsModal.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func,
-  shortestReadAlignmentLength: PropTypes.number,
-  longestReadAlignmentLength: PropTypes.number,
+  pipelineVersion: PropTypes.string,
+  sampleId: PropTypes.number,
+  taxonId: PropTypes.number,
+  taxonLevel: PropTypes.number,
   taxonName: PropTypes.string,
 };
 

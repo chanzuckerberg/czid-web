@@ -24,7 +24,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_v2, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
-                  :contig_taxid_list, :taxid_contigs, :taxid_contigs_download, :summary_contig_counts, :coverage_viz_summary,
+                  :contig_taxid_list, :taxid_contigs, :taxid_contigs_download, :taxon_five_longest_reads, :summary_contig_counts, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow,].freeze
@@ -945,6 +945,53 @@ class SamplesController < ApplicationController
     send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
   end
 
+  # GET /samples/:id/taxon_five_longest_reads.json?taxid=:taxid&tax_level=:tax_level&pipeline_version=:pipeline_version
+  def taxon_five_longest_reads
+    permitted_params = params.permit(:taxid, :tax_level, :pipeline_version)
+
+    taxid = permitted_params[:taxid].to_i
+    return if HUMAN_TAX_IDS.include? taxid
+
+    pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
+    tax_level = TaxonCount::LEVEL_2_NAME[permitted_params[:tax_level].to_i]
+    s3_file_path = pr.five_longest_reads_fasta_s3("nt.#{tax_level}.#{taxid}")
+
+    begin
+      five_longest_reads = S3Util.get_s3_file(s3_file_path)
+      five_longest_reads_with_headers = five_longest_reads.split(">") # Note: This split gets rid of the '>' for each sequence. We must add it back later on.
+      # Get rid of empty quotes in the first position of the array
+      five_longest_reads_with_headers.shift
+
+      # Calculate shortest and longest alignment reads
+      sequence_detector_regex = Regexp.new('\n((.|\n)*)') # Grabs everything after the first new line '\n' is the read sequence. Everything before the first '\n' is the read header.
+      reads_without_headers = five_longest_reads_with_headers.map do |read_with_header|
+        # Regex match returns an array of two items:
+        # The first item contains the sequence with the newline '\n' prepended
+        # The second item is the sequence without the newline prepended '\n'
+        sequence_detector_regex.match(read_with_header)[1]
+      end
+
+      min_alignment_length, max_alignment_length = determine_min_and_max_alignment_lengths(reads_without_headers)
+
+      response = {
+        # Need to add back the ">" symbol that signifies the start of a read header
+        reads: five_longest_reads_with_headers.map { |r| ">" + r },
+        shortestAlignmentLength: min_alignment_length,
+        longestAlignmentLength: max_alignment_length,
+      }
+
+      render(
+        json: response.to_json,
+        status: :ok
+      )
+    rescue StandardError => err
+      render(
+        json: { error: "An unexpected error has occured", details: err },
+        status: :internal_server_error
+      )
+    end
+  end
+
   def show_taxid_alignment_viz
     @taxon_info = params[:taxon_info].split(".")[0]
     @taxid = @taxon_info.split("_")[2].to_i
@@ -1382,6 +1429,14 @@ class SamplesController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
 
   private
+
+  def determine_min_and_max_alignment_lengths(sequences)
+    sorted_sequences = sequences.map(&:strip).sort_by!(&:length)
+    shortest_sequence = sorted_sequences.first
+    longest_sequence = sorted_sequences.last
+
+    [shortest_sequence.length, longest_sequence.length]
+  end
 
   def clean_taxid_name(pipeline_run, taxid)
     return 'all' if taxid == 'all'

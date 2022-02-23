@@ -1596,6 +1596,11 @@ class PipelineRun < ApplicationRecord
     end
   end
 
+  def five_longest_reads_fasta_s3(taxon_info)
+    # taxon_info example: 'nt.species.573'
+    "#{alignment_viz_output_s3_path}/#{taxon_info}.longest_5_reads.fasta"
+  end
+
   def host_filter_output_s3_path
     step_function? ? sfn_results_path : output_s3_path_with_version
   end

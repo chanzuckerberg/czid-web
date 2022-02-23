@@ -12,6 +12,20 @@ export const fetchLongestContigsForTaxonId = ({
     },
   });
 
+export const fetchLongestReadsForTaxonId = ({
+  sampleId,
+  pipelineVersion,
+  taxonId,
+  taxonLevel,
+}) =>
+  get(`/samples/${sampleId}/taxon_five_longest_reads.json`, {
+    params: {
+      taxid: taxonId,
+      tax_level: taxonLevel,
+      pipeline_version: pipelineVersion,
+    },
+  });
+
 export const createAnnotation = ({ pipelineRunId, taxId, annotationType }) =>
   postWithCSRF(`/annotations.json`, {
     pipeline_run_id: pipelineRunId,

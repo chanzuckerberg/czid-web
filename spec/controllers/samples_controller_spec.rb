@@ -819,6 +819,39 @@ RSpec.describe SamplesController, type: :controller do
         expect(read_counts).to contain_exactly(104, 103, 102)
       end
     end
+
+    describe "#taxon_five_longest_reads" do
+      before do
+        five_longest_reads = ">sequence1/1\nABC\n>sequence2/2\nABC\nDEFG\n>sequence3/1\nABCDEFGHIJK\n>sequence4/2\nABCDEFGHIJKLMN\n>sequence5/1\nABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        project = create(:project, users: [@joe])
+        @sample = create(:sample, project: project)
+        @pipeline_run = create(:pipeline_run,
+                               sample: @sample,
+                               sfn_execution_arn: "fake_sfn_execution_arn",
+                               job_status: "CHECKED",
+                               pipeline_version: 6.10,
+                               wdl_version: "5.0")
+        allow(S3Util).to receive(:get_s3_file).and_return(five_longest_reads)
+      end
+
+      it "should fetch the five longest reads from s3 and determine the shortest & longest alignment lengths" do
+        get :taxon_five_longest_reads, format: :json, params: { id: @sample.id, taxid: 573, taxon_level: 1, pipeline_version: @pipeline_run.pipeline_version }
+
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        reads = json_response["reads"]
+        shortest_alignment_length = json_response["shortestAlignmentLength"]
+        longest_alignment_length = json_response["longestAlignmentLength"]
+
+        expect(reads.length).to eq(5)
+        expect(shortest_alignment_length).to eq(3)
+        expect(longest_alignment_length).to eq(26)
+        # Second sequence has a line break in the middle of it. This test expects the entire sequence to be returned.
+        expect(reads[1]).to eq(">sequence2/2\nABC\nDEFG\n")
+      end
+    end
   end
 
   context "Admin user" do
