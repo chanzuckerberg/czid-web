@@ -199,36 +199,23 @@ const HoverActions = ({
     const HOVER_ACTIONS_DOWNLOAD = {
       key: `download_${params.taxId}`,
       message: "Download Options",
-      iconComponentClass: function DropdownDownload({ className }) {
-        return (
-          <BareDropdown
-            hideArrow
-            onMouseEnter={() => setShowHoverActions(true)}
-            onMouseLeave={() => setShowHoverActions(false)}
-            onClose={() => setShowHoverActions(false)}
-            onBlur={() => setShowHoverActions(false)}
-            onClick={() => setShowHoverActions(false)}
-            trigger={<IconDownloadSmall className={className} />}
-            options={[
-              {
-                text: "Contigs FASTA",
-                value: DOWNLOAD_CONTIGS,
-                disabled: !contigVizEnabled,
-              },
-              {
-                text: "Reads FASTA",
-                value: DOWNLOAD_READS,
-                disabled: !fastaEnabled,
-              },
-            ]}
-            onChange={value => {
-              if (value === DOWNLOAD_CONTIGS) onContigVizClick(params || {});
-              else if (value === DOWNLOAD_READS)
-                onFastaActionClick(params || {});
-              else console.error("Unexpected dropdown value:", value);
-            }}
-          />
-        );
+      iconComponentClass: IconDownloadSmall,
+      options: [
+        {
+          text: "Contigs FASTA",
+          value: DOWNLOAD_CONTIGS,
+          disabled: !contigVizEnabled,
+        },
+        {
+          text: "Reads FASTA",
+          value: DOWNLOAD_READS,
+          disabled: !fastaEnabled,
+        },
+      ],
+      onChange: value => {
+        if (value === DOWNLOAD_CONTIGS) onContigVizClick(params || {});
+        else if (value === DOWNLOAD_READS) onFastaActionClick(params || {});
+        else console.error("Unexpected dropdown value:", value);
       },
       enabled: contigVizEnabled || fastaEnabled,
       disabledMessage: "Downloads Not Available",
@@ -327,12 +314,28 @@ const HoverActions = ({
         <span className={cs.countCircle}>{hoverAction.count}</span>
       ) : null;
 
-      trigger = (
-        <div onClick={onClickFn} className={cs.actionDot}>
-          <IconComponent className={cs.icon} />
-          {count}
-        </div>
-      );
+      // Support for a dropdown menu
+      if (!hoverAction.options) {
+        trigger = (
+          <div onClick={onClickFn} className={cs.actionDot} role="none">
+            <IconComponent className={cs.icon} />
+            {count}
+          </div>
+        );
+      } else {
+        trigger = (
+          <div onClick={onClickFn} className={cs.actionDot} role="none">
+            <BareDropdown
+              hideArrow
+              onOpen={() => setShowHoverActions(true)}
+              onClose={() => setShowHoverActions(false)}
+              trigger={<IconDownloadSmall className={cs.icon} />}
+              options={hoverAction.options}
+              onChange={hoverAction.onChange}
+            />
+          </div>
+        );
+      }
 
       tooltipMessage = hoverAction.message;
     } else {
