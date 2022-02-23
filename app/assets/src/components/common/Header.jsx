@@ -112,6 +112,14 @@ class Header extends React.Component {
           message="Looking for IDseq? You're in the right spot. As of December, our new name is Chan Zuckerberg ID."
           inverted={true}
         />
+        <AnnouncementBanner
+          id="alignment-scalability"
+          visible={announcementBannerEnabled}
+          message={<> We&#x27;re upgrading our pipeline to v7.0 on March 10. Learn more 
+          <ExternalLink href="https://info.chanzuckerberg.com/cz-id-pipeline-update-making-our-pipeline-more-scalable"> here </ExternalLink> </>
+          } 
+          inverted={false}
+        />
         <div className={cs.header}>
           <div className={cs.logo}>
             <a href="/">
