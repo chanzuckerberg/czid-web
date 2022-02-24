@@ -41,3 +41,7 @@
     }
   }
 }
+
+:global(.ui):global(.popup).pathogenLabelPopup {
+  @include font-body-xs;
+}

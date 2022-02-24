@@ -2,8 +2,14 @@
 @import "~styles/themes/elements";
 @import "~czifui/dist/variables";
 
-:global(.ui):global(.popup).annotationPopup {
-  @include font-header-xs;
+:global(.ui):global(.popup) {
+  &.annotationPopup {
+    @include font-header-xs;
+  }
+
+  &.annotationPreviewPopup {
+    @include font-body-xs;
+  }
 }
 
 .annotationIcon {

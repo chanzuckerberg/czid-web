@@ -60,3 +60,13 @@
     }
   }
 }
+
+:global(.ui):global(.popup).hoverActionPopup {
+  &.actionEnabled {
+    @include font-header-xs;
+  }
+
+  &.actionDisabled {
+    @include font-body-xs;
+  }
+}

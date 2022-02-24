@@ -66,6 +66,7 @@ const PathogenLabel = ({ type, color }) => {
   );
   return allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
     <BasicPopup
+      className={cs.pathogenLabelPopup}
       trigger={React.cloneElement(label, {
         onMouseEnter: () =>
           logAnalyticsEvent(ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_HOVERED),

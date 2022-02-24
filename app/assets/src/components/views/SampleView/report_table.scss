@@ -183,6 +183,10 @@
     &.dimmed * {
       color: $sds-color-gray-600 !important;
 
+      .taxonName {
+        color: $sds-color-primary-400 !important;
+      }
+
       &:global(.dimRed.label) {
         background-color: $sds-color-error-600 !important;
         border-color: $sds-color-error-600 !important;

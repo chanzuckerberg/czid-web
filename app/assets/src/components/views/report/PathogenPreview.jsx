@@ -31,6 +31,7 @@ const PathogenPreview = ({ tag2Count }) => {
     );
     return allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
       <BasicPopup
+        className="pathogen-preview-popup"
         trigger={React.cloneElement(display, {
           onMouseEnter: () =>
             logAnalyticsEvent(ANALYTICS_EVENT_NAMES.PATHOGEN_PREVIEW_HOVERED),

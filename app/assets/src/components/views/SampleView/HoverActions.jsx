@@ -351,7 +351,12 @@ const HoverActions = ({
 
     return (
       <BasicPopup
+        className={cx(
+          cs.hoverActionPopup,
+          hoverAction.enabled ? cs.actionEnabled : cs.actionDisabled,
+        )}
         basic={false}
+        inverted={hoverAction.enabled}
         position="top center"
         key={hoverAction.key}
         trigger={React.cloneElement(trigger, {

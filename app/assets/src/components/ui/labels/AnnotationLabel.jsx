@@ -60,7 +60,7 @@ const AnnotationLabel = ({
     label
   ) : (
     <BasicPopup
-      className={isSmall ? "" : cs.annotationPopup} // Bold large label tooltips
+      className={isSmall ? cs.annotationPreviewPopup : cs.annotationPopup}
       trigger={label}
       content={description}
       basic={false}

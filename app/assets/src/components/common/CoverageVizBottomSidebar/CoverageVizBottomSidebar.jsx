@@ -467,6 +467,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
             {hasBlastFeature && (
               <div className={cs.actionIcons}>
                 <BasicPopup
+                  className={cs.actionIconPopup}
                   basic={false}
                   content="BLASTN"
                   position="top center"
@@ -498,6 +499,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   }
                 />
                 <BasicPopup
+                  className={cs.actionIconPopup}
                   basic={false}
                   content="Download Contig FASTA"
                   position="top center"

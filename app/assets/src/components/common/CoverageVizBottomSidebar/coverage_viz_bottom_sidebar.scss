@@ -99,6 +99,10 @@ $genome-viz-spacing: $sds-spaces-xs;
   }
 }
 
+:global(.ui):global(.popup).actionIconPopup {
+  @include font-header-xs;
+}
+
 // Used to style multiple links in different locations in coverage viz sidebar.
 .linkWithArrow {
   @include font-header-xxs;
