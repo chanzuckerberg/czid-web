@@ -11,7 +11,12 @@ import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 
 import cs from "./blast_redirection_modal.scss";
 
-const BlastRedirectionModal = ({ open, onClose, onContinue }) => {
+const BlastRedirectionModal = ({
+  open,
+  onClose,
+  onContinue,
+  shouldOpenMultipleTabs,
+}) => {
   const [shouldRedirectBlast, setShouldRedirectBlast] = useState(false);
 
   const renderActions = () => {
@@ -45,7 +50,7 @@ const BlastRedirectionModal = ({ open, onClose, onContinue }) => {
         <div className={cs.title}>You are now leaving CZ ID.</div>
         <div className={cs.text}>
           By clicking {'"'}Continue{'"'} you agree to send a copy of your
-          sequencing data to NCBI{"'"}s BLAST service,and that you understand
+          sequencing data to NCBI{"'"}s BLAST service, and that you understand
           this may make the data accessible to others. NCBI is a separate
           service from CZ ID. Your data will be subject to their{" "}
           <ExternalLink
@@ -56,6 +61,7 @@ const BlastRedirectionModal = ({ open, onClose, onContinue }) => {
           >
             Conditions of Use
           </ExternalLink>
+          .
         </div>
         <div className={cs.autoRedirect}>
           <Checkbox
@@ -68,6 +74,12 @@ const BlastRedirectionModal = ({ open, onClose, onContinue }) => {
           Automatically redirect in the future.
         </div>
         <div className={cs.actions}>{renderActions()}</div>
+        {shouldOpenMultipleTabs && (
+          <div className={cs.linksOpeningInMultipleTabNotification}>
+            Multiple tabs will open because the NCBI server can only receive
+            about 8000 characters per URL.
+          </div>
+        )}
       </div>
     </Modal>
   );
@@ -77,6 +89,7 @@ BlastRedirectionModal.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func,
   onContinue: PropTypes.func,
+  shouldOpenMultipleTabs: PropTypes.bool,
 };
 
 export default BlastRedirectionModal;

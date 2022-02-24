@@ -214,8 +214,8 @@ const BlastContigsModal = ({
       displayStyle="flat"
       className={cs.longContigNotification}
     >
-      For selected contig(s) that exceeds ~8000 base pairs (bp), up to the
-      middle 8000 bp will be used due to NCBI{`'`}s server limitation.
+      For selected contig(s) that exceeds ~7500 base pairs (bp), up to the
+      middle 7500 bp will be used due to NCBI{`'`}s server limitation.
     </Notification>
   );
 
@@ -275,6 +275,7 @@ const BlastContigsModal = ({
         <div className={cs.useCases}>
           <div className={cs.title}>BLASTN contigs helps you:</div>
           <List
+            itemClassName={cs.listItems}
             listClassName={cs.list}
             listItems={[
               `Confirm hits.`,
@@ -299,7 +300,9 @@ const BlastContigsModal = ({
           open
           onClose={handleRedirectionModalClose}
           onContinue={handleRedirectionModalContinue}
-          shouldOpenMultipleTabs={sequencesAreTooLong}
+          shouldOpenMultipleTabs={
+            sequencesAreTooLong && size(selectedContigIds) > 1
+          }
         />
       )}
     </Modal>

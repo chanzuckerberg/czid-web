@@ -58,4 +58,10 @@
       vertical-align: middle;
     }
   }
+
+  .linksOpeningInMultipleTabNotification {
+    font: $sds-font-body-xs-400-font;
+    margin-top: $sds-spaces-s;
+    color: $sds-color-gray-500;
+  }
 }
