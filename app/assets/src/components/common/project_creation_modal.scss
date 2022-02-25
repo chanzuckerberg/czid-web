@@ -48,7 +48,7 @@
       background-color: $sds-color-gray-100;
       padding: $sds-spaces-l;
       margin-bottom: $sds-spaces-l;
-      border-radius: $border-radius-m;
+      border-radius: $sds-corners-corner-m;
 
       .title {
         @include font-header-xs;
@@ -78,7 +78,7 @@
     align-items: flex-start;
     padding: $sds-spaces-l 0;
     margin-bottom: $sds-spaces-xxs;
-    border-radius: $border-radius-m;
+    border-radius: $sds-corners-corner-m;
     cursor: pointer;
 
     &:hover {

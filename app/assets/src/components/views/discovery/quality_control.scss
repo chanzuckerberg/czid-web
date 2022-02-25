@@ -58,7 +58,7 @@
     .histogramContainer {
       padding: $sds-spaces-xl;
       border: $sds-borders-gray-300;
-      border-radius: $border-radius-m;
+      border-radius: $sds-corners-corner-m;
       width: 100%;
       min-height: calc(#{$img-l} * 2.5);
       min-width: calc(#{$img-l} * 2.5);

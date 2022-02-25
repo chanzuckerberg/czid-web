@@ -59,7 +59,7 @@
 
 .issueGroup {
   margin-top: $sds-spaces-xs;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
 
   &:first-child {
     margin-top: 0;
@@ -94,7 +94,7 @@
   display: flex;
   align-items: center;
   padding: $sds-spaces-m;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   margin-top: $sds-spaces-xs;
 
   &:first-child {

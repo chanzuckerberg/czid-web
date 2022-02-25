@@ -116,7 +116,7 @@
     background-color: $sds-color-gray-white;
     box-shadow: $sds-drop-shadows-shadow-m;
     border: $sds-borders-gray-300;
-    border-radius: $border-radius-m;
+    border-radius: $sds-corners-corner-m;
 
     &:global(.left) {
       .innerMenu {
@@ -157,7 +157,7 @@
   .innerMenu {
     /* Override semantic-ui */
     box-shadow: none !important;
-    border-radius: 0 !important;
+    border-radius: $border-radius-none !important;
     border-top: none !important;
     max-height: 288px;
     overflow: auto;
@@ -165,7 +165,7 @@
     // TODO(mark): Move this to a global CSS file.
     &::-webkit-scrollbar {
       width: 8px;
-      border-radius: $border-radius-s;
+      border-radius: $sds-corners-corner-s;
     }
 
     &::-webkit-scrollbar-track {

@@ -11,13 +11,13 @@
   position: absolute;
   box-shadow: $sds-drop-shadows-shadow-m;
   border: $sds-borders-gray-300;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   background-color: $sds-color-gray-white;
   z-index: 0;
 
   .legend {
     padding: $sds-spaces-s 12px;
-    border-radius: $border-radius-m; // so that corners to do not cover parent corners
+    border-radius: $sds-corners-corner-m; // so that corners to do not cover parent corners
     background-color: $sds-color-gray-white;
     z-index: 1;
     text-align: center;
@@ -37,6 +37,6 @@
     transform: rotate(45deg);
     z-index: -1;
     box-shadow: $sds-drop-shadows-shadow-m;
-    border-radius: 0 0 $border-radius-s 0; // this is different from semantic-ui
+    border-radius: 0 0 $sds-corners-corner-s 0; // this is different from semantic-ui
   }
 }

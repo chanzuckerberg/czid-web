@@ -1,18 +1,18 @@
 @import "~styles/themes/colors";
 @import "~czifui/dist/variables";
 
-// Box-shadows depreciated! Using czifui spaces as of 12/2021
+// Box-shadows depreciated! Using czifui shadows as of 12/2021
 $box-shadow-s: 0 2px 4px 0 rgba(0, 0, 0, 0.25);
 $box-shadow-m: 0 2px 4px 0 rgba(0, 0, 0, 0.15), 0 2px 10px 0 rgba(0, 0, 0, 0.15);
 $box-shadow-l: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
 
-// Corners
+// Corners !depreciated! Using czifui corners as of 2/2022
 $border-radius-l: 20px;
 $border-radius-m: 4px;
 $border-radius-s: 2px;
 $border-radius-none: 0px;
 
-// Borders !depreciated! Using czifui spaces as of 1/2022
+// Borders !depreciated! Using czifui colors as of 1/2022
 $border-primary: 1px solid $primary;
 $border-primary-dark: 1px solid $primary-dark;
 $border-primary-darkest: 1px solid $primary-darkest;

@@ -26,7 +26,7 @@
 .statusBox {
   padding: $sds-spaces-l;
   display: flex;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   margin-bottom: $sds-spaces-l;
 
   .statusIcon {

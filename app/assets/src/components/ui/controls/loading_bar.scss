@@ -5,14 +5,14 @@
 .loadingBarBackground {
   background-color: $sds-color-gray-200;
   height: $sds-spaces-s;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   overflow: hidden;
 
   .loadingBar {
     background-color: $sds-color-primary-400;
     height: $sds-spaces-s;
     width: 0px;
-    border-radius: $border-radius-m;
+    border-radius: $sds-corners-corner-m;
 
     &.showHint {
       min-width: $sds-spaces-xxs;
@@ -28,7 +28,7 @@
 
     .loadingBar {
       height: $sds-spaces-xs;
-      border-radius: $border-radius-m;
+      border-radius: $sds-corners-corner-m;
     }
   }
 

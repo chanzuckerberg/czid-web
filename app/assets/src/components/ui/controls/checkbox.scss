@@ -33,7 +33,7 @@
     width: 16px;
     flex: none;
     border: $sds-borders-gray-300;
-    border-radius: $border-radius-s;
+    border-radius: $sds-corners-corner-s;
     opacity: 100;
 
     &:hover {
@@ -49,7 +49,7 @@
       width: 6px;
       height: 9px;
       border: solid $sds-color-gray-white;
-      border-radius: $border-radius-s;
+      border-radius: $sds-corners-corner-s;
       border-width: 0 2px 2px 0;
       -webkit-transform: rotate(40deg);
       -ms-transform: rotate(40deg);

@@ -14,7 +14,7 @@ $tooltip-tip-size: 8px;
   :global(.mapboxgl-popup-content) {
     padding: 0;
     border: $tooltip-border-width solid $tooltip-border-color;
-    border-radius: $border-radius-m;
+    border-radius: $sds-corners-corner-m;
     border-bottom: none;
     box-shadow: $sds-drop-shadows-shadow-m;
 

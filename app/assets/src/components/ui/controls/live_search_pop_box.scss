@@ -6,13 +6,13 @@
 .liveSearchPopBox {
   &:not(.rectangular) {
     input[type="text"] {
-      border-radius: $border-radius-l;
+      border-radius: $sds-corners-corner-l;
     }
   }
 
   &:not(.rectangular) {
     input[type="text"] {
-      border-radius: $border-radius-m;
+      border-radius: $sds-corners-corner-m;
     }
   }
 

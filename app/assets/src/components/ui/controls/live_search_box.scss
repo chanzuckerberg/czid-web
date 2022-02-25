@@ -8,7 +8,7 @@
     @include font-body-xs;
 
     height: 34px;
-    border-radius: $border-radius-m;
+    border-radius: $sds-corners-corner-m;
     box-sizing: border-box;
     border: $sds-borders-gray-300;
 
@@ -20,14 +20,14 @@
 
   &.rectangular {
     :global(.prompt) {
-      border-radius: $border-radius-m;
+      border-radius: $sds-corners-corner-m;
     }
   }
 
   &:not(.rectangular) {
     :global(.prompt) {
       width: 260px !important;
-      border-radius: $border-radius-l !important;
+      border-radius: $sds-corners-corner-l !important;
     }
   }
 

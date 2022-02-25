@@ -23,7 +23,7 @@ body {
   height: 100%;
   background-size: 100px;
   opacity: 1;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   div {
     text-transform: none;
     font-size: 1.3rem;
@@ -43,7 +43,7 @@ body {
   tbody {
     td {
       i.fa {
-        border-radius: $border-radius-m;
+        border-radius: $sds-corners-corner-m;
         padding: 5px;
         margin: 0 13px;
         color: $sds-color-gray-white;

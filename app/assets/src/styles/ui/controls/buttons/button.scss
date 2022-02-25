@@ -2,7 +2,7 @@
 
 .idseq-ui.button {
   position: relative;
-  border-radius: $border-radius-l;
+  border-radius: $sds-corners-corner-l;
   cursor: pointer;
   font-family: $font-family-default;
   font-size: 13px;
@@ -16,7 +16,7 @@
   vertical-align: middle;
 
   &.rectangular {
-    border-radius: $border-radius-m;
+    border-radius: $sds-corners-corner-m;
   }
 
   &.circular {

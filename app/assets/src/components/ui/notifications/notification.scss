@@ -6,7 +6,7 @@
 .notification {
   @include font-body-xs;
   border-left: 5px solid $sds-color-gray-black;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   box-shadow: $sds-drop-shadows-shadow-s;
   color: $sds-color-gray-black;
   display: flex;

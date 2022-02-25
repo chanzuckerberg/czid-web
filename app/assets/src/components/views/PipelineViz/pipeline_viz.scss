@@ -88,7 +88,7 @@
 .stageButton {
   @include font-caps-xxs;
   background-color: $sds-color-gray-white;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   padding: $sds-spaces-xs $sds-spaces-s;
   cursor: pointer;
   box-shadow: $sds-drop-shadows-shadow-s;
@@ -242,7 +242,7 @@
 
 .openedStage {
   background-color: $sds-color-gray-100;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   padding: 16px 0;
   display: flex;
   flex-direction: column;

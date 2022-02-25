@@ -13,7 +13,7 @@ $break-large: 1460px;
   margin: 0 auto;
   box-shadow: $sds-drop-shadows-shadow-m;
   margin-top: 150px;
-  border-radius: $border-radius-m;
+  border-radius: $sds-corners-corner-m;
   .title {
     padding: 25px 35px;
     p.signup {
@@ -41,7 +41,7 @@ $break-large: 1460px;
     @include font-body-xxs;
     width: 80%;
     background: $sds-color-error-200;
-    border-radius: $border-radius-m;
+    border-radius: $sds-corners-corner-m;
     color: $sds-color-error-400;
     margin: 0 auto;
     padding: $sds-spaces-m 5px;
@@ -53,7 +53,7 @@ $break-large: 1460px;
     @include font-body-xxs;
     width: 80%;
     background: $sds-color-success-200;
-    border-radius: $border-radius-m;
+    border-radius: $sds-corners-corner-m;
     color: $sds-color-success-400;
     margin: 0 auto;
     padding: $sds-spaces-m 5px;
