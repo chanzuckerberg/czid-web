@@ -624,7 +624,7 @@ class ProjectsController < ApplicationController
 
   def shared_project_email_arguments
     {
-      email_subject: 'You have been added to a project on IDseq',
+      email_subject: 'You have been added to a project on CZ ID',
       sharing_user_id: current_user.id,
       shared_project_id: @project.id,
     }

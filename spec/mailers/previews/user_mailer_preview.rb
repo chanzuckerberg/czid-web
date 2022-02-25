@@ -3,7 +3,7 @@ class UserMailerPreview < ActionMailer::Preview
   def added_to_projects_email
     UserMailer.added_to_projects_email(
       User.second.id,
-      email_subject: 'You have been added to a project on IDseq',
+      email_subject: 'You have been added to a project on CZ ID',
       sharing_user_id: User.first.id,
       shared_project_id: Project.first.id
     )
