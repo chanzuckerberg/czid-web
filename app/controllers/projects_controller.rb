@@ -233,7 +233,7 @@ class ProjectsController < ApplicationController
         bins_map = projects.group(
           ActiveRecord::Base.send(
             :sanitize_sql_array,
-            ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `projects`.`created_at`)/:step)", min_date: min_date, step: step]
+            ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `projects`.`created_at`)/:step)", { min_date: min_date, step: step }]
           )
         ).count
         time_bins = (0...MAX_BINS).map do |bucket|
@@ -495,13 +495,14 @@ class ProjectsController < ApplicationController
   end
 
   def add_user
-    params[:user_email_to_add].downcase!
-    @user = User.find_by(email: params[:user_email_to_add])
+    @user = User.find_by(email: add_user_params[:user_email_to_add].downcase)
+
     if @user
       UserMailer.added_to_projects_email(@user.id, shared_project_email_arguments).deliver_now unless @project.user_ids.include? @user.id
     else
-      create_new_user_random_password(params[:user_name_to_add], params[:user_email_to_add])
+      @user = create_new_user_random_password(name: add_user_params[:user_name_to_add], email: add_user_params[:user_email_to_add])
     end
+
     @project.user_ids |= [@user.id]
   end
 
@@ -592,34 +593,16 @@ class ProjectsController < ApplicationController
   private
 
   # Use callbacks to share common setup or constraints between actions.
-  def create_new_user_random_password(name, email)
-    email = email.downcase
+  def create_new_user_random_password(name:, email:)
     Rails.logger.info("Going to create new user via project sharing: #{email}")
-    user_params = { email: email, name: name }
-    @user = User.new(**user_params, created_by_user_id: current_user.id)
 
-    # New flow for account creation on Auth0.
-    if @user.save!
-      # Create the user with Auth0.
-      create_response = Auth0UserManagementHelper.create_auth0_user(user_params)
-      auth0_id = create_response["user_id"]
+    user_params = {
+      email: email,
+      name: name,
+      created_by_user_id: current_user.id,
+    }
 
-      # Get their password reset link so they can set a password.
-      reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_id)
-      reset_url = reset_response["ticket"]
-
-      # Send them an invitation and account activation email.
-      UserMailer.new_auth0_user_new_project(current_user,
-                                            email,
-                                            @project.id,
-                                            reset_url).deliver_now
-    end
-  rescue StandardError => exception
-    LogUtil.log_error(
-      "Failed to send 'new user on project' password instructions to #{email}. #{exception.message}",
-      exception: exception,
-      user_params: user_params
-    )
+    return UserFactoryService.call(current_user: current_user, project_id: @project.id, send_activation: true, **user_params)
   end
 
   def shared_project_email_arguments
@@ -641,6 +624,10 @@ class ProjectsController < ApplicationController
     result[:name] = ProjectsHelper.sanitize_project_name(result[:name]) if result[:name]
     result[:description] = ProjectsHelper.sanitize_project_description(result[:description]) if result[:description]
     result
+  end
+
+  def add_user_params
+    params.permit(:user_email_to_add, :user_name_to_add)
   end
 
   def project_reports_progress_message

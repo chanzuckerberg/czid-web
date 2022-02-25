@@ -675,6 +675,98 @@ RSpec.describe ProjectsController, type: :controller do
         end
       end
 
+      describe "PUT add_user" do
+        let(:name_to_add) { "New User" }
+        let(:email_to_add) { "new_user_email@example.com" }
+        let(:project) { create(:project, :with_sample, users: [@joe]) }
+
+        subject do
+          put :add_user, params: {
+            id: project.id,
+            user_email_to_add: email_to_add,
+            user_name_to_add: name_to_add,
+          }
+        end
+
+        let(:email_message_double) { instance_double(ActionMailer::MessageDelivery) }
+
+        before do
+          allow(email_message_double).to receive(:deliver_now)
+        end
+
+        context "when email does not exist for a user" do
+          before do
+            allow(UserFactoryService).to receive(:call).and_call_original
+
+            # stubs for methods in UserFactoryService - due to the logic in the controller
+            # we have to avoid creating the user as part of the stub, so unfortunately we need to
+            # let the original service run
+            allow(MetricUtil).to receive(:post_to_airtable)
+            allow(Auth0UserManagementHelper).to receive(:create_auth0_user).and_return(
+              { "user_id" => 1 }
+            )
+            allow(Auth0UserManagementHelper).to receive(:get_auth0_password_reset_token).and_return(
+              { "ticket" => "auth0_reset_url" }
+            )
+            allow(UserMailer).to receive(:new_auth0_user_new_project).and_return(email_message_double)
+          end
+
+          it "calls UserFactoryService to create a new user" do
+            expect(UserFactoryService).to receive(:call)
+
+            subject
+          end
+
+          it "sets @user instance variable" do
+            subject
+
+            new_user = assigns(:user)
+            expect(new_user.id).to eq(User.last.id)
+          end
+        end
+
+        context "when email is already tied to a user account" do
+          let(:email_to_add) { create(:user).email }
+
+          it "sets @user instance variable to existing user" do
+            subject
+
+            user_instance_var = assigns(:user)
+            expect(user_instance_var.email).to eq(email_to_add)
+          end
+
+          context "when user is not in project" do
+            it "creates account existing user user" do
+              expect(UserMailer).to receive(:added_to_projects_email).and_return(email_message_double)
+              expect(email_message_double).to receive(:deliver_now)
+              subject
+            end
+
+            it "does not call UserFactoryService to create a new user" do
+              expect(UserFactoryService).not_to receive(:call)
+
+              subject
+            end
+          end
+
+          context "when user is already added to project" do
+            let(:email_to_add) { @joe.email }
+
+            it "does not email existing user" do
+              expect(UserMailer).not_to receive(:added_to_projects_email)
+
+              subject
+            end
+
+            it "does not call UserFactoryService to create a new user" do
+              expect(UserFactoryService).not_to receive(:call)
+
+              subject
+            end
+          end
+        end
+      end
+
       describe "POST validate_sample_names" do
         before do
           @project = create(:project, :with_sample, users: [@joe])

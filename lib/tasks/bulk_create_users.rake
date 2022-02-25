@@ -23,9 +23,9 @@ desc 'Bulk create users'
 #   }
 # ]
 
-# Note: ROLE parameter will be default to 0 (regular user), unless script is modified to give admin privelages.
+# NOTE: ROLE parameter will be default to 0 (regular user), unless script is modified to give admin privileges.
 
-# To run rake task:
+# To run rake task from a rails console:
 #   1. Rails.application.load_tasks
 #   2. Create a new_users_info array
 #   3. Rake::Task['bulk_create_users'].invoke(new_users_info, yourUserIdHere)
@@ -34,31 +34,18 @@ task 'bulk_create_users', [:new_users_info, :current_user_id] => :environment do
   args[:new_users_info].each do |user_info|
     new_user_params = user_info.to_h.symbolize_keys
     new_user_params[:role] = 0
-    new_user_params[:email].downcase!
     send_activation = new_user_params.delete(:send_activation)
 
-    new_user = User.new(**new_user_params, created_by_user_id: args[:current_user_id])
-
-    if new_user.save!
-      # Create the user with Auth0.
-      create_response = Auth0UserManagementHelper.create_auth0_user(**new_user_params.slice(:email, :name, :role))
-
-      if send_activation
-        # Get their password reset link so they can set a password.
-        auth0_id = create_response["user_id"]
-        reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_id)
-        reset_url = reset_response["ticket"]
-
-        # Send them an invitation and account activation email.
-        email = new_user_params[:email]
-        begin
-          UserMailer.account_activation(email, reset_url).deliver_now
-          puts "User #{new_user.id} was created successfully"
-        rescue Net::SMTPAuthenticationError => e
-          puts "SMTP Authentication is failing with #{e.message}"
-          Auth0UserManagementHelper.send_auth0_password_reset_email(email)
-        end
-      end
+    begin
+      UserFactoryService.call(
+        current_user: User.find(args[:current_user_id]),
+        send_activation: send_activation,
+        **new_user_params
+      )
+      puts "User #{new_user.id} was created successfully"
+    rescue Net::SMTPAuthenticationError => e
+      puts "SMTP Authentication is failing with #{e.message}"
+      Auth0UserManagementHelper.send_auth0_password_reset_email(email)
     end
   end
 end

@@ -17,41 +17,21 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
-    new_user_params = user_params.to_h.symbolize_keys
-    new_user_params[:email].downcase!
-    send_activation = new_user_params.delete(:send_activation)
-    new_user(new_user_params)
+    @user = UserFactoryService.call(
+      current_user: current_user,
+      created_by_user_id: current_user.id,
+      **user_params.to_h.symbolize_keys
+    )
 
     respond_to do |format|
-      if @user.save
-        # Create the user with Auth0.
-        create_response = Auth0UserManagementHelper.create_auth0_user(**new_user_params.slice(:email, :name, :role))
-
-        if send_activation
-          # Get their password reset link so they can set a password.
-          auth0_id = create_response["user_id"]
-          reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_id)
-          reset_url = reset_response["ticket"]
-
-          # Send them an invitation and account activation email.
-          email = new_user_params[:email]
-          begin
-            UserMailer.account_activation(email, reset_url).deliver_now
-          rescue Net::SMTPAuthenticationError
-            render(
-              json: ["User was successfully created but SMTP email is not configured. Try manual password reset at #{request.base_url}#{users_password_new_path} To enable SMTP, set environment variables for SMTP_USER and SMTP_PASSWORD."],
-              status: :internal_server_error
-            ) and return
-          end
-        end
-
-        format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
-        format.json { render :show, status: :created, location: root_path }
-      else
-        format.html { render :new }
-        format.json { render json: @user.errors.full_messages, status: :unprocessable_entity }
-      end
+      format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
+      format.json { render :show, status: :created, location: root_path }
     end
+  rescue Net::SMTPAuthenticationError
+    render(
+      json: ["User was successfully created but SMTP email is not configured. Try manual password reset at #{request.base_url}#{users_password_new_path} To enable SMTP, set environment variables for SMTP_USER and SMTP_PASSWORD."],
+      status: :internal_server_error
+    )
   rescue StandardError => err
     render json: [err], status: :unprocessable_entity
   end
