@@ -10,6 +10,7 @@ import {
 } from "lodash/fp";
 import React from "react";
 
+import { Link as RouterLink } from "react-router-dom";
 import {
   logAnalyticsEvent,
   withAnalytics,
@@ -214,7 +215,15 @@ class SamplesView extends React.Component {
               return (
                 <BareDropdown.Item
                   key={option.text}
-                  text={<a href={`${option.value}?${params}`}>{option.text}</a>}
+                  text={
+                    <RouterLink
+                      to={`${option.value}?${params}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {option.text}
+                    </RouterLink>
+                  }
                   onClick={log}
                 />
               );
