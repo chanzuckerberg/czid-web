@@ -441,6 +441,28 @@ export default class FAQPage extends React.Component {
             other services or programs offered, or supported, by CZI.
           </p>
         </Accordion>
+        <Accordion
+          className={cs.question}
+          header={
+            <h3>
+              Where can I learn more information about CZ ID’s commitment to
+              security?
+            </h3>
+          }
+        >
+          <p>
+            The best place to start is CZ ID’s{" "}
+            <a href="/privacy">Privacy Policy</a> and{" "}
+            <a href="/terms">Terms of Use</a>. More technical readers should
+            take a look at the{" "}
+            <a href="/security_white_paper">CZ ID Security White Paper</a>. In
+            this paper, you can find additional clarity on details regarding our
+            infrastructure, application, and physical security, as well as our
+            security governance and policies. If you have additional questions,
+            please feel free to reach out to our team at{" "}
+            <a href="mailto:security@czid.org">security@czid.org</a>.
+          </p>
+        </Accordion>
       </NarrowContainer>
     );
   }
