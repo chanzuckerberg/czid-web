@@ -159,6 +159,7 @@ const BlastContigsModal = ({
         {
           automaticallyRedirectedToNCBI: false,
           numberOfContigs: size(selectedContigIds),
+          sampleId,
         },
       );
       setShowBlastRedirectModal(true);
@@ -201,6 +202,7 @@ const BlastContigsModal = ({
       lengthsOfSequencesBlasted,
       numberOfContigs: size(selectedContigIds),
       blastUrlLengths: map(url => size(url), blastUrls),
+      sampleId,
     });
   };
 

@@ -91,6 +91,7 @@ const BlastReadsModal = ({
       shortestAlignmentLength,
       longestAlignmentLength,
       blastUrlSize: size(blastUrl),
+      sampleId,
     });
   };
 
