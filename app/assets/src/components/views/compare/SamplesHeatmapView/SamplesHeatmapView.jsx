@@ -505,7 +505,21 @@ class SamplesHeatmapView extends React.Component {
     return "highest_" + countType + "_" + metricName;
   }
 
-  fetchHeatmapData() {
+  async fetchHeatmapData() {
+    const { heatmapTs } = this.props;
+    const {
+      presets,
+      species,
+      categories,
+      subcategories,
+      metric,
+      thresholdFilters,
+      taxonsPerSample,
+      readSpecificity,
+      background,
+    } = this.state.selectedOptions;
+    const { sampleIds } = this.state;
+
     // If using client-side filtering, the server should still return info
     // related to removed taxa in case the user decides to add the taxon back.
     const removedTaxonIds = [];
@@ -514,23 +528,38 @@ class SamplesHeatmapView extends React.Component {
       this.lastRequestToken.cancel("Parameters changed");
     }
     this.lastRequestToken = axios.CancelToken.source();
-    return getSampleTaxons(
-      {
-        sampleIds: this.state.sampleIds,
-        removedTaxonIds: removedTaxonIds,
-        presets: this.state.selectedOptions.presets,
-        species: this.state.selectedOptions.species,
-        categories: this.state.selectedOptions.categories,
-        subcategories: this.state.selectedOptions.subcategories,
-        sortBy: this.metricToSortField(this.state.selectedOptions.metric),
-        thresholdFilters: this.state.selectedOptions.thresholdFilters,
-        taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
-        readSpecificity: this.state.selectedOptions.readSpecificity,
-        background: this.state.selectedOptions.background,
-        heatmapTs: this.props.heatmapTs,
-      },
+
+    const fetchDataStart = new Date();
+    const fetchHeatmapDataParams = {
+      sampleIds: sampleIds,
+      removedTaxonIds: removedTaxonIds,
+      presets: presets,
+      species: species,
+      categories: categories,
+      subcategories: subcategories,
+      sortBy: this.metricToSortField(metric),
+      thresholdFilters: thresholdFilters,
+      taxonsPerSample: taxonsPerSample,
+      readSpecificity: readSpecificity,
+      background: background,
+      heatmapTs: heatmapTs,
+    };
+
+    const heatmapData = await getSampleTaxons(
+      fetchHeatmapDataParams,
       this.lastRequestToken.token,
     );
+    const fetchDataEnd = new Date();
+    const loadTimeInMilliseconds = fetchDataEnd - fetchDataStart;
+
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED,
+      {
+        ...fetchHeatmapDataParams,
+        loadTimeInMilliseconds: loadTimeInMilliseconds,
+      },
+    );
+    return heatmapData;
   }
 
   fetchMetadataFieldsBySampleIds() {

@@ -212,6 +212,10 @@ function EventDictionary() {
   this.PROJECT_VISIBILITY_HELP_LINK_CLICKED =
     "PROJECT_VISIBILITY_HELP_LINK_CLICKED";
 
+  /** The user navigated to the samples heatmap view and backend heatmap data is fetched. */
+  this.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED =
+    "SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED";
+
   /** The user ran into an error while loading heatmap data. */
   this.SAMPLES_HEATMAP_VIEW_LOADING_ERROR =
     "SAMPLES_HEATMAP_VIEW_LOADING_ERROR";
