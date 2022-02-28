@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Image } from "semantic-ui-react";
 import { withAnalytics, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { NCBI_BLAST_USAGE_GUIDELINES_LINK } from "~/components/utils/documentationLinks";
+import { NCBI_POLICIES_AND_DISCLAIMERS_LINK } from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
 import Checkbox from "~ui/controls/Checkbox";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
@@ -57,9 +57,9 @@ const BlastRedirectionModal = ({
             analyticEventName={
               ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED
             }
-            href={NCBI_BLAST_USAGE_GUIDELINES_LINK}
+            href={NCBI_POLICIES_AND_DISCLAIMERS_LINK}
           >
-            Conditions of Use
+            Policies and Disclaimers
           </ExternalLink>
           .
         </div>

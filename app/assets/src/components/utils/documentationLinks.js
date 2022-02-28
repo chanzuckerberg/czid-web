@@ -34,7 +34,7 @@ export const BACKGROUND_MODELS_LINK =
   "https://help.czid.org/hc/en-us/articles/360050883054-Background-Models";
 export const CG_QUALITY_CONTROL_LINK =
   "https://help.czid.org/hc/en-us/articles/360049787632-Building-and-analyzing-a-SARS-CoV-2-consensus-genome#Quality-control";
-export const NCBI_BLAST_USAGE_GUIDELINES_LINK =
-  "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=DeveloperInfo";
+export const NCBI_POLICIES_AND_DISCLAIMERS_LINK =
+  "https://www.ncbi.nlm.nih.gov/home/about/policies/";
 export const BLASTN_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/4429814631572-Confirm-hits-using-BLASTN";
