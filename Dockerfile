@@ -19,7 +19,7 @@ RUN apt-get install -y nodejs
 RUN pip3 install --upgrade pip
 
 # Install chamber, for pulling secrets into the container.
-RUN curl -L https://github.com/segmentio/chamber/releases/download/v2.2.0/chamber-v2.2.0-linux-amd64 -o /bin/chamber
+RUN curl -L https://github.com/segmentio/chamber/releases/download/v2.10.8/chamber-v2.10.8-linux-amd64 -o /bin/chamber
 RUN chmod +x /bin/chamber
 
 COPY requirements.txt ./
