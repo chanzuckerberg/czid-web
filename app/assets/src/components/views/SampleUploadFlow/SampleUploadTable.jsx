@@ -1,7 +1,7 @@
 // Lists samples that the user has selected for upload.
 // Allows users to select and unselect samples, and remove unselected samples.
 
-import { difference, size, isEmpty, map, some } from "lodash/fp";
+import { difference, flatten, isEmpty, map, size } from "lodash/fp";
 import React from "react";
 import { SortDirection } from "react-virtualized";
 
@@ -49,14 +49,21 @@ const FILE_TYPE_COLUMN = {
   headerClassName: cs.header,
 };
 
-const FILE_NAMES_COLUMN = {
-  dataKey: "file_names",
+const FILE_NAMES_R1_COLUMN = {
+  dataKey: "file_names_R1",
   flexGrow: 1,
-  width: 100,
+  width: NAME_COLUMN.width,
   label: "Files",
   className: cs.cell,
   headerClassName: cs.header,
   cellRenderer: SampleUploadTableRenderers.renderFileNames,
+};
+
+const FILE_NAMES_R2_COLUMN = {
+  ...FILE_NAMES_R1_COLUMN,
+  dataKey: "file_names_R2",
+  label: "", // R2 column doesn't have a label
+  disableSort: true, // Hide R2 sorting since sorting on R1 == sorting on R2
 };
 
 export default class SampleUploadTable extends React.Component {
@@ -72,14 +79,14 @@ export default class SampleUploadTable extends React.Component {
     }
 
     if (sampleUploadType === "remote" || sampleUploadType === "local") {
-      return [NAME_COLUMN, FILE_NAMES_COLUMN];
+      return [NAME_COLUMN, FILE_NAMES_R1_COLUMN, FILE_NAMES_R2_COLUMN];
     }
   };
 
   removeUnselectedSamples = () => {
     const { samples, onSamplesRemove, selectedSampleIds } = this.props;
     const unselectedSampleIds = difference(
-      map(SELECT_ID_KEY, samples),
+      flatten(map(sample => sample[SELECT_ID_KEY].split(","), samples)),
       Array.from(selectedSampleIds),
     );
 
@@ -88,17 +95,16 @@ export default class SampleUploadTable extends React.Component {
 
   onRowClick = ({ rowData }) => {
     const { onSampleSelect, selectedSampleIds } = this.props;
-    const sampleSelectId = rowData._selectId;
-
-    onSampleSelect(sampleSelectId, !selectedSampleIds.has(sampleSelectId));
-  };
-
-  hasPairedSample = () => {
-    const { samples } = this.props;
-    return some(sample => size(sample.file_names) > 1, samples);
+    // Support rows that contain multiple selection IDs
+    const sampleSelectIds = rowData[SELECT_ID_KEY].split(",");
+    sampleSelectIds.forEach(sampleSelectId => {
+      onSampleSelect(sampleSelectId, !selectedSampleIds.has(sampleSelectId));
+    });
   };
 
   render() {
+    const mapSampleToConcatGroup = {};
+    const selectedSampleIdsConcat = new Set();
     const {
       samples,
       onSampleSelect,
@@ -108,11 +114,22 @@ export default class SampleUploadTable extends React.Component {
 
     if (isEmpty(samples)) return null;
 
+    // Map each sampleId (e.g. "1") to its concatenation group (e.g. "1,2")
+    samples.forEach(sample =>
+      sample._selectId.split(",").forEach(selectId => {
+        mapSampleToConcatGroup[selectId] = sample._selectId;
+      }),
+    );
+    // Convert selected sample IDs (e.g. ["1", "2"]) to the concatenated equivalent (["1,2"])
+    selectedSampleIds.forEach(sampleId => {
+      selectedSampleIdsConcat.add(mapSampleToConcatGroup[sampleId]);
+    });
     return (
       <div className={cs.sampleUploadTable}>
         <div className={cs.detectedMsg}>
           <span className={cs.count}>
-            {size(selectedSampleIds)} of {size(samples)} samples selected.&nbsp;
+            {size(selectedSampleIdsConcat)} of {size(samples)} samples
+            selected.&nbsp;
           </span>
           Select samples that you want to upload. &nbsp;
           <span
@@ -126,12 +143,20 @@ export default class SampleUploadTable extends React.Component {
           className={cs.table}
           columns={this.getColumns()}
           data={samples}
-          defaultRowHeight={this.hasPairedSample() ? 75 : 40}
+          // Default to 40px for non-local (i.e. BaseSpace) uploads
+          defaultRowHeight={({ row }) =>
+            10 + 30 * (row.file_names_R1?.length || 1)
+          }
+          // Reset cached row heights so dynamic heights keep working
+          onColumnSort={() => SampleUploadTableRenderers.cache.clearAll()}
           sortable
-          selectableKey="_selectId"
-          onSelectRow={onSampleSelect}
+          selectableKey={SELECT_ID_KEY}
+          // Support selecting rows containing concatenated samples
+          onSelectRow={(values, checked) =>
+            values.split(",").forEach(value => onSampleSelect(value, checked))
+          }
           onSelectAllRows={onAllSamplesSelect}
-          selected={selectedSampleIds}
+          selected={selectedSampleIdsConcat}
           onRowClick={this.onRowClick}
           defaultSortBy="name"
           defaultSortDirection={SortDirection.ASC}
@@ -147,7 +172,8 @@ SampleUploadTable.propTypes = {
       name: PropTypes.string,
       file_size: PropTypes.number,
       file_type: PropTypes.string,
-      file_names: PropTypes.arrayOf(PropTypes.string),
+      file_names_R1: PropTypes.arrayOf(PropTypes.string),
+      file_names_R2: PropTypes.arrayOf(PropTypes.string),
       basespace_project_name: PropTypes.string,
       _selectId: PropTypes.string,
     }),

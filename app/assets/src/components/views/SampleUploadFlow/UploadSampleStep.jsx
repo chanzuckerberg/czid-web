@@ -42,6 +42,7 @@ import { UserContext } from "~/components/common/UserContext";
 import Tabs from "~/components/ui/controls/Tabs";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+import { LANE_CONCAT_LOCAL_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import IssueGroup from "~ui/notifications/IssueGroup";
@@ -58,7 +59,11 @@ import {
   DEFAULT_MEDAKA_MODEL_OPTION,
 } from "./constants";
 import cs from "./sample_upload_flow.scss";
-import { openBasespaceOAuthPopup } from "./utils";
+import {
+  groupSamplesByLane,
+  openBasespaceOAuthPopup,
+  removeLaneFromName,
+} from "./utils";
 
 const LOCAL_UPLOAD = "local";
 const REMOTE_UPLOAD = "remote";
@@ -144,7 +149,7 @@ class UploadSampleStep extends React.Component {
       selectedWorkflows,
       usedClearLabs,
     } = this.state;
-    const basespaceSamples = this.getSelectedSamples("basespace");
+    const basespaceSamples = this.getSelectedSamples(BASESPACE_UPLOAD);
 
     if (
       event.source === this._window &&
@@ -169,7 +174,7 @@ class UploadSampleStep extends React.Component {
         medakaModel: selectedMedakaModel,
         samples: samplesWithToken,
         technology: selectedTechnology,
-        uploadType: "basespace",
+        uploadType: BASESPACE_UPLOAD,
         wetlabProtocol: selectedWetlabProtocol,
         workflows: selectedWorkflows,
       });
@@ -177,7 +182,7 @@ class UploadSampleStep extends React.Component {
   };
 
   requestBasespaceReadProjectPermissions = () => {
-    const basespaceSamples = this.getSelectedSamples("basespace");
+    const basespaceSamples = this.getSelectedSamples(BASESPACE_UPLOAD);
     const { basespaceOauthRedirectUri, basespaceClientId } = this.props;
 
     // Request permissions to read (i.e. download files) from all source projects.
@@ -428,27 +433,55 @@ class UploadSampleStep extends React.Component {
     const selectedSampleIds = this.getSelectedSampleIds(sampleType);
     const samplesKey = this.getSamplesKey(sampleType);
     return filter(
-      sample => selectedSampleIds.has(sample._selectId),
+      sample => selectedSampleIds.has(sample[SELECT_ID_KEY]),
       this.state[samplesKey],
     );
   };
 
   // Get fields for display in the SampleUploadTable.
   getSampleDataForUploadTable = sampleType => {
-    if (sampleType === "basespace") {
+    const { allowedFeatures = [] } = this.context || {};
+    const hasLaneConcatLocalFeature = allowedFeatures.includes(
+      LANE_CONCAT_LOCAL_FEATURE,
+    );
+
+    if (sampleType === BASESPACE_UPLOAD) {
       return this.state.basespaceSamples;
     }
 
-    if (sampleType === "remote" || sampleType === "local") {
+    if (sampleType === REMOTE_UPLOAD || sampleType === LOCAL_UPLOAD) {
       const samplesKey = this.getSamplesKey(sampleType);
       const samples = this.state[samplesKey];
-      return samples.map(sample => ({
-        ...pick(["name", SELECT_ID_KEY], sample),
-        file_names: map(
+
+      // For local uploads, show how lanes will be concatenated
+      if (sampleType === LOCAL_UPLOAD && hasLaneConcatLocalFeature) {
+        const sampleInfo = [];
+        const groups = groupSamplesByLane(samples);
+        for (let group in groups) {
+          const files = groups[group].files;
+          sampleInfo.push({
+            file_names_R1: groups[group].filesR1.map(file => file.name),
+            file_names_R2: groups[group].filesR2.map(file => file.name),
+            name: removeLaneFromName(files[0].name),
+            // If we concatenate samples 1 through 4, the selectId = "1,2,3,4"
+            [SELECT_ID_KEY]: files.map(file => file[SELECT_ID_KEY]).join(","),
+          });
+        }
+        return sampleInfo;
+      }
+
+      return samples.map(sample => {
+        const fileNames = map(
           file => file.name || file.source,
           sample.input_files_attributes,
-        ).sort(),
-      }));
+        ).sort();
+
+        return {
+          ...pick(["name", SELECT_ID_KEY], sample),
+          file_names_R1: [fileNames[0]],
+          file_names_R2: [fileNames[1]],
+        };
+      });
     }
   };
 
@@ -527,7 +560,7 @@ class UploadSampleStep extends React.Component {
   // Perform sample validation and return the validated samples.
   validateAddedSamples = async (samples, sampleType) => {
     // For non-local samples, we just need to de-dupe the name.
-    if (sampleType !== "local") {
+    if (sampleType !== LOCAL_UPLOAD) {
       return this.validateSampleNames({ samples });
     }
 
@@ -625,7 +658,7 @@ class UploadSampleStep extends React.Component {
     // so we can show a warning.
     this.setState({
       validatingSamples: true,
-      ...(sampleType === "local" ? { removedLocalFiles: [] } : {}),
+      ...(sampleType === LOCAL_UPLOAD ? { removedLocalFiles: [] } : {}),
     });
 
     const newSamplesWithSelectIds = this.addSelectIdToSamples(newSamples);
@@ -658,14 +691,14 @@ class UploadSampleStep extends React.Component {
       validatingSamples: false,
       [samplesKey]: mergedSamples,
       [selectedSampleIdsKey]: mergedSelectedSampleIds,
-      ...(sampleType === "local" ? { removedLocalFiles } : {}),
+      ...(sampleType === LOCAL_UPLOAD ? { removedLocalFiles } : {}),
     });
 
     logAnalyticsEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
       newSamples: validatedNewSamples.length,
       totalSamples: mergedSamples.length,
       sampleType,
-      ...(sampleType === "local"
+      ...(sampleType === LOCAL_UPLOAD
         ? { removedLocalFiles: removedLocalFiles.length }
         : {}),
       ...this.getAnalyticsContext(),
@@ -715,16 +748,28 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       usedClearLabs,
     } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+    const hasLaneConcatLocalFeature = allowedFeatures.includes(
+      LANE_CONCAT_LOCAL_FEATURE,
+    );
 
     if (currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
     } else {
+      let samples = this.getSelectedSamples(currentTab);
+
+      // Provide concatenated lane files for next upload step
+      if (currentTab === LOCAL_UPLOAD && hasLaneConcatLocalFeature) {
+        const groups = groupSamplesByLane(samples);
+        samples = map(group => group.concatenated, groups);
+      }
+
       onUploadSamples({
+        samples,
         clearlabs: usedClearLabs,
         technology: selectedTechnology,
         medakaModel: selectedMedakaModel,
         project: selectedProject,
-        samples: this.getSelectedSamples(currentTab),
         uploadType: currentTab,
         wetlabProtocol: selectedWetlabProtocol,
         workflows: selectedWorkflows,
@@ -795,9 +840,9 @@ class UploadSampleStep extends React.Component {
       case LOCAL_UPLOAD:
         return (
           <LocalSampleFileUpload
-            onChange={samples => this.handleSamplesAdd(samples, "local")}
+            onChange={samples => this.handleSamplesAdd(samples, LOCAL_UPLOAD)}
             project={selectedProject}
-            samples={this.getSelectedSamples("local")}
+            samples={this.getSelectedSamples(LOCAL_UPLOAD)}
             hasSamplesLoaded={size(this.state.localSamples) > 0}
           />
         );
@@ -805,7 +850,7 @@ class UploadSampleStep extends React.Component {
         return (
           <RemoteSampleFileUpload
             project={selectedProject}
-            onChange={samples => this.handleSamplesAdd(samples, "remote")}
+            onChange={samples => this.handleSamplesAdd(samples, REMOTE_UPLOAD)}
             onNoProject={this.handleNoProject}
           />
         );
@@ -813,7 +858,9 @@ class UploadSampleStep extends React.Component {
         return (
           <BasespaceSampleImport
             project={selectedProject}
-            onChange={samples => this.handleSamplesAdd(samples, "basespace")}
+            onChange={samples =>
+              this.handleSamplesAdd(samples, BASESPACE_UPLOAD)
+            }
             accessToken={basespaceAccessToken}
             onAccessTokenChange={this.handleBasespaceAccessTokenChange}
             basespaceClientId={this.props.basespaceClientId}

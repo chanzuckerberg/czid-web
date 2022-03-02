@@ -17,6 +17,7 @@ const Table = ({
   sortable,
   defaultSortBy,
   defaultSortDirection,
+  defaultRowHeight,
   ...props
 }) => {
   const [sortBy, setSortBy] = useState(defaultSortBy);
@@ -36,6 +37,12 @@ const Table = ({
         sortBy,
         sortDirection,
       });
+  };
+
+  const handleGetRowHeight = ({ index }) => {
+    return typeof defaultRowHeight === "function"
+      ? defaultRowHeight({ index, row: sortedData[index] })
+      : defaultRowHeight;
   };
 
   const isSelectAllChecked = () => {
@@ -69,6 +76,7 @@ const Table = ({
   return (
     <BaseTable
       columns={columns}
+      defaultRowHeight={handleGetRowHeight}
       onSelectAllRows={onSelectAllRows}
       onSelectRow={onSelectRow}
       onSort={handleSort}
@@ -105,6 +113,8 @@ Table.propTypes = {
   // Allows you to set a sort on table initialization, but still allows user to change the sort.
   defaultSortBy: PropTypes.string,
   defaultSortDirection: PropTypes.string,
+  // Allows to set a custom row height function that receives the row data, not just the ID
+  defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
 };
 
 export default Table;
