@@ -5,7 +5,7 @@ import React from "react";
 import { logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { openUrl } from "~utils/links";
+import { openUrlInNewTab } from "~utils/links";
 
 import PipelineVersionSelect from "./PipelineVersionSelect";
 import cs from "./workflow_version_header.scss";
@@ -56,9 +56,8 @@ export default function WorkflowVersionHeader({
         !snapshotShareId &&
         mngsWorkflow &&
         get(versionKey, currentRun) &&
-        openUrl(
+        openUrlInNewTab(
           `/samples/${sampleId}/pipeline_viz/${get(versionKey, currentRun)}`,
-          event,
         )
       }
     >
