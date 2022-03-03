@@ -18,7 +18,7 @@ const ReviewPage = ({ metadata, samples }) => {
       (match, hostGenome) => sample[hostGenome] || match,
       null,
     );
-    const isHuman = hostGenomeName.toLowerCase() === "human";
+    const isHuman = hostGenomeName && hostGenomeName.toLowerCase() === "human";
     const containsHostAge = "Host Age" in sample;
     if (isHuman && containsHostAge) {
       // returnHipaaCompliantMetadata requires metadataType to be defined using underscore notation
