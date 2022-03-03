@@ -34,7 +34,7 @@ class SfnPipelineDispatchService
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_MNGS_ARN) || AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
-    @wdl_version = AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
+    @wdl_version = /\d+\.\d+\.\d+/ =~ pipeline_run.pipeline_branch ? pipeline_run.pipeline_branch : AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
     raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
   end
 

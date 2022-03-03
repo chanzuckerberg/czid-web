@@ -19,8 +19,8 @@ const ADMIN_OPTIONS = {
     placeholder: 1000000,
   },
   pipeline_branch: {
-    helpText: "The idseq-dag branch to run the samples on.",
-    placeholder: "master",
+    helpText: "The pipeline_version to run the samples on.",
+    placeholder: "6.9.1",
   },
   alignment_config_name: {
     helpText: "The name of the alignment config to use for these samples.",
