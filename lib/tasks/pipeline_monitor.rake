@@ -46,7 +46,17 @@ class CheckPipelineRuns
         break if @shutdown_requested
 
         Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
-        pr.update_job_status
+
+        # With SFN notifications, the responsibility here is reduced to
+        # dispatching the first stage:
+        if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
+          prs = pr.active_stage
+          if prs && !prs.started? && prs.step_number == 1
+            pr.dispatch_sfn_pipeline
+          end
+        else
+          pr.update_job_status
+        end
       rescue StandardError => exception
         LogUtil.log_error(
           "Updating pipeline run #{pr.id} failed with exception: #{exception.message}",

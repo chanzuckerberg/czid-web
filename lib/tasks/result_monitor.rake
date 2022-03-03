@@ -18,8 +18,10 @@ class MonitorPipelineResults
         PipelineRun.results_in_progress.each do |pr|
           break if @shutdown_requested
 
-          Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
-          pr.monitor_results
+          if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) != "1"
+            Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
+            pr.monitor_results
+          end
         rescue StandardError => exception
           LogUtil.log_error(
             "Failed monitor results for pipeline run #{pr.id}: #{exception.message}",
@@ -33,8 +35,11 @@ class MonitorPipelineResults
         PhyloTree.in_progress.each do |pt|
           break if @shutdown_requested
 
-          Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
-          pt.monitor_results
+          # TODO: Remove this call when deprecating old phylo trees.
+          if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) != "1"
+            Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
+            pr.monitor_results
+          end
         rescue StandardError => exception
           LogUtil.log_error(
             "Failed monitor results for phylo_tree #{pt.id}: #{exception.message}",
