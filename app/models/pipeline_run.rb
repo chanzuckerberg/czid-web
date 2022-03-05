@@ -1140,7 +1140,8 @@ class PipelineRun < ApplicationRecord
         # in order to preserve most of the logic of the old pipeline we decided
         # that this was the least intrusive place (vs. both downstream in run_job>host_filtering_command
         # and upstream)
-        if step_function? && prs.step_number == 1
+        # With SFN notifications, the first stage should have already been dispatched by PipelineMonitor.
+        if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) != "1" && step_function? && prs.step_number == 1
           dispatch_sfn_pipeline
         end
 

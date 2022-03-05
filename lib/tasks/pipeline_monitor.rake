@@ -53,6 +53,7 @@ class CheckPipelineRuns
           prs = pr.active_stage
           if prs && !prs.started? && prs.step_number == 1
             pr.dispatch_sfn_pipeline
+            prs.run_job
           end
         else
           pr.update_job_status

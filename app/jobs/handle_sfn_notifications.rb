@@ -36,6 +36,10 @@ class HandleSfnNotifications
         pr = PipelineRun.find_by(sfn_execution_arn: arn)
         if pr
           pr.update_job_status
+          # pr.async_update_job_status will check if the PipelineRun was set to
+          # a complete/failed state in pr.update_job_status; if so, it will mark
+          # the PipelineRun as finalized.
+          pr.async_update_job_status
           Rails.logger.info("Updated PipelineRun #{pr.id} #{arn} to #{status}")
           pr.monitor_results
           Rails.logger.info("Monitoring results for PipelineRun #{pr.id} #{arn}")
