@@ -1675,11 +1675,19 @@ class PipelineRun < ApplicationRecord
            .where("lineage_json IS NOT NULL")
   end
 
-  def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS)
+  def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS, db = "nt_and_nr")
     contig_ids = []
     contig_lineages(min_contig_reads).each do |c|
       lineage = JSON.parse(c.lineage_json)
-      contig_ids << c.id if lineage.values.flatten.include?(taxid)
+
+      if db.casecmp("NT").zero?
+        contig_ids << c.id if lineage&.[]("NT")&.include?(taxid)
+      elsif db.casecmp("NR").zero?
+        contig_ids << c.id if lineage&.[]("NR")&.include?(taxid)
+      # look through NT, NR, and merged_NT_NR
+      elsif lineage.values.flatten.include?(taxid)
+        contig_ids << c.id
+      end
     end
 
     contigs.where(id: contig_ids).order("read_count DESC")

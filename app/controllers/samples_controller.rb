@@ -896,7 +896,7 @@ class SamplesController < ApplicationController
     return if HUMAN_TAX_IDS.include? taxid.to_i
 
     pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
-    contigs = pr.get_contigs_for_taxid(taxid.to_i)
+    contigs = pr.get_contigs_for_taxid(taxid.to_i, PipelineRun::MIN_CONTIG_READS, "NT")
 
     order_by = sanitize_order_by(Contig, order_by, :read_count)
     order_dir = sanitize_order_dir(order_dir, :desc)
