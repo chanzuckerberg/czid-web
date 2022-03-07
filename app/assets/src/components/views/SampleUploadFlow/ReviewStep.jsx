@@ -1,15 +1,5 @@
 import cx from "classnames";
-import {
-  flatten,
-  flow,
-  get,
-  keyBy,
-  map,
-  mapKeys,
-  mapValues,
-  omit,
-  without,
-} from "lodash/fp";
+import { flatten, get, keyBy, map, mapKeys, without } from "lodash/fp";
 import React from "react";
 
 import {
@@ -40,12 +30,6 @@ import {
 } from "./constants";
 
 import cs from "./sample_upload_flow.scss";
-
-const processMetadataRows = metadataRows =>
-  flow(
-    keyBy(row => row.sample_name || row["Sample Name"]),
-    mapValues(omit(["sample_name", "Sample Name"])),
-  )(metadataRows);
 
 class ReviewStep extends React.Component {
   state = {
@@ -564,7 +548,7 @@ class ReviewStep extends React.Component {
               clearlabs={clearlabs}
               technology={technology}
               medakaModel={medakaModel}
-              metadata={processMetadataRows(metadata.rows)}
+              metadata={metadata}
               onUploadComplete={onUploadComplete}
               project={project}
               samples={samples}
