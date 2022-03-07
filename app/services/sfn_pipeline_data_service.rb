@@ -50,6 +50,7 @@ class SfnPipelineDataService
       # "RunCDHitDup" required for backwards compatibility
       "RunCDHitDup" => "cdhitdup_out",
       "RunIDSeqDedup" => "idseq_dedup_out",
+      "RunCZIDDedup" => "czid_dedup_out",
       "RunLZW" => "lzw_out",
       "RunBowtie2" => "bowtie2_out",
       "RunBowtie2_bowtie2_out" => "bowtie2_out",

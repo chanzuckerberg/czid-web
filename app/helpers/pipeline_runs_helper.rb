@@ -12,7 +12,9 @@ module PipelineRunsHelper
         "priceseq_out" => "Removes low-quality reads",
         # "cdhitdup_out" required for backwards compatibility
         "cdhitdup_out" => "Identifies and collapses duplicate reads",
+        # "idseq_dedup_out" required for backwards compatibiility
         "idseq_dedup_out" => "Identifies and collapses duplicate reads",
+        "czid_dedup_out" => "Identifies and collapses duplicate reads",
         "lzw_out" => "Removes low-complexity reads",
         "bowtie2_out" => "Removes remaining host reads",
         "star_human_out" => "Remove human reads using STAR",
@@ -24,6 +26,7 @@ module PipelineRunsHelper
       "step_names" => {
         "star_out" => "STAR",
         "idseq_dedup_out" => "CZID-dedup",
+        "czid_dedup_out" => "CZID-dedup",
         "lzw_out" => "LZW",
         "bowtie2_out" => "Bowtie2",
         "star_human_out" => "STAR",

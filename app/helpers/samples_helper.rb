@@ -33,7 +33,7 @@ module SamplesHelper
     # reads_after_cdhitdup required for backwards compatibility
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
-                    quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup reads_after_idseq_dedup
+                    quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup reads_after_idseq_dedup reads_after_czid_dedup
                     host_organism notes
                     insert_size_median insert_size_mode insert_size_median_absolute_deviation insert_size_min insert_size_max insert_size_mean insert_size_standard_deviation insert_size_read_pairs]
 
@@ -74,6 +74,7 @@ module SamplesHelper
                         # reads_after_cdhitdup required for backwards compatibility
                         reads_after_cdhitdup: (derived_output[:summary_stats] || {})[:reads_after_cdhitdup] || '',
                         reads_after_idseq_dedup: (derived_output[:summary_stats] || {})[:reads_after_idseq_dedup] || '',
+                        reads_after_czid_dedup: (derived_output[:summary_stats] || {})[:reads_after_czid_dedup] || '',
                         host_organism: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
                         notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '',
                         insert_size_median: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.median ? pipeline_run.insert_size_metric_set.median : '',
@@ -121,8 +122,8 @@ module SamplesHelper
       last_processed_at: last_processed_at,
     }
 
-    # "cdhitdup" required for backwards compatibility
-    dedup_step = job_stats_hash["idseq_dedup_out"] ? "idseq_dedup" : "cdhitdup"
+    # "idseq_dedup" required for backwards compatibility
+    dedup_step = job_stats_hash["czid_dedup_out"] ? "czid_dedup" : "idseq_dedup"
     ["star", "trimmomatic", "priceseq", dedup_step].each do |step|
       result["reads_after_#{step}".to_sym] = (job_stats_hash["#{step}_out"] || {})["reads_after"]
     end
@@ -149,9 +150,9 @@ module SamplesHelper
 
   def compute_compression_ratio(job_stats_hash)
     # job_stats_hash['cdhitdup_out'] required for backwards compatibility
-    idseq_dedup_stats = job_stats_hash['idseq_dedup_out'] || job_stats_hash['cdhitdup_out']
+    czid_dedup_stats = job_stats_hash['czid_dedup_out'] || job_stats_hash['idseq_dedup_out'] || job_stats_hash['cdhitdup_out']
     priceseq_stats = job_stats_hash['priceseq_out']
-    (1.0 * priceseq_stats['reads_after']) / idseq_dedup_stats['reads_after'] unless idseq_dedup_stats.nil? || priceseq_stats.nil?
+    (1.0 * priceseq_stats['reads_after']) / czid_dedup_stats['reads_after'] unless czid_dedup_stats.nil? || priceseq_stats.nil?
   end
 
   def compute_qc_value(job_stats_hash)

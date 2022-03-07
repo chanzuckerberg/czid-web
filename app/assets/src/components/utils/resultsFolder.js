@@ -18,6 +18,8 @@ export const READ_DEDUP_KEYS = [
   "cdhitdup_out",
   "runIdSeqDedup",
   "idseq_dedup_out",
+  "runCZIDDedup",
+  "czid_dedup_out",
 ];
 
 export const RESULTS_FOLDER_ROOT_KEY = "displayedData";

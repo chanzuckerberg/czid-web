@@ -65,7 +65,7 @@ class PipelineRun < ApplicationRecord
   MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
   # CDHITDUP_HIT_FASTA_BASENAME is required for backwards compatibility
   CDHITDUP_HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
-  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.idseq_dedup.priceseqfilter.unmapped.star.fasta'.freeze
+  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.czid_dedup.priceseqfilter.unmapped.star.fasta'.freeze
 
   GSNAP_M8 = "gsnap.m8".freeze
   RAPSEARCH2_M8 = "rapsearch2.m8".freeze
