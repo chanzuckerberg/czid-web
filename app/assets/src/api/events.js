@@ -428,8 +428,11 @@ function EventDictionary() {
   this.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED =
     "QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED";
 
-  /** The user hovered over the Annotations Label on a samples view ReportTable */
+  /** The user hovered over the AnnotationsLabel on a samples view ReportTable. */
   this.ANNOTATION_LABEL_HOVERED = "ANNOTATION_LABEL_HOVERED";
+
+  /** The user clicked a MenuItem within the AnnotationMenu. */
+  this.ANNOTATION_MENU_MENU_ITEM_CLICKED = "ANNOTATION_MENU_MENU_ITEM_CLICKED";
 
   /** The user closed the Project Creation modal in the Upload Sample Step. */
   this.UPLOAD_SAMPLE_STEP_PROJECT_CREATION_MODAL_CLOSED =
@@ -439,6 +442,7 @@ function EventDictionary() {
   this.REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED =
     "REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED";
 
+  /** The user opened the AnnotationMenu within a species or genus row. */
   this.REPORT_TABLE_ANNOTATION_MENU_OPENED =
     "REPORT_TABLE_ANNOTATION_MENU_OPENED";
 }
