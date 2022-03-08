@@ -12,9 +12,6 @@ class ResultMonitorLoader
       output_state.update(state: PipelineRun::STATUS_LOADING)
       pr.send(PipelineRun::LOADERS_BY_OUTPUT[output])
       output_state.update(state: PipelineRun::STATUS_LOADED)
-
-      # Call monitor_results again to check if the run is now complete and all results loaded
-      pr.monitor_results
     rescue StandardError
       # wait for up to 30 seconds. mark as error and restart
       # TODO: revisit this
