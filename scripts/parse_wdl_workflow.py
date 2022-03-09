@@ -32,6 +32,7 @@ import json
 
 # function names we can parse for Apply expressions
 SELECT_ALL = "select_all"
+SELECT_FIRST = "select_first"
 DEFINED = "defined"
 GLOB = "glob"
 
@@ -160,7 +161,7 @@ def parse_get_expression(get_exp):
 
 def parse_apply_expression(apply_exp):
     function_name = str(apply_exp.function_name)
-    if function_name == SELECT_ALL:
+    if function_name == SELECT_ALL or function_name == SELECT_FIRST:
         return parse_array_expression(apply_exp.arguments[0])
     elif function_name == DEFINED:
         return []

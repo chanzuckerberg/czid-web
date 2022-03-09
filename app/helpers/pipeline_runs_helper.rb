@@ -38,7 +38,11 @@ module PipelineRunsHelper
       "stage" => "Align reads to NCBI nucleotide and protein databases.",
       "steps" => {
         "gsnap_out" => "Align remaining reads to the NCBI NT database using GSNAP.",
+        "minimap2_out" => "Align remaining reads to the NCBI NT database using minimap2",
+        "minimap2_call_hits_out" => "Assign accessions from minimap2 to taxon",
         "rapsearch2_out" => "Align remaining reads to the NCBI NR database using RAPSearch2.",
+        "diamond_out" => "Align remaining reads to the NCBI NR database using diamond",
+        "diamond_call_hits_out" => "Assign accessions from diamond to taxon",
         "taxon_count_out" => "Count preliminary taxon hits.",
         "annotated_out" => "Annotate non-host FASTA with preliminary NCBI accession IDs.",
       },

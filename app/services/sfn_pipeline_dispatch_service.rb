@@ -30,11 +30,14 @@ class SfnPipelineDispatchService
   def initialize(pipeline_run)
     @pipeline_run = pipeline_run
     @sample = pipeline_run.sample
-
+    current_user = User.find(@sample.user_id)
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_MNGS_ARN) || AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
     @wdl_version = /\d+\.\d+\.\d+/ =~ pipeline_run.pipeline_branch ? pipeline_run.pipeline_branch : AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
+    if current_user.allowed_feature_list.include?("legacy_pipeline_service")
+      @wdl_version = "6.11.0"
+    end
     raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
   end
 
