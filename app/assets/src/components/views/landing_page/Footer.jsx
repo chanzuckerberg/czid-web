@@ -14,14 +14,6 @@ const Footer = () => {
         </a>
         <div className={cs.topNavMenu}>
           <a
-            href="https://discoveridseq.com"
-            aria-label="See how a local researcher quickly detects the source of a meningitis outbreak in Dhaka, Bangladesh, using CZ ID technology. (opens in new window)"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Experience CZ ID&apos;s Impact
-          </a>
-          <a
             href="https://github.com/chanzuckerberg/czid-workflows"
             aria-label="View the repo for czid-workflows on GitHub (opens in new window)"
             target="_blank"

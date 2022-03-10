@@ -11,6 +11,7 @@ import React, { useContext } from "react";
 import { Route, Switch } from "react-router-dom";
 
 import { UserContext } from "~/components/common/UserContext";
+import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
 import SampleView from "~/components/views/SampleView/SampleView";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
@@ -35,6 +36,9 @@ const DiscoveryViewRouter = ({
   const { userSignedIn } = useContext(UserContext);
   return (
     <Switch>
+      <Route exact path="/impact">
+        <ImpactPage />
+      </Route>
       <Route exact path="/pathogen_list">
         <PathogenListView />
       </Route>

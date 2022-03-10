@@ -1,0 +1,80 @@
+.countryGridContainer {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding-bottom: 60px;
+
+  &Inner {
+    padding: 0 147px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-column-gap: 80px;
+
+    @media (max-width: 1260px) {
+      padding: 0 5%;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    @media (max-width: 992px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .gridItemLine {
+      display: inline-block;
+      height: 1px;
+      width: 20px;
+      background: #cccccc;
+    }
+  }
+}
+
+.gridItem {
+  width: 100%;
+
+  &:first-of-type {
+    .gridItemLine {
+      display: none;
+    }
+  }
+
+  @media (min-width: 768px) {
+    &:nth-of-type(2) {
+      .gridItemLine {
+        display: none;
+      }
+    }
+  }
+
+  @media (min-width: 992px) {
+    &:nth-of-type(3) {
+      .gridItemLine {
+        display: none;
+      }
+    }
+  }
+
+  @media (min-width: 1260px) {
+    &:nth-of-type(4) {
+      .gridItemLine {
+        display: none;
+      }
+    }
+  }
+
+  h3 {
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0.3px;
+  }
+
+  p {
+    font-size: 13px;
+    line-height: 20px;
+    color: #545454;
+  }
+}

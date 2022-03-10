@@ -36,6 +36,13 @@
   font-weight: $font-weight-semibold;
 }
 
+.textLinkActive {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+  text-underline-offset: 8px;
+}
+
 .buttonLink {
   display: inline-block;
   text-align: center;

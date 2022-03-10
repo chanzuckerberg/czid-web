@@ -1,6 +1,7 @@
 class SupportController < ApplicationController
   PUBLIC_ACTIONS = [
     :faqs,
+    :impact,
     :privacy_notice_for_user_research,
     :privacy,
     :terms_changes,
@@ -24,6 +25,11 @@ class SupportController < ApplicationController
   end
 
   def privacy_notice_for_user_research
+    render "home/discovery_view_router"
+  end
+
+  def impact
+    @hide_header = true
     render "home/discovery_view_router"
   end
 

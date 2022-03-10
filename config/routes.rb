@@ -109,6 +109,7 @@ Rails.application.routes.draw do
   # SupportController:
   get 'faqs', to: 'support#faqs'
   get 'privacy_notice_for_user_research', to: "support#privacy_notice_for_user_research"
+  get 'impact', to: "support#impact"
   get 'privacy', to: 'support#privacy'
   get 'terms_changes', to: 'support#terms_changes'
   get 'terms', to: 'support#terms'

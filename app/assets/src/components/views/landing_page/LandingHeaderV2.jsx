@@ -9,6 +9,7 @@ import cs from "./LandingHeaderV2.scss";
 const LandingHeaderV2 = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
+  impactPage,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -35,6 +36,15 @@ const LandingHeaderV2 = ({
         </a>
         <nav className={cs.nav}>
           <span className={cs.hideMobile}>
+            <a
+              className={`${cs.textLink} ${
+                impactPage ? cs.textLinkActive : null
+              }`}
+              href="/impact"
+              aria-label="View the CZ ID impact page"
+            >
+              Impact
+            </a>
             <a
               className={cs.textLink}
               href="http://help.czid.org"
@@ -82,6 +92,16 @@ const LandingHeaderV2 = ({
             <div className={cs.mobileNavLinkContainer}>
               <a
                 className={cs.mobileNavLink}
+                href="/impact"
+                style={menuOpen ? { opacity: "1" } : { opacity: "0" }}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="View the CZ ID impact page (opens in new window)"
+              >
+                Impact
+              </a>
+              <a
+                className={cs.mobileNavLink}
                 href="http://help.czid.org"
                 style={menuOpen ? { opacity: "1" } : { opacity: "0" }}
                 target="_blank"
@@ -122,6 +142,7 @@ const LandingHeaderV2 = ({
 LandingHeaderV2.propTypes = {
   announcementBannerEnabled: PropTypes.bool,
   emergencyBannerMessage: PropTypes.string,
+  impactPage: PropTypes.bool,
 };
 
 export default LandingHeaderV2;
