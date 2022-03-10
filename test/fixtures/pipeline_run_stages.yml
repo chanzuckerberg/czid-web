@@ -35,7 +35,7 @@ public_sample_run_stage_alignment:
   pipeline_run: public_sample_run_with_pipeline_stages
   step_number: 1
   job_command_func: "command"
-  name: "GSNAPL/RAPSEARCH2 alignment"
+  name: "Minimap2/Diamond alignment"
   dag_json: "{\"key2\": \"value2\"}"
 
 public_sample_run_stage_post_processing:
@@ -63,7 +63,7 @@ private_sample_run_stage_alignment:
   pipeline_run: private_sample_run_with_pipeline_stages
   step_number: 1
   job_command_func: "command"
-  name: "GSNAPL/RAPSEARCH2 alignment"
+  name: "Minimap2/Diamond alignment"
   dag_json: "{\"key2\": \"value2\"}"
 
 private_sample_run_stage_post_processing:

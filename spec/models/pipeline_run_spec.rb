@@ -467,7 +467,7 @@ describe PipelineRun, type: :model do
       context "in order" do
         context "and stage 1 reported success" do
           let(:pipeline_run_stages_statuses) { ["SUCCEEDED", nil, nil, nil] }
-          it { is_expected.to have_attributes(job_status: "2.GSNAPL/RAPSEARCH2 alignment-STARTED", finalized: 0) }
+          it { is_expected.to have_attributes(job_status: "2.Minimap2/Diamond alignment-STARTED", finalized: 0) }
         end
         context "and stage 1 reported failure" do
           let(:pipeline_run_stages_statuses) { ["FAILED", nil, nil, nil] }
@@ -493,7 +493,7 @@ describe PipelineRun, type: :model do
       end
       context "and stages 1/3/4 reported successes but missing staging 2 status" do
         let(:pipeline_run_stages_statuses) { ["SUCCEEDED", nil, "SUCCEEDED", "SUCCEEDED"] }
-        it { is_expected.to have_attributes(job_status: "2.GSNAPL/RAPSEARCH2 alignment-STARTED", finalized: 0) }
+        it { is_expected.to have_attributes(job_status: "2.Minimap2/Diamond alignment-STARTED", finalized: 0) }
       end
       context "and all stages reported success" do
         let(:pipeline_run_stages_statuses) { ["SUCCEEDED", "SUCCEEDED", "SUCCEEDED", "SUCCEEDED"] }
@@ -508,7 +508,7 @@ describe PipelineRun, type: :model do
       end
       context "and stage 3 reported failure, stage 1 reported success, but missing stage 2 status" do
         let(:pipeline_run_stages_statuses) { ["SUCCEEDED", nil, "FAILED", nil] }
-        it { is_expected.to have_attributes(job_status: "2.GSNAPL/RAPSEARCH2 alignment-STARTED", finalized: 0) }
+        it { is_expected.to have_attributes(job_status: "2.Minimap2/Diamond alignment-STARTED", finalized: 0) }
       end
     end
   end

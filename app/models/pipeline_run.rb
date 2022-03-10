@@ -142,9 +142,9 @@ class PipelineRun < ApplicationRecord
   # +-------------------------------------------+
   # | 1.Host Filtering-FAILED                   |
   # | 1.Host Filtering-FAILED|READY             |
-  # | 2.GSNAPL/RAPSEARCH alignment-FAILED       |
-  # | 2.GSNAPL/RAPSEARCH alignment-FAILED|READY |
-  # | 2.GSNAPL/RAPSEARCH alignment-RUNNING      |
+  # | 2.Minimap2/Diamond alignment-FAILED       |
+  # | 2.Minimap2/Diamond alignment-FAILED|READY |
+  # | 2.Minimap2/Diamond alignment-RUNNING      |
   # | 3.Post Processing-FAILED                  |
   # | 3.Post Processing-FAILED|READY            |
   # | 4.De-Novo Assembly-FAILED|READY           |

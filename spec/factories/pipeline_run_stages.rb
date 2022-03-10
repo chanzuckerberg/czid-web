@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :pipeline_run_stage, class: PipelineRunStage do
     # Should be one of the four stages:
-    # Host Filtering, GSNAPLgcRAPSEARCH2 alignment,
+    # Host Filtering, Minimap2/Diamond alignment,
     # Post Processing, Experimental
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     step_number { 1 }

@@ -24,7 +24,7 @@ class PipelineRunStage < ApplicationRecord
 
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
-  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH2 alignment'.freeze
+  ALIGNMENT_STAGE_NAME = 'Minimap2/Diamond alignment'.freeze
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze # also known as "assembly"
   EXPT_STAGE_NAME = "Experimental".freeze # Not actually experimental anymore!
 
