@@ -90,6 +90,14 @@
     @include font-body-xxxs;
   }
 
+  .cookieSettings {
+    margin: 0px;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
   p {
     margin-right: $sds-spaces-m;
     margin-bottom: 0px;

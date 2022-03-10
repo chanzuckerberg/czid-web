@@ -1,0 +1,13 @@
+<!-- OneTrust Cookies Consent Notice for czid.org -->
+<% if Rails.env.prod? %>
+  <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="1c26eebb-a1f5-496e-8e19-a26d600cae4f" ></script>
+  <script type="text/javascript">
+  function OptanonWrapper() { }
+  </script>
+<% else %>
+  <!-- OneTrust Cookies Consent Notice for localhost, sandbox, and staging -->
+  <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="1c26eebb-a1f5-496e-8e19-a26d600cae4f-test" ></script>
+  <script type="text/javascript">
+  function OptanonWrapper() { }
+  </script>
+<% end %>

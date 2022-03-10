@@ -1,3 +1,4 @@
+import cx from "classnames";
 import React from "react";
 import IconBiohubLogo from "~/components/ui/icons/IconBiohubLogo";
 import IconCziLogo from "~/components/ui/icons/IconCziLogo";
@@ -69,6 +70,13 @@ const Footer = () => {
             </a>
             <span>|</span>
             <a href="mailto:help@czid.org">Contact us</a>
+            <span>|</span>
+            <span
+              aria-label="View the CZ ID cookie settings (opens in a modal)"
+              className={cx(cs.cookieSettings, "optanon-show-settings")}
+            >
+              Cookie Settings
+            </span>
           </div>
         </div>
         <div className={cs.czLogoContainer}>
