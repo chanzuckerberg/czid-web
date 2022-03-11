@@ -28,7 +28,7 @@ env:
 jobs:
   production-deploy:
     name: Deploy ${{ inputs.source }} to prod
-    if: ${{ inputs.destination }} == 'prod'
+    if: ${{ inputs.destination == 'prod' }} 
     runs-on: [self-hosted, idseq-prod]
     steps:
       - name: Checkout
@@ -47,7 +47,7 @@ jobs:
         run: bin/deploy_automation/deploy_rev.sh -f prod origin/${{ inputs.source }}
   development-deploy:
     name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
-    if: ${{ inputs.destination }} != 'prod'
+    if: ${{ inputs.destination != 'prod' }} 
     runs-on: [self-hosted, idseq-dev]
     steps:
       - name: Checkout
