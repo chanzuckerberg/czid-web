@@ -761,7 +761,7 @@ class UploadSampleStep extends React.Component {
 
   // *** Miscellaneous functions ***
 
-  handleContinue = () => {
+  handleContinue = async () => {
     const { onUploadSamples } = this.props;
     const {
       currentTab,
@@ -786,6 +786,18 @@ class UploadSampleStep extends React.Component {
       if (currentTab === LOCAL_UPLOAD && hasLaneConcatLocalFeature) {
         const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
         samples = map(group => group.concatenated, groups);
+        // Validate names of the grouped samples if there are any samples that need concatenation
+        const shouldValidateNames = samples.some(sample =>
+          sample.input_files_attributes.some(
+            file => file.concatenated && file.concatenated.length > 1,
+          ),
+        );
+        if (shouldValidateNames) {
+          const { samples: validatedSamples } = await this.validateSampleNames({
+            samples,
+          });
+          samples = validatedSamples;
+        }
       }
 
       onUploadSamples({
