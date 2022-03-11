@@ -42,7 +42,7 @@ jobs:
       - name: Install ruby
         uses: actions/setup-ruby@v1
         with:
-          ruby-version: "2.7.5"
+          ruby-version: "2.7"
       - name: Determine Kernel Version
         run: |
           echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
@@ -81,7 +81,7 @@ jobs:
       - name: Install ruby
         uses: actions/setup-ruby@v1
         with:
-          ruby-version: "2.7.5"
+          ruby-version: "2.7"
       - name: Determine Kernel Version
         run: |
           echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
