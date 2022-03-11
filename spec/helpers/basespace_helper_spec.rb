@@ -120,7 +120,7 @@ RSpec.describe BasespaceHelper, type: :helper do
         # If the syscall fails, we should log the error.
         expect(LogUtil).to receive(:log_error).with(
           "Failed to transfer file from basespace to #{fake_s3_path} for #{fake_file_name}: #{fake_std_err}",
-          hash_including(basespace_path: "fake_basespace_path", file_name: "fake_file_name", s3_path: "fake_s3_path")
+          hash_including(basespace_paths: "fake_basespace_path", file_name: "fake_file_name", s3_path: "fake_s3_path")
         ).exactly(1).times
 
         success = helper.upload_from_basespace_to_s3(fake_basespace_path, fake_s3_path, fake_file_name)

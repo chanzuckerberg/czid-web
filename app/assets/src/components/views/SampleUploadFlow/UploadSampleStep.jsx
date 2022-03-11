@@ -42,7 +42,10 @@ import { UserContext } from "~/components/common/UserContext";
 import Tabs from "~/components/ui/controls/Tabs";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import { LANE_CONCAT_LOCAL_FEATURE } from "~/components/utils/features";
+import {
+  LANE_CONCAT_BASESPACE_FEATURE,
+  LANE_CONCAT_LOCAL_FEATURE,
+} from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import IssueGroup from "~ui/notifications/IssueGroup";
@@ -149,6 +152,10 @@ class UploadSampleStep extends React.Component {
       selectedWorkflows,
       usedClearLabs,
     } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+    const hasLaneConcatBaseSpaceFeature = allowedFeatures.includes(
+      LANE_CONCAT_BASESPACE_FEATURE,
+    );
     const basespaceSamples = this.getSelectedSamples(BASESPACE_UPLOAD);
 
     if (
@@ -160,13 +167,19 @@ class UploadSampleStep extends React.Component {
       const accessToken = event.data.basespaceAccessToken;
 
       // Add the access token to each sample. The token will be used on the back-end.
-      const samplesWithToken = map(
+      let samplesWithToken = map(
         sample => ({
           ...sample,
           basespace_access_token: accessToken,
         }),
         basespaceSamples,
       );
+
+      if (hasLaneConcatBaseSpaceFeature)
+        samplesWithToken = groupSamplesByLane(
+          samplesWithToken,
+          BASESPACE_UPLOAD,
+        );
 
       this.props.onUploadSamples({
         clearlabs: usedClearLabs,
@@ -444,8 +457,19 @@ class UploadSampleStep extends React.Component {
     const hasLaneConcatLocalFeature = allowedFeatures.includes(
       LANE_CONCAT_LOCAL_FEATURE,
     );
+    const hasLaneConcatBaseSpaceFeature = allowedFeatures.includes(
+      LANE_CONCAT_BASESPACE_FEATURE,
+    );
 
     if (sampleType === BASESPACE_UPLOAD) {
+      // Show how lanes will be concatenated
+      if (hasLaneConcatBaseSpaceFeature) {
+        return groupSamplesByLane(
+          this.state.basespaceSamples,
+          BASESPACE_UPLOAD,
+        );
+      }
+
       return this.state.basespaceSamples;
     }
 
@@ -456,7 +480,7 @@ class UploadSampleStep extends React.Component {
       // For local uploads, show how lanes will be concatenated
       if (sampleType === LOCAL_UPLOAD && hasLaneConcatLocalFeature) {
         const sampleInfo = [];
-        const groups = groupSamplesByLane(samples);
+        const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
         for (let group in groups) {
           const files = groups[group].files;
           sampleInfo.push({
@@ -760,7 +784,7 @@ class UploadSampleStep extends React.Component {
 
       // Provide concatenated lane files for next upload step
       if (currentTab === LOCAL_UPLOAD && hasLaneConcatLocalFeature) {
-        const groups = groupSamplesByLane(samples);
+        const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
         samples = map(group => group.concatenated, groups);
       }
 

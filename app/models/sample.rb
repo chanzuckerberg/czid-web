@@ -401,14 +401,40 @@ class Sample < ApplicationRecord
     # Only continue if the sample status is CREATED and not yet UPLOADED.
     return unless status == STATUS_CREATED
 
-    files = files_for_basespace_dataset(basespace_dataset_id, basespace_access_token)
+    # If we have comma-separated datasets IDs, that represents the IDs of lanes we want to concatenate
+    basespace_dataset_ids = basespace_dataset_id.split(",")
+    should_concat_lanes = basespace_dataset_ids.size > 1
 
-    # Raise error if fetching the files failed, or we fetched zero files (since we can't proceed with zero files)
-    raise SampleUploadErrors.error_fetching_basespace_files_for_dataset(basespace_dataset_id, name, id) if files.nil?
-    raise SampleUploadErrors.no_files_in_basespace_dataset(basespace_dataset_id, name, id) if files.empty?
+    # Combine URLs for the lanes we want to concatenate
+    files_concat = []
+    basespace_dataset_ids.each_with_index do |dataset_id, dataset_index|
+      files = files_for_basespace_dataset(dataset_id, basespace_access_token)
+
+      # Raise error if fetching the files failed, or we fetched zero files (since we can't proceed with zero files)
+      raise SampleUploadErrors.error_fetching_basespace_files_for_dataset(dataset_id, name, id) if files.nil?
+      raise SampleUploadErrors.no_files_in_basespace_dataset(dataset_id, name, id) if files.empty?
+
+      # Concatenate each read pair separately (i.e. R1 lanes separately from R2 lanes)
+      files.each_with_index do |file, read_index|
+        # The first time, we need to initialize the object
+        if dataset_index == 0
+          # If we're concatenating multiple lanes, remove the lane number from the file name
+          file_name = should_concat_lanes ? file[:name].sub(/_L00[1-8]/, "") : file[:name]
+          files_concat[read_index] = {
+            name: file_name,
+            source_path: file[:source_path],
+            download_path: [file[:download_path]],
+          }
+        # Otherwise, just append
+        else
+          files_concat[read_index][:source_path] << "," << file[:source_path]
+          files_concat[read_index][:download_path].push(file[:download_path])
+        end
+      end
+    end
 
     # Retry uploading three times, in case of transient network failures.
-    files.each do |file|
+    files_concat.each do |file|
       max_tries = 3
       try = 0
       # Use exponential backoff in case the issue is overload on Illumina servers.

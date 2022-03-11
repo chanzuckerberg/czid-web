@@ -1,4 +1,4 @@
-import { groupBy, maxBy, sortBy } from "lodash/fp";
+import { groupBy, maxBy, sortBy, sum } from "lodash/fp";
 
 import { openUrlInPopupWindow } from "~/components/utils/links";
 import { getURLParamString } from "~/helpers/url";
@@ -61,7 +61,35 @@ export const removeLaneFromName = name => {
   return name.replace(/_L00[1-8]/, "");
 };
 
-export const groupSamplesByLane = samples => {
+export const groupSamplesByLane = (samples, sampleType) => {
+  // BaseSpace uploads can't use the same logic as local uploads because data format is different:
+  // BaseSpace groups R1/R2 for us, and we need to track dataset IDs and send them to the backend,
+  // where concatenation happens (with local uploads, concatenation happens in the browser).
+  if (sampleType === "basespace") {
+    const groups = groupBy(sample => {
+      const name = removeLaneFromName(sample.name);
+      const fileType = sample.file_type;
+      const bsProjectId = sample.basespace_project_id;
+      return `${name}:${fileType}:${bsProjectId}`;
+    }, samples);
+
+    const sampleInfo = [];
+    for (let group in groups) {
+      const files = groups[group];
+      sampleInfo.push({
+        ...files[0], // Most information is identical for all lanes
+        name: removeLaneFromName(files[0].name),
+        basespace_dataset_id: files
+          .map(file => file.basespace_dataset_id)
+          .join(","), // Track dataset IDs of each lane
+        file_size: sum(files.map(file => file.file_size)),
+        _selectId: files.map(file => file._selectId).join(","),
+      });
+    }
+
+    return sampleInfo;
+  }
+
   // Group samples by lanes *and* read pairs, e.g. if a user chooses the files
   // L1_R1, L1_R2, L2_R1, don't group them because we're missing L2_R2.
   const groups = groupBy(sample => {

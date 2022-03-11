@@ -170,19 +170,22 @@ module BasespaceHelper
     end
   end
 
-  def upload_from_basespace_to_s3(basespace_path, s3_path, file_name)
+  def upload_from_basespace_to_s3(basespace_paths, s3_path, file_name)
+    # Make sure lanes are concatenated in ascending order (Lane 1 -> 8)
+    basespace_paths.sort! if basespace_paths.is_a?(Array)
+
     # Run the piped commands and save stderr
     success, stderr = Syscall.pipe(
       # Don't show the cURL progress bar, but do show any errors.
       # Fail if the HTTP status code is an error.
-      ["curl", "--fail", "-s", "--show-error", basespace_path],
+      ["curl", "--fail", "-s", "--show-error", *basespace_paths],
       ["aws", "s3", "cp", "-", "#{s3_path}/#{file_name}"]
     )
 
     unless success
       LogUtil.log_error(
         "Failed to transfer file from basespace to #{s3_path} for #{file_name}: #{stderr}",
-        basespace_path: basespace_path,
+        basespace_paths: basespace_paths,
         s3_path: s3_path,
         file_name: file_name
       )
