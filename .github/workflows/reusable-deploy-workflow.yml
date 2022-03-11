@@ -42,10 +42,6 @@ jobs:
           sudo apt-add-repository ppa:brightbox/ruby-ng
           sudo apt-get update
           sudo apt-get install -y ruby2.7
-      - name: Install Ruby Dependencies
-        run: |
-          gem install bundler
-          bundle install --jobs 4 --retry 3
       - name: Deploy ${{ inputs.source }} to production
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }}
@@ -68,10 +64,6 @@ jobs:
           sudo apt-add-repository ppa:brightbox/ruby-ng
           sudo apt-get update
           sudo apt-get install -y ruby2.7
-      - name: Install Ruby Dependencies
-        run: |
-          gem install bundler
-          bundle install --jobs 4 --retry 3
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }}
