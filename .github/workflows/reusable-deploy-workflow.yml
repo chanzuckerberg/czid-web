@@ -40,7 +40,7 @@ jobs:
           curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
           sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
       - name: Deploy ${{ inputs.source }} to production
-        if: !${{ inputs.force }}
+        if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }}
       - name: Force deploy ${{ inputs.source }} to production
         if: ${{ inputs.force }}
@@ -59,7 +59,7 @@ jobs:
           curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
           sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
-        if: !${{ inputs.force }}
+        if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }}
       - name: Force deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ inputs.force }}

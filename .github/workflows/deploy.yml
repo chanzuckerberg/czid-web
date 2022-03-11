@@ -22,4 +22,4 @@ jobs:
     with:
       source: ${{ github.event.inputs.source }}
       destination: ${{ github.event.inputs.destination }}
-      force: ${{ github.event.inputs.force }}
+      force: ${{ github.event.inputs.force }} == 'true'
