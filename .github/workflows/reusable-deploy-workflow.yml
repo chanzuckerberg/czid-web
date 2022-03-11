@@ -1,0 +1,66 @@
+name: Resuable deploy workflow
+
+on: 
+  workflow_call:
+    inputs:
+      source:
+        required: true
+        type: string
+      destination: 
+        required: true
+        type: string
+      force:
+        default: 'false'
+        required: false
+        type: boolean
+
+env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # GITHUB_TOKEN is provided by Actions and can create deployment objects, but these objects won't trigger workflows.
+    # A separate token, bound to a specific developer with access to the repo, is required to create GitHub deployment
+    # objects that can trigger a deployment workflow. The secret for this token (with repo_deployment scope) is created in
+    # https://github.com/settings/tokens and can be managed in https://github.com/chanzuckerberg/idseq/settings/secrets.
+    DEBIAN_FRONTEND: noninteractive
+    GH_CLI_VERSION: 0.11.1
+    LC_ALL: C.UTF-8
+    LANG: C.UTF-8
+  
+jobs:
+  production-deploy:
+    name: Deploy ${{ inputs.source }} to prod
+    if: ${{ inputs.destination }} == 'prod'
+    runs-on: [self-hosted, idseq-prod]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install release script dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie curl
+          curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
+          sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
+      - name: Deploy ${{ inputs.source }} to production
+        if: ${{ inputs.force }} == 'false'
+        run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }}
+      - name: Force deploy ${{ inputs.source }} to production
+        if: ${{ inputs.force }} == 'true'
+        run: bin/deploy_automation/deploy_rev.sh -f prod origin/${{ inputs.source }}
+  development-deploy:
+    name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
+    if: ${{ inputs.destination }} != 'prod'
+    runs-on: [self-hosted, idseq-dev]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install release script dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie git curl
+          curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
+          sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
+      - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
+        if: ${{ inputs.force }} == 'false'
+        run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }}
+      - name: Force deploy ${{ inputs.source }} to ${{ inputs.destination }}
+        if: ${{ inputs.force }} == 'true'
+        run: bin/deploy_automation/deploy_rev.sh -f ${{ inputs.destination }} origin/${{ inputs.source }}

@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: Source branch you want to deploy changes from
+        required: true
+      destination:
+        description: Destination branch you want to deploy to (e.g. sandbox)
+        required: true
+      release_notes:
+        description: Reason for the release (scheduled, hotfix, issue ID, etc.)
+      force:
+        description: Force release (set to `true` to release even if checks fail)
+        default: 'false'
+
+jobs:
+  run_deploymnet:
+    name: Deploy ${{ github.event.inputs.source }} to ${{ github.event.inputs.destination }}
+    uses: ./.github/workflows/reusable-deploy-workflow.yml
+    with:
+      source: ${{ github.event.inputs.source }}
+      destination: ${{ github.event.inputs.destination }}
+      force: ${{ github.event.inputs.force }}

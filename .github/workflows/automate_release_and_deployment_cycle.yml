@@ -1,0 +1,23 @@
+name: Automate regular release and deployment cycle
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-deployment-prerequisites:
+    runs-on: [self-hosted, idseq-dev]
+    steps:
+      - name: Update release fix checklist
+        run:  ./bin/deploy_automation/update_release_checklist.sh
+      - name: Automate release cycle
+        run:  ./bin/deploy_automation/automate_release_cycle.sh
+  deploy-staging-to-prod:
+    uses: ./.github/workflows/reusable-deploy-workflow.yml
+    with:
+      source: staging
+      destination: prod
+  deploy-main-to-staging:
+    uses: ./.github/workflows/reusable-deploy-workflow.yml
+    with:
+      source: main
+      destination: staging
