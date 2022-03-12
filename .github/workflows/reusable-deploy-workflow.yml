@@ -36,6 +36,22 @@ jobs:
       - uses: actions/setup-ruby@v1
         with:
           ruby-version: "2.7"
+      - name: Determine Kernel Version
+        run: |
+          echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
+      - name: Cache Ruby Dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          # Include kernel version for under-the-hood gem changes:
+          key: ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems
+      - name: Install Ruby Dependencies
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
       - name: Install release script dependencies
         run: |
           sudo apt-get -qq update
@@ -48,6 +64,7 @@ jobs:
       - name: Force deploy ${{ inputs.source }} to production
         if: ${{ inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh -f prod origin/${{ inputs.source }}
+
   development-deploy:
     name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
     if: ${{ inputs.destination != 'prod' }} 
@@ -64,6 +81,22 @@ jobs:
           sudo apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie git curl
           curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
           sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
+      - name: Determine Kernel Version
+        run: |
+          echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
+      - name: Cache Ruby Dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          # Include kernel version for under-the-hood gem changes:
+          key: ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.KERNEL_VERSION }}-gems
+      - name: Install Ruby Dependencies
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }}
