@@ -36,6 +36,8 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "2.7"
+        env:
+          ImageOS: ubuntu20
       - name: Determine Kernel Version
         run: |
           echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
@@ -75,6 +77,8 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "2.7"
+        env:
+          ImageOS: ubuntu20
       - name: Install release script dependencies
         run: |
           sudo apt-get -qq update
