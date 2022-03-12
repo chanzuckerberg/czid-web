@@ -33,15 +33,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: "2.7"
       - name: Install release script dependencies
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie curl
           curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
           sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
-          sudo apt-add-repository ppa:brightbox/ruby-ng
-          sudo apt-get update
-          sudo apt-get install -y ruby2.7
       - name: Deploy ${{ inputs.source }} to production
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }}
@@ -55,15 +55,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: "2.7"
       - name: Install release script dependencies
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie git curl
           curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
           sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
-          sudo apt-add-repository ppa:brightbox/ruby-ng
-          sudo apt-get update
-          sudo apt-get install -y ruby2.7
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }}
