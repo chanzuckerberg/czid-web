@@ -152,13 +152,14 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-    - name: Check the Lockfile Version
-      run: |
-        VERSION=`cat package-lock.json | jq '.lockfileVersion'`
-        if [ "$VERSION" -lt "2"  ]; then
-          echo "Check the lockfileVersion in package-lock.json."
-          exit 1
-        fi
+    # re-enable when we upgrade node to v15+ and npm to v7+
+    # - name: Check the Lockfile Version
+    #   run: |
+    #     VERSION=`cat package-lock.json | jq '.lockfileVersion'`
+    #     if [ "$VERSION" -lt "2"  ]; then
+    #       echo "Check the lockfileVersion in package-lock.json."
+    #       exit 1
+    #     fi
     - name: Switch git to use HTTP
       # See: https://github.com/actions/setup-node/issues/214#issuecomment-842538631
       run: >

@@ -60,6 +60,27 @@ RSpec.describe "Sample request", type: :request do
       end
 
       describe "when we create a sample via sample upload flow" do
+        describe "sample input files" do
+          it "returns input file attributes" do
+            post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+            expect(response.content_type).to include("application/json")
+            expect(response).to have_http_status(:ok)
+            json_response = JSON.parse(response.body)
+
+            resp_input_files = json_response["samples"][0]["input_files"]
+
+            resp_input_files.each do |resp_input_file|
+              input_file = InputFile.find(resp_input_file["id"])
+              expect(resp_input_file["id"]).to eq(input_file.id)
+              expect(resp_input_file["name"]).to eq(input_file.name)
+              expect(resp_input_file["presigned_url"]).to eq(input_file.presigned_url)
+              expect(resp_input_file["s3_bucket"]).to eq(ENV["SAMPLES_BUCKET_NAME"])
+              expect(resp_input_file["s3_file_path"]).to eq(input_file.file_path)
+            end
+          end
+        end
+
         it "should keep pipeline_execution_strategy flag nil in the sample when no flag is passed" do
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 

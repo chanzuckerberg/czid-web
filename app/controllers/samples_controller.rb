@@ -610,6 +610,27 @@ class SamplesController < ApplicationController
     warn_if_large_bulk_upload(samples)
 
     resp = { samples: samples, sample_ids: samples.pluck(:id), errors: errors }
+
+    if client == "web" && samples.any?
+      web_samples = samples.map do |sample|
+        input_files = sample.input_files.map do |input_file|
+          {
+            id: input_file.id,
+            name: input_file.name,
+            presigned_url: input_file.presigned_url,
+            s3_bucket: ENV["SAMPLES_BUCKET_NAME"],
+            s3_file_path: input_file.file_path,
+          }
+        end
+        {
+          id: sample.id,
+          name: sample.name,
+          input_files: input_files,
+        }
+      end
+      resp = { samples: web_samples, sample_ids: samples.pluck(:id), errors: errors }
+    end
+
     if client != "web" && samples.any?
       v2_samples = samples.map do |sample|
         input_files = sample.input_files.map do |input_file|
@@ -654,7 +675,7 @@ class SamplesController < ApplicationController
     end
     credentials = get_upload_credentials([@sample])[:credentials]
     respond_to do |format|
-      format.json { render json: credentials }
+      format.json { render json: { aws_region: ENV["AWS_REGION"] }.merge(credentials) }
     end
   end
 
@@ -965,7 +986,7 @@ class SamplesController < ApplicationController
 
     begin
       five_longest_reads = S3Util.get_s3_file(s3_file_path)
-      five_longest_reads_with_headers = five_longest_reads.split(">") # Note: This split gets rid of the '>' for each sequence. We must add it back later on.
+      five_longest_reads_with_headers = five_longest_reads.split(">") # NOTE: This split gets rid of the '>' for each sequence. We must add it back later on.
       # Get rid of empty quotes in the first position of the array
       five_longest_reads_with_headers.shift
 

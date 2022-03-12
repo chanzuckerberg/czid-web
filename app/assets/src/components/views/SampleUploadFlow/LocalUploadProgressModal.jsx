@@ -1,23 +1,30 @@
+import { S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import cx from "classnames";
 import {
-  isEmpty,
-  filter,
-  map,
-  sum,
-  zipObject,
-  times,
   constant,
-  size,
+  filter,
   find,
+  isEmpty,
+  map,
+  size,
+  sum,
+  times,
+  zipObject,
 } from "lodash/fp";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import {
+  completeSampleUpload,
+  getUploadCredentials,
   initiateBulkUploadLocalWithMetadata,
+  startUploadHeartbeat,
   uploadSampleFilesToPresignedURL,
 } from "~/api/upload";
+import { UserContext } from "~/components/common/UserContext";
 import LoadingBar from "~/components/ui/controls/LoadingBar";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { LOCAL_MULTIPART_UPLOADS_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
 import { logError } from "~/components/utils/logUtil";
 import PropTypes from "~/components/utils/propTypes";
@@ -48,13 +55,17 @@ const LocalUploadProgressModal = ({
   wetlabProtocol,
   workflows,
 }) => {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
+
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
   const [locallyCreatedSamples, setLocallyCreatedSamples] = useState([]);
   const [retryingSampleUpload, setRetryingSampleUpload] = useState(false);
-
   const [sampleUploadPercentages, setSampleUploadPercentages] = useState({});
   const [sampleUploadStatuses, setSampleUploadStatuses] = useState({});
   const [uploadComplete, setUploadComplete] = useState(false);
+
+  let sampleFilePercentages = {};
 
   useEffect(() => {
     initiateUploadLocal();
@@ -100,49 +111,63 @@ const LocalUploadProgressModal = ({
     }));
   };
 
+  // For AWS SDK Upload lib
+  const updateSampleFilePercentage = ({
+    sampleName,
+    s3Key,
+    percentage = 0,
+    fileSize = null,
+  }) => {
+    const newSampleKeyState = { percentage };
+    if (fileSize) {
+      newSampleKeyState.size = fileSize;
+    }
+
+    const newSampleFileState = {
+      ...sampleFilePercentages[sampleName],
+      [s3Key]: {
+        ...(sampleFilePercentages[sampleName] &&
+          sampleFilePercentages[sampleName][s3Key]),
+        ...newSampleKeyState,
+      },
+    };
+
+    sampleFilePercentages = {
+      ...sampleFilePercentages,
+      [sampleName]: newSampleFileState,
+    };
+
+    updateSampleUploadPercentage(
+      sampleName,
+      calculatePercentageForSample(sampleFilePercentages[sampleName]),
+    );
+  };
+
+  const calculatePercentageForSample = sampleFilePercentage => {
+    const uploadedSize = sum(
+      map(key => (key.percentage || 0) * key.size, sampleFilePercentage),
+    );
+
+    const totalSize = sum(map(progress => progress.size, sampleFilePercentage));
+
+    return uploadedSize / totalSize;
+  };
+
+  // callbacks for uploading to pre-signed URLs
   const getUploadProgressCallbacks = () => {
     return {
       onSampleUploadProgress: (sample, percentage) => {
         updateSampleUploadPercentage(sample.name, percentage);
       },
-      onSampleUploadError: (sample, error) => {
-        logError({
-          message:
-            "UploadProgressModal: Local sample upload error to S3 occured",
-          details: {
-            sample,
-            error,
-          },
-        });
-        updateSampleUploadStatus(sample.name, "error");
-        logUploadStepError({
-          step: "sampleUpload",
-          erroredSamples: 1,
-          uploadType,
-        });
-      },
+      onSampleUploadError: handleSampleUploadError,
       onSampleUploadSuccess: sample => {
         updateSampleUploadStatus(sample.name, "success");
       },
-      onMarkSampleUploadedError: sample => {
-        logError({
-          message:
-            "UploadProgressModal: An error occured when marking a sample as uploaded",
-          details: {
-            sample,
-          },
-        });
-        updateSampleUploadStatus(sample.name, "error");
-        logUploadStepError({
-          step: "markSampleUploaded",
-          erroredSamples: 1,
-          uploadType,
-        });
-      },
+      onMarkSampleUploadedError: handleMarkSampleUploadedError,
     };
   };
 
-  const initiateUploadLocal = () => {
+  const initiateUploadLocal = async () => {
     const samplesToUpload = addFlagsToSamples({
       adminOptions,
       clearlabs,
@@ -155,7 +180,7 @@ const LocalUploadProgressModal = ({
       wetlabProtocol,
     });
 
-    initiateBulkUploadLocalWithMetadata({
+    const createdSamples = await initiateBulkUploadLocalWithMetadata({
       samples: samplesToUpload,
       metadata,
       callbacks: {
@@ -182,12 +207,146 @@ const LocalUploadProgressModal = ({
           });
         },
       },
-    }).then(createdSamples => {
-      setLocallyCreatedSamples(createdSamples);
-      return uploadSampleFilesToPresignedURL({
+    });
+
+    setLocallyCreatedSamples(createdSamples);
+
+    if (allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
+      const heartbeatInterval = startUploadHeartbeat(map("id", samples));
+
+      await Promise.all(
+        createdSamples.map(async sample => {
+          const s3ClientForSample = await getS3Client(sample);
+
+          updateSampleUploadPercentage(sample.name, 0);
+
+          try {
+            await Promise.all(
+              sample.input_files.map(async inputFile => {
+                await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
+              }),
+            );
+
+            await completeSampleUpload({
+              sample,
+              onSampleUploadSuccess: sample => {
+                updateSampleUploadStatus(sample.name, "success");
+              },
+              onMarkSampleUploadedError: handleSampleUploadError,
+            });
+          } catch (e) {
+            handleSampleUploadError(sample, e);
+            clearInterval(heartbeatInterval);
+          }
+        }),
+      );
+
+      clearInterval(heartbeatInterval);
+      logAnalyticsEvent("Uploads_batch-heartbeat_completed", {
+        sampleIds: map("id", samples),
+      });
+    } else {
+      await uploadSampleFilesToPresignedURL({
         samples: createdSamples,
         callbacks: getUploadProgressCallbacks(),
       });
+    }
+  };
+
+  const getS3Client = async sample => {
+    const credentials = await getUploadCredentials(sample.id);
+
+    const {
+      access_key_id: accessKeyId,
+      aws_region: region,
+      expiration,
+      secret_access_key: secretAccessKey,
+      session_token: sessionToken,
+    } = credentials;
+
+    return new S3Client({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+        sessionToken,
+        expiration,
+      },
+    });
+  };
+
+  const uploadInputFileToS3 = async (sample, inputFile, s3Client) => {
+    const {
+      name: fileName,
+      s3_bucket: s3Bucket,
+      s3_file_path: s3Key,
+    } = inputFile;
+
+    const body = sample.filesToUpload[fileName];
+    const target = {
+      Bucket: s3Bucket,
+      Key: s3Key,
+      Body: body,
+    };
+
+    updateSampleFilePercentage({
+      sampleName: sample.name,
+      s3Key,
+      fileSize: body.size,
+    });
+
+    const fileUpload = new Upload({
+      client: s3Client,
+      leavePartsOnError: false, // configures lib to propagate errors
+      params: target,
+    });
+
+    fileUpload.on("httpUploadProgress", progress => {
+      const percentage = progress.loaded / progress.total;
+      updateSampleFilePercentage({
+        sampleName: sample.name,
+        s3Key,
+        percentage,
+      });
+    });
+
+    await fileUpload.done();
+  };
+
+  const handleSampleUploadError = (sample, error = null) => {
+    const message =
+      "UploadProgressModal: Local sample upload error to S3 occured";
+    logSampleUploadError({
+      error,
+      message,
+      sample,
+    });
+    updateSampleUploadPercentage(sample.name, 0);
+  };
+
+  const handleMarkSampleUploadedError = (sample, error = null) => {
+    const message =
+      "UploadProgressModal: An error occured when marking a sample as uploaded";
+    logSampleUploadError({
+      error,
+      message,
+      sample,
+    });
+  };
+
+  const logSampleUploadError = ({ error = null, message, sample }) => {
+    logError({
+      message,
+      details: {
+        sample,
+        error,
+      },
+    });
+    updateSampleUploadStatus(sample.name, "error");
+    logUploadStepError({
+      step: "sampleUpload",
+      erroredSamples: 1,
+      uploadType,
     });
   };
 

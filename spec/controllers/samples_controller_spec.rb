@@ -653,6 +653,7 @@ RSpec.describe SamplesController, type: :controller do
     describe "GET upload_credentials" do
       let(:fake_role_arn) { "dsfsdfsdfs" }
       let(:fake_access_key_id) { "123456789012" }
+      let(:fake_region) { "fake-aws-region" }
 
       before do
         @project = create(:project, users: [@joe])
@@ -674,6 +675,8 @@ RSpec.describe SamplesController, type: :controller do
       it "can get credentials for a sample" do
         allow(ENV).to receive(:[]).and_call_original
         allow(ENV).to receive(:[]).with('CLI_UPLOAD_ROLE_ARN').and_return(fake_role_arn)
+        allow(ENV).to receive(:[]).with('AWS_REGION').and_return(fake_region)
+
         mock_client = Aws::STS::Client.new(stub_responses: true)
         creds = mock_client.stub_data(
           :assume_role,
@@ -690,6 +693,7 @@ RSpec.describe SamplesController, type: :controller do
         expect(response).to have_http_status :success
         creds = JSON.parse(response.body)
         expect(creds["access_key_id"]).to eq(fake_access_key_id)
+        expect(creds["aws_region"]).to eq(fake_region)
         expect(mock_client.api_requests.length).to eq(1)
         request = mock_client.api_requests.first
 

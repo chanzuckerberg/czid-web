@@ -15,7 +15,7 @@ import {
 import { markSampleUploaded, uploadFileToUrlWithRetries } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 
-import { postWithCSRF } from "./core";
+import { get as httpGet, postWithCSRF } from "./core";
 
 export const MAX_MARK_SAMPLE_RETRIES = 10;
 
@@ -111,6 +111,29 @@ export const initiateBulkUploadLocalWithMetadata = async ({
   return response.samples;
 };
 
+export const completeSampleUpload = async ({
+  sample,
+  onSampleUploadSuccess = null,
+  onMarkSampleUploadedError = null,
+}) => {
+  let tryCount = 0;
+  while (true) {
+    try {
+      await markSampleUploaded(sample.id);
+
+      onSampleUploadSuccess && onSampleUploadSuccess(sample);
+      break;
+    } catch (e) {
+      tryCount++;
+      if (tryCount === MAX_MARK_SAMPLE_RETRIES) {
+        onMarkSampleUploadedError && onMarkSampleUploadedError(sample, e);
+        break;
+      }
+      await exponentialDelayWithJitter(tryCount);
+    }
+  }
+};
+
 export const uploadSampleFilesToPresignedURL = ({
   samples,
   callbacks = {
@@ -127,7 +150,7 @@ export const uploadSampleFilesToPresignedURL = ({
   const sampleNamesToFiles = mapValues("filesToUpload", keyBy("name", samples));
 
   // This function needs access to fileNamesToProgress.
-  const onFileUploadSuccess = async (sample, sampleId) => {
+  const onFileUploadSuccess = async sample => {
     const sampleFiles = sampleNamesToFiles[sample.name];
     // If every file for this sample is uploaded, mark it as uploaded.
     if (
@@ -136,24 +159,11 @@ export const uploadSampleFilesToPresignedURL = ({
     ) {
       markedUploaded[sample.name] = true;
 
-      let tryCount = 0;
-      while (true) {
-        try {
-          await markSampleUploaded(sampleId);
-
-          callbacks.onSampleUploadSuccess &&
-            callbacks.onSampleUploadSuccess(sample);
-          break;
-        } catch (_) {
-          tryCount++;
-          if (tryCount === MAX_MARK_SAMPLE_RETRIES) {
-            callbacks.onMarkSampleUploadedError &&
-              callbacks.onMarkSampleUploadedError(sample);
-            break;
-          }
-          await exponentialDelayWithJitter(tryCount);
-        }
-      }
+      await completeSampleUpload({
+        sample,
+        onSampleUploadSuccess: callbacks.onSampleUploadSuccess,
+        onMarkSampleUploadedError: callbacks.onMarkSampleUploadedError,
+      });
     }
   };
 
@@ -222,7 +232,7 @@ export const uploadSampleFilesToPresignedURL = ({
           fileNamesToProgress[file.name] = 1;
           onFileNameFinalized(file.name);
 
-          onFileUploadSuccess(sample, sample.id);
+          onFileUploadSuccess(sample);
         },
         onError: error => {
           fileNamesToProgress[file.name] = 0;
@@ -275,3 +285,6 @@ export const startUploadHeartbeat = async sampleIds => {
   const milliseconds = minutes * 60 * 10000;
   return setInterval(sendHeartbeat, milliseconds);
 };
+
+export const getUploadCredentials = sampleId =>
+  httpGet(`/samples/${sampleId}/upload_credentials.json`);
