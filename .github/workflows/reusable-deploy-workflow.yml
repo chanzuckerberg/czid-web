@@ -90,7 +90,7 @@ jobs:
       - name: Install release script dependencies
         run: |
           apt-get -qq update
-          apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie git curl
+          apt-get -qq install -o=Dpkg::Use-Pty=0 --yes jq httpie git curl awscli
           curl -OLs https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
           dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
