@@ -60,8 +60,6 @@ jobs:
           export token=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
           export AWS_DEFAULT_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
           aws configure set default.region $AWS_DEFAULT_REGION
-          export AWS_ACCOUNT_ID=$(aws sts get-caller-identity | jq -r .Account)
-          $(aws ecr get-login --no-include-email)
       - name: Deploy ${{ inputs.source }} to production
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }}
@@ -103,8 +101,6 @@ jobs:
           export token=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
           export AWS_DEFAULT_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
           aws configure set default.region $AWS_DEFAULT_REGION
-          export AWS_ACCOUNT_ID=$(aws sts get-caller-identity | jq -r .Account)
-          $(aws ecr get-login --no-include-email)
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }}
