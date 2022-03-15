@@ -175,11 +175,23 @@ class UploadSampleStep extends React.Component {
         basespaceSamples,
       );
 
-      if (hasLaneConcatBaseSpaceFeature)
+      if (hasLaneConcatBaseSpaceFeature) {
         samplesWithToken = groupSamplesByLane(
           samplesWithToken,
           BASESPACE_UPLOAD,
         );
+
+        // Validate names of the grouped samples if there are any samples that need concatenation
+        const shouldValidateNames = samplesWithToken.some(sample =>
+          sample.basespace_dataset_id?.includes(","),
+        );
+        if (shouldValidateNames) {
+          const { samples: validatedSamples } = await this.validateSampleNames({
+            samples: samplesWithToken,
+          });
+          samplesWithToken = validatedSamples;
+        }
+      }
 
       this.props.onUploadSamples({
         clearlabs: usedClearLabs,
