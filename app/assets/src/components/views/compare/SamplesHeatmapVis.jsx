@@ -1,13 +1,19 @@
 import cx from "classnames";
-import { size, map, keyBy, isEmpty } from "lodash/fp";
+import { size, map, keyBy, isEmpty, orderBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  withAnalytics,
+  logAnalyticsEvent,
+} from "~/api/analytics";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
+import PinSampleSelector from "~/components/common/Heatmap/PinSampleSelector";
 import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import TaxonSelector from "~/components/common/TaxonSelector";
+import { UserContext } from "~/components/common/UserContext";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { generateUrlToSampleView } from "~/components/utils/urls";
@@ -34,6 +40,7 @@ class SamplesHeatmapVis extends React.Component {
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
       displayControlsBanner: true,
+      pinSampleTrigger: null,
     };
 
     this.heatmap = null;
@@ -58,6 +65,7 @@ class SamplesHeatmapVis extends React.Component {
       metadataSortField,
       metadataSortAsc,
     } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
 
     this.heatmap = new Heatmap(
       this.heatmapContainer,
@@ -83,6 +91,12 @@ class SamplesHeatmapVis extends React.Component {
         onRowGroupLeave: this.handleRowGroupLeave,
         onAddRowClick: this.props.onAddTaxon ? this.handleAddTaxonClick : null,
         onRemoveRow: this.props.onRemoveTaxon,
+        onPinColumnClick:
+          allowedFeatures.includes("heatmap_pin_samples") &&
+          this.props.onPinSample
+            ? this.handlePinSampleClick
+            : null,
+        onUnpinColumn: this.props.onUnpinSample,
         onCellClick: this.handleCellClick,
         onColumnLabelMove: this.handleMouseHoverMove,
         onColumnLabelHover: this.handleSampleLabelHover,
@@ -125,6 +139,11 @@ class SamplesHeatmapVis extends React.Component {
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
       });
     }
+    if (this.props.pinnedSampleIds !== prevProps.pinnedSampleIds) {
+      this.heatmap.updateData({
+        columnLabels: this.extractSampleLabels(), // Also includes column pinned state.
+      });
+    }
     if (this.props.data !== prevProps.data) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
@@ -156,6 +175,7 @@ class SamplesHeatmapVis extends React.Component {
         metadata: this.props.sampleDetails[id].metadata,
         id,
         duplicateLabel: this.props.sampleDetails[id].duplicate,
+        pinned: this.props.pinnedSampleIds.includes(id),
       };
     });
   }
@@ -429,6 +449,18 @@ class SamplesHeatmapVis extends React.Component {
     });
   };
 
+  handlePinSampleClick = trigger => {
+    this.setState({
+      pinSampleTrigger: trigger,
+    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIS_PIN_SAMPLES_DROPDOWN_TRIGGER_CLICKED,
+      {
+        pinSampleTrigger: trigger,
+      },
+    );
+  };
+
   getAvailableTaxa() {
     // taxonDetails includes entries mapping both
     // taxId => taxonDetails and taxName => taxonDetails,
@@ -525,7 +557,22 @@ class SamplesHeatmapVis extends React.Component {
       rowGroupLegend,
       addMetadataTrigger,
       selectedMetadata,
+      pinSampleTrigger,
     } = this.state;
+
+    let pinSampleOptions = this.props.sampleIds.map(id => {
+      return {
+        id,
+        name: this.props.sampleDetails[id].name,
+        pinned: this.props.pinnedSampleIds.includes(id),
+      };
+    });
+    pinSampleOptions = orderBy(
+      ["pinned", "name"],
+      ["desc", "asc"],
+      pinSampleOptions,
+    );
+
     return (
       <div className={cs.samplesHeatmapVis}>
         <PlusMinusControl
@@ -597,6 +644,19 @@ class SamplesHeatmapVis extends React.Component {
             taxLevel={this.props.taxLevel}
           />
         )}
+        {pinSampleTrigger && (
+          <PinSampleSelector
+            onApply={this.props.onPinSampleApply}
+            onCancel={this.props.onPinSampleCancel}
+            onClose={() => {
+              this.setState({ pinSampleTrigger: null });
+            }}
+            onSelectionChange={this.props.onPinSample}
+            options={pinSampleOptions}
+            selectedSamples={this.props.pendingPinnedSampleIds}
+            selectSampleTrigger={pinSampleTrigger}
+          />
+        )}
         <div
           className={cx(
             cs.bannerContainer,
@@ -633,6 +693,12 @@ SamplesHeatmapVis.propTypes = {
   onAddTaxon: PropTypes.func,
   newTaxon: PropTypes.number,
   onRemoveTaxon: PropTypes.func,
+  onPinSample: PropTypes.func,
+  onPinSampleApply: PropTypes.func,
+  onPinSampleCancel: PropTypes.func,
+  onUnpinSample: PropTypes.func,
+  pendingPinnedSampleIds: PropTypes.array,
+  pinnedSampleIds: PropTypes.array,
   onSampleLabelClick: PropTypes.func,
   onTaxonLabelClick: PropTypes.func,
   sampleDetails: PropTypes.object,
@@ -650,5 +716,7 @@ SamplesHeatmapVis.propTypes = {
   fullScreen: PropTypes.bool,
   taxaSortType: PropTypes.string,
 };
+
+SamplesHeatmapVis.contextType = UserContext;
 
 export default SamplesHeatmapVis;

@@ -3,7 +3,7 @@ import Cluster from "clusterfck";
 import d3 from "d3";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
-import { orderBy, some } from "lodash";
+import { compact, orderBy, some } from "lodash";
 import { clamp, find, mean, sortBy } from "lodash/fp";
 import SvgSaver from "svgsaver";
 import textWidth from "text-width";
@@ -322,6 +322,7 @@ export default class Heatmap {
 
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
     this.gAddRow = this.g.append("g").attr("class", cs.columnMetadata);
+    this.gPinColumn = this.g.append("g").attr("class", cs.columnMetadata);
     this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
 
@@ -425,6 +426,7 @@ export default class Heatmap {
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
       .attr("height", totalColumnLabelsHeight + this.options.marginTop);
     this.placeColumnLabelAndMetadataContainers(this.columnLabelsHeight);
+    this.placePinColumnLinkContainer(this.columnLabelsHeight);
 
     this.addRowBackground
       .attr(
@@ -623,6 +625,7 @@ export default class Heatmap {
       columnLabelsCurrent[1] - deltaY,
     );
     this.placeColumnLabelAndMetadataContainers(labelsDy, transition);
+    this.placePinColumnLinkContainer(labelsDy, transition);
     this.placeAddRowLinkContainer(labelsDy, transition);
   }
 
@@ -679,6 +682,13 @@ export default class Heatmap {
       );
   }
 
+  placePinColumnLinkContainer(y, transition = false) {
+    this.gPinColumn
+      .transition()
+      .duration(transition ? this.options.transitionDuration : 0)
+      .attr("transform", `translate(0, ${y})`);
+  }
+
   processMetadata() {
     // count number of distinct pieces of metadata
     let metadatumCount = 0;
@@ -716,18 +726,43 @@ export default class Heatmap {
 
     if (this.columnMetadataSortField) {
       this.columnClustering = null;
-      orderBy(
-        this.columnLabels,
-        label => {
-          return (
-            (label.metadata && label.metadata[this.columnMetadataSortField]) ||
-            "ZZZ"
-          );
-        },
-        this.columnMetadataSortAsc ? "asc" : "desc",
-      ).forEach((label, idx) => {
-        label.pos = idx;
-      });
+
+      if (this.options.onPinColumnClick) {
+        orderBy(
+          this.columnLabels,
+          [
+            label => label.pinned,
+            label => {
+              // Pinned columns should not be sorted by the metadata;
+              // they will appear first, in alphabetical order.
+              if (!label.pinned) {
+                return (
+                  (label.metadata &&
+                    label.metadata[this.columnMetadataSortField]) ||
+                  "ZZZ"
+                );
+              }
+            },
+          ],
+          ["desc", this.columnMetadataSortAsc ? "asc" : "desc"],
+        ).forEach((label, idx) => {
+          label.pos = idx;
+        });
+      } else {
+        orderBy(
+          this.columnLabels,
+          label => {
+            return (
+              (label.metadata &&
+                label.metadata[this.columnMetadataSortField]) ||
+              "ZZZ"
+            );
+          },
+          this.columnMetadataSortAsc ? "asc" : "desc",
+        ).forEach((label, idx) => {
+          label.pos = idx;
+        });
+      }
     } else if (this.options.shouldSortColumns) {
       this.sortColumns("asc");
     } else if (this.options.clustering) {
@@ -739,6 +774,7 @@ export default class Heatmap {
     this.renderHeatmap();
     this.renderRowLabels();
     this.renderColumnLabels();
+    this.renderPinColumnLink();
     this.renderColumnMetadata();
     this.renderRowAddLink(0);
 
@@ -794,6 +830,33 @@ export default class Heatmap {
     return columns;
   }
 
+  getPinnedColumns() {
+    return this.columnLabels.filter(col => col.pinned);
+  }
+
+  getUnpinnedColumns() {
+    return this.columnLabels.filter(col => !col.pinned);
+  }
+
+  getUnpinnedColumnValues() {
+    let scale = this.getScale();
+    let columns = [];
+    for (let i = 0; i < this.columnLabels.length; i++) {
+      for (let j = 0; j < this.rowLabels.length; j++) {
+        if (!this.rowLabels[j].hidden && !this.columnLabels[i].pinned) {
+          if (!columns[i]) {
+            columns[i] = [];
+            columns[i].idx = i;
+          }
+          columns[i].push(
+            scale(this.data.values[j][i] || this.options.nullValue),
+          );
+        }
+      }
+    }
+    return compact(columns);
+  }
+
   sortTree(root) {
     if (!root) return;
     let scale = this.getScale();
@@ -842,12 +905,11 @@ export default class Heatmap {
     return maxDepth;
   }
 
-  setOrder(root, labels) {
+  setOrder(root, labels, offset = 0) {
     let stack = [];
-    let order = [];
 
     let done = false;
-    let pos = 0;
+    let pos = offset;
     while (!done) {
       if (root) {
         stack.push(root);
@@ -864,7 +926,8 @@ export default class Heatmap {
         }
       }
     }
-    return order;
+
+    return labels;
   }
 
   clusterRows() {
@@ -875,11 +938,36 @@ export default class Heatmap {
     this.setOrder(this.rowClustering, this.rowLabels);
   }
 
+  unpinColumn = column => {
+    this.options.onUnpinColumn && this.options.onUnpinColumn(column.id);
+  };
+
   clusterColumns() {
-    let columns = this.getColumns();
-    this.columnClustering = Cluster.hcluster(columns);
-    this.sortTree(this.columnClustering);
-    this.setOrder(this.columnClustering, this.columnLabels);
+    if (this.options.onPinColumnClick) {
+      // Make sure pinnned columns appear first, in alphabetical order.
+      orderBy(
+        this.columnLabels,
+        [label => label.pinned, label => label.label],
+        ["desc", "asc"],
+      ).forEach((label, idx) => {
+        label.pos = idx;
+      });
+
+      // Cluster the remaining unpinned columns.
+      let unpinnedColumnValues = this.getUnpinnedColumnValues();
+      this.columnClustering = Cluster.hcluster(unpinnedColumnValues);
+      this.sortTree(this.columnClustering);
+      this.setOrder(
+        this.columnClustering,
+        this.columnLabels,
+        this.getPinnedColumns().length,
+      );
+    } else {
+      let columns = this.getColumns();
+      this.columnClustering = Cluster.hcluster(columns);
+      this.sortTree(this.columnClustering);
+      this.setOrder(this.columnClustering, this.columnLabels);
+    }
   }
 
   // Re-sorts the columns. The rendered order of columns is determined solely by
@@ -887,11 +975,21 @@ export default class Heatmap {
   sortColumns(direction) {
     this.columnClustering = null;
 
-    orderBy(this.columnLabels, label => label.label, direction).forEach(
-      (label, idx) => {
+    if (this.options.onPinColumnClick) {
+      orderBy(
+        this.columnLabels,
+        [label => label.pinned, label => label.label],
+        ["desc", direction],
+      ).forEach((label, idx) => {
         label.pos = idx;
-      },
-    );
+      });
+    } else {
+      orderBy(this.columnLabels, label => label.label, direction).forEach(
+        (label, idx) => {
+          label.pos = idx;
+        },
+      );
+    }
   }
 
   // Re-sorts the rows. The rendered order of rows is determined solely by
@@ -1353,6 +1451,71 @@ export default class Heatmap {
     }
   }
 
+  renderPinColumnLink(dx = 0) {
+    if (this.options.onPinColumnClick) {
+      const handlePinColumnClick = () => {
+        this.options.onPinColumnClick(pinColumnTrigger.node(), {
+          x: this.rowLabelsWidth - 10,
+          y: yPos,
+        });
+      };
+
+      let addLink = this.gPinColumn
+        .selectAll(`.${cs.columnMetadataAdd}`)
+        .data([1]);
+
+      let addLinkEnter = addLink
+        .enter()
+        .append("g")
+        .attr("class", cs.columnMetadataAdd);
+
+      let yPos = this.options.metadataAddLinkHeight / 2;
+
+      addLinkEnter.append("rect");
+
+      addLinkEnter
+        .append("text")
+        .text(() => "Pin Samples")
+        .attr("class", cs.metadataAddLabel)
+        .attr("x", this.rowLabelsWidth - 25)
+        .attr("y", 11)
+        .on("click", handlePinColumnClick);
+
+      let pinColumnTrigger = addLinkEnter
+        .append("g")
+        .attr("class", cs.metadataAddTrigger)
+        .on("click", handlePinColumnClick);
+
+      pinColumnTrigger
+        .append("svg:image")
+        .attr("class", cs.metadataAddIcon)
+        .attr("width", this.options.metadataAddLinkHeight)
+        .attr("height", this.options.metadataAddLinkHeight)
+        .attr("x", this.rowLabelsWidth - 20)
+        .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
+
+      // setup triggers
+      if (pinColumnTrigger.size()) {
+        this.pinColumnTrigger = pinColumnTrigger.node();
+      }
+
+      // update
+      addLink.attr(
+        "transform",
+        `translate(${dx}, ${-this.totalMetadataHeight +
+          this.options.spacing / 2})`,
+      );
+
+      addLink
+        .select("rect")
+        .attr(
+          "width",
+          this.rowLabelsWidth + this.columnLabels.length * this.cell.width,
+        )
+        .attr("height", this.options.metadataAddLinkHeight);
+    }
+  }
+
   renderColumnLabels() {
     let applyFormat = nodes => {
       nodes.attr("transform", d => {
@@ -1698,7 +1861,10 @@ export default class Heatmap {
     this.gColumnDendogram.select("g").remove();
     let container = this.gColumnDendogram.append("g");
     if (this.columnClustering) {
-      let width = this.cell.width * this.columnLabels.length;
+      const numColumns = this.options.onPinColumnClick
+        ? this.getUnpinnedColumns().length
+        : this.columnLabels.length;
+      let width = this.cell.width * numColumns;
       let height = this.columnClusterHeight - this.options.spacing;
 
       this.renderDendrogram(
@@ -1708,9 +1874,13 @@ export default class Heatmap {
         width,
         height,
       );
+
+      const offset = this.options.onPinColumnClick
+        ? this.cell.width * this.getPinnedColumns().length
+        : 0;
       container.attr(
         "transform",
-        `rotate(-90) translate(-${height + this.options.spacing},0)`,
+        `rotate(-90) translate(-${height + this.options.spacing},${offset})`,
       );
     }
   }

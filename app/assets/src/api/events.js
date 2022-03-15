@@ -445,6 +445,22 @@ function EventDictionary() {
   /** The user opened the AnnotationMenu within a species or genus row. */
   this.REPORT_TABLE_ANNOTATION_MENU_OPENED =
     "REPORT_TABLE_ANNOTATION_MENU_OPENED";
+
+  /** The user clicked the trigger to open the Pin Samples dropdown on the SamplesHeatmapVis. */
+  this.SAMPLES_HEATMAP_VIS_PIN_SAMPLES_DROPDOWN_TRIGGER_CLICKED =
+    "SAMPLES_HEATMAP_VIS_PIN_SAMPLES_DROPDOWN_TRIGGER_CLICKED";
+
+  /** The user changed the selected Pinned Samples in the dropdown on the SamplesHeatmapView. */
+  this.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED =
+    "SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED";
+
+  /** The user applied changes to their selected Pinned Samples in the dropdown on the SamplesHeatmapView. */
+  this.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED =
+    "SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED";
+
+  /** The user canceled changes to their selected Pinned Samples in the dropdown on the SamplesHeatmapView. */
+  this.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED =
+    "SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED";
 }
 
 const eventNames = new EventDictionary();

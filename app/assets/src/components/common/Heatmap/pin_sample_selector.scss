@@ -1,0 +1,28 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.title {
+  @include font-header-xs;
+  color: $sds-font-color;
+  margin: $sds-spaces-m 0 $sds-spaces-m $sds-spaces-s;
+}
+
+.buttonsContainer {
+  display: flex;
+  justify-content: flex-end;
+
+  .button {
+    margin-top: $sds-spaces-l;
+    margin-bottom: $sds-spaces-s;
+    &:first-of-type {
+      margin-left: $sds-spaces-s;
+      margin-right: $sds-spaces-m;
+    }
+
+    &:last-child {
+      margin-left: 0;
+      margin-right: $sds-spaces-s;
+    }
+  }
+}

@@ -162,6 +162,8 @@ class SamplesHeatmapView extends React.Component {
       sidebarVisible: false,
       sidebarTaxonModeConfig: null,
       taxonFilterState: [],
+      pendingPinnedSampleIds: [],
+      pinnedSampleIds: [],
     };
 
     this.removedTaxonIds = new Set(
@@ -1434,6 +1436,48 @@ class SamplesHeatmapView extends React.Component {
     });
   };
 
+  handlePinnedSampleChange = (_event, selectedSamples) => {
+    const selectedSampleIds = selectedSamples.map(sample =>
+      sample.id ? sample.id : sample,
+    );
+    this.setState({ pendingPinnedSampleIds: selectedSampleIds });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED,
+      selectedSamples,
+    );
+  };
+
+  handlePinnedSampleChangeApply = () => {
+    const { pendingPinnedSampleIds } = this.state;
+    this.setState({
+      pinnedSampleIds: pendingPinnedSampleIds,
+    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED,
+      pendingPinnedSampleIds,
+    );
+  };
+
+  handlePinnedSampleChangeCancel = () => {
+    const { pinnedSampleIds } = this.state;
+    this.setState({
+      pendingPinnedSampleIds: pinnedSampleIds,
+    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED,
+      pinnedSampleIds,
+    );
+  };
+
+  handleUnpinSample = sampleId => {
+    const prevPinnedSamples = this.state.pinnedSampleIds;
+    const newPinnedSamples = prevPinnedSamples.remove(sampleId);
+    this.setState({
+      pinnedSampleIds: newPinnedSamples,
+      pendingPinnedSampleIds: newPinnedSamples,
+    });
+  };
+
   handleSampleLabelClick = sampleId => {
     if (!sampleId) {
       this.setState({
@@ -1706,6 +1750,12 @@ class SamplesHeatmapView extends React.Component {
           metric={this.state.selectedOptions.metric}
           onMetadataSortChange={this.handleMetadataSortChange}
           onMetadataChange={this.handleMetadataChange}
+          onPinSample={this.handlePinnedSampleChange}
+          onPinSampleApply={this.handlePinnedSampleChangeApply}
+          onPinSampleCancel={this.handlePinnedSampleChangeCancel}
+          onUnpinSample={this.handleUnpinSample}
+          pendingPinnedSampleIds={this.state.pendingPinnedSampleIds}
+          pinnedSampleIds={this.state.pinnedSampleIds}
           onAddTaxon={this.handleAddedTaxonChange}
           newTaxon={this.state.newestTaxonId}
           onRemoveTaxon={this.handleRemoveTaxon}
