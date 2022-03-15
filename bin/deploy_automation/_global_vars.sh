@@ -5,6 +5,7 @@ export STAGING_BRANCH="staging"
 export STAGING_ENV="staging"
 export MAIN_BRANCH="main"
 export GITHUB_TOKEN; GITHUB_TOKEN=${GITHUB_TOKEN:-$(cut -f 3 -d : ~/.git-credentials | cut -f 1 -d @)}
+export GITHUB_TOKEN=${GH_DEPLOY_TOKEN:-$GITHUB_TOKEN}
 export GITHUB_REPOSITORY_API="https://api.github.com/repos/chanzuckerberg/czid-web-private"
 export GITHUB_REPOSITORY_URL="https://github.com/chanzuckerberg/czid-web-private"
 export ECR_REPOSITORY_NAME="idseq-web"

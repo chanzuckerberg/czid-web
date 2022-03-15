@@ -20,6 +20,7 @@ env:
     # A separate token, bound to a specific developer with access to the repo, is required to create GitHub deployment
     # objects that can trigger a deployment workflow. The secret for this token (with repo_deployment scope) is created in
     # https://github.com/settings/tokens and can be managed in https://github.com/chanzuckerberg/idseq/settings/secrets.
+    GH_DEPLOY_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
     DEBIAN_FRONTEND: noninteractive
     GH_CLI_VERSION: 0.11.1
     LC_ALL: C.UTF-8

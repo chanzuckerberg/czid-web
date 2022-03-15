@@ -28,7 +28,7 @@ main() {
   echo "ecr repo name ${ECR_REPOSITORY_NAME}"
   echo "github repo api ${GITHUB_REPOSITORY_API}"
   echo "github repo url ${GITHUB_REPOSITORY_URL}"
-
+  echo "github token ${GITHUB_TOKEN}"
   _log "Starting deployment of $git_rev (sha-$sha) to $env"
 
   _log "Checking if docker image $docker_image is available"
