@@ -24,8 +24,6 @@ env:
     GH_CLI_VERSION: 0.11.1
     LC_ALL: C.UTF-8
     LANG: C.UTF-8
-    GITHUB_REPOSITORY_URL: https://github.com/chanzuckerberg/czid-web-private
-    GITHUB_REPOSITORY_API: https://api.github.com/repos/chanzuckerberg/czid-web-private
 
 jobs:
   production-deploy:

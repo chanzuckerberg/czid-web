@@ -25,6 +25,9 @@ main() {
 
   declare sha; sha=$(git log -n1 "${git_rev}" --format=%h --abbrev=8)
   declare docker_image="${ECR_REPOSITORY_NAME}:sha-$sha"
+  echo "ecr repo name ${ECR_REPOSITORY_NAME}"
+  echo "github repo api ${GITHUB_REPOSITORY_API}"
+  echo "github repo url ${GITHUB_REPOSITORY_URL}"
 
   _log "Starting deployment of $git_rev (sha-$sha) to $env"
 

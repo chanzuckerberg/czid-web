@@ -5,10 +5,9 @@ export STAGING_BRANCH="staging"
 export STAGING_ENV="staging"
 export MAIN_BRANCH="main"
 export GITHUB_TOKEN; GITHUB_TOKEN=${GITHUB_TOKEN:-$(cut -f 3 -d : ~/.git-credentials | cut -f 1 -d @)}
-export GITHUB_REMOTE_ORIGIN; GITHUB_REMOTE_ORIGIN=$(git remote get-url origin | sed -E "s/^(https|git)(:\/\/|@)([^\/:]+)[\/:]([^\/:]+)\/(.+).git$/\\4\/\\5/")
-export GITHUB_REPOSITORY_API="https://api.github.com/repos/${GITHUB_REMOTE_ORIGIN}"
-export GITHUB_REPOSITORY_URL="https://github.com/${GITHUB_REMOTE_ORIGIN}"
-export ECR_REPOSITORY_NAME; ECR_REPOSITORY_NAME=$(echo idseq-web | cut -f 2 -d / | sed -E 's/-private$//')
+export GITHUB_REPOSITORY_API="https://api.github.com/repos/chanzuckerberg/czid-web-private"
+export GITHUB_REPOSITORY_URL="https://github.com/chanzuckerberg/czid-web-private"
+export ECR_REPOSITORY_NAME="idseq-web"
 
 # Special chars
 export TAB=$'\t'
