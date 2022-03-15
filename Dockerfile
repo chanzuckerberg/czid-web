@@ -45,6 +45,10 @@ RUN bundle install --jobs 20 --retry 5
 # Do the same for node packages, allowing them to be cached
 RUN npm update -g
 COPY package.json package-lock.json ./
+
+# Copy aws-js-sdk-v3 packages that are installed from file
+COPY vendor/aws-js-sdk-v3/* ./vendor/aws-js-sdk-v3/
+
 RUN npm install --no-optional
 
 # Generate the app's static resources using npm/webpack
