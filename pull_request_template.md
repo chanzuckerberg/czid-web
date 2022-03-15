@@ -4,6 +4,8 @@
 
 *The intended change, motivation and consequences.*
 
+*Please tag a teammate as primary reviewer.*
+
 # Notes
 
 *Optional observations, comments or explanations.*
