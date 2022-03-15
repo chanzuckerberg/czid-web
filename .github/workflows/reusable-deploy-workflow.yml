@@ -24,7 +24,9 @@ env:
     GH_CLI_VERSION: 0.11.1
     LC_ALL: C.UTF-8
     LANG: C.UTF-8
-  
+    GITHUB_REPOSITORY_URL: https://github.com/chanzuckerberg/czid-web-private
+    GITHUB_REPOSITORY_API: https://api.github.com/repos/chanzuckerberg/czid-web-private
+
 jobs:
   production-deploy:
     name: Deploy ${{ inputs.source }} to prod
@@ -60,8 +62,6 @@ jobs:
           export token=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
           export AWS_DEFAULT_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
           aws configure set default.region $AWS_DEFAULT_REGION
-          export GITHUB_REPOSITORY_URL="https://github.com/chanzuckerberg/czid-web-private"
-          export GITHUB_REPOSITORY_API="https://api.github.com/repos/chanzuckerberg/czid-web-private"
       - name: Deploy ${{ inputs.source }} to production
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }}
@@ -102,9 +102,7 @@ jobs:
 
           export token=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
           export AWS_DEFAULT_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
-          aws configure set default.region $AWS_DEFAULT_REGION
-          export GITHUB_REPOSITORY_URL="https://github.com/chanzuckerberg/czid-web-private"
-          export GITHUB_REPOSITORY_API="https://api.github.com/repos/chanzuckerberg/czid-web-private"
+          aws configure set default.region $AWS_DEFAULT_REGION 
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ !inputs.force }}
         run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }}
