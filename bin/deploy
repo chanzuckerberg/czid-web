@@ -43,7 +43,7 @@ def notify_slack(env, image, stage, deployed_by = nil)
   if slack_hook
     if stage=="start"
       message = "Starting to deploy #{image} to #{env}.\n" + "   - refs: #{tags_and_branches(image).join(', ')}"
-      message += "   - deployed_by: #{deployed_by}" if deployed_by
+      message += "\n   - deployed_by: #{deployed_by}" if deployed_by
       post_slack_message({"icon_emoji": ":ghost:", "text": message}, slack_hook)
     elsif stage=="end"
       post_slack_message({"icon_emoji": ":sharkdance:", "text": "Finished deploying #{image} to #{env}."}, slack_hook)
