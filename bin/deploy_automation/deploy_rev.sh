@@ -20,6 +20,7 @@ main() {
   done
   declare env="$1" # staging / prod
   declare git_rev="$2" # https://git-scm.com/docs/git-rev-parse#_specifying_revisions
+  declare deployed_by="$3" # the name of the developer who triggered the deployment
 
   _git_fetch_and_cleanup
 
@@ -46,7 +47,7 @@ main() {
   _log "Creating deployment event on Github"
   declare github_deploy_id=$(__start_github_deploy "${sha}" "$env")
 
-  "$SCRIPT_DIR/../deploy" "$env" "sha-$sha"
+  "$SCRIPT_DIR/../deploy" "$env" "sha-$sha" "$deployed_by"
 
   _log "Marking successful deploy on Github"
   __finish_github_deploy "$github_deploy_id"

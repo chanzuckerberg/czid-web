@@ -63,10 +63,10 @@ jobs:
           aws configure set default.region $AWS_DEFAULT_REGION
       - name: Deploy ${{ inputs.source }} to production
         if: ${{ !inputs.force }}
-        run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }}
+        run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }} ${{ github.actor }}
       - name: Force deploy ${{ inputs.source }} to production
         if: ${{ inputs.force }}
-        run: bin/deploy_automation/deploy_rev.sh -f prod origin/${{ inputs.source }}
+        run: bin/deploy_automation/deploy_rev.sh -f prod origin/${{ inputs.source }} ${{ github.actor }}
 
   development-deploy:
     name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
@@ -104,7 +104,7 @@ jobs:
           aws configure set default.region $AWS_DEFAULT_REGION 
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ !inputs.force }}
-        run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }}
+        run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }} ${{ github.actor }}
       - name: Force deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ inputs.force }}
-        run: bin/deploy_automation/deploy_rev.sh -f ${{ inputs.destination }} origin/${{ inputs.source }}
+        run: bin/deploy_automation/deploy_rev.sh -f ${{ inputs.destination }} origin/${{ inputs.source }} ${{ github.actor }}
