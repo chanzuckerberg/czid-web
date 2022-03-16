@@ -461,6 +461,10 @@ function EventDictionary() {
   /** The user canceled changes to their selected Pinned Samples in the dropdown on the SamplesHeatmapView. */
   this.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED =
     "SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED";
+
+  /** The user clicked the pin icon to unpin a sample on the taxon heatmap. */
+  this.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED =
+    "SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED";
 }
 
 const eventNames = new EventDictionary();

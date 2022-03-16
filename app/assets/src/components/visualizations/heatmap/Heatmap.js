@@ -1566,7 +1566,29 @@ export default class Heatmap {
           this.options.onColumnLabelClick(d.id, d3.event),
       );
 
+    columnLabelEnter
+      .append("svg:image")
+      .attr("class", cs.pinIcon)
+      .attr("transform", `translate(${this.cell.width / 2}, 0)`)
+      .attr("xlink:href", `${this.options.iconPath}/IconPin.svg`)
+      .on("mousemove", d => {
+        this.options.onNodeHoverMove &&
+          this.options.onNodeHoverMove(d, d3.event);
+      })
+      .on("mouseenter", this.options.onPinIconHover)
+      .on("mouseleave", this.options.onPinIconExit)
+      .on("click", this.unpinColumn);
+
     applyFormat(columnLabelEnter);
+
+    // Only display the pin icon if the column is pinned.
+    columnLabel.select(`.${cs.pinIcon}`).attr("display", d => {
+      if (d.pinned) {
+        return "default";
+      } else {
+        return "none";
+      }
+    });
   }
 
   renderColumnMetadata(dx = 0, transition = true) {
@@ -1848,10 +1870,7 @@ export default class Heatmap {
 
       addLink
         .select("rect")
-        .attr(
-          "width",
-          this.rowLabelsWidth + this.columnLabels.length * this.cell.width,
-        )
+        .attr("width", this.rowLabelsWidth)
         .attr("height", this.options.metadataAddLinkHeight);
     }
   }

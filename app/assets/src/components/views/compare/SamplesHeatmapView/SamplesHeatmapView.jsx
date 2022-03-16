@@ -162,8 +162,8 @@ class SamplesHeatmapView extends React.Component {
       sidebarVisible: false,
       sidebarTaxonModeConfig: null,
       taxonFilterState: [],
-      pendingPinnedSampleIds: [],
-      pinnedSampleIds: [],
+      pendingPinnedSampleIds: new Set(),
+      pinnedSampleIds: new Set(),
     };
 
     this.removedTaxonIds = new Set(
@@ -1437,8 +1437,8 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handlePinnedSampleChange = (_event, selectedSamples) => {
-    const selectedSampleIds = selectedSamples.map(sample =>
-      sample.id ? sample.id : sample,
+    const selectedSampleIds = new Set(
+      selectedSamples.map(sample => (sample.id ? sample.id : sample)),
     );
     this.setState({ pendingPinnedSampleIds: selectedSampleIds });
     logAnalyticsEvent(
@@ -1470,12 +1470,17 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handleUnpinSample = sampleId => {
-    const prevPinnedSamples = this.state.pinnedSampleIds;
-    const newPinnedSamples = prevPinnedSamples.remove(sampleId);
+    let { pinnedSampleIds } = this.state;
+    pinnedSampleIds.delete(sampleId);
+    logAnalyticsEvent();
     this.setState({
-      pinnedSampleIds: newPinnedSamples,
-      pendingPinnedSampleIds: newPinnedSamples,
+      pinnedSampleIds,
+      pendingPinnedSampleIds: pinnedSampleIds,
     });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED,
+      sampleId,
+    );
   };
 
   handleSampleLabelClick = sampleId => {
@@ -1754,8 +1759,8 @@ class SamplesHeatmapView extends React.Component {
           onPinSampleApply={this.handlePinnedSampleChangeApply}
           onPinSampleCancel={this.handlePinnedSampleChangeCancel}
           onUnpinSample={this.handleUnpinSample}
-          pendingPinnedSampleIds={this.state.pendingPinnedSampleIds}
-          pinnedSampleIds={this.state.pinnedSampleIds}
+          pendingPinnedSampleIds={Array.from(this.state.pendingPinnedSampleIds)}
+          pinnedSampleIds={Array.from(this.state.pinnedSampleIds)}
           onAddTaxon={this.handleAddedTaxonChange}
           newTaxon={this.state.newestTaxonId}
           onRemoveTaxon={this.handleRemoveTaxon}

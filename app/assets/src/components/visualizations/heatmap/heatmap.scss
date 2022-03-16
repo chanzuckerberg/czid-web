@@ -36,6 +36,14 @@
         visibility: hidden;
       }
 
+      .pinIcon {
+        &:hover {
+          cursor: pointer;
+          // The filter is defined in heatmap.js
+          filter: url("#blue");
+        }
+      }
+
       &.highlighted {
         fill: $sds-color-primary-400;
       }

@@ -8,6 +8,7 @@ import {
   withAnalytics,
   logAnalyticsEvent,
 } from "~/api/analytics";
+import BasicPopup from "~/components/BasicPopup";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import PinSampleSelector from "~/components/common/Heatmap/PinSampleSelector";
@@ -40,6 +41,7 @@ class SamplesHeatmapVis extends React.Component {
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
       displayControlsBanner: true,
+      pinIconHovered: false,
       pinSampleTrigger: null,
     };
 
@@ -97,6 +99,8 @@ class SamplesHeatmapVis extends React.Component {
             ? this.handlePinSampleClick
             : null,
         onUnpinColumn: this.props.onUnpinSample,
+        onPinIconHover: this.handlePinIconHover,
+        onPinIconExit: this.handlePinIconExit,
         onCellClick: this.handleCellClick,
         onColumnLabelMove: this.handleMouseHoverMove,
         onColumnLabelHover: this.handleSampleLabelHover,
@@ -461,6 +465,18 @@ class SamplesHeatmapVis extends React.Component {
     );
   };
 
+  handlePinIconHover = () => {
+    this.setState({
+      pinIconHovered: true,
+    });
+  };
+
+  handlePinIconExit = () => {
+    this.setState({
+      pinIconHovered: false,
+    });
+  };
+
   getAvailableTaxa() {
     // taxonDetails includes entries mapping both
     // taxId => taxonDetails and taxName => taxonDetails,
@@ -558,6 +574,7 @@ class SamplesHeatmapVis extends React.Component {
       addMetadataTrigger,
       selectedMetadata,
       pinSampleTrigger,
+      pinIconHovered,
     } = this.state;
 
     let pinSampleOptions = this.props.sampleIds.map(id => {
@@ -616,6 +633,23 @@ class SamplesHeatmapVis extends React.Component {
             metadataColors={columnMetadataLegend}
             tooltipLocation={tooltipLocation}
           />
+        )}
+        {pinIconHovered && tooltipLocation && (
+          <div
+            className={cx(cs.tooltip, cs.visible)}
+            style={{
+              left: tooltipLocation.left,
+              top: tooltipLocation.top - 10,
+            }}
+          >
+            <BasicPopup
+              basic={false}
+              content="Unpin"
+              open // Make sure the tooltip is visible as long as the container is visible.
+              position="top center"
+              trigger={<div />} // Pass in an empty div because the tooltip requires a trigger element.
+            />
+          </div>
         )}
         {rowGroupLegend && <RowGroupLegend {...rowGroupLegend} />}
         {addMetadataTrigger && (
