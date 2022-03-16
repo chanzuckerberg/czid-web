@@ -16,10 +16,11 @@ on:
         default: 'false'
 
 jobs:
-  run_deploymnet:
+  run_deployment:
     name: Deploy ${{ github.event.inputs.source }} to ${{ github.event.inputs.destination }}
     uses: ./.github/workflows/reusable-deploy-workflow.yml
     with:
       source: ${{ github.event.inputs.source }}
       destination: ${{ github.event.inputs.destination }}
       force: ${{ github.event.inputs.force == 'true' }}
+      developer_name: ${{ github.actor }}

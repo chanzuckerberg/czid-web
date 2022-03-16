@@ -16,8 +16,10 @@ jobs:
     with:
       source: staging
       destination: prod
+      developer_name: ${{ github.actor }}
   deploy-main-to-staging:
     uses: ./.github/workflows/reusable-deploy-workflow.yml
     with:
       source: main
       destination: staging
+      developer_name: ${{ github.actor }}
