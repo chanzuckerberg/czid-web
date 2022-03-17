@@ -118,10 +118,37 @@ WebMock.disable_net_connect!(allow_localhost: true)
 RSpec.configure do |_config|
   # sign_in method to be used in rspec tests
   def sign_in(user)
+    allow_any_instance_of(ApplicationController).to receive(:current_user) { user }
+    allow_any_instance_of(ApplicationController).to receive(:authenticate_user!) { true }
+  end
+
+  # sign_in method that emulates a successfully decoded and valid auth0 bearer token
+  def sign_in_auth0(user)
     unless user.instance_of? User
       user = users(user)
     end
-    allow_any_instance_of(ApplicationController).to receive(:current_user) { user }
-    allow_any_instance_of(ApplicationController).to receive(:authenticate_user!) { true }
+    roles = user.admin? ? ["admin"] : []
+    decoded_auth0_token = { authenticated: true, auth_payload: { "email" => user.email, "exp" => DateTime.now.to_i + 10.hours, Auth0Helper::ROLES_CUSTOM_CLAIM => roles } }
+    allow_any_instance_of(Auth0Helper).to receive(:auth0_decode_auth_token) { decoded_auth0_token }
+
+    OmniAuth.config.test_mode = true
+    OmniAuth.config.add_mock(:auth0)
+    post "/auth/auth0"
+    follow_redirect!
+  end
+
+  def setup
+    # We don't want our tests invoking real auth0 client
+    @auth0_management_client_double = double("Auth0Client")
+    allow(Auth0UserManagementHelper).to receive(:auth0_management_client).and_return(@auth0_management_client_double)
+  end
+
+  def setup_auth0_double
+    setup
+  end
+
+  def teardown
+    OmniAuth.config.mock_auth[:auth0] = nil
+    OmniAuth.config.test_mode = false
   end
 end
