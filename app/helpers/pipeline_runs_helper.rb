@@ -47,6 +47,15 @@ module PipelineRunsHelper
         "annotated_out" => "Annotate non-host FASTA with preliminary NCBI accession IDs.",
       },
     },
+    PipelineRunStage::OLD_ALIGNMENT_STAGE_NAME => {
+      "stage" => "Align reads to NCBI nucleotide and protein databases.",
+      "steps" => {
+        "gsnap_out" => "Align remaining reads to the NCBI NT database using GSNAP.",
+        "rapsearch2_out" => "Align remaining reads to the NCBI NR database using RAPSearch2.",
+        "taxon_count_out" => "Count preliminary taxon hits.",
+        "annotated_out" => "Annotate non-host FASTA with preliminary NCBI accession IDs.",
+      },
+    },
     PipelineRunStage::POSTPROCESS_STAGE_NAME => {
       "stage" => "Assemble reads and refine read assignments.",
       "steps" => {

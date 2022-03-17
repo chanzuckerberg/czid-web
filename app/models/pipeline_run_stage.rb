@@ -25,6 +25,7 @@ class PipelineRunStage < ApplicationRecord
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
   ALIGNMENT_STAGE_NAME = 'Minimap2/Diamond alignment'.freeze
+  OLD_ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH2 alignment'.freeze
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze # also known as "assembly"
   EXPT_STAGE_NAME = "Experimental".freeze # Not actually experimental anymore!
 
@@ -40,6 +41,7 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_BY_STAGE_NAME = {
     HOST_FILTERING_STAGE_NAME => DAG_NAME_HOST_FILTER,
     ALIGNMENT_STAGE_NAME => DAG_NAME_ALIGNMENT,
+    OLD_ALIGNMENT_STAGE_NAME => DAG_NAME_ALIGNMENT,
     POSTPROCESS_STAGE_NAME => DAG_NAME_POSTPROCESS,
     EXPT_STAGE_NAME => DAG_NAME_EXPERIMENTAL,
   }.freeze
