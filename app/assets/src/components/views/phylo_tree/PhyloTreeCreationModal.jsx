@@ -30,7 +30,6 @@ import ProjectSelect from "~/components/common/ProjectSelect";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
-import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
 import { formatPercent } from "~/components/utils/format";
 import {
   isPipelineFeatureAvailable,
@@ -52,8 +51,6 @@ import cs from "./phylo_tree_creation_modal.scss";
 class PhyloTreeCreationModal extends React.Component {
   constructor(props, context) {
     super(props, context);
-
-    const { allowedFeatures = [] } = context || {};
 
     this.state = {
       defaultPage: 0,
@@ -99,10 +96,8 @@ class PhyloTreeCreationModal extends React.Component {
       tissue: "Sample Type",
       location: "Location",
       date: "Date",
-      ...(allowedFeatures.includes(PHYLO_TREE_NG_FEATURE) && {
-        numContigs: "Contigs",
-        coverageBreadth: "Coverage Breadth",
-      }),
+      numContigs: "Contigs",
+      coverageBreadth: "Coverage Breadth",
     };
 
     this.otherSamplesHeaders = {
@@ -136,51 +131,34 @@ class PhyloTreeCreationModal extends React.Component {
 
   loadPhylotrees = async () => {
     const { taxonId, projectId } = this.state;
-    const { allowedFeatures = [] } = this.context || {};
 
-    const { phyloTrees, taxonName } = await getPhyloTrees({
+    const { phyloTrees } = await getPhyloTrees({
       taxId: taxonId,
       projectId,
     });
 
-    if (allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)) {
-      // With PHYLO_TREE_NG_FEATURE, we combine the old and new 'index' results:
-      const { phyloTrees: phyloTreeNgs, taxonNameNg } = await getPhyloTrees({
-        taxId: taxonId,
-        projectId,
-        nextGeneration: true,
-      });
+    // Combine the old + new tree index results.
+    const { phyloTrees: phyloTreeNgs, taxonNameNg } = await getPhyloTrees({
+      taxId: taxonId,
+      projectId,
+      nextGeneration: true,
+    });
 
-      if (isEmpty(phyloTrees) && isEmpty(phyloTreeNgs)) {
-        this.setState({
-          skipListTrees: true,
-          phyloTreesLoaded: true,
-        });
-      } else {
-        this.setState({
-          // NOTE: This shows NG first so it may seem out-of-order if user has a
-          // mix of old and new trees. Could sort by updated_at.
-          phyloTrees: this.parsePhyloTreeData(phyloTreeNgs).concat(
-            this.parsePhyloTreeData(phyloTrees),
-          ),
-          phyloTreesLoaded: true,
-          taxonName: taxonNameNg,
-        });
-      }
+    if (isEmpty(phyloTrees) && isEmpty(phyloTreeNgs)) {
+      this.setState({
+        skipListTrees: true,
+        phyloTreesLoaded: true,
+      });
     } else {
-      // Without PHYLO_TREE_NG_FEATURE
-      if (isEmpty(phyloTrees)) {
-        this.setState({
-          skipListTrees: true,
-          phyloTreesLoaded: true,
-        });
-      } else {
-        this.setState({
-          phyloTrees: this.parsePhyloTreeData(phyloTrees),
-          phyloTreesLoaded: true,
-          taxonName,
-        });
-      }
+      this.setState({
+        // NOTE: This shows NG first so it may seem out-of-order if user has a
+        // mix of old and new trees. Could sort by updated_at.
+        phyloTrees: this.parsePhyloTreeData(phyloTreeNgs).concat(
+          this.parsePhyloTreeData(phyloTrees),
+        ),
+        phyloTreesLoaded: true,
+        taxonName: taxonNameNg,
+      });
     }
   };
 
@@ -220,14 +198,12 @@ class PhyloTreeCreationModal extends React.Component {
 
   loadNewTreeContext = () => {
     const { taxonId, projectId, treeName } = this.state;
-    const { allowedFeatures = [] } = this.context || {};
 
     this.setState({ showErrorName: false });
 
     getNewPhyloTree({
       taxId: taxonId,
       projectId,
-      nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
     }).then(({ samples }) => this.handleNewTreeContextResponse(samples));
 
     if (this.wizard.current) {
@@ -259,11 +235,6 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   parseProjectSamplesData = samples => {
-    const { allowedFeatures = [] } = this.context || {};
-
-    const hasPhyloTreeNgFeature = allowedFeatures.includes(
-      PHYLO_TREE_NG_FEATURE,
-    );
     const projectSamples = [];
     const otherSamples = [];
 
@@ -277,47 +248,45 @@ class PhyloTreeCreationModal extends React.Component {
         pipelineRunId: sample.pipeline_run_id,
       };
 
-      if (hasPhyloTreeNgFeature) {
-        const numContigs = get("num_contigs", sample);
+      const numContigs = get("num_contigs", sample);
 
-        formattedSample = {
-          numContigs,
-          ...(numContigs === 0 && {
-            shouldDisable: true,
-            tooltipInfo: {
+      formattedSample = {
+        numContigs,
+        ...(numContigs === 0 && {
+          shouldDisable: true,
+          tooltipInfo: {
+            position: "top center",
+            content:
+              "There must be at least 1 contig in the sample for it to be selected for inclusion in the tree.",
+          },
+        }),
+        ...formattedSample,
+      };
+
+      const coverageBreadth = get("coverage_breadth", sample);
+      const pipelineVersion = get("pipeline_version", sample);
+      const hasCoverageBreadth = isPipelineFeatureAvailable(
+        ACCESSION_COVERAGE_STATS_FEATURE,
+        pipelineVersion,
+      );
+
+      formattedSample = {
+        coverageBreadth:
+          hasCoverageBreadth || numContigs === 0
+            ? formatPercent(coverageBreadth)
+            : "-",
+        ...(!hasCoverageBreadth && {
+          columnTooltips: {
+            coverageBreadth: {
               position: "top center",
+              offset: [-5, 0],
               content:
-                "There must be at least 1 contig in the sample for it to be selected for inclusion in the tree.",
+                "Not shown for samples on pipeline versions older than 6.0.",
             },
-          }),
-          ...formattedSample,
-        };
-
-        const coverageBreadth = get("coverage_breadth", sample);
-        const pipelineVersion = get("pipeline_version", sample);
-        const hasCoverageBreadth = isPipelineFeatureAvailable(
-          ACCESSION_COVERAGE_STATS_FEATURE,
-          pipelineVersion,
-        );
-
-        formattedSample = {
-          coverageBreadth:
-            hasCoverageBreadth || numContigs === 0
-              ? formatPercent(coverageBreadth)
-              : "-",
-          ...(!hasCoverageBreadth && {
-            columnTooltips: {
-              coverageBreadth: {
-                position: "top center",
-                offset: [-5, 0],
-                content:
-                  "Not shown for samples on pipeline versions older than 6.0.",
-              },
-            },
-          }),
-          ...formattedSample,
-        };
-      }
+          },
+        }),
+        ...formattedSample,
+      };
 
       if (sample.project_id === this.state.projectId) {
         projectSamples.push(formattedSample);
@@ -494,11 +463,8 @@ class PhyloTreeCreationModal extends React.Component {
       selectedProjectSamples,
       selectedOtherSamples,
       taxonId,
-      taxonName,
     } = this.state;
     const { onClose } = this.props;
-    const { dagBranch, dagVars } = this;
-    const { allowedFeatures = [] } = this.context || {};
 
     const totalNumberOfSamplesSelected =
       selectedProjectSamples.size + selectedOtherSamples.size;
@@ -532,47 +498,34 @@ class PhyloTreeCreationModal extends React.Component {
       pipelineRunIds.push(this.state.otherSamples[rowIndex].pipelineRunId);
     });
 
-    const nextGeneration = allowedFeatures.includes(PHYLO_TREE_NG_FEATURE);
     createPhyloTree({
       treeName,
-      dagBranch,
-      dagVars,
       projectId,
       taxId: taxonId,
-      taxName: taxonName,
       pipelineRunIds,
-      nextGeneration,
     }).then(({ phylo_tree_id: phyloTreeId }) => {
       const sharedAnalyticsPayload = {
         treeName,
         projectId,
         taxonId,
-        taxonName,
         pipelineRunIds,
-        ...(!nextGeneration ? { dagBranch, dagVars } : {}),
       };
       if (phyloTreeId) {
-        const analyticEventName = nextGeneration
-          ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL
-          : ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATION_SUCCESSFUL;
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL,
+          {
+            treeId: phyloTreeId,
+            ...sharedAnalyticsPayload,
+          },
+        );
 
-        logAnalyticsEvent(analyticEventName, {
-          treeId: phyloTreeId,
-          ...sharedAnalyticsPayload,
-        });
-
-        if (nextGeneration) {
-          showPhyloTreeNotification();
-          onClose();
-        } else {
-          location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
-        }
+        showPhyloTreeNotification();
+        onClose();
       } else {
-        const analyticEventName = nextGeneration
-          ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED
-          : ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATION_FAILED;
-
-        logAnalyticsEvent(analyticEventName, sharedAnalyticsPayload);
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED,
+          sharedAnalyticsPayload,
+        );
 
         // TODO: properly handle error
         // eslint-disable-next-line no-console
@@ -621,11 +574,9 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   isTreeNameValid = async () => {
-    const { allowedFeatures = [] } = this.context || {};
     const { treeName } = this.state;
     const { sanitizedName, valid } = await validatePhyloTreeName({
       treeName,
-      nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
     });
 
     this.setState({

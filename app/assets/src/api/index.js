@@ -398,29 +398,12 @@ const getContigsSequencesByByteranges = (
   return get(`/samples/${sampleId}/contigs_sequences_by_byteranges?${params}`);
 };
 
-const createPhyloTree = ({
-  treeName,
-  dagBranch,
-  dagVars,
-  projectId,
-  taxId,
-  taxName,
-  pipelineRunIds,
-  nextGeneration = false,
-}) => {
-  const endpoint = nextGeneration
-    ? "/phylo_tree_ngs.json"
-    : "/phylo_trees/create.json";
-
-  return postWithCSRF(endpoint, {
+const createPhyloTree = ({ treeName, projectId, taxId, pipelineRunIds }) => {
+  return postWithCSRF("/phylo_tree_ngs.json", {
     name: treeName,
     projectId,
     taxId,
     pipelineRunIds,
-    // The following inputs are only applicable for the old phylo_trees/create endpoint.
-    dagBranch,
-    dagVars,
-    taxName,
   });
 };
 
@@ -439,12 +422,8 @@ const getPhyloTrees = ({ taxId, projectId, nextGeneration = false } = {}) => {
   });
 };
 
-const getNewPhyloTree = ({ taxId, projectId, nextGeneration = false }) => {
-  const endpoint = nextGeneration
-    ? "/phylo_tree_ngs/new.json"
-    : "/phylo_trees/new.json";
-
-  return get(endpoint, {
+const getNewPhyloTree = ({ taxId, projectId }) => {
+  return get("/phylo_tree_ngs/new.json", {
     params: {
       taxId,
       projectId,
@@ -455,12 +434,8 @@ const getNewPhyloTree = ({ taxId, projectId, nextGeneration = false }) => {
 // Consider consolidating with ProjectsController#index:
 const getProjectsToChooseFrom = () => get("/choose_project.json");
 
-const validatePhyloTreeName = ({ treeName, nextGeneration = false }) => {
-  const endpoint = nextGeneration
-    ? "/phylo_tree_ngs/validate_name"
-    : "/phylo_trees/validate_name";
-
-  return get(endpoint, { params: { name: treeName } });
+const validatePhyloTreeName = ({ treeName }) => {
+  return get("/phylo_tree_ngs/validate_name", { params: { name: treeName } });
 };
 
 const retryPhyloTree = id => postWithCSRF("/phylo_trees/retry", { id });

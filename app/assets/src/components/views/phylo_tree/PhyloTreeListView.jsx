@@ -30,7 +30,6 @@ import {
   PHYLO_TREE_LINK,
   MAIL_TO_HELP_LINK,
 } from "~/components/utils/documentationLinks";
-import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
 import PairwiseDistanceMatrixErrorModal from "~/components/views/phylo_tree/PairwiseDistanceMatrixErrorModal";
@@ -105,7 +104,6 @@ class PhyloTreeListView extends React.Component {
   }
 
   async componentDidMount() {
-    const { allowedFeatures = [] } = this.context || {};
     const { phyloTrees } = this.props;
     const { selectedPhyloTreeId, selectedPhyloTreeNgId } = this.state;
 
@@ -134,18 +132,16 @@ class PhyloTreeListView extends React.Component {
     }
 
     // Populating the dropdown list of trees: First make sure the list of old
-    // trees is there. Then add new NG trees if feature is enabled:
+    // trees is there. Then add NG trees:
     let allPhyloTrees = phyloTrees || [];
     if (!phyloTrees) {
       const { phyloTrees } = await getPhyloTrees();
       allPhyloTrees = phyloTrees;
     }
-    if (allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)) {
-      const { phyloTrees: phyloTreeNgs } = await getPhyloTrees({
-        nextGeneration: true,
-      });
-      allPhyloTrees = [...phyloTreeNgs, ...allPhyloTrees];
-    }
+    const { phyloTrees: phyloTreeNgs } = await getPhyloTrees({
+      nextGeneration: true,
+    });
+    allPhyloTrees = [...phyloTreeNgs, ...allPhyloTrees];
     this.setState({ phyloTrees: allPhyloTrees });
   }
 
@@ -461,7 +457,6 @@ class PhyloTreeListView extends React.Component {
       selectedPhyloTreeNgId,
       treeContainer,
     } = this.state;
-    const { allowedFeatures = [] } = this.context || {};
     const clustermapSvgUrl = currentTree
       ? currentTree.clustermap_svg_url
       : false;
@@ -535,19 +530,17 @@ class PhyloTreeListView extends React.Component {
                 treeContainer={treeContainer}
               />
             )}
-            {allowedFeatures.includes("phylo_tree_appcue") && (
-              <HelpButton
-                className={cs.controlElement}
-                onClick={showAppcue({
-                  flowId: clustermapSvgUrl
-                    ? PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR
-                    : PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
-                  analyticsEventName: clustermapSvgUrl
-                    ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED
-                    : ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
-                })}
-              />
-            )}
+            <HelpButton
+              className={cs.controlElement}
+              onClick={showAppcue({
+                flowId: clustermapSvgUrl
+                  ? PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR
+                  : PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
+                analyticsEventName: clustermapSvgUrl
+                  ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED
+                  : ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
+              })}
+            />
           </ViewHeader.Controls>
         </ViewHeader>
       </NarrowContainer>
@@ -690,7 +683,6 @@ class PhyloTreeListView extends React.Component {
 }
 
 PhyloTreeListView.propTypes = {
-  allowedFeatures: PropTypes.array,
   phyloTrees: PropTypes.array,
   selectedPhyloTreeNgId: PropTypes.number,
 };

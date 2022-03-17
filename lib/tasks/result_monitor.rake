@@ -31,24 +31,6 @@ class MonitorPipelineResults
         end
       end
 
-      Instrument.snippet(name: "PhyloTree Loop", cloudwatch_namespace: instrumentation_namespace) do
-        PhyloTree.in_progress.each do |pt|
-          break if @shutdown_requested
-
-          # TODO: Remove this call when deprecating old phylo trees.
-          if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) != "1"
-            Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
-            pr.monitor_results
-          end
-        rescue StandardError => exception
-          LogUtil.log_error(
-            "Failed monitor results for phylo_tree #{pt.id}: #{exception.message}",
-            exception: exception,
-            phylo_tree_id: pt.id
-          )
-        end
-      end
-
       Instrument.snippet(name: "Failed/Stalled Uploads", cloudwatch_namespace: instrumentation_namespace) do
         # "stalled uploads" are not pipeline jobs, but they fit in here better than
         # anywhere else.
