@@ -45,6 +45,8 @@ jobs:
   build_prod_docker_image:
     runs-on: [self-hosted, idseq-prod]
     steps:
+      - name: Cleanup
+        run: sudo chown -R $USER:$USER /opt/actions-runner/_work/czid-web-private/czid-web-private
       - name: Checkout
         uses: actions/checkout@v2
       - uses: actions/cache@v1
