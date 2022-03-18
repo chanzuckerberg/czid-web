@@ -100,6 +100,9 @@ const HoverActions = ({
     // If there are contigs, then BLAST contigs, otherwise BLAST reads.
     onBlastClick &&
       onBlastClick({
+        context: {
+          blastedFrom: "HoverActions",
+        },
         pipelineVersion,
         sampleId,
         shouldBlastContigs: ntContigs > 0,

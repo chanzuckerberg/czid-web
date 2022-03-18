@@ -1249,6 +1249,7 @@ class SampleView extends React.Component {
   };
 
   handleBlastClick = ({
+    context,
     pipelineVersion,
     sampleId,
     shouldBlastContigs,
@@ -1261,6 +1262,7 @@ class SampleView extends React.Component {
         ? { blastContigsModalVisible: true }
         : { blastReadsModalVisible: true }),
       blastData: {
+        context,
         pipelineVersion,
         sampleId,
         taxName,
@@ -2284,6 +2286,7 @@ class SampleView extends React.Component {
         {blastContigsModalVisible && (
           <BlastContigsModal
             open
+            context={get("context", blastData)}
             onClose={this.handleBlastContigsModalClose}
             pipelineVersion={get("pipelineVersion", blastData)}
             sampleId={get("sampleId", blastData)}
@@ -2294,6 +2297,7 @@ class SampleView extends React.Component {
         {blastReadsModalVisible && (
           <BlastReadsModal
             open
+            context={get("context", blastData)}
             onClose={this.handleBlastReadsModalClose}
             pipelineVersion={get("pipelineVersion", blastData)}
             sampleId={get("sampleId", blastData)}

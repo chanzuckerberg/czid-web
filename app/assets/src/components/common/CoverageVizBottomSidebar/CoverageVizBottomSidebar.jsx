@@ -479,6 +479,9 @@ export default class CoverageVizBottomSidebar extends React.Component {
                         logAnalyticsEvent(
                           ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_BLAST_BUTTON_CLICKED,
                           onBlastClick({
+                            context: {
+                              blastedFrom: "CoverageVizBottomSidebar",
+                            },
                             pipelineVersion,
                             sampleId,
                             shouldBlastContigs: true,

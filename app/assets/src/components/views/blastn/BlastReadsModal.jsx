@@ -18,6 +18,7 @@ import { SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY } from "./constants";
 import { prepareBlastQuery } from "./utils";
 
 const BlastReadsModal = ({
+  context,
   onClose,
   open,
   sampleId,
@@ -92,6 +93,7 @@ const BlastReadsModal = ({
       longestAlignmentLength,
       blastUrlSize: size(blastUrl),
       sampleId,
+      ...context,
     });
   };
 
@@ -182,6 +184,7 @@ const BlastReadsModal = ({
 };
 
 BlastReadsModal.propTypes = {
+  context: PropTypes.object,
   open: PropTypes.bool,
   onClose: PropTypes.func,
   pipelineVersion: PropTypes.string,

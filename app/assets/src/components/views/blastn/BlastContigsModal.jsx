@@ -30,6 +30,7 @@ import {
 import { prepareBlastQuery } from "./utils";
 
 const BlastContigsModal = ({
+  context,
   onClose,
   open,
   sampleId,
@@ -154,14 +155,13 @@ const BlastContigsModal = ({
       showBlastNotification();
       onClose();
     } else {
-      logAnalyticsEvent(
-        ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED,
-        {
-          automaticallyRedirectedToNCBI: false,
-          numberOfContigs: size(selectedContigIds),
-          sampleId,
-        },
-      );
+      logBlastEvent({
+        analyticEventName:
+          ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED,
+        automaticallyRedirectedToNCBI: false,
+        numberOfContigs: size(selectedContigIds),
+        sampleId,
+      });
       setShowBlastRedirectModal(true);
     }
   };
@@ -203,6 +203,7 @@ const BlastContigsModal = ({
       numberOfContigs: size(selectedContigIds),
       blastUrlLengths: map(url => size(url), blastUrls),
       sampleId,
+      ...context,
     });
   };
 
@@ -312,6 +313,7 @@ const BlastContigsModal = ({
 };
 
 BlastContigsModal.propTypes = {
+  context: PropTypes.object,
   open: PropTypes.bool,
   onClose: PropTypes.func,
   pipelineVersion: PropTypes.number,
