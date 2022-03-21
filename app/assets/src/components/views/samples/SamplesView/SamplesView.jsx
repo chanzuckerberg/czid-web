@@ -40,6 +40,7 @@ import {
   IconDownload,
   IconPhyloTree,
   IconNextcladeLarge,
+  IconShare,
 } from "~ui/icons";
 import Label from "~ui/labels/Label";
 import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
@@ -354,6 +355,47 @@ class SamplesView extends React.Component {
     );
   };
 
+  renderGenEpiTrigger = () => {
+    const { objects, selectedIds } = this.props;
+    const { allowedFeatures = {} } = this.context || {};
+
+    if (!allowedFeatures.includes("genepi")) {
+      return;
+    }
+
+    const selectedObjects = objects.loaded.filter(object =>
+      selectedIds.has(object.id),
+    );
+
+    const sarsCov2Count = selectedObjects
+      .map(object => get(["referenceGenome", "taxonName"], object))
+      .reduce((n, taxonName) => {
+        return n + (taxonName === SARS_COV_2);
+      }, 0);
+
+    // TODO: this is currently a placeholder icon, replace with GenEpi
+    // integration icon once it's created.
+    const uploadIcon = <IconShare className={cx(cs.icon, cs.nextclade)} />;
+
+    const getPopupSubtitle = () => {
+      if (sarsCov2Count === 0) {
+        return "Select at least 1 SARS-CoV-2 sample";
+      } else {
+        return "";
+      }
+    };
+
+    return (
+      <ToolbarIcon
+        className={cs.action}
+        icon={uploadIcon}
+        popupText="Send samples to CZ Gen Epi"
+        popupSubtitle={getPopupSubtitle()}
+        disabled={sarsCov2Count === 0}
+      />
+    );
+  };
+
   renderTriggers = () => {
     const { selectedIds, workflow } = this.props;
 
@@ -363,6 +405,7 @@ class SamplesView extends React.Component {
       [TRIGGERS.phylogeneticTree]: this.renderPhyloTreeTrigger,
       [TRIGGERS.download]: this.renderBulkDownloadTrigger,
       [TRIGGERS.nextclade]: this.renderNextcladeTrigger,
+      [TRIGGERS.genepi]: this.renderGenEpiTrigger,
     };
     const triggersToRender = WORKFLOW_TRIGGERS[workflow].map(trigger => (
       <React.Fragment key={`${workflow}-${trigger}`}>
@@ -445,7 +488,6 @@ class SamplesView extends React.Component {
 
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch, projectId, workflow } = this.props;
-    const { allowedFeatures = {} } = this.context || {};
 
     return (
       <DiscoveryViewToggle
@@ -455,9 +497,7 @@ class SamplesView extends React.Component {
           logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
         }}
         includePLQC={
-          !!projectId &&
-          workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
-          allowedFeatures.includes("plqc")
+          !!projectId && workflow === WORKFLOWS.SHORT_READ_MNGS.value
         }
       />
     );

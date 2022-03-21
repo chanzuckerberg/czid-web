@@ -2,6 +2,7 @@ import { WORKFLOWS } from "~utils/workflows";
 
 export const TRIGGERS = {
   backgroundModel: "backgroundModel",
+  genepi: "genepi",
   heatmap: "heatmap",
   phylogeneticTree: "phylogeneticTree",
   download: "download",
@@ -9,7 +10,11 @@ export const TRIGGERS = {
 };
 
 export const WORKFLOW_TRIGGERS = {
-  [WORKFLOWS.CONSENSUS_GENOME.value]: [TRIGGERS.nextclade, TRIGGERS.download],
+  [WORKFLOWS.CONSENSUS_GENOME.value]: [
+    TRIGGERS.nextclade,
+    TRIGGERS.download,
+    TRIGGERS.genepi,
+  ],
   [WORKFLOWS.SHORT_READ_MNGS.value]: [
     TRIGGERS.backgroundModel,
     TRIGGERS.heatmap,
