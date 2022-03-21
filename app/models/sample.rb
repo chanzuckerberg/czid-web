@@ -1008,4 +1008,10 @@ class Sample < ApplicationRecord
       scoped
     end
   end
+
+  def move_to_project(new_project_id)
+    new_sample_path = File.join('samples', new_project_id.to_s, id.to_s)
+    Syscall.s3_mv_recursive("s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/", "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{new_sample_path}/")
+    update(project_id: new_project_id)
+  end
 end

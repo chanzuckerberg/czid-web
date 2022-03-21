@@ -69,6 +69,10 @@ class Syscall
     run("aws", "s3", "cp", source_s3_path, destination_s3_path)
   end
 
+  def self.s3_mv_recursive(source_s3_path, destination_s3_path)
+    run("aws", "s3", "mv", "--recursive", source_s3_path, destination_s3_path)
+  end
+
   # See also S3Util::s3_select_json
   def self.s3_read_json(path)
     raw = s3_cp(path, "-")

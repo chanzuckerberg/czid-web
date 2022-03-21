@@ -49,6 +49,11 @@
   <%= button_to 'rerun from top', kickoff_pipeline_sample_path(@sample), method: :put, form: {target: '_blank'} %>
 <% end %>
 <%= button_to 'delete sample', sample_path(@sample), method: :delete %>
+<%= form_with(url: "#{sample_path(@sample)}/move_to_project", method: :put) do |form| %>
+  <%= form.label :project_id, "Move to project ID:" %>
+  <%= form.number_field :project_id %>
+  <%= form.submit "Move" %>
+<% end %>
 
 <% if @sample.first_pipeline_run %>
   <table class="table table-condensed">

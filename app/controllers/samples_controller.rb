@@ -27,7 +27,7 @@ class SamplesController < ApplicationController
                   :contig_taxid_list, :taxid_contigs_for_blast, :taxid_contigs_download, :taxon_five_longest_reads, :summary_contig_counts, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
-                  :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow,].freeze
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow, :move_to_project,].freeze
 
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
@@ -40,7 +40,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
-  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs]
+  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project]
   before_action :login_required, only: [:bulk_import]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
@@ -1452,6 +1452,14 @@ class SamplesController < ApplicationController
     render json: {
       uploaded_by_current_user: sample_ids.length == samples.length,
     }
+  end
+
+  def move_to_project
+    @sample.move_to_project(params[:project_id])
+    respond_to do |format|
+      format.html { redirect_to pipeline_runs_sample_path(@sample), notice: 'Sample Moved' }
+      format.json { render :show, status: :ok, location: @sample }
+    end
   end
 
   # Use callbacks to share common setup or constraints between actions.
