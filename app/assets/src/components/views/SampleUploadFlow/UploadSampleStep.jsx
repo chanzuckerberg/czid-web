@@ -181,16 +181,12 @@ class UploadSampleStep extends React.Component {
           BASESPACE_UPLOAD,
         );
 
-        // Validate names of the grouped samples if there are any samples that need concatenation
-        const shouldValidateNames = samplesWithToken.some(sample =>
-          sample.basespace_dataset_id?.includes(","),
-        );
-        if (shouldValidateNames) {
-          const { samples: validatedSamples } = await this.validateSampleNames({
-            samples: samplesWithToken,
-          });
-          samplesWithToken = validatedSamples;
-        }
+        // Validate names of grouped samples after concatenation (need to do this
+        // even if it's a group that only contains 1 dataset ID).
+        const { samples: validatedSamples } = await this.validateSampleNames({
+          samples: samplesWithToken,
+        });
+        samplesWithToken = validatedSamples;
       }
 
       this.props.onUploadSamples({
@@ -798,18 +794,12 @@ class UploadSampleStep extends React.Component {
       if (currentTab === LOCAL_UPLOAD && hasLaneConcatLocalFeature) {
         const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
         samples = map(group => group.concatenated, groups);
-        // Validate names of the grouped samples if there are any samples that need concatenation
-        const shouldValidateNames = samples.some(sample =>
-          sample.input_files_attributes.some(
-            file => file.concatenated && file.concatenated.length > 1,
-          ),
-        );
-        if (shouldValidateNames) {
-          const { samples: validatedSamples } = await this.validateSampleNames({
-            samples,
-          });
-          samples = validatedSamples;
-        }
+        // Validate names of grouped samples after concatenation (need to do this
+        // even if it's a group that only contains 1 lane file).
+        const { samples: validatedSamples } = await this.validateSampleNames({
+          samples,
+        });
+        samples = validatedSamples;
       }
 
       onUploadSamples({
