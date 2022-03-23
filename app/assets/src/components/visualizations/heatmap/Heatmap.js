@@ -731,10 +731,10 @@ export default class Heatmap {
         orderBy(
           this.columnLabels,
           [
+            // Make sure pinned columns appear first,
             label => label.pinned,
             label => {
-              // Pinned columns should not be sorted by the metadata;
-              // they will appear first, in alphabetical order.
+              // Pinned columns should not be sorted by the metadata.
               if (!label.pinned) {
                 return (
                   (label.metadata &&
@@ -743,8 +743,10 @@ export default class Heatmap {
                 );
               }
             },
+            // Pinned columns in alphabetical order relative to each other.
+            label => label.label,
           ],
-          ["desc", this.columnMetadataSortAsc ? "asc" : "desc"],
+          ["desc", this.columnMetadataSortAsc ? "asc" : "desc", "asc"],
         ).forEach((label, idx) => {
           label.pos = idx;
         });
