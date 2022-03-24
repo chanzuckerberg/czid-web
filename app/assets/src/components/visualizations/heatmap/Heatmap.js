@@ -615,6 +615,7 @@ export default class Heatmap {
     // Don't include the transition animation while rendering.
     this.renderColumnMetadata(labelsDx, false);
     this.renderRowAddLink(labelsDx);
+    this.renderPinColumnLink(labelsDx);
 
     // Translating the column and metadata labels in the opposite y direction of the svg.
     let columnLabelsCurrent = d3.transform(this.gColumnLabels.attr("transform"))
