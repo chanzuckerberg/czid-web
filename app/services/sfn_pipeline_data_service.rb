@@ -111,11 +111,6 @@ class SfnPipelineDataService
     # get the idseq-workflow s3 folder
     s3_folder = @pipeline_run.wdl_s3_folder
 
-    # TODO: remove once alignment scalability is released
-    if s3_folder == "s3://idseq-workflows/short-read-mngs-v6.8.9"
-      s3_folder = "s3://idseq-workflows/short-read-mngs-v6.8.8"
-    end
-
     @stage_names = []
     @stage_job_statuses = []
     @stages_wdl_info = []
