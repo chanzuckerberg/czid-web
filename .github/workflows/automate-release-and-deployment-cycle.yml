@@ -3,23 +3,40 @@ name: Automate regular release and deployment cycle
 on:
   workflow_dispatch:
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # GITHUB_TOKEN is provided by Actions and can create deployment objects, but these objects won't trigger workflows.
+  # A separate token, bound to a specific developer with access to the repo, is required to create GitHub deployment
+  # objects that can trigger a deployment workflow. The secret for this token (with repo_deployment scope) is created in
+  # https://github.com/settings/tokens and can be managed in https://github.com/chanzuckerberg/idseq/settings/secrets.
+  GH_DEPLOY_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
+
 jobs:
   run-deployment-prerequisites:
     runs-on: [self-hosted, idseq-dev]
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: |
+            ${{ secrets.GH_SSH_KEY }}
       - name: Update release fix checklist
         run:  ./bin/deploy_automation/update_release_checklist.sh
       - name: Automate release cycle
         run:  ./bin/deploy_automation/automate_release_cycle.sh
-  deploy-staging-to-prod:
+  deploy-prod:
+    needs: run-deployment-prerequisites
+    uses: ./.github/workflows/reusable-deploy-workflow.yml
+    with:
+      source: prod
+      destination: prod
+      developer_name: ${{ github.actor }}
+  deploy-staging:
+    needs: [run-deployment-prerequisites, deploy-prod]
     uses: ./.github/workflows/reusable-deploy-workflow.yml
     with:
       source: staging
-      destination: prod
-      developer_name: ${{ github.actor }}
-  deploy-main-to-staging:
-    uses: ./.github/workflows/reusable-deploy-workflow.yml
-    with:
-      source: main
       destination: staging
       developer_name: ${{ github.actor }}
