@@ -614,13 +614,13 @@ class SamplesController < ApplicationController
     if client == "web" && samples.any?
       web_samples = samples.map do |sample|
         input_files = sample.input_files.map do |input_file|
-          {
-            id: input_file.id,
-            name: input_file.name,
-            presigned_url: input_file.presigned_url,
-            s3_bucket: ENV["SAMPLES_BUCKET_NAME"],
-            s3_file_path: input_file.file_path,
-          }
+          {}.tap do |file_hash|
+            file_hash[:id] = input_file.id
+            file_hash[:name] = input_file.name
+            file_hash[:presigned_url] = input_file.presigned_url unless current_user.allowed_feature?("local_multipart_uploads")
+            file_hash[:s3_bucket] = ENV["SAMPLES_BUCKET_NAME"]
+            file_hash[:s3_file_path] = input_file.file_path
+          end
         end
         {
           id: sample.id,

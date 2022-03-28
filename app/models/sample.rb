@@ -58,7 +58,7 @@ class Sample < ApplicationRecord
   validates :initial_workflow, inclusion: { in: WorkflowRun::WORKFLOW.values }
 
   before_save :check_host_genome, :concatenate_input_parts, :check_status
-  after_save :set_presigned_url_for_local_upload
+  after_save :set_presigned_url_for_local_upload, unless: -> { user.allowed_feature?("local_multipart_uploads") }
   after_create :initiate_input_file_upload
   before_destroy :cleanup_relations
   after_destroy :cleanup_s3

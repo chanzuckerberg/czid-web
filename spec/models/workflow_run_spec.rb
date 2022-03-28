@@ -274,9 +274,9 @@ describe WorkflowRun, type: :model do
     subject { workflow_run.send(:inputs) }
 
     it "calls JSON parse on the inputs_json column" do
-      expect(JSON).to receive(:parse).with(inputs_json).and_call_original
+      response = workflow_run.send(:inputs)
 
-      expect(subject).to eq(parsed_input)
+      expect(response).to eq(parsed_input)
     end
 
     it "returns null if missing input" do
@@ -350,16 +350,15 @@ describe WorkflowRun, type: :model do
     let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], cached_results: cached_results) }
     let(:workflow_run_no_results) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome]) }
 
-    subject { workflow_run.send(:parsed_cached_results) }
-
     it "calls JSON parse on the cached_results column" do
-      expect(JSON).to receive(:parse).with(cached_results).and_call_original
+      response = workflow_run.send(:parsed_cached_results)
 
-      expect(subject).to eq(parsed_results)
+      expect(response).to eq(parsed_results)
     end
 
     it "returns null if missing results" do
-      expect(workflow_run_no_results.parsed_cached_results).to be_nil
+      response = workflow_run_no_results.send(:parsed_cached_results)
+      expect(response).to be_nil
     end
   end
 end
