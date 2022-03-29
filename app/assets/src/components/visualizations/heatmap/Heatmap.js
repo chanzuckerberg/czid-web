@@ -1505,8 +1505,7 @@ export default class Heatmap {
       // update
       addLink.attr(
         "transform",
-        `translate(${dx}, ${-this.totalMetadataHeight +
-          this.options.spacing / 2})`,
+        `translate(${dx}, ${-this.options.metadataAddLinkHeight * 2})`,
       );
 
       addLink
