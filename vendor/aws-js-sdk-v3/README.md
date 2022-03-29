@@ -24,7 +24,12 @@ This folder contains `aws-sdk-js-v3` packages built and installed from the sourc
 
 1. Check out the [CZI fork of the aws-sdk-js-v3 repo](https://github.com/chanzuckerberg/aws-sdk-js-v3)
 1. Make updates in the repository.
-1. Build package for specific folder, following [instructions for installing from source](https://github.com/chanzuckerberg/aws-sdk-js-v3#install-from-source).
+1. Run `yarn build` in the module where changes have been made, for example:
+    ```
+    cd lib/lib-storage/
+    yarn build
+    ```
+1. Build package archive for module, following [instructions for installing from source](https://github.com/chanzuckerberg/aws-sdk-js-v3#install-from-source).
 1. Add package archive to this folder
 1. Run `npm ci` to install/update the package.
 1. If needed, make sure the Dockerfile copies the new package archive into the docker container so that docker images can be built.  The Dockerfile currently copies all files in this folder into the image.

@@ -7,6 +7,7 @@ import {
   find,
   isEmpty,
   map,
+  omit,
   size,
   sum,
   times,
@@ -59,13 +60,24 @@ const LocalUploadProgressModal = ({
   const { allowedFeatures } = userContext || {};
 
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
-  const [locallyCreatedSamples, setLocallyCreatedSamples] = useState([]);
+
+  // State variables to manage download state
   const [retryingSampleUpload, setRetryingSampleUpload] = useState(false);
-  const [sampleUploadPercentages, setSampleUploadPercentages] = useState({});
-  const [sampleUploadStatuses, setSampleUploadStatuses] = useState({});
   const [uploadComplete, setUploadComplete] = useState(false);
 
+  // Store samples created in API
+  const [locallyCreatedSamples, setLocallyCreatedSamples] = useState([]);
+
+  // State to track download progress
+  const [sampleFileUploadIds, setSampleFileUploadIds] = useState({});
+  const [sampleUploadPercentages, setSampleUploadPercentages] = useState({});
+  const [sampleUploadStatuses, setSampleUploadStatuses] = useState({});
+  const [sampleFileCompleted, setSampleFileCompleted] = useState({});
+
   let sampleFilePercentages = {};
+
+  const IN_PROGRESS_STATUS = "in progress";
+  const ERROR_STATUS = "error";
 
   useEffect(() => {
     initiateUploadLocal();
@@ -78,14 +90,11 @@ const LocalUploadProgressModal = ({
       setUploadComplete(true);
       setRetryingSampleUpload(false);
 
-      if (!isEmpty(getLocalSamplesFailed())) {
-        const failedSamples = filter(
-          sample => sampleUploadStatuses[sample.name] === "error",
-          samples,
-        );
+      const numFailedSamples = size(getLocalSamplesFailed());
+      if (numFailedSamples > 0) {
         logAnalyticsEvent("UploadProgressModal_upload_failed", {
-          erroredSamples: failedSamples.length,
-          createdSamples: samples.length - failedSamples.length,
+          erroredSamples: numFailedSamples,
+          createdSamples: samples.length - numFailedSamples,
           uploadType,
         });
       } else {
@@ -192,7 +201,7 @@ const LocalUploadProgressModal = ({
 
           const uploadStatuses = zipObject(
             erroredSampleNames,
-            times(constant("error"), erroredSampleNames.length),
+            times(constant(ERROR_STATUS), erroredSampleNames.length),
           );
 
           setSampleUploadStatuses(prevState => ({
@@ -212,39 +221,7 @@ const LocalUploadProgressModal = ({
     setLocallyCreatedSamples(createdSamples);
 
     if (allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
-      const heartbeatInterval = startUploadHeartbeat(map("id", samples));
-
-      await Promise.all(
-        createdSamples.map(async sample => {
-          const s3ClientForSample = await getS3Client(sample);
-
-          updateSampleUploadPercentage(sample.name, 0);
-
-          try {
-            await Promise.all(
-              sample.input_files.map(async inputFile => {
-                await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
-              }),
-            );
-
-            await completeSampleUpload({
-              sample,
-              onSampleUploadSuccess: sample => {
-                updateSampleUploadStatus(sample.name, "success");
-              },
-              onMarkSampleUploadedError: handleSampleUploadError,
-            });
-          } catch (e) {
-            handleSampleUploadError(sample, e);
-            clearInterval(heartbeatInterval);
-          }
-        }),
-      );
-
-      clearInterval(heartbeatInterval);
-      logAnalyticsEvent("Uploads_batch-heartbeat_completed", {
-        sampleIds: map("id", samples),
-      });
+      await uploadSamples(createdSamples);
     } else {
       await uploadSampleFilesToPresignedURL({
         samples: createdSamples,
@@ -253,9 +230,43 @@ const LocalUploadProgressModal = ({
     }
   };
 
+  const uploadSamples = async samples => {
+    const heartbeatInterval = startUploadHeartbeat(map("id", samples));
+
+    await Promise.all(
+      samples.map(async sample => {
+        try {
+          const s3ClientForSample = await getS3Client(sample);
+          updateSampleUploadPercentage(sample.name, 0);
+
+          await Promise.all(
+            sample.input_files.map(async inputFile => {
+              await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
+            }),
+          );
+
+          await completeSampleUpload({
+            sample,
+            onSampleUploadSuccess: sample => {
+              updateSampleUploadStatus(sample.name, "success");
+            },
+            onMarkSampleUploadedError: handleSampleUploadError,
+          });
+        } catch (e) {
+          handleSampleUploadError(sample, e);
+          clearInterval(heartbeatInterval);
+        }
+      }),
+    );
+
+    clearInterval(heartbeatInterval);
+    logAnalyticsEvent("Uploads_batch-heartbeat_completed", {
+      sampleIds: map("id", samples),
+    });
+  };
+
   const getS3Client = async sample => {
     const credentials = await getUploadCredentials(sample.id);
-
     const {
       access_key_id: accessKeyId,
       aws_region: region,
@@ -282,8 +293,12 @@ const LocalUploadProgressModal = ({
       s3_file_path: s3Key,
     } = inputFile;
 
+    if (sampleFileCompleted[s3Key]) {
+      return;
+    }
+
     const body = sample.filesToUpload[fileName];
-    const target = {
+    const uploadParams = {
       Bucket: s3Bucket,
       Key: s3Key,
       Body: body,
@@ -297,8 +312,11 @@ const LocalUploadProgressModal = ({
 
     const fileUpload = new Upload({
       client: s3Client,
-      leavePartsOnError: false, // configures lib to propagate errors
-      params: target,
+      leavePartsOnError: true, // configures lib to propagate errors
+      params: uploadParams,
+      ...(sampleFileUploadIds[s3Key] && {
+        uploadId: sampleFileUploadIds[s3Key],
+      }),
     });
 
     fileUpload.on("httpUploadProgress", progress => {
@@ -310,7 +328,25 @@ const LocalUploadProgressModal = ({
       });
     });
 
+    fileUpload.onCreatedMultipartUpload(uploadId => {
+      setSampleFileUploadIds(prevState => {
+        return uploadId
+          ? { ...prevState, [s3Key]: uploadId }
+          : removeS3KeyFromUploadIds(s3Key);
+      });
+    });
+
     await fileUpload.done();
+
+    removeS3KeyFromUploadIds(s3Key);
+    setSampleFileCompleted(prevState => ({
+      ...prevState,
+      [s3Key]: true,
+    }));
+  };
+
+  const removeS3KeyFromUploadIds = s3Key => {
+    setSampleFileUploadIds(prevState => omit(s3Key, prevState));
   };
 
   const handleSampleUploadError = (sample, error = null) => {
@@ -321,7 +357,6 @@ const LocalUploadProgressModal = ({
       message,
       sample,
     });
-    updateSampleUploadPercentage(sample.name, 0);
   };
 
   const handleMarkSampleUploadedError = (sample, error = null) => {
@@ -342,7 +377,7 @@ const LocalUploadProgressModal = ({
         error,
       },
     });
-    updateSampleUploadStatus(sample.name, "error");
+    updateSampleUploadStatus(sample.name, ERROR_STATUS);
     logUploadStepError({
       step: "sampleUpload",
       erroredSamples: 1,
@@ -354,43 +389,48 @@ const LocalUploadProgressModal = ({
     return sampleUploadPercentages[sample.name];
   };
 
-  const getNumFailedSamples = () => size(getLocalSamplesFailed());
-
   const getLocalSamplesInProgress = () => {
     return filter(
       sample =>
         sampleUploadStatuses[sample.name] === undefined ||
-        sampleUploadStatuses[sample.name] === "in progress",
+        sampleUploadStatuses[sample.name] === IN_PROGRESS_STATUS,
       samples,
     );
   };
 
   const getLocalSamplesFailed = () => {
     return filter(
-      sample => sampleUploadStatuses[sample.name] === "error",
+      sample => sampleUploadStatuses[sample.name] === ERROR_STATUS,
       samples,
     );
   };
 
-  const retryFailedSamplesUploadToS3 = failedSamples => {
+  const retryFailedSamplesUploadToS3 = async failedSamples => {
     setRetryingSampleUpload(true);
     setUploadComplete(false);
 
-    const failedSamplesWithPresignedURLs = map(failedSample => {
-      updateSampleUploadStatus(failedSample.name, "in progress");
-      updateSampleUploadPercentage(failedSample.name, 0);
+    const failedLocallyCreatedSamples = map(failedSample => {
+      updateSampleUploadStatus(failedSample.name, IN_PROGRESS_STATUS);
+
+      if (!allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
+        updateSampleUploadPercentage(failedSample.name, 0);
+      }
 
       return find({ name: failedSample.name }, locallyCreatedSamples);
     }, failedSamples);
 
-    uploadSampleFilesToPresignedURL({
-      samples: failedSamplesWithPresignedURLs,
-      callbacks: getUploadProgressCallbacks(),
-    });
+    if (allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
+      await uploadSamples(failedLocallyCreatedSamples);
+    } else {
+      uploadSampleFilesToPresignedURL({
+        samples: failedLocallyCreatedSamples,
+        callbacks: getUploadProgressCallbacks(),
+      });
+    }
   };
 
   const renderSampleStatus = ({ sample, status }) => {
-    if (status === "error") {
+    if (status === ERROR_STATUS) {
       return (
         <>
           <IconAlert className={cs.alertIcon} type="error" />
@@ -452,7 +492,7 @@ const LocalUploadProgressModal = ({
   };
 
   const failedSamplesTitle = () => {
-    const numFailedSamples = getNumFailedSamples();
+    const numFailedSamples = size(getLocalSamplesFailed());
     const title =
       Object.keys(sampleUploadStatuses).length === numFailedSamples
         ? "All uploads failed"
@@ -575,7 +615,7 @@ const LocalUploadProgressModal = ({
               </div>
               <LoadingBar
                 percentage={getUploadPercentageForSample(sample)}
-                error={status === "error"}
+                error={status === ERROR_STATUS}
               />
             </div>
           );
@@ -586,7 +626,7 @@ const LocalUploadProgressModal = ({
       )}
       {confirmationModalOpen && (
         <UploadConfirmationModal
-          numberOfFailedSamples={getNumFailedSamples()}
+          numberOfFailedSamples={size(getLocalSamplesFailed())}
           onCancel={() => setConfirmationModalOpen(false)}
           onConfirm={() => {
             logAnalyticsEvent(
