@@ -1,11 +1,12 @@
-import PropTypes from "prop-types";
-import React from "react";
 
-import { IconShare } from "~ui/icons";
+import React from "react";
+import IconShare from "~ui/icons/IconShare";
+
+
 import PrimaryButton from "./PrimaryButton";
 import SecondaryButton from "./SecondaryButton";
 
-const ShareButton = ({ primary, ...props }) => {
+const ShareButton = ({ primary, ...props } : ShareButtonProps) => {
   if (primary) {
     return <PrimaryButton text="Share" {...props} icon={<IconShare />} />;
   } else {
@@ -17,8 +18,8 @@ ShareButton.defaultProps = {
   primary: true,
 };
 
-ShareButton.propTypes = {
-  primary: PropTypes.bool,
+interface ShareButtonProps {
+  primary: boolean,
 };
 
 export default ShareButton;

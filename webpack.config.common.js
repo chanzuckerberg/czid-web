@@ -12,7 +12,7 @@ const config = {
     filename: "dist/[name].bundle.min.js",
   },
   resolve: {
-    extensions: [".js", ".jsx"],
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
     alias: {
       "~": path.resolve(__dirname, "app/assets/src"),
       "~ui": path.resolve(__dirname, "app/assets/src/components/ui"),
@@ -30,16 +30,9 @@ const config = {
   module: {
     rules: [
       {
-        test: /.js$/,
+        test: /.(js|ts)x?$/,
         exclude: new RegExp(
-          `/node_modules/(?!(${includedNodeModules.join("|")})/).*/`
-        ),
-        loader: "babel-loader",
-      },
-      {
-        test: /.jsx$/,
-        exclude: new RegExp(
-          `/node_modules/(?!(${includedNodeModules.join("|")})/).*/`
+          `/node_modules/(?!(${includedNodeModules.join("|")})/).*/`,
         ),
         loader: "babel-loader",
       },
