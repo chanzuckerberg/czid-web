@@ -191,12 +191,21 @@ class VisualizationsController < ApplicationController
   end
 
   def download_heatmap
-    @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
-      params,
-      samples_for_heatmap,
-      background_for_heatmap
-    )
-    output_csv = generate_heatmap_csv(@sample_taxons_dict)
+    if current_user.allowed_feature?("heatmap_elasticsearch")
+      heatmap_es_dict = HeatmapElasticsearchService.call(
+        params: params,
+        samples_for_heatmap: samples_for_heatmap,
+        background_for_heatmap: background_for_heatmap
+      )
+      output_csv = generate_heatmap_csv(heatmap_es_dict)
+    else
+      @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
+        params,
+        samples_for_heatmap,
+        background_for_heatmap
+      )
+      output_csv = generate_heatmap_csv(@sample_taxons_dict)
+    end
     send_data output_csv, filename: 'heatmap.csv'
   end
 
@@ -210,6 +219,13 @@ class VisualizationsController < ApplicationController
         background_id: background_for_heatmap
       )
       render json: heatmap_dict
+    elsif current_user.allowed_feature?("heatmap_elasticsearch")
+      heatmap_es_dict = HeatmapElasticsearchService.call(
+        params: params,
+        samples_for_heatmap: samples_for_heatmap,
+        background_for_heatmap: background_for_heatmap
+      )
+      render json: heatmap_es_dict
     else
       @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
         params,
@@ -233,6 +249,12 @@ class VisualizationsController < ApplicationController
         pipeline_run_ids: pr_id_to_sample_id.keys,
         taxon_ids: taxon_ids.compact,
         background_id: background_for_heatmap
+      )
+    elsif current_user.allowed_feature?("heatmap_elasticsearch")
+      sample_taxons_dict = HeatmapElasticsearchService.call(
+        params: params,
+        samples_for_heatmap: samples_for_heatmap,
+        background_for_heatmap: background_for_heatmap
       )
     else
       update_background_only = params[:updateBackgroundOnly]

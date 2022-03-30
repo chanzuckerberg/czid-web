@@ -1,0 +1,90 @@
+{
+    "took": 164,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 145,
+            "relation": "eq"
+        },
+        "max_score": null,
+        "hits": [
+            {
+                "_index": "scored_taxon_count",
+                "_type": "_doc",
+                "_id": "7xaAmX8B-Y92L3equola",
+                "_score": null,
+                "fields": {
+                    "tax_id": [
+                        562
+                    ]
+                },
+                "sort": [
+                    "NT",
+                    640414.7
+                ],
+                "inner_hits": {
+                    "documents": {
+                        "hits": {
+                            "total": {
+                                "value": 1,
+                                "relation": "eq"
+                            },
+                            "max_score": 5.4341717,
+                            "hits": [
+                                {
+                                    "_index": "scored_taxon_count",
+                                    "_type": "_doc",
+                                    "_id": "7xaAmX8B-Y92L3equola",
+                                    "_score": 5.4341717,
+                                    "_source": {
+                                        "metric_list": [
+                                            {
+                                                "alignment_length": 27755.0,
+                                                "mean": 5.50036,
+                                                "counts": 1900373,
+                                                "count_type": "NT",
+                                                "percent_identity": 99.9607,
+                                                "e_value": -292.1954650878906,
+                                                "zscore": 99.0,
+                                                "stdev": 32.6038,
+                                                "rpm": 640414.7050795138
+                                            },
+                                            {
+                                                "alignment_length": 832.553,
+                                                "stdev_mass_normalized": 1,
+                                                "mean": 7.8056,
+                                                "counts": 1683094,
+                                                "count_type": "NR",
+                                                "percent_identity": 99.357,
+                                                "e_value": -0.06364035606384277,
+                                                "zscore": 99.0,
+                                                "mean_mass_normalized": 1,
+                                                "stdev": 34.2902,
+                                                "rpm": 567192.9392972322
+                                            }
+                                        ],
+                                        "superkingdom_taxid": 2,
+                                        "name": "Escherichia coli",
+                                        "pipeline_run_id": 27441,
+                                        "background_id": 26,
+                                        "genus_taxid": 561,
+                                        "is_phage": 0,
+                                        "tax_id": 562,
+                                        "tax_level": 1,
+                                        "family_taxid": 543
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

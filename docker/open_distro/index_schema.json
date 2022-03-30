@@ -1,0 +1,86 @@
+{
+  "index_patterns": [
+    "scored_taxon_count*"
+  ],
+  "template": {
+    "aliases": {},
+    "mappings": {
+      "properties": {
+        "is_phage": {
+          "type": "integer",
+          "null_value": "0"
+        },
+        "name": {
+          "type": "text"
+        },
+        "pipeline_run_id": {
+          "type": "long"
+        },
+        "superkingdom_taxid": {
+          "type": "long",
+          "null_value": "0"
+        },
+        "tax_id": {
+          "type": "long",
+          "null_value": "0"
+        },
+        "tax_level": {
+          "type": "long",
+          "null_value": "0"
+        },
+        "metric_list": {
+          "type": "nested",
+          "properties": {
+            "zscore": {
+              "type": "float"
+            },
+            "rpm": {
+              "type": "float"
+            },
+            "stdev": {
+              "type": "float",
+              "null_value": "0"
+            },
+            "percent_identity": {
+              "type": "float",
+              "index": false
+            },
+            "mean": {
+              "type": "float",
+              "null_value": "0"
+            },
+            "mean_mass_normalized": {
+              "type": "float",
+              "null_value": "0"
+            },
+            "alignment_length": {
+              "type": "float",
+              "null_value": "0"
+            },
+            "counts": {
+              "type": "long",
+              "null_value": "0"
+            },
+            "count_type": {
+              "type": "keyword",
+              "null_value": "NULL"
+            },
+            "e_value": {
+              "type": "float",
+              "null_value": "0"
+            },
+            "stdev_mass_normalized": {
+              "type": "float",
+              "null_value": "0"
+            }
+          }
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "version": 1,
+  "_meta": {
+    "description": "z-score and RPM score count for taxon and pipeline run "
+  }
+}

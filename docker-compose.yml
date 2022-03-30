@@ -30,6 +30,7 @@ x-web-variables: &web-variables
   ? SERVER_DOMAIN
   ? SMTP_PASSWORD
   ? SMTP_USER
+  ? HEATMAP_ES_ADDRESS=http://heatmap-elasticsearch:9200
 
 x-auth0-variables: &auth0-variables
   ? AUTH0_CLIENT_ID
@@ -71,6 +72,27 @@ services:
     ports:
       - 9200:9200
     platform: linux/amd64
+  heatmap-elasticsearch:
+    build:
+      context: ./docker/open_distro
+      dockerfile: Dockerfile
+    image: opendistro-for-elasticsearch-no-security
+    container_name: heatmap-elasticsearch
+    environment:
+      - node.name=heatmap-elasticsearch-node
+      - discovery.type=single-node
+      - cluster.name=es-docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./docker_data/heatmap_elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - 9400:9200
+      - 9600:9600
   db:
     image: mysql:5.7
     container_name: mysql
@@ -111,6 +133,7 @@ services:
       - db
       - redis
       - elasticsearch
+      - heatmap-elasticsearch
     environment:
       <<: *web-variables
       <<: *aws-variables
