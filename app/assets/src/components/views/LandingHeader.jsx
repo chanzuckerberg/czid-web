@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import ExternalLink from "~ui/controls/ExternalLink";
-import { LogoReversed } from "~ui/icons";
+import { CZIDLogoReversed } from "~ui/icons";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 
 import cs from "./landing.scss";
@@ -17,7 +17,7 @@ const LandingHeader = ({ browserInfo }) => {
         <div className={cs.brandDetails}>
           <a href="/">
             <span className={cs.logoIcon}>
-              <LogoReversed />
+              <CZIDLogoReversed />
             </span>
           </a>
         </div>
@@ -32,7 +32,7 @@ const LandingHeader = ({ browserInfo }) => {
           </ExternalLink>
           <ExternalLink
             className={cs.headerLink}
-            href="https://www.discoveridseq.com"
+            href="https://www.czid.org/impact"
             analyticsEventName="Landing_video-tour-link_clicked"
           >
             Video Tour

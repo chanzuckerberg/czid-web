@@ -78,12 +78,10 @@ import IconTempSmall from "./IconTempSmall";
 import IconTreeSmall from "./IconTreeSmall";
 import IconUploadFigure from "./IconUploadFigure";
 import IconViewSmall from "./IconViewSmall";
-import LogoColor from "./LogoColor";
 import LogoLockupColor from "./LogoLockupColor";
 import LogoLockupReversed from "./LogoLockupReversed";
 import LogoMarkColor from "./LogoMarkColor";
 import LogoMarkReversed from "./LogoMarkReversed";
-import LogoReversed from "./LogoReversed";
 import SortIcon from "./SortIcon";
 
 export const ICONS_TAXONOMY = {
@@ -170,7 +168,6 @@ export const ICONS_TAXONOMY = {
   LOGO: {
     IconBiohubLogo,
     IconCziLogo,
-    LogoColor,
     LogoLockupColor,
     LogoMarkColor,
   },
@@ -178,7 +175,6 @@ export const ICONS_TAXONOMY = {
     CZIDLogoReversed,
     LogoLockupReversed,
     LogoMarkReversed,
-    LogoReversed,
   },
 };
 
