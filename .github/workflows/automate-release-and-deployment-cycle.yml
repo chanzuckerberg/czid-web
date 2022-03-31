@@ -25,7 +25,7 @@ jobs:
       - name: Update release fix checklist
         run:  ./bin/deploy_automation/update_release_checklist.sh
       - name: Automate release cycle
-        run:  ./bin/deploy_automation/automate_release_cycle.sh
+        run:  ./bin/deploy_automation/automated_release_cycle.sh
   deploy-prod:
     needs: run-deployment-prerequisites
     uses: ./.github/workflows/reusable-deploy-workflow.yml
