@@ -1,7 +1,11 @@
 import cx from "classnames";
 import { map, take, pick, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import { logAnalyticsEvent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  logAnalyticsEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { bulkUploadRemote, bulkUploadBasespace } from "~/api/upload";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
@@ -95,11 +99,14 @@ const RemoteUploadProgressModal = ({
       setUploadComplete(true);
       setFailedSampleNames(map("name", samples));
 
-      logAnalyticsEvent("UploadProgressModal_upload_failed", {
-        erroredSamples: samplesWithFlags.length,
-        createdSamples: 0,
-        uploadType,
-      });
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
+        {
+          erroredSamples: samplesWithFlags.length,
+          createdSamples: 0,
+          uploadType,
+        },
+      );
       return;
     }
 
@@ -109,16 +116,22 @@ const RemoteUploadProgressModal = ({
     onUploadComplete();
 
     if (response.errors.length > 0) {
-      logAnalyticsEvent("UploadProgressModal_upload_failed", {
-        erroredSamples: response.errored_sample_names.length,
-        createdSamples: response.sample_ids.length,
-        uploadType,
-      });
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
+        {
+          erroredSamples: response.errored_sample_names.length,
+          createdSamples: response.sample_ids.length,
+          uploadType,
+        },
+      );
     } else {
-      logAnalyticsEvent("UploadProgressModal_upload_succeeded", {
-        createdSamples: response.sample_ids.length,
-        uploadType,
-      });
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
+        {
+          createdSamples: response.sample_ids.length,
+          uploadType,
+        },
+      );
     }
   };
 
@@ -142,7 +155,9 @@ const RemoteUploadProgressModal = ({
               className={cs.helpLink}
               href="mailto:help@czid.org"
               onClick={() =>
-                logAnalyticsEvent("UploadProgressModal_contact-us-link_clicked")
+                logAnalyticsEvent(
+                  ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
+                )
               }
             >
               Contact us for help
@@ -193,12 +208,14 @@ const RemoteUploadProgressModal = ({
 
   const renderViewProjectButton = () => {
     const buttonCallback = () => {
-      logAnalyticsEvent("UploadProgressModal_to-project-button_clicked", {
-        projectId: project.id,
-        projectName: project.name,
-      });
-
-      redirectToProject(project.id);
+      withAnalytics(
+        redirectToProject(project.id),
+        ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED,
+        {
+          projectId: project.id,
+          projectName: project.name,
+        },
+      );
     };
 
     return (

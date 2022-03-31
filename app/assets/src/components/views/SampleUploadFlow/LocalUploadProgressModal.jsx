@@ -14,7 +14,11 @@ import {
   zipObject,
 } from "lodash/fp";
 import React, { useContext, useEffect, useState } from "react";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  logAnalyticsEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import {
   completeSampleUpload,
   getUploadCredentials,
@@ -92,19 +96,46 @@ const LocalUploadProgressModal = ({
 
       const numFailedSamples = size(getLocalSamplesFailed());
       if (numFailedSamples > 0) {
-        logAnalyticsEvent("UploadProgressModal_upload_failed", {
-          erroredSamples: numFailedSamples,
-          createdSamples: samples.length - numFailedSamples,
-          uploadType,
-        });
+        const failedSamples = filter(
+          sample => sampleUploadStatuses[sample.name] === "error",
+          samples,
+        );
+        const createdSamples = filter(
+          sample => sampleUploadStatuses[sample.name] !== "error",
+          samples,
+        );
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
+          {
+            erroredSamples: failedSamples.length,
+            createdSamples: samples.length - failedSamples.length,
+            erroredSamplesFileSizes: sampleNameToFileSizes(failedSamples),
+            createdSamplesFileSizes: sampleNameToFileSizes(createdSamples),
+            projectId: project.id,
+            uploadType,
+          },
+        );
       } else {
-        logAnalyticsEvent("UploadProgressModal_upload_succeeded", {
-          createdSamples: samples.length,
-          uploadType,
-        });
+        logAnalyticsEvent(
+          ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
+          {
+            createdSamples: samples.length,
+            createdSamplesFileSizes: sampleNameToFileSizes(samples),
+            projectId: project.id,
+            uploadType,
+          },
+        );
       }
     }
   }, [sampleUploadStatuses]);
+
+  // Returns a map of sample names to a list of their file sizes
+  const sampleNameToFileSizes = samples => {
+    return samples.reduce(function(nameToFileSizes, sample) {
+      nameToFileSizes[sample.name] = map(file => file.size, sample.files);
+      return nameToFileSizes;
+    }, {});
+  };
 
   const updateSampleUploadStatus = (sampleName, status) => {
     setSampleUploadStatuses(prevState => ({
@@ -213,6 +244,7 @@ const LocalUploadProgressModal = ({
             step: "createSamples",
             erroredSamples: erroredSampleNames.length,
             uploadType,
+            errors,
           });
         },
       },
@@ -260,9 +292,12 @@ const LocalUploadProgressModal = ({
     );
 
     clearInterval(heartbeatInterval);
-    logAnalyticsEvent("Uploads_batch-heartbeat_completed", {
-      sampleIds: map("id", samples),
-    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED,
+      {
+        sampleIds: map("id", samples),
+      },
+    );
   };
 
   const getS3Client = async sample => {
@@ -384,6 +419,7 @@ const LocalUploadProgressModal = ({
       step: "sampleUpload",
       erroredSamples: 1,
       uploadType,
+      errors: error,
     });
   };
 
@@ -441,7 +477,7 @@ const LocalUploadProgressModal = ({
           <div
             onClick={withAnalytics(
               () => retryFailedSamplesUploadToS3([sample]),
-              "UploadProgressModal_retry_clicked",
+              ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_CLICKED,
               {
                 sampleName: sample.name,
               },
@@ -468,10 +504,14 @@ const LocalUploadProgressModal = ({
       return "Waiting to upload...";
     }
 
-    const totalSize = sum(map(file => file.size, sample.files));
+    const totalSize = totalFilesSize(sample.files);
     return `Uploaded ${formatFileSize(
       totalSize * uploadPercentage,
     )} of ${formatFileSize(totalSize)}`;
+  };
+
+  const totalFilesSize = files => {
+    return sum(map(file => file.size, files));
   };
 
   const uploadInProgressTitle = () => {
@@ -511,7 +551,9 @@ const LocalUploadProgressModal = ({
               className={cs.helpLink}
               href="mailto:help@czid.org"
               onClick={() =>
-                logAnalyticsEvent("UploadProgressModal_contact-us-link_clicked")
+                logAnalyticsEvent(
+                  ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
+                )
               }
             >
               Contact us for help
@@ -555,7 +597,7 @@ const LocalUploadProgressModal = ({
             className={cx(cs.sampleRetry, cs.retryAll)}
             onClick={withAnalytics(
               () => retryFailedSamplesUploadToS3(localSamplesFailed),
-              "UploadProgressModal_retry-all-failed_clicked",
+              ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_ALL_FAILED_CLICKED,
               {
                 numberOfLocalSamplesFailed,
               },
@@ -570,10 +612,13 @@ const LocalUploadProgressModal = ({
 
   const renderViewProjectButton = () => {
     const buttonCallback = () => {
-      logAnalyticsEvent("UploadProgressModal_to-project-button_clicked", {
-        projectId: project.id,
-        projectName: project.name,
-      });
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED,
+        {
+          projectId: project.id,
+          projectName: project.name,
+        },
+      );
       if (!isEmpty(getLocalSamplesFailed())) {
         setConfirmationModalOpen(true);
       } else {
@@ -629,10 +674,19 @@ const LocalUploadProgressModal = ({
       {confirmationModalOpen && (
         <UploadConfirmationModal
           numberOfFailedSamples={size(getLocalSamplesFailed())}
-          onCancel={() => setConfirmationModalOpen(false)}
+          onCancel={() => {
+            logAnalyticsEvent(
+              ANALYTICS_EVENT_NAMES.UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED,
+              {
+                numberOfTotalSamples: size(samples),
+                numberOfFailedSamples: size(getLocalSamplesFailed),
+              },
+            );
+            setConfirmationModalOpen(false);
+          }}
           onConfirm={() => {
             logAnalyticsEvent(
-              "UploadConfirmationModal_to-project-button_clicked",
+              ANALYTICS_EVENT_NAMES.UPLOAD_CONFIRMATION_MODAL_LEAVE_UPLOAD_BUTTON_CLICKED,
               {
                 numberOfTotalSamples: size(samples),
                 numberOfFailedSamples: size(getLocalSamplesFailed),

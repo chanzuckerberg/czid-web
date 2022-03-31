@@ -465,6 +465,66 @@ function EventDictionary() {
   /** The user clicked the pin icon to unpin a sample on the taxon heatmap. */
   this.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED =
     "SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED";
+
+  /** An in-progress local upload has failed. Its status on the LocalUploadProgress modal has been updated. */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED";
+
+  /** An in-progress local upload has succeeded. Its status on the LocalUploadProgress modal has been updated. */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED";
+
+  /** An in-progress local upload step has failed.  */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_STEP_ERROR =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_STEP_ERROR";
+
+  /** The user clicked the "contact us" link on the LocalUploadProgressModal. */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED";
+
+  /** The user clicked the "Go to Project" button on the LocalUploadProgressModal. */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED";
+
+  /** The user clicked "Retry all failed" in the upload failure Notification on the LocalUploadProgressModal. */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_ALL_FAILED_CLICKED =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_ALL_FAILED_CLICKED";
+
+  /** The user clicked "Retry" in the upload failure Alert on the LocalUploadProgressModal. */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_CLICKED =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_CLICKED";
+
+  /** Heartbeat, which is sent every minute and indicates that the browser is actively uploading samples, has been activated. */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_SENT =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_SENT";
+
+  /** Heartbeat, which is sent every minute and indicates that the browser is actively uploading samples, has been deactivated. */
+  this.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED =
+    "LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED";
+
+  /** An in-progress remote upload has failed. Its status on the LocalUploadProgress modal has been updated. */
+  this.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED =
+    "REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED";
+
+  /** An in-progress remote upload has succeeded. Its status on the LocalUploadProgress modal has been updated. */
+  this.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED =
+    "REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED";
+
+  /** The user clicked the "contact us" link on the RemoteUploadProgressModal. */
+  this.REMOTE_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED =
+    "REMOTE_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED";
+
+  /** The user clicked the "Go to Project" button on the RemoteUploadProgressModal. */
+  this.REMOTE_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED =
+    "REMOTE_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED";
+
+  /** The user clicked the "Yes, leave Upload" button on the UploadConfirmationModal. */
+  this.UPLOAD_CONFIRMATION_MODAL_LEAVE_UPLOAD_BUTTON_CLICKED =
+    "UPLOAD_CONFIRMATION_MODAL_LEAVE_UPLOAD_BUTTON_CLICKED";
+
+  /** The user clicked the "Return to Upload" button on the UploadConfirmationModal. */
+  this.UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED =
+    "UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED";
 }
 
 const eventNames = new EventDictionary();

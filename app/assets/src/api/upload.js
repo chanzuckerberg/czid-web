@@ -13,7 +13,7 @@ import {
 } from "lodash/fp";
 
 import { markSampleUploaded, uploadFileToUrlWithRetries } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
 
 import { get as httpGet, postWithCSRF } from "./core";
 
@@ -205,9 +205,12 @@ export const uploadSampleFilesToPresignedURL = ({
       isEqual(keys(finalizedFileNames).sort(), keys(fileNamesToProgress).sort())
     ) {
       clearInterval(heartbeatInterval);
-      logAnalyticsEvent("Uploads_batch-heartbeat_completed", {
-        sampleIds: map("id", samples),
-      });
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED,
+        {
+          sampleIds: map("id", samples),
+        },
+      );
     }
   };
 
@@ -277,7 +280,10 @@ const bulkUploadWithMetadata = async (samples, metadata) => {
 // Ping a heartbeat periodically to say the browser is actively uploading the samples.
 export const startUploadHeartbeat = async sampleIds => {
   const sendHeartbeat = () =>
-    logAnalyticsEvent("Uploads_batch-heartbeat_sent", { sampleIds });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_SENT,
+      { sampleIds },
+    );
 
   sendHeartbeat(); // Send first heartbeat immediately so we know it is working
 
