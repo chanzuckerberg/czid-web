@@ -283,6 +283,7 @@ const LocalUploadProgressModal = ({
         sessionToken,
         expiration,
       },
+      useAccelerateEndpoint: true,
     });
   };
 
