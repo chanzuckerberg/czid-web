@@ -1,4 +1,4 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { ChecksumAlgorithm, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import cx from "classnames";
 import {
@@ -302,6 +302,7 @@ const LocalUploadProgressModal = ({
       Bucket: s3Bucket,
       Key: s3Key,
       Body: body,
+      ChecksumAlgorithm: ChecksumAlgorithm.SHA256,
     };
 
     updateSampleFilePercentage({
