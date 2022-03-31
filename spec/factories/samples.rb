@@ -27,6 +27,7 @@ FactoryBot.define do
 
     status { Sample::STATUS_CREATED }
     association :user
+    association :project
 
     # metadata fields
     # ensure the metadata field is added to the host genome

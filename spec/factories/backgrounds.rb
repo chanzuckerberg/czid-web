@@ -1,11 +1,15 @@
 FactoryBot.define do
   factory :background do
     sequence(:name) { |n| "Background #{n}" }
-    association :pipeline_runs, factory: [:pipeline_run]
-    ready { 1 }
-
     transient do
       taxon_summaries_data { [] }
+      pipeline_runs_count { 2 }
+    end
+
+    pipeline_runs do
+      Array.new(pipeline_runs_count) do
+        association :pipeline_run
+      end
     end
 
     before :create do |background, options|
