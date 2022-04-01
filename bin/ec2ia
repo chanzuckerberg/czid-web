@@ -125,7 +125,19 @@ launch_command() {
         --no-dns
     )
 
-    run_aegea ${PARSED_OPTIONS[dry-run]:-0} ${aegea_opts[@]} ${PARSED_OPTIONS_RAW[@]} "$instance_name"
+    output=$(run_aegea ${PARSED_OPTIONS[dry-run]:-0} ${aegea_opts[@]} ${PARSED_OPTIONS_RAW[@]} "$instance_name")
+    instance_id=$(jq -r .instance_id <<< $output)
+    echo $output
+    while true; do
+        sleep 10
+        state=$(aws ec2 describe-instances --instance-id $instance_id | jq -r '.Reservations[0]["Instances"][0]["State"]["Name"]')
+        echo $state
+        if [[ $state == "running" ]]; then 
+            break
+        fi
+    done
+    increase_hop_limit=$(aws ec2 modify-instance-metadata-options --instance-id $instance_id --http-put-response-hop-limit 2)
+    echo $increase_hop_limit
 }
 
 ssh_help() {
