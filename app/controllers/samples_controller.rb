@@ -1076,7 +1076,7 @@ class SamplesController < ApplicationController
       if @contigs_fasta_url
         redirect_to @contigs_fasta_url
       else
-        LogUtil.log_error("Contigs fasta file does not exist for sample #{@sample.id}", sample_id: sample.id)
+        LogUtil.log_error("Contigs fasta file does not exist for sample #{@sample.id}", sample_id: @sample.id)
         render json: {
           error: "contigs fasta file does not exist for this sample",
         }
@@ -1146,7 +1146,7 @@ class SamplesController < ApplicationController
     if @nonhost_fasta_url
       redirect_to @nonhost_fasta_url
     else
-      LogUtil.log_error("Nonhost fasta file does not exist for sample #{@sample.id}", sample_id: sample.id)
+      LogUtil.log_error("Nonhost fasta file does not exist for sample #{@sample.id}", sample_id: @sample.id)
       render json: {
         error: "nonhost fasta file does not exist for this sample",
       }
@@ -1160,7 +1160,7 @@ class SamplesController < ApplicationController
     if @unidentified_fasta_url
       redirect_to @unidentified_fasta_url
     else
-      LogUtil.log_error("Unidentified fasta file does not exist for sample #{@sample.id}", sample_id: sample.id)
+      LogUtil.log_error("Unidentified fasta file does not exist for sample #{@sample.id}", sample_id: @sample.id)
       render json: {
         error: "unidentified fasta file does not exist for this sample",
       }
