@@ -20,7 +20,7 @@
       "git add"
     ],
     "*.rb": [
-      "bundle exec rubocop --auto-correct --config .rubocop.yml --display-cop-names --display-style-guide",
+      "bundle exec rubocop --auto-correct --config .rubocop.yml --display-cop-names --display-style-guide --force-exclusion",
       "git add"
     ],
     "*.py": [

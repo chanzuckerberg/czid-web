@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_211_027_162_823) do
+ActiveRecord::Schema.define(version: 2022_02_08_002644) do
+
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -41,7 +42,6 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
     t.integer "lineage_version", limit: 2
     t.text "s3_nt_info_db_path"
     t.string "s3_taxon_blacklist_path", default: "s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
-    t.index ["name"], name: "index_alignment_configs_on_name", unique: true
   end
 
   create_table "amr_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -156,7 +156,7 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "lineage_json"
+    t.text "lineage_json", size: :medium
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
@@ -219,7 +219,7 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type", null: false
+    t.string "source_type"
     t.text "source"
     t.text "parts"
     t.string "upload_client"
@@ -278,7 +278,7 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
   end
 
   create_table "metadata", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
@@ -307,9 +307,7 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
     t.datetime "updated_at", null: false
     t.string "examples"
     t.integer "default_for_new_host_genome", limit: 1, default: 0
-    t.index ["display_name"], name: "index_metadata_fields_on_display_name", unique: true
     t.index ["group"], name: "index_metadata_fields_on_group"
-    t.index ["name"], name: "index_metadata_fields_on_name", unique: true
   end
 
   create_table "metadata_fields_projects", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -496,10 +494,10 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
   end
 
   create_table "projects", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1
+    t.integer "public_access", limit: 1, default: 0
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
@@ -527,7 +525,7 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
   end
 
   create_table "samples", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -621,7 +619,7 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.string "count_type"
     t.float "percent_identity"
     t.float "alignment_length"
@@ -741,16 +739,15 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
   end
 
   create_table "users", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "email", default: "", null: false, collation: "utf8_general_ci"
-    t.string "name", collation: "utf8_general_ci"
+    t.string "email"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip", collation: "utf8_general_ci"
-    t.string "last_sign_in_ip", collation: "utf8_general_ci"
-    t.string "salt", limit: 24
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
     t.integer "role"
     t.text "allowed_features"
     t.string "institution", limit: 100
@@ -762,6 +759,7 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
     t.bigint "created_by_user_id", comment: "The user_id that created/invited this user."
     t.text "archetypes"
     t.string "segments"
+    t.string "salt", limit: 24
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -836,5 +834,4 @@ ActiveRecord::Schema.define(version: 20_211_027_162_823) do
   add_foreign_key "snapshot_links", "projects"
   add_foreign_key "user_settings", "users"
   add_foreign_key "visualizations", "users", name: "visualizations_user_id_fk"
-  add_foreign_key "workflow_runs", "samples"
 end
