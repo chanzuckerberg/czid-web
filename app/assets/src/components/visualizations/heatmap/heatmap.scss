@@ -37,7 +37,11 @@
       }
 
       .pinIcon {
+        // Equivalent to $sds-color-gray-400
+        opacity: 0.45;
+
         &:hover {
+          opacity: 1;
           cursor: pointer;
           // The filter is defined in heatmap.js
           filter: url("#blue");

@@ -1571,7 +1571,8 @@ export default class Heatmap {
     columnLabelEnter
       .append("svg:image")
       .attr("class", cs.pinIcon)
-      .attr("transform", `translate(${this.cell.width / 2}, 0)`)
+      // Center the icon in the column, offset by the half the icon width.
+      .attr("transform", `translate(${this.cell.width / 2 - 7}, 0)`)
       .attr("xlink:href", `${this.options.iconPath}/IconPin.svg`)
       .on("mousemove", d => {
         this.options.onNodeHoverMove &&
