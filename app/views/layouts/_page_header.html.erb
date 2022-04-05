@@ -30,16 +30,18 @@
         announcementBannerEnabled: <%= @announcement_banner_enabled %>,
         emergencyBannerMessage: '<%= @emergency_banner_message %>',
       }, 'page_header', JSON.parse('<%= raw escape_json(user_context)%>'))
-
+      <% end %>
 
       <% if ENV["SEGMENT_JS_ID"] %>
         <!-- See https://segment.com/docs/connections/sources/catalog/libraries/website/javascript/ for more information on analytics.identify() -->
         <!-- analytics.identify([userId], [traits], [options], [callback]) -->
-        analytics.identify(
-          <%= current_user.id %>,
-          <%= raw escape_json(current_user.traits_for_segment(include_pii: true)) %>,
-        );
-      <% end %>
+
+        <script type="text/plain" class="optanon-category-C0002">
+          analytics.identify(
+            <%= current_user.id %>,
+            <%= raw escape_json(current_user.traits_for_segment(include_pii: true)) %>,
+          );
+        </script>
     <% end %>
   <% end %>
 </div>
