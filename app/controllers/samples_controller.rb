@@ -87,14 +87,20 @@ class SamplesController < ApplicationController
     # without sacrificing speed of development)
     domain = params[:domain]
     order_by = params[:orderBy] || :id
-    order_dir = params[:orderDir] || :desc
+    order_dir = sanitize_order_dir(params[:orderDir], :desc)
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
 
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     samples = fetch_samples(domain: domain, filters: params)
-    samples = samples.order(Hash[order_by => order_dir])
+
+    samples = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+                Sample.sort_samples(samples, order_by, order_dir)
+              else
+                samples.order(Hash[order_by => order_dir])
+              end
+
     limited_samples = samples.offset(offset).limit(limit)
 
     limited_samples_json = limited_samples.includes(:project).as_json(

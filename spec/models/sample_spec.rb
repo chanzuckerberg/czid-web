@@ -301,4 +301,34 @@ describe Sample, type: :model do
       expect(result).to eq(nil)
     end
   end
+
+  context "#sort_samples" do
+    before do
+      project_one = create(:project)
+      project_two = create(:project)
+
+      # Note: samples two and three are created out of order for testing purposes
+      @sample_one = create(:sample, project: project_one, name: "Test Sample A", created_at: 3.days.ago)
+      @sample_three = create(:sample, project: project_one, name: "Test Sample B", created_at: 2.days.ago)
+      @sample_two = create(:sample, project: project_two, name: "Test Sample B", created_at: 1.day.ago)
+
+      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
+    end
+
+    it "correctly sorts samples by name" do
+      asc_results = Sample.sort_samples(@samples_input, "sample", "asc")
+      expect(asc_results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_two.id])
+
+      desc_results = Sample.sort_samples(@samples_input, "sample", "desc")
+      expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id])
+    end
+
+    it "correctly sorts samples by createdAt" do
+      asc_results = Sample.sort_samples(@samples_input, "createdAt", "asc")
+      expect(asc_results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_two.id])
+
+      desc_results = Sample.sort_samples(@samples_input, "createdAt", "desc")
+      expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id])
+    end
+  end
 end

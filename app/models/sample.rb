@@ -1014,4 +1014,12 @@ class Sample < ApplicationRecord
     Syscall.s3_mv_recursive("s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/", "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{new_sample_path}/")
     update(project_id: new_project_id)
   end
+
+  # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
+  def self.sort_samples(samples, order_by, order_dir)
+    tiebreaker = "id #{order_dir}"
+    samples = samples.order("name #{order_dir}, #{tiebreaker}") if order_by == "sample"
+    samples = samples.order("created_at #{order_dir}, #{tiebreaker}") if order_by == "createdAt"
+    samples
+  end
 end
