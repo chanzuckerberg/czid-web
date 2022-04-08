@@ -12,8 +12,11 @@ RUN apt-get update && \
       apt-transport-https
 
 # Install node + npm
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install -y nodejs
+
+# Use a more recent version of npm
+RUN npm i -g npm@8.5.5
 
 # Install pip
 RUN pip3 install --upgrade pip
@@ -38,12 +41,12 @@ WORKDIR /app
 COPY Gemfile Gemfile.lock ./
 RUN gem install bundler
 
-# allow nokogiri to install on arm / M1 macks
+# allow nokogiri to install on arm64 / M1 Macs
 RUN bundle config set force_ruby_platform true
 RUN bundle install --jobs 20 --retry 5
 
-# Do the same for node packages, allowing them to be cached
-RUN npm update -g
+# Copy package.json and install packages, allowing the
+# dependencies to be cached
 COPY package.json package-lock.json ./
 
 # Copy aws-js-sdk-v3 packages that are installed from file
@@ -54,9 +57,11 @@ RUN npm install --no-optional
 # Generate the app's static resources using npm/webpack
 # Increase memory available to node to 6GB (from default 1.5GB). At this time, our self-hosted Github runner has ~16GB.
 ENV NODE_OPTIONS "--max_old_space_size=6144"
+
 # Only copy what is required so we don't need to rebuild when we are only updating the api
 COPY app/assets app/assets
 COPY webpack.config.common.js webpack.config.prod.js .babelrc ./
+
 # Generate assets
 RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
 
@@ -77,7 +82,7 @@ RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | de
 RUN DPKG_ARCH=$(dpkg --print-architecture ) && if [ $DPKG_ARCH = arm64 ]; then dpkg --add-architecture amd64; fi
 
 RUN apt-get update && \
-  apt-get install -y mysql-client
+  apt-get install -y mysql-community-client mysql-client
 
 ARG GIT_COMMIT
 ENV GIT_VERSION ${GIT_COMMIT}

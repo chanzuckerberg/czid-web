@@ -3,8 +3,10 @@ log
 .git
 node_modules
 
-# Ignore .sql and sql.gz files at root
-#   These are used to populate the db for local development
-#   If these are not ignored the local images you build will be huge
+# sql and sql.gz files that are typically generate to
+# populate the db for local development
 /*.sql
 /*.sql.gz
+
+# docker_data folder contains volume data for db and elasticsearch
+docker_data
