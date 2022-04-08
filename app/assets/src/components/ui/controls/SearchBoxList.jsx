@@ -12,6 +12,7 @@ class SearchBoxList extends React.Component {
     super(props);
 
     let selected = new Set(this.props.selected);
+    this.sortedOptions = this.sortOptions(this.props.options, selected);
     this.state = {
       // Filtered options can be controlled by the client by setting an onFilterChange
       filteredOptions: this.sortOptions(this.props.options, selected),
