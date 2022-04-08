@@ -1472,7 +1472,6 @@ class SamplesHeatmapView extends React.Component {
   handleUnpinSample = sampleId => {
     let { pinnedSampleIds } = this.state;
     pinnedSampleIds.delete(sampleId);
-    logAnalyticsEvent();
     this.setState({
       pinnedSampleIds,
       pendingPinnedSampleIds: pinnedSampleIds,

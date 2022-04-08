@@ -143,11 +143,6 @@ class SamplesHeatmapVis extends React.Component {
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
       });
     }
-    if (this.props.pinnedSampleIds !== prevProps.pinnedSampleIds) {
-      this.heatmap.updateData({
-        columnLabels: this.extractSampleLabels(), // Also includes column pinned state.
-      });
-    }
     if (this.props.data !== prevProps.data) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
@@ -159,6 +154,11 @@ class SamplesHeatmapVis extends React.Component {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
         rowLabels: this.extractTaxonLabels(),
+      });
+    }
+    if (this.props.pinnedSampleIds !== prevProps.pinnedSampleIds) {
+      this.heatmap.updateData({
+        columnLabels: this.extractSampleLabels(), // Also includes column pinned state.
       });
     }
     if (this.props.thresholdFilters !== prevProps.thresholdFilters) {
