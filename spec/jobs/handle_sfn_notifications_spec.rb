@@ -72,6 +72,7 @@ RSpec.describe HandleSfnNotifications, type: :job do
       AppConfigHelper.set_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS, "1")
       _ = pipeline_run  # Force it to be loaded
       expect(PipelineRun).to receive(:find_by).with(sfn_execution_arn: known_pr_execution_arn).and_call_original
+      allow_any_instance_of(PipelineRun).to receive(:format_job_status_text).and_return(new_pr_status)
       expect(sqs_msg).to receive(:delete)
 
       subject.perform(sqs_msg, valid_pr_message)

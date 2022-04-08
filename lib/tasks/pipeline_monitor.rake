@@ -46,15 +46,7 @@ class CheckPipelineRuns
 
         Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
 
-        # With SFN notifications, the responsibility here is reduced to
-        # dispatching the first stage:
-        if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
-          prs = pr.active_stage
-          if prs && !prs.started? && prs.step_number == 1
-            pr.dispatch_sfn_pipeline
-            prs.run_job
-          end
-        else
+        if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) != "1"
           pr.update_job_status
         end
       rescue StandardError => exception

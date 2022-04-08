@@ -776,6 +776,16 @@ class Sample < ApplicationRecord
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
     pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
     pr.save!
+
+    # If async notifications are enabled for mNGS, we dispatch the pipeline run as soon as it's created,
+    # since it won't be kicked off by PipelineMonitor.
+    if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
+      prs = pr.active_stage
+      if prs && !prs.started? && prs.step_number == 1
+        pr.dispatch_sfn_pipeline
+        prs.run_job
+      end
+    end
   rescue StandardError => err
     LogUtil.log_error("Error saving pipeline run: #{err.inspect}", exception: err)
     # This may cause a message to be shown to the user on the sample page.

@@ -1011,8 +1011,6 @@ class PipelineRun < ApplicationRecord
   def monitor_results
     return if results_finalized?
 
-    compiling_stats_failed = false
-
     # Get pipeline_version, which determines S3 locations of output files.
     # If pipeline version is not present, we cannot load results yet.
     # Except, if the pipeline run is finalized, we have to (this is a failure case).
@@ -1025,46 +1023,48 @@ class PipelineRun < ApplicationRecord
     end
 
     # Update job stats:
-    begin
-      # TODO:  Make this less expensive while jobs are running, perhaps by doing it only sometimes, then again at end.
-      # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
-      # TODO: (gdingle): compile_stats_file! will fetch s3 files 100s of times unnecessarily in a typical run.
-      # See https://jira.czi.team/browse/IDSEQ-1924.
-      compile_stats_file!
-      load_stats_file
-    rescue StandardError => e
-      LogUtil.log_error("Failure compiling stats: #{e}", exception: e)
-      compiling_stats_failed = true
-    end
+    compiling_stats_error = update_job_stats
 
     # Check if run is complete:
     if all_output_states_terminal?
-
-      if all_output_states_loaded? && !compiling_stats_failed
-        update(
-          results_finalized: FINALIZED_SUCCESS,
-          time_to_results_finalized: time_since_executed_at
-        )
-
-        # Precache reports for all backgrounds.
-        if ready_for_cache?
-          Resque.enqueue(PrecacheReportInfo, id)
-        end
-        event = EventDictionary::PIPELINE_RUN_SUCCEEDED
-      else
-        update(
-          results_finalized: FINALIZED_FAIL,
-          time_to_results_finalized: time_since_executed_at
-        )
-        event = EventDictionary::PIPELINE_RUN_FAILED
-      end
-
-      MetricUtil.log_analytics_event(
-        event,
-        sample.user,
-        pipeline_run_id: id, project_id: sample.project.id, run_time: run_time
-      )
+      finalize_results(compiling_stats_error)
     end
+  end
+
+  def update_job_stats
+    # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
+    compile_stats_file!
+    load_stats_file
+  rescue StandardError => error
+    LogUtil.log_error("Failure compiling stats: #{error}", exception: error)
+    error
+  end
+
+  def finalize_results(compiling_stats_error)
+    if all_output_states_loaded? && !compiling_stats_error
+      update(
+        results_finalized: FINALIZED_SUCCESS,
+        time_to_results_finalized: time_since_executed_at
+      )
+
+      # Precache reports for all backgrounds.
+      if ready_for_cache?
+        Resque.enqueue(PrecacheReportInfo, id)
+      end
+      event = EventDictionary::PIPELINE_RUN_SUCCEEDED
+    else
+      update(
+        results_finalized: FINALIZED_FAIL,
+        time_to_results_finalized: time_since_executed_at
+      )
+      event = EventDictionary::PIPELINE_RUN_FAILED
+    end
+
+    MetricUtil.log_analytics_event(
+      event,
+      sample.user,
+      pipeline_run_id: id, project_id: sample.project.id, run_time: run_time
+    )
   end
 
   def file_generated_since_jobstats?(s3_path)
@@ -1140,8 +1140,7 @@ class PipelineRun < ApplicationRecord
         # in order to preserve most of the logic of the old pipeline we decided
         # that this was the least intrusive place (vs. both downstream in run_job>host_filtering_command
         # and upstream)
-        # With SFN notifications, the first stage should have already been dispatched by PipelineMonitor.
-        if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) != "1" && step_function? && prs.step_number == 1
+        if step_function? && prs.step_number == 1
           dispatch_sfn_pipeline
         end
 
@@ -1163,19 +1162,39 @@ class PipelineRun < ApplicationRecord
   # This method should be renamed to update_job_status after fully transitioning to step functions
   # and completely removing the polling mechanism and DAG pipeline_execution_strategy
   def async_update_job_status
+    # active_stage is the first PipelineRunStage that is not succeeded.
     prs = active_stage
+    if prs.present?
+      prs.update_job_status
+    end
+
+    # If the last active_stage was successful, we proceed to the next stage (if there is one),
+    # and update its status and created_at/executed_at times accordingly.
+    if prs.present? && prs.succeeded?
+      prs = active_stage
+      if prs.present?
+        prs.run_job
+        prs.update_job_status
+      end
+    end
+
     if prs.nil?
-      # all stages succeeded
+      # All stages succeeded.
       self.finalized = 1
       self.time_to_finalized = time_since_executed_at
       self.job_status = STATUS_CHECKED
     else
       if prs.failed?
+        # The pipeline encountered a failure.
         self.job_status = STATUS_FAILED
         self.finalized = 1
         self.time_to_finalized = time_since_executed_at
         self.known_user_error, self.error_message = check_for_user_error(prs)
         report_failed_pipeline_run_stage(prs, known_user_error)
+      else
+        # The pipeline is still running.
+        # Check for long-running pipeline run and log/alert if needed.
+        check_and_log_long_run
       end
       self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status || PipelineRunStage::STATUS_STARTED, report_ready?)
     end
