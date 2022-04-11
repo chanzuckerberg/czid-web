@@ -166,8 +166,7 @@ export default class FAQPage extends React.Component {
                 any fields where Protected Health Information (PHI) can be
                 derived.
               </React.Fragment>,
-            ]}
-          />
+            ]}/>
         </Accordion>
         <Accordion
           className={cs.question}

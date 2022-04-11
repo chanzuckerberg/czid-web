@@ -86,7 +86,7 @@
       "files": ["*.ts"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
-        "project": "./tsconfig.json"
+        "project": "app/assets/tsconfig.json"
       },
       "plugins": [
         "@typescript-eslint/eslint-plugin"

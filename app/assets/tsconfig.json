@@ -35,6 +35,10 @@
       }
     },
     "include": [
-      "src"
+      "./src", 
+      "declaration.ts"    
+    ],
+    "exclude": [
+      "node_modules"
     ]
   }

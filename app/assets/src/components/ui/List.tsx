@@ -1,8 +1,6 @@
-import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 import { nanoid } from "nanoid";
-import PropTypes from "prop-types";
-import React from "react";
+import React, { ReactFragment } from "react";
 
 import cs from "./list.scss";
 
@@ -16,7 +14,7 @@ const List = ({
   xsmallSpacing,
   xxsmallSpacing,
   ...props
-}) => {
+}: ListProps) => {
   const items = listItems.map((item, index) => {
     return (
       <li
@@ -48,16 +46,16 @@ const List = ({
   }
 };
 
-List.propTypes = forbidExtraProps({
-  dynamic: PropTypes.bool,
-  listClassName: PropTypes.string,
-  listItems: PropTypes.array,
-  itemClassName: PropTypes.string,
-  ordered: PropTypes.bool,
-  smallSpacing: PropTypes.bool, // for $font-body-m, $font-body-l
-  xsmallSpacing: PropTypes.bool, // for $font-body-xxs, $font-body-xs, $font-body-s
-  xxsmallSpacing: PropTypes.bool, // for $font-body-xxxs
-});
+interface ListProps {
+  dynamic: boolean,
+  listClassName?: string,
+  listItems: Array<ReactFragment>,
+  itemClassName?: string,
+  ordered: boolean,
+  smallSpacing: boolean, // for $font-body-m, $font-body-l
+  xsmallSpacing: boolean, // for $font-body-xxs, $font-body-xs, $font-body-s
+  xxsmallSpacing: boolean, // for $font-body-xxxs
+};
 
 List.defaultProps = {
   dynamic: false,
