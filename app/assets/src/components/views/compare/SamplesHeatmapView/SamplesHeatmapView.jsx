@@ -1601,20 +1601,63 @@ class SamplesHeatmapView extends React.Component {
   });
 
   handleSelectedOptionsChange = newOptions => {
-    const frontendFilters = [
-      "species",
-      "categories",
-      "subcategories",
-      "thresholdFilters",
-      "readSpecificity",
-      "metric",
-      "taxonsPerSample",
-    ];
-    const backendFilters = ["background"];
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+
+    // When not using heatmap ES, most filtering operations happen in the front-end
+    let frontendFilters = [];
+    let backendFilters = [];
+    if (!useHeatmapES) {
+      backendFilters = ["background"];
+      frontendFilters = [
+        "species",
+        "categories",
+        "subcategories",
+        "thresholdFilters",
+        "readSpecificity",
+        "metric",
+        "taxonsPerSample",
+      ];
+      // Otherwise, move most filters to the backend
+    } else {
+      frontendFilters = ["metric", "thresholdFilters"];
+      backendFilters = [
+        "readSpecificity",
+        "background",
+        "species",
+        "categories",
+        "subcategories",
+      ];
+
+      // Only need to query backend if we need more taxons, but use frontend filtering if using fewer taxons
+      if (
+        newOptions?.taxonsPerSample > this.state.selectedOptions.taxonsPerSample
+      )
+        backendFilters.push("taxonsPerSample");
+      else frontendFilters.push("taxonsPerSample");
+    }
+
     const shouldRefetchData =
       intersection(keys(newOptions), backendFilters).length > 0;
     const shouldRefilterData =
       intersection(keys(newOptions), frontendFilters).length > 0;
+
+    // Infer which function to use to either fetch the data or filter it in the front-end
+    let callbackFn = null;
+    if (!useHeatmapES) {
+      if (shouldRefetchData) callbackFn = this.updateBackground;
+      else if (shouldRefilterData) callbackFn = this.updateFilters;
+      // Slightly more verbose but should make it easier to remove the feature flag in the future
+    } else {
+      if (shouldRefetchData)
+        callbackFn = async () => {
+          if (newOptions?.background !== this.state.selectedOptions.background)
+            await this.updateBackground();
+          await this.fetchViewData();
+        };
+      else if (shouldRefilterData) callbackFn = this.updateFilters;
+    }
+
     this.setState(
       {
         selectedOptions: assign(this.state.selectedOptions, newOptions),
@@ -1622,11 +1665,7 @@ class SamplesHeatmapView extends React.Component {
         // Don't re-notify the user if their manually selected taxa do not pass the new filters.
         notifiedFilteredOutTaxonIds: this.state.addedTaxonIds,
       },
-      shouldRefetchData
-        ? this.updateBackground
-        : shouldRefilterData
-        ? this.updateFilters
-        : null,
+      callbackFn,
     );
   };
 
