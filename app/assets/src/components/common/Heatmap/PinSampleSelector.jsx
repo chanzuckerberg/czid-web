@@ -1,7 +1,3 @@
-// *** Metadata selector is a component shared between the AMR
-// and Taxon heatmaps that displays a dropdown checklist (with search box)
-// when a user clicks on the "Add Metadata" button on the Heatmap. ***
-
 import { Button, DropdownPopper, DropdownPaper, MenuSelect } from "czifui";
 import PropTypes from "prop-types";
 import React from "react";
@@ -28,7 +24,7 @@ const PinSampleSelector = ({
   }
 
   function handleClose(_event, reason) {
-    if (reason !== "blur") {
+    if (reason !== "blur" && reason !== "toggleInput") {
       onClose();
     }
   }
