@@ -6,11 +6,19 @@ FactoryBot.define do
       # Array of samples entries to create.
       # The hash elements will be passed on to sample factory as keyword arguments.
       samples_data { [] }
+      # Number of metadata_field records to create
+      metadata_fields_count { 2 }
     end
 
     sequence(:name) { |n| "Project #{n}" }
     sequence(:description) { |n| "Test project \##{n}" }
     public_access { 0 }
+
+    metadata_fields do
+      Array.new(metadata_fields_count) do
+        association :metadata_field
+      end
+    end
 
     trait :with_sample do
       after :create do |project, options|
@@ -47,9 +55,9 @@ FactoryBot.define do
         end
       end
     end
+  end
 
-    factory :public_project, parent: :project do
-      public_access { 1 }
-    end
+  factory :public_project, parent: :project do
+    public_access { 1 }
   end
 end

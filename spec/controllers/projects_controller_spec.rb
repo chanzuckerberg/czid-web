@@ -827,3 +827,120 @@ RSpec.describe ProjectsController, type: :controller do
     end
   end
 end
+
+RSpec.describe ProjectsController, type: :request do
+  create_users
+
+  before do
+    @auth0_management_client_double = double("Auth0Client")
+    allow(Auth0UserManagementHelper).to receive(:auth0_management_client).and_return(@auth0_management_client_double)
+
+    @metadata_field_sample_type = create(:metadata_field, name: 'sample_type', display_name: 'sample_type')
+    @metadata_field_nucleotide_type = create(:metadata_field, name: 'nucleotide_type', display_name: 'nucleotide_type')
+
+    @project = create(:project)
+    @metadata_validation_project = create(:project) # , metadata_fields: ['sample_type', 'nucleotide_type', 'collection_date', 'age', 'admission_date', 'blood_fed', 'reported_sex', 'sex'])
+    @joe_project = create(:project, :with_sample, users: [@joe]) # , metadata_fields: ['sample_type', 'nucleotide_type', 'age', 'admission_date', 'blood_fed', 'reported_sex', 'sex'])
+    @public_project = create(:public_project, :with_sample) # , metadata_fields: [@metadata_field_sample_type, @metadata_field_nucleotide_type])
+    @deletable_project = create(:project)
+  end
+
+  context 'Admin User' do
+    before do
+      sign_in_auth0 @admin
+    end
+
+    it 'should get index' do
+      get projects_url
+      assert_response :success
+    end
+
+    it 'should get new' do
+      get new_project_url
+      assert_response :success
+    end
+
+    it 'should create project' do
+      assert_difference('Project.count') do
+        post projects_url, params: { project: { name: 'New Project', public_access: 0, description: "New Project" } }
+      end
+
+      assert_redirected_to project_url(Project.last)
+    end
+
+    it 'should show project' do
+      get project_url(@project)
+      assert_response :success
+    end
+
+    it 'should get edit' do
+      get edit_project_url(@project)
+      assert_response :success
+    end
+
+    it 'should update project' do
+      patch project_url(@project), params: { project: { name: @project.name, public_access: 1, description: @project.description } }
+      assert_redirected_to project_url(@project)
+    end
+
+    it 'should destroy project' do
+      assert_difference('Project.count', -1) do
+        delete project_url(@deletable_project)
+      end
+
+      assert_redirected_to projects_url
+    end
+  end
+
+  context 'Non Admin User' do
+    before do
+      sign_in_auth0 @joe
+    end
+
+    it 'joe can query the metadata fields that belong to a public project' do
+      get metadata_fields_projects_url, params: {
+        projectIds: [@public_project.id],
+      }
+      assert_response :success
+
+      assert_equal @public_project.metadata_fields.pluck('display_name'), @response.parsed_body.pluck("name")
+    end
+
+    it 'joe can query the metadata fields that belong to a private project he is a part of' do
+      get metadata_fields_projects_url, params: {
+        projectIds: [@joe_project.id],
+      }
+      assert_response :success
+
+      assert_equal @joe_project.metadata_fields.pluck('display_name'), @response.parsed_body.pluck("name")
+    end
+
+    it 'joe cannot query the metadata fields that belong to another private project' do
+      assert_raises(ActiveRecord::RecordNotFound) do
+        get metadata_fields_projects_url, params: {
+          projectIds: [@metadata_validation_project.id],
+        }
+      end
+    end
+
+    # If multiple samples, merge the fields.
+    it 'joe can query the metadata fields that belong to multiple projects' do
+      get metadata_fields_projects_url, params: {
+        projectIds: [@public_project.id, @joe_project.id],
+      }
+      assert_response :success
+
+      assert_equal @joe_project.metadata_fields.pluck('display_name') + @public_project.metadata_fields.pluck('display_name'), @response.parsed_body.pluck("name")
+    end
+
+    # If multiple samples but one is invalid, return fields for the valid ones.
+    it 'joe can query the metadata fields that belong to multiple projects, and invalid projects will be omitted.' do
+      get metadata_fields_projects_url, params: {
+        projectIds: [@public_project.id, @metadata_validation_project.id],
+      }
+      assert_response :success
+
+      assert_equal @public_project.metadata_fields.pluck('display_name'), @response.parsed_body.pluck("name")
+    end
+  end
+end
