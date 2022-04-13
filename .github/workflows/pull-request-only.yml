@@ -10,8 +10,12 @@ jobs:
       - id: checkout
         name: Checkout
         uses: actions/checkout@v2
+      - run: |
+          sudo chown -R root:root $GITHUB_WORKSPACE
       - name: ReviewDog Brakeman
         if: ${{ steps.checkout.conclusion }} == "success"
         uses: reviewdog/action-brakeman@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_error: true
+          brakeman_flags: '--no-exit-on-warn --no-exit-on-error'
