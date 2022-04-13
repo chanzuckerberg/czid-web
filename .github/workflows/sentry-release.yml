@@ -12,10 +12,10 @@ jobs:
       SENTRY_URL: https://sentry.prod.si.czi.technology
       SENTRY_ENV: ${{ github.event.deployment.environment }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
       with:
-        node-version: '14.x'
+        node-version-file: ".node-version"
     - name: Cache Node Dependencies
       uses: actions/cache@v2
       with:
@@ -36,4 +36,4 @@ jobs:
         sentry-cli releases --project idseq-frontend files "${GITHUB_SHA::8}" upload-sourcemaps app/assets/dist --no-rewrite
         sentry-cli releases finalize "${GITHUB_SHA::8}"
         now=$(date +%s)
-        sentry-cli releases deploys "${GITHUB_SHA::8}" new -e $SENTRY_ENV -t $((now-start))
+        sentry-cli releases deploys "${GITHUB_SHA::8}" new --env $SENTRY_ENV -t $((now-start))
