@@ -34,6 +34,27 @@ RSpec.describe ProjectsController, type: :controller do
       end
     end
 
+    describe "GET index" do
+      it "sees all projects (with sorting_v0 enabled)" do
+        @admin.add_allowed_feature("sorting_v0")
+        expected_projects = [
+          create(:project, users: [@admin]),
+          create(:project, users: [@joe]),
+          create(:project, users: [@joe, @admin]),
+          create(:public_project),
+          create(:project, samples_data: [{ created_at: 1.year.ago }]),
+          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }]),
+        ]
+
+        get :index, params: { format: "json" }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["projects"].count).to eq(expected_projects.count)
+        expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        expect(json_response["projects"].pluck("users").flatten.pluck("name")).to contain_exactly(*expected_projects.map(&:users).flatten.pluck(:name))
+      end
+    end
+
     describe "GET index for updatable domain" do
       it "sees all projects" do
         expected_projects = [

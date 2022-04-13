@@ -315,6 +315,14 @@ describe Sample, type: :model do
       @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
     end
 
+    it "returns unsorted samples for invalid/unsortable data keys" do
+      asc_results = Sample.sort_samples(@samples_input, "invalid_data_key", "asc")
+      expect(asc_results.pluck(:id)).to eq(@samples_input.pluck(:id))
+
+      desc_results = Sample.sort_samples(@samples_input, "invalid_data_key", "desc")
+      expect(desc_results.pluck(:id)).to eq(@samples_input.pluck(:id))
+    end
+
     it "correctly sorts samples by name" do
       asc_results = Sample.sort_samples(@samples_input, "sample", "asc")
       expect(asc_results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_two.id])

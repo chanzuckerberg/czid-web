@@ -361,4 +361,36 @@ describe WorkflowRun, type: :model do
       expect(response).to be_nil
     end
   end
+
+  describe "#sort_workflow_runs" do
+    before do
+      project = create(:project)
+      sample = create(:sample, project: project)
+      sample3 = create(:sample, project: project)
+      sample2 = create(:sample, project: project)
+
+      # Note: workflow_runs two and three are created out of order for testing purposes
+      @workflow_run = create(:workflow_run, sample: sample, status: WorkflowRun::STATUS[:created], created_at: 3.days.ago)
+      @workflow_run3 = create(:workflow_run, sample: sample3, status: WorkflowRun::STATUS[:created], created_at: 2.days.ago)
+      @workflow_run2 = create(:workflow_run, sample: sample2, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
+
+      @workflow_runs_input = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id])
+    end
+
+    it "returns unsorted workflow_runs for invalid/unsortable data keys" do
+      asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "invalid_data_key", "asc")
+      expect(asc_results.pluck(:id)).to eq(@workflow_runs_input.pluck(:id))
+
+      desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "invalid_data_key", "desc")
+      expect(desc_results.pluck(:id)).to eq(@workflow_runs_input.pluck(:id))
+    end
+
+    it "correctly sorts workflow_runs by createdAt" do
+      asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "createdAt", "asc")
+      expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+
+      desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "createdAt", "desc")
+      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
+    end
+  end
 end

@@ -30,6 +30,14 @@ class Project < ApplicationRecord
 
   before_create :add_default_metadata_fields
 
+  # Constants related to sorting
+  DATA_KEY_TO_SORT_KEY = {
+    "project" => "name",
+    "created_at" => "created_at",
+  }.freeze
+  PROJECTS_SORT_KEYS = ["name", "created_at"].freeze
+  TIEBREAKER_SORT_KEY = "id".freeze
+
   def csv_dir(user_id)
     path = "/app/tmp/report_csvs/#{id}/#{user_id}"
     sanitize_path(path)
@@ -167,5 +175,12 @@ class Project < ApplicationRecord
 
   def status_url
     UrlUtil.absolute_base_url + "/projects/#{id}"
+  end
+
+  # order_by stores a sortable column's dataKey (refer to: ProjectsView.jsx)
+  def self.sort_projects(projects, order_by, order_dir)
+    sort_key = DATA_KEY_TO_SORT_KEY[order_by]
+    projects = projects.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if PROJECTS_SORT_KEYS.include?(sort_key)
+    projects
   end
 end

@@ -82,7 +82,12 @@ class ProjectsController < ApplicationController
           projects = projects.where(public_access: access_to_project)
         end
 
-        projects = projects.order(Hash[order_by => order_dir])
+        projects = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+                     Project.sort_projects(projects, order_by, order_dir)
+                   else
+                     projects.order(Hash[order_by => order_dir])
+                   end
+
         limited_projects = limit ? projects.offset(offset).limit(limit) : projects
 
         basic_attributes = [

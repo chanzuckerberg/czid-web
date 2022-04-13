@@ -14,11 +14,18 @@ class WorkflowRunsController < ApplicationController
     permitted_params = index_params
 
     filters = permitted_params.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility, :time, :workflow)
-    workflow_runs = fetch_workflow_runs(domain: permitted_params[:domain], filters: filters)
+    domain = permitted_params[:domain]
+    workflow_runs = fetch_workflow_runs(domain: domain, filters: filters)
 
     order_by = sanitize_order_by(WorkflowRun, order_by, :id)
     order_dir = sanitize_order_dir(order_dir, :desc)
-    workflow_runs = workflow_runs.order(Hash[order_by => order_dir])
+
+    workflow_runs = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+                      order_by = permitted_params[:order_by]
+                      WorkflowRun.sort_workflow_runs(workflow_runs, order_by, order_dir)
+                    else
+                      workflow_runs.order(Hash[order_by => order_dir])
+                    end
 
     paginated_workflow_runs = paginate_workflow_runs(
       workflow_runs: workflow_runs,

@@ -1,6 +1,7 @@
 class VisualizationsController < ApplicationController
   include ReportHelper
   include HeatmapHelper
+  include ParameterSanitization
 
   # This action takes up to 10s for 50 samples so we cache it.
   caches_action(
@@ -21,6 +22,8 @@ class VisualizationsController < ApplicationController
   def index
     domain = visualization_params[:domain]
     search = visualization_params[:search]
+    order_by = visualization_params[:orderBy] || :updated_at
+    order_dir = sanitize_order_dir(visualization_params[:orderDir], :desc)
 
     visualizations = if domain == "my_data"
                        current_user.visualizations
@@ -41,7 +44,14 @@ class VisualizationsController < ApplicationController
                      .select("DISTINCT visualizations.id AS id, users.id AS user_id, visualization_type, users.name AS user_name, visualizations.name, visualizations.updated_at, visualizations.status") \
                      .where.not(data: deprecated_visualizations_data) # filter out deprecated PhyloTreeNgs
                      .where.not(visualization_type: [nil, 'undefined'], name: nil) # filter out legacy data
-                     .order(updated_at: :desc)
+
+    visualizations = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+                       Visualization.sort_visualizations(visualizations, order_by, order_dir)
+                     else
+                       visualizations.order(updated_at: :desc)
+                     end
+
+    visualizations = visualizations
                      .includes(samples: [:project])
                      .db_search(search)
 

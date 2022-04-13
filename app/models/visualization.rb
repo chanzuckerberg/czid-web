@@ -23,6 +23,14 @@ class Visualization < ApplicationRecord
 
   delegate :count, to: :samples, prefix: true
 
+  # Constants related to sorting
+  DATA_KEY_TO_SORT_KEY = {
+    "visualization" => "name",
+    "updated_at" => "updated_at",
+  }.freeze
+  VISUALIZATIONS_SORT_KEYS = ["name", "updated_at"].freeze
+  TIEBREAKER_SORT_KEY = "id".freeze
+
   # In the common case, a visualization will come from a single project.
   def project_name
     if samples.length == 1
@@ -54,5 +62,12 @@ class Visualization < ApplicationRecord
 
   def self.public
     where(public_access: 1)
+  end
+
+  # order_by stores a sortable column's dataKey (refer to: VisualizationsView.jsx)
+  def self.sort_visualizations(visualizations, order_by, order_dir)
+    sort_key = DATA_KEY_TO_SORT_KEY[order_by]
+    visualizations = visualizations.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if VISUALIZATIONS_SORT_KEYS.include?(sort_key)
+    visualizations
   end
 end

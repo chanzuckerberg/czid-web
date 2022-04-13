@@ -36,4 +36,39 @@ describe Project, type: :model do
       end
     end
   end
+
+  context "#sort_projects" do
+    before do
+      # Note: projects two and three are created out of order for testing purposes
+      @project_one = create(:project, name: "Test Project A", created_at: 3.days.ago)
+      @project_three = create(:project, name: "Test Project B", created_at: 2.days.ago)
+      @project_two = create(:project, name: "Test Project C", created_at: 1.day.ago)
+
+      @projects_input = Project.where(id: [@project_one.id, @project_two.id, @project_three.id])
+    end
+
+    it "returns unsorted projects for invalid/unsortable data keys" do
+      asc_results = Project.sort_projects(@projects_input, "invalid_data_key", "asc")
+      expect(asc_results.pluck(:id)).to eq(@projects_input.pluck(:id))
+
+      desc_results = Project.sort_projects(@projects_input, "invalid_data_key", "desc")
+      expect(desc_results.pluck(:id)).to eq(@projects_input.pluck(:id))
+    end
+
+    it "correctly sorts projects by name" do
+      asc_results = Project.sort_projects(@projects_input, "project", "asc")
+      expect(asc_results.pluck(:id)).to eq([@project_one.id, @project_three.id, @project_two.id])
+
+      desc_results = Project.sort_projects(@projects_input, "project", "desc")
+      expect(desc_results.pluck(:id)).to eq([@project_two.id, @project_three.id, @project_one.id])
+    end
+
+    it "correctly sorts projects by created_at" do
+      asc_results = Project.sort_projects(@projects_input, "created_at", "asc")
+      expect(asc_results.pluck(:id)).to eq([@project_one.id, @project_three.id, @project_two.id])
+
+      desc_results = Project.sort_projects(@projects_input, "created_at", "desc")
+      expect(desc_results.pluck(:id)).to eq([@project_two.id, @project_three.id, @project_one.id])
+    end
+  end
 end

@@ -79,6 +79,13 @@ class WorkflowRun < ApplicationRecord
     "InvalidFileFormatError" => "The input file you provided has a formatting error in it.",
   }.freeze
 
+  # Constants related to sorting
+  DATA_KEY_TO_SORT_KEY = {
+    "createdAt" => "created_at",
+  }.freeze
+  WORKFLOW_RUNS_SORT_KEYS = ["created_at"].freeze
+  TIEBREAKER_SORT_KEY = "id".freeze
+
   validates :status, inclusion: { in: STATUS.values }
 
   scope :by_time, ->(start_date:, end_date:) { where(created_at: start_date.beginning_of_day..end_date.end_of_day) }
@@ -184,6 +191,13 @@ class WorkflowRun < ApplicationRecord
   def self.handle_sample_upload_restart(sample)
     # Assumes that the latest failed run should be reset.
     WorkflowRun.where(sample: sample, status: WorkflowRun::STATUS[:failed]).order(created_at: :desc).first&.update(status: WorkflowRun::STATUS[:created])
+  end
+
+  # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
+  def self.sort_workflow_runs(workflow_runs, order_by, order_dir)
+    sort_key = DATA_KEY_TO_SORT_KEY[order_by]
+    workflow_runs = workflow_runs.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if WORKFLOW_RUNS_SORT_KEYS.include?(sort_key)
+    workflow_runs
   end
 
   private

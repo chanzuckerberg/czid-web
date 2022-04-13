@@ -105,6 +105,14 @@ class Sample < ApplicationRecord
   # Script parameters
   FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT = Rails.root.join("scripts", "fastq-fasta-line-validation.awk").to_s
 
+  # Constants related to sorting
+  DATA_KEY_TO_SORT_KEY = {
+    "sample" => "name",
+    "createdAt" => "created_at",
+  }.freeze
+  SAMPLES_SORT_KEYS = ["name", "created_at"].freeze
+  TIEBREAKER_SORT_KEY = "id".freeze
+
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id
 
@@ -1027,9 +1035,8 @@ class Sample < ApplicationRecord
 
   # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
   def self.sort_samples(samples, order_by, order_dir)
-    tiebreaker = "id #{order_dir}"
-    samples = samples.order("name #{order_dir}, #{tiebreaker}") if order_by == "sample"
-    samples = samples.order("created_at #{order_dir}, #{tiebreaker}") if order_by == "createdAt"
+    sort_key = DATA_KEY_TO_SORT_KEY[order_by]
+    samples = samples.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if SAMPLES_SORT_KEYS.include?(sort_key)
     samples
   end
 end
