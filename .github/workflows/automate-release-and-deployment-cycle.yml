@@ -40,3 +40,18 @@ jobs:
       source: staging
       destination: staging
       developer_name: ${{ github.actor }}
+  # Separated make-release-checklist into it's own job to prevent the failure of it from blocking deployment
+  # The goal here is make make_release_checklist part of run-deployment-prerequisites eventually, but for the time being this will help debug the script better
+  make-release-checklist:
+    needs: [run-deployment-prerequisites]
+    runs-on: [self-hosted, idseq-dev]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: |
+            ${{ secrets.GH_SSH_KEY }}
+      - name: Make release checklist
+        run:  ./bin/deploy_automation/make_release_checklist.sh

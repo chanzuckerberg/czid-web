@@ -28,6 +28,17 @@ main() {
   # and we want to be in a different branch to prevent any issues.
   _assert_current_branch_is_not "prod" "staging"
 
+  declare should_make_release_checklist=${should_make_release_checklist:-false};
+  while getopts "c" opt; do
+    # Ex: ./automated_release_checklist.sh -c
+    case ${opt} in
+      c )
+        should_make_release_checklist=true
+        shift $((OPTIND-1))
+        ;;
+    esac
+  done
+
   _log "**** CHECKING TAG VERSIONS FOR RELEASE/HOT FIXES ****"
   "$SCRIPT_DIR/patch_branch_version_tags.sh"
   _trace ""
@@ -46,7 +57,7 @@ main() {
   _trace ""
 
   _log "**** STARTING NEW RELEASE CYCLE ****"
-  "$SCRIPT_DIR/start_release_cycle.sh"
+  "$SCRIPT_DIR/start_release_cycle.sh" "$should_make_release_checklist"
   _trace ""
 
   _log "**** READY FOR DEPLOYMENT ****"

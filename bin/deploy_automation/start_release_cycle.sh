@@ -22,7 +22,7 @@ main() {
 
   # make sure release checklist doesn't exist yet
   _assert_no_release_checklist
-
+  declare should_make_release_checklist=${1:-false}
   declare staging_tag_version; staging_tag_version="$(_get_latest_version "$STAGING_BRANCH")"
   declare prod_tag_version; prod_tag_version="$(_get_latest_version "$PROD_BRANCH")"
 
@@ -58,8 +58,10 @@ main() {
   # Update remote with new tag and branch head
   git push --atomic -f origin "${tag}" "${STAGING_BRANCH}"
 
-  # make a new release checklist
-  "$SCRIPT_DIR/make_release_checklist.sh"
+  if [ "$should_make_release_checklist" == true ]; then
+    # make a new release checklist
+    "$SCRIPT_DIR/make_release_checklist.sh"
+  fi
 
   # deploy instructions
   _log "Release cycle ready." \
