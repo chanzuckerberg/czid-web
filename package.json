@@ -6,7 +6,7 @@
     "preinstall": "npm_config_yes=true npx npm-force-resolutions",
     "start": "npm install && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
-    "lint": "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx",
+    "lint": "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx,.ts,.tsx",
     "test": "jest",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"

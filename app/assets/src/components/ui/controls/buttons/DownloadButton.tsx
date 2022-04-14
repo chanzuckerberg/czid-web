@@ -1,14 +1,19 @@
-import PropTypes from "prop-types";
 import React from "react";
-
-import { IconDownload } from "~ui/icons";
-
+import IconDownload from "~ui/icons/IconDownload";
 import PrimaryButton from "./PrimaryButton";
 import SecondaryButton from "./SecondaryButton";
 
 import cs from "./download_button.scss";
 
-const DownloadButton = ({ disabled, onClick, text, primary, ...props }) => {
+interface DownloadButtonProps {
+    disabled?: boolean;
+    onClick?: $TSFixMeFunction;
+    primary?: boolean;
+    text?: string;
+    className? : string;
+}
+
+const DownloadButton = ({ disabled, onClick, text, primary, ...props }: DownloadButtonProps) => {
   if (primary) {
     return (
       <PrimaryButton
@@ -35,13 +40,6 @@ const DownloadButton = ({ disabled, onClick, text, primary, ...props }) => {
 DownloadButton.defaultProps = {
   primary: false,
   text: "Download",
-};
-
-DownloadButton.propTypes = {
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func,
-  primary: PropTypes.bool,
-  text: PropTypes.string,
 };
 
 export default DownloadButton;

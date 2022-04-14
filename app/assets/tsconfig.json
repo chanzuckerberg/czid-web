@@ -35,8 +35,8 @@
       }
     },
     "include": [
-      "./src", 
-      "declaration.ts"    
+      "./src",
+      "declaration.ts"
     ],
     "exclude": [
       "node_modules"

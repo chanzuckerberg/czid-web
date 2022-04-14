@@ -110,7 +110,7 @@ class BaseTable extends React.Component {
 
     return (
       <React.Fragment key={dataKey}>
-        {/* 
+        {/*
           If the column is not the first column, add the empty div first so we can
           properly position the column name in the middle and the draggable component
           to the far right (alignment done via justify-content: space-between).

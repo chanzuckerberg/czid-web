@@ -31,6 +31,7 @@ const PipelineRunSampleViewControls = ({
   reportMetadata,
   sample,
   view,
+  project,
 }) => {
   const downloadCSV = () => {
     const resParams = {

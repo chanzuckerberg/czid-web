@@ -4,6 +4,17 @@ import React, { ReactFragment } from "react";
 
 import cs from "./list.scss";
 
+interface ListProps {
+  dynamic: boolean,
+  listClassName?: string,
+  listItems: Array<ReactFragment>,
+  itemClassName?: string,
+  ordered: boolean,
+  smallSpacing: boolean, // for $font-body-m, $font-body-l
+  xsmallSpacing: boolean, // for $font-body-xxs, $font-body-xs, $font-body-s
+  xxsmallSpacing: boolean, // for $font-body-xxxs
+}
+
 const List = ({
   dynamic,
   listClassName,
@@ -44,17 +55,6 @@ const List = ({
       </ul>
     );
   }
-};
-
-interface ListProps {
-  dynamic: boolean,
-  listClassName?: string,
-  listItems: Array<ReactFragment>,
-  itemClassName?: string,
-  ordered: boolean,
-  smallSpacing: boolean, // for $font-body-m, $font-body-l
-  xsmallSpacing: boolean, // for $font-body-xxs, $font-body-xs, $font-body-s
-  xxsmallSpacing: boolean, // for $font-body-xxxs
 };
 
 List.defaultProps = {

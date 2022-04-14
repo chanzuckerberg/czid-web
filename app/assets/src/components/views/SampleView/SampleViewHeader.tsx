@@ -15,11 +15,14 @@ import {
   SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
   SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
-import PropTypes from "~/components/utils/propTypes";
+
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import { parseUrlParams } from "~/helpers/url";
+import Project from "~/interface/project";
+import ReportMetadata from "~/interface/reportMetaData";
+import sample, { PipelineRuns } from "~/interface/sample";
 import {
   DownloadButton,
   ErrorButton,
@@ -52,7 +55,7 @@ export default function SampleViewHeader({
   snapshotShareId,
   view,
   onShareClick,
-}) {
+}: SampleViewHeaderProps) {
   const [
     sampleDeletionConfirmationModalOpen,
     setSampleDeletionConfirmationModalOpen,
@@ -71,7 +74,7 @@ export default function SampleViewHeader({
   const onSaveClick = async () => {
     if (view) {
       const params = parseUrlParams();
-      params.sampleIds = [sample.id];
+      params.sampleIds = sample.id;
       await saveVisualization(view, params);
     }
   };
@@ -138,8 +141,7 @@ export default function SampleViewHeader({
                         sampleId: sample.id,
                       },
                     );
-                  }}
-                />
+                  } }/>
               </>
             )}
             {!succeeded &&
@@ -292,23 +294,26 @@ SampleViewHeader.defaultProps = {
   reportMetadata: {},
 };
 
-SampleViewHeader.propTypes = {
-  backgroundId: PropTypes.number,
-  currentRun: PropTypes.object,
-  currentTab: PropTypes.string,
-  deletable: PropTypes.bool,
-  editable: PropTypes.bool.isRequired,
-  getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
-  hasAppliedFilters: PropTypes.bool.isRequired,
-  onDetailsClick: PropTypes.func.isRequired,
-  onPipelineVersionChange: PropTypes.func.isRequired,
-  onShareClick: PropTypes.func,
-  pipelineRun: PropTypes.PipelineRun,
-  pipelineVersions: PropTypes.arrayOf(PropTypes.string),
-  project: PropTypes.Project,
-  projectSamples: PropTypes.arrayOf(PropTypes.Sample),
-  reportMetadata: PropTypes.ReportMetadata,
-  sample: PropTypes.Sample,
-  snapshotShareId: PropTypes.string,
-  view: PropTypes.string.isRequired,
-};
+interface SampleViewHeaderProps {
+  backgroundId?: number;
+  currentRun: { id: number };
+  currentTab: string;
+  deletable: boolean;
+  editable: boolean;
+  getDownloadReportTableWithAppliedFiltersLink?: $TSFixMeFunction;
+  hasAppliedFilters: boolean;
+  onDetailsClick: $TSFixMeFunction;
+  onPipelineVersionChange: $TSFixMeFunction;
+  onShareClick: $TSFixMeFunction;
+  pipelineRun: PipelineRuns;
+  pipelineVersions?: string[];
+  project: Project;
+  projectSamples: {
+    id: number;
+    name: string;
+  }[];
+  reportMetadata: ReportMetadata;
+  sample: sample;
+  snapshotShareId?: $TSFixMe;
+  view: string;
+}

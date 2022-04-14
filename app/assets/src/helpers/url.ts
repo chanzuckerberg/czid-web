@@ -16,11 +16,11 @@ import QueryString from "query-string";
 import { shortenUrl } from "~/api";
 
 // See also parseUrlParams in SamplesHeatmapView
-export const parseUrlParams = () => {
-  let urlParams = QueryString.parse(location.search, {
+export const parseUrlParams = (): QueryString.ParsedQuery<string | boolean | number> => {
+  const urlParams = QueryString.parse(location.search, {
     arrayFormat: "bracket",
   });
-  for (var key in urlParams) {
+  for (const key in urlParams) {
     // Don't parse pipeline_version even though it looks like a number.
     // 3.10 is different from 3.1
     // TODO(mark): Switch to using UrlQueryParser instead.
@@ -39,7 +39,7 @@ export const parseUrlParams = () => {
 export const getURLParamString = params => {
   // Use isPlainObject to remove objects, but keep arrays.
   const filtered = pickBy(
-    (v, k) => !isPlainObject(v) && !isUndefined(v),
+    (v) => !isPlainObject(v) && !isUndefined(v),
     params,
   );
   return flow(

@@ -31,6 +31,7 @@
     "no-prototype-builtins": "warn",
     "no-unreachable": "error",
     "no-unused-vars": "error",
+    "no-trailing-spaces": "warn",
     "react/boolean-prop-naming": "warn",
     "react/jsx-key": "warn",
     "react/no-deprecated": "warn",
@@ -40,7 +41,6 @@
     "react/no-string-refs": "warn",
     "react/prop-types": "warn",
     "react/no-danger": "error",
-    "semi": ["error", "always"],
     "space-before-function-paren": [
       "error",
       {
@@ -83,7 +83,7 @@
   "overrides": [
     {
       "extends": ["plugin:@typescript-eslint/recommended"],
-      "files": ["*.ts"],
+      "files": ["*.ts", "*.tsx"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": "app/assets/tsconfig.json"
@@ -92,9 +92,11 @@
         "@typescript-eslint/eslint-plugin"
       ],
       "rules": {
-        "@typescript-eslint/no-inferrable-types": "off",
-        "@typescript-eslint/ban-ts-ignore": "warn",
-        "@typescript-eslint/no-use-before-define": ["error", { "functions": false }]
+        "no-use-before-define": "off",
+        "@typescript-eslint/no-use-before-define": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "camelcase": "off",
+        "@typescript-eslint/camelcase": "off"
       }
     }
   ],

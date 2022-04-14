@@ -1,10 +1,14 @@
-
 import React from "react";
 import IconShare from "~ui/icons/IconShare";
 
-
 import PrimaryButton from "./PrimaryButton";
 import SecondaryButton from "./SecondaryButton";
+
+interface ShareButtonProps {
+  primary: boolean,
+  className?: string,
+  onClick: $TSFixMeFunction
+}
 
 const ShareButton = ({ primary, ...props } : ShareButtonProps) => {
   if (primary) {
@@ -16,10 +20,6 @@ const ShareButton = ({ primary, ...props } : ShareButtonProps) => {
 
 ShareButton.defaultProps = {
   primary: true,
-};
-
-interface ShareButtonProps {
-  primary: boolean,
 };
 
 export default ShareButton;
