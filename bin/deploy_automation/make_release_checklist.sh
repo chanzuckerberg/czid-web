@@ -37,6 +37,10 @@ __make_release_checklist() {
   )
 
   _log "Creating release checklist..."
+  _log "Source commit: ($source_commit)"
+  _log "Target commit: ($target_commit)"
+  _log "Release checklist body:\n$release_checklist_body"
+
   declare response_json
   if response_json=$(
     # see https://developer.github.com/v3/pulls/#create-a-pull-request
