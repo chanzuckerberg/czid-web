@@ -61,7 +61,7 @@ const LocalUploadProgressModal = ({
   workflows,
 }) => {
   const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
+  const { allowedFeatures = [] } = userContext || {};
 
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 
