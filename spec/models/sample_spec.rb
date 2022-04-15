@@ -305,13 +305,15 @@ describe Sample, type: :model do
   context "#sort_samples" do
     before do
       project_one = create(:project)
-      project_two = create(:project)
+      @project_two = create(:project)
 
       # Note: samples two and three are created out of order for testing purposes
-      @sample_one = create(:sample, project: project_one, name: "Test Sample A", created_at: 3.days.ago)
-      @sample_three = create(:sample, project: project_one, name: "Test Sample B", created_at: 2.days.ago)
-      @sample_two = create(:sample, project: project_two, name: "Test Sample B", created_at: 1.day.ago)
-
+      @sample_one = create(:sample, project: project_one, name: "Test Sample A", created_at: 3.days.ago,
+                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", water_control: "No" })
+      @sample_three = create(:sample, project: project_one, name: "Test Sample B", created_at: 2.days.ago,
+                                      metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes" })
+      @sample_two = create(:sample, project: @project_two, name: "Test Sample B", created_at: 1.day.ago,
+                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes" })
       @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
     end
 
@@ -323,20 +325,29 @@ describe Sample, type: :model do
       expect(desc_results.pluck(:id)).to eq(@samples_input.pluck(:id))
     end
 
-    it "correctly sorts samples by name" do
-      asc_results = Sample.sort_samples(@samples_input, "sample", "asc")
-      expect(asc_results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_two.id])
+    it "correctly sorts samples by samples fields" do
+      ["sample", "createdAt"].each do |samples_sort_key|
+        asc_results = Sample.sort_samples(@samples_input, samples_sort_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_two.id])
 
-      desc_results = Sample.sort_samples(@samples_input, "sample", "desc")
-      expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id])
+        desc_results = Sample.sort_samples(@samples_input, samples_sort_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id])
+      end
     end
 
-    it "correctly sorts samples by createdAt" do
-      asc_results = Sample.sort_samples(@samples_input, "createdAt", "asc")
-      expect(asc_results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_two.id])
+    it "correctly sorts samples by metadata fields" do
+      # create sample with no metadata to test null-handling
+      sample_four = create(:sample, project: @project_two, name: "Test Sample C", created_at: 1.day.ago)
 
-      desc_results = Sample.sort_samples(@samples_input, "createdAt", "desc")
-      expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id])
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, sample_four.id])
+
+      ["collectionLocationV2", "sampleType", "waterControl"].each do |metadata_sort_key|
+        asc_results = Sample.sort_samples(samples, metadata_sort_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([sample_four.id, @sample_one.id, @sample_three.id, @sample_two.id])
+
+        desc_results = Sample.sort_samples(samples, metadata_sort_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, sample_four.id])
+      end
     end
   end
 end

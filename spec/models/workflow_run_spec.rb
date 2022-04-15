@@ -364,10 +364,12 @@ describe WorkflowRun, type: :model do
 
   describe "#sort_workflow_runs" do
     before do
-      project = create(:project)
-      sample = create(:sample, project: project)
-      sample3 = create(:sample, project: project)
-      sample2 = create(:sample, project: project)
+      create(:metadata_field, name: "ct_value", base_type: MetadataField::NUMBER_TYPE)
+
+      @project = create(:project)
+      sample = create(:sample, project: @project, metadata_fields: { ct_value: 1 })
+      sample3 = create(:sample, project: @project, metadata_fields: { ct_value: 2 })
+      sample2 = create(:sample, project: @project, metadata_fields: { ct_value: 2 })
 
       # Note: workflow_runs two and three are created out of order for testing purposes
       @workflow_run = create(:workflow_run, sample: sample, status: WorkflowRun::STATUS[:created], created_at: 3.days.ago)
@@ -391,6 +393,20 @@ describe WorkflowRun, type: :model do
 
       desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "createdAt", "desc")
       expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
+    end
+
+    it "correctly sorts workflow_runs by metadata" do
+      # create workflow run with no metadata to test null-handling
+      sample4 = create(:sample, project: @project)
+      workflow_run4 = create(:workflow_run, sample: sample4, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
+
+      workflow_runs = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, workflow_run4.id])
+
+      asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "ctValue", "asc")
+      expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+
+      desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "ctValue", "desc")
+      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
     end
   end
 end

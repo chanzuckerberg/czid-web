@@ -82,8 +82,10 @@ class WorkflowRun < ApplicationRecord
   # Constants related to sorting
   DATA_KEY_TO_SORT_KEY = {
     "createdAt" => "created_at",
+    "ctValue" => "ct_value",
   }.freeze
   WORKFLOW_RUNS_SORT_KEYS = ["created_at"].freeze
+  METADATA_SORT_KEYS = ["ct_value"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   validates :status, inclusion: { in: STATUS.values }
@@ -197,7 +199,17 @@ class WorkflowRun < ApplicationRecord
   def self.sort_workflow_runs(workflow_runs, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by]
     workflow_runs = workflow_runs.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if WORKFLOW_RUNS_SORT_KEYS.include?(sort_key)
+    workflow_runs = WorkflowRun.sort_by_metadata_key(workflow_runs, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
     workflow_runs
+  end
+
+  def self.sort_by_metadata_key(workflow_runs, sort_key, order_dir)
+    joins_statement = "
+        LEFT JOIN samples ON workflow_runs.sample_id = samples.id
+        LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')
+    "
+    workflow_runs.joins(ActiveRecord::Base.send(:sanitize_sql_array, joins_statement))
+                 .order("metadata.number_validated_value #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
   end
 
   private

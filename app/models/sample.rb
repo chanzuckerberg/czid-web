@@ -109,8 +109,12 @@ class Sample < ApplicationRecord
   DATA_KEY_TO_SORT_KEY = {
     "sample" => "name",
     "createdAt" => "created_at",
+    "collectionLocationV2" => "collection_location_v2",
+    "sampleType" => "sample_type",
+    "waterControl" => "water_control",
   }.freeze
   SAMPLES_SORT_KEYS = ["name", "created_at"].freeze
+  METADATA_SORT_KEYS = ["collection_location_v2", "sample_type", "water_control"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
@@ -1037,6 +1041,13 @@ class Sample < ApplicationRecord
   def self.sort_samples(samples, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by]
     samples = samples.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if SAMPLES_SORT_KEYS.include?(sort_key)
+    samples = Sample.sort_by_metadata_key(samples, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
     samples
+  end
+
+  def self.sort_by_metadata_key(samples, sort_key, order_dir)
+    joins_statement = "LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')"
+    samples.joins(ActiveRecord::Base.send(:sanitize_sql_array, joins_statement))
+           .order("metadata.string_validated_value #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
   end
 end
