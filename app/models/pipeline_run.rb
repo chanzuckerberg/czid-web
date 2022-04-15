@@ -1041,7 +1041,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def finalize_results(compiling_stats_error)
-    if all_output_states_loaded? && !compiling_stats_error
+    if all_output_states_loaded? && compiling_stats_error.empty?
       update(
         results_finalized: FINALIZED_SUCCESS,
         time_to_results_finalized: time_since_executed_at
