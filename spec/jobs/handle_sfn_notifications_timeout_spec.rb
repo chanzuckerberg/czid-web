@@ -43,6 +43,7 @@ RSpec.describe HandleSfnNotificationsTimeout, type: :job do
       end
 
       it "marks overdue pipeline runs as failed" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS, "1")
         _ = [run5, run6, run7]
 
         expect(CloudWatchUtil).to receive(:put_metric_data)
@@ -51,7 +52,8 @@ RSpec.describe HandleSfnNotificationsTimeout, type: :job do
 
         expect(run5.reload.job_status).to eq(PipelineRun::STATUS_RUNNING)
         expect(run6.reload.job_status).to eq(PipelineRun::STATUS_CHECKED)
-        expect(run7.reload.job_status).to eq(PipelineRun::STATUS_RUNNING)
+        expect(run7.reload.job_status).to eq(PipelineRun::STATUS_FAILED)
+        expect(run7.reload.results_finalized?).to eq(true)
       end
     end
   end

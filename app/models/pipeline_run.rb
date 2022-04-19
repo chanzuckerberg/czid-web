@@ -973,12 +973,14 @@ class PipelineRun < ApplicationRecord
     return unless [STATUS_UNKNOWN, STATUS_LOADING_ERROR].include?(state)
 
     Rails.logger.info("[PR: #{id}] Checking output - finalized: #{finalized?}, last update: #{pipeline_run_stages.order(:step_number).last.updated_at}")
+    # If the run completed over a minute ago, the output should be available.
+    should_be_available = finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
     if output_ready?(output)
       Rails.logger.info("[PR: #{id}] Enqueue for resque: #{output}")
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
-    # check if job is done more than a minute ago
-    elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
+    # If we're using async notifications, the output should be available.
+    elsif should_be_available || AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
       Rails.logger.info("[PR: #{id}] Should have been generated: #{output_state.output}")
       checker = CHECKERS_BY_OUTPUT[output_state.output]
       # If there is no checker, the file should have been generated
@@ -986,6 +988,7 @@ class PipelineRun < ApplicationRecord
       should_have_been_generated = !checker || send(checker)
       if should_have_been_generated
         output_state.update(state: STATUS_FAILED)
+        LogUtil.log_error("Failed to load #{output_state.output} for PipelineRun #{id}; output file was not available. results_finalized will be marked as failed.")
       else
         output_state.update(state: STATUS_LOADED)
       end
@@ -1019,6 +1022,30 @@ class PipelineRun < ApplicationRecord
 
     # Load any new outputs that have become available:
     output_states.each do |o|
+      check_and_enqueue(o)
+    end
+
+    # Update job stats:
+    compiling_stats_error = update_job_stats
+
+    # Check if run is complete:
+    if all_output_states_terminal?
+      finalize_results(compiling_stats_error)
+    end
+  end
+
+  def load_stage_results(last_completed_stage)
+    return if results_finalized?
+
+    # Get pipeline_version, which determines S3 locations of output files.
+    # If pipeline version is not present, we cannot load results yet.
+    # Except, if the pipeline run is finalized, we have to (this is a failure case).
+    update_pipeline_version(self, :pipeline_version, pipeline_version_file) if pipeline_version.blank?
+    return if pipeline_version.blank? && !finalized
+
+    # Load any new outputs that have become available based on the last completed stage:
+    stage_outputs = PipelineRunStage::OUTPUTS_BY_STAGE[last_completed_stage]
+    output_states.where(output: stage_outputs).each do |o|
       check_and_enqueue(o)
     end
 

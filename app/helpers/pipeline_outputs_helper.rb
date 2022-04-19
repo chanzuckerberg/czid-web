@@ -207,6 +207,7 @@ module PipelineOutputsHelper
   end
 
   def status_display_helper(states_by_output_hash, results_finalized_var)
+    # TODO(julie): Revisit if checking these outputs for the status still makes sense.
     # Status display for the frontend.
     h = states_by_output_hash
     if [PipelineRun::FINALIZED_SUCCESS, PipelineRun::FINALIZED_FAIL].include?(results_finalized_var)

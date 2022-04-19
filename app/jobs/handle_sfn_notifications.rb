@@ -19,28 +19,11 @@ class HandleSfnNotifications
       status = details["status"]
 
       Rails.logger.info("Looking for run with arn #{arn}")
-
-      wr = WorkflowRun.find_by(sfn_execution_arn: arn)
-      pt = PhyloTreeNg.find_by(sfn_execution_arn: arn)
-      if wr
-        wr.update_status(status)
-        sqs_msg.delete
-        Rails.logger.info("Updated WorkflowRun #{wr.id} #{arn} to #{status}")
-      elsif pt
-        pt.update_status(status)
-        sqs_msg.delete
-        Rails.logger.info("Updated PhyloTreeNg #{pt.id} #{arn} to #{status}")
-      end
+      handle_workflow_run_update(arn, sqs_msg, status)
+      handle_phylo_tree_ng_update(arn, sqs_msg, status)
 
       if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
-        pr = PipelineRun.find_by(sfn_execution_arn: arn)
-        if pr
-          pr.async_update_job_status
-          Rails.logger.info("Updated PipelineRun #{pr.id} #{arn} to #{status}")
-          pr.monitor_results
-          Rails.logger.info("Monitoring results for PipelineRun #{pr.id} #{arn}")
-          sqs_msg.delete
-        end
+        handle_pipeline_run_update(arn, sqs_msg, details, status)
       end
 
     end
@@ -49,5 +32,41 @@ class HandleSfnNotifications
     # queue since we don't call sqs_msg.delete.
   rescue StandardError => e
     LogUtil.log_error("Unexpected error in HandleSfnNotifications", exception: e, body: body)
+  end
+
+  def handle_workflow_run_update(arn, sqs_msg, status)
+    wr = WorkflowRun.find_by(sfn_execution_arn: arn)
+    if wr && !wr.finalized?
+      wr.update_status(status)
+      sqs_msg.delete
+      Rails.logger.info("Updated WorkflowRun #{wr.id} #{arn} to #{status}")
+    end
+  end
+
+  def handle_phylo_tree_ng_update(arn, sqs_msg, status)
+    pt = PhyloTreeNg.find_by(sfn_execution_arn: arn)
+    if pt && !pt.finalized?
+      pt.update_status(status)
+      sqs_msg.delete
+      Rails.logger.info("Updated PhyloTreeNg #{pt.id} #{arn} to #{status}")
+    end
+  end
+
+  def handle_pipeline_run_update(arn, sqs_msg, details, status)
+    pr = PipelineRun.find_by(sfn_execution_arn: arn)
+    if pr && !pr.finalized?
+      pr.async_update_job_status
+      Rails.logger.info("Updated PipelineRun #{pr.id} #{arn} to #{status}")
+      # If a stage has completed, load in the outputs from that stage into the db.
+      if stage_complete_event?(details)
+        pr.load_stage_results(details["lastCompletedStage"])
+        Rails.logger.info("Loading #{details['lastCompletedStage']} results for PipelineRun #{pr.id} #{arn}")
+      end
+      sqs_msg.delete
+    end
+  end
+
+  def stage_complete_event?(details)
+    details["lastCompletedStage"].present?
   end
 end

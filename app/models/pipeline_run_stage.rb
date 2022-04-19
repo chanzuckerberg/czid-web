@@ -69,6 +69,13 @@ class PipelineRunStage < ApplicationRecord
     },
   }.freeze
 
+  OUTPUTS_BY_STAGE = {
+    DAG_NAME_HOST_FILTER => ["ercc_counts", "insert_size_metrics"],
+    DAG_NAME_ALIGNMENT => [],
+    DAG_NAME_POSTPROCESS => ["taxon_counts", "taxon_byteranges", "contigs", "contig_counts"],
+    DAG_NAME_EXPERIMENTAL => ["amr_counts", "accession_coverage_stats"],
+  }.freeze
+
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 

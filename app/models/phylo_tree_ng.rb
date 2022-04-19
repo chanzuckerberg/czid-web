@@ -145,6 +145,10 @@ class PhyloTreeNg < ApplicationRecord
     phylo_tree
   end
 
+  def finalized?
+    [WorkflowRun::STATUS[:failed], WorkflowRun::STATUS[:succeeded], WorkflowRun::STATUS[:succeeded_with_issue]].include?(status)
+  end
+
   private
 
   # Visualizations is a generalized class and they should be 1:1 with a phylo tree or heatmap.
@@ -169,8 +173,7 @@ class PhyloTreeNg < ApplicationRecord
   # Duplicated from WorkflowRun
   def sfn_execution
     s3_path = s3_output_prefix # will be set in the dispatch service
-    finalized = [WorkflowRun::STATUS[:failed], WorkflowRun::STATUS[:succeeded], WorkflowRun::STATUS[:succeeded_with_issue]].include?(status)
 
-    @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: s3_path, finalized: finalized)
+    @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: s3_path, finalized: finalized?)
   end
 end

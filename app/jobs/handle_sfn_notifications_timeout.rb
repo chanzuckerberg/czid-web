@@ -36,6 +36,8 @@ class HandleSfnNotificationsTimeout
         automatic_restart = pr.automatic_restart_allowed? unless pr.known_user_error
         # Alert is sent within report_failed_pipeline_run_stage:
         pr.send(:report_failed_pipeline_run_stage, prs, pr.known_user_error, automatic_restart)
+        pr.save
+        pr.monitor_results
         Rails.logger.info("Marked PipelineRun #{pr.id} as failed due to timeout.")
       end
     end
