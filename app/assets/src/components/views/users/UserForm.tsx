@@ -1,7 +1,8 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
+import Archetypes from "~/interface/archetypes";
+import Segments from "~/interface/segments";
 import Checkbox from "~ui/controls/Checkbox";
 import Input from "~ui/controls/Input";
 
@@ -9,7 +10,6 @@ import cs from "./user_form.scss";
 
 const UserForm = ({
   archetypes,
-  clearError,
   email,
   errorMessage,
   funcName,
@@ -39,7 +39,7 @@ const UserForm = ({
   submitting,
   success,
   successMessage,
-}) => {
+}: UserFormProps) => {
   const displayError = (failedStatus, serverErrors, formattedError) => {
     if (failedStatus) {
       const ret = serverErrors.length ? (
@@ -228,49 +228,38 @@ const UserForm = ({
   );
 };
 
-UserForm.propTypes = {
-  archetypes: PropTypes.shape({
-    isLandscapeExplorer: PropTypes.bool,
-    isMedicalDetective: PropTypes.bool,
-    isMicrobiomeInvestigator: PropTypes.bool,
-    isOutbreakSurveyor: PropTypes.bool,
-  }),
-  clearError: PropTypes.func,
-  email: PropTypes.string,
-  errorMessage: PropTypes.string,
-  funcName: PropTypes.string,
-  segments: PropTypes.shape({
-    isAfricaCDC: PropTypes.bool,
-    isBiohub: PropTypes.bool,
-    isDPH: PropTypes.bool,
-    isGCE: PropTypes.bool,
-    isLMIC: PropTypes.bool,
-  }),
-  institution: PropTypes.string,
-  isAdmin: PropTypes.bool,
-  name: PropTypes.string,
-  onAdminChange: PropTypes.func,
-  onAfricaCDCChange: PropTypes.func,
-  onBiohubChange: PropTypes.func,
-  onDPHChange: PropTypes.func,
-  onEmailChange: PropTypes.func,
-  onGCEChange: PropTypes.func,
-  onInstitutionChange: PropTypes.func,
-  onLandscapeExplorerChange: PropTypes.func,
-  onLMICChange: PropTypes.func,
-  onMedicalDetectiveChange: PropTypes.func,
-  onMicrobiomeInvestigatorChange: PropTypes.func,
-  onNameChange: PropTypes.func,
-  onOutbreakSurveyorChange: PropTypes.func,
-  onSendActivationChange: PropTypes.func,
-  selectedUser: PropTypes.object,
-  sendActivation: PropTypes.bool,
-  serverErrors: PropTypes.array,
-  showFailed: PropTypes.bool,
-  submitFunc: PropTypes.func,
-  submitting: PropTypes.bool,
-  success: PropTypes.bool,
-  successMessage: PropTypes.string,
-};
+interface UserFormProps {
+  archetypes: Archetypes,
+  clearError: $TSFixMeFunction,
+  email: string,
+  errorMessage: string,
+  funcName: string,
+  segments: Segments,
+  institution: string,
+  isAdmin: boolean,
+  name: string,
+  onAdminChange: $TSFixMeFunction,
+  onAfricaCDCChange: $TSFixMeFunction,
+  onBiohubChange: $TSFixMeFunction,
+  onDPHChange: $TSFixMeFunction,
+  onEmailChange: $TSFixMeFunction,
+  onGCEChange: $TSFixMeFunction,
+  onInstitutionChange: $TSFixMeFunction,
+  onLandscapeExplorerChange: $TSFixMeFunction,
+  onLMICChange: $TSFixMeFunction,
+  onMedicalDetectiveChange: $TSFixMeFunction,
+  onMicrobiomeInvestigatorChange: $TSFixMeFunction,
+  onNameChange: $TSFixMeFunction,
+  onOutbreakSurveyorChange: $TSFixMeFunction,
+  onSendActivationChange: $TSFixMeFunction,
+  selectedUser: object,
+  sendActivation: boolean,
+  serverErrors: [],
+  showFailed: boolean,
+  submitFunc: $TSFixMeFunction,
+  submitting: boolean,
+  success: boolean,
+  successMessage: string,
+}
 
 export default UserForm;
