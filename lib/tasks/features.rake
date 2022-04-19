@@ -1,6 +1,11 @@
 namespace "features" do
   # rake features:launch[<feature_name>]
   task :launch, [:feature_name] => :environment do |_, args|
+    if args[:feature_name].nil?
+      puts "No feature specified to launch"
+      next
+    end
+
     new_features = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, []) | [args[:feature_name]]
     AppConfigHelper.set_json_app_config(AppConfig::LAUNCHED_FEATURES, new_features)
     puts "Add feature: #{args[:feature_name]}"
