@@ -28,6 +28,8 @@ jobs:
             --files-with-matches \
             --include '*.js' \
             --include '*.jsx' \
+            --exclude 'app/assets/config/manifest.js' \
+            --exclude 'app/assets/javascripts/application.js' \
             ' ' \
             app |
             wc -l)
