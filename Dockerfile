@@ -49,8 +49,8 @@ RUN bundle install --jobs 20 --retry 5
 # dependencies to be cached
 COPY package.json package-lock.json ./
 
-# Copy aws-js-sdk-v3 packages that are installed from file
-COPY vendor/aws-js-sdk-v3/* ./vendor/aws-js-sdk-v3/
+# Copy aws-sdk-js-v3 packages that are installed from file
+COPY vendor/aws-sdk-js-v3/* ./vendor/aws-sdk-js-v3/
 
 RUN npm install --no-optional
 
