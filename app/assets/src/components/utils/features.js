@@ -7,5 +7,3 @@ export const PATHOGEN_LABEL_V0_FEATURE = "pathogen_label_v0";
 export const BLAST_FEATURE = "blast";
 export const ANNOTATION_FEATURE = "annotation";
 export const LOCAL_MULTIPART_UPLOADS_FEATURE = "local_multipart_uploads";
-export const LANE_CONCAT_LOCAL_FEATURE = "lane_concat_local";
-export const LANE_CONCAT_BASESPACE_FEATURE = "lane_concat_basespace";

@@ -11,7 +11,6 @@ import { getProjectMetadataFields } from "~/api/metadata";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { LANE_CONCAT_LOCAL_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
@@ -135,35 +134,19 @@ class ReviewStep extends React.Component {
 
       // We display different columns if the uploadType is basespace.
       if (uploadType !== "basespace") {
-        // If lane concatenation enabled, we need to display the concatenated file names here too
-        const { allowedFeatures = [] } = this.context || {};
-        const hasLaneConcatLocalFeature = allowedFeatures.includes(
-          LANE_CONCAT_LOCAL_FEATURE,
+        // Display the concatenated file names here too
+        const files = flatten(
+          sample.input_files_attributes.map(pair => pair.concatenated),
         );
-        if (hasLaneConcatLocalFeature) {
-          const files = flatten(
-            sample.input_files_attributes.map(pair => pair.concatenated),
-          );
-          sampleData["Input Files"] = (
-            <div className={cs.files}>
-              {files.map(file => (
-                <div key={file} className={cs.file}>
-                  {file}
-                </div>
-              ))}
-            </div>
-          );
-        } else {
-          sampleData["Input Files"] = (
-            <div className={cs.files}>
-              {sample.input_files_attributes.map(file => (
-                <div key={file.source} className={cs.file}>
-                  {file.name || file.source}
-                </div>
-              ))}
-            </div>
-          );
-        }
+        sampleData["Input Files"] = (
+          <div className={cs.files}>
+            {files.map(file => (
+              <div key={file} className={cs.file}>
+                {file}
+              </div>
+            ))}
+          </div>
+        );
       } else {
         sampleData["File Size"] = formatFileSize(sample.file_size);
         sampleData["File Type"] = sample.file_type;

@@ -15,10 +15,7 @@ import React from "react";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
-import {
-  LANE_CONCAT_LOCAL_FEATURE,
-  LOCAL_MULTIPART_UPLOADS_FEATURE,
-} from "~/components/utils/features";
+import { LOCAL_MULTIPART_UPLOADS_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
@@ -128,10 +125,6 @@ class LocalSampleFileUpload extends React.Component {
   };
 
   render() {
-    const { allowedFeatures = [] } = this.context || {};
-    const laneConcatText = allowedFeatures.includes(LANE_CONCAT_LOCAL_FEATURE)
-      ? "If we detect multiple lane files, we will concatenate them for you."
-      : "";
     const filePickerTitle = this.getFilePickerTitle();
 
     return (
@@ -157,7 +150,7 @@ class LocalSampleFileUpload extends React.Component {
                   />
                 </>,
                 `Paired files must be labeled with "_R1" or
-                "_R2" at the end of the basename. ${laneConcatText}`,
+                "_R2" at the end of the basename. If we detect multiple lane files, we will concatenate them for you.`,
                 `File names must be no longer than 120 characters and can only
                 contain letters from the English alphabet (A-Z, upper and lower
                 case), numbers (0-9), periods (.), hyphens (-) and underscores
