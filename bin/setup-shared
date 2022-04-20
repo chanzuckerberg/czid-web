@@ -14,10 +14,10 @@ aws-oidc exec -- docker-compose up -d db
 sleep 10
 
 echo "== Initializing DB =="
-aws-oidc exec -- docker-compose run --rm web rake db:drop db:create db:migrate db:seed
+aws-oidc exec -- docker-compose run --rm web rake db:drop db:create db:migrate:with_data db:seed
 
 echo "== Initializing test DB =="
-aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:drop db:create db:migrate db:seed
+aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:drop db:create db:migrate:with_data db:seed
 
 echo "== Bringing up all services =="
 aws-oidc exec -- docker-compose up -d db redis web resque resque_result_monitor resque_pipeline_monitor elasticsearch

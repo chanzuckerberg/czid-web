@@ -173,6 +173,9 @@ ActiveRecord::Schema.define(version: 2022_04_05_175815) do
     t.index ["pipeline_run_id", "species_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nt"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  end
+
   create_table "ercc_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id"
     t.string "name"

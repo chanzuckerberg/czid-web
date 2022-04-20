@@ -8,7 +8,7 @@
   - `aws-oidc exec -- docker-compose run web "rspec path/to/file/file.rb"`
   - Ex: `aws-oidc exec -- docker-compose run web "rspec spec/controllers/workflow_runs_controller_spec.rb"`
 - To reset the test database:
-  - `aws-oidc exec -- docker-compose run -e RAILS_ENV=test web rake db:drop db:create db:migrate`
+  - `aws-oidc exec -- docker-compose run -e RAILS_ENV=test web rake db:drop db:create db:migrate:with_data`
   - See also: `bin/setup-shared`
 - You can debug controller/request spec responses by printing out the `response.body`.
 - If you're getting 302 Redirect controller/request responses:

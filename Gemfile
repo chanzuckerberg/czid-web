@@ -37,6 +37,7 @@ gem 'brakeman'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 gem 'consul', '>= 0.13.1'
+gem 'data_migrate'
 gem 'health_check', '>= 2.7.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.11'
