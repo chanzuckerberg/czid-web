@@ -54,14 +54,22 @@ class HandleSfnNotifications
 
   def handle_pipeline_run_update(arn, sqs_msg, details, status)
     pr = PipelineRun.find_by(sfn_execution_arn: arn)
-    if pr && !pr.finalized?
-      pr.async_update_job_status
-      Rails.logger.info("Updated PipelineRun #{pr.id} #{arn} to #{status}")
+    if pr
+      unless pr.finalized?
+        pr.async_update_job_status
+        Rails.logger.info("Updated PipelineRun #{pr.id} #{arn} to #{status}")
+      end
+
+      # If the execution failed, try to load in any available results and mark the rest as failed.
+      if ["TIMED_OUT", "ABORTED", "FAILED"].include?(status)
+        Rails.logger.info("Loading results for PipelineRun #{pr.id} #{arn}")
+        pr.monitor_results
       # If a stage has completed, load in the outputs from that stage into the db.
-      if stage_complete_event?(details)
+      elsif stage_complete_event?(details)
         pr.load_stage_results(details["lastCompletedStage"])
         Rails.logger.info("Loading #{details['lastCompletedStage']} results for PipelineRun #{pr.id} #{arn}")
       end
+
       sqs_msg.delete
     end
   end
