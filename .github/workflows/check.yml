@@ -78,7 +78,7 @@ jobs:
         echo foo > app/assets/dist/vendors~main.bundle.min.css
         echo foo > app/assets/dist/vendors~main.bundle.min.js
     - name: Initialize Database
-      run: bundle exec rake db:create db:migrate:with_data db:seed
+      run: bundle exec rake db:create db:migrate db:seed
     - name: RSpec
       run: bundle exec rspec
       env:
