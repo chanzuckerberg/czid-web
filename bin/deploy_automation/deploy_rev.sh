@@ -63,15 +63,27 @@ __check_commit_state() {
   declare sha="$1"
   declare branch="$2"
 
-  response_json=$(http --ignore-stdin --timeout 30 --check-status -b GET \
-                       "$GITHUB_REPOSITORY_API/commits/$sha/check-suites" \
-                       Authorization:"token $GITHUB_TOKEN" \
-                       Accept:application/vnd.github.antiope-preview+json)
+  # Fetch latest idseq-web build Docker image (build-docker-image.yml) workflow run for the branch being deployed
+  build_docker_images_workflow_run_response=$(http --ignore-stdin --timeout 30 --check-status -b GET \
+              "$GITHUB_REPOSITORY_API/actions/workflows/build-docker-image.yml/runs" \
+              branch==$git_rev \
+              Authorization:"token $GITHUB_TOKEN" \
+              Accept:application/vnd.github.v3+json)
 
-  # Dependabot checks take a long time to complete; skip them when checking commit status
-  # We no longer use Travis CI
-  if jq -re '.check_suites[] | select(.app.slug != "dependabot" and .app.slug != "travis-ci" and .app.slug != "codecov" and .app.slug != "czi-sastisfaction") | select(.conclusion != "success")' <<< "$response_json"; then
-    _trace "Status checks failed for commit ${sha} in branch ${branch}. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
+  if jq -re '.workflow_runs[0] | select(.conclusion != "success")' <<< "$build_docker_images_workflow_run_response"; then
+    _trace "The build-docker-image.yml workflow for commit ${sha} in branch ${branch} has either failed or is still in progress. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
+    return 1
+  fi
+
+  # Fetch latest idseq-web check (check.yml) workflow run for the branch being deployed
+  check_workflow_run_response=$(http --ignore-stdin --timeout 30 --check-status -b GET \
+            "$GITHUB_REPOSITORY_API/actions/workflows/check.yml/runs" \
+            branch==$git_rev \
+            Authorization:"token $GITHUB_TOKEN" \
+            Accept:application/vnd.github.v3+json)
+
+  if jq -re '.workflow_runs[0] | select(.conclusion != "success")' <<< "$check_workflow_run_response"; then
+    _trace "The check.yml workflow for commit ${sha} in branch ${branch} has either failed or is still in progress. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
     return 1
   fi
 }
