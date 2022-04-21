@@ -3,7 +3,7 @@ import { StylesProvider, ThemeProvider } from "@material-ui/core/styles";
 import * as Sentry from "@sentry/react";
 import { defaultTheme } from "czifui";
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 
@@ -55,7 +55,8 @@ contextKeys.forEach(key => {
 const react_component = (componentName, props, target, userContext) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
-    ReactDOM.render(
+    const root = createRoot(document.getElementById(target));
+    root.render(
       <Sentry.ErrorBoundary fallback={"An error has occured"}>
         <BrowserRouter>
           <UserContext.Provider value={userContext || {}}>
@@ -71,7 +72,6 @@ const react_component = (componentName, props, target, userContext) => {
           </UserContext.Provider>
         </BrowserRouter>
       </Sentry.ErrorBoundary>,
-      document.getElementById(target),
     );
     if (userContext && userContext.userId) {
       Sentry.setUser({ id: userContext.userId });
