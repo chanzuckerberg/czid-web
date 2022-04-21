@@ -148,6 +148,8 @@ const getSamples = ({
   offset,
   filters,
   listAllIds,
+  orderBy,
+  orderDir,
   sampleIds,
   snapshotShareId,
   basic = false,
@@ -163,6 +165,8 @@ const getSamples = ({
         domain,
         limit,
         offset,
+        orderBy,
+        orderDir,
         listAllIds,
         snapshotShareId,
         basic, // if true, then don't include extra details (ex: metadata) for each sample
@@ -271,6 +275,8 @@ const getProjects = ({
   limit,
   listAllIds,
   offset,
+  orderBy,
+  orderDir,
   search,
   projectId,
 } = {}) =>
@@ -281,17 +287,27 @@ const getProjects = ({
       limit,
       listAllIds,
       offset,
+      orderBy,
+      orderDir,
       search,
       projectId,
       ...filters,
     },
   });
 
-const getVisualizations = ({ domain, filters, search } = {}) =>
+const getVisualizations = ({
+  domain,
+  filters,
+  search,
+  orderBy,
+  orderDir,
+} = {}) =>
   get("/visualizations.json", {
     params: {
       domain,
       search,
+      orderBy,
+      orderDir,
       ...filters,
     },
   });

@@ -69,6 +69,8 @@ class SamplesView extends React.Component {
       bulkDownloadButtonTempTooltip: null,
       sarsCov2Count: 0,
       referenceSelectId: null,
+      sortBy: "",
+      sortDirection: "DESC",
     };
 
     const { snapshotShareId } = this.props;
@@ -142,6 +144,14 @@ class SamplesView extends React.Component {
         : difference(Array.from(selectedIds), selectableIds),
     );
     onUpdateSelectedIds(newSelected);
+  };
+
+  handleSortColumn = ({ sortBy, sortDirection }) => {
+    // Updates column header UI with new sort state
+    this.setState({ sortBy, sortDirection });
+
+    // Calls onSortColumn callback to fetch sorted data
+    this.props.onSortColumn({ sortBy, sortDirection });
   };
 
   isSelectAllChecked = () => {
@@ -452,8 +462,10 @@ class SamplesView extends React.Component {
       onLoadRows,
       protectedColumns,
       selectedIds,
+      sortable,
       workflow,
     } = this.props;
+    const { sortBy, sortDirection } = this.state;
 
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
@@ -475,12 +487,16 @@ class SamplesView extends React.Component {
           )}
           onSelectRow={this.handleSelectRow}
           onRowClick={this.handleRowClick}
+          onSortColumn={this.handleSortColumn}
           protectedColumns={protectedColumns}
           rowClassName={cs.tableDataRow}
           selectableKey={hideAllTriggers ? null : "id"}
           selected={selectedIds}
           selectAllChecked={selectAllChecked}
           selectableCellClassName={cs.selectableCell}
+          sortable={sortable}
+          sortBy={sortBy}
+          sortDirection={sortDirection}
         />
       </div>
     );
@@ -743,12 +759,14 @@ SamplesView.propTypes = {
   onPLQCHistogramBarClick: PropTypes.func,
   onObjectSelected: PropTypes.func,
   onUpdateSelectedIds: PropTypes.func,
+  onSortColumn: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   sampleStatsSidebarOpen: PropTypes.bool,
   selectableIds: PropTypes.array,
   selectedIds: PropTypes.instanceOf(Set),
   snapshotShareId: PropTypes.string,
+  sortable: PropTypes.bool,
   workflow: PropTypes.string,
   workflowEntity: PropTypes.string,
 };

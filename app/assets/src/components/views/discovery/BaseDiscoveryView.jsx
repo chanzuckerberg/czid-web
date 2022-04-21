@@ -27,9 +27,13 @@ class BaseDiscoveryView extends React.Component {
       headerClassName,
       initialActiveColumns,
       onLoadRows,
+      onSortColumn,
       protectedColumns,
       rowClassName,
       rowHeight,
+      sortable,
+      sortBy,
+      sortDirection,
     } = this.props;
     return (
       <InfiniteTable
@@ -40,10 +44,13 @@ class BaseDiscoveryView extends React.Component {
         loadingClassName={csTableRenderer.loading}
         onLoadRows={onLoadRows}
         onRowClick={handleRowClick}
+        onSortColumn={onSortColumn}
         protectedColumns={protectedColumns}
         ref={infiniteTable => (this.infiniteTable = infiniteTable)}
         rowClassName={cx(cs.tableDataRow, rowClassName)}
-        sortable
+        sortable={sortable}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
         draggableColumns
       />
     );
@@ -63,9 +70,13 @@ BaseDiscoveryView.propTypes = {
   headerClassName: PropTypes.string,
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   onLoadRows: PropTypes.func.isRequired,
+  onSortColumn: PropTypes.func,
   protectedColumns: PropTypes.arrayOf(PropTypes.string),
   rowClassName: PropTypes.string,
   rowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
+  sortable: PropTypes.bool,
+  sortBy: PropTypes.string,
+  sortDirection: PropTypes.string,
 };
 
 export default BaseDiscoveryView;

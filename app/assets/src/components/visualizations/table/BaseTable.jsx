@@ -379,9 +379,9 @@ class BaseTable extends React.Component {
               rowGetter={rowGetter}
               rowHeight={defaultRowHeight}
               rowRenderer={rowRenderer}
-              sort={sortable && onSort}
-              sortBy={sortable && sortBy}
-              sortDirection={sortable && sortDirection}
+              sort={sortable ? onSort : null}
+              sortBy={sortable ? sortBy : ""}
+              sortDirection={sortable ? sortDirection : "DESC"}
               width={width}
               onRowClick={onRowClick}
               {...extraTableProps}

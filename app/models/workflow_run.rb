@@ -201,7 +201,7 @@ class WorkflowRun < ApplicationRecord
 
   # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
   def self.sort_workflow_runs(workflow_runs, order_by, order_dir)
-    sort_key = DATA_KEY_TO_SORT_KEY[order_by]
+    sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
     workflow_runs = workflow_runs.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if WORKFLOW_RUNS_SORT_KEYS.include?(sort_key)
     workflow_runs = WorkflowRun.sort_by_metadata_key(workflow_runs, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
     workflow_runs

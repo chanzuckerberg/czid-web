@@ -282,7 +282,7 @@ class VisualizationsController < ApplicationController
   private
 
   def visualization_params
-    params.permit(:domain, :type, :id, :url, :search, data: {})
+    params.permit(:domain, :type, :id, :url, :search, :orderBy, :orderDir, data: {})
   end
 
   def samples_for_heatmap

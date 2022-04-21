@@ -309,6 +309,8 @@ const getDiscoverySamples = async ({
   search,
   limit = 100,
   offset = 0,
+  orderBy,
+  orderDir,
   listAllIds = false,
   sampleIds,
 } = {}) => {
@@ -320,6 +322,8 @@ const getDiscoverySamples = async ({
     search,
     limit,
     offset,
+    orderBy,
+    orderDir,
     listAllIds,
     sampleIds,
     workflow: WORKFLOWS.SHORT_READ_MNGS.value,
@@ -370,6 +374,8 @@ const getDiscoveryProjects = async ({
   search,
   limit = 100,
   offset = 0,
+  orderBy,
+  orderDir,
   listAllIds = false,
 } = {}) => {
   const projectResults = await getProjects({
@@ -379,6 +385,8 @@ const getDiscoveryProjects = async ({
     search,
     limit,
     offset,
+    orderBy,
+    orderDir,
     listAllIds,
   });
   return {
@@ -393,6 +401,8 @@ const getDiscoveryVisualizations = async ({
   search,
   limit = 100,
   offset = 0,
+  orderBy,
+  orderDir,
   listAllIds = false,
 } = {}) => {
   const visualizations = await getVisualizations({
@@ -401,6 +411,8 @@ const getDiscoveryVisualizations = async ({
     search,
     limit,
     offset,
+    orderBy,
+    orderDir,
     listAllIds,
   });
   return {

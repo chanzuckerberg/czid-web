@@ -53,7 +53,12 @@ class ProjectsController < ApplicationController
       format.json do
         domain = params[:domain]
 
-        order_by = sanitize_order_by(Project, params[:orderBy], :id)
+        order_by = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+                     params[:orderBy] || :created_at
+                   else
+                     sanitize_order_by(Project, params[:orderBy], :id)
+                   end
+
         order_dir = sanitize_order_dir(params[:orderDir], :desc)
         # TODO: impose a max return value -> implies changing all calls to projects
         limit = params[:limit] ? params[:limit].to_i : nil

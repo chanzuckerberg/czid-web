@@ -39,6 +39,12 @@ class VisualizationsView extends React.Component {
   constructor(props) {
     super(props);
 
+    this.discoveryView = null;
+    this.state = {
+      sortBy: "",
+      sortDirection: "DESC",
+    };
+
     this.columns = [
       {
         dataKey: "visualization",
@@ -68,11 +74,13 @@ class VisualizationsView extends React.Component {
       {
         dataKey: "project_name",
         width: 280, // big enough for "mBAL-PLASMA and Medical Detectives"
+        disableSort: true,
         label: "Project",
       },
       {
         dataKey: "samples_count",
         width: 140,
+        disableSort: true,
         label: "Samples",
       },
     ];
@@ -121,7 +129,7 @@ class VisualizationsView extends React.Component {
       ) : (
         <IconPhyloTreePrivate className={cs.icon} />
       );
-    } else {
+    } else if (!["table", "tree"].includes(visualizationType)) {
       // eslint-disable-next-line no-console
       console.error(`Unknown visualization type: ${visualizationType}`);
     }
@@ -142,8 +150,8 @@ class VisualizationsView extends React.Component {
   };
 
   handleLoadRowsAndFormat = async args => {
-    const { visualizations } = this.props;
-    const visualizationsArray = await visualizations.handleLoadObjectRows(args);
+    const { onLoadRows } = this.props;
+    const visualizationsArray = await onLoadRows(args);
 
     return visualizationsArray.map(visualization => {
       return merge(
@@ -167,19 +175,46 @@ class VisualizationsView extends React.Component {
     });
   };
 
+  handleSortColumn = ({ sortBy, sortDirection }) => {
+    // Updates column header UI with new sort state
+    this.setState({ sortBy, sortDirection });
+
+    // Calls onSortColumn callback to fetch sorted data
+    this.props.onSortColumn({ sortBy, sortDirection });
+  };
+
+  reset = () => {
+    const { currentDisplay } = this.props;
+    currentDisplay === "table" &&
+      this.discoveryView &&
+      this.discoveryView.reset();
+  };
+
   render() {
+    const { sortable } = this.props;
+    const { sortBy, sortDirection } = this.state;
+
     return (
       <BaseDiscoveryView
         columns={this.columns}
         handleRowClick={this.handleRowClick}
         onLoadRows={this.handleLoadRowsAndFormat}
+        onSortColumn={this.handleSortColumn}
+        ref={discoveryView => (this.discoveryView = discoveryView)}
+        sortable={sortable}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
       />
     );
   }
 }
 
 VisualizationsView.propTypes = {
+  currentDisplay: PropTypes.string.isRequired,
   visualizations: PropTypes.instanceOf(ObjectCollectionView).isRequired,
+  onLoadRows: PropTypes.func.isRequired,
+  onSortColumn: PropTypes.func,
+  sortable: PropTypes.bool,
 };
 
 export default VisualizationsView;

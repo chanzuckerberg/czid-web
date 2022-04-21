@@ -35,6 +35,7 @@ import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
+import { SORTING_V0_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import {
@@ -216,6 +217,7 @@ class DiscoveryView extends React.Component {
     this.projectsView = null;
     this.samplesView = null;
     this.mapPreviewSidebar = null;
+    this.visualizationsView = null;
 
     // preload first pages
     this.samples.loadPage(0);
@@ -435,6 +437,7 @@ class DiscoveryView extends React.Component {
       () => {
         this.samplesView && this.samplesView.reset();
         this.projectsView && this.projectsView.reset();
+        this.visualizationsView && this.visualizationsView.reset();
         callback && callback();
       },
     );
@@ -872,13 +875,15 @@ class DiscoveryView extends React.Component {
   };
 
   getConditions = () => {
-    const { projectId, search } = this.state;
+    const { projectId, search, orderBy, orderDirection } = this.state;
     const { snapshotShareId } = this.props;
 
     return {
       projectId,
       snapshotShareId,
       search,
+      orderBy,
+      orderDir: orderDirection,
       filters: this.preparedFilters(),
     };
   };
@@ -1217,6 +1222,13 @@ class DiscoveryView extends React.Component {
 
   handleSelectedWorkflowRunsUpdate = selectedWorkflowRunIds =>
     this.setState({ selectedWorkflowRunIds });
+
+  handleSortColumn = ({ sortBy, sortDirection }) => {
+    this.setState({ orderBy: sortBy, orderDirection: sortDirection }, () => {
+      this.updateBrowsingHistory("replace");
+      this.resetDataFromFilterChange();
+    });
+  };
 
   handleMapSidebarTabChange = mapSidebarTab => this.setState({ mapSidebarTab });
 
@@ -1599,7 +1611,13 @@ class DiscoveryView extends React.Component {
       workflowEntity,
     } = this.state;
 
-    const { admin, allowedFeatures, mapTilerKey, snapshotShareId } = this.props;
+    const {
+      admin,
+      allowedFeatures,
+      domain,
+      mapTilerKey,
+      snapshotShareId,
+    } = this.props;
     const { projects, visualizations } = this;
 
     const isWorkflowRunEntity =
@@ -1619,6 +1637,10 @@ class DiscoveryView extends React.Component {
           selectedSampleIds,
           this.handleSelectedSamplesUpdate,
         ];
+
+    const sortable =
+      allowedFeatures.includes(SORTING_V0_FEATURE) &&
+      domain === DISCOVERY_DOMAIN_MY_DATA;
 
     return (
       <>
@@ -1641,8 +1663,10 @@ class DiscoveryView extends React.Component {
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onProjectSelected={this.handleProjectSelected}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
+                onSortColumn={this.handleSortColumn}
                 projects={projects}
                 ref={projectsView => (this.projectsView = projectsView)}
+                sortable={sortable}
               />
             </div>
             {projects &&
@@ -1682,8 +1706,10 @@ class DiscoveryView extends React.Component {
                   onMapMarkerClick={this.handleMapMarkerClick}
                   onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                   onObjectSelected={this.handleObjectSelected}
+                  onSortColumn={this.handleSortColumn}
                   projectId={projectId}
                   snapshotShareId={snapshotShareId}
+                  sortable={sortable}
                   ref={samplesView => (this.samplesView = samplesView)}
                   selectableIds={selectableIds}
                   selectedIds={selectedIds}
@@ -1708,7 +1734,16 @@ class DiscoveryView extends React.Component {
         {currentTab === "visualizations" && (
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
-              <VisualizationsView visualizations={visualizations} />
+              <VisualizationsView
+                currentDisplay={currentDisplay}
+                visualizations={visualizations}
+                onLoadRows={visualizations.handleLoadObjectRows}
+                onSortColumn={this.handleSortColumn}
+                ref={visualizationsView =>
+                  (this.visualizationsView = visualizationsView)
+                }
+                sortable={sortable}
+              />
             </div>
             {visualizations &&
               !visualizations.length &&

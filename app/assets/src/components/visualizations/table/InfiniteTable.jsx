@@ -159,6 +159,10 @@ class InfiniteTable extends React.Component {
       minimumBatchSize,
       onSelectRow,
       onSelectAllRows,
+      onSortColumn,
+      sortable,
+      sortBy,
+      sortDirection,
       defaultRowHeight,
       threshold,
       ...extraProps
@@ -184,10 +188,15 @@ class InfiniteTable extends React.Component {
               onRowsRendered={onRowsRendered}
               onSelectAllRows={onSelectAllRows}
               onSelectRow={onSelectRow}
+              onSort={onSortColumn}
               rowCount={rowCount}
               rowGetter={this.getRow}
               rowHeight={this.handleGetRowHeight}
               rowRenderer={this.rowRenderer}
+              sortable={sortable}
+              sortBy={sortBy}
+              sortDirection={sortDirection}
+              sortedHeaderClassName={cs.sortedHeader}
             />
           );
         }}
@@ -214,7 +223,11 @@ InfiniteTable.propTypes = {
   onLoadRows: PropTypes.func,
   onSelectRow: PropTypes.func,
   onSelectAllRows: PropTypes.func,
+  onSortColumn: PropTypes.func,
   rowCount: PropTypes.number,
+  sortable: PropTypes.bool,
+  sortBy: PropTypes.string,
+  sortDirection: PropTypes.string,
   defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   threshold: PropTypes.number,
 };

@@ -7,3 +7,4 @@ export const PATHOGEN_LABEL_V0_FEATURE = "pathogen_label_v0";
 export const BLAST_FEATURE = "blast";
 export const ANNOTATION_FEATURE = "annotation";
 export const LOCAL_MULTIPART_UPLOADS_FEATURE = "local_multipart_uploads";
+export const SORTING_V0_FEATURE = "sorting_v0";

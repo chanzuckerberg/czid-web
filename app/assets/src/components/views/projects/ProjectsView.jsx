@@ -24,13 +24,16 @@ class ProjectsView extends React.Component {
     super(props);
 
     this.discoveryView = null;
+    this.state = {
+      sortBy: "",
+      sortDirection: "DESC",
+    };
 
     this.columns = [
       {
         dataKey: "project",
         flexGrow: 1,
         width: 350,
-        disableSort: true,
         cellRenderer: ({ cellData }) =>
           TableRenderers.renderItemDetails(
             merge(
@@ -50,7 +53,6 @@ class ProjectsView extends React.Component {
         dataKey: "created_at",
         label: "Created On",
         width: 120,
-        disableSort: true,
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
@@ -166,6 +168,14 @@ class ProjectsView extends React.Component {
     );
   };
 
+  handleSortColumn = ({ sortBy, sortDirection }) => {
+    // Updates column header UI with new sort state
+    this.setState({ sortBy, sortDirection });
+
+    // Calls onSortColumn callback to fetch sorted data
+    this.props.onSortColumn({ sortBy, sortDirection });
+  };
+
   reset = () => {
     const { currentDisplay } = this.props;
     currentDisplay === "table" &&
@@ -186,7 +196,9 @@ class ProjectsView extends React.Component {
       onMapLevelChange,
       onMapMarkerClick,
       onMapTooltipTitleClick,
+      sortable,
     } = this.props;
+    const { sortBy, sortDirection } = this.state;
 
     return (
       <div className={cs.container}>
@@ -196,8 +208,12 @@ class ProjectsView extends React.Component {
             columns={this.columns}
             handleRowClick={this.handleRowClick}
             onLoadRows={this.handleLoadRowsAndFormat}
+            onSortColumn={this.handleSortColumn}
             ref={discoveryView => (this.discoveryView = discoveryView)}
             rowHeight={this.getRowHeight}
+            sortable={sortable}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
           />
         ) : (
           <div className={cs.map}>
@@ -240,7 +256,11 @@ ProjectsView.propTypes = {
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
+  onSortColumn: PropTypes.func,
   projects: PropTypes.instanceOf(ObjectCollectionView).isRequired,
+  sortable: PropTypes.bool,
+  sortBy: PropTypes.string,
+  sortDireciton: PropTypes.string,
 };
 
 export default ProjectsView;
