@@ -62,11 +62,13 @@ __docker_tag_exists() {
 __check_commit_state() {
   declare sha="$1"
   declare branch="$2"
+  # Get everything after `origin/` since the Github API will fail to find the workflow runs for a branch name prefixed with `origin/`
+  declare git_rev_without_origin_prefix=${git_rev/origin\/}
 
   # Fetch latest idseq-web build Docker image (build-docker-image.yml) workflow run for the branch being deployed
   build_docker_images_workflow_run_response=$(http --ignore-stdin --timeout 30 --check-status -b GET \
               "$GITHUB_REPOSITORY_API/actions/workflows/build-docker-image.yml/runs" \
-              branch==$git_rev \
+              branch==$git_rev_without_origin_prefix \
               Authorization:"token $GITHUB_TOKEN" \
               Accept:application/vnd.github.v3+json)
 
@@ -78,7 +80,7 @@ __check_commit_state() {
   # Fetch latest idseq-web check (check.yml) workflow run for the branch being deployed
   check_workflow_run_response=$(http --ignore-stdin --timeout 30 --check-status -b GET \
             "$GITHUB_REPOSITORY_API/actions/workflows/check.yml/runs" \
-            branch==$git_rev \
+            branch==$git_rev_without_origin_prefix \
             Authorization:"token $GITHUB_TOKEN" \
             Accept:application/vnd.github.v3+json)
 
