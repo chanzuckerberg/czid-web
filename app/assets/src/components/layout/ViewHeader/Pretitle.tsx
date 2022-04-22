@@ -1,9 +1,8 @@
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./view_header.scss";
 
-class Pretitle extends React.Component {
-  render() {
+// eslint-disable-next-line no-empty-pattern
+function Pretitle({}: PretitleProps) {
     const { breadcrumbLink } = this.props;
     if (breadcrumbLink) {
       return (
@@ -19,12 +18,11 @@ class Pretitle extends React.Component {
     } else {
       return <div className={cs.pretitle}>{this.props.children}</div>;
     }
-  }
 }
 
-Pretitle.propTypes = {
-  breadcrumbLink: PropTypes.string,
-  children: PropTypes.node,
-};
+interface PretitleProps {
+  breadcrumbLink?: string,
+  children: React.ReactNode
+}
 
 export default Pretitle;

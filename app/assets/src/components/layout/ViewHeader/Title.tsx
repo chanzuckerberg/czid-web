@@ -1,12 +1,13 @@
 import cx from "classnames";
 import { filter } from "lodash";
-import PropTypes from "prop-types";
 import React from "react";
 import { Popup } from "semantic-ui-react";
 import BareDropdown from "../../ui/controls/dropdowns/BareDropdown";
 import cs from "./view_header.scss";
 
-class Title extends React.Component {
+class Title extends React.Component<TitleProp> {
+  _nameContainer: $TSFixMe;
+  _name: $TSFixMe;
   state = {
     nameOverflows: false,
   };
@@ -89,17 +90,20 @@ class Title extends React.Component {
   }
 }
 
-Title.propTypes = {
-  children: PropTypes.node,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string.isRequired,
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      onClick: PropTypes.func.isRequired,
-    }),
-  ),
-  label: PropTypes.string,
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-};
+interface TitleProp {
+  children?: React.ReactNode,
+  options?: Options,
+  label: string,
+  id?: string | number
+}
+
+interface Options {
+  length: number;
+  options?: {
+    label: string,
+    id: number,
+    onClick: $TSFixMeFunction
+  }[]
+}
 
 export default Title;
