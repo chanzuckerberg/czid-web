@@ -35,7 +35,7 @@ if (!function f() {}.name) {
   });
 }
 
-const context = require.context("./components", true, /\.(js|jsx|ts|tsx)$/);
+const context = require.context("./components", true, /\.(js|jsx)$/);
 const foundComponents = {};
 const contextKeys = context.keys();
 contextKeys.forEach(key => {
