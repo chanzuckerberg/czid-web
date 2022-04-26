@@ -83,9 +83,26 @@ class WorkflowRun < ApplicationRecord
   DATA_KEY_TO_SORT_KEY = {
     "createdAt" => "created_at",
     "ctValue" => "ct_value",
+    "referenceGenome" => "accession_id",
+    "wetlabProtocol" => "wetlab_protocol",
+    "technology" => "technology",
+    "medakaModel" => "medaka_model",
+    "totalReadsCG" => "total_reads",
+    "percentGenomeCalled" => "percent_genome_called",
+    "vadrPassFail" => "vadr_pass_fail",
+    "coverageDepth" => "coverage_depth",
+    "gcPercent" => "gc_percent",
+    "refSnps" => "ref_snps",
+    "percentIdentity" => "percent_identity",
+    "nActg" => "n_actg",
+    "nMissing" => "n_missing",
+    "nAmbiguous" => "n_ambiguous",
+    "referenceGenomeLength" => "reference_genome_length",
   }.freeze
   WORKFLOW_RUNS_SORT_KEYS = ["created_at"].freeze
   METADATA_SORT_KEYS = ["ct_value"].freeze
+  INPUT_SORT_KEYS = ["accession_id", "wetlab_protocol", "technology", "medaka_model"].freeze
+  CACHED_RESULT_SORT_KEYS = ["total_reads", "percent_genome_called", "vadr_pass_fail", "coverage_depth", "gc_percent", "ref_snps", "percent_identity", "n_actg", "n_missing", "n_ambiguous", "reference_genome_length"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   validates :status, inclusion: { in: STATUS.values }
@@ -204,6 +221,8 @@ class WorkflowRun < ApplicationRecord
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
     workflow_runs = workflow_runs.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if WORKFLOW_RUNS_SORT_KEYS.include?(sort_key)
     workflow_runs = WorkflowRun.sort_by_metadata_key(workflow_runs, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
+    workflow_runs = WorkflowRun.sort_by_input(workflow_runs, sort_key, order_dir) if INPUT_SORT_KEYS.include?(sort_key)
+    workflow_runs = WorkflowRun.sort_by_cached_result(workflow_runs, sort_key, order_dir) if CACHED_RESULT_SORT_KEYS.include?(sort_key)
     workflow_runs
   end
 
@@ -213,7 +232,18 @@ class WorkflowRun < ApplicationRecord
         LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')
     "
     workflow_runs.joins(ActiveRecord::Base.send(:sanitize_sql_array, joins_statement))
-                 .order("metadata.number_validated_value #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+                 .order("metadata.number_validated_value #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  end
+
+  def self.sort_by_input(workflow_runs, sort_key, order_dir)
+    order_statement = "JSON_EXTRACT(`inputs_json`, '$.#{sort_key}') #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}"
+    workflow_runs.order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  end
+
+  def self.sort_by_cached_result(workflow_runs, sort_key, order_dir)
+    cached_result_key = sort_key == "coverage_depth" ? "coverage_viz" : "quality_metrics"
+    order_statement = "JSON_EXTRACT(`cached_results`, '$.#{cached_result_key}.#{sort_key}') #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}"
+    workflow_runs.order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
   end
 
   private

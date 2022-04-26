@@ -408,5 +408,99 @@ describe WorkflowRun, type: :model do
       desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "ctValue", "desc")
       expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
     end
+
+    it "correctly sorts workflow_runs by their input data" do
+      # create workflow run with empty inputs_json data to test null-handling
+      empty_input = {}.to_json
+
+      low_val_input = {
+        accession_id: "NC_006213.1",
+        technology: "Illumina",
+        wetlab_protocol: "artic",
+        medaka_model: "test_model_a",
+      }.to_json
+
+      high_val_input = {
+        accession_id: "NC_006213.2",
+        technology: "ONT",
+        wetlab_protocol: "midnight",
+        medaka_model: "test_model_b",
+      }.to_json
+
+      workflow_run4 = create(:workflow_run, sample: create(:sample, project: @project), status: WorkflowRun::STATUS[:created], created_at: 1.day.ago, inputs_json: empty_input)
+      @workflow_run.update(inputs_json: low_val_input)
+      @workflow_run3.update(inputs_json: high_val_input)
+      @workflow_run2.update(inputs_json: high_val_input)
+
+      workflow_runs = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, workflow_run4.id])
+
+      ["referenceGenome", "wetlabProtocol", "technology", "medakaModel"].each do |inputs_sort_key|
+        asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, inputs_sort_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+
+        desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, inputs_sort_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
+      end
+    end
+
+    it "correctly sorts workflow_runs by cached result" do
+      # create workflow run with empty cached result data to test null-handling
+      empty_cached_result = {
+        coverage_viz: {},
+        quality_metrics: {},
+      }.to_json
+
+      low_val_cached_result = {
+        coverage_viz: {
+          coverage_depth: 0.9986289001103568,
+        },
+        quality_metrics: {
+          n_actg: 29_852,
+          n_ambiguous: 0,
+          n_missing: 10,
+          ref_snps: 7,
+          total_reads: 187_444,
+          percent_identity: 99.0,
+          gc_percent: 38.0,
+          percent_genome_called: 99.7,
+          reference_genome_length: 29_903,
+          vadr_pass_fail: "FAIL",
+        },
+      }.to_json
+
+      high_val_cached_result = {
+        coverage_viz: {
+          coverage_depth: 1.9986289001103568,
+        },
+        quality_metrics: {
+          n_actg: 29_853,
+          n_ambiguous: 1,
+          n_missing: 11,
+          ref_snps: 8,
+          total_reads: 187_445,
+          percent_identity: 100.0,
+          gc_percent: 39.0,
+          percent_genome_called: 99.8,
+          reference_genome_length: 29_904,
+          vadr_pass_fail: "PASS",
+        },
+      }.to_json
+
+      workflow_run4 = create(:workflow_run, sample: create(:sample, project: @project), status: WorkflowRun::STATUS[:created], created_at: 1.day.ago, cached_results: empty_cached_result)
+      @workflow_run.update(cached_results: low_val_cached_result)
+
+      @workflow_run3.update(cached_results: high_val_cached_result)
+      @workflow_run2.update(cached_results: high_val_cached_result)
+
+      workflow_runs = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, workflow_run4.id])
+
+      ["totalReadsCG", "percentGenomeCalled", "vadrPassFail", "coverageDepth", "gcPercent", "refSnps", "percentIdentity", "nActg", "nMissing", "nAmbiguous", "referenceGenomeLength"].each do |cached_result_sort_key|
+        asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, cached_result_sort_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+
+        desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, cached_result_sort_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
+      end
+    end
   end
 end

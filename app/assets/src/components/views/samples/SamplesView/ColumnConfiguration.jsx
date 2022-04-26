@@ -216,7 +216,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "coverageDepth",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumber(rowData[dataKey]),
@@ -224,7 +223,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "totalReadsCG",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
@@ -232,7 +230,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "gcPercent",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatPercentage(rowData[dataKey]),
@@ -240,13 +237,11 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "refSnps",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
       dataKey: "percentIdentity",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatPercentage(rowData[dataKey]),
@@ -254,7 +249,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "nActg",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
@@ -262,7 +256,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "percentGenomeCalled",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatPercentage(rowData[dataKey]),
@@ -270,7 +263,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "nMissing",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
@@ -278,7 +270,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "nAmbiguous",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
@@ -286,20 +277,17 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "wetlabProtocol",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
       dataKey: "technology",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
       dataKey: "referenceGenome",
       flexGrow: 1,
       width: 200,
-      disableSort: true,
       className: cs.basicCell,
       cellRenderer: ({ cellData }) =>
         TableRenderers.renderReferenceGenome(cellData),
@@ -307,7 +295,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "referenceGenomeLength",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
@@ -315,13 +302,11 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "vadrPassFail",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
       dataKey: "medakaModel",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
