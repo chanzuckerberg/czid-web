@@ -83,6 +83,7 @@ class WorkflowRun < ApplicationRecord
   DATA_KEY_TO_SORT_KEY = {
     "createdAt" => "created_at",
     "ctValue" => "ct_value",
+    "host" => "host",
     "referenceGenome" => "accession_id",
     "wetlabProtocol" => "wetlab_protocol",
     "technology" => "technology",
@@ -221,6 +222,7 @@ class WorkflowRun < ApplicationRecord
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
     workflow_runs = workflow_runs.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if WORKFLOW_RUNS_SORT_KEYS.include?(sort_key)
     workflow_runs = WorkflowRun.sort_by_metadata_key(workflow_runs, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
+    workflow_runs = WorkflowRun.sort_by_host_genome(workflow_runs, order_dir) if sort_key == "host"
     workflow_runs = WorkflowRun.sort_by_input(workflow_runs, sort_key, order_dir) if INPUT_SORT_KEYS.include?(sort_key)
     workflow_runs = WorkflowRun.sort_by_cached_result(workflow_runs, sort_key, order_dir) if CACHED_RESULT_SORT_KEYS.include?(sort_key)
     workflow_runs
@@ -233,6 +235,14 @@ class WorkflowRun < ApplicationRecord
     "
     workflow_runs.joins(ActiveRecord::Base.send(:sanitize_sql_array, joins_statement))
                  .order("metadata.number_validated_value #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  end
+
+  def self.sort_by_host_genome(workflow_runs, order_dir)
+    joins_statement = "
+        LEFT JOIN samples ON workflow_runs.sample_id = samples.id
+        LEFT JOIN host_genomes ON host_genomes.id = samples.host_genome_id
+    "
+    workflow_runs.joins(joins_statement).order("host_genomes.name #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
   end
 
   def self.sort_by_input(workflow_runs, sort_key, order_dir)

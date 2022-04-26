@@ -112,6 +112,7 @@ class Sample < ApplicationRecord
     "collectionLocationV2" => "collection_location_v2",
     "sampleType" => "sample_type",
     "waterControl" => "water_control",
+    "host" => "host",
   }.freeze
   SAMPLES_SORT_KEYS = ["name", "created_at"].freeze
   METADATA_SORT_KEYS = ["collection_location_v2", "sample_type", "water_control"].freeze
@@ -1042,6 +1043,7 @@ class Sample < ApplicationRecord
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
     samples = samples.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if SAMPLES_SORT_KEYS.include?(sort_key)
     samples = Sample.sort_by_metadata_key(samples, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
+    samples = Sample.sort_by_host_genome(samples, order_dir) if sort_key == "host"
     samples
   end
 
@@ -1049,5 +1051,9 @@ class Sample < ApplicationRecord
     joins_statement = "LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')"
     samples.joins(ActiveRecord::Base.send(:sanitize_sql_array, joins_statement))
            .order("metadata.string_validated_value #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  end
+
+  def self.sort_by_host_genome(samples, order_dir)
+    samples.left_outer_joins(:host_genome).order("host_genomes.name #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
   end
 end

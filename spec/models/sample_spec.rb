@@ -349,5 +349,20 @@ describe Sample, type: :model do
         expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, sample_four.id])
       end
     end
+
+    it "correctly sorts samples by host genome" do
+      human_hg = create(:host_genome, name: "Human")
+      mosquito_hg = create(:host_genome, name: "Mosquito")
+
+      @sample_one.update(host_genome_id: human_hg.id)
+      @sample_three.update(host_genome_id: mosquito_hg.id)
+      @sample_two.update(host_genome_id: mosquito_hg.id)
+
+      asc_results = Sample.sort_samples(@samples_input, "host", "asc")
+      expect(asc_results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_two.id])
+
+      desc_results = Sample.sort_samples(@samples_input, "host", "desc")
+      expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id])
+    end
   end
 end

@@ -366,10 +366,13 @@ describe WorkflowRun, type: :model do
     before do
       create(:metadata_field, name: "ct_value", base_type: MetadataField::NUMBER_TYPE)
 
+      human_hg = create(:host_genome, name: "Human")
+      mosquito_hg = create(:host_genome, name: "Mosquito")
+
       @project = create(:project)
-      sample = create(:sample, project: @project, metadata_fields: { ct_value: 1 })
-      sample3 = create(:sample, project: @project, metadata_fields: { ct_value: 2 })
-      sample2 = create(:sample, project: @project, metadata_fields: { ct_value: 2 })
+      sample = create(:sample, project: @project, host_genome_id: human_hg.id, metadata_fields: { ct_value: 1 })
+      sample3 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { ct_value: 2 })
+      sample2 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { ct_value: 2 })
 
       # Note: workflow_runs two and three are created out of order for testing purposes
       @workflow_run = create(:workflow_run, sample: sample, status: WorkflowRun::STATUS[:created], created_at: 3.days.ago)
@@ -407,6 +410,14 @@ describe WorkflowRun, type: :model do
 
       desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "ctValue", "desc")
       expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
+    end
+
+    it "correctly sorts samples by host genome" do
+      asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "host", "asc")
+      expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+
+      desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "host", "desc")
+      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
     end
 
     it "correctly sorts workflow_runs by their input data" do

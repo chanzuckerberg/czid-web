@@ -38,7 +38,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "host",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
@@ -177,7 +176,6 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "host",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
