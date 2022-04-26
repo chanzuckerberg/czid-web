@@ -1,9 +1,14 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./narrow_container.scss";
 
-const NarrowContainer = ({ children, className, size }) => {
+interface NarrowContainerProps {
+  children: React.ReactNode[] | React.ReactNode,
+  className?: string,
+  size?: "small" | "large",
+}
+
+const NarrowContainer = ({ children, className, size }: NarrowContainerProps) => {
   // NarrowContainer will enforce our policy for page width
   // As a general rule, should be applied to most page contents and headers
   return (
@@ -11,15 +16,6 @@ const NarrowContainer = ({ children, className, size }) => {
       {children}
     </div>
   );
-};
-
-NarrowContainer.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-  className: PropTypes.string,
-  size: PropTypes.oneOf(["small"]),
 };
 
 export default NarrowContainer;

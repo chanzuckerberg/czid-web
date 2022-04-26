@@ -24,13 +24,16 @@ const PathogenListView = () => {
     [setCurrentSectionIndex],
   );
 
-  useEffect(async () => {
-    const result = await getPathogenList();
-    const alphabetizedPathogens = sortBy("name", result["pathogens"]);
-    const categorizedPathogens = groupBy("category", alphabetizedPathogens);
+  useEffect(() => {
+    const fetchPathogenList = async () => {
+      const result = await getPathogenList();
+      const alphabetizedPathogens = sortBy("name", result["pathogens"]);
+      const categorizedPathogens = groupBy("category", alphabetizedPathogens);
 
-    setPathogenList(result);
-    setCategorizedPathogens(categorizedPathogens);
+      setPathogenList(result);
+      setCategorizedPathogens(categorizedPathogens);
+    }
+    fetchPathogenList();
   }, []);
 
   const renderTitle = () => (
