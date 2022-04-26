@@ -50,7 +50,7 @@ const PrivacyNotice = () => {
             <td>Your Choices</td>
           </tr>
           <tr className={cs.sectionRow}>
-            <td colSpan="5">
+            <td colSpan={5}>
               <b>Data you upload to or create using CZ ID</b>
             </td>
           </tr>
@@ -73,7 +73,7 @@ const PrivacyNotice = () => {
               ever accessed by anyone working on CZ ID unless specifically
               requested by a User, such as to debug an issue.
             </td>
-            <td rowSpan="4">
+            <td rowSpan={4}>
               Users can request deletion of Raw Sample Data or their CZ ID
               account data by contacting us at{" "}
               <a href="mailto:privacy@czid.org">privacy@czid.org</a> and we will
@@ -137,7 +137,7 @@ const PrivacyNotice = () => {
             <td>See above.</td>
           </tr>
           <tr className={cs.sectionRow}>
-            <td colSpan="5">
+            <td colSpan={5}>
               <b>Data CZ ID collects</b>
             </td>
           </tr>
@@ -181,7 +181,7 @@ const PrivacyNotice = () => {
                 </p>
               </div>
             </td>
-            <td rowSpan="2">
+            <td rowSpan={2}>
               Users can request deletion of their CZ ID account data by
               contacting us at{" "}
               <a href="mailto:privacy@czid.org">privacy@czid.org</a> and we will
