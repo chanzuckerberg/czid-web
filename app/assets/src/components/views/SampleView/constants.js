@@ -112,7 +112,7 @@ export const REPORT_TABLE_COLUMNS = {
   zscore: {
     title: "Z-score",
     tooltip:
-      "Statistic used for evaluating the prevelance of microbes in the sample as compared to background contaminants.",
+      "Statistic used for evaluating the prevalence of microbes in the sample as compared to background contaminants.",
     link: DOC_BASE_LINK + "#z-score",
   },
   rpm: {
