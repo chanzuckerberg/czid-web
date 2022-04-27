@@ -4,21 +4,20 @@ import React from "react";
 import { getUserSettingMetadataByCategory, updateUserSetting } from "~/api";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
-import { ViewHeader, NarrowContainer } from "~/components/layout";
+import { NarrowContainer, ViewHeader } from "~/components/layout";
 import Checkbox from "~ui/controls/Checkbox";
 
 import cs from "./user_settings_view.scss";
 
 interface UserSettingsViewProps {
-  userPreferenceMetadata: [] | null,
+  userPreferenceMetadata: [],
   isLoading: boolean,
   modifiedUserSettings: object,
   error: string,
 }
-
 export default class UserSettingsView extends React.Component {
   state: UserSettingsViewProps = {
-    userPreferenceMetadata: null,
+    userPreferenceMetadata: [],
     isLoading: true,
     // User setting values that were modified on this page and not reflected in the UserContext.
     modifiedUserSettings: {},

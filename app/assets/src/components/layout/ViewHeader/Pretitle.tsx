@@ -1,15 +1,18 @@
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./view_header.scss";
 
-class Pretitle extends React.Component {
-  render() {
-    const { breadcrumbLink } = this.props;
+interface PretitleProps {
+  breadcrumbLink?: string,
+  children: React.ReactNode
+}
+
+function Pretitle(props: PretitleProps) {
+    const { breadcrumbLink } = props;
     if (breadcrumbLink) {
       return (
         <div className={cs.pretitle}>
           <a href={breadcrumbLink} className={cs.link}>
-            {this.props.children}
+            {props.children}
           </a>
           <span className={cs.rightArrow}>
             <i className="fa fa-angle-right" aria-hidden="true" />
@@ -17,14 +20,8 @@ class Pretitle extends React.Component {
         </div>
       );
     } else {
-      return <div className={cs.pretitle}>{this.props.children}</div>;
+      return <div className={cs.pretitle}>{props.children}</div>;
     }
-  }
 }
-
-Pretitle.propTypes = {
-  breadcrumbLink: PropTypes.string,
-  children: PropTypes.node,
-};
 
 export default Pretitle;
