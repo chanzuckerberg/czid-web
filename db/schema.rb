@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_05_175815) do
+ActiveRecord::Schema.define(version: 2022_04_26_223649) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -491,8 +491,12 @@ ActiveRecord::Schema.define(version: 2022_04_05_175815) do
     t.datetime "executed_at", comment: "When the pipeline run was actually dispatched for processing."
     t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing, not including results loading."
     t.integer "time_to_results_finalized", comment: "Seconds from executed_at to marked as finished with processing and results loading."
+    t.float "qc_percent"
+    t.float "compression_ratio"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
+    t.index ["compression_ratio"], name: "index_pipeline_runs_on_compression_ratio"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
+    t.index ["qc_percent"], name: "index_pipeline_runs_on_qc_percent"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 

@@ -288,7 +288,7 @@ RSpec.describe SnapshotSamplesController, type: :controller do
                                       "known_user_error", "host_subtracted", "max_input_fragments", "pipeline_branch", "pipeline_commit",
                                       "pipeline_execution_strategy", "pipeline_version", "results_finalized", "sample_id",
                                       "sfn_execution_arn", "subsample", "total_ercc_reads", "total_reads", "truncated",
-                                      "unmapped_reads", "updated_at", "use_taxon_whitelist", "version", "wdl_version", "s3_output_prefix", "executed_at", "time_to_finalized", "time_to_results_finalized",]
+                                      "unmapped_reads", "updated_at", "use_taxon_whitelist", "version", "wdl_version", "s3_output_prefix", "executed_at", "time_to_finalized", "time_to_results_finalized", "qc_percent", "compression_ratio",]
         expected_pipeline_version_keys = ["alignment_db", "pipeline"]
         expect(json_response.keys).to contain_exactly("metadata", "additional_info")
         expect(json_response["additional_info"].keys).to match_array(expected_additional_info_keys)
