@@ -13,7 +13,7 @@ export interface WorkflowRuns {
   workflowsRun: [];
 }
 
-export default interface Sample  {
+export default interface Sample {
   pipeline_runs: PipelineRuns;
   workflow_runs: WorkflowRuns;
   id: number;

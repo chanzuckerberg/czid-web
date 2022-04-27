@@ -29,7 +29,7 @@ const ViewHeader = ({ className, children }: ViewHeaderProps) => {
       {controls}
     </div>
   );
-}
+};
 
 ViewHeader.Content = Content;
 ViewHeader.Controls = Controls;

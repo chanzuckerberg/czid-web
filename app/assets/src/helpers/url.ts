@@ -51,8 +51,8 @@ export const getURLParamString = params => {
       ([key, value]) =>
         isArray(value)
           ? filter(val => !isObject(val), value).map(
-              eachValue => `${key}[]=${eachValue}`,
-            )
+            eachValue => `${key}[]=${eachValue}`,
+          )
           : `${key}=${value}`,
     ),
     flatten,

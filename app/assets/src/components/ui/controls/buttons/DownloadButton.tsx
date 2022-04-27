@@ -6,11 +6,11 @@ import SecondaryButton from "./SecondaryButton";
 import cs from "./download_button.scss";
 
 interface DownloadButtonProps {
-    disabled?: boolean;
-    onClick?: $TSFixMeFunction;
-    primary?: boolean;
-    text?: string;
-    className? : string;
+  disabled?: boolean;
+  onClick?: $TSFixMeFunction;
+  primary?: boolean;
+  text?: string;
+  className? : string;
 }
 
 const DownloadButton = ({ disabled, onClick, text, primary, ...props }: DownloadButtonProps) => {

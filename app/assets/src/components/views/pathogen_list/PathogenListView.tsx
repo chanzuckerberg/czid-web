@@ -32,7 +32,7 @@ const PathogenListView = () => {
 
       setPathogenList(result);
       setCategorizedPathogens(categorizedPathogens);
-    }
+    };
     fetchPathogenList();
   }, []);
 

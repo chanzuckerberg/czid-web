@@ -32,6 +32,7 @@
     "no-unreachable": "error",
     "no-unused-vars": "error",
     "no-trailing-spaces": "warn",
+    "no-multi-spaces": "error",
     "react/boolean-prop-naming": "warn",
     "react/jsx-key": "warn",
     "react/no-deprecated": "warn",
@@ -41,6 +42,8 @@
     "react/no-string-refs": "warn",
     "react/prop-types": "warn",
     "react/no-danger": "error",
+    "semi": ["error", "always"],
+    "no-extra-semi": "error",
     "space-before-function-paren": [
       "error",
       {
@@ -96,7 +99,12 @@
         "@typescript-eslint/no-use-before-define": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "camelcase": "off",
-        "@typescript-eslint/camelcase": "off"
+        "@typescript-eslint/camelcase": "off",
+        "semi": "off",
+        "@typescript-eslint/semi": "error",
+        "no-extra-semi": "off",
+        "@typescript-eslint/no-extra-semi": "off",
+        "@typescript-eslint/indent":[ "error", 2]
       }
     }
   ],

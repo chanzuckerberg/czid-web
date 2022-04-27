@@ -8,11 +8,11 @@ interface ViewHeaderControlsProps {
 }
 
 function ViewHeaderControls(props: ViewHeaderControlsProps) {
-    return (
-      <div className={cx(cs.controls, props.className)}>
-        {props.children}
-      </div>
-    );
+  return (
+    <div className={cx(cs.controls, props.className)}>
+      {props.children}
+    </div>
+  );
 }
 
 ViewHeaderControls.CLASS_NAME = "ViewHeaderControls";

@@ -15,7 +15,7 @@
     "setupTestFrameworkScriptFile": "./enzyme_config.js"
   },
   "lint-staged": {
-    "*.{js,jsx,css,scss}": [
+    "*.{js,jsx,css,scss,ts,tsx}": [
       "prettier --write --trailing-comma all",
       "git add"
     ],
