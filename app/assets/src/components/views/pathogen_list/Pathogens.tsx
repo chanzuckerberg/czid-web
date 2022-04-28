@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 import { Grid } from "semantic-ui-react";
 
@@ -7,7 +6,7 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./pathogens.scss";
 
-const Pathogens = ({ pathogens }) => {
+const Pathogens = ({ pathogens }: PathogensProps) => {
   return (
     <Grid className={cs.pathogensContainer} columns={3}>
       {pathogens.map((pathogen, index) => (
@@ -28,8 +27,11 @@ const Pathogens = ({ pathogens }) => {
   );
 };
 
-Pathogens.propTypes = {
-  pathogens: PropTypes.arrayOf(PropTypes.object),
-};
+interface PathogensProps {
+  pathogens: {
+    name: string,
+    tax_id: number,
+  }[],
+}
 
 export default Pathogens;
