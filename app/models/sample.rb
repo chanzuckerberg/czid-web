@@ -1041,7 +1041,7 @@ class Sample < ApplicationRecord
   # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
   def self.sort_samples(samples, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
-    samples = samples.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if SAMPLES_SORT_KEYS.include?(sort_key)
+    samples = samples.order("samples.#{sort_key} #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}") if SAMPLES_SORT_KEYS.include?(sort_key)
     samples = Sample.sort_by_metadata_key(samples, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
     samples = Sample.sort_by_location(samples, order_dir) if sort_key == "collection_location_v2"
     samples = Sample.sort_by_host_genome(samples, order_dir) if sort_key == "host"

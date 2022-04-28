@@ -45,7 +45,10 @@ class VisualizationsController < ApplicationController
                      .where.not(data: deprecated_visualizations_data) # filter out deprecated PhyloTreeNgs
                      .where.not(visualization_type: [nil, 'undefined'], name: nil) # filter out legacy data
 
-    visualizations = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+    sorting_v0_allowed = current_user.allowed_feature?("sorting_v0_admin") ||
+                         (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
+
+    visualizations = if sorting_v0_allowed
                        Visualization.sort_visualizations(visualizations, order_by, order_dir)
                      else
                        visualizations.order(updated_at: :desc)

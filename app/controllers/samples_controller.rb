@@ -95,7 +95,10 @@ class SamplesController < ApplicationController
 
     samples = fetch_samples(domain: domain, filters: params)
 
-    samples = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+    sorting_v0_allowed = current_user.allowed_feature?("sorting_v0_admin") ||
+                         (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
+
+    samples = if sorting_v0_allowed
                 Sample.sort_samples(samples, order_by, order_dir)
               else
                 samples.order(Hash[order_by => order_dir])

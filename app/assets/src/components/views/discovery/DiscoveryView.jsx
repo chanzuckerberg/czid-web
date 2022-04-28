@@ -35,7 +35,10 @@ import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { SORTING_V0_FEATURE } from "~/components/utils/features";
+import {
+  SORTING_V0_ADMIN_FEATURE,
+  SORTING_V0_FEATURE,
+} from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import {
@@ -1639,8 +1642,9 @@ class DiscoveryView extends React.Component {
         ];
 
     const sortable =
-      allowedFeatures.includes(SORTING_V0_FEATURE) &&
-      domain === DISCOVERY_DOMAIN_MY_DATA;
+      allowedFeatures.includes(SORTING_V0_ADMIN_FEATURE) ||
+      (allowedFeatures.includes(SORTING_V0_FEATURE) &&
+        domain === DISCOVERY_DOMAIN_MY_DATA);
 
     return (
       <>

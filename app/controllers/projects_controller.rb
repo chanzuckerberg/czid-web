@@ -53,7 +53,10 @@ class ProjectsController < ApplicationController
       format.json do
         domain = params[:domain]
 
-        order_by = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+        sorting_v0_allowed = current_user.allowed_feature?("sorting_v0_admin") ||
+                             (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
+
+        order_by = if sorting_v0_allowed
                      params[:orderBy] || :created_at
                    else
                      sanitize_order_by(Project, params[:orderBy], :id)
@@ -87,7 +90,7 @@ class ProjectsController < ApplicationController
           projects = projects.where(public_access: access_to_project)
         end
 
-        projects = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+        projects = if sorting_v0_allowed
                      Project.sort_projects(projects, order_by, order_dir)
                    else
                      projects.order(Hash[order_by => order_dir])

@@ -17,14 +17,17 @@ class WorkflowRunsController < ApplicationController
     domain = permitted_params[:domain]
     workflow_runs = fetch_workflow_runs(domain: domain, filters: filters)
 
-    order_by = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+    sorting_v0_allowed = current_user.allowed_feature?("sorting_v0_admin") ||
+                         (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
+
+    order_by = if sorting_v0_allowed
                  permitted_params[:orderBy] || :created_at
                else
                  sanitize_order_by(WorkflowRun, order_by, :id)
                end
     order_dir = sanitize_order_dir(permitted_params[:orderDir], :desc)
 
-    workflow_runs = if current_user.allowed_feature?("sorting_v0") && domain == "my_data"
+    workflow_runs = if sorting_v0_allowed
                       WorkflowRun.sort_workflow_runs(workflow_runs, order_by, order_dir)
                     else
                       workflow_runs.order(Hash[order_by => order_dir])
