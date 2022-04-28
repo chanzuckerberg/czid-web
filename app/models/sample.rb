@@ -115,7 +115,7 @@ class Sample < ApplicationRecord
     "host" => "host",
   }.freeze
   SAMPLES_SORT_KEYS = ["name", "created_at"].freeze
-  METADATA_SORT_KEYS = ["collection_location_v2", "sample_type", "water_control"].freeze
+  METADATA_SORT_KEYS = ["sample_type", "water_control"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
@@ -1043,14 +1043,26 @@ class Sample < ApplicationRecord
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
     samples = samples.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}") if SAMPLES_SORT_KEYS.include?(sort_key)
     samples = Sample.sort_by_metadata_key(samples, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
+    samples = Sample.sort_by_location(samples, order_dir) if sort_key == "collection_location_v2"
     samples = Sample.sort_by_host_genome(samples, order_dir) if sort_key == "host"
     samples
   end
 
   def self.sort_by_metadata_key(samples, sort_key, order_dir)
     joins_statement = "LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')"
-    samples.joins(ActiveRecord::Base.send(:sanitize_sql_array, joins_statement))
+    samples.joins(ActiveRecord::Base.sanitize_sql_array(joins_statement))
            .order("metadata.string_validated_value #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  end
+
+  def self.sort_by_location(samples, order_dir)
+    joins_statement = "
+      LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = 'collection_location_v2')
+      LEFT JOIN locations ON metadata.location_id = locations.id
+    "
+    # TODO(ihan): Investigate location metadata creation. I've implemented a workaround solution below,
+    # but ideally, all location info should be stored by location_id.
+    order_statement = "(CASE WHEN ISNULL(metadata.location_id) THEN metadata.string_validated_value ELSE locations.name END) #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    samples.joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
   end
 
   def self.sort_by_host_genome(samples, order_dir)

@@ -308,6 +308,11 @@ describe Sample, type: :model do
       @project_two = create(:project)
 
       # Note: samples two and three are created out of order for testing purposes
+      # Test samples are created where:
+      #   - @sample_one contains a low-value sortable data
+      #   - @sample_two and @sample_three contain the same high-value sortable data (for tiebreaker testing)
+      #   - sample_four (optional) contains null sortable data
+      # such that sample_four < @sample_one < @sample_three < @sample_two.
       @sample_one = create(:sample, project: project_one, name: "Test Sample A", created_at: 3.days.ago,
                                     metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", water_control: "No" })
       @sample_three = create(:sample, project: project_one, name: "Test Sample B", created_at: 2.days.ago,
@@ -341,13 +346,42 @@ describe Sample, type: :model do
 
       samples = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, sample_four.id])
 
-      ["collectionLocationV2", "sampleType", "waterControl"].each do |metadata_sort_key|
+      ["sampleType", "waterControl"].each do |metadata_sort_key|
         asc_results = Sample.sort_samples(samples, metadata_sort_key, "asc")
         expect(asc_results.pluck(:id)).to eq([sample_four.id, @sample_one.id, @sample_three.id, @sample_two.id])
 
         desc_results = Sample.sort_samples(samples, metadata_sort_key, "desc")
         expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, sample_four.id])
       end
+    end
+
+    it "correctly sorts samples by location" do
+      # Ensures that location metadata field is valid for sample_four
+      location_metadata_field = create(
+        :metadata_field, name: 'collection_location_v2', base_type: MetadataField::LOCATION_TYPE
+      )
+      host_genome = create(:host_genome, name: "mock_host_genome")
+      host_genome.metadata_fields << location_metadata_field
+      sample_four = create(:sample, project: @project_two, name: "Test Sample C", created_at: 1.day.ago, host_genome: host_genome)
+
+      # Create sample_four with a lowest-value location name
+      # and which stores location info in a location object (vs in its metadata's string_validated_value)
+      location = create(:location, name: "California, USA", osm_id: 200, locationiq_id: 100)
+      location_metadata = Metadatum.new(
+        sample: sample_four,
+        metadata_field: location_metadata_field,
+        key: "collection_location_v2",
+        location: location
+      )
+      location_metadata.save!
+
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, sample_four.id])
+
+      asc_results = Sample.sort_samples(samples, "collectionLocationV2", "asc")
+      expect(asc_results.pluck(:id)).to eq([sample_four.id, @sample_one.id, @sample_three.id, @sample_two.id])
+
+      desc_results = Sample.sort_samples(samples, "collectionLocationV2", "desc")
+      expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, sample_four.id])
     end
 
     it "correctly sorts samples by host genome" do
