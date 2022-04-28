@@ -855,7 +855,15 @@ class PipelineRun < ApplicationRecord
   def sfn_error
     return unless sfn_output_path
 
-    SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_output_path).error
+    error_type = SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_output_path).error
+    return error_type
+  end
+
+  def sfn_pipeline_error
+    return unless sfn_output_path
+
+    error_type, error_cause = SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_output_path).pipeline_error
+    return [error_type, error_cause]
   end
 
   def cleanup

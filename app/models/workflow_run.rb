@@ -159,11 +159,16 @@ class WorkflowRun < ApplicationRecord
   end
 
   def input_error
-    sfn_error = sfn_execution.error
+    if sample.user.allowed_feature?("better_errors")
+      sfn_error, error_message = sfn_execution.pipeline_error
+    else
+      sfn_error = sfn_execution.error
+      error_message = INPUT_ERRORS[sfn_error]
+    end
     if INPUT_ERRORS.include?(sfn_error)
       return {
         label: sfn_error,
-        message: INPUT_ERRORS[sfn_error],
+        message: error_message,
       }
     end
   end

@@ -1,3 +1,5 @@
+require 'json'
+
 class SfnExecution
   class OutputNotFoundError < StandardError
     def initialize(output_key, available_keys)
@@ -28,6 +30,18 @@ class SfnExecution
   def error
     if description && description[:status] == "FAILED"
       return history[:events].last[:execution_failed_event_details][:error]
+    end
+  end
+
+  def pipeline_error
+    if description && description[:status] == "FAILED"
+      error_hash = history[:events].last[:execution_failed_event_details]
+      begin
+        cause = JSON.parse(error_hash[:cause], { symbolize_names: true })[:errorMessage]
+      rescue JSON::ParserError
+        cause = nil
+      end
+      return error_hash[:error], cause
     end
   end
 
