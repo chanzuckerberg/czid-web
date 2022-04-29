@@ -113,8 +113,8 @@ module SamplesHelper
     last_processed_at = pr.nil? ? nil : pr.created_at
     result = {
       adjusted_remaining_reads: get_adjusted_remaining_reads(pr),
-      compression_ratio: compute_compression_ratio(job_stats_hash),
-      qc_percent: compute_qc_value(job_stats_hash),
+      compression_ratio: compute_compression_ratio(pr, job_stats_hash),
+      qc_percent: compute_qc_value(pr, job_stats_hash),
       percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
       insert_size_mean: get_insert_size_mean(pr),
@@ -148,17 +148,27 @@ module SamplesHelper
     insert_size_metric_set.standard_deviation unless insert_size_metric_set.nil?
   end
 
-  def compute_compression_ratio(job_stats_hash)
-    # job_stats_hash['cdhitdup_out'] required for backwards compatibility
-    czid_dedup_stats = job_stats_hash['czid_dedup_out'] || job_stats_hash['idseq_dedup_out'] || job_stats_hash['cdhitdup_out']
-    priceseq_stats = job_stats_hash['priceseq_out']
-    (1.0 * priceseq_stats['reads_after']) / czid_dedup_stats['reads_after'] unless czid_dedup_stats.nil? || priceseq_stats.nil?
+  def compute_compression_ratio(pr, job_stats_hash)
+    if pr.compression_ratio.present?
+      pr.compression_ratio unless pr.nil?
+    else
+      # TODO: Remove this manual calculation once compression ratio has been backfilled.
+      # job_stats_hash['cdhitdup_out'] required for backwards compatibility
+      czid_dedup_stats = job_stats_hash['czid_dedup_out'] || job_stats_hash['idseq_dedup_out'] || job_stats_hash['cdhitdup_out']
+      priceseq_stats = job_stats_hash['priceseq_out']
+      (1.0 * priceseq_stats['reads_after']) / czid_dedup_stats['reads_after'] unless czid_dedup_stats.nil? || priceseq_stats.nil?
+    end
   end
 
-  def compute_qc_value(job_stats_hash)
-    star_stats = job_stats_hash['star_out']
-    priceseqfilter_stats = job_stats_hash['priceseq_out']
-    (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after'] unless priceseqfilter_stats.nil? || star_stats.nil?
+  def compute_qc_value(pr, job_stats_hash)
+    if pr.qc_percent.present?
+      pr.qc_percent unless pr.nil?
+    else
+      # TODO: Remove this manual calculation once qc_value has been backfilled.
+      star_stats = job_stats_hash['star_out']
+      priceseqfilter_stats = job_stats_hash['priceseq_out']
+      (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after'] unless priceseqfilter_stats.nil? || star_stats.nil?
+    end
   end
 
   def compute_percentage_reads(pr)

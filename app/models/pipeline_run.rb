@@ -1070,13 +1070,17 @@ class PipelineRun < ApplicationRecord
     # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
     compile_stats_file!
     load_stats_file
+
+    job_stats_hash = job_stats.index_by(&:task)
+    load_qc_percent(job_stats_hash)
+    load_compression_ratio(job_stats_hash)
   rescue StandardError => error
     LogUtil.log_error("Failure compiling stats: #{error}", exception: error)
     error
   end
 
   def finalize_results(compiling_stats_error)
-    if all_output_states_loaded? && compiling_stats_error.empty?
+    if all_output_states_loaded? && compiling_stats_error.blank?
       update(
         results_finalized: FINALIZED_SUCCESS,
         time_to_results_finalized: time_since_executed_at
@@ -2016,6 +2020,21 @@ class PipelineRun < ApplicationRecord
 
   def rpm(raw_read_count)
     raw_read_count / ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+  end
+
+  def load_compression_ratio(job_stats_hash)
+    # job_stats_hash['cdhitdup_out'] required for backwards compatibility
+    czid_dedup_stats = job_stats_hash['czid_dedup_out'] || job_stats_hash['idseq_dedup_out'] || job_stats_hash['cdhitdup_out']
+    priceseq_stats = job_stats_hash['priceseq_out']
+    self.compression_ratio = (1.0 * priceseq_stats['reads_after']) / czid_dedup_stats['reads_after'] unless czid_dedup_stats.nil? || priceseq_stats.nil?
+    save
+  end
+
+  def load_qc_percent(job_stats_hash)
+    star_stats = job_stats_hash['star_out']
+    priceseqfilter_stats = job_stats_hash['priceseq_out']
+    self.qc_percent = (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after'] unless priceseqfilter_stats.nil? || star_stats.nil?
+    save
   end
 
   # Given a list of samples, returns a list of the latest pipeline run for each of the samples.
