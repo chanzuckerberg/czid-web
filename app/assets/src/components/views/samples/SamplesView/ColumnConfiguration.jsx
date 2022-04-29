@@ -151,7 +151,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "sample",
       flexGrow: 1,
       width: 350,
-      disableSort: true,
       cellRenderer: ({ rowData }) =>
         TableRenderers.renderSampleInfo({
           rowData,
@@ -176,7 +175,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "collectionLocationV2",
       label: "Location",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
@@ -196,7 +194,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "sampleType",
       label: "Sample Type",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {

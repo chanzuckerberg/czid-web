@@ -370,10 +370,9 @@ describe WorkflowRun, type: :model do
       mosquito_hg = create(:host_genome, name: "Mosquito")
 
       @project = create(:project)
-      sample = create(:sample, project: @project, host_genome_id: human_hg.id, metadata_fields: { ct_value: 1 })
-      sample3 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { ct_value: 2 })
-      sample2 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { ct_value: 2 })
-
+      sample = create(:sample, project: @project, host_genome_id: human_hg.id, metadata_fields: { name: "Test Sample A", collection_location_v2: "Los Angeles, USA", ct_value: 1, water_control: "No", sample_type: "Cerebrospinal Fluid" })
+      sample3 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab" })
+      sample2 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab" })
       # Note: workflow_runs two and three are created out of order for testing purposes
       @workflow_run = create(:workflow_run, sample: sample, status: WorkflowRun::STATUS[:created], created_at: 3.days.ago)
       @workflow_run3 = create(:workflow_run, sample: sample3, status: WorkflowRun::STATUS[:created], created_at: 2.days.ago)
@@ -410,6 +409,26 @@ describe WorkflowRun, type: :model do
 
       desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "ctValue", "desc")
       expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
+
+      asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "waterControl", "asc")
+      expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+
+      desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "waterControl", "desc")
+      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
+
+      asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "sampleType", "asc")
+      expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id, workflow_run4.id])
+
+      desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "sampleType", "desc")
+      expect(desc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run2.id, @workflow_run3.id, @workflow_run.id])
+    end
+
+    it "correctly sorts workflow runs by sample name" do
+      asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "sample", "asc")
+      expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+
+      desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "sample", "desc")
+      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
     end
 
     it "correctly sorts samples by host genome" do
@@ -512,6 +531,36 @@ describe WorkflowRun, type: :model do
         desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, cached_result_sort_key, "desc")
         expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
       end
+    end
+
+    it "correctly sorts workflow runs by location" do
+      # Ensures that location metadata field is valid for sample_four
+      location_metadata_field = create(
+        :metadata_field, name: 'collection_location_v2', base_type: MetadataField::LOCATION_TYPE
+      )
+      host_genome = create(:host_genome, name: "mock_host_genome")
+      host_genome.metadata_fields << location_metadata_field
+      sample4 = create(:sample, project: @project, name: "Test Sample C", created_at: 1.day.ago, host_genome: host_genome)
+      workflow_run4 = create(:workflow_run, sample: sample4, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
+
+      # Create sample_four with a lowest-value location name
+      # and which stores location info in a location object (vs in its metadata's string_validated_value)
+      location = create(:location, name: "California, USA", osm_id: 200, locationiq_id: 100)
+      location_metadata = Metadatum.new(
+        sample: sample4,
+        metadata_field: location_metadata_field,
+        key: "collection_location_v2",
+        location: location
+      )
+      location_metadata.save!
+
+      workflow_runs = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, workflow_run4.id])
+
+      asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "collectionLocationV2", "asc")
+      expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+
+      desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "collectionLocationV2", "desc")
+      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
     end
   end
 end
