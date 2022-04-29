@@ -50,7 +50,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "totalReads",
       label: "Total Reads",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
@@ -59,7 +58,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "nonHostReads",
       label: "Passed Filters",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellRenderer: TableRenderers.renderNumberAndPercentage,
     },
@@ -85,7 +83,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "erccReads",
       label: "ERCC Reads",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
@@ -107,7 +104,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "pipelineVersion",
       label: "Pipeline Version",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {
@@ -120,7 +116,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "subsampledFraction",
       label: "SubSampled Fraction",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumber(rowData[dataKey]),
@@ -144,7 +139,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "meanInsertSize",
       label: "Mean Insert Size",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
   ];

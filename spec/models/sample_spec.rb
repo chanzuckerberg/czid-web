@@ -398,5 +398,61 @@ describe Sample, type: :model do
       desc_results = Sample.sort_samples(@samples_input, "host", "desc")
       expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id])
     end
+
+    it "correctly sorts samples by pipeline run info" do
+      # create old @sample_one pipeline run
+      create(:pipeline_run, sample: @sample_one, finalized: 1,
+                            total_reads: 200, adjusted_remaining_reads: 200, total_ercc_reads: 200, pipeline_version: "3.0",
+                            fraction_subsampled: 1.2, qc_percent: 1.0, compression_ratio: 1.0)
+      # create most-recent @sample_one pipeline run
+      create(:pipeline_run, sample: @sample_one, finalized: 1,
+                            total_reads: 100, adjusted_remaining_reads: 100, total_ercc_reads: 100, pipeline_version: "2.0",
+                            fraction_subsampled: 1.0, qc_percent: 0.5, compression_ratio: 0.5)
+      create(:pipeline_run, sample: @sample_three, finalized: 1,
+                            total_reads: 200, adjusted_remaining_reads: 200, total_ercc_reads: 200, pipeline_version: "3.0",
+                            fraction_subsampled: 1.2, qc_percent: 1.0, compression_ratio: 1.0)
+      create(:pipeline_run, sample: @sample_two, finalized: 1,
+                            total_reads: 200, adjusted_remaining_reads: 200, total_ercc_reads: 200, pipeline_version: "3.0",
+                            fraction_subsampled: 1.2, qc_percent: 1.0, compression_ratio: 1.0)
+
+      # create sample with an in-progress pipeline run to test null-handling
+      sample_four = create(:sample, project: @project_two, name: "Test Sample C", created_at: 1.day.ago)
+      create(:pipeline_run, sample: sample_four)
+
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, sample_four.id])
+
+      ["totalReads", "nonHostReads", "erccReads", "pipelineVersion", "subsampledFraction", "qcPercent", "duplicateCompressionRatio"].each do |pipeline_runs_sort_key|
+        asc_results = Sample.sort_samples(samples, pipeline_runs_sort_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([sample_four.id, @sample_one.id, @sample_three.id, @sample_two.id])
+
+        desc_results = Sample.sort_samples(samples, pipeline_runs_sort_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, sample_four.id])
+      end
+    end
+
+    it "correctly sorts samples by insert size" do
+      # create old @sample_one pipeline run and insert size metric
+      pr_one_old = create(:pipeline_run, sample: @sample_one, finalized: 1)
+      create(:insert_size_metric_set, pipeline_run: pr_one_old, mean: 1.0)
+
+      pr_one = create(:pipeline_run, sample: @sample_one, finalized: 1)
+      pr_three = create(:pipeline_run, sample: @sample_three, finalized: 1)
+      pr_two = create(:pipeline_run, sample: @sample_two, finalized: 1)
+      create(:insert_size_metric_set, pipeline_run: pr_one, mean: 0.5)
+      create(:insert_size_metric_set, pipeline_run: pr_three, mean: 1.0)
+      create(:insert_size_metric_set, pipeline_run: pr_two, mean: 1.0)
+
+      # create sample with an in-progress pipeline run (and no insert size) to test null-handling
+      sample_four = create(:sample, project: @project_two, name: "Test Sample C", created_at: 1.day.ago)
+      create(:pipeline_run, sample: sample_four)
+
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, sample_four.id])
+
+      asc_results = Sample.sort_samples(samples, "meanInsertSize", "asc")
+      expect(asc_results.pluck(:id)).to eq([sample_four.id, @sample_one.id, @sample_three.id, @sample_two.id])
+
+      desc_results = Sample.sort_samples(samples, "meanInsertSize", "desc")
+      expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, sample_four.id])
+    end
   end
 end

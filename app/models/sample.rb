@@ -113,9 +113,18 @@ class Sample < ApplicationRecord
     "sampleType" => "sample_type",
     "waterControl" => "water_control",
     "host" => "host",
+    "totalReads" => "total_reads",
+    "nonHostReads" => "adjusted_remaining_reads",
+    "erccReads" => "total_ercc_reads",
+    "pipelineVersion" => "pipeline_version",
+    "subsampledFraction" => "fraction_subsampled",
+    "qcPercent" => "qc_percent",
+    "duplicateCompressionRatio" => "compression_ratio",
+    "meanInsertSize" => "mean_insert_size",
   }.freeze
   SAMPLES_SORT_KEYS = ["name", "created_at"].freeze
   METADATA_SORT_KEYS = ["sample_type", "water_control"].freeze
+  PIPELINE_RUNS_SORT_KEYS = ["total_reads", "adjusted_remaining_reads", "total_ercc_reads", "pipeline_version", "fraction_subsampled", "qc_percent", "compression_ratio"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
@@ -1045,6 +1054,8 @@ class Sample < ApplicationRecord
     samples = Sample.sort_by_metadata_key(samples, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
     samples = Sample.sort_by_location(samples, order_dir) if sort_key == "collection_location_v2"
     samples = Sample.sort_by_host_genome(samples, order_dir) if sort_key == "host"
+    samples = Sample.sort_by_pipeline_run(samples, sort_key, order_dir) if PIPELINE_RUNS_SORT_KEYS.include?(sort_key)
+    samples = Sample.sort_by_insert_size(samples, order_dir) if sort_key == "mean_insert_size"
     samples
   end
 
@@ -1067,5 +1078,24 @@ class Sample < ApplicationRecord
 
   def self.sort_by_host_genome(samples, order_dir)
     samples.left_outer_joins(:host_genome).order("host_genomes.name #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  end
+
+  def self.sort_by_pipeline_run(samples, sort_key, order_dir)
+    # join on each sample's most-recent pipeline run
+    joins_statement = "
+      LEFT JOIN pipeline_runs ON samples.id = pipeline_runs.sample_id AND
+      pipeline_runs.id = (SELECT MAX(id) FROM pipeline_runs WHERE samples.id = pipeline_runs.sample_id)
+    "
+    samples.joins(joins_statement).order("pipeline_runs.#{sort_key} #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  end
+
+  def self.sort_by_insert_size(samples, order_dir)
+    # join on each sample's most-recent pipeline run
+    joins_statement = "
+      LEFT JOIN pipeline_runs ON samples.id = pipeline_runs.sample_id AND
+      pipeline_runs.id = (SELECT MAX(id) FROM pipeline_runs WHERE samples.id = pipeline_runs.sample_id)
+      LEFT JOIN insert_size_metric_sets ON insert_size_metric_sets.pipeline_run_id = pipeline_runs.id
+    "
+    samples.joins(joins_statement).order("insert_size_metric_sets.mean #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
   end
 end
