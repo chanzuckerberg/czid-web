@@ -20,7 +20,7 @@
 - Active Record migrations are intended to capture database schema changes.  It's generally not recomended to perform data changes migrations using Active Record migrations, primarily due to the data being invalid if the schema changes.
 - For data migrations, CZ ID uses [the `data_migrate` gem](https://github.com/ilyakatz/data-migrate), which provides structure and interface for performing data migrations in a very similar to data migrations.
 - [More information on Active Record migrations](https://czi.quip.com/N5eMAFsZ47jX/Rails-Database-migrations)
-- To run data migrations, append `:with_data` to standard `db:migrate` rake tasks (`bin/rails db:migrate`), or use the specific data rake tasks documented in the gem (such as `bin/rails data:migrate`).
+- To run data migrations, append `:with_data` to standard `db:migrate` rake tasks (e.g. `bin/rails db:migrate:with_data`), or use the specific data rake tasks documented in the gem (such as `bin/rails data:migrate`).
 
 ## Tips and tricks
 
@@ -48,9 +48,9 @@ You have 3 pending migrations:
 - This means there is a migration that hasn't been run on your local database yet:
   - `ActiveRecord::PendingMigrationError - Migrations are pending. To resolve this issue, run: bin/rails db:migrate RAILS_ENV=development`
 - To apply pending migrations:
-  - `aws-oidc exec -- docker-compose run web "rake db:migrate"`
+  - `aws-oidc exec -- docker-compose run web "rake db:migrate:with_data"`
 - The `test` database for local tests is separate as well, so you may need:
-  - `aws-oidc exec -- docker-compose run web "RAILS_ENV=test rake db:migrate"`
+  - `aws-oidc exec -- docker-compose run web "RAILS_ENV=test rake db:migrate:with_data"`
 
 ### Rolling back migrations
 
