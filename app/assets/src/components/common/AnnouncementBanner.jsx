@@ -54,7 +54,7 @@ const AnnouncementBanner = ({ visible, message, inverted, id }) => {
 
 AnnouncementBanner.propTypes = {
   visible: PropTypes.bool,
-  message: PropTypes.string.isRequired,
+  message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
   inverted: PropTypes.bool,
   id: PropTypes.string.isRequired,
 };
