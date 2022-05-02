@@ -193,7 +193,11 @@ class SampleView extends React.Component {
         workflowRunId: workflowRunIdFromUrl || null,
         workflowRunResults: null,
         sharedWithNoBackground: !!(
-          selectedOptionsFromUrl && isNull(selectedOptionsFromUrl.background)
+          (
+            (selectedOptionsFromUrl &&
+              isNull(selectedOptionsFromUrl.background)) ||
+            !isEmpty(tempSelectedOptions)
+          ) // Don't fetch saved background if have temp options (e.g. if coming from heatmap)
         ),
       },
       nonNestedLocalState,
