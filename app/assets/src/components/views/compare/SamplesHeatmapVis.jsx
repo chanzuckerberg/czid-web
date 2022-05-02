@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { size, map, keyBy, isEmpty, orderBy } from "lodash/fp";
+import { size, map, keyBy, isEqual, isEmpty, orderBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -138,6 +138,9 @@ class SamplesHeatmapVis extends React.Component {
       this.scale = this.props.scale;
       this.heatmap.updateScale(this.props.scale);
     }
+    // We don't need to use isEqual() for comparing the objects `sampleDetails` and `data`.
+    // This is because their references are only updated when the data changes, in which
+    // case !== will pick it up.
     if (this.props.sampleDetails !== prevProps.sampleDetails) {
       this.heatmap.updateData({
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
@@ -150,18 +153,18 @@ class SamplesHeatmapVis extends React.Component {
       });
       this.scrollToRow();
     }
-    if (this.props.taxonIds !== prevProps.taxonIds) {
+    if (!isEqual(this.props.taxonIds, prevProps.taxonIds)) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
         rowLabels: this.extractTaxonLabels(),
       });
     }
-    if (this.props.pinnedSampleIds !== prevProps.pinnedSampleIds) {
+    if (!isEqual(this.props.pinnedSampleIds, prevProps.pinnedSampleIds)) {
       this.heatmap.updateData({
         columnLabels: this.extractSampleLabels(), // Also includes column pinned state.
       });
     }
-    if (this.props.thresholdFilters !== prevProps.thresholdFilters) {
+    if (!isEqual(this.props.thresholdFilters, prevProps.thresholdFilters)) {
       this.heatmap.updatePrintCaption(this.generateHeatmapCaptions());
     }
     if (this.props.sampleSortType !== prevProps.sampleSortType) {
