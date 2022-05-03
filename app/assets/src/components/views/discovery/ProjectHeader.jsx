@@ -4,7 +4,7 @@ import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 import { validateProjectName, saveProjectName } from "~/api";
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
@@ -63,7 +63,7 @@ const ProjectHeader = ({
     try {
       await saveProjectName(project.id, sanitizedName);
       onMetadataUpdated();
-      logAnalyticsEvent(ANALYTICS_EVENT_NAMES.PROJECT_HEADER_PROJECT_RENAMED, {
+      trackEvent(ANALYTICS_EVENT_NAMES.PROJECT_HEADER_PROJECT_RENAMED, {
         projectId: project.id,
         projectName: sanitizedName,
       });

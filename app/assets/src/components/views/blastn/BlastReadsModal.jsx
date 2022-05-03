@@ -2,7 +2,7 @@ import { size } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -86,7 +86,7 @@ const BlastReadsModal = ({
     analyticsEventName,
     automaticallyRedirectedToNCBI,
   }) => {
-    logAnalyticsEvent(analyticsEventName, {
+    trackEvent(analyticsEventName, {
       automaticallyRedirectedToNCBI,
       numberOfReads: size(reads),
       shortestAlignmentLength,

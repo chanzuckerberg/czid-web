@@ -1,7 +1,7 @@
 import { get, throttle, upperFirst, size, map, uniq, flatten } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import MapBanner from "~/components/views/discovery/mapping/MapBanner";
@@ -27,10 +27,7 @@ class DiscoveryMap extends React.Component {
     };
 
     // By default throttle includes the trailing event
-    this.logAnalyticsEventThrottled = throttle(
-      DEFAULT_THROTTLE_MS,
-      logAnalyticsEvent,
-    );
+    this.trackEventThrottled = throttle(DEFAULT_THROTTLE_MS, trackEvent);
     if (onMapLevelChange) {
       this.onMapLevelChangeThrottled = throttle(
         DEFAULT_THROTTLE_MS,
@@ -55,13 +52,13 @@ class DiscoveryMap extends React.Component {
       this.onMapLevelChangeThrottled(level);
     }
 
-    this.logAnalyticsEventThrottled("DiscoveryMap_viewport_updated");
+    this.trackEventThrottled("DiscoveryMap_viewport_updated");
   };
 
   handleMarkerClick = locationId => {
     const { onMarkerClick } = this.props;
     onMarkerClick && onMarkerClick(locationId);
-    logAnalyticsEvent("DiscoveryMap_marker_clicked", { locationId });
+    trackEvent("DiscoveryMap_marker_clicked", { locationId });
   };
 
   handleMarkerMouseEnter = locationInfo => {
@@ -85,7 +82,7 @@ class DiscoveryMap extends React.Component {
     );
     this.setState({ tooltip, tooltipShouldClose: false });
 
-    logAnalyticsEvent("DiscoveryMap_marker_hovered", {
+    trackEvent("DiscoveryMap_marker_hovered", {
       locationId: locationInfo.id,
     });
   };
@@ -107,7 +104,7 @@ class DiscoveryMap extends React.Component {
     const { onTooltipTitleClick } = this.props;
     onTooltipTitleClick && onTooltipTitleClick(locationInfo.id);
 
-    logAnalyticsEvent("DiscoveryMap_tooltip-title_clicked", {
+    trackEvent("DiscoveryMap_tooltip-title_clicked", {
       locationId: locationInfo.id,
     });
   };
@@ -115,7 +112,7 @@ class DiscoveryMap extends React.Component {
   handleMapClick = () => {
     const { onClick } = this.props;
     onClick && onClick();
-    logAnalyticsEvent("DiscoveryMap_blank-area_clicked");
+    trackEvent("DiscoveryMap_blank-area_clicked");
   };
 
   renderMarker = locationInfo => {

@@ -10,7 +10,7 @@ import {
 import { validateSampleIds } from "~/api/access_control";
 import {
   ANALYTICS_EVENT_NAMES,
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
@@ -160,7 +160,7 @@ class CollectionModal extends React.Component {
     const normalizedBackgroundName = toLower(trim(backgroundName));
     if (PROHIBITED_BACKGROUND_MODEL_NAMES.has(normalizedBackgroundName)) {
       this.setState({ invalidBackgroundName: normalizedBackgroundName }, () => {
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.COLLECTION_MODAL_INVALID_BACKGROUND_MODEL_NAME_ENTERED,
           {
             backgroundName,

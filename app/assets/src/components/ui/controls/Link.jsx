@@ -2,7 +2,7 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import cs from "./link.scss";
 
 class Link extends React.Component {
@@ -15,9 +15,9 @@ class Link extends React.Component {
     } = this.props;
 
     if (analyticsEventName) {
-      logAnalyticsEvent(analyticsEventName, analyticsEventData);
+      trackEvent(analyticsEventName, analyticsEventData);
     } else {
-      logAnalyticsEvent("Link_generic_clicked", {
+      trackEvent("Link_generic_clicked", {
         external: external,
         href: href,
       });
@@ -58,7 +58,7 @@ Link.propTypes = {
   href: PropTypes.string,
 
   // We intentionally don't have an onClick prop, because we don't want to encourage arbitrary onClick handlers,
-  // since there is already an on-click behavior (following the link href). logAnalyticsEvent is an exception.
+  // since there is already an on-click behavior (following the link href). trackEvent is an exception.
   analyticsEventName: PropTypes.string,
   analyticsEventData: PropTypes.object,
 };

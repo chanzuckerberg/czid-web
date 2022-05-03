@@ -1,5 +1,5 @@
 import { compact } from "lodash/fp";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 
 const NON_HOST_READS_LABEL = "Download Non-Host Reads (.fasta)";
 const NON_HOST_CONTIGS_LABEL = "Download Non-Host Contigs (.fasta)";
@@ -83,7 +83,7 @@ export const getWorkflowRunZipLink = workflowRunId => {
 };
 
 export const logDownloadOption = ({ component, option, details = {} }) => {
-  logAnalyticsEvent(
+  trackEvent(
     // make names like:
     // SamplesHeatmapHeader_download-current-heatmap-view-csv_clicked
     `${component}-download-${option

@@ -2,7 +2,7 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import {
   ANNOTATION_HIT,
   ANNOTATION_NOT_A_HIT,
@@ -43,7 +43,7 @@ const AnnotationLabel = ({
     <span
       {...props}
       onMouseEnter={() =>
-        logAnalyticsEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_LABEL_HOVERED)
+        trackEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_LABEL_HOVERED)
       }
     >
       <IconAnnotation

@@ -3,7 +3,7 @@ import { camelCase, getOr, find, isEmpty, size, get, isNil } from "lodash/fp";
 import memoize from "memoize-one";
 import React, { useEffect, useState, useRef } from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -319,9 +319,7 @@ const ConsensusGenomeView = ({
             className={cs.coverageVizHistogram}
             ref={coverageVizContainerRef}
             onMouseEnter={() =>
-              logAnalyticsEvent(
-                "ConsensusGenomeView_coverage-viz-histogram_hovered",
-              )
+              trackEvent("ConsensusGenomeView_coverage-viz-histogram_hovered")
             }
           />
         </div>
@@ -489,9 +487,7 @@ const ConsensusGenomeView = ({
           status={"IN PROGRESS"}
           type={"inProgress"}
           onClick={() =>
-            logAnalyticsEvent(
-              "ConsensusGenomeView_consenus-genome-doc-link_clicked",
-            )
+            trackEvent("ConsensusGenomeView_consenus-genome-doc-link_clicked")
           }
         />
       );
@@ -519,9 +515,7 @@ const ConsensusGenomeView = ({
           status={status}
           type={type}
           onClick={() =>
-            logAnalyticsEvent(
-              "ConsensusGenomeView_sample-error-info-link_clicked",
-            )
+            trackEvent("ConsensusGenomeView_sample-error-info-link_clicked")
           }
         />
       );

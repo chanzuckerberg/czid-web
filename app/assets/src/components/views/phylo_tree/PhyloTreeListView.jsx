@@ -11,7 +11,7 @@ import {
 } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
 import { getPhyloTreeNg, rerunPhyloTreeNg } from "~/api/phylo_tree_ngs";
@@ -170,7 +170,7 @@ class PhyloTreeListView extends React.Component {
       );
       // NG isn't using the sessionStorage 'default tree' functionality
 
-      logAnalyticsEvent("PhyloTreeListView_phylo-tree_changed", {
+      trackEvent("PhyloTreeListView_phylo-tree_changed", {
         selectedPhyloTreeNgId: newPhyloTreeId,
       });
     } else {
@@ -192,7 +192,7 @@ class PhyloTreeListView extends React.Component {
       // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
       window.sessionStorage.setItem("treeId", newPhyloTreeId);
 
-      logAnalyticsEvent("PhyloTreeListView_phylo-tree_changed", {
+      trackEvent("PhyloTreeListView_phylo-tree_changed", {
         selectedPhyloTreeId: newPhyloTreeId,
       });
     }
@@ -274,7 +274,7 @@ class PhyloTreeListView extends React.Component {
       this.setState({
         sidebarVisible: false,
       });
-      logAnalyticsEvent("PhyloTreeListView_taxon-details-sidebar_closed", {
+      trackEvent("PhyloTreeListView_taxon-details-sidebar_closed", {
         sidebarMode: "taxonDetails",
         treeName: currentTree.name,
         treeId: currentTree.id,
@@ -289,7 +289,7 @@ class PhyloTreeListView extends React.Component {
         },
         sidebarMode: "taxonDetails",
       });
-      logAnalyticsEvent("PhyloTreeListView_taxon-details-sidebar_opened", {
+      trackEvent("PhyloTreeListView_taxon-details-sidebar_opened", {
         sidebarMode: "taxonDetails",
         treeName: currentTree.name,
         treeId: currentTree.id,
@@ -316,7 +316,7 @@ class PhyloTreeListView extends React.Component {
       this.setState({
         sidebarVisible: false,
       });
-      logAnalyticsEvent("PhyloTreeListView_sample-details-sidebar_closed", {
+      trackEvent("PhyloTreeListView_sample-details-sidebar_closed", {
         sidebarMode: "sampleDetails",
         selectedSampleId: sampleId,
       });
@@ -332,7 +332,7 @@ class PhyloTreeListView extends React.Component {
         sidebarMode: "sampleDetails",
         sidebarVisible: true,
       });
-      logAnalyticsEvent("PhyloTreeListView_sample-details-sidebar_opened", {
+      trackEvent("PhyloTreeListView_sample-details-sidebar_opened", {
         sidebarMode: "sampleDetails",
         selectedSampleId: sampleId,
       });
@@ -411,7 +411,7 @@ class PhyloTreeListView extends React.Component {
           status="Tree Failed"
           type="error"
           onClick={() =>
-            logAnalyticsEvent(
+            trackEvent(
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED,
             )
           }
@@ -435,7 +435,7 @@ class PhyloTreeListView extends React.Component {
           subtitle="Hang tight and grab a cup of coffee while we generate your tree!"
           type="inProgress"
           onClick={() =>
-            logAnalyticsEvent(
+            trackEvent(
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED,
             )
           }

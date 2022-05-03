@@ -3,7 +3,7 @@ import { get, isEmpty, find, size, set } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 
 import { saveSampleName, saveSampleNotes, getAllSampleTypes } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import {
   getSampleMetadata,
   saveSampleMetadata,
@@ -70,7 +70,7 @@ const SampleDetailsMode = ({
 
   const onTabChange = tab => {
     setCurrentTab(tab);
-    logAnalyticsEvent("SampleDetailsMode_tab_changed", {
+    trackEvent("SampleDetailsMode_tab_changed", {
       sampleId,
       tab,
     });
@@ -135,7 +135,7 @@ const SampleDetailsMode = ({
     setMetadataChanged(set(key, !shouldSave, metadataChanged));
     setMetadataErrors(set(key, null, metadataErrors));
 
-    logAnalyticsEvent("SampleDetailsMode_metadata_changed", {
+    trackEvent("SampleDetailsMode_metadata_changed", {
       sampleId,
       key,
       shouldSave,
@@ -151,7 +151,7 @@ const SampleDetailsMode = ({
       setMetadataChanged(set(key, false, metadataChanged));
       _save(sampleId, key, newValue);
 
-      logAnalyticsEvent("SampleDetailsMode_metadata_saved", {
+      trackEvent("SampleDetailsMode_metadata_saved", {
         sampleId,
         key,
       });
@@ -286,7 +286,7 @@ const SampleDetailsMode = ({
             target="_blank"
             rel="noreferrer noopener"
             onClick={() =>
-              logAnalyticsEvent("SampleDetailsMode_see-report-link_clicked", {
+              trackEvent("SampleDetailsMode_see-report-link_clicked", {
                 withTempSelectedOptions: !isEmpty(tempSelectedOptions),
               })
             }

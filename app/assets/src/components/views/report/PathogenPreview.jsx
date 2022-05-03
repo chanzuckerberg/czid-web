@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import Label from "~/components/ui/labels/Label";
@@ -34,7 +34,7 @@ const PathogenPreview = ({ tag2Count }) => {
         className="pathogen-preview-popup"
         trigger={React.cloneElement(display, {
           onMouseEnter: () =>
-            logAnalyticsEvent(ANALYTICS_EVENT_NAMES.PATHOGEN_PREVIEW_HOVERED),
+            trackEvent(ANALYTICS_EVENT_NAMES.PATHOGEN_PREVIEW_HOVERED),
         })}
         content="Contains flagged pathogen species."
         basic={false}

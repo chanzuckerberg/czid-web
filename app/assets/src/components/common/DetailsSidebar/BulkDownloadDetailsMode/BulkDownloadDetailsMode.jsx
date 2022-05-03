@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { getBulkDownload } from "~/api/bulk_downloads";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -57,7 +57,7 @@ export default class BulkDownloadDetailsMode extends React.Component {
 
   onTabChange = tab => {
     this.setState({ currentTab: tab });
-    logAnalyticsEvent("bulkDownloadDetailsMode_tab_changed", {
+    trackEvent("bulkDownloadDetailsMode_tab_changed", {
       bulkDownloadId: this.props.bulkDownload.id,
       tab,
     });

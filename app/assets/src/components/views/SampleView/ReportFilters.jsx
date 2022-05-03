@@ -10,7 +10,7 @@ import {
 import PropTypes from "prop-types";
 import React from "react";
 
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
@@ -38,7 +38,7 @@ const ReportFilters = ({
   snapshotShareId,
 }) => {
   const handleFilterChange = ({ key, value }) => {
-    logAnalyticsEvent("SampleView_filter_changed", {
+    trackEvent("SampleView_filter_changed", {
       key,
       value,
     });
@@ -46,7 +46,7 @@ const ReportFilters = ({
   };
 
   const handleRemoveFilter = ({ key, subpath, value }) => {
-    logAnalyticsEvent("SampleView_filter_removed", {
+    trackEvent("SampleView_filter_removed", {
       key,
       subpath,
       value,
@@ -173,7 +173,7 @@ const ReportFilters = ({
           <BackgroundModelFilter
             allBackgrounds={backgrounds}
             onClick={() =>
-              logAnalyticsEvent(
+              trackEvent(
                 ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED,
               )
             }

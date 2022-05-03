@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 
@@ -35,7 +35,7 @@ class ProjectUploadMenu extends React.Component {
         text="Upload Samples"
         key="1"
         onClick={() => {
-          logAnalyticsEvent("ProjectUploadMenu_upload-sample-btn_clicked");
+          trackEvent("ProjectUploadMenu_upload-sample-btn_clicked");
           this.goToPage(`/samples/upload?projectId=${project.id}`);
         }}
       />,

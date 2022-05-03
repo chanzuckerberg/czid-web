@@ -10,7 +10,7 @@ import {
 } from "react-virtualized";
 import "react-virtualized/styles.css";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -257,7 +257,7 @@ class BaseTable extends React.Component {
         onActiveColumnsChange &&
         onActiveColumnsChange(this.state.activeColumns),
     );
-    logAnalyticsEvent("BaseTable_column-selector_changed", {
+    trackEvent("BaseTable_column-selector_changed", {
       selectedColumns: selectedColumns.length,
       protectedColumns: protectedColumns.length,
     });

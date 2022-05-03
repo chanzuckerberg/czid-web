@@ -3,7 +3,7 @@ import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
 import PropTypes from "~/components/utils/propTypes";
@@ -114,7 +114,7 @@ export default class DiscoverySidebar extends React.Component {
                 key={entry.value}
                 style={{ height: percent + "px" }}
                 onClick={() => {
-                  logAnalyticsEvent("DiscoverySidebar_date-filter_clicked", {
+                  trackEvent("DiscoverySidebar_date-filter_clicked", {
                     dateValue: entry.value,
                     dates: dates.length,
                     count: entry.count,
@@ -183,7 +183,7 @@ export default class DiscoverySidebar extends React.Component {
             className={cs.showHide}
             onClick={() => {
               this.toggleExpandedMetadataGroup(field);
-              logAnalyticsEvent("DiscoverySidebar_show-more-toggle_clicked", {
+              trackEvent("DiscoverySidebar_show-more-toggle_clicked", {
                 field,
                 extraRows: extraRows.length,
                 linkText,

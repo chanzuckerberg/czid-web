@@ -2,7 +2,7 @@ import { get, getOr, map } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import TidyTree from "~/components/visualizations/TidyTree";
 
@@ -112,7 +112,7 @@ class TaxonTreeVis extends React.Component {
 
   handleNodeHover = node => {
     this.setState({ nodeHover: node });
-    logAnalyticsEvent("TaxonTreeVis_node_hovered", {
+    trackEvent("TaxonTreeVis_node_hovered", {
       id: node.id,
       scientificName: node.data.scientificName,
       commonName: node.data.commonName,
@@ -124,7 +124,7 @@ class TaxonTreeVis extends React.Component {
     if (["genus", "species"].includes(node.data.lineageRank)) {
       onTaxonClick(node.data);
     }
-    logAnalyticsEvent("TaxonTreeVis_node-label_clicked", {
+    trackEvent("TaxonTreeVis_node-label_clicked", {
       taxonId: node.data.taxId,
       taxonName: node.data.name,
       taxLevel: node.data.lineageRank,

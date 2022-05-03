@@ -12,7 +12,7 @@ import _fp, {
 } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
 import { LOCAL_MULTIPART_UPLOADS_FEATURE } from "~/components/utils/features";
@@ -98,7 +98,7 @@ class LocalSampleFileUpload extends React.Component {
         showInfo: !this.state.showInfo,
       },
       () => {
-        logAnalyticsEvent("LocalSampleFileUpload_more-info-toggle_clicked", {
+        trackEvent("LocalSampleFileUpload_more-info-toggle_clicked", {
           showInfo: this.state.showInfo,
         });
       },

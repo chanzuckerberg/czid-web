@@ -22,7 +22,7 @@ import {
 } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
 import { chooseTaxon } from "~/api/phylo_tree_ngs";
@@ -173,7 +173,7 @@ class PhyloTreeCreationModal extends React.Component {
       view: row.nextGeneration ? (
         <RouterLink
           onClick={() => {
-            logAnalyticsEvent(
+            trackEvent(
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_NG_LINK_CLICKED,
               { treeId: row.id },
             );
@@ -330,7 +330,7 @@ class PhyloTreeCreationModal extends React.Component {
         otherSamplesFilter: "",
       },
       () =>
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SELECTED,
           {
             projectId: result.id,
@@ -362,7 +362,7 @@ class PhyloTreeCreationModal extends React.Component {
         otherSamplesFilter: "",
       },
       () =>
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TAXON_SELECTED,
           {
             taxonId,
@@ -389,7 +389,7 @@ class PhyloTreeCreationModal extends React.Component {
         selectedProjectSamples: newSelectedProjectSamples,
       },
       () => {
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
           {
             previousSelectedProjectSamples: Array.from(
@@ -410,7 +410,7 @@ class PhyloTreeCreationModal extends React.Component {
         selectedOtherSamples: newSelectedOtherSamples,
       },
       () => {
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
           {
             previousSelectedOtherSamples: Array.from(
@@ -431,7 +431,7 @@ class PhyloTreeCreationModal extends React.Component {
           otherSamplesFilter: newFilter,
         },
         () => {
-          logAnalyticsEvent(
+          trackEvent(
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED,
             {
               sampleSearchString: newFilter,
@@ -478,7 +478,7 @@ class PhyloTreeCreationModal extends React.Component {
           showErrorSamples: true,
         },
         () =>
-          logAnalyticsEvent(
+          trackEvent(
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_INVALID_AMOUNT_OF_SAMPLES_SELECTED_FOR_CREATION,
             {
               totalNumberOfSamplesSelected,
@@ -511,7 +511,7 @@ class PhyloTreeCreationModal extends React.Component {
         pipelineRunIds,
       };
       if (phyloTreeId) {
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_SUCCESSFUL,
           {
             treeId: phyloTreeId,
@@ -522,7 +522,7 @@ class PhyloTreeCreationModal extends React.Component {
         showPhyloTreeNotification();
         onClose();
       } else {
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_NG_CREATION_FAILED,
           sharedAnalyticsPayload,
         );
@@ -614,7 +614,7 @@ class PhyloTreeCreationModal extends React.Component {
     this.setState({ showErrorName: true });
     const isTreeNameValid = this.isTreeNameValid();
 
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_TREE_NAME_ENTERED,
       {
         treeNameValid,
@@ -738,7 +738,7 @@ class PhyloTreeCreationModal extends React.Component {
             <Wizard.Action
               action="continue"
               onAfterAction={() =>
-                logAnalyticsEvent(
+                trackEvent(
                   ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_NEW_TREE_BUTTON_CLICKED,
                 )
               }

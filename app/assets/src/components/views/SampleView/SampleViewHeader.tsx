@@ -5,7 +5,7 @@ import { deleteSample, saveVisualization } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
   withAnalytics,
-  logAnalyticsEvent,
+  trackEvent,
 } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
@@ -97,7 +97,7 @@ export default function SampleViewHeader({
   const handleDeleteSample = async () => {
     await deleteSample(sample.id);
     location.href = `/home?project_id=${project.id}`;
-    logAnalyticsEvent("SampleViewHeader_delete-sample-button_clicked", {
+    trackEvent("SampleViewHeader_delete-sample-button_clicked", {
       sampleId: sample.id,
       sampleName: sample.name,
     });
@@ -135,13 +135,14 @@ export default function SampleViewHeader({
                   text="Download All"
                   onClick={() => {
                     openUrl(getWorkflowRunZipLink(currentRun.id));
-                    logAnalyticsEvent(
+                    trackEvent(
                       "SampleViewHeader_consensus-genome-download-all-button_clicked",
                       {
                         sampleId: sample.id,
                       },
                     );
-                  } }/>
+                  }}
+                />
               </>
             )}
             {!succeeded &&
@@ -248,7 +249,7 @@ export default function SampleViewHeader({
                 snapshotShareId,
               }),
             );
-            logAnalyticsEvent("SampleView_header-title_clicked", {
+            trackEvent("SampleView_header-title_clicked", {
               sampleId: sample.id,
             });
           },

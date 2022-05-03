@@ -6,7 +6,7 @@ import React from "react";
 import {
   ANALYTICS_EVENT_NAMES,
   withAnalytics,
-  logAnalyticsEvent,
+  trackEvent,
 } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
@@ -258,7 +258,7 @@ class SamplesHeatmapVis extends React.Component {
 
   handleNodeHover = node => {
     this.setState({ nodeHoverInfo: this.getTooltipData(node) });
-    logAnalyticsEvent("SamplesHeatmapVis_node_hovered", {
+    trackEvent("SamplesHeatmapVis_node_hovered", {
       nodeValue: node.value,
       nodeId: node.id,
     });
@@ -271,7 +271,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({
       columnMetadataLegend: currentPair,
     });
-    logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
+    trackEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
   handleRowGroupEnter = (rowGroup, rect, minTop) => {
@@ -284,7 +284,7 @@ class SamplesHeatmapVis extends React.Component {
         },
       },
     });
-    logAnalyticsEvent("SamplesHeatmapVis_row-group_hovered", {
+    trackEvent("SamplesHeatmapVis_row-group_hovered", {
       genusName: rowGroup.genusName,
       genusId: rowGroup.sortKey,
     });
@@ -299,7 +299,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({
       columnMetadataLegend: legend,
     });
-    logAnalyticsEvent("SamplesHeatmapVis_column-metadata_hovered", {
+    trackEvent("SamplesHeatmapVis_column-metadata_hovered", {
       nodeValue: node.value,
     });
   };
@@ -441,7 +441,7 @@ class SamplesHeatmapVis extends React.Component {
       });
 
       openUrlInNewTab(url, currentEvent);
-      logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
+      trackEvent("SamplesHeatmapVis_cell_clicked", {
         sampleId,
       });
     }
@@ -451,7 +451,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({
       addTaxonTrigger: trigger,
     });
-    logAnalyticsEvent("SamplesHeatmapVis_add-taxon_clicked", {
+    trackEvent("SamplesHeatmapVis_add-taxon_clicked", {
       addTaxonTrigger: trigger,
     });
   };
@@ -460,7 +460,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({
       pinSampleTrigger: trigger,
     });
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIS_PIN_SAMPLES_DROPDOWN_TRIGGER_CLICKED,
       {
         pinSampleTrigger: trigger,
@@ -506,7 +506,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({
       addMetadataTrigger: trigger,
     });
-    logAnalyticsEvent("SamplesHeatmapVis_column-metadata_clicked", {
+    trackEvent("SamplesHeatmapVis_column-metadata_clicked", {
       addMetadataTrigger: trigger,
     });
   };
@@ -527,7 +527,7 @@ class SamplesHeatmapVis extends React.Component {
       () => {
         this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
         onMetadataChange && onMetadataChange(selectedMetadata);
-        logAnalyticsEvent("SamplesHeatmapVis_selected-metadata_changed", {
+        trackEvent("SamplesHeatmapVis_selected-metadata_changed", {
           selectedMetadata: current.length,
         });
       },

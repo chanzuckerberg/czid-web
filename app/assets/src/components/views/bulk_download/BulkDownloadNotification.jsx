@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 
@@ -19,9 +19,7 @@ export default class BulkDownloadNotification extends React.Component {
           <a
             href="bulk_downloads"
             onClick={() =>
-              logAnalyticsEvent(
-                "BulkDownloadNotification_downloads-page-link-clicked",
-              )
+              trackEvent("BulkDownloadNotification_downloads-page-link-clicked")
             }
           >
             Downloads page

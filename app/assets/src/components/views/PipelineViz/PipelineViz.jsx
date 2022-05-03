@@ -4,7 +4,7 @@ import { groupBy } from "lodash/fp";
 import React from "react";
 import { PanZoom } from "react-easy-panzoom";
 
-import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
+import { withAnalytics, trackEvent } from "~/api/analytics";
 import { getGraph } from "~/api/pipelineViz";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -180,7 +180,7 @@ class PipelineViz extends React.Component {
       return;
     }
 
-    logAnalyticsEvent("PipelineViz_step-node_clicked", {
+    trackEvent("PipelineViz_step-node_clicked", {
       stageName: this.stageNames[stageIndex],
       stepName: this.getStepDataAtIndices({
         stageIndex: stageIndex,
@@ -291,7 +291,7 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeHover(stageIndex, nodeId) {
-    logAnalyticsEvent("PipelineViz_step-node_mouseovered", {
+    trackEvent("PipelineViz_step-node_mouseovered", {
       stageName: this.stageNames[stageIndex],
       stepName: this.getStepDataAtIndices({
         stageIndex: stageIndex,

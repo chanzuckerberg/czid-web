@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { getTaxonDescriptions, getTaxonDistributionForBackground } from "~/api";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Histogram, {
   HISTOGRAM_SCALE,
@@ -229,7 +229,7 @@ export default class TaxonDetailsMode extends React.Component {
 
     if (url) {
       window.open(url, "_blank", "noopener", "noreferrer");
-      logAnalyticsEvent("TaxonDetailsMode_external-link_clicked", {
+      trackEvent("TaxonDetailsMode_external-link_clicked", {
         source,
         url,
         taxonId: this.props.taxonId,

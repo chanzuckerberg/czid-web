@@ -14,7 +14,7 @@ import {
   validateSampleIds,
   validateWorkflowRunIds,
 } from "~/api/access_control";
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
@@ -254,10 +254,10 @@ class BulkDownloadModal extends React.Component {
       return;
     }
 
-    logAnalyticsEvent(
-      "BulkDownloadModal_radio-button-for-download-type_selected",
-      { downloadType: newSelectedDownloadTypeName, workflow },
-    );
+    trackEvent("BulkDownloadModal_radio-button-for-download-type_selected", {
+      downloadType: newSelectedDownloadTypeName,
+      workflow,
+    });
     this.setState({
       selectedDownloadTypeName: newSelectedDownloadTypeName,
     });
@@ -266,7 +266,7 @@ class BulkDownloadModal extends React.Component {
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
     const { workflow } = this.props;
     this.setState(prevState => {
-      logAnalyticsEvent(
+      trackEvent(
         "BulkDownloadModal_dropdown-field-for-download-type_selected",
         {
           downloadType,
@@ -324,7 +324,7 @@ class BulkDownloadModal extends React.Component {
         createStatus: "error",
         createError: e.error || DEFAULT_CREATION_ERROR,
       });
-      logAnalyticsEvent(
+      trackEvent(
         ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED,
         {
           workflow,
@@ -335,7 +335,7 @@ class BulkDownloadModal extends React.Component {
       return;
     }
 
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESSFUL,
       {
         workflow,

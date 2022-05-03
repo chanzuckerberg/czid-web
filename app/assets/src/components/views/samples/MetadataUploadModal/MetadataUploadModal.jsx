@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { getSamples } from "~/api";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { showToast } from "~/components/utils/toast";
 import Modal from "~ui/containers/Modal";
@@ -72,7 +72,7 @@ class MetadataUploadModal extends React.Component {
         />
       ));
 
-      logAnalyticsEvent("MetadataUploadModal_modal_error", {
+      trackEvent("MetadataUploadModal_modal_error", {
         projectId: this.props.project.id,
         projectSamples: this.state.projectSamples.length,
         errors: response.errors.length,
@@ -89,7 +89,7 @@ class MetadataUploadModal extends React.Component {
         },
       );
 
-      logAnalyticsEvent("MetadataUploadModal_modal_success", {
+      trackEvent("MetadataUploadModal_modal_success", {
         projectId: this.props.project.id,
         projectSamples: this.state.projectSamples.length,
       });

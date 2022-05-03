@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import SvgSaver from "svgsaver";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
@@ -63,7 +63,7 @@ class PhyloTreeDownloadButton extends React.Component {
       // eslint-disable-next-line no-console
       console.error(`Bad download option: ${option}`);
     }
-    logAnalyticsEvent("PhyloTreeDownloadButton_option_clicked", {
+    trackEvent("PhyloTreeDownloadButton_option_clicked", {
       option,
       treeName: this.props.tree.name,
       treeId: this.props.tree.id,

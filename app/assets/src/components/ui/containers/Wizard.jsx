@@ -1,7 +1,7 @@
 import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import PrimaryButton from "../controls/buttons/PrimaryButton";
 import SecondaryButton from "../controls/buttons/SecondaryButton";
 
@@ -111,7 +111,7 @@ class Wizard extends React.Component {
 
     if (currentPage < children.length - 1) {
       this.setState({ currentPage: currentPage + 1 }, () =>
-        logAnalyticsEvent(ANALYTICS_EVENT_NAMES.WIZARD_PAGE_ADVANCED, {
+        trackEvent(ANALYTICS_EVENT_NAMES.WIZARD_PAGE_ADVANCED, {
           wizard: wizardType,
           previousPage: this.state.currentPage - 1,
           currentPage: this.state.currentPage,

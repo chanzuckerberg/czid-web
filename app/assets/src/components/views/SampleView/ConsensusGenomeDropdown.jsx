@@ -1,5 +1,5 @@
 import React from "react";
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 import PropTypes from "~utils/propTypes";
 
@@ -32,7 +32,7 @@ const ConsensusGenomeDropdown = ({
       initialSelectedValue={initialSelectedValue}
       onChange={workflowRunId => {
         onConsensusGenomeSelection(workflowRunId);
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_DROPDOWN_CONSENSUS_GENOME_SELECTED,
           { workflowRunId },
         );

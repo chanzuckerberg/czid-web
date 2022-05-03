@@ -1,7 +1,7 @@
 import cx from "classnames";
 import React from "react";
 
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
 import { IconInfoSmall } from "~/components/ui/icons";
@@ -61,7 +61,7 @@ const WorkflowSelector = ({
           className={cs.dropdown}
           onChange={value => {
             onWetlabProtocolChange(value);
-            logAnalyticsEvent("WorkflowSelector_wetlab-protocol_selected", {
+            trackEvent("WorkflowSelector_wetlab-protocol_selected", {
               wetlabOption: value,
             });
           }}

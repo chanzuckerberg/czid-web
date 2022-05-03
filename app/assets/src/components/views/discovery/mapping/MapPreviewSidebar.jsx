@@ -10,7 +10,7 @@ import {
 } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import Tabs from "~/components/ui/controls/Tabs";
 import PropTypes from "~/components/utils/propTypes";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
@@ -239,7 +239,7 @@ export default class MapPreviewSidebar extends React.Component {
     this.referenceSelectId = value;
 
     onSelectionUpdate(newSelected);
-    logAnalyticsEvent("MapPreviewSidebar_row_selected", {
+    trackEvent("MapPreviewSidebar_row_selected", {
       selectedSampleIds: newSelected.size,
     });
   };
@@ -248,7 +248,7 @@ export default class MapPreviewSidebar extends React.Component {
     const { onSampleClicked, samples } = this.props;
     const sample = samples.get(rowData.id);
     onSampleClicked && onSampleClicked({ object: sample, currentEvent: event });
-    logAnalyticsEvent("MapPreviewSidebar_sample-row_clicked", {
+    trackEvent("MapPreviewSidebar_sample-row_clicked", {
       sampleId: sample.id,
       sampleName: sample.name,
     });
@@ -258,7 +258,7 @@ export default class MapPreviewSidebar extends React.Component {
     const { onProjectSelected, projects } = this.props;
     const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
-    logAnalyticsEvent("MapPreviewSidebar_project-row_clicked", {
+    trackEvent("MapPreviewSidebar_project-row_clicked", {
       projectId: project.id,
       projectName: project.name,
     });
@@ -283,13 +283,13 @@ export default class MapPreviewSidebar extends React.Component {
     );
     onSelectionUpdate(newSelected);
 
-    logAnalyticsEvent("MapPreviewSidebar_select-all-rows_clicked");
+    trackEvent("MapPreviewSidebar_select-all-rows_clicked");
   };
 
   handleTabChange = tab => {
     const { onTabChange } = this.props;
     onTabChange && onTabChange(tab);
-    logAnalyticsEvent("MapPreviewSidebar_tab_clicked", { tab });
+    trackEvent("MapPreviewSidebar_tab_clicked", { tab });
   };
 
   computeTabs = () => {

@@ -1,7 +1,7 @@
 import { uniq, find, chunk, random, get } from "lodash/fp";
 import React from "react";
 
-import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
+import { withAnalytics, trackEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
@@ -121,7 +121,7 @@ class MetadataCSVLocationsMenu extends React.Component {
           metadata: newMetadata,
         });
         this.setState({ applyToAllSample: sampleName });
-        logAnalyticsEvent("MetadataCSVLocationsMenu_input_changed", {
+        trackEvent("MetadataCSVLocationsMenu_input_changed", {
           key,
           sampleName,
         });

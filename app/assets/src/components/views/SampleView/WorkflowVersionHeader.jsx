@@ -2,7 +2,7 @@ import cx from "classnames";
 import { map, get } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { openUrlInNewTab } from "~utils/links";
@@ -70,7 +70,7 @@ export default function WorkflowVersionHeader({
         versionKey={versionKey}
         lastProcessedAt={get(timeKey, currentRun)}
         onPipelineVersionSelect={version => {
-          logAnalyticsEvent("SampleView_pipeline-select_clicked", {
+          trackEvent("SampleView_pipeline-select_clicked", {
             sampleId,
             pipelineVersion: version,
             workflowType,

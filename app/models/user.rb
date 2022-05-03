@@ -17,7 +17,7 @@ class User < ApplicationRecord
   # NOTE: counter_cache is not supported for has_and_belongs_to_many.
   has_and_belongs_to_many :projects
   # All one-to-many assocs are counter cached for per-user analytics.
-  # See traits_for_segment.
+  # See traits_for_analytics.
   has_many :samples, dependent: :destroy
   has_many :favorite_projects, dependent: :destroy
   has_many :favorites, through: :favorite_projects, source: :project, dependent: :destroy
@@ -205,12 +205,12 @@ class User < ApplicationRecord
     save(validate: false)
   end
 
-  # This returns a hash of interesting optional data for Segment user tracking.
-  # Make sure you use any reserved names as intended by Segment!
+  # This returns a hash of interesting optional data for Analytics user tracking.
+  # Make sure you use any reserved names as intended by Segment or Appcues!
   # See https://segment.com/docs/spec/identify/#traits .
-  def traits_for_segment(include_pii: false)
+  def traits_for_analytics(include_pii: false)
     # Caching because this method does a lot of queries but does not need per-second accuracy.
-    Rails.cache.fetch("traits_for_segment-user-#{id}-#{include_pii}", expires_in: 1.minute) do
+    Rails.cache.fetch("traits_for_analytics-user-#{id}-#{include_pii}", expires_in: 1.minute) do
       traits = {
         # DB fields
         created_at: created_at,
@@ -257,6 +257,7 @@ class User < ApplicationRecord
         }
         traits.merge!(pii_traits)
       end
+      traits
     end
   end
 end

@@ -16,7 +16,7 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
 import {
@@ -104,7 +104,7 @@ const LocalUploadProgressModal = ({
           sample => sampleUploadStatuses[sample.name] !== "error",
           samples,
         );
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
           {
             erroredSamples: failedSamples.length,
@@ -116,7 +116,7 @@ const LocalUploadProgressModal = ({
           },
         );
       } else {
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
           {
             createdSamples: samples.length,
@@ -292,7 +292,7 @@ const LocalUploadProgressModal = ({
     );
 
     clearInterval(heartbeatInterval);
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_COMPLETED,
       {
         sampleIds: map("id", samples),
@@ -551,7 +551,7 @@ const LocalUploadProgressModal = ({
               className={cs.helpLink}
               href="mailto:help@czid.org"
               onClick={() =>
-                logAnalyticsEvent(
+                trackEvent(
                   ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
                 )
               }
@@ -612,7 +612,7 @@ const LocalUploadProgressModal = ({
 
   const renderViewProjectButton = () => {
     const buttonCallback = () => {
-      logAnalyticsEvent(
+      trackEvent(
         ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_GO_TO_PROJECT_BUTTON_CLICKED,
         {
           projectId: project.id,
@@ -675,7 +675,7 @@ const LocalUploadProgressModal = ({
         <UploadConfirmationModal
           numberOfFailedSamples={size(getLocalSamplesFailed())}
           onCancel={() => {
-            logAnalyticsEvent(
+            trackEvent(
               ANALYTICS_EVENT_NAMES.UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED,
               {
                 numberOfTotalSamples: size(samples),
@@ -685,7 +685,7 @@ const LocalUploadProgressModal = ({
             setConfirmationModalOpen(false);
           }}
           onConfirm={() => {
-            logAnalyticsEvent(
+            trackEvent(
               ANALYTICS_EVENT_NAMES.UPLOAD_CONFIRMATION_MODAL_LEAVE_UPLOAD_BUTTON_CLICKED,
               {
                 numberOfTotalSamples: size(samples),

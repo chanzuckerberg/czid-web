@@ -3,7 +3,7 @@ import React from "react";
 import { StickyContainer, Sticky } from "react-sticky";
 
 import { getAMRCounts } from "~/api/amr";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -226,7 +226,7 @@ export default class AMRHeatmapView extends React.Component {
     this.setState({
       selectedOptions: newOptions,
     });
-    logAnalyticsEvent("AMRHeatmapView_options_changed", {
+    trackEvent("AMRHeatmapView_options_changed", {
       control: Object.keys(options)[0],
       option: Object.values(options)[0],
     });
@@ -250,7 +250,7 @@ export default class AMRHeatmapView extends React.Component {
         sidebarMode: SIDEBAR_SAMPLE_MODE,
         sidebarVisible: true,
       });
-      logAnalyticsEvent("AMRHeatmapView_sample-details-sidebar_opened", {
+      trackEvent("AMRHeatmapView_sample-details-sidebar_opened", {
         sampleId: sampleId,
         sidebarMode: "sampleDetails",
       });
@@ -272,7 +272,7 @@ export default class AMRHeatmapView extends React.Component {
         sidebarMode: SIDEBAR_GENE_MODE,
         sidebarVisible: true,
       });
-      logAnalyticsEvent("AMRHeatmapView_gene-details-sidebar_opened", {
+      trackEvent("AMRHeatmapView_gene-details-sidebar_opened", {
         selectedGene: geneName,
         sidebarMode: "geneDetails",
       });
@@ -359,9 +359,7 @@ export default class AMRHeatmapView extends React.Component {
         target="_blank"
         rel="noopener noreferrer"
         key={"Download_CSV_link"}
-        onClick={() =>
-          logAnalyticsEvent("AMRHeatmapView_download-csv-table_clicked")
-        }
+        onClick={() => trackEvent("AMRHeatmapView_download-csv-table_clicked")}
       >
         Download CSV
       </a>
@@ -390,9 +388,7 @@ export default class AMRHeatmapView extends React.Component {
               className={cs.controlElement}
               options={this.getDownloadOptions()}
               onClick={() =>
-                logAnalyticsEvent(
-                  "AMRHeatmapView_download-button-dropdown_clicked",
-                )
+                trackEvent("AMRHeatmapView_download-button-dropdown_clicked")
               }
               disabled={loading}
             />

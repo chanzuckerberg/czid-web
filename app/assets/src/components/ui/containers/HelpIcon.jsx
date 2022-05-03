@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { IconInfoSmall } from "~ui/icons";
 import cs from "./help_icon.scss";
@@ -10,7 +10,7 @@ class HelpIcon extends React.Component {
   handleTriggerEnter = () => {
     const { analyticsEventName, analyticsEventData } = this.props;
     if (analyticsEventName) {
-      logAnalyticsEvent(analyticsEventName, analyticsEventData);
+      trackEvent(analyticsEventName, analyticsEventData);
     }
   };
 

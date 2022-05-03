@@ -4,7 +4,7 @@ import React from "react";
 
 import {
   ANALYTICS_EVENT_NAMES,
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
@@ -237,7 +237,7 @@ class ReviewStep extends React.Component {
               className={cs.link}
               onClick={() => {
                 this.onLinkClick("uploadSamples");
-                logAnalyticsEvent("ReviewStep_edit-project-link_clicked", {
+                trackEvent("ReviewStep_edit-project-link_clicked", {
                   projectId: project.id,
                   projectName: project.name,
                   uploadType,
@@ -325,7 +325,7 @@ class ReviewStep extends React.Component {
               className={cs.link}
               onClick={() => {
                 this.onLinkClick("uploadSamples");
-                logAnalyticsEvent(
+                trackEvent(
                   ANALYTICS_EVENT_NAMES.REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED,
                   {
                     projectId: project.id,
@@ -417,7 +417,7 @@ class ReviewStep extends React.Component {
               className={cs.link}
               onClick={() => {
                 this.onLinkClick("uploadSamples");
-                logAnalyticsEvent("ReviewStep_edit-samples-link_clicked", {
+                trackEvent("ReviewStep_edit-samples-link_clicked", {
                   projectId: project.id,
                   projectName: project.name,
                   uploadType,
@@ -431,7 +431,7 @@ class ReviewStep extends React.Component {
               className={cs.link}
               onClick={() => {
                 this.onLinkClick("uploadMetadata");
-                logAnalyticsEvent("ReviewStep_edit-metadata-link_clicked", {
+                trackEvent("ReviewStep_edit-metadata-link_clicked", {
                   projectId: project.id,
                   projectName: project.name,
                   uploadType,
@@ -505,7 +505,7 @@ class ReviewStep extends React.Component {
                   consentChecked: !consentChecked,
                 },
                 () =>
-                  logAnalyticsEvent("ReviewStep_consent-checkbox_checked", {
+                  trackEvent("ReviewStep_consent-checkbox_checked", {
                     consentChecked: consentChecked,
                   }),
               )

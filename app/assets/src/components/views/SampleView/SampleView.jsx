@@ -42,7 +42,7 @@ import {
 } from "~/api";
 import { getAmrData } from "~/api/amr";
 import {
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
@@ -565,7 +565,7 @@ class SampleView extends React.Component {
       })
       .catch(err => console.error(err));
 
-    logAnalyticsEvent("PipelineSampleReport_sample_viewed", {
+    trackEvent("PipelineSampleReport_sample_viewed", {
       sampleId,
     });
 
@@ -847,7 +847,7 @@ class SampleView extends React.Component {
   handleTabChange = tab => {
     this.setState({ currentTab: tab });
     const name = tab.replace(/\W+/g, "-").toLowerCase();
-    logAnalyticsEvent(`SampleView_tab-${name}_clicked`, {
+    trackEvent(`SampleView_tab-${name}_clicked`, {
       tab: tab,
     });
   };
@@ -883,14 +883,11 @@ class SampleView extends React.Component {
     });
 
     if (key === "background") {
-      logAnalyticsEvent(
-        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED,
-        {
-          sampleId: sample.id,
-          projectId: project.id,
-          backgroundId: value,
-        },
-      );
+      trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED, {
+        sampleId: sample.id,
+        projectId: project.id,
+        backgroundId: value,
+      });
     }
 
     this.refreshDataFromOptionsChange({ key, newSelectedOptions });
@@ -1306,7 +1303,7 @@ class SampleView extends React.Component {
         },
         () => {
           console.error(error);
-          logAnalyticsEvent(
+          trackEvent(
             ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_KICKOFF_FAILED,
             {
               error,
@@ -1345,7 +1342,7 @@ class SampleView extends React.Component {
         taxonName,
       });
 
-      logAnalyticsEvent(
+      trackEvent(
         ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_ERROR_MODAL_RETRY_BUTTON_CLICKED,
         {
           accessionId,
@@ -1357,7 +1354,7 @@ class SampleView extends React.Component {
       );
     } catch (error) {
       console.error(error);
-      logAnalyticsEvent(
+      trackEvent(
         ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED,
         {
           error,
@@ -1556,7 +1553,7 @@ class SampleView extends React.Component {
         this.updateHistoryAndPersistOptions();
       },
     );
-    logAnalyticsEvent("PipelineSampleReport_clear-filters-link_clicked");
+    trackEvent("PipelineSampleReport_clear-filters-link_clicked");
   };
 
   countFilters = () => {
@@ -1725,7 +1722,7 @@ class SampleView extends React.Component {
         status={status}
         type={type}
         onClick={() =>
-          logAnalyticsEvent(
+          trackEvent(
             ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED,
             { status },
           )
@@ -1735,7 +1732,7 @@ class SampleView extends React.Component {
   };
 
   handleViewClick = ({ view }) => {
-    logAnalyticsEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
+    trackEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
     this.setState({ view }, () => {
       this.updateHistoryAndPersistOptions();
     });
@@ -1995,7 +1992,7 @@ class SampleView extends React.Component {
     // Ensure Share recipient sees report with the same options:
     this.updateHistoryAndPersistOptions();
     copyShortUrlToClipboard();
-    logAnalyticsEvent("SampleView_share-button_clicked", {
+    trackEvent("SampleView_share-button_clicked", {
       sampleId: sample && sample.id,
     });
   };

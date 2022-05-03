@@ -12,7 +12,7 @@ import React from "react";
 
 import { Link as RouterLink } from "react-router-dom";
 import {
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
@@ -125,7 +125,7 @@ class SamplesView extends React.Component {
 
     onUpdateSelectedIds(newSelected);
 
-    logAnalyticsEvent("SamplesView_row_selected", {
+    trackEvent("SamplesView_row_selected", {
       rowIsChecked: checked,
       rowType: find({ value: workflow }, values(WORKFLOWS)).entity,
       selectedId: value,
@@ -219,7 +219,7 @@ class SamplesView extends React.Component {
                 sampleIds: Array.from(selectedIds),
               });
               const log = () =>
-                logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
+                trackEvent("SamplesView_heatmap-option_clicked", {
                   option,
                   selectedIds: selectedIds.size,
                 });
@@ -430,9 +430,7 @@ class SamplesView extends React.Component {
             circular
             className={cs.counter}
             // Log this no-op so we know if users want a way to view their selected samples
-            onClick={() =>
-              logAnalyticsEvent(`SamplesView_sample-counter_clicked`)
-            }
+            onClick={() => trackEvent(`SamplesView_sample-counter_clicked`)}
             text={`${selectedIds.size}`}
           />
           <span className={cs.label}>Selected</span>
@@ -510,7 +508,7 @@ class SamplesView extends React.Component {
         currentDisplay={currentDisplay}
         onDisplaySwitch={display => {
           onDisplaySwitch(display);
-          logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
+          trackEvent(`SamplesView_${display}-switch_clicked`);
         }}
         includePLQC={
           !!projectId && workflow === WORKFLOWS.SHORT_READ_MNGS.value
@@ -646,7 +644,7 @@ class SamplesView extends React.Component {
     const object = objects.get(rowData.id);
     onObjectSelected && onObjectSelected({ object, currentEvent: event });
 
-    logAnalyticsEvent("SamplesView_row_clicked", {
+    trackEvent("SamplesView_row_clicked", {
       sampleId: object.id,
       sampleName:
         workflowEntity === WORKFLOW_ENTITIES.SAMPLE

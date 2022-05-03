@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import {
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
@@ -35,7 +35,7 @@ const AnnotationMenu = ({
   const onItemSelected = annotationType => {
     onAnnotationSelected(annotationType);
     handleClose();
-    logAnalyticsEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_MENU_MENU_ITEM_CLICKED, {
+    trackEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_MENU_MENU_ITEM_CLICKED, {
       ...analyticsContext,
       annotationType: annotationType,
     });

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { getBackgrounds } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import {
   createSnapshot,
   getSnapshotInfo,
@@ -121,14 +121,14 @@ class ViewOnlyLinkForm extends React.Component {
     try {
       await createSnapshot(project.id);
       await this.fetchSnapshotInfo();
-      logAnalyticsEvent("ViewOnlyLinkForm_on-toggle_clicked", {
+      trackEvent("ViewOnlyLinkForm_on-toggle_clicked", {
         snapshotShareId: snapshotShareId,
         projectId: project.id,
       });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      logAnalyticsEvent("ViewOnlyLinkForm_snapshot_creation-failed", {
+      trackEvent("ViewOnlyLinkForm_snapshot_creation-failed", {
         projectId: project.id,
       });
     }
@@ -140,13 +140,13 @@ class ViewOnlyLinkForm extends React.Component {
     try {
       await deleteSnapshot(snapshotShareId);
       this.clearSnapshotInfo();
-      logAnalyticsEvent("ViewOnlyLinkForm_off-toggle_clicked", {
+      trackEvent("ViewOnlyLinkForm_off-toggle_clicked", {
         projectId: project.id,
       });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      logAnalyticsEvent("ViewOnlyLinkForm_snapshot_deletion-failed", {
+      trackEvent("ViewOnlyLinkForm_snapshot_deletion-failed", {
         projectId: project.id,
       });
     }
@@ -197,14 +197,14 @@ class ViewOnlyLinkForm extends React.Component {
     this.setState({ backgroundId });
     try {
       await updateSnapshotBackground(snapshotShareId, backgroundId);
-      logAnalyticsEvent("ViewOnlyLinkForm_background-select_changed", {
+      trackEvent("ViewOnlyLinkForm_background-select_changed", {
         projectId: project.id,
         backgroundId,
       });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      logAnalyticsEvent("ViewOnlyLinkForm_background-select_failed", {
+      trackEvent("ViewOnlyLinkForm_background-select_failed", {
         projectId: project.id,
         backgroundId,
       });
@@ -361,13 +361,10 @@ class ViewOnlyLinkForm extends React.Component {
                       rounded={false}
                       onClick={() => {
                         copyUrlToClipboard(shareableLink);
-                        logAnalyticsEvent(
-                          "ViewOnlyLinkForm_copy-button_clicked",
-                          {
-                            snapshotShareId: snapshotShareId,
-                            projectId: project.id,
-                          },
-                        );
+                        trackEvent("ViewOnlyLinkForm_copy-button_clicked", {
+                          snapshotShareId: snapshotShareId,
+                          projectId: project.id,
+                        });
                       }}
                     />
                   }

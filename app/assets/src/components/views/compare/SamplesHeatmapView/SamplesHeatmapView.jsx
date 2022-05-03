@@ -27,7 +27,7 @@ import { getSampleTaxons, getTaxaDetails, saveVisualization } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import {
   ANALYTICS_EVENT_NAMES,
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
@@ -554,7 +554,7 @@ class SamplesHeatmapView extends React.Component {
     const fetchDataEnd = new Date();
     const loadTimeInMilliseconds = fetchDataEnd - fetchDataStart;
 
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED,
       {
         ...fetchHeatmapDataParams,
@@ -676,14 +676,11 @@ class SamplesHeatmapView extends React.Component {
       logSingleError(err);
     }
 
-    logAnalyticsEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR,
-      {
-        numSamples: size(sampleIds),
-        numTaxons: size(allTaxonIds),
-        sampleIds: sampleIds,
-      },
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR, {
+      numSamples: size(sampleIds),
+      numTaxons: size(allTaxonIds),
+      sampleIds: sampleIds,
+    });
   };
 
   extractDataFromService(rawData) {
@@ -1398,7 +1395,7 @@ class SamplesHeatmapView extends React.Component {
         }
       },
     );
-    logAnalyticsEvent("SamplesHeatmapView_taxon_added", {
+    trackEvent("SamplesHeatmapView_taxon_added", {
       selected: currentAddedTaxa,
     });
     this.updateHistoryState();
@@ -1409,7 +1406,7 @@ class SamplesHeatmapView extends React.Component {
     let taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
     addedTaxonIds.delete(taxonId);
-    logAnalyticsEvent("SamplesHeatmapView_taxon_removed", {
+    trackEvent("SamplesHeatmapView_taxon_removed", {
       taxonId,
       taxonName,
     });
@@ -1420,7 +1417,7 @@ class SamplesHeatmapView extends React.Component {
     this.setState({
       selectedMetadata: Array.from(metadataFields),
     });
-    logAnalyticsEvent("SamplesHeatmapView_metadata_changed", {
+    trackEvent("SamplesHeatmapView_metadata_changed", {
       selected: metadataFields,
     });
     this.updateHistoryState();
@@ -1430,7 +1427,7 @@ class SamplesHeatmapView extends React.Component {
     this.metadataSortField = field;
     this.metadataSortAsc = dir;
     this.updateHistoryState();
-    logAnalyticsEvent("Heatmap_column-metadata-label_clicked", {
+    trackEvent("Heatmap_column-metadata-label_clicked", {
       columnMetadataSortField: field,
       sortDirection: dir ? "asc" : "desc",
     });
@@ -1441,7 +1438,7 @@ class SamplesHeatmapView extends React.Component {
       selectedSamples.map(sample => (sample.id ? sample.id : sample)),
     );
     this.setState({ pendingPinnedSampleIds: selectedSampleIds });
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED,
       selectedSamples,
     );
@@ -1452,7 +1449,7 @@ class SamplesHeatmapView extends React.Component {
     this.setState({
       pinnedSampleIds: pendingPinnedSampleIds,
     });
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED,
       pendingPinnedSampleIds,
     );
@@ -1463,7 +1460,7 @@ class SamplesHeatmapView extends React.Component {
     this.setState({
       pendingPinnedSampleIds: pinnedSampleIds,
     });
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED,
       pinnedSampleIds,
     );
@@ -1476,7 +1473,7 @@ class SamplesHeatmapView extends React.Component {
       pinnedSampleIds,
       pendingPinnedSampleIds: pinnedSampleIds,
     });
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED,
       sampleId,
     );
@@ -1498,7 +1495,7 @@ class SamplesHeatmapView extends React.Component {
       this.setState({
         sidebarVisible: false,
       });
-      logAnalyticsEvent("SamplesHeatmapView_sample-details-sidebar_closed", {
+      trackEvent("SamplesHeatmapView_sample-details-sidebar_closed", {
         sampleId: sampleId,
         sidebarMode: "sampleDetails",
       });
@@ -1508,7 +1505,7 @@ class SamplesHeatmapView extends React.Component {
         sidebarMode: "sampleDetails",
         sidebarVisible: true,
       });
-      logAnalyticsEvent("SamplesHeatmapView_sample-details-sidebar_opened", {
+      trackEvent("SamplesHeatmapView_sample-details-sidebar_opened", {
         sampleId: sampleId,
         sidebarMode: "sampleDetails",
       });
@@ -1533,7 +1530,7 @@ class SamplesHeatmapView extends React.Component {
       this.setState({
         sidebarVisible: false,
       });
-      logAnalyticsEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
+      trackEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
         parentTaxonId: taxonDetails.parentId,
         taxonId: taxonDetails.id,
         taxonName,
@@ -1549,7 +1546,7 @@ class SamplesHeatmapView extends React.Component {
         },
         sidebarVisible: true,
       });
-      logAnalyticsEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
+      trackEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
         parentTaxonId: taxonDetails.parentId,
         taxonId: taxonDetails.id,
         taxonName,

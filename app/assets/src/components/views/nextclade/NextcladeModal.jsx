@@ -5,7 +5,7 @@ import React from "react";
 
 import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
 import { validateWorkflowRunIds } from "~/api/access_control";
-import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
@@ -172,7 +172,7 @@ export default class NextcladeModal extends React.Component {
   handleConfirmationModalClose = () => {
     const { projectIds, validWorkflowRunIds, selectedTreeType } = this.state;
 
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED,
       {
         workflowRunIds: Array.from(validWorkflowRunIds),
@@ -190,7 +190,7 @@ export default class NextcladeModal extends React.Component {
 
     try {
       this.setState({ loadingResults: true }, () => {
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED,
           {
             workflowRunIds: Array.from(validWorkflowRunIds),
@@ -213,15 +213,12 @@ export default class NextcladeModal extends React.Component {
         },
         () => {
           console.error(error);
-          logAnalyticsEvent(
-            ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_UPLOAD_FAILED,
-            {
-              error,
-              workflowRunIds: Array.from(validWorkflowRunIds),
-              selectedTreeType,
-              projectIds,
-            },
-          );
+          trackEvent(ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_UPLOAD_FAILED, {
+            error,
+            workflowRunIds: Array.from(validWorkflowRunIds),
+            selectedTreeType,
+            projectIds,
+          });
         },
       );
     }
@@ -235,7 +232,7 @@ export default class NextcladeModal extends React.Component {
       await this.openExportLink();
       this.setState({ errorModalOpen: false }, () => {
         onClose();
-        logAnalyticsEvent(
+        trackEvent(
           ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED,
           {
             workflowRunIds: Array.from(validWorkflowRunIds),
@@ -246,15 +243,12 @@ export default class NextcladeModal extends React.Component {
       });
     } catch (error) {
       console.error(error);
-      logAnalyticsEvent(
-        ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED,
-        {
-          error,
-          workflowRunIds: Array.from(validWorkflowRunIds),
-          selectedTreeType,
-          projectIds,
-        },
-      );
+      trackEvent(ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED, {
+        error,
+        workflowRunIds: Array.from(validWorkflowRunIds),
+        selectedTreeType,
+        projectIds,
+      });
     }
   };
 

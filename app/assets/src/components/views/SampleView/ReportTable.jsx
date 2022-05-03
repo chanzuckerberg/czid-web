@@ -4,7 +4,7 @@ import React from "react";
 import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 
 import {
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
@@ -896,13 +896,10 @@ class ReportTable extends React.Component {
   };
 
   handleColumnSort = ({ sortBy, sortDirection }) => {
-    logAnalyticsEvent(
-      ANALYTICS_EVENT_NAMES.REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED,
-      {
-        sortBy,
-        sortDirection,
-      },
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED, {
+      sortBy,
+      sortDirection,
+    });
   };
 
   toggleExpandGenus = ({ taxId }) => {

@@ -29,7 +29,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router";
 
 import { getSearchSuggestions } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent, trackPageTransition } from "~/api/analytics";
 import { get } from "~/api/core";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
@@ -365,9 +365,7 @@ class DiscoveryView extends React.Component {
 
     // Track changes to the page that did not cause a page load but the URL was updated
     // Used specifically to notify Appcues
-    if (window.analytics) {
-      window.analytics.page();
-    }
+    trackPageTransition();
   };
 
   isFirstTimeUser = () => {
@@ -730,7 +728,7 @@ class DiscoveryView extends React.Component {
     this.setState({ currentTab }, () => {
       this.updateBrowsingHistory("replace");
       const name = currentTab.replace(/\W+/g, "-").toLowerCase();
-      logAnalyticsEvent(`DiscoveryView_tab-${name}_clicked`, {
+      trackEvent(`DiscoveryView_tab-${name}_clicked`, {
         currentTab: currentTab,
       });
     });
@@ -745,7 +743,7 @@ class DiscoveryView extends React.Component {
     this.setState({ filters: selectedFilters }, () => {
       this.updateBrowsingHistory("replace");
       this.resetDataFromFilterChange();
-      logAnalyticsEvent(`DiscoveryView_filters_changed`, {
+      trackEvent(`DiscoveryView_filters_changed`, {
         filters: this.getFilterCount(),
       });
     });
@@ -758,7 +756,7 @@ class DiscoveryView extends React.Component {
     sampleActiveColumnsByWorkflow[workflow] = activeColumns;
     this.setState({ sampleActiveColumnsByWorkflow }, () => {
       this.updateBrowsingHistory("replace");
-      logAnalyticsEvent(`DiscoveryView_columns_changed`, {
+      trackEvent(`DiscoveryView_columns_changed`, {
         newColumns: sampleActiveColumnsByWorkflow[workflow],
         previousColumns: previousColumns,
       });
@@ -836,7 +834,7 @@ class DiscoveryView extends React.Component {
         },
       );
     }
-    logAnalyticsEvent("DiscoveryView_search_selected", {
+    trackEvent("DiscoveryView_search_selected", {
       key,
       value,
       text,
@@ -852,7 +850,7 @@ class DiscoveryView extends React.Component {
       this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
-        logAnalyticsEvent("DiscoveryView_string-search_entered", {
+        trackEvent("DiscoveryView_string-search_entered", {
           search: parsedSearch,
         });
       });
@@ -862,7 +860,7 @@ class DiscoveryView extends React.Component {
   handleFilterToggle = () => {
     this.setState({ showFilters: !this.state.showFilters }, () => {
       this.updateBrowsingHistory("replace");
-      logAnalyticsEvent("DiscoveryView_show-filters_toggled", {
+      trackEvent("DiscoveryView_show-filters_toggled", {
         showFilters: this.state.showFilters,
       });
     });
@@ -871,7 +869,7 @@ class DiscoveryView extends React.Component {
   handleStatsToggle = () => {
     this.setState({ showStats: !this.state.showStats }, () => {
       this.updateBrowsingHistory("replace");
-      logAnalyticsEvent("DiscoveryView_show-stats_toggled", {
+      trackEvent("DiscoveryView_show-stats_toggled", {
         showFilters: this.state.showStats,
       });
     });
@@ -1566,7 +1564,7 @@ class DiscoveryView extends React.Component {
         this.samplesView && this.samplesView.reset();
       },
     );
-    logAnalyticsEvent(`DiscoveryView_${workflow}-tab_clicked`);
+    trackEvent(`DiscoveryView_${workflow}-tab_clicked`);
   };
 
   computeWorkflowTabs = () => {

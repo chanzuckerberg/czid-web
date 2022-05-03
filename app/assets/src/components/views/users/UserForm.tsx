@@ -1,6 +1,6 @@
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import Archetypes from "~/interface/archetypes";
 import Segments from "~/interface/segments";
 import Checkbox from "~ui/controls/Checkbox";
@@ -54,7 +54,7 @@ const UserForm = ({
         <span>{formattedError}</span>
       );
       const form = selectedUser ? "update" : "create";
-      logAnalyticsEvent(`CreateUser_${form}-errors_displayed`, {
+      trackEvent(`CreateUser_${form}-errors_displayed`, {
         form,
         serverErrors,
         formattedError,
@@ -259,7 +259,7 @@ interface UserFormProps {
   submitFunc: $TSFixMeFunction,
   submitting: boolean,
   success: boolean,
-  successMessage: string,
+  successMessage: string
 }
 
 export default UserForm;

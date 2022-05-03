@@ -2,7 +2,7 @@ import cx from "classnames";
 import { some } from "lodash/fp";
 import React from "react";
 import { SortDirection } from "react-virtualized";
-import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
+import { withAnalytics, trackEvent } from "~/api/analytics";
 
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
@@ -150,14 +150,14 @@ class BulkDownloadList extends React.Component {
       ...bulkDownload,
       // Add callback to be used in renderDownload table renderer.
       onStatusClick: () => {
-        logAnalyticsEvent("BulkDownloadList_details-link_clicked", {
+        trackEvent("BulkDownloadList_details-link_clicked", {
           bulkDownloadId: bulkDownload.id,
         });
         this.handleStatusClick(bulkDownload);
       },
       // Add callbacks to be used in renderStatus table renderer.
       onDownloadFileClick: () => {
-        logAnalyticsEvent("BulkDownloadList_direct-download-link_clicked", {
+        trackEvent("BulkDownloadList_direct-download-link_clicked", {
           bulkDownloadId: bulkDownload.id,
         });
         this.handleDownloadFileClick(bulkDownload);

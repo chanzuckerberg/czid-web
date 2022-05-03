@@ -1,4 +1,8 @@
 import eventNames from "~/api/events";
+import {
+  trackAppcuesPageTransition,
+  trackEventForAppcues,
+} from "~/components/utils/appcues";
 import { getGlobalAnalyticsContext } from "~/redux/modules/discovery/selectors";
 import store from "~/redux/store";
 
@@ -7,13 +11,13 @@ export const ANALYTICS_EVENT_NAMES = eventNames;
 
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
-export const logAnalyticsEvent = async (eventName, eventData = {}) => {
+const logAnalyticsEvent = async (eventName, eventData = {}) => {
   if (window.analytics) {
     // Include high value user groups in event properties to avoid JOINs downstream.
     if (window.analytics.user) {
       const traits = window.analytics.user().traits();
       eventData = {
-        // see traits_for_segment
+        // see User.traits_for_analytics
         admin: traits.admin,
         biohub_user: traits.biohub_user,
         czi_user: traits.czi_user,
@@ -59,7 +63,17 @@ export const withAnalytics = (handleEvent, eventName, eventData = {}) => {
 
   return (...args) => {
     const ret = handleEvent(...args);
-    logAnalyticsEvent(eventName, eventData);
+    trackEvent(eventName, eventData);
     return ret;
   };
+};
+
+export const trackPageTransition = () => {
+  window.analytics && window.analytics.page();
+  trackAppcuesPageTransition();
+};
+
+export const trackEvent = (eventName, eventData = {}) => {
+  logAnalyticsEvent(eventName, eventData);
+  trackEventForAppcues(eventName, eventData);
 };

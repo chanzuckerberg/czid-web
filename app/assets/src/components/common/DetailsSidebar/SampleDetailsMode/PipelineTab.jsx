@@ -3,7 +3,7 @@ import { get, set } from "lodash/fp";
 import React from "react";
 
 import { getSamplePipelineResults } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -69,7 +69,7 @@ class PipelineTab extends React.Component {
     this.setState({
       sectionOpen: set(section, newValue, sectionOpen),
     });
-    logAnalyticsEvent("PipelineTab_section_toggled", {
+    trackEvent("PipelineTab_section_toggled", {
       section: section,
       sectionOpen: newValue,
       sampleId: this.props.sampleId,
@@ -96,9 +96,7 @@ class PipelineTab extends React.Component {
           <div
             className={cs.metadataValue}
             onClick={() =>
-              logAnalyticsEvent(
-                "PipelineTab_pipeline-visualization-link_clicked",
-              )
+              trackEvent("PipelineTab_pipeline-visualization-link_clicked")
             }
           >
             {text}
@@ -354,7 +352,7 @@ class PipelineTab extends React.Component {
                       target={option.newPage ? "_blank" : "_self"}
                       rel="noopener noreferrer"
                       onClick={() =>
-                        logAnalyticsEvent("PipelineTab_download-link_clicked", {
+                        trackEvent("PipelineTab_download-link_clicked", {
                           newPage: option.newPage,
                           label: option.label,
                           href: option.path,

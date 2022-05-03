@@ -3,7 +3,7 @@ import { map, take, pick, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
 import { bulkUploadRemote, bulkUploadBasespace } from "~/api/upload";
@@ -99,7 +99,7 @@ const RemoteUploadProgressModal = ({
       setUploadComplete(true);
       setFailedSampleNames(map("name", samples));
 
-      logAnalyticsEvent(
+      trackEvent(
         ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
         {
           erroredSamples: samplesWithFlags.length,
@@ -116,7 +116,7 @@ const RemoteUploadProgressModal = ({
     onUploadComplete();
 
     if (response.errors.length > 0) {
-      logAnalyticsEvent(
+      trackEvent(
         ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
         {
           erroredSamples: response.errored_sample_names.length,
@@ -125,7 +125,7 @@ const RemoteUploadProgressModal = ({
         },
       );
     } else {
-      logAnalyticsEvent(
+      trackEvent(
         ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
         {
           createdSamples: response.sample_ids.length,
@@ -155,7 +155,7 @@ const RemoteUploadProgressModal = ({
               className={cs.helpLink}
               href="mailto:help@czid.org"
               onClick={() =>
-                logAnalyticsEvent(
+                trackEvent(
                   ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
                 )
               }

@@ -31,7 +31,7 @@ class MetricUtil
       if user
         SEGMENT_ANALYTICS.identify(
           user_id: user_id,
-          traits: user.traits_for_segment,
+          traits: user.traits_for_analytics,
           context: request ? context_for_segment(request) : {}
         )
       end

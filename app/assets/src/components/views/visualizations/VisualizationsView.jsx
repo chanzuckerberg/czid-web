@@ -2,7 +2,7 @@ import { merge, pick } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { humanize } from "~/helpers/strings";
@@ -141,7 +141,7 @@ class VisualizationsView extends React.Component {
   handleRowClick = ({ rowData }) => {
     const url = `/visualizations/${rowData.visualization.visualization_type}/${rowData.id}`;
     openUrl(url, event);
-    logAnalyticsEvent("VisualizationsView_row_clicked", {
+    trackEvent("VisualizationsView_row_clicked", {
       visualizationType: rowData.visualization.visualization_type,
       visualizationId: rowData.id,
       url,

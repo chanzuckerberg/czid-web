@@ -19,7 +19,7 @@ import _fp, {
 } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -321,7 +321,7 @@ class MetadataManualInput extends React.Component {
 
   handleColumnChange = selectedFieldNames => {
     this.setState({ selectedFieldNames });
-    logAnalyticsEvent("MetadataManualInput_column-selector_changed", {
+    trackEvent("MetadataManualInput_column-selector_changed", {
       selectedFieldNames: selectedFieldNames.length,
     });
   };
@@ -383,7 +383,7 @@ class MetadataManualInput extends React.Component {
         onClick={() => {
           const newValue = this.getMetadataValue(sample, column);
           this.applyToAll(column, newValue);
-          logAnalyticsEvent("MetadataManualInput_apply-all_clicked", {
+          trackEvent("MetadataManualInput_apply-all_clicked", {
             sampleName: sample.name,
             column,
           });
@@ -477,7 +477,7 @@ class MetadataManualInput extends React.Component {
                   metadataType={this.state.projectMetadataFields[column]}
                   onChange={(key, value) => {
                     this.updateMetadataField(key, value, sample);
-                    logAnalyticsEvent("MetadataManualInput_input_changed", {
+                    trackEvent("MetadataManualInput_input_changed", {
                       key,
                       sampleName: sample.name,
                     });

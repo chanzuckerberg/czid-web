@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 
@@ -17,7 +17,7 @@ const PhyloTreeNotification = ({ onClose }) => {
             href="/my_data?currentTab=visualizations"
             onClick={() => {
               onClose();
-              logAnalyticsEvent(
+              trackEvent(
                 ANALYTICS_EVENT_NAMES.PHYLO_TREE_NOTIFICATION_VIEW_VISUALIZATIONS_LINK_CLICKED,
               );
             }}

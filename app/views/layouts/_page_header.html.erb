@@ -39,7 +39,7 @@
         <script type="text/plain" class="optanon-category-C0002">
           analytics.identify(
             <%= current_user.id %>,
-            <%= raw escape_json(current_user.traits_for_segment(include_pii: true)) %>,
+            <%= raw escape_json(current_user.traits_for_analytics(include_pii: true)) %>,
           );
         </script>
     <% end %>

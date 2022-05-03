@@ -2,7 +2,7 @@ import { compact, get, isString } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 
@@ -82,7 +82,7 @@ class GeoSearchInputBox extends React.Component {
           }),
         };
       }
-      logAnalyticsEvent("GeoSearchInputBox_location_queried", {
+      trackEvent("GeoSearchInputBox_location_queried", {
         query: query,
         numResults: serverSideSuggestions.length,
       });
@@ -90,7 +90,7 @@ class GeoSearchInputBox extends React.Component {
       // In the case of an error (e.g. no API key in dev), just catch and show the plain text option.
       // eslint-disable-next-line no-console
       console.log(e);
-      logAnalyticsEvent("GeoSearchInputBox_request_erred", {
+      trackEvent("GeoSearchInputBox_request_erred", {
         query,
         message: e.message,
       });
@@ -116,7 +116,7 @@ class GeoSearchInputBox extends React.Component {
     // Wrap plain text submission
     if (isString(result) && result !== "") result = { name: result };
 
-    logAnalyticsEvent("GeoSearchInputBox_result_selected", {
+    trackEvent("GeoSearchInputBox_result_selected", {
       selected: result.name,
       // Real results will have a description
       isMatched: !!result.description,

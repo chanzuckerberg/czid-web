@@ -5,7 +5,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import { getCoverageVizData } from "~/api";
-import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -312,14 +312,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
               rel="noopener noreferrer"
               className={cs.ncbiLink}
               onClick={() =>
-                logAnalyticsEvent(
-                  "CoverageVizBottomSidebar_ncbi-link_clicked",
-                  {
-                    accessionId: currentAccessionSummary.id,
-                    taxonId: params.taxonId,
-                    sampleId,
-                  },
-                )
+                trackEvent("CoverageVizBottomSidebar_ncbi-link_clicked", {
+                  accessionId: currentAccessionSummary.id,
+                  taxonId: params.taxonId,
+                  sampleId,
+                })
               }
             >
               {currentAccessionSummary.id} - {currentAccessionSummary.name}
@@ -417,14 +414,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
               </div>
             }
             onChange={accessionId => {
-              logAnalyticsEvent(
-                "CoverageVizBottomSidebar_accession-select_changed",
-                {
-                  accessionId,
-                  taxonId: params.taxonId,
-                  sampleId,
-                },
-              );
+              trackEvent("CoverageVizBottomSidebar_accession-select_changed", {
+                accessionId,
+                taxonId: params.taxonId,
+                sampleId,
+              });
               this.setCurrentAccession(accessionId);
             }}
             rounded
@@ -450,7 +444,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() =>
-                  logAnalyticsEvent(
+                  trackEvent(
                     "CoverageVizBottomSidebar_alignment-viz-link_clicked",
                     {
                       accessionId: currentAccessionSummary.id,
@@ -476,7 +470,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                     <IconButton
                       className={cs.iconButton}
                       onClick={() =>
-                        logAnalyticsEvent(
+                        trackEvent(
                           ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_BLAST_BUTTON_CLICKED,
                           onBlastClick({
                             context: {
@@ -511,7 +505,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                     <IconButton
                       className={cs.iconButton}
                       onClick={() =>
-                        logAnalyticsEvent(
+                        trackEvent(
                           ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_DOWNLOAD_CONTIG_BUTTON_CLICKED,
                           openUrl(
                             getDownloadContigUrl({
@@ -569,7 +563,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 className={cs.linkWithArrow}
                 href="mailto:help@czid.org"
                 onClick={() =>
-                  logAnalyticsEvent(
+                  trackEvent(
                     "CoverageVizBottomSidebar_accession-data-invalid-contact-us_clicked",
                     {
                       accessionId: currentAccessionSummary.id,
@@ -637,7 +631,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() =>
-                  logAnalyticsEvent(
+                  trackEvent(
                     "CoverageVizBottomSidebar_ref-accession-viz-link_clicked",
                     {
                       accessionId: currentAccessionSummary.id,
@@ -732,7 +726,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() =>
-                    logAnalyticsEvent(
+                    trackEvent(
                       "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
                       {
                         taxonId: params.taxonId,

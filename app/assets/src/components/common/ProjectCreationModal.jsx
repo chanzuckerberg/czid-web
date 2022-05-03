@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React, { useState, useEffect } from "react";
 
 import { createProject } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
@@ -41,7 +41,7 @@ const ProjectCreationModal = ({ modalOpen, onCancel, onCreate }) => {
   }, [name, accessLevel, description]);
 
   useEffect(() => {
-    logAnalyticsEvent("ProjectCreationModal_more-info-toggle_clicked", {
+    trackEvent("ProjectCreationModal_more-info-toggle_clicked", {
       showInfo,
     });
   }, [showInfo]);

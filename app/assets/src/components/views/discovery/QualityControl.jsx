@@ -17,7 +17,7 @@ import { nanoid } from "nanoid";
 import React from "react";
 
 import { getProject, getSamples, getSamplesReadStats } from "~/api";
-import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -452,12 +452,9 @@ class QualityControl extends React.Component {
     } else if (data === meanInsertSizeBins) {
       bin = samplesByInsertSize[binIndex];
     }
-    logAnalyticsEvent(
-      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_CLICKED,
-      {
-        bin,
-      },
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_CLICKED, {
+      bin,
+    });
     handleBarClick(bin);
   };
 
@@ -500,12 +497,9 @@ class QualityControl extends React.Component {
       });
     }
 
-    logAnalyticsEvent(
-      ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_HOVEREED,
-      {
-        bin,
-      },
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_HOVEREED, {
+      bin,
+    });
     this.setState({
       histogramTooltipData,
     });
@@ -531,7 +525,7 @@ class QualityControl extends React.Component {
   handleChartElementHover = (clientX, clientY) => {
     const tooltipLocation =
       clientX && clientY ? { left: clientX, top: clientY } : null;
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED,
     );
     this.setState({ tooltipLocation });
@@ -547,7 +541,7 @@ class QualityControl extends React.Component {
 
   handleHistogramEmptyClick = () => {
     const { handleBarClick } = this.props;
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTOGRAM_EMPTY_SPACE_CLICKED,
     );
     handleBarClick([]);
@@ -650,7 +644,7 @@ class QualityControl extends React.Component {
       },
     ];
 
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_HOVERED,
       {
         sampleName,
@@ -672,7 +666,7 @@ class QualityControl extends React.Component {
       return;
     }
 
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_LABEL_CLICKED,
       {
         sampleName,
@@ -778,7 +772,7 @@ class QualityControl extends React.Component {
                       <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
-                          logAnalyticsEvent(
+                          trackEvent(
                             ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
                           );
                         }}
@@ -811,7 +805,7 @@ class QualityControl extends React.Component {
                       <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
-                          logAnalyticsEvent(
+                          trackEvent(
                             ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
                           );
                         }}
@@ -844,7 +838,7 @@ class QualityControl extends React.Component {
                       <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
-                          logAnalyticsEvent(
+                          trackEvent(
                             ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
                           );
                         }}
@@ -884,7 +878,7 @@ class QualityControl extends React.Component {
                       <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
-                          logAnalyticsEvent(
+                          trackEvent(
                             ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
                           );
                         }}
@@ -905,7 +899,7 @@ class QualityControl extends React.Component {
                           <IconInfoSmall
                             className={cs.infoIcon}
                             onMouseOver={() => {
-                              logAnalyticsEvent(
+                              trackEvent(
                                 ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
                               );
                             }}
@@ -980,7 +974,7 @@ class QualityControl extends React.Component {
                   currentDisplay={normalize ? "percentage" : "count"}
                   onDisplaySwitch={display => {
                     this.setState({ normalize: !normalize });
-                    logAnalyticsEvent(
+                    trackEvent(
                       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED,
                       {
                         display,
@@ -997,7 +991,7 @@ class QualityControl extends React.Component {
                       <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
-                          logAnalyticsEvent(
+                          trackEvent(
                             ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
                           );
                         }}

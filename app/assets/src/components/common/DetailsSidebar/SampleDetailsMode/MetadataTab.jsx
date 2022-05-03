@@ -3,7 +3,7 @@ import { mapValues, filter, includes } from "lodash";
 import { isObject, set, values } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
@@ -62,7 +62,7 @@ class MetadataTab extends React.Component {
     }
 
     this.setState(newState);
-    logAnalyticsEvent("MetadataTab_section_toggled", {
+    trackEvent("MetadataTab_section_toggled", {
       section: section.name,
       sectionOpen: newValue,
       ...this.props.additionalInfo,
@@ -84,7 +84,7 @@ class MetadataTab extends React.Component {
       newState.sectionOpen = set(section.name, true, sectionOpen);
     }
     this.setState(newState);
-    logAnalyticsEvent("MetadataTab_section-edit_toggled", {
+    trackEvent("MetadataTab_section-edit_toggled", {
       section: section.name,
       sectionEditing: newValue,
       ...this.props.additionalInfo,

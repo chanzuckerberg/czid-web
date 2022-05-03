@@ -3,7 +3,7 @@ import cx from "classnames";
 import { filter, pick, size } from "lodash/fp";
 import React, { useContext, useState } from "react";
 
-import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
@@ -366,20 +366,17 @@ const HoverActions = ({
           onMouseEnter: () => {
             const { enabled, key, params } = hoverAction;
 
-            logAnalyticsEvent(
-              ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HOVER_ACTION_HOVERED,
-              {
-                enabled,
-                key,
-                sampleId,
-                ...(params
-                  ? pick(
-                      ["taxId", "taxLevel", "taxName", "pipelineVersion"],
-                      params,
-                    )
-                  : {}),
-              },
-            );
+            trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HOVER_ACTION_HOVERED, {
+              enabled,
+              key,
+              sampleId,
+              ...(params
+                ? pick(
+                    ["taxId", "taxLevel", "taxName", "pipelineVersion"],
+                    params,
+                  )
+                : {}),
+            });
           },
         })}
         content={tooltipMessage}

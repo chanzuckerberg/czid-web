@@ -1,7 +1,7 @@
 import cx from "classnames";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import { validateManualMetadataForNewSamples } from "~/api/metadata";
 import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -77,7 +77,7 @@ class UploadMetadataStep extends React.Component {
         newHostGenomes: this.state.newHostGenomes,
       });
     }
-    logAnalyticsEvent("UploadMetadataStep_continue-button_clicked", {
+    trackEvent("UploadMetadataStep_continue-button_clicked", {
       wasManual: this.state.wasManual,
       errors: (result || this.state).issues.errors.length,
       warnings: (result || this.state).issues.warnings.length,
@@ -136,13 +136,10 @@ class UploadMetadataStep extends React.Component {
               <SecondaryButton
                 text="Cancel"
                 onClick={() =>
-                  logAnalyticsEvent(
-                    "UploadMetadataStep_cancel-button_clicked",
-                    {
-                      projectId: project.id,
-                      projectName: project.name,
-                    },
-                  )
+                  trackEvent("UploadMetadataStep_cancel-button_clicked", {
+                    projectId: project.id,
+                    projectName: project.name,
+                  })
                 }
               />
             </a>

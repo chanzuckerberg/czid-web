@@ -5,7 +5,7 @@ import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -183,9 +183,7 @@ const TermsDropdownItem = (
         target="_blank"
         rel="noopener noreferrer"
         href="/terms"
-        onClick={() =>
-          logAnalyticsEvent("Header_dropdown-terms-option_clicked")
-        }
+        onClick={() => trackEvent("Header_dropdown-terms-option_clicked")}
       >
         Terms of Use
       </a>
@@ -203,7 +201,7 @@ const PrivacyDropdownItem = (
         rel="noopener noreferrer"
         href="/privacy"
         onClick={() =>
-          logAnalyticsEvent("Header_dropdown-privacy-notice-option_clicked")
+          trackEvent("Header_dropdown-privacy-notice-option_clicked")
         }
       >
         Privacy Notice
@@ -249,7 +247,7 @@ const UserMenuDropDown = ({
             className={cs.option}
             href="/bulk_downloads"
             onClick={() =>
-              logAnalyticsEvent("Header_dropdown-downloads-option_clicked")
+              trackEvent("Header_dropdown-downloads-option_clicked")
             }
           >
             Downloads
@@ -267,9 +265,7 @@ const UserMenuDropDown = ({
               className={cs.option}
               href="/user_settings"
               onClick={() =>
-                logAnalyticsEvent(
-                  "Header_dropdown-user-settings-option_clicked",
-                )
+                trackEvent("Header_dropdown-user-settings-option_clicked")
               }
             >
               Settings
@@ -298,7 +294,7 @@ const UserMenuDropDown = ({
             className={cs.option}
             href={`mailto:${email}?Subject=Report%20Feedback`}
             onClick={() =>
-              logAnalyticsEvent("Header_dropdown-feedback-option_clicked")
+              trackEvent("Header_dropdown-feedback-option_clicked")
             }
           >
             Contact Us
@@ -373,7 +369,7 @@ const MainMenu = ({ adminUser, userSignedIn }) => {
           rel="noopener noreferrer"
           /* eslint-disable-next-line react/jsx-no-target-blank */
           target="_blank"
-          onClick={() => logAnalyticsEvent("MainMenu_help_clicked")}
+          onClick={() => trackEvent("MainMenu_help_clicked")}
         >
           Help Center
         </a>
@@ -415,7 +411,7 @@ const MainMenu = ({ adminUser, userSignedIn }) => {
       <a
         className={cx(cs.item, isSelected("samples/upload") && cs.selected)}
         href={"/samples/upload"}
-        onClick={() => logAnalyticsEvent("Header_upload-link_clicked")}
+        onClick={() => trackEvent("Header_upload-link_clicked")}
       >
         Upload
       </a>

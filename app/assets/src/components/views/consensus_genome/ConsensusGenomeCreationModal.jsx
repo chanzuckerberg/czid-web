@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import {
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
@@ -78,7 +78,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
       selectedAccessionIndex: accessionIndex,
     });
 
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED,
       {
         previousAccession:
@@ -103,7 +103,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
       taxonName: taxName,
     });
 
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_CREATE_BUTTON_CLICKED,
       {
         accessionId: selectedAccession.id,

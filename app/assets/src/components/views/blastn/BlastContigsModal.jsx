@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 
 import {
   withAnalytics,
-  logAnalyticsEvent,
+  trackEvent,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
@@ -197,7 +197,7 @@ const BlastContigsModal = ({
       contigsBlasted,
     );
 
-    logAnalyticsEvent(analyticEventName, {
+    trackEvent(analyticEventName, {
       automaticallyRedirectedToNCBI,
       lengthsOfSequencesBlasted,
       numberOfContigs: size(selectedContigIds),

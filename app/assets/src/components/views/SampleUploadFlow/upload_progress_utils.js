@@ -1,4 +1,4 @@
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 
 // Add flags selected by the user in the upload review Step
@@ -43,7 +43,7 @@ export const logUploadStepError = ({
   uploadType,
   errors,
 }) => {
-  logAnalyticsEvent(
+  trackEvent(
     ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_STEP_ERROR,
     {
       erroredSamples,

@@ -3,7 +3,7 @@ import { find, forEach, pick } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
@@ -78,7 +78,7 @@ class DiscoveryFilters extends React.Component {
     const newState = [];
     newState[selectedKey] = selected;
     this.setState(newState, this.notifyFilterChangeHandler);
-    logAnalyticsEvent(`DiscoveryFilters_${selectedKey.toLowerCase()}_changed`, {
+    trackEvent(`DiscoveryFilters_${selectedKey.toLowerCase()}_changed`, {
       selectedKey: selected,
     });
   }

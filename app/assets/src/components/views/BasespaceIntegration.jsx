@@ -1,6 +1,6 @@
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import PropTypes from "~/components/utils/propTypes";
 
@@ -20,9 +20,9 @@ export default class BasespaceIntegration extends React.Component {
 
     // Log whether an access token was returned.
     if (accessToken) {
-      logAnalyticsEvent("BasespaceIntegration_authorization_succeeded");
+      trackEvent("BasespaceIntegration_authorization_succeeded");
     } else {
-      logAnalyticsEvent("BasespaceIntegration_authorization_failed");
+      trackEvent("BasespaceIntegration_authorization_failed");
     }
   }
 

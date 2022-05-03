@@ -2,7 +2,7 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -53,10 +53,10 @@ export default class AMRHeatmapVis extends React.Component {
       this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
     }
     if (nodeHovered !== prevState.nodeHovered) {
-      logAnalyticsEvent("AMRHeatmapVis_heatmap-node-hover_triggered");
+      trackEvent("AMRHeatmapVis_heatmap-node-hover_triggered");
     }
     if (metadataLabelHovered !== prevState.metadataLabelHovered) {
-      logAnalyticsEvent("AMRHeatmapVis_heatmap-metadata-label-hover_triggered");
+      trackEvent("AMRHeatmapVis_heatmap-metadata-label-hover_triggered");
     }
   }
 
@@ -312,14 +312,14 @@ export default class AMRHeatmapVis extends React.Component {
     this.setState({
       addMetadataTrigger: trigger,
     });
-    logAnalyticsEvent("AMRHeatmapVis_metadata-add-button_clicked");
+    trackEvent("AMRHeatmapVis_metadata-add-button_clicked");
   };
 
   onMetadataSelectionChange = selectedMetadata => {
     this.setState({
       selectedMetadata,
     });
-    logAnalyticsEvent("AMRHeatmapVis_selected-metadata_changed", {
+    trackEvent("AMRHeatmapVis_selected-metadata_changed", {
       selectedMetadata,
     });
   };

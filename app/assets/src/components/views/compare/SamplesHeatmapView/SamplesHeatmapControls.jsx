@@ -12,7 +12,7 @@ import {
 import PropTypes from "prop-types";
 import React from "react";
 
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { Divider } from "~/components/layout";
 import List from "~/components/ui/List";
@@ -47,7 +47,7 @@ export default class SamplesHeatmapControls extends React.Component {
     }
 
     this.props.onSelectedOptionsChange({ species: taxonLevel });
-    logAnalyticsEvent("SamplesHeatmapControls_taxon-level-select_changed", {
+    trackEvent("SamplesHeatmapControls_taxon-level-select_changed", {
       taxonLevel,
     });
   };
@@ -78,7 +78,7 @@ export default class SamplesHeatmapControls extends React.Component {
 
   onCategoryChange = (categories, subcategories) => {
     this.props.onSelectedOptionsChange({ categories, subcategories });
-    logAnalyticsEvent("SamplesHeatmapControls_category-filter_changed", {
+    trackEvent("SamplesHeatmapControls_category-filter_changed", {
       categories: categories.length,
       subcategories: subcategories.length,
     });
@@ -130,7 +130,7 @@ export default class SamplesHeatmapControls extends React.Component {
     }
 
     this.props.onSelectedOptionsChange({ metric });
-    logAnalyticsEvent("SamplesHeatmapControls_metric-select_changed", {
+    trackEvent("SamplesHeatmapControls_metric-select_changed", {
       metric,
     });
   };
@@ -155,7 +155,7 @@ export default class SamplesHeatmapControls extends React.Component {
     }
 
     this.props.onSelectedOptionsChange({ background });
-    logAnalyticsEvent("SamplesHeatmapControls_background-select_changed", {
+    trackEvent("SamplesHeatmapControls_background-select_changed", {
       background,
     });
   };
@@ -178,7 +178,7 @@ export default class SamplesHeatmapControls extends React.Component {
         enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
         onChange={this.onBackgroundChange}
         onClick={() =>
-          logAnalyticsEvent(
+          trackEvent(
             ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_BACKGROUND_MODEL_FILTER_CLICKED,
           )
         }
@@ -199,12 +199,9 @@ export default class SamplesHeatmapControls extends React.Component {
     }
 
     this.props.onSelectedOptionsChange({ thresholdFilters: filters });
-    logAnalyticsEvent(
-      "SamplesHeatmapControls_threshold-filter-select_applied",
-      {
-        filters: filters.length,
-      },
-    );
+    trackEvent("SamplesHeatmapControls_threshold-filter-select_applied", {
+      filters: filters.length,
+    });
   };
 
   renderThresholdFilterSelect() {
@@ -235,7 +232,7 @@ export default class SamplesHeatmapControls extends React.Component {
     }
 
     this.props.onSelectedOptionsChange({ readSpecificity: specificity });
-    logAnalyticsEvent("SamplesHeatmapControls_specificity-filter_changed", {
+    trackEvent("SamplesHeatmapControls_specificity-filter_changed", {
       readSpecificity: specificity,
     });
   };
@@ -270,7 +267,7 @@ export default class SamplesHeatmapControls extends React.Component {
     }
 
     this.props.onSelectedOptionsChange({ sampleSortType: selectedSortType });
-    logAnalyticsEvent("SamplesHeatmapControls_sort-samples-select_changed", {
+    trackEvent("SamplesHeatmapControls_sort-samples-select_changed", {
       sampleSortType: selectedSortType,
     });
   };
@@ -295,7 +292,7 @@ export default class SamplesHeatmapControls extends React.Component {
     }
 
     this.props.onSelectedOptionsChange({ taxaSortType: selectedSortType });
-    logAnalyticsEvent("SamplesHeatmapControls_sort-taxa-select_changed", {
+    trackEvent("SamplesHeatmapControls_sort-taxa-select_changed", {
       taxaSortType: selectedSortType,
     });
   };
@@ -320,7 +317,7 @@ export default class SamplesHeatmapControls extends React.Component {
     }
 
     this.props.onSelectedOptionsChange({ dataScaleIdx: scaleIdx });
-    logAnalyticsEvent("SamplesHeatmapControls_data-scale-select_changed", {
+    trackEvent("SamplesHeatmapControls_data-scale-select_changed", {
       dataScaleIdx: scaleIdx,
     });
   };
@@ -346,12 +343,9 @@ export default class SamplesHeatmapControls extends React.Component {
 
   onTaxonsPerSampleEnd = newValue => {
     this.props.onSelectedOptionsChange({ taxonsPerSample: newValue });
-    logAnalyticsEvent(
-      "SamplesHeatmapControls_taxons-per-sample-slider_changed",
-      {
-        taxonsPerSample: newValue,
-      },
-    );
+    trackEvent("SamplesHeatmapControls_taxons-per-sample-slider_changed", {
+      taxonsPerSample: newValue,
+    });
   };
 
   renderTaxonsPerSampleSlider() {
@@ -431,7 +425,7 @@ export default class SamplesHeatmapControls extends React.Component {
                 threshold={threshold}
                 onClose={() => {
                   this.handleRemoveThresholdFilter(threshold);
-                  logAnalyticsEvent(
+                  trackEvent(
                     "SamplesHeatmapControls_threshold-filter_removed",
                     {
                       value: threshold.value,
@@ -464,7 +458,7 @@ export default class SamplesHeatmapControls extends React.Component {
                 text={category}
                 onClose={() => {
                   this.handleRemoveCategory(category);
-                  logAnalyticsEvent(
+                  trackEvent(
                     "SamplesHeatmapControl_categories-filter_removed",
                     {
                       category,
@@ -496,7 +490,7 @@ export default class SamplesHeatmapControls extends React.Component {
                 text={subcat}
                 onClose={() => {
                   this.handleRemoveSubcategory(subcat);
-                  logAnalyticsEvent(
+                  trackEvent(
                     "SamplesHeatmapControl_categories-filter_removed",
                     {
                       subcat,

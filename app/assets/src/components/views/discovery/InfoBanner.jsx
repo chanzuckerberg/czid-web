@@ -2,7 +2,7 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import ExternalLink from "~ui/controls/ExternalLink";
 import Link from "~ui/controls/Link";
 import { IconArrowRight } from "~ui/icons";
@@ -24,7 +24,7 @@ const InfoBanner = ({
   type,
 }) => {
   // This is a hack to associate the event with the parent component, DiscoveryView
-  logAnalyticsEvent("DiscoveryView_no-results-banner_displayed", {
+  trackEvent("DiscoveryView_no-results-banner_displayed", {
     message,
     title,
     type,

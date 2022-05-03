@@ -1,7 +1,7 @@
 import { merge, pick } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
@@ -121,7 +121,7 @@ class ProjectsView extends React.Component {
     const { onProjectSelected, projects } = this.props;
     const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
-    logAnalyticsEvent("ProjectsView_row_clicked", {
+    trackEvent("ProjectsView_row_clicked", {
       projectId: project.id,
       projectName: project.name,
     });
@@ -135,7 +135,7 @@ class ProjectsView extends React.Component {
           currentDisplay={currentDisplay}
           onDisplaySwitch={display => {
             onDisplaySwitch(display);
-            logAnalyticsEvent(`ProjectsView_${display}-switch_clicked`);
+            trackEvent(`ProjectsView_${display}-switch_clicked`);
           }}
         />
       </div>

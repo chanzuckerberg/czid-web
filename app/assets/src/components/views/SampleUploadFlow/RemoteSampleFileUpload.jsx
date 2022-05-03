@@ -2,7 +2,7 @@ import { compact } from "lodash/fp";
 import React from "react";
 
 import { bulkImportRemoteSamples } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import List from "~/components/ui/List";
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~ui/controls/Input";
@@ -39,7 +39,7 @@ class RemoteSampleFileUpload extends React.Component {
         showInfo: !this.state.showInfo,
       },
       () => {
-        logAnalyticsEvent("RemoteSampleFileUpload_more-info-toggle_clicked", {
+        trackEvent("RemoteSampleFileUpload_more-info-toggle_clicked", {
           showInfo: this.state.showInfo,
         });
       },
@@ -82,7 +82,7 @@ class RemoteSampleFileUpload extends React.Component {
 
       this.props.onChange(newSamples);
 
-      logAnalyticsEvent("RemoteSampleFileUpload_connect_succeeded", {
+      trackEvent("RemoteSampleFileUpload_connect_succeeded", {
         projectId: this.props.project.id,
         bulkPath: this.state.remoteS3Path,
         newSamples: newSamples.length,
@@ -100,7 +100,7 @@ class RemoteSampleFileUpload extends React.Component {
         this.setState({ error: NO_VALID_SAMPLES_FOUND_ERROR });
       }
 
-      logAnalyticsEvent("RemoteSampleFileUpload_connect_failed", {
+      trackEvent("RemoteSampleFileUpload_connect_failed", {
         projectId: this.props.project.id,
         bulkPath: this.state.remoteS3Path,
         error: e.status || e.message || e,

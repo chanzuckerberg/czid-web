@@ -2,7 +2,7 @@ import cx from "classnames";
 import { startCase } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PropTypes from "~/components/utils/propTypes";
@@ -82,13 +82,10 @@ class SampleUploadFlowHeader extends React.Component {
                   key={val.text}
                   onClick={() => {
                     this.onStepSelect(val.step);
-                    logAnalyticsEvent(
-                      "SampleUploadFlowHeader_step-option_clicked",
-                      {
-                        step: val.step,
-                        text: val.text,
-                      },
-                    );
+                    trackEvent("SampleUploadFlowHeader_step-option_clicked", {
+                      step: val.step,
+                      text: val.text,
+                    });
                   }}
                 >
                   <Label className={cs.circle} circular text={index + 1} />

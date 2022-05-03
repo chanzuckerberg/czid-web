@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { Grid } from "semantic-ui-react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { trackEvent } from "~/api/analytics";
 import Input from "~/components/ui/controls/Input";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -119,12 +119,12 @@ class ThresholdFilterDropdown extends React.Component {
       this.setState({ thresholds: newThresholds });
       this.props.onApply(newThresholds);
 
-      logAnalyticsEvent("ThresholdFilterDropdown_apply-button_clicked", {
+      trackEvent("ThresholdFilterDropdown_apply-button_clicked", {
         thresholds: newThresholds.length,
       });
     } else {
       this.setState({ thresholds: this.props.thresholds });
-      logAnalyticsEvent("ThresholdFilterDropdown_cancel-button_clicked", {
+      trackEvent("ThresholdFilterDropdown_cancel-button_clicked", {
         thresholds: this.props.thresholds.length,
       });
     }

@@ -32,7 +32,7 @@ import React from "react";
 import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
-  logAnalyticsEvent,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
@@ -238,7 +238,7 @@ class UploadSampleStep extends React.Component {
   handleTabChange = tab => {
     this.props.onDirty();
     this.setState({ currentTab: tab });
-    logAnalyticsEvent("UploadSampleStep_tab_changed", {
+    trackEvent("UploadSampleStep_tab_changed", {
       tab,
     });
   };
@@ -293,7 +293,7 @@ class UploadSampleStep extends React.Component {
       basespaceSamples: newBasespaceSamples,
     });
 
-    logAnalyticsEvent("UploadSampleStep_project_created", {
+    trackEvent("UploadSampleStep_project_created", {
       localSamples: newLocalSamples.length,
       remoteSamples: newRemoteSamples.length,
       basespaceSamples: newBasespaceSamples.length,
@@ -335,7 +335,7 @@ class UploadSampleStep extends React.Component {
       basespaceSamples: newBasespaceSamples,
     });
 
-    logAnalyticsEvent("UploadSampleStep_project-selector_changed", {
+    trackEvent("UploadSampleStep_project-selector_changed", {
       localSamples: newLocalSamples.length,
       remoteSamples: newRemoteSamples.length,
       basespaceSamples: newBasespaceSamples.length,
@@ -373,7 +373,7 @@ class UploadSampleStep extends React.Component {
         selectedWetlabProtocol: null,
         selectedTechnology: null,
       });
-      logAnalyticsEvent(`UploadSampleStep_${workflow}-workflow_selected`);
+      trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
     }
   };
 
@@ -387,7 +387,7 @@ class UploadSampleStep extends React.Component {
         selectedWetlabProtocol: null,
       });
 
-      logAnalyticsEvent(
+      trackEvent(
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
         { technology },
       );
@@ -397,13 +397,13 @@ class UploadSampleStep extends React.Component {
   handleWetlabProtocolChange = selected => {
     this.props.onDirty();
     this.setState({ selectedWetlabProtocol: selected });
-    logAnalyticsEvent(`UploadSampleStep_${selected}-protocol_selected`);
+    trackEvent(`UploadSampleStep_${selected}-protocol_selected`);
   };
 
   handleMedakaModelChange = selected => {
     this.props.onDirty();
     this.setState({ selectedMedakaModel: selected });
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED,
       { selected },
     );
@@ -421,7 +421,7 @@ class UploadSampleStep extends React.Component {
         ? DEFAULT_MEDAKA_MODEL_OPTION
         : this.state.selectedMedakaModel,
     });
-    logAnalyticsEvent(
+    trackEvent(
       ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED,
       { usedClearLabs },
     );
@@ -697,7 +697,7 @@ class UploadSampleStep extends React.Component {
       ...(sampleType === LOCAL_UPLOAD ? { removedLocalFiles } : {}),
     });
 
-    logAnalyticsEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
+    trackEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
       newSamples: validatedNewSamples.length,
       totalSamples: mergedSamples.length,
       sampleType,
@@ -731,7 +731,7 @@ class UploadSampleStep extends React.Component {
 
     this.setState(newState);
 
-    logAnalyticsEvent("UploadSampleStep_samples_removed", {
+    trackEvent("UploadSampleStep_samples_removed", {
       sampleNames: sampleSelectIds.length,
       sampleType: this.state.currentTab,
       ...this.getAnalyticsContext(),
@@ -781,7 +781,7 @@ class UploadSampleStep extends React.Component {
       });
     }
 
-    logAnalyticsEvent("UploadSampleStep_continue-button_clicked", {
+    trackEvent("UploadSampleStep_continue-button_clicked", {
       basespaceSamples: this.state.basespaceSamples.length,
       technology: selectedTechnology,
       currentTab: this.state.currentTab,
@@ -1014,7 +1014,7 @@ class UploadSampleStep extends React.Component {
             <SecondaryButton
               text="Cancel"
               onClick={() =>
-                logAnalyticsEvent("UploadSampleStep_cancel-button_clicked", {
+                trackEvent("UploadSampleStep_cancel-button_clicked", {
                   ...this.getAnalyticsContext(),
                 })
               }

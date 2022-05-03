@@ -13,7 +13,7 @@ import _fp, {
 import React from "react";
 
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
 import MetadataCSVLocationsMenu, {
   geosearchCSVLocations,
@@ -152,7 +152,7 @@ class MetadataUpload extends React.Component {
       issues: null,
       wasManual: tab === "Manual Input",
     });
-    logAnalyticsEvent("MetadataUpload_tab_changed", {
+    trackEvent("MetadataUpload_tab_changed", {
       tab,
       projectId: this.props.project.id,
       projectName: this.props.project.name,
@@ -178,7 +178,7 @@ class MetadataUpload extends React.Component {
     });
     if (!validatingCSV) {
       // We only want to log on the second call when issues are present
-      logAnalyticsEvent("MetadataUpload_csv-metadata_changed", {
+      trackEvent("MetadataUpload_csv-metadata_changed", {
         errors: issues.errors.length,
         warnings: issues.warnings.length,
         projectId: this.props.project.id,
@@ -246,7 +246,7 @@ class MetadataUpload extends React.Component {
     }
     // wasManual will trigger another validation when the Continue button is clicked.
     this.props.onMetadataChange({ metadata, wasManual: true });
-    logAnalyticsEvent("MetadataUpload_manual-metadata_changed", {
+    trackEvent("MetadataUpload_manual-metadata_changed", {
       projectId: this.props.project.id,
       projectName: this.props.project.name,
     });
@@ -346,23 +346,17 @@ class MetadataUpload extends React.Component {
             className={cs.link}
             onClick={() => {
               this.handleDownloadCSV();
-              logAnalyticsEvent(
-                "MetadataUpload_download-csv-template_clicked",
-                {
-                  projectId: project.id,
-                  projectName: project.name,
-                },
-              );
+              trackEvent("MetadataUpload_download-csv-template_clicked", {
+                projectId: project.id,
+                projectName: project.name,
+              });
             }}
             onKeyDown={() => {
               this.handleDownloadCSV();
-              logAnalyticsEvent(
-                "MetadataUpload_download-csv-template_clicked",
-                {
-                  projectId: project.id,
-                  projectName: project.name,
-                },
-              );
+              trackEvent("MetadataUpload_download-csv-template_clicked", {
+                projectId: project.id,
+                projectName: project.name,
+              });
             }}
           >
             Download Metadata CSV Template
@@ -490,13 +484,10 @@ class MetadataUpload extends React.Component {
                 className={cs.link}
                 target="_blank"
                 onClick={() =>
-                  logAnalyticsEvent(
-                    "MetadataUpload_full-dictionary-link_clicked",
-                    {
-                      projectId: this.props.project.id,
-                      projectName: this.props.project.name,
-                    },
-                  )
+                  trackEvent("MetadataUpload_full-dictionary-link_clicked", {
+                    projectId: this.props.project.id,
+                    projectName: this.props.project.name,
+                  })
                 }
               >
                 View Full Metadata Dictionary
@@ -526,7 +517,7 @@ class MetadataUpload extends React.Component {
                 className={cs.link}
                 target="_blank"
                 onClick={() =>
-                  logAnalyticsEvent("MetadataUpload_dictionary-link_clicked", {
+                  trackEvent("MetadataUpload_dictionary-link_clicked", {
                     projectId: this.props.project.id,
                     projectName: this.props.project.name,
                   })
