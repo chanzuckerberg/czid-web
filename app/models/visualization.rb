@@ -27,9 +27,15 @@ class Visualization < ApplicationRecord
   DATA_KEY_TO_SORT_KEY = {
     "visualization" => "name",
     "updated_at" => "updated_at",
+    "samples_count" => "samples_count",
   }.freeze
   VISUALIZATIONS_SORT_KEYS = ["name", "updated_at"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
+
+  scope :sort_by_sample_count, lambda { |order_dir|
+    order_statement = "COUNT(samples.id) #{order_dir}, visualizations.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    left_outer_joins(:samples).group(:id).order(ActiveRecord::Base.sanitize_sql_array(order_statement))
+  }
 
   # In the common case, a visualization will come from a single project.
   def project_name
@@ -68,6 +74,7 @@ class Visualization < ApplicationRecord
   def self.sort_visualizations(visualizations, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
     visualizations = visualizations.order("visualizations.#{sort_key} #{order_dir}, visualizations.#{TIEBREAKER_SORT_KEY} #{order_dir}") if VISUALIZATIONS_SORT_KEYS.include?(sort_key)
+    visualizations = visualizations.sort_by_sample_count(order_dir) if sort_key == "samples_count"
     visualizations
   end
 end

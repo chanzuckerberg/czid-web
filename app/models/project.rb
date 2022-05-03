@@ -34,9 +34,15 @@ class Project < ApplicationRecord
   DATA_KEY_TO_SORT_KEY = {
     "project" => "name",
     "created_at" => "created_at",
+    "sample_counts" => "sample_counts",
   }.freeze
   PROJECTS_SORT_KEYS = ["name", "created_at"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
+
+  scope :sort_by_sample_count, lambda { |order_dir|
+    order_statement = "COUNT(samples.id) #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    left_outer_joins(:samples).group(:id).order(ActiveRecord::Base.sanitize_sql_array(order_statement))
+  }
 
   def csv_dir(user_id)
     path = "/app/tmp/report_csvs/#{id}/#{user_id}"
@@ -181,6 +187,7 @@ class Project < ApplicationRecord
   def self.sort_projects(projects, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
     projects = projects.order("projects.#{sort_key} #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}") if PROJECTS_SORT_KEYS.include?(sort_key)
+    projects = projects.sort_by_sample_count(order_dir) if sort_key == "sample_counts"
     projects
   end
 end

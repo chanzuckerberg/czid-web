@@ -40,6 +40,11 @@ describe Project, type: :model do
   context "#sort_projects" do
     before do
       # Note: projects two and three are created out of order for testing purposes
+      # Test projects are created where:
+      #   - @project_one contains a low-value sortable data
+      #   - @project_two and @project_three contain the same high-value sortable data (for tiebreaker testing)
+      #   - project_four (optional) contains null sortable data
+      # such that project_four < @project_one < @project_three < @project_two.
       @project_one = create(:project, name: "Test Project A", created_at: 3.days.ago)
       @project_three = create(:project, name: "Test Project B", created_at: 2.days.ago)
       @project_two = create(:project, name: "Test Project C", created_at: 1.day.ago)
@@ -69,6 +74,26 @@ describe Project, type: :model do
 
       desc_results = Project.sort_projects(@projects_input, "created_at", "desc")
       expect(desc_results.pluck(:id)).to eq([@project_two.id, @project_three.id, @project_one.id])
+    end
+
+    context "when sorting by sample count" do
+      let(:order_by) { "sample_counts" }
+
+      before do
+        # @project_one contains 0 samples, @project_two and @project_three each contain 1 sample
+        create(:sample, project: @project_two, initial_workflow: "short-read-mngs")
+        create(:sample, project: @project_three, initial_workflow: "consensus-genome")
+      end
+
+      it "returns projects in ascending sample count when order_dir is ascending" do
+        asc_results = Project.sort_projects(@projects_input, order_by, "asc")
+        expect(asc_results.pluck(:id)).to eq([@project_one.id, @project_three.id, @project_two.id])
+      end
+
+      it "rreturns projects in descending sample count when order_dir is descending" do
+        desc_results = Project.sort_projects(@projects_input, order_by, "desc")
+        expect(desc_results.pluck(:id)).to eq([@project_two.id, @project_three.id, @project_one.id])
+      end
     end
   end
 end

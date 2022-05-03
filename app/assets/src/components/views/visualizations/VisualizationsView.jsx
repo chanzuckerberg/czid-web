@@ -80,7 +80,6 @@ class VisualizationsView extends React.Component {
       {
         dataKey: "samples_count",
         width: 140,
-        disableSort: true,
         label: "Samples",
       },
     ];

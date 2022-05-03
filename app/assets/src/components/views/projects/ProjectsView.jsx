@@ -73,7 +73,6 @@ class ProjectsView extends React.Component {
         dataKey: "sample_counts",
         label: "Counts",
         width: 140,
-        disableSort: true,
         cellRenderer: TableRenderers.renderSampleCounts,
       },
     ];
