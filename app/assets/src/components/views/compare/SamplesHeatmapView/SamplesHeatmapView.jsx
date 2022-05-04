@@ -521,6 +521,8 @@ class SamplesHeatmapView extends React.Component {
       background,
     } = this.state.selectedOptions;
     const { sampleIds } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
 
     // If using client-side filtering, the server should still return info
     // related to removed taxa in case the user decides to add the taxon back.
@@ -558,7 +560,8 @@ class SamplesHeatmapView extends React.Component {
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED,
       {
         ...fetchHeatmapDataParams,
-        loadTimeInMilliseconds: loadTimeInMilliseconds,
+        loadTimeInMilliseconds,
+        useHeatmapES,
       },
     );
     return heatmapData;
@@ -650,6 +653,8 @@ class SamplesHeatmapView extends React.Component {
 
   handleLoadingFailure = err => {
     const { allTaxonIds, sampleIds } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
 
     this.setState({
       loading: false,
@@ -679,7 +684,8 @@ class SamplesHeatmapView extends React.Component {
     trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR, {
       numSamples: size(sampleIds),
       numTaxons: size(allTaxonIds),
-      sampleIds: sampleIds,
+      sampleIds,
+      useHeatmapES,
     });
   };
 
