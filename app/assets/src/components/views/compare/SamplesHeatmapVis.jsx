@@ -83,11 +83,9 @@ class SamplesHeatmapVis extends React.Component {
         initialColumnMetadataSortAsc: metadataSortAsc,
         onNodeHover: this.handleNodeHover,
         onMetadataNodeHover: this.handleMetadataNodeHover,
-        onNodeHoverMove: this.handleMouseHoverMove,
         onNodeHoverOut: this.handleNodeHoverOut,
         onColumnMetadataSortChange: onMetadataSortChange,
         onColumnMetadataLabelHover: this.handleColumnMetadataLabelHover,
-        onColumnMetadataLabelMove: this.handleMouseHoverMove,
         onColumnMetadataLabelOut: this.handleColumnMetadataLabelOut,
         onRowGroupEnter: this.handleRowGroupEnter,
         onRowGroupLeave: this.handleRowGroupLeave,
@@ -102,7 +100,6 @@ class SamplesHeatmapVis extends React.Component {
         onPinIconHover: this.handlePinIconHover,
         onPinIconExit: this.handlePinIconExit,
         onCellClick: this.handleCellClick,
-        onColumnLabelMove: this.handleMouseHoverMove,
         onColumnLabelHover: this.handleSampleLabelHover,
         onColumnLabelOut: this.handleSampleLabelOut,
         onColumnLabelClick: this.props.onSampleLabelClick,
@@ -238,26 +235,12 @@ class SamplesHeatmapVis extends React.Component {
     return splitIntoMultipleLines(fullString, CAPTION_LINE_WIDTH);
   };
 
-  handleMouseHoverMove = (_, currentEvent) => {
-    if (currentEvent) {
-      this.setState({
-        tooltipLocation: {
-          left: currentEvent.pageX,
-          top: currentEvent.pageY,
-        },
-      });
-    }
-    // Disable tooltip if currently spacebar is pressed to pan the heatmap.
-    if (this.state.spacePressed) {
-      this.setState({
-        tooltipLocation: null,
-        nodeHoverInfo: null,
-      });
-    }
-  };
-
+  // Update tooltip contents and location when hover over a data/metadata node
   handleNodeHover = node => {
-    this.setState({ nodeHoverInfo: this.getTooltipData(node) });
+    this.setState({
+      nodeHoverInfo: this.getTooltipData(node),
+      tooltipLocation: this.heatmap.getCursorLocation(),
+    });
     trackEvent("SamplesHeatmapVis_node_hovered", {
       nodeValue: node.value,
       nodeId: node.id,
@@ -270,6 +253,7 @@ class SamplesHeatmapVis extends React.Component {
     const currentPair = { [currentValue]: legend[currentValue] };
     this.setState({
       columnMetadataLegend: currentPair,
+      tooltipLocation: this.heatmap.getCursorLocation(),
     });
     trackEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
@@ -298,6 +282,7 @@ class SamplesHeatmapVis extends React.Component {
     const legend = this.heatmap.getColumnMetadataLegend(node.value);
     this.setState({
       columnMetadataLegend: legend,
+      tooltipLocation: this.heatmap.getCursorLocation(),
     });
     trackEvent("SamplesHeatmapVis_column-metadata_hovered", {
       nodeValue: node.value,
@@ -313,7 +298,10 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleSampleLabelHover = node => {
-    this.setState({ columnMetadataLegend: this.getSampleTooltipData(node) });
+    this.setState({
+      columnMetadataLegend: this.getSampleTooltipData(node),
+      tooltipLocation: this.heatmap.getCursorLocation(),
+    });
   };
 
   handleSampleLabelOut = () => {

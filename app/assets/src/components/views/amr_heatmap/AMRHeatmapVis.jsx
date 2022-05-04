@@ -241,12 +241,10 @@ export default class AMRHeatmapVis extends React.Component {
         scaleMin: 0,
         customColorCallback: this.colorFilter,
         onNodeHover: this.onNodeHover,
-        onNodeHoverMove: this.onNodeHoverMove,
         onNodeHoverOut: this.onNodeHoverOut,
         onColumnLabelClick: onSampleLabelClick,
         onRowLabelClick: this.onRowLabelClick,
         columnMetadata: this.getSelectedMetadataFields(), // gets the selected metadata *fields*
-        onColumnMetadataLabelMove: this.onNodeHoverMove,
         onColumnMetadataLabelHover: this.onMetadataLabelHover,
         onColumnMetadataLabelOut: this.onMetadataLabelOut,
         onAddColumnMetadataClick: this.onMetadataAddButtonClick,
@@ -267,18 +265,8 @@ export default class AMRHeatmapVis extends React.Component {
     this.setState({
       nodeHoverInfo: this.getTooltipData(node),
       nodeHovered: true,
+      tooltipLocation: this.heatmap.getCursorLocation(),
     });
-  };
-
-  onNodeHoverMove = (_, event) => {
-    if (event) {
-      this.setState({
-        tooltipLocation: {
-          left: event.pageX,
-          top: event.pageY,
-        },
-      });
-    }
   };
 
   onNodeHoverOut = () => {
@@ -301,6 +289,7 @@ export default class AMRHeatmapVis extends React.Component {
     this.setState({
       columnMetadataLegend: legend,
       metadataLabelHovered: true,
+      tooltipLocation: this.heatmap.getCursorLocation(),
     });
   };
 

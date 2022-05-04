@@ -860,6 +860,15 @@ export default class Heatmap {
     return compact(columns);
   }
 
+  // Get current cursor location from d3 state. This function is called from heatmap components.
+  // This removes the need to pass around "d3.event" to get cursor coordinates.
+  getCursorLocation() {
+    return {
+      left: d3.event.pageX,
+      top: d3.event.pageY,
+    };
+  }
+
   sortTree(root) {
     if (!root) return;
     let scale = this.getScale();
@@ -1288,10 +1297,6 @@ export default class Heatmap {
 
         this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
       })
-      .on("mousemove", d => {
-        this.options.onNodeHoverMove &&
-          this.options.onNodeHoverMove(d, d3.event);
-      })
       .on(
         "click",
         d => this.options.onCellClick && this.options.onCellClick(d, d3.event),
@@ -1557,10 +1562,6 @@ export default class Heatmap {
         this.options.onColumnLabelHover && this.options.onColumnLabelHover(d);
       })
       .on("mouseleave", this.options.onColumnLabelOut)
-      .on("mousemove", d => {
-        this.options.onColumnLabelMove &&
-          this.options.onColumnLabelMove(d, d3.event);
-      })
       .on(
         "click",
         d =>
@@ -1574,10 +1575,6 @@ export default class Heatmap {
       // Center the icon in the column, offset by the half the icon width.
       .attr("transform", `translate(${this.cell.width / 2 - 7}, 0)`)
       .attr("xlink:href", `${this.options.iconPath}/IconPin.svg`)
-      .on("mousemove", d => {
-        this.options.onNodeHoverMove &&
-          this.options.onNodeHoverMove(d, d3.event);
-      })
       .on("mouseenter", this.options.onPinIconHover)
       .on("mouseleave", this.options.onPinIconExit)
       .on("click", this.unpinColumn);
@@ -1687,10 +1684,6 @@ export default class Heatmap {
       .on("mouseleave", d => {
         this.options.onColumnMetadataLabelOut &&
           this.options.onColumnMetadataLabelOut(d);
-      })
-      .on("mousemove", d => {
-        this.options.onColumnMetadataLabelMove &&
-          this.options.onColumnMetadataLabelMove(d, d3.event);
       });
 
     columnMetadataLabelEnter
@@ -1804,10 +1797,6 @@ export default class Heatmap {
           // use same hover out handler because we want the same behavior
           this.options.onColumnMetadataLabelOut &&
             this.options.onColumnMetadataLabelOut(d);
-        })
-        .on("mousemove", d => {
-          this.options.onNodeHoverMove &&
-            this.options.onColumnMetadataLabelMove(d, d3.event);
         });
 
       columnMetadataCell.style("fill", d => {
