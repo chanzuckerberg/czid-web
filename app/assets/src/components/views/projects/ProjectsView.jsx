@@ -58,7 +58,6 @@ class ProjectsView extends React.Component {
       {
         dataKey: "hosts",
         width: 200,
-        disableSort: true,
         cellRenderer: TableRenderers.renderList,
       },
       {
@@ -66,7 +65,6 @@ class ProjectsView extends React.Component {
         // tissue type was later renamed to sample type globally
         label: "Sample Types",
         width: 200,
-        disableSort: true,
         cellRenderer: TableRenderers.renderList,
       },
       {

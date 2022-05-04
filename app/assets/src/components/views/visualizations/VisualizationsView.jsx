@@ -74,7 +74,6 @@ class VisualizationsView extends React.Component {
       {
         dataKey: "project_name",
         width: 280, // big enough for "mBAL-PLASMA and Medical Detectives"
-        disableSort: true,
         label: "Project",
       },
       {

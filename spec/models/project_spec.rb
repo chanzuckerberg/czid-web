@@ -48,32 +48,103 @@ describe Project, type: :model do
       @project_one = create(:project, name: "Test Project A", created_at: 3.days.ago)
       @project_three = create(:project, name: "Test Project B", created_at: 2.days.ago)
       @project_two = create(:project, name: "Test Project C", created_at: 1.day.ago)
+      @project_four = create(:project, name: "Test Project D", created_at: 1.hour.ago)
 
       @projects_input = Project.where(id: [@project_one.id, @project_two.id, @project_three.id])
     end
 
-    it "returns unsorted projects for invalid/unsortable data keys" do
-      asc_results = Project.sort_projects(@projects_input, "invalid_data_key", "asc")
-      expect(asc_results.pluck(:id)).to eq(@projects_input.pluck(:id))
+    context "when invalid order by key passed" do
+      let(:order_by) { "invalid_data_key" }
 
-      desc_results = Project.sort_projects(@projects_input, "invalid_data_key", "desc")
-      expect(desc_results.pluck(:id)).to eq(@projects_input.pluck(:id))
+      it "returns unsorted projects when order_dir is 'asc'" do
+        asc_results = Project.sort_projects(@projects_input, order_by, "asc")
+        expect(asc_results.pluck(:id)).to eq(@projects_input.pluck(:id))
+      end
+
+      it "returns unsorted projects when order_dir is 'desc'" do
+        desc_results = Project.sort_projects(@projects_input, order_by, "desc")
+        expect(desc_results.pluck(:id)).to eq(@projects_input.pluck(:id))
+      end
     end
 
-    it "correctly sorts projects by name" do
-      asc_results = Project.sort_projects(@projects_input, "project", "asc")
-      expect(asc_results.pluck(:id)).to eq([@project_one.id, @project_three.id, @project_two.id])
+    context "when sorting by project name" do
+      let(:order_by) { "project" }
 
-      desc_results = Project.sort_projects(@projects_input, "project", "desc")
-      expect(desc_results.pluck(:id)).to eq([@project_two.id, @project_three.id, @project_one.id])
+      it "returns projects in ascending order by name when order_dir is 'asc'" do
+        asc_results = Project.sort_projects(@projects_input, order_by, "asc")
+        expect(asc_results.pluck(:id)).to eq([@project_one.id, @project_three.id, @project_two.id])
+      end
+
+      it "returns projects in descending order by name when order_dir is 'desc'" do
+        desc_results = Project.sort_projects(@projects_input, order_by, "desc")
+        expect(desc_results.pluck(:id)).to eq([@project_two.id, @project_three.id, @project_one.id])
+      end
     end
 
-    it "correctly sorts projects by created_at" do
-      asc_results = Project.sort_projects(@projects_input, "created_at", "asc")
-      expect(asc_results.pluck(:id)).to eq([@project_one.id, @project_three.id, @project_two.id])
+    context "when sorting by project creation date" do
+      let(:order_by) { "created_at" }
 
-      desc_results = Project.sort_projects(@projects_input, "created_at", "desc")
-      expect(desc_results.pluck(:id)).to eq([@project_two.id, @project_three.id, @project_one.id])
+      it "returns projects in ascending creation order when order_dir is 'asc'" do
+        asc_results = Project.sort_projects(@projects_input, order_by, "asc")
+        expect(asc_results.pluck(:id)).to eq([@project_one.id, @project_three.id, @project_two.id])
+      end
+
+      it "returns projects in descending creation order when order_dir is 'desc'" do
+        desc_results = Project.sort_projects(@projects_input, order_by, "desc")
+        expect(desc_results.pluck(:id)).to eq([@project_two.id, @project_three.id, @project_one.id])
+      end
+    end
+
+    context "when sorting by hosts" do
+      let(:order_by) { "hosts" }
+
+      before do
+        create(:sample, project: @project_one, host_genome_name: "Cow")
+
+        create(:sample, project: @project_three, host_genome_name: "Human")
+        create(:sample, project: @project_three, host_genome_name: "Koala")
+
+        create(:sample, project: @project_two, host_genome_name: "Human")
+        create(:sample, project: @project_two, host_genome_name: "Koala")
+
+        @projects_input = Project.where(id: [@project_one.id, @project_two.id, @project_three.id, @project_four.id])
+      end
+
+      it "sorts projects in ascending order of hosts when order_dir is 'asc'" do
+        asc_results = Project.sort_projects(@projects_input, order_by, "asc")
+        expect(asc_results.map(&:id)).to eq([@project_four.id, @project_one.id, @project_three.id, @project_two.id])
+      end
+
+      it "sorts projects in descending order of  hosts when order_dir is 'desc'" do
+        desc_results = Project.sort_projects(@projects_input, order_by, "desc")
+        expect(desc_results.map(&:id)).to eq([@project_two.id, @project_three.id, @project_one.id, @project_four.id])
+      end
+    end
+
+    context "when sorting by sample type" do
+      let(:order_by) { "tissues" }
+
+      before do
+        create(:sample, project: @project_one, metadata_fields: { sample_type: "CSF" })
+
+        create(:sample, project: @project_three, metadata_fields: { sample_type:  "Serum" })
+        create(:sample, project: @project_three, metadata_fields: { sample_type:  "Nasopharyngeal Swab" })
+
+        create(:sample, project: @project_two, metadata_fields: { sample_type: "Serum" })
+        create(:sample, project: @project_two, metadata_fields: { sample_type: "Nasopharyngeal Swab" })
+
+        @projects_input = Project.where(id: [@project_one.id, @project_two.id, @project_three.id, @project_four.id])
+      end
+
+      it "sorts projects in ascending order of hosts when order_dir is 'asc'" do
+        asc_results = Project.sort_projects(@projects_input, order_by, "asc")
+        expect(asc_results.map(&:id)).to eq([@project_four.id, @project_one.id, @project_three.id, @project_two.id])
+      end
+
+      it "sorts projects in descending order of  hosts when order_dir is 'desc'" do
+        desc_results = Project.sort_projects(@projects_input, order_by, "desc")
+        expect(desc_results.map(&:id)).to eq([@project_two.id, @project_three.id, @project_one.id, @project_four.id])
+      end
     end
 
     context "when sorting by sample count" do

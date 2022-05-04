@@ -31,17 +31,53 @@ class Project < ApplicationRecord
   before_create :add_default_metadata_fields
 
   # Constants related to sorting
+  NAME_SORT_KEY = "name".freeze
+  CREATED_AT_SORT_KEY = "created_at".freeze
+  SAMPLE_COUNTS_SORT_KEY = "sample_counts".freeze
+  HOSTS_SORT_KEY = "hosts".freeze
+  SAMPLE_TYPES_SORT_KEY = "sample_type".freeze
+
   DATA_KEY_TO_SORT_KEY = {
-    "project" => "name",
-    "created_at" => "created_at",
-    "sample_counts" => "sample_counts",
+    "project" => NAME_SORT_KEY,
+    "created_at" => CREATED_AT_SORT_KEY,
+    "sample_counts" => SAMPLE_COUNTS_SORT_KEY,
+    "hosts" => HOSTS_SORT_KEY,
+    "tissues" => SAMPLE_TYPES_SORT_KEY,
   }.freeze
-  PROJECTS_SORT_KEYS = ["name", "created_at"].freeze
+
+  PROJECTS_SORT_KEYS = [NAME_SORT_KEY, CREATED_AT_SORT_KEY].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   scope :sort_by_sample_count, lambda { |order_dir|
     order_statement = "COUNT(samples.id) #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}"
     left_outer_joins(:samples).group(:id).order(ActiveRecord::Base.sanitize_sql_array(order_statement))
+  }
+
+  # For these sort scopes, GROUP_CONCAT assembles a sort key, but the select filters out other fields
+  # that may be in the ActiveRecord object passed in, so we perform one query to get a list of sorted
+  # IDs, and then a second query to get the full object in sorted order
+  scope :sort_by_hosts, lambda { |order_dir|
+    host_genome_list_alias = "host_genome_list"
+    sorted_project_ids = select("projects.id, GROUP_CONCAT(DISTINCT host_genomes.name ORDER BY host_genomes.name ASC) AS #{host_genome_list_alias}")
+                         .left_joins(samples: [:host_genome])
+                         .group(:id)
+                         .order(Arel.sql("#{host_genome_list_alias} #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}"))
+                         .collect(&:id)
+
+    where(id: sorted_project_ids).order(Arel.sql("field(projects.id, #{sorted_project_ids.join ','})"))
+  }
+
+  scope :sort_by_sample_types, lambda { |order_dir|
+    sample_type_list_alias = "sample_types_list"
+    metadata_sample_type_key = "sample_type"
+    sorted_project_ids = select("projects.id, GROUP_CONCAT(DISTINCT metadata.string_validated_value ORDER BY metadata.string_validated_value ASC) AS #{sample_type_list_alias}")
+                         .left_joins(:samples)
+                         .joins("LEFT OUTER JOIN metadata ON (metadata.sample_id=samples.id) AND metadata.key='#{metadata_sample_type_key}'")
+                         .group(:id)
+                         .order(Arel.sql("#{sample_type_list_alias} #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}"))
+                         .collect(&:id)
+
+    where(id: sorted_project_ids).order(Arel.sql("field(projects.id, #{sorted_project_ids.join ','})"))
   }
 
   def csv_dir(user_id)
@@ -185,9 +221,18 @@ class Project < ApplicationRecord
 
   # order_by stores a sortable column's dataKey (refer to: ProjectsView.jsx)
   def self.sort_projects(projects, order_by, order_dir)
-    sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
-    projects = projects.order("projects.#{sort_key} #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}") if PROJECTS_SORT_KEYS.include?(sort_key)
-    projects = projects.sort_by_sample_count(order_dir) if sort_key == "sample_counts"
-    projects
+    sort_key = DATA_KEY_TO_SORT_KEY[order_by]
+
+    if PROJECTS_SORT_KEYS.include?(sort_key)
+      projects.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}")
+    elsif sort_key == SAMPLE_COUNTS_SORT_KEY
+      projects.sort_by_sample_count(order_dir)
+    elsif sort_key == HOSTS_SORT_KEY
+      projects.sort_by_hosts(order_dir)
+    elsif sort_key == SAMPLE_TYPES_SORT_KEY
+      projects.sort_by_sample_types(order_dir)
+    else
+      projects
+    end
   end
 end

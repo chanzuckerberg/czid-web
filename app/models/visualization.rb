@@ -24,17 +24,35 @@ class Visualization < ApplicationRecord
   delegate :count, to: :samples, prefix: true
 
   # Constants related to sorting
+  NAME_SORT_KEY = "name".freeze
+  UPDATED_AT_SORT_KEY = "updated_at".freeze
+  PROJECT_SORT_KEY = "project".freeze
+  SAMPLES_COUNT_SORT_KEY = "samples_count".freeze
   DATA_KEY_TO_SORT_KEY = {
-    "visualization" => "name",
-    "updated_at" => "updated_at",
-    "samples_count" => "samples_count",
+    "visualization" => NAME_SORT_KEY,
+    "samples_count" => SAMPLES_COUNT_SORT_KEY,
+    "updated_at" => UPDATED_AT_SORT_KEY,
+    "project_name" => PROJECT_SORT_KEY,
   }.freeze
-  VISUALIZATIONS_SORT_KEYS = ["name", "updated_at"].freeze
+  VISUALIZATIONS_SORT_KEYS = [NAME_SORT_KEY, UPDATED_AT_SORT_KEY].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   scope :sort_by_sample_count, lambda { |order_dir|
     order_statement = "COUNT(samples.id) #{order_dir}, visualizations.#{TIEBREAKER_SORT_KEY} #{order_dir}"
     left_outer_joins(:samples).group(:id).order(ActiveRecord::Base.sanitize_sql_array(order_statement))
+  }
+
+  scope :sort_by_projects, lambda { |order_dir|
+    project_list_alias = "project_list"
+
+    sorted_visualization_ids =
+      select("visualizations.id, GROUP_CONCAT(DISTINCT projects.name ORDER BY projects.name ASC) AS #{project_list_alias}")
+      .left_joins(samples: [:project])
+      .group(:id)
+      .order(Arel.sql("#{project_list_alias} #{order_dir}, visualizations.#{TIEBREAKER_SORT_KEY} #{order_dir}"))
+      .collect(&:id)
+
+    where(id: sorted_visualization_ids).order(Arel.sql("field(visualizations.id, #{sorted_visualization_ids.join ','})"))
   }
 
   # In the common case, a visualization will come from a single project.
@@ -43,7 +61,7 @@ class Visualization < ApplicationRecord
       samples[0].project.name
     elsif samples.length > 1
       names = samples.map { |sample| sample.project.name }
-      names.uniq.to_sentence
+      names.uniq.sort_by(&:downcase).to_sentence
     else
       "unknown"
     end
@@ -73,8 +91,15 @@ class Visualization < ApplicationRecord
   # order_by stores a sortable column's dataKey (refer to: VisualizationsView.jsx)
   def self.sort_visualizations(visualizations, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
-    visualizations = visualizations.order("visualizations.#{sort_key} #{order_dir}, visualizations.#{TIEBREAKER_SORT_KEY} #{order_dir}") if VISUALIZATIONS_SORT_KEYS.include?(sort_key)
-    visualizations = visualizations.sort_by_sample_count(order_dir) if sort_key == "samples_count"
-    visualizations
+
+    if VISUALIZATIONS_SORT_KEYS.include?(sort_key)
+      visualizations.order("visualizations.#{sort_key} #{order_dir}, visualizations.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+    elsif sort_key == SAMPLES_COUNT_SORT_KEY
+      visualizations.sort_by_sample_count(order_dir)
+    elsif sort_key == PROJECT_SORT_KEY
+      visualizations.sort_by_projects(order_dir)
+    else
+      visualizations
+    end
   end
 end
