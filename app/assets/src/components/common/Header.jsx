@@ -154,6 +154,7 @@ class Header extends React.Component {
         <ToastContainer />
         {userSignedIn && (
           <iframe
+            title="background_refresh"
             className={cs.backgroundRefreshFrame}
             src="/auth0/background_refresh"
           />

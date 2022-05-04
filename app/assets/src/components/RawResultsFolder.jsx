@@ -13,10 +13,6 @@ class RawResultsFolder extends React.Component {
     this.projectName = props.projectName;
   }
 
-  gotoPath(path) {
-    location.href = `${path}`;
-  }
-
   download(url) {
     location.href = `${url}`;
   }
@@ -26,27 +22,17 @@ class RawResultsFolder extends React.Component {
       <div className="results-folder">
         <div className="header">
           <span className="title">
-            <span className="back" onClick={this.gotoPath.bind(this, "/")}>
-              {this.filePath[0]}
-            </span>
+            <a href="/">{this.filePath[0]}</a>
             <span className="path">{">"}</span>
-            <span
-              className="back"
-              onClick={this.gotoPath.bind(
-                this,
-                `/home?project_id=${this.filePath[1]}`,
-              )}
-            >
+
+            <a href={`/home?project_id=${this.filePath[1]}`}>
               {this.projectName}
-            </span>
+            </a>
             <span className="path">/</span>
-            <span
-              className="back"
-              onClick={this.gotoPath.bind(this, this.props.samplePath)}
-            >
-              {this.sampleName}
-            </span>
+
+            <a href={this.props.samplePath}>{this.sampleName}</a>
             <span className="path">/</span>
+
             {this.filePath[3]}
           </span>
         </div>

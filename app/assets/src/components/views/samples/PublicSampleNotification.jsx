@@ -24,7 +24,9 @@ class PublicSampleNotification extends React.Component {
         . If you have any questions, please refer to CZ ID&apos;s&nbsp;
         <a
           className={cs.policyLink}
-          onClick={() => window.open("https://idseq.net/privacy")}
+          href="https://czid.org/privacy"
+          target="_blank"
+          rel="noreferrer"
         >
           privacy notice
         </a>

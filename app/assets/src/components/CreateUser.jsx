@@ -331,18 +331,8 @@ class CreateUser extends React.Component {
           successMessage={successMessage}
         />
         <div className="bottom">
-          <span
-            className="back"
-            onClick={() =>
-              this.props.selectedUser ? openUrl("/users") : openUrl("/")
-            }
-          >
-            Back
-          </span>
-          |
-          <span className="home" onClick={() => openUrl("/")}>
-            Home
-          </span>
+          <a href={this.props.selectedUser ? "/users" : "/"}>Back</a> |
+          <a href="/">Home</a>
         </div>
       </div>
     );
