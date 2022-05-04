@@ -103,8 +103,7 @@
         "semi": "off",
         "@typescript-eslint/semi": "error",
         "no-extra-semi": "off",
-        "@typescript-eslint/no-extra-semi": "off",
-        "@typescript-eslint/indent":[ "error", 2]
+        "@typescript-eslint/no-extra-semi": "off"
       }
     }
   ],

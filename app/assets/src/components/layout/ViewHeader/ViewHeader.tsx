@@ -9,11 +9,11 @@ import Title from "./Title";
 import cs from "./view_header.scss";
 
 interface ViewHeaderProps {
-  className?: string,
-  title?: string,
-  preTitle?: string,
-  subTitle?: string,
-  children: React.ReactNode[] | React.ReactNode
+  className?: string;
+  title?: string;
+  preTitle?: string;
+  subTitle?: string;
+  children: React.ReactNode[] | React.ReactNode;
 }
 
 const ViewHeader = ({ className, children }: ViewHeaderProps) => {

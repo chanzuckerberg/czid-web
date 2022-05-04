@@ -2,8 +2,8 @@ import React from "react";
 import cs from "./view_header.scss";
 
 interface PretitleProps {
-  breadcrumbLink?: string,
-  children: React.ReactNode
+  breadcrumbLink?: string;
+  children: React.ReactNode;
 }
 
 function Pretitle(props: PretitleProps) {

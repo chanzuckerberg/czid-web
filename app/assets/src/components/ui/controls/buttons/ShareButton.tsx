@@ -5,12 +5,12 @@ import PrimaryButton from "./PrimaryButton";
 import SecondaryButton from "./SecondaryButton";
 
 interface ShareButtonProps {
-  primary: boolean,
-  className?: string,
-  onClick: $TSFixMeFunction
+  primary: boolean;
+  className?: string;
+  onClick: $TSFixMeFunction;
 }
 
-const ShareButton = ({ primary, ...props } : ShareButtonProps) => {
+const ShareButton = ({ primary, ...props }: ShareButtonProps) => {
   if (primary) {
     return <PrimaryButton text="Share" {...props} icon={<IconShare />} />;
   } else {

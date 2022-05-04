@@ -10,10 +10,16 @@ interface DownloadButtonProps {
   onClick?: $TSFixMeFunction;
   primary?: boolean;
   text?: string;
-  className? : string;
+  className?: string;
 }
 
-const DownloadButton = ({ disabled, onClick, text, primary, ...props }: DownloadButtonProps) => {
+const DownloadButton = ({
+  disabled,
+  onClick,
+  text,
+  primary,
+  ...props
+}: DownloadButtonProps) => {
   if (primary) {
     return (
       <PrimaryButton

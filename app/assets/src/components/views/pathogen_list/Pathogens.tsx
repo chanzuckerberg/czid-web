@@ -29,9 +29,9 @@ const Pathogens = ({ pathogens }: PathogensProps) => {
 
 interface PathogensProps {
   pathogens: {
-    name: string,
-    tax_id: number,
-  }[],
+    name: string;
+    tax_id: number;
+  }[];
 }
 
 export default Pathogens;

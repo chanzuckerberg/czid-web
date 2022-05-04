@@ -6,14 +6,14 @@ import BareDropdown from "../../ui/controls/dropdowns/BareDropdown";
 import cs from "./view_header.scss";
 
 interface TitleProps {
-  children?: React.ReactNode,
+  children?: React.ReactNode;
   options?: {
-    label: string,
-    id: number | string,
-    onClick: $TSFixMeFunction
-  }[],
-  label: string,
-  id?: string | number
+    label: string;
+    id: number | string;
+    onClick: $TSFixMeFunction;
+  }[];
+  label: string;
+  id?: string | number;
 }
 
 class Title extends React.Component<TitleProps> {

@@ -149,12 +149,12 @@ export default function SampleViewHeader({
             editable &&
             deletable &&
             isEmpty(sample.pipeline_runs) && ( // wouldn't want to delete mngs report
-              <ErrorButton
-                className={cs.controlElement}
-                onClick={() => setSampleDeletionConfirmationModalOpen(true)}
-                text="Delete Sample"
-              />
-            )}
+                <ErrorButton
+                  className={cs.controlElement}
+                  onClick={() => setSampleDeletionConfirmationModalOpen(true)}
+                  text="Delete Sample"
+                />
+              )}
             {shouldHideConsensusGenomeHelpButton ||
               renderConsensusGenomeHelpButton()}
           </>
