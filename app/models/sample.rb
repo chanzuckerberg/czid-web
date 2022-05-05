@@ -120,11 +120,12 @@ class Sample < ApplicationRecord
     "subsampledFraction" => "fraction_subsampled",
     "qcPercent" => "qc_percent",
     "duplicateCompressionRatio" => "compression_ratio",
+    "totalRuntime" => "time_to_finalized",
     "meanInsertSize" => "mean_insert_size",
   }.freeze
   SAMPLES_SORT_KEYS = ["name", "created_at"].freeze
   METADATA_SORT_KEYS = ["sample_type", "water_control"].freeze
-  PIPELINE_RUNS_SORT_KEYS = ["total_reads", "adjusted_remaining_reads", "total_ercc_reads", "pipeline_version", "fraction_subsampled", "qc_percent", "compression_ratio"].freeze
+  PIPELINE_RUNS_SORT_KEYS = ["total_reads", "adjusted_remaining_reads", "total_ercc_reads", "pipeline_version", "fraction_subsampled", "qc_percent", "compression_ratio", "time_to_finalized"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.

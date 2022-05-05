@@ -65,7 +65,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "qcPercent",
       label: "Passed QC",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatPercentage(rowData[dataKey]),
@@ -74,7 +73,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "duplicateCompressionRatio",
       label: "DCR",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumber(rowData[dataKey]),
@@ -124,7 +122,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "totalRuntime",
       label: "Total Runtime",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatDuration(rowData[dataKey]),
