@@ -224,7 +224,7 @@ class Project < ApplicationRecord
     sort_key = DATA_KEY_TO_SORT_KEY[order_by]
 
     if PROJECTS_SORT_KEYS.include?(sort_key)
-      projects.order("#{sort_key} #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}")
+      projects.order("projects.#{sort_key} #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}")
     elsif sort_key == SAMPLE_COUNTS_SORT_KEY
       projects.sort_by_sample_count(order_dir)
     elsif sort_key == HOSTS_SORT_KEY
