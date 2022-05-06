@@ -1,9 +1,15 @@
-import PropTypes from "prop-types";
 import React from "react";
 import IconDoubleQuotes from "~/components/ui/icons/IconDoubleQuotes";
 import cs from "./QuoteSliderItem.scss";
 
-const QuoteSliderItem = props => {
+interface QuoteSliderItemProps {
+  quoteText: string;
+  quoteAuthor: string;
+  quoteCredentials: string;
+  customStyles?: object;
+}
+
+const QuoteSliderItem = (props: QuoteSliderItemProps) => {
   return (
     <div className={cs.carouselCell}>
       <div className={cs.quoteContainer} style={props.customStyles}>
@@ -18,13 +24,6 @@ const QuoteSliderItem = props => {
       </div>
     </div>
   );
-};
-
-QuoteSliderItem.propTypes = {
-  quoteText: PropTypes.string,
-  quoteAuthor: PropTypes.string,
-  quoteCredentials: PropTypes.string,
-  customStyles: PropTypes.object,
 };
 
 export default QuoteSliderItem;
