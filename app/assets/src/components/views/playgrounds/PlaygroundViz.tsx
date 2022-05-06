@@ -11,6 +11,8 @@ import cs from "./playground_viz.scss";
 const TABS = ["Heatmap", "HorizontalStackedBarChart"];
 
 export default class PlaygroundViz extends React.Component {
+  vizContainer: HTMLDivElement;
+  viz: Heatmap;
   state = {
     currentTab: TABS[0],
   };

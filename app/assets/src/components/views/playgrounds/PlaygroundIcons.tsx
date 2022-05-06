@@ -3,7 +3,7 @@ import { values } from "lodash/fp";
 import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { ICONS_TAXONOMY } from "~ui/icons";
-import Illustrations from "~ui/illustrations";
+import { ILLUSTRATIONS } from "~ui/illustrations";
 import cs from "./playground_icons.scss";
 
 class PlaygroundIcons extends React.Component {
@@ -27,7 +27,7 @@ class PlaygroundIcons extends React.Component {
         className={cx(cs.icon, cs.logoReversedIcon)}
       />
     ));
-    const illustrations = values(Illustrations).map(IconComponent => (
+    const illustrations = values(ILLUSTRATIONS).map(IconComponent => (
       <IconComponent key={IconComponent.name} className={cs.logoIcon} />
     ));
 
