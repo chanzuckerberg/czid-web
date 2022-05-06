@@ -245,6 +245,7 @@ export default class AMRHeatmapVis extends React.Component {
         onColumnLabelClick: onSampleLabelClick,
         onRowLabelClick: this.onRowLabelClick,
         columnMetadata: this.getSelectedMetadataFields(), // gets the selected metadata *fields*
+        onMetadataNodeHover: this.onMetadataNodeHover,
         onColumnMetadataLabelHover: this.onMetadataLabelHover,
         onColumnMetadataLabelOut: this.onMetadataLabelOut,
         onAddColumnMetadataClick: this.onMetadataAddButtonClick,
@@ -291,6 +292,17 @@ export default class AMRHeatmapVis extends React.Component {
       metadataLabelHovered: true,
       tooltipLocation: this.heatmap.getCursorLocation(),
     });
+  };
+
+  onMetadataNodeHover = (node, metadata) => {
+    const legend = this.heatmap.getColumnMetadataLegend(metadata.value);
+    const currentValue = node.metadata[metadata.value] || "Unknown";
+    const currentPair = { [currentValue]: legend[currentValue] };
+    this.setState({
+      columnMetadataLegend: currentPair,
+      tooltipLocation: this.heatmap.getCursorLocation(),
+    });
+    trackEvent("AMRHeatmapVis_metadata-node_hovered", metadata);
   };
 
   onMetadataLabelOut = () => {
@@ -393,7 +405,7 @@ AMRHeatmapVis.propTypes = {
     PropTypes.shape({
       sampleName: PropTypes.string,
       sampleId: PropTypes.number,
-      metadata: PropTypes.array,
+      metadata: PropTypes.object,
       amrCounts: PropTypes.array,
       error: PropTypes.string,
     }),
@@ -413,8 +425,8 @@ AMRHeatmapVis.propTypes = {
       metadata: PropTypes.object,
     }),
   ),
-  geneLabels: PropTypes.shape({ label: PropTypes.string }),
-  alleleLabels: PropTypes.shape({ label: PropTypes.string }),
+  geneLabels: PropTypes.arrayOf(PropTypes.shape({ label: PropTypes.string })),
+  alleleLabels: PropTypes.arrayOf(PropTypes.shape({ label: PropTypes.string })),
   alleleToGeneMap: PropTypes.object,
   metrics: PropTypes.arrayOf(
     PropTypes.shape({
