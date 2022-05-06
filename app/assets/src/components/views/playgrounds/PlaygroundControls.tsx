@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import Checkbox from "~ui/controls/Checkbox";
@@ -16,7 +15,42 @@ import MultipleNestedDropdown from "~ui/controls/dropdowns/MultipleNestedDropdow
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "~ui/labels/BetaLabel";
 
-class PlaygroundControls extends React.Component {
+interface ComponentCardProps {
+  children: React.ReactNode;
+  title: string;
+  width: number;
+}
+
+interface DropdownOption {
+  text: string;
+  value: string | number;
+  suboptions?: DropdownOption[];
+}
+
+interface ThresholdOptions {
+  targets: {
+    text: string;
+    value: string;
+  }[];
+}
+
+interface PlaygroundControlsProps {
+  thresholdFilters: ThresholdOptions;
+}
+
+interface PlaygroundControlsState {
+  event: $TSFixMe;
+  option?: $TSFixMe;
+  vars?: $TSFixMe;
+}
+
+class PlaygroundControls extends React.Component<
+  PlaygroundControlsProps,
+  PlaygroundControlsState
+> {
+  dropdownOptions: DropdownOption[];
+  thresholdOptions: ThresholdOptions;
+
   constructor(props) {
     super(props);
     this.thresholdOptions = this.props.thresholdFilters;
@@ -37,7 +71,6 @@ class PlaygroundControls extends React.Component {
       event: "",
     };
   }
-
   render() {
     return (
       <div className="playground">
@@ -228,7 +261,7 @@ class PlaygroundControls extends React.Component {
               rounded
               options={this.dropdownOptions}
               label="Options"
-              onChange={(a, b) => {
+              onChange={() => {
                 this.setState({ event: "MultipleDropdown:Change" });
               }}
             />
@@ -237,7 +270,7 @@ class PlaygroundControls extends React.Component {
             <BareDropdown
               key={0}
               trigger={<div>click me</div>}
-              items={this.dropdownOptions.map((option, i) => (
+              items={this.dropdownOptions.map((_, i) => (
                 <BareDropdown.Item key={`option_${i}`} text={`option ${i}`} />
               ))}
               direction="left"
@@ -304,11 +337,7 @@ class PlaygroundControls extends React.Component {
   }
 }
 
-PlaygroundControls.propTypes = {
-  thresholdFilters: PropTypes.object,
-};
-
-const ComponentCard = ({ title, width, children }) => {
+const ComponentCard = ({ title, width, children }: ComponentCardProps) => {
   return (
     <div
       className="component-card"
@@ -322,12 +351,6 @@ const ComponentCard = ({ title, width, children }) => {
       ))}
     </div>
   );
-};
-
-ComponentCard.propTypes = {
-  children: PropTypes.node,
-  title: PropTypes.string,
-  width: PropTypes.number,
 };
 
 export default PlaygroundControls;
