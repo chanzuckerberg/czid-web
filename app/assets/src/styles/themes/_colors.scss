@@ -51,6 +51,10 @@ $box-shadow-lighter: rgba(34, 36, 38, 0.15);
 $box-shadow-light: rgba(0, 0, 0, 0.22);
 $box-shadow-dark: rgba(34, 36, 38, 0.5);
 
+// Deprecated color variables from czifui@3.4.1 that are no longer included in czifui@6.1.0
+$sds-color-warning-100-overlay: #f4eee4;
+$sds-color-info-100-overlay: #e7eaf4;
+
 @function hover-state($base-color) {
   @return darken($base-color, 5%);
 }
