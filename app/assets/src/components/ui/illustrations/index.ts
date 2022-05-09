@@ -25,5 +25,3 @@ export const ILLUSTRATIONS = {
   ImgUploadPrimary,
   ImgVizSecondary,
 };
-
-module.exports = ILLUSTRATIONS;
