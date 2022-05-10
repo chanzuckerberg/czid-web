@@ -1,10 +1,18 @@
-import PropTypes from "prop-types";
 import React from "react";
 import { IconArrowRight } from "~ui/icons";
 import cs from "./PublicationsAndNews.scss";
 import { publicationsData, newsData } from "./PublicationsAndNewsData";
 
-const PublicationEntry = props => {
+interface PublicationsAndNewsProps {
+  index?: number;
+  publicationLink: string;
+  publicationDate: string;
+  publicationTitle: string;
+  publicationSource?: string;
+  publicationCompany: string;
+}
+
+const PublicationEntry = (props: PublicationsAndNewsProps) => {
   return (
     <li className={cs.publication} key={props.index}>
       <a href={props.publicationLink} target="_blank" rel="noopener noreferrer">
@@ -21,7 +29,7 @@ const PublicationEntry = props => {
   );
 };
 
-const NewsEntry = props => {
+const NewsEntry = (props: PublicationsAndNewsProps) => {
   return (
     <li className={cs.publication} key={props.index}>
       <a href={props.publicationLink} target="_blank" rel="noopener noreferrer">
@@ -36,18 +44,6 @@ const NewsEntry = props => {
     </li>
   );
 };
-
-const PublicationsAndNewsPropTypes = {
-  index: PropTypes.number,
-  publicationLink: PropTypes.string,
-  publicationDate: PropTypes.string,
-  publicationTitle: PropTypes.string,
-  publicationSource: PropTypes.string,
-  publicationCompany: PropTypes.string,
-};
-
-PublicationEntry.propTypes = PublicationsAndNewsPropTypes;
-NewsEntry.propTypes = PublicationsAndNewsPropTypes;
 
 const Publications = () => {
   return (
@@ -80,7 +76,7 @@ const News = () => {
         {newsData &&
           newsData.map((entry, index) => {
             return (
-              <PublicationEntry
+              <NewsEntry
                 key={index}
                 publicationLink={entry.publicationLink}
                 publicationDate={entry.publicationDate}

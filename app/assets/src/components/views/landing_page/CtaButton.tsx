@@ -4,7 +4,7 @@ import cs from "./CtaButton.scss";
 interface CtaButtonProps {
   text: string;
   className: string;
-  linkUrl: string;
+  linkUrl?: string;
 }
 
 const CtaButton = (props: CtaButtonProps) => {

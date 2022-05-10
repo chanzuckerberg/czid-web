@@ -1,8 +1,14 @@
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./TabbedGalleryTab.scss";
 
-const TabbedGalleryTab = props => {
+interface TabbedGalleryTabProps {
+  activeClass: string;
+  tabTitle: string;
+  tabDescription: string;
+  onClick: $TSFixMeFunction;
+}
+
+const TabbedGalleryTab = (props: TabbedGalleryTabProps) => {
   return (
     <div onClick={props.onClick} className={`${cs.tabContainer} tabContainer`}>
       <div
@@ -44,13 +50,6 @@ const TabbedGalleryTab = props => {
       </div>
     </div>
   );
-};
-
-TabbedGalleryTab.propTypes = {
-  activeClass: PropTypes.string.isRequired,
-  tabTitle: PropTypes.string.isRequired,
-  tabDescription: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
 };
 
 export default TabbedGalleryTab;
