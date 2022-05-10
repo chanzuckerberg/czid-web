@@ -7,7 +7,7 @@ const Hero = () => {
   const [moveUp, setMoveUp] = useState(false);
   const [shiftLeft, setShiftLeft] = useState(false);
 
-  let rotatingHeroText = [
+  const rotatingHeroText = [
     "Pathogen Detection",
     "Microbiome Characterization",
     "Outbreak Detection",
@@ -17,7 +17,7 @@ const Hero = () => {
 
   useEffect(() => {
     setInterval(function() {
-      let textTarget = document.querySelector(".rotating-text");
+      const textTarget = document.querySelector(".rotating-text");
 
       if (i === 2) {
         i = 0;

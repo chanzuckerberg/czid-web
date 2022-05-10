@@ -1,8 +1,15 @@
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./AccordionItem.scss";
 
-const AccordionItem = props => {
+interface AccordionItemProps {
+  accordionTitle: string;
+  accordionText: string | object;
+  isOpen: boolean;
+  onClick: $TSFixMeFunction;
+  className?: string;
+}
+
+const AccordionItem = (props: AccordionItemProps) => {
   return (
     <div
       onClick={props.onClick}
@@ -60,13 +67,6 @@ const AccordionItem = props => {
       </div>
     </div>
   );
-};
-
-AccordionItem.propTypes = {
-  accordionTitle: PropTypes.string.isRequired,
-  accordionText: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-  isOpen: PropTypes.bool.isRequired,
-  onClick: PropTypes.func.isRequired,
 };
 
 export default AccordionItem;

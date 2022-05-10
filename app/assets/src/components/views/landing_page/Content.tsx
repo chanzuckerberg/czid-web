@@ -112,7 +112,7 @@ const Content = () => {
 
       <section className={cs.questions}>
         <h2>Frequently Asked Questions</h2>
-        <KniAccordion className={cs.accordion} />
+        <KniAccordion />
         <CtaButton
           text="View All Questions"
           linkUrl="https://czid.org/faqs"

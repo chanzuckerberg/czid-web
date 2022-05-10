@@ -6,10 +6,9 @@ const Accordion = () => {
   const [openAccordion, setOpenAccordion] = useState(0);
 
   useEffect(() => {
-    var accordions = document.querySelectorAll(".accordionItem");
-
+    const accordions = document.querySelectorAll(".accordionItem") as any;
     accordions.forEach(accordion => {
-      var panel = accordion.children[2];
+      const panel = accordion.children[2];
       panel.style.maxHeight = null;
     });
 
