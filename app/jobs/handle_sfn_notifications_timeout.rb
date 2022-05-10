@@ -25,7 +25,7 @@ class HandleSfnNotificationsTimeout
       end
     end
 
-    overdue_pipeline_runs = PipelineRun.where(job_status: PipelineRun::STATUS_RUNNING).where("executed_at < ?", MAX_RUNTIME.ago)
+    overdue_pipeline_runs = PipelineRun.in_progress.where("executed_at < ?", MAX_RUNTIME.ago)
     if overdue_pipeline_runs.present?
       overdue_pipeline_runs.each do |pr|
         prs = pr.active_stage

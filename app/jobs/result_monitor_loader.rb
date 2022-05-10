@@ -24,7 +24,7 @@ class ResultMonitorLoader
         # Wait for up to 30 seconds. Mark as error and restart.
         sleep(Time.now.to_i % 30)
         output_state.update(state: PipelineRun::STATUS_LOADING_ERROR)
-        message = "SampleFailedEvent: Pipeline Run #{pr.id} for Sample #{pr.sample.id} by #{pr.sample.user.role_name} failed loading #{output} with #{pr.adjusted_remaining_reads || 0} reads remaining after #{pr.duration_hrs} hours. See: #{pr.status_url}"
+        message = "Pipeline Run #{pr.id} for Sample #{pr.sample.id} by #{pr.sample.user.role_name} failed loading #{output} with #{pr.adjusted_remaining_reads || 0} reads remaining after #{pr.duration_hrs} hours. See: #{pr.status_url}"
         LogUtil.log_error(message, exception: e)
 
         # If we've reached our max attempts, mark as failed and raise an error.
@@ -57,9 +57,7 @@ class ResultMonitorLoader
     if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
       # Check if run is complete:
       if pipeline_run.all_output_states_terminal?
-        # Update job stats:
-        compiling_stats_error = pipeline_run.update_job_stats
-
+        compiling_stats_error = check_job_stats
         pipeline_run.finalize_results(compiling_stats_error)
       end
     end

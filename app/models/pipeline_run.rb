@@ -1057,11 +1057,17 @@ class PipelineRun < ApplicationRecord
       check_and_enqueue(o)
     end
 
-    # Update job stats:
-    compiling_stats_error = update_job_stats
+    # Job stats are compiled from *.count files, which are outputs of Host Filtering.
+    if last_completed_stage == PipelineRunStage::DAG_NAME_HOST_FILTER
+      compiling_stats_error = update_job_stats
+      if compiling_stats_error.present?
+        LogUtil.log_error("SampleFailedEvent: Failure compiling stats for PipelineRun #{id}: #{compiling_stats_error}", exception: compiling_stats_error)
+      end
+    end
 
     # Check if run is complete:
     if all_output_states_terminal?
+      compiling_stats_error = check_job_stats
       finalize_results(compiling_stats_error)
     end
   end
@@ -1133,6 +1139,26 @@ class PipelineRun < ApplicationRecord
     job_stats.destroy_all
     update(job_stats_attributes: stats_array)
     _stdout = Syscall.run("rm", "-f", downloaded_stats_path)
+  end
+
+  def check_job_stats
+    stats_json_s3_path = "#{output_s3_path_with_version}/#{STATS_JSON_NAME}"
+    stats_file = S3Util.get_s3_file(stats_json_s3_path)
+    return unless stats_file
+
+    # Get the list of all the tasks in the job stats file and check that they have all
+    # been loaded into the db.
+    stats_array = JSON.parse(stats_file)
+    stats_array = stats_array.select { |entry| entry.key?("task") }.map { |job| job["task"] }
+    loaded_job_stats = job_stats.pluck(:task)
+    all_stats_loaded = stats_array.sort == loaded_job_stats.sort
+
+    # If we are missing job stats in the db, log and return an error.
+    unless all_stats_loaded
+      error = "PipelineRun #{id} failed to load job stats: #{stats_array - loaded_job_stats}"
+      LogUtil.log_error(error)
+      error
+    end
   end
 
   def dispatch_sfn_pipeline
