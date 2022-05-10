@@ -184,7 +184,6 @@ export const computeColumnsByWorkflow = ({
       dataKey: "nucleotideType",
       label: "Nucleotide Type",
       flexGrow: 1,
-      disableSort: true,
       className: cs.basicCell,
     },
     {

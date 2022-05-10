@@ -370,9 +370,9 @@ describe WorkflowRun, type: :model do
       mosquito_hg = create(:host_genome, name: "Mosquito")
 
       @project = create(:project)
-      sample = create(:sample, project: @project, host_genome_id: human_hg.id, metadata_fields: { name: "Test Sample A", collection_location_v2: "Los Angeles, USA", ct_value: 1, water_control: "No", sample_type: "Cerebrospinal Fluid" })
-      sample3 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab" })
-      sample2 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab" })
+      sample = create(:sample, project: @project, host_genome_id: human_hg.id, metadata_fields: { name: "Test Sample A", collection_location_v2: "Los Angeles, USA", ct_value: 1, water_control: "No", sample_type: "Cerebrospinal Fluid", nucleotide_type: "DNA" })
+      sample3 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab", nucleotide_type: "RNA" })
+      sample2 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab", nucleotide_type: "RNA" })
       # Note: workflow_runs two and three are created out of order for testing purposes
       @workflow_run = create(:workflow_run, sample: sample, status: WorkflowRun::STATUS[:created], created_at: 3.days.ago)
       @workflow_run3 = create(:workflow_run, sample: sample3, status: WorkflowRun::STATUS[:created], created_at: 2.days.ago)
@@ -381,186 +381,241 @@ describe WorkflowRun, type: :model do
       @workflow_runs_input = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id])
     end
 
-    it "returns unsorted workflow_runs for invalid/unsortable data keys" do
-      asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "invalid_data_key", "asc")
-      expect(asc_results.pluck(:id)).to eq(@workflow_runs_input.pluck(:id))
+    context "when invalid order by key passed" do
+      let(:data_key) { "invalid_data_key" }
 
-      desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "invalid_data_key", "desc")
-      expect(desc_results.pluck(:id)).to eq(@workflow_runs_input.pluck(:id))
-    end
+      it "returns unsorted workflow runs when order_dir is 'asc'" do
+        asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "asc")
+        expect(asc_results.pluck(:id)).to eq(@workflow_runs_input.pluck(:id))
+      end
 
-    it "correctly sorts workflow_runs by createdAt" do
-      asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "createdAt", "asc")
-      expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
-
-      desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "createdAt", "desc")
-      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
-    end
-
-    it "correctly sorts workflow_runs by metadata" do
-      # create workflow run with no metadata to test null-handling
-      sample4 = create(:sample, project: @project)
-      workflow_run4 = create(:workflow_run, sample: sample4, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
-
-      workflow_runs = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, workflow_run4.id])
-
-      asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "ctValue", "asc")
-      expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
-
-      desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "ctValue", "desc")
-      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
-
-      asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "waterControl", "asc")
-      expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
-
-      desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "waterControl", "desc")
-      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
-
-      asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "sampleType", "asc")
-      expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id, workflow_run4.id])
-
-      desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "sampleType", "desc")
-      expect(desc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run2.id, @workflow_run3.id, @workflow_run.id])
-    end
-
-    it "correctly sorts workflow runs by sample name" do
-      asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "sample", "asc")
-      expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
-
-      desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "sample", "desc")
-      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
-    end
-
-    it "correctly sorts samples by host genome" do
-      asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "host", "asc")
-      expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
-
-      desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, "host", "desc")
-      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
-    end
-
-    it "correctly sorts workflow_runs by their input data" do
-      # create workflow run with empty inputs_json data to test null-handling
-      empty_input = {}.to_json
-
-      low_val_input = {
-        accession_id: "NC_006213.1",
-        technology: "Illumina",
-        wetlab_protocol: "artic",
-        medaka_model: "test_model_a",
-      }.to_json
-
-      high_val_input = {
-        accession_id: "NC_006213.2",
-        technology: "ONT",
-        wetlab_protocol: "midnight",
-        medaka_model: "test_model_b",
-      }.to_json
-
-      workflow_run4 = create(:workflow_run, sample: create(:sample, project: @project), status: WorkflowRun::STATUS[:created], created_at: 1.day.ago, inputs_json: empty_input)
-      @workflow_run.update(inputs_json: low_val_input)
-      @workflow_run3.update(inputs_json: high_val_input)
-      @workflow_run2.update(inputs_json: high_val_input)
-
-      workflow_runs = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, workflow_run4.id])
-
-      ["referenceGenome", "wetlabProtocol", "technology", "medakaModel"].each do |inputs_sort_key|
-        asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, inputs_sort_key, "asc")
-        expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
-
-        desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, inputs_sort_key, "desc")
-        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
+      it "returns unsorted projects when order_dir is 'desc'" do
+        desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "desc")
+        expect(desc_results.pluck(:id)).to eq(@workflow_runs_input.pluck(:id))
       end
     end
 
-    it "correctly sorts workflow_runs by cached result" do
-      # create workflow run with empty cached result data to test null-handling
-      empty_cached_result = {
-        coverage_viz: {},
-        quality_metrics: {},
-      }.to_json
+    context "when sorting workflow runs by creation date" do
+      let(:data_key) { "createdAt" }
 
-      low_val_cached_result = {
-        coverage_viz: {
-          coverage_depth: 0.9986289001103568,
-        },
-        quality_metrics: {
-          n_actg: 29_852,
-          n_ambiguous: 0,
-          n_missing: 10,
-          ref_snps: 7,
-          total_reads: 187_444,
-          percent_identity: 99.0,
-          gc_percent: 38.0,
-          percent_genome_called: 99.7,
-          reference_genome_length: 29_903,
-          vadr_pass_fail: "FAIL",
-        },
-      }.to_json
+      it "returns workflow runs in ascending creation order when order_dir is 'asc'" do
+        asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+      end
 
-      high_val_cached_result = {
-        coverage_viz: {
-          coverage_depth: 1.9986289001103568,
-        },
-        quality_metrics: {
-          n_actg: 29_853,
-          n_ambiguous: 1,
-          n_missing: 11,
-          ref_snps: 8,
-          total_reads: 187_445,
-          percent_identity: 100.0,
-          gc_percent: 39.0,
-          percent_genome_called: 99.8,
-          reference_genome_length: 29_904,
-          vadr_pass_fail: "PASS",
-        },
-      }.to_json
-
-      workflow_run4 = create(:workflow_run, sample: create(:sample, project: @project), status: WorkflowRun::STATUS[:created], created_at: 1.day.ago, cached_results: empty_cached_result)
-      @workflow_run.update(cached_results: low_val_cached_result)
-
-      @workflow_run3.update(cached_results: high_val_cached_result)
-      @workflow_run2.update(cached_results: high_val_cached_result)
-
-      workflow_runs = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, workflow_run4.id])
-
-      ["totalReadsCG", "percentGenomeCalled", "vadrPassFail", "coverageDepth", "gcPercent", "refSnps", "percentIdentity", "nActg", "nMissing", "nAmbiguous", "referenceGenomeLength"].each do |cached_result_sort_key|
-        asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, cached_result_sort_key, "asc")
-        expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
-
-        desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, cached_result_sort_key, "desc")
-        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
+      it "returns workflow runs in descending creation order when order_dir is 'desc'" do
+        desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
       end
     end
 
-    it "correctly sorts workflow runs by location" do
-      # Ensures that location metadata field is valid for sample_four
-      location_metadata_field = create(
-        :metadata_field, name: 'collection_location_v2', base_type: MetadataField::LOCATION_TYPE
-      )
-      host_genome = create(:host_genome, name: "mock_host_genome")
-      host_genome.metadata_fields << location_metadata_field
-      sample4 = create(:sample, project: @project, name: "Test Sample C", created_at: 1.day.ago, host_genome: host_genome)
-      workflow_run4 = create(:workflow_run, sample: sample4, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
+    context "when sorting workflow runs by sample name" do
+      let(:data_key) { "sample" }
 
-      # Create sample_four with a lowest-value location name
-      # and which stores location info in a location object (vs in its metadata's string_validated_value)
-      location = create(:location, name: "California, USA", osm_id: 200, locationiq_id: 100)
-      location_metadata = Metadatum.new(
-        sample: sample4,
-        metadata_field: location_metadata_field,
-        key: "collection_location_v2",
-        location: location
-      )
-      location_metadata.save!
+      it "returns workflow runs in ascending sample name order when order_dir is 'asc'" do
+        asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+      end
 
-      workflow_runs = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, workflow_run4.id])
+      it "returns workflow runs in descending creation order when order_dir is 'desc'" do
+        desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
+      end
+    end
 
-      asc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "collectionLocationV2", "asc")
-      expect(asc_results.pluck(:id)).to eq([workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+    context "when sorting workflow runs by metadata" do
+      let(:data_key_list) { ["ctValue", "waterControl", "sampleType", "nucleotideType"] }
 
-      desc_results = WorkflowRun.sort_workflow_runs(workflow_runs, "collectionLocationV2", "desc")
-      expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, workflow_run4.id])
+      before do
+        # create workflow run with no metadata to test null-handling
+        sample4 = create(:sample, project: @project)
+        @workflow_run4 = create(:workflow_run, sample: sample4, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
+
+        @workflow_runs_with_null_data = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, @workflow_run4.id])
+      end
+
+      it "returns workflow runs in ascending order by metadata when order_dir is 'asc'" do
+        data_key_list.each do |_data_key|
+          asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, "ctValue", "asc")
+          expect(asc_results.pluck(:id)).to eq([@workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+        end
+      end
+
+      it "returns workflow runs in descending order by metadata when order_dir is 'desc'" do
+        data_key_list.each do |_data_key|
+          desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, "ctValue", "desc")
+          expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, @workflow_run4.id])
+        end
+      end
+    end
+
+    context "when sorting workflow runs by host" do
+      let(:data_key) { "host" }
+
+      it "returns workflow runs in ascending order by host when order_dir is 'asc'" do
+        asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+      end
+
+      it "returns workflow runs in descending order by host when order_dir is 'desc'" do
+        desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
+      end
+    end
+
+    context "when sorting workflow runs by input data" do
+      let(:data_key_list) { ["referenceGenome", "wetlabProtocol", "technology", "medakaModel"] }
+
+      before do
+        # create workflow run with empty inputs_json data to test null-handling
+        empty_input = {}.to_json
+
+        low_val_input = {
+          accession_id: "NC_006213.1",
+          technology: "Illumina",
+          wetlab_protocol: "artic",
+          medaka_model: "test_model_a",
+        }.to_json
+
+        high_val_input = {
+          accession_id: "NC_006213.2",
+          technology: "ONT",
+          wetlab_protocol: "midnight",
+          medaka_model: "test_model_b",
+        }.to_json
+
+        @workflow_run4 = create(:workflow_run, sample: create(:sample, project: @project), status: WorkflowRun::STATUS[:created], created_at: 1.day.ago, inputs_json: empty_input)
+        @workflow_run.update(inputs_json: low_val_input)
+        @workflow_run3.update(inputs_json: high_val_input)
+        @workflow_run2.update(inputs_json: high_val_input)
+
+        @workflow_runs_with_null_data = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, @workflow_run4.id])
+      end
+
+      it "returns workflow runs in ascending order by input data when order_dir is 'asc'" do
+        data_key_list.each do |data_key|
+          asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "asc")
+          expect(asc_results.pluck(:id)).to eq([@workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+        end
+      end
+
+      it "returns workflow runs in descending order by input data when order_dir is 'desc'" do
+        data_key_list.each do |data_key|
+          desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "desc")
+          expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, @workflow_run4.id])
+        end
+      end
+    end
+
+    context "when sorting workflow runs by cached results" do
+      let(:data_key_list) do
+        ["totalReadsCG", "percentGenomeCalled", "vadrPassFail", "coverageDepth", "gcPercent",
+         "refSnps", "percentIdentity", "nActg", "nMissing", "nAmbiguous", "referenceGenomeLength",]
+      end
+
+      before do
+        # create workflow run with empty cached result data to test null-handling
+        empty_cached_result = {
+          coverage_viz: {},
+          quality_metrics: {},
+        }.to_json
+
+        low_val_cached_result = {
+          coverage_viz: {
+            coverage_depth: 0.9986289001103568,
+          },
+          quality_metrics: {
+            n_actg: 29_852,
+            n_ambiguous: 0,
+            n_missing: 10,
+            ref_snps: 7,
+            total_reads: 187_444,
+            percent_identity: 99.0,
+            gc_percent: 38.0,
+            percent_genome_called: 99.7,
+            reference_genome_length: 29_903,
+            vadr_pass_fail: "FAIL",
+          },
+        }.to_json
+
+        high_val_cached_result = {
+          coverage_viz: {
+            coverage_depth: 1.9986289001103568,
+          },
+          quality_metrics: {
+            n_actg: 29_853,
+            n_ambiguous: 1,
+            n_missing: 11,
+            ref_snps: 8,
+            total_reads: 187_445,
+            percent_identity: 100.0,
+            gc_percent: 39.0,
+            percent_genome_called: 99.8,
+            reference_genome_length: 29_904,
+            vadr_pass_fail: "PASS",
+          },
+        }.to_json
+
+        @workflow_run4 = create(:workflow_run, sample: create(:sample, project: @project), status: WorkflowRun::STATUS[:created], created_at: 1.day.ago, cached_results: empty_cached_result)
+        @workflow_run.update(cached_results: low_val_cached_result)
+
+        @workflow_run3.update(cached_results: high_val_cached_result)
+        @workflow_run2.update(cached_results: high_val_cached_result)
+
+        @workflow_runs_with_null_data = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, @workflow_run4.id])
+      end
+
+      it "returns workflow runs in ascending order by cached results when order_dir is 'asc'" do
+        data_key_list.each do |data_key|
+          asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "asc")
+          expect(asc_results.pluck(:id)).to eq([@workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+        end
+      end
+
+      it "returns workflow runs in descending order by cached results when order_dir is 'desc'" do
+        data_key_list.each do |data_key|
+          desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "desc")
+          expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, @workflow_run4.id])
+        end
+      end
+    end
+
+    context "when sorting workflow runs by collection location" do
+      let(:data_key) { "collectionLocationV2" }
+
+      before do
+        # Ensures that location metadata field is valid for sample_four
+        location_metadata_field = create(
+          :metadata_field, name: 'collection_location_v2', base_type: MetadataField::LOCATION_TYPE
+        )
+        host_genome = create(:host_genome, name: "mock_host_genome")
+        host_genome.metadata_fields << location_metadata_field
+        sample4 = create(:sample, project: @project, name: "Test Sample C", created_at: 1.day.ago, host_genome: host_genome)
+        @workflow_run4 = create(:workflow_run, sample: sample4, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
+
+        # Create sample_four with a lowest-value location name
+        # and which stores location info in a location object (vs in its metadata's string_validated_value)
+        location = create(:location, name: "California, USA", osm_id: 200, locationiq_id: 100)
+        location_metadata = Metadatum.new(
+          sample: sample4,
+          metadata_field: location_metadata_field,
+          key: "collection_location_v2",
+          location: location
+        )
+        location_metadata.save!
+
+        @workflow_runs_with_location_object = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, @workflow_run4.id])
+      end
+
+      it "returns samples in ascending order by pipeline run info when order_dir is 'asc'" do
+        asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_location_object, data_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([@workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+      end
+
+      it "returns samples in descending order by pipeline run info when order_dir is 'desc'" do
+        desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_location_object, data_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, @workflow_run4.id])
+      end
     end
   end
 end

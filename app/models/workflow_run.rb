@@ -84,7 +84,10 @@ class WorkflowRun < ApplicationRecord
     "sample" => "name",
     "collectionLocationV2" => "collection_location_v2",
     "createdAt" => "created_at",
+    "waterControl" => "water_control",
+    "sampleType" => "sample_type",
     "ctValue" => "ct_value",
+    "nucleotideType" => "nucleotide_type",
     "host" => "host",
     "referenceGenome" => "accession_id",
     "wetlabProtocol" => "wetlab_protocol",
@@ -101,14 +104,57 @@ class WorkflowRun < ApplicationRecord
     "nMissing" => "n_missing",
     "nAmbiguous" => "n_ambiguous",
     "referenceGenomeLength" => "reference_genome_length",
-    "sampleType" => "sample_type",
-    "waterControl" => "water_control",
   }.freeze
-  WORKFLOW_RUNS_SORT_KEYS = ["created_at"].freeze
-  METADATA_SORT_KEYS = ["water_control", "sample_type", "ct_value"].freeze
+  METADATA_SORT_KEYS = ["water_control", "sample_type", "ct_value", "nucleotide_type"].freeze
   INPUT_SORT_KEYS = ["accession_id", "wetlab_protocol", "technology", "medaka_model"].freeze
   CACHED_RESULT_SORT_KEYS = ["total_reads", "percent_genome_called", "vadr_pass_fail", "coverage_depth", "gc_percent", "ref_snps", "percent_identity", "n_actg", "n_missing", "n_ambiguous", "reference_genome_length"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
+
+  scope :sort_by_sample_name, lambda { |order_dir|
+    order_statement = "samples.name #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    left_outer_joins(:sample).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  }
+
+  scope :sort_by_metadata, lambda { |sort_key, order_dir|
+    joins_statement = "
+        LEFT JOIN samples ON workflow_runs.sample_id = samples.id
+        LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')
+    "
+    order_by = sort_key == "ct_value" ? "number_validated_value" : "string_validated_value"
+
+    joins(ActiveRecord::Base.send(:sanitize_sql_array, joins_statement)).order("metadata.#{order_by} #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  }
+
+  scope :sort_by_host_genome, lambda { |order_dir|
+    joins_statement = "
+        LEFT JOIN samples ON workflow_runs.sample_id = samples.id
+        LEFT JOIN host_genomes ON host_genomes.id = samples.host_genome_id
+    "
+    joins(joins_statement).order("host_genomes.name #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  }
+
+  scope :sort_by_input, lambda { |sort_key, order_dir|
+    order_statement = "JSON_EXTRACT(`inputs_json`, '$.#{sort_key}') #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}"
+    order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  }
+
+  scope :sort_by_cached_result, lambda { |sort_key, order_dir|
+    cached_result_key = sort_key == "coverage_depth" ? "coverage_viz" : "quality_metrics"
+    order_statement = "JSON_EXTRACT(`cached_results`, '$.#{cached_result_key}.#{sort_key}') #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}"
+    order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  }
+
+  scope :sort_by_location, lambda { |order_dir|
+    joins_statement = "
+      LEFT JOIN samples ON (workflow_runs.sample_id = samples.id)
+      LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = 'collection_location_v2')
+      LEFT JOIN locations ON metadata.location_id = locations.id
+    "
+    # TODO(ihan): Investigate location metadata creation. I've implemented a workaround solution below,
+    # but ideally, all location info should be stored by location_id.
+    order_statement = "(CASE WHEN ISNULL(metadata.location_id) THEN metadata.string_validated_value ELSE locations.name END) #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  }
 
   validates :status, inclusion: { in: STATUS.values }
 
@@ -229,60 +275,24 @@ class WorkflowRun < ApplicationRecord
   # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
   def self.sort_workflow_runs(workflow_runs, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
-    workflow_runs = workflow_runs.order("workflow_runs.#{sort_key} #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}") if WORKFLOW_RUNS_SORT_KEYS.include?(sort_key)
-    workflow_runs = WorkflowRun.sort_by_sample_name(workflow_runs, order_dir) if sort_key == "name"
-    workflow_runs = WorkflowRun.sort_by_metadata_key(workflow_runs, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
-    workflow_runs = WorkflowRun.sort_by_host_genome(workflow_runs, order_dir) if sort_key == "host"
-    workflow_runs = WorkflowRun.sort_by_input(workflow_runs, sort_key, order_dir) if INPUT_SORT_KEYS.include?(sort_key)
-    workflow_runs = WorkflowRun.sort_by_cached_result(workflow_runs, sort_key, order_dir) if CACHED_RESULT_SORT_KEYS.include?(sort_key)
-    workflow_runs = WorkflowRun.sort_by_location(workflow_runs, order_dir) if sort_key == "collection_location_v2"
-    workflow_runs
-  end
 
-  def self.sort_by_sample_name(workflow_runs, order_dir)
-    workflow_runs.left_outer_joins(:sample).order("samples.name #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
-  end
-
-  def self.sort_by_metadata_key(workflow_runs, sort_key, order_dir)
-    joins_statement = "
-        LEFT JOIN samples ON workflow_runs.sample_id = samples.id
-        LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')
-    "
-    order_by = sort_key == "water_control" ? "metadata.string_validated_value" : "metadata.number_validated_value"
-
-    workflow_runs.joins(ActiveRecord::Base.send(:sanitize_sql_array, joins_statement))
-                 .order("#{order_by} #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
-  end
-
-  def self.sort_by_host_genome(workflow_runs, order_dir)
-    joins_statement = "
-        LEFT JOIN samples ON workflow_runs.sample_id = samples.id
-        LEFT JOIN host_genomes ON host_genomes.id = samples.host_genome_id
-    "
-    workflow_runs.joins(joins_statement).order("host_genomes.name #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
-  end
-
-  def self.sort_by_input(workflow_runs, sort_key, order_dir)
-    order_statement = "JSON_EXTRACT(`inputs_json`, '$.#{sort_key}') #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}"
-    workflow_runs.order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
-  end
-
-  def self.sort_by_cached_result(workflow_runs, sort_key, order_dir)
-    cached_result_key = sort_key == "coverage_depth" ? "coverage_viz" : "quality_metrics"
-    order_statement = "JSON_EXTRACT(`cached_results`, '$.#{cached_result_key}.#{sort_key}') #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}"
-    workflow_runs.order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
-  end
-
-  def self.sort_by_location(workflow_runs, order_dir)
-    joins_statement = "
-      LEFT JOIN samples ON (workflow_runs.sample_id = samples.id)
-      LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = 'collection_location_v2')
-      LEFT JOIN locations ON metadata.location_id = locations.id
-    "
-    # TODO(ihan): Investigate location metadata creation. I've implemented a workaround solution below,
-    # but ideally, all location info should be stored by location_id.
-    order_statement = "(CASE WHEN ISNULL(metadata.location_id) THEN metadata.string_validated_value ELSE locations.name END) #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
-    workflow_runs.joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+    if sort_key == "created_at"
+      workflow_runs.order("workflow_runs.#{sort_key} #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+    elsif sort_key == "name"
+      workflow_runs.sort_by_sample_name(order_dir)
+    elsif METADATA_SORT_KEYS.include?(sort_key)
+      workflow_runs.sort_by_metadata(sort_key, order_dir)
+    elsif sort_key == "host"
+      workflow_runs.sort_by_host_genome(order_dir)
+    elsif INPUT_SORT_KEYS.include?(sort_key)
+      workflow_runs.sort_by_input(sort_key, order_dir)
+    elsif CACHED_RESULT_SORT_KEYS.include?(sort_key)
+      workflow_runs.sort_by_cached_result(sort_key, order_dir)
+    elsif sort_key == "collection_location_v2"
+      workflow_runs.sort_by_location(order_dir)
+    else
+      workflow_runs
+    end
   end
 
   private
