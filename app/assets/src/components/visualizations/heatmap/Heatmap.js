@@ -4,7 +4,7 @@ import d3 from "d3";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
 import { compact, orderBy, some } from "lodash";
-import { clamp, find, mean, sortBy } from "lodash/fp";
+import { clamp, find, mean, sortBy, minBy } from "lodash/fp";
 import SvgSaver from "svgsaver";
 import textWidth from "text-width";
 
@@ -102,6 +102,9 @@ export default class Heatmap {
     this.columnMetadataSortAsc = this.options.initialColumnMetadataSortAsc;
 
     this.addRowTrigger = null;
+
+    this.overlays = []; // rectangle overlays used for highlighting rows/columns
+    this.overlaysDebounce = false; // used to reduce flickering when highlight row/column labels
   }
 
   getScaleType() {
@@ -1100,15 +1103,11 @@ export default class Heatmap {
   };
 
   handleRowLabelMouseEnter = rowLabelEntered => {
-    for (let i = 0; i < this.rowLabels.length; i++) {
-      // Shade all rows except the one that's being hovered over.
-      this.rowLabels[i].shaded = i !== rowLabelEntered.rowIndex;
-    }
     this.updateLabelHighlights(
       this.gRowLabels.selectAll(`.${cs.rowLabel}`),
       this.rowLabels,
     );
-    this.updateCellHighlights();
+    this.highlightRowOrColumn(rowLabelEntered);
 
     if (this.rowClustering) return;
 
@@ -1138,14 +1137,11 @@ export default class Heatmap {
   };
 
   handleRowLabelMouseLeave = rowLabelLeft => {
-    for (let i = 0; i < this.rowLabels.length; i++) {
-      this.rowLabels[i].shaded = false;
-    }
     this.updateLabelHighlights(
       this.gRowLabels.selectAll(`.${cs.rowLabel}`),
       this.rowLabels,
     );
-    this.updateCellHighlights();
+    this.highlightRowOrColumn(null);
 
     if (this.rowClustering) return;
     this.gRowLabels
@@ -1156,26 +1152,19 @@ export default class Heatmap {
   };
 
   handleColumnLabelMouseEnter = columnLabelEntered => {
-    for (let i = 0; i < this.columnLabels.length; i++) {
-      // Shade all columns except the one that's being hovered over.
-      this.columnLabels[i].shaded = i !== columnLabelEntered.columnIndex;
-    }
     this.updateLabelHighlights(
       this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
       this.columnLabels,
     );
-    this.updateCellHighlights();
+    this.highlightRowOrColumn(columnLabelEntered);
   };
 
   handleColumnLabelMouseLeave = columnLabelLeft => {
-    for (let i = 0; i < this.columnLabels.length; i++) {
-      this.columnLabels[i].shaded = false;
-    }
     this.updateLabelHighlights(
       this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
       this.columnLabels,
     );
-    this.updateCellHighlights();
+    this.highlightRowOrColumn(null);
   };
 
   handleColumnMetadataLabelClick(value) {
@@ -1933,6 +1922,82 @@ export default class Heatmap {
       );
   }
 
+  // Highlight a row or column. The `nbCells` determines how many cells-wide the
+  // highlighted region should be (it's > 1 for dendrogram hovers).
+  highlightRowOrColumn(rowOrColumn, nbCells = 1) {
+    // Add debouncing logic before we clear the overlays. That way, if the user
+    // hovers quickly across rows/columns on a large heatmap, it won't flicker.
+    if (!rowOrColumn) {
+      this.overlaysDebounce = true;
+      setTimeout(() => {
+        if (this.overlaysDebounce) this.clearOverlays();
+      }, 100);
+      return;
+    }
+
+    // Clear previous overlays
+    this.overlaysDebounce = false;
+    this.clearOverlays();
+    const pos = rowOrColumn.pos;
+
+    // Highlight column
+    if (rowOrColumn.columnIndex != null) {
+      // Create overlay rectangle to the left of the highlighted column
+      this.createOverlay({
+        x: 0,
+        y: 0,
+        width: this.cell.width * pos,
+        height: this.height,
+      });
+
+      // Create overlay rectangle to the right of the highlighted column
+      this.createOverlay({
+        x: this.cell.width * (pos + nbCells),
+        y: 0,
+        width: this.cell.width * (this.columnLabels.length - pos - nbCells),
+        height: this.height,
+      });
+
+      // Highlight row
+    } else if (rowOrColumn.rowIndex != null) {
+      // Create overlay rectangle above the highlighted row
+      this.createOverlay({
+        x: 0,
+        y: 0,
+        width: this.width,
+        height: this.cell.height * pos,
+      });
+
+      // Create overlay rectangle below the highlighted row
+      this.createOverlay({
+        x: 0,
+        y: this.cell.height * (pos + nbCells),
+        width: this.width,
+        height: this.cell.height * (this.rowLabels.length - pos - nbCells),
+      });
+    }
+  }
+
+  // Create a rectangle that overlays over the heatmap
+  createOverlay({ x, y, width, height }) {
+    const overlay = this.gCells
+      .append("rect")
+      .style("fill", "white")
+      .style("opacity", 0.8)
+      .attr("x", x)
+      .attr("y", y)
+      .attr("width", width)
+      .attr("height", height);
+
+    this.overlays.push(overlay);
+  }
+
+  // Clear previously drawn overlays
+  clearOverlays() {
+    this.overlays.map(d => d.remove());
+    this.overlays = [];
+  }
+
   updateCellHighlights() {
     this.gCells
       .selectAll(`.${cs.cell}`)
@@ -1980,23 +2045,31 @@ export default class Heatmap {
         target.shaded = highlighted;
       });
 
+      let toUpdate = [];
       while (stack.length) {
         let node = stack.pop();
         node.highlighted = highlighted;
         if (node.left) stack.push(node.left);
         if (node.right) stack.push(node.right);
 
-        if (highlighted && node.value && node.value.idx >= 0) {
-          targets[node.value.idx].shaded = !highlighted;
-        }
+        if (highlighted && node.value && node.value.idx >= 0)
+          toUpdate.push(targets[node.value.idx]);
       }
 
+      // Highlight dendrogram branches
       container
         .selectAll(`.${cs.link}`)
         .data(cluster.links(nodes))
         .classed(cs.highlighted, d => d.source.highlighted);
 
-      this.updateCellHighlights();
+      // Highlight heatmap rows/columns
+      if (!highlighted || toUpdate.length === 0)
+        this.highlightRowOrColumn(null);
+      else {
+        // Start at the lowest positioned row or column, and highlight `toUpdate.length` cells
+        const rowOrColumn = minBy(d => d.pos, toUpdate);
+        this.highlightRowOrColumn(rowOrColumn, toUpdate.length);
+      }
     };
 
     cluster.children(function(d) {
