@@ -113,8 +113,8 @@ module SamplesHelper
     last_processed_at = pr.nil? ? nil : pr.created_at
     result = {
       adjusted_remaining_reads: get_adjusted_remaining_reads(pr),
-      compression_ratio: compute_compression_ratio(pr, job_stats_hash),
-      qc_percent: compute_qc_value(pr, job_stats_hash),
+      compression_ratio: get_compression_ratio(pr),
+      qc_percent: get_qc_percent(pr),
       percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
       insert_size_mean: get_insert_size_mean(pr),
@@ -148,27 +148,12 @@ module SamplesHelper
     insert_size_metric_set.standard_deviation unless insert_size_metric_set.nil?
   end
 
-  def compute_compression_ratio(pr, job_stats_hash)
-    if pr.compression_ratio.present?
-      pr.compression_ratio unless pr.nil?
-    else
-      # TODO: Remove this manual calculation once compression ratio has been backfilled.
-      # job_stats_hash['cdhitdup_out'] required for backwards compatibility
-      czid_dedup_stats = job_stats_hash['czid_dedup_out'] || job_stats_hash['idseq_dedup_out'] || job_stats_hash['cdhitdup_out']
-      priceseq_stats = job_stats_hash['priceseq_out']
-      (1.0 * priceseq_stats['reads_after']) / czid_dedup_stats['reads_after'] unless czid_dedup_stats.nil? || priceseq_stats.nil?
-    end
+  def get_compression_ratio(pr)
+    pr.compression_ratio unless pr.nil? || pr.compression_ratio.blank?
   end
 
-  def compute_qc_value(pr, job_stats_hash)
-    if pr.qc_percent.present?
-      pr.qc_percent unless pr.nil?
-    else
-      # TODO: Remove this manual calculation once qc_value has been backfilled.
-      star_stats = job_stats_hash['star_out']
-      priceseqfilter_stats = job_stats_hash['priceseq_out']
-      (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after'] unless priceseqfilter_stats.nil? || star_stats.nil?
-    end
+  def get_qc_percent(pr)
+    pr.qc_percent unless pr.nil? || pr.qc_percent.blank?
   end
 
   def compute_percentage_reads(pr)
@@ -297,21 +282,20 @@ module SamplesHelper
     samples
   end
 
-  def get_total_runtime(pipeline_run, run_stages)
+  def get_total_runtime(pipeline_run)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
-      (run_stages || []).map { |rs| rs.updated_at - rs.created_at }.sum
+      pipeline_run.time_to_finalized
     else
       # time since pipeline kickoff (including time spent waiting), for run diagnostics
       (Time.current - pipeline_run.created_at)
     end
   end
 
-  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
+  def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, output_states_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
-      run_stages = pipeline_run_stages_by_pipeline_run_id[pipeline_run.id]
-      pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run, run_stages)
+      pipeline_run_entry[:total_runtime] = get_total_runtime(pipeline_run)
       pipeline_run_entry[:with_assembly] = pipeline_run.assembly? ? 1 : 0
       pipeline_run_entry[:result_status_description] = pipeline_run.status_display(output_states_by_pipeline_run_id)
       pipeline_run_entry[:finalized] = pipeline_run.finalized
@@ -400,7 +384,6 @@ module SamplesHelper
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
     unless is_snapshot
-      pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
       report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
     end
     output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
@@ -419,7 +402,7 @@ module SamplesHelper
       job_info[:upload_error] = get_result_status_description_for_errored_sample(sample) if sample.upload_error.present?
 
       if sample.upload_error.nil?
-        job_info[:mngs_run_info] = is_snapshot ? snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id) : pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
+        job_info[:mngs_run_info] = is_snapshot ? snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id) : pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids, output_states_by_pipeline_run_id)
       end
 
       if is_snapshot
