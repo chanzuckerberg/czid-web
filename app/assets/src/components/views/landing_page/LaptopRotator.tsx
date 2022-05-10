@@ -9,7 +9,7 @@ import LaptopImageTwo2x from "~/images/landing_page/laptop-image-2-2x.png";
 import cs from "./LaptopRotator.scss";
 
 const LaptopRotator = () => {
-  let settings = {
+  const settings = {
     dots: false,
     infinite: true,
     speed: 600,
