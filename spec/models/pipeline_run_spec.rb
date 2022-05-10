@@ -547,4 +547,64 @@ describe PipelineRun, type: :model do
       end
     end
   end
+
+  context "loading qc_percent and compression_ratio from job_stats" do
+    let(:job_stats) do
+      [
+        ["cdhitdup_out", 5000],
+        ["priceseq_out", 1_000_000],
+        ["star_out", 2_000_000],
+      ]
+    end
+
+    let(:zero_job_stats) do
+      [
+        ["cdhitdup_out", 0.0],
+        ["priceseq_out", 0.0],
+        ["star_out", 0.0],
+      ]
+    end
+
+    before do
+      @pipeline_run_one = create(:pipeline_run)
+      job_stats.each do |step, reads_after|
+        create(:job_stat, task: step, reads_after: reads_after, pipeline_run_id: @pipeline_run_one.id)
+      end
+
+      @pipeline_run_two = create(:pipeline_run)
+      zero_job_stats.each do |step, reads_after|
+        create(:job_stat, task: step, reads_after: reads_after, pipeline_run_id: @pipeline_run_two.id)
+      end
+    end
+
+    context "when the job stats are present and non-zero" do
+      it "updates qc_percent and compression_ratio" do
+        job_stats_hash = @pipeline_run_one.job_stats.index_by(&:task)
+
+        @pipeline_run_one.load_compression_ratio(job_stats_hash)
+        @pipeline_run_one.load_qc_percent(job_stats_hash)
+
+        expect(@pipeline_run_one.compression_ratio).to eq(200.0)
+        expect(@pipeline_run_one.qc_percent).to eq(50.0)
+      end
+    end
+
+    context "when czid_dedup_stats reads_remaining is 0" do
+      it "does not error while trying to update compression_ratio" do
+        job_stats_hash = @pipeline_run_two.job_stats.index_by(&:task)
+
+        @pipeline_run_two.load_compression_ratio(job_stats_hash)
+        expect(@pipeline_run_two.compression_ratio).to eq(nil)
+      end
+    end
+
+    context "when star_stats reads_remaining is 0" do
+      it "does not error while trying to update qc_percent" do
+        job_stats_hash = @pipeline_run_two.job_stats.index_by(&:task)
+
+        @pipeline_run_two.load_qc_percent(job_stats_hash)
+        expect(@pipeline_run_two.qc_percent).to eq(nil)
+      end
+    end
+  end
 end
