@@ -21,7 +21,7 @@ class WorkflowRunsController < ApplicationController
                          (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
 
     order_by = if sorting_v0_allowed
-                 permitted_params[:orderBy] || :created_at
+                 permitted_params[:orderBy] || "createdAt"
                else
                  sanitize_order_by(WorkflowRun, order_by, :id)
                end

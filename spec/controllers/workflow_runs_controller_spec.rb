@@ -686,14 +686,33 @@ RSpec.describe WorkflowRunsController, type: :controller do
   context "Joe" do
     before do
       sign_in @joe
+      @project = create(:project, users: [@joe])
+      @sample = create(:sample, project: @project, user: @joe)
+    end
+
+    describe "GET index" do
+      context "when sorting_v0 is enabled" do
+        it "sees projects ordered by descending creation date if no sort parameters are specified" do
+          @joe.add_allowed_feature("sorting_v0")
+
+          workflow_run1 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+          workflow_run2 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+
+          expected_workflow_runs = [workflow_run2, workflow_run1]
+
+          get :index, params: { format: "json" }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response["workflow_runs"].count).to eq(expected_workflow_runs.count)
+          expect(json_response["workflow_runs"]).to include_json([
+                                                                   { id: workflow_run2.id },
+                                                                   { id: workflow_run1.id },
+                                                                 ])
+        end
+      end
     end
 
     describe "GET /results" do
-      before do
-        @project = create(:project, users: [@joe])
-        @sample = create(:sample, project: @project, user: @joe)
-      end
-
       context "for consensus genome workflow" do
         it "returns success response" do
           workflow_run = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome])

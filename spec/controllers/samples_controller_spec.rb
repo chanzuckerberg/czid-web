@@ -44,22 +44,24 @@ RSpec.describe SamplesController, type: :controller do
                                               ])
       end
 
-      it "loads a correctly sorted list of samples (with sorting_v0 enabled)" do
-        @joe.add_allowed_feature("sorting_v0")
+      context "when sorting_v0 is enabled" do
+        it "loads samples ordered by descending creation date if no sort parameters are specified" do
+          @joe.add_allowed_feature("sorting_v0")
 
-        project = create(:project, users: [@joe])
-        sample_one = create(:sample, project: project, user: @joe, name: "Test Sample B")
-        sample_two = create(:sample, project: project, user: @joe, name: "Test Sample A")
+          project = create(:project, users: [@joe])
+          sample_one = create(:sample, project: project, user: @joe, name: "Test Sample B")
+          sample_two = create(:sample, project: project, user: @joe, name: "Test Sample A")
 
-        get :index_v2, format: :json, params: { project_id: project.id, domain: "my_data", order_by: "sample", orderDir: "asc" }
-        expect(response).to have_http_status :success
+          get :index_v2, format: :json, params: { project_id: project.id, domain: "my_data" }
+          expect(response).to have_http_status :success
 
-        json_response = JSON.parse(response.body)
-        expect(json_response["samples"].length).to eq(2)
-        expect(json_response).to include_json(samples: [
-                                                { id: sample_two.id },
-                                                { id: sample_one.id },
-                                              ])
+          json_response = JSON.parse(response.body)
+          expect(json_response["samples"].length).to eq(2)
+          expect(json_response).to include_json(samples: [
+                                                  { id: sample_two.id },
+                                                  { id: sample_one.id },
+                                                ])
+        end
       end
     end
 

@@ -86,7 +86,15 @@ class SamplesController < ApplicationController
     # discovery views (old one was kept to avoid breaking the current interface
     # without sacrificing speed of development)
     domain = params[:domain]
-    order_by = params[:orderBy] || :id
+
+    sorting_v0_allowed = current_user.allowed_feature?("sorting_v0_admin") || (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
+
+    order_by = if sorting_v0_allowed
+                 params[:orderBy] || "createdAt"
+               else
+                 params[:orderBy] || :id
+               end
+
     order_dir = sanitize_order_dir(params[:orderDir], :desc)
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
@@ -94,9 +102,6 @@ class SamplesController < ApplicationController
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     samples = fetch_samples(domain: domain, filters: params)
-
-    sorting_v0_allowed = current_user.allowed_feature?("sorting_v0_admin") ||
-                         (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
 
     samples = if sorting_v0_allowed
                 Sample.sort_samples(samples, order_by, order_dir)

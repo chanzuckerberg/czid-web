@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe VisualizationsController, type: :controller do
   create_users
 
-  context "Non-admin" do
+  context "Joe" do
     before do
       sign_in @joe
       project = create(:project)
@@ -17,27 +17,38 @@ RSpec.describe VisualizationsController, type: :controller do
         @visualization_one.samples << sample
         @visualization_two.samples << sample
       end
-      @expected_visualizations = [@visualization_one, @visualization_two]
     end
 
     describe "#GET index" do
-      it "loads a list of visualizations" do
+      it "loads visualizations ordered by descending updated date if no sort parameters are specified" do
         get :index, params: { domain: "my_data" }
         expect(response).to have_http_status :success
 
+        expected_visualizations = [@visualization_two, @visualization_one]
+
         json_response = JSON.parse(response.body)
-        expect(json_response.count).to eq(@expected_visualizations.count)
-        expect(json_response.pluck("id")).to contain_exactly(*@expected_visualizations.pluck("id"))
+        expect(json_response.count).to eq(expected_visualizations.count)
+        expect(json_response).to include_json([
+                                                { id: @visualization_two.id },
+                                                { id: @visualization_one.id },
+                                              ])
       end
 
-      it "loads a list of visualizations (with sorting_v0 enabled)" do
-        @joe.add_allowed_feature("sorting_v0")
-        get :index, params: { domain: "my_data" }
-        expect(response).to have_http_status :success
+      context "when sorting_v0 is enabled" do
+        it "loads visualizations ordered by descending updated date if no sort parameters are specified" do
+          @joe.add_allowed_feature("sorting_v0")
+          get :index, params: { domain: "my_data" }
+          expect(response).to have_http_status :success
 
-        json_response = JSON.parse(response.body)
-        expect(json_response.count).to eq(@expected_visualizations.count)
-        expect(json_response.pluck("id")).to contain_exactly(*@expected_visualizations.pluck("id"))
+          expected_visualizations = [@visualization_two, @visualization_one]
+
+          json_response = JSON.parse(response.body)
+          expect(json_response.count).to eq(expected_visualizations.count)
+          expect(json_response).to include_json([
+                                                  { id: @visualization_two.id },
+                                                  { id: @visualization_one.id },
+                                                ])
+        end
       end
     end
   end

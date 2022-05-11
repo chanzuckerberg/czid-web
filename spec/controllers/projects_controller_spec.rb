@@ -12,39 +12,17 @@ RSpec.describe ProjectsController, type: :controller do
     # create_users
     before do
       sign_in @admin
+      @project1 = create(:project, users: [@admin])
+      @project2 = create(:project, users: [@joe])
+      @project3 = create(:project, users: [@joe, @admin])
+      @project4 = create(:public_project)
+      @project5 = create(:project, samples_data: [{ created_at: 1.year.ago }])
+      @project6 = create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }])
     end
 
     describe "GET index" do
       it "sees all projects" do
-        expected_projects = [
-          create(:project, users: [@admin]),
-          create(:project, users: [@joe]),
-          create(:project, users: [@joe, @admin]),
-          create(:public_project),
-          create(:project, samples_data: [{ created_at: 1.year.ago }]),
-          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }]),
-        ]
-
-        get :index, params: { format: "json" }
-
-        json_response = JSON.parse(response.body)
-        expect(json_response["projects"].count).to eq(expected_projects.count)
-        expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
-        expect(json_response["projects"].pluck("users").flatten.pluck("name")).to contain_exactly(*expected_projects.map(&:users).flatten.pluck(:name))
-      end
-    end
-
-    describe "GET index" do
-      it "sees all projects (with sorting_v0 enabled)" do
-        @admin.add_allowed_feature("sorting_v0")
-        expected_projects = [
-          create(:project, users: [@admin]),
-          create(:project, users: [@joe]),
-          create(:project, users: [@joe, @admin]),
-          create(:public_project),
-          create(:project, samples_data: [{ created_at: 1.year.ago }]),
-          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }]),
-        ]
+        expected_projects = [@project1, @project2, @project3, @project4, @project5, @project6]
 
         get :index, params: { format: "json" }
 
@@ -57,14 +35,7 @@ RSpec.describe ProjectsController, type: :controller do
 
     describe "GET index for updatable domain" do
       it "sees all projects" do
-        expected_projects = [
-          create(:project, users: [@admin]),
-          create(:project, users: [@joe]),
-          create(:project, users: [@joe, @admin]),
-          create(:public_project),
-          create(:project, samples_data: [{ created_at: 1.year.ago }]),
-          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }]),
-        ]
+        expected_projects = [@project1, @project2, @project3, @project4, @project5, @project6]
 
         get :index, params: { format: "json", domain: "updatable" }
 
@@ -94,31 +65,45 @@ RSpec.describe ProjectsController, type: :controller do
   context "Joe" do
     before do
       sign_in @joe
+      @project1 = create(:project, users: [@admin])
+      @project2 = create(:project, users: [@joe])
+      @project3 = create(:project, users: [@joe, @admin])
+      @project4 = create(:public_project)
     end
 
     describe "GET index" do
-      it "sees own projects" do
-        expected_projects = []
-        create(:project, users: [@admin])
-        expected_projects << create(:project, users: [@joe])
-        expected_projects << create(:project, users: [@joe, @admin])
-        create(:public_project)
-
+      it "sees own projects ordered by descending creation date" do
         get :index, params: { format: "json" }
 
         json_response = JSON.parse(response.body)
+        expected_projects = [@project3, @project2]
         expect(json_response["projects"].count).to eq(expected_projects.count)
-        expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        expect(json_response["projects"]).to include_json([
+                                                            { id: @project3.id },
+                                                            { id: @project2.id },
+                                                          ])
+      end
+
+      context "when sorting_v0 is enabled" do
+        it "sees own projects ordered by descending creation date if no sort parameters are specified" do
+          @joe.add_allowed_feature("sorting_v0")
+
+          get :index, params: { format: "json" }
+
+          json_response = JSON.parse(response.body)
+          expected_projects = [@project3, @project2]
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"]).to include_json([
+                                                              { id: @project3.id },
+                                                              { id: @project2.id },
+                                                            ])
+        end
       end
     end
 
     describe "GET index for updatable" do
       it "sees own projects" do
-        expected_projects = []
-        create(:project, users: [@admin])
-        expected_projects << create(:project, users: [@joe])
-        expected_projects << create(:project, users: [@joe, @admin])
-        create(:public_project)
+        expected_projects = [@project2, @project3]
 
         get :index, params: { format: "json", domain: "updatable" }
 

@@ -22,7 +22,14 @@ class VisualizationsController < ApplicationController
   def index
     domain = visualization_params[:domain]
     search = visualization_params[:search]
-    order_by = visualization_params[:orderBy] || :updated_at
+
+    sorting_v0_allowed = current_user.allowed_feature?("sorting_v0_admin") || (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
+
+    order_by = if sorting_v0_allowed
+                 visualization_params[:orderBy] || "updated_at"
+               else
+                 visualization_params[:orderBy] || :updated_at
+               end
     order_dir = sanitize_order_dir(visualization_params[:orderDir], :desc)
 
     visualizations = if domain == "my_data"
@@ -44,9 +51,6 @@ class VisualizationsController < ApplicationController
                      .select("DISTINCT visualizations.id AS id, users.id AS user_id, visualization_type, users.name AS user_name, visualizations.name, visualizations.updated_at, visualizations.status") \
                      .where.not(data: deprecated_visualizations_data) # filter out deprecated PhyloTreeNgs
                      .where.not(visualization_type: [nil, 'undefined'], name: nil) # filter out legacy data
-
-    sorting_v0_allowed = current_user.allowed_feature?("sorting_v0_admin") ||
-                         (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
 
     visualizations = if sorting_v0_allowed
                        Visualization.sort_visualizations(visualizations, order_by, order_dir)

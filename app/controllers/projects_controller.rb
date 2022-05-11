@@ -57,7 +57,7 @@ class ProjectsController < ApplicationController
                              (current_user.allowed_feature?("sorting_v0") && domain == "my_data")
 
         order_by = if sorting_v0_allowed
-                     params[:orderBy] || :created_at
+                     params[:orderBy] || "created_at"
                    else
                      sanitize_order_by(Project, params[:orderBy], :id)
                    end
