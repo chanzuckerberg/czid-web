@@ -547,22 +547,16 @@ export default class Heatmap {
 
       // Briefly highlight the focused row.
       this.rowLabels[rowIndex].highlighted = true;
-      for (let i = 0; i < this.rowLabels.length; i++) {
-        this.rowLabels[i].shaded = i !== rowIndex;
-      }
+      this.highlightRowOrColumn(this.rowLabels[rowIndex]);
       this.updateLabelHighlights(
         this.gRowLabels.selectAll(`.${cs.rowLabel}`),
         this.rowLabels,
       );
-      this.updateCellHighlights();
 
       this.rowLabels[rowIndex].highlighted = false;
-      for (let i = 0; i < this.rowLabels.length; i++) {
-        this.rowLabels[i].shaded = false;
-      }
       setTimeout(() => {
+        this.highlightRowOrColumn(null);
         this.rowLabels[rowIndex].highlighted = false;
-        this.updateCellHighlights();
         this.updateLabelHighlights(
           this.gRowLabels.selectAll(`.${cs.rowLabel}`),
           this.rowLabels,
@@ -1996,18 +1990,6 @@ export default class Heatmap {
   clearOverlays() {
     this.overlays.map(d => d.remove());
     this.overlays = [];
-  }
-
-  updateCellHighlights() {
-    this.gCells
-      .selectAll(`.${cs.cell}`)
-      .data(this.cells, d => d.id)
-      .classed(
-        cs.shaded,
-        d =>
-          this.columnLabels[d.columnIndex].shaded ||
-          this.rowLabels[d.rowIndex].shaded,
-      );
   }
 
   updateLabelHighlights(nodes, labels) {
