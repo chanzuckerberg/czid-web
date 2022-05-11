@@ -3,90 +3,64 @@ import { IconArrowRight } from "~ui/icons";
 import cs from "./PublicationsAndNews.scss";
 import { publicationsData, newsData } from "./PublicationsAndNewsData";
 
-interface PublicationsAndNewsProps {
-  index?: number;
-  publicationLink: string;
-  publicationDate: string;
-  publicationTitle: string;
-  publicationSource?: string;
-  publicationCompany: string;
+interface EntryListProps {
+  className: string;
+  title: string;
+  data: {
+    publicationLink: string;
+    publicationDate: string;
+    publicationTitle: string;
+    publicationCompany: string;
+    publicationSource?: string;
+  }[];
 }
 
-const PublicationEntry = (props: PublicationsAndNewsProps) => {
+const EntryList = (props: EntryListProps) => {
   return (
-    <li className={cs.publication} key={props.index}>
-      <a href={props.publicationLink} target="_blank" rel="noopener noreferrer">
-        <time className={cs.date}>
-          {props.publicationDate} - {props.publicationCompany}
-        </time>
-        <h3 className={cs.title}>{props.publicationTitle}</h3>
-        <p className={cs.source}>{props.publicationSource}</p>
-        <p className={cs.readMore}>
-          Read More <IconArrowRight />
-        </p>
-      </a>
-    </li>
-  );
-};
-
-const NewsEntry = (props: PublicationsAndNewsProps) => {
-  return (
-    <li className={cs.publication} key={props.index}>
-      <a href={props.publicationLink} target="_blank" rel="noopener noreferrer">
-        <time className={cs.date}>
-          {props.publicationDate} - {props.publicationCompany}
-        </time>
-        <h3 className={cs.title}>{props.publicationTitle}</h3>
-        <p className={cs.readMore}>
-          Read More <IconArrowRight />
-        </p>
-      </a>
-    </li>
+    <div className={props.className}>
+      <h2>{props.title}</h2>
+      <ul>
+        {props.data &&
+          props.data.map((entry, index) => {
+            return (
+              <li className={cs.publication} key={index}>
+                <a
+                  href={entry.publicationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <time className={cs.date}>
+                    {entry.publicationDate} - {entry.publicationCompany}
+                  </time>
+                  <h3 className={cs.title}>{entry.publicationTitle}</h3>
+                  {entry.publicationSource && (
+                    <p className={cs.source}>{entry.publicationSource}</p>
+                  )}
+                  <p className={cs.readMore}>
+                    Read More <IconArrowRight />
+                  </p>
+                </a>
+              </li>
+            );
+          })}
+      </ul>
+    </div>
   );
 };
 
 const Publications = () => {
   return (
-    <div className={cs.publications}>
-      <h2>Scientific Publications</h2>
-      <ul>
-        {publicationsData &&
-          publicationsData.map((entry, index) => {
-            return (
-              <PublicationEntry
-                key={index}
-                publicationLink={entry.publicationLink}
-                publicationDate={entry.publicationDate}
-                publicationTitle={entry.publicationTitle}
-                publicationSource={entry.publicationSource}
-                publicationCompany={entry.publicationCompany}
-              />
-            );
-          })}
-      </ul>
-    </div>
+    <EntryList
+      className={cs.publications}
+      title="Scientific Publications"
+      data={publicationsData}
+    />
   );
 };
 
 const News = () => {
   return (
-    <div className={cs.news}>
-      <h2>CZ ID in the News</h2>
-      <ul>
-        {newsData &&
-          newsData.map((entry, index) => {
-            return (
-              <NewsEntry
-                key={index}
-                publicationLink={entry.publicationLink}
-                publicationDate={entry.publicationDate}
-                publicationTitle={entry.publicationTitle}
-                publicationCompany={entry.publicationCompany}
-              />
-            );
-          })}
-      </ul>
-    </div>
+    <EntryList className={cs.news} title="CZ ID in the News" data={newsData} />
   );
 };
 
