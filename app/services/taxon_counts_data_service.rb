@@ -100,7 +100,7 @@ class TaxonCountsDataService
       taxon_counts_query = taxon_counts_query
                            .joins(pipeline_run: :alignment_config)
                            .joins(:taxon_lineage)
-                           .where('alignment_configs.lineage_version BETWEEN version_start_new AND version_end_new')
+                           .where('alignment_configs.lineage_version BETWEEN version_start AND version_end')
     end
 
     taxon_counts_query.pluck_to_hash(*fields)

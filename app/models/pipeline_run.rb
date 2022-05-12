@@ -1523,7 +1523,7 @@ class PipelineRun < ApplicationRecord
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
-       WHERE (#{lineage_version} BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new) AND
+       WHERE (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
              taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_run_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
@@ -1544,7 +1544,7 @@ class PipelineRun < ApplicationRecord
         WHERE taxon_counts.pipeline_run_id=$1 AND
               taxon_counts.tax_level=$2 AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
-              ($3 BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new) AND
+              ($3 BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
               taxon_lineages.#{level}_name IS NOT NULL
       ", [nil, id, level_id, lineage_version])
     end
@@ -1558,7 +1558,7 @@ class PipelineRun < ApplicationRecord
           taxon_counts.family_taxid = taxon_lineages.family_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=$1 AND
-            ($2 BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new) AND
+            ($2 BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
             taxon_lineages.taxid = taxon_counts.tax_id
     ", [nil, id, lineage_version])
   end
@@ -1569,7 +1569,7 @@ class PipelineRun < ApplicationRecord
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=$1
-            AND ($2 BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new)
+            AND ($2 BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
             AND taxon_counts.tax_id > $3
             AND taxon_lineages.taxid = taxon_counts.tax_id
     ", [nil, id, lineage_version, TaxonLineage::INVALID_CALL_BASE_ID])
@@ -1577,18 +1577,26 @@ class PipelineRun < ApplicationRecord
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=$1
-            AND ($2 BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new)
+            AND ($2 BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
             AND taxon_counts.tax_id < $3
             AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS($3))
     ", [nil, id, lineage_version, TaxonLineage::INVALID_CALL_BASE_ID])
   end
 
   def update_is_phage
+    phage_families = TaxonLineage::PHAGE_FAMILIES_TAXIDS.join(",")
     TaxonCount.connection.execute("
-      UPDATE taxon_counts, taxon_lineages
-      SET taxon_counts.is_phage = taxon_lineages.is_phage
+      UPDATE taxon_counts
+      SET is_phage = 1
       WHERE pipeline_run_id=#{id} AND
-            taxon_counts.tax_id = taxon_lineages.taxid
+            family_taxid IN (#{phage_families})
+    ")
+    phage_taxids = TaxonLineage::PHAGE_TAXIDS.join(",")
+    TaxonCount.connection.execute("
+      UPDATE taxon_counts
+      SET is_phage = 1
+      WHERE pipeline_run_id=#{id} AND
+            tax_id IN (#{phage_taxids})
     ")
   end
 

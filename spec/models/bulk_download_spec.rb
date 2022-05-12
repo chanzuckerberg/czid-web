@@ -640,7 +640,7 @@ describe BulkDownload, type: :model do
     before do |example|
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
-      @alignment_config = create(:alignment_config, lineage_version: "2022-01-03")
+      @alignment_config = create(:alignment_config, lineage_version: 3)
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version, alignment_config_id: @alignment_config.id }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
