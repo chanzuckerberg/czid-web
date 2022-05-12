@@ -45,14 +45,17 @@ main() {
   declare tag; tag="$(_format_version_tag "${staging_tag_version}" "${PROD_BRANCH}")"
   _log "Creating tag ${tag} to point ${PROD_BRANCH} to the head of ${STAGING_BRANCH} branch..."
   git tag -a -m "Release $staging_tag_version" "${tag}" "origin/$STAGING_BRANCH"
+  sleep 5
 
   # Set HEAD of prod branch to this new tag
   declare sha; sha=$(_get_latest_commit "${tag}")
   _log "Pointing prod branch to tag ${tag}..."
   git branch -f "${PROD_BRANCH}" "${sha}"
+  sleep 5
 
   # Update remote with new tag and branch head
   git push --atomic -f origin "${tag}" "${PROD_BRANCH}"
+  sleep 5
 
   # deploy instructions
   _log "Release cycle $staging_tag_version successfully closed." \

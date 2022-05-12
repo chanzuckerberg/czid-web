@@ -49,11 +49,13 @@ main() {
   declare tag; tag="$(_format_version_tag "${next_version}" "${STAGING_ENV}")"
   _log "Creating tag ${tag} pointing to the top of ${MAIN_BRANCH} branch..."
   git tag -a -m "Started release cycle $next_version" "${tag}" "origin/$MAIN_BRANCH"
+  sleep 5
 
   # point staging branch head to main
   declare sha; sha=$(git log -n1 "${tag}" --format=%h --abbrev=8)
   _log "Pointing ${STAGING_BRANCH} branch to tag ${tag}..."
   git branch -f "${STAGING_BRANCH}" "${sha}"
+  sleep 5
 
   # Update remote with new tag and branch head
   git push --atomic -f origin "${tag}" "${STAGING_BRANCH}"

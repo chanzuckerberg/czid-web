@@ -48,6 +48,8 @@ main() {
   _log "Current release cycle state: $current_release_state"
   _trace ""
 
+  sleep 5
+
   _log "**** CLOSING RELEASE CYCLE ****"
   if [ "$current_release_state" != "closed" ]; then
     "$SCRIPT_DIR/close_release_cycle.sh"
@@ -55,6 +57,8 @@ main() {
     _log "${YELLOW}WARNING: Current release cycle seems to be already closed. Skipping this step."
   fi
   _trace ""
+
+  sleep 5
 
   _log "**** STARTING NEW RELEASE CYCLE ****"
   "$SCRIPT_DIR/start_release_cycle.sh" "$should_make_release_checklist"
