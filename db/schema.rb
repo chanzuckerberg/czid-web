@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_26_223649) do
+ActiveRecord::Schema.define(version: 2022_05_11_215021) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -241,6 +241,7 @@ ActiveRecord::Schema.define(version: 2022_04_26_223649) do
     t.integer "read_pairs", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["mean"], name: "index_insert_size_metric_sets_on_mean"
     t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
   end
 
@@ -292,7 +293,9 @@ ActiveRecord::Schema.define(version: 2022_04_26_223649) do
     t.bigint "metadata_field_id"
     t.bigint "location_id"
     t.index ["metadata_field_id"], name: "index_metadata_on_metadata_field_id"
+    t.index ["number_validated_value"], name: "index_metadata_on_number_validated_value"
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
+    t.index ["string_validated_value"], name: "index_metadata_on_string_validated_value"
   end
 
   create_table "metadata_fields", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -493,11 +496,17 @@ ActiveRecord::Schema.define(version: 2022_04_26_223649) do
     t.integer "time_to_results_finalized", comment: "Seconds from executed_at to marked as finished with processing and results loading."
     t.float "qc_percent"
     t.float "compression_ratio"
+    t.index ["adjusted_remaining_reads"], name: "index_pipeline_runs_on_adjusted_remaining_reads"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["compression_ratio"], name: "index_pipeline_runs_on_compression_ratio"
+    t.index ["fraction_subsampled"], name: "index_pipeline_runs_on_fraction_subsampled"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
+    t.index ["pipeline_version"], name: "index_pipeline_runs_on_pipeline_version"
     t.index ["qc_percent"], name: "index_pipeline_runs_on_qc_percent"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
+    t.index ["time_to_finalized"], name: "index_pipeline_runs_on_time_to_finalized"
+    t.index ["total_ercc_reads"], name: "index_pipeline_runs_on_total_ercc_reads"
+    t.index ["total_reads"], name: "index_pipeline_runs_on_total_reads"
   end
 
   create_table "projects", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -559,6 +568,7 @@ ActiveRecord::Schema.define(version: 2022_04_26_223649) do
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.string "initial_workflow", default: "short-read-mngs", null: false, comment: "A soft enum (string) describing the initial workflow the sample was run on"
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
+    t.index ["name"], name: "index_samples_on_name"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
@@ -779,6 +789,8 @@ ActiveRecord::Schema.define(version: 2022_04_26_223649) do
     t.integer "public_access", limit: 1
     t.string "name"
     t.string "status", comment: "A soft enum (string) describing the execution status. Currently only applicable to phylo trees."
+    t.index ["name"], name: "index_visualizations_on_name"
+    t.index ["updated_at"], name: "index_visualizations_on_updated_at"
     t.index ["user_id"], name: "index_visualizations_on_user_id"
   end
 

@@ -108,7 +108,7 @@ class Sample < ApplicationRecord
   # Constants related to sorting
   DATA_KEY_TO_SORT_KEY = {
     "sample" => "name",
-    "createdAt" => "created_at",
+    "createdAt" => "id",
     "collectionLocationV2" => "collection_location_v2",
     "sampleType" => "sample_type",
     "waterControl" => "water_control",
@@ -123,7 +123,7 @@ class Sample < ApplicationRecord
     "totalRuntime" => "time_to_finalized",
     "meanInsertSize" => "mean_insert_size",
   }.freeze
-  SAMPLES_SORT_KEYS = ["name", "created_at"].freeze
+  SAMPLES_SORT_KEYS = ["name", "id"].freeze
   METADATA_SORT_KEYS = ["sample_type", "water_control"].freeze
   PIPELINE_RUNS_SORT_KEYS = ["total_reads", "adjusted_remaining_reads", "total_ercc_reads", "pipeline_version", "fraction_subsampled", "qc_percent", "compression_ratio", "time_to_finalized"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
