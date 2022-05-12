@@ -6,6 +6,8 @@ FactoryBot.define do
     sequence(:ended_at) { |n| Time.zone.local(3000 + n, 1, 1) }
     sequence(:version_start) { 1 }
     sequence(:version_end) { 1 }
+    sequence(:version_start_new) { "2022-01-01" }
+    sequence(:version_end_new) { "2022-01-01" }
 
     factory :species do
       sequence(:tax_name) { |n| "species-#{n}" }

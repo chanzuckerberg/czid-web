@@ -2,10 +2,14 @@ one:
   taxid: 1
   version_start: 1
   version_end: 1
+  version_start_new: "2022-01-01"
+  version_end_new: "2022-01-01"
 
 kleb_pneumo:
   version_start: 1
   version_end: 1
+  version_start_new: "2022-01-01"
+  version_end_new: "2022-01-01"
   taxid: 573
   species_taxid: 573
   genus_taxid: 570
@@ -58,3 +62,5 @@ strep_pneumo:
   tax_name: "Streptococcus pneumoniae"
   version_start: 1
   version_end: 3
+  version_start_new: "2022-01-01"
+  version_end_new: "2022-01-03"

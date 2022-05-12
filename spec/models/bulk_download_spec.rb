@@ -640,7 +640,7 @@ describe BulkDownload, type: :model do
     before do |example|
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
-      @alignment_config = create(:alignment_config, lineage_version: 3)
+      @alignment_config = create(:alignment_config, lineage_version: "2022-01-03")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version, alignment_config_id: @alignment_config.id }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
@@ -681,7 +681,7 @@ describe BulkDownload, type: :model do
 
     def create_taxon_lineage(taxid)
       # Creates a taxon lineage with effective tax_level 2 (genus)
-      create(:taxon_lineage, taxid: taxid, genus_taxid: taxid, version_start: 3, version_end: 5)
+      create(:taxon_lineage, taxid: taxid, genus_taxid: taxid, version_start: 3, version_end: 5, version_start_new: "2022-01-03", version_end_new: "2022-01-05")
     end
 
     it "correctly generates download file for download type sample_taxon_report" do
