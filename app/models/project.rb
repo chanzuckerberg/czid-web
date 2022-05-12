@@ -49,8 +49,14 @@ class Project < ApplicationRecord
   TIEBREAKER_SORT_KEY = "id".freeze
 
   scope :sort_by_sample_count, lambda { |order_dir|
-    order_statement = "COUNT(samples.id) #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}"
-    left_outer_joins(:samples).group(:id).order(ActiveRecord::Base.sanitize_sql_array(order_statement))
+    sample_count_alias = "total_sample_count"
+    sorted_project_ids = select("projects.id, COUNT(DISTINCT samples.id) AS #{sample_count_alias}")
+                         .left_joins(:samples)
+                         .group(:id)
+                         .order(Arel.sql("#{sample_count_alias} #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}"))
+                         .collect(&:id)
+
+    where(id: sorted_project_ids).order(Arel.sql("field(projects.id, #{sorted_project_ids.join ','})"))
   }
 
   # For these sort scopes, GROUP_CONCAT assembles a sort key, but the select filters out other fields
