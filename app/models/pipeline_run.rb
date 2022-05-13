@@ -1540,50 +1540,50 @@ class PipelineRun < ApplicationRecord
     lineage_version = alignment_config.lineage_version
     %w[species genus family].each do |level|
       level_id = ActiveRecord::Base.connection.quote(TaxonCount::NAME_2_LEVEL[level])
-      TaxonCount.connection.exec_query("
+      TaxonCount.connection.execute(ActiveRecord::Base.sanitize_sql_array(["
         UPDATE taxon_counts, taxon_lineages
         SET taxon_counts.name = taxon_lineages.#{level}_name,
             taxon_counts.common_name = taxon_lineages.#{level}_common_name
-        WHERE taxon_counts.pipeline_run_id=$1 AND
-              taxon_counts.tax_level=$2 AND
+        WHERE taxon_counts.pipeline_run_id=:id AND
+              taxon_counts.tax_level=:level_id AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
-              ($3 BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
+              (:lineage_version BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
               taxon_lineages.#{level}_name IS NOT NULL
-      ", [nil, id, level_id, lineage_version])
+      ", id: id, level_id: level_id, lineage_version: lineage_version,]))
     end
   end
 
   def update_genera
     lineage_version = alignment_config.lineage_version
-    TaxonCount.connection.exec_query("
+    TaxonCount.connection.execute(ActiveRecord::Base.sanitize_sql_array(["
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
           taxon_counts.family_taxid = taxon_lineages.family_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
-      WHERE taxon_counts.pipeline_run_id=$1 AND
-            ($2 BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
+      WHERE taxon_counts.pipeline_run_id=:id AND
+            (:lineage_version BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
             taxon_lineages.taxid = taxon_counts.tax_id
-    ", [nil, id, lineage_version])
+    ", id: id, lineage_version: lineage_version,]))
   end
 
   def update_superkingdoms
     lineage_version = alignment_config.lineage_version
-    TaxonCount.connection.exec_query("
+    TaxonCount.connection.execute(ActiveRecord::Base.sanitize_sql_array(["
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
-      WHERE taxon_counts.pipeline_run_id=$1
-            AND ($2 BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
-            AND taxon_counts.tax_id > $3
+      WHERE taxon_counts.pipeline_run_id=:id
+            AND (:lineage_version BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
+            AND taxon_counts.tax_id > :invalid_call_base_id
             AND taxon_lineages.taxid = taxon_counts.tax_id
-    ", [nil, id, lineage_version, TaxonLineage::INVALID_CALL_BASE_ID])
-    TaxonCount.connection.exec_query("
+    ", id: id, lineage_version: lineage_version, invalid_call_base_id: TaxonLineage::INVALID_CALL_BASE_ID,]))
+    TaxonCount.connection.execute(ActiveRecord::Base.sanitize_sql_array(["
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
-      WHERE taxon_counts.pipeline_run_id=$1
-            AND ($2 BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
-            AND taxon_counts.tax_id < $3
-            AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS($3))
-    ", [nil, id, lineage_version, TaxonLineage::INVALID_CALL_BASE_ID])
+      WHERE taxon_counts.pipeline_run_id=:id
+            AND (:lineage_version BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
+            AND taxon_counts.tax_id < :invalid_call_base_id
+            AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS(:invalid_call_base_id))
+    ", id: id, lineage_version: lineage_version, invalid_call_base_id: TaxonLineage::INVALID_CALL_BASE_ID,]))
   end
 
   def update_is_phage
