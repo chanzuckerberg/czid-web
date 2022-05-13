@@ -57,7 +57,7 @@ class ResultMonitorLoader
     if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
       # Check if run is complete:
       if pipeline_run.all_output_states_terminal?
-        compiling_stats_error = check_job_stats
+        compiling_stats_error = pipeline_run.check_job_stats
         pipeline_run.finalize_results(compiling_stats_error)
       end
     end
