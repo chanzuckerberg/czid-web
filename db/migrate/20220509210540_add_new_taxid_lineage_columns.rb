@@ -9,23 +9,25 @@ class AddNewTaxidLineageColumns < ActiveRecord::Migration[6.1]
     end
 
     TaxonLineage.connection.execute("
-      UPDATE taxon_lineages, alignment_configs
-      SET taxon_lineages.version_start_new = IFNULL(alignment_configs.name, '2020-01-15')
-      WHERE taxon_lineages.version_start = alignment_configs.lineage_version;
+      UPDATE taxon_lineages
+        LEFT JOIN alignment_configs
+      ON taxon_lineages.version_start = alignment_configs.lineage_version
+      SET taxon_lineages.version_start_new = IFNULL(alignment_configs.name, '2020-01-15');
     ")
 
     TaxonLineage.connection.execute("
-      UPDATE taxon_lineages, alignment_configs
-      SET taxon_lineages.version_end_new = IFNULL(alignment_configs.name, '2020-01-15')
-      WHERE taxon_lineages.version_end = alignment_configs.lineage_version;
+      UPDATE taxon_lineages
+        LEFT JOIN alignment_configs
+      ON taxon_lineages.version_end = alignment_configs.lineage_version
+      SET taxon_lineages.version_end_new = IFNULL(alignment_configs.name, '2020-01-15');
     ")
 
     change_table :taxon_lineages, bulk: true do |t|
       t.change_null :version_start_new, false
       t.change_null :version_end_new, false
-      t.index ["taxid", "version_start_new"], name: "index_taxon_lineages_on_taxid_and_version_start_new", unique: true, if_not_exists: true
-      t.index ["taxid", "version_start_new", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_versions_new", unique: true, if_not_exists: true
-      t.index ["taxid", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_version_end_new", unique: true, if_not_exists: true
+      t.index ["taxid", "version_start_new"], name: "index_taxon_lineages_on_taxid_and_version_start_new", unique: true
+      t.index ["taxid", "version_start_new", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_versions_new", unique: true
+      t.index ["taxid", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_version_end_new", unique: true
     end
 
     phage_families = TaxonLineage::PHAGE_FAMILIES_TAXIDS.join(",")
@@ -44,11 +46,11 @@ class AddNewTaxidLineageColumns < ActiveRecord::Migration[6.1]
 
   def down
     change_table :taxon_lineages, bulk: true do |t|
-      t.remove_index name: "index_taxon_lineages_on_taxid_and_version_start_new", if_exists: true
-      t.remove_index name: "index_taxon_lineages_on_taxid_and_versions_new", if_exists: true
-      t.remove_index name: "index_taxon_lineages_on_taxid_and_version_end_new", if_exists: true
-      t.remove :version_start_new, if_exists: true
-      t.remove :version_end_new, if_exists: true
+      t.remove_index name: "index_taxon_lineages_on_taxid_and_version_start_new"
+      t.remove_index name: "index_taxon_lineages_on_taxid_and_versions_new"
+      t.remove_index name: "index_taxon_lineages_on_taxid_and_version_end_new"
+      t.remove :version_start_new
+      t.remove :version_end_new
       t.remove :is_phage
     end
   end
