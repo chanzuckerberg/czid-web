@@ -1061,7 +1061,7 @@ class PipelineRun < ApplicationRecord
     if last_completed_stage == PipelineRunStage::DAG_NAME_HOST_FILTER
       compiling_stats_error = update_job_stats
       if compiling_stats_error.present?
-        LogUtil.log_error("SampleFailedEvent: Failure compiling stats for PipelineRun #{id}: #{compiling_stats_error}", exception: compiling_stats_error)
+        LogUtil.log_error("SampleFailedEvent: Failure compiling stats for PipelineRun #{id}: #{compiling_stats_error}")
       end
     end
 
@@ -1080,6 +1080,9 @@ class PipelineRun < ApplicationRecord
     job_stats_hash = job_stats.index_by(&:task)
     load_qc_percent(job_stats_hash)
     load_compression_ratio(job_stats_hash)
+
+    # return nil to indicate no error has occurred
+    return nil
   rescue StandardError => error
     LogUtil.log_error("Failure compiling stats: #{error}", exception: error)
     error
