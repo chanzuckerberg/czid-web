@@ -477,6 +477,44 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  resetDataFromSortChange = () => {
+    const { currentTab } = this.state;
+    if (currentTab === "samples") {
+      this.resetSamplesData();
+    } else if (currentTab === "projects") {
+      this.resetProjectsData();
+    } else if (currentTab === "visualiations") {
+      this.resetVisualizationsData();
+    }
+  };
+
+  resetSamplesData = () => {
+    const { workflow } = this.state;
+    const conditions = this.getConditions();
+
+    if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
+      this.samples.reset({ conditions, loadFirstPage: true });
+    } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+      this.workflowRuns.reset({ conditions, loadFirstPage: true });
+    }
+
+    this.samplesView && this.samplesView.reset();
+  };
+
+  resetProjectsData = () => {
+    const conditions = this.getConditions();
+
+    this.projects.reset({ conditions, loadFirstPage: true });
+    this.projectsView && this.projectsView.reset();
+  };
+
+  resetVisualizationsData = () => {
+    const conditions = this.getConditions();
+
+    this.visualizations.reset({ conditions, loadFirstPage: true });
+    this.visualizationsView && this.visualizationsView.reset();
+  };
+
   refreshDataFromProjectChange = () => {
     this.resetData({
       callback: () => {
@@ -1227,7 +1265,7 @@ class DiscoveryView extends React.Component {
   handleSortColumn = ({ sortBy, sortDirection }) => {
     this.setState({ orderBy: sortBy, orderDirection: sortDirection }, () => {
       this.updateBrowsingHistory("replace");
-      this.resetDataFromFilterChange();
+      this.resetDataFromSortChange();
     });
   };
 
