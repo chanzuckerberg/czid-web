@@ -46,14 +46,19 @@ const BlastContigsModal = ({
   const [blastUrls, setBlastUrls] = useState([]);
   const [sequencesAreTooLong, setSequencesAreTooLong] = useState(false);
 
-  useEffect(async () => {
-    const { contigs } = await fetchLongestContigsForTaxonId({
-      sampleId,
-      pipelineVersion,
-      taxonId,
-    });
+  useEffect(() => {
+    // Run async logic in separate function since `useEffect(async () => ...)` is not supported
+    async function run() {
+      const { contigs } = await fetchLongestContigsForTaxonId({
+        sampleId,
+        pipelineVersion,
+        taxonId,
+      });
 
-    setContigs(contigs);
+      setContigs(contigs);
+    }
+
+    run();
   }, []);
 
   useEffect(() => {
@@ -316,7 +321,7 @@ BlastContigsModal.propTypes = {
   context: PropTypes.object,
   open: PropTypes.bool,
   onClose: PropTypes.func,
-  pipelineVersion: PropTypes.number,
+  pipelineVersion: PropTypes.string,
   sampleId: PropTypes.number,
   taxonId: PropTypes.number,
   taxonName: PropTypes.string,

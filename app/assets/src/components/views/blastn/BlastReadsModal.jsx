@@ -35,23 +35,27 @@ const BlastReadsModal = ({
   );
   const [blastUrl, setBlastUrl] = useState("");
 
-  useEffect(async () => {
-    const {
-      reads,
-      shortestAlignmentLength,
-      longestAlignmentLength,
-    } = await fetchLongestReadsForTaxonId({
-      sampleId,
-      pipelineVersion,
-      taxonId,
-      taxonLevel,
-    });
-    const blastUrl = prepareBlastQuery({ sequences: reads.join("") });
+  useEffect(() => {
+    // Run async logic in separate function since `useEffect(async () => ...)` is not supported
+    async function run() {
+      const {
+        reads,
+        shortestAlignmentLength,
+        longestAlignmentLength,
+      } = await fetchLongestReadsForTaxonId({
+        sampleId,
+        pipelineVersion,
+        taxonId,
+        taxonLevel,
+      });
+      const blastUrl = prepareBlastQuery({ sequences: reads.join("") });
 
-    setShortestAlignmentLength(shortestAlignmentLength);
-    setLongestAlignmentLength(longestAlignmentLength);
-    setReads(reads);
-    setBlastUrl(blastUrl);
+      setShortestAlignmentLength(shortestAlignmentLength);
+      setLongestAlignmentLength(longestAlignmentLength);
+      setReads(reads);
+      setBlastUrl(blastUrl);
+    }
+    run();
   }, []);
 
   const handleContinue = () => {
