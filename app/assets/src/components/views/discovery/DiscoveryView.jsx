@@ -52,11 +52,10 @@ import { DEFAULTS_BY_WORKFLOW } from "~/components/views/samples/SamplesView/Col
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import Tabs from "~ui/controls/Tabs";
-import {
-  ImgProjectsSecondary,
-  ImgSamplesSecondary,
-  ImgVizSecondary,
-} from "~ui/illustrations";
+import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
+import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
+import ImgVizSecondary from "~ui/illustrations/ImgVizSecondary";
+
 import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 

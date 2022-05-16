@@ -72,7 +72,7 @@ ProjectUploadMenu.propTypes = {
     id: PropTypes.number,
     name: PropTypes.string,
   }),
-  workflow: PropTypes.workflow,
+  workflow: PropTypes.string,
 };
 
 export default ProjectUploadMenu;
