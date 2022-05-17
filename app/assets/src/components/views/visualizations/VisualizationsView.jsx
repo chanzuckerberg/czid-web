@@ -40,10 +40,6 @@ class VisualizationsView extends React.Component {
     super(props);
 
     this.discoveryView = null;
-    this.state = {
-      sortBy: "",
-      sortDirection: "DESC",
-    };
 
     this.columns = [
       {
@@ -174,9 +170,6 @@ class VisualizationsView extends React.Component {
   };
 
   handleSortColumn = ({ sortBy, sortDirection }) => {
-    // Updates column header UI with new sort state
-    this.setState({ sortBy, sortDirection });
-
     // Calls onSortColumn callback to fetch sorted data
     this.props.onSortColumn({ sortBy, sortDirection });
   };
@@ -189,8 +182,7 @@ class VisualizationsView extends React.Component {
   };
 
   render() {
-    const { sortable } = this.props;
-    const { sortBy, sortDirection } = this.state;
+    const { sortBy, sortDirection, sortable } = this.props;
 
     return (
       <BaseDiscoveryView
@@ -212,6 +204,8 @@ VisualizationsView.propTypes = {
   visualizations: PropTypes.instanceOf(ObjectCollectionView).isRequired,
   onLoadRows: PropTypes.func.isRequired,
   onSortColumn: PropTypes.func,
+  sortBy: PropTypes.string,
+  sortDirection: PropTypes.string,
   sortable: PropTypes.bool,
 };
 

@@ -38,10 +38,12 @@ RSpec.describe SamplesController, type: :controller do
 
         json_response = JSON.parse(response.body)
         expect(json_response["samples"].length).to eq(2)
-        expect(json_response).to include_json(samples: [
-                                                { id: sample_two.id },
-                                                { id: sample_one.id },
-                                              ])
+        expect(json_response).to include_json(
+          samples: [
+            { id: sample_one.id },
+            { id: sample_two.id },
+          ]
+        )
       end
 
       context "when sorting_v0 is enabled" do

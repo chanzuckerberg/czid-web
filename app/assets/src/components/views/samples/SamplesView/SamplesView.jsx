@@ -60,6 +60,7 @@ class SamplesView extends React.Component {
   constructor(props, context) {
     super(props);
 
+    const { snapshotShareId } = this.props;
     this.state = {
       phyloTreeCreationModalOpen: false,
       bulkDownloadModalOpen: false,
@@ -69,11 +70,7 @@ class SamplesView extends React.Component {
       bulkDownloadButtonTempTooltip: null,
       sarsCov2Count: 0,
       referenceSelectId: null,
-      sortBy: "",
-      sortDirection: "DESC",
     };
-
-    const { snapshotShareId } = this.props;
 
     // TODO: Remove allowedFeatures argument once General Viral CG Flat List implementation (CH-127140)
     // It is passed in as an argument since static methods (TableRenderers) can't access React Context directly
@@ -147,10 +144,6 @@ class SamplesView extends React.Component {
   };
 
   handleSortColumn = ({ sortBy, sortDirection }) => {
-    // Updates column header UI with new sort state
-    this.setState({ sortBy, sortDirection });
-
-    // Calls onSortColumn callback to fetch sorted data
     this.props.onSortColumn({ sortBy, sortDirection });
   };
 
@@ -461,9 +454,10 @@ class SamplesView extends React.Component {
       protectedColumns,
       selectedIds,
       sortable,
+      sortBy,
+      sortDirection,
       workflow,
     } = this.props;
-    const { sortBy, sortDirection } = this.state;
 
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
@@ -763,6 +757,8 @@ SamplesView.propTypes = {
   sampleStatsSidebarOpen: PropTypes.bool,
   selectableIds: PropTypes.array,
   selectedIds: PropTypes.instanceOf(Set),
+  sortBy: PropTypes.string,
+  sortDirection: PropTypes.string,
   snapshotShareId: PropTypes.string,
   sortable: PropTypes.bool,
   workflow: PropTypes.string,

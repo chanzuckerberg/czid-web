@@ -29,7 +29,11 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router";
 
 import { getSearchSuggestions } from "~/api";
-import { trackEvent, trackPageTransition } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  trackPageTransition,
+} from "~/api/analytics";
 import { get } from "~/api/core";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
@@ -103,10 +107,27 @@ import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 // * On project selected
 //   - load (A) non-filtered dimensions, (B) filtered dimensions and (C) filtered stats
 //     (synchronous data not needed for now because we do not show projects and visualizations)
+
+const TAB_PROJECTS = "projects";
+const TAB_SAMPLES = "samples";
+const TAB_VISUALIZATIONS = "visualizations";
+const CURRENT_TAB_OPTIONS = [TAB_PROJECTS, TAB_SAMPLES, TAB_VISUALIZATIONS];
+
 class DiscoveryView extends React.Component {
+  // used to preserve order keys across sessionStorage updates
+  SESSION_ORDER_FIELD_KEYS = [
+    this.getOrderByKeyFor(TAB_PROJECTS),
+    this.getOrderDirKeyFor(TAB_PROJECTS),
+    this.getOrderByKeyFor(TAB_SAMPLES, WORKFLOWS.CONSENSUS_GENOME.value),
+    this.getOrderDirKeyFor(TAB_SAMPLES, WORKFLOWS.CONSENSUS_GENOME.value),
+    this.getOrderByKeyFor(TAB_SAMPLES, WORKFLOWS.SHORT_READ_MNGS.value),
+    this.getOrderDirKeyFor(TAB_SAMPLES, WORKFLOWS.SHORT_READ_MNGS.value),
+    this.getOrderByKeyFor(TAB_VISUALIZATIONS),
+    this.getOrderDirKeyFor(TAB_VISUALIZATIONS),
+  ];
+
   constructor(props, context) {
     super(props, context);
-
     const { domain, projectId, updateDiscoveryProjectId } = this.props;
 
     this.urlParser = new UrlQueryParser({
@@ -124,7 +145,6 @@ class DiscoveryView extends React.Component {
     // If the projectId was passed as props or is in the URL, update the projectIds in the redux state via the updateProjectIds action creator
     updateDiscoveryProjectId(projectIdToUpdate || null);
 
-    // values are copied from left to right to the first argument (last arguments override previous)
     this.state = Object.assign(
       {
         currentDisplay: "table",
@@ -175,6 +195,11 @@ class DiscoveryView extends React.Component {
       urlState,
     );
 
+    this.state.orderBy =
+      sessionState[`${this.getCurrentTabOrderByKey()}`] || "";
+    this.state.orderDirection =
+      sessionState[`${this.getCurrentTabOrderDirKey()}`] || "DESC";
+
     // If a user had previously selected the PLQC view for a specific project,
     // ensure that currentDisplay defaults to "table" if they switch to a different view,
     // since the PLQC display only exists when viewing a single project.
@@ -192,23 +217,55 @@ class DiscoveryView extends React.Component {
 
     this.dataLayer = new DiscoveryDataLayer(domain);
     const conditions = this.getConditions();
+
+    const samplesOrderFields = this.getOrderStateFieldsFor(
+      TAB_SAMPLES,
+      WORKFLOWS.SHORT_READ_MNGS.value,
+    );
     this.samples = this.dataLayer.samples.createView({
-      conditions,
+      conditions: {
+        ...conditions,
+        orderBy: samplesOrderFields.orderBy,
+        orderDir: samplesOrderFields.orderDirection,
+      },
       onViewChange: this.refreshSampleData,
       displayName: WORKFLOWS.SHORT_READ_MNGS.value,
     });
+
+    const workflowRunsOrderFields = this.getOrderStateFieldsFor(
+      TAB_SAMPLES,
+      WORKFLOWS.CONSENSUS_GENOME.value,
+    );
     this.workflowRuns = this.dataLayer.workflowRuns.createView({
-      conditions,
+      conditions: {
+        ...conditions,
+        orderBy: workflowRunsOrderFields.orderBy,
+        orderDir: workflowRunsOrderFields.orderDirection,
+      },
       onViewChange: this.refreshWorkflowRunData,
       displayName: WORKFLOWS.CONSENSUS_GENOME.value,
     });
+
+    const projectOrderFields = this.getOrderStateFieldsFor(TAB_PROJECTS);
     this.projects = this.dataLayer.projects.createView({
-      conditions,
+      conditions: {
+        ...conditions,
+        orderBy: projectOrderFields.orderBy,
+        orderDir: projectOrderFields.orderDirection,
+      },
       onViewChange: this.refreshProjectData,
       displayName: "ProjectsViewBase",
     });
+
+    const visualizationsOrderFields = this.getOrderStateFieldsFor(
+      TAB_VISUALIZATIONS,
+    );
     this.visualizations = this.dataLayer.visualizations.createView({
-      conditions,
+      conditions: {
+        ...conditions,
+        orderBy: visualizationsOrderFields.orderBy,
+        orderDir: visualizationsOrderFields.orderDirection,
+      },
       onViewChange: this.refreshVisualizationData,
       displayName: "VisualizationsViewBase",
     });
@@ -271,15 +328,56 @@ class DiscoveryView extends React.Component {
     return stateObject;
   }
 
+  getOrderKeyPrefix(tab, workflow) {
+    // for samples, each workflow has its own order parameters
+    return tab === TAB_SAMPLES ? `${tab}-${workflow}` : tab;
+  }
+
+  getOrderByKeyFor(tab, workflow = null) {
+    return `${this.getOrderKeyPrefix(tab, workflow)}OrderBy`;
+  }
+
+  getCurrentTabOrderByKey() {
+    const { currentTab, workflow } = this.state;
+    return this.getOrderByKeyFor(currentTab, workflow);
+  }
+
+  getOrderDirKeyFor(tab, workflow = null) {
+    return `${this.getOrderKeyPrefix(tab, workflow)}OrderDir`;
+  }
+
+  getCurrentTabOrderDirKey() {
+    const { currentTab, workflow } = this.state;
+    return this.getOrderDirKeyFor(currentTab, workflow);
+  }
+
+  getOrderStateFieldsFor = (tab, workflow = null) => {
+    const sessionState = this.loadState(sessionStorage, "DiscoveryViewOptions");
+    const orderBy = sessionState[`${this.getOrderByKeyFor(tab, workflow)}`];
+    const orderDirection =
+      sessionState[`${this.getOrderDirKeyFor(tab, workflow)}`];
+    return { orderBy, orderDirection };
+  };
+
   updateBrowsingHistory = (action = "push") => {
     const { domain, snapshotShareId, updateDiscoveryProjectId } = this.props;
+    const { currentTab, orderBy, orderDirection } = this.state;
+
     const { updatedAt: updatedAtFromLocalStorage } = this.loadState(
       localStorage,
       "DiscoveryViewOptions",
     );
-    const { updatedAt: updatedAtFromSessionStorage } = this.loadState(
+
+    const currentSessionStorageState = this.loadState(
       sessionStorage,
       "DiscoveryViewOptions",
+    );
+    const {
+      updatedAt: updatedAtFromSessionStorage,
+    } = currentSessionStorageState;
+    const orderFieldsInSessionStorage = pick(
+      this.SESSION_ORDER_FIELD_KEYS,
+      currentSessionStorageState,
     );
 
     const localFields = [
@@ -294,6 +392,7 @@ class DiscoveryView extends React.Component {
       "mapSidebarTab",
       "workflow",
     ]);
+
     const urlFields = concat(sessionFields, [
       "currentTab",
       "filters",
@@ -307,8 +406,16 @@ class DiscoveryView extends React.Component {
     let localState = pick(localFields, this.state);
     localState["updatedAt"] = updatedAtFromLocalStorage;
 
-    let sessionState = pick(sessionFields, this.state);
+    let sessionState = {
+      ...pick(sessionFields, this.state),
+      ...orderFieldsInSessionStorage,
+    };
     sessionState["updatedAt"] = updatedAtFromSessionStorage;
+
+    if (CURRENT_TAB_OPTIONS.includes(currentTab)) {
+      sessionState[`${this.getCurrentTabOrderByKey()}`] = orderBy;
+      sessionState[`${this.getCurrentTabOrderDirKey()}`] = orderDirection;
+    }
 
     // TODO(omar): This is a temporary fix to ensure that upon launch of [v1] General Viral CG,
     // users will have the reference accession column appear by default next to the sample name.
@@ -482,7 +589,7 @@ class DiscoveryView extends React.Component {
       this.resetSamplesData();
     } else if (currentTab === "projects") {
       this.resetProjectsData();
-    } else if (currentTab === "visualiations") {
+    } else if (currentTab === "visualizations") {
       this.resetVisualizationsData();
     }
   };
@@ -761,14 +868,21 @@ class DiscoveryView extends React.Component {
   };
 
   handleTabChange = currentTab => {
-    const { mapSidebarTab } = this.state;
-    this.setState({ currentTab }, () => {
-      this.updateBrowsingHistory("replace");
-      const name = currentTab.replace(/\W+/g, "-").toLowerCase();
-      trackEvent(`DiscoveryView_tab-${name}_clicked`, {
-        currentTab: currentTab,
-      });
-    });
+    const { mapSidebarTab, workflow } = this.state;
+
+    this.setState(
+      {
+        currentTab,
+        ...this.getOrderStateFieldsFor(currentTab, workflow),
+      },
+      () => {
+        this.updateBrowsingHistory("replace");
+        const name = currentTab.replace(/\W+/g, "-").toLowerCase();
+        trackEvent(`DiscoveryView_tab-${name}_clicked`, {
+          currentTab: currentTab,
+        });
+      },
+    );
 
     // Set to match 'samples' or 'projects'
     if (mapSidebarTab !== "summary") {
@@ -1262,9 +1376,38 @@ class DiscoveryView extends React.Component {
     this.setState({ selectedWorkflowRunIds });
 
   handleSortColumn = ({ sortBy, sortDirection }) => {
+    const { domain } = this.props;
+    const {
+      currentTab,
+      filteredSampleCount,
+      filteredProjectCount,
+      filteredVisualizationCount,
+      filteredWorkflowRunCount,
+      workflow,
+    } = this.state;
     this.setState({ orderBy: sortBy, orderDirection: sortDirection }, () => {
       this.updateBrowsingHistory("replace");
+
+      const sortStart = new Date();
       this.resetDataFromSortChange();
+      const sortEnd = new Date();
+
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED,
+        {
+          domain,
+          currentTab,
+          workflow,
+          sortBy,
+          sortDirection,
+          filters: this.preparedFilters(),
+          filteredSampleCount,
+          filteredProjectCount,
+          filteredVisualizationCount,
+          filteredWorkflowRunCount,
+          sortTimeInMilliseconds: sortEnd - sortStart,
+        },
+      );
     });
   };
 
@@ -1581,7 +1724,7 @@ class DiscoveryView extends React.Component {
         : this.samples;
 
     // PLQC is currently only available for mNGS samples.
-    let { currentDisplay } = this.state;
+    let { currentDisplay, currentTab } = this.state;
     currentDisplay =
       currentDisplay === "plqc" && workflow === WORKFLOWS.CONSENSUS_GENOME.value
         ? "table"
@@ -1595,10 +1738,11 @@ class DiscoveryView extends React.Component {
           : { selectableSampleIds: view.getIds() }),
         workflow,
         workflowEntity: find({ value: workflow }, values(WORKFLOWS)).entity,
+        ...this.getOrderStateFieldsFor(currentTab, workflow),
       },
       () => {
         this.updateBrowsingHistory("replace");
-        this.samplesView && this.samplesView.reset();
+        this.resetDataFromSortChange();
       },
     );
     trackEvent(`DiscoveryView_${workflow}-tab_clicked`);
@@ -1644,6 +1788,8 @@ class DiscoveryView extends React.Component {
       selectedWorkflowRunIds,
       showFilters,
       showStats,
+      orderBy,
+      orderDirection,
       userDataCounts,
       workflow,
       workflowEntity,
@@ -1705,6 +1851,8 @@ class DiscoveryView extends React.Component {
                 onSortColumn={this.handleSortColumn}
                 projects={projects}
                 ref={projectsView => (this.projectsView = projectsView)}
+                sortBy={orderBy}
+                sortDirection={orderDirection}
                 sortable={sortable}
               />
             </div>
@@ -1752,6 +1900,8 @@ class DiscoveryView extends React.Component {
                   ref={samplesView => (this.samplesView = samplesView)}
                   selectableIds={selectableIds}
                   selectedIds={selectedIds}
+                  sortBy={orderBy}
+                  sortDirection={orderDirection}
                   onUpdateSelectedIds={updateSelectedIds}
                   filtersSidebarOpen={showFilters}
                   sampleStatsSidebarOpen={showStats}
@@ -1781,6 +1931,8 @@ class DiscoveryView extends React.Component {
                 ref={visualizationsView =>
                   (this.visualizationsView = visualizationsView)
                 }
+                sortBy={orderBy}
+                sortDirection={orderDirection}
                 sortable={sortable}
               />
             </div>

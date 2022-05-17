@@ -92,7 +92,7 @@ class SamplesController < ApplicationController
     order_by = if sorting_v0_allowed
                  params[:orderBy] || "createdAt"
                else
-                 params[:orderBy] || :id
+                 :id
                end
 
     order_dir = sanitize_order_dir(params[:orderDir], :desc)

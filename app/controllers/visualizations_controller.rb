@@ -28,7 +28,7 @@ class VisualizationsController < ApplicationController
     order_by = if sorting_v0_allowed
                  visualization_params[:orderBy] || "updated_at"
                else
-                 visualization_params[:orderBy] || :updated_at
+                 :updated_at
                end
     order_dir = sanitize_order_dir(visualization_params[:orderDir], :desc)
 

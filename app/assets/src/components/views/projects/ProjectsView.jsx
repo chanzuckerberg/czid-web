@@ -24,10 +24,6 @@ class ProjectsView extends React.Component {
     super(props);
 
     this.discoveryView = null;
-    this.state = {
-      sortBy: "",
-      sortDirection: "DESC",
-    };
 
     this.columns = [
       {
@@ -166,9 +162,6 @@ class ProjectsView extends React.Component {
   };
 
   handleSortColumn = ({ sortBy, sortDirection }) => {
-    // Updates column header UI with new sort state
-    this.setState({ sortBy, sortDirection });
-
     // Calls onSortColumn callback to fetch sorted data
     this.props.onSortColumn({ sortBy, sortDirection });
   };
@@ -193,9 +186,10 @@ class ProjectsView extends React.Component {
       onMapLevelChange,
       onMapMarkerClick,
       onMapTooltipTitleClick,
+      sortBy,
+      sortDirection,
       sortable,
     } = this.props;
-    const { sortBy, sortDirection } = this.state;
 
     return (
       <div className={cs.container}>
@@ -257,7 +251,7 @@ ProjectsView.propTypes = {
   projects: PropTypes.instanceOf(ObjectCollectionView).isRequired,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
-  sortDireciton: PropTypes.string,
+  sortDirection: PropTypes.string,
 };
 
 export default ProjectsView;

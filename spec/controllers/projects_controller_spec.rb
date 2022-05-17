@@ -216,18 +216,52 @@ RSpec.describe ProjectsController, type: :controller do
       end
 
       describe "GET index with order" do
-        it "sees projects sorted in descending order by default" do
-          expected_projects = []
-          expected_projects << create(:project, name: "Project M", users: [@user])
-          expected_projects << create(:project, name: "Project Z", users: [@user])
-          expected_projects << create(:project, name: "Project A", users: [@user])
-          expected_projects.sort_by!(&:name).reverse!
+        context "when sorting_v0_admin is enabled" do
+          it "defaults to sorting projects in descending order by created at" do
+            @user.add_allowed_feature("sorting_v0_admin")
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:created_at).reverse!
 
-          get :index, params: { format: "json", orderBy: "name" }
+            get :index, params: { format: "json" }
 
-          json_response = JSON.parse(response.body)
-          expect(json_response["projects"].count).to eq(expected_projects.count)
-          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
+
+          it "sorts projects in descending order by passed orderBy param" do
+            @user.add_allowed_feature("sorting_v0_admin")
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:name).reverse!
+
+            get :index, params: { format: "json", orderBy: "project" }
+
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
+        end
+
+        context "when sorting_v0 is disabled" do
+          it "defaults to sorting projects in descending order by id" do
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:id).reverse!
+
+            get :index, params: { format: "json" }
+
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
         end
       end
 
@@ -277,51 +311,112 @@ RSpec.describe ProjectsController, type: :controller do
       end
 
       describe "GET index with ascending order" do
-        it "sees projects sorted in ascending order" do
-          expected_projects = []
-          expected_projects << create(:project, name: "Project M", users: [@user])
-          expected_projects << create(:project, name: "Project Z", users: [@user])
-          expected_projects << create(:project, name: "Project A", users: [@user])
-          expected_projects.sort_by!(&:name)
+        context "when sorting_v0_admin is enabled" do
+          it "sees projects sorted in ascending order" do
+            @user.add_allowed_feature("sorting_v0_admin")
 
-          get :index, params: { format: "json", orderBy: "name", orderDir: "asc" }
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:name)
 
-          json_response = JSON.parse(response.body)
-          expect(json_response["projects"].count).to eq(expected_projects.count)
-          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+            get :index, params: { format: "json", orderBy: "project", orderDir: "asc" }
+
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
+        end
+
+        context "when sorting_v0 is disabled" do
+          it "sees projects sorted in ascending order" do
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:id)
+
+            get :index, params: { format: "json", orderBy: "project", orderDir: "asc" }
+
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
         end
       end
 
       describe "GET index with descending order" do
-        it "sees projects sorted in descending order" do
-          expected_projects = []
-          expected_projects << create(:project, name: "Project M", users: [@user])
-          expected_projects << create(:project, name: "Project Z", users: [@user])
-          expected_projects << create(:project, name: "Project A", users: [@user])
-          expected_projects.sort_by!(&:name).reverse!
+        context "when sorting_v0_admin is enabled" do
+          it "sees projects sorted in descending order by name" do
+            @user.add_allowed_feature("sorting_v0_admin")
 
-          get :index, params: { format: "json", orderBy: "name", orderDir: "desc" }
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:name).reverse!
 
-          json_response = JSON.parse(response.body)
-          expect(json_response["projects"].count).to eq(expected_projects.count)
-          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+            get :index, params: { format: "json", orderBy: "project", orderDir: "desc" }
+
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
+        end
+
+        context "when sorting_v0 is disabled" do
+          it "sees projects sorted in descending order by id" do
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:id).reverse!
+
+            get :index, params: { format: "json", orderBy: "project", orderDir: "desc" }
+
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
         end
       end
 
       describe "GET index with malicious order direction field" do
-        it "sees projects sorted in (default) descending order" do
-          # in an exploitable query this would just work
-          expected_projects = []
-          expected_projects << create(:project, name: "Project M", users: [@user])
-          expected_projects << create(:project, name: "Project Z", users: [@user])
-          expected_projects << create(:project, name: "Project A", users: [@user])
-          expected_projects.sort_by!(&:name).reverse!
+        context "when sorting_v0_admin is enabled" do
+          it "sees projects sorted in (default) descending order" do
+            @user.add_allowed_feature("sorting_v0_admin")
 
-          get :index, params: { format: "json", orderBy: "name", orderDir: "asc;" }
+            # in an exploitable query this would just work
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:name).reverse!
 
-          json_response = JSON.parse(response.body)
-          expect(json_response["projects"].count).to eq(expected_projects.count)
-          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+            get :index, params: { format: "json", orderBy: "project", orderDir: "asc;" }
+
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
+        end
+
+        context "when sorting_v0 is disabled" do
+          it "sees projects sorted in (default) descending order by id" do
+            # in an exploitable query this would just work
+            expected_projects = []
+            expected_projects << create(:project, name: "Project M", users: [@user])
+            expected_projects << create(:project, name: "Project Z", users: [@user])
+            expected_projects << create(:project, name: "Project A", users: [@user])
+            expected_projects.sort_by!(&:id).reverse!
+
+            get :index, params: { format: "json", orderBy: "project", orderDir: "asc;" }
+
+            json_response = JSON.parse(response.body)
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          end
         end
       end
 

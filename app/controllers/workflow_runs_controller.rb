@@ -23,7 +23,7 @@ class WorkflowRunsController < ApplicationController
     order_by = if sorting_v0_allowed
                  permitted_params[:orderBy] || "createdAt"
                else
-                 sanitize_order_by(WorkflowRun, order_by, :id)
+                 :id
                end
     order_dir = sanitize_order_dir(permitted_params[:orderDir], :desc)
 

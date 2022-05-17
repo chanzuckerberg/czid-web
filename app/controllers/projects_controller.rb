@@ -59,7 +59,7 @@ class ProjectsController < ApplicationController
         order_by = if sorting_v0_allowed
                      params[:orderBy] || "created_at"
                    else
-                     sanitize_order_by(Project, params[:orderBy], :id)
+                     :id
                    end
 
         order_dir = sanitize_order_dir(params[:orderDir], :desc)

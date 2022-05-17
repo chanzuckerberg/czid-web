@@ -525,6 +525,10 @@ function EventDictionary() {
   /** The user clicked the "Return to Upload" button on the UploadConfirmationModal. */
   this.UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED =
     "UPLOAD_CONFIRMATION_MODAL_RETURN_TO_UPLOAD_BUTTON_CLICKED";
+
+  /** This user clicked the sortable column headers on a discovery view table. */
+  this.DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED =
+    "DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED";
 }
 
 const eventNames = new EventDictionary();
