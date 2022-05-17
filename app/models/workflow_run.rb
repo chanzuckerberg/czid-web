@@ -83,7 +83,7 @@ class WorkflowRun < ApplicationRecord
   DATA_KEY_TO_SORT_KEY = {
     "sample" => "name",
     "collectionLocationV2" => "collection_location_v2",
-    "createdAt" => "id",
+    "createdAt" => "created_at",
     "waterControl" => "water_control",
     "sampleType" => "sample_type",
     "ctValue" => "ct_value",
@@ -276,7 +276,7 @@ class WorkflowRun < ApplicationRecord
   def self.sort_workflow_runs(workflow_runs, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
 
-    if sort_key == "id"
+    if sort_key == "created_at"
       workflow_runs.order("workflow_runs.#{sort_key} #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
     elsif sort_key == "name"
       workflow_runs.sort_by_sample_name(order_dir)
