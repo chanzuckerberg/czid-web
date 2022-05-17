@@ -157,7 +157,7 @@ class TaxonLineage < ApplicationRecord
   def self.versioned_lineages(tax_ids, lineage_version)
     TaxonLineage
       .where(taxid: tax_ids)
-      .where('? BETWEEN version_start AND version_end', lineage_version)
+      .where('? BETWEEN version_start_new AND version_end_new', lineage_version)
   end
 
   def self.fetch_lineage_by_taxid(tax_map, pipeline_run_id)

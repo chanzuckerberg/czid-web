@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_11_215021) do
+ActiveRecord::Schema.define(version: 2022_05_13_205412) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -39,10 +39,10 @@ ActiveRecord::Schema.define(version: 2022_05_11_215021) do
     t.text "s3_deuterostome_db_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "lineage_version", limit: 10
-    t.integer "lineage_version_old", limit: 2
     t.text "s3_nt_info_db_path"
     t.string "s3_taxon_blacklist_path", default: "s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
+    t.integer "lineage_version_old", limit: 2
+    t.string "lineage_version", limit: 10, null: false
   end
 
   create_table "amr_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -172,9 +172,6 @@ ActiveRecord::Schema.define(version: 2022_05_11_215021) do
     t.index ["pipeline_run_id", "species_taxid_merged_nt_nr"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_merged_nt_nr"
     t.index ["pipeline_run_id", "species_taxid_nr"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nr"
     t.index ["pipeline_run_id", "species_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nt"
-  end
-
-  create_table "data_migrations", primary_key: "version", id: :string, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
   end
 
   create_table "ercc_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -698,7 +695,8 @@ ActiveRecord::Schema.define(version: 2022_05_11_215021) do
     t.integer "version_start", limit: 2, null: false, comment: "The first version for which the taxon is active"
     t.integer "version_end", limit: 2, null: false, comment: "The last version for which the taxon is active"
     t.string "version_start_new", limit: 10, null: false, comment: "The first version for which the lineage is valid"
-    t.string "version_end_new", limit: 10, null: false, comment: "The first version for which the lineage is valid"
+    t.string "version_end_new", limit: 10, null: false, comment: "The last version for which the lineage is valid"
+    t.boolean "is_phage", default: false, null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
@@ -711,11 +709,11 @@ ActiveRecord::Schema.define(version: 2022_05_11_215021) do
     t.index ["taxid", "started_at", "ended_at"], name: "index_taxon_lineages_on_taxid_and_started_at_and_ended_at"
     t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
     t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end", unique: true
+    t.index ["taxid", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_version_end_new", unique: true
     t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end", unique: true
     t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
-    t.index ["taxid", "version_start_new"], name: "index_taxon_lineages_on_taxid_and_version_start_new", unique: true
     t.index ["taxid", "version_start_new", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_versions_new", unique: true
-    t.index ["taxid", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_version_end_new", unique: true
+    t.index ["taxid", "version_start_new"], name: "index_taxon_lineages_on_taxid_and_version_start_new", unique: true
   end
 
   create_table "taxon_scoring_models", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|

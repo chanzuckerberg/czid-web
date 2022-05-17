@@ -1,6 +1,6 @@
 one:
   name: 'ac1'
-  lineage_version: 1
+  lineage_version: "2022-01-01"
   s3_nt_db_path: "s3://czid-public-references/alignment_data/#{name}/nt"
   s3_nt_loc_db_path: "s3://czid-public-references/alignment_data/#{name}/nt_loc.db"
   s3_nr_db_path: "s3://czid-public-references/alignment_data/#{name}/nr"
