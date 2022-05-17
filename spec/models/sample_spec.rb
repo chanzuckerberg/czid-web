@@ -314,11 +314,11 @@ describe Sample, type: :model do
       #   - sample_four (optional) contains null sortable data
       # such that @sample_four < @sample_one < @sample_three < @sample_two.
       @sample_one = create(:sample, project: project_one, name: "Test Sample A", created_at: 3.days.ago,
-                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", water_control: "No" })
+                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", water_control: "No", nucleotide_type: "DNA" })
       @sample_three = create(:sample, project: project_one, name: "Test Sample B", created_at: 2.days.ago,
-                                      metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes" })
+                                      metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes", nucleotide_type: "RNA" })
       @sample_two = create(:sample, project: @project_two, name: "Test Sample B", created_at: 1.day.ago,
-                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes" })
+                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes", nucleotide_type: "RNA" })
       @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
     end
 
@@ -355,7 +355,7 @@ describe Sample, type: :model do
     end
 
     context "when sorting samples by metadata" do
-      let(:data_key_list) { ["sampleType", "waterControl"] }
+      let(:data_key_list) { ["sampleType", "waterControl", "nucleotideType"] }
 
       before do
         # create sample with no metadata to test null-handling

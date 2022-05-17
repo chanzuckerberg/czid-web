@@ -112,6 +112,7 @@ class Sample < ApplicationRecord
     "collectionLocationV2" => "collection_location_v2",
     "sampleType" => "sample_type",
     "waterControl" => "water_control",
+    "nucleotideType" => "nucleotide_type",
     "host" => "host",
     "totalReads" => "total_reads",
     "nonHostReads" => "adjusted_remaining_reads",
@@ -124,7 +125,7 @@ class Sample < ApplicationRecord
     "meanInsertSize" => "mean_insert_size",
   }.freeze
   SAMPLES_SORT_KEYS = ["name", "created_at"].freeze
-  METADATA_SORT_KEYS = ["sample_type", "water_control"].freeze
+  METADATA_SORT_KEYS = ["sample_type", "water_control", "nucleotide_type"].freeze
   PIPELINE_RUNS_SORT_KEYS = ["total_reads", "adjusted_remaining_reads", "total_ercc_reads", "pipeline_version", "fraction_subsampled", "qc_percent", "compression_ratio", "time_to_finalized"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
