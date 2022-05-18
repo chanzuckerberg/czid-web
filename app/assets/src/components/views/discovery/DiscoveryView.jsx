@@ -217,59 +217,37 @@ class DiscoveryView extends React.Component {
     ).entity;
 
     this.dataLayer = new DiscoveryDataLayer(domain);
-    const conditions = this.getConditions();
 
-    const samplesOrderFields = this.getOrderStateFieldsFor(
-      TAB_SAMPLES,
-      WORKFLOWS.SHORT_READ_MNGS.value,
-    );
     this.samples = this.dataLayer.samples.createView({
-      conditions: {
-        ...conditions,
-        orderBy: samplesOrderFields.orderBy,
-        orderDir: samplesOrderFields.orderDirection,
-      },
+      conditions: this.getConditionsFor(
+        TAB_SAMPLES,
+        WORKFLOWS.SHORT_READ_MNGS.value,
+      ),
       onViewChange: this.refreshSampleData,
       displayName: WORKFLOWS.SHORT_READ_MNGS.value,
     });
 
-    const workflowRunsOrderFields = this.getOrderStateFieldsFor(
-      TAB_SAMPLES,
-      WORKFLOWS.CONSENSUS_GENOME.value,
-    );
     this.workflowRuns = this.dataLayer.workflowRuns.createView({
-      conditions: {
-        ...conditions,
-        orderBy: workflowRunsOrderFields.orderBy,
-        orderDir: workflowRunsOrderFields.orderDirection,
-      },
+      conditions: this.getConditionsFor(
+        TAB_SAMPLES,
+        WORKFLOWS.CONSENSUS_GENOME.value,
+      ),
       onViewChange: this.refreshWorkflowRunData,
       displayName: WORKFLOWS.CONSENSUS_GENOME.value,
     });
 
-    const projectOrderFields = this.getOrderStateFieldsFor(TAB_PROJECTS);
     this.projects = this.dataLayer.projects.createView({
-      conditions: {
-        ...conditions,
-        orderBy: projectOrderFields.orderBy,
-        orderDir: projectOrderFields.orderDirection,
-      },
+      conditions: this.getConditionsFor(TAB_PROJECTS),
       onViewChange: this.refreshProjectData,
       displayName: "ProjectsViewBase",
     });
 
-    const visualizationsOrderFields = this.getOrderStateFieldsFor(
-      TAB_VISUALIZATIONS,
-    );
     this.visualizations = this.dataLayer.visualizations.createView({
-      conditions: {
-        ...conditions,
-        orderBy: visualizationsOrderFields.orderBy,
-        orderDir: visualizationsOrderFields.orderDirection,
-      },
+      conditions: this.getConditionsFor(TAB_VISUALIZATIONS),
       onViewChange: this.refreshVisualizationData,
       displayName: "VisualizationsViewBase",
     });
+
     this.mapPreviewProjects = this.projects;
     this.mapPreviewSamples = this.samples;
 
@@ -296,12 +274,24 @@ class DiscoveryView extends React.Component {
     this.initialLoad();
     domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.checkPublicSamples();
 
+    // this event is triggered when a user clicks "Back" in their browser
+    // to make sure session sorting parameters are preserved, we need
+    // to set the correct order parameters in the state
     window.onpopstate = () => {
-      this.setState(history.state, () => {
-        this.resetData({
-          callback: this.initialLoad,
-        });
-      });
+      this.setState(
+        {
+          ...history.state,
+          ...this.getOrderStateFieldsFor(
+            history.state.currentTab,
+            history.state.workflow,
+          ),
+        },
+        () => {
+          this.resetData({
+            callback: this.initialLoad,
+          });
+        },
+      );
     };
   }
 
@@ -358,6 +348,14 @@ class DiscoveryView extends React.Component {
     const orderDirection =
       sessionState[`${this.getOrderDirKeyFor(tab, workflow)}`];
     return { orderBy, orderDirection };
+  };
+
+  getDataLayerOrderStateFieldsFor = (tab, workflow = null) => {
+    const { orderBy, orderDirection: orderDir } = this.getOrderStateFieldsFor(
+      tab,
+      workflow,
+    );
+    return { orderBy, orderDir };
   };
 
   updateBrowsingHistory = (action = "push") => {
@@ -518,12 +516,30 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
     const conditions = this.getConditions();
 
-    this.samples.reset({ conditions, loadFirstPage: true });
+    this.samples.reset({
+      conditions: this.getConditionsFor(
+        TAB_SAMPLES,
+        WORKFLOWS.SHORT_READ_MNGS.value,
+      ),
+      loadFirstPage: true,
+    });
 
     if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
-      this.projects.reset({ conditions, loadFirstPage: true });
-      this.visualizations.reset({ conditions, loadFirstPage: true });
-      this.workflowRuns.reset({ conditions, loadFirstPage: true });
+      this.projects.reset({
+        conditions: this.getConditionsFor(TAB_PROJECTS),
+        loadFirstPage: true,
+      });
+      this.visualizations.reset({
+        conditions: this.getConditionsFor(TAB_VISUALIZATIONS),
+        loadFirstPage: true,
+      });
+      this.workflowRuns.reset({
+        conditions: this.getConditionsFor(
+          TAB_SAMPLES,
+          WORKFLOWS.CONSENSUS_GENOME.value,
+        ),
+        loadFirstPage: true,
+      });
     }
     if (this.mapPreviewSamples !== this.samples) {
       this.mapPreviewSamples.reset({ conditions, loadFirstPage: true });
@@ -1031,6 +1047,13 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  getConditionsFor = (tab, workflow = null) => {
+    return {
+      ...this.getConditions(),
+      ...this.getDataLayerOrderStateFieldsFor(tab, workflow),
+    };
+  };
+
   getConditions = () => {
     const { projectId, search, orderBy, orderDirection } = this.state;
     const { snapshotShareId } = this.props;
@@ -1046,7 +1069,7 @@ class DiscoveryView extends React.Component {
   };
 
   handleProjectSelected = ({ project }) => {
-    const { mapSidebarTab } = this.state;
+    const { mapSidebarTab, workflow } = this.state;
     const { updateDiscoveryProjectId } = this.props;
 
     this.setState(
@@ -1056,6 +1079,7 @@ class DiscoveryView extends React.Component {
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
         projectId: project.id,
         search: null,
+        ...this.getOrderStateFieldsFor("samples", workflow),
       },
       () => {
         updateDiscoveryProjectId(project.id);
