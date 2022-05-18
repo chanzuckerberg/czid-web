@@ -10,3 +10,4 @@ export const LOCAL_MULTIPART_UPLOADS_FEATURE = "local_multipart_uploads";
 export const SORTING_V0_FEATURE = "sorting_v0";
 // SORTING_V0_ADMIN_FEATURE enables sorting on all domains and will be enabled for admin testing purposes only
 export const SORTING_V0_ADMIN_FEATURE = "sorting_v0_admin";
+export const TAXON_THRESHOLD_FILTERING_FEATURE = "taxon_threshold_filter";

@@ -8,13 +8,24 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    margin-bottom: 5px;
 
-    &:not(:first-child) {
-      margin-top: 5px;
+    &.taxonThresholdFilterContainer {
+      margin-bottom: $sds-spaces-l;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
     }
 
     .tags {
       flex: 0 0 auto;
+
+      .descriptor {
+        font: $sds-font-body-xs-400-font;
+        color: $sds-color-gray-500;
+        margin-top: $sds-spaces-l;
+      }
 
       .filterTag {
         margin: 0;
@@ -30,5 +41,11 @@
         }
       }
     }
+  }
+
+  .divider {
+    width: 100%;
+    border: 1px solid $sds-color-gray-200;
+    margin: $sds-spaces-l 0;
   }
 }

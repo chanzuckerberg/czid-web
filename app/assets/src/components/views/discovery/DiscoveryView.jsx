@@ -42,6 +42,7 @@ import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   SORTING_V0_ADMIN_FEATURE,
   SORTING_V0_FEATURE,
+  TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { generateUrlToSampleView } from "~/components/utils/urls";
@@ -480,6 +481,7 @@ class DiscoveryView extends React.Component {
   };
 
   preparedFilters = () => {
+    const { allowedFeatures } = this.props;
     const { filters } = this.state;
     let preparedFilters = mapKeys(replace("Selected", ""), filters);
 
@@ -503,7 +505,10 @@ class DiscoveryView extends React.Component {
 
     // Taxon is an exception: this filter needs to store complete option, so need to convert to values only
     if (preparedFilters.taxon && preparedFilters.taxon.length) {
-      preparedFilters.taxon = map("value", preparedFilters.taxon);
+      const mapKey = allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)
+        ? "id"
+        : "value";
+      preparedFilters.taxon = map(mapKey, preparedFilters.taxon);
     }
 
     return preparedFilters;

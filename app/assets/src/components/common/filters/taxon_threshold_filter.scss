@@ -1,0 +1,24 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.filterContainer {
+  margin: $sds-spaces-l;
+  color: $sds-color-gray-black;
+
+  .title {
+    font: $sds-font-header-s-600-font;
+    margin-bottom: $sds-spaces-l;
+  }
+
+  .filterDescriptor {
+    font: $sds-font-body-s-400-font;
+    margin-bottom: $sds-spaces-xs;
+  }
+
+  .actions {
+    margin-top: $sds-spaces-xxl;
+    display: flex;
+    gap: $sds-spaces-s;
+  }
+}

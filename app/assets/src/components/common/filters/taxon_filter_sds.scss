@@ -1,0 +1,15 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+$DROPDOWN_WIDTH: 360px;
+
+.dropdown {
+  width: $DROPDOWN_WIDTH;
+}
+
+.dropdownPopper {
+  min-width: $DROPDOWN_WIDTH !important;
+  width: fit-content;
+  margin-top: $sds-spaces-xs;
+}

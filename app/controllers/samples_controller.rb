@@ -483,14 +483,64 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("taxon")
-      taxon_list = taxon_search(query, ["species", "genus"], samples: constrained_samples)
-      unless taxon_list.empty?
+      if AppConfigHelper.get_app_config(AppConfig::BYPASS_ES_TAXON_SEARCH) == "1"
         results["Taxon"] = {
           "name" => "Taxon",
-          "results" => taxon_list.map do |entry|
-            entry.merge("category" => "Taxon")
-          end,
+          "results" => [
+            {
+              "title": "Klebsiella variicola",
+              "description": "Taxonomy ID: 244366",
+              "taxid": 244_366,
+              "level": "species",
+              "category": "Taxon",
+            },
+            {
+              "title": "Klebsiella pneumoniae",
+              "description": "Taxonomy ID: 573",
+              "taxid": 573,
+              "level": "species",
+              "category": "Taxon",
+            },
+            {
+              "title": "Klebsiella aerogenes",
+              "description": "Taxonomy ID: 548",
+              "taxid": 548,
+              "level": "species",
+              "category": "Taxon",
+            },
+            {
+              "title": "Klebsiella oxytoca",
+              "description": "Taxonomy ID: 571",
+              "taxid": 571,
+              "level": "species",
+              "category": "Taxon",
+            },
+            {
+              "title": "Klebsiella michiganensis",
+              "description": "Taxonomy ID: 1134687",
+              "taxid": 1_134_687,
+              "level": "species",
+              "category": "Taxon",
+            },
+            {
+              "title": "Klebsiella but with a really reallly really really really long name",
+              "description": "Taxonomy ID: 570",
+              "taxid": 570,
+              "level": "genus",
+              "category": "Taxon",
+            },
+          ],
         }
+      else
+        taxon_list = taxon_search(query, ["species", "genus"], samples: constrained_samples)
+        unless taxon_list.empty?
+          results["Taxon"] = {
+            "name" => "Taxon",
+            "results" => taxon_list.map do |entry|
+              entry.merge("category" => "Taxon")
+            end,
+          }
+        end
       end
     end
 

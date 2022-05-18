@@ -1,0 +1,25 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.taxonFilterLabel {
+  @include font-caps-xxxs;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  line-height: 24px;
+  color: $sds-color-gray-500;
+
+  &.disabled {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.45;
+  }
+
+  .dropdownArrow {
+    width: 12px;
+    margin-left: $sds-spaces-m;
+    font-size: 20px;
+  }
+}

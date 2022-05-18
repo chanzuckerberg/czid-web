@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { find, forEach, pick } from "lodash/fp";
+import { isEmpty, find, forEach, pick } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -10,6 +10,8 @@ import {
   LocationFilter,
   TaxonFilter,
 } from "~/components/common/filters";
+import TaxonThresholdFilter from "~/components/common/filters/TaxonThresholdFilter";
+import { TAXON_THRESHOLD_FILTERING_FEATURE } from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import FilterTag from "~ui/controls/FilterTag";
 import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
@@ -88,7 +90,7 @@ class DiscoveryFilters extends React.Component {
 
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
-        option => (option.value || option) !== valueToRemove,
+        option => (option.value || option.id || option) !== valueToRemove,
       );
     }
 
@@ -107,12 +109,13 @@ class DiscoveryFilters extends React.Component {
 
     const tags = selectedOptions
       // check if filter is on option format or just value (taxon are hashes with text and value)
+      // TaxonThresholdFilters are hashes with { id: number, name: string }, instead of { value: number, text: string }.
       .map(option =>
-        option.text
+        option.text || option.name
           ? option
           : find({ value: option }, options) || {
-              text: option,
-              value: option,
+              name: option,
+              id: option,
             },
       )
       // create the filter tag
@@ -120,24 +123,32 @@ class DiscoveryFilters extends React.Component {
         return (
           <FilterTag
             className={cs.filterTag}
-            key={option.value}
-            text={option.text}
+            key={option.value || option.id}
+            text={option.text || option.name}
             onClose={withAnalytics(
               () =>
                 this.handleRemoveTag({
                   selectedKey,
-                  valueToRemove: option.value,
+                  valueToRemove: option.value || option.id,
                 }),
               "DiscoveryFilters_tag_removed",
               {
-                value: option.value,
-                text: option.text,
+                value: option.value || option.id,
+                text: option.text || option.name,
               },
             )}
           />
         );
       });
-    return <div className={cs.tags}>{tags}</div>;
+
+    return (
+      <div className={cs.tags}>
+        {!isEmpty(tags) && (
+          <div className={cs.descriptor}>Has at least one:</div>
+        )}
+        {tags}
+      </div>
+    );
   }
 
   render() {
@@ -151,6 +162,7 @@ class DiscoveryFilters extends React.Component {
     } = this.state;
 
     const {
+      allowedFeatures,
       className,
       domain,
       host,
@@ -161,21 +173,41 @@ class DiscoveryFilters extends React.Component {
       workflow,
     } = this.props;
 
+    const hasTaxonThresholdFilterFeature = allowedFeatures.includes(
+      TAXON_THRESHOLD_FILTERING_FEATURE,
+    );
+
     return (
       <div className={cx(cs.filtersContainer, className)}>
         {/* TODO(ihan): enable taxon and location filter for snapshot view */}
         {domain !== DISCOVERY_DOMAIN_SNAPSHOT && (
           <>
-            <div className={cs.filterContainer}>
-              <TaxonFilter
-                domain={domain}
-                onChange={this.handleChange.bind(this, "taxonSelected")}
-                selectedOptions={taxonSelected}
-                disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
-              />
+            <div
+              className={cx(
+                cs.filterContainer,
+                hasTaxonThresholdFilterFeature &&
+                  cs.taxonThresholdFilterContainer,
+              )}
+            >
+              {hasTaxonThresholdFilterFeature ? (
+                <TaxonThresholdFilter
+                  domain={domain}
+                  onChange={this.handleChange.bind(this, "taxonSelected")}
+                  selectedOptions={taxonSelected}
+                  disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
+                />
+              ) : (
+                <TaxonFilter
+                  domain={domain}
+                  onChange={this.handleChange.bind(this, "taxonSelected")}
+                  selectedOptions={taxonSelected}
+                  disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
+                />
+              )}
               {workflow !== WORKFLOWS.CONSENSUS_GENOME.value &&
                 this.renderTags("taxon")}
             </div>
+            {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}
             <div className={cs.filterContainer}>
               <LocationFilter
                 onChange={this.handleChange.bind(this, "locationV2Selected")}

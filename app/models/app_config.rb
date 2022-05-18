@@ -59,6 +59,8 @@ class AppConfig < ApplicationRecord
   ENABLE_BULK_DOWNLOADS_V1 = "enable_bulk_downloads_v1".freeze
   # When this is "1", Pipeline Run status updates will be in HandleSfnNotifications instead of PipelineMonitor and ResultMonitor.
   ENABLE_SFN_NOTIFICATIONS = "enable_sfn_notifications".freeze
+  # When this is "1", filtering by taxon will bypass ES and instead return a predefined set of 5 taxa. Mainly intended to be used by developers on M1 since ES is currently incompatible.
+  BYPASS_ES_TAXON_SEARCH = "bypass_es_taxon_search".freeze
 
   after_save :clear_cached_record
 
