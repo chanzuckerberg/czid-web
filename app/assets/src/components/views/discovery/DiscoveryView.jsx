@@ -196,7 +196,7 @@ class DiscoveryView extends React.Component {
     );
 
     this.state.orderBy =
-      sessionState[`${this.getCurrentTabOrderByKey()}`] || "";
+      sessionState[`${this.getCurrentTabOrderByKey()}`] || null;
     this.state.orderDirection =
       sessionState[`${this.getCurrentTabOrderDirKey()}`] || "DESC";
 
