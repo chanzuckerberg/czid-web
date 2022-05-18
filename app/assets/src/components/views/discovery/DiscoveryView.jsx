@@ -151,8 +151,8 @@ class DiscoveryView extends React.Component {
         currentDisplay: "table",
         currentTab:
           projectId || domain === DISCOVERY_DOMAIN_ALL_DATA
-            ? "samples"
-            : "projects",
+            ? TAB_SAMPLES
+            : TAB_PROJECTS,
         emptyStateModalOpen: this.isFirstTimeUser(),
         filteredProjectCount: null,
         filteredProjectDimensions: [],
@@ -606,11 +606,11 @@ class DiscoveryView extends React.Component {
 
   resetDataFromSortChange = () => {
     const { currentTab } = this.state;
-    if (currentTab === "samples") {
+    if (currentTab === TAB_SAMPLES) {
       this.resetSamplesData();
-    } else if (currentTab === "projects") {
+    } else if (currentTab === TAB_PROJECTS) {
       this.resetProjectsData();
-    } else if (currentTab === "visualizations") {
+    } else if (currentTab === TAB_VISUALIZATIONS) {
       this.resetVisualizationsData();
     }
   };
@@ -874,16 +874,16 @@ class DiscoveryView extends React.Component {
     return compact([
       !projectId && {
         label: renderTab("Projects", filteredProjectCount || "-"),
-        value: "projects",
+        value: TAB_PROJECTS,
       },
       {
         label: renderTab("Samples", filteredSampleStats.count || "-"),
-        value: "samples",
+        value: TAB_SAMPLES,
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
         !projectId && {
           label: renderTab("Visualizations", filteredVisualizationCount || "-"),
-          value: "visualizations",
+          value: TAB_VISUALIZATIONS,
         },
     ]);
   };
@@ -1075,11 +1075,12 @@ class DiscoveryView extends React.Component {
     this.setState(
       {
         currentDisplay: "table",
-        currentTab: "samples",
-        mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
+        currentTab: TAB_SAMPLES,
+        mapSidebarTab:
+          mapSidebarTab === "summary" ? mapSidebarTab : TAB_SAMPLES,
         projectId: project.id,
         search: null,
-        ...this.getOrderStateFieldsFor("samples", workflow),
+        ...this.getOrderStateFieldsFor(TAB_SAMPLES, workflow),
       },
       () => {
         updateDiscoveryProjectId(project.id);
@@ -1332,7 +1333,7 @@ class DiscoveryView extends React.Component {
       getDiscoveryDimensions({ domain, ...conditions }),
     ]);
     this.setState({
-      mapSidebarTab: "samples",
+      mapSidebarTab: TAB_SAMPLES,
       mapSidebarSampleStats: sampleStats,
       mapSidebarSampleCount: mapSidebarSampleCount,
       mapSidebarSampleDimensions: sampleDimensions,
@@ -1452,7 +1453,7 @@ class DiscoveryView extends React.Component {
   handleMapLevelChange = mapLevel => {
     const { rawMapLocationData, currentTab } = this.state;
 
-    const ids = currentTab === "samples" ? "sample_ids" : "project_ids";
+    const ids = currentTab === TAB_SAMPLES ? "sample_ids" : "project_ids";
     const clusteredData = {};
 
     const copyLocation = entry => {
@@ -1562,7 +1563,7 @@ class DiscoveryView extends React.Component {
     }
 
     switch (currentTab) {
-      case "projects":
+      case TAB_PROJECTS:
         if (!search && filteredProjectCount === 0) {
           return (
             <div className={cs.noDataBannerFlexContainer}>
@@ -1581,7 +1582,7 @@ class DiscoveryView extends React.Component {
           );
         }
         break;
-      case "samples":
+      case TAB_SAMPLES:
         if (userDataCounts.sampleCount === 0) {
           return (
             <div className={cs.noDataBannerFlexContainer}>
@@ -1604,7 +1605,7 @@ class DiscoveryView extends React.Component {
           );
         }
         break;
-      case "visualizations":
+      case TAB_VISUALIZATIONS:
         if (userDataCounts.visualizationCount === 0) {
           return (
             <div className={cs.noDataBannerFlexContainer}>
@@ -1665,33 +1666,33 @@ class DiscoveryView extends React.Component {
     };
 
     switch (type) {
-      case "projects":
+      case TAB_PROJECTS:
         bannerData = {
           searchType: "Project",
           icon: <ImgProjectsSecondary />,
           listenerLink: {
             text: "Or view Sample results",
-            tabToSwitchTo: "samples",
+            tabToSwitchTo: TAB_SAMPLES,
           },
         };
         break;
-      case "samples":
+      case TAB_SAMPLES:
         bannerData = {
           searchType: "Sample",
           icon: <ImgSamplesSecondary />,
           listenerLink: {
             text: "Or view Project results",
-            tabToSwitchTo: "projects",
+            tabToSwitchTo: TAB_PROJECTS,
           },
         };
         break;
-      case "visualizations":
+      case TAB_VISUALIZATIONS:
         bannerData = {
           searchType: "Visualization",
           icon: <ImgVizSecondary />,
           listenerLink: {
             text: "Or view Sample results",
-            tabToSwitchTo: "samples",
+            tabToSwitchTo: TAB_SAMPLES,
           },
         };
         break;
@@ -1858,7 +1859,7 @@ class DiscoveryView extends React.Component {
 
     return (
       <>
-        {currentTab === "projects" && (
+        {currentTab === TAB_PROJECTS && (
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <ProjectsView
@@ -1889,10 +1890,10 @@ class DiscoveryView extends React.Component {
               !projects.isLoading() &&
               currentDisplay === "table" &&
               filteredProjectCount === 0 &&
-              this.renderNoSearchResultsBanner("projects")}
+              this.renderNoSearchResultsBanner(TAB_PROJECTS)}
           </div>
         )}
-        {currentTab === "samples" && (
+        {currentTab === TAB_SAMPLES && (
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
@@ -1945,11 +1946,11 @@ class DiscoveryView extends React.Component {
             !this.samples.length &&
             !this.workflowRuns.length &&
             tableHasLoaded
-              ? this.renderNoSearchResultsBanner("samples")
+              ? this.renderNoSearchResultsBanner(TAB_SAMPLES)
               : null}
           </div>
         )}
-        {currentTab === "visualizations" && (
+        {currentTab === TAB_VISUALIZATIONS && (
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <VisualizationsView
@@ -1969,7 +1970,7 @@ class DiscoveryView extends React.Component {
               !visualizations.length &&
               !visualizations.isLoading() &&
               currentDisplay === "table" &&
-              this.renderNoSearchResultsBanner("visualizations")}
+              this.renderNoSearchResultsBanner(TAB_VISUALIZATIONS)}
           </div>
         )}
       </>
@@ -2016,7 +2017,7 @@ class DiscoveryView extends React.Component {
     return (
       <div className={cs.rightPane}>
         {showStats &&
-          currentTab !== "visualizations" &&
+          currentTab !== TAB_VISUALIZATIONS &&
           (currentDisplay !== "table" ? (
             <MapPreviewSidebar
               allowedFeatures={allowedFeatures}
@@ -2174,7 +2175,7 @@ class DiscoveryView extends React.Component {
           <div className={cs.centerPane}>
             {userDataCounts &&
               (currentDisplay === "map" &&
-              ["samples", "projects"].includes(currentTab) ? (
+              [TAB_SAMPLES, TAB_PROJECTS].includes(currentTab) ? (
                 <div className={cs.viewContainer}>
                   {(domain === DISCOVERY_DOMAIN_MY_DATA &&
                     this.renderNoDataBanners()) ||
