@@ -297,7 +297,7 @@ export default class Heatmap {
     addSvgColorFilter(defs, "blue", COLOR_HOVER_LINK);
 
     this.g = this.svg.append("g");
-    this.gCells = this.g.append("g").attr("class", cs.cells);
+    this.gCells = this.g.append("g");
     this.gRowDendogram = this.g
       .append("g")
       .attr("class", cx(cs.dendogram, cs.rowDendogram));
@@ -488,14 +488,12 @@ export default class Heatmap {
       .on("keydown", () => {
         if (d3.event.code === "Space") {
           this.svg.style("cursor", "move");
-          this.gCells.selectAll(`.${cs.cell}`).style("cursor", "move");
           this.spacePressed = true;
         }
       })
       .on("keyup", () => {
         if (d3.event.code === "Space") {
           this.svg.style("cursor", "auto");
-          this.gCells.selectAll(`.${cs.cell}`).style("cursor", "auto");
           this.spacePressed = false;
         }
       });
@@ -1249,10 +1247,12 @@ export default class Heatmap {
     let cellsEnter = cells
       .enter()
       .append("rect")
-      .attr("class", d =>
-        cx(cs.cell, `cellColumn_${d.columnIndex}`, `cellRow_${d.rowIndex}`),
-      )
+      .attr("class", d => cs.cell)
       .on("mouseover", d => {
+        // Highlight cell user hovered over
+        d3.event.target.style.setProperty("stroke", COLOR_HOVER_LINK);
+
+        // Highlight this cell's row/column labels
         this.rowLabels[d.rowIndex].highlighted = true;
         this.columnLabels[d.columnIndex].highlighted = true;
         this.updateLabelHighlights(
@@ -1267,6 +1267,10 @@ export default class Heatmap {
         this.options.onNodeHover && this.options.onNodeHover(d);
       })
       .on("mouseleave", d => {
+        // Stop highlighting cell
+        d3.event.target.style.removeProperty("stroke");
+
+        // Stop highlighting this cell's row/column labels
         this.rowLabels[d.rowIndex].highlighted = false;
         this.columnLabels[d.columnIndex].highlighted = false;
         this.updateLabelHighlights(

@@ -7,21 +7,6 @@
 }
 
 .heatmap {
-  .cells {
-    rect.cell {
-      cursor: pointer;
-
-      &:hover {
-        stroke: $sds-color-primary-400;
-        stroke-width: 1px;
-      }
-
-      &.panning {
-        cursor: move;
-      }
-    }
-  }
-
   .rowLabels,
   .columnLabels {
     .rowLabel,
