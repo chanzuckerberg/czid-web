@@ -352,6 +352,7 @@ class SamplesHeatmapView extends React.Component {
         "species",
         "background",
         "metric",
+        "presets",
       ],
       diff(selectedOptions, this.getDefaultSelectedOptions()),
     );
