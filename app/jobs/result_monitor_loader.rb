@@ -20,6 +20,13 @@ class ResultMonitorLoader
 
         # If successful, break out of the retry loop.
         break
+      rescue ActiveRecord::RecordNotUnique
+        # We may potentially receive duplicate messages from our notification queue,
+        # which can result in trying to load an output that already exists in our database.
+        Rails.logger.warn("PipelineRun #{pipeline_run_id} has already loaded output #{output}")
+
+        # The output has already been loaded, so break out of the retry loop.
+        break
       rescue StandardError => e
         # Wait for up to 30 seconds. Mark as error and restart.
         sleep(Time.now.to_i % 30)
@@ -32,6 +39,8 @@ class ResultMonitorLoader
           output_state.update(state: PipelineRun::STATUS_FAILED)
           message = "SampleFailedEvent: Pipeline Run #{pr.id} for Sample #{pr.sample.id} by #{pr.sample.user.role_name} failed loading #{output} with #{pr.adjusted_remaining_reads || 0} reads remaining after #{pr.duration_hrs} hours and #{MAX_ATTEMPTS} attempts. See: #{pr.status_url}"
           LogUtil.log_error(message, exception: e)
+
+          finalize_pipeline_run_results(pr)
         end
       end
     else
@@ -55,13 +64,16 @@ class ResultMonitorLoader
     output_state.update(state: PipelineRun::STATUS_LOADED)
 
     if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
-      # Check if run is complete:
-      if pipeline_run.all_output_states_terminal?
-        compiling_stats_error = pipeline_run.check_job_stats
-        pipeline_run.finalize_results(compiling_stats_error)
-      end
+      finalize_pipeline_run_results(pipeline_run)
     end
 
     output_state
+  end
+
+  def self.finalize_pipeline_run_results(pipeline_run)
+    if pipeline_run.all_output_states_terminal?
+      compiling_stats_error = pipeline_run.check_job_stats
+      pipeline_run.finalize_results(compiling_stats_error)
+    end
   end
 end
