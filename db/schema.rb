@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_19_161213) do
+ActiveRecord::Schema.define(version: 2022_05_13_205412) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -521,7 +521,6 @@ ActiveRecord::Schema.define(version: 2022_05_19_161213) do
     t.integer "subsample_default", comment: "The default value of subsample for newly uploaded samples. Can be overridden by admin options."
     t.integer "max_input_fragments_default", comment: "The default value of max_input_fragments for newly uploaded samples. Can be overridden by admin options."
     t.bigint "creator_id", comment: "The user_id that created the project."
-    t.index ["created_at"], name: "index_projects_on_created_at"
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
@@ -569,7 +568,6 @@ ActiveRecord::Schema.define(version: 2022_05_19_161213) do
     t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.string "initial_workflow", default: "short-read-mngs", null: false, comment: "A soft enum (string) describing the initial workflow the sample was run on"
-    t.index ["created_at"], name: "index_samples_on_created_at"
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["name"], name: "index_samples_on_name"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
@@ -818,7 +816,6 @@ ActiveRecord::Schema.define(version: 2022_05_19_161213) do
     t.text "inputs_json", comment: "Generic JSON-string field for recording execution inputs."
     t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/samples/subpath/results' Never allow users to set this."
     t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing."
-    t.index ["created_at"], name: "index_workflow_runs_on_created_at"
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
 
