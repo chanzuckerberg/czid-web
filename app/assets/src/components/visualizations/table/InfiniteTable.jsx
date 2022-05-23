@@ -156,6 +156,7 @@ class InfiniteTable extends React.Component {
   render() {
     const {
       defaultCellRenderer,
+      draggableColumns,
       minimumBatchSize,
       onSelectRow,
       onSelectAllRows,
@@ -184,6 +185,7 @@ class InfiniteTable extends React.Component {
               defaultCellRenderer={
                 defaultCellRenderer || this.defaultCellRenderer
               }
+              draggableColumns={draggableColumns}
               forwardRef={registerChild}
               onRowsRendered={onRowsRendered}
               onSelectAllRows={onSelectAllRows}

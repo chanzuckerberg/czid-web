@@ -98,15 +98,30 @@ class BaseTable extends React.Component {
     nextDataKey,
     columnData,
     label,
+    sortBy,
+    sortDirection,
     totalTableWidth,
     totalTableHeight,
     isFirstColumn,
+    isSortableColumn,
   }) => {
-    const { headerLabelClassName } = this.props;
     const {
       columnCurrentlyDragged,
       mouseOverDraggableAreaForColumn,
     } = this.state;
+
+    let header;
+    if (isSortableColumn) {
+      header = this._sortableHeaderRenderer({
+        columnData,
+        dataKey,
+        label,
+        sortBy,
+        sortDirection,
+      });
+    } else {
+      header = this.basicHeaderRenderer({ columnData, label });
+    }
 
     return (
       <React.Fragment key={dataKey}>
@@ -116,20 +131,7 @@ class BaseTable extends React.Component {
           to the far right (alignment done via justify-content: space-between).
         */}
         {!isFirstColumn && <div />}
-        {columnData ? (
-          <ColumnHeaderTooltip
-            trigger={
-              <span className={cx(cs.label, headerLabelClassName)}>
-                {label}
-              </span>
-            }
-            title={label}
-            content={columnData.tooltip}
-            link={columnData.link}
-          />
-        ) : (
-          <span className={cx(cs.label, headerLabelClassName)}>{label}</span>
-        )}
+        {header}
         {/*
           If the column is the first column, align the header to the far left by putting an empty div
           in the middle of the label and draggable icon (alginment done via justify-content: space-between).
@@ -220,7 +222,7 @@ class BaseTable extends React.Component {
     sortBy,
     sortDirection,
   }) => {
-    const { sortedHeaderClassName } = this.props;
+    const { headerLabelClassName, sortedHeaderClassName } = this.props;
     return (
       <div
         className={cx(
@@ -230,14 +232,22 @@ class BaseTable extends React.Component {
       >
         {columnData ? (
           <ColumnHeaderTooltip
-            trigger={<span className={cs.label}>{label}</span>}
+            trigger={
+              <span className={cx(cs.label, headerLabelClassName)}>
+                {label}
+              </span>
+            }
             title={label}
             content={columnData.tooltip}
             link={columnData.link}
           />
         ) : (
           <BasicPopup
-            trigger={<span className={cs.label}>{label}</span>}
+            trigger={
+              <span className={cx(cs.label, headerLabelClassName)}>
+                {label}
+              </span>
+            }
             content={label}
           />
         )}
@@ -406,6 +416,12 @@ class BaseTable extends React.Component {
                 }
 
                 const isLastColumn = index === numberOfColumns - 1;
+                const isSortableColumn = sortable && !columnProps.disableSort;
+                const isDraggableColumn =
+                  draggableColumnsFeatureEnabled &&
+                  !columnProps.disableDrag &&
+                  !isLastColumn;
+
                 const {
                   cellRenderer,
                   className,
@@ -418,13 +434,7 @@ class BaseTable extends React.Component {
                 } = columnProps;
 
                 let headerRenderer;
-                if (sortable && !columnProps.disableSort) {
-                  headerRenderer = this._sortableHeaderRenderer;
-                } else if (
-                  draggableColumnsFeatureEnabled &&
-                  !columnProps.disableDrag &&
-                  !isLastColumn
-                ) {
+                if (isDraggableColumn) {
                   headerRenderer = args =>
                     this.draggableHeaderRenderer({
                       // Columns first in the order are aligned left, all others are aligned in the center
@@ -432,8 +442,11 @@ class BaseTable extends React.Component {
                       totalTableWidth: width,
                       totalTableHeight: height,
                       nextDataKey: columnOrder[index + 1],
+                      isSortableColumn,
                       ...args,
                     });
+                } else if (isSortableColumn) {
+                  headerRenderer = this._sortableHeaderRenderer;
                 } else {
                   headerRenderer = this.basicHeaderRenderer;
                 }
