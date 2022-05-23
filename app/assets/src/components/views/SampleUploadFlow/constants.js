@@ -47,6 +47,10 @@ export const CG_WETLAB_OPTIONS = [
     text: "Midnight",
     value: "midnight",
   },
+  {
+    text: "Easyseq",
+    value: "easyseq",
+  },
 ];
 
 export const CG_WETLAB_DISPLAY_NAMES = {
@@ -60,6 +64,7 @@ export const CG_WETLAB_DISPLAY_NAMES = {
   msspe: "MSSPE",
   snap: "SNAP",
   varskip: "varskip",
+  easyseq: "easyseq",
 };
 
 export const CG_TECHNOLOGY_OPTIONS = {

@@ -155,6 +155,8 @@ class SfnCgPipelineDispatchService
       "artic_v4_primers.bed"
     when protocols[:varskip]
       "neb_vss1a.primer.bed"
+    when protocols[:easyseq]
+      "easyseq.bed"
     when protocols[:midnight]
       "midnight_primers.bed"
     else

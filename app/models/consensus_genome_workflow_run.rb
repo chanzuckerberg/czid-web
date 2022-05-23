@@ -41,6 +41,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     snap: "snap",
     # See: https://github.com/nebiolabs/VarSkip
     varskip: "varskip",
+    # See: https://www.nimagen.com/gfx/Covid19/SARS_CoV_2_kit_V4.txt
+    easyseq: "easyseq",
   }.freeze
 
   DEFAULT_MEDAKA_MODEL = "r941_min_high_g360".freeze

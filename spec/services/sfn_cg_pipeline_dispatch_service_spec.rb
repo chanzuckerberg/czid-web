@@ -350,6 +350,27 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
         end
       end
 
+      context "when easyseq wetlab protocol is chosen" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:easyseq] }.to_json)
+        end
+        it "returns sfn input with Easyseq Primer" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/easyseq.bed",
+                },
+              },
+            }
+          )
+        end
+      end
+
       context "when no wetlab protocol is supplied" do
         let(:workflow_run) do
           create(:workflow_run,
