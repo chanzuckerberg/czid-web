@@ -69,6 +69,7 @@ gem 'thread'
 gem "sentry-raven"
 # Use SCSS for stylesheets
 gem 'sprockets-es6'
+gem "strong_migrations"
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets

@@ -1509,6 +1509,8 @@ GEM
       ssrf_filter (~> 1.0)
       typhoeus (~> 1.0, >= 1.0.1)
     stackprof (0.2.12)
+    strong_migrations (1.0.0)
+      activerecord (>= 5.2)
     thor (1.1.0)
     thread (0.2.2)
     tilt (2.0.10)
@@ -1623,6 +1625,7 @@ DEPENDENCIES
   sprockets-es6
   ssrfs-up (~> 0.0.19)
   stackprof
+  strong_migrations
   thread
   turbolinks (~> 5)
   tzinfo-data

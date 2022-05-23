@@ -6,18 +6,24 @@
 - Include a schema `comment` on everything but the simplest columns. Even a short explanation can provide context.
 - If you will be querying two or more fields together frequently, make sure to include a composite or compound index. The left-prefix rule means that prefix subsets can be used standalone (e.g. `t.index ["host_genome_id", "metadata_field_id"]` also functions as an index just for `host_genome_id`.)
 
-## Migration safety
+## Database Schema Migration Safety
 
-- Writing safe, zero-downtime DB migrations requires special attention, particularly on large tables such as `taxon_counts` or frequently accessed fields. This is because there could be a mismatch between the old and new versions of the code during the deployment, or a migration could lock columns/tables that are needed to fulfill requests.
-- Ideally, operations such as renaming a column are split across multiple _code deploys_ (not just multiple pull requests).
-- This [CZI blog post describes the problem](https://medium.com/czi-technology/db-migrations-and-push-safety-in-rails-508bc877dd7e)
-- The [`strong_migrations` gem documentation describes potentially dangerous operations recommmendations](https://github.com/ankane/strong_migrations#checks). (We may adopt this Gem!)
-- [Post-mortem on DB migration issues](https://czi.quip.com/SZigAbUTTNGa)
-- If you use `change_column`, please define `def up` and `def down` or a `reversible` block instead of just `def change`. Otherwise reverting it will trigger: `This migration uses change_column, which is not automatically reversible.`
+- Writing safe, zero-downtime DB migrations requires special attention, particularly on large tables such as `taxon_counts` or frequently accessed fields. During deployment, there can be a  old and new versions of the code running against unmigrated or migrated versions of the DB, or a migration could lock columns/tables that are needed to fulfill requests.
+- This [CZI blog post describes the problem](https://medium.com/czi-technology/db-migrations-and-push-safety-in-rails-508bc877dd7e), and the team as previously conducted a [post-mortem on DB migration issues](https://czi.quip.com/SZigAbUTTNGa)
+- The [`strong_migrations` gem documentation describes potentially dangerous operations and provides safer recommmendations](https://github.com/ankane/strong_migrations#checks).  This gem will automatically raise an error if it detects a dangerous migration when they are run.
+  - Sometimes it is necessary to perform a dangerous action in a migration.  As [documented in the strong migrations documentation, migrations steps can be marked as safe by wrapping them in a `safety_assured` block](https://github.com/ankane/strong_migrations#assuring-safety)
+
+    ```ruby
+    class MySafeMigration < ActiveRecord::Migration[7.0]
+      def change
+        safety_assured { remove_column :users, :some_column }
+      end
+    end
+    ```
 
 ## Schema vs data migrations
 
-- Active Record migrations are intended to capture database schema changes.  It's generally not recomended to perform data changes migrations using Active Record migrations, primarily due to the data being invalid if the schema changes.
+- Active Record migrations are intended to capture database schema changes.  It's generally not recomended to perform data change migrations using Active Record migrations, primarily due to the data being invalid if the schema changes.
 - For data migrations, CZ ID uses [the `data_migrate` gem](https://github.com/ilyakatz/data-migrate), which provides structure and interface for performing data migrations in a very similar to data migrations.
 - [More information on Active Record migrations](https://czi.quip.com/N5eMAFsZ47jX/Rails-Database-migrations)
 - To run data migrations, append `:with_data` to standard `db:migrate` rake tasks (e.g. `bin/rails db:migrate:with_data`), or use the specific data rake tasks documented in the gem (such as `bin/rails data:migrate`).
