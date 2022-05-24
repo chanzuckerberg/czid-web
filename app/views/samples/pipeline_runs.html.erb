@@ -7,6 +7,13 @@
     padding: 15px 5px;
   }
 </style>
+<script>
+
+function showhide(id) {
+    var e = document.getElementById(id);
+    e.style.display = (e.style.display == 'block') ? 'none' : 'block';
+}
+</script>
 
 <p>
   <strong>Name:</strong>
@@ -129,6 +136,7 @@
       <% end %>
     </tbody>
   </table>
+  <%= button_to 'Show Logs', pipeline_logs_sample_path(@sample), method: :get %>
 <% end %>
 
 <% if @sample.workflow_runs.size > 0 %>

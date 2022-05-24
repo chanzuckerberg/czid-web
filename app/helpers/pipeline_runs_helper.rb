@@ -347,6 +347,41 @@ module PipelineRunsHelper
     value
   end
 
+  def get_pipeline_run_logs(last_n = 30)
+    return [] if step_function? && sfn_execution_arn.blank?
+
+    if step_function?
+      sfn = SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_output_path)
+      sfn_events = sfn.history.to_h[:events]
+      if sfn_events.nil?
+        return ["No step function events, step function may have expired"]
+      end
+
+      batch_events = sfn_events.reject { |event| event[:task_submitted_event_details].nil? }
+      if batch_events.empty?
+        return ["No submitted batch jobs"]
+      end
+
+      last_job = batch_events[-1]
+      job_arn = JSON.parse(last_job[:task_submitted_event_details][:output])["JobArn"]
+      batch_job = AwsClient[:batch].describe_jobs({ "jobs": [job_arn] }).to_h[:jobs]
+      if batch_job.empty?
+        return ["No result from batch job, the batch information may have expired"]
+      end
+
+      log_stream_name = batch_job[0][:container][:log_stream_name]
+      if log_stream_name.empty?
+        return ["No log stream name, batch job may have just started"]
+      end
+
+      AwsClient[:cloudwatchlogs].get_log_events({
+                                                  "log_group_name": "/aws/batch/job",
+                                                  "log_stream_name": log_stream_name,
+                                                  "limit": last_n,
+                                                }).to_h[:events].pluck(:message)
+    end
+  end
+
   def check_for_user_error(failed_stage)
     pr = failed_stage.pipeline_run
     # if SFN run, return no user error if the SFN failed to start

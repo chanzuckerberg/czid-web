@@ -56,6 +56,7 @@ Rails.application.routes.draw do
       get :summary_contig_counts
       get :coverage_viz_summary
       get :coverage_viz_data
+      get :pipeline_logs
 
       put :reupload_source
       put :kickoff_pipeline

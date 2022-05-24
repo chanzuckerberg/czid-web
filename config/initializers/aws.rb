@@ -28,6 +28,8 @@ module AwsClient
     },
     sts: -> { Aws::STS::Client.new(stub_responses: stub_responses) },
     cloudwatch: -> { Aws::CloudWatch::Client.new(stub_responses: stub_responses) },
+    cloudwatchlogs: -> { Aws::CloudWatchLogs::Client.new(stub_responses: stub_responses) },
+    batch: -> { Aws::Batch::Client.new(stub_responses: stub_responses) },
   }.freeze
 
   @clients = {}

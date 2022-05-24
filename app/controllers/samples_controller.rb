@@ -25,7 +25,7 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs_for_blast, :taxid_contigs_download, :taxon_five_longest_reads, :summary_contig_counts, :coverage_viz_summary,
-                  :coverage_viz_data, :upload_credentials,].freeze
+                  :coverage_viz_data, :upload_credentials, :pipeline_logs,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow, :move_to_project,].freeze
 
@@ -40,7 +40,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
-  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project]
+  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project, :pipeline_logs]
   before_action :login_required, only: [:bulk_import]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
@@ -1391,6 +1391,19 @@ class SamplesController < ApplicationController
       else
         format.html { redirect_to pipeline_runs_sample_path(@sample), notice: 'No pipeline run in progress.' }
         format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def pipeline_logs
+    if @sample.first_pipeline_run.nil?
+      render json: {
+        error: "no pipeline_runs available",
+      }
+    else
+      respond_to do |format|
+        format.html {}
+        format.json { @sample.first_pipeline_run.get_pipeline_run_logs }
       end
     end
   end
