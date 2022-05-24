@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -25,7 +24,7 @@ const AnnotationLabel = ({
   isSmall = false,
   hideTooltip = false,
   ...props
-}) => {
+}: AnnotationLabelProps) => {
   const IconAnnotation = {
     [ANNOTATION_HIT]: IconAnnotationCheck,
     [ANNOTATION_NOT_A_HIT]: IconAnnotationCross,
@@ -70,17 +69,12 @@ const AnnotationLabel = ({
   );
 };
 
-AnnotationLabel.propTypes = {
-  className: PropTypes.string,
-  type: PropTypes.oneOf([
-    ANNOTATION_HIT,
-    ANNOTATION_NOT_A_HIT,
-    ANNOTATION_INCONCLUSIVE,
-    ANNOTATION_NONE,
-  ]),
-  isSmall: PropTypes.bool,
-  hideTooltip: PropTypes.bool,
-  onClick: PropTypes.func,
-};
+interface AnnotationLabelProps {
+  className: string;
+  type: "hit" | "not_a_hit" | "inconclusive" | "none";
+  isSmall: boolean;
+  hideTooltip: boolean;
+  onClick: $TSFixMeFunction;
+}
 
 export default AnnotationLabel;

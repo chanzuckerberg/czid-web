@@ -1,12 +1,20 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import BasicPopup from "~/components/BasicPopup";
 
 import cs from "./status_label.scss";
 
-class StatusLabel extends React.Component {
+interface StatusLabelProps {
+  className?: string;
+  status?: React.ReactNode;
+  type?: "beta" | "default" | "error" | "info" | "success" | "warning";
+  tooltipText?: string;
+  inline?: boolean;
+}
+
+class StatusLabel extends React.Component<StatusLabelProps> {
+  static defaultProps: { type: "default" };
   render() {
     const { status, type, className, tooltipText, inline } = this.props;
     const label = (
@@ -30,24 +38,5 @@ class StatusLabel extends React.Component {
     return label;
   }
 }
-
-StatusLabel.propTypes = {
-  className: PropTypes.string,
-  status: PropTypes.node,
-  type: PropTypes.oneOf([
-    "beta",
-    "default",
-    "error",
-    "info",
-    "success",
-    "warning",
-  ]),
-  tooltipText: PropTypes.string,
-  inline: PropTypes.bool,
-};
-
-StatusLabel.defaultProps = {
-  type: "default",
-};
 
 export default StatusLabel;

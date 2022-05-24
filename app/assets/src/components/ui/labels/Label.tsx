@@ -1,8 +1,10 @@
-import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
-import { Label as BaseLabel } from "semantic-ui-react";
+import {
+  Label as BaseLabel,
+  SemanticCOLORS,
+  SemanticSIZES,
+} from "semantic-ui-react";
 import cs from "./label.scss";
 
 const Label = ({
@@ -13,7 +15,7 @@ const Label = ({
   floating,
   text,
   onClick,
-}) => {
+}: LabelProps) => {
   return (
     <BaseLabel
       className={cx(className, cs.label)}
@@ -28,14 +30,14 @@ const Label = ({
   );
 };
 
-Label.propTypes = forbidExtraProps({
-  className: PropTypes.string,
-  color: PropTypes.string,
-  size: PropTypes.string,
-  circular: PropTypes.bool,
-  floating: PropTypes.bool,
-  text: PropTypes.node,
-  onClick: PropTypes.func,
-});
+interface LabelProps {
+  className?: string;
+  color: SemanticCOLORS;
+  size: SemanticSIZES;
+  circular?: boolean;
+  floating?: boolean;
+  text: React.ReactNode;
+  onClick?: $TSFixMeFunction;
+}
 
 export default Label;

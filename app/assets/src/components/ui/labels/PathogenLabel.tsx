@@ -1,5 +1,5 @@
-import PropTypes from "prop-types";
 import React, { useContext } from "react";
+import { SemanticCOLORS } from "semantic-ui-react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
@@ -35,7 +35,14 @@ export const CATEGORIES = {
   },
 };
 
-const PathogenLabel = ({ type, color }) => {
+interface PathogenLabelProps {
+  type?: string;
+  // TODO: make this prop required after deprecating legacy pathogen tags
+  // legacy pathogen label colors are defined in CATEGORIES, not via this prop
+  color: SemanticCOLORS;
+}
+
+const PathogenLabel = ({ type, color }: PathogenLabelProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -45,7 +52,7 @@ const PathogenLabel = ({ type, color }) => {
   ) {
     return null;
   }
-  let label = allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
+  const label = allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
     <span>
       <Label
         text="Known Pathogen"
@@ -97,13 +104,6 @@ const PathogenLabel = ({ type, color }) => {
       basic={false}
     />
   );
-};
-
-PathogenLabel.propTypes = {
-  type: PropTypes.string,
-  // TODO: make this prop required after deprecating legacy pathogen tags
-  // legacy pathogen label colors are defined in CATEGORIES, not via this prop
-  color: PropTypes.string,
 };
 
 export default PathogenLabel;
