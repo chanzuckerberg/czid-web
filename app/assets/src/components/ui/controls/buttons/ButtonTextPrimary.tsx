@@ -1,11 +1,10 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import Button from "./Button";
 
 import cs from "./button_text_primary.scss";
 
-const ButtonTextPrimary = props => {
+const ButtonTextPrimary = (props: ButtonTextPrimaryProps) => {
   const { className } = props;
 
   return (
@@ -17,8 +16,8 @@ const ButtonTextPrimary = props => {
   );
 };
 
-ButtonTextPrimary.propTypes = {
-  className: PropTypes.string,
-};
+interface ButtonTextPrimaryProps {
+  className: string;
+}
 
 export default ButtonTextPrimary;

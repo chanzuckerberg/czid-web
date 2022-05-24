@@ -1,6 +1,4 @@
-import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { Button as BaseButton } from "semantic-ui-react";
 
@@ -16,7 +14,7 @@ const Button = ({
   rounded,
   text,
   ...props
-}) => {
+}: ButtonProps) => {
   let content = text;
   if (icon || label) {
     content = (
@@ -27,7 +25,7 @@ const Button = ({
       </div>
     );
   }
-  let cname = "idseq-ui";
+  const cname = "idseq-ui";
   return (
     <BaseButton
       {...props}
@@ -47,24 +45,24 @@ const Button = ({
   );
 };
 
-Button.propTypes = forbidExtraProps({
-  circular: PropTypes.bool,
-  className: PropTypes.string,
-  disabled: PropTypes.bool,
-  hasDropdownArrow: PropTypes.bool,
-  icon: PropTypes.element,
-  label: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
-  labelClassName: PropTypes.string,
-  onBlur: PropTypes.func,
-  onClick: PropTypes.func,
-  onFocus: PropTypes.func,
-  onMouseEnter: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  primary: PropTypes.bool,
-  rounded: PropTypes.bool,
-  secondary: PropTypes.bool,
-  text: PropTypes.string,
-});
+interface ButtonProps {
+  circular?: boolean;
+  className: string;
+  disabled?: boolean;
+  hasDropdownArrow?: boolean;
+  icon?: $TSFixMe;
+  label?: string | $TSFixMe;
+  labelClassName?: string;
+  onBlur?: $TSFixMeFunction;
+  onClick?: $TSFixMeFunction;
+  onFocus?: React.MouseEvent<HTMLElement>;
+  onMouseEnter?: React.MouseEvent<HTMLElement>;
+  onMouseLeave?: React.MouseEvent<HTMLElement>;
+  primary?: boolean;
+  rounded?: boolean;
+  secondary?: boolean;
+  text?: string;
+}
 
 Button.defaultProps = {
   circular: false,
