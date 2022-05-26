@@ -1195,7 +1195,7 @@ GEM
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.6)
-    csv-safe (1.2.0)
+    csv-safe (3.0.0)
     data_migrate (8.0.0)
       activerecord (>= 5.0)
       railties (>= 5.0)
@@ -1572,7 +1572,7 @@ DEPENDENCIES
   byebug
   capybara (~> 2.17, >= 2.17.0)
   consul (>= 0.13.1)
-  csv-safe (~> 1.2)
+  csv-safe (~> 3.0)
   data_migrate
   deep_cloneable (~> 3.1)
   elasticsearch-model

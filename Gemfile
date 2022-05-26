@@ -108,7 +108,7 @@ gem 'nokogiri'
 gem 'immigrant'
 
 # Better CSV handling
-gem 'csv-safe', '~> 1.2'
+gem 'csv-safe', '~> 3.0'
 
 # For accessing Auth0 management APIs
 gem 'auth0'
