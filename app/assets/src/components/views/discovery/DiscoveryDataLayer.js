@@ -1,4 +1,5 @@
 import { findIndex, findLastIndex, range, slice } from "lodash/fp";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import {
   getDiscoveryProjects,
   getDiscoverySamples,
@@ -97,23 +98,38 @@ class ObjectCollectionView {
 
   isLoading = () => this._loading;
 
-  reset = ({ conditions, loadFirstPage = false } = {}) => {
+  reset = ({ conditions, loadFirstPage = false, logLoadTime = false } = {}) => {
     this._orderedIds = null;
     this._loading = true;
     this._conditions = conditions;
     this._activePromises = {};
 
     if (loadFirstPage) {
-      this.loadPage(0);
+      this.loadPage(0, logLoadTime);
     }
   };
 
-  loadPage = async pageNumber => {
+  loadPage = async (pageNumber, logLoadTime = false) => {
     const indices = {
       startIndex: pageNumber,
       stopIndex: this._pageSize * (1 + pageNumber) - 1,
     };
-    return this.handleLoadObjectRows(indices);
+
+    const startLoad = new Date();
+    const objectRows = await this.handleLoadObjectRows(indices);
+    const endLoad = new Date();
+
+    if (logLoadTime) {
+      trackEvent(ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_TABLE_PAGE_LOADED, {
+        domain: this._collection.domain,
+        displayName: this._displayName,
+        allIdsCount: this._orderedIds.length,
+        loadTimeInMilleseconds: endLoad - startLoad,
+        ...this._conditions,
+      });
+    }
+
+    return objectRows;
   };
 
   handleLoadObjectRows = async ({ startIndex, stopIndex }) => {

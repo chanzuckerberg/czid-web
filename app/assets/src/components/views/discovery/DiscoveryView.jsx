@@ -620,9 +620,17 @@ class DiscoveryView extends React.Component {
     const conditions = this.getConditions();
 
     if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
-      this.samples.reset({ conditions, loadFirstPage: true });
+      this.samples.reset({
+        conditions,
+        loadFirstPage: true,
+        logLoadTime: true,
+      });
     } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
-      this.workflowRuns.reset({ conditions, loadFirstPage: true });
+      this.workflowRuns.reset({
+        conditions,
+        loadFirstPage: true,
+        logLoadTime: true,
+      });
     }
 
     this.samplesView && this.samplesView.reset();
@@ -631,14 +639,18 @@ class DiscoveryView extends React.Component {
   resetProjectsData = () => {
     const conditions = this.getConditions();
 
-    this.projects.reset({ conditions, loadFirstPage: true });
+    this.projects.reset({ conditions, loadFirstPage: true, logLoadTime: true });
     this.projectsView && this.projectsView.reset();
   };
 
   resetVisualizationsData = () => {
     const conditions = this.getConditions();
 
-    this.visualizations.reset({ conditions, loadFirstPage: true });
+    this.visualizations.reset({
+      conditions,
+      loadFirstPage: true,
+      logLoadTime: true,
+    });
     this.visualizationsView && this.visualizationsView.reset();
   };
 
@@ -1417,10 +1429,7 @@ class DiscoveryView extends React.Component {
     } = this.state;
     this.setState({ orderBy: sortBy, orderDirection: sortDirection }, () => {
       this.updateBrowsingHistory("replace");
-
-      const sortStart = new Date();
       this.resetDataFromSortChange();
-      const sortEnd = new Date();
 
       trackEvent(
         ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED,
@@ -1435,7 +1444,6 @@ class DiscoveryView extends React.Component {
           filteredProjectCount,
           filteredVisualizationCount,
           filteredWorkflowRunCount,
-          sortTimeInMilliseconds: sortEnd - sortStart,
         },
       );
     });

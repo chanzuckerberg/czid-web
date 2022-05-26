@@ -529,6 +529,9 @@ function EventDictionary() {
   /** This user clicked the sortable column headers on a discovery view table. */
   this.DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED =
     "DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED";
+
+  /** One page of data is loaded onto the DiscoveryView table */
+  this.DISCOVERY_VIEW_TABLE_PAGE_LOADED = "DISCOVERY_VIEW_TABLE_PAGE_LOADED";
 }
 
 const eventNames = new EventDictionary();
