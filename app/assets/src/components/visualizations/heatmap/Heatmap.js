@@ -4,7 +4,7 @@ import d3 from "d3";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
 import { compact, orderBy, some } from "lodash";
-import { clamp, find, mean, sortBy, minBy } from "lodash/fp";
+import { clamp, find, mean, sortBy, minBy, isEqual } from "lodash/fp";
 import SvgSaver from "svgsaver";
 import textWidth from "text-width";
 
@@ -105,6 +105,7 @@ export default class Heatmap {
 
     this.overlays = []; // rectangle overlays used for highlighting rows/columns
     this.overlaysDebounce = false; // used to reduce flickering when highlight row/column labels
+    this.previousNullHover = null; // track the last cell with no data that we hovered on
   }
 
   getScaleType() {
@@ -268,7 +269,8 @@ export default class Heatmap {
 
   filterData() {
     this.filteredCells = this.cells.filter(
-      cell => !this.rowLabels[cell.rowIndex].hidden,
+      // Don't render cells with value = null or undefined (but render cells with value 0)
+      cell => !this.rowLabels[cell.rowIndex].hidden && cell.value != null,
     );
 
     // Initially sort so that genus seperators are placed correctly
@@ -293,6 +295,7 @@ export default class Heatmap {
     );
 
     const defs = this.svg.append("defs");
+    this.defs = defs;
     // Create a blue color filter to match $primary-light.
     addSvgColorFilter(defs, "blue", COLOR_HOVER_LINK);
 
@@ -452,6 +455,63 @@ export default class Heatmap {
           this.totalMetadataHeight +
           this.totalRowAddLinkHeight})`,
     );
+
+    // Draw a rectangle that will be used as a border when hovering over cells. We do this
+    // because cells are not rendered if they don't have data, but we still want to see a
+    // border when hovering around those cells.
+    this.gCellHover = this.gCells
+      .append("rect")
+      .style("fill-opacity", 0)
+      .style("stroke", COLOR_HOVER_LINK)
+      .attr("height", this.cell.height)
+      .attr("width", this.cell.width)
+      .attr("visibility", "hidden");
+
+    // Define background pattern
+    const pattern = this.defs
+      .append("pattern")
+      .attr("id", "pattern-grid")
+      .attr("patternUnits", "userSpaceOnUse")
+      .attr("width", this.cell.width)
+      .attr("height", this.cell.height);
+
+    pattern
+      .append("rect")
+      .style("fill", "rgb(234, 234, 234)")
+      .attr("height", this.cell.height - 2)
+      .attr("width", this.cell.width - 2)
+      .attr("x", 1)
+      .attr("y", 1);
+
+    // Draw background grid with pattern above
+    this.gCells
+      .append("rect")
+      .attr("width", totalCellWidth)
+      .attr("height", totalCellHeight)
+      .attr("style", "fill: url(#pattern-grid)")
+      .on("mousemove", () => {
+        // Update tooltip on "mousemove", not "mouseover" because you can hover over many cells in that grid
+        const cell = this.getCellFromCursorLocation();
+        if (!cell) return;
+
+        // Update the tooltip only if we hover over a new cell, otherwise, the tooltip would follow the cursor,
+        // which is not how the rest of the cells behave.
+        if (!isEqual(this.previousNullHover, cell)) {
+          if (this.previousNullHover)
+            this.handleCellMouseLeave(this.previousNullHover);
+          this.handleCellMouseOver(cell);
+          this.previousNullHover = cell;
+        }
+      })
+      .on("mouseleave", () => {
+        // Need this, otherwise if hover over null then hover over data, old highlightings still there!
+        if (this.previousNullHover) {
+          this.handleCellMouseLeave(this.previousNullHover);
+          this.previousNullHover = null;
+        }
+      });
+
+    // Draw dendrogram
     this.gRowDendogram.attr(
       "transform",
       `translate(
@@ -864,6 +924,27 @@ export default class Heatmap {
     };
   }
 
+  // Get info about the cell the user is currently hovering over. We use this to derive the
+  // position of cells that are not rendered (i.e. cells with no data).
+  getCellFromCursorLocation() {
+    const grid = this.gCells[0][0].getBoundingClientRect();
+
+    // Convert x/y coordinates into row and column positions.
+    // Subtract `left` and `top` to account for scrolling of the grid.
+    const x = d3.event.clientX - grid.left;
+    const y = d3.event.clientY - grid.top;
+
+    // Calculate relative position of the cell
+    const xPos = Math.floor((x / grid.width) * this.columnLabels.length);
+    const yPos = Math.floor((y / grid.height) * this.rowLabels.length);
+    if (xPos < 0 || yPos < 0) return null;
+
+    // Infer row/column index. Note that xPos != columnIndex because rows can be ordered differently
+    const columnIndex = find({ pos: xPos }, this.columnLabels).columnIndex;
+    const rowIndex = find({ pos: yPos }, this.rowLabels).rowIndex;
+    return find({ columnIndex, rowIndex }, this.cells);
+  }
+
   sortTree(root) {
     if (!root) return;
     let scale = this.getScale();
@@ -1181,6 +1262,51 @@ export default class Heatmap {
       );
   }
 
+  handleCellMouseOver = d => {
+    // Highlight cell user hovered over
+    this.gCellHover
+      .attr("visibility", "visible")
+      .attr("x", this.columnLabels[d.columnIndex].pos * this.cell.width)
+      .attr("y", this.rowLabels[d.rowIndex].pos * this.cell.height);
+
+    // Highlight this cell's row/column labels
+    this.rowLabels[d.rowIndex].highlighted = true;
+    this.columnLabels[d.columnIndex].highlighted = true;
+    this.updateLabelHighlights(
+      this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+      this.rowLabels,
+    );
+    this.updateLabelHighlights(
+      this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
+      this.columnLabels,
+    );
+
+    this.options.onNodeHover && this.options.onNodeHover(d);
+  };
+
+  handleCellMouseLeave = d => {
+    // Stop highlighting cell
+    this.gCellHover.attr("visibility", "hidden");
+
+    // Stop highlighting this cell's row/column labels
+    this.rowLabels[d.rowIndex].highlighted = false;
+    this.columnLabels[d.columnIndex].highlighted = false;
+    this.updateLabelHighlights(
+      this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+      this.rowLabels,
+    );
+    this.updateLabelHighlights(
+      this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
+      this.columnLabels,
+    );
+
+    this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
+  };
+
+  handleCellClick = d => {
+    this.options.onCellClick && this.options.onCellClick(d, d3.event);
+  };
+
   applyScale(scale, value, min, max) {
     value = Math.min(Math.max(value, min), max);
     return Math.round(scale(value));
@@ -1248,46 +1374,9 @@ export default class Heatmap {
       .enter()
       .append("rect")
       .attr("class", d => cs.cell)
-      .on("mouseover", d => {
-        // Highlight cell user hovered over
-        d3.event.target.style.setProperty("stroke", COLOR_HOVER_LINK);
-
-        // Highlight this cell's row/column labels
-        this.rowLabels[d.rowIndex].highlighted = true;
-        this.columnLabels[d.columnIndex].highlighted = true;
-        this.updateLabelHighlights(
-          this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-          this.rowLabels,
-        );
-        this.updateLabelHighlights(
-          this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
-          this.columnLabels,
-        );
-
-        this.options.onNodeHover && this.options.onNodeHover(d);
-      })
-      .on("mouseleave", d => {
-        // Stop highlighting cell
-        d3.event.target.style.removeProperty("stroke");
-
-        // Stop highlighting this cell's row/column labels
-        this.rowLabels[d.rowIndex].highlighted = false;
-        this.columnLabels[d.columnIndex].highlighted = false;
-        this.updateLabelHighlights(
-          this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-          this.rowLabels,
-        );
-        this.updateLabelHighlights(
-          this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
-          this.columnLabels,
-        );
-
-        this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
-      })
-      .on(
-        "click",
-        d => this.options.onCellClick && this.options.onCellClick(d, d3.event),
-      );
+      .on("mouseover", this.handleCellMouseOver)
+      .on("mouseleave", this.handleCellMouseLeave)
+      .on("click", this.handleCellClick);
     applyFormat(cellsEnter);
   }
 
