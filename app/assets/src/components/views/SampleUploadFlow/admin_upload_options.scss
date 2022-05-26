@@ -1,3 +1,5 @@
+@use "sass:math";
+
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
@@ -25,7 +27,7 @@
 }
 
 .field {
-  width: calc(33.3% - #{$sds-spaces-xl * 2 / 3});
+  width: calc(33.3% - #{math.div($sds-spaces-xl * 2, 3)});
   margin-right: $sds-spaces-xl;
   margin-bottom: $sds-spaces-l;
 

@@ -121,7 +121,7 @@
   flex-wrap: wrap;
 
   .field {
-    width: calc(50% - #{$sds-spaces-xl / 2});
+    width: calc(50% - #{$sds-spaces-xl * 0.5});
 
     &:nth-child(odd) {
       margin-right: $sds-spaces-xl;

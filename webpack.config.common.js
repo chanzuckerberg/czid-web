@@ -68,8 +68,8 @@ const config = {
           {
             loader: "sass-loader",
             options: {
-              minimize: true,
               sourceMap: true,
+              implementation: require("sass"),
             },
           },
         ],
@@ -105,8 +105,8 @@ const config = {
           {
             loader: "sass-loader",
             options: {
-              minimize: true,
               sourceMap: true,
+              implementation: require("sass"),
             },
           },
         ],

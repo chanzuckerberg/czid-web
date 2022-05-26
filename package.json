@@ -87,7 +87,7 @@
     "postcss-loader": "^3.0.0",
     "prettier": "^1.19.1",
     "sass": "^1.50.1",
-    "sass-loader": "^6.0.6",
+    "sass-loader": "9.0",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.3",
     "style-loader": "^0.20.2",
