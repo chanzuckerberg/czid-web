@@ -2,7 +2,7 @@ import { includes } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { withAnalytics } from "~/api/analytics";
-import { useCreateUser , updateUser as userUpdater } from "~/api/user";
+import { useCreateUser, updateUser as userUpdater } from "~/api/user";
 import UserForm from "~/components/views/users/UserForm";
 import { openUrl } from "~utils/links";
 
