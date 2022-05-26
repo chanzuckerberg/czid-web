@@ -10,6 +10,15 @@ module Types
       argument :id, ID, required: true
     end
 
+    field :user, UserType, null: false do
+      argument :email, String, required: true
+      argument :name, String, required: true
+      argument :institution, String, required: true
+      argument :archetypes, String, required: true
+      argument :segments, String, required: true
+      argument :role, Int, required: true
+    end
+
     def app_config(id:)
       AppConfig.find(id)
     end

@@ -1,8 +1,8 @@
 import { includes } from "lodash/fp";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
 import { withAnalytics } from "~/api/analytics";
-import { createUser, updateUser } from "~/api/user";
+import { useCreateUser , updateUser as userUpdater } from "~/api/user";
 import UserForm from "~/components/views/users/UserForm";
 import { openUrl } from "~utils/links";
 
@@ -17,91 +17,96 @@ const LANDSCAPE_EXPLORER = "Landscape Explorer";
 const OUTBREAK_SURVEYOR = "Outbreak Surveyor";
 const MICROBIOME_INVESTIGATOR = "Microbiome Investigator";
 
-class CreateUser extends React.Component {
-  constructor(props, context) {
-    super(props, context);
-    this.user = props.selectedUser || null;
-    this.selectedUser = {
-      email: this.user ? this.user.email : "",
-      name: this.user ? this.user.name : "",
-      institution: this.user ? this.user.institution : "",
-      id: this.user ? this.user.id : null,
-      adminStatus: this.user ? this.user.admin : null,
-      archetypes: this.user ? this.user.archetypes : [],
-      segments: this.user ? this.user.segments : null,
-    };
-    this.state = {
-      submitting: false,
-      isAdmin: !!this.selectedUser.adminStatus,
-      success: false,
-      showFailed: false,
-      errorMessage: "",
-      successMessage: "",
-      serverErrors: [],
-      email: this.selectedUser.email || "",
-      name: this.selectedUser.name || "",
-      id: this.selectedUser.id,
-      sendActivation: true,
-      institution: this.selectedUser.institution || "",
-      isMedicalDetective: includes(
-        MEDICAL_DETECTIVE,
-        this.selectedUser.archetypes,
-      ),
-      isLandscapeExplorer: includes(
-        LANDSCAPE_EXPLORER,
-        this.selectedUser.archetypes,
-      ),
-      isOutbreakSurveyor: includes(
-        OUTBREAK_SURVEYOR,
-        this.selectedUser.archetypes,
-      ),
-      isMicrobiomeInvestigator: includes(
-        MICROBIOME_INVESTIGATOR,
-        this.selectedUser.archetypes,
-      ),
-      isAfricaCDC: includes(AFRICA_CDC, this.selectedUser.segments),
-      isBiohub: includes(BIOHUB, this.selectedUser.segments),
-      isDPH: includes(DPH, this.selectedUser.segments),
-      isGCE: includes(GCE, this.selectedUser.segments),
-      isLMIC: includes(LMIC, this.selectedUser.segments),
-    };
+function CreateUser(props = {}) {
+  const user = props.selectedUser || null;
+  const selectedUser = {
+    email: user ? user.email : "",
+    name: user ? user.name : "",
+    institution: user ? user.institution : "",
+    id: user ? user.id : null,
+    adminStatus: user ? user.admin : null,
+    archetypes: user ? user.archetypes : [],
+    segments: user ? user.segments : null,
+  };
+  const [submitting, setSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(!!selectedUser.adminStatus);
+  const [success, setSuccess] = useState(false);
+  const [showFailed, setShowFailed] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [serverErrors, setServerErrors] = useState([]);
+  const [email, setEmail] = useState(selectedUser.email || "");
+  const [name, setName] = useState(selectedUser.name || "");
+  const [id] = useState(selectedUser.id);
+  const [sendActivation, setSendActivation] = useState(true);
+  const [institution, setInstitution] = useState(
+    selectedUser.institution || "",
+  );
+  const [isMedicalDetective, setIsMedicalDetective] = useState(
+    includes(MEDICAL_DETECTIVE, selectedUser.archetypes),
+  );
+  const [isLandscapeExplorer, setIsLandscapeExplorer] = useState(
+    includes(LANDSCAPE_EXPLORER, selectedUser.archetypes),
+  );
+  const [isOutbreakSurveyor, setIsOutbreakSurveyor] = useState(
+    includes(OUTBREAK_SURVEYOR, selectedUser.archetypes),
+  );
+  const [isMicrobiomeInvestigator, setIsMicrobiomeInvestigator] = useState(
+    includes(MICROBIOME_INVESTIGATOR, selectedUser.archetypes),
+  );
+  const [isAfricaCDC, setIsAfricaCDC] = useState(
+    includes(AFRICA_CDC, selectedUser.segments),
+  );
+  const [isBiohub, setIsBiohub] = useState(
+    includes(BIOHUB, selectedUser.segments),
+  );
+  const [isDPH, setIsDPH] = useState(includes(DPH, selectedUser.segments));
+  const [isGCE, setIsGCE] = useState(includes(GCE, selectedUser.segments));
+  const [isLMIC, setIsLMIC] = useState(includes(LMIC, selectedUser.segments));
+
+  const userCreator = useCreateUser();
+
+  const isCreateFormInvalid = () => {
+    if (email === "") {
+      setShowFailed(true);
+      setErrorMessage("Please fill all fields");
+      return true;
+    }
+  };
+
+  function isUpdateFormValid() {
+    if (email === "") {
+      setShowFailed(true);
+      setErrorMessage("Please enter valid email address");
+      return true;
+    }
   }
 
-  handleCreate = () => {
-    if (!this.isCreateFormInvalid()) {
-      this.setState({
-        submitting: true,
-      });
-      this.createUser();
+  const handleCreate = () => {
+    if (!isCreateFormInvalid()) {
+      setSubmitting(true);
+      createUser();
     }
   };
 
-  handleUpdate = () => {
-    if (!this.isUpdateFormValid()) {
-      this.setState({
-        submitting: true,
-      });
-      this.updateUser();
+  const handleUpdate = () => {
+    if (!isUpdateFormValid()) {
+      setSubmitting(true);
+      updateUser();
     }
   };
 
-  clearError = () => {
-    this.setState({ showFailed: false });
+  const clearError = () => {
+    setShowFailed(false);
   };
 
-  handleEmailChange = email => this.setState({ email });
+  const handleEmailChange = email => setEmail(email);
 
-  handleNameChange = name => this.setState({ name });
+  const handleNameChange = name => setName(name);
 
-  handleInstitutionChange = institution => this.setState({ institution });
+  const handleInstitutionChange = institution => setInstitution(institution);
 
-  getArchetypes = () => {
-    const {
-      isMedicalDetective,
-      isLandscapeExplorer,
-      isOutbreakSurveyor,
-      isMicrobiomeInvestigator,
-    } = this.state;
+  const getArchetypes = () => {
     let archetypes = [];
     if (isMedicalDetective) {
       archetypes.push(MEDICAL_DETECTIVE);
@@ -118,8 +123,7 @@ class CreateUser extends React.Component {
     return JSON.stringify(archetypes);
   };
 
-  getSegments = () => {
-    const { isAfricaCDC, isBiohub, isDPH, isGCE, isLMIC } = this.state;
+  const getSegments = () => {
     let segments = [];
     if (isAfricaCDC) {
       segments.push(AFRICA_CDC);
@@ -139,65 +143,38 @@ class CreateUser extends React.Component {
     return JSON.stringify(segments);
   };
 
-  isCreateFormInvalid() {
-    if (this.state.email === "") {
-      this.setState({
-        showFailed: true,
-        errorMessage: "Please fill all fields",
-      });
-      return true;
-    }
-  }
-
-  isUpdateFormValid() {
-    if (this.state.email === "") {
-      this.setState({
-        showFailed: true,
-        errorMessage: "Please enter valid email address",
-      });
-      return true;
-    }
-  }
-
-  createUser = async () => {
-    const { name, email, institution, isAdmin, sendActivation } = this.state;
-    const archetypes = this.getArchetypes();
-    const segments = this.getSegments();
+  const createUser = async () => {
+    const archetypes = getArchetypes();
+    const segments = getSegments();
     try {
-      await createUser({
-        name,
-        email,
-        institution,
-        isAdmin,
-        sendActivation,
-        archetypes,
-        segments,
+      await userCreator({
+        variables: {
+          name,
+          email,
+          institution,
+          role: isAdmin ? 1 : 0,
+          sendActivation,
+          archetypes,
+          segments,
+        },
       });
-      this.setState(
-        {
-          submitting: false,
-          success: true,
-          successMessage: "User created successfully",
-        },
-        () => {
-          openUrl("/users");
-        },
-      );
+
+      setSubmitting(false);
+      setSuccess(true);
+      setSuccessMessage("User created successfully");
+      openUrl("/users");
     } catch (err) {
-      this.setState({
-        submitting: false,
-        showFailed: true,
-        serverErrors: err.data,
-      });
+      setSubmitting(false);
+      setShowFailed(true);
+      setServerErrors(err.data);
     }
   };
 
-  async updateUser() {
-    const { name, email, institution, isAdmin, id } = this.state;
-    const archetypes = this.getArchetypes();
-    const segments = this.getSegments();
+  async function updateUser() {
+    const archetypes = getArchetypes();
+    const segments = getSegments();
     try {
-      await updateUser({
+      await userUpdater({
         userId: id,
         name,
         email,
@@ -206,137 +183,102 @@ class CreateUser extends React.Component {
         archetypes,
         segments,
       });
-      this.setState(
-        {
-          submitting: false,
-          success: true,
-          successMessage: "User updated successfully",
-        },
-        () => {
-          openUrl("/users");
-        },
-      );
+      setSubmitting(false);
+      setSuccess(true);
+      setSuccessMessage("User updated successfully");
+      openUrl("/users");
     } catch (err) {
-      this.setState({
-        submitting: false,
-        showFailed: true,
-        serverErrors: err.data,
-      });
+      setSubmitting(true);
+      setSuccess(false);
+      setServerErrors(err.data);
     }
   }
 
-  render() {
-    const { selectedUser } = this.props;
-    const {
-      email,
-      errorMessage,
-      institution,
-      isAdmin,
-      isAfricaCDC,
-      isBiohub,
-      isDPH,
-      isGCE,
-      isLandscapeExplorer,
-      isLMIC,
-      isMedicalDetective,
-      isMicrobiomeInvestigator,
-      isOutbreakSurveyor,
-      name,
-      sendActivation,
-      serverErrors,
-      showFailed,
-      submitting,
-      success,
-      successMessage,
-    } = this.state;
+  const submitFunc = props.selectedUser
+    ? () =>
+        withAnalytics(handleUpdate, "CreateUser_update-form_submitted", {
+          form: "Update",
+        })
+    : () =>
+        withAnalytics(handleCreate, "CreateUser_create-form_submitted", {
+          form: "Create",
+        });
+  const funcName = props.selectedUser ? "Update" : "Create";
 
-    const submitFunc = selectedUser
-      ? () =>
-          withAnalytics(this.handleUpdate, "CreateUser_update-form_submitted", {
-            form: "Update",
-          })
-      : () =>
-          withAnalytics(this.handleCreate, "CreateUser_create-form_submitted", {
-            form: "Create",
-          });
-    const funcName = selectedUser ? "Update" : "Create";
-
-    return (
-      <div>
-        <UserForm
-          archetypes={{
-            isMedicalDetective,
-            isLandscapeExplorer,
-            isOutbreakSurveyor,
-            isMicrobiomeInvestigator,
-          }}
-          clearError={this.clearError}
-          email={email}
-          errorMessage={errorMessage}
-          funcName={funcName}
-          segments={{
-            isAfricaCDC,
-            isBiohub,
-            isDPH,
-            isGCE,
-            isLMIC,
-          }}
-          institution={institution}
-          isAdmin={isAdmin}
-          name={name}
-          onAdminChange={withAnalytics(() => {
-            this.setState({ isAdmin: !isAdmin });
-          }, "CreateUser_admin_changed")}
-          onAfricaCDCChange={() => this.setState({ isAfricaCDC: !isAfricaCDC })}
-          onBiohubChange={() => this.setState({ isBiohub: !isBiohub })}
-          onDPHChange={() => this.setState({ isDPH: !isDPH })}
-          onEmailChange={withAnalytics(
-            this.handleEmailChange,
-            "CreateUser_email_changed",
-          )}
-          onGCEChange={() => this.setState({ isGCE: !isGCE })}
-          onInstitutionChange={withAnalytics(
-            this.handleInstitutionChange,
-            "CreateUser_institution_changed",
-          )}
-          onLandscapeExplorerChange={() =>
-            this.setState({ isLandscapeExplorer: !isLandscapeExplorer })
-          }
-          onLMICChange={() => this.setState({ isLMIC: !isLMIC })}
-          onMedicalDetectiveChange={() =>
-            this.setState({ isMedicalDetective: !isMedicalDetective })
-          }
-          onMicrobiomeInvestigatorChange={() =>
-            this.setState({
-              isMicrobiomeInvestigator: !isMicrobiomeInvestigator,
-            })
-          }
-          onNameChange={withAnalytics(
-            this.handleNameChange,
-            "CreateUser_name_changed",
-          )}
-          onOutbreakSurveyorChange={() =>
-            this.setState({ isOutbreakSurveyor: !isOutbreakSurveyor })
-          }
-          onSendActivationChange={withAnalytics(() => {
-            this.setState({ sendActivation: !sendActivation });
-          }, "CreateUser_send-activation_changed")}
-          selectedUser={selectedUser}
-          sendActivation={sendActivation}
-          serverErrors={serverErrors}
-          showFailed={showFailed}
-          submitFunc={submitFunc}
-          submitting={submitting}
-          success={success}
-          successMessage={successMessage}
-        />
-        <div className="bottom">
-          <a href={this.props.selectedUser ? "/users" : "/"}>Back</a> |
-          <a href="/">Home</a>
-        </div>
+  return (
+    <div>
+      <UserForm
+        archetypes={{
+          isMedicalDetective,
+          isLandscapeExplorer,
+          isOutbreakSurveyor,
+          isMicrobiomeInvestigator,
+        }}
+        clearError={clearError}
+        email={email}
+        errorMessage={errorMessage}
+        funcName={funcName}
+        segments={{
+          isAfricaCDC,
+          isBiohub,
+          isDPH,
+          isGCE,
+          isLMIC,
+        }}
+        institution={institution}
+        isAdmin={isAdmin}
+        name={name}
+        onAdminChange={withAnalytics(() => {
+          setIsAdmin(prevState => !prevState);
+        }, "CreateUser_admin_changed")}
+        onAfricaCDCChange={() => setIsAfricaCDC(prevState => !prevState)}
+        onBiohubChange={() => setIsBiohub(prevState => !prevState)}
+        onDPHChange={() => setIsDPH(prevState => !prevState)}
+        onEmailChange={withAnalytics(
+          handleEmailChange,
+          "CreateUser_email_changed",
+        )}
+        onGCEChange={() => setIsGCE(prevState => !prevState)}
+        onInstitutionChange={withAnalytics(
+          handleInstitutionChange,
+          "CreateUser_institution_changed",
+        )}
+        onLandscapeExplorerChange={() =>
+          setIsLandscapeExplorer(prevState => !prevState)
+        }
+        onLMICChange={() => setIsLMIC(prevState => !prevState)}
+        onMedicalDetectiveChange={() =>
+          setIsMedicalDetective(prevState => !prevState)
+        }
+        onMicrobiomeInvestigatorChange={() =>
+          setIsMicrobiomeInvestigator(prevState => !prevState)
+        }
+        onNameChange={withAnalytics(
+          handleNameChange,
+          "CreateUser_name_changed",
+        )}
+        onOutbreakSurveyorChange={() =>
+          setIsOutbreakSurveyor(prevState => !prevState)
+        }
+        onSendActivationChange={withAnalytics(() => {
+          setSendActivation(prevState => !prevState);
+        }, "CreateUser_send-activation_changed")}
+        selectedUser={props.selectedUser}
+        sendActivation={sendActivation}
+        serverErrors={serverErrors}
+        showFailed={showFailed}
+        submitFunc={submitFunc}
+        submitting={submitting}
+        success={success}
+        successMessage={successMessage}
+      />
+      <div className="bottom">
+        <a href={props.selectedUser ? "/users" : "/"}>Back</a> |
+        <a href="/">Home</a>
       </div>
-    );
-  }
+    </div>
+  );
+  // }
 }
 
 CreateUser.propTypes = {

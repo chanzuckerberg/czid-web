@@ -1,3 +1,4 @@
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { StylesProvider, ThemeProvider } from "@material-ui/core/styles";
 import * as Sentry from "@sentry/react";
@@ -50,6 +51,12 @@ contextKeys.forEach(key => {
   }
 });
 
+// Initialize Apollo
+const apolloClient = new ApolloClient({
+  uri: "/graphql",
+  cache: new InMemoryCache(),
+});
+
 // Turn off camelcase rule
 /* eslint camelcase: 0 */
 const react_component = (componentName, props, target, userContext) => {
@@ -59,17 +66,19 @@ const react_component = (componentName, props, target, userContext) => {
     root.render(
       <Sentry.ErrorBoundary fallback={"An error has occured"}>
         <BrowserRouter>
-          <UserContext.Provider value={userContext || {}}>
-            <Provider store={store}>
-              <StylesProvider injectFirst>
-                <EmotionThemeProvider theme={defaultTheme}>
-                  <ThemeProvider theme={defaultTheme}>
-                    {React.createElement(matchedComponent, props)}
-                  </ThemeProvider>
-                </EmotionThemeProvider>
-              </StylesProvider>
-            </Provider>
-          </UserContext.Provider>
+          <ApolloProvider client={apolloClient}>
+            <UserContext.Provider value={userContext || {}}>
+              <Provider store={store}>
+                <StylesProvider injectFirst>
+                  <EmotionThemeProvider theme={defaultTheme}>
+                    <ThemeProvider theme={defaultTheme}>
+                      {React.createElement(matchedComponent, props)}
+                    </ThemeProvider>
+                  </EmotionThemeProvider>
+                </StylesProvider>
+              </Provider>
+            </UserContext.Provider>
+          </ApolloProvider>
         </BrowserRouter>
       </Sentry.ErrorBoundary>,
     );

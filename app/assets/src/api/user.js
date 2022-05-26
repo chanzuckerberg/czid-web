@@ -1,25 +1,44 @@
+import { gql, useMutation } from "@apollo/client";
 import { postWithCSRF, putWithCSRF } from "./core";
 
-const createUser = ({
-  name,
-  email,
-  institution,
-  isAdmin,
-  sendActivation,
-  archetypes,
-  segments,
-}) => {
-  return postWithCSRF("/users.json", {
-    user: {
-      name,
-      email,
-      institution,
-      archetypes,
-      segments,
-      role: isAdmin ? 1 : 0,
-      send_activation: sendActivation,
-    },
-  });
+const CREATE_USER = gql`
+  # Creates a new user
+
+  mutation CreateUser(
+    $name: String!
+    $email: String!
+    $institution: String!
+    $role: Int!
+    $sendActivation: Boolean!
+    $archetypes: String!
+    $segments: String!
+  ) {
+    createUser(
+      name: $name
+      email: $email
+      institution: $institution
+      role: $role
+      sendActivation: $sendActivation
+      archetypes: $archetypes
+      segments: $segments
+    ) {
+      name
+      email
+      institution
+      role
+      archetypes
+      segments
+    }
+  }
+`;
+
+const useCreateUser = () => {
+  const [create, { loading, error }] = useMutation(CREATE_USER);
+
+  if (loading) return "Submitting...";
+  if (error) return `Submission error! ${error.message}`;
+
+  return create;
 };
 
 const updateUser = ({
@@ -49,4 +68,4 @@ const requestPasswordReset = email => {
   });
 };
 
-export { createUser, updateUser, requestPasswordReset };
+export { useCreateUser, updateUser, requestPasswordReset };

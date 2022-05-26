@@ -42,17 +42,18 @@ const UserForm = ({
 }: UserFormProps) => {
   const displayError = (failedStatus, serverErrors, formattedError) => {
     if (failedStatus) {
-      const ret = serverErrors.length ? (
-        serverErrors.map((error, i) => {
-          return (
-            <p className="error center-align" key={i}>
-              {error}
-            </p>
-          );
-        })
-      ) : (
-        <span>{formattedError}</span>
-      );
+      const ret =
+        serverErrors && serverErrors.length ? (
+          serverErrors.map((error, i) => {
+            return (
+              <p className="error center-align" key={i}>
+                {error}
+              </p>
+            );
+          })
+        ) : (
+          <span>{formattedError}</span>
+        );
       const form = selectedUser ? "update" : "create";
       trackEvent(`CreateUser_${form}-errors_displayed`, {
         form,
