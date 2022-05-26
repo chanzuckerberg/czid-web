@@ -65,6 +65,7 @@
 
     .subtitle {
       @include font-body-xxs;
+      margin-left: $sds-spaces-xxxs;
       margin-bottom: $sds-spaces-s;
     }
 

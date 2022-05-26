@@ -1658,7 +1658,7 @@ class SampleView extends React.Component {
     const { loadingReport, pipelineRun, reportMetadata, sample } = this.state;
     const { snapshotShareId } = this.props;
     const { pipelineRunStatus, jobStatus } = reportMetadata;
-    let status, message, linkText, type, link, icon;
+    let status, message, subtitle, linkText, type, link, icon;
     // Error messages were previously sent from the server in the reportMetadata,
     // but after the switch to SFN are now sent as part of the sample's information.
     // Try to extract the error messages from the sample if possible, then try the
@@ -1700,7 +1700,7 @@ class SampleView extends React.Component {
           pipelineRun.known_user_error = knownUserError;
           pipelineRun.error_message = errorMessage;
         }
-        ({ status, message, linkText, type, link, icon } = sampleErrorInfo({
+        ({ status, message, subtitle, linkText, type, link, icon } = sampleErrorInfo({
           sample,
           pipelineRun,
         }));
@@ -1719,6 +1719,7 @@ class SampleView extends React.Component {
         link={link}
         linkText={linkText}
         message={message}
+        subtitle={subtitle}
         status={status}
         type={type}
         onClick={() =>

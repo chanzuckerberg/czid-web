@@ -35,8 +35,32 @@ export const sampleNameFromFileName = fname => {
   return base;
 };
 
+const errorMap = {
+  "The .fastq file.+has an invalid number of lines.": "Please verify the number of lines in the file is divisible by 4.",
+  "The maximum line length was exceeded.+": "Please verify that .fastq headers or sequences are less than 10,000 characters long",
+  "There was an error unzipping the input file.+": "Please verify that this file is a proper .gz file.",
+  "Paired input files.+": "Paired input files must contain the same number of reads.",
+  "The input file.+is invalid.": "Please check that your .fastq file is valid and try again.",
+  "The input .fastq file.+did not begin with an \"@\"": "Please check the .fastq file and try again.",
+  "The input .fasta file.+read ID did not begin with a \">\"": "Please check the .fasta file and try again.",
+  "The input file.+ has duplicate read IDs": "Please remove duplicate read ids and try again",
+  "There was an insufficient number of reads .+": "Please verify the sequencing quality of this sample.",
+  "The file.+contain reads longer than the 500 bp limit for the Illumina-supported pipeline": "Please verify the sequencing platform during sample upload.",
+  "The CZ ID pipeline expects a single input file.+": "Please check your input file and try again.",
+  "There was an error parsing the input file.+": "Please check that the file is not corrupted and is in the .fastq format.",
+  "The file.+is in .fasta format.+": "Please upload a .fastq file.",
+};
+
+function subtextError(message){
+  for (const [key, value] of Object.entries(errorMap)) {
+    if (message.match(key)) {
+      return value;
+    }
+  }
+}
+
 export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
-  let status, message, linkText, type, link, pipelineVersionUrlParam;
+  let status, message, subtitle, linkText, type, link, pipelineVersionUrlParam;
   switch (
     sample.upload_error ||
     (pipelineRun && pipelineRun.known_user_error) ||
@@ -48,20 +72,23 @@ export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
     case "InvalidInputFileError":
       status = "COMPLETE - ISSUE";
       message = pipelineRun.error_message || error.message;
-      linkText = "Please check your file format and reupload your file.";
+      subtitle = subtextError(message);
+      linkText = subtitle? "": "Please check your file format and reupload your file.";
       type = "warning";
       link = "/samples/upload";
       break;
     case "InvalidFileFormatError":
       status = "COMPLETE - ISSUE";
       message = pipelineRun.error_message || error.message;
-      linkText = "Please check your file format and reupload your file.";
+      subtitle = subtextError(message);
+      linkText = subtitle? "": "Please check your file format and reupload your file.";
       type = "warning";
       link = "/samples/upload";
       break;
     case "InsufficientReadsError":
       status = "COMPLETE - ISSUE";
       message = pipelineRun.error_message || error.message;
+      subtitle = subtextError(message);
       linkText = isEmpty(pipelineRun)
         ? "Contact us for help."
         : "Check where your reads were filtered out.";
@@ -162,6 +189,7 @@ export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
   return {
     status: status,
     message: message,
+    subtitle: subtitle,
     type: type,
     linkText: linkText,
     link: link,

@@ -502,7 +502,7 @@ const ConsensusGenomeView = ({
       );
     } else {
       // FAILED
-      const { link, linkText, message, status, type } = sampleErrorInfo({
+      const { link, linkText, subtitle, message, status, type } = sampleErrorInfo({
         sample,
         error: workflowRun.input_error || {},
       });
@@ -511,6 +511,7 @@ const ConsensusGenomeView = ({
           icon={<IconAlert className={cs.iconAlert} type={type} />}
           link={link}
           linkText={linkText}
+          subtitle={subtitle}
           message={message}
           status={status}
           type={type}
