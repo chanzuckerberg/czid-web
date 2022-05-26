@@ -698,8 +698,8 @@ ActiveRecord::Schema.define(version: 2022_05_25_214615) do
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
     t.string "tax_name"
-    t.integer "version_start", limit: 2, null: false, comment: "The first version for which the taxon is active"
-    t.integer "version_end", limit: 2, null: false, comment: "The last version for which the taxon is active"
+    t.string "version_start", limit: 10, null: false, comment: "The first version for which the lineage is valid"
+    t.string "version_end", limit: 10, null: false, comment: "The last version for which the lineage is valid"
     t.string "version_start_new", limit: 10, null: false, comment: "The first version for which the lineage is valid"
     t.string "version_end_new", limit: 10, null: false, comment: "The last version for which the lineage is valid"
     t.boolean "is_phage", default: false, null: false
