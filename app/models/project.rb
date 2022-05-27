@@ -48,12 +48,6 @@ class Project < ApplicationRecord
   PROJECTS_SORT_KEYS = [NAME_SORT_KEY, CREATED_AT_SORT_KEY].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
-  scope :sort_by_project_keys, lambda { |sort_key, order_dir|
-    sorted_project_ids = order(Arel.sql("projects.#{sort_key} #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}"))
-                         .collect(&:id)
-    where(id: sorted_project_ids).order(Arel.sql("field(projects.id, #{sorted_project_ids.join ','})"))
-  }
-
   scope :sort_by_sample_count, lambda { |order_dir|
     sample_count_alias = "total_sample_count"
     sorted_project_ids = select("projects.id, COUNT(DISTINCT samples.id) AS #{sample_count_alias}")
@@ -236,7 +230,7 @@ class Project < ApplicationRecord
     sort_key = DATA_KEY_TO_SORT_KEY[order_by]
 
     if PROJECTS_SORT_KEYS.include?(sort_key)
-      projects.sort_by_project_keys(sort_key, order_dir)
+      projects.order("projects.#{sort_key} #{order_dir}, projects.#{TIEBREAKER_SORT_KEY} #{order_dir}")
     elsif sort_key == SAMPLE_COUNTS_SORT_KEY
       projects.sort_by_sample_count(order_dir)
     elsif sort_key == HOSTS_SORT_KEY
