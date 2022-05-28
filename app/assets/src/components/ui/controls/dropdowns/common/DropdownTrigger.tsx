@@ -1,11 +1,32 @@
 import cx from "classnames";
 
 import { isNil } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./dropdown_trigger.scss";
 
-class DropdownTrigger extends React.Component {
+interface DropdownTriggerProps {
+  className?: string;
+  label?: string;
+  itemSubtext?: string;
+  value?: React.ReactNode;
+  placeholder?: string;
+  rounded?: boolean;
+  active?: boolean;
+  disabled?: boolean;
+  erred?: boolean;
+  onClick?: $TSFixMeFunction;
+  disableMarginRight?: boolean;
+}
+
+interface DropdownTriggerState {
+  hideDropdownLabel: boolean;
+}
+
+class DropdownTrigger extends React.Component<
+  DropdownTriggerProps,
+  DropdownTriggerState
+> {
+  resizeObserver: any;
   constructor(props) {
     super(props);
 
@@ -68,19 +89,5 @@ class DropdownTrigger extends React.Component {
     );
   }
 }
-
-DropdownTrigger.propTypes = {
-  className: PropTypes.string,
-  label: PropTypes.string,
-  itemSubtext: PropTypes.string,
-  value: PropTypes.node,
-  placeholder: PropTypes.string,
-  rounded: PropTypes.bool,
-  active: PropTypes.bool,
-  disabled: PropTypes.bool,
-  erred: PropTypes.bool,
-  onClick: PropTypes.func,
-  disableMarginRight: PropTypes.bool,
-};
 
 export default DropdownTrigger;

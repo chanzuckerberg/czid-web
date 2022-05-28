@@ -1,11 +1,24 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { IconCheckSmall } from "~ui/icons";
 import BareDropdown from "../BareDropdown";
 import cs from "./checkbox_item.scss";
 
-const CheckboxItem = ({ value, label, checked, onOptionClick, boxed }) => (
+interface CheckboxItemProps {
+  boxed?: boolean;
+  checked?: boolean;
+  label?: string;
+  onOptionClick?(...args: unknown[]): unknown;
+  value?: any;
+}
+
+const CheckboxItem = ({
+  value,
+  label,
+  checked,
+  onOptionClick,
+  boxed,
+}: CheckboxItemProps) => (
   <BareDropdown.Item
     onClick={e => {
       e.stopPropagation();
@@ -26,13 +39,5 @@ const CheckboxItem = ({ value, label, checked, onOptionClick, boxed }) => (
     </div>
   </BareDropdown.Item>
 );
-
-CheckboxItem.propTypes = {
-  boxed: PropTypes.bool,
-  checked: PropTypes.bool,
-  label: PropTypes.string,
-  onOptionClick: PropTypes.func,
-  value: PropTypes.any,
-};
 
 export default CheckboxItem;
