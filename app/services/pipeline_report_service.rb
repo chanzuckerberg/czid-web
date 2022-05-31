@@ -296,7 +296,7 @@ class PipelineReportService
 
     lineage_by_tax_id = TaxonLineage
                         .where(taxid: tax_ids)
-                        .where('? BETWEEN version_start_new AND version_end_new', lineage_version)
+                        .where('? BETWEEN version_start AND version_end', lineage_version)
                         .pluck(*LINEAGE_COLUMNS)
                         .map { |r| [r[0], LINEAGE_COLUMNS.zip(r).to_h] }
                         .to_h

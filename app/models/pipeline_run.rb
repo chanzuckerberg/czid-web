@@ -1527,7 +1527,7 @@ class PipelineRun < ApplicationRecord
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
-       WHERE (#{lineage_version} BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new) AND
+       WHERE (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
              taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_run_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
@@ -1548,7 +1548,7 @@ class PipelineRun < ApplicationRecord
         WHERE taxon_counts.pipeline_run_id=:id AND
               taxon_counts.tax_level=:level_id AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
-              (:lineage_version BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new) AND
+              (:lineage_version BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
               taxon_lineages.#{level}_name IS NOT NULL
       ", id: id, level_id: level_id, lineage_version: lineage_version,]))
     end
@@ -1562,7 +1562,7 @@ class PipelineRun < ApplicationRecord
           taxon_counts.family_taxid = taxon_lineages.family_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=:id AND
-            (:lineage_version BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new) AND
+            (:lineage_version BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
             taxon_lineages.taxid = taxon_counts.tax_id
     ", id: id, lineage_version: lineage_version,]))
   end
@@ -1573,7 +1573,7 @@ class PipelineRun < ApplicationRecord
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=:id
-            AND (:lineage_version BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new)
+            AND (:lineage_version BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
             AND taxon_counts.tax_id > :invalid_call_base_id
             AND taxon_lineages.taxid = taxon_counts.tax_id
     ", id: id, lineage_version: lineage_version, invalid_call_base_id: TaxonLineage::INVALID_CALL_BASE_ID,]))
@@ -1581,7 +1581,7 @@ class PipelineRun < ApplicationRecord
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=:id
-            AND (:lineage_version BETWEEN taxon_lineages.version_start_new AND taxon_lineages.version_end_new)
+            AND (:lineage_version BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
             AND taxon_counts.tax_id < :invalid_call_base_id
             AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS(:invalid_call_base_id))
     ", id: id, lineage_version: lineage_version, invalid_call_base_id: TaxonLineage::INVALID_CALL_BASE_ID,]))

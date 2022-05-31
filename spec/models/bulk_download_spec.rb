@@ -681,7 +681,7 @@ describe BulkDownload, type: :model do
 
     def create_taxon_lineage(taxid)
       # Creates a taxon lineage with effective tax_level 2 (genus)
-      create(:taxon_lineage, taxid: taxid, genus_taxid: taxid, version_start: 3, version_end: 5, version_start_new: "2022-01-03", version_end_new: "2022-01-05")
+      create(:taxon_lineage, taxid: taxid, genus_taxid: taxid, version_start: "2022-01-03", version_end: "2022-01-05")
     end
 
     it "correctly generates download file for download type sample_taxon_report" do

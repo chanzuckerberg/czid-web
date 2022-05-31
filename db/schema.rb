@@ -692,16 +692,12 @@ ActiveRecord::Schema.define(version: 2022_05_25_214615) do
     t.string "family_common_name", default: "", null: false
     t.string "genus_common_name", default: "", null: false
     t.string "species_common_name", default: "", null: false
-    t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
-    t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
     t.integer "kingdom_taxid", default: -650, null: false
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
     t.string "tax_name"
     t.string "version_start", limit: 10, null: false, comment: "The first version for which the lineage is valid"
     t.string "version_end", limit: 10, null: false, comment: "The last version for which the lineage is valid"
-    t.string "version_start_new", limit: 10, null: false, comment: "The first version for which the lineage is valid"
-    t.string "version_end_new", limit: 10, null: false, comment: "The last version for which the lineage is valid"
     t.boolean "is_phage", default: false, null: false
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
@@ -711,15 +707,9 @@ ActiveRecord::Schema.define(version: 2022_05_25_214615) do
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
     t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
     t.index ["tax_name"], name: "index_taxon_lineages_on_tax_name"
-    t.index ["taxid", "ended_at"], name: "index_taxon_lineages_on_taxid_and_end", unique: true
-    t.index ["taxid", "started_at", "ended_at"], name: "index_taxon_lineages_on_taxid_and_started_at_and_ended_at"
-    t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
     t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end", unique: true
-    t.index ["taxid", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_version_end_new", unique: true
     t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end", unique: true
     t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
-    t.index ["taxid", "version_start_new", "version_end_new"], name: "index_taxon_lineages_on_taxid_and_versions_new", unique: true
-    t.index ["taxid", "version_start_new"], name: "index_taxon_lineages_on_taxid_and_version_start_new", unique: true
   end
 
   create_table "taxon_scoring_models", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
