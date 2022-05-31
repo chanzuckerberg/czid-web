@@ -509,6 +509,11 @@ export default class Heatmap {
           this.handleCellMouseLeave(this.previousNullHover);
           this.previousNullHover = null;
         }
+      })
+      .on("click", d => {
+        const cell = this.getCellFromCursorLocation();
+        if (!cell) return;
+        this.handleCellClick(cell);
       });
 
     // Draw dendrogram
