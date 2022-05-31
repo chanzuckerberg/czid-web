@@ -82,13 +82,6 @@ begin
   aws_account_id = `aws sts get-caller-identity --query="Account" | tr -d '\"'`.strip
   task_definition_arn = `/tmp/czecs register -f balances.json --set tag=#{image} --set env=#{env} --set account_id=#{aws_account_id} czecs.json`.strip
   $?.exitstatus == 0 || abort("\n== Could not register task ==\n")
-  # resque workers can be interrupted safely, doing this will prevent errors from migrating while old versions are running and speed up deployment
-  puts 'scaling down resque workers'
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count 0")
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 0")
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 0")
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-scheduler --desired-count 0")
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-shoryuken --desired-count 0")
 
   puts 'running migrations'
   puts "/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json"
@@ -109,20 +102,6 @@ begin
 
   # Shoryuken
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=shoryuken --set entry_command='-R -C config/shoryuken.yml' --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-shoryuken czecs-shoryuken.json")
-
-  puts 'scaling up resque workers'
-  resque_count = env == "prod" ? 10 : 2
-
-  # Resque workers
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count #{resque_count}")
-  # Resque scheduler
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-scheduler --desired-count 1")
-  # Pipeline monitor
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 1")
-  # Result monitor
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 1")
-  # Shoryuken
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-shoryuken --desired-count 1")
 
   puts "load release tag into param store"
   `aws ssm put-parameter --name /idseq-#{env}-web/GIT_RELEASE_SHA --value #{image.match(/^sha-([0-9a-f]{7,})$/)[1]} --type String --overwrite`
