@@ -54,20 +54,6 @@ COPY vendor/aws-sdk-js-v3/* ./vendor/aws-sdk-js-v3/
 
 RUN npm install --no-optional
 
-# Generate the app's static resources using npm/webpack
-# Increase memory available to node to 6GB (from default 1.5GB). At this time, our self-hosted Github runner has ~16GB.
-ENV NODE_OPTIONS "--max_old_space_size=6144"
-
-# Only copy what is required so we don't need to rebuild when we are only updating the api
-COPY app/assets app/assets
-COPY webpack.config.common.js webpack.config.prod.js .babelrc ./
-
-# Generate assets
-RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
-
-# Copy the main application.
-COPY . ./
-
 # This section is for the purpose of installing the non-MariaDB mysql-client /
 # mysqldump utility. The default-mysql-client package is actually
 # mariadb-client, and we found some incompatibility with virtual generated
@@ -84,6 +70,20 @@ RUN DPKG_ARCH=$(dpkg --print-architecture ) && if [ $DPKG_ARCH = arm64 ]; then d
 RUN apt-get update && \
   apt-get install -y mysql-community-client mysql-client
 
+# Generate the app's static resources using npm/webpack
+# Increase memory available to node to 6GB (from default 1.5GB). At this time, our self-hosted Github runner has ~16GB.
+ENV NODE_OPTIONS "--max_old_space_size=6144"
+
+# Only copy what is required so we don't need to rebuild when we are only updating the api
+COPY app/assets app/assets
+COPY webpack.config.common.js webpack.config.prod.js .babelrc ./
+
+# Generate assets
+RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
+
+# Copy the main application.
+COPY . ./
+
 ARG GIT_COMMIT
 ENV GIT_VERSION ${GIT_COMMIT}
 
@@ -99,3 +99,4 @@ ENTRYPOINT ["bin/entrypoint.sh"]
 # tell the Rails dev server to bind to all interfaces by
 # default.
 CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+
