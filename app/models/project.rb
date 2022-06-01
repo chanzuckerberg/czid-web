@@ -32,7 +32,7 @@ class Project < ApplicationRecord
 
   # Constants related to sorting
   NAME_SORT_KEY = "name".freeze
-  CREATED_AT_SORT_KEY = "created_at".freeze
+  CREATED_AT_SORT_KEY = "id".freeze
   SAMPLE_COUNTS_SORT_KEY = "sample_counts".freeze
   HOSTS_SORT_KEY = "hosts".freeze
   SAMPLE_TYPES_SORT_KEY = "sample_type".freeze
