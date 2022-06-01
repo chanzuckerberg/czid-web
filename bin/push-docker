@@ -20,7 +20,7 @@ while [ $run -eq 1 ] ; do
     # NOTE: Pushing without a tag no longer pushes all tags. It only pushes latest.
     docker push "$REPO:$COMMIT"
     docker push "$REPO:$BRANCH"
-    if [ "$BRANCH" == "main" ]; then
+    if [ "$BRANCH" == "branch-main" ]; then
         docker push $LATEST_TAG
     fi
     if [ $? -eq 0 ]; then  # Success
