@@ -40,6 +40,8 @@ class SfnExecution
         cause = JSON.parse(error_hash[:cause], { symbolize_names: true })[:errorMessage]
       rescue JSON::ParserError
         cause = nil
+      rescue TypeError
+        cause = nil
       end
       return error_hash[:error], cause
     end

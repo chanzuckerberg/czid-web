@@ -388,18 +388,13 @@ module PipelineRunsHelper
     return [nil, nil] if pr.step_function? && pr.sfn_execution_arn.blank?
 
     if pr.step_function?
-      if pr.sample.user.allowed_feature?("better_errors")
-        sfn_pipeline_error = pr.sfn_pipeline_error
-        sfn_error = sfn_pipeline_error[0]
-        error_message = if sfn_pipeline_error[1].nil?
-                          WorkflowRun::INPUT_ERRORS[sfn_pipeline_error[0]]
-                        else
-                          sfn_pipeline_error[1]
-                        end
-      else
-        sfn_error = pr.sfn_error
-        error_message = WorkflowRun::INPUT_ERRORS[sfn_error]
-      end
+      sfn_pipeline_error = pr.sfn_pipeline_error
+      sfn_error = sfn_pipeline_error[0]
+      error_message = if sfn_pipeline_error[1].nil?
+                        WorkflowRun::INPUT_ERRORS[sfn_pipeline_error[0]]
+                      else
+                        sfn_pipeline_error[1]
+                      end
       return WorkflowRun::INPUT_ERRORS.include?(sfn_error) ? [sfn_error, error_message] : [nil, nil]
     end
 
