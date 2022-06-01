@@ -21,7 +21,7 @@ while [ $run -eq 1 ] ; do
     docker push "$REPO:$COMMIT"
     docker push "$REPO:$BRANCH"
     if [ "$BRANCH" == "branch-main" ]; then
-        docker push $LATEST_TAG
+        docker push $REPO:latest
     fi
     if [ $? -eq 0 ]; then  # Success
         run=0
