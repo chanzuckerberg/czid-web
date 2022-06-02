@@ -123,7 +123,7 @@ class ProjectsController < ApplicationController
           creator_id = Arel.sql("creators_projects.id AS creator_id")
           mngs_runs_count = Arel.sql("COUNT(DISTINCT CASE WHEN samples.initial_workflow='#{WorkflowRun::WORKFLOW[:short_read_mngs]}' THEN samples.id ELSE NULL END) AS mngs_runs_count")
           cg_runs_count = Arel.sql("COUNT(DISTINCT (CASE
-                                      WHEN workflow_runs.workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' AND deprecated = false THEN workflow_runs.id
+                                      WHEN workflow_runs.workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' AND workflow_runs.deprecated = false THEN workflow_runs.id
                                       WHEN samples.initial_workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' THEN samples.id
                                       ELSE NULL
                                     END)

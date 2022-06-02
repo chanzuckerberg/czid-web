@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_05_25_220054) do
+ActiveRecord::Schema.define(version: 2022_06_01_235454) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -497,6 +497,7 @@ ActiveRecord::Schema.define(version: 2022_05_25_220054) do
     t.integer "time_to_results_finalized", comment: "Seconds from executed_at to marked as finished with processing and results loading."
     t.float "qc_percent"
     t.float "compression_ratio"
+    t.boolean "deprecated", default: false, comment: "True/false if the pipeline run has been deprecated or not. Non deprecated pipeline runs are used in the normal flow of the web app."
     t.index ["adjusted_remaining_reads"], name: "index_pipeline_runs_on_adjusted_remaining_reads"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["compression_ratio"], name: "index_pipeline_runs_on_compression_ratio"

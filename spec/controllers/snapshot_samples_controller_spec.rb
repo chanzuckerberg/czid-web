@@ -283,7 +283,7 @@ RSpec.describe SnapshotSamplesController, type: :controller do
         # check for expected keys
         expected_additional_info_keys = ["editable", "ercc_comparison", "host_genome_name", "host_genome_taxa_category", "name",
                                          "notes", "pipeline_run", "project_id", "project_name", "summary_stats", "upload_date",]
-        expected_pipeline_run_keys = ["adjusted_remaining_reads", "alert_sent", "alignment_config_id", "assembled", "created_at",
+        expected_pipeline_run_keys = ["adjusted_remaining_reads", "alert_sent", "alignment_config_id", "assembled", "created_at", "deprecated",
                                       "dag_vars", "error_message", "finalized", "fraction_subsampled", "id", "job_status",
                                       "known_user_error", "host_subtracted", "max_input_fragments", "pipeline_branch", "pipeline_commit",
                                       "pipeline_execution_strategy", "pipeline_version", "results_finalized", "sample_id",
