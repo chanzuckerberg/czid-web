@@ -1,6 +1,5 @@
 import cx from "classnames";
 import { zipObject } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import Accordion from "~/components/layout/Accordion";
@@ -8,6 +7,16 @@ import DataTable from "~/components/visualizations/table/DataTable";
 import { IconAlert, IconSuccess } from "~ui/icons";
 
 import cs from "./issue_group.scss";
+
+interface IssueGroupProps {
+  caption?: string;
+  className?: string;
+  getColumnWidth?: $TSFixMeFunction;
+  headers?: string[];
+  initialOpen?: boolean;
+  rows?: $TSFixMe[][];
+  type?: "error" | "warning" | "info";
+}
 
 const IssueGroup = ({
   caption,
@@ -17,7 +26,7 @@ const IssueGroup = ({
   initialOpen,
   rows,
   type,
-}) => {
+}: IssueGroupProps) => {
   const rowObject = rows.map(row => zipObject(headers, row));
 
   return (
@@ -46,16 +55,6 @@ const IssueGroup = ({
       </div>
     </Accordion>
   );
-};
-
-IssueGroup.propTypes = {
-  caption: PropTypes.string,
-  className: PropTypes.string,
-  getColumnWidth: PropTypes.func,
-  headers: PropTypes.arrayOf(PropTypes.string),
-  initialOpen: PropTypes.bool,
-  rows: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)),
-  type: PropTypes.oneOf(["error", "warning", "info"]),
 };
 
 export default IssueGroup;

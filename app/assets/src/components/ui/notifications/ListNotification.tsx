@@ -1,14 +1,23 @@
 // A notification that includes a list of items (such as errors) in an Accordion.
 
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import Accordion from "~/components/layout/Accordion";
 import Notification from "~ui/notifications/Notification";
 import cs from "./list_notification.scss";
 
-class ListNotification extends React.Component {
+interface ListNotificationProps {
+  className: string;
+  children: React.ReactNode;
+  onClose: $TSFixMeFunction;
+  type: "success" | "info" | "warning" | "error";
+  label: React.ReactNode;
+  listItems: string[];
+  listItemName: string;
+}
+
+class ListNotification extends React.Component<ListNotificationProps> {
   render() {
     const {
       type,
@@ -47,15 +56,5 @@ class ListNotification extends React.Component {
     );
   }
 }
-
-ListNotification.propTypes = {
-  className: PropTypes.string,
-  children: PropTypes.node,
-  onClose: PropTypes.func,
-  type: PropTypes.oneOf(["success", "info", "warning", "error"]),
-  label: PropTypes.node,
-  listItems: PropTypes.arrayOf(PropTypes.string),
-  listItemName: PropTypes.string,
-};
 
 export default ListNotification;

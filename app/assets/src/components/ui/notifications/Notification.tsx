@@ -1,10 +1,20 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { IconCheckSmall, IconAlert, IconInfo, IconCloseSmall } from "~ui/icons";
 import cs from "./notification.scss";
 
-class Notification extends React.Component {
+interface NotificationProps {
+  className: string;
+  children: React.ReactNode;
+  displayStyle: "flat" | "elevated";
+  onClose: $TSFixMeFunction;
+  type: "success" | "info" | "warning" | "error";
+  closeWithDismiss: boolean;
+  closeWithIcon: boolean;
+}
+
+class Notification extends React.Component<NotificationProps> {
+  static defaultProps: NotificationProps;
   getIcon(type) {
     switch (type) {
       case "warning":
@@ -56,15 +66,4 @@ Notification.defaultProps = {
   closeWithDismiss: true,
   closeWithIcon: false,
 };
-
-Notification.propTypes = {
-  className: PropTypes.string,
-  children: PropTypes.node,
-  displayStyle: PropTypes.oneOf(["flat", "elevated"]),
-  onClose: PropTypes.func,
-  type: PropTypes.oneOf(["success", "info", "warning", "error"]).isRequired,
-  closeWithDismiss: PropTypes.bool,
-  closeWithIcon: PropTypes.bool,
-};
-
 export default Notification;

@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import Accordion from "~/components/layout/Accordion";
@@ -7,7 +6,10 @@ import Notification from "~ui/notifications/Notification";
 
 import cs from "./accordion_notification.scss";
 
-export default class AccordionNotification extends React.Component {
+export default class AccordionNotification extends React.Component<
+  AccordionNotificationProps
+> {
+  static defaultProps: AccordionNotificationProps;
   render() {
     const {
       bottomContentPadding,
@@ -57,16 +59,16 @@ AccordionNotification.defaultProps = {
   displayStyle: "flat",
 };
 
-AccordionNotification.propTypes = {
-  bottomContentPadding: PropTypes.bool,
-  className: PropTypes.string,
-  header: PropTypes.node,
-  headerClassName: PropTypes.string,
-  content: PropTypes.node,
-  notificationClassName: PropTypes.string,
-  open: PropTypes.bool,
-  toggleable: PropTypes.bool,
-  type: PropTypes.oneOf(["success", "info", "warning", "error"]),
-  displayStyle: PropTypes.oneOf(["flat", "elevated"]),
-  onClose: PropTypes.func,
-};
+interface AccordionNotificationProps {
+  bottomContentPadding?: boolean;
+  className?: string;
+  header?: React.ReactNode;
+  headerClassName?: string;
+  content?: React.ReactNode;
+  notificationClassName?: string;
+  open?: boolean;
+  toggleable?: boolean;
+  type?: "success" | "info" | "warning" | "error";
+  displayStyle?: "flat" | "elevated";
+  onClose?: $TSFixMeFunction;
+}
