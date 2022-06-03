@@ -89,11 +89,13 @@ function showhide(id) {
           <% prs.each do |run_stage| %>
             <tr>
               <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %> </td>
-              <td class="<%= run_stage.job_status == "FAILED" ? "failed" : "" %>">
-                <%= run_stage.job_status %>
-                <p>
-                  <%= run_stage.batch_job_status_reason %>
-                </p>
+              <td class="<%= run_stage.job_status == "FAILED" ? "failed" : "" %>">            
+              <%= run_stage.job_status %>
+              <p>
+              <code>
+                <%= run_stage.job_status == "FAILED" ? pipeline_run.error_message : "" %>
+              </code>
+              </p>
               </td>
               <% if pipeline_run %>
                 <% if pipeline_run && pipeline_run.step_function? %>
@@ -161,7 +163,17 @@ function showhide(id) {
           <td><%= workflow_run.workflow %></td>
           <td><%= workflow_run.inputs&.[]("accession_id") %></td>
           <td><%= workflow_run.wdl_version %></td>
-          <td><%= workflow_run.status %></td>
+          <td>
+          <p class="<%= workflow_run.status == "FAILED" ? "failed" : "succeeded" %>">
+          <%= workflow_run.status %> 
+          </p>
+          <% if workflow_run.status != "SUCCEEDED" %>
+            <code> 
+            <%  error = workflow_run.input_error %>
+            <%= error ? error[:message] : "" %> 
+            </code>
+          <% end %>
+          </td>
           <% if workflow_run.sfn_execution_arn %>
             <td><u><%= link_to workflow_run.sfn_execution_arn, AwsUtil.get_sfn_execution_url(workflow_run.sfn_execution_arn), target: :_blank  %></u></td>
           <% else %>
