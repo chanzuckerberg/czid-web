@@ -14,7 +14,7 @@ interface StatusLabelProps {
 }
 
 class StatusLabel extends React.Component<StatusLabelProps> {
-  static defaultProps: { type: "default" };
+  static defaultProps: StatusLabelProps;
   render() {
     const { status, type, className, tooltipText, inline } = this.props;
     const label = (
@@ -38,5 +38,9 @@ class StatusLabel extends React.Component<StatusLabelProps> {
     return label;
   }
 }
+
+StatusLabel.defaultProps = {
+  type: "default",
+};
 
 export default StatusLabel;
