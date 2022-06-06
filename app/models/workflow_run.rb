@@ -1,3 +1,5 @@
+require 'yaml'
+
 class WorkflowRun < ApplicationRecord
   # WorkflowRun model manages the run of a generic workflow type through our
   # pipeline and access to the results.
@@ -215,6 +217,18 @@ class WorkflowRun < ApplicationRecord
         label: sfn_error,
         message: error_message,
       }
+    end
+  end
+
+  def error_message
+    return input_error[:message] unless input_error.nil?
+
+    _, error_message = sfn_execution.pipeline_error
+    begin
+      # uncaught errors require another level of parsing in YAML this time
+      YAML.safe_load(error_message, { symbolize_names: true })[:message]
+    rescue StandardError
+      return nil
     end
   end
 

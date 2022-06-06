@@ -1,5 +1,6 @@
 require 'open3'
 require 'shellwords'
+require 'yaml'
 
 module PipelineRunsHelper
   STEP_DESCRIPTIONS = {
@@ -395,7 +396,19 @@ module PipelineRunsHelper
                       else
                         sfn_pipeline_error[1]
                       end
-      return WorkflowRun::INPUT_ERRORS.include?(sfn_error) ? [sfn_error, error_message] : [nil, nil]
+      if WorkflowRun::INPUT_ERRORS.include?(sfn_error)
+        return [sfn_error, error_message]
+      elsif ["UncaughtError", "RunFailed"].include?(sfn_error)
+        begin
+          # uncaught errors require another level of parsing in YAML this time
+          message = YAML.safe_load(error_message, { symbolize_names: true })[:message]
+        rescue StandardError
+          return [nil, nil]
+        end
+        return [nil, message]
+      else
+        return [nil, nil]
+      end
     end
 
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.

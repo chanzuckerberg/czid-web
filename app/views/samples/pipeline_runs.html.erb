@@ -169,8 +169,7 @@ function showhide(id) {
           </p>
           <% if workflow_run.status != "SUCCEEDED" %>
             <code> 
-            <%  error = workflow_run.input_error %>
-            <%= error ? error[:message] : "" %> 
+            <%=  workflow_run.error_message %>
             </code>
           <% end %>
           </td>
