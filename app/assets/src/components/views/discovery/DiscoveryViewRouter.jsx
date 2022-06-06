@@ -22,7 +22,6 @@ import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoti
 
 const DiscoveryViewRouter = ({
   admin,
-  allowedFeatures,
   domain,
   mapTilerKey,
   projectId,
@@ -84,7 +83,6 @@ const DiscoveryViewRouter = ({
         <Route>
           <DiscoveryView
             admin={admin}
-            allowedFeatures={allowedFeatures}
             domain={domain}
             mapTilerKey={mapTilerKey}
             projectId={projectId}
@@ -108,7 +106,6 @@ const DiscoveryViewRouter = ({
 
 DiscoveryViewRouter.propTypes = {
   admin: PropTypes.bool,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   domain: PropTypes.oneOf(DISCOVERY_DOMAINS),
   mapTilerKey: PropTypes.string,
   projectId: PropTypes.number,

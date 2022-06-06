@@ -479,7 +479,7 @@ class DiscoveryView extends React.Component {
   };
 
   preparedFilters = () => {
-    const { allowedFeatures } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
     const { filters } = this.state;
     let preparedFilters = mapKeys(replace("Selected", ""), filters);
 
@@ -1833,13 +1833,8 @@ class DiscoveryView extends React.Component {
       workflowEntity,
     } = this.state;
 
-    const {
-      admin,
-      allowedFeatures,
-      domain,
-      mapTilerKey,
-      snapshotShareId,
-    } = this.props;
+    const { admin, domain, mapTilerKey, snapshotShareId } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
     const { projects, visualizations } = this;
 
     const isWorkflowRunEntity =
@@ -1859,7 +1854,6 @@ class DiscoveryView extends React.Component {
           selectedSampleIds,
           this.handleSelectedSamplesUpdate,
         ];
-
     const sortable =
       allowedFeatures.includes(SORTING_V0_ADMIN_FEATURE) ||
       (allowedFeatures.includes(SORTING_V0_FEATURE) &&
@@ -1986,7 +1980,8 @@ class DiscoveryView extends React.Component {
   };
 
   renderRightPane = () => {
-    const { allowedFeatures, domain } = this.props;
+    const { domain } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
     const {
       currentDisplay,
       currentTab,
@@ -2127,7 +2122,8 @@ class DiscoveryView extends React.Component {
       userDataCounts,
       workflow,
     } = this.state;
-    const { domain, allowedFeatures, snapshotProjectName } = this.props;
+    const { domain, snapshotProjectName } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -2211,7 +2207,6 @@ class DiscoveryView extends React.Component {
 
 DiscoveryView.propTypes = {
   admin: PropTypes.bool,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
   history: PropTypes.object,
   mapTilerKey: PropTypes.string,
