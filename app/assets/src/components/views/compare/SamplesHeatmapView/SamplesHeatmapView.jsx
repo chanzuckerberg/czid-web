@@ -1412,12 +1412,19 @@ class SamplesHeatmapView extends React.Component {
     let { addedTaxonIds } = this.state;
     let taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
-    addedTaxonIds.delete(taxonId);
+
     trackEvent("SamplesHeatmapView_taxon_removed", {
       taxonId,
       taxonName,
     });
-    this.setState({ addedTaxonIds }, this.updateFilters);
+
+    // Only update state if something changed (slightly faster not to update state when not necessary)
+    if (addedTaxonIds.has(taxonId)) {
+      addedTaxonIds.delete(taxonId);
+      this.setState({ addedTaxonIds }, this.updateFilters);
+    } else {
+      this.updateFilters();
+    }
   };
 
   handleMetadataChange = metadataFields => {

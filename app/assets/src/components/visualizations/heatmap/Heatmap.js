@@ -106,6 +106,9 @@ export default class Heatmap {
     this.overlays = []; // rectangle overlays used for highlighting rows/columns
     this.overlaysDebounce = false; // used to reduce flickering when highlight row/column labels
     this.previousNullHover = null; // track the last cell with no data that we hovered on
+    this.bgGrid = null; // grey background grid
+    this.bgPattern = null; // SVG pattern used in the background grid to simulate cells we don't render
+    this.gCellHover = null; // square used to add border around the cell being hovered on
   }
 
   getScaleType() {
@@ -455,66 +458,6 @@ export default class Heatmap {
           this.totalMetadataHeight +
           this.totalRowAddLinkHeight})`,
     );
-
-    // Draw a rectangle that will be used as a border when hovering over cells. We do this
-    // because cells are not rendered if they don't have data, but we still want to see a
-    // border when hovering around those cells.
-    this.gCellHover = this.gCells
-      .append("rect")
-      .style("fill-opacity", 0)
-      .style("stroke", COLOR_HOVER_LINK)
-      .attr("height", this.cell.height)
-      .attr("width", this.cell.width)
-      .attr("visibility", "hidden");
-
-    // Define background pattern
-    const pattern = this.defs
-      .append("pattern")
-      .attr("id", "pattern-grid")
-      .attr("patternUnits", "userSpaceOnUse")
-      .attr("width", this.cell.width)
-      .attr("height", this.cell.height);
-
-    pattern
-      .append("rect")
-      .style("fill", "rgb(234, 234, 234)")
-      .attr("height", this.cell.height - 2)
-      .attr("width", this.cell.width - 2)
-      .attr("x", 1)
-      .attr("y", 1);
-
-    // Draw background grid with pattern above
-    this.gCells
-      .append("rect")
-      .attr("width", totalCellWidth)
-      .attr("height", totalCellHeight)
-      .attr("style", "fill: url(#pattern-grid)")
-      .on("mousemove", () => {
-        // Update tooltip on "mousemove", not "mouseover" because you can hover over many cells in that grid
-        const cell = this.getCellFromCursorLocation();
-        if (!cell) return;
-
-        // Update the tooltip only if we hover over a new cell, otherwise, the tooltip would follow the cursor,
-        // which is not how the rest of the cells behave.
-        if (!isEqual(this.previousNullHover, cell)) {
-          if (this.previousNullHover)
-            this.handleCellMouseLeave(this.previousNullHover);
-          this.handleCellMouseOver(cell);
-          this.previousNullHover = cell;
-        }
-      })
-      .on("mouseleave", () => {
-        // Need this, otherwise if hover over null then hover over data, old highlightings still there!
-        if (this.previousNullHover) {
-          this.handleCellMouseLeave(this.previousNullHover);
-          this.previousNullHover = null;
-        }
-      })
-      .on("click", d => {
-        const cell = this.getCellFromCursorLocation();
-        if (!cell) return;
-        this.handleCellClick(cell);
-      });
 
     // Draw dendrogram
     this.gRowDendogram.attr(
@@ -1174,6 +1117,10 @@ export default class Heatmap {
   };
 
   removeRow = row => {
+    // Clear out any row/col highlighting overlays before we remove the row
+    this.clearOverlays();
+
+    // Remove the row
     this.options.onRemoveRow && this.options.onRemoveRow(row.label);
     delete row.pos;
     row.hidden = true;
@@ -1358,6 +1305,71 @@ export default class Heatmap {
         });
     };
 
+    // Define background pattern
+    if (this.bgPattern) this.bgPattern.remove();
+    this.bgPattern = this.defs
+      .append("pattern")
+      .attr("id", "pattern-grid")
+      .attr("patternUnits", "userSpaceOnUse")
+      .attr("width", this.cell.width)
+      .attr("height", this.cell.height);
+    this.bgPattern
+      .append("rect")
+      .style("fill", "rgb(234, 234, 234)")
+      .attr("height", this.cell.height - 2)
+      .attr("width", this.cell.width - 2)
+      .attr("x", 1)
+      .attr("y", 1);
+
+    // Render background grid with pattern created above
+    const totalCellWidth = this.cell.width * this.columnLabels.length;
+    const totalCellHeight = this.cell.height * this.filteredRowLabels.length;
+    if (this.bgGrid != null) this.bgGrid.remove();
+    this.bgGrid = this.gCells.append("rect").lower();
+    this.bgGrid
+      .attr("width", totalCellWidth)
+      .attr("height", totalCellHeight)
+      .attr("style", "fill: url(#pattern-grid)")
+      .on("mousemove", () => {
+        // Update tooltip on "mousemove", not "mouseover" because you can hover over many cells in that grid
+        const cell = this.getCellFromCursorLocation();
+        if (!cell) return;
+
+        // Update the tooltip only if we hover over a new cell, otherwise, the tooltip would follow the cursor,
+        // which is not how the rest of the cells behave.
+        if (!isEqual(this.previousNullHover, cell)) {
+          if (this.previousNullHover)
+            this.handleCellMouseLeave(this.previousNullHover);
+          this.previousNullHover = cell;
+          this.handleCellMouseOver(cell);
+        }
+      })
+      .on("mouseleave", () => {
+        // Need this, otherwise if hover over null then hover over data, old highlightings still there!
+        if (this.previousNullHover) {
+          this.handleCellMouseLeave(this.previousNullHover);
+          this.previousNullHover = null;
+        }
+      })
+      .on("click", d => {
+        const cell = this.getCellFromCursorLocation();
+        if (!cell) return;
+        this.handleCellClick(cell);
+      });
+
+    // Draw a rectangle that will be used as a border when hovering over cells. We do this
+    // because cells are not rendered if they don't have data, but we still want to see a
+    // border when hovering around those cells.
+    if (this.gCellHover) this.gCellHover.remove();
+    this.gCellHover = this.gCells.append("rect").lower();
+    this.gCellHover
+      .style("fill-opacity", 0)
+      .style("stroke", COLOR_HOVER_LINK)
+      .attr("height", this.cell.height)
+      .attr("width", this.cell.width)
+      .attr("visibility", "hidden");
+
+    // Render cells
     let cells = this.gCells
       .selectAll(`.${cs.cell}`)
       .data(this.filteredCells, d => d.id);

@@ -7,6 +7,10 @@
 }
 
 .heatmap {
+  .cell {
+    cursor: pointer;
+  }
+
   .rowLabels,
   .columnLabels {
     .rowLabel,
