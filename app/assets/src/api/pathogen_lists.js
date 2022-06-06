@@ -1,5 +1,23 @@
-import { get } from "./core";
+import { gql, useQuery } from "@apollo/client";
 
-const getPathogenList = () => get(`/pathogen_list.json`);
+const GET_PATHOGEN_LIST = gql`
+  query GetPathogenList {
+    pathogenList {
+      version
+      citations
+      updatedAt
+      pathogens {
+        category
+        name
+        taxId
+      }
+    }
+  }
+`;
 
-export { getPathogenList };
+const usePathogenList = () => {
+  const { loading, error, data } = useQuery(GET_PATHOGEN_LIST);
+  return { loading, error, data };
+};
+
+export { usePathogenList };

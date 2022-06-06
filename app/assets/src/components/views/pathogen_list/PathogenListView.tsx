@@ -1,8 +1,8 @@
 import { groupBy, sortBy } from "lodash/fp";
 import throttle from "lodash/throttle";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 
-import { getPathogenList } from "~/api/pathogen_lists";
+import { usePathogenList } from "~/api/pathogen_lists";
 import SectionNavigation from "~/components/common/AnchorMenu/SectionNavigation";
 import Sections from "~/components/common/AnchorMenu/Sections";
 import { NarrowContainer } from "~/components/layout";
@@ -11,8 +11,6 @@ import List from "~/components/ui/List";
 import cs from "./pathogen_list_view.scss";
 
 const PathogenListView = () => {
-  const [pathogenList, setPathogenList] = useState(null);
-  const [categorizedPathogens, setCategorizedPathogens] = useState([]);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
 
   // Pauses setCurrentSectionIndex while page-scroll in-progress
@@ -24,27 +22,17 @@ const PathogenListView = () => {
     [setCurrentSectionIndex],
   );
 
-  useEffect(() => {
-    const fetchPathogenList = async () => {
-      const result = await getPathogenList();
-      const alphabetizedPathogens = sortBy("name", result["pathogens"]);
-      const categorizedPathogens = groupBy("category", alphabetizedPathogens);
-
-      setPathogenList(result);
-      setCategorizedPathogens(categorizedPathogens);
-    };
-    fetchPathogenList();
-  }, []);
-
-  const renderTitle = () => (
-    <div className={cs.title}>
-      <h1>CZ ID Pathogen List</h1>
-      <h4 className={cs.subtitle}>
-        Last Updated: {pathogenList["updated_at"]}. CZ ID Pathogen List v
-        {pathogenList["version"]}.
-      </h4>
-    </div>
-  );
+  const renderTitle = () => {
+    return (
+      <div className={cs.title}>
+        <h1>CZ ID Pathogen List</h1>
+        <h4 className={cs.subtitle}>
+          Last Updated: {pathogenList["updatedAt"]}. CZ ID Pathogen List v
+          {pathogenList["version"]}.
+        </h4>
+      </div>
+    );
+  };
 
   const renderIntro = () => (
     <>
@@ -72,25 +60,33 @@ const PathogenListView = () => {
     </>
   );
 
-  const renderPathogenList = () => (
-    <Sections
-      sectionContentByHeader={categorizedPathogens}
-      setCurrentSectionIndex={throttledSetCurrentIndex}
-    />
-  );
+  const renderPathogenList = () => {
+    return (
+      <Sections
+        sectionContentByHeader={categorizedPathogens}
+        setCurrentSectionIndex={throttledSetCurrentIndex}
+      />
+    );
+  };
 
   const renderCitations = () => (
     <div className={cs.citations} id={"citations"}>
       <h3>Citations</h3>
       <List
         listClassName={cs.list}
-        listItems={pathogenList["citations"].sort()}
+        listItems={[...pathogenList["citations"]].sort()}
         ordered={true}
       ></List>
     </div>
   );
 
-  if (!pathogenList) return null;
+  const { data, loading, error } = usePathogenList();
+  if (loading) return "Loading...";
+  if (error) return `An error occurred: ${error.message}`;
+
+  const pathogenList = data.pathogenList;
+  const alphabetizedPathogens = sortBy("name", data.pathogenList["pathogens"]);
+  const categorizedPathogens = groupBy("category", alphabetizedPathogens);
 
   return (
     <div className={cs.pathogenListViewContainer}>

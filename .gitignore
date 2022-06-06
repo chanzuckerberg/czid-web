@@ -77,3 +77,6 @@ __pycache__/
 
 # Docker Compose override
 docker-compose.override.yml
+
+# BlessConfig
+blessclientconfig.yml
