@@ -799,7 +799,7 @@ class Sample < ApplicationRecord
 
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
     pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
-    pr.save!
+    mark_older_pipeline_runs_as_deprecated if pr.save!
 
     # If async notifications are enabled for mNGS, we dispatch the pipeline run as soon as it's created,
     # since it won't be kicked off by PipelineMonitor.
@@ -1099,5 +1099,15 @@ class Sample < ApplicationRecord
       LEFT JOIN insert_size_metric_sets ON insert_size_metric_sets.pipeline_run_id = pipeline_runs.id
     "
     samples.joins(joins_statement).order("insert_size_metric_sets.mean #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+  end
+
+  private
+
+  def mark_older_pipeline_runs_as_deprecated
+    # If the sample has more than one pipeline run, set deprecated to true for all other pipeline runs except the first.
+    # Pipeline Runs are sorted by created_at: desc by default when accessing a sample's pipeline runs via `sample.pipeline_runs`
+    pipeline_runs.each_with_index do |pr, index|
+      pr.update(deprecated: true) if index != 0
+    end
   end
 end
