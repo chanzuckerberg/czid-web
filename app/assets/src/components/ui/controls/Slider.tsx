@@ -1,8 +1,23 @@
-import PropTypes from "prop-types";
 import BaseSlider from "rc-slider";
 import React from "react";
 
-class Slider extends React.Component {
+interface SliderProps {
+  disabled?: boolean;
+  label?: string;
+  onChange?: $TSFixMeFunction;
+  options?: $TSFixMe;
+  onAfterChange: $TSFixMeFunction;
+  min: number;
+  max: number;
+  value?: number;
+}
+
+interface SliderState {
+  value: number;
+}
+
+class Slider extends React.Component<SliderProps, SliderState> {
+  onChangeParent: $TSFixMeFunction;
   constructor(props) {
     super(props);
     this.onChangeParent = this.props.onChange;
@@ -39,12 +54,5 @@ class Slider extends React.Component {
     );
   }
 }
-
-Slider.propTypes = {
-  disabled: PropTypes.bool,
-  label: PropTypes.string,
-  onChange: PropTypes.func,
-  value: PropTypes.number,
-};
 
 export default Slider;

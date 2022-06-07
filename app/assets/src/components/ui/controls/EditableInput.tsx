@@ -1,17 +1,23 @@
 import cx from "classnames";
 import { isEmpty } from "lodash/fp";
-import PropTypes from "prop-types";
 import React, { useEffect, useState, useRef } from "react";
 import Input from "~ui/controls/Input";
 import { IconEditSmall, IconAlertSmall } from "~ui/icons";
 import cs from "./editable_input.scss";
+
+interface EditableInputProps {
+  value?: string | number;
+  className?: string;
+  onDoneEditing?: $TSFixMeFunction;
+  getWarningMessage?: $TSFixMeFunction;
+}
 
 const EditableInput = ({
   value,
   className,
   onDoneEditing,
   getWarningMessage,
-}) => {
+}: EditableInputProps) => {
   const inputRef = useRef(null);
   const [editable, setEditable] = useState(false);
   const [inputVisible, setInputVisible] = useState(false);
@@ -116,13 +122,6 @@ const EditableInput = ({
       )}
     </>
   );
-};
-
-EditableInput.propTypes = {
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  className: PropTypes.string,
-  onDoneEditing: PropTypes.func,
-  getWarningMessage: PropTypes.func,
 };
 
 export default EditableInput;

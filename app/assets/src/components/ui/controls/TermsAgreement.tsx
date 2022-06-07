@@ -1,9 +1,13 @@
-import PropTypes from "prop-types";
 import React from "react";
 import Checkbox from "~ui/controls/Checkbox";
 import cs from "./terms_agreement.scss";
 
-class TermsAgreement extends React.Component {
+interface TermsAgreementProps {
+  onChange?: $TSFixMeFunction;
+  checked?: boolean;
+}
+
+class TermsAgreement extends React.Component<TermsAgreementProps> {
   render() {
     const { onChange, checked } = this.props;
 
@@ -42,10 +46,5 @@ class TermsAgreement extends React.Component {
     );
   }
 }
-
-TermsAgreement.propTypes = {
-  onChange: PropTypes.func,
-  checked: PropTypes.bool,
-};
 
 export default TermsAgreement;

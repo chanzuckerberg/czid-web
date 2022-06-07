@@ -1,9 +1,15 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./radio_button.scss";
 
-class RadioButton extends React.Component {
+interface RadioButtonProps {
+  selected?: boolean;
+  disabled?: boolean;
+  onClick?: $TSFixMeFunction;
+  className?: string;
+}
+
+class RadioButton extends React.Component<RadioButtonProps> {
   render() {
     return (
       <div
@@ -18,12 +24,5 @@ class RadioButton extends React.Component {
     );
   }
 }
-
-RadioButton.propTypes = {
-  selected: PropTypes.bool,
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func,
-  className: PropTypes.string,
-};
 
 export default RadioButton;

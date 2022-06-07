@@ -1,11 +1,38 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { Search } from "semantic-ui-react";
 import { IconSearch } from "~ui/icons";
 import cs from "./live_search_box.scss";
 
-class LiveSearchBox extends React.Component {
+interface LiveSearchBoxProps {
+  className?: string;
+  initialValue?: string;
+  delayTriggerSearch?: number;
+  minChars?: number;
+  placeholder?: string;
+  value?: string;
+  onEnter?: $TSFixMeFunction;
+  onSearchTriggered?: $TSFixMeFunction;
+  onSearchChange?: $TSFixMeFunction;
+  onResultSelect?: $TSFixMeFunction;
+  rectangular?: boolean;
+  inputMode?: boolean;
+}
+
+interface LiveSearchBoxState {
+  isLoading: boolean;
+  results: $TSFixMe;
+  value: $TSFixMe;
+  selectedResult: boolean;
+  lastSearchedTerm: boolean;
+}
+
+class LiveSearchBox extends React.Component<
+  LiveSearchBoxProps,
+  LiveSearchBoxState
+> {
+  lastestTimerId: any;
+  static defaultProps: LiveSearchBoxProps;
   constructor(props) {
     super(props);
 
@@ -104,7 +131,7 @@ class LiveSearchBox extends React.Component {
     }
   };
 
-  handleSelectionChange = (e, { result }) => {
+  handleSelectionChange = (_e, { result }) => {
     this.setState({ selectedResult: result });
   };
 
@@ -143,21 +170,6 @@ LiveSearchBox.defaultProps = {
   placeholder: "Search",
   rectangular: false,
   inputMode: false,
-};
-
-LiveSearchBox.propTypes = {
-  className: PropTypes.string,
-  initialValue: PropTypes.string,
-  delayTriggerSearch: PropTypes.number,
-  minChars: PropTypes.number,
-  placeholder: PropTypes.string,
-  value: PropTypes.string,
-  onEnter: PropTypes.func,
-  onSearchTriggered: PropTypes.func.isRequired,
-  onSearchChange: PropTypes.func,
-  onResultSelect: PropTypes.func,
-  rectangular: PropTypes.bool,
-  inputMode: PropTypes.bool,
 };
 
 export default LiveSearchBox;

@@ -1,10 +1,22 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import cs from "./checkbox.scss";
 
-class Checkbox extends React.Component {
+interface CheckboxProps {
+  className?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  label?: string | React.ReactElement;
+  onChange?: $TSFixMeFunction;
+  value?: string | number;
+}
+
+interface CheckboxState {
+  isChecked: boolean;
+}
+class Checkbox extends React.Component<CheckboxProps, CheckboxState> {
+  static defaultProps: CheckboxProps;
   constructor(props) {
     super(props);
 
@@ -59,15 +71,6 @@ class Checkbox extends React.Component {
 
 Checkbox.defaultProps = {
   checked: false,
-};
-
-Checkbox.propTypes = {
-  className: PropTypes.string,
-  checked: PropTypes.bool,
-  disabled: PropTypes.bool,
-  label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default Checkbox;

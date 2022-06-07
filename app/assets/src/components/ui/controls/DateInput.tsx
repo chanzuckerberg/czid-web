@@ -1,6 +1,4 @@
-import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { DateInput as BaseDateInput } from "semantic-ui-calendar-react";
 import cs from "./date_input.scss";
@@ -11,7 +9,14 @@ import cs from "./date_input.scss";
 // 2) Events onBlur and onChange do not behave as expected, as when
 // user clicks a date onBlur fires before onChange (triggering onBlur
 // manually would create problems with async setState)
-class DateInput extends React.Component {
+
+interface DateInputProps {
+  className: string;
+  onChange: $TSFixMeFunction;
+  value: string | number;
+}
+
+class DateInput extends React.Component<DateInputProps> {
   handleChange = (_, { value }) => {
     this.props.onChange(value);
   };
@@ -31,11 +36,5 @@ class DateInput extends React.Component {
     );
   }
 }
-
-DateInput.propTypes = forbidExtraProps({
-  className: PropTypes.string,
-  onChange: PropTypes.func,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-});
 
 export default DateInput;

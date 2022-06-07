@@ -1,10 +1,15 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { TextArea as SemanticTextarea } from "semantic-ui-react";
 import cs from "./textarea.scss";
 
-class Textarea extends React.Component {
+interface TextareaProps {
+  value?: string;
+  onChange?: $TSFixMeFunction;
+  className?: string;
+}
+
+class Textarea extends React.Component<TextareaProps> {
   handleChange = (_, inputProps) => {
     if (this.props.onChange) {
       this.props.onChange(inputProps.value);
@@ -12,7 +17,7 @@ class Textarea extends React.Component {
   };
 
   render() {
-    let { className, ...props } = this.props;
+    const { className, ...props } = this.props;
     return (
       <SemanticTextarea
         className={cx(cs.textarea, className)}
@@ -22,11 +27,5 @@ class Textarea extends React.Component {
     );
   }
 }
-
-Textarea.propTypes = {
-  value: PropTypes.string,
-  onChange: PropTypes.func,
-  className: PropTypes.string,
-};
 
 export default Textarea;

@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React, { useContext, useState } from "react";
 
 import Dropzone from "react-dropzone";
@@ -7,6 +6,17 @@ import { UserContext } from "~/components/common/UserContext";
 import { LOCAL_MULTIPART_UPLOADS_FEATURE } from "~/components/utils/features";
 import Icon from "../icons/Icon";
 import cs from "./file_picker.scss";
+
+interface FilePickerProps {
+  className?: string;
+  accept?: string;
+  file?: File;
+  onChange: $TSFixMeFunction;
+  message?: string;
+  title?: string;
+  onRejected?: $TSFixMeFunction;
+  multiFile?: boolean;
+}
 
 const FilePicker = ({
   accept,
@@ -17,7 +27,7 @@ const FilePicker = ({
   multiFile,
   className,
   file,
-}) => {
+}: FilePickerProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures = [] } = userContext || {};
 
@@ -86,17 +96,6 @@ const FilePicker = ({
       </div>
     </Dropzone>
   );
-};
-
-FilePicker.propTypes = {
-  className: PropTypes.string,
-  accept: PropTypes.string,
-  file: PropTypes.instanceOf(File),
-  onChange: PropTypes.func.isRequired,
-  message: PropTypes.string,
-  title: PropTypes.string,
-  onRejected: PropTypes.func,
-  multiFile: PropTypes.bool,
 };
 
 export default FilePicker;

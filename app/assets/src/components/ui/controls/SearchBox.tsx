@@ -1,6 +1,5 @@
 import cx from "classnames";
 import { escapeRegExp, debounce } from "lodash";
-import PropTypes from "prop-types";
 import React from "react";
 import { Search } from "semantic-ui-react";
 
@@ -9,7 +8,44 @@ import { getURLParamString } from "~/helpers/url";
 import { IconSearch } from "~ui/icons";
 import cs from "./search_box.scss";
 
-class SearchBox extends React.Component {
+interface SearchBoxProps {
+  // Provide either clientSearchSource or serverSearchAction.
+  // If clientSearchSource is provided, query matching will happen on the client side (use for small data).
+  // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
+  clientSearchSource?: $TSFixMe;
+  serverSearchAction?: string;
+  serverSearchActionArgs?: object;
+  rounded?: boolean;
+  category?: boolean;
+  levelLabel?: boolean;
+  initialValue?: string;
+  onResultSelect?: $TSFixMeFunction;
+  placeholder?: string;
+  // indicates if field is cleared when user selects a result
+  clearOnSelect?: boolean;
+  onEnter?: $TSFixMeFunction;
+}
+
+interface SearchBoxState {
+  isLoading: boolean;
+  results: $TSFixMe;
+  value: $TSFixMe;
+  selectedResult: boolean;
+}
+
+class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
+  waitHandleSearchChange: number;
+  minChars: number;
+  placeholder: string;
+  handleEnter: $TSFixMeFunction;
+  blankState: {
+    isLoading: boolean;
+    results: any[];
+    value: string;
+    selectedResult: any;
+  };
+  handleServerSearchActionDebounced: any;
+  static defaultProps: SearchBoxProps;
   constructor(props) {
     super(props);
 
@@ -149,24 +185,6 @@ class SearchBox extends React.Component {
 
 SearchBox.defaultProps = {
   clearOnSelect: false,
-};
-
-SearchBox.propTypes = {
-  // Provide either clientSearchSource or serverSearchAction.
-  // If clientSearchSource is provided, query matching will happen on the client side (use for small data).
-  // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
-  clientSearchSource: PropTypes.array,
-  serverSearchAction: PropTypes.string,
-  serverSearchActionArgs: PropTypes.object,
-  rounded: PropTypes.bool,
-  category: PropTypes.bool,
-  levelLabel: PropTypes.bool,
-  initialValue: PropTypes.string,
-  onResultSelect: PropTypes.func,
-  placeholder: PropTypes.string,
-  // indicates if field is cleared when user selects a result
-  clearOnSelect: PropTypes.bool,
-  onEnter: PropTypes.func,
 };
 
 export default SearchBox;

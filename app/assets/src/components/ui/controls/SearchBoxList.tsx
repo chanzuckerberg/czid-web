@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import Input from "~ui/controls/Input";
@@ -7,11 +6,31 @@ import { IconCheckSmall, IconSearch } from "~ui/icons";
 
 import cs from "./search_box_list.scss";
 
-class SearchBoxList extends React.Component {
+interface SearchBoxListProps {
+  options?: $TSFixMe;
+  selected?: $TSFixMe;
+  onChange?: $TSFixMeFunction;
+  onFilterChange?: $TSFixMeFunction;
+  title?: string;
+  labelTitle?: string;
+  countTitle?: string;
+}
+
+interface searchBoxListState {
+  selected: $TSFixMe;
+  filteredOptions: $TSFixMe;
+}
+
+class SearchBoxList extends React.Component<
+  SearchBoxListProps,
+  searchBoxListState
+> {
+  static defaultProps: SearchBoxListProps;
+  sortedOptions: $TSFixMe[];
   constructor(props) {
     super(props);
 
-    let selected = new Set(this.props.selected);
+    const selected = new Set(this.props.selected);
     this.sortedOptions = this.sortOptions(this.props.options, selected);
     this.state = {
       // Filtered options can be controlled by the client by setting an onFilterChange
@@ -34,7 +53,7 @@ class SearchBoxList extends React.Component {
   };
 
   handleOptionClick = optionValue => {
-    let selected = new Set(this.state.selected);
+    const selected = new Set(this.state.selected);
     if (selected.has(optionValue)) {
       selected.delete(optionValue);
     } else {
@@ -57,8 +76,8 @@ class SearchBoxList extends React.Component {
     const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1);
 
     // TODO(tcarvalho): review data structures to simplify this function
-    let selectedOptions = {};
-    let unselectedOptions = [];
+    const selectedOptions = {};
+    const unselectedOptions = [];
     options.forEach(option => {
       if (selected.has(option.value)) {
         selectedOptions[option.value] = option;
@@ -80,7 +99,7 @@ class SearchBoxList extends React.Component {
 
   render() {
     const { onFilterChange } = this.props;
-    let { filteredOptions } = this.state;
+    const { filteredOptions } = this.state;
 
     return (
       <div className={cs.searchBoxList}>
@@ -136,19 +155,6 @@ SearchBoxList.defaultProps = {
   selected: [],
   labelTitle: null,
   countTitle: null,
-};
-
-SearchBoxList.propTypes = {
-  options: PropTypes.array,
-  selected: PropTypes.oneOfType([
-    PropTypes.instanceOf(Set), // for sets
-    PropTypes.array,
-  ]),
-  onChange: PropTypes.func,
-  onFilterChange: PropTypes.func,
-  title: PropTypes.string,
-  labelTitle: PropTypes.string,
-  countTitle: PropTypes.string,
 };
 
 export default SearchBoxList;

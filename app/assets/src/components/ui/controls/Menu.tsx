@@ -1,9 +1,13 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { Menu as BaseMenu } from "semantic-ui-react";
 
-class Menu extends React.Component {
+interface MenuProps {
+  className?: string;
+  children?: React.ReactNode[] | React.ReactNode;
+}
+
+class Menu extends React.Component<MenuProps> {
   render() {
     const { className } = this.props;
     return (
@@ -14,15 +18,7 @@ class Menu extends React.Component {
   }
 }
 
-Menu.propTypes = {
-  className: PropTypes.string,
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]),
-};
-
-class MenuItem extends React.Component {
+class MenuItem extends React.Component<MenuProps> {
   render() {
     const { className } = this.props;
     return (
@@ -32,13 +28,5 @@ class MenuItem extends React.Component {
     );
   }
 }
-
-MenuItem.propTypes = {
-  className: PropTypes.string,
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]),
-};
 
 export { Menu, MenuItem };

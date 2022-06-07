@@ -1,8 +1,19 @@
-import PropTypes from "prop-types";
 import React from "react";
 import { Input as SemanticInput } from "semantic-ui-react";
 
-class Input extends React.Component {
+interface InputProps {
+  value?: string | number;
+  onChange?: $TSFixMeFunction;
+  className?: string;
+  disableAutocomplete?: boolean;
+  fluid?: boolean;
+  icon?: string;
+  loading?: boolean;
+  placeholder?: string;
+  onKeyPress: $TSFixMeFunction;
+}
+
+class Input extends React.Component<InputProps> {
   handleChange = (_, inputProps) => {
     if (this.props.onChange) {
       this.props.onChange(inputProps.value);
@@ -10,10 +21,12 @@ class Input extends React.Component {
   };
 
   render() {
+    /* eslint-disable prefer-const */
     let { className, disableAutocomplete, ...props } = this.props;
     className = "idseq-ui " + className;
     return (
       <SemanticInput
+        /* eslint-disable prefer-const */
         {...props}
         className={className}
         onChange={this.handleChange}
@@ -24,12 +37,5 @@ class Input extends React.Component {
     );
   }
 }
-
-Input.propTypes = {
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  onChange: PropTypes.func,
-  className: PropTypes.string,
-  disableAutocomplete: PropTypes.bool,
-};
 
 export default Input;

@@ -1,10 +1,17 @@
 import { filter, some } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import { parseCSVBlob } from "~/components/utils/csv";
 import FilePicker from "./FilePicker";
 
-class CSVUpload extends React.Component {
+interface CSVUploadProps {
+  className?: string;
+  title?: string;
+  onCSV: $TSFixMeFunction;
+  // Deleting in Excel may leave a row of ""s in the CSV. This option lets you filter them out.
+  removeEmptyRows?: boolean;
+}
+
+class CSVUpload extends React.Component<CSVUploadProps> {
   state = {
     file: null,
   };
@@ -46,13 +53,5 @@ class CSVUpload extends React.Component {
     );
   }
 }
-
-CSVUpload.propTypes = {
-  className: PropTypes.string,
-  title: PropTypes.string,
-  onCSV: PropTypes.func.isRequired,
-  // Deleting in Excel may leave a row of ""s in the CSV. This option lets you filter them out.
-  removeEmptyRows: PropTypes.bool,
-};
 
 export default CSVUpload;

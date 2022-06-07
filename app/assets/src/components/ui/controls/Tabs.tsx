@@ -1,9 +1,27 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./tabs.scss";
 
-class Tabs extends React.Component {
+interface TabsProps {
+  tabs:
+    | string[]
+    | {
+        value: string;
+        label: React.ReactNode;
+      }[];
+  onChange: $TSFixMeFunction;
+  value?: string;
+  className?: string;
+  hideBorder?: boolean;
+  tabStyling?: string;
+}
+
+interface TabsState {
+  indicatorLeft: number;
+  indicatorWidth: number;
+}
+class Tabs extends React.Component<TabsProps, TabsState> {
+  _tabs: object;
   constructor(props) {
     super(props);
     this._tabs = {};
@@ -84,22 +102,5 @@ class Tabs extends React.Component {
     );
   }
 }
-
-Tabs.propTypes = {
-  tabs: PropTypes.arrayOf(
-    PropTypes.oneOfType([
-      PropTypes.string.isRequired,
-      PropTypes.shape({
-        value: PropTypes.string.isRequired,
-        label: PropTypes.node.isRequired,
-      }),
-    ]),
-  ).isRequired,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-  className: PropTypes.string,
-  hideBorder: PropTypes.bool,
-  tabStyling: PropTypes.string,
-};
 
 export default Tabs;

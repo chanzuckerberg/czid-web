@@ -1,5 +1,4 @@
 import { compact, get, isString } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
@@ -60,10 +59,10 @@ export const getLocationWarning = result => {
 };
 
 // An input box that fetches and shows geosearch suggestions for user input of locations.
-class GeoSearchInputBox extends React.Component {
+class GeoSearchInputBox extends React.Component<GeoSearchInputBoxProps> {
   // Fetch geosearch results and format into categories for LiveSearchBox
   handleSearchTriggered = async query => {
-    let categories = {};
+    const categories = {};
     let serverSideSuggestions = [];
     try {
       serverSideSuggestions = await getGeoSearchSuggestions(query);
@@ -124,6 +123,7 @@ class GeoSearchInputBox extends React.Component {
 
     onResultSelect && onResultSelect({ result });
   };
+  static defaultProps: GeoSearchInputBoxProps;
 
   render() {
     const { className, inputClassName, value } = this.props;
@@ -147,11 +147,11 @@ GeoSearchInputBox.defaultProps = {
   value: "",
 };
 
-GeoSearchInputBox.propTypes = {
-  className: PropTypes.string,
-  inputClassName: PropTypes.string,
-  onResultSelect: PropTypes.func,
-  value: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
-};
+interface GeoSearchInputBoxProps {
+  className?: string;
+  inputClassName?: string;
+  onResultSelect?: $TSFixMe;
+  value: object | string;
+}
 
 export default GeoSearchInputBox;

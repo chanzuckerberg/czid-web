@@ -32,7 +32,7 @@ const Label = ({
 
 interface LabelProps {
   className?: string;
-  color: SemanticCOLORS;
+  color?: SemanticCOLORS;
   size: SemanticSIZES;
   circular?: boolean;
   floating?: boolean;

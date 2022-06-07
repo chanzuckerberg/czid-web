@@ -1,11 +1,24 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 import cs from "./link.scss";
 
-class Link extends React.Component {
+interface LinkProps {
+  // We use black styling for links on a colored background.
+  coloredBackground?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+  external?: boolean;
+  href?: string;
+  // We intentionally don't have an onClick prop, because we don't want to encourage arbitrary onClick handlers,
+  // since there is already an on-click behavior (following the link href). trackEvent is an exception.
+  analyticsEventName?: string;
+  analyticsEventData?: object;
+  externalLink: boolean;
+}
+
+class Link extends React.Component<LinkProps> {
   onClick = () => {
     const {
       analyticsEventData,
@@ -23,6 +36,7 @@ class Link extends React.Component {
       });
     }
   };
+  static defaultProps: LinkProps;
 
   render() {
     const {
@@ -48,20 +62,6 @@ class Link extends React.Component {
     );
   }
 }
-
-Link.propTypes = {
-  // We use black styling for links on a colored background.
-  coloredBackground: PropTypes.bool,
-  children: PropTypes.node,
-  className: PropTypes.string,
-  external: PropTypes.bool,
-  href: PropTypes.string,
-
-  // We intentionally don't have an onClick prop, because we don't want to encourage arbitrary onClick handlers,
-  // since there is already an on-click behavior (following the link href). trackEvent is an exception.
-  analyticsEventName: PropTypes.string,
-  analyticsEventData: PropTypes.object,
-};
 
 Link.defaultProps = {
   analyticsEventData: {},

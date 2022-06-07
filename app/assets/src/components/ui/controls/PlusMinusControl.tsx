@@ -1,9 +1,16 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { IconMinusSmall, IconPlusSmall } from "~/components/ui/icons";
 import cs from "./plus_minus_control.scss";
+
+interface PlusMinusControlProps {
+  className?: string;
+  onPlusClick?: $TSFixMeFunction;
+  onMinusClick?: $TSFixMeFunction;
+  plusDisabled?: boolean;
+  minusDisabled?: boolean;
+}
 
 const PlusMinusControl = ({
   onPlusClick,
@@ -11,7 +18,7 @@ const PlusMinusControl = ({
   plusDisabled,
   minusDisabled,
   className,
-}) => {
+}: PlusMinusControlProps) => {
   return (
     <div className={cx(className, cs.plusMinusContainer)}>
       <button disabled={plusDisabled} onClick={onPlusClick}>
@@ -22,14 +29,6 @@ const PlusMinusControl = ({
       </button>
     </div>
   );
-};
-
-PlusMinusControl.propTypes = {
-  className: PropTypes.string,
-  onPlusClick: PropTypes.func,
-  onMinusClick: PropTypes.func,
-  plusDisabled: PropTypes.bool,
-  minusDisabled: PropTypes.bool,
 };
 
 export default PlusMinusControl;

@@ -1,12 +1,26 @@
 import cx from "classnames";
 
 import { clamp } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import cs from "./loading_bar.scss";
 
-const LoadingBar = ({ error = false, percentage, showHint, tiny }) => {
+interface LoadingBarProps {
+  // If true, set the loading bar's color to $error-medium.
+  error?: boolean;
+  percentage?: number;
+  // If true, we show a tiny sliver of loading bar even at 0%, to help users understand.
+  showHint?: boolean;
+  // Alternative styling for loading bars with small width. The height is narrower.
+  tiny?: boolean;
+}
+
+const LoadingBar = ({
+  error = false,
+  percentage,
+  showHint,
+  tiny,
+}: LoadingBarProps) => {
   return (
     <div
       className={cx(
@@ -25,16 +39,6 @@ const LoadingBar = ({ error = false, percentage, showHint, tiny }) => {
       />
     </div>
   );
-};
-
-LoadingBar.propTypes = {
-  // If true, set the loading bar's color to $error-medium.
-  error: PropTypes.bool,
-  percentage: PropTypes.number,
-  // If true, we show a tiny sliver of loading bar even at 0%, to help users understand.
-  showHint: PropTypes.bool,
-  // Alternative styling for loading bars with small width. The height is narrower.
-  tiny: PropTypes.bool,
 };
 
 export default LoadingBar;

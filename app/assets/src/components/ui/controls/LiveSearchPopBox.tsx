@@ -1,12 +1,23 @@
 import cx from "classnames";
 import { forEach, sumBy, values } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import Input from "~ui/controls/Input";
 import { BareDropdown } from "~ui/controls/dropdowns";
 import cs from "./live_search_pop_box.scss";
 
-class LiveSearchPopBox extends React.Component {
+interface LiveSearchPopBoxState {
+  isLoading: boolean;
+  results: $TSFixMe;
+  inputValue: $TSFixMe;
+  focus?: boolean;
+}
+
+class LiveSearchPopBox extends React.Component<
+  LiveSearchPopBoxProps,
+  LiveSearchPopBoxState
+> {
+  static defaultProps: LiveSearchPopBoxProps;
+  lastestTimerId: any;
   constructor(props) {
     super(props);
 
@@ -40,7 +51,10 @@ class LiveSearchPopBox extends React.Component {
     // Pressing enter selects what they currently typed.
     if (keyEvent.key === "Enter") {
       if (inputMode) {
-        this.handleResultSelect({ result: inputValue });
+        this.handleResultSelect({
+          result: inputValue,
+          currentEvent: {},
+        });
       }
       onEnter && onEnter({ current: keyEvent, value: inputValue });
     }
@@ -117,7 +131,7 @@ class LiveSearchPopBox extends React.Component {
     );
   };
 
-  handleFocus = _ => {
+  handleFocus = () => {
     if (this.hasEnoughChars() && this.props.shouldSearchOnFocus) {
       this.handleSearchChange(this.state.inputValue);
     }
@@ -168,7 +182,7 @@ class LiveSearchPopBox extends React.Component {
     const { results } = this.state;
 
     const uncappedForEach = forEach.convert({ cap: false });
-    let items = [];
+    const items = [];
     uncappedForEach((category, key) => {
       items.push(this.buildSectionHeader(category.name));
       uncappedForEach((result, index) => {
@@ -225,22 +239,22 @@ LiveSearchPopBox.defaultProps = {
   shouldSearchOnFocus: false,
 };
 
-LiveSearchPopBox.propTypes = {
-  className: PropTypes.string,
-  delayTriggerSearch: PropTypes.number,
-  initialValue: PropTypes.string,
-  inputClassName: PropTypes.string,
-  inputMode: PropTypes.bool,
-  minChars: PropTypes.number,
-  onEnter: PropTypes.func,
-  onResultSelect: PropTypes.func,
-  onSearchChange: PropTypes.func,
-  onSearchTriggered: PropTypes.func.isRequired,
-  placeholder: PropTypes.string,
-  rectangular: PropTypes.bool,
-  value: PropTypes.string,
-  icon: PropTypes.string,
-  shouldSearchOnFocus: PropTypes.bool,
-};
+interface LiveSearchPopBoxProps {
+  className?: string;
+  delayTriggerSearch: number;
+  initialValue: string;
+  inputClassName?: string;
+  inputMode: boolean;
+  minChars: number;
+  onEnter?: $TSFixMeFunction;
+  onResultSelect?: $TSFixMeFunction;
+  onSearchChange?: $TSFixMeFunction;
+  onSearchTriggered?: $TSFixMeFunction;
+  placeholder: string;
+  rectangular: boolean;
+  value?: string;
+  icon: string;
+  shouldSearchOnFocus: boolean;
+}
 
 export default LiveSearchPopBox;

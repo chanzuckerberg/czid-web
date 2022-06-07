@@ -1,16 +1,29 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { Radio } from "semantic-ui-react";
 
 import cs from "./toggle.scss";
 
+interface ToggleProps {
+  className?: string;
+  onChange?: $TSFixMeFunction;
+  // Use isChecked when using custom logic to determine whether or not to toggle in the parent component
+  isChecked?: boolean;
+  onLabel: string;
+  offLabel: string;
+  initialChecked: boolean;
+}
+
+interface ToggleState {
+  checked?: boolean;
+}
 /**
  * Extension of semantic-ui radio toggle that shows on/off labels. The current
  * label is sent to the onChange handler. The current state can be overriden
  * by passing in new props.
  */
-class Toggle extends React.PureComponent {
+class Toggle extends React.PureComponent<ToggleProps, ToggleState> {
+  static defaultProps: ToggleProps;
   constructor(props) {
     super(props);
     this.state = {};
@@ -49,16 +62,6 @@ class Toggle extends React.PureComponent {
     );
   }
 }
-
-Toggle.propTypes = {
-  className: PropTypes.string,
-  onChange: PropTypes.func,
-  // Use isChecked when using custom logic to determine whether or not to toggle in the parent component
-  isChecked: PropTypes.bool,
-  onLabel: PropTypes.string.isRequired,
-  offLabel: PropTypes.string.isRequired,
-  initialChecked: PropTypes.bool.isRequired,
-};
 
 Toggle.defaultProps = {
   onLabel: "On",
