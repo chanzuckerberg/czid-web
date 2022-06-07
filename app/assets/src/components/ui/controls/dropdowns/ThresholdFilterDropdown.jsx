@@ -1,17 +1,13 @@
 import { forbidExtraProps } from "airbnb-prop-types";
-import { get, find } from "lodash/fp";
+import { get } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
-import { Grid } from "semantic-ui-react";
 
 import { trackEvent } from "~/api/analytics";
-import Input from "~/components/ui/controls/Input";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import { IconCloseSmall } from "~ui/icons";
 
-import PrimaryButton from "../buttons/PrimaryButton";
-import SecondaryButton from "../buttons/SecondaryButton";
+import { PrimaryButton, SecondaryButton } from "../buttons";
+import ThresholdFilterList from "./ThresholdFilterList";
 import DropdownLabel from "./common/DropdownLabel";
 import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./threshold_filter_dropdown.scss";
@@ -70,14 +66,16 @@ class ThresholdFilterDropdown extends React.Component {
   }
 
   handleThresholdRemove(thresholdIdx) {
-    var newThresholds = [...this.state.thresholds];
+    const newThresholds = [...this.state.thresholds];
     newThresholds.splice(thresholdIdx, 1);
+
     this.setState({ thresholds: newThresholds });
   }
 
   handleThresholdChange(thresholdIdx, threshold) {
-    var newThresholds = [...this.state.thresholds];
+    const newThresholds = [...this.state.thresholds];
     newThresholds[thresholdIdx] = threshold;
+
     this.setState({ thresholds: newThresholds });
   }
 
@@ -104,30 +102,28 @@ class ThresholdFilterDropdown extends React.Component {
     });
   }
 
-  handleAddThresholdItem(event) {
+  handleAddThresholdItem() {
     this.addNewItem();
-    event.stopPropagation();
   }
 
-  handleClose = shouldApply => {
-    this.setState({ popupIsOpen: false });
+  applyFilterUpdates = () => {
+    let newThresholds = this.state.thresholds.filter(
+      ThresholdFilterDropdown.isThresholdValid,
+    );
 
-    if (shouldApply) {
-      let newThresholds = this.state.thresholds.filter(
-        ThresholdFilterDropdown.isThresholdValid,
-      );
-      this.setState({ thresholds: newThresholds });
-      this.props.onApply(newThresholds);
+    this.setState({ popupIsOpen: false, thresholds: newThresholds });
+    this.props.onApply(newThresholds);
 
-      trackEvent("ThresholdFilterDropdown_apply-button_clicked", {
-        thresholds: newThresholds.length,
-      });
-    } else {
-      this.setState({ thresholds: this.props.thresholds });
-      trackEvent("ThresholdFilterDropdown_cancel-button_clicked", {
-        thresholds: this.props.thresholds.length,
-      });
-    }
+    trackEvent("ThresholdFilterDropdown_apply-button_clicked", {
+      thresholds: newThresholds.length,
+    });
+  };
+
+  cancelFilterUpdates = () => {
+    this.setState({ popupIsOpen: false, thresholds: this.props.thresholds });
+    trackEvent("ThresholdFilterDropdown_cancel-button_clicked", {
+      thresholds: this.props.thresholds.length,
+    });
   };
 
   handleOpen = () => {
@@ -178,6 +174,7 @@ class ThresholdFilterDropdown extends React.Component {
 
   render() {
     const { disabled } = this.props;
+    const { thresholds } = this.state;
     return (
       <BareDropdown
         trigger={this.renderLabel()}
@@ -187,54 +184,44 @@ class ThresholdFilterDropdown extends React.Component {
         className={cs.thresholdFilterDropdown}
         onOpen={this.handleOpen}
         onClose={e => {
-          // shouldApply on 'Enter'
-          this.handleClose(get("key", e) === "Enter");
+          const enterPressed = get("key", e) === "Enter";
+          if (enterPressed) {
+            this.applyFilterUpdates();
+          } else {
+            this.cancelFilterUpdates();
+          }
         }}
         open={this.state.popupIsOpen}
         closeOnClick={false}
         disabled={disabled}
       >
         <div className={cs.container}>
-          <Grid verticalAlign="middle" columns="equal">
-            {this.state.thresholds.map((threshold, idx) => (
-              <ThresholdFilter
-                key={idx}
-                metrics={this.metrics}
-                operators={this.operators}
-                threshold={threshold}
-                onChange={threshold =>
-                  this.handleThresholdChange(idx, threshold)
-                }
-                onRemove={() => {
-                  this.handleThresholdRemove(idx);
-                }}
-              />
-            ))}
-            <Grid.Row className={cs.thresholdActions}>
-              <Grid.Column>
-                <span
-                  className={cs.addThresholdLink}
-                  onClick={this.handleAddThresholdItem.bind(this)}
-                >
-                  + Add a threshold
-                </span>
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row className={cs.thresholdButtons}>
-              <Grid.Column>
-                <SecondaryButton
-                  text="Cancel"
-                  onClick={() => this.handleClose(false)}
-                  className={cs.button}
-                />
-                <PrimaryButton
-                  text="Apply"
-                  onClick={() => this.handleClose(true)}
-                  className={cs.button}
-                />
-              </Grid.Column>
-            </Grid.Row>
-          </Grid>
+          <ThresholdFilterList
+            metrics={this.metrics}
+            operators={this.operators}
+            thresholds={thresholds}
+            onChangeThreshold={(idx, threshold) =>
+              this.handleThresholdChange(idx, threshold)
+            }
+            onRemoveThreshold={idx => {
+              this.handleThresholdRemove(idx);
+            }}
+            onAddThreshold={event => {
+              this.handleAddThresholdItem(event);
+            }}
+          />
+          <div className={cs.thresholdButtons}>
+            <SecondaryButton
+              text="Cancel"
+              onClick={this.cancelFilterUpdates}
+              className={cs.button}
+            />
+            <PrimaryButton
+              text="Apply"
+              onClick={this.applyFilterUpdates}
+              className={cs.button}
+            />
+          </div>
         </div>
       </BareDropdown>
     );
@@ -262,84 +249,6 @@ ThresholdFilterDropdown.propTypes = forbidExtraProps({
 
   // TODO: Refactor ThresholdFilterDropdown to be compatible with PortalDropdown,
   // so we can use usePortal and withinModal
-});
-
-const ThresholdFilter = ({
-  threshold,
-  metrics,
-  operators,
-  onChange,
-  onRemove,
-}) => {
-  let { metric, value, operator, metricDisplay } = threshold;
-
-  const handleMetricChange = newMetric => {
-    const newMetricDisplay = get("text", find(["value", newMetric], metrics));
-    onChange({
-      metric: newMetric,
-      value,
-      operator,
-      metricDisplay: newMetricDisplay,
-    });
-  };
-
-  const handleOperatorChange = newOperator => {
-    onChange({ metric, value, operator: newOperator, metricDisplay });
-  };
-
-  const handleValueChange = newValue => {
-    onChange({ metric, value: newValue, operator, metricDisplay });
-  };
-
-  return (
-    <Grid.Row className={cs.thresholdFilter}>
-      <Grid.Column width={9}>
-        <Dropdown
-          placeholder="Metric"
-          fluid
-          floating
-          scrolling
-          options={metrics}
-          onChange={handleMetricChange}
-          value={metric}
-        />
-      </Grid.Column>
-      <Grid.Column>
-        <Dropdown
-          placeholder="Op."
-          fluid
-          floating
-          scrolling
-          options={operators.map(option => ({ text: option, value: option }))}
-          onChange={handleOperatorChange}
-          value={operator}
-        />
-      </Grid.Column>
-      <Grid.Column>
-        <Input type="number" onChange={handleValueChange} value={value} />
-      </Grid.Column>
-      <Grid.Column width={1}>
-        <div onClick={onRemove} className={cs.removeIcon}>
-          <IconCloseSmall />
-        </div>
-      </Grid.Column>
-    </Grid.Row>
-  );
-};
-
-ThresholdFilter.propTypes = forbidExtraProps({
-  metrics: PropTypes.arrayOf(
-    PropTypes.shape({
-      metric: PropTypes.string,
-      value: PropTypes.string,
-      operator: PropTypes.string,
-      metricDisplay: PropTypes.string,
-    }),
-  ),
-  onChange: PropTypes.func,
-  onRemove: PropTypes.func,
-  operators: PropTypes.array,
-  threshold: PropTypes.object,
 });
 
 export default ThresholdFilterDropdown;

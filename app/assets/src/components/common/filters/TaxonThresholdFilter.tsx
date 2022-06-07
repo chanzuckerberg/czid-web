@@ -1,6 +1,12 @@
 import { Button, DropdownPopper } from "czifui";
 import { isEmpty } from "lodash/fp";
 import React, { useEffect, useState } from "react";
+import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";
+import { NON_BACKGROUND_DEPENDENT_THRESHOLDS } from "~/components/views/SampleView/constants";
+import {
+  ThresholdFilterData,
+  ThresholdFilterOperator,
+} from "~/interface/dropdown";
 import FilterTrigger from "./FilterTrigger";
 import TaxonFilterSDS, { TaxonOption } from "./TaxonFilterSDS";
 
@@ -9,54 +15,83 @@ import cs from "./taxon_threshold_filter.scss";
 interface TaxonThresholdFilterProps {
   domain: string;
   selectedOptions: TaxonOption[];
-  onChange: (selected: TaxonOption[]) => void;
+  selectedThresholds: ThresholdFilterData[];
+  onFilterApply: (
+    taxa: TaxonOption[],
+    thresholds: ThresholdFilterData[],
+  ) => void;
   disabled: boolean;
 }
 
 const TaxonThresholdFilter = ({
   domain,
   selectedOptions,
-  onChange,
+  selectedThresholds,
+  onFilterApply,
   disabled = false,
 }: TaxonThresholdFilterProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  // Taxa selections are "pending" as soon as they're made. Once the Apply button is clicked, then the taxa filters gets applied.
+
+  // Taxa and threshold selections are only stored in this component's state until they
+  // are applied, at which point they are passed to the parent component via callback
   const [selectedTaxa, setSelectedTaxa] = React.useState<TaxonOption[]>(
     selectedOptions,
   );
+  const [thresholds, setThresholds] = useState<ThresholdFilterData[]>(
+    selectedThresholds,
+  );
+
+  const filterOperators: ThresholdFilterOperator[] = [">=", "<="];
 
   useEffect(() => {
     setSelectedTaxa(selectedOptions);
   }, [selectedOptions]);
 
+  useEffect(() => {
+    setThresholds(selectedThresholds);
+  }, [selectedThresholds]);
+
   const handleCancel = () => {
     setAnchorEl(null);
     setSelectedTaxa(selectedOptions);
+    setThresholds(selectedThresholds);
   };
 
   const handleTaxonLabelClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
   };
 
-  const renderActions = () => (
-    <div className={cs.actions}>
-      <div className={cs.action}>
-        <Button
-          sdsStyle="square"
-          sdsType="primary"
-          disabled={isEmpty(selectedTaxa)}
-          onClick={() => onChange(selectedTaxa)}
-        >
-          Apply
-        </Button>
-      </div>
-      <div className={cs.action}>
-        <Button sdsStyle="square" sdsType="secondary" onClick={handleCancel}>
-          Cancel
-        </Button>
-      </div>
-    </div>
-  );
+  const handleThresholdChange = (
+    thresholdIdx: number,
+    threshold: ThresholdFilterData,
+  ) => {
+    setThresholds((existingThresholds: ThresholdFilterData[]) => [
+      ...existingThresholds.slice(0, thresholdIdx),
+      threshold,
+      ...existingThresholds.slice(thresholdIdx + 1, existingThresholds.length),
+    ]);
+  };
+
+  const handleThresholdRemove = (thresholdIdx: number) => {
+    setThresholds((existingThresholds: ThresholdFilterData[]) => [
+      ...existingThresholds.slice(0, thresholdIdx),
+      ...existingThresholds.slice(thresholdIdx + 1, existingThresholds.length),
+    ]);
+  };
+
+  const handleAddThresholdItem = () => {
+    const firstMetric = NON_BACKGROUND_DEPENDENT_THRESHOLDS[0];
+
+    setThresholds((existingThresholds: ThresholdFilterData[]) => [
+      ...(Array.isArray(existingThresholds) ? existingThresholds : []),
+      {
+        metric: firstMetric.value,
+        metricDisplay: firstMetric.text,
+        operator: filterOperators[0],
+        value: "",
+      },
+    ]);
+  };
 
   return (
     <>
@@ -82,8 +117,45 @@ const TaxonThresholdFilter = ({
               setSelectedTaxa(selectedTaxaOptions)
             }
           />
-          {/** TODO: Render Threshold Filter */}
-          {renderActions()}
+          <div className={cs.thresholdDescriptor}>
+            Meets all of these thresholds:
+          </div>
+          <ThresholdFilterList
+            metrics={NON_BACKGROUND_DEPENDENT_THRESHOLDS}
+            operators={filterOperators}
+            thresholds={thresholds}
+            onChangeThreshold={(idx, threshold) =>
+              handleThresholdChange(idx, threshold)
+            }
+            onRemoveThreshold={idx => {
+              handleThresholdRemove(idx);
+            }}
+            onAddThreshold={handleAddThresholdItem}
+          />
+          <div className={cs.actions}>
+            <div className={cs.action}>
+              <Button
+                sdsStyle="square"
+                sdsType="primary"
+                disabled={isEmpty(selectedTaxa)}
+                onClick={() => {
+                  setAnchorEl(null);
+                  onFilterApply(selectedTaxa, thresholds);
+                }}
+              >
+                Apply
+              </Button>
+            </div>
+            <div className={cs.action}>
+              <Button
+                sdsStyle="square"
+                sdsType="secondary"
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
         </div>
       </DropdownPopper>
     </>

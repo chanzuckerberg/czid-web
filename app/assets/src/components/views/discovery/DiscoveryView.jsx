@@ -509,6 +509,33 @@ class DiscoveryView extends React.Component {
       preparedFilters.taxon = map(mapKey, preparedFilters.taxon);
     }
 
+    // Format threshold filter data for API query
+    if (Array.isArray(preparedFilters.taxonThresholds)) {
+      preparedFilters.taxonThresholds = preparedFilters.taxonThresholds.reduce(
+        (result, threshold) => {
+          const parsedMetric = threshold["metric"].split(":");
+
+          // basic validation that the metric contains a valid count type and metric
+          if (
+            parsedMetric.length === 2 &&
+            ["nt", "nr"].includes(parsedMetric[0])
+          ) {
+            const [countType, metric] = parsedMetric;
+            const { operator, value } = threshold;
+            result.push({
+              metric,
+              count_type: countType.toUpperCase(),
+              operator,
+              value,
+            });
+          }
+
+          return result;
+        },
+        [],
+      );
+    }
+
     return preparedFilters;
   };
 

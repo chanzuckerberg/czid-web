@@ -1,9 +1,10 @@
 import cx from "classnames";
-import { isEmpty, find, forEach, pick } from "lodash/fp";
+import { isEmpty, isEqual, find, forEach, pick } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent, withAnalytics } from "~/api/analytics";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
@@ -14,6 +15,11 @@ import TaxonThresholdFilter from "~/components/common/filters/TaxonThresholdFilt
 import { TAXON_THRESHOLD_FILTERING_FEATURE } from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import FilterTag from "~ui/controls/FilterTag";
+import {
+  KEY_TAXON,
+  KEY_TAXON_SELECTED,
+  KEY_TAXON_THRESHOLDS_SELECTED,
+} from "../SampleView/constants";
 import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
 
 import cs from "./discovery_filters.scss";
@@ -32,6 +38,7 @@ class DiscoveryFilters extends React.Component {
       visibilitySelected: this.props.visibilitySelected,
       hostSelected: this.props.hostSelected,
       tissueSelected: this.props.tissueSelected,
+      taxonThresholdsSelected: this.props.taxonThresholdsSelected,
     };
   }
 
@@ -49,7 +56,8 @@ class DiscoveryFilters extends React.Component {
         "hostSelected",
         "locationSelected",
         "locationV2Selected",
-        "taxonSelected",
+        KEY_TAXON_SELECTED,
+        KEY_TAXON_THRESHOLDS_SELECTED,
         "timeSelected",
         "tissueSelected",
         "visibilitySelected",
@@ -66,14 +74,44 @@ class DiscoveryFilters extends React.Component {
         "hostSelected",
         "locationSelected",
         "locationV2Selected",
-        "taxonSelected",
+        KEY_TAXON_SELECTED,
+        KEY_TAXON_THRESHOLDS_SELECTED,
         "timeSelected",
         "tissueSelected",
         "visibilitySelected",
       ],
       this.state,
     );
+
     onFilterChange && onFilterChange(selected);
+  };
+
+  handleTaxonThresholdFilterChange = (taxa, thresholds) => {
+    const taxonFilterStateUpdate = {};
+
+    // check if selected taxa changed
+    if (!isEqual(this.state[KEY_TAXON_SELECTED], taxa)) {
+      taxonFilterStateUpdate[KEY_TAXON_SELECTED] = taxa;
+      trackEvent(
+        `DiscoveryFilters_${KEY_TAXON_SELECTED.toLowerCase()}_changed`,
+        {
+          selectedKey: taxa,
+        },
+      );
+    }
+
+    // check if selected taxon thresholds were changed
+    if (!isEqual(this.state[KEY_TAXON_THRESHOLDS_SELECTED], thresholds)) {
+      taxonFilterStateUpdate[KEY_TAXON_THRESHOLDS_SELECTED] = thresholds;
+      trackEvent(
+        `DiscoveryFilters_${KEY_TAXON_THRESHOLDS_SELECTED.toLowerCase()}_changed`,
+        {
+          selectedKey: thresholds,
+        },
+      );
+    }
+
+    this.setState(taxonFilterStateUpdate, this.notifyFilterChangeHandler);
   };
 
   handleChange(selectedKey, selected) {
@@ -151,11 +189,38 @@ class DiscoveryFilters extends React.Component {
     );
   }
 
+  renderTaxonThresholdFilterTags = () => {
+    let selectedThresholds = this.state[KEY_TAXON_THRESHOLDS_SELECTED];
+    if (!selectedThresholds) return;
+
+    return (
+      <div className={cs.tags}>
+        {!isEmpty(selectedThresholds) && (
+          <div className={cs.descriptor}>Meets all:</div>
+        )}
+        {selectedThresholds.map((threshold, i) => (
+          <ThresholdFilterTag
+            className={cs.filterTag}
+            key={`threshold_filter_tag_${i}`}
+            threshold={threshold}
+            onClose={() =>
+              this.handleRemoveTag({
+                selectedKey: KEY_TAXON_THRESHOLDS_SELECTED,
+                valueToRemove: threshold.value,
+              })
+            }
+          />
+        ))}
+      </div>
+    );
+  };
+
   render() {
     const {
       hostSelected,
       locationV2Selected,
       taxonSelected,
+      taxonThresholdsSelected,
       timeSelected,
       tissueSelected,
       visibilitySelected,
@@ -192,20 +257,28 @@ class DiscoveryFilters extends React.Component {
               {hasTaxonThresholdFilterFeature ? (
                 <TaxonThresholdFilter
                   domain={domain}
-                  onChange={this.handleChange.bind(this, "taxonSelected")}
+                  onFilterApply={(taxa, thresholds) => {
+                    this.handleTaxonThresholdFilterChange(taxa, thresholds);
+                  }}
                   selectedOptions={taxonSelected}
+                  selectedThresholds={taxonThresholdsSelected}
                   disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
                 />
               ) : (
                 <TaxonFilter
                   domain={domain}
-                  onChange={this.handleChange.bind(this, "taxonSelected")}
+                  onChange={this.handleChange.bind(this, KEY_TAXON_SELECTED)}
                   selectedOptions={taxonSelected}
                   disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
                 />
               )}
-              {workflow !== WORKFLOWS.CONSENSUS_GENOME.value &&
-                this.renderTags("taxon")}
+              {workflow !== WORKFLOWS.CONSENSUS_GENOME.value && (
+                <>
+                  {this.renderTags(KEY_TAXON)}
+                  {hasTaxonThresholdFilterFeature &&
+                    this.renderTaxonThresholdFilterTags()}
+                </>
+              )}
             </div>
             {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}
             <div className={cs.filterContainer}>
@@ -294,6 +367,7 @@ DiscoveryFilters.propTypes = {
   locationSelected: PropTypes.array,
   locationV2Selected: PropTypes.array,
   taxonSelected: PropTypes.array,
+  taxonThresholdsSelected: PropTypes.array,
   timeSelected: PropTypes.string,
   tissueSelected: PropTypes.array,
   visibilitySelected: PropTypes.string,

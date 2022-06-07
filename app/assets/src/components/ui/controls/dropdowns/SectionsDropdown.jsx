@@ -21,6 +21,7 @@ const SectionsDropdown = ({
   search,
   ...props
 }) => {
+  let { label, rounded, ...restProps } = props;
   const renderMenuItem = option => {
     const trigger = (
       <BareDropdown.Item
@@ -112,8 +113,6 @@ const SectionsDropdown = ({
   );
 
   const renderDropdownTrigger = () => {
-    let { label, ...restProps } = props;
-
     let text;
     if (!isNil(selectedValue)) {
       const value = selectedValue.toString();
@@ -127,6 +126,7 @@ const SectionsDropdown = ({
       <DropdownTrigger
         {...restProps}
         label={label ? label + ":" : ""}
+        rounded={rounded}
         className={cs.dropdownTrigger}
         value={text}
       />
@@ -135,7 +135,7 @@ const SectionsDropdown = ({
 
   return (
     <BareDropdown
-      {...props}
+      {...restProps}
       arrowInsideTrigger={true}
       className={className}
       trigger={renderDropdownTrigger()}
@@ -170,6 +170,7 @@ SectionsDropdown.propTypes = {
   label: PropTypes.string,
   nullLabel: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  rounded: PropTypes.bool,
   selectedValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   search: PropTypes.bool,
 };

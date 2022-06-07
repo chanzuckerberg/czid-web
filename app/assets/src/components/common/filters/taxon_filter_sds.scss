@@ -2,14 +2,15 @@
 @import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
-$DROPDOWN_WIDTH: 360px;
+@import "./taxon_filter_variables.scss";
 
 .dropdown {
-  width: $DROPDOWN_WIDTH;
+  width: $TAXON_THRESHOLD_FILTER_WIDTH;
+  margin-bottom: 0px !important;
 }
 
 .dropdownPopper {
-  min-width: $DROPDOWN_WIDTH !important;
+  min-width: $TAXON_THRESHOLD_FILTER_WIDTH !important;
   width: fit-content;
   margin-top: $sds-spaces-xs;
 }

@@ -11,11 +11,11 @@
 
   .container {
     width: 412px;
-    padding: $sds-spaces-xs;
+    padding: $sds-spaces-m;
 
     .thresholdButtons {
       /* Override row css */
-      padding-top: 5px !important;
+      margin-top: $sds-spaces-xxl;
       text-align: center;
 
       .button {
@@ -23,40 +23,6 @@
 
         &:first-child {
           margin-left: 0;
-        }
-      }
-    }
-
-    .thresholdFilter {
-      .removeIcon {
-        cursor: pointer;
-        opacity: 0.3;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
-    }
-
-    .addThresholdLink {
-      text-align: left;
-      font-weight: 600;
-      cursor: pointer;
-
-      &:hover {
-        color: $sds-color-primary-400;
-      }
-    }
-
-    :global(.grid) {
-      margin: 0;
-
-      :global(.row) {
-        margin: 0;
-        padding: 0;
-
-        :global(.column) {
-          padding: $sds-spaces-xs;
         }
       }
     }

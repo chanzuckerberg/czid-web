@@ -1,0 +1,20 @@
+@import "~czifui/dist/variables";
+
+.thresholdFilter {
+  padding-bottom: $sds-spaces-l !important;
+
+  .inputFieldColumn {
+    &:not(:last-child) {
+      margin-right: $sds-spaces-m;
+    }
+  }
+
+  .removeIcon {
+    cursor: pointer;
+    opacity: 0.3;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

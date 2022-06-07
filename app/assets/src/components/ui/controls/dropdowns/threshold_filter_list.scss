@@ -1,0 +1,26 @@
+@import "~czifui/dist/variables";
+
+.thresholdFilterList {
+  .addThresholdLink {
+    text-align: left;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      color: $sds-color-primary-400;
+    }
+  }
+
+  :global(.grid) {
+    margin: 0;
+
+    :global(.row) {
+      margin: 0;
+      padding: 0;
+
+      :global(.column) {
+        padding: 0;
+      }
+    }
+  }
+}

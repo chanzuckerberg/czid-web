@@ -62,6 +62,23 @@ export const NOTIFICATION_TYPES = {
   invalidBackground: "invalid background",
 };
 
+export const NON_BACKGROUND_DEPENDENT_THRESHOLDS = [
+  { text: "NT rPM", value: "nt:rpm" },
+  { text: "NT r (total reads)", value: "nt:count" },
+  { text: "NT contigs", value: "nt:contigs" },
+  { text: "NT contig reads", value: "nt:contig_r" },
+  { text: "NT %id", value: "nt:percent_identity" },
+  { text: "NT L (alignment length in bp)", value: "nt:alignment_length" },
+  { text: "NT E value (as a power of 10)", value: "nt:e_value" },
+  { text: "NR rPM", value: "nr:rpm" },
+  { text: "NR r (total reads)", value: "nr:count" },
+  { text: "NR contigs", value: "nr:contigs" },
+  { text: "NR contig reads", value: "nr:contig_r" },
+  { text: "NR %id", value: "nr:percent_identity" },
+  { text: "NR L (alignment length in bp)", value: "nr:alignment_length" },
+  { text: "NR E value (as a power of 10)", value: "nr:e_value" },
+];
+
 export const THRESHOLDS = [
   { text: "Score", value: "agg_score" },
   { text: "NT Z Score", value: "nt:z_score" },
@@ -204,3 +221,8 @@ export const ANNOTATION_NONE = "none";
 // Supported downloads
 export const DOWNLOAD_CONTIGS = "download-contigs";
 export const DOWNLOAD_READS = "download-reads";
+
+// Discovery Filter keys
+export const KEY_TAXON = "taxon";
+export const KEY_TAXON_SELECTED = `${KEY_TAXON}Selected`;
+export const KEY_TAXON_THRESHOLDS_SELECTED = "taxonThresholdsSelected";
