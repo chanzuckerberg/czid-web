@@ -170,7 +170,7 @@ const processRawSample = sample => {
       "metadata.collection_location_v2",
       sample.details,
     ),
-    ctValue: get("metadata.ct_value", sample.details),
+    ct_Value: get("metadata.ct_value", sample.details),
     createdAt: sample.created_at,
     duplicateCompressionRatio: get(
       "derived_sample_output.summary_stats.compression_ratio",
@@ -194,7 +194,7 @@ const processRawSample = sample => {
       ),
     },
     notes: get("db_sample.sample_notes", sample.details),
-    nucleotideType: get("metadata.nucleotide_type", sample.details),
+    nucleotide_type: get("metadata.nucleotide_type", sample.details),
     pipelineVersion: get(
       "derived_sample_output.pipeline_run.pipeline_version",
       sample.details,
@@ -205,7 +205,7 @@ const processRawSample = sample => {
       "derived_sample_output.summary_stats.qc_percent",
       sample.details,
     ),
-    sampleType: get("metadata.sample_type", sample.details),
+    sample_type: get("metadata.sample_type", sample.details),
     subsampledFraction: get(
       "derived_sample_output.pipeline_run.fraction_subsampled",
       sample.details,
@@ -215,7 +215,7 @@ const processRawSample = sample => {
       sample.details,
     ),
     totalRuntime: get("mngs_run_info.total_runtime", sample.details),
-    waterControl: get("metadata.water_control", sample.details),
+    water_control: get("metadata.water_control", sample.details),
     ...consensusGenomeFields,
   };
   return row;
@@ -292,10 +292,10 @@ const processRawWorkflowRun = workflowRun => {
       "metadata",
       "collection_location_v2",
     ]),
-    ctValue: getSampleField(["metadata", "ct_value"]),
-    nucleotideType: getSampleField(["metadata", "nucleotide_type"]),
-    sampleType: getSampleField(["metadata", "sample_type"]),
-    waterControl: getSampleField(["metadata", "water_control"]),
+    ct_value: getSampleField(["metadata", "ct_value"]),
+    nucleotide_type: getSampleField(["metadata", "nucleotide_type"]),
+    sample_type: getSampleField(["metadata", "sample_type"]),
+    water_control: getSampleField(["metadata", "water_control"]),
     ...workflowRunFields,
   };
   return row;

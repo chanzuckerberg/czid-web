@@ -21,6 +21,7 @@ class Sample < ApplicationRecord
   include PipelineOutputsHelper
   include PipelineRunsHelper
   include TestHelper
+  extend ParameterSanitization
 
   belongs_to :project
   # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
@@ -110,9 +111,6 @@ class Sample < ApplicationRecord
     "sample" => "name",
     "createdAt" => "id",
     "collectionLocationV2" => "collection_location_v2",
-    "sampleType" => "sample_type",
-    "waterControl" => "water_control",
-    "nucleotideType" => "nucleotide_type",
     "host" => "host",
     "totalReads" => "total_reads",
     "nonHostReads" => "adjusted_remaining_reads",
@@ -125,9 +123,51 @@ class Sample < ApplicationRecord
     "meanInsertSize" => "mean_insert_size",
   }.freeze
   SAMPLES_SORT_KEYS = ["name", "id"].freeze
-  METADATA_SORT_KEYS = ["sample_type", "water_control", "nucleotide_type"].freeze
   PIPELINE_RUNS_SORT_KEYS = ["total_reads", "adjusted_remaining_reads", "total_ercc_reads", "pipeline_version", "fraction_subsampled", "qc_percent", "compression_ratio", "time_to_finalized"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
+
+  scope :sort_by_metadata, lambda { |sort_key, order_dir|
+    joins_statement = "LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')"
+    order_statement = "metadata.string_validated_value #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    joins(ActiveRecord::Base.sanitize_sql_array(joins_statement)).order(ActiveRecord::Base.sanitize_sql_array(order_statement))
+  }
+
+  scope :sort_by_location, lambda { |order_dir|
+    joins_statement = "
+      LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = 'collection_location_v2')
+      LEFT JOIN locations ON metadata.location_id = locations.id
+    "
+    # TODO(ihan): Investigate location metadata creation. I've implemented a workaround solution below,
+    # but ideally, all location info should be stored by location_id.
+    order_statement = "(CASE WHEN ISNULL(metadata.location_id) THEN metadata.string_validated_value ELSE locations.name END) #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  }
+
+  scope :sort_by_host_genome, lambda { |order_dir|
+    order_statement = "host_genomes.name #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    left_outer_joins(:host_genome).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  }
+
+  scope :sort_by_pipeline_run, lambda { |sort_key, order_dir|
+    # join on each sample's most-recent pipeline run
+    joins_statement = "
+      LEFT JOIN pipeline_runs ON samples.id = pipeline_runs.sample_id AND
+      pipeline_runs.id = (SELECT MAX(id) FROM pipeline_runs WHERE samples.id = pipeline_runs.sample_id)
+    "
+    order_statement = "pipeline_runs.#{sort_key} #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  }
+
+  scope :sort_by_insert_size, lambda { |order_dir|
+    # join on each sample's most-recent pipeline run
+    joins_statement = "
+      LEFT JOIN pipeline_runs ON samples.id = pipeline_runs.sample_id AND
+      pipeline_runs.id = (SELECT MAX(id) FROM pipeline_runs WHERE samples.id = pipeline_runs.sample_id)
+      LEFT JOIN insert_size_metric_sets ON insert_size_metric_sets.pipeline_run_id = pipeline_runs.id
+    "
+    order_statement = "insert_size_metric_sets.mean #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
+    joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
+  }
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id
@@ -1052,53 +1092,23 @@ class Sample < ApplicationRecord
   # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
   def self.sort_samples(samples, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
-    samples = samples.order("samples.#{sort_key} #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}") if SAMPLES_SORT_KEYS.include?(sort_key)
-    samples = Sample.sort_by_metadata_key(samples, sort_key, order_dir) if METADATA_SORT_KEYS.include?(sort_key)
-    samples = Sample.sort_by_location(samples, order_dir) if sort_key == "collection_location_v2"
-    samples = Sample.sort_by_host_genome(samples, order_dir) if sort_key == "host"
-    samples = Sample.sort_by_pipeline_run(samples, sort_key, order_dir) if PIPELINE_RUNS_SORT_KEYS.include?(sort_key)
-    samples = Sample.sort_by_insert_size(samples, order_dir) if sort_key == "mean_insert_size"
-    samples
-  end
+    metadata_sort_key = sanitize_metadata_field_name(order_by)
 
-  def self.sort_by_metadata_key(samples, sort_key, order_dir)
-    joins_statement = "LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')"
-    samples.joins(ActiveRecord::Base.sanitize_sql_array(joins_statement))
-           .order("metadata.string_validated_value #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
-  end
-
-  def self.sort_by_location(samples, order_dir)
-    joins_statement = "
-      LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = 'collection_location_v2')
-      LEFT JOIN locations ON metadata.location_id = locations.id
-    "
-    # TODO(ihan): Investigate location metadata creation. I've implemented a workaround solution below,
-    # but ideally, all location info should be stored by location_id.
-    order_statement = "(CASE WHEN ISNULL(metadata.location_id) THEN metadata.string_validated_value ELSE locations.name END) #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
-    samples.joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
-  end
-
-  def self.sort_by_host_genome(samples, order_dir)
-    samples.left_outer_joins(:host_genome).order("host_genomes.name #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
-  end
-
-  def self.sort_by_pipeline_run(samples, sort_key, order_dir)
-    # join on each sample's most-recent pipeline run
-    joins_statement = "
-      LEFT JOIN pipeline_runs ON samples.id = pipeline_runs.sample_id AND
-      pipeline_runs.id = (SELECT MAX(id) FROM pipeline_runs WHERE samples.id = pipeline_runs.sample_id)
-    "
-    samples.joins(joins_statement).order("pipeline_runs.#{sort_key} #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
-  end
-
-  def self.sort_by_insert_size(samples, order_dir)
-    # join on each sample's most-recent pipeline run
-    joins_statement = "
-      LEFT JOIN pipeline_runs ON samples.id = pipeline_runs.sample_id AND
-      pipeline_runs.id = (SELECT MAX(id) FROM pipeline_runs WHERE samples.id = pipeline_runs.sample_id)
-      LEFT JOIN insert_size_metric_sets ON insert_size_metric_sets.pipeline_run_id = pipeline_runs.id
-    "
-    samples.joins(joins_statement).order("insert_size_metric_sets.mean #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+    if SAMPLES_SORT_KEYS.include?(sort_key)
+      samples.order("samples.#{sort_key} #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}")
+    elsif sort_key == "host"
+      samples.sort_by_host_genome(order_dir)
+    elsif PIPELINE_RUNS_SORT_KEYS.include?(sort_key)
+      samples.sort_by_pipeline_run(sort_key, order_dir)
+    elsif sort_key == "mean_insert_size"
+      samples.sort_by_insert_size(order_dir)
+    elsif sort_key == "collection_location_v2"
+      samples.sort_by_location(order_dir)
+    elsif metadata_sort_key.present?
+      samples.sort_by_metadata(metadata_sort_key, order_dir)
+    else
+      samples
+    end
   end
 
   private

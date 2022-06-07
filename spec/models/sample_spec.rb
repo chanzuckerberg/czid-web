@@ -314,11 +314,20 @@ describe Sample, type: :model do
       #   - sample_four (optional) contains null sortable data
       # such that @sample_four < @sample_one < @sample_three < @sample_two.
       @sample_one = create(:sample, project: project_one, name: "Test Sample A", created_at: 3.days.ago,
-                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", water_control: "No", nucleotide_type: "DNA" })
+                                    metadata_fields: {
+                                      collection_location_v2: "Los Angeles, USA", sample_type: "CSF", water_control: "No", nucleotide_type: "DNA",
+                                      host_sex: "Female", host_age: 50, custom_metadata: "test a", "custom metadata space-separated" => "test a",
+                                    })
       @sample_three = create(:sample, project: project_one, name: "Test Sample B", created_at: 2.days.ago,
-                                      metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes", nucleotide_type: "RNA" })
+                                      metadata_fields: {
+                                        collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes", nucleotide_type: "RNA",
+                                        host_sex: "Male", host_age: 60, custom_metadata: "test b", "custom metadata space-separated" => "test b",
+                                      })
       @sample_two = create(:sample, project: @project_two, name: "Test Sample B", created_at: 1.day.ago,
-                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes", nucleotide_type: "RNA" })
+                                    metadata_fields: {
+                                      collection_location_v2: "San Francisco, USA", sample_type: "Serum", water_control: "Yes", nucleotide_type: "RNA",
+                                      host_sex: "Male", host_age: 60, custom_metadata: "test b", "custom metadata space-separated" => "test b",
+                                    })
       @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
     end
 
@@ -354,8 +363,58 @@ describe Sample, type: :model do
       end
     end
 
-    context "when sorting samples by metadata" do
-      let(:data_key_list) { ["sampleType", "waterControl", "nucleotideType"] }
+    context "when sorting samples by required metadata" do
+      let(:data_key_list) { ["sample_type", "water_control", "nucleotide_type"] }
+
+      before do
+        # create sample with no metadata to test null-handling
+        @sample_four = create(:sample, project: @project_two, name: "Test Sample C", created_at: 1.day.ago)
+
+        @samples_input_with_null_data = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, @sample_four.id])
+      end
+
+      it "returns samples in ascending order by metadata when order_dir is 'asc'" do
+        data_key_list.each do |data_key|
+          asc_results = Sample.sort_samples(@samples_input_with_null_data, data_key, "asc")
+          expect(asc_results.pluck(:id)).to eq([@sample_four.id, @sample_one.id, @sample_three.id, @sample_two.id])
+        end
+      end
+
+      it "returns samples in descending order by metadata when order_dir is 'desc'" do
+        data_key_list.each do |data_key|
+          desc_results = Sample.sort_samples(@samples_input_with_null_data, data_key, "desc")
+          expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, @sample_four.id])
+        end
+      end
+    end
+
+    context "when sorting samples by optional metadata" do
+      let(:data_key_list) { ["host_sex", "host_age"] }
+
+      before do
+        # create sample with no metadata to test null-handling
+        @sample_four = create(:sample, project: @project_two, name: "Test Sample C", created_at: 1.day.ago)
+
+        @samples_input_with_null_data = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, @sample_four.id])
+      end
+
+      it "returns samples in ascending order by metadata when order_dir is 'asc'" do
+        data_key_list.each do |data_key|
+          asc_results = Sample.sort_samples(@samples_input_with_null_data, data_key, "asc")
+          expect(asc_results.pluck(:id)).to eq([@sample_four.id, @sample_one.id, @sample_three.id, @sample_two.id])
+        end
+      end
+
+      it "returns samples in descending order by metadata when order_dir is 'desc'" do
+        data_key_list.each do |data_key|
+          desc_results = Sample.sort_samples(@samples_input_with_null_data, data_key, "desc")
+          expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, @sample_four.id])
+        end
+      end
+    end
+
+    context "when sorting samples by custom metadata" do
+      let(:data_key_list) { ["custom_metadata", "custom metadata space-separated"] }
 
       before do
         # create sample with no metadata to test null-handling

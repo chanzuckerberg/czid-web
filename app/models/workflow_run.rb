@@ -42,6 +42,7 @@ class WorkflowRun < ApplicationRecord
   #   Don't include larger file-based outputs or outputs that can be loaded from
   #   S3 on-demand.
   include PipelineOutputsHelper
+  extend ParameterSanitization
 
   belongs_to :sample
   before_destroy :cleanup
@@ -86,10 +87,6 @@ class WorkflowRun < ApplicationRecord
     "sample" => "name",
     "collectionLocationV2" => "collection_location_v2",
     "createdAt" => "id",
-    "waterControl" => "water_control",
-    "sampleType" => "sample_type",
-    "ctValue" => "ct_value",
-    "nucleotideType" => "nucleotide_type",
     "host" => "host",
     "referenceGenome" => "accession_id",
     "wetlabProtocol" => "wetlab_protocol",
@@ -107,7 +104,6 @@ class WorkflowRun < ApplicationRecord
     "nAmbiguous" => "n_ambiguous",
     "referenceGenomeLength" => "reference_genome_length",
   }.freeze
-  METADATA_SORT_KEYS = ["water_control", "sample_type", "ct_value", "nucleotide_type"].freeze
   INPUT_SORT_KEYS = ["accession_id", "wetlab_protocol", "technology", "medaka_model"].freeze
   CACHED_RESULT_SORT_KEYS = ["total_reads", "percent_genome_called", "vadr_pass_fail", "coverage_depth", "gc_percent", "ref_snps", "percent_identity", "n_actg", "n_missing", "n_ambiguous", "reference_genome_length"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
@@ -284,13 +280,12 @@ class WorkflowRun < ApplicationRecord
   # order_by stores a sortable column's dataKey (refer to: ColumnConfigurations.jsx)
   def self.sort_workflow_runs(workflow_runs, order_by, order_dir)
     sort_key = DATA_KEY_TO_SORT_KEY[order_by.to_s]
+    metadata_sort_key = sanitize_metadata_field_name(order_by)
 
     if sort_key == "id"
       workflow_runs.order("workflow_runs.#{sort_key} #{order_dir}, workflow_runs.#{TIEBREAKER_SORT_KEY} #{order_dir}")
     elsif sort_key == "name"
       workflow_runs.sort_by_sample_name(order_dir)
-    elsif METADATA_SORT_KEYS.include?(sort_key)
-      workflow_runs.sort_by_metadata(sort_key, order_dir)
     elsif sort_key == "host"
       workflow_runs.sort_by_host_genome(order_dir)
     elsif INPUT_SORT_KEYS.include?(sort_key)
@@ -299,6 +294,8 @@ class WorkflowRun < ApplicationRecord
       workflow_runs.sort_by_cached_result(sort_key, order_dir)
     elsif sort_key == "collection_location_v2"
       workflow_runs.sort_by_location(order_dir)
+    elsif metadata_sort_key.present?
+      workflow_runs.sort_by_metadata(metadata_sort_key, order_dir)
     else
       workflow_runs
     end

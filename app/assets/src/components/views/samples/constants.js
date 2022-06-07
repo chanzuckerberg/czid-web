@@ -52,7 +52,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   notes: {
     tooltip: "User-supplied notes.",
   },
-  nucleotideType: {
+  nucleotide_type: {
     tooltip:
       "User-selected metadata field indicating the nucleotide type (RNA, DNA).",
   },
@@ -64,7 +64,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
       "Reads filtered during each step of the pipeline. The full length of the bar represents the Total Reads. Passed Filters represent the reads that passed quality control and filtering steps.",
     link: DOC_BASE_LINK + "360053758913-Sample-QC#Reads-Lost",
   },
-  sampleType: {
+  sample_type: {
     tooltip: "User-supplied metadata field indicating the sample type.",
   },
   subsampledFraction: {
@@ -77,7 +77,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     tooltip: `The total time required by the CZ ID pipeline to process .fastq files into
     CZ ID reports.`,
   },
-  waterControl: {
+  water_control: {
     tooltip: "Whether a sample is water-only as a control.",
   },
 };

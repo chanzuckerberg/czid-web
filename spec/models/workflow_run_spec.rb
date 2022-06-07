@@ -370,9 +370,21 @@ describe WorkflowRun, type: :model do
       mosquito_hg = create(:host_genome, name: "Mosquito")
 
       @project = create(:project)
-      sample = create(:sample, project: @project, host_genome_id: human_hg.id, metadata_fields: { name: "Test Sample A", collection_location_v2: "Los Angeles, USA", ct_value: 1, water_control: "No", sample_type: "Cerebrospinal Fluid", nucleotide_type: "DNA" })
-      sample3 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab", nucleotide_type: "RNA" })
-      sample2 = create(:sample, project: @project, host_genome_id: mosquito_hg.id, metadata_fields: { name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab", nucleotide_type: "RNA" })
+      sample = create(:sample, project: @project, host_genome_id: human_hg.id,
+                               metadata_fields: {
+                                 name: "Test Sample A", collection_location_v2: "Los Angeles, USA", ct_value: 1, water_control: "No", sample_type: "Cerebrospinal Fluid", nucleotide_type: "DNA",
+                                 host_sex: "Female", host_age: 50, custom_metadata: "test a", "custom metadata space-separated" => "test a",
+                               })
+      sample3 = create(:sample, project: @project, host_genome_id: mosquito_hg.id,
+                                metadata_fields: {
+                                  name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab", nucleotide_type: "RNA",
+                                  host_sex: "Male", host_age: 60, custom_metadata: "test b", "custom metadata space-separated" => "test b",
+                                })
+      sample2 = create(:sample, project: @project, host_genome_id: mosquito_hg.id,
+                                metadata_fields: {
+                                  name: "Test Sample B", collection_location_v2: "San Francisco, USA", ct_value: 2, water_control: "Yes", sample_type: "Nasopharyngeal Swab", nucleotide_type: "RNA",
+                                  host_sex: "Male", host_age: 60, custom_metadata: "test b", "custom metadata space-separated" => "test b",
+                                })
       # Note: workflow_runs two and three are created out of order for testing purposes
       @workflow_run = create(:workflow_run, sample: sample, status: WorkflowRun::STATUS[:created], created_at: 3.days.ago)
       @workflow_run3 = create(:workflow_run, sample: sample3, status: WorkflowRun::STATUS[:created], created_at: 2.days.ago)
@@ -423,8 +435,8 @@ describe WorkflowRun, type: :model do
       end
     end
 
-    context "when sorting workflow runs by metadata" do
-      let(:data_key_list) { ["ctValue", "waterControl", "sampleType", "nucleotideType"] }
+    context "when sorting workflow runs by required metadata" do
+      let(:data_key_list) { ["water_control", "sample_type", "nucleotide_type"] }
 
       before do
         # create workflow run with no metadata to test null-handling
@@ -435,15 +447,67 @@ describe WorkflowRun, type: :model do
       end
 
       it "returns workflow runs in ascending order by metadata when order_dir is 'asc'" do
-        data_key_list.each do |_data_key|
-          asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, "ctValue", "asc")
+        data_key_list.each do |data_key|
+          asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "asc")
           expect(asc_results.pluck(:id)).to eq([@workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
         end
       end
 
       it "returns workflow runs in descending order by metadata when order_dir is 'desc'" do
-        data_key_list.each do |_data_key|
-          desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, "ctValue", "desc")
+        data_key_list.each do |data_key|
+          desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "desc")
+          expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, @workflow_run4.id])
+        end
+      end
+    end
+
+    context "when sorting workflow runs by optional metadata" do
+      let(:data_key_list) { ["ct_value"] }
+
+      before do
+        # create workflow run with no metadata to test null-handling
+        sample4 = create(:sample, project: @project)
+        @workflow_run4 = create(:workflow_run, sample: sample4, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
+
+        @workflow_runs_with_null_data = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, @workflow_run4.id])
+      end
+
+      it "returns workflow runs in ascending order by metadata when order_dir is 'asc'" do
+        data_key_list.each do |data_key|
+          asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "asc")
+          expect(asc_results.pluck(:id)).to eq([@workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+        end
+      end
+
+      it "returns workflow runs in descending order by metadata when order_dir is 'desc'" do
+        data_key_list.each do |data_key|
+          desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "desc")
+          expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, @workflow_run4.id])
+        end
+      end
+    end
+
+    context "when sorting workflow runs by custom metadata" do
+      let(:data_key_list) { ["custom_metadata", "custom metadata space-separated"] }
+
+      before do
+        # create workflow run with no metadata to test null-handling
+        sample4 = create(:sample, project: @project)
+        @workflow_run4 = create(:workflow_run, sample: sample4, status: WorkflowRun::STATUS[:created], created_at: 1.day.ago)
+
+        @workflow_runs_with_null_data = WorkflowRun.where(id: [@workflow_run.id, @workflow_run2.id, @workflow_run3.id, @workflow_run4.id])
+      end
+
+      it "returns workflow runs in ascending order by metadata when order_dir is 'asc'" do
+        data_key_list.each do |data_key|
+          asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "asc")
+          expect(asc_results.pluck(:id)).to eq([@workflow_run4.id, @workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+        end
+      end
+
+      it "returns workflow runs in descending order by metadata when order_dir is 'desc'" do
+        data_key_list.each do |data_key|
+          desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_with_null_data, data_key, "desc")
           expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id, @workflow_run4.id])
         end
       end

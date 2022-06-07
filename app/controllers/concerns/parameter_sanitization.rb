@@ -12,6 +12,10 @@ module ParameterSanitization
     return default
   end
 
+  def sanitize_metadata_field_name(name, default = nil)
+    return MetadataField.where(name: name).exists? ? name : default
+  end
+
   def sanitize_title_name(title)
     # Allow letters, numbers, underscores, dashes, and spaces
     return title.gsub(/[^A-Za-z0-9_\- ]/, ' ').strip

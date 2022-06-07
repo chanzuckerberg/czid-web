@@ -100,13 +100,13 @@ export default class MapPreviewSidebar extends React.Component {
         className: cs.basicCell,
       },
       {
-        dataKey: "nucleotideType",
+        dataKey: "nucleotide_type",
         label: "Nucleotide Type",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
-        dataKey: "sampleType",
+        dataKey: "sample_type",
         label: "Sample Type",
         flexGrow: 1,
         className: cs.basicCell,

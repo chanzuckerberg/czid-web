@@ -92,7 +92,7 @@ export const computeColumnsByWorkflow = ({
       className: cs.basicCell,
     },
     {
-      dataKey: "nucleotideType",
+      dataKey: "nucleotide_type",
       label: "Nucleotide Type",
       flexGrow: 1,
       className: cs.basicCell,
@@ -104,7 +104,7 @@ export const computeColumnsByWorkflow = ({
       className: cs.basicCell,
     },
     {
-      dataKey: "sampleType",
+      dataKey: "sample_type",
       label: "Sample Type",
       flexGrow: 1,
       className: cs.basicCell,
@@ -126,7 +126,7 @@ export const computeColumnsByWorkflow = ({
         TableRenderers.formatDuration(rowData[dataKey]),
     },
     {
-      dataKey: "waterControl",
+      dataKey: "water_control",
       label: "Water Control",
       flexGrow: 1,
       className: cs.basicCell,
@@ -180,19 +180,19 @@ export const computeColumnsByWorkflow = ({
       className: cs.basicCell,
     },
     {
-      dataKey: "nucleotideType",
+      dataKey: "nucleotide_type",
       label: "Nucleotide Type",
       flexGrow: 1,
       className: cs.basicCell,
     },
     {
-      dataKey: "sampleType",
+      dataKey: "sample_type",
       label: "Sample Type",
       flexGrow: 1,
       className: cs.basicCell,
     },
     {
-      dataKey: "waterControl",
+      dataKey: "water_control",
       label: "Water Control",
       flexGrow: 1,
       className: cs.basicCell,
@@ -294,7 +294,7 @@ export const computeColumnsByWorkflow = ({
       className: cs.basicCell,
     },
     {
-      dataKey: "ctValue",
+      dataKey: "ct_value",
       label: "Ct Value",
       flexGrow: 1,
       className: cs.basicCell,
