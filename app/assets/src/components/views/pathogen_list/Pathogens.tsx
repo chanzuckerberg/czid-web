@@ -14,12 +14,12 @@ const Pathogens = ({ pathogens }: PathogensProps) => {
           <div className={cs.pathogenName}>{pathogen.name}</div>
           <ExternalLink
             className={cs.pathogenTaxid}
-            href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${pathogen.tax_id}`}
+            href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${pathogen.taxId}`}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.PATHOGEN_LIST_VIEW_NCBI_LINK_CLICKED
             }
           >
-            Tax ID: {pathogen.tax_id}
+            Tax ID: {pathogen.taxId}
           </ExternalLink>
         </Grid.Column>
       ))}
@@ -30,7 +30,7 @@ const Pathogens = ({ pathogens }: PathogensProps) => {
 interface PathogensProps {
   pathogens: {
     name: string;
-    tax_id: number;
+    taxId: number;
   }[];
 }
 
