@@ -1,5 +1,7 @@
 # Mark existing migrations as safe
-StrongMigrations.start_after = 20_220_513_205_413
+# rubocop:disable Style/NumericLiterals
+StrongMigrations.start_after = 20220513205413
+# rubocop:enable Style/NumericLiterals
 
 # Set timeouts for migrations
 StrongMigrations.lock_timeout = 10.seconds
