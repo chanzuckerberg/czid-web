@@ -164,6 +164,8 @@ jobs:
       run: >
         git config --global url."https://github.com/".insteadOf
         ssh://git@github.com/
+    - name: Install older version of npm
+      run: npm install -g npm@v8.5.5
     - name: Install Dependencies
       # Verifies that package.json and package-lock.json match.
       # See: https://docs.npmjs.com/cli/v7/commands/npm-ci

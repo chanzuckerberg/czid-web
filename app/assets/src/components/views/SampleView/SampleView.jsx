@@ -529,48 +529,47 @@ class SampleView extends React.Component {
     const { currentTab, selectedOptions, pipelineVersion } = this.state;
 
     const backgroundIdUsed = backgroundId || selectedOptions.background;
-    let successfullyFetchedSampleReportData = false;
     const mergeNtNr =
       allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
       (currentTab === TABS.MERGED_NT_NR || currentTab === TABS.SHORT_READ_MNGS);
 
     this.setState({ loadingReport: true });
-    await getSampleReportData({
-      snapshotShareId,
-      sampleId,
-      background: backgroundIdUsed,
-      pipelineVersion,
-      mergeNtNr,
-    })
-      .then(rawReportData => {
-        this.setState(
-          ({ selectedOptions: prevSelectedOptions }) => ({
-            loadingReport: false,
-            // If the fetching of the sample report was triggered by a background model change,
-            // then update the background if the report loaded successfully.
-            ...(prevSelectedOptions.background !== backgroundIdUsed && {
-              selectedOptions: {
-                ...selectedOptions,
-                background: backgroundIdUsed,
-              },
-            }),
-          }),
-          () => {
-            if (rawReportData) {
-              this.processRawSampleReportData(rawReportData);
-              successfullyFetchedSampleReportData = true;
-            }
-          },
-        );
-      })
-      .catch(err => console.error(err));
-
     trackEvent("PipelineSampleReport_sample_viewed", {
       sampleId,
     });
-
-    return successfullyFetchedSampleReportData;
-  };
+    try {
+      const rawReportData = await getSampleReportData({
+        snapshotShareId,
+        sampleId,
+        background: backgroundIdUsed,
+        pipelineVersion,
+        mergeNtNr,
+      });
+      this.setState(
+        ({ selectedOptions: prevSelectedOptions }) => ({
+          loadingReport: false,
+          // If the fetching of the sample report was triggered by a background model change,
+          // then update the background if the report loaded successfully.
+          ...(prevSelectedOptions.background !== backgroundIdUsed && {
+            selectedOptions: {
+              ...selectedOptions,
+              background: backgroundIdUsed,
+            },
+          }),
+        }),
+        () => {
+          if (rawReportData) {
+            this.processRawSampleReportData(rawReportData);
+          }
+        },
+      );
+      return !!rawReportData;
+    }
+    catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
 
   fetchAmrData = async () => {
     const { sample } = this.state;
