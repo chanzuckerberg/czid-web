@@ -355,6 +355,7 @@ class BaseTable extends React.Component {
       rowRenderer,
       selectableColumnClassName,
       selectableKey,
+      selectRowDataGetter,
       sortable,
       sortBy,
       sortDirection,
@@ -401,6 +402,7 @@ class BaseTable extends React.Component {
                   className={selectableColumnClassName}
                   dataKey={selectableKey}
                   headerRenderer={this.renderSelectableHeader}
+                  cellDataGetter={selectRowDataGetter}
                   cellRenderer={this.renderSelectableCell}
                   disableSort={true}
                   width={defaultSelectColumnWidth}
@@ -555,6 +557,7 @@ BaseTable.propTypes = {
   onSelectRow: PropTypes.func,
   onSelectAllRows: PropTypes.func,
   selectAllChecked: PropTypes.bool,
+  selectRowDataGetter: PropTypes.func,
 };
 
 BaseTable.contextType = UserContext;

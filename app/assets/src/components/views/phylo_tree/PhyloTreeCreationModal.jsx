@@ -1,8 +1,9 @@
+import { cx } from "@emotion/css";
 import { reverse } from "lodash";
 import {
+  clone,
   debounce,
   find,
-  forEach,
   get,
   isEmpty,
   isUndefined,
@@ -12,10 +13,12 @@ import PropTypes from "prop-types";
 import React from "react";
 import Moment from "react-moment";
 import { Link as RouterLink } from "react-router-dom";
+import { defaultTableRowRenderer } from "react-virtualized";
 
 import {
   createPhyloTree,
-  getNewPhyloTree,
+  getNewPhyloTreePipelineRunIds,
+  getNewPhyloTreePipelineRunInfo,
   getPhyloTrees,
   getProjectsToChooseFrom,
   validatePhyloTreeName,
@@ -30,12 +33,9 @@ import ProjectSelect from "~/components/common/ProjectSelect";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
-import { formatPercent } from "~/components/utils/format";
-import {
-  isPipelineFeatureAvailable,
-  ACCESSION_COVERAGE_STATS_FEATURE,
-} from "~/components/utils/pipeline_versions";
 import { showPhyloTreeNotification } from "~/components/views/phylo_tree/PhyloTreeNotification";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Link from "~ui/controls/Link";
 import { SubtextDropdown } from "~ui/controls/dropdowns";
 import { IconLoading } from "~ui/icons";
@@ -44,6 +44,7 @@ import Modal from "../../ui/containers/Modal";
 import Wizard from "../../ui/containers/Wizard";
 import Input from "../../ui/controls/Input";
 import DataTable from "../../visualizations/table/DataTable";
+import { COLUMNS } from "./ColumnConfiguration";
 import PhyloTreeChecks from "./PhyloTreeChecks";
 
 import cs from "./phylo_tree_creation_modal.scss";
@@ -58,12 +59,24 @@ class PhyloTreeCreationModal extends React.Component {
       phyloTreesLoaded: false,
       phyloTrees: [],
 
-      samplesLoaded: false,
-      projectSamples: [],
-      selectedProjectSamples: new Set(),
+      projectPipelineRunsLoaded: false,
+      projectPipelineRunIds: new Set(),
+      // We only allow users to select runs with at least one contig,
+      // even though we display all runs in their selected project.
+      selectableProjectPipelineRuns: new Set(),
+      selectedProjectPipelineRuns: new Set(),
+      projectPipelineRunsSelectAllChecked: false,
+      // We need to know the coverage breadth of runs to determine
+      // whether or not to display the low coverage warning.
+      projectCoverageBreadths: null,
 
-      otherSamples: [],
-      selectedOtherSamples: new Set(),
+      otherPipelineRunsLoaded: false,
+      otherPipelineRunIds: new Set(),
+      selectedOtherPipelineRuns: new Set(),
+      otherPipelineRunsSelectAllChecked: false,
+      // We need to know the coverage breadth of runs to determine
+      // whether or not to display the low coverage warning.
+      otherCoverageBreadths: null,
       otherSamplesFilter: "",
 
       taxonList: [],
@@ -90,25 +103,7 @@ class PhyloTreeCreationModal extends React.Component {
       view: "View",
     };
 
-    this.projectSamplesHeaders = {
-      name: "Name",
-      host: "Host",
-      tissue: "Sample Type",
-      location: "Location",
-      date: "Date",
-      numContigs: "Contigs",
-      coverageBreadth: "Coverage Breadth",
-    };
-
-    this.otherSamplesHeaders = {
-      project: "Project",
-      ...this.projectSamplesHeaders,
-    };
-
     this.skipSelectProjectAndTaxon = this.props.projectId && this.props.taxonId;
-
-    this.dagBranch = "";
-    this.dagVars = "{}";
 
     this.inputTimeout = null;
     this.inputDelay = 200;
@@ -123,6 +118,7 @@ class PhyloTreeCreationModal extends React.Component {
     );
 
     this.wizard = React.createRef();
+    this.infiniteTable = null;
   }
 
   componentDidMount() {
@@ -196,15 +192,39 @@ class PhyloTreeCreationModal extends React.Component {
     }));
   };
 
-  loadNewTreeContext = () => {
-    const { taxonId, projectId, treeName } = this.state;
+  loadPipelineRunIds = () => {
+    this.loadProjectPipelineRunIds();
+    this.loadAdditionalPipelineRunIds();
+  };
 
-    this.setState({ showErrorName: false });
-
-    getNewPhyloTree({
-      taxId: taxonId,
+  loadProjectPipelineRunIds = async () => {
+    const {
+      taxonId,
       projectId,
-    }).then(({ samples }) => this.handleNewTreeContextResponse(samples));
+      treeName,
+      projectPipelineRunsLoaded,
+    } = this.state;
+
+    // Don't refetch the runs if they've already been loaded.
+    if (!projectPipelineRunsLoaded) {
+      const {
+        pipelineRunIds,
+        coverageBreadths,
+        runsWithContigs,
+      } = await getNewPhyloTreePipelineRunIds({
+        getAdditionalSamples: false,
+        projectId,
+        taxId: taxonId,
+      });
+
+      this.setState({
+        projectPipelineRunIds: new Set(reverse(pipelineRunIds)),
+        projectPipelineRunsLoaded: true,
+        showErrorName: false,
+        projectCoverageBreadths: coverageBreadths,
+        selectableProjectPipelineRuns: new Set(runsWithContigs),
+      });
+    }
 
     if (this.wizard.current) {
       const continueEnabled = !isEmpty(treeName);
@@ -212,94 +232,96 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  handleNewTreeContextResponse = samples => {
-    if (!samples || !Array.isArray(samples)) {
-      // TODO: properly handle error
-      // eslint-disable-next-line no-console
-      console.error("Error loading samples data");
-    } else if (isEmpty(samples)) {
-      this.setState({
-        samplesLoaded: true,
+  loadAdditionalPipelineRunIds = async () => {
+    const {
+      taxonId,
+      projectId,
+      treeName,
+      otherSamplesFilter,
+      otherPipelineRunsLoaded,
+    } = this.state;
+
+    // Don't refetch the runs if they've already been loaded.
+    if (!otherPipelineRunsLoaded) {
+      const {
+        pipelineRunIds,
+        coverageBreadths,
+      } = await getNewPhyloTreePipelineRunIds({
+        getAdditionalSamples: true,
+        projectId,
+        taxId: taxonId,
+        filter: otherSamplesFilter,
       });
-    } else {
-      const { projectSamples, otherSamples } = this.parseProjectSamplesData(
-        samples,
-      );
 
       this.setState({
-        projectSamples,
-        otherSamples,
-        samplesLoaded: true,
+        otherPipelineRunIds: new Set(reverse(pipelineRunIds)),
+        otherPipelineRunsLoaded: true,
+        showErrorName: false,
+        otherCoverageBreadths: coverageBreadths,
       });
+    }
+
+    if (this.wizard.current) {
+      const continueEnabled = !isEmpty(treeName);
+      this.wizard.current.handleContinueEnabled(continueEnabled);
     }
   };
 
-  parseProjectSamplesData = samples => {
-    const projectSamples = [];
-    const otherSamples = [];
+  rowRenderer = rowProps => {
+    const data = rowProps.rowData;
 
-    forEach(sample => {
-      let formattedSample = {
-        name: sample.name,
-        host: sample.host,
-        tissue: sample.tissue,
-        location: sample.location,
-        date: <Moment fromNow date={sample.created_at} />,
-        pipelineRunId: sample.pipeline_run_id,
-      };
+    if (data) {
+      const numContigs = get("num_contigs", data);
 
-      const numContigs = get("num_contigs", sample);
-
-      formattedSample = {
-        numContigs,
-        ...(numContigs === 0 && {
-          shouldDisable: true,
-          tooltipInfo: {
-            position: "top center",
-            content:
-              "There must be at least 1 contig in the sample for it to be selected for inclusion in the tree.",
-          },
-        }),
-        ...formattedSample,
-      };
-
-      const coverageBreadth = get("coverage_breadth", sample);
-      const pipelineVersion = get("pipeline_version", sample);
-      const hasCoverageBreadth = isPipelineFeatureAvailable(
-        ACCESSION_COVERAGE_STATS_FEATURE,
-        pipelineVersion,
-      );
-
-      formattedSample = {
-        coverageBreadth:
-          hasCoverageBreadth || numContigs === 0
-            ? formatPercent(coverageBreadth)
-            : "-",
-        ...(!hasCoverageBreadth && {
-          columnTooltips: {
-            coverageBreadth: {
-              position: "top center",
-              offset: [-5, 0],
-              content:
-                "Not shown for samples on pipeline versions older than 6.0.",
-            },
-          },
-        }),
-        ...formattedSample,
-      };
-
-      if (sample.project_id === this.state.projectId) {
-        projectSamples.push(formattedSample);
-      } else {
-        formattedSample.project = sample.project_name;
-        otherSamples.push(formattedSample);
+      // If the run has no contigs, we disable the row and render a tooltip when its hovered.
+      if (numContigs === 0) {
+        rowProps.className = cx(rowProps.className, cs.disabled);
+        return (
+          <ColumnHeaderTooltip
+            trigger={defaultTableRowRenderer(rowProps)}
+            content={
+              "There must be at least 1 contig in the sample for it to be selected for inclusion in the tree."
+            }
+            position="top center"
+            style={{}} // Need to pass in a style to suppress a warning
+            key={rowProps.key}
+          />
+        );
       }
-    }, samples);
+    }
+    return defaultTableRowRenderer(rowProps);
+  };
 
-    return {
-      projectSamples: reverse(projectSamples),
-      otherSamples: reverse(otherSamples),
-    };
+  handleLoadProjectPipelineRunRows = async ({ startIndex, stopIndex }) => {
+    const { taxonId, projectPipelineRunIds } = this.state;
+
+    const idsToLoad = Array.from(projectPipelineRunIds).slice(
+      startIndex,
+      stopIndex + 1,
+    );
+    const { samples } = await getNewPhyloTreePipelineRunInfo({
+      getAdditionalSamples: false,
+      pipelineRunIds: idsToLoad,
+      taxId: taxonId,
+    });
+
+    return samples;
+  };
+
+  handleLoadOtherPipelineRunRows = async ({ startIndex, stopIndex }) => {
+    const { taxonId, otherPipelineRunIds } = this.state;
+
+    const idsToLoad = Array.from(otherPipelineRunIds).slice(
+      startIndex,
+      stopIndex + 1,
+    );
+    const { samples } = await getNewPhyloTreePipelineRunInfo({
+      getAdditionalSamples: true,
+      pipelineRunIds: idsToLoad,
+      taxId: taxonId,
+    });
+
+    return samples;
   };
 
   loadProjectSearchContext = () => {
@@ -322,11 +344,18 @@ class PhyloTreeCreationModal extends React.Component {
         projectId: result.id,
         projectName: result.name,
         // Reset sample lists (in case user went back and changed project selection after they had been loaded)
-        samplesLoaded: false,
-        projectSamples: [],
-        selectedProjectSamples: new Set(),
-        otherSamples: [],
-        selectedOtherSamples: new Set(),
+        projectPipelineRunsLoaded: false,
+        projectPipelineRunIds: new Set(),
+        selectableProjectPipelineRuns: new Set(),
+        selectedProjectPipelineRuns: new Set(),
+        projectPipelineRunsSelectAllChecked: false,
+        projectCoverageBreadths: null,
+
+        otherPipelineRunsLoaded: false,
+        otherPipelineRunIds: new Set(),
+        selectedOtherPipelineRuns: new Set(),
+        otherPipelineRunsSelectAllChecked: false,
+        otherCoverageBreadths: null,
         otherSamplesFilter: "",
       },
       () =>
@@ -354,11 +383,18 @@ class PhyloTreeCreationModal extends React.Component {
         taxonId,
         taxonName,
         // Reset sample lists (in case user went back and changed taxon selection after they had been loaded)
-        samplesLoaded: false,
-        projectSamples: [],
-        selectedProjectSamples: new Set(),
-        otherSamples: [],
-        selectedOtherSamples: new Set(),
+        projectPipelineRunsLoaded: false,
+        projectPipelineRunIds: new Set(),
+        selectableProjectPipelineRuns: new Set(),
+        selectedProjectPipelineRuns: new Set(),
+        projectPipelineRunsSelectAllChecked: false,
+        projectCoverageBreadths: null,
+
+        otherPipelineRunsLoaded: false,
+        otherPipelineRunIds: new Set(),
+        selectedOtherPipelineRuns: new Set(),
+        otherPipelineRunsSelectAllChecked: false,
+        otherCoverageBreadths: null,
         otherSamplesFilter: "",
       },
       () =>
@@ -379,44 +415,137 @@ class PhyloTreeCreationModal extends React.Component {
 
   setPage = defaultPage => this.setState({ defaultPage });
 
-  handleChangedProjectSamples = newSelectedProjectSamples => {
+  handleSelectProjectPipelineRunsRow = (value, checked) => {
     const {
-      selectedProjectSamples: previousSelectedProjectSamples,
+      selectedProjectPipelineRuns: previousSelectedProjectPipelineRuns,
+      selectableProjectPipelineRuns,
     } = this.state;
+
+    let newSelectedProjectPipelineRuns = clone(
+      previousSelectedProjectPipelineRuns,
+    );
+
+    if (checked) {
+      newSelectedProjectPipelineRuns.add(value);
+    } else {
+      newSelectedProjectPipelineRuns.delete(value);
+    }
 
     this.setState(
       {
-        selectedProjectSamples: newSelectedProjectSamples,
+        projectPipelineRunsSelectAllChecked:
+          selectableProjectPipelineRuns.size ===
+          newSelectedProjectPipelineRuns.size,
+        selectedProjectPipelineRuns: newSelectedProjectPipelineRuns,
       },
       () => {
         trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
           {
-            previousSelectedProjectSamples: Array.from(
-              previousSelectedProjectSamples,
+            previousSelectedProjectPipelineRuns: Array.from(
+              previousSelectedProjectPipelineRuns,
             ),
-            newSelectedProjectSamples: Array.from(newSelectedProjectSamples),
+            newSelectedProjectPipelineRuns: Array.from(
+              newSelectedProjectPipelineRuns,
+            ),
           },
         );
       },
     );
   };
 
-  handleChangedOtherSamples = newSelectedOtherSamples => {
-    const { selectedOtherSamples: previousSelectedOtherSamples } = this.state;
+  handleSelectOtherPipelineRunsRow = (value, checked) => {
+    const {
+      selectedOtherPipelineRuns: previousSelectedOtherPipelineRuns,
+      otherPipelineRunIds,
+    } = this.state;
+
+    let newSelectedOtherPipelineRuns = clone(previousSelectedOtherPipelineRuns);
+
+    if (checked) {
+      newSelectedOtherPipelineRuns.add(value);
+    } else {
+      newSelectedOtherPipelineRuns.delete(value);
+    }
 
     this.setState(
       {
-        selectedOtherSamples: newSelectedOtherSamples,
+        otherPipelineRunsSelectAllChecked:
+          otherPipelineRunIds.size === newSelectedOtherPipelineRuns.size,
+        selectedOtherPipelineRuns: newSelectedOtherPipelineRuns,
       },
       () => {
         trackEvent(
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
           {
-            previousSelectedOtherSamples: Array.from(
-              previousSelectedOtherSamples,
+            previousSelectedOtherPipelineRuns: Array.from(
+              previousSelectedOtherPipelineRuns,
             ),
-            newSelectedOtherSamples: Array.from(newSelectedOtherSamples),
+            newSelectedOtherPipelineRuns: Array.from(
+              newSelectedOtherPipelineRuns,
+            ),
+          },
+        );
+      },
+    );
+  };
+
+  handleSelectAllProjectPipelineRuns = checked => {
+    const {
+      selectedProjectPipelineRuns: previousSelectedProjectPipelineRuns,
+      selectableProjectPipelineRuns,
+    } = this.state;
+
+    const newSelectedProjectPipelineRuns = checked
+      ? clone(selectableProjectPipelineRuns)
+      : new Set();
+
+    this.setState(
+      {
+        projectPipelineRunsSelectAllChecked: checked,
+        selectedProjectPipelineRuns: newSelectedProjectPipelineRuns,
+      },
+      () => {
+        trackEvent(
+          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_PROJECT_SAMPLES_CHANGED,
+          {
+            previousSelectedProjectPipelineRuns: Array.from(
+              previousSelectedProjectPipelineRuns,
+            ),
+            newSelectedProjectPipelineRuns: Array.from(
+              newSelectedProjectPipelineRuns,
+            ),
+          },
+        );
+      },
+    );
+  };
+
+  handleSelectAllOtherPipelineRuns = checked => {
+    const {
+      selectedOtherPipelineRuns: previousSelectedOtherPipelineRuns,
+      otherPipelineRunIds,
+    } = this.state;
+
+    const newSelectedOtherPipelineRuns = checked
+      ? clone(otherPipelineRunIds)
+      : new Set();
+
+    this.setState(
+      {
+        otherPipelineRunsSelectAllChecked: checked,
+        selectedOtherPipelineRuns: newSelectedOtherPipelineRuns,
+      },
+      () => {
+        trackEvent(
+          ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_OTHER_SAMPLES_CHANGED,
+          {
+            previousSelectedOtherPipelineRuns: Array.from(
+              previousSelectedOtherPipelineRuns,
+            ),
+            newSelectedOtherPipelineRuns: Array.from(
+              newSelectedOtherPipelineRuns,
+            ),
           },
         );
       },
@@ -429,8 +558,12 @@ class PhyloTreeCreationModal extends React.Component {
       this.setState(
         {
           otherSamplesFilter: newFilter,
+          otherPipelineRunIds: new Set(),
+          otherPipelineRunsLoaded: false,
+          otherCoverageBreadths: null,
         },
         () => {
+          this.loadAdditionalPipelineRunIds();
           trackEvent(
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_SAMPLE_SEARCH_PERFORMED,
             {
@@ -448,26 +581,18 @@ class PhyloTreeCreationModal extends React.Component {
     this.setState({ treeName: newName.trim() }, this.isTreeNameValidDebounced);
   };
 
-  handleBranchChange = newBranch => {
-    this.dagBranch = newBranch.trim();
-  };
-
-  handleDagVarsChange = newDagVars => {
-    this.dagVars = newDagVars;
-  };
-
   handleCreation = () => {
     const {
       treeName,
       projectId,
-      selectedProjectSamples,
-      selectedOtherSamples,
+      selectedProjectPipelineRuns,
+      selectedOtherPipelineRuns,
       taxonId,
     } = this.state;
     const { onClose } = this.props;
 
     const totalNumberOfSamplesSelected =
-      selectedProjectSamples.size + selectedOtherSamples.size;
+      selectedProjectPipelineRuns.size + selectedOtherPipelineRuns.size;
     const numberOfSamplesIsValid = PhyloTreeChecks.isNumberOfSamplesValid(
       totalNumberOfSamplesSelected,
     );
@@ -490,13 +615,9 @@ class PhyloTreeCreationModal extends React.Component {
       return false;
     }
 
-    const pipelineRunIds = [];
-    this.state.selectedProjectSamples.forEach(rowIndex => {
-      pipelineRunIds.push(this.state.projectSamples[rowIndex].pipelineRunId);
-    });
-    this.state.selectedOtherSamples.forEach(rowIndex => {
-      pipelineRunIds.push(this.state.otherSamples[rowIndex].pipelineRunId);
-    });
+    const pipelineRunIds = Array.from(selectedProjectPipelineRuns).concat(
+      Array.from(selectedOtherPipelineRuns),
+    );
 
     createPhyloTree({
       treeName,
@@ -594,8 +715,8 @@ class PhyloTreeCreationModal extends React.Component {
 
   isNumberOfSamplesValid() {
     let nSamples =
-      this.state.selectedProjectSamples.size +
-      this.state.selectedOtherSamples.size;
+      this.state.selectedProjectPipelineRuns.size +
+      this.state.selectedOtherPipelineRuns.size;
     return PhyloTreeChecks.isNumberOfSamplesValid(nSamples);
   }
 
@@ -627,8 +748,8 @@ class PhyloTreeCreationModal extends React.Component {
 
   getTotalPageRendering() {
     let totalSelectedSamples =
-      this.state.selectedProjectSamples.size +
-      this.state.selectedOtherSamples.size;
+      this.state.selectedProjectPipelineRuns.size +
+      this.state.selectedOtherPipelineRuns.size;
     return `${totalSelectedSamples} Total Samples`;
   }
 
@@ -638,34 +759,30 @@ class PhyloTreeCreationModal extends React.Component {
       treeNameValid,
       showErrorSamples,
       showErrorName,
-      selectedProjectSamples,
-      selectedOtherSamples,
-      projectSamples,
-      otherSamples,
+      selectedProjectPipelineRuns,
+      selectedOtherPipelineRuns,
+      projectCoverageBreadths,
+      otherCoverageBreadths,
     } = this.state;
+    const { minCoverageBreadth } = this.props;
 
-    const lowCoverageBreadths = [];
-    selectedProjectSamples.forEach(sampleIndex => {
-      const coverageBreadthPercentage =
-        projectSamples[sampleIndex].coverageBreadth;
-      const coverageBreadth = parseFloat(
-        coverageBreadthPercentage.slice(0, coverageBreadthPercentage.length),
-      );
-      if (coverageBreadth < 25) {
-        lowCoverageBreadths.push(coverageBreadth);
+    let showLowCoverageWarning = false;
+    for (const runId of selectedProjectPipelineRuns) {
+      const coverageBreadth = projectCoverageBreadths[runId] * 100;
+      if (coverageBreadth < minCoverageBreadth) {
+        showLowCoverageWarning = true;
+        break;
       }
-    });
-    selectedOtherSamples.forEach(sampleIndex => {
-      const coverageBreadthPercentage =
-        otherSamples[sampleIndex].coverageBreadth;
-      const coverageBreadth = parseFloat(
-        coverageBreadthPercentage.slice(0, coverageBreadthPercentage.length),
-      );
-      if (coverageBreadth < 25) {
-        lowCoverageBreadths.push(coverageBreadth);
+    }
+    if (!showLowCoverageWarning) {
+      for (const runId of selectedOtherPipelineRuns) {
+        const coverageBreadth = otherCoverageBreadths[runId] * 100;
+        if (coverageBreadth < minCoverageBreadth) {
+          showLowCoverageWarning = true;
+          break;
+        }
       }
-    });
-    const showLowCoverageWarning = lowCoverageBreadths.length > 0;
+    }
 
     if (showErrorName && !treeNameValid && treeName) {
       return (
@@ -684,8 +801,9 @@ class PhyloTreeCreationModal extends React.Component {
     } else if (showLowCoverageWarning) {
       return (
         <Notification type="warning" displayStyle="flat">
-          Some of the samples you have selected have low coverage breadth, under
-          25%. This may reduce the quality of the output results.{" "}
+          Some of the samples you have selected have low coverage breadth, under{" "}
+          {minCoverageBreadth}%. This may reduce the quality of the output
+          results.{" "}
           <ExternalLink
             coloredBackground={true}
             href={PHYLO_TREE_LINK}
@@ -702,18 +820,20 @@ class PhyloTreeCreationModal extends React.Component {
   }
 
   page = action => {
-    const { projectList, projectId } = this.state;
+    const {
+      projectList,
+      projectId,
 
-    const projectSamplesColumns = [
-      "name",
-      "host",
-      "tissue",
-      "location",
-      "date",
-      "numContigs",
-      "coverageBreadth",
-    ];
-    const otherSamplesColumns = ["project", ...projectSamplesColumns];
+      projectPipelineRunsLoaded,
+      projectPipelineRunIds,
+      projectPipelineRunsSelectAllChecked,
+      selectedProjectPipelineRuns,
+
+      otherPipelineRunsLoaded,
+      otherPipelineRunIds,
+      otherPipelineRunsSelectAllChecked,
+      selectedOtherPipelineRuns,
+    } = this.state;
 
     let options = {
       listTrees: (
@@ -796,7 +916,7 @@ class PhyloTreeCreationModal extends React.Component {
         <Wizard.Page
           key="wizard__page_3"
           title={`Name phylogenetic tree and select samples from project '${this.state.projectName}'`}
-          onLoad={this.loadNewTreeContext}
+          onLoad={this.loadPipelineRunIds}
           onContinueAsync={this.canContinueWithTreeName}
         >
           <div className="wizard__page-3__subtitle">{this.state.taxonName}</div>
@@ -816,32 +936,33 @@ class PhyloTreeCreationModal extends React.Component {
                 defaultValue={this.state.treeName}
               />
             </div>
-            {this.props.admin === 1 && (
-              <div>
-                <div className="wizard__page-3__form__label-branch">Branch</div>
-                <Input
-                  placeholder="master"
-                  onChange={this.handleBranchChange}
-                />
-                <div className="wizard__page-3__form__label-branch">
-                  DAG variables
-                </div>
-                <Input placeholder="{}" onChange={this.handleDagVarsChange} />
-              </div>
-            )}
           </div>
           <div className="wizard__page-3__table">
-            {this.state.samplesLoaded &&
-            this.state.projectSamples.length > 0 ? (
-              <DataTable
-                headers={this.projectSamplesHeaders}
-                columns={projectSamplesColumns}
-                data={this.state.projectSamples}
-                selectedRows={this.state.selectedProjectSamples}
-                onSelectedRowsChanged={this.handleChangedProjectSamples}
+            {projectPipelineRunsLoaded && projectPipelineRunIds.size > 0 ? (
+              <InfiniteTable
+                headerLabelClassName={cs.columnHeaderLabel}
+                columns={COLUMNS.slice(1)} // Exclude the project column
+                onLoadRows={this.handleLoadProjectPipelineRunRows}
+                onSelectAllRows={this.handleSelectAllProjectPipelineRuns}
+                onSelectRow={this.handleSelectProjectPipelineRunsRow}
+                rowRenderer={this.rowRenderer}
+                selectAllChecked={projectPipelineRunsSelectAllChecked}
+                selected={selectedProjectPipelineRuns}
+                selectRowDataGetter={({ rowData }) => {
+                  // If a run has no contigs, disable the row from being selected.
+                  const numContigs = get("num_contigs", rowData);
+                  if (numContigs !== 0) {
+                    return get("pipeline_run_id", rowData);
+                  } else {
+                    return null;
+                  }
+                }}
+                selectableKey="pipeline_run_id"
+                ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+                defaultRowHeight={75}
               />
-            ) : this.state.samplesLoaded &&
-              this.state.projectSamples.length === 0 ? (
+            ) : projectPipelineRunsLoaded &&
+              projectPipelineRunIds.size === 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
               <IconLoading />
@@ -863,27 +984,40 @@ class PhyloTreeCreationModal extends React.Component {
               <Input placeholder="Search" onChange={this.handleFilterChange} />
             </div>
             <div className="wizard__page-4__searchbar__container">
-              {this.state.selectedProjectSamples.size} Project Samples
+              {this.state.selectedProjectPipelineRuns.size} Project Samples
             </div>
             <div className="wizard__page-4__searchbar__container">
-              {this.state.selectedOtherSamples.size} CZ ID Samples
+              {this.state.selectedOtherPipelineRuns.size} CZ ID Samples
             </div>
             <div className="wizard__page-4__searchbar__container">
               {this.getTotalPageRendering()}
             </div>
           </div>
           <div className="wizard__page-4__table">
-            {this.state.samplesLoaded && this.state.otherSamples.length > 0 ? (
-              <DataTable
-                headers={this.otherSamplesHeaders}
-                columns={otherSamplesColumns}
-                data={this.state.otherSamples}
-                selectedRows={this.state.selectedOtherSamples}
-                onSelectedRowsChanged={this.handleChangedOtherSamples}
-                filter={this.state.otherSamplesFilter}
+            {otherPipelineRunsLoaded && otherPipelineRunIds.size > 0 ? (
+              <InfiniteTable
+                headerLabelClassName={cs.columnHeaderLabel}
+                columns={COLUMNS}
+                onLoadRows={this.handleLoadOtherPipelineRunRows}
+                onSelectAllRows={this.handleSelectAllOtherPipelineRuns}
+                onSelectRow={this.handleSelectOtherPipelineRunsRow}
+                rowRenderer={this.rowRenderer}
+                selectAllChecked={otherPipelineRunsSelectAllChecked}
+                selected={selectedOtherPipelineRuns}
+                selectRowDataGetter={({ rowData }) => {
+                  const numContigs = get("num_contigs", rowData);
+                  // If a run has no contigs, disable the row from being selected.
+                  if (numContigs !== 0) {
+                    return get("pipeline_run_id", rowData);
+                  } else {
+                    return null;
+                  }
+                }}
+                selectableKey="pipeline_run_id"
+                ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+                defaultRowHeight={75}
               />
-            ) : this.state.samplesLoaded &&
-              this.state.otherSamples.length === 0 ? (
+            ) : otherPipelineRunsLoaded && otherPipelineRunIds.size === 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
               <IconLoading />
@@ -944,12 +1078,16 @@ class PhyloTreeCreationModal extends React.Component {
   }
 }
 
+PhyloTreeCreationModal.defaultProps = {
+  minCoverageBreadth: 25,
+};
+
 PhyloTreeCreationModal.propTypes = {
   admin: PropTypes.number,
-  csrf: PropTypes.string.isRequired,
   onClose: PropTypes.func,
   projectId: PropTypes.number,
   projectName: PropTypes.string,
+  minCoverageBreadth: PropTypes.number,
   taxonId: PropTypes.number,
   taxonName: PropTypes.string,
 };

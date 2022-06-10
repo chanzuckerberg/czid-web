@@ -438,11 +438,32 @@ const getPhyloTrees = ({ taxId, projectId, nextGeneration = false } = {}) => {
   });
 };
 
-const getNewPhyloTree = ({ taxId, projectId }) => {
-  return get("/phylo_tree_ngs/new.json", {
+const getNewPhyloTreePipelineRunIds = ({
+  getAdditionalSamples,
+  projectId,
+  taxId,
+  filter,
+}) => {
+  return get("/phylo_tree_ngs/new_pr_ids.json", {
     params: {
-      taxId,
+      getAdditionalSamples,
       projectId,
+      taxId,
+      filter,
+    },
+  });
+};
+
+const getNewPhyloTreePipelineRunInfo = ({
+  getAdditionalSamples,
+  pipelineRunIds,
+  taxId,
+}) => {
+  return get("/phylo_tree_ngs/new_pr_info.json", {
+    params: {
+      getAdditionalSamples,
+      pipelineRunIds,
+      taxId,
     },
   });
 };
@@ -611,7 +632,8 @@ export {
   getCoverageVizSummary,
   getHeatmapMetrics,
   getMassNormalizedBackgroundAvailability,
-  getNewPhyloTree,
+  getNewPhyloTreePipelineRunIds,
+  getNewPhyloTreePipelineRunInfo,
   getPhyloTree,
   getPhyloTrees,
   getProject,

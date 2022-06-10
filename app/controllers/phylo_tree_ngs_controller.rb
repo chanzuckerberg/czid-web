@@ -135,36 +135,105 @@ class PhyloTreeNgsController < ApplicationController
     end
   end
 
-  # GET /phylo_tree_ngs/new
-  def new
-    permitted_params = index_params
+  # GET /phylo_tree_ngs/new_pr_ids
+  def new_pr_ids
+    permitted_params = new_params
+    get_additonal_samples = ActiveModel::Type::Boolean.new.cast(permitted_params[:getAdditionalSamples])
     tax_id = permitted_params[:taxId]&.to_i
     project_id = permitted_params[:projectId]&.to_i
+    filter = permitted_params[:filter].present? ? "%" + permitted_params[:filter] + "%" : nil
 
     if ApplicationHelper::HUMAN_TAX_IDS.include? tax_id
       render json: { message: "Human taxon ids are not allowed" }, status: :forbidden
       return
     end
 
-    project = current_power.updatable_projects.find(project_id)
+    # Return runs that are not from the specified project
+    if get_additonal_samples
+      # Fetch the top (non-deprecated) pipeline runs that the user has access to.
+      # If the user has typed a search term, filter the results.
+      eligible_pipeline_runs = if filter.present?
+                                 current_power.pipeline_runs.joins(sample: [:project, :host_genome, :metadata]).where.not(samples: { project_id: project_id }).where(
+                                   "pipeline_runs.id in (select max(id) from pipeline_runs where job_status = 'CHECKED' and sample_id in (select id from samples) group by sample_id)"
+                                 ).where(
+                                   "(projects.name like :filter)
+          or (samples.name like :filter)
+          or (host_genomes.name like :filter)
+          or (metadata.key = 'sample_type' and metadata.string_validated_value like :filter)
+          or (metadata.key = 'collection_location_v2' and metadata.string_validated_value like :filter)
+          ",
+                                   filter: filter
+                                 )
+                               else
+                                 current_power.pipeline_runs.joins(sample: [:project])
+                                              .where.not(samples: { project_id: project_id })
+                                              .where("pipeline_runs.id in (select max(id) from pipeline_runs where job_status = 'CHECKED' and sample_id in (select id from samples) group by sample_id)")
+                               end
 
-    # Retrieve the top (most recent) pipeline runs from samples that contains the specified taxid.
-    eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
-    pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: tax_id).order(id: :desc).limit(PIPELINE_RUN_IDS_WITH_TAXID_LIMIT).pluck(:pipeline_run_id)
-    eligible_pipeline_run_ids_with_taxid = eligible_pipeline_runs.where(id: pipeline_run_ids_with_taxid).order(id: :desc).pluck(:id)
-    # Always include the project's top pipeline runs (in case they were excluded due to the ELIGIBLE_PIPELINE_RUNS_LIMIT)
-    project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: tax_id, samples: { project_id: project_id }).pluck(:pipeline_run_id)
-    top_project_pipeline_run_ids_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs.pluck(:id)
+      eligible_pipeline_run_ids = eligible_pipeline_runs.pluck(:id)
+      run_ids_string = eligible_pipeline_run_ids.to_set.to_a.join(',')
 
-    # Retrieve information for displaying the tree's sample list.
-    project_samples = sample_details_json(top_project_pipeline_run_ids_with_taxid, tax_id, contigs_only: false)
-    additional_samples = sample_details_json(eligible_pipeline_run_ids_with_taxid - top_project_pipeline_run_ids_with_taxid, tax_id, contigs_only: true)
-    all_samples = project_samples + additional_samples
+      # Get all pipeline_run_ids with at least one contig.
+      # TODO: the additional DISTINCT clauses seem to degrade the perfromance of the UNIONs; would it be faster to convert this query into rails?
+      query = "SELECT DISTINCT pipeline_run_id FROM contigs WHERE species_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE species_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE genus_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE genus_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string});"
 
-    render json: {
-      project: project,
-      samples: all_samples,
-    }
+      pipeline_run_ids_with_taxid = Contig.connection.select_all(ActiveRecord::Base.sanitize_sql_array([query])).pluck("pipeline_run_id")
+
+      render json: {
+        pipelineRunIds: pipeline_run_ids_with_taxid,
+        # We need to know the coverage breadth of runs to determine whether or not to display a low coverage warning.
+        coverageBreadths: get_coverage_breadth_for_pipeline_runs(PipelineRun.where(id: pipeline_run_ids_with_taxid), tax_id, true),
+      }
+    else
+      project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: tax_id, samples: { project_id: project_id }).pluck(:pipeline_run_id)
+      top_project_pipeline_runs_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs
+      top_project_pipeline_runs_ids = top_project_pipeline_runs_with_taxid.pluck(:id)
+
+      # Get the ids of the runs with contigs for the specified taxon;
+      # we only allow users to select runs with at least one contig for the phylo tree,
+      # even though we display all runs in their selected project.
+      run_ids_string = top_project_pipeline_runs_ids.to_set.to_a.join(',')
+      # TODO: the additional DISTINCT clauses seem to degrade the perfromance of the UNIONs; would it be faster to convert this query into rails?
+      query = "SELECT DISTINCT pipeline_run_id FROM contigs WHERE species_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE species_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE genus_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE genus_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string});"
+
+      pipeline_runs_with_contigs = Contig.connection.select_all(ActiveRecord::Base.sanitize_sql_array([query])).pluck("pipeline_run_id")
+
+      render json: {
+        pipelineRunIds: top_project_pipeline_runs_ids,
+        # We need to know the coverage breadth of runs to determine whether or not to display a low coverage warning.
+        coverageBreadths: get_coverage_breadth_for_pipeline_runs(top_project_pipeline_runs_with_taxid, tax_id, true),
+        # We need a list of runs with contigs since we only allow users to select runs with at least one contig.
+        runsWithContigs: pipeline_runs_with_contigs,
+      }
+    end
+  end
+
+  # GET /phylo_tree_ngs/new_pr_info
+  def new_pr_info
+    permitted_params = new_params
+    get_additonal_samples = ActiveModel::Type::Boolean.new.cast(permitted_params[:getAdditionalSamples])
+    pipeline_run_ids = permitted_params[:pipelineRunIds]
+    tax_id = permitted_params[:taxId]&.to_i
+
+    if get_additonal_samples
+      additional_samples = sample_details_json(pipeline_run_ids, tax_id, contigs_only: true)
+
+      render json: {
+        samples: additional_samples,
+      }
+    else
+      project_samples = sample_details_json(pipeline_run_ids, tax_id, contigs_only: false)
+
+      render json: {
+        samples: project_samples,
+      }
+    end
   end
 
   # POST /phylo_tree_ngs
@@ -299,6 +368,16 @@ class PhyloTreeNgsController < ApplicationController
     params.permit(:id, :output)
   end
 
+  def new_params
+    params.permit(
+      :getAdditionalSamples,
+      :projectId,
+      :taxId,
+      :filter,
+      { pipelineRunIds: [] }
+    )
+  end
+
   def create_params
     params.permit(:name, :projectId, :taxId, { pipelineRunIds: [] })
   end
@@ -430,7 +509,7 @@ class PhyloTreeNgsController < ApplicationController
     # - the sample's coverage breadth for the taxon
     samples_projects = current_power.pipeline_runs.joins(sample: [:project, :host_genome]).joins(Arel.sql(coverage_stats_query)).joins(Arel.sql(sanitized_join_sql_statement)).where(
       id: pipeline_run_ids
-    ).group("id").limit(runs_limit).pluck(Arel.sql("
+    ).group("id").order(id: :desc).limit(runs_limit).pluck(Arel.sql("
       samples.name,
       samples.project_id,
       samples.created_at,
@@ -491,7 +570,7 @@ class PhyloTreeNgsController < ApplicationController
         )", species_taxids: species_taxids,])
   end
 
-  def get_coverage_breadth_for_pipeline_runs(pipeline_runs, taxid)
+  def get_coverage_breadth_for_pipeline_runs(pipeline_runs, taxid, fill_zero = false)
     # Get the coverage breadth for the given taxid, for each pipeline run.
     coverage_breadths = []
     tax_level = TaxonLineage.where(taxid: taxid).last.tax_level
@@ -513,6 +592,16 @@ class PhyloTreeNgsController < ApplicationController
     pr_to_coverage_breadth = {}
     coverage_breadths.each do |pr_id, coverage|
       pr_to_coverage_breadth[pr_id] = coverage
+    end
+
+    # If there is no coverage breadth value for the specified taxon found for the pipeline run,
+    # set it to 0.
+    if fill_zero
+      pipeline_runs.each do |pr|
+        unless pr_to_coverage_breadth.key?(pr.id)
+          pr_to_coverage_breadth[pr.id] = 0.0
+        end
+      end
     end
 
     pr_to_coverage_breadth

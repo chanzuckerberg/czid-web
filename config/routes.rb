@@ -270,13 +270,15 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :phylo_tree_ngs, only: [:create, :index, :new, :show] do
+  resources :phylo_tree_ngs, only: [:create, :index, :show] do
     member do
       get :download
       put :rerun
     end
 
     collection do
+      get :new_pr_ids
+      get :new_pr_info
       get :choose_taxon
       get :validate_name
     end

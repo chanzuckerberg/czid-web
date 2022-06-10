@@ -1,9 +1,33 @@
-@import "~styles/themes/elements";
-@import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
 .searchTitle {
   @include font-header-s;
   margin-bottom: $sds-spaces-xs;
+}
+
+.sampleNameHeader {
+  text-align: left !important; // override header styling from BaseTable
+}
+
+.columnHeaderLabel {
+  white-space: normal !important; // override label styling from BaseTable
+}
+
+.sampleNameCell {
+  white-space: normal;
+  word-wrap: break-word;
+  text-align: left;
+  color: inherit; // if the cell is disabled, inherit the disabled coloring
+}
+
+.basicCell {
+  @include font-body-xs;
+  white-space: normal;
+  word-wrap: break-word;
+  color: inherit; // if the cell is disabled, inherit the disabled coloring
+}
+
+.disabled {
+  color: $sds-color-gray-300;
 }

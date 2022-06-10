@@ -110,12 +110,16 @@ class InfiniteTable extends React.Component {
   };
 
   rowRenderer = rowProps => {
-    const { loadingClassName } = this.props;
+    const { loadingClassName, rowRenderer } = this.props;
     if (!this.rows[rowProps.index]) {
       rowProps.className = cx(rowProps.className, cs.loading, loadingClassName);
     }
 
-    return defaultTableRowRenderer(rowProps);
+    if (rowRenderer) {
+      return rowRenderer(rowProps);
+    } else {
+      return defaultTableRowRenderer(rowProps);
+    }
   };
 
   defaultCellRenderer = ({ cellData }) => {
@@ -227,6 +231,7 @@ InfiniteTable.propTypes = {
   onSelectAllRows: PropTypes.func,
   onSortColumn: PropTypes.func,
   rowCount: PropTypes.number,
+  rowRenderer: PropTypes.func,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,

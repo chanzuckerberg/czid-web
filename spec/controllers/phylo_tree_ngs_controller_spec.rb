@@ -199,13 +199,16 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     end
   end
 
-  describe "GET new" do
+  describe "get information for selecting new pipeline runs to create a tree from" do
     before do
       sign_in @joe
 
+      # Create taxon_lineages for a few species/genus.
       @species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", genus_taxid: 10, superkingdom_taxid: 2)
       @species_b = create(:taxon_lineage, tax_name: "species a", taxid: 2, species_taxid: 2, species_name: "species b", genus_taxid: 10, superkingdom_taxid: 2)
       @genus = create(:taxon_lineage, tax_name: "test genus", taxid: 10, genus_taxid: 10, superkingdom_taxid: 2)
+
+      # Create projects and samples belonging to a normal user.
       @project = create(:project, users: [@joe], name: "new tree project")
       @sample_one = create(:sample, project: @project, name: "sample_one", metadata_fields: {
                              collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab",
@@ -218,12 +221,51 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
                          { taxon_name: @species_b.tax_name, tax_level: 1, nr: 100 },
                        ],
                        wdl_version: "6.0.0")
+      @sample_two = create(:sample, project: @project, name: "sample_two", metadata_fields: {
+                             collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab",
+                           })
+      @pr_two = create(:pipeline_run,
+                       sample: @sample_two,
+                       job_status: "CHECKED",
+                       taxon_counts_data: [
+                         { taxon_name: @species_a.tax_name, tax_level: 1, nt: 70 },
+                         { taxon_name: @species_b.tax_name, tax_level: 1, nr: 100 },
+                       ],
+                       wdl_version: "6.0.0")
+
+      @project_other = create(:project, users: [@joe], name: "other project")
+      @sample_three = create(:sample, project: @project_other, name: "sample_three", metadata_fields: {
+                               collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab",
+                             })
+      @pr_three = create(:pipeline_run,
+                         sample: @sample_three,
+                         job_status: "CHECKED",
+                         taxon_counts_data: [
+                           { taxon_name: @species_a.tax_name, tax_level: 1, nt: 70 },
+                           { taxon_name: @species_b.tax_name, tax_level: 1, nr: 100 },
+                         ],
+                         wdl_version: "6.0.0")
+      @sample_four = create(:sample, project: @project_other, name: "sample_four", metadata_fields: {
+                              collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab",
+                            })
+      @pr_four = create(:pipeline_run,
+                        sample: @sample_four,
+                        job_status: "CHECKED",
+                        taxon_counts_data: [
+                          { taxon_name: @species_a.tax_name, tax_level: 1, nt: 70 },
+                          { taxon_name: @species_b.tax_name, tax_level: 1, nr: 100 },
+                        ],
+                        wdl_version: "6.0.0")
+
+      # Create contigs, taxon byteranges, and accession coverage stats for Joe's samples.
       2.times do
         create(:contig, pipeline_run_id: @pr_one.id, species_taxid_nt: @species_a.species_taxid, genus_taxid_nt: @species_a.genus_taxid)
       end
       5.times do
         create(:contig, pipeline_run_id: @pr_one.id, species_taxid_nt: @species_b.species_taxid, genus_taxid_nt: @species_b.genus_taxid)
       end
+
+      create(:contig, pipeline_run_id: @pr_three.id, species_taxid_nt: @species_a.species_taxid, genus_taxid_nt: @species_a.genus_taxid)
 
       create(:taxon_byterange,
              taxid: 1,
@@ -246,28 +288,106 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
              last_byte: 100,
              pipeline_run_id: @pr_one.id)
 
+      create(:taxon_byterange,
+             taxid: 1,
+             hit_type: TaxonCount::COUNT_TYPE_NT,
+             first_byte: 0,
+             last_byte: 70,
+             pipeline_run_id: @pr_two.id)
+
+      create(:taxon_byterange,
+             taxid: 1,
+             hit_type: TaxonCount::COUNT_TYPE_NT,
+             first_byte: 0,
+             last_byte: 70,
+             pipeline_run_id: @pr_three.id)
+
       create(:accession_coverage_stat, pipeline_run: @pr_one, coverage_breadth: 0.5, taxid: 1, num_contigs: 2)
       create(:accession_coverage_stat, pipeline_run: @pr_one, coverage_breadth: 0.1, taxid: 2, num_contigs: 5)
+
+      # Create a sample and project belonging to an admin.
+      @project_admin = create(:project, users: [@admin], name: "admin-restricted project")
+      @sample_admin = create(:sample, project: @project_admin, name: "sample_admin", metadata_fields: {
+                               collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab",
+                             })
+      @pr_admin = create(:pipeline_run,
+                         sample: @sample_admin,
+                         job_status: "CHECKED",
+                         taxon_counts_data: [
+                           { taxon_name: @species_a.tax_name, tax_level: 1, nt: 10 },
+                           { taxon_name: @species_b.tax_name, tax_level: 1, nr: 10 },
+                         ],
+                         wdl_version: "6.0.0")
+      # Create contigs, taxon byteranges, and accession coverage stats for the admin's sample.
+      create(:contig, pipeline_run_id: @pr_admin.id, species_taxid_nt: @species_a.species_taxid, genus_taxid_nt: @species_a.genus_taxid)
+
+      create(:taxon_byterange,
+             taxid: 1,
+             hit_type: TaxonCount::COUNT_TYPE_NT,
+             first_byte: 0,
+             last_byte: 70,
+             pipeline_run_id: @pr_admin.id)
+
+      create(:taxon_byterange,
+             taxid: 10,
+             hit_type: TaxonCount::COUNT_TYPE_NT,
+             first_byte: 0,
+             last_byte: 100,
+             pipeline_run_id: @pr_admin.id)
+
+      create(:accession_coverage_stat, pipeline_run: @pr_admin, coverage_breadth: 0.25, taxid: 1, num_contigs: 1)
     end
 
-    context "fetching eligible sample info given new phylo tree parameters" do
+    context "fetching eligible sample ids given new phylo tree parameters" do
       it "errors if taxId specified is a human taxId" do
-        get :new, format: :json, params: { taxId: 9605 }
+        get :new_pr_ids, format: :json, params: { taxId: 9605, projectId: @project.id, getAdditionalSamples: false }
 
         expect(response).to have_http_status :forbidden
         expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Human taxon ids are not allowed")
       end
 
-      it "includes project in response" do
-        get :new, format: :json, params: { projectId: @project.id, taxId: 1 }
+      it "includes coverage breadths in response" do
+        get :new_pr_ids, format: :json, params: { projectId: @project.id, taxId: 1, getAdditionalSamples: false }
 
         expect(response).to have_http_status :ok
         json_response = JSON.parse(response.body, symbolize_names: true)
 
-        expect(json_response.keys).to contain_exactly(:project, :samples)
-        expect(json_response[:project][:id]).to eq(@project.id)
+        expect(json_response.keys).to contain_exactly(:pipelineRunIds, :coverageBreadths, :runsWithContigs)
+        expect(json_response[:coverageBreadths]).to eq({ @pr_one.id.to_s => 0.5, @pr_two.id.to_s => 0.0 }.symbolize_keys)
       end
 
+      it "includes all project pipeline run ids if project-specific runs were requested" do
+        get :new_pr_ids, format: :json, params: { projectId: @project.id, taxId: 1, getAdditionalSamples: false }
+
+        expect(response).to have_http_status :ok
+        json_response = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json_response.keys).to contain_exactly(:pipelineRunIds, :coverageBreadths, :runsWithContigs)
+        expect(json_response[:pipelineRunIds]).to eq([@pr_one.id, @pr_two.id])
+      end
+
+      it "only includes pipeiline run ids with at least one contig if additional samples were requested" do
+        get :new_pr_ids, format: :json, params: { projectId: @project.id, taxId: 1, getAdditionalSamples: true }
+
+        expect(response).to have_http_status :ok
+        json_response = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json_response.keys).to contain_exactly(:pipelineRunIds, :coverageBreadths)
+        expect(json_response[:pipelineRunIds]).to eq([@pr_three.id])
+      end
+
+      it "includes ids for the subset of runs with contigs if project-specific runs were requested" do
+        get :new_pr_ids, format: :json, params: { projectId: @project.id, taxId: 1, getAdditionalSamples: false }
+
+        expect(response).to have_http_status :ok
+        json_response = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json_response.keys).to contain_exactly(:pipelineRunIds, :coverageBreadths, :runsWithContigs)
+        expect(json_response[:runsWithContigs]).to eq([@pr_one.id])
+      end
+    end
+
+    context "fetching pipeline run information" do
       it "includes correct sample info in response to a species taxId" do
         expected_samples_info = {
           name: "sample_one",
@@ -283,13 +403,13 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
           coverage_breadth: 0.5,
         }
 
-        get :new, format: :json, params: { projectId: @project.id, taxId: 1 }
+        get :new_pr_info, format: :json, params: { getAdditionalSamples: false, pipelineRunIds: [@pr_one.id], taxId: 1 }
 
         expect(response).to have_http_status :ok
         json_response = JSON.parse(response.body, symbolize_names: true)
         sample_info = json_response[:samples][0]
 
-        expect(json_response.keys).to contain_exactly(:project, :samples)
+        expect(json_response.keys).to contain_exactly(:samples)
         expect(sample_info.except(:created_at)).to eq(expected_samples_info)
         # Workaround to compare two timestamps
         expect(Time.parse(sample_info[:created_at]).to_i).to eq(Time.parse(@sample_one.created_at.to_s).to_i)
@@ -309,13 +429,13 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
           num_contigs: 7,
         }
 
-        get :new, format: :json, params: { projectId: @project.id, taxId: 10 }
+        get :new_pr_info, format: :json, params: { getAdditionalSamples: false, pipelineRunIds: [@pr_one.id], taxId: 10 }
 
         expect(response).to have_http_status :ok
         json_response = JSON.parse(response.body, symbolize_names: true)
         sample_info = json_response[:samples][0]
 
-        expect(json_response.keys).to contain_exactly(:project, :samples)
+        expect(json_response.keys).to contain_exactly(:samples)
         expect(sample_info.except(:created_at, :coverage_breadth)).to eq(expected_samples_info)
         # Float precision testing quirk; we round to the nearest tenth of a percent for display.
         expect(sample_info[:coverage_breadth]).to be_within(0.0001).of(0.1)
