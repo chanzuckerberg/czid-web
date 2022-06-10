@@ -398,9 +398,11 @@ module PipelineRunsHelper
                       end
       if WorkflowRun::INPUT_ERRORS.include?(sfn_error)
         return [sfn_error, error_message]
-      elsif ["UncaughtError", "RunFailed"].include?(sfn_error)
+      elsif sfn_error == "UncaughtError"
+        return [nil, error_message]
+      elsif sfn_error == "RunFailed"
         begin
-          # uncaught errors require another level of parsing in YAML this time
+          # RunFailed errors require another level of parsing in YAML this time
           message = YAML.safe_load(error_message, { symbolize_names: true })[:message]
         rescue StandardError
           return [nil, nil]
