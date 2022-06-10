@@ -117,9 +117,11 @@ const TaxonThresholdFilter = ({
               setSelectedTaxa(selectedTaxaOptions)
             }
           />
-          <div className={cs.thresholdDescriptor}>
-            Meets all of these thresholds:
-          </div>
+          {thresholds?.length > 0 && (
+            <div className={cs.thresholdDescriptor}>
+              Meets all of these thresholds:
+            </div>
+          )}
           <ThresholdFilterList
             metrics={NON_BACKGROUND_DEPENDENT_THRESHOLDS}
             operators={filterOperators}

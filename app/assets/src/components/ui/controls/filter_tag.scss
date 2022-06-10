@@ -2,9 +2,24 @@
 @import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
-:global(.ui):global(.label).filterTag {
-  @include font-body-xxxs;
-  background: $sds-color-primary-400 !important;
-  border-color: $sds-color-primary-400 !important;
-  color: $sds-color-gray-white !important;
+.labelContainer {
+  margin-top: $sds-spaces-xxxs;
+}
+
+:global(.ui):global(.label) {
+  &.filterTag {
+    @include font-body-xxxs;
+    background: $sds-color-primary-400 !important;
+    border-color: $sds-color-primary-400 !important;
+    color: $sds-color-gray-white !important;
+    margin: 0;
+
+    .closeIcon {
+      cursor: pointer;
+      fill: $sds-color-gray-white;
+      height: $sds-icon-sizes-xs-height;
+      width: $sds-icon-sizes-xs-width;
+      margin-left: $sds-spaces-xxs;
+    }
+  }
 }

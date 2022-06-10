@@ -2,7 +2,7 @@ import cx from "classnames";
 import React from "react";
 
 import Label from "~/components/ui/labels/Label";
-import Icon from "~ui/icons/Icon";
+import IconCloseSmall from "../icons/IconCloseSmall";
 
 import cs from "./filter_tag.scss";
 
@@ -16,16 +16,18 @@ const FilterTag = ({ text, onClose, className }: FilterTagProps) => {
   const labelText = (
     <>
       {text}
-      {onClose && <Icon name="close" onClick={onClose} />}
+      {onClose && <IconCloseSmall className={cs.closeIcon} onClick={onClose} />}
     </>
   );
 
   return (
-    <Label
-      className={cx(cs.filterTag, className)}
-      size="tiny"
-      text={labelText}
-    />
+    <div className={cs.labelContainer}>
+      <Label
+        className={cx(cs.filterTag, className)}
+        size="tiny"
+        text={labelText}
+      />
+    </div>
   );
 };
 

@@ -1,9 +1,13 @@
+@import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
 .thresholdFilter {
-  padding-bottom: $sds-spaces-l !important;
+  &:not(:first-child) {
+    padding-top: $sds-spaces-l !important;
+  }
 
   .inputFieldColumn {
+    @include font-body-xs;
     &:not(:last-child) {
       margin-right: $sds-spaces-m;
     }

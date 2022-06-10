@@ -1,13 +1,22 @@
+@import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
 .thresholdFilterList {
-  .addThresholdLink {
-    text-align: left;
-    font-weight: 600;
-    cursor: pointer;
+  .thresholdFilterGrid {
+    .addThresholdRow {
+      padding-top: $sds-spaces-l !important;
 
-    &:hover {
-      color: $sds-color-primary-400;
+      .addThresholdColumn {
+        .addThresholdLink {
+          @include font-caps-xxxs;
+          cursor: pointer;
+          text-align: left;
+
+          &:hover {
+            color: $sds-color-primary-400;
+          }
+        }
+      }
     }
   }
 

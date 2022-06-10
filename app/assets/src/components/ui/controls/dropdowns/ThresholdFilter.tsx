@@ -76,7 +76,12 @@ const ThresholdFilter = ({
         />
       </Grid.Column>
       <Grid.Column className={cs.inputFieldColumn}>
-        <Input type="number" onChange={handleValueChange} value={value} />
+        <Input
+          className={"noSpinner"}
+          onChange={handleValueChange}
+          type="number"
+          value={value}
+        />
       </Grid.Column>
       <Grid.Column className={cs.inputFieldColumn} width={1}>
         <div onClick={onRemove} className={cs.removeIcon}>

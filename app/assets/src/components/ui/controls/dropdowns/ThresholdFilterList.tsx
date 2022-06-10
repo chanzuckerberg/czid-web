@@ -31,7 +31,11 @@ const ThresholdFilterList = ({
 }: ThresholdFilterListProps) => {
   return (
     <div className={cs.thresholdFilterList}>
-      <Grid verticalAlign="middle" columns="equal">
+      <Grid
+        className={cs.thresholdFilterGrid}
+        verticalAlign="middle"
+        columns="equal"
+      >
         {Array.isArray(thresholds) &&
           thresholds.map((threshold: ThresholdFilterData, idx: number) => (
             <ThresholdFilter
@@ -47,8 +51,8 @@ const ThresholdFilterList = ({
               }}
             />
           ))}
-        <Grid.Row>
-          <Grid.Column>
+        <Grid.Row className={cs.addThresholdRow}>
+          <Grid.Column className={cs.addThresholdColumn}>
             <span
               className={cs.addThresholdLink}
               onClick={() => {

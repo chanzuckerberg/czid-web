@@ -10,17 +10,17 @@
   width: $TAXON_THRESHOLD_FILTER_WIDTH;
 
   .title {
-    font: $sds-font-header-m-600-font;
+    @include font-header-m;
     margin-bottom: $sds-spaces-l;
   }
 
   .filterDescriptor {
-    font: $sds-font-body-s-400-font;
+    @include font-body-s;
     margin-bottom: $sds-spaces-xs;
   }
 
   .thresholdDescriptor {
-    font: $sds-font-body-s-400-font;
+    @include font-body-s;
     margin-top: $sds-spaces-xl;
     margin-bottom: $sds-spaces-xs;
   }
