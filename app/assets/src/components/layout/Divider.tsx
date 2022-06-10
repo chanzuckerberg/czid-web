@@ -1,18 +1,17 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import cs from "./divider.scss";
 
-const Divider = ({ style }) => {
+interface DividerProps {
+  style?: "thin" | "medium";
+}
+
+const Divider = ({ style }: DividerProps) => {
   return <div className={cx(cs.divider, cs[style])} />;
 };
 
 Divider.defaultProps = {
   style: "thin",
-};
-
-Divider.propTypes = {
-  style: PropTypes.oneOf(["thin", "medium"]),
 };
 
 export default Divider;

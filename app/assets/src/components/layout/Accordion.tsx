@@ -1,13 +1,29 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { IconArrowDownSmall, IconArrowUpSmall } from "~ui/icons";
 
 import cs from "./accordion.scss";
 
-class Accordion extends React.Component {
-  state = {};
+interface AccordionProps {
+  className?: string;
+  headerClassName?: string;
+  iconClassName?: string;
+  toggleable?: boolean;
+  // the vertical alignment of the toggle arrow with other header elements
+  toggleArrowAlignment?: "center" | "baseline" | "topRight";
+  // Accordion can be controlled or non-controlled.
+  onToggle?: $TSFixMeFunction;
+  open?: boolean;
+  // Useful for separating the accordion content from the elements below it.
+  bottomContentPadding?: boolean;
+  header?: React.ReactNode;
+  children?: React.ReactNode;
+}
+
+class Accordion extends React.Component<AccordionProps> {
+  static defaultProps: AccordionProps;
+  state = { wasToggled: false, open: false };
 
   onToggle = () => {
     this.setState({
@@ -76,22 +92,6 @@ class Accordion extends React.Component {
     );
   }
 }
-
-Accordion.propTypes = {
-  className: PropTypes.string,
-  headerClassName: PropTypes.string,
-  iconClassName: PropTypes.string,
-  toggleable: PropTypes.bool,
-  // the vertical alignment of the toggle arrow with other header elements
-  toggleArrowAlignment: PropTypes.oneOf(["center", "baseline", "topRight"]),
-  // Accordion can be controlled or non-controlled.
-  onToggle: PropTypes.func,
-  open: PropTypes.bool,
-  // Useful for separating the accordion content from the elements below it.
-  bottomContentPadding: PropTypes.bool,
-  header: PropTypes.node,
-  children: PropTypes.node,
-};
 
 Accordion.defaultProps = {
   toggleable: true,
