@@ -1,11 +1,27 @@
 import cx from "classnames";
 import { getOr } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import cs from "./tooltip_viz_table.scss";
 
-const TooltipVizTable = ({ data, description, subtitle, title }) => {
+interface TooltipVizTableProps {
+  data?: {
+    name?: string;
+    // Array of key-value pairs
+    data?: object[][];
+    disabled?: boolean;
+  }[];
+  description?: string | React.ReactElement;
+  subtitle?: string | React.ReactElement;
+  title?: string | React.ReactElement;
+}
+
+const TooltipVizTable = ({
+  data,
+  description,
+  subtitle,
+  title,
+}: TooltipVizTableProps) => {
   const shouldCompactLabel = data.length === 1;
 
   const renderLabel = label => {
@@ -55,20 +71,6 @@ const TooltipVizTable = ({ data, description, subtitle, title }) => {
       {description && <div className={cs.description}>{description}</div>}
     </div>
   );
-};
-
-TooltipVizTable.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      // Array of key-value pairs
-      data: PropTypes.arrayOf(PropTypes.array),
-      disabled: PropTypes.bool,
-    }),
-  ),
-  description: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  subtitle: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  title: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
 };
 
 export default TooltipVizTable;

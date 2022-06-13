@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -9,6 +8,15 @@ import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 
 import cs from "./error_modal.scss";
 
+interface ErrorModalProps {
+  helpLinkEvent?: string;
+  labelText?: string;
+  onCancel: $TSFixMeFunction;
+  onConfirm: React.MouseEvent;
+  open?: boolean;
+  title?: string;
+}
+
 const ErrorModal = ({
   helpLinkEvent,
   labelText,
@@ -16,7 +24,7 @@ const ErrorModal = ({
   onConfirm,
   open,
   title,
-}) => {
+}: ErrorModalProps) => {
   return (
     <Modal className={cs.errorModal} narrowest open={open}>
       <div className={cs.errorMessage}>
@@ -50,15 +58,6 @@ const ErrorModal = ({
       </div>
     </Modal>
   );
-};
-
-ErrorModal.propTypes = {
-  helpLinkEvent: PropTypes.string,
-  labelText: PropTypes.string,
-  onCancel: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  open: PropTypes.bool,
-  title: PropTypes.string,
 };
 
 export default ErrorModal;

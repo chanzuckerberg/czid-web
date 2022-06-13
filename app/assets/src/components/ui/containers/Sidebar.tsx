@@ -1,12 +1,20 @@
-import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { Sidebar as SemanticSidebar } from "semantic-ui-react";
 import { IconClose } from "~ui/icons";
 import cs from "./sidebar.scss";
 
-class Sidebar extends React.Component {
+interface SidebarProps {
+  direction?: "right" | "left" | "top" | "bottom";
+  width?: "very thin" | "thin" | "wide" | "very wide";
+  visible?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+  onClose?: $TSFixMeFunction;
+}
+
+class Sidebar extends React.Component<SidebarProps> {
+  static defaultProps: SidebarProps;
   render() {
     const { children, className, ...props } = this.props;
     return (
@@ -23,15 +31,6 @@ class Sidebar extends React.Component {
     );
   }
 }
-
-Sidebar.propTypes = forbidExtraProps({
-  direction: PropTypes.string /* top, left, right, bottom */,
-  width: PropTypes.string /* very thin, thin, wide, very wide */,
-  visible: PropTypes.bool,
-  children: PropTypes.node,
-  className: PropTypes.string,
-  onClose: PropTypes.func.isRequired,
-});
 
 Sidebar.defaultProps = {
   direction: "right",

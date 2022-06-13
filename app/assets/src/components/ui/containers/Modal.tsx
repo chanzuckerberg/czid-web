@@ -1,12 +1,27 @@
-import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { Modal as SemanticModal } from "semantic-ui-react";
 import { IconClose } from "~ui/icons";
 import cs from "./modal.scss";
 
-class Modal extends React.Component {
+interface ModalProps {
+  children?: React.ReactNode[] | React.ReactNode;
+  className?: string;
+  onClose?: $TSFixMeFunction;
+  open?: boolean;
+  fixedHeight?: boolean;
+  minimumHeight?: boolean;
+  narrow?: boolean; // Sets the Modal to a minimum height it cannot shrink past.;
+  narrowest?: boolean; // Decrease the width of the Modal for smaller modals.;
+  wide?: boolean; // Decrease the width of the Modal for the smallest modals.;
+  tall?: boolean; // Increase the width of the Modal for the wider modals.;
+  title?: string; // Increase the max-height of the Modal for tall content.;
+  sCloseIcon?: boolean;
+  xlCloseIcon?: boolean;
+}
+
+class Modal extends React.Component<ModalProps> {
+  static defaultProps: ModalProps;
   render() {
     const {
       fixedHeight,
@@ -60,24 +75,5 @@ Modal.defaultProps = {
   sCloseIcon: false,
   xlCloseIcon: false,
 };
-
-Modal.propTypes = forbidExtraProps({
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-  className: PropTypes.string,
-  onClose: PropTypes.func,
-  open: PropTypes.bool,
-  fixedHeight: PropTypes.bool,
-  minimumHeight: PropTypes.bool, // Sets the Modal to a minimum height it cannot shrink past.
-  narrow: PropTypes.bool, // Decrease the width of the Modal for smaller modals.
-  narrowest: PropTypes.bool, // Decrease the width of the Modal for the smallest modals.
-  wide: PropTypes.bool, // Increase the width of the Modal for the wider modals.
-  tall: PropTypes.bool, // Increase the max-height of the Modal for tall content.
-  title: PropTypes.string,
-  sCloseIcon: PropTypes.bool,
-  xlCloseIcon: PropTypes.bool,
-});
 
 export default Modal;

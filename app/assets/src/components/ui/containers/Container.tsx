@@ -1,8 +1,11 @@
-import PropTypes from "prop-types";
 import React from "react";
 import { Container as SemanticContainer } from "semantic-ui-react";
 
-class Container extends React.Component {
+interface ContainerProps {
+  children: React.ReactNode[] | React.ReactNode;
+}
+
+class Container extends React.Component<ContainerProps> {
   render() {
     return (
       <SemanticContainer className="idseq-ui" {...this.props}>
@@ -11,12 +14,5 @@ class Container extends React.Component {
     );
   }
 }
-
-Container.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-};
 
 export default Container;

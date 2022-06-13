@@ -1,7 +1,27 @@
-import PropTypes from "prop-types";
 import React from "react";
 
-export default class ContextPlaceholder extends React.PureComponent {
+interface ContextPlaceholderProps {
+  children?: React.ReactNode[] | React.ReactNode;
+  onClose?: $TSFixMeFunction;
+  horizontalOffset?: number;
+  verticalOffset?: number;
+  open?: boolean;
+  position?: string;
+  closeOnOutsideClick?: boolean;
+  context?: Element;
+}
+
+interface ContextPlaceholderState {
+  style: $TSFixMe;
+  open: boolean;
+}
+
+export default class ContextPlaceholder extends React.PureComponent<
+  ContextPlaceholderProps,
+  ContextPlaceholderState
+> {
+  static defaultProps: ContextPlaceholderProps;
+  placeholderRef: $TSFixMe;
   // Creates a placeholder for components whose position will be relative
   // to a given DOM element. Similar to semantic-ui Popup.
   // Rewrote because could not make Popup work as a controllable component
@@ -42,7 +62,7 @@ export default class ContextPlaceholder extends React.PureComponent {
   };
 
   getStyle() {
-    let style = { position: "absolute" };
+    const style = { position: "absolute" };
     if (this.props.context && this.placeholderRef) {
       Object.assign(style, this.getPlaceholderPosition());
     }
@@ -52,14 +72,14 @@ export default class ContextPlaceholder extends React.PureComponent {
   getPlaceholderPosition() {
     const contextRect = this.props.context.getBoundingClientRect();
     const placeholderRect = this.placeholderRef.getBoundingClientRect();
-    let { horizontalOffset, verticalOffset, position } = this.props;
+    const { horizontalOffset, verticalOffset, position } = this.props;
     const { pageYOffset, pageXOffset } = window;
     const { clientWidth, clientHeight } = document.documentElement;
 
-    let right = 0;
-    let left = 0;
-    let top = 0;
-    let bottom = 0;
+    let right: string | number = 0;
+    let left: string | number = 0;
+    let top: string | number = 0;
+    let bottom: string | number = 0;
 
     if (position.includes("right")) {
       right = Math.round(
@@ -137,18 +157,4 @@ ContextPlaceholder.defaultProps = {
   verticalOffset: 0,
   closeOnOutsideClick: false,
   open: true,
-};
-
-ContextPlaceholder.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]),
-  onClose: PropTypes.func,
-  horizontalOffset: PropTypes.number,
-  verticalOffset: PropTypes.number,
-  open: PropTypes.bool,
-  position: PropTypes.string,
-  closeOnOutsideClick: PropTypes.bool,
-  context: PropTypes.instanceOf(Element),
 };

@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import PrimaryButton from "../controls/buttons/PrimaryButton";
@@ -10,7 +9,30 @@ const WizardContext = React.createContext({
   actions: {},
 });
 
-class Wizard extends React.Component {
+interface WizardProps {
+  children: React.ReactElement[];
+  labels?: Record<string, string>;
+  onComplete?: $TSFixMeFunction;
+  showPageInfo?: boolean;
+  skipPageInfoNPages?: number;
+  title?: string;
+  className?: string;
+  wizardType?: string;
+}
+
+interface WizardState {
+  currentPage: number;
+  overlay: $TSFixMe;
+  continueEnabled: boolean;
+  onContinueValidation?: $TSFixMe;
+}
+
+class Wizard extends React.Component<WizardProps, WizardState> {
+  showPageInfo: boolean;
+  skipPageInfoNPages: number;
+  labels: Record<string, string>;
+  static Page: typeof Page;
+  static Action: typeof Action;
   constructor(props) {
     super(props);
 
@@ -82,9 +104,9 @@ class Wizard extends React.Component {
   }
 
   handleContinueClick = async () => {
-    let onContinue = this.props.children[this.state.currentPage].props
+    const onContinue = this.props.children[this.state.currentPage].props
       .onContinue;
-    let onContinueAsync = this.props.children[this.state.currentPage].props
+    const onContinueAsync = this.props.children[this.state.currentPage].props
       .onContinueAsync;
     if (onContinue) {
       if (onContinue()) {
@@ -108,7 +130,6 @@ class Wizard extends React.Component {
   advancePage = () => {
     const { children, wizardType } = this.props;
     const { currentPage } = this.state;
-
     if (currentPage < children.length - 1) {
       this.setState({ currentPage: currentPage + 1 }, () =>
         trackEvent(ANALYTICS_EVENT_NAMES.WIZARD_PAGE_ADVANCED, {
@@ -202,30 +223,17 @@ class Wizard extends React.Component {
   }
 }
 
-Wizard.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.shape({
-      type: Wizard.Page,
-    }),
-    PropTypes.arrayOf(
-      PropTypes.shape({
-        type: Wizard.Page,
-      }),
-    ),
-  ]).isRequired,
-  labels: PropTypes.objectOf(PropTypes.string),
-  onComplete: PropTypes.func,
-  showPageInfo: PropTypes.bool,
-  skipPageInfoNPages: PropTypes.number,
-  title: PropTypes.string,
-  className: PropTypes.string,
-  wizardType: PropTypes.string,
-};
+interface PageProps {
+  children: React.ReactNode | React.ReactNode[];
+  onLoad?: $TSFixMeFunction;
+  // Props are used in Wizard.
+  skipDefaultButtons?: boolean;
+}
 
 // You can use the Page component for basic use cases, or create your own custom page class.
 // This component can't receive props such as "wizardEnableContinue", which allows you to toggle whether
 // the continue button is enabled for the current page. Custom page classes such as UploadPage can.
-class Page extends React.Component {
+class Page extends React.Component<PageProps> {
   constructor(props) {
     super(props);
     this.state = {};
@@ -246,19 +254,15 @@ class Page extends React.Component {
   }
 }
 
-Page.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.PropTypes.node,
-    PropTypes.arrayOf(PropTypes.node),
-  ]).isRequired,
-  onLoad: PropTypes.func,
-  // Props are used in Wizard.
-  skipDefaultButtons: PropTypes.bool,
-};
-
 Wizard.Page = Page;
 
-const Action = ({ action, onAfterAction, children }) => {
+interface ActionProps {
+  action?: "back" | "continue" | "finish";
+  children: React.ReactNode;
+  onAfterAction?: $TSFixMeFunction;
+}
+
+const Action = ({ action, onAfterAction, children }: ActionProps) => {
   const handleOnClick = wizardAction => {
     wizardAction();
 
@@ -281,12 +285,6 @@ const Action = ({ action, onAfterAction, children }) => {
       }}
     </WizardContext.Consumer>
   );
-};
-
-Action.propTypes = {
-  action: PropTypes.oneOf(["back", "continue", "finish"]),
-  children: PropTypes.node.isRequired,
-  onAfterAction: PropTypes.func,
 };
 
 Wizard.Action = Action;

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
@@ -6,7 +5,14 @@ import BasicPopup from "~/components/BasicPopup";
 import { IconInfoSmall } from "~ui/icons";
 import cs from "./help_icon.scss";
 
-class HelpIcon extends React.Component {
+interface HelpIconProps {
+  analyticsEventData?: object;
+  analyticsEventName?: string;
+  className?: string;
+  text?: React.ReactNode;
+}
+
+class HelpIcon extends React.Component<HelpIconProps> {
   handleTriggerEnter = () => {
     const { analyticsEventName, analyticsEventData } = this.props;
     if (analyticsEventName) {
@@ -33,12 +39,5 @@ class HelpIcon extends React.Component {
     );
   }
 }
-
-HelpIcon.propTypes = {
-  analyticsEventData: PropTypes.object,
-  analyticsEventName: PropTypes.string,
-  className: PropTypes.string,
-  text: PropTypes.node,
-};
 
 export default HelpIcon;
