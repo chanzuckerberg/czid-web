@@ -18,6 +18,7 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import StatusLabel from "~ui/labels/StatusLabel";
 
 import TaxonHitSelect from "./TaxonHitSelect";
+import ThresholdFilterModal from "./ThresholdFilterModal";
 import cs from "./bulk_download_modal_options.scss";
 import {
   BULK_DOWNLOAD_DOCUMENTATION_LINKS,
@@ -154,6 +155,19 @@ class BulkDownloadModalOptions extends React.Component {
         dropdownOptions = metricsOptions || [];
         placeholder = metricsOptions ? "Select metric" : "Loading...";
         break;
+      case "filter_by":
+        return (
+        <div className={cs.description}>
+          <div className={cs.filterbyField} key={field.type}>
+            <div className={cs.label}>{field.display_name}:</div>
+              <ThresholdFilterModal
+                addFilterList={onFieldSelect}
+                backgroundOptions={backgroundOptions}
+                />
+          </div>
+          To apply more filters, download directly from heatmap
+        </div>
+        );
       case "download_format":
         dropdownOptions = field.options.map(option => ({
           text: option,

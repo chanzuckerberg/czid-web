@@ -99,6 +99,12 @@ export const THRESHOLDS = [
   { text: "NR E value (as a power of 10)", value: "nr:e_value" },
 ];
 
+export const BACKGROUND_DEPENDENT_THRESHOLDS = THRESHOLDS.filter(threshold =>
+  !NON_BACKGROUND_DEPENDENT_THRESHOLDS.some(nbdThreshold =>
+    threshold.text === nbdThreshold.text && threshold.value === nbdThreshold.value,
+    ),
+  );
+
 export const TREE_METRICS = [
   { text: "Aggregate Score", value: "aggregatescore" },
   { text: "NT r (total reads)", value: "nt_r" },

@@ -15,7 +15,6 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import cs from "./threshold_filter.scss";
 
 interface ThresholdFilterProps {
-  key: number;
   threshold: ThresholdFilterData;
   metrics: MetricOption[] | [];
   operators: ThresholdFilterOperator[] | [];

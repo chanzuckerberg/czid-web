@@ -16,6 +16,7 @@ module BulkDownloadTypesHelper
   CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE = "contigs_non_host".freeze
   UNMAPPED_READS_BULK_DOWNLOAD_TYPE = "unmapped_reads".freeze
   BETACORONOVIRUS_BULK_DOWNLOAD_TYPE = "betacoronavirus".freeze
+  BIOM_FORMAT_DOWNLOAD_TYPE = "biom_format".freeze
 
   # Specific to consensus genome workflows
   CONSENSUS_GENOME_DOWNLOAD_TYPE = "consensus_genome".freeze
@@ -142,6 +143,26 @@ module BulkDownloadTypesHelper
       execution_type: ECS_EXECUTION_TYPE,
       admin_only: true,
       file_type_display: ".star.tab",
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+    },
+    {
+      type: BIOM_FORMAT_DOWNLOAD_TYPE,
+      display_name: "Combined Microbiome File",
+      description: "Sample report data (samples x taxons) combined with all sample metadata and taxon metadata in BIOM format. Learn More",
+      category: "reports",
+      fields: [
+        {
+          display_name: "Download Metric",
+          type: "metric",
+        },
+        {
+          display_name: "Filter by",
+          type: "filter_by",
+        },
+      ],
+      execution_type: RESQUE_EXECUTION_TYPE,
+      admin_only: true,
+      file_type_display: ".biom",
       workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
