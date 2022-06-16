@@ -9,7 +9,7 @@ class VisualizationsController < ApplicationController
     expires_in: 30.days,
     cache_path: proc do |c|
       sorted_params = c.request.params.to_h.sort.to_h
-      ["heatmap_service"].each do |feature|
+      ["heatmap_service", "heatmap_elasticsearch"].each do |feature|
         if current_user.allowed_feature?(feature)
           sorted_params[feature.to_sym] = true
         end
