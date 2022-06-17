@@ -16,7 +16,6 @@ import {
   isNil,
   keys,
   map,
-  mapValues,
   merge,
   omit,
   pick,
@@ -89,6 +88,7 @@ import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import Notification from "~ui/notifications/Notification";
 
+import { KEY_DISCOVERY_VIEW_OPTIONS } from "../discovery/constants";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import ReportViewSelector from "./ReportViewSelector";
@@ -96,7 +96,6 @@ import SampleViewHeader from "./SampleViewHeader";
 import TaxonTreeVis from "./TaxonTreeVis";
 import {
   GENUS_LEVEL_INDEX,
-  LOCAL_STORAGE_FIELDS,
   METRIC_DECIMAL_PLACES,
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
@@ -109,17 +108,20 @@ import {
   URL_FIELDS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
+  LOCAL_STORAGE_EXCLUDED_SELECTED_OPTIONS,
+  KEY_SELECTED_OPTIONS_THRESHOLDS,
+  KEY_SAMPLE_VIEW_OPTIONS,
+  KEY_SELECTED_OPTIONS_BACKGROUND,
 } from "./constants";
 import csSampleMessage from "./sample_message.scss";
 import cs from "./sample_view.scss";
-
-const mapValuesWithKey = mapValues.convert({ cap: false });
 
 class SampleView extends React.Component {
   constructor(props) {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
+
     // remove nested options to be merge separately
     const {
       selectedOptions: selectedOptionsFromUrl,
@@ -127,10 +129,31 @@ class SampleView extends React.Component {
       workflowRunId: workflowRunIdFromUrl,
       ...nonNestedUrlState
     } = this.urlParser.parse(location.search);
+
     const {
       selectedOptions: selectedOptionsFromLocal,
       ...nonNestedLocalState
-    } = this.loadState(localStorage, "SampleViewOptions");
+    } = this.loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
+
+    // CHECK FOR DISCOVERY VIEW SESSION THRESHOLDS
+    // If user has set threshold filters in the discovery view, those settings
+    // should override the existing settings for the SampleView in localStorage
+    let discoveryViewThresholdFilters = {};
+    let persistThresholdsToLocalState = true;
+
+    // Get thresholds from discovery view options in session storage
+    const {
+      filters: { taxonThresholdsSelected: thresholds } = {
+        taxonThresholdsSelected: [],
+      },
+    } = this.loadState(sessionStorage, KEY_DISCOVERY_VIEW_OPTIONS);
+
+    // If there are exising thresholds, add them to object that will override local options in state
+    if (!isEmpty(thresholds)) {
+      discoveryViewThresholdFilters = { thresholds };
+      persistThresholdsToLocalState = false;
+    }
+    // END CHECK FOR DISCOVERY VIEW SESSION THRESHOLDS
 
     if (
       !get("background", selectedOptionsFromLocal) &&
@@ -145,64 +168,63 @@ class SampleView extends React.Component {
       ).value;
     }
 
-    this.state = Object.assign(
-      {
-        amrData: null,
-        backgrounds: [],
-        blastData: {},
-        blastContigsModalVisible: false,
-        blastReadsModalVisible: false,
-        consensusGenomeData: {},
-        consensusGenomeCreationParams: {},
-        consensusGenomePreviousParams: {},
-        consensusGenomeCreationModalVisible: false,
-        consensusGenomeErrorModalVisible: false,
-        consensusGenomePreviousModalVisible: false,
-        coverageVizDataByTaxon: {},
-        coverageVizParams: {},
-        coverageVizVisible: false,
-        currentTab: null,
-        hasPersistedBackground: false,
-        filteredReportData: [],
-        loadingReport: false,
-        loadingWorkflowRunResults: false,
-        ownedBackgrounds: null,
-        otherBackgrounds: null,
-        pipelineRun: null,
-        pipelineVersion: null,
-        project: null,
-        projectSamples: [],
-        reportData: [],
-        reportMetadata: {},
-        sample: null,
-        selectedOptions: Object.assign(
-          this.getDefaultSelectedOptions(),
-          !isEmpty(tempSelectedOptions)
-            ? tempSelectedOptions
-            : Object.assign(
-                {},
-                selectedOptionsFromLocal,
-                selectedOptionsFromUrl,
-              ),
-        ),
-        sidebarMode: null,
-        sidebarVisible: false,
-        sidebarTaxonData: null,
-        view: "table",
-        workflowRun: null,
-        workflowRunId: workflowRunIdFromUrl || null,
-        workflowRunResults: null,
-        sharedWithNoBackground: !!(
-          (
-            (selectedOptionsFromUrl &&
-              isNull(selectedOptionsFromUrl.background)) ||
-            !isEmpty(tempSelectedOptions)
-          ) // Don't fetch saved background if have temp options (e.g. if coming from heatmap)
-        ),
+    this.state = {
+      amrData: null,
+      backgrounds: [],
+      blastData: {},
+      blastContigsModalVisible: false,
+      blastReadsModalVisible: false,
+      consensusGenomeData: {},
+      consensusGenomeCreationParams: {},
+      consensusGenomePreviousParams: {},
+      consensusGenomeCreationModalVisible: false,
+      consensusGenomeErrorModalVisible: false,
+      consensusGenomePreviousModalVisible: false,
+      coverageVizDataByTaxon: {},
+      coverageVizParams: {},
+      coverageVizVisible: false,
+      currentTab: null,
+      hasPersistedBackground: false,
+      filteredReportData: [],
+      loadingReport: false,
+      loadingWorkflowRunResults: false,
+      ownedBackgrounds: null,
+      otherBackgrounds: null,
+      pipelineRun: null,
+      pipelineVersion: null,
+      project: null,
+      projectSamples: [],
+      reportData: [],
+      reportMetadata: {},
+      sample: null,
+      selectedOptions: {
+        ...this.getDefaultSelectedOptions(),
+        ...(!isEmpty(tempSelectedOptions)
+          ? tempSelectedOptions
+          : {
+              ...selectedOptionsFromLocal,
+              ...discoveryViewThresholdFilters,
+              ...selectedOptionsFromUrl,
+            }),
       },
-      nonNestedLocalState,
-      nonNestedUrlState,
-    );
+      sidebarMode: null,
+      sidebarVisible: false,
+      sidebarTaxonData: null,
+      persistThresholdsToLocalState,
+      view: "table",
+      workflowRun: null,
+      workflowRunId: workflowRunIdFromUrl || null,
+      workflowRunResults: null,
+      sharedWithNoBackground: !!(
+        (
+          (selectedOptionsFromUrl &&
+            isNull(selectedOptionsFromUrl.background)) ||
+          !isEmpty(tempSelectedOptions)
+        ) // Don't fetch saved background if have temp options (e.g. if coming from heatmap)
+      ),
+      ...nonNestedLocalState,
+      ...nonNestedUrlState,
+    };
   }
 
   componentDidMount = () => {
@@ -564,12 +586,11 @@ class SampleView extends React.Component {
         },
       );
       return !!rawReportData;
-    }
-    catch (err) {
+    } catch (err) {
       console.error(err);
       return false;
     }
-  }
+  };
 
   fetchAmrData = async () => {
     const { sample } = this.state;
@@ -851,15 +872,37 @@ class SampleView extends React.Component {
     });
   };
 
+  getSelectedOptionsToSave = () => {
+    let selectedOptions = omit(
+      LOCAL_STORAGE_EXCLUDED_SELECTED_OPTIONS,
+      this.state.selectedOptions,
+    );
+
+    // when using discovery view session thresholds, this condition will be true
+    if (!this.state.persistThresholdsToLocalState) {
+      // remove state thresholds since they are from session storage
+      selectedOptions = omit(KEY_SELECTED_OPTIONS_THRESHOLDS, selectedOptions);
+
+      // retrieve existing thresholds from local storage
+      const existingThresholdsFromLocal = this.loadState(
+        localStorage,
+        KEY_SAMPLE_VIEW_OPTIONS,
+      )?.selectedOptions?.[KEY_SELECTED_OPTIONS_THRESHOLDS];
+
+      // persist existing thresholds in local storage
+      if (existingThresholdsFromLocal) {
+        // prettier-ignore
+        selectedOptions[KEY_SELECTED_OPTIONS_THRESHOLDS] = existingThresholdsFromLocal;
+      }
+    }
+
+    return selectedOptions;
+  };
+
   updateHistoryAndPersistOptions = () => {
     const urlState = pick(keys(URL_FIELDS), this.state);
 
-    // After feature release, add "background" to the constant excludePaths:
-    let localStorageFields = LOCAL_STORAGE_FIELDS;
-
-    let localState = mapValuesWithKey((options, key) => {
-      return omit(options.excludePaths || [], this.state[key]);
-    }, localStorageFields);
+    let localState = { selectedOptions: this.getSelectedOptionsToSave() };
 
     // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
@@ -868,7 +911,7 @@ class SampleView extends React.Component {
     }
     history.replaceState(urlState, `SampleView`, `${urlQuery}`);
 
-    localStorage.setItem("SampleViewOptions", JSON.stringify(localState));
+    localStorage.setItem(KEY_SAMPLE_VIEW_OPTIONS, JSON.stringify(localState));
   };
 
   handleOptionChanged = ({ key, value }) => {
@@ -881,7 +924,7 @@ class SampleView extends React.Component {
       [key]: value,
     });
 
-    if (key === "background") {
+    if (key === KEY_SELECTED_OPTIONS_BACKGROUND) {
       trackEvent(ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_SELECTED, {
         sampleId: sample.id,
         projectId: project.id,
@@ -1699,7 +1742,15 @@ class SampleView extends React.Component {
           pipelineRun.known_user_error = knownUserError;
           pipelineRun.error_message = errorMessage;
         }
-        ({ status, message, subtitle, linkText, type, link, icon } = sampleErrorInfo({
+        ({
+          status,
+          message,
+          subtitle,
+          linkText,
+          type,
+          link,
+          icon,
+        } = sampleErrorInfo({
           sample,
           pipelineRun,
         }));

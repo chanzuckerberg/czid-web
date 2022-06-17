@@ -4,6 +4,17 @@ import { FIELDS_METADATA } from "~utils/tooltip";
 export const SPECIES_LEVEL_INDEX = 1;
 export const GENUS_LEVEL_INDEX = 2;
 
+export const KEY_SAMPLE_VIEW_OPTIONS = "SampleViewOptions";
+
+export const KEY_SELECTED_OPTIONS_BACKGROUND = "background";
+export const KEY_SELECTED_OPTIONS_TAXON = "taxon";
+export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholds";
+
+export const LOCAL_STORAGE_EXCLUDED_SELECTED_OPTIONS = [
+  KEY_SELECTED_OPTIONS_BACKGROUND,
+  KEY_SELECTED_OPTIONS_TAXON,
+];
+
 export const URL_FIELDS = {
   pipelineVersion: "string",
   selectedOptions: "object",
@@ -27,10 +38,6 @@ export const CG_VIEW_METRIC_COLUMNS = [
 
 export const CG_HISTOGRAM_FILL_COLOR = "#A9BDFC";
 export const CG_HISTOGRAM_HOVER_FILL_COLOR = "#3867FA";
-
-export const LOCAL_STORAGE_FIELDS = {
-  selectedOptions: { excludePaths: ["background", "taxon"] },
-};
 
 export const METRIC_DECIMAL_PLACES = {
   agg_score: 0,

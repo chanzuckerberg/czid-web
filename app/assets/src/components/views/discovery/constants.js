@@ -36,3 +36,7 @@ export const MIN_BIN_WIDTH = {
   meanInsertSize: 50,
 };
 export const MISSING_INSERT_SIZE_WARNING = `This value is only computed for paired-end sequencing libraries generated from human hosts and samples processed on pipeline version 3.19 and later.`;
+
+export const KEY_DISCOVERY_VIEW_OPTIONS = "DiscoveryViewOptions";
+
+export const KEY_DISCOVERY_SESSION_FILTERS = "filters";

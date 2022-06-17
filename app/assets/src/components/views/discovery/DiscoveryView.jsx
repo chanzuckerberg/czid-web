@@ -76,6 +76,10 @@ import ModalFirstTimeUser from "./ModalFirstTimeUser";
 import NoSearchResultsBanner from "./NoSearchResultsBanner";
 import ProjectHeader from "./ProjectHeader";
 import {
+  KEY_DISCOVERY_SESSION_FILTERS,
+  KEY_DISCOVERY_VIEW_OPTIONS,
+} from "./constants";
+import {
   getDiscoveryDimensions,
   getDiscoveryLocations,
   getDiscoveryStats,
@@ -139,62 +143,63 @@ class DiscoveryView extends React.Component {
     });
 
     const urlState = this.urlParser.parse(location.search);
-    let sessionState = this.loadState(sessionStorage, "DiscoveryViewOptions");
-    let localState = this.loadState(localStorage, "DiscoveryViewOptions");
+    let sessionState = this.loadState(
+      sessionStorage,
+      KEY_DISCOVERY_VIEW_OPTIONS,
+    );
+    let localState = this.loadState(localStorage, KEY_DISCOVERY_VIEW_OPTIONS);
 
     const projectIdToUpdate = projectId || urlState.projectId;
     // If the projectId was passed as props or is in the URL, update the projectIds in the redux state via the updateProjectIds action creator
     updateDiscoveryProjectId(projectIdToUpdate || null);
 
-    this.state = Object.assign(
-      {
-        currentDisplay: "table",
-        currentTab:
-          projectId || domain === DISCOVERY_DOMAIN_ALL_DATA
-            ? TAB_SAMPLES
-            : TAB_PROJECTS,
-        emptyStateModalOpen: this.isFirstTimeUser(),
-        filteredProjectCount: null,
-        filteredProjectDimensions: [],
-        filteredSampleCount: null,
-        filteredSampleDimensions: [],
-        filteredSampleStats: {},
-        filteredVisualizationCount: null,
-        filteredWorkflowRunCount: null,
-        filters: {},
-        loadingDimensions: true,
-        loadingLocations: true,
-        loadingStats: true,
-        mapLevel: "country",
-        mapLocationData: {},
-        mapPreviewedLocationId: null,
-        mapSidebarProjectCount: null,
-        mapSidebarProjectDimensions: [],
-        mapSidebarSampleCount: null,
-        mapSidebarSampleDimensions: [],
-        mapSidebarSampleStats: {},
-        mapSidebarTab: "summary",
-        project: null,
-        projectDimensions: [],
-        projectId: projectId,
-        rawMapLocationData: {},
-        sampleActiveColumnsByWorkflow: undefined,
-        sampleDimensions: [],
-        search: null,
-        selectableSampleIds: [],
-        selectedSampleIds: new Set(),
-        selectableWorkflowRunIds: [],
-        selectedWorkflowRunIds: new Set(),
-        showFilters: true,
-        showStats: true,
-        userDataCounts: null,
-        workflow: WORKFLOWS.SHORT_READ_MNGS.value,
-        workflowEntity: WORKFLOW_ENTITIES.SAMPLES,
-      },
-      localState,
-      sessionState,
-      urlState,
-    );
+    this.state = {
+      currentDisplay: "table",
+      currentTab:
+        projectId || domain === DISCOVERY_DOMAIN_ALL_DATA
+          ? TAB_SAMPLES
+          : TAB_PROJECTS,
+      emptyStateModalOpen: this.isFirstTimeUser(),
+      filteredProjectCount: null,
+      filteredProjectDimensions: [],
+      filteredSampleCount: null,
+      filteredSampleDimensions: [],
+      filteredSampleStats: {},
+      filteredVisualizationCount: null,
+      filteredWorkflowRunCount: null,
+      filters: {},
+      loadingDimensions: true,
+      loadingLocations: true,
+      loadingStats: true,
+      mapLevel: "country",
+      mapLocationData: {},
+      mapPreviewedLocationId: null,
+      mapSidebarProjectCount: null,
+      mapSidebarProjectDimensions: [],
+      mapSidebarSampleCount: null,
+      mapSidebarSampleDimensions: [],
+      mapSidebarSampleStats: {},
+      mapSidebarTab: "summary",
+      project: null,
+      projectDimensions: [],
+      projectId: projectId,
+      rawMapLocationData: {},
+      sampleActiveColumnsByWorkflow: undefined,
+      sampleDimensions: [],
+      search: null,
+      selectableSampleIds: [],
+      selectedSampleIds: new Set(),
+      selectableWorkflowRunIds: [],
+      selectedWorkflowRunIds: new Set(),
+      showFilters: true,
+      showStats: true,
+      userDataCounts: null,
+      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+      workflowEntity: WORKFLOW_ENTITIES.SAMPLES,
+      ...localState,
+      ...sessionState,
+      ...urlState,
+    };
 
     this.state.orderBy =
       sessionState[`${this.getCurrentTabOrderByKey()}`] || null;
@@ -371,9 +376,12 @@ class DiscoveryView extends React.Component {
       sessionStorage,
       "DiscoveryViewOptions",
     );
+
     const {
       updatedAt: updatedAtFromSessionStorage,
     } = currentSessionStorageState;
+
+    // prevent existing order fields from being removed from session storage
     const orderFieldsInSessionStorage = pick(
       this.SESSION_ORDER_FIELD_KEYS,
       currentSessionStorageState,
@@ -388,13 +396,13 @@ class DiscoveryView extends React.Component {
 
     const sessionFields = concat(localFields, [
       "currentDisplay",
+      KEY_DISCOVERY_SESSION_FILTERS,
       "mapSidebarTab",
       "workflow",
     ]);
 
     const urlFields = concat(sessionFields, [
       "currentTab",
-      "filters",
       "projectId",
       "search",
       "appcue",
@@ -461,12 +469,15 @@ class DiscoveryView extends React.Component {
 
     // We want to persist all options when user navigates to other pages within the same session
     sessionStorage.setItem(
-      "DiscoveryViewOptions",
+      KEY_DISCOVERY_VIEW_OPTIONS,
       JSON.stringify(sessionState),
     );
 
     // We want to persist some options when user returns to the page on a different session
-    localStorage.setItem("DiscoveryViewOptions", JSON.stringify(localState));
+    localStorage.setItem(
+      KEY_DISCOVERY_VIEW_OPTIONS,
+      JSON.stringify(localState),
+    );
 
     // Track changes to the page that did not cause a page load but the URL was updated
     // Used specifically to notify Appcues
