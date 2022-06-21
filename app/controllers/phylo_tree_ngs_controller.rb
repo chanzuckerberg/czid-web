@@ -148,6 +148,7 @@ class PhyloTreeNgsController < ApplicationController
       return
     end
 
+    tax_level = TaxonLineage.where(taxid: tax_id).last.tax_level
     # Return runs that are not from the specified project
     if get_additonal_samples
       # Fetch the top (non-deprecated) pipeline runs that the user has access to.
@@ -174,11 +175,13 @@ class PhyloTreeNgsController < ApplicationController
       run_ids_string = eligible_pipeline_run_ids.to_set.to_a.join(',')
 
       # Get all pipeline_run_ids with at least one contig.
-      # TODO: the additional DISTINCT clauses seem to degrade the perfromance of the UNIONs; would it be faster to convert this query into rails?
-      query = "SELECT DISTINCT pipeline_run_id FROM contigs WHERE species_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
-      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE species_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
-      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE genus_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
-      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE genus_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string});"
+      query = if tax_level == TaxonCount::TAX_LEVEL_SPECIES
+                "SELECT pipeline_run_id FROM contigs WHERE species_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+                UNION SELECT pipeline_run_id FROM contigs WHERE species_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string});"
+              else
+                "SELECT pipeline_run_id FROM contigs WHERE genus_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+                UNION SELECT pipeline_run_id FROM contigs WHERE genus_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string});"
+              end
 
       pipeline_run_ids_with_taxid = Contig.connection.select_all(ActiveRecord::Base.sanitize_sql_array([query])).pluck("pipeline_run_id")
 
@@ -196,11 +199,13 @@ class PhyloTreeNgsController < ApplicationController
       # we only allow users to select runs with at least one contig for the phylo tree,
       # even though we display all runs in their selected project.
       run_ids_string = top_project_pipeline_runs_ids.to_set.to_a.join(',')
-      # TODO: the additional DISTINCT clauses seem to degrade the perfromance of the UNIONs; would it be faster to convert this query into rails?
-      query = "SELECT DISTINCT pipeline_run_id FROM contigs WHERE species_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
-      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE species_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
-      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE genus_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
-      UNION DISTINCT SELECT DISTINCT pipeline_run_id FROM contigs WHERE genus_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string});"
+      query = if tax_level == TaxonCount::TAX_LEVEL_SPECIES
+                "SELECT pipeline_run_id FROM contigs WHERE species_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+        UNION SELECT pipeline_run_id FROM contigs WHERE species_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string});"
+              else
+                "SELECT pipeline_run_id FROM contigs WHERE genus_taxid_nt = #{tax_id} AND pipeline_run_id IN (#{run_ids_string})
+        UNION SELECT pipeline_run_id FROM contigs WHERE genus_taxid_nr = #{tax_id} AND pipeline_run_id IN (#{run_ids_string});"
+              end
 
       pipeline_runs_with_contigs = Contig.connection.select_all(ActiveRecord::Base.sanitize_sql_array([query])).pluck("pipeline_run_id")
 

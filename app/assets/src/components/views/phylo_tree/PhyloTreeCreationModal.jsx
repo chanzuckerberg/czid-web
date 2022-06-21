@@ -768,18 +768,22 @@ class PhyloTreeCreationModal extends React.Component {
 
     let showLowCoverageWarning = false;
     for (const runId of selectedProjectPipelineRuns) {
-      const coverageBreadth = projectCoverageBreadths[runId] * 100;
-      if (coverageBreadth < minCoverageBreadth) {
-        showLowCoverageWarning = true;
-        break;
+      if (!isEmpty(projectCoverageBreadths) && projectCoverageBreadths[runId]) {
+        const coverageBreadth = projectCoverageBreadths[runId] * 100;
+        if (coverageBreadth < minCoverageBreadth) {
+          showLowCoverageWarning = true;
+          break;
+        }
       }
     }
     if (!showLowCoverageWarning) {
       for (const runId of selectedOtherPipelineRuns) {
-        const coverageBreadth = otherCoverageBreadths[runId] * 100;
-        if (coverageBreadth < minCoverageBreadth) {
-          showLowCoverageWarning = true;
-          break;
+        if (!isEmpty(otherCoverageBreadths) && otherCoverageBreadths[runId]) {
+          const coverageBreadth = otherCoverageBreadths[runId] * 100;
+          if (coverageBreadth < minCoverageBreadth) {
+            showLowCoverageWarning = true;
+            break;
+          }
         }
       }
     }
