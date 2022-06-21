@@ -31,5 +31,6 @@ FactoryBot.define do
     percent_identity { 95.65 }
     alignment_length { 149.75 }
     e_value { 1.31 }
+    rpm { 100 }
   end
 end

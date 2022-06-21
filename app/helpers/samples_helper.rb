@@ -255,7 +255,8 @@ module SamplesHelper
       host = filters[:host]
       location = filters[:location]
       location_v2 = filters[:locationV2]
-      taxon = filters[:taxon]
+      tax_ids = filters[:taxon]
+      threshold_filter_info = filters[:taxonThresholds]
       time = filters[:time]
       # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
       # instances to "sample_type"
@@ -267,7 +268,6 @@ module SamplesHelper
       workflow = filters[:workflow]
 
       samples = samples.where(project_id: project_id) if project_id.present?
-      samples = filter_by_taxid(samples, taxon) if taxon.present?
       samples = filter_by_host(samples, host) if host.present?
       samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
       samples = filter_by_metadata_key(samples, "collection_location_v2", location_v2) if location_v2.present?
@@ -277,6 +277,14 @@ module SamplesHelper
       samples = filter_by_search_string(samples, search_string) if search_string.present?
       samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
       samples = filter_by_workflow(samples, workflow) if workflow.present?
+
+      if tax_ids.present?
+        samples = if threshold_filter_info.present?
+                    filter_by_taxon_threshold(samples, tax_ids, threshold_filter_info)
+                  else
+                    filter_by_taxid(samples, tax_ids)
+                  end
+      end
     end
 
     samples
@@ -810,6 +818,30 @@ module SamplesHelper
   def filter_by_workflow(samples, query)
     samples_with_workflow_run = samples.joins(:workflow_runs).where(workflow_runs: { workflow: query }).pluck(:id)
     samples.where(initial_workflow: query).or(samples.where(id: samples_with_workflow_run))
+  end
+
+  def filter_by_taxon_threshold(samples, tax_ids, threshold_filter_info)
+    parsed_threshold_filter_info = threshold_filter_info.map { |json_encoded_filter| JSON.parse(json_encoded_filter, symbolize_names: true) }
+    validate_threshold_filter_values(parsed_threshold_filter_info)
+
+    if parsed_threshold_filter_info.any? { |filter| TaxonCount::TAXON_COUNT_METRIC_FILTERS.include?(filter[:metric]) }
+      samples = samples.filter_by_taxon_count_threshold(tax_ids, parsed_threshold_filter_info)
+    end
+
+    samples
+  end
+
+  def validate_threshold_filter_values(threshold_filters)
+    threshold_filters.each do |filter|
+      filter.assert_valid_keys(*Sample::TAXON_FILTER_THRESHOLD_KEYS)
+      count_type, metric, operator, value = *filter.fetch_values(*Sample::TAXON_FILTER_THRESHOLD_KEYS)
+
+      raise ThresholdFilterErrors.invalid_metric(metric) unless TaxonCount::TAXON_COUNT_METRIC_FILTERS.include?(metric) || Contig::CONTIG_FILTERS.include?(metric)
+      raise ThresholdFilterErrors.invalid_count_type(count_type) unless TaxonCount::COUNT_TYPES_FOR_FILTERING.include?(count_type)
+      raise ThresholdFilterErrors.invalid_operator(operator) unless Sample::FILTERING_OPERATORS.include?(operator)
+
+      Float(value) # Kernel::Float will raise an ArgumentError if it fails to convert the value to a Float.
+    end
   end
 
   def get_upload_credentials(samples)

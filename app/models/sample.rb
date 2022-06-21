@@ -106,6 +106,8 @@ class Sample < ApplicationRecord
   # Script parameters
   FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT = Rails.root.join("scripts", "fastq-fasta-line-validation.awk").to_s
 
+  FILTERING_OPERATORS = [">=", "<="].freeze
+
   # Constants related to sorting
   DATA_KEY_TO_SORT_KEY = {
     "sample" => "name",
@@ -125,6 +127,7 @@ class Sample < ApplicationRecord
   SAMPLES_SORT_KEYS = ["name", "id"].freeze
   PIPELINE_RUNS_SORT_KEYS = ["total_reads", "adjusted_remaining_reads", "total_ercc_reads", "pipeline_version", "fraction_subsampled", "qc_percent", "compression_ratio", "time_to_finalized"].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
+  TAXON_FILTER_THRESHOLD_KEYS = [:count_type, :metric, :operator, :value].freeze
 
   scope :sort_by_metadata, lambda { |sort_key, order_dir|
     joins_statement = "LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')"
@@ -1108,6 +1111,51 @@ class Sample < ApplicationRecord
       samples.sort_by_metadata(metadata_sort_key, order_dir)
     else
       samples
+    end
+  end
+
+  def self.group_taxon_filters_by_count_type(threshold_filter_info)
+    # Convert threshold hash into a filter statement and group it by count types (nt or nr)
+    filters_by_count_type = threshold_filter_info.each_with_object({}) do |threshold_filter, result|
+      count_type, metric, operator, value = *threshold_filter.fetch_values(*TAXON_FILTER_THRESHOLD_KEYS)
+      uppercase_count_type = count_type.upcase
+      value = Float(value)
+
+      filter_statement = TaxonCount.arel_table[metric]
+      filter_statement = operator == ">=" ? filter_statement.gteq(value) : filter_statement.lteq(value)
+      if result[uppercase_count_type].nil?
+        result[uppercase_count_type] = [filter_statement.to_sql]
+      else
+        result[uppercase_count_type] << filter_statement.to_sql
+      end
+    end
+
+    filters_by_count_type
+  end
+
+  # threshold_filter_info is an array of JSON strings that need to be parsed
+  def self.filter_by_taxon_count_threshold(tax_ids, threshold_filter_info)
+    threshold_filters_by_count_type = group_taxon_filters_by_count_type(threshold_filter_info)
+
+    queries_by_count_type = threshold_filters_by_count_type.each_with_object({}) do |(count_type, filter_queries), queries|
+      filter_statement = filter_queries.join(" AND ")
+      # TODO: Test out creating new composite index (pipeline_run_id, count_type, tax_id)
+      left_join_statement = "LEFT OUTER JOIN `pipeline_runs` ON `pipeline_runs`.`sample_id` = `samples`.`id` LEFT OUTER JOIN `taxon_counts` FORCE INDEX FOR JOIN (`index_pr_tax_hit_level_tc`) ON `taxon_counts`.`pipeline_run_id` = `pipeline_runs`.`id`"
+      queries[count_type] = joins(left_join_statement).where(
+        taxon_counts: {
+          tax_id: tax_ids,
+          count_type: count_type,
+        }
+      ).where(filter_statement)
+    end
+
+    case queries_by_count_type.keys
+    when [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR]
+      queries_by_count_type[TaxonCount::COUNT_TYPE_NT].or(queries_by_count_type[TaxonCount::COUNT_TYPE_NR]).distinct
+    when [TaxonCount::COUNT_TYPE_NT]
+      queries_by_count_type[TaxonCount::COUNT_TYPE_NT].distinct
+    when [TaxonCount::COUNT_TYPE_NR]
+      queries_by_count_type[TaxonCount::COUNT_TYPE_NR].distinct
     end
   end
 

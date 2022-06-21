@@ -12,6 +12,20 @@ module ErrorHelper
     NUMBER_OUT_OF_RANGE = "Number is out of range.".freeze
   end
 
+  module ThresholdFilterErrors
+    def self.invalid_count_type(count_type)
+      "Invalid count_type provided: #{count_type}. Expected count type to one of #{TaxonCount::COUNT_TYPES_FOR_FILTERING}"
+    end
+
+    def self.invalid_operator(operator)
+      "Invalid operator provided: #{operator}. Expected operator to be one of #{Sample::FILTERING_OPERATORS}"
+    end
+
+    def self.invalid_metric(metric)
+      "Invalid metric provided: #{metric}. Expected metric to exist in: #{TaxonCount::TAXON_COUNT_METRIC_FILTERS}"
+    end
+  end
+
   module MetadataUploadErrors
     def self.invalid_sample_name(invalid_name)
       "'#{invalid_name}' does not match any samples in this project"

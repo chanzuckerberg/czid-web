@@ -517,6 +517,7 @@ class DiscoveryView extends React.Component {
       const mapKey = allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)
         ? "id"
         : "value";
+
       preparedFilters.taxon = map(mapKey, preparedFilters.taxon);
     }
 

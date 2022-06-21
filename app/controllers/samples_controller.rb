@@ -117,9 +117,10 @@ class SamplesController < ApplicationController
     )
 
     basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
+    sample_ids = limited_samples.map(&:id)
     # If basic requested, then don't include extra details (ex: metadata) for each sample.
     unless basic
-      samples_visibility = get_visibility_by_sample_id(limited_samples.pluck(:id))
+      samples_visibility = get_visibility_by_sample_id(sample_ids)
       # format_samples loads a lot of information about samples
       # There are many ways we can refactor: multiple endpoints for client to ask for the information
       # they actually need or at least a configurable function to get only certain data
@@ -134,7 +135,7 @@ class SamplesController < ApplicationController
     end
 
     results = { samples: limited_samples_json }
-    results[:all_samples_ids] = samples.pluck(:id) if list_all_sample_ids
+    results[:all_samples_ids] = sample_ids if list_all_sample_ids
 
     # Refactor once we have a clear API definition policy
     respond_to do |format|

@@ -75,6 +75,9 @@ class TaxonCount < ApplicationRecord
                    'superkingdom' => TAX_LEVEL_SUPERKINGDOM, }.freeze
   LEVEL_2_NAME = NAME_2_LEVEL.invert
 
+  TAXON_COUNT_METRIC_FILTERS = ["count", "percent_identity", "alignment_length", "e_value", "rpm"].freeze
+  COUNT_TYPES_FOR_FILTERING = [COUNT_TYPE_NT, COUNT_TYPE_NR].freeze
+
   scope :type, ->(count_type) { where(count_type: count_type) }
   scope :level, ->(tax_level) { where(tax_level: tax_level) }
 end

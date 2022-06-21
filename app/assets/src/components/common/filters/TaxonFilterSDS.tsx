@@ -19,6 +19,14 @@ interface TaxonFilterSDSProps {
   disabled?: boolean;
 }
 
+interface TaxonSearchResult {
+  taxid: number;
+  title: string;
+  category: string;
+  description: string;
+  level: string;
+}
+
 const StyledDropdownPopper = (props: any) => {
   return (
     <DropdownPopper
@@ -47,7 +55,6 @@ const TaxonFilterSDS = ({
       domain,
     });
 
-    type TaxonSearchResult = { taxid: number; title: string };
     const options: TaxonSearchResult[] = get("Taxon.results", searchResults)
       .filter((result: TaxonSearchResult) => result.taxid > 0)
       .map((result: TaxonSearchResult) => ({

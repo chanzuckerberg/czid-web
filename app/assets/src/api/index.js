@@ -154,8 +154,7 @@ const getSamples = ({
   snapshotShareId,
   basic = false,
   workflow,
-} = {}) =>
-  get(
+} = {}) => get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       "/samples/index_v2.json",
     {

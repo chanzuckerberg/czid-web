@@ -559,6 +559,191 @@ RSpec.describe SamplesHelper, type: :helper do
     end
   end
 
+  describe "#filter_by_taxon_threshold" do
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe])
+
+      @sample_one = create(:sample, project: @project, name: "Test Sample One", initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs], pipeline_runs_data: [
+                             taxon_counts_data: [{
+                               tax_level: 1,
+                               tax_id: 573,
+                               nr: 99,
+                               percent_identity: 50.0,
+                               alignment_length: 99.123,
+                               e_value: 99,
+                               rpm: 99,
+                             }, {
+                               tax_level: 1,
+                               tax_id: 573,
+                               nt: 99,
+                               percent_identity: 50.0,
+                               alignment_length: 99.123,
+                               e_value: 99,
+                               rpm: 99,
+                             }, {
+                               tax_level: 2,
+                               nt: 99,
+                               tax_id: 570,
+                               percent_identity: 50.0,
+                               alignment_length: 99.123,
+                               e_value: -99,
+                               rpm: 99,
+                             }, {
+                               tax_level: 2,
+                               nr: 99,
+                               tax_id: 570,
+                               percent_identity: 50.0,
+                               alignment_length: 99.123,
+                               e_value: -99,
+                               rpm: 99,
+                             },],
+                           ])
+      @sample_two = create(:sample, project: @project, name: "Test Sample Two", initial_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+      @sample_three = create(:sample, project: @project, name: "Test Sample Three", initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs], pipeline_runs_data: [
+                               taxon_counts_data: [{
+                                 tax_level: 1,
+                                 tax_id: 573,
+                                 nr: 200,
+                                 percent_identity: 100.0,
+                                 alignment_length: 200.123,
+                                 e_value: 200,
+                                 rpm: 200,
+                               }, {
+                                 tax_level: 1,
+                                 tax_id: 573,
+                                 nt: 200,
+                                 percent_identity: 100.0,
+                                 alignment_length: 200.123,
+                                 e_value: 200,
+                                 rpm: 200,
+                               }, {
+                                 tax_level: 2,
+                                 nt: 200,
+                                 tax_id: 570,
+                                 percent_identity: 100.0,
+                                 alignment_length: 200.123,
+                                 e_value: 200,
+                                 rpm: 200,
+                               }, {
+                                 tax_level: 2,
+                                 nr: 200,
+                                 tax_id: 570,
+                                 percent_identity: 100.0,
+                                 alignment_length: 200.123,
+                                 e_value: 200,
+                                 rpm: 200,
+                               },],
+                             ])
+
+      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
+      @tax_ids = [570, 573]
+    end
+
+    context "validates threshold filtering parameters" do
+      it "raises error if threshold filter hash keys do not match expected keys" do
+        threshold_with_extra_key = [
+          {
+            metric: "rpm",
+            count_type: "NR",
+            operator: ">=",
+            value: 10,
+            additional_key: "this key is not supposed to be here",
+          }.to_json,
+        ]
+
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_extra_key) }.to raise_error(ArgumentError)
+      end
+
+      it "raises error if value is invalid" do
+        threshold_with_invalid_value = [
+          {
+            metric: "rpm",
+            count_type: "NR",
+            operator: ">=",
+            value: "Invalid value",
+          }.to_json,
+        ]
+
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_invalid_value) }.to raise_error(ArgumentError)
+      end
+
+      it "raises error if count_type is invalid" do
+        count_type = "Inalid count_type, not NT or NR"
+        threshold_with_invalid_count_type = [
+          {
+            metric: "percent_identity",
+            count_type: count_type,
+            operator: ">=",
+            value: 10,
+          }.to_json,
+        ]
+
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_invalid_count_type) }.to raise_error(RuntimeError) # , ErrorHelper::ThresholdFilterErrors.invalid_count_type(count_type)
+      end
+
+      it "raises error if operator is invalid" do
+        operator = "Invalid operator, not <= or >="
+        threshold_with_invalid_operator = [
+          {
+            metric: "e_value",
+            count_type: "NT",
+            operator: operator,
+            value: 10,
+          }.to_json,
+        ]
+
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_invalid_operator) }.to raise_error(RuntimeError) # ErrorHelper::ThresholdFilterErrors.invalid_operator(operator)
+      end
+
+      it "raises error if metric is invalid" do
+        metric = "Invalid metric"
+
+        threshold_with_invalid_metric = [
+          {
+            metric: metric,
+            count_type: "NT",
+            operator: ">=",
+            value: 10,
+          }.to_json,
+        ]
+
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_invalid_metric) }.to raise_error(RuntimeError) # ErrorHelper::ThresholdFilterErrors.invalid_metric(metric)
+      end
+    end
+
+    # TODO(omar): Uncomment these tests out when percent_identity, alignment_length, and rpm columns are converted to decimal.
+    # Since float's are approximate values, doing equality comparisons (<=, >=, and ==) do not work as expected.
+
+    # TaxonCount::TAXON_COUNT_METRIC_FILTERS.each do |metric|
+    #   TaxonCount::COUNT_TYPES_FOR_FILTERING.each do |count_type|
+    #     Sample::FILTERING_OPERATORS.each do |operator|
+    #       value = 100
+    #       klebsiella_tax_id = 570
+    #       threshold_filter = [
+    #         {
+    #           metric: metric,
+    #           count_type: count_type,
+    #           operator: operator,
+    #           value: value,
+    #         }.to_json,
+    #       ]
+
+    #       it "filters correctly when metric: #{metric}, count_type: #{count_type}, operator: #{operator}, value: #{value}" do
+    #         filtered_samples = helper.send(:filter_by_taxon_threshold, @samples_input, [klebsiella_tax_id], threshold_filter)
+    #         filtered_sample_ids = filtered_samples.map(&:id).uniq
+
+    #         if operator == ">="
+    #           expect(filtered_sample_ids).to eq([@sample_three.id])
+    #         elsif operator == "<="
+    #           expect(filtered_sample_ids).to eq([@sample_one.id])
+    #         end
+    #       end
+    #     end
+    #   end
+    # end
+  end
+
   describe "#format_samples" do
     # TODO: Backfill more tests.
   end
