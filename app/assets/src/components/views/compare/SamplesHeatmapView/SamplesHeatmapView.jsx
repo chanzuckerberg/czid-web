@@ -1629,10 +1629,12 @@ class SamplesHeatmapView extends React.Component {
         "metric",
         "taxonsPerSample",
       ];
-      // Otherwise, move most filters to the backend
+      // Otherwise ES on the backend handles all filters
     } else {
-      frontendFilters = ["metric", "thresholdFilters"];
+      frontendFilters = [];
       backendFilters = [
+        "metric",
+        "thresholdFilters",
         "readSpecificity",
         "background",
         "species",

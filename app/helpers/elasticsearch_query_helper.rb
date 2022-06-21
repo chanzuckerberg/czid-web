@@ -19,45 +19,185 @@ module ElasticsearchQueryHelper
 
   # Check is the data exists in ES for background_id and pipeline_run_ids if not then invoke AWS Glue job
   # to calculate and save scores in the ES index
-  def self.update_es_for_missing_data(background_id, pr_id_to_sample_id)
-    missing_pipeline_run_ids = background_pipeline_present_in_es(
+  def self.update_es_for_missing_data(background_id, pipeline_run_ids)
+    missing_pipeline_run_ids = find_pipeline_runs_missing_from_es(
       background_id,
-      pr_id_to_sample_id
+      pipeline_run_ids
     )
     if missing_pipeline_run_ids.present?
       _job_status = call_aws_glue_job(
         background_id,
-        pr_id_to_sample_id
+        missing_pipeline_run_ids
       )
     end
   end
 
-  # Based on the provided filter criteria, query ES index and return top taxons
-  def self.top_taxon_search(
+  # Based on the provided filter criteria, query ES index and return top N taxon for each sample
+  # reduce the returned tax_ids to a unique set and return
+  def self.top_n_taxa_per_sample(
     filter_param,
-    pr_id_to_sample_id
+    pipeline_run_ids
   )
-    query_clause = build_query_clause(filter_param, pr_id_to_sample_id)
-    search_params = {
+    sort_params = ReportHelper.decode_sort_by(filter_param[:sort_by])
+
+    base_query_filter_clause = [
+      {
+        "terms": {
+          "pipeline_run_id": pipeline_run_ids,
+        },
+      },
+      {
+        "term": {
+          "background_id": filter_param[:background_id].to_s,
+        },
+      },
+      {
+        "term": {
+          "tax_level": filter_param[:taxon_level].to_s,
+        },
+      },
+    ]
+
+    base_query_must_not_clause = [
+      {
+        "term": {
+          "genus_taxid": "-201",
+        },
+      },
+    ]
+
+    threshold_filters_clause = build_threshold_filters_clause(filter_param[:threshold_filters]) # includes the mandatory count > 5 filter
+    categories_filter_clause = build_categories_filter_clause(filter_param[:categories], filter_param[:include_phage])
+    read_specificity_filter_clause = build_read_specificity_filter_clause(filter_param[:read_specificity])
+
+    search_body = {
       "_source": false,
-      "from": 0,
-      "size": filter_param[:taxons_per_sample],
-      "query": query_clause,
-      "sort": build_sort_clause(filter_param[:sort_by]),
-      "collapse": {
-        "field": "tax_id",
-        "inner_hits": [
-          {
-            "name": "documents",
-            "size": pr_id_to_sample_id.keys.size,
-            "_source": [
-              "*",
-            ],
+      "query": {
+        "bool": {
+          "filter": base_query_filter_clause + threshold_filters_clause + categories_filter_clause + read_specificity_filter_clause,
+          "must_not": base_query_must_not_clause,
+        },
+      },
+      "aggs": {
+        "pipeline_runs": {
+          "terms": {
+            "field": "pipeline_run_id",
+            "size": pipeline_run_ids.size,
           },
-        ],
+          "aggs": {
+            "top_taxa": {
+              "top_hits": {
+                "size": filter_param[:taxons_per_sample],
+                "sort": [
+                  {
+                    "metric_list.#{METRICS_MAPPING[:"#{sort_params[:metric]}"]}": {
+                      "order": sort_params[:direction] == 'highest' ? 'DESC' : 'ASC',
+                      "nested": {
+                        "path": "metric_list",
+                        "filter": {
+                          "term": {
+                            "metric_list.count_type": sort_params[:count_type],
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+                "_source": [
+                  "tax_id",
+                ],
+              },
+            },
+          },
+        },
       },
     }
-    response = ES_CLIENT.search(index: "scored_taxon_count", body: search_params)
+
+    response = ES_CLIENT.search(index: "scored_taxon_count", body: search_body)
+    return parse_top_n_taxa_per_sample_response(response)
+  end
+
+  def self.batch_tax_ids(
+    pipeline_run_ids,
+    tax_ids
+  )
+    # if we have more than 10_000 pipeline_runs (samples) we will need to reconsider this paging strategy
+    if pipeline_run_ids.size > 10_000
+      raise "too many samples/pipelines given. Select 10000 or fewer."
+    end
+
+    # termination condition
+    if (tax_ids.size * pipeline_run_ids.size) <= 10_000
+      return [tax_ids]
+    end
+
+    # split the tax_ids in half and recurse to consider for further splitting
+    left, right = tax_ids.each_slice((tax_ids.size / 2.0).round).to_a
+    left_batches = batch_tax_ids(pipeline_run_ids, left)
+    right_batches = batch_tax_ids(pipeline_run_ids, right)
+    return left_batches + right_batches
+  end
+
+  # get all of the metrics for the given pipeline_run_ids X tax_ids
+  def self.all_metrics_per_sample_and_taxa(
+    filter_param,
+    pipeline_run_ids,
+    tax_ids
+  )
+    tax_id_batches = batch_tax_ids(pipeline_run_ids, tax_ids)
+
+    results = []
+    # currently we will only have multiple batches if taxa_per_sample == 100 and there are more than 100 samples selected
+    # if multiple batches becomes more common we should consider parallelizing these requests
+    tax_id_batches.each do |tax_id_batch|
+      results += fetch_all_metrics_per_sample_and_taxa(
+        filter_param,
+        pipeline_run_ids,
+        tax_id_batch
+      )
+    end
+    return results
+  end
+
+  # get all of the metrics for the given pipeline_run_ids X tax_ids
+  def self.fetch_all_metrics_per_sample_and_taxa(
+    filter_param,
+    pipeline_run_ids,
+    tax_ids
+  )
+
+    search_body = {
+      "_source": true,
+      "size": 10_000, # the number of results will not be higher than 10_000 thanks to batch_tax_ids()
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "terms": {
+                "pipeline_run_id": pipeline_run_ids,
+              },
+            },
+            {
+              "terms": {
+                "tax_id": tax_ids,
+              },
+            },
+            {
+              "term": {
+                "background_id": filter_param[:background_id].to_s,
+              },
+            },
+            {
+              "term": {
+                "tax_level": filter_param[:taxon_level].to_s,
+              },
+            },
+          ],
+        },
+      },
+    }
+
+    response = ES_CLIENT.search(index: "scored_taxon_count", body: search_body)
     return parse_es_response(response)
   end
 
@@ -100,23 +240,27 @@ module ElasticsearchQueryHelper
   end
 
   # Query ES index to check if background and pipeline run ids are present
-  def self.background_pipeline_present_in_es(background_id, pr_id_to_sample_id)
-    pipeline_run_id_for_heatmap = pr_id_to_sample_id.keys
-    missing_pipeline_run_ids_queries = "SELECT DISTINCT pipeline_run_id FROM scored_taxon_count WHERE background_id=#{background_id} AND pipeline_run_id in (#{pr_id_to_sample_id.keys.join(',')})"
-    _columns, pipeline_run_ids_present = query_es(missing_pipeline_run_ids_queries)
-    missing_pipeline_run_ids = pipeline_run_id_for_heatmap - pipeline_run_ids_present.flatten
+  def self.find_pipeline_runs_missing_from_es(background_id, pipeline_run_ids)
+    if pipeline_run_ids.empty?
+      return []
+    end
+
+    pipeline_runs_in_es_query = "SELECT DISTINCT pipeline_run_id FROM scored_taxon_count WHERE background_id=#{background_id} AND pipeline_run_id in (#{pipeline_run_ids.join(',')})"
+    _columns, pipelines_in_es = query_es(pipeline_runs_in_es_query)
+    missing_pipeline_run_ids = pipeline_run_ids - pipelines_in_es.flatten
     return missing_pipeline_run_ids.flatten
   end
 
   # Call to AWS glue spark job to calculate heatmap data and store it in ES
-  def self.call_aws_glue_job(background_id, pr_id_to_sample_id)
+  def self.call_aws_glue_job(background_id, pipeline_run_ids)
     env = Rails.env.development? || Rails.env.test? ? "sandbox" : Rails.env
     job_name = "#{env}_heatmap_es_job"
     glue_response = GLUE_CLIENT.start_job_run(
       job_name: job_name.to_s,
       arguments: {
-        "--user_pipeline_run_ids" => pr_id_to_sample_id.keys.join("|"),
+        "--user_pipeline_run_ids" => pipeline_run_ids.join("|"),
         "--user_background_id" => background_id.to_s,
+        "--job-type" => "selected_runs",
       }
     )
     job_status = ""
@@ -128,118 +272,49 @@ module ElasticsearchQueryHelper
     return job_status
   end
 
-  # Build ES query clause for the provided filter values
-  def self.build_query_clause(filter_param, pr_id_to_sample_id)
-    query_must_array = build_query_must_clause(
-      filter_param[:min_reads],
-      filter_param[:threshold_filters]
-    )
-
-    query_filter_hash_array = build_query_filter_clause(
-      pr_id_to_sample_id,
-      filter_param
-    )
-
-    query_must_not_hash_array = build_query_must_not_clause(
-      filter_param[:categories],
-      filter_param[:include_phage]
-    )
-
-    {
-      "bool": {
-        "must": query_must_array,
-        "filter": query_filter_hash_array,
-        "must_not": [
-          {
-            "bool": {
-              "filter": query_must_not_hash_array,
-            },
-          },
-        ],
-      },
-    }
-  end
-
-  def self.build_query_filter_clause(
-    pr_id_to_sample_id,
-    filter_param
-  )
-    must_filter_array = []
-    must_filter_array << get_pipeline_run_filter(pr_id_to_sample_id)
-    must_filter_array << get_background_filter(filter_param[:background_id])
-    must_filter_array << get_taxon_level_filter(filter_param[:taxon_level])
-    must_filter_array << get_categories_filter(filter_param[:categories], filter_param[:include_phage])
-    must_filter_array << get_phage_filter(filter_param[:categories], filter_param[:include_phage])[1]
-    must_filter_array << get_read_specificity_filter(filter_param[:read_specificity])
-    must_filter_array << get_tax_ids_clause(filter_param[:taxon_ids])
-    return must_filter_array.compact
-  end
-
-  def self.get_pipeline_run_filter(pr_id_to_sample_id)
-    {
-      "terms": {
-        "pipeline_run_id": pr_id_to_sample_id.keys,
-      },
-    }
-  end
-
-  def self.get_background_filter(background_id)
-    {
-      "term": {
-        "background_id": background_id.to_s,
-      },
-    }
-  end
-
-  def self.get_taxon_level_filter(taxon_level)
-    {
-      "term": {
-        "tax_level": taxon_level.to_s,
-      },
-    }
-  end
-
-  def self.get_categories_filter(categories, include_phage)
-    categories_clause = nil
+  def self.build_categories_filter_clause(categories, include_phage)
+    categories_filter_clause = []
 
     if categories.present?
       categories = categories.map { |category| ReportHelper::CATEGORIES_TAXID_BY_NAME[category] }.compact
-      categories_clause = {
+      categories_filter_clause << {
         "terms": {
           "superkingdom_taxid": categories,
         },
       }
     elsif include_phage
-      categories_clause = {
+      categories_filter_clause << {
         "term": {
           "superkingdom_taxid": (ReportHelper::CATEGORIES_TAXID_BY_NAME["Viruses"]).to_s,
         },
       }
     end
-    categories_clause
-  end
 
-  def self.get_phage_filter(categories, include_phage)
-    phage_clause = {
-      "term": {
-        "is_phage": 1,
-      },
-    }
+    # create the is_phage filter here as well as this is determined by the categories selected
+    phage_clause = []
     if !include_phage && categories.present?
       # explicitly filter out phages
-      return phage_clause, nil
+      phage_clause << {
+        "term": {
+          "is_phage": 0,
+        },
+      }
     elsif include_phage && categories.blank?
       # only fetch phages
-      return nil, phage_clause
+      phage_clause << {
+        "term": {
+          "is_phage": 1,
+        },
+      }
     end
 
-    return nil, nil
+    categories_filter_clause + phage_clause
   end
 
-  def self.get_read_specificity_filter(read_specificity)
-    read_specificity_clause = nil
+  def self.build_read_specificity_filter_clause(read_specificity)
+    read_specificity_filter_clause = []
     if read_specificity == 1
-      read_specificity_clause = {
+      read_specificity_filter_clause << {
         "range": {
           "tax_id": {
             "gte": "0",
@@ -247,83 +322,24 @@ module ElasticsearchQueryHelper
         },
       }
     end
-    read_specificity_clause
+    read_specificity_filter_clause
   end
 
-  # Apply count_type and metric sort clause depending upon metric filter
-  def self.build_sort_clause(sort_by)
-    sort = ReportHelper.decode_sort_by(sort_by)
-    count_type_order = "desc"
-    if sort[:count_type] == "NR"
-      count_type_order = "asc"
-    end
-    metric = sort[:metric]
-
-    [
-      {
-        "metric_list.count_type": {
-          "order": count_type_order,
-          "nested": {
-            "path": "metric_list",
-          },
-        },
-      },
-      {
-        "metric_list.#{metric}": {
-          "order": "desc",
-          "nested": {
-            "path": "metric_list",
-          },
-        },
-      },
-    ]
-  end
-
-  def self.get_tax_ids_clause(tax_ids)
-    if tax_ids.present?
-      {
-        "terms": {
-          "tax_id": tax_ids,
-        },
-      }
-    end
-  end
-
-  # Query clause which must not be match to find the taxons
-  def self.build_query_must_not_clause(
-    categories,
-    include_phage
-  )
-    must_not_filter_array = []
-    must_not_filter_array << genus_taxid_filter()
-    must_not_filter_array << get_phage_filter(categories, include_phage)[0]
-    return must_not_filter_array.compact
-  end
-
-  def self.genus_taxid_filter
-    {
-      "term": {
-        "genus_taxid": "-201",
-      },
-    }
-  end
-
-  # Query clause which must be match to find the taxons
-  def self.build_query_must_clause(
-    _min_reads,
+  # clause for the threshold filters provided by the user (and the mandatory count > 5)
+  def self.build_threshold_filters_clause(
     threshold_filters
   )
-    query_must_array = []
-    nt_nested_clause = build_nested_query_must_clause("NT", threshold_filters)
-    nr_nested_clause = build_nested_query_must_clause("NR", threshold_filters)
+    threshold_filters_clause = []
+    nt_nested_clause = build_nested_threshold_filter_clause("NT", threshold_filters)
+    nr_nested_clause = build_nested_threshold_filter_clause("NR", threshold_filters)
 
-    query_must_array << nt_nested_clause
-    query_must_array << nr_nested_clause
-    return query_must_array.compact
+    threshold_filters_clause << nt_nested_clause
+    threshold_filters_clause << nr_nested_clause
+    return threshold_filters_clause.compact
   end
 
   # Build nested query clause to apply threshold filters
-  def self.build_nested_query_must_clause(count_type, threshold_filters)
+  def self.build_nested_threshold_filter_clause(count_type, threshold_filters)
     query_array = []
     if threshold_filters.present?
       parsed = parse_custom_filters(threshold_filters)
@@ -342,37 +358,23 @@ module ElasticsearchQueryHelper
       end
     end
 
-    # Mandatory count type clause ['NT','NR']
-    query_array <<
-      {
-        "match": {
-          "metric_list.count_type": count_type.to_s,
-        },
-      }
-    # Mandatory counts clause > 5
-    query_array <<
-      {
-        "range": {
-          "metric_list.counts": {
-            "gte": 5,
-          },
-        },
-      }
+    return nil if query_array.empty?
+
     nested_query =
       {
         "nested": {
           "path": "metric_list",
           "query": {
             "bool": {
-              "must": query_array,
+              "filter": query_array,
             },
           },
         },
       }
-    return nested_query
+    nested_query
   end
 
-  # Parse threshold_filters to identify county type, metric, value and operator(less then or greater than)
+  # Parse threshold_filters to identify count type, metric, value and operator(less then or greater than)
   def self.parse_custom_filters(threshold_filters)
     parsed = []
     threshold_filters.each do |filter|
@@ -397,21 +399,31 @@ module ElasticsearchQueryHelper
   # Iterate through the hits and inner_hits to find all the taxons
   def self.parse_es_response(es_response)
     taxons = []
-    es_response["hits"]["hits"].each do |hits|
-      hits["inner_hits"]["documents"]["hits"]["hits"].each do |doc|
-        source_doc = doc["_source"].reject { |key, _value| key == "metric_list" }
-        doc["_source"]["metric_list"].each do |metric|
-          unless metric["count_type"] == "merged_NT_NR"
-            metric_clone = metric.clone
-            # field alias conversion for the UI
-            metric_clone = change_field_name(metric_clone)
-            metric_clone = round_decimal_value(metric_clone)
-            taxons << metric_clone.merge(source_doc)
-          end
+    es_response["hits"]["hits"].each do |doc|
+      source_doc = doc["_source"].reject { |key, _value| key == "metric_list" }
+      doc["_source"]["metric_list"].each do |metric|
+        unless metric["count_type"] == "merged_NT_NR"
+          metric_clone = metric.clone
+          # field alias conversion for the UI
+          metric_clone = change_field_name(metric_clone)
+          metric_clone = round_decimal_value(metric_clone)
+          taxons << metric_clone.merge(source_doc)
         end
       end
     end
     return taxons
+  end
+
+  # Actual data for the heatmap is wrapped inside inner_hits of collapse ES function.
+  # Iterate through the hits and inner_hits to find all the taxons
+  def self.parse_top_n_taxa_per_sample_response(es_response)
+    tax_ids = []
+    es_response["aggregations"]["pipeline_runs"]["buckets"].each do |hits|
+      hits["top_taxa"]["hits"]["hits"].each do |doc|
+        tax_ids << doc["_source"]["tax_id"]
+      end
+    end
+    return tax_ids.uniq
   end
 
   # field alias conversion for the UI

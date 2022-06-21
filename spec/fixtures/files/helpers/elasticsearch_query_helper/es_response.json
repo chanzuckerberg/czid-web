@@ -1,15 +1,15 @@
 {
-    "took": 164,
+    "took": 193,
     "timed_out": false,
     "_shards": {
-        "total": 1,
-        "successful": 1,
+        "total": 5,
+        "successful": 5,
         "skipped": 0,
         "failed": 0
     },
     "hits": {
         "total": {
-            "value": 145,
+            "value": 2,
             "relation": "eq"
         },
         "max_score": null,
@@ -17,73 +17,114 @@
             {
                 "_index": "scored_taxon_count",
                 "_type": "_doc",
-                "_id": "7xaAmX8B-Y92L3equola",
+                "_id": "84023_1_28321_26",
                 "_score": null,
-                "fields": {
-                    "tax_id": [
-                        562
-                    ]
+                "_source": {
+                    "pipeline_run_id": 28321,
+                    "tax_id": 84023,
+                    "background_id": "26",
+                    "tax_level": 1,
+                    "genus_taxid": 1485,
+                    "family_taxid": 31979,
+                    "superkingdom_taxid": 2,
+                    "name": "Clostridium autoethanogenum",
+                    "common_name": "",
+                    "is_phage": 0,
+                    "metric_list": [
+                        {
+                            "alignment_length": 87,
+                            "counts": 39,
+                            "mean": 0.00777724,
+                            "count_type": "NT",
+                            "percent_identity": 90.99108108108108,
+                            "e_value": -25.228698919246906,
+                            "zscore": 97.3501,
+                            "stdev": 0.038392,
+                            "rpm": 3.7452424
+                        },
+                        {
+                            "alignment_length": 40,
+                            "counts": 16,
+                            "mean": 6.6576E-4,
+                            "count_type": "NR",
+                            "percent_identity": 64.86,
+                            "e_value": 5.756020380000014E-6,
+                            "zscore": 99.0,
+                            "stdev": 0.00655697,
+                            "rpm": 1.5365096
+                        },
+                        {
+                            "alignment_length": 127,
+                            "counts": 39,
+                            "count_type": "merged_NT_NR",
+                            "percent_identity": 90.99108108108108,
+                            "e_value": -19.250986157759822,
+                            "zscore": 99.0,
+                            "rpm": 3.7452424
+                        }
+                    ],
+                    "id": "84023_1_28321_26"
                 },
                 "sort": [
-                    "NT",
-                    640414.7
-                ],
-                "inner_hits": {
-                    "documents": {
-                        "hits": {
-                            "total": {
-                                "value": 1,
-                                "relation": "eq"
-                            },
-                            "max_score": 5.4341717,
-                            "hits": [
-                                {
-                                    "_index": "scored_taxon_count",
-                                    "_type": "_doc",
-                                    "_id": "7xaAmX8B-Y92L3equola",
-                                    "_score": 5.4341717,
-                                    "_source": {
-                                        "metric_list": [
-                                            {
-                                                "alignment_length": 27755.0,
-                                                "mean": 5.50036,
-                                                "counts": 1900373,
-                                                "count_type": "NT",
-                                                "percent_identity": 99.9607,
-                                                "e_value": -292.1954650878906,
-                                                "zscore": 99.0,
-                                                "stdev": 32.6038,
-                                                "rpm": 640414.7050795138
-                                            },
-                                            {
-                                                "alignment_length": 832.553,
-                                                "stdev_mass_normalized": 1,
-                                                "mean": 7.8056,
-                                                "counts": 1683094,
-                                                "count_type": "NR",
-                                                "percent_identity": 99.357,
-                                                "e_value": -0.06364035606384277,
-                                                "zscore": 99.0,
-                                                "mean_mass_normalized": 1,
-                                                "stdev": 34.2902,
-                                                "rpm": 567192.9392972322
-                                            }
-                                        ],
-                                        "superkingdom_taxid": 2,
-                                        "name": "Escherichia coli",
-                                        "pipeline_run_id": 27441,
-                                        "background_id": 26,
-                                        "genus_taxid": 561,
-                                        "is_phage": 0,
-                                        "tax_id": 562,
-                                        "tax_level": 1,
-                                        "family_taxid": 543
-                                    }
-                                }
-                            ]
+                    "merged_NT_NR",
+                    3.7452424
+                ]
+            },
+            {
+                "_index": "scored_taxon_count",
+                "_type": "_doc",
+                "_id": "84023_1_28331_26",
+                "_score": null,
+                "_source": {
+                    "pipeline_run_id": 28331,
+                    "tax_id": 84023,
+                    "background_id": "26",
+                    "tax_level": 1,
+                    "genus_taxid": 1485,
+                    "family_taxid": 31979,
+                    "superkingdom_taxid": 2,
+                    "name": "Clostridium autoethanogenum",
+                    "common_name": "",
+                    "is_phage": 0,
+                    "metric_list": [
+                        {
+                            "alignment_length": 67,
+                            "counts": 28,
+                            "mean": 0.00777724,
+                            "count_type": "NT",
+                            "percent_identity": 90.37229629629628,
+                            "e_value": -23.051248044745627,
+                            "zscore": 81.30477,
+                            "stdev": 0.038392,
+                            "rpm": 3.12923
+                        },
+                        {
+                            "alignment_length": 43,
+                            "counts": 7,
+                            "mean": 6.6576E-4,
+                            "count_type": "NR",
+                            "percent_identity": 70.27742857142857,
+                            "e_value": 1.0435641571428571E-5,
+                            "zscore": 99.0,
+                            "stdev": 0.00655697,
+                            "rpm": 0.7823075
+                        },
+                        {
+                            "alignment_length": 114,
+                            "counts": 28,
+                            "count_type": "merged_NT_NR",
+                            "percent_identity": 90.37229629629628,
+                            "e_value": -15.829021714466368,
+                            "zscore": 99.0,
+                            "rpm": 3.12923
                         }
-                    }
-                }
+                    ],
+                    "id": "84023_1_28331_26"
+                },
+                "sort": [
+                    "merged_NT_NR",
+                    3.12923
+                ]
             }
         ]
     }
