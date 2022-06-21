@@ -52,4 +52,19 @@ RSpec.describe VisualizationsController, type: :controller do
       end
     end
   end
+  describe "#PUT Update" do
+    before do
+      sign_in @joe
+      project = create(:project)
+      sample_one = create(:sample, project: project)
+      sample_two = create(:sample, project: project)
+      @visualization_one = create(:visualization, user_id: @joe.id, visualization_type: "heatmap", name: "Test Visualization A", updated_at: 2.days.ago, samples: [sample_one, sample_two])
+    end
+    it "update visualization name" do
+      put :update, params: { id: @visualization_one.id, name: "TestHeatmap" }
+
+      expect(@visualization_one.reload.name).to eq("TestHeatmap")
+      expect(response).to have_http_status(:ok)
+    end
+  end
 end

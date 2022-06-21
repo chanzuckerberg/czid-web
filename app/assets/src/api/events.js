@@ -208,6 +208,10 @@ function EventDictionary() {
   /** The user renamed a project from the project header. */
   this.PROJECT_HEADER_PROJECT_RENAMED = "PROJECT_HEADER_PROJECT_RENAMED";
 
+  // /** The user renamed a heatmap from the heatmap header. */
+  this.SAMPLES_HEATMAP_HEADER_NAME_RENAMED =
+    "SAMPLES_HEATMAP_HEADER_NAME_RENAMED";
+
   /** The user clicked on the Learn More link in the project visibility tooltip. */
   this.PROJECT_VISIBILITY_HELP_LINK_CLICKED =
     "PROJECT_VISIBILITY_HELP_LINK_CLICKED";

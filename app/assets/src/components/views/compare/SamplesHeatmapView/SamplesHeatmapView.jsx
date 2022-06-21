@@ -92,7 +92,6 @@ class SamplesHeatmapView extends React.Component {
     };
 
     this.initOnBeforeUnload(props.savedParamValues);
-
     // IMPORTANT NOTE: These default values should be kept in sync with the
     // backend defaults in HeatmapHelper for sanity.
     this.state = {
@@ -233,6 +232,7 @@ class SamplesHeatmapView extends React.Component {
     let urlParams = queryString.parse(location.search, {
       arrayFormat: "bracket",
     });
+
     // consider the cases where variables can be passed as array string
     if (typeof urlParams.sampleIds === "string") {
       urlParams.sampleIds = urlParams.sampleIds.split(",");
@@ -314,6 +314,7 @@ class SamplesHeatmapView extends React.Component {
   getUrlParams = () => {
     return Object.assign(
       {
+        id: this.id,
         selectedMetadata: this.state.selectedMetadata,
         metadataSortField: this.metadataSortField,
         metadataSortAsc: this.metadataSortAsc,
@@ -1983,6 +1984,10 @@ class SamplesHeatmapView extends React.Component {
               <SamplesHeatmapHeader
                 sampleIds={sampleIds}
                 data={data}
+                heatmapId={
+                  this.props.savedParamValues && this.props.savedParamValues.id
+                }
+                heatmapName={this.props.name}
                 onDownloadSvg={this.handleDownloadSvg}
                 onDownloadPng={this.handleDownloadPng}
                 onDownloadCurrentHeatmapViewCsv={
@@ -2065,6 +2070,7 @@ SamplesHeatmapView.propTypes = {
   categories: PropTypes.array,
   heatmapTs: PropTypes.number,
   metrics: PropTypes.array,
+  name: PropTypes.string,
   prefilterConstants: PropTypes.object,
   removedTaxonIds: PropTypes.array,
   projectIds: PropTypes.array,

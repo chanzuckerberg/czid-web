@@ -74,12 +74,13 @@ class VisualizationsController < ApplicationController
     if @type == "heatmap"
       @visualization_data = heatmap
     end
-
     id = visualization_params[:id]
     if id
       vis = current_power.visualizations.find(id)
       vis.data[:sampleIds] = vis.sample_ids
+      vis.data[:id] = id
       @visualization_data[:savedParamValues] = vis.data
+      @visualization_data[:name] = vis.name
     end
 
     # Redirects until we support standalone visualizations for these types
@@ -100,7 +101,6 @@ class VisualizationsController < ApplicationController
   def save
     @type = visualization_params[:type]
     @data = visualization_params[:data]
-
     sample_ids = @data[:sampleIds]
     # Delete to have single source of truth.
     @data.delete(:sampleIds)
@@ -129,6 +129,7 @@ class VisualizationsController < ApplicationController
         name: @type.titleize
       )
     end
+
     vis.save!
 
     render json: {
@@ -286,10 +287,23 @@ class VisualizationsController < ApplicationController
     render json: sample_taxons_dict
   end
 
+  # PATCH/PUT /visualizations/1
+  # PATCH/PUT /visualizations/1.json
+  def update
+    id = visualization_params[:id]
+    name = visualization_params[:name]
+
+    if Visualization.find(id).update(name: name)
+      render json: { id: id, name: name }, status: :ok
+    else
+      render json: { error: @visualization.errors.full_messages }, status: :internal_server_error
+    end
+  end
+
   private
 
   def visualization_params
-    params.permit(:domain, :type, :id, :url, :search, :orderBy, :orderDir, data: {})
+    params.permit(:domain, :visualization, :name, :type, :id, :url, :search, :orderBy, :orderDir, data: {})
   end
 
   def samples_for_heatmap

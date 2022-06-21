@@ -165,6 +165,7 @@ Rails.application.routes.draw do
   get 'visualizations/:type(/:id)', to: 'visualizations#visualization'
   post 'visualizations/shorten_url', to: 'visualizations#shorten_url'
   get 'visualizations.json', to: 'visualizations#index'
+  put 'visualizations/:id', to: 'visualizations#update'
 
   get 'amr_heatmap/amr_counts.json', to: 'amr_heatmap#amr_counts'
   get 'amr_heatmap/fetch_ontology.json', to: 'amr_heatmap#fetch_ontology'

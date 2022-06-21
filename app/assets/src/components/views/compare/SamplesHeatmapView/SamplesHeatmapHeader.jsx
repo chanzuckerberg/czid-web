@@ -1,11 +1,17 @@
 import PropTypes from "prop-types";
 import React, { useContext } from "react";
 
-import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  withAnalytics,
+  trackEvent,
+} from "~/api/analytics";
+import { updateHeatmapName } from "~/api/visualization";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader } from "~/components/layout";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import EditableInput from "~/components/ui/controls/EditableInput";
 import {
   showAppcue,
   SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
@@ -13,6 +19,10 @@ import {
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
 import { logDownloadOption } from "~/components/views/report/utils/download";
+import {
+  replaceSpecialCharacters,
+  testForSpecialCharacters,
+} from "~/helpers/strings";
 import {
   PrimaryButton,
   HelpButton,
@@ -32,6 +42,8 @@ import cs from "./samples_heatmap_view.scss";
 const SamplesHeatmapHeader = ({
   sampleIds,
   data,
+  heatmapId,
+  heatmapName,
   onDownloadAllHeatmapMetricsCsv,
   onDownloadCurrentHeatmapViewCsv,
   onDownloadSvg,
@@ -42,7 +54,6 @@ const SamplesHeatmapHeader = ({
 }) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
-
   const handleDownloadClick = option => {
     switch (option) {
       case "svg":
@@ -79,18 +90,52 @@ const SamplesHeatmapHeader = ({
     });
   };
 
+  const handleHeatmapRename = async name => {
+    if (name === "heatmap") return "";
+    let error = "";
+
+    name = replaceSpecialCharacters(name);
+
+    try {
+      await updateHeatmapName(heatmapId, name);
+      trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_NAME_RENAMED, {
+        id: heatmapId,
+        heatmapName: name,
+      });
+    } catch (e) {
+      error = "There was an error renaming your heatmap";
+    }
+    return [error, name];
+  };
+
+  const getWarningMessage = inputText => {
+    return testForSpecialCharacters(inputText)
+      ? 'The special character(s) you entered will be converted to "-"'
+      : "";
+  };
+
   const showNewPresetsButton =
     allowedFeatures.includes("taxon_heatmap_presets") &&
     sampleIds.length > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM;
-
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
         <ViewHeader.Pretitle>
-          <React.Fragment>Heatmap</React.Fragment>
+          <>Comparing {sampleIds ? sampleIds.length : ""} Samples</>
         </ViewHeader.Pretitle>
         <ViewHeader.Title
-          label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
+          label={
+            heatmapId != null ? (
+              <EditableInput
+                value={heatmapName || "Heatmap"}
+                className={cs.name}
+                onDoneEditing={handleHeatmapRename}
+                getWarningMessage={getWarningMessage}
+              />
+            ) : (
+              <>Heatmap</>
+            )
+          }
         />
       </ViewHeader.Content>
       <ViewHeader.Controls className={cs.controls}>
@@ -162,6 +207,8 @@ SamplesHeatmapHeader.propTypes = {
   data: PropTypes.objectOf(
     PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
   ),
+  heatmapId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  heatmapName: PropTypes.string,
   onDownloadSvg: PropTypes.func.isRequired,
   onDownloadPng: PropTypes.func.isRequired,
   onDownloadAllHeatmapMetricsCsv: PropTypes.func.isRequired,

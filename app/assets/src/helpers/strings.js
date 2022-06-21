@@ -96,3 +96,14 @@ export function numberWithSiPrefix(value) {
 export function numberWithPercent(value) {
   return `${value}%`;
 }
+
+const specialCharacters = /[^A-Za-z0-9_\- ]/g;
+
+export function replaceSpecialCharacters(value) {
+  value = value.replaceAll(specialCharacters, "-");
+  return value;
+}
+
+export function testForSpecialCharacters(value) {
+  return specialCharacters.test(value);
+}
