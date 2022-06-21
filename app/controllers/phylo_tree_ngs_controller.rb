@@ -172,6 +172,15 @@ class PhyloTreeNgsController < ApplicationController
                                end
 
       eligible_pipeline_run_ids = eligible_pipeline_runs.pluck(:id)
+      # If there are no runs of interest, return an empty list.
+      if eligible_pipeline_run_ids.empty?
+        render json: {
+          pipelineRunIds: [],
+          coverageBreadths: {},
+        }
+        return
+      end
+
       run_ids_string = eligible_pipeline_run_ids.to_set.to_a.join(',')
 
       # Get all pipeline_run_ids with at least one contig.
@@ -194,6 +203,15 @@ class PhyloTreeNgsController < ApplicationController
       project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: tax_id, samples: { project_id: project_id }).pluck(:pipeline_run_id)
       top_project_pipeline_runs_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs
       top_project_pipeline_runs_ids = top_project_pipeline_runs_with_taxid.pluck(:id)
+      # If there are no runs of interest, return an empty list.
+      if top_project_pipeline_runs_ids.empty?
+        render json: {
+          pipelineRunIds: [],
+          coverageBreadths: {},
+          runsWithContigs: [],
+        }
+        return
+      end
 
       # Get the ids of the runs with contigs for the specified taxon;
       # we only allow users to select runs with at least one contig for the phylo tree,
