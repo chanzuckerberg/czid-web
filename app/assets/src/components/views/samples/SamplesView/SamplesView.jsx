@@ -60,7 +60,6 @@ class SamplesView extends React.Component {
   constructor(props, context) {
     super(props);
 
-    const { snapshotShareId } = this.props;
     this.state = {
       phyloTreeCreationModalOpen: false,
       bulkDownloadModalOpen: false,
@@ -71,14 +70,6 @@ class SamplesView extends React.Component {
       sarsCov2Count: 0,
       referenceSelectId: null,
     };
-
-    // TODO: Remove allowedFeatures argument once General Viral CG Flat List implementation (CH-127140)
-    // It is passed in as an argument since static methods (TableRenderers) can't access React Context directly
-    const { allowedFeatures = [] } = context || {};
-    this.columnsByWorkflow = computeColumnsByWorkflow({
-      basicIcon: !!snapshotShareId,
-      allowedFeatures,
-    });
 
     this.referenceSelectId = null;
   }
@@ -453,6 +444,7 @@ class SamplesView extends React.Component {
       onLoadRows,
       protectedColumns,
       selectedIds,
+      snapshotShareId,
       sortable,
       sortBy,
       sortDirection,
@@ -466,7 +458,10 @@ class SamplesView extends React.Component {
       <div className={cs.table}>
         <InfiniteTable
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
-          columns={this.columnsByWorkflow[workflow]}
+          columns={computeColumnsByWorkflow({
+            workflow,
+            basicIcon: !!snapshotShareId,
+          })}
           defaultRowHeight={rowHeight}
           draggableColumns
           initialActiveColumns={activeColumns}

@@ -7,12 +7,19 @@ import { WORKFLOWS } from "~utils/workflows";
 import cs from "./samples_view.scss";
 
 export const computeColumnsByWorkflow = ({
+  workflow,
+  metadataColumns = [],
   basicIcon = false,
-  allowedFeatures = [],
 } = {}) => {
-  const columnsByWorkflow = {};
+  if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
+    return computeMngsColumns({ basicIcon });
+  } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+    return computeConsensusGenomeColumns({ basicIcon });
+  }
+};
 
-  columnsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value] = [
+const computeMngsColumns = ({ basicIcon }) => {
+  const fixedColumns = [
     {
       dataKey: "sample",
       flexGrow: 1,
@@ -86,26 +93,32 @@ export const computeColumnsByWorkflow = ({
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
     },
     {
-      dataKey: "notes",
-      flexGrow: 1,
-      disableSort: true,
-      className: cs.basicCell,
-    },
-    {
       dataKey: "nucleotide_type",
       label: "Nucleotide Type",
       flexGrow: 1,
       className: cs.basicCell,
     },
     {
-      dataKey: "pipelineVersion",
-      label: "Pipeline Version",
+      dataKey: "sample_type",
+      label: "Sample Type",
       flexGrow: 1,
       className: cs.basicCell,
     },
     {
-      dataKey: "sample_type",
-      label: "Sample Type",
+      dataKey: "water_control",
+      label: "Water Control",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+    {
+      dataKey: "notes",
+      flexGrow: 1,
+      disableSort: true,
+      className: cs.basicCell,
+    },
+    {
+      dataKey: "pipelineVersion",
+      label: "Pipeline Version",
       flexGrow: 1,
       className: cs.basicCell,
     },
@@ -126,23 +139,22 @@ export const computeColumnsByWorkflow = ({
         TableRenderers.formatDuration(rowData[dataKey]),
     },
     {
-      dataKey: "water_control",
-      label: "Water Control",
-      flexGrow: 1,
-      className: cs.basicCell,
-    },
-    {
       dataKey: "meanInsertSize",
       label: "Mean Insert Size",
       flexGrow: 1,
       className: cs.basicCell,
     },
   ];
-  for (const col of columnsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value]) {
+
+  for (const col of fixedColumns) {
     col["columnData"] = SAMPLE_TABLE_COLUMNS_V2[col["dataKey"]];
   }
 
-  columnsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value] = [
+  return fixedColumns;
+};
+
+const computeConsensusGenomeColumns = ({ basicIcon }) => {
+  const fixedColumns = [
     {
       dataKey: "sample",
       flexGrow: 1,
@@ -174,12 +186,6 @@ export const computeColumnsByWorkflow = ({
       className: cs.basicCell,
     },
     {
-      dataKey: "notes",
-      flexGrow: 1,
-      disableSort: true,
-      className: cs.basicCell,
-    },
-    {
       dataKey: "nucleotide_type",
       label: "Nucleotide Type",
       flexGrow: 1,
@@ -195,6 +201,12 @@ export const computeColumnsByWorkflow = ({
       dataKey: "water_control",
       label: "Water Control",
       flexGrow: 1,
+      className: cs.basicCell,
+    },
+    {
+      dataKey: "notes",
+      flexGrow: 1,
+      disableSort: true,
       className: cs.basicCell,
     },
     {
@@ -301,7 +313,7 @@ export const computeColumnsByWorkflow = ({
     },
   ];
 
-  for (const col of columnsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value]) {
+  for (const col of fixedColumns) {
     const dataKey = col["dataKey"];
     if (
       Object.prototype.hasOwnProperty.call(SAMPLE_TABLE_COLUMNS_V2, dataKey)
@@ -313,7 +325,7 @@ export const computeColumnsByWorkflow = ({
     }
   }
 
-  return columnsByWorkflow;
+  return fixedColumns;
 };
 
 export const DEFAULTS_BY_WORKFLOW = {
