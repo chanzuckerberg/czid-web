@@ -84,7 +84,7 @@ class HeatmapElasticsearchService
     end
     filter_params[:taxon_level] = @params[:species].to_i == TaxonCount::TAX_LEVEL_SPECIES ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
     if @params.include?("readSpecificity")
-      filter_params[:read_specificity] = @params[:readSpecificity]
+      filter_params[:read_specificity] = @params[:readSpecificity].to_i
     end
     filter_params[:sort_by] = @params[:sortBy] || DEFAULT_TAXON_SORT_PARAM
     filter_params[:taxons_per_sample] = @params[:taxonsPerSample] || DEFAULT_MAX_NUM_TAXONS
