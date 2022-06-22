@@ -1,51 +1,68 @@
 import React from "react";
-
+import GoogleCardboardIcon from "~/images/impact_page/google-cardboard-icon.png";
 import cs from "./ImpactVRSection.scss";
 
 const ImpactVRSection = () => {
   return (
-    <div className={cs.vrContainer}>
-      <div className={cs.cardboardContainer}>
-        <h3>Watch with Google Cardboard</h3>
-        <ol>
-          <li>Assemble Google Cardboard.</li>
-          <li>Open YouTube on your mobile device.</li>
-          <li>
-            Search for the VR video &ldquo;Infectious DIsease Detectives -
-            Bangladesh&rdquo;
-          </li>
-          <li>To start playback, tap the play button.</li>
-          <li>Tap the Cardboard icon.</li>
-          <li>Insert your phone into Cardboard.</li>
-          <li>Look around to view the video in 360 degrees.</li>
-        </ol>
-        <a
-          className={cs.btnLink}
-          href="https://arvr.google.com/cardboard/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Learn More
-        </a>
-      </div>
-      <div className={cs.oculusContainer}>
-        <h3>Watch with Your Oculus Headset</h3>
-        <p>
-          Watch the VR video for free via the Oculus store video gallery. The
-          video is compatible with all Oculus headsets.
-          <br />
-          <br />
-          If you are logged into your Oculus account, you can save the video to
-          your device on the Oculus Gallery Page.
-        </p>
-        <a
-          className={cs.btnLink}
-          href="https://www.oculus.com/experiences/media/138425597437093/2292875140835046/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Learn More
-        </a>
+    <div>
+      <p className={cs.vrCompatibilityText}>
+        Compatible with headsets including Daydream View, Gear VR, Google
+        Cardboard, HTC Vive, Lenovo Mirage Solo, Oculus Go, Oculus Quest, Oculus
+        Rift, and PlayStation VR.
+      </p>
+      <div className={cs.vrContainer}>
+        <div className={cs.cardboardContainer}>
+          <h3>Watch with your VR headset:</h3>
+          <ol>
+            <li>
+              Make sure you have the YouTube app installed on your device.
+            </li>
+            <li>Put on your VR device.</li>
+            <li>
+              Open the{" "}
+              <a
+                className={cs.vrInlineLink}
+                href="https://www.youtube.com/watch?v=7w-pAc4rwHI"
+              >
+                CZ ID video
+              </a>
+              .
+            </li>
+            <li>Press play.</li>
+          </ol>
+        </div>
+        <div className={cs.oculusContainer}>
+          <h3>
+            Alternatively, watch on your phone with a cardboard VR viewer:
+          </h3>
+          <ol>
+            <li>Download the Youtube app on your phone.</li>
+            <li>Put on your VR device.</li>
+            <li>
+              Open the{" "}
+              <a
+                className={cs.vrInlineLink}
+                href="https://www.youtube.com/watch?v=7w-pAc4rwHI"
+              >
+                CZ ID video
+              </a>
+              .
+            </li>
+            <li>Press play.</li>
+            <li>
+              Tap on the{" "}
+              <img src={GoogleCardboardIcon} alt="Google Cardboard icon" /> icon
+              in the lower right of the video to play in VR.
+            </li>
+            <li>
+              Once the video is playing in stereoscopic, place your phone in
+              your cardboard VR viewer.
+            </li>
+            <li>
+              Hold the viewer up to your eyes and simply move your head around.
+            </li>
+          </ol>
+        </div>
       </div>
     </div>
   );

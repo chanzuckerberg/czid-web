@@ -41,7 +41,7 @@ const ImpactVideoSection = () => {
           <div className={`${cs.videoContainer}`}>
             <div className={cs.video}>
               <iframe
-                src="https://www.youtube.com/embed/CWizlAFKKL4"
+                src="https://www.youtube.com/embed/XA63ld-VT7o"
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -56,7 +56,7 @@ const ImpactVideoSection = () => {
           <div className={cs.videoContainer}>
             <div className={cs.video}>
               <iframe
-                src="https://www.youtube.com/embed/EYOV37PjcxQ"
+                src="https://www.youtube.com/embed/7w-pAc4rwHI"
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -69,12 +69,12 @@ const ImpactVideoSection = () => {
         {(video === "video" || video === "360") && (
           <div className={cs.videoDescription}>
             <p>
-              Take a 360° Video Tour to see how a local researcher quickly
-              detects the source of a meningitis outbreak in Dhaka, Bangladesh,
-              using Chan Zuckerberg ID (CZ ID), an open-source, no-code,
-              metagenomics analysis platform that empowers researchers to
-              rapidly identify new and emerging infectious diseases from
-              sequencing data.
+              Watch our video or take a 360° VR video tour to see how a local
+              researcher quickly detects the source of a meningitis outbreak in
+              Dhaka, Bangladesh, using Chan Zuckerberg ID (CZ ID), an
+              open-source, no-code, metagenomics analysis platform that empowers
+              researchers to rapidly identify new and emerging infectious
+              diseases from sequencing data.
             </p>
           </div>
         )}
