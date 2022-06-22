@@ -121,10 +121,11 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
     );
     let qualityString =
       misMatches1 < misMatches2 ? qualityString1 : qualityString2;
+    let aligned = misMatches1 < misMatches2 ? alignedPortion : complementSeq(alignedPortion);
     let whiteSpaceLeft = repeatStr(" ", leftPortion.length);
     let whiteSpaceRight = repeatStr(" ", rightPortion.length);
     let refSeqDisplay = readInfo.refInfo.join("|");
-    let readSeqDisplay = [leftPortion, alignedPortion, rightPortion].join("|");
+    let readSeqDisplay = [leftPortion, aligned, rightPortion].join("|");
     let qualityStringDisplay = [
       whiteSpaceLeft,
       qualityString,
