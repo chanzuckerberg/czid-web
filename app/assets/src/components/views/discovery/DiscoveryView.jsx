@@ -8,6 +8,8 @@ import {
   get as _get,
   getOr,
   isEmpty,
+  isNull,
+  isUndefined,
   keyBy,
   map,
   mapKeys,
@@ -117,7 +119,11 @@ const TAB_PROJECTS = "projects";
 const TAB_SAMPLES = "samples";
 const TAB_VISUALIZATIONS = "visualizations";
 const CURRENT_TAB_OPTIONS = [TAB_PROJECTS, TAB_SAMPLES, TAB_VISUALIZATIONS];
-
+const DEFAULT_ORDER_BY_TAB = {
+  [TAB_PROJECTS]: "created_at",
+  [TAB_SAMPLES]: "createdAt",
+  [TAB_VISUALIZATIONS]: "updated_at",
+};
 class DiscoveryView extends React.Component {
   // used to preserve order keys across sessionStorage updates
   SESSION_ORDER_FIELD_KEYS = [
@@ -200,11 +206,6 @@ class DiscoveryView extends React.Component {
       ...sessionState,
       ...urlState,
     };
-
-    this.state.orderBy =
-      sessionState[`${this.getCurrentTabOrderByKey()}`] || null;
-    this.state.orderDirection =
-      sessionState[`${this.getCurrentTabOrderDirKey()}`] || "DESC";
 
     // If a user had previously selected the PLQC view for a specific project,
     // ensure that currentDisplay defaults to "table" if they switch to a different view,
@@ -1893,10 +1894,18 @@ class DiscoveryView extends React.Component {
           selectedSampleIds,
           this.handleSelectedSamplesUpdate,
         ];
+
     const sortable =
       allowedFeatures.includes(SORTING_V0_ADMIN_FEATURE) ||
       (allowedFeatures.includes(SORTING_V0_FEATURE) &&
         domain === DISCOVERY_DOMAIN_MY_DATA);
+
+    // Note: If the user has not defined an ordered table column in the given session,
+    // we update the UI to indicate default sort behavior but do not update session storage.
+    const orderNotDefined = isUndefined(orderBy) || isNull(orderBy);
+    const orderByForCurrentTab = orderNotDefined
+      ? DEFAULT_ORDER_BY_TAB[currentTab]
+      : orderBy;
 
     return (
       <>
@@ -1922,7 +1931,7 @@ class DiscoveryView extends React.Component {
                 onSortColumn={this.handleSortColumn}
                 projects={projects}
                 ref={projectsView => (this.projectsView = projectsView)}
-                sortBy={orderBy}
+                sortBy={orderByForCurrentTab}
                 sortDirection={orderDirection}
                 sortable={sortable}
               />
@@ -1971,7 +1980,7 @@ class DiscoveryView extends React.Component {
                   ref={samplesView => (this.samplesView = samplesView)}
                   selectableIds={selectableIds}
                   selectedIds={selectedIds}
-                  sortBy={orderBy}
+                  sortBy={orderByForCurrentTab}
                   sortDirection={orderDirection}
                   onUpdateSelectedIds={updateSelectedIds}
                   filtersSidebarOpen={showFilters}
@@ -2002,7 +2011,7 @@ class DiscoveryView extends React.Component {
                 ref={visualizationsView =>
                   (this.visualizationsView = visualizationsView)
                 }
-                sortBy={orderBy}
+                sortBy={orderByForCurrentTab}
                 sortDirection={orderDirection}
                 sortable={sortable}
               />
