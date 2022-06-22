@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_01_235454) do
+ActiveRecord::Schema.define(version: 2022_06_21_231800) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -651,6 +651,9 @@ ActiveRecord::Schema.define(version: 2022_06_01_235454) do
     t.integer "is_phage", limit: 1, default: 0, null: false
     t.string "source_count_type", comment: "The count type which the merged_nt_nr value is derived from"
     t.float "rpm", comment: "Number of reads aligning to the taxon in the NCBI NR/NT database, per million reads sequenced."
+    t.decimal "percent_identity_decimal", precision: 9, scale: 2
+    t.decimal "alignment_length_decimal", precision: 9, scale: 2
+    t.decimal "rpm_decimal", precision: 9, scale: 2
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
     t.index ["tax_id"], name: "index_taxon_counts_on_tax_id"
   end

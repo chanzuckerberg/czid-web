@@ -806,8 +806,14 @@ class PipelineRun < ApplicationRecord
       'pipeline_run_id' => id,
     }
     taxon_counts_attributes_filtered.each do |tcnt|
+      # Temporarily write to the new decimal type columns while we convert the columns from float to decimal type
+      tcnt["percent_identity_decimal"] = tcnt["percent_identity"]
+      tcnt["alignment_length_decimal"] = tcnt["alignment_length"]
+
       tcnt["count_type"] += "+" if refined
-      tcnt["rpm"] = rpm(tcnt["count"])
+      rpm_value = rpm(tcnt["count"])
+      tcnt["rpm"] = rpm_value
+      tcnt["rpm_decimal"] = rpm_value
       tcnt.merge!(tcnt_attrs_to_merge)
       # Format source count type as NT, NR or NT-NR (is currently an unordered array with possible unique value of ["NT", "NR"])
       tcnt["source_count_type"] = tcnt["source_count_type"] ? tcnt["source_count_type"].sort.reverse.join("-") : nil
