@@ -384,6 +384,8 @@ module PipelineRunsHelper
   end
 
   def check_for_user_error(failed_stage)
+    return [nil, nil] if failed_stage.blank?
+
     pr = failed_stage.pipeline_run
     # if SFN run, return no user error if the SFN failed to start
     return [nil, nil] if pr.step_function? && pr.sfn_execution_arn.blank?
