@@ -7,6 +7,9 @@ class ReadsStatsService
   # the "subsampled" stat is actually a bool indicating whether or not subsampling happened
   BLOCKLIST = ["run_generate_unidentified_fasta", "unidentified_fasta", "subsampled"].freeze
 
+  RUN_STAR = "star_out".freeze
+  ERCC = "ERCC".freeze
+
   def initialize(samples)
     if samples.nil?
       Rails.logger.warn("ReadsStatsService call with samples = nil")
@@ -39,6 +42,14 @@ class ReadsStatsService
       end
       if stat.task == INITIAL_READS_STAT
         reads_stats[stat.pipeline_run_id][:initialReads] = stat.reads_after
+      elsif stat.task == RUN_STAR
+        # If there are ERCC reads, separate them from STAR host filtering reads.
+        pr = PipelineRun.find(stat.pipeline_run_id)
+        ercc_counts = pr.total_ercc_reads
+        if ercc_counts.present?
+          reads_stats[stat.pipeline_run_id][:steps].push(name: ERCC, reads_after: pr.total_reads - ercc_counts)
+        end
+        reads_stats[stat.pipeline_run_id][:steps].push(name: stat.task, reads_after: stat.reads_after)
       elsif !BLOCKLIST.include?(stat.task)
         reads_stats[stat.pipeline_run_id][:steps].push(name: stat.task, reads_after: stat.reads_after)
       end
