@@ -24,20 +24,15 @@
       .descriptor {
         font: $sds-font-body-xs-400-font;
         color: $sds-color-gray-500;
-        margin-top: $sds-spaces-l;
+        margin-top: $sds-spaces-m;
       }
 
       .filterTag {
         margin: 0;
-
-        margin-right: $sds-spaces-xs;
+        margin-top: $sds-spaces-xxs;
 
         &:last-child {
           margin-right: 0;
-        }
-
-        &:not(:first-child) {
-          margin-top: $sds-spaces-xxxs;
         }
       }
     }

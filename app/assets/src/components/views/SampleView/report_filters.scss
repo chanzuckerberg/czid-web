@@ -18,6 +18,8 @@
   margin-bottom: $sds-spaces-l;
 
   .filterTag {
+    display: inline-block;
+    margin: 0;
     margin-right: $sds-spaces-xs;
 
     &:last-child {

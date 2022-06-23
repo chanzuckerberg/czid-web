@@ -37,7 +37,9 @@
 
     .filterTagsList {
       margin-bottom: $sds-spaces-l;
+
       .filterTag {
+        margin: 0;
         margin-right: $sds-spaces-xs;
 
         &:last-child {

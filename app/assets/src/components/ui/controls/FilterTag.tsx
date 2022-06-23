@@ -21,13 +21,11 @@ const FilterTag = ({ text, onClose, className }: FilterTagProps) => {
   );
 
   return (
-    <div className={cs.labelContainer}>
-      <Label
-        className={cx(cs.filterTag, className)}
-        size="tiny"
-        text={labelText}
-      />
-    </div>
+    <Label
+      className={cx(cs.filterTag, className)}
+      size="tiny"
+      text={labelText}
+    />
   );
 };
 
