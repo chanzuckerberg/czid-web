@@ -16,7 +16,6 @@ import { TAXON_THRESHOLD_FILTERING_FEATURE } from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import FilterTag from "~ui/controls/FilterTag";
 import {
-  KEY_TAXON,
   KEY_TAXON_SELECTED,
   KEY_TAXON_THRESHOLDS_SELECTED,
 } from "../SampleView/constants";
@@ -147,13 +146,12 @@ class DiscoveryFilters extends React.Component {
 
     const tags = selectedOptions
       // check if filter is on option format or just value (taxon are hashes with text and value)
-      // TaxonThresholdFilters are hashes with { id: number, name: string }, instead of { value: number, text: string }.
       .map(option =>
-        option.text || option.name
+        option.text
           ? option
           : find({ value: option }, options) || {
-              name: option,
-              id: option,
+              text: option,
+              value: option,
             },
       )
       // create the filter tag
@@ -161,43 +159,64 @@ class DiscoveryFilters extends React.Component {
         return (
           <FilterTag
             className={cs.filterTag}
-            key={option.value || option.id}
-            text={option.text || option.name}
+            key={option.value}
+            text={option.text}
             onClose={withAnalytics(
               () =>
                 this.handleRemoveTag({
                   selectedKey,
-                  valueToRemove: option.value || option.id,
+                  valueToRemove: option.value,
                 }),
               "DiscoveryFilters_tag_removed",
               {
-                value: option.value || option.id,
-                text: option.text || option.name,
+                value: option.value,
+                text: option.text,
               },
             )}
           />
         );
       });
 
+    return <div className={cs.tags}>{tags}</div>;
+  }
+
+  renderTaxonFilterTags = () => {
+    let selectedTaxa = this.state[KEY_TAXON_SELECTED];
+    if (isEmpty(selectedTaxa)) return;
+
     return (
       <div className={cs.tags}>
-        {!isEmpty(tags) && (
-          <div className={cs.descriptor}>Has at least one:</div>
-        )}
-        {tags}
+        <div className={cs.descriptor}>Has at least one:</div>
+        {selectedTaxa.map((selectedTaxon, i) => (
+          <FilterTag
+            className={cs.filterTag}
+            key={`taxon_filter_tag_${selectedTaxon.id}`}
+            text={selectedTaxon.name}
+            onClose={withAnalytics(
+              () =>
+                this.handleRemoveTag({
+                  selectedKey: KEY_TAXON_SELECTED,
+                  valueToRemove: selectedTaxon.id,
+                }),
+              "DiscoveryFilters_tag_removed",
+              {
+                value: selectedTaxon.id,
+                text: selectedTaxon.name,
+              },
+            )}
+          />
+        ))}
       </div>
     );
-  }
+  };
 
   renderTaxonThresholdFilterTags = () => {
     let selectedThresholds = this.state[KEY_TAXON_THRESHOLDS_SELECTED];
-    if (!selectedThresholds) return;
+    if (isEmpty(selectedThresholds)) return;
 
     return (
       <div className={cs.tags}>
-        {!isEmpty(selectedThresholds) && (
-          <div className={cs.descriptor}>Meets all:</div>
-        )}
+        <div className={cs.descriptor}>Meets all:</div>
         {selectedThresholds.map((threshold, i) => (
           <ThresholdFilterTag
             className={cs.filterTag}
@@ -274,7 +293,9 @@ class DiscoveryFilters extends React.Component {
               )}
               {workflow !== WORKFLOWS.CONSENSUS_GENOME.value && (
                 <>
-                  {this.renderTags(KEY_TAXON)}
+                  {!hasTaxonThresholdFilterFeature && this.renderTags("taxon")}
+                  {hasTaxonThresholdFilterFeature &&
+                    this.renderTaxonFilterTags()}
                   {hasTaxonThresholdFilterFeature &&
                     this.renderTaxonThresholdFilterTags()}
                 </>
