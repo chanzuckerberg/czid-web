@@ -135,7 +135,7 @@ class SamplesController < ApplicationController
     end
 
     results = { samples: limited_samples_json }
-    results[:all_samples_ids] = sample_ids if list_all_sample_ids
+    results[:all_samples_ids] = samples.pluck(:id) if list_all_sample_ids
 
     # Refactor once we have a clear API definition policy
     respond_to do |format|
