@@ -127,25 +127,61 @@
         flex: 0 1 auto;
         min-width: 0;
 
-        &:hover {
-          color: $sds-color-gray-black;
-          cursor: pointer;
-        }
+        // Offset label by sortIcon width + sortIcon margin width
+        margin-left: $sds-icon-sizes-xs-width + $sds-spaces-xxs +
+          $sds-spaces-xxs;
       }
 
       .sortIcon {
         // Make the sort icon slightly bigger than the text.
         margin: 0 $sds-spaces-xxs;
-        fill: currentColor;
-        width: 12px;
 
-        &.active {
-          display: flex;
+        width: $sds-icon-sizes-xs-width;
+        min-width: $sds-icon-sizes-xs-width;
+
+        // For inactive headers: use gray-500 and hide icon
+        fill: white;
+      }
+
+      // For inactive, hovered headers: use gray-600 color and show icon
+      &:hover {
+        color: $sds-color-gray-600;
+
+        .label {
+          cursor: pointer;
+        }
+
+        .sortIcon {
+          fill: $sds-color-gray-600;
         }
       }
-      // Display sortIcon when sortableHeader label is hovered over
+
+      // For active headers: use primary-400 and show icon
+      &.active {
+        color: $sds-color-primary-400;
+
+        .sortIcon {
+          fill: $sds-color-primary-400;
+        }
+
+        // For active, hovered headers: use primary-500 color and show icon
+        &:hover {
+          color: $sds-color-primary-500;
+
+          .label {
+            cursor: pointer;
+          }
+
+          .sortIcon {
+            fill: $sds-color-primary-500;
+          }
+        }
+      }
+
+      // When the label within the header is hovered, use gray-dark and show icon
       .label:hover + .sortIcon {
-        display: flex;
+        color: $sds-color-gray-black;
+        fill: $sds-color-gray-black;
       }
     }
 

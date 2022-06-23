@@ -999,7 +999,6 @@ class ReportTable extends React.Component {
           rowClassName={cs.row}
           rowRenderer={this.rowRenderer}
           sortable={true}
-          sortedHeaderClassName={cs.sortedHeader}
         />
         {phyloTreeModalParams && (
           <UserContext.Consumer>

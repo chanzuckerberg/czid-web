@@ -222,14 +222,9 @@ class BaseTable extends React.Component {
     sortBy,
     sortDirection,
   }) => {
-    const { headerLabelClassName, sortedHeaderClassName } = this.props;
+    const { headerLabelClassName } = this.props;
     return (
-      <div
-        className={cx(
-          cs.sortableHeader,
-          sortBy === dataKey && sortedHeaderClassName,
-        )}
-      >
+      <div className={cx(cs.sortableHeader, sortBy === dataKey && cs.active)}>
         {columnData ? (
           <ColumnHeaderTooltip
             trigger={
@@ -548,7 +543,6 @@ BaseTable.propTypes = {
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
-  sortedHeaderClassName: PropTypes.string,
 
   // make the table selectable, by setting a selectable key
   // the tables will check for the selectable key in the selected set/array
