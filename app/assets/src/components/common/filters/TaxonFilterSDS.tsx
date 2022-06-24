@@ -95,6 +95,7 @@ const TaxonFilterSDS = ({
       }}
       label={label}
       multiple
+      isTriggerChangeOnOptionClick
       search
       options={options}
       onChange={handleChange}
