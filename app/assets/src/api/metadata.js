@@ -24,13 +24,11 @@ const getSampleMetadata = ({
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
 const getSampleMetadataFields = (ids, snapshotShareId) =>
-  get(
+  postWithCSRF(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       "/samples/metadata_fields",
     {
-      params: {
-        sampleIds: flatten([ids]),
-      },
+      sampleIds: flatten([ids]),
     },
   );
 

@@ -406,9 +406,6 @@ class BaseTable extends React.Component {
               {columnOrder.map((dataKey, index) => {
                 const columnProps = find({ dataKey }, columns);
                 if (!columnProps) {
-                  console.error(
-                    `${dataKey} was expected but not found in column config. Skipping.`,
-                  );
                   return null;
                 }
 

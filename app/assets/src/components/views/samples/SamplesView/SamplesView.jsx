@@ -16,6 +16,7 @@ import {
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
+import { getSampleMetadataFields } from "~/api/metadata";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
@@ -69,19 +70,43 @@ class SamplesView extends React.Component {
       bulkDownloadButtonTempTooltip: null,
       sarsCov2Count: 0,
       referenceSelectId: null,
+      metadataFields: [],
     };
 
     this.referenceSelectId = null;
   }
 
+  componentDidMount() {
+    this.fetchMetadataFieldsBySampleIds();
+  }
+
   componentDidUpdate(prevProps) {
+    const { selectedIds, selectableIds } = this.props;
     // Reset the tooltip whenever the selected samples changes.
-    if (this.props.selectedIds !== prevProps.selectedIds) {
+    if (selectedIds !== prevProps.selectedIds) {
       this.setState({
         bulkDownloadButtonTempTooltip: null,
       });
     }
+
+    if (selectableIds !== prevProps.selectableIds) {
+      this.fetchMetadataFieldsBySampleIds();
+    }
   }
+
+  fetchMetadataFieldsBySampleIds = async () => {
+    const { selectableIds, showAllMetadata, workflow } = this.props;
+
+    // TODO(ihan): enable getWorkflowRunMetadataFields for consensus genome samples
+    if (
+      selectableIds &&
+      showAllMetadata &&
+      workflow === WORKFLOWS.SHORT_READ_MNGS.value
+    ) {
+      const metadataFields = await getSampleMetadataFields(selectableIds);
+      this.setState({ metadataFields });
+    }
+  };
 
   handleSelectRow = (value, checked, event) => {
     const { objects, selectedIds, onUpdateSelectedIds, workflow } = this.props;
@@ -451,6 +476,8 @@ class SamplesView extends React.Component {
       workflow,
     } = this.props;
 
+    const { metadataFields } = this.state;
+
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
     const selectAllChecked = this.isSelectAllChecked();
@@ -460,6 +487,7 @@ class SamplesView extends React.Component {
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
           columns={computeColumnsByWorkflow({
             workflow,
+            metadataFields,
             basicIcon: !!snapshotShareId,
           })}
           defaultRowHeight={rowHeight}
@@ -752,6 +780,7 @@ SamplesView.propTypes = {
   sampleStatsSidebarOpen: PropTypes.bool,
   selectableIds: PropTypes.array,
   selectedIds: PropTypes.instanceOf(Set),
+  showAllMetadata: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
   snapshotShareId: PropTypes.string,

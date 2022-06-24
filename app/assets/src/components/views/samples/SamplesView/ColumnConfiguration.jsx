@@ -8,17 +8,17 @@ import cs from "./samples_view.scss";
 
 export const computeColumnsByWorkflow = ({
   workflow,
-  metadataColumns = [],
+  metadataFields = [],
   basicIcon = false,
 } = {}) => {
   if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
-    return computeMngsColumns({ basicIcon });
+    return computeMngsColumns({ basicIcon, metadataFields });
   } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
     return computeConsensusGenomeColumns({ basicIcon });
   }
 };
 
-const computeMngsColumns = ({ basicIcon }) => {
+const computeMngsColumns = ({ basicIcon, metadataFields }) => {
   const fixedColumns = [
     {
       dataKey: "sample",
@@ -48,7 +48,7 @@ const computeMngsColumns = ({ basicIcon }) => {
       className: cs.basicCell,
     },
     {
-      dataKey: "collectionLocationV2",
+      dataKey: "collection_location_v2",
       label: "Location",
       flexGrow: 1,
       className: cs.basicCell,
@@ -146,11 +146,13 @@ const computeMngsColumns = ({ basicIcon }) => {
     },
   ];
 
-  for (const col of fixedColumns) {
+  const columns = [...fixedColumns, ...computeMetadataColumns(metadataFields)];
+
+  for (const col of columns) {
     col["columnData"] = SAMPLE_TABLE_COLUMNS_V2[col["dataKey"]];
   }
 
-  return fixedColumns;
+  return columns;
 };
 
 const computeConsensusGenomeColumns = ({ basicIcon }) => {
@@ -328,12 +330,39 @@ const computeConsensusGenomeColumns = ({ basicIcon }) => {
   return fixedColumns;
 };
 
+const computeMetadataColumns = metadataFields => {
+  // The following metadata fields are hard-coded in fixedColumns
+  // and will always be available on the samples table.
+  const fixedMetadata = [
+    "sample_type",
+    "nucleotide_type",
+    "water_control",
+    "collection_location_v2",
+    "ct_value",
+  ];
+
+  const additionalMetadata = metadataFields.filter(
+    mf => !fixedMetadata.includes(mf["key"]),
+  );
+
+  const metadataColumns = additionalMetadata.map(mf => {
+    return {
+      dataKey: mf["key"],
+      label: mf["name"],
+      flexGrow: 1,
+      className: cs.basicCell,
+    };
+  }, []);
+
+  return metadataColumns;
+};
+
 export const DEFAULTS_BY_WORKFLOW = {
   [WORKFLOWS.SHORT_READ_MNGS.value]: [
     "sample",
     "createdAt",
     "host",
-    "collectionLocationV2",
+    "collection_location_v2",
     "nonHostReads",
     "qcPercent",
   ],

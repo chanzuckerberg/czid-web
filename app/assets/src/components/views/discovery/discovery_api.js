@@ -90,64 +90,10 @@ const processRawSample = sample => {
     "derived_sample_output.summary_stats.insert_size_standard_deviation",
     sample.details,
   );
-
   const meanInsertSizeString = numberWithPlusOrMinus(
     meanInsertSize,
     insertSizeStandardDeviation,
   );
-
-  const getConsensusGenomeField = path =>
-    get(
-      [WORKFLOWS.CONSENSUS_GENOME.value, "cached_results", ...path],
-      sample.details,
-    );
-  const consensusGenomeFields = {
-    coverageDepth: getConsensusGenomeField(["coverage_viz", "coverage_depth"]),
-    totalReadsCG: getConsensusGenomeField(["quality_metrics", "total_reads"]),
-    gcPercent: getConsensusGenomeField(["quality_metrics", "gc_percent"]),
-    refSnps: getConsensusGenomeField(["quality_metrics", "ref_snps"]),
-    percentIdentity: getConsensusGenomeField([
-      "quality_metrics",
-      "percent_identity",
-    ]),
-    medakaModel: get(
-      [WORKFLOWS.CONSENSUS_GENOME.value, "medaka_model"],
-      sample.details,
-    ),
-    nActg: getConsensusGenomeField(["quality_metrics", "n_actg"]),
-    percentGenomeCalled: getConsensusGenomeField([
-      "quality_metrics",
-      "percent_genome_called",
-    ]),
-    nMissing: getConsensusGenomeField(["quality_metrics", "n_missing"]),
-    nAmbiguous: getConsensusGenomeField(["quality_metrics", "n_ambiguous"]),
-    referenceGenome: {
-      accessionName: getConsensusGenomeField(["taxon_info", "accession_name"]),
-      referenceGenomeId: getConsensusGenomeField([
-        "taxon_info",
-        "accession_id",
-      ]),
-      taxonName: getConsensusGenomeField(["taxon_info", "taxon_name"]),
-    },
-    referenceGenomeLength: getConsensusGenomeField([
-      "quality_metrics",
-      "reference_genome_length",
-    ]),
-    vadrPassFail: getConsensusGenomeField([
-      "quality_metrics",
-      "vadr_pass_fail",
-    ]),
-    technology: get(
-      [WORKFLOWS.CONSENSUS_GENOME.value, "technology"],
-      sample.details,
-    ),
-    wetlabProtocol: formatWetlabProtocol(
-      get(
-        [WORKFLOWS.CONSENSUS_GENOME.value, "wetlab_protocol"],
-        sample.details,
-      ),
-    ),
-  };
 
   const row = {
     sample: {
@@ -165,12 +111,6 @@ const processRawSample = sample => {
       user: get("uploader.name", sample.details),
       userId: get("uploader.id", sample.details),
     },
-    collectionLocation: get("metadata.collection_location", sample.details),
-    collectionLocationV2: get(
-      "metadata.collection_location_v2",
-      sample.details,
-    ),
-    ct_Value: get("metadata.ct_value", sample.details),
     createdAt: sample.created_at,
     duplicateCompressionRatio: get(
       "derived_sample_output.summary_stats.compression_ratio",
@@ -194,7 +134,6 @@ const processRawSample = sample => {
       ),
     },
     notes: get("db_sample.sample_notes", sample.details),
-    nucleotide_type: get("metadata.nucleotide_type", sample.details),
     pipelineVersion: get(
       "derived_sample_output.pipeline_run.pipeline_version",
       sample.details,
@@ -205,7 +144,6 @@ const processRawSample = sample => {
       "derived_sample_output.summary_stats.qc_percent",
       sample.details,
     ),
-    sample_type: get("metadata.sample_type", sample.details),
     subsampledFraction: get(
       "derived_sample_output.pipeline_run.fraction_subsampled",
       sample.details,
@@ -215,8 +153,7 @@ const processRawSample = sample => {
       sample.details,
     ),
     totalRuntime: get("mngs_run_info.total_runtime", sample.details),
-    water_control: get("metadata.water_control", sample.details),
-    ...consensusGenomeFields,
+    ...get("metadata", sample.details),
   };
   return row;
 };

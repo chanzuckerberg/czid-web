@@ -140,7 +140,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'joe can fetch the metadata fields for a public sample' do
     sign_in @user_nonadmin
 
-    get metadata_fields_samples_url, params: {
+    post metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_public.id],
     }
     assert_response :success
@@ -151,7 +151,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'joe can fetch the metadata fields for an expired sample' do
     sign_in @user_nonadmin
 
-    get metadata_fields_samples_url, params: {
+    post metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_expired.id],
     }
     assert_response :success
@@ -162,7 +162,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'joe can fetch the metadata fields for his own private sample' do
     sign_in @user_nonadmin
 
-    get metadata_fields_samples_url, params: {
+    post metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_joe_project.id],
     }
     assert_response :success
@@ -174,7 +174,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
-      get metadata_fields_samples_url, params: {
+      post metadata_fields_samples_url, params: {
         sampleIds: [@metadata_validation_sample_human_existing_metadata.id],
       }
     end
@@ -184,7 +184,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'joe can fetch the metadata fields for multiple samples' do
     sign_in @user_nonadmin
 
-    get metadata_fields_samples_url, params: {
+    post metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_public.id, @sample_human_existing_metadata_expired.id],
     }
     assert_response :success
@@ -196,7 +196,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'joe can fetch the metadata fields for multiple samples, and invalid ones will be omitted' do
     sign_in @user_nonadmin
 
-    get metadata_fields_samples_url, params: {
+    post metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_public.id, @metadata_validation_sample_human_existing_metadata.id],
     }
     assert_response :success

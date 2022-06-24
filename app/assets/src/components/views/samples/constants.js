@@ -13,7 +13,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
       genomes are used for initial host subtraction pipeline steps.`,
     link: DOC_BASE_LINK + "360035296613-Project-Page#metrics-meanings",
   },
-  collectionLocationV2: {
+  collection_location_v2: {
     tooltip: "User-defined location from which the sample was collected.",
   },
   totalReads: {

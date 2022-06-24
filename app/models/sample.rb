@@ -112,7 +112,6 @@ class Sample < ApplicationRecord
   DATA_KEY_TO_SORT_KEY = {
     "sample" => "name",
     "createdAt" => "id",
-    "collectionLocationV2" => "collection_location_v2",
     "host" => "host",
     "totalReads" => "total_reads",
     "nonHostReads" => "adjusted_remaining_reads",
