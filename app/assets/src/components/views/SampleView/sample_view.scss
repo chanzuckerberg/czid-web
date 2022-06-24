@@ -83,6 +83,13 @@
     color: $sds-color-primary-400;
     cursor: pointer;
   }
+
+  .revertFiltersLink {
+    @include font-caps-xxs;
+    margin-top: $sds-spaces-xs;
+    color: $sds-color-gray-black;
+    cursor: pointer;
+  }
 }
 
 .tabs {

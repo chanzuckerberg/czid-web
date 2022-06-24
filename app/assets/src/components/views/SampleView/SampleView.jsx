@@ -136,22 +136,29 @@ class SampleView extends React.Component {
     } = this.loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
 
     // CHECK FOR DISCOVERY VIEW SESSION THRESHOLDS
-    // If user has set threshold filters in the discovery view, those settings
-    // should override the existing settings for the SampleView in localStorage
+    // If user has set threshold filters in the discovery view (stored in
+    // session storage), those settings should override the existing
+    // settings for the SampleView in localStorage. Thresholds in the URL
+    // should override both session and local storage
     let discoveryViewThresholdFilters = {};
     let persistThresholdsToLocalState = true;
 
-    // Get thresholds from discovery view options in session storage
-    const {
-      filters: { taxonThresholdsSelected: thresholds } = {
-        taxonThresholdsSelected: [],
-      },
-    } = this.loadState(sessionStorage, KEY_DISCOVERY_VIEW_OPTIONS);
+    const noUrlThresholds = isEmpty(selectedOptionsFromUrl?.thresholds);
+    if (noUrlThresholds) {
+      // Get thresholds from discovery view options in session storage
+      const {
+        filters: { taxonThresholdsSelected: thresholds } = {
+          taxonThresholdsSelected: [],
+        },
+      } = this.loadState(sessionStorage, KEY_DISCOVERY_VIEW_OPTIONS);
 
-    // If there are exising thresholds, add them to object that will override local options in state
-    if (!isEmpty(thresholds)) {
-      discoveryViewThresholdFilters = { thresholds };
-      persistThresholdsToLocalState = false;
+      // If there are exising session thresholds, override local options in state
+      if (!isEmpty(thresholds)) {
+        discoveryViewThresholdFilters = { thresholds };
+        persistThresholdsToLocalState = false;
+
+        this.renderPersistedDiscoveryViewThresholdsNotification();
+      }
     }
     // END CHECK FOR DISCOVERY VIEW SESSION THRESHOLDS
 
@@ -1841,11 +1848,67 @@ class SampleView extends React.Component {
             this.handleTabChange(TABS.CONSENSUS_GENOME);
             closeToast();
           }}
+          onKeyDown={() => {
+            this.handleTabChange(TABS.CONSENSUS_GENOME);
+            closeToast();
+          }}
         >
           View Consensus Genomes
         </div>
       </Notification>
     );
+  };
+
+  renderPersistedDiscoveryViewThresholdsNotification = () => {
+    showToast(
+      ({ closeToast }) => (
+        <Notification
+          className={cs.notificationBody}
+          closeWithIcon
+          closeWithDismiss={false}
+          onClose={closeToast}
+          type="warning"
+        >
+          The taxon filters from the samples page have carried over. If you
+          would like to use filters previously applied to the report, click the
+          button below.
+          <div
+            className={cs.revertFiltersLink}
+            onClick={() => {
+              this.revertToSampleViewThresholds();
+              closeToast();
+            }}
+            onKeyDown={() => {
+              this.handleTabChange(TABS.CONSENSUS_GENOME);
+              closeToast();
+            }}
+          >
+            Revert
+          </div>
+        </Notification>
+      ),
+      {
+        autoClose: 100000,
+      },
+    );
+  };
+
+  revertToSampleViewThresholds = () => {
+    const { selectedOptions: selectedOptionsFromLocal } = this.loadState(
+      localStorage,
+      KEY_SAMPLE_VIEW_OPTIONS,
+    );
+    const newSelectedOptions = {
+      ...this.state.selectedOptions,
+      thresholds: selectedOptionsFromLocal?.thresholds || [],
+    };
+
+    this.setState({ selectedOptions: newSelectedOptions }, () => {
+      this.refreshDataFromOptionsChange({
+        key: "thresholds",
+        newSelectedOptions,
+      });
+    });
   };
 
   hasAppliedFilters = () => {
@@ -2093,6 +2156,7 @@ class SampleView extends React.Component {
                 <span
                   className={cs.clearAllFilters}
                   onClick={this.clearAllFilters}
+                  onKeyDown={this.clearAllFilters}
                 >
                   Clear All Filters
                 </span>
