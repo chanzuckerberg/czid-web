@@ -19,7 +19,7 @@ class Contig < ApplicationRecord
 
   BLAST_SEQUENCE_CHARACTER_LIMIT = 7500
 
-  CONTIG_FILTERS = ["contig", "contig_r"].freeze
+  CONTIG_FILTERS = ["contigs", "contig_r"].freeze
 
   def to_fa
     "#{fa_header}#{sequence}"

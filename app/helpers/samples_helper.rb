@@ -256,6 +256,7 @@ module SamplesHelper
       location = filters[:location]
       location_v2 = filters[:locationV2]
       tax_ids = filters[:taxon]
+      tax_levels = filters[:taxaLevels]
       threshold_filter_info = filters[:taxonThresholds]
       time = filters[:time]
       # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
@@ -280,7 +281,7 @@ module SamplesHelper
 
       if tax_ids.present?
         samples = if threshold_filter_info.present?
-                    filter_by_taxon_threshold(samples, tax_ids, threshold_filter_info)
+                    filter_by_taxon_threshold(samples, tax_ids, tax_levels, threshold_filter_info)
                   else
                     filter_by_taxid(samples, tax_ids)
                   end
@@ -820,18 +821,22 @@ module SamplesHelper
     samples.where(initial_workflow: query).or(samples.where(id: samples_with_workflow_run))
   end
 
-  def filter_by_taxon_threshold(samples, tax_ids, threshold_filter_info)
+  def filter_by_taxon_threshold(samples, tax_ids, tax_levels, threshold_filter_info)
     parsed_threshold_filter_info = threshold_filter_info.map { |json_encoded_filter| JSON.parse(json_encoded_filter, symbolize_names: true) }
-    validate_threshold_filter_values(parsed_threshold_filter_info)
+    validate_threshold_filter_input(parsed_threshold_filter_info, tax_levels)
 
-    if parsed_threshold_filter_info.any? { |filter| TaxonCount::TAXON_COUNT_METRIC_FILTERS.include?(filter[:metric]) }
-      samples = samples.filter_by_taxon_count_threshold(tax_ids, parsed_threshold_filter_info)
+    taxon_count_thresold_filters = parsed_threshold_filter_info.filter { |filter| TaxonCount::TAXON_COUNT_METRIC_FILTERS.include?(filter[:metric]) }
+    contig_threshold_filters = parsed_threshold_filter_info.filter { |filter| Contig::CONTIG_FILTERS.include?(filter[:metric]) }
+
+    samples = samples.filter_by_taxon_count_threshold(tax_ids, taxon_count_thresold_filters) if taxon_count_thresold_filters.present?
+    if contig_threshold_filters.present?
+      tax_ids_with_levels = tax_ids.zip(tax_levels)
+      samples = samples.filter_by_contig_threshold(tax_ids_with_levels, contig_threshold_filters)
     end
-
     samples
   end
 
-  def validate_threshold_filter_values(threshold_filters)
+  def validate_threshold_filter_input(threshold_filters, tax_levels)
     threshold_filters.each do |filter|
       filter.assert_valid_keys(*Sample::TAXON_FILTER_THRESHOLD_KEYS)
       count_type, metric, operator, value = *filter.fetch_values(*Sample::TAXON_FILTER_THRESHOLD_KEYS)
@@ -842,6 +847,8 @@ module SamplesHelper
 
       Float(value) # Kernel::Float will raise an ArgumentError if it fails to convert the value to a Float.
     end
+
+    tax_levels.each { |tax_level| raise ThresholdFilterErrors.invalid_tax_level(tax_level) unless TaxonCount::LEVELS_FOR_FILTERING.include?(tax_level) }
   end
 
   def get_upload_credentials(samples)

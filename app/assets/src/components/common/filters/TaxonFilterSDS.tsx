@@ -60,6 +60,7 @@ const TaxonFilterSDS = ({
       .map((result: TaxonSearchResult) => ({
         id: result.taxid,
         name: result.title,
+        level: result.level,
       }));
 
     return options;

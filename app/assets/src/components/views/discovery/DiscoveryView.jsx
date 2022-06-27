@@ -516,9 +516,12 @@ class DiscoveryView extends React.Component {
 
     // Taxon is an exception: this filter needs to store complete option, so need to convert to values only
     if (preparedFilters.taxon && preparedFilters.taxon.length) {
-      const mapKey = allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)
-        ? "id"
-        : "value";
+      let mapKey = "value";
+
+      if (allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)) {
+        mapKey = "id";
+        preparedFilters.taxaLevels = map("level", preparedFilters.taxon);
+      }
 
       preparedFilters.taxon = map(mapKey, preparedFilters.taxon);
     }

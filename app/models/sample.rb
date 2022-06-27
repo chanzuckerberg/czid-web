@@ -1113,7 +1113,7 @@ class Sample < ApplicationRecord
     end
   end
 
-  def self.group_taxon_filters_by_count_type(threshold_filter_info)
+  def self.group_taxon_count_filters_by_count_type(threshold_filter_info)
     # Convert threshold hash into a filter statement and group it by count types (nt or nr)
     filters_by_count_type = threshold_filter_info.each_with_object({}) do |threshold_filter, result|
       count_type, metric, operator, value = *threshold_filter.fetch_values(*TAXON_FILTER_THRESHOLD_KEYS)
@@ -1134,13 +1134,16 @@ class Sample < ApplicationRecord
 
   # threshold_filter_info is an array of JSON strings that need to be parsed
   def self.filter_by_taxon_count_threshold(tax_ids, threshold_filter_info)
-    threshold_filters_by_count_type = group_taxon_filters_by_count_type(threshold_filter_info)
+    threshold_filters_by_count_type = group_taxon_count_filters_by_count_type(threshold_filter_info)
 
     queries_by_count_type = threshold_filters_by_count_type.each_with_object({}) do |(count_type, filter_queries), queries|
       filter_statement = filter_queries.join(" AND ")
       # TODO: Test out creating new composite index (pipeline_run_id, count_type, tax_id)
       left_join_statement = "LEFT OUTER JOIN `pipeline_runs` ON `pipeline_runs`.`sample_id` = `samples`.`id` LEFT OUTER JOIN `taxon_counts` FORCE INDEX FOR JOIN (`index_pr_tax_hit_level_tc`) ON `taxon_counts`.`pipeline_run_id` = `pipeline_runs`.`id`"
       queries[count_type] = joins(left_join_statement).where(
+        pipeline_runs: {
+          deprecated: false,
+        },
         taxon_counts: {
           tax_id: tax_ids,
           count_type: count_type,
@@ -1156,6 +1159,50 @@ class Sample < ApplicationRecord
     when [TaxonCount::COUNT_TYPE_NR]
       queries_by_count_type[TaxonCount::COUNT_TYPE_NR].distinct
     end
+  end
+
+  def self.filter_by_contig_threshold(tax_ids_with_levels, contig_threshold_filters)
+    queries = contig_threshold_filters.each_with_object([]) do |filter, result|
+      count_type, metric, operator, value = *filter.fetch_values(*TAXON_FILTER_THRESHOLD_KEYS)
+
+      tax_ids_with_levels.each do |tax_id, tax_level|
+        contig_filter_statement = create_contig_filter_statement(metric, tax_id, tax_level, count_type, operator, value)
+        result << left_outer_joins(pipeline_runs: [:contigs]).where(pipeline_runs: { deprecated: false }).where(contig_filter_statement).distinct.to_sql
+      end
+    end
+
+    # Execute raw SQL then convert the results back to an active record relation
+    # TODO: Find a better way to do the union of multiple ActiveRecord::Relation and return an ActiveRecord::Relation
+    filtered_sample_ids = Sample.find_by_sql(queries.join(" UNION ")).pluck(:id)
+    Sample.where(id: filtered_sample_ids)
+  end
+
+  def self.create_contig_filter_statement(metric, tax_id, tax_level, count_type, operator, value)
+    contig_arel_table = Contig.arel_table
+    lowercase_count_type = count_type.downcase
+
+    filter_statement = contig_arel_table.where(contig_arel_table[:read_count].gteq(PipelineRun::MIN_CONTIG_READS))
+    filter_statement = filter_statement.where(contig_arel_table["#{tax_level}_taxid_#{lowercase_count_type}"].eq(tax_id))
+    filter_statement = filter_statement.where(PipelineRun.arel_table[:id].eq(contig_arel_table[:pipeline_run_id]))
+    filter_statement = add_aggregate_arel_node_for_contig_metric(filter_statement, metric, operator, value)
+
+    filter_statement.to_sql
+  end
+
+  def self.add_aggregate_arel_node_for_contig_metric(arel_query, metric, operator, value)
+    contig_arel_table = Contig.arel_table
+
+    case metric
+    when "contigs"
+      arel_aggregate_statement_node = Arel.star.count
+    when "contig_r"
+      arel_aggregate_statement_node = contig_arel_table[:read_count].sum
+    end
+
+    arel_having_node = operator == ">=" ? arel_aggregate_statement_node.gteq(value) : arel_aggregate_statement_node.lteq(value)
+    query = arel_query.group(contig_arel_table[:pipeline_run_id]).project(arel_aggregate_statement_node).having(arel_having_node)
+
+    query
   end
 
   private

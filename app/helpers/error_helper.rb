@@ -24,6 +24,10 @@ module ErrorHelper
     def self.invalid_metric(metric)
       "Invalid metric provided: #{metric}. Expected metric to exist in: #{TaxonCount::TAXON_COUNT_METRIC_FILTERS}"
     end
+
+    def self.invalid_tax_level(tax_level)
+      "Invalid tax level provided: #{tax_level}. Expected tax level to exist in #{TaxonCount::LEVELS_FOR_FILTERING}"
+    end
   end
 
   module MetadataUploadErrors

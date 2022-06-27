@@ -77,6 +77,7 @@ class TaxonCount < ApplicationRecord
 
   TAXON_COUNT_METRIC_FILTERS = ["count", "percent_identity", "alignment_length", "e_value", "rpm"].freeze
   COUNT_TYPES_FOR_FILTERING = [COUNT_TYPE_NT, COUNT_TYPE_NR].freeze
+  LEVELS_FOR_FILTERING = ["species", "genus"].freeze
 
   scope :type, ->(count_type) { where(count_type: count_type) }
   scope :level, ->(tax_level) { where(tax_level: tax_level) }

@@ -254,6 +254,8 @@ class PipelineRun < ApplicationRecord
     step_function: "step_function",
   }
 
+  scope :non_deprecated, -> { where(deprecated: false) }
+
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
   end

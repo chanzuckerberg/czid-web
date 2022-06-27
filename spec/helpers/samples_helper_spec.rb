@@ -598,6 +598,13 @@ RSpec.describe SamplesHelper, type: :helper do
                                e_value: -99,
                                rpm: 99,
                              },],
+                             contigs_data: [{
+                               genus_taxid_nt: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 573,
+                               read_count: 99,
+                             },],
                            ])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two", initial_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
       @sample_three = create(:sample, project: @project, name: "Test Sample Three", initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs], pipeline_runs_data: [
@@ -634,13 +641,27 @@ RSpec.describe SamplesHelper, type: :helper do
                                  e_value: 200,
                                  rpm: 200,
                                },],
+                               contigs_data: [{
+                                 genus_taxid_nt: 570,
+                                 read_count: 100,
+                               }, {
+                                 genus_taxid_nt: 570,
+                                 read_count: 100,
+                               }, {
+                                 species_taxid_nt: 573,
+                                 read_count: 100,
+                               }, {
+                                 species_taxid_nt: 573,
+                                 read_count: 100,
+                               },],
                              ])
 
       @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
       @tax_ids = [570, 573]
+      @tax_levels = ["genus", "species"]
     end
 
-    context "validates threshold filtering parameters" do
+    context "validates threshold filtering input" do
       it "raises error if threshold filter hash keys do not match expected keys" do
         threshold_with_extra_key = [
           {
@@ -652,7 +673,7 @@ RSpec.describe SamplesHelper, type: :helper do
           }.to_json,
         ]
 
-        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_extra_key) }.to raise_error(ArgumentError)
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, @tax_levels, threshold_with_extra_key) }.to raise_error(ArgumentError)
       end
 
       it "raises error if value is invalid" do
@@ -665,7 +686,7 @@ RSpec.describe SamplesHelper, type: :helper do
           }.to_json,
         ]
 
-        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_invalid_value) }.to raise_error(ArgumentError)
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, @tax_levels, threshold_with_invalid_value) }.to raise_error(ArgumentError)
       end
 
       it "raises error if count_type is invalid" do
@@ -679,7 +700,7 @@ RSpec.describe SamplesHelper, type: :helper do
           }.to_json,
         ]
 
-        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_invalid_count_type) }.to raise_error(RuntimeError) # , ErrorHelper::ThresholdFilterErrors.invalid_count_type(count_type)
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, @tax_levels, threshold_with_invalid_count_type) }.to raise_error(RuntimeError) # , ErrorHelper::ThresholdFilterErrors.invalid_count_type(count_type)
       end
 
       it "raises error if operator is invalid" do
@@ -693,7 +714,7 @@ RSpec.describe SamplesHelper, type: :helper do
           }.to_json,
         ]
 
-        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_invalid_operator) }.to raise_error(RuntimeError) # ErrorHelper::ThresholdFilterErrors.invalid_operator(operator)
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, @tax_levels, threshold_with_invalid_operator) }.to raise_error(RuntimeError) # ErrorHelper::ThresholdFilterErrors.invalid_operator(operator)
       end
 
       it "raises error if metric is invalid" do
@@ -708,14 +729,28 @@ RSpec.describe SamplesHelper, type: :helper do
           }.to_json,
         ]
 
-        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, threshold_with_invalid_metric) }.to raise_error(RuntimeError) # ErrorHelper::ThresholdFilterErrors.invalid_metric(metric)
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, @tax_levels, threshold_with_invalid_metric) }.to raise_error(RuntimeError) # ErrorHelper::ThresholdFilterErrors.invalid_metric(metric)
+      end
+
+      it "raises error if tax_level is invalid" do
+        invalid_tax_levels = ["invalid tax level"]
+        valid_threshold_filter = [
+          {
+            metric: "count",
+            count_type: "NT",
+            operator: ">=",
+            value: 10,
+          }.to_json,
+        ]
+
+        expect { helper.send(:filter_by_taxon_threshold, @samples_input, @tax_ids, invalid_tax_levels, valid_threshold_filter) }.to raise_error(RuntimeError) # ErrorHelper::ThresholdFilterErrors.invalid_metric(tax_level)
       end
     end
 
     # TODO(omar): Uncomment these tests out when percent_identity, alignment_length, and rpm columns are converted to decimal.
     # Since float's are approximate values, doing equality comparisons (<=, >=, and ==) do not work as expected.
 
-    # TaxonCount::TAXON_COUNT_METRIC_FILTERS.each do |metric|
+    # Contig::CONTIG_FILTERS.concat(TaxonCount::TAXON_COUNT_METRIC_FILTERS).each do |metric|
     #   TaxonCount::COUNT_TYPES_FOR_FILTERING.each do |count_type|
     #     Sample::FILTERING_OPERATORS.each do |operator|
     #       value = 100
