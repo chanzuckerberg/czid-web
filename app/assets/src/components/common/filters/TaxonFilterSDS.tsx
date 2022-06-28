@@ -102,6 +102,7 @@ const TaxonFilterSDS = ({
       onChange={handleChange}
       value={selectedTaxa}
       MenuSelectProps={{
+        keepSearchOnSelect: true,
         noOptionsText: "No results",
         onInputChange,
         getOptionSelected: (option: TaxonOption, value: TaxonOption) =>
