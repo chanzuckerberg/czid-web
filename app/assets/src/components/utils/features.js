@@ -13,3 +13,4 @@ export const SORTING_V0_ADMIN_FEATURE = "sorting_v0_admin";
 export const TAXON_THRESHOLD_FILTERING_FEATURE = "taxon_threshold_filter";
 export const SAMPLES_TABLE_METADATA_COLUMNS_FEATURE =
   "samples_table_metadata_columns";
+export const MICROBIOME_DOWNLOAD_FEATURE = "microbiome";

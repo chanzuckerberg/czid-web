@@ -1,3 +1,8 @@
+import React from "react";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+
+// TODO: Remove DOWNLOAD_OPTIONS when microbiome feature is launched;
+// it will be replaced by HEATMAP_DOWNLOAD_OPTIONS.
 export const DOWNLOAD_OPTIONS = [
   { text: "Download All Heatmap Metrics (.csv)", value: "csv_metrics" },
   {
@@ -6,6 +11,61 @@ export const DOWNLOAD_OPTIONS = [
   },
   { text: "Download SVG", value: "svg" },
   { text: "Download PNG", value: "png" },
+];
+
+export const HEATMAP_DOWNLOAD_CATEGORIES = ["reports", "images"];
+
+export const HEATMAP_DOWNLOAD_OPTIONS = [
+  {
+    category: "reports",
+    description:
+      "User-uploaded metadata, including sample collection location, collection date, sample type",
+    display_name: "All Heatmap Metrics",
+    file_type_display: ".csv",
+    type: "all_metrics",
+  },
+  {
+    category: "reports",
+    description:
+      "User-uploaded metadata, including sample collection location, collection date, sample type",
+    display_name: "Current Heatmap Metrics",
+    file_type_display: ".csv",
+    type: "current_metrics",
+  },
+  {
+    admin_only: true,
+    category: "reports",
+    description: (
+      // TODO: Replace the hrefs with the actual links once they're available.
+      <React.Fragment>
+        Sample report data (samples x taxons) combined with all sample metadata
+        and taxon metadata in{" "}
+        <ExternalLink href="https://help.czid.org">BIOM</ExternalLink> format.{" "}
+        <ExternalLink href="https://help.czid.org">Learn more</ExternalLink>
+      </React.Fragment>
+    ),
+    display_name: "Combined Microbiome File",
+    fields: [
+      {
+        display_name: "Download Metric",
+        type: "metric",
+      },
+    ],
+    file_type_display: ".biom",
+    type: "biom_format",
+  },
+  {
+    category: "images",
+    display_name: "Heatmap Image",
+    file_type_display: ".png",
+    type: "png",
+  },
+  {
+    category: "images",
+    display_name: "Heatmap Image",
+    file_type_display: ".svg",
+    type: "svg",
+  },
 ];
 
 export const SCALE_OPTIONS = [
@@ -86,3 +146,10 @@ export const SPECIES_SELECTION_OPTIONS = {
   species: 1,
   genus: 0,
 };
+
+export const MICROBIOME_DOWNLOAD_METRIC_OPTIONS = [
+  { text: "NT rPM", value: "NT.rpm" },
+  { text: "NT r (total reads)", value: "NT.r" },
+  { text: "NR rPM", value: "NR.rpm" },
+  { text: "NR r (total reads)", value: "NR.r" },
+];

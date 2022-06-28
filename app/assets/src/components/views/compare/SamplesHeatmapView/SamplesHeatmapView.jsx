@@ -59,6 +59,7 @@ import Notification from "~ui/notifications/Notification";
 import { processMetadata } from "~utils/metadata";
 
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
+import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 import {
   BACKGROUND_METRICS,
@@ -115,6 +116,7 @@ class SamplesHeatmapView extends React.Component {
         presets: this.urlParams.presets || [],
       },
       heatmapCreationModalOpen: false,
+      downloadModalOpen: false,
       loading: false,
       loadingFailed: false,
       selectedMetadata: this.urlParams.selectedMetadata || [
@@ -499,6 +501,14 @@ class SamplesHeatmapView extends React.Component {
 
   handleHeatmapCreationModalClose = () => {
     this.setState({ heatmapCreationModalOpen: false });
+  };
+
+  handleDownloadModalOpen = () => {
+    this.setState({ downloadModalOpen: true });
+  };
+
+  handleDownloadModalClose = () => {
+    this.setState({ downloadModalOpen: false });
   };
 
   metricToSortField(metric) {
@@ -1959,6 +1969,7 @@ class SamplesHeatmapView extends React.Component {
       allGeneraIds,
       allSpeciesIds,
       data,
+      downloadModalOpen,
       enableMassNormalizedBackgrounds,
       heatmapCreationModalOpen,
       hideFilters,
@@ -1983,11 +1994,12 @@ class SamplesHeatmapView extends React.Component {
             <NarrowContainer>
               <SamplesHeatmapHeader
                 sampleIds={sampleIds}
-                data={data}
                 heatmapId={
                   this.props.savedParamValues && this.props.savedParamValues.id
                 }
+                loading={loading}
                 heatmapName={this.props.name}
+                onDownloadClick={this.handleDownloadModalOpen}
                 onDownloadSvg={this.handleDownloadSvg}
                 onDownloadPng={this.handleDownloadPng}
                 onDownloadCurrentHeatmapViewCsv={
@@ -2057,6 +2069,16 @@ class SamplesHeatmapView extends React.Component {
               ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED,
             )}
             selectedIds={sampleIds}
+          />
+        )}
+        {downloadModalOpen && (
+          <SamplesHeatmapDownloadModal
+            open
+            onClose={withAnalytics(
+              this.handleDownloadModalClose,
+              ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_CLOSED,
+            )}
+            sampleIds={sampleIds}
           />
         )}
       </div>

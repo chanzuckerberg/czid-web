@@ -17,6 +17,7 @@ import {
   SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
+import { MICROBIOME_DOWNLOAD_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { logDownloadOption } from "~/components/views/report/utils/download";
 import {
@@ -24,6 +25,7 @@ import {
   testForSpecialCharacters,
 } from "~/helpers/strings";
 import {
+  DownloadButton,
   PrimaryButton,
   HelpButton,
   SaveButton,
@@ -41,9 +43,10 @@ import cs from "./samples_heatmap_view.scss";
 
 const SamplesHeatmapHeader = ({
   sampleIds,
-  data,
+  loading,
   heatmapId,
   heatmapName,
+  onDownloadClick,
   onDownloadAllHeatmapMetricsCsv,
   onDownloadCurrentHeatmapViewCsv,
   onDownloadSvg,
@@ -54,6 +57,9 @@ const SamplesHeatmapHeader = ({
 }) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
+  const hasMicrobiomeFeature = allowedFeatures.includes(
+    MICROBIOME_DOWNLOAD_FEATURE,
+  );
   const handleDownloadClick = option => {
     switch (option) {
       case "svg":
@@ -117,6 +123,7 @@ const SamplesHeatmapHeader = ({
   const showNewPresetsButton =
     allowedFeatures.includes("taxon_heatmap_presets") &&
     sampleIds.length > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM;
+
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
@@ -183,12 +190,20 @@ const SamplesHeatmapHeader = ({
           )}
           className={cs.controlElement}
         />
-        <DownloadButtonDropdown
-          className={cs.controlElement}
-          options={DOWNLOAD_OPTIONS}
-          onClick={handleDownloadClick}
-          disabled={!data}
-        />
+        {hasMicrobiomeFeature ? (
+          <DownloadButton
+            className={cs.controlElement}
+            onClick={onDownloadClick}
+            disabled={loading}
+          />
+        ) : (
+          <DownloadButtonDropdown
+            className={cs.controlElement}
+            options={DOWNLOAD_OPTIONS}
+            onClick={handleDownloadClick}
+            disabled={loading}
+          />
+        )}
         <HelpButton
           className={cs.controlElement}
           onClick={showAppcue({
@@ -204,11 +219,10 @@ const SamplesHeatmapHeader = ({
 
 SamplesHeatmapHeader.propTypes = {
   sampleIds: PropTypes.arrayOf(PropTypes.number),
-  data: PropTypes.objectOf(
-    PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
-  ),
+  loading: PropTypes.bool,
   heatmapId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   heatmapName: PropTypes.string,
+  onDownloadClick: PropTypes.func,
   onDownloadSvg: PropTypes.func.isRequired,
   onDownloadPng: PropTypes.func.isRequired,
   onDownloadAllHeatmapMetricsCsv: PropTypes.func.isRequired,

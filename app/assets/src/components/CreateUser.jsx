@@ -278,7 +278,6 @@ function CreateUser(props = {}) {
       </div>
     </div>
   );
-  // }
 }
 
 CreateUser.propTypes = {
