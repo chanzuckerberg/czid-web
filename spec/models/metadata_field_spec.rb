@@ -81,4 +81,60 @@ describe MetadataField, type: :model do
     metadata_field = find_test_field(host_genome)
     expect(metadata_field).to be_nil
   end
+
+  context "MetadataField.by_samples" do
+    before do
+      @user = create(:user)
+      @project = create(:project, users: [@user])
+      @host_genome = create(:host_genome, name: "mock_host_genome")
+      @host_metadata_field = create(
+        :metadata_field, name: "host_metadata_field", base_type: MetadataField::STRING_TYPE
+      )
+    end
+
+    it "should return an empty array if no samples are passed" do
+      samples = Sample.where(name: "non-existent sample")
+      results = MetadataField.by_samples(samples)
+      expect(results).to eq([])
+    end
+
+    it "should not return metadata fields that are not associated with the samples' projects" do
+      @host_genome.metadata_fields << @host_metadata_field
+
+      sample = create(:sample, project: @project, host_genome: @host_genome)
+      samples = Sample.where(:id [sample.id])
+
+      results = MetadataField.by_samples(samples)
+      expect(results.pluck(:key)).not_to include("host_metadata_field")
+    end
+
+    it "should not return metadata fields that are not associated with the samples' host genomes" do
+      @project.metadata_fields.append(@host_metadata_field)
+
+      sample = create(:sample, project: @project, host_genome: @host_genome)
+      samples = Sample.where(:id [sample.id])
+
+      results = MetadataField.by_samples(samples)
+      expect(results.pluck(:key)).not_to include("host_metadata_field")
+    end
+
+    it "should return all metadata fields associated with the samples' projects and host genomes" do
+      project_two = create(:project, users: [@user])
+      host_genome_two = create(:host_genome, name: "mock_host_genome_two")
+      host_metadata_field_two = create(
+        :metadata_field, name: "host_metadata_field_two", base_type: MetadataField::STRING_TYPE
+      )
+
+      @host_genome.metadata_fields << @host_metadata_field
+      host_genome_two.metadata_fields << host_metadata_field_two
+      @project.metadata_fields.append(@host_metadata_field, host_metadata_field_two)
+
+      sample_one = create(:sample, project: @project, host_genome: @host_genome)
+      sample_two = create(:sample, project: project_two, host_genome: host_genome_two)
+      samples = Sample.where(:id [sample_one.id, sample_two.id])
+
+      results = MetadataField.by_samples(samples)
+      expect(results.pluck(:key)).to eq([@host_metadata_field.name, host_metadata_field_two.name])
+    end
+  end
 end

@@ -268,6 +268,7 @@ Rails.application.routes.draw do
       post :created_by_current_user
       post :consensus_genome_clade_export
       post :workflow_runs_info
+      post :metadata_fields
     end
   end
 

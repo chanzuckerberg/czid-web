@@ -222,6 +222,18 @@ class MetadataField < ApplicationRecord
     return parsed[0] == "Yes" && parsed[1] == "No"
   end
 
+  # Get the MetadataFields that are on the Samples' Projects and HostGenomes
+  def self.by_samples(samples)
+    return [] if samples.nil?
+
+    project_ids = samples.distinct.pluck(:project_id)
+    host_genome_ids = samples.distinct.pluck(:host_genome_id)
+
+    project_fields = Project.where(id: project_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
+    host_genome_fields = HostGenome.where(id: host_genome_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
+    (project_fields.flatten & host_genome_fields.flatten).map(&:field_info)
+  end
+
   private
 
   def add_examples_helper(new_examples, host_genome)

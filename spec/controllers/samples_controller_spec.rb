@@ -893,6 +893,54 @@ RSpec.describe SamplesController, type: :controller do
         expect(reads[1]).to eq(">sequence2/2\nABC\nDEFG\n")
       end
     end
+
+    describe "POST #metadata_fields" do
+      before do
+        # Create @sample1 that is viewable by @joe
+        # and add host_metadata_field1 to its project and host genome
+        host_genome1 = create(:host_genome, name: "mock_host_genome1")
+        @host_metadata_field1 = create(
+          :metadata_field, name: "host_metadata_field1", base_type: MetadataField::STRING_TYPE
+        )
+        host_genome1.metadata_fields << @host_metadata_field1
+        project1 = create(:project, users: [@joe])
+        project1.metadata_fields.append(@host_metadata_field1)
+        @sample1 = create(:sample, project: project1, host_genome: host_genome1)
+      end
+
+      it "should return an empty array if no sample ids are provided" do
+        post :metadata_fields, params: { sampleIds: [] }, as: :json
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq([])
+      end
+
+      it "should return the correct metadata fields if 1 sample id is provided" do
+        post :metadata_fields, params: { sampleIds: [@sample1.id] }, as: :json
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(1)
+        expect(json_response[0]["key"]).to eq(@host_metadata_field1.name)
+      end
+
+      it "should only return metadata fields of viewable samples" do
+        # Create @sample2 that is not viewable by @joe
+        host_genome2 = create(:host_genome, name: "mock_host_genome2")
+        host_metadata_field2 = create(
+          :metadata_field, name: "host_metadata_field2", base_type: MetadataField::STRING_TYPE
+        )
+        host_genome2.metadata_fields << host_metadata_field2
+        project2 = create(:project, users: [create(:user)])
+        project2.metadata_fields.append(host_metadata_field2)
+        sample2 = create(:sample, project: project2, host_genome: host_genome2)
+
+        post :metadata_fields, params: { sampleIds: [@sample1.id, sample2.id] }, as: :json
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(1)
+        expect(json_response[0]["key"]).to eq(@host_metadata_field1.name)
+      end
+    end
   end
 
   context "Admin user" do

@@ -803,12 +803,7 @@ class SamplesController < ApplicationController
     else
       # Get the MetadataFields that are on the Samples' Projects and HostGenomes
       samples = current_power.viewable_samples.where(id: sample_ids)
-      project_ids = samples.distinct.pluck(:project_id)
-      host_genome_ids = samples.distinct.pluck(:host_genome_id)
-
-      project_fields = Project.where(id: project_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
-      host_genome_fields = HostGenome.where(id: host_genome_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
-      results = (project_fields.flatten & host_genome_fields.flatten).map(&:field_info)
+      results = MetadataField.by_samples(samples)
     end
 
     render json: results

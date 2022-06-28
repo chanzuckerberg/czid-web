@@ -158,6 +158,17 @@ class WorkflowRunsController < ApplicationController
     )
   end
 
+  # POST /workflow_runs/metadata_fields
+  def metadata_fields
+    workflow_run_ids = (params[:workflowRunIds] || []).map(&:to_i)
+    sample_ids = current_power.workflow_runs.where(id: workflow_run_ids).pluck(:sample_id).uniq
+
+    samples = current_power.viewable_samples.where(id: sample_ids)
+    results = MetadataField.by_samples(samples)
+
+    render json: results
+  end
+
   # POST /workflow_runs/created_by_current_user
   # Returns whether all workflow runs were created by the current user.
   # This method uses POST because hundreds of workflowRunIds can be passed.
