@@ -15,6 +15,7 @@ import { humanize } from "~/helpers/strings";
 import Checkbox from "~ui/controls/Checkbox";
 import RadioButton from "~ui/controls/RadioButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import LinkCS from "~ui/controls/link.scss";
 import StatusLabel from "~ui/labels/StatusLabel";
 
 import TaxonHitSelect from "./TaxonHitSelect";
@@ -165,7 +166,6 @@ class BulkDownloadModalOptions extends React.Component {
                 backgroundOptions={backgroundOptions}
                 />
           </div>
-          To apply more filters, download directly from heatmap
         </div>
         );
       case "download_format":
@@ -256,6 +256,7 @@ class BulkDownloadModalOptions extends React.Component {
       allObjectsUploadedByCurrentUser,
       selectedDownloadTypeName,
       objectDownloaded,
+      handleHeatmapLink,
     } = this.props;
     const { admin, appConfig } = this.context || {};
 
@@ -335,6 +336,22 @@ class BulkDownloadModalOptions extends React.Component {
               {downloadType.fields.map(field =>
                 this.renderOption(downloadType, field),
               )}
+              {downloadType.type === "biom_format" &&
+                <div className={cs.description}>
+                  To apply more filters, download directly from
+                  <span
+                    role="link"
+                    className={LinkCS.linkDefault}
+                    tabIndex="0"
+                    onClick={ (e) => {
+                        handleHeatmapLink();
+                        e.stopPropagation();
+                      }}
+                    onKeyDown={handleHeatmapLink}
+                    > heatmap
+                  </span>
+                </div>
+              }
             </div>
           )}
         </div>
@@ -431,6 +448,7 @@ BulkDownloadModalOptions.propTypes = {
   metricsOptions: PropTypes.array,
   allObjectsUploadedByCurrentUser: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
+  handleHeatmapLink: PropTypes.func.isRequired,
   enableMassNormalizedBackgrounds: PropTypes.bool,
   objectDownloaded: PropTypes.string,
 };

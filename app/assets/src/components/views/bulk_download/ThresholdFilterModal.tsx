@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ThresholdFilterList from "~/components/ui/controls/dropdowns/ThresholdFilterList";
-import { THRESHOLDS } from "~/components/views/SampleView/constants";
+import { THRESHOLDS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { BackgroundOption, ThresholdFilterData } from "~/interface/dropdown";
 
 interface ThresholdFilterModalProps {
@@ -43,12 +43,13 @@ const ThresholdFilterModal = ({
                 ]);
             }}
             onChangeThreshold={ (thresholdIdx, threshold) => {
-                setThresholds([
+                const newThresholds = [
                     ...thresholds.slice(0, thresholdIdx),
                     threshold,
                     ...thresholds.slice(thresholdIdx + 1, thresholds.length),
-                ]);
-                addFilterList("biom_file", "metric_list", thresholds, "metric_list");
+                ];
+                setThresholds(newThresholds);
+                addFilterList("biom_format", "metric_list", newThresholds, "metric_list");
             }}
             onRemoveThreshold={ (thresholdIdx) => {
                 setThresholds([

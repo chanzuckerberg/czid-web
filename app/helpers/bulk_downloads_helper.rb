@@ -196,7 +196,6 @@ module BulkDownloadsHelper
   def self.pivot_biom_metrics(taxon_metrics, sample_names, pr_id_to_sample_id, fields, bulk_download_id)
     # Pivots the taxon metrics table in chunks and streams the output to tsv
     # Also streams the taxonomy metadata to a tsv
-
     taxon_metric_ids = taxon_metrics.pluck(:id)
     sample_metrics = Array.new(sample_names.count, 0) # create empty array of sample names
     data_file = "/tmp/#{bulk_download_id}_output.tsv"
@@ -271,7 +270,6 @@ module BulkDownloadsHelper
     # we can't fit the entire dataset into memory for large datasets
     pr_id_to_sample_id = pipeline_runs.non_deprecated.pluck(:id, :sample_id).to_h
     pipeline_run_ids = pr_id_to_sample_id.keys
-
     taxon_metrics, fields = TaxonCountsDataService.call(
       pipeline_run_ids: pipeline_run_ids,
       taxon_ids: nil,

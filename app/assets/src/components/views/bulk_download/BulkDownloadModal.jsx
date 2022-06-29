@@ -16,7 +16,9 @@ import {
 } from "~/api/access_control";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
+import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
+import { openUrl } from "~utils/links";
 import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
@@ -263,6 +265,37 @@ class BulkDownloadModal extends React.Component {
     });
   };
 
+  handleHeatmapLink = (event) => {
+    const {
+      selectedFields,
+      validObjectIds,
+    } = this.state;
+    const metricList = selectedFields["biom_format"] &&
+                      selectedFields["biom_format"]["metric_list"];
+    const sortMetric = selectedFields["biom_format"] && selectedFields["biom_format"]["metric"];
+    const presets = [];
+    if(metricList) {
+      presets.push("thresholdFilters");
+    }
+    if (sortMetric){
+      presets.push("metric");
+    }
+
+    const params = getURLParamString({
+      background: metricList && metricList[0]["background_id"] ? metricList[0]["background_id"]: 26,
+      categories: [],
+      subcategories: JSON.stringify({}),
+      readSpecificity: null,
+      sampleIds: Array.from(validObjectIds),
+      species: null,
+      thresholdFilters: JSON.stringify(metricList),
+      metric: sortMetric,
+      presets: presets,
+    });
+
+    openUrl(`/visualizations/heatmap?${params}`);
+  }
+
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
     const { workflow } = this.props;
     this.setState(prevState => {
@@ -392,6 +425,7 @@ class BulkDownloadModal extends React.Component {
               selectedFields={selectedFields}
               selectedDownloadTypeName={selectedDownloadTypeName}
               onSelect={this.handleSelectDownloadType}
+              handleHeatmapLink={this.handleHeatmapLink}
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
               objectDownloaded={objectDownloaded}
             />

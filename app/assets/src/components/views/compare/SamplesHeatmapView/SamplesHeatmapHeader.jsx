@@ -36,7 +36,6 @@ import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { IconFilters } from "~ui/icons";
 import {
   DOWNLOAD_OPTIONS,
-  TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM,
 } from "./constants";
 
 import cs from "./samples_heatmap_view.scss";
@@ -46,6 +45,7 @@ const SamplesHeatmapHeader = ({
   loading,
   heatmapId,
   heatmapName,
+  presets,
   onDownloadClick,
   onDownloadAllHeatmapMetricsCsv,
   onDownloadCurrentHeatmapViewCsv,
@@ -122,8 +122,7 @@ const SamplesHeatmapHeader = ({
 
   const showNewPresetsButton =
     allowedFeatures.includes("taxon_heatmap_presets") &&
-    sampleIds.length > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM;
-
+    !!presets.length;
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
@@ -222,6 +221,7 @@ SamplesHeatmapHeader.propTypes = {
   loading: PropTypes.bool,
   heatmapId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   heatmapName: PropTypes.string,
+  presets: PropTypes.array,
   onDownloadClick: PropTypes.func,
   onDownloadSvg: PropTypes.func.isRequired,
   onDownloadPng: PropTypes.func.isRequired,

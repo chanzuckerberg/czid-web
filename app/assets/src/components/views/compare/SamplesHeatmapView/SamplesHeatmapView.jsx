@@ -1999,6 +1999,7 @@ class SamplesHeatmapView extends React.Component {
                 }
                 loading={loading}
                 heatmapName={this.props.name}
+                presets={this.state.selectedOptions["presets"]}
                 onDownloadClick={this.handleDownloadModalOpen}
                 onDownloadSvg={this.handleDownloadSvg}
                 onDownloadPng={this.handleDownloadPng}
