@@ -15,7 +15,6 @@ import React from "react";
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
-import { LOCAL_MULTIPART_UPLOADS_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
@@ -68,21 +67,12 @@ class LocalSampleFileUpload extends React.Component {
   };
 
   onRejected = rejectedFiles => {
-    const { allowedFeatures = [] } = this.context || {};
     const emptyFiles = rejectedFiles.filter(f => f.size === 0);
     const invalidFiles = rejectedFiles.filter(f => f.size > 0 && f.size < 5e9);
     const mapNames = _fp.compose(_fp.join(", "), _fp.map("name"));
     let msg = "Some of your files cannot be uploaded.\n";
     if (emptyFiles.length > 0) {
       msg += `- Empty files: ${mapNames(emptyFiles)}\n`;
-    }
-    if (!allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
-      const bigFiles = rejectedFiles.filter(f => f.size >= 5e9);
-      if (bigFiles.length > 0) {
-        msg += `- Too large: ${mapNames(
-          bigFiles,
-        )}\nSize must be under 5GB for local uploads. For larger files, please try our CLI.`;
-      }
     }
 
     if (invalidFiles.length > 0) {

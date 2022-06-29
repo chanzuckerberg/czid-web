@@ -54,9 +54,6 @@ RSpec.describe "Sample request", type: :request do
         }
 
         @client_params = "web"
-
-        # don't actually do any remote work
-        allow_any_instance_of(Sample).to receive(:set_presigned_url_for_local_upload).and_return(true)
       end
 
       describe "when we create a sample via sample upload flow" do
@@ -395,9 +392,6 @@ RSpec.describe "Sample request", type: :request do
         }
 
         @client_params = "web"
-
-        # don't actually do any remote work
-        allow_any_instance_of(Sample).to receive(:set_presigned_url_for_local_upload).and_return(true)
       end
 
       it "subsample or max_input_fragments in the sample params should take precedence if project default is set" do

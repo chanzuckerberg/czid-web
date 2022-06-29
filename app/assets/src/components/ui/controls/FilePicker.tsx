@@ -1,9 +1,7 @@
 import cx from "classnames";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 
 import Dropzone from "react-dropzone";
-import { UserContext } from "~/components/common/UserContext";
-import { LOCAL_MULTIPART_UPLOADS_FEATURE } from "~/components/utils/features";
 import Icon from "../icons/Icon";
 import cs from "./file_picker.scss";
 
@@ -28,26 +26,11 @@ const FilePicker = ({
   className,
   file,
 }: FilePickerProps) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures = [] } = userContext || {};
-
   const [selectedFile, setSelectedFile] = useState(null);
-
-  const MAX_FILE_SIZE = allowedFeatures.includes(
-    LOCAL_MULTIPART_UPLOADS_FEATURE,
-  )
-    ? Infinity
-    : 5e9;
 
   // Default handler for dropped files being rejected
   const defaultOnRejected = () => {
-    if (allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
-      window.alert("File could not be selected for upload");
-    } else {
-      window.alert(
-        "Invalid file. File size must be under 5GB for local uploads.",
-      );
-    }
+    window.alert("File could not be selected for upload");
   };
 
   // Default handler for dropped files
@@ -84,7 +67,6 @@ const FilePicker = ({
     <Dropzone
       acceptClassName={cs.accepted}
       accept={accept}
-      maxSize={MAX_FILE_SIZE}
       minSize={1}
       onDrop={onChange || defaultOnChange}
       onDropRejected={onRejected || defaultOnRejected}

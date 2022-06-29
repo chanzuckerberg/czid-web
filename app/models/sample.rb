@@ -59,7 +59,6 @@ class Sample < ApplicationRecord
   validates :initial_workflow, inclusion: { in: WorkflowRun::WORKFLOW.values }
 
   before_save :check_host_genome, :concatenate_input_parts, :check_status
-  after_save :set_presigned_url_for_local_upload, unless: -> { user.allowed_feature?("local_multipart_uploads") }
   after_create :initiate_input_file_upload
   before_destroy :cleanup_relations
   after_destroy :cleanup_s3
@@ -242,26 +241,6 @@ class Sample < ApplicationRecord
 
   def missing_required_metadata_fields
     required_metadata_fields - metadata.map(&:metadata_field)
-  end
-
-  def set_presigned_url_for_local_upload
-    use_acceleration = nil
-    input_files.each do |f|
-      if f.source_type == InputFile::SOURCE_TYPE_LOCAL && f.parts
-        if use_acceleration.nil?
-          accel_response = S3_CLIENT.get_bucket_accelerate_configuration(bucket: SAMPLES_BUCKET_NAME)
-          use_acceleration = accel_response && accel_response[:status] == "Enabled"
-        end
-
-        # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
-        parts = f.parts.split(", ")
-        presigned_urls = parts.map do |part|
-          S3_PRESIGNER.presigned_url(:put_object, expires_in: 86_400, bucket: SAMPLES_BUCKET_NAME,
-                                                  key: File.join(File.dirname(f.file_path), File.basename(part)), use_accelerate_endpoint: use_acceleration)
-        end
-        f.update(presigned_url: presigned_urls.join(", "))
-      end
-    end
   end
 
   # Find sample results based on the string searched. Supports direct search on

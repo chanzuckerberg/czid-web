@@ -2,7 +2,6 @@
 // TODO(mark): Split this file up as more API methods get added.
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
-import axiosRetry from "axios-retry";
 
 import { getURLParamString } from "~/helpers/url";
 
@@ -102,31 +101,6 @@ const uploadFileToUrl = async (
     .catch(onError);
 };
 
-// Upload with retries with more resilient settings (e.g. for sample uploads)
-const uploadFileToUrlWithRetries = async (
-  file,
-  url,
-  { onUploadProgress, onSuccess, onError },
-) => {
-  const config = {
-    onUploadProgress,
-  };
-
-  // Retry up to 3 times with a 10s delay. axiosRetry interceptor means that 'catch' won't be
-  // called until all tries fail.
-  const client = axios.create();
-  axiosRetry(client, {
-    retries: 3,
-    retryDelay: () => 10000,
-    retryCondition: () => true,
-  });
-
-  return client
-    .put(url, file, config)
-    .then(onSuccess)
-    .catch(onError);
-};
-
 const getTaxonDescriptions = taxonList =>
   get(`/taxon_descriptions.json?taxon_list=${taxonList.join(",")}`);
 
@@ -154,7 +128,8 @@ const getSamples = ({
   snapshotShareId,
   basic = false,
   workflow,
-} = {}) => get(
+} = {}) =>
+  get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       "/samples/index_v2.json",
     {
@@ -672,7 +647,6 @@ export {
   updateUserSetting,
   samplesUploadedByCurrentUser,
   uploadFileToUrl,
-  uploadFileToUrlWithRetries,
   validatePhyloTreeName,
   validateProjectName,
   validateSampleFiles,

@@ -210,8 +210,8 @@ RSpec.describe SamplesHelper, type: :helper do
           expect(created_sample.workflow_runs.length).to eq(0)
 
           expect(created_sample.input_files.length).to eq(2)
-          expect(created_sample.input_files.first.presigned_url).not_to be_empty
-          expect(created_sample.input_files.second.presigned_url).not_to be_empty
+          expect(created_sample.input_files.first.presigned_url).to be_nil
+          expect(created_sample.input_files.second.presigned_url).to be_nil
         end
 
         it "returns the sample when re-called with the same sample name if it is not uploaded" do

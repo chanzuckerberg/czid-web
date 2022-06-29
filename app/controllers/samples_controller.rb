@@ -682,7 +682,6 @@ class SamplesController < ApplicationController
           {}.tap do |file_hash|
             file_hash[:id] = input_file.id
             file_hash[:name] = input_file.name
-            file_hash[:presigned_url] = input_file.presigned_url unless current_user.allowed_feature?("local_multipart_uploads")
             file_hash[:s3_bucket] = ENV["SAMPLES_BUCKET_NAME"]
             file_hash[:s3_file_path] = input_file.file_path
           end

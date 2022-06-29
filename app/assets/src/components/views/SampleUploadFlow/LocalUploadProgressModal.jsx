@@ -13,7 +13,7 @@ import {
   times,
   zipObject,
 } from "lodash/fp";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
   trackEvent,
@@ -24,12 +24,9 @@ import {
   getUploadCredentials,
   initiateBulkUploadLocalWithMetadata,
   startUploadHeartbeat,
-  uploadSampleFilesToPresignedURL,
 } from "~/api/upload";
-import { UserContext } from "~/components/common/UserContext";
 import LoadingBar from "~/components/ui/controls/LoadingBar";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { LOCAL_MULTIPART_UPLOADS_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
 import { logError } from "~/components/utils/logUtil";
 import PropTypes from "~/components/utils/propTypes";
@@ -60,9 +57,6 @@ const LocalUploadProgressModal = ({
   wetlabProtocol,
   workflows,
 }) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures = [] } = userContext || {};
-
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 
   // State variables to manage download state
@@ -193,20 +187,6 @@ const LocalUploadProgressModal = ({
     return uploadedSize / totalSize;
   };
 
-  // callbacks for uploading to pre-signed URLs
-  const getUploadProgressCallbacks = () => {
-    return {
-      onSampleUploadProgress: (sample, percentage) => {
-        updateSampleUploadPercentage(sample.name, percentage);
-      },
-      onSampleUploadError: handleSampleUploadError,
-      onSampleUploadSuccess: sample => {
-        updateSampleUploadStatus(sample.name, "success");
-      },
-      onMarkSampleUploadedError: handleMarkSampleUploadedError,
-    };
-  };
-
   const initiateUploadLocal = async () => {
     const samplesToUpload = addFlagsToSamples({
       adminOptions,
@@ -251,15 +231,7 @@ const LocalUploadProgressModal = ({
     });
 
     setLocallyCreatedSamples(createdSamples);
-
-    if (allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
-      await uploadSamples(createdSamples);
-    } else {
-      await uploadSampleFilesToPresignedURL({
-        samples: createdSamples,
-        callbacks: getUploadProgressCallbacks(),
-      });
-    }
+    await uploadSamples(createdSamples);
   };
 
   const uploadSamples = async samples => {
@@ -396,16 +368,6 @@ const LocalUploadProgressModal = ({
     });
   };
 
-  const handleMarkSampleUploadedError = (sample, error = null) => {
-    const message =
-      "UploadProgressModal: An error occured when marking a sample as uploaded";
-    logSampleUploadError({
-      error,
-      message,
-      sample,
-    });
-  };
-
   const logSampleUploadError = ({ error = null, message, sample }) => {
     logError({
       message,
@@ -450,21 +412,10 @@ const LocalUploadProgressModal = ({
     const failedLocallyCreatedSamples = map(failedSample => {
       updateSampleUploadStatus(failedSample.name, IN_PROGRESS_STATUS);
 
-      if (!allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
-        updateSampleUploadPercentage(failedSample.name, 0);
-      }
-
       return find({ name: failedSample.name }, locallyCreatedSamples);
     }, failedSamples);
 
-    if (allowedFeatures.includes(LOCAL_MULTIPART_UPLOADS_FEATURE)) {
-      await uploadSamples(failedLocallyCreatedSamples);
-    } else {
-      uploadSampleFilesToPresignedURL({
-        samples: failedLocallyCreatedSamples,
-        callbacks: getUploadProgressCallbacks(),
-      });
-    }
+    await uploadSamples(failedLocallyCreatedSamples);
   };
 
   const renderSampleStatus = ({ sample, status }) => {
