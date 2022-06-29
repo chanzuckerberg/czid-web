@@ -20,6 +20,7 @@ module BulkDownloadsHelper
   UPLOADER_ONLY_DOWNLOAD_TYPE = "You must be the uploader of all selected samples to initiate this download type.".freeze
   BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
   READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE = "Unexpected error. Could not find valid taxon lineage for taxid %s".freeze
+  TAXONOMY_LIST = ["superkingdom_name", "kingdom_name", "phylum_name", "class_name", "order_name", "family_name", "genus_name", "species_name"].freeze
 
   # Check that all pipeline runs have succeeded for the provided samples
   # and return the pipeline run ids.
@@ -190,6 +191,107 @@ module BulkDownloadsHelper
       metric_values: metric_values,
       taxids_to_name: taxids_to_name,
     }
+  end
+
+  def self.pivot_biom_metrics(taxon_metrics, sample_names, pr_id_to_sample_id, fields, bulk_download_id)
+    # Pivots the taxon metrics table in chunks and streams the output to tsv
+    # Also streams the taxonomy metadata to a tsv
+
+    taxon_metric_ids = taxon_metrics.pluck(:id)
+    sample_metrics = Array.new(sample_names.count, 0) # create empty array of sample names
+    data_file = "/tmp/#{bulk_download_id}_output.tsv"
+    taxonomy_file = "/tmp/#{bulk_download_id}_taxonomy.tsv"
+    CSVSafe.open(data_file, "wb", col_sep: "\t") do |csv|
+      CSVSafe.open(taxonomy_file, "wb", col_sep: "\t") do |taxonomy_tsv|
+        csv << ["Taxon Name"] + sample_names
+        taxonomy_tsv << [
+          "#TaxID",
+          "taxonomy1",
+          "taxonomy2",
+          "taxonomy3",
+          "taxonomy4",
+          "taxonomy5",
+          "taxonomy6",
+          "taxonomy7",
+          "taxonomy8",
+        ]
+        prev_tax_id = nil
+        prev_tax_name = nil
+        prev_taxon_count = nil
+        taxon_metric_ids.in_groups_of(1000) do |ids|
+          taxon_metrics.order(:tax_id, :pipeline_run_id).where(id: ids).pluck_to_hash(*fields).each do |taxon_count|
+            if prev_tax_id.present? && taxon_count["tax_id"] != prev_tax_id # if taxon changes, output the previous row
+              taxon_uniq_id = prev_tax_name + ":" + prev_tax_id.to_s
+              csv << sample_metrics.unshift(taxon_uniq_id) # output sample metrics
+              sample_metrics = Array.new(sample_names.count, 0) # recreate new sample metrics array
+              taxonomy_tsv << [
+                taxon_uniq_id,
+                prev_taxon_count["superkingdom_name"],
+                prev_taxon_count["kingdom_name"],
+                prev_taxon_count["phylum_name"],
+                prev_taxon_count["class_name"],
+                prev_taxon_count["order_name"],
+                prev_taxon_count["family_name"],
+                prev_taxon_count["genus_name"],
+                prev_taxon_count["species_name"],
+              ]
+            end
+            ind = pr_id_to_sample_id.keys.index(taxon_count["pipeline_run_id"]) # get index of run_id, likely will want to turn this into a map of some kind
+            sample_metrics[ind] = taxon_count["count"].nil? ? 0 : taxon_count["count"] # set metric to array
+            prev_tax_id = taxon_count["tax_id"]
+            prev_tax_name = taxon_count["name"].nil? ? "Unknown Taxon Name" : taxon_count["name"]
+            prev_taxon_count = taxon_count
+          end
+        end
+      end
+    end
+    return [data_file, taxonomy_file]
+  end
+
+  def self.output_metadata(pipeline_run_ids, bulk_download_id)
+    pipeline_runs = PipelineRun.where(id: pipeline_run_ids).includes(:sample)
+    metadata_path = "/tmp/#{bulk_download_id}_metadata.tsv"
+    CSVSafe.open(metadata_path, "wb", col_sep: "\t") do |csv|
+      csv << ["#SampleID", "uploader", "created_at", "job_status", "runtime_seconds"]
+      pipeline_runs.each do |pipeline_run|
+        sample = pipeline_run.sample
+        sample_id = sample.name + ":" + sample.id.to_s
+        uploader = sample.user.name
+        created_at = sample.created_at
+        job_status = pipeline_run.job_status
+        runtime_seconds = pipeline_run.time_to_finalized
+        csv << [sample_id, uploader, created_at, job_status, runtime_seconds]
+      end
+    end
+    return metadata_path
+  end
+
+  def self.generate_biom_format_file(pipeline_runs, _metric, background_id, _filters, bulk_download_id)
+    # ideally we want to return a lazy loaded array with tax_id, pipeline_runs, metric
+    # we can't fit the entire dataset into memory for large datasets
+    pr_id_to_sample_id = pipeline_runs.non_deprecated.pluck(:id, :sample_id).to_h
+    pipeline_run_ids = pr_id_to_sample_id.keys
+
+    taxon_metrics, fields = TaxonCountsDataService.call(
+      pipeline_run_ids: pipeline_run_ids,
+      taxon_ids: nil,
+      background_id: background_id,
+      include_lineage: true,
+      lazy: true
+    )
+    taxon_metrics = taxon_metrics.order(:tax_id, :pipeline_run_id)
+
+    # create ordered list of sample names
+    samples_index = Sample.find(pr_id_to_sample_id.values).index_by(&:id)
+    sample_names = pr_id_to_sample_id.values.collect { |sample_id| samples_index[sample_id] }.pluck(:name, :id).map { |name, id| "#{name}:#{id}" }
+
+    # output metadata
+    metadata_path = output_metadata(pipeline_run_ids, bulk_download_id)
+
+    # create pivot table so that we end up with array of shape taxons X pipeline runs, with metric as the value
+    metrics_path, taxon_lineage_path = pivot_biom_metrics(taxon_metrics, sample_names, pr_id_to_sample_id, fields, bulk_download_id)
+
+    [metrics_path, metadata_path, taxon_lineage_path]
   end
 
   # This method models HeatmapHelper.sample_taxons_dict when fetching metrics. It uses the necessary logic from that function.

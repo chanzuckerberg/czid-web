@@ -50,21 +50,22 @@ class TaxonCountsDataService
     superkingdom_name kingdom_name phylum_name class_name order_name family_name genus_name species_name
   ].freeze
 
-  def initialize(pipeline_run_ids:, taxon_ids: nil, background_id: nil, count_types: DEFAULT_COUNT_TYPES, include_lineage: false)
+  def initialize(pipeline_run_ids:, taxon_ids: nil, background_id: nil, count_types: DEFAULT_COUNT_TYPES, include_lineage: false, lazy: false)
     @pipeline_run_ids = pipeline_run_ids
     @taxon_ids = taxon_ids
     @background_id = background_id
     @count_types = count_types
     @include_lineage = include_lineage
+    @lazy = lazy
   end
 
   def call
-    return generate
+    return generate(@lazy)
   end
 
   private
 
-  def generate
+  def generate(lazy)
     fields = TAXON_COUNT_FIELDS_TO_PLUCK
     taxon_counts_query = TaxonCount.joins(:pipeline_run)
 
@@ -103,6 +104,10 @@ class TaxonCountsDataService
                            .where('alignment_configs.lineage_version BETWEEN version_start AND version_end')
     end
 
-    taxon_counts_query.pluck_to_hash(*fields)
+    if lazy
+      [taxon_counts_query, fields]
+    else
+      taxon_counts_query.pluck_to_hash(*fields)
+    end
   end
 end

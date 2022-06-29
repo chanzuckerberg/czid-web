@@ -236,10 +236,13 @@ class BulkDownload < ApplicationRecord
   end
 
   def download_output_key
+    download_key = "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}"
     if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE && get_param_value("download_format") == BulkDownloadTypesHelper::SINGLE_FILE_CONCATENATED_DOWNLOAD
-      "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}.fa"
+      "#{download_key}.fa"
+    elsif download_type == BIOM_FORMAT_DOWNLOAD_TYPE
+      "#{download_key}.biom"
     else
-      "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}.tar.gz"
+      "#{download_key}.tar.gz"
     end
   end
 
@@ -465,6 +468,30 @@ class BulkDownload < ApplicationRecord
     PROGRESS_UPDATE_DELAY
   end
 
+  def create_biom_file(metrics_path, metadata_path, taxon_lineage_path)
+    output_biom = "/tmp/#{id.to_s.shellescape}_output.biom"
+    output_biom_metadata = "/tmp/#{id.to_s.shellescape}_output_metadata.biom"
+    stdout, stderr, status = Open3.capture3("biom", "convert", "-i", metrics_path, "-o", output_biom.shellescape, "--to-json")
+    if status.exitstatus.zero?
+      stdout, stderr, status = Open3.capture3(
+        "biom", "add-metadata", "-i", output_biom.shellescape, "-o", output_biom_metadata.shellescape,
+        "--sample-metadata-fp", metadata_path, "--observation-metadata-fp", taxon_lineage_path,
+        "--output-as-json"
+      )
+      if status.exitstatus.zero?
+        return output_biom_metadata
+      else
+        self.status = STATUS_ERROR
+        LogUtil.log_error("biom add-metadata failed: #{stdout}, #{stderr}")
+        raise stderr
+      end
+    else
+      self.status = STATUS_ERROR
+      LogUtil.log_error("biom convert failed: #{stdout}, #{stderr}")
+      raise stderr
+    end
+  end
+
   def write_output_files_to_s3_tar_writer(s3_tar_writer)
     failed_sample_ids = []
     # The last time since we updated the progress.
@@ -603,6 +630,12 @@ class BulkDownload < ApplicationRecord
       S3Util.upload_to_s3(samples_bucket_name, download_output_key, content)
 
       Rails.logger.info("Success!")
+    elsif download_type == BIOM_FORMAT_DOWNLOAD_TYPE
+      Rails.logger.info("Generating biom file for #{pipeline_runs.length} samples...")
+      samples_bucket_name = AppConfigHelper.get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1) ? ENV['SAMPLES_BUCKET_NAME_V1'] : ENV['SAMPLES_BUCKET_NAME']
+      metrics_path, metadata_path, taxon_lineage_path = BulkDownloadsHelper.generate_biom_format_file(pipeline_runs, get_param_value("metric"), get_param_value("background_id"), get_param_value("filters"), id)
+      biom_file = create_biom_file(metrics_path, metadata_path, taxon_lineage_path)
+      S3Util.upload_to_s3(samples_bucket_name, download_output_key, biom_file)
     else
       start_time = Time.now.to_f
 

@@ -15,8 +15,8 @@ module BulkDownloadTypesHelper
   READS_NON_HOST_BULK_DOWNLOAD_TYPE = "reads_non_host".freeze
   CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE = "contigs_non_host".freeze
   UNMAPPED_READS_BULK_DOWNLOAD_TYPE = "unmapped_reads".freeze
-  BETACORONOVIRUS_BULK_DOWNLOAD_TYPE = "betacoronavirus".freeze
   BIOM_FORMAT_DOWNLOAD_TYPE = "biom_format".freeze
+  BETACORONOVIRUS_BULK_DOWNLOAD_TYPE = "betacoronavirus".freeze
 
   # Specific to consensus genome workflows
   CONSENSUS_GENOME_DOWNLOAD_TYPE = "consensus_genome".freeze
