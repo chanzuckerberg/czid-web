@@ -87,7 +87,14 @@ class BaseTable extends React.Component {
             link={columnData.link}
           />
         ) : (
-          <span className={cx(cs.label, headerLabelClassName)}>{label}</span>
+          <ColumnHeaderTooltip
+            trigger={
+              <span className={cx(cs.label, headerLabelClassName)}>
+                {label}
+              </span>
+            }
+            content={label}
+          />
         )}
       </div>
     );
@@ -237,7 +244,7 @@ class BaseTable extends React.Component {
             link={columnData.link}
           />
         ) : (
-          <BasicPopup
+          <ColumnHeaderTooltip
             trigger={
               <span className={cx(cs.label, headerLabelClassName)}>
                 {label}
