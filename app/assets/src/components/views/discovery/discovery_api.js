@@ -225,16 +225,10 @@ const processRawWorkflowRun = workflowRun => {
     notes: getSampleField(["info", "sample_notes"]),
     privateUntil: getSampleField(["info", "private_until"]),
     projectId: getSampleField(["info", "project_id"]),
-    collectionLocationV2: getSampleField([
-      "metadata",
-      "collection_location_v2",
-    ]),
-    ct_value: getSampleField(["metadata", "ct_value"]),
-    nucleotide_type: getSampleField(["metadata", "nucleotide_type"]),
-    sample_type: getSampleField(["metadata", "sample_type"]),
-    water_control: getSampleField(["metadata", "water_control"]),
     ...workflowRunFields,
+    ...getSampleField(["metadata"]),
   };
+
   return row;
 };
 

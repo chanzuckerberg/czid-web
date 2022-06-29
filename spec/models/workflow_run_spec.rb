@@ -645,7 +645,7 @@ describe WorkflowRun, type: :model do
     end
 
     context "when sorting workflow runs by collection location" do
-      let(:data_key) { "collectionLocationV2" }
+      let(:data_key) { "collection_location_v2" }
 
       before do
         # Ensures that location metadata field is valid for sample_four

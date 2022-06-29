@@ -85,7 +85,6 @@ class WorkflowRun < ApplicationRecord
   # Constants related to sorting
   DATA_KEY_TO_SORT_KEY = {
     "sample" => "name",
-    "collectionLocationV2" => "collection_location_v2",
     "createdAt" => "id",
     "host" => "host",
     "referenceGenome" => "accession_id",

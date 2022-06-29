@@ -14,7 +14,7 @@ export const computeColumnsByWorkflow = ({
   if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
     return computeMngsColumns({ basicIcon, metadataFields });
   } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
-    return computeConsensusGenomeColumns({ basicIcon });
+    return computeConsensusGenomeColumns({ basicIcon, metadataFields });
   }
 };
 
@@ -155,7 +155,7 @@ const computeMngsColumns = ({ basicIcon, metadataFields }) => {
   return columns;
 };
 
-const computeConsensusGenomeColumns = ({ basicIcon }) => {
+const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
   const fixedColumns = [
     {
       dataKey: "sample",
@@ -182,7 +182,7 @@ const computeConsensusGenomeColumns = ({ basicIcon }) => {
       className: cs.basicCell,
     },
     {
-      dataKey: "collectionLocationV2",
+      dataKey: "collection_location_v2",
       label: "Location",
       flexGrow: 1,
       className: cs.basicCell,
@@ -315,7 +315,9 @@ const computeConsensusGenomeColumns = ({ basicIcon }) => {
     },
   ];
 
-  for (const col of fixedColumns) {
+  const columns = [...fixedColumns, ...computeMetadataColumns(metadataFields)];
+
+  for (const col of columns) {
     const dataKey = col["dataKey"];
     if (
       Object.prototype.hasOwnProperty.call(SAMPLE_TABLE_COLUMNS_V2, dataKey)
@@ -327,7 +329,7 @@ const computeConsensusGenomeColumns = ({ basicIcon }) => {
     }
   }
 
-  return fixedColumns;
+  return columns;
 };
 
 const computeMetadataColumns = metadataFields => {
@@ -371,7 +373,7 @@ export const DEFAULTS_BY_WORKFLOW = {
     "referenceGenome",
     "createdAt",
     "host",
-    "collectionLocationV2",
+    "collection_location_v2",
     "totalReadsCG",
     "percentGenomeCalled",
     "vadrPassFail",

@@ -40,6 +40,16 @@ const getProjectMetadataFields = ids =>
     },
   });
 
+// Get MetadataField info for the workflow run(s) (either one ID or an array)
+const getWorkflowRunMetadataFields = (ids, snapshotShareId) =>
+  postWithCSRF(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      "/workflow_runs/metadata_fields",
+    {
+      workflowRunIds: flatten([ids]),
+    },
+  );
+
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
     field,
@@ -97,6 +107,7 @@ export {
   getSampleMetadata,
   getSampleMetadataFields,
   getProjectMetadataFields,
+  getWorkflowRunMetadataFields,
   saveSampleMetadata,
   uploadMetadataForProject,
   validateMetadataCSVForProject,

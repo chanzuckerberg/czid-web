@@ -160,7 +160,8 @@ class WorkflowRunsController < ApplicationController
 
   # POST /workflow_runs/metadata_fields
   def metadata_fields
-    workflow_run_ids = (params[:workflowRunIds] || []).map(&:to_i)
+    permitted_params = params.permit(workflowRunIds: [])
+    workflow_run_ids = permitted_params[:workflowRunIds]
     sample_ids = current_power.workflow_runs.where(id: workflow_run_ids).pluck(:sample_id).uniq
 
     samples = current_power.viewable_samples.where(id: sample_ids)

@@ -16,7 +16,10 @@ import {
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
-import { getSampleMetadataFields } from "~/api/metadata";
+import {
+  getSampleMetadataFields,
+  getWorkflowRunMetadataFields,
+} from "~/api/metadata";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
@@ -96,14 +99,15 @@ class SamplesView extends React.Component {
 
   fetchMetadataFieldsBySampleIds = async () => {
     const { selectableIds, showAllMetadata, workflow } = this.props;
+    if (selectableIds && showAllMetadata) {
+      let metadataFields = [];
 
-    // TODO(ihan): enable getWorkflowRunMetadataFields for consensus genome samples
-    if (
-      selectableIds &&
-      showAllMetadata &&
-      workflow === WORKFLOWS.SHORT_READ_MNGS.value
-    ) {
-      const metadataFields = await getSampleMetadataFields(selectableIds);
+      if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
+        metadataFields = await getSampleMetadataFields(selectableIds);
+      } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+        metadataFields = await getWorkflowRunMetadataFields(selectableIds);
+      }
+
       this.setState({ metadataFields });
     }
   };
