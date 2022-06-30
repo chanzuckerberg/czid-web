@@ -366,7 +366,13 @@ module ElasticsearchQueryHelper
           "path": "metric_list",
           "query": {
             "bool": {
-              "filter": query_array,
+              "filter": [
+                {
+                  "term": {
+                    "metric_list.count_type": count_type,
+                  },
+                },
+              ] + query_array,
             },
           },
         },
