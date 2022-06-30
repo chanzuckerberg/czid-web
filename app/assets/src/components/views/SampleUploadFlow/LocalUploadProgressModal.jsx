@@ -25,16 +25,14 @@ import {
   initiateBulkUploadLocalWithMetadata,
   startUploadHeartbeat,
 } from "~/api/upload";
-import LoadingBar from "~/components/ui/controls/LoadingBar";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { formatFileSize } from "~/components/utils/format";
 import { logError } from "~/components/utils/logUtil";
 import PropTypes from "~/components/utils/propTypes";
 import Modal from "~ui/containers/Modal";
-import { IconAlert, IconCheckSmall } from "~ui/icons";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import Notification from "~ui/notifications/Notification";
 import UploadConfirmationModal from "./UploadConfirmationModal";
+import UploadProgressModalSampleList from "./UploadProgressModalSampleList";
 import cs from "./upload_progress_modal.scss";
 import {
   addFlagsToSamples,
@@ -78,116 +76,17 @@ const LocalUploadProgressModal = ({
   const ERROR_STATUS = "error";
 
   useEffect(() => {
-    initiateUploadLocal();
+    initiateLocalUpload();
   }, []);
 
   useEffect(() => {
-    // For local uploads, check if all samples are completed whenever sampleUploadStatuses changes.
-    if (!uploadComplete && isEmpty(getLocalSamplesInProgress())) {
-      onUploadComplete();
-      setUploadComplete(true);
-      setRetryingSampleUpload(false);
+    const uploadsInProgress = !isEmpty(getLocalSamplesInProgress());
+    if (uploadComplete || uploadsInProgress) return;
 
-      const numFailedSamples = size(getLocalSamplesFailed());
-      if (numFailedSamples > 0) {
-        const failedSamples = filter(
-          sample => sampleUploadStatuses[sample.name] === "error",
-          samples,
-        );
-        const createdSamples = filter(
-          sample => sampleUploadStatuses[sample.name] !== "error",
-          samples,
-        );
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
-          {
-            erroredSamples: failedSamples.length,
-            createdSamples: samples.length - failedSamples.length,
-            erroredSamplesFileSizes: sampleNameToFileSizes(failedSamples),
-            createdSamplesFileSizes: sampleNameToFileSizes(createdSamples),
-            projectId: project.id,
-            uploadType,
-          },
-        );
-      } else {
-        trackEvent(
-          ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
-          {
-            createdSamples: samples.length,
-            createdSamplesFileSizes: sampleNameToFileSizes(samples),
-            projectId: project.id,
-            uploadType,
-          },
-        );
-      }
-    }
+    completeLocalUpload();
   }, [sampleUploadStatuses]);
 
-  // Returns a map of sample names to a list of their file sizes
-  const sampleNameToFileSizes = samples => {
-    return samples.reduce(function(nameToFileSizes, sample) {
-      nameToFileSizes[sample.name] = map(file => file.size, sample.files);
-      return nameToFileSizes;
-    }, {});
-  };
-
-  const updateSampleUploadStatus = (sampleName, status) => {
-    setSampleUploadStatuses(prevState => ({
-      ...prevState,
-      [sampleName]: status,
-    }));
-  };
-
-  const updateSampleUploadPercentage = (sampleName, percentage) => {
-    setSampleUploadPercentages(prevState => ({
-      ...prevState,
-      [sampleName]: percentage,
-    }));
-  };
-
-  // For AWS SDK Upload lib
-  const updateSampleFilePercentage = ({
-    sampleName,
-    s3Key,
-    percentage = 0,
-    fileSize = null,
-  }) => {
-    const newSampleKeyState = { percentage };
-    if (fileSize) {
-      newSampleKeyState.size = fileSize;
-    }
-
-    const newSampleFileState = {
-      ...sampleFilePercentages[sampleName],
-      [s3Key]: {
-        ...(sampleFilePercentages[sampleName] &&
-          sampleFilePercentages[sampleName][s3Key]),
-        ...newSampleKeyState,
-      },
-    };
-
-    sampleFilePercentages = {
-      ...sampleFilePercentages,
-      [sampleName]: newSampleFileState,
-    };
-
-    updateSampleUploadPercentage(
-      sampleName,
-      calculatePercentageForSample(sampleFilePercentages[sampleName]),
-    );
-  };
-
-  const calculatePercentageForSample = sampleFilePercentage => {
-    const uploadedSize = sum(
-      map(key => (key.percentage || 0) * key.size, sampleFilePercentage),
-    );
-
-    const totalSize = sum(map(progress => progress.size, sampleFilePercentage));
-
-    return uploadedSize / totalSize;
-  };
-
-  const initiateUploadLocal = async () => {
+  const initiateLocalUpload = async () => {
     const samplesToUpload = addFlagsToSamples({
       adminOptions,
       clearlabs,
@@ -203,30 +102,28 @@ const LocalUploadProgressModal = ({
     const createdSamples = await initiateBulkUploadLocalWithMetadata({
       samples: samplesToUpload,
       metadata,
-      callbacks: {
-        onCreateSamplesError: (errors, erroredSampleNames) => {
-          logError({
-            message: "UploadProgressModal: onCreateSamplesError",
-            details: { errors },
-          });
+      onCreateSamplesError: (errors, erroredSampleNames) => {
+        logError({
+          message: "UploadProgressModal: onCreateSamplesError",
+          details: { errors },
+        });
 
-          const uploadStatuses = zipObject(
-            erroredSampleNames,
-            times(constant(ERROR_STATUS), erroredSampleNames.length),
-          );
+        const uploadStatuses = zipObject(
+          erroredSampleNames,
+          times(constant(ERROR_STATUS), erroredSampleNames.length),
+        );
 
-          setSampleUploadStatuses(prevState => ({
-            ...prevState,
-            ...uploadStatuses,
-          }));
+        setSampleUploadStatuses(prevState => ({
+          ...prevState,
+          ...uploadStatuses,
+        }));
 
-          logUploadStepError({
-            step: "createSamples",
-            erroredSamples: erroredSampleNames.length,
-            uploadType,
-            errors,
-          });
-        },
+        logUploadStepError({
+          step: "createSamples",
+          erroredSamples: erroredSampleNames.length,
+          uploadType,
+          errors,
+        });
       },
     });
 
@@ -328,6 +225,10 @@ const LocalUploadProgressModal = ({
       }),
     });
 
+    const removeS3KeyFromUploadIds = s3Key => {
+      setSampleFileUploadIds(prevState => omit(s3Key, prevState));
+    };
+
     fileUpload.on("httpUploadProgress", progress => {
       const percentage = progress.loaded / progress.total;
       updateSampleFilePercentage({
@@ -341,34 +242,84 @@ const LocalUploadProgressModal = ({
       setSampleFileUploadIds(prevState => {
         return uploadId
           ? { ...prevState, [s3Key]: uploadId }
-          : removeS3KeyFromUploadIds(s3Key);
+          : // when there is no valid upload ID we could not create a multipart upload
+            // for the file, so remove it from upload ID list to avoid retrying it
+            removeS3KeyFromUploadIds(s3Key);
       });
     });
 
     await fileUpload.done();
 
+    // prevent successfully uploaded files from being resumed if other files fail
     removeS3KeyFromUploadIds(s3Key);
+
     setSampleFileCompleted(prevState => ({
       ...prevState,
       [s3Key]: true,
     }));
   };
 
-  const removeS3KeyFromUploadIds = s3Key => {
-    setSampleFileUploadIds(prevState => omit(s3Key, prevState));
+  const updateSampleUploadStatus = (sampleName, status) => {
+    setSampleUploadStatuses(prevState => ({
+      ...prevState,
+      [sampleName]: status,
+    }));
+  };
+
+  const updateSampleFilePercentage = ({
+    sampleName,
+    s3Key,
+    percentage = 0,
+    fileSize = null,
+  }) => {
+    const newSampleKeyState = { percentage };
+    if (fileSize) {
+      newSampleKeyState.size = fileSize;
+    }
+
+    const newSampleFileState = {
+      ...sampleFilePercentages[sampleName],
+      [s3Key]: {
+        ...(sampleFilePercentages[sampleName] &&
+          sampleFilePercentages[sampleName][s3Key]),
+        ...newSampleKeyState,
+      },
+    };
+
+    sampleFilePercentages = {
+      ...sampleFilePercentages,
+      [sampleName]: newSampleFileState,
+    };
+
+    updateSampleUploadPercentage(
+      sampleName,
+      calculatePercentageForSample(sampleFilePercentages[sampleName]),
+    );
+  };
+
+  const updateSampleUploadPercentage = (sampleName, percentage) => {
+    setSampleUploadPercentages(prevState => ({
+      ...prevState,
+      [sampleName]: percentage,
+    }));
+  };
+
+  const calculatePercentageForSample = sampleFilePercentage => {
+    const uploadedSize = sum(
+      map(key => (key.percentage || 0) * key.size, sampleFilePercentage),
+    );
+
+    const totalSize = sum(map(progress => progress.size, sampleFilePercentage));
+
+    return uploadedSize / totalSize;
   };
 
   const handleSampleUploadError = (sample, error = null) => {
     const message =
       "UploadProgressModal: Local sample upload error to S3 occured";
-    logSampleUploadError({
-      error,
-      message,
-      sample,
-    });
-  };
 
-  const logSampleUploadError = ({ error = null, message, sample }) => {
+    updateSampleUploadStatus(sample.name, ERROR_STATUS);
+
     logError({
       message,
       details: {
@@ -376,17 +327,13 @@ const LocalUploadProgressModal = ({
         error,
       },
     });
-    updateSampleUploadStatus(sample.name, ERROR_STATUS);
+
     logUploadStepError({
       step: "sampleUpload",
       erroredSamples: 1,
       uploadType,
       errors: error,
     });
-  };
-
-  const getUploadPercentageForSample = sample => {
-    return sampleUploadPercentages[sample.name];
   };
 
   const getLocalSamplesInProgress = () => {
@@ -405,7 +352,7 @@ const LocalUploadProgressModal = ({
     );
   };
 
-  const retryFailedSamplesUploadToS3 = async failedSamples => {
+  const retryFailedSampleUploads = async failedSamples => {
     setRetryingSampleUpload(true);
     setUploadComplete(false);
 
@@ -418,52 +365,57 @@ const LocalUploadProgressModal = ({
     await uploadSamples(failedLocallyCreatedSamples);
   };
 
-  const renderSampleStatus = ({ sample, status }) => {
-    if (status === ERROR_STATUS) {
-      return (
-        <>
-          <IconAlert className={cs.alertIcon} type="error" />
-          Upload failed
-          <div className={cs.verticalDivider}> | </div>{" "}
-          <div
-            onClick={withAnalytics(
-              () => retryFailedSamplesUploadToS3([sample]),
-              ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_CLICKED,
-              {
-                sampleName: sample.name,
-              },
-            )}
-            className={cs.sampleRetry}
-          >
-            Retry
-          </div>
-        </>
+  const completeLocalUpload = () => {
+    onUploadComplete();
+    setUploadComplete(true);
+    setRetryingSampleUpload(false);
+
+    const numFailedSamples = size(getLocalSamplesFailed());
+
+    if (numFailedSamples > 0) {
+      const failedSamples = filter(
+        sample => sampleUploadStatuses[sample.name] === "error",
+        samples,
+      );
+      const createdSamples = filter(
+        sample => sampleUploadStatuses[sample.name] !== "error",
+        samples,
+      );
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
+        {
+          erroredSamples: failedSamples.length,
+          createdSamples: samples.length - failedSamples.length,
+          erroredSamplesFileSizes: sampleNameToFileSizes(failedSamples),
+          createdSamplesFileSizes: sampleNameToFileSizes(createdSamples),
+          projectId: project.id,
+          uploadType,
+        },
+      );
+    } else {
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
+        {
+          createdSamples: samples.length,
+          createdSamplesFileSizes: sampleNameToFileSizes(samples),
+          projectId: project.id,
+          uploadType,
+        },
       );
     }
-
-    if (status === "success") {
-      return (
-        <div className={cs.success}>
-          <IconCheckSmall className={cs.checkmarkIcon} />
-          Sent to pipeline
-        </div>
-      );
-    }
-
-    const uploadPercentage = getUploadPercentageForSample(sample);
-    if (uploadPercentage === undefined) {
-      return "Waiting to upload...";
-    }
-
-    const totalSize = totalFilesSize(sample.files);
-    return `Uploaded ${formatFileSize(
-      totalSize * uploadPercentage,
-    )} of ${formatFileSize(totalSize)}`;
   };
 
-  const totalFilesSize = files => {
-    return sum(map(file => file.size, files));
+  // Returns a map of sample names to a list of their file sizes
+  const sampleNameToFileSizes = samples => {
+    return samples.reduce(function(nameToFileSizes, sample) {
+      nameToFileSizes[sample.name] = map(file => file.size, sample.files);
+      return nameToFileSizes;
+    }, {});
   };
+
+  /*
+    START Component rendering methods
+  */
 
   const uploadInProgressTitle = () => {
     const numLocalSamplesInProgress = size(getLocalSamplesInProgress());
@@ -473,7 +425,7 @@ const LocalUploadProgressModal = ({
       <>
         <div className={cs.title}>
           {retryingSampleUpload
-            ? `Restarting ${numLocalSamplesInProgress} sample upload${pluralSuffix}`
+            ? `Retrying ${numLocalSamplesInProgress} sample upload${pluralSuffix}`
             : `Uploading ${numLocalSamplesInProgress} sample${pluralSuffix} to ${project.name}`}
         </div>
         <div className={cs.subtitle}>
@@ -543,11 +495,10 @@ const LocalUploadProgressModal = ({
             {numberOfLocalSamplesFailed > 1 && "s"} ha
             {numberOfLocalSamplesFailed > 1 ? "ve" : "s"} failed
           </div>
-          <div className={cs.fill} />
           <div
             className={cx(cs.sampleRetry, cs.retryAll)}
             onClick={withAnalytics(
-              () => retryFailedSamplesUploadToS3(localSamplesFailed),
+              () => retryFailedSampleUploads(localSamplesFailed),
               ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_RETRY_ALL_FAILED_CLICKED,
               {
                 numberOfLocalSamplesFailed,
@@ -581,6 +532,9 @@ const LocalUploadProgressModal = ({
       <PrimaryButton text="Go to Project" onClick={() => buttonCallback()} />
     );
   };
+  /*
+    END component rendering methods
+  */
 
   return (
     <Modal
@@ -598,27 +552,12 @@ const LocalUploadProgressModal = ({
         {!isEmpty(getLocalSamplesFailed()) &&
           renderRetryAllFailedNotification()}
       </div>
-      <div className={cs.sampleList}>
-        {samples.map(sample => {
-          const status = sampleUploadStatuses[sample.name];
-
-          return (
-            <div key={sample.name} className={cs.sample}>
-              <div className={cs.sampleHeader}>
-                <div className={cs.sampleName}>{sample.name}</div>
-                <div className={cs.fill} />
-                <div className={cs.sampleStatus}>
-                  {renderSampleStatus({ sample, status })}
-                </div>
-              </div>
-              <LoadingBar
-                percentage={getUploadPercentageForSample(sample)}
-                error={status === ERROR_STATUS}
-              />
-            </div>
-          );
-        })}
-      </div>
+      <UploadProgressModalSampleList
+        samples={samples}
+        sampleUploadPercentages={sampleUploadPercentages}
+        sampleUploadStatuses={sampleUploadStatuses}
+        onRetryUpload={retryFailedSampleUploads}
+      />
       {!retryingSampleUpload && uploadComplete && (
         <div className={cs.footer}>{renderViewProjectButton()}</div>
       )}

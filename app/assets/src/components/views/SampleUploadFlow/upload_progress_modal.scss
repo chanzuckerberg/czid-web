@@ -1,3 +1,4 @@
+@import "./sample_upload_flow_shared";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
@@ -74,68 +75,11 @@
 
       .content {
         display: flex;
+        justify-content: space-between;
 
         .errorMessage {
           @include font-header-s;
         }
-      }
-    }
-  }
-
-  .sampleList {
-    margin: $sds-spaces-xxl $sds-spaces-xxl 0;
-    max-height: 200px;
-    overflow: auto;
-
-    .sample {
-      margin-top: 30px;
-
-      &:first-child {
-        margin-top: 0;
-      }
-    }
-
-    .sampleHeader {
-      display: flex;
-      align-items: center;
-
-      .sampleName {
-        @include font-header-s;
-        flex: 0 1 auto;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-
-      .sampleStatus {
-        @include font-body-xxs;
-        color: $sds-color-gray-600;
-        display: flex;
-        align-items: center;
-        margin-left: $sds-spaces-m;
-        white-space: nowrap;
-
-        .alertIcon {
-          fill: $sds-color-error-400;
-          width: 14px;
-          height: 14px;
-          margin-right: 5px;
-          margin-bottom: $sds-spaces-xxxs;
-        }
-
-        .checkmarkIcon {
-          width: 16px;
-          height: 16px;
-          margin-bottom: -$sds-spaces-xxs;
-          margin-right: 5px;
-          fill: $sds-color-success-400;
-        }
-      }
-
-      .verticalDivider {
-        @include font-body-l;
-        color: $sds-color-gray-300;
-        padding: 0 $sds-spaces-xxs $sds-spaces-xxs;
       }
     }
   }
@@ -161,10 +105,7 @@
 }
 
 .sampleRetry {
-  @include font-caps-xxxs;
-  color: $sds-color-primary-400;
-  text-transform: uppercase;
-  align-self: center;
+  @include sampleUploadRetry;
 
   &.retryAll {
     color: $sds-color-error-400;
@@ -173,13 +114,4 @@
       color: $sds-color-error-600 !important;
     }
   }
-
-  &:hover {
-    cursor: pointer;
-    color: $sds-color-primary-500;
-  }
-}
-
-.fill {
-  flex: 1 1 0;
 }

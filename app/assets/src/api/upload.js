@@ -23,8 +23,13 @@ export const bulkUploadRemote = ({ samples, metadata }) =>
 export const initiateBulkUploadLocalWithMetadata = async ({
   samples,
   metadata,
-  callbacks = {
-    onCreateSamplesError: null,
+  onCreateSamplesError = (errors, erroredSampleNames) => {
+    console.error(
+      "CreateSamplesError",
+      errors,
+      "erroredSamplesNames",
+      erroredSampleNames,
+    );
   },
 }) => {
   // Only upload these fields from the sample.
@@ -71,18 +76,14 @@ export const initiateBulkUploadLocalWithMetadata = async ({
     // Creates the Sample objects and assigns a presigned S3 URL so we can upload the sample files to S3 via the URL
     response = await bulkUploadWithMetadata(processedSamples, metadata);
   } catch (e) {
-    callbacks.onCreateSamplesError &&
-      callbacks.onCreateSamplesError([e], map("name", samples));
+    onCreateSamplesError && onCreateSamplesError([e], map("name", samples));
     return;
   }
 
   // It's possible that a subset of samples errored out, but other ones can still be uploaded.
   if (response.errors.length > 0) {
-    callbacks.onCreateSamplesError &&
-      callbacks.onCreateSamplesError(
-        response.errors,
-        response.errored_sample_names,
-      );
+    onCreateSamplesError &&
+      onCreateSamplesError(response.errors, response.errored_sample_names);
   }
 
   // The samples created from the network response (response.samples) does not contain the files that need to be upload to S3.

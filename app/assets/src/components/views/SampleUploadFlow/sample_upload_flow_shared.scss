@@ -1,0 +1,14 @@
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+@mixin sampleUploadRetry {
+  @include font-caps-xxxs;
+  color: $sds-color-primary-400;
+  text-transform: uppercase;
+  align-self: center;
+
+  &:hover {
+    cursor: pointer;
+    color: $sds-color-primary-500;
+  }
+}
