@@ -10,6 +10,7 @@ class PipelineReportService
 
   TAXON_COUNT_FIELDS_TO_PLUCK = [
     :alignment_length,
+    :alignment_length_decimal,
     :common_name,
     :count,
     :count_type,
@@ -18,6 +19,9 @@ class PipelineReportService
     :is_phage,
     :name,
     :percent_identity,
+    :percent_identity_decimal,
+    :rpm,
+    :rpm_decimal,
     :source_count_type,
     :superkingdom_taxid,
     :tax_id,
@@ -26,12 +30,16 @@ class PipelineReportService
 
   TAXON_COUNT_FIELDS_DEFAULTS = {
     alignment_length: 0,
+    alignment_length_decimal: 0,
     count: 0,
     count_type: nil,
     e_value: 0,
     genus_taxid: nil,
     name: nil,
     percent_identity: 0,
+    percent_identity_decimal: 0,
+    rpm: 0,
+    rpm_decimal: 0,
     tax_id: nil,
     tax_level: nil,
   }.freeze
@@ -110,6 +118,7 @@ class PipelineReportService
     @merge_nt_nr = merge_nt_nr
     @priority_pathogens = priority_pathogens
     @show_annotations = show_annotations
+    @use_decimal_columns = AppConfigHelper.get_app_config(AppConfig::PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS, false) == "1"
   end
 
   def call
@@ -249,16 +258,18 @@ class PipelineReportService
     )
     @timer.split("cleanup_missing_genus_counts")
 
-    counts_by_tax_level.each_value do |tax_level_taxa|
-      compute_rpm(count_types: [:nt, :nr], taxa_counts: tax_level_taxa, total_reads: total_reads)
-    end
-    @timer.split("compute_rpm")
-
-    if merged_count_types_by_tax_level.present?
-      merged_count_types_by_tax_level.each_value do |tax_level_taxa|
-        compute_rpm(count_types: [:merged_nt_nr], taxa_counts: tax_level_taxa, total_reads: total_reads)
+    unless @use_decimal_columns
+      counts_by_tax_level.each_value do |tax_level_taxa|
+        compute_rpm(count_types: [:nt, :nr], taxa_counts: tax_level_taxa, total_reads: total_reads)
       end
-      @timer.split("compute_rpm_merged_count_type")
+      @timer.split("compute_rpm")
+
+      if merged_count_types_by_tax_level.present?
+        merged_count_types_by_tax_level.each_value do |tax_level_taxa|
+          compute_rpm(count_types: [:merged_nt_nr], taxa_counts: tax_level_taxa, total_reads: total_reads)
+        end
+        @timer.split("compute_rpm_merged_count_type")
+      end
     end
 
     counts_by_tax_level.each_value do |tax_level_taxa|
@@ -479,13 +490,24 @@ class PipelineReportService
         counts_hash[tax_id][:is_phage] = false
       end
 
+      if @use_decimal_columns
+        percent_identity = counts[field_index[:percent_identity_decimal]].to_f
+        alignment_length = counts[field_index[:alignment_length_decimal]].to_f
+        rpm = counts[field_index[:rpm_decimal]].to_f
+      else
+        percent_identity = counts[field_index[:percent_identity]]
+        alignment_length = counts[field_index[:alignment_length]]
+        rpm = counts[field_index[:rpm]]
+      end
+
       count_type = counts[field_index[:count_type]].downcase.to_sym
       counts_hash[tax_id][count_type] = {
         count: counts[field_index[:count]],
-        percent_identity: counts[field_index[:percent_identity]],
-        alignment_length: counts[field_index[:alignment_length]],
         e_value: counts[field_index[:e_value]],
         source_count_type: counts[field_index[:source_count_type]],
+        percent_identity: percent_identity,
+        alignment_length: alignment_length,
+        rpm: rpm,
       }
 
       unless count_type == :merged_nt_nr

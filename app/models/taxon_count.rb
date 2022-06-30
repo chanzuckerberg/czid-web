@@ -75,7 +75,7 @@ class TaxonCount < ApplicationRecord
                    'superkingdom' => TAX_LEVEL_SUPERKINGDOM, }.freeze
   LEVEL_2_NAME = NAME_2_LEVEL.invert
 
-  TAXON_COUNT_METRIC_FILTERS = ["count", "percent_identity", "alignment_length", "e_value", "rpm"].freeze
+  TAXON_COUNT_METRIC_FILTERS = ["count", "percent_identity", "alignment_length", "e_value", "rpm", "percent_identity_decimal", "alignment_length_decimal", "rpm_decimal"].freeze
   COUNT_TYPES_FOR_FILTERING = [COUNT_TYPE_NT, COUNT_TYPE_NR].freeze
   LEVELS_FOR_FILTERING = ["species", "genus"].freeze
 

@@ -61,6 +61,8 @@ class AppConfig < ApplicationRecord
   ENABLE_SFN_NOTIFICATIONS = "enable_sfn_notifications".freeze
   # When this is "1", filtering by taxon will bypass ES and instead return a predefined set of 5 taxa. Mainly intended to be used by developers on M1 since ES is currently incompatible.
   BYPASS_ES_TAXON_SEARCH = "bypass_es_taxon_search".freeze
+  # When this is "1", PipelineReportService will return the decimal type columns for rpm, percent_identity, and alignment_length (instead of the float type columns)
+  PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS = "pipeline_report_service_use_decimal_type_columns".freeze
 
   after_save :clear_cached_record
 
