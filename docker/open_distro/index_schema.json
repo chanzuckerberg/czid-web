@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "scored_taxon_count*"
+    "scored_taxon_counts-*"
   ],
   "template": {
     "aliases": {},
@@ -13,6 +13,12 @@
         "name": {
           "type": "text"
         },
+        "common_name": {
+          "type": "text"
+        },
+        "genus_name": {
+          "type": "text"
+        },
         "pipeline_run_id": {
           "type": "long"
         },
@@ -21,10 +27,22 @@
           "null_value": "0"
         },
         "tax_id": {
-          "type": "long",
+          "type": "integer",
           "null_value": "0"
         },
         "tax_level": {
+          "type": "long",
+          "null_value": "0"
+        },
+        "genus_taxid": {
+          "type": "long",
+          "null_value": "0"
+        },
+        "family_taxid": {
+          "type": "long",
+          "null_value": "0"
+        },
+        "background_id": {
           "type": "long",
           "null_value": "0"
         },
@@ -43,7 +61,7 @@
             },
             "percent_identity": {
               "type": "float",
-              "index": false
+              "null_value": "0"
             },
             "mean": {
               "type": "float",

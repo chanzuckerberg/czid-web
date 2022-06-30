@@ -113,7 +113,7 @@ module ElasticsearchQueryHelper
       },
     }
 
-    response = ES_CLIENT.search(index: "scored_taxon_count", body: search_body)
+    response = ES_CLIENT.search(index: "scored_taxon_counts", body: search_body)
     return parse_top_n_taxa_per_sample_response(response)
   end
 
@@ -197,7 +197,7 @@ module ElasticsearchQueryHelper
       },
     }
 
-    response = ES_CLIENT.search(index: "scored_taxon_count", body: search_body)
+    response = ES_CLIENT.search(index: "scored_taxon_counts", body: search_body)
     return parse_es_response(response)
   end
 
