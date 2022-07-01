@@ -513,6 +513,25 @@ describe WorkflowRun, type: :model do
       end
     end
 
+    context "when sorting workflow runs by metadata that does not belong to the workflow runs" do
+      let(:data_key) { ["comorbidity"] }
+
+      before do
+        # Create metadata field that is not associated with the workflow runs' projects and host genomes
+        create(:metadata_field, name: "comorbidity")
+      end
+
+      it "returns samples in ascending order by creation date when order_dir is 'asc'" do
+        asc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "asc")
+        expect(asc_results.pluck(:id)).to eq([@workflow_run.id, @workflow_run3.id, @workflow_run2.id])
+      end
+
+      it "returns samples in descending order by creation date when order_dir is 'desc'" do
+        desc_results = WorkflowRun.sort_workflow_runs(@workflow_runs_input, data_key, "desc")
+        expect(desc_results.pluck(:id)).to eq([@workflow_run2.id, @workflow_run3.id, @workflow_run.id])
+      end
+    end
+
     context "when sorting workflow runs by host" do
       let(:data_key) { "host" }
 

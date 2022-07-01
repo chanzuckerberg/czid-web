@@ -438,6 +438,29 @@ describe Sample, type: :model do
       end
     end
 
+    context "when sorting samples by metadata that does not belong to the samples" do
+      let(:data_key_list) { ["comorbidity"] }
+
+      before do
+        # Create metadata field that is not associated with the samples' projects and host genomes
+        create(:metadata_field, name: "comorbidity")
+      end
+
+      it "returns samples in ascending order by creation date when order_dir is 'asc'" do
+        data_key_list.each do |data_key|
+          asc_results = Sample.sort_samples(@samples_input, data_key, "asc")
+          expect(asc_results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_two.id])
+        end
+      end
+
+      it "returns samples in descending order by creation date when order_dir is 'desc'" do
+        data_key_list.each do |data_key|
+          desc_results = Sample.sort_samples(@samples_input, data_key, "desc")
+          expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id])
+        end
+      end
+    end
+
     context "when sorting samples by collection location" do
       let(:data_key) { "collection_location_v2" }
 

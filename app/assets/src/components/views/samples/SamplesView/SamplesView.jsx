@@ -51,7 +51,8 @@ import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 
 import {
   computeColumnsByWorkflow,
-  DEFAULTS_BY_WORKFLOW,
+  DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
+  DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "./ColumnConfiguration";
 import ToolbarIcon from "./ToolbarIcon";
 import { SARS_COV_2, TRIGGERS, WORKFLOW_TRIGGERS } from "./constants";
@@ -74,6 +75,7 @@ class SamplesView extends React.Component {
       sarsCov2Count: 0,
       referenceSelectId: null,
       metadataFields: [],
+      loading: true,
     };
 
     this.referenceSelectId = null;
@@ -84,16 +86,12 @@ class SamplesView extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { selectedIds, selectableIds } = this.props;
+    const { selectedIds } = this.props;
     // Reset the tooltip whenever the selected samples changes.
     if (selectedIds !== prevProps.selectedIds) {
       this.setState({
         bulkDownloadButtonTempTooltip: null,
       });
-    }
-
-    if (selectableIds !== prevProps.selectableIds) {
-      this.fetchMetadataFieldsBySampleIds();
     }
   }
 
@@ -110,6 +108,7 @@ class SamplesView extends React.Component {
 
       this.setState({ metadataFields });
     }
+    this.setState({ loading: false });
   };
 
   handleSelectRow = (value, checked, event) => {
@@ -177,7 +176,7 @@ class SamplesView extends React.Component {
 
   reset = () => {
     const { currentDisplay } = this.props;
-    if (currentDisplay === "table") this.infiniteTable.reset();
+    if (currentDisplay === "table") this.infiniteTable?.reset();
   };
 
   renderHeatmapTrigger = () => {
@@ -480,7 +479,23 @@ class SamplesView extends React.Component {
       workflow,
     } = this.props;
 
-    const { metadataFields } = this.state;
+    const { metadataFields, loading } = this.state;
+
+    if (loading) return null;
+
+    const columns = computeColumnsByWorkflow({
+      workflow,
+      metadataFields,
+      basicIcon: !!snapshotShareId,
+    });
+
+    // Note: If the specified sortBy column (ie. a custom metadata field) is not available on this view,
+    // we expect the fetched samples to be sorted by the default column and we will bold the default column header.
+    // This will not overwrite the sortBy in session storage.
+    const sortByNotAvailable = !columns.some(c => c.dataKey === sortBy);
+    const sortedColumn = sortByNotAvailable
+      ? DEFAULT_SORTED_COLUMN_BY_TAB["samples"]
+      : sortBy;
 
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
@@ -489,11 +504,7 @@ class SamplesView extends React.Component {
       <div className={cs.table}>
         <InfiniteTable
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
-          columns={computeColumnsByWorkflow({
-            workflow,
-            metadataFields,
-            basicIcon: !!snapshotShareId,
-          })}
+          columns={columns}
           defaultRowHeight={rowHeight}
           draggableColumns
           initialActiveColumns={activeColumns}
@@ -514,7 +525,7 @@ class SamplesView extends React.Component {
           selectAllChecked={selectAllChecked}
           selectableCellClassName={cs.selectableCell}
           sortable={sortable}
-          sortBy={sortBy}
+          sortBy={sortedColumn}
           sortDirection={sortDirection}
         />
       </div>
@@ -748,7 +759,8 @@ class SamplesView extends React.Component {
 }
 
 SamplesView.defaultProps = {
-  activeColumns: DEFAULTS_BY_WORKFLOW[WORKFLOWS.SHORT_READ_MNGS.value],
+  activeColumns:
+    DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[WORKFLOWS.SHORT_READ_MNGS.value],
   protectedColumns: ["sample"],
   currentDisplay: "table",
   workflow: WORKFLOWS.SHORT_READ_MNGS.value,

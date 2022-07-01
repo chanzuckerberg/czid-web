@@ -113,6 +113,8 @@ class WorkflowRun < ApplicationRecord
   }
 
   scope :sort_by_metadata, lambda { |sort_key, order_dir|
+    # Note: if the workflow runs do not contain the specified metadata, all order_by's will be nil
+    # and workflow runs will be sorted by TIEBREAKER_SORT_KEY
     joins_statement = "
         LEFT JOIN samples ON workflow_runs.sample_id = samples.id
         LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')

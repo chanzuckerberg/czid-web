@@ -359,7 +359,7 @@ const computeMetadataColumns = metadataFields => {
   return metadataColumns;
 };
 
-export const DEFAULTS_BY_WORKFLOW = {
+export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
   [WORKFLOWS.SHORT_READ_MNGS.value]: [
     "sample",
     "createdAt",
@@ -378,4 +378,11 @@ export const DEFAULTS_BY_WORKFLOW = {
     "percentGenomeCalled",
     "vadrPassFail",
   ],
+};
+
+// DEFAULT_SORTED_COLUMN_BY_TAB (frontend) should always match TIEBREAKER_SORT_KEY (backend).
+export const DEFAULT_SORTED_COLUMN_BY_TAB = {
+  projects: "created_at",
+  samples: "createdAt",
+  visualizations: "updated_at",
 };

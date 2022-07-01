@@ -56,7 +56,10 @@ import {
 } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
-import { DEFAULTS_BY_WORKFLOW } from "~/components/views/samples/SamplesView/ColumnConfiguration";
+import {
+  DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
+  DEFAULT_SORTED_COLUMN_BY_TAB,
+} from "~/components/views/samples/SamplesView/ColumnConfiguration";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import Tabs from "~ui/controls/Tabs";
@@ -120,11 +123,7 @@ const TAB_PROJECTS = "projects";
 const TAB_SAMPLES = "samples";
 const TAB_VISUALIZATIONS = "visualizations";
 const CURRENT_TAB_OPTIONS = [TAB_PROJECTS, TAB_SAMPLES, TAB_VISUALIZATIONS];
-const DEFAULT_ORDER_BY_TAB = {
-  [TAB_PROJECTS]: "created_at",
-  [TAB_SAMPLES]: "createdAt",
-  [TAB_VISUALIZATIONS]: "updated_at",
-};
+
 class DiscoveryView extends React.Component {
   // used to preserve order keys across sessionStorage updates
   SESSION_ORDER_FIELD_KEYS = [
@@ -215,7 +214,7 @@ class DiscoveryView extends React.Component {
       this.state.currentDisplay = "table";
     }
     if (!this.state.sampleActiveColumnsByWorkflow) {
-      this.state.sampleActiveColumnsByWorkflow = DEFAULTS_BY_WORKFLOW;
+      this.state.sampleActiveColumnsByWorkflow = DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW;
     }
 
     this.workflowEntity = find(
@@ -315,7 +314,7 @@ class DiscoveryView extends React.Component {
 
   overwriteCGDefaultActiveColumns({ stateObject }) {
     const defaultCGColumns =
-      DEFAULTS_BY_WORKFLOW[WORKFLOWS.CONSENSUS_GENOME.value];
+      DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[WORKFLOWS.CONSENSUS_GENOME.value];
 
     // eslint-disable-next-line standard/computed-property-even-spacing
     stateObject.sampleActiveColumnsByWorkflow[
@@ -1908,7 +1907,7 @@ class DiscoveryView extends React.Component {
     // we update the UI to indicate default sort behavior but do not update session storage.
     const orderNotDefined = isUndefined(orderBy) || isNull(orderBy);
     const orderByForCurrentTab = orderNotDefined
-      ? DEFAULT_ORDER_BY_TAB[currentTab]
+      ? DEFAULT_SORTED_COLUMN_BY_TAB[currentTab]
       : orderBy;
 
     // If showAllMetadata is true, all metadata (including custom metadata) will be available.

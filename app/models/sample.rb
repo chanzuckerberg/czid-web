@@ -128,6 +128,8 @@ class Sample < ApplicationRecord
   TAXON_FILTER_THRESHOLD_KEYS = [:count_type, :metric, :operator, :value].freeze
 
   scope :sort_by_metadata, lambda { |sort_key, order_dir|
+    # Note: if the samples do not contain the specified metadata, all metadata.string_validated_value's will be nil
+    # and samples will be sorted by TIEBREAKER_SORT_KEY
     joins_statement = "LEFT JOIN metadata ON (samples.id = metadata.sample_id AND metadata.key = '#{sort_key}')"
     order_statement = "metadata.string_validated_value #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
     joins(ActiveRecord::Base.sanitize_sql_array(joins_statement)).order(ActiveRecord::Base.sanitize_sql_array(order_statement))
