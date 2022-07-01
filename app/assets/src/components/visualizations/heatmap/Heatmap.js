@@ -536,7 +536,8 @@ export default class Heatmap {
 
   scroll() {
     this.pan(-d3.event.deltaX, -d3.event.deltaY);
-    d3.event.stopPropagation();
+    d3.event.preventDefault(); // prevent browser from navigating away from page when scroll
+    d3.event.stopPropagation(); // don't propagate the event to the element's parent
   }
 
   scrollToRow(label) {
