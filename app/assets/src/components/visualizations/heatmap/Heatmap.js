@@ -1969,8 +1969,7 @@ export default class Heatmap {
           .attr("x", this.rowLabelsWidth - this.options.marginAddLink);
         nodes
           .select("image")
-          .attr("x", this.rowLabelsWidth - this.options.marginAddLinkImg)
-          .attr("transform", `translate(${dx}, 0)`);
+          .attr("x", this.rowLabelsWidth - this.options.marginAddLinkImg);
       };
 
       // Update elements that changed
@@ -2013,6 +2012,9 @@ export default class Heatmap {
       if (addMetadataTrigger.size()) {
         this.addMetadataTrigger = addMetadataTrigger.node();
       }
+
+      // update
+      addLink.attr("transform", `translate(${dx}, 0)`);
     }
   }
 
