@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { isEmpty, isEqual, find, forEach, pick } from "lodash/fp";
+import { isEmpty, isEqual, find, forEach, pick, reject } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -124,14 +124,19 @@ class DiscoveryFilters extends React.Component {
 
   handleRemoveTag = ({ selectedKey, valueToRemove = "" }) => {
     let newSelected = null;
+    let newState = {};
 
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
         option => (option.value || option.id || option) !== valueToRemove,
       );
+
+      // If all taxon filters have been removed, remove the threshold filters as well
+      if (selectedKey === KEY_TAXON_SELECTED && isEmpty(newSelected)) {
+        newState[KEY_TAXON_THRESHOLDS_SELECTED] = [];
+      }
     }
 
-    let newState = {};
     newState[selectedKey] = newSelected;
     this.setState(newState, this.notifyFilterChangeHandler);
   };
@@ -210,6 +215,16 @@ class DiscoveryFilters extends React.Component {
     );
   };
 
+  handleRemoveThresholdFilterTag = threshold => {
+    const filteredThresholds = reject(
+      threshold,
+      this.state[KEY_TAXON_THRESHOLDS_SELECTED],
+    );
+    const newState = { [KEY_TAXON_THRESHOLDS_SELECTED]: filteredThresholds };
+
+    this.setState(newState, this.notifyFilterChangeHandler);
+  };
+
   renderTaxonThresholdFilterTags = () => {
     let selectedThresholds = this.state[KEY_TAXON_THRESHOLDS_SELECTED];
     if (isEmpty(selectedThresholds)) return;
@@ -222,12 +237,7 @@ class DiscoveryFilters extends React.Component {
             className={cs.filterTag}
             key={`threshold_filter_tag_${i}`}
             threshold={threshold}
-            onClose={() =>
-              this.handleRemoveTag({
-                selectedKey: KEY_TAXON_THRESHOLDS_SELECTED,
-                valueToRemove: threshold.value,
-              })
-            }
+            onClose={() => this.handleRemoveThresholdFilterTag(threshold)}
           />
         ))}
       </div>

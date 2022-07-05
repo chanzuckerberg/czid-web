@@ -1,7 +1,7 @@
 import { AutocompleteInputChangeReason } from "@material-ui/lab/Autocomplete";
 import { Dropdown, DropdownPopper } from "czifui";
 import { get, unionBy, debounce, size } from "lodash/fp";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { getSearchSuggestions } from "~/api";
 
 import cs from "./taxon_filter_sds.scss";
@@ -48,6 +48,13 @@ const TaxonFilterSDS = ({
   const label =
     numTaxaSelected > 0 ? `${numTaxaSelected} Taxa Selected` : "Choose Taxon";
 
+  useEffect(() => {
+    // Stop the invocation of the debounced function after unmounting this component
+    return () => {
+      loadOptionsForQuery.cancel();
+    };
+  }, []);
+
   const handleFilterChange = async (query: string) => {
     const searchResults = await getSearchSuggestions({
       query,
@@ -66,12 +73,12 @@ const TaxonFilterSDS = ({
     return options;
   };
 
-  const loadOptionsForQuery = debounce(
-    AUTOCOMPLETE_DEBOUNCE_DELAY,
-    async (query: string) => {
+  const loadOptionsForQuery = useCallback(
+    debounce(AUTOCOMPLETE_DEBOUNCE_DELAY, async (query: string) => {
       const newOptions = await handleFilterChange(query);
       setOptions(unionBy("id", newOptions, selectedTaxa));
-    },
+    }),
+    [],
   );
 
   const onInputChange = (
@@ -80,9 +87,7 @@ const TaxonFilterSDS = ({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _reason: AutocompleteInputChangeReason,
   ) => {
-    if (value) {
-      loadOptionsForQuery(value);
-    }
+    loadOptionsForQuery(value);
   };
 
   return (
@@ -100,6 +105,7 @@ const TaxonFilterSDS = ({
       search
       options={options}
       onChange={handleChange}
+      onClose={() => setOptions(selectedTaxa)}
       value={selectedTaxa}
       MenuSelectProps={{
         keepSearchOnSelect: true,
