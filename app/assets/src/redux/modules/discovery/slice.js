@@ -19,9 +19,15 @@ const discoverySlice = createSlice({
     updateProjectIds(state, action) {
       state.projectIds = action.payload;
     },
+    updateFilteredSampleCount(state, action) {
+      state.filteredSampleCount = action.payload;
+    },
   },
 });
 
-export const { updateProjectIds } = discoverySlice.actions;
+export const {
+  updateProjectIds,
+  updateFilteredSampleCount,
+} = discoverySlice.actions;
 
 export default discoverySlice.reducer;

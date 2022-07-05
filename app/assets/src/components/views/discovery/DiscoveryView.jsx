@@ -61,7 +61,10 @@ import {
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "~/components/views/samples/SamplesView/ColumnConfiguration";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
-import { updateProjectIds } from "~/redux/modules/discovery/slice";
+import {
+  updateFilteredSampleCount,
+  updateProjectIds,
+} from "~/redux/modules/discovery/slice";
 import Tabs from "~ui/controls/Tabs";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
@@ -768,10 +771,16 @@ class DiscoveryView extends React.Component {
   };
 
   refreshSampleData = () => {
-    this.setState({
-      filteredSampleCount: this.samples.length,
-      selectableSampleIds: this.samples.getIds(),
-    });
+    const { updateDiscoveryFilteredSampleCount } = this.props;
+    const filteredSampleCount = this.samples.length;
+
+    this.setState(
+      {
+        filteredSampleCount,
+        selectableSampleIds: this.samples.getIds(),
+      },
+      () => updateDiscoveryFilteredSampleCount(filteredSampleCount),
+    );
   };
 
   refreshVisualizationData = () => {
@@ -2273,11 +2282,15 @@ DiscoveryView.propTypes = {
   snapshotProjectName: PropTypes.string,
   snapshotShareId: PropTypes.string,
   updateDiscoveryProjectId: PropTypes.func,
+  updateDiscoveryFilteredSampleCount: PropTypes.func,
 };
 
 DiscoveryView.contextType = UserContext;
 
-const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectIds };
+const mapDispatchToProps = {
+  updateDiscoveryProjectId: updateProjectIds,
+  updateDiscoveryFilteredSampleCount: updateFilteredSampleCount,
+};
 
 // Don't need mapStateToProps yet so pass in null
 const connectedComponent = connect(null, mapDispatchToProps)(DiscoveryView);

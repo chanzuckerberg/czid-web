@@ -537,6 +537,11 @@ function EventDictionary() {
   /** One page of data is loaded onto the DiscoveryView table */
   this.DISCOVERY_VIEW_TABLE_PAGE_LOADED = "DISCOVERY_VIEW_TABLE_PAGE_LOADED";
 
+
+  /** The user clicked apply in the TaxonThresholdFilter. */
+  this.TAXON_THRESHOLD_FILTER_APPLY_CLICKED =
+    "TAXON_THRESHOLD_FILTER_APPLY_CLICKED";
+
   /** The user triggered a download from the SampleHeatmapDownloadModal. */
   this.SAMPLES_HEATMAP_DOWNLOAD_MODAL_DOWNLOAD_CLICKED =
     "SAMPLES_HEATMAP_DOWNLOAD_MODAL_DOWNLOAD_CLICKED";
