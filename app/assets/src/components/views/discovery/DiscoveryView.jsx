@@ -43,6 +43,7 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
+  SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
   SORTING_V0_ADMIN_FEATURE,
   SORTING_V0_FEATURE,
   TAXON_THRESHOLD_FILTERING_FEATURE,
@@ -1922,8 +1923,9 @@ class DiscoveryView extends React.Component {
     // If showAllMetadata is true, all metadata (including custom metadata) will be available.
     // If showAllMetadata is false, only a subset of metadata will be available. (Refer to fixedMetadata in ColumnConfigurations.jsx.)
     const showAllMetadata =
-      allowedFeatures.includes(SAMPLES_TABLE_METADATA_COLUMNS_FEATURE) &&
-      domain === DISCOVERY_DOMAIN_MY_DATA;
+      allowedFeatures.includes(SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE) ||
+      (allowedFeatures.includes(SAMPLES_TABLE_METADATA_COLUMNS_FEATURE) &&
+        domain === DISCOVERY_DOMAIN_MY_DATA);
 
     return (
       <>

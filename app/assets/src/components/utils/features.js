@@ -12,4 +12,7 @@ export const SORTING_V0_ADMIN_FEATURE = "sorting_v0_admin";
 export const TAXON_THRESHOLD_FILTERING_FEATURE = "taxon_threshold_filter";
 export const SAMPLES_TABLE_METADATA_COLUMNS_FEATURE =
   "samples_table_metadata_columns";
+// SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE enables metadata columns on all domains and will be enabled for admin testing purposes only
+export const SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE =
+  "samples_table_metadata_columns_admin";
 export const MICROBIOME_DOWNLOAD_FEATURE = "microbiome";
