@@ -76,7 +76,7 @@ module ErrorHelper
     end
 
     def self.max_file_size_exceeded(file_size, maximum)
-      "File size of #{file_size} exceeds maximum of #{maximum}GB"
+      "File size of #{file_size} exceeds maximum of #{maximum} bytes"
     end
   end
 
