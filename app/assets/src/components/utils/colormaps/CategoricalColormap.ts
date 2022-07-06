@@ -1,4 +1,5 @@
 export class CategoricalColormap {
+  gradients: string[][];
   constructor(gradientLimits) {
     this.gradients = gradientLimits || [
       "482778",
@@ -13,7 +14,7 @@ export class CategoricalColormap {
   }
 
   hexToDec(hexColor) {
-    let decColors = [];
+    const decColors = [];
     for (let j = 0; j < 3; j++) {
       decColors.push(parseInt(hexColor.slice(j * 2, j * 2 + 2), 16));
     }
@@ -33,23 +34,23 @@ export class CategoricalColormap {
     //    of each gradient segment using a round-robin
     if (n === 0) return [];
 
-    let colors = this.gradients
+    const colors = this.gradients
       .slice(0, Math.min(this.gradients.length, n))
       .map(decColor => this.decToHex(decColor));
 
     if (colors.length < n) {
-      let colorsPerInterval = Math.floor(
+      const colorsPerInterval = Math.floor(
         (n - this.gradients.length) / (this.gradients.length - 1),
       );
-      let extraColors =
+      const extraColors =
         (n - this.gradients.length) % (this.gradients.length - 1);
       for (let i = colors.length; i < n; i++) {
-        let sequenceColor = Math.floor(
+        const sequenceColor = Math.floor(
           (i - this.gradients.length) / (this.gradients.length - 1),
         );
-        let interval =
+        const interval =
           (i - this.gradients.length) % (this.gradients.length - 1);
-        let step =
+        const step =
           (sequenceColor + 1) /
           (1 + colorsPerInterval + (interval < extraColors ? 1 : 0));
 
@@ -68,7 +69,7 @@ export class CategoricalColormap {
   }
 
   getLinearColor(startColor, endColor, k) {
-    let decColor = [];
+    const decColor = [];
     for (let j = 0; j < 3; j++) {
       decColor.push(
         Math.floor(startColor[j] + k * (endColor[j] - startColor[j])),

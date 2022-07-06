@@ -10,8 +10,8 @@ export class SequentialColormap {
     const baseScale = this.loadLocalScale(scaleName);
     n = Math.min(n, baseScale.length);
 
-    let step = baseScale.length / n;
-    let sampledScale = [];
+    const step = baseScale.length / n;
+    const sampledScale = [];
     for (let i = 0; i < n - 1; i++) {
       sampledScale.push(baseScale[Math.round(i * step)]);
     }

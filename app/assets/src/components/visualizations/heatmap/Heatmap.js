@@ -9,7 +9,7 @@ import SvgSaver from "svgsaver";
 import textWidth from "text-width";
 
 import { sanitizeCSVRow } from "~/components/utils/csv";
-import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
+import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.ts";
 import symlog from "../../utils/d3/scales/symlog.js";
 import addSvgColorFilter from "../../utils/d3/svg.js";
 import cs from "./heatmap.scss";
