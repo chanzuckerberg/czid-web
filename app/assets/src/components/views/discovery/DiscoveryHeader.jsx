@@ -26,9 +26,13 @@ class DiscoveryHeader extends React.Component {
     let category = result.category;
     if (category !== "locationV2") category = category.toLowerCase();
     let value = result.id;
+    let sdsTaxonFilterData = {};
     switch (category) {
       case "taxon": {
         value = result.taxid;
+        // eslint-disable-next-line  no-undef
+        const { taxid: id, level, title: name } = result;
+        sdsTaxonFilterData = { id, level, name };
         break;
       }
       case "sample": {
@@ -45,6 +49,7 @@ class DiscoveryHeader extends React.Component {
       key: category,
       value: value,
       text: result.title,
+      sdsTaxonFilterData,
     };
 
     onSearchResultSelected &&

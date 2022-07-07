@@ -12,6 +12,7 @@ import {
   TaxonFilter,
 } from "~/components/common/filters";
 import TaxonThresholdFilter from "~/components/common/filters/TaxonThresholdFilter";
+import ThresholdMap from "~/components/utils/ThresholdMap";
 import { TAXON_THRESHOLD_FILTERING_FEATURE } from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import FilterTag from "~ui/controls/FilterTag";
@@ -287,7 +288,13 @@ class DiscoveryFilters extends React.Component {
                 <TaxonThresholdFilter
                   domain={domain}
                   onFilterApply={(taxa, thresholds) => {
-                    this.handleTaxonThresholdFilterChange(taxa, thresholds);
+                    const validThresholds = thresholds.filter(
+                      ThresholdMap.isThresholdValid,
+                    );
+                    this.handleTaxonThresholdFilterChange(
+                      taxa,
+                      validThresholds,
+                    );
                   }}
                   selectedOptions={taxonSelected}
                   selectedThresholds={taxonThresholdsSelected}

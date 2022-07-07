@@ -1016,7 +1016,11 @@ class DiscoveryView extends React.Component {
     this.handleFilterChange(selectedFilters);
   };
 
-  handleSearchSelected = ({ key, value, text }, currentEvent) => {
+  handleSearchSelected = (
+    { key, value, text, sdsTaxonFilterData },
+    currentEvent,
+  ) => {
+    const { allowedFeatures = [] } = this.context || {};
     const { filters, search } = this.state;
 
     const dimensions = this.getCurrentDimensions();
@@ -1028,11 +1032,23 @@ class DiscoveryView extends React.Component {
       case "taxon": {
         // If the user selected a taxon we add it to the dropdown
         // (since we do know which options are available, we always added)
-        newFilters[selectedKey] = xorBy(
-          "value",
-          [{ value, text }],
-          newFilters[selectedKey],
-        );
+        let filteredTaxa = [];
+
+        if (allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)) {
+          filteredTaxa = xorBy(
+            "id",
+            [sdsTaxonFilterData],
+            newFilters[selectedKey],
+          );
+        } else {
+          filteredTaxa = xorBy(
+            "value",
+            [{ value, text }],
+            newFilters[selectedKey],
+          );
+        }
+
+        newFilters[selectedKey] = filteredTaxa;
         filtersChanged = true;
         break;
       }
@@ -1868,6 +1884,7 @@ class DiscoveryView extends React.Component {
       currentDisplay,
       currentTab,
       filteredProjectCount,
+      filteredSampleCount,
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
@@ -1893,7 +1910,10 @@ class DiscoveryView extends React.Component {
     const isWorkflowRunEntity =
       workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
     const objects = isWorkflowRunEntity ? this.workflowRuns : this.samples;
-    const tableHasLoaded = !objects.isLoading() && currentDisplay === "table";
+    const tableHasLoaded =
+      !this.workflowRuns.isLoading() &&
+      !this.samples.isLoading() &&
+      currentDisplay === "table";
 
     const hideAllTriggers = !!snapshotShareId;
     const [selectableIds, selectedIds, updateSelectedIds] = isWorkflowRunEntity
@@ -2014,8 +2034,8 @@ class DiscoveryView extends React.Component {
             </div>
             {userDataCounts &&
             userDataCounts.sampleCountByWorkflow[workflow] &&
-            !this.samples.length &&
-            !this.workflowRuns.length &&
+            !filteredSampleCount &&
+            workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
             tableHasLoaded
               ? this.renderNoSearchResultsBanner(TAB_SAMPLES)
               : null}
