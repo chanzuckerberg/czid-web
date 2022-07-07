@@ -8,6 +8,8 @@
         "                                                                                ",
         "    aws s3 cp idseq-bench-config.v2.json s3://idseq-bench/config.v2.json        ",
         "                                                                                ",
+        " Note that s3://idseq-bench/ is used for both staging and prod environments.    ",
+        "                                                                                ",
         " This process allows changing webapp configuration without the cost             ",
         " and disruption of a production push.                                           ",
         "                                                                                ",
@@ -26,7 +28,7 @@
     "defaults": {
         "how_to_use_these_defaults": "These properties may be overridden in each entry of active_benchmarks below.",
         "project_name": "IDSeq Bench",
-        "user_email": "bdimitrov@chanzuckerberg.com",
+        "user_email": "idseq-tech@chanzuckerberg.com",
         "frequency_hours": 24,
         "trigger_on_webapp_change": true,
         "trigger_on_pipeline_change": true,
@@ -40,15 +42,14 @@
             "key": "5",
             "comment": "Comprehensive general benchmark built with idseq-bench, contains additional microbes (beyond bench/4) commonly found in IDseq samples. Deployed 2019-04-30.",
             "environments": ["prod", "staging"]
-        },
+        }
+    ],
+    "retired_benchmarks": [
         {
             "bucket": "idseq-bench",
             "key": "7",
             "comment": "Comprehensive general benchmark built with idseq-bench, contains additional microbes (beyond bench/4) commonly found in IDseq samples. Uses the new benchmark configuration. Deployed 2019-10-40.",
-            "environments": ["prod", "staging"],
-            "user_email": "tcarvalho@chanzuckerberg.com"
+            "environments": ["prod", "staging"]
         }
-    ],
-    "retired_benchmarks": [
     ]
 }
