@@ -26,6 +26,7 @@ import cs from "./report_filters.scss";
 
 const ReportFilters = ({
   backgrounds,
+  loadingReport,
   onFilterChanged,
   onFilterRemoved,
   otherBackgrounds,
@@ -144,12 +145,15 @@ const ReportFilters = ({
               }}
               onResultSelect={(_, { result }) => {
                 return handleFilterChange({
-                  key: "taxon",
-                  value: {
-                    taxId: result.taxid,
-                    taxLevel: result.level,
-                    name: result.title,
-                  },
+                  key: "taxa",
+                  // TODO: In the future, we may want to allow users to filter by more than one taxon in the sample report page
+                  value: [
+                    {
+                      id: result.taxid,
+                      level: result.level,
+                      name: result.title,
+                    },
+                  ],
                 });
               }}
               placeholder="Taxon name"
@@ -270,24 +274,28 @@ const ReportFilters = ({
           </div>
         )}
       </div>
-      <div className={cs.tagList}>
-        {selected.taxon &&
-          renderFilterTag({
-            key: "taxon",
-            label: selected.taxon.name,
-            value: selected.taxon,
-          })}
-        {selected.thresholds.map((threshold, i) =>
-          renderThresholdFilterTag({ threshold, idx: i }),
-        )}
-        {renderCategoryFilterTags()}
-      </div>
+      {!loadingReport && (
+        <div className={cs.tagList}>
+          {selected.taxa.map(taxon =>
+            renderFilterTag({
+              key: "taxa",
+              label: taxon.name,
+              value: taxon,
+            }),
+          )}
+          {selected.thresholds.map((threshold, i) =>
+            renderThresholdFilterTag({ threshold, idx: i }),
+          )}
+          {renderCategoryFilterTags()}
+        </div>
+      )}
     </>
   );
 };
 
 ReportFilters.propTypes = {
   backgrounds: PropTypes.array,
+  loadingReport: PropTypes.bool,
   onFilterChanged: PropTypes.func,
   onFilterRemoved: PropTypes.func,
   otherBackgrounds: PropTypes.array,

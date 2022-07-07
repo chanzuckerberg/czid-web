@@ -147,14 +147,18 @@ class SampleView extends React.Component {
     if (noUrlThresholds) {
       // Get thresholds from discovery view options in session storage
       const {
-        filters: { taxonThresholdsSelected: thresholds } = {
+        filters: {
+          taxonThresholdsSelected: thresholds,
+          taxonSelected: taxa,
+        } = {
           taxonThresholdsSelected: [],
+          taxonSelected: [],
         },
       } = this.loadState(sessionStorage, KEY_DISCOVERY_VIEW_OPTIONS);
 
       // If there are exising session thresholds, override local options in state
       if (!isEmpty(thresholds)) {
-        discoveryViewThresholdFilters = { thresholds };
+        discoveryViewThresholdFilters = { taxa, thresholds };
         persistThresholdsToLocalState = false;
 
         this.renderPersistedDiscoveryViewThresholdsNotification();
@@ -312,7 +316,7 @@ class SampleView extends React.Component {
       metric: find({ value: "nt_r" }, TREE_METRICS).value,
       nameType: "Scientific name",
       readSpecificity: 0,
-      taxon: null,
+      taxa: [],
       thresholds: [],
     };
   };
@@ -575,17 +579,26 @@ class SampleView extends React.Component {
         mergeNtNr,
       });
       this.setState(
-        ({ selectedOptions: prevSelectedOptions }) => ({
-          loadingReport: false,
-          // If the fetching of the sample report was triggered by a background model change,
-          // then update the background if the report loaded successfully.
-          ...(prevSelectedOptions.background !== backgroundIdUsed && {
-            selectedOptions: {
-              ...selectedOptions,
+        ({ selectedOptions: prevSelectedOptions }) => {
+          const newSelectedOptions = {
+            ...selectedOptions,
+            ...(!isEmpty(rawReportData?.all_tax_ids) &&
+              !isEmpty(selectedOptions.taxa) && {
+                taxa: filter(
+                  taxon => rawReportData?.all_tax_ids.includes(taxon.id),
+                  selectedOptions.taxa,
+                ),
+              }),
+            ...(prevSelectedOptions.background !== backgroundIdUsed && {
               background: backgroundIdUsed,
-            },
-          }),
-        }),
+            }),
+          };
+
+          return {
+            loadingReport: false,
+            selectedOptions: newSelectedOptions,
+          };
+        },
         () => {
           if (rawReportData) {
             this.processRawSampleReportData(rawReportData);
@@ -656,21 +669,25 @@ class SampleView extends React.Component {
     subcategories,
     thresholds,
     readSpecificity,
-    taxon,
+    taxa,
   }) => {
     // When adding filters consider their order based on filter complexity (more complex later)
     // and effeciency (filters more likely to filter out more taxa earlier)
     return (
-      this.filterTaxon({ row, taxon }) &&
+      this.filterTaxa({ row, taxa }) &&
       this.filterCategories({ row, categories, subcategories }) &&
       this.filterReadSpecificity({ row, readSpecificity }) &&
       this.filterThresholds({ row, thresholds })
     );
   };
 
-  filterTaxon = ({ row, taxon }) => {
-    return (
-      !taxon || row.taxId === taxon.taxId || row.genus_tax_id === taxon.taxId
+  filterTaxa = ({ row, taxa }) => {
+    // If there's no taxa to filter, then return true
+    if (isEmpty(taxa)) return true;
+
+    return some(
+      taxon => row.taxId === taxon.id || row.genus_tax_id === taxon.id,
+      taxa,
     );
   };
 
@@ -775,7 +792,7 @@ class SampleView extends React.Component {
 
   filterReportData = ({
     reportData,
-    filters: { categories, thresholds, readSpecificity, taxon },
+    filters: { categories, thresholds, readSpecificity, taxa },
   }) => {
     const categoriesSet = new Set(
       map(c => c.toLowerCase(), categories.categories || []),
@@ -792,7 +809,7 @@ class SampleView extends React.Component {
         subcategories: subcategoriesSet,
         thresholds,
         readSpecificity,
-        taxon,
+        taxa,
       });
 
       genusRow.filteredSpecies = genusRow.species.filter(speciesRow =>
@@ -802,7 +819,7 @@ class SampleView extends React.Component {
           subcategories: subcategoriesSet,
           thresholds,
           readSpecificity,
-          taxon,
+          taxa,
         }),
       );
       if (genusRow.passedFilters || genusRow.filteredSpecies.length) {
@@ -943,7 +960,7 @@ class SampleView extends React.Component {
   };
 
   persistNewBackgroundModelSelection = async ({ newBackgroundId }) => {
-    const { hasPersistedBackground, project, selectedOptions } = this.state;
+    const { hasPersistedBackground, project } = this.state;
 
     const persistBackgroundApi = !hasPersistedBackground
       ? createPersistedBackground
@@ -966,10 +983,13 @@ class SampleView extends React.Component {
     });
 
     this.setState(
-      {
+      ({ selectedOptions: previousSelectedOptions }) => ({
         hasPersistedBackground: true,
-        selectedOptions: { ...selectedOptions, background: newBackgroundId },
-      },
+        selectedOptions: {
+          ...previousSelectedOptions,
+          background: newBackgroundId,
+        },
+      }),
       () => this.updateHistoryAndPersistOptions(),
     );
   };
@@ -986,8 +1006,8 @@ class SampleView extends React.Component {
           newSelectedOptions.categories,
         );
         break;
-      case "taxon":
-        newSelectedOptions.taxon = null;
+      case "taxa":
+        newSelectedOptions.taxa = pull(value, newSelectedOptions.taxa);
         break;
       case "thresholds":
         newSelectedOptions.thresholds = pull(
@@ -1132,11 +1152,11 @@ class SampleView extends React.Component {
         });
         break;
 
-      // - taxon: refresh filtered data
+      // - taxa: refresh filtered data
       // - categories: refresh filtered data
       // - threshold filters: refresh filtered data
       // - read specificity: refresh filtered data
-      case "taxon":
+      case "taxa":
       case "categories":
       case "thresholds":
       case "readSpecificity":
@@ -1587,7 +1607,7 @@ class SampleView extends React.Component {
 
     const newSelectedOptions = { ...selectedOptions };
     newSelectedOptions.categories = {};
-    newSelectedOptions.taxon = null;
+    newSelectedOptions.taxa = [];
     newSelectedOptions.thresholds = [];
 
     this.setState(
@@ -1607,10 +1627,10 @@ class SampleView extends React.Component {
 
   countFilters = () => {
     const {
-      selectedOptions: { categories, thresholds, taxon },
+      selectedOptions: { categories, thresholds, taxa },
     } = this.state;
 
-    let numFilters = taxon ? 1 : 0;
+    let numFilters = taxa.length;
     numFilters += thresholds.length;
     numFilters += (categories.categories || []).length;
     numFilters += sum(
@@ -1913,13 +1933,13 @@ class SampleView extends React.Component {
 
   hasAppliedFilters = () => {
     const { selectedOptions } = this.state;
-    const { categories, readSpecificity, taxon, thresholds } = selectedOptions;
+    const { categories, readSpecificity, taxa, thresholds } = selectedOptions;
 
     const hasCategoryFilters =
       !isEmpty(getOr([], "categories", categories)) ||
       !isEmpty(getOr([], "subcategories.Viruses", categories));
     const hasReadSpecificityFilters = readSpecificity !== 0;
-    const hasTaxonFilter = !isEmpty(taxon);
+    const hasTaxonFilter = !isEmpty(taxa);
     const hasThresholdFilters = !isEmpty(thresholds);
 
     return (
@@ -1988,9 +2008,11 @@ class SampleView extends React.Component {
 
           break;
         }
-        case "taxon": {
-          filterRow.push(`Taxon Name:, ${get("name", optionVal)}`);
-          numberOfFilters += 1;
+        case "taxa": {
+          optionVal.forEach(taxon => {
+            filterRow.push(`Taxon Name:, ${get("name", taxon)}`);
+            numberOfFilters += 1;
+          });
           break;
         }
         case "thresholds": {
@@ -2117,6 +2139,7 @@ class SampleView extends React.Component {
       enableMassNormalizedBackgrounds,
       filteredReportData,
       lineageData,
+      loadingReport,
       ownedBackgrounds,
       otherBackgrounds,
       pipelineRun,
@@ -2137,6 +2160,7 @@ class SampleView extends React.Component {
           <div className={cs.reportFilters}>
             <ReportFilters
               backgrounds={backgrounds}
+              loadingReport={loadingReport}
               ownedBackgrounds={ownedBackgrounds}
               otherBackgrounds={otherBackgrounds}
               shouldDisableFilters={displayMergedNtNrValue}

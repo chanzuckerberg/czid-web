@@ -217,6 +217,11 @@ class PipelineReportService
     align_viz_available = @pipeline_run.align_viz_available?
     @timer.split("compute_options_available_for_pipeline_run")
 
+    all_tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].values.each_with_object([]) do |genus, tax_ids|
+      tax_ids << genus[:genus_tax_id]
+      tax_ids << genus[:species_tax_ids]
+    end.flatten.to_set
+
     # OUTPUT TAXON INFORMATION
     if @csv
       csv_output = report_csv(counts_by_tax_level, sorted_genus_tax_ids)
@@ -234,6 +239,7 @@ class PipelineReportService
       json_dump =
         Oj.dump(
           {
+            all_tax_ids: all_tax_ids,
             metadata: metadata.compact,
             counts: counts_by_tax_level,
             lineage: structured_lineage,

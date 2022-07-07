@@ -288,7 +288,7 @@ class DiscoveryFilters extends React.Component {
                 <TaxonThresholdFilter
                   domain={domain}
                   onFilterApply={(taxa, thresholds) => {
-                    const validThresholds = thresholds.filter(
+                    const validThresholds = thresholds?.filter(
                       ThresholdMap.isThresholdValid,
                     );
                     this.handleTaxonThresholdFilterChange(

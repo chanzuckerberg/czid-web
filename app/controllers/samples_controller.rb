@@ -530,6 +530,13 @@ class SamplesController < ApplicationController
               "level": "genus",
               "category": "Taxon",
             },
+            {
+              "title": "Betacoronavirus",
+              "description": "Taxonomy ID: 694002",
+              "taxid": 694_002,
+              "level": "genus",
+              "category": "Taxon",
+            },
           ],
         }
       else
