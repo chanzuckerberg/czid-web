@@ -9,17 +9,25 @@ export const CONDITIONAL_FIELDS = [
     // The download type this conditional field applies to.
     downloadType: "reads_non_host",
     // The field this conditional field depends on.
-    dependentField: "taxa_with_reads",
+    dependentFields: ["taxa_with_reads"],
     // The values of the dependent field that trigger the conditional field.
     triggerValues: ["all", undefined],
   },
   {
     field: "background",
     downloadType: "combined_sample_taxon_results",
-    dependentField: "metric",
+    dependentFields: ["metric"],
+    triggerValues: ["NR.zscore", "NT.zscore"],
+  },
+  {
+    field: "background",
+    downloadType: "biom_format",
+    dependentFields: ["metric", "filter_by"],
     triggerValues: ["NR.zscore", "NT.zscore"],
   },
 ];
+
+export const DEFAULT_BACKGROUND_MODEL = 26;
 
 export const BULK_DOWNLOAD_TYPES = {
   SAMPLE_METADATA: "sample_metadata",

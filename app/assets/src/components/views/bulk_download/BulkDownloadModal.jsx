@@ -16,6 +16,7 @@ import {
 } from "~/api/access_control";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
+import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
 import { openUrl } from "~utils/links";
@@ -24,6 +25,7 @@ import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
 import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
 import cs from "./bulk_download_modal.scss";
+import { DEFAULT_BACKGROUND_MODEL } from "./constants";
 
 const DEFAULT_CREATION_ERROR =
   "An unknown error occurred. Please contact us for help.";
@@ -270,10 +272,11 @@ class BulkDownloadModal extends React.Component {
       selectedFields,
       validObjectIds,
     } = this.state;
-    const metricList = selectedFields["biom_format"] &&
-                      selectedFields["biom_format"]["metric_list"];
-    const sortMetric = selectedFields["biom_format"] && selectedFields["biom_format"]["metric"];
+    const metricList = selectedFields?.["biom_format"]?.["filter_by"];
+    const metric = selectedFields?.["biom_format"]?.["metric"];
+    const sortMetric = METRIC_OPTIONS.includes(metric); // check heatmap is sortable on selected metric
     const presets = [];
+
     if(metricList) {
       presets.push("thresholdFilters");
     }
@@ -282,7 +285,7 @@ class BulkDownloadModal extends React.Component {
     }
 
     const params = getURLParamString({
-      background: metricList && metricList[0]["background_id"] ? metricList[0]["background_id"]: 26,
+      background: selectedFields?.["biom_format"]?.["background"] || DEFAULT_BACKGROUND_MODEL,
       categories: [],
       subcategories: JSON.stringify({}),
       readSpecificity: null,

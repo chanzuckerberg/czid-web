@@ -1,9 +1,6 @@
 import React from "react";
 import { Grid } from "semantic-ui-react";
-import { BACKGROUND_DEPENDENT_THRESHOLDS } from "~/components/views/SampleView/constants";
-import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import {
-  BackgroundOption,
   MetricOption,
   ThresholdFilterData,
   ThresholdFilterOperator,
@@ -16,7 +13,6 @@ interface ThresholdFilterListProps {
   metrics: MetricOption[];
   operators: ThresholdFilterOperator[];
   thresholds: ThresholdFilterData[];
-  backgroundOptions?: BackgroundOption[];
   onChangeThreshold: (
     thresholdIdx: number,
     threshold: ThresholdFilterData,
@@ -29,7 +25,6 @@ const ThresholdFilterList = ({
   metrics,
   operators,
   thresholds,
-  backgroundOptions,
   onChangeThreshold,
   onRemoveThreshold,
   onAddThreshold,
@@ -43,8 +38,8 @@ const ThresholdFilterList = ({
       >
         {Array.isArray(thresholds) &&
           thresholds.map((threshold: ThresholdFilterData, idx: number) => (
-            <React.Fragment key={idx}>
               <ThresholdFilter
+                key={idx}
                 metrics={metrics}
                 operators={operators}
                 threshold={threshold}
@@ -55,21 +50,6 @@ const ThresholdFilterList = ({
                   onRemoveThreshold(idx);
                 }}
               />
-              { backgroundOptions && BACKGROUND_DEPENDENT_THRESHOLDS.map(a => a.text).includes(threshold.metricDisplay) && (
-                <div>
-                <BackgroundModelFilter
-                  placeholder={"Select Background"}
-                  allBackgrounds={backgroundOptions}
-                  onChange={(value:number)=> {threshold["background_id"] = value;}}
-                  enableMassNormalizedBackgrounds={false}
-                  value={threshold}
-                  usePortal
-                  rounded={false}
-                  label={""}
-                />
-                </div>
-                ) }
-            </React.Fragment>
           ))}
         <Grid.Row className={cs.addThresholdRow}>
           <Grid.Column className={cs.addThresholdColumn}>

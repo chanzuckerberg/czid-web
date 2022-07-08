@@ -26,10 +26,21 @@ import {
   CONDITIONAL_FIELDS,
 } from "./constants.js";
 
+const triggersCondtionalFieldMetricList = (conditionalField, dependentField, selectedFields) =>
+  {
+    const thresholdMetrics = selectedFields["filter_by"].map((obj) => obj["metric"].replace("_", ".")); // Heatmap metrics use underscore as separator, bulk downloads use periods
+    return thresholdMetrics.filter( (metric) => conditionalField.triggerValues.includes(metric)).length > 0;
+  };
+
 const triggersConditionalField = (conditionalField, selectedFields) =>
-  conditionalField.triggerValues.includes(
-    get(conditionalField.dependentField, selectedFields),
-  );
+  conditionalField.dependentFields.map( (dependentField) =>
+   (selectedFields && selectedFields["filter_by"] && dependentField === "filter_by") ?
+      triggersCondtionalFieldMetricList(conditionalField, dependentField, selectedFields,
+      ) : (
+        conditionalField.triggerValues.includes(
+          get(dependentField, selectedFields),
+        )),
+  ).some(Boolean);
 
 class BulkDownloadModalOptions extends React.Component {
   sortTaxaWithReadsOptions = memoize(options =>
@@ -163,7 +174,6 @@ class BulkDownloadModalOptions extends React.Component {
             <div className={cs.label}>{field.display_name}:</div>
               <ThresholdFilterModal
                 addFilterList={onFieldSelect}
-                backgroundOptions={backgroundOptions}
                 />
           </div>
         </div>

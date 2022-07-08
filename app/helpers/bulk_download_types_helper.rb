@@ -159,6 +159,10 @@ module BulkDownloadTypesHelper
           display_name: "Filter by",
           type: "filter_by",
         },
+        {
+          display_name: "Background",
+          type: "background",
+        },
       ],
       execution_type: RESQUE_EXECUTION_TYPE,
       admin_only: true,
