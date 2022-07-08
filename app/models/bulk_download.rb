@@ -100,6 +100,8 @@ class BulkDownload < ApplicationRecord
       filename = BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)
       filename += if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE && get_param_value("download_format") == BulkDownloadTypesHelper::SINGLE_FILE_CONCATENATED_DOWNLOAD
                     ".fa"
+                  elsif download_type == BIOM_FORMAT_DOWNLOAD_TYPE
+                    ".biom"
                   else
                     ".tar.gz"
                   end
@@ -635,7 +637,7 @@ class BulkDownload < ApplicationRecord
       samples_bucket_name = AppConfigHelper.get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1) ? ENV['SAMPLES_BUCKET_NAME_V1'] : ENV['SAMPLES_BUCKET_NAME']
       metrics_path, metadata_path, taxon_lineage_path = BulkDownloadsHelper.generate_biom_format_file(pipeline_runs, get_param_value("metric"), get_param_value("background_id"), get_param_value("filters"), id)
       biom_file = create_biom_file(metrics_path, metadata_path, taxon_lineage_path)
-      S3Util.upload_to_s3(samples_bucket_name, download_output_key, biom_file)
+      S3Util.upload_to_s3(samples_bucket_name, download_output_key, IO.read(biom_file))
     else
       start_time = Time.now.to_f
 
