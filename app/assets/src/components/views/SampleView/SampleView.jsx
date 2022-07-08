@@ -156,11 +156,14 @@ class SampleView extends React.Component {
         },
       } = this.loadState(sessionStorage, KEY_DISCOVERY_VIEW_OPTIONS);
 
-      // If there are exising session thresholds, override local options in state
-      if (!isEmpty(thresholds)) {
-        discoveryViewThresholdFilters = { taxa, thresholds };
+      // Threshold filters may be stored in 3 places: 1) session storage, 2) local storage, 3) component state
+      // If there are exising session taxa or thresholds, override local options in state
+      if (!isEmpty(taxa)) {
+        discoveryViewThresholdFilters = {
+          taxa,
+          thresholds: isEmpty(thresholds) ? [] : thresholds,
+        };
         persistThresholdsToLocalState = false;
-
         this.renderPersistedDiscoveryViewThresholdsNotification();
       }
     }
@@ -1895,7 +1898,7 @@ class SampleView extends React.Component {
           <div
             className={cs.revertFiltersLink}
             onClick={() => {
-              this.revertToSampleViewThresholds();
+              this.revertToSampleViewFilters();
               closeToast();
             }}
             onKeyDown={() => {
@@ -1913,19 +1916,20 @@ class SampleView extends React.Component {
     );
   };
 
-  revertToSampleViewThresholds = () => {
+  revertToSampleViewFilters = () => {
     const { selectedOptions: selectedOptionsFromLocal } = this.loadState(
       localStorage,
       KEY_SAMPLE_VIEW_OPTIONS,
     );
     const newSelectedOptions = {
       ...this.state.selectedOptions,
+      taxa: selectedOptionsFromLocal?.taxa || [],
       thresholds: selectedOptionsFromLocal?.thresholds || [],
     };
 
     this.setState({ selectedOptions: newSelectedOptions }, () => {
       this.refreshDataFromOptionsChange({
-        key: "thresholds",
+        key: "taxa",
         newSelectedOptions,
       });
     });

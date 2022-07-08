@@ -7,12 +7,12 @@ export const GENUS_LEVEL_INDEX = 2;
 export const KEY_SAMPLE_VIEW_OPTIONS = "SampleViewOptions";
 
 export const KEY_SELECTED_OPTIONS_BACKGROUND = "background";
-export const KEY_SELECTED_OPTIONS_TAXON = "taxon";
+export const KEY_SELECTED_OPTIONS_TAXA = "taxa";
 export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholds";
 
 export const LOCAL_STORAGE_EXCLUDED_SELECTED_OPTIONS = [
   KEY_SELECTED_OPTIONS_BACKGROUND,
-  KEY_SELECTED_OPTIONS_TAXON,
+  KEY_SELECTED_OPTIONS_TAXA,
 ];
 
 export const URL_FIELDS = {
@@ -106,11 +106,14 @@ export const THRESHOLDS = [
   { text: "NR E value (as a power of 10)", value: "nr:e_value" },
 ];
 
-export const BACKGROUND_DEPENDENT_THRESHOLDS = THRESHOLDS.filter(threshold =>
-  !NON_BACKGROUND_DEPENDENT_THRESHOLDS.some(nbdThreshold =>
-    threshold.text === nbdThreshold.text && threshold.value === nbdThreshold.value,
+export const BACKGROUND_DEPENDENT_THRESHOLDS = THRESHOLDS.filter(
+  threshold =>
+    !NON_BACKGROUND_DEPENDENT_THRESHOLDS.some(
+      nbdThreshold =>
+        threshold.text === nbdThreshold.text &&
+        threshold.value === nbdThreshold.value,
     ),
-  );
+);
 
 export const TREE_METRICS = [
   { text: "Aggregate Score", value: "aggregatescore" },
