@@ -32,7 +32,6 @@ import IconCziLogo from "./IconCziLogo";
 import IconDoubleQuotes from "./IconDoubleQuotes";
 import IconDownload from "./IconDownload";
 import IconDownloadSmall from "./IconDownloadSmall";
-import IconEditSmall from "./IconEditSmall";
 import IconFilters from "./IconFilters";
 import IconHeatmap from "./IconHeatmap";
 import IconHeatmapPrivate from "./IconHeatmapPrivate";
@@ -114,7 +113,6 @@ export const ICONS_TAXONOMY = {
     IconDoubleQuotes,
     IconDownload,
     IconDownloadSmall,
-    IconEditSmall,
     IconFilters,
     IconHeatmap,
     IconHeatmapPrivate,

@@ -1,8 +1,9 @@
 import cx from "classnames";
+import { Icon, IconButton } from "czifui";
 import { isEmpty } from "lodash/fp";
 import React, { useEffect, useState, useRef } from "react";
 import Input from "~ui/controls/Input";
-import { IconEditSmall, IconAlertSmall } from "~ui/icons";
+import { IconAlertSmall } from "~ui/icons";
 import cs from "./editable_input.scss";
 
 interface EditableInputProps {
@@ -117,7 +118,11 @@ const EditableInput = ({
           <div className={cx(className, editable && cs.editableText)}>
             {inputText}
           </div>
-          {editable && <IconEditSmall className={cs.editIcon} />}
+          {editable && (
+            <IconButton className={cs.editIcon} sdsSize="small">
+              <Icon sdsIcon="edit" sdsSize="s" sdsType="iconButton" />
+            </IconButton>
+          )}
         </div>
       )}
     </>

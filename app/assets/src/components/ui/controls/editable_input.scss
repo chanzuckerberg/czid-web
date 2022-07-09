@@ -14,12 +14,11 @@
 
   .editIcon {
     flex: 1 0 auto;
-    height: $icon-s;
-    fill: $sds-color-gray-500;
+    color: $sds-color-gray-500;
     margin-left: $sds-spaces-m;
 
     &:hover {
-      fill: $sds-color-primary-400;
+      color: $sds-color-primary-400;
     }
   }
 }
