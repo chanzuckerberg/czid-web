@@ -235,6 +235,7 @@ module ElasticsearchQueryHelper
       return response
     rescue StandardError => e
       LogUtil.log_error("unable to fetch heatmap data from elasticsearch: #{e}", exception: e)
+      raise e
     end
     return nil
   end
