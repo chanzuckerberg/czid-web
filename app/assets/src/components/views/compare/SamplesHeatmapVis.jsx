@@ -192,7 +192,7 @@ class SamplesHeatmapVis extends React.Component {
     let taxonDetails = this.props.taxonDetails[taxonId];
 
     const filtered =
-      taxonFilterState[taxonDetails["index"]][sampleDetails["index"]];
+      taxonFilterState?.[taxonDetails["index"]]?.[sampleDetails["index"]];
     return value > 0 && filtered ? originalColor : colorNoValue;
   };
 
