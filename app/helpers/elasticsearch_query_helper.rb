@@ -255,21 +255,41 @@ module ElasticsearchQueryHelper
   def self.call_aws_glue_job(background_id, pipeline_run_ids)
     env = Rails.env.development? || Rails.env.test? ? "sandbox" : Rails.env
     job_name = "#{env}_heatmap_es_job"
-    glue_response = GLUE_CLIENT.start_job_run(
-      job_name: job_name.to_s,
-      arguments: {
-        "--user_pipeline_run_ids" => pipeline_run_ids.join("|"),
-        "--user_background_id" => background_id.to_s,
-        "--job-type" => "selected_runs",
-      }
-    )
+
+    glue_arguments = {
+      "--user_pipeline_run_ids" => pipeline_run_ids.join("|"),
+      "--user_background_id" => background_id.to_s,
+      "--job-type" => "selected_runs",
+    }
+
+    currently_running_job = get_running_glue_job_by_args(job_name, glue_arguments)
+    if !currently_running_job.nil?
+      job_run_id = currently_running_job.id
+    else
+      glue_response = GLUE_CLIENT.start_job_run(
+        job_name: job_name.to_s,
+        arguments: glue_arguments
+      )
+      job_run_id = glue_response.job_run_id.to_s
+    end
+
     job_status = ""
     loop do
-      resp = GLUE_CLIENT.get_job_run({ job_name: job_name.to_s, run_id: glue_response.job_run_id.to_s })
+      resp = GLUE_CLIENT.get_job_run({ job_name: job_name.to_s, run_id: job_run_id })
       job_status = resp.job_run.job_run_state
       break if job_status != "RUNNING"
     end
     return job_status
+  end
+
+  def self.get_running_glue_job_by_args(job_name, args)
+    resp = GLUE_CLIENT.get_job_runs({ job_name: job_name.to_s })
+    return resp.job_runs.find do |job_run|
+      job_run.job_run_state == "RUNNING" &&
+      job_run.arguments["--user_pipeline_run_ids"] == args["--user_pipeline_run_ids"] &&
+      job_run.arguments["--user_background_id"] == args["--user_background_id"] &&
+      job_run.arguments["--job-type"] == args["--job-type"]
+    end
   end
 
   def self.build_categories_filter_clause(categories, include_phage)
