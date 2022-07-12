@@ -29,6 +29,7 @@ import {
 } from "lodash/fp";
 import React from "react";
 import { connect } from "react-redux";
+import { toast } from "react-toastify";
 
 import {
   getBackgrounds,
@@ -240,6 +241,10 @@ class SampleView extends React.Component {
       ...nonNestedUrlState,
     };
   }
+
+  componentWillUnmount = () => {
+    toast.dismiss();
+  };
 
   componentDidMount = () => {
     // When we navigate to the SampleView via React Router, let Appcues know we are on this page.
@@ -1911,7 +1916,7 @@ class SampleView extends React.Component {
         </Notification>
       ),
       {
-        autoClose: 100000,
+        autoClose: 12000,
       },
     );
   };
