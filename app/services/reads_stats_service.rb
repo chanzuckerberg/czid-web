@@ -64,6 +64,15 @@ class ReadsStatsService
     unique_versions.each do |uniq|
       representative_run = pipeline_runs.find { |pr| uniq == [pr.wdl_version, pr.pipeline_version] }
       ordered_tasks = representative_run.host_filtering_stage.step_statuses.keys
+
+      # Make sure to include ERCC as a step.
+      if ordered_tasks.present?
+        star_index = ordered_tasks.find_index(RUN_STAR)
+        if star_index
+          ordered_tasks.insert(star_index, ERCC)
+        end
+      end
+
       # save in step_orders hash according to [wdl_version][pipeline_version]
       # uses 'to_s' because some values may be nil
       wdl_version = representative_run.wdl_version.to_s
