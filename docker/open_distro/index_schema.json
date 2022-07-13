@@ -3,7 +3,9 @@
     "scored_taxon_counts-*"
   ],
   "template": {
-    "aliases": {},
+    "aliases": {
+      "scored_taxon_counts": {}
+    },
     "mappings": {
       "properties": {
         "is_phage": {

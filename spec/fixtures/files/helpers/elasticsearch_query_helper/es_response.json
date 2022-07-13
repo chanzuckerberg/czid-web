@@ -15,7 +15,7 @@
         "max_score": null,
         "hits": [
             {
-                "_index": "scored_taxon_count",
+                "_index": "scored_taxon_counts-test",
                 "_type": "_doc",
                 "_id": "84023_1_28321_26",
                 "_score": null,
@@ -71,7 +71,7 @@
                 ]
             },
             {
-                "_index": "scored_taxon_count",
+                "_index": "scored_taxon_counts-test",
                 "_type": "_doc",
                 "_id": "84023_1_28331_26",
                 "_score": null,

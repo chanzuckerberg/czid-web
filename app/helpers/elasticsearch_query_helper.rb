@@ -246,7 +246,7 @@ module ElasticsearchQueryHelper
       return []
     end
 
-    pipeline_runs_in_es_query = "SELECT DISTINCT pipeline_run_id FROM scored_taxon_count WHERE background_id=#{background_id} AND pipeline_run_id in (#{pipeline_run_ids.join(',')})"
+    pipeline_runs_in_es_query = "SELECT DISTINCT pipeline_run_id FROM scored_taxon_counts WHERE background_id=#{background_id} AND pipeline_run_id in (#{pipeline_run_ids.join(',')})"
     _columns, pipelines_in_es = query_es(pipeline_runs_in_es_query)
     missing_pipeline_run_ids = pipeline_run_ids - pipelines_in_es.flatten
     return missing_pipeline_run_ids.flatten
