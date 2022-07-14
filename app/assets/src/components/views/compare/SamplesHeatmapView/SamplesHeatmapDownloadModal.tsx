@@ -3,8 +3,10 @@ import { filter, get, set, unset, isEmpty } from "lodash/fp";
 import React, { useState } from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { createBulkDownload } from "~/api/bulk_downloads";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { humanize } from "~/helpers/strings";
+import { ThresholdFilterData } from "~/interface/dropdown";
 import Modal from "~ui/containers/Modal";
 import RadioButton from "~ui/controls/RadioButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -18,8 +20,36 @@ import cs from "./heatmap_download_modal.scss";
 
 interface SamplesHeatmapDownloadModalProps {
   onClose: () => void;
+  onGenerateBulkDownload: () => void;
   open: boolean;
   sampleIds: [number];
+  heatmapParams: HeatmapParamType;
+}
+
+interface HeatmapParamType {
+  background: number,
+  categories: string[],
+  metric: string,
+  presets: string[],
+  readSpecificity: number,
+  sampleSortType: string,
+  species: number,
+  subcategories: SubcategoryType,
+  taxaSortType: string,
+  taxonsPerSample: number,
+  thresholdFilters: ThresholdFilterData[],
+}
+
+interface SubcategoryType {
+  Viruses: string[],
+}
+
+interface SelectedDownloadSubmissionType {
+  downloadType: string,
+  fields: object,
+  validObjectIds: number[],
+  workflow: string,
+  workflowEntity: string,
 }
 
 interface DownloadType {
@@ -41,7 +71,9 @@ interface Field {
 const SamplesHeatmapDownloadModal = ({
   onClose,
   open,
+  onGenerateBulkDownload,
   sampleIds,
+  heatmapParams,
 }: SamplesHeatmapDownloadModalProps) => {
   const [selectedDownloadType, setSelectedDownloadType] = useState("");
   const [selectedFields, setSelectedFields] = useState({});
@@ -136,6 +168,53 @@ const SamplesHeatmapDownloadModal = ({
     return downloadTypeElement;
   };
 
+  const submitBulkDownload = async (selectedDownloadSubmission: SelectedDownloadSubmissionType) => {
+    // The bulk download modal has some error handling around this, but not sure if it actually does anything for the end user
+    try {
+      await createBulkDownload(selectedDownloadSubmission);
+    } catch (e) {
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED,
+        {
+          workflow: selectedDownloadSubmission["workflow"],
+          downloadType: selectedDownloadSubmission["downloadType"],
+          ...selectedDownloadSubmission["validObjectIds"],
+        },
+      );
+    }
+  };
+
+  const handleBulkDownload = (workflow = "short-read-mngs", workflowEntity = "Samples") => {
+    trackEvent(
+        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_DOWNLOAD_CLICKED,
+      );
+      const metric = selectedFields["biom_format"]["metric"];
+      const selectedDownloadSubmission = {
+        downloadType: selectedDownloadType,
+        fields: {
+          metric: {
+            "value": metric,
+          },
+          filter_by: {
+            "value": heatmapParams["thresholdFilters"],
+          },
+          categories: {
+            "value": heatmapParams["categories"],
+          },
+          background: {
+            "value": heatmapParams["background"],
+          },
+        },
+        validObjectIds: sampleIds,
+        workflow: workflow,
+        workflowEntity: workflowEntity,
+      };
+
+      submitBulkDownload(selectedDownloadSubmission);
+      // close modal when download is created
+      onGenerateBulkDownload();
+  };
+
   const renderDownloadTypes = () => {
     const computedDownloadTypes = HEATMAP_DOWNLOAD_CATEGORIES.map(category => {
       const categoryTypes = filter(
@@ -158,13 +237,34 @@ const SamplesHeatmapDownloadModal = ({
     const text = microbiomeSelected ? "Start Generating Download" : "Download";
     const disabled =
       !selectedDownloadType || (microbiomeSelected && isEmpty(selectedFields));
+
+    let runDownload: () => void;
+
+    switch(selectedDownloadType) {
+      case "svg":
+        // runDownload = onDownloadSvg;
+        break;
+      case "png":
+        // runDownload = onDownloadPng;
+        break;
+      case "all_metrics":
+        // runDownload = onDownloadAllHeatmapMetricsCsv;
+        break;
+      case "current_metrics":
+        // runDownload = triggerFileDownload({
+        //  downloadUrl: onDownloadCurrentHeatmapViewCsv(),
+        //  fileName: "current_heatmap_view.csv",
+        // });
+        break;
+      case "biom_format":
+        runDownload = handleBulkDownload;
+        break;
+    }
     return (
       <PrimaryButton
         disabled={disabled}
         text={text}
-        onClick={trackEvent(
-          ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_DOWNLOAD_CLICKED,
-        )}
+        onClick={() => runDownload() }
       />
     );
   };

@@ -512,6 +512,11 @@ class SamplesHeatmapView extends React.Component {
     this.setState({ downloadModalOpen: false });
   };
 
+  handleGenerateBulkDownload = () => {
+    this.handleDownloadModalClose();
+    // launch bulk download notification
+  };
+
   metricToSortField(metric) {
     let fields = metric.split(".");
     let countType = fields[0].toLowerCase();
@@ -2055,7 +2060,10 @@ class SamplesHeatmapView extends React.Component {
               this.handleDownloadModalClose,
               ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_CLOSED,
             )}
+            onGenerateBulkDownload={this.handleGenerateBulkDownload}
             sampleIds={sampleIds}
+            heatmapParams={selectedOptions}
+
           />
         )}
       </div>
