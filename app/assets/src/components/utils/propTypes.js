@@ -123,6 +123,7 @@ const DownloadType = PropTypes.shape({
     }),
   ),
   uploader_only: PropTypes.bool,
+  required_allowed_feature: PropTypes.string,
   file_type_display: PropTypes.string,
 });
 

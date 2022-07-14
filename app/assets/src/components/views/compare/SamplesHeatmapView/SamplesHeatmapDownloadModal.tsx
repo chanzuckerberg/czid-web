@@ -30,6 +30,7 @@ interface DownloadType {
   fields: [Field];
   file_type_display: string;
   type: string;
+  required_allowed_feature?: string;
 }
 
 interface Field {

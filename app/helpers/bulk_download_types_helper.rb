@@ -165,7 +165,7 @@ module BulkDownloadTypesHelper
         },
       ],
       execution_type: RESQUE_EXECUTION_TYPE,
-      admin_only: true,
+      required_allowed_feature: "microbiome",
       file_type_display: ".biom",
       workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
