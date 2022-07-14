@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { createBulkDownload } from "~/api/bulk_downloads";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { humanize } from "~/helpers/strings";
 import { ThresholdFilterData } from "~/interface/dropdown";
 import Modal from "~ui/containers/Modal";
@@ -24,6 +25,10 @@ interface SamplesHeatmapDownloadModalProps {
   open: boolean;
   sampleIds: [number];
   heatmapParams: HeatmapParamType;
+  onDownloadSvg: () => void;
+  onDownloadPng: () => void;
+  onDownloadAllHeatmapMetricsCsv: () => void;
+  onDownloadCurrentHeatmapViewCsv: () => string;
 }
 
 interface HeatmapParamType {
@@ -74,6 +79,10 @@ const SamplesHeatmapDownloadModal = ({
   onGenerateBulkDownload,
   sampleIds,
   heatmapParams,
+  onDownloadSvg,
+  onDownloadPng,
+  onDownloadAllHeatmapMetricsCsv,
+  onDownloadCurrentHeatmapViewCsv,
 }: SamplesHeatmapDownloadModalProps) => {
   const [selectedDownloadType, setSelectedDownloadType] = useState("");
   const [selectedFields, setSelectedFields] = useState({});
@@ -231,6 +240,12 @@ const SamplesHeatmapDownloadModal = ({
 
     return <React.Fragment>{computedDownloadTypes}</React.Fragment>;
   };
+  const runCurrentHeatmapViewDownload = () => {
+    triggerFileDownload({
+      downloadUrl: onDownloadCurrentHeatmapViewCsv(),
+      fileName: "current_heatmap_view.csv",
+    });
+  };
 
   const renderDownloadButton = () => {
     const microbiomeSelected = selectedDownloadType === "biom_format";
@@ -242,19 +257,16 @@ const SamplesHeatmapDownloadModal = ({
 
     switch(selectedDownloadType) {
       case "svg":
-        // runDownload = onDownloadSvg;
+        runDownload = onDownloadSvg;
         break;
       case "png":
-        // runDownload = onDownloadPng;
+        runDownload = onDownloadPng;
         break;
       case "all_metrics":
-        // runDownload = onDownloadAllHeatmapMetricsCsv;
+        runDownload = onDownloadAllHeatmapMetricsCsv;
         break;
       case "current_metrics":
-        // runDownload = triggerFileDownload({
-        //  downloadUrl: onDownloadCurrentHeatmapViewCsv(),
-        //  fileName: "current_heatmap_view.csv",
-        // });
+        runDownload = runCurrentHeatmapViewDownload;
         break;
       case "biom_format":
         runDownload = handleBulkDownload;

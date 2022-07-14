@@ -2063,7 +2063,12 @@ class SamplesHeatmapView extends React.Component {
             onGenerateBulkDownload={this.handleGenerateBulkDownload}
             sampleIds={sampleIds}
             heatmapParams={selectedOptions}
-
+            onDownloadSvg={this.handleDownloadSvg}
+            onDownloadPng={this.handleDownloadPng}
+            onDownloadCurrentHeatmapViewCsv={
+              this.getDownloadCurrentViewHeatmapCSVLink
+            }
+            onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
           />
         )}
       </div>
