@@ -72,6 +72,7 @@ import {
   TAXONS_PER_SAMPLE_RANGE,
   TAXON_LEVEL_OPTIONS,
   TAXON_LEVEL_SELECTED,
+  HEATMAP_FILTERS,
 } from "./constants";
 import cs from "./samples_heatmap_view.scss";
 
@@ -1198,6 +1199,9 @@ class SamplesHeatmapView extends React.Component {
   }
 
   getTopTaxaPerSample(filteredTaxonIds, addedTaxonIds) {
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+
     // Fetch the top N taxa from each sample, sorted by the selected metric,
     // that passed all selected filters.
     let {
@@ -1208,6 +1212,8 @@ class SamplesHeatmapView extends React.Component {
     } = this.state;
     let { metric, taxonsPerSample } = selectedOptions;
     const { metrics } = this.props;
+
+    if (useHeatmapES) return [filteredTaxonIds, allTaxonDetails, allData];
 
     let topTaxIds = new Set();
     let topTaxonDetails = {};
@@ -1626,40 +1632,11 @@ class SamplesHeatmapView extends React.Component {
     const { allowedFeatures = [] } = this.context || {};
     const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
 
-    // When not using heatmap ES, most filtering operations happen in the front-end
+    // When using heatmap ES, all filtering operations happen on the backend
     let frontendFilters = [];
-    let backendFilters = [];
-    if (!useHeatmapES) {
-      backendFilters = ["background"];
-      frontendFilters = [
-        "species",
-        "categories",
-        "subcategories",
-        "thresholdFilters",
-        "readSpecificity",
-        "metric",
-        "taxonsPerSample",
-      ];
-      // Otherwise ES on the backend handles all filters
-    } else {
-      frontendFilters = [];
-      backendFilters = [
-        "metric",
-        "thresholdFilters",
-        "readSpecificity",
-        "background",
-        "species",
-        "categories",
-        "subcategories",
-      ];
-
-      // Only need to query backend if we need more taxons, but use frontend filtering if using fewer taxons
-      if (
-        newOptions?.taxonsPerSample > this.state.selectedOptions.taxonsPerSample
-      )
-        backendFilters.push("taxonsPerSample");
-      else frontendFilters.push("taxonsPerSample");
-    }
+    let backendFilters = ["background"];
+    if (useHeatmapES) backendFilters = backendFilters.concat(HEATMAP_FILTERS);
+    else frontendFilters = HEATMAP_FILTERS;
 
     const shouldRefetchData =
       intersection(keys(newOptions), backendFilters).length > 0;
@@ -1679,7 +1656,6 @@ class SamplesHeatmapView extends React.Component {
             await this.updateBackground();
           await this.fetchViewData();
         };
-      else if (shouldRefilterData) callbackFn = this.updateFilters;
     }
 
     this.setState(

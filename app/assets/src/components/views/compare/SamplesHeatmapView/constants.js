@@ -13,6 +13,16 @@ export const DOWNLOAD_OPTIONS = [
   { text: "Download PNG", value: "png" },
 ];
 
+export const HEATMAP_FILTERS = [
+  "metric",
+  "thresholdFilters",
+  "readSpecificity",
+  "species",
+  "categories",
+  "subcategories",
+  "taxonsPerSample",
+];
+
 export const HEATMAP_DOWNLOAD_CATEGORIES = ["reports", "images"];
 
 export const HEATMAP_DOWNLOAD_OPTIONS = [
