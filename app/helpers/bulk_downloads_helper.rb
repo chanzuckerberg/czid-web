@@ -6,6 +6,7 @@ module BulkDownloadsHelper
   SAMPLE_STILL_RUNNING_ERROR = "Some selected samples have not finished running yet. Please remove these samples and try again.".freeze
   SAMPLE_FAILED_ERROR = "Some selected samples failed their most recent run. Please remove these samples and try again.".freeze
   MAX_OBJECTS_EXCEEDED_ERROR_TEMPLATE = "No more than %s objects allowed in one download.".freeze
+  INVALID_OPERATOR_ERROR = "The given operator was not recognized".freeze
   BULK_DOWNLOAD_NOT_FOUND = "No bulk download was found with this id.".freeze
   OUTPUT_FILE_NOT_SUCCESSFUL = "Bulk download has not succeeded. Can't get output file url.".freeze
   INVALID_ACCESS_TOKEN = "The access token was invalid for this bulk download.".freeze
@@ -21,6 +22,14 @@ module BulkDownloadsHelper
   BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
   READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE = "Unexpected error. Could not find valid taxon lineage for taxid %s".freeze
   TAXONOMY_LIST = ["superkingdom_name", "kingdom_name", "phylum_name", "class_name", "order_name", "family_name", "genus_name", "species_name"].freeze
+  METRIC_MAP = {
+    "r": "count",
+    "zscore": "z_score",
+    "rpm": "rpm",
+    "percentidentity": "percent_identity",
+    "alignmentlength": "alignment_length",
+    "logevalue": "e_value",
+  }.freeze
 
   # Check that all pipeline runs have succeeded for the provided samples
   # and return the pipeline run ids.
@@ -193,7 +202,27 @@ module BulkDownloadsHelper
     }
   end
 
-  def self.pivot_biom_metrics(taxon_metrics, sample_names, pr_id_to_sample_id, fields, bulk_download_id)
+  def self.filter_zscore(zscore_filters, zscore)
+    zscore_filters.map do |filter|
+      if filter[:operator] == ">="
+        zscore >= Float(filter[:value])
+      elsif filter[:operator] == "<="
+        zscore <= Float(filter[:value])
+      else
+        return raise INVALID_OPERATOR_ERROR
+      end
+    end.all?
+  end
+
+  def self.pivot_biom_metrics(
+    taxon_metrics,
+    zscore_filters,
+    metric,
+    sample_names,
+    pr_id_to_sample_id,
+    fields,
+    bulk_download_id
+  )
     # Pivots the taxon metrics table in chunks and streams the output to tsv
     # Also streams the taxonomy metadata to a tsv
     taxon_metric_ids = taxon_metrics.pluck(:id)
@@ -217,8 +246,11 @@ module BulkDownloadsHelper
         prev_tax_id = nil
         prev_tax_name = nil
         prev_taxon_count = nil
-        taxon_metric_ids.in_groups_of(1000) do |ids|
+        taxon_metric_ids.in_groups_of(10_000) do |ids|
           taxon_metrics.order(:tax_id, :pipeline_run_id).where(id: ids).pluck_to_hash(*fields).each do |taxon_count|
+            pass_zscore_filter = filter_zscore(zscore_filters, taxon_count["z_score"])
+            next unless pass_zscore_filter
+
             if prev_tax_id.present? && taxon_count["tax_id"] != prev_tax_id # if taxon changes, output the previous row
               taxon_uniq_id = prev_tax_name + ":" + prev_tax_id.to_s
               csv << sample_metrics.unshift(taxon_uniq_id) # output sample metrics
@@ -236,7 +268,7 @@ module BulkDownloadsHelper
               ]
             end
             ind = pr_id_to_sample_id.keys.index(taxon_count["pipeline_run_id"]) # get index of run_id, likely will want to turn this into a map of some kind
-            sample_metrics[ind] = taxon_count["count"].nil? ? 0 : taxon_count["count"] # set metric to array
+            sample_metrics[ind] = taxon_count[metric].nil? ? 0 : taxon_count[metric] # set metric to array
             prev_tax_id = taxon_count["tax_id"]
             prev_tax_name = taxon_count["name"].nil? ? "Unknown Taxon Name" : taxon_count["name"]
             prev_taxon_count = taxon_count
@@ -262,9 +294,57 @@ module BulkDownloadsHelper
     return metadata_path
   end
 
-  def self.generate_biom_format_file(pipeline_runs, _metric, background_id, _filters, bulk_download_id)
-    # ideally we want to return a lazy loaded array with tax_id, pipeline_runs, metric
-    # we can't fit the entire dataset into memory for large datasets
+  def self.filter_by_category(categories, taxon_metrics)
+    return taxon_metrics if categories.blank?
+
+    superkingdom_taxids = categories.map { |category| ReportHelper::CATEGORIES_TAXID_BY_NAME[category] }
+    taxon_metrics.where(superkingdom_taxid: superkingdom_taxids)
+  end
+
+  def self.parse_metric_string(metric_string)
+    if metric_string.include?("_")
+      count_type, metric_fe = metric_string.split("_", 2) # split into 2
+    elsif metric_string.include?(".")
+      count_type, metric_fe = metric_string.split(".", 2) # split into 2
+    end
+    [count_type, METRIC_MAP[metric_fe.to_sym]]
+  end
+
+  def self.parse_filters(filters)
+    filters.map do |filter|
+      count_type, metric = parse_metric_string(filter["metric"])
+      {
+        metric: metric,
+        value: Float(filter["value"]),
+        operator: filter["operator"],
+        count_type: count_type,
+      }
+    end
+  end
+
+  def self.filter_by_threshold(filters, taxon_metrics)
+    return [taxon_metrics, []] if filters.blank?
+
+    filters = parse_filters(filters)
+    # zscore filters have to be filtered out since they aren't calculated until the `pluck_to_hash`
+    zscore_filters = filters.select { |filter| filter[:metric] == "z_score" }
+    taxon_count_filters = filters.reject { |filter| filter[:metric] == "z_score" }
+    filters_by_count_type = Sample.group_taxon_count_filters_by_count_type(taxon_count_filters)
+    filters_by_count_type.each do |count_type, query_statements|
+      joined_query_statement = query_statements.join(" AND ")
+      taxon_metrics = taxon_metrics.where(count_type: count_type).where(joined_query_statement)
+    end
+    [taxon_metrics, zscore_filters]
+  end
+
+  def self.filter_by_count_type(count_type, taxon_metrics)
+    return taxon_metrics unless ["NT", "NR"].include?(count_type)
+
+    taxon_metrics.where(count_type: count_type)
+  end
+
+  def self.generate_biom_format_file(pipeline_runs, metric_string, background_id, categories, filters, bulk_download_id)
+    # Uses the TaxonCountsDataService to generate the files needed for the biom format
     pr_id_to_sample_id = pipeline_runs.non_deprecated.pluck(:id, :sample_id).to_h
     pipeline_run_ids = pr_id_to_sample_id.keys
     taxon_metrics, fields = TaxonCountsDataService.call(
@@ -274,7 +354,12 @@ module BulkDownloadsHelper
       include_lineage: true,
       lazy: true
     )
-    taxon_metrics = taxon_metrics.order(:tax_id, :pipeline_run_id)
+    taxon_metrics = filter_by_category(categories, taxon_metrics)
+
+    count_type, metric = parse_metric_string(metric_string)
+    taxon_metrics = filter_by_count_type(count_type, taxon_metrics)
+
+    taxon_metrics, zscore_filters = filter_by_threshold(filters, taxon_metrics)
 
     # create ordered list of sample names
     samples_index = Sample.find(pr_id_to_sample_id.values).index_by(&:id)
@@ -284,7 +369,16 @@ module BulkDownloadsHelper
     metadata_path = output_metadata(samples_index, sample_names, bulk_download_id)
 
     # create pivot table so that we end up with array of shape taxons X pipeline runs, with metric as the value
-    metrics_path, taxon_lineage_path = pivot_biom_metrics(taxon_metrics, sample_names, pr_id_to_sample_id, fields, bulk_download_id)
+    taxon_metrics = taxon_metrics.order(tax_id: :asc, pipeline_run_id: :asc)
+    metrics_path, taxon_lineage_path = pivot_biom_metrics(
+      taxon_metrics,
+      zscore_filters,
+      metric,
+      sample_names,
+      pr_id_to_sample_id,
+      fields,
+      bulk_download_id
+    )
 
     [metrics_path, metadata_path, taxon_lineage_path]
   end

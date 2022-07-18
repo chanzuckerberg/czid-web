@@ -76,10 +76,10 @@ class TaxonCountsDataService
                             " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
                             " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
                             " AND taxon_summaries.background_id = #{@background_id}")
+      fields += TAXON_SUMMARY_FIELDS_TO_PLUCK
     end
 
     if @taxon_ids.present?
-      fields += TAXON_SUMMARY_FIELDS_TO_PLUCK if @background_id.present?
       taxon_counts_query = taxon_counts_query.where(tax_id: @taxon_ids)
     end
 

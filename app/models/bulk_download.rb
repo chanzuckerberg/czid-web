@@ -76,6 +76,33 @@ class BulkDownload < ApplicationRecord
     if download_type == BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE
       errors.add(:params, "download_format must be Separate Files or Single File (Concatenated)") unless [BulkDownloadTypesHelper::SEPARATE_FILES_DOWNLOAD, BulkDownloadTypesHelper::SINGLE_FILE_CONCATENATED_DOWNLOAD].include?(get_param_value("download_format"))
     end
+
+    if download_type == BulkDownloadTypesHelper::BIOM_FORMAT_DOWNLOAD_TYPE
+      valid_count_types = ["NT", "NR"]
+      valid_operators = [">=", "<="]
+
+      metric_string = get_param_value("metric")
+      count_type, metric = BulkDownloadsHelper.parse_metric_string(metric_string)
+      errors.add(:params, "count type is invalid") unless valid_count_types.include?(count_type)
+      errors.add(:params, "metric value is invalid") unless BulkDownloadsHelper::METRIC_MAP.value?(metric)
+
+      background_id = get_param_value("background_id")
+      errors.add(:params, "background value must be an integer") unless background_id.nil? || background_id.is_a?(Integer)
+
+      categories = get_param_value("categories")
+      errors.add(:params, "category is invalid") unless categories.blank? || [
+        "Bacteria", "Archaea", "Eukaryota", "Viruses", "Viroids",
+      ].include?(categories)
+
+      threshold_filters = get_param_value("filter_by")
+      threshold_filters.each do |threshold_filter|
+        threshold_count_type, threshold_metric = BulkDownloadsHelper.parse_metric_string(threshold_filter["metric"])
+        errors.add(:params, "threshold filter contains invalid count type") unless valid_count_types.include?(threshold_count_type)
+        errors.add(:params, "threshold filter contains invalid metric") unless BulkDownloadsHelper::METRIC_MAP.value?(threshold_metric)
+
+        errors.add(:params, "threshold filter contains invalid operator") unless valid_operators.include?(threshold_filter["operator"])
+      end
+    end
   end
 
   # Only bulk downloads created by the user
@@ -635,7 +662,14 @@ class BulkDownload < ApplicationRecord
     elsif download_type == BIOM_FORMAT_DOWNLOAD_TYPE
       Rails.logger.info("Generating biom file for #{pipeline_runs.length} samples...")
       samples_bucket_name = AppConfigHelper.get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1) ? ENV['SAMPLES_BUCKET_NAME_V1'] : ENV['SAMPLES_BUCKET_NAME']
-      metrics_path, metadata_path, taxon_lineage_path = BulkDownloadsHelper.generate_biom_format_file(pipeline_runs, get_param_value("metric"), get_param_value("background_id"), get_param_value("filters"), id)
+      metrics_path, metadata_path, taxon_lineage_path = BulkDownloadsHelper.generate_biom_format_file(
+        pipeline_runs,
+        get_param_value("metric"),
+        get_param_value("background"),
+        get_param_value("categories"),
+        get_param_value("filter_by"),
+        id
+      )
       biom_file = create_biom_file(metrics_path, metadata_path, taxon_lineage_path)
       S3Util.upload_to_s3(samples_bucket_name, download_output_key, IO.read(biom_file))
     else

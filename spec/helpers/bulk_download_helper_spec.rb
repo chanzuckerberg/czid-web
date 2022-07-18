@@ -186,6 +186,91 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
     end
   end
 
+  describe "#generate_biom_filter_working" do
+    before do
+      @joe = create(:joe)
+      # Create taxon_lineages for a few species/genus.
+      @species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", genus_taxid: 10, superkingdom_taxid: 2)
+      @species_b = create(:taxon_lineage, tax_name: "species b", taxid: 2, species_taxid: 2, species_name: "species b", genus_taxid: 10, superkingdom_taxid: 2)
+      @species_different_category = create(:taxon_lineage, tax_name: "species c", taxid: 5, species_taxid: 5, species_name: "species c", genus_taxid: 11, superkingdom_taxid: 3)
+      @species_d = create(:taxon_lineage, tax_name: "species d", taxid: 3, species_taxid: 3, species_name: "species d", genus_taxid: 10, superkingdom_taxid: 2)
+
+      # Create projects and samples belonging to a normal user.
+      @project = create(:project, users: [@joe], name: "new project")
+      @sample_one = create(:sample, project: @project, name: "sample_one", metadata_fields: {
+                             collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab",
+                           })
+      @pr_one = create(:pipeline_run,
+                       sample: @sample_one,
+                       job_status: "CHECKED",
+                       taxon_counts_data: [
+                         { taxon_name: @species_a.tax_name, tax_level: 1, nt: 70 },
+                         { taxon_name: @species_b.tax_name, tax_level: 1, nt: 100 },
+                         { taxon_name: @species_different_category.tax_name, tax_level: 1, nt: 120 },
+                         { taxon_name: @species_d.tax_name, tax_level: 1, nt: 30 },
+
+                       ],
+                       wdl_version: "7.1.2")
+    end
+
+    it "returns all taxons from TaxonCountsDataService" do
+      pipeline_run_ids = @sample_one.pipeline_runs
+      taxon_metrics, = TaxonCountsDataService.call(pipeline_run_ids: pipeline_run_ids, lazy: true)
+      expect(taxon_metrics.count).to eq(4)
+    end
+
+    it "filters by category correctly" do
+      pipeline_run_ids = @sample_one.pipeline_runs
+      taxon_metrics, = TaxonCountsDataService.call(pipeline_run_ids: pipeline_run_ids, lazy: true)
+
+      # filtering with empty categories returns same values as input
+      all_taxon_metrics = BulkDownloadsHelper.filter_by_category([], taxon_metrics)
+      expect(all_taxon_metrics.count).to eq(taxon_metrics.count)
+
+      # filtering bacteria returns only bacterial taxons
+      bacteria_taxa = BulkDownloadsHelper.filter_by_category(["Bacteria"], taxon_metrics)
+      expect(bacteria_taxa.count).to eq(3)
+      expect(bacteria_taxa.pluck(:superkingdom_taxid)).to eq([2, 2, 2])
+
+      # filtering on a fake category returns no results
+      no_taxa = BulkDownloadsHelper.filter_by_category(["Not a real category"], taxon_metrics)
+      expect(no_taxa.count).to eq(0)
+    end
+
+    it "filters by threshold correctly" do
+      pipeline_run_ids = @sample_one.pipeline_runs
+      taxon_metrics, fields = TaxonCountsDataService.call(pipeline_run_ids: pipeline_run_ids, lazy: true)
+
+      # filtering with empty taxa returns same values as input
+      ret0, = BulkDownloadsHelper.filter_by_threshold([], taxon_metrics)
+      expect(ret0.count).to eq(taxon_metrics.count)
+      expect(ret0).to eq(taxon_metrics)
+
+      # filter out 1 taxa works
+      thresholds1 = [{ "metric" => "NT_r", "value" => "31", "operator" => ">=", "metricDisplay" => "NT r" }]
+      ret1, = BulkDownloadsHelper.filter_by_threshold(thresholds1, taxon_metrics)
+      expect(ret1.count).to eq(3)
+
+      # filter between thresholds
+      thresholds2 = thresholds1.append({ "metric" => "NT_r", "value" => "119", "operator" => "<=", "metricDisplay" => "NT r" })
+      ret2, = BulkDownloadsHelper.filter_by_threshold(thresholds2, taxon_metrics)
+      expect(ret2.count).to eq(2)
+
+      # filters to the correct taxa
+      thresholds3 = thresholds2.append({ "metric" => "NT_r", "value" => "71", "operator" => ">=", "metricDisplay" => "NT r" })
+      ret3, = BulkDownloadsHelper.filter_by_threshold(thresholds3, taxon_metrics)
+      last_taxon = ret3.pluck_to_hash(*fields)
+      expect(last_taxon.count).to eq(1)
+      expect(last_taxon.first["name"]). to eq(@species_b.tax_name)
+
+      # zscore filter returns separately
+      thresholds4 = thresholds3.append({ "metric" => "NT_zscore", "value" => "3", "operator" => ">=", "metricDisplay" => "NT ZScore" })
+      ret4, zscore_filter = BulkDownloadsHelper.filter_by_threshold(thresholds4, taxon_metrics)
+      expect(ret4.count).to eq(1)
+      expect(zscore_filter.count). to eq(1)
+    end
+  end
+
   describe "#generate_metadata_csv" do
     before do
       @joe = create(:joe)
