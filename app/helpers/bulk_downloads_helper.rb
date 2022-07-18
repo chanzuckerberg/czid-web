@@ -247,19 +247,16 @@ module BulkDownloadsHelper
     return [data_file, taxonomy_file]
   end
 
-  def self.output_metadata(pipeline_run_ids, bulk_download_id)
-    pipeline_runs = PipelineRun.where(id: pipeline_run_ids).includes(:sample)
+  def self.output_metadata(samples_index, sample_names, bulk_download_id)
+    # Gets the metadata for each sample. We might want to add in additional metadata.
+    metadata_headers, metadata_keys, metadata_by_sample_id = generate_sample_metadata_csv_info(samples: samples_index.values)
     metadata_path = "/tmp/#{bulk_download_id}_metadata.tsv"
     CSVSafe.open(metadata_path, "wb", col_sep: "\t") do |csv|
-      csv << ["#SampleID", "uploader", "created_at", "job_status", "runtime_seconds"]
-      pipeline_runs.each do |pipeline_run|
-        sample = pipeline_run.sample
-        sample_id = sample.name + ":" + sample.id.to_s
-        uploader = sample.user.name
-        created_at = sample.created_at
-        job_status = pipeline_run.job_status
-        runtime_seconds = pipeline_run.time_to_finalized
-        csv << [sample_id, uploader, created_at, job_status, runtime_seconds]
+      csv << metadata_headers.unshift("#SampleID")
+      sample_names.each do |sample_name|
+        sample_id = sample_name.split(":")[1].to_i
+        sample_metadata = metadata_by_sample_id[sample_id]
+        csv << metadata_keys.map { |metadata_key| sample_metadata[metadata_key] }.unshift(sample_name)
       end
     end
     return metadata_path
@@ -284,7 +281,7 @@ module BulkDownloadsHelper
     sample_names = pr_id_to_sample_id.values.collect { |sample_id| samples_index[sample_id] }.pluck(:name, :id).map { |name, id| "#{name}:#{id}" }
 
     # output metadata
-    metadata_path = output_metadata(pipeline_run_ids, bulk_download_id)
+    metadata_path = output_metadata(samples_index, sample_names, bulk_download_id)
 
     # create pivot table so that we end up with array of shape taxons X pipeline runs, with metric as the value
     metrics_path, taxon_lineage_path = pivot_biom_metrics(taxon_metrics, sample_names, pr_id_to_sample_id, fields, bulk_download_id)
