@@ -14,7 +14,6 @@ import {
   property,
   set,
   size,
-  toLower,
   uniq,
   values,
 } from "lodash/fp";
@@ -46,6 +45,10 @@ import {
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
+import {
+  getTempSelectedOptions,
+  HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
+} from "~/components/utils/urls";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
@@ -57,7 +60,6 @@ import { IconAlert, SortIcon } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import { processMetadata } from "~utils/metadata";
-
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
@@ -1598,14 +1600,24 @@ class SamplesHeatmapView extends React.Component {
   };
 
   getSidebarParams = () => {
-    if (this.state.sidebarMode === "taxonDetails") {
-      return this.state.sidebarTaxonModeConfig;
+    const {
+      selectedSampleId,
+      sidebarMode,
+      sidebarTaxonModeConfig,
+      selectedOptions,
+    } = this.state;
+
+    if (sidebarMode === "taxonDetails") {
+      return sidebarTaxonModeConfig;
     }
-    if (this.state.sidebarMode === "sampleDetails") {
+    if (sidebarMode === "sampleDetails") {
       return {
-        tempSelectedOptions: this.getTempSelectedOptions(),
+        tempSelectedOptions: getTempSelectedOptions({
+          selectedOptions,
+          source: HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
+        }),
         onMetadataUpdate: this.handleMetadataUpdate,
-        sampleId: this.state.selectedSampleId,
+        sampleId: selectedSampleId,
         showReportLink: true,
       };
     }
@@ -1681,58 +1693,6 @@ class SamplesHeatmapView extends React.Component {
   updateFilters() {
     this.filterTaxa();
   }
-
-  // Maps SamplesHeatmapView threshold metric names to SampleView threshold metric names
-  mapThresholdMetricName = metricName => {
-    switch (metricName) {
-      case "zscore":
-        return "z_score";
-      case "rpm":
-        return "rpm";
-      case "r":
-        return "count";
-      case "percentidentity":
-        return "percent_identity";
-      case "alignmentlength":
-        return "alignment_length";
-      case "logevalue":
-        return "e_value";
-    }
-  };
-
-  // TODO: In the future, it would be convenient to consolidate the selectedOptions (structure & threshold filter metric names)
-  getTempSelectedOptions = () => {
-    const { selectedOptions } = this.state;
-
-    // Since the structure of the selectedOptions are different in the SampleView & SamplesHeatmapView components,
-    // we map SamplesHeatmapView's selectedOptions into SampleView's selectedOptions structure
-    // To checkout the differences between selectedOptions in both components, refer to their getDefaultSelectedOptions()
-    return {
-      background: selectedOptions.background,
-      categories: {
-        categories: selectedOptions.categories || [],
-        subcategories: selectedOptions.subcategories || {},
-      },
-      // SampleView thresholds expect the metric format: nt:z_score
-      // SamplesHeatmapView thresholds are in the format: NT_zscore so we convert them appropriately
-      thresholds: map(threshold => {
-        // i.e. r => count
-        const mappedSampleViewThresholdValue = this.mapThresholdMetricName(
-          threshold.metric.slice(3),
-        );
-        return {
-          ...threshold,
-          // Convert to lowercase and replace everything after the first _ with the mappedSampleViewThresholdValue
-          // i.e. NT_r => nt:count
-          metric: toLower(threshold.metric).replace(
-            /_.*/,
-            `:${mappedSampleViewThresholdValue}`,
-          ),
-        };
-      }, selectedOptions.thresholdFilters),
-      readSpecificity: selectedOptions.readSpecificity,
-    };
-  };
 
   renderVisualization() {
     return (
@@ -1819,7 +1779,10 @@ class SamplesHeatmapView extends React.Component {
           selectedOptions={this.state.selectedOptions}
           // this.state.selectedOptions.species is 1 if species is selected, 0 otherwise.
           taxLevel={TAXON_LEVEL_SELECTED[this.state.selectedOptions.species]}
-          tempSelectedOptions={this.getTempSelectedOptions()}
+          tempSelectedOptions={getTempSelectedOptions({
+            selectedOptions: this.state.selectedOptions,
+            source: HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
+          })}
           allTaxonIds={
             this.state.selectedOptions.species
               ? this.state.allSpeciesIds

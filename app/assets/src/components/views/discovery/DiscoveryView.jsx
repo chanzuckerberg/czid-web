@@ -49,7 +49,11 @@ import {
   TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
-import { generateUrlToSampleView } from "~/components/utils/urls";
+import {
+  DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS,
+  generateUrlToSampleView,
+  getTempSelectedOptions,
+} from "~/components/utils/urls";
 import {
   WORKFLOWS,
   WORKFLOW_ENTITIES,
@@ -1176,10 +1180,12 @@ class DiscoveryView extends React.Component {
 
   handleObjectSelected = ({ object, currentEvent }) => {
     const { snapshotShareId, history: RouterHistory } = this.props;
-    const { workflow, workflowEntity } = this.state;
+    const { filters, workflow, workflowEntity } = this.state;
+    const { taxonSelected, taxonThresholdsSelected } = filters;
 
     let sampleId;
     let workflowRunId;
+    let tempSelectedOptions;
 
     if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
       sampleId = _get("sample.id", object);
@@ -1188,11 +1194,23 @@ class DiscoveryView extends React.Component {
       sampleId = _get("id", object);
     }
 
+    if (!isEmpty(taxonSelected) || !isEmpty(taxonThresholdsSelected)) {
+      tempSelectedOptions = getTempSelectedOptions({
+        optionsToTemporarilyPersist: [
+          "taxonSelected",
+          "taxonThresholdsSelected",
+        ],
+        selectedOptions: filters,
+        source: DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS,
+      });
+    }
+
     let url = generateUrlToSampleView({
       workflow,
       sampleId,
       workflowRunId,
       snapshotShareId,
+      tempSelectedOptions,
     });
 
     // If user used CMD or CTRL, openUrl will open in a new tab:

@@ -10,10 +10,9 @@ export const KEY_SELECTED_OPTIONS_BACKGROUND = "background";
 export const KEY_SELECTED_OPTIONS_TAXA = "taxa";
 export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholds";
 
-export const LOCAL_STORAGE_EXCLUDED_SELECTED_OPTIONS = [
-  KEY_SELECTED_OPTIONS_BACKGROUND,
-  KEY_SELECTED_OPTIONS_TAXA,
-];
+export const LOCAL_STORAGE_FIELDS = {
+  selectedOptions: { excludePaths: ["background", "taxon"] },
+};
 
 export const URL_FIELDS = {
   pipelineVersion: "string",
@@ -65,8 +64,9 @@ export const PIPELINE_RUN_TABS = [
 ];
 
 export const NOTIFICATION_TYPES = {
-  consensusGenomeCreated: "consensus genome created",
-  invalidBackground: "invalid background",
+  consensusGenomeCreated: "consensusGenomeCreated",
+  invalidBackground: "invalidBackground",
+  discoveryViewFiltersPersisted: "discoveryViewFiltersPersisted",
 };
 
 export const NON_BACKGROUND_DEPENDENT_THRESHOLDS = [

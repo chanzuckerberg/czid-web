@@ -16,6 +16,7 @@ import {
   isNil,
   keys,
   map,
+  mapValues,
   merge,
   omit,
   pick,
@@ -89,7 +90,6 @@ import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import Notification from "~ui/notifications/Notification";
 
-import { KEY_DISCOVERY_VIEW_OPTIONS } from "../discovery/constants";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import ReportViewSelector from "./ReportViewSelector";
@@ -97,6 +97,7 @@ import SampleViewHeader from "./SampleViewHeader";
 import TaxonTreeVis from "./TaxonTreeVis";
 import {
   GENUS_LEVEL_INDEX,
+  LOCAL_STORAGE_FIELDS,
   METRIC_DECIMAL_PLACES,
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
@@ -109,13 +110,13 @@ import {
   URL_FIELDS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
-  LOCAL_STORAGE_EXCLUDED_SELECTED_OPTIONS,
-  KEY_SELECTED_OPTIONS_THRESHOLDS,
   KEY_SAMPLE_VIEW_OPTIONS,
   KEY_SELECTED_OPTIONS_BACKGROUND,
 } from "./constants";
 import csSampleMessage from "./sample_message.scss";
 import cs from "./sample_view.scss";
+
+const mapValuesWithKey = mapValues.convert({ cap: false });
 
 class SampleView extends React.Component {
   constructor(props) {
@@ -136,39 +137,10 @@ class SampleView extends React.Component {
       ...nonNestedLocalState
     } = this.loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
 
-    // CHECK FOR DISCOVERY VIEW SESSION THRESHOLDS
-    // If user has set threshold filters in the discovery view (stored in
-    // session storage), those settings should override the existing
-    // settings for the SampleView in localStorage. Thresholds in the URL
-    // should override both session and local storage
-    let discoveryViewThresholdFilters = {};
-    let persistThresholdsToLocalState = true;
-
-    const noUrlThresholds = isEmpty(selectedOptionsFromUrl?.thresholds);
-    if (noUrlThresholds) {
-      // Get thresholds from discovery view options in session storage
-      const {
-        filters: {
-          taxonThresholdsSelected: thresholds,
-          taxonSelected: taxa,
-        } = {
-          taxonThresholdsSelected: [],
-          taxonSelected: [],
-        },
-      } = this.loadState(sessionStorage, KEY_DISCOVERY_VIEW_OPTIONS);
-
-      // Threshold filters may be stored in 3 places: 1) session storage, 2) local storage, 3) component state
-      // If there are exising session taxa or thresholds, override local options in state
-      if (!isEmpty(taxa)) {
-        discoveryViewThresholdFilters = {
-          taxa,
-          thresholds: isEmpty(thresholds) ? [] : thresholds,
-        };
-        persistThresholdsToLocalState = false;
-        this.renderPersistedDiscoveryViewThresholdsNotification();
-      }
+    const { taxa, thresholds } = tempSelectedOptions || {};
+    if (!isEmpty(taxa) || !isEmpty(thresholds)) {
+      this.showNotification(NOTIFICATION_TYPES.discoveryViewFiltersPersisted);
     }
-    // END CHECK FOR DISCOVERY VIEW SESSION THRESHOLDS
 
     if (
       !get("background", selectedOptionsFromLocal) &&
@@ -218,14 +190,12 @@ class SampleView extends React.Component {
           ? tempSelectedOptions
           : {
               ...selectedOptionsFromLocal,
-              ...discoveryViewThresholdFilters,
               ...selectedOptionsFromUrl,
             }),
       },
       sidebarMode: null,
       sidebarVisible: false,
       sidebarTaxonData: null,
-      persistThresholdsToLocalState,
       view: "table",
       workflowRun: null,
       workflowRunId: workflowRunIdFromUrl || null,
@@ -904,37 +874,14 @@ class SampleView extends React.Component {
     });
   };
 
-  getSelectedOptionsToSave = () => {
-    let selectedOptions = omit(
-      LOCAL_STORAGE_EXCLUDED_SELECTED_OPTIONS,
-      this.state.selectedOptions,
-    );
-
-    // when using discovery view session thresholds, this condition will be true
-    if (!this.state.persistThresholdsToLocalState) {
-      // remove state thresholds since they are from session storage
-      selectedOptions = omit(KEY_SELECTED_OPTIONS_THRESHOLDS, selectedOptions);
-
-      // retrieve existing thresholds from local storage
-      const existingThresholdsFromLocal = this.loadState(
-        localStorage,
-        KEY_SAMPLE_VIEW_OPTIONS,
-      )?.selectedOptions?.[KEY_SELECTED_OPTIONS_THRESHOLDS];
-
-      // persist existing thresholds in local storage
-      if (existingThresholdsFromLocal) {
-        // prettier-ignore
-        selectedOptions[KEY_SELECTED_OPTIONS_THRESHOLDS] = existingThresholdsFromLocal;
-      }
-    }
-
-    return selectedOptions;
-  };
-
   updateHistoryAndPersistOptions = () => {
     const urlState = pick(keys(URL_FIELDS), this.state);
 
-    let localState = { selectedOptions: this.getSelectedOptionsToSave() };
+    let localStorageFields = LOCAL_STORAGE_FIELDS;
+
+    let localState = mapValuesWithKey((options, key) => {
+      return omit(options.excludePaths || [], this.state[key]);
+    }, localStorageFields);
 
     // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
@@ -1845,6 +1792,16 @@ class SampleView extends React.Component {
         );
         break;
       }
+      case NOTIFICATION_TYPES.discoveryViewFiltersPersisted: {
+        showToast(
+          ({ closeToast }) =>
+            this.renderPersistedDiscoveryViewThresholds(closeToast),
+          {
+            autoClose: 12000,
+          },
+        );
+        break;
+      }
     }
   };
 
@@ -1887,39 +1844,32 @@ class SampleView extends React.Component {
     );
   };
 
-  renderPersistedDiscoveryViewThresholdsNotification = () => {
-    showToast(
-      ({ closeToast }) => (
-        <Notification
-          className={cs.notificationBody}
-          closeWithIcon
-          closeWithDismiss={false}
-          onClose={closeToast}
-          type="warning"
-        >
-          The taxon filters from the samples page have carried over. If you
-          would like to use filters previously applied to the report, click the
-          button below.
-          <div
-            className={cs.revertFiltersLink}
-            onClick={() => {
-              this.revertToSampleViewFilters();
-              closeToast();
-            }}
-            onKeyDown={() => {
-              this.handleTabChange(TABS.CONSENSUS_GENOME);
-              closeToast();
-            }}
-          >
-            Revert
-          </div>
-        </Notification>
-      ),
-      {
-        autoClose: 12000,
-      },
-    );
-  };
+  renderPersistedDiscoveryViewThresholds = closeToast => (
+    <Notification
+      className={cs.notificationBody}
+      closeWithIcon
+      closeWithDismiss={false}
+      onClose={closeToast}
+      type="warning"
+    >
+      The taxon filters from the samples page have carried over. If you would
+      like to use filters previously applied to the report, click the button
+      below.
+      <div
+        className={cs.revertFiltersLink}
+        onClick={() => {
+          this.revertToSampleViewFilters();
+          closeToast();
+        }}
+        onKeyDown={() => {
+          this.handleTabChange(TABS.CONSENSUS_GENOME);
+          closeToast();
+        }}
+      >
+        Revert
+      </div>
+    </Notification>
+  );
 
   revertToSampleViewFilters = () => {
     const { selectedOptions: selectedOptionsFromLocal } = this.loadState(
@@ -1927,9 +1877,8 @@ class SampleView extends React.Component {
       KEY_SAMPLE_VIEW_OPTIONS,
     );
     const newSelectedOptions = {
-      ...this.state.selectedOptions,
-      taxa: selectedOptionsFromLocal?.taxa || [],
-      thresholds: selectedOptionsFromLocal?.thresholds || [],
+      ...this.getDefaultSelectedOptions(),
+      ...selectedOptionsFromLocal,
     };
 
     this.setState({ selectedOptions: newSelectedOptions }, () => {
