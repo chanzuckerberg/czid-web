@@ -284,7 +284,7 @@ class BulkDownloadModal extends React.Component {
       presets.push("metric");
     }
 
-    const params = getURLParamString({
+    const params = encodeURI(getURLParamString({
       background: selectedFields?.["biom_format"]?.["background"] || DEFAULT_BACKGROUND_MODEL,
       categories: [],
       subcategories: JSON.stringify({}),
@@ -294,7 +294,7 @@ class BulkDownloadModal extends React.Component {
       thresholdFilters: JSON.stringify(metricList),
       metric: sortMetric,
       presets: presets,
-    });
+    }));
 
     openUrl(`/visualizations/heatmap?${params}`);
   }

@@ -44,7 +44,8 @@ const ThresholdFilterModal = ({
                     ...thresholds.slice(thresholdIdx + 1, thresholds.length),
                 ];
                 setThresholds(newThresholds);
-                addFilterList("biom_format", "filter_by", newThresholds, "filter_by");
+                // only add threshold if there is a valid metric and value
+                threshold["metric"] && threshold["value"] && addFilterList("biom_format", "filter_by", newThresholds, "filter_by");
             }}
             onRemoveThreshold={ (thresholdIdx) => {
                 setThresholds([

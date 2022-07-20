@@ -148,7 +148,7 @@ module BulkDownloadTypesHelper
     {
       type: BIOM_FORMAT_DOWNLOAD_TYPE,
       display_name: "Combined Microbiome File",
-      description: "Sample report data (samples x taxons) combined with all sample metadata and taxon metadata in BIOM format.",
+      description: "Sample report data (samples x taxons) combined with all sample metadata and taxon metadata in",
       category: "reports",
       fields: [
         {

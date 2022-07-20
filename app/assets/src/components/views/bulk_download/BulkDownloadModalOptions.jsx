@@ -18,6 +18,7 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LinkCS from "~ui/controls/link.scss";
 import StatusLabel from "~ui/labels/StatusLabel";
 
+import { MICROBIOME_DOWNLOAD_METRIC_OPTIONS } from "../compare/SamplesHeatmapView/constants";
 import TaxonHitSelect from "./TaxonHitSelect";
 import ThresholdFilterModal from "./ThresholdFilterModal";
 import cs from "./bulk_download_modal_options.scss";
@@ -164,7 +165,8 @@ class BulkDownloadModalOptions extends React.Component {
         placeholder = backgroundOptions ? "Select background" : "Loading...";
         break;
       case "metric":
-        dropdownOptions = metricsOptions || [];
+        // if download type is biom_format, only return RPM and r for NT and NR
+        dropdownOptions = (downloadType.type === "biom_format" ? MICROBIOME_DOWNLOAD_METRIC_OPTIONS: metricsOptions) || [];
         placeholder = metricsOptions ? "Select metric" : "Loading...";
         break;
       case "filter_by":
@@ -328,6 +330,13 @@ class BulkDownloadModalOptions extends React.Component {
           </div>
           <div className={cs.description}>
             {downloadType.description}{" "}
+            {downloadType.type === "biom_format" ?
+              (<>
+              <ExternalLink href="https://biom-format.org/">
+                BIOM
+              </ExternalLink> format. </>):
+              ""
+              }
             {downloadType.type in BULK_DOWNLOAD_DOCUMENTATION_LINKS ? (
               <ExternalLink
                 href={BULK_DOWNLOAD_DOCUMENTATION_LINKS[downloadType.type]}
