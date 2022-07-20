@@ -260,7 +260,7 @@ module ElasticsearchQueryHelper
     glue_arguments = {
       "--user_pipeline_run_ids" => pipeline_run_ids.join("|"),
       "--user_background_id" => background_id.to_s,
-      "--job-type" => "selected_runs",
+      "--job_type" => "selected_runs",
     }
 
     currently_running_job = get_running_glue_job_by_args(job_name, glue_arguments)
@@ -289,7 +289,7 @@ module ElasticsearchQueryHelper
       job_run.job_run_state == "RUNNING" &&
       job_run.arguments["--user_pipeline_run_ids"] == args["--user_pipeline_run_ids"] &&
       job_run.arguments["--user_background_id"] == args["--user_background_id"] &&
-      job_run.arguments["--job-type"] == args["--job-type"]
+      job_run.arguments["--job_type"] == args["--job_type"]
     end
   end
 
