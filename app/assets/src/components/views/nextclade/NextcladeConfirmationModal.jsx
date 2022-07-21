@@ -2,8 +2,8 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { Image } from "semantic-ui-react";
+import LoadingMessage from "~/components/common/LoadingMessage";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import IconLoading from "~/components/ui/icons/IconLoading";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 
@@ -33,10 +33,7 @@ const NextcladeConfirmationModal = ({ onCancel, onConfirm, open, loading }) => {
       </div>
       <div className={cs.actions}>
         {loading ? (
-          <React.Fragment>
-            <IconLoading className={cs.loadingIcon} />
-            <span className={cs.loading}>{"Loading..."}</span>
-          </React.Fragment>
+          <LoadingMessage message="Loading..."/>
         ) : (
           <React.Fragment>
             <div className={cs.item}>

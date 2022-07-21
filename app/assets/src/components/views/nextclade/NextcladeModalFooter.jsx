@@ -1,8 +1,8 @@
 import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
+import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import IconLoading from "~/components/ui/icons/IconLoading";
 import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
@@ -127,10 +127,7 @@ const NextcladeModalFooter = ({
     <div className={cs.footer}>
       <div className={cs.notifications}>
         {loading && (
-          <div className={cs.loading}>
-            <IconLoading className={cs.loadingIcon} />
-            {" Validating consensus genomes..."}
-          </div>
+          <LoadingMessage message="Validating consensus genomes..." className={cs.loading}/>
         )}
         {renderValidationError()}
         {renderInvalidSamplesNotifications()}

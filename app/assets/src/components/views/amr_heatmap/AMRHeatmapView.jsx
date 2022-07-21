@@ -7,6 +7,7 @@ import { trackEvent } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import LoadingMessage from "~/components/common/LoadingMessage";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 import {
   processMetadata,
@@ -15,7 +16,6 @@ import {
 import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControls";
 import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { IconLoading } from "~ui/icons";
 import { createCSVObjectURL } from "~utils/csv";
 
 import cs from "./amr_heatmap_view.scss";
@@ -425,10 +425,7 @@ export default class AMRHeatmapView extends React.Component {
     } = this.state;
     if (loading) {
       return (
-        <p className={cs.loadingIndicator}>
-          <IconLoading className={cs.loadingIndicator} />
-          Loading...
-        </p>
+        <LoadingMessage message="Loading..." className={cs.loadingIndicator} />
       );
     } else if (!this.hasDataToDisplay(samplesWithAMRCounts)) {
       return (

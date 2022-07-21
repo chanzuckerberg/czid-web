@@ -21,9 +21,10 @@ import { TooltipVizTable } from "~ui/containers";
 import HelpIcon from "~ui/containers/HelpIcon";
 import Sidebar from "~ui/containers/Sidebar";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { IconLoading, IconArrowRight } from "~ui/icons";
+import { IconArrowRight } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 import { openUrl } from "~utils/links";
+import LoadingMessage from "../LoadingMessage";
 
 import HitGroupViz from "./HitGroupViz";
 import cs from "./coverage_viz_bottom_sidebar.scss";
@@ -542,10 +543,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     if (!currentAccessionData) {
       return (
         <div className={cs.loadingContainer}>
-          <div className={cs.loadingMessage}>
-            <IconLoading className={cs.loadingIcon} />
-            Loading Visualization...
-          </div>
+          <LoadingMessage message="Loading Visualization..."/>
         </div>
       );
     }

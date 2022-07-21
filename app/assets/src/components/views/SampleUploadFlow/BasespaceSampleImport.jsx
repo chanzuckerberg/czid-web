@@ -6,10 +6,10 @@ import {
   getBasespaceProjects,
   getSamplesForBasespaceProject,
 } from "~/api/basespace";
+import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import PropTypes from "~/components/utils/propTypes";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 
 import cs from "./basespace_sample_import.scss";
@@ -222,10 +222,7 @@ export default class BasespaceSampleImport extends React.Component {
           />
         </div>
         {loadingSamples && (
-          <div className={cs.loadingMessage}>
-            <IconLoading className={cs.loadingIcon} />
-            <span>Loading samples...</span>
-          </div>
+          <LoadingMessage message="Loading samples..." className={cs.loadingMessage}/>
         )}
         {this.state.error && (
           <Notification

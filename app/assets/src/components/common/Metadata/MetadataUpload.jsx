@@ -23,9 +23,10 @@ import Tabs from "~/components/ui/controls/Tabs";
 import { generateClientDownloadFromEndpoint } from "~/components/utils/clientDownload";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { IconAlert, IconLoading } from "~ui/icons";
+import { IconAlert } from "~ui/icons";
 
 import IssueGroup from "~ui/notifications/IssueGroup";
+import LoadingMessage from "../LoadingMessage";
 import MetadataManualInput from "./MetadataManualInput";
 import { METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW } from "./constants";
 import cs from "./metadata_upload.scss";
@@ -362,16 +363,10 @@ class MetadataUpload extends React.Component {
             Download Metadata CSV Template
           </div>
           {this.state.validatingCSV && (
-            <div className={cs.validationMessage}>
-              <IconLoading className={cs.loadingIcon} />
-              Validating metadata...
-            </div>
+            <LoadingMessage message="Validating metadata..." className={cs.validationMessage}/>
           )}
           {this.state.fetchingCSVLocationMatches && (
-            <div className={cs.validationMessage}>
-              <IconLoading className={cs.loadingIcon} />
-              Verifying collection locations...
-            </div>
+            <LoadingMessage message="Verifying collection locations..." className={cs.validationMessage} />
           )}
         </>
       );
