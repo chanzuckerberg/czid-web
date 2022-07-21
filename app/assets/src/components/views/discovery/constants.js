@@ -40,3 +40,18 @@ export const MISSING_INSERT_SIZE_WARNING = `This value is only computed for pair
 export const KEY_DISCOVERY_VIEW_OPTIONS = "DiscoveryViewOptions";
 
 export const KEY_DISCOVERY_SESSION_FILTERS = "filters";
+
+export const ANNOTATION_FILTER_OPTIONS = [
+  {
+    name: "Hit",
+  },
+  {
+    name: "Not a hit",
+  },
+  {
+    name: "Inconclusive",
+  },
+  {
+    name: "None",
+  },
+];

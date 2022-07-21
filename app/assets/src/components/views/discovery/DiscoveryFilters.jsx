@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Dropdown } from "czifui";
 import { isEmpty, isEqual, find, forEach, pick, reject } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
@@ -17,13 +18,17 @@ import {
 } from "~/components/common/filters";
 import TaxonThresholdFilter from "~/components/common/filters/TaxonThresholdFilter";
 import ThresholdMap from "~/components/utils/ThresholdMap";
-import { TAXON_THRESHOLD_FILTERING_FEATURE } from "~/components/utils/features";
+import {
+  ANNOTATION_FILTER_FEATURE,
+  TAXON_THRESHOLD_FILTERING_FEATURE,
+} from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import FilterTag from "~ui/controls/FilterTag";
 import {
   KEY_TAXON_SELECTED,
   KEY_TAXON_THRESHOLDS_SELECTED,
 } from "../SampleView/constants";
+import { ANNOTATION_FILTER_OPTIONS } from "./constants";
 import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
 
 import cs from "./discovery_filters.scss";
@@ -291,7 +296,7 @@ class DiscoveryFilters extends React.Component {
 
     return (
       <div className={cx(cs.filtersContainer, className)}>
-        {/* TODO(ihan): enable taxon and location filter for snapshot view */}
+        {/* Note: Taxon and location filter are disabled on snapshot views */}
         {domain !== DISCOVERY_DOMAIN_SNAPSHOT && (
           <>
             <div
@@ -335,6 +340,16 @@ class DiscoveryFilters extends React.Component {
                 </>
               )}
             </div>
+            {allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) && (
+              <div className={cs.filterContainer}>
+                <Dropdown
+                  label={<div className={cs.filterLabel}>Annotation</div>}
+                  onChange={() => Function.prototype()}
+                  options={ANNOTATION_FILTER_OPTIONS}
+                  multiple
+                />
+              </div>
+            )}
             {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}
             <div className={cs.filterContainer}>
               <LocationFilter

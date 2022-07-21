@@ -9,6 +9,7 @@
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 5px;
+    color: $sds-color-gray-500;
 
     &.taxonThresholdFilterContainer {
       margin-bottom: $sds-spaces-l;
@@ -16,6 +17,10 @@
 
     &:last-child {
       margin-bottom: 0;
+    }
+
+    .filterLabel {
+      @include font-caps-xxxs;
     }
 
     .tags {

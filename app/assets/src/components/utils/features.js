@@ -16,3 +16,4 @@ export const SAMPLES_TABLE_METADATA_COLUMNS_FEATURE =
 export const SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE =
   "samples_table_metadata_columns_admin";
 export const MICROBIOME_DOWNLOAD_FEATURE = "microbiome";
+export const ANNOTATION_FILTER_FEATURE = "annotation_filter";
