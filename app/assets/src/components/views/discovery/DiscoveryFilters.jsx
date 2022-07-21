@@ -3,7 +3,11 @@ import { isEmpty, isEqual, find, forEach, pick, reject } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import {
   BaseMultipleFilter,
@@ -67,9 +71,9 @@ class DiscoveryFilters extends React.Component {
     return newState;
   }
 
-  notifyFilterChangeHandler = () => {
+  notifyFilterChangeHandler = (callback = null) => {
     const { onFilterChange } = this.props;
-    const selected = pick(
+    const selectedFilters = pick(
       [
         "hostSelected",
         "locationSelected",
@@ -83,10 +87,12 @@ class DiscoveryFilters extends React.Component {
       this.state,
     );
 
-    onFilterChange && onFilterChange(selected);
+    onFilterChange &&
+      onFilterChange({ selectedFilters, onFilterChangeCallback: callback });
   };
 
   handleTaxonThresholdFilterChange = (taxa, thresholds) => {
+    const { domain } = this.props;
     const taxonFilterStateUpdate = {};
 
     // check if selected taxa changed
@@ -111,7 +117,18 @@ class DiscoveryFilters extends React.Component {
       );
     }
 
-    this.setState(taxonFilterStateUpdate, this.notifyFilterChangeHandler);
+    const callback = filteredSampleCount => {
+      trackEvent(ANALYTICS_EVENT_NAMES.TAXON_THRESHOLD_FILTER_APPLY_CLICKED, {
+        domain,
+        selectedTaxa: taxa,
+        thresholds,
+        filteredSampleCount,
+      });
+    };
+
+    this.setState(taxonFilterStateUpdate, () =>
+      this.notifyFilterChangeHandler(callback),
+    );
   };
 
   handleChange(selectedKey, selected) {

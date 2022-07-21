@@ -8,7 +8,3 @@ const selectSelf = state => state;
 export const getGlobalAnalyticsContext = createSelector(selectSelf, state => ({
   projectIds: state.discovery.projectIds,
 }));
-
-export const getFilteredSampleCount = createSelector(selectSelf, state => ({
-  filteredSampleCount: state.discovery.filteredSampleCount,
-}));

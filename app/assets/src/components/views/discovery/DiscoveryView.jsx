@@ -66,10 +66,7 @@ import {
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "~/components/views/samples/SamplesView/ColumnConfiguration";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
-import {
-  updateFilteredSampleCount,
-  updateProjectIds,
-} from "~/redux/modules/discovery/slice";
+import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import Tabs from "~ui/controls/Tabs";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
@@ -639,14 +636,14 @@ class DiscoveryView extends React.Component {
     (this.getFilterCount() || project) && this.refreshFilteredDimensions();
   };
 
-  resetDataFromFilterChange = () => {
+  resetDataFromFilterChange = ({ refreshFilterStatsCallback = null } = {}) => {
     const { domain } = this.props;
     this.resetData({
       callback: () => {
         // * On filter change:
         //   - load (B) filtered dimensions, (C) filtered stats, (D) filtered locations
         this.refreshFilteredDimensions();
-        this.refreshFilteredStats();
+        this.refreshFilteredStats(refreshFilterStatsCallback);
         if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
           this.refreshFilteredLocations();
           this.refreshSelectedPLQCSamples();
@@ -744,7 +741,7 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  refreshFilteredStats = async () => {
+  refreshFilteredStats = async (refreshStatsCallback = null) => {
     const { domain, snapshotShareId } = this.props;
     const { projectId, search } = this.state;
 
@@ -760,10 +757,16 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState({
-      filteredSampleStats,
-      loadingStats: false,
-    });
+    this.setState(
+      {
+        filteredSampleStats,
+        loadingStats: false,
+      },
+      () => {
+        refreshStatsCallback &&
+          refreshStatsCallback(filteredSampleStats?.count);
+      },
+    );
   };
 
   refreshProjectData = () => {
@@ -776,16 +779,12 @@ class DiscoveryView extends React.Component {
   };
 
   refreshSampleData = () => {
-    const { updateDiscoveryFilteredSampleCount } = this.props;
     const filteredSampleCount = this.samples.length;
 
-    this.setState(
-      {
-        filteredSampleCount,
-        selectableSampleIds: this.samples.getIds(),
-      },
-      () => updateDiscoveryFilteredSampleCount(filteredSampleCount),
-    );
+    this.setState({
+      filteredSampleCount,
+      selectableSampleIds: this.samples.getIds(),
+    });
   };
 
   refreshVisualizationData = () => {
@@ -980,10 +979,12 @@ class DiscoveryView extends React.Component {
     }
   };
 
-  handleFilterChange = selectedFilters => {
+  handleFilterChange = ({ selectedFilters, onFilterChangeCallback = null }) => {
     this.setState({ filters: selectedFilters }, () => {
       this.updateBrowsingHistory("replace");
-      this.resetDataFromFilterChange();
+      this.resetDataFromFilterChange({
+        refreshFilterStatsCallback: onFilterChangeCallback,
+      });
       trackEvent(`DiscoveryView_filters_changed`, {
         filters: this.getFilterCount(),
       });
@@ -1017,7 +1018,7 @@ class DiscoveryView extends React.Component {
       selectedFilters[key] = [value];
     }
 
-    this.handleFilterChange(selectedFilters);
+    this.handleFilterChange({ selectedFilters });
   };
 
   handleSearchSelected = (
@@ -2322,14 +2323,12 @@ DiscoveryView.propTypes = {
   snapshotProjectName: PropTypes.string,
   snapshotShareId: PropTypes.string,
   updateDiscoveryProjectId: PropTypes.func,
-  updateDiscoveryFilteredSampleCount: PropTypes.func,
 };
 
 DiscoveryView.contextType = UserContext;
 
 const mapDispatchToProps = {
   updateDiscoveryProjectId: updateProjectIds,
-  updateDiscoveryFilteredSampleCount: updateFilteredSampleCount,
 };
 
 // Don't need mapStateToProps yet so pass in null

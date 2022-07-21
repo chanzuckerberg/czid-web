@@ -1,15 +1,12 @@
 import { Button, DropdownPopper } from "czifui";
 import { isEmpty } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";
 import { NON_BACKGROUND_DEPENDENT_THRESHOLDS } from "~/components/views/SampleView/constants";
 import {
   ThresholdFilterData,
   ThresholdFilterOperator,
 } from "~/interface/dropdown";
-import { getFilteredSampleCount } from "~/redux/modules/discovery/selectors";
-import store from "~/redux/store";
 import FilterTrigger from "./FilterTrigger";
 import TaxonFilterSDS, { TaxonOption } from "./TaxonFilterSDS";
 
@@ -99,12 +96,6 @@ const TaxonThresholdFilter = ({
   const handleApply = () => {
     setAnchorEl(null);
     onFilterApply(selectedTaxa, thresholds);
-    trackEvent(ANALYTICS_EVENT_NAMES.TAXON_THRESHOLD_FILTER_APPLY_CLICKED, {
-      domain,
-      selectedTaxa,
-      thresholds,
-      filteredSampleCount: getFilteredSampleCount(store.getState()),
-    });
   };
 
   return (
