@@ -115,27 +115,11 @@ export default class NextcladeModal extends React.Component {
   };
 
   handleFileUpload = async file => {
-    const fileContents = await this.readUploadedFile(file);
+    // Stringify, then parse to remove excess whitespace
+    const fileContents = JSON.stringify(JSON.parse(await file.text()));
     this.setState({
       referenceTree: file,
       referenceTreeContents: fileContents,
-    });
-  };
-
-  readUploadedFile = inputFile => {
-    const reader = new FileReader();
-
-    return new Promise((resolve, reject) => {
-      reader.onerror = () => {
-        reader.abort();
-        reject(reader.error);
-      };
-
-      reader.onload = () => {
-        // stringify-parse to remove excess whitespace
-        resolve(JSON.stringify(JSON.parse(reader.result)));
-      };
-      reader.readAsText(inputFile);
     });
   };
 
