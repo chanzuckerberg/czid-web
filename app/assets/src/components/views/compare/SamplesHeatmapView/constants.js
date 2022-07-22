@@ -131,6 +131,7 @@ export const NOTIFICATION_TYPES = {
   invalidSamples: "invalid samples",
   taxaFilteredOut: "taxa filtered out",
   multiplePipelineVersions: "diverse_pipelines",
+  customBackground: "custom_background_slow_with_es",
 };
 
 export const MASS_NORMALIZED_PIPELINE_VERSION = 4.0;

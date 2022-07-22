@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Notification } from "czifui";
 import DeepEqual from "fast-deep-equal";
 import {
   assign,
@@ -58,7 +59,6 @@ import { copyShortUrlToClipboard } from "~/helpers/url";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, SortIcon } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
-import Notification from "~ui/notifications/Notification";
 import { processMetadata } from "~utils/metadata";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
@@ -1669,8 +1669,9 @@ class SamplesHeatmapView extends React.Component {
     } else {
       if (shouldRefetchData)
         callbackFn = async () => {
-          if (newOptions?.background !== this.state.selectedOptions.background)
-            await this.updateBackground();
+          // TODO: We can remove this notification once we pre-compute custom backgrounds or speed up Spark jobs
+          if (newOptions?.background)
+            this.showNotification(NOTIFICATION_TYPES.customBackground);
           await this.fetchViewData();
         };
     }
@@ -1845,7 +1846,7 @@ class SamplesHeatmapView extends React.Component {
 
   renderFilteredOutWarning(onClose, taxon) {
     return (
-      <Notification type="warning" displayStyle="elevated" onClose={onClose}>
+      <Notification intent="warning" onClose={onClose}>
         <div>
           <span className={cs.highlight}>
             {taxon.name} is filtered out by your current filter settings.
@@ -1858,15 +1859,26 @@ class SamplesHeatmapView extends React.Component {
 
   renderFilteredMultiplePipelineVersionsWarning(onClose, versions) {
     return (
-      <Notification type="warning" displayStyle="elevated" onClose={onClose}>
+      <Notification intent="warning" onClose={onClose}>
         <div>
           <span className={cs.highlight}>
             The selected samples come from multiple major pipeline versions:{" "}
             {versions.join(", ")}.
-          </span>
+          </span>{" "}
           A major change in the pipeline may produce results that are not
           comparable across all metrics. We recommend re-running samples on the
           latest major pipeline version.
+        </div>
+      </Notification>
+    );
+  }
+
+  renderCustomBackgroundWarning(onClose) {
+    return (
+      <Notification intent="warning" onClose={onClose}>
+        <div>
+          We&apos;re busy generating your heatmap with a new background model.
+          It may take a couple of minutes to load.
         </div>
       </Notification>
     );
@@ -1900,6 +1912,12 @@ class SamplesHeatmapView extends React.Component {
           {
             autoClose: 12000,
           },
+        );
+        break;
+      case NOTIFICATION_TYPES.customBackground:
+        showToast(
+          ({ closeToast }) => this.renderCustomBackgroundWarning(closeToast),
+          { autoClose: 12000 },
         );
         break;
       default:
