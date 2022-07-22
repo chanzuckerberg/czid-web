@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Button } from "czifui";
 import {
   difference,
   find,
@@ -464,6 +465,43 @@ class SamplesView extends React.Component {
     );
   };
 
+  renderFilteredCount = () => {
+    const {
+      hasAtLeastOneFilterApplied,
+      selectableIds,
+      onClearFilters,
+      userDataCounts,
+      workflow,
+    } = this.props;
+
+    if (!isEmpty(userDataCounts)) {
+      const objectsDisplayed =
+        workflow === WORKFLOWS.SHORT_READ_MNGS.value
+          ? "samples"
+          : "consensus genomes";
+      const totalNumberOfObjects =
+        workflow === WORKFLOWS.SHORT_READ_MNGS.value
+          ? userDataCounts.sampleCountByWorkflow[workflow]
+          : userDataCounts.numberOfConsensusGenomes;
+      const filteredCountByWorkflowMessage = `${selectableIds?.length ||
+        0} out of ${totalNumberOfObjects} ${objectsDisplayed}`;
+
+      return (
+        <div className={cs.filteredCount}>
+          {filteredCountByWorkflowMessage}
+          <Button
+            disabled={!hasAtLeastOneFilterApplied}
+            sdsStyle="minimal"
+            sdsType="secondary"
+            onClick={onClearFilters}
+          >
+            Clear Filters
+          </Button>
+        </div>
+      );
+    }
+  };
+
   renderTable = () => {
     const {
       activeColumns,
@@ -708,6 +746,7 @@ class SamplesView extends React.Component {
         ) : (
           <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
         )}
+        {this.renderFilteredCount()}
         {this.renderDisplay()}
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal
@@ -773,11 +812,13 @@ SamplesView.propTypes = {
   currentTab: PropTypes.string.isRequired,
   filters: PropTypes.object,
   filtersSidebarOpen: PropTypes.bool,
+  hasAtLeastOneFilterApplied: PropTypes.bool,
   hideAllTriggers: PropTypes.bool,
   mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapTilerKey: PropTypes.string,
+  numOfMngsSamples: PropTypes.number,
   objects: PropTypes.instanceOf(ObjectCollectionView),
   onActiveColumnsChange: PropTypes.func,
   onClearFilters: PropTypes.func,
@@ -801,6 +842,7 @@ SamplesView.propTypes = {
   sortDirection: PropTypes.string,
   snapshotShareId: PropTypes.string,
   sortable: PropTypes.bool,
+  userDataCounts: PropTypes.object,
   workflow: PropTypes.string,
   workflowEntity: PropTypes.string,
 };

@@ -18,6 +18,7 @@ import {
   partition,
   pick,
   replace,
+  some,
   sumBy,
   union,
   values,
@@ -910,6 +911,7 @@ class DiscoveryView extends React.Component {
         workflow,
         workflowEntity: find({ value: workflow }, values(WORKFLOWS)).entity,
         userDataCounts: {
+          numberOfConsensusGenomes: sampleStats.consensusGenomesCount,
           sampleCountByWorkflow: sampleStats.countByWorkflow,
           sampleCount: sampleStats.count,
           projectCount: sampleStats.projectCount,
@@ -1966,6 +1968,10 @@ class DiscoveryView extends React.Component {
       (allowedFeatures.includes(SAMPLES_TABLE_METADATA_COLUMNS_FEATURE) &&
         domain === DISCOVERY_DOMAIN_MY_DATA);
 
+    const hasAtLeastOneFilterApplied = some(
+      filter => !isEmpty(filter),
+      Object.values(this.preparedFilters()),
+    );
     return (
       <>
         {currentTab === TAB_PROJECTS && (
@@ -1975,6 +1981,8 @@ class DiscoveryView extends React.Component {
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
+                filteredProjectCount={filteredProjectCount}
+                hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
                 mapLevel={mapLevel}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
@@ -1993,6 +2001,7 @@ class DiscoveryView extends React.Component {
                 sortBy={orderByForCurrentTab}
                 sortDirection={orderDirection}
                 sortable={sortable}
+                totalNumberOfProjects={userDataCounts?.projectCount}
               />
             </div>
             {projects &&
@@ -2017,6 +2026,7 @@ class DiscoveryView extends React.Component {
                   currentDisplay={currentDisplay}
                   currentTab={currentTab}
                   filters={this.preparedFilters()}
+                  hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
                   mapLevel={mapLevel}
                   mapLocationData={mapLocationData}
                   mapPreviewedLocationId={mapPreviewedLocationId}
@@ -2043,6 +2053,7 @@ class DiscoveryView extends React.Component {
                   sortBy={orderByForCurrentTab}
                   sortDirection={orderDirection}
                   onUpdateSelectedIds={updateSelectedIds}
+                  userDataCounts={userDataCounts}
                   filtersSidebarOpen={showFilters}
                   sampleStatsSidebarOpen={showStats}
                   hideAllTriggers={hideAllTriggers}

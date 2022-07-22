@@ -102,6 +102,17 @@
   }
 }
 
+.filteredCount {
+  display: flex;
+  align-content: center;
+  font: $sds-font-body-s-400-font;
+  color: $sds-color-gray-500;
+
+  margin-top: 11px;
+  margin-bottom: $sds-spaces-s;
+  gap: $sds-spaces-m;
+}
+
 .sampleHeader {
   justify-content: left;
   text-align: left;

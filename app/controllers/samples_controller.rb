@@ -345,6 +345,8 @@ class SamplesController < ApplicationController
       WorkflowRun::WORKFLOW[:short_read_mngs] => samples.where(initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs]).distinct.count,
       WorkflowRun::WORKFLOW[:consensus_genome] => samples.joins(:workflow_runs).where(["workflow_runs.workflow = :workflow OR samples.initial_workflow = :workflow", { workflow: WorkflowRun::WORKFLOW[:consensus_genome] }]).distinct.count,
     }
+    num_cgs = WorkflowRun.where(sample: samples).non_deprecated.count
+    total_project_count = domain == "snapshot" ? project_ids.count : current_power.projects_by_domain("my_data").count
 
     if sample_ids.count > 0
       pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
@@ -358,8 +360,9 @@ class SamplesController < ApplicationController
       format.json do
         render json: {
           countByWorkflow: workflow_count,
+          consensusGenomesCount: num_cgs,
           count: sample_ids.count,
-          projectCount: project_ids.count,
+          projectCount: total_project_count,
           avgTotalReads: avg_total_reads.presence || 0,
           avgAdjustedRemainingReads: avg_remaining_reads.presence || 0,
         }

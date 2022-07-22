@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Dropdown } from "czifui";
+import { Dropdown, Tooltip } from "czifui";
 import { isEmpty, isEqual, find, forEach, pick, reject } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
@@ -267,12 +267,49 @@ class DiscoveryFilters extends React.Component {
     );
   };
 
+  renderTaxonThresholdFilter = () => {
+    const { domain, workflow } = this.props;
+    const { taxonSelected, taxonThresholdsSelected } = this.state;
+
+    let taxonThresholdFilter = (
+      <TaxonThresholdFilter
+        disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
+        domain={domain}
+        onFilterApply={(taxa, thresholds) => {
+          const validThresholds = thresholds?.filter(
+            ThresholdMap.isThresholdValid,
+          );
+          this.handleTaxonThresholdFilterChange(taxa, validThresholds);
+        }}
+        selectedOptions={taxonSelected}
+        selectedThresholds={taxonThresholdsSelected}
+      />
+    );
+
+    // Disable the Taxon Threshold Fitler if the user is on the CG tab and show a tooltip
+    if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+      taxonThresholdFilter = (
+        <Tooltip
+          arrow
+          placement="top-start"
+          title="Not available for Consensus Genomes."
+          classes={{
+            tooltip: cs.disabledTooltip,
+          }}
+        >
+          <span>{taxonThresholdFilter}</span>
+        </Tooltip>
+      );
+    }
+
+    return taxonThresholdFilter;
+  };
+
   render() {
     const {
       hostSelected,
       locationV2Selected,
       taxonSelected,
-      taxonThresholdsSelected,
       timeSelected,
       tissueSelected,
       visibilitySelected,
@@ -307,21 +344,7 @@ class DiscoveryFilters extends React.Component {
               )}
             >
               {hasTaxonThresholdFilterFeature ? (
-                <TaxonThresholdFilter
-                  domain={domain}
-                  onFilterApply={(taxa, thresholds) => {
-                    const validThresholds = thresholds?.filter(
-                      ThresholdMap.isThresholdValid,
-                    );
-                    this.handleTaxonThresholdFilterChange(
-                      taxa,
-                      validThresholds,
-                    );
-                  }}
-                  selectedOptions={taxonSelected}
-                  selectedThresholds={taxonThresholdsSelected}
-                  disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
-                />
+                this.renderTaxonThresholdFilter()
               ) : (
                 <TaxonFilter
                   domain={domain}

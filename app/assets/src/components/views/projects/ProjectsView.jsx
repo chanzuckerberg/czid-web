@@ -1,3 +1,4 @@
+import { Button } from "czifui";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 
@@ -121,6 +122,30 @@ class ProjectsView extends React.Component {
     });
   };
 
+  renderFilteredCount = () => {
+    const {
+      filteredProjectCount,
+      hasAtLeastOneFilterApplied,
+      onClearFilters,
+      totalNumberOfProjects,
+    } = this.props;
+
+    return (
+      <div className={cs.filteredCount}>
+        {`${filteredProjectCount ||
+          0} out of ${totalNumberOfProjects} projects`}
+        <Button
+          disabled={!hasAtLeastOneFilterApplied}
+          sdsStyle="minimal"
+          sdsType="secondary"
+          onClick={onClearFilters}
+        >
+          Clear Filters
+        </Button>
+      </div>
+    );
+  };
+
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
     const renderContent = () => (
@@ -194,6 +219,7 @@ class ProjectsView extends React.Component {
     return (
       <div className={cs.container}>
         {this.renderDisplaySwitcher()}
+        {this.renderFilteredCount()}
         {currentDisplay === "table" ? (
           <BaseDiscoveryView
             columns={this.columns}
@@ -235,6 +261,8 @@ ProjectsView.propTypes = {
   allowedFeatures: PropTypes.array,
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
+  filteredProjectCount: PropTypes.number,
+  hasAtLeastOneFilterApplied: PropTypes.bool,
   mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
@@ -252,6 +280,7 @@ ProjectsView.propTypes = {
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
+  totalNumberOfProjects: PropTypes.number,
 };
 
 export default ProjectsView;
