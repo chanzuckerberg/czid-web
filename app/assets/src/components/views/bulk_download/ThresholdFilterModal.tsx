@@ -11,6 +11,11 @@ interface ThresholdFilterModalProps {
         displayName: string,
     ) => void;
 }
+
+const thresholdToString = (thresholds: ThresholdFilterData[]) => {
+    return thresholds.reduce((acc, threshold) => acc + threshold["metric"] + threshold["operator"] + threshold["value"] + " ", "");
+};
+
 const ThresholdFilterModal = ({
     addFilterList,
 }: ThresholdFilterModalProps) => {
@@ -45,13 +50,15 @@ const ThresholdFilterModal = ({
                 ];
                 setThresholds(newThresholds);
                 // only add threshold if there is a valid metric and value
-                threshold["metric"] && threshold["value"] && addFilterList("biom_format", "filter_by", newThresholds, "filter_by");
+                threshold["metric"] && threshold["value"] && addFilterList("biom_format", "filter_by", newThresholds, thresholdToString(newThresholds));
             }}
             onRemoveThreshold={ (thresholdIdx) => {
-                setThresholds([
-                        ...thresholds.slice(0, thresholdIdx),
-                        ...thresholds.slice(thresholdIdx + 1, thresholds.length),
-                ]);
+                const newThresholds = [
+                    ...thresholds.slice(0, thresholdIdx),
+                    ...thresholds.slice(thresholdIdx + 1, thresholds.length),
+                ];
+                setThresholds(newThresholds);
+                addFilterList("biom_format", "filter_by", newThresholds, thresholdToString(newThresholds));
             }}
         />
     );

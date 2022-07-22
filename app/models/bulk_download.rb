@@ -95,7 +95,7 @@ class BulkDownload < ApplicationRecord
       ].include?(categories)
 
       threshold_filters = get_param_value("filter_by")
-      threshold_filters.each do |threshold_filter|
+      threshold_filters.present? && threshold_filters.each do |threshold_filter|
         threshold_count_type, threshold_metric = BulkDownloadsHelper.parse_metric_string(threshold_filter["metric"])
         errors.add(:params, "threshold filter contains invalid count type") unless valid_count_types.include?(threshold_count_type)
         errors.add(:params, "threshold filter contains invalid metric") unless BulkDownloadsHelper::METRIC_MAP.value?(threshold_metric)

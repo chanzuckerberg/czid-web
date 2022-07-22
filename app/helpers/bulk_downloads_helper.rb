@@ -214,6 +214,15 @@ module BulkDownloadsHelper
     end.all?
   end
 
+  def self.output_tsv_row(tsv, taxonomy_tsv, sample_metrics, prev_taxon_count)
+    return if prev_taxon_count.nil?
+
+    taxon_list = TAXONOMY_LIST.map { |taxonomy_level| prev_taxon_count[taxonomy_level] }
+    taxon_uniq_id = taxon_list.join(";") # must output full taxonomy in tax_id for microbiomeDB to work
+    tsv << sample_metrics.unshift(taxon_uniq_id) # output sample metrics
+    taxonomy_tsv << taxon_list.unshift(taxon_uniq_id)
+  end
+
   def self.pivot_biom_metrics(
     taxon_metrics,
     zscore_filters,
@@ -229,9 +238,9 @@ module BulkDownloadsHelper
     sample_metrics = Array.new(sample_names.count, 0) # create empty array of sample names
     data_file = "/tmp/#{bulk_download_id}_output.tsv"
     taxonomy_file = "/tmp/#{bulk_download_id}_taxonomy.tsv"
-    CSVSafe.open(data_file, "wb", col_sep: "\t") do |csv|
+    CSVSafe.open(data_file, "wb", col_sep: "\t") do |tsv|
       CSVSafe.open(taxonomy_file, "wb", col_sep: "\t") do |taxonomy_tsv|
-        csv << ["Taxon Name"] + sample_names
+        tsv << ["Taxon Name"] + sample_names
         taxonomy_tsv << [
           "#TaxID",
           "taxonomy1",
@@ -243,37 +252,22 @@ module BulkDownloadsHelper
           "taxonomy7",
           "taxonomy8",
         ]
-        prev_tax_id = nil
-        prev_tax_name = nil
         prev_taxon_count = nil
         taxon_metric_ids.in_groups_of(10_000) do |ids|
           taxon_metrics.order(:tax_id, :pipeline_run_id).where(id: ids).pluck_to_hash(*fields).each do |taxon_count|
             pass_zscore_filter = filter_zscore(zscore_filters, taxon_count["z_score"])
             next unless pass_zscore_filter
 
-            if prev_tax_id.present? && taxon_count["tax_id"] != prev_tax_id # if taxon changes, output the previous row
-              taxon_uniq_id = prev_tax_name + ":" + prev_tax_id.to_s
-              csv << sample_metrics.unshift(taxon_uniq_id) # output sample metrics
+            if prev_taxon_count.present? && taxon_count["tax_id"] != prev_taxon_count["tax_id"] # if taxon changes, output the previous row
+              output_tsv_row(tsv, taxonomy_tsv, sample_metrics, prev_taxon_count)
               sample_metrics = Array.new(sample_names.count, 0) # recreate new sample metrics array
-              taxonomy_tsv << [
-                taxon_uniq_id,
-                prev_taxon_count["superkingdom_name"],
-                prev_taxon_count["kingdom_name"],
-                prev_taxon_count["phylum_name"],
-                prev_taxon_count["class_name"],
-                prev_taxon_count["order_name"],
-                prev_taxon_count["family_name"],
-                prev_taxon_count["genus_name"],
-                prev_taxon_count["species_name"],
-              ]
             end
             ind = pr_id_to_sample_id.keys.index(taxon_count["pipeline_run_id"]) # get index of run_id, likely will want to turn this into a map of some kind
             sample_metrics[ind] = taxon_count[metric].nil? ? 0 : taxon_count[metric] # set metric to array
-            prev_tax_id = taxon_count["tax_id"]
-            prev_tax_name = taxon_count["name"].nil? ? "Unknown Taxon Name" : taxon_count["name"]
             prev_taxon_count = taxon_count
           end
         end
+        output_tsv_row(tsv, taxonomy_tsv, sample_metrics, prev_taxon_count) # must output the last row
       end
     end
     return [data_file, taxonomy_file]
@@ -330,11 +324,18 @@ module BulkDownloadsHelper
     zscore_filters = filters.select { |filter| filter[:metric] == "z_score" }
     taxon_count_filters = filters.reject { |filter| filter[:metric] == "z_score" }
     filters_by_count_type = Sample.group_taxon_count_filters_by_count_type(taxon_count_filters)
+    return [taxon_metrics, zscore_filters] if filters_by_count_type.count == 0
+
+    taxon_return_metrics = nil
     filters_by_count_type.each do |count_type, query_statements|
       joined_query_statement = query_statements.join(" AND ")
-      taxon_metrics = taxon_metrics.where(count_type: count_type).where(joined_query_statement)
+      taxon_return_metrics = if taxon_return_metrics.nil?
+                               taxon_metrics.where(count_type: count_type).where(joined_query_statement)
+                             else
+                               taxon_return_metrics.or(taxon_metrics.where(count_type: count_type).where(joined_query_statement))
+                             end
     end
-    [taxon_metrics, zscore_filters]
+    [taxon_return_metrics, zscore_filters]
   end
 
   def self.filter_by_count_type(count_type, taxon_metrics)
@@ -354,6 +355,8 @@ module BulkDownloadsHelper
       include_lineage: true,
       lazy: true
     )
+    taxon_metrics = taxon_metrics.where(tax_level: TaxonCount::TAX_LEVEL_SPECIES)
+
     taxon_metrics = filter_by_category(categories, taxon_metrics)
 
     count_type, metric = parse_metric_string(metric_string)

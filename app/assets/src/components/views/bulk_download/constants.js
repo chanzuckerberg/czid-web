@@ -27,6 +27,13 @@ export const CONDITIONAL_FIELDS = [
   },
 ];
 
+export const OPTIONAL_FIELDS = [
+  {
+    field: "filter_by",
+    downloadType: "biom_format",
+  },
+];
+
 export const DEFAULT_BACKGROUND_MODEL = 26;
 
 export const BULK_DOWNLOAD_TYPES = {

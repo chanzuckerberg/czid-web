@@ -60,6 +60,8 @@ import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, SortIcon } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
+
+import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
@@ -516,7 +518,7 @@ class SamplesHeatmapView extends React.Component {
 
   handleGenerateBulkDownload = () => {
     this.handleDownloadModalClose();
-    // launch bulk download notification
+    showBulkDownloadNotification();
   };
 
   metricToSortField(metric) {

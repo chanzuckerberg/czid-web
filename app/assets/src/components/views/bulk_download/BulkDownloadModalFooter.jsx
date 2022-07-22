@@ -10,7 +10,7 @@ import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 
 import cs from "./bulk_download_modal_footer.scss";
-import { CONDITIONAL_FIELDS } from "./constants.js";
+import { CONDITIONAL_FIELDS, OPTIONAL_FIELDS } from "./constants.js";
 
 const triggersCondtionalFieldMetricList = (conditionalField, dependentField, selectedFields) =>
   {
@@ -57,6 +57,12 @@ export default class BulkDownloadModalFooter extends React.Component {
         downloadType.type === field.downloadType &&
         !triggersConditionalField(field, selectedFieldsForType)
       ) {
+        requiredFields = reject(["type", field.field], requiredFields);
+      }
+    });
+
+    OPTIONAL_FIELDS.forEach(field => {
+      if (downloadType.type === field.downloadType) {
         requiredFields = reject(["type", field.field], requiredFields);
       }
     });
