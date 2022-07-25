@@ -3,8 +3,29 @@ import { find, isEmpty, map, toLower, pick, values } from "lodash/fp";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { URL_FIELDS } from "~/components/views/SampleView/constants";
+import { WorkflowValues, ThresholdFilterShape } from "~/interface/sample";
+import { LabelVal } from "~/interface/shared";
 
 const urlParser = new UrlQueryParser(URL_FIELDS);
+
+export interface TempSelectedOptionsShape {
+  background: number;
+  categories: {
+    categories: string[],
+    subcategories: Record<string,any> | Record<string,never>,
+  };
+  taxa: LabelVal[];
+  readSpecificity: number;
+  thresholds?: ThresholdFilterShape[];
+}
+
+interface generateUrlOptions {
+  sampleId: number;
+  snapshotShareId?: number | null;
+  tempSelectedOptions?: TempSelectedOptionsShape | Record<string,never>;
+  workflow?: WorkflowValues | null;
+  workflowRunId?: number | null;
+}
 
 const generateUrlToSampleView = ({
   sampleId,
@@ -12,7 +33,7 @@ const generateUrlToSampleView = ({
   tempSelectedOptions = null,
   workflow = null,
   workflowRunId = null,
-} = {}) => {
+} : generateUrlOptions): string => {
   const currentTab = workflow
     ? find({ value: workflow }, values(WORKFLOWS)).label
     : null;
@@ -31,13 +52,19 @@ const generateUrlToSampleView = ({
 const HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS = "heatmap";
 const DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS = "discovery";
 
+interface getTempSelectedParams {
+  optionsToTemporarilyPersist: string[];
+  selectedOptions: Record<string, any[]>;
+  source: "discovery" | "heatmap" | "";
+}
+
 const getTempSelectedOptions = ({
   // If optionsToTemporarilyPersist is omitted, then all selectedOptions will be temporarily persisted.
   // Otherwise only temporarily persist the specified selected options.
   optionsToTemporarilyPersist = [],
   selectedOptions,
   source = "",
-}) => {
+}: getTempSelectedParams): TempSelectedOptionsShape => {
   const tempSelectedOptions = isEmpty(optionsToTemporarilyPersist)
     ? selectedOptions
     : pick(optionsToTemporarilyPersist, selectedOptions);
