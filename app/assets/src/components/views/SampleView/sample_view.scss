@@ -38,9 +38,11 @@
     display: flex;
 
     .statsRow {
-      @include font-body-xxs;
-
+      font: $sds-font-body-s-400-font;
       color: $sds-color-gray-500;
+
+      display: flex;
+      align-items: center;
       flex: 1 0 auto;
 
       .reportInfoMsg {
@@ -50,10 +52,7 @@
       }
 
       .clearAllFilters {
-        margin-left: $sds-spaces-xxs;
-        font-weight: $font-weight-semibold;
-        white-space: nowrap;
-        cursor: pointer;
+        margin-left: $sds-spaces-s;
       }
     }
 

@@ -1,3 +1,4 @@
+import { Button } from "czifui";
 import deepEqual from "fast-deep-equal";
 import {
   all,
@@ -2135,12 +2136,14 @@ class SampleView extends React.Component {
             <div className={cs.statsRow}>
               {this.renderReportInfo()}
               {!!this.countFilters() && (
-                <span
-                  className={cs.clearAllFilters}
-                  onClick={this.clearAllFilters}
-                  onKeyDown={this.clearAllFilters}
-                >
-                  Clear All Filters
+                <span className={cs.clearAllFilters}>
+                  <Button
+                    sdsStyle="minimal"
+                    sdsType="secondary"
+                    onClick={this.clearAllFilters}
+                  >
+                    Clear Filters
+                  </Button>
                 </span>
               )}
             </div>
