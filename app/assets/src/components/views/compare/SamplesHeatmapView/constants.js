@@ -50,8 +50,8 @@ export const HEATMAP_DOWNLOAD_OPTIONS = [
       <React.Fragment>
         Sample report data (samples x taxons) combined with all sample metadata
         and taxon metadata in{" "}
-        <ExternalLink href="https://help.czid.org">BIOM</ExternalLink> format.{" "}
-        <ExternalLink href="https://help.czid.org">Learn more</ExternalLink>
+        <ExternalLink href="https://biom-format.org/">BIOM</ExternalLink> format.{" "}
+        <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360042575714-Initiate-a-Bulk-Download">Learn more</ExternalLink>
       </React.Fragment>
     ),
     display_name: "Combined Microbiome File",

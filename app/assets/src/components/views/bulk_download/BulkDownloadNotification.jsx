@@ -17,7 +17,7 @@ export default class BulkDownloadNotification extends React.Component {
           We&apos;ve received your download request and are busy preparing your
           data. To check the status of your download, visit the{" "}
           <a
-            href="bulk_downloads"
+            href="/bulk_downloads"
             onClick={() =>
               trackEvent("BulkDownloadNotification_downloads-page-link-clicked")
             }
