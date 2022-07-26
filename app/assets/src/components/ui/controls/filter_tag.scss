@@ -11,10 +11,17 @@
 
     .closeIcon {
       cursor: pointer;
+      flex-shrink: 0;
       fill: $sds-color-gray-white;
       height: $sds-icon-sizes-xs-height;
       width: $sds-icon-sizes-xs-width;
       margin-left: $sds-spaces-xxs;
     }
+  }
+
+  .labelText {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

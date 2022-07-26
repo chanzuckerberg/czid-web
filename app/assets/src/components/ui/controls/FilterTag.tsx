@@ -14,10 +14,10 @@ interface FilterTagProps {
 
 const FilterTag = ({ text, onClose, className }: FilterTagProps) => {
   const labelText = (
-    <>
+    <div className={cs.labelText}>
       {text}
       {onClose && <IconCloseSmall className={cs.closeIcon} onClick={onClose} />}
-    </>
+    </div>
   );
 
   return (

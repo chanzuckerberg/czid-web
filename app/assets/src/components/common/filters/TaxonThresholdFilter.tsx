@@ -1,5 +1,5 @@
 import { Button, DropdownPopper } from "czifui";
-import { isEmpty } from "lodash/fp";
+import { find, isEqual, isEmpty, map, some } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";
 import { NON_BACKGROUND_DEPENDENT_THRESHOLDS } from "~/components/views/SampleView/constants";
@@ -31,7 +31,7 @@ const TaxonThresholdFilter = ({
   disabled = false,
 }: TaxonThresholdFilterProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
+  const [hasModifiedFilters, setHasModifiedFilters] = useState<boolean>(false);
   // Taxa and threshold selections are only stored in this component's state until they
   // are applied, at which point they are passed to the parent component via callback
   const [selectedTaxa, setSelectedTaxa] = React.useState<TaxonOption[]>(
@@ -65,18 +65,24 @@ const TaxonThresholdFilter = ({
     thresholdIdx: number,
     threshold: ThresholdFilterData,
   ) => {
-    setThresholds((existingThresholds: ThresholdFilterData[]) => [
-      ...existingThresholds.slice(0, thresholdIdx),
+    const newThresholds = [
+      ...thresholds.slice(0, thresholdIdx),
       threshold,
-      ...existingThresholds.slice(thresholdIdx + 1, existingThresholds.length),
-    ]);
+      ...thresholds.slice(thresholdIdx + 1, thresholds.length),
+    ];
+
+    setHasModifiedFilters(checkIfThresholdFiltersWereModified(newThresholds));
+    setThresholds(newThresholds);
   };
 
   const handleThresholdRemove = (thresholdIdx: number) => {
-    setThresholds((existingThresholds: ThresholdFilterData[]) => [
-      ...existingThresholds.slice(0, thresholdIdx),
-      ...existingThresholds.slice(thresholdIdx + 1, existingThresholds.length),
-    ]);
+    const newThresholds = [
+      ...thresholds.slice(0, thresholdIdx),
+      ...thresholds.slice(thresholdIdx + 1, thresholds.length),
+    ];
+
+    setHasModifiedFilters(checkIfThresholdFiltersWereModified(newThresholds));
+    setThresholds(newThresholds);
   };
 
   const handleAddThresholdItem = () => {
@@ -96,6 +102,18 @@ const TaxonThresholdFilter = ({
   const handleApply = () => {
     setAnchorEl(null);
     onFilterApply(selectedTaxa, thresholds);
+  };
+
+  // If any of the newThresholds were not found in the existing selected thresholds, then the threshold filters were modified
+  const checkIfThresholdFiltersWereModified = (
+    newThresholds: ThresholdFilterData[],
+  ) => {
+    return some(
+      (newThreshold: ThresholdFilterData) =>
+        !isEmpty(newThreshold.value) &&
+        find(newThreshold, selectedThresholds) === undefined,
+      newThresholds,
+    );
   };
 
   return (
@@ -118,9 +136,14 @@ const TaxonThresholdFilter = ({
           <TaxonFilterSDS
             domain={domain}
             selectedTaxa={selectedTaxa}
-            handleChange={(selectedTaxaOptions: TaxonOption[]) =>
-              setSelectedTaxa(selectedTaxaOptions)
-            }
+            handleChange={(selectedTaxaOptions: TaxonOption[]) => {
+              const selectedTaxaHasChanged = !isEqual(
+                map("id", selectedOptions).sort(),
+                map("id", selectedTaxaOptions).sort(),
+              );
+              setHasModifiedFilters(selectedTaxaHasChanged);
+              setSelectedTaxa(selectedTaxaOptions);
+            }}
           />
           {thresholds?.length > 0 && (
             <div className={cs.thresholdDescriptor}>
@@ -131,9 +154,9 @@ const TaxonThresholdFilter = ({
             metrics={NON_BACKGROUND_DEPENDENT_THRESHOLDS}
             operators={filterOperators}
             thresholds={thresholds}
-            onChangeThreshold={(idx, threshold) =>
-              handleThresholdChange(idx, threshold)
-            }
+            onChangeThreshold={(idx, threshold) => {
+              handleThresholdChange(idx, threshold);
+            }}
             onRemoveThreshold={idx => {
               handleThresholdRemove(idx);
             }}
@@ -144,7 +167,7 @@ const TaxonThresholdFilter = ({
               <Button
                 sdsStyle="square"
                 sdsType="primary"
-                disabled={isEmpty(selectedTaxa)}
+                disabled={!hasModifiedFilters || isEmpty(selectedTaxa)}
                 onClick={handleApply}
               >
                 Apply
