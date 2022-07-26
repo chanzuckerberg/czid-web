@@ -1,5 +1,10 @@
 import { get, postWithCSRF } from "./core";
 
+export enum CountTypes {
+  NT = "NT",
+  NR = "NR",
+}
+
 export const fetchLongestContigsForTaxonId = ({
   sampleId,
   pipelineVersion,
@@ -9,6 +14,7 @@ export const fetchLongestContigsForTaxonId = ({
     params: {
       taxid: taxonId,
       pipeline_version: pipelineVersion,
+      count_type: CountTypes.NT,
     },
   });
 
@@ -23,6 +29,7 @@ export const fetchLongestReadsForTaxonId = ({
       taxid: taxonId,
       tax_level: taxonLevel,
       pipeline_version: pipelineVersion,
+      count_type: CountTypes.NT,
     },
   });
 

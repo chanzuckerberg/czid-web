@@ -848,7 +848,7 @@ RSpec.describe SamplesController, type: :controller do
       end
 
       it "returns up to the 3 longest contigs" do
-        get :taxid_contigs_for_blast, format: :json, params: { id: @sample.id, taxid: 573, pipeline_version: @pipeline_run.pipeline_version }
+        get :taxid_contigs_for_blast, format: :json, params: { id: @sample.id, taxid: 573, pipeline_version: @pipeline_run.pipeline_version, count_type: TaxonCount::COUNT_TYPE_NT }
 
         expect(response).to have_http_status :success
 
@@ -877,7 +877,7 @@ RSpec.describe SamplesController, type: :controller do
       end
 
       it "should fetch the five longest reads from s3 and determine the shortest & longest alignment lengths" do
-        get :taxon_five_longest_reads, format: :json, params: { id: @sample.id, taxid: 573, taxon_level: 1, pipeline_version: @pipeline_run.pipeline_version }
+        get :taxon_five_longest_reads, format: :json, params: { id: @sample.id, taxid: 573, taxon_level: 1, pipeline_version: @pipeline_run.pipeline_version, count_type: TaxonCount::COUNT_TYPE_NT }
 
         expect(response).to have_http_status :success
 

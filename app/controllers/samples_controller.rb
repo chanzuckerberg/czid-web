@@ -980,13 +980,13 @@ class SamplesController < ApplicationController
 
   # GET /samples/:id/taxid_contigs_for_blast.json?taxid=:taxid&pipeline_version=:pipeline_version
   def taxid_contigs_for_blast
-    permitted_params = params.permit(:taxid, :pipeline_version)
+    permitted_params = params.permit(:taxid, :pipeline_version, :count_type)
 
     taxid = permitted_params[:taxid]
     return if HUMAN_TAX_IDS.include? taxid.to_i
 
     pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
-    contigs = pr.get_contigs_for_taxid(taxid.to_i, PipelineRun::MIN_CONTIG_READS, "NT")
+    contigs = pr.get_contigs_for_taxid(taxid.to_i, PipelineRun::MIN_CONTIG_READS, permitted_params[:count_type])
 
     order_by = sanitize_order_by(Contig, order_by, :read_count)
     order_dir = sanitize_order_dir(order_dir, :desc)
@@ -1044,14 +1044,15 @@ class SamplesController < ApplicationController
 
   # GET /samples/:id/taxon_five_longest_reads.json?taxid=:taxid&tax_level=:tax_level&pipeline_version=:pipeline_version
   def taxon_five_longest_reads
-    permitted_params = params.permit(:taxid, :tax_level, :pipeline_version)
+    permitted_params = params.permit(:taxid, :tax_level, :pipeline_version, :count_type)
 
     taxid = permitted_params[:taxid].to_i
     return if HUMAN_TAX_IDS.include? taxid
 
     pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
     tax_level = TaxonCount::LEVEL_2_NAME[permitted_params[:tax_level].to_i]
-    s3_file_path = pr.five_longest_reads_fasta_s3("nt.#{tax_level}.#{taxid}")
+    count_type = permitted_params[:count_type].downcase
+    s3_file_path = pr.five_longest_reads_fasta_s3("#{count_type}.#{tax_level}.#{taxid}")
 
     begin
       five_longest_reads = S3Util.get_s3_file(s3_file_path)
