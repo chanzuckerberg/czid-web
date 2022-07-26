@@ -289,6 +289,7 @@ class SampleView extends React.Component {
 
   getDefaultSelectedOptions = () => {
     return {
+      annotations: [],
       background: null,
       categories: { categories: [], subcategories: { Viruses: [] } },
       // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.

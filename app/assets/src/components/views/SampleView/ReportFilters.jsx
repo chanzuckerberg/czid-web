@@ -8,10 +8,13 @@ import {
   values,
 } from "lodash/fp";
 import PropTypes from "prop-types";
-import React from "react";
-
+import React, { useContext } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
+import { UserContext } from "~/components/common/UserContext";
+
+import { ANNOTATION_FILTER_FEATURE } from "~/components/utils/features";
+import AnnotationFilter from "~/components/views/report/filters/AnnotationFilter";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
 import MetricPicker from "~/components/views/report/filters/MetricPicker";
@@ -38,6 +41,9 @@ const ReportFilters = ({
   shouldDisableFilters,
   snapshotShareId,
 }) => {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
+
   const handleFilterChange = ({ key, value }) => {
     trackEvent("SampleView_filter_changed", {
       key,
@@ -259,6 +265,21 @@ const ReportFilters = ({
             {...sharedFilterProps}
           />
         </div>
+        {view === "table" &&
+          allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) && (
+            <div className={cs.filterListElement}>
+              <AnnotationFilter
+                selectedAnnotations={selected.annotations}
+                onChange={value =>
+                  handleFilterChange({
+                    key: "annotations",
+                    value,
+                  })
+                }
+                {...sharedFilterProps}
+              />
+            </div>
+          )}
         {view === "tree" && (
           <div className={cs.filterListElement}>
             <MetricPicker
