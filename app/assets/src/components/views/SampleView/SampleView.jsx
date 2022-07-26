@@ -1508,8 +1508,8 @@ class SampleView extends React.Component {
     const { total, filtered } = this.countReportRows();
 
     return filtered !== total
-      ? `${filtered} rows passing the above filters, out of ${total} total rows.`
-      : `${total} total rows.`;
+      ? `${filtered} rows passing the above filters, out of ${total} total rows`
+      : `${total} rows`;
   };
 
   truncatedMessage = () => {

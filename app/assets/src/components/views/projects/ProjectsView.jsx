@@ -130,18 +130,23 @@ class ProjectsView extends React.Component {
       totalNumberOfProjects,
     } = this.props;
 
+    const description = hasAtLeastOneFilterApplied
+      ? `${filteredProjectCount || 0} out of ${totalNumberOfProjects} projects`
+      : `${totalNumberOfProjects} project${
+          totalNumberOfProjects === 1 ? "" : "s"
+        }`;
     return (
       <div className={cs.filteredCount}>
-        {`${filteredProjectCount ||
-          0} out of ${totalNumberOfProjects} projects`}
-        <Button
-          disabled={!hasAtLeastOneFilterApplied}
-          sdsStyle="minimal"
-          sdsType="secondary"
-          onClick={onClearFilters}
-        >
-          Clear Filters
-        </Button>
+        {description}
+        {hasAtLeastOneFilterApplied && (
+          <Button
+            sdsStyle="minimal"
+            sdsType="secondary"
+            onClick={onClearFilters}
+          >
+            Clear Filters
+          </Button>
+        )}
       </div>
     );
   };

@@ -475,28 +475,33 @@ class SamplesView extends React.Component {
     } = this.props;
 
     if (!isEmpty(userDataCounts)) {
-      const objectsDisplayed =
-        workflow === WORKFLOWS.SHORT_READ_MNGS.value
-          ? "samples"
-          : "consensus genomes";
       const totalNumberOfObjects =
         workflow === WORKFLOWS.SHORT_READ_MNGS.value
           ? userDataCounts.sampleCountByWorkflow[workflow]
           : userDataCounts.numberOfConsensusGenomes;
+      const pluralGrammer = `${totalNumberOfObjects === 1 ? "" : "s"}`;
+      const objectsDisplayed =
+        workflow === WORKFLOWS.SHORT_READ_MNGS.value
+          ? `sample${pluralGrammer}`
+          : `consensus genome${pluralGrammer}`;
       const filteredCountByWorkflowMessage = `${selectableIds?.length ||
         0} out of ${totalNumberOfObjects} ${objectsDisplayed}`;
+      const description = hasAtLeastOneFilterApplied
+        ? filteredCountByWorkflowMessage
+        : `${selectableIds?.length} ${objectsDisplayed}`;
 
       return (
         <div className={cs.filteredCount}>
-          {filteredCountByWorkflowMessage}
-          <Button
-            disabled={!hasAtLeastOneFilterApplied}
-            sdsStyle="minimal"
-            sdsType="secondary"
-            onClick={onClearFilters}
-          >
-            Clear Filters
-          </Button>
+          {description}
+          {hasAtLeastOneFilterApplied && (
+            <Button
+              sdsStyle="minimal"
+              sdsType="secondary"
+              onClick={onClearFilters}
+            >
+              Clear Filters
+            </Button>
+          )}
         </div>
       );
     }
