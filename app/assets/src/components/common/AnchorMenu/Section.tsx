@@ -1,8 +1,14 @@
-import PropTypes from "prop-types";
 import React, { useEffect, useRef } from "react";
 import cs from "./section.scss";
 
-const Section = ({ children, id, name, observer }) => {
+interface SectionProps {
+  id: string,
+  name: string,
+  observer: IntersectionObserver,
+  children: React.ReactNode;
+}
+
+const Section = ({ children, id, name, observer } : SectionProps) => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
@@ -22,14 +28,6 @@ const Section = ({ children, id, name, observer }) => {
       {children}
     </div>
   );
-};
-
-Section.propTypes = {
-  id: PropTypes.string.isRequired,
-  index: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired,
-  observer: PropTypes.object,
 };
 
 export default Section;

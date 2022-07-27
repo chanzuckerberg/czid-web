@@ -4,9 +4,15 @@ import React from "react";
 import NavLink from "~/components/common/AnchorMenu/NavLink";
 import cs from "./section_navigation.scss";
 
-const getSectionId = section => {
+export const getSectionId = (section : string) => {
   return section.replace(/\s+/g, "-").toLowerCase();
 };
+
+interface SectionNavigation {
+  currentSectionIndex:number;
+  setCurrentSectionIndex:React.Dispatch<React.SetStateAction<number>>;
+  sectionContentByHeader:Record<string, any[]>
+}
 
 const SectionNavigation = ({
   currentSectionIndex,

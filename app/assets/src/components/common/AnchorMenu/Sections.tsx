@@ -1,17 +1,19 @@
-import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 
 import Section from "~/components/common/AnchorMenu/Section";
 import Pathogens from "~/components/views/pathogen_list/Pathogens";
 
+import { getSectionId } from "./SectionNavigation";
+
 import cs from "./sections.scss";
 
-const getSectionId = section => {
-  return section.replace(/\s+/g, "-").toLowerCase();
-};
+interface SectionsProps {
+  sectionContentByHeader: Record<string, any[]>;
+  setCurrentSectionIndex: Dispatch<SetStateAction<number>>
+}
 
-const Sections = ({ sectionContentByHeader, setCurrentSectionIndex }) => {
-  const [observer, setObserver] = useState();
+const Sections = ({ sectionContentByHeader, setCurrentSectionIndex } : SectionsProps) => {
+  const [observer, setObserver] = useState<IntersectionObserver | null>(null);
 
   const setIndex = useCallback(
     entries => {
@@ -45,10 +47,9 @@ const Sections = ({ sectionContentByHeader, setCurrentSectionIndex }) => {
 
   return (
     <div className={cs.sections}>
-      {Object.keys(sectionContentByHeader).map((header, key) => (
+      {Object.keys(sectionContentByHeader).map((header) => (
         <Section
           id={getSectionId(header)}
-          index={key}
           key={`section-${getSectionId(header)}`}
           name={header}
           observer={observer}
@@ -58,11 +59,6 @@ const Sections = ({ sectionContentByHeader, setCurrentSectionIndex }) => {
       ))}
     </div>
   );
-};
-
-Sections.propTypes = {
-  sectionContentByHeader: PropTypes.object,
-  setCurrentSectionIndex: PropTypes.func,
 };
 
 export default Sections;
