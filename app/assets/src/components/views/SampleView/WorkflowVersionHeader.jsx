@@ -24,7 +24,7 @@ export default function WorkflowVersionHeader({
   const renderAlignmentConfigString = () => {
     const alignmentConfigName = get("alignment_config_name", currentRun);
     const alignmentConfigNameString = alignmentConfigName
-      ? `, NT/NR: ${alignmentConfigName}`
+      ? `, NCBI Index Date: ${alignmentConfigName}`
       : "";
     return alignmentConfigNameString;
   };
