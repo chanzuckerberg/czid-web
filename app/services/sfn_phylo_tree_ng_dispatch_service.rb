@@ -103,6 +103,14 @@ class SfnPhyloTreeNgDispatchService
       docker_image_id: docker_image_id,
     }
 
+    if Gem::Version.new(@wdl_version) >= Gem::Version.new("1.2.5")
+      alignment_config = AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+      run_inputs[:nt_s3_path] = alignment_config.s3_nt_db_path
+      run_inputs[:nt_loc_db] = alignment_config.s3_nt_loc_db_path
+      run_inputs[:nr_s3_path] = alignment_config.s3_nr_db_path
+      run_inputs[:nr_loc_db] = alignment_config.s3_nr_loc_db_path
+    end
+
     sfn_pipeline_input_json = {
       RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@phylo_tree.version_tag}/run.wdl",
       Input: {
