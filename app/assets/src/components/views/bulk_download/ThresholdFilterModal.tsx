@@ -49,8 +49,12 @@ const ThresholdFilterModal = ({
                     ...thresholds.slice(thresholdIdx + 1, thresholds.length),
                 ];
                 setThresholds(newThresholds);
-                // only add threshold if there is a valid metric and value
-                threshold["metric"] && threshold["value"] && addFilterList("biom_format", "filter_by", newThresholds, thresholdToString(newThresholds));
+
+                addFilterList(
+                    "biom_format",
+                    "filter_by",
+                    newThresholds.filter(threshold=> threshold["metric"] && threshold["value"]), // only add threshold if there is a valid metric and value
+                    thresholdToString(newThresholds));
             }}
             onRemoveThreshold={ (thresholdIdx) => {
                 const newThresholds = [
@@ -58,7 +62,11 @@ const ThresholdFilterModal = ({
                     ...thresholds.slice(thresholdIdx + 1, thresholds.length),
                 ];
                 setThresholds(newThresholds);
-                addFilterList("biom_format", "filter_by", newThresholds, thresholdToString(newThresholds));
+                addFilterList(
+                    "biom_format",
+                    "filter_by",
+                    newThresholds.filter(threshold=> threshold["metric"] && threshold["value"]), // only add threshold if there is a valid metric and value
+                    thresholdToString(newThresholds));
             }}
         />
     );

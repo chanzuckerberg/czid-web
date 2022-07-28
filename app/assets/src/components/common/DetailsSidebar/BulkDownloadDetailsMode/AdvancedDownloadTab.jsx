@@ -47,6 +47,10 @@ export default class AdvancedDownloadTab extends React.Component {
     let currentTimestamp = moment().format("MM-D-YYYY hh-mm-ssa");
     let bulkDownloadFileName = `${bulkDownload.download_name}-${currentTimestamp}`;
 
+    if (bulkDownload.download_type === "biom_format") {
+      return `curl -L "${bulkDownload.presigned_output_url}" > "${bulkDownloadFileName}.biom" `;
+    }
+
     return `curl -L "${bulkDownload.presigned_output_url}" > "${bulkDownloadFileName}.tar.gz"\
         && mkdir "${bulkDownloadFileName}"\
         && tar -zvxf "${bulkDownloadFileName}.tar.gz" -C "${bulkDownloadFileName}"\

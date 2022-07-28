@@ -90,9 +90,9 @@ class BulkDownload < ApplicationRecord
       errors.add(:params, "background value must be an integer") unless background_id.nil? || background_id.is_a?(Integer)
 
       categories = get_param_value("categories")
-      errors.add(:params, "category is invalid") unless categories.blank? || [
+      errors.add(:params, "category is invalid") unless categories.blank? || (categories - [
         "Bacteria", "Archaea", "Eukaryota", "Viruses", "Viroids",
-      ].include?(categories)
+      ]).empty?
 
       threshold_filters = get_param_value("filter_by")
       threshold_filters.present? && threshold_filters.each do |threshold_filter|

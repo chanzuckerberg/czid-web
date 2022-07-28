@@ -181,12 +181,21 @@ const SamplesHeatmapDownloadModal = ({
     // The bulk download modal has some error handling around this, but not sure if it actually does anything for the end user
     try {
       await createBulkDownload(selectedDownloadSubmission);
-    } catch (e) {
       trackEvent(
-        ANALYTICS_EVENT_NAMES.BULK_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED,
+        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_SUCCESS,
         {
           workflow: selectedDownloadSubmission["workflow"],
           downloadType: selectedDownloadSubmission["downloadType"],
+          ...selectedDownloadSubmission["validObjectIds"],
+        },
+      );
+    } catch (e) {
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED,
+        {
+          workflow: selectedDownloadSubmission["workflow"],
+          downloadType: selectedDownloadSubmission["downloadType"],
+          error: e.error,
           ...selectedDownloadSubmission["validObjectIds"],
         },
       );
