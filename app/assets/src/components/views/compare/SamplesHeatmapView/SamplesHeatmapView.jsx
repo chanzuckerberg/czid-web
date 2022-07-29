@@ -529,7 +529,7 @@ class SamplesHeatmapView extends React.Component {
     return "highest_" + countType + "_" + metricName;
   }
 
-  async fetchHeatmapData() {
+  async fetchHeatmapData(sampleIds) {
     const { heatmapTs } = this.props;
     const {
       presets,
@@ -542,7 +542,6 @@ class SamplesHeatmapView extends React.Component {
       readSpecificity,
       background,
     } = this.state.selectedOptions;
-    const { sampleIds } = this.state;
     const { allowedFeatures = [] } = this.context || {};
     const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
 
@@ -589,9 +588,9 @@ class SamplesHeatmapView extends React.Component {
     return heatmapData;
   }
 
-  fetchMetadataFieldsBySampleIds() {
+  fetchMetadataFieldsBySampleIds(sampleIds) {
     if (this.state.metadataTypes) return null;
-    return getSampleMetadataFields(this.state.sampleIds);
+    return getSampleMetadataFields(sampleIds);
   }
 
   async fetchViewData() {
@@ -622,8 +621,8 @@ class SamplesHeatmapView extends React.Component {
     let heatmapData, metadataFields;
     try {
       [heatmapData, metadataFields] = await Promise.all([
-        this.fetchHeatmapData(),
-        this.fetchMetadataFieldsBySampleIds(),
+        this.fetchHeatmapData(validIds),
+        this.fetchMetadataFieldsBySampleIds(validIds),
       ]);
     } catch (err) {
       this.handleLoadingFailure(err);
