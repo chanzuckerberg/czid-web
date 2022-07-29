@@ -32,29 +32,29 @@ interface SamplesHeatmapDownloadModalProps {
 }
 
 interface HeatmapParamType {
-  background: number,
-  categories: string[],
-  metric: string,
-  presets: string[],
-  readSpecificity: number,
-  sampleSortType: string,
-  species: number,
-  subcategories: SubcategoryType,
-  taxaSortType: string,
-  taxonsPerSample: number,
-  thresholdFilters: ThresholdFilterData[],
+  background: number;
+  categories: string[];
+  metric: string;
+  presets: string[];
+  readSpecificity: number;
+  sampleSortType: string;
+  species: number;
+  subcategories: SubcategoryType;
+  taxaSortType: string;
+  taxonsPerSample: number;
+  thresholdFilters: ThresholdFilterData[];
 }
 
 interface SubcategoryType {
-  Viruses: string[],
+  Viruses: string[];
 }
 
 interface SelectedDownloadSubmissionType {
-  downloadType: string,
-  fields: object,
-  validObjectIds: number[],
-  workflow: string,
-  workflowEntity: string,
+  downloadType: string;
+  fields: object;
+  validObjectIds: number[];
+  workflow: string;
+  workflowEntity: string;
 }
 
 interface DownloadType {
@@ -177,7 +177,9 @@ const SamplesHeatmapDownloadModal = ({
     return downloadTypeElement;
   };
 
-  const submitBulkDownload = async (selectedDownloadSubmission: SelectedDownloadSubmissionType) => {
+  const submitBulkDownload = async (
+    selectedDownloadSubmission: SelectedDownloadSubmissionType,
+  ) => {
     // The bulk download modal has some error handling around this, but not sure if it actually does anything for the end user
     try {
       await createBulkDownload(selectedDownloadSubmission);
@@ -202,35 +204,38 @@ const SamplesHeatmapDownloadModal = ({
     }
   };
 
-  const handleBulkDownload = (workflow = "short-read-mngs", workflowEntity = "Samples") => {
+  const handleBulkDownload = (
+    workflow = "short-read-mngs",
+    workflowEntity = "Samples",
+  ) => {
     trackEvent(
-        ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_DOWNLOAD_CLICKED,
-      );
-      const metric = selectedFields["biom_format"]["metric"];
-      const selectedDownloadSubmission = {
-        downloadType: selectedDownloadType,
-        fields: {
-          metric: {
-            "value": metric,
-          },
-          filter_by: {
-            "value": heatmapParams["thresholdFilters"],
-          },
-          categories: {
-            "value": heatmapParams["categories"],
-          },
-          background: {
-            "value": heatmapParams["background"],
-          },
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_DOWNLOAD_MODAL_DOWNLOAD_CLICKED,
+    );
+    const metric = selectedFields["biom_format"]["metric"];
+    const selectedDownloadSubmission = {
+      downloadType: selectedDownloadType,
+      fields: {
+        metric: {
+          value: metric,
         },
-        validObjectIds: sampleIds,
-        workflow: workflow,
-        workflowEntity: workflowEntity,
-      };
+        filter_by: {
+          value: heatmapParams["thresholdFilters"],
+        },
+        categories: {
+          value: heatmapParams["categories"],
+        },
+        background: {
+          value: heatmapParams["background"],
+        },
+      },
+      validObjectIds: sampleIds,
+      workflow: workflow,
+      workflowEntity: workflowEntity,
+    };
 
-      submitBulkDownload(selectedDownloadSubmission);
-      // close modal when download is created
-      onGenerateBulkDownload();
+    submitBulkDownload(selectedDownloadSubmission);
+    // close modal when download is created
+    onGenerateBulkDownload();
   };
 
   const renderDownloadTypes = () => {
@@ -264,7 +269,7 @@ const SamplesHeatmapDownloadModal = ({
 
     let runDownload: () => void;
 
-    switch(selectedDownloadType) {
+    switch (selectedDownloadType) {
       case "svg":
         runDownload = onDownloadSvg;
         break;
@@ -285,7 +290,7 @@ const SamplesHeatmapDownloadModal = ({
       <PrimaryButton
         disabled={disabled}
         text={text}
-        onClick={() => runDownload() }
+        onClick={() => runDownload()}
       />
     );
   };

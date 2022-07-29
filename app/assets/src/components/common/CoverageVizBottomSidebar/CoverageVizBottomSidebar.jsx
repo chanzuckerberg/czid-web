@@ -543,7 +543,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     if (!currentAccessionData) {
       return (
         <div className={cs.loadingContainer}>
-          <LoadingMessage message="Loading Visualization..."/>
+          <LoadingMessage message="Loading Visualization..." />
         </div>
       );
     }

@@ -250,3 +250,15 @@ export const MEDAKA_MODEL_OPTIONS = {
     ],
   },
 };
+
+export const MEGABYTE = 1000000;
+export const ERROR_MESSAGE = "Error has occured";
+export const SUCCESS_MESSAGE = "Success";
+export const DUPLICATE_ID_ERROR = "Duplicate IDs";
+export const INVALID_FASTA_FASTQ_ERROR = "File is not FASTA or FASTQ";
+export const TRUNCATED_FILE_ERROR = "File is truncated";
+export const ILLUMINA = "Illumina";
+export const NANOPORE = "ONT";
+export const R1CHECK = "_R1";
+export const R2CHECK = "_R2";
+export const AIOLI_LIBRARIES = ["htslib/htsfile/1.10", "seqtk/1.3"];

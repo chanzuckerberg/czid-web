@@ -127,7 +127,10 @@ const NextcladeModalFooter = ({
     <div className={cs.footer}>
       <div className={cs.notifications}>
         {loading && (
-          <LoadingMessage message="Validating consensus genomes..." className={cs.loading}/>
+          <LoadingMessage
+            message="Validating consensus genomes..."
+            className={cs.loading}
+          />
         )}
         {renderValidationError()}
         {renderInvalidSamplesNotifications()}

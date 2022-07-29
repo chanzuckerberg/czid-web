@@ -27,21 +27,37 @@ import {
   CONDITIONAL_FIELDS,
 } from "./constants.js";
 
-const triggersCondtionalFieldMetricList = (conditionalField, dependentField, selectedFields) =>
-  {
-    const thresholdMetrics = selectedFields["filter_by"].map((obj) => obj["metric"].replace("_", ".")); // Heatmap metrics use underscore as separator, bulk downloads use periods
-    return thresholdMetrics.filter( (metric) => conditionalField.triggerValues.includes(metric)).length > 0;
-  };
+const triggersCondtionalFieldMetricList = (
+  conditionalField,
+  dependentField,
+  selectedFields,
+) => {
+  const thresholdMetrics = selectedFields["filter_by"].map(obj =>
+    obj["metric"].replace("_", "."),
+  ); // Heatmap metrics use underscore as separator, bulk downloads use periods
+  return (
+    thresholdMetrics.filter(metric =>
+      conditionalField.triggerValues.includes(metric),
+    ).length > 0
+  );
+};
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
-  conditionalField.dependentFields.map( (dependentField) =>
-   (selectedFields && selectedFields["filter_by"] && dependentField === "filter_by") ?
-      triggersCondtionalFieldMetricList(conditionalField, dependentField, selectedFields,
-      ) : (
-        conditionalField.triggerValues.includes(
-          get(dependentField, selectedFields),
-        )),
-  ).some(Boolean);
+  conditionalField.dependentFields
+    .map(dependentField =>
+      selectedFields &&
+      selectedFields["filter_by"] &&
+      dependentField === "filter_by"
+        ? triggersCondtionalFieldMetricList(
+            conditionalField,
+            dependentField,
+            selectedFields,
+          )
+        : conditionalField.triggerValues.includes(
+            get(dependentField, selectedFields),
+          ),
+    )
+    .some(Boolean);
 
 class BulkDownloadModalOptions extends React.Component {
   sortTaxaWithReadsOptions = memoize(options =>
@@ -166,19 +182,19 @@ class BulkDownloadModalOptions extends React.Component {
         break;
       case "metric":
         // if download type is biom_format, only return RPM and r for NT and NR
-        dropdownOptions = (downloadType.type === "biom_format" ? MICROBIOME_DOWNLOAD_METRIC_OPTIONS: metricsOptions) || [];
+        dropdownOptions =
+          (downloadType.type === "biom_format"
+            ? MICROBIOME_DOWNLOAD_METRIC_OPTIONS
+            : metricsOptions) || [];
         placeholder = metricsOptions ? "Select metric" : "Loading...";
         break;
       case "filter_by":
         return (
-        <div className={cs.filterbyField} key={field.type}>
-
-          <span className={cs.label}>{field.display_name}: </span>
-          <span className={cs.description}> — optional </span>
-            <ThresholdFilterModal
-              addFilterList={onFieldSelect}
-              />
-        </div>
+          <div className={cs.filterbyField} key={field.type}>
+            <span className={cs.label}>{field.display_name}: </span>
+            <span className={cs.description}> — optional </span>
+            <ThresholdFilterModal addFilterList={onFieldSelect} />
+          </div>
         );
       case "download_format":
         dropdownOptions = field.options.map(option => ({
@@ -330,13 +346,16 @@ class BulkDownloadModalOptions extends React.Component {
           </div>
           <div className={cs.description}>
             {downloadType.description}{" "}
-            {downloadType.type === "biom_format" ?
-              (<>
-              <ExternalLink href="https://biom-format.org/">
-                BIOM
-              </ExternalLink> format. </>):
+            {downloadType.type === "biom_format" ? (
+              <>
+                <ExternalLink href="https://biom-format.org/">
+                  BIOM
+                </ExternalLink>{" "}
+                format.{" "}
+              </>
+            ) : (
               ""
-              }
+            )}
             {downloadType.type in BULK_DOWNLOAD_DOCUMENTATION_LINKS ? (
               <ExternalLink
                 href={BULK_DOWNLOAD_DOCUMENTATION_LINKS[downloadType.type]}
@@ -355,22 +374,24 @@ class BulkDownloadModalOptions extends React.Component {
               {downloadType.fields.map(field =>
                 this.renderOption(downloadType, field),
               )}
-              {downloadType.type === "biom_format" &&
+              {downloadType.type === "biom_format" && (
                 <div className={cs.description}>
                   To apply more filters, download directly from
                   <span
                     role="link"
                     className={LinkCS.linkDefault}
                     tabIndex="0"
-                    onClick={ (e) => {
-                        handleHeatmapLink();
-                        e.stopPropagation();
-                      }}
+                    onClick={e => {
+                      handleHeatmapLink();
+                      e.stopPropagation();
+                    }}
                     onKeyDown={handleHeatmapLink}
-                    > heatmap
+                  >
+                    {" "}
+                    heatmap
                   </span>
                 </div>
-              }
+              )}
             </div>
           )}
         </div>

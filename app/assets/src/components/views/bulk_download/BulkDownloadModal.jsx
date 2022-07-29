@@ -267,37 +267,38 @@ class BulkDownloadModal extends React.Component {
     });
   };
 
-  handleHeatmapLink = (event) => {
-    const {
-      selectedFields,
-      validObjectIds,
-    } = this.state;
+  handleHeatmapLink = event => {
+    const { selectedFields, validObjectIds } = this.state;
     const metricList = selectedFields?.["biom_format"]?.["filter_by"];
     const metric = selectedFields?.["biom_format"]?.["metric"];
     const sortMetric = METRIC_OPTIONS.includes(metric); // check heatmap is sortable on selected metric
     const presets = [];
 
-    if(metricList) {
+    if (metricList) {
       presets.push("thresholdFilters");
     }
-    if (sortMetric){
+    if (sortMetric) {
       presets.push("metric");
     }
 
-    const params = encodeURI(getURLParamString({
-      background: selectedFields?.["biom_format"]?.["background"] || DEFAULT_BACKGROUND_MODEL,
-      categories: [],
-      subcategories: JSON.stringify({}),
-      readSpecificity: null,
-      sampleIds: Array.from(validObjectIds),
-      species: null,
-      thresholdFilters: JSON.stringify(metricList),
-      metric: sortMetric,
-      presets: presets,
-    }));
+    const params = encodeURI(
+      getURLParamString({
+        background:
+          selectedFields?.["biom_format"]?.["background"] ||
+          DEFAULT_BACKGROUND_MODEL,
+        categories: [],
+        subcategories: JSON.stringify({}),
+        readSpecificity: null,
+        sampleIds: Array.from(validObjectIds),
+        species: null,
+        thresholdFilters: JSON.stringify(metricList),
+        metric: sortMetric,
+        presets: presets,
+      }),
+    );
 
     openUrl(`/visualizations/heatmap?${params}`);
-  }
+  };
 
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
     const { workflow } = this.props;

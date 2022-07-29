@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from "react";
 import cs from "./section.scss";
 
 interface SectionProps {
-  id: string,
-  name: string,
-  observer: IntersectionObserver,
+  id: string;
+  name: string;
+  observer: IntersectionObserver;
   children: React.ReactNode;
 }
 
-const Section = ({ children, id, name, observer } : SectionProps) => {
+const Section = ({ children, id, name, observer }: SectionProps) => {
   const sectionRef = useRef(null);
 
   useEffect(() => {

@@ -15,7 +15,7 @@ export interface WorkflowRuns {
 
 export enum WorkflowValues {
   CONSENSUS_GENOME = "consensus-genome",
-  SHORT_READ_MNGS = "short-read-mngs"
+  SHORT_READ_MNGS = "short-read-mngs",
 }
 
 export interface ThresholdFilterShape {

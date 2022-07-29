@@ -12,21 +12,35 @@ import Notification from "~ui/notifications/Notification";
 import cs from "./bulk_download_modal_footer.scss";
 import { CONDITIONAL_FIELDS, OPTIONAL_FIELDS } from "./constants.js";
 
-const triggersCondtionalFieldMetricList = (conditionalField, dependentField, selectedFields) =>
-  {
-    const thresholdMetrics = selectedFields["filter_by"].map((obj) => obj["metric"].replace("_", ".")); // Heatmap metrics use underscore as separator, bulk downloads use periods
-    return thresholdMetrics.some(metric => conditionalField.triggerValues.includes(metric));
-  };
+const triggersCondtionalFieldMetricList = (
+  conditionalField,
+  dependentField,
+  selectedFields,
+) => {
+  const thresholdMetrics = selectedFields["filter_by"].map(obj =>
+    obj["metric"].replace("_", "."),
+  ); // Heatmap metrics use underscore as separator, bulk downloads use periods
+  return thresholdMetrics.some(metric =>
+    conditionalField.triggerValues.includes(metric),
+  );
+};
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
-  conditionalField.dependentFields.map( (dependentField) =>
-   (selectedFields && selectedFields["filter_by"] && dependentField === "filter_by") ?
-      triggersCondtionalFieldMetricList(conditionalField, dependentField, selectedFields,
-      ) : (
-        conditionalField.triggerValues.includes(
-          get(dependentField, selectedFields),
-        )),
-  ).some(Boolean);
+  conditionalField.dependentFields
+    .map(dependentField =>
+      selectedFields &&
+      selectedFields["filter_by"] &&
+      dependentField === "filter_by"
+        ? triggersCondtionalFieldMetricList(
+            conditionalField,
+            dependentField,
+            selectedFields,
+          )
+        : conditionalField.triggerValues.includes(
+            get(dependentField, selectedFields),
+          ),
+    )
+    .some(Boolean);
 
 export default class BulkDownloadModalFooter extends React.Component {
   getSelectedDownloadType = () => {

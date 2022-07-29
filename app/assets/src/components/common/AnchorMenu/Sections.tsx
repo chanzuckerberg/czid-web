@@ -1,4 +1,10 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import Section from "~/components/common/AnchorMenu/Section";
 import Pathogens from "~/components/views/pathogen_list/Pathogens";
@@ -9,10 +15,13 @@ import cs from "./sections.scss";
 
 interface SectionsProps {
   sectionContentByHeader: Record<string, any[]>;
-  setCurrentSectionIndex: Dispatch<SetStateAction<number>>
+  setCurrentSectionIndex: Dispatch<SetStateAction<number>>;
 }
 
-const Sections = ({ sectionContentByHeader, setCurrentSectionIndex } : SectionsProps) => {
+const Sections = ({
+  sectionContentByHeader,
+  setCurrentSectionIndex,
+}: SectionsProps) => {
   const [observer, setObserver] = useState<IntersectionObserver | null>(null);
 
   const setIndex = useCallback(
@@ -47,7 +56,7 @@ const Sections = ({ sectionContentByHeader, setCurrentSectionIndex } : SectionsP
 
   return (
     <div className={cs.sections}>
-      {Object.keys(sectionContentByHeader).map((header) => (
+      {Object.keys(sectionContentByHeader).map(header => (
         <Section
           id={getSectionId(header)}
           key={`section-${getSectionId(header)}`}

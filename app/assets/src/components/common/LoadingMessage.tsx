@@ -6,8 +6,8 @@ import { IconLoading } from "~ui/icons";
 import cs from "./loading_message.scss";
 
 interface LoadingMessageProps {
-  className?: string,
-  message?: string
+  className?: string;
+  message?: string;
 }
 
 const LoadingMessage = ({ className, message }: LoadingMessageProps) => (

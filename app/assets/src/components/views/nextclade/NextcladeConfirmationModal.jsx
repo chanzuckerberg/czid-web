@@ -33,7 +33,7 @@ const NextcladeConfirmationModal = ({ onCancel, onConfirm, open, loading }) => {
       </div>
       <div className={cs.actions}>
         {loading ? (
-          <LoadingMessage message="Loading..."/>
+          <LoadingMessage message="Loading..." />
         ) : (
           <React.Fragment>
             <div className={cs.item}>

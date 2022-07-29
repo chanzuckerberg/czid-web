@@ -42,12 +42,14 @@ import { UserContext } from "~/components/common/UserContext";
 import Tabs from "~/components/ui/controls/Tabs";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import IssueGroup from "~ui/notifications/IssueGroup";
 
 import BasespaceSampleImport from "./BasespaceSampleImport";
 import LocalSampleFileUpload from "./LocalSampleFileUpload";
+import PreUploadQCCheck from "./PreUploadQCCheck";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
 import SampleUploadTable from "./SampleUploadTable";
 import WorkflowSelector from "./WorkflowSelector";
@@ -96,6 +98,7 @@ class UploadSampleStep extends React.Component {
     selectedWorkflows: new Set(),
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
     usedClearLabs: false,
+    files: [],
     validatingSamples: false, // Disable the "Continue" button while validating samples.
   };
 
@@ -455,11 +458,13 @@ class UploadSampleStep extends React.Component {
     if (sampleType === REMOTE_UPLOAD || sampleType === LOCAL_UPLOAD) {
       const samplesKey = this.getSamplesKey(sampleType);
       const samples = this.state[samplesKey];
+      const filesForQcCheck = this.state.files;
 
       // For local uploads, show how lanes will be concatenated
       if (sampleType === LOCAL_UPLOAD) {
         const sampleInfo = [];
         const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
+
         for (let group in groups) {
           const files = groups[group].files;
           sampleInfo.push({
@@ -468,6 +473,14 @@ class UploadSampleStep extends React.Component {
             name: removeLaneFromName(files[0].name),
             // If we concatenate samples 1 through 4, the selectId = "1,2,3,4"
             [SELECT_ID_KEY]: files.map(file => file[SELECT_ID_KEY]).join(","),
+            // Check to see if file is finished validating
+            finishedValidating: filesForQcCheck.find(
+              element => element.name === groups[group].concatenated["name"],
+            ).finishedValidating,
+            // Get result if file is validated
+            isValid: filesForQcCheck.find(
+              element => element.name === groups[group].concatenated["name"],
+            ).isValid,
           });
         }
         return sampleInfo;
@@ -695,6 +708,7 @@ class UploadSampleStep extends React.Component {
       [samplesKey]: mergedSamples,
       [selectedSampleIdsKey]: mergedSelectedSampleIds,
       ...(sampleType === LOCAL_UPLOAD ? { removedLocalFiles } : {}),
+      files: this.state.files.concat(validatedNewSamples),
     });
 
     trackEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
@@ -728,6 +742,13 @@ class UploadSampleStep extends React.Component {
       [samplesKey]: newSamples,
       [selectedSampleIdsKey]: newSelectedSampleIds,
     };
+
+    // Filter out samples from files that have been removed
+    const { files } = this.state;
+    const newStateForfiles = files.filter(object1 =>
+      newSamples.some(object2 => object1.name === object2.name),
+    );
+    this.handleValidatedFilesChange(newStateForfiles);
 
     this.setState(newState);
 
@@ -793,6 +814,13 @@ class UploadSampleStep extends React.Component {
     });
   };
 
+  // Change state for files
+  handleValidatedFilesChange = files => {
+    this.setState({
+      files,
+    });
+  };
+
   // Whether the current user input is valid. Determines whether the Continue button is enabled.
   isValid = () => {
     const {
@@ -802,6 +830,7 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       selectedWorkflows,
       validatingSamples,
+      files,
     } = this.state;
 
     let workflowsValid;
@@ -825,7 +854,8 @@ class UploadSampleStep extends React.Component {
       selectedProject !== null &&
       size(this.getSelectedSamples(currentTab)) > 0 &&
       !validatingSamples &&
-      workflowsValid
+      workflowsValid &&
+      files.every(element => element.isValid === true)
     );
   };
 
@@ -840,7 +870,12 @@ class UploadSampleStep extends React.Component {
   // *** Render functions ***
 
   renderTab = () => {
-    const { basespaceAccessToken, currentTab, selectedProject } = this.state;
+    const {
+      basespaceAccessToken,
+      currentTab,
+      selectedProject,
+      files,
+    } = this.state;
     switch (currentTab) {
       case LOCAL_UPLOAD:
         return (
@@ -849,6 +884,7 @@ class UploadSampleStep extends React.Component {
             project={selectedProject}
             samples={this.getSelectedSamples(LOCAL_UPLOAD)}
             hasSamplesLoaded={size(this.state.localSamples) > 0}
+            files={files}
           />
         );
       case REMOTE_UPLOAD:
@@ -879,6 +915,7 @@ class UploadSampleStep extends React.Component {
   };
 
   render() {
+    const { allowedFeatures } = this.context || {};
     const {
       createProjectOpen,
       currentTab,
@@ -887,11 +924,11 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       selectedWorkflows,
       usedClearLabs,
+      files,
     } = this.state;
 
     const readyForBasespaceAuth =
       currentTab === BASESPACE_UPLOAD && this.isValid();
-
     return (
       <div
         className={cx(
@@ -983,7 +1020,17 @@ class UploadSampleStep extends React.Component {
             }
             selectedSampleIds={this.getSelectedSampleIds(currentTab)}
             sampleUploadType={currentTab}
+            files={files}
           />
+          {this.getSelectedSamples(LOCAL_UPLOAD).length > 0 &&
+            allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) && (
+              <PreUploadQCCheck
+                samples={files}
+                changeState={this.handleValidatedFilesChange}
+                selectedWorkFlows={selectedWorkflows}
+                selectedTechnology={selectedTechnology}
+              />
+            )}
         </div>
         <div className={cs.controls}>
           {readyForBasespaceAuth && (

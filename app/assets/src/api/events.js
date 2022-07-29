@@ -537,7 +537,6 @@ function EventDictionary() {
   /** One page of data is loaded onto the DiscoveryView table */
   this.DISCOVERY_VIEW_TABLE_PAGE_LOADED = "DISCOVERY_VIEW_TABLE_PAGE_LOADED";
 
-
   /** The user clicked apply in the TaxonThresholdFilter. */
   this.TAXON_THRESHOLD_FILTER_APPLY_CLICKED =
     "TAXON_THRESHOLD_FILTER_APPLY_CLICKED";

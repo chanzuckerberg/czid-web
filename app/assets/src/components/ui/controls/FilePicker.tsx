@@ -2,9 +2,10 @@ import cx from "classnames";
 import React, { useState } from "react";
 
 import Dropzone from "react-dropzone";
+import { IconLoading } from "~/components/ui/icons";
+
 import Icon from "../icons/Icon";
 import cs from "./file_picker.scss";
-
 interface FilePickerProps {
   className?: string;
   accept?: string;
@@ -14,6 +15,7 @@ interface FilePickerProps {
   title?: string;
   onRejected?: $TSFixMeFunction;
   multiFile?: boolean;
+  finishedValidating?: boolean;
 }
 
 const FilePicker = ({
@@ -25,6 +27,7 @@ const FilePicker = ({
   multiFile,
   className,
   file,
+  finishedValidating,
 }: FilePickerProps) => {
   const [selectedFile, setSelectedFile] = useState(null);
 
@@ -73,7 +76,12 @@ const FilePicker = ({
       className={cx(cs.filePicker, className, getFile() && cs.active)}
     >
       <div className={cs.inner}>
-        <div className={cs.title}>{title}</div>
+        <div className={cs.title}>
+          {title && !finishedValidating && (
+            <IconLoading className={cs.loadingIndicator} />
+          )}
+          {title}
+        </div>
         {filePickerContent()}
       </div>
     </Dropzone>

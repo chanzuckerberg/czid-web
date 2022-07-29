@@ -45,9 +45,13 @@
 
   .cell {
     text-align: left;
+    color: inherit;
   }
 
   .header {
     justify-content: left;
+  }
+  .disabled {
+    color: $sds-color-gray-500;
   }
 }

@@ -34,9 +34,7 @@ import {
 
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { IconFilters } from "~ui/icons";
-import {
-  DOWNLOAD_OPTIONS,
-} from "./constants";
+import { DOWNLOAD_OPTIONS } from "./constants";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -121,8 +119,7 @@ const SamplesHeatmapHeader = ({
   };
 
   const showNewPresetsButton =
-    allowedFeatures.includes("taxon_heatmap_presets") &&
-    !!presets.length;
+    allowedFeatures.includes("taxon_heatmap_presets") && !!presets.length;
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>

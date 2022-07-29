@@ -4,72 +4,85 @@ import { THRESHOLDS } from "~/components/views/compare/SamplesHeatmapView/consta
 import { ThresholdFilterData } from "~/interface/dropdown";
 
 interface ThresholdFilterModalProps {
-    addFilterList: (
-        downloadType: string,
-        fieldType: string,
-        value: ThresholdFilterData[],
-        displayName: string,
-    ) => void;
+  addFilterList: (
+    downloadType: string,
+    fieldType: string,
+    value: ThresholdFilterData[],
+    displayName: string,
+  ) => void;
 }
 
 const thresholdToString = (thresholds: ThresholdFilterData[]) => {
-    return thresholds.reduce((acc, threshold) => acc + threshold["metric"] + threshold["operator"] + threshold["value"] + " ", "");
+  return thresholds.reduce(
+    (acc, threshold) =>
+      acc +
+      threshold["metric"] +
+      threshold["operator"] +
+      threshold["value"] +
+      " ",
+    "",
+  );
 };
 
-const ThresholdFilterModal = ({
-    addFilterList,
-}: ThresholdFilterModalProps) => {
-    const initialThreshold: ThresholdFilterData = {
-        metric: "",
-        metricDisplay: "",
-        operator: ">=",
-        value: "",
-    };
-    const [thresholds, setThresholds] = useState([initialThreshold]);
+const ThresholdFilterModal = ({ addFilterList }: ThresholdFilterModalProps) => {
+  const initialThreshold: ThresholdFilterData = {
+    metric: "",
+    metricDisplay: "",
+    operator: ">=",
+    value: "",
+  };
+  const [thresholds, setThresholds] = useState([initialThreshold]);
 
-    return (
-        <ThresholdFilterList
-            metrics={THRESHOLDS}
-            operators={[">=", "<="]}
-            thresholds={thresholds}
-            onAddThreshold={ () => {
-                setThresholds([
-                    ...thresholds, {
-                        metric: "",
-                        metricDisplay: "",
-                        operator: ">=",
-                        value: "",
-                    },
-                ]);
-            }}
-            onChangeThreshold={ (thresholdIdx, threshold) => {
-                const newThresholds = [
-                    ...thresholds.slice(0, thresholdIdx),
-                    threshold,
-                    ...thresholds.slice(thresholdIdx + 1, thresholds.length),
-                ];
-                setThresholds(newThresholds);
+  return (
+    <ThresholdFilterList
+      metrics={THRESHOLDS}
+      operators={[">=", "<="]}
+      thresholds={thresholds}
+      onAddThreshold={() => {
+        setThresholds([
+          ...thresholds,
+          {
+            metric: "",
+            metricDisplay: "",
+            operator: ">=",
+            value: "",
+          },
+        ]);
+      }}
+      onChangeThreshold={(thresholdIdx, threshold) => {
+        const newThresholds = [
+          ...thresholds.slice(0, thresholdIdx),
+          threshold,
+          ...thresholds.slice(thresholdIdx + 1, thresholds.length),
+        ];
+        setThresholds(newThresholds);
 
-                addFilterList(
-                    "biom_format",
-                    "filter_by",
-                    newThresholds.filter(threshold=> threshold["metric"] && threshold["value"]), // only add threshold if there is a valid metric and value
-                    thresholdToString(newThresholds));
-            }}
-            onRemoveThreshold={ (thresholdIdx) => {
-                const newThresholds = [
-                    ...thresholds.slice(0, thresholdIdx),
-                    ...thresholds.slice(thresholdIdx + 1, thresholds.length),
-                ];
-                setThresholds(newThresholds);
-                addFilterList(
-                    "biom_format",
-                    "filter_by",
-                    newThresholds.filter(threshold=> threshold["metric"] && threshold["value"]), // only add threshold if there is a valid metric and value
-                    thresholdToString(newThresholds));
-            }}
-        />
-    );
+        addFilterList(
+          "biom_format",
+          "filter_by",
+          newThresholds.filter(
+            threshold => threshold["metric"] && threshold["value"],
+          ), // only add threshold if there is a valid metric and value
+          thresholdToString(newThresholds),
+        );
+      }}
+      onRemoveThreshold={thresholdIdx => {
+        const newThresholds = [
+          ...thresholds.slice(0, thresholdIdx),
+          ...thresholds.slice(thresholdIdx + 1, thresholds.length),
+        ];
+        setThresholds(newThresholds);
+        addFilterList(
+          "biom_format",
+          "filter_by",
+          newThresholds.filter(
+            threshold => threshold["metric"] && threshold["value"],
+          ), // only add threshold if there is a valid metric and value
+          thresholdToString(newThresholds),
+        );
+      }}
+    />
+  );
 };
 
 export default ThresholdFilterModal;

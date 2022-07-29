@@ -39,6 +39,10 @@
   overflow: hidden;
 }
 
+.disabled {
+  color: $sds-color-gray-500;
+}
+
 .row {
   &:global(.ReactVirtualized__Table__headerRow) {
     border-bottom: 3px solid $sds-color-gray-200;

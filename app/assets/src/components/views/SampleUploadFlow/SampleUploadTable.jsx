@@ -1,9 +1,10 @@
 // Lists samples that the user has selected for upload.
 // Allows users to select and unselect samples, and remove unselected samples.
 
-import { difference, flatten, isEmpty, map, size } from "lodash/fp";
+import { cx } from "@emotion/css";
+import { difference, flatten, isEmpty, map, size, get } from "lodash/fp";
 import React from "react";
-import { SortDirection } from "react-virtualized";
+import { SortDirection, defaultTableRowRenderer } from "react-virtualized";
 
 import { formatFileSize } from "~/components/utils/format";
 import PropTypes from "~/components/utils/propTypes";
@@ -56,6 +57,8 @@ const FILE_NAMES_R1_COLUMN = {
   label: "Files",
   className: cs.cell,
   headerClassName: cs.header,
+  cellDataGetter: ({ dataKey, rowData }) =>
+    SampleUploadTableRenderers.getCellData({ dataKey, rowData }),
   cellRenderer: SampleUploadTableRenderers.renderFileNames,
 };
 
@@ -100,6 +103,17 @@ export default class SampleUploadTable extends React.Component {
     sampleSelectIds.forEach(sampleSelectId => {
       onSampleSelect(sampleSelectId, !selectedSampleIds.has(sampleSelectId));
     });
+  };
+
+  // If sample is still being validated than disable row
+  rowRenderer = rowProps => {
+    const data = rowProps.rowData;
+    const finishedValidating = data.finishedValidating;
+    if (finishedValidating) {
+      rowProps.className = cx(rowProps.className, cs.disabled);
+    }
+
+    return defaultTableRowRenderer(rowProps);
   };
 
   render() {
@@ -160,6 +174,14 @@ export default class SampleUploadTable extends React.Component {
           onRowClick={this.onRowClick}
           defaultSortBy="name"
           defaultSortDirection={SortDirection.ASC}
+          selectRowDataGetter={({ rowData }) => {
+            const arr = {
+              finishedValidating: get("finishedValidating", rowData),
+              id: get("_selectId", rowData),
+            };
+            return arr;
+          }}
+          rowRenderer={this.rowRenderer}
         />
       </div>
     );
@@ -183,4 +205,5 @@ SampleUploadTable.propTypes = {
   onSampleSelect: PropTypes.func.isRequired,
   onAllSamplesSelect: PropTypes.func.isRequired,
   sampleUploadType: PropTypes.SampleUploadType.isRequired,
+  files: PropTypes.array,
 };

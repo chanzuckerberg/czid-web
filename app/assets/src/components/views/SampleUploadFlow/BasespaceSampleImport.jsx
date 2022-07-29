@@ -222,7 +222,10 @@ export default class BasespaceSampleImport extends React.Component {
           />
         </div>
         {loadingSamples && (
-          <LoadingMessage message="Loading samples..." className={cs.loadingMessage}/>
+          <LoadingMessage
+            message="Loading samples..."
+            className={cs.loadingMessage}
+          />
         )}
         {this.state.error && (
           <Notification

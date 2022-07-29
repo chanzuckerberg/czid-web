@@ -1,6 +1,8 @@
+import { get } from "lodash/fp";
 import React from "react";
 import { CellMeasurer, CellMeasurerCache } from "react-virtualized";
-
+import { IconLoading } from "~/components/ui/icons";
+import Checkbox from "~ui/controls/Checkbox";
 import cs from "./sample_upload_table_renderers.scss";
 
 export default class SampleUploadTableRenderers extends React.Component {
@@ -20,13 +22,46 @@ export default class SampleUploadTableRenderers extends React.Component {
         rowIndex={rowIndex}
       >
         <div>
-          {cellData.map(fileName => (
-            <div key={fileName} className={cs.fileName}>
-              {fileName}
+          {[cellData].map(fileName => (
+            <div key={fileName.fileName} className={cs.fileName.fileName}>
+              {fileName.fileName}
             </div>
           ))}
         </div>
       </CellMeasurer>
+    );
+  };
+  static getCellData = ({ dataKey, rowData }) => {
+    const arr = {
+      fileName: get(dataKey, rowData),
+      finishedValidating: get("finishedValidating", rowData),
+      id: get("_selectId", rowData),
+      isValid: get("isValid", rowData),
+    };
+    return arr;
+  };
+
+  static renderSelectableCell = ({
+    cellData,
+    selected,
+    onSelectRow,
+    selectableCellClassName,
+    disabled,
+  }) => {
+    return (
+      <div>
+        {cellData.finishedValidating ? (
+          <Checkbox
+            className={selectableCellClassName}
+            checked={selected.has(cellData.id)}
+            onChange={onSelectRow}
+            value={disabled ? -1 : cellData.id}
+            disabled={disabled}
+          />
+        ) : (
+          <IconLoading className={cs.loadingIcon} />
+        )}
+      </div>
     );
   };
 }

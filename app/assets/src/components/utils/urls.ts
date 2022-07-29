@@ -11,8 +11,8 @@ const urlParser = new UrlQueryParser(URL_FIELDS);
 export interface TempSelectedOptionsShape {
   background: number;
   categories: {
-    categories: string[],
-    subcategories: Record<string,any> | Record<string,never>,
+    categories: string[];
+    subcategories: Record<string, any> | Record<string, never>;
   };
   taxa: LabelVal[];
   readSpecificity: number;
@@ -22,7 +22,7 @@ export interface TempSelectedOptionsShape {
 interface generateUrlOptions {
   sampleId: number;
   snapshotShareId?: number | null;
-  tempSelectedOptions?: TempSelectedOptionsShape | Record<string,never>;
+  tempSelectedOptions?: TempSelectedOptionsShape | Record<string, never>;
   workflow?: WorkflowValues | null;
   workflowRunId?: number | null;
 }
@@ -33,7 +33,7 @@ const generateUrlToSampleView = ({
   tempSelectedOptions = null,
   workflow = null,
   workflowRunId = null,
-} : generateUrlOptions): string => {
+}: generateUrlOptions): string => {
   const currentTab = workflow
     ? find({ value: workflow }, values(WORKFLOWS)).label
     : null;

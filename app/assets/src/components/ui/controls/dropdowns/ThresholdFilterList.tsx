@@ -38,18 +38,18 @@ const ThresholdFilterList = ({
       >
         {Array.isArray(thresholds) &&
           thresholds.map((threshold: ThresholdFilterData, idx: number) => (
-              <ThresholdFilter
-                key={idx}
-                metrics={metrics}
-                operators={operators}
-                threshold={threshold}
-                onChange={(threshold: ThresholdFilterData) => {
-                  onChangeThreshold(idx, threshold);
-                }}
-                onRemove={() => {
-                  onRemoveThreshold(idx);
-                }}
-              />
+            <ThresholdFilter
+              key={idx}
+              metrics={metrics}
+              operators={operators}
+              threshold={threshold}
+              onChange={(threshold: ThresholdFilterData) => {
+                onChangeThreshold(idx, threshold);
+              }}
+              onRemove={() => {
+                onRemoveThreshold(idx);
+              }}
+            />
           ))}
         <Grid.Row className={cs.addThresholdRow}>
           <Grid.Column className={cs.addThresholdColumn}>

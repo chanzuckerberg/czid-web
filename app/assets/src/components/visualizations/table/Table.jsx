@@ -18,6 +18,8 @@ const Table = ({
   defaultSortBy,
   defaultSortDirection,
   defaultRowHeight,
+  selectRowDataGetter,
+  rowRenderer,
   ...props
 }) => {
   const [sortBy, setSortBy] = useState(defaultSortBy);
@@ -86,8 +88,10 @@ const Table = ({
       selectAllChecked={isSelectAllChecked()}
       selected={selected}
       sortable={sortable}
+      rowRenderer={rowRenderer}
       sortBy={sortBy}
       sortDirection={sortDirection}
+      selectRowDataGetter={selectRowDataGetter}
       {...props}
     />
   );
@@ -115,6 +119,8 @@ Table.propTypes = {
   defaultSortDirection: PropTypes.string,
   // Allows to set a custom row height function that receives the row data, not just the ID
   defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
+  selectRowDataGetter: PropTypes.func,
+  rowRenderer: PropTypes.func,
 };
 
 export default Table;

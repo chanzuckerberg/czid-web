@@ -96,7 +96,7 @@ class LocalSampleFileUpload extends React.Component {
   };
 
   getFilePickerTitle = () => {
-    const { hasSamplesLoaded } = this.props;
+    const { hasSamplesLoaded, files } = this.props;
 
     const fileCount = sumBy(
       s => size(s.input_files_attributes),
@@ -104,9 +104,20 @@ class LocalSampleFileUpload extends React.Component {
     );
 
     if (fileCount) {
-      return `${fileCount} File${fileCount > 1 ? "s" : ""} Selected For Upload`;
+      if (!files.every(element => element.finishedValidating)) {
+        return `Validating ${
+          files.filter(element => !element.finishedValidating).length
+        } File${
+          files.filter(element => !element.finishedValidating).length > 1
+            ? "s"
+            : ""
+        }`;
+      } else {
+        return `${fileCount} File${
+          fileCount > 1 ? "s" : ""
+        } Selected For Upload`;
+      }
     }
-
     if (hasSamplesLoaded) {
       return "No Files Selected For Upload";
     }
@@ -115,6 +126,10 @@ class LocalSampleFileUpload extends React.Component {
   };
 
   render() {
+    const { files } = this.props;
+    const finishedValidating = files.every(
+      element => element.finishedValidating,
+    );
     const filePickerTitle = this.getFilePickerTitle();
 
     return (
@@ -156,6 +171,7 @@ class LocalSampleFileUpload extends React.Component {
           onChange={this.onDrop}
           onRejected={this.onRejected}
           multiFile={true}
+          finishedValidating={finishedValidating}
         />
       </div>
     );
@@ -169,6 +185,7 @@ LocalSampleFileUpload.propTypes = {
   onChange: PropTypes.func.isRequired,
   samples: PropTypes.arrayOf(PropTypes.object),
   hasSamplesLoaded: PropTypes.bool,
+  files: PropTypes.array,
 };
 
 export default LocalSampleFileUpload;

@@ -363,10 +363,16 @@ class MetadataUpload extends React.Component {
             Download Metadata CSV Template
           </div>
           {this.state.validatingCSV && (
-            <LoadingMessage message="Validating metadata..." className={cs.validationMessage}/>
+            <LoadingMessage
+              message="Validating metadata..."
+              className={cs.validationMessage}
+            />
           )}
           {this.state.fetchingCSVLocationMatches && (
-            <LoadingMessage message="Verifying collection locations..." className={cs.validationMessage} />
+            <LoadingMessage
+              message="Verifying collection locations..."
+              className={cs.validationMessage}
+            />
           )}
         </>
       );
