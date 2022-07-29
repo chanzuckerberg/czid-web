@@ -488,60 +488,71 @@ class SamplesController < ApplicationController
 
     if !categories || categories.include?("taxon")
       if AppConfigHelper.get_app_config(AppConfig::BYPASS_ES_TAXON_SEARCH) == "1"
-        results["Taxon"] = {
-          "name" => "Taxon",
-          "results" => [
-            {
-              "title": "Klebsiella variicola",
-              "description": "Taxonomy ID: 244366",
-              "taxid": 244_366,
-              "level": "species",
-              "category": "Taxon",
-            },
-            {
-              "title": "Klebsiella pneumoniae",
-              "description": "Taxonomy ID: 573",
-              "taxid": 573,
-              "level": "species",
-              "category": "Taxon",
-            },
-            {
-              "title": "Klebsiella aerogenes",
-              "description": "Taxonomy ID: 548",
-              "taxid": 548,
-              "level": "species",
-              "category": "Taxon",
-            },
-            {
-              "title": "Klebsiella oxytoca",
-              "description": "Taxonomy ID: 571",
-              "taxid": 571,
-              "level": "species",
-              "category": "Taxon",
-            },
-            {
-              "title": "Klebsiella michiganensis",
-              "description": "Taxonomy ID: 1134687",
-              "taxid": 1_134_687,
-              "level": "species",
-              "category": "Taxon",
-            },
-            {
-              "title": "Klebsiella but with a really reallly really really really long name",
-              "description": "Taxonomy ID: 570",
-              "taxid": 570,
-              "level": "genus",
-              "category": "Taxon",
-            },
-            {
-              "title": "Betacoronavirus",
-              "description": "Taxonomy ID: 694002",
-              "taxid": 694_002,
-              "level": "genus",
-              "category": "Taxon",
-            },
-          ],
-        }
+        taxa_results = [
+          {
+            "title": "Klebsiella variicola",
+            "description": "Taxonomy ID: 244366",
+            "taxid": 244_366,
+            "level": "species",
+            "category": "Taxon",
+          },
+          {
+            "title": "Klebsiella pneumoniae",
+            "description": "Taxonomy ID: 573",
+            "taxid": 573,
+            "level": "species",
+            "category": "Taxon",
+          },
+          {
+            "title": "Klebsiella aerogenes",
+            "description": "Taxonomy ID: 548",
+            "taxid": 548,
+            "level": "species",
+            "category": "Taxon",
+          },
+          {
+            "title": "Klebsiella oxytoca",
+            "description": "Taxonomy ID: 571",
+            "taxid": 571,
+            "level": "species",
+            "category": "Taxon",
+          },
+          {
+            "title": "Klebsiella michiganensis",
+            "description": "Taxonomy ID: 1134687",
+            "taxid": 1_134_687,
+            "level": "species",
+            "category": "Taxon",
+          },
+          {
+            "title": "Klebsiella but with a really reallly really really really long name",
+            "description": "Taxonomy ID: 570",
+            "taxid": 570,
+            "level": "genus",
+            "category": "Taxon",
+          },
+          {
+            "title": "Betacoronavirus",
+            "description": "Taxonomy ID: 694002",
+            "taxid": 694_002,
+            "level": "genus",
+            "category": "Taxon",
+          },
+        ]
+
+        # the actual elasticsearch query returns no results when the query is empty
+        filtered_taxa_results = nil
+        if query.present?
+          filtered_taxa_results = taxa_results.select { |result| result[:title].downcase.include?(query) }
+        end
+
+        # the actual elasticsearch query does not return the "Taxon" object when there are no results
+        if filtered_taxa_results.present?
+          results["Taxon"] = {
+            "name" => "Taxon",
+            "results" => filtered_taxa_results,
+          }
+        end
       else
         taxon_list = taxon_search(query, ["species", "genus"], samples: constrained_samples)
         unless taxon_list.empty?

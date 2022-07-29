@@ -1,11 +1,12 @@
-import { AutocompleteInputChangeReason } from "@material-ui/lab/Autocomplete";
-import { Dropdown, DropdownPopper } from "czifui";
+import { Dropdown, DropdownPopper, LoadingIndicator } from "czifui";
 import { get, unionBy, debounce, size } from "lodash/fp";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getSearchSuggestions } from "~/api";
 
 import cs from "./taxon_filter_sds.scss";
-const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
+const AUTOCOMPLETE_DEBOUNCE_DELAY = 600;
+const NO_SEARCH_RESULTS_TEXT = "No results";
+const MIN_SEARCH_LENGTH = 2;
 
 export interface TaxonOption {
   id: number;
@@ -43,6 +44,8 @@ const TaxonFilterSDS = ({
   handleChange,
 }: TaxonFilterSDSProps) => {
   const [options, setOptions] = useState<TaxonOption[] | []>(selectedTaxa);
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const [noOptionsText, setNoOptionsText] = useState("");
 
   const numTaxaSelected = size(selectedTaxa);
   const label =
@@ -55,38 +58,75 @@ const TaxonFilterSDS = ({
     };
   }, []);
 
-  const handleFilterChange = async (query: string) => {
+  const getTaxaOptionsForQuery = async (query: string) => {
     const searchResults = await getSearchSuggestions({
       query,
       categories: ["taxon"],
       domain,
     });
 
-    const options: TaxonSearchResult[] = get("Taxon.results", searchResults)
-      .filter((result: TaxonSearchResult) => result.taxid > 0)
-      .map((result: TaxonSearchResult) => ({
-        id: result.taxid,
-        name: result.title,
-        level: result.level,
-      }));
+    // elasticsearch returns an empty object if there are no results
+    const taxonResults: TaxonSearchResult[] = get(
+      "Taxon.results",
+      searchResults,
+    );
 
-    return options;
+    return taxonResults
+      ? taxonResults
+          .filter((result: TaxonSearchResult) => result.taxid > 0)
+          .map((result: TaxonSearchResult) => ({
+            id: result.taxid,
+            name: result.title,
+            level: result.level,
+          }))
+      : [];
   };
 
-  const loadOptionsForQuery = useCallback(
-    debounce(AUTOCOMPLETE_DEBOUNCE_DELAY, async (query: string) => {
-      const newOptions = await handleFilterChange(query);
-      setOptions(unionBy("id", newOptions, selectedTaxa));
-    }),
-    [],
+  const loadOptionsForQuery = useMemo(
+    () =>
+      debounce(AUTOCOMPLETE_DEBOUNCE_DELAY, async (query: string) => {
+        let noOptionsText = "";
+        let newOptions = [];
+
+        // Empty queries return no results from ES, and single character queries
+        // are inefficient and not very helpful, so don't run a query in those cases
+        if (query?.length >= MIN_SEARCH_LENGTH) {
+          // setSearchQueryInProgress(true);
+          noOptionsText = NO_SEARCH_RESULTS_TEXT;
+          newOptions = await getTaxaOptionsForQuery(query);
+        }
+
+        setOptions(unionBy("id", newOptions, selectedTaxa));
+        setNoOptionsText(noOptionsText);
+        setOptionsLoading(false);
+
+        return newOptions;
+      }),
+    [selectedTaxa],
   );
 
-  const onInputChange = (
-    _event: React.SyntheticEvent,
-    value: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _reason: AutocompleteInputChangeReason,
-  ) => {
+  const onInputChange = (event: React.SyntheticEvent, value: string) => {
+    const isSearchInputChange = event?.type === "change";
+
+    // This may be fixed at some point in SDS, but selecting an option
+    // in the dropdown triggers an input change, but we do not want to
+    // perform a new search
+    if (!isSearchInputChange) return;
+
+    // Show loading indicator
+    // options have to be empty for loading indicator to show in Dropdown
+    setOptions([]);
+    setOptionsLoading(true);
+
+    // Show UI display for short searches as soon as possible, but call
+    // debounced handler to avoid race condition where results from
+    // long running search results replace an empty search
+    if (value?.length < MIN_SEARCH_LENGTH) {
+      setNoOptionsText("");
+      setOptions(unionBy("id", [], selectedTaxa));
+      setOptionsLoading(false);
+    }
+
     loadOptionsForQuery(value);
   };
 
@@ -109,7 +149,9 @@ const TaxonFilterSDS = ({
       value={selectedTaxa}
       MenuSelectProps={{
         keepSearchOnSelect: true,
-        noOptionsText: "No results",
+        loading: optionsLoading,
+        loadingText: <LoadingIndicator sdsStyle="minimal" />,
+        noOptionsText: noOptionsText,
         onInputChange,
         getOptionSelected: (option: TaxonOption, value: TaxonOption) =>
           option.id === value.id,
