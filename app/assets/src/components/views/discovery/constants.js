@@ -55,3 +55,15 @@ export const ANNOTATION_FILTER_OPTIONS = [
     name: "None",
   },
 ];
+
+export const TAB_PROJECTS = "projects";
+
+export const TAB_SAMPLES = "samples";
+
+export const TAB_VISUALIZATIONS = "visualizations";
+
+export const CURRENT_TAB_OPTIONS = [
+  TAB_PROJECTS,
+  TAB_SAMPLES,
+  TAB_VISUALIZATIONS,
+];

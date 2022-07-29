@@ -88,8 +88,12 @@ import ModalFirstTimeUser from "./ModalFirstTimeUser";
 import NoSearchResultsBanner from "./NoSearchResultsBanner";
 import ProjectHeader from "./ProjectHeader";
 import {
+  CURRENT_TAB_OPTIONS,
   KEY_DISCOVERY_SESSION_FILTERS,
   KEY_DISCOVERY_VIEW_OPTIONS,
+  TAB_PROJECTS,
+  TAB_SAMPLES,
+  TAB_VISUALIZATIONS,
 } from "./constants";
 import {
   getDiscoveryDimensions,
@@ -124,11 +128,6 @@ import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 // * On project selected
 //   - load (A) non-filtered dimensions, (B) filtered dimensions and (C) filtered stats
 //     (synchronous data not needed for now because we do not show projects and visualizations)
-
-const TAB_PROJECTS = "projects";
-const TAB_SAMPLES = "samples";
-const TAB_VISUALIZATIONS = "visualizations";
-const CURRENT_TAB_OPTIONS = [TAB_PROJECTS, TAB_SAMPLES, TAB_VISUALIZATIONS];
 
 class DiscoveryView extends React.Component {
   // used to preserve order keys across sessionStorage updates
@@ -2288,6 +2287,7 @@ class DiscoveryView extends React.Component {
                   keyBy("dimension", dimensions),
                 )}
                 {...filters}
+                currentTab={currentTab}
                 domain={domain}
                 onFilterChange={this.handleFilterChange}
                 allowedFeatures={allowedFeatures}

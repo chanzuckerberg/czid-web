@@ -28,7 +28,7 @@ import {
   KEY_TAXON_SELECTED,
   KEY_TAXON_THRESHOLDS_SELECTED,
 } from "../SampleView/constants";
-import { ANNOTATION_FILTER_OPTIONS } from "./constants";
+import { ANNOTATION_FILTER_OPTIONS, TAB_SAMPLES } from "./constants";
 import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
 
 import cs from "./discovery_filters.scss";
@@ -268,12 +268,15 @@ class DiscoveryFilters extends React.Component {
   };
 
   renderTaxonThresholdFilter = () => {
-    const { domain, workflow } = this.props;
+    const { currentTab, domain, workflow } = this.props;
     const { taxonSelected, taxonThresholdsSelected } = this.state;
 
+    const shouldDisableFilter =
+      currentTab === TAB_SAMPLES &&
+      workflow === WORKFLOWS.CONSENSUS_GENOME.value;
     let taxonThresholdFilter = (
       <TaxonThresholdFilter
-        disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
+        disabled={shouldDisableFilter}
         domain={domain}
         onFilterApply={(taxa, thresholds) => {
           const validThresholds = thresholds?.filter(
@@ -287,7 +290,7 @@ class DiscoveryFilters extends React.Component {
     );
 
     // Disable the Taxon Threshold Fitler if the user is on the CG tab and show a tooltip
-    if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+    if (shouldDisableFilter) {
       taxonThresholdFilter = (
         <Tooltip
           arrow
@@ -444,6 +447,7 @@ DiscoveryFilters.defaultProps = {
 DiscoveryFilters.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   className: PropTypes.string,
+  currentTab: PropTypes.string,
   domain: PropTypes.string,
   workflow: PropTypes.string,
 
