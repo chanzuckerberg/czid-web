@@ -166,7 +166,9 @@ function CreateUser(props = {}) {
     } catch (err) {
       setSubmitting(false);
       setShowFailed(true);
-      setServerErrors(err.data);
+      // create user graphQL endpoint returns a single error string instead of array of errors
+      // but there are other contexts where the UserForm still expects an array
+      setServerErrors([err.message]);
     }
   };
 
