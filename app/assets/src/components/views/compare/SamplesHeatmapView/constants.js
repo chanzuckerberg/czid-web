@@ -53,7 +53,7 @@ export const HEATMAP_DOWNLOAD_OPTIONS = [
         <ExternalLink href="https://biom-format.org/">BIOM</ExternalLink>{" "}
         format.{" "}
         <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360042575714-Initiate-a-Bulk-Download">
-          Learn more
+          Learn More
         </ExternalLink>
       </React.Fragment>
     ),

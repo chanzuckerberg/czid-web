@@ -14,12 +14,12 @@ import {
   validateSampleIds,
   validateWorkflowRunIds,
 } from "~/api/access_control";
-import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent, withAnalytics } from "~/api/analytics";
 import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
 import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
-import { openUrl } from "~utils/links";
+import { openUrlInNewTab } from "~utils/links";
 import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
@@ -297,8 +297,14 @@ class BulkDownloadModal extends React.Component {
       }),
     );
 
-    openUrl(`/visualizations/heatmap?${params}`);
-  };
+    withAnalytics(
+      openUrlInNewTab(`/visualizations/heatmap?${params}`),
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_BULK_DOWNLOAD_MODAL_CLICKED,
+      {
+        params,
+      },
+    );
+  }
 
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
     const { workflow } = this.props;

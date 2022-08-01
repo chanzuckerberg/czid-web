@@ -190,11 +190,17 @@ class BulkDownloadModalOptions extends React.Component {
         break;
       case "filter_by":
         return (
-          <div className={cs.filterbyField} key={field.type}>
-            <span className={cs.label}>{field.display_name}: </span>
-            <span className={cs.description}> — optional </span>
-            <ThresholdFilterModal addFilterList={onFieldSelect} />
+        <div className={cs.filterbyField} key={field.type}>
+
+          <div className={cs.label}>
+          <span>{field.display_name}: </span>
+          <span className={cs.description}> — optional </span>
           </div>
+            <ThresholdFilterModal
+              addFilterList={onFieldSelect}
+              />
+        </div>
+
         );
       case "download_format":
         dropdownOptions = field.options.map(option => ({
@@ -363,7 +369,7 @@ class BulkDownloadModalOptions extends React.Component {
                   ANALYTICS_EVENT_NAMES.CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED
                 }
               >
-                Learn more
+                Learn More
               </ExternalLink>
             ) : (
               ""

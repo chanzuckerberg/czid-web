@@ -63,7 +63,7 @@
 }
 
 .downloadType {
-  padding: $sds-spaces-s $sds-spaces-m;
+  padding: $sds-spaces-l $sds-spaces-m;
   margin-bottom: $sds-spaces-xxs;
   margin-right: $sds-spaces-m;
   border-radius: $sds-corners-corner-m;
@@ -129,7 +129,7 @@
 
     .label {
       @include font-body-xs;
-      margin-bottom: $sds-spaces-xxxs;
+      margin-bottom: $sds-spaces-xxs;
     }
 
     .forcedOption {
@@ -150,7 +150,11 @@
   }
   .filterbyField{
     width: calc(100% - #{$sds-spaces-xl * 0.5});
-    margin-top: $sds-spaces-s;
-    margin-bottom: $sds-spaces-s;
+    margin-top: $sds-spaces-xl;
+    margin-bottom: $sds-spaces-xl;
+    .label {
+      @include font-body-xs;
+      margin-bottom: $sds-spaces-xxs;
+    }
   }
 }
