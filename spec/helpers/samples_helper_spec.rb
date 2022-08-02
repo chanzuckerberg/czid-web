@@ -779,6 +779,86 @@ RSpec.describe SamplesHelper, type: :helper do
     # end
   end
 
+  describe "#filter_by_taxon_annotation" do
+    before do
+      project = create(:project)
+
+      @sample_one = create(:sample, project: project)
+      @sample_two = create(:sample, project: project)
+      @sample_three = create(:sample, project: project)
+
+      @pr_one_old = create(:pipeline_run, sample: @sample_one, deprecated: true)
+      @pr_one = create(:pipeline_run, sample: @sample_one, deprecated: false)
+      @pr_two = create(:pipeline_run, sample: @sample_two, deprecated: false)
+      @pr_three = create(:pipeline_run, sample: @sample_three, deprecated: false)
+
+      @taxon = create(:taxon_lineage, tax_name: "taxon", taxid: 1)
+
+      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
+    end
+
+    it "returns an empty response if no samples contain the specified annotations" do
+      annotation_filters = [Annotation.contents["hit"]]
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, annotation_filters)
+      expect(results).to eq([])
+    end
+
+    it "returns correctly-filtered samples if samples have multiple pipeline runs" do
+      create(:annotation, pipeline_run_id: @pr_one_old.id, tax_id: @taxon.taxid, content: "hit")
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "inconclusive")
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      expect(results).to eq([])
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["inconclusive"]])
+      expect(results.pluck(:id)).to eq([@sample_one.id])
+    end
+
+    it "returns correctly-filtered samples if samples have multiple annotations on the same taxon" do
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "hit")
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "inconclusive")
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      expect(results).to eq([])
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["inconclusive"]])
+      expect(results.pluck(:id)).to eq([@sample_one.id])
+    end
+
+    it "returns correctly-filtered samples if samples have annotations on multiple taxa" do
+      taxon_two = create(:taxon_lineage, tax_name: "taxon", taxid: 2)
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "hit")
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: taxon_two.taxid, content: "inconclusive")
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      expect(results.pluck(:id)).to eq([@sample_one.id])
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["inconclusive"]])
+      expect(results.pluck(:id)).to eq([@sample_one.id])
+    end
+
+    it "returns distinct samples if samples have multiple annotations that match filters" do
+      taxon_two = create(:taxon_lineage, tax_name: "taxon", taxid: 2)
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "hit")
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: taxon_two.taxid, content: "hit")
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      expect(results.pluck(:id)).to eq([@sample_one.id])
+    end
+
+    it "returns correctly-filtered samples with the specified annotation(s)" do
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "hit")
+      create(:annotation, pipeline_run_id: @pr_two.id, tax_id: @taxon.taxid, content: "not_a_hit")
+      create(:annotation, pipeline_run_id: @pr_three.id, tax_id: @taxon.taxid, content: "inconclusive")
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      expect(results.pluck(:id)).to eq([@sample_one.id])
+
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"], Annotation.contents["not_a_hit"]])
+      expect(results.pluck(:id)).to eq([@sample_one.id, @sample_two.id])
+    end
+  end
+
   describe "#format_samples" do
     # TODO: Backfill more tests.
   end

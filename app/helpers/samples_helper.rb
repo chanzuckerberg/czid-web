@@ -258,6 +258,7 @@ module SamplesHelper
       tax_ids = filters[:taxon]
       tax_levels = filters[:taxaLevels]
       threshold_filter_info = filters[:taxonThresholds]
+      annotations = filters[:annotations]
       time = filters[:time]
       # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
       # instances to "sample_type"
@@ -268,6 +269,7 @@ module SamplesHelper
       requested_sample_ids = filters[:sampleIds]
       workflow = filters[:workflow]
 
+      # Metadata filters
       samples = samples.where(project_id: project_id) if project_id.present?
       samples = filter_by_host(samples, host) if host.present?
       samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
@@ -279,6 +281,7 @@ module SamplesHelper
       samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
       samples = filter_by_workflow(samples, workflow) if workflow.present?
 
+      # Taxon filters
       if tax_ids.present?
         samples = if threshold_filter_info.present?
                     filter_by_taxon_threshold(samples, tax_ids, tax_levels, threshold_filter_info)
@@ -286,6 +289,7 @@ module SamplesHelper
                     filter_by_taxid(samples, tax_ids)
                   end
       end
+      samples = filter_by_taxon_annotation(samples, annotations) if annotations.present?
     end
 
     samples
@@ -849,6 +853,21 @@ module SamplesHelper
     end
 
     tax_levels.each { |tax_level| raise ThresholdFilterErrors.invalid_tax_level(tax_level) unless TaxonCount::LEVELS_FOR_FILTERING.include?(tax_level) }
+  end
+
+  def filter_by_taxon_annotation(samples, annotation_filters)
+    # If a taxon has multiple annotations, only the most recently-created annotation is considered active
+    samples.left_joins(:pipeline_runs).where(pipeline_runs: { deprecated: false })
+           .joins("
+            LEFT OUTER JOIN annotations a
+              ON a.pipeline_run_id = pipeline_runs.id
+              AND a.id IN (
+                SELECT MAX(id)
+                FROM annotations
+                WHERE pipeline_run_id = pipeline_runs.id
+                GROUP BY tax_id
+            )")
+           .where(a: { content: annotation_filters }).distinct
   end
 
   def get_upload_credentials(samples)
