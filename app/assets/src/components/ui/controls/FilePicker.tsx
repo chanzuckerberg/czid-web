@@ -2,9 +2,8 @@ import cx from "classnames";
 import React, { useState } from "react";
 
 import Dropzone from "react-dropzone";
-import { IconLoading } from "~/components/ui/icons";
-
 import Icon from "../icons/Icon";
+import IconLoading from "../icons/IconLoading";
 import cs from "./file_picker.scss";
 interface FilePickerProps {
   className?: string;

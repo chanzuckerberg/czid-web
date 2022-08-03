@@ -318,8 +318,68 @@ class PhyloTreeNgsController < ApplicationController
       # Note: 'where' because downstream expects a Relation.
       filters[:samples] = current_power.samples.where(id: collection_params[:sampleId])
     end
+    if AppConfigHelper.get_app_config(AppConfig::BYPASS_ES_TAXON_SEARCH) == "1"
+      taxa_results = [
+        {
+          "title": "Klebsiella variicola",
+          "description": "Taxonomy ID: 244366",
+          "taxid": 244_366,
+          "level": "species",
+          "category": "Taxon",
+        },
+        {
+          "title": "Klebsiella pneumoniae",
+          "description": "Taxonomy ID: 573",
+          "taxid": 573,
+          "level": "species",
+          "category": "Taxon",
+        },
+        {
+          "title": "Klebsiella aerogenes",
+          "description": "Taxonomy ID: 548",
+          "taxid": 548,
+          "level": "species",
+          "category": "Taxon",
+        },
+        {
+          "title": "Klebsiella oxytoca",
+          "description": "Taxonomy ID: 571",
+          "taxid": 571,
+          "level": "species",
+          "category": "Taxon",
+        },
+        {
+          "title": "Klebsiella michiganensis",
+          "description": "Taxonomy ID: 1134687",
+          "taxid": 1_134_687,
+          "level": "species",
+          "category": "Taxon",
+        },
+        {
+          "title": "Klebsiella but with a really reallly really really really long name",
+          "description": "Taxonomy ID: 570",
+          "taxid": 570,
+          "level": "genus",
+          "category": "Taxon",
+        },
+        {
+          "title": "Betacoronavirus",
+          "description": "Taxonomy ID: 694002",
+          "taxid": 694_002,
+          "level": "genus",
+          "category": "Taxon",
+        },
+      ]
 
-    taxon_list = taxon_search(collection_params[:query], tax_levels, filters)
+      # the actual elasticsearch query returns no results when the query is empty
+      taxon_list = nil
+      if collection_params[:query].present?
+        taxon_list = taxa_results.select { |result| result[:title].downcase.include?(collection_params[:query]) }
+      end
+
+    else
+      taxon_list = taxon_search(collection_params[:query], tax_levels, filters)
+    end
     render json: JSON.dump(taxon_list)
   end
 

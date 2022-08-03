@@ -1,7 +1,9 @@
-import { get } from "lodash/fp";
+import { get, isEmpty } from "lodash/fp";
 import React from "react";
 import { CellMeasurer, CellMeasurerCache } from "react-virtualized";
-import { IconLoading } from "~/components/ui/icons";
+import { UserContext } from "~/components/common/UserContext";
+import IconInfoSmall from "~/components/ui/icons/IconInfoSmall";
+import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import Checkbox from "~ui/controls/Checkbox";
 import cs from "./sample_upload_table_renderers.scss";
 
@@ -14,6 +16,7 @@ export default class SampleUploadTableRenderers extends React.Component {
   });
 
   static renderFileNames = ({ cellData, dataKey, parent, rowIndex }) => {
+    const { allowedFeatures = [] } = this.context || {};
     return (
       <CellMeasurer
         cache={this.cache}
@@ -22,9 +25,12 @@ export default class SampleUploadTableRenderers extends React.Component {
         rowIndex={rowIndex}
       >
         <div>
-          {[cellData].map(fileName => (
-            <div key={fileName.fileName} className={cs.fileName.fileName}>
-              {fileName.fileName}
+          {cellData.fileName.map(fileName => (
+            <div key={fileName} className={cs.fileName}>
+              {fileName}
+              {allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
+                !isEmpty(fileName.fileName) &&
+                !fileName.isValid && <IconInfoSmall className={cs.icon} />}
             </div>
           ))}
         </div>
@@ -48,9 +54,18 @@ export default class SampleUploadTableRenderers extends React.Component {
     selectableCellClassName,
     disabled,
   }) => {
+    const { allowedFeatures = [] } = this.context || {};
     return (
       <div>
-        {cellData.finishedValidating ? (
+        {!allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) ? (
+          <Checkbox
+            className={selectableCellClassName}
+            checked={selected.has(cellData.id)}
+            onChange={onSelectRow}
+            value={disabled ? -1 : cellData.id}
+            disabled={disabled}
+          />
+        ) : cellData.finishedValidating ? (
           <Checkbox
             className={selectableCellClassName}
             checked={selected.has(cellData.id)}
@@ -59,9 +74,10 @@ export default class SampleUploadTableRenderers extends React.Component {
             disabled={disabled}
           />
         ) : (
-          <IconLoading className={cs.loadingIcon} />
+          <i className="fa fa-spinner fa-pulse fa-fw" />
         )}
       </div>
     );
   };
 }
+SampleUploadTableRenderers.contextType = UserContext;

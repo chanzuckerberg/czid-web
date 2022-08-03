@@ -17,7 +17,7 @@ import {
 const PreUploadQCCheck = ({
   samples,
   changeState,
-  selectedWorkFlows,
+  selectedWorkflows,
   selectedTechnology,
 }) => {
   // CLI is used for calling some of the bioinformatics tools for PreUploadQC checks (biowasm, etc...)
@@ -321,13 +321,13 @@ const PreUploadQCCheck = ({
 
   // Check to see if user has metagenomics selected
   const metagenomicsSelected = () => {
-    return selectedWorkFlows.has(WORKFLOWS.SHORT_READ_MNGS.value);
+    return selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value);
   };
 
   // Check to see if user has selected illumina
   const illuminaIsSelected = () => {
     return (
-      selectedWorkFlows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+      selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
       selectedTechnology === ILLUMINA
     );
   };
@@ -335,7 +335,7 @@ const PreUploadQCCheck = ({
   // Check to see if user has selected nanopore
   const nanoporeIsSelected = () => {
     return (
-      selectedWorkFlows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+      selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
       selectedTechnology === NANOPORE
     );
   };
@@ -397,7 +397,7 @@ const PreUploadQCCheck = ({
   // Rerenders whenever samples, or selected changes
   useEffect(() => {
     wrapper();
-  }, [samples, selectedWorkFlows, selectedTechnology]);
+  }, [samples, selectedWorkflows, selectedTechnology]);
 
   // Adds every file into array
   const addAllFilesIntoArray = () => {
@@ -551,7 +551,7 @@ const PreUploadQCCheck = ({
 PreUploadQCCheck.propTypes = {
   samples: PropTypes.array,
   changeState: PropTypes.func,
-  selectedWorkFlows: PropTypes.object,
+  selectedWorkflows: PropTypes.object,
   selectedTechnology: PropTypes.string,
 };
 

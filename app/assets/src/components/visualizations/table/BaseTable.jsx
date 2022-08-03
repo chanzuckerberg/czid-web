@@ -314,7 +314,7 @@ class BaseTable extends React.Component {
   renderSelectableCell = ({ cellData }) => {
     const { selected, onSelectRow, selectableCellClassName } = this.props;
     const disabled = cellData === null || cellData === undefined;
-    if (typeof cellData === "object") {
+    if (cellData && typeof cellData === "object") {
       return SampleUploadTableRenderers.renderSelectableCell({
         cellData,
         selected,

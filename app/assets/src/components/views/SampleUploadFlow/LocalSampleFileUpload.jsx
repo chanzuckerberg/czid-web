@@ -15,6 +15,7 @@ import React from "react";
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
+import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
@@ -96,6 +97,7 @@ class LocalSampleFileUpload extends React.Component {
   };
 
   getFilePickerTitle = () => {
+    const { allowedFeatures } = this.context || {};
     const { hasSamplesLoaded, files } = this.props;
 
     const fileCount = sumBy(
@@ -104,7 +106,10 @@ class LocalSampleFileUpload extends React.Component {
     );
 
     if (fileCount) {
-      if (!files.every(element => element.finishedValidating)) {
+      if (
+        allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
+        !files.every(element => element.finishedValidating)
+      ) {
         return `Validating ${
           files.filter(element => !element.finishedValidating).length
         } File${
@@ -126,6 +131,7 @@ class LocalSampleFileUpload extends React.Component {
   };
 
   render() {
+    const { allowedFeatures } = this.context || {};
     const { files } = this.props;
     const finishedValidating = files.every(
       element => element.finishedValidating,
@@ -171,7 +177,11 @@ class LocalSampleFileUpload extends React.Component {
           onChange={this.onDrop}
           onRejected={this.onRejected}
           multiFile={true}
-          finishedValidating={finishedValidating}
+          finishedValidating={
+            allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)
+              ? finishedValidating
+              : true
+          }
         />
       </div>
     );

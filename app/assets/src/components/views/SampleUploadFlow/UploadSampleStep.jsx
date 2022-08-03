@@ -467,20 +467,28 @@ class UploadSampleStep extends React.Component {
 
         for (let group in groups) {
           const files = groups[group].files;
+
+          // Need to check the individual file name rather than group file name because sometimes the names of the group files are concatenated
+          let currentFile;
+          for (let i = 0; i < filesForQcCheck.length; i++) {
+            let passedFile = filesForQcCheck[i];
+            for (let j = 0; j < files.length; j++) {
+              if (passedFile.name === files[j].name) {
+                currentFile = passedFile;
+                break;
+              }
+            }
+          }
           sampleInfo.push({
             file_names_R1: groups[group].filesR1.map(file => file.name),
             file_names_R2: groups[group].filesR2.map(file => file.name),
             name: removeLaneFromName(files[0].name),
             // If we concatenate samples 1 through 4, the selectId = "1,2,3,4"
             [SELECT_ID_KEY]: files.map(file => file[SELECT_ID_KEY]).join(","),
-            // Check to see if file is finished validating
-            finishedValidating: filesForQcCheck.find(
-              element => element.name === groups[group].concatenated["name"],
-            ).finishedValidating,
+            // Check to see if finishined validating
+            finishedValidating: currentFile.finishedValidating,
             // Get result if file is validated
-            isValid: filesForQcCheck.find(
-              element => element.name === groups[group].concatenated["name"],
-            ).isValid,
+            isValid: currentFile.isValid,
           });
         }
         return sampleInfo;
@@ -830,7 +838,6 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       selectedWorkflows,
       validatingSamples,
-      files,
     } = this.state;
 
     let workflowsValid;
@@ -849,13 +856,11 @@ class UploadSampleStep extends React.Component {
     } else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
       workflowsValid = true;
     }
-
     return (
       selectedProject !== null &&
       size(this.getSelectedSamples(currentTab)) > 0 &&
       !validatingSamples &&
-      workflowsValid &&
-      files.every(element => element.isValid === true)
+      workflowsValid
     );
   };
 
@@ -1027,7 +1032,7 @@ class UploadSampleStep extends React.Component {
               <PreUploadQCCheck
                 samples={files}
                 changeState={this.handleValidatedFilesChange}
-                selectedWorkFlows={selectedWorkflows}
+                selectedWorkflows={selectedWorkflows}
                 selectedTechnology={selectedTechnology}
               />
             )}
