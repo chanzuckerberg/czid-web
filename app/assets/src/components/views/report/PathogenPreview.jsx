@@ -5,7 +5,6 @@ import { UserContext } from "~/components/common/UserContext";
 import Label from "~/components/ui/labels/Label";
 import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
 import { PATHOGEN_LABEL_V0_FEATURE } from "~/components/utils/features";
-import PropTypes from "~/components/utils/propTypes";
 
 const PathogenPreview = ({ tag2Count }) => {
   const userContext = useContext(UserContext);
@@ -50,10 +49,6 @@ const PathogenPreview = ({ tag2Count }) => {
       />
     );
   }
-};
-
-PathogenPreview.propTypes = {
-  tag2Count: PropTypes.object,
 };
 
 export default PathogenPreview;

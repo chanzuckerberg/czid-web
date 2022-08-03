@@ -103,8 +103,6 @@ BackgroundModelFilter.defaultProps = {
   label: "Background",
 };
 
-BackgroundModelFilter.displayName = "BackgroundModelFilter";
-
 BackgroundModelFilter.propTypes = {
   allBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
   categorizeBackgrounds: PropTypes.bool,
