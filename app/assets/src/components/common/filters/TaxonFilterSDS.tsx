@@ -153,7 +153,7 @@ const TaxonFilterSDS = ({
         loadingText: <LoadingIndicator sdsStyle="minimal" />,
         noOptionsText: noOptionsText,
         onInputChange,
-        getOptionSelected: (option: TaxonOption, value: TaxonOption) =>
+        isOptionEqualToValue: (option: TaxonOption, value: TaxonOption) =>
           option.id === value.id,
       }}
       PopperComponent={StyledDropdownPopper}

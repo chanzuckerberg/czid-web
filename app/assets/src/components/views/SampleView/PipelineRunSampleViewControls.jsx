@@ -25,13 +25,11 @@ const PipelineRunSampleViewControls = ({
   editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
-  minContigReads,
   onDeleteSample,
   pipelineRun,
   reportMetadata,
   sample,
   view,
-  project,
 }) => {
   const downloadCSV = () => {
     const resParams = {
@@ -40,7 +38,6 @@ const PipelineRunSampleViewControls = ({
         pipelineRun.pipeline_version && {
           pipeline_version: pipelineRun.pipeline_version,
         }),
-      ...(minContigReads && { min_contig_reads: minContigReads }),
     };
     location.href = `/samples/${sample.id}/report_csv?${querystring.stringify(
       resParams,
@@ -180,7 +177,6 @@ PipelineRunSampleViewControls.propTypes = {
   editable: PropTypes.bool,
   getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
   hasAppliedFilters: PropTypes.bool,
-  minContigReads: PropTypes.number,
   onDeleteSample: PropTypes.func,
   pipelineRun: PropTypes.PipelineRun,
   reportMetadata: PropTypes.ReportMetadata,

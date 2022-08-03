@@ -189,7 +189,6 @@ export default function SampleViewHeader({
             onDeleteSample={() => setSampleDeletionConfirmationModalOpen(true)}
             hasAppliedFilters={hasAppliedFilters}
             pipelineRun={currentRun}
-            project={project}
             reportMetadata={reportMetadata}
             sample={sample}
             view={view}

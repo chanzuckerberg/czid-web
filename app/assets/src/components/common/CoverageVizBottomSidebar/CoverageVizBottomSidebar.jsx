@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Icon, IconButton } from "czifui";
+import { Icon, ButtonIcon } from "czifui";
 import { sum, find, get, isEmpty } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -468,7 +468,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   position="top center"
                   inverted
                   trigger={
-                    <IconButton
+                    <ButtonIcon
                       className={cs.iconButton}
                       onClick={() =>
                         trackEvent(
@@ -493,7 +493,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                         sdsSize="xl"
                         sdsType="iconButton"
                       />
-                    </IconButton>
+                    </ButtonIcon>
                   }
                 />
                 <BasicPopup
@@ -503,7 +503,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   position="top center"
                   inverted
                   trigger={
-                    <IconButton
+                    <ButtonIcon
                       className={cs.iconButton}
                       onClick={() =>
                         trackEvent(
@@ -525,7 +525,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                         sdsSize="xl"
                         sdsType="iconButton"
                       />
-                    </IconButton>
+                    </ButtonIcon>
                   }
                 />
               </div>

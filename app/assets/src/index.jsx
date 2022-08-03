@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
-import { StylesProvider, ThemeProvider } from "@material-ui/core/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import * as Sentry from "@sentry/react";
 import { defaultTheme } from "czifui";
 import React from "react";
@@ -69,13 +69,11 @@ const react_component = (componentName, props, target, userContext) => {
           <ApolloProvider client={apolloClient}>
             <UserContext.Provider value={userContext || {}}>
               <Provider store={store}>
-                <StylesProvider injectFirst>
-                  <EmotionThemeProvider theme={defaultTheme}>
-                    <ThemeProvider theme={defaultTheme}>
-                      {React.createElement(matchedComponent, props)}
-                    </ThemeProvider>
-                  </EmotionThemeProvider>
-                </StylesProvider>
+                <EmotionThemeProvider theme={defaultTheme}>
+                  <ThemeProvider theme={defaultTheme}>
+                    {React.createElement(matchedComponent, props)}
+                  </ThemeProvider>
+                </EmotionThemeProvider>
               </Provider>
             </UserContext.Provider>
           </ApolloProvider>

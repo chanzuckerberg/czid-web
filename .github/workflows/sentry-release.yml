@@ -23,6 +23,8 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
+    - name: Install older version of npm
+      run: npm install -g npm@v8.5.5
     - name: Install dependencies
       run: |
         npm install
