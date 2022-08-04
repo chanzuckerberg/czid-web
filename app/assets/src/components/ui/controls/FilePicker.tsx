@@ -1,7 +1,9 @@
 import cx from "classnames";
-import React, { useState } from "react";
-
+import React, { useState, useContext } from "react";
 import Dropzone from "react-dropzone";
+import { UserContext } from "~/components/common/UserContext";
+import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
+
 import Icon from "../icons/Icon";
 import IconLoading from "../icons/IconLoading";
 import cs from "./file_picker.scss";
@@ -29,6 +31,8 @@ const FilePicker = ({
   finishedValidating,
 }: FilePickerProps) => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
 
   // Default handler for dropped files being rejected
   const defaultOnRejected = () => {
@@ -76,9 +80,11 @@ const FilePicker = ({
     >
       <div className={cs.inner}>
         <div className={cs.title}>
-          {title && !finishedValidating && (
-            <IconLoading className={cs.loadingIndicator} />
-          )}
+          {title &&
+            finishedValidating === false &&
+            allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) && (
+              <IconLoading className={cs.loadingIndicator} />
+            )}
           {title}
         </div>
         {filePickerContent()}
