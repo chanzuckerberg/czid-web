@@ -3,14 +3,14 @@ module.exports = {
 };
 
 function transformImports() {
-  const materialUIPackages = ["core", "icons", "lab", "styles"];
+  const muiPackages = ["core", "icons", "lab", "styles"];
 
   const transform = {};
 
-  for (const package of materialUIPackages) {
-    transform["@material-ui/" + package] = {
+  for (const muiPackage of muiPackages) {
+    transform["@mui/" + muiPackage] = {
       preventFullImport: true,
-      transform: `@material-ui/${package}/` + "${member}",
+      transform: `@mui/${muiPackage}/` + "${member}",
     };
   }
 

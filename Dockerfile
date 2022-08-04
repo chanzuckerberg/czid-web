@@ -15,7 +15,7 @@ RUN apt-get update && \
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install -y nodejs
 
-# Use a more recent version of npm
+# Last version of NPM before legacy peer dependency issues
 RUN npm i -g npm@8.5.5
 
 # Install pip
@@ -52,7 +52,7 @@ COPY package.json package-lock.json ./
 # Copy aws-sdk-js-v3 packages that are installed from file
 COPY vendor/aws-sdk-js-v3/* ./vendor/aws-sdk-js-v3/
 
-RUN npm install --no-optional
+RUN npm ci --omit=optional
 
 # This section is for the purpose of installing the non-MariaDB mysql-client /
 # mysqldump utility. The default-mysql-client package is actually
@@ -99,4 +99,3 @@ ENTRYPOINT ["bin/entrypoint.sh"]
 # tell the Rails dev server to bind to all interfaces by
 # default.
 CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]
-
