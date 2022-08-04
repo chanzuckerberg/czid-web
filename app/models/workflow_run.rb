@@ -87,7 +87,7 @@ class WorkflowRun < ApplicationRecord
     "sample" => "name",
     "createdAt" => "id",
     "host" => "host",
-    "referenceGenome" => "accession_id",
+    "referenceAccession" => "accession_id",
     "wetlabProtocol" => "wetlab_protocol",
     "technology" => "technology",
     "medakaModel" => "medaka_model",
@@ -101,7 +101,7 @@ class WorkflowRun < ApplicationRecord
     "nActg" => "n_actg",
     "nMissing" => "n_missing",
     "nAmbiguous" => "n_ambiguous",
-    "referenceGenomeLength" => "reference_genome_length",
+    "referenceAccessionLength" => "reference_genome_length",
   }.freeze
   INPUT_SORT_KEYS = ["accession_id", "wetlab_protocol", "technology", "medaka_model"].freeze
   CACHED_RESULT_SORT_KEYS = ["total_reads", "percent_genome_called", "vadr_pass_fail", "coverage_depth", "gc_percent", "ref_snps", "percent_identity", "n_actg", "n_missing", "n_ambiguous", "reference_genome_length"].freeze

@@ -237,7 +237,7 @@
   }
 }
 
-.referenceGenome {
+.referenceAccession {
   .title {
     @include font-header-s;
 
@@ -260,7 +260,7 @@
   }
 }
 
-.referenceGenomeTooltip {
+.referenceAccessionTooltip {
   .title {
     @include font-header-xs;
     color: $sds-color-gray-white;

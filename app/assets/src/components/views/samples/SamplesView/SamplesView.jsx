@@ -346,7 +346,7 @@ class SamplesView extends React.Component {
     );
 
     const sarsCov2Count = selectedObjects
-      .map(object => get(["referenceGenome", "taxonName"], object))
+      .map(object => get(["referenceAccession", "taxonName"], object))
       .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);
@@ -391,7 +391,7 @@ class SamplesView extends React.Component {
     );
 
     const sarsCov2Count = selectedObjects
-      .map(object => get(["referenceGenome", "taxonName"], object))
+      .map(object => get(["referenceAccession", "taxonName"], object))
       .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);

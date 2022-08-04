@@ -222,15 +222,15 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderReferenceGenome = cellData => {
+  static renderReferenceAccession = cellData => {
     const accessionName = get("accessionName", cellData);
-    const referenceGenomeId = get("referenceGenomeId", cellData);
+    const referenceAccessionId = get("referenceAccessionId", cellData);
     const taxonName = get("taxonName", cellData);
 
     const content = (
       <div>
         <div className={cs.title}>
-          {referenceGenomeId} - {accessionName}
+          {referenceAccessionId} - {accessionName}
         </div>
         <div className={cs.details}>{taxonName}</div>
       </div>
@@ -240,13 +240,13 @@ class TableRenderers extends React.Component {
       <BasicPopup
         basic={false}
         trigger={
-          <div className={cs.referenceGenome}>
-            {referenceGenomeId && content}
+          <div className={cs.referenceAccession}>
+            {referenceAccessionId && content}
           </div>
         }
         content={
-          <div className={cs.referenceGenomeTooltip}>
-            {referenceGenomeId && content}
+          <div className={cs.referenceAccessionTooltip}>
+            {referenceAccessionId && content}
           </div>
         }
       />

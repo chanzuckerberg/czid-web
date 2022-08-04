@@ -49,12 +49,12 @@ export const FIELDS_METADATA = {
   refSnps: {
     label: "SNPs",
     tooltip:
-      "The number of single nucleotide polymorphisms (SNPs) - locations where the nucleotide of the consensus genome does not match the base of the reference genome",
+      "The number of single nucleotide polymorphisms (SNPs) - locations where the nucleotide of the consensus genome does not match the base of the reference accession",
   },
   percentIdentity: {
     label: "%id",
     tooltip:
-      "The percentage of nucleotides of the consensus genome that are identical to those in the reference genome.",
+      "The percentage of nucleotides of the consensus genome that are identical to those in the reference accession.",
   },
   nActg: {
     label: "Informative Nucleotides",
@@ -106,13 +106,13 @@ export const FIELDS_METADATA = {
     label: "Sequencing Platform",
     tooltip: "The sequencing technology used for read generation.",
   },
-  referenceGenome: {
-    label: "Reference Genome",
+  referenceAccession: {
+    label: "Reference Accession",
     tooltip: "The reference to which the non-host reads were aligned.",
   },
-  referenceGenomeLength: {
-    label: "Reference Genome Length",
-    tooltip: "Length of reference genome in basepairs.",
+  referenceAccessionLength: {
+    label: "Reference Accession Length",
+    tooltip: "Length of reference accession in basepairs.",
   },
   vadrPassFail: {
     label: "VADR",

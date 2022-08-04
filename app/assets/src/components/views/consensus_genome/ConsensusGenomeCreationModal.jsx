@@ -26,7 +26,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
     };
   }
 
-  getReferenceGenomes = () => {
+  getReferenceAccessions = () => {
     const { consensusGenomeData } = this.props;
     const {
       accessionData,
@@ -131,8 +131,8 @@ export default class ConsensusGenomeCreationModal extends React.Component {
       >
         <div className={cs.title}>Generate Consensus Genome</div>
         <div className={cs.description}>
-          Align non-host reads to the reference genome of choice to generate a
-          consensus genome for this taxon. This pipeline should not be used on
+          Align non-host reads to the reference accession of choice to generate
+          a consensus genome for this taxon. This pipeline should not be used on
           samples using enrichment protocols such as MSSPE.{" "}
           <ExternalLink
             href={VIRAL_CONSENSUS_GENOME_DOC_LINK}
@@ -148,11 +148,11 @@ export default class ConsensusGenomeCreationModal extends React.Component {
           <span className={cs.taxonName}>{consensusGenomeData.taxName}</span>
         </div>
         <div className={cs.label}>
-          Reference Genome
+          Reference Accession
           <ColumnHeaderTooltip
             trigger={<IconInfoSmall className={cs.infoIcon} />}
             content={
-              "Choose the reference genome you would like to map the non-host reads against to create a consensus genome."
+              "Choose the reference accession you would like to map the non-host reads against to create a consensus genome."
             }
             link={VIRAL_CONSENSUS_GENOME_DOC_LINK}
             position={"top center"}
@@ -161,9 +161,9 @@ export default class ConsensusGenomeCreationModal extends React.Component {
         <SubtextDropdown
           className={cs.dropdown}
           fluid
-          options={this.getReferenceGenomes()}
+          options={this.getReferenceAccessions()}
           onChange={this.handleAccessionChange}
-          placeholder="Select a reference genome"
+          placeholder="Select a reference accession"
         />
         <PrimaryButton
           className={cs.button}

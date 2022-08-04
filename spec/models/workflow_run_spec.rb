@@ -547,7 +547,7 @@ describe WorkflowRun, type: :model do
     end
 
     context "when sorting workflow runs by input data" do
-      let(:data_key_list) { ["referenceGenome", "wetlabProtocol", "technology", "medakaModel"] }
+      let(:data_key_list) { ["referenceAccession", "wetlabProtocol", "technology", "medakaModel"] }
 
       before do
         # create workflow run with empty inputs_json data to test null-handling
@@ -593,7 +593,7 @@ describe WorkflowRun, type: :model do
     context "when sorting workflow runs by cached results" do
       let(:data_key_list) do
         ["totalReadsCG", "percentGenomeCalled", "vadrPassFail", "coverageDepth", "gcPercent",
-         "refSnps", "percentIdentity", "nActg", "nMissing", "nAmbiguous", "referenceGenomeLength",]
+         "refSnps", "percentIdentity", "nActg", "nMissing", "nAmbiguous", "referenceAccessionLength",]
       end
 
       before do

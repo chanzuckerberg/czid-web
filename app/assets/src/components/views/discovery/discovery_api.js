@@ -169,9 +169,9 @@ const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
     medakaModel: getInput(["medaka_model"]),
     technology: getInput(["technology"]),
     wetlabProtocol: formatWetlabProtocol(getInput(["wetlab_protocol"])),
-    referenceGenome: {
+    referenceAccession: {
       accessionName: getInput(["accession_name"]),
-      referenceGenomeId: getInput(["accession_id"]),
+      referenceAccessionId: getInput(["accession_id"]),
       taxonName: getInput(["taxon_name"]),
     },
     ...(get("cached_results", cgWorkflowRun) && {
@@ -187,7 +187,7 @@ const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
       ]),
       nMissing: getCachedResult(["quality_metrics", "n_missing"]),
       nAmbiguous: getCachedResult(["quality_metrics", "n_ambiguous"]),
-      referenceGenomeLength: getCachedResult([
+      referenceAccessionLength: getCachedResult([
         "quality_metrics",
         "reference_genome_length",
       ]),

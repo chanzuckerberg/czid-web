@@ -283,15 +283,15 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
       className: cs.basicCell,
     },
     {
-      dataKey: "referenceGenome",
+      dataKey: "referenceAccession",
       flexGrow: 1,
       width: 200,
       className: cs.basicCell,
       cellRenderer: ({ cellData }) =>
-        TableRenderers.renderReferenceGenome(cellData),
+        TableRenderers.renderReferenceAccession(cellData),
     },
     {
-      dataKey: "referenceGenomeLength",
+      dataKey: "referenceAccessionLength",
       flexGrow: 1,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
@@ -370,7 +370,7 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
   ],
   [WORKFLOWS.CONSENSUS_GENOME.value]: [
     "sample",
-    "referenceGenome",
+    "referenceAccession",
     "createdAt",
     "host",
     "collection_location_v2",

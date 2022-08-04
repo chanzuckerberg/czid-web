@@ -199,7 +199,7 @@ const ConsensusGenomeView = ({
         hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
         labelsBold: true,
         labelsLarge: true,
-        labelX: "Reference Genome",
+        labelX: "Reference Accession",
         labelY: "Coverage (SymLog)",
         labelXSubtext: subtext,
         labelYHorizontalOffset: 30,
@@ -287,7 +287,7 @@ const ConsensusGenomeView = ({
           How good is the coverage?
           {renderHelpIcon({
             text:
-              "These metrics and chart help determine the coverage of the reference genome.",
+              "These metrics and chart help determine the coverage of the reference accession.",
             link: helpLink,
             analytics: {
               analyticsEventName:
@@ -368,7 +368,7 @@ const ConsensusGenomeView = ({
           Is my consensus genome complete?
           {renderHelpIcon({
             text:
-              "These metrics help determine the quality of the reference genome.",
+              "These metrics help determine the quality of the reference accession.",
             link: helpLink,
             analytics: {
               analyticsEventName:
@@ -502,7 +502,14 @@ const ConsensusGenomeView = ({
       );
     } else {
       // FAILED
-      const { link, linkText, subtitle, message, status, type } = sampleErrorInfo({
+      const {
+        link,
+        linkText,
+        subtitle,
+        message,
+        status,
+        type,
+      } = sampleErrorInfo({
         sample,
         error: workflowRun.input_error || {},
       });
