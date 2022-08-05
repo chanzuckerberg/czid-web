@@ -83,7 +83,7 @@ class ProjectsController < ApplicationController
         projects = projects.includes(:users).includes(:samples)
         projects = projects.where(id: project_id) if project_id
         projects = projects.search_by_name(search) if search
-        if [:host, :location, :locationV2, :taxon, :time, :tissue].any? { |key| params.key? key }
+        if [:host, :location, :locationV2, :taxon, :time, :tissue, :annotations].any? { |key| params.key? key }
           projects = projects.where(samples: { id: filter_samples(current_power.samples, params) })
         elsif params.key?(:visibility)
           access_to_project = params[:visibility] == "public"

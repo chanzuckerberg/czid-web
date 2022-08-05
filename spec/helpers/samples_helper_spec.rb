@@ -798,8 +798,8 @@ RSpec.describe SamplesHelper, type: :helper do
     end
 
     it "returns an empty response if no samples contain the specified annotations" do
-      annotation_filters = [Annotation.contents["hit"]]
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, annotation_filters)
+      annotation_filters = ["{\"name\":\"Hit\"}"]
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, annotation_filters, nil)
       expect(results).to eq([])
     end
 
@@ -807,10 +807,10 @@ RSpec.describe SamplesHelper, type: :helper do
       create(:annotation, pipeline_run_id: @pr_one_old.id, tax_id: @taxon.taxid, content: "hit")
       create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "inconclusive")
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}"], nil)
       expect(results).to eq([])
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["inconclusive"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Inconclusive\"}"], nil)
       expect(results.pluck(:id)).to eq([@sample_one.id])
     end
 
@@ -818,10 +818,10 @@ RSpec.describe SamplesHelper, type: :helper do
       create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "hit")
       create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "inconclusive")
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}"], nil)
       expect(results).to eq([])
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["inconclusive"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Inconclusive\"}"], nil)
       expect(results.pluck(:id)).to eq([@sample_one.id])
     end
 
@@ -830,10 +830,10 @@ RSpec.describe SamplesHelper, type: :helper do
       create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "hit")
       create(:annotation, pipeline_run_id: @pr_one.id, tax_id: taxon_two.taxid, content: "inconclusive")
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}"], nil)
       expect(results.pluck(:id)).to eq([@sample_one.id])
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["inconclusive"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Inconclusive\"}"], nil)
       expect(results.pluck(:id)).to eq([@sample_one.id])
     end
 
@@ -842,7 +842,7 @@ RSpec.describe SamplesHelper, type: :helper do
       create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "hit")
       create(:annotation, pipeline_run_id: @pr_one.id, tax_id: taxon_two.taxid, content: "hit")
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}"], nil)
       expect(results.pluck(:id)).to eq([@sample_one.id])
     end
 
@@ -851,11 +851,20 @@ RSpec.describe SamplesHelper, type: :helper do
       create(:annotation, pipeline_run_id: @pr_two.id, tax_id: @taxon.taxid, content: "not_a_hit")
       create(:annotation, pipeline_run_id: @pr_three.id, tax_id: @taxon.taxid, content: "inconclusive")
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}"], nil)
       expect(results.pluck(:id)).to eq([@sample_one.id])
 
-      results = helper.send(:filter_by_taxon_annotation, @samples_input, [Annotation.contents["hit"], Annotation.contents["not_a_hit"]])
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}", "{\"name\":\"Not a hit\"}"], nil)
       expect(results.pluck(:id)).to eq([@sample_one.id, @sample_two.id])
+    end
+
+    it "returns correctly-filtered samples with the specified annotations(s) on the specifed taxa" do
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}"], [@taxon.taxid])
+      expect(results.pluck(:id)).to eq([])
+
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: @taxon.taxid, content: "hit")
+      results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}"], [@taxon.taxid])
+      expect(results.pluck(:id)).to eq([@sample_one.id])
     end
   end
 

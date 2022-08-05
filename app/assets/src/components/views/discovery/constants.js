@@ -51,9 +51,6 @@ export const ANNOTATION_FILTER_OPTIONS = [
   {
     name: "Inconclusive",
   },
-  {
-    name: "None",
-  },
 ];
 
 export const TAB_PROJECTS = "projects";

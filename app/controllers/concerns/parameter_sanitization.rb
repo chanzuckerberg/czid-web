@@ -27,4 +27,18 @@ module ParameterSanitization
       return accession_id.gsub(/[^A-Z0-9_\.]/, '')
     end
   end
+
+  def sanitize_annotation_filters(annotation_filters)
+    if annotation_filters
+      return annotation_filters.select do |a|
+        Annotation.contents.key?(get_annotation_name(a))
+      end.map do |a|
+        Annotation.contents[get_annotation_name(a)]
+      end
+    end
+  end
+
+  def get_annotation_name(annotation_filter)
+    return JSON.parse(annotation_filter)["name"].downcase.parameterize(separator: '_')
+  end
 end

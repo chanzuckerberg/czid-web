@@ -32,4 +32,20 @@ RSpec.describe ParameterSanitization do
       expect(subject.sanitize_accession_id(nil)).to eq(nil)
     end
   end
+
+  describe "#sanitize_annotation_filters" do
+    it "allows nil input" do
+      expect(subject.sanitize_annotation_filters(nil)).to eq(nil)
+    end
+
+    it "removes all invalid annotation types" do
+      annotation_filters = ["{\"name\":\"None\"}"]
+      expect(subject.sanitize_annotation_filters(annotation_filters)).to eq([])
+    end
+
+    it "returns list of valid annotation types" do
+      annotation_filters = ["{\"name\":\"Hit\"}", "{\"name\":\"Not a hit\"}", "{\"name\":\"Inconclusive\"}"]
+      expect(subject.sanitize_annotation_filters(annotation_filters)).to eq([Annotation.contents["hit"], Annotation.contents["not_a_hit"], Annotation.contents["inconclusive"]])
+    end
+  end
 end

@@ -25,11 +25,15 @@ import {
 import { WORKFLOWS } from "~/components/utils/workflows";
 import FilterTag from "~ui/controls/FilterTag";
 import {
+  KEY_ANNOTATION_SELECTED,
   KEY_TAXON_SELECTED,
   KEY_TAXON_THRESHOLDS_SELECTED,
 } from "../SampleView/constants";
 import { ANNOTATION_FILTER_OPTIONS, TAB_SAMPLES } from "./constants";
-import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
+import {
+  DISCOVERY_DOMAIN_MY_DATA,
+  DISCOVERY_DOMAIN_SNAPSHOT,
+} from "./discovery_api";
 
 import cs from "./discovery_filters.scss";
 
@@ -48,6 +52,7 @@ class DiscoveryFilters extends React.Component {
       hostSelected: this.props.hostSelected,
       tissueSelected: this.props.tissueSelected,
       taxonThresholdsSelected: this.props.taxonThresholdsSelected,
+      annotationsSelected: null,
     };
   }
 
@@ -85,6 +90,7 @@ class DiscoveryFilters extends React.Component {
         "locationV2Selected",
         KEY_TAXON_SELECTED,
         KEY_TAXON_THRESHOLDS_SELECTED,
+        KEY_ANNOTATION_SELECTED,
         "timeSelected",
         "tissueSelected",
         "visibilitySelected",
@@ -334,6 +340,10 @@ class DiscoveryFilters extends React.Component {
       TAXON_THRESHOLD_FILTERING_FEATURE,
     );
 
+    const hasAnnotationFilter =
+      allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) &&
+      domain === DISCOVERY_DOMAIN_MY_DATA;
+
     return (
       <div className={cx(cs.filtersContainer, className)}>
         {/* Note: Taxon and location filter are disabled on snapshot views */}
@@ -366,12 +376,16 @@ class DiscoveryFilters extends React.Component {
                 </>
               )}
             </div>
-            {allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) && (
+            {hasAnnotationFilter && (
               <div className={cs.filterContainer}>
                 <Dropdown
                   label={<div className={cs.filterLabel}>Annotation</div>}
-                  onChange={() => Function.prototype()}
+                  onChange={this.handleChange.bind(
+                    this,
+                    KEY_ANNOTATION_SELECTED,
+                  )}
                   options={ANNOTATION_FILTER_OPTIONS}
+                  disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
                   multiple
                 />
               </div>
@@ -460,6 +474,7 @@ DiscoveryFilters.propTypes = {
   visibility: PropTypes.array,
 
   // Selected values
+  annotationSelected: PropTypes.array,
   hostSelected: PropTypes.array,
   locationSelected: PropTypes.array,
   locationV2Selected: PropTypes.array,

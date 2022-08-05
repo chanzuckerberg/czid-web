@@ -3,6 +3,7 @@ require 'csv'
 require 'aws-sdk-s3'
 
 module SamplesHelper
+  include ParameterSanitization
   include PipelineOutputsHelper
   include PipelineRunsHelper
   include SnapshotSamplesHelper
@@ -289,7 +290,7 @@ module SamplesHelper
                     filter_by_taxid(samples, tax_ids)
                   end
       end
-      samples = filter_by_taxon_annotation(samples, annotations) if annotations.present?
+      samples = filter_by_taxon_annotation(samples, annotations, tax_ids) if annotations.present?
     end
 
     samples
@@ -855,10 +856,12 @@ module SamplesHelper
     tax_levels.each { |tax_level| raise ThresholdFilterErrors.invalid_tax_level(tax_level) unless TaxonCount::LEVELS_FOR_FILTERING.include?(tax_level) }
   end
 
-  def filter_by_taxon_annotation(samples, annotation_filters)
+  def filter_by_taxon_annotation(samples, annotation_filters, tax_ids)
+    annotation_filters = sanitize_annotation_filters(annotation_filters)
+
     # If a taxon has multiple annotations, only the most recently-created annotation is considered active
-    samples.left_joins(:pipeline_runs).where(pipeline_runs: { deprecated: false })
-           .joins("
+    samples = samples.left_joins(:pipeline_runs).where(pipeline_runs: { deprecated: false })
+                     .joins("
             LEFT OUTER JOIN annotations a
               ON a.pipeline_run_id = pipeline_runs.id
               AND a.id IN (
@@ -867,7 +870,11 @@ module SamplesHelper
                 WHERE pipeline_run_id = pipeline_runs.id
                 GROUP BY tax_id
             )")
-           .where(a: { content: annotation_filters }).distinct
+    if tax_ids.present?
+      samples.where(a: { content: annotation_filters, tax_id: tax_ids }).distinct
+    else
+      samples.where(a: { content: annotation_filters }).distinct
+    end
   end
 
   def get_upload_credentials(samples)
