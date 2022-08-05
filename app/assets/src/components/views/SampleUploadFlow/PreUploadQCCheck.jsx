@@ -2,7 +2,6 @@ import Aioli from "@biowasm/aioli";
 import { isEmpty } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
-import { WORKFLOWS } from "~/components/utils/workflows";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
   ERROR_MESSAGE,
@@ -12,14 +11,13 @@ import {
   NANOPORE,
   R1CHECK,
   R2CHECK,
+  DUPLICATE_ID_ERROR,
+  INVALID_FASTA_FASTQ_ERROR,
+  TRUNCATED_FILE_ERROR,
+  MISMATCH_FILES_ERROR,
 } from "./constants";
 
-const PreUploadQCCheck = ({
-  samples,
-  changeState,
-  selectedWorkflows,
-  selectedTechnology,
-}) => {
+const PreUploadQCCheck = ({ samples, changeState, sequenceTechnology }) => {
   // CLI is used for calling some of the bioinformatics tools for PreUploadQC checks (biowasm, etc...)
   let CLI;
   // Set for files that did not pass validateFileType
@@ -272,20 +270,22 @@ const PreUploadQCCheck = ({
         if (element.isValid) {
           // File is FASTA or FASTQ file does not have format
           if (!element.format) result = false;
-          // Metagenomics is selected and format is Illumina
-          else if (metagenomicsSelected() && element.format === ILLUMINA)
-            result = false;
-          // Illumina is selected and format is Illumina
-          else if (illuminaIsSelected() && element.format === ILLUMINA)
+          // Illumina Technology is selected and format is illumina
+          else if (
+            sequenceTechnology === ILLUMINA &&
+            element.format === ILLUMINA
+          )
             result = false;
           // Nanopore is selected and format is nanopore
-          else if (nanoporeIsSelected() && element.format === NANOPORE)
-            result = false;
-          // Metagenomics, Illumina, and nanopore is not selected
           else if (
-            !illuminaIsSelected() &&
-            !nanoporeIsSelected() &&
-            !metagenomicsSelected()
+            sequenceTechnology === NANOPORE &&
+            element.format === NANOPORE
+          )
+            result = false;
+          // Illumina or nanopore is not selected
+          else if (
+            sequenceTechnology !== ILLUMINA &&
+            sequenceTechnology !== NANOPORE
           )
             result = false;
         }
@@ -319,27 +319,6 @@ const PreUploadQCCheck = ({
     return diff;
   };
 
-  // Check to see if user has metagenomics selected
-  const metagenomicsSelected = () => {
-    return selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value);
-  };
-
-  // Check to see if user has selected illumina
-  const illuminaIsSelected = () => {
-    return (
-      selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-      selectedTechnology === ILLUMINA
-    );
-  };
-
-  // Check to see if user has selected nanopore
-  const nanoporeIsSelected = () => {
-    return (
-      selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-      selectedTechnology === NANOPORE
-    );
-  };
-
   // Run each validation check for each file
   const runAllValidationChecks = async () => {
     for (let i = 0; i < samples.length; i++) {
@@ -353,19 +332,26 @@ const PreUploadQCCheck = ({
         );
         if (validatedFastaOrFastq === ERROR_MESSAGE) {
           fileIsValid = false;
+          passedFile.error = INVALID_FASTA_FASTQ_ERROR;
           break;
         } else if (validatedFastaOrFastq.includes(FASTA_FILE_TYPE)) {
           const validatedDuplicates = await validateDuplicates(
             passedFile.files[key],
           );
-          if (validatedDuplicates === false) fileIsValid = false;
+          if (!validatedDuplicates) {
+            fileIsValid = false;
+            passedFile.error = DUPLICATE_ID_ERROR;
+          }
         } else if (validatedFastaOrFastq.includes(FASTQ_FILE_TYPE)) {
           // Do not want to check if .gz files are truncated
           if (!passedFile.files[key].name.includes(GZ_FILE_TYPE)) {
             const validatedTruncatedFile = await validateTruncatedFile(
               passedFile.files[key],
             );
-            if (validatedTruncatedFile === false) fileIsValid = false;
+            if (!validatedTruncatedFile) {
+              fileIsValid = false;
+              passedFile.error = TRUNCATED_FILE_ERROR;
+            }
           }
 
           await validateMismatchFormat(passedFile, key);
@@ -383,7 +369,10 @@ const PreUploadQCCheck = ({
                 passedFile.files[key],
                 passedFile.files[pairedEndSample],
               );
-              if (validatedMismatchedFiles === false) fileIsValid = false;
+              if (!validatedMismatchedFiles) {
+                fileIsValid = false;
+                passedFile.error = MISMATCH_FILES_ERROR;
+              }
             }
           }
         }
@@ -394,10 +383,10 @@ const PreUploadQCCheck = ({
     }
   };
 
-  // Rerenders whenever samples, or selected changes
+  // Rerenders whenever samples, or sequence technolgoy changes
   useEffect(() => {
     wrapper();
-  }, [samples, selectedWorkflows, selectedTechnology]);
+  }, [samples, sequenceTechnology]);
 
   // Adds every file into array
   const addAllFilesIntoArray = () => {
@@ -456,34 +445,7 @@ const PreUploadQCCheck = ({
             type="warning"
           />
         )}
-        {metagenomicsSelected() &&
-          samples.some(element => element.format === NANOPORE) && (
-            <IssueGroup
-              caption={`${
-                samples.filter(element => element.format === NANOPORE).length
-              } 
-              file${
-                samples.filter(element => element.format === NANOPORE).length >
-                1
-                  ? "s"
-                  : ""
-              } 
-              will not be uploaded. The metagenomics pipeline only supports Illumina datasets.  
-              Please verify that your file${
-                samples.filter(element => element.format === NANOPORE).length >
-                1
-                  ? "s"
-                  : ""
-              }
-              is from an Illumina sequencer.`}
-              headers={["File Name"]}
-              rows={samples
-                .filter(element => element.format === NANOPORE)
-                .map(name => [name.name])}
-              type="warning"
-            />
-          )}
-        {illuminaIsSelected() &&
+        {sequenceTechnology === ILLUMINA &&
           samples.some(element => element.format === NANOPORE) && (
             <IssueGroup
               caption={`${
@@ -510,7 +472,7 @@ const PreUploadQCCheck = ({
               type="warning"
             />
           )}
-        {nanoporeIsSelected() &&
+        {sequenceTechnology === NANOPORE &&
           samples.some(element => element.format === ILLUMINA) && (
             <IssueGroup
               caption={`${
@@ -551,8 +513,7 @@ const PreUploadQCCheck = ({
 PreUploadQCCheck.propTypes = {
   samples: PropTypes.array,
   changeState: PropTypes.func,
-  selectedWorkflows: PropTypes.object,
-  selectedTechnology: PropTypes.string,
+  sequenceTechnology: PropTypes.string,
 };
 
 export default PreUploadQCCheck;

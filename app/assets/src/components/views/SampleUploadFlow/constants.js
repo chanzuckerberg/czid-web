@@ -254,9 +254,16 @@ export const MEDAKA_MODEL_OPTIONS = {
 export const MEGABYTE = 1000000;
 export const ERROR_MESSAGE = "Error has occured";
 export const SUCCESS_MESSAGE = "Success";
-export const DUPLICATE_ID_ERROR = "Duplicate IDs";
-export const INVALID_FASTA_FASTQ_ERROR = "File is not FASTA or FASTQ";
-export const TRUNCATED_FILE_ERROR = "File is truncated";
+export const DUPLICATE_ID_ERROR =
+  "This file has duplicate IDs. Please make sure all read IDs are unique";
+export const INVALID_FASTA_FASTQ_ERROR =
+  "This is not valid FASTA or FASTQ file. Please make sure your file is either a FASTA or FASTQ. ";
+export const TRUNCATED_FILE_ERROR =
+  "This file is truncated. Please make sure your FASTQ file is subsampled to a number of lines divisible by 4";
+export const MISMATCH_FORMAT_ERROR =
+  "This file does not match the sequencing technology selected. Please make sure that you have selected the correct sequencing technology for this file";
+export const MISMATCH_FILES_ERROR =
+  "R1 and R2 files are paired-end mismatched. Please make sure that R1 and R2 files reads match up";
 export const ILLUMINA = "Illumina";
 export const NANOPORE = "ONT";
 export const R1CHECK = "_R1";

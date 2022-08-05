@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~czifui/dist/variables";
+@import "~styles/themes/colors";
 
 .fileName {
   @include font-body-xs;
@@ -7,4 +8,12 @@
   margin-bottom: $sds-spaces-m;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+.iconInfo {
+  fill: $sds-color-error-400;
+  margin-bottom: -$sds-spaces-xxxs;
+  margin-left: $sds-spaces-xs;
+  &:hover {
+    fill: $sds-color-error-600;
+  }
 }

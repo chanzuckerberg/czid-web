@@ -58,6 +58,9 @@ import {
   SELECT_ID_KEY,
   DEFAULT_NANOPORE_WETLAB_OPTION,
   DEFAULT_MEDAKA_MODEL_OPTION,
+  ILLUMINA,
+  NANOPORE,
+  MISMATCH_FORMAT_ERROR,
 } from "./constants";
 import cs from "./sample_upload_flow.scss";
 import {
@@ -479,16 +482,30 @@ class UploadSampleStep extends React.Component {
               }
             }
           }
+          // Validate that correct sequence technology is selected for file
+          const correctSequenceTechnologySelected = this.validateCorrectFormat(
+            currentFile,
+          );
+          // Gets the type of error that file has. If no error then returns empty string
+          const errorForFile = !correctSequenceTechnologySelected
+            ? MISMATCH_FORMAT_ERROR
+            : currentFile
+            ? currentFile.error
+            : "";
+
           sampleInfo.push({
             file_names_R1: groups[group].filesR1.map(file => file.name),
             file_names_R2: groups[group].filesR2.map(file => file.name),
             name: removeLaneFromName(files[0].name),
             // If we concatenate samples 1 through 4, the selectId = "1,2,3,4"
             [SELECT_ID_KEY]: files.map(file => file[SELECT_ID_KEY]).join(","),
-            // Check to see if finishined validating
-            finishedValidating: currentFile.finishedValidating,
-            // Get result if file is validated
-            isValid: currentFile.isValid,
+            finishedValidating: currentFile
+              ? currentFile.finishedValidating
+              : true,
+            isValid: currentFile
+              ? currentFile.isValid && correctSequenceTechnologySelected
+              : true,
+            error: errorForFile,
           });
         }
         return sampleInfo;
@@ -872,6 +889,28 @@ class UploadSampleStep extends React.Component {
     };
   };
 
+  getSequenceTechnology = () => {
+    const { selectedWorkflows, selectedTechnology } = this.state;
+    if (
+      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
+      (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+        selectedTechnology === ILLUMINA)
+    )
+      return ILLUMINA;
+    else if (
+      selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+      selectedTechnology === NANOPORE
+    )
+      return NANOPORE;
+  };
+
+  validateCorrectFormat = file => {
+    const sequenceTechnology = this.getSequenceTechnology();
+    return file.format && sequenceTechnology
+      ? file.format === sequenceTechnology
+      : true;
+  };
+
   // *** Render functions ***
 
   renderTab = () => {
@@ -1032,8 +1071,7 @@ class UploadSampleStep extends React.Component {
               <PreUploadQCCheck
                 samples={files}
                 changeState={this.handleValidatedFilesChange}
-                selectedWorkflows={selectedWorkflows}
-                selectedTechnology={selectedTechnology}
+                sequenceTechnology={this.getSequenceTechnology()}
               />
             )}
         </div>
