@@ -25,6 +25,7 @@ import {
   set,
   size,
   some,
+  snakeCase,
   sum,
   uniq,
   values,
@@ -650,11 +651,13 @@ class SampleView extends React.Component {
     thresholds,
     readSpecificity,
     taxa,
+    annotations,
   }) => {
     // When adding filters consider their order based on filter complexity (more complex later)
     // and effeciency (filters more likely to filter out more taxa earlier)
     return (
       this.filterTaxa({ row, taxa }) &&
+      this.filterAnnotations({ row, annotations }) &&
       this.filterCategories({ row, categories, subcategories }) &&
       this.filterReadSpecificity({ row, readSpecificity }) &&
       this.filterThresholds({ row, thresholds })
@@ -669,6 +672,17 @@ class SampleView extends React.Component {
       taxon => row.taxId === taxon.id || row.genus_tax_id === taxon.id,
       taxa,
     );
+  };
+
+  filterAnnotations = ({ row, annotations }) => {
+    if (isEmpty(annotations)) return true;
+    // When this component is converted to typescript, we can define a type for the
+    // annotation filters and row data, and remove this comment
+    // Use snake case on filter options and raw data for consistent comparisons
+    // selected annotation options from filter are "Hit", "Not a hit", "Inconclusive"
+    // annotations options from the source data are "hit", "not_a_hit", "inconclusive"
+    const selectedAnnotationsInSnakeCase = map(a => snakeCase(a), annotations);
+    return selectedAnnotationsInSnakeCase.includes(snakeCase(row.annotation));
   };
 
   filterCategories = ({ row, categories, subcategories }) => {
@@ -772,7 +786,7 @@ class SampleView extends React.Component {
 
   filterReportData = ({
     reportData,
-    filters: { categories, thresholds, readSpecificity, taxa },
+    filters: { categories, thresholds, readSpecificity, taxa, annotations },
   }) => {
     const categoriesSet = new Set(
       map(c => c.toLowerCase(), categories.categories || []),
@@ -790,6 +804,7 @@ class SampleView extends React.Component {
         thresholds,
         readSpecificity,
         taxa,
+        annotations,
       });
 
       genusRow.filteredSpecies = genusRow.species.filter(speciesRow =>
@@ -800,6 +815,7 @@ class SampleView extends React.Component {
           thresholds,
           readSpecificity,
           taxa,
+          annotations,
         }),
       );
       if (genusRow.passedFilters || genusRow.filteredSpecies.length) {
@@ -956,20 +972,16 @@ class SampleView extends React.Component {
 
     let newSelectedOptions = { ...selectedOptions };
     switch (key) {
+      case "taxa":
+      case "thresholds":
+      case "annotations":
+        newSelectedOptions[key] = pull(value, newSelectedOptions[key]);
+        break;
       case "categories":
         newSelectedOptions.categories = set(
           subpath,
           pull(value, get(subpath, newSelectedOptions.categories)),
           newSelectedOptions.categories,
-        );
-        break;
-      case "taxa":
-        newSelectedOptions.taxa = pull(value, newSelectedOptions.taxa);
-        break;
-      case "thresholds":
-        newSelectedOptions.thresholds = pull(
-          value,
-          newSelectedOptions.thresholds,
         );
         break;
       default:
@@ -1113,6 +1125,7 @@ class SampleView extends React.Component {
       // - categories: refresh filtered data
       // - threshold filters: refresh filtered data
       // - read specificity: refresh filtered data
+      case "annotations":
       case "taxa":
       case "categories":
       case "thresholds":

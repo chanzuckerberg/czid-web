@@ -308,6 +308,14 @@ const ReportFilters = ({
             renderThresholdFilterTag({ threshold, idx: i }),
           )}
           {renderCategoryFilterTags()}
+          {selected.annotations.map((annotation, i) =>
+            renderFilterTag({
+              key: "annotations",
+              label: annotation,
+              value: annotation,
+              idx: i,
+            }),
+          )}
         </div>
       )}
     </>
