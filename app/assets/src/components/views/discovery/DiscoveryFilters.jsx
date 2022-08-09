@@ -158,7 +158,9 @@ class DiscoveryFilters extends React.Component {
 
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
-        option => (option.value || option.id || option) !== valueToRemove,
+        option =>
+          (option.value || option.id || option.name || option) !==
+          valueToRemove,
       );
 
       // If all taxon filters have been removed, remove the threshold filters as well
@@ -180,7 +182,8 @@ class DiscoveryFilters extends React.Component {
     if (!Array.isArray(selectedOptions)) selectedOptions = [selectedOptions];
 
     const tags = selectedOptions
-      // check if filter is on option format or just value (taxon are hashes with text and value)
+      // Depending on the filter, selected options may be formatted as a hash or a string value
+      // Taxon filter options are hashes with { text: string, value: number }
       .map(option =>
         option.text
           ? option
@@ -214,6 +217,36 @@ class DiscoveryFilters extends React.Component {
 
     return <div className={cs.tags}>{tags}</div>;
   }
+
+  // Annotations filter options are hashes with { name: string }
+  // Note: This function can be modified to render tags for any SDS Dropdown-based filter.
+  renderAnnotationsFilterTags = () => {
+    let selectedOptions = this.state[KEY_ANNOTATIONS_SELECTED];
+    if (isEmpty(selectedOptions)) return;
+
+    const tags = selectedOptions.map(option => {
+      return (
+        <FilterTag
+          className={cs.filterTag}
+          key={option.name}
+          text={option.name}
+          onClose={withAnalytics(
+            () =>
+              this.handleRemoveTag({
+                selectedKey: KEY_ANNOTATIONS_SELECTED,
+                valueToRemove: option.name,
+              }),
+            "DiscoveryFilters_tag_removed",
+            {
+              value: option.name,
+              text: option.name,
+            },
+          )}
+        />
+      );
+    });
+    return <div className={cs.tags}>{tags}</div>;
+  };
 
   renderTaxonFilterTags = () => {
     let selectedTaxa = this.state[KEY_TAXON_SELECTED];
@@ -329,6 +362,7 @@ class DiscoveryFilters extends React.Component {
     const {
       allowedFeatures,
       className,
+      currentTab,
       domain,
       host,
       locationV2,
@@ -342,13 +376,18 @@ class DiscoveryFilters extends React.Component {
       TAXON_THRESHOLD_FILTERING_FEATURE,
     );
 
-    const hasAnnotationFilter =
+    const hasAnnotationsFilter =
       allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) &&
       domain === DISCOVERY_DOMAIN_MY_DATA;
 
+    // Taxon threshold and annotations filters are disabled on the cg tab
+    const taxonFiltersDisabled =
+      currentTab === TAB_SAMPLES &&
+      workflow === WORKFLOWS.CONSENSUS_GENOME.value;
+
     return (
       <div className={cx(cs.filtersContainer, className)}>
-        {/* Note: Taxon and location filter are disabled on snapshot views */}
+        {/* Note: Taxon, annotations, and location filter are disabled on snapshot views */}
         {domain !== DISCOVERY_DOMAIN_SNAPSHOT && (
           <>
             <div
@@ -368,7 +407,7 @@ class DiscoveryFilters extends React.Component {
                   disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
                 />
               )}
-              {workflow !== WORKFLOWS.CONSENSUS_GENOME.value && (
+              {!taxonFiltersDisabled && (
                 <>
                   {!hasTaxonThresholdFilterFeature && this.renderTags("taxon")}
                   {hasTaxonThresholdFilterFeature &&
@@ -378,7 +417,7 @@ class DiscoveryFilters extends React.Component {
                 </>
               )}
             </div>
-            {hasAnnotationFilter && (
+            {hasAnnotationsFilter && (
               <div className={cs.filterContainer}>
                 <Dropdown
                   label={<div className={cs.filterLabel}>Annotation</div>}
@@ -388,9 +427,10 @@ class DiscoveryFilters extends React.Component {
                   )}
                   value={annotationsSelected || undefined}
                   options={ANNOTATION_FILTER_OPTIONS}
-                  disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
+                  disabled={taxonFiltersDisabled}
                   multiple
                 />
+                {!taxonFiltersDisabled && this.renderAnnotationsFilterTags()}
               </div>
             )}
             {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}
