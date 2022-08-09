@@ -6,6 +6,7 @@ import cs from "./textarea.scss";
 interface TextareaProps {
   value?: string;
   onChange?: $TSFixMeFunction;
+  onBlur?:$TSFixMeFunction;
   className?: string;
 }
 

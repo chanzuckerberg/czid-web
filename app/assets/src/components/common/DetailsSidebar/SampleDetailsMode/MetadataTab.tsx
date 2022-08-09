@@ -1,21 +1,75 @@
-import { mapValues, filter, includes } from "lodash";
-// TODO(mark): Refactor all calls to lodash/fp.
-import { isObject, set, values } from "lodash/fp";
+import { set, mapValues } from "lodash/fp";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
-import PropTypes from "~/components/utils/propTypes";
 
-import { returnHipaaCompliantMetadata } from "~utils/metadata";
+import { BooleanNums } from "~/interface/shared";
+import { Metadata, returnHipaaCompliantMetadata } from "~utils/metadata";
 import MetadataSection from "./MetadataSection";
+import { AdditionalInfo } from "./SampleDetailsMode";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_mode.scss";
 
-class MetadataTab extends React.Component {
-  constructor(props) {
+export type MetadataTypes = {
+  [key: string]: MetadataType;
+};
+
+interface MetadataTabProps {
+  metadata: Metadata;
+  metadataTypes: MetadataTypes;
+  onMetadataChange: (key: string, value: any, shouldSave?: boolean) => void;
+  onMetadataSave: (key: string) => Promise<void>;
+  savePending?: boolean;
+  additionalInfo: AdditionalInfo;
+  metadataErrors?: { [key: string]: string };
+  sampleTypes: SampleType[];
+  snapshotShareId?: string;
+}
+
+interface MetadataTabState {
+  sectionOpen?: {
+    [key: Section["name"]]: boolean;
+  };
+  sectionEditing?: {
+    [key: Section["name"]]: boolean;
+  };
+  sections?: Section[];
+}
+
+interface Section {
+  name: string;
+  keys: string[];
+}
+
+interface SampleType {
+  created_at: string;
+  group: string;
+  human_only: false;
+  id: number;
+  insect_only: false;
+  name: string;
+  updated_at: string;
+}
+
+export interface MetadataType {
+  dataType: string;
+  default_for_new_host_genome: 0;
+  description: string | null;
+  examples: { [key: number]: string[] } | null;
+  group: string | null;
+  host_genome_ids: number[];
+  isBoolean: boolean;
+  is_required: BooleanNums;
+  key: string;
+  name: string;
+  options: string[] | null;
+}
+
+class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
+  constructor(props: MetadataTabProps) {
     super(props);
 
     const sections = this.getMetadataSections();
@@ -32,8 +86,8 @@ class MetadataTab extends React.Component {
   getMetadataSections = () => {
     // Group the MetadataFields by group name
     // Include Sample Info by default so that special cases in SAMPLE_ADDITIONAL_INFO always show
-    let nameToFields = { "Sample Info": [] };
-    values(this.props.metadataTypes).forEach(field => {
+    const nameToFields = { "Sample Info": [] };
+    Object.values(this.props.metadataTypes).forEach((field) => {
       const name =
         field.group === null ? "Custom Metadata" : field.group + " Info";
       if (name in nameToFields) {
@@ -44,15 +98,18 @@ class MetadataTab extends React.Component {
     });
 
     // Format as [{name: "Sample Info", keys: ["sample_type"]}, {name: "Host Info", keys: ["age"]}]
-    return Object.entries(nameToFields).map(entry => {
-      return { name: entry[0], keys: entry[1].sort() };
+    return Object.entries(nameToFields).map((entry) => {
+      return {
+        name: entry[0],
+        keys: entry[1].sort(),
+      };
     });
   };
 
-  toggleSection = section => {
+  toggleSection = (section: Section) => {
     const { sectionOpen, sectionEditing } = this.state;
     const newValue = !sectionOpen[section.name];
-    const newState = {
+    const newState: MetadataTabState = {
       sectionOpen: set(section.name, newValue, sectionOpen),
     };
 
@@ -69,10 +126,10 @@ class MetadataTab extends React.Component {
     });
   };
 
-  toggleSectionEdit = section => {
+  toggleSectionEdit = (section: Section) => {
     const { sectionEditing, sectionOpen } = this.state;
     const newValue = !sectionEditing[section.name];
-    const newState = {
+    const newState: MetadataTabState = {
       sectionEditing: set(section.name, newValue, sectionEditing),
     };
 
@@ -91,7 +148,7 @@ class MetadataTab extends React.Component {
     });
   };
 
-  renderInput = metadataType => {
+  renderInput = (metadataType: MetadataType) => {
     const {
       metadata,
       onMetadataChange,
@@ -119,18 +176,18 @@ class MetadataTab extends React.Component {
     );
   };
 
-  static renderMetadataValue = val => {
+  static renderMetadataValue = (val: string | { name: string }) => {
     return val === undefined || val === null || val === "" ? (
       <div className={cs.emptyValue}>--</div>
     ) : (
       <div className={cs.metadataValue}>
         {/* If we want to display an object (e.g. location object), provide a 'name' field */}
-        {isObject(val) && val.name !== undefined ? val.name : val}
+        {typeof val === "object" && val.name !== undefined ? val.name : val}
       </div>
     );
   };
 
-  renderMetadataType = metadataType => {
+  renderMetadataType = (metadataType: MetadataType) => {
     const { metadata, additionalInfo } = this.props;
     let metadataValue = metadata[metadataType.key];
 
@@ -145,7 +202,7 @@ class MetadataTab extends React.Component {
     return MetadataTab.renderMetadataValue(metadataValue);
   };
 
-  renderMetadataSectionContent = section => {
+  renderMetadataSectionContent = (section: Section) => {
     const {
       metadataTypes,
       additionalInfo,
@@ -155,12 +212,16 @@ class MetadataTab extends React.Component {
     } = this.props;
     const { sectionEditing } = this.state;
 
-    const validKeys = filter(section.keys, key =>
-      includes(Object.keys(metadataTypes), key),
+    const validKeys = section.keys.filter((key) =>
+      Object.keys(metadataTypes).includes(key),
     );
+
     const isSectionEditing = sectionEditing[section.name];
 
-    const metadataFields = [];
+    const metadataFields: {
+      label: string;
+      value: React.ReactNode;
+    }[] = [];
 
     const projectLink = snapshotShareId
       ? `/pub/${snapshotShareId}`
@@ -169,7 +230,7 @@ class MetadataTab extends React.Component {
     // Special Sample Info fields.
     // TODO: Consider refactoring so SAMPLE_ADDITIONAL_INFO doesn't have to be special.
     if (section.name === "Sample Info" && !isSectionEditing) {
-      SAMPLE_ADDITIONAL_INFO.forEach(info => {
+      SAMPLE_ADDITIONAL_INFO.forEach((info) => {
         metadataFields.push({
           label: info.name,
           value:
@@ -191,7 +252,7 @@ class MetadataTab extends React.Component {
         label: "Sample Name",
         value: (
           <Input
-            onChange={val => onMetadataChange("name", val)}
+            onChange={(val) => onMetadataChange("name", val)}
             onBlur={() => onMetadataSave("name")}
             value={additionalInfo.name}
             type="text"
@@ -201,7 +262,7 @@ class MetadataTab extends React.Component {
       });
     }
 
-    validKeys.forEach(key => {
+    validKeys.forEach((key) => {
       metadataFields.push({
         label: metadataTypes[key].name,
         value: isSectionEditing
@@ -216,7 +277,7 @@ class MetadataTab extends React.Component {
   render() {
     return (
       <div>
-        {this.state.sections.map(section => (
+        {this.state.sections.map((section) => (
           <MetadataSection
             key={section.name}
             editable={this.props.additionalInfo.editable}
@@ -235,27 +296,5 @@ class MetadataTab extends React.Component {
     );
   }
 }
-
-MetadataTab.propTypes = {
-  metadata: PropTypes.objectOf(
-    PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  ).isRequired,
-  metadataTypes: PropTypes.objectOf(PropTypes.MetadataType).isRequired,
-  onMetadataChange: PropTypes.func.isRequired,
-  onMetadataSave: PropTypes.func.isRequired,
-  savePending: PropTypes.bool,
-  additionalInfo: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    project_id: PropTypes.number.isRequired,
-    project_name: PropTypes.string.isRequired,
-    upload_date: PropTypes.string,
-    host_genome_name: PropTypes.string,
-    host_genome_taxa_category: PropTypes.string,
-    editable: PropTypes.bool,
-  }).isRequired,
-  metadataErrors: PropTypes.objectOf(PropTypes.string),
-  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
-  snapshotShareId: PropTypes.string,
-};
 
 export default MetadataTab;

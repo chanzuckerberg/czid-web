@@ -1,16 +1,23 @@
 import cx from "classnames";
 
 import { get } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
 import cs from "./field_list.scss";
 
-const FieldList = ({ className, fields }) => {
+interface FieldListProps {
+  className: string;
+  fields: {
+    label: string;
+    value: React.ReactNode;
+  }[];
+}
+
+const FieldList = ({ className, fields }: FieldListProps) => {
   return (
     <div className={cx(cs.fieldList, className)}>
-      {fields.map(field => {
+      {fields.map((field) => {
         const fieldMetadata = get("fieldMetadata", field);
         const fieldLabel = <div className={cs.label}>{field.label}</div>;
         const labelWithTooltip = fieldMetadata && (
@@ -31,16 +38,6 @@ const FieldList = ({ className, fields }) => {
       })}
     </div>
   );
-};
-
-FieldList.propTypes = {
-  className: PropTypes.string,
-  fields: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string,
-      value: PropTypes.node,
-    }),
-  ),
 };
 
 export default FieldList;

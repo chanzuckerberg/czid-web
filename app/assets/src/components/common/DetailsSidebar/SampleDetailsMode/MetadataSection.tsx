@@ -1,18 +1,43 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 import Accordion from "~/components/layout/Accordion";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import cs from "./metadata_section.scss";
 
-class MetadataSection extends React.Component {
+interface MetadataSectionProps {
+  className?: string;
+  title: string;
+  open?: boolean;
+  toggleable: boolean;
+  onToggle?: () => void;
+  editable?: boolean;
+  editing?: boolean;
+  onEditToggle?: () => void;
+  savePending?: boolean;
+  alwaysShowEditLink?: boolean;
+  children: React.ReactNode;
+}
+
+interface MetadataSectionState {
+  hasSaved: boolean;
+  prevSavePending: boolean;
+  prevEditing: boolean;
+}
+
+class MetadataSection extends React.Component<
+  MetadataSectionProps,
+  MetadataSectionState
+> {
   state = {
     hasSaved: false,
     prevSavePending: this.props.savePending,
     prevEditing: this.props.editing,
   };
 
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(
+    props: MetadataSectionProps,
+    state: MetadataSectionState,
+  ) {
     let hasSaved = state.hasSaved;
 
     // If we just switched to editing, hide 'All changes saved'
@@ -70,7 +95,7 @@ class MetadataSection extends React.Component {
           ) : (
             <div
               className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
-              onClick={e => {
+              onClick={(e) => {
                 onEditToggle();
                 e.stopPropagation();
               }}
@@ -103,19 +128,5 @@ class MetadataSection extends React.Component {
     );
   }
 }
-
-MetadataSection.propTypes = {
-  className: PropTypes.string,
-  title: PropTypes.string,
-  open: PropTypes.bool,
-  toggleable: PropTypes.bool,
-  onToggle: PropTypes.func,
-  editable: PropTypes.bool,
-  editing: PropTypes.bool,
-  onEditToggle: PropTypes.func,
-  savePending: PropTypes.bool,
-  alwaysShowEditLink: PropTypes.bool,
-  children: PropTypes.node,
-};
 
 export default MetadataSection;

@@ -8,15 +8,19 @@ import {
   CG_WETLAB_OPTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
 import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
+import { PipelineInfo } from "./PipelineTab";
+import { AdditionalInfo } from "./SampleDetailsMode";
 
 // Compute display values for Pipeline Info from server response.
-export const processPipelineInfo = additionalInfo => {
+export const processPipelineInfo = (
+  additionalInfo: AdditionalInfo,
+): PipelineInfo => {
   const {
     pipeline_run: pipelineRun,
     summary_stats: summaryStats,
   } = additionalInfo;
 
-  let pipelineInfo = {};
+  const pipelineInfo: PipelineInfo = {};
 
   const BLANK_TEXT = "unknown";
 
@@ -99,7 +103,7 @@ export const processPipelineInfo = additionalInfo => {
   return pipelineInfo;
 };
 
-export const processCGWorkflowRunInfo = workflowRun => {
+export const processCGWorkflowRunInfo = (workflowRun) => {
   const qualityMetrics = get(
     "parsed_cached_results.quality_metrics",
     workflowRun,
@@ -132,11 +136,11 @@ export const processCGWorkflowRunInfo = workflowRun => {
     workflow: get("label", find({ value: workflowRun.workflow }, WORKFLOWS)),
   };
 
-  return mapValues(v => ({ text: v }), cgWorkflowRunInfo);
+  return mapValues((v) => ({ text: v }), cgWorkflowRunInfo);
 };
 
 // Format the upload date.
-export const processAdditionalInfo = additionalInfo => ({
+export const processAdditionalInfo = (additionalInfo: AdditionalInfo) => ({
   ...additionalInfo,
   upload_date: moment(additionalInfo.upload_date).format("YYYY-MM-DD"),
 });

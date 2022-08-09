@@ -7,8 +7,7 @@ import { trackEvent } from "~/api/analytics";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import { IconLoading, IconArrowRight } from "~/components/ui/icons";
-import PropTypes from "~/components/utils/propTypes";
+import { IconArrowRight } from "~/components/ui/icons";
 import {
   RESULTS_FOLDER_STAGE_KEYS,
   RESULTS_FOLDER_STEP_KEYS,
@@ -18,7 +17,14 @@ import {
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
+import {
+  ERCCComparisonShape,
+  PipelineRun,
+  SampleId,
+  SnapshotShareId,
+} from "~/interface/shared";
 import Link from "~ui/controls/Link";
+import LoadingMessage from "../../LoadingMessage";
 import MetadataSection from "./MetadataSection";
 import {
   PIPELINE_INFO_FIELDS,
@@ -30,8 +36,55 @@ import cs from "./sample_details_mode.scss";
 const READ_COUNTS_TABLE = "readsRemaining";
 const ERCC_PLOT = "erccScatterplot";
 
-class PipelineTab extends React.Component {
-  state = {
+interface PipelineTabProps {
+  pipelineInfo: PipelineInfo;
+  sampleId: SampleId;
+  snapshotShareId?: SnapshotShareId;
+  erccComparison?: ERCCComparisonShape[];
+  pipelineRun?: PipelineRun;
+}
+
+export interface PipelineInfo {
+  [key: string]: {
+    text?: string;
+    link?: string;
+    linkLabel?: string;
+  };
+}
+
+interface PipelineTabState {
+  sectionOpen: {
+    pipelineInfo: boolean;
+    [READ_COUNTS_TABLE]: boolean;
+    [ERCC_PLOT]: boolean;
+    downloads: boolean;
+  };
+  sectionEditing: { [key: string]: boolean };
+  graphWidth: number;
+  loading: string[];
+  pipelineStepDict:
+    | {
+        name: string;
+        stageDescription: string;
+        steps: {
+          [key: string]: {
+            fileList: {
+              displayName: string;
+              key: string | null;
+              url: string | null;
+            }[];
+            name: string;
+            readsAfter: number | null;
+            stepDescription: string;
+          };
+        };
+      }
+    | Record<string, never>;
+}
+
+class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
+  private _graphContainer: { offsetWidth: number };
+  state: PipelineTabState = {
     sectionOpen: {
       pipelineInfo: true,
       [READ_COUNTS_TABLE]: false,
@@ -62,7 +115,7 @@ class PipelineTab extends React.Component {
     }
   };
 
-  toggleSection = section => {
+  toggleSection = (section) => {
     const { sectionOpen } = this.state;
 
     const newValue = !sectionOpen[section];
@@ -76,7 +129,7 @@ class PipelineTab extends React.Component {
     });
   };
 
-  getPipelineInfoField = field => {
+  getPipelineInfoField = (field) => {
     const { pipelineInfo, snapshotShareId } = this.props;
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
@@ -118,17 +171,17 @@ class PipelineTab extends React.Component {
       const hostFilteringStageKey = Object.keys(
         pipelineResults[RESULTS_FOLDER_ROOT_KEY],
       )[0];
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         pipelineStepDict:
           pipelineResults[RESULTS_FOLDER_ROOT_KEY][hostFilteringStageKey],
         loading: prevState.loading.filter(
-          section => section !== READ_COUNTS_TABLE,
+          (section) => section !== READ_COUNTS_TABLE,
         ),
       }));
     }
   };
 
-  renderReadCountsTable = stepKey => {
+  renderReadCountsTable = (stepKey: string) => {
     const { pipelineRun } = this.props;
     const { pipelineStepDict } = this.state;
     const { stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
@@ -155,7 +208,7 @@ class PipelineTab extends React.Component {
       // Property order is predictable in JavaScript objects since ES2015
       const stepKeys = Object.keys(pipelineStepDict[stepsKey]);
       const previousStepKey =
-        stepKeys[stepKeys.findIndex(key => key === stepKey) - 1];
+        stepKeys[stepKeys.findIndex((key) => key === stepKey) - 1];
       const previousStep = pipelineStepDict[stepsKey][previousStepKey];
       uniqueReads = readsAfter;
       readsAfter = previousStep[readsAfterKey];
@@ -220,12 +273,7 @@ class PipelineTab extends React.Component {
     const { loading, pipelineStepDict } = this.state;
 
     if (loading.includes(READ_COUNTS_TABLE)) {
-      return (
-        <div className={cs.loading}>
-          <IconLoading className={cs.loadingIcon} />
-          {" Loading"}
-        </div>
-      );
+      return <LoadingMessage message="Loading" className={cs.loading} />;
     }
 
     if (!pipelineRun || !pipelineRun.total_reads || !this.readsPresent()) {
@@ -255,9 +303,9 @@ class PipelineTab extends React.Component {
             <div className={cs.labelText}>% Reads Remaining</div>
           </div>
         </div>
-        {Object.keys(pipelineStepDict[stepsKey]).map(
-          this.renderReadCountsTable,
-        )}
+        {Object.keys(pipelineStepDict[stepsKey]).map((stepKey) => (
+          <div key={stepKey}>{this.renderReadCountsTable(stepKey)}</div>
+        ))}
       </div>
     );
   };
@@ -267,12 +315,7 @@ class PipelineTab extends React.Component {
     const { graphWidth } = this.state;
 
     if (!pipelineRun) {
-      return (
-        <div className={cs.loading}>
-          <IconLoading className={cs.loadingIcon} />
-          {" Loading"}
-        </div>
-      );
+      return <LoadingMessage message="Loading" className={cs.loading} />;
     }
 
     if (!erccComparison) {
@@ -330,7 +373,7 @@ class PipelineTab extends React.Component {
               className={cs.erccScatterplotSection}
             >
               <div
-                ref={c => (this._graphContainer = c)}
+                ref={(c) => (this._graphContainer = c)}
                 className={cs.graphContainer}
               >
                 {this.renderErccComparison()}
@@ -344,7 +387,7 @@ class PipelineTab extends React.Component {
             >
               <div className={cs.downloadSectionContent}>
                 {pipelineRun &&
-                  getDownloadLinks(sampleId, pipelineRun).map(option => (
+                  getDownloadLinks(sampleId, pipelineRun).map((option) => (
                     <a
                       key={option.label}
                       className={cs.downloadLink}
@@ -371,19 +414,5 @@ class PipelineTab extends React.Component {
     );
   }
 }
-
-PipelineTab.propTypes = {
-  pipelineInfo: PropTypes.objectOf(
-    PropTypes.shape({
-      text: PropTypes.string,
-      link: PropTypes.string,
-      linkLabel: PropTypes.string,
-    }),
-  ).isRequired,
-  sampleId: PropTypes.number.isRequired,
-  snapshotShareId: PropTypes.string,
-  erccComparison: PropTypes.ERCCComparison,
-  pipelineRun: PropTypes.PipelineRun,
-};
 
 export default PipelineTab;

@@ -1,24 +1,19 @@
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { PopupProps } from "../../../../../../node_modules/semantic-ui-react/dist/commonjs/modules/Popup/index";
 import cs from "./column_header_tooltip.scss";
 
-interface ColumnHeaderTooltipProps {
+interface ColumnHeaderTooltipProps extends PopupProps {
   content?: React.ReactNode;
   title?: string;
   link?: string;
-  basic: boolean;
-  hoverable: boolean;
-  inverted: boolean;
-  size: string;
-  position: string;
 }
 
 class ColumnHeaderTooltip extends React.Component<ColumnHeaderTooltipProps> {
   static defaultProps: ColumnHeaderTooltipProps;
   render() {
     const { content, link, title } = this.props;
-
     return (
       <BasicPopup
         {...this.props}

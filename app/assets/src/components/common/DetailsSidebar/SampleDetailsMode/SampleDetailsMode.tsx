@@ -10,14 +10,22 @@ import {
   getSampleMetadataFields,
 } from "~/api/metadata";
 import Tabs from "~/components/ui/controls/Tabs";
-import PropTypes from "~/components/utils/propTypes";
-import { generateUrlToSampleView } from "~/components/utils/urls";
+import {
+  generateUrlToSampleView,
+  TempSelectedOptionsShape,
+} from "~/components/utils/urls";
 import ConsensusGenomeDropdown from "~/components/views/SampleView/ConsensusGenomeDropdown";
 import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
-import { processMetadata, processMetadataTypes } from "~utils/metadata";
-import MetadataTab from "./MetadataTab";
+import Sample from "~/interface/sample";
+import { PipelineRun, SnapshotShareId, SummaryStats } from "~/interface/shared";
+import {
+  processMetadata,
+  processMetadataTypes,
+  Metadata,
+} from "~utils/metadata";
+import MetadataTab, { MetadataTypes } from "./MetadataTab";
 import NotesTab from "./NotesTab";
-import PipelineTab from "./PipelineTab";
+import PipelineTab, { PipelineInfo } from "./PipelineTab";
 
 import cs from "./sample_details_mode.scss";
 import {
@@ -26,7 +34,36 @@ import {
   processCGWorkflowRunInfo,
 } from "./utils";
 
-const TABS = ["Metadata", "Pipelines", "Notes"];
+interface SampleDetailsModeProps {
+  currentRun: Record<string, string | number | null>;
+  currentWorkflowTab: string;
+  handleWorkflowTabChange: $TSFixMeFunction;
+  sample: Sample;
+  sampleId: number;
+  pipelineVersion: string; // Needs to be string for 3.1 vs. 3.10.
+  onMetadataUpdate: $TSFixMeFunction;
+  onWorkflowRunSelect: $TSFixMeFunction;
+  sampleWorkflowLabels: string[];
+  showReportLink: boolean;
+  snapshotShareId: SnapshotShareId;
+  tempSelectedOptions: TempSelectedOptionsShape;
+}
+
+export interface AdditionalInfo {
+  name: string;
+  project_id: number;
+  project_name: string;
+  upload_date?: string;
+  host_genome_name?: string;
+  host_genome_taxa_category?: string;
+  editable?: boolean;
+  notes?: string | null;
+  ercc_comparison: { name: string; actual: number; expected: number }[];
+  summary_stats?: SummaryStats;
+  pipeline_run?: PipelineRun;
+}
+type TabNames = "Metadata" | "Pipelines" | "Notes";
+const TABS: TabNames[] = ["Metadata", "Pipelines", "Notes"];
 
 const SampleDetailsMode = ({
   currentRun,
@@ -40,20 +77,34 @@ const SampleDetailsMode = ({
   snapshotShareId,
   tempSelectedOptions,
   sampleWorkflowLabels,
-}) => {
-  const [additionalInfo, setAdditionalInfo] = useState(null);
+}: SampleDetailsModeProps) => {
+  const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo | null>(
+    null,
+  );
   const [currentTab, setCurrentTab] = useState(TABS[0]);
-  const [lastValidMetadata, setLastValidMetadata] = useState(null);
+  const [lastValidMetadata, setLastValidMetadata] = useState<Metadata | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
-  const [metadata, setMetadata] = useState(null);
-  const [metadataChanged, setMetadataChanged] = useState({});
-  const [metadataErrors, setMetadataErrors] = useState({});
-  const [metadataSavePending, setMetadataSavePending] = useState({});
-  const [metadataTypes, setMetadataTypes] = useState(null);
-  const [pipelineInfo, setPipelineInfo] = useState(null);
-  const [pipelineRun, setPipelineRun] = useState(null);
+  const [metadata, setMetadata] = useState<Metadata | null>(null);
+  const [metadataChanged, setMetadataChanged] = useState<
+    Record<string, boolean>
+  >({});
+  const [metadataErrors, setMetadataErrors] = useState<
+    Record<string, string | null>
+  >({});
+  const [metadataSavePending, setMetadataSavePending] = useState<
+    Record<string, boolean>
+  >({});
+  const [metadataTypes, setMetadataTypes] = useState<MetadataTypes | null>(
+    null,
+  );
+  const [pipelineInfo, setPipelineInfo] = useState<PipelineInfo | null>(null);
+  const [pipelineRun, setPipelineRun] = useState<PipelineRun | null>(null);
   const [sampleTypes, setSampleTypes] = useState(null);
-  const [singleKeyValueToSave, setSingleKeyValueToSave] = useState(null);
+  const [singleKeyValueToSave, setSingleKeyValueToSave] = useState<
+    [string, string | number] | null
+  >(null);
 
   useEffect(() => {
     if (sampleId) fetchMetadata();
@@ -68,7 +119,7 @@ const SampleDetailsMode = ({
     }
   }, [metadata]);
 
-  const onTabChange = tab => {
+  const onTabChange = (tab: TabNames) => {
     setCurrentTab(tab);
     trackEvent("SampleDetailsMode_tab_changed", {
       sampleId,
@@ -121,7 +172,11 @@ const SampleDetailsMode = ({
 
   // shouldSave option is used when <Input> option is selected
   // to change and save in one call (to avoid setState issues)
-  const handleMetadataChange = (key, value, shouldSave) => {
+  const handleMetadataChange = (
+    key: string,
+    value: string | number,
+    shouldSave?: boolean,
+  ) => {
     /* Sample name and note are special cases */
     if (key === "name" || key === "notes") {
       setAdditionalInfo(set(key, value, additionalInfo));
@@ -143,7 +198,7 @@ const SampleDetailsMode = ({
     });
   };
 
-  const handleMetadataSave = async key => {
+  const handleMetadataSave = async (key: string) => {
     if (metadataChanged[key]) {
       const newValue =
         key === "name" || key === "notes" ? additionalInfo[key] : metadata[key];
@@ -158,7 +213,7 @@ const SampleDetailsMode = ({
     }
   };
 
-  const _save = async (id, key, value) => {
+  const _save = async (id: number, key: string, value: string | number) => {
     let _lastValidMetadata = lastValidMetadata;
     let _metadataErrors = metadataErrors;
     let _metadata = metadata;
@@ -174,7 +229,7 @@ const SampleDetailsMode = ({
     } else if (key === "notes") {
       await saveSampleNotes(id, value);
     } else {
-      await saveSampleMetadata(sampleId, key, value).then(response => {
+      await saveSampleMetadata(sampleId, key, value).then((response) => {
         // If the save fails, immediately revert to the last valid metadata value.
         if (response.status === "failed") {
           _metadataErrors = set(key, response.message, _metadataErrors);
@@ -228,7 +283,7 @@ const SampleDetailsMode = ({
             <ConsensusGenomeDropdown
               workflowRuns={sample.workflow_runs}
               initialSelectedValue={currentRun.id}
-              onConsensusGenomeSelection={workflowRunId =>
+              onConsensusGenomeSelection={(workflowRunId) =>
                 onWorkflowRunSelect(
                   find({ id: workflowRunId }, sample.workflow_runs),
                 )
@@ -260,7 +315,7 @@ const SampleDetailsMode = ({
         <NotesTab
           notes={additionalInfo.notes}
           editable={additionalInfo.editable}
-          onNoteChange={val => handleMetadataChange("notes", val)}
+          onNoteChange={(val) => handleMetadataChange("notes", val)}
           onNoteSave={() => handleMetadataSave("notes")}
           savePending={savePending}
         />
@@ -306,21 +361,6 @@ const SampleDetailsMode = ({
       {!loading && renderTab()}
     </div>
   );
-};
-
-SampleDetailsMode.propTypes = {
-  currentRun: PropTypes.object,
-  currentWorkflowTab: PropTypes.string,
-  handleWorkflowTabChange: PropTypes.func,
-  sample: PropTypes.object,
-  sampleId: PropTypes.number,
-  pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
-  onMetadataUpdate: PropTypes.func,
-  onWorkflowRunSelect: PropTypes.func,
-  sampleWorkflowLabels: PropTypes.array,
-  showReportLink: PropTypes.bool,
-  snapshotShareId: PropTypes.string,
-  tempSelectedOptions: PropTypes.object,
 };
 
 export default SampleDetailsMode;

@@ -4,7 +4,7 @@ import React from "react";
 import { trackEvent } from "~/api/analytics";
 import cs from "./link.scss";
 
-interface LinkProps {
+export interface LinkProps {
   // We use black styling for links on a colored background.
   coloredBackground?: boolean;
   children?: React.ReactNode;
