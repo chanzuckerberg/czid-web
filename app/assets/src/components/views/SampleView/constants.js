@@ -242,4 +242,4 @@ export const DOWNLOAD_READS = "download-reads";
 export const KEY_TAXON = "taxon";
 export const KEY_TAXON_SELECTED = `${KEY_TAXON}Selected`;
 export const KEY_TAXON_THRESHOLDS_SELECTED = "taxonThresholdsSelected";
-export const KEY_ANNOTATION_SELECTED = "annotationsSelected";
+export const KEY_ANNOTATIONS_SELECTED = "annotationsSelected";

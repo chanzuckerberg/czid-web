@@ -3,6 +3,7 @@ import { find, isEmpty, map, toLower, pick, values } from "lodash/fp";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { URL_FIELDS } from "~/components/views/SampleView/constants";
+import { AnnotationFilterOption } from "~/interface/discovery";
 import { WorkflowValues, ThresholdFilterShape } from "~/interface/sample";
 import { LabelVal } from "~/interface/shared";
 
@@ -69,7 +70,12 @@ const getTempSelectedOptions = ({
     ? selectedOptions
     : pick(optionsToTemporarilyPersist, selectedOptions);
 
+  const annotationsForSampleView = transformAnnotationsFormatForSampleView(
+    tempSelectedOptions?.annotationsSelected,
+  );
+
   const sampleViewFormattedSelectedOptions = {
+    annotations: annotationsForSampleView,
     background: tempSelectedOptions?.background,
     categories: {
       categories: tempSelectedOptions?.categories || [],
@@ -104,6 +110,16 @@ const getTempSelectedOptions = ({
 
   return sampleViewFormattedSelectedOptions;
 };
+
+const transformAnnotationsFormatForSampleView = (
+  annotationFilters: AnnotationFilterOption[],
+) =>
+  annotationFilters
+    ? map(
+        (annotationFilter: AnnotationFilterOption) => annotationFilter.name,
+        annotationFilters,
+      )
+    : [];
 
 // SampleView thresholds expect the metric format: nt:z_score
 // SamplesHeatmapView thresholds are in the format: NT_zscore so we convert them appropriately

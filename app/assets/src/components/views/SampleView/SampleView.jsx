@@ -139,8 +139,15 @@ class SampleView extends React.Component {
       ...nonNestedLocalState
     } = this.loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
 
-    const { taxa, thresholds } = tempSelectedOptions || {};
-    if (!isEmpty(taxa) || !isEmpty(thresholds)) {
+    const { annotations, taxa, thresholds } = tempSelectedOptions || {};
+
+    const persistedDiscoveryFiltersPresent = [
+      annotations,
+      taxa,
+      thresholds,
+    ].some(filter => !isEmpty(filter));
+
+    if (persistedDiscoveryFiltersPresent) {
       this.showNotification(NOTIFICATION_TYPES.discoveryViewFiltersPersisted);
     }
 
@@ -1877,7 +1884,7 @@ class SampleView extends React.Component {
           closeToast();
         }}
         onKeyDown={() => {
-          this.handleTabChange(TABS.CONSENSUS_GENOME);
+          this.revertToSampleViewFilters();
           closeToast();
         }}
       >

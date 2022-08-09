@@ -1183,7 +1183,11 @@ class DiscoveryView extends React.Component {
   handleObjectSelected = ({ object, currentEvent }) => {
     const { snapshotShareId, history: RouterHistory } = this.props;
     const { filters, workflow, workflowEntity } = this.state;
-    const { taxonSelected, taxonThresholdsSelected } = filters;
+    const {
+      annotationsSelected,
+      taxonSelected,
+      taxonThresholdsSelected,
+    } = filters;
 
     let sampleId;
     let workflowRunId;
@@ -1196,9 +1200,16 @@ class DiscoveryView extends React.Component {
       sampleId = _get("id", object);
     }
 
-    if (!isEmpty(taxonSelected) || !isEmpty(taxonThresholdsSelected)) {
+    const persistedFiltersSelected = [
+      annotationsSelected,
+      taxonSelected,
+      taxonThresholdsSelected,
+    ].some(filter => !isEmpty(filter));
+
+    if (persistedFiltersSelected) {
       tempSelectedOptions = getTempSelectedOptions({
         optionsToTemporarilyPersist: [
+          "annotationsSelected",
           "taxonSelected",
           "taxonThresholdsSelected",
         ],

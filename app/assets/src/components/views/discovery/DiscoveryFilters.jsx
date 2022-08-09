@@ -25,7 +25,7 @@ import {
 import { WORKFLOWS } from "~/components/utils/workflows";
 import FilterTag from "~ui/controls/FilterTag";
 import {
-  KEY_ANNOTATION_SELECTED,
+  KEY_ANNOTATIONS_SELECTED,
   KEY_TAXON_SELECTED,
   KEY_TAXON_THRESHOLDS_SELECTED,
 } from "../SampleView/constants";
@@ -52,7 +52,7 @@ class DiscoveryFilters extends React.Component {
       hostSelected: this.props.hostSelected,
       tissueSelected: this.props.tissueSelected,
       taxonThresholdsSelected: this.props.taxonThresholdsSelected,
-      annotationsSelected: null,
+      annotationsSelected: this.props.annotationsSelected,
     };
   }
 
@@ -70,6 +70,7 @@ class DiscoveryFilters extends React.Component {
         "hostSelected",
         "locationSelected",
         "locationV2Selected",
+        KEY_ANNOTATIONS_SELECTED,
         KEY_TAXON_SELECTED,
         KEY_TAXON_THRESHOLDS_SELECTED,
         "timeSelected",
@@ -90,7 +91,7 @@ class DiscoveryFilters extends React.Component {
         "locationV2Selected",
         KEY_TAXON_SELECTED,
         KEY_TAXON_THRESHOLDS_SELECTED,
-        KEY_ANNOTATION_SELECTED,
+        KEY_ANNOTATIONS_SELECTED,
         "timeSelected",
         "tissueSelected",
         "visibilitySelected",
@@ -316,6 +317,7 @@ class DiscoveryFilters extends React.Component {
 
   render() {
     const {
+      annotationsSelected,
       hostSelected,
       locationV2Selected,
       taxonSelected,
@@ -382,8 +384,9 @@ class DiscoveryFilters extends React.Component {
                   label={<div className={cs.filterLabel}>Annotation</div>}
                   onChange={this.handleChange.bind(
                     this,
-                    KEY_ANNOTATION_SELECTED,
+                    KEY_ANNOTATIONS_SELECTED,
                   )}
+                  value={annotationsSelected || undefined}
                   options={ANNOTATION_FILTER_OPTIONS}
                   disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
                   multiple
@@ -474,7 +477,7 @@ DiscoveryFilters.propTypes = {
   visibility: PropTypes.array,
 
   // Selected values
-  annotationSelected: PropTypes.array,
+  annotationsSelected: PropTypes.array,
   hostSelected: PropTypes.array,
   locationSelected: PropTypes.array,
   locationV2Selected: PropTypes.array,
