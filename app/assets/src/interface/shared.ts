@@ -13,9 +13,23 @@ export interface ERCCComparisonShape {
   expected: number;
 }
 
+export type FileList = {
+  fileName: string;
+  url?: string | null;
+}[];
+
+export interface InputFile {
+  fromStepName?: string;
+  files: FileList;
+}
+
 export interface LabelVal {
   label: string;
   value: string;
+}
+export interface NameUrl {
+  name: string;
+  url: string;
 }
 
 export interface PipelineRun {

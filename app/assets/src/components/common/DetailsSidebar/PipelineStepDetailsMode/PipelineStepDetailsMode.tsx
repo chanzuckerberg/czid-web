@@ -1,22 +1,46 @@
 import cx from "classnames";
 import moment from "moment";
-import React from "react";
+import React, { ReactNode } from "react";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
 
 import { withAnalytics } from "~/api/analytics";
 import { Accordion } from "~/components/layout";
-import PropTypes from "~/components/utils/propTypes";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
+import Sample from "~/interface/sample";
+import { PipelineRun, FileList, InputFile, NameUrl } from "~/interface/shared";
 import { openUrl } from "~utils/links";
 
 import cs from "./pipeline_step_details_mode.scss";
 
-class PipelineStepDetailsMode extends React.Component {
-  renderStatusBox() {
-    const { status, startTime, endTime, sample, pipelineRun } = this.props;
-    let statusTitle, statusDescription;
+interface PipelineStepDetailsModeProps {
+  status: string;
+  startTime: number;
+  endTime: number;
+  sample: Sample;
+  pipelineRun: PipelineRun;
+  description: string;
+  inputFiles: InputFile[];
+  stepName: string;
+  outputFiles: FileList;
+  resources: NameUrl[];
+}
+
+const PipelineStepDetailsMode = ({
+  status,
+  startTime,
+  endTime,
+  sample,
+  pipelineRun,
+  description,
+  inputFiles,
+  stepName,
+  outputFiles,
+  resources,
+}: PipelineStepDetailsModeProps) => {
+  const renderStatusBox = () => {
+    let statusTitle: string, statusDescription: ReactNode;
     switch (status) {
       case "inProgress":
         statusTitle = "Current step";
@@ -60,10 +84,9 @@ class PipelineStepDetailsMode extends React.Component {
         </div>
       </div>
     );
-  }
+  };
 
-  renderStepInfo() {
-    const { description } = this.props;
+  const renderStepInfo = () => {
     if (description) {
       const header = <div className={cs.title}>Step Info</div>;
       const descriptionWithoutIndentation = description.replace(/( {4})/gi, "");
@@ -80,10 +103,9 @@ class PipelineStepDetailsMode extends React.Component {
         </Accordion>
       );
     }
-  }
+  };
 
-  renderInputFiles() {
-    const { inputFiles } = this.props;
+  const renderInputFiles = () => {
     if (!inputFiles || !inputFiles.length) {
       return null;
     }
@@ -94,7 +116,7 @@ class PipelineStepDetailsMode extends React.Component {
           <div
             className={cs.fileGroupHeader}
           >{`From ${inputFileGroup.fromStepName || "Sample"} Step:`}</div>
-          {this.renderFileList(inputFileGroup.files)}
+          {renderFileList(inputFileGroup.files)}
         </div>
       );
     });
@@ -105,10 +127,9 @@ class PipelineStepDetailsMode extends React.Component {
         <div className={cs.accordionContent}>{fileGroupList}</div>
       </Accordion>
     );
-  }
+  };
 
-  renderOutputFiles() {
-    const { stepName, outputFiles } = this.props;
+  const renderOutputFiles = () => {
     if (outputFiles && outputFiles.length) {
       const outputFilesHeader = <div className={cs.title}>Output Files</div>;
       return (
@@ -119,14 +140,14 @@ class PipelineStepDetailsMode extends React.Component {
         >
           <div className={cx(cs.accordionContent, cs.fileGroup)}>
             <div className={cs.fileGroupHeader}>{`From ${stepName} Step:`}</div>
-            {this.renderFileList(outputFiles)}
+            {renderFileList(outputFiles)}
           </div>
         </Accordion>
       );
     }
-  }
+  };
 
-  renderFileList(fileList) {
+  const renderFileList = (fileList: FileList) => {
     return fileList.map((file, i) => {
       const cssClass = file.url ? cs.fileLink : cs.disabledFileLink;
       const content = file.url ? (
@@ -150,13 +171,12 @@ class PipelineStepDetailsMode extends React.Component {
         </div>
       );
     });
-  }
+  };
 
-  renderResources() {
-    const { resources } = this.props;
+  const renderResources = () => {
     if (resources && resources.length) {
       const resourcesHeader = <div className={cs.title}>Resources</div>;
-      const resourceLinks = resources.map(linkInfo => {
+      const resourceLinks = resources.map((linkInfo) => {
         return (
           <span key={linkInfo.url}>
             <a
@@ -164,6 +184,7 @@ class PipelineStepDetailsMode extends React.Component {
               target="_blank"
               rel="noopener noreferrer"
               onClick={withAnalytics(
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
                 () => {},
                 "PipelineStepDetailsMode_resource-link_clicked",
                 { linkName: linkInfo.name, linkUrl: linkInfo.url },
@@ -187,51 +208,18 @@ class PipelineStepDetailsMode extends React.Component {
         </Accordion>
       );
     }
-  }
+  };
 
-  render() {
-    const { stepName } = this.props;
-    return (
-      <div className={cs.content}>
-        <div className={cs.stepName}>{stepName}</div>
-        {this.renderStatusBox()}
-        {this.renderStepInfo()}
-        {this.renderInputFiles()}
-        {this.renderOutputFiles()}
-        {this.renderResources()}
-      </div>
-    );
-  }
-}
-
-const FileList = PropTypes.arrayOf(
-  PropTypes.shape({
-    fileName: PropTypes.string.isRequired,
-    url: PropTypes.string,
-  }).isRequired,
-);
-
-PipelineStepDetailsMode.propTypes = {
-  stepName: PropTypes.string,
-  description: PropTypes.string,
-  inputFiles: PropTypes.arrayOf(
-    PropTypes.shape({
-      fromStepName: PropTypes.string,
-      files: FileList.isRequired,
-    }).isRequired,
-  ).isRequired,
-  outputFiles: FileList.isRequired,
-  status: PropTypes.string,
-  startTime: PropTypes.number,
-  endTime: PropTypes.number,
-  resources: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      url: PropTypes.string,
-    }),
-  ),
-  sample: PropTypes.Sample,
-  pipelineRun: PropTypes.PipelineRun,
+  return (
+    <div className={cs.content}>
+      <div className={cs.stepName}>{stepName}</div>
+      {renderStatusBox()}
+      {renderStepInfo()}
+      {renderInputFiles()}
+      {renderOutputFiles()}
+      {renderResources()}
+    </div>
+  );
 };
 
 export default PipelineStepDetailsMode;
