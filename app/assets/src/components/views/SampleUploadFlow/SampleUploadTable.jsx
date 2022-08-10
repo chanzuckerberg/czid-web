@@ -145,6 +145,7 @@ export default class SampleUploadTable extends React.Component {
     selectedSampleIds.forEach(sampleId => {
       selectedSampleIdsConcat.add(mapSampleToConcatGroup[sampleId]);
     });
+
     return (
       <div className={cs.sampleUploadTable}>
         <div className={cs.detectedMsg}>
@@ -185,6 +186,7 @@ export default class SampleUploadTable extends React.Component {
             const arr = {
               finishedValidating: get("finishedValidating", rowData),
               id: get("_selectId", rowData),
+              isValid: get("isValid", rowData),
             };
             return arr;
           }}

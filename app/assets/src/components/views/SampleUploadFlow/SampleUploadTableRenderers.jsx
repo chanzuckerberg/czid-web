@@ -71,28 +71,35 @@ export default class SampleUploadTableRenderers extends React.Component {
     selectableCellClassName,
     disabled,
   }) => {
-    const { allowedFeatures = [] } = this.context || {};
     return (
       <div>
-        {!allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) ? (
-          <Checkbox
-            className={selectableCellClassName}
-            checked={selected.has(cellData.id)}
-            onChange={onSelectRow}
-            value={disabled ? -1 : cellData.id}
-            disabled={disabled}
-          />
-        ) : cellData.finishedValidating ? (
-          <Checkbox
-            className={selectableCellClassName}
-            checked={selected.has(cellData.id)}
-            onChange={onSelectRow}
-            value={disabled ? -1 : cellData.id}
-            disabled={disabled}
-          />
-        ) : (
-          <i className="fa fa-spinner fa-pulse fa-fw" />
-        )}
+        <UserContext.Consumer>
+          {currentUser => (
+            <div>
+              {!currentUser.allowedFeatures.includes(
+                PRE_UPLOAD_CHECK_FEATURE,
+              ) ? (
+                <Checkbox
+                  className={selectableCellClassName}
+                  checked={selected.has(cellData.id)}
+                  onChange={onSelectRow}
+                  value={disabled ? -1 : cellData.id}
+                  disabled={disabled}
+                />
+              ) : cellData.finishedValidating ? (
+                <Checkbox
+                  className={selectableCellClassName}
+                  checked={selected.has(cellData.id)}
+                  onChange={onSelectRow}
+                  value={disabled ? -1 : cellData.id}
+                  disabled={!selected.has(cellData.id)}
+                />
+              ) : (
+                <i className="fa fa-spinner fa-pulse fa-fw" />
+              )}
+            </div>
+          )}
+        </UserContext.Consumer>
       </div>
     );
   };

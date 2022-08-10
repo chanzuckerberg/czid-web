@@ -665,7 +665,6 @@ class UploadSampleStep extends React.Component {
     this.props.onDirty();
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
     const selectedSamples = this.state[selectedSampleIdsKey];
-
     if (checked) {
       selectedSamples.add(value);
     } else {
@@ -846,6 +845,32 @@ class UploadSampleStep extends React.Component {
     });
   };
 
+  handleContinueButtonTooltip = () => {
+    const {
+      currentTab,
+      files,
+      selectedProject,
+      selectedTechnology,
+      selectedWorkflows,
+      selectedWetlabProtocol,
+    } = this.state;
+    const { allowedFeatures } = this.context || {};
+
+    if (allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)) {
+      if (!files.every(element => element.finishedValidating))
+        return "Please wait for file validation to complete";
+    }
+    if (!selectedProject) return "Please select a project to continue";
+    else if (size(this.getSelectedSamples(currentTab)) < 1)
+      return "Please select a sample to continue";
+    else if (
+      !selectedWorkflows ||
+      !selectedTechnology ||
+      !selectedWetlabProtocol
+    )
+      return "Please select an analysis type to continue";
+  };
+
   // Whether the current user input is valid. Determines whether the Continue button is enabled.
   isValid = () => {
     const {
@@ -855,7 +880,9 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       selectedWorkflows,
       validatingSamples,
+      files,
     } = this.state;
+    const { allowedFeatures } = this.context || {};
 
     let workflowsValid;
     if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
@@ -873,12 +900,17 @@ class UploadSampleStep extends React.Component {
     } else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
       workflowsValid = true;
     }
-    return (
-      selectedProject !== null &&
-      size(this.getSelectedSamples(currentTab)) > 0 &&
-      !validatingSamples &&
-      workflowsValid
-    );
+
+    return allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)
+      ? selectedProject !== null &&
+          size(this.getSelectedSamples(currentTab)) > 0 &&
+          !validatingSamples &&
+          workflowsValid &&
+          files.every(element => element.finishedValidating)
+      : selectedProject !== null &&
+          size(this.getSelectedSamples(currentTab)) > 0 &&
+          !validatingSamples &&
+          workflowsValid;
   };
 
   getAnalyticsContext = () => {
@@ -961,7 +993,6 @@ class UploadSampleStep extends React.Component {
   render() {
     const { allowedFeatures } = this.context || {};
     const {
-      createProjectOpen,
       currentTab,
       selectedMedakaModel,
       selectedTechnology,
@@ -969,6 +1000,7 @@ class UploadSampleStep extends React.Component {
       selectedWorkflows,
       usedClearLabs,
       files,
+      localSamples,
     } = this.state;
 
     const readyForBasespaceAuth =
@@ -1066,11 +1098,12 @@ class UploadSampleStep extends React.Component {
             sampleUploadType={currentTab}
             files={files}
           />
-          {this.getSelectedSamples(LOCAL_UPLOAD).length > 0 &&
+          {localSamples.length > 0 &&
             allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) && (
               <PreUploadQCCheck
                 samples={files}
                 changeState={this.handleValidatedFilesChange}
+                handleSampleSelect={this.handleSampleSelect}
                 sequenceTechnology={this.getSequenceTechnology()}
               />
             )}
@@ -1084,7 +1117,7 @@ class UploadSampleStep extends React.Component {
           )}
           <BasicPopup
             basic={false}
-            disabled={!createProjectOpen || this.isValid()}
+            disabled={this.isValid()}
             position="top center"
             trigger={
               <span>
@@ -1097,8 +1130,7 @@ class UploadSampleStep extends React.Component {
               </span>
             }
           >
-            Click &ldquo;Create Project&rdquo; above to finish project creation
-            and continue
+            {this.handleContinueButtonTooltip()}
           </BasicPopup>
           <a href="/home">
             <SecondaryButton

@@ -131,7 +131,6 @@ class LocalSampleFileUpload extends React.Component {
   };
 
   render() {
-    const { allowedFeatures } = this.context || {};
     const { files } = this.props;
     const finishedValidating = files.every(
       element => element.finishedValidating,
@@ -177,11 +176,7 @@ class LocalSampleFileUpload extends React.Component {
           onChange={this.onDrop}
           onRejected={this.onRejected}
           multiFile={true}
-          finishedValidating={
-            allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)
-              ? finishedValidating
-              : true
-          }
+          finishedValidating={finishedValidating}
         />
       </div>
     );

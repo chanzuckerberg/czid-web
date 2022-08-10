@@ -17,7 +17,13 @@ import {
   MISMATCH_FILES_ERROR,
 } from "./constants";
 
-const PreUploadQCCheck = ({ samples, changeState, sequenceTechnology }) => {
+
+const PreUploadQCCheck = ({
+  samples,
+  changeState,
+  handleSampleSelect,
+  sequenceTechnology,
+}) => {
   // CLI is used for calling some of the bioinformatics tools for PreUploadQC checks (biowasm, etc...)
   let CLI;
   // Set for files that did not pass validateFileType
@@ -230,7 +236,7 @@ const PreUploadQCCheck = ({ samples, changeState, sequenceTechnology }) => {
   };
 
   // Validate that there are no mismatch sequencing
-  const validateMismatchFormat = async (file, key) => {
+  const addFormatToFile = async (file, key) => {
     try {
       let fileName = file.files[key];
       let fileContents = await fileName.text();
@@ -257,9 +263,8 @@ const PreUploadQCCheck = ({ samples, changeState, sequenceTechnology }) => {
       if (isIlluminaFormat || isNanoporeFormat)
         file.format = isIlluminaFormat ? ILLUMINA : NANOPORE;
     } catch (e) {
-      return false;
+      return ERROR_MESSAGE;
     }
-    return true;
   };
 
   // Validate if all samples are invalid
@@ -323,7 +328,10 @@ const PreUploadQCCheck = ({ samples, changeState, sequenceTechnology }) => {
   const runAllValidationChecks = async () => {
     for (let i = 0; i < samples.length; i++) {
       let passedFile = samples[i];
-      if (passedFile.finishedValidating === true) continue;
+      if (passedFile.finishedValidating === true) {
+        handleCheckbox(passedFile);
+        continue;
+      }
       let fileIsValid = true;
 
       for (var key in passedFile.files) {
@@ -353,9 +361,7 @@ const PreUploadQCCheck = ({ samples, changeState, sequenceTechnology }) => {
               passedFile.error = TRUNCATED_FILE_ERROR;
             }
           }
-
-          await validateMismatchFormat(passedFile, key);
-
+          await addFormatToFile(passedFile, key);
           // Check to see if FASTQ file has matching R1/R2 file
           if (key.includes(R1CHECK) || key.includes(R2CHECK)) {
             const pairedEndSample = key.includes(R1CHECK)
@@ -380,6 +386,26 @@ const PreUploadQCCheck = ({ samples, changeState, sequenceTechnology }) => {
       passedFile.finishedValidating = true;
       passedFile.isValid = fileIsValid;
       changeState(samples);
+      handleCheckbox(passedFile);
+    }
+  };
+
+  // Delete samples from selected IDs if file is invalid
+  const handleCheckbox = passedFile => {
+    if (!passedFile.isValid) {
+      handleSampleSelect(passedFile._selectId, false, "local");
+    } else if (passedFile.format) {
+      if (passedFile.format === ILLUMINA)
+        handleSampleSelect(
+          passedFile._selectId,
+          passedFile.format === ILLUMINA && sequenceTechnology !== NANOPORE,
+          "local",
+        );
+      else if (passedFile.format === NANOPORE)
+        handleSampleSelect(
+          passedFile._selectId,
+          passedFile.format === NANOPORE && sequenceTechnology !== ILLUMINA,
+          "local");
     }
   };
 
@@ -513,6 +539,7 @@ const PreUploadQCCheck = ({ samples, changeState, sequenceTechnology }) => {
 PreUploadQCCheck.propTypes = {
   samples: PropTypes.array,
   changeState: PropTypes.func,
+  handleSampleSelect: PropTypes.func,
   sequenceTechnology: PropTypes.string,
 };
 

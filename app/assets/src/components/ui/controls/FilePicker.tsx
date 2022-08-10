@@ -5,7 +5,6 @@ import { UserContext } from "~/components/common/UserContext";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 
 import Icon from "../icons/Icon";
-import IconLoading from "../icons/IconLoading";
 import cs from "./file_picker.scss";
 interface FilePickerProps {
   className?: string;
@@ -83,7 +82,7 @@ const FilePicker = ({
           {title &&
             finishedValidating === false &&
             allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) && (
-              <IconLoading className={cs.loadingIndicator} />
+              <i className="fa fa-spinner fa-pulse fa-fw" />
             )}
           {title}
         </div>
