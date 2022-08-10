@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
   ERROR_MESSAGE,
-  AIOLI_LIBRARIES,
   MEGABYTE,
   ILLUMINA,
   NANOPORE,
@@ -44,7 +43,26 @@ const PreUploadQCCheck = ({
 
   // Add libraries to CLI and mount each file
   const initializeCLI = async () => {
-    CLI = await new Aioli(AIOLI_LIBRARIES);
+    const pathToAssets = `${location.origin}/assets`;
+    CLI = await new Aioli(
+      [
+        {
+          tool: "htslib",
+          program: "htsfile",
+          version: "1.10",
+          urlPrefix: `${pathToAssets}/htslib`,
+        },
+        {
+          tool: "seqtk",
+          version: "1.3",
+          urlPrefix: `${pathToAssets}/seqtk`,
+        },
+      ],
+      {
+        urlAioli: `${pathToAssets}/aioli.worker.js`,
+        urlBaseModule: `${pathToAssets}/base`,
+      },
+    );
 
     for (let i = 0; i < samples.length; i++) {
       let passedFile = samples[i];
