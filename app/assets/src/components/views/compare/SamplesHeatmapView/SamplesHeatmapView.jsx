@@ -610,13 +610,12 @@ class SamplesHeatmapView extends React.Component {
     this.setState({
       sampleIds: validIds,
       invalidSampleNames,
-    });
-
+    },
     // If there are failed/waiting samples selected, display a warning
     // to the user that they won't appear in the heatmap.
-    if (invalidSampleNames.length > 0) {
-      this.showNotification(NOTIFICATION_TYPES.invalidSamples);
-    }
+    () => invalidSampleNames.length > 0 && this.showNotification(NOTIFICATION_TYPES.invalidSamples),
+    );
+
 
     let heatmapData, metadataFields;
     try {
