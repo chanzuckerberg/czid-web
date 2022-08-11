@@ -307,16 +307,31 @@ class DiscoveryFilters extends React.Component {
     );
   };
 
-  renderTaxonThresholdFilter = () => {
-    const { currentTab, domain, workflow } = this.props;
+  renderAnnotationsFilter = ({ disabled }) => {
+    const { annotationsSelected } = this.state;
+    const annotationsFilter = (
+      <Dropdown
+        label={<div className={cs.filterLabel}>Annotation</div>}
+        onChange={this.handleChange.bind(this, KEY_ANNOTATIONS_SELECTED)}
+        value={annotationsSelected || undefined}
+        options={ANNOTATION_FILTER_OPTIONS}
+        disabled={disabled}
+        multiple
+      />
+    );
+
+    return disabled
+      ? this.renderDisabledFilter(annotationsFilter)
+      : annotationsFilter;
+  };
+
+  renderTaxonThresholdFilter = ({ disabled }) => {
+    const { domain } = this.props;
     const { taxonSelected, taxonThresholdsSelected } = this.state;
 
-    const shouldDisableFilter =
-      currentTab === TAB_SAMPLES &&
-      workflow === WORKFLOWS.CONSENSUS_GENOME.value;
-    let taxonThresholdFilter = (
+    const taxonThresholdFilter = (
       <TaxonThresholdFilter
-        disabled={shouldDisableFilter}
+        disabled={disabled}
         domain={domain}
         onFilterApply={(taxa, thresholds) => {
           const validThresholds = thresholds?.filter(
@@ -329,28 +344,28 @@ class DiscoveryFilters extends React.Component {
       />
     );
 
-    // Disable the Taxon Threshold Fitler if the user is on the CG tab and show a tooltip
-    if (shouldDisableFilter) {
-      taxonThresholdFilter = (
-        <Tooltip
-          arrow
-          placement="top-start"
-          title="Not available for Consensus Genomes."
-          classes={{
-            tooltip: cs.disabledTooltip,
-          }}
-        >
-          <span>{taxonThresholdFilter}</span>
-        </Tooltip>
-      );
-    }
+    return disabled
+      ? this.renderDisabledFilter(taxonThresholdFilter)
+      : taxonThresholdFilter;
+  };
 
-    return taxonThresholdFilter;
+  renderDisabledFilter = (filter, tooltipTitle) => {
+    return (
+      <Tooltip
+        arrow
+        placement="top-start"
+        title="Not available for Consensus Genomes."
+        classes={{
+          tooltip: cs.disabledTooltip,
+        }}
+      >
+        <span>{filter}</span>
+      </Tooltip>
+    );
   };
 
   render() {
     const {
-      annotationsSelected,
       hostSelected,
       locationV2Selected,
       taxonSelected,
@@ -381,7 +396,7 @@ class DiscoveryFilters extends React.Component {
       domain === DISCOVERY_DOMAIN_MY_DATA;
 
     // Taxon threshold and annotations filters are disabled on the cg tab
-    const taxonFiltersDisabled =
+    const mngsFiltersDisabled =
       currentTab === TAB_SAMPLES &&
       workflow === WORKFLOWS.CONSENSUS_GENOME.value;
 
@@ -398,16 +413,18 @@ class DiscoveryFilters extends React.Component {
               )}
             >
               {hasTaxonThresholdFilterFeature ? (
-                this.renderTaxonThresholdFilter()
+                this.renderTaxonThresholdFilter({
+                  disabled: mngsFiltersDisabled,
+                })
               ) : (
                 <TaxonFilter
                   domain={domain}
                   onChange={this.handleChange.bind(this, KEY_TAXON_SELECTED)}
                   selectedOptions={taxonSelected}
-                  disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
+                  disabled={mngsFiltersDisabled}
                 />
               )}
-              {!taxonFiltersDisabled && (
+              {!mngsFiltersDisabled && (
                 <>
                   {!hasTaxonThresholdFilterFeature && this.renderTags("taxon")}
                   {hasTaxonThresholdFilterFeature &&
@@ -419,18 +436,10 @@ class DiscoveryFilters extends React.Component {
             </div>
             {hasAnnotationsFilter && (
               <div className={cs.filterContainer}>
-                <Dropdown
-                  label={<div className={cs.filterLabel}>Annotation</div>}
-                  onChange={this.handleChange.bind(
-                    this,
-                    KEY_ANNOTATIONS_SELECTED,
-                  )}
-                  value={annotationsSelected || undefined}
-                  options={ANNOTATION_FILTER_OPTIONS}
-                  disabled={taxonFiltersDisabled}
-                  multiple
-                />
-                {!taxonFiltersDisabled && this.renderAnnotationsFilterTags()}
+                {this.renderAnnotationsFilter({
+                  disabled: mngsFiltersDisabled,
+                })}
+                {!mngsFiltersDisabled && this.renderAnnotationsFilterTags()}
               </div>
             )}
             {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}

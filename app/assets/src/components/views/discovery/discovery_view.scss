@@ -22,7 +22,7 @@
     .leftPane:not(:empty) {
       border-right: 2px solid $sds-color-gray-200;
       flex: 0 0 auto;
-      padding: $sds-spaces-m 20px;
+      padding: $sds-spaces-l $sds-spaces-xl;
       overflow-x: visible;
     }
 
