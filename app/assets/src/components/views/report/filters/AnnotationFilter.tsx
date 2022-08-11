@@ -3,7 +3,7 @@ import React from "react";
 import { MultipleNestedDropdown } from "~/components/ui/controls/dropdowns";
 import { DropdownOption } from "~/interface/shared";
 
-const ANNOTATION_OPTIONS = ["Hit", "Not a hit", "Inconclusive", "None"];
+const ANNOTATION_OPTIONS = ["Hit", "Not a hit", "Inconclusive"];
 
 interface AnnotationFilterProps {
   selectedAnnotations: DropdownOption[];
