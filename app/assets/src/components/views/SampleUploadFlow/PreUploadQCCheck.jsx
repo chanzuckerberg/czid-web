@@ -2,6 +2,7 @@ import Aioli from "@biowasm/aioli";
 import { isEmpty } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
   ERROR_MESSAGE,
@@ -10,6 +11,12 @@ import {
   NANOPORE,
   R1CHECK,
   R2CHECK,
+  INVALID_FASTA_FASTQ,
+  MISMATCH_SEQUENCING_PLATFORM,
+  TRUNCATED_FILE,
+  PAIRED_END_MISMATCHED,
+  DUPLICATE_ID,
+  NO_VALID_SAMPLES,
   DUPLICATE_ID_ERROR,
   INVALID_FASTA_FASTQ_ERROR,
   TRUNCATED_FILE_ERROR,
@@ -135,6 +142,9 @@ const PreUploadQCCheck = ({
       // Will return either "FASTA text", "FASTQ sequence text", or "unknown text"
       if (fileType.includes(UNKNOWN_FILE_TYPE) && !invalidFiles.has(fileName)) {
         setInvalidFiles(arr => new Set([...arr, fileName]));
+        trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
+          error: INVALID_FASTA_FASTQ,
+        });
         return ERROR_MESSAGE;
       }
       result += fileType;
@@ -163,6 +173,9 @@ const PreUploadQCCheck = ({
       for (let i = 0; i < arr.length; i++) {
         if (ids.includes(arr[i]) && !duplicateIds.has(fileName)) {
           setDuplicateIds(dup => new Set([...dup, fileName]));
+          trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
+            error: DUPLICATE_ID,
+          });
           return false;
         }
         ids.push(arr[i]);
@@ -208,6 +221,9 @@ const PreUploadQCCheck = ({
         !truncatedFiles.has(fileName)
       ) {
         setTruncatedFiles(arr => new Set([...arr, fileName]));
+        trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
+          error: TRUNCATED_FILE,
+        });
         return false;
       }
     } catch (e) {
@@ -243,6 +259,9 @@ const PreUploadQCCheck = ({
         const sequenceIsNotPairwise = findDiff(arrR1[i], arrR2[i]) !== "2";
         if (sequenceIsNotPairwise) {
           setMismatchedFiles(arr => new Set([...arr, fileNameR1, fileNameR2]));
+          trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
+            error: PAIRED_END_MISMATCHED,
+          });
           return false;
         }
       }
@@ -284,7 +303,7 @@ const PreUploadQCCheck = ({
     }
   };
 
-  // Validate if all samples are invalid
+  // Validate if all samples are invalid, also handles analytics for mismatch sequence check
   const validateAllSamplesAreInvalid = () => {
     if (samples.every(element => element.finishedValidating === true)) {
       let result = true;
@@ -296,14 +315,22 @@ const PreUploadQCCheck = ({
           else if (
             sequenceTechnology === ILLUMINA &&
             element.format === ILLUMINA
-          )
+          ) {
             result = false;
+            trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
+              error: MISMATCH_SEQUENCING_PLATFORM,
+            });
+          }
           // Nanopore is selected and format is nanopore
           else if (
             sequenceTechnology === NANOPORE &&
             element.format === NANOPORE
-          )
+          ) {
             result = false;
+            trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
+              error: MISMATCH_SEQUENCING_PLATFORM,
+            });
+          }
           // Illumina or nanopore is not selected
           else if (
             sequenceTechnology !== ILLUMINA &&
@@ -312,6 +339,11 @@ const PreUploadQCCheck = ({
             result = false;
         }
       });
+      if (result) {
+        trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
+          error: NO_VALID_SAMPLES,
+        });
+      }
       return result;
     }
   };

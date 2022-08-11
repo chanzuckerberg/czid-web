@@ -254,6 +254,12 @@ export const MEDAKA_MODEL_OPTIONS = {
 export const MEGABYTE = 1000000;
 export const ERROR_MESSAGE = "Error has occured";
 export const SUCCESS_MESSAGE = "Success";
+export const INVALID_FASTA_FASTQ = "Invalid FASTA or FASTQ ";
+export const MISMATCH_SEQUENCING_PLATFORM = "Mismatch sequencing platform";
+export const TRUNCATED_FILE = "Truncated File";
+export const PAIRED_END_MISMATCHED = "Paired End Mismatched";
+export const DUPLICATE_ID = "Duplicated Read Ids inFASTA files";
+export const NO_VALID_SAMPLES = "No valid Samples";
 export const DUPLICATE_ID_ERROR =
   "This file has duplicate IDs. Please make sure all read IDs are unique";
 export const INVALID_FASTA_FASTQ_ERROR =

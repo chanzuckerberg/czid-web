@@ -796,6 +796,7 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       usedClearLabs,
     } = this.state;
+    const { allowedFeatures } = this.context || {};
 
     if (currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
@@ -812,6 +813,43 @@ class UploadSampleStep extends React.Component {
           samples,
         });
         samples = validatedSamples;
+
+        if (allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)) {
+          let errorTypes = new Set();
+          const samplesData = this.getSampleDataForUploadTable(LOCAL_UPLOAD);
+
+          let cumulativeFileSizeOfInvalidSamples = 0;
+
+          samplesData.forEach(element => {
+            if (!element.isValid) {
+              errorTypes.add(element.error);
+              const currentSample = samples.find(
+                obj => obj.name === element.name,
+              );
+              for (var key in currentSample.files) {
+                cumulativeFileSizeOfInvalidSamples +=
+                  currentSample.files[key].size;
+              }
+            }
+          });
+
+          if (samplesData.some(element => !element.isValid)) {
+            trackEvent(
+              ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_CUMULATIVE_FILE_SIZE_FAILED,
+              {
+                cumalativeInvalidFileSizes: cumulativeFileSizeOfInvalidSamples,
+              },
+            );
+          }
+          if (errorTypes.size > 1) {
+            trackEvent(
+              ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_MULTIPLE_ISSUES_FAILED,
+              {
+                multipleIssues: true,
+              },
+            );
+          }
+        }
       }
 
       onUploadSamples({
