@@ -676,6 +676,7 @@ class ReportTable extends React.Component {
     taxName,
     taxCommonName,
     taxSpecies,
+    taxonStatsByCountType,
   }) => {
     const { onCoverageVizClick, pipelineVersion, sampleId } = this.props;
     const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
@@ -688,6 +689,7 @@ class ReportTable extends React.Component {
         taxLevel,
         alignmentVizUrl,
         taxSpecies,
+        taxonStatsByCountType,
       });
     } else {
       window.open(alignmentVizUrl);
@@ -748,8 +750,12 @@ class ReportTable extends React.Component {
       );
     const percentIdentity = get("nt.percent_identity", rowData);
     const previousConsensusGenomeRuns = get(rowData.taxId, consensusGenomeData);
-    const ntContigs = get("nt.contigs", rowData);
-    const ntReads = get("nt.count", rowData);
+    const taxonStatsByCountType = {
+      ntContigs: get("nt.contigs", rowData),
+      ntReads: get("nt.count", rowData),
+      nrContigs: get("nr.contigs", rowData),
+      nrReads: get("nr.count", rowData),
+    };
 
     const analyticsContext = this.getAnalyticsContext({ rowData });
     return (
@@ -766,8 +772,7 @@ class ReportTable extends React.Component {
         taxSpecies={rowData.species}
         taxCategory={rowData.category}
         ncbiEnabled={validTaxId}
-        ntContigs={ntContigs}
-        ntReads={ntReads}
+        taxonStatsByCountType={taxonStatsByCountType}
         onBlastClick={withAnalytics(
           onBlastClick,
           ANALYTICS_EVENT_NAMES.REPORT_TABLE_BLAST_BUTTON_HOVER_ACTION_CLICKED,

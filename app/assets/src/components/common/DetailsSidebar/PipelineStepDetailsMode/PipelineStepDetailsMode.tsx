@@ -176,7 +176,7 @@ const PipelineStepDetailsMode = ({
   const renderResources = () => {
     if (resources && resources.length) {
       const resourcesHeader = <div className={cs.title}>Resources</div>;
-      const resourceLinks = resources.map((linkInfo) => {
+      const resourceLinks = resources.map(linkInfo => {
         return (
           <span key={linkInfo.url}>
             <a

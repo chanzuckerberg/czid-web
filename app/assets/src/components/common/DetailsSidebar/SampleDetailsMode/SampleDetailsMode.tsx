@@ -229,7 +229,7 @@ const SampleDetailsMode = ({
     } else if (key === "notes") {
       await saveSampleNotes(id, value);
     } else {
-      await saveSampleMetadata(sampleId, key, value).then((response) => {
+      await saveSampleMetadata(sampleId, key, value).then(response => {
         // If the save fails, immediately revert to the last valid metadata value.
         if (response.status === "failed") {
           _metadataErrors = set(key, response.message, _metadataErrors);
@@ -283,7 +283,7 @@ const SampleDetailsMode = ({
             <ConsensusGenomeDropdown
               workflowRuns={sample.workflow_runs}
               initialSelectedValue={currentRun.id}
-              onConsensusGenomeSelection={(workflowRunId) =>
+              onConsensusGenomeSelection={workflowRunId =>
                 onWorkflowRunSelect(
                   find({ id: workflowRunId }, sample.workflow_runs),
                 )
@@ -315,7 +315,7 @@ const SampleDetailsMode = ({
         <NotesTab
           notes={additionalInfo.notes}
           editable={additionalInfo.editable}
-          onNoteChange={(val) => handleMetadataChange("notes", val)}
+          onNoteChange={val => handleMetadataChange("notes", val)}
           onNoteSave={() => handleMetadataSave("notes")}
           savePending={savePending}
         />

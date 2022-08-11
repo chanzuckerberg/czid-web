@@ -1,11 +1,8 @@
+import { CountTypes } from "~/components/views/blast/constants";
 import { get, postWithCSRF } from "./core";
 
-export enum CountTypes {
-  NT = "NT",
-  NR = "NR",
-}
-
 export const fetchLongestContigsForTaxonId = ({
+  countType = CountTypes.NT,
   sampleId,
   pipelineVersion,
   taxonId,
@@ -14,11 +11,12 @@ export const fetchLongestContigsForTaxonId = ({
     params: {
       taxid: taxonId,
       pipeline_version: pipelineVersion,
-      count_type: CountTypes.NT,
+      count_type: countType,
     },
   });
 
 export const fetchLongestReadsForTaxonId = ({
+  countType = CountTypes.NT,
   sampleId,
   pipelineVersion,
   taxonId,
@@ -29,7 +27,7 @@ export const fetchLongestReadsForTaxonId = ({
       taxid: taxonId,
       tax_level: taxonLevel,
       pipeline_version: pipelineVersion,
-      count_type: CountTypes.NT,
+      count_type: countType,
     },
   });
 

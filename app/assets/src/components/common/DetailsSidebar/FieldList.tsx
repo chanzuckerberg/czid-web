@@ -17,7 +17,7 @@ interface FieldListProps {
 const FieldList = ({ className, fields }: FieldListProps) => {
   return (
     <div className={cx(cs.fieldList, className)}>
-      {fields.map((field) => {
+      {fields.map(field => {
         const fieldMetadata = get("fieldMetadata", field);
         const fieldLabel = <div className={cs.label}>{field.label}</div>;
         const labelWithTooltip = fieldMetadata && (

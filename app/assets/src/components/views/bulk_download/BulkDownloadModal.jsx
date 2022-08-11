@@ -14,7 +14,11 @@ import {
   validateSampleIds,
   validateWorkflowRunIds,
 } from "~/api/access_control";
-import { ANALYTICS_EVENT_NAMES, trackEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
 import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { getURLParamString } from "~/helpers/url";
@@ -304,7 +308,7 @@ class BulkDownloadModal extends React.Component {
         params,
       },
     );
-  }
+  };
 
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
     const { workflow } = this.props;

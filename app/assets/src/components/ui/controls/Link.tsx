@@ -9,6 +9,7 @@ export interface LinkProps {
   coloredBackground?: boolean;
   children?: React.ReactNode;
   className?: string;
+  disabled?: boolean;
   external?: boolean;
   href?: string;
   // We intentionally don't have an onClick prop, because we don't want to encourage arbitrary onClick handlers,
@@ -44,6 +45,7 @@ class Link extends React.Component<LinkProps> {
       coloredBackground,
       className,
       children,
+      disabled,
       external,
     } = this.props;
     return (
@@ -51,6 +53,7 @@ class Link extends React.Component<LinkProps> {
         href={href}
         className={cx(
           coloredBackground ? cs.linkBlack : cs.linkDefault,
+          disabled && cs.linkDisabled,
           className,
         )}
         target={external ? "_blank" : null}

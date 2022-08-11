@@ -9,7 +9,7 @@ import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
-import { BLAST_FEATURE } from "~/components/utils/features";
+import { BLAST_V1_FEATURE } from "~/components/utils/features";
 import {
   isPipelineFeatureAvailable,
   COVERAGE_VIZ_FEATURE,
@@ -20,9 +20,7 @@ import PropTypes from "~/components/utils/propTypes";
 import {
   IconAlignmentSmall,
   IconBlastSmall,
-  IconBrowserSmall,
   IconConsensusSmall,
-  IconContigSmall,
   IconCoverage,
   IconDownloadSmall,
   IconPhyloTreeSmall,
@@ -43,8 +41,6 @@ const HoverActions = ({
   coverageVizEnabled,
   fastaEnabled,
   ncbiEnabled,
-  ntContigs,
-  ntReads,
   onBlastClick,
   onConsensusGenomeClick,
   onContigVizClick,
@@ -59,6 +55,7 @@ const HoverActions = ({
   previousConsensusGenomeRuns,
   sampleId,
   snapshotShareId,
+  taxonStatsByCountType,
   taxCategory,
   taxCommonName,
   taxId,
@@ -69,6 +66,7 @@ const HoverActions = ({
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const [showHoverActions, setShowHoverActions] = useState(false);
+  const { ntContigs, ntReads } = taxonStatsByCountType;
 
   const handlePhyloModalOpen = () => {
     onPhyloTreeModalOpened &&
@@ -105,7 +103,9 @@ const HoverActions = ({
         },
         pipelineVersion,
         sampleId,
-        shouldBlastContigs: ntContigs > 0,
+        // shouldBlastContigs is only used by the BLAST v0 feature. It will be removed after BLAST v1 is launched
+        shouldBlastContigs: ntContigs >= 0,
+        taxonStatsByCountType,
         taxName,
         taxLevel,
         taxId,
@@ -118,7 +118,7 @@ const HoverActions = ({
       COVERAGE_VIZ_FEATURE,
       pipelineVersion,
     );
-    const hasBlastFeature = allowedFeatures.includes(BLAST_FEATURE);
+    const hasBlastv1Feature = allowedFeatures.includes(BLAST_V1_FEATURE);
     const params = {
       pipelineVersion,
       taxCommonName: taxCommonName,
@@ -127,6 +127,7 @@ const HoverActions = ({
         taxLevel === SPECIES_LEVEL_INDEX ? TAX_LEVEL_SPECIES : TAX_LEVEL_GENUS,
       taxName: taxName,
       taxSpecies: taxSpecies,
+      taxonStatsByCountType,
     };
 
     // Define all available icons (but don't display them)
@@ -152,6 +153,14 @@ const HoverActions = ({
             "Alignment Visualization Not Available - requires reads in NT",
           params,
         };
+
+    const HOVER_ACTIONS_BLAST_V1 = {
+      key: `blast_${params.taxId}_v1`,
+      message: "BLAST",
+      iconComponentClass: IconBlastSmall,
+      handleClick: handleBlastClick,
+      enabled: true,
+    };
 
     const HOVER_ACTIONS_BLAST = {
       key: `blast_${params.taxId}`,
@@ -226,42 +235,12 @@ const HoverActions = ({
       params,
     };
 
-    // Hover actions not used with Blast feature flag
-    const HOVER_ACTIONS_NCBI_TAXONOMY = {
-      key: `taxonomy_browser_${params.taxId}`,
-      message: "NCBI Taxonomy Browser",
-      iconComponentClass: IconBrowserSmall,
-      handleClick: onNcbiActionClick,
-      enabled: ncbiEnabled,
-      disabledMessage: "NCBI Taxonomy Not Found",
-      params,
-      snapshotEnabled: true,
-    };
-    const HOVER_ACTIONS_DOWNLOAD_FASTA = {
-      key: `fasta_download_${params.taxId}`,
-      message: "FASTA Download",
-      iconComponentClass: IconDownloadSmall,
-      handleClick: onFastaActionClick,
-      enabled: fastaEnabled,
-      disabledMessage: "FASTA Download Not Available",
-      params,
-    };
-    const HOVER_ACTIONS_DOWNLOAD_CONTIGS = {
-      key: `contigs_download_${params.taxId}`,
-      message: "Contigs Download",
-      iconComponentClass: IconContigSmall,
-      handleClick: onContigVizClick,
-      enabled: contigVizEnabled,
-      disabledMessage: "No Contigs Available",
-      params,
-    };
-
     // Build up the list of hover actions
     let hoverActions = [];
-    if (hasBlastFeature) {
+    if (hasBlastv1Feature) {
       hoverActions = [
         HOVER_ACTIONS_VIZ,
-        HOVER_ACTIONS_BLAST,
+        HOVER_ACTIONS_BLAST_V1,
         { divider: true },
         HOVER_ACTIONS_PHYLO,
         HOVER_ACTIONS_CONSENSUS,
@@ -269,12 +248,12 @@ const HoverActions = ({
       ];
     } else {
       hoverActions = [
-        HOVER_ACTIONS_NCBI_TAXONOMY,
-        HOVER_ACTIONS_DOWNLOAD_FASTA,
-        HOVER_ACTIONS_DOWNLOAD_CONTIGS,
         HOVER_ACTIONS_VIZ,
+        HOVER_ACTIONS_BLAST,
+        { divider: true },
         HOVER_ACTIONS_PHYLO,
         HOVER_ACTIONS_CONSENSUS,
+        HOVER_ACTIONS_DOWNLOAD,
       ];
     }
     // Remove null actions (could happen with HOVER_ACTIONS_CONSENSUS)
@@ -407,8 +386,6 @@ HoverActions.propTypes = {
   coverageVizEnabled: PropTypes.bool,
   fastaEnabled: PropTypes.bool,
   ncbiEnabled: PropTypes.bool,
-  ntContigs: PropTypes.number,
-  ntReads: PropTypes.number,
   onBlastClick: PropTypes.func.isRequired,
   onConsensusGenomeClick: PropTypes.func.isRequired,
   onContigVizClick: PropTypes.func.isRequired,
@@ -423,6 +400,7 @@ HoverActions.propTypes = {
   previousConsensusGenomeRuns: PropTypes.array,
   sampleId: PropTypes.number,
   snapshotShareId: PropTypes.string,
+  taxonStatsByCountType: PropTypes.object,
   taxCategory: PropTypes.string,
   taxCommonName: PropTypes.string,
   taxId: PropTypes.number,

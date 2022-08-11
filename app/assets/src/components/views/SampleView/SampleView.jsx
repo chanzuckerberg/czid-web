@@ -65,6 +65,7 @@ import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import {
   AMR_TABLE_FEATURE,
+  BLAST_V1_FEATURE,
   MERGED_NT_NR_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
@@ -81,8 +82,10 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
-import BlastContigsModal from "~/components/views/blastn/BlastContigsModal";
-import BlastReadsModal from "~/components/views/blastn/BlastReadsModal";
+import BlastContigsModal from "~/components/views/blast/BlastContigsModal";
+import BlastReadsModal from "~/components/views/blast/BlastReadsModal";
+import BlastV1ContigsModal from "~/components/views/blast/BlastV1ContigsModal";
+import BlastV1ReadsModal from "~/components/views/blast/BlastV1ReadsModal";
 import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
 import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/ConsensusGenomePreviousModal";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
@@ -92,6 +95,7 @@ import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import Notification from "~ui/notifications/Notification";
 
+import BlastSelectionModal from "../blast/BlastSelectionModal";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import ReportViewSelector from "./ReportViewSelector";
@@ -168,8 +172,12 @@ class SampleView extends React.Component {
       amrData: null,
       backgrounds: [],
       blastData: {},
+      blastModalInfo: {},
+      blastSelectionModalVisible: false,
       blastContigsModalVisible: false,
       blastReadsModalVisible: false,
+      blastV1ContigsModalVisible: false,
+      blastV1ReadsModalVisible: false,
       consensusGenomeData: {},
       consensusGenomeCreationParams: {},
       consensusGenomePreviousParams: {},
@@ -1090,6 +1098,7 @@ class SampleView extends React.Component {
       taxonLevel: coverageVizParams.taxLevel,
       alignmentVizUrl: coverageVizParams.alignmentVizUrl,
       accessionData,
+      taxonStatsByCountType: coverageVizParams.taxonStatsByCountType,
     };
   };
 
@@ -1300,14 +1309,22 @@ class SampleView extends React.Component {
     pipelineVersion,
     sampleId,
     shouldBlastContigs,
+    taxonStatsByCountType,
     taxName,
     taxLevel,
     taxId,
   }) => {
+    const { allowedFeatures = [] } = this.context || {};
+    const blastSelectionModalVisible = allowedFeatures.includes(
+      BLAST_V1_FEATURE,
+    );
+
     this.setState({
-      ...(shouldBlastContigs
-        ? { blastContigsModalVisible: true }
-        : { blastReadsModalVisible: true }),
+      blastSelectionModalVisible,
+      ...(!blastSelectionModalVisible &&
+        (shouldBlastContigs
+          ? { blastContigsModalVisible: true }
+          : { blastReadsModalVisible: true })),
       blastData: {
         context,
         pipelineVersion,
@@ -1315,6 +1332,7 @@ class SampleView extends React.Component {
         taxName,
         taxLevel,
         taxId,
+        taxonStatsByCountType,
       },
     });
   };
@@ -2258,12 +2276,37 @@ class SampleView extends React.Component {
   handleBlastReadsModalClose = () =>
     this.setState({ blastReadsModalVisible: false });
 
+  handleBlastV1ContigsModalClose = () =>
+    this.setState({ blastV1ContigsModalVisible: false });
+
+  handleBlastV1ReadsModalClose = () =>
+    this.setState({ blastV1ReadsModalVisible: false });
+
+  handleBlastSelectionModalClose = () =>
+    this.setState({ blastSelectionModalVisible: false });
+
+  handleBlastSelectionModalContinue = blastModalInfo => {
+    const { shouldBlastContigs } = blastModalInfo;
+
+    this.setState({
+      blastSelectionModalVisible: false,
+      blastModalInfo,
+      ...(shouldBlastContigs
+        ? { blastV1ContigsModalVisible: true }
+        : { blastV1ReadsModalVisible: true }),
+    });
+  };
+
   render = () => {
     const {
       amrData,
       blastData,
+      blastModalInfo,
       blastContigsModalVisible,
       blastReadsModalVisible,
+      blastV1ContigsModalVisible,
+      blastV1ReadsModalVisible,
+      blastSelectionModalVisible,
       consensusGenomeData,
       consensusGenomePreviousParams,
       consensusGenomeCreationModalVisible,
@@ -2405,11 +2448,21 @@ class SampleView extends React.Component {
             }
           />
         )}
+        {blastSelectionModalVisible && (
+          <BlastSelectionModal
+            open
+            onContinue={this.handleBlastSelectionModalContinue}
+            onClose={this.handleBlastSelectionModalClose}
+            taxonName={get("taxName", blastData)}
+            taxonStatsByCountType={get("taxonStatsByCountType", blastData)}
+          />
+        )}
+        {/* These are the BLAST v0 modals that will be removed once BLAST v1 is released **/}
         {blastContigsModalVisible && (
           <BlastContigsModal
             open
-            context={get("context", blastData)}
             onClose={this.handleBlastContigsModalClose}
+            context={get("context", blastData)}
             pipelineVersion={get("pipelineVersion", blastData)}
             sampleId={get("sampleId", blastData)}
             taxonName={get("taxName", blastData)}
@@ -2419,8 +2472,34 @@ class SampleView extends React.Component {
         {blastReadsModalVisible && (
           <BlastReadsModal
             open
-            context={get("context", blastData)}
             onClose={this.handleBlastReadsModalClose}
+            context={get("context", blastData)}
+            pipelineVersion={get("pipelineVersion", blastData)}
+            sampleId={get("sampleId", blastData)}
+            taxonName={get("taxName", blastData)}
+            taxonLevel={get("taxLevel", blastData)}
+            taxonId={get("taxId", blastData)}
+          />
+        )}
+        {/* BLAST v1 modals **/}
+        {blastV1ContigsModalVisible && (
+          <BlastV1ContigsModal
+            open
+            onClose={this.handleBlastV1ContigsModalClose}
+            blastModalInfo={blastModalInfo}
+            context={get("context", blastData)}
+            pipelineVersion={get("pipelineVersion", blastData)}
+            sampleId={get("sampleId", blastData)}
+            taxonName={get("taxName", blastData)}
+            taxonId={get("taxId", blastData)}
+          />
+        )}
+        {blastV1ReadsModalVisible && (
+          <BlastV1ReadsModal
+            open
+            onClose={this.handleBlastV1ReadsModalClose}
+            blastModalInfo={blastModalInfo}
+            context={get("context", blastData)}
             pipelineVersion={get("pipelineVersion", blastData)}
             sampleId={get("sampleId", blastData)}
             taxonName={get("taxName", blastData)}

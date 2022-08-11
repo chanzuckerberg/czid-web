@@ -9,7 +9,7 @@ import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import { BLAST_FEATURE } from "~/components/utils/features";
+import { BLAST_V1_FEATURE } from "~/components/utils/features";
 import { formatPercent } from "~/components/utils/format";
 import PropTypes from "~/components/utils/propTypes";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -374,19 +374,58 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
   };
 
-  renderContentHeader = () => {
-    const {
-      onBlastClick,
-      params,
-      pipelineVersion,
-      sampleId,
-      snapshotShareId,
-    } = this.props;
-    const { currentAccessionSummary } = this.state;
-    const { taxonId, taxonName } = params;
-
+  renderBlastAction = () => {
+    const { onBlastClick, params, pipelineVersion, sampleId } = this.props;
+    const { taxonId, taxonName, taxonStatsByCountType } = params;
     const { allowedFeatures = [] } = this.context || {};
-    const hasBlastFeature = allowedFeatures.includes(BLAST_FEATURE);
+
+    const hasBlastv1Feature = allowedFeatures.includes(BLAST_V1_FEATURE);
+
+    return (
+      <BasicPopup
+        className={cs.actionIconPopup}
+        basic={false}
+        content={hasBlastv1Feature ? "BLAST" : "BLASTN"}
+        position="top center"
+        inverted
+        trigger={
+          <ButtonIcon
+            className={cs.iconButton}
+            onClick={() =>
+              trackEvent(
+                ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_BLAST_BUTTON_CLICKED,
+                onBlastClick({
+                  context: {
+                    blastedFrom: "CoverageVizBottomSidebar",
+                  },
+                  pipelineVersion,
+                  sampleId,
+                  taxName: taxonName,
+                  taxId: taxonId,
+                  // shouldBlastContigs is only used by Blast V0 and will be removed after Blast V1 is launched
+                  shouldBlastContigs: true,
+                  taxonStatsByCountType,
+                }),
+              )
+            }
+            sdsSize="large"
+            sdsType="secondary"
+          >
+            <Icon
+              sdsIcon="searchLinesHorizontal"
+              sdsSize="xl"
+              sdsType="iconButton"
+            />
+          </ButtonIcon>
+        }
+      />
+    );
+  };
+
+  renderContentHeader = () => {
+    const { params, pipelineVersion, sampleId, snapshotShareId } = this.props;
+    const { currentAccessionSummary } = this.state;
+    const { taxonId } = params;
 
     const numBestAccessions = params.accessionData.best_accessions.length;
     const numAccessions = params.accessionData.num_accessions;
@@ -459,43 +498,9 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 <IconArrowRight />
               </a>
             </div>
-            {hasBlastFeature && (
+            {
               <div className={cs.actionIcons}>
-                <BasicPopup
-                  className={cs.actionIconPopup}
-                  basic={false}
-                  content="BLASTN"
-                  position="top center"
-                  inverted
-                  trigger={
-                    <ButtonIcon
-                      className={cs.iconButton}
-                      onClick={() =>
-                        trackEvent(
-                          ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_BLAST_BUTTON_CLICKED,
-                          onBlastClick({
-                            context: {
-                              blastedFrom: "CoverageVizBottomSidebar",
-                            },
-                            pipelineVersion,
-                            sampleId,
-                            shouldBlastContigs: true,
-                            taxName: taxonName,
-                            taxId: taxonId,
-                          }),
-                        )
-                      }
-                      sdsSize="large"
-                      sdsType="secondary"
-                    >
-                      <Icon
-                        sdsIcon="searchLinesHorizontal"
-                        sdsSize="xl"
-                        sdsType="iconButton"
-                      />
-                    </ButtonIcon>
-                  }
-                />
+                {this.renderBlastAction()}
                 <BasicPopup
                   className={cs.actionIconPopup}
                   basic={false}
@@ -529,7 +534,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   }
                 />
               </div>
-            )}
+            }
           </div>
         )}
       </div>
@@ -773,6 +778,12 @@ CoverageVizBottomSidebar.propTypes = {
     taxonName: PropTypes.string,
     taxonCommonName: PropTypes.string,
     taxonLevel: PropTypes.string,
+    taxonStatsByCountType: PropTypes.shape({
+      ntContigs: PropTypes.number,
+      ntReads: PropTypes.number,
+      nrContigs: PropTypes.number,
+      nrReads: PropTypes.number,
+    }),
     accessionData: PropTypes.shape({
       best_accessions: PropTypes.arrayOf(
         PropTypes.shape({

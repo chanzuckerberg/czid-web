@@ -16,7 +16,6 @@ import {
   MISMATCH_FILES_ERROR,
 } from "./constants";
 
-
 const PreUploadQCCheck = ({
   samples,
   changeState,
@@ -423,7 +422,8 @@ const PreUploadQCCheck = ({
         handleSampleSelect(
           passedFile._selectId,
           passedFile.format === NANOPORE && sequenceTechnology !== ILLUMINA,
-          "local");
+          "local",
+        );
     }
   };
 

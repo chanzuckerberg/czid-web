@@ -29,7 +29,7 @@ const BlastContigsTable = ({
     {
       dataKey: "contig_name",
       width: 300,
-      label: "Contig name",
+      label: "Name",
       cellRenderer: ({ cellData }) =>
         contigNameCellRenderer({ contigName: cellData }),
       headerClassName: cx(cs.header, cs.contigNameHeader),
@@ -37,14 +37,14 @@ const BlastContigsTable = ({
     {
       dataKey: "num_reads",
       width: 140,
-      label: "Number of reads",
+      label: "Reads",
       className: cx(cs.cell, cs.numReads),
       headerClassName: cs.header,
     },
     {
       dataKey: "contig_length",
       width: 125,
-      label: "Contig length",
+      label: "Length",
       className: cx(cs.cell, cs.contigLength),
       headerClassName: cs.header,
     },

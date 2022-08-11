@@ -115,7 +115,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     }
   };
 
-  toggleSection = (section) => {
+  toggleSection = section => {
     const { sectionOpen } = this.state;
 
     const newValue = !sectionOpen[section];
@@ -129,7 +129,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     });
   };
 
-  getPipelineInfoField = (field) => {
+  getPipelineInfoField = field => {
     const { pipelineInfo, snapshotShareId } = this.props;
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
@@ -171,11 +171,11 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
       const hostFilteringStageKey = Object.keys(
         pipelineResults[RESULTS_FOLDER_ROOT_KEY],
       )[0];
-      this.setState((prevState) => ({
+      this.setState(prevState => ({
         pipelineStepDict:
           pipelineResults[RESULTS_FOLDER_ROOT_KEY][hostFilteringStageKey],
         loading: prevState.loading.filter(
-          (section) => section !== READ_COUNTS_TABLE,
+          section => section !== READ_COUNTS_TABLE,
         ),
       }));
     }
@@ -208,7 +208,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
       // Property order is predictable in JavaScript objects since ES2015
       const stepKeys = Object.keys(pipelineStepDict[stepsKey]);
       const previousStepKey =
-        stepKeys[stepKeys.findIndex((key) => key === stepKey) - 1];
+        stepKeys[stepKeys.findIndex(key => key === stepKey) - 1];
       const previousStep = pipelineStepDict[stepsKey][previousStepKey];
       uniqueReads = readsAfter;
       readsAfter = previousStep[readsAfterKey];
@@ -303,7 +303,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
             <div className={cs.labelText}>% Reads Remaining</div>
           </div>
         </div>
-        {Object.keys(pipelineStepDict[stepsKey]).map((stepKey) => (
+        {Object.keys(pipelineStepDict[stepsKey]).map(stepKey => (
           <div key={stepKey}>{this.renderReadCountsTable(stepKey)}</div>
         ))}
       </div>
@@ -373,7 +373,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
               className={cs.erccScatterplotSection}
             >
               <div
-                ref={(c) => (this._graphContainer = c)}
+                ref={c => (this._graphContainer = c)}
                 className={cs.graphContainer}
               >
                 {this.renderErccComparison()}
@@ -387,7 +387,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
             >
               <div className={cs.downloadSectionContent}>
                 {pipelineRun &&
-                  getDownloadLinks(sampleId, pipelineRun).map((option) => (
+                  getDownloadLinks(sampleId, pipelineRun).map(option => (
                     <a
                       key={option.label}
                       className={cs.downloadLink}

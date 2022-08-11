@@ -1,3 +1,4 @@
+// BlastContigsModal.jsx is only used for Blast V0
 import { Tooltip } from "czifui";
 import { filter, map, reduce, size } from "lodash/fp";
 import PropTypes from "prop-types";

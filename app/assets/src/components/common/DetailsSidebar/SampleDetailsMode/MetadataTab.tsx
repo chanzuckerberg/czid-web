@@ -87,7 +87,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     // Group the MetadataFields by group name
     // Include Sample Info by default so that special cases in SAMPLE_ADDITIONAL_INFO always show
     const nameToFields = { "Sample Info": [] };
-    Object.values(this.props.metadataTypes).forEach((field) => {
+    Object.values(this.props.metadataTypes).forEach(field => {
       const name =
         field.group === null ? "Custom Metadata" : field.group + " Info";
       if (name in nameToFields) {
@@ -98,7 +98,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     });
 
     // Format as [{name: "Sample Info", keys: ["sample_type"]}, {name: "Host Info", keys: ["age"]}]
-    return Object.entries(nameToFields).map((entry) => {
+    return Object.entries(nameToFields).map(entry => {
       return {
         name: entry[0],
         keys: entry[1].sort(),
@@ -212,7 +212,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     } = this.props;
     const { sectionEditing } = this.state;
 
-    const validKeys = section.keys.filter((key) =>
+    const validKeys = section.keys.filter(key =>
       Object.keys(metadataTypes).includes(key),
     );
 
@@ -230,7 +230,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     // Special Sample Info fields.
     // TODO: Consider refactoring so SAMPLE_ADDITIONAL_INFO doesn't have to be special.
     if (section.name === "Sample Info" && !isSectionEditing) {
-      SAMPLE_ADDITIONAL_INFO.forEach((info) => {
+      SAMPLE_ADDITIONAL_INFO.forEach(info => {
         metadataFields.push({
           label: info.name,
           value:
@@ -252,7 +252,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
         label: "Sample Name",
         value: (
           <Input
-            onChange={(val) => onMetadataChange("name", val)}
+            onChange={val => onMetadataChange("name", val)}
             onBlur={() => onMetadataSave("name")}
             value={additionalInfo.name}
             type="text"
@@ -262,7 +262,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
       });
     }
 
-    validKeys.forEach((key) => {
+    validKeys.forEach(key => {
       metadataFields.push({
         label: metadataTypes[key].name,
         value: isSectionEditing
@@ -277,7 +277,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
   render() {
     return (
       <div>
-        {this.state.sections.map((section) => (
+        {this.state.sections.map(section => (
           <MetadataSection
             key={section.name}
             editable={this.props.additionalInfo.editable}

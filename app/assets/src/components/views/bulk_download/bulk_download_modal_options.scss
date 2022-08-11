@@ -148,7 +148,7 @@
     @include font-body-xxs;
     color: $sds-color-gray-black;
   }
-  .filterbyField{
+  .filterbyField {
     width: calc(100% - #{$sds-spaces-xl * 0.5});
     margin-top: $sds-spaces-xl;
     margin-bottom: $sds-spaces-xl;

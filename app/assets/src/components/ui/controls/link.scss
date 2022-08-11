@@ -9,6 +9,11 @@
   &:active {
     color: $sds-color-primary-600 !important;
   }
+
+  &.linkDisabled {
+    cursor: default !important;
+    color: $sds-color-gray-300 !important;
+  }
 }
 
 .linkBlack {

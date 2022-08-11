@@ -1,0 +1,59 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.blastReadsModal {
+  display: flex;
+  flex-direction: column;
+
+  .blastType {
+    @include font-header-xl;
+    color: $sds-color-gray-black;
+    text-transform: uppercase;
+  }
+
+  .taxonName {
+    font: $sds-font-body-xxs-400-font;
+    color: $sds-color-gray-500;
+  }
+
+  .title {
+    font: $sds-font-header-m-600-font;
+    color: $sds-color-gray-black;
+
+    &.spacing {
+      margin-top: $sds-spaces-xl;
+    }
+  }
+
+  .readsIdentification {
+    margin-top: $sds-spaces-s;
+    background-color: $sds-color-gray-100;
+
+    .description {
+      font: $sds-font-header-s-600-font;
+      margin: $sds-spaces-l 0 0 $sds-spaces-l;
+    }
+
+    .alignmentRange {
+      font: $sds-font-body-s-400-font;
+      margin: 0 0 $sds-spaces-l $sds-spaces-l;
+    }
+  }
+
+  .actions {
+    margin-top: $sds-spaces-xxl;
+    display: flex;
+
+    .item {
+      &:not(:first-child) {
+        margin-left: $space-xs;
+      }
+
+      &:not(:last-child) {
+        margin-right: $space-xs;
+      }
+    }
+  }
+}

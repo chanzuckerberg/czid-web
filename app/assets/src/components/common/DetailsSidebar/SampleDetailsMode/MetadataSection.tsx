@@ -95,7 +95,7 @@ class MetadataSection extends React.Component<
           ) : (
             <div
               className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
-              onClick={(e) => {
+              onClick={e => {
                 onEditToggle();
                 e.stopPropagation();
               }}

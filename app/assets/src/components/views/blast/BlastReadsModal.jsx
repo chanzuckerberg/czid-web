@@ -1,3 +1,4 @@
+// BlastReadssModal.jsx is only used for Blast V0
 import { size } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";

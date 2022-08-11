@@ -190,17 +190,13 @@ class BulkDownloadModalOptions extends React.Component {
         break;
       case "filter_by":
         return (
-        <div className={cs.filterbyField} key={field.type}>
-
-          <div className={cs.label}>
-          <span>{field.display_name}: </span>
-          <span className={cs.description}> — optional </span>
+          <div className={cs.filterbyField} key={field.type}>
+            <div className={cs.label}>
+              <span>{field.display_name}: </span>
+              <span className={cs.description}> — optional </span>
+            </div>
+            <ThresholdFilterModal addFilterList={onFieldSelect} />
           </div>
-            <ThresholdFilterModal
-              addFilterList={onFieldSelect}
-              />
-        </div>
-
         );
       case "download_format":
         dropdownOptions = field.options.map(option => ({

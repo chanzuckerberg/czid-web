@@ -42,7 +42,7 @@ const NotesTab = ({
       {editing && (
         <div className={cs.textareaContainer}>
           <Textarea
-            onChange={(val) => onNoteChange(val)}
+            onChange={val => onNoteChange(val)}
             onBlur={() => onNoteSave()}
             value={notes}
             className={cs.textarea}

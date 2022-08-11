@@ -989,7 +989,7 @@ class SamplesController < ApplicationController
     send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
   end
 
-  # GET /samples/:id/taxid_contigs_for_blast.json?taxid=:taxid&pipeline_version=:pipeline_version
+  # GET /samples/:id/taxid_contigs_for_blast.json?taxid=:taxid&pipeline_version=:pipeline_version&count_type=:count_type
   def taxid_contigs_for_blast
     permitted_params = params.permit(:taxid, :pipeline_version, :count_type)
 

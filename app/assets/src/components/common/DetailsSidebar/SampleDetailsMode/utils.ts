@@ -103,7 +103,7 @@ export const processPipelineInfo = (
   return pipelineInfo;
 };
 
-export const processCGWorkflowRunInfo = (workflowRun) => {
+export const processCGWorkflowRunInfo = workflowRun => {
   const qualityMetrics = get(
     "parsed_cached_results.quality_metrics",
     workflowRun,
@@ -136,7 +136,7 @@ export const processCGWorkflowRunInfo = (workflowRun) => {
     workflow: get("label", find({ value: workflowRun.workflow }, WORKFLOWS)),
   };
 
-  return mapValues((v) => ({ text: v }), cgWorkflowRunInfo);
+  return mapValues(v => ({ text: v }), cgWorkflowRunInfo);
 };
 
 // Format the upload date.

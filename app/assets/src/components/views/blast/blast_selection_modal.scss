@@ -1,0 +1,90 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.blastSelectionModal {
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    font: $sds-font-header-xl-600-font;
+    text-transform: capitalize;
+    color: $sds-color-gray-black;
+  }
+
+  .taxonName {
+    font: $sds-font-body-xxs-400-font;
+    color: $sds-color-gray-500;
+  }
+
+  .selectableOptions {
+    margin-top: $sds-spaces-xl;
+    margin-bottom: $sds-spaces-xl;
+
+    .selectableOption {
+      display: flex;
+      padding: $sds-spaces-l;
+      border-radius: $sds-corners-corner-m;
+      cursor: pointer;
+
+      &:hover:not(.disabled) {
+        background-color: $sds-color-gray-100;
+      }
+
+      &.selected {
+        background-color: $sds-color-gray-100;
+      }
+
+      &.disabled {
+        cursor: default;
+      }
+
+      .radioButton {
+        flex-shrink: 0;
+        margin: $sds-spaces-l 10px $sds-spaces-l 0;
+
+        &.alignTitle {
+          margin-top: $sds-spaces-xxs;
+        }
+      }
+
+      .optionText {
+        .title {
+          font: $sds-font-header-s-600-font;
+          text-transform: uppercase;
+
+          &.disabled {
+            color: $sds-color-gray-300 !important;
+          }
+        }
+
+        .description {
+          font: $sds-font-body-xs-400-font;
+          color: $sds-color-gray-500;
+
+          margin-top: $sds-spaces-xs;
+          margin-bottom: $sds-spaces-l;
+
+          &.disabled {
+            color: $sds-color-gray-300 !important;
+          }
+        }
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+
+    .action {
+      &:not(:first-child) {
+        margin-left: $space-xs;
+      }
+
+      &:not(:last-child) {
+        margin-right: $space-xs;
+      }
+    }
+  }
+}
