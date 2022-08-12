@@ -3,6 +3,7 @@ import { isEmpty } from "lodash/fp";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
   ERROR_MESSAGE,
@@ -22,6 +23,8 @@ import {
   TRUNCATED_FILE_ERROR,
   MISMATCH_FILES_ERROR,
 } from "./constants";
+import cs from "./pre_upload_qc_check.scss";
+
 
 const PreUploadQCCheck = ({
   samples,
@@ -459,6 +462,19 @@ const PreUploadQCCheck = ({
     }
   };
 
+  // Get all files of the given sequence technology
+  const getFiles = sequenceTechnologyType => {
+    let allFiles = [];
+    let filteredArrayOfSequenceTechnolgy = samples.filter(
+      element => element.format === sequenceTechnologyType,
+    );
+
+    filteredArrayOfSequenceTechnolgy.forEach(element => {
+      for (var key in element.files) allFiles.push(key);
+    });
+    return allFiles;
+  };
+
   // Rerenders whenever samples, or sequence technolgoy changes
   useEffect(() => {
     wrapper();
@@ -474,10 +490,11 @@ const PreUploadQCCheck = ({
   };
 
   return (
-    <div>
+    <div className={cs.warning}>
       <div>
         {invalidFiles.size > 0 && (
           <IssueGroup
+            className={cs.issue}
             caption={`${invalidFiles.size} file${
               invalidFiles.size > 1 ? "s" : ""
             } 
@@ -489,11 +506,20 @@ const PreUploadQCCheck = ({
         )}
         {duplicateIds.size > 0 && (
           <IssueGroup
-            caption={`${duplicateIds.size} file${
-              duplicateIds.size > 1 ? "s" : ""
-            } 
-            will not be uploaded because there are duplicate read IDs.  Tip! You can use the SeqKit method “rename” on the duplicate read IDs in your FASTA file to make them unique. Check out SeqKit documentation 
-            here`}
+            className={cs.issue}
+            caption={
+              <span>
+                {duplicateIds.size + " file"}
+                {duplicateIds.size > 1 ? "s " : " "}
+                will not be uploaded because there are duplicate read IDs. Tip!
+                You can use the SeqKit method &quot;rename&quot; on the
+                duplicate read IDs in your FASTA file to make them unique. Check
+                out SeqKit documentation
+                <ExternalLink href="https://bioinf.shenwei.me/seqkit/usage/#rename">
+                  {" here."}
+                </ExternalLink>
+              </span>
+            }
             headers={["File Name"]}
             rows={[...duplicateIds].map(name => [name])}
             type="warning"
@@ -501,6 +527,7 @@ const PreUploadQCCheck = ({
         )}
         {truncatedFiles.size > 0 && (
           <IssueGroup
+            className={cs.issue}
             caption={`${truncatedFiles.size} file${
               truncatedFiles.size > 1 ? "s" : ""
             } 
@@ -512,10 +539,20 @@ const PreUploadQCCheck = ({
         )}
         {mismatchedFiles.size > 0 && (
           <IssueGroup
-            caption={`${mismatchedFiles.size} file${
-              mismatchedFiles.size > 1 ? "s" : ""
-            } 
-            won't be uploaded because thee paired-end files are not matching. Tip! You can use use the SeqKit method named "pair" to sort your FASTQ files so that R1 and R2 reads match up. Check out SeqKit documentation here.`}
+            className={cs.issue}
+            caption={
+              <span>
+                {mismatchedFiles.size + " file"}
+                {mismatchedFiles.size > 1 ? "s " : " "}
+                will not be uploaded because the paired-end files do not match.
+                Tip! You can use use the SeqKit method named &quot;pair&quot; to
+                sort your FASTQ files so that R1 and R2 reads match up. Check
+                out SeqKit documentation
+                <ExternalLink href="https://bioinf.shenwei.me/seqkit/usage/#pair">
+                  {" here."}
+                </ExternalLink>
+              </span>
+            }
             headers={["File Name"]}
             rows={[...mismatchedFiles].map(name => [name])}
             type="warning"
@@ -524,52 +561,30 @@ const PreUploadQCCheck = ({
         {sequenceTechnology === ILLUMINA &&
           samples.some(element => element.format === NANOPORE) && (
             <IssueGroup
-              caption={`${
-                samples.filter(element => element.format === NANOPORE).length
-              } 
-              file${
-                samples.filter(element => element.format === NANOPORE).length >
-                1
-                  ? "s"
-                  : ""
-              } 
+              className={cs.issue}
+              caption={`${getFiles(NANOPORE).length} 
+              file${getFiles(NANOPORE).length > 1 ? "s" : ""} 
               will not be uploaded. You selected Illumina as the sequencing platform, but the 
-              file${
-                samples.filter(element => element.format === NANOPORE).length >
-                1
-                  ? "s"
-                  : ""
-              } 
+              file${getFiles(NANOPORE).length > 1 ? "s" : ""} 
               does not appear to be an Illumina output.`}
               headers={["File Name"]}
-              rows={samples
-                .filter(element => element.format === NANOPORE)
-                .map(name => [name.name])}
+              rows={getFiles(NANOPORE).map(name => [name])}
               type="warning"
             />
           )}
         {sequenceTechnology === NANOPORE &&
           samples.some(element => element.format === ILLUMINA) && (
             <IssueGroup
-              caption={`${
-                samples.filter(element => element.format === ILLUMINA).length
-              } file${
-                samples.filter(element => element.format === ILLUMINA).length >
-                1
-                  ? "s"
-                  : ""
+              className={cs.issue}
+              caption={`${getFiles(ILLUMINA).length} file${
+                getFiles(ILLUMINA).length > 1 ? "s" : ""
               } 
               will not be uploaded. You selected Nanopore as the sequencing platform, but the file${
-                samples.filter(element => element.format === ILLUMINA).length >
-                1
-                  ? "s"
-                  : ""
+                getFiles(ILLUMINA).length > 1 ? "s" : ""
               } 
               does not appear to be a Nanopore output.`}
               headers={["File Name"]}
-              rows={samples
-                .filter(element => element.format === ILLUMINA)
-                .map(name => [name.name])}
+              rows={getFiles(ILLUMINA).map(name => [name])}
               type="warning"
             />
           )}
