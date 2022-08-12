@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import {
   difference,
   forEach,
@@ -18,7 +19,6 @@ import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import { ObjectCollectionView } from "../DiscoveryDataLayer";
 
 import cs from "./map_preview_sidebar.scss";
@@ -154,9 +154,17 @@ export default class MapPreviewSidebar extends React.Component {
                 visibilityIconRenderer: p =>
                   p ? (
                     p.public_access ? (
-                      <IconProjectPublic />
+                      <Icon
+                        sdsIcon="projectPublic"
+                        sdsSize="xl"
+                        sdsType="static"
+                      />
                     ) : (
-                      <IconProjectPrivate />
+                      <Icon
+                        sdsIcon="projectPrivate"
+                        sdsSize="xl"
+                        sdsType="static"
+                      />
                     )
                   ) : (
                     ""

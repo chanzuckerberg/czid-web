@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import { flatten, get, keyBy, map, mapKeys, without } from "lodash/fp";
 import React from "react";
 
@@ -17,7 +18,7 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import DataTable from "~/components/visualizations/table/DataTable";
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
-import { IconProjectPrivate, IconProjectPublic, IconSample } from "~ui/icons";
+import { IconSample } from "~ui/icons";
 import { returnHipaaCompliantMetadata } from "~utils/metadata";
 import AdminUploadOptions from "./AdminUploadOptions";
 import HostOrganismMessage from "./HostOrganismMessage";
@@ -250,9 +251,13 @@ class ReviewStep extends React.Component {
         </div>
         <div className={cs.section}>
           {project.public_access === 1 ? (
-            <IconProjectPublic className={cs.icon} />
+            <div className={cs.icon}>
+              <Icon sdsIcon="projectPublic" sdsSize="xl" sdsType="static" />
+            </div>
           ) : (
-            <IconProjectPrivate className={cs.icon} />
+            <div className={cs.icon}>
+              <Icon sdsIcon="projectPrivate" sdsSize="xl" sdsType="static" />
+            </div>
           )}
           <div className={cs.text}>
             <div className={cs.header}>

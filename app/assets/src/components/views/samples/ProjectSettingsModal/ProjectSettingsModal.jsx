@@ -1,5 +1,6 @@
 import axios from "axios";
 import cx from "classnames";
+import { Icon } from "czifui";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -9,7 +10,6 @@ import Divider from "~/components/layout/Divider";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import ShareButton from "~ui/controls/buttons/ShareButton";
-import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 
 import PublicProjectConfirmationModal from "./PublicProjectConfirmationModal";
 import UserManagementForm from "./UserManagementForm";
@@ -85,7 +85,13 @@ class ProjectSettingsModal extends React.Component {
               <div className={cx(cs.background, cs.projectVisibility)}>
                 {project.public_access ? (
                   <div className={cs.visibility}>
-                    <IconProjectPublic className={cs.icon} />
+                    <div className={cs.icon}>
+                      <Icon
+                        sdsIcon="projectPublic"
+                        sdsSize="xl"
+                        sdsType="static"
+                      />
+                    </div>
                     <div className={cs.text}>
                       <div className={cs.label}>Public Project</div>
                       <div className={cs.note}>
@@ -97,7 +103,13 @@ class ProjectSettingsModal extends React.Component {
                   </div>
                 ) : (
                   <div className={cs.visibility}>
-                    <IconProjectPrivate className={cs.icon} />
+                    <div className={cs.icon}>
+                      <Icon
+                        sdsIcon="projectPrivate"
+                        sdsSize="xl"
+                        sdsType="static"
+                      />
+                    </div>
                     <div className={cs.text}>
                       <div className={cs.header}>
                         <div className={cs.label}>Private Project</div>

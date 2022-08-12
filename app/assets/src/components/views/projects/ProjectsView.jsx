@@ -1,4 +1,4 @@
-import { Button } from "czifui";
+import { Icon, Button } from "czifui";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 
@@ -9,7 +9,6 @@ import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import {
   DEFAULT_ROW_HEIGHT,
@@ -86,9 +85,9 @@ class ProjectsView extends React.Component {
       return <div className={cs.icon} />;
     }
     return project.public_access ? (
-      <IconProjectPublic />
+      <Icon sdsIcon="projectPublic" sdsSize="xl" sdsType="static" />
     ) : (
-      <IconProjectPrivate />
+      <Icon sdsIcon="projectPrivate" sdsSize="xl" sdsType="static" />
     );
   }
 

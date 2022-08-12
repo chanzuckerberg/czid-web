@@ -58,8 +58,6 @@ import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
 import IconPlusCircleSmall from "./IconPlusCircleSmall";
 import IconPlusSmall from "./IconPlusSmall";
 import IconPrivateSmall from "./IconPrivateSmall";
-import IconProjectPrivate from "./IconProjectPrivate";
-import IconProjectPublic from "./IconProjectPublic";
 import IconPublicSmall from "./IconPublicSmall";
 import IconRefresh from "./IconRefresh";
 import IconSample from "./IconSample";
@@ -139,8 +137,6 @@ export const ICONS_TAXONOMY = {
     IconPlusCircleSmall,
     IconPlusSmall,
     IconPrivateSmall,
-    IconProjectPrivate,
-    IconProjectPublic,
     IconPublicSmall,
     IconRefresh,
     IconSample,

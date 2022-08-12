@@ -1,4 +1,4 @@
-import { Tooltip } from "czifui";
+import { Icon, Tooltip } from "czifui";
 import PropTypes from "prop-types";
 import React, { useState, useEffect } from "react";
 
@@ -13,7 +13,6 @@ import RadioButton from "~ui/controls/RadioButton";
 import Textarea from "~ui/controls/Textarea";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
-import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 
 import cs from "./project_creation_modal.scss";
 
@@ -86,7 +85,9 @@ const ProjectCreationModal = ({ modalOpen, onCancel, onCreate }) => {
                 selected={accessLevel === ACCESS_LEVEL.publicAccess}
                 className={cs.radioButton}
               />
-              <IconProjectPublic className={cs.projectIcon} />
+              <div className={cs.projectIcon}>
+                <Icon sdsIcon="projectPublic" sdsSize="xl" sdsType="static" />
+              </div>
             </div>
             <div className={cs.optionText}>
               <div className={cs.title}>Public Project</div>
@@ -109,7 +110,9 @@ const ProjectCreationModal = ({ modalOpen, onCancel, onCreate }) => {
                 selected={accessLevel === ACCESS_LEVEL.privateAccess}
                 className={cs.radioButton}
               />
-              <IconProjectPrivate className={cs.projectIcon} />
+              <div className={cs.projectIcon}>
+                <Icon sdsIcon="projectPrivate" sdsSize="xl" sdsType="static" />
+              </div>
             </div>
             <div className={cs.optionText}>
               <div className={cs.title}>Private Project</div>
