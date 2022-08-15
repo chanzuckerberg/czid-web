@@ -30,10 +30,7 @@ import {
   KEY_TAXON_THRESHOLDS_SELECTED,
 } from "../SampleView/constants";
 import { ANNOTATION_FILTER_OPTIONS, TAB_SAMPLES } from "./constants";
-import {
-  DISCOVERY_DOMAIN_MY_DATA,
-  DISCOVERY_DOMAIN_SNAPSHOT,
-} from "./discovery_api";
+import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
 
 import cs from "./discovery_filters.scss";
 
@@ -391,9 +388,9 @@ class DiscoveryFilters extends React.Component {
       TAXON_THRESHOLD_FILTERING_FEATURE,
     );
 
-    const hasAnnotationsFilter =
-      allowedFeatures.includes(ANNOTATION_FILTER_FEATURE) &&
-      domain === DISCOVERY_DOMAIN_MY_DATA;
+    const hasAnnotationsFilter = allowedFeatures.includes(
+      ANNOTATION_FILTER_FEATURE,
+    );
 
     // Taxon threshold and annotations filters are disabled on the cg tab
     const mngsFiltersDisabled =
