@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { getOntology } from "~/api/amr";
@@ -27,8 +26,38 @@ const CARD_RESISTANCES = "Drug Resistances";
 const CARD_SYNONYMS = "Synonym(s)";
 const CARD_PUBLICATIONS = "Publications";
 
-export default class GeneDetailsMode extends React.Component {
-  constructor(props) {
+interface DescriptionLabel {
+  description: string;
+  label: string;
+}
+
+interface GDMProps {
+  geneName: string;
+}
+
+interface GDMState {
+  cardEntryFound: boolean;
+  collapseOntology: boolean;
+  loading: boolean;
+  ontologyInfoFound?: boolean;
+  ontology: {
+    accession: string;
+    description: string;
+    drugClass: DescriptionLabel;
+    error: string;
+    geneFamily: DescriptionLabel[];
+    genbankAccession?: string;
+    label: string;
+    publications: string[];
+    synonyms: string[];
+  };
+}
+
+export default class GeneDetailsMode extends React.Component<
+  GDMProps,
+  GDMState
+> {
+  constructor(props: GDMProps) {
     super(props);
 
     this.state = {
@@ -41,7 +70,10 @@ export default class GeneDetailsMode extends React.Component {
         synonyms: [],
         description: "",
         geneFamily: [],
-        drugClass: [],
+        drugClass: {
+          description: "",
+          label: "",
+        },
         publications: [],
         error: "Placeholder",
       },
@@ -53,7 +85,7 @@ export default class GeneDetailsMode extends React.Component {
     this.getGeneInfo(geneName);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: GDMProps) {
     const { geneName } = this.props;
     if (geneName !== prevProps.geneName) {
       this.setState({
@@ -65,7 +97,7 @@ export default class GeneDetailsMode extends React.Component {
     }
   }
 
-  async getGeneInfo(geneName) {
+  async getGeneInfo(geneName: string) {
     const ontology = await getOntology(geneName);
     const ontologyInfoFound = ontology.error === "";
     // all the CARD accessions we are interested in ar 7 in length.
@@ -90,7 +122,7 @@ export default class GeneDetailsMode extends React.Component {
 
   // *** Functions depending on state ***
 
-  generateLinkTo(source) {
+  generateLinkTo(source: string) {
     const {
       ontology: { accession, genbankAccession },
     } = this.state;
@@ -228,9 +260,9 @@ export default class GeneDetailsMode extends React.Component {
         )}
         {collapseOntology &&
           (geneFamily.length > 0 || publications.length > 0) && (
-            <div className={cs.expandLink} onClick={this.expandOntology}>
+            <button className={cs.expandLink} onClick={this.expandOntology}>
               Show More
-            </div>
+            </button>
           )}
         <div className={cs.text}>
           <div className={cs.textInner}>{this.renderCARDLicense()}</div>
@@ -240,8 +272,8 @@ export default class GeneDetailsMode extends React.Component {
     );
   }
 
-  renderPropertyList(array) {
-    return array.map(property => {
+  renderPropertyList(array: DescriptionLabel[]) {
+    return array.map((property) => {
       return (
         <div key={property.label}>
           <div className={cs.textInner}>
@@ -258,7 +290,7 @@ export default class GeneDetailsMode extends React.Component {
       ontology: { label, publications },
     } = this.state;
     const { geneName } = this.props;
-    return publications.map(publication => {
+    return publications.map((publication) => {
       const citation = /.*(?=(\(PMID))/.exec(publication)[0];
       const pmidText = /(PMID)\s[0-9]*/.exec(publication)[0];
       const pubmedId = pmidText.split(" ")[1];
@@ -301,7 +333,7 @@ export default class GeneDetailsMode extends React.Component {
     if (cardEntryFound) {
       sources.unshift(SOURCE_CARD);
     }
-    const footerLinks = sources.map(source => {
+    const footerLinks = sources.map((source) => {
       return (
         <li className={cs.link} key={source}>
           <a
@@ -348,7 +380,3 @@ export default class GeneDetailsMode extends React.Component {
     );
   }
 }
-
-GeneDetailsMode.propTypes = {
-  geneName: PropTypes.string.isRequired,
-};

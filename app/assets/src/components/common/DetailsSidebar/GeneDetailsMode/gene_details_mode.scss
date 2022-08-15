@@ -52,9 +52,12 @@
   }
 
   .expandLink {
+    @include font-body-s;
     color: $sds-color-primary-400;
-    margin-top: $sds-spaces-m;
-    cursor: pointer;
+    margin: $sds-spaces-m 0 0 0;
+    background-color: transparent;
+    border: none;
+    padding: 0;
   }
 }
 
