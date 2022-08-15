@@ -313,7 +313,7 @@ class DiscoveryFilters extends React.Component {
       <Dropdown
         label={<div className={cs.filterLabel}>Annotation</div>}
         onChange={this.handleChange.bind(this, KEY_ANNOTATIONS_SELECTED)}
-        value={annotationsSelected || undefined}
+        value={annotationsSelected || []}
         options={ANNOTATION_FILTER_OPTIONS}
         disabled={disabled}
         multiple

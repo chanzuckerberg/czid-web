@@ -48,6 +48,7 @@ const ReportFilters = ({
     trackEvent("SampleView_filter_changed", {
       key,
       value,
+      sampleId,
     });
     onFilterChanged({ key, value });
   };
@@ -57,6 +58,7 @@ const ReportFilters = ({
       key,
       subpath,
       value,
+      sampleId,
     });
     onFilterRemoved({ key, subpath, value });
   };

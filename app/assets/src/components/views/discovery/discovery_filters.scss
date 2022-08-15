@@ -33,8 +33,7 @@
       }
 
       .filterTag {
-        margin: 0;
-        margin-top: $sds-spaces-xxs;
+        margin: $sds-spaces-xxs $sds-spaces-xxs 0 0;
 
         &:last-child {
           margin-right: 0;
@@ -44,9 +43,10 @@
   }
 
   .divider {
-    width: 100%;
     border: 1px solid $sds-color-gray-200;
-    margin: $sds-spaces-xl 0;
+    // For the divider to extend from end-to-end of the left sidebar,
+    // we must apply negative margin to counteract the left sidebar's padding
+    margin: $sds-spaces-xl calc(-1 * $sds-spaces-xl);
   }
 }
 
