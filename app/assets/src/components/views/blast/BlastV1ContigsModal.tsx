@@ -72,13 +72,14 @@ const BlastV1ContigsModal = ({
   const [sequencesAreTooLong, setSequencesAreTooLong] = useState<boolean>(
     false,
   );
+  const currentCountType =
+    selectedCountTypeTab !== null
+      ? IndexToCountType[selectedCountTypeTab]
+      : CountTypes.NT;
 
   const fetchContigs = async () => {
     const { contigs } = await fetchLongestContigsForTaxonId({
-      countType:
-        selectedCountTypeTab !== null
-          ? IndexToCountType[selectedCountTypeTab]
-          : CountTypes.NT,
+      countType: currentCountType,
       sampleId,
       pipelineVersion,
       taxonId,
@@ -249,6 +250,8 @@ const BlastV1ContigsModal = ({
       numberOfContigs: size(selectedContigIds),
       blastUrlLengths: map(url => size(url), blastUrls),
       sampleId,
+      countType: currentCountType,
+      blastType: blastModalInfo?.selectedBlastType,
       ...context,
     });
   };

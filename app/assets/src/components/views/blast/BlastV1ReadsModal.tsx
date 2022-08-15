@@ -137,6 +137,8 @@ const BlastV1ReadsModal = ({
       longestAlignmentLength,
       blastUrlSize: size(blastUrl),
       sampleId,
+      countType: currentCountType,
+      blastType: blastModalInfo?.selectedBlastType,
       ...context,
     });
   };
