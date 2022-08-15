@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { getTaxonDescriptions, getTaxonDistributionForBackground } from "~/api";
@@ -14,7 +13,37 @@ import cs from "./taxon_details_mode.scss";
 
 const COLLAPSED_HEIGHT = 120;
 
-export default class TaxonDetailsMode extends React.Component {
+interface TaxonDetailsModeProps {
+  taxonId: number;
+  taxonName: string;
+  parentTaxonId?: number;
+  taxonValues?: { NT: { rpm: number }; NR: { rpm: number } };
+  background?: { id: number; name: string };
+}
+
+interface TaxonDetailsModeState {
+  loading: boolean;
+  showHistogram: boolean;
+  taxonDescription: string;
+  taxonParentName: string;
+  taxonParentDescription: string;
+  wikiUrl: string | null;
+  collapseTaxonDescription: boolean;
+  collapseParentDescription: boolean;
+  taxonDescriptionTall: boolean;
+  parentDescriptionTall: boolean;
+  parentWikiUrl: string;
+  histogramRpmSeries: number[][];
+}
+
+export default class TaxonDetailsMode extends React.Component<
+  TaxonDetailsModeProps,
+  TaxonDetailsModeState
+> {
+  private _taxonDescription: { clientHeight: number };
+  private _taxonParentDescription: { clientHeight: number };
+  private histogramContainer: HTMLDivElement;
+  private histogram: $TSFixMe;
   state = {
     loading: false,
     showHistogram: false,
@@ -22,17 +51,22 @@ export default class TaxonDetailsMode extends React.Component {
     taxonParentName: "",
     taxonParentDescription: "",
     wikiUrl: null,
+    parentWikiUrl: null,
     collapseTaxonDescription: true,
     collapseParentDescription: true,
     taxonDescriptionTall: false,
     parentDescriptionTall: false,
+    histogramRpmSeries: null,
   };
 
   componentDidMount() {
     this.loadData();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(
+    prevProps: TaxonDetailsModeProps,
+    prevState: TaxonDetailsModeState,
+  ) {
     if (
       prevProps.taxonId !== this.props.taxonId ||
       prevProps.background !== this.props.background
@@ -87,7 +121,7 @@ export default class TaxonDetailsMode extends React.Component {
     });
   };
 
-  renderWikipediaLicense(taxonName, wikiUrl) {
+  renderWikipediaLicense(taxonName: string, wikiUrl: string) {
     return (
       <div className={cs.wikiLicense}>
         This article uses material from the Wikipedia article{" "}
@@ -106,40 +140,38 @@ export default class TaxonDetailsMode extends React.Component {
     );
   }
 
-  loadTaxonInfo() {
-    let taxonList = [this.props.taxonId];
+  async loadTaxonInfo() {
+    const taxonList = [this.props.taxonId];
     if (this.props.parentTaxonId) {
       taxonList.push(this.props.parentTaxonId);
     }
-    return getTaxonDescriptions(taxonList)
-      .then(response => {
-        let taxonInfo = response[this.props.taxonId];
-        let parentTaxonInfo =
-          this.props.parentTaxonId && response[this.props.parentTaxonId];
+    try {
+      const response = await getTaxonDescriptions(taxonList);
+      const taxonInfo = response[this.props.taxonId];
+      const parentTaxonInfo =
+        this.props.parentTaxonId && response[this.props.parentTaxonId];
 
-        if (taxonInfo) {
-          this.setState({
-            taxonDescription: response[this.props.taxonId].summary || "",
-            wikiUrl: response[this.props.taxonId].wiki_url || "",
-          });
-        }
-
-        if (parentTaxonInfo) {
-          this.setState({
-            taxonParentName: response[this.props.parentTaxonId].title,
-            taxonParentDescription: response[this.props.parentTaxonId].summary,
-            parentWikiUrl: response[this.props.parentTaxonId].wiki_url,
-          });
-        }
-      })
-      .catch(error => {
-        // TODO: properly handle error
-        // eslint-disable-next-line no-console
-        console.error("Error loading taxon information: ", error);
-      });
+      if (taxonInfo) {
+        this.setState({
+          taxonDescription: response[this.props.taxonId].summary || "",
+          wikiUrl: response[this.props.taxonId].wiki_url || "",
+        });
+      }
+      if (parentTaxonInfo) {
+        this.setState({
+          taxonParentName: response[this.props.parentTaxonId].title,
+          taxonParentDescription: response[this.props.parentTaxonId].summary,
+          parentWikiUrl: response[this.props.parentTaxonId].wiki_url,
+        });
+      }
+    } catch (error) {
+      // TODO: properly handle error
+      // eslint-disable-next-line no-console
+      console.error("Error loading taxon information: ", error);
+    }
   }
 
-  loadBackgroundInfo() {
+  async loadBackgroundInfo() {
     if (
       !this.props.background ||
       !this.props.taxonId ||
@@ -148,28 +180,27 @@ export default class TaxonDetailsMode extends React.Component {
       return Promise.resolve();
     }
     this.histogram = null;
-    return getTaxonDistributionForBackground(
-      this.props.background.id,
-      this.props.taxonId,
-    )
-      .then(data => {
-        if (
-          Object.keys(data).length &&
-          (data.NT || {}).rpm_list &&
-          (data.NR || []).rpm_list
-        ) {
-          let rpmSeries = [data.NT.rpm_list, data.NR.rpm_list];
-          this.setState({
-            histogramRpmSeries: rpmSeries,
-            showHistogram: true,
-          });
-        }
-      })
-      .catch(error => {
-        // TODO: properly handle error
-        // eslint-disable-next-line no-console
-        console.error("Unable to retrieve background info", error);
-      });
+    try {
+      const data = await getTaxonDistributionForBackground(
+        this.props.background.id,
+        this.props.taxonId,
+      );
+      if (
+        Object.keys(data).length &&
+        (data.NT || {}).rpm_list &&
+        (data.NR || []).rpm_list
+      ) {
+        const rpmSeries = [data.NT.rpm_list, data.NR.rpm_list];
+        this.setState({
+          histogramRpmSeries: rpmSeries,
+          showHistogram: true,
+        });
+      }
+    } catch (error) {
+      // TODO: properly handle error
+      // eslint-disable-next-line no-console
+      console.error("Unable to retrieve background info", error);
+    }
   }
 
   expandTaxonDescription = () => {
@@ -208,7 +239,7 @@ export default class TaxonDetailsMode extends React.Component {
     this.histogram.update();
   };
 
-  linkTo(source) {
+  linkTo(source: string) {
     let url = null;
     switch (source) {
       case "ncbi":
@@ -228,7 +259,7 @@ export default class TaxonDetailsMode extends React.Component {
     }
 
     if (url) {
-      window.open(url, "_blank", "noopener", "noreferrer");
+      window.open(url, "_blank", "noreferrer");
       trackEvent("TaxonDetailsMode_external-link_clicked", {
         source,
         url,
@@ -253,7 +284,7 @@ export default class TaxonDetailsMode extends React.Component {
             >
               <div
                 className={cs.textInner}
-                ref={c => (this._taxonDescription = c)}
+                ref={(c) => (this._taxonDescription = c)}
               >
                 {this.state.taxonDescription}
                 {this.renderWikipediaLicense(
@@ -294,7 +325,7 @@ export default class TaxonDetailsMode extends React.Component {
             >
               <div
                 className={cs.textInner}
-                ref={c => (this._taxonParentDescription = c)}
+                ref={(c) => (this._taxonParentDescription = c)}
               >
                 {this.state.taxonParentDescription}
                 {this.renderWikipediaLicense(
@@ -340,7 +371,7 @@ export default class TaxonDetailsMode extends React.Component {
             </div>
             <div
               className={cs.histogram}
-              ref={histogramContainer => {
+              ref={(histogramContainer) => {
                 this.histogramContainer = histogramContainer;
               }}
             />
@@ -392,11 +423,3 @@ export default class TaxonDetailsMode extends React.Component {
     );
   }
 }
-
-TaxonDetailsMode.propTypes = {
-  taxonId: PropTypes.number.isRequired,
-  taxonName: PropTypes.string.isRequired,
-  parentTaxonId: PropTypes.number,
-  taxonValues: PropTypes.object,
-  background: PropTypes.object,
-};
