@@ -14,6 +14,7 @@ interface InputProps {
   loading?: boolean;
   placeholder?: string;
   onKeyPress?: $TSFixMeFunction;
+  onKeyDown?: $TSFixMeFunction;
   type?: HTMLInputTypeAttribute;
 }
 

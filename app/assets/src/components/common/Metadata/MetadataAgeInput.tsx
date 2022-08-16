@@ -1,11 +1,10 @@
 import cx from "classnames";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, KeyboardEvent } from "react";
 
-import PropTypes from "~/components/utils/propTypes";
 import Input from "~ui/controls/Input";
 import { IconAlertSmall } from "~ui/icons";
+import { MetadataInputProps } from "./MetadataInput";
 import { FIELDS_THAT_HAVE_MAX_INPUT } from "./constants";
-
 import cs from "./metadata_age_input.scss";
 
 // Description: This is a MetadataInput component for the "Host Age" field and is only surfaced when the sample host is human.
@@ -18,6 +17,24 @@ import cs from "./metadata_age_input.scss";
 //    backspace/delete key) while input box is zeroed and displays the "≥ {max value}" placeholder.
 // A warning message is surfaced when the user changes the host age to a value which exceeds the max.
 
+interface MetadataAgeInputProps
+  extends Pick<
+    MetadataInputProps,
+    "className" | "value" | "metadataType" | "onChange" | "onSave"
+  > {
+  ensureDefinedValue: ({
+    key,
+    value,
+    type,
+    taxaCategory,
+  }: {
+    key: string;
+    value: string | number;
+    type: MetadataInputProps["metadataType"]["dataType"];
+    taxaCategory: string;
+  }) => string;
+}
+
 const MetadataAgeInput = ({
   className,
   value,
@@ -25,7 +42,7 @@ const MetadataAgeInput = ({
   onChange,
   onSave,
   ensureDefinedValue,
-}) => {
+}: MetadataAgeInputProps) => {
   const maxAge = FIELDS_THAT_HAVE_MAX_INPUT[metadataType.key];
   const [safeHumanAge, setSafeHumanAge] = useState(value);
   const [hipaaWarning, setHipaaWarning] = useState(value >= maxAge);
@@ -50,7 +67,7 @@ const MetadataAgeInput = ({
     setHipaaWarning(safeHumanAge >= maxAge);
   }, [safeHumanAge]);
 
-  const handleKeyDown = keyEvent => {
+  const handleKeyDown = (keyEvent: KeyboardEvent<HTMLInputElement>) => {
     if (
       hipaaWarning &&
       (keyEvent.key === "Backspace" || keyEvent.key === "Delete")
@@ -67,7 +84,7 @@ const MetadataAgeInput = ({
           cs.darkPlaceholder,
           hipaaWarning && ageChanged && "warning",
         )}
-        onChange={val => {
+        onChange={(val) => {
           const definedVal = ensureDefinedValue({
             key: metadataType.key,
             value: val,
@@ -78,7 +95,7 @@ const MetadataAgeInput = ({
           setSafeHumanAge(definedVal);
           onChange(metadataType.key, definedVal.toString());
         }}
-        onKeyDown={e => handleKeyDown(e)}
+        onKeyDown={(e) => handleKeyDown(e)}
         onBlur={() => onSave && onSave(metadataType.key)}
         value={hipaaWarning ? "" : safeHumanAge}
         type={"number"}
@@ -94,20 +111,6 @@ const MetadataAgeInput = ({
       )}
     </>
   );
-};
-
-MetadataAgeInput.propTypes = {
-  className: PropTypes.string,
-  value: PropTypes.any,
-  metadataType: PropTypes.shape({
-    key: PropTypes.string,
-    dataType: PropTypes.oneOf(["number", "string", "date", "location"]),
-    options: PropTypes.arrayOf(PropTypes.string),
-    isBoolean: PropTypes.bool,
-  }).isRequired,
-  onChange: PropTypes.func.isRequired,
-  onSave: PropTypes.func,
-  ensureDefinedValue: PropTypes.func.isRequired,
 };
 
 export default MetadataAgeInput;

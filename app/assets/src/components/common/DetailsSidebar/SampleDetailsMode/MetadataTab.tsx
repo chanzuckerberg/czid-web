@@ -55,7 +55,7 @@ interface SampleType {
 }
 
 export interface MetadataType {
-  dataType: string;
+  dataType: "number" | "string" | "date" | "location";
   default_for_new_host_genome: 0;
   description: string | null;
   examples: { [key: number]: string[] } | null;
@@ -166,7 +166,6 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
           onChange={onMetadataChange}
           onSave={onMetadataSave}
           isHuman={additionalInfo.host_genome_taxa_category === "human"}
-          isInsect={additionalInfo.host_genome_taxa_category === "insect"}
           sampleTypes={sampleTypes}
         />
         {metadataErrors[metadataType.key] && (
