@@ -49,7 +49,7 @@ class DiscoveryFilters extends React.Component {
       hostSelected: this.props.hostSelected,
       tissueSelected: this.props.tissueSelected,
       taxonThresholdsSelected: this.props.taxonThresholdsSelected,
-      annotationsSelected: this.props.annotationsSelected,
+      annotationsSelected: this.props.annotationsSelected || [],
     };
   }
 
