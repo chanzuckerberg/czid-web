@@ -25,7 +25,6 @@ import {
 } from "./constants";
 import cs from "./pre_upload_qc_check.scss";
 
-
 const PreUploadQCCheck = ({
   samples,
   changeState,
@@ -281,8 +280,7 @@ const PreUploadQCCheck = ({
       let fileContents = await fileName.text();
 
       const arr = filterArrayByIndex(fileContents, 4);
-
-      const nanoporeRegexExp = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+      const nanoporeRegexExp = /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
 
       const illuminiaRegexExp = /^@[a-zA-z0-9]+:[0-9]+:[a-zA-Z0-9]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+(:[ATGCN]+[+][ATGCN]+)*[ 12]{2}:[YN]:[0-9]+:[ATGCN]+([+][ATGCN]+)*$/i;
 
