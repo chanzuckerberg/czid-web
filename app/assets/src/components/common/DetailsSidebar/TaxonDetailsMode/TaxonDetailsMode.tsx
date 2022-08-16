@@ -13,7 +13,7 @@ import cs from "./taxon_details_mode.scss";
 
 const COLLAPSED_HEIGHT = 120;
 
-interface TaxonDetailsModeProps {
+export interface TaxonDetailsModeProps {
   taxonId: number;
   taxonName: string;
   parentTaxonId?: number;
@@ -284,7 +284,7 @@ export default class TaxonDetailsMode extends React.Component<
             >
               <div
                 className={cs.textInner}
-                ref={(c) => (this._taxonDescription = c)}
+                ref={c => (this._taxonDescription = c)}
               >
                 {this.state.taxonDescription}
                 {this.renderWikipediaLicense(
@@ -325,7 +325,7 @@ export default class TaxonDetailsMode extends React.Component<
             >
               <div
                 className={cs.textInner}
-                ref={(c) => (this._taxonParentDescription = c)}
+                ref={c => (this._taxonParentDescription = c)}
               >
                 {this.state.taxonParentDescription}
                 {this.renderWikipediaLicense(
@@ -371,7 +371,7 @@ export default class TaxonDetailsMode extends React.Component<
             </div>
             <div
               className={cs.histogram}
-              ref={(histogramContainer) => {
+              ref={histogramContainer => {
                 this.histogramContainer = histogramContainer;
               }}
             />

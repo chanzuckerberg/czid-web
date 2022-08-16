@@ -10,7 +10,7 @@ interface SidebarProps {
   visible?: boolean;
   children?: React.ReactNode;
   className?: string;
-  onClose?: $TSFixMeFunction;
+  onClose?: () => void;
 }
 
 class Sidebar extends React.Component<SidebarProps> {

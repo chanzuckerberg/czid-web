@@ -1,10 +1,35 @@
-export type BooleanNums = 0 | 1;
+import { DateString, NumberId } from "./generic";
 
-export type DateString = string;
+export interface BulkDownloadDetails extends NumberId {
+  num_samples: number;
+  params: { [key: string]: DownloadTypeParam };
+  presigned_output_url: string;
+  download_name: string;
+  file_size: string;
+  status: "success" | "waiting" | "running" | "error";
+  download_type: string;
+  pipeline_runs: { id: number; sample_name: string }[];
+  workflow_runs: Array<$TSFixMe>;
+  description: string;
+}
 
-export interface DropdownOption {
-  text: string;
-  value: string | number;
+export interface DownloadTypeParam {
+  displayName: string;
+  value: unknown;
+}
+
+export interface DownloadType {
+  display_name: string;
+  admin_only: boolean;
+  description: string;
+  category: string;
+  fields: {
+    type: string;
+    display_name: string;
+  }[];
+  uploader_only: boolean;
+  required_allowed_feature: string;
+  file_type_display: string;
 }
 
 export interface ERCCComparisonShape {
@@ -21,15 +46,6 @@ export type FileList = {
 export interface InputFile {
   fromStepName?: string;
   files: FileList;
-}
-
-export interface LabelVal {
-  label: string;
-  value: string;
-}
-export interface NameUrl {
-  name: string;
-  url: string;
 }
 
 export interface PipelineRun {

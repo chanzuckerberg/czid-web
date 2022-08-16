@@ -1,3 +1,4 @@
-import PipelineStepDetailsMode from "./PipelineStepDetailsMode";
+import PipelineStepDetailsMode, { PSDProps } from "./PipelineStepDetailsMode";
 
+export { PSDProps };
 export default PipelineStepDetailsMode;

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
@@ -6,15 +5,35 @@ import { getBulkDownload } from "~/api/bulk_downloads";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
+import {
+  DownloadType,
+  BulkDownloadDetails,
+  NumberId,
+} from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
 
 import AdvancedDownloadTab from "./AdvancedDownloadTab";
 import DetailsTab from "./DetailsTab";
 import cs from "./bulk_download_details_mode.scss";
 
-const TABS = ["Details", "Advanced Download"];
+type TabNames = "Details" | "Advanced Download";
+const TABS: TabNames[] = ["Details", "Advanced Download"];
 
-export default class BulkDownloadDetailsMode extends React.Component {
+export interface BDDProps {
+  bulkDownload: NumberId;
+}
+
+interface BulkDownloadDetailsState {
+  loading: boolean;
+  currentTab: TabNames;
+  bulkDownloadDetails?: BulkDownloadDetails;
+  downloadType?: DownloadType;
+}
+
+export default class BulkDownloadDetailsMode extends React.Component<
+  BDDProps,
+  BulkDownloadDetailsState
+> {
   state = {
     loading: true,
     currentTab: TABS[0],
@@ -26,7 +45,7 @@ export default class BulkDownloadDetailsMode extends React.Component {
     this.fetchBulkDownload(this.props.bulkDownload.id);
   }
 
-  async componentDidUpdate(prevProps) {
+  async componentDidUpdate(prevProps: BDDProps) {
     if (
       this.props.bulkDownload &&
       prevProps.bulkDownload !== this.props.bulkDownload
@@ -39,7 +58,7 @@ export default class BulkDownloadDetailsMode extends React.Component {
     }
   }
 
-  fetchBulkDownload = async bulkDownloadId => {
+  fetchBulkDownload = async (bulkDownloadId: number) => {
     const {
       bulk_download: bulkDownloadDetails,
       download_type: downloadType,
@@ -55,7 +74,7 @@ export default class BulkDownloadDetailsMode extends React.Component {
     }
   };
 
-  onTabChange = tab => {
+  onTabChange = (tab: TabNames) => {
     this.setState({ currentTab: tab });
     trackEvent("bulkDownloadDetailsMode_tab_changed", {
       bulkDownloadId: this.props.bulkDownload.id,
@@ -109,12 +128,7 @@ export default class BulkDownloadDetailsMode extends React.Component {
       );
     }
     if (this.state.currentTab === "Advanced Download") {
-      return (
-        <AdvancedDownloadTab
-          bulkDownload={bulkDownloadDetails}
-          downloadType={downloadType}
-        />
-      );
+      return <AdvancedDownloadTab bulkDownload={bulkDownloadDetails} />;
     }
     return null;
   };
@@ -161,11 +175,5 @@ export default class BulkDownloadDetailsMode extends React.Component {
     );
   }
 }
-
-BulkDownloadDetailsMode.propTypes = {
-  bulkDownload: PropTypes.shape({
-    id: PropTypes.number,
-  }),
-};
 
 BulkDownloadDetailsMode.contextType = UserContext;

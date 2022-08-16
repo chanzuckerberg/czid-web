@@ -4,17 +4,16 @@ import React, { ReactNode } from "react";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
 
-import { withAnalytics } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import { Accordion } from "~/components/layout";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
 import Sample from "~/interface/sample";
 import { PipelineRun, FileList, InputFile, NameUrl } from "~/interface/shared";
-import { openUrl } from "~utils/links";
 
 import cs from "./pipeline_step_details_mode.scss";
 
-interface PipelineStepDetailsModeProps {
+export interface PSDProps {
   status: string;
   startTime: number;
   endTime: number;
@@ -38,7 +37,7 @@ const PipelineStepDetailsMode = ({
   stepName,
   outputFiles,
   resources,
-}: PipelineStepDetailsModeProps) => {
+}: PSDProps) => {
   const renderStatusBox = () => {
     let statusTitle: string, statusDescription: ReactNode;
     switch (status) {
@@ -151,13 +150,14 @@ const PipelineStepDetailsMode = ({
     return fileList.map((file, i) => {
       const cssClass = file.url ? cs.fileLink : cs.disabledFileLink;
       const content = file.url ? (
-        // Use onClick instead of href to remove url appearance when hovering.
         <a
-          onClick={withAnalytics(
-            () => openUrl(file.url),
-            "PipelineStepDetailsMode_file-link_clicked",
-            { fileName: file.fileName, url: file.url },
-          )}
+          href={file.url}
+          onClick={() =>
+            trackEvent("PipelineStepDetailsMode_file-link_clicked", {
+              fileName: file.fileName,
+              url: file.url,
+            })
+          }
         >
           {file.fileName}
         </a>

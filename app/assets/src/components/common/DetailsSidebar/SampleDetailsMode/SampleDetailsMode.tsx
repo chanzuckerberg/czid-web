@@ -34,7 +34,7 @@ import {
   processCGWorkflowRunInfo,
 } from "./utils";
 
-interface SampleDetailsModeProps {
+export interface SampleDetailsModeProps {
   currentRun: Record<string, string | number | null>;
   currentWorkflowTab: string;
   handleWorkflowTabChange: $TSFixMeFunction;

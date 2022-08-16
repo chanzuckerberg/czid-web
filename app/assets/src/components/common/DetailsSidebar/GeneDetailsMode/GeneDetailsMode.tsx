@@ -31,7 +31,7 @@ interface DescriptionLabel {
   label: string;
 }
 
-interface GDMProps {
+export interface GDMProps {
   geneName: string;
 }
 
@@ -273,7 +273,7 @@ export default class GeneDetailsMode extends React.Component<
   }
 
   renderPropertyList(array: DescriptionLabel[]) {
-    return array.map((property) => {
+    return array.map(property => {
       return (
         <div key={property.label}>
           <div className={cs.textInner}>
@@ -290,7 +290,7 @@ export default class GeneDetailsMode extends React.Component<
       ontology: { label, publications },
     } = this.state;
     const { geneName } = this.props;
-    return publications.map((publication) => {
+    return publications.map(publication => {
       const citation = /.*(?=(\(PMID))/.exec(publication)[0];
       const pmidText = /(PMID)\s[0-9]*/.exec(publication)[0];
       const pubmedId = pmidText.split(" ")[1];
@@ -333,7 +333,7 @@ export default class GeneDetailsMode extends React.Component<
     if (cardEntryFound) {
       sources.unshift(SOURCE_CARD);
     }
-    const footerLinks = sources.map((source) => {
+    const footerLinks = sources.map(source => {
       return (
         <li className={cs.link} key={source}>
           <a

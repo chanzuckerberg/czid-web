@@ -7,7 +7,7 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import cs from "./field_list.scss";
 
 interface FieldListProps {
-  className: string;
+  className?: string;
   fields: {
     label: string;
     value: React.ReactNode;
