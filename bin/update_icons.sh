@@ -27,6 +27,7 @@ ICONS_LOGO=""
 ICONS_LOGO_REVERSED=""
 ICONS_FONT_AWESOME=""
 ICONS_CUSTOM=""
+ALLICONS=""
 for iconPath in $DIR_ROOT/*.tsx; do
     # Extract name from file name (remove folder name and .tsx extension)
     iconName=$(basename ${iconPath//.tsx})
@@ -37,6 +38,9 @@ for iconPath in $DIR_ROOT/*.tsx; do
     iconLine="    ${iconName},$BREAKLINE"
     # Generate code that imports icon
     IMPORTS+="import $iconName from \"./$iconName\";$BREAKLINE"
+    # Generate code that exports individual icons
+    ALLICONS+=" $iconName,$BREAKLINE"  
+
 
     # Logo*.tsx
     if [[ "$iconName" == *"Logo"* ]]; then
@@ -80,9 +84,6 @@ $ICONS_LOGO  },
 $ICONS_LOGO_REVERSED  },
 };
 
-const icons = Object.values(ICONS_TAXONOMY).reduce((result, components) => {
-  return Object.assign(result, components);
-}, {});
-
-module.exports = Object.assign(icons, { ICONS_TAXONOMY });
+export {
+  $ALLICONS };
 EOF
