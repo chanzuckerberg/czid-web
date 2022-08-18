@@ -37,6 +37,9 @@ const BlastSelectionModal = ({
   taxonName,
   taxonStatsByCountType,
 }: BlastSelectionModalProps) => {
+  const [blastOptionHovered, setBlastOptionHovered] = useState<string | null>(
+    null,
+  );
   const [blastOptionSelected, setBlastOptionSelected] = useState(null);
   const ntContigs = getOr(0, "ntContigs", taxonStatsByCountType);
   const ntReads = getOr(0, "ntReads", taxonStatsByCountType);
@@ -92,13 +95,29 @@ const BlastSelectionModal = ({
     const blastOptionIsDisabled = shouldDisableBlastOption(blastType);
     const blastOptionIsSelected = blastOptionSelected === blastType;
 
-    let blastLabel = (
+    let blastTitle = (
+      <div className={cx(cs.title, blastOptionIsDisabled && cs.disabled)}>
+        {blastType}
+      </div>
+    );
+
+    if (blastOptionIsDisabled && blastOptionHovered === blastType) {
+      blastTitle = (
+        <Tooltip open arrow placement="top" title={disabledTooltipText}>
+          {blastTitle}
+        </Tooltip>
+      );
+    }
+
+    const blastLabel = (
       <div
         className={cx(
           cs.selectableOption,
           blastOptionIsSelected && cs.selected,
           blastOptionIsDisabled && cs.disabled,
         )}
+        onMouseEnter={() => setBlastOptionHovered(blastType)}
+        onMouseLeave={() => setBlastOptionHovered(null)}
         onClick={() =>
           blastOptionIsDisabled ? null : setBlastOptionSelected(blastType)
         }
@@ -109,9 +128,7 @@ const BlastSelectionModal = ({
           className={cx(cs.radioButton, cs.alignTitle)}
         />
         <div className={cs.optionText}>
-          <div className={cx(cs.title, blastOptionIsDisabled && cs.disabled)}>
-            {blastType}
-          </div>
+          {blastTitle}
           <div
             className={cx(cs.description, blastOptionIsDisabled && cs.disabled)}
           >
@@ -132,14 +149,6 @@ const BlastSelectionModal = ({
         </div>
       </div>
     );
-
-    if (blastOptionIsDisabled) {
-      blastLabel = (
-        <Tooltip arrow placement="top" title={disabledTooltipText}>
-          <span>{blastLabel}</span>
-        </Tooltip>
-      );
-    }
 
     return blastLabel;
   };

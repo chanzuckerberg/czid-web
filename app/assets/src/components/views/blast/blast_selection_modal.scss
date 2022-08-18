@@ -9,7 +9,6 @@
 
   .header {
     font: $sds-font-header-xl-600-font;
-    text-transform: capitalize;
     color: $sds-color-gray-black;
   }
 
@@ -53,6 +52,7 @@
         .title {
           font: $sds-font-header-s-600-font;
           text-transform: uppercase;
+          width: fit-content;
 
           &.disabled {
             color: $sds-color-gray-300 !important;
