@@ -43,6 +43,7 @@ module Idseq
     config.hosts << 'czid.org'
     # Exclude health_check so that load balancer checks are allowed:
     config.host_authorization = { exclude: ->(request) { request.path =~ /health_check/ } }
+    config.x.constants.default_background = 26
   end
 end
 
