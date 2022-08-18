@@ -15,7 +15,6 @@ import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { DRAGGABLE_COLUMNS_FEATURE } from "~/components/utils/features";
-import SampleUploadTableRenderers from "~/components/views/SampleUploadFlow/SampleUploadTableRenderers";
 import { humanize } from "~/helpers/strings";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
@@ -312,10 +311,15 @@ class BaseTable extends React.Component {
   };
 
   renderSelectableCell = ({ cellData }) => {
-    const { selected, onSelectRow, selectableCellClassName } = this.props;
+    const {
+      selected,
+      onSelectRow,
+      selectableCellClassName,
+      selectableCellRenderer,
+    } = this.props;
     const disabled = cellData === null || cellData === undefined;
-    if (cellData && typeof cellData === "object") {
-      return SampleUploadTableRenderers.renderSelectableCell({
+    if (selectableCellRenderer) {
+      return selectableCellRenderer({
         cellData,
         selected,
         onSelectRow,
@@ -553,6 +557,7 @@ BaseTable.propTypes = {
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,
   selectableCellClassName: PropTypes.string,
+  selectableCellRenderer: PropTypes.func,
   selectableColumnClassName: PropTypes.string,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,

@@ -55,3 +55,7 @@
     color: $sds-color-gray-500;
   }
 }
+
+.columnHeaderLabel {
+  margin-left: 0 !important; // override label styling from BaseTable
+}

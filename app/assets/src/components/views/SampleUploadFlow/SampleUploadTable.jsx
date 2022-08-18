@@ -109,12 +109,14 @@ export default class SampleUploadTable extends React.Component {
 
   // If sample is still being validated than disable row
   rowRenderer = rowProps => {
+    const { sampleUploadType } = this.props;
     const { allowedFeatures = [] } = this.context || {};
     const data = rowProps.rowData;
     const finishedValidating = data.finishedValidating;
     const isValid = data.isValid;
     if (
       allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
+      sampleUploadType === "local" &&
       (!finishedValidating || !isValid)
     ) {
       rowProps.className = cx(rowProps.className, cs.disabled);
@@ -130,8 +132,11 @@ export default class SampleUploadTable extends React.Component {
       samples,
       onSampleSelect,
       onAllSamplesSelect,
+      sampleUploadType,
       selectedSampleIds,
     } = this.props;
+
+    const localUpload = sampleUploadType === "local";
 
     if (isEmpty(samples)) return null;
 
@@ -169,6 +174,7 @@ export default class SampleUploadTable extends React.Component {
           defaultRowHeight={({ row }) =>
             10 + 30 * (row.file_names_R1?.length || 1)
           }
+          headerLabelClassName={cs.columnHeaderLabel}
           // Reset cached row heights so dynamic heights keep working
           onColumnSort={() => SampleUploadTableRenderers.cache.clearAll()}
           sortable
@@ -179,16 +185,21 @@ export default class SampleUploadTable extends React.Component {
           }
           onSelectAllRows={onAllSamplesSelect}
           selected={selectedSampleIdsConcat}
+          selectableCellRenderer={
+            localUpload ? SampleUploadTableRenderers.renderSelectableCell : null
+          }
           onRowClick={this.onRowClick}
           defaultSortBy="name"
           defaultSortDirection={SortDirection.ASC}
           selectRowDataGetter={({ rowData }) => {
-            const arr = {
-              finishedValidating: get("finishedValidating", rowData),
-              id: get("_selectId", rowData),
-              isValid: get("isValid", rowData),
-            };
-            return arr;
+            if (localUpload) {
+              return {
+                finishedValidating: get("finishedValidating", rowData),
+                id: get("_selectId", rowData),
+                isValid: get("isValid", rowData),
+              };
+            }
+            return get("_selectId", rowData);
           }}
           rowRenderer={this.rowRenderer}
         />

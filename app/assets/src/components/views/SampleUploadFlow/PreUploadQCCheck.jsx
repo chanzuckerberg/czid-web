@@ -401,7 +401,7 @@ const PreUploadQCCheck = ({
             passedFile.error = DUPLICATE_ID_ERROR;
           }
         } else if (validatedFastaOrFastq.includes(FASTQ_FILE_TYPE)) {
-          // Do not want to check if .gz files are truncated
+          // Don't check for truncation/matching paired-ends for .gz files
           if (!passedFile.files[key].name.includes(GZ_FILE_TYPE)) {
             const validatedTruncatedFile = await validateTruncatedFile(
               passedFile.files[key],
@@ -410,24 +410,24 @@ const PreUploadQCCheck = ({
               fileIsValid = false;
               passedFile.error = TRUNCATED_FILE_ERROR;
             }
-          }
-          await addFormatToFile(passedFile, key);
-          // Check to see if FASTQ file has matching R1/R2 file
-          if (key.includes(R1CHECK) || key.includes(R2CHECK)) {
-            const pairedEndSample = key.includes(R1CHECK)
-              ? key.replace(R1CHECK, R2CHECK)
-              : key.replace(R2CHECK, R1CHECK);
-            if (
-              key in passedFile.files &&
-              pairedEndSample in passedFile.files
-            ) {
-              const validatedMismatchedFiles = await validateMismatchedFiles(
-                passedFile.files[key],
-                passedFile.files[pairedEndSample],
-              );
-              if (!validatedMismatchedFiles) {
-                fileIsValid = false;
-                passedFile.error = MISMATCH_FILES_ERROR;
+            await addFormatToFile(passedFile, key);
+            // Check to see if FASTQ file has matching R1/R2 file
+            if (key.includes(R1CHECK) || key.includes(R2CHECK)) {
+              const pairedEndSample = key.includes(R1CHECK)
+                ? key.replace(R1CHECK, R2CHECK)
+                : key.replace(R2CHECK, R1CHECK);
+              if (
+                key in passedFile.files &&
+                pairedEndSample in passedFile.files
+              ) {
+                const validatedMismatchedFiles = await validateMismatchedFiles(
+                  passedFile.files[key],
+                  passedFile.files[pairedEndSample],
+                );
+                if (!validatedMismatchedFiles) {
+                  fileIsValid = false;
+                  passedFile.error = MISMATCH_FILES_ERROR;
+                }
               }
             }
           }
@@ -512,10 +512,14 @@ const PreUploadQCCheck = ({
                 will not be uploaded because there are duplicate read IDs. Tip!
                 You can use the SeqKit method &quot;rename&quot; on the
                 duplicate read IDs in your FASTA file to make them unique. Check
-                out SeqKit documentation
-                <ExternalLink href="https://bioinf.shenwei.me/seqkit/usage/#rename">
-                  {" here."}
+                out SeqKit documentation{" "}
+                <ExternalLink
+                  coloredBackground={true}
+                  href="https://bioinf.shenwei.me/seqkit/usage/#rename"
+                >
+                  {"here"}
                 </ExternalLink>
+                .
               </span>
             }
             headers={["File Name"]}
@@ -545,10 +549,14 @@ const PreUploadQCCheck = ({
                 will not be uploaded because the paired-end files do not match.
                 Tip! You can use use the SeqKit method named &quot;pair&quot; to
                 sort your FASTQ files so that R1 and R2 reads match up. Check
-                out SeqKit documentation
-                <ExternalLink href="https://bioinf.shenwei.me/seqkit/usage/#pair">
-                  {" here."}
+                out SeqKit documentation{" "}
+                <ExternalLink
+                  coloredBackground={true}
+                  href="https://bioinf.shenwei.me/seqkit/usage/#pair"
+                >
+                  {"here"}
                 </ExternalLink>
+                .
               </span>
             }
             headers={["File Name"]}

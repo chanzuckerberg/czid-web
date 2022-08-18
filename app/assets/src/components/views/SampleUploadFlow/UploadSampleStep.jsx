@@ -894,7 +894,10 @@ class UploadSampleStep extends React.Component {
     } = this.state;
     const { allowedFeatures } = this.context || {};
 
-    if (allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)) {
+    if (
+      currentTab === LOCAL_UPLOAD &&
+      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)
+    ) {
       if (!files.every(element => element.finishedValidating))
         return "Please wait for file validation to complete";
     }
@@ -939,7 +942,8 @@ class UploadSampleStep extends React.Component {
       workflowsValid = true;
     }
 
-    return allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)
+    return allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
+      currentTab === LOCAL_UPLOAD
       ? selectedProject !== null &&
           size(this.getSelectedSamples(currentTab)) > 0 &&
           !validatingSamples &&
