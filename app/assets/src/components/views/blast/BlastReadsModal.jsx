@@ -7,7 +7,7 @@ import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { BLASTN_HELP_LINK } from "~/components/utils/documentationLinks";
+import { BLAST_HELP_LINK } from "~/components/utils/documentationLinks";
 import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
@@ -159,7 +159,7 @@ const BlastReadsModal = ({
           BLASTN compares nucleotide query sequence(s) to the nucleotide (NT)
           databases in NCBI.{" "}
           <ExternalLink
-            href={BLASTN_HELP_LINK}
+            href={BLAST_HELP_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.BLAST_READS_MODAL_LEARN_MORE_CLICKED
             }

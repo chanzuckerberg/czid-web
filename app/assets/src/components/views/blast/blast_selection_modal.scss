@@ -61,6 +61,7 @@
 
         .description {
           font: $sds-font-body-xs-400-font;
+          display: grid;
           color: $sds-color-gray-500;
 
           margin-top: $sds-spaces-xs;
@@ -68,6 +69,10 @@
 
           &.disabled {
             color: $sds-color-gray-300 !important;
+          }
+
+          .link {
+            width: fit-content;
           }
         }
       }

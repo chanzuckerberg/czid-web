@@ -132,8 +132,12 @@ const BlastSelectionModal = ({
           <div
             className={cx(cs.description, blastOptionIsDisabled && cs.disabled)}
           >
-            {description}{" "}
-            <ExternalLink disabled={blastOptionIsDisabled} href={learnMoreLink}>
+            {description}
+            <ExternalLink
+              className={cs.link}
+              disabled={blastOptionIsDisabled}
+              href={learnMoreLink}
+            >
               Learn More
             </ExternalLink>
           </div>
@@ -154,7 +158,7 @@ const BlastSelectionModal = ({
   };
 
   return (
-    <Modal narrow open={open} tall onClose={onClose} sCloseIcon>
+    <Modal narrow open={open} tall onClose={onClose} xlCloseIcon>
       <div className={cs.blastSelectionModal}>
         <div className={cs.header}>Select a BLAST Type</div>
         <div className={cs.taxonName}>{taxonName}</div>

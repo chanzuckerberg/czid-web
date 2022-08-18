@@ -498,43 +498,41 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 <IconArrowRight />
               </a>
             </div>
-            {
-              <div className={cs.actionIcons}>
-                {this.renderBlastAction()}
-                <BasicPopup
-                  className={cs.actionIconPopup}
-                  basic={false}
-                  content="Download Contig FASTA"
-                  position="top center"
-                  inverted
-                  trigger={
-                    <ButtonIcon
-                      className={cs.iconButton}
-                      onClick={() =>
-                        trackEvent(
-                          ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_DOWNLOAD_CONTIG_BUTTON_CLICKED,
-                          openUrl(
-                            getDownloadContigUrl({
-                              pipelineVersion,
-                              sampleId,
-                              taxId: taxonId,
-                            }),
-                          ),
-                        )
-                      }
-                      sdsSize="large"
-                      sdsType="secondary"
-                    >
-                      <Icon
-                        sdsIcon="download"
-                        sdsSize="xl"
-                        sdsType="iconButton"
-                      />
-                    </ButtonIcon>
-                  }
-                />
-              </div>
-            }
+            <div className={cs.actionIcons}>
+              {this.renderBlastAction()}
+              <BasicPopup
+                className={cs.actionIconPopup}
+                basic={false}
+                content="Download Contig FASTA"
+                position="top center"
+                inverted
+                trigger={
+                  <ButtonIcon
+                    className={cs.iconButton}
+                    onClick={() =>
+                      trackEvent(
+                        ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_DOWNLOAD_CONTIG_BUTTON_CLICKED,
+                        openUrl(
+                          getDownloadContigUrl({
+                            pipelineVersion,
+                            sampleId,
+                            taxId: taxonId,
+                          }),
+                        ),
+                      )
+                    }
+                    sdsSize="large"
+                    sdsType="secondary"
+                  >
+                    <Icon
+                      sdsIcon="download"
+                      sdsSize="xl"
+                      sdsType="iconButton"
+                    />
+                  </ButtonIcon>
+                }
+              />
+            </div>
           </div>
         )}
       </div>

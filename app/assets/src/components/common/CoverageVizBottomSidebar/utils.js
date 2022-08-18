@@ -48,26 +48,26 @@ export const getGenomeVizTooltipData = memoize((hitGroups, dataIndex) => {
   let counts = [];
 
   if (numContigs > 0 && numReads > 0) {
-    name = "Aggregated Contigs and Reads";
+    name = "Aggregated NT Contigs and NT Reads";
     counts = [
-      ["# Contigs", numContigs],
-      ["# Loose Reads", numReads],
-      ["Contig Read Count", hitObj[2]],
+      ["# NT Contigs", numContigs],
+      ["# Loose NT Reads", numReads],
+      ["NT Contig Read Count", hitObj[2]],
     ];
   } else if (numReads > 1) {
-    name = "Aggregated Loose Reads";
-    counts = [["# Loose Reads", numReads]];
+    name = "Aggregated Loose NT Reads";
+    counts = [["# Loose NT Reads", numReads]];
   } else if (numReads === 1) {
-    name = "Loose Read";
+    name = "Loose NT Read";
   } else if (numContigs > 1) {
     name = "Aggregated Contigs";
     counts = [
-      ["# Contigs", numContigs],
-      ["Contig Read Count", hitObj[2]],
+      ["# NT Contigs", numContigs],
+      ["NT Contig Read Count", hitObj[2]],
     ];
   } else if (numContigs === 1) {
-    name = "Contig";
-    counts = [["Contig Read Count", hitObj[2]]];
+    name = "NT Contig";
+    counts = [["NT Contig Read Count", hitObj[2]]];
   }
 
   const averagePrefix = multipleHits ? "Avg. " : "";

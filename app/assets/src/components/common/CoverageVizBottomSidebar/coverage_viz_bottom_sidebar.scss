@@ -27,6 +27,8 @@ $genome-viz-spacing: $sds-spaces-xs;
   display: flex;
 
   .headerText {
+    padding-top: 24px;
+
     .taxonLabel {
       @include font-header-xs;
       color: $sds-color-gray-500;

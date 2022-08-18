@@ -36,7 +36,7 @@ export const CG_QUALITY_CONTROL_LINK =
   "https://help.czid.org/hc/en-us/articles/360049787632-Building-and-analyzing-a-SARS-CoV-2-consensus-genome#Quality-control";
 export const NCBI_POLICIES_AND_DISCLAIMERS_LINK =
   "https://www.ncbi.nlm.nih.gov/home/about/policies/";
-export const BLASTN_HELP_LINK =
+export const BLAST_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/4429814631572-Confirm-hits-using-BLASTN";
 export const BULK_DOWNLOAD_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360042575714-Initiate-a-Bulk-Download";
