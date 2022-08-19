@@ -97,7 +97,7 @@
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
-    "@apollo/client": "^3.5.10",
+    "@apollo/client": "^3.6.8",
     "@aws-sdk/client-s3": "file:vendor/aws-sdk-js-v3/aws-sdk-client-s3-v3.56.0-70c13fe.tgz",
     "@aws-sdk/lib-storage": "file:vendor/aws-sdk-js-v3/aws-sdk-lib-storage-v3.56.0-70c13fe.tgz",
     "@biowasm/aioli": "^2.4.0",

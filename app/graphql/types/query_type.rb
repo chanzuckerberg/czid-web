@@ -20,13 +20,14 @@ module Types
     end
 
     field :pathogen_list, PathogenListType, null: false do
+      argument :version, String, required: false
     end
 
     def app_config(id:)
       AppConfig.find(id)
     end
 
-    def pathogen_list
+    def pathogen_list(version: nil)
       launched = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
       unless launched.include?("pathogen_list_v0")
         redirect_to page_not_found_path
@@ -38,18 +39,18 @@ module Types
         # TODO: Validate that version is never sent in params and remove commented lines below
         # permitted_params = [:version]
         # version = params.permit(*permitted_params)
-        @list_version = global_pathogen_list.fetch_list_version()
+        @list_version = global_pathogen_list.fetch_list_version(version)
       end
 
       if @list_version.present?
         {
           version: @list_version.version,
-          updated_at: @list_version.updated_at.strftime("%b %d, %Y"),
+          updated_at: @list_version.updated_at,
           pathogens: @list_version.fetch_pathogens_info,
           citations: @list_version.fetch_citation_footnotes,
         }
       else
-        {}
+        raise GraphQL::ExecutionError, "Pathogen list not found"
       end
     end
   end
