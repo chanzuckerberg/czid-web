@@ -21,6 +21,18 @@ module AppConfigHelper
     app_config.update(value: value)
   end
 
+  def remove_app_config(key)
+    app_config = AppConfig.find_by(key: key)
+
+    if app_config.nil?
+      Rails.logger.error("[AppConfigHelper#remove_app_config] could not find key '#{key}'")
+    else
+      Rails.logger.info("[AppConfigHelper#remove_app_config] removing key '#{key}' with value '#{app_config.value}'")
+      app_config.destroy
+      Rails.cache.delete("app_config-#{key}")
+    end
+  end
+
   def get_json_app_config(key, default_value = nil, raise_error = false)
     value = get_app_config(key)
     begin

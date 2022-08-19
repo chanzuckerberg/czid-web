@@ -162,8 +162,6 @@ gem "omniauth-rails_csrf_protection", "~> 0.1.2"
 
 gem "jwt", "~> 2.2"
 
-gem "ssrfs-up", "~> 0.0.19" # https://github.com/chanzuckerberg/SSRFs-Up
-
 # Background processing based on AWS SQS
 gem "shoryuken"
 

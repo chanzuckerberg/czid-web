@@ -12,22 +12,14 @@ class LocationTest < ActiveSupport::TestCase
     net_response.expect(:is_a?, true, [Object])
 
     net_start = MiniTest::Mock.new
-    if AppConfigHelper.get_app_config(AppConfig::ENABLE_SSRFS_UP) == "1"
-      net_start.expect(:call, net_response, [query, { sensitive: ["key"] }])
-      SSRFsUp.stub :get, net_start do
-        res = Location.location_api_request(query)
-        assert_equal [true, LocationTestHelper::API_GEOSEARCH_RESPONSE], res
-      end
-      assert net_response.verify
-      assert net_start.verify
-    else
-      net_start.expect(:call, net_response, ["us1.locationiq.com", 443, { use_ssl: true }])
 
-      Net::HTTP.stub :start, net_start do
-        res = Location.location_api_request(query)
-        assert_equal [true, LocationTestHelper::API_GEOSEARCH_RESPONSE], res
-      end
+    net_start.expect(:call, net_response, ["us1.locationiq.com", 443, { use_ssl: true }])
+
+    Net::HTTP.stub :start, net_start do
+      res = Location.location_api_request(query)
+      assert_equal [true, LocationTestHelper::API_GEOSEARCH_RESPONSE], res
     end
+
     assert net_response.verify
     assert net_start.verify
   end

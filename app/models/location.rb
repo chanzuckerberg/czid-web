@@ -54,22 +54,14 @@ class Location < ApplicationRecord
 
     query_url = "#{LOCATION_IQ_BASE_URL}/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
 
-    # only trigger this flow if the app is configured to use SSRFs UP
-    # until it's tested in staging a bit, it currently just invokes the lambda
-    # and calls the old behavior. We'll use lambda metrics to see how it is working.
-    if AppConfigHelper.get_app_config(AppConfig::ENABLE_SSRFS_UP) == "1"
-      resp = SSRFsUp.get(query_url, { sensitive: ["key"] })
-      [resp.status_code == 200 || resp.status_code == 404, JSON.parse(resp.body)]
-    else
-      uri = Addressable::URI.parse(query_url)
-      request = Net::HTTP::Get.new(uri)
-      resp = Net::HTTP.start(uri.host, 443, use_ssl: true) do |http|
-        http.request(request)
-      end
-      # Search with 0 results will return HTTPNotFound. Consider it a successful request for our handling.
-      success = resp.is_a?(Net::HTTPSuccess) || resp.is_a?(Net::HTTPNotFound)
-      [success, JSON.parse(resp.body)]
+    uri = Addressable::URI.parse(query_url)
+    request = Net::HTTP::Get.new(uri)
+    resp = Net::HTTP.start(uri.host, 443, use_ssl: true) do |http|
+      http.request(request)
     end
+    # Search with 0 results will return HTTPNotFound. Consider it a successful request for our handling.
+    success = resp.is_a?(Net::HTTPSuccess) || resp.is_a?(Net::HTTPNotFound)
+    [success, JSON.parse(resp.body)]
   end
 
   # Search request to Location IQ API by freeform query.
