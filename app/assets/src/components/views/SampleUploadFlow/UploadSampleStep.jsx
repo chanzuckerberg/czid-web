@@ -385,13 +385,24 @@ class UploadSampleStep extends React.Component {
 
   handleTechnologyToggle = technology => {
     this.props.onDirty();
-    const { selectedWorkflows } = this.state;
+    const { selectedWorkflows, usedClearLabs } = this.state;
 
     if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
-      this.setState({
-        selectedTechnology: technology,
-        selectedWetlabProtocol: null,
-      });
+      // If user has selected Nanopore as their technology
+      // and has previously toggled "Used Clear Labs" on,
+      // then make sure to use the default wetlab + medaka model options.
+      if (technology === NANOPORE && usedClearLabs) {
+        this.setState({
+          selectedTechnology: technology,
+          selectedWetlabProtocol: DEFAULT_NANOPORE_WETLAB_OPTION,
+          selectedMedakaModel: DEFAULT_MEDAKA_MODEL_OPTION,
+        });
+      } else {
+        this.setState({
+          selectedTechnology: technology,
+          selectedWetlabProtocol: null,
+        });
+      }
 
       trackEvent(
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
@@ -461,7 +472,6 @@ class UploadSampleStep extends React.Component {
     if (sampleType === REMOTE_UPLOAD || sampleType === LOCAL_UPLOAD) {
       const samplesKey = this.getSamplesKey(sampleType);
       const samples = this.state[samplesKey];
-      const filesForQcCheck = this.state.files;
 
       // For local uploads, show how lanes will be concatenated
       if (sampleType === LOCAL_UPLOAD) {
@@ -469,43 +479,41 @@ class UploadSampleStep extends React.Component {
         const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
 
         for (let group in groups) {
-          const files = groups[group].files;
+          // Map errors/validation checks to each fileName
+          // to inform if/how to display file errors in the SampleUploadtable.
+          const pairedFiles = groups[group].files;
 
-          // Need to check the individual file name rather than group file name because sometimes the names of the group files are concatenated
-          let currentFile;
-          for (let i = 0; i < filesForQcCheck.length; i++) {
-            let passedFile = filesForQcCheck[i];
-            for (let j = 0; j < files.length; j++) {
-              if (passedFile.name === files[j].name) {
-                currentFile = passedFile;
-                break;
-              }
+          let finishedValidating = {};
+          let isValid = {};
+          let error = {};
+
+          pairedFiles.forEach(pair => {
+            const files = pair.files;
+            for (let fileName in files) {
+              finishedValidating[fileName] = pair.finishedValidating;
+              const correctSequenceTechnologySelected = this.validateCorrectFormat(
+                pair,
+              );
+              isValid[fileName] =
+                pair.isValid && correctSequenceTechnologySelected;
+              const errorMsg = !correctSequenceTechnologySelected
+                ? MISMATCH_FORMAT_ERROR
+                : pair.error;
+              error[fileName] = errorMsg || "";
             }
-          }
-          // Validate that correct sequence technology is selected for file
-          const correctSequenceTechnologySelected = this.validateCorrectFormat(
-            currentFile,
-          );
-          // Gets the type of error that file has. If no error then returns empty string
-          const errorForFile = !correctSequenceTechnologySelected
-            ? MISMATCH_FORMAT_ERROR
-            : currentFile
-            ? currentFile.error
-            : "";
+          });
 
           sampleInfo.push({
             file_names_R1: groups[group].filesR1.map(file => file.name),
             file_names_R2: groups[group].filesR2.map(file => file.name),
-            name: removeLaneFromName(files[0].name),
+            name: removeLaneFromName(pairedFiles[0].name),
             // If we concatenate samples 1 through 4, the selectId = "1,2,3,4"
-            [SELECT_ID_KEY]: files.map(file => file[SELECT_ID_KEY]).join(","),
-            finishedValidating: currentFile
-              ? currentFile.finishedValidating
-              : true,
-            isValid: currentFile
-              ? currentFile.isValid && correctSequenceTechnologySelected
-              : true,
-            error: errorForFile,
+            [SELECT_ID_KEY]: pairedFiles
+              .map(file => file[SELECT_ID_KEY])
+              .join(","),
+            finishedValidating,
+            isValid,
+            error,
           });
         }
         return sampleInfo;
@@ -662,7 +670,22 @@ class UploadSampleStep extends React.Component {
 
   // When a sample is checked or unchecked.
   handleSampleSelect = (value, checked, sampleType) => {
+    const { allowedFeatures } = this.context || {};
     this.props.onDirty();
+    const samplesKey = this.getSamplesKey(sampleType);
+    const samples = this.state[samplesKey];
+
+    // If the user tries to select an invalid sample, do nothing.
+    if (
+      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
+      sampleType === LOCAL_UPLOAD
+    ) {
+      const sample = samples.find(sample => sample[SELECT_ID_KEY] === value);
+      if (sample.isValid === false) {
+        return;
+      }
+    }
+
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
     const selectedSamples = this.state[selectedSampleIdsKey];
     if (checked) {
@@ -676,14 +699,40 @@ class UploadSampleStep extends React.Component {
     });
   };
 
+  // Callback for PreUploadQCCheck to remove invalid samples from selectedSamples.
+  handleInvalidSample = (value, checked, sampleType) => {
+    this.props.onDirty();
+    const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
+    const selectedSamples = this.state[selectedSampleIdsKey];
+
+    if (checked) {
+      selectedSamples.add(value);
+    } else {
+      selectedSamples.delete(value);
+    }
+    this.setState({
+      [selectedSampleIdsKey]: selectedSamples,
+    });
+  };
+
   handleAllSamplesSelect = (checked, sampleType) => {
+    const { allowedFeatures } = this.context || {};
     this.props.onDirty();
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
     const samplesKey = this.getSamplesKey(sampleType);
+    let samples = this.state[samplesKey];
+
+    // Filter out invalid samples.
+    if (
+      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
+      sampleType === LOCAL_UPLOAD
+    ) {
+      samples = samples.filter(sample => sample.isValid);
+    }
 
     this.setState({
       [selectedSampleIdsKey]: checked
-        ? new Set(map(SELECT_ID_KEY, this.state[samplesKey]))
+        ? new Set(map(SELECT_ID_KEY, samples))
         : new Set(),
     });
   };
@@ -766,13 +815,6 @@ class UploadSampleStep extends React.Component {
       [samplesKey]: newSamples,
       [selectedSampleIdsKey]: newSelectedSampleIds,
     };
-
-    // Filter out samples from files that have been removed
-    const { files } = this.state;
-    const newStateForfiles = files.filter(object1 =>
-      newSamples.some(object2 => object1.name === object2.name),
-    );
-    this.handleValidatedFilesChange(newStateForfiles);
 
     this.setState(newState);
 
@@ -877,16 +919,16 @@ class UploadSampleStep extends React.Component {
   };
 
   // Change state for files
-  handleValidatedFilesChange = files => {
+  handleValidatedFilesChange = localSamples => {
     this.setState({
-      files,
+      localSamples,
     });
   };
 
   handleContinueButtonTooltip = () => {
     const {
       currentTab,
-      files,
+      localSamples,
       selectedProject,
       selectedTechnology,
       selectedWorkflows,
@@ -898,7 +940,7 @@ class UploadSampleStep extends React.Component {
       currentTab === LOCAL_UPLOAD &&
       allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)
     ) {
-      if (!files.every(element => element.finishedValidating))
+      if (!localSamples.every(element => element.finishedValidating))
         return "Please wait for file validation to complete";
     }
     if (!selectedProject) return "Please select a project to continue";
@@ -921,7 +963,7 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       selectedWorkflows,
       validatingSamples,
-      files,
+      localSamples,
     } = this.state;
     const { allowedFeatures } = this.context || {};
 
@@ -948,7 +990,7 @@ class UploadSampleStep extends React.Component {
           size(this.getSelectedSamples(currentTab)) > 0 &&
           !validatingSamples &&
           workflowsValid &&
-          files.every(element => element.finishedValidating)
+          localSamples.every(element => element.finishedValidating)
       : selectedProject !== null &&
           size(this.getSelectedSamples(currentTab)) > 0 &&
           !validatingSamples &&
@@ -988,12 +1030,7 @@ class UploadSampleStep extends React.Component {
   // *** Render functions ***
 
   renderTab = () => {
-    const {
-      basespaceAccessToken,
-      currentTab,
-      selectedProject,
-      files,
-    } = this.state;
+    const { basespaceAccessToken, currentTab, selectedProject } = this.state;
     switch (currentTab) {
       case LOCAL_UPLOAD:
         return (
@@ -1002,7 +1039,6 @@ class UploadSampleStep extends React.Component {
             project={selectedProject}
             samples={this.getSelectedSamples(LOCAL_UPLOAD)}
             hasSamplesLoaded={size(this.state.localSamples) > 0}
-            files={files}
           />
         );
       case REMOTE_UPLOAD:
@@ -1143,9 +1179,9 @@ class UploadSampleStep extends React.Component {
           {localSamples.length > 0 &&
             allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) && (
               <PreUploadQCCheck
-                samples={files}
+                samples={localSamples}
                 changeState={this.handleValidatedFilesChange}
-                handleSampleSelect={this.handleSampleSelect}
+                handleSampleDeselect={this.handleInvalidSample}
                 sequenceTechnology={this.getSequenceTechnology()}
               />
             )}

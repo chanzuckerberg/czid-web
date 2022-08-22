@@ -9,6 +9,11 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.disabled {
+  color: $sds-color-gray-500;
+}
+
 .iconInfo {
   fill: $sds-color-error-400;
   margin-bottom: -$sds-spaces-xxxs;

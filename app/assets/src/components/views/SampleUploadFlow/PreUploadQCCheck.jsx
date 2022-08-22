@@ -28,7 +28,7 @@ import cs from "./pre_upload_qc_check.scss";
 const PreUploadQCCheck = ({
   samples,
   changeState,
-  handleSampleSelect,
+  handleSampleDeselect,
   sequenceTechnology,
 }) => {
   // CLI is used for calling some of the bioinformatics tools for PreUploadQC checks (biowasm, etc...)
@@ -443,16 +443,16 @@ const PreUploadQCCheck = ({
   // Delete samples from selected IDs if file is invalid
   const handleCheckbox = passedFile => {
     if (!passedFile.isValid) {
-      handleSampleSelect(passedFile._selectId, false, "local");
+      handleSampleDeselect(passedFile._selectId, false, "local");
     } else if (passedFile.format) {
       if (passedFile.format === ILLUMINA)
-        handleSampleSelect(
+        handleSampleDeselect(
           passedFile._selectId,
           passedFile.format === ILLUMINA && sequenceTechnology !== NANOPORE,
           "local",
         );
       else if (passedFile.format === NANOPORE)
-        handleSampleSelect(
+        handleSampleDeselect(
           passedFile._selectId,
           passedFile.format === NANOPORE && sequenceTechnology !== ILLUMINA,
           "local",
@@ -485,6 +485,30 @@ const PreUploadQCCheck = ({
       Object.values(element.files).forEach(val => allFiles.push(val)),
     );
     return allFiles;
+  };
+
+  // Returns a list of filenames for files with mismatched paired ends,
+  // with the paired files grouped together.
+  // For example: [[sample1_R1, sample1_R2], [sample2_R1, sample2_R2], ...]
+  // Used for displaying the errored files in two separate columns in the warning callout.
+  const pairMismatchedFileNames = () => {
+    let pairedFiles = new Set();
+    let fileNames = [];
+    mismatchedFiles.forEach(file => {
+      const fileName = file.name;
+      if (!pairedFiles.has(fileName)) {
+        if (fileName.includes(R1CHECK)) {
+          fileNames.push([fileName, fileName.replace(R1CHECK, R2CHECK)]);
+          pairedFiles.add(fileName);
+          pairedFiles.add(fileName.replace(R1CHECK, R2CHECK));
+        } else if (file.includes(R2CHECK)) {
+          fileNames.push([fileName.replace(R2CHECK, R1CHECK), fileName]);
+          pairedFiles.add(fileName);
+          pairedFiles.add(fileName.replace(R2CHECK, R1CHECK));
+        }
+      }
+    });
+    return fileNames;
   };
 
   return (
@@ -559,8 +583,8 @@ const PreUploadQCCheck = ({
                 .
               </span>
             }
-            headers={["File Name"]}
-            rows={[...mismatchedFiles].map(name => [name])}
+            headers={["R1 File Name", "R2 File Name"]}
+            rows={pairMismatchedFileNames()}
             type="warning"
           />
         )}
@@ -571,8 +595,8 @@ const PreUploadQCCheck = ({
               caption={`${getFiles(NANOPORE).length} 
               file${getFiles(NANOPORE).length > 1 ? "s" : ""} 
               will not be uploaded. You selected Illumina as the sequencing platform, but the 
-              file${getFiles(NANOPORE).length > 1 ? "s" : ""} 
-              does not appear to be an Illumina output.`}
+              file${getFiles(NANOPORE).length > 1 ? "s do" : " does"} 
+              not appear to be an Illumina output.`}
               headers={["File Name"]}
               rows={getFiles(NANOPORE).map(name => [name])}
               type="warning"
@@ -586,9 +610,9 @@ const PreUploadQCCheck = ({
                 getFiles(ILLUMINA).length > 1 ? "s" : ""
               } 
               will not be uploaded. You selected Nanopore as the sequencing platform, but the file${
-                getFiles(ILLUMINA).length > 1 ? "s" : ""
+                getFiles(ILLUMINA).length > 1 ? "s do" : " does"
               } 
-              does not appear to be a Nanopore output.`}
+              not appear to be a Nanopore output.`}
               headers={["File Name"]}
               rows={getFiles(ILLUMINA).map(name => [name])}
               type="warning"
@@ -610,7 +634,7 @@ const PreUploadQCCheck = ({
 PreUploadQCCheck.propTypes = {
   samples: PropTypes.array,
   changeState: PropTypes.func,
-  handleSampleSelect: PropTypes.func,
+  handleSampleDeselect: PropTypes.func,
   sequenceTechnology: PropTypes.string,
 };
 

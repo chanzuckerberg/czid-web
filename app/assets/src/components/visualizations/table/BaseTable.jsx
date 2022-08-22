@@ -317,16 +317,16 @@ class BaseTable extends React.Component {
       selectableCellClassName,
       selectableCellRenderer,
     } = this.props;
-    const disabled = cellData === null || cellData === undefined;
     if (selectableCellRenderer) {
       return selectableCellRenderer({
         cellData,
         selected,
         onSelectRow,
         selectableCellClassName,
-        disabled,
       });
     }
+
+    const disabled = cellData === null || cellData === undefined;
     return (
       <Checkbox
         className={selectableCellClassName}

@@ -1,3 +1,4 @@
+import { cx } from "@emotion/css";
 import { get, isEmpty } from "lodash/fp";
 import React from "react";
 import { CellMeasurer, CellMeasurerCache } from "react-virtualized";
@@ -28,20 +29,26 @@ export default class SampleUploadTableRenderers extends React.Component {
           {cellData.fileName.map(fileName => (
             <UserContext.Consumer key={fileName}>
               {currentUser => (
-                <div key={fileName} className={cs.fileName}>
+                <div
+                  key={fileName}
+                  className={cx(
+                    cs.fileName,
+                    cellData.isValid[fileName] === false && cs.disabled,
+                  )}
+                >
                   {fileName}
                   {currentUser.allowedFeatures.includes(
                     PRE_UPLOAD_CHECK_FEATURE,
                   ) &&
                     isEmpty(fileName) === false &&
-                    cellData.isValid === false && (
+                    cellData.isValid[fileName] === false && (
                       <ColumnHeaderTooltip
                         trigger={
                           <span>
                             <IconInfoSmall className={cs.iconInfo} />
                           </span>
                         }
-                        content={cellData.error}
+                        content={cellData.error[fileName]}
                       />
                     )}
                 </div>
@@ -69,8 +76,16 @@ export default class SampleUploadTableRenderers extends React.Component {
     selected,
     onSelectRow,
     selectableCellClassName,
-    disabled,
   }) => {
+    // If any file is still being validated, disable the entire sample row.
+    const finishedValidating = Object.values(cellData.finishedValidating).every(
+      fileFinished => fileFinished,
+    );
+    // If at least one file is valid, enable the sample row.
+    const isValid = Object.values(cellData.isValid).some(
+      fileValid => fileValid,
+    );
+    const disabled = !finishedValidating || !isValid;
     return (
       <div>
         <UserContext.Consumer>
@@ -86,13 +101,13 @@ export default class SampleUploadTableRenderers extends React.Component {
                   value={disabled ? -1 : cellData.id}
                   disabled={disabled}
                 />
-              ) : cellData.finishedValidating ? (
+              ) : finishedValidating ? (
                 <Checkbox
                   className={selectableCellClassName}
                   checked={selected.has(cellData.id)}
                   onChange={onSelectRow}
                   value={disabled ? -1 : cellData.id}
-                  disabled={!selected.has(cellData.id)}
+                  disabled={disabled}
                 />
               ) : (
                 <i className="fa fa-spinner fa-pulse fa-fw" />
