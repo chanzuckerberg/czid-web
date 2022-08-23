@@ -681,7 +681,11 @@ class UploadSampleStep extends React.Component {
       sampleType === LOCAL_UPLOAD
     ) {
       const sample = samples.find(sample => sample[SELECT_ID_KEY] === value);
-      if (sample.isValid === false) {
+      if (
+        !sample ||
+        sample.isValid === false ||
+        !this.validateCorrectFormat(sample)
+      ) {
         return;
       }
     }
@@ -727,7 +731,9 @@ class UploadSampleStep extends React.Component {
       allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
       sampleType === LOCAL_UPLOAD
     ) {
-      samples = samples.filter(sample => sample.isValid);
+      samples = samples.filter(
+        sample => sample.isValid && this.validateCorrectFormat(sample),
+      );
     }
 
     this.setState({
@@ -857,32 +863,42 @@ class UploadSampleStep extends React.Component {
         samples = validatedSamples;
 
         if (allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)) {
-          let errorTypes = new Set();
+          const { localSamples } = this.state;
           const samplesData = this.getSampleDataForUploadTable(LOCAL_UPLOAD);
 
-          let cumulativeFileSizeOfInvalidSamples = 0;
+          let errorTypes = new Set();
+          let cumulativeInvalidFileSizes = 0;
 
-          samplesData.forEach(element => {
-            if (!element.isValid) {
-              errorTypes.add(element.error);
-              const currentSample = samples.find(
-                obj => obj.name === element.name,
-              );
-              for (var key in currentSample.files) {
-                cumulativeFileSizeOfInvalidSamples +=
-                  currentSample.files[key].size;
+          samplesData.forEach(sample => {
+            Object.entries(sample.isValid).forEach(([fileName, isValid]) => {
+              if (!isValid) {
+                errorTypes.add(sample.error[fileName]);
+
+                // Get the actual file object from the sample so we can track the file size.
+                localSamples.forEach(localSample => {
+                  Object.entries(localSample.files).forEach(
+                    ([fileObjectName, fileObject]) => {
+                      if (fileName === fileObjectName) {
+                        cumulativeInvalidFileSizes += fileObject.size;
+                      }
+                    },
+                  );
+                });
               }
-            }
+            });
           });
 
-          if (samplesData.some(element => !element.isValid)) {
+          // If the files encountered errors, track the cumulative size of the failed file(s).
+          if (errorTypes.size > 0) {
             trackEvent(
               ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_CUMULATIVE_FILE_SIZE_FAILED,
               {
-                cumalativeInvalidFileSizes: cumulativeFileSizeOfInvalidSamples,
+                cumulativeInvalidFileSizes,
               },
             );
           }
+
+          // Track if there were multiple issues with the file(s).
           if (errorTypes.size > 1) {
             trackEvent(
               ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_MULTIPLE_ISSUES_FAILED,
