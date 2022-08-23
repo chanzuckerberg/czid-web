@@ -19,7 +19,6 @@ import IconBarChartHorizontal3Small from "./IconBarChartHorizontal3Small";
 import IconBiohubLogo from "./IconBiohubLogo";
 import IconBlast from "./IconBlast";
 import IconBlastSmall from "./IconBlastSmall";
-import IconBrowserSmall from "./IconBrowserSmall";
 import IconChartSmall from "./IconChartSmall";
 import IconCheckSmall from "./IconCheckSmall";
 import IconClose from "./IconClose";
@@ -99,7 +98,6 @@ export const ICONS_TAXONOMY = {
     IconBarChartHorizontal3Small,
     IconBlast,
     IconBlastSmall,
-    IconBrowserSmall,
     IconChartSmall,
     IconCheckSmall,
     IconClose,
@@ -192,7 +190,6 @@ export {
   IconBiohubLogo,
   IconBlast,
   IconBlastSmall,
-  IconBrowserSmall,
   IconChartSmall,
   IconCheckSmall,
   IconClose,
