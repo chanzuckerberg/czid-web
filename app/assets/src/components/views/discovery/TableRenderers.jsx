@@ -1,12 +1,11 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import { at, isNil, get } from "lodash/fp";
 import moment from "moment";
 import React from "react";
 
 import BasicPopup from "~/components/BasicPopup";
 import { numberWithCommas } from "~/helpers/strings";
-import { IconSamplePrivate, IconSamplePublic } from "~ui/icons";
-import IconSample from "~ui/icons/IconSample";
 import StatusLabel from "~ui/labels/StatusLabel";
 
 // CSS file must be loaded after any elements you might want to override
@@ -132,11 +131,13 @@ class TableRenderers extends React.Component {
           <div className={cs.visibility}>
             {sample &&
               (basicIcon ? (
-                <IconSample className={cx(cs.iconSample)} />
+                <div className={cs.iconFlask}>
+                  <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
+                </div>
               ) : sample.publicAccess ? (
-                <IconSamplePublic className={cx(cs.icon)} />
+                <Icon sdsIcon="flaskPublic" sdsSize="xl" sdsType="static" />
               ) : (
-                <IconSamplePrivate className={cx(cs.icon)} />
+                <Icon sdsIcon="flaskPrivate" sdsSize="xl" sdsType="static" />
               ))}
           </div>
         )}
@@ -185,11 +186,13 @@ class TableRenderers extends React.Component {
           <div className={cs.visibility}>
             {sample &&
               (basicIcon ? (
-                <IconSample className={cx(cs.iconSample)} />
+                <div className={cs.iconFlask}>
+                  <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
+                </div>
               ) : sample.publicAccess ? (
-                <IconSamplePublic className={cx(cs.icon)} />
+                <Icon sdsIcon="flaskPublic" sdsSize="xl" sdsType="static" />
               ) : (
-                <IconSamplePrivate className={cx(cs.icon)} />
+                <Icon sdsIcon="flaskPrivate" sdsSize="xl" sdsType="static" />
               ))}
           </div>
         )}

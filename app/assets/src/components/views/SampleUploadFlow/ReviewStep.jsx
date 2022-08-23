@@ -18,7 +18,6 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import DataTable from "~/components/visualizations/table/DataTable";
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
-import { IconSample } from "~ui/icons";
 import { returnHipaaCompliantMetadata } from "~utils/metadata";
 import AdminUploadOptions from "./AdminUploadOptions";
 import HostOrganismMessage from "./HostOrganismMessage";
@@ -345,7 +344,9 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.section}>
-          <IconSample className={cs.icon} />
+          <div className={cs.icon}>
+            <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
+          </div>
           <div className={cs.text}>
             <div className={cs.header}>
               <div className={cs.name}>{workflowType}</div>

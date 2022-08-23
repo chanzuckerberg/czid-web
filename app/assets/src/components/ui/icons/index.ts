@@ -59,10 +59,7 @@ import IconPlusSmall from "./IconPlusSmall";
 import IconPrivateSmall from "./IconPrivateSmall";
 import IconPublicSmall from "./IconPublicSmall";
 import IconRefresh from "./IconRefresh";
-import IconSample from "./IconSample";
 import IconSampleFigure from "./IconSampleFigure";
-import IconSamplePrivate from "./IconSamplePrivate";
-import IconSamplePublic from "./IconSamplePublic";
 import IconSave from "./IconSave";
 import IconSearch from "./IconSearch";
 import IconShare from "./IconShare";
@@ -137,10 +134,7 @@ export const ICONS_TAXONOMY = {
     IconPrivateSmall,
     IconPublicSmall,
     IconRefresh,
-    IconSample,
     IconSampleFigure,
-    IconSamplePrivate,
-    IconSamplePublic,
     IconSave,
     IconSearch,
     IconShare,
@@ -230,10 +224,7 @@ export {
   IconPrivateSmall,
   IconPublicSmall,
   IconRefresh,
-  IconSample,
   IconSampleFigure,
-  IconSamplePrivate,
-  IconSamplePublic,
   IconSave,
   IconSearch,
   IconShare,

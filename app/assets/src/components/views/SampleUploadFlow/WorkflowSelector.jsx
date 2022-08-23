@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import React from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -14,7 +15,6 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import RadioButton from "~ui/controls/RadioButton";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import IconSample from "~ui/icons/IconSample";
 import PropTypes from "~utils/propTypes";
 import { WORKFLOWS } from "~utils/workflows";
 
@@ -90,7 +90,9 @@ const WorkflowSelector = ({
           selected={mngsWorkflowSelected}
           className={cs.radioButton}
         />
-        <IconSample className={cs.iconSample} />
+        <div className={cs.iconSample}>
+          <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
+        </div>
         <div className={cs.optionText}>
           <div className={cs.title}>Metagenomics</div>
           <div className={cs.description}>
@@ -112,7 +114,9 @@ const WorkflowSelector = ({
         onClick={() => onWorkflowToggle(WORKFLOWS.CONSENSUS_GENOME.value)}
       >
         <RadioButton selected={cgWorkflowSelected} className={cs.radioButton} />
-        <IconSample className={cs.iconSample} />
+        <div className={cs.iconSample}>
+          <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
+        </div>
         <div className={cs.optionText}>
           <div className={cs.title}>SARS-CoV-2 Consensus Genome</div>
           <div className={cs.description}>
