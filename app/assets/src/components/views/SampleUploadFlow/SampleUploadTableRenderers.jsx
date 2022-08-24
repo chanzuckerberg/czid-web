@@ -33,7 +33,8 @@ export default class SampleUploadTableRenderers extends React.Component {
                   key={fileName}
                   className={cx(
                     cs.fileName,
-                    cellData?.isValid[fileName] === false &&
+                    cellData.isValid &&
+                      cellData.isValid[fileName] === false &&
                       cs.disabled,
                   )}
                 >
@@ -42,7 +43,8 @@ export default class SampleUploadTableRenderers extends React.Component {
                     PRE_UPLOAD_CHECK_FEATURE,
                   ) &&
                     isEmpty(fileName) === false &&
-                   cellData?.isValid[fileName] === false && (
+                    cellData.isValid &&
+                    cellData.isValid[fileName] === false && (
                       <ColumnHeaderTooltip
                         trigger={
                           <span>
