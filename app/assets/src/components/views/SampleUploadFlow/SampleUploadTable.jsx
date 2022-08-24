@@ -111,18 +111,20 @@ export default class SampleUploadTable extends React.Component {
     const { sampleUploadType } = this.props;
     const { allowedFeatures = [] } = this.context || {};
     const data = rowProps.rowData;
-    // If any file is still being validated, disable the entire sample row.
-    const finishedValidating = Object.values(data.finishedValidating).every(
-      fileFinished => fileFinished,
-    );
-    // If at least one file is valid, enable the sample row.
-    const isValid = Object.values(data.isValid).some(fileValid => fileValid);
     if (
       allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
-      sampleUploadType === "local" &&
-      (!finishedValidating || !isValid)
+      sampleUploadType === "local"
     ) {
-      rowProps.className = cx(rowProps.className, cs.disabled);
+      // If any file is still being validated, disable the entire sample row.
+      const finishedValidating = Object.values(data.finishedValidating).every(
+        fileFinished => fileFinished,
+      );
+      // If at least one file is valid, enable the sample row.
+      const isValid = Object.values(data.isValid).some(fileValid => fileValid);
+
+      if (!finishedValidating || !isValid) {
+        rowProps.className = cx(rowProps.className, cs.disabled);
+      }
     }
 
     return defaultTableRowRenderer(rowProps);

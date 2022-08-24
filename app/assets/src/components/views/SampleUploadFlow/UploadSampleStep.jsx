@@ -474,6 +474,7 @@ class UploadSampleStep extends React.Component {
       const samples = this.state[samplesKey];
 
       // For local uploads, show how lanes will be concatenated
+      // If applicable, also add information from the preupload QC checks.
       if (sampleType === LOCAL_UPLOAD) {
         const sampleInfo = [];
         const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
@@ -676,6 +677,7 @@ class UploadSampleStep extends React.Component {
     const samples = this.state[samplesKey];
 
     // If the user tries to select an invalid sample, do nothing.
+    // Note: we currently only run validation checks on locally uploaded samples
     if (
       allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
       sampleType === LOCAL_UPLOAD
@@ -727,6 +729,7 @@ class UploadSampleStep extends React.Component {
     let samples = this.state[samplesKey];
 
     // Filter out invalid samples.
+    // Note: we currently only run validation checks on locally uploaded samples
     if (
       allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
       sampleType === LOCAL_UPLOAD
@@ -952,6 +955,7 @@ class UploadSampleStep extends React.Component {
     } = this.state;
     const { allowedFeatures } = this.context || {};
 
+    // Note: we currently only run validation checks on locally uploaded samples
     if (
       currentTab === LOCAL_UPLOAD &&
       allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)
@@ -1000,6 +1004,7 @@ class UploadSampleStep extends React.Component {
       workflowsValid = true;
     }
 
+    // Note: we currently only run validation checks on locally uploaded samples
     return allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
       currentTab === LOCAL_UPLOAD
       ? selectedProject !== null &&
@@ -1194,6 +1199,7 @@ class UploadSampleStep extends React.Component {
           />
           {localSamples.length > 0 &&
             allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) && (
+              // Note: we currently only run validation checks on locally uploaded samples
               <PreUploadQCCheck
                 samples={localSamples}
                 changeState={this.handleValidatedFilesChange}
