@@ -1,4 +1,4 @@
-import { Button, DropdownPopper, DropdownPaper, MenuSelect } from "czifui";
+import { Button, DropdownMenu } from "czifui";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -30,19 +30,20 @@ const PinSampleSelector = ({
   }
 
   return (
-    <DropdownPopper open anchorEl={selectSampleTrigger} placement="bottom-end">
-      <div className={cs.title}>Select Samples to Pin</div>
-      <MenuSelect
-        label="Select Samples to Pin"
-        multiple={true}
-        getOptionSelected={(option, value) => option.id === value}
-        options={options}
-        onChange={onSelectionChange}
-        onClose={handleClose}
-        search={true}
-        value={selectedSamples}
-        PaperComponent={DropdownPaper}
-      />
+    <DropdownMenu
+      anchorEl={selectSampleTrigger}
+      disableCloseOnSelect
+      multiple
+      onChange={onSelectionChange}
+      onClose={handleClose}
+      open
+      options={options}
+      isOptionEqualToValue={(option, value) => option.id === value}
+      PopperBaseProps={{ placement: "bottom-end", sx: { width: 300 } }}
+      search
+      title="Select Samples to Pin"
+      value={selectedSamples}
+    >
       <div className={cs.buttonsContainer}>
         <Button
           className={cs.button}
@@ -61,7 +62,7 @@ const PinSampleSelector = ({
           Cancel
         </Button>
       </div>
-    </DropdownPopper>
+    </DropdownMenu>
   );
 };
 
