@@ -590,6 +590,14 @@ const kickoffConsensusGenome = ({
     },
   });
 
+  const kickoffAMR = ({
+    sampleId,
+    workflow,
+  }) =>
+    postWithCSRF(`/samples/${sampleId}/kickoff_workflow`, {
+      workflow,
+    });
+
 export {
   bulkImportRemoteSamples,
   createBackground,
@@ -636,6 +644,7 @@ export {
   getWorkflowRunsInfo,
   getWorkflowRunResults,
   kickoffConsensusGenome,
+  kickoffAMR,
   markSampleUploaded,
   retryPhyloTree,
   saveProjectDescription,

@@ -51,6 +51,7 @@ class WorkflowRun < ApplicationRecord
     # NOTE: 'main' is not yet supported in WorkflowRuns.
     main: "main",
     consensus_genome: "consensus-genome",
+    amr: "amr",
     short_read_mngs: "short-read-mngs",
   }.freeze
 
@@ -174,6 +175,8 @@ class WorkflowRun < ApplicationRecord
   def dispatch
     if workflow == WORKFLOW[:consensus_genome]
       SfnCgPipelineDispatchService.call(self)
+    elsif workflow == WORKFLOW[:amr]
+      SfnAmrPipelineDispatchService.call(self)
     end
   end
 
