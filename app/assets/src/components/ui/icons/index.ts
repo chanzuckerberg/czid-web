@@ -58,7 +58,6 @@ import IconPlusCircleSmall from "./IconPlusCircleSmall";
 import IconPlusSmall from "./IconPlusSmall";
 import IconPrivateSmall from "./IconPrivateSmall";
 import IconPublicSmall from "./IconPublicSmall";
-import IconRefresh from "./IconRefresh";
 import IconSampleFigure from "./IconSampleFigure";
 import IconSave from "./IconSave";
 import IconSearch from "./IconSearch";
@@ -133,7 +132,6 @@ export const ICONS_TAXONOMY = {
     IconPlusSmall,
     IconPrivateSmall,
     IconPublicSmall,
-    IconRefresh,
     IconSampleFigure,
     IconSave,
     IconSearch,
@@ -223,7 +221,6 @@ export {
   IconPlusSmall,
   IconPrivateSmall,
   IconPublicSmall,
-  IconRefresh,
   IconSampleFigure,
   IconSave,
   IconSearch,
