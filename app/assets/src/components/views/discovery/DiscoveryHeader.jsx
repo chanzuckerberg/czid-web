@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon, ButtonIcon } from "czifui";
 import { startCase } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
@@ -6,7 +7,6 @@ import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import Tabs from "~ui/controls/Tabs";
-import { IconFilters, IconInfoPanel } from "~ui/icons";
 import Label from "~ui/labels/Label";
 import { DISCOVERY_DOMAINS } from "./discovery_api";
 
@@ -89,13 +89,18 @@ class DiscoveryHeader extends React.Component {
           <BasicPopup
             trigger={
               <div>
-                <IconFilters
-                  className={cx(
-                    cs.filtersIcon,
-                    disableSidebars ? cs.disabledIcon : cs.icon,
-                    !showFilters && cs.closed,
-                  )}
-                />
+                <ButtonIcon
+                  sdsSize="large"
+                  sdsType="primary"
+                  active={showFilters}
+                  disabled={disableSidebars}
+                >
+                  <Icon
+                    sdsIcon="slidersHorizontal"
+                    sdsSize="xl"
+                    sdsType="iconButton"
+                  />
+                </ButtonIcon>
                 {!disableSidebars && (
                   <Label
                     className={cs.filtersCounter}
@@ -150,13 +155,18 @@ class DiscoveryHeader extends React.Component {
           <BasicPopup
             trigger={
               <div>
-                <IconInfoPanel
-                  className={cx(
-                    cs.statsIcon,
-                    disableSidebars ? cs.disabledIcon : cs.icon,
-                    !showStats && cs.closed,
-                  )}
-                />
+                <ButtonIcon
+                  sdsSize="large"
+                  sdsType="primary"
+                  active={showStats}
+                  disabled={disableSidebars}
+                >
+                  <Icon
+                    sdsIcon="infoSpeechBubble"
+                    sdsSize="xl"
+                    sdsType="iconButton"
+                  />
+                </ButtonIcon>
               </div>
             }
             content={

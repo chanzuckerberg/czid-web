@@ -9,28 +9,6 @@
   align-items: center;
   margin-bottom: $sds-spaces-m;
 
-  .icon {
-    fill: $sds-color-primary-400;
-    width: 30px;
-
-    &.closed {
-      fill: $sds-color-gray-300;
-    }
-
-    &:hover {
-      fill: $sds-color-primary-300;
-    }
-  }
-
-  .filtersIcon {
-    width: 25px;
-  }
-
-  .disabledIcon {
-    fill: $sds-color-gray-300;
-    width: 30px;
-  }
-
   .filtersTrigger {
     align-items: center;
     cursor: pointer;
@@ -48,8 +26,7 @@
       // Override semantic-ui
       padding: 3px !important;
       position: absolute;
-      top: -5px;
-      right: -12px;
+      right: calc(-1 * $sds-spaces-xs);
       vertical-align: middle;
     }
   }

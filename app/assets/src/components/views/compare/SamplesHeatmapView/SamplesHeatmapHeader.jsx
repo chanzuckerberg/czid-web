@@ -1,3 +1,4 @@
+import { Icon } from "czifui";
 import PropTypes from "prop-types";
 import React, { useContext } from "react";
 
@@ -33,7 +34,6 @@ import {
 } from "~ui/controls/buttons";
 
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { IconFilters } from "~ui/icons";
 import { DOWNLOAD_OPTIONS } from "./constants";
 
 import cs from "./samples_heatmap_view.scss";
@@ -147,7 +147,13 @@ const SamplesHeatmapHeader = ({
             trigger={
               <PrimaryButton
                 text="New Presets"
-                icon={<IconFilters />}
+                icon={
+                  <Icon
+                    sdsIcon="slidersHorizontal"
+                    sdsSize="l"
+                    sdsType="static"
+                  />
+                }
                 onClick={withAnalytics(
                   onNewPresetsClick,
                   ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_NEW_PRESETS_BUTTON_CLICKED,
