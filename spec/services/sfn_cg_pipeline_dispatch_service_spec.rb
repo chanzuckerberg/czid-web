@@ -611,6 +611,29 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
           expect { subject }.to raise_error(SfnCgPipelineDispatchService::InvalidMedakaModelError)
         end
       end
+
+      context "when custom ref_fasta and primer bed are chosen" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { technology: illumina_technology, ref_fasta: "ref.fasta", primer_bed: "primer.bed", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
+        end
+
+        it "returns sfn input with SNAP primer" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  ref_fasta: format(s3_sample_input_files_path, sample_id: sample.id, project_id: project.id, input_file_name: "ref.fasta"),
+                  primer_bed: format(s3_sample_input_files_path, sample_id: sample.id, project_id: project.id, input_file_name: "primer.bed"),
+                },
+              },
+            }
+          )
+        end
+      end
     end
   end
 end

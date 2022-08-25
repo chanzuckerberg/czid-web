@@ -553,6 +553,18 @@ module SamplesHelper
         wetlab_protocol = sample_attributes.delete(:wetlab_protocol)
       end
 
+      if sample_attributes.key?(:accession_id)
+        accession_id = sample_attributes.delete(:accession_id)
+      end
+
+      if sample_attributes.key?(:ref_fasta)
+        ref_fasta = sample_attributes.delete(:ref_fasta)
+      end
+
+      if sample_attributes.key?(:primer_bed)
+        primer_bed = sample_attributes.delete(:primer_bed)
+      end
+
       sample = Sample.find_by(
         name: sample_attributes[:name],
         project_id: sample_attributes[:project_id],
@@ -590,12 +602,14 @@ module SamplesHelper
           # Temporarily hardcode inputs_json's taxon info as sars-cov-2 for samples uploaded from FE via regular upload flow
           # TODO: Generalize taxon info in inputs_json when FE uploader is modified to specify a taxon upon creating a consensus genome
           inputs_json = {}.tap do |h|
-            h[:accession_id] = ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
+            h[:accession_id] = accession_id || ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
             h[:accession_name] = "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome"
             h[:taxon_id] = 2_697_049
             h[:taxon_name] = "Severe acute respiratory syndrome coronavirus 2"
             h[:technology] = technology
             h[:wetlab_protocol] = wetlab_protocol
+            h[:ref_fasta] = ref_fasta
+            h[:primer_bed] = primer_bed
 
             if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
               h[:clearlabs] = clearlabs

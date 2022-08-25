@@ -290,6 +290,8 @@ RSpec.describe SamplesHelper, type: :helper do
                                                            "taxon_name",
                                                            "technology",
                                                            "wetlab_protocol",
+                                                           "ref_fasta",
+                                                           "primer_bed",
                                                            "clearlabs",
                                                            "medaka_model",
                                                            "vadr_options",

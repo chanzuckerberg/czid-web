@@ -190,6 +190,13 @@ class SfnCgPipelineDispatchService
   end
 
   def generate_wdl_input
+    ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
+    primer_bed_name = @workflow_run.inputs&.[]("primer_bed")
+
+    input_fastas = @sample.input_files.filter { |i| i.name != ref_fasta_name && i.name != primer_bed_name }
+    ref_fasta_input = ref_fasta_name && @sample.input_files.find { |i| i.name != ref_fasta_name }
+    primer_bed_input = primer_bed_name && @sample.input_files.find { |i| i.name != primer_bed_name }
+
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
     additional_inputs = if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
                           # ONT sars-cov-2 cg
@@ -201,6 +208,13 @@ class SfnCgPipelineDispatchService
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
                             primer_set: nanopore_primer_set,
                             primer_schemes: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic-primer-schemes_v5.tar.gz",
+                          }
+                        elsif (ref_fasta_input || @workflow_run.inputs&.[]("reference_accession")) && primer_bed_input
+                          # illumina gen cg custom reference + primers
+                          {
+                            ref_fasta: File.join(@sample.sample_input_s3_path, ref_fasta_name),
+                            ref_accession_id: @workflow_run.inputs&.[]("reference_accession"),
+                            primer_bed: File.join(@sample.sample_input_s3_path, primer_bed_name),
                           }
                         elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
                           # illumina sars-cov-2 cg
@@ -223,8 +237,8 @@ class SfnCgPipelineDispatchService
 
     run_inputs = {
       docker_image_id: retrieve_docker_image_id,
-      fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
-      fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+      fastqs_0: File.join(@sample.sample_input_s3_path, input_fastas[0].name),
+      fastqs_1: input_fastas[1] ? File.join(@sample.sample_input_s3_path, input_fastas[1].name) : nil,
       sample: @sample.name.tr(" ", "_"),
       ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
       kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",

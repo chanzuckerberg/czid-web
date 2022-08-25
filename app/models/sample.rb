@@ -224,7 +224,9 @@ class Sample < ApplicationRecord
   def input_files_checks
     # validate that we have the correct number of input files
     errors.add(:input_files, "invalid number (#{input_files.size})") unless
-      input_files.size.between?(1, 2) || (uploaded_from_basespace? && input_files.empty?)
+      # we can have up to 4 input files, input fasta R1 + R2, a primer bed for consensus genomes,
+      #  and a reference fasta for consensus genomes. We currently don't support this from basespace
+      uploaded_from_basespace? ? input_files.size.between?(0, 2) : input_files.size.between?(1, 4)
 
     # validate that both input files have the same source_type and file_type
     if input_files.length == 2
