@@ -866,42 +866,18 @@ class UploadSampleStep extends React.Component {
         samples = validatedSamples;
 
         if (allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)) {
-          const { localSamples } = this.state;
+          // Track if there were multiple issues with the file(s).
           const samplesData = this.getSampleDataForUploadTable(LOCAL_UPLOAD);
-
           let errorTypes = new Set();
-          let cumulativeInvalidFileSizes = 0;
 
           samplesData.forEach(sample => {
             Object.entries(sample.isValid).forEach(([fileName, isValid]) => {
               if (!isValid) {
                 errorTypes.add(sample.error[fileName]);
-
-                // Get the actual file object from the sample so we can track the file size.
-                localSamples.forEach(localSample => {
-                  Object.entries(localSample.files).forEach(
-                    ([fileObjectName, fileObject]) => {
-                      if (fileName === fileObjectName) {
-                        cumulativeInvalidFileSizes += fileObject.size;
-                      }
-                    },
-                  );
-                });
               }
             });
           });
 
-          // If the files encountered errors, track the cumulative size of the failed file(s).
-          if (errorTypes.size > 0) {
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_CUMULATIVE_FILE_SIZE_FAILED,
-              {
-                cumulativeInvalidFileSizes,
-              },
-            );
-          }
-
-          // Track if there were multiple issues with the file(s).
           if (errorTypes.size > 1) {
             trackEvent(
               ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_MULTIPLE_ISSUES_FAILED,

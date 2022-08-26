@@ -376,9 +376,16 @@ const PreUploadQCCheck = ({
 
   // Run each validation check for each file
   const runAllValidationChecks = async () => {
+    let cumulativeInvalidFileSizes = 0;
+
     for (let i = 0; i < samples.length; i++) {
       let passedFile = samples[i];
       if (passedFile.finishedValidating === true) {
+        if (!passedFile.isValid) {
+          Object.entries(passedFile.files).forEach(([fileName, file]) => {
+            cumulativeInvalidFileSizes += file.size;
+          });
+        }
         handleCheckbox(passedFile);
         continue;
       }
@@ -435,8 +442,22 @@ const PreUploadQCCheck = ({
       }
       passedFile.finishedValidating = true;
       passedFile.isValid = fileIsValid;
+      if (!fileIsValid) {
+        Object.entries(passedFile.files).forEach(([fileName, file]) => {
+          cumulativeInvalidFileSizes += file.size;
+        });
+      }
       changeState(samples);
       handleCheckbox(passedFile);
+    }
+    // If the files encountered errors, track the cumulative size of the failed file(s).
+    if (cumulativeInvalidFileSizes > 0) {
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_CUMULATIVE_FILE_SIZE_FAILED,
+        {
+          cumulativeInvalidFileSizes,
+        },
+      );
     }
   };
 
