@@ -42,8 +42,6 @@ import IconListSmall from "./IconListSmall";
 import IconLoading from "./IconLoading";
 import IconMapSmall from "./IconMapSmall";
 import IconMatchesFigure from "./IconMatchesFigure";
-import IconMember from "./IconMember";
-import IconMemberSmall from "./IconMemberSmall";
 import IconMinusSmall from "./IconMinusSmall";
 import IconMobileNavClose from "./IconMobileNavClose";
 import IconNextcladeLarge from "./IconNextcladeLarge";
@@ -54,8 +52,6 @@ import IconPhyloTreePublic from "./IconPhyloTreePublic";
 import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
 import IconPlusCircleSmall from "./IconPlusCircleSmall";
 import IconPlusSmall from "./IconPlusSmall";
-import IconPrivateSmall from "./IconPrivateSmall";
-import IconPublicSmall from "./IconPublicSmall";
 import IconSampleFigure from "./IconSampleFigure";
 import IconSave from "./IconSave";
 import IconSearch from "./IconSearch";
@@ -67,7 +63,6 @@ import IconTableSmall from "./IconTableSmall";
 import IconTempSmall from "./IconTempSmall";
 import IconTreeSmall from "./IconTreeSmall";
 import IconUploadFigure from "./IconUploadFigure";
-import IconViewSmall from "./IconViewSmall";
 import LogoLockupColor from "./LogoLockupColor";
 import LogoLockupReversed from "./LogoLockupReversed";
 import LogoMarkColor from "./LogoMarkColor";
@@ -114,8 +109,6 @@ export const ICONS_TAXONOMY = {
     IconLoading,
     IconMapSmall,
     IconMatchesFigure,
-    IconMember,
-    IconMemberSmall,
     IconMinusSmall,
     IconMobileNavClose,
     IconNextcladeLarge,
@@ -126,8 +119,6 @@ export const ICONS_TAXONOMY = {
     IconPhyloTreeSmall,
     IconPlusCircleSmall,
     IconPlusSmall,
-    IconPrivateSmall,
-    IconPublicSmall,
     IconSampleFigure,
     IconSave,
     IconSearch,
@@ -139,7 +130,6 @@ export const ICONS_TAXONOMY = {
     IconTempSmall,
     IconTreeSmall,
     IconUploadFigure,
-    IconViewSmall,
     SortIcon,
   },
   FONT_AWESOME: {
@@ -201,8 +191,6 @@ export {
   IconLoading,
   IconMapSmall,
   IconMatchesFigure,
-  IconMember,
-  IconMemberSmall,
   IconMinusSmall,
   IconMobileNavClose,
   IconNextcladeLarge,
@@ -213,8 +201,6 @@ export {
   IconPhyloTreeSmall,
   IconPlusCircleSmall,
   IconPlusSmall,
-  IconPrivateSmall,
-  IconPublicSmall,
   IconSampleFigure,
   IconSave,
   IconSearch,
@@ -226,7 +212,6 @@ export {
   IconTempSmall,
   IconTreeSmall,
   IconUploadFigure,
-  IconViewSmall,
   LogoLockupColor,
   LogoLockupReversed,
   LogoMarkColor,

@@ -24,18 +24,13 @@
     align-items: center;
     white-space: nowrap;
 
+    svg {
+      color: $sds-color-gray-500;
+      margin-right: $sds-spaces-xxxs;
+    }
+
     &:not(:first-child) {
       margin-left: $sds-spaces-l;
     }
-  }
-}
-
-.smallIcon {
-  height: 16px;
-  margin-right: $sds-spaces-xxxs;
-  fill: $sds-color-gray-500;
-
-  .userIcon {
-    height: $icon-s;
   }
 }

@@ -1,4 +1,4 @@
-import cx from "classnames";
+import { Icon } from "czifui";
 import { assign, find, min } from "lodash/fp";
 import moment from "moment";
 import PropTypes from "prop-types";
@@ -9,8 +9,6 @@ import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
 import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
-import { IconMemberSmall, IconPrivateSmall, IconPublicSmall } from "~ui/icons";
-import IconViewSmall from "~ui/icons/IconViewSmall";
 import cs from "./project_header.scss";
 
 const ProjectHeader = ({
@@ -97,15 +95,16 @@ const ProjectHeader = ({
       <div className={cs.fillIn} />
       {snapshotProjectName ? (
         <div className={cs.item}>
-          <IconViewSmall className={cs.smallIcon} /> View-only version
+          <Icon sdsIcon="eyeOpen" sdsSize="s" sdsType="static" /> View-only
+          version
         </div>
       ) : project.public_access ? (
         <div className={cs.item}>
-          <IconPublicSmall className={cs.smallIcon} /> Public project
+          <Icon sdsIcon="globe" sdsSize="s" sdsType="static" /> Public project
         </div>
       ) : (
         <div className={cs.item}>
-          <IconPrivateSmall className={cs.smallIcon} /> Private project
+          <Icon sdsIcon="lock" sdsSize="s" sdsType="static" /> Private project
         </div>
       )}
       {project.editable && (
@@ -115,7 +114,7 @@ const ProjectHeader = ({
             position="bottom center"
           />
           <div className={cs.item}>
-            <IconMemberSmall className={cx(cs.smallIcon, cs.userIcon)} />{" "}
+            <Icon sdsIcon="people" sdsSize="s" sdsType="static" />{" "}
             {project.users.length
               ? `${project.users.length} member${
                   project.users.length > 1 ? "s" : ""
