@@ -395,7 +395,8 @@ module BulkDownloadsHelper
     taxon_counts_by_pr = HeatmapHelper.fetch_top_taxons(
       samples,
       background_id,
-      min_reads: 0 # minimum read threshold
+      min_reads: 0, # minimum read threshold
+      taxa_per_sample: 1_000_000
     )
 
     # Generate the metric values matrix.

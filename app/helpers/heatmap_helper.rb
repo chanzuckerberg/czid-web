@@ -180,6 +180,7 @@ module HeatmapHelper
     read_specificity: false,
     taxon_level: nil,
     min_reads: MINIMUM_READ_THRESHOLD,
+    taxa_per_sample: CLIENT_FILTERING_TAXA_PER_SAMPLE,
     threshold_filters: []
   )
     categories_clause = ""
@@ -280,7 +281,7 @@ module HeatmapHelper
     sql_results = TaxonCount.connection.select_all(
       top_n_query(
         query,
-        CLIENT_FILTERING_TAXA_PER_SAMPLE,
+        taxa_per_sample,
         sort[:metric],
         sort[:direction],
         threshold_filters: threshold_filters,
