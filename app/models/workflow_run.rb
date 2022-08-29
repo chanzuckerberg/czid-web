@@ -50,13 +50,14 @@ class WorkflowRun < ApplicationRecord
   WORKFLOW = {
     # NOTE: 'main' is not yet supported in WorkflowRuns.
     main: "main",
-    consensus_genome: "consensus-genome",
     amr: "amr",
+    consensus_genome: "consensus-genome",
     short_read_mngs: "short-read-mngs",
   }.freeze
 
   WORKFLOW_CLASS = {
     WORKFLOW[:consensus_genome] => ConsensusGenomeWorkflowRun,
+    WORKFLOW[:amr] => AmrWorkflowRun,
   }.freeze
 
   STATUS = {
@@ -161,6 +162,7 @@ class WorkflowRun < ApplicationRecord
   scope :by_time, ->(start_date:, end_date:) { where(created_at: start_date.beginning_of_day..end_date.end_of_day) }
   scope :by_workflow, ->(workflow) { where(workflow: workflow) }
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
+  scope :amr, -> { where(workflow: WORKFLOW[:amr]) }
   scope :non_deprecated, -> { where(deprecated: false) }
   scope :active, -> { where(status: WorkflowRun::STATUS[:succeeded], deprecated: false) }
   scope :viewable, ->(user) { where(sample: Sample.viewable(user)) }
@@ -305,6 +307,10 @@ class WorkflowRun < ApplicationRecord
     end
   end
 
+  def workflow_by_class
+    becomes(WORKFLOW_CLASS[workflow])
+  end
+
   private
 
   def cleanup
@@ -318,10 +324,6 @@ class WorkflowRun < ApplicationRecord
     s3_path = s3_output_prefix || sample.sample_output_s3_path
 
     @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: s3_path, finalized: finalized?)
-  end
-
-  def workflow_by_class
-    becomes(WORKFLOW_CLASS[workflow])
   end
 
   # TODO: Consider refactoring with a different OOP approach or asynchronous results loading.
