@@ -1,5 +1,24 @@
 import { DateString, NumberId } from "./generic";
 
+export type HistogramShape = $TSFixMe;
+export type GenomeVizShape = $TSFixMe;
+
+export interface OnBLASTClickProps {
+  context: { blastedFrom: string };
+  pipelineVersion: string;
+  sampleId: number;
+  shouldBlastContigs: boolean;
+  taxName: string;
+  taxLevel?: string;
+  taxId: number;
+  taxonStatsByCountType: {
+    ntContigs: number;
+    ntReads: number;
+    nrContigs: number;
+    nrReads: number;
+  };
+}
+
 export interface BulkDownloadDetails extends NumberId {
   num_samples: number;
   params: { [key: string]: DownloadTypeParam };

@@ -11,7 +11,7 @@ const PIPELINE_VIZ_LABEL = "View Pipeline Visualization";
 
 // Get download options based on pipeline metadata.
 const getDownloadOptions = pipelineRun => {
-  let stageTwoComplete = pipelineRun && pipelineRun.adjusted_remaining_reads;
+  const stageTwoComplete = pipelineRun && pipelineRun.adjusted_remaining_reads;
   const assembled = pipelineRun && pipelineRun.assembled === 1;
 
   return compact([
@@ -95,6 +95,14 @@ export const logDownloadOption = ({ component, option, details = {} }) => {
   );
 };
 
-export const getDownloadContigUrl = ({ pipelineVersion, sampleId, taxId }) => {
+export const getDownloadContigUrl = ({
+  pipelineVersion,
+  sampleId,
+  taxId,
+}: {
+  pipelineVersion: string;
+  sampleId: number;
+  taxId: number;
+}): string => {
   return `/samples/${sampleId}/taxid_contigs_download?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
 };

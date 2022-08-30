@@ -1,16 +1,12 @@
 import cx from "classnames";
 import { getOr } from "lodash/fp";
 import React from "react";
+import { HistogramTooltipData } from "~/components/common/CoverageVizBottomSidebar";
 
 import cs from "./tooltip_viz_table.scss";
 
 interface TooltipVizTableProps {
-  data?: {
-    name?: string;
-    // Array of key-value pairs
-    data?: object[][];
-    disabled?: boolean;
-  }[];
+  data?: HistogramTooltipData[];
   description?: string | React.ReactElement;
   subtitle?: string | React.ReactElement;
   title?: string | React.ReactElement;

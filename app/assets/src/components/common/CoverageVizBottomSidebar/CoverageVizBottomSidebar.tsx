@@ -1,33 +1,17 @@
+/* eslint-disable import/order */
 import cx from "classnames";
 import { Icon, ButtonIcon } from "czifui";
 import { sum, find, get, isEmpty } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
 
+// Helper Functions and Constants
 import { getCoverageVizData } from "~/api";
-import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
-import { UserContext } from "~/components/common/UserContext";
-import NarrowContainer from "~/components/layout/NarrowContainer";
-import { BLAST_V1_FEATURE } from "~/components/utils/features";
-import { formatPercent } from "~/components/utils/format";
-import PropTypes from "~/components/utils/propTypes";
-import { getTooltipStyle } from "~/components/utils/tooltip";
-import { getDownloadContigUrl } from "~/components/views/report/utils/download";
-import GenomeViz from "~/components/visualizations/GenomeViz";
-import Histogram from "~/components/visualizations/Histogram";
-import { getTaxonName } from "~/helpers/taxon";
-import { TooltipVizTable } from "~ui/containers";
-import HelpIcon from "~ui/containers/HelpIcon";
-import Sidebar from "~ui/containers/Sidebar";
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { IconArrowRight } from "~ui/icons";
-import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
-import { openUrl } from "~utils/links";
-import LoadingMessage from "../LoadingMessage";
-
-import HitGroupViz from "./HitGroupViz";
-import cs from "./coverage_viz_bottom_sidebar.scss";
+import {
+  trackEvent,
+  ANALYTICS_EVENT_NAMES,
+  withAnalytics,
+} from "~/api/analytics";
 import {
   getHistogramTooltipData,
   generateCoverageVizData,
@@ -35,78 +19,64 @@ import {
   selectContigsFromHitGroups,
   selectReadsFromHitGroups,
 } from "./utils";
+import { formatPercent } from "~/components/utils/format";
+import { getTooltipStyle } from "~/components/utils/tooltip";
+import { getDownloadContigUrl } from "~/components/views/report/utils/download";
+import { getTaxonName } from "~/helpers/taxon";
+import { openUrl } from "~utils/links";
+import {
+  METRIC_COLUMNS,
+  REF_ACC_COLOR,
+  CONTIG_FILL_COLOR,
+  READ_FILL_COLOR,
+} from "./constants";
 
-// Lighter shade of primary blue.
-const READ_FILL_COLOR = "#A9BDFC";
-const CONTIG_FILL_COLOR = "#3867FA";
-const REF_ACC_COLOR = "#EAEAEA";
+// Components
+import BasicPopup from "~/components/BasicPopup";
+import { UserContext } from "~/components/common/UserContext";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import { BLAST_V1_FEATURE } from "~/components/utils/features";
+import GenomeViz from "~/components/visualizations/GenomeViz";
+import Histogram from "~/components/visualizations/Histogram";
+import { HistogramShape, GenomeVizShape } from "~/interface/shared";
+import { TooltipVizTable } from "~ui/containers";
+import HelpIcon from "~ui/containers/HelpIcon";
+import Sidebar from "~ui/containers/Sidebar";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import { IconArrowRight } from "~ui/icons";
+import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
+import LoadingMessage from "../LoadingMessage";
+import HitGroupViz from "./HitGroupViz";
 
-const METRIC_COLUMNS = [
-  [
-    {
-      key: "referenceNCBIEntry",
-      name: "Reference NCBI Entry",
-      tooltip: "The NCBI Genbank entry for the reference accession.",
-    },
-    {
-      key: "referenceLength",
-      name: "Reference Length",
-      tooltip: "Length in base pairs of the reference accession.",
-    },
-  ],
-  [
-    {
-      key: "alignedContigs",
-      name: "Aligned Contigs",
-      tooltip: "Number of contigs for which this accession was the best match.",
-    },
-    {
-      key: "alignedReads",
-      name: "Aligned Loose Reads",
-      tooltip:
-        "Number of reads for which this accession was the best match. Only includes reads which did not assemble into a contig.",
-    },
-  ],
-  [
-    {
-      key: "coverageDepth",
-      name: "Coverage Depth",
-      tooltip:
-        "The average read depth of aligned contigs and reads over the length of the accession.",
-    },
-    {
-      key: "coverageBreadth",
-      name: "Coverage Breadth",
-      tooltip:
-        "The percentage of the accession that is covered by at least one read or contig.",
-    },
-  ],
-  [
-    {
-      key: "maxAlignedLength",
-      name: "Max Alignment Length",
-      tooltip:
-        "Length of the longest aligned region over all reads and contigs.",
-    },
-    {
-      key: "avgMismatchedPercent",
-      name: "Avg. Mismatched %",
-      tooltip:
-        "Percentage of aligned regions that are mismatches, averaged over all reads and contigs.",
-    },
-  ],
-];
+// Types and Styles
+import cs from "./coverage_viz_bottom_sidebar.scss";
+import {
+  CoverageVizBottomSidebarProps,
+  CoverageVizBottomSidebarsState,
+  AccessionsSummary,
+  AccessionsData,
+} from "./types";
 
-export default class CoverageVizBottomSidebar extends React.Component {
+export default class CoverageVizBottomSidebar extends React.Component<
+  CoverageVizBottomSidebarProps,
+  CoverageVizBottomSidebarsState
+> {
   _accessionDataCache = {};
+  private coverageViz: HistogramShape;
+  private coverageVizContainer: HTMLDivElement;
+  private refAccessionVizContainer: HTMLDivElement;
+  private refAccesssionViz: GenomeVizShape;
 
-  state = {
+  state: CoverageVizBottomSidebarsState = {
     currentAccessionSummary: null,
     histogramTooltipLocation: null,
     histogramTooltipData: null,
   };
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(
+    prevProps: CoverageVizBottomSidebarProps,
+    prevState: CoverageVizBottomSidebarsState,
+  ) {
     const { params, visible } = this.props;
     const { currentAccessionData } = this.state;
 
@@ -137,7 +107,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
   }
 
-  getDataForAccession = async accessionId => {
+  getDataForAccession = async (accessionId: string) => {
     const { sampleId, snapshotShareId } = this.props;
 
     if (this._accessionDataCache[accessionId]) {
@@ -153,7 +123,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
   };
 
-  loadAccession = async accession => {
+  loadAccession = async (accession: AccessionsSummary) => {
     const data = await this.getDataForAccession(accession.id);
 
     this.setState({
@@ -167,9 +137,10 @@ export default class CoverageVizBottomSidebar extends React.Component {
   // It's possible that the accessionData failed to load.
   // For example, the coverage viz s3 files couldn't be found.
   // In this case, the accessionData is not valid, and we will display an error message.
-  isAccessionDataValid = accessionData => !!accessionData.coverage;
+  isAccessionDataValid = (accessionData: AccessionsData): boolean =>
+    !!accessionData.coverage;
 
-  setCurrentAccession = accessionId => {
+  setCurrentAccession = (accessionId: string): void => {
     const { params } = this.props;
 
     const accession = accessionId
@@ -186,7 +157,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
   };
 
-  handleHistogramBarEnter = hoverData => {
+  handleHistogramBarEnter = (hoverData: [number, number]) => {
     const { currentAccessionData } = this.state;
 
     if (hoverData && hoverData[0] === 0) {
@@ -199,7 +170,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
   };
 
-  handleHistogramBarHover = (clientX, clientY) => {
+  handleHistogramBarHover = (clientX: number, clientY: number): void => {
     this.setState({
       histogramTooltipLocation: {
         left: clientX,
@@ -215,7 +186,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     });
   };
 
-  renderHistogram = data => {
+  renderHistogram = (data: AccessionsData) => {
     const coverageVizData = generateCoverageVizData(
       data.coverage,
       data.coverage_bin_size,
@@ -250,7 +221,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.coverageViz.update();
   };
 
-  renderRefAccessionViz = data => {
+  renderRefAccessionViz = (data: AccessionsData) => {
     this.refAccesssionViz = new GenomeViz(
       this.refAccessionVizContainer,
       [[0, data.total_length, 0]],
@@ -262,14 +233,18 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.refAccesssionViz.update();
   };
 
-  getAccessionTaxonName = accessionSummary =>
+  getAccessionTaxonName = (accessionSummary: AccessionsSummary): string =>
     getTaxonName(
       accessionSummary.taxon_name,
       accessionSummary.taxon_common_name,
       this.props.nameType,
     );
 
-  getAccessionOptions = () => {
+  getAccessionOptions = (): {
+    value: string;
+    text: string;
+    customNode: JSX.Element;
+  }[] => {
     const { params } = this.props;
     return getSortedAccessionSummaries(params.accessionData).map(summary => ({
       value: summary.id,
@@ -295,7 +270,16 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }));
   };
 
-  getAccessionMetrics = () => {
+  getAccessionMetrics = (): {
+    referenceNCBIEntry?: JSX.Element;
+    referenceLength?: number;
+    alignedContigs?: number;
+    maxAlignedLength?: number;
+    coverageDepth?: string;
+    coverageBreadth?: string;
+    alignedReads?: number;
+    avgMismatchedPercent?: string;
+  } => {
     const { sampleId, params } = this.props;
     const { currentAccessionData, currentAccessionSummary } = this.state;
 
@@ -392,8 +376,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
           <ButtonIcon
             className={cs.iconButton}
             onClick={() =>
-              trackEvent(
-                ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_BLAST_BUTTON_CLICKED,
+              withAnalytics(
                 onBlastClick({
                   context: {
                     blastedFrom: "CoverageVizBottomSidebar",
@@ -406,6 +389,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   shouldBlastContigs: true,
                   taxonStatsByCountType,
                 }),
+                ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_BLAST_BUTTON_CLICKED,
               )
             }
             sdsSize="large"
@@ -432,7 +416,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     const onlySomeAccessionsShown = numBestAccessions < numAccessions;
 
-    let helpText = `
+    const helpText = `
         ${numAccessions -
           numBestAccessions} poor-quality accessions are omitted, as they have
         no contig alignments and few read alignments.
@@ -453,7 +437,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 {get("name", currentAccessionSummary)}
               </div>
             }
-            onChange={accessionId => {
+            onChange={(accessionId: string) => {
               trackEvent("CoverageVizBottomSidebar_accession-select_changed", {
                 accessionId,
                 taxonId: params.taxonId,
@@ -510,8 +494,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   <ButtonIcon
                     className={cs.iconButton}
                     onClick={() =>
-                      trackEvent(
-                        ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_DOWNLOAD_CONTIG_BUTTON_CLICKED,
+                      withAnalytics(
                         openUrl(
                           getDownloadContigUrl({
                             pipelineVersion,
@@ -519,6 +502,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                             taxId: taxonId,
                           }),
                         ),
+                        ANALYTICS_EVENT_NAMES.COVERAGE_VIZ_BOTTOM_SIDEBAR_DOWNLOAD_CONTIG_BUTTON_CLICKED,
                       )
                     }
                     sdsSize="large"
@@ -766,44 +750,5 @@ export default class CoverageVizBottomSidebar extends React.Component {
     );
   }
 }
-
-CoverageVizBottomSidebar.propTypes = {
-  visible: PropTypes.bool,
-  onBlastClick: PropTypes.func,
-  onClose: PropTypes.func.isRequired,
-  params: PropTypes.shape({
-    taxonId: PropTypes.number,
-    taxonName: PropTypes.string,
-    taxonCommonName: PropTypes.string,
-    taxonLevel: PropTypes.string,
-    taxonStatsByCountType: PropTypes.shape({
-      ntContigs: PropTypes.number,
-      ntReads: PropTypes.number,
-      nrContigs: PropTypes.number,
-      nrReads: PropTypes.number,
-    }),
-    accessionData: PropTypes.shape({
-      best_accessions: PropTypes.arrayOf(
-        PropTypes.shape({
-          id: PropTypes.string,
-          num_contigs: PropTypes.number,
-          num_reads: PropTypes.number,
-          name: PropTypes.string,
-          score: PropTypes.number,
-          coverage_depth: PropTypes.number,
-          taxon_name: PropTypes.string,
-          taxon_common_name: PropTypes.string,
-        }),
-      ),
-      num_accessions: PropTypes.number,
-    }),
-    // Link to the old alignment viz.
-    alignmentVizUrl: PropTypes.string,
-  }),
-  sampleId: PropTypes.number,
-  pipelineVersion: PropTypes.string,
-  nameType: PropTypes.string,
-  snapshotShareId: PropTypes.string,
-};
 
 CoverageVizBottomSidebar.contextType = UserContext;

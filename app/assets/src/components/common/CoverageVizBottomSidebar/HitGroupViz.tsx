@@ -1,7 +1,6 @@
 import cx from "classnames";
 import copy from "copy-to-clipboard";
 import { get, map, sum, size } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -11,19 +10,50 @@ import BasicPopup from "~/components/BasicPopup";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import { getURLParamString } from "~/helpers/url";
+import { GenomeVizShape } from "~/interface/shared";
 import { TooltipVizTable } from "~ui/containers";
 import { IconCopySmall, IconDownloadSmall } from "~ui/icons";
 
 import cs from "./coverage_viz_bottom_sidebar.scss";
+import { AccessionsData, TooltipLocation } from "./types";
 import { generateContigReadVizData, getGenomeVizTooltipData } from "./utils";
 
 const DEFAULT_CONTIG_COPY_MESSAGE = "Copy Contig Sequence to Clipboard";
 
-const totalByterangeLength = byteranges =>
+const totalByterangeLength = (byteranges: [number, number][]) =>
   sum(map(range => range[1], byteranges));
 
-export default class HitGroupViz extends React.Component {
-  state = {
+interface HitGroupVizProps {
+  label: string;
+  hitGroups: AccessionsData["hit_groups"];
+  accessionData: AccessionsData;
+  sampleId: number;
+  taxonId: number;
+  pipelineVersion: string;
+  color: string;
+  snapshotShareId?: string;
+}
+
+interface HitGroupVizState {
+  genomeVizTooltipLocation?: TooltipLocation;
+  genomeVizTooltipData: {
+    name: string;
+    data: [string, string | number][];
+  }[];
+  contigDownloaderLocation?: TooltipLocation;
+  contigDownloaderData: { contigByteranges: [number, number][] };
+  currentCopyIconMessage: string;
+}
+
+export default class HitGroupViz extends React.Component<
+  HitGroupVizProps,
+  HitGroupVizState
+> {
+  private hitGroupVizContainer: $TSFixMe;
+  private _contigDownloader: $TSFixMe | null;
+  private hitGroupViz: GenomeVizShape;
+
+  state: HitGroupVizState = {
     genomeVizTooltipLocation: null,
     genomeVizTooltipData: null,
     contigDownloaderLocation: null,
@@ -43,7 +73,7 @@ export default class HitGroupViz extends React.Component {
     document.removeEventListener("mousedown", this.handleOutClick);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: { accessionData: any }) {
     const { accessionData, hitGroups } = this.props;
     if (!prevProps.accessionData && accessionData && hitGroups) {
       this.renderGenomeViz(accessionData, hitGroups);
@@ -65,7 +95,7 @@ export default class HitGroupViz extends React.Component {
     }
   };
 
-  handleGenomeVizBarEnter = hoverData => {
+  handleGenomeVizBarEnter = (hoverData: number) => {
     const { hitGroups } = this.props;
 
     if (hoverData !== null) {
@@ -75,7 +105,7 @@ export default class HitGroupViz extends React.Component {
     }
   };
 
-  handleGenomeVizBarHover = (clientX, clientY) => {
+  handleGenomeVizBarHover = (clientX: any, clientY: any) => {
     this.setState({
       genomeVizTooltipLocation: {
         left: clientX,
@@ -84,7 +114,11 @@ export default class HitGroupViz extends React.Component {
     });
   };
 
-  handleGenomeVizBarClick = (dataIndex, barRight, barTop) => {
+  handleGenomeVizBarClick = (
+    dataIndex: string | number | null,
+    barRight?: number,
+    barTop?: number,
+  ) => {
     const { hitGroups } = this.props;
     if (dataIndex === null) {
       this.setState({
@@ -121,7 +155,10 @@ export default class HitGroupViz extends React.Component {
     });
   };
 
-  renderGenomeViz = (accessionData, hitGroups) => {
+  renderGenomeViz = (
+    accessionData: AccessionsData,
+    hitGroups: AccessionsData["hit_groups"],
+  ) => {
     const hitGroupVizData = generateContigReadVizData(
       hitGroups,
       accessionData.coverage_bin_size,
@@ -295,31 +332,3 @@ export default class HitGroupViz extends React.Component {
     );
   }
 }
-
-HitGroupViz.propTypes = {
-  label: PropTypes.string,
-  hitGroups: PropTypes.arrayOf(
-    PropTypes.arrayOf(
-      PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.arrayOf(PropTypes.number),
-      ]),
-    ),
-  ),
-  accessionData: PropTypes.shape({
-    avg_prop_mismatch: PropTypes.number,
-    coverage: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
-    coverage_bin_size: PropTypes.number,
-    coverage_breadth: PropTypes.number,
-    coverage_depth: PropTypes.number,
-    id: PropTypes.number,
-    max_aligned_length: PropTypes.number,
-    name: PropTypes.string,
-    total_length: PropTypes.number,
-  }),
-  sampleId: PropTypes.number,
-  taxonId: PropTypes.number,
-  pipelineVersion: PropTypes.string,
-  color: PropTypes.string,
-  snapshotShareId: PropTypes.string,
-};
