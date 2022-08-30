@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
@@ -7,7 +6,19 @@ import BasicPopup from "~/components/BasicPopup";
 import { IconAlert, IconCloseSmall } from "~ui/icons";
 import cs from "./announcement_banner.scss";
 
-const AnnouncementBanner = ({ visible, message, inverted, id }) => {
+interface AnnouncementBannerProps {
+  visible?: boolean;
+  message: string | React.ReactNode;
+  inverted?: boolean;
+  id: string;
+}
+
+const AnnouncementBanner = ({
+  visible = false,
+  message,
+  inverted = false,
+  id,
+}: AnnouncementBannerProps) => {
   const [showAnnouncementBanner, setShowAnnouncmentBanner] = useState(false);
 
   useEffect(() => {
@@ -50,18 +61,6 @@ const AnnouncementBanner = ({ visible, message, inverted, id }) => {
       />
     </div>
   );
-};
-
-AnnouncementBanner.propTypes = {
-  visible: PropTypes.bool,
-  message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
-  inverted: PropTypes.bool,
-  id: PropTypes.string.isRequired,
-};
-
-AnnouncementBanner.defaultProps = {
-  visible: false,
-  inverted: false,
 };
 
 export default AnnouncementBanner;
