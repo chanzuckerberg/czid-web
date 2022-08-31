@@ -3,7 +3,7 @@ require 'will_paginate/array'
 class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required, except: [:landing, :sign_up, :maintenance, :page_not_found]
-  before_action :admin_required, only: [:all_data]
+  before_action :admin_required, only: [:all_data, :admin_settings, :set_workflow_version]
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance, :page_not_found]
   skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
   power :projects, except: [:landing, :sign_up, :maintenance, :page_not_found]
@@ -146,6 +146,41 @@ class HomeController < ApplicationController
     else
       redirect_to root_path
     end
+  end
+
+  def check_valid_workflow(workflow, version)
+    filename = if workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
+                 "host_filter.wdl"
+               else
+                 "run.wdl"
+               end
+    response = AwsClient[:s3].get_object(bucket: S3_WORKFLOWS_BUCKET, key: "#{workflow}-v#{version}/#{filename}")
+    return response[:content_length] > 0
+  end
+
+  def admin_settings
+  end
+
+  def set_workflow_version
+    workflow_name = params["app_config"]["key"].gsub("-version", "")
+    version = params["app_config"]["value"]
+    begin
+      check_valid_workflow(workflow_name, version) || raise("Updating workflow failed could not find wdl file")
+      AppConfigHelper.set_workflow_version(workflow_name, version)
+    rescue Aws::S3::Errors::AccessDenied
+      render json: {
+        status: "Updating workflow failed could not find wdl file",
+      }
+      return
+    rescue StandardError => e
+      render json: {
+        status: e,
+      }
+      return
+    end
+    render json: {
+      status: :success,
+    }
   end
 
   private

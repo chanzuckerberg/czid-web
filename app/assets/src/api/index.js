@@ -500,6 +500,14 @@ const getSamplesReadStats = async sampleIds => {
   return result;
 };
 
+const setWorkflowVersion = (workflowName, version) =>
+  putWithCSRF("/app_config", {
+    app_config: {
+      key: workflowName,
+      value: version,
+    },
+  });
+
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
 const getTaxaWithReadsSuggestions = (query, sampleIds, taxLevel) =>
   postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
@@ -649,6 +657,7 @@ export {
   saveSampleName,
   saveSampleNotes,
   saveVisualization,
+  setWorkflowVersion,
   shortenUrl,
   updateUserSetting,
   samplesUploadedByCurrentUser,

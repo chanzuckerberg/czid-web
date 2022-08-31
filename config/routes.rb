@@ -104,6 +104,8 @@ Rails.application.routes.draw do
   get 'public', to: 'home#public'
   get 'select', to: 'home#index'
   get 'taxon_descriptions', to: 'home#taxon_descriptions'
+  get 'admin_settings', to: 'home#admin_settings'
+  put 'app_config', to: 'home#set_workflow_version'
   post 'feedback', to: 'home#feedback'
   post 'sign_up', to: 'home#sign_up'
 

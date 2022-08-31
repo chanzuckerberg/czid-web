@@ -1,0 +1,8 @@
+
+<%= javascript_tag do %>
+    react_component('AdminSettingsView', {
+        workflows:  JSON.parse('<%= raw json_escape(AppConfig.all.filter{| app_config | app_config.key.include?("version")}.to_json) %>')
+        }, 'page_content', JSON.parse('<%= raw escape_json(user_context) %>')
+        );
+    
+<% end %>
