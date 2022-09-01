@@ -4,6 +4,11 @@
 .filtersContainer {
   width: 150px;
 
+  .filterHeader {
+    font: $sds-font-body-s-600-font;
+    margin-bottom: $sds-spaces-l;
+  }
+
   .filterContainer {
     display: flex;
     flex-direction: column;

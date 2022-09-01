@@ -402,6 +402,7 @@ class DiscoveryFilters extends React.Component {
         {/* Note: Taxon, annotations, and location filter are disabled on snapshot views */}
         {domain !== DISCOVERY_DOMAIN_SNAPSHOT && (
           <>
+            <div className={cs.filterHeader}> Taxon Filters </div>
             <div
               className={cx(
                 cs.filterContainer,
@@ -440,6 +441,7 @@ class DiscoveryFilters extends React.Component {
               </div>
             )}
             {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}
+            <div className={cs.filterHeader}> Metadata Filters </div>
             <div className={cs.filterContainer}>
               <LocationFilter
                 onChange={this.handleChange.bind(this, "locationV2Selected")}
