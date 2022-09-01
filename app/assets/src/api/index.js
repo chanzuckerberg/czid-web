@@ -240,8 +240,6 @@ const getProjectDimensions = ({ domain, filters, projectId, search }) =>
     },
   });
 
-const getProject = ({ projectId }) => get(`/projects/${projectId}.json`);
-
 const getProjects = ({
   basic,
   domain,
@@ -623,7 +621,6 @@ export {
   getNewPhyloTreePipelineRunInfo,
   getPhyloTree,
   getPhyloTrees,
-  getProject,
   getProjectDimensions,
   getProjects,
   getProjectsToChooseFrom,

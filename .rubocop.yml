@@ -1,6 +1,7 @@
 require:
   - rubocop-rails
   - rubocop-performance
+  # - rubocop-graphql
 
 AllCops:
   Include:
@@ -208,3 +209,13 @@ Rails/InverseOf:
 # TODO: Add back after manual fixes
 Rails/FilePath:
   Enabled: false
+
+# GraphQL/FieldDescription:
+#   Enabled: false
+
+# GraphQL/ArgumentDescription:
+#   Enabled: false
+
+# # TODO: Enable after manual fixes
+# GraphQL/FieldName:
+#   Enabled: false

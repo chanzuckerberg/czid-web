@@ -168,3 +168,5 @@ gem "shoryuken"
 # GraphQL-related
 gem 'graphiql-rails', group: :development
 gem "graphql"
+
+gem "rubocop-graphql", "~> 0.14.5"

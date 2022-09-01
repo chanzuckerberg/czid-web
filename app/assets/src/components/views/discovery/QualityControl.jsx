@@ -1,9 +1,11 @@
+import { useQuery } from "@apollo/client";
 import cx from "classnames";
 
 import d3 from "d3";
 import {
   ceil,
   compact,
+  debounce,
   flatten,
   get,
   isEqual,
@@ -14,10 +16,10 @@ import {
 } from "lodash/fp";
 import memoize from "memoize-one";
 import { nanoid } from "nanoid";
-import React from "react";
-
-import { getProject, getSamples, getSamplesReadStats } from "~/api";
+import React, { useEffect, useRef, useState } from "react";
+import { getSamples, getSamplesReadStats } from "~/api";
 import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { GET_PROJECTS_QUERY } from "~/api/projects";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -49,55 +51,89 @@ import {
 } from "./constants.js";
 import cs from "./quality_control.scss";
 
-class QualityControl extends React.Component {
-  constructor(props) {
-    super(props);
+// TODO: get rid of this wrapper once the graphql
+// conversion for getSamples and getSamplesReadStats
+// is complete
+function QualityControlWrapper(props) {
+  const { loading, error, data } = useQuery(GET_PROJECTS_QUERY, {
+    variables: { projectId: parseInt(props.projectId) },
+  });
+  if (loading) return "Loading...";
+  if (error) return `Error! ${error.message}`;
 
-    this.state = {
-      loading: true,
-      samples: [],
-      showProcessingSamplesMessage: true,
-      sidebarVisible: false,
-      sidebarParams: {
-        sampleId: null,
-      },
-      histogramTooltipData: null,
-      readsLostTooltipData: null,
-      redrawNeeded: true,
-      normalize: false,
-    };
-  }
+  return <QualityControl project={data.project} {...props} />;
+}
 
-  componentDidMount() {
-    this.fetchProjectData();
-    window.addEventListener("resize", this.handleWindowResize);
-  }
+function QualityControl({ filters, project, projectId, handleBarClick }) {
+  const [loading, setLoading] = useState(true);
+  const [
+    showProcessingSamplesMessage,
+    setShowProcessingSamplesMessage,
+  ] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarParams, setSidebarParams] = useState({ sampleId: null });
+  const [histogramTooltipData, setHistogramTooltipData] = useState(null);
+  const [normalize, setNormalize] = useState(false);
+  const [failedSamples, setFailedSamples] = useState(null);
+  const [readsLostData, setReadsLostData] = useState(null);
+  const [readsLostLegendColors, setReadsLostLegendColors] = useState(null);
+  const [readsLostCategories, setReadsLostCategories] = useState(null);
+  const [readsLostChartColors, setReadsLostChartColors] = useState(null);
+  const [totalSampleCount, setTotalSampleCount] = useState(null);
+  const [samplesDict, setSamplesDict] = useState(null);
+  const [tooltipLocation, setTooltipLocation] = useState(null);
+  const [tooltipClass, setTooltipClass] = useState(null);
+  const [validSamples, setValidSamples] = useState(null);
+  const [runningSamples, setRunningSamples] = useState(null);
+  const [meanInsertSizeHistogram, setMeanInsertSizeHistogram] = useState(null);
 
-  componentDidUpdate(prevProps, prevState) {
-    const { loading, validSamples, redrawNeeded } = this.state;
-    const { filtersSidebarOpen, sampleStatsSidebarOpen, filters } = this.props;
-    if (!isEqual(filters, prevProps.filters)) {
-      this.fetchProjectData();
-    } else if (
-      // Do not render histograms if loading or there are no samples to display
-      !loading &&
-      validSamples.length > 0 &&
-      (validSamples !== prevState.validSamples ||
-        redrawNeeded ||
-        // Rerender the histograms if the sidepanels are toggled to scale their sizes appropriately
-        !(
-          filtersSidebarOpen === prevProps.filtersSidebarOpen &&
-          sampleStatsSidebarOpen === prevProps.sampleStatsSidebarOpen
-        ))
-    ) {
+  const samplesByTotalReads = useRef([]);
+  const samplesByQCPercent = useRef([]);
+  const samplesByDCR = useRef([]);
+  const samplesByInsertSize = useRef([]);
+  const meanInsertSizeBins = useRef([]);
+  const totalReadsBins = useRef([]);
+  const dcrBins = useRef([]);
+  const qcPercentBins = useRef([]);
+  const totalReadsHistogramContainer = useRef(null);
+  const qualityReadsHistogramContainer = useRef(null);
+  const meanInsertSizeHistogramContainer = useRef(null);
+  const dcrHistogramContainer = useRef(null);
+
+  const filtersRef = useRef(filters);
+
+  useEffect(() => {
+    window.addEventListener("resize", handleWindowResize);
+    return () => window.removeEventListener("resize", handleWindowResize);
+  }, []);
+
+  useEffect(() => {
+    fetchProjectData();
+  }, []);
+
+  useEffect(() => {
+    if (!isEqual(filters, filtersRef)) {
+      filtersRef.current = filters;
+      fetchProjectData();
+    }
+  }, [filters]);
+
+  useEffect(() => {
+    redrawHistograms();
+  }, [loading]);
+
+  const handleWindowResize = debounce(200, () => redrawHistograms());
+
+  const redrawHistograms = () => {
+    if (!loading && validSamples.length > 0) {
       const {
         totalReadsBins,
         qcPercentBins,
         dcrBins,
         meanInsertSizeBins,
-      } = this.getBins();
+      } = getBins();
 
-      const totalReadsFormat = d => {
+      const totalReadsFormat = (d) => {
         if (d === 0) {
           return 0;
         } else {
@@ -105,96 +141,87 @@ class QualityControl extends React.Component {
         }
       };
 
-      this.totalReadsHistogram = this.renderHistogram({
-        container: this.totalReadsHistogramContainer,
+      renderHistogram({
+        container: totalReadsHistogramContainer.current,
         data: totalReadsBins,
         labelX: "Total Reads",
         labelY: "Number of Samples",
-        tickFormat: d => {
+        tickFormat: (d) => {
           return totalReadsFormat(d);
         },
       });
-      this.qualityReadsHistogram = this.renderHistogram({
-        container: this.qualityReadsHistogramContainer,
+
+      renderHistogram({
+        container: qualityReadsHistogramContainer.current,
         data: qcPercentBins,
         labelX: "Percentage",
         labelY: "Number of Samples",
-        tickFormat: d => numberWithPercent(d),
+        tickFormat: (d) => numberWithPercent(d),
       });
-      this.dcrHistogram = this.renderHistogram({
-        container: this.dcrHistogramContainer,
+
+      renderHistogram({
+        container: dcrHistogramContainer.current,
         data: dcrBins,
         labelX: "DCR",
         labelY: "Number of Samples",
       });
       if (meanInsertSizeBins) {
-        this.meanInsertSizeHistogram = this.renderHistogram({
-          container: this.meanInsertSizeHistogramContainer,
+        const _meanInsertSizeHistogram = renderHistogram({
+          container: meanInsertSizeHistogramContainer.current,
           data: meanInsertSizeBins,
           labelX: "Base pairs",
           labelY: "Number of Samples",
         });
+        setMeanInsertSizeHistogram(_meanInsertSizeHistogram);
       }
-      this.setState({ redrawNeeded: false });
     }
-  }
+  };
 
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.handleWindowResize);
-  }
-
-  fetchProjectData = async () => {
-    this.setState({ loading: true });
-    const { projectId, filters } = this.props;
-    const project = await getProject({ projectId });
-
+  const fetchProjectData = async () => {
+    setLoading(true);
     const projectSamples = await getSamples({
       projectId: projectId,
       filters: filters,
-      limit: project.total_sample_count,
+      limit: project.totalSampleCount,
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
     });
-
-    let data = this.extractData(projectSamples.samples);
+    let data = extractData(projectSamples.samples);
     const totalSampleCount =
       data.validSamples.length +
       data.runningSamples.length +
       data.failedSamples.length;
 
     const samplesReadsStats = await getSamplesReadStats(
-      data.validSamples.map(sample => sample.id),
+      data.validSamples.map((sample) => sample.id),
     );
-    const { categories, legendColors, readsLostData } = this.stackReadsLostData(
+    const { categories, legendColors, _readsLostData } = stackReadsLostData(
       samplesReadsStats,
     );
     const chartColors = legendColors.map(({ color, label }) => color);
 
-    this.setState({
-      loading: false,
-      samples: projectSamples.samples,
-      validSamples: data.validSamples,
-      runningSamples: data.runningSamples,
-      failedSamples: data.failedSamples,
-      samplesDict: data.samplesDict,
-      readsLostData: readsLostData,
-      readsLostLegendColors: legendColors,
-      readsLostCategories: categories,
-      readsLostChartColors: chartColors,
-      totalSampleCount,
-    });
+    setLoading(false);
+    setValidSamples(data.validSamples);
+    setRunningSamples(data.runningSamples);
+    setFailedSamples(data.failedSamples);
+    setSamplesDict(data.samplesDict);
+    setReadsLostData(_readsLostData);
+    setReadsLostLegendColors(legendColors);
+    setReadsLostCategories(categories);
+    setReadsLostChartColors(chartColors);
+    setTotalSampleCount(totalSampleCount);
   };
 
-  stackReadsLostData(samplesReadsStats) {
+  function stackReadsLostData(samplesReadsStats) {
     const sampleIds = Object.keys(samplesReadsStats);
-    const samplesWithInitialReads = sampleIds.filter(sampleId =>
+    const samplesWithInitialReads = sampleIds.filter((sampleId) =>
       Number.isInteger(samplesReadsStats[sampleId].initialReads),
     );
 
     // Filter out Idseq Dedup step from samples run on pipeline versions >= 4.0
-    samplesWithInitialReads.forEach(sampleId => {
+    samplesWithInitialReads.forEach((sampleId) => {
       const sampleData = samplesReadsStats[sampleId];
       if (parseFloat(sampleData.pipelineVersion) >= 4) {
-        sampleData.steps = sampleData.steps.filter(step => {
+        sampleData.steps = sampleData.steps.filter((step) => {
           // Cdhitdup required for backwards compatibility
           return step.name !== "Idseq Dedup" && step.name !== "Cdhitdup";
         });
@@ -227,17 +254,17 @@ class QualityControl extends React.Component {
       };
     });
 
-    const readsLostData = samplesWithInitialReads.map(sampleId => {
+    const _readsLostData = samplesWithInitialReads.map((sampleId) => {
       const dataRow = {};
       let readsRemaining = samplesReadsStats[sampleId].initialReads;
-      samplesReadsStats[sampleId].steps.forEach(step => {
+      samplesReadsStats[sampleId].steps.forEach((step) => {
         let readsAfter = step.readsAfter || readsRemaining;
         const readsLost = readsRemaining - readsAfter;
         dataRow[step.name] = readsLost;
         readsRemaining = readsAfter;
       });
       // account for every category
-      categories.forEach(category => {
+      categories.forEach((category) => {
         if (!dataRow[category]) {
           dataRow[category] = 0;
         }
@@ -245,20 +272,19 @@ class QualityControl extends React.Component {
       dataRow.total = samplesReadsStats[sampleId].initialReads;
       dataRow.name = samplesReadsStats[sampleId].name;
       dataRow[READS_REMAINING] = readsRemaining;
-
       return dataRow;
     });
 
-    return { categories, legendColors, readsLostData };
+    return { categories, legendColors, _readsLostData };
   }
 
-  extractData(samples) {
+  function extractData(samples) {
     const validSamples = [];
     const runningSamples = [];
     const failedSamples = [];
     const samplesDict = {};
 
-    samples.forEach(sample => {
+    samples.forEach((sample) => {
       // PLQC is only for samples with an mNGS pipeline run
       // The `created_at` field is only present+filled for a workflow run type
       // if the sample has a workflow run of that type, so we check if the sample
@@ -293,71 +319,68 @@ class QualityControl extends React.Component {
     };
   }
 
-  getBins = () => {
-    const sortedReads = this.sortSamplesByMetric(sample => {
+  const getBins = () => {
+    const sortedReads = sortSamplesByMetric((sample) => {
       return sample.details.derived_sample_output.pipeline_run.total_reads;
     });
-    const [totalReadsBins, samplesByTotalReads] = this.extractBins({
+    const [_totalReadsBins, _samplesByTotalReads] = extractBins({
       data: sortedReads,
       numBins: MIN_NUM_BINS,
       minBinWidth: MIN_BIN_WIDTH.totalReads,
     });
 
-    const sortedQC = this.sortSamplesByMetric(sample => {
+    const sortedQC = sortSamplesByMetric((sample) => {
       return sample.details.derived_sample_output.summary_stats.qc_percent;
     });
-    const [qcPercentBins, samplesByQCPercent] = this.extractBins({
+    const [_qcPercentBins, _samplesByQCPercent] = extractBins({
       data: sortedQC,
       numBins: MIN_NUM_BINS,
       minBinWidth: MIN_BIN_WIDTH.qc,
     });
 
-    const sortedDCR = this.sortSamplesByMetric(sample => {
+    const sortedDCR = sortSamplesByMetric((sample) => {
       return sample.details.derived_sample_output.summary_stats
         .compression_ratio;
     });
-    const [dcrBins, samplesByDCR] = this.extractBins({
+    const [_dcrBins, _samplesByDCR] = extractBins({
       data: sortedDCR,
       numBins: MIN_NUM_BINS,
       minBinWidth: MIN_BIN_WIDTH.dcr,
     });
 
-    const sortedInsertSize = this.sortSamplesByMetric(sample => {
+    const sortedInsertSize = sortSamplesByMetric((sample) => {
       return sample.details.derived_sample_output.summary_stats
         .insert_size_mean;
     });
-    const [meanInsertSizeBins, samplesByInsertSize] = this.extractBins({
+    const [_meanInsertSizeBins, _samplesByInsertSize] = extractBins({
       data: sortedInsertSize,
       numBins: MIN_NUM_BINS,
       minBinWidth: MIN_BIN_WIDTH.meanInsertSize,
     });
 
-    this.setState({
-      totalReadsBins,
-      samplesByTotalReads,
-      qcPercentBins,
-      samplesByQCPercent,
-      dcrBins,
-      samplesByDCR,
-      meanInsertSizeBins,
-      samplesByInsertSize,
-    });
+    samplesByTotalReads.current = _samplesByTotalReads;
+    samplesByQCPercent.current = _samplesByQCPercent;
+    samplesByDCR.current = _samplesByDCR;
+    samplesByInsertSize.current = _samplesByInsertSize;
+    totalReadsBins.current = _totalReadsBins;
+    qcPercentBins.current = _qcPercentBins;
+    dcrBins.current = _dcrBins;
+    meanInsertSizeBins.current = _meanInsertSizeBins;
 
     return {
-      totalReadsBins,
-      qcPercentBins,
-      dcrBins,
-      meanInsertSizeBins,
+      totalReadsBins: _totalReadsBins,
+      qcPercentBins: _qcPercentBins,
+      dcrBins: _dcrBins,
+      meanInsertSizeBins: _meanInsertSizeBins,
     };
   };
 
-  sortSamplesByMetric = fetchMetric => {
-    const { samplesDict } = this.state;
+  const sortSamplesByMetric = (fetchMetric) => {
     const sampleIds = Object.keys(samplesDict);
     return sortBy(
-      valuePair => valuePair.value,
+      (valuePair) => valuePair.value,
       compact(
-        sampleIds.map(sampleId => {
+        sampleIds.map((sampleId) => {
           if (fetchMetric(samplesDict[sampleId])) {
             return {
               id: sampleId,
@@ -369,7 +392,7 @@ class QualityControl extends React.Component {
     );
   };
 
-  extractBins = ({ data, numBins, minBinWidth }) => {
+  const extractBins = ({ data, numBins, minBinWidth }) => {
     if (!data.length) {
       return [null, null];
     }
@@ -425,32 +448,16 @@ class QualityControl extends React.Component {
 
   /** callback functions **/
 
-  handleWindowResize = () => {
-    this.setState({ redrawNeeded: true });
-  };
-
-  handleHistogramBarClick = (data, binIndex) => {
-    const {
-      totalReadsBins,
-      samplesByTotalReads,
-      qcPercentBins,
-      samplesByQCPercent,
-      dcrBins,
-      samplesByDCR,
-      meanInsertSizeBins,
-      samplesByInsertSize,
-    } = this.state;
-    const { handleBarClick } = this.props;
-
+  const handleHistogramBarClick = (data, binIndex) => {
     let bin = [];
-    if (data === totalReadsBins) {
-      bin = samplesByTotalReads[binIndex];
-    } else if (data === qcPercentBins) {
-      bin = samplesByQCPercent[binIndex];
-    } else if (data === dcrBins) {
-      bin = samplesByDCR[binIndex];
-    } else if (data === meanInsertSizeBins) {
-      bin = samplesByInsertSize[binIndex];
+    if (data === totalReadsBins.current) {
+      bin = samplesByTotalReads.current[binIndex];
+    } else if (data === qcPercentBins.current) {
+      bin = samplesByQCPercent.current[binIndex];
+    } else if (data === dcrBins.current) {
+      bin = samplesByDCR.current[binIndex];
+    } else if (data === meanInsertSizeBins.current) {
+      bin = samplesByInsertSize.current[binIndex];
     }
     trackEvent(ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_CLICKED, {
       bin,
@@ -458,20 +465,13 @@ class QualityControl extends React.Component {
     handleBarClick(bin);
   };
 
-  handleHistogramBarEnter = (bin, data) => {
-    const {
-      totalReadsBins,
-      qcPercentBins,
-      dcrBins,
-      meanInsertSizeBins,
-    } = this.state;
-
-    let histogramTooltipData = {};
-    if (data === totalReadsBins) {
-      histogramTooltipData = this.getHistogramTooltipData({
+  const handleHistogramBarEnter = (bin, data) => {
+    let histogramTooltipData = null;
+    if (data === totalReadsBins.current) {
+      histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Total Reads",
-        format: d => {
+        format: (d) => {
           if (d === 0) {
             return 0;
           } else {
@@ -479,19 +479,19 @@ class QualityControl extends React.Component {
           }
         },
       });
-    } else if (data === qcPercentBins) {
-      histogramTooltipData = this.getHistogramTooltipData({
+    } else if (data === qcPercentBins.current) {
+      histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Passed QC",
-        format: d => numberWithPercent(d),
+        format: (d) => numberWithPercent(d),
       });
-    } else if (data === dcrBins) {
-      histogramTooltipData = this.getHistogramTooltipData({
+    } else if (data === dcrBins.current) {
+      histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Ratio Number",
       });
-    } else if (data === meanInsertSizeBins) {
-      histogramTooltipData = this.getHistogramTooltipData({
+    } else if (data === meanInsertSizeBins.current) {
+      histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Base Pairs",
       });
@@ -500,12 +500,10 @@ class QualityControl extends React.Component {
     trackEvent(ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTORGRAM_BAR_HOVEREED, {
       bin,
     });
-    this.setState({
-      histogramTooltipData,
-    });
+    setHistogramTooltipData(histogramTooltipData);
   };
 
-  getHistogramTooltipData = memoize(({ bin, label, format }) => {
+  const getHistogramTooltipData = memoize(({ bin, label, format }) => {
     const binMin = format ? format(bin.x0) : bin.x0;
     const binMax = format ? format(bin.x1) : bin.x1;
     const samplesText = bin.length === 1 ? "sample" : "samples";
@@ -522,36 +520,31 @@ class QualityControl extends React.Component {
     ];
   });
 
-  handleChartElementHover = (clientX, clientY) => {
+  const handleChartElementHover = (clientX, clientY) => {
     const tooltipLocation =
       clientX && clientY ? { left: clientX, top: clientY } : null;
     trackEvent(
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_BAR_HOVERED,
     );
-    this.setState({ tooltipLocation });
+    setTooltipLocation(tooltipLocation);
   };
 
-  handleChartElementExit = () => {
-    this.setState({
-      tooltipLocation: null,
-      tooltipClass: null,
-      histogramTooltipData: null,
-    });
+  const handleChartElementExit = () => {
+    setTooltipLocation(null);
+    setTooltipClass(null);
+    setHistogramTooltipData(null);
   };
 
-  handleHistogramEmptyClick = () => {
-    const { handleBarClick } = this.props;
+  const handleHistogramEmptyClick = () => {
     trackEvent(
       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_HISTOGRAM_EMPTY_SPACE_CLICKED,
     );
     handleBarClick([]);
   };
 
-  handleSingleBarStackEnter = (stepName, readsLost) => {
-    const { normalize, readsLostLegendColors } = this.state;
-
+  const handleSingleBarStackEnter = (stepName, readsLost) => {
     const stepLegend = readsLostLegendColors.find(
-      legendData => legendData.label === stepName,
+      (legendData) => legendData.label === stepName,
     );
 
     const readsLostStr = readsLost.toLocaleString();
@@ -573,24 +566,20 @@ class QualityControl extends React.Component {
       },
     ];
 
-    this.setState({
-      histogramTooltipData,
-    });
+    setHistogramTooltipData(histogramTooltipData);
   };
 
-  handleEmptyBarSpaceEnter = readsLostData => {
-    const { readsLostLegendColors, readsLostCategories } = this.state;
-
+  const handleEmptyBarSpaceEnter = (readsLostData) => {
     const readsRemainingLegend = readsLostLegendColors.find(
-      legendData => legendData.label === READS_REMAINING,
+      (legendData) => legendData.label === READS_REMAINING,
     );
     const readsLostSummary = [];
-    readsLostCategories.forEach(category => {
+    readsLostCategories.forEach((category) => {
       if (category === READS_REMAINING) {
         return;
       }
       const categoryLegend = readsLostLegendColors.find(
-        legendData => legendData.label === category,
+        (legendData) => legendData.label === category,
       );
       readsLostSummary.push([
         <CategoricalLegend
@@ -628,14 +617,11 @@ class QualityControl extends React.Component {
         disabled: false,
       },
     ];
-
-    this.setState({
-      histogramTooltipData,
-      tooltipClass: cs.summaryTooltip,
-    });
+    setHistogramTooltipData(histogramTooltipData);
+    setTooltipClass(cs.summaryTooltip);
   };
 
-  handleSampleLabelEnter = sampleName => {
+  const handleSampleLabelEnter = (sampleName) => {
     const histogramTooltipData = [
       {
         name: "Info",
@@ -650,19 +636,15 @@ class QualityControl extends React.Component {
         sampleName,
       },
     );
-
-    this.setState({
-      histogramTooltipData,
-    });
+    setHistogramTooltipData(histogramTooltipData);
   };
 
-  handleSampleLabelClick = sampleName => {
-    const { validSamples, sidebarParams, sidebarVisible } = this.state;
-
-    const sampleId = validSamples.find(sample => sample.name === sampleName).id;
+  const handleSampleLabelClick = (sampleName) => {
+    const sampleId = validSamples.find((sample) => sample.name === sampleName)
+      .id;
 
     if (sampleId === sidebarParams.sampleId && sidebarVisible === true) {
-      this.closeSidebar();
+      closeSidebar();
       return;
     }
 
@@ -673,28 +655,22 @@ class QualityControl extends React.Component {
       },
     );
 
-    this.setState({
-      sidebarVisible: true,
-      sidebarParams: {
-        sampleId: sampleId,
-      },
-    });
+    setSidebarVisible(true);
+    setSidebarParams({ sampleId });
   };
 
-  closeSidebar = () => {
-    this.setState({
-      sidebarVisible: false,
-    });
+  const closeSidebar = () => {
+    setSidebarVisible(false);
   };
 
-  hideprocessingSamplesMessage = () => {
-    this.setState({ showProcessingSamplesMessage: false });
+  const hideprocessingSamplesMessage = () => {
+    setShowProcessingSamplesMessage(false);
   };
 
   /* --- render functions --- */
 
-  renderHistogram = ({ container, data, labelX, labelY, tickFormat }) => {
-    const tickValues = data.map(d => d.x0);
+  const renderHistogram = ({ container, data, labelX, labelY, tickFormat }) => {
+    const tickValues = data.map((d) => d.x0);
     tickValues.push(last(data).x1);
 
     let histogram = new Histogram(container, data, {
@@ -725,17 +701,17 @@ class QualityControl extends React.Component {
         bottom: 40,
         left: 40,
       },
-      onHistogramBarClick: this.handleHistogramBarClick,
-      onHistogramBarHover: this.handleChartElementHover,
-      onHistogramBarEnter: this.handleHistogramBarEnter,
-      onHistogramBarExit: this.handleChartElementExit,
-      onHistogramEmptyClick: this.handleHistogramEmptyClick,
+      onHistogramBarClick: handleHistogramBarClick,
+      onHistogramBarHover: handleChartElementHover,
+      onHistogramBarEnter: handleHistogramBarEnter,
+      onHistogramBarExit: handleChartElementExit,
+      onHistogramEmptyClick: handleHistogramEmptyClick,
     });
     histogram.update();
     return histogram;
   };
 
-  renderLoading() {
+  function renderLoading() {
     return (
       <div className={cs.content}>
         <p className={cs.loadingIndicator}>
@@ -746,18 +722,16 @@ class QualityControl extends React.Component {
     );
   }
 
-  renderHistograms() {
-    const { validSamples, samplesByInsertSize } = this.state;
-    const numSamplesWithInsertSize = this.meanInsertSizeHistogram
+  function renderHistograms() {
+    const numSamplesWithInsertSize = meanInsertSizeHistogram
       ? flatten(samplesByInsertSize).length
       : 0;
     const showMeanInsertSizeWarning =
-      this.meanInsertSizeHistogram &&
-      numSamplesWithInsertSize < validSamples.length;
+      meanInsertSizeHistogram && numSamplesWithInsertSize < validSamples.length;
 
     return (
       <div className={cs.histogramSection}>
-        {this.renderSampleStatsInfo()}
+        {renderSampleStatsInfo()}
         <div className={cs.chartsContainer}>
           <div className={cs.halfPageChart}>
             <div className={cs.title}>
@@ -786,8 +760,8 @@ class QualityControl extends React.Component {
               </div>
               <div
                 className={cs.d3Container}
-                ref={histogramContainer => {
-                  this.totalReadsHistogramContainer = histogramContainer;
+                ref={(histogramContainer) => {
+                  totalReadsHistogramContainer.current = histogramContainer;
                 }}
               />
             </div>
@@ -819,8 +793,8 @@ class QualityControl extends React.Component {
               </div>
               <div
                 className={cs.d3Container}
-                ref={histogramContainer => {
-                  this.qualityReadsHistogramContainer = histogramContainer;
+                ref={(histogramContainer) => {
+                  qualityReadsHistogramContainer.current = histogramContainer;
                 }}
               />
             </div>
@@ -854,8 +828,8 @@ class QualityControl extends React.Component {
               </div>
               <div
                 className={cs.d3Container}
-                ref={histogramContainer => {
-                  this.dcrHistogramContainer = histogramContainer;
+                ref={(histogramContainer) => {
+                  dcrHistogramContainer.current = histogramContainer;
                 }}
               />
             </div>
@@ -910,7 +884,7 @@ class QualityControl extends React.Component {
                     />
                   </div>
                 )}
-                {!this.meanInsertSizeHistogram && (
+                {!meanInsertSizeHistogram && (
                   <div className={cs.information}>
                     Mean Insert Size is not available.{" "}
                     {MISSING_INSERT_SIZE_WARNING}
@@ -919,8 +893,8 @@ class QualityControl extends React.Component {
               </div>
               <div
                 className={cs.d3Container}
-                ref={histogramContainer => {
-                  this.meanInsertSizeHistogramContainer = histogramContainer;
+                ref={(histogramContainer) => {
+                  meanInsertSizeHistogramContainer.current = histogramContainer;
                 }}
               />
             </div>
@@ -930,15 +904,7 @@ class QualityControl extends React.Component {
     );
   }
 
-  renderReadsLostChart() {
-    const {
-      normalize,
-      readsLostData,
-      readsLostCategories,
-      readsLostChartColors,
-      readsLostLegendColors,
-    } = this.state;
-
+  function renderReadsLostChart() {
     const options = {
       colors: readsLostChartColors,
       x: {
@@ -953,12 +919,12 @@ class QualityControl extends React.Component {
     };
 
     const events = {
-      onYAxisLabelClick: this.handleSampleLabelClick,
-      onYAxisLabelEnter: this.handleSampleLabelEnter,
-      onBarStackEnter: this.handleSingleBarStackEnter,
-      onBarEmptySpaceEnter: this.handleEmptyBarSpaceEnter,
-      onChartHover: this.handleChartElementHover,
-      onChartElementExit: this.handleChartElementExit,
+      onYAxisLabelClick: handleSampleLabelClick,
+      onYAxisLabelEnter: handleSampleLabelEnter,
+      onBarStackEnter: handleSingleBarStackEnter,
+      onBarEmptySpaceEnter: handleEmptyBarSpaceEnter,
+      onChartHover: handleChartElementHover,
+      onChartElementExit: handleChartElementExit,
     };
 
     return (
@@ -972,8 +938,8 @@ class QualityControl extends React.Component {
               <div className={cs.toggleContainer}>
                 <BarChartToggle
                   currentDisplay={normalize ? "percentage" : "count"}
-                  onDisplaySwitch={display => {
-                    this.setState({ normalize: !normalize });
+                  onDisplaySwitch={(display) => {
+                    setNormalize((i) => !i);
                     trackEvent(
                       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED,
                       {
@@ -1041,27 +1007,19 @@ class QualityControl extends React.Component {
     );
   }
 
-  renderSampleStatsInfo = () => {
-    const {
-      validSamples,
-      runningSamples,
-      failedSamples,
-      showProcessingSamplesMessage,
-      totalSampleCount,
-    } = this.state;
-
+  const renderSampleStatsInfo = () => {
     const content = (
       <React.Fragment>
         <List
           listClassName={cs.statusList}
           listItems={[
-            `${validSamples.length} 
+            `${validSamples.length}
             ${validSamples.length === 1 ? "sample has" : "samples have"} been
             uploaded and selected by filters.`,
-            `${runningSamples.length} 
+            `${runningSamples.length}
             ${runningSamples.length === 1 ? "sample is" : "samples are"} still
             being processed.`,
-            `${failedSamples.length} 
+            `${failedSamples.length}
             ${failedSamples.length === 1 ? "sample" : "samples"} failed to
             process. Failed samples are not displayed in the charts below.`,
             `Samples with only Consensus Genome runs will not be displayed in the
@@ -1081,7 +1039,7 @@ class QualityControl extends React.Component {
             )}
             type="info"
             displayStyle="flat"
-            onClose={this.hideprocessingSamplesMessage}
+            onClose={hideprocessingSamplesMessage}
             closeWithDismiss={false}
             closeWithIcon={true}
           >
@@ -1105,7 +1063,7 @@ class QualityControl extends React.Component {
     );
   };
 
-  renderBlankState() {
+  function renderBlankState() {
     return (
       <div className={cs.noDataBannerFlexContainer}>
         <InfoBanner
@@ -1123,31 +1081,22 @@ class QualityControl extends React.Component {
     );
   }
 
-  renderVisualization() {
-    const {
-      loading,
-      validSamples,
-      sidebarVisible,
-      sidebarParams,
-      tooltipLocation,
-      histogramTooltipData,
-      tooltipClass,
-    } = this.state;
+  function renderVisualization() {
     const showBlankState = !loading && validSamples.length === 0;
 
     if (showBlankState) {
-      return this.renderBlankState();
+      return renderBlankState();
     }
 
     return (
       <div className={cs.content}>
-        {this.renderHistograms()}
-        {this.renderReadsLostChart()}
+        {renderHistograms()}
+        {renderReadsLostChart()}
         <DetailsSidebar
           visible={sidebarVisible}
           mode="sampleDetails"
           params={sidebarParams}
-          onClose={this.closeSidebar}
+          onClose={closeSidebar}
         />
         {tooltipLocation && histogramTooltipData && (
           <div
@@ -1160,19 +1109,24 @@ class QualityControl extends React.Component {
       </div>
     );
   }
-
-  render() {
-    const { loading } = this.state;
-    return loading ? this.renderLoading() : this.renderVisualization();
-  }
+  return loading ? renderLoading() : renderVisualization();
 }
 
-QualityControl.propTypes = {
-  filters: PropTypes.array,
+QualityControlWrapper.propTypes = {
+  filters: PropTypes.object,
   projectId: PropTypes.number,
   handleBarClick: PropTypes.func.isRequired,
   sampleStatsSidebarOpen: PropTypes.bool,
   filtersSidebarOpen: PropTypes.bool,
 };
 
-export default QualityControl;
+QualityControl.propTypes = {
+  filters: PropTypes.object,
+  projectId: PropTypes.number,
+  handleBarClick: PropTypes.func.isRequired,
+  sampleStatsSidebarOpen: PropTypes.bool,
+  filtersSidebarOpen: PropTypes.bool,
+  project: PropTypes.object,
+};
+
+export default QualityControlWrapper;
