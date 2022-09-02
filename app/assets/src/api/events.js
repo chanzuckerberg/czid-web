@@ -558,10 +558,6 @@ function EventDictionary() {
   this.SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED =
     "SAMPLES_HEATMAP_DOWNLOAD_MODAL_BULK_DOWNLOAD_CREATION_FAILED";
 
-  /** The user has selected multiple files for upload that did not pass our pre-upload QC checks */
-  this.PRE_UPLOAD_QC_CHECK_MULTIPLE_ISSUES_FAILED =
-    "PRE_UPLOAD_QC_CHECK_MULTIPLE_ISSUES_FAILED";
-
   /**  The user selected a file for upload that failed one or more pre-upload QC checks */
   this.PRE_UPLOAD_QC_CHECK_WARNING_TYPE = "PRE_UPLOAD_QC_CHECK_WARNING_TYPE";
 

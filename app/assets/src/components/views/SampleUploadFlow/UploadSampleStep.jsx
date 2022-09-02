@@ -847,7 +847,6 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       usedClearLabs,
     } = this.state;
-    const { allowedFeatures } = this.context || {};
 
     if (currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
@@ -864,29 +863,6 @@ class UploadSampleStep extends React.Component {
           samples,
         });
         samples = validatedSamples;
-
-        if (allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)) {
-          // Track if there were multiple issues with the file(s).
-          const samplesData = this.getSampleDataForUploadTable(LOCAL_UPLOAD);
-          let errorTypes = new Set();
-
-          samplesData.forEach(sample => {
-            Object.entries(sample.isValid).forEach(([fileName, isValid]) => {
-              if (!isValid) {
-                errorTypes.add(sample.error[fileName]);
-              }
-            });
-          });
-
-          if (errorTypes.size > 1) {
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_MULTIPLE_ISSUES_FAILED,
-              {
-                multipleIssues: true,
-              },
-            );
-          }
-        }
       }
 
       onUploadSamples({
