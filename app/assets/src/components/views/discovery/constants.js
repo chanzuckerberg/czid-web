@@ -27,6 +27,7 @@ export const HUMAN_READABLE_STEP_NAMES = {
   "Gsnap Filter": "Filter human (GSNAP)",
   "Star Downstream": "Filter human (STAR)",
   "Bowtie2 Bowtie2 Human": "Filter human (Bowtie2)",
+  "Czid Dedup": "Mark duplicates (Czid Dedup)",
 };
 export const MIN_NUM_BINS = 10;
 export const MIN_BIN_WIDTH = {
