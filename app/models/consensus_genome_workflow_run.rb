@@ -91,7 +91,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   end
 
   def zip_link
-    ConsensusGenomeZipService.call(self)
+    WorkflowRunZipService.call(self)
   rescue StandardError => exception
     LogUtil.log_error(
       "Error loading zip link",

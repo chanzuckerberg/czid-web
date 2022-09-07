@@ -1607,7 +1607,7 @@ DEPENDENCIES
   rspec-json_expectations
   rspec-rails (~> 5.0)
   rubocop (>= 0.92)
-  rubocop-graphql
+  rubocop-graphql (~> 0.14.5)
   rubocop-performance
   rubocop-rails
   selenium-webdriver
