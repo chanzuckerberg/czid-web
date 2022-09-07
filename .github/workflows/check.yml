@@ -7,7 +7,7 @@ jobs:
   ruby_test:
     name: Ruby Test
     runs-on: ubuntu-latest
-    container: ruby:2.7
+    container: ruby:3.1.2
     env:
       # This is a dummy secret, do not use it for anything
       AUTH_TOKEN_SECRET: 'GYbvZ9/uHy75wWWK4BO3jZGJ0noacv7GbTJI96wZgWQ='
@@ -95,8 +95,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-ruby@v1
-      with:
-        ruby-version: "2.7"
     - name: Determine Kernel Version
       run: |
         echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV

@@ -1,5 +1,3 @@
-require 'will_paginate/array'
-
 class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required, except: [:landing, :sign_up, :maintenance, :page_not_found]

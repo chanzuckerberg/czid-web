@@ -56,7 +56,7 @@ AllCops:
     - vendor/**/*
     - bin/*
     - node_modules/**/*
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 3.0
 
 Metrics/ClassLength:
   Enabled: false
@@ -208,6 +208,12 @@ Rails/InverseOf:
 
 # TODO: Add back after manual fixes
 Rails/FilePath:
+  Enabled: false
+
+# Prevents Ruby 3.1 incompatibility error. You can enable this cop when Ruby 2.4 support is dropped.
+# See https://github.com/rubocop/rubocop/issues/10258
+# Upgrading Rubocop to 1.22.3 may fix this too: https://github.com/rubocop/rubocop/issues/10258#issuecomment-974615729
+Layout/BlockAlignment:
   Enabled: false
 
 # GraphQL/FieldDescription:

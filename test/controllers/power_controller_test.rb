@@ -3,37 +3,6 @@ require 'test_helper'
 class PowerControllerTest < ActionDispatch::IntegrationTest
   include TestHelper
 
-  test 'joe can create project' do
-    sign_in(:joe)
-    post "#{projects_url}.json", params: { project: { name: "2nd Joe Project", public_access: 0, description: "Joe's second project" } }
-    assert_response :success
-  end
-
-  test 'joe can add users to joe_project ' do
-    sign_in(:joe)
-    @joe_project = projects(:joe_project)
-    expect(@auth0_management_client_double)
-      .to(receive(:create_user)
-          .with(
-            "Username-Password-Authentication",
-            email: "help@czid.org",
-            name: "User invited from Power Controller test",
-            password: instance_of(String),
-            app_metadata: { roles: [] }
-          )
-          .and_return("user_id" => "auth0|FAKE_AUTH0_USER_ID"))
-
-    expect(@auth0_management_client_double)
-      .to(receive(:post_password_change)
-          .with(user_id: "auth0|FAKE_AUTH0_USER_ID")
-          .and_return(
-            "ticket" => "https://fake_idseq_test.idseq.net/fake_auth0_response_ticket_url?"
-          ))
-    put add_user_project_url(@joe_project), params: { user_email_to_add: "help@czid.org", user_name_to_add: "User invited from Power Controller test" }
-    assert_response :success
-    assert_equal User.last.created_by_user_id, users(:joe).id
-  end
-
   test 'joe can change project visibility to joe_project ' do
     sign_in(:joe)
     @joe_project = projects(:joe_project)

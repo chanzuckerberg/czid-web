@@ -39,7 +39,7 @@ for iconPath in $DIR_ROOT/*.tsx; do
     # Generate code that imports icon
     IMPORTS+="import $iconName from \"./$iconName\";$BREAKLINE"
     # Generate code that exports individual icons
-    ALLICONS+=" $iconName,$BREAKLINE"  
+    ALLICONS+=" $iconName,$BREAKLINE"
 
 
     # Logo*.tsx

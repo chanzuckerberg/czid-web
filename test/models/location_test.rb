@@ -3,27 +3,6 @@ require "minitest/mock"
 require "test_helpers/location_test_helper"
 
 class LocationTest < ActiveSupport::TestCase
-  test "should make a location API request" do
-    query = "search.php?addressdetails=1&normalizecity=1&q=UCSF"
-    ENV["LOCATION_IQ_API_KEY"] = "abc"
-
-    net_response = MiniTest::Mock.new
-    net_response.expect(:body, LocationTestHelper::API_GEOSEARCH_RESPONSE.to_json)
-    net_response.expect(:is_a?, true, [Object])
-
-    net_start = MiniTest::Mock.new
-
-    net_start.expect(:call, net_response, ["us1.locationiq.com", 443, { use_ssl: true }])
-
-    Net::HTTP.stub :start, net_start do
-      res = Location.location_api_request(query)
-      assert_equal [true, LocationTestHelper::API_GEOSEARCH_RESPONSE], res
-    end
-
-    assert net_response.verify
-    assert net_start.verify
-  end
-
   test "should raise an API key error" do
     ENV["LOCATION_IQ_API_KEY"] = nil
     err = assert_raises RuntimeError do
@@ -96,17 +75,6 @@ class LocationTest < ActiveSupport::TestCase
       assert_equal [true, api_response], res
     end
     assert mock.verify
-  end
-
-  test "should find existing Location by matching fields" do
-    location_info = { name: "Nevada, USA", geo_level: "state", country_name: "USA", state_name: "Nevada", subdivision_name: "", city_name: "" }
-    new_location = Location.new
-    mock = MiniTest::Mock.new
-    mock.expect(:call, new_location, [location_info])
-    Location.stub :find_by, mock do
-      res = Location.find_or_new_by_fields(location_info)
-      assert_equal new_location, res
-    end
   end
 
   test "should create new Location by OSM ID" do

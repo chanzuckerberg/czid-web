@@ -3,11 +3,12 @@ require 'rails_helper'
 RSpec.describe UserFactoryService do
   let!(:admin_user) { create(:admin) }
   let(:new_user_email) { "user_factory_user@email.com" }
+  let(:new_user_name) { "UserFactory User" }
   let(:project_id) { nil }
   let(:send_activation) { false }
   let(:new_user_params) do
     {
-      name: "UserFactory User",
+      name: new_user_name,
       email: new_user_email,
       role: 1,
       created_by_user_id: admin_user.id,
@@ -17,12 +18,13 @@ RSpec.describe UserFactoryService do
   let(:auth0_user_id) { "1" }
 
   let(:user_factory_instance) do
-    described_class.new({
-                          current_user: admin_user,
-                          project_id: project_id,
-                          send_activation: send_activation,
-                          **new_user_params,
-                        })
+    described_class.new(
+      current_user: admin_user,
+      project_id: project_id,
+      send_activation: send_activation,
+      created_by_user_id: admin_user.id,
+      **new_user_params
+    )
   end
 
   before do
@@ -51,7 +53,8 @@ RSpec.describe UserFactoryService do
   context "when create is successful" do
     it "adds a new user" do
       expect { user_factory_instance.call }.to change { User.count }.by(1)
-      expect(User.last).to have_attributes(**new_user_params)
+      expect(User.last.name).to eq(new_user_name)
+      expect(User.last.email).to eq(new_user_email)
     end
 
     context "when new user email has capital letters" do
@@ -207,7 +210,7 @@ RSpec.describe UserFactoryService do
 
       context "when send activation email raises an error" do
         before do
-          allow(UserMailer).to receive(:account_activation).and_raise(Net::SMTPAuthenticationError)
+          allow(UserMailer).to receive(:account_activation).and_raise(Net::SMTPAuthenticationError, "test UserMailer error")
         end
 
         it "logs error" do

@@ -133,7 +133,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
         meanInsertSizeBins,
       } = getBins();
 
-      const totalReadsFormat = (d) => {
+      const totalReadsFormat = d => {
         if (d === 0) {
           return 0;
         } else {
@@ -146,7 +146,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
         data: totalReadsBins,
         labelX: "Total Reads",
         labelY: "Number of Samples",
-        tickFormat: (d) => {
+        tickFormat: d => {
           return totalReadsFormat(d);
         },
       });
@@ -156,7 +156,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
         data: qcPercentBins,
         labelX: "Percentage",
         labelY: "Number of Samples",
-        tickFormat: (d) => numberWithPercent(d),
+        tickFormat: d => numberWithPercent(d),
       });
 
       renderHistogram({
@@ -192,7 +192,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
       data.failedSamples.length;
 
     const samplesReadsStats = await getSamplesReadStats(
-      data.validSamples.map((sample) => sample.id),
+      data.validSamples.map(sample => sample.id),
     );
     const { categories, legendColors, _readsLostData } = stackReadsLostData(
       samplesReadsStats,
@@ -213,15 +213,15 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
 
   function stackReadsLostData(samplesReadsStats) {
     const sampleIds = Object.keys(samplesReadsStats);
-    const samplesWithInitialReads = sampleIds.filter((sampleId) =>
+    const samplesWithInitialReads = sampleIds.filter(sampleId =>
       Number.isInteger(samplesReadsStats[sampleId].initialReads),
     );
 
     // Filter out Idseq Dedup step from samples run on pipeline versions >= 4.0
-    samplesWithInitialReads.forEach((sampleId) => {
+    samplesWithInitialReads.forEach(sampleId => {
       const sampleData = samplesReadsStats[sampleId];
       if (parseFloat(sampleData.pipelineVersion) >= 4) {
-        sampleData.steps = sampleData.steps.filter((step) => {
+        sampleData.steps = sampleData.steps.filter(step => {
           // Cdhitdup required for backwards compatibility
           return step.name !== "Idseq Dedup" && step.name !== "Cdhitdup";
         });
@@ -254,17 +254,17 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
       };
     });
 
-    const _readsLostData = samplesWithInitialReads.map((sampleId) => {
+    const _readsLostData = samplesWithInitialReads.map(sampleId => {
       const dataRow = {};
       let readsRemaining = samplesReadsStats[sampleId].initialReads;
-      samplesReadsStats[sampleId].steps.forEach((step) => {
+      samplesReadsStats[sampleId].steps.forEach(step => {
         let readsAfter = step.readsAfter || readsRemaining;
         const readsLost = readsRemaining - readsAfter;
         dataRow[step.name] = readsLost;
         readsRemaining = readsAfter;
       });
       // account for every category
-      categories.forEach((category) => {
+      categories.forEach(category => {
         if (!dataRow[category]) {
           dataRow[category] = 0;
         }
@@ -284,7 +284,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
     const failedSamples = [];
     const samplesDict = {};
 
-    samples.forEach((sample) => {
+    samples.forEach(sample => {
       // PLQC is only for samples with an mNGS pipeline run
       // The `created_at` field is only present+filled for a workflow run type
       // if the sample has a workflow run of that type, so we check if the sample
@@ -320,7 +320,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
   }
 
   const getBins = () => {
-    const sortedReads = sortSamplesByMetric((sample) => {
+    const sortedReads = sortSamplesByMetric(sample => {
       return sample.details.derived_sample_output.pipeline_run.total_reads;
     });
     const [_totalReadsBins, _samplesByTotalReads] = extractBins({
@@ -329,7 +329,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
       minBinWidth: MIN_BIN_WIDTH.totalReads,
     });
 
-    const sortedQC = sortSamplesByMetric((sample) => {
+    const sortedQC = sortSamplesByMetric(sample => {
       return sample.details.derived_sample_output.summary_stats.qc_percent;
     });
     const [_qcPercentBins, _samplesByQCPercent] = extractBins({
@@ -338,7 +338,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
       minBinWidth: MIN_BIN_WIDTH.qc,
     });
 
-    const sortedDCR = sortSamplesByMetric((sample) => {
+    const sortedDCR = sortSamplesByMetric(sample => {
       return sample.details.derived_sample_output.summary_stats
         .compression_ratio;
     });
@@ -348,7 +348,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
       minBinWidth: MIN_BIN_WIDTH.dcr,
     });
 
-    const sortedInsertSize = sortSamplesByMetric((sample) => {
+    const sortedInsertSize = sortSamplesByMetric(sample => {
       return sample.details.derived_sample_output.summary_stats
         .insert_size_mean;
     });
@@ -375,12 +375,12 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
     };
   };
 
-  const sortSamplesByMetric = (fetchMetric) => {
+  const sortSamplesByMetric = fetchMetric => {
     const sampleIds = Object.keys(samplesDict);
     return sortBy(
-      (valuePair) => valuePair.value,
+      valuePair => valuePair.value,
       compact(
-        sampleIds.map((sampleId) => {
+        sampleIds.map(sampleId => {
           if (fetchMetric(samplesDict[sampleId])) {
             return {
               id: sampleId,
@@ -471,7 +471,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
       histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Total Reads",
-        format: (d) => {
+        format: d => {
           if (d === 0) {
             return 0;
           } else {
@@ -483,7 +483,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
       histogramTooltipData = getHistogramTooltipData({
         bin: bin,
         label: "Passed QC",
-        format: (d) => numberWithPercent(d),
+        format: d => numberWithPercent(d),
       });
     } else if (data === dcrBins.current) {
       histogramTooltipData = getHistogramTooltipData({
@@ -544,7 +544,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
 
   const handleSingleBarStackEnter = (stepName, readsLost) => {
     const stepLegend = readsLostLegendColors.find(
-      (legendData) => legendData.label === stepName,
+      legendData => legendData.label === stepName,
     );
 
     const readsLostStr = readsLost.toLocaleString();
@@ -569,17 +569,17 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
     setHistogramTooltipData(histogramTooltipData);
   };
 
-  const handleEmptyBarSpaceEnter = (readsLostData) => {
+  const handleEmptyBarSpaceEnter = readsLostData => {
     const readsRemainingLegend = readsLostLegendColors.find(
-      (legendData) => legendData.label === READS_REMAINING,
+      legendData => legendData.label === READS_REMAINING,
     );
     const readsLostSummary = [];
-    readsLostCategories.forEach((category) => {
+    readsLostCategories.forEach(category => {
       if (category === READS_REMAINING) {
         return;
       }
       const categoryLegend = readsLostLegendColors.find(
-        (legendData) => legendData.label === category,
+        legendData => legendData.label === category,
       );
       readsLostSummary.push([
         <CategoricalLegend
@@ -621,7 +621,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
     setTooltipClass(cs.summaryTooltip);
   };
 
-  const handleSampleLabelEnter = (sampleName) => {
+  const handleSampleLabelEnter = sampleName => {
     const histogramTooltipData = [
       {
         name: "Info",
@@ -639,9 +639,8 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
     setHistogramTooltipData(histogramTooltipData);
   };
 
-  const handleSampleLabelClick = (sampleName) => {
-    const sampleId = validSamples.find((sample) => sample.name === sampleName)
-      .id;
+  const handleSampleLabelClick = sampleName => {
+    const sampleId = validSamples.find(sample => sample.name === sampleName).id;
 
     if (sampleId === sidebarParams.sampleId && sidebarVisible === true) {
       closeSidebar();
@@ -670,7 +669,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
   /* --- render functions --- */
 
   const renderHistogram = ({ container, data, labelX, labelY, tickFormat }) => {
-    const tickValues = data.map((d) => d.x0);
+    const tickValues = data.map(d => d.x0);
     tickValues.push(last(data).x1);
 
     let histogram = new Histogram(container, data, {
@@ -760,7 +759,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
               </div>
               <div
                 className={cs.d3Container}
-                ref={(histogramContainer) => {
+                ref={histogramContainer => {
                   totalReadsHistogramContainer.current = histogramContainer;
                 }}
               />
@@ -793,7 +792,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
               </div>
               <div
                 className={cs.d3Container}
-                ref={(histogramContainer) => {
+                ref={histogramContainer => {
                   qualityReadsHistogramContainer.current = histogramContainer;
                 }}
               />
@@ -828,7 +827,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
               </div>
               <div
                 className={cs.d3Container}
-                ref={(histogramContainer) => {
+                ref={histogramContainer => {
                   dcrHistogramContainer.current = histogramContainer;
                 }}
               />
@@ -893,7 +892,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
               </div>
               <div
                 className={cs.d3Container}
-                ref={(histogramContainer) => {
+                ref={histogramContainer => {
                   meanInsertSizeHistogramContainer.current = histogramContainer;
                 }}
               />
@@ -938,8 +937,8 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
               <div className={cs.toggleContainer}>
                 <BarChartToggle
                   currentDisplay={normalize ? "percentage" : "count"}
-                  onDisplaySwitch={(display) => {
-                    setNormalize((i) => !i);
+                  onDisplaySwitch={display => {
+                    setNormalize(i => !i);
                     trackEvent(
                       ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_BAR_CHART_TOGGLE_CLICKED,
                       {

@@ -7,7 +7,7 @@ RSpec.describe HomeController, type: :controller do
   context "non signed-in user" do
     describe "GET landing" do
       it "returns the landing page" do
-        get :landing, { format: "html" }
+        get :landing, params: { format: "html" }
 
         expect(response).to have_http_status :ok
         expect(response.body).to render_template("landing")
@@ -16,10 +16,21 @@ RSpec.describe HomeController, type: :controller do
 
     describe "POST sign_up" do
       it "accepts account request form submissions" do
+        sign_up_params = {
+          firstName: "Joe",
+          lastName: "Schmoe",
+          email: "fake@czid.org",
+          institution: "Fake Institution",
+          usage: "I love metagenomics",
+        }
         expect(UserMailer).to receive(:account_request_reply).and_call_original
         expect(UserMailer).to receive(:landing_sign_up_email).and_call_original
+        expect(MetricUtil).to receive(:post_to_airtable).with(
+          "Landing Page Form",
+          { fields: sign_up_params }.to_json
+        )
 
-        params = { signUp: { firstName: "Joe", lastName: "Schmoe", email: "fake@czid.org", institution: "Fake Institution", usage: "I love metagenomics" } }
+        params = { signUp: sign_up_params }
         post :sign_up, params: params
 
         expect(response).to have_http_status :success

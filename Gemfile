@@ -36,9 +36,9 @@ gem 'aws-sdk-states'
 gem 'brakeman'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
-gem 'consul', '>= 0.13.1'
+gem 'consul', '~> 1.0.3'
 gem 'data_migrate'
-gem 'health_check', '>= 2.7.0'
+gem 'health_check', '~> 3.0.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.11'
 # Logger
@@ -46,7 +46,7 @@ gem 'lograge'
 gem 'multipart-post'
 gem 'silencer'
 # elasticsearch
-gem 'elasticsearch-model'
+gem 'elasticsearch-model', '~> 6.1'
 # Use mysql as the database for Active Record
 gem 'mysql2'
 gem 'oj'
@@ -58,12 +58,12 @@ gem 'redis', '~> 4.3'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.1'
-gem 'rails-controller-testing'
+gem 'rails-controller-testing', '~> 1.0', '>= 1.0.5'
 gem 'rake'
 # Worker/Scheduler management
-gem 'resque', '>= 1.27.4'
+gem 'resque', '~> 2.3'
 gem 'resque-lock'
-gem 'resque-scheduler', '>= 4.3.1'
+gem 'resque-scheduler', '~> 4.6'
 gem 'thread'
 # SentryIO
 gem "sentry-raven"
@@ -73,8 +73,7 @@ gem "strong_migrations"
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets
-gem 'uglifier', '>= 1.3.0'
-gem 'will_paginate'
+gem 'uglifier', '~> 4.1'
 # Redirect
 gem 'activesupport'
 gem 'rack-host-redirect'
@@ -83,7 +82,7 @@ gem 'useragent'
 # Performance profiling in all envs
 gem 'flamegraph'
 gem 'memory_profiler'
-gem 'rack-mini-profiler'
+gem 'rack-mini-profiler', '~> 3.0' # https://github.com/rails/rails/issues/42261
 gem 'stackprof'
 
 # Helps batch ActiveRecord calls
@@ -132,8 +131,9 @@ group :development, :test do
   gem 'capybara', '~> 2.17', '>= 2.17.0'
   gem 'factory_bot_rails'
   gem 'guard', '~> 2.15'
-  gem 'rspec-rails', '~> 5.0'
-  gem 'rubocop', '>=0.92'
+  gem 'rspec-rails', '~> 5.1'
+  gem 'rubocop', '~> 0.92'
+  gem "rubocop-graphql", "~> 0.14.5"
   gem 'rubocop-performance'
   gem 'rubocop-rails'
   gem 'selenium-webdriver'
@@ -142,7 +142,7 @@ end
 
 group :development do
   gem 'amazing_print'
-  gem 'listen', '>= 3.0.5', '< 3.2'
+  gem 'listen', '~> 3.7'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console', '>= 3.5.1'
 end
@@ -169,4 +169,12 @@ gem "shoryuken"
 gem 'graphiql-rails', group: :development
 gem "graphql"
 
-gem "rubocop-graphql", "~> 0.14.5"
+# required for Ruby 3 upgrade
+# https://stackoverflow.com/questions/70500220/rails-7-ruby-3-1-loaderror-cannot-load-such-file-net-smtp
+# upgrade to Rails >= 7.0.1 will fix this too
+gem 'net-imap', require: false
+gem 'net-pop', require: false
+gem 'net-smtp', require: false
+
+# need version >= 1.2.3 for M1 macs - https://github.com/cotag/http-parser/issues/12
+gem 'http-parser', '~> 1.2.3'
