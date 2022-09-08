@@ -17,6 +17,7 @@ import {
   merge,
   partition,
   pick,
+  pull,
   replace,
   some,
   sumBy,
@@ -48,6 +49,7 @@ import {
   SORTING_V0_ADMIN_FEATURE,
   SORTING_V0_FEATURE,
   TAXON_THRESHOLD_FILTERING_FEATURE,
+  AMR_V1_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
@@ -1888,7 +1890,12 @@ class DiscoveryView extends React.Component {
 
   computeWorkflowTabs = () => {
     const { snapshotShareId } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
     let workflows = WORKFLOW_ORDER;
+    if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
+      workflows = pull("AMR", WORKFLOW_ORDER);
+    }
+
     if (snapshotShareId) workflows = [workflows[0]]; // Only mngs
 
     return workflows.map(name => {
@@ -2035,6 +2042,7 @@ class DiscoveryView extends React.Component {
                   allowedFeatures={allowedFeatures}
                   currentDisplay={currentDisplay}
                   currentTab={currentTab}
+                  domain={domain}
                   filters={this.preparedFilters()}
                   hasAtLeastOneFilterApplied={hasAtLeastOneFilterApplied}
                   mapLevel={mapLevel}

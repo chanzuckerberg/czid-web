@@ -564,6 +564,10 @@ function EventDictionary() {
   /** Track the cumulative size of files that did not pass the pre-upload validation checks */
   this.PRE_UPLOAD_QC_CHECK_CUMULATIVE_FILE_SIZE_FAILED =
     "PRE_UPLOAD_QC_CHECK_CUMULATIVE_FILE_SIZE_FAILED";
+
+  /** The user has clicked the Bulk Kickoff AMR Trigger on the SamplesView */
+  this.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED =
+    "SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED";
 }
 
 const eventNames = new EventDictionary();

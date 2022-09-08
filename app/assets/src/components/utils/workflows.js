@@ -15,6 +15,11 @@ export const WORKFLOWS = {
     value: "short-read-mngs",
     entity: WORKFLOW_ENTITIES.SAMPLES,
   },
+  AMR: {
+    label: "Antimicrobial Resistance",
+    value: "amr",
+    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
+  },
 };
 
-export const WORKFLOW_ORDER = ["SHORT_READ_MNGS", "CONSENSUS_GENOME"];
+export const WORKFLOW_ORDER = ["SHORT_READ_MNGS", "CONSENSUS_GENOME", "AMR"];

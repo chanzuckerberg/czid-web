@@ -86,6 +86,7 @@ Rails.application.routes.draw do
       post :taxa_with_reads_suggestions
       post :taxa_with_contigs_suggestions
       post :uploaded_by_current_user
+      post :bulk_kickoff_workflow_runs
     end
   end
 

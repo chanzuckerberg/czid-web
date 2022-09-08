@@ -19,3 +19,4 @@ export const SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE =
 export const MICROBIOME_DOWNLOAD_FEATURE = "microbiome";
 export const ANNOTATION_FILTER_FEATURE = "annotation_filter";
 export const BLAST_V1_FEATURE = "blast_v1";
+export const AMR_V1_FEATURE = "amr_v1";

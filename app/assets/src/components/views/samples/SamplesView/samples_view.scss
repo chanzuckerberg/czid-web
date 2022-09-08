@@ -132,3 +132,27 @@
   padding-left: 0px;
   justify-content: center;
 }
+
+.amrNotification {
+  @include font-body-xs;
+
+  .amrTab {
+    display: inline;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
+.highlight {
+  @include font-header-xxs;
+}
+
+.messageLine {
+  @include font-body-xxs;
+  padding: $sds-spaces-xxs 0;
+  margin-right: $sds-spaces-xl;
+}

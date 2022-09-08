@@ -32,7 +32,7 @@ class SamplesController < ApplicationController
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
-                   :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,].freeze
+                   :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export, :bulk_kickoff_workflow_runs,].freeze
   OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :upload_credentials].freeze
 
@@ -1437,6 +1437,23 @@ class SamplesController < ApplicationController
       only: WORKFLOW_RUN_DEFAULT_FIELDS,
       methods: [:input_error, :inputs, :parsed_cached_results]
     )
+  end
+
+  # POST /samples/bulk_kickoff_workflow_runs
+  # Creates + dispatches new workflow runs in bulk for existing samples
+  def bulk_kickoff_workflow_runs
+    workflow = collection_params[:workflow]
+    sample_ids = collection_params[:sampleIds]
+    samples = Sample.where(id: sample_ids)
+
+    new_wrs = samples.map do |s|
+      # TODO: Use rails 6 insert_all! to bulk insert into SQL efficiently so we don't potentially insert many individual records
+      # Need to find a way to bulk dispatch so we don't update many individual records at once
+      s.create_and_dispatch_workflow_run(workflow)
+    end
+
+    new_workflow_run_ids = new_wrs.map(&:id)
+    render json: { newWorkflowRunIds: new_workflow_run_ids }
   end
 
   def cli_user_instructions

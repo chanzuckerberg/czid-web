@@ -1,17 +1,23 @@
 import cx from "classnames";
-import { Button } from "czifui";
+import { Button, Icon } from "czifui";
 import {
   difference,
   find,
+  filter,
   forEach,
   get,
   isEmpty,
+  intersection,
+  map,
   union,
+  reduce,
+  size,
   values,
 } from "lodash/fp";
 import React from "react";
 
 import { Link as RouterLink } from "react-router-dom";
+import { bulkKickoffWorkflowRuns } from "~/api";
 import {
   trackEvent,
   withAnalytics,
@@ -23,7 +29,9 @@ import {
 } from "~/api/metadata";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import { AMR_V1_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
+import { showToast } from "~/components/utils/toast";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
@@ -48,6 +56,8 @@ import {
   IconShare,
 } from "~ui/icons";
 import Label from "~ui/labels/Label";
+import AccordionNotification from "~ui/notifications/AccordionNotification";
+import Notification from "~ui/notifications/Notification";
 import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 
 import {
@@ -56,7 +66,13 @@ import {
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "./ColumnConfiguration";
 import ToolbarIcon from "./ToolbarIcon";
-import { SARS_COV_2, TRIGGERS, WORKFLOW_TRIGGERS } from "./constants";
+import {
+  PipelineRunStatuses,
+  SARS_COV_2,
+  TRIGGERS,
+  WORKFLOW_TRIGGERS,
+  WORKFLOW_TRIGGERS_BY_DOMAIN,
+} from "./constants";
 import cs from "./samples_view.scss";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
@@ -419,8 +435,164 @@ class SamplesView extends React.Component {
     );
   };
 
+  renderBulkKickoffAmr = () => {
+    const { objects, selectedIds } = this.props;
+    const { allowedFeatures = {} } = this.context || {};
+
+    if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
+      return;
+    }
+
+    const selectedObjects = objects.loaded.filter(object =>
+      selectedIds.has(object.id),
+    );
+    const numOfSelectedObjects = size(selectedObjects);
+
+    const downloadIcon = (
+      <Icon sdsIcon="dotsHorizontal" sdsSize="s" sdsStyle="button" />
+    );
+
+    return (
+      <ToolbarIcon
+        className={cs.action}
+        icon={downloadIcon}
+        popupText="Run Antimicrobial Resistance Pipeline (Beta)"
+        popupSubtitle={
+          numOfSelectedObjects === 0 ? "Select at least 1 sample" : ""
+        }
+        disabled={numOfSelectedObjects === 0}
+        onClick={withAnalytics(
+          this.handleBulkKickoffAmrClick,
+          ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED,
+        )}
+      />
+    );
+  };
+
+  handleBulkKickoffAmrClick = async () => {
+    const { objects, selectedIds } = this.props;
+
+    const selectedObjects = filter(
+      object => selectedIds.has(object.id),
+      objects.loaded,
+    );
+    const amrPipelineEligibility = reduce(
+      (result, sample) => {
+        if (this.isNotEligibleForAmrPipeline(sample)) {
+          result.ineligible.push(sample);
+        } else {
+          result.eligible.push(sample);
+        }
+        return result;
+      },
+      { eligible: [], ineligible: [] },
+      selectedObjects,
+    );
+
+    if (size(amrPipelineEligibility.eligible) > 0) {
+      this.kickoffAmrPipelineForSamples(
+        map("id", amrPipelineEligibility.eligible),
+      );
+      this.renderAmrPipelineBulkKickedOffNotification();
+    }
+
+    if (size(amrPipelineEligibility.ineligible) > 0) {
+      const ineligibleSampleNames = map(
+        sample => get("sample.name", sample),
+        amrPipelineEligibility.ineligible,
+      );
+      // We need this 10ms delay to allow the first toast to render properly before showing the second toast
+      await this.delay(10);
+      this.renderIneligibleSamplesForBulkKickoffAmrNotification(
+        ineligibleSampleNames,
+      );
+    }
+  };
+
+  isNotEligibleForAmrPipeline = sample => {
+    const failedToUploadSample = !isEmpty(get("sample.uploadError", sample));
+    const nonHostReadsUnavailable = !(
+      get("sample.pipelineRunStatus", sample) === PipelineRunStatuses.Complete
+    );
+    const hasExistingAmrWorkflowRun =
+      get("sample.workflowRunsCountByWorkflow", sample)[WORKFLOWS.AMR.value] >
+      0;
+
+    return (
+      failedToUploadSample ||
+      nonHostReadsUnavailable ||
+      hasExistingAmrWorkflowRun
+    );
+  };
+
+  delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  kickoffAmrPipelineForSamples = sampleIds => {
+    bulkKickoffWorkflowRuns({
+      sampleIds,
+      workflow: WORKFLOWS.AMR.value,
+    });
+  };
+
+  renderAmrPipelineBulkKickedOffNotification = () => {
+    const renderAmrNotification = onClose => (
+      <Notification displayStyle="elevated" type="info" onClose={onClose}>
+        <div className={cs.amrNotification}>
+          We&apos;ve started running your samples on the Antimicrobial
+          Resistance (Beta) pipeline. To view your samples, visit the{" "}
+          {/* TODO: When the user clicks this AMR link, it should switch to the AMR tab */}
+          <div className={cs.amrTab}>Antimicrobial Resistance</div> tab.
+        </div>
+      </Notification>
+    );
+
+    showToast(({ closeToast }) => renderAmrNotification(closeToast), {
+      autoClose: 12000,
+    });
+  };
+
+  renderIneligibleSamplesForBulkKickoffAmrNotification = invalidSampleNames => {
+    const header = (
+      <div>
+        <span className={cs.highlight}>
+          {invalidSampleNames.length} sample
+          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be run
+        </span>{" "}
+        on the Antimicrobial Resistance (Beta) pipeline because they either
+        failed, are still processing, or were already run.
+      </div>
+    );
+
+    const content = (
+      <span>
+        {invalidSampleNames.map((name, index) => {
+          return (
+            <div key={index} className={cs.messageLine}>
+              {name}
+            </div>
+          );
+        })}
+      </span>
+    );
+
+    const renderAmrNotification = onClose => (
+      <AccordionNotification
+        header={header}
+        content={content}
+        open={false}
+        type={"warning"}
+        displayStyle={"elevated"}
+        onClose={onClose}
+      />
+    );
+
+    showToast(({ closeToast }) => renderAmrNotification(closeToast), {
+      autoClose: 12000,
+    });
+  };
+
   renderTriggers = () => {
-    const { selectedIds, workflow } = this.props;
+    const { domain, selectedIds, workflow } = this.props;
 
     const triggers = {
       [TRIGGERS.backgroundModel]: this.renderCollectionTrigger,
@@ -429,8 +601,14 @@ class SamplesView extends React.Component {
       [TRIGGERS.download]: this.renderBulkDownloadTrigger,
       [TRIGGERS.nextclade]: this.renderNextcladeTrigger,
       [TRIGGERS.genepi]: this.renderGenEpiTrigger,
+      [TRIGGERS.bulk_kickoff_amr]: this.renderBulkKickoffAmr,
     };
-    const triggersToRender = WORKFLOW_TRIGGERS[workflow].map(trigger => (
+    // Get workflows triggers available in the current domain and workflow tab
+    const triggersAvailable = intersection(
+      WORKFLOW_TRIGGERS_BY_DOMAIN[domain],
+      WORKFLOW_TRIGGERS[workflow],
+    );
+    const triggersToRender = triggersAvailable.map(trigger => (
       <React.Fragment key={`${workflow}-${trigger}`}>
         {triggers[trigger]()}
       </React.Fragment>
@@ -815,6 +993,7 @@ SamplesView.propTypes = {
   admin: PropTypes.bool,
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
+  domain: PropTypes.string,
   filters: PropTypes.object,
   filtersSidebarOpen: PropTypes.bool,
   hasAtLeastOneFilterApplied: PropTypes.bool,

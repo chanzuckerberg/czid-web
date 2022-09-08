@@ -110,6 +110,10 @@ const processRawSample = sample => {
       ),
       user: get("uploader.name", sample.details),
       userId: get("uploader.id", sample.details),
+      workflowRunsCountByWorkflow: get(
+        "workflow_runs_count_by_workflow",
+        sample.details,
+      ),
     },
     createdAt: sample.created_at,
     duplicateCompressionRatio: get(

@@ -941,6 +941,39 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response[0]["key"]).to eq(@host_metadata_field1.name)
       end
     end
+
+    describe "POST #bulk_kickoff_workflow_runs" do
+      let(:fake_sfn_arn) { "fake:sfn:arn" }
+      let(:test_workflow_name) { WorkflowRun::WORKFLOW[:amr] }
+      let(:fake_wdl_version) { "10.0.0" }
+
+      before do
+        @project = create(:project, users: [@joe])
+        @sample1 = create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample2 = create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: fake_sfn_arn)
+        create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: test_workflow_name), value: fake_wdl_version)
+      end
+
+      context "Whem AMR workflow is specified" do
+        it "should create and dispatch AMR workflow runs for each sample" do
+          params = {
+            sampleIds: [@sample1.id, @sample2.id],
+            workflow: WorkflowRun::WORKFLOW[:amr],
+          }
+
+          post :bulk_kickoff_workflow_runs, params: params
+
+          expect(response).to have_http_status(200)
+          json_response = JSON.parse(response.body)
+          wr1 = @sample1.workflow_runs.last
+          wr2 = @sample2.workflow_runs.last
+          expect(wr1.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
+          expect(wr2.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
+          expect(json_response["newWorkflowRunIds"]).to eq([wr1.id, wr2.id])
+        end
+      end
+    end
   end
 
   context "Admin user" do

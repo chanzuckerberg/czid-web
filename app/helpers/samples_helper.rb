@@ -405,7 +405,7 @@ module SamplesHelper
 
     # Massage data into the right format
     snapshot_omissions = [:project, :input_files, :db_sample]
-    samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each do |sample|
+    samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user, :workflow_runs).each do |sample|
       job_info = {}
       job_info[:db_sample] = sample
       job_info[:metadata] = metadata_by_sample_id[sample.id]
@@ -417,6 +417,9 @@ module SamplesHelper
 
       if sample.upload_error.nil?
         job_info[:mngs_run_info] = is_snapshot ? snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id) : pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids, output_states_by_pipeline_run_id)
+        job_info[:workflow_runs_count_by_workflow] = sample.workflow_runs.each_with_object({}) do |wr, result|
+          result.key?(wr.workflow) ? result[wr.workflow] += 1 : result[wr.workflow] = 1
+        end
       end
 
       if is_snapshot

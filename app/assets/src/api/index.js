@@ -601,8 +601,15 @@ const kickoffAMR = ({ sampleId, workflow }) =>
     workflow,
   });
 
+const bulkKickoffWorkflowRuns = ({ sampleIds, workflow }) =>
+  postWithCSRF(`/samples/bulk_kickoff_workflow_runs`, {
+    sampleIds,
+    workflow,
+  });
+
 export {
   bulkImportRemoteSamples,
+  bulkKickoffWorkflowRuns,
   createBackground,
   createConsensusGenomeCladeExport,
   createPhyloTree,
