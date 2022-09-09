@@ -7,6 +7,10 @@ class Mutations::CreateUser < Mutations::BaseMutation
   field :role, Int, null: true
   field :sendActivation, Boolean, null: true
 
+  def self.authorized?(object, context)
+    super && current_user_is_admin?(context)
+  end
+
   def resolve(email:, name:, institution:, archetypes:, segments:, send_activation:, role:)
     current_user = context[:current_user]
     @user = UserFactoryService.call(

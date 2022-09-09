@@ -13,5 +13,9 @@ module Types
     field :creator, Types::UserType, null: true
     field :samples, [Types::SampleType], null: true
     field :total_sample_count, Integer, null: false
+
+    def self.authorized?(object, context)
+      super && current_user_is_admin?(context)
+    end
   end
 end
