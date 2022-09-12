@@ -515,7 +515,7 @@ class SamplesView extends React.Component {
       get("sample.pipelineRunStatus", sample) === PipelineRunStatuses.Complete
     );
     const hasExistingAmrWorkflowRun =
-      get("sample.workflowRunsCountByWorkflow", sample)[WORKFLOWS.AMR.value] >
+      get(["sample.workflowRunsCountByWorkflow", WORKFLOWS.AMR.value], sample) >
       0;
 
     return (
