@@ -56,8 +56,8 @@ const ImpactVideoSection = () => {
           <div className={cs.videoContainer}>
             <div className={cs.video}>
               <iframe
-                src="https://www.youtube.com/embed/7w-pAc4rwHI"
-                title="YouTube video player"
+                src="https://www.youtube.com/embed/dnf63o22CWA"
+                title="360&deg; VR Tour with Infectious Disease Detectives – Bangladesh"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
