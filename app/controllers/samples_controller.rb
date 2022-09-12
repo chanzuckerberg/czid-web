@@ -27,7 +27,7 @@ class SamplesController < ApplicationController
                   :contig_taxid_list, :taxid_contigs_for_blast, :taxid_contigs_download, :taxon_five_longest_reads, :summary_contig_counts, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials, :pipeline_logs,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
-                  :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow, :move_to_project,].freeze
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow, :move_to_project, :cancel_pipeline_run,].freeze
 
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
@@ -40,7 +40,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
-  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project, :pipeline_logs]
+  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :pipeline_runs, :move_to_project, :pipeline_logs, :cancel_pipeline_run]
   before_action :login_required, only: [:bulk_import]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
@@ -1425,6 +1425,22 @@ class SamplesController < ApplicationController
       else
         format.html { redirect_to pipeline_runs_sample_path(@sample), notice: 'No pipeline run in progress.' }
         format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def cancel_pipeline_run
+    pipeline_run = @sample.pipeline_runs.where(finalized: 0, deprecated: false).first
+    respond_to do |format|
+      if pipeline_run.nil?
+        # only cancel pipeline run if it is in progress
+        format.html { redirect_to pipeline_runs_sample_path(@sample), notice: 'No pipeline run in progress.' }
+      else
+        sfn = SfnExecution.new(execution_arn: pipeline_run.sfn_execution_arn, s3_path: pipeline_run.s3_output_prefix)
+        cancel_success = sfn.stop_execution()
+        # pipeline runs in later stages (e.g. experimental) may not be able to be cancelled but sfn.stop_execution may still return true
+        notice = cancel_success ? "Pipeline run has been cancelled." : "Pipeline run could not be cancelled."
+        format.html { redirect_to pipeline_runs_sample_path(@sample), notice: notice }
       end
     end
   end

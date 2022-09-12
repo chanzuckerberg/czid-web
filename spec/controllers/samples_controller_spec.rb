@@ -1016,5 +1016,54 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response["error"]).to be_nil
       end
     end
+
+    describe "PUT #cancel_pipeline_run" do
+      before do
+        @project = create(:project, users: [@joe])
+        @running_sample = create(:sample, project: @project, name: "Test Sample Two")
+        @in_prog_pipeline_run = create(:pipeline_run,
+                                       sample: @running_sample,
+                                       sfn_execution_arn: "fake_sfn_execution_arn",
+                                       s3_output_prefix: "fake_s3_prefix",
+                                       job_status: "RUNNING",
+                                       finalized: 0,
+                                       pipeline_version: 6.10,
+                                       wdl_version: "5.0")
+      end
+
+      context "when user is not an admin" do
+        before do
+          sign_in @joe
+        end
+
+        it "will not execute for non-admin users" do
+          expect_any_instance_of(SfnExecution).not_to receive(:stop_execution)
+          put :cancel_pipeline_run, params: { id: @running_sample.id }
+        end
+      end
+
+      context "when user is an admin" do
+        it "will try to cancel running pipelines" do
+          expect_any_instance_of(SfnExecution).to receive(:stop_execution)
+          put :cancel_pipeline_run, params: { id: @running_sample.id }
+          expect(response).to redirect_to(pipeline_runs_sample_path(@running_sample.id))
+        end
+
+        it "will not try to cancel completed pipelines" do
+          @completed_sample = create(:sample, project: @project, name: "Test Sample One")
+          @completed_pipeline_run = create(:pipeline_run,
+                                           sample: @completed_sample,
+                                           sfn_execution_arn: "fake_sfn_execution_arn",
+                                           s3_output_prefix: "s3_output_prefix",
+                                           job_status: "CHECKED",
+                                           finalized: 1,
+                                           pipeline_version: 6.10,
+                                           wdl_version: "5.0")
+          expect_any_instance_of(SfnExecution).not_to receive(:stop_execution)
+          put :cancel_pipeline_run, params: { id: @completed_sample.id }
+          expect(response).to redirect_to(pipeline_runs_sample_path(@completed_sample.id))
+        end
+      end
+    end
   end
 end
