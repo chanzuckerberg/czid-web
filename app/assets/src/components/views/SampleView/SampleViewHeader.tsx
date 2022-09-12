@@ -15,14 +15,13 @@ import {
   SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
   SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
-
 import { generateUrlToSampleView } from "~/components/utils/urls";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WORKFLOWS, findInWorkflows } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import { parseUrlParams } from "~/helpers/url";
 import Project from "~/interface/project";
 import ReportMetadata from "~/interface/reportMetaData";
-import sample, { PipelineRuns } from "~/interface/sample";
+import Sample, { PipelineRuns } from "~/interface/sample";
 import {
   DownloadButton,
   ErrorButton,
@@ -66,7 +65,7 @@ export default function SampleViewHeader({
 
   const workflow = PIPELINE_RUN_TABS.includes(currentTab)
     ? WORKFLOWS.SHORT_READ_MNGS.value
-    : WORKFLOWS.CONSENSUS_GENOME.value;
+    : WORKFLOWS[findInWorkflows(currentTab, "label")]?.value;
 
   // Leaving in for now, removing in CH-118827
   const mngsWorkflow = workflow === WORKFLOWS.SHORT_READ_MNGS.value;
@@ -121,7 +120,6 @@ export default function SampleViewHeader({
       (sample &&
         isEmpty(sample.pipeline_runs) &&
         size(sample.workflow_runs) === 1);
-
     if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
       const succeeded = get("status", currentRun) === "SUCCEEDED";
       return (
@@ -158,6 +156,26 @@ export default function SampleViewHeader({
             {shouldHideConsensusGenomeHelpButton ||
               renderConsensusGenomeHelpButton()}
           </>
+        </ViewHeader.Controls>
+      );
+    } else if (workflow === WORKFLOWS.AMR.value) {
+      // This block is for amr PipelineRun reports.
+      const succeeded = get("status", currentRun) === "SUCCEEDED";
+      return (
+        <ViewHeader.Controls>
+          {succeeded && (
+            <DownloadButton
+              primary={true}
+              className={cs.controlElement}
+              text="Download All"
+              onClick={() => {
+                openUrl(getWorkflowRunZipLink(currentRun.id));
+                trackEvent("SampleViewHeader_amr-download-all-button_clicked", {
+                  sampleId: sample.id,
+                });
+              }}
+            />
+          )}
         </ViewHeader.Controls>
       );
     } else {
@@ -215,16 +233,19 @@ export default function SampleViewHeader({
       : `/home?project_id=${project.id}`;
   };
 
+  const getAllRuns = () => {
+    const runsByType =
+      get("workflow_runs", sample) &&
+      get("workflow_runs", sample).filter(run => run.workflow === workflow);
+    return mngsWorkflow ? get("pipeline_runs", sample) : runsByType;
+  };
+
   const renderViewHeaderContent = () => (
     <ViewHeader.Content>
       <WorkflowVersionHeader
         sampleId={get("id", sample)}
         currentRun={currentRun}
-        allRuns={
-          mngsWorkflow
-            ? get("pipeline_runs", sample)
-            : get("workflow_runs", sample)
-        }
+        allRuns={getAllRuns()}
         workflowType={workflow}
         mngsWorkflow={mngsWorkflow}
         versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
@@ -313,7 +334,7 @@ interface SampleViewHeaderProps {
     name: string;
   }[];
   reportMetadata: ReportMetadata;
-  sample: sample;
+  sample: Sample;
   snapshotShareId?: $TSFixMe;
   view: string;
 }

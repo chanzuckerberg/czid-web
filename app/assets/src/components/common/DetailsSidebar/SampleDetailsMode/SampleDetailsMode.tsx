@@ -14,6 +14,7 @@ import {
   generateUrlToSampleView,
   TempSelectedOptionsShape,
 } from "~/components/utils/urls";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import ConsensusGenomeDropdown from "~/components/views/SampleView/ConsensusGenomeDropdown";
 import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
 import Sample from "~/interface/sample";
@@ -248,7 +249,9 @@ const SampleDetailsMode = ({
 
   const renderTab = () => {
     const savePending = some(metadataSavePending);
-
+    const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
+      run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
+    );
     if (currentTab === "Metadata") {
       return (
         <MetadataTab
@@ -278,14 +281,14 @@ const SampleDetailsMode = ({
 
       const consensusGenomeDropdown = currentWorkflowTab ===
         WORKFLOW_TABS.CONSENSUS_GENOME &&
-        size(sample.workflow_runs) > 1 && (
+        size(consensusGenomeWorkflowRuns) > 1 && (
           <div className={cs.dropdownContainer}>
             <ConsensusGenomeDropdown
-              workflowRuns={sample.workflow_runs}
+              workflowRuns={consensusGenomeWorkflowRuns}
               initialSelectedValue={currentRun.id}
               onConsensusGenomeSelection={workflowRunId =>
                 onWorkflowRunSelect(
-                  find({ id: workflowRunId }, sample.workflow_runs),
+                  find({ id: workflowRunId }, consensusGenomeWorkflowRuns),
                 )
               }
             />

@@ -1,0 +1,30 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.section {
+  margin-top: $sds-spaces-xl;
+}
+
+.title {
+  @include font-header-m;
+  margin-bottom: $sds-spaces-s;
+}
+
+.subtitle {
+  @include font-body-s;
+  margin-bottom: $sds-spaces-l;
+}
+
+.bolded {
+  font-weight: $font-weight-semibold;
+}
+
+.list {
+  margin-bottom: $sds-spaces-l;
+}
+
+.main {
+  padding-bottom: $sds-spaces-xl;
+}

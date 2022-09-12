@@ -4,7 +4,7 @@ import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
 import { openUrlInNewTab } from "~utils/links";
 
 import PipelineVersionSelect from "./PipelineVersionSelect";
@@ -29,17 +29,25 @@ export default function WorkflowVersionHeader({
     return alignmentConfigNameString;
   };
 
+  const renderCardDBString = () => {
+    const cardVersion = "3.4.3";
+    return ` CARD DB: ${cardVersion}`;
+  };
+
   const renderWorkflowVersionString = () => {
     if (!currentRun[versionKey]) return;
 
-    let workflowKey = Object.keys(WORKFLOWS).find(
-      flow => WORKFLOWS[flow].value === workflowType,
-    );
+    let workflowKey = findInWorkflows(workflowType, "value");
     let versionString = `${WORKFLOWS[workflowKey].label} Pipeline v${currentRun[versionKey]}`;
 
     if (mngsWorkflow) {
       versionString += renderAlignmentConfigString();
     }
+
+    if (workflowType === WORKFLOWS.AMR.value) {
+      versionString += renderCardDBString();
+    }
+
     return versionString;
   };
 

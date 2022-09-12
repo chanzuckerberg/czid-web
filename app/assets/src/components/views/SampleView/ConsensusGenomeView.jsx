@@ -7,7 +7,7 @@ import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import SampleMessage from "~/components/views/SampleView/SampleMessage";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import Histogram, {
   HISTOGRAM_SCALE,
 } from "~/components/visualizations/Histogram";
@@ -15,27 +15,24 @@ import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
-import { IconAlert, IconArrowRight, IconLoading } from "~ui/icons";
+import { IconArrowRight } from "~ui/icons";
 import {
   SARS_COV_2_CONSENSUS_GENOME_DOC_LINK,
   VIRAL_CONSENSUS_GENOME_DOC_LINK,
 } from "~utils/documentationLinks";
 import PropTypes from "~utils/propTypes";
-import { sampleErrorInfo } from "~utils/sample";
 import { FIELDS_METADATA } from "~utils/tooltip";
 import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
+import SampleReportContent from "./SampleReportContent";
 
 import cs from "./consensus_genome_view.scss";
 import {
   CG_HISTOGRAM_FILL_COLOR,
   CG_HISTOGRAM_HOVER_FILL_COLOR,
   CG_VIEW_METRIC_COLUMNS,
-  CREATED_STATE,
   RUNNING_STATE,
   SARS_COV_2_ACCESSION_ID,
-  SUCCEEDED_STATE,
 } from "./constants";
-import csSampleMessage from "./sample_message.scss";
 
 const ConsensusGenomeView = ({
   onWorkflowRunSelect,
@@ -49,7 +46,9 @@ const ConsensusGenomeView = ({
   const [histogramTooltipLocation, setHistogramTooltipLocation] = useState(
     null,
   );
-
+  const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
+    run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
+  );
   useEffect(() => {
     if (
       !isNil(coverageVizContainerRef) &&
@@ -63,11 +62,11 @@ const ConsensusGenomeView = ({
     return (
       <div className={cs.dropdownContainer}>
         <ConsensusGenomeDropdown
-          workflowRuns={sample.workflow_runs}
+          workflowRuns={consensusGenomeWorkflowRuns}
           initialSelectedValue={workflowRun.id}
           onConsensusGenomeSelection={workflowRunId =>
             onWorkflowRunSelect(
-              find({ id: workflowRunId }, sample.workflow_runs),
+              find({ id: workflowRunId }, consensusGenomeWorkflowRuns),
             )
           }
         />
@@ -76,7 +75,7 @@ const ConsensusGenomeView = ({
   };
 
   const renderHeaderInfoAndDropdown = () => {
-    const shouldRenderCGDropdown = size(sample.workflow_runs) > 1;
+    const shouldRenderCGDropdown = size(consensusGenomeWorkflowRuns) > 1;
     return (
       <div
         className={cx(
@@ -98,17 +97,6 @@ const ConsensusGenomeView = ({
           </ExternalLink>
         )}
       </div>
-    );
-  };
-
-  const renderLoadingMessage = () => {
-    return (
-      <SampleMessage
-        icon={<IconLoading className={csSampleMessage.icon} />}
-        message={"Loading report data."}
-        status={"Loading"}
-        type={"inProgress"}
-      />
     );
   };
 
@@ -469,71 +457,24 @@ const ConsensusGenomeView = ({
     return VIRAL_CONSENSUS_GENOME_DOC_LINK;
   };
 
-  const renderContent = () => {
-    if (get("status", workflowRun) === SUCCEEDED_STATE) {
-      return renderResults();
-    } else if (
-      !sample.upload_error &&
-      (!workflowRun ||
-        !workflowRun.status ||
-        workflowRun.status === RUNNING_STATE)
-    ) {
-      return (
-        <SampleMessage
-          icon={<IconLoading className={csSampleMessage.icon} />}
-          link={computeHelpLink()}
-          linkText={"Learn about Consensus Genomes"}
-          message={"Your Consensus Genome is being generated!"}
-          status={"IN PROGRESS"}
-          type={"inProgress"}
-          onClick={() =>
-            trackEvent("ConsensusGenomeView_consenus-genome-doc-link_clicked")
-          }
-        />
-      );
-    } else if (!sample.upload_error && workflowRun.status === CREATED_STATE) {
-      return (
-        <SampleMessage
-          icon={<IconLoading className={csSampleMessage.icon} />}
-          message={"Waiting to Start or Receive Files"}
-          status={"IN PROGRESS"}
-          type={"inProgress"}
-        />
-      );
-    } else {
-      // FAILED
-      const {
-        link,
-        linkText,
-        subtitle,
-        message,
-        status,
-        type,
-      } = sampleErrorInfo({
-        sample,
-        error: workflowRun.input_error || {},
-      });
-      return (
-        <SampleMessage
-          icon={<IconAlert className={cs.iconAlert} type={type} />}
-          link={link}
-          linkText={linkText}
-          subtitle={subtitle}
-          message={message}
-          status={status}
-          type={type}
-          onClick={() =>
-            trackEvent("ConsensusGenomeView_sample-error-info-link_clicked")
-          }
-        />
-      );
-    }
-  };
-
   return (
     <>
       {renderHeaderInfoAndDropdown()}
-      {loadingResults ? renderLoadingMessage() : renderContent()}
+      <SampleReportContent
+        sample={sample}
+        workflowRun={workflowRun}
+        loadingResults={loadingResults}
+        loadingInfo={{
+          linkText: "Learn about Consensus Genomes",
+          message: "Your Consensus Genome is being generated!",
+          helpLink: computeHelpLink(),
+        }}
+        eventNames={{
+          error: "ConsensusGenomeView_sample-error-info-link_clicked",
+          loading: "ConsensusGenomeView_consenus-genome-doc-link_clicked",
+        }}
+        renderResults={renderResults}
+      />
     </>
   );
 };

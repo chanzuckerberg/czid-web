@@ -43,7 +43,7 @@ import {
   getWorkflowRunResults,
   kickoffConsensusGenome,
 } from "~/api";
-import { getAmrData } from "~/api/amr";
+import { getAmrDeprecatedData } from "~/api/amr";
 import {
   trackEvent,
   withAnalytics,
@@ -54,7 +54,7 @@ import {
   createPersistedBackground,
   updatePersistedBackground,
 } from "~/api/persisted_backgrounds";
-import AMRView from "~/components/AMRView";
+import DeprecatedAmrView from "~/components/DeprecatedAmrView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
@@ -64,7 +64,8 @@ import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import {
-  AMR_TABLE_FEATURE,
+  AMR_V1_FEATURE,
+  AMR_DEPRECATED_FEATURE,
   BLAST_V1_FEATURE,
   MERGED_NT_NR_FEATURE,
 } from "~/components/utils/features";
@@ -78,7 +79,11 @@ import {
 import PropTypes from "~/components/utils/propTypes";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import { showToast } from "~/components/utils/toast";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import {
+  findInWorkflows,
+  WORKFLOWS,
+  WORKFLOW_ENTITIES,
+} from "~/components/utils/workflows";
 import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
@@ -96,6 +101,7 @@ import StatusLabel from "~ui/labels/StatusLabel";
 import Notification from "~ui/notifications/Notification";
 
 import BlastSelectionModal from "../blast/BlastSelectionModal";
+import AmrView from "./AmrView";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import ReportViewSelector from "./ReportViewSelector";
@@ -169,7 +175,7 @@ class SampleView extends React.Component {
     }
 
     this.state = {
-      amrData: null,
+      amrDeprecatedData: null,
       backgrounds: [],
       blastData: {},
       blastModalInfo: {},
@@ -244,25 +250,24 @@ class SampleView extends React.Component {
 
   componentDidUpdate(_, prevState) {
     const {
-      amrData,
+      amrDeprecatedData,
       currentTab,
       loadingWorkflowRunResults,
       workflowRun,
       workflowRunResults,
     } = this.state;
 
-    if (currentTab === TABS.AMR && !amrData) {
-      this.fetchAmrData();
+    if (currentTab === TABS.AMR_DEPRECATED && !amrDeprecatedData) {
+      this.fetchAmrDeprecatedData();
     }
 
-    if (currentTab === TABS.CONSENSUS_GENOME) {
+    if (currentTab === TABS.CONSENSUS_GENOME || currentTab === TABS.AMR) {
       const currentRun = this.getCurrentRun();
       const isFirstCGLoad = !isNil(currentRun) && isNil(workflowRunResults);
       const tabChanged = currentTab !== prevState.currentTab;
       const workflowRunChanged =
         workflowRun &&
         get("id", workflowRun) !== get("id", prevState.workflowRun);
-
       if (
         !loadingWorkflowRunResults &&
         (isFirstCGLoad || tabChanged || workflowRunChanged)
@@ -274,7 +279,6 @@ class SampleView extends React.Component {
 
   fetchWorkflowRunResults = async () => {
     const { loadingWorkflowRunResults } = this.state;
-
     if (!loadingWorkflowRunResults) {
       this.setState({ loadingWorkflowRunResults: true });
       const currentWorkflowRun = this.getCurrentRun();
@@ -317,27 +321,45 @@ class SampleView extends React.Component {
     };
   };
 
-  // TODO(omar): Generalize when new workflows are introduced
-  getWorkflowCount = sample => ({
-    [WORKFLOWS.SHORT_READ_MNGS.value]: size(sample.pipeline_runs),
-    [WORKFLOWS.CONSENSUS_GENOME.value]: size(sample.workflow_runs),
-  });
+  getWorkflowCount = sample => {
+    const count = {};
+    Object.keys(WORKFLOWS).forEach(workflow => {
+      switch (WORKFLOWS[workflow].entity) {
+        case WORKFLOW_ENTITIES.SAMPLES:
+          count[WORKFLOWS[workflow].value] = size(sample.pipeline_runs);
+          break;
+        case WORKFLOW_ENTITIES.WORKFLOW_RUNS:
+          count[WORKFLOWS[workflow].value] = size(
+            sample.workflow_runs.filter(
+              run => run.workflow === WORKFLOWS[workflow].value,
+            ),
+          );
+          break;
+        default:
+          break;
+      }
+    });
+    return count;
+  };
 
   determineInitialTab = ({
     initialWorkflow,
     workflowCount: {
       [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
       [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
+      [WORKFLOWS.AMR.value]: amr,
     },
   }) => {
     if (mngs) {
       return TABS.SHORT_READ_MNGS;
     } else if (cg) {
       return TABS.CONSENSUS_GENOME;
+    } else if (amr) {
+      return TABS.AMR;
+    } else if (initialWorkflow) {
+      return TABS[findInWorkflows(initialWorkflow, "value")];
     } else {
-      return initialWorkflow === WORKFLOWS.SHORT_READ_MNGS.value
-        ? TABS.SHORT_READ_MNGS
-        : TABS.CONSENSUS_GENOME;
+      return TABS.SHORT_READ_MNGS;
     }
   };
 
@@ -608,10 +630,10 @@ class SampleView extends React.Component {
     }
   };
 
-  fetchAmrData = async () => {
+  fetchAmrDeprecatedData = async () => {
     const { sample } = this.state;
-    const amrData = await getAmrData(sample.id);
-    this.setState({ amrData });
+    const amrDeprecatedData = await getAmrDeprecatedData(sample.id);
+    this.setState({ amrDeprecatedData });
   };
 
   fetchBackgrounds = async () => {
@@ -866,9 +888,14 @@ class SampleView extends React.Component {
           this.fetchCoverageVizData();
         },
       );
-    } else if (currentTab === TABS.CONSENSUS_GENOME) {
+    } else if (
+      currentTab === TABS.CONSENSUS_GENOME ||
+      currentTab === TABS.AMR
+    ) {
+      const workflowVal =
+        WORKFLOWS[findInWorkflows(currentTab, "label")]?.value;
       const newRun = find(
-        { wdl_version: newPipelineVersion },
+        { wdl_version: newPipelineVersion, workflow: workflowVal },
         sample.workflow_runs,
       );
       this.setState(
@@ -1681,38 +1708,49 @@ class SampleView extends React.Component {
     const { reportMetadata, sample } = this.state;
     const { allowedFeatures = [] } = this.context || {};
 
-    const mergedNtNrTab = {
-      value: TABS.MERGED_NT_NR,
+    const customTab = (value, status) => ({
+      value: value,
       label: (
         <>
-          {TABS.MERGED_NT_NR}
+          {value}
           <StatusLabel
             className={cs.statusLabel}
             inline
-            status="Prototype"
+            status={status}
             type="beta"
           />
         </>
       ),
-    };
+    });
+
+    const mergedNtNrTab = customTab(TABS.MERGED_NT_NR, "Prototype");
+    const amrTab = customTab(TABS.AMR, "Beta");
 
     const {
       [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
       [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
+      [WORKFLOWS.AMR.value]: amr,
     } = this.getWorkflowCount(sample);
+
+    // only show deprecated label on old AMR tab to users who have the new AMR feature enabled
+    const deprecatedAmrLabel = allowedFeatures.includes(AMR_V1_FEATURE)
+      ? allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
+        reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
+        TABS.AMR_DEPRECATED
+      : allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
+        reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
+        TABS.AMR;
+
     const workflowTabs = compact([
       mngs && TABS.SHORT_READ_MNGS,
       mngs && allowedFeatures.includes(MERGED_NT_NR_FEATURE) && mergedNtNrTab,
-      allowedFeatures.includes(AMR_TABLE_FEATURE) &&
-        reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
-        TABS.AMR,
+      deprecatedAmrLabel,
+      allowedFeatures.includes(AMR_V1_FEATURE) && amr && amrTab,
       cg && TABS.CONSENSUS_GENOME,
     ]);
 
     if (isEmpty(workflowTabs)) {
-      return sample.initial_workflow === WORKFLOWS.SHORT_READ_MNGS.value
-        ? [TABS.SHORT_READ_MNGS]
-        : [TABS.CONSENSUS_GENOME];
+      return [findInWorkflows(sample.initial_workflow, "value")];
     } else {
       return workflowTabs;
     }
@@ -2270,6 +2308,18 @@ class SampleView extends React.Component {
     );
   };
 
+  renderAmrView = () => {
+    return (
+      this.state.sample && (
+        <AmrView
+          sample={this.state.sample}
+          loadingResults={this.state.loadingWorkflowRunResults}
+          workflowRun={this.getCurrentRun()}
+        />
+      )
+    );
+  };
+
   handleBlastContigsModalClose = () =>
     this.setState({ blastContigsModalVisible: false });
 
@@ -2299,7 +2349,7 @@ class SampleView extends React.Component {
 
   render = () => {
     const {
-      amrData,
+      amrDeprecatedData,
       blastData,
       blastModalInfo,
       blastContigsModalVisible,
@@ -2374,7 +2424,10 @@ class SampleView extends React.Component {
           {currentTab === TABS.SHORT_READ_MNGS && this.renderReport()}
           {currentTab === TABS.MERGED_NT_NR &&
             this.renderReport({ displayMergedNtNrValue: true })}
-          {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
+          {currentTab === TABS.AMR_DEPRECATED && amrDeprecatedData && (
+            <DeprecatedAmrView amr={amrDeprecatedData} />
+          )}
+          {currentTab === TABS.AMR && this.renderAmrView()}
           {currentTab === TABS.CONSENSUS_GENOME &&
             this.renderConsensusGenomeView()}
         </NarrowContainer>

@@ -1,3 +1,4 @@
+import { DateString } from "./shared/generic";
 export interface PipelineRuns {
   adjustedRemainingReads: number;
   alignmentConfigName: string;
@@ -9,9 +10,24 @@ export interface PipelineRuns {
   totalErccReads: number;
 }
 
-export interface WorkflowRuns {
-  workflowsRun: [];
+export interface WorkflowRun {
+  workflow: string;
+  status: string;
+  wdl_version: string;
+  id: number;
+  executed_at: DateString;
+  input_error: string;
+  inputs?: {
+    accession_id: string;
+    accession_name: string;
+    taxon_id: number;
+    taxon_name: string;
+    technology: string;
+    wetlab_protocol: string;
+  };
 }
+
+export type WorkflowRuns = WorkflowRun[];
 
 export enum WorkflowValues {
   CONSENSUS_GENOME = "consensus-genome",
@@ -27,7 +43,7 @@ export interface ThresholdFilterShape {
 
 export default interface Sample {
   pipeline_runs: PipelineRuns;
-  workflow_runs: WorkflowRuns;
+  workflow_runs: WorkflowRuns | undefined;
   id: number;
   name: string;
   createdAt: string;
@@ -36,4 +52,5 @@ export default interface Sample {
   deletable: boolean;
   editable: boolean;
   initialWorkflow: string;
+  upload_error: string;
 }

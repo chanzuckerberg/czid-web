@@ -23,3 +23,25 @@ export const WORKFLOWS = {
 };
 
 export const WORKFLOW_ORDER = ["SHORT_READ_MNGS", "CONSENSUS_GENOME", "AMR"];
+
+/**
+ *
+ * Return key of matched element in WORKFLOWS object
+ *
+ * ie.
+ * toCompare === "Antimicrobial Resistance"
+ * keyToFind === "label"
+ * Returns "AMR";
+ *
+ * @param {string} toCompare String to search for within WORKFLOWS values
+ * @param {string} keyToSearch Key at which to search
+ * @return {string} Key in WORKFLOWS where toCompare was found
+ */
+export const findInWorkflows = (
+  toCompare: string,
+  keyToSearch: string,
+): string => {
+  return Object.keys(WORKFLOWS).find(
+    workflow => WORKFLOWS[workflow][keyToSearch] === toCompare,
+  );
+};

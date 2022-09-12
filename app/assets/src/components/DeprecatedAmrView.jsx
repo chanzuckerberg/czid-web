@@ -43,7 +43,7 @@ const columns = [
   },
 ];
 
-class AMRView extends React.Component {
+class DeprecatedAmrView extends React.Component {
   constructor(props) {
     super(props);
     this.data = props.amr ? props.amr : (this.data = []);
@@ -86,8 +86,8 @@ class AMRView extends React.Component {
   }
 }
 
-AMRView.propTypes = {
+DeprecatedAmrView.propTypes = {
   amr: PropTypes.object,
 };
 
-export default AMRView;
+export default DeprecatedAmrView;

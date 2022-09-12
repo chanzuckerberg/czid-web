@@ -53,13 +53,14 @@ export const METRIC_DECIMAL_PLACES = {
 export const TABS = {
   CONSENSUS_GENOME: WORKFLOWS.CONSENSUS_GENOME.label,
   SHORT_READ_MNGS: WORKFLOWS.SHORT_READ_MNGS.label,
-  AMR: "Antimicrobial Resistance",
+  AMR_DEPRECATED: "Antimicrobial Resistance (Deprecated)",
+  AMR: WORKFLOWS.AMR.label,
   MERGED_NT_NR: "Metagenomics - Simplified",
 };
 
 export const PIPELINE_RUN_TABS = [
   TABS.SHORT_READ_MNGS,
-  TABS.AMR,
+  TABS.AMR_DEPRECATED,
   TABS.MERGED_NT_NR,
 ];
 

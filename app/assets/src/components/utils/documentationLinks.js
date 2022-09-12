@@ -40,3 +40,4 @@ export const BLAST_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/4429814631572-Confirm-hits-using-BLASTN";
 export const BULK_DOWNLOAD_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360042575714-Initiate-a-Bulk-Download";
+export const AMR_HELP_LINK = "https://help.czid.org/";
