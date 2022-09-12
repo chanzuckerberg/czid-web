@@ -58,7 +58,9 @@ import {
   getTempSelectedOptions,
 } from "~/components/utils/urls";
 import {
+  workflowHasConfig,
   WORKFLOWS,
+  WORKFLOW_CONFIG,
   WORKFLOW_ENTITIES,
   WORKFLOW_ORDER,
 } from "~/components/utils/workflows";
@@ -147,6 +149,7 @@ class DiscoveryView extends React.Component {
   constructor(props, context) {
     super(props, context);
     const { domain, projectId, updateDiscoveryProjectId } = this.props;
+    const allowedFeatures = context?.allowedFeatures || [];
 
     this.urlParser = new UrlQueryParser({
       filters: "object",
@@ -231,6 +234,7 @@ class DiscoveryView extends React.Component {
 
     this.dataLayer = new DiscoveryDataLayer(domain);
 
+    // TODO: put ObjectCollection's into an array for easier iteration?
     this.samples = this.dataLayer.samples.createView({
       conditions: this.getConditionsFor(
         TAB_SAMPLES,
@@ -248,6 +252,15 @@ class DiscoveryView extends React.Component {
       onViewChange: this.refreshWorkflowRunData,
       displayName: WORKFLOWS.CONSENSUS_GENOME.value,
     });
+
+    if (allowedFeatures.includes(AMR_V1_FEATURE)) {
+      this.amrWorkflowRuns = this.dataLayer.amrWorkflowRuns.createView({
+        conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
+        // TODO: figure out right value for this attribute
+        // onViewChange:
+        displayName: WORKFLOWS.AMR.value,
+      });
+    }
 
     this.projects = this.dataLayer.projects.createView({
       conditions: this.getConditionsFor(TAB_PROJECTS),
@@ -276,6 +289,10 @@ class DiscoveryView extends React.Component {
       this.projects.loadPage(0);
       this.workflowRuns.loadPage(0);
       this.visualizations.loadPage(0);
+
+      if (allowedFeatures.includes(AMR_V1_FEATURE)) {
+        this.amrWorkflowRuns.loadPage(0);
+      }
     }
 
     this.updateBrowsingHistory("replace");
@@ -307,6 +324,34 @@ class DiscoveryView extends React.Component {
       );
     };
   }
+
+  getConditionsFor = (tab, workflow = null) => {
+    return {
+      ...this.getConditions(workflow),
+      ...this.getDataLayerOrderStateFieldsFor(tab, workflow),
+    };
+  };
+
+  getConditions = workflow => {
+    const { projectId, search, orderBy, orderDirection } = this.state;
+    const { snapshotShareId } = this.props;
+
+    const includeWorkflowCondition =
+      workflowHasConfig(workflow) &&
+      WORKFLOW_CONFIG[workflow].entity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
+
+    return {
+      projectId,
+      snapshotShareId,
+      search,
+      orderBy,
+      orderDir: orderDirection,
+      filters: {
+        ...this.preparedFilters(),
+        ...(includeWorkflowCondition && { workflow }),
+      },
+    };
+  };
 
   loadState = (store, key) => {
     try {
@@ -1134,27 +1179,6 @@ class DiscoveryView extends React.Component {
         showFilters: this.state.showStats,
       });
     });
-  };
-
-  getConditionsFor = (tab, workflow = null) => {
-    return {
-      ...this.getConditions(),
-      ...this.getDataLayerOrderStateFieldsFor(tab, workflow),
-    };
-  };
-
-  getConditions = () => {
-    const { projectId, search, orderBy, orderDirection } = this.state;
-    const { snapshotShareId } = this.props;
-
-    return {
-      projectId,
-      snapshotShareId,
-      search,
-      orderBy,
-      orderDir: orderDirection,
-      filters: this.preparedFilters(),
-    };
   };
 
   handleProjectSelected = ({ project }) => {

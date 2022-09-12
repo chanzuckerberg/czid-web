@@ -217,6 +217,7 @@ class DiscoveryDataLayer {
       this.fetchVisualizations,
     );
     this.workflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
+    this.amrWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
   }
 
   fetchSamples = async params => {

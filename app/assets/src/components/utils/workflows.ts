@@ -45,3 +45,20 @@ export const findInWorkflows = (
     workflow => WORKFLOWS[workflow][keyToSearch] === toCompare,
   );
 };
+
+export const WORKFLOW_CONFIG = {
+  [WORKFLOWS.SHORT_READ_MNGS.value]: {
+    entity: WORKFLOW_ENTITIES.SAMPLES,
+  },
+  [WORKFLOWS.CONSENSUS_GENOME.value]: {
+    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
+  },
+  [WORKFLOWS.AMR.value]: {
+    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
+  },
+};
+
+export const workflowHasConfig = workflow => {
+  if (!workflow) return false;
+  return Object.keys(WORKFLOW_CONFIG).includes(workflow);
+};
