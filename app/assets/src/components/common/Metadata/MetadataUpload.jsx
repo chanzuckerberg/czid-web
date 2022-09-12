@@ -9,6 +9,7 @@ import _fp, {
   find,
   sortBy,
   remove,
+  flatten,
 } from "lodash/fp";
 import React from "react";
 
@@ -119,13 +120,15 @@ class MetadataUpload extends React.Component {
   filterMetadataFieldsByWorkflow = projectMetadataFields => {
     const { workflows } = this.props;
 
-    // We currently only support one workflow per upload. Either mNGS or CG. [as of 2021-07-14]
-    const workflow = Array.from(workflows)[0];
-    return remove(
-      metadataField =>
-        METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW[workflow].has(
-          get("key", metadataField),
+    const metadataFieldsToRemove = new Set(
+      flatten(
+        Array.from(workflows).map(
+          workflow => METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW[workflow],
         ),
+      ),
+    );
+    return remove(
+      metadataField => metadataFieldsToRemove.has(get("key", metadataField)),
       projectMetadataFields,
     );
   };
@@ -287,7 +290,6 @@ class MetadataUpload extends React.Component {
       samplesAreNew,
       visible,
       withinModal,
-      workflows,
     } = this.props;
     const {
       currentTab,
@@ -310,7 +312,6 @@ class MetadataUpload extends React.Component {
             projectMetadataFields={projectMetadataFields}
             hostGenomes={hostGenomes}
             sampleTypes={sampleTypes}
-            workflows={workflows}
           />
         );
       }

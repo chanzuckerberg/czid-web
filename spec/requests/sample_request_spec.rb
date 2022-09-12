@@ -38,6 +38,7 @@ RSpec.describe "Sample request", type: :request do
           name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",
           project_id: @project.id,
           do_not_process: false,
+          workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
         }
 
         @metadata_params = {

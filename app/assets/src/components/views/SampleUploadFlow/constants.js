@@ -1,9 +1,17 @@
+import { WORKFLOWS } from "~/components/utils/workflows";
+
 export const NO_TARGET_PROJECT_ERROR =
   "Please select a CZ ID project to upload your samples to.";
 
 export const NO_VALID_SAMPLES_FOUND_ERROR = "No valid samples were found.";
 
 export const SELECT_ID_KEY = "_selectId";
+
+export const WORKFLOW_DISPLAY_NAMES = {
+  [WORKFLOWS.SHORT_READ_MNGS.value]: "Metagenomics",
+  [WORKFLOWS.CONSENSUS_GENOME.value]: "SARS-CoV-2 Consensus Genome",
+  [WORKFLOWS.AMR.value]: "Antimicrobial Resistance",
+};
 
 // WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/czid-cli
 export const CG_WETLAB_OPTIONS = [

@@ -42,7 +42,10 @@ import { UserContext } from "~/components/common/UserContext";
 import Tabs from "~/components/ui/controls/Tabs";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
+import {
+  AMR_V1_FEATURE,
+  PRE_UPLOAD_CHECK_FEATURE,
+} from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import IssueGroup from "~ui/notifications/IssueGroup";
@@ -371,16 +374,47 @@ class UploadSampleStep extends React.Component {
 
   handleWorkflowToggle = workflow => {
     this.props.onDirty();
+    const { allowedFeatures } = this.context || {};
     let { selectedWorkflows } = this.state;
-    // TODO: Behavior will change to support multiple selectedWorkflows.
-    if (!selectedWorkflows.has(workflow)) {
+
+    if (allowedFeatures.includes(AMR_V1_FEATURE)) {
+      const workflowIsAlreadySelected = selectedWorkflows.has(workflow);
+      workflowIsAlreadySelected
+        ? selectedWorkflows.delete(workflow)
+        : selectedWorkflows.add(workflow);
+
+      selectedWorkflows = this.limitWorkflowSelection(workflow);
       this.setState({
-        selectedWorkflows: new Set([workflow]),
+        selectedWorkflows,
         selectedWetlabProtocol: null,
         selectedTechnology: null,
       });
-      trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
+    } else {
+      // TODO: Remove this `else` branch once AMR v1 launches.
+      if (!selectedWorkflows.has(workflow)) {
+        this.setState({
+          selectedWorkflows: new Set([workflow]),
+          selectedWetlabProtocol: null,
+          selectedTechnology: null,
+        });
+      }
     }
+
+    trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
+  };
+
+  limitWorkflowSelection = workflowSelected => {
+    let { selectedWorkflows } = this.state;
+
+    // Only allow mNGS and AMR to be selected together.
+    if (workflowSelected === WORKFLOWS.CONSENSUS_GENOME.value) {
+      selectedWorkflows.delete(WORKFLOWS.SHORT_READ_MNGS.value);
+      selectedWorkflows.delete(WORKFLOWS.AMR.value);
+    } else if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
+      selectedWorkflows.delete(WORKFLOWS.CONSENSUS_GENOME.value);
+    }
+
+    return selectedWorkflows;
   };
 
   handleTechnologyToggle = technology => {
@@ -952,7 +986,10 @@ class UploadSampleStep extends React.Component {
           workflowsValid = false;
           break;
       }
-    } else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
+    } else if (
+      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
+      selectedWorkflows.has(WORKFLOWS.AMR.value)
+    ) {
       workflowsValid = true;
     }
 
@@ -982,6 +1019,7 @@ class UploadSampleStep extends React.Component {
     const { selectedWorkflows, selectedTechnology } = this.state;
     if (
       selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
+      selectedWorkflows.has(WORKFLOWS.AMR.value) ||
       (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
         selectedTechnology === ILLUMINA)
     )

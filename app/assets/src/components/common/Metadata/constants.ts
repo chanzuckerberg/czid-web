@@ -2,8 +2,9 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 
 // metadataFields that should not be available for input for a workflow
 export const METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: new Set(["ct_value"]),
-  [WORKFLOWS.CONSENSUS_GENOME.value]: new Set([]),
+  [WORKFLOWS.SHORT_READ_MNGS.value]: ["ct_value"],
+  [WORKFLOWS.AMR.value]: ["ct_value"],
+  [WORKFLOWS.CONSENSUS_GENOME.value]: [],
 };
 
 export const FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT = new Set([

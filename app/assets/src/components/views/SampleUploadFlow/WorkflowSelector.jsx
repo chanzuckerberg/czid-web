@@ -1,8 +1,10 @@
 import cx from "classnames";
-import { Icon } from "czifui";
-import React from "react";
+import { Icon, Tooltip } from "czifui";
+import { compact, map, size } from "lodash/fp";
+import React, { useState, useContext } from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
 import { IconInfoSmall } from "~/components/ui/icons";
@@ -11,10 +13,12 @@ import {
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
 } from "~/components/utils/documentationLinks";
+import { AMR_V1_FEATURE } from "~/components/utils/features";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import RadioButton from "~ui/controls/RadioButton";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import StatusLabel from "~ui/labels/StatusLabel";
 import PropTypes from "~utils/propTypes";
 import { WORKFLOWS } from "~utils/workflows";
 
@@ -23,6 +27,7 @@ import {
   CG_TECHNOLOGY_OPTIONS,
   CG_NANOPORE_WETLAB_OPTIONS,
   MEDAKA_MODEL_OPTIONS,
+  WORKFLOW_DISPLAY_NAMES,
 } from "./constants";
 import cs from "./workflow_selector.scss";
 
@@ -38,100 +43,13 @@ const WorkflowSelector = ({
   selectedWorkflows,
   usedClearLabs,
 }) => {
-  const createExternalLink = ({
-    additionalStyle = null,
-    analyticsEventName,
-    content,
-    link,
-  }) => (
-    <ExternalLink
-      href={link}
-      analyticsEventName={analyticsEventName}
-      className={cx(cs.externalLink, additionalStyle && additionalStyle)}
-    >
-      {content}
-    </ExternalLink>
-  );
-
-  const renderWetlabSelector = technology => {
-    return (
-      <div className={cs.item}>
-        <div className={cs.subheader}>Wetlab Protocol&#58;</div>
-        <Dropdown
-          className={cs.dropdown}
-          onChange={value => {
-            onWetlabProtocolChange(value);
-            trackEvent("WorkflowSelector_wetlab-protocol_selected", {
-              wetlabOption: value,
-            });
-          }}
-          options={
-            technology === CG_TECHNOLOGY_OPTIONS.ILLUMINA
-              ? CG_WETLAB_OPTIONS
-              : CG_NANOPORE_WETLAB_OPTIONS
-          }
-          placeholder="Select"
-          value={selectedWetlabProtocol}
-        ></Dropdown>
-      </div>
-    );
-  };
-
-  const renderMngsAnalysisType = () => {
-    const mngsWorkflowSelected = selectedWorkflows.has(
-      WORKFLOWS.SHORT_READ_MNGS.value,
-    );
-    return (
-      <div
-        className={cx(cs.selectableOption, mngsWorkflowSelected && cs.selected)}
-        onClick={() => onWorkflowToggle(WORKFLOWS.SHORT_READ_MNGS.value)}
-      >
-        <RadioButton
-          selected={mngsWorkflowSelected}
-          className={cs.radioButton}
-        />
-        <div className={cs.iconSample}>
-          <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
-        </div>
-        <div className={cs.optionText}>
-          <div className={cs.title}>Metagenomics</div>
-          <div className={cs.description}>
-            Run your samples through our metagenomics pipeline. Our pipeline
-            only supports Illumina.
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderCGAnalysisType = () => {
-    const cgWorkflowSelected = selectedWorkflows.has(
-      WORKFLOWS.CONSENSUS_GENOME.value,
-    );
-    return (
-      <div
-        className={cx(cs.selectableOption, cgWorkflowSelected && cs.selected)}
-        onClick={() => onWorkflowToggle(WORKFLOWS.CONSENSUS_GENOME.value)}
-      >
-        <RadioButton selected={cgWorkflowSelected} className={cs.radioButton} />
-        <div className={cs.iconSample}>
-          <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
-        </div>
-        <div className={cs.optionText}>
-          <div className={cs.title}>SARS-CoV-2 Consensus Genome</div>
-          <div className={cs.description}>
-            Run your samples through our Illumina or Nanopore supported
-            pipelines to get consensus genomes for SARS-CoV-2.
-          </div>
-          {cgWorkflowSelected && renderTechnologyOptions()}
-        </div>
-      </div>
-    );
-  };
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
+  const [workflowOptionHovered, setWorkflowOptionHovered] = useState(null);
 
   const renderTechnologyOptions = () => {
     return (
-      <div className={cs.optionText}>
+      <div className={cs.optionText} onClick={e => e.stopPropagation()}>
         <div className={cx(cs.title, cs.technologyTitle)}>
           Sequencing Platform:
           <div className={cs.technologyOptions}>
@@ -294,11 +212,169 @@ const WorkflowSelector = ({
     );
   };
 
+  const createExternalLink = ({
+    additionalStyle = null,
+    analyticsEventName,
+    content,
+    link,
+  }) => (
+    <ExternalLink
+      href={link}
+      analyticsEventName={analyticsEventName}
+      className={cx(cs.externalLink, additionalStyle && additionalStyle)}
+    >
+      {content}
+    </ExternalLink>
+  );
+
+  const renderWetlabSelector = technology => {
+    return (
+      <div className={cs.item}>
+        <div className={cs.subheader}>Wetlab Protocol&#58;</div>
+        <Dropdown
+          className={cs.dropdown}
+          onChange={value => {
+            onWetlabProtocolChange(value);
+            trackEvent("WorkflowSelector_wetlab-protocol_selected", {
+              wetlabOption: value,
+            });
+          }}
+          options={
+            technology === CG_TECHNOLOGY_OPTIONS.ILLUMINA
+              ? CG_WETLAB_OPTIONS
+              : CG_NANOPORE_WETLAB_OPTIONS
+          }
+          placeholder="Select"
+          value={selectedWetlabProtocol}
+        ></Dropdown>
+      </div>
+    );
+  };
+
+  const WORKFLOW_UPLOAD_OPTIONS = [
+    {
+      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+      title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.SHORT_READ_MNGS.value],
+      description:
+        "Run your samples through our metagenomics pipeline. Our pipeline only supports Illumina.",
+      beta: false,
+    },
+    {
+      workflow: WORKFLOWS.AMR.value,
+      title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.AMR.value],
+      description:
+        "Run your samples through our antimicrobial resistance pipeline. Our pipeline supports metagenomics or whole genome data. It only supports Illumina.",
+      beta: true,
+      shouldHideOption: !allowedFeatures.includes(AMR_V1_FEATURE),
+    },
+    {
+      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+      title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.CONSENSUS_GENOME.value],
+      description:
+        "Run your samples through our Illumina or Nanopore supported pipelines to get consensus genomes for SARS-CoV-2.",
+      otherOptions: renderTechnologyOptions,
+      beta: false,
+    },
+  ];
+
+  const shouldDisableWorkflowOption = workflow => {
+    const workflowIsCurrentlySelected = selectedWorkflows.has(workflow);
+
+    switch (workflow) {
+      case WORKFLOWS.SHORT_READ_MNGS.value:
+      case WORKFLOWS.AMR.value:
+        return (
+          !workflowIsCurrentlySelected &&
+          selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)
+        );
+      case WORKFLOWS.CONSENSUS_GENOME.value:
+        return !workflowIsCurrentlySelected && size(selectedWorkflows) > 0;
+    }
+  };
+
+  const renderAnalysisTypes = () =>
+    compact(
+      map(
+        ({
+          beta,
+          description,
+          shouldHideOption,
+          otherOptions,
+          title,
+          workflow,
+        }) => {
+          if (shouldHideOption) return;
+
+          const analysisOptionSelected = selectedWorkflows.has(workflow);
+          const shouldDisableOption =
+            allowedFeatures.includes(AMR_V1_FEATURE) &&
+            shouldDisableWorkflowOption(workflow);
+
+          let radioOption = (
+            <RadioButton
+              selected={analysisOptionSelected}
+              className={cs.radioButton}
+              disabled={shouldDisableOption}
+            />
+          );
+
+          if (
+            allowedFeatures.includes(AMR_V1_FEATURE) &&
+            shouldDisableOption &&
+            workflowOptionHovered === workflow
+          ) {
+            const tooltipText =
+              "This is disabled because this pipeline cannot be run with the current selection.";
+            radioOption = (
+              <Tooltip open arrow placement="top" title={tooltipText}>
+                <span>{radioOption}</span>
+              </Tooltip>
+            );
+          }
+
+          return (
+            <div
+              className={cx(
+                cs.selectableOption,
+                analysisOptionSelected && cs.selected,
+                shouldDisableOption && cs.disabled,
+              )}
+              onClick={() =>
+                shouldDisableOption ? null : onWorkflowToggle(workflow)
+              }
+              onMouseEnter={() => setWorkflowOptionHovered(workflow)}
+              onMouseLeave={() => setWorkflowOptionHovered(null)}
+            >
+              {radioOption}
+              <div className={cs.iconSample}>
+                <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
+              </div>
+              <div className={cs.optionText}>
+                <div className={cs.title}>
+                  {title}
+                  {beta && (
+                    <StatusLabel
+                      className={shouldDisableOption && cs.disabledStatus}
+                      inline
+                      status="Beta"
+                      type="beta"
+                    />
+                  )}
+                </div>
+                <div className={cs.description}>{description}</div>
+                {analysisOptionSelected && otherOptions && otherOptions()}
+              </div>
+            </div>
+          );
+        },
+        WORKFLOW_UPLOAD_OPTIONS,
+      ),
+    );
+
   return (
     <div className={cs.workflowSelector}>
       <div className={cs.header}>Analysis Type</div>
-      {renderMngsAnalysisType()}
-      {renderCGAnalysisType()}
+      {renderAnalysisTypes()}
     </div>
   );
 };

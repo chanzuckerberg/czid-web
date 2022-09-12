@@ -1,6 +1,6 @@
 import cx from "classnames";
 import { Icon } from "czifui";
-import { flatten, get, keyBy, map, mapKeys, without } from "lodash/fp";
+import { compact, flatten, get, keyBy, map, mapKeys, without } from "lodash/fp";
 import React from "react";
 
 import {
@@ -12,6 +12,7 @@ import { getProjectMetadataFields } from "~/api/metadata";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { formatFileSize } from "~/components/utils/format";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
@@ -26,6 +27,7 @@ import {
   CG_WETLAB_DISPLAY_NAMES,
   CG_TECHNOLOGY_OPTIONS,
   CG_TECHNOLOGY_DISPLAY_NAMES,
+  WORKFLOW_DISPLAY_NAMES,
 } from "./constants";
 
 import cs from "./sample_upload_flow.scss";
@@ -305,88 +307,128 @@ class ReviewStep extends React.Component {
     );
   };
 
-  renderAnalysisTypeInfo = () => {
+  renderReviewHeader = () => {
+    const { project, uploadType } = this.props;
+
+    return (
+      <div className={cs.reviewHeader}>
+        <span className={cs.text}>Analysis Type Info</span>
+        <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
+          <div
+            className={cs.link}
+            onClick={() => {
+              this.onLinkClick("uploadSamples");
+              trackEvent(
+                ANALYTICS_EVENT_NAMES.REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED,
+                {
+                  projectId: project.id,
+                  projectName: project.name,
+                  uploadType,
+                },
+              );
+            }}
+          >
+            Edit Analysis Type
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  renderAnalysesSections = () => {
     const {
       clearlabs,
       technology,
       medakaModel,
-      project,
-      uploadType,
       wetlabProtocol,
       workflows,
     } = this.props;
 
-    const workflowType = workflows.has(WORKFLOWS.CONSENSUS_GENOME.value)
-      ? "SARS-CoV-2 Consensus Genome"
-      : "Metagenomics";
+    const sections = map(workflow => {
+      const workflowDisplayName = WORKFLOW_DISPLAY_NAMES[workflow];
+      const hasSequencingPlatform =
+        workflow === WORKFLOWS.SHORT_READ_MNGS.value ||
+        workflow === WORKFLOWS.CONSENSUS_GENOME.value;
+      const beta = workflow === WORKFLOWS.AMR.value;
+      const shouldRenderAnalysisTypeContent =
+        hasSequencingPlatform ||
+        workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) ||
+        technology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
 
-    return (
-      <div className={cs.sectionContainer}>
-        <div className={cs.reviewHeader}>
-          <span className={cs.text}>Analysis Type Info</span>
-          <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
-            <div
-              className={cs.link}
-              onClick={() => {
-                this.onLinkClick("uploadSamples");
-                trackEvent(
-                  ANALYTICS_EVENT_NAMES.REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED,
-                  {
-                    projectId: project.id,
-                    projectName: project.name,
-                    uploadType,
-                  },
-                );
-              }}
-            >
-              Edit Analysis Type
-            </div>
-          </div>
-        </div>
+      return (
         <div className={cs.section}>
           <div className={cs.icon}>
             <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
           </div>
           <div className={cs.text}>
             <div className={cs.header}>
-              <div className={cs.name}>{workflowType}</div>
+              <div className={cs.name}>{workflowDisplayName}</div>
+              {beta && <StatusLabel inline status="Beta" type="beta" />}
             </div>
-            <div className={cs.analysisTypeContent}>
-              <div className={cs.item}>
-                <div className={cs.subheader}>Sequencing Platform&#58;</div>
-                <div className={cs.description}>
-                  {/* Default to displaying "Illumina" for mNGS samples, which don't have
-                  technology set as an input parameter. */}
-                  {CG_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
-                </div>
-              </div>
-              {technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && (
-                <div className={cs.item}>
-                  <div className={cs.subheader}>Used Clear Labs&#58;</div>
-                  <div className={cs.description}>
-                    {clearlabs ? "Yes" : "No"}
+            {shouldRenderAnalysisTypeContent && (
+              <div className={cs.analysisTypeContent}>
+                {hasSequencingPlatform && (
+                  <div className={cs.item}>
+                    <div className={cs.subheader}>Sequencing Platform&#58;</div>
+                    <div className={cs.description}>
+                      {/* Default to displaying "Illumina" for mNGS samples, which don't have
+                    technology set as an input parameter. */}
+                      {CG_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
+                    </div>
                   </div>
-                </div>
-              )}
-              {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
-                <div className={cs.item}>
-                  <div className={cs.subheader}>Wetlab Protocol&#58;</div>
-                  <div className={cs.description}>
-                    {CG_WETLAB_DISPLAY_NAMES[wetlabProtocol]}
-                  </div>
-                </div>
-              )}
-              <div className={cs.item}>
-                {technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && (
-                  <>
-                    <div className={cs.subheader}>Medaka Model&#58;</div>
-                    <div className={cs.description}>{medakaModel}</div>
-                  </>
                 )}
+                {technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && (
+                  <div className={cs.item}>
+                    <div className={cs.subheader}>Used Clear Labs&#58;</div>
+                    <div className={cs.description}>
+                      {clearlabs ? "Yes" : "No"}
+                    </div>
+                  </div>
+                )}
+                {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
+                  <div className={cs.item}>
+                    <div className={cs.subheader}>Wetlab Protocol&#58;</div>
+                    <div className={cs.description}>
+                      {CG_WETLAB_DISPLAY_NAMES[wetlabProtocol]}
+                    </div>
+                  </div>
+                )}
+                <div className={cs.item}>
+                  {technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && (
+                    <>
+                      <div className={cs.subheader}>Medaka Model&#58;</div>
+                      <div className={cs.description}>{medakaModel}</div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
+      );
+    }, this.getWorkflowSectionOrder());
+    return sections;
+  };
+
+  getWorkflowSectionOrder = () => {
+    const { workflows } = this.props;
+
+    const mngs = WORKFLOWS.SHORT_READ_MNGS.value;
+    const amr = WORKFLOWS.AMR.value;
+    const cg = WORKFLOWS.CONSENSUS_GENOME.value;
+
+    return compact([
+      workflows.has(mngs) && mngs,
+      workflows.has(amr) && amr,
+      workflows.has(cg) && cg,
+    ]);
+  };
+
+  renderAnalysisTypeInfo = () => {
+    return (
+      <div className={cs.sectionContainer}>
+        {this.renderReviewHeader()}
+        {this.renderAnalysesSections()}
       </div>
     );
   };

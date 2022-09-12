@@ -10,7 +10,7 @@ class AmrWorkflowRun < WorkflowRun
   # * The idea is that the model should have one set of well-defined outputs
   #   that are consistently served, instead of having client pages compose
   #   different sets of results each time.
-  OUTPUT_ZIP = "amr.zip_outputs_out_output_zip".freeze
+  OUTPUT_ZIP = "amr.ZipOutputs.output_zip".freeze
 
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).

@@ -640,12 +640,16 @@ class Sample < ApplicationRecord
     # Since this method is called in `before_save` hook, if there is any errors,
     # the pipeline run / workflow run creation is rolled back, leaving the sample in a weird waiting state.
     # TODO: Support retry status on WorkflowRuns
+    amr_wrs_to_dispatch = workflow_runs.where(status: WorkflowRun::STATUS[:created], workflow: WorkflowRun::WORKFLOW[:amr])
     if transient_status == STATUS_RETRY_PR && pr
       pr.retry
     elsif initial_workflow == WorkflowRun::WORKFLOW[:consensus_genome]
       workflow_runs.where(status: WorkflowRun::STATUS[:created], workflow: WorkflowRun::WORKFLOW[:consensus_genome]).all.map(&:dispatch)
-    else
+    elsif initial_workflow == WorkflowRun::WORKFLOW[:amr]
+      amr_wrs_to_dispatch.all.map(&:dispatch)
+    elsif initial_workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
       kickoff_pipeline
+      amr_wrs_to_dispatch.all.map(&:dispatch) unless amr_wrs_to_dispatch.empty?
     end
   end
 

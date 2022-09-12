@@ -536,11 +536,20 @@ module SamplesHelper
         sample_attributes[:host_genome_id] = hg.id
       end
 
-      # Frontend uploader only lets the user select one workflow at a time, so select the only workflow in the array.
-      workflow = sample_attributes[:initial_workflow] = sample_attributes.delete(:workflows)[0] if sample_attributes[:workflows].present?
+      if sample_attributes[:workflows].present?
+        workflows = sample_attributes.delete(:workflows)
+        # TODO: Remove initial_workflow in the future, since users can now upload a sample with multiple workflows specified
+        # For AMR v1, we'll set the initial worklow to short-read-mngs if the user has selected short-read-mngs and amr together, otherwise get the only workflow in the workflows array.
+        # The user can only select mNGS and AMR to be uploaded at once as of 9/9/2022
+        # This is not the ideal solution so we should remove initial_workflow in the future.
+        sample_attributes[:initial_workflow] = workflows.include?(WorkflowRun::WORKFLOW[:short_read_mngs]) && workflows.include?(WorkflowRun::WORKFLOW[:amr]) ? WorkflowRun::WORKFLOW[:short_read_mngs] : workflows[0]
+        # Remove short-read-mngs from the workflows array so we don't create a WorkflowRun with a workflow of short_reads_mngs
+        workflows.delete(WorkflowRun::WORKFLOW[:short_read_mngs]) if workflows.include?(WorkflowRun::WORKFLOW[:short_read_mngs])
+      end
+
       technology = sample_attributes.delete(:technology) if sample_attributes.key?(:technology)
 
-      if workflow == WorkflowRun::WORKFLOW[:consensus_genome] && technology.nil?
+      if workflows&.include?(WorkflowRun::WORKFLOW[:consensus_genome]) && technology.nil?
         should_attempt_to_save_sample = false
         errors << SampleUploadErrors.missing_required_technology_for_cg(sample_attributes[:project_id])
       end
@@ -601,29 +610,31 @@ module SamplesHelper
       if should_attempt_to_save_sample && sample && sample.save
         samples << sample
 
-        if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
-          # Temporarily hardcode inputs_json's taxon info as sars-cov-2 for samples uploaded from FE via regular upload flow
-          # TODO: Generalize taxon info in inputs_json when FE uploader is modified to specify a taxon upon creating a consensus genome
-          inputs_json = {}.tap do |h|
-            h[:accession_id] = accession_id || ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
-            h[:accession_name] = "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome"
-            h[:taxon_id] = 2_697_049
-            h[:taxon_name] = "Severe acute respiratory syndrome coronavirus 2"
-            h[:technology] = technology
-            h[:wetlab_protocol] = wetlab_protocol
-            h[:ref_fasta] = ref_fasta
-            h[:primer_bed] = primer_bed
+        workflows&.each do |workflow|
+          if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
+            # Temporarily hardcode inputs_json's taxon info as sars-cov-2 for samples uploaded from FE via regular upload flow
+            # TODO: Generalize taxon info in inputs_json when FE uploader is modified to specify a taxon upon creating a consensus genome
+            inputs_json = {}.tap do |h|
+              h[:accession_id] = accession_id || ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
+              h[:accession_name] = "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome"
+              h[:taxon_id] = 2_697_049
+              h[:taxon_name] = "Severe acute respiratory syndrome coronavirus 2"
+              h[:technology] = technology
+              h[:wetlab_protocol] = wetlab_protocol
+              h[:ref_fasta] = ref_fasta
+              h[:primer_bed] = primer_bed
 
-            if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
-              h[:clearlabs] = clearlabs
-              h[:medaka_model] = medaka_model
-              h[:vadr_options] = vadr_options
+              if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+                h[:clearlabs] = clearlabs
+                h[:medaka_model] = medaka_model
+                h[:vadr_options] = vadr_options
+              end
             end
           end
 
           # In case the user uploads a large amount of samples: instantiate the WorkflowRun, add to workflow_runs array, then WorkflowRun.bulk_import them at once.
           # We do this to prevent a large amount of individual insertions. Instead they're done in a bulk_import down below.
-          wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json.to_json)
+          wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json&.to_json)
           workflow_runs << wr
         end
       else

@@ -25,6 +25,12 @@
       background-color: $sds-color-gray-100;
     }
 
+    &.disabled {
+      cursor: default;
+      background-color: initial;
+      color: $sds-color-gray-300;
+    }
+
     .technologyOptions {
       margin-top: $sds-spaces-xxxs;
 
@@ -53,11 +59,20 @@
     .iconSample {
       margin-top: $sds-spaces-xxs;
       margin-right: $sds-spaces-default;
+
+      .disabledIcon {
+        color: $sds-color-gray-200;
+      }
     }
 
     .optionText {
       .title {
         @include font-header-s;
+
+        .disabledStatus {
+          background-color: $sds-color-gray-200;
+          color: $sds-color-gray-300;
+        }
 
         &.technologyTitle {
           padding-top: $sds-spaces-l;

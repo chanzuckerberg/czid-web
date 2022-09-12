@@ -316,6 +316,7 @@
     background-color: $sds-color-gray-100;
     padding: $sds-spaces-xl;
     display: flex;
+    margin-bottom: $sds-spaces-m;
 
     .name {
       @include font-header-m;
@@ -333,6 +334,7 @@
 
       .header {
         display: flex;
+        align-items: center;
       }
 
       .existingSamples {
