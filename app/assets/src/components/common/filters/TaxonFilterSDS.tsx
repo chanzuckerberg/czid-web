@@ -147,7 +147,7 @@ const TaxonFilterSDS = ({
       onChange={handleChange}
       onClose={() => setOptions(selectedTaxa)}
       value={selectedTaxa}
-      MenuSelectProps={{
+      DropdownMenuProps={{
         keepSearchOnSelect: true,
         loading: optionsLoading,
         loadingText: <LoadingIndicator sdsStyle="minimal" />,
