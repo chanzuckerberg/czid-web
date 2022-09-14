@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Icon, Tooltip } from "czifui";
+import { Checkbox, Icon, Tooltip } from "czifui";
 import { compact, map, size } from "lodash/fp";
 import React, { useState, useContext } from "react";
 
@@ -251,6 +251,7 @@ const WorkflowSelector = ({
     );
   };
 
+  // `sdsIcon` maps directly with czifui Icon component prop: sdsIcon
   const WORKFLOW_UPLOAD_OPTIONS = [
     {
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
@@ -258,6 +259,7 @@ const WorkflowSelector = ({
       description:
         "Run your samples through our metagenomics pipeline. Our pipeline only supports Illumina.",
       beta: false,
+      sdsIcon: "dna",
     },
     {
       workflow: WORKFLOWS.AMR.value,
@@ -265,6 +267,7 @@ const WorkflowSelector = ({
       description:
         "Run your samples through our antimicrobial resistance pipeline. Our pipeline supports metagenomics or whole genome data. It only supports Illumina.",
       beta: true,
+      sdsIcon: "bacteria",
       shouldHideOption: !allowedFeatures.includes(AMR_V1_FEATURE),
     },
     {
@@ -274,6 +277,7 @@ const WorkflowSelector = ({
         "Run your samples through our Illumina or Nanopore supported pipelines to get consensus genomes for SARS-CoV-2.",
       otherOptions: renderTechnologyOptions,
       beta: false,
+      sdsIcon: "virus",
     },
   ];
 
@@ -301,6 +305,7 @@ const WorkflowSelector = ({
           shouldHideOption,
           otherOptions,
           title,
+          sdsIcon,
           workflow,
         }) => {
           if (shouldHideOption) return;
@@ -310,11 +315,16 @@ const WorkflowSelector = ({
             allowedFeatures.includes(AMR_V1_FEATURE) &&
             shouldDisableWorkflowOption(workflow);
 
-          let radioOption = (
+          let radioOption = allowedFeatures.includes(AMR_V1_FEATURE) ? (
+            <Checkbox
+              disabled={shouldDisableOption}
+              className={cs.checkbox}
+              stage={analysisOptionSelected ? "checked" : "unchecked"}
+            />
+          ) : (
             <RadioButton
               selected={analysisOptionSelected}
               className={cs.radioButton}
-              disabled={shouldDisableOption}
             />
           );
 
@@ -347,7 +357,7 @@ const WorkflowSelector = ({
             >
               {radioOption}
               <div className={cs.iconSample}>
-                <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
+                <Icon sdsIcon={sdsIcon} sdsSize="xl" sdsType="static" />
               </div>
               <div className={cs.optionText}>
                 <div className={cs.title}>

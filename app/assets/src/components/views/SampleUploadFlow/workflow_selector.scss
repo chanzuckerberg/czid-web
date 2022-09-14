@@ -47,6 +47,17 @@
       }
     }
 
+    .checkbox {
+      flex-shrink: 0;
+      align-items: flex-start;
+      margin-top: $sds-spaces-xxs;
+
+      &.alignTitle {
+        padding-top: $sds-spaces-xxs;
+        margin-top: 0px;
+      }
+    }
+
     .radioButton {
       flex-shrink: 0;
       margin: $sds-spaces-l;
