@@ -599,6 +599,9 @@ const kickoffConsensusGenome = ({
 const kickoffAMR = ({ sampleId, workflow }) =>
   postWithCSRF(`/samples/${sampleId}/kickoff_workflow`, {
     workflow,
+    inputs_json: {
+      start_from_mngs: true,
+    },
   });
 
 const bulkKickoffWorkflowRuns = ({ sampleIds, workflow }) =>

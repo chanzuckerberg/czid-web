@@ -1482,7 +1482,12 @@ class SamplesController < ApplicationController
     new_wrs = samples.map do |s|
       # TODO: Use rails 6 insert_all! to bulk insert into SQL efficiently so we don't potentially insert many individual records
       # Need to find a way to bulk dispatch so we don't update many individual records at once
-      s.create_and_dispatch_workflow_run(workflow)
+      s.create_and_dispatch_workflow_run(workflow,
+                                         inputs_json: {
+                                           # start_from_mngs creates the amr run using the already host filtered reads
+                                           # and assembled contigs
+                                           start_from_mngs: "true",
+                                         }.to_json)
     end
 
     new_workflow_run_ids = new_wrs.map(&:id)
@@ -1662,7 +1667,7 @@ class SamplesController < ApplicationController
 
   # Doesn't require :sample or :samples
   def collection_params
-    permitted_params = [:referenceTree, :workflow, { sampleIds: [], workflowRunIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology] }]
+    permitted_params = [:referenceTree, :workflow, { sampleIds: [], workflowRunIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology, :start_from_mngs] }]
     params.permit(*permitted_params)
   end
 

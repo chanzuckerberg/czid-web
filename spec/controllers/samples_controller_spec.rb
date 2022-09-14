@@ -948,9 +948,11 @@ RSpec.describe SamplesController, type: :controller do
       let(:fake_wdl_version) { "10.0.0" }
 
       before do
+        host_genome1 = create(:host_genome, name: "Human")
         @project = create(:project, users: [@joe])
-        @sample1 = create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
-        @sample2 = create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample1 = create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], host_genome: host_genome1)
+        @sample2 = create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], host_genome: host_genome1)
+
         create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: fake_sfn_arn)
         create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: test_workflow_name), value: fake_wdl_version)
       end

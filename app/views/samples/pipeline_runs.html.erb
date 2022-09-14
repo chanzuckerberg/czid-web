@@ -145,7 +145,7 @@ function showhide(id) {
       <% end %>
     </tbody>
   </table>
-  <%= button_to 'Run AMR', kickoff_workflow_sample_path(@sample), method: :post, params: {:workflow => 'amr'} %>
+  <%= button_to 'Run AMR', kickoff_workflow_sample_path(@sample), method: :post, params: {:workflow => 'amr', :inputs_json => {start_from_mngs: true} } %>
   <%= button_to 'Show Logs', pipeline_logs_sample_path(@sample), method: :get %>
 <% end %>
 

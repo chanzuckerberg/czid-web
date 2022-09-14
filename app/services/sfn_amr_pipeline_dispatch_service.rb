@@ -74,8 +74,49 @@ class SfnAmrPipelineDispatchService
     return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/amr:v#{@workflow_run.wdl_version}"
   end
 
+  def retrieve_mngs_docker_image_id
+    resp = AwsClient[:sts].get_caller_identity
+    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/#{WorkflowRun::WORKFLOW[:short_read_mngs]}:v#{AppConfigHelper.get_workflow_version('short-read-mngs')}"
+  end
+
   def output_prefix
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample.sample_path}/#{@workflow_run.id}"
+  end
+
+  def strtrue(str)
+    str == "true"
+  end
+
+  def host_filtering_parameters
+    {
+      "raw_reads_0": strtrue(@workflow_run.get_input("start_from_mngs")) ? nil : @sample.input_file_s3_paths[0],
+      "raw_reads_1": if strtrue(@workflow_run.get_input("start_from_mngs"))
+                       nil
+                     else
+                       (
+                             @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil
+                           )
+                     end,
+      "host_filtering_docker_image_id": retrieve_mngs_docker_image_id,
+      "host_filter_stage.file_ext": @sample.fasta_input? ? "fasta" : "fastq",
+      "host_filter_stage.nucleotide_type": @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
+      "host_filter_stage.host_genome": @sample.host_genome_name.downcase,
+      "host_filter_stage.star_genome": @sample.host_genome.s3_star_index_path,
+      "host_filter_stage.bowtie2_genome": @sample.host_genome.s3_bowtie2_index_path,
+      "host_filter_stage.human_star_genome": HostGenome.find_by(name: "Human").s3_star_index_path,
+      "host_filter_stage.human_bowtie2_genome": HostGenome.find_by(name: "Human").s3_bowtie2_index_path,
+      "host_filter_stage.adapter_fasta": PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
+      "host_filter_stage.max_input_fragments": PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS,
+      "host_filter_stage.max_subsample_fragments": PipelineRun::DEFAULT_SUBSAMPLING,
+    }
+  end
+
+  def nonhost_reads
+    sfn_results_path = @sample.pipeline_runs.non_deprecated.first.sfn_results_path
+    [
+      "#{sfn_results_path}/gsnap_filter_1.fa",
+      @sample.input_files[1] ? "#{sfn_results_path}/gsnap_filter_2.fa" : nil,
+    ].compact
   end
 
   def generate_wdl_input
@@ -83,15 +124,12 @@ class SfnAmrPipelineDispatchService
 
     run_inputs = {
       docker_image_id: retrieve_docker_image_id,
-      non_host_reads: [
-        "#{@sample.first_pipeline_run.sfn_results_path}/gsnap_filter_1.fa",
-        "#{@sample.first_pipeline_run.sfn_results_path}/gsnap_filter_2.fa",
-      ],
-      contigs: "#{@sample.first_pipeline_run.sfn_results_path}/contigs.fasta",
-    }
+      non_host_reads: strtrue(@workflow_run.get_input("start_from_mngs")) ? nonhost_reads : nil,
+      contigs: strtrue(@workflow_run.get_input("start_from_mngs")) ? "#{@sample.pipeline_runs.non_deprecated.first.sfn_results_path}/contigs.fasta" : nil,
+    }.merge(host_filtering_parameters)
 
     sfn_pipeline_input_json = {
-      RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@workflow_run.workflow_version_tag}/run.wdl",
+      RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@workflow_run.workflow_version_tag}/run.wdl.zip",
       Input: {
         Run: run_inputs,
       },
