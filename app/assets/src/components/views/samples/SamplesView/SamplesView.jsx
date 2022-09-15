@@ -93,6 +93,13 @@ class SamplesView extends React.Component {
       referenceSelectId: null,
       metadataFields: [],
       loading: true,
+      /*
+        We need to keep track of samples that have been created from the web app so the user doesn't
+          create more than one AMR workflow run by clicking the BulkKickoffAmr trigger more than once.
+        If the page refreshes, the SampleView will fetch the number of AMR workflow runs
+          from the DB and will prevent the user from creating an AMR workflow run for that sample.
+      */
+      recentlyKickedOffAmrWorkflowRunsForSampleIds: new Set([]),
     };
 
     this.referenceSelectId = null;
@@ -490,10 +497,20 @@ class SamplesView extends React.Component {
     );
 
     if (size(amrPipelineEligibility.eligible) > 0) {
-      this.kickoffAmrPipelineForSamples(
-        map("id", amrPipelineEligibility.eligible),
-      );
+      const sampleIdsToKickoffAmr = map("id", amrPipelineEligibility.eligible);
+      this.kickoffAmrPipelineForSamples(sampleIdsToKickoffAmr);
       this.renderAmrPipelineBulkKickedOffNotification();
+
+      this.setState(
+        ({
+          recentlyKickedOffAmrWorkflowRunsForSampleIds: prevRecentlyKickedOffAmrWorkflowRunsForSampleIds,
+        }) => ({
+          recentlyKickedOffAmrWorkflowRunsForSampleIds: new Set([
+            ...Array.from(prevRecentlyKickedOffAmrWorkflowRunsForSampleIds),
+            ...sampleIdsToKickoffAmr,
+          ]),
+        }),
+      );
     }
 
     if (size(amrPipelineEligibility.ineligible) > 0) {
@@ -510,18 +527,28 @@ class SamplesView extends React.Component {
   };
 
   isNotEligibleForAmrPipeline = sample => {
+    const { recentlyKickedOffAmrWorkflowRunsForSampleIds } = this.state;
+
     const failedToUploadSample = !isEmpty(get("sample.uploadError", sample));
     const nonHostReadsUnavailable = !(
       get("sample.pipelineRunStatus", sample) === PipelineRunStatuses.Complete
     );
-    const hasExistingAmrWorkflowRun =
-      get(["sample.workflowRunsCountByWorkflow", WORKFLOWS.AMR.value], sample) >
-      0;
+    const hasExistingAmrWorkflowRunInDatabase =
+      get(
+        ["sample", "workflowRunsCountByWorkflow", WORKFLOWS.AMR.value],
+        sample,
+      ) > 0;
+    // `recentlyKickedOffAmrWorkflowRunsForSampleIds` only gets updated when the user sucessfully
+    // kicks off new AMR workflow runs by clicking the BulkKickoffAmr trigger
+    const alreadyKickedOffAmrWorkflowRun = recentlyKickedOffAmrWorkflowRunsForSampleIds.has(
+      sample.id,
+    );
 
     return (
       failedToUploadSample ||
       nonHostReadsUnavailable ||
-      hasExistingAmrWorkflowRun
+      hasExistingAmrWorkflowRunInDatabase ||
+      alreadyKickedOffAmrWorkflowRun
     );
   };
 
