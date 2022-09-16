@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
 import { UserContext } from "~/components/common/UserContext";
+import { SampleTypeProps } from "~/interface/shared";
 import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
@@ -37,13 +38,6 @@ export interface MetadataInputProps {
   warning?: string;
   withinModal?: boolean;
   taxaCategory?: string;
-}
-
-interface SampleTypeProps {
-  name: string;
-  group: string;
-  insect_only: boolean;
-  human_only: boolean;
 }
 
 // If value is undefined or null, an empty string should be displayed.
@@ -130,12 +124,12 @@ const MetadataInput = ({
         initialChecked={value === onLabel}
         onLabel={onLabel}
         offLabel={offLabel}
-        onChange={(label) => onChange(metadataType.key, label, true)}
+        onChange={label => onChange(metadataType.key, label, true)}
         className={className}
       />
     );
   } else if (isArray(metadataType.options)) {
-    const options = metadataType.options.map((option) => ({
+    const options = metadataType.options.map(option => ({
       text: option,
       value: option,
     }));
@@ -144,7 +138,7 @@ const MetadataInput = ({
         fluid
         floating
         options={options}
-        onChange={(val) => onChange(metadataType.key, val, true)}
+        onChange={val => onChange(metadataType.key, val, true)}
         value={value}
         className={className}
         usePortal
@@ -155,7 +149,7 @@ const MetadataInput = ({
     return (
       <Input
         className={className}
-        onChange={(val) => onChange(metadataType.key, val)}
+        onChange={val => onChange(metadataType.key, val)}
         onBlur={() => onSave && onSave(metadataType.key)}
         value={ensureDefinedValue({
           key: metadataType.key,
@@ -217,7 +211,7 @@ const MetadataInput = ({
     return (
       <Input
         className={className}
-        onChange={(val) => onChange(metadataType.key, val)}
+        onChange={val => onChange(metadataType.key, val)}
         onBlur={() => onSave && onSave(metadataType.key)}
         value={ensureDefinedValue({
           key: metadataType.key,

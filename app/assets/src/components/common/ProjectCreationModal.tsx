@@ -1,5 +1,4 @@
 import { Icon, Tooltip } from "czifui";
-import PropTypes from "prop-types";
 import React, { useState, useEffect } from "react";
 
 import { createProject } from "~/api";
@@ -22,16 +21,28 @@ const ACCESS_LEVEL = Object.freeze({
   noSelection: -1,
 });
 
-const ProjectCreationModal = ({ modalOpen, onCancel, onCreate }) => {
+interface ProjectCreationModalProps {
+  modalOpen: boolean;
+  onCancel: $TSFixMeFunction;
+  onCreate: $TSFixMeFunction;
+}
+
+const ProjectCreationModal = ({
+  modalOpen,
+  onCancel,
+  onCreate,
+}: ProjectCreationModalProps) => {
   const [name, setName] = useState("");
-  const [accessLevel, setAccessLevel] = useState(ACCESS_LEVEL.noSelection); // No selection by default
+  const [accessLevel, setAccessLevel] = useState<number>(
+    ACCESS_LEVEL.noSelection,
+  ); // No selection by default
   const [error, setError] = useState("");
   const [description, setDescription] = useState("");
   const [showInfo, setShowInfo] = useState(false);
   const [disableCreateButton, setDisableCreateButton] = useState(true);
 
   useEffect(() => {
-    let anyFieldInvalid =
+    const anyFieldInvalid =
       name === "" ||
       accessLevel === ACCESS_LEVEL.noSelection ||
       description.length < 1;
@@ -199,12 +210,6 @@ const ProjectCreationModal = ({ modalOpen, onCancel, onCreate }) => {
       </div>
     </Modal>
   );
-};
-
-ProjectCreationModal.propTypes = {
-  modalOpen: PropTypes.bool,
-  onCancel: PropTypes.func.isRequired,
-  onCreate: PropTypes.func.isRequired,
 };
 
 export default ProjectCreationModal;

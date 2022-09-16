@@ -62,6 +62,14 @@ export type FileList = {
   url?: string | null;
 }[];
 
+export interface HostGenome {
+  id: number;
+  name: string;
+  samples_count: number;
+  ercc_only: boolean;
+  showAsOption: boolean;
+}
+
 export interface InputFile {
   fromStepName?: string;
   files: FileList;
@@ -110,6 +118,11 @@ export interface PipelineRun {
   host_subtracted: string;
 }
 
+export interface Project extends NumberId {
+  name: string;
+  public_access: "Public Project" | "Private Project";
+}
+
 export interface SummaryStats {
   adjusted_remaining_reads: number;
   compression_ratio: number;
@@ -126,6 +139,14 @@ export interface SummaryStats {
 }
 
 export type SampleId = number;
+
+export interface SampleTypeProps {
+  name: string;
+  group: string;
+  insect_only: boolean;
+  human_only: boolean;
+}
+
 export type SnapshotShareId = string;
 
 export interface TooltipLocation {

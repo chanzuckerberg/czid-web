@@ -2,7 +2,7 @@ import React from "react";
 
 interface ContextPlaceholderProps {
   children?: React.ReactNode[] | React.ReactNode;
-  onClose?: $TSFixMeFunction;
+  onClose?: () => void;
   horizontalOffset?: number;
   verticalOffset?: number;
   open?: boolean;

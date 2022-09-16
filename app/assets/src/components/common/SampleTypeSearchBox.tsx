@@ -1,38 +1,59 @@
 import { groupBy, get } from "lodash/fp";
 import React from "react";
-
-import PropTypes from "~/components/utils/propTypes";
 import {
   doesResultMatch,
   sortResults,
 } from "~/components/views/SampleUploadFlow/utils";
+import { SampleTypeProps } from "~/interface/shared";
 
 import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 
 const SUGGESTED = "SUGGESTED";
 const ALL = "ALL";
 
-class SampleTypeSearchBox extends React.Component {
-  handleSearchTriggered = query => {
-    return this.buildResults(this.getMatchesByCategory(query), query);
-  };
+interface SampleTypeSearchBoxProps {
+  className: string;
+  onResultSelect: $TSFixMeFunction;
+  value: string;
+  sampleTypes: SampleTypeProps[];
+  taxaCategory: string;
+  showDescription?: boolean;
+}
+export interface Result {
+  name: string;
+  results: {
+    title: string;
+    name: number | string;
+    description?: string;
+  }[];
+}
 
-  getMatchesByCategory(query) {
-    const matchedSampleTypes = this.props.sampleTypes.filter(sampleType =>
+const SampleTypeSearchBox = ({
+  className,
+  value,
+  onResultSelect,
+  showDescription,
+  taxaCategory,
+  sampleTypes,
+}: SampleTypeSearchBoxProps) => {
+  const handleSearchTriggered = query => {
+    return buildResults(getMatchesByCategory(query), query);
+  };
+  const getMatchesByCategory = query => {
+    const matchedSampleTypes = sampleTypes.filter(sampleType =>
       doesResultMatch(sampleType, query),
     );
 
     const sortedSampleTypes = sortResults(
       matchedSampleTypes,
       query,
-      sampleType => sampleType.name,
+      (sampleType: SampleTypeProps) => sampleType.name,
     );
 
     // Sample types are grouped differently based on whether the current
     // sample's host genome is an insect, a human, a non-human animal or
     // unknown. The "suggested" group is shown first, then the "all" group.
     const getSampleTypeCategory = sampleType => {
-      const { taxaCategory } = this.props;
       const isHuman = taxaCategory === "human";
       const isInsect = taxaCategory === "insect";
       const isNonHumanAnimal = taxaCategory === "non-human-animal";
@@ -49,17 +70,20 @@ class SampleTypeSearchBox extends React.Component {
       return ALL;
     };
     return groupBy(getSampleTypeCategory, sortedSampleTypes);
-  }
-
-  buildResults(sampleTypesByCategory, query) {
+  };
+  const buildResults = (sampleTypesByCategory, query) => {
     const formatResult = result => {
       return {
         title: result.name,
         name: result.name,
-        description: this.props.showDescription ? result.group : null,
+        description: showDescription ? result.group : null,
       };
     };
-    const results = {};
+    const results = {} as {
+      suggested: Result;
+      all: Result;
+      noMatch: Result;
+    };
     if (sampleTypesByCategory[SUGGESTED]) {
       results.suggested = {
         name: SUGGESTED,
@@ -82,33 +106,20 @@ class SampleTypeSearchBox extends React.Component {
       };
     }
     return results;
-  }
-
-  render() {
-    const { className, value, onResultSelect } = this.props;
-    return (
-      <LiveSearchPopBox
-        className={className}
-        value={value}
-        onSearchTriggered={this.handleSearchTriggered}
-        onResultSelect={onResultSelect}
-        minChars={0}
-        placeholder=""
-        icon="chevron down"
-        shouldSearchOnFocus={true}
-        delayTriggerSearch={0}
-      />
-    );
-  }
-}
-
-SampleTypeSearchBox.propTypes = {
-  className: PropTypes.string,
-  onResultSelect: PropTypes.func.isRequired,
-  value: PropTypes.string,
-  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
-  taxaCategory: PropTypes.string,
-  showDescription: PropTypes.bool,
+  };
+  return (
+    <LiveSearchPopBox
+      className={className}
+      value={value}
+      onSearchTriggered={handleSearchTriggered}
+      onResultSelect={onResultSelect}
+      minChars={0}
+      placeholder=""
+      icon="chevron down"
+      shouldSearchOnFocus={true}
+      delayTriggerSearch={0}
+    />
+  );
 };
 
 export default SampleTypeSearchBox;

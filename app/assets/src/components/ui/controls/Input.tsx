@@ -5,7 +5,7 @@ import { APP_CSS_CLASS_PREFIX } from "./constants";
 
 interface InputProps {
   value?: string | number;
-  onChange?: (value: string | number) => void;
+  onChange?: $TSFixMeFunction;
   onBlur?: $TSFixMeFunction;
   className?: string;
   disableAutocomplete?: boolean;

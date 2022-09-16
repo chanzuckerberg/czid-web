@@ -1,23 +1,35 @@
 import { get } from "lodash/fp";
 import React from "react";
-
-import PropTypes from "~/components/utils/propTypes";
 import {
   doesResultMatch,
   sortResults,
 } from "~/components/views/SampleUploadFlow/utils";
+import { HostGenome } from "~/interface/shared";
 
 import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
+import { Result } from "./SampleTypeSearchBox";
+
+interface HostOrganismSearchBoxProps {
+  className?: string;
+  onResultSelect: $TSFixMeFunction;
+  value?: string;
+  hostGenomes: HostGenome[];
+}
 
 // Adapted from SampleTypeSearchBox
-class HostOrganismSearchBox extends React.Component {
-  handleSearchTriggered = query => {
-    return this.buildResults(this.getMatchesByCategory(query), query);
+const HostOrganismSearchBox = ({
+  className,
+  value,
+  onResultSelect,
+  hostGenomes,
+}: HostOrganismSearchBoxProps) => {
+  const handleSearchTriggered = (query: string) => {
+    return buildResults(getMatchesByCategory(query), query);
   };
 
   // TODO (gdingle): extract all these to utils if re-used
-  getMatchesByCategory(query) {
-    const matchedHostGenomes = this.props.hostGenomes.filter(
+  const getMatchesByCategory = (query: string) => {
+    const matchedHostGenomes = hostGenomes.filter(
       hostGenome =>
         // IMPORTANT NOTE: Only existing, null-user host genomes will be shown as
         // options for new samples until the team gets a chance to review this
@@ -27,11 +39,17 @@ class HostOrganismSearchBox extends React.Component {
     );
 
     return sortResults(matchedHostGenomes, query, t => t.samples_count * -1);
-  }
+  };
 
-  buildResults(sortedHostGenomes, query) {
-    const formatResult = result => {
-      const hostGenome = this.props.hostGenomes.find(hg => hg.id === result.id);
+  const buildResults = (sortedHostGenomes: HostGenome[], query: string) => {
+    const formatResult = (
+      result: HostGenome,
+    ): {
+      title: string;
+      name: number;
+      description?: string;
+    } => {
+      const hostGenome = hostGenomes.find(hg => hg.id === result.id);
       return {
         title: result.name,
         name: result.id,
@@ -40,7 +58,10 @@ class HostOrganismSearchBox extends React.Component {
           : null,
       };
     };
-    const results = {};
+    const results = {} as {
+      suggested: Result;
+      noMatch: Result;
+    };
     if (sortedHostGenomes.length) {
       results.suggested = {
         name: "SUGGESTED",
@@ -60,31 +81,21 @@ class HostOrganismSearchBox extends React.Component {
       };
     }
     return results;
-  }
+  };
 
-  render() {
-    const { className, value, onResultSelect } = this.props;
-    return (
-      <LiveSearchPopBox
-        className={className}
-        value={value}
-        onSearchTriggered={this.handleSearchTriggered}
-        onResultSelect={onResultSelect}
-        minChars={0}
-        placeholder=""
-        icon="chevron down"
-        shouldSearchOnFocus={true}
-        delayTriggerSearch={0}
-      />
-    );
-  }
-}
-
-HostOrganismSearchBox.propTypes = {
-  className: PropTypes.string,
-  onResultSelect: PropTypes.func.isRequired,
-  value: PropTypes.string,
-  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
+  return (
+    <LiveSearchPopBox
+      className={className}
+      value={value}
+      onSearchTriggered={handleSearchTriggered}
+      onResultSelect={onResultSelect}
+      minChars={0}
+      placeholder=""
+      icon="chevron down"
+      shouldSearchOnFocus={true}
+      delayTriggerSearch={0}
+    />
+  );
 };
 
 export default HostOrganismSearchBox;

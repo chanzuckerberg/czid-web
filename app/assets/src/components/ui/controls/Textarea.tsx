@@ -8,6 +8,8 @@ interface TextareaProps {
   onChange?: $TSFixMeFunction;
   onBlur?: $TSFixMeFunction;
   className?: string;
+  maxLength?: number;
+  placeholder?: string;
 }
 
 class Textarea extends React.Component<TextareaProps> {

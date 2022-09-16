@@ -1,13 +1,16 @@
-import { Tooltip } from "czifui";
+import { Tooltip, TooltipProps } from "czifui";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import PropTypes from "~/components/utils/propTypes";
 import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./project_info_icon_tooltip.scss";
 
-const ProjectInfoIconTooltip = props => {
+interface ProjectInfoIconTooltipProps extends TooltipProps {
+  isPublic: boolean;
+}
+
+const ProjectInfoIconTooltip = (props: ProjectInfoIconTooltipProps) => {
   const { isPublic, ...rest } = props;
 
   const description = isPublic
@@ -35,10 +38,6 @@ const ProjectInfoIconTooltip = props => {
       </span>
     </Tooltip>
   );
-};
-
-ProjectInfoIconTooltip.propTypes = {
-  isPublic: PropTypes.bool.isRequired,
 };
 
 export default ProjectInfoIconTooltip;
