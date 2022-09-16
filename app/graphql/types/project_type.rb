@@ -15,7 +15,7 @@ module Types
     field :total_sample_count, Integer, null: false
 
     def self.authorized?(object, context)
-      super && current_user_is_admin?(context)
+      super && current_user_is_logged_in?(context)
     end
   end
 end
