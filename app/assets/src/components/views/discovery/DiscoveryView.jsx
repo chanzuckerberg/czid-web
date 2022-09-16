@@ -6,7 +6,6 @@ import {
   escapeRegExp,
   find,
   get as _get,
-  getOr,
   isEmpty,
   isNull,
   isUndefined,
@@ -42,6 +41,7 @@ import { get } from "~/api/core";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import StatusLabel from "~/components/ui/labels/StatusLabel";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
@@ -58,9 +58,9 @@ import {
   getTempSelectedOptions,
 } from "~/components/utils/urls";
 import {
-  workflowHasConfig,
+  getWorkflowLabelForWorkflow,
+  workflowIsWorkflowRunEntity,
   WORKFLOWS,
-  WORKFLOW_CONFIG,
   WORKFLOW_ENTITIES,
   WORKFLOW_ORDER,
 } from "~/components/utils/workflows";
@@ -93,6 +93,7 @@ import NoSearchResultsBanner from "./NoSearchResultsBanner";
 import ProjectHeader from "./ProjectHeader";
 import {
   CURRENT_TAB_OPTIONS,
+  DISPLAY_PLQC,
   KEY_DISCOVERY_SESSION_FILTERS,
   KEY_DISCOVERY_VIEW_OPTIONS,
   TAB_PROJECTS,
@@ -113,6 +114,11 @@ import {
 
 import cs from "./discovery_view.scss";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
+import {
+  getOrderByKeyFor,
+  getOrderDirKeyFor,
+  getSessionOrderFieldsKeys,
+} from "./utils";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -134,18 +140,6 @@ import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 //     (synchronous data not needed for now because we do not show projects and visualizations)
 
 class DiscoveryView extends React.Component {
-  // used to preserve order keys across sessionStorage updates
-  SESSION_ORDER_FIELD_KEYS = [
-    this.getOrderByKeyFor(TAB_PROJECTS),
-    this.getOrderDirKeyFor(TAB_PROJECTS),
-    this.getOrderByKeyFor(TAB_SAMPLES, WORKFLOWS.CONSENSUS_GENOME.value),
-    this.getOrderDirKeyFor(TAB_SAMPLES, WORKFLOWS.CONSENSUS_GENOME.value),
-    this.getOrderByKeyFor(TAB_SAMPLES, WORKFLOWS.SHORT_READ_MNGS.value),
-    this.getOrderDirKeyFor(TAB_SAMPLES, WORKFLOWS.SHORT_READ_MNGS.value),
-    this.getOrderByKeyFor(TAB_VISUALIZATIONS),
-    this.getOrderDirKeyFor(TAB_VISUALIZATIONS),
-  ];
-
   constructor(props, context) {
     super(props, context);
     const { domain, projectId, updateDiscoveryProjectId } = this.props;
@@ -178,11 +172,14 @@ class DiscoveryView extends React.Component {
       emptyStateModalOpen: this.isFirstTimeUser(),
       filteredProjectCount: null,
       filteredProjectDimensions: [],
-      filteredSampleCount: null,
+      filteredSampleCountsByWorkflow: {
+        [WORKFLOWS.SHORT_READ_MNGS.value]: null,
+        [WORKFLOWS.AMR.value]: null,
+        [WORKFLOWS.CONSENSUS_GENOME.value]: null,
+      },
       filteredSampleDimensions: [],
       filteredSampleStats: {},
       filteredVisualizationCount: null,
-      filteredWorkflowRunCount: null,
       filters: {},
       loadingDimensions: true,
       loadingLocations: true,
@@ -204,9 +201,12 @@ class DiscoveryView extends React.Component {
       sampleDimensions: [],
       search: null,
       selectableSampleIds: [],
-      selectedSampleIds: new Set(),
       selectableWorkflowRunIds: [],
-      selectedWorkflowRunIds: new Set(),
+      selectedSampleIdsByWorkflow: {
+        [WORKFLOWS.AMR.value]: new Set(),
+        [WORKFLOWS.CONSENSUS_GENOME.value]: new Set(),
+        [WORKFLOWS.SHORT_READ_MNGS.value]: new Set(),
+      },
       showFilters: true,
       showStats: true,
       userDataCounts: null,
@@ -249,15 +249,18 @@ class DiscoveryView extends React.Component {
         TAB_SAMPLES,
         WORKFLOWS.CONSENSUS_GENOME.value,
       ),
-      onViewChange: this.refreshWorkflowRunData,
+      onViewChange: () => {
+        this.refreshWorkflowRunData(WORKFLOWS.CONSENSUS_GENOME.value);
+      },
       displayName: WORKFLOWS.CONSENSUS_GENOME.value,
     });
 
     if (allowedFeatures.includes(AMR_V1_FEATURE)) {
       this.amrWorkflowRuns = this.dataLayer.amrWorkflowRuns.createView({
         conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
-        // TODO: figure out right value for this attribute
-        // onViewChange:
+        onViewChange: () => {
+          this.refreshWorkflowRunData(WORKFLOWS.AMR.value);
+        },
         displayName: WORKFLOWS.AMR.value,
       });
     }
@@ -273,6 +276,8 @@ class DiscoveryView extends React.Component {
       onViewChange: this.refreshVisualizationData,
       displayName: "VisualizationsViewBase",
     });
+
+    this.setupWorkflowConfigs();
 
     this.mapPreviewProjects = this.projects;
     this.mapPreviewSamples = this.samples;
@@ -297,6 +302,44 @@ class DiscoveryView extends React.Component {
 
     this.updateBrowsingHistory("replace");
   }
+
+  setupWorkflowConfigs = () => {
+    this.configForWorkflow = {
+      [WORKFLOWS.AMR.value]: {
+        bannerTitle: `${WORKFLOWS.AMR.label} Samples`,
+        objectCollection: this.amrWorkflowRuns,
+      },
+      [WORKFLOWS.CONSENSUS_GENOME.value]: {
+        bannerTitle: `${WORKFLOWS.CONSENSUS_GENOME.label}s`,
+        objectCollection: this.workflowRuns,
+      },
+      [WORKFLOWS.SHORT_READ_MNGS.value]: {
+        bannerTitle: `${WORKFLOWS.SHORT_READ_MNGS.label} Samples`,
+        objectCollection: this.samples,
+      },
+    };
+  };
+
+  getWorkflowToDisplay = (initialWorkflow, countByWorkflow) => {
+    // If default workflow does not have any samples, switch to a tab with samples
+    // Order to check tabs is SHORT_READ_MNGS, CONSENSUS_GENOME, then AMR
+    const initialWorkflowCount = countByWorkflow?.[initialWorkflow] || 0;
+    if (initialWorkflowCount > 0) {
+      return initialWorkflow;
+    }
+
+    const numOfMngsSamples = countByWorkflow?.[WORKFLOWS.SHORT_READ_MNGS.value];
+    const numOfCgSamples = countByWorkflow?.[WORKFLOWS.CONSENSUS_GENOME.value];
+    const numOfAmrSamples = countByWorkflow?.[WORKFLOWS.AMR.value];
+
+    if (numOfMngsSamples > 0) {
+      return WORKFLOWS.SHORT_READ_MNGS.value;
+    } else if (numOfCgSamples > 0) {
+      return WORKFLOWS.CONSENSUS_GENOME.value;
+    } else if (numOfAmrSamples > 0) {
+      return WORKFLOWS.AMR.value;
+    }
+  };
 
   async componentDidMount() {
     const { domain } = this.props;
@@ -336,10 +379,6 @@ class DiscoveryView extends React.Component {
     const { projectId, search, orderBy, orderDirection } = this.state;
     const { snapshotShareId } = this.props;
 
-    const includeWorkflowCondition =
-      workflowHasConfig(workflow) &&
-      WORKFLOW_CONFIG[workflow].entity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
-
     return {
       projectId,
       snapshotShareId,
@@ -348,7 +387,7 @@ class DiscoveryView extends React.Component {
       orderDir: orderDirection,
       filters: {
         ...this.preparedFilters(),
-        ...(includeWorkflowCondition && { workflow }),
+        ...(workflowIsWorkflowRunEntity && { workflow }),
       },
     };
   };
@@ -377,34 +416,20 @@ class DiscoveryView extends React.Component {
     return stateObject;
   }
 
-  getOrderKeyPrefix(tab, workflow) {
-    // for samples, each workflow has its own order parameters
-    return tab === TAB_SAMPLES ? `${tab}-${workflow}` : tab;
-  }
-
-  getOrderByKeyFor(tab, workflow = null) {
-    return `${this.getOrderKeyPrefix(tab, workflow)}OrderBy`;
-  }
-
   getCurrentTabOrderByKey() {
     const { currentTab, workflow } = this.state;
-    return this.getOrderByKeyFor(currentTab, workflow);
-  }
-
-  getOrderDirKeyFor(tab, workflow = null) {
-    return `${this.getOrderKeyPrefix(tab, workflow)}OrderDir`;
+    return getOrderByKeyFor(currentTab, workflow);
   }
 
   getCurrentTabOrderDirKey() {
     const { currentTab, workflow } = this.state;
-    return this.getOrderDirKeyFor(currentTab, workflow);
+    return getOrderDirKeyFor(currentTab, workflow);
   }
 
   getOrderStateFieldsFor = (tab, workflow = null) => {
     const sessionState = this.loadState(sessionStorage, "DiscoveryViewOptions");
-    const orderBy = sessionState[`${this.getOrderByKeyFor(tab, workflow)}`];
-    const orderDirection =
-      sessionState[`${this.getOrderDirKeyFor(tab, workflow)}`];
+    const orderBy = sessionState[`${getOrderByKeyFor(tab, workflow)}`];
+    const orderDirection = sessionState[`${getOrderDirKeyFor(tab, workflow)}`];
     return { orderBy, orderDirection };
   };
 
@@ -436,7 +461,7 @@ class DiscoveryView extends React.Component {
 
     // prevent existing order fields from being removed from session storage
     const orderFieldsInSessionStorage = pick(
-      this.SESSION_ORDER_FIELD_KEYS,
+      getSessionOrderFieldsKeys(),
       currentSessionStorageState,
     );
 
@@ -610,6 +635,7 @@ class DiscoveryView extends React.Component {
   resetData = ({ callback } = {}) => {
     const { domain } = this.props;
     const conditions = this.getConditions();
+    const allowedFeatures = this.context?.allowedFeatures || [];
 
     this.samples.reset({
       conditions: this.getConditionsFor(
@@ -635,6 +661,12 @@ class DiscoveryView extends React.Component {
         ),
         loadFirstPage: true,
       });
+      if (allowedFeatures.includes(AMR_V1_FEATURE)) {
+        this.amrWorkflowRuns.reset({
+          conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
+          loadFirstPage: true,
+        });
+      }
     }
     if (this.mapPreviewSamples !== this.samples) {
       this.mapPreviewSamples.reset({ conditions, loadFirstPage: true });
@@ -647,11 +679,14 @@ class DiscoveryView extends React.Component {
       {
         filteredProjectCount: null,
         filteredProjectDimensions: [],
-        filteredSampleCount: null,
+        filteredSampleCountsByWorkflow: {
+          [WORKFLOWS.AMR.value]: null,
+          [WORKFLOWS.CONSENSUS_GENOME.value]: null,
+          [WORKFLOWS.SHORT_READ_MNGS.value]: null,
+        },
         filteredSampleDimensions: [],
         filteredVisualizationCount: null,
         filteredSampleStats: {},
-        filteredWorkflowRunCount: null,
         loadingDimensions: true,
         mapSidebarProjectCount: null,
         mapSidebarSampleCount: null,
@@ -712,21 +747,14 @@ class DiscoveryView extends React.Component {
 
   resetSamplesData = () => {
     const { workflow } = this.state;
-    const conditions = this.getConditions();
+    const conditions = this.getConditions(workflow);
 
-    if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
-      this.samples.reset({
-        conditions,
-        loadFirstPage: true,
-        logLoadTime: true,
-      });
-    } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
-      this.workflowRuns.reset({
-        conditions,
-        loadFirstPage: true,
-        logLoadTime: true,
-      });
-    }
+    const workflowObjects = this.configForWorkflow[workflow].objectCollection;
+    workflowObjects.reset({
+      conditions,
+      loadFirstPage: true,
+      logLoadTime: true,
+    });
 
     this.samplesView && this.samplesView.reset();
   };
@@ -826,10 +854,13 @@ class DiscoveryView extends React.Component {
   };
 
   refreshSampleData = () => {
-    const filteredSampleCount = this.samples.length;
+    const { filteredSampleCountsByWorkflow } = this.state;
 
     this.setState({
-      filteredSampleCount,
+      filteredSampleCountsByWorkflow: {
+        ...filteredSampleCountsByWorkflow,
+        [WORKFLOWS.SHORT_READ_MNGS.value]: this.samples.length,
+      },
       selectableSampleIds: this.samples.getIds(),
     });
   };
@@ -840,10 +871,30 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  refreshWorkflowRunData = () => {
+  refreshWorkflowRunData = workflowTypeToUpdate => {
+    const {
+      filteredSampleCountsByWorkflow,
+      workflow,
+      workflowEntity,
+    } = this.state;
+
+    const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
+    const collectionToUpdate = configToUpdate.objectCollection;
+
+    // The selectableWorkflowRunIds only need to be updated if a workflow run tab is active
+    const currentWorkflowEntityIsWorkflowRun =
+      workflowEntity !== WORKFLOW_ENTITIES.SAMPLES;
+    const currentConfig = this.configForWorkflow[workflow];
+    const currentCollection = currentConfig.objectCollection;
+
     this.setState({
-      filteredWorkflowRunCount: this.workflowRuns.length,
-      selectableWorkflowRunIds: this.workflowRuns.getIds(),
+      filteredSampleCountsByWorkflow: {
+        ...filteredSampleCountsByWorkflow,
+        [workflowTypeToUpdate]: collectionToUpdate.length,
+      },
+      ...(currentWorkflowEntityIsWorkflowRun && {
+        selectableWorkflowRunIds: currentCollection.getIds(),
+      }),
     });
   };
 
@@ -936,21 +987,8 @@ class DiscoveryView extends React.Component {
       getDiscoveryVisualizations({ domain }),
     ]);
 
-    const numOfCgSamples = getOr(
-      0,
-      WORKFLOWS.CONSENSUS_GENOME.value,
-      sampleStats.countByWorkflow,
-    );
-    const numOfMngsSamples = getOr(
-      0,
-      WORKFLOWS.SHORT_READ_MNGS.value,
-      sampleStats.countByWorkflow,
-    );
-    if (numOfMngsSamples === 0 && numOfCgSamples > 0) {
-      workflow = WORKFLOWS.CONSENSUS_GENOME.value;
-    } else if (numOfCgSamples === 0 && numOfMngsSamples > 0) {
-      workflow = WORKFLOWS.SHORT_READ_MNGS.value;
-    }
+    const countByWorkflow = sampleStats?.countByWorkflow;
+    workflow = this.getWorkflowToDisplay(workflow, countByWorkflow);
 
     this.setState(
       {
@@ -1537,25 +1575,37 @@ class DiscoveryView extends React.Component {
     this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
   };
 
-  handleSelectedSamplesUpdate = selectedSampleIds =>
-    this.setState({ selectedSampleIds });
-
-  handleSelectedWorkflowRunsUpdate = selectedWorkflowRunIds =>
-    this.setState({ selectedWorkflowRunIds });
+  handleSelectedSamplesUpdate = selectedSampleIds => {
+    const { workflow, selectedSampleIdsByWorkflow } = this.state;
+    this.setState({
+      selectedSampleIdsByWorkflow: {
+        ...selectedSampleIdsByWorkflow,
+        [workflow]: selectedSampleIds,
+      },
+    });
+  };
 
   handleSortColumn = ({ sortBy, sortDirection }) => {
     const { domain } = this.props;
     const {
       currentTab,
-      filteredSampleCount,
+      filteredSampleCountsByWorkflow,
       filteredProjectCount,
       filteredVisualizationCount,
-      filteredWorkflowRunCount,
       workflow,
     } = this.state;
     this.setState({ orderBy: sortBy, orderDirection: sortDirection }, () => {
       this.updateBrowsingHistory("replace");
       this.resetDataFromSortChange();
+
+      const filteredSampleCounts = {
+        filteredSampleCount:
+          filteredSampleCountsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value],
+        filteredWorkflowRunCount:
+          filteredSampleCountsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value],
+        filteredAmrWorkflowRunCount:
+          filteredSampleCountsByWorkflow[WORKFLOWS.AMR.value],
+      };
 
       trackEvent(
         ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_COLUMN_SORT_ARROW_CLICKED,
@@ -1566,10 +1616,9 @@ class DiscoveryView extends React.Component {
           sortBy,
           sortDirection,
           filters: this.preparedFilters(),
-          filteredSampleCount,
           filteredProjectCount,
           filteredVisualizationCount,
-          filteredWorkflowRunCount,
+          ...filteredSampleCounts,
         },
       );
     });
@@ -1764,16 +1813,9 @@ class DiscoveryView extends React.Component {
   };
 
   renderNoDataWorkflowBanner = workflow => {
-    const [workflowLabel, emptyTitle] =
-      workflow === WORKFLOWS.SHORT_READ_MNGS.value
-        ? [
-            WORKFLOWS.SHORT_READ_MNGS.label,
-            `${WORKFLOWS.SHORT_READ_MNGS.label} Samples`,
-          ]
-        : [
-            WORKFLOWS.CONSENSUS_GENOME.label,
-            `${WORKFLOWS.CONSENSUS_GENOME.label}s`,
-          ];
+    const workflowLabel = getWorkflowLabelForWorkflow(workflow);
+    const emptyTitle = this.configForWorkflow[workflow].bannerTitle;
+
     return (
       <InfoBanner
         className={cs.noResultsContainer}
@@ -1882,24 +1924,25 @@ class DiscoveryView extends React.Component {
   };
 
   handleWorkflowTabChange = workflow => {
-    const view =
-      workflow === WORKFLOWS.CONSENSUS_GENOME.value
-        ? this.workflowRuns
-        : this.samples;
+    let { currentDisplay, currentTab } = this.state;
+
+    const workflowObjects = this.configForWorkflow[workflow].objectCollection;
+    const workflowIsMngs = workflow === WORKFLOWS.SHORT_READ_MNGS.value;
 
     // PLQC is currently only available for mNGS samples.
-    let { currentDisplay, currentTab } = this.state;
-    currentDisplay =
-      currentDisplay === "plqc" && workflow === WORKFLOWS.CONSENSUS_GENOME.value
-        ? "table"
-        : currentDisplay;
+    if (currentDisplay === DISPLAY_PLQC && !workflowIsMngs) {
+      currentDisplay = "table";
+    }
 
     this.setState(
       {
         currentDisplay,
-        ...(workflow === WORKFLOWS.CONSENSUS_GENOME.value
-          ? { selectableWorkflowRunIds: view.getIds() }
-          : { selectableSampleIds: view.getIds() }),
+        ...(workflowIsMngs && {
+          selectableWorkflowRunIds: workflowObjects.getIds(),
+        }),
+        ...(!workflowIsMngs && {
+          selectableSampleIds: workflowObjects.getIds(),
+        }),
         workflow,
         workflowEntity: find({ value: workflow }, values(WORKFLOWS)).entity,
         ...this.getOrderStateFieldsFor(currentTab, workflow),
@@ -1914,6 +1957,7 @@ class DiscoveryView extends React.Component {
 
   computeWorkflowTabs = () => {
     const { snapshotShareId } = this.props;
+    const { filteredSampleCountsByWorkflow } = this.state;
     const { allowedFeatures = [] } = this.context || {};
     let workflows = WORKFLOW_ORDER;
     if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
@@ -1925,15 +1969,21 @@ class DiscoveryView extends React.Component {
     return workflows.map(name => {
       const workflowName = `${WORKFLOWS[name].label}s`;
       const workflowCount =
-        name === "CONSENSUS_GENOME"
-          ? this.workflowRuns.length
-          : this.samples.length;
+        filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
 
       return {
         label: (
           <>
             <span className={cs.tabLabel}>{workflowName}</span>
             <span className={cs.tabCounter}>{workflowCount || "0"}</span>
+            {name === "AMR" && (
+              <StatusLabel
+                className={cs.statusLabel}
+                inline
+                status={"Beta"}
+                type="beta"
+              />
+            )}
           </>
         ),
         value: WORKFLOWS[name].value,
@@ -1946,7 +1996,7 @@ class DiscoveryView extends React.Component {
       currentDisplay,
       currentTab,
       filteredProjectCount,
-      filteredSampleCount,
+      filteredSampleCountsByWorkflow,
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
@@ -1954,8 +2004,7 @@ class DiscoveryView extends React.Component {
       sampleActiveColumnsByWorkflow,
       selectableSampleIds,
       selectableWorkflowRunIds,
-      selectedSampleIds,
-      selectedWorkflowRunIds,
+      selectedSampleIdsByWorkflow,
       showFilters,
       showStats,
       orderBy,
@@ -1971,25 +2020,26 @@ class DiscoveryView extends React.Component {
 
     const isWorkflowRunEntity =
       workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
-    const objects = isWorkflowRunEntity ? this.workflowRuns : this.samples;
+
+    const workflowObjects = this.configForWorkflow[workflow].objectCollection;
+    const amrHasLoaded = allowedFeatures.includes(AMR_V1_FEATURE)
+      ? !this.amrWorkflowRuns.isLoading()
+      : true;
     const tableHasLoaded =
+      amrHasLoaded &&
       !this.workflowRuns.isLoading() &&
       !this.samples.isLoading() &&
       currentDisplay === "table";
 
     const hideAllTriggers = !!snapshotShareId;
-    const [selectableIds, selectedIds, updateSelectedIds] = isWorkflowRunEntity
-      ? [
-          selectableWorkflowRunIds,
-          selectedWorkflowRunIds,
-          this.handleSelectedWorkflowRunsUpdate,
-        ]
-      : [
-          selectableSampleIds,
-          selectedSampleIds,
-          this.handleSelectedSamplesUpdate,
-        ];
 
+    const selectableIds = isWorkflowRunEntity
+      ? selectableWorkflowRunIds
+      : selectableSampleIds;
+    const selectedIds = selectedSampleIdsByWorkflow[workflow];
+    const updateSelectedIds = this.handleSelectedSamplesUpdate;
+
+    // TODO: verify if sorting works for AMR
     const sortable =
       allowedFeatures.includes(SORTING_V0_ADMIN_FEATURE) ||
       (allowedFeatures.includes(SORTING_V0_FEATURE) &&
@@ -2073,11 +2123,11 @@ class DiscoveryView extends React.Component {
                   mapLocationData={mapLocationData}
                   mapPreviewedLocationId={mapPreviewedLocationId}
                   mapTilerKey={mapTilerKey}
-                  objects={objects}
+                  objects={workflowObjects}
                   onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                   onClearFilters={this.handleClearFilters}
                   onDisplaySwitch={this.handleDisplaySwitch}
-                  onLoadRows={objects.handleLoadObjectRows}
+                  onLoadRows={workflowObjects.handleLoadObjectRows}
                   onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
                   onMapClick={this.clearMapPreview}
                   onMapLevelChange={this.handleMapLevelChange}
@@ -2106,7 +2156,7 @@ class DiscoveryView extends React.Component {
             </div>
             {userDataCounts &&
             userDataCounts.sampleCountByWorkflow[workflow] &&
-            !filteredSampleCount &&
+            !filteredSampleCountsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value] &&
             workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
             tableHasLoaded
               ? this.renderNoSearchResultsBanner(TAB_SAMPLES)
@@ -2148,7 +2198,7 @@ class DiscoveryView extends React.Component {
       currentTab,
       filteredProjectCount,
       filteredProjectDimensions,
-      filteredSampleCount,
+      filteredSampleCountsByWorkflow,
       filteredSampleDimensions,
       filteredSampleStats,
       loadingDimensions,
@@ -2159,7 +2209,7 @@ class DiscoveryView extends React.Component {
       mapSidebarSampleCount,
       mapSidebarSampleDimensions,
       mapSidebarSampleStats,
-      selectedSampleIds,
+      selectedSampleIdsByWorkflow,
       mapSidebarTab,
       plqcPreviewedSamples,
       projectDimensions,
@@ -2177,7 +2227,11 @@ class DiscoveryView extends React.Component {
     const computedSampleDimensions =
       filterCount || search ? filteredSampleDimensions : sampleDimensions;
     const loading = loadingDimensions || loadingStats;
+    const selectedMngsSampleIds =
+      selectedSampleIdsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value];
 
+    const filteredMngsSampleCount =
+      filteredSampleCountsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value];
     return (
       <div className={cs.rightPane}>
         {showStats &&
@@ -2218,14 +2272,14 @@ class DiscoveryView extends React.Component {
                 !mapPreviewedLocationId && !plqcPreviewedSamples
                   ? {
                       ...filteredSampleStats,
-                      count: filteredSampleCount,
+                      count: filteredMngsSampleCount,
                     }
                   : {
                       ...mapSidebarSampleStats,
                       count: mapSidebarSampleCount,
                     }
               }
-              selectedSampleIds={selectedSampleIds}
+              selectedSampleIds={selectedMngsSampleIds}
             />
           ) : (
             <DiscoverySidebar
@@ -2247,7 +2301,7 @@ class DiscoveryView extends React.Component {
                 // if no filtered samples are present, setting the project count to null
                 // will display the no results sidebar
                 domain === DISCOVERY_DOMAIN_SNAPSHOT
-                  ? { count: filteredSampleCount ? 1 : null }
+                  ? { count: filteredMngsSampleCount ? 1 : null }
                   : { count: filteredProjectCount }
               }
               sampleDimensions={computedSampleDimensions}

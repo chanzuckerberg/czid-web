@@ -949,15 +949,18 @@ class SamplesView extends React.Component {
       phyloTreeCreationModalOpen,
     } = this.state;
 
+    const workflowIsAmr = workflow === WORKFLOWS.AMR.value;
     return (
       <div className={cs.container}>
-        {currentDisplay === "table" || currentDisplay === "plqc" ? (
+        {!workflowIsAmr &&
+        (currentDisplay === "table" || currentDisplay === "plqc") ? (
           !snapshotShareId && this.renderToolbar()
         ) : (
           <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
         )}
-        {this.renderFilteredCount()}
-        {this.renderDisplay()}
+        {!workflowIsAmr && this.renderFilteredCount()}
+        {!workflowIsAmr && this.renderDisplay()}
+        {workflowIsAmr && <div>AMR tab placeholder</div>}
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal
             // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this

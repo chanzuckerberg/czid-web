@@ -54,6 +54,8 @@ export const ANNOTATION_FILTER_OPTIONS = [
   },
 ];
 
+export const DISPLAY_PLQC = "plqc";
+
 export const TAB_PROJECTS = "projects";
 
 export const TAB_SAMPLES = "samples";

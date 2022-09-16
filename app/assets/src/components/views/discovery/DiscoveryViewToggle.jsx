@@ -6,12 +6,14 @@ import { Menu, MenuItem } from "~ui/controls/Menu";
 import IconChartSmall from "~ui/icons/IconChartSmall";
 import IconListSmall from "~ui/icons/IconListSmall";
 import IconMapSmall from "~ui/icons/IconMapSmall";
+import { DISPLAY_PLQC } from "./constants";
 
 import cs from "./discovery_view_toggle.scss";
 
+// TODO: replace strings here with contants
 const MAP_DISPLAYS = ["table", "map"];
 // Enable the PLQC toggle option if viewing a specific project.
-const PROJECT_DISPLAYS = ["table", "plqc", "map"];
+const PROJECT_DISPLAYS = ["table", DISPLAY_PLQC, "map"];
 
 class DiscoveryViewToggle extends React.Component {
   render() {

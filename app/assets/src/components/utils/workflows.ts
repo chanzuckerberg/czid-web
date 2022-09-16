@@ -1,3 +1,5 @@
+export type WORKFLOW_VALUES = "amr" | "consensus-genome" | "short-read-mngs";
+
 // Pipeline workflow options
 export const WORKFLOW_ENTITIES = {
   SAMPLES: "Samples",
@@ -5,6 +7,11 @@ export const WORKFLOW_ENTITIES = {
 };
 
 export const WORKFLOWS = {
+  AMR: {
+    label: "Antimicrobial Resistance",
+    value: "amr",
+    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
+  },
   CONSENSUS_GENOME: {
     label: "Consensus Genome",
     value: "consensus-genome",
@@ -15,11 +22,22 @@ export const WORKFLOWS = {
     value: "short-read-mngs",
     entity: WORKFLOW_ENTITIES.SAMPLES,
   },
-  AMR: {
-    label: "Antimicrobial Resistance",
-    value: "amr",
-    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
-  },
+};
+
+export const WORKFLOW_KEY_FOR_VALUE = {
+  [WORKFLOWS.AMR.value]: "AMR",
+  [WORKFLOWS.CONSENSUS_GENOME.value]: "CONSENSUS_GENOME",
+  [WORKFLOWS.SHORT_READ_MNGS.value]: "SHORT_READ_MNGS",
+};
+
+export const workflowIsWorkflowRunEntity = (workflow: WORKFLOW_VALUES) => {
+  const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
+  return WORKFLOWS[workflowKey].entity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
+};
+
+export const getWorkflowLabelForWorkflow = (workflow: WORKFLOW_VALUES) => {
+  const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
+  return WORKFLOWS[workflowKey].label;
 };
 
 export const WORKFLOW_ORDER = ["SHORT_READ_MNGS", "CONSENSUS_GENOME", "AMR"];
@@ -44,21 +62,4 @@ export const findInWorkflows = (
   return Object.keys(WORKFLOWS).find(
     workflow => WORKFLOWS[workflow][keyToSearch] === toCompare,
   );
-};
-
-export const WORKFLOW_CONFIG = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: {
-    entity: WORKFLOW_ENTITIES.SAMPLES,
-  },
-  [WORKFLOWS.CONSENSUS_GENOME.value]: {
-    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
-  },
-  [WORKFLOWS.AMR.value]: {
-    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
-  },
-};
-
-export const workflowHasConfig = workflow => {
-  if (!workflow) return false;
-  return Object.keys(WORKFLOW_CONFIG).includes(workflow);
 };
