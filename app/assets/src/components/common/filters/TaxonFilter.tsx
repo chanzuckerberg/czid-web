@@ -1,11 +1,22 @@
-import PropTypes from "prop-types";
 import React from "react";
 import { getSearchSuggestions } from "~/api";
 import { AsyncMultipleDropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
 
-const TaxonFilter = ({ domain, selectedOptions, onChange, disabled }) => {
-  const handleFilterChange = async query => {
+interface TaxonFilterProps {
+  domain: string;
+  selectedOptions: { id: number; level: string; name: string }[];
+  onChange: (selected: string) => void;
+  disabled: boolean;
+}
+
+const TaxonFilter = ({
+  domain,
+  selectedOptions,
+  onChange,
+  disabled,
+}: TaxonFilterProps) => {
+  const handleFilterChange = async (query: string) => {
     const searchResults = await getSearchSuggestions({
       query,
       categories: ["taxon"],
@@ -31,13 +42,6 @@ const TaxonFilter = ({ domain, selectedOptions, onChange, disabled }) => {
       disabled={disabled}
     />
   );
-};
-
-TaxonFilter.propTypes = {
-  domain: PropTypes.string,
-  selectedOptions: PropTypes.array,
-  onChange: PropTypes.func,
-  disabled: PropTypes.bool,
 };
 
 export default TaxonFilter;

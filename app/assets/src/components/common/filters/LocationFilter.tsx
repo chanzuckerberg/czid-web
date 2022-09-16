@@ -1,11 +1,16 @@
 import { forEach, values, sortBy } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import { BaseMultipleFilter } from "~/components/common/filters";
+import { BaseMultipleFilterProps, FilterOption } from "./BaseMultipleFilter";
 
-class LocationFilter extends React.Component {
-  expandParents = options => {
-    let mergedOptions = {};
+const LocationFilter = ({
+  options,
+  selected,
+  onChange,
+  label,
+}: LocationFilterProps) => {
+  const expandParents = (options: LocationFilterProps["options"]) => {
+    const mergedOptions = {} as { [key: string]: FilterOption };
     forEach(option => {
       // Tally parents
       forEach(parent => {
@@ -34,21 +39,18 @@ class LocationFilter extends React.Component {
     }, options);
     return values(mergedOptions);
   };
-
-  render() {
-    const { options, ...otherProps } = this.props;
-
-    return (
-      <BaseMultipleFilter
-        {...otherProps}
-        options={sortBy("text", this.expandParents(options))}
-      />
-    );
-  }
-}
-
-LocationFilter.propTypes = {
-  options: PropTypes.array,
+  return (
+    <BaseMultipleFilter
+      selected={selected}
+      onChange={onChange}
+      label={label}
+      options={sortBy("text", expandParents(options))}
+    />
+  );
 };
+
+interface LocationFilterProps extends Omit<BaseMultipleFilterProps, "options"> {
+  options: { count: number; parents: string[]; text: string; value: string }[];
+}
 
 export default LocationFilter;
