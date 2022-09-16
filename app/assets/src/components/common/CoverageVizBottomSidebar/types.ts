@@ -1,4 +1,4 @@
-import { OnBLASTClickProps } from "~/interface/shared";
+import { OnBLASTClickProps, TooltipLocation } from "~/interface/shared";
 
 export interface CoverageVizBottomSidebarProps {
   visible?: boolean;
@@ -71,11 +71,6 @@ export interface HistogramTooltipData {
   data: [string, string | number][];
   name: string;
   disabled?: boolean;
-}
-
-export interface TooltipLocation {
-  left: number;
-  top: number;
 }
 
 export interface CoverageVizBottomSidebarsState {

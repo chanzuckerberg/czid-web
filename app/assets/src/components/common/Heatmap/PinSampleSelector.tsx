@@ -1,8 +1,27 @@
 import { Button, DropdownMenu } from "czifui";
-import PropTypes from "prop-types";
 import React from "react";
 
 import cs from "./pin_sample_selector.scss";
+
+interface PinSampleSelectorProps {
+  onApply: () => void;
+  onCancel: () => void;
+  onClose: () => void;
+  onSelectionChange: (
+    event: React.SyntheticEvent<Element, Event>,
+    value: (
+      | string
+      | {
+          id: number;
+          name: string;
+          pinned: boolean;
+        }
+    )[],
+  ) => void;
+  options: { id: number; name: string; pinned: boolean }[];
+  selectedSamples: number[];
+  selectSampleTrigger: HTMLElement;
+}
 
 const PinSampleSelector = ({
   selectSampleTrigger,
@@ -12,7 +31,7 @@ const PinSampleSelector = ({
   onCancel,
   onClose,
   selectedSamples,
-}) => {
+}: PinSampleSelectorProps) => {
   function handleApply() {
     onApply();
     onClose();
@@ -28,7 +47,6 @@ const PinSampleSelector = ({
       onClose();
     }
   }
-
   return (
     <DropdownMenu
       anchorEl={selectSampleTrigger}
@@ -64,16 +82,6 @@ const PinSampleSelector = ({
       </div>
     </DropdownMenu>
   );
-};
-
-PinSampleSelector.propTypes = {
-  onApply: PropTypes.func,
-  onCancel: PropTypes.func,
-  onClose: PropTypes.func,
-  onSelectionChange: PropTypes.func,
-  options: PropTypes.array,
-  selectedSamples: PropTypes.array,
-  selectSampleTrigger: PropTypes.object,
 };
 
 export default PinSampleSelector;

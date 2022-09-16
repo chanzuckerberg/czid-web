@@ -127,3 +127,8 @@ export interface SummaryStats {
 
 export type SampleId = number;
 export type SnapshotShareId = string;
+
+export interface TooltipLocation {
+  left: number;
+  top: number;
+}
