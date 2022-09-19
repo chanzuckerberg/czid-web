@@ -29,16 +29,24 @@ class HandleSfnNotificationsTimeout
     if overdue_pipeline_runs.present?
       overdue_pipeline_runs.each do |pr|
         prs = pr.active_stage
-        pr.job_status = PipelineRun::STATUS_FAILED
-        pr.finalized = 1
-        pr.time_to_finalized = pr.send(:time_since_executed_at)
-        pr.known_user_error, pr.error_message = pr.check_for_user_error(prs)
-        automatic_restart = pr.automatic_restart_allowed? unless pr.known_user_error
-        # Alert is sent within report_failed_pipeline_run_stage:
-        pr.send(:report_failed_pipeline_run_stage, prs, pr.known_user_error, automatic_restart)
-        pr.save
-        pr.monitor_results
-        Rails.logger.info("Marked PipelineRun #{pr.id} as failed due to timeout.")
+        if prs.nil?
+          # All stages succeeded.
+          pr.finalized = 1
+          pr.time_to_finalized = pr.send(:time_since_executed_at)
+          pr.job_status = PipelineRun::STATUS_CHECKED
+          pr.save
+        else
+          pr.job_status = PipelineRun::STATUS_FAILED
+          pr.finalized = 1
+          pr.time_to_finalized = pr.send(:time_since_executed_at)
+          pr.known_user_error, pr.error_message = pr.check_for_user_error(prs)
+          automatic_restart = pr.automatic_restart_allowed? unless pr.known_user_error
+          # Alert is sent within report_failed_pipeline_run_stage:
+          pr.send(:report_failed_pipeline_run_stage, prs, pr.known_user_error, automatic_restart)
+          pr.save
+          pr.monitor_results
+          Rails.logger.info("Marked PipelineRun #{pr.id} as failed due to timeout.")
+        end
       end
     end
 
