@@ -58,7 +58,11 @@ import {
 import Label from "~ui/labels/Label";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
-import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
+import {
+  workflowIsWorkflowRunEntity,
+  WORKFLOWS,
+  WORKFLOW_ENTITIES,
+} from "~utils/workflows";
 
 import {
   computeColumnsByWorkflow,
@@ -103,6 +107,7 @@ class SamplesView extends React.Component {
     };
 
     this.referenceSelectId = null;
+    this.setupWorkflowConfigs();
   }
 
   componentDidMount() {
@@ -119,15 +124,29 @@ class SamplesView extends React.Component {
     }
   }
 
+  setupWorkflowConfigs = () => {
+    this.configForWorkflow = {
+      [WORKFLOWS.AMR.value]: {
+        displayText: "antimicrobial resistance",
+      },
+      [WORKFLOWS.CONSENSUS_GENOME.value]: {
+        displayText: "consensus genome",
+      },
+      [WORKFLOWS.SHORT_READ_MNGS.value]: {
+        displayText: "sample",
+      },
+    };
+  };
+
   fetchMetadataFieldsBySampleIds = async () => {
     const { selectableIds, showAllMetadata, workflow } = this.props;
     if (selectableIds && showAllMetadata) {
       let metadataFields = [];
 
-      if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
-        metadataFields = await getSampleMetadataFields(selectableIds);
-      } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+      if (workflowIsWorkflowRunEntity(workflow)) {
         metadataFields = await getWorkflowRunMetadataFields(selectableIds);
+      } else {
+        metadataFields = await getSampleMetadataFields(selectableIds);
       }
 
       this.setState({ metadataFields });
@@ -681,19 +700,17 @@ class SamplesView extends React.Component {
 
     if (!isEmpty(userDataCounts)) {
       const totalNumberOfObjects =
-        workflow === WORKFLOWS.SHORT_READ_MNGS.value
-          ? userDataCounts.sampleCountByWorkflow[workflow]
-          : userDataCounts.numberOfConsensusGenomes;
-      const pluralGrammer = `${totalNumberOfObjects === 1 ? "" : "s"}`;
-      const objectsDisplayed =
-        workflow === WORKFLOWS.SHORT_READ_MNGS.value
-          ? `sample${pluralGrammer}`
-          : `consensus genome${pluralGrammer}`;
+        userDataCounts.sampleCountByWorkflow[workflow];
+      const pluralGrammar = `${totalNumberOfObjects === 1 ? "" : "s"}`;
+
+      const workflowConfig = this.configForWorkflow[workflow];
+      const workflowDisplayText = `${workflowConfig.displayText}${pluralGrammar}`;
       const filteredCountByWorkflowMessage = `${selectableIds?.length ||
-        0} out of ${totalNumberOfObjects} ${objectsDisplayed}`;
+        0} out of ${totalNumberOfObjects} ${workflowDisplayText}`;
+
       const description = hasAtLeastOneFilterApplied
         ? filteredCountByWorkflowMessage
-        : `${selectableIds?.length} ${objectsDisplayed}`;
+        : `${selectableIds?.length} ${workflowDisplayText}`;
 
       return (
         <div className={cs.filteredCount}>
@@ -949,18 +966,15 @@ class SamplesView extends React.Component {
       phyloTreeCreationModalOpen,
     } = this.state;
 
-    const workflowIsAmr = workflow === WORKFLOWS.AMR.value;
     return (
       <div className={cs.container}>
-        {!workflowIsAmr &&
-        (currentDisplay === "table" || currentDisplay === "plqc") ? (
+        {currentDisplay === "table" || currentDisplay === "plqc" ? (
           !snapshotShareId && this.renderToolbar()
         ) : (
           <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
         )}
-        {!workflowIsAmr && this.renderFilteredCount()}
-        {!workflowIsAmr && this.renderDisplay()}
-        {workflowIsAmr && <div>AMR tab placeholder</div>}
+        {this.renderFilteredCount()}
+        {this.renderDisplay()}
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal
             // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this

@@ -203,10 +203,14 @@ const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
 const processRawWorkflowRun = workflowRun => {
   const getSampleField = path => get(["sample", ...path], workflowRun);
 
-  const workflowRunFields =
-    workflowRun.workflow === WORKFLOWS.CONSENSUS_GENOME.value
-      ? processConsensusGenomeWorkflowRun(workflowRun)
-      : null;
+  let workflowRunFields = null;
+
+  // TODO: determine if we need different functions / fields per workflow
+  if (workflowRun.workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+    workflowRunFields = processConsensusGenomeWorkflowRun(workflowRun);
+  } else if (workflowRun.workflow === WORKFLOWS.AMR.value) {
+    workflowRunFields = processConsensusGenomeWorkflowRun(workflowRun);
+  }
 
   const row = {
     id: workflowRun.id,
