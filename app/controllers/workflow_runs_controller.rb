@@ -271,7 +271,7 @@ class WorkflowRunsController < ApplicationController
   end
 
   def index_params
-    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :host, :locationV2, :tissue, :projectId, :visibility, :workflow, time: [])
+    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :locationV2, :tissue, :projectId, :visibility, :workflow, host: [], time: [])
   end
 
   def fetch_workflow_runs(domain:, filters: {})
@@ -281,8 +281,7 @@ class WorkflowRunsController < ApplicationController
     samples = fetch_samples(domain: domain, filters: sample_filters)
     samples_workflow_runs = current_power.samples_workflow_runs(samples).non_deprecated
 
-    filtered_workflow_runs = filter_workflow_runs(workflow_runs: samples_workflow_runs, filters: workflow_run_filters)
-    filtered_workflow_runs
+    filter_workflow_runs(workflow_runs: samples_workflow_runs, filters: workflow_run_filters)
   end
 
   def format_workflow_runs(workflow_runs:, mode: "basic")

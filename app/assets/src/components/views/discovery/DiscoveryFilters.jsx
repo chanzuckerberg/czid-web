@@ -392,10 +392,14 @@ class DiscoveryFilters extends React.Component {
       ANNOTATION_FILTER_FEATURE,
     );
 
-    // Taxon threshold and annotations filters are disabled on the cg tab
+    // Taxon threshold and annotations filters are not available for some workflows
+    const mngsFilterDisabledWorkflows = [
+      WORKFLOWS.CONSENSUS_GENOME.value,
+      WORKFLOWS.AMR.value,
+    ];
     const mngsFiltersDisabled =
       currentTab === TAB_SAMPLES &&
-      workflow === WORKFLOWS.CONSENSUS_GENOME.value;
+      mngsFilterDisabledWorkflows.includes(workflow);
 
     return (
       <div className={cx(cs.filtersContainer, className)}>

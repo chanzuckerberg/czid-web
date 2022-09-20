@@ -513,7 +513,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
             context "filtering by sample host" do
               it "returns correct workflow runs in domain '#{domain}' with mode '#{mode}'" do
-                get :index, params: { domain: domain, mode: mode, host: HostGenome.find_by(name: "Bear").id, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+                get :index, params: { domain: domain, mode: mode, host: [HostGenome.find_by(name: "Bear").id], workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
