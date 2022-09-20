@@ -33,7 +33,7 @@ module SamplesHelper
 
     # reads_after_cdhitdup required for backwards compatibility
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
-                    total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
+                    total_reads passed_filters passed_filters_percent total_ercc_reads subsampled_fraction
                     quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup reads_after_idseq_dedup reads_after_czid_dedup
                     host_organism notes
                     insert_size_median insert_size_mode insert_size_median_absolute_deviation insert_size_min insert_size_max insert_size_mean insert_size_standard_deviation insert_size_read_pairs]
@@ -63,8 +63,8 @@ module SamplesHelper
                         overall_job_status: run_info ? run_info[:result_status_description] : '',
                         runtime_seconds: run_info ? run_info[:total_runtime] : '',
                         total_reads: pipeline_run ? pipeline_run.total_reads : '',
-                        nonhost_reads: pipeline_run ? pipeline_run.adjusted_remaining_reads : '',
-                        nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
+                        passed_filters: pipeline_run ? pipeline_run.adjusted_remaining_reads : '',
+                        passed_filters_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
                         total_ercc_reads: pipeline_run ? pipeline_run.total_ercc_reads : '',
                         subsampled_fraction: pipeline_run ? pipeline_run.fraction_subsampled : '',
                         quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
