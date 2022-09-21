@@ -276,6 +276,7 @@ module ElasticsearchQueryHelper
 
     job_status = ""
     loop do
+      sleep(5.seconds)
       resp = GLUE_CLIENT.get_job_run({ job_name: job_name.to_s, run_id: job_run_id })
       job_status = resp.job_run.job_run_state
       break if job_status != "RUNNING"
