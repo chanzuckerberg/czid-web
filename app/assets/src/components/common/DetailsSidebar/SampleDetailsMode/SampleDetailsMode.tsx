@@ -249,9 +249,7 @@ const SampleDetailsMode = ({
 
   const renderTab = () => {
     const savePending = some(metadataSavePending);
-    const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
-      run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
-    );
+
     if (currentTab === "Metadata") {
       return (
         <MetadataTab
@@ -278,6 +276,12 @@ const SampleDetailsMode = ({
           hideBorder
         />
       );
+
+      const consensusGenomeWorkflowRuns =
+        sample &&
+        sample.workflow_runs.filter(
+          run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
+        );
 
       const consensusGenomeDropdown = currentWorkflowTab ===
         WORKFLOW_TABS.CONSENSUS_GENOME &&
