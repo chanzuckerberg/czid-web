@@ -943,10 +943,7 @@ class SamplesView extends React.Component {
 
     trackEvent("SamplesView_row_clicked", {
       sampleId: object.id,
-      sampleName:
-        workflowEntity === WORKFLOW_ENTITIES.SAMPLE
-          ? object.name
-          : get("sample.info.name", object),
+      sampleName: object?.sample?.name,
       workflowEntity,
     });
   };
