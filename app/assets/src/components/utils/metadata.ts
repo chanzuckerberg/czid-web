@@ -1,35 +1,31 @@
 import { keyBy, mapValues, isObject } from "lodash/fp";
 import { FIELDS_THAT_HAVE_MAX_INPUT } from "~/components/common/Metadata/constants";
+import { Metadata, RawMetadata } from "~/interface/shared";
 import { MetadataType } from "../common/DetailsSidebar/SampleDetailsMode/MetadataTab";
-
-type RawMetadata = Record<string, string | number | null>;
-export type Metadata = Record<string, string>;
-
-interface ProcessMetadataParams {
-  metadata: RawMetadata;
-  flatten: boolean;
-}
 
 // Transform the server metadata response to a simple key => value map.
 export const processMetadata = ({
   metadata,
   flatten = false,
-}: ProcessMetadataParams): Metadata => {
-  let newMetadata: Metadata = keyBy("key", metadata);
-
-  newMetadata = mapValues(
+}: {
+  metadata: RawMetadata[];
+  flatten: boolean;
+}): Metadata => {
+  const metadataObject = keyBy("key", metadata);
+  const newMetadata = mapValues(
     (val: RawMetadata) =>
       val.base_type === "date"
         ? val.raw_value
         : val[`${val.base_type}_validated_value`],
-    newMetadata,
+    metadataObject,
   );
   // If flatten, simplify objects (e.g. location objects) to .name
   if (flatten) {
-    newMetadata = mapValues(
-      (val: RawMetadata) => (isObject(val) ? val.name : val),
+    const flatNewMetadata = mapValues(
+      val => (isObject(val) ? val.name : val),
       newMetadata,
     );
+    return flatNewMetadata;
   }
   return newMetadata;
 };

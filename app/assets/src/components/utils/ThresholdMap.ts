@@ -4,24 +4,26 @@ function ThresholdMap(options) {
   this.options = options;
 }
 
-ThresholdMap.isThresholdValid = function(threshold) {
+ThresholdMap.isThresholdValid = function(threshold: ThresholdConditions) {
   if (threshold.metric && threshold.operator && threshold.value) {
     return (
       threshold.metric.length > 0 &&
       threshold.operator.length > 0 &&
       threshold.value !== "" &&
-      !isNaN(threshold.value)
+      !isNaN(Number(threshold.value))
     );
   }
   return false;
 };
 
-ThresholdMap.getSavedThresholdFilters = function() {
+ThresholdMap.getSavedThresholdFilters = function(): ThresholdConditions[] {
   const activeThresholds = window.localStorage.getItem("activeThresholds");
   return activeThresholds ? JSON.parse(activeThresholds) : [];
 };
 
-ThresholdMap.saveThresholdFilters = function(thresholds) {
+ThresholdMap.saveThresholdFilters = function(
+  thresholds: ThresholdConditions[],
+) {
   const activeThresholds = thresholds.filter(threshold => {
     return ThresholdMap.isThresholdValid(threshold);
   });
@@ -31,16 +33,19 @@ ThresholdMap.saveThresholdFilters = function(thresholds) {
   );
 };
 
-ThresholdMap.taxonPassThresholdFilter = function(taxon, rules) {
+ThresholdMap.taxonPassThresholdFilter = function(
+  taxon: object,
+  rules: ThresholdConditions[],
+) {
   if (Object.keys(taxon).length <= 0) {
     return false;
   }
 
   for (let i = 0; i < rules.length; i += 1) {
-    let rule = rules[i];
+    const rule = rules[i];
     if (ThresholdMap.isThresholdValid(rule)) {
-      let { metric, operator, value } = rule;
-      let threshold = parseFloat(value);
+      const { metric, operator, value } = rule;
+      const threshold = parseFloat(value);
       const [fieldType, fieldTitle] = metric.split("_");
       const taxonValue = getTaxonMetric(taxon, fieldType, fieldTitle);
       switch (operator) {
@@ -63,5 +68,12 @@ ThresholdMap.taxonPassThresholdFilter = function(taxon, rules) {
   }
   return true;
 };
+
+export interface ThresholdConditions {
+  metric: string;
+  operator: ">=" | "<=";
+  value: string;
+  metricDisplay: string;
+}
 
 export default ThresholdMap;

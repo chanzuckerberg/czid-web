@@ -1,7 +1,9 @@
 import { isEmpty, last } from "lodash/fp";
+import Sample from "~/interface/sample";
+import { PipelineRun } from "../../interface/shared/specific";
 
 // Get the basename from a file path
-export const baseName = str => {
+export const baseName = (str: string) => {
   let base = cleanFilePath(str);
 
   let separator = "/";
@@ -20,14 +22,14 @@ export const baseName = str => {
   return base;
 };
 
-export const cleanFilePath = name => {
+export const cleanFilePath = (name: string) => {
   name = name.trim();
 
   // Remove ./ and .\ from the start of file paths
   return name.replace(/^\.[\\|/]/, "");
 };
 
-export const sampleNameFromFileName = fname => {
+export const sampleNameFromFileName = (fname: string) => {
   let base = baseName(fname);
   const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
   const readLabel = /_R1.*$|_R2.*$/gi;
@@ -36,22 +38,34 @@ export const sampleNameFromFileName = fname => {
 };
 
 const errorMap = {
-  "The .fastq file.+has an invalid number of lines.": "Please verify the number of lines in the file is divisible by 4.",
-  "The maximum line length was exceeded.+": "Please verify that .fastq headers or sequences are less than 10,000 characters long",
-  "There was an error unzipping the input file.+": "Please verify that this file is a proper .gz file.",
-  "Paired input files.+": "Paired input files must contain the same number of reads.",
-  "The input file.+is invalid.": "Please check that your .fastq file is valid and try again.",
-  "The input .fastq file.+did not begin with an \"@\"": "Please check the .fastq file and try again.",
-  "The input .fasta file.+read ID did not begin with a \">\"": "Please check the .fasta file and try again.",
-  "The input file.+ has duplicate read IDs": "Please remove duplicate read ids and try again",
-  "There was an insufficient number of reads .+": "Please verify the sequencing quality of this sample.",
-  "The file.+contain reads longer than the 500 bp limit for the Illumina-supported pipeline": "Please verify the sequencing platform during sample upload.",
-  "The CZ ID pipeline expects a single input file.+": "Please check your input file and try again.",
-  "There was an error parsing the input file.+": "Please check that the file is not corrupted and is in the .fastq format.",
+  "The .fastq file.+has an invalid number of lines.":
+    "Please verify the number of lines in the file is divisible by 4.",
+  "The maximum line length was exceeded.+":
+    "Please verify that .fastq headers or sequences are less than 10,000 characters long",
+  "There was an error unzipping the input file.+":
+    "Please verify that this file is a proper .gz file.",
+  "Paired input files.+":
+    "Paired input files must contain the same number of reads.",
+  "The input file.+is invalid.":
+    "Please check that your .fastq file is valid and try again.",
+  'The input .fastq file.+did not begin with an "@"':
+    "Please check the .fastq file and try again.",
+  'The input .fasta file.+read ID did not begin with a ">"':
+    "Please check the .fasta file and try again.",
+  "The input file.+ has duplicate read IDs":
+    "Please remove duplicate read ids and try again",
+  "There was an insufficient number of reads .+":
+    "Please verify the sequencing quality of this sample.",
+  "The file.+contain reads longer than the 500 bp limit for the Illumina-supported pipeline":
+    "Please verify the sequencing platform during sample upload.",
+  "The CZ ID pipeline expects a single input file.+":
+    "Please check your input file and try again.",
+  "There was an error parsing the input file.+":
+    "Please check that the file is not corrupted and is in the .fastq format.",
   "The file.+is in .fasta format.+": "Please upload a .fastq file.",
 };
 
-function subtextError(message){
+function subtextError(message: string) {
   for (const [key, value] of Object.entries(errorMap)) {
     if (message.match(key)) {
       return value;
@@ -59,7 +73,15 @@ function subtextError(message){
   }
 }
 
-export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
+export const sampleErrorInfo = ({
+  sample,
+  pipelineRun = {},
+  error = {},
+}: {
+  sample: Sample;
+  pipelineRun: PipelineRun | Record<string, never>;
+  error: { label?: string; message: string } | Record<string, never>;
+}) => {
   let status, message, subtitle, linkText, type, link, pipelineVersionUrlParam;
   switch (
     sample.upload_error ||
@@ -73,7 +95,9 @@ export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
       status = "COMPLETE - ISSUE";
       message = pipelineRun.error_message || error.message;
       subtitle = subtextError(message);
-      linkText = subtitle? "": "Please check your file format and reupload your file.";
+      linkText = subtitle
+        ? ""
+        : "Please check your file format and reupload your file.";
       type = "warning";
       link = "/samples/upload";
       break;
@@ -81,7 +105,9 @@ export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
       status = "COMPLETE - ISSUE";
       message = pipelineRun.error_message || error.message;
       subtitle = subtextError(message);
-      linkText = subtitle? "": "Please check your file format and reupload your file.";
+      linkText = subtitle
+        ? ""
+        : "Please check your file format and reupload your file.";
       type = "warning";
       link = "/samples/upload";
       break;

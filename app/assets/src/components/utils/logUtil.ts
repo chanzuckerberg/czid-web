@@ -4,8 +4,8 @@ import * as Sentry from "@sentry/browser";
 
 interface LogErrorParams {
   message: string;
-  exception: Error;
-  details: { [key: string]: string };
+  exception?: Error;
+  details?: { [key: string]: string };
 }
 
 export const logError = ({

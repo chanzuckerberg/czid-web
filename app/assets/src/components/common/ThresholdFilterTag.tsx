@@ -1,15 +1,12 @@
 import React from "react";
-import ThresholdMap from "~/components/utils/ThresholdMap";
+import ThresholdMap, {
+  ThresholdConditions,
+} from "~/components/utils/ThresholdMap";
 import FilterTag from "~ui/controls/FilterTag";
 
 interface ThresholdFilterTagProps {
   onClose: () => void;
-  threshold: {
-    metric: string;
-    value: string;
-    operator: string;
-    metricDisplay: string;
-  };
+  threshold: ThresholdConditions;
   className: string;
 }
 

@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import { logError } from "./logUtil";
 
 // Assumes that the CSV has headers.
-export const parseCSVBlob = blob => {
+export const parseCSVBlob = (blob: string) => {
   const csvData = Papa.parse(blob, {
     skipEmptyLines: true,
   }).data;
@@ -14,7 +14,7 @@ export const parseCSVBlob = blob => {
   };
 };
 
-const escapeFormulae = datum => {
+const escapeFormulae = (datum: string) => {
   // Defend against injection attacks, because Excel and LibreOffice will automatically parse =, +, -, or @ such cells as formulae.
   // Formulae Injection Attacks: https://www.contextis.com/en/blog/comma-separated-vulnerabilities
 
@@ -22,7 +22,7 @@ const escapeFormulae = datum => {
   return datum.replace(/^[=+\-@]/g, "");
 };
 
-export const sanitizeCSVRow = row => {
+export const sanitizeCSVRow = (row: string[]) => {
   if (!isEmpty(row)) {
     return row.map(val => {
       if (isNumber(val)) {
@@ -50,7 +50,7 @@ export const sanitizeCSVRow = row => {
 //        ["694002,"genus",694002,"Betacoronavirus","","viruse…187294,99.9763,4399.69,0.00284868,"-","-","-","-""],
 //        ["694009,"species",694002,"Severe acute respiratory …98.5,187350,1,187294,100,4399.7,0,"-","-","-","-""],
 //     ]
-export const createCSVObjectURL = (headers, rows) => {
+export const createCSVObjectURL = (headers: string[], rows: string[][]) => {
   const csvData = [headers].concat(rows);
   const dataString = csvData.join("\n");
   const dataBlob = new Blob([dataString], { type: "text/csv" });

@@ -1,5 +1,5 @@
 export default class ArrayUtils {
-  static equal(array1, array2) {
+  static equal(array1: unknown[], array2: unknown[]) {
     if (array1 === array2) return true;
     // Feature: if one of them is not an array return false.
     // Make sure you send arrays for comparison
@@ -18,7 +18,7 @@ export default class ArrayUtils {
   }
 
   // Use binary search to find the closest neighbors to a value in a sorted array.
-  static findClosestNeighbors(sortedArray, value) {
+  static findClosestNeighbors(sortedArray: number[], value: number) {
     if (sortedArray.length === 0) {
       return [];
     }
@@ -53,7 +53,7 @@ export default class ArrayUtils {
     return [sortedArray[low], sortedArray[high]];
   }
 
-  static caseInsensitiveIncludes = (strArray, filterStr) => {
+  static caseInsensitiveIncludes = (strArray: string[], filterStr: string) => {
     return strArray
       .map(element => element.toLowerCase())
       .includes((filterStr || "").toLowerCase());

@@ -153,3 +153,43 @@ export interface TooltipLocation {
   left: number;
   top: number;
 }
+
+export interface RawMetadata {
+  base_type: "date" | "location";
+  created_at: string;
+  id: number;
+  key: string;
+  location_id: number | null;
+  location_validated_value?: LocationObject;
+  date_validated_value: null;
+  metadata_field_id: number;
+  number_validated_value: null;
+  raw_value: string;
+  sample_id: number;
+  string_validated_value: null;
+  updated_at: string;
+}
+
+interface LocationObject {
+  city_id: null;
+  city_name: string;
+  country_code: string;
+  country_id: number;
+  country_name: string;
+  created_at: string;
+  geo_level: "subdivision";
+  id: number;
+  lat: string;
+  lng: string;
+  locationiq_id: number;
+  name: string;
+  osm_id: number;
+  osm_type: "relation";
+  state_id: number;
+  state_name: string;
+  subdivision_id: number;
+  subdivision_name: string;
+  updated_at: string;
+}
+
+export type Metadata = Record<string, string | LocationObject>;
