@@ -27,6 +27,12 @@ module SamplesHelper
     end
   end
 
+  class WorkflowNotFoundError < StandardError
+    def initialize
+      super("Workflow type not found")
+    end
+  end
+
   # If selected_pipeline_runs_by_sample_id is provided, use those pipelines runs instead of the latest pipeline run for each sample.
   def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false)
     formatted_samples = format_samples(samples, selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
@@ -774,6 +780,47 @@ module SamplesHelper
     end
 
     sample_ids.size
+  end
+
+  def bulk_create_and_dispatch_workflow_runs(sample_ids, workflow, inputs_json: nil)
+    # update_all and insert_all skip validations so do a manual check for a valid workflow type
+    unless WorkflowRun::WORKFLOW.value?(workflow)
+      raise WorkflowNotFoundError
+    end
+
+    # select only samples with no running workflows of this type
+    samples_with_no_amr_wrs = Sample.includes(:workflow_runs).where(id: sample_ids, workflow_runs: { sample_id: nil })
+    sample_ids_with_non_running_amr_wrs = Sample.includes(:workflow_runs).where(id: sample_ids, workflow_runs: {
+                                                                                  workflow: workflow,
+                                                                                  deprecated: false,
+                                                                                  status: [WorkflowRun::STATUS[:succeeded], WorkflowRun::STATUS[:succeeded_with_issue], WorkflowRun::STATUS[:failed]],
+                                                                                })
+    sample_ids_filtered = sample_ids_with_non_running_amr_wrs.or(samples_with_no_amr_wrs).pluck(:id)
+    if sample_ids_filtered.empty?
+      return []
+    end
+
+    # deprecate completed workflow runs and bulk insert new workflow runs
+    begin
+      ActiveRecord::Base.transaction do
+        # rubocop:disable Rails/SkipsModelValidations
+        WorkflowRun.where(sample_id: sample_ids_filtered, workflow: workflow).update_all(deprecated: true, updated_at: Time.current)
+        WorkflowRun.insert_all!(
+          sample_ids_filtered.map do |id|
+            { sample_id: id, workflow: workflow, created_at: Time.current, updated_at: Time.current, inputs_json: inputs_json }
+          end
+        )
+      end
+    # rubocop:enable Rails/SkipsModelValidations
+    rescue StandardError => e
+      message = "Unexpected error in inserting new workflow runs."
+      LogUtil.log_error(message, exception: e, sample_ids: sample_ids_filtered)
+      return []
+    end
+
+    # TODO: replace this with a new dispatch service to dispatch multiple workflow runs at once
+    new_wrs = WorkflowRun.where(sample_id: sample_ids_filtered, workflow: workflow, deprecated: false)
+    new_wrs.each(&:dispatch).map(&:id)
   end
 
   private

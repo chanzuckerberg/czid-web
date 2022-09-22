@@ -1477,20 +1477,13 @@ class SamplesController < ApplicationController
   def bulk_kickoff_workflow_runs
     workflow = collection_params[:workflow]
     sample_ids = collection_params[:sampleIds]
-    samples = Sample.where(id: sample_ids)
-
-    new_wrs = samples.map do |s|
-      # TODO: Use rails 6 insert_all! to bulk insert into SQL efficiently so we don't potentially insert many individual records
-      # Need to find a way to bulk dispatch so we don't update many individual records at once
-      s.create_and_dispatch_workflow_run(workflow,
-                                         inputs_json: {
-                                           # start_from_mngs creates the amr run using the already host filtered reads
-                                           # and assembled contigs
-                                           start_from_mngs: "true",
-                                         }.to_json)
-    end
-
-    new_workflow_run_ids = new_wrs.map(&:id)
+    new_workflow_run_ids = bulk_create_and_dispatch_workflow_runs(sample_ids,
+                                                                  workflow,
+                                                                  inputs_json: {
+                                                                    # start_from_mngs creates the amr run using the already host filtered reads
+                                                                    # and assembled contigs
+                                                                    start_from_mngs: "true",
+                                                                  }.to_json)
     render json: { newWorkflowRunIds: new_workflow_run_ids }
   end
 

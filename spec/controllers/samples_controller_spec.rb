@@ -952,12 +952,22 @@ RSpec.describe SamplesController, type: :controller do
         @project = create(:project, users: [@joe])
         @sample1 = create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], host_genome: host_genome1)
         @sample2 = create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], host_genome: host_genome1)
-
+        @sample3 = create(:sample, project: @project, name: "Test Sample Three", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], host_genome: host_genome1)
         create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: fake_sfn_arn)
         create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: test_workflow_name), value: fake_wdl_version)
       end
 
-      context "Whem AMR workflow is specified" do
+      it "should raise an error for unrecognized workflow types" do
+        params = {
+          sampleIds: [@sample1.id, @sample2.id],
+          workflow: "bad_workflow",
+        }
+        expect do
+          post :bulk_kickoff_workflow_runs, params: params
+        end.to raise_error(SamplesHelper::WorkflowNotFoundError)
+      end
+
+      context "When AMR workflow is specified" do
         it "should create and dispatch AMR workflow runs for each sample" do
           params = {
             sampleIds: [@sample1.id, @sample2.id],
@@ -972,7 +982,68 @@ RSpec.describe SamplesController, type: :controller do
           wr2 = @sample2.workflow_runs.last
           expect(wr1.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
           expect(wr2.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
-          expect(json_response["newWorkflowRunIds"]).to eq([wr1.id, wr2.id])
+          expect(json_response["newWorkflowRunIds"]).to contain_exactly(wr1.id, wr2.id)
+        end
+
+        it "should deprecate previous AMR workflows and allow rerunning of completed AMR workflow" do
+          @completed_wr = create(:workflow_run, sample_id: @sample3.id, workflow: WorkflowRun::WORKFLOW[:amr], deprecated: false, status: WorkflowRun::STATUS[:succeeded])
+
+          params = {
+            sampleIds: [@sample1.id, @sample2.id, @sample3.id],
+            workflow: WorkflowRun::WORKFLOW[:amr],
+          }
+
+          post :bulk_kickoff_workflow_runs, params: params
+
+          expect(response).to have_http_status(200)
+          json_response = JSON.parse(response.body)
+          wr1 = @sample1.workflow_runs.last
+          wr2 = @sample2.workflow_runs.last
+          wr3 = @sample3.workflow_runs.last
+          expect(wr1.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
+          expect(wr2.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
+          expect(wr3.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
+          expect(json_response["newWorkflowRunIds"]).to contain_exactly(wr1.id, wr2.id, wr3.id)
+          expect(wr3.id).not_to eq(@completed_wr.id)
+          expect(@completed_wr.reload.deprecated?).to be(true)
+        end
+
+        context "When one or more samples has an in-progress AMR workflow" do
+          before do
+            @in_prog_wr = create(:workflow_run, sample_id: @sample3.id, workflow: WorkflowRun::WORKFLOW[:amr], deprecated: false, status: WorkflowRun::STATUS[:running])
+          end
+
+          it "should not kick off AMR for sample with in-progress AMR workflow" do
+            params = {
+              sampleIds: [@sample1.id, @sample2.id, @sample3.id],
+              workflow: WorkflowRun::WORKFLOW[:amr],
+            }
+
+            post :bulk_kickoff_workflow_runs, params: params
+
+            expect(response).to have_http_status(200)
+            json_response = JSON.parse(response.body)
+            wr1 = @sample1.workflow_runs.last
+            wr2 = @sample2.workflow_runs.last
+            wr3 = @sample3.workflow_runs.last
+            expect(wr1.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
+            expect(wr2.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
+            expect(wr3.workflow).to eq(WorkflowRun::WORKFLOW[:amr])
+            expect(json_response["newWorkflowRunIds"]).to contain_exactly(wr1.id, wr2.id)
+            expect(wr3.id).to eq(@in_prog_wr.id)
+            expect(@in_prog_wr.reload.deprecated?).to be(false)
+          end
+
+          it "should exit quietly if no samples are eligible for AMR" do
+            params = {
+              sampleIds: [@sample3.id],
+              workflow: WorkflowRun::WORKFLOW[:amr],
+            }
+            post :bulk_kickoff_workflow_runs, params: params
+            expect(response).to have_http_status(200)
+            json_response = JSON.parse(response.body)
+            expect(json_response["newWorkflowRunIds"]).to eq([])
+          end
         end
       end
     end
