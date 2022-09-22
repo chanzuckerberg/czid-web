@@ -1,7 +1,7 @@
 class ConsensusGenomeMetricsService
   include Callable
 
-  ALL_METRICS = {
+  QUALITY_METRICS = {
     reference_genome_length: "Reference Length",
     percent_genome_called: "% Genome Called",
     percent_identity: "%id",
@@ -14,6 +14,12 @@ class ConsensusGenomeMetricsService
     n_missing: "Missing Bases",
     n_ambiguous: "Ambiguous Bases",
   }.freeze
+
+  COVERAGE_METRICS = {
+    coverage_depth: "Coverage Depth",
+  }.freeze
+
+  ALL_METRICS = QUALITY_METRICS.merge(COVERAGE_METRICS).freeze
 
   OUTPUT_STATS_METRICS = [
     :ercc_mapped_reads,

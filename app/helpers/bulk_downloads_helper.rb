@@ -477,9 +477,13 @@ module BulkDownloadsHelper
   def self.prepare_workflow_run_metrics_csv_info(workflow_run:)
     parsed_cached_results = workflow_run.parsed_cached_results
     quality_metrics = parsed_cached_results&.[]("quality_metrics") if parsed_cached_results.present?
+    coverage_viz_metrics = parsed_cached_results&.[]("coverage_viz") if parsed_cached_results.present?
 
-    if quality_metrics.present?
-      return quality_metrics.values_at(*ConsensusGenomeMetricsService::ALL_METRICS.keys.map(&:to_s))
+    all_metrics = Hash.new('') # set default value to ""
+    all_metrics.update(quality_metrics) if quality_metrics.present?
+    all_metrics.update(coverage_viz_metrics) if coverage_viz_metrics.present?
+    unless all_metrics.empty?
+      return all_metrics.values_at(*ConsensusGenomeMetricsService::ALL_METRICS.keys.map(&:to_s))
     end
 
     # Most likely will not reach this line since the frontend excludes samples that failed/have issues from bulk downloads
