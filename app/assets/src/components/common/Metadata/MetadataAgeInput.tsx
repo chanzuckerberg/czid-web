@@ -1,11 +1,14 @@
 import cx from "classnames";
 import React, { useEffect, useState, KeyboardEvent } from "react";
 
+import { MetadataValue } from "~/interface/shared";
 import Input from "~ui/controls/Input";
 import { IconAlertSmall } from "~ui/icons";
-import { MetadataInputProps } from "./MetadataInput";
+
 import { FIELDS_THAT_HAVE_MAX_INPUT } from "./constants";
+
 import cs from "./metadata_age_input.scss";
+import { MetadataInputProps } from "./types";
 
 // Description: This is a MetadataInput component for the "Host Age" field and is only surfaced when the sample host is human.
 // This component enforces a max value to ensure that users enter HIPAA-complaint host ages.
@@ -29,10 +32,10 @@ interface MetadataAgeInputProps
     taxaCategory,
   }: {
     key: string;
-    value: string | number;
+    value: MetadataValue;
     type: MetadataInputProps["metadataType"]["dataType"];
     taxaCategory: string;
-  }) => string;
+  }) => MetadataValue;
 }
 
 const MetadataAgeInput = ({
@@ -84,7 +87,7 @@ const MetadataAgeInput = ({
           cs.darkPlaceholder,
           hipaaWarning && ageChanged && "warning",
         )}
-        onChange={(val) => {
+        onChange={val => {
           const definedVal = ensureDefinedValue({
             key: metadataType.key,
             value: val,
@@ -95,7 +98,7 @@ const MetadataAgeInput = ({
           setSafeHumanAge(definedVal);
           onChange(metadataType.key, definedVal.toString());
         }}
-        onKeyDown={(e) => handleKeyDown(e)}
+        onKeyDown={e => handleKeyDown(e)}
         onBlur={() => onSave && onSave(metadataType.key)}
         value={hipaaWarning ? "" : safeHumanAge}
         type={"number"}

@@ -16,6 +16,7 @@ import _fp, {
   orderBy,
   merge,
   keys,
+  LodashZipObject1x2,
 } from "lodash/fp";
 import React from "react";
 
@@ -24,68 +25,24 @@ import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
-import PropTypes from "~/components/utils/propTypes";
 import DataTable from "~/components/visualizations/table/DataTable";
+import { LocationObject, MetadataValue, Sample } from "~/interface/shared";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import { IconPlusCircleSmall } from "~ui/icons";
-
 import MetadataInput from "./MetadataInput";
-import cs from "./metadata_manual_input.scss";
+import { AUTO_POPULATE_FIELDS, COLUMN_HEADER_TOOLTIPS } from "./constants";
 
+import cs from "./metadata_manual_input.scss";
+import { MetadataManualInputProps, MetadataManualInputState } from "./types";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 const map = _fp.map.convert({ cap: false });
 
-// From https://czi.quip.com/FPnbATvWSIIL/Metadata-Tooltips#AQKACA1SEBr on 2020-02-18.
-// See also descriptions stored in database by MetadataField.
-// NOTE: for good layout, text should be no longer than 110 chars.
-const COLUMN_HEADER_TOOLTIPS = {
-  "Host Organism": "Host from which the sample was originally collected.",
-  collection_date:
-    "Date on which sample was originally collected. For privacy reasons, only use month and/or year for human data.",
-  collection_location_v2:
-    "Location from which sample was originally collected. For privacy, we do not allow city-level data for human hosts.",
-  nucleotide_type: "Nucleotide type of sample.",
-  sample_type:
-    "Tissue or site from which the sample was originally collected. Suggested list is dependent on host selection.",
-  water_control: "Whether or not sample is a water control.",
-  collected_by: "Institution/agency that collected sample.",
-  isolate: "Whether or not sample is an isolate.",
-  antibiotic_administered: "Antibiotics administered to host.",
-  comorbidity: "Other chronic diseases present.",
-  host_age: "Age of host (in years).",
-  host_genus_species: "Genus or species of host.",
-  host_id: "Unique identifier for host.",
-  host_race_ethnicity: "Race and-or ethnicity of host.",
-  host_sex: "Sex of host.",
-  immunocomp: "Information on if host was immunocompromised.",
-  primary_diagnosis: "Diagnosed disease that resulted in hospital admission.",
-  detection_method:
-    "Detection method for the known organism identified by a clinical lab.",
-  infection_class: "Class of infection.",
-  known_organism: "Organism in sample detected by clinical lab.",
-  library_prep: "Information on library prep kit.",
-  rna_dna_input: "RNA/DNA input in nanograms.",
-  sequencer: "Model of sequencer used.",
-  diseases_and_conditions: "Diseases and-or conditions observed in host.",
-  blood_fed: "Information about host's blood feeding.",
-  gravid: "Whether or not host was gravid.",
-  host_life_stage: "Life stage of host.",
-  preservation_method: "Preservation method of host.",
-  sample_unit: "Number of hosts in sample.",
-  trap_type: "Trap type used on host.",
-  ct_value:
-    "The number of cycles required for the fluorescent signal to cross the background fluorescent threshold during qPCR. The value is inversely proportional to the amount of target nucleic acid.",
-};
-
-// When the auto-populate button is clicked, the following metadata fields will be populated with these values.
-const AUTO_POPULATE_FIELDS = {
-  "Host Organism": "Human",
-  sample_type: "CSF",
-  nucleotide_type: "DNA",
-  collection_date: "2020-05",
-  collection_location_v2: "California, USA",
-};
-
-class MetadataManualInput extends React.Component {
+class MetadataManualInput extends React.Component<
+  MetadataManualInputProps,
+  MetadataManualInputState
+> {
   state = {
     selectedFieldNames: [],
     projectMetadataFields: null,
@@ -104,7 +61,7 @@ class MetadataManualInput extends React.Component {
     this.setRequiredFields();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: MetadataManualInputProps) {
     const { projectMetadataFields, samples, samplesAreNew } = this.props;
     // Whenever the samples change, we need to re-sync the metadata with the parent.
     // (e.g. update which samples are included in the metadata object)
@@ -164,7 +121,7 @@ class MetadataManualInput extends React.Component {
     return false;
   };
 
-  getManualInputColumns = () => {
+  getManualInputColumns = (): string[] => {
     return [
       "Sample Name",
       ...(this.props.samplesAreNew ? ["Host Organism"] : []),
@@ -176,7 +133,7 @@ class MetadataManualInput extends React.Component {
     const { samples } = this.props;
     const { metadataFieldsToEdit, headersToEdit } = this.state;
 
-    let newMetadataFieldsToEdit = {};
+    const newMetadataFieldsToEdit = {};
 
     // For each sample, merge auto-populate fields into existing fields (which may be empty).
     // Existing fields take precedence.
@@ -202,8 +159,8 @@ class MetadataManualInput extends React.Component {
   };
 
   // Update metadata field based on user's manual input.
-  updateMetadataField = (key, value, sample) => {
-    const newHeaders = union([key], this.state.headersToEdit);
+  updateMetadataField = (key: string, value: MetadataValue, sample: Sample) => {
+    const newHeaders = union<string>([key], this.state.headersToEdit);
     const newFields = set(
       [sample.name, key],
       value,
@@ -221,7 +178,11 @@ class MetadataManualInput extends React.Component {
     this.onMetadataChange(newHeaders, newFields);
   };
 
-  applyToAll = (column, newValue, overrideExistingValue = true) => {
+  applyToAll = (
+    column: string,
+    newValue: string | LocationObject,
+    overrideExistingValue = true,
+  ) => {
     let newFields = this.state.metadataFieldsToEdit;
 
     this.props.samples.forEach(curSample => {
@@ -276,7 +237,10 @@ class MetadataManualInput extends React.Component {
       sampleNames,
     );
 
-    let fieldsForSamples = zipObject(sampleNames, sampleMetadataFields);
+    let fieldsForSamples = zipObject(
+      sampleNames,
+      sampleMetadataFields,
+    ) as Partial<LodashZipObject1x2<unknown>>;
 
     // If we are modifying existing samples, no need to include the samples with empty metadata fields to edit.
     // When modifying new samples, we DO include the empty field objects so the validation error is clearer.
@@ -530,11 +494,14 @@ class MetadataManualInput extends React.Component {
               content={content}
               link={showLink ? "/metadata/dictionary" : null}
               wide={true}
-              popperModifiers={{
-                preventOverflow: {
-                  enabled: false,
+              popperModifiers={[
+                {
+                  name: "preventOverflow",
+                  options: {
+                    mainAxis: false,
+                  },
                 },
-              }}
+              ]}
             />
           );
         }
@@ -573,18 +540,6 @@ class MetadataManualInput extends React.Component {
     );
   }
 }
-
-MetadataManualInput.propTypes = {
-  samples: PropTypes.arrayOf(PropTypes.Sample),
-  project: PropTypes.Project,
-  className: PropTypes.string,
-  onMetadataChange: PropTypes.func.isRequired,
-  samplesAreNew: PropTypes.bool,
-  withinModal: PropTypes.bool,
-  projectMetadataFields: PropTypes.object,
-  hostGenomes: PropTypes.array,
-  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
-};
 
 MetadataManualInput.contextType = UserContext;
 

@@ -13,6 +13,10 @@ export interface NumberId {
   id: number;
 }
 
+export interface NameId extends NumberId {
+  name: string;
+}
+
 export interface LabelVal {
   label: string;
   value: string;
@@ -20,4 +24,9 @@ export interface LabelVal {
 export interface NameUrl {
   name: string;
   url: string;
+}
+
+export interface CSV {
+  headers: string[];
+  rows: string[][];
 }

@@ -16,26 +16,34 @@ import React from "react";
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
-import MetadataCSVLocationsMenu, {
-  geosearchCSVLocations,
-} from "~/components/common/Metadata/MetadataCSVLocationsMenu";
+import MetadataCSVLocationsMenu from "~/components/common/Metadata/MetadataCSVLocationsMenu";
 import MetadataCSVUpload from "~/components/common/Metadata/MetadataCSVUpload";
 import Tabs from "~/components/ui/controls/Tabs";
 import { generateClientDownloadFromEndpoint } from "~/components/utils/clientDownload";
-import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { MetadataType } from "~/interface/shared";
 import { IconAlert } from "~ui/icons";
-
 import IssueGroup from "~ui/notifications/IssueGroup";
 import LoadingMessage from "../LoadingMessage";
 import MetadataManualInput from "./MetadataManualInput";
 import { METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW } from "./constants";
 import cs from "./metadata_upload.scss";
+import {
+  MetadataCSVLocationsMenuProps,
+  MetadataUploadProps,
+  MetadataUploadState,
+} from "./types";
+import { geosearchCSVLocations } from "./utils";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 const map = _fp.map.convert({ cap: false });
 
-class MetadataUpload extends React.Component {
-  state = {
+class MetadataUpload extends React.Component<
+  MetadataUploadProps,
+  MetadataUploadState
+> {
+  state: MetadataUploadState = {
     currentTab: "Manual Input",
     issues: {
       errors: [],
@@ -47,6 +55,7 @@ class MetadataUpload extends React.Component {
     validatingCSV: false,
     fetchingCSVLocationMatches: false,
     showMetadataCSVLocationsMenu: false,
+    allProjectMetadataFields: null,
   };
 
   // Define the order in which metadata fields should be render in the upload
@@ -82,7 +91,7 @@ class MetadataUpload extends React.Component {
     });
   }
 
-  async componentDidUpdate(prevProps) {
+  async componentDidUpdate(prevProps: MetadataUploadProps) {
     if (prevProps.project.id !== this.props.project.id) {
       // Set the projectMetadataFields to null while fetching the new fields.
       // This forces the MetadataManualInput to re-mount which is necessary for correct behavior.
@@ -90,7 +99,7 @@ class MetadataUpload extends React.Component {
         projectMetadataFields: null,
       });
 
-      const projectMetadataFields = await getProjectMetadataFields(
+      const projectMetadataFields: MetadataUploadState["allProjectMetadataFields"] = await getProjectMetadataFields(
         this.props.project.id,
       );
 
@@ -117,7 +126,9 @@ class MetadataUpload extends React.Component {
   }
 
   // Removes metadataFields that should not be selectable for a particular workflow
-  filterMetadataFieldsByWorkflow = projectMetadataFields => {
+  filterMetadataFieldsByWorkflow = (
+    projectMetadataFields: MetadataType[],
+  ): MetadataType[] => {
     const { workflows } = this.props;
 
     const metadataFieldsToRemove = new Set(
@@ -133,7 +144,7 @@ class MetadataUpload extends React.Component {
     );
   };
 
-  processProjectMetadataFields = projectMetadataFields => {
+  processProjectMetadataFields = (projectMetadataFields: MetadataType[]) => {
     if (!isEmpty(projectMetadataFields)) {
       const filteredProjectMetadataFields = this.filterMetadataFieldsByWorkflow(
         projectMetadataFields,
@@ -143,12 +154,11 @@ class MetadataUpload extends React.Component {
           this.ordering[metadataField.key] || Number.MAX_SAFE_INTEGER,
         filteredProjectMetadataFields,
       );
-
       return keyBy("key", sorted);
     }
   };
 
-  handleTabChange = tab => {
+  handleTabChange = (tab: string) => {
     this.setState({ currentTab: tab, issues: null });
     // When the tab changes, reset state.
     this.props.onMetadataChange({
@@ -272,7 +282,7 @@ class MetadataUpload extends React.Component {
     });
   };
 
-  getRequiredLocationMetadataType = () => {
+  getRequiredLocationMetadataType = (): MetadataCSVLocationsMenuProps["locationMetadataType"] => {
     const { projectMetadataFields } = this.state;
     // Use the first required location MetadataField
     return find(
@@ -543,25 +553,5 @@ class MetadataUpload extends React.Component {
     );
   }
 }
-
-MetadataUpload.propTypes = {
-  className: PropTypes.string,
-  issues: PropTypes.shape({
-    errors: PropTypes.arrayOf(PropTypes.string),
-    warnings: PropTypes.arrayOf(PropTypes.string),
-  }),
-  metadata: PropTypes.object,
-  // Immediately called when the user changes anything, even before validation has returned.
-  // Can be used to disable the header navigation.
-  onDirty: PropTypes.func,
-  onMetadataChange: PropTypes.func.isRequired,
-  onShowCSVInstructions: PropTypes.func.isRequired,
-  project: PropTypes.Project,
-  samples: PropTypes.arrayOf(PropTypes.Sample),
-  samplesAreNew: PropTypes.bool,
-  withinModal: PropTypes.bool,
-  visible: PropTypes.bool,
-  workflows: PropTypes.instanceOf(Set),
-};
 
 export default MetadataUpload;

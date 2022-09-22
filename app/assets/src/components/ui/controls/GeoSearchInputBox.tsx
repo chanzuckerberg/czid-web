@@ -3,6 +3,7 @@ import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
+import { LocationObject } from "~/interface/shared";
 import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 
 export const LOCATION_PRIVACY_WARNING =
@@ -11,13 +12,20 @@ export const LOCATION_UNRESOLVED_WARNING =
   // this is the max length to appear on one line
   "No match. Sample will not appear on maps.";
 
-// Process location selections.
-export const processLocationSelection = (result, isHuman) => {
+// Process location selections for humans.
+export const processLocationSelection = (
+  location: LocationObject | string,
+  isHuman: boolean,
+) => {
   // For human samples, drop the city part of the name and show a warning.
   // NOTE: The backend will redo the geosearch for confirmation and re-apply
   // this restriction.
-  if (isHuman && get("geo_level", result) === "city") {
-    result = Object.assign({}, result); // make a copy to avoid side effects
+  if (
+    isHuman &&
+    typeof location !== "string" &&
+    get("geo_level", location) === "city"
+  ) {
+    const result: LocationObject = Object.assign({}, location); // make a copy to avoid side effects
 
     // If the subdivision name is identical to the city name, remove the subdivision name as well to be safe.
     if (result.subdivision_name === result.city_name) {
@@ -42,9 +50,10 @@ export const processLocationSelection = (result, isHuman) => {
     } else if (result.country_name) {
       result.geo_level = "country";
     }
+    return result;
   }
 
-  return result;
+  return location;
 };
 
 export const getLocationWarning = result => {
@@ -151,7 +160,7 @@ interface GeoSearchInputBoxProps {
   className?: string;
   inputClassName?: string;
   onResultSelect?: $TSFixMe;
-  value: object | string;
+  value: { name: string } | string;
 }
 
 export default GeoSearchInputBox;

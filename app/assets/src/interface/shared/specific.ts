@@ -1,4 +1,4 @@
-import { DateString, NumberId } from "./generic";
+import { BooleanNums, DateString, NameId, NumberId } from "./generic";
 
 export type HistogramShape = $TSFixMe;
 export type GenomeVizShape = $TSFixMe;
@@ -62,9 +62,7 @@ export type FileList = {
   url?: string | null;
 }[];
 
-export interface HostGenome {
-  id: number;
-  name: string;
+export interface HostGenome extends NameId {
   samples_count: number;
   ercc_only: boolean;
   showAsOption: boolean;
@@ -136,6 +134,67 @@ export interface SummaryStats {
   reads_after_trimmomatic: number;
   reads_after_priceseq: number;
   reads_after_czid_dedup: number;
+}
+
+export interface MetadataType {
+  dataType: string;
+  default_for_new_host_genome?: 0;
+  description?: string | null;
+  examples?: { [key: number]: string[] } | null;
+  group?: string | null;
+  host_genome_ids?: number[];
+  isBoolean?: boolean;
+  is_required?: BooleanNums;
+  key: string;
+  name: string;
+  options?: string[] | null;
+}
+
+export type MetadataTypes = {
+  [key: string]: MetadataType;
+};
+
+export interface LocationObject {
+  subdivision_name?: string;
+  city_name?: string;
+  refetch_adjusted_location?: boolean;
+  name: string;
+  state_name?: string;
+  country_name?: string;
+  geo_level?: string;
+}
+
+export type MetadataValue = string | number | LocationObject;
+
+export interface Sample {
+  _selectId: string;
+  name: string;
+  host_genome_id: string;
+  project_id: number;
+  status: "created";
+  client: string;
+  files: {
+    [key: string]: {
+      arrayBuffer: $TSFixMeFunction;
+    };
+  };
+  input_files_attributes: {
+    concatenated: string[];
+    parts: string;
+    source: string;
+    source_type: string;
+    upload_client: string;
+  }[];
+}
+
+export interface SampleType {
+  created_at: string;
+  group: string;
+  human_only: false;
+  id: number;
+  insect_only: false;
+  name: string;
+  updated_at: string;
 }
 
 export type SampleId = number;

@@ -18,13 +18,18 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import ConsensusGenomeDropdown from "~/components/views/SampleView/ConsensusGenomeDropdown";
 import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
 import Sample from "~/interface/sample";
-import { PipelineRun, SnapshotShareId, SummaryStats } from "~/interface/shared";
+import {
+  PipelineRun,
+  SnapshotShareId,
+  SummaryStats,
+  MetadataTypes,
+} from "~/interface/shared";
 import {
   processMetadata,
   processMetadataTypes,
   Metadata,
 } from "~utils/metadata";
-import MetadataTab, { MetadataTypes } from "./MetadataTab";
+import MetadataTab from "./MetadataTab";
 import NotesTab from "./NotesTab";
 import PipelineTab, { PipelineInfo } from "./PipelineTab";
 

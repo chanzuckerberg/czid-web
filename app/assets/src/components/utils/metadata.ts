@@ -1,7 +1,6 @@
 import { keyBy, mapValues, isObject } from "lodash/fp";
 import { FIELDS_THAT_HAVE_MAX_INPUT } from "~/components/common/Metadata/constants";
-import { Metadata, RawMetadata } from "~/interface/shared";
-import { MetadataType } from "../common/DetailsSidebar/SampleDetailsMode/MetadataTab";
+import { Metadata, RawMetadata, MetadataType } from "~/interface/shared";
 
 // Transform the server metadata response to a simple key => value map.
 export const processMetadata = ({
@@ -27,6 +26,7 @@ export const processMetadata = ({
     );
     return flatNewMetadata;
   }
+
   return newMetadata;
 };
 

@@ -1,10 +1,7 @@
 import cx from "classnames";
-import { isUndefined, isNaN, isNull, isArray, max, min } from "lodash/fp";
+import { isArray } from "lodash/fp";
 import React, { useState } from "react";
-
 import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
-import { UserContext } from "~/components/common/UserContext";
-import { SampleTypeProps } from "~/interface/shared";
 import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
@@ -13,70 +10,10 @@ import Input from "~ui/controls/Input";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import { IconAlertSmall } from "~ui/icons";
-import { MetadataType } from "../DetailsSidebar/SampleDetailsMode/MetadataTab";
 import MetadataAgeInput from "./MetadataAgeInput";
-import {
-  FIELDS_THAT_HAVE_MAX_INPUT,
-  FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT,
-} from "./constants";
-
 import cs from "./metadata_input.scss";
-
-export interface MetadataInputProps {
-  className: string;
-  value: string | number | undefined;
-  metadataType: Pick<
-    MetadataType,
-    "dataType" | "key" | "options" | "isBoolean"
-  >;
-  // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".
-  // This is useful for the text input, where the parent wants to save onBlur, not onChange.
-  onChange: (key: string, value: any, shouldSave?: boolean) => void;
-  onSave: (key: string) => Promise<void>;
-  isHuman: boolean;
-  sampleTypes: SampleTypeProps[];
-  warning?: string;
-  withinModal?: boolean;
-  taxaCategory?: string;
-}
-
-// If value is undefined or null, an empty string should be displayed.
-// However, if the MetadataInput is re-used for different samples, and the second sample has no value
-// a particular metadata field, undefined will be passed to the MetadataInput for that field
-// and the first sample's metadata value will contain to be shown.
-// To avoid this, we explicitly pass in the empty string whenever the field is undefined or null.
-const ensureDefinedValue = ({
-  key = "",
-  value,
-  type,
-  taxaCategory,
-}: {
-  key: string;
-  value: string;
-  type: MetadataInputProps["metadataType"]["dataType"];
-  taxaCategory: string;
-}): string => {
-  let safeValue = isUndefined(value) || isNull(value) ? "" : value;
-
-  if (
-    FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT.has(key) &&
-    type === "number" &&
-    safeValue
-  ) {
-    const parsedValue = Number.parseInt(value);
-    if (!isNaN(parsedValue)) {
-      // Do not let the user select values less than 0
-      safeValue = max([parsedValue, 0]);
-    }
-
-    // Numbers that exceed maxValue will be stored as maxValue + 1
-    if (key in FIELDS_THAT_HAVE_MAX_INPUT && taxaCategory === "human") {
-      const maxValue = FIELDS_THAT_HAVE_MAX_INPUT[key];
-      safeValue = min([safeValue, maxValue + 1]);
-    }
-  }
-  return safeValue;
-};
+import { MetadataInputProps } from "./types";
+import { ensureDefinedValue } from "./utils";
 
 const MetadataInput = ({
   value,
@@ -103,7 +40,7 @@ const MetadataInput = ({
     setPrevWarning(warning);
   }
 
-  if (metadataType.key === "sample_type") {
+  if (metadataType.key === "sample_type" && typeof value === "string") {
     return (
       <SampleTypeSearchBox
         className={className}
@@ -176,7 +113,7 @@ const MetadataInput = ({
             );
             onChange(metadataType.key, result, true);
           }}
-          value={value}
+          value={typeof value === "number" ? value.toString() : value}
         />
         {warning && value && (
           <div className={cs.warning}>
@@ -224,7 +161,5 @@ const MetadataInput = ({
     );
   }
 };
-
-MetadataInput.contextType = UserContext;
 
 export default MetadataInput;

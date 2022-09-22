@@ -1,10 +1,11 @@
 import React, { HTMLInputTypeAttribute } from "react";
-
 import { Input as SemanticInput } from "semantic-ui-react";
+import { MetadataValue } from "~/interface/shared";
+
 import { APP_CSS_CLASS_PREFIX } from "./constants";
 
 interface InputProps {
-  value?: string | number;
+  value?: MetadataValue;
   onChange?: $TSFixMeFunction;
   onBlur?: $TSFixMeFunction;
   className?: string;
@@ -26,8 +27,7 @@ class Input extends React.Component<InputProps> {
   };
 
   render() {
-    /* eslint-disable prefer-const */
-    let { className, disableAutocomplete, ...props } = this.props;
+    const { className, disableAutocomplete, ...props } = this.props;
     let inputClass = APP_CSS_CLASS_PREFIX;
     if (className) {
       inputClass = `${inputClass} ${className}`;
@@ -35,7 +35,6 @@ class Input extends React.Component<InputProps> {
 
     return (
       <SemanticInput
-        /* eslint-disable prefer-const */
         {...props}
         className={inputClass}
         onChange={this.handleChange}

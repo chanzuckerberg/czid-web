@@ -33,7 +33,7 @@ const getSampleMetadataFields = (ids, snapshotShareId) =>
   );
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
-const getProjectMetadataFields = ids =>
+const getProjectMetadataFields = (ids: number | number[]) =>
   get("/projects/metadata_fields", {
     params: {
       projectIds: flatten([ids]),

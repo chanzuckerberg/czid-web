@@ -6,16 +6,12 @@ import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
 
-import { BooleanNums } from "~/interface/shared";
+import { MetadataType, MetadataTypes, SampleType } from "~/interface/shared";
 import { Metadata, returnHipaaCompliantMetadata } from "~utils/metadata";
 import MetadataSection from "./MetadataSection";
 import { AdditionalInfo } from "./SampleDetailsMode";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_mode.scss";
-
-export type MetadataTypes = {
-  [key: string]: MetadataType;
-};
 
 interface MetadataTabProps {
   metadata: Metadata;
@@ -42,30 +38,6 @@ interface MetadataTabState {
 interface Section {
   name: string;
   keys: string[];
-}
-
-interface SampleType {
-  created_at: string;
-  group: string;
-  human_only: false;
-  id: number;
-  insect_only: false;
-  name: string;
-  updated_at: string;
-}
-
-export interface MetadataType {
-  dataType: "number" | "string" | "date" | "location";
-  default_for_new_host_genome: 0;
-  description: string | null;
-  examples: { [key: number]: string[] } | null;
-  group: string | null;
-  host_genome_ids: number[];
-  isBoolean: boolean;
-  is_required: BooleanNums;
-  key: string;
-  name: string;
-  options: string[] | null;
 }
 
 class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {

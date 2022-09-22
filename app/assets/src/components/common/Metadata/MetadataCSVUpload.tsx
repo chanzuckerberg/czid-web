@@ -1,39 +1,25 @@
 // A CSV Upload component for uploading metadata.
 // Sends uploaded to server for validation and displays errors and warnings.
 import cx from "classnames";
-import { filter, map, zip, fromPairs, isNull, isEqual } from "lodash/fp";
-import PropTypes from "prop-types";
+import { map, isNull, isEqual } from "lodash/fp";
 import React from "react";
 import {
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
 } from "~/api/metadata";
+import { CSV } from "~/interface/shared";
 import CSVUpload from "~ui/controls/CSVUpload";
 import cs from "./metadata_csv_upload.scss";
+import { MetadataCSVUploadState, MetadataCSVUploadProps } from "./types";
+import { processCSVMetadata } from "./utils";
 
-const processCSVMetadata = csv => {
-  const { headers, rows } = csv;
-
-  return {
-    headers,
-    rows: map(
-      // Remove empty values, and convert rows from array of strings to object.
-      // It's possible to have two different MetadataFields with the same name, but for different host genomes.
-      // In this case, only one of the two fields will have a value for any given sample
-      // (since only one of them will the sample's host genome).
-      // There is a risk if you naively zipObject that you will overwrite the actual value with an empty value
-      // (from the other metadata field with the same name), since precedence is based on the order.
-      // The below code makes sure this case is handled correctly by filtering before converting to an object.
-      row => fromPairs(filter(pair => pair[1] !== "", zip(headers, row))),
-      rows,
-    ),
-  };
-};
-
-class MetadataCSVUpload extends React.Component {
+class MetadataCSVUpload extends React.Component<
+  MetadataCSVUploadProps,
+  MetadataCSVUploadState
+> {
   // MetadataCSVUpload stores each row as arrays of strings,
   // but converts the row to objects before calling onMetadataChange.
-  state = {
+  state: MetadataCSVUploadState = {
     metadata: null,
     validatingCSV: false,
     // Keep track of the last sample names and project id validated so we can re-validate if the samples changed.
@@ -41,7 +27,7 @@ class MetadataCSVUpload extends React.Component {
     lastProjectIdValidated: null,
   };
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: MetadataCSVUploadProps) {
     // When the CSV Upload becomes visible again, validate the CSV if the samples have changed.
     if (
       !prevProps.visible &&
@@ -57,7 +43,7 @@ class MetadataCSVUpload extends React.Component {
     }
   }
 
-  onCSV = csv => {
+  onCSV = (csv: CSV) => {
     if (this.props.onDirty) {
       this.props.onDirty();
     }
@@ -66,7 +52,7 @@ class MetadataCSVUpload extends React.Component {
     this.validateCSV(csv);
   };
 
-  validateCSV = async csv => {
+  validateCSV = async (csv: CSV) => {
     this.props.onMetadataChange({
       metadata: null,
       issues: {
@@ -97,7 +83,6 @@ class MetadataCSVUpload extends React.Component {
         csv,
       );
     }
-
     this.props.onMetadataChange({
       metadata: processCSVMetadata(csv),
       issues: serverResponse.issues,
@@ -120,28 +105,5 @@ class MetadataCSVUpload extends React.Component {
     );
   }
 }
-
-MetadataCSVUpload.propTypes = {
-  // For uploading metadata to existing samples in a project.
-  project: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string,
-  }),
-  // For uploading metadata together with new samples.
-  samples: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      project_id: PropTypes.number,
-      host_genome_id: PropTypes.number,
-    }),
-  ),
-  className: PropTypes.string,
-  onMetadataChange: PropTypes.func.isRequired,
-  samplesAreNew: PropTypes.bool,
-  visible: PropTypes.bool,
-  // Immediately called when the user changes anything, even before validation has returned.
-  // Can be used to disable the header navigation.
-  onDirty: PropTypes.func.isRequired,
-};
 
 export default MetadataCSVUpload;
