@@ -1,10 +1,16 @@
 import { transform, isEqual, isObject } from "lodash/fp";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 const _transform = transform.convert({
   cap: false,
 });
 
-const iteratee = baseObj => (result, value, key) => {
+const iteratee = (baseObj: object) => (
+  result: unknown,
+  value: object,
+  key: string,
+) => {
   if (!isEqual(value, baseObj[key])) {
     const valueIsObject = isObject(value) && isObject(baseObj[key]);
     result[key] = valueIsObject === true ? diff(value, baseObj[key]) : value;
@@ -31,6 +37,6 @@ const iteratee = baseObj => (result, value, key) => {
 //
 //      diff(obj1, obj2) => { a: 1, c: ["1", "2"] }
 
-export const diff = (targetObj, baseObj) => {
+export const diff = (targetObj: object, baseObj: object) => {
   return _transform(iteratee(baseObj), null, targetObj);
 };

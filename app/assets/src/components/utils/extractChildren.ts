@@ -5,7 +5,10 @@ import React from "react";
 // children - this.props.children.
 // componentTypes - strings that match the original name of the element's component class.
 // Returns an array of matching components.
-const extractChildren = (children, componentTypes) => {
+const extractChildren = (
+  children: React.ReactNode | React.ReactNode[],
+  componentTypes: string[],
+) => {
   const components = React.Children.toArray(children);
 
   return componentTypes.map(type =>

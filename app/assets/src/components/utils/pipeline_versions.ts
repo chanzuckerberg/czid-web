@@ -13,11 +13,15 @@ export const MINIMUM_VERSIONS = {
   [ACCESSION_COVERAGE_STATS_FEATURE]: "6.0",
 };
 
-const pipelineVersionAtLeast = (pipelineVersion, testVersion) => {
+const pipelineVersionAtLeast = (
+  pipelineVersion: string,
+  testVersion: string,
+) => {
   if (!pipelineVersion) return false;
 
   // turn undefined to 0.
-  const toInt = versionNumber => +versionNumber || 0;
+  const toInt = (versionNumber: string | undefined): number =>
+    +versionNumber || 0;
 
   const pipelineNums = pipelineVersion.split(".");
   const testNums = testVersion.split(".");
@@ -37,6 +41,9 @@ const pipelineVersionAtLeast = (pipelineVersion, testVersion) => {
   return false;
 };
 
-export const isPipelineFeatureAvailable = (feature, pipelineVersion) => {
+export const isPipelineFeatureAvailable = (
+  feature: keyof typeof MINIMUM_VERSIONS,
+  pipelineVersion: string,
+) => {
   return pipelineVersionAtLeast(pipelineVersion, MINIMUM_VERSIONS[feature]);
 };

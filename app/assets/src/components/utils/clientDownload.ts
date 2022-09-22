@@ -5,6 +5,11 @@ export const generateClientDownloadFromEndpoint = async ({
   params,
   fileName,
   fileType,
+}: {
+  endpoint: string;
+  params?: { [key: string]: string };
+  fileName: string;
+  fileType: string;
 }) => {
   const csv = await postWithCSRF(endpoint, params);
   const dataBlob = new Blob([csv], { type: fileType });
@@ -17,7 +22,7 @@ export const generateClientDownloadFromEndpoint = async ({
 };
 
 export const triggerFileDownload = ({ downloadUrl, fileName }) => {
-  let link = document.createElement("a");
+  const link = document.createElement("a");
   link.setAttribute("href", downloadUrl);
   link.setAttribute("download", fileName);
   link.setAttribute("visibility", "hidden");

@@ -1,9 +1,27 @@
 import { withAnalytics } from "~/api/analytics";
 
+declare global {
+  interface Window {
+    Appcues?: {
+      show: (flowId: string) => void;
+      track: (
+        eventname: string,
+        deconstructedEvent: Record<string, unknown>,
+      ) => void;
+      page: () => void;
+    };
+    USER_TRAITS_WITHOUT_PII: Record<string, unknown>;
+  }
+}
+
 export const showAppcue = ({
   flowId,
   analyticEventName,
   analyticEventProperties = {},
+}: {
+  flowId: string;
+  analyticEventName: string;
+  analyticEventProperties?: Record<string, string>;
 }) =>
   withAnalytics(
     () => window.Appcues && window.Appcues.show(flowId),
@@ -11,7 +29,7 @@ export const showAppcue = ({
     analyticEventProperties,
   );
 
-export const trackEventForAppcues = (eventName, eventData = {}) => {
+export const trackEventForAppcues = (eventName: string, eventData = {}) => {
   // Appcues only takes attributes as a flat object (not nested)
   const deconstructedEvent = {
     ...window?.USER_TRAITS_WITHOUT_PII,
