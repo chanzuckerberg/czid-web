@@ -30,6 +30,7 @@ export const WORKFLOW_TRIGGERS = {
     TRIGGERS.download,
     TRIGGERS.bulk_kickoff_amr,
   ],
+  [WORKFLOWS.AMR.value]: [TRIGGERS.download],
 };
 
 export const WORKFLOW_TRIGGERS_BY_DOMAIN = {

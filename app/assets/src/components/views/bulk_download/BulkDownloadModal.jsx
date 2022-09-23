@@ -29,7 +29,7 @@ import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
 import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
 import cs from "./bulk_download_modal.scss";
-import { DEFAULT_BACKGROUND_MODEL } from "./constants";
+import { DEFAULT_BACKGROUND_MODEL, WORKFLOW_OBJECT_LABELS } from "./constants";
 
 const DEFAULT_CREATION_ERROR =
   "An unknown error occurred. Please contact us for help.";
@@ -116,14 +116,7 @@ class BulkDownloadModal extends React.Component {
       selectedFieldsDisplay: newSelectedFieldsDisplay,
     } = this.state;
 
-    // TODO (omar): Remove temporary workflow fix when celaning up dead CG code.
-    const tempBulkDownloadWorkflow =
-      workflow === WORKFLOWS.SHORT_READ_MNGS.value
-        ? workflow
-        : WORKFLOWS.CONSENSUS_GENOME.value;
-    const bulkDownloadTypesRequest = getBulkDownloadTypes(
-      tempBulkDownloadWorkflow,
-    );
+    const bulkDownloadTypesRequest = getBulkDownloadTypes(workflow);
     const validationInfoRequest = this.fetchValidationInfo({
       ids: Array.from(selectedIds),
       workflow,
@@ -187,7 +180,7 @@ class BulkDownloadModal extends React.Component {
     WORKFLOW_ENTITIES.WORKFLOW_RUNS
       ? validateWorkflowRunIds({
           workflowRunIds: ids,
-          workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+          workflow,
         })
       : validateSampleIds({
           sampleIds: ids,
@@ -350,13 +343,13 @@ class BulkDownloadModal extends React.Component {
   // *** Create bulk download and close modal ***
 
   createBulkDownload = async selectedDownload => {
-    const { onGenerate, workflow } = this.props;
+    const { onGenerate, workflow, workflowEntity } = this.props;
 
     let objectIds;
 
     if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
       objectIds = { sampleIds: selectedDownload.validObjectIds };
-    } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+    } else if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
       objectIds = { workflowRunIds: selectedDownload.validObjectIds };
     }
 
@@ -395,7 +388,7 @@ class BulkDownloadModal extends React.Component {
   };
 
   render() {
-    const { open, onClose, workflow, workflowEntity } = this.props;
+    const { open, onClose, workflow } = this.props;
     const {
       bulkDownloadTypes,
       validObjectIds,
@@ -413,10 +406,7 @@ class BulkDownloadModal extends React.Component {
     } = this.state;
 
     const numObjects = validObjectIds.size;
-    const objectDownloaded =
-      workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-        ? "consensus genome"
-        : "sample";
+    const objectDownloaded = WORKFLOW_OBJECT_LABELS[workflow];
 
     return (
       <Modal narrow open={open} tall onClose={onClose}>

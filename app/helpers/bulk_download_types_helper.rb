@@ -25,6 +25,9 @@ module BulkDownloadTypesHelper
   SEPARATE_FILES_DOWNLOAD = "Separate Files".freeze
   SINGLE_FILE_CONCATENATED_DOWNLOAD = "Single File (Concatenated)".freeze
 
+  # Specific to antimicrobial resistance workflows
+  AMR_RESULTS_BULK_DOWNLOAD = "amr_results_bulk_download".freeze
+
   RESQUE_EXECUTION_TYPE = "resque".freeze
   VARIABLE_EXECUTION_TYPE = "variable".freeze
   ECS_EXECUTION_TYPE = "ecs".freeze
@@ -49,6 +52,15 @@ module BulkDownloadTypesHelper
       display_name: "Customer Support Request",
       execution_type: MANUAL_UPLOAD_TYPE,
       hide_in_creation_modal: true,
+    },
+    {
+      type: AMR_RESULTS_BULK_DOWNLOAD,
+      display_name: "Antimicrobial Resistance Results",
+      file_type_display: ".tar.gz",
+      description: "Includes the AMR Report, Combined AMR Metrics Summary, Contigs, Non-host reads, and raw outputs from CARD RGI. Learn More.",
+      category: "reports",
+      execution_type: ECS_EXECUTION_TYPE,
+      workflows: [WorkflowRun::WORKFLOW[:amr]],
     },
 
     # Common to all workflows

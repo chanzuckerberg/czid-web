@@ -481,6 +481,14 @@ class BulkDownload < ApplicationRecord
       end
     end
 
+    if download_type == AMR_RESULTS_BULK_DOWNLOAD
+      download_src_urls = workflow_runs_ordered.map { |run| run.output_path(AmrWorkflowRun::OUTPUT_ZIP) }
+
+      download_tar_names = workflow_runs_ordered.map do |run|
+        get_output_file_prefix(run.sample, cleaned_project_names).to_s
+      end
+    end
+
     if download_src_urls.present? && download_tar_names.present?
       return s3_tar_writer_command(
         download_src_urls,

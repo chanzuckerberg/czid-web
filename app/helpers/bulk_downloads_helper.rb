@@ -53,15 +53,28 @@ module BulkDownloadsHelper
   end
 
   def format_bulk_download(bulk_download, detailed: false, admin: false)
-    number_of_pipeline_runs = bulk_download.pipeline_runs.length
+    analyses_counts = {}.tap do |counts_hash|
+      counts_hash[WorkflowRun::WORKFLOW[:amr]] = bulk_download.workflow_runs.where(workflow: WorkflowRun::WORKFLOW[:amr]).count
+      counts_hash[WorkflowRun::WORKFLOW[:consensus_genome]] = bulk_download.workflow_runs.where(workflow: WorkflowRun::WORKFLOW[:consensus_genome]).count
+      counts_hash[WorkflowRun::WORKFLOW[:short_read_mngs]] = bulk_download.pipeline_runs.length
+    end
 
-    # TODO: Adapt to a hash structure when a new workflow is introduced or when we can create
-    # bulk downloads from multiple workflows. This approach works because we can create
-    # a bulk download from one and only one workflow.
-    workflow, count = if number_of_pipeline_runs > 0
-                        [WorkflowRun::WORKFLOW[:short_read_mngs], number_of_pipeline_runs]
+    # TODO: We need to adapt this when we can create bulk downloads from multiple workflows.
+    # This approach works because we can create a bulk download from one and only one workflow.
+    workflow, count = if analyses_counts[WorkflowRun::WORKFLOW[:short_read_mngs]] > 0
+                        [WorkflowRun::WORKFLOW[:short_read_mngs], analyses_counts[WorkflowRun::WORKFLOW[:short_read_mngs]]]
+                      elsif analyses_counts[WorkflowRun::WORKFLOW[:consensus_genome]] > 0
+                        [WorkflowRun::WORKFLOW[:consensus_genome], analyses_counts[WorkflowRun::WORKFLOW[:consensus_genome]]]
+                      elsif analyses_counts[WorkflowRun::WORKFLOW[:amr]] > 0
+                        [WorkflowRun::WORKFLOW[:amr], analyses_counts[WorkflowRun::WORKFLOW[:amr]]]
                       else
-                        [WorkflowRun::WORKFLOW[:consensus_genome], bulk_download.workflow_runs.length]
+                        # The bulk download has no pipeline runs or workflow runs associated with it
+                        # We should never get to this else statement, unless there is an issue with
+                        # bulk download not being deleted when its corresponding samples get deleted.
+                        LogUtil.log_message("BulkDownloadsHelper#format_bulk_download - bulk download #{bulk_download.id} has no associated workflow runs or pipeline runs. We should delete it.")
+
+                        # return mNGS and 0 intentionally so the client does not crash
+                        [WorkflowRun::WORKFLOW[:short_read_mngs], 0]
                       end
 
     formatted_bulk_download = bulk_download.as_json(except: [:access_token])
