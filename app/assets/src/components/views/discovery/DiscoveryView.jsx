@@ -339,6 +339,9 @@ class DiscoveryView extends React.Component {
     } else if (numOfAmrSamples > 0) {
       return WORKFLOWS.AMR.value;
     }
+
+    // If the user has no samples at all, return short-read-mngs
+    return WORKFLOWS.SHORT_READ_MNGS.value;
   };
 
   async componentDidMount() {
