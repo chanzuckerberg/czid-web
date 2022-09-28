@@ -215,6 +215,8 @@ class SfnCgPipelineDispatchService
                             ref_fasta: File.join(@sample.sample_input_s3_path, ref_fasta_name),
                             ref_accession_id: @workflow_run.inputs&.[]("reference_accession"),
                             primer_bed: File.join(@sample.sample_input_s3_path, primer_bed_name),
+                            # This option filters all except SARS-CoV-2 at the moment:
+                            filter_reads: false,
                           }
                         elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
                           # illumina sars-cov-2 cg
