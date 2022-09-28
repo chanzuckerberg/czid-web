@@ -8,7 +8,7 @@ interface CheckboxItemProps {
   boxed?: boolean;
   checked?: boolean;
   label?: string;
-  onOptionClick?(...args: unknown[]): unknown;
+  onOptionClick?: $TSFixMeFunction;
   value?: any;
 }
 
@@ -19,8 +19,9 @@ const CheckboxItem = ({
   onOptionClick,
   boxed,
 }: CheckboxItemProps) => (
+  // @ts-expect-error 'Item' does not exist on BareDropdown
   <BareDropdown.Item
-    onClick={e => {
+    onClick={(e: $TSFixMe) => {
       e.stopPropagation();
       onOptionClick(value, !checked);
     }}
@@ -37,6 +38,7 @@ const CheckboxItem = ({
       </div>
       <div className={cs.listLabel}>{label}</div>
     </div>
+    {/* @ts-expect-error 'Item' does not exist on BareDropdown */}
   </BareDropdown.Item>
 );
 

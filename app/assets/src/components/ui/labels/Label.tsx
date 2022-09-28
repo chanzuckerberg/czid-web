@@ -33,7 +33,7 @@ const Label = ({
 interface LabelProps {
   className?: string;
   color?: SemanticCOLORS;
-  size: SemanticSIZES;
+  size?: SemanticSIZES;
   circular?: boolean;
   floating?: boolean;
   text: React.ReactNode;

@@ -10,7 +10,6 @@
 
 // TODO(mark): Refactor this component to remove props.options and props.itemSearchStrings, which are confusing and
 // redundant with props.items.customNode and props.children.
-import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 import {
   compact,
@@ -25,16 +24,80 @@ import {
   sortBy,
 } from "lodash/fp";
 import { nanoid } from "nanoid";
-import PropTypes from "prop-types";
 import React from "react";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
 import { IconArrowDownSmall, IconSearch } from "~ui/icons";
-import PortalDropdown from "./PortalDropdown.jsx";
+import PortalDropdown from "./PortalDropdown";
 import cs from "./bare_dropdown.scss";
 
-class BareDropdown extends React.Component {
-  constructor(props) {
+interface BareDropdownProps {
+  // Custom props
+  // whether the arrow should be displayed outside the trigger or inside it.
+  arrowInsideTrigger?: boolean;
+  hideArrow?: boolean;
+  smallArrow?: boolean;
+  menuLabel?: string;
+  // Optional header that displays between the search box and the options.
+  optionsHeader?: React.ReactNode;
+  // whether the dropdown should close when you click on the menu. Useful for custom dropdown menus.
+  closeOnClick?: boolean;
+  search?: boolean;
+  // If search is true, and you provide pre-rendered "items" instead of "options",
+  // you must also provide a list of strings to search by.
+  itemSearchStrings?: string[];
+  // Custom prop for rendering items within sections.
+  // It is a mapping between the section and the itemSearchStrings in that section.
+  // Mainly used to put searched/filtered items back into their respective sections.
+  sections?: object;
+  // If search is true, but you want to customize behavior of search function, e.g. async search,
+  // you should provide your own handler
+  onFilterChange?: $TSFixMeFunction;
+  showNoResultsMessage?: boolean;
+  // Don't show the no results message if search options are currently loading.
+  // TODO(mark): Visually indicate that search options are loading even if
+  // there are old search results to display.
+  isLoadingSearchOptions?: boolean;
+  // Custom props for rendering options
+  options?: {
+    value?: any;
+    text?: React.ReactNode;
+    disabled?: boolean;
+    // Custom node to render for the option.
+    customNode?: React.ReactNode;
+  }[];
+  value?: any;
+  onChange?: $TSFixMeFunction;
+  // Custom props for rendering items
+  items?: React.ReactNode[];
+  usePortal?: boolean;
+  // Whether to increase the z-index of the menu to be above the Modal z-index.
+  // Useful for PortalDropdowns.
+  withinModal?: boolean;
+  // Props directly passed to semantic-ui.
+  children?: React.ReactNode;
+  className?: string;
+  direction?: "left" | "right";
+  disabled?: boolean;
+  floating?: boolean;
+  fluid?: boolean;
+  menuClassName?: string;
+  onBlur?: $TSFixMeFunction;
+  onClick?: $TSFixMeFunction;
+  onClose?: $TSFixMeFunction;
+  onFocus?: $TSFixMeFunction;
+  onMouseEnter?: $TSFixMeFunction;
+  onMouseLeave?: $TSFixMeFunction;
+  onOpen?: $TSFixMeFunction;
+  open?: boolean;
+  selectOnBlur?: boolean;
+  trigger: React.ReactNode;
+  disableAutocomplete?: boolean;
+}
+
+class BareDropdown extends React.Component<BareDropdownProps> {
+  baseDropdownRef: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.baseDropdownRef = React.createRef();
@@ -45,8 +108,8 @@ class BareDropdown extends React.Component {
   }
 
   // If the user provides us options instead of items, we will render them like this.
-  renderItemsDefault = options => {
-    return options.map(option =>
+  renderItemsDefault = (options: $TSFixMe) => {
+    return options.map((option: $TSFixMe) =>
       option.customNode ? (
         <div
           key={option.value}
@@ -72,7 +135,7 @@ class BareDropdown extends React.Component {
     );
   };
 
-  handleFilterChange = filterString => {
+  handleFilterChange = (filterString: $TSFixMe) => {
     const { onFilterChange } = this.props;
 
     this.setState(
@@ -85,16 +148,16 @@ class BareDropdown extends React.Component {
     );
   };
 
-  matchesFilter = (text, filterString) =>
+  matchesFilter = (text: $TSFixMe, filterString: $TSFixMe) =>
     text &&
     filterString &&
     text.toLowerCase().includes(filterString.toLowerCase());
 
   // Return 0 if starts with prefix, 1 otherwise
-  prioritizePrefixMatches = (option, prefix) =>
+  prioritizePrefixMatches = (option: $TSFixMe, prefix: $TSFixMe) =>
     option.toLowerCase().startsWith(prefix.toLowerCase()) ? 0 : 1;
 
-  getFilteredItems = filterString => {
+  getFilteredItems = (filterString: $TSFixMe) => {
     const { items, itemSearchStrings, options, sections } = this.props;
     if (!items && !options) return;
 
@@ -105,10 +168,12 @@ class BareDropdown extends React.Component {
 
     if (items) {
       // Exclude Headers, Dividers, and unsearchable items from being zipped up with the itemSearchStrings
-      let itemsToZip = !isEmpty(sections)
+      const itemsToZip = !isEmpty(sections)
         ? items.filter(
-            item =>
+            (item: $TSFixMe) =>
+              // @ts-expect-error: Property 'Header' does not exist
               item.type !== BareDropdown.Header &&
+              // @ts-expect-error ts-migrate(2339) FIXME: Property 'Divider' does not exist on type 'typeof ... Remove this comment to see the full error message
               item.type !== BareDropdown.Divider &&
               get("props.flag", item) !== "unsearchable",
           )
@@ -131,7 +196,7 @@ class BareDropdown extends React.Component {
           this.categorizeSearchResults(sortedPairs)
         : map(nth(1), sortedPairs);
     } else {
-      const filteredOptions = options.filter(option =>
+      const filteredOptions = options.filter((option: $TSFixMe) =>
         this.matchesFilter(option.text, filterString),
       );
       const sortedOptions = sortBy(
@@ -142,9 +207,9 @@ class BareDropdown extends React.Component {
     }
   };
 
-  categorizeSearchResults = uncategorizedItemPairs => {
+  categorizeSearchResults = (uncategorizedItemPairs: $TSFixMe) => {
     const { sections } = this.props;
-    const categorizedItems = [];
+    const categorizedItems: $TSFixMe = [];
 
     Object.entries(sections).forEach(([sectionName, itemStringsInSection]) => {
       const sectionItems = compact(
@@ -159,11 +224,13 @@ class BareDropdown extends React.Component {
       }
 
       const header = (
+        // @ts-expect-error: Property 'Header' does not exist
         <BareDropdown.Header
           content={sectionName}
           key={`${sectionName}_header`}
         />
       );
+      // @ts-expect-error: Property 'Divider' does not exist
       const divider = <BareDropdown.Divider key={`${sectionName}_divider`} />;
       categorizedItems.push(header, ...sectionItems, divider);
     });
@@ -174,14 +241,16 @@ class BareDropdown extends React.Component {
   };
 
   renderNoResultsFoundInSection = () => (
+    // @ts-expect-error: Property 'Item' does not exist
     <BareDropdown.Item className={cs.emptySection} key={nanoid()}>
       <div className={cs.message}>
         There are no results matching your search.
       </div>
+      {/* @ts-expect-error: Property 'Item' does not exist */}
     </BareDropdown.Item>
   );
 
-  handleMenuClick = e => {
+  handleMenuClick = (e: $TSFixMe) => {
     const { closeOnClick, search } = this.props;
 
     if (!closeOnClick) {
@@ -203,12 +272,7 @@ class BareDropdown extends React.Component {
       smallArrow,
       menuLabel,
       search,
-      closeOnClick,
-      itemSearchStrings,
-      usePortal,
-      withinModal,
       children,
-      onFilterChange,
       menuClassName,
       disableAutocomplete,
       trigger,
@@ -226,6 +290,7 @@ class BareDropdown extends React.Component {
       smallArrow && cs.smallArrow,
     );
 
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'filterString' does not exist on type 'Re... Remove this comment to see the full error message
     const { filterString } = this.state;
 
     let wrappedTrigger = trigger;
@@ -234,6 +299,7 @@ class BareDropdown extends React.Component {
     // for some reason. Manually close it in this case.
     if (this.props.search) {
       // When search is true, inject an onClick handler onto the trigger element.
+      // @ts-expect-error  Type 'string' is not assignable to type
       wrappedTrigger = React.cloneElement(trigger, {
         onClick: () => {
           // Manually close the base dropdown if it's open.
@@ -248,7 +314,9 @@ class BareDropdown extends React.Component {
           }
 
           // Make sure the trigger's original onClick handler is still called, if it was set.
+          // @ts-expect-error Property 'props' does not exist on type 'ReactNode'.
           if (trigger.props.onClick) {
+            // @ts-expect-error Property 'props' does not exist on type 'ReactNode'.
             trigger.props.onClick();
           }
         },
@@ -306,6 +374,7 @@ class BareDropdown extends React.Component {
             <Input
               fluid
               className={cs.searchInput}
+              // @ts-expect-error  Type 'Element' is not assignable to type 'string'.
               icon={<IconSearch className={cs.searchInputIcon} />}
               placeholder="Search"
               value={filterString}
@@ -370,82 +439,16 @@ class BareDropdown extends React.Component {
   }
 }
 
-BareDropdown.propTypes = forbidExtraProps({
-  // Custom props
-  // whether the arrow should be displayed outside the trigger or inside it.
-  arrowInsideTrigger: PropTypes.bool,
-  hideArrow: PropTypes.bool,
-  smallArrow: PropTypes.bool,
-  menuLabel: PropTypes.string,
-  // Optional header that displays between the search box and the options.
-  optionsHeader: PropTypes.node,
-  // whether the dropdown should close when you click on the menu. Useful for custom dropdown menus.
-  closeOnClick: PropTypes.bool,
-  search: PropTypes.bool,
-  // If search is true, and you provide pre-rendered "items" instead of "options",
-  // you must also provide a list of strings to search by.
-  itemSearchStrings: PropTypes.arrayOf(PropTypes.string),
-  // Custom prop for rendering items within sections.
-  // It is a mapping between the section and the itemSearchStrings in that section.
-  // Mainly used to put searched/filtered items back into their respective sections.
-  sections: PropTypes.object,
-  // If search is true, but you want to customize behavior of search function, e.g. async search,
-  // you should provide your own handler
-  onFilterChange: PropTypes.func,
-  showNoResultsMessage: PropTypes.bool,
-  // Don't show the no results message if search options are currently loading.
-  // TODO(mark): Visually indicate that search options are loading even if
-  // there are old search results to display.
-  isLoadingSearchOptions: PropTypes.bool,
-
-  // Custom props for rendering options
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      value: PropTypes.any,
-      text: PropTypes.node,
-      disabled: PropTypes.bool,
-      // Custom node to render for the option.
-      customNode: PropTypes.node,
-    }),
-  ),
-  value: PropTypes.any,
-  onChange: PropTypes.func,
-
-  // Custom props for rendering items
-  items: PropTypes.arrayOf(PropTypes.node),
-
-  usePortal: PropTypes.bool,
-  // Whether to increase the z-index of the menu to be above the Modal z-index.
-  // Useful for PortalDropdowns.
-  withinModal: PropTypes.bool,
-
-  // Props directly passed to semantic-ui.
-  children: PropTypes.node,
-  className: PropTypes.string,
-  direction: PropTypes.oneOf(["left", "right"]),
-  disabled: PropTypes.bool,
-  floating: PropTypes.bool,
-  fluid: PropTypes.bool,
-  menuClassName: PropTypes.string,
-  onBlur: PropTypes.func,
-  onClick: PropTypes.func,
-  onClose: PropTypes.func,
-  onFocus: PropTypes.func,
-  onMouseEnter: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onOpen: PropTypes.func,
-  open: PropTypes.bool,
-  selectOnBlur: PropTypes.bool,
-  trigger: PropTypes.node.isRequired,
-  disableAutocomplete: PropTypes.bool,
-});
-
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 BareDropdown.defaultProps = {
   closeOnClick: true,
 };
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'Header' does not exist on type 'typeof B... Remove this comment to see the full error message
 BareDropdown.Header = BaseDropdown.Header;
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'Item' does not exist on type 'typeof Bar... Remove this comment to see the full error message
 BareDropdown.Item = BaseDropdown.Item;
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'Divider' does not exist on type 'typeof ... Remove this comment to see the full error message
 BareDropdown.Divider = BaseDropdown.Divider;
 
 export default BareDropdown;

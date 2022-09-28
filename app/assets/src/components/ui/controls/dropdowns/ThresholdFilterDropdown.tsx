@@ -1,6 +1,4 @@
-import { forbidExtraProps } from "airbnb-prop-types";
 import { get } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
@@ -12,11 +10,29 @@ import DropdownLabel from "./common/DropdownLabel";
 import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./threshold_filter_dropdown.scss";
 
-class ThresholdFilterDropdown extends React.Component {
-  constructor(props) {
+interface ThresholdFilterDropdownProps {
+  disabled?: boolean;
+  label?: string;
+  thresholds?: unknown[];
+  onApply?: $TSFixMeFunction;
+  options?: object;
+  disableMarginRight?: boolean;
+  rounded?: boolean;
+  placeholder?: string;
+  useDropdownLabelCounter?: boolean;
+}
+
+class ThresholdFilterDropdown extends React.Component<
+  ThresholdFilterDropdownProps
+> {
+  metrics: $TSFixMe;
+  operators: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'targets' does not exist on type 'Readonl... Remove this comment to see the full error message
     this.metrics = (this.props.options || {}).targets || [];
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'operators' does not exist on type 'Readonl... Remove this comment to see the full error message
     this.operators = (this.props.options || {}).operators || [];
 
     this.state = {
@@ -25,8 +41,8 @@ class ThresholdFilterDropdown extends React.Component {
     };
   }
 
-  static getDerivedStateFromProps(props, state) {
-    let newThresholds = props.thresholds.filter(
+  static getDerivedStateFromProps(props: $TSFixMe, state: $TSFixMe) {
+    const newThresholds = props.thresholds.filter(
       ThresholdFilterDropdown.isThresholdValid,
     );
     if (
@@ -43,7 +59,7 @@ class ThresholdFilterDropdown extends React.Component {
     return null;
   }
 
-  static areThresholdsFiltersEqual(tfs1, tfs2) {
+  static areThresholdsFiltersEqual(tfs1: $TSFixMe, tfs2: $TSFixMe) {
     // this functions assumes that lists with the sames thresholds in different order are different
     if (typeof tfs1 !== typeof tfs2) return false;
     tfs1 = tfs1 || [];
@@ -52,8 +68,8 @@ class ThresholdFilterDropdown extends React.Component {
       return false;
     }
     for (let i = 0; i < tfs1.length; i++) {
-      let tf1 = tfs1[i];
-      let tf2 = tfs2[i];
+      const tf1 = tfs1[i];
+      const tf2 = tfs2[i];
       if (
         tf1.metric !== tf2.metric ||
         tf1.operator !== tf2.operator ||
@@ -65,21 +81,23 @@ class ThresholdFilterDropdown extends React.Component {
     return true;
   }
 
-  handleThresholdRemove(thresholdIdx) {
+  handleThresholdRemove(thresholdIdx: $TSFixMe) {
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholds' does not exist on type 'Read... Remove this comment to see the full error message
     const newThresholds = [...this.state.thresholds];
     newThresholds.splice(thresholdIdx, 1);
 
     this.setState({ thresholds: newThresholds });
   }
 
-  handleThresholdChange(thresholdIdx, threshold) {
+  handleThresholdChange(thresholdIdx: $TSFixMe, threshold: $TSFixMe) {
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholds' does not exist on type 'Read... Remove this comment to see the full error message
     const newThresholds = [...this.state.thresholds];
     newThresholds[thresholdIdx] = threshold;
 
     this.setState({ thresholds: newThresholds });
   }
 
-  static isThresholdValid(threshold) {
+  static isThresholdValid(threshold: $TSFixMe) {
     return (
       threshold.metric.length > 0 &&
       threshold.operator.length > 0 &&
@@ -91,6 +109,7 @@ class ThresholdFilterDropdown extends React.Component {
   addNewItem() {
     this.setState({
       thresholds: [
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholds' does not exist on type 'Read... Remove this comment to see the full error message
         ...this.state.thresholds,
         {
           metric: this.metrics[0].value,
@@ -107,7 +126,8 @@ class ThresholdFilterDropdown extends React.Component {
   }
 
   applyFilterUpdates = () => {
-    let newThresholds = this.state.thresholds.filter(
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholds' does not exist on type 'Read... Remove this comment to see the full error message
+    const newThresholds = this.state.thresholds.filter(
       ThresholdFilterDropdown.isThresholdValid,
     );
 
@@ -127,6 +147,7 @@ class ThresholdFilterDropdown extends React.Component {
   };
 
   handleOpen = () => {
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholds' does not exist on type 'Read... Remove this comment to see the full error message
     if (!this.state.thresholds.length) {
       this.addNewItem();
     }
@@ -174,6 +195,7 @@ class ThresholdFilterDropdown extends React.Component {
 
   render() {
     const { disabled } = this.props;
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholds' does not exist on type 'Read... Remove this comment to see the full error message
     const { thresholds } = this.state;
     return (
       <BareDropdown
@@ -183,7 +205,7 @@ class ThresholdFilterDropdown extends React.Component {
         arrowInsideTrigger
         className={cs.thresholdFilterDropdown}
         onOpen={this.handleOpen}
-        onClose={e => {
+        onClose={(e: $TSFixMe) => {
           const enterPressed = get("key", e) === "Enter";
           if (enterPressed) {
             this.applyFilterUpdates();
@@ -191,6 +213,7 @@ class ThresholdFilterDropdown extends React.Component {
             this.cancelFilterUpdates();
           }
         }}
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'popupIsOpen' does not exist on type 'Rea... Remove this comment to see the full error message
         open={this.state.popupIsOpen}
         closeOnClick={false}
         disabled={disabled}
@@ -200,13 +223,15 @@ class ThresholdFilterDropdown extends React.Component {
             metrics={this.metrics}
             operators={this.operators}
             thresholds={thresholds}
-            onChangeThreshold={(idx, threshold) =>
+            onChangeThreshold={(idx: $TSFixMe, threshold: $TSFixMe) =>
               this.handleThresholdChange(idx, threshold)
             }
-            onRemoveThreshold={idx => {
+            onRemoveThreshold={(idx: $TSFixMe) => {
               this.handleThresholdRemove(idx);
             }}
-            onAddThreshold={event => {
+            // @ts-expect-error Type '(event: $TSFixMe) => void' is not assignable to type '() => void'
+            onAddThreshold={(event: $TSFixMe) => {
+              // @ts-expect-error ts-migrate(2554) FIXME: Expected 0 arguments, but got 1.
               this.handleAddThresholdItem(event);
             }}
           />
@@ -228,6 +253,7 @@ class ThresholdFilterDropdown extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 ThresholdFilterDropdown.defaultProps = {
   label: "Threshold filters",
   placeholder: null,
@@ -235,20 +261,5 @@ ThresholdFilterDropdown.defaultProps = {
   thresholds: [],
   useDropdownLabelCounter: true,
 };
-
-ThresholdFilterDropdown.propTypes = forbidExtraProps({
-  disabled: PropTypes.bool,
-  label: PropTypes.string,
-  thresholds: PropTypes.array,
-  onApply: PropTypes.func,
-  options: PropTypes.object,
-  disableMarginRight: PropTypes.bool,
-  rounded: PropTypes.bool,
-  placeholder: PropTypes.string,
-  useDropdownLabelCounter: PropTypes.bool,
-
-  // TODO: Refactor ThresholdFilterDropdown to be compatible with PortalDropdown,
-  // so we can use usePortal and withinModal
-});
 
 export default ThresholdFilterDropdown;

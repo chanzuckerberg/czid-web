@@ -1,5 +1,4 @@
 import { omit } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import ArrayUtils from "../../../utils/ArrayUtils";
 import BareDropdown from "./BareDropdown";
@@ -8,8 +7,25 @@ import DropdownLabel from "./common/DropdownLabel";
 import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./multiple_nested_dropdown.scss";
 
-class MultipleNestedDropdown extends React.Component {
-  constructor(props) {
+interface MultipleNestedDropdownProps {
+  boxed?: boolean;
+  label?: string;
+  onChange?: $TSFixMeFunction;
+  options?: unknown[];
+  selectedOptions?: unknown[];
+  selectedSuboptions?: object;
+  disabled?: boolean;
+  rounded?: boolean;
+  disableMarginRight?: boolean;
+  placeholder?: string;
+  useDropdownLabelCounter?: boolean;
+}
+
+class MultipleNestedDropdown extends React.Component<
+  MultipleNestedDropdownProps
+> {
+  suboptionsToOptionMap: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.state = {
@@ -20,8 +36,8 @@ class MultipleNestedDropdown extends React.Component {
     };
 
     this.suboptionsToOptionMap = {};
-    this.props.options.forEach(option => {
-      (option.suboptions || []).forEach(suboption => {
+    this.props.options.forEach((option: $TSFixMe) => {
+      (option.suboptions || []).forEach((suboption: $TSFixMe) => {
         this.suboptionsToOptionMap[suboption.value] = option.value;
       });
     });
@@ -30,7 +46,7 @@ class MultipleNestedDropdown extends React.Component {
     this.handleSuboptionClicked = this.handleSuboptionClicked.bind(this);
   }
 
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(props: $TSFixMe, state: $TSFixMe) {
     let newState = null;
     if (
       props.selectedOptions !== state.oldSelectedOptions ||
@@ -61,39 +77,46 @@ class MultipleNestedDropdown extends React.Component {
     return newState;
   }
 
-  static areSuboptionsEqual(suboptions1, suboptions2) {
+  static areSuboptionsEqual(suboptions1: $TSFixMe, suboptions2: $TSFixMe) {
     if (!suboptions1 || !suboptions2) return suboptions1 === suboptions2;
     if (Object.keys(suboptions1) !== Object.keys(suboptions2)) return false;
-    for (let key in suboptions1) {
+    for (const key in suboptions1) {
       if (!(key in suboptions2)) return false;
       if (!ArrayUtils.equal(suboptions1[key], suboptions2[key])) return false;
     }
     return true;
   }
 
-  handleOptionClicked(optionValue, isChecked) {
+  handleOptionClicked(optionValue: $TSFixMe, isChecked: $TSFixMe) {
     if (isChecked) {
       // when option is checked, check all suboptions
       this.setState(
         prevState => {
-          let stateUpdate = {
+          const stateUpdate = {
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
             selectedOptions: [...prevState.selectedOptions, optionValue],
           };
           const optionClicked = this.props.options.find(
-            option => option.value === optionValue,
+            (option: $TSFixMe) => option.value === optionValue,
           );
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'suboptions' does not exist on type ... Remove this comment to see the full error message
           if (optionClicked.suboptions) {
-            let selectedSuboptions = optionClicked.suboptions.map(
-              suboption => suboption.value,
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'suboptions' does not exist on type ... Remove this comment to see the full error message
+            const selectedSuboptions = optionClicked.suboptions.map(
+              (suboption: $TSFixMe) => suboption.value,
             );
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
             prevState.selectedSuboptions[optionValue] = selectedSuboptions;
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
             stateUpdate.selectedSuboptions = prevState.selectedSuboptions;
           }
           return stateUpdate;
         },
         () => {
           this.props.onChange(
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
             this.state.selectedOptions,
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
             this.state.selectedSuboptions,
           );
         },
@@ -102,71 +125,93 @@ class MultipleNestedDropdown extends React.Component {
       this.setState(
         prevState => {
           return {
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
             selectedOptions: prevState.selectedOptions.filter(
-              value => value !== optionValue,
+              (value: $TSFixMe) => value !== optionValue,
             ),
           };
         },
         () =>
           this.props.onChange(
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
             this.state.selectedOptions,
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
             this.state.selectedSuboptions,
           ),
       );
     }
   }
 
-  handleSuboptionClicked(suboptionValue, isChecked, event) {
+  handleSuboptionClicked(suboptionValue: $TSFixMe, isChecked: $TSFixMe) {
     const optionValue = this.suboptionsToOptionMap[suboptionValue];
     if (isChecked) {
       this.setState(
         prevState => {
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
           if (!prevState.selectedSuboptions[optionValue]) {
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
             prevState.selectedSuboptions[optionValue] = [];
           }
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
           prevState.selectedSuboptions[optionValue].push(suboptionValue);
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
           return { selectedSuboptions: prevState.selectedSuboptions };
         },
         () =>
           this.props.onChange(
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
             this.state.selectedOptions,
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
             this.state.selectedSuboptions,
           ),
       );
     } else {
       this.setState(
         prevState => {
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
           if (prevState.selectedSuboptions[optionValue]) {
-            let suboptions = prevState.selectedSuboptions[optionValue].filter(
-              value => value !== suboptionValue,
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
+            const suboptions = prevState.selectedSuboptions[optionValue].filter(
+              (value: $TSFixMe) => value !== suboptionValue,
             );
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
             prevState.selectedSuboptions[optionValue] = suboptions;
           }
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
           return { selectedSuboptions: prevState.selectedSuboptions };
         },
         () =>
           this.props.onChange(
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
             this.state.selectedOptions,
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
             this.state.selectedSuboptions,
           ),
       );
     }
   }
 
-  handleItemClicked(event) {
+  handleItemClicked(event: $TSFixMe) {
     event.stopPropagation();
   }
 
   getNumberOfSelectedOptions() {
     let suboptionCount = 0;
-    this.props.options.forEach(option => {
+    this.props.options.forEach((option: $TSFixMe) => {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
       suboptionCount += (this.state.selectedSuboptions[option.value] || [])
         .length;
     });
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
     return this.state.selectedOptions.length + suboptionCount;
   }
 
-  renderItem(value, text, checked, callback) {
+  renderItem(
+    value: $TSFixMe,
+    text: $TSFixMe,
+    checked: $TSFixMe,
+    callback: $TSFixMe,
+  ) {
     const { boxed } = this.props;
     return (
       <CheckboxItem
@@ -180,12 +225,14 @@ class MultipleNestedDropdown extends React.Component {
     );
   }
 
-  isOptionChecked(optionValue) {
+  isOptionChecked(optionValue: $TSFixMe) {
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
     return this.state.selectedOptions.indexOf(optionValue) > -1;
   }
 
-  isSuboptionChecked(optionValue, suboptionValue) {
+  isSuboptionChecked(optionValue: $TSFixMe, suboptionValue: $TSFixMe) {
     return (
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedSuboptions' does not exist on ty... Remove this comment to see the full error message
       (this.state.selectedSuboptions[optionValue] || []).indexOf(
         suboptionValue,
       ) > -1
@@ -193,8 +240,8 @@ class MultipleNestedDropdown extends React.Component {
   }
 
   renderItems() {
-    let items = [];
-    this.props.options.forEach(option => {
+    const items: $TSFixMe = [];
+    this.props.options.forEach((option: $TSFixMe) => {
       items.push(
         this.renderItem(
           option.value,
@@ -203,7 +250,7 @@ class MultipleNestedDropdown extends React.Component {
           this.handleOptionClicked,
         ),
       );
-      (option.suboptions || []).forEach(suboption => {
+      (option.suboptions || []).forEach((suboption: $TSFixMe) => {
         items.push(
           this.renderItem(
             suboption.value,
@@ -291,25 +338,12 @@ class MultipleNestedDropdown extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 MultipleNestedDropdown.defaultProps = {
   disableMarginRight: false,
   selectedOptions: [],
   selectedSuboptions: {},
   useDropdownLabelCounter: true,
-};
-
-MultipleNestedDropdown.propTypes = {
-  boxed: PropTypes.bool,
-  label: PropTypes.string,
-  onChange: PropTypes.func,
-  options: PropTypes.array,
-  selectedOptions: PropTypes.array,
-  selectedSuboptions: PropTypes.object,
-  disabled: PropTypes.bool,
-  rounded: PropTypes.bool,
-  disableMarginRight: PropTypes.bool,
-  placeholder: PropTypes.string,
-  useDropdownLabelCounter: PropTypes.bool,
 };
 
 export default MultipleNestedDropdown;

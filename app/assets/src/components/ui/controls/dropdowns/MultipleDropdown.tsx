@@ -1,6 +1,5 @@
 import cx from "classnames";
 import { find, without, includes } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import BareDropdown from "./BareDropdown";
 import CheckboxItem from "./common/CheckboxItem";
@@ -8,8 +7,24 @@ import DropdownLabel from "./common/DropdownLabel";
 import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./multiple_dropdown.scss";
 
-class MultipleDropdown extends React.Component {
-  constructor(props) {
+interface MultipleDropdownProps {
+  arrowInsideTrigger?: boolean;
+  boxed?: boolean;
+  checkedOnTop?: boolean;
+  disabled?: boolean;
+  hideCounter?: boolean;
+  label?: string;
+  rounded?: boolean;
+  onChange: $TSFixMeFunction;
+  options?: object[];
+  trigger?: React.ReactNode;
+  value?: unknown[];
+  className?: string;
+  search?: boolean;
+}
+
+class MultipleDropdown extends React.Component<MultipleDropdownProps> {
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.state = {
@@ -18,7 +33,8 @@ class MultipleDropdown extends React.Component {
     };
   }
 
-  handleOptionClicked = (value, isChecked) => {
+  handleOptionClicked = (value: $TSFixMe, isChecked: $TSFixMe) => {
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'value' does not exist on type 'Readonly<... Remove this comment to see the full error message
     let selectedValues = this.state.value.slice();
     if (!isChecked) {
       selectedValues = without([value], selectedValues);
@@ -29,9 +45,9 @@ class MultipleDropdown extends React.Component {
     this.props.onChange && this.props.onChange(selectedValues);
   };
 
-  handleItemClicked = event => event.stopPropagation();
+  handleItemClicked = (event: $TSFixMe) => event.stopPropagation();
 
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(props: $TSFixMe, state: $TSFixMe) {
     if (props.value !== state.prevPropsValue) {
       return {
         value: props.value,
@@ -41,7 +57,7 @@ class MultipleDropdown extends React.Component {
     return null;
   }
 
-  renderMenuItem(option, checked) {
+  renderMenuItem(option: $TSFixMe, checked: $TSFixMe) {
     const { boxed } = this.props;
     return (
       <CheckboxItem
@@ -57,27 +73,30 @@ class MultipleDropdown extends React.Component {
 
   renderMenuItems() {
     const { value: propsValue, options, checkedOnTop } = this.props;
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'value' does not exist on type 'Readonly<... Remove this comment to see the full error message
     const { value: stateValue, valueOnOpen } = this.state;
-    let checkedOptions = propsValue || stateValue;
+    const checkedOptions = propsValue || stateValue;
 
     if (checkedOnTop) {
       const checked = valueOnOpen
-        .filter(optionValue => find({ value: optionValue }, options))
-        .map(optionValue =>
+        .filter((optionValue: $TSFixMe) =>
+          find({ value: optionValue }, options),
+        )
+        .map((optionValue: $TSFixMe) =>
           this.renderMenuItem(
             find({ value: optionValue }, options),
             includes(optionValue, checkedOptions),
           ),
         );
       const unchecked = options
-        .filter(option => !includes(option.value, valueOnOpen))
-        .map(option =>
+        .filter((option: $TSFixMe) => !includes(option.value, valueOnOpen))
+        .map((option: $TSFixMe) =>
           this.renderMenuItem(option, includes(option.value, checkedOptions)),
         );
 
       return checked.concat(unchecked);
     } else {
-      return options.map(option =>
+      return options.map((option: $TSFixMe) =>
         this.renderMenuItem(option, includes(option.value, checkedOptions)),
       );
     }
@@ -85,6 +104,7 @@ class MultipleDropdown extends React.Component {
 
   renderText() {
     const { disabled, hideCounter, label, rounded } = this.props;
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'value' does not exist on type 'Readonly<... Remove this comment to see the full error message
     const { value } = this.state;
 
     const labelText =
@@ -111,6 +131,7 @@ class MultipleDropdown extends React.Component {
     const { checkedOnTop } = this.props;
     if (checkedOnTop) {
       this.setState({
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'value' does not exist on type 'Readonly<... Remove this comment to see the full error message
         valueOnOpen: this.state.value.slice(),
       });
     }
@@ -119,21 +140,15 @@ class MultipleDropdown extends React.Component {
   render() {
     const {
       arrowInsideTrigger,
-      boxed,
-      checkedOnTop,
-      hideCounter,
-      label,
-      onChange,
-      options,
-      rounded,
       trigger,
-      value,
       className,
       ...otherProps
     } = this.props;
 
     const renderedMenuItems = this.renderMenuItems();
-    const searchStrings = renderedMenuItems.map(item => item.props.label);
+    const searchStrings = renderedMenuItems.map(
+      (item: $TSFixMe) => item.props.label,
+    );
 
     return (
       <BareDropdown
@@ -151,25 +166,10 @@ class MultipleDropdown extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 MultipleDropdown.defaultProps = {
   arrowInsideTrigger: true,
   value: [],
-};
-
-MultipleDropdown.propTypes = {
-  arrowInsideTrigger: PropTypes.bool,
-  boxed: PropTypes.bool,
-  checkedOnTop: PropTypes.bool,
-  disabled: PropTypes.bool,
-  hideCounter: PropTypes.bool,
-  label: PropTypes.string,
-  rounded: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(PropTypes.object),
-  trigger: PropTypes.node,
-  value: PropTypes.array,
-  className: PropTypes.string,
-  search: PropTypes.bool,
 };
 
 export default MultipleDropdown;

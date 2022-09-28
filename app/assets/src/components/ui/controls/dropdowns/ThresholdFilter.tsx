@@ -41,11 +41,11 @@ const ThresholdFilter = ({
     });
   };
 
-  const handleOperatorChange = newOperator => {
+  const handleOperatorChange = (newOperator: $TSFixMe) => {
     onChange({ metric, value, operator: newOperator, metricDisplay });
   };
 
-  const handleValueChange = newValue => {
+  const handleValueChange = (newValue: $TSFixMe) => {
     onChange({ metric, value: newValue, operator, metricDisplay });
   };
 
