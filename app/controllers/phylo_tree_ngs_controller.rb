@@ -537,9 +537,7 @@ class PhyloTreeNgsController < ApplicationController
         JOIN contigs ON (
           pipeline_runs.id = contigs.pipeline_run_id AND (
             contigs.species_taxid_nt = :tax_id OR
-            contigs.species_taxid_nr = :tax_id OR
-            contigs.genus_taxid_nt = :tax_id OR
-            contigs.genus_taxid_nr = :tax_id
+            contigs.genus_taxid_nt = :tax_id
           )
         )", tax_id: tax_id,])
                                    else
@@ -548,9 +546,7 @@ class PhyloTreeNgsController < ApplicationController
         LEFT JOIN contigs ON (
           pipeline_runs.id = contigs.pipeline_run_id AND (
             contigs.species_taxid_nt = :tax_id OR
-            contigs.species_taxid_nr = :tax_id OR
-            contigs.genus_taxid_nt = :tax_id OR
-            contigs.genus_taxid_nr = :tax_id
+            contigs.genus_taxid_nt = :tax_id
           )
         )", tax_id: tax_id,])
                                    end
