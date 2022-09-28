@@ -1,6 +1,6 @@
 import { get } from "./core";
 
-export const getBasespaceProjects = accessToken =>
+export const getBasespaceProjects = (accessToken: $TSFixMe) =>
   get("/basespace/projects", {
     params: {
       access_token: accessToken,
@@ -8,8 +8,8 @@ export const getBasespaceProjects = accessToken =>
   });
 
 export const getSamplesForBasespaceProject = (
-  accessToken,
-  basespaceProjectId,
+  accessToken: $TSFixMe,
+  basespaceProjectId: $TSFixMe,
 ) =>
   get("/basespace/samples_for_project", {
     params: {

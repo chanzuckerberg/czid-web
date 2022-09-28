@@ -6,7 +6,7 @@ export const fetchLongestContigsForTaxonId = ({
   sampleId,
   pipelineVersion,
   taxonId,
-}) =>
+}: $TSFixMe) =>
   get(`/samples/${sampleId}/taxid_contigs_for_blast.json`, {
     params: {
       taxid: taxonId,
@@ -21,7 +21,7 @@ export const fetchLongestReadsForTaxonId = ({
   pipelineVersion,
   taxonId,
   taxonLevel,
-}) =>
+}: $TSFixMe) =>
   get(`/samples/${sampleId}/taxon_five_longest_reads.json`, {
     params: {
       taxid: taxonId,
@@ -31,7 +31,11 @@ export const fetchLongestReadsForTaxonId = ({
     },
   });
 
-export const createAnnotation = ({ pipelineRunId, taxId, annotationType }) =>
+export const createAnnotation = ({
+  pipelineRunId,
+  taxId,
+  annotationType,
+}: $TSFixMe) =>
   postWithCSRF(`/annotations.json`, {
     pipeline_run_id: pipelineRunId,
     tax_id: taxId,

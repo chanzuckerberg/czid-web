@@ -14,23 +14,28 @@ import {
 } from "./core";
 
 // Save fields on the sample model (NOT sample metadata)
-const saveSampleField = (id, field, value) =>
+const saveSampleField = (id: $TSFixMe, field: $TSFixMe, value: $TSFixMe) =>
   postWithCSRF(`/samples/${id}/save_metadata`, {
     field,
     value,
   });
 
-const saveSampleName = (id, name) => saveSampleField(id, "name", name);
+const saveSampleName = (id: $TSFixMe, name: $TSFixMe) =>
+  saveSampleField(id, "name", name);
 
-const saveSampleNotes = (id, sampleNotes) =>
+const saveSampleNotes = (id: $TSFixMe, sampleNotes: $TSFixMe) =>
   saveSampleField(id, "sample_notes", sampleNotes);
 
-const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
+const getAlignmentData = (
+  sampleId: $TSFixMe,
+  alignmentQuery: $TSFixMe,
+  pipelineVersion: $TSFixMe,
+) =>
   get(
     `/samples/${sampleId}/alignment_viz/${alignmentQuery}.json?pipeline_version=${pipelineVersion}`,
   );
 
-const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
+const deleteSample = (id: $TSFixMe) => deleteWithCSRF(`/samples/${id}.json`);
 
 const getSampleReportData = ({
   snapshotShareId = null,
@@ -38,7 +43,7 @@ const getSampleReportData = ({
   background,
   pipelineVersion = null,
   mergeNtNr = false,
-}) =>
+}: $TSFixMe) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}/report_v2.json?`,
@@ -52,7 +57,7 @@ const getSampleReportData = ({
     },
   );
 
-const getSummaryContigCounts = (id, minContigReads) =>
+const getSummaryContigCounts = (id: $TSFixMe, minContigReads: $TSFixMe) =>
   get(
     `/samples/${id}/summary_contig_counts?min_contig_reads=${minContigReads}`,
   );
@@ -61,15 +66,20 @@ const getAllHostGenomes = () => get("/host_genomes.json");
 
 const getAllSampleTypes = () => get("/sample_types.json");
 
-const saveVisualization = (type, data) =>
+const saveVisualization = (type: $TSFixMe, data: $TSFixMe) =>
   postWithCSRF(`/visualizations/${type}/save`, {
     type,
     data,
   });
 
-const shortenUrl = url => postWithCSRF("/visualizations/shorten_url", { url });
+const shortenUrl = (url: $TSFixMe) =>
+  postWithCSRF("/visualizations/shorten_url", { url });
 
-const bulkImportRemoteSamples = ({ projectId, hostGenomeId, bulkPath }) =>
+const bulkImportRemoteSamples = ({
+  projectId,
+  hostGenomeId,
+  bulkPath,
+}: $TSFixMe) =>
   get("/samples/bulk_import.json", {
     params: {
       project_id: projectId,
@@ -78,7 +88,7 @@ const bulkImportRemoteSamples = ({ projectId, hostGenomeId, bulkPath }) =>
     },
   });
 
-const markSampleUploaded = sampleId =>
+const markSampleUploaded = (sampleId: $TSFixMe) =>
   putWithCSRF(`/samples/${sampleId}.json`, {
     sample: {
       id: sampleId,
@@ -87,9 +97,9 @@ const markSampleUploaded = sampleId =>
   });
 
 const uploadFileToUrl = async (
-  file,
-  url,
-  { onUploadProgress, onSuccess, onError },
+  file: $TSFixMe,
+  url: $TSFixMe,
+  { onUploadProgress, onSuccess, onError }: $TSFixMe,
 ) => {
   const config = {
     onUploadProgress,
@@ -101,13 +111,15 @@ const uploadFileToUrl = async (
     .catch(onError);
 };
 
-const getTaxonDescriptions = taxonList =>
+const getTaxonDescriptions = (taxonList: $TSFixMe) =>
   get(`/taxon_descriptions.json?taxon_list=${taxonList.join(",")}`);
 
-const getTaxonDistributionForBackground = (backgroundId, taxonId) =>
-  get(`/backgrounds/${backgroundId}/show_taxon_dist.json?taxid=${taxonId}`);
+const getTaxonDistributionForBackground = (
+  backgroundId: $TSFixMe,
+  taxonId: $TSFixMe,
+) => get(`/backgrounds/${backgroundId}/show_taxon_dist.json?taxid=${taxonId}`);
 
-const getSampleTaxons = (params, cancelToken) =>
+const getSampleTaxons = (params: $TSFixMe, cancelToken: $TSFixMe) =>
   get("/visualizations/samples_taxons.json", {
     params,
     cancelToken,
@@ -128,7 +140,7 @@ const getSamples = ({
   snapshotShareId,
   basic = false,
   workflow,
-} = {}) =>
+}: $TSFixMe = {}) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       "/samples/index_v2.json",
@@ -163,7 +175,7 @@ const getWorkflowRuns = ({
   orderDir,
   limit,
   offset,
-} = {}) =>
+}: $TSFixMe = {}) =>
   get("/workflow_runs.json", {
     params: {
       projectId,
@@ -186,7 +198,7 @@ const getSampleDimensions = ({
   snapshotShareId,
   search,
   sampleIds,
-}) =>
+}: $TSFixMe) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       "/samples/dimensions.json",
@@ -209,7 +221,7 @@ const getSampleStats = ({
   snapshotShareId,
   search,
   sampleIds,
-}) =>
+}: $TSFixMe) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") + "/samples/stats.json",
     {
@@ -224,13 +236,18 @@ const getSampleStats = ({
     },
   );
 
-const getSample = ({ snapshotShareId, sampleId }) =>
+const getSample = ({ snapshotShareId, sampleId }: $TSFixMe) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}.json`,
   );
 
-const getProjectDimensions = ({ domain, filters, projectId, search }) =>
+const getProjectDimensions = ({
+  domain,
+  filters,
+  projectId,
+  search,
+}: $TSFixMe) =>
   get("/projects/dimensions.json", {
     params: {
       domain,
@@ -251,7 +268,7 @@ const getProjects = ({
   orderDir,
   search,
   projectId,
-} = {}) =>
+}: $TSFixMe = {}) =>
   get("/projects.json", {
     params: {
       basic,
@@ -273,7 +290,7 @@ const getVisualizations = ({
   search,
   orderBy,
   orderDir,
-} = {}) =>
+}: $TSFixMe = {}) =>
   get("/visualizations.json", {
     params: {
       domain,
@@ -284,27 +301,27 @@ const getVisualizations = ({
     },
   });
 
-const createProject = params =>
+const createProject = (params: $TSFixMe) =>
   postWithCSRF("/projects.json", {
     project: params,
   });
 
-const saveProjectName = (projectId, projectName) =>
+const saveProjectName = (projectId: $TSFixMe, projectName: $TSFixMe) =>
   putWithCSRF(`/projects/${projectId}.json`, {
     name: projectName,
   });
 
-const validateProjectName = (projectId, projectName) =>
+const validateProjectName = (projectId: $TSFixMe, projectName: $TSFixMe) =>
   get(`/projects/${projectId}/validate_project_name.json`, {
     params: { name: projectName },
   });
 
-const saveProjectDescription = (projectId, description) =>
+const saveProjectDescription = (projectId: $TSFixMe, description: $TSFixMe) =>
   putWithCSRF(`/projects/${projectId}.json`, {
     description: description,
   });
 
-const validateSampleNames = (projectId, sampleNames) => {
+const validateSampleNames = (projectId: $TSFixMe, sampleNames: $TSFixMe) => {
   if (!projectId) {
     return Promise.resolve(sampleNames);
   }
@@ -314,7 +331,7 @@ const validateSampleNames = (projectId, sampleNames) => {
   });
 };
 
-const validateSampleFiles = sampleFiles => {
+const validateSampleFiles = (sampleFiles: $TSFixMe) => {
   if (!sampleFiles || sampleFiles.length === 0) {
     return Promise.resolve(sampleFiles);
   }
@@ -324,7 +341,7 @@ const validateSampleFiles = sampleFiles => {
   });
 };
 
-const getSearchSuggestions = ({ categories, query, domain }) =>
+const getSearchSuggestions = ({ categories, query, domain }: $TSFixMe) =>
   get("/search_suggestions", {
     params: {
       categories,
@@ -333,7 +350,12 @@ const getSearchSuggestions = ({ categories, query, domain }) =>
     },
   });
 
-const createBackground = ({ description, name, sampleIds, massNormalized }) =>
+const createBackground = ({
+  description,
+  name,
+  sampleIds,
+  massNormalized,
+}: $TSFixMe) =>
   postWithCSRF("/backgrounds", {
     name,
     description,
@@ -345,7 +367,7 @@ const getBackgrounds = ({
   snapshotShareId,
   ownedOrPublicBackgroundsOnly,
   categorizeBackgrounds,
-} = {}) =>
+}: $TSFixMe = {}) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") + "/backgrounds.json",
     {
@@ -356,37 +378,46 @@ const getBackgrounds = ({
     },
   );
 
-const getCoverageVizSummary = ({ sampleId, snapshotShareId } = {}) =>
+const getCoverageVizSummary = ({ sampleId, snapshotShareId }: $TSFixMe = {}) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}/coverage_viz_summary`,
   );
 
-const getCoverageVizData = ({ sampleId, accessionId, snapshotShareId } = {}) =>
+const getCoverageVizData = ({
+  sampleId,
+  accessionId,
+  snapshotShareId,
+}: $TSFixMe = {}) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`,
   );
 
-const getWorkflowRunsInfo = workflowRunIds =>
+const getWorkflowRunsInfo = (workflowRunIds: $TSFixMe) =>
   postWithCSRF("/workflow_runs/workflow_runs_info", { workflowRunIds });
 
-const getWorkflowRunResults = workflowRunId =>
+const getWorkflowRunResults = (workflowRunId: $TSFixMe) =>
   get(`/workflow_runs/${workflowRunId}/results`);
 
 const getContigsSequencesByByteranges = (
-  sampleId,
-  byteranges,
-  pipelineVersion,
+  sampleId: $TSFixMe,
+  byteranges: $TSFixMe,
+  pipelineVersion: $TSFixMe,
 ) => {
   const params = getURLParamString({
-    byteranges: byteranges.map(byterange => byterange.join(",")),
+    byteranges: byteranges.map((byterange: $TSFixMe) => byterange.join(",")),
     pipelineVersion,
   });
   return get(`/samples/${sampleId}/contigs_sequences_by_byteranges?${params}`);
 };
 
-const createPhyloTree = ({ treeName, projectId, taxId, pipelineRunIds }) => {
+const createPhyloTree = ({
+  treeName,
+  projectId,
+  taxId,
+  pipelineRunIds,
+}: $TSFixMe) => {
   return postWithCSRF("/phylo_tree_ngs.json", {
     name: treeName,
     projectId,
@@ -395,9 +426,13 @@ const createPhyloTree = ({ treeName, projectId, taxId, pipelineRunIds }) => {
   });
 };
 
-const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
+const getPhyloTree = (id: $TSFixMe) => get(`/phylo_trees/${id}/show.json`);
 
-const getPhyloTrees = ({ taxId, projectId, nextGeneration = false } = {}) => {
+const getPhyloTrees = ({
+  taxId,
+  projectId,
+  nextGeneration = false,
+}: $TSFixMe = {}) => {
   const endpoint = nextGeneration
     ? "/phylo_tree_ngs.json"
     : "/phylo_trees/index.json";
@@ -415,7 +450,7 @@ const getNewPhyloTreePipelineRunIds = ({
   projectId,
   taxId,
   filter,
-}) => {
+}: $TSFixMe) => {
   return get("/phylo_tree_ngs/new_pr_ids.json", {
     params: {
       getAdditionalSamples,
@@ -430,7 +465,7 @@ const getNewPhyloTreePipelineRunInfo = ({
   getAdditionalSamples,
   pipelineRunIds,
   taxId,
-}) => {
+}: $TSFixMe) => {
   return get("/phylo_tree_ngs/new_pr_info.json", {
     params: {
       getAdditionalSamples,
@@ -443,13 +478,19 @@ const getNewPhyloTreePipelineRunInfo = ({
 // Consider consolidating with ProjectsController#index:
 const getProjectsToChooseFrom = () => get("/choose_project.json");
 
-const validatePhyloTreeName = ({ treeName }) => {
+const validatePhyloTreeName = ({ treeName }: $TSFixMe) => {
   return get("/phylo_tree_ngs/validate_name", { params: { name: treeName } });
 };
 
-const retryPhyloTree = id => postWithCSRF("/phylo_trees/retry", { id });
+const retryPhyloTree = (id: $TSFixMe) =>
+  postWithCSRF("/phylo_trees/retry", { id });
 
-const getSamplesLocations = ({ domain, filters, projectId, search }) =>
+const getSamplesLocations = ({
+  domain,
+  filters,
+  projectId,
+  search,
+}: $TSFixMe) =>
   get("/locations/sample_locations.json", {
     params: {
       domain,
@@ -459,7 +500,10 @@ const getSamplesLocations = ({ domain, filters, projectId, search }) =>
     },
   });
 
-const getSamplePipelineResults = (sampleId, pipelineVersion) =>
+const getSamplePipelineResults = (
+  sampleId: $TSFixMe,
+  pipelineVersion: $TSFixMe,
+) =>
   get(`/samples/${sampleId}/results_folder.json`, {
     params: {
       pipeline_version: pipelineVersion,
@@ -467,7 +511,7 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
   });
 
 // Limits requests to MAX_SAMPLES_FOR_GET_REQUEST samples at a time, per Puma limits.
-const getSamplesReadStats = async sampleIds => {
+const getSamplesReadStats = async (sampleIds: $TSFixMe) => {
   if (!Array.isArray(sampleIds) || sampleIds.length < 1) {
     return {};
   }
@@ -492,13 +536,15 @@ const getSamplesReadStats = async sampleIds => {
 
   const response = await Promise.all(requests);
   // flatten into one object
-  const result = response.flat().reduce((accum, current) => {
-    return Object.assign(accum, current);
-  }, {});
+  const result = response
+    .flat()
+    .reduce((accum: $TSFixMe, current: $TSFixMe) => {
+      return Object.assign(accum, current);
+    }, {});
   return result;
 };
 
-const setWorkflowVersion = (workflowName, version) =>
+const setWorkflowVersion = (workflowName: $TSFixMe, version: $TSFixMe) =>
   putWithCSRF("/app_config", {
     app_config: {
       key: workflowName,
@@ -507,7 +553,11 @@ const setWorkflowVersion = (workflowName, version) =>
   });
 
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
-const getTaxaWithReadsSuggestions = (query, sampleIds, taxLevel) =>
+const getTaxaWithReadsSuggestions = (
+  query: $TSFixMe,
+  sampleIds: $TSFixMe,
+  taxLevel: $TSFixMe,
+) =>
   postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
     query,
     sampleIds,
@@ -515,13 +565,13 @@ const getTaxaWithReadsSuggestions = (query, sampleIds, taxLevel) =>
   });
 
 // Get autocomplete suggestions for "taxa that have contigs" for a set of samples.
-const getTaxaWithContigsSuggestions = (query, sampleIds) =>
+const getTaxaWithContigsSuggestions = (query: $TSFixMe, sampleIds: $TSFixMe) =>
   postWithCSRF("/samples/taxa_with_contigs_suggestions.json", {
     query,
     sampleIds,
   });
 
-const samplesUploadedByCurrentUser = async sampleIds => {
+const samplesUploadedByCurrentUser = async (sampleIds: $TSFixMe) => {
   const {
     uploaded_by_current_user: allSamplesUploadedByCurrentUser,
   } = await postWithCSRF("samples/uploaded_by_current_user", {
@@ -531,7 +581,7 @@ const samplesUploadedByCurrentUser = async sampleIds => {
   return allSamplesUploadedByCurrentUser;
 };
 
-const workflowRunsCreatedByCurrentUser = async workflowRunIds => {
+const workflowRunsCreatedByCurrentUser = async (workflowRunIds: $TSFixMe) => {
   const {
     created_by_current_user: allWorkflowRunsCreatedByCurrentUser,
   } = await postWithCSRF("workflow_runs/created_by_current_user", {
@@ -546,13 +596,13 @@ const getHeatmapMetrics = () => get("/visualizations/heatmap_metrics.json");
 const getUserSettingMetadataByCategory = () =>
   get("/user_settings/metadata_by_category");
 
-const updateUserSetting = (key, value) =>
+const updateUserSetting = (key: $TSFixMe, value: $TSFixMe) =>
   postWithCSRF("user_settings/update", {
     key,
     value,
   });
 
-const getTaxaDetails = params =>
+const getTaxaDetails = (params: $TSFixMe) =>
   postWithCSRF("/visualizations/taxa_details.json", {
     sampleIds: params.sampleIds,
     taxonIds: params.taxonIds,
@@ -562,7 +612,7 @@ const getTaxaDetails = params =>
     presets: params.presets,
   });
 
-const getMassNormalizedBackgroundAvailability = sampleIds =>
+const getMassNormalizedBackgroundAvailability = (sampleIds: $TSFixMe) =>
   postWithCSRF("/samples/enable_mass_normalized_backgrounds.json", {
     sampleIds,
   });
@@ -570,7 +620,7 @@ const getMassNormalizedBackgroundAvailability = sampleIds =>
 const createConsensusGenomeCladeExport = ({
   workflowRunIds = [],
   referenceTree,
-}) =>
+}: $TSFixMe) =>
   postWithCSRF("/workflow_runs/consensus_genome_clade_export", {
     workflowRunIds,
     referenceTree,
@@ -584,7 +634,7 @@ const kickoffConsensusGenome = ({
   taxonId,
   taxonName,
   technology,
-}) =>
+}: $TSFixMe) =>
   postWithCSRF(`/samples/${sampleId}/kickoff_workflow`, {
     workflow,
     inputs_json: {
@@ -596,7 +646,7 @@ const kickoffConsensusGenome = ({
     },
   });
 
-const kickoffAMR = ({ sampleId, workflow }) =>
+const kickoffAMR = ({ sampleId, workflow }: $TSFixMe) =>
   postWithCSRF(`/samples/${sampleId}/kickoff_workflow`, {
     workflow,
     inputs_json: {
@@ -604,7 +654,7 @@ const kickoffAMR = ({ sampleId, workflow }) =>
     },
   });
 
-const bulkKickoffWorkflowRuns = ({ sampleIds, workflow }) =>
+const bulkKickoffWorkflowRuns = ({ sampleIds, workflow }: $TSFixMe) =>
   postWithCSRF(`/samples/bulk_kickoff_workflow_runs`, {
     sampleIds,
     workflow,

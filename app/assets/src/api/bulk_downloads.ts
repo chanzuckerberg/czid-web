@@ -1,10 +1,10 @@
 import { WORKFLOW_ENTITIES } from "~utils/workflows";
 import { get, postWithCSRF } from "./core";
 
-export const getBulkDownloadTypes = workflow =>
+export const getBulkDownloadTypes = (workflow: $TSFixMe) =>
   get(`/bulk_downloads/types?workflow=${workflow}`);
 
-export const createBulkDownload = bulkDownload =>
+export const createBulkDownload = (bulkDownload: $TSFixMe) =>
   postWithCSRF("/bulk_downloads", {
     download_type: bulkDownload.downloadType,
     ...(bulkDownload.workflowEntity === WORKFLOW_ENTITIES.SAMPLES
@@ -16,8 +16,8 @@ export const createBulkDownload = bulkDownload =>
 
 export const getBulkDownloads = () => get("/bulk_downloads.json");
 
-export const getBulkDownload = bulkDownloadId =>
+export const getBulkDownload = (bulkDownloadId: $TSFixMe) =>
   get(`/bulk_downloads/${bulkDownloadId}.json`);
 
-export const getPresignedOutputUrl = bulkDownloadId =>
+export const getPresignedOutputUrl = (bulkDownloadId: $TSFixMe) =>
   get(`/bulk_downloads/${bulkDownloadId}/presigned_output_url`);

@@ -8,7 +8,7 @@ const getSampleMetadata = ({
   id,
   pipelineVersion = null,
   snapshotShareId = null,
-}) => {
+}: $TSFixMe) => {
   if (snapshotShareId) {
     return get(
       `/pub/${snapshotShareId}/samples/${id}/metadata?pipeline_version=${pipelineVersion}`,
@@ -23,7 +23,7 @@ const getSampleMetadata = ({
 };
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
-const getSampleMetadataFields = (ids, snapshotShareId) =>
+const getSampleMetadataFields = (ids: $TSFixMe, snapshotShareId: $TSFixMe) =>
   postWithCSRF(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       "/samples/metadata_fields",
@@ -41,7 +41,10 @@ const getProjectMetadataFields = (ids: number | number[]) =>
   });
 
 // Get MetadataField info for the workflow run(s) (either one ID or an array)
-const getWorkflowRunMetadataFields = (ids, snapshotShareId) =>
+const getWorkflowRunMetadataFields = (
+  ids: $TSFixMe,
+  snapshotShareId: $TSFixMe,
+) =>
   postWithCSRF(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       "/workflow_runs/metadata_fields",
@@ -50,24 +53,26 @@ const getWorkflowRunMetadataFields = (ids, snapshotShareId) =>
     },
   );
 
-const saveSampleMetadata = (id, field, value) =>
+const saveSampleMetadata = (id: $TSFixMe, field: $TSFixMe, value: $TSFixMe) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
     field,
     value,
   });
 
 // Validate CSV metadata against samples in an existing project.
-const validateMetadataCSVForProject = (id, metadata) =>
+const validateMetadataCSVForProject = (id: $TSFixMe, metadata: $TSFixMe) =>
   postWithCSRF(`/projects/${id}/validate_metadata_csv`, {
     metadata,
   });
 
 // Validate manually input metadata against samples in an existing project.
-const validateManualMetadataForProject = (id, metadata) => {
+const validateManualMetadataForProject = (id: $TSFixMe, metadata: $TSFixMe) => {
   // Convert manual metadata into a csv-like format and use the csv endpoint for validation.
   const metadataAsCSV = set(
     "rows",
-    metadata.rows.map(row => metadata.headers.map(header => row[header] || "")),
+    metadata.rows.map((row: $TSFixMe) =>
+      metadata.headers.map((header: $TSFixMe) => row[header] || ""),
+    ),
     metadata,
   );
 
@@ -76,25 +81,33 @@ const validateManualMetadataForProject = (id, metadata) => {
 
 // Validate CSV metadata for new samples.
 // For samples, we just require { name, host_genome_id }
-const validateMetadataCSVForNewSamples = (samples, metadata) =>
+const validateMetadataCSVForNewSamples = (
+  samples: $TSFixMe,
+  metadata: $TSFixMe,
+) =>
   postWithCSRF("/metadata/validate_csv_for_new_samples", {
     metadata,
     samples,
   });
 
 // Validate manually input metadata for new samples.
-const validateManualMetadataForNewSamples = (samples, metadata) => {
+const validateManualMetadataForNewSamples = (
+  samples: $TSFixMe,
+  metadata: $TSFixMe,
+) => {
   // Convert manual metadata into a csv-like format and use the csv endpoint for validation.
   const metadataAsCSV = set(
     "rows",
-    metadata.rows.map(row => metadata.headers.map(header => row[header] || "")),
+    metadata.rows.map((row: $TSFixMe) =>
+      metadata.headers.map((header: $TSFixMe) => row[header] || ""),
+    ),
     metadata,
   );
 
   return validateMetadataCSVForNewSamples(samples, metadataAsCSV);
 };
 
-const uploadMetadataForProject = (id, metadata) =>
+const uploadMetadataForProject = (id: $TSFixMe, metadata: $TSFixMe) =>
   postWithCSRF(`/projects/${id}/upload_metadata`, {
     metadata,
   });

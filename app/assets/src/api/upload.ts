@@ -7,23 +7,24 @@ import { get as httpGet, postWithCSRF } from "./core";
 
 export const MAX_MARK_SAMPLE_RETRIES = 10;
 
-export const exponentialDelayWithJitter = tryCount => {
+export const exponentialDelayWithJitter = (tryCount: $TSFixMe) => {
   // ~13 sec, ~46 sec, ~158 sec, ... -> ~115 minutes.
   // Derived via eyeballing. Adjust based on user feedback.
   const delay = ((tryCount + Math.random()) * 10) ** 3.5 + 10000;
   return new Promise(resolve => setTimeout(resolve, delay));
 };
 
-export const bulkUploadBasespace = ({ samples, metadata }) =>
+export const bulkUploadBasespace = ({ samples, metadata }: $TSFixMe) =>
   bulkUploadWithMetadata(samples, metadata);
 
-export const bulkUploadRemote = ({ samples, metadata }) =>
+export const bulkUploadRemote = ({ samples, metadata }: $TSFixMe) =>
   bulkUploadWithMetadata(samples, metadata);
 
 export const initiateBulkUploadLocalWithMetadata = async ({
   samples,
   metadata,
-  onCreateSamplesError = (errors, erroredSampleNames) => {
+
+  onCreateSamplesError = (errors: $TSFixMe, erroredSampleNames: $TSFixMe) => {
     console.error(
       "CreateSamplesError",
       errors,
@@ -31,7 +32,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
       erroredSampleNames,
     );
   },
-}) => {
+}: $TSFixMe) => {
   // Only upload these fields from the sample.
   const processedSamples = map(
     pick([
@@ -91,7 +92,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
   // The sample files that need to be uploaded to S3 are in the samples argument passed into initiateBulkUploadLocalWithMetadata
   // So we need to fetch the files from samples argument and copy them over to response.samples where they're later uploaded to S3 via uploadSampleFilesToPresignedURL
   response.samples.forEach(
-    createdSample =>
+    (createdSample: $TSFixMe) =>
       (createdSample["filesToUpload"] = get(
         "files",
         find({ name: createdSample.name }, samples),
@@ -104,7 +105,7 @@ export const completeSampleUpload = async ({
   sample,
   onSampleUploadSuccess = null,
   onMarkSampleUploadedError = null,
-}) => {
+}: $TSFixMe) => {
   let tryCount = 0;
   while (true) {
     try {
@@ -124,7 +125,10 @@ export const completeSampleUpload = async ({
 };
 
 // Bulk-upload samples (both local and remote), with metadata.
-const bulkUploadWithMetadata = async (samples, metadata) => {
+const bulkUploadWithMetadata = async (
+  samples: $TSFixMe,
+  metadata: $TSFixMe,
+) => {
   const response = await postWithCSRF(
     `/samples/bulk_upload_with_metadata.json`,
     {
@@ -152,7 +156,7 @@ const bulkUploadWithMetadata = async (samples, metadata) => {
 
 // Local uploads go directly from the browser to S3, so we don't know if an upload was interrupted.
 // Ping a heartbeat periodically to say the browser is actively uploading the samples.
-export const startUploadHeartbeat = async sampleIds => {
+export const startUploadHeartbeat = async (sampleIds: $TSFixMe) => {
   const sendHeartbeat = () =>
     trackEvent(
       ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOADS_BATCH_HEARTBEAT_SENT,
@@ -166,5 +170,5 @@ export const startUploadHeartbeat = async sampleIds => {
   return setInterval(sendHeartbeat, milliseconds);
 };
 
-export const getUploadCredentials = sampleId =>
+export const getUploadCredentials = (sampleId: $TSFixMe) =>
   httpGet(`/samples/${sampleId}/upload_credentials.json`);

@@ -49,7 +49,7 @@ const updateUser = ({
   isAdmin,
   archetypes,
   segments,
-}) => {
+}: $TSFixMe) => {
   return putWithCSRF(`/users/${userId}.json`, {
     user: {
       name,
@@ -62,7 +62,7 @@ const updateUser = ({
   });
 };
 
-const requestPasswordReset = email => {
+const requestPasswordReset = (email: $TSFixMe) => {
   return postWithCSRF("/auth0/request_password_reset", {
     user: { email },
   });
