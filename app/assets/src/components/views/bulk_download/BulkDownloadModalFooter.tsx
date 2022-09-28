@@ -4,16 +4,16 @@ import { withAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import PropTypes from "~/components/utils/propTypes";
 
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 
 import cs from "./bulk_download_modal_footer.scss";
-import { CONDITIONAL_FIELDS, OPTIONAL_FIELDS } from "./constants.js";
+import { CONDITIONAL_FIELDS, OPTIONAL_FIELDS } from "./constants";
 
 const triggersCondtionalFieldMetricList = (
   conditionalField,
+  // @ts-expect-error 'dependentField' is declared but its value is never read.
   dependentField,
   selectedFields,
 ) => {
@@ -42,7 +42,25 @@ const triggersConditionalField = (conditionalField, selectedFields) =>
     )
     .some(Boolean);
 
-export default class BulkDownloadModalFooter extends React.Component {
+interface BulkDownloadModalFooterProps {
+  loading?: boolean;
+  downloadTypes?: $TSFixMeUnknown[];
+  validObjectIds: Set<$TSFixMeUnknown>;
+  invalidSampleNames?: string[];
+  validationError?: string;
+  selectedDownloadTypeName?: string;
+  // The selected fields of the currently selected download type.
+  selectedFields?: Record<string, string>;
+  waitingForCreate?: boolean;
+  createStatus?: string;
+  createError?: string;
+  onDownloadRequest: $TSFixMeFunction;
+  workflow: string;
+}
+
+export default class BulkDownloadModalFooter extends React.Component<
+  BulkDownloadModalFooterProps
+> {
   getSelectedDownloadType = () => {
     const { downloadTypes, selectedDownloadTypeName } = this.props;
 
@@ -62,12 +80,13 @@ export default class BulkDownloadModalFooter extends React.Component {
     const downloadType = this.getSelectedDownloadType();
 
     if (!downloadType) return null;
-
+    // @ts-expect-error Property 'fields' does not exist on type 'unknown'
     let requiredFields = downloadType.fields;
 
     // Remove any conditional fields if they don't meet the criteria.
     CONDITIONAL_FIELDS.forEach(field => {
       if (
+        // @ts-expect-error Property 'type' does not exist on type 'unknown'
         downloadType.type === field.downloadType &&
         !triggersConditionalField(field, selectedFieldsForType)
       ) {
@@ -76,6 +95,7 @@ export default class BulkDownloadModalFooter extends React.Component {
     });
 
     OPTIONAL_FIELDS.forEach(field => {
+      // @ts-expect-error Property 'type' does not exist on type 'unknown'
       if (downloadType.type === field.downloadType) {
         requiredFields = reject(["type", field.field], requiredFields);
       }
@@ -235,21 +255,5 @@ export default class BulkDownloadModalFooter extends React.Component {
     );
   }
 }
-
-BulkDownloadModalFooter.propTypes = {
-  loading: PropTypes.bool,
-  downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
-  validObjectIds: PropTypes.instanceOf(Set).isRequired,
-  invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
-  validationError: PropTypes.string,
-  selectedDownloadTypeName: PropTypes.string,
-  // The selected fields of the currently selected download type.
-  selectedFields: PropTypes.objectOf(PropTypes.string),
-  waitingForCreate: PropTypes.bool,
-  createStatus: PropTypes.string,
-  createError: PropTypes.string,
-  onDownloadRequest: PropTypes.func.isRequired,
-  workflow: PropTypes.string.isRequired,
-};
 
 BulkDownloadModalFooter.contextType = UserContext;

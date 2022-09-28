@@ -9,14 +9,22 @@ import {
   getTaxaWithContigsSuggestions,
   getTaxaWithReadsSuggestions,
 } from "~/api";
-import PropTypes from "~/components/utils/propTypes";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 
 import cs from "./taxon_hit_select.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
-class TaxonHitSelect extends React.Component {
+interface TaxonHitSelectProps {
+  sampleIds?: Set<$TSFixMeUnknown>;
+  onChange?: $TSFixMeFunction;
+  value?: number;
+  usePortal?: boolean; // The currently selected taxid.;
+  withinModal?: boolean;
+  hitType?: "read" | "contig";
+}
+
+class TaxonHitSelect extends React.Component<TaxonHitSelectProps> {
   state = {
     options: null,
     isLoadingOptions: false,
@@ -126,15 +134,7 @@ class TaxonHitSelect extends React.Component {
   }
 }
 
-TaxonHitSelect.propTypes = {
-  sampleIds: PropTypes.instanceOf(Set),
-  onChange: PropTypes.func,
-  value: PropTypes.number, // The currently selected taxid.
-  usePortal: PropTypes.bool,
-  withinModal: PropTypes.bool,
-  hitType: PropTypes.oneOf(["read", "contig"]),
-};
-
+// @ts-expect-error Property 'defaultProps' does not exist on type 'typeof TaxonHitSelect'
 TaxonHitSelect.defaultProps = {
   usePortal: true,
   withinModal: true,

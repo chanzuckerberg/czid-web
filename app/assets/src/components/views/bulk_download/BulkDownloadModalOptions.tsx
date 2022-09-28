@@ -8,7 +8,6 @@ import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { humanize } from "~/helpers/strings";
@@ -25,10 +24,11 @@ import cs from "./bulk_download_modal_options.scss";
 import {
   BULK_DOWNLOAD_DOCUMENTATION_LINKS,
   CONDITIONAL_FIELDS,
-} from "./constants.js";
+} from "./constants";
 
 const triggersCondtionalFieldMetricList = (
   conditionalField,
+  // @ts-expect-error 'dependentField' is declared but its value is never read.
   dependentField,
   selectedFields,
 ) => {
@@ -59,7 +59,25 @@ const triggersConditionalField = (conditionalField, selectedFields) =>
     )
     .some(Boolean);
 
-class BulkDownloadModalOptions extends React.Component {
+interface BulkDownloadModalOptionsProps {
+  downloadTypes?: $TSFixMeUnknown[];
+  selectedDownloadTypeName?: string;
+  // The selected fields of the currently selected download type.
+  selectedFields?: Record<string, string>;
+  onFieldSelect: $TSFixMeFunction;
+  validObjectIds: Set<$TSFixMeUnknown>;
+  backgroundOptions?: $TSFixMeUnknown[];
+  metricsOptions?: $TSFixMeUnknown[];
+  allObjectsUploadedByCurrentUser?: boolean;
+  onSelect: $TSFixMeFunction;
+  handleHeatmapLink: $TSFixMeFunction;
+  enableMassNormalizedBackgrounds?: boolean;
+  objectDownloaded?: string;
+}
+
+class BulkDownloadModalOptions extends React.Component<
+  BulkDownloadModalOptionsProps
+> {
   sortTaxaWithReadsOptions = memoize(options =>
     orderBy(["sampleCount", "text"], ["desc", "asc"], options),
   );
@@ -127,6 +145,7 @@ class BulkDownloadModalOptions extends React.Component {
                 isChecked ? "Yes" : "No" /* display name */,
               )
             }
+            // @ts-expect-error Type 'LodashGet9x2<string>' is not assignable to type 'boolean'
             checked={selectedField}
           />
         );
@@ -152,6 +171,7 @@ class BulkDownloadModalOptions extends React.Component {
                   displayName,
                 );
               }}
+              // @ts-expect-error Type 'LodashGet9x2<string>' is not assignable to type 'number'
               value={selectedField}
               hitType="read"
             />
@@ -171,6 +191,7 @@ class BulkDownloadModalOptions extends React.Component {
                   displayName,
                 );
               }}
+              // @ts-expect-error Type 'LodashGet9x2<string>' is not assignable to type 'number'
               value={selectedField}
               hitType="contig"
             />
@@ -217,6 +238,7 @@ class BulkDownloadModalOptions extends React.Component {
         <div className={cs.label}>{field.display_name}:</div>
         {field.type === "background" ? (
           <BackgroundModelFilter
+            // @ts-expect-error Property fluid does not exist
             fluid
             placeholder={placeholder}
             allBackgrounds={dropdownOptions}
@@ -226,6 +248,7 @@ class BulkDownloadModalOptions extends React.Component {
               // Reset conditional fields if they are no longer needed.
               CONDITIONAL_FIELDS.forEach(conditionalField => {
                 if (
+                  // @ts-expect-error Property 'dependentField' does not exist
                   field.type === conditionalField.dependentField &&
                   downloadType.type === conditionalField.downloadType &&
                   !conditionalField.triggerValues.includes(value)
@@ -257,6 +280,7 @@ class BulkDownloadModalOptions extends React.Component {
               // Reset conditional fields if they are no longer needed.
               CONDITIONAL_FIELDS.forEach(conditionalField => {
                 if (
+                  // @ts-expect-error Property 'dependentField' does not exist
                   field.type === conditionalField.dependentField &&
                   downloadType.type === conditionalField.downloadType &&
                   !conditionalField.triggerValues.includes(value)
@@ -382,6 +406,7 @@ class BulkDownloadModalOptions extends React.Component {
                   <span
                     role="link"
                     className={LinkCS.linkDefault}
+                    // @ts-expect-error Type 'string' is not assignable to type 'number'
                     tabIndex="0"
                     onClick={e => {
                       handleHeatmapLink();
@@ -423,6 +448,7 @@ class BulkDownloadModalOptions extends React.Component {
     const visibleTypes = downloadTypes.filter(
       type =>
         Object.prototype.hasOwnProperty.call(type, "category") &&
+        // @ts-expect-error Property 'hide_in_creation_modal' does not exist on type 'unknown'
         !type.hide_in_creation_modal,
     );
 
@@ -431,12 +457,15 @@ class BulkDownloadModalOptions extends React.Component {
     // for CG bulk downloads v0, just don't display any categories
     if (
       visibleTypes.some(
+        // @ts-expect-error Property 'display_name' does not exist on type 'unknown'
         type => type.display_name === WORKFLOWS.CONSENSUS_GENOME.label,
       )
     ) {
       visibleTypes.sort(
         (typeA, typeB) =>
+          // @ts-expect-error Property 'category' does not exist on type 'unknown'
           designatedOrder.indexOf(typeA.category) -
+          // @ts-expect-error Property 'category' does not exist on type 'unknown'
           designatedOrder.indexOf(typeB.category),
       );
       return (
@@ -447,6 +476,7 @@ class BulkDownloadModalOptions extends React.Component {
     }
 
     const backendCategories = [
+      // @ts-expect-error Property 'category' does not exist on type 'unknown'
       ...new Set(visibleTypes.map(type => type.category)),
     ];
     const additionalCategories = backendCategories.filter(
@@ -478,22 +508,6 @@ class BulkDownloadModalOptions extends React.Component {
     );
   }
 }
-
-BulkDownloadModalOptions.propTypes = {
-  downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
-  selectedDownloadTypeName: PropTypes.string,
-  // The selected fields of the currently selected download type.
-  selectedFields: PropTypes.objectOf(PropTypes.string),
-  onFieldSelect: PropTypes.func.isRequired,
-  validObjectIds: PropTypes.instanceOf(Set).isRequired,
-  backgroundOptions: PropTypes.array,
-  metricsOptions: PropTypes.array,
-  allObjectsUploadedByCurrentUser: PropTypes.bool,
-  onSelect: PropTypes.func.isRequired,
-  handleHeatmapLink: PropTypes.func.isRequired,
-  enableMassNormalizedBackgrounds: PropTypes.bool,
-  objectDownloaded: PropTypes.string,
-};
 
 BulkDownloadModalOptions.contextType = UserContext;
 

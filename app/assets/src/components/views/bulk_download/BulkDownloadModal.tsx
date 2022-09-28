@@ -1,6 +1,5 @@
 import { unset, get, set } from "lodash/fp";
 import memoize from "memoize-one";
-import PropTypes from "prop-types";
 import React from "react";
 
 import {
@@ -51,7 +50,7 @@ const assembleSelectedDownload = memoize(
 
     const fields = {};
     if (fieldValues) {
-      for (let [fieldName, fieldValue] of Object.entries(fieldValues)) {
+      for (const [fieldName, fieldValue] of Object.entries(fieldValues)) {
         fields[fieldName] = {
           value: fieldValue,
           // Use the display name for the value if it exists. Otherwise, use the value.
@@ -70,7 +69,17 @@ const assembleSelectedDownload = memoize(
   },
 );
 
-class BulkDownloadModal extends React.Component {
+interface BulkDownloadModalProps {
+  onClose: $TSFixMeFunction;
+  open?: boolean;
+  selectedIds?: Set<$TSFixMeUnknown>;
+  // called when a bulk download has successfully been kicked off
+  onGenerate: $TSFixMeFunction;
+  workflow: string;
+  workflowEntity?: string;
+}
+
+class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   state = {
     bulkDownloadTypes: null,
     // We save the fields for ALL download types.
@@ -140,7 +149,7 @@ class BulkDownloadModal extends React.Component {
     ]);
 
     // Set any default bulk download field values.
-    bulkDownloadTypes.forEach(type => {
+    bulkDownloadTypes.forEach((type: $TSFixMe) => {
       if (type.fields) {
         type.fields.forEach(field => {
           if (field.default_value) {
@@ -194,7 +203,7 @@ class BulkDownloadModal extends React.Component {
   async fetchBackgrounds() {
     const { backgrounds } = await getBackgrounds();
 
-    const backgroundOptions = backgrounds.map(background => ({
+    const backgroundOptions = backgrounds.map((background: $TSFixMe) => ({
       text: background.name,
       value: background.id,
       mass_normalized: background.mass_normalized,
@@ -248,7 +257,7 @@ class BulkDownloadModal extends React.Component {
     this.createBulkDownload(selectedDownload);
   };
 
-  handleSelectDownloadType = newSelectedDownloadTypeName => {
+  handleSelectDownloadType = (newSelectedDownloadTypeName: $TSFixMe) => {
     const { workflow } = this.props;
     const { selectedDownloadTypeName } = this.state;
     if (newSelectedDownloadTypeName === selectedDownloadTypeName) {
@@ -264,7 +273,7 @@ class BulkDownloadModal extends React.Component {
     });
   };
 
-  handleHeatmapLink = event => {
+  handleHeatmapLink = () => {
     const { selectedFields, validObjectIds } = this.state;
     const metricList = selectedFields?.["biom_format"]?.["filter_by"];
     const metric = selectedFields?.["biom_format"]?.["metric"];
@@ -303,7 +312,12 @@ class BulkDownloadModal extends React.Component {
     );
   };
 
-  handleFieldSelect = (downloadType, fieldType, value, displayName) => {
+  handleFieldSelect = (
+    downloadType,
+    fieldType,
+    value,
+    displayName,
+  ): $TSFixMe => {
     const { workflow } = this.props;
     this.setState(prevState => {
       trackEvent(
@@ -321,17 +335,21 @@ class BulkDownloadModal extends React.Component {
       // if the field becomes no longer required, we can unset it.
       const newSelectedFields =
         value !== undefined
-          ? set([downloadType, fieldType], value, prevState.selectedFields)
-          : unset([downloadType, fieldType], prevState.selectedFields);
+          ? // @ts-expect-error Property 'selectedFields' does not exist on type 'Readonly<{}>
+            set([downloadType, fieldType], value, prevState.selectedFields)
+          : // @ts-expect-error Property 'selectedFields' does not exist on type 'Readonly<{}>
+            unset([downloadType, fieldType], prevState.selectedFields);
 
       const newSelectedFieldsDisplay =
         displayName !== undefined
           ? set(
               [downloadType, fieldType],
               displayName,
+              // @ts-expect-error Property 'selectedFields' does not exist on type 'Readonly<{}>
               prevState.selectedFieldsDisplay,
             )
-          : unset([downloadType, fieldType], prevState.selectedFieldsDisplay);
+          : // @ts-expect-error Property 'selectedFields' does not exist on type 'Readonly<{}>
+            unset([downloadType, fieldType], prevState.selectedFieldsDisplay);
 
       return {
         selectedFields: newSelectedFields,
@@ -342,7 +360,7 @@ class BulkDownloadModal extends React.Component {
 
   // *** Create bulk download and close modal ***
 
-  createBulkDownload = async selectedDownload => {
+  createBulkDownload = async (selectedDownload: $TSFixMe) => {
     const { onGenerate, workflow, workflowEntity } = this.props;
 
     let objectIds;
@@ -402,6 +420,7 @@ class BulkDownloadModal extends React.Component {
       waitingForCreate,
       createStatus,
       createError,
+      // @ts-expect-error Property 'enableMassNormalizedBackgrounds' does not exist on type
       enableMassNormalizedBackgrounds,
     } = this.state;
 
@@ -455,15 +474,5 @@ class BulkDownloadModal extends React.Component {
     );
   }
 }
-
-BulkDownloadModal.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool,
-  selectedIds: PropTypes.instanceOf(Set),
-  // called when a bulk download has successfully been kicked off
-  onGenerate: PropTypes.func.isRequired,
-  workflow: PropTypes.string.isRequired,
-  workflowEntity: PropTypes.string,
-};
 
 export default BulkDownloadModal;

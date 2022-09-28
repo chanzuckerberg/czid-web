@@ -42,21 +42,21 @@ const STATUS_DISPLAY = {
 // It is possible for a bulk download to "complete with issues".
 // For example, a few of the source files could not be found, but the rest were compressed successfully.
 // In this case, the bulk download task will have status = success and also have an error message.
-const getStatusType = bulkDownload => {
+const getStatusType = (bulkDownload: $TSFixMe) => {
   if (bulkDownload.status === "success" && bulkDownload.error_message) {
     return "warning";
   }
   return STATUS_TYPES[bulkDownload.status];
 };
 
-const getStatusDisplay = bulkDownload => {
+const getStatusDisplay = (bulkDownload: $TSFixMe) => {
   if (bulkDownload.status === "success" && bulkDownload.error_message) {
     return "complete with issue";
   }
   return STATUS_DISPLAY[bulkDownload.status];
 };
 
-const getTooltipText = bulkDownload => {
+const getTooltipText = (bulkDownload: $TSFixMe) => {
   if (bulkDownload.status === "success" && bulkDownload.error_message) {
     return bulkDownload.error_message;
   }
@@ -111,7 +111,7 @@ class BulkDownloadList extends React.Component {
         width: 500,
         flexGrow: 1,
         headerClassName: cs.downloadNameHeader,
-        cellRenderer: cellData =>
+        cellRenderer: (cellData: $TSFixMe) =>
           BulkDownloadTableRenderers.renderDownload(cellData, admin),
       },
       {
@@ -145,8 +145,8 @@ class BulkDownloadList extends React.Component {
   hasInProgressBulkDownloads = () =>
     some(["status", "running"], this.state.bulkDownloads);
 
-  processBulkDownloads = bulkDownloads =>
-    bulkDownloads.map(bulkDownload => ({
+  processBulkDownloads = (bulkDownloads: $TSFixMe) =>
+    bulkDownloads.map((bulkDownload: $TSFixMe) => ({
       ...bulkDownload,
       // Add callback to be used in renderDownload table renderer.
       onStatusClick: () => {
@@ -171,20 +171,21 @@ class BulkDownloadList extends React.Component {
   isEmpty = () =>
     this.state.bulkDownloads && this.state.bulkDownloads.length === 0;
 
-  handleStatusClick = bulkDownload => {
+  handleStatusClick = (bulkDownload: $TSFixMe) => {
     this.setState({
       selectedBulkDownload: bulkDownload,
       sidebarOpen: true,
     });
   };
 
-  handleDownloadFileClick = async bulkDownload => {
+  handleDownloadFileClick = async (bulkDownload: $TSFixMe) => {
     // This should only be clickable when the bulk download has succeeded
     // TODO(mark): Handle error case.
     if (bulkDownload.status === "success") {
       const outputFilePresignedUrl = await getPresignedOutputUrl(
         bulkDownload.id,
       );
+      // @ts-expect-error Expected 2 arguments, but got 1
       openUrl(outputFilePresignedUrl);
     }
   };
@@ -241,6 +242,7 @@ class BulkDownloadList extends React.Component {
               </span>
             </Notification>
           )}
+        {/* @ts-expect-error Missing the properties from type */}
         <Table
           rowClassName={cs.tableRow}
           headerClassName={cs.tableHeader}
@@ -257,6 +259,7 @@ class BulkDownloadList extends React.Component {
   }
 
   render() {
+    // @ts-expect-error sidebarOpen does not exist on this.state
     const { selectedBulkDownload, sidebarOpen } = this.state;
     return (
       <div

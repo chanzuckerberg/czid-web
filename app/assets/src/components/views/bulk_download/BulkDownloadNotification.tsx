@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
@@ -7,7 +6,13 @@ import Notification from "~ui/notifications/Notification";
 
 import cs from "./bulk_download_notification.scss";
 
-export default class BulkDownloadNotification extends React.Component {
+interface BulkDownloadNotificationProps {
+  onClose?: $TSFixMeFunction;
+}
+
+export default class BulkDownloadNotification extends React.Component<
+  BulkDownloadNotificationProps
+> {
   render() {
     const { onClose } = this.props;
 
@@ -49,8 +54,4 @@ export const showBulkDownloadNotification = () => {
       autoClose: 12000,
     },
   );
-};
-
-BulkDownloadNotification.propTypes = {
-  onClose: PropTypes.func,
 };
