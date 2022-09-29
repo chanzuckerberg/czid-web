@@ -366,6 +366,60 @@ const computeAmrColumns = ({ basicIcon, metadataFields }) => {
       flexGrow: 1,
       className: cs.basicCell,
     },
+    // TODO: consider DRY'ing repeated configs
+    {
+      dataKey: "nonHostReads",
+      label: "Passed Filters",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: TableRenderers.renderNumberAndPercentage,
+    },
+    {
+      dataKey: "totalReadsAMR",
+      label: "Total Reads",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellDataGetter: ({ dataKey, rowData }) =>
+        TableRenderers.formatNumberWithCommas(rowData[dataKey]),
+    },
+    {
+      dataKey: "qcPercent",
+      label: "Passed QC",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellDataGetter: ({ dataKey, rowData }) =>
+        TableRenderers.formatPercentage(rowData[dataKey]),
+    },
+    {
+      dataKey: "duplicateCompressionRatio",
+      label: "DCR",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellDataGetter: ({ dataKey, rowData }) =>
+        TableRenderers.formatNumber(rowData[dataKey]),
+    },
+    {
+      dataKey: "erccReads",
+      label: "ERCC Reads",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellDataGetter: ({ dataKey, rowData }) =>
+        TableRenderers.formatNumberWithCommas(rowData[dataKey]),
+    },
+    {
+      dataKey: "subsampledFraction",
+      label: "SubSampled Fraction",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellDataGetter: ({ dataKey, rowData }) =>
+        TableRenderers.formatNumber(rowData[dataKey]),
+    },
+    {
+      dataKey: "meanInsertSize",
+      label: "Mean Insert Size",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
   ];
 
   const columns = [...fixedColumns, ...computeMetadataColumns(metadataFields)];
@@ -431,7 +485,14 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
     "percentGenomeCalled",
     "vadrPassFail",
   ],
-  [WORKFLOWS.AMR.value]: ["sample", "createdAt", "sample_type", "host"],
+  [WORKFLOWS.AMR.value]: [
+    "sample",
+    "createdAt",
+    "sample_type",
+    "host",
+    "nonHostReads",
+    "totalReadsAMR",
+  ],
 };
 
 // DEFAULT_SORTED_COLUMN_BY_TAB (frontend) should always match TIEBREAKER_SORT_KEY (backend).

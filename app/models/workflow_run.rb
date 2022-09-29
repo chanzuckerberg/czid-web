@@ -84,6 +84,16 @@ class WorkflowRun < ApplicationRecord
     "InvalidFileFormatError" => "The input file you provided has a formatting error in it.",
   }.freeze
 
+  TOTAL_READS_KEY = "total_reads".freeze
+  QC_PERCENT_KEY = "qc_percent".freeze
+  REMAINING_READS_KEY = "adjusted_remaining_reads".freeze
+  PERCENT_REMAINING_KEY = "percent_remaining".freeze
+  COMPRESSION_RATIO_KEY = "compression_ratio".freeze
+  TOTAL_ERCC_READS_KEY = "total_ercc_reads".freeze
+  SUBSAMPLED_FRACTION_KEY = "fraction_subsampled".freeze
+  INSERT_SIZE_MEAN_KEY = "insert_size_mean".freeze
+  INSERT_SIZE_STD_DEV_KEY = "insert_size_standard_deviation".freeze
+
   # Constants related to sorting
   DATA_KEY_TO_SORT_KEY = {
     "sample" => "name",
@@ -104,9 +114,23 @@ class WorkflowRun < ApplicationRecord
     "nMissing" => "n_missing",
     "nAmbiguous" => "n_ambiguous",
     "referenceAccessionLength" => "reference_genome_length",
+    # AMR result key mappings
+    "totalReadsAMR" => TOTAL_READS_KEY,
+    "passedQC" => QC_PERCENT_KEY,
+    "nonHostReads" => REMAINING_READS_KEY,
+    "duplicateCompressionRatio" => COMPRESSION_RATIO_KEY,
+    "erccReads" => TOTAL_ERCC_READS_KEY,
+    "subsampledFraction" => SUBSAMPLED_FRACTION_KEY,
+    "meanInsertSize" => INSERT_SIZE_MEAN_KEY,
   }.freeze
+
   INPUT_SORT_KEYS = ["accession_id", "wetlab_protocol", "technology", "medaka_model"].freeze
-  CACHED_RESULT_SORT_KEYS = ["total_reads", "percent_genome_called", "vadr_pass_fail", "coverage_depth", "gc_percent", "ref_snps", "percent_identity", "n_actg", "n_missing", "n_ambiguous", "reference_genome_length"].freeze
+  CACHED_RESULT_SORT_KEYS = [
+    "total_reads", "percent_genome_called", "vadr_pass_fail", "coverage_depth", "gc_percent",
+    "ref_snps", "percent_identity", "n_actg", "n_missing", "n_ambiguous",
+    "reference_genome_length", QC_PERCENT_KEY, REMAINING_READS_KEY, COMPRESSION_RATIO_KEY,
+    TOTAL_ERCC_READS_KEY, SUBSAMPLED_FRACTION_KEY, INSERT_SIZE_MEAN_KEY,
+  ].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
   scope :sort_by_sample_name, lambda { |order_dir|

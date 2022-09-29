@@ -15,8 +15,20 @@ class AmrWorkflowRun < WorkflowRun
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).
   def results(*)
-    # AmrWorkflowRuns do not store any results from S3 into the db.
-    {}
+    {
+      "quality_metrics": amr_metrics,
+    }
+  end
+
+  def amr_metrics
+    AmrMetricsService.call(self)
+  rescue StandardError => exception
+    LogUtil.log_error(
+      "Error loading counts metrics",
+      exception: exception,
+      workflow_run_id: id
+    )
+    return nil
   end
 
   def zip_link

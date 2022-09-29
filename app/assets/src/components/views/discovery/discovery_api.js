@@ -200,16 +200,40 @@ const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
   };
 };
 
+const processAmrWorkflowRun = workflowRun => {
+  const qualityMetrics = workflowRun?.cached_results?.quality_metrics;
+
+  const insertSizeMean = qualityMetrics?.insert_size_mean;
+  const insertSizeStandardDeviation =
+    qualityMetrics?.insert_size_standard_deviation;
+  const meanInsertSizeString =
+    numberWithPlusOrMinus(insertSizeMean, insertSizeStandardDeviation) || "";
+
+  return {
+    ...(qualityMetrics && {
+      nonHostReads: {
+        value: qualityMetrics.adjusted_remaining_reads,
+        percent: qualityMetrics.percent_remaining,
+      },
+      totalReadsAMR: qualityMetrics.total_reads,
+      qcPercent: qualityMetrics.qc_percent,
+      duplicateCompressionRatio: qualityMetrics.compression_ratio,
+      erccReads: qualityMetrics.total_ercc_reads,
+      subsampledFraction: qualityMetrics.fraction_subsampled,
+      meanInsertSize: meanInsertSizeString,
+    }),
+  };
+};
+
 const processRawWorkflowRun = workflowRun => {
   const getSampleField = path => get(["sample", ...path], workflowRun);
 
   let workflowRunFields = null;
 
-  // TODO: determine if we need different functions / fields per workflow
   if (workflowRun.workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
     workflowRunFields = processConsensusGenomeWorkflowRun(workflowRun);
   } else if (workflowRun.workflow === WORKFLOWS.AMR.value) {
-    workflowRunFields = processConsensusGenomeWorkflowRun(workflowRun);
+    workflowRunFields = processAmrWorkflowRun(workflowRun);
   }
 
   const row = {
