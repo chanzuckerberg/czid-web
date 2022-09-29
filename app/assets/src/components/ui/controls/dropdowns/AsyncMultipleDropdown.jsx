@@ -1,19 +1,11 @@
 import { find, unionBy, debounce } from "lodash/fp";
+import PropTypes from "prop-types";
 import React from "react";
 import MultipleDropdown from "./MultipleDropdown";
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
-interface AsyncMultipleDropdownProps {
-  selectedOptions?: unknown[];
-  onChange?: $TSFixMeFunction;
-  onFilterChange?: $TSFixMeFunction;
-}
-
-class AsyncMultipleDropdown extends React.Component<
-  AsyncMultipleDropdownProps
-> {
-  _lastQuery: $TSFixMe;
-  constructor(props: $TSFixMe) {
+class AsyncMultipleDropdown extends React.Component {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -22,7 +14,7 @@ class AsyncMultipleDropdown extends React.Component<
     };
   }
 
-  static getDerivedStateFromProps(props: $TSFixMe, state: $TSFixMe) {
+  static getDerivedStateFromProps(props, state) {
     if (props.selectedOptions !== state.prevPropsSelectedOptions) {
       return {
         selectedOptions: props.selectedOptions,
@@ -33,22 +25,18 @@ class AsyncMultipleDropdown extends React.Component<
     return null;
   }
 
-  handleChange = (selected: $TSFixMe) => {
-    // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
+  handleChange = selected => {
     const { selectedOptions } = this.state;
     const { onChange } = this.props;
 
     const selectedSet = new Set(selected);
     // remove if not in selected
-    const newSelectedOptions = selectedOptions.filter((option: $TSFixMe) =>
+    const newSelectedOptions = selectedOptions.filter(option =>
       selectedSet.has(option.value),
     );
     // get newly selected
-    selectedOptions.forEach((option: $TSFixMe) =>
-      selectedSet.delete(option.value),
-    );
+    selectedOptions.forEach(option => selectedSet.delete(option.value));
     selectedSet.forEach(newSelectedValue => {
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'options' does not exist on type 'Readonl... Remove this comment to see the full error message
       const newOption = find({ value: newSelectedValue }, this.state.options);
       if (newOption) newSelectedOptions.push(newOption);
     });
@@ -57,12 +45,11 @@ class AsyncMultipleDropdown extends React.Component<
       {
         selectedOptions: newSelectedOptions,
       },
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
       () => onChange(this.state.selectedOptions),
     );
   };
 
-  handleFilterChange = (query: $TSFixMe) => {
+  handleFilterChange = query => {
     this.loadOptionsForQuery(query);
   };
 
@@ -70,9 +57,8 @@ class AsyncMultipleDropdown extends React.Component<
   loadOptionsForQuery = debounce(AUTOCOMPLETE_DEBOUNCE_DELAY, async query => {
     this._lastQuery = query;
     const { onFilterChange } = this.props;
-    // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedOptions' does not exist on type ... Remove this comment to see the full error message
     const { selectedOptions } = this.state;
-    const options = await onFilterChange(query);
+    let options = await onFilterChange(query);
 
     // If the query has since changed, discard the response (don't do anything).
     // Otherwise, update the state with the query response.
@@ -82,14 +68,16 @@ class AsyncMultipleDropdown extends React.Component<
   });
 
   render() {
-    // @ts-expect-error ts-migrate(2339) FIXME: Property 'options' does not exist on type 'Readonl... Remove this comment to see the full error message
     const { options, selectedOptions } = this.state;
-    const { ...extraProps } = this.props;
+    const {
+      onFilterChange,
+      selectedOptions: propsSelectedOptions,
+      ...extraProps
+    } = this.props;
 
     return (
       <MultipleDropdown
         {...extraProps}
-        // @ts-expect-error: Property 'fluid' does not exist
         fluid
         hideCounter
         rounded
@@ -98,13 +86,18 @@ class AsyncMultipleDropdown extends React.Component<
         onChange={this.handleChange}
         onFilterChange={this.handleFilterChange}
         options={options}
-        value={selectedOptions.map((option: $TSFixMe) => option.value)}
+        value={selectedOptions.map(option => option.value)}
       />
     );
   }
 }
 
-// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
+AsyncMultipleDropdown.propTypes = {
+  selectedOptions: PropTypes.array,
+  onChange: PropTypes.func,
+  onFilterChange: PropTypes.func,
+};
+
 AsyncMultipleDropdown.defaultProps = {
   selectedOptions: [],
 };

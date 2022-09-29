@@ -5,34 +5,15 @@
 // because we are using Portals.
 // TODO(mark): Handle nested dropdowns case, and replace semantic-ui dropdown with this component.
 import cx from "classnames";
+import PropTypes from "prop-types";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Manager, Reference, Popper } from "react-popper";
 
 import cs from "./portal_dropdown.scss";
 
-interface PortalDropdownProps {
-  trigger: React.ReactNode;
-  menu: React.ReactNode;
-  menuClassName: string;
-  triggerClassName: string;
-  withinModal: boolean;
-  direction: "left" | "right";
-  fluid: boolean;
-  floating: boolean;
-  disabled: boolean;
-  onOpen: $TSFixMeFunction;
-  onClose: $TSFixMeFunction;
-  open: boolean;
-  hideArrow: boolean;
-  arrowInsideTrigger: boolean;
-}
-
 // TODO(mark): Handle opening and closing when focused with the Tab key.
-class PortalDropdown extends React.Component<PortalDropdownProps> {
-  _lastTransform: $TSFixMe;
-  _menuRef: $TSFixMe;
-  _triggerRef: $TSFixMe;
+class PortalDropdown extends React.Component {
   state = {
     open: false,
     // Used to give the menuContainer min-width equal to the trigger element.
@@ -114,13 +95,11 @@ class PortalDropdown extends React.Component<PortalDropdownProps> {
                       : cs.arrowOutsideTrigger),
                 )}
                 ref={c => {
-                  // @ts-expect-error ts-migrate(2349) FIXME: This expression is not callable.
                   ref(c);
                   this._triggerRef = c;
                 }}
                 onClick={this.toggleOpen}
               >
-                {/* @ts-expect-error ts-migrate(2339) FIXME: Property 'trigger' */}
                 {React.cloneElement(this.props.trigger, {
                   active: open,
                 })}
@@ -170,7 +149,6 @@ class PortalDropdown extends React.Component<PortalDropdownProps> {
                     )}
                     onClick={this.close}
                     ref={c => {
-                      // @ts-expect-error ts-migrate(2349) FIXME: This expression is not callable.
                       ref(c);
                       this._menuRef = c;
                     }}
@@ -193,7 +171,23 @@ class PortalDropdown extends React.Component<PortalDropdownProps> {
   }
 }
 
-// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
+PortalDropdown.propTypes = {
+  trigger: PropTypes.node,
+  menu: PropTypes.node,
+  menuClassName: PropTypes.string,
+  triggerClassName: PropTypes.string,
+  withinModal: PropTypes.bool,
+  direction: PropTypes.oneOf(["left", "right"]),
+  fluid: PropTypes.bool,
+  floating: PropTypes.bool,
+  disabled: PropTypes.bool,
+  onOpen: PropTypes.func,
+  onClose: PropTypes.func,
+  open: PropTypes.bool,
+  hideArrow: PropTypes.bool,
+  arrowInsideTrigger: PropTypes.bool,
+};
+
 PortalDropdown.defaultProps = {
   direction: "right",
 };

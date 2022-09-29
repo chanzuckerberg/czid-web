@@ -1,24 +1,12 @@
 import cx from "classnames";
+import PropTypes from "prop-types";
 import React from "react";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import PrimaryButton from "../buttons/PrimaryButton";
 import SecondaryButton from "../buttons/SecondaryButton";
 import cs from "./button_dropdown.scss";
 
-interface ButtonDropdownProps {
-  className?: string;
-  disabled?: boolean;
-  icon?: React.ReactElement;
-  onClick?: $TSFixMeFunction;
-  items?: React.ReactNode[];
-  options?: unknown[];
-  primary?: boolean;
-  secondary?: boolean;
-  text?: string;
-  direction?: "left" | "right";
-}
-
-class ButtonDropdown extends React.Component<ButtonDropdownProps> {
+class ButtonDropdown extends React.Component {
   getButton() {
     if (this.props.primary) {
       return (
@@ -59,5 +47,18 @@ class ButtonDropdown extends React.Component<ButtonDropdownProps> {
     );
   }
 }
+
+ButtonDropdown.propTypes = {
+  className: PropTypes.string,
+  disabled: PropTypes.bool,
+  icon: PropTypes.element,
+  onClick: PropTypes.func,
+  items: PropTypes.arrayOf(PropTypes.node),
+  options: PropTypes.array,
+  primary: PropTypes.bool,
+  secondary: PropTypes.bool,
+  text: PropTypes.string,
+  direction: PropTypes.oneOf(["left", "right"]),
+};
 
 export default ButtonDropdown;
