@@ -78,7 +78,7 @@ export const getDownloadLinks = (sampleId, pipelineRun) => {
   }));
 };
 
-export const getWorkflowRunZipLink = workflowRunId => {
+export const getWorkflowRunZipLink = (workflowRunId: number) => {
   return `/workflow_runs/${workflowRunId}/zip_link`;
 };
 

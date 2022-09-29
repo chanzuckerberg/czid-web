@@ -24,11 +24,15 @@ const AmrView = ({
   sample,
 }: AmrViewProps) => {
   const listItems = [
-    ["AMR Report", "amr_report.tsv"],
-    ["Combined AMR Metrics Summary", "merged_amr_summary.tsv"],
+    ["AMR Report", "final_reports/primary_AMR_report.tsv"],
+    [
+      "Combined AMR Metrics Summary",
+      "final_reports/comprehensive_AMR_metrics.tsv",
+    ],
     ["Contigs", "contigs.fa"],
     ["Non host reads", "non_host_reads.fa"],
-    ["Raw outputs from CARD RGI", "card_rgi_intermediates.tar.gz"],
+    ["Raw outputs from CARD RGI", "raw_reports/"],
+    ["Intermediate files", "intermediate_files/"],
   ];
   const renderResults = () => {
     return (

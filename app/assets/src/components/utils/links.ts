@@ -1,6 +1,6 @@
 const openUrl = (
   link: string,
-  currentEvent: { metaKey: boolean; ctrlKey: boolean },
+  currentEvent?: { metaKey: boolean; ctrlKey: boolean },
 ) => {
   // currentEvent is optional and it is used to consider
   // modifiers like CMD and CTRL key to open urls in new tabs

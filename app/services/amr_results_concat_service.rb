@@ -34,7 +34,7 @@ class AmrResultsConcatService
 
       workflow_runs.each do |wr|
         content = get_output_file_contents(wr)
-        parsed_csv = CSV.parse(content, col_sep: "\t")
+        parsed_csv = CSVSafe.parse(content, col_sep: "\t")
         # skip the headers, we only care about the contents of the CSV because the headers were already added above
         parsed_csv.shift
         parsed_csv.each { |row| csv << row }
