@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_21_231800) do
+ActiveRecord::Schema.define(version: 2022_09_27_162932) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -164,6 +164,8 @@ ActiveRecord::Schema.define(version: 2022_06_21_231800) do
     t.integer "genus_taxid_nr"
     t.integer "species_taxid_merged_nt_nr"
     t.integer "genus_taxid_merged_nt_nr"
+    t.integer "base_count", comment: "Number of bases in the contig"
+    t.index ["pipeline_run_id", "base_count"], name: "index_contigs_on_pipeline_run_id_and_base_count"
     t.index ["pipeline_run_id", "genus_taxid_merged_nt_nr"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_merged_nt_nr"
     t.index ["pipeline_run_id", "genus_taxid_nr"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_nr"
     t.index ["pipeline_run_id", "genus_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_nt"
@@ -654,6 +656,8 @@ ActiveRecord::Schema.define(version: 2022_06_21_231800) do
     t.decimal "percent_identity_decimal", precision: 9, scale: 2
     t.decimal "alignment_length_decimal", precision: 9, scale: 2
     t.decimal "rpm_decimal", precision: 9, scale: 2
+    t.integer "base_count", comment: "Number of bases aligning to the taxon in the NCBI NR/NT database"
+    t.float "bpm", comment: "Number of bases aligning to the taxon in the NCBI NR/NT database, per million bases sequenced"
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
     t.index ["tax_id"], name: "index_taxon_counts_on_tax_id"
   end
