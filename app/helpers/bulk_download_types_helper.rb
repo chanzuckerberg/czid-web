@@ -27,6 +27,7 @@ module BulkDownloadTypesHelper
 
   # Specific to antimicrobial resistance workflows
   AMR_RESULTS_BULK_DOWNLOAD = "amr_results_bulk_download".freeze
+  AMR_COMBINED_RESULTS_BULK_DOWNLOAD = "amr_combined_results_bulk_download".freeze
 
   RESQUE_EXECUTION_TYPE = "resque".freeze
   VARIABLE_EXECUTION_TYPE = "variable".freeze
@@ -53,6 +54,8 @@ module BulkDownloadTypesHelper
       execution_type: MANUAL_UPLOAD_TYPE,
       hide_in_creation_modal: true,
     },
+
+    # Specific to amr workflows
     {
       type: AMR_RESULTS_BULK_DOWNLOAD,
       display_name: "Antimicrobial Resistance Results",
@@ -60,6 +63,15 @@ module BulkDownloadTypesHelper
       description: "Includes the AMR Report, Combined AMR Metrics Summary, Contigs, Non-host reads, and raw outputs from CARD RGI. Learn More.",
       category: "reports",
       execution_type: ECS_EXECUTION_TYPE,
+      workflows: [WorkflowRun::WORKFLOW[:amr]],
+    },
+    {
+      type: AMR_COMBINED_RESULTS_BULK_DOWNLOAD,
+      display_name: "Combined AMR Results",
+      file_type_display: ".csv",
+      description: "Primary metrics (e.g. coverage, depth) for all AMR genes in all selected samples, combined into a single file.",
+      category: "reports",
+      execution_type: RESQUE_EXECUTION_TYPE,
       workflows: [WorkflowRun::WORKFLOW[:amr]],
     },
 

@@ -704,6 +704,11 @@ class BulkDownload < ApplicationRecord
         )
 
         s3_tar_writer.add_file_with_data("consensus_genome_overviews.csv", consensus_genome_overviews_csv)
+      elsif download_type == AMR_COMBINED_RESULTS_BULK_DOWNLOAD
+        Rails.logger.info("Generating AMR combined results CSV for #{workflow_runs.length} antimicrobial resistances...")
+        amr_combined_results_csv = AmrResultsConcatService.call(workflow_runs.map(&:id))
+
+        s3_tar_writer.add_file_with_data("combined_amr_results.csv", amr_combined_results_csv)
       elsif download_type == COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
         metric = get_param_value("metric")
         Rails.logger.info("Generating combined sample taxon results for #{metric} for #{pipeline_runs.length} samples...")

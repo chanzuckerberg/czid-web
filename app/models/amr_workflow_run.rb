@@ -11,6 +11,7 @@ class AmrWorkflowRun < WorkflowRun
   #   that are consistently served, instead of having client pages compose
   #   different sets of results each time.
   OUTPUT_ZIP = "amr.ZipOutputs.output_zip".freeze
+  OUTPUT_REPORT = "amr.RunResultsPerSample.synthesized_report".freeze
 
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).
