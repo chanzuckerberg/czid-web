@@ -126,6 +126,7 @@ class SfnAmrPipelineDispatchService
       docker_image_id: retrieve_docker_image_id,
       non_host_reads: strtrue(@workflow_run.get_input("start_from_mngs")) ? nonhost_reads : nil,
       contigs: strtrue(@workflow_run.get_input("start_from_mngs")) ? "#{@sample.pipeline_runs.non_deprecated.first.sfn_results_path}/contigs.fasta" : nil,
+      sample_name: @workflow_run.sample.name,
     }.merge(host_filtering_parameters)
 
     sfn_pipeline_input_json = {
