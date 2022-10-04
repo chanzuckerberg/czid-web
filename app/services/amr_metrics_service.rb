@@ -78,9 +78,11 @@ class AmrMetricsService
     end
 
     pipeline_run_insert_size_metrics = InsertSizeMetricSet.find_by(pipeline_run_id: pipeline_run.id)
-    metrics[WorkflowRun::INSERT_SIZE_MEAN_KEY] = pipeline_run_insert_size_metrics.mean
-    metrics[WorkflowRun::INSERT_SIZE_STD_DEV_KEY] = pipeline_run_insert_size_metrics.standard_deviation
+    metrics[WorkflowRun::INSERT_SIZE_MEAN_KEY] = pipeline_run_insert_size_metrics&.mean
+    metrics[WorkflowRun::INSERT_SIZE_STD_DEV_KEY] = pipeline_run_insert_size_metrics&.standard_deviation
+
     metrics[WorkflowRun::PERCENT_REMAINING_KEY] = compute_percentage_reads_for_pipeline_run(pipeline_run)
+
     metrics
   end
 
