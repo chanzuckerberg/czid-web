@@ -50,15 +50,17 @@ export default class BulkDownloadTableRenderers extends React.Component {
         ? get("num_samples", rowData)
         : get("analysis_count", rowData);
 
-    const analysisType =
-      bulkDownloadType === BULK_DOWNLOAD_TYPES.SAMPLE_METADATA
-        ? `Sample`
-        : get(
-            "label",
-            find({ value: get("analysis_type", rowData) }, WORKFLOWS),
-          );
+    let analysisTypeString = count === 1 ? "Sample" : "Samples";
+    if (bulkDownloadType !== BULK_DOWNLOAD_TYPES.SAMPLE_METADATA) {
+      const workflowLabelField = count === 1 ? "label" : "pluralizedLabel";
+      const workflowObj = find(
+        { value: get("analysis_type", rowData) },
+        WORKFLOWS,
+      );
+      analysisTypeString = get(workflowLabelField, workflowObj);
+    }
 
-    return <div>{`${count} ${analysisType}${count > 1 ? "s" : ""}`}</div>;
+    return <div>{`${count} ${analysisTypeString}`}</div>;
   };
 
   static renderStatus = ({ rowData }) => {

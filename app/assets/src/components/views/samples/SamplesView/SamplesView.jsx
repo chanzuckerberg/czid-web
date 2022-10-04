@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Button, Icon } from "czifui";
+import { Button, Icon, Menu, MenuItem } from "czifui";
 import {
   difference,
   find,
@@ -90,6 +90,7 @@ class SamplesView extends React.Component {
       phyloTreeCreationModalOpen: false,
       bulkDownloadModalOpen: false,
       heatmapCreationModalOpen: false,
+      actionsMenuAnchorEl: null,
       nextcladeModalOpen: false,
       // This tooltip is reset whenever the selectedIds changes.
       bulkDownloadButtonTempTooltip: null,
@@ -127,13 +128,16 @@ class SamplesView extends React.Component {
   setupWorkflowConfigs = () => {
     this.configForWorkflow = {
       [WORKFLOWS.AMR.value]: {
-        displayText: "antimicrobial resistance",
+        singlularDisplay: WORKFLOWS.AMR.label.toLowerCase(),
+        pluralDisplay: WORKFLOWS.AMR.pluralizedLabel.toLowerCase(),
       },
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
-        displayText: "consensus genome",
+        singlularDisplay: WORKFLOWS.CONSENSUS_GENOME.label.toLowerCase(),
+        pluralDisplay: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel.toLowerCase(),
       },
       [WORKFLOWS.SHORT_READ_MNGS.value]: {
-        displayText: "sample",
+        singlularDisplay: "sample",
+        pluralDisplay: "samples",
       },
     };
   };
@@ -226,9 +230,16 @@ class SamplesView extends React.Component {
     const { selectedIds } = this.props;
     const { allowedFeatures = {} } = this.context || {};
 
+    // Should still show deprecated after feature flag is removed
+    // (until we've updated the heatmap)
+    const amrHeatmapDeprecatedText = allowedFeatures.includes(AMR_V1_FEATURE)
+      ? " (Deprecated)"
+      : "";
+    const amrHeatmapText = `AMR Heatmap${amrHeatmapDeprecatedText}`;
+
     const heatmapOptions = [
       { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
-      { text: "AMR Heatmap", value: "/amr_heatmap" },
+      { text: amrHeatmapText, value: "/amr_heatmap" },
     ];
 
     const heatmapIcon = <IconHeatmap className={cs.icon} />;
@@ -462,9 +473,9 @@ class SamplesView extends React.Component {
   };
 
   renderBulkKickoffAmr = () => {
-    const { objects, selectedIds } = this.props;
     const { allowedFeatures = {} } = this.context || {};
-
+    const { objects, selectedIds } = this.props;
+    const { actionsMenuAnchorEl } = this.state;
     if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
       return;
     }
@@ -474,28 +485,63 @@ class SamplesView extends React.Component {
     );
     const numOfSelectedObjects = size(selectedObjects);
 
-    const downloadIcon = (
+    const menuIcon = (
       <Icon sdsIcon="dotsHorizontal" sdsSize="s" sdsStyle="button" />
     );
 
+    const openMenu = event => {
+      this.setState({
+        actionsMenuAnchorEl: event.currentTarget,
+      });
+    };
+
     return (
-      <ToolbarIcon
-        className={cs.action}
-        icon={downloadIcon}
-        popupText="Run Antimicrobial Resistance Pipeline (Beta)"
-        popupSubtitle={
-          numOfSelectedObjects === 0 ? "Select at least 1 sample" : ""
-        }
-        disabled={numOfSelectedObjects === 0}
-        onClick={withAnalytics(
-          this.handleBulkKickoffAmrClick,
-          ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED,
-        )}
-      />
+      <div>
+        <ToolbarIcon
+          className={cs.action}
+          icon={menuIcon}
+          popupText="Run Antimicrobial Resistance Pipeline (Beta)"
+          popupSubtitle={
+            numOfSelectedObjects === 0 ? "Select at least 1 sample" : ""
+          }
+          disabled={numOfSelectedObjects === 0}
+          onClick={openMenu}
+        />
+        <Menu
+          anchorEl={actionsMenuAnchorEl}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          keepMounted
+          open={Boolean(actionsMenuAnchorEl)}
+          onClose={this.closeActionsMenu}
+        >
+          <MenuItem
+            onClick={withAnalytics(
+              this.handleBulkKickoffAmrClick,
+              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED,
+            )}
+          >
+            Run Antimicrobial Resistance Pipeline (Beta)
+          </MenuItem>
+        </Menu>
+      </div>
     );
   };
 
+  closeActionsMenu = () => {
+    this.setState({
+      actionsMenuAnchorEl: null,
+    });
+  };
+
   handleBulkKickoffAmrClick = async () => {
+    this.closeActionsMenu();
     const { objects, selectedIds } = this.props;
 
     const selectedObjects = filter(
@@ -701,10 +747,14 @@ class SamplesView extends React.Component {
     if (!isEmpty(userDataCounts)) {
       const totalNumberOfObjects =
         userDataCounts.sampleCountByWorkflow[workflow];
-      const pluralGrammar = `${totalNumberOfObjects === 1 ? "" : "s"}`;
 
       const workflowConfig = this.configForWorkflow[workflow];
-      const workflowDisplayText = `${workflowConfig.displayText}${pluralGrammar}`;
+
+      const workflowDisplayText =
+        totalNumberOfObjects === 1
+          ? workflowConfig.singlularDisplay
+          : workflowConfig.pluralDisplay;
+
       const filteredCountByWorkflowMessage = `${selectableIds?.length ||
         0} out of ${totalNumberOfObjects} ${workflowDisplayText}`;
 

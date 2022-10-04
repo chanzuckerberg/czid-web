@@ -9,16 +9,19 @@ export const WORKFLOW_ENTITIES = {
 export const WORKFLOWS = {
   AMR: {
     label: "Antimicrobial Resistance",
+    pluralizedLabel: "Antimicrobial Resistance",
     value: "amr",
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
   },
   CONSENSUS_GENOME: {
     label: "Consensus Genome",
+    pluralizedLabel: "Consensus Genomes",
     value: "consensus-genome",
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
   },
   SHORT_READ_MNGS: {
     label: "Metagenomic",
+    pluralizedLabel: "Metagenomics",
     value: "short-read-mngs",
     entity: WORKFLOW_ENTITIES.SAMPLES,
   },

@@ -1,3 +1,4 @@
+import { Callout } from "czifui";
 import PropTypes from "prop-types";
 import React from "react";
 import { StickyContainer, Sticky } from "react-sticky";
@@ -8,7 +9,10 @@ import { getSampleMetadataFields } from "~/api/metadata";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
+import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { AMR_V1_FEATURE } from "~/components/utils/features";
 import {
   processMetadata,
   processMetadataTypes,
@@ -412,6 +416,16 @@ export default class AMRHeatmapView extends React.Component {
     );
   }
 
+  renderDeprecationWarning() {
+    return (
+      <Callout className={cs.deprecationWarning} intent="info">
+        This heatmap is created with data from a deprecated version of our
+        Antimicrobial Resistance pipeline.{" "}
+        <ExternalLink href={"https://help.czid.org/"}>Learn more.</ExternalLink>
+      </Callout>
+    );
+  }
+
   renderVisualization() {
     const {
       loading,
@@ -467,6 +481,8 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   render() {
+    const allowedFeatures = this.context?.allowedFeatures || [];
+
     return (
       <div className={cs.AMRHeatmapView}>
         <NarrowContainer>{this.renderHeader()}</NarrowContainer>
@@ -478,6 +494,11 @@ export default class AMRHeatmapView extends React.Component {
               </div>
             )}
           </Sticky>
+          <NarrowContainer>
+            {/* This should still be displayed even after feature flag is removed (until we've updated the heatmap) */
+            allowedFeatures.includes(AMR_V1_FEATURE) &&
+              this.renderDeprecationWarning()}
+          </NarrowContainer>
           {this.renderVisualization()}
         </StickyContainer>
         {this.renderSidebar()}
@@ -485,6 +506,8 @@ export default class AMRHeatmapView extends React.Component {
     );
   }
 }
+
+AMRHeatmapView.contextType = UserContext;
 
 AMRHeatmapView.propTypes = {
   sampleIds: PropTypes.array,

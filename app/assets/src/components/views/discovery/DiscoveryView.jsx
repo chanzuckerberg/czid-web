@@ -1970,7 +1970,8 @@ class DiscoveryView extends React.Component {
     if (snapshotShareId) workflows = [workflows[0]]; // Only mngs
 
     return workflows.map(name => {
-      const workflowName = `${WORKFLOWS[name].label}s`;
+      const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
+
       const workflowCount =
         filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
 

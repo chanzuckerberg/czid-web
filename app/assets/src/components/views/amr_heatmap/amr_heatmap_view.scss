@@ -32,6 +32,11 @@
     }
   }
 
+  .deprecationWarning {
+    width: auto;
+    margin: $sds-spaces-l 0;
+  }
+
   .loadingIndicator,
   .noDataMsg {
     margin: 50px;

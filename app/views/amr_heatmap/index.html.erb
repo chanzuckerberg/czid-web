@@ -3,6 +3,7 @@
   react_component(
     'AMRHeatmapView',
     { sampleIds: JSON.parse('<%= raw escape_json(@sample_ids) %>') },
-    'page_content'
+    'page_content',
+    JSON.parse('<%= raw escape_json(user_context)%>')
   )
 <% end %>
