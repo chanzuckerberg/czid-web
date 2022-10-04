@@ -532,7 +532,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
             context "filtering by sample location_v2" do
               it "returns correct workflow runs in domain '#{domain}' with mode '#{mode}'" do
-                get :index, params: { domain: domain, mode: mode, locationV2: "New York, USA", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+                get :index, params: { domain: domain, mode: mode, locationV2: ["New York, USA"], workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -550,7 +550,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
             context "filtering by sample type" do
               it "returns the correct workflow runs in domain '#{domain}' with mode '#{mode}'" do
-                get :index, params: { domain: domain, mode: mode, tissue: "Brain", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+                get :index, params: { domain: domain, mode: mode, tissue: ["Brain"], workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 

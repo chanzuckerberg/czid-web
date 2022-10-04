@@ -271,7 +271,7 @@ class WorkflowRunsController < ApplicationController
   end
 
   def index_params
-    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :locationV2, :tissue, :projectId, :visibility, :workflow, host: [], time: [])
+    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :projectId, :visibility, :workflow, host: [], time: [], locationV2: [], tissue: [])
   end
 
   def fetch_workflow_runs(domain:, filters: {})
