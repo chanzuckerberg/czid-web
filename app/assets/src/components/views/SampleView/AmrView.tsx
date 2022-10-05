@@ -24,9 +24,9 @@ const AmrView = ({
   sample,
 }: AmrViewProps) => {
   const listItems = [
-    ["AMR Report", "final_reports/primary_AMR_report.tsv"],
+    ["Primary AMR Report", "final_reports/primary_AMR_report.tsv"],
     [
-      "Combined AMR Metrics Summary",
+      "Comprehensive AMR Metrics",
       "final_reports/comprehensive_AMR_metrics.tsv",
     ],
     ["Contigs", "contigs.fa"],
