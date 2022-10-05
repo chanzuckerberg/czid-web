@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import ImgMicrobeSecondary from "~/components/ui/illustrations/ImgMicrobeSecondary";
@@ -7,7 +6,18 @@ import InfoBanner from "~/components/views/discovery/InfoBanner";
 
 import cs from "./page_not_found.scss";
 
-const PageNotFound = ({ browserInfo, showLandingHeader }) => {
+interface PageNotFoundProps {
+  browserInfo?: {
+    supported: $TSFixMe;
+    browser: $TSFixMe;
+  };
+  showLandingHeader?: boolean;
+}
+
+const PageNotFound = ({
+  browserInfo,
+  showLandingHeader,
+}: PageNotFoundProps) => {
   return (
     <div>
       {showLandingHeader && <LandingHeader browserInfo={browserInfo} />}
@@ -25,11 +35,6 @@ const PageNotFound = ({ browserInfo, showLandingHeader }) => {
       </div>
     </div>
   );
-};
-
-PageNotFound.propTypes = {
-  browserInfo: PropTypes.object,
-  showLandingHeader: PropTypes.bool,
 };
 
 export default PageNotFound;

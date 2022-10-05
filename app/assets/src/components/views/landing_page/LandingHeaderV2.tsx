@@ -1,16 +1,21 @@
 import { isEmpty } from "lodash/fp";
-import PropTypes from "prop-types";
 import React, { useState } from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import IconMobileNavClose from "~/components/ui/icons/IconMobileNavClose";
 import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./LandingHeaderV2.scss";
 
+interface LandingHeaderV2Props {
+  announcementBannerEnabled?: boolean;
+  emergencyBannerMessage?: string;
+  impactPage?: boolean;
+}
+
 const LandingHeaderV2 = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
   impactPage,
-}) => {
+}: LandingHeaderV2Props) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   function toggleMobileNav() {
@@ -137,12 +142,6 @@ const LandingHeaderV2 = ({
       </div>
     </>
   );
-};
-
-LandingHeaderV2.propTypes = {
-  announcementBannerEnabled: PropTypes.bool,
-  emergencyBannerMessage: PropTypes.string,
-  impactPage: PropTypes.bool,
 };
 
 export default LandingHeaderV2;

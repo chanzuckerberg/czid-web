@@ -2,12 +2,15 @@ import { upperFirst } from "lodash/fp";
 import React from "react";
 
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
-import PropTypes from "~/components/utils/propTypes";
 import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 
 import cs from "./auth0_error.scss";
 
-class Auth0Error extends React.Component {
+interface Auth0ErrorProps {
+  message?: string;
+}
+
+class Auth0Error extends React.Component<Auth0ErrorProps> {
   render() {
     const { message } = this.props;
     return (
@@ -26,9 +29,5 @@ class Auth0Error extends React.Component {
     );
   }
 }
-
-Auth0Error.propTypes = {
-  message: PropTypes.string,
-};
 
 export default Auth0Error;

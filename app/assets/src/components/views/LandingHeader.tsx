@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import ExternalLink from "~ui/controls/ExternalLink";
@@ -7,7 +6,14 @@ import TransparentButton from "../ui/controls/buttons/TransparentButton";
 
 import cs from "./landing.scss";
 
-const LandingHeader = ({ browserInfo }) => {
+interface LandingHeaderProps {
+  browserInfo?: {
+    supported: $TSFixMe;
+    browser: $TSFixMe;
+  };
+}
+
+const LandingHeader = ({ browserInfo }: LandingHeaderProps) => {
   const signInLink = () => {
     location.href = "/auth0/login";
   };
@@ -70,10 +76,6 @@ const LandingHeader = ({ browserInfo }) => {
       </div>
     </div>
   );
-};
-
-LandingHeader.propTypes = {
-  browserInfo: PropTypes.object,
 };
 
 export default LandingHeader;

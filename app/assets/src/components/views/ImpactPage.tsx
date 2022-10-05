@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 import ImpactBottomCTA from "~/components/views/impact_page/ImpactBottomCTA";
 import ImpactCountryGrid from "~/components/views/impact_page/ImpactCountryGrid";
@@ -20,10 +19,6 @@ const ImpactPage = () => {
       <Footer />
     </>
   );
-};
-
-ImpactPage.propTypes = {
-  impactPage: PropTypes.bool,
 };
 
 export default ImpactPage;
