@@ -1,6 +1,8 @@
 import cx from "classnames";
+import { Tab, Tabs, Tooltip } from "czifui";
 import {
   find,
+  findIndex,
   filter,
   keys,
   pick,
@@ -20,7 +22,6 @@ import {
   mergeWith,
   uniqBy,
   uniq,
-  compact,
   difference,
   union,
   uniqueId,
@@ -39,7 +40,6 @@ import BasicPopup from "~/components/BasicPopup";
 import ProjectCreationModal from "~/components/common/ProjectCreationModal";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import { UserContext } from "~/components/common/UserContext";
-import Tabs from "~/components/ui/controls/Tabs";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import {
@@ -65,6 +65,7 @@ import {
   NANOPORE,
   MISMATCH_FORMAT_ERROR,
   ALLOWED_WORKFLOWS_BY_TECHNOLOGY,
+  UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
 } from "./constants";
 import cs from "./sample_upload_flow.scss";
 import {
@@ -231,13 +232,12 @@ class UploadSampleStep extends React.Component {
   // *** Tab-related functions ***
 
   getUploadTabs = () => {
-    const { admin, biohubS3UploadEnabled } = this.props;
-    return compact([
+    return [
       {
         value: LOCAL_UPLOAD,
         label: LOCAL_UPLOAD_LABEL,
       },
-      (admin || biohubS3UploadEnabled) && {
+      {
         value: REMOTE_UPLOAD,
         label: REMOTE_UPLOAD_LABEL,
       },
@@ -245,11 +245,12 @@ class UploadSampleStep extends React.Component {
         value: BASESPACE_UPLOAD,
         label: BASESPACE_UPLOAD_LABEL,
       },
-    ]);
+    ];
   };
 
-  handleTabChange = tab => {
+  handleTabChange = tabIndex => {
     this.props.onDirty();
+    const tab = this.getUploadTabs()[tabIndex].value;
     this.setState({ currentTab: tab });
     trackEvent("UploadSampleStep_tab_changed", {
       tab,
@@ -1057,7 +1058,44 @@ class UploadSampleStep extends React.Component {
 
   // *** Render functions ***
 
-  renderTab = () => {
+  renderUploadTabs = () => {
+    const { admin, biohubS3UploadEnabled } = this.props;
+    const { selectedWorkflows, selectedTechnology } = this.state;
+    const isLongReadMngs = selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) && selectedTechnology === NANOPORE;
+
+    // We're currently disabling S3 and basespace uploads for ONT v1, but they may be re-enabled in the future
+    const s3Tab = this.renderUploadTab(isLongReadMngs, REMOTE_UPLOAD_LABEL);
+    const basespaceTab = this.renderUploadTab(isLongReadMngs, BASESPACE_UPLOAD_LABEL);
+
+    return (
+      <Tabs
+        sdsSize="large"
+        underlined
+        value={findIndex({value: this.state.currentTab}, this.getUploadTabs())}
+        onChange={(_, selectedTabIndex) => this.handleTabChange(selectedTabIndex)}
+      >
+        <Tab label={LOCAL_UPLOAD_LABEL}></Tab>
+        {(admin || biohubS3UploadEnabled) && s3Tab}
+        {basespaceTab}
+      </Tabs>
+    );
+  };
+
+  renderUploadTab = (disabled, label) => {
+    let tab = (
+      <Tab disabled={disabled} label={label}></Tab>
+    );
+    if (disabled) {
+      tab = (
+        <Tooltip arrow placement="top" title={UNSUPPORTED_UPLOAD_OPTION_TOOLTIP} leaveDelay={0}>
+          <span>{tab}</span>
+        </Tooltip>
+      );
+    }
+    return tab;
+  };
+
+  renderUploadTabContent = () => {
     const { basespaceAccessToken, currentTab, selectedProject } = this.state;
     switch (currentTab) {
       case LOCAL_UPLOAD:
@@ -1175,13 +1213,8 @@ class UploadSampleStep extends React.Component {
           />
           <div className={cs.fileUpload}>
             <div className={cs.title}>Upload Files</div>
-            <Tabs
-              className={cs.tabs}
-              tabs={this.getUploadTabs()}
-              value={this.state.currentTab}
-              onChange={this.handleTabChange}
-            />
-            {this.renderTab()}
+            {this.renderUploadTabs()}
+            {this.renderUploadTabContent()}
           </div>
           {this.state.currentTab === LOCAL_UPLOAD &&
             this.state.removedLocalFiles.length > 0 && (
