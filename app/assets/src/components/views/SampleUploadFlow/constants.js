@@ -6,12 +6,29 @@ export const NO_TARGET_PROJECT_ERROR =
 export const NO_VALID_SAMPLES_FOUND_ERROR = "No valid samples were found.";
 
 export const SELECT_ID_KEY = "_selectId";
+export const ILLUMINA = "Illumina";
+export const NANOPORE = "ONT";
 
 export const WORKFLOW_DISPLAY_NAMES = {
   [WORKFLOWS.SHORT_READ_MNGS.value]: "Metagenomics",
   [WORKFLOWS.CONSENSUS_GENOME.value]: "SARS-CoV-2 Consensus Genome",
   [WORKFLOWS.AMR.value]: "Antimicrobial Resistance",
 };
+
+export const GUPPY_BASECALLER_SETTINGS = [
+  {
+    text: "fast",
+    value: "fast",
+  },
+  {
+    text: "hac",
+    value: "hac",
+  },
+  {
+    text: "super",
+    value: "super",
+  },
+];
 
 // WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/czid-cli
 export const CG_WETLAB_OPTIONS = [
@@ -259,6 +276,20 @@ export const MEDAKA_MODEL_OPTIONS = {
   },
 };
 
+export const ALLOWED_WORKFLOWS_BY_TECHNOLOGY = {
+  [WORKFLOWS.SHORT_READ_MNGS.value]: {
+    [ILLUMINA]: [WORKFLOWS.SHORT_READ_MNGS.value, WORKFLOWS.AMR.value],
+    [NANOPORE]: [WORKFLOWS.SHORT_READ_MNGS.value],
+  },
+  [WORKFLOWS.AMR.value]: {
+    [ILLUMINA]: [WORKFLOWS.AMR.value, WORKFLOWS.SHORT_READ_MNGS.value],
+  },
+  [WORKFLOWS.CONSENSUS_GENOME.value]: {
+    [ILLUMINA]: [WORKFLOWS.CONSENSUS_GENOME.value],
+    [NANOPORE]: [WORKFLOWS.CONSENSUS_GENOME.value],
+  },
+};
+
 export const MEGABYTE = 1000000;
 export const ERROR_MESSAGE = "Error has occured";
 export const SUCCESS_MESSAGE = "Success";
@@ -278,8 +309,6 @@ export const MISMATCH_FORMAT_ERROR =
   "This file does not match the sequencing technology selected. Please make sure that you have selected the correct sequencing technology for this file.";
 export const MISMATCH_FILES_ERROR =
   "R1 and R2 files are paired-end mismatched. Please make sure that R1 and R2 files reads match up.";
-export const ILLUMINA = "Illumina";
-export const NANOPORE = "ONT";
 export const R1CHECK = "_R1";
 export const R2CHECK = "_R2";
 export const AIOLI_LIBRARIES = ["htslib/htsfile/1.10", "seqtk/1.3"];

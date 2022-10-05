@@ -21,6 +21,8 @@ export const ARTIC_PIPELINE_LINK =
   "https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html";
 export const CG_ILLUMINA_PIPELINE_GITHUB_LINK =
   "https://github.com/chanzuckerberg/czid-workflows/blob/main/consensus-genome/run.wdl";
+export const MNGS_ILLUMINA_PIPELINE_GITHUB_LINK =
+  "https://github.com/chanzuckerberg/czid-workflows";
 export const PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK =
   "https://help.czid.org/hc/en-us/articles/360058195412";
 export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =

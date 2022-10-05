@@ -25,6 +25,7 @@ class SampleUploadFlow extends React.Component {
     sampleNamesToFiles: null, // Needed for local samples.
     // Metadata upload information
     clearlabs: false,
+    guppyBasecallerSetting: null,
     medakaModel: null,
     metadata: null, //
     metadataIssues: null,
@@ -53,6 +54,7 @@ class SampleUploadFlow extends React.Component {
     clearlabs,
     technology,
     project,
+    guppyBasecallerSetting,
     medakaModel,
     sampleNamesToFiles,
     samples,
@@ -64,6 +66,7 @@ class SampleUploadFlow extends React.Component {
       clearlabs,
       technology,
       currentStep: "uploadMetadata",
+      guppyBasecallerSetting,
       medakaModel,
       project,
       sampleNamesToFiles,

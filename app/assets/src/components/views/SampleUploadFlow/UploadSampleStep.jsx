@@ -64,6 +64,7 @@ import {
   ILLUMINA,
   NANOPORE,
   MISMATCH_FORMAT_ERROR,
+  ALLOWED_WORKFLOWS_BY_TECHNOLOGY,
 } from "./constants";
 import cs from "./sample_upload_flow.scss";
 import {
@@ -97,6 +98,7 @@ class UploadSampleStep extends React.Component {
     remoteSamples: [],
     remoteSelectedSampleIds: new Set(),
     removedLocalFiles: [], // Invalid local files that were removed.
+    selectedGuppyBasecallerSetting: null,
     selectedTechnology: null,
     selectedProject: null,
     selectedMedakaModel: DEFAULT_MEDAKA_MODEL_OPTION,
@@ -156,6 +158,7 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       selectedWorkflows,
       usedClearLabs,
+      selectedGuppyBasecallerSetting,
     } = this.state;
     const basespaceSamples = this.getSelectedSamples(BASESPACE_UPLOAD);
 
@@ -188,6 +191,7 @@ class UploadSampleStep extends React.Component {
       this.props.onUploadSamples({
         clearlabs: usedClearLabs,
         project: selectedProject,
+        guppyBasecallerVersion: selectedGuppyBasecallerSetting,
         medakaModel: selectedMedakaModel,
         samples: samplesWithToken,
         technology: selectedTechnology,
@@ -375,7 +379,7 @@ class UploadSampleStep extends React.Component {
   handleWorkflowToggle = workflow => {
     this.props.onDirty();
     const { allowedFeatures } = this.context || {};
-    let { selectedWorkflows } = this.state;
+    let { selectedWorkflows, selectedTechnology } = this.state;
 
     if (allowedFeatures.includes(AMR_V1_FEATURE)) {
       const workflowIsAlreadySelected = selectedWorkflows.has(workflow);
@@ -383,11 +387,11 @@ class UploadSampleStep extends React.Component {
         ? selectedWorkflows.delete(workflow)
         : selectedWorkflows.add(workflow);
 
-      selectedWorkflows = this.limitWorkflowSelection(workflow);
+      selectedWorkflows = this.limitWorkflowSelection(workflow, selectedTechnology);
       this.setState({
         selectedWorkflows,
         selectedWetlabProtocol: null,
-        selectedTechnology: null,
+        selectedTechnology: workflow === WORKFLOWS.AMR.value ? selectedTechnology : null,
       });
     } else {
       // TODO: Remove this `else` branch once AMR v1 launches.
@@ -403,21 +407,23 @@ class UploadSampleStep extends React.Component {
     trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
   };
 
-  limitWorkflowSelection = workflowSelected => {
+  limitWorkflowSelection = (workflowSelected, selectedTechnology) => {
     let { selectedWorkflows } = this.state;
 
-    // Only allow mNGS and AMR to be selected together.
-    if (workflowSelected === WORKFLOWS.CONSENSUS_GENOME.value) {
-      selectedWorkflows.delete(WORKFLOWS.SHORT_READ_MNGS.value);
-      selectedWorkflows.delete(WORKFLOWS.AMR.value);
-    } else if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
-      selectedWorkflows.delete(WORKFLOWS.CONSENSUS_GENOME.value);
-    }
+    // Based on workflowSelected and selectedTechnology, determine which workflows are permitted
+    let technology = selectedTechnology ?? ILLUMINA;
+    const permittedWorkflows = ALLOWED_WORKFLOWS_BY_TECHNOLOGY[workflowSelected][technology];
+    // Then delete non-permitted workflows
+    let filteredWorkflows = new Set(selectedWorkflows);
+    filteredWorkflows.forEach((workflow) => {
+      if (!permittedWorkflows.includes(workflow)) {
+        filteredWorkflows.delete(workflow);
+      }
+    });
+    return filteredWorkflows;
+  }
 
-    return selectedWorkflows;
-  };
-
-  handleTechnologyToggle = technology => {
+  handleTechnologyToggle = (technology) => {
     this.props.onDirty();
     const { selectedWorkflows, usedClearLabs } = this.state;
 
@@ -443,6 +449,12 @@ class UploadSampleStep extends React.Component {
         { technology },
       );
     }
+    else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
+      const filteredWorkflows = this.limitWorkflowSelection(WORKFLOWS.SHORT_READ_MNGS.value, technology);
+      // We can reuse the same selectedTechnology state because we
+      // could never have different technologies selected for mNGS and Consensus Genome.
+      this.setState({selectedTechnology: technology, selectedWorkflows: filteredWorkflows});
+    }
   };
 
   handleWetlabProtocolChange = selected => {
@@ -450,6 +462,11 @@ class UploadSampleStep extends React.Component {
     this.setState({ selectedWetlabProtocol: selected });
     trackEvent(`UploadSampleStep_${selected}-protocol_selected`);
   };
+
+  handleGuppyBasecallerSettingChange = selected => {
+    this.props.onDirty();
+    this.setState({ selectedGuppyBasecallerSetting: selected });
+  }
 
   handleMedakaModelChange = selected => {
     this.props.onDirty();
@@ -1084,6 +1101,7 @@ class UploadSampleStep extends React.Component {
     const {
       currentTab,
       selectedMedakaModel,
+      selectedGuppyBasecallerSetting,
       selectedTechnology,
       selectedWetlabProtocol,
       selectedWorkflows,
@@ -1144,10 +1162,12 @@ class UploadSampleStep extends React.Component {
           <WorkflowSelector
             onClearLabsChange={this.handleClearLabsChange}
             onMedakaModelChange={this.handleMedakaModelChange}
+            onGuppyBasecallerSettingChange={this.handleGuppyBasecallerSettingChange}
             onWetlabProtocolChange={this.handleWetlabProtocolChange}
             onTechnologyToggle={this.handleTechnologyToggle}
             onWorkflowToggle={this.handleWorkflowToggle}
             selectedMedakaModel={selectedMedakaModel}
+            selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
             selectedTechnology={selectedTechnology}
             selectedWorkflows={selectedWorkflows}
             selectedWetlabProtocol={selectedWetlabProtocol}

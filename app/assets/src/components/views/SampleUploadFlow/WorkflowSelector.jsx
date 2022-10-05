@@ -1,6 +1,6 @@
 import cx from "classnames";
 import { Checkbox, Icon, Tooltip } from "czifui";
-import { compact, map, size } from "lodash/fp";
+import { compact, find, map, size } from "lodash/fp";
 import React, { useState, useContext } from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -11,9 +11,10 @@ import { IconInfoSmall } from "~/components/ui/icons";
 import {
   ARTIC_PIPELINE_LINK,
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
+  MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
   UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
 } from "~/components/utils/documentationLinks";
-import { AMR_V1_FEATURE } from "~/components/utils/features";
+import { AMR_V1_FEATURE, ONT_V1_FEATURE } from "~/components/utils/features";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import RadioButton from "~ui/controls/RadioButton";
 import Toggle from "~ui/controls/Toggle";
@@ -26,6 +27,7 @@ import {
   CG_WETLAB_OPTIONS,
   CG_TECHNOLOGY_OPTIONS,
   CG_NANOPORE_WETLAB_OPTIONS,
+  GUPPY_BASECALLER_SETTINGS,
   MEDAKA_MODEL_OPTIONS,
   WORKFLOW_DISPLAY_NAMES,
 } from "./constants";
@@ -35,9 +37,11 @@ const WorkflowSelector = ({
   onClearLabsChange,
   onMedakaModelChange,
   onTechnologyToggle,
+  onGuppyBasecallerSettingChange,
   onWetlabProtocolChange,
   onWorkflowToggle,
   selectedMedakaModel,
+  selectedGuppyBasecallerSetting,
   selectedTechnology,
   selectedWetlabProtocol,
   selectedWorkflows,
@@ -47,21 +51,22 @@ const WorkflowSelector = ({
   const { allowedFeatures } = userContext || {};
   const [workflowOptionHovered, setWorkflowOptionHovered] = useState(null);
 
-  const renderTechnologyOptions = () => {
+  const renderTechnologyOptions = (workflowKey) => {
     return (
       <div className={cs.optionText} onClick={e => e.stopPropagation()}>
         <div className={cx(cs.title, cs.technologyTitle)}>
           Sequencing Platform:
           <div className={cs.technologyOptions}>
-            {renderIlluminaOption()}
-            {renderNanoporeOption()}
+            {renderIlluminaOption(workflowKey)}
+            {renderNanoporeOption(workflowKey)}
           </div>
         </div>
       </div>
     );
   };
 
-  const renderIlluminaOption = () => {
+  const renderIlluminaOption = (workflowKey) => {
+    const workflowObject = find(w => w.workflow === workflowKey, WORKFLOW_UPLOAD_OPTIONS);
     const illuminaTechnologyOptionSelected =
       selectedTechnology === CG_TECHNOLOGY_OPTIONS.ILLUMINA;
 
@@ -72,7 +77,7 @@ const WorkflowSelector = ({
           cs.technology,
           illuminaTechnologyOptionSelected && cs.selected,
         )}
-        onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA)}
+        onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA, workflowKey)}
       >
         <RadioButton
           selected={illuminaTechnologyOptionSelected}
@@ -83,10 +88,9 @@ const WorkflowSelector = ({
           <div className={cs.technologyDescription}>
             You can check out the Illumina pipeline on GitHub{" "}
             {createExternalLink({
-              analyticsEventName:
-                ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED,
+              analyticsEventName: workflowObject.illuminaClickedLinkEvent,
               content: "here",
-              link: CG_ILLUMINA_PIPELINE_GITHUB_LINK,
+              link: workflowObject.illuminaLink,
             })}
             .
           </div>
@@ -100,7 +104,7 @@ const WorkflowSelector = ({
     );
   };
 
-  const renderNanoporeContent = () => (
+  const renderCGNanoporeContent = () => (
     <div className={cs.technologyContent}>
       <div className={cs.item}>
         <div className={cs.subheader}>
@@ -177,7 +181,14 @@ const WorkflowSelector = ({
     </div>
   );
 
-  const renderNanoporeOption = () => {
+  const renderMNGSNanoporeContent = () => (
+    <div className={cs.technologyContent}>
+      {renderGuppyBasecallerSettingSelector()}
+    </div>
+  );
+
+  const renderNanoporeOption = (workflowKey) => {
+    const workflowObject = find(w => w.workflow === workflowKey, WORKFLOW_UPLOAD_OPTIONS);
     const nanoporeTechnologyOptionSelected =
       selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
     return (
@@ -187,26 +198,34 @@ const WorkflowSelector = ({
           cs.technology,
           nanoporeTechnologyOptionSelected && cs.selected,
         )}
-        onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE)}
+        onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowKey)}
       >
         <RadioButton
           selected={nanoporeTechnologyOptionSelected}
           className={cx(cs.radioButton, cs.alignTitle)}
         />
         <div className={cs.optionText}>
-          <div className={cs.title}>Nanopore</div>
+          <div className={cs.title}>
+          Nanopore
+          {workflowKey === WORKFLOWS.SHORT_READ_MNGS.value && (
+                    <StatusLabel
+                      inline
+                      status="Beta"
+                      type="beta"
+                    />
+                  )}</div>
+
           <div className={cs.technologyDescription}>
-            We are using the ARTIC network’s nCoV-2019 novel coronavirus
-            bioinformatics protocol for nanopore sequencing, which can be found{" "}
+            {workflowObject.nanoporeText}
+
             {createExternalLink({
-              analyticsEventName:
-                ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED,
+              analyticsEventName: workflowObject.nanoporeClickedLinkEvent,
               content: "here",
-              link: ARTIC_PIPELINE_LINK,
+              link: workflowObject.nanoporeLink,
             })}
             .
           </div>
-          {nanoporeTechnologyOptionSelected && renderNanoporeContent()}
+          {nanoporeTechnologyOptionSelected && workflowObject.nanoporeContent}
         </div>
       </div>
     );
@@ -251,15 +270,48 @@ const WorkflowSelector = ({
     );
   };
 
+  const renderGuppyBasecallerSettingSelector = () => {
+    return (
+      <div className={cs.item}>
+        <div className={cs.subheader}>
+          {"Guppy Basecaller Setting:"}
+          <ColumnHeaderTooltip
+            trigger={<IconInfoSmall className={cs.infoIcon} />}
+            content={
+              "This specifies which version of the base calling software 'Guppy' was used to generate the data. This will affect the pipeline parameters."
+            }
+            position={"top center"}
+            link={""} // TODO update link for guppy basecaller
+          /></div>
+        <Dropdown
+          className={cs.dropdown}
+          options={GUPPY_BASECALLER_SETTINGS}
+          placeholder="Select"
+          value={selectedGuppyBasecallerSetting}
+          onChange={value => onGuppyBasecallerSettingChange(value)}
+        ></Dropdown>
+      </div>
+    );
+  };
+
   // `sdsIcon` maps directly with czifui Icon component prop: sdsIcon
   const WORKFLOW_UPLOAD_OPTIONS = [
     {
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
       title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.SHORT_READ_MNGS.value],
-      description:
-        "Run your samples through our metagenomics pipeline. Our pipeline only supports Illumina.",
+      description: allowedFeatures.includes(ONT_V1_FEATURE) ?
+        "Run your samples through our metagenomics pipeline. Our pipeline supports Illumina and Nanopore technologies."
+        : "Run your samples through our metagenomics pipeline. Our pipeline only supports Illumina.",
+      otherOptions: allowedFeatures.includes(ONT_V1_FEATURE) ? () => renderTechnologyOptions(WORKFLOWS.SHORT_READ_MNGS.value) : null,
       beta: false,
       sdsIcon: "dna",
+      illuminaText: "You can check out the Illumina pipeline on GitHub ",
+      illuminaLink: MNGS_ILLUMINA_PIPELINE_GITHUB_LINK, // TODO there might be a more specific link than the current one
+      illuminaClickedLinkEvent: "", // TODO add analytics here and below
+      nanoporeText: "You can check out the Nanopore pipeline on Github ",
+      nanoporeLink: "", // TODO add link once available
+      nanoporeClickedLinkEvent: "",
+      nanoporeContent: renderMNGSNanoporeContent(),
     },
     {
       workflow: WORKFLOWS.AMR.value,
@@ -275,21 +327,32 @@ const WorkflowSelector = ({
       title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.CONSENSUS_GENOME.value],
       description:
         "Run your samples through our Illumina or Nanopore supported pipelines to get consensus genomes for SARS-CoV-2.",
-      otherOptions: renderTechnologyOptions,
+      otherOptions: () => renderTechnologyOptions(WORKFLOWS.CONSENSUS_GENOME.value),
       beta: false,
       sdsIcon: "virus",
+      illuminaText: "You can check out the Illumina pipeline on GitHub ",
+      illuminaLink: CG_ILLUMINA_PIPELINE_GITHUB_LINK,
+      illuminaClickedLinkEvent: ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED,
+      nanoporeText: "We are using the ARTIC network’s nCoV-2019 novel coronavirus bioinformatics protocol for nanopore sequencing, which can be found ",
+      nanoporeLink: ARTIC_PIPELINE_LINK,
+      nanoporeClickedLinkEvent: ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED,
+      nanoporeContent: renderCGNanoporeContent(),
     },
   ];
 
   const shouldDisableWorkflowOption = workflow => {
     const workflowIsCurrentlySelected = selectedWorkflows.has(workflow);
-
+    const selectedMNGSNanopore = selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) && selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
     switch (workflow) {
       case WORKFLOWS.SHORT_READ_MNGS.value:
-      case WORKFLOWS.AMR.value:
         return (
           !workflowIsCurrentlySelected &&
           selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)
+        );
+      case WORKFLOWS.AMR.value:
+        return (
+          !workflowIsCurrentlySelected &&
+          (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) || selectedMNGSNanopore)
         );
       case WORKFLOWS.CONSENSUS_GENOME.value:
         return !workflowIsCurrentlySelected && size(selectedWorkflows) > 0;
@@ -393,9 +456,11 @@ WorkflowSelector.propTypes = {
   onClearLabsChange: PropTypes.func,
   onMedakaModelChange: PropTypes.func,
   onTechnologyToggle: PropTypes.func,
+  onGuppyBasecallerSettingChange: PropTypes.func,
   onWetlabProtocolChange: PropTypes.func,
   onWorkflowToggle: PropTypes.func,
   selectedMedakaModel: PropTypes.string,
+  selectedGuppyBasecallerSetting: PropTypes.string,
   selectedTechnology: PropTypes.string,
   selectedWetlabProtocol: PropTypes.string,
   selectedWorkflows: PropTypes.instanceOf(Set),
