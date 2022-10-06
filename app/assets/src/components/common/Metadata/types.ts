@@ -149,7 +149,7 @@ export interface MetadataInputProps {
   sampleTypes?: SampleTypeProps[];
   warning?: string;
   withinModal?: boolean;
-  taxaCategory?: string;
+  taxaCategory: string;
 }
 
 interface SampleTypeProps {

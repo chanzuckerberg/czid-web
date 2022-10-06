@@ -111,6 +111,7 @@ const MetadataInput = ({
               selection,
               taxaCategory === "human",
             );
+            // @ts-expect-error Argument of type 'string | LocationObject' is not assignable to parameter of type 'MetadataValue'.
             onChange(metadataType.key, result, true);
           }}
           value={typeof value === "number" ? value.toString() : value}

@@ -139,6 +139,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
           onSave={onMetadataSave}
           isHuman={additionalInfo.host_genome_taxa_category === "human"}
           sampleTypes={sampleTypes}
+          taxaCategory={additionalInfo.host_genome_taxa_category}
         />
         {metadataErrors[metadataType.key] && (
           <div className={cs.error}>{metadataErrors[metadataType.key]}</div>

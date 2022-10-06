@@ -23,6 +23,7 @@ import {
   SnapshotShareId,
   SummaryStats,
   MetadataTypes,
+  LocationObject,
 } from "~/interface/shared";
 import {
   processMetadata,
@@ -109,7 +110,7 @@ const SampleDetailsMode = ({
   const [pipelineRun, setPipelineRun] = useState<PipelineRun | null>(null);
   const [sampleTypes, setSampleTypes] = useState(null);
   const [singleKeyValueToSave, setSingleKeyValueToSave] = useState<
-    [string, string | number] | null
+    [string, string | number | LocationObject] | null
   >(null);
 
   useEffect(() => {
@@ -180,7 +181,7 @@ const SampleDetailsMode = ({
   // to change and save in one call (to avoid setState issues)
   const handleMetadataChange = (
     key: string,
-    value: string | number,
+    value: string | number | LocationObject,
     shouldSave?: boolean,
   ) => {
     /* Sample name and note are special cases */
@@ -219,7 +220,11 @@ const SampleDetailsMode = ({
     }
   };
 
-  const _save = async (id: number, key: string, value: string | number) => {
+  const _save = async (
+    id: number,
+    key: string,
+    value: string | number | LocationObject,
+  ) => {
     let _lastValidMetadata = lastValidMetadata;
     let _metadataErrors = metadataErrors;
     let _metadata = metadata;
