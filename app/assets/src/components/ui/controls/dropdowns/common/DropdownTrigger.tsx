@@ -26,8 +26,8 @@ class DropdownTrigger extends React.Component<
   DropdownTriggerProps,
   DropdownTriggerState
 > {
-  resizeObserver: any;
-  constructor(props) {
+  resizeObserver: $TSFixMe;
+  constructor(props: DropdownTriggerProps) {
     super(props);
 
     this.resizeObserver = null;
