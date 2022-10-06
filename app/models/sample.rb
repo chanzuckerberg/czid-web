@@ -1125,6 +1125,7 @@ class Sample < ApplicationRecord
 
     queries_by_count_type = threshold_filters_by_count_type.each_with_object({}) do |(count_type, filter_queries), queries|
       filter_statement = filter_queries.join(" AND ")
+      sanitized_filter_statement = ActiveRecord::Base.sanitize_sql_array(["(`taxon_counts`.`count_type` = '#{count_type}' AND #{filter_statement})"])
       # TODO: Test out creating new composite index (pipeline_run_id, count_type, tax_id)
       left_join_statement = "LEFT OUTER JOIN `pipeline_runs` ON `pipeline_runs`.`sample_id` = `samples`.`id` LEFT OUTER JOIN `taxon_counts` FORCE INDEX FOR JOIN (`index_pr_tax_hit_level_tc`) ON `taxon_counts`.`pipeline_run_id` = `pipeline_runs`.`id`"
       queries[count_type] = joins(left_join_statement).where(
@@ -1133,13 +1134,12 @@ class Sample < ApplicationRecord
         },
         taxon_counts: {
           tax_id: tax_ids,
-          count_type: count_type,
         }
-      ).where(filter_statement)
+      ).where(Arel.sql(sanitized_filter_statement))
     end
 
     case queries_by_count_type.keys
-    when [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR]
+    when [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], [TaxonCount::COUNT_TYPE_NR, TaxonCount::COUNT_TYPE_NT]
       queries_by_count_type[TaxonCount::COUNT_TYPE_NT].or(queries_by_count_type[TaxonCount::COUNT_TYPE_NR]).distinct
     when [TaxonCount::COUNT_TYPE_NT]
       queries_by_count_type[TaxonCount::COUNT_TYPE_NT].distinct
