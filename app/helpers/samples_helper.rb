@@ -257,6 +257,13 @@ module SamplesHelper
     samples
   end
 
+  def fetch_samples_with_current_power(current_power, domain:, filters: {})
+    samples = samples_by_domain_with_current_power(domain, current_power)
+    samples = filter_samples(samples, filters)
+
+    samples
+  end
+
   def filter_samples(samples, filters)
     if filters.present?
       host = filters[:host]
@@ -446,6 +453,24 @@ module SamplesHelper
   end
 
   def get_visibility_by_sample_id(sample_ids)
+    # When in conjunction with some filters, the query below was not returning the public property,
+    # thus we need to get ids and redo the query independently
+    # p current_power, 'current_power first2'
+    # current_power = current_power_arg || current_power
+    # p current_power, 'current_power again2'
+    # if current_power.nil?
+    #   p 'getting to setting current power'
+    #   current_power = current_power_arg
+    # end
+    return Hash[
+      current_power
+           .samples
+           .where(id: sample_ids)
+           .joins(:project)
+           .pluck("samples.id", Arel.sql("IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime('%y-%m-%d')}', true, false) AS public"))]
+  end
+
+  def get_visibility_by_sample_id_and_current_power(sample_ids, current_power)
     # When in conjunction with some filters, the query below was not returning the public property,
     # thus we need to get ids and redo the query independently
     return Hash[
@@ -670,6 +695,20 @@ module SamplesHelper
   end
 
   def samples_by_domain(domain)
+    case domain
+    when "my_data"
+      # samples for projects that user owns
+      current_power.my_data_samples
+    when "public"
+      # samples for public projects
+      Sample.public_samples
+    else
+      # all samples user can see
+      current_power.samples
+    end
+  end
+
+  def samples_by_domain_with_current_power(domain, current_power)
     case domain
     when "my_data"
       # samples for projects that user owns

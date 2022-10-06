@@ -17,9 +17,10 @@ import {
 import memoize from "memoize-one";
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef, useState } from "react";
-import { getSamples, getSamplesReadStats } from "~/api";
+import { getSamplesReadStats } from "~/api";
 import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { GET_PROJECTS_QUERY } from "~/api/projects";
+import { GET_SAMPLES_QUERY } from "~/api/samples";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -58,13 +59,19 @@ function QualityControlWrapper(props) {
   const { loading, error, data } = useQuery(GET_PROJECTS_QUERY, {
     variables: { projectId: parseInt(props.projectId) },
   });
-  if (loading) return "Loading...";
-  if (error) return `Error! ${error.message}`;
-
-  return <QualityControl project={data.project} {...props} />;
+  const { loading: samplesLoading, error: samplesError, data: samples } = useQuery(GET_SAMPLES_QUERY, {
+    variables: {
+      projectId: props.projectId,
+      filters: props.filters,
+      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+    },
+  });
+  if (loading || samplesLoading ) return "Loading...";
+  if (error || samplesError ) return `Error! ${error.message} ${samplesError.message}`;
+  return <QualityControl project={data.project} samples={samples.samplesList.samples} {...props} />;
 }
 
-function QualityControl({ filters, project, projectId, handleBarClick }) {
+function QualityControl({ filters, project, projectId, samples, handleBarClick }) {
   const [loading, setLoading] = useState(true);
   const [
     showProcessingSamplesMessage,
@@ -165,7 +172,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
         labelX: "DCR",
         labelY: "Number of Samples",
       });
-      if (meanInsertSizeBins) {
+      if (meanInsertSizeBins.length > 0) {
         const _meanInsertSizeHistogram = renderHistogram({
           container: meanInsertSizeHistogramContainer.current,
           data: meanInsertSizeBins,
@@ -179,18 +186,11 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
 
   const fetchProjectData = async () => {
     setLoading(true);
-    const projectSamples = await getSamples({
-      projectId: projectId,
-      filters: filters,
-      limit: project.totalSampleCount,
-      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
-    });
-    let data = extractData(projectSamples.samples);
+    let data = extractData(samples);
     const totalSampleCount =
       data.validSamples.length +
       data.runningSamples.length +
       data.failedSamples.length;
-
     const samplesReadsStats = await getSamplesReadStats(
       data.validSamples.map(sample => sample.id),
     );
@@ -289,19 +289,19 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
       // The `created_at` field is only present+filled for a workflow run type
       // if the sample has a workflow run of that type, so we check if the sample
       // has `created_at` filled for mNGS.
-      if (get("mngs_run_info.created_at", sample.details)) {
+      if (get("mngsRunInfo.createdAt", sample.details)) {
         const runInfo =
-          get("upload_error", sample.details) ||
-          get("mngs_run_info", sample.details);
+          get("uploadError", sample.details) ||
+          get("mngsRunInfo", sample.details);
         if (
-          runInfo.result_status_description === "FAILED" ||
-          runInfo.result_status_description === "COMPLETE - ISSUE" ||
-          runInfo.result_status_description === "COMPLETE*"
+          runInfo.resultStatusDescription === "FAILED" ||
+          runInfo.resultStatusDescription === "COMPLETE - ISSUE" ||
+          runInfo.resultStatusDescription === "COMPLETE*"
         ) {
           failedSamples.push(sample);
         } else if (
-          runInfo.report_ready &&
-          sample.details.derived_sample_output.summary_stats
+          runInfo.reportReady &&
+          sample.details.derivedSampleOutput.summaryStats
         ) {
           validSamples.push(sample);
           samplesDict[sample.id] = sample;
@@ -321,7 +321,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
 
   const getBins = () => {
     const sortedReads = sortSamplesByMetric(sample => {
-      return sample.details.derived_sample_output.pipeline_run.total_reads;
+      return sample.details.derivedSampleOutput.pipelineRun.totalReads;
     });
     const [_totalReadsBins, _samplesByTotalReads] = extractBins({
       data: sortedReads,
@@ -330,7 +330,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
     });
 
     const sortedQC = sortSamplesByMetric(sample => {
-      return sample.details.derived_sample_output.summary_stats.qc_percent;
+      return sample.details.derivedSampleOutput.summaryStats.qcPercent;
     });
     const [_qcPercentBins, _samplesByQCPercent] = extractBins({
       data: sortedQC,
@@ -339,8 +339,8 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
     });
 
     const sortedDCR = sortSamplesByMetric(sample => {
-      return sample.details.derived_sample_output.summary_stats
-        .compression_ratio;
+      return sample.details.derivedSampleOutput.summaryStats
+        .compressionRatio;
     });
     const [_dcrBins, _samplesByDCR] = extractBins({
       data: sortedDCR,
@@ -349,8 +349,8 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
     });
 
     const sortedInsertSize = sortSamplesByMetric(sample => {
-      return sample.details.derived_sample_output.summary_stats
-        .insert_size_mean;
+      return sample.details.derivedSampleOutput.summaryStats
+        .insertSizeMean;
     });
     const [_meanInsertSizeBins, _samplesByInsertSize] = extractBins({
       data: sortedInsertSize,
@@ -394,7 +394,7 @@ function QualityControl({ filters, project, projectId, handleBarClick }) {
 
   const extractBins = ({ data, numBins, minBinWidth }) => {
     if (!data.length) {
-      return [null, null];
+      return [[], []];
     }
     // data is an array of {id, value} pairs, sorted by value
     const minVal = 0;
