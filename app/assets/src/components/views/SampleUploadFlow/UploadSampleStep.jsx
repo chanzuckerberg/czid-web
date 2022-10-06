@@ -44,6 +44,7 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import {
   AMR_V1_FEATURE,
+  ONT_V1_FEATURE,
   PRE_UPLOAD_CHECK_FEATURE,
 } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
@@ -388,11 +389,15 @@ class UploadSampleStep extends React.Component {
         ? selectedWorkflows.delete(workflow)
         : selectedWorkflows.add(workflow);
 
-      selectedWorkflows = this.limitWorkflowSelection(workflow, selectedTechnology);
+      selectedWorkflows = this.limitWorkflowSelection(
+        workflow,
+        selectedTechnology,
+      );
       this.setState({
         selectedWorkflows,
         selectedWetlabProtocol: null,
-        selectedTechnology: workflow === WORKFLOWS.AMR.value ? selectedTechnology : null,
+        selectedTechnology:
+          workflow === WORKFLOWS.AMR.value ? selectedTechnology : null,
       });
     } else {
       // TODO: Remove this `else` branch once AMR v1 launches.
@@ -413,18 +418,19 @@ class UploadSampleStep extends React.Component {
 
     // Based on workflowSelected and selectedTechnology, determine which workflows are permitted
     let technology = selectedTechnology ?? ILLUMINA;
-    const permittedWorkflows = ALLOWED_WORKFLOWS_BY_TECHNOLOGY[workflowSelected][technology];
+    const permittedWorkflows =
+      ALLOWED_WORKFLOWS_BY_TECHNOLOGY[workflowSelected][technology];
     // Then delete non-permitted workflows
     let filteredWorkflows = new Set(selectedWorkflows);
-    filteredWorkflows.forEach((workflow) => {
+    filteredWorkflows.forEach(workflow => {
       if (!permittedWorkflows.includes(workflow)) {
         filteredWorkflows.delete(workflow);
       }
     });
     return filteredWorkflows;
-  }
+  };
 
-  handleTechnologyToggle = (technology) => {
+  handleTechnologyToggle = technology => {
     this.props.onDirty();
     const { selectedWorkflows, usedClearLabs } = this.state;
 
@@ -449,12 +455,17 @@ class UploadSampleStep extends React.Component {
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
         { technology },
       );
-    }
-    else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
-      const filteredWorkflows = this.limitWorkflowSelection(WORKFLOWS.SHORT_READ_MNGS.value, technology);
+    } else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
+      const filteredWorkflows = this.limitWorkflowSelection(
+        WORKFLOWS.SHORT_READ_MNGS.value,
+        technology,
+      );
       // We can reuse the same selectedTechnology state because we
       // could never have different technologies selected for mNGS and Consensus Genome.
-      this.setState({selectedTechnology: technology, selectedWorkflows: filteredWorkflows});
+      this.setState({
+        selectedTechnology: technology,
+        selectedWorkflows: filteredWorkflows,
+      });
     }
   };
 
@@ -467,7 +478,7 @@ class UploadSampleStep extends React.Component {
   handleGuppyBasecallerSettingChange = selected => {
     this.props.onDirty();
     this.setState({ selectedGuppyBasecallerSetting: selected });
-  }
+  };
 
   handleMedakaModelChange = selected => {
     this.props.onDirty();
@@ -1035,18 +1046,32 @@ class UploadSampleStep extends React.Component {
 
   getSequenceTechnology = () => {
     const { selectedWorkflows, selectedTechnology } = this.state;
-    if (
-      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
-      selectedWorkflows.has(WORKFLOWS.AMR.value) ||
-      (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-        selectedTechnology === ILLUMINA)
-    )
-      return ILLUMINA;
-    else if (
-      selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-      selectedTechnology === NANOPORE
-    )
-      return NANOPORE;
+    const { allowedFeatures } = this.context || {};
+
+    if (allowedFeatures.includes(ONT_V1_FEATURE)) {
+      if (
+        selectedTechnology === ILLUMINA ||
+        selectedWorkflows.has(WORKFLOWS.AMR.value)
+      )
+        return ILLUMINA;
+      else if (selectedTechnology === NANOPORE) return NANOPORE;
+    } else {
+      // TODO: We currently assume all metagenomics samples are Illumina by default.
+      // Remove this block of logic after the metagenomics ONT pipeline has been
+      // released to all users.
+      if (
+        selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
+        selectedWorkflows.has(WORKFLOWS.AMR.value) ||
+        (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+          selectedTechnology === ILLUMINA)
+      )
+        return ILLUMINA;
+      else if (
+        selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+        selectedTechnology === NANOPORE
+      )
+        return NANOPORE;
+    }
   };
 
   validateCorrectFormat = file => {
@@ -1061,18 +1086,28 @@ class UploadSampleStep extends React.Component {
   renderUploadTabs = () => {
     const { admin, biohubS3UploadEnabled } = this.props;
     const { selectedWorkflows, selectedTechnology } = this.state;
-    const isLongReadMngs = selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) && selectedTechnology === NANOPORE;
+    const isLongReadMngs =
+      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
+      selectedTechnology === NANOPORE;
 
     // We're currently disabling S3 and basespace uploads for ONT v1, but they may be re-enabled in the future
     const s3Tab = this.renderUploadTab(isLongReadMngs, REMOTE_UPLOAD_LABEL);
-    const basespaceTab = this.renderUploadTab(isLongReadMngs, BASESPACE_UPLOAD_LABEL);
+    const basespaceTab = this.renderUploadTab(
+      isLongReadMngs,
+      BASESPACE_UPLOAD_LABEL,
+    );
 
     return (
       <Tabs
         sdsSize="large"
         underlined
-        value={findIndex({value: this.state.currentTab}, this.getUploadTabs())}
-        onChange={(_, selectedTabIndex) => this.handleTabChange(selectedTabIndex)}
+        value={findIndex(
+          { value: this.state.currentTab },
+          this.getUploadTabs(),
+        )}
+        onChange={(_, selectedTabIndex) =>
+          this.handleTabChange(selectedTabIndex)
+        }
       >
         <Tab label={LOCAL_UPLOAD_LABEL}></Tab>
         {(admin || biohubS3UploadEnabled) && s3Tab}
@@ -1082,12 +1117,15 @@ class UploadSampleStep extends React.Component {
   };
 
   renderUploadTab = (disabled, label) => {
-    let tab = (
-      <Tab disabled={disabled} label={label}></Tab>
-    );
+    let tab = <Tab disabled={disabled} label={label}></Tab>;
     if (disabled) {
       tab = (
-        <Tooltip arrow placement="top" title={UNSUPPORTED_UPLOAD_OPTION_TOOLTIP} leaveDelay={0}>
+        <Tooltip
+          arrow
+          placement="top"
+          title={UNSUPPORTED_UPLOAD_OPTION_TOOLTIP}
+          leaveDelay={0}
+        >
           <span>{tab}</span>
         </Tooltip>
       );
@@ -1200,7 +1238,9 @@ class UploadSampleStep extends React.Component {
           <WorkflowSelector
             onClearLabsChange={this.handleClearLabsChange}
             onMedakaModelChange={this.handleMedakaModelChange}
-            onGuppyBasecallerSettingChange={this.handleGuppyBasecallerSettingChange}
+            onGuppyBasecallerSettingChange={
+              this.handleGuppyBasecallerSettingChange
+            }
             onWetlabProtocolChange={this.handleWetlabProtocolChange}
             onTechnologyToggle={this.handleTechnologyToggle}
             onWorkflowToggle={this.handleWorkflowToggle}
