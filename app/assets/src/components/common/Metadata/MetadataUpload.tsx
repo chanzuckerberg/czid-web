@@ -486,11 +486,11 @@ class MetadataUpload extends React.Component<
         {samplesAreNew && (
           <div className={cs.info}>
             <div className={cs.details}>
-              <span className={cs.label}>{`Required fields: `}</span>
-              We require the following metadata to determine how to process your
-              data and display the results:{" "}
-              {requiredFields && requiredFields.join(", ")}. Please be as
-              accurate as possible!{" "}
+              <span className={cs.label}>
+                We require the following metadata to determine how to process your
+                data and display the results:{" "}
+                {requiredFields && requiredFields.join(", ")}.{" "}
+              </span>
               <a
                 href="/metadata/dictionary"
                 className={cs.link}
