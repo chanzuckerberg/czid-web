@@ -1972,8 +1972,11 @@ class DiscoveryView extends React.Component {
     return workflows.map(name => {
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
 
-      const workflowCount =
-        filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
+      let workflowCount = filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
+
+      // this count is set to null when we reset data, so show "-" as loading state
+      // this is the same pattern used for the top level tabs
+      if (workflowCount === null) workflowCount = "-";
 
       return {
         label: (
