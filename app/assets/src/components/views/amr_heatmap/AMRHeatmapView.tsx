@@ -1,5 +1,4 @@
 import { Callout } from "czifui";
-import PropTypes from "prop-types";
 import React from "react";
 import { StickyContainer, Sticky } from "react-sticky";
 
@@ -45,8 +44,32 @@ const SCALES = [
 const SIDEBAR_SAMPLE_MODE = "sampleDetails";
 const SIDEBAR_GENE_MODE = "geneDetails";
 
-export default class AMRHeatmapView extends React.Component {
-  constructor(props) {
+interface AMRHeatmapViewProps {
+  sampleIds?: $TSFixMe[];
+}
+
+interface AMRHeatmapViewState {
+  loading: boolean;
+  samplesWithAMRCounts: $TSFixMe;
+  selectedOptions: $TSFixMe;
+  samplesMetadataTypes: $TSFixMe;
+  sampleLabels?: $TSFixMe;
+  geneLabels?: $TSFixMe;
+  alleleLabels?: $TSFixMe;
+  alleleToGeneMap?: $TSFixMe;
+  maxValues: $TSFixMe;
+  rawSampleData: $TSFixMe;
+  selectedSampleId: $TSFixMe;
+  selectedGene: $TSFixMe;
+  sidebarVisible: boolean;
+  sidebarMode: $TSFixMe;
+}
+
+export default class AMRHeatmapView extends React.Component<
+  AMRHeatmapViewProps,
+  AMRHeatmapViewState
+> {
+  constructor(props: AMRHeatmapViewProps) {
     super(props);
 
     this.state = {
@@ -75,15 +98,18 @@ export default class AMRHeatmapView extends React.Component {
   async requestSampleData(sampleIds) {
     const [rawSampleData, rawSamplesMetadataTypes] = await Promise.all([
       getAMRCounts(sampleIds),
+      // @ts-expect-error Expected 2 arguments, but got 1.
       getSampleMetadataFields(sampleIds),
     ]);
     const filteredSamples = rawSampleData.filter(
-      sampleData => sampleData.error === "",
+      (sampleData: $TSFixMe) => sampleData.error === "",
     );
-    const samplesWithKeyedMetadata = filteredSamples.map(sample => ({
-      ...sample,
-      metadata: processMetadata({ metadata: sample.metadata, flatten: true }),
-    }));
+    const samplesWithKeyedMetadata = filteredSamples.map(
+      (sample: { metadata: $TSFixMe }) => ({
+        ...sample,
+        metadata: processMetadata({ metadata: sample.metadata, flatten: true }),
+      }),
+    );
     const samplesWithAMRCounts = this.correctSampleAndGeneNames(
       samplesWithKeyedMetadata,
     );
@@ -107,22 +133,22 @@ export default class AMRHeatmapView extends React.Component {
     });
   }
 
-  correctSampleAndGeneNames(filteredSamples) {
-    let sampleNamesCounts = new Map();
+  correctSampleAndGeneNames(filteredSamples: $TSFixMe[]) {
+    const sampleNamesCounts = new Map();
     filteredSamples.forEach(sample => {
       // Keep track of samples with the same name, which may occur if
       // a user selects samples from multiple projects.
       if (sampleNamesCounts.has(sample.sampleName)) {
         // Append a number to a sample's name to differentiate between samples with the same name.
-        let count = sampleNamesCounts.get(sample.sampleName);
-        let originalName = sample.sampleName;
+        const count = sampleNamesCounts.get(sample.sampleName);
+        const originalName = sample.sampleName;
         sample.sampleName = `${sample.sampleName} (${count})`;
         sampleNamesCounts.set(originalName, count + 1);
       } else {
         sampleNamesCounts.set(sample.sampleName, 1);
       }
 
-      sample.amrCounts.forEach(amrCount => {
+      sample.amrCounts.forEach((amrCount: { gene: string }) => {
         // The following three lines are a kind of hacky workaround to the fact that
         // the amr counts stored in the db have a gene name that includes the actual gene
         // plus the drug class.
@@ -145,10 +171,10 @@ export default class AMRHeatmapView extends React.Component {
     ];
   }
 
-  findMaxValues(samplesWithAMRCounts) {
+  findMaxValues(samplesWithAMRCounts: $TSFixMe[]) {
     const maxValues = samplesWithAMRCounts.reduce(
       (accum, currentSample) => {
-        currentSample.amrCounts.forEach(amrCount => {
+        currentSample.amrCounts.forEach((amrCount: $TSFixMe) => {
           accum.depth = Math.max(accum.depth, amrCount.depth);
           accum.coverage = Math.max(accum.coverage, amrCount.coverage);
           accum.rpm = Math.max(accum.rpm, amrCount.rpm || 0);
@@ -165,7 +191,7 @@ export default class AMRHeatmapView extends React.Component {
     return maxValues;
   }
 
-  hasDataToDisplay(samplesWithAMRCounts) {
+  hasDataToDisplay(samplesWithAMRCounts: $TSFixMe[]) {
     return samplesWithAMRCounts.some(sample => sample.amrCounts.length > 0);
   }
 
@@ -174,18 +200,24 @@ export default class AMRHeatmapView extends React.Component {
   // an allele and the column is a sample with no AMR count for the allele.
   // With no AMR count, there's no easy way to grab the name of the gene
   // for the allele. Hence the allele-to-gene mapping.
-  mapAllelesToGenes(sampleData) {
+  mapAllelesToGenes(sampleData: $TSFixMe[]) {
     const alleleToGeneMap = {};
     sampleData.forEach(sample => {
-      sample.amrCounts.forEach(amrCount => {
-        alleleToGeneMap[amrCount.allele] =
-          amrCount.annotation_gene || amrCount.gene;
-      });
+      sample.amrCounts.forEach(
+        (amrCount: {
+          allele: string | number;
+          annotation_gene: $TSFixMe;
+          gene: $TSFixMe;
+        }) => {
+          alleleToGeneMap[amrCount.allele] =
+            amrCount.annotation_gene || amrCount.gene;
+        },
+      );
     });
     return alleleToGeneMap;
   }
 
-  extractSampleLabels(sampleData) {
+  extractSampleLabels(sampleData: $TSFixMe[]) {
     const sampleLabels = sampleData.map(sample => {
       return {
         label: sample.sampleName,
@@ -196,11 +228,11 @@ export default class AMRHeatmapView extends React.Component {
     return sampleLabels;
   }
 
-  extractGeneAndAlleleLabels(sampleData) {
+  extractGeneAndAlleleLabels(sampleData: $TSFixMe[]) {
     const genes = {};
     const alleles = {};
     sampleData.forEach(sample => {
-      sample.amrCounts.forEach(amrCount => {
+      sample.amrCounts.forEach((amrCount: $TSFixMe) => {
         if (
           amrCount.annotation_gene === null ||
           amrCount.annotation_gene === undefined
@@ -224,9 +256,9 @@ export default class AMRHeatmapView extends React.Component {
 
   // *** Callback methods ***
 
-  updateOptions = options => {
+  updateOptions = (options: $TSFixMe) => {
     const { selectedOptions } = this.state;
-    let newOptions = Object.assign({}, selectedOptions, options);
+    const newOptions = Object.assign({}, selectedOptions, options);
     this.setState({
       selectedOptions: newOptions,
     });
@@ -236,7 +268,7 @@ export default class AMRHeatmapView extends React.Component {
     });
   };
 
-  onSampleLabelClick = sampleId => {
+  onSampleLabelClick = (sampleId: $TSFixMe) => {
     const { sidebarVisible, sidebarMode, selectedSampleId } = this.state;
     if (!sampleId) {
       this.closeSidebar();
@@ -261,7 +293,7 @@ export default class AMRHeatmapView extends React.Component {
     }
   };
 
-  onGeneLabelClick = geneName => {
+  onGeneLabelClick = (geneName: $TSFixMe) => {
     const { sidebarVisible, sidebarMode, selectedGene } = this.state;
     if (
       !geneName ||
@@ -289,9 +321,9 @@ export default class AMRHeatmapView extends React.Component {
     });
   };
 
-  onMetadataUpdate = (key, value) => {
+  onMetadataUpdate = (key: $TSFixMe, value: $TSFixMe) => {
     const { selectedSampleId, samplesWithAMRCounts } = this.state;
-    const updatedSamples = samplesWithAMRCounts.map(sample => {
+    const updatedSamples = samplesWithAMRCounts.map((sample: $TSFixMe) => {
       if (sample.sampleId !== selectedSampleId) {
         return sample;
       } else {
@@ -313,20 +345,22 @@ export default class AMRHeatmapView extends React.Component {
 
     const csvRows = [];
 
-    samplesWithAMRCounts.forEach(sample => {
-      // Each sample may have multiple amr counts.
-      // Add a separate row for each amr count.
-      sample.amrCounts.forEach(amrCount => {
-        const row = [
-          `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
-            amrCount.coverage
-          },${amrCount.depth},${amrCount.rpm || "N/A"},${amrCount.dpm ||
-            "N/A"},${amrCount.total_reads || "N/A"}`,
-        ];
+    samplesWithAMRCounts.forEach(
+      (sample: { amrCounts: $TSFixMe[]; sampleName: $TSFixMe }) => {
+        // Each sample may have multiple amr counts.
+        // Add a separate row for each amr count.
+        sample.amrCounts.forEach(amrCount => {
+          const row = [
+            `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
+              amrCount.coverage
+            },${amrCount.depth},${amrCount.rpm || "N/A"},${amrCount.dpm ||
+              "N/A"},${amrCount.total_reads || "N/A"}`,
+          ];
 
-        csvRows.push(row);
-      });
-    });
+          csvRows.push(row);
+        });
+      },
+    );
 
     const csvHeaders = [
       "sample_name,gene_name,allele_name,coverage,depth,rpm,dpm,mapped_reads",
@@ -475,6 +509,7 @@ export default class AMRHeatmapView extends React.Component {
         visible={sidebarVisible}
         mode={sidebarMode}
         onClose={this.closeSidebar}
+        // @ts-expect-error 'params' signature does not match
         params={this.getSidebarParams()}
       />
     );
@@ -508,7 +543,3 @@ export default class AMRHeatmapView extends React.Component {
 }
 
 AMRHeatmapView.contextType = UserContext;
-
-AMRHeatmapView.propTypes = {
-  sampleIds: PropTypes.array,
-};

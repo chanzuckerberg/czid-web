@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
@@ -16,8 +15,57 @@ const VIEW_LEVEL_GENES = "gene";
 
 const DEFAULT_SELECTED_METADATA = ["collection_location_v2"];
 
-export default class AMRHeatmapVis extends React.Component {
-  constructor(props) {
+interface AMRHeatmapVisProps {
+  samplesWithAMRCounts?: {
+    sampleName?: string;
+    sampleId?: number;
+    metadata?: object;
+    amrCounts?: unknown[];
+    error?: string;
+  }[];
+  selectedOptions?: {
+    metric?: string;
+    viewLevel?: string;
+    scale?: string;
+  };
+  onSampleLabelClick?: $TSFixMe;
+  onGeneLabelClick?: $TSFixMe;
+  samplesMetadataTypes?: object;
+  sampleLabels?: {
+    label?: string;
+    id?: number;
+    metadata?: object;
+  }[];
+  geneLabels?: {
+    label?: string;
+  }[];
+  alleleLabels?: {
+    label?: string;
+  }[];
+  alleleToGeneMap?: object;
+  metrics?: {
+    text?: string;
+    value?: string;
+  }[];
+}
+
+interface AMRHeatmapVisState {
+  nodeHoverInfo: $TSFixMe;
+  tooltipLocation: $TSFixMe;
+  columnMetadataLegend: $TSFixMe;
+  addMetadataTrigger: $TSFixMe;
+  nodeHovered: boolean;
+  metadataLabelHovered: boolean;
+  selectedMetadata: Set<$TSFixMe>;
+}
+
+export default class AMRHeatmapVis extends React.Component<
+  AMRHeatmapVisProps,
+  AMRHeatmapVisState
+> {
+  heatmap: $TSFixMe;
+  heatmapContainer: $TSFixMe;
+  constructor(props: AMRHeatmapVisProps) {
     super(props);
 
     this.state = {
@@ -37,7 +85,10 @@ export default class AMRHeatmapVis extends React.Component {
     this.updateHeatmap();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(
+    prevProps: AMRHeatmapVisProps,
+    prevState: AMRHeatmapVisState,
+  ) {
     const { selectedMetadata, nodeHovered, metadataLabelHovered } = this.state;
     const { sampleLabels, selectedOptions } = this.props;
     if (
@@ -72,7 +123,7 @@ export default class AMRHeatmapVis extends React.Component {
       });
   }
 
-  getTooltipData(node) {
+  getTooltipData(node: $TSFixMe) {
     const {
       sampleLabels,
       alleleToGeneMap,
@@ -104,7 +155,7 @@ export default class AMRHeatmapVis extends React.Component {
       }
     }
 
-    let values = metrics.map(metric => {
+    const values = metrics.map(metric => {
       // If sample is too old to have evaluated the new metrics, give "N/A"
       let value = amrCountForNode ? amrCountForNode[metric.value] || "N/A" : 0;
 
@@ -115,6 +166,7 @@ export default class AMRHeatmapVis extends React.Component {
       ) {
         // If sample is too old to have evaluated the new metrics,
         // change 0 to N/A
+        // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
         const newAMRDataCheck = sampleForColumn.amrCounts[0].rpm;
         if (
           value === 0 &&
@@ -164,21 +216,21 @@ export default class AMRHeatmapVis extends React.Component {
   // and what gets named a gene. See the documentation
   // for more detail.
 
-  findAMRCountForName(rowName, sample) {
+  findAMRCountForName(rowName: $TSFixMe, sample: $TSFixMe) {
     const { selectedOptions } = this.props;
     switch (selectedOptions.viewLevel) {
       case VIEW_LEVEL_ALLELES: {
         return sample.amrCounts.find(
-          amrCount => amrCount["allele"] === rowName,
+          (amrCount: $TSFixMe) => amrCount["allele"] === rowName,
         );
       }
       case VIEW_LEVEL_GENES: {
         let amrCountForRow = sample.amrCounts.find(
-          amrCount => amrCount["annotation_gene"] === rowName,
+          (amrCount: $TSFixMe) => amrCount["annotation_gene"] === rowName,
         );
         if (amrCountForRow === undefined) {
           amrCountForRow = sample.amrCounts.find(
-            amrCount => amrCount["gene"] === rowName,
+            (amrCount: $TSFixMe) => amrCount["gene"] === rowName,
           );
         }
         return amrCountForRow;
@@ -186,11 +238,11 @@ export default class AMRHeatmapVis extends React.Component {
     }
   }
 
-  computeHeatmapValues(rows) {
+  computeHeatmapValues(rows: $TSFixMe) {
     const { selectedOptions, samplesWithAMRCounts } = this.props;
-    const heatmapValues = [];
-    rows.forEach(label => {
-      const rowValues = [];
+    const heatmapValues: $TSFixMe = [];
+    rows.forEach((label: $TSFixMe) => {
+      const rowValues: $TSFixMe = [];
       const rowName = label.label;
       samplesWithAMRCounts.forEach(sample => {
         const amrCountForRow = this.findAMRCountForName(rowName, sample);
@@ -222,7 +274,7 @@ export default class AMRHeatmapVis extends React.Component {
     }
   }
 
-  initializeHeatmap(rows, columns, values) {
+  initializeHeatmap(rows: $TSFixMe, columns: $TSFixMe, values: $TSFixMe) {
     const { selectedOptions, onSampleLabelClick } = this.props;
     this.heatmap = new Heatmap(
       this.heatmapContainer,
@@ -257,12 +309,18 @@ export default class AMRHeatmapVis extends React.Component {
 
   // *** Callback functions for the heatmap ***
 
-  colorFilter = (value, node, originalColor, _, colorNoValue) => {
+  colorFilter = (
+    value: $TSFixMe,
+    _node: $TSFixMe,
+    originalColor: $TSFixMe,
+    _colors: $TSFixMe,
+    colorNoValue: $TSFixMe,
+  ) => {
     // Leave zero values gray
     return value > 0 ? originalColor : colorNoValue;
   };
 
-  onNodeHover = node => {
+  onNodeHover = (node: $TSFixMe) => {
     this.setState({
       nodeHoverInfo: this.getTooltipData(node),
       nodeHovered: true,
@@ -276,7 +334,7 @@ export default class AMRHeatmapVis extends React.Component {
 
   // mediate the callback function for clicking a row label in the heatmap,
   // so that clicking an allele returns the proper gene
-  onRowLabelClick = rowLabel => {
+  onRowLabelClick = (rowLabel: $TSFixMe) => {
     const { alleleToGeneMap, selectedOptions, onGeneLabelClick } = this.props;
     let geneName = rowLabel;
     if (selectedOptions.viewLevel === VIEW_LEVEL_ALLELES) {
@@ -285,7 +343,7 @@ export default class AMRHeatmapVis extends React.Component {
     onGeneLabelClick(geneName);
   };
 
-  onMetadataLabelHover = node => {
+  onMetadataLabelHover = (node: $TSFixMe) => {
     const legend = this.heatmap.getColumnMetadataLegend(node.value);
     this.setState({
       columnMetadataLegend: legend,
@@ -294,7 +352,7 @@ export default class AMRHeatmapVis extends React.Component {
     });
   };
 
-  onMetadataNodeHover = (node, metadata) => {
+  onMetadataNodeHover = (node: $TSFixMe, metadata: $TSFixMe) => {
     const legend = this.heatmap.getColumnMetadataLegend(metadata.value);
     const currentValue = node.metadata[metadata.value] || "Unknown";
     const currentPair = { [currentValue]: legend[currentValue] };
@@ -309,14 +367,14 @@ export default class AMRHeatmapVis extends React.Component {
     this.setState({ columnMetadataLegend: null });
   };
 
-  onMetadataAddButtonClick = trigger => {
+  onMetadataAddButtonClick = (trigger: $TSFixMe) => {
     this.setState({
       addMetadataTrigger: trigger,
     });
     trackEvent("AMRHeatmapVis_metadata-add-button_clicked");
   };
 
-  onMetadataSelectionChange = selectedMetadata => {
+  onMetadataSelectionChange = (selectedMetadata: $TSFixMe) => {
     this.setState({
       selectedMetadata,
     });
@@ -330,7 +388,8 @@ export default class AMRHeatmapVis extends React.Component {
   getSelectedMetadataFields() {
     const { samplesMetadataTypes } = this.props;
     const { selectedMetadata } = this.state;
-    const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1); // alphabetical
+    const sortByLabel = (a: $TSFixMe, b: $TSFixMe) =>
+      a.label > b.label ? 1 : -1; // alphabetical
 
     return Array.from(selectedMetadata)
       .map(metadatum => {
@@ -399,39 +458,3 @@ export default class AMRHeatmapVis extends React.Component {
     );
   }
 }
-
-AMRHeatmapVis.propTypes = {
-  samplesWithAMRCounts: PropTypes.arrayOf(
-    PropTypes.shape({
-      sampleName: PropTypes.string,
-      sampleId: PropTypes.number,
-      metadata: PropTypes.object,
-      amrCounts: PropTypes.array,
-      error: PropTypes.string,
-    }),
-  ),
-  selectedOptions: PropTypes.shape({
-    metric: PropTypes.string,
-    viewLevel: PropTypes.string,
-    scale: PropTypes.string,
-  }),
-  onSampleLabelClick: PropTypes.func,
-  onGeneLabelClick: PropTypes.func,
-  samplesMetadataTypes: PropTypes.object,
-  sampleLabels: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string,
-      id: PropTypes.number,
-      metadata: PropTypes.object,
-    }),
-  ),
-  geneLabels: PropTypes.arrayOf(PropTypes.shape({ label: PropTypes.string })),
-  alleleLabels: PropTypes.arrayOf(PropTypes.shape({ label: PropTypes.string })),
-  alleleToGeneMap: PropTypes.object,
-  metrics: PropTypes.arrayOf(
-    PropTypes.shape({
-      text: PropTypes.string,
-      value: PropTypes.string,
-    }),
-  ),
-};

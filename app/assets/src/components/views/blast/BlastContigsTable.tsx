@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { Table } from "~/components/visualizations/table";
@@ -10,12 +9,19 @@ import {
   BLAST_CONTIG_HEADER_ROW_WIDTH,
 } from "./constants";
 
+interface BlastContigsTableProps {
+  contigs?: unknown[];
+  onContigSelection?: $TSFixMeFunction;
+  onAllContigsSelected?: $TSFixMeFunction;
+  selectedContigs?: Set<$TSFixMe>;
+}
+
 const BlastContigsTable = ({
   contigs,
   onContigSelection,
   onAllContigsSelected,
   selectedContigs,
-}) => {
+}: BlastContigsTableProps) => {
   const contigNameCellRenderer = ({ contigName }) => (
     <ColumnHeaderTooltip
       trigger={<div className={cx(cs.cell, cs.contigName)}>{contigName}</div>}
@@ -51,6 +57,7 @@ const BlastContigsTable = ({
   ];
 
   return (
+    // @ts-expect-error missing attribute draggableColumns, onColumnSort, defaultSortBy, defaultSortDirection ...
     <Table
       data={contigs}
       defaultRowHeight={BLAST_CONTIG_ROW_WIDTH}
@@ -71,13 +78,6 @@ const BlastContigsTable = ({
       sortable={false}
     />
   );
-};
-
-BlastContigsTable.propTypes = {
-  contigs: PropTypes.array,
-  onContigSelection: PropTypes.func,
-  onAllContigsSelected: PropTypes.func,
-  selectedContigs: PropTypes.instanceOf(Set),
 };
 
 export default BlastContigsTable;

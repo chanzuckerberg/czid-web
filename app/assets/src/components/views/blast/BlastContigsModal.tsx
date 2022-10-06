@@ -1,7 +1,6 @@
 // BlastContigsModal.jsx is only used for Blast V0
 import { Tooltip } from "czifui";
 import { filter, map, reduce, size } from "lodash/fp";
-import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
 import {
@@ -30,6 +29,16 @@ import {
 } from "./constants";
 import { prepareBlastQuery } from "./utils";
 
+interface BlastContigsModalProps {
+  context?: object;
+  open?: boolean;
+  onClose?: $TSFixMeFunction;
+  pipelineVersion?: string;
+  sampleId?: number;
+  taxonId?: number;
+  taxonName?: string;
+}
+
 const BlastContigsModal = ({
   context,
   onClose,
@@ -38,7 +47,7 @@ const BlastContigsModal = ({
   pipelineVersion,
   taxonName,
   taxonId,
-}) => {
+}: BlastContigsModalProps) => {
   const [contigs, setContigs] = useState([]);
   const [selectedContigIds, setSelectedContigIds] = useState(new Set());
   const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
@@ -165,6 +174,7 @@ const BlastContigsModal = ({
         analyticEventName:
           ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_CONTINUE_BUTTON_CLICKED,
         automaticallyRedirectedToNCBI: false,
+        // @ts-expect-error 'numberOfContigs' does not exist in type
         numberOfContigs: size(selectedContigIds),
         sampleId,
       });
@@ -174,7 +184,9 @@ const BlastContigsModal = ({
 
   const handleRedirectionModalClose = () => setShowBlastRedirectModal(false);
 
-  const handleRedirectionModalContinue = shouldAutoRedirectBlastForCurrentSession => {
+  const handleRedirectionModalContinue = (
+    shouldAutoRedirectBlastForCurrentSession: $TSFixMe,
+  ) => {
     shouldAutoRedirectBlastForCurrentSession &&
       autoRedirectBlastForCurrentSession();
 
@@ -214,6 +226,7 @@ const BlastContigsModal = ({
   };
 
   const autoRedirectBlastForCurrentSession = () => {
+    // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'
     sessionStorage.setItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY, true);
   };
 
@@ -316,16 +329,6 @@ const BlastContigsModal = ({
       )}
     </Modal>
   );
-};
-
-BlastContigsModal.propTypes = {
-  context: PropTypes.object,
-  open: PropTypes.bool,
-  onClose: PropTypes.func,
-  pipelineVersion: PropTypes.string,
-  sampleId: PropTypes.number,
-  taxonId: PropTypes.number,
-  taxonName: PropTypes.string,
 };
 
 export default BlastContigsModal;

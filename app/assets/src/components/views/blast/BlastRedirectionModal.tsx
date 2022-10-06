@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import { Image } from "semantic-ui-react";
@@ -11,12 +10,19 @@ import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 
 import cs from "./blast_redirection_modal.scss";
 
+interface BlastRedirectionModalProps {
+  open?: boolean;
+  onClose?: $TSFixMeFunction;
+  onContinue?: $TSFixMeFunction;
+  shouldOpenMultipleTabs?: boolean;
+}
+
 const BlastRedirectionModal = ({
   open,
   onClose,
   onContinue,
   shouldOpenMultipleTabs,
-}) => {
+}: BlastRedirectionModalProps) => {
   const [shouldRedirectBlast, setShouldRedirectBlast] = useState(false);
 
   const renderActions = () => {
@@ -54,7 +60,7 @@ const BlastRedirectionModal = ({
           this may make the data accessible to others. NCBI is a separate
           service from CZ ID. Your data will be subject to their{" "}
           <ExternalLink
-            analyticEventName={
+            analyticsEventName={
               ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED
             }
             href={NCBI_POLICIES_AND_DISCLAIMERS_LINK}
@@ -83,13 +89,6 @@ const BlastRedirectionModal = ({
       </div>
     </Modal>
   );
-};
-
-BlastRedirectionModal.propTypes = {
-  open: PropTypes.bool,
-  onClose: PropTypes.func,
-  onContinue: PropTypes.func,
-  shouldOpenMultipleTabs: PropTypes.bool,
 };
 
 export default BlastRedirectionModal;

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
@@ -9,7 +8,11 @@ import Notification from "~ui/notifications/Notification";
 import cs from "./blast_notification.scss";
 import { NCBI_SUPPORT_CENTER_LINK } from "./constants";
 
-const BlastNotification = ({ onClose }) => {
+interface BlastNotificationProps {
+  onClose?: $TSFixMeFunction;
+}
+
+const BlastNotification = ({ onClose }: BlastNotificationProps) => {
   const label = (
     <div className={cs.label}>
       <div className={cs.message}>
@@ -40,8 +43,4 @@ export default BlastNotification;
 
 export const showBlastNotification = () => {
   showToast(({ closeToast }) => <BlastNotification onClose={closeToast} />);
-};
-
-BlastNotification.propTypes = {
-  onClose: PropTypes.func,
 };

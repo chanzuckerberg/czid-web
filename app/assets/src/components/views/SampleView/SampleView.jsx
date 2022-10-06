@@ -1514,7 +1514,10 @@ class SampleView extends React.Component {
     } else if (sidebarMode === "sampleDetails") {
       const sampleWorkflowLabels = compact([
         size(sample.pipeline_runs) && WORKFLOWS.SHORT_READ_MNGS.label,
-        find({ workflow: WORKFLOWS.CONSENSUS_GENOME.value }, sample.workflow_runs) && WORKFLOWS.CONSENSUS_GENOME.label,
+        find(
+          { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
+          sample.workflow_runs,
+        ) && WORKFLOWS.CONSENSUS_GENOME.label,
       ]);
 
       return {

@@ -1,6 +1,5 @@
 // BlastReadssModal.jsx is only used for Blast V0
 import { size } from "lodash/fp";
-import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -18,6 +17,17 @@ import cs from "./blast_reads_modal.scss";
 import { SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY } from "./constants";
 import { prepareBlastQuery } from "./utils";
 
+interface BlastReadsModalProps {
+  context?: object;
+  open?: boolean;
+  onClose?: $TSFixMeFunction;
+  pipelineVersion?: string;
+  sampleId?: number;
+  taxonId?: number;
+  taxonLevel?: number;
+  taxonName?: string;
+}
+
 const BlastReadsModal = ({
   context,
   onClose,
@@ -27,7 +37,7 @@ const BlastReadsModal = ({
   taxonName,
   taxonLevel,
   taxonId,
-}) => {
+}: BlastReadsModalProps) => {
   const [shortestAlignmentLength, setShortestAlignmentLength] = useState();
   const [longestAlignmentLength, setLongestAlignmentLength] = useState();
   const [reads, setReads] = useState([]);
@@ -103,12 +113,15 @@ const BlastReadsModal = ({
   };
 
   const autoRedirectBlastForCurrentSession = () => {
+    // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'
     sessionStorage.setItem(SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY, true);
   };
 
   const handleRedirectionModalClose = () => setShowBlastRedirectModal(false);
 
-  const handleRedirectionModalContinue = shouldAutoRedirectBlastForCurrentSession => {
+  const handleRedirectionModalContinue = (
+    shouldAutoRedirectBlastForCurrentSession: $TSFixMe,
+  ) => {
     shouldAutoRedirectBlastForCurrentSession &&
       autoRedirectBlastForCurrentSession();
 
@@ -186,17 +199,6 @@ const BlastReadsModal = ({
       )}
     </Modal>
   );
-};
-
-BlastReadsModal.propTypes = {
-  context: PropTypes.object,
-  open: PropTypes.bool,
-  onClose: PropTypes.func,
-  pipelineVersion: PropTypes.string,
-  sampleId: PropTypes.number,
-  taxonId: PropTypes.number,
-  taxonLevel: PropTypes.number,
-  taxonName: PropTypes.string,
 };
 
 export default BlastReadsModal;

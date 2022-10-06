@@ -11,7 +11,7 @@ export const prepareBlastQuery = ({ sequences, program = "blastn" }) => {
   return baseUrl + queryParams;
 };
 
-const determineDatabaseForBlast = blastMethod => {
+const determineDatabaseForBlast = (blastMethod: string) => {
   switch (blastMethod) {
     case BlastMethods.BlastN:
       return "nt";
