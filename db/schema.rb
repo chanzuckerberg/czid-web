@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_10_04_172546) do
+ActiveRecord::Schema.define(version: 2022_10_07_180609) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -165,6 +165,7 @@ ActiveRecord::Schema.define(version: 2022_10_04_172546) do
     t.integer "species_taxid_merged_nt_nr"
     t.integer "genus_taxid_merged_nt_nr"
     t.integer "base_count", comment: "Number of bases in the contig"
+    t.index ["pipeline_run_id", "base_count"], name: "index_contigs_on_pipeline_run_id_and_base_count"
     t.index ["pipeline_run_id", "genus_taxid_merged_nt_nr"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_merged_nt_nr"
     t.index ["pipeline_run_id", "genus_taxid_nr"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_nr"
     t.index ["pipeline_run_id", "genus_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_nt"
@@ -645,7 +646,7 @@ ActiveRecord::Schema.define(version: 2022_10_04_172546) do
     t.datetime "updated_at", null: false
     t.string "name"
     t.string "count_type"
-    t.float "percent_identity"
+    t.decimal "percent_identity", precision: 9, scale: 2
     t.float "alignment_length"
     t.float "e_value"
     t.integer "genus_taxid", default: -200, null: false
@@ -655,7 +656,7 @@ ActiveRecord::Schema.define(version: 2022_10_04_172546) do
     t.integer "family_taxid", default: -300, null: false
     t.integer "is_phage", limit: 1, default: 0, null: false
     t.string "source_count_type", comment: "The count type which the merged_nt_nr value is derived from"
-    t.float "rpm", comment: "Number of reads aligning to the taxon in the NCBI NR/NT database, per million reads sequenced."
+    t.float "rpm"
     t.decimal "percent_identity_decimal", precision: 9, scale: 2
     t.decimal "alignment_length_decimal", precision: 9, scale: 2
     t.decimal "rpm_decimal", precision: 9, scale: 2
@@ -818,6 +819,7 @@ ActiveRecord::Schema.define(version: 2022_10_04_172546) do
     t.text "inputs_json", comment: "Generic JSON-string field for recording execution inputs."
     t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/samples/subpath/results' Never allow users to set this."
     t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing."
+    t.text "error_message"
     t.index ["created_at"], name: "index_workflow_runs_on_created_at"
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
