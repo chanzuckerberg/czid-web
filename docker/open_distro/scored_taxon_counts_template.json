@@ -1,8 +1,17 @@
 {
+  "_meta": {
+    "description": "z-score and RPM score count for taxon and pipeline run "
+  },
+  "priority": 200,
+  "version": 1,
   "index_patterns": [
     "scored_taxon_counts-*"
   ],
   "template": {
+    "settings": {
+      "number_of_shards": 4,
+      "number_of_replicas": 1
+    },
     "aliases": {
       "scored_taxon_counts": {}
     },
@@ -13,13 +22,16 @@
           "null_value": "0"
         },
         "name": {
-          "type": "text"
+          "type": "text",
+          "index": false
         },
         "common_name": {
-          "type": "text"
+          "type": "text",
+          "index": false
         },
         "genus_name": {
-          "type": "text"
+          "type": "text",
+          "index": false
         },
         "pipeline_run_id": {
           "type": "long"
@@ -97,10 +109,5 @@
         }
       }
     }
-  },
-  "priority": 200,
-  "version": 1,
-  "_meta": {
-    "description": "z-score and RPM score count for taxon and pipeline run "
   }
 }

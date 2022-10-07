@@ -1,0 +1,39 @@
+{
+    "_meta": {
+        "description": "Pipeline run metadata for tracking taxon_count completeness"
+    },
+    "priority": 200,
+    "version": 1,
+    "index_patterns": [
+        "pipeline_runs-*"
+    ],
+    "template": {
+        "settings": {
+            "number_of_shards": 4,
+            "number_of_replicas": 1
+        },
+        "aliases": {
+            "pipeline_runs": {}
+        },
+        "mappings": {
+            "properties": {
+                "pipeline_run_id": {
+                    "type": "long"
+                },
+                "background_id": {
+                    "type": "long"
+                },
+                "is_complete": {
+                    "type": "boolean",
+                    "null_value": false
+                },
+                "created_at": {
+                    "type": "date"
+                },
+                "last_read_at": {
+                    "type": "date"
+                }
+            }
+        }
+    }
+}

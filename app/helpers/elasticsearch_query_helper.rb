@@ -4,7 +4,10 @@ module ElasticsearchQueryHelper
   config = { host: ENV["HEATMAP_ES_ADDRESS"], transport_options: { request: { timeout: 200 } } }
   ES_CLIENT = Elasticsearch::Client.new(config) unless Rails.env.test?
 
-  GLUE_CLIENT = Aws::Glue::Client.new
+  LAMBDA_CLIENT = Aws::Lambda::Client.new(
+    http_read_timeout: 1000, # more than the 900 second limit on lambda executions
+    retry_limit: 0 # TODO: retry on networking error?
+  )
 
   DEFAULT_QUERY_FETCH_SIZE = 100
 
@@ -17,7 +20,7 @@ module ElasticsearchQueryHelper
     zscore: "zscore",
   }.freeze
 
-  # Check is the data exists in ES for background_id and pipeline_run_ids if not then invoke AWS Glue job
+  # Check is the data exists in ES for background_id and pipeline_run_ids if not then invoke taxon-indexing lambda job
   # to calculate and save scores in the ES index
   def self.update_es_for_missing_data(background_id, pipeline_run_ids)
     missing_pipeline_run_ids = find_pipeline_runs_missing_from_es(
@@ -25,7 +28,7 @@ module ElasticsearchQueryHelper
       pipeline_run_ids
     )
     if missing_pipeline_run_ids.present?
-      _job_status = call_aws_glue_job(
+      call_taxon_indexing_lambda(
         background_id,
         missing_pipeline_run_ids
       )
@@ -246,51 +249,46 @@ module ElasticsearchQueryHelper
       return []
     end
 
-    pipeline_runs_in_es_query = "SELECT DISTINCT pipeline_run_id FROM scored_taxon_counts WHERE background_id=#{background_id} AND pipeline_run_id in (#{pipeline_run_ids.join(',')})"
+    pipeline_runs_in_es_query = "SELECT DISTINCT pipeline_run_id FROM pipeline_runs WHERE is_complete = true AND background_id=#{background_id} AND pipeline_run_id in (#{pipeline_run_ids.join(',')})"
     _columns, pipelines_in_es = query_es(pipeline_runs_in_es_query)
     missing_pipeline_run_ids = pipeline_run_ids - pipelines_in_es.flatten
     return missing_pipeline_run_ids.flatten
   end
 
-  # Call to AWS glue spark job to calculate heatmap data and store it in ES
-  def self.call_aws_glue_job(background_id, pipeline_run_ids)
+  def self.call_taxon_indexing_lambda(background_id, pipeline_run_ids)
     env = Rails.env.development? || Rails.env.test? ? "sandbox" : Rails.env
-    job_name = "#{env}_heatmap_es_job"
-
-    glue_arguments = {
-      "--user_pipeline_run_ids" => pipeline_run_ids.join("|"),
-      "--user_background_id" => background_id.to_s,
-      "--job_type" => "selected_runs",
+    function_name = "taxon-indexing-concurrency-manager-#{env}"
+    payload = {
+      background_id: background_id,
+      pipeline_run_ids: pipeline_run_ids,
     }
-
-    currently_running_job = get_running_glue_job_by_args(job_name, glue_arguments)
-    if !currently_running_job.nil?
-      job_run_id = currently_running_job.id
-    else
-      glue_response = GLUE_CLIENT.start_job_run(
-        job_name: job_name.to_s,
-        arguments: glue_arguments
-      )
-      job_run_id = glue_response.job_run_id.to_s
+    begin
+      attempts ||= 1
+      resp = LAMBDA_CLIENT.invoke({
+                                    function_name: function_name,
+                                    invocation_type: 'RequestResponse',
+                                    log_type: "None",
+                                    payload: JSON.generate(payload),
+                                  })
+      if resp["status_code"] != 200 || !resp["function_error"].nil?
+        raise "Taxon indexing concurrency manager lambda invocation failure"
+      end
+    rescue StandardError => error
+      LogUtil.log_error("Taxon indexing concurrency manager lambda invocation failure", exception: error)
+      if (attempts += 1) <= 2
+        sleep(3.seconds)
+        retry
+      end
+      raise error
     end
 
-    job_status = ""
-    loop do
-      sleep(5.seconds)
-      resp = GLUE_CLIENT.get_job_run({ job_name: job_name.to_s, run_id: job_run_id })
-      job_status = resp.job_run.job_run_state
-      break if job_status != "RUNNING"
-    end
-    return job_status
-  end
-
-  def self.get_running_glue_job_by_args(job_name, args)
-    resp = GLUE_CLIENT.get_job_runs({ job_name: job_name.to_s })
-    return resp.job_runs.find do |job_run|
-      job_run.job_run_state == "RUNNING" &&
-      job_run.arguments["--user_pipeline_run_ids"] == args["--user_pipeline_run_ids"] &&
-      job_run.arguments["--user_background_id"] == args["--user_background_id"] &&
-      job_run.arguments["--job_type"] == args["--job_type"]
+    resp_payload = JSON.parse(resp.payload.string)
+    failure_count = resp_payload.count { |invocation| invocation["FunctionError"] }
+    # check if any indexing jobs failed. If they did, raise an error to the user so that
+    # they can retry. All indexing jobs must succeed before the heatmap can be rendered.
+    if failure_count > 0
+      LogUtil.log_error("Some taxon indexing jobs failed", exception: resp_payload)
+      raise "Some taxon indexing jobs failed"
     end
   end
 

@@ -68,7 +68,7 @@ class HandleSfnNotifications
         if stage_complete_event?(details)
           pr.load_stage_results(details["lastCompletedStage"])
           Rails.logger.info("Loading #{details['lastCompletedStage']} results for PipelineRun #{pr.id} #{arn} into the database")
-          # trigger glue job that indexes the taxons in this pipeline run into ES for later heatmap generation
+          # trigger lambda job that indexes the taxons in this pipeline run into ES for later heatmap generation
           Resque.enqueue(
             IndexTaxons,
             Rails.configuration.x.constants.default_background,

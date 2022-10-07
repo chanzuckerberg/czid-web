@@ -17,18 +17,6 @@ RSpec.describe ElasticsearchQueryHelper, type: :helper do
     end
   end
 
-  describe "#find_pipeline_runs_missing_from_es" do
-    it "should find missing pipeline run ids" do
-      req_body = "SELECT DISTINCT pipeline_run_id FROM scored_taxon_counts WHERE background_id=26 AND pipeline_run_id in (1,2)"
-      cols = ["pipeline_run_id"]
-      rows = [[1]]
-      expect(ElasticsearchQueryHelper).to receive(:query_es).with(req_body).and_return([cols, rows])
-      missing_ids = ElasticsearchQueryHelper.find_pipeline_runs_missing_from_es(26, [1, 2])
-      expect(missing_ids.size).to eq 1
-      expect(missing_ids[0]).to eq 2
-    end
-  end
-
   describe "#build_categories_filter_clause" do
     it "should return valid categories if phage is true and categories are blank " do
       categories_clause = ElasticsearchQueryHelper.build_categories_filter_clause([], true)
