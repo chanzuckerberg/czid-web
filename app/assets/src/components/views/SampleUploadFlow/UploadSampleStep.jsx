@@ -160,7 +160,6 @@ class UploadSampleStep extends React.Component {
       selectedWetlabProtocol,
       selectedWorkflows,
       usedClearLabs,
-      selectedGuppyBasecallerSetting,
     } = this.state;
     const basespaceSamples = this.getSelectedSamples(BASESPACE_UPLOAD);
 
@@ -193,7 +192,6 @@ class UploadSampleStep extends React.Component {
       this.props.onUploadSamples({
         clearlabs: usedClearLabs,
         project: selectedProject,
-        guppyBasecallerVersion: selectedGuppyBasecallerSetting,
         medakaModel: selectedMedakaModel,
         samples: samplesWithToken,
         technology: selectedTechnology,
@@ -905,6 +903,7 @@ class UploadSampleStep extends React.Component {
       currentTab,
       selectedTechnology,
       selectedMedakaModel,
+      selectedGuppyBasecallerSetting,
       selectedProject,
       selectedWorkflows,
       selectedWetlabProtocol,
@@ -933,6 +932,7 @@ class UploadSampleStep extends React.Component {
         clearlabs: usedClearLabs,
         technology: selectedTechnology,
         medakaModel: selectedMedakaModel,
+        guppyBasecallerSetting: selectedGuppyBasecallerSetting,
         project: selectedProject,
         uploadType: currentTab,
         wetlabProtocol: selectedWetlabProtocol,

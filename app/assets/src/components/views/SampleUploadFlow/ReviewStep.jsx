@@ -25,9 +25,9 @@ import HostOrganismMessage from "./HostOrganismMessage";
 import UploadProgressModal from "./UploadProgressModal";
 import {
   CG_WETLAB_DISPLAY_NAMES,
-  CG_TECHNOLOGY_OPTIONS,
   CG_TECHNOLOGY_DISPLAY_NAMES,
   WORKFLOW_DISPLAY_NAMES,
+  NANOPORE,
 } from "./constants";
 
 import cs from "./sample_upload_flow.scss";
@@ -336,24 +336,15 @@ class ReviewStep extends React.Component {
   };
 
   renderAnalysesSections = () => {
-    const {
-      clearlabs,
-      technology,
-      medakaModel,
-      wetlabProtocol,
-      workflows,
-    } = this.props;
+    const { technology } = this.props;
 
     const sections = map(workflow => {
       const workflowDisplayName = WORKFLOW_DISPLAY_NAMES[workflow];
-      const hasSequencingPlatform =
+      const hasAnalysisTypeContent =
         workflow === WORKFLOWS.SHORT_READ_MNGS.value ||
         workflow === WORKFLOWS.CONSENSUS_GENOME.value;
-      const beta = workflow === WORKFLOWS.AMR.value;
-      const shouldRenderAnalysisTypeContent =
-        hasSequencingPlatform ||
-        workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) ||
-        technology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
+      const workflowIsBeta = workflow === WORKFLOWS.AMR.value;
+      const sequencingPlatformIsBeta = workflow === WORKFLOWS.SHORT_READ_MNGS.value && technology === NANOPORE;
 
       return (
         <div className={cs.section}>
@@ -363,44 +354,22 @@ class ReviewStep extends React.Component {
           <div className={cs.text}>
             <div className={cs.header}>
               <div className={cs.name}>{workflowDisplayName}</div>
-              {beta && <StatusLabel inline status="Beta" type="beta" />}
+              {workflowIsBeta && <StatusLabel inline status="Beta" type="beta" />}
             </div>
-            {shouldRenderAnalysisTypeContent && (
+            {hasAnalysisTypeContent && (
               <div className={cs.analysisTypeContent}>
-                {hasSequencingPlatform && (
-                  <div className={cs.item}>
-                    <div className={cs.subheader}>Sequencing Platform&#58;</div>
-                    <div className={cs.description}>
-                      {/* Default to displaying "Illumina" for mNGS samples, which don't have
-                    technology set as an input parameter. */}
-                      {CG_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
-                    </div>
-                  </div>
-                )}
-                {technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && (
-                  <div className={cs.item}>
-                    <div className={cs.subheader}>Used Clear Labs&#58;</div>
-                    <div className={cs.description}>
-                      {clearlabs ? "Yes" : "No"}
-                    </div>
-                  </div>
-                )}
-                {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
-                  <div className={cs.item}>
-                    <div className={cs.subheader}>Wetlab Protocol&#58;</div>
-                    <div className={cs.description}>
-                      {CG_WETLAB_DISPLAY_NAMES[wetlabProtocol]}
-                    </div>
-                  </div>
-                )}
                 <div className={cs.item}>
-                  {technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && (
-                    <>
-                      <div className={cs.subheader}>Medaka Model&#58;</div>
-                      <div className={cs.description}>{medakaModel}</div>
-                    </>
-                  )}
+                  <div className={cs.subheader}>{"Sequencing Platform: "}</div>
+                  <div className={cs.description}>
+                    {/* TODO: we should probably update this constant, now that technology display names
+                    are relevant for CG and mNGS. The default technology of Illumina can be deleted once
+                    ONT v1 is launched to all users. */}
+                    {CG_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
+                    {sequencingPlatformIsBeta && <StatusLabel inline status="Beta" type="beta" />}
+                  </div>
                 </div>
+                {workflow === WORKFLOWS.CONSENSUS_GENOME.value && this.renderCGAnalysisSection()}
+                {workflow === WORKFLOWS.SHORT_READ_MNGS.value && this.renderMngsAnalysisSection()}
               </div>
             )}
           </div>
@@ -409,6 +378,56 @@ class ReviewStep extends React.Component {
     }, this.getWorkflowSectionOrder());
     return sections;
   };
+
+  renderCGAnalysisSection = () => {
+    const { clearlabs, medakaModel, technology, wetlabProtocol, workflows } = this.props;
+    return (
+      <>
+      {technology === NANOPORE && (
+        <div className={cs.item}>
+          <div className={cs.subheader}>Used Clear Labs&#58;</div>
+          <div className={cs.description}>
+            {clearlabs ? "Yes" : "No"}
+          </div>
+        </div>
+      )}
+      {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
+        <div className={cs.item}>
+          <div className={cs.subheader}>Wetlab Protocol&#58;</div>
+          <div className={cs.description}>
+            {CG_WETLAB_DISPLAY_NAMES[wetlabProtocol]}
+          </div>
+        </div>
+      )}
+      <div className={cs.item}>
+        {technology === NANOPORE && (
+          <>
+            <div className={cs.subheader}>Medaka Model&#58;</div>
+            <div className={cs.description}>{medakaModel}</div>
+          </>
+        )}
+      </div>
+      </>
+    );
+  }
+
+  renderMngsAnalysisSection = () => {
+    const { technology, guppyBasecallerSetting } = this.props;
+    return (
+      <>
+        {technology === NANOPORE && (
+          <>
+            <div className={cs.item}>
+              <div className={cs.subheader}>{"Guppy Basecaller Setting: "}</div>
+              <div className={cs.description}>{guppyBasecallerSetting}</div>
+            </div>
+            {/* Empty item for spacing purposes */}
+            <div className={cs.item}></div>
+          </>
+        )}
+      </>
+    );
+  }
 
   getWorkflowSectionOrder = () => {
     const { workflows } = this.props;
@@ -633,6 +652,7 @@ ReviewStep.propTypes = {
   clearlabs: PropTypes.bool,
   technology: PropTypes.string,
   medakaModel: PropTypes.string,
+  guppyBasecallerSetting: PropTypes.string,
   workflows: PropTypes.instanceOf(Set),
   wetlabProtocol: PropTypes.string,
 };

@@ -195,6 +195,7 @@ class SampleUploadFlow extends React.Component {
             technology={this.state.technology}
             medakaModel={this.state.medakaModel}
             hostGenomes={this.state.hostGenomes}
+            guppyBasecallerSetting={this.state.guppyBasecallerSetting}
             metadata={this.state.metadata}
             onStepSelect={this.handleStepSelect}
             onUploadComplete={this.onUploadComplete}
