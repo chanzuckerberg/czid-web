@@ -5,6 +5,7 @@ import d3 from "d3";
 import {
   ceil,
   compact,
+  cloneDeep,
   debounce,
   flatten,
   get,
@@ -17,10 +18,10 @@ import {
 import memoize from "memoize-one";
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef, useState } from "react";
-import { getSamplesReadStats } from "~/api";
 import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { GET_PROJECTS_QUERY } from "~/api/projects";
 import { GET_SAMPLES_QUERY } from "~/api/samples";
+import { GET_SAMPLES_READS_STATS_QUERY } from "~/api/samples_reads_stats";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -35,6 +36,7 @@ import BarChartToggle from "~/components/visualizations/bar_charts/BarChartToggl
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
 import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
 import { numberWithPercent } from "~/helpers/strings";
+import { apolloClient } from "~/index";
 import { TooltipVizTable } from "~ui/containers";
 import Notification from "~ui/notifications/Notification";
 import InfoBanner from "./InfoBanner";
@@ -66,8 +68,10 @@ function QualityControlWrapper(props) {
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
     },
   });
+
   if (loading || samplesLoading ) return "Loading...";
   if (error || samplesError ) return `Error! ${error.message} ${samplesError.message}`;
+
   return <QualityControl project={data.project} samples={samples.samplesList.samples} {...props} />;
 }
 
@@ -191,9 +195,15 @@ function QualityControl({ filters, project, projectId, samples, handleBarClick }
       data.validSamples.length +
       data.runningSamples.length +
       data.failedSamples.length;
-    const samplesReadsStats = await getSamplesReadStats(
-      data.validSamples.map(sample => sample.id),
-    );
+
+    const result = await apolloClient.query({
+      query: GET_SAMPLES_READS_STATS_QUERY,
+      variables: {
+        sampleIds: data.validSamples.map(sample => sample.id),
+      },
+    });
+    const samplesReadsStats = result.data.sampleReadsStats.sampleReadsStats;
+
     const { categories, legendColors, _readsLostData } = stackReadsLostData(
       samplesReadsStats,
     );
@@ -211,7 +221,12 @@ function QualityControl({ filters, project, projectId, samples, handleBarClick }
     setTotalSampleCount(totalSampleCount);
   };
 
+
   function stackReadsLostData(samplesReadsStats) {
+    samplesReadsStats = samplesReadsStats.reduce((result, item) => {
+      result[item.sampleId] = cloneDeep(item);
+      return result;
+    }, {});
     const sampleIds = Object.keys(samplesReadsStats);
     const samplesWithInitialReads = sampleIds.filter(sampleId =>
       Number.isInteger(samplesReadsStats[sampleId].initialReads),
@@ -220,6 +235,7 @@ function QualityControl({ filters, project, projectId, samples, handleBarClick }
     // Filter out Idseq Dedup step from samples run on pipeline versions >= 4.0
     samplesWithInitialReads.forEach(sampleId => {
       const sampleData = samplesReadsStats[sampleId];
+
       if (parseFloat(sampleData.pipelineVersion) >= 4) {
         sampleData.steps = sampleData.steps.filter(step => {
           // Cdhitdup required for backwards compatibility

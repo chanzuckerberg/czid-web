@@ -52,7 +52,7 @@ contextKeys.forEach(key => {
 });
 
 // Initialize Apollo
-const apolloClient = new ApolloClient({
+export const apolloClient = new ApolloClient({
   uri: "/graphql",
   cache: new InMemoryCache(),
 });
