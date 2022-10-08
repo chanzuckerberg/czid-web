@@ -51,7 +51,7 @@ const WorkflowSelector = ({
   const { allowedFeatures } = userContext || {};
   const [workflowOptionHovered, setWorkflowOptionHovered] = useState(null);
 
-  const renderTechnologyOptions = (workflowKey) => {
+  const renderTechnologyOptions = workflowKey => {
     return (
       <div className={cs.optionText} onClick={e => e.stopPropagation()}>
         <div className={cx(cs.title, cs.technologyTitle)}>
@@ -65,8 +65,11 @@ const WorkflowSelector = ({
     );
   };
 
-  const renderIlluminaOption = (workflowKey) => {
-    const workflowObject = find(w => w.workflow === workflowKey, WORKFLOW_UPLOAD_OPTIONS);
+  const renderIlluminaOption = workflowKey => {
+    const workflowObject = find(
+      w => w.workflow === workflowKey,
+      WORKFLOW_UPLOAD_OPTIONS,
+    );
     const illuminaTechnologyOptionSelected =
       selectedTechnology === CG_TECHNOLOGY_OPTIONS.ILLUMINA;
 
@@ -77,7 +80,9 @@ const WorkflowSelector = ({
           cs.technology,
           illuminaTechnologyOptionSelected && cs.selected,
         )}
-        onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA, workflowKey)}
+        onClick={() =>
+          onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA, workflowKey)
+        }
       >
         <RadioButton
           selected={illuminaTechnologyOptionSelected}
@@ -187,8 +192,11 @@ const WorkflowSelector = ({
     </div>
   );
 
-  const renderNanoporeOption = (workflowKey) => {
-    const workflowObject = find(w => w.workflow === workflowKey, WORKFLOW_UPLOAD_OPTIONS);
+  const renderNanoporeOption = workflowKey => {
+    const workflowObject = find(
+      w => w.workflow === workflowKey,
+      WORKFLOW_UPLOAD_OPTIONS,
+    );
     const nanoporeTechnologyOptionSelected =
       selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
     return (
@@ -198,7 +206,9 @@ const WorkflowSelector = ({
           cs.technology,
           nanoporeTechnologyOptionSelected && cs.selected,
         )}
-        onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowKey)}
+        onClick={() =>
+          onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowKey)
+        }
       >
         <RadioButton
           selected={nanoporeTechnologyOptionSelected}
@@ -206,18 +216,14 @@ const WorkflowSelector = ({
         />
         <div className={cs.optionText}>
           <div className={cs.title}>
-          Nanopore
-          {workflowKey === WORKFLOWS.SHORT_READ_MNGS.value && (
-                    <StatusLabel
-                      inline
-                      status="Beta"
-                      type="beta"
-                    />
-                  )}</div>
+            Nanopore
+            {workflowKey === WORKFLOWS.SHORT_READ_MNGS.value && (
+              <StatusLabel inline status="Beta" type="beta" />
+            )}
+          </div>
 
           <div className={cs.technologyDescription}>
             {workflowObject.nanoporeText}
-
             {createExternalLink({
               analyticsEventName: workflowObject.nanoporeClickedLinkEvent,
               content: "here",
@@ -282,7 +288,8 @@ const WorkflowSelector = ({
             }
             position={"top center"}
             link={""} // TODO update link for guppy basecaller
-          /></div>
+          />
+        </div>
         <Dropdown
           className={cs.dropdown}
           options={GUPPY_BASECALLER_SETTINGS}
@@ -299,10 +306,12 @@ const WorkflowSelector = ({
     {
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
       title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.SHORT_READ_MNGS.value],
-      description: allowedFeatures.includes(ONT_V1_FEATURE) ?
-        "Run your samples through our metagenomics pipeline. Our pipeline supports Illumina and Nanopore technologies."
+      description: allowedFeatures.includes(ONT_V1_FEATURE)
+        ? "Run your samples through our metagenomics pipeline. Our pipeline supports Illumina and Nanopore technologies."
         : "Run your samples through our metagenomics pipeline. Our pipeline only supports Illumina.",
-      otherOptions: allowedFeatures.includes(ONT_V1_FEATURE) ? () => renderTechnologyOptions(WORKFLOWS.SHORT_READ_MNGS.value) : null,
+      otherOptions: allowedFeatures.includes(ONT_V1_FEATURE)
+        ? () => renderTechnologyOptions(WORKFLOWS.SHORT_READ_MNGS.value)
+        : null,
       beta: false,
       sdsIcon: "dna",
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
@@ -317,7 +326,7 @@ const WorkflowSelector = ({
       workflow: WORKFLOWS.AMR.value,
       title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.AMR.value],
       description:
-        "Run your samples through our antimicrobial resistance pipeline. Our pipeline supports metagenomics or whole genome data. It only supports Illumina.",
+        "Run your samples through our antimicrobial resistance pipeline. Our pipeline supports metagenomics or whole genome data. It only supports Illumina. You can also run the AMR pipeline from within an existing project by selecting previously uploaded mNGS samples.",
       beta: true,
       sdsIcon: "bacteria",
       shouldHideOption: !allowedFeatures.includes(AMR_V1_FEATURE),
@@ -327,22 +336,28 @@ const WorkflowSelector = ({
       title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.CONSENSUS_GENOME.value],
       description:
         "Run your samples through our Illumina or Nanopore supported pipelines to get consensus genomes for SARS-CoV-2.",
-      otherOptions: () => renderTechnologyOptions(WORKFLOWS.CONSENSUS_GENOME.value),
+      otherOptions: () =>
+        renderTechnologyOptions(WORKFLOWS.CONSENSUS_GENOME.value),
       beta: false,
       sdsIcon: "virus",
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
       illuminaLink: CG_ILLUMINA_PIPELINE_GITHUB_LINK,
-      illuminaClickedLinkEvent: ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED,
-      nanoporeText: "We are using the ARTIC network’s nCoV-2019 novel coronavirus bioinformatics protocol for nanopore sequencing, which can be found ",
+      illuminaClickedLinkEvent:
+        ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED,
+      nanoporeText:
+        "We are using the ARTIC network’s nCoV-2019 novel coronavirus bioinformatics protocol for nanopore sequencing, which can be found ",
       nanoporeLink: ARTIC_PIPELINE_LINK,
-      nanoporeClickedLinkEvent: ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED,
+      nanoporeClickedLinkEvent:
+        ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED,
       nanoporeContent: renderCGNanoporeContent(),
     },
   ];
 
   const shouldDisableWorkflowOption = workflow => {
     const workflowIsCurrentlySelected = selectedWorkflows.has(workflow);
-    const selectedMNGSNanopore = selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) && selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
+    const selectedMNGSNanopore =
+      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
+      selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
     switch (workflow) {
       case WORKFLOWS.SHORT_READ_MNGS.value:
         return (
@@ -352,7 +367,8 @@ const WorkflowSelector = ({
       case WORKFLOWS.AMR.value:
         return (
           !workflowIsCurrentlySelected &&
-          (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) || selectedMNGSNanopore)
+          (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) ||
+            selectedMNGSNanopore)
         );
       case WORKFLOWS.CONSENSUS_GENOME.value:
         return !workflowIsCurrentlySelected && size(selectedWorkflows) > 0;
@@ -420,18 +436,25 @@ const WorkflowSelector = ({
             >
               {radioOption}
               <div className={cs.iconSample}>
-                <Icon sdsIcon={sdsIcon} sdsSize="xl" sdsType="static" />
+                <Icon
+                  sdsIcon={sdsIcon}
+                  sdsSize="xl"
+                  sdsType="static"
+                  className={shouldDisableOption && cs.disabledIcon}
+                />
               </div>
               <div className={cs.optionText}>
-                <div className={cs.title}>
-                  {title}
+                <div className={cx(cs.title, beta && cs.alignBetaIcon)}>
+                  <span>{title}</span>
                   {beta && (
-                    <StatusLabel
-                      className={shouldDisableOption && cs.disabledStatus}
-                      inline
-                      status="Beta"
-                      type="beta"
-                    />
+                    <span className={cs.statusLabel}>
+                      <StatusLabel
+                        className={shouldDisableOption && cs.disabledStatus}
+                        inline
+                        status="Beta"
+                        type="beta"
+                      />
+                    </span>
                   )}
                 </div>
                 <div className={cs.description}>{description}</div>

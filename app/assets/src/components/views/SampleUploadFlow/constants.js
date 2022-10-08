@@ -15,6 +15,12 @@ export const WORKFLOW_DISPLAY_NAMES = {
   [WORKFLOWS.AMR.value]: "Antimicrobial Resistance",
 };
 
+export const WORKFLOW_ICONS = {
+  [WORKFLOWS.SHORT_READ_MNGS.value]: "dna",
+  [WORKFLOWS.CONSENSUS_GENOME.value]: "virus",
+  [WORKFLOWS.AMR.value]: "bacteria",
+};
+
 export const GUPPY_BASECALLER_SETTINGS = [
   {
     text: "fast",

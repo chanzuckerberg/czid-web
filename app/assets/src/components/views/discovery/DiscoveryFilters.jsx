@@ -304,7 +304,7 @@ class DiscoveryFilters extends React.Component {
     );
   };
 
-  renderAnnotationsFilter = ({ disabled }) => {
+  renderAnnotationsFilter = ({ disabled, workflow }) => {
     const { annotationsSelected } = this.state;
     const annotationsFilter = (
       <Dropdown
@@ -318,11 +318,11 @@ class DiscoveryFilters extends React.Component {
     );
 
     return disabled
-      ? this.renderDisabledFilter(annotationsFilter)
+      ? this.renderDisabledFilter(annotationsFilter, workflow)
       : annotationsFilter;
   };
 
-  renderTaxonThresholdFilter = ({ disabled }) => {
+  renderTaxonThresholdFilter = ({ disabled, workflow }) => {
     const { domain } = this.props;
     const { taxonSelected, taxonThresholdsSelected } = this.state;
 
@@ -342,16 +342,18 @@ class DiscoveryFilters extends React.Component {
     );
 
     return disabled
-      ? this.renderDisabledFilter(taxonThresholdFilter)
+      ? this.renderDisabledFilter(taxonThresholdFilter, workflow)
       : taxonThresholdFilter;
   };
 
-  renderDisabledFilter = (filter, tooltipTitle) => {
+  renderDisabledFilter = (filter, workflow) => {
     return (
       <Tooltip
         arrow
         placement="top-start"
-        title="Not available for Consensus Genomes."
+        title={`Not available for ${
+          find({ value: workflow }, WORKFLOWS)?.pluralizedLabel
+        }.`}
         classes={{
           tooltip: cs.disabledTooltip,
         }}
@@ -417,6 +419,7 @@ class DiscoveryFilters extends React.Component {
               {hasTaxonThresholdFilterFeature ? (
                 this.renderTaxonThresholdFilter({
                   disabled: mngsFiltersDisabled,
+                  workflow,
                 })
               ) : (
                 <TaxonFilter
@@ -440,6 +443,7 @@ class DiscoveryFilters extends React.Component {
               <div className={cs.filterContainer}>
                 {this.renderAnnotationsFilter({
                   disabled: mngsFiltersDisabled,
+                  workflow,
                 })}
                 {!mngsFiltersDisabled && this.renderAnnotationsFilterTags()}
               </div>

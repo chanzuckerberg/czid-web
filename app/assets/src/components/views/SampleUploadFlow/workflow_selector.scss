@@ -16,6 +16,7 @@
     cursor: pointer;
     display: flex;
     padding: $sds-spaces-l;
+    margin-bottom: $sds-spaces-xs;
 
     &:hover {
       background-color: $sds-color-gray-100;
@@ -100,6 +101,15 @@
             fill: $sds-color-primary-400;
           }
         }
+
+        &.alignBetaIcon {
+          display: flex;
+          align-items: center;
+        }
+      }
+
+      .statusLabel {
+        padding-bottom: 3px;
       }
 
       .description {

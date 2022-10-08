@@ -26,8 +26,9 @@ import UploadProgressModal from "./UploadProgressModal";
 import {
   CG_WETLAB_DISPLAY_NAMES,
   CG_TECHNOLOGY_DISPLAY_NAMES,
-  WORKFLOW_DISPLAY_NAMES,
   NANOPORE,
+  WORKFLOW_DISPLAY_NAMES,
+  WORKFLOW_ICONS,
 } from "./constants";
 
 import cs from "./sample_upload_flow.scss";
@@ -349,7 +350,11 @@ class ReviewStep extends React.Component {
       return (
         <div className={cs.section}>
           <div className={cs.icon}>
-            <Icon sdsIcon="flask" sdsSize="xl" sdsType="static" />
+            <Icon
+              sdsIcon={WORKFLOW_ICONS[workflow]}
+              sdsSize="xl"
+              sdsType="static"
+            />
           </div>
           <div className={cs.text}>
             <div className={cs.header}>

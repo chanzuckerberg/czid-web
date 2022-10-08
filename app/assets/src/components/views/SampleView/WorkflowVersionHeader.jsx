@@ -30,7 +30,7 @@ export default function WorkflowVersionHeader({
   };
 
   const renderCardDBString = () => {
-    const cardVersion = "3.4.3";
+    const cardVersion = "3.2.3";
     return ` CARD DB: ${cardVersion}`;
   };
 

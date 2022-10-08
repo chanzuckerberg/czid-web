@@ -86,6 +86,10 @@
       margin-top: $sds-spaces-xs;
       margin-bottom: $sds-spaces-xs;
 
+      .alignBetaTag {
+        display: inline-flex;
+      }
+
       .tabLabel {
         @include font-header-xs;
       }

@@ -1971,6 +1971,7 @@ class DiscoveryView extends React.Component {
 
     return workflows.map(name => {
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
+      const isBeta = name === "AMR";
 
       let workflowCount = filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
 
@@ -1980,10 +1981,10 @@ class DiscoveryView extends React.Component {
 
       return {
         label: (
-          <>
+          <div className={isBeta && cs.alignBetaTag}>
             <span className={cs.tabLabel}>{workflowName}</span>
             <span className={cs.tabCounter}>{workflowCount || "0"}</span>
-            {name === "AMR" && (
+            {isBeta && (
               <StatusLabel
                 className={cs.statusLabel}
                 inline
@@ -1991,10 +1992,25 @@ class DiscoveryView extends React.Component {
                 type="beta"
               />
             )}
-          </>
+          </div>
         ),
         value: WORKFLOWS[name].value,
       };
+    });
+  };
+
+  handleNewAmrCreationsFromMngs = newUserDataCounts => {
+    const { filteredSampleCountsByWorkflow } = this.state;
+
+    // When AMR workflow runs are kicked off from existing mNGS, we need to update the counts appropriately
+    this.setState({
+      userDataCounts: newUserDataCounts,
+      filteredSampleCountsByWorkflow: {
+        ...filteredSampleCountsByWorkflow,
+        [WORKFLOWS.AMR.value]:
+          filteredSampleCountsByWorkflow[WORKFLOWS.AMR.value] +
+          newUserDataCounts?.sampleCountByWorkflow?.amr,
+      },
     });
   };
 
@@ -2153,6 +2169,9 @@ class DiscoveryView extends React.Component {
                   sortDirection={orderDirection}
                   onUpdateSelectedIds={updateSelectedIds}
                   userDataCounts={userDataCounts}
+                  handleNewAmrCreationsFromMngs={
+                    this.handleNewAmrCreationsFromMngs
+                  }
                   filtersSidebarOpen={showFilters}
                   sampleStatsSidebarOpen={showStats}
                   hideAllTriggers={hideAllTriggers}
