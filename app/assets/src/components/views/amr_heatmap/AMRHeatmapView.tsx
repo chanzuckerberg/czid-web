@@ -11,6 +11,7 @@ import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { AMR_DEPRECATED_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V1_FEATURE } from "~/components/utils/features";
 import {
   processMetadata,
@@ -455,7 +456,7 @@ export default class AMRHeatmapView extends React.Component<
       <Callout className={cs.deprecationWarning} intent="info">
         This heatmap is created with data from a deprecated version of our
         Antimicrobial Resistance pipeline.{" "}
-        <ExternalLink href={"https://help.czid.org/"}>Learn more.</ExternalLink>
+        <ExternalLink href={AMR_DEPRECATED_HELP_LINK}>Learn more.</ExternalLink>
       </Callout>
     );
   }

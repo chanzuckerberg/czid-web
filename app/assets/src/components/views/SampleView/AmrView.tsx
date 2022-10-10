@@ -113,7 +113,7 @@ const AmrView = ({
       loadingInfo={{
         message: "Your antimicrobial resistance results are being generated!",
         linkText: "Learn More about our antimicrobial resistance pipeline",
-        helpLink: "https://help.czid.org",
+        helpLink: AMR_HELP_LINK,
       }}
       eventNames={{
         error: "AmrView_sample-error-info-link_clicked",
