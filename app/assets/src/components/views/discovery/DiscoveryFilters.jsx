@@ -165,9 +165,7 @@ class DiscoveryFilters extends React.Component {
         newState[KEY_TAXON_THRESHOLDS_SELECTED] = [];
       }
     }
-
-    newState[selectedKey] = newSelected;
-    this.setState(newState, this.notifyFilterChangeHandler);
+    this.handleChange(selectedKey, newSelected);
   };
 
   renderTags(optionsKey) {
@@ -309,7 +307,14 @@ class DiscoveryFilters extends React.Component {
     const annotationsFilter = (
       <Dropdown
         label={<div className={cs.filterLabel}>Annotation</div>}
-        onChange={this.handleChange.bind(this, KEY_ANNOTATIONS_SELECTED)}
+        onChange={selectedValue => {
+          // SDS Dropdown component has a bug where onChange is fired even when the value has not changed
+          const selectedValueChanged =
+            selectedValue !== this.state[KEY_ANNOTATIONS_SELECTED];
+          if (selectedValueChanged) {
+            this.handleChange(KEY_ANNOTATIONS_SELECTED, selectedValue);
+          }
+        }}
         value={annotationsSelected || []}
         options={ANNOTATION_FILTER_OPTIONS}
         disabled={disabled}

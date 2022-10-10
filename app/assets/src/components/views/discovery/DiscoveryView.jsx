@@ -857,14 +857,18 @@ class DiscoveryView extends React.Component {
   };
 
   refreshSampleData = () => {
-    const { filteredSampleCountsByWorkflow } = this.state;
+    this.setState(prevState => {
+      const {
+        filteredSampleCountsByWorkflow: prevFilteredSampleCountsByWorkflow,
+      } = prevState;
 
-    this.setState({
-      filteredSampleCountsByWorkflow: {
-        ...filteredSampleCountsByWorkflow,
-        [WORKFLOWS.SHORT_READ_MNGS.value]: this.samples.length,
-      },
-      selectableSampleIds: this.samples.getIds(),
+      return {
+        filteredSampleCountsByWorkflow: {
+          ...prevFilteredSampleCountsByWorkflow,
+          [WORKFLOWS.SHORT_READ_MNGS.value]: this.samples.length,
+        },
+        selectableSampleIds: this.samples.getIds(),
+      };
     });
   };
 
@@ -875,29 +879,30 @@ class DiscoveryView extends React.Component {
   };
 
   refreshWorkflowRunData = workflowTypeToUpdate => {
-    const {
-      filteredSampleCountsByWorkflow,
-      workflow,
-      workflowEntity,
-    } = this.state;
-
     const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
     const collectionToUpdate = configToUpdate.objectCollection;
 
-    // The selectableWorkflowRunIds only need to be updated if a workflow run tab is active
-    const currentWorkflowEntityIsWorkflowRun =
-      workflowEntity !== WORKFLOW_ENTITIES.SAMPLES;
-    const currentConfig = this.configForWorkflow[workflow];
-    const currentCollection = currentConfig.objectCollection;
+    this.setState(prevState => {
+      const {
+        filteredSampleCountsByWorkflow: prevFilteredSampleCountsByWorkflow,
+        workflow,
+      } = prevState;
 
-    this.setState({
-      filteredSampleCountsByWorkflow: {
-        ...filteredSampleCountsByWorkflow,
-        [workflowTypeToUpdate]: collectionToUpdate.length,
-      },
-      ...(currentWorkflowEntityIsWorkflowRun && {
-        selectableWorkflowRunIds: currentCollection.getIds(),
-      }),
+      // Make sure workflow has not change from when this function was invoked
+      const currentWorkflowIsTypeToUpdate = workflow === workflowTypeToUpdate;
+
+      const shouldUpdateSelectableIds =
+        workflowIsWorkflowRunEntity(workflow) && currentWorkflowIsTypeToUpdate;
+
+      return {
+        filteredSampleCountsByWorkflow: {
+          ...prevFilteredSampleCountsByWorkflow,
+          [workflowTypeToUpdate]: collectionToUpdate.length,
+        },
+        ...(shouldUpdateSelectableIds && {
+          selectableWorkflowRunIds: collectionToUpdate.getIds(),
+        }),
+      };
     });
   };
 
@@ -1926,24 +1931,33 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  resetAmrData = () => {
+    this.amrWorkflowRuns.reset({
+      conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
+      loadFirstPage: true,
+    });
+
+    this.samplesView && this.samplesView.reset();
+  };
+
   handleWorkflowTabChange = workflow => {
     let { currentDisplay, currentTab } = this.state;
 
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
-    const workflowIsMngs = workflow === WORKFLOWS.SHORT_READ_MNGS.value;
+    const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
 
-    // PLQC is currently only available for mNGS samples.
-    if (currentDisplay === DISPLAY_PLQC && !workflowIsMngs) {
+    // PLQC is currently only available for mNGS samples
+    if (currentDisplay === DISPLAY_PLQC && isWorkflowRunTab) {
       currentDisplay = "table";
     }
 
     this.setState(
       {
         currentDisplay,
-        ...(workflowIsMngs && {
+        ...(isWorkflowRunTab && {
           selectableWorkflowRunIds: workflowObjects.getIds(),
         }),
-        ...(!workflowIsMngs && {
+        ...(!isWorkflowRunTab && {
           selectableSampleIds: workflowObjects.getIds(),
         }),
         workflow,
@@ -1952,7 +1966,10 @@ class DiscoveryView extends React.Component {
       },
       () => {
         this.updateBrowsingHistory("replace");
-        this.resetDataFromSortChange();
+
+        workflow === WORKFLOWS.AMR.value
+          ? this.resetAmrData()
+          : this.samplesView && this.samplesView.reset();
       },
     );
     trackEvent(`DiscoveryView_${workflow}-tab_clicked`);
