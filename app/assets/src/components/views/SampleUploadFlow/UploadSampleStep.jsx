@@ -22,6 +22,7 @@ import {
   mergeWith,
   uniqBy,
   uniq,
+  compact,
   difference,
   union,
   uniqueId,
@@ -231,12 +232,13 @@ class UploadSampleStep extends React.Component {
   // *** Tab-related functions ***
 
   getUploadTabs = () => {
-    return [
+    const { admin, biohubS3UploadEnabled } = this.props;
+    return compact([
       {
         value: LOCAL_UPLOAD,
         label: LOCAL_UPLOAD_LABEL,
       },
-      {
+      (admin || biohubS3UploadEnabled) &&{
         value: REMOTE_UPLOAD,
         label: REMOTE_UPLOAD_LABEL,
       },
@@ -244,7 +246,7 @@ class UploadSampleStep extends React.Component {
         value: BASESPACE_UPLOAD,
         label: BASESPACE_UPLOAD_LABEL,
       },
-    ];
+    ]);
   };
 
   handleTabChange = tabIndex => {
