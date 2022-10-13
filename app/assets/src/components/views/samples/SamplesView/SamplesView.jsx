@@ -542,13 +542,7 @@ class SamplesView extends React.Component {
 
   handleBulkKickoffAmrClick = async () => {
     this.closeActionsMenu();
-    const {
-      objects,
-      selectedIds,
-      userDataCounts,
-      handleNewAmrCreationsFromMngs,
-    } = this.props;
-    const { sampleCountByWorkflow } = userDataCounts;
+    const { objects, selectedIds, handleNewAmrCreationsFromMngs } = this.props;
 
     const selectedObjects = filter(
       object => selectedIds.has(object.id),
@@ -573,13 +567,9 @@ class SamplesView extends React.Component {
       this.renderAmrPipelineBulkKickedOffNotification();
 
       handleNewAmrCreationsFromMngs({
-        ...userDataCounts,
-        sampleCountByWorkflow: {
-          ...sampleCountByWorkflow,
-          [WORKFLOWS.AMR.value]:
-            sampleCountByWorkflow?.amr + size(amrPipelineEligibility.eligible),
-        },
+        numAmrRunsCreated: size(amrPipelineEligibility.eligible),
       });
+
       this.setState(
         ({
           recentlyKickedOffAmrWorkflowRunsForSampleIds: prevRecentlyKickedOffAmrWorkflowRunsForSampleIds,

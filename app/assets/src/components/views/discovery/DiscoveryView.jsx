@@ -2016,19 +2016,33 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleNewAmrCreationsFromMngs = newUserDataCounts => {
-    const { filteredSampleCountsByWorkflow } = this.state;
-
+  handleNewAmrCreationsFromMngs = ({ numAmrRunsCreated }) => {
     // When AMR workflow runs are kicked off from existing mNGS, we need to update the counts appropriately
-    this.setState({
-      userDataCounts: newUserDataCounts,
-      filteredSampleCountsByWorkflow: {
-        ...filteredSampleCountsByWorkflow,
-        [WORKFLOWS.AMR.value]:
-          filteredSampleCountsByWorkflow[WORKFLOWS.AMR.value] +
-          newUserDataCounts?.sampleCountByWorkflow?.amr,
+    this.setState(
+      ({
+        filteredSampleCountsByWorkflow: prevFilteredSampleCountsByWorkflow,
+        userDataCounts: prevUserDataCounts,
+      }) => {
+        const prevSampleCountByWorkflow =
+          prevUserDataCounts?.sampleCountByWorkflow;
+        const newAmrRunsCount =
+          prevFilteredSampleCountsByWorkflow?.amr + numAmrRunsCreated;
+
+        return {
+          userDataCounts: {
+            ...prevUserDataCounts,
+            sampleCountByWorkflow: {
+              ...prevSampleCountByWorkflow,
+              [WORKFLOWS.AMR.value]: newAmrRunsCount,
+            },
+          },
+          filteredSampleCountsByWorkflow: {
+            ...prevFilteredSampleCountsByWorkflow,
+            [WORKFLOWS.AMR.value]: newAmrRunsCount,
+          },
+        };
       },
-    });
+    );
   };
 
   renderCenterPaneContent = () => {

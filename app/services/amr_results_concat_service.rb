@@ -29,15 +29,22 @@ class AmrResultsConcatService
     raise WorkflowRunNotFoundError, missing_ids if missing_ids.present?
 
     CSVSafe.generate(headers: true) do |csv|
-      headers = CSVSafe.parse(get_output_file_contents(workflow_runs.first), col_sep: "\t").first
-      csv << headers
+      headers = nil
 
       workflow_runs.each do |wr|
         content = get_output_file_contents(wr)
-        parsed_csv = CSVSafe.parse(content, col_sep: "\t")
-        # skip the headers, we only care about the contents of the CSV because the headers were already added above
-        parsed_csv.shift
-        parsed_csv.each { |row| csv << row }
+
+        unless content.empty?
+          if headers.nil?
+            headers = CSVSafe.parse(get_output_file_contents(workflow_runs.first), col_sep: "\t").first
+            csv << headers unless headers.nil?
+          end
+
+          parsed_csv = CSVSafe.parse(content, col_sep: "\t")
+          # skip the headers, we only care about the contents of the CSV because the headers were already added above
+          parsed_csv.shift
+          parsed_csv.each { |row| csv << row }
+        end
       end
     end
   end
