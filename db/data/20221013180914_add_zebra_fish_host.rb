@@ -2,7 +2,7 @@
 
 class AddZebraFishHost < ActiveRecord::Migration[6.1]
   def up
-    return if HostGenome.find_by(name: "Large Japanese Fieldmouse")
+    return if HostGenome.find_by(name: "Zebra Fish")
 
     hg = HostGenome.new
     hg.name = "Zebra Fish"
