@@ -8,9 +8,10 @@ import { withAnalytics, trackEvent } from "~/api/analytics";
 import { getGraph } from "~/api/pipelineViz";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
-import PropTypes from "~/components/utils/propTypes";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import { getURLParamString, parseUrlParams } from "~/helpers/url";
+import Sample from "~/interface/sample";
+import { PipelineRun } from "~/interface/shared";
 import { IconCloseSmall, IconArrowPipelineStage } from "~ui/icons";
 
 import PipelineVizHeader from "./PipelineVizHeader";
@@ -20,8 +21,49 @@ import { inverseTransformDOMCoordinates } from "./utils";
 
 const START_NODE_ID = -1;
 const END_NODE_ID = -2;
-class PipelineViz extends React.Component {
-  constructor(props) {
+
+interface PipelineVizProps {
+  showExperimental?: boolean;
+  graphData?: { stages: $TSFixMe; edges: $TSFixMe };
+  pipelineRun?: PipelineRun;
+  sample?: Sample;
+  pipelineVersions?: string[];
+  lastProcessedAt?: string;
+  backgroundColor?: string;
+  notStartedNodeColor?: NodeColors;
+  inProgressNodeColor?: NodeColors;
+  finishedNodeColor?: NodeColors;
+  erroredNodeColor?: NodeColors;
+  edgeColor?: string;
+  outputEdgeColor?: string;
+  inputEdgeColor?: string;
+  zoomMin?: number;
+  zoomMax?: number;
+  zoomSpeed?: number;
+  minMouseMoveUpdateDistance?: number;
+  xLayoutInterval?: number;
+  yLayoutInterval?: number;
+  staggerLayoutMultiplier?: number;
+  updateInterval?: number;
+}
+
+interface PipelineVizState {
+  stagesOpened: $TSFixMe[];
+  interStageArrows: string[];
+  sidebarVisible: boolean;
+  sidebarParams: object;
+  hovered: boolean;
+  graphData: PipelineVizProps["graphData"];
+}
+
+class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
+  graphContainers: $TSFixMe;
+  graphs: $TSFixMe;
+  lastMouseMoveInfo: $TSFixMe;
+  panZoomContainer: $TSFixMe;
+  stageNames: $TSFixMe;
+  updateLoop: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.stageNames = [
@@ -45,7 +87,7 @@ class PipelineViz extends React.Component {
     this.state = {
       // Set stages that can be rendered to open, and others to closed.
       stagesOpened: this.stageNames.map(
-        (_, i) => i < this.props.graphData.stages.length,
+        (_: $TSFixMe, i: $TSFixMe) => i < this.props.graphData.stages.length,
       ),
       interStageArrows: ["", "", ""],
       sidebarVisible: false,
@@ -86,7 +128,9 @@ class PipelineViz extends React.Component {
       () => this.pipelineIsFinished() && clearInterval(this.updateLoop),
     );
     const updates = diff(oldGraphData, newGraphData);
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'stages' does not exist on type 'object'.
     if (updates.stages) {
+      // @ts-expect-error ts-migrate(2550) FIXME: Property 'entries' does not exist on type 'ObjectC... Remove this comment to see the full error message
       Object.entries(updates.stages).forEach(
         ([stageIndexStr, stageChanges]) => {
           const stageIndex = parseInt(stageIndexStr);
@@ -94,9 +138,11 @@ class PipelineViz extends React.Component {
           if (stageIndex < this.graphs.length) {
             // Graph already exists.
             const graph = this.graphs[stageIndex];
+            // @ts-expect-error Property 'steps' does not exist on type 'unknown'.
             const steps = stageChanges.steps;
             Object.entries(steps).forEach(([stepIndexStr, stepChanges]) => {
               const stepIndex = parseInt(stepIndexStr);
+              // @ts-expect-error Property 'steps' does not exist on type 'unknown'.
               const status = stepChanges.status;
               graph.updateNodes([stepIndex], {
                 group: status,
@@ -111,10 +157,12 @@ class PipelineViz extends React.Component {
               prevStageIndex++
             ) {
               const prevGraph = this.graphs[prevStageIndex];
-              this.generateEdgeData(prevStageIndex).forEach(edge => {
-                const { id, ...options } = edge;
-                prevGraph.updateEdges([id], options);
-              });
+              this.generateEdgeData(prevStageIndex).forEach(
+                (edge: $TSFixMe) => {
+                  const { id, ...options } = edge;
+                  prevGraph.updateEdges([id], options);
+                },
+              );
             }
 
             this.drawStageGraph(stageIndex);
@@ -126,20 +174,26 @@ class PipelineViz extends React.Component {
 
   pipelineIsFinished() {
     const {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'status' does not exist on type 'object |... Remove this comment to see the full error message
       graphData: { status },
     } = this.state;
     return ["finished", "userErrored", "pipelineErrored"].includes(status);
   }
 
-  getStepDataAtIndices({ stageIndex, stepIndex }) {
+  getStepDataAtIndices({ stageIndex, stepIndex }: $TSFixMe) {
     const {
       graphData: { stages },
     } = this.state;
     return stages[stageIndex].steps[stepIndex];
   }
 
-  getEdgeInfoFor(stageIndex, stepIndex, direction) {
+  getEdgeInfoFor(
+    stageIndex: $TSFixMe,
+    stepIndex: $TSFixMe,
+    direction: $TSFixMe,
+  ) {
     const {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'edges' does not exist on type 'object | ... Remove this comment to see the full error message
       graphData: { edges },
     } = this.state;
     const stepData = this.getStepDataAtIndices({
@@ -148,17 +202,17 @@ class PipelineViz extends React.Component {
     });
     switch (direction) {
       case "input":
-        return stepData.inputEdges.map(edgeId => edges[edgeId]);
+        return stepData.inputEdges.map((edgeId: $TSFixMe) => edges[edgeId]);
       case "output":
-        return stepData.outputEdges.map(edgeId => edges[edgeId]);
+        return stepData.outputEdges.map((edgeId: $TSFixMe) => edges[edgeId]);
       default:
         return stepData.inputEdges
           .concat(stepData.outputEdges)
-          .map(edgeId => edges[edgeId]);
+          .map((edgeId: $TSFixMe) => edges[edgeId]);
     }
   }
 
-  getNodeIdAtCoords(graph, xCoord, yCoord) {
+  getNodeIdAtCoords(graph: $TSFixMe, xCoord: $TSFixMe, yCoord: $TSFixMe) {
     const { x, y } = inverseTransformDOMCoordinates(
       this.panZoomContainer.current.dragContainer.current,
       xCoord,
@@ -167,7 +221,7 @@ class PipelineViz extends React.Component {
     return graph.getNodeAt(x, y);
   }
 
-  handleStageClick(stageIndex, info) {
+  handleStageClick(stageIndex: $TSFixMe, info: $TSFixMe) {
     const { sample, pipelineRun } = this.props;
     const graph = this.graphs[stageIndex];
     const clickedNodeId = this.getNodeIdAtCoords(
@@ -188,7 +242,9 @@ class PipelineViz extends React.Component {
       }).name,
     });
 
-    this.graphs.forEach((graph, i) => i !== stageIndex && graph.unselectAll());
+    this.graphs.forEach(
+      (graph: $TSFixMe, i: $TSFixMe) => i !== stageIndex && graph.unselectAll(),
+    );
     graph.selectNodes([clickedNodeId]);
 
     const inputEdgesInfo = this.getEdgeInfoFor(
@@ -196,13 +252,13 @@ class PipelineViz extends React.Component {
       clickedNodeId,
       "input",
     );
-    const inputInfo = inputEdgesInfo.map(edgeInfo => {
+    const inputInfo = inputEdgesInfo.map((edgeInfo: $TSFixMe) => {
       const fromStepName = edgeInfo.from
         ? this.getStepDataAtIndices(edgeInfo.from).name
         : "";
       return {
         fromStepName: fromStepName,
-        files: edgeInfo.files.map(file => {
+        files: edgeInfo.files.map((file: $TSFixMe) => {
           return { fileName: file.displayName, url: file.url };
         }),
       };
@@ -215,9 +271,9 @@ class PipelineViz extends React.Component {
       "output",
     );
     const outputInfo = outputEdgesInfo
-      .map(edgeInfo => {
+      .map((edgeInfo: $TSFixMe) => {
         // Remove duplicate output file listings
-        return edgeInfo.files.reduce((files, fileInfo) => {
+        return edgeInfo.files.reduce((files: $TSFixMe, fileInfo: $TSFixMe) => {
           const fileInfoAsString = JSON.stringify(fileInfo);
           if (!seenFiles.has(fileInfoAsString)) {
             seenFiles.add(fileInfoAsString);
@@ -249,7 +305,7 @@ class PipelineViz extends React.Component {
     });
   }
 
-  shouldUpdateMoveMouse(x, y) {
+  shouldUpdateMoveMouse(x: $TSFixMe, y: $TSFixMe) {
     const { minMouseMoveUpdateDistance } = this.props;
     const distance = Math.sqrt(
       Math.pow(x - this.lastMouseMoveInfo.x, 2) +
@@ -258,7 +314,7 @@ class PipelineViz extends React.Component {
     return distance >= minMouseMoveUpdateDistance;
   }
 
-  handleMouseMove(stageIndex, e) {
+  handleMouseMove(stageIndex: $TSFixMe, e: $TSFixMe) {
     const graph = this.graphs[stageIndex];
     if (!this.shouldUpdateMoveMouse(e.clientX, e.clientY)) {
       return;
@@ -290,7 +346,7 @@ class PipelineViz extends React.Component {
     }
   }
 
-  handleNodeHover(stageIndex, nodeId) {
+  handleNodeHover(stageIndex: $TSFixMe, nodeId: $TSFixMe) {
     trackEvent("PipelineViz_step-node_mouseovered", {
       stageName: this.stageNames[stageIndex],
       stepName: this.getStepDataAtIndices({
@@ -323,30 +379,33 @@ class PipelineViz extends React.Component {
       hidden: false,
     };
     const inputEdgesInfo = this.getEdgeInfoFor(stageIndex, nodeId, "input");
-    const intraStageInputEdges = inputEdgesInfo.reduce((edgeIds, edgeInfo) => {
-      if (edgeInfo.isIntraStage) {
-        edgeIds.push(`${edgeInfo.from.stepIndex}-${nodeId}-colored`);
-      } else {
-        if (edgeInfo.from) {
-          const prevGraph = this.graphs[edgeInfo.from.stageIndex];
-          const prevEdgeId = `${edgeInfo.from.stepIndex}-${END_NODE_ID}-colored`;
-          prevGraph.updateEdges([prevEdgeId], inputColorOptions);
+    const intraStageInputEdges = inputEdgesInfo.reduce(
+      (edgeIds: $TSFixMe, edgeInfo: $TSFixMe) => {
+        if (edgeInfo.isIntraStage) {
+          edgeIds.push(`${edgeInfo.from.stepIndex}-${nodeId}-colored`);
+        } else {
+          if (edgeInfo.from) {
+            const prevGraph = this.graphs[edgeInfo.from.stageIndex];
+            const prevEdgeId = `${edgeInfo.from.stepIndex}-${END_NODE_ID}-colored`;
+            prevGraph.updateEdges([prevEdgeId], inputColorOptions);
 
-          for (
-            let arrowIndex = edgeInfo.from.stageIndex;
-            arrowIndex < stageIndex;
-            arrowIndex++
-          ) {
-            updatedInterStageArrows[arrowIndex] = "from";
+            for (
+              let arrowIndex = edgeInfo.from.stageIndex;
+              arrowIndex < stageIndex;
+              arrowIndex++
+            ) {
+              updatedInterStageArrows[arrowIndex] = "from";
+            }
+
+            this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.from.stageIndex);
           }
 
-          this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.from.stageIndex);
+          edgeIds.push(`${START_NODE_ID}-${nodeId}-colored`);
         }
-
-        edgeIds.push(`${START_NODE_ID}-${nodeId}-colored`);
-      }
-      return edgeIds;
-    }, []);
+        return edgeIds;
+      },
+      [],
+    );
     graph.updateEdges(intraStageInputEdges, inputColorOptions);
 
     const outputColorOptions = {
@@ -360,7 +419,7 @@ class PipelineViz extends React.Component {
     };
     const outputEdgesInfo = this.getEdgeInfoFor(stageIndex, nodeId, "output");
     const intraStageOutputEdges = outputEdgesInfo.reduce(
-      (edgeIds, edgeInfo) => {
+      (edgeIds: $TSFixMe, edgeInfo: $TSFixMe) => {
         if (edgeInfo.to) {
           if (edgeInfo.isIntraStage) {
             edgeIds.push(`${nodeId}-${edgeInfo.to.stepIndex}-colored`);
@@ -407,9 +466,9 @@ class PipelineViz extends React.Component {
     );
     this.graphs[graphIndex].updateNodes([nodeId], origNodeColor);
 
-    alteredGraphs.forEach(i => {
+    alteredGraphs.forEach((i: $TSFixMe) => {
       const graph = this.graphs[i];
-      const allColoredEdges = graph.getEdges(edge => {
+      const allColoredEdges = graph.getEdges((edge: $TSFixMe) => {
         return edge.id.match(/-colored$/g);
       });
       graph.updateEdges(allColoredEdges, { hidden: true });
@@ -422,13 +481,13 @@ class PipelineViz extends React.Component {
   };
 
   closeSidebar = () => {
-    this.graphs.forEach(graph => graph.unselectAll());
+    this.graphs.forEach((graph: $TSFixMe) => graph.unselectAll());
     this.setState({
       sidebarVisible: false,
     });
   };
 
-  toggleStage(index, updateHistory = true) {
+  toggleStage(index: $TSFixMe, updateHistory = true) {
     const updatedStagesOpened = [...this.state.stagesOpened];
     updatedStagesOpened[index] = !updatedStagesOpened[index];
     this.setState({ stagesOpened: updatedStagesOpened });
@@ -441,7 +500,7 @@ class PipelineViz extends React.Component {
       );
   }
 
-  getStatusGroupFor(stageIndex, stepIndex) {
+  getStatusGroupFor(stageIndex: $TSFixMe, stepIndex: $TSFixMe) {
     const step = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: stepIndex,
@@ -449,12 +508,12 @@ class PipelineViz extends React.Component {
     return step.status;
   }
 
-  generateNodeData(stageIndex, edgeData) {
+  generateNodeData(stageIndex: $TSFixMe, edgeData: $TSFixMe) {
     const {
       graphData: { stages },
     } = this.state;
     const stepData = stages[stageIndex].steps;
-    const nodeData = stepData.map((step, i) => {
+    const nodeData = stepData.map((step: $TSFixMe, i: $TSFixMe) => {
       return {
         id: i,
         label: step.name,
@@ -469,7 +528,7 @@ class PipelineViz extends React.Component {
     return nodeData;
   }
 
-  getNodeStatusOptions(status, hovered = false) {
+  getNodeStatusOptions(status: $TSFixMe, hovered = false) {
     const options = this.props[`${status}NodeColor`];
     if (!options) {
       return {};
@@ -503,7 +562,7 @@ class PipelineViz extends React.Component {
     };
   }
 
-  addPositionToNodes(nodeData, edgeData) {
+  addPositionToNodes(nodeData: $TSFixMe, edgeData: $TSFixMe) {
     const fromToToEdgeMap = groupBy("from", edgeData);
     const toToFromEdgeMap = groupBy("to", edgeData);
 
@@ -511,11 +570,11 @@ class PipelineViz extends React.Component {
     this.addYCoordinatesToNodes(nodeData, fromToToEdgeMap, toToFromEdgeMap);
   }
 
-  addXCoordinatesToNodes(nodeData, fromToToEdgeMap) {
+  addXCoordinatesToNodes(nodeData: $TSFixMe, fromToToEdgeMap: $TSFixMe) {
     const { xLayoutInterval } = this.props;
 
     const nodeToCurrentLevel = {};
-    nodeData.forEach(node => {
+    nodeData.forEach((node: $TSFixMe) => {
       nodeToCurrentLevel[node.id] = 0;
     });
 
@@ -526,7 +585,7 @@ class PipelineViz extends React.Component {
       if (currentNode > END_NODE_ID) {
         // Update children and add to back of bfs queue
         const newLevel = nodeToCurrentLevel[currentNode] + 1;
-        fromToToEdgeMap[currentNode].forEach(edge => {
+        fromToToEdgeMap[currentNode].forEach((edge: $TSFixMe) => {
           const toNodeId = edge.to;
           if (newLevel > nodeToCurrentLevel[toNodeId]) {
             nodeToCurrentLevel[toNodeId] = newLevel;
@@ -542,14 +601,19 @@ class PipelineViz extends React.Component {
       }
     }
 
+    // @ts-expect-error ts-migrate(2550) FIXME: Property 'values' does not exist on type 'ObjectCo... Remove this comment to see the full error message
     const maxLevel = Math.max(...Object.values(nodeToCurrentLevel));
-    nodeData.forEach(node => {
+    nodeData.forEach((node: $TSFixMe) => {
       node.x = (nodeToCurrentLevel[node.id] - maxLevel / 2.0) * xLayoutInterval;
       node.level = nodeToCurrentLevel[node.id];
     });
   }
 
-  addYCoordinatesToNodes(nodeData, fromToToEdgeMap, toToFromEdgeMap) {
+  addYCoordinatesToNodes(
+    nodeData: $TSFixMe,
+    fromToToEdgeMap: $TSFixMe,
+    toToFromEdgeMap: $TSFixMe,
+  ) {
     const { yLayoutInterval, staggerLayoutMultiplier } = this.props;
 
     // Because this method groups by the "level" value in the nodes, it must be
@@ -559,9 +623,9 @@ class PipelineViz extends React.Component {
 
     // Stagger nodes if more than 2 levels (4, if including start and end nodes).
     let applyStaggerNodesMultiplier = maxLevel > 4;
-    Object.values(nodesByLevel).forEach(nodes => {
+    Object.values(nodesByLevel).forEach((nodes: $TSFixMe) => {
       // Sort by number of inputting and outputting edges
-      nodes.sort((n1, n2) => {
+      nodes.sort((n1: $TSFixMe, n2: $TSFixMe) => {
         const n1Val =
           fromToToEdgeMap[n1.id].length + toToFromEdgeMap[n1.id].length;
         const n2Val =
@@ -571,7 +635,7 @@ class PipelineViz extends React.Component {
 
       let direction = nodes.length % 2 ? -1 : 1;
       let offsetAmount = nodes.length % 2 ? 0 : yLayoutInterval / 2;
-      nodes.forEach(node => {
+      nodes.forEach((node: $TSFixMe) => {
         node.y =
           offsetAmount *
           direction *
@@ -586,7 +650,7 @@ class PipelineViz extends React.Component {
     });
   }
 
-  generateEdgeData(stageIndex) {
+  generateEdgeData(stageIndex: $TSFixMe) {
     const { edgeColor } = this.props;
     const {
       graphData: { stages },
@@ -594,32 +658,35 @@ class PipelineViz extends React.Component {
     const stepData = stages[stageIndex].steps;
 
     const regularColoringEdgeData = stepData
-      .map((_, currStepIndex) => {
+      .map((_: $TSFixMe, currStepIndex: $TSFixMe) => {
         let connectedToEndNode = false;
         const outputEdgeInfo = this.getEdgeInfoFor(
           stageIndex,
           currStepIndex,
           "output",
         );
-        const outputEdges = outputEdgeInfo.reduce((edges, edgeInfo) => {
-          if (edgeInfo.isIntraStage) {
-            edges.push({
-              from: currStepIndex,
-              to: edgeInfo.to.stepIndex,
-              id: `${currStepIndex}-${edgeInfo.to.stepIndex}`,
-              color: edgeColor,
-            });
-          } else if (!connectedToEndNode && edgeInfo.to) {
-            connectedToEndNode = true;
-            edges.push({
-              from: currStepIndex,
-              to: END_NODE_ID,
-              id: `${currStepIndex}-${END_NODE_ID}`,
-              color: edgeColor,
-            });
-          }
-          return edges;
-        }, []);
+        const outputEdges = outputEdgeInfo.reduce(
+          (edges: $TSFixMe, edgeInfo: $TSFixMe) => {
+            if (edgeInfo.isIntraStage) {
+              edges.push({
+                from: currStepIndex,
+                to: edgeInfo.to.stepIndex,
+                id: `${currStepIndex}-${edgeInfo.to.stepIndex}`,
+                color: edgeColor,
+              });
+            } else if (!connectedToEndNode && edgeInfo.to) {
+              connectedToEndNode = true;
+              edges.push({
+                from: currStepIndex,
+                to: END_NODE_ID,
+                id: `${currStepIndex}-${END_NODE_ID}`,
+                color: edgeColor,
+              });
+            }
+            return edges;
+          },
+          [],
+        );
 
         let connectedToStartNode = false;
         const inputEdgeInfo = this.getEdgeInfoFor(
@@ -627,24 +694,27 @@ class PipelineViz extends React.Component {
           currStepIndex,
           "input",
         );
-        const inputEdges = inputEdgeInfo.reduce((edges, edgeInfo) => {
-          if (!edgeInfo.isIntraStage && !connectedToStartNode) {
-            connectedToStartNode = true;
-            edges.push({
-              from: START_NODE_ID,
-              to: currStepIndex,
-              id: `${START_NODE_ID}-${currStepIndex}`,
-              color: edgeColor,
-            });
-          }
-          return edges;
-        }, []);
+        const inputEdges = inputEdgeInfo.reduce(
+          (edges: $TSFixMe, edgeInfo: $TSFixMe) => {
+            if (!edgeInfo.isIntraStage && !connectedToStartNode) {
+              connectedToStartNode = true;
+              edges.push({
+                from: START_NODE_ID,
+                to: currStepIndex,
+                id: `${START_NODE_ID}-${currStepIndex}`,
+                color: edgeColor,
+              });
+            }
+            return edges;
+          },
+          [],
+        );
 
         return outputEdges.concat(inputEdges);
       })
       .flat();
 
-    const coloringEdgeData = regularColoringEdgeData.map(edge => {
+    const coloringEdgeData = regularColoringEdgeData.map((edge: $TSFixMe) => {
       return Object.assign(
         { ...edge },
         {
@@ -661,7 +731,7 @@ class PipelineViz extends React.Component {
     );
   }
 
-  generateHiddenEdges(stageIndex) {
+  generateHiddenEdges(stageIndex: $TSFixMe) {
     const {
       graphData: { stages },
     } = this.state;
@@ -674,7 +744,7 @@ class PipelineViz extends React.Component {
 
     // Connect all nodes to start and end nodes with hidden edges for centering
     return stages[stageIndex].steps
-      .map((_, stepIndex) => {
+      .map((_: $TSFixMe, stepIndex: $TSFixMe) => {
         return [
           {
             from: stepIndex,
@@ -699,7 +769,7 @@ class PipelineViz extends React.Component {
     } = this.state;
 
     const stagesOpened = history.state || parseUrlParams();
-    stages.forEach((stageData, stageIndex) => {
+    stages.forEach((stageData: $TSFixMe, stageIndex: $TSFixMe) => {
       const graph = this.graphs[stageIndex];
       const prevOpened = stagesOpened && stagesOpened[stageIndex];
       if (!(prevOpened || stageData.jobStatus === "inProgress") && graph) {
@@ -714,7 +784,7 @@ class PipelineViz extends React.Component {
     );
   }
 
-  urlWithStagesOpenedState(stagesOpened) {
+  urlWithStagesOpenedState(stagesOpened: $TSFixMe) {
     const { sample, pipelineRun } = this.props;
     const pipelineVersion =
       pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
@@ -729,14 +799,14 @@ class PipelineViz extends React.Component {
     const {
       graphData: { stages },
     } = this.state;
-    stages.forEach((_, i) => {
+    stages.forEach((_: $TSFixMe, i: $TSFixMe) => {
       this.drawStageGraph(i);
     });
 
     this.setInitialOpenedStages();
   }
 
-  drawStageGraph(index) {
+  drawStageGraph(index: $TSFixMe) {
     const { backgroundColor, edgeColor } = this.props;
     const { stagesOpened } = this.state;
 
@@ -825,7 +895,7 @@ class PipelineViz extends React.Component {
         hover: false,
         selectConnectedEdges: false,
       },
-      onClick: info => this.handleStageClick(index, info),
+      onClick: (info: $TSFixMe) => this.handleStageClick(index, info),
     };
 
     // Ensure stage is opened when drawing stage graph for accurate positioning.
@@ -844,14 +914,14 @@ class PipelineViz extends React.Component {
   }
 
   handleWindowResize = () => {
-    this.graphs.forEach((graph, i) => {
+    this.graphs.forEach((graph: $TSFixMe, i: $TSFixMe) => {
       if (this.state.stagesOpened[i]) {
         graph.minimizeSizeGivenScale(1.0);
       }
     });
   };
 
-  renderStageContainer(stageName, i) {
+  renderStageContainer(stageName: $TSFixMe, i: $TSFixMe) {
     const {
       graphData: { stages },
     } = this.state;
@@ -913,7 +983,7 @@ class PipelineViz extends React.Component {
     );
   }
 
-  renderStageArrow(arrowValue) {
+  renderStageArrow(arrowValue: $TSFixMe) {
     let coloring;
     switch (arrowValue) {
       case "from":
@@ -934,7 +1004,7 @@ class PipelineViz extends React.Component {
     );
   }
 
-  handleZoom = isIn => {
+  handleZoom = (isIn: $TSFixMe) => {
     const { zoomSpeed } = this.props;
     return () => {
       if (this.panZoomContainer && this.panZoomContainer.current) {
@@ -957,14 +1027,16 @@ class PipelineViz extends React.Component {
     } = this.props;
     const { sidebarVisible, sidebarParams, interStageArrows } = this.state;
 
-    const stageContainers = this.stageNames.map((stageName, i) => {
-      return (
-        <div key={stageName} className={cs.stageAndArrow}>
-          {i > 0 && this.renderStageArrow(interStageArrows[i - 1])}
-          {this.renderStageContainer(stageName, i)}
-        </div>
-      );
-    });
+    const stageContainers = this.stageNames.map(
+      (stageName: $TSFixMe, i: $TSFixMe) => {
+        return (
+          <div key={stageName} className={cs.stageAndArrow}>
+            {i > 0 && this.renderStageArrow(interStageArrows[i - 1])}
+            {this.renderStageContainer(stageName, i)}
+          </div>
+        );
+      },
+    );
 
     return (
       <div className={cs.pipelineVizPage}>
@@ -985,6 +1057,7 @@ class PipelineViz extends React.Component {
           >
             <div className={cs.pipelineViz}>{stageContainers}</div>
           </PanZoom>
+
           <PlusMinusControl
             onPlusClick={withAnalytics(
               this.handleZoom(true),
@@ -1000,6 +1073,7 @@ class PipelineViz extends React.Component {
         <DetailsSidebar
           visible={sidebarVisible}
           mode="pipelineStepDetails"
+          // @ts-expect-errors Type 'object' is not assignable to type
           params={sidebarParams}
           onClose={withAnalytics(
             this.closeSidebar,
@@ -1011,38 +1085,14 @@ class PipelineViz extends React.Component {
   }
 }
 
-const nodeColors = PropTypes.shape({
-  default: PropTypes.string.isRequired,
-  hovered: PropTypes.string,
-  textColor: PropTypes.string,
-  shadowColor: PropTypes.string,
-});
+interface NodeColors {
+  default: string;
+  hovered?: string;
+  textColor?: string;
+  shadowColor?: string;
+}
 
-PipelineViz.propTypes = {
-  showExperimental: PropTypes.bool,
-  graphData: PropTypes.object,
-  pipelineRun: PropTypes.PipelineRun,
-  sample: PropTypes.Sample,
-  pipelineVersions: PropTypes.arrayOf(PropTypes.string),
-  lastProcessedAt: PropTypes.string,
-  backgroundColor: PropTypes.string,
-  notStartedNodeColor: nodeColors,
-  inProgressNodeColor: nodeColors,
-  finishedNodeColor: nodeColors,
-  erroredNodeColor: nodeColors,
-  edgeColor: PropTypes.string,
-  outputEdgeColor: PropTypes.string,
-  inputEdgeColor: PropTypes.string,
-  zoomMin: PropTypes.number,
-  zoomMax: PropTypes.number,
-  zoomSpeed: PropTypes.number,
-  minMouseMoveUpdateDistance: PropTypes.number,
-  xLayoutInterval: PropTypes.number,
-  yLayoutInterval: PropTypes.number,
-  staggerLayoutMultiplier: PropTypes.number,
-  updateInterval: PropTypes.number,
-};
-
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 PipelineViz.defaultProps = {
   showExperimental: false,
   backgroundColor: cs.offWhite,

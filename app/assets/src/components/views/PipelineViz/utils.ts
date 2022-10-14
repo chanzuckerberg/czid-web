@@ -14,7 +14,10 @@ export const inverseTransformDOMCoordinates = (transformedElement, x, y) => {
     return { x: x, y: y };
   }
 
-  const scalingMatrix = new Matrix([[a, c], [b, d]]);
+  const scalingMatrix = new Matrix([
+    [a, c],
+    [b, d],
+  ]);
   const invScalingMatrix = inverse(scalingMatrix);
 
   const coordinates = Matrix.columnVector([x, y]);

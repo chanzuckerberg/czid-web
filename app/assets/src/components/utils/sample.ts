@@ -80,7 +80,7 @@ export const sampleErrorInfo = ({
 }: {
   sample: Sample;
   pipelineRun: PipelineRun | Record<string, never>;
-  error: { label?: string; message: string } | Record<string, never>;
+  error?: { label?: string; message: string } | Record<string, never>;
 }) => {
   let status, message, subtitle, linkText, type, link, pipelineVersionUrlParam;
   switch (

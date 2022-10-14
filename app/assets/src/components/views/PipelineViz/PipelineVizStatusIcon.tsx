@@ -1,12 +1,19 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { IconLoading, IconSuccessSmall, IconInfoSmall } from "~ui/icons";
 
 import cs from "./pipeline_viz.scss";
 
-const PipelineVizStatusIcon = ({ type, className }) => {
+interface PipelineVizStatusIconProps {
+  type?: string;
+  className?: string;
+}
+
+const PipelineVizStatusIcon = ({
+  type,
+  className,
+}: PipelineVizStatusIconProps) => {
   switch (type) {
     case "inProgress":
       return <IconLoading className={cx(className, cs.inProgressIcon)} />;
@@ -21,11 +28,6 @@ const PipelineVizStatusIcon = ({ type, className }) => {
     default:
       return null;
   }
-};
-
-PipelineVizStatusIcon.propTypes = {
-  type: PropTypes.string,
-  className: PropTypes.string,
 };
 
 export default PipelineVizStatusIcon;
