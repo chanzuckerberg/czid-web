@@ -1,4 +1,4 @@
-module GraphQLAuthHelpers
+module GraphqlAuthHelpers
   def current_user_is_logged_in?(context)
     current_user = context.current_user
     !!current_user

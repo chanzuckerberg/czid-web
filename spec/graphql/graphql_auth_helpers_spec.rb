@@ -2,7 +2,7 @@ require 'rails_helper'
 require "graphql_auth_helpers"
 require 'ostruct'
 
-RSpec.describe GraphQLAuthHelpers, type: :helper do
+RSpec.describe GraphqlAuthHelpers, type: :helper do
   describe "#current_user_is_logged_in?" do
     subject { helper.current_user_is_logged_in? context }
 
