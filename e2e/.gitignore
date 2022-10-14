@@ -1,0 +1,7 @@
+node_modules/
+results/
+report/
+.cache/
+.env.staging
+storage/state.json
+

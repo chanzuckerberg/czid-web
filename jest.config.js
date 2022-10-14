@@ -14,4 +14,22 @@ const mappedModuleAliases = Object.entries(webpackConfig.resolve.alias)
 module.exports = {
   verbose: true,
   moduleNameMapper: mappedModuleAliases,
+  coverageDirectory: "<rootDir>/client-coverage",
+  coveragePathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/build/"],
+  coverageReporters: ["text-summary", "json", "html"],
+  coverageThreshold: {
+    global: {
+      branches: 35,
+      functions: 40,
+      lines: 55,
+      statements: 55,
+    },
+  },
+  globals: {},
+  moduleDirectories: ["node_modules", "src"],
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
+  modulePaths: ["<rootDir>/"],
+  rootDir: "./",
+  testMatch: ["<rootDir>/**/**/*.test.{js,jsx,ts,tsx}"],
+  testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/build/"],
 };

@@ -39,7 +39,7 @@ const LandingHeaderV2 = ({
         <a aria-label="Go to the CZ ID homepage" href="/">
           <CZIDLogoReversed className={cs.headerLogo} />
         </a>
-        <nav className={cs.nav}>
+        <nav className={cs.nav} data-test-id="home-top-nav">
           <span className={cs.hideMobile}>
             <a
               className={`${cs.textLink} ${
@@ -47,6 +47,7 @@ const LandingHeaderV2 = ({
               }`}
               href="/impact"
               aria-label="View the CZ ID impact page"
+              data-testid="home-top-nav-impact"
             >
               Impact
             </a>
@@ -56,6 +57,7 @@ const LandingHeaderV2 = ({
               target="_blank"
               rel="noreferrer"
               aria-label="View the CZ ID help page (opens in new window)"
+              data-testid="home-top-nav-resources"
             >
               Resources
             </a>
@@ -65,10 +67,15 @@ const LandingHeaderV2 = ({
               target="_blank"
               rel="noreferrer"
               aria-label="View the CZ ID intro survey (opens in new window)"
+              data-testid="home-top-nav-request-access"
             >
               Request Access
             </a>
-            <a className={cs.buttonLink} href="/auth0/login">
+            <a
+              className={cs.buttonLink}
+              href="/auth0/login"
+              data-testid="home-top-nav-login"
+            >
               Sign in
             </a>
           </span>
@@ -76,6 +83,7 @@ const LandingHeaderV2 = ({
             onClick={toggleMobileNav}
             onKeyDown={toggleMobileNav}
             className={cs.hamburgerIcon}
+            data-testid="home-mobile-hamburger"
           >
             <div className={cs.bar1}></div>
             <div className={cs.bar2}></div>
@@ -90,6 +98,7 @@ const LandingHeaderV2 = ({
                 className={cs.mobileNavClose}
                 onClick={toggleMobileNav}
                 onKeyDown={toggleMobileNav}
+                data-testid="home-mobile-close-hamburger"
               >
                 <IconMobileNavClose />
               </span>
@@ -102,6 +111,7 @@ const LandingHeaderV2 = ({
                 target="_blank"
                 rel="noreferrer"
                 aria-label="View the CZ ID impact page (opens in new window)"
+                data-testid="home-mobile-menu-impact"
               >
                 Impact
               </a>
@@ -112,6 +122,7 @@ const LandingHeaderV2 = ({
                 target="_blank"
                 rel="noreferrer"
                 aria-label="View the CZ ID help page (opens in new window)"
+                data-testid="home-mobile-menu-resources"
               >
                 Resources
               </a>
@@ -123,6 +134,7 @@ const LandingHeaderV2 = ({
                 className={cs.mobileNavLink}
                 href="/auth0/login"
                 style={menuOpen ? { opacity: "1" } : { opacity: "0" }}
+                data-testid="home-mobile-menu-login"
               >
                 Sign In
               </a>
@@ -133,6 +145,7 @@ const LandingHeaderV2 = ({
                 target="_blank"
                 rel="noreferrer"
                 aria-label="View the CZ ID intro survey (opens in new window)"
+                data-testid="home-mobile-menu-request-access"
               >
                 Request Access
               </a>

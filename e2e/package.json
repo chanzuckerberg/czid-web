@@ -1,0 +1,22 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "description": "E2E automated tests for CZID",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "e2e:staging": "NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
+    "e2e:local": "NODE_ENV=development npx playwright test --headed -c ./setup/local.config.ts",
+    "e2e:staging:headless": "NODE_ENV=staging npx playwright test --headless -c ./setup/staging.config.ts",
+    "e2e:staging:debug": "DEBUG=pw:browser NODE_ENV=staging npx playwright test -c ./setup/staging.config.ts",
+    "e2e:report": "npx playwright show-report"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.26.1",
+    "dotenv": "^16.0.1"
+  }
+}
