@@ -1,13 +1,14 @@
 import NewickParser from "../parsers/NewickParser";
 
 export default class Tree {
-  constructor(root, nodeData) {
+  root: $TSFixMe;
+  constructor(root: $TSFixMe, nodeData: $TSFixMe) {
     this.root = root;
 
     if (nodeData) {
-      let nodes = this.bfs();
+      const nodes = this.bfs();
       for (let i = 0; i < nodes.length; i++) {
-        let node = nodes[i];
+        const node = nodes[i];
         if (nodeData[node.name]) {
           Object.assign(node, nodeData[node.name]);
         }
@@ -15,27 +16,28 @@ export default class Tree {
     }
   }
 
-  static fromNewickString(newickString, ...props) {
+  static fromNewickString(newickString: $TSFixMe, ...props: $TSFixMe[]) {
     if (!newickString) {
       return null;
     }
-    let parser = new NewickParser(newickString);
+    const parser = new NewickParser(newickString);
     parser.parse();
+    // @ts-expect-error ts-migrate(2556) FIXME: Expected 2 arguments, but got 1 or more.
     return new Tree(parser.root, ...props);
   }
 
-  detachFromParent(node, parent) {
-    let childIndex = (parent.children || []).indexOf(node);
+  detachFromParent(node: $TSFixMe, parent: $TSFixMe) {
+    const childIndex = (parent.children || []).indexOf(node);
     parent.children.splice(childIndex, 1);
   }
 
-  rerootTree(nodeId) {
-    let ancestors = this.ancestors(this.root, nodeId);
+  rerootTree(nodeId: $TSFixMe) {
+    const ancestors = this.ancestors(this.root, nodeId);
     while (ancestors.length > 1) {
-      let nodeToMove = ancestors.pop();
+      const nodeToMove = ancestors.pop();
 
       // remove the next ancestor from children
-      let previousAncestor = ancestors[ancestors.length - 1];
+      const previousAncestor = ancestors[ancestors.length - 1];
       this.detachFromParent(previousAncestor, nodeToMove);
 
       // set node's new distance
@@ -49,14 +51,14 @@ export default class Tree {
     this.root = ancestors.pop();
   }
 
-  ancestors(root, nodeId) {
+  ancestors(root: $TSFixMe, nodeId: $TSFixMe) {
     if (root.id === nodeId) {
       return [root];
     }
 
     for (let i = 0; i < root.children.length; i++) {
-      let node = root.children[i];
-      let ancestorNodes = this.ancestors(node, nodeId);
+      const node = root.children[i];
+      const ancestorNodes = this.ancestors(node, nodeId);
       if (ancestorNodes) {
         ancestorNodes.push(root);
         return ancestorNodes;
@@ -66,11 +68,11 @@ export default class Tree {
   }
 
   bfs() {
-    let order = [];
+    const order = [];
     let stack = [this.root];
 
     while (stack.length > 0) {
-      let node = stack.shift();
+      const node = stack.shift();
       order.push(node);
       stack = stack.concat(node.children);
     }

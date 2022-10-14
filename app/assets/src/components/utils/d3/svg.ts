@@ -1,6 +1,6 @@
 // Creates a color matrix that can recolor a black icon via a filter. See:
 // https://semisignal.com/using-fecolormatrix-to-dynamically-recolor-icons-part-1-single-color-icons/
-function generateColorMatrix(rgb) {
+function generateColorMatrix(rgb: $TSFixMe) {
   const rScaled = rgb[0] / 255.0;
   const gScaled = rgb[1] / 255.0;
   const bScaled = rgb[2] / 255.0;
@@ -11,14 +11,18 @@ function generateColorMatrix(rgb) {
 }
 
 // Convert hex string to rgb array
-function hexToRgb(hex) {
+function hexToRgb(hex: $TSFixMe) {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return [r, g, b];
 }
 
-export default function addSvgColorFilter(defs, id, color) {
+export default function addSvgColorFilter(
+  defs: $TSFixMe,
+  id: $TSFixMe,
+  color: $TSFixMe,
+) {
   defs
     .append("filter")
     .attr("id", id)

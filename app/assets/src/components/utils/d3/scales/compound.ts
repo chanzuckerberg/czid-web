@@ -1,12 +1,12 @@
-export default function compound() {
-  var scales = [].slice.call(arguments);
+export default function compound(...args: $TSFixMe[]) {
+  let scales = args;
   if (scales.length === 0) {
     return null;
   }
 
-  function scale(x) {
-    for (var i = 0; i < scales.length; i++) {
-      var domain = scales[i].domain();
+  function scale(x: $TSFixMe) {
+    for (let i = 0; i < scales.length; i++) {
+      const domain = scales[i].domain();
       if (
         Math.min.apply(null, domain) <= x &&
         x <= Math.max.apply(null, domain)
@@ -22,13 +22,12 @@ export default function compound() {
     if (arguments.length) {
       throw new Error("Setting a domain is not supported on compound scales");
     }
-    var values = [].concat.apply(
-      [],
-      scales.map(function(s) {
+    const values = [].concat(
+      ...scales.map(function(s: { domain: () => any }) {
         return s.domain();
       }),
     );
-    var domain = [Math.min.apply(null, values), Math.max.apply(null, values)];
+    let domain = [Math.min.apply(null, values), Math.max.apply(null, values)];
     if (values[0] > values[1]) domain = domain.slice().reverse();
     return domain;
   };
@@ -37,18 +36,18 @@ export default function compound() {
     if (arguments.length) {
       throw new Error("Setting a range is not supported on compound scales");
     }
-    var values = [].concat.apply(
-      [],
-      scales.map(function(s) {
+    const values = [].concat(
+      ...scales.map(function(s) {
         return s.range();
       }),
     );
-    var range = [Math.min.apply(null, values), Math.max.apply(null, values)];
+    let range = [Math.min.apply(null, values), Math.max.apply(null, values)];
     if (values[0] > values[1]) range = range.slice().reverse();
     return range;
   };
 
   scale.copy = function() {
+    // eslint-disable-next-line prefer-spread
     return compound.apply(
       null,
       scales.map(function(s) {
@@ -57,7 +56,7 @@ export default function compound() {
     );
   };
 
-  scale.scales = function(_) {
+  scale.scales = function(_: $TSFixMe) {
     return arguments.length ? ((scales = _), scale) : scales;
   };
 

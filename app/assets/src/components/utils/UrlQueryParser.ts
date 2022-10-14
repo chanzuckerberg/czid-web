@@ -2,6 +2,7 @@ import { has } from "lodash/fp";
 import QueryString from "query-string";
 
 class UrlQueryParser {
+  _types: $TSFixMe;
   // This util class enhances query-string to enable parsing
   // string values to desired object types.
   // Also takes care of stringifying nested object values.
@@ -10,7 +11,7 @@ class UrlQueryParser {
     this._types = types;
   }
 
-  parse(query) {
+  parse(query: $TSFixMe) {
     const params = QueryString.parse(query);
     Object.entries(this._types).forEach(([key, type]) => {
       if (params[key]) {
@@ -20,7 +21,7 @@ class UrlQueryParser {
     return params;
   }
 
-  stringify(object) {
+  stringify(object: $TSFixMe) {
     const convertedObject = Object.keys(object).reduce((hash, key) => {
       if (object[key]) {
         if (this._types[key]) {
@@ -34,7 +35,7 @@ class UrlQueryParser {
     return QueryString.stringify(convertedObject);
   }
 
-  convertValue(value, type) {
+  convertValue(value: $TSFixMe, type: $TSFixMe) {
     switch (type) {
       case "object":
         return JSON.parse(value);
@@ -53,7 +54,7 @@ class UrlQueryParser {
     }
   }
 
-  stringifyValue(value, type) {
+  stringifyValue(value: $TSFixMe, type: $TSFixMe) {
     switch (type) {
       case "object":
         return !value || Object.keys(value).length === 0
@@ -65,7 +66,11 @@ class UrlQueryParser {
   }
 
   // Updates a query string parameter that currently exist in the URL and returns the updated query paramters.
-  updateQueryStringParameter(searchUrl, key, value) {
+  updateQueryStringParameter(
+    searchUrl: $TSFixMe,
+    key: $TSFixMe,
+    value: $TSFixMe,
+  ) {
     const queryStringParams = this.parse(searchUrl);
 
     if (has(key, queryStringParams)) {

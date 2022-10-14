@@ -5,7 +5,7 @@ import { select, event as currentEvent } from "d3-selection";
 import { timeout } from "d3-timer";
 import { get, isObject } from "lodash/fp";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
-import addSvgColorFilter from "../../utils/d3/svg.js";
+import addSvgColorFilter from "../../utils/d3/svg";
 import cs from "./dendrogram.scss";
 
 // used for filter to make warning icon orange
