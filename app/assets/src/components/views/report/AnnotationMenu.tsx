@@ -1,5 +1,4 @@
 import { Menu, MenuItem } from "czifui";
-import PropTypes from "prop-types";
 import React, { useState } from "react";
 
 import {
@@ -17,14 +16,20 @@ import {
 
 import cs from "./annotation_menu.scss";
 
+interface AnnotationMenuProps {
+  currentLabelType?: "hit" | "not_a_hit" | "inconclusive" | "none";
+  onAnnotationSelected?: $TSFixMeFunction;
+  analyticsContext?: object;
+}
+
 const AnnotationMenu = ({
   currentLabelType,
   onAnnotationSelected,
   analyticsContext,
-}) => {
+}: AnnotationMenuProps) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleClick = event => {
+  const handleClick = (event: $TSFixMe) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -32,7 +37,7 @@ const AnnotationMenu = ({
     setAnchorEl(null);
   };
 
-  const onItemSelected = annotationType => {
+  const onItemSelected = (annotationType: $TSFixMe) => {
     onAnnotationSelected(annotationType);
     handleClose();
     trackEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_MENU_MENU_ITEM_CLICKED, {
@@ -64,6 +69,7 @@ const AnnotationMenu = ({
         keepMounted
         open={!!anchorEl}
         onClose={handleClose}
+        // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; anchorEl: null; ancho... Remove this comment to see the full error message
         getContentAnchorEl={null}
       >
         <MenuItem
@@ -115,17 +121,6 @@ const AnnotationMenu = ({
       </Menu>
     </>
   );
-};
-
-AnnotationMenu.propTypes = {
-  currentLabelType: PropTypes.oneOf([
-    ANNOTATION_HIT,
-    ANNOTATION_NOT_A_HIT,
-    ANNOTATION_INCONCLUSIVE,
-    ANNOTATION_NONE,
-  ]),
-  onAnnotationSelected: PropTypes.func,
-  analyticsContext: PropTypes.object,
 };
 
 export default AnnotationMenu;

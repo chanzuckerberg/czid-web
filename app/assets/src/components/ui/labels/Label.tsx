@@ -36,7 +36,7 @@ interface LabelProps {
   size?: SemanticSIZES;
   circular?: boolean;
   floating?: boolean;
-  text: React.ReactNode;
+  text?: React.ReactNode;
   onClick?: $TSFixMeFunction;
 }
 

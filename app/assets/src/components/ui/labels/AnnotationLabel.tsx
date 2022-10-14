@@ -70,11 +70,11 @@ const AnnotationLabel = ({
 };
 
 interface AnnotationLabelProps {
-  className: string;
+  className?: string;
   type: "hit" | "not_a_hit" | "inconclusive" | "none";
-  isSmall: boolean;
-  hideTooltip: boolean;
-  onClick: $TSFixMeFunction;
+  isSmall?: boolean;
+  hideTooltip?: boolean;
+  onClick?: $TSFixMeFunction;
 }
 
 export default AnnotationLabel;

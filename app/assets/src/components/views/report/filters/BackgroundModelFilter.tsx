@@ -1,8 +1,24 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 
+import { NumberId } from "~/interface/shared";
 import SectionsDropdown from "~ui/controls/dropdowns/SectionsDropdown";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
-import PropTypes from "~utils/propTypes";
+
+interface BackgroundModelFilterProps {
+  allBackgrounds?: NumberId[];
+  categorizeBackgrounds?: boolean;
+  otherBackgrounds?: NumberId[];
+  ownedBackgrounds?: NumberId[];
+  disabled?: boolean;
+  enableMassNormalizedBackgrounds?: boolean;
+  label?: string;
+  onChange: $TSFixMeFunction;
+  onClick?: $TSFixMeFunction;
+  placeholder?: string;
+  rounded?: boolean;
+  value?: number;
+}
 
 const BackgroundModelFilter = React.memo(
   ({
@@ -15,11 +31,11 @@ const BackgroundModelFilter = React.memo(
     value,
     categorizeBackgrounds = false,
     ...props
-  }) => {
+  }: BackgroundModelFilterProps) => {
     let disabled = props.disabled || false;
 
-    const formatBackgroundOptions = backgrounds =>
-      backgrounds.map(background => {
+    const formatBackgroundOptions = (backgrounds: $TSFixMe) =>
+      backgrounds.map((background: $TSFixMe) => {
         const disabledOption =
           !enableMassNormalizedBackgrounds && background.mass_normalized;
         return {
@@ -62,12 +78,14 @@ const BackgroundModelFilter = React.memo(
         ...ownedBackgrounds,
         ...otherBackgrounds,
       ].reduce((result, bg) => {
+        // @ts-expect-error Property 'value' does not exist on type 'NumberId'
         result[bg.id || bg.value] = bg.name || bg.text;
         return result;
       }, {});
 
       return (
         <SectionsDropdown
+          // @ts-expect-error Type has no common properties with type
           categories={backgroundSections}
           disabled={disabled}
           fluid
@@ -87,6 +105,7 @@ const BackgroundModelFilter = React.memo(
           {...props}
           options={backgroundOptions}
           initialSelectedValue={value}
+          // @ts-expect-error Property 'disabled' does not exist on type
           disabled={disabled}
           onChange={onChange}
           onClick={onClick}
@@ -98,26 +117,12 @@ const BackgroundModelFilter = React.memo(
   },
 );
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'Na... Remove this comment to see the full error message
 BackgroundModelFilter.defaultProps = {
   rounded: true,
   label: "Background",
 };
 
 BackgroundModelFilter.displayName = "BackgroundModelFilter";
-
-BackgroundModelFilter.propTypes = {
-  allBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
-  categorizeBackgrounds: PropTypes.bool,
-  otherBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
-  ownedBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
-  disabled: PropTypes.bool,
-  enableMassNormalizedBackgrounds: PropTypes.bool,
-  label: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  onClick: PropTypes.func,
-  placeholder: PropTypes.string,
-  rounded: PropTypes.bool,
-  value: PropTypes.number,
-};
 
 export default BackgroundModelFilter;

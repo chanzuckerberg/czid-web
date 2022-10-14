@@ -1,14 +1,23 @@
 import React from "react";
 
 import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
-import PropTypes from "../../../utils/propTypes";
 
 const SPECIFICITY_OPTIONS = [
   { text: "All", value: 0 },
   { text: "Specific Only", value: 1 },
 ];
 
-const SpecificityFilter = ({ value, onChange, disabled = false }) => {
+interface SpecificityFilterProps {
+  disabled?: boolean;
+  onChange: $TSFixMeFunction;
+  value: number;
+}
+
+const SpecificityFilter = ({
+  value,
+  onChange,
+  disabled = false,
+}: SpecificityFilterProps) => {
   return (
     <Dropdown
       options={SPECIFICITY_OPTIONS}
@@ -19,12 +28,6 @@ const SpecificityFilter = ({ value, onChange, disabled = false }) => {
       disabled={disabled}
     />
   );
-};
-
-SpecificityFilter.propTypes = {
-  disabled: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.number.isRequired,
 };
 
 export default SpecificityFilter;

@@ -1,7 +1,19 @@
 import React from "react";
 
 import MultipleNestedDropdown from "../../../ui/controls/dropdowns/MultipleNestedDropdown";
-import PropTypes from "../../../utils/propTypes";
+
+interface CategoryFilterProps {
+  allCategories: {
+    name?: string;
+  }[];
+  categoryParentChild: Record<string, string[]>;
+  categoryChildParent: Record<string, string>;
+  disabled?: boolean;
+  disableMarginRight: boolean;
+  onChange: $TSFixMeFunction;
+  selectedCategories: string[];
+  selectedSubcategories: string[];
+}
 
 const CategoryFilter = ({
   allCategories,
@@ -12,26 +24,28 @@ const CategoryFilter = ({
   selectedCategories,
   selectedSubcategories,
   onChange,
-}) => {
-  let options = [];
+}: CategoryFilterProps) => {
+  const options: $TSFixMe = [];
   allCategories.forEach(category => {
     options.push({ text: category.name, value: category.name });
 
-    let suboptions = [];
-    (categoryParentChild[category.name] || []).forEach(subcategory => {
-      suboptions.push({
-        text: subcategory,
-        value: subcategory,
-      });
-    });
+    const suboptions: $TSFixMe = [];
+    (categoryParentChild[category.name] || []).forEach(
+      (subcategory: $TSFixMe) => {
+        suboptions.push({
+          text: subcategory,
+          value: subcategory,
+        });
+      },
+    );
     if (suboptions.length > 0) {
       options[options.length - 1].suboptions = suboptions;
     }
   });
 
-  let selectedSuboptions = {};
+  const selectedSuboptions = {};
   selectedSubcategories.forEach(subcategory => {
-    let category = categoryChildParent[subcategory];
+    const category = categoryChildParent[subcategory];
     if (!selectedSuboptions[category]) {
       selectedSuboptions[category] = [];
     }
@@ -51,22 +65,6 @@ const CategoryFilter = ({
       disabled={disabled}
     />
   );
-};
-
-CategoryFilter.propTypes = {
-  allCategories: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-    }),
-  ).isRequired,
-  categoryParentChild: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string))
-    .isRequired,
-  categoryChildParent: PropTypes.objectOf(PropTypes.string).isRequired,
-  disabled: PropTypes.bool,
-  disableMarginRight: PropTypes.bool.isRequired,
-  onChange: PropTypes.func.isRequired,
-  selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
-  selectedSubcategories: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default CategoryFilter;

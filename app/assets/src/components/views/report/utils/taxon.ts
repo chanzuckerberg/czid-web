@@ -1,8 +1,11 @@
 import { omit, set, get } from "lodash/fp";
 import ThresholdMap from "~/components/utils/ThresholdMap";
 
-export const computeThresholdedTaxons = (candidateTaxons, activeThresholds) => {
-  let resultTaxons = [];
+export const computeThresholdedTaxons = (
+  candidateTaxons: $TSFixMe,
+  activeThresholds: $TSFixMe,
+) => {
+  let resultTaxons: $TSFixMe = [];
   let genusTaxon = {};
   let matchedTaxons = [];
   for (let i = 0; i < candidateTaxons.length; i++) {
@@ -40,25 +43,29 @@ export const computeThresholdedTaxons = (candidateTaxons, activeThresholds) => {
 };
 
 export const isTaxonIncluded = (
-  taxon,
-  includedCategories,
-  includedSubcategoryColumns,
-  excludedSubcategoryColumns,
+  taxon: $TSFixMe,
+  includedCategories: $TSFixMe,
+  includedSubcategoryColumns: $TSFixMe,
+  excludedSubcategoryColumns: $TSFixMe,
 ) => {
   // returns if taxon is in either the included categories / subcategories AND
   // the taxon is not in an excluded subcategory
   return (
     (includedCategories.indexOf(taxon.category_name) >= 0 ||
-      includedSubcategoryColumns.some(column => {
+      includedSubcategoryColumns.some((column: $TSFixMe) => {
         return taxon[column] === 1;
       })) &&
-    !excludedSubcategoryColumns.some(column => {
+    !excludedSubcategoryColumns.some((column: $TSFixMe) => {
       return taxon[column] === 1;
     })
   );
 };
 
-export const getTaxonMetric = (taxon, type, metric) => {
+export const getTaxonMetric = (
+  taxon: $TSFixMe,
+  type: $TSFixMe,
+  metric: $TSFixMe,
+) => {
   if (metric === "contigs" || metric === "contigreads") {
     return get(["summaryContigCounts", type, metric], taxon) || 0;
   }
@@ -66,14 +73,14 @@ export const getTaxonMetric = (taxon, type, metric) => {
 };
 
 export const getTaxonSortComparator = (
-  primarySortParams,
-  secondarySortParams,
-  genusMap,
+  primarySortParams: $TSFixMe,
+  secondarySortParams: $TSFixMe,
+  genusMap: $TSFixMe,
 ) => {
   const [ptype, pmetric] = primarySortParams;
   const [stype, smetric] = secondarySortParams;
 
-  return (a, b) => {
+  return (a: $TSFixMe, b: $TSFixMe) => {
     const genusA = genusMap[a.genus_taxid];
     const genusB = genusMap[b.genus_taxid];
 
@@ -132,7 +139,7 @@ export const getTaxonSortComparator = (
   };
 };
 
-export const getCategoryAdjective = category => {
+export const getCategoryAdjective = (category: $TSFixMe) => {
   const categoryLowercase = category.toLowerCase();
   switch (categoryLowercase) {
     case "bacteria":
@@ -153,12 +160,12 @@ export const getCategoryAdjective = category => {
 };
 
 export const addContigCountsToTaxonomyDetails = (
-  baseTaxonomyDetails,
-  summaryContigCounts,
+  baseTaxonomyDetails: $TSFixMe,
+  summaryContigCounts: $TSFixMe,
 ) => {
   let contigCountsMap = {};
 
-  summaryContigCounts.forEach(contigCount => {
+  summaryContigCounts.forEach((contigCount: $TSFixMe) => {
     contigCountsMap = set(
       [contigCount.taxid, contigCount.count_type],
       {
@@ -170,7 +177,7 @@ export const addContigCountsToTaxonomyDetails = (
   });
 
   // Add the contigCountsMap attributes to the corresponding taxonomy detail.
-  return baseTaxonomyDetails.map(detail =>
+  return baseTaxonomyDetails.map((detail: $TSFixMe) =>
     contigCountsMap[detail.tax_id]
       ? {
           ...detail,

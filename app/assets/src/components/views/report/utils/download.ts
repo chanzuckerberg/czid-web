@@ -10,7 +10,7 @@ const RESULTS_FOLDER_LABEL = "View Results Folder";
 const PIPELINE_VIZ_LABEL = "View Pipeline Visualization";
 
 // Get download options based on pipeline metadata.
-const getDownloadOptions = pipelineRun => {
+const getDownloadOptions = (pipelineRun: $TSFixMe) => {
   const stageTwoComplete = pipelineRun && pipelineRun.adjusted_remaining_reads;
   const assembled = pipelineRun && pipelineRun.assembled === 1;
 
@@ -25,7 +25,7 @@ const getDownloadOptions = pipelineRun => {
 };
 
 // Convert options to download options.
-export const getDownloadDropdownOptions = pipelineRun => {
+export const getDownloadDropdownOptions = (pipelineRun: $TSFixMe) => {
   const downloadOptions = getDownloadOptions(pipelineRun);
 
   return downloadOptions.map(option => ({
@@ -41,32 +41,40 @@ const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
     path: `/samples/${sampleId}/nonhost_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: false,
   },
+
   [NON_HOST_CONTIGS_LABEL]: {
     path: `/samples/${sampleId}/contigs_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: false,
   },
+
   [NON_HOST_CONTIGS_MAPPING_LABEL]: {
     path: `/samples/${sampleId}/contigs_summary?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: false,
   },
+
   [UNMAPPED_READS_LABEL]: {
     path: `/samples/${sampleId}/unidentified_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: false,
   },
+
   [RESULTS_FOLDER_LABEL]: {
     path: `/samples/${sampleId}/results_folder?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: true,
   },
+
   [PIPELINE_VIZ_LABEL]: {
     path: `/samples/${sampleId}/pipeline_viz/${pipelineRun.pipeline_version}`,
     newPage: true,
   },
 });
 
-export const getLinkInfoForDownloadOption = (option, sampleId, pipelineRun) =>
-  getDownloadLinkInfoMap(sampleId, pipelineRun)[option];
+export const getLinkInfoForDownloadOption = (
+  option: $TSFixMe,
+  sampleId: $TSFixMe,
+  pipelineRun: $TSFixMe,
+) => getDownloadLinkInfoMap(sampleId, pipelineRun)[option];
 
-export const getDownloadLinks = (sampleId, pipelineRun) => {
+export const getDownloadLinks = (sampleId: $TSFixMe, pipelineRun: $TSFixMe) => {
   const downloadOptions = getDownloadOptions(pipelineRun);
 
   const downloadLinkInfoMap = getDownloadLinkInfoMap(sampleId, pipelineRun);
@@ -82,7 +90,11 @@ export const getWorkflowRunZipLink = (workflowRunId: number) => {
   return `/workflow_runs/${workflowRunId}/zip_link`;
 };
 
-export const logDownloadOption = ({ component, option, details = {} }) => {
+export const logDownloadOption = ({
+  component,
+  option,
+  details = {},
+}: $TSFixMe) => {
   trackEvent(
     // make names like:
     // SamplesHeatmapHeader_download-current-heatmap-view-csv_clicked
