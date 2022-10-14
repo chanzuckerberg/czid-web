@@ -6,16 +6,11 @@
 .introContainer {
   display: flex;
   max-width: 1440px;
-  // width: 100%;
   margin: 0 auto;
   position: relative;
   align-items: center;
-  padding: 60px 0 40px 0;
   overflow: hidden;
-
-  @media (max-width: 1260px) {
-    padding: 60px 5% 40px 5%;
-  }
+  padding: 60px 5% 40px 5%;
 
   @media (max-width: 992px) {
     flex-direction: column;
@@ -62,13 +57,16 @@
 }
 
 .introTextWrap {
-  padding-left: 147px;
-  background-color: rgba(255, 255, 255, 0.4);
   position: relative;
   z-index: 2;
+  min-width: 0;
 
-  @media (max-width: 1260px) {
-    padding-left: 0;
+  @media (min-width: 992px) {
+    width: 47%;
+  }
+
+  .introTextLink {
+    color: #3867fa !important;
   }
 }
 
@@ -91,7 +89,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 145px;
+  min-width: 141px;
   height: 70px;
   border: 1px solid #eaeaea;
   border-radius: 3px;
@@ -133,23 +131,99 @@
 }
 
 .mapContainer {
-  position: absolute;
-  right: 147px;
-
-  @media (max-width: 1440px) {
-    right: 80px;
-  }
+  width: 100%;
+  position: relative;
 
   .impactMap {
-    max-width: 800px;
     width: 100%;
+    height: auto;
 
-    @media (max-width: 768px) {
-      transform: scale(1.2) translateX(-6%);
+    &Dot {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      outline: 1px solid transparent;
+      cursor: pointer;
+      transition: 0.2s;
+
+      &:hover {
+        &.cycle1 {
+          outline: 10px solid rgba(60, 179, 113, 0.2);
+        }
+
+        &.cycle2 {
+          outline: 10px solid rgba(56, 103, 250, 0.2);
+        }
+
+        .impactMapDotLabel {
+          opacity: 1;
+        }
+      }
+
+      &.cycle1 {
+        background-color: #3cb371;
+
+        .impactMapDotLabel {
+          background: rgba(60, 179, 113, 0.2);
+        }
+      }
+
+      &.cycle2 {
+        background-color: #3867fa;
+
+        .impactMapDotLabel {
+          background: rgba(56, 103, 250, 0.2);
+        }
+      }
+
+      &Label {
+        display: inline-block;
+        opacity: 0;
+        transition: 0.2s;
+        padding: 7px 20px;
+        border-radius: 19px 19px 19px 0;
+        bottom: 3.5rem;
+        left: 0.4rem;
+        position: relative;
+        pointer-events: none;
+        color: #000000;
+        text-transform: none;
+        letter-spacing: 0.28px;
+        width: max-content;
+      }
     }
 
-    @media (max-width: 500px) {
-      transform: scale(1.4) translateX(-6%);
+    &Legend {
+      display: flex;
+      position: absolute;
+      bottom: -10%;
+      right: 18%;
+
+      @media (min-width: 992px) {
+        bottom: 0;
+      }
+
+      &Item {
+        display: flex;
+        align-items: center;
+        margin-left: 18px;
+
+        span.impactMapDot {
+          position: relative;
+          display: inline-block;
+        }
+      }
+
+      &Text {
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        color: #767676;
+        margin-bottom: 0;
+        text-transform: none;
+        margin-left: 7.5px;
+      }
     }
   }
 
