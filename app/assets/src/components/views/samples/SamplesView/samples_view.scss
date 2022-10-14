@@ -73,30 +73,7 @@
 
     .action {
       &:not(:first-child) {
-        margin-left: $sds-spaces-xxxs;
-      }
-    }
-
-    .icon {
-      height: 21px;
-      width: 21px;
-
-      &.background {
-        height: 28px;
-        width: 28px;
-      }
-
-      &.download {
-        width: 28px;
-      }
-
-      &.nextclade {
-        height: 23px;
-        width: 28px;
-      }
-
-      &.phyloTree {
-        margin-right: $sds-spaces-xxs;
+        margin-left: $sds-spaces-m;
       }
     }
   }

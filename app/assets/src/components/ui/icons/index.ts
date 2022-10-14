@@ -14,7 +14,6 @@ import IconArrowDownSmall from "./IconArrowDownSmall";
 import IconArrowPipelineStage from "./IconArrowPipelineStage";
 import IconArrowRight from "./IconArrowRight";
 import IconArrowUpSmall from "./IconArrowUpSmall";
-import IconBackgroundModel from "./IconBackgroundModel";
 import IconBarChartHorizontal3Small from "./IconBarChartHorizontal3Small";
 import IconBiohubLogo from "./IconBiohubLogo";
 import IconBlast from "./IconBlast";
@@ -31,7 +30,6 @@ import IconCziLogo from "./IconCziLogo";
 import IconDoubleQuotes from "./IconDoubleQuotes";
 import IconDownload from "./IconDownload";
 import IconDownloadSmall from "./IconDownloadSmall";
-import IconHeatmap from "./IconHeatmap";
 import IconHeatmapPrivate from "./IconHeatmapPrivate";
 import IconHeatmapPublic from "./IconHeatmapPublic";
 import IconHelp from "./IconHelp";
@@ -44,9 +42,7 @@ import IconMapSmall from "./IconMapSmall";
 import IconMatchesFigure from "./IconMatchesFigure";
 import IconMinusSmall from "./IconMinusSmall";
 import IconMobileNavClose from "./IconMobileNavClose";
-import IconNextcladeLarge from "./IconNextcladeLarge";
 import IconPercentageSmall from "./IconPercentageSmall";
-import IconPhyloTree from "./IconPhyloTree";
 import IconPhyloTreePrivate from "./IconPhyloTreePrivate";
 import IconPhyloTreePublic from "./IconPhyloTreePublic";
 import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
@@ -83,7 +79,6 @@ export const ICONS_TAXONOMY = {
     IconArrowDownSmall,
     IconArrowPipelineStage,
     IconArrowUpSmall,
-    IconBackgroundModel,
     IconBarChartHorizontal3Small,
     IconBlast,
     IconBlastSmall,
@@ -98,7 +93,6 @@ export const ICONS_TAXONOMY = {
     IconDoubleQuotes,
     IconDownload,
     IconDownloadSmall,
-    IconHeatmap,
     IconHeatmapPrivate,
     IconHeatmapPublic,
     IconHelp,
@@ -111,9 +105,7 @@ export const ICONS_TAXONOMY = {
     IconMatchesFigure,
     IconMinusSmall,
     IconMobileNavClose,
-    IconNextcladeLarge,
     IconPercentageSmall,
-    IconPhyloTree,
     IconPhyloTreePrivate,
     IconPhyloTreePublic,
     IconPhyloTreeSmall,
@@ -163,7 +155,6 @@ export {
   IconArrowPipelineStage,
   IconArrowRight,
   IconArrowUpSmall,
-  IconBackgroundModel,
   IconBarChartHorizontal3Small,
   IconBiohubLogo,
   IconBlast,
@@ -180,7 +171,6 @@ export {
   IconDoubleQuotes,
   IconDownload,
   IconDownloadSmall,
-  IconHeatmap,
   IconHeatmapPrivate,
   IconHeatmapPublic,
   IconHelp,
@@ -193,9 +183,7 @@ export {
   IconMatchesFigure,
   IconMinusSmall,
   IconMobileNavClose,
-  IconNextcladeLarge,
   IconPercentageSmall,
-  IconPhyloTree,
   IconPhyloTreePrivate,
   IconPhyloTreePublic,
   IconPhyloTreeSmall,

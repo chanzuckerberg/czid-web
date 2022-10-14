@@ -47,14 +47,6 @@ import CollectionModal from "~/components/views/samples/CollectionModal";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import {
-  IconHeatmap,
-  IconBackgroundModel,
-  IconDownload,
-  IconPhyloTree,
-  IconNextcladeLarge,
-  IconShare,
-} from "~ui/icons";
 import Label from "~ui/labels/Label";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
@@ -69,7 +61,7 @@ import {
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "./ColumnConfiguration";
-import ToolbarIcon from "./ToolbarIcon";
+import ToolbarButtonIcon from "./ToolbarButtonIcon";
 import {
   PipelineRunStatuses,
   SARS_COV_2,
@@ -242,14 +234,13 @@ class SamplesView extends React.Component {
       { text: amrHeatmapText, value: "/amr_heatmap" },
     ];
 
-    const heatmapIcon = <IconHeatmap className={cs.icon} />;
     const disabledToolbarIcon = subtitle => (
-      <ToolbarIcon
-        className={cx(cs.action, cs.heatmap)}
-        disabled
-        icon={heatmapIcon}
+      <ToolbarButtonIcon
+        className={cs.action}
+        icon={<Icon sdsIcon="grid" sdsSize="xl" sdsType="iconButton" />}
         popupText="Heatmap"
         popupSubtitle={subtitle}
+        disabled
       />
     );
 
@@ -307,9 +298,9 @@ class SamplesView extends React.Component {
             }
           })}
           trigger={
-            <ToolbarIcon
-              className={cs.heatmap}
-              icon={heatmapIcon}
+            <ToolbarButtonIcon
+              className={cs.action}
+              icon={<Icon sdsIcon="grid" sdsSize="xl" sdsType="iconButton" />}
               popupText="Heatmap"
             />
           }
@@ -319,13 +310,12 @@ class SamplesView extends React.Component {
   };
 
   renderPhyloTreeTrigger = () => {
-    const phyloTreeIcon = (
-      <IconPhyloTree className={cx(cs.icon, cs.phyloTree)} />
-    );
     return (
-      <ToolbarIcon
+      <ToolbarButtonIcon
         className={cs.action}
-        icon={phyloTreeIcon}
+        icon={
+          <Icon sdsIcon="treeHorizontal" sdsSize="xl" sdsType="iconButton" />
+        }
         popupText="Phylogenetic Tree"
         onClick={withAnalytics(
           this.handlePhyloModalOpen,
@@ -338,11 +328,10 @@ class SamplesView extends React.Component {
   renderBulkDownloadTrigger = () => {
     const { selectedIds, workflow } = this.props;
     const { bulkDownloadButtonTempTooltip } = this.state;
-    const downloadIcon = <IconDownload className={cx(cs.icon, cs.download)} />;
     return (
-      <ToolbarIcon
+      <ToolbarButtonIcon
         className={cs.action}
-        icon={downloadIcon}
+        icon={<Icon sdsIcon="download" sdsSize="xl" sdsType="iconButton" />}
         popperDependencies={[bulkDownloadButtonTempTooltip]}
         popupText={bulkDownloadButtonTempTooltip || "Download"}
         popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
@@ -361,24 +350,32 @@ class SamplesView extends React.Component {
 
     const targetSamples = objects.loaded;
 
-    const backgroundIcon = (
-      <IconBackgroundModel className={cx(cs.icon, cs.background)} />
-    );
-
     return selectedIds.size < 2 ? (
-      <ToolbarIcon
+      <ToolbarButtonIcon
         className={cs.action}
-        disabled
-        icon={backgroundIcon}
+        icon={
+          <Icon
+            sdsIcon="squareOnDashedSquare"
+            sdsSize="xl"
+            sdsType="iconButton"
+          />
+        }
         popupText="Background Model"
         popupSubtitle="Select at least 2 samples"
+        disabled
       />
     ) : (
       <CollectionModal
         trigger={
-          <ToolbarIcon
+          <ToolbarButtonIcon
             className={cs.action}
-            icon={backgroundIcon}
+            icon={
+              <Icon
+                sdsIcon="squareOnDashedSquare"
+                sdsSize="xl"
+                sdsType="iconButton"
+              />
+            }
             popupText="Background Model"
           />
         }
@@ -404,9 +401,6 @@ class SamplesView extends React.Component {
         return n + (taxonName === SARS_COV_2);
       }, 0);
 
-    const downloadIcon = (
-      <IconNextcladeLarge className={cx(cs.icon, cs.nextclade)} />
-    );
     const getPopupSubtitle = () => {
       if (sarsCov2Count > MAX_NEXTCLADE_SAMPLES) {
         return `Select at most ${MAX_NEXTCLADE_SAMPLES} SARS-CoV-2 samples`;
@@ -417,9 +411,9 @@ class SamplesView extends React.Component {
       }
     };
     return (
-      <ToolbarIcon
+      <ToolbarButtonIcon
         className={cs.action}
-        icon={downloadIcon}
+        icon={<Icon sdsIcon="treeDendogram" sdsSize="l" sdsType="iconButton" />}
         popupText="Nextclade"
         popupSubtitle={getPopupSubtitle()}
         disabled={sarsCov2Count === 0 || sarsCov2Count > MAX_NEXTCLADE_SAMPLES}
@@ -449,10 +443,6 @@ class SamplesView extends React.Component {
         return n + (taxonName === SARS_COV_2);
       }, 0);
 
-    // TODO: this is currently a placeholder icon, replace with GenEpi
-    // integration icon once it's created.
-    const uploadIcon = <IconShare className={cx(cs.icon, cs.nextclade)} />;
-
     const getPopupSubtitle = () => {
       if (sarsCov2Count === 0) {
         return "Select at least 1 SARS-CoV-2 sample";
@@ -462,9 +452,11 @@ class SamplesView extends React.Component {
     };
 
     return (
-      <ToolbarIcon
+      <ToolbarButtonIcon
         className={cs.action}
-        icon={uploadIcon}
+        // TODO: this is currently a placeholder icon, replace with GenEpi
+        // integration icon once it's created.
+        icon={<Icon sdsIcon="share" sdsSize="xl" sdsType="iconButton" />}
         popupText="Send samples to CZ Gen Epi"
         popupSubtitle={getPopupSubtitle()}
         disabled={sarsCov2Count === 0}
@@ -485,10 +477,6 @@ class SamplesView extends React.Component {
     );
     const numOfSelectedObjects = size(selectedObjects);
 
-    const menuIcon = (
-      <Icon sdsIcon="dotsHorizontal" sdsSize="s" sdsStyle="button" />
-    );
-
     const openMenu = event => {
       this.setState({
         actionsMenuAnchorEl: event.currentTarget,
@@ -496,10 +484,11 @@ class SamplesView extends React.Component {
     };
 
     return (
-      <div>
-        <ToolbarIcon
-          className={cs.action}
-          icon={menuIcon}
+      <div className={cs.action}>
+        <ToolbarButtonIcon
+          icon={
+            <Icon sdsIcon="dotsHorizontal" sdsSize="xl" sdsStyle="iconButton" />
+          }
           popupText="Run Antimicrobial Resistance Pipeline (Beta)"
           popupSubtitle={
             numOfSelectedObjects === 0 ? "Select at least 1 sample" : ""

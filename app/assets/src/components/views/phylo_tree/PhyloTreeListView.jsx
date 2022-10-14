@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { ButtonIcon, Icon, Tooltip } from "czifui";
 import { set, find, isUndefined } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
@@ -33,7 +34,6 @@ import {
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
 import PairwiseDistanceMatrixErrorModal from "~/components/views/phylo_tree/PairwiseDistanceMatrixErrorModal";
-import ToolbarIcon from "~/components/views/samples/SamplesView/ToolbarIcon";
 import {
   copyShortUrlToClipboard,
   getURLParamString,
@@ -42,7 +42,6 @@ import {
 import Link from "~ui/controls/Link";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import { IconAlert, IconInfoSmall, IconLoading } from "~ui/icons";
-import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 import Notification from "~ui/notifications/Notification";
 
 import Divider from "../../layout/Divider";
@@ -657,13 +656,17 @@ class PhyloTreeListView extends React.Component {
           {this.renderVisualization()}
           {selectedPhyloTreeNgId && this.renderToolsAttributionBanner()}
           {admin && (
-            <ToolbarIcon
-              onClick={() => {
-                this.setState({ adminToolsOpen: !adminToolsOpen });
-              }}
-              icon={<ImgMicrobePrimary />}
-              popupText="Admin Tools"
-            />
+            <Tooltip arrow sdsStyle="dark" placement="top" title="Admin Tools">
+              <ButtonIcon
+                sdsSize="large"
+                sdsType="primary"
+                onClick={() => {
+                  this.setState({ adminToolsOpen: !adminToolsOpen });
+                }}
+              >
+                <Icon sdsIcon="bacteria" sdsSize="xl" sdsType="iconButton" />
+              </ButtonIcon>
+            </Tooltip>
           )}
           {adminToolsOpen && this.renderAdminPanel()}
         </NarrowContainer>

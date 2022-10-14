@@ -1,0 +1,12 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.popupText {
+  @include font-body-xxs;
+  text-align: center;
+
+  .popupSubtitle {
+    color: $sds-color-gray-500;
+  }
+}
