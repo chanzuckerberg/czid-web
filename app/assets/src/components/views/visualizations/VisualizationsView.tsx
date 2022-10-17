@@ -1,5 +1,4 @@
 import { merge, pick } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
@@ -34,9 +33,21 @@ const STATUS_TYPE = {
   FAILED: "error",
 };
 
+interface VisualizationsViewProps {
+  currentDisplay: string;
+  visualizations: ObjectCollectionView;
+  onLoadRows: $TSFixMeFunction;
+  onSortColumn?: $TSFixMeFunction;
+  sortBy?: string;
+  sortDirection?: string;
+  sortable?: boolean;
+}
+
 // See also ProjectsView which is very similar
-class VisualizationsView extends React.Component {
-  constructor(props) {
+class VisualizationsView extends React.Component<VisualizationsViewProps> {
+  columns: $TSFixMe;
+  discoveryView: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.discoveryView = null;
@@ -46,7 +57,7 @@ class VisualizationsView extends React.Component {
         dataKey: "visualization",
         flexGrow: 1,
         width: 350,
-        cellRenderer: ({ cellData }) =>
+        cellRenderer: ({ cellData }: $TSFixMe) =>
           TableRenderers.renderVisualization(
             merge(
               { cellData },
@@ -59,7 +70,7 @@ class VisualizationsView extends React.Component {
             ),
           ),
         headerClassName: cs.visualizationHeader,
-        sortKey: p => p && p.updated_at,
+        sortKey: (p: $TSFixMe) => p && p.updated_at,
       },
       {
         dataKey: "updated_at",
@@ -80,7 +91,7 @@ class VisualizationsView extends React.Component {
     ];
   }
 
-  nameRenderer = visualization => {
+  nameRenderer = (visualization: $TSFixMe) => {
     return (
       <div>
         {visualization
@@ -90,7 +101,7 @@ class VisualizationsView extends React.Component {
     );
   };
 
-  statusRenderer = visualization => {
+  statusRenderer = (visualization: $TSFixMe) => {
     return (
       <div>
         {visualization && visualization.status && (
@@ -104,7 +115,7 @@ class VisualizationsView extends React.Component {
     );
   };
 
-  visibilityIconRenderer = visualization => {
+  visibilityIconRenderer = (visualization: $TSFixMe) => {
     if (!visualization) return <div className={cs.icon} />;
 
     const {
@@ -129,12 +140,13 @@ class VisualizationsView extends React.Component {
     }
   };
 
-  detailsRenderer(visualization) {
+  detailsRenderer(visualization: $TSFixMe) {
     return <div>{visualization ? visualization.user_name : ""}</div>;
   }
 
-  handleRowClick = ({ rowData }) => {
+  handleRowClick = ({ rowData }: $TSFixMe) => {
     const url = `/visualizations/${rowData.visualization.visualization_type}/${rowData.id}`;
+    // @ts-expect-error Type 'Event' is missing the following properties
     openUrl(url, event);
     trackEvent("VisualizationsView_row_clicked", {
       visualizationType: rowData.visualization.visualization_type,
@@ -143,11 +155,12 @@ class VisualizationsView extends React.Component {
     });
   };
 
-  handleLoadRowsAndFormat = async args => {
+  handleLoadRowsAndFormat = async (args: $TSFixMe) => {
     const { onLoadRows } = this.props;
     const visualizationsArray = await onLoadRows(args);
 
-    return visualizationsArray.map(visualization => {
+    // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
+    return visualizationsArray.map((visualization: $TSFixMe) => {
       return merge(
         {
           visualization: pick(
@@ -169,7 +182,7 @@ class VisualizationsView extends React.Component {
     });
   };
 
-  handleSortColumn = ({ sortBy, sortDirection }) => {
+  handleSortColumn = ({ sortBy, sortDirection }: $TSFixMe) => {
     // Calls onSortColumn callback to fetch sorted data
     this.props.onSortColumn({ sortBy, sortDirection });
   };
@@ -198,15 +211,5 @@ class VisualizationsView extends React.Component {
     );
   }
 }
-
-VisualizationsView.propTypes = {
-  currentDisplay: PropTypes.string.isRequired,
-  visualizations: PropTypes.instanceOf(ObjectCollectionView).isRequired,
-  onLoadRows: PropTypes.func.isRequired,
-  onSortColumn: PropTypes.func,
-  sortBy: PropTypes.string,
-  sortDirection: PropTypes.string,
-  sortable: PropTypes.bool,
-};
 
 export default VisualizationsView;
