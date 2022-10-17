@@ -16,7 +16,9 @@ import QueryString from "query-string";
 import { shortenUrl } from "~/api";
 
 // See also parseUrlParams in SamplesHeatmapView
-export const parseUrlParams = (): QueryString.ParsedQuery<string | boolean | number> => {
+export const parseUrlParams = (): QueryString.ParsedQuery<
+  string | boolean | number
+> => {
   const urlParams = QueryString.parse(location.search, {
     arrayFormat: "bracket",
   });
@@ -27,6 +29,7 @@ export const parseUrlParams = (): QueryString.ParsedQuery<string | boolean | num
     if (key !== "pipeline_version") {
       try {
         // This parses booleans and numbers.
+        // @ts-expect-error Type 'string[]' is not assignable to type 'string'
         urlParams[key] = JSON.parse(urlParams[key]);
       } catch (e) {
         // pass
@@ -38,10 +41,7 @@ export const parseUrlParams = (): QueryString.ParsedQuery<string | boolean | num
 
 export const getURLParamString = params => {
   // Use isPlainObject to remove objects, but keep arrays.
-  const filtered = pickBy(
-    (v) => !isPlainObject(v) && !isUndefined(v),
-    params,
-  );
+  const filtered = pickBy(v => !isPlainObject(v) && !isUndefined(v), params);
   return flow(
     toPairs,
     map(
@@ -51,8 +51,8 @@ export const getURLParamString = params => {
       ([key, value]) =>
         isArray(value)
           ? filter(val => !isObject(val), value).map(
-            eachValue => `${key}[]=${eachValue}`,
-          )
+              eachValue => `${key}[]=${eachValue}`,
+            )
           : `${key}=${value}`,
     ),
     flatten,
