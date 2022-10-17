@@ -8,42 +8,43 @@ import * as path from "path";
 export class BasePage {
   constructor(public readonly page: Page) {}
 
-  async gotoUrl(url: string, option?: any) {
-    if (option) {
-      this.page.goto(url, option);
-    } else {
-      this.page.goto(url);
-    }
+  async gotoUrl(url: string) {
+    this.page.waitForNavigation();
+    await this.page.goto(url);
   }
 
-  async url() {
+  async getUrl() {
     return this.page.url();
+  }
+
+  async waitForNavigation() {
+    await this.page.waitForNavigation();
   }
   /**
    * Convenience method to press the enter key
    */
   async pressEnter() {
-    this.page.keyboard.press("Enter");
+    await this.page.keyboard.press("Enter");
   }
 
   /**
    * Convenience method to press the escape key.
    */
   async pressEsc() {
-    this.page.keyboard.press("Escape");
+    await this.page.keyboard.press("Escape");
   }
 
   /**
    * Convenience method to press key.
    */
   async pressKey(key: string) {
-    this.page.keyboard.press(key, { delay: 100 });
+    await this.page.keyboard.press(key, { delay: 100 });
   }
   /**
    * Convenience method to press the tab key.
    */
   async pressTab() {
-    this.page.keyboard.press("Tab");
+    await this.page.keyboard.press("Tab");
   }
 
   async clickElement(selector: string) {

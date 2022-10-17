@@ -30,7 +30,7 @@ const config: PlaywrightTestConfig = {
     headless: true,
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
-    storageState: "e2e/storage/state.json",
+    storageState: "/tmp/state.json",
     trace: "on-first-retry",
   },
 };

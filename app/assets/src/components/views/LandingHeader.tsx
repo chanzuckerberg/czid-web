@@ -60,7 +60,7 @@ const LandingHeader = ({ browserInfo }: LandingHeaderProps) => {
           </ExternalLink>
         </div>
         {browserInfo.supported ? (
-          <div className="sign-in">
+          <div className="sign-in" data-testid="home-top-nav-login">
             <TransparentButton
               text="Sign In"
               onClick={signInLink}
