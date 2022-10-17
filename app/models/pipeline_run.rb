@@ -46,6 +46,11 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :accession_coverage_stats
   accepts_nested_attributes_for :insert_size_metric_set
 
+  TECHNOLOGY_INPUT = {
+    illumina: "Illumina",
+    nanopore: "ONT",
+  }.freeze
+
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
   ADAPTER_SEQUENCES = { "single-end" => "s3://#{S3_DATABASE_BUCKET}/adapter_sequences/illumina_TruSeq3-SE.fasta",
