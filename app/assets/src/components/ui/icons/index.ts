@@ -30,8 +30,6 @@ import IconCziLogo from "./IconCziLogo";
 import IconDoubleQuotes from "./IconDoubleQuotes";
 import IconDownload from "./IconDownload";
 import IconDownloadSmall from "./IconDownloadSmall";
-import IconHeatmapPrivate from "./IconHeatmapPrivate";
-import IconHeatmapPublic from "./IconHeatmapPublic";
 import IconHelp from "./IconHelp";
 import IconInfo from "./IconInfo";
 import IconInfoSmall from "./IconInfoSmall";
@@ -43,8 +41,6 @@ import IconMatchesFigure from "./IconMatchesFigure";
 import IconMinusSmall from "./IconMinusSmall";
 import IconMobileNavClose from "./IconMobileNavClose";
 import IconPercentageSmall from "./IconPercentageSmall";
-import IconPhyloTreePrivate from "./IconPhyloTreePrivate";
-import IconPhyloTreePublic from "./IconPhyloTreePublic";
 import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
 import IconPlusCircleSmall from "./IconPlusCircleSmall";
 import IconPlusSmall from "./IconPlusSmall";
@@ -93,8 +89,6 @@ export const ICONS_TAXONOMY = {
     IconDoubleQuotes,
     IconDownload,
     IconDownloadSmall,
-    IconHeatmapPrivate,
-    IconHeatmapPublic,
     IconHelp,
     IconInfo,
     IconInfoSmall,
@@ -106,8 +100,6 @@ export const ICONS_TAXONOMY = {
     IconMinusSmall,
     IconMobileNavClose,
     IconPercentageSmall,
-    IconPhyloTreePrivate,
-    IconPhyloTreePublic,
     IconPhyloTreeSmall,
     IconPlusCircleSmall,
     IconPlusSmall,
@@ -171,8 +163,6 @@ export {
   IconDoubleQuotes,
   IconDownload,
   IconDownloadSmall,
-  IconHeatmapPrivate,
-  IconHeatmapPublic,
   IconHelp,
   IconInfo,
   IconInfoSmall,
@@ -184,8 +174,6 @@ export {
   IconMinusSmall,
   IconMobileNavClose,
   IconPercentageSmall,
-  IconPhyloTreePrivate,
-  IconPhyloTreePublic,
   IconPhyloTreeSmall,
   IconPlusCircleSmall,
   IconPlusSmall,

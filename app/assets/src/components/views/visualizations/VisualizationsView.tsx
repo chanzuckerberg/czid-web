@@ -1,3 +1,4 @@
+import { Icon } from "czifui";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 
@@ -5,12 +6,6 @@ import { trackEvent } from "~/api/analytics";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { humanize } from "~/helpers/strings";
-import {
-  IconHeatmapPrivate,
-  IconHeatmapPublic,
-  IconPhyloTreePrivate,
-  IconPhyloTreePublic,
-} from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { openUrl } from "~utils/links";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
@@ -124,15 +119,15 @@ class VisualizationsView extends React.Component<VisualizationsViewProps> {
     } = visualization;
     if (visualizationType === "heatmap") {
       return publicAccess ? (
-        <IconHeatmapPublic className={cs.icon} />
+        <Icon sdsIcon="gridPublic" sdsSize="xl" sdsType="static" />
       ) : (
-        <IconHeatmapPrivate className={cs.icon} />
+        <Icon sdsIcon="gridPrivate" sdsSize="xl" sdsType="static" />
       );
     } else if (["phylo_tree", "phylo_tree_ng"].includes(visualizationType)) {
       return publicAccess ? (
-        <IconPhyloTreePublic className={cs.icon} />
+        <Icon sdsIcon="treeHorizontalPublic" sdsSize="xl" sdsType="static" />
       ) : (
-        <IconPhyloTreePrivate className={cs.icon} />
+        <Icon sdsIcon="treeHorizontalPrivate" sdsSize="xl" sdsType="static" />
       );
     } else if (!["table", "tree"].includes(visualizationType)) {
       // eslint-disable-next-line no-console
