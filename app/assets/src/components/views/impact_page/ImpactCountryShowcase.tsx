@@ -286,8 +286,10 @@ const ImpactCountryShowcase = () => {
                   className={cs.countryShowcaseCtaLink}
                   href={publication.src}
                   key={`showcaseCtaLink-${index}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  Read the Paper
+                  View Publication
                 </a>
               ))}
             </div>

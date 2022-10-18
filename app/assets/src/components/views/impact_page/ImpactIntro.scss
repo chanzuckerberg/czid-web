@@ -32,7 +32,11 @@
     line-height: 26px;
     color: #545454;
     max-width: 360px;
-    margin-bottom: 40px;
+    margin-bottom: 18px;
+
+    &:last-of-type {
+      margin-bottom: 22px;
+    }
 
     @media (max-width: 992px) {
       max-width: none;
@@ -40,13 +44,8 @@
   }
 
   span {
-    text-transform: uppercase;
-    color: #545454;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    line-height: 18px;
-    font-family: $font-family-sans-serif;
+    color: #000000;
+    @include font-body-xxs;
 
     @media (max-width: 992px) {
       text-align: center;
@@ -158,6 +157,7 @@
 
         .impactMapDotLabel {
           opacity: 1;
+          z-index: 2;
         }
       }
 
@@ -165,7 +165,7 @@
         background-color: #3cb371;
 
         .impactMapDotLabel {
-          background: rgba(60, 179, 113, 0.2);
+          background: rgb(60, 179, 113);
         }
       }
 
@@ -173,7 +173,7 @@
         background-color: #3867fa;
 
         .impactMapDotLabel {
-          background: rgba(56, 103, 250, 0.2);
+          background: rgb(56, 103, 250);
         }
       }
 

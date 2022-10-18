@@ -39,9 +39,9 @@ const ImpactIntro = () => {
         <p>
           In addition to providing funding to increase access to sequencing
           hardware and analysis tools, we also provide comprehensive, hands-on
-          training to researchers across the globe. Our program has enabled
-          local communities to identify unknown causes of disease and to respond
-          to outbreaks more rapidly and effectively.
+          training to researchers across the globe. Our partnership has enabled
+          local communities to identify unknown causes of disease and respond to
+          outbreaks more rapidly and effectively.
         </p>
         <span>In partnership with</span>
         <div className={cs.logoLinkContainer}>

@@ -78,6 +78,7 @@
 
   &ButtonLink {
     color: $sds-color-gray-white !important;
+    background: #000000;
     text-decoration: none;
     font-family: $sds-font-font-family;
     padding: 7px $sds-spaces-l;
@@ -89,10 +90,6 @@
     border: 1px solid $sds-color-gray-white;
     border-radius: 999px;
     transform: matrix(-1, 0, 0, 1, 0, 0);
-
-    @media (max-width: 768px) {
-      width: 112px;
-    }
 
     &:hover {
       background: $sds-color-gray-white;
