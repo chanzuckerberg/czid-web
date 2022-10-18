@@ -61,7 +61,11 @@ function QualityControlWrapper(props) {
   const { loading, error, data } = useQuery(GET_PROJECTS_QUERY, {
     variables: { projectId: parseInt(props.projectId) },
   });
-  const { loading: samplesLoading, error: samplesError, data: samples } = useQuery(GET_SAMPLES_QUERY, {
+  const {
+    loading: samplesLoading,
+    error: samplesError,
+    data: samples,
+  } = useQuery(GET_SAMPLES_QUERY, {
     variables: {
       projectId: props.projectId,
       filters: props.filters,
@@ -69,13 +73,26 @@ function QualityControlWrapper(props) {
     },
   });
 
-  if (loading || samplesLoading ) return "Loading...";
-  if (error || samplesError ) return `Error! ${error.message} ${samplesError.message}`;
+  if (loading || samplesLoading) return "Loading...";
+  if (error || samplesError)
+    return `Error! ${error.message} ${samplesError.message}`;
 
-  return <QualityControl project={data.project} samples={samples.samplesList.samples} {...props} />;
+  return (
+    <QualityControl
+      project={data.project}
+      samples={samples.samplesList.samples}
+      {...props}
+    />
+  );
 }
 
-function QualityControl({ filters, project, projectId, samples, handleBarClick }) {
+function QualityControl({
+  filters,
+  project,
+  projectId,
+  samples,
+  handleBarClick,
+}) {
   const [loading, setLoading] = useState(true);
   const [
     showProcessingSamplesMessage,
@@ -221,7 +238,6 @@ function QualityControl({ filters, project, projectId, samples, handleBarClick }
     setTotalSampleCount(totalSampleCount);
   };
 
-
   function stackReadsLostData(samplesReadsStats) {
     samplesReadsStats = samplesReadsStats.reduce((result, item) => {
       result[item.sampleId] = cloneDeep(item);
@@ -355,8 +371,7 @@ function QualityControl({ filters, project, projectId, samples, handleBarClick }
     });
 
     const sortedDCR = sortSamplesByMetric(sample => {
-      return sample.details.derivedSampleOutput.summaryStats
-        .compressionRatio;
+      return sample.details.derivedSampleOutput.summaryStats.compressionRatio;
     });
     const [_dcrBins, _samplesByDCR] = extractBins({
       data: sortedDCR,
@@ -365,8 +380,7 @@ function QualityControl({ filters, project, projectId, samples, handleBarClick }
     });
 
     const sortedInsertSize = sortSamplesByMetric(sample => {
-      return sample.details.derivedSampleOutput.summaryStats
-        .insertSizeMean;
+      return sample.details.derivedSampleOutput.summaryStats.insertSizeMean;
     });
     const [_meanInsertSizeBins, _samplesByInsertSize] = extractBins({
       data: sortedInsertSize,

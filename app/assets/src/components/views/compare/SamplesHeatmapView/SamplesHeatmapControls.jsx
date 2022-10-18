@@ -14,6 +14,7 @@ import React from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
+import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import List from "~/components/ui/List";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
@@ -23,6 +24,7 @@ import FilterTag from "~ui/controls/FilterTag";
 import Slider from "~ui/controls/Slider";
 import {
   Dropdown,
+  MultipleNestedConfirmDropdown,
   MultipleNestedDropdown,
   ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
@@ -102,20 +104,38 @@ export default class SamplesHeatmapControls extends React.Component {
       return option;
     });
 
-    const categorySelect = (
-      <MultipleNestedDropdown
-        boxed
-        fluid
-        rounded
-        options={categoryOptions}
-        onChange={this.onCategoryChange}
-        selectedOptions={selectedOptions.categories}
-        selectedSuboptions={selectedOptions.subcategories}
-        label="Categories"
-        disabled={disabled}
-        disableMarginRight
-      />
-    );
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+
+    const categorySelect =
+      // add apply/cancel buttons to the dropdown to allow users to select multiple categories before
+      useHeatmapES ? (
+        <MultipleNestedConfirmDropdown
+          boxed
+          fluid
+          rounded
+          options={categoryOptions}
+          onChange={this.onCategoryChange}
+          selectedOptions={selectedOptions.categories}
+          selectedSuboptions={selectedOptions.subcategories}
+          label="Categories"
+          disabled={disabled}
+          disableMarginRight
+        />
+      ) : (
+        <MultipleNestedDropdown
+          boxed
+          fluid
+          rounded
+          options={categoryOptions}
+          onChange={this.onCategoryChange}
+          selectedOptions={selectedOptions.categories}
+          selectedSuboptions={selectedOptions.subcategories}
+          label="Categories"
+          disabled={disabled}
+          disableMarginRight
+        />
+      );
 
     if (isPreset) {
       return this.renderPresetTooltip({ component: categorySelect });
@@ -686,3 +706,5 @@ SamplesHeatmapControls.propTypes = {
   prefilterConstants: PropTypes.object,
   enableMassNormalizedBackgrounds: PropTypes.bool,
 };
+
+SamplesHeatmapControls.contextType = UserContext;

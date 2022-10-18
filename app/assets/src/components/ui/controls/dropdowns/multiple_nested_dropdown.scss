@@ -11,4 +11,18 @@
       border: $sds-borders-primary-400;
     }
   }
+
+  .multipleNestedDropdownButtons {
+    /* Override row css */
+    text-align: center;
+    padding: 10px;
+
+    .button {
+      margin-left: $sds-spaces-m;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+  }
 }
