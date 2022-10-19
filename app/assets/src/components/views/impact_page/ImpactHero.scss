@@ -62,7 +62,6 @@
     margin-bottom: 40px;
     margin-top: $sds-spaces-xs;
     transform: matrix(-1, 0, 0, 1, 0, 0);
-    max-width: 527px;
     @include font-body-m;
 
     @media (max-width: 768px) {
@@ -73,27 +72,6 @@
 
     @media (max-width: 526px) {
       @include font-header-xs;
-    }
-  }
-
-  &ButtonLink {
-    color: $sds-color-gray-white !important;
-    background: #000000;
-    text-decoration: none;
-    font-family: $sds-font-font-family;
-    padding: 7px $sds-spaces-l;
-    margin: 0 5px;
-    @include font-body-xs;
-    font-weight: $font-weight-semibold;
-    display: inline-block;
-    text-align: center;
-    border: 1px solid $sds-color-gray-white;
-    border-radius: 999px;
-    transform: matrix(-1, 0, 0, 1, 0, 0);
-
-    &:hover {
-      background: $sds-color-gray-white;
-      color: $sds-color-gray-black !important;
     }
   }
 }

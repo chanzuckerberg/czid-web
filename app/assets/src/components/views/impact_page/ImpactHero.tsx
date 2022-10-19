@@ -4,14 +4,8 @@ import cs from "./ImpactHero.scss";
 const ImpactHero = () => {
   return (
     <div className={cs.hero}>
-      <h1>Explore CZ ID&apos;s Impact</h1>
-      <p>
-        Chan Zuckerberg ID (CZ ID): The free, cloud-based metagenomics platform
-        for researchers
-      </p>
-      <a className={cs.heroButtonLink} href="#videoSection">
-        Take the video tour
-      </a>
+      <h1>Experience CZ ID&apos;s Impact</h1>
+      <p>Empowering medical detectives on the frontlines</p>
     </div>
   );
 };
