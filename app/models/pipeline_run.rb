@@ -51,6 +51,12 @@ class PipelineRun < ApplicationRecord
     nanopore: "ONT",
   }.freeze
 
+  # Mapping the technology input to the outputs produced by the pipeline.
+  TARGET_OUTPUTS = {
+    TECHNOLOGY_INPUT[:illumina] => %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metrics accession_coverage_stats],
+    TECHNOLOGY_INPUT[:nanopore] => %w[taxon_counts contig_counts taxon_byteranges],
+  }.freeze
+
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
   ADAPTER_SEQUENCES = { "single-end" => "s3://#{S3_DATABASE_BUCKET}/adapter_sequences/illumina_TruSeq3-SE.fasta",
@@ -249,7 +255,8 @@ class PipelineRun < ApplicationRecord
 
   # Triggers a run for new samples by defining output states and run stages configurations.
   # *Exception* for cloned pipeline runs that already have results and finalized status
-  before_create :create_output_states, :create_run_stages, unless: :results_finalized?
+  before_create :create_run_stages, unless: :results_finalized?
+  after_create :create_output_states
   before_destroy :cleanup
 
   delegate :status_url, to: :sample
@@ -313,8 +320,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def create_output_states
-    # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metrics accession_coverage_stats]
+    # First, determine which outputs we need.
+    # Default to the illumina outputs if technology is not present.
+    target_outputs = technology.blank? ? TARGET_OUTPUTS[TECHNOLOGY_INPUT[:illumina]] : TARGET_OUTPUTS[technology]
 
     # Then, generate output_states
     output_state_entries = []
