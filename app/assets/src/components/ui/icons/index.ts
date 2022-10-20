@@ -33,7 +33,6 @@ import IconDownloadSmall from "./IconDownloadSmall";
 import IconHelp from "./IconHelp";
 import IconInfo from "./IconInfo";
 import IconInfoSmall from "./IconInfoSmall";
-import IconInsightSmall from "./IconInsightSmall";
 import IconListSmall from "./IconListSmall";
 import IconLoading from "./IconLoading";
 import IconMapSmall from "./IconMapSmall";
@@ -92,7 +91,6 @@ export const ICONS_TAXONOMY = {
     IconHelp,
     IconInfo,
     IconInfoSmall,
-    IconInsightSmall,
     IconListSmall,
     IconLoading,
     IconMapSmall,
@@ -166,7 +164,6 @@ export {
   IconHelp,
   IconInfo,
   IconInfoSmall,
-  IconInsightSmall,
   IconListSmall,
   IconLoading,
   IconMapSmall,

@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon, Tooltip } from "czifui";
 import { compact, filter, get, getOr, map, orderBy, reduce } from "lodash/fp";
 import React from "react";
 import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
@@ -31,7 +32,6 @@ import PathogenPreview from "~/components/views/report/PathogenPreview";
 import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { Table } from "~/components/visualizations/table";
-import { IconInsightSmall } from "~ui/icons";
 import HoverActions from "./HoverActions";
 import {
   REPORT_TABLE_COLUMNS,
@@ -359,7 +359,16 @@ class ReportTable extends React.Component {
         <div className={cs.annotatedData}>
           <div className={cs.icon}>
             {rowData.highlighted && (
-              <IconInsightSmall tooltip="Highest-scoring organisms satisfying certain thresholds" />
+              <Tooltip
+                arrow
+                placement="top"
+                sdsStyle="light"
+                title="Highest-scoring organisms satisfying certain thresholds"
+              >
+                <span>
+                  <Icon sdsIcon="lightBulb" sdsSize="s" sdsType="static" />
+                </span>
+              </Tooltip>
             )}
           </div>
           <div className={cs.data}>
