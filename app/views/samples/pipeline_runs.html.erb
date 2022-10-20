@@ -96,7 +96,7 @@ function showhide(id) {
           <% prs.each do |run_stage| %>
             <tr>
               <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %> </td>
-              <td class="<%= run_stage.job_status == "FAILED" ? "failed" : "" %>">            
+              <td class="<%= run_stage.job_status == "FAILED" ? "failed" : "" %>">
               <%= run_stage.job_status %>
               <p>
               <code>
@@ -173,11 +173,11 @@ function showhide(id) {
           <td><%= workflow_run.wdl_version %></td>
           <td>
           <p class="<%= workflow_run.status == "FAILED" ? "failed" : "succeeded" %>">
-          <%= workflow_run.status %> 
+          <%= workflow_run.status %>
           </p>
           <% if workflow_run.status != "SUCCEEDED" %>
-            <code> 
-            <%=  workflow_run.error_message %>
+            <code>
+            <%=  workflow_run.error_message_display %>
             </code>
           <% end %>
           </td>

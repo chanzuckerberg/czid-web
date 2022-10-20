@@ -66,6 +66,8 @@ class WorkflowRun < ApplicationRecord
     succeeded: "SUCCEEDED",
     succeeded_with_issue: "SUCCEEDED_WITH_ISSUE",
     failed: "FAILED",
+    timed_out: "TIMED_OUT",
+    aborted: "ABORTED",
   }.freeze
 
   # Maps SFN execution statuses to classic frontend statuses
@@ -76,6 +78,12 @@ class WorkflowRun < ApplicationRecord
     STATUS[:succeeded_with_issue] => "COMPLETE - ISSUE",
     STATUS[:failed] => "FAILED",
   }.freeze
+
+  FAILED_REMOTE_STATUSES = [
+    STATUS[:failed],
+    STATUS[:timed_out],
+    STATUS[:aborted],
+  ].freeze
 
   INPUT_ERRORS = {
     "InvalidInputFileError" => "There was an error parsing one of the input files.",
@@ -214,48 +222,52 @@ class WorkflowRun < ApplicationRecord
     remote_status ||= sfn_execution.description[:status]
     # Collapse failed status into our local unique failure status. Status retrieved from [2020/08/12]:
     # https://docs.aws.amazon.com/step-functions/latest/apireference/API_DescribeExecution.html#API_DescribeExecution_ResponseSyntax
-    if ["TIMED_OUT", "ABORTED", "FAILED"].include?(remote_status)
+    if remote_status_failed?(remote_status)
       remote_status = STATUS[:failed]
-    end
 
-    if remote_status == STATUS[:failed]
+      error_message = nil
       if input_error.present?
         remote_status = STATUS[:succeeded_with_issue]
+        error_message = input_error[:message]
       else
         Rails.logger.error("SampleFailedEvent: Sample #{sample.id} by " \
         "#{sample.user.role_name} failed WorkflowRun #{id} (#{workflow}). See: #{sample.status_url}")
+        error_message = parse_yaml_error_message
       end
-      update(time_to_finalized: time_since_executed_at)
+      update(
+        time_to_finalized: time_since_executed_at,
+        error_message: error_message,
+        status: remote_status
+      )
     elsif remote_status == STATUS[:succeeded]
       load_cached_results
-      update(time_to_finalized: time_since_executed_at)
-    end
-
-    if remote_status != status
+      update(
+        time_to_finalized: time_since_executed_at,
+        status: remote_status
+      )
+    # prevent run status from reverting to RUNNING if messages are processed out of order
+    elsif !finalized? && remote_status != status
       update(status: remote_status)
     end
   end
 
   def input_error
-    sfn_error, error_message = sfn_execution.pipeline_error
+    sfn_error, sfn_error_message = sfn_execution.pipeline_error
+
     if INPUT_ERRORS.include?(sfn_error)
       return {
         label: sfn_error,
-        message: error_message,
+        message: sfn_error_message,
       }
     end
   end
 
-  def error_message
+  # TODO: can remove this method if we backfill the error_message column
+  def error_message_display
+    return error_message unless error_message.nil?
     return input_error[:message] unless input_error.nil?
 
-    _, error_message = sfn_execution.pipeline_error
-    begin
-      # uncaught errors require another level of parsing in YAML this time
-      YAML.safe_load(error_message, { symbolize_names: true })[:message]
-    rescue StandardError
-      return nil
-    end
+    parse_yaml_error_message
   end
 
   def output_path(output_key)
@@ -373,7 +385,23 @@ class WorkflowRun < ApplicationRecord
 
   def time_since_executed_at
     if executed_at
-      Time.now.utc - executed_at  # seconds
+      Time.now.utc - executed_at # seconds
+    end
+  end
+
+  def remote_status_failed?(remote_status)
+    FAILED_REMOTE_STATUSES.include?(remote_status)
+  end
+
+  def parse_yaml_error_message
+    _, error_message = sfn_execution.pipeline_error
+    begin
+      # uncaught errors require another level of parsing in YAML this time
+      YAML.safe_load(error_message, symbolize_names: true)[:message]
+    rescue StandardError => e
+      Rails.logger.error("YAML safe_load failed parsing sfn error message, #{e.message}\n " \
+      "error_message object #{error_message}")
+      return nil
     end
   end
 end

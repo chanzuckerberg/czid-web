@@ -4,6 +4,7 @@ describe WorkflowRun, type: :model do
   let(:fake_sfn_name) { "fake_sfn_name" }
   let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+  let(:fake_sfn_status) { "SUCCEEDED" }
   let(:fake_sfn_execution_description) do
     {
       execution_arn: fake_sfn_execution_arn,
@@ -11,9 +12,15 @@ describe WorkflowRun, type: :model do
       # AWS SDK rounds to second
       start_date: Time.zone.now.round,
       state_machine_arn: fake_sfn_arn,
-      status: "SUCCEEDED",
+      status: fake_sfn_status,
     }
   end
+
+  let(:failed_sfn_status) { "FAILED" }
+  let(:failed_sfn_error) { "sfn error" }
+  let(:failed_sfn_error_message) { "sfn error message" }
+  let(:failed_sfn_error_message_json) { { message: failed_sfn_error_message }.to_json }
+  let(:failed_sfn_error_cause) { { errorMessage: failed_sfn_error_message_json }.to_json }
   let(:fake_failed_sfn_execution_description) do
     {
       execution_arn: fake_sfn_execution_arn,
@@ -21,7 +28,7 @@ describe WorkflowRun, type: :model do
       # AWS SDK rounds to second
       start_date: Time.zone.now.round,
       state_machine_arn: fake_sfn_arn,
-      status: "FAILED",
+      status: failed_sfn_status,
     }
   end
   let(:fake_error_sfn_execution_history) do
@@ -29,19 +36,28 @@ describe WorkflowRun, type: :model do
       events: [
         {
           id: 1,
-          execution_failed_event_details: { error: "dummy_error" },
+          execution_failed_event_details: {
+            error: failed_sfn_error,
+            cause: failed_sfn_error_cause,
+          },
           timestamp: Time.zone.now,
           type: "dummy_type",
         },
       ],
     }
   end
+
+  let(:bad_input_error_message) { "input error message" }
+  let(:bad_input_sfn_error_cause) { { errorMessage: bad_input_error_message }.to_json }
   let(:fake_bad_input_sfn_execution_history) do
     {
       events: [
         {
           id: 1,
-          execution_failed_event_details: { error: "InsufficientReadsError" },
+          execution_failed_event_details: {
+            error: "InsufficientReadsError",
+            cause: bad_input_sfn_error_cause,
+          },
           timestamp: Time.zone.now,
           type: "dummy_type",
         },
@@ -78,7 +94,7 @@ describe WorkflowRun, type: :model do
     AppConfigHelper.set_app_config(AppConfig::SFN_SINGLE_WDL_ARN, fake_sfn_arn)
   end
 
-  context "#in_progress" do
+  describe "#in_progress" do
     it "loads Consensus Genome workflows in progress" do
       res = WorkflowRun.in_progress(WorkflowRun::WORKFLOW[:consensus_genome])
       expect(res).to eq([@workflow_running, @second_workflow_running])
@@ -89,7 +105,7 @@ describe WorkflowRun, type: :model do
     end
   end
 
-  context "#update_status" do
+  describe "#update_status" do
     it "checks and updates run statuses" do
       @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
 
@@ -104,23 +120,83 @@ describe WorkflowRun, type: :model do
       expect(@workflow_running).to have_attributes(status: new_status)
     end
 
-    it "reports run failures" do
+    context "when remote status is 'TIMED_OUT'" do
+      let(:failed_sfn_status) { WorkflowRun::STATUS[:timed_out] }
+
+      it "sets remote status to failed" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
+        @workflow_running.update_status
+        expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:failed])
+      end
+    end
+
+    context "when remote status is 'ABORTED'" do
+      let(:failed_sfn_status) { WorkflowRun::STATUS[:aborted] }
+
+      it "sets remote status to failed" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
+        @workflow_running.update_status
+        expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:failed])
+      end
+    end
+
+    it "reports run failures and sets error_message" do
       @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
       @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_error_sfn_execution_history)
       expect(Rails.logger).to receive(:error).with(match(/SampleFailedEvent/))
 
       @workflow_running.update_status
       expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:failed])
+      expect(@workflow_running.error_message).to eq(failed_sfn_error_message)
       expect(@workflow_running.time_to_finalized).to be_within(5.seconds).of fake_runtime
     end
 
-    it "detects input errors and does not report error" do
-      @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
-      @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_bad_input_sfn_execution_history)
-      expect(Rails.logger).not_to receive(:error).with(match(/SampleFailedEvent/))
+    context "when there is an input error" do
+      it "does not report error and sets error_message" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
+        @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_bad_input_sfn_execution_history)
+        expect(Rails.logger).not_to receive(:error).with(match(/SampleFailedEvent/))
 
-      @workflow_running.update_status
-      expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded_with_issue])
+        @workflow_running.update_status
+        expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded_with_issue])
+        expect(@workflow_running.error_message).to eq(bad_input_error_message)
+      end
+    end
+
+    context "when workflow run is finalized" do
+      let(:fake_sfn_status) { "RUNNING" }
+
+      before do
+        allow(S3Util).to receive(:get_s3_file)
+          .and_return(fake_sfn_execution_description.to_json)
+      end
+
+      context "when workflow run status is succeeded" do
+        it "does not update status" do
+          @workflow_running.update(status: WorkflowRun::STATUS[:succeeded])
+
+          @workflow_running.update_status
+          expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded])
+        end
+      end
+
+      context "when workflow run status is succeeded with issue" do
+        it "does not update status" do
+          @workflow_running.update(status: WorkflowRun::STATUS[:succeeded_with_issue])
+
+          @workflow_running.update_status
+          expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded_with_issue])
+        end
+      end
+
+      context "when workflow run status is failed" do
+        it "does not update status" do
+          @workflow_running.update(status: WorkflowRun::STATUS[:failed])
+
+          @workflow_running.update_status
+          expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:failed])
+        end
+      end
     end
 
     it "triggers output metrics loading on success" do
@@ -130,6 +206,31 @@ describe WorkflowRun, type: :model do
       @workflow_running.update_status
       expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded])
       expect(@workflow_running.time_to_finalized).to be_within(5.seconds).of fake_runtime
+    end
+  end
+
+  describe "#error_message_display" do
+    context "when error_message column is populated" do
+      it "returns stored error_message" do
+        @workflow_running.update(error_message: "stored error message")
+        expect(@workflow_running.error_message_display).to eq("stored error message")
+      end
+    end
+
+    context "when there is an input error" do
+      it "returns error message in sfn execution" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
+        @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_bad_input_sfn_execution_history)
+        expect(@workflow_running.error_message_display).to eq(bad_input_error_message)
+      end
+    end
+
+    context "when there is an unknown error" do
+      it "returns parsed error" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
+        @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_error_sfn_execution_history)
+        expect(@workflow_running.error_message_display).to eq(failed_sfn_error_message)
+      end
     end
   end
 
