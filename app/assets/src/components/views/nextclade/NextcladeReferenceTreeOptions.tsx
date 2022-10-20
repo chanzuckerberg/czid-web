@@ -7,14 +7,22 @@ import {
   NEXTCLADE_TREE_FORMAT_LINK,
   NEXTCLADE_TREE_ROOT_LINK,
 } from "~/components/utils/documentationLinks";
-import PropTypes from "~/components/utils/propTypes";
 
 import FilePicker from "~ui/controls/FilePicker";
 import RadioButton from "~ui/controls/RadioButton";
 
 import cs from "./nextclade_modal_tree_options.scss";
 
-class NextcladeReferenceTreeOptions extends React.Component {
+interface NextcladeReferenceTreeOptionsProps {
+  referenceTree?: string;
+  onChange: $TSFixMeFunction;
+  onSelect: $TSFixMeFunction;
+  selectedType?: string;
+}
+
+class NextcladeReferenceTreeOptions extends React.Component<
+  NextcladeReferenceTreeOptionsProps
+> {
   onDrop = acceptedFile => {
     this.props.onChange(head(acceptedFile));
   };
@@ -91,12 +99,5 @@ class NextcladeReferenceTreeOptions extends React.Component {
     );
   }
 }
-
-NextcladeReferenceTreeOptions.propTypes = {
-  referenceTree: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  onSelect: PropTypes.func.isRequired,
-  selectedType: PropTypes.string,
-};
 
 export default NextcladeReferenceTreeOptions;

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { Image } from "semantic-ui-react";
@@ -9,7 +8,19 @@ import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 
 import cs from "./nextclade_confirmation_modal.scss";
 
-const NextcladeConfirmationModal = ({ onCancel, onConfirm, open, loading }) => {
+interface NextcladeConfirmationModalProps {
+  onCancel: $TSFixMeFunction;
+  onConfirm: $TSFixMeFunction;
+  open?: boolean;
+  loading?: boolean;
+}
+
+const NextcladeConfirmationModal = ({
+  onCancel,
+  onConfirm,
+  open,
+  loading,
+}: NextcladeConfirmationModalProps) => {
   return (
     <Modal className={cs.nextcladeConfirmation} narrowest open={open}>
       <Image className={cs.logo} src="/assets/LogoNextclade.png" />
@@ -55,13 +66,6 @@ const NextcladeConfirmationModal = ({ onCancel, onConfirm, open, loading }) => {
       </div>
     </Modal>
   );
-};
-
-NextcladeConfirmationModal.propTypes = {
-  onCancel: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  open: PropTypes.bool,
-  loading: PropTypes.bool,
 };
 
 export default NextcladeConfirmationModal;

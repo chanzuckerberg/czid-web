@@ -7,7 +7,18 @@ import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 
-import PropTypes from "~utils/propTypes";
+interface NextcladeModalFooterProps {
+  description?: string;
+  invalidSampleNames?: string[];
+  hasValidIds?: boolean;
+  list?: string[];
+  loading?: boolean;
+  message?: string;
+  onClick?: $TSFixMeFunction;
+  nonSarsCov2SampleNames?: string[];
+  type?: "warning" | "error" | "success" | "info";
+  validationError?: string;
+}
 
 const NextcladeModalFooter = ({
   hasValidIds,
@@ -16,12 +27,12 @@ const NextcladeModalFooter = ({
   onClick,
   nonSarsCov2SampleNames,
   validationError,
-}) => {
+}: NextcladeModalFooterProps) => {
   const renderAccordionNotification = ({
     message,
     description,
     list,
-    type = "warning",
+    type = "warning" as const,
   }) => {
     const header = (
       <div>
@@ -139,19 +150,6 @@ const NextcladeModalFooter = ({
       {renderViewQCInNextcladeButton()}
     </div>
   );
-};
-
-NextcladeModalFooter.propTypes = {
-  description: PropTypes.string,
-  invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
-  hasValidIds: PropTypes.bool,
-  list: PropTypes.arrayOf(PropTypes.string),
-  loading: PropTypes.bool,
-  message: PropTypes.string,
-  onClick: PropTypes.func,
-  nonSarsCov2SampleNames: PropTypes.arrayOf(PropTypes.string),
-  type: PropTypes.string,
-  validationError: PropTypes.string,
 };
 
 export default NextcladeModalFooter;

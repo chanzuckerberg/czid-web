@@ -12,7 +12,7 @@ interface ErrorModalProps {
   helpLinkEvent?: string;
   labelText?: string;
   onCancel: $TSFixMeFunction;
-  onConfirm: React.MouseEvent;
+  onConfirm: $TSFixMeFunction;
   open?: boolean;
   title?: string;
 }

@@ -1,6 +1,5 @@
 import cx from "classnames";
 import { difference, size } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
@@ -19,13 +18,40 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import { WORKFLOWS } from "~utils/workflows";
+import { PopupProps } from "../../../../../../node_modules/semantic-ui-react/dist/commonjs/modules/Popup/index";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
 
 import cs from "./nextclade_modal.scss";
 
-export default class NextcladeModal extends React.Component {
+interface NextcladeModalProps {
+  onClose: $TSFixMeFunction;
+  open?: boolean;
+  selectedIds?: Set<$TSFixMe>;
+  workflowEntity?: string;
+}
+
+interface NextcladeModalState {
+  confirmationModalOpen: boolean;
+  errorModalOpen: boolean;
+  invalidSampleNames: $TSFixMe[];
+  loading: boolean;
+  loadingResults: boolean;
+  nonSarsCov2SampleNames: $TSFixMe[];
+  projectIds: $TSFixMe[];
+  referenceTree: $TSFixMe;
+  selectedTreeType: string;
+  validationError: $TSFixMe;
+  validWorkflowRunIds: Set<$TSFixMe>;
+  validWorkflowInfo: $TSFixMe[];
+  referenceTreeContents?: $TSFixMe;
+}
+
+export default class NextcladeModal extends React.Component<
+  NextcladeModalProps,
+  NextcladeModalState
+> {
   constructor(props) {
     super(props);
 
@@ -135,6 +161,12 @@ export default class NextcladeModal extends React.Component {
     iconStyle = null,
     offset = [0, 0],
     position = "top center",
+  }: {
+    content: string;
+    link?: string;
+    iconStyle?: string;
+    offset?: [number, number];
+    position?: PopupProps["position"];
   }) => {
     return (
       <ColumnHeaderTooltip
@@ -350,12 +382,5 @@ export default class NextcladeModal extends React.Component {
     );
   }
 }
-
-NextcladeModal.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool,
-  selectedIds: PropTypes.instanceOf(Set),
-  workflowEntity: PropTypes.string,
-};
 
 NextcladeModal.contextType = UserContext;
