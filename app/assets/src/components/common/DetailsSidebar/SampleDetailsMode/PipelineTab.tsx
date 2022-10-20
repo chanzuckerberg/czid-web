@@ -244,7 +244,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
   readsPresent = () => {
     const { pipelineStepDict } = this.state;
 
-    if (!isEmpty(pipelineStepDict)) {
+    if (isEmpty(pipelineStepDict)) {
       return false;
     }
 
