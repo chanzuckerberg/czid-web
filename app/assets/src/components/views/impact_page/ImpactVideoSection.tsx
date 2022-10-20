@@ -6,7 +6,7 @@ const ImpactVideoSection = () => {
   const [video, setVideo] = useState("video");
 
   return (
-    <div className={cs.videoSection}>
+    <div className={cs.videoSection} id="videoSection">
       <div className={cs.videoSectionInner}>
         <h2>Take the Video Tour</h2>
         <div className={cs.videoSelectionContainer}>
