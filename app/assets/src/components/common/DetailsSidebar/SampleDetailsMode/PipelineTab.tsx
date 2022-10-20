@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { get, set } from "lodash/fp";
+import { get, set, isEmpty } from "lodash/fp";
 import React from "react";
 
 import { getSamplePipelineResults } from "~/api";
@@ -244,14 +244,16 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
   readsPresent = () => {
     const { pipelineStepDict } = this.state;
 
-    const stepDictPresent = Boolean(pipelineStepDict);
+    if (!isEmpty(pipelineStepDict)) {
+      return false;
+    }
 
     const stepInformationPresent = Object.prototype.hasOwnProperty.call(
       pipelineStepDict,
       "steps",
     );
     if (!stepInformationPresent) {
-      return;
+      return false;
     }
 
     const readsPresent = Object.values(pipelineStepDict["steps"]).reduce(
@@ -264,7 +266,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
       false,
     );
 
-    return stepDictPresent && stepInformationPresent && readsPresent;
+    return stepInformationPresent && readsPresent;
   };
 
   renderReadsRemainingSection = () => {
