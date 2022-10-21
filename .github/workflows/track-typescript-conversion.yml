@@ -7,20 +7,22 @@ on:
 
 jobs:
   track-typescript-conversion:
-    runs-on: [self-hosted, idseq-dev]
+    runs-on: ubuntu-latest
+    permissions: # these permissions must be set for AWS auth to work!
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           ref: 'main'
-      - name: Install script dependencies
-        run: |
-          apt-get -qq update
-          apt-get -qq install -o=Dpkg::Use-Pty=0 --yes curl awscli jq
-
-          export token=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-          export AWS_DEFAULT_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
-          aws configure set default.region $AWS_DEFAULT_REGION
+      - name: Configure AWS Credentials
+        id: configure_aws_credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ secrets.DEV_AWS_ROLE }}
+          role-session-name: build-push-docker-img
       - name: Publish AWS CloudWatch metric about .js, .jsx, .ts, and .tsx file counts
         run: |
           js_file_count=$(grep \
