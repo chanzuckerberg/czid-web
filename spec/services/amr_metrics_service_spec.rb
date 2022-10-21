@@ -59,7 +59,7 @@ RSpec.describe AmrMetricsService, type: :service do
 
   describe "#call" do
     context "when AMR workflow run was started from a pipeline run" do
-      let(:pipeline_run) do
+      let!(:pipeline_run) do
         create(
           :pipeline_run,
           sample: sample,
@@ -75,26 +75,39 @@ RSpec.describe AmrMetricsService, type: :service do
       before do
         allow(workflow_run).to receive(:get_input)
           .with("start_from_mngs").and_return("true")
-
-        create(:insert_size_metric_set, pipeline_run: pipeline_run, mean: expected_insert_size_mean, standard_deviation: expected_insert_size_std_dev)
       end
 
-      it "returns metrics from pipeline run" do
-        metrics = subject.call
+      context "when insert size metric set exists for pipeline run" do
+        before do
+          create(:insert_size_metric_set, pipeline_run: pipeline_run, mean: expected_insert_size_mean, standard_deviation: expected_insert_size_std_dev)
+        end
 
-        # Some pipeline run columns are stored as float types, and the precision
-        # differes from ruby floats.  This is the smallest value for which the specs all pass
-        float_margin = 0.0001
+        it "returns metrics from pipeline run" do
+          metrics = subject.call
 
-        expect(metrics[WorkflowRun::TOTAL_READS_KEY]).to eq(input_read_val)
-        expect(metrics[WorkflowRun::QC_PERCENT_KEY]).to be_within(float_margin).of(expected_passed_qc)
-        expect(metrics[WorkflowRun::REMAINING_READS_KEY]).to eq(expected_remaining_reads)
-        expect(metrics[WorkflowRun::COMPRESSION_RATIO_KEY]).to be_within(float_margin).of(expected_compression_ratio)
-        expect(metrics[WorkflowRun::TOTAL_ERCC_READS_KEY]).to eq(expected_ercc_count)
-        expect(metrics[WorkflowRun::SUBSAMPLED_FRACTION_KEY]).to be_within(float_margin).of(expected_subsampled_fraction)
-        expect(metrics[WorkflowRun::INSERT_SIZE_MEAN_KEY]).to be_within(float_margin).of(expected_insert_size_mean)
-        expect(metrics[WorkflowRun::INSERT_SIZE_STD_DEV_KEY]).to be_within(float_margin).of(expected_insert_size_std_dev)
-        expect(metrics[WorkflowRun::PERCENT_REMAINING_KEY]).to eq(expected_percent_remaining)
+          # Some pipeline run columns are stored as float types, and the precision
+          # differes from ruby floats.  This is the smallest value for which the specs all pass
+          float_margin = 0.0001
+
+          expect(metrics[WorkflowRun::TOTAL_READS_KEY]).to eq(input_read_val)
+          expect(metrics[WorkflowRun::QC_PERCENT_KEY]).to be_within(float_margin).of(expected_passed_qc)
+          expect(metrics[WorkflowRun::REMAINING_READS_KEY]).to eq(expected_remaining_reads)
+          expect(metrics[WorkflowRun::COMPRESSION_RATIO_KEY]).to be_within(float_margin).of(expected_compression_ratio)
+          expect(metrics[WorkflowRun::TOTAL_ERCC_READS_KEY]).to eq(expected_ercc_count)
+          expect(metrics[WorkflowRun::SUBSAMPLED_FRACTION_KEY]).to be_within(float_margin).of(expected_subsampled_fraction)
+          expect(metrics[WorkflowRun::INSERT_SIZE_MEAN_KEY]).to be_within(float_margin).of(expected_insert_size_mean)
+          expect(metrics[WorkflowRun::INSERT_SIZE_STD_DEV_KEY]).to be_within(float_margin).of(expected_insert_size_std_dev)
+          expect(metrics[WorkflowRun::PERCENT_REMAINING_KEY]).to eq(expected_percent_remaining)
+        end
+      end
+
+      context "when no insert size metric set exists for pipeline run" do
+        it "returns null for insert size metrics" do
+          metrics = subject.call
+
+          expect(metrics[WorkflowRun::INSERT_SIZE_MEAN_KEY]).to be_nil
+          expect(metrics[WorkflowRun::INSERT_SIZE_STD_DEV_KEY]).to be_nil
+        end
       end
     end
 
