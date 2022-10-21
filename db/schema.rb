@@ -646,7 +646,7 @@ ActiveRecord::Schema.define(version: 2022_10_07_180609) do
     t.datetime "updated_at", null: false
     t.string "name"
     t.string "count_type"
-    t.decimal "percent_identity", precision: 9, scale: 2
+    t.float "percent_identity"
     t.float "alignment_length"
     t.float "e_value"
     t.integer "genus_taxid", default: -200, null: false
@@ -656,7 +656,7 @@ ActiveRecord::Schema.define(version: 2022_10_07_180609) do
     t.integer "family_taxid", default: -300, null: false
     t.integer "is_phage", limit: 1, default: 0, null: false
     t.string "source_count_type", comment: "The count type which the merged_nt_nr value is derived from"
-    t.float "rpm"
+    t.float "rpm", comment: "Number of reads aligning to the taxon in the NCBI NR/NT database, per million reads sequenced."
     t.decimal "percent_identity_decimal", precision: 9, scale: 2
     t.decimal "alignment_length_decimal", precision: 9, scale: 2
     t.decimal "rpm_decimal", precision: 9, scale: 2
