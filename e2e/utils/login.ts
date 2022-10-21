@@ -11,6 +11,5 @@ export async function login(
   await basePage.clickByText("Sign in");
   await basePage.fillByName("email", username);
   await basePage.fillByName("password", password);
-
   await Promise.all([await basePage.clickByName("submit")]);
 }

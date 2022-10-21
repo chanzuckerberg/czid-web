@@ -9,3 +9,20 @@ export const footer: Record<string, string> = {
 };
 export const tag =
   "Chan Zuckerberg ID: The free, cloud-based metagenomics platform for researchers";
+export const CZID = "CZ ID";
+export const MY_DATA = "My Data";
+export const PUBLIC = "Public";
+export const UPLOAD = "Upload";
+export const INCON_BUTTON = "iconButton";
+export const SEARCH_MY_DATA = "Search My Data...";
+export const HREF = {
+  MYDATA: "/my_data",
+  PUBLIC: "/public",
+  UPLOAD: "/samples/upload",
+};
+
+export const PROJECTS = "Projects";
+export const SAMPLES = "Samples";
+export const VISUALIZATIONS = "Visualizations";
+export const TAXON_FILTERS = "Taxon Filters";
+export const METADATA_FILTERS = "Metadata Filters";

@@ -106,6 +106,7 @@ class DiscoveryHeader extends React.Component {
                     className={cs.filtersCounter}
                     circular
                     text={filterCount}
+                    data-testid="filters"
                   />
                 )}
               </div>
@@ -137,6 +138,7 @@ class DiscoveryHeader extends React.Component {
               onEnter={this.handleSearchEnterPressed}
               placeholder={`Search ${startCase(domain)}...`}
               value={searchValue}
+              data-testid="search"
             />
           )}
         </div>

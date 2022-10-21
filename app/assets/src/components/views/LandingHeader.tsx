@@ -21,7 +21,7 @@ const LandingHeader = ({ browserInfo }: LandingHeaderProps) => {
     <div className={cs.header}>
       <div className={cs.siteHeader}>
         <div className={cs.brandDetails}>
-          <a href="/">
+          <a href="/" data-testid="logo">
             <span className={cs.logoIcon}>
               <CZIDLogoReversed />
             </span>
@@ -33,6 +33,7 @@ const LandingHeader = ({ browserInfo }: LandingHeaderProps) => {
             className={cs.headerLink}
             href="https://help.czid.org"
             analyticsEventName="Landing_help-center-link_clicked"
+            data-testid="help-center"
           >
             Help Center
           </ExternalLink>
@@ -40,6 +41,7 @@ const LandingHeader = ({ browserInfo }: LandingHeaderProps) => {
             className={cs.headerLink}
             href="https://www.czid.org/impact"
             analyticsEventName="Landing_video-tour-link_clicked"
+            data-testid="video-tour"
           >
             Video Tour
           </ExternalLink>
@@ -48,6 +50,7 @@ const LandingHeader = ({ browserInfo }: LandingHeaderProps) => {
             // NOTE(2021-09-30): Alternatively there is https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2931482 as of now.
             href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/3293983"
             analyticsEventName="Landing_hiring-link_clicked"
+            data-testid="hiring"
           >
             Hiring
           </ExternalLink>
@@ -55,6 +58,7 @@ const LandingHeader = ({ browserInfo }: LandingHeaderProps) => {
             className={cs.headerLink}
             href="https://github.com/chanzuckerberg/czid-workflows"
             analyticsEventName="Landing_github-link_clicked"
+            data-testid="github"
           >
             GitHub
           </ExternalLink>

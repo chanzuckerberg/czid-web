@@ -1027,7 +1027,7 @@ class DiscoveryView extends React.Component {
 
     const renderTab = (label, count) => {
       return (
-        <div>
+        <div data-testid={label.toLowerCase()}>
           <span className={cs.tabLabel}>{label}</span>
           <span className={cs.tabCounter}>{count}</span>
         </div>

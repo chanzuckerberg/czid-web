@@ -95,7 +95,11 @@ const UserMenuDropDown = ({
         <BareDropdown.Item
           key="create_user"
           text={
-            <a className={cs.option} href="/users/new">
+            <a
+              className={cs.option}
+              href="/users/new"
+              data-testid="create-user"
+            >
               Create User
             </a>
           }
