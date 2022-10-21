@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Button, Icon, Menu, MenuItem } from "czifui";
+import { Button, Icon } from "czifui";
 import {
   difference,
   find,
@@ -56,6 +56,7 @@ import {
   WORKFLOW_ENTITIES,
 } from "~utils/workflows";
 
+import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
 import {
   computeColumnsByWorkflow,
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
@@ -464,10 +465,10 @@ class SamplesView extends React.Component {
     );
   };
 
-  renderBulkKickoffAmr = () => {
+  renderBulkSamplesActionsMenu = () => {
     const { allowedFeatures = {} } = this.context || {};
     const { objects, selectedIds } = this.props;
-    const { actionsMenuAnchorEl } = this.state;
+
     if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
       return;
     }
@@ -475,62 +476,17 @@ class SamplesView extends React.Component {
     const selectedObjects = objects.loaded.filter(object =>
       selectedIds.has(object.id),
     );
-    const numOfSelectedObjects = size(selectedObjects);
-
-    const openMenu = event => {
-      this.setState({
-        actionsMenuAnchorEl: event.currentTarget,
-      });
-    };
+    const noObjectsSelected = size(selectedObjects) === 0;
 
     return (
-      <div className={cs.action}>
-        <ToolbarButtonIcon
-          icon={
-            <Icon sdsIcon="dotsHorizontal" sdsSize="xl" sdsStyle="iconButton" />
-          }
-          popupText="Run Antimicrobial Resistance Pipeline (Beta)"
-          popupSubtitle={
-            numOfSelectedObjects === 0 ? "Select at least 1 sample" : ""
-          }
-          disabled={numOfSelectedObjects === 0}
-          onClick={openMenu}
-        />
-        <Menu
-          anchorEl={actionsMenuAnchorEl}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          keepMounted
-          open={Boolean(actionsMenuAnchorEl)}
-          onClose={this.closeActionsMenu}
-        >
-          <MenuItem
-            onClick={withAnalytics(
-              this.handleBulkKickoffAmrClick,
-              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED,
-            )}
-          >
-            Run Antimicrobial Resistance Pipeline (Beta)
-          </MenuItem>
-        </Menu>
-      </div>
+      <BulkSamplesActionsMenu
+        disabled={noObjectsSelected}
+        handleBulkKickoffAmr={this.handleBulkKickoffAmr}
+      />
     );
   };
 
-  closeActionsMenu = () => {
-    this.setState({
-      actionsMenuAnchorEl: null,
-    });
-  };
-
-  handleBulkKickoffAmrClick = async () => {
-    this.closeActionsMenu();
+  handleBulkKickoffAmr = async () => {
     const { objects, selectedIds, handleNewAmrCreationsFromMngs } = this.props;
 
     const selectedObjects = filter(
@@ -686,7 +642,7 @@ class SamplesView extends React.Component {
       [TRIGGERS.download]: this.renderBulkDownloadTrigger,
       [TRIGGERS.nextclade]: this.renderNextcladeTrigger,
       [TRIGGERS.genepi]: this.renderGenEpiTrigger,
-      [TRIGGERS.bulk_kickoff_amr]: this.renderBulkKickoffAmr,
+      [TRIGGERS.bulk_kickoff_amr]: this.renderBulkSamplesActionsMenu,
     };
     // Get workflows triggers available in the current domain and workflow tab
     const triggersAvailable = intersection(
