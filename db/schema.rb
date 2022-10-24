@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_10_07_180609) do
+ActiveRecord::Schema.define(version: 2022_10_24_190301) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -500,7 +500,7 @@ ActiveRecord::Schema.define(version: 2022_10_07_180609) do
     t.float "qc_percent"
     t.float "compression_ratio"
     t.boolean "deprecated", default: false, comment: "True/false if the pipeline run has been deprecated or not. Non deprecated pipeline runs are used in the normal flow of the web app."
-    t.string "technology", comment: "Name of the technology used, e.g. illumina or ont."
+    t.string "technology", default: "Illumina", comment: "Name of the technology used, e.g. illumina or ont."
     t.string "guppy_basecaller_setting", comment: "User-specified input used by ont pipeline runs. Null for illumina pipeline runs."
     t.index ["adjusted_remaining_reads"], name: "index_pipeline_runs_on_adjusted_remaining_reads"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
