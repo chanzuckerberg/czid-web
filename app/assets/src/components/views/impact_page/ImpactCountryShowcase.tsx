@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { Button } from "czifui";
+import PropTypes from "prop-types";
+import React, { useEffect } from "react";
 import { ImpactCountryData } from "./ImpactCountryData";
 import cs from "./ImpactCountryShowcase.scss";
 
@@ -9,6 +11,7 @@ const PrevArrow = () => (
     viewBox="0 0 33 33"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className={cs.countryShowcaseNavPrev}
   >
     <circle
       cx="16.3927"
@@ -53,6 +56,7 @@ const NextArrow = () => (
     viewBox="0 0 33 33"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className={cs.countryShowcaseNavNext}
   >
     <circle
       cx="16.3927"
@@ -180,166 +184,192 @@ const PakistanSvg = () => (
   </svg>
 );
 
-const ImpactCountryShowcase = () => {
-  const [selectedCountry, setSelectedCountry] = useState(ImpactCountryData[0]);
+const ImpactCountryShowcase = props => {
+  useEffect(() => {
+    document
+      .querySelector(".active-country-item")
+      .scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [props.selectedCountry]);
 
   return (
     <div className={cs.countryShowcaseContainer}>
-      <section className={cs.countryShowcaseScroller}>
-        {ImpactCountryData.map((country, index) => (
-          <div
-            key={`countryScrollItem-${index}`}
-            className={`${cs.countryScrollItem}`}
-            onClick={() => setSelectedCountry(country)}
-          >
+      <div className={cs.countryShowcaseScrollerWrapper}>
+        <section className={cs.countryShowcaseScroller}>
+          {ImpactCountryData.map((country, index) => (
             <div
-              className={`${cs.countryScrollItemIndicator} ${
-                country === selectedCountry
-                  ? cs.countryScrollItemIndicatorActive
-                  : ""
+              key={`countryScrollItem-${index}`}
+              className={`${cs.countryScrollItem} ${
+                props.selectedCountry === country ? "active-country-item" : ""
               }`}
-            ></div>
-            <div className={cs.countryScrollItemDescription}>
-              <h3>{country.countryName}</h3>
-              <p>{country.institution}</p>
-            </div>
-            <div className={cs.countryScrollItemCycle}>
+              onClick={() => props.setSelectedCountry(country)}
+            >
               <div
-                className={`
-                  ${cs.countryScrollItemCycleDot} 
-                  ${country.cycle === 1 ? cs.cycle1 : cs.cycle2}
-                `}
+                className={`${cs.countryScrollItemIndicator} ${
+                  country === props.selectedCountry
+                    ? cs.countryScrollItemIndicatorActive
+                    : ""
+                }`}
               ></div>
-              <span className={cs.countryScrollItemCycleText}>
-                Cycle <span>{country.cycle}</span>
-              </span>
+              <div className={cs.countryScrollItemDescription}>
+                <h3>{country.countryName}</h3>
+                <p>{country.institution}</p>
+              </div>
+              <div className={cs.countryScrollItemCycle}>
+                <div
+                  className={`
+                    ${cs.countryScrollItemCycleDot} 
+                    ${country.cycle === 1 ? cs.cycle1 : cs.cycle2}
+                  `}
+                ></div>
+                <span className={cs.countryScrollItemCycleText}>
+                  Cycle <span>{country.cycle}</span>
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
-      </section>
+          ))}
+        </section>
+      </div>
       <div className={cs.countryShowcaseWindow}>
         <div className={cs.countryShowcaseWindowTitleContainer}>
           <div className={cs.countryShowcaseWindowTitleTextContainer}>
             <p className={cs.countryShowcaseWindowCountryName}>
-              {selectedCountry.countryName}&nbsp;
+              {props.selectedCountry.countryName}&nbsp;
               <span
                 className={`
                   ${cs.countryShowcaseWindowCountryCycleDot} 
-                  ${selectedCountry.cycle === 1 ? cs.cycle1 : cs.cycle2}
+                  ${props.selectedCountry.cycle === 1 ? cs.cycle1 : cs.cycle2}
                 `}
               ></span>
-              <span>Cycle {selectedCountry.cycle}</span>
+              <span>Cycle {props.selectedCountry.cycle}</span>
             </p>
             <h2 className={cs.countryShowcaseWindowProjectTitle}>
-              {selectedCountry.projectTitle}
+              {props.selectedCountry.projectTitle}
             </h2>
           </div>
           <div className={cs.countryShowcaseWindowMapContainer}>
-            {selectedCountry.countryName !==
+            {props.selectedCountry.countryName !==
               ("Brazil" || "The Gambia" || "Guinea" || "Pakistan") &&
-            selectedCountry?.mapImage?.src ? (
+            props.selectedCountry?.mapImage?.src ? (
               <img
                 className={cs.countryShowcaseWindowMapImage}
-                src={selectedCountry.mapImage.src}
-                alt={selectedCountry.mapImage.alt || ""}
+                src={props.selectedCountry.mapImage.src}
+                alt={props.selectedCountry.mapImage.alt || ""}
               />
             ) : null}
-            {selectedCountry.countryName === "Brazil" &&
-            selectedCountry.cycle === 1 ? (
+            {props.selectedCountry.countryName === "Brazil" &&
+            props.selectedCountry.cycle === 1 ? (
               <BrazilSvg1 />
             ) : null}
-            {selectedCountry.countryName === "Brazil" &&
-            selectedCountry.cycle === 2 ? (
+            {props.selectedCountry.countryName === "Brazil" &&
+            props.selectedCountry.cycle === 2 ? (
               <BrazilSvg2 />
             ) : null}
-            {selectedCountry.countryName === "The Gambia" ? (
+            {props.selectedCountry.countryName === "The Gambia" ? (
               <GambiaSvg />
             ) : null}
-            {selectedCountry.countryName === "Guinea" ? <GuineaSvg /> : null}
-            {selectedCountry.countryName === "Pakistan" ? (
+            {props.selectedCountry.countryName === "Guinea" ? (
+              <GuineaSvg />
+            ) : null}
+            {props.selectedCountry.countryName === "Pakistan" ? (
               <PakistanSvg />
             ) : null}
           </div>
         </div>
         <div className={cs.countryShowcaseWindowDescriptionContainer}>
           <div className={cs.countryShowcasePrincipalInvestigatorContainer}>
-            {selectedCountry?.headshot ? (
+            {props.selectedCountry?.headshot ? (
               <img
-                src={selectedCountry.headshot.src}
-                alt={selectedCountry.headshot.alt || ""}
+                src={props.selectedCountry.headshot.src}
+                alt={props.selectedCountry.headshot.alt || ""}
               />
             ) : null}
             <div>
               <p className={cs.countryShowcasePrincipalInvestigatorName}>
-                {selectedCountry.principalInvestigator}
+                {props.selectedCountry.principalInvestigator}
               </p>
               <span className={cs.countryShowcasePrincipalInvestigatorTitle}>
                 Principal Investigator
               </span>
             </div>
           </div>
-          <p className={cs.countryShowcaseSummary}>{selectedCountry.summary}</p>
-          {selectedCountry?.publications ? (
+          <p className={cs.countryShowcaseSummary}>
+            {props.selectedCountry.summary}
+          </p>
+          {props.selectedCountry?.publications ? (
             <div className={cs.countryShowcaseCtaContainer}>
-              {selectedCountry.publications.length > 1
-                ? selectedCountry.publications.map((publication, index) => (
-                    <a
-                      className={cs.countryShowcaseCtaLink}
-                      href={publication.src}
-                      key={`showcaseCtaLink-${index}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View Publication ({index + 1})
-                    </a>
-                  ))
-                : selectedCountry.publications.map((publication, index) => (
-                    <a
-                      className={cs.countryShowcaseCtaLink}
-                      href={publication.src}
-                      key={`showcaseCtaLink-${index}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View Publication
-                    </a>
-                  ))}
+              {props.selectedCountry.publications.length > 1
+                ? props.selectedCountry.publications.map(
+                    (publication, index) => (
+                      <Button
+                        className={cs.countryShowcaseCtaLink}
+                        sdsStyle="rounded"
+                        sdsType="secondary"
+                        href={publication.src}
+                        key={`showcaseCtaLink-${index}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Publication ({index + 1})
+                      </Button>
+                    ),
+                  )
+                : props.selectedCountry.publications.map(
+                    (publication, index) => (
+                      <Button
+                        className={cs.countryShowcaseCtaLink}
+                        sdsStyle="rounded"
+                        sdsType="secondary"
+                        href={publication.src}
+                        key={`showcaseCtaLink-${index}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Publication
+                      </Button>
+                    ),
+                  )}
             </div>
           ) : null}
         </div>
         <div className={cs.countryShowcaseNavContainer}>
           <span
             className={`${cs.countryShowcaseNavButton} ${
-              selectedCountry.prevCountryIndex === undefined ? cs.disabled : ""
+              props.selectedCountry.prevCountryIndex === undefined
+                ? cs.disabled
+                : ""
             }`}
             onClick={() => {
-              if (ImpactCountryData[selectedCountry?.prevCountryIndex]) {
-                setSelectedCountry(
-                  ImpactCountryData[selectedCountry.prevCountryIndex],
+              if (ImpactCountryData[props.selectedCountry?.prevCountryIndex]) {
+                props.setSelectedCountry(
+                  ImpactCountryData[props.selectedCountry.prevCountryIndex],
                 );
               }
             }}
           >
-            {ImpactCountryData[selectedCountry.prevCountryIndex] ===
+            {ImpactCountryData[props.selectedCountry.prevCountryIndex] ===
             undefined ? (
               <PrevArrowDisabled />
             ) : (
+              // <div className="countryShowcaseNavPrev">
               <PrevArrow />
+              // </div>
             )}
           </span>
           <span
             className={`${cs.countryShowcaseNavButton} ${
-              selectedCountry.nextCountryIndex === undefined ? cs.disabled : ""
+              props.selectedCountry.nextCountryIndex === undefined
+                ? cs.disabled
+                : ""
             }`}
             onClick={() => {
-              if (ImpactCountryData[selectedCountry?.nextCountryIndex]) {
-                setSelectedCountry(
-                  ImpactCountryData[selectedCountry.nextCountryIndex],
+              if (ImpactCountryData[props.selectedCountry?.nextCountryIndex]) {
+                props.setSelectedCountry(
+                  ImpactCountryData[props.selectedCountry.nextCountryIndex],
                 );
               }
             }}
           >
-            {ImpactCountryData[selectedCountry.nextCountryIndex] ===
+            {ImpactCountryData[props.selectedCountry.nextCountryIndex] ===
             undefined ? (
               <NextArrowDisabled />
             ) : (
@@ -350,6 +380,11 @@ const ImpactCountryShowcase = () => {
       </div>
     </div>
   );
+};
+
+ImpactCountryShowcase.propTypes = {
+  selectedCountry: PropTypes.object,
+  setSelectedCountry: PropTypes.func,
 };
 
 export default ImpactCountryShowcase;

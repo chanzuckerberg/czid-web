@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import ImpactBottomCTA from "~/components/views/impact_page/ImpactBottomCTA";
+import { ImpactCountryData } from "~/components/views/impact_page/ImpactCountryData";
 import ImpactCountryShowcase from "~/components/views/impact_page/ImpactCountryShowcase";
 import ImpactHero from "~/components/views/impact_page/ImpactHero";
 import ImpactIntro from "~/components/views/impact_page/ImpactIntro";
@@ -50,12 +51,20 @@ document
 
 // good Impact Page
 const ImpactPage = () => {
+  const [selectedCountry, setSelectedCountry] = useState(ImpactCountryData[0]);
+
   return (
     <>
       <Header impactPage={true} />
       <ImpactHero />
-      <ImpactIntro />
-      <ImpactCountryShowcase />
+      <ImpactIntro
+        setSelectedCountry={country => setSelectedCountry(country)}
+        selectedCountry={selectedCountry}
+      />
+      <ImpactCountryShowcase
+        setSelectedCountry={country => setSelectedCountry(country)}
+        selectedCountry={selectedCountry}
+      />
       <ImpactVideoSection />
       <ImpactBottomCTA />
       <Footer />

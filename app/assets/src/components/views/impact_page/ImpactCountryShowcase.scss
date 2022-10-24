@@ -26,10 +26,6 @@
     @media (max-width: 992px) {
       display: none;
     }
-
-    &::-webkit-scrollbar {
-      margin-right: 20px;
-    }
   }
 }
 
@@ -43,15 +39,11 @@
   border-top: 1px solid #e4e4e4;
   border-bottom: 1px solid #e4e4e4;
   position: relative;
+  width: 391px;
 
   &:hover {
     .countryScrollItemIndicator {
       background: #3867fa !important;
-      opacity: 0.3;
-    }
-
-    .countryScrollItemIndicatorActive {
-      opacity: 1;
     }
   }
 
@@ -76,12 +68,16 @@
     padding-left: 27.5px;
 
     h3 {
-      @include font-header-xl;
+      @include font-header-l;
+      margin-bottom: 0;
     }
 
     p {
-      @include font-body-m;
+      @include font-body-s;
+      margin-top: 4px;
+      line-height: 16.8px;
       color: #767676;
+      max-width: 223px;
     }
   }
 
@@ -227,6 +223,7 @@
 
   &DescriptionContainer {
     margin-top: 30px;
+    margin-bottom: 12px;
 
     .countryShowcasePrincipalInvestigatorContainer {
       display: flex;
@@ -274,10 +271,8 @@
     }
   }
 
-  a.countryShowcaseCtaLink {
+  .countryShowcaseCtaLink {
     display: inline-block;
-    border: 1px solid #3867fa;
-    background: #ffffff;
     color: #3867fa !important;
     font-size: 13px;
     font-weight: 600;
@@ -286,7 +281,6 @@
     justify-content: center;
     align-items: center;
     text-decoration: none;
-    border-radius: 24px;
     padding: 7px 36px;
 
     & + .countryShowcaseCtaLink {
@@ -299,8 +293,7 @@
     }
 
     &:hover {
-      background: #3867fa;
-      color: #000000 !important;
+      color: #ffffff !important;
     }
   }
 
@@ -327,6 +320,24 @@
 
       & + .countryShowcaseNavButton {
         margin-left: 10px;
+      }
+    }
+
+    &Prev,
+    &Next {
+      circle,
+      path {
+        transition: 0.2s;
+      }
+
+      &:hover {
+        circle {
+          fill: #3867fa;
+        }
+
+        path {
+          fill: #ffffff;
+        }
       }
     }
   }

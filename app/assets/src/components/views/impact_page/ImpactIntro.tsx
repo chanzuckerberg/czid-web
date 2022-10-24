@@ -1,3 +1,5 @@
+import { Link } from "czifui";
+import PropTypes from "prop-types";
 import React from "react";
 import ImpactMap from "~/images/impact_page/ImpactMap.svg";
 import IconBiohubLogo from "~/images/impact_page/logo-cz-biohub-color.png";
@@ -7,7 +9,7 @@ import { ImpactCountryData } from "./ImpactCountryData";
 
 import cs from "./ImpactIntro.scss";
 
-const ImpactIntro = () => {
+const ImpactIntro = props => {
   return (
     <div className={cs.introContainer}>
       <div className={cs.introTextWrap}>
@@ -15,23 +17,23 @@ const ImpactIntro = () => {
         <p>
           Together with the Bill & Melinda Gates Foundation through its Global
           Grand Challenges initiative, the{" "}
-          <a
+          <Link
             className={cs.introTextLink}
             href="https://chanzuckerberg.com/"
             target="_blank"
             rel="noopener noreferrer"
           >
             Chan Zuckerberg Initiative (CZI)
-          </a>{" "}
+          </Link>{" "}
           and the{" "}
-          <a
+          <Link
             className={cs.introTextLink}
             href="https://www.czbiohub.org/"
             target="_blank"
             rel="noopener noreferrer"
           >
             Chan Zuckerberg Biohub (CZ Biohub)
-          </a>{" "}
+          </Link>{" "}
           are partnering with researchers around the world to characterize
           pathogen landscapes and increase capacity for infectious disease
           research in low- to-middle income countries.
@@ -80,6 +82,9 @@ const ImpactIntro = () => {
             className={`${cs.impactMapDot} ${
               country.cycle === 1 ? cs.cycle1 : cs.cycle2
             }`}
+            onClick={() => {
+              props.setSelectedCountry(ImpactCountryData[index]);
+            }}
             style={{
               bottom: `${country.mapPosition.bottom}`,
               left: `${country.mapPosition.left}`,
@@ -101,6 +106,10 @@ const ImpactIntro = () => {
       </div>
     </div>
   );
+};
+
+ImpactIntro.propTypes = {
+  setSelectedCountry: PropTypes.func,
 };
 
 export default ImpactIntro;

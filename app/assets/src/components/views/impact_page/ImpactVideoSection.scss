@@ -63,6 +63,11 @@
   max-width: 700px;
   margin: 0 auto;
 
+  h3 {
+    @include font-header-xl;
+    margin-bottom: 10px;
+  }
+
   p {
     color: #545454;
     @include font-body-s;

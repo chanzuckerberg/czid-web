@@ -20,10 +20,10 @@ export const ImpactCountryData = [
   },
   {
     countryName: "Brazil",
-    principalInvestigator: "Ida Kolte, Fiocruz, Sao Paolo",
+    principalInvestigator: "Ida Kolte, Fiocruz, Rio de Janeiro",
     projectTitle:
       "Discovering the Etiology Behind Severe Lung Infections Impacting Indigenous Peoples of Brazil",
-    institution: "Fiocruz, Sao Paolo",
+    institution: "Fiocruz, Rio de Janeiro",
     summary: `From 2017-19, 8.5% of all deaths among Indigenous community members in Brazil did not have a registered cause — which is double the proportion observed in the non-Indigenous population. Many of Brazil’s Indigenous communities live in close proximity to wild and domestic animals and in precarious circumstances with food insecurity and limited access to sanitation. These challenges create an optimal environment for transmission of infectious diseases and for potential co-infections. Additionally, Indigenous patients rarely receive a laboratory-confirmed diagnosis, leading to increasing numbers of avoidable deaths. This project will leverage metagenomics and CZ ID to identify pathogens and co-infections and strengthen clinical diagnostic pathways.
     `,
     cycle: 2,
@@ -320,7 +320,7 @@ export const ImpactCountryData = [
       left: "74.5%",
     },
     mapImage: {
-      src: require("~/images/impact_page/country-malaysia-2.svg"),
+      src: require("~/images/impact_page/country-malaysia.svg"),
       alt: "outline map of Malaysia",
     },
     headshot: {

@@ -68,6 +68,11 @@ const ImpactVideoSection = () => {
 
         {(video === "video" || video === "360") && (
           <div className={cs.videoDescription}>
+            <h3>
+              {video === "video"
+                ? "Infectious Disease Detectives - Bangladesh"
+                : "360° Video Tour with  Infectious Disease Detectives - Bangladesh"}
+            </h3>
             <p>
               Watch our video or take a 360° VR video tour to see how a local
               researcher quickly detects the source of a meningitis outbreak in

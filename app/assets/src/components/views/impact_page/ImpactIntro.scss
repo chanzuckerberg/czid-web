@@ -43,8 +43,8 @@
     }
   }
 
-  span {
-    color: #000000;
+  span.impactMapDotLabel {
+    color: #ffffff;
     @include font-body-xxs;
 
     @media (max-width: 992px) {
@@ -205,7 +205,7 @@
     &Legend {
       display: flex;
       position: absolute;
-      bottom: -10%;
+      bottom: -20px;
       right: 18%;
 
       @media (min-width: 992px) {

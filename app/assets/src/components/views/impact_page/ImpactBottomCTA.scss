@@ -32,30 +32,12 @@
     }
   }
 
-  a.btnLink {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  .btnLink {
     width: 172px;
     height: 34px;
     color: #ffffff !important;
-    border-radius: 24px;
-    border: 1px solid #3867fa;
-    text-decoration: none;
-    font-family: $font-family-sans-serif, sans-serif;
-    font-size: 13px;
-    line-height: 20px;
-    font-weight: 600;
-    transition: 0.1s ease;
-    align-self: flex-start;
-    margin-top: 30px;
+    margin-top: 27px;
     margin-bottom: 60px;
-    background: #3867fa;
-    text-transform: capitalize;
-
-    &:hover {
-      opacity: 0.9;
-    }
 
     @media (max-width: 992px) {
       margin: 30px auto 60px auto;
