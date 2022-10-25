@@ -85,9 +85,9 @@ begin
 
   puts 'running migrations'
   puts "/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json"
-  puts "/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} #{cluster} czid-#{env}-web"
+  puts "/tmp/czecs upgrade --timeout 900 --task-definition-arn #{task_definition_arn} #{cluster} czid-#{env}-web"
   system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json")
-  system!("/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} #{cluster} czid-#{env}-web")
+  system!("/tmp/czecs upgrade --timeout 900 --task-definition-arn #{task_definition_arn} #{cluster} czid-#{env}-web")
 
   puts "image: #{image}, env: #{env}, aws_account_id: #{aws_account_id}, cluster: #{cluster}"
   # Resque workers
