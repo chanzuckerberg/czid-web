@@ -576,7 +576,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
       currentAccessionData.hit_groups,
     );
 
-    const totalContigs = sum(contigHitGroups.map(hitGroup => hitGroup[0]));
+    const totalContigs = currentAccessionSummary.num_contigs; // total number of contigs not contig fragments
     const totalReads = sum(readHitGroups.map(hitGroup => hitGroup[1]));
 
     return (
