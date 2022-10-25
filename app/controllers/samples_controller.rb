@@ -555,6 +555,13 @@ class SamplesController < ApplicationController
             "level": "genus",
             "category": "Taxon",
           },
+          {
+            "title": "Betacoronavirus 1",
+            "description": "Taxonomy ID: 694003",
+            "taxid": 694_003,
+            "level": "genus",
+            "category": "Taxon",
+          },
         ]
 
         # the actual elasticsearch query returns no results when the query is empty

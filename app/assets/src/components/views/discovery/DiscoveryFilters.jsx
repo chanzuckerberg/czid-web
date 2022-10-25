@@ -51,6 +51,8 @@ class DiscoveryFilters extends React.Component {
       taxonThresholdsSelected: this.props.taxonThresholdsSelected,
       annotationsSelected: this.props.annotationsSelected || [],
     };
+
+    this.setupWorkflowConfigs();
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -78,6 +80,26 @@ class DiscoveryFilters extends React.Component {
 
     return newState;
   }
+
+  setupWorkflowConfigs = () => {
+    this.configForWorkflow = {
+      [WORKFLOWS.AMR.value]: {
+        disableTaxonFilter: true,
+        disableTaxonThresholdFilter: true,
+        disableAnnotationFilter: true,
+      },
+      [WORKFLOWS.CONSENSUS_GENOME.value]: {
+        disableTaxonFilter: false,
+        disableTaxonThresholdFilter: true,
+        disableAnnotationFilter: true,
+      },
+      [WORKFLOWS.SHORT_READ_MNGS.value]: {
+        disableTaxonFilter: false,
+        disableTaxonThresholdFilter: false,
+        disableAnnotationFilter: false,
+      },
+    };
+  };
 
   notifyFilterChangeHandler = (callback = null) => {
     const { onFilterChange } = this.props;
@@ -245,11 +267,12 @@ class DiscoveryFilters extends React.Component {
 
   renderTaxonFilterTags = () => {
     let selectedTaxa = this.state[KEY_TAXON_SELECTED];
+    const thresholdFilterDisabled = this.configForWorkflow[this.props.workflow].disableTaxonThresholdFilter;
     if (isEmpty(selectedTaxa)) return;
 
     return (
       <div className={cs.tags}>
-        <div className={cs.descriptor}>Has at least one:</div>
+        {!thresholdFilterDisabled && (<div className={cs.descriptor}>Has at least one:</div>)}
         {selectedTaxa.map((selectedTaxon, i) => (
           <FilterTag
             className={cs.filterTag}
@@ -327,13 +350,14 @@ class DiscoveryFilters extends React.Component {
       : annotationsFilter;
   };
 
-  renderTaxonThresholdFilter = ({ disabled, workflow }) => {
+  renderTaxonThresholdFilter = ({ disabled, disableThreshold, workflow }) => {
     const { domain } = this.props;
     const { taxonSelected, taxonThresholdsSelected } = this.state;
 
     const taxonThresholdFilter = (
       <TaxonThresholdFilter
         disabled={disabled}
+        thresholdFilterEnabled={!disableThreshold}
         domain={domain}
         onFilterApply={(taxa, thresholds) => {
           const validThresholds = thresholds?.filter(
@@ -400,13 +424,9 @@ class DiscoveryFilters extends React.Component {
     );
 
     // Taxon threshold and annotations filters are not available for some workflows
-    const mngsFilterDisabledWorkflows = [
-      WORKFLOWS.CONSENSUS_GENOME.value,
-      WORKFLOWS.AMR.value,
-    ];
-    const mngsFiltersDisabled =
-      currentTab === TAB_SAMPLES &&
-      mngsFilterDisabledWorkflows.includes(workflow);
+    const taxonFilterDisabled = currentTab === TAB_SAMPLES && this.configForWorkflow[workflow].disableTaxonFilter;
+    const annotationFilterDisabled = currentTab === TAB_SAMPLES && this.configForWorkflow[workflow].disableAnnotationFilter;
+    const disableTaxonThreshold = currentTab === TAB_SAMPLES && this.configForWorkflow[workflow].disableTaxonThresholdFilter;
 
     return (
       <div className={cx(cs.filtersContainer, className)}>
@@ -423,7 +443,8 @@ class DiscoveryFilters extends React.Component {
             >
               {hasTaxonThresholdFilterFeature ? (
                 this.renderTaxonThresholdFilter({
-                  disabled: mngsFiltersDisabled,
+                  disabled: taxonFilterDisabled,
+                  disableThreshold: disableTaxonThreshold,
                   workflow,
                 })
               ) : (
@@ -431,15 +452,15 @@ class DiscoveryFilters extends React.Component {
                   domain={domain}
                   onChange={this.handleChange.bind(this, KEY_TAXON_SELECTED)}
                   selectedOptions={taxonSelected}
-                  disabled={mngsFiltersDisabled}
+                  disabled={taxonFilterDisabled}
                 />
               )}
-              {!mngsFiltersDisabled && (
+              {!taxonFilterDisabled && (
                 <>
                   {!hasTaxonThresholdFilterFeature && this.renderTags("taxon")}
                   {hasTaxonThresholdFilterFeature &&
                     this.renderTaxonFilterTags()}
-                  {hasTaxonThresholdFilterFeature &&
+                  {hasTaxonThresholdFilterFeature && !disableTaxonThreshold &&
                     this.renderTaxonThresholdFilterTags()}
                 </>
               )}
@@ -447,10 +468,10 @@ class DiscoveryFilters extends React.Component {
             {hasAnnotationsFilter && (
               <div className={cs.filterContainer}>
                 {this.renderAnnotationsFilter({
-                  disabled: mngsFiltersDisabled,
+                  disabled: annotationFilterDisabled,
                   workflow,
                 })}
-                {!mngsFiltersDisabled && this.renderAnnotationsFilterTags()}
+                {!annotationFilterDisabled && this.renderAnnotationsFilterTags()}
               </div>
             )}
             {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}

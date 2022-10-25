@@ -177,6 +177,7 @@ const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
       accessionName: getInput(["accession_name"]),
       referenceAccessionId: getInput(["accession_id"]),
       taxonName: getInput(["taxon_name"]),
+      taxonId: getInput(["taxon_id"]),
     },
     ...(get("cached_results", cgWorkflowRun) && {
       coverageDepth: getCachedResult(["coverage_viz", "coverage_depth"]),

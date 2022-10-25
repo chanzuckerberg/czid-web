@@ -189,10 +189,16 @@ class WorkflowRun < ApplicationRecord
     joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
   }
 
+  scope :by_taxon, lambda { |taxon_id|
+    query = "JSON_EXTRACT(`inputs_json`, '$.taxon_id') IN (#{taxon_id.join(',')})"
+    where(Arel.sql(ActiveRecord::Base.sanitize_sql_array(query)))
+  }
+
   validates :status, inclusion: { in: STATUS.values }
 
   scope :by_time, ->(start_date:, end_date:) { where(created_at: start_date.beginning_of_day..end_date.end_of_day) }
   scope :by_workflow, ->(workflow) { where(workflow: workflow) }
+
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
   scope :amr, -> { where(workflow: WORKFLOW[:amr]) }
   scope :non_deprecated, -> { where(deprecated: false) }

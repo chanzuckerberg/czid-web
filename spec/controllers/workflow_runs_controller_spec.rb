@@ -570,11 +570,11 @@ RSpec.describe WorkflowRunsController, type: :controller do
           context "workflow run filters" do
             before do
               public_project = create(:public_project, users: [@user])
-              create(:sample, project: public_project, name: "Test Sample 9", workflow_runs_data: [
-                       { workflow: WorkflowRun::WORKFLOW[:consensus_genome] },
-                       { workflow: WorkflowRun::WORKFLOW[:short_read_mngs] },
-                       { workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: true },
-                     ])
+              @sample1 = create(:sample, project: public_project, name: "Test Sample 9", workflow_runs_data: [
+                                  { workflow: WorkflowRun::WORKFLOW[:consensus_genome] },
+                                  { workflow: WorkflowRun::WORKFLOW[:short_read_mngs] },
+                                  { workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: true },
+                                ])
             end
 
             context "filtering by workflow" do
@@ -590,6 +590,40 @@ RSpec.describe WorkflowRunsController, type: :controller do
                 expect(json_response.keys).to eq(["workflow_runs"])
                 expect(has_deprecated_workflow_run).to eq(false)
                 expect(workflow_runs_workflow).to eq([WorkflowRun::WORKFLOW[:consensus_genome]])
+              end
+            end
+
+            context "filtering by taxon" do
+              it "returns correct and non-deprecated workflow runs in domain '#{domain}' with mode '#{mode}'" do
+                @wr1 = create(:workflow_run,
+                              sample: @sample1,
+                              workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                              status: WorkflowRun::STATUS[:succeeded],
+                              inputs_json: { taxon_id: 123, taxon_name: "fake taxon 1" }.to_json)
+                @wr2 = create(:workflow_run,
+                              sample: @sample1,
+                              workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                              status: WorkflowRun::STATUS[:succeeded],
+                              inputs_json: { taxon_id: 456, taxon_name: "fake taxon 2" }.to_json)
+                @wr3 = create(:workflow_run,
+                              sample: @sample1,
+                              workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                              status: WorkflowRun::STATUS[:succeeded],
+                              inputs_json: { taxon_id: 789, taxon_name: "fake taxon 3" }.to_json)
+                get :index, params: { domain: domain, mode: mode, workflow: WorkflowRun::WORKFLOW[:consensus_genome], taxon: [123, 456] }
+
+                json_response = JSON.parse(response.body)
+
+                workflow_runs = json_response["workflow_runs"]
+                has_deprecated_workflow_run = workflow_runs.map { |wr| WorkflowRun.find(wr["id"]).deprecated }.include?(true)
+                workflow_runs_workflow = workflow_runs.map { |wr| wr["workflow"] }.uniq
+                wr_ids = workflow_runs.map { |wr| wr["id"] }
+
+                expect(json_response.keys).to eq(["workflow_runs"])
+                expect(has_deprecated_workflow_run).to eq(false)
+                expect(workflow_runs_workflow).to eq([WorkflowRun::WORKFLOW[:consensus_genome]])
+                expect(workflow_runs.count).to eq(2)
+                expect(wr_ids).to contain_exactly(@wr1.id, @wr2.id)
               end
             end
           end

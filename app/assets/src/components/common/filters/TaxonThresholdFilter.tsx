@@ -21,6 +21,7 @@ interface TaxonThresholdFilterProps {
     thresholds: ThresholdFilterData[],
   ) => void;
   disabled: boolean;
+  thresholdFilterEnabled: boolean;
 }
 
 const TaxonThresholdFilter = ({
@@ -29,6 +30,7 @@ const TaxonThresholdFilter = ({
   selectedThresholds,
   onFilterApply,
   disabled = false,
+  thresholdFilterEnabled = true,
 }: TaxonThresholdFilterProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [hasModifiedFilters, setHasModifiedFilters] = useState<boolean>(false);
@@ -145,12 +147,12 @@ const TaxonThresholdFilter = ({
               setSelectedTaxa(selectedTaxaOptions);
             }}
           />
-          {thresholds?.length > 0 && (
+          {thresholdFilterEnabled && thresholds?.length > 0 && (
             <div className={cs.thresholdDescriptor}>
               Meets all of these thresholds:
             </div>
           )}
-          <ThresholdFilterList
+          {thresholdFilterEnabled && <ThresholdFilterList
             metrics={NON_BACKGROUND_DEPENDENT_THRESHOLDS}
             operators={filterOperators}
             thresholds={thresholds}
@@ -161,7 +163,7 @@ const TaxonThresholdFilter = ({
               handleThresholdRemove(idx);
             }}
             onAddThreshold={handleAddThresholdItem}
-          />
+          />}
           <div className={cs.actions}>
             <div className={cs.action}>
               <Button

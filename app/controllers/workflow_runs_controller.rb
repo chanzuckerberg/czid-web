@@ -13,7 +13,7 @@ class WorkflowRunsController < ApplicationController
   def index
     permitted_params = index_params
 
-    filters = permitted_params.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility, :time, :workflow)
+    filters = permitted_params.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility, :time, :workflow, :taxon)
     domain = permitted_params[:domain]
     workflow_runs = fetch_workflow_runs(domain: domain, filters: filters)
 
@@ -271,12 +271,12 @@ class WorkflowRunsController < ApplicationController
   end
 
   def index_params
-    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :projectId, :visibility, :workflow, host: [], time: [], locationV2: [], tissue: [])
+    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :projectId, :visibility, :workflow, host: [], time: [], locationV2: [], tissue: [], taxon: [])
   end
 
   def fetch_workflow_runs(domain:, filters: {})
     sample_filters = filters.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility)
-    workflow_run_filters = filters.slice(:workflow, :time)
+    workflow_run_filters = filters.slice(:workflow, :time, :taxon)
 
     samples = fetch_samples(domain: domain, filters: sample_filters)
     samples_workflow_runs = current_power.samples_workflow_runs(samples).non_deprecated
@@ -334,9 +334,12 @@ class WorkflowRunsController < ApplicationController
     if filters.present?
       time = filters[:time]
       workflow = filters[:workflow]
+      taxon_id = filters[:taxon]
 
       workflow_runs = workflow_runs.by_time(start_date: Date.parse(time[0]), end_date: Date.parse(time[1])) if time.present?
       workflow_runs = workflow_runs.by_workflow(workflow) if workflow.present?
+      # At the moment, filtering workflows by taxon is only supported for consensus genome
+      workflow_runs = workflow_runs.by_taxon(taxon_id) if taxon_id.present? && workflow == WorkflowRun::WORKFLOW[:consensus_genome]
     end
 
     workflow_runs

@@ -2213,8 +2213,7 @@ class DiscoveryView extends React.Component {
             </div>
             {userDataCounts &&
             userDataCounts.sampleCountByWorkflow[workflow] &&
-            !filteredSampleCountsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value] &&
-            workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
+            !filteredSampleCountsByWorkflow[workflow] &&
             tableHasLoaded
               ? this.renderNoSearchResultsBanner(TAB_SAMPLES)
               : null}
