@@ -230,7 +230,8 @@ class SamplesHeatmapVis extends React.Component {
     const fullString = `${numFilters} filter${
       numFilters > 1 ? "s were" : " was"
     } applied to the above heatmap: ${filterStrings.join(", ")}.
-      Non-conforming cells have been hidden or grayed out.`;
+      Non-conforming cells have been hidden or grayed out.
+      Taxa that are not present in the sample are represented by white cells.`;
 
     return splitIntoMultipleLines(fullString, CAPTION_LINE_WIDTH);
   };
