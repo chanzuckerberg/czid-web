@@ -8,9 +8,13 @@ import { PATHOGEN_LABEL_V0_FEATURE } from "~/components/utils/features";
 
 interface PathogenPreviewProps {
   tag2Count?: object;
+  totalPathogenCount?: number;
 }
 
-const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
+const PathogenPreview = ({
+  tag2Count,
+  totalPathogenCount,
+}: PathogenPreviewProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -18,9 +22,6 @@ const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
   if (tags.length === 0) {
     return null;
   } else {
-    const totalCount = Object.values(tag2Count).reduce(
-      (a: $TSFixMe, b: $TSFixMe) => a + b,
-    );
     const display = (
       <span className="idseq-ui pathogen-preview">
         {allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (
@@ -32,7 +33,7 @@ const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
             );
           })
         )}
-        <span className="pathogen-count">{totalCount}</span>
+        <span className="pathogen-count">{totalPathogenCount}</span>
       </span>
     );
     return allowedFeatures.includes(PATHOGEN_LABEL_V0_FEATURE) ? (

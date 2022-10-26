@@ -1,6 +1,15 @@
 import cx from "classnames";
 import { Icon, Tooltip } from "czifui";
-import { compact, filter, get, getOr, map, orderBy, reduce } from "lodash/fp";
+import {
+  compact,
+  filter,
+  get,
+  getOr,
+  map,
+  orderBy,
+  reduce,
+  size,
+} from "lodash/fp";
 import React from "react";
 import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 
@@ -400,7 +409,19 @@ class ReportTable extends React.Component {
     const { allowedFeatures = [] } = this.context || {};
     const { displayMergedNtNrValue, onTaxonNameClick } = this.props;
     let childrenCount = 0;
+    let filteredSpeciesKnownPathogenCount =
+      get("pathogens.knownPathogens", rowData) || 0;
+
     if (rowData.taxLevel === TAX_LEVEL_GENUS) {
+      filteredSpeciesKnownPathogenCount = size(
+        compact(
+          filter(
+            filteredSpecies => get("pathogenTag", filteredSpecies),
+            rowData.filteredSpecies,
+          ),
+        ),
+      );
+
       childrenCount = displayMergedNtNrValue
         ? filter(species => species["merged_nt_nr"], rowData.filteredSpecies)
             .length
@@ -445,7 +466,10 @@ class ReportTable extends React.Component {
                       rowData.category,
                     )} species`}
                   </span>
-                  {this.renderGenusLevelPreviews({ rowData })}
+                  {this.renderGenusLevelPreviews({
+                    rowData,
+                    filteredSpeciesKnownPathogenCount,
+                  })}
                   {` )`}
                 </span>
               ) : (
@@ -473,7 +497,10 @@ class ReportTable extends React.Component {
     );
   };
 
-  renderGenusLevelPreviews = ({ rowData }) => {
+  renderGenusLevelPreviews = ({
+    rowData,
+    filteredSpeciesKnownPathogenCount,
+  }) => {
     const { allowedFeatures = [] } = this.context || {};
     const displayAnnotationPreviews =
       allowedFeatures.includes(ANNOTATION_FEATURE) &&
@@ -489,7 +516,12 @@ class ReportTable extends React.Component {
           {(rowData.pathogens || displayAnnotationPreviews) && <span>:</span>}
         </span>
         {/* Show pathogen and annotation counts */}
-        {rowData.pathogens && <PathogenPreview tag2Count={rowData.pathogens} />}
+        {rowData.pathogens && (
+          <PathogenPreview
+            tag2Count={rowData.pathogens}
+            totalPathogenCount={filteredSpeciesKnownPathogenCount}
+          />
+        )}
         {displayAnnotationPreviews && (
           <AnnotationPreview tag2Count={rowData.species_annotations} />
         )}
