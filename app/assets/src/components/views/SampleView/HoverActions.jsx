@@ -273,7 +273,7 @@ const HoverActions = ({
       return "Consensus genome pipeline is currently available for viruses only.";
     } else if (taxLevel !== 1) {
       return "Consensus genome pipeline only available at the species level.";
-    } else if (ntContigs <= 0) {
+    } else if (ntContigs === undefined || ntContigs <= 0) {
       return "Please select a virus with at least 1 contig that aligned to the NT database to run the consensus genome pipeline.";
     } else if (!coverageVizEnabled) {
       return "Consensus genome pipeline only available when coverage visualization is available.";
