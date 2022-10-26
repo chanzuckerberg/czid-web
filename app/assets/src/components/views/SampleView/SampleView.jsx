@@ -1634,6 +1634,7 @@ class SampleView extends React.Component {
     newSelectedOptions.categories = {};
     newSelectedOptions.taxa = [];
     newSelectedOptions.thresholds = [];
+    newSelectedOptions.annotations = [];
 
     this.setState(
       {
@@ -1652,11 +1653,12 @@ class SampleView extends React.Component {
 
   countFilters = () => {
     const {
-      selectedOptions: { categories, thresholds, taxa },
+      selectedOptions: { categories, thresholds, taxa, annotations },
     } = this.state;
 
     let numFilters = taxa.length;
     numFilters += thresholds.length;
+    numFilters += annotations.length;
     numFilters += (categories.categories || []).length;
     numFilters += sum(
       map(v => v.length, values(categories.subcategories || {})),
