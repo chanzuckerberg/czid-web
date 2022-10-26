@@ -282,19 +282,14 @@ class SamplesView extends React.Component {
                   selectedIds: selectedIds.size,
                 });
               return (
-                <BareDropdown.Item
-                  key={option.text}
-                  text={
-                    <RouterLink
-                      to={`${option.value}?${params}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {option.text}
-                    </RouterLink>
-                  }
+                <RouterLink
+                  to={`${option.value}?${params}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={log}
-                />
+                >
+                  <BareDropdown.Item key={option.text} text={option.text} />
+                </RouterLink>
               );
             }
           })}
