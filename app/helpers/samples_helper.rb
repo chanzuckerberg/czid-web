@@ -974,21 +974,22 @@ module SamplesHelper
     annotation_filters = sanitize_annotation_filters(annotation_filters)
 
     # If a taxon has multiple annotations, only the most recently-created annotation is considered active
-    samples = samples.left_joins(:pipeline_runs).where(pipeline_runs: { deprecated: false })
-                     .joins("
-            LEFT OUTER JOIN annotations a
-              ON a.pipeline_run_id = pipeline_runs.id
-              AND a.id IN (
-                SELECT MAX(id)
-                FROM annotations
-                WHERE pipeline_run_id = pipeline_runs.id
-                GROUP BY tax_id
-            )")
-    if tax_ids.present?
-      samples.where(a: { content: annotation_filters, tax_id: tax_ids }).distinct
-    else
-      samples.where(a: { content: annotation_filters }).distinct
-    end
+    join_on_active_annotation = "
+      LEFT OUTER JOIN annotations a
+      ON a.pipeline_run_id = pipeline_runs.id
+      AND a.id IN (
+        SELECT MAX(id)
+        FROM annotations
+        WHERE pipeline_run_id = pipeline_runs.id
+        GROUP BY tax_id
+    )"
+
+    samples
+      .where(id: samples
+        .distinct(:id)
+        .left_joins(:pipeline_runs).where(pipeline_runs: { deprecated: false })
+        .joins(join_on_active_annotation)
+        .where(tax_ids.present? ? { a: { content: annotation_filters, tax_id: tax_ids } } : { a: { content: annotation_filters } }))
   end
 
   def get_upload_credentials(samples)

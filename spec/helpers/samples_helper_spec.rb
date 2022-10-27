@@ -861,6 +861,8 @@ RSpec.describe SamplesHelper, type: :helper do
     end
 
     it "returns correctly-filtered samples with the specified annotations(s) on the specifed taxa" do
+      taxon_two = create(:taxon_lineage, tax_name: "taxon", taxid: 2)
+      create(:annotation, pipeline_run_id: @pr_one.id, tax_id: taxon_two.taxid, content: "hit")
       results = helper.send(:filter_by_taxon_annotation, @samples_input, ["{\"name\":\"Hit\"}"], [@taxon.taxid])
       expect(results.pluck(:id)).to eq([])
 
