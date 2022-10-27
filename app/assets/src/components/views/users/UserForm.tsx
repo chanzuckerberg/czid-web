@@ -219,6 +219,7 @@ const UserForm = ({
               <i className="fa fa-spinner fa-spin fa-lg" />{" "}
             </div>
           ) : (
+            // @ts-expect-error Type 'unknown' is not assignable to type 'MouseEventHandler<HTMLDivElement>'.
             <div onClick={submitFunc()} className="center login-wrapper">
               Submit
             </div>
@@ -255,7 +256,7 @@ interface UserFormProps {
   onSendActivationChange: $TSFixMeFunction;
   selectedUser: object;
   sendActivation: boolean;
-  serverErrors: [];
+  serverErrors: $TSFixMe[];
   showFailed: boolean;
   submitFunc: $TSFixMeFunction;
   submitting: boolean;

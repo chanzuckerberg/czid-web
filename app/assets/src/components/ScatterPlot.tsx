@@ -1,20 +1,45 @@
 import d3 from "d3";
 import React from "react";
 
-class ScatterPlot extends React.Component {
+interface ScatterPlotProps {
+  data: $TSFixMe[];
+  xKey: string;
+  yKey: string;
+  width: number;
+  height: number;
+  xLabel: string;
+  yLabel: string;
+}
+
+class ScatterPlot extends React.Component<ScatterPlotProps> {
+  container: $TSFixMe;
+  data: $TSFixMe;
+  height: $TSFixMe;
+  margin: $TSFixMe;
+  scale: $TSFixMe;
+  svg: $TSFixMe;
+  width: $TSFixMe;
+  xKey: $TSFixMe;
+  xLabel: $TSFixMe;
+  xMinMax: $TSFixMe;
+  xScale: $TSFixMe;
+  yKey: $TSFixMe;
+  yLabel: $TSFixMe;
+  yMinMax: $TSFixMe;
+  yScale: $TSFixMe;
   componentDidMount() {
     this.renderD3(this.props);
   }
 
   // eslint-disable-next-line camelcase
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: ScatterPlotProps) {
     d3.select(this.container)
       .select("svg")
       .remove();
     this.renderD3(nextProps);
   }
 
-  renderD3(props) {
+  renderD3(props: ScatterPlotProps) {
     this.data = props.data;
     this.margin = {
       top: 10,
@@ -35,12 +60,12 @@ class ScatterPlot extends React.Component {
     this.width -= this.margin.left + this.margin.right;
     this.height -= this.margin.top + this.margin.bottom;
 
-    this.xMinMax = d3.extent(this.data, d => {
+    this.xMinMax = d3.extent(this.data, (d: $TSFixMe) => {
       return d[this.xKey];
     });
     this.xMinMax = [this.xMinMax[0] - 1, this.xMinMax[1] + 1];
 
-    this.yMinMax = d3.extent(this.data, d => {
+    this.yMinMax = d3.extent(this.data, (d: $TSFixMe) => {
       return d[this.yKey];
     });
     this.yMinMax = [this.yMinMax[0] - 1, this.yMinMax[1] + 1];
@@ -65,7 +90,7 @@ class ScatterPlot extends React.Component {
     this.renderFitLine();
   }
   renderXAxis() {
-    var xAxis = d3.svg
+    const xAxis = d3.svg
       .axis()
       .scale(this.xScale)
       .ticks(10, ".2f")
@@ -92,7 +117,7 @@ class ScatterPlot extends React.Component {
   }
 
   renderYAxis() {
-    var yAxis = d3.svg
+    const yAxis = d3.svg
       .axis()
       .scale(this.yScale)
       .ticks(10, ",.2f")
@@ -127,26 +152,26 @@ class ScatterPlot extends React.Component {
       .append("circle")
       .attr("class", "point")
       .attr("r", 2)
-      .attr("data-x", d => {
+      .attr("data-x", (d: $TSFixMe) => {
         return d[this.xKey];
       })
-      .attr("data-y", d => {
+      .attr("data-y", (d: $TSFixMe) => {
         return d[this.yKey];
       })
-      .attr("cx", d => {
+      .attr("cx", (d: $TSFixMe) => {
         return this.xScale(d[this.xKey]);
       })
-      .attr("cy", d => {
+      .attr("cy", (d: $TSFixMe) => {
         return this.yScale(d[this.yKey]);
       });
   }
 
   renderFitLine() {
-    let leastSquares = this.leastSquares();
-    let slope = leastSquares[0];
-    let intercept = leastSquares[1];
+    const leastSquares = this.leastSquares();
+    const slope = leastSquares[0];
+    const intercept = leastSquares[1];
 
-    let x1 = Math.max((this.yMinMax[0] - intercept) / slope, this.xMinMax[0]);
+    const x1 = Math.max((this.yMinMax[0] - intercept) / slope, this.xMinMax[0]);
 
     this.svg
       .append("g")
@@ -163,41 +188,41 @@ class ScatterPlot extends React.Component {
   }
 
   leastSquares() {
-    let xSeries = this.data.map(d => {
+    const xSeries = this.data.map((d: $TSFixMe) => {
       return d[this.xKey];
     });
-    let ySeries = this.data.map(d => {
+    const ySeries = this.data.map((d: $TSFixMe) => {
       return d[this.yKey];
     });
 
-    let reduceSumFunc = function(prev, cur) {
+    const reduceSumFunc = function(prev: $TSFixMe, cur: $TSFixMe) {
       return prev + cur;
     };
 
-    let xBar = (xSeries.reduce(reduceSumFunc) * 1.0) / xSeries.length;
-    let yBar = (ySeries.reduce(reduceSumFunc) * 1.0) / ySeries.length;
+    const xBar = (xSeries.reduce(reduceSumFunc) * 1.0) / xSeries.length;
+    const yBar = (ySeries.reduce(reduceSumFunc) * 1.0) / ySeries.length;
 
-    let ssXX = xSeries
-      .map(function(d) {
+    const ssXX = xSeries
+      .map(function(d: $TSFixMe) {
         return Math.pow(d - xBar, 2);
       })
       .reduce(reduceSumFunc);
 
-    let ssYY = ySeries
-      .map(function(d) {
+    const ssYY = ySeries
+      .map(function(d: $TSFixMe) {
         return Math.pow(d - yBar, 2);
       })
       .reduce(reduceSumFunc);
 
-    let ssXY = xSeries
-      .map(function(d, i) {
+    const ssXY = xSeries
+      .map(function(d: $TSFixMe, i: $TSFixMe) {
         return (d - xBar) * (ySeries[i] - yBar);
       })
       .reduce(reduceSumFunc);
 
-    let slope = ssXY / ssXX;
-    let intercept = yBar - xBar * slope;
-    let rSquare = Math.pow(ssXY, 2) / (ssXX * ssYY);
+    const slope = ssXY / ssXX;
+    const intercept = yBar - xBar * slope;
+    const rSquare = Math.pow(ssXY, 2) / (ssXX * ssYY);
 
     return [slope, intercept, rSquare];
   }

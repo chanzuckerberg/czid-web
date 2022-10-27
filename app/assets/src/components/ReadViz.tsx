@@ -1,8 +1,14 @@
-import PropTypes from "prop-types";
 import React from "react";
 
-function ReadViz({ metrics, name, refInfo, sequence }) {
-  const repeatStr = (c, n) => {
+interface ReadVizProps {
+  metrics?: number | string[];
+  name?: string;
+  refInfo?: string[];
+  sequence?: string;
+}
+
+function ReadViz({ metrics, name, refInfo, sequence }: ReadVizProps) {
+  const repeatStr = (c: $TSFixMe, n: $TSFixMe) => {
     let output = "";
     for (let i = 0; i < n; i += 1) {
       output += c;
@@ -10,12 +16,12 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
     return output;
   };
 
-  const generateQualityString = (refString, seqString) => {
+  const generateQualityString = (refString: $TSFixMe, seqString: $TSFixMe) => {
     let misMatches = 0;
     let qualityString = "";
     for (let i = 0; i < seqString.length; i += 1) {
-      let cr = refString[i];
-      let cs = seqString[i];
+      const cr = refString[i];
+      const cs = seqString[i];
       if (cr === "N" || cs === "N" || cr === cs) {
         qualityString += " ";
       } else {
@@ -26,9 +32,9 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
     return [qualityString, misMatches];
   };
 
-  const complementSeq = seq => {
+  const complementSeq = (seq: $TSFixMe) => {
     let output = "";
-    for (let c of seq) {
+    for (const c of seq) {
       switch (c) {
         case "A":
           output += "T";
@@ -49,7 +55,7 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
     return output;
   };
 
-  const parseAlignment = readInfo => {
+  const parseAlignment = (readInfo: $TSFixMe) => {
     const readPart = parseInt(readInfo.name.split("/")[1]) || 1;
     const seqLen = readInfo.sequence.length;
     let sequence = readInfo.sequence;
@@ -74,21 +80,21 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
       (reversed === 1 && readPart === 1) ||
       (reversed === 0 && readPart === 2)
     ) {
-      let m4 = readInfo.metrics[4];
-      let m5 = readInfo.metrics[5];
+      const m4 = readInfo.metrics[4];
+      const m5 = readInfo.metrics[5];
       readInfo.metrics[4] = seqLen - m5 + 1;
       readInfo.metrics[5] = seqLen - m4 + 1;
     }
 
-    let alignedPortion = sequence.slice(
+    const alignedPortion = sequence.slice(
       readInfo.metrics[4] - 1,
       readInfo.metrics[5],
     );
-    let leftPortion =
+    const leftPortion =
       readInfo.metrics[4] - 2 >= 0
         ? sequence.slice(0, readInfo.metrics[4] - 1)
         : "";
-    let rightPortion =
+    const rightPortion =
       readInfo.metrics[5] < seqLen ? sequence.slice(readInfo.metrics[5]) : "";
 
     if (readInfo.refInfo[0].length > leftPortion.length) {
@@ -111,25 +117,25 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
         readInfo.refInfo[2] += " ";
       }
     }
-    let [qualityString1, misMatches1] = generateQualityString(
+    const [qualityString1, misMatches1] = generateQualityString(
       readInfo.refInfo[1],
       alignedPortion,
     );
-    let [qualityString2, misMatches2] = generateQualityString(
+    const [qualityString2, misMatches2] = generateQualityString(
       readInfo.refInfo[1],
       complementSeq(alignedPortion),
     );
-    let qualityString =
+    const qualityString =
       misMatches1 < misMatches2 ? qualityString1 : qualityString2;
-    let aligned =
+    const aligned =
       misMatches1 < misMatches2
         ? alignedPortion
         : complementSeq(alignedPortion);
-    let whiteSpaceLeft = repeatStr(" ", leftPortion.length);
-    let whiteSpaceRight = repeatStr(" ", rightPortion.length);
-    let refSeqDisplay = readInfo.refInfo.join("|");
-    let readSeqDisplay = [leftPortion, aligned, rightPortion].join("|");
-    let qualityStringDisplay = [
+    const whiteSpaceLeft = repeatStr(" ", leftPortion.length);
+    const whiteSpaceRight = repeatStr(" ", rightPortion.length);
+    const refSeqDisplay = readInfo.refInfo.join("|");
+    const readSeqDisplay = [leftPortion, aligned, rightPortion].join("|");
+    const qualityStringDisplay = [
       whiteSpaceLeft,
       qualityString,
       whiteSpaceRight,
@@ -182,14 +188,5 @@ function ReadViz({ metrics, name, refInfo, sequence }) {
     </div>
   );
 }
-
-ReadViz.propTypes = {
-  metrics: PropTypes.arrayOf(
-    PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  ),
-  name: PropTypes.string,
-  refInfo: PropTypes.arrayOf(PropTypes.string),
-  sequence: PropTypes.string,
-};
 
 export default ReadViz;

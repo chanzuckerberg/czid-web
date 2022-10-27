@@ -2,11 +2,16 @@ import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import PropTypes from "~/components/utils/propTypes";
 
 import cs from "./basespace_integration.scss";
 
-export default class BasespaceIntegration extends React.Component {
+interface BasespaceIntegrationProps {
+  accessToken?: string;
+}
+
+export default class BasespaceIntegration extends React.Component<
+  BasespaceIntegrationProps
+> {
   componentDidMount() {
     const { accessToken } = this.props;
     if (window.opener && accessToken) {
@@ -64,7 +69,3 @@ export default class BasespaceIntegration extends React.Component {
     );
   }
 }
-
-BasespaceIntegration.propTypes = {
-  accessToken: PropTypes.string,
-};

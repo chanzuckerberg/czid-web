@@ -1,12 +1,39 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
 import ReadViz from "./ReadViz";
 
-class AccessionViz extends React.Component {
-  constructor(props) {
-    super();
+interface AccessionVizProps {
+  accession?: string;
+  coverageSummary?: object;
+  name?: string;
+  reads?: string | number[] | string[][][];
+  readsPerPage?: number;
+  ref_link?: string;
+  ref_seq?: string;
+  ref_seq_len?: number;
+  reads_count?: number;
+}
+
+interface AccessionVizState {
+  reads: [
+    string | undefined,
+    string | undefined,
+    number | string[] | undefined,
+    string[],
+  ][];
+  rendering: boolean;
+}
+
+class AccessionViz extends React.Component<
+  AccessionVizProps,
+  AccessionVizState
+> {
+  allReads: $TSFixMe;
+  coverageSummary: $TSFixMe;
+  readsPerPage: $TSFixMe;
+  constructor(props: AccessionVizProps) {
+    super(props);
     this.allReads = props.reads;
     this.readsPerPage = props.readsPerPage;
     this.coverageSummary = props.coverageSummary || {};
@@ -17,7 +44,7 @@ class AccessionViz extends React.Component {
     };
   }
 
-  componentDidUpdate(_prevProps, _prevState) {
+  componentDidUpdate() {
     this.setState({
       rendering: false,
     });
@@ -25,7 +52,7 @@ class AccessionViz extends React.Component {
 
   renderMoreReads() {
     const numReads = this.state.reads.length;
-    let nextPageReads = this.allReads.slice(
+    const nextPageReads = this.allReads.slice(
       numReads,
       numReads + this.readsPerPage,
     );
@@ -34,7 +61,7 @@ class AccessionViz extends React.Component {
     }));
   }
 
-  renderCoverageTable(coverageTable) {
+  renderCoverageTable(coverageTable: $TSFixMe) {
     return (
       <div>
         <h5> Coverage Details </h5>
@@ -42,13 +69,13 @@ class AccessionViz extends React.Component {
           <tbody>
             <tr>
               <td>Read Count</td>
-              {coverageTable.map((item, i) => {
+              {coverageTable.map((item: $TSFixMe, i: $TSFixMe) => {
                 return <td key={`count_${i}`}>{item[1]}</td>;
               })}
             </tr>
             <tr>
               <td>Position Range</td>
-              {coverageTable.map((item, i) => {
+              {coverageTable.map((item: $TSFixMe, i: $TSFixMe) => {
                 return <td key={`position_${i}`}>{item[0]}</td>;
               })}
             </tr>
@@ -58,26 +85,27 @@ class AccessionViz extends React.Component {
     );
   }
 
-  renderCoverageSummary(cs) {
-    let readLength = cs.total_read_length / cs.num_reads;
-    let avgAlignedLength = cs.total_aligned_length / cs.num_reads;
-    let avgAlignedPct = (avgAlignedLength / readLength) * 100;
-    let mismatchedPct =
+  renderCoverageSummary(cs: $TSFixMe) {
+    const readLength = cs.total_read_length / cs.num_reads;
+    const avgAlignedLength = cs.total_aligned_length / cs.num_reads;
+    const avgAlignedPct = (avgAlignedLength / readLength) * 100;
+    const mismatchedPct =
       (cs.total_mismatched_length / cs.total_aligned_length) * 100;
-    let coverage = (cs.total_aligned_length / cs.ref_seq_len) * 100;
-    let distinctCoverage = (cs.distinct_covered_length / cs.ref_seq_len) * 100;
+    const coverage = (cs.total_aligned_length / cs.ref_seq_len) * 100;
+    const distinctCoverage =
+      (cs.distinct_covered_length / cs.ref_seq_len) * 100;
     return (
       <div>
-        Read Length: <b> {readLength} </b>, Average Aligned Length:{" "}
+        Read Length:<b> {readLength} </b>, Average Aligned Length:{" "}
         <b>
           {" "}
           {avgAlignedLength.toFixed(2)} ({avgAlignedPct.toFixed(2)} %){" "}
         </b>
-        , Mismatched Percenage: <b> {mismatchedPct.toFixed(2)} % </b> <br />
-        Total Aligned bps: <b> {cs.total_aligned_length} </b>, Coverage:{" "}
+        , Mismatched Percenage:<b> {mismatchedPct.toFixed(2)} % </b> <br />
+        Total Aligned bps:<b> {cs.total_aligned_length} </b>, Coverage:{" "}
         <b> {coverage} % </b> <br />
-        Distinct Aligned bps: <b> {cs.distinct_covered_length} </b>, Distinct
-        Coverage: <b>{distinctCoverage} %</b>
+        Distinct Aligned bps:<b> {cs.distinct_covered_length} </b>, Distinct
+        Coverage:<b>{distinctCoverage} %</b>
       </div>
     );
   }
@@ -119,7 +147,8 @@ class AccessionViz extends React.Component {
         <b>
           <a href={this.props.ref_link}>NCBI URL</a>
         </b>
-        , <b> {this.props.reads_count} </b> aligned reads <br />
+        ,<b> {this.props.reads_count} </b>aligned reads
+        <br />
         {coverageSummary}
         {coverageTable}
         <h5>Reads</h5>
@@ -140,25 +169,5 @@ class AccessionViz extends React.Component {
     );
   }
 }
-
-AccessionViz.propTypes = {
-  accession: PropTypes.string,
-  coverageSummary: PropTypes.object,
-  name: PropTypes.string,
-  reads: PropTypes.arrayOf(
-    PropTypes.arrayOf(
-      PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.arrayOf(PropTypes.number),
-        PropTypes.arrayOf(PropTypes.string),
-      ]),
-    ),
-  ),
-  readsPerPage: PropTypes.number,
-  ref_link: PropTypes.string,
-  ref_seq: PropTypes.string,
-  ref_seq_len: PropTypes.number,
-  reads_count: PropTypes.number,
-};
 
 export default AccessionViz;

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 import {
   RESULTS_FOLDER_STAGE_KEYS,
@@ -8,13 +7,18 @@ import Divider from "./layout/Divider";
 import cs from "./results_folder.scss";
 import { openUrl, downloadStringToFile } from "./utils/links";
 
-class OutputFile extends React.Component {
-  constructor(props, context) {
+interface OutputFileProps {
+  file?: object;
+}
+
+class OutputFile extends React.Component<OutputFileProps> {
+  file: $TSFixMe;
+  constructor(props: OutputFileProps, context: $TSFixMe) {
     super(props, context);
     this.file = props.file;
   }
 
-  conditionalOpenUrl = url => {
+  conditionalOpenUrl = (url: $TSFixMe) => {
     if (url) {
       openUrl(this.file.url);
     }
@@ -36,8 +40,13 @@ class OutputFile extends React.Component {
   }
 }
 
-class ConfigFile extends React.Component {
-  constructor(props, context) {
+interface ConfigFileProps {
+  stageDagJson?: object;
+}
+
+class ConfigFile extends React.Component<ConfigFileProps> {
+  stageDagJson: $TSFixMe;
+  constructor(props: ConfigFileProps, context: $TSFixMe) {
     super(props, context);
     this.stageDagJson = props.stageDagJson;
   }
@@ -67,8 +76,13 @@ const ResultsFolderStepDivider = () => {
   );
 };
 
-class ResultsFolderStep extends React.Component {
-  constructor(props, context) {
+interface ResultsFolderStepProps {
+  step?: object;
+}
+
+class ResultsFolderStep extends React.Component<ResultsFolderStepProps> {
+  step: $TSFixMe;
+  constructor(props: $TSFixMe, context: $TSFixMe) {
     super(props, context);
     this.step = props.step;
   }
@@ -97,7 +111,7 @@ class ResultsFolderStep extends React.Component {
             ) : null}
           </td>
         </tr>
-        {fileList.map((file, j) => {
+        {fileList.map((file: $TSFixMe, j: $TSFixMe) => {
           return <OutputFile file={file} key={j} />;
         })}
         <ResultsFolderStepDivider />
@@ -106,8 +120,15 @@ class ResultsFolderStep extends React.Component {
   }
 }
 
-class ResultsFolderStepList extends React.Component {
-  constructor(props, context) {
+interface ResultsFolderStepListProps {
+  stepDict?: object;
+}
+
+class ResultsFolderStepList extends React.Component<
+  ResultsFolderStepListProps
+> {
+  stepDict: $TSFixMe;
+  constructor(props: $TSFixMe, context: $TSFixMe) {
     super(props, context);
     this.stepDict = props.stepDict;
   }
@@ -120,8 +141,23 @@ class ResultsFolderStepList extends React.Component {
   }
 }
 
-class ResultsFolder extends React.Component {
-  constructor(props, context) {
+interface ResultsFolderProps {
+  filePath?: string;
+  fileList?: unknown[];
+  samplePath?: string;
+  sampleName?: string;
+  projectName?: string;
+  rawResultsUrl?: string;
+}
+
+class ResultsFolder extends React.Component<ResultsFolderProps> {
+  filePath: $TSFixMe;
+  fileUrl: $TSFixMe;
+  projectName: $TSFixMe;
+  rawResultsUrl: $TSFixMe;
+  sampleName: $TSFixMe;
+  stageDict: $TSFixMe;
+  constructor(props: $TSFixMe, context: $TSFixMe) {
     super(props, context);
     this.fileUrl = props.filePath;
     this.filePath = this.fileUrl.split("/");
@@ -134,6 +170,7 @@ class ResultsFolder extends React.Component {
   render() {
     const {
       stageDescriptionKey,
+      // @ts-expect-error Property 'stageDagJsonKey' does not exist on type
       stageDagJsonKey,
       stepsKey,
       stageNameKey,
@@ -206,30 +243,5 @@ class ResultsFolder extends React.Component {
     );
   }
 }
-
-ConfigFile.propTypes = {
-  stageDagJson: PropTypes.object,
-};
-
-OutputFile.propTypes = {
-  file: PropTypes.object,
-};
-
-ResultsFolderStep.propTypes = {
-  step: PropTypes.object,
-};
-
-ResultsFolderStepList.propTypes = {
-  stepDict: PropTypes.object,
-};
-
-ResultsFolder.propTypes = {
-  filePath: PropTypes.string,
-  fileList: PropTypes.array,
-  samplePath: PropTypes.string,
-  sampleName: PropTypes.string,
-  projectName: PropTypes.string,
-  rawResultsUrl: PropTypes.string,
-};
 
 export default ResultsFolder;

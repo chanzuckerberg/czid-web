@@ -1,5 +1,4 @@
 import { includes } from "lodash/fp";
-import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { withAnalytics } from "~/api/analytics";
 import { useCreateUser, updateUser as userUpdater } from "~/api/user";
@@ -17,7 +16,19 @@ const LANDSCAPE_EXPLORER = "Landscape Explorer";
 const OUTBREAK_SURVEYOR = "Outbreak Surveyor";
 const MICROBIOME_INVESTIGATOR = "Microbiome Investigator";
 
-function CreateUser(props = {}) {
+interface CreateUserProps {
+  selectedUser?: {
+    admin?: boolean;
+    archetypes?: string;
+    email?: string;
+    name?: string;
+    institution?: string;
+    id?: number;
+    segments?: string;
+  };
+}
+
+function CreateUser(props: CreateUserProps = {}) {
   const user = props.selectedUser || null;
   const selectedUser = {
     email: user ? user.email : "",
@@ -100,14 +111,15 @@ function CreateUser(props = {}) {
     setShowFailed(false);
   };
 
-  const handleEmailChange = email => setEmail(email);
+  const handleEmailChange = (email: string) => setEmail(email);
 
-  const handleNameChange = name => setName(name);
+  const handleNameChange = (name: string) => setName(name);
 
-  const handleInstitutionChange = institution => setInstitution(institution);
+  const handleInstitutionChange = (institution: string) =>
+    setInstitution(institution);
 
   const getArchetypes = () => {
-    let archetypes = [];
+    const archetypes = [];
     if (isMedicalDetective) {
       archetypes.push(MEDICAL_DETECTIVE);
     }
@@ -124,7 +136,7 @@ function CreateUser(props = {}) {
   };
 
   const getSegments = () => {
-    let segments = [];
+    const segments = [];
     if (isAfricaCDC) {
       segments.push(AFRICA_CDC);
     }
@@ -147,6 +159,7 @@ function CreateUser(props = {}) {
     const archetypes = getArchetypes();
     const segments = getSegments();
     try {
+      // @ts-expect-error This expression is not callable.
       await userCreator({
         variables: {
           name,
@@ -281,17 +294,5 @@ function CreateUser(props = {}) {
     </div>
   );
 }
-
-CreateUser.propTypes = {
-  selectedUser: PropTypes.shape({
-    admin: PropTypes.bool,
-    archetypes: PropTypes.string,
-    email: PropTypes.string,
-    name: PropTypes.string,
-    institution: PropTypes.string,
-    id: PropTypes.number,
-    segments: PropTypes.string,
-  }),
-};
 
 export default CreateUser;

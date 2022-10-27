@@ -1,5 +1,4 @@
 import _ from "lodash";
-import PropTypes from "prop-types";
 import React from "react";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
@@ -15,7 +14,8 @@ const columns = [
   {
     Header: "Gene",
     accessor: "gene",
-    aggregate: vals => "",
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    aggregate: (_vals: $TSFixMe) => "",
     style: {
       textAlign: "center",
     },
@@ -27,30 +27,37 @@ const columns = [
     style: {
       textAlign: "center",
     },
-    aggregate: vals => _.round(_.mean(vals)),
-    filterMethod: (filter, row) => row[filter.id] >= filter.value,
-    Cell: props => parseFloat(props.value).toFixed(1),
+    aggregate: (vals: $TSFixMe) => _.round(_.mean(vals)),
+    filterMethod: (filter: $TSFixMe, row: $TSFixMe) =>
+      row[filter.id] >= filter.value,
+    Cell: (props: $TSFixMe) => parseFloat(props.value).toFixed(1),
   },
   {
     Header: "Depth",
     accessor: "depth",
-    aggregate: vals => _.round(_.sum(vals)),
+    aggregate: (vals: $TSFixMe) => _.round(_.sum(vals)),
     style: {
       textAlign: "center",
     },
-    filterMethod: (filter, row) => row[filter.id] >= filter.value,
-    Cell: props => parseFloat(props.value).toFixed(1),
+    filterMethod: (filter: $TSFixMe, row: $TSFixMe) =>
+      row[filter.id] >= filter.value,
+    Cell: (props: $TSFixMe) => parseFloat(props.value).toFixed(1),
   },
 ];
 
-class DeprecatedAmrView extends React.Component {
-  constructor(props) {
+interface DeprecatedAmrViewProps {
+  amr?: object;
+}
+
+class DeprecatedAmrView extends React.Component<DeprecatedAmrViewProps> {
+  data: $TSFixMe;
+  constructor(props: DeprecatedAmrViewProps) {
     super(props);
     this.data = props.amr ? props.amr : (this.data = []);
     if (this.data) {
       // TODO: Talk with Chaz to determine how to improve gene family identification further.
-      for (var i = 0; i < Object.keys(this.data).length; i++) {
-        var key = Object.keys(this.data)[i];
+      for (let i = 0; i < Object.keys(this.data).length; i++) {
+        const key = Object.keys(this.data)[i];
         this.data[key].gene_family = this.data[key].gene.slice(0, 5); // first four characters of gene family
       }
     }
@@ -60,7 +67,8 @@ class DeprecatedAmrView extends React.Component {
       <div className={cs.tableContainer}>
         <ReactTable
           filterable
-          defaultFilterMethod={(filter, row, column) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          defaultFilterMethod={(filter, row, _column) => {
             const id = filter.pivotId || filter.id;
             return row[id] !== undefined
               ? String(row[id])
@@ -85,9 +93,5 @@ class DeprecatedAmrView extends React.Component {
     );
   }
 }
-
-DeprecatedAmrView.propTypes = {
-  amr: PropTypes.object,
-};
 
 export default DeprecatedAmrView;

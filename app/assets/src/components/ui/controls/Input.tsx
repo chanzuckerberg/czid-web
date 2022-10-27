@@ -9,6 +9,7 @@ interface InputProps {
   onChange?: $TSFixMeFunction;
   onBlur?: $TSFixMeFunction;
   className?: string;
+  defaultValue?: string;
   disableAutocomplete?: boolean;
   fluid?: boolean;
   icon?: string;

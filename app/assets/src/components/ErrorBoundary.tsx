@@ -1,8 +1,11 @@
-import PropTypes from "prop-types";
 import React from "react";
 
-class ErrorBoundary extends React.Component {
-  componentDidCatch(error, info) {
+interface ErrorBoundaryProps {
+  children?: React.ReactNode;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps> {
+  componentDidCatch(error: $TSFixMe, info: $TSFixMe) {
     // TODO: do proper error processing
     // eslint-disable-next-line no-console
     console.error("ErrorBoundary", error, info);
@@ -12,9 +15,5 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-
-ErrorBoundary.propTypes = {
-  children: PropTypes.node,
-};
 
 export default ErrorBoundary;

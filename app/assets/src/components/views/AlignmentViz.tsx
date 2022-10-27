@@ -7,13 +7,38 @@ import {
   isPipelineFeatureAvailable,
   ASSEMBLY_FEATURE,
 } from "~/components/utils/pipeline_versions";
-import PropTypes from "~/components/utils/propTypes";
 import AccessionViz from "../AccessionViz";
 import cs from "./alignment_viz.scss";
 
-class AlignmentViz extends React.Component {
-  constructor(props) {
-    super();
+interface AlignmentVizProps {
+  alignmentQuery?: string;
+  pipelineVersion?: string;
+  readsPerPage?: number;
+  sampleId?: number;
+  taxId?: string;
+  taxLevel?: string;
+  taxName?: string;
+}
+
+interface AlignmentVizState {
+  alignmentData: $TSFixMeUnknown[] | { error: string };
+  pipelineRun: { pipeline_version: string } | null;
+  loading: boolean;
+}
+
+class AlignmentViz extends React.Component<
+  AlignmentVizProps,
+  AlignmentVizState
+> {
+  alignmentQuery: $TSFixMe;
+  pipelineVersion: $TSFixMe;
+  readsPerPage: $TSFixMe;
+  sampleId: $TSFixMe;
+  taxId: $TSFixMe;
+  taxLevel: $TSFixMe;
+  taxName: $TSFixMe;
+  constructor(props: AlignmentVizProps) {
+    super(props);
     this.sampleId = props.sampleId;
     this.alignmentQuery = props.alignmentQuery;
     this.taxId = props.taxId;
@@ -86,7 +111,7 @@ class AlignmentViz extends React.Component {
               )}
           </h2>
           <div className={cs.accessionViz}>
-            {alignmentData.map(function(item, i) {
+            {alignmentData.map(function(this: $TSFixMe, item, i) {
               return (
                 <AccessionViz
                   key={`accession_${i}`}
@@ -103,15 +128,5 @@ class AlignmentViz extends React.Component {
     }
   }
 }
-
-AlignmentViz.propTypes = {
-  alignmentQuery: PropTypes.string,
-  pipelineVersion: PropTypes.string,
-  readsPerPage: PropTypes.number,
-  sampleId: PropTypes.number,
-  taxId: PropTypes.string,
-  taxLevel: PropTypes.string,
-  taxName: PropTypes.string,
-};
 
 export default AlignmentViz;

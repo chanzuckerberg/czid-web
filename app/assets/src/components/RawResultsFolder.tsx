@@ -1,10 +1,20 @@
-// This legacy component is intended to be developer-facing only.
-// The user-facing component has since evolved to ResultsFolder.jsx.
-import PropTypes from "prop-types";
 import React from "react";
 
-class RawResultsFolder extends React.Component {
-  constructor(props, context) {
+interface RawResultsFolderProps {
+  samplePath?: string;
+  sampleName?: string;
+  projectName?: string;
+  filePath?: string;
+  fileList?: $TSFixMeUnknown[];
+}
+
+class RawResultsFolder extends React.Component<RawResultsFolderProps> {
+  fileList: $TSFixMe;
+  filePath: $TSFixMe;
+  fileUrl: $TSFixMe;
+  projectName: $TSFixMe;
+  sampleName: $TSFixMe;
+  constructor(props: RawResultsFolderProps, context: $TSFixMe) {
     super(props, context);
     this.fileUrl = props.filePath;
     this.filePath = this.fileUrl.split("/");
@@ -13,7 +23,7 @@ class RawResultsFolder extends React.Component {
     this.projectName = props.projectName;
   }
 
-  download(url) {
+  download(url: $TSFixMe) {
     location.href = `${url}`;
   }
 
@@ -49,7 +59,7 @@ class RawResultsFolder extends React.Component {
                 </tr>
               </thead>
               <tbody>
-                {this.fileList.map((file, i) => {
+                {this.fileList.map((file: $TSFixMe, i: $TSFixMe) => {
                   return (
                     <tr
                       className="file-link"
@@ -74,13 +84,5 @@ class RawResultsFolder extends React.Component {
     );
   }
 }
-
-RawResultsFolder.propTypes = {
-  samplePath: PropTypes.string,
-  sampleName: PropTypes.string,
-  projectName: PropTypes.string,
-  filePath: PropTypes.string,
-  fileList: PropTypes.array,
-};
 
 export default RawResultsFolder;
