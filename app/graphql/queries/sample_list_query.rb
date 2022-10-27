@@ -4,6 +4,8 @@ module Queries
     include SamplesHelper
 
     included do
+      MAX_SAMPLES_LIMIT = 100
+
       field :samples_list, Types::SampleListType, null: false do
         argument :projectId, Integer, required: false
         argument :domain, String, required: false
@@ -42,7 +44,22 @@ module Queries
                  end
 
       order_dir = sanitize_order_dir(params[:orderDir], :desc)
-      limit = params[limit] ? parmas[limit].to_i : 100
+      limit = params[:limit] ? params[:limit].to_i : nil
+
+      # API best practice is to have some hard limit to prevent an API call from
+      # retrieving large amounts of data.  The app has some pages (i.e. quality control)
+      # which need to retrieve all samples for a project, which may be over the limit.
+      # To balance safety and functionality, if a project id is provided, we allow the limit to be disabled
+      limit = if limit.nil?
+                if params[:projectId]
+                  nil
+                else
+                  MAX_SAMPLES_LIMIT
+                end
+              else
+                [MAX_SAMPLES_LIMIT, limit].min
+              end
+
       offset = params[offset].to_i
 
       list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
@@ -72,8 +89,10 @@ module Queries
                   samples.order(Hash[order_by => order_dir])
                 end
 
-      limited_samples = samples.offset(offset).limit(limit)
-
+      limited_samples = samples
+      unless limit.nil?
+        limited_samples = samples.offset(offset).limit(limit)
+      end
       limited_samples_json = limited_samples.includes(:project).as_json(
         only: [:id, :name, :host_genome_id, :project_id, :created_at],
         methods: [:private_until]
