@@ -36,23 +36,26 @@
 
   .reportHeader {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
 
     .statsRow {
       font: $sds-font-body-s-400-font;
       color: $sds-color-gray-500;
 
       display: flex;
-      align-items: center;
-      flex: 1 0 auto;
+      flex-direction: column;
+      align-items: flex-start;
 
-      .reportInfoMsg {
-        &:not(:first-child) {
-          margin-left: $sds-spaces-xxs;
+      .statsRowFilterInfo {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        .clearAllFilters {
+          flex: 0 0 auto;
+          margin-left: $sds-spaces-s;
         }
-      }
-
-      .clearAllFilters {
-        margin-left: $sds-spaces-s;
       }
     }
 

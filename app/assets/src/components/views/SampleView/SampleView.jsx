@@ -1577,8 +1577,8 @@ class SampleView extends React.Component {
     const { total, filtered } = this.countReportRows();
 
     return filtered !== total
-      ? `${filtered} rows passing the above filters, out of ${total} total rows`
-      : `${total} rows`;
+      ? `${filtered} rows passing the above filters, out of ${total} total rows `
+      : `${total} rows `;
   };
 
   truncatedMessage = () => {
@@ -1587,7 +1587,7 @@ class SampleView extends React.Component {
     } = this.state;
     return (
       truncatedReadsCount &&
-      `Initial input was truncated to ${truncatedReadsCount} reads.`
+      `Initial input was truncated to ${truncatedReadsCount} reads. `
     );
   };
 
@@ -1600,7 +1600,7 @@ class SampleView extends React.Component {
       adjustedRemainingReadsCount &&
       subsampledReadsCount !== adjustedRemainingReadsCount &&
       `Report values are computed from ${subsampledReadsCount} unique reads subsampled \
-        randomly from the ${adjustedRemainingReadsCount} reads passing host and quality filters.`
+        randomly from the ${adjustedRemainingReadsCount} reads passing host and quality filters. `
     );
   };
 
@@ -1610,7 +1610,7 @@ class SampleView extends React.Component {
     } = this.state;
     return (
       taxonWhitelisted &&
-      `Report was processed with a whitelist filter of respiratory pathogens.`
+      `Report was processed with a whitelist filter of respiratory pathogens. `
     );
   };
 
@@ -1618,13 +1618,11 @@ class SampleView extends React.Component {
     return compact([
       this.truncatedMessage(),
       this.subsamplingMessage(),
-      this.filteredMessage(),
       this.whitelistedMessage(),
-    ]).map((msg, i) => (
-      <span className={cs.reportInfoMsg} key={`msg-${i}`}>
-        {msg}
-      </span>
-    ));
+    ]).reduce((reportInfoMsg, msg) => {
+      reportInfoMsg += msg;
+      return reportInfoMsg;
+    }, "");
   };
 
   clearAllFilters = () => {
@@ -2217,17 +2215,20 @@ class SampleView extends React.Component {
           <div className={cs.reportHeader}>
             <div className={cs.statsRow}>
               {this.renderReportInfo()}
-              {!!this.countFilters() && (
-                <span className={cs.clearAllFilters}>
-                  <Button
-                    sdsStyle="minimal"
-                    sdsType="secondary"
-                    onClick={this.clearAllFilters}
-                  >
-                    Clear Filters
-                  </Button>
-                </span>
-              )}
+              <div className={cs.statsRowFilterInfo}>
+                {this.filteredMessage()}
+                {!!this.countFilters() && (
+                  <span className={cs.clearAllFilters}>
+                    <Button
+                      sdsStyle="minimal"
+                      sdsType="secondary"
+                      onClick={this.clearAllFilters}
+                    >
+                      Clear Filters
+                    </Button>
+                  </span>
+                )}
+              </div>
             </div>
             <div className={cs.reportViewSelector}>
               <ReportViewSelector
