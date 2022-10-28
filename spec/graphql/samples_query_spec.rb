@@ -19,15 +19,15 @@ RSpec.describe GraphqlController, type: :request do
     $listAllIds: Boolean
     $basic: Boolean
     $sampleIds: [Int!]
-    $host: String
+    $host: [Int!]
     $location: String
-    $locationV2: String
+    $locationV2: [String!]
     $taxIds: [Int!]
     $taxLevels: [String!]
     $thresholdFilterInfo: String
     $annotations: [String!]
-    # $time: String
-    $sampleType: String
+    $time: [String!]
+    $tissue: [String!]
     $visibility: [String!]
     $searchString: String
     $requestedSampleIds: [Int!]
@@ -51,8 +51,8 @@ RSpec.describe GraphqlController, type: :request do
       taxLevels: $taxLevels
       thresholdFilterInfo: $thresholdFilterInfo
       annotations: $annotations
-      # time: $time
-      sampleType: $sampleType
+      time: $time
+      tissue: $tissue
       visibility: $visibility
       searchString: $searchString
       requestedSampleIds: $requestedSampleIds

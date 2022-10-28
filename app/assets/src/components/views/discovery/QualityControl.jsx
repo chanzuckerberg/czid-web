@@ -61,6 +61,7 @@ function QualityControlWrapper(props) {
   const { loading, error, data } = useQuery(GET_PROJECTS_QUERY, {
     variables: { projectId: parseInt(props.projectId) },
   });
+
   const {
     loading: samplesLoading,
     error: samplesError,
@@ -68,8 +69,8 @@ function QualityControlWrapper(props) {
   } = useQuery(GET_SAMPLES_QUERY, {
     variables: {
       projectId: props.projectId,
-      filters: props.filters,
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+      ...props.filters,
     },
   });
 
@@ -142,7 +143,7 @@ function QualityControl({
   useEffect(() => {
     if (!isEqual(filters, filtersRef)) {
       filtersRef.current = filters;
-      fetchProjectData();
+      fetchProjectData().then(redrawHistograms);
     }
   }, [filters]);
 
@@ -168,7 +169,6 @@ function QualityControl({
           return d3.format(".2s")(d);
         }
       };
-
       renderHistogram({
         container: totalReadsHistogramContainer.current,
         data: totalReadsBins,
@@ -226,7 +226,6 @@ function QualityControl({
     );
     const chartColors = legendColors.map(({ color, label }) => color);
 
-    setLoading(false);
     setValidSamples(data.validSamples);
     setRunningSamples(data.runningSamples);
     setFailedSamples(data.failedSamples);
@@ -236,6 +235,7 @@ function QualityControl({
     setReadsLostCategories(categories);
     setReadsLostChartColors(chartColors);
     setTotalSampleCount(totalSampleCount);
+    setLoading(false);
   };
 
   function stackReadsLostData(samplesReadsStats) {

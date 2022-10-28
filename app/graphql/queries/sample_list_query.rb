@@ -16,15 +16,15 @@ module Queries
         argument :listAllIds, GraphQL::Types::Boolean, required: false
         argument :basic, GraphQL::Types::Boolean, required: false
         argument :sampleIds, [Integer], required: false
-        argument :host, String, required: false
+        argument :host, [Integer], required: false
         argument :location, String, required: false
-        argument :locationV2, String, required: false
+        argument :locationV2, [String], required: false
         argument :taxIds, [Integer], required: false
         argument :taxLevels, [String], required: false
         argument :thresholdFilterInfo, String, required: false
         argument :annotations, [String], required: false
-        argument :time, GraphQL::Types::ISO8601DateTime, required: false
-        argument :sampleType, String, required: false
+        argument :time, [String], required: false
+        argument :tissue, [String], required: false
         argument :visibility, [String], required: false
         argument :searchString, String, required: false
         argument :requestedSampleIds, [Integer], required: false
@@ -73,7 +73,7 @@ module Queries
         thresholdFilterInfo: params[:thresholdFilterInfo],
         annotations: params[:annotations],
         time: params[:time],
-        sampleType: params[:sampleType],
+        tissue: params[:tissue],
         visibility: params[:visibility],
         projectId: params[:projectId],
         searchString: params[:searchString],
