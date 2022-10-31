@@ -53,6 +53,7 @@ class WorkflowRun < ApplicationRecord
     amr: "amr",
     consensus_genome: "consensus-genome",
     short_read_mngs: "short-read-mngs",
+    long_read_mngs: "long-read-mngs",
   }.freeze
 
   WORKFLOW_CLASS = {

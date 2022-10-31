@@ -533,7 +533,8 @@ RSpec.describe SamplesHelper, type: :helper do
       @sample_four = create(:sample, project: @project, name: "Test Sample Four", initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
       create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], sample: @sample_four)
 
-      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, @sample_four])
+      @sample_five = create(:sample, project: @project, name: "Test Sample Five", initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs])
+      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, @sample_four.id, @sample_five.id])
     end
 
     it "properly returns only samples with a short-read-mngs workflow" do
@@ -552,6 +553,12 @@ RSpec.describe SamplesHelper, type: :helper do
       query = [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:consensus_genome]]
       results = helper.send(:filter_by_workflow, @samples_input, query)
       expect(results.pluck(:id)).to include(@sample_one.id, @sample_two.id, @sample_three.id, @sample_four.id)
+    end
+
+    it "properly returns only samples with a long-read-mngs workflow" do
+      query = [WorkflowRun::WORKFLOW[:long_read_mngs]]
+      results = helper.send(:filter_by_workflow, @samples_input, query)
+      expect(results.pluck(:id)).to eq([@sample_five.id])
     end
 
     it "returns an empty response if no sample workflows match the query" do
