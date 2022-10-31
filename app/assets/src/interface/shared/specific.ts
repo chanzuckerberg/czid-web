@@ -1,3 +1,4 @@
+import { ThresholdFilterData } from "../dropdown";
 import { BooleanNums, DateString, NameId, NumberId } from "./generic";
 
 export type HistogramShape = $TSFixMe;
@@ -252,3 +253,22 @@ interface LocationObject {
 }
 
 export type Metadata = Record<string, string | LocationObject>;
+
+export interface SelectedOptions {
+  species?: number;
+  categories?: string[];
+  subcategories?: Subcategories;
+  metric?: string;
+  background?: number;
+  thresholdFilters?: ThresholdFilterData[];
+  readSpecificity?: number;
+  sampleSortType?: string;
+  taxaSortType?: string;
+  dataScaleIdx?: number;
+  taxonsPerSample?: number;
+  presets?: string[];
+}
+
+export interface Subcategories {
+  Viruses: string[];
+}

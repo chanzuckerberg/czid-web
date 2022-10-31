@@ -1,5 +1,4 @@
 import { isEqual, isNull, size, startCase } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { getBackgrounds, getMassNormalizedBackgroundAvailability } from "~/api";
@@ -25,8 +24,29 @@ import { openUrl, openUrlInNewTab } from "~utils/links";
 
 import cs from "./heatmap_creation_modal.scss";
 
-export default class HeatmapCreationModal extends React.Component {
-  constructor(props) {
+interface HeatmapCreationModalProps {
+  continueInNewTab?: boolean;
+  onClose: $TSFixMeFunction;
+  open?: boolean;
+  selectedIds?: Set<$TSFixMe> | $TSFixMe[];
+}
+
+interface HeatmapCreationModalState {
+  backgroundOptions: $TSFixMe[];
+  enableMassNormalizedBackgrounds: boolean;
+  selectedBackground: number;
+  selectedCategories: $TSFixMe[];
+  selectedSpecificity: $TSFixMe;
+  selectedSubcategories: object;
+  selectedTaxonLevel: $TSFixMe;
+  selectedThresholdFilters: $TSFixMe[];
+}
+
+export default class HeatmapCreationModal extends React.Component<
+  HeatmapCreationModalProps,
+  HeatmapCreationModalState
+> {
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.state = {
@@ -46,7 +66,7 @@ export default class HeatmapCreationModal extends React.Component {
     this.fetchBackgroundAvailability();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: $TSFixMe) {
     if (prevProps.selectedIds !== this.props.selectedIds) {
       this.fetchBackgroundAvailability();
     }
@@ -55,7 +75,7 @@ export default class HeatmapCreationModal extends React.Component {
   async fetchBackgrounds() {
     const { backgrounds } = await getBackgrounds();
 
-    const backgroundOptions = backgrounds.map(background => ({
+    const backgroundOptions = backgrounds.map((background: $TSFixMe) => ({
       text: background.name,
       value: background.id,
       mass_normalized: background.mass_normalized,
@@ -77,7 +97,7 @@ export default class HeatmapCreationModal extends React.Component {
     });
   }
 
-  onCategoryChange = (categories, subcategories) => {
+  onCategoryChange = (categories: $TSFixMe, subcategories: $TSFixMe) => {
     this.setState({
       selectedCategories: categories,
       selectedSubcategories: subcategories,
@@ -87,10 +107,11 @@ export default class HeatmapCreationModal extends React.Component {
   renderCategoryFilter() {
     const { selectedCategories, selectedSubcategories } = this.state;
 
-    let options = CATEGORIES.map(category => {
-      let option = { text: category.name, value: category.name };
-      let subcategories = category.children;
+    const options = CATEGORIES.map((category: $TSFixMe) => {
+      const option = { text: category.name, value: category.name };
+      const subcategories = category.children;
       if (Array.isArray(subcategories)) {
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'suboptions' does not exist on type '{ te... Remove this comment to see the full error message
         option.suboptions = subcategories.map(subcategory => {
           return { text: subcategory, value: subcategory };
         });
@@ -100,6 +121,7 @@ export default class HeatmapCreationModal extends React.Component {
 
     return (
       <MultipleNestedDropdown
+        // @ts-expect-error Property 'fluid' does not exist on type
         fluid
         options={options}
         onChange={this.onCategoryChange}
@@ -111,7 +133,7 @@ export default class HeatmapCreationModal extends React.Component {
     );
   }
 
-  onBackgroundChange = background => {
+  onBackgroundChange = (background: $TSFixMe) => {
     this.setState({
       selectedBackground: background,
     });
@@ -128,6 +150,7 @@ export default class HeatmapCreationModal extends React.Component {
       <BackgroundModelFilter
         allBackgrounds={backgroundOptions}
         enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+        // @ts-expect-error Property 'fluid' does not exist on type
         fluid
         label={null}
         onChange={this.onBackgroundChange}
@@ -137,12 +160,12 @@ export default class HeatmapCreationModal extends React.Component {
     );
   }
 
-  onTaxonLevelChange = taxonLevel => {
+  onTaxonLevelChange = (taxonLevel: $TSFixMe) => {
     this.setState({ selectedTaxonLevel: taxonLevel });
   };
 
   renderTaxonLevelSelect() {
-    const taxonLevels = [];
+    const taxonLevels: $TSFixMe = [];
     Object.entries(SPECIES_SELECTION_OPTIONS).forEach(([text, value]) =>
       taxonLevels.push({ text: startCase(text), value }),
     );
@@ -159,7 +182,7 @@ export default class HeatmapCreationModal extends React.Component {
     );
   }
 
-  onSpecificityChange = specificity => {
+  onSpecificityChange = (specificity: $TSFixMe) => {
     this.setState({ selectedSpecificity: specificity });
   };
 
@@ -176,7 +199,7 @@ export default class HeatmapCreationModal extends React.Component {
     );
   }
 
-  onThresholdFilterApply = newThresholdFilters => {
+  onThresholdFilterApply = (newThresholdFilters: $TSFixMe) => {
     const { selectedThresholdFilters } = this.state;
     if (isEqual(selectedThresholdFilters, newThresholdFilters)) {
       return;
@@ -189,7 +212,7 @@ export default class HeatmapCreationModal extends React.Component {
 
     // We don't use the aggregate score filter on heatmaps.
     const thresholdOptions = THRESHOLDS.filter(
-      threshold => threshold.value !== "agg_score",
+      (threshold: $TSFixMe) => threshold.value !== "agg_score",
     );
 
     return (
@@ -269,7 +292,7 @@ export default class HeatmapCreationModal extends React.Component {
       selectedThresholdFilters,
     } = this.state;
 
-    let presets = [];
+    const presets = [];
     if (selectedBackground !== 26) {
       presets.push("background");
     }
@@ -349,18 +372,9 @@ export default class HeatmapCreationModal extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 HeatmapCreationModal.defaultProps = {
   continueInNewTab: false,
-};
-
-HeatmapCreationModal.propTypes = {
-  continueInNewTab: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool,
-  selectedIds: PropTypes.oneOfType([
-    PropTypes.instanceOf(Set),
-    PropTypes.array,
-  ]),
 };
 
 HeatmapCreationModal.contextType = UserContext;

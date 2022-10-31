@@ -17,8 +17,8 @@ interface DropdownProps {
   rounded?: boolean;
   label?: string;
   options: {
-    text: string;
-    value: string | number;
+    text?: string;
+    value?: string | number;
     // Optional node element will be rendered instead of text.
     // Text will still be used in the <DropdownTrigger>
     customNode?: React.ReactNode;

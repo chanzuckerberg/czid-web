@@ -1,6 +1,5 @@
 import cx from "classnames";
 import { size, map, keyBy, isEqual, isEmpty, orderBy } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import {
@@ -28,8 +27,67 @@ import cs from "./samples_heatmap_vis.scss";
 
 const CAPTION_LINE_WIDTH = 180;
 
-class SamplesHeatmapVis extends React.Component {
-  constructor(props) {
+interface SamplesHeatmapVisProps {
+  data?: object;
+  taxonFilterState?: Record<string, Record<string, boolean>>;
+  defaultMetadata?: $TSFixMe[];
+  metadataTypes?: $TSFixMe[];
+  metric?: string;
+  metadataSortField?: string;
+  metadataSortAsc?: boolean;
+  onMetadataSortChange?: $TSFixMeFunction;
+  onMetadataChange?: $TSFixMeFunction;
+  onAddTaxon?: $TSFixMeFunction;
+  newTaxon?: number;
+  onRemoveTaxon?: $TSFixMeFunction;
+  onPinSample?: $TSFixMeFunction;
+  onPinSampleApply?: $TSFixMeFunction;
+  onPinSampleCancel?: $TSFixMeFunction;
+  onUnpinSample?: $TSFixMeFunction;
+  pendingPinnedSampleIds?: $TSFixMe[];
+  pinnedSampleIds?: $TSFixMe[];
+  onSampleLabelClick?: $TSFixMeFunction;
+  onTaxonLabelClick?: $TSFixMeFunction;
+  sampleDetails?: object;
+  sampleIds?: $TSFixMe[];
+  scale?: string;
+  taxLevel?: string;
+  taxonCategories?: $TSFixMe[];
+  taxonDetails?: object;
+  tempSelectedOptions?: object;
+  allTaxonIds?: $TSFixMe[];
+  taxonIds?: $TSFixMe[];
+  selectedTaxa?: object;
+  thresholdFilters?: $TSFixMe;
+  sampleSortType?: string;
+  fullScreen?: boolean;
+  taxaSortType?: string;
+}
+
+interface SamplesHeatmapVisState {
+  addTaxonTrigger: $TSFixMe;
+  addMetadataTrigger: $TSFixMe;
+  nodeHoverInfo: $TSFixMe;
+  columnMetadataLegend: $TSFixMe;
+  rowGroupLegend: $TSFixMe;
+  selectedMetadata: Set<$TSFixMe>;
+  tooltipLocation: $TSFixMe;
+  displayControlsBanner: $TSFixMe;
+  pinIconHovered: boolean;
+  pinSampleTrigger: $TSFixMe;
+  spacePressed?: boolean;
+}
+
+class SamplesHeatmapVis extends React.Component<
+  SamplesHeatmapVisProps,
+  SamplesHeatmapVisState
+> {
+  heatmap: $TSFixMe;
+  heatmapContainer: $TSFixMe;
+  metadataTypes: $TSFixMe;
+  metrics: $TSFixMe;
+  scale: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.state = {
@@ -130,7 +188,7 @@ class SamplesHeatmapVis extends React.Component {
     document.removeEventListener("keyup", this.handleKeyUp, false);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: $TSFixMe) {
     if (this.props.scale !== this.scale) {
       this.scale = this.props.scale;
       this.heatmap.updateScale(this.props.scale);
@@ -184,12 +242,18 @@ class SamplesHeatmapVis extends React.Component {
     });
   }
 
-  colorScale = (value, node, originalColor, _, colorNoValue) => {
+  colorScale = (
+    value: $TSFixMe,
+    node: $TSFixMe,
+    originalColor: $TSFixMe,
+    _: $TSFixMe,
+    colorNoValue: $TSFixMe,
+  ) => {
     const { taxonFilterState, sampleIds, taxonIds } = this.props;
-    let sampleId = sampleIds[node.columnIndex];
-    let taxonId = taxonIds[node.rowIndex];
-    let sampleDetails = this.props.sampleDetails[sampleId];
-    let taxonDetails = this.props.taxonDetails[taxonId];
+    const sampleId = sampleIds[node.columnIndex];
+    const taxonId = taxonIds[node.rowIndex];
+    const sampleDetails = this.props.sampleDetails[sampleId];
+    const taxonDetails = this.props.taxonDetails[taxonId];
 
     const filtered =
       taxonFilterState?.[taxonDetails["index"]]?.[sampleDetails["index"]];
@@ -237,7 +301,7 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   // Update tooltip contents and location when hover over a data/metadata node
-  handleNodeHover = node => {
+  handleNodeHover = (node: $TSFixMe) => {
     this.setState({
       nodeHoverInfo: this.getTooltipData(node),
       tooltipLocation: this.heatmap.getCursorLocation(),
@@ -248,7 +312,7 @@ class SamplesHeatmapVis extends React.Component {
     });
   };
 
-  handleMetadataNodeHover = (node, metadata) => {
+  handleMetadataNodeHover = (node: $TSFixMe, metadata: $TSFixMe) => {
     const legend = this.heatmap.getColumnMetadataLegend(metadata.value);
     const currentValue = node.metadata[metadata.value] || "Unknown";
     const currentPair = { [currentValue]: legend[currentValue] };
@@ -259,7 +323,11 @@ class SamplesHeatmapVis extends React.Component {
     trackEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
-  handleRowGroupEnter = (rowGroup, rect, minTop) => {
+  handleRowGroupEnter = (
+    rowGroup: $TSFixMe,
+    rect: $TSFixMe,
+    minTop: $TSFixMe,
+  ) => {
     this.setState({
       rowGroupLegend: {
         label: `Genus: ${rowGroup.genusName || "Unknown"}`,
@@ -279,7 +347,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ nodeHoverInfo: null });
   };
 
-  handleColumnMetadataLabelHover = node => {
+  handleColumnMetadataLabelHover = (node: $TSFixMe) => {
     const legend = this.heatmap.getColumnMetadataLegend(node.value);
     this.setState({
       columnMetadataLegend: legend,
@@ -298,7 +366,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ rowGroupLegend: null });
   };
 
-  handleSampleLabelHover = node => {
+  handleSampleLabelHover = (node: $TSFixMe) => {
     this.setState({
       columnMetadataLegend: this.getSampleTooltipData(node),
       tooltipLocation: this.heatmap.getCursorLocation(),
@@ -309,9 +377,9 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ columnMetadataLegend: null });
   };
 
-  getSampleTooltipData(node) {
-    let sampleId = node.id;
-    let sampleDetails = this.props.sampleDetails[sampleId];
+  getSampleTooltipData(node: $TSFixMe) {
+    const sampleId = node.id;
+    const sampleDetails = this.props.sampleDetails[sampleId];
 
     if (sampleDetails["duplicate"]) {
       return { "Duplicate sample name": "" };
@@ -326,22 +394,22 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.downloadAsPng();
   }
 
-  computeCurrentHeatmapViewValuesForCSV({ headers }) {
+  computeCurrentHeatmapViewValuesForCSV({ headers }: $TSFixMe) {
     // Need to specify the Taxon header. The other headers (sample names in the heatmap) will be computed in this.heatmap
     return this.heatmap.computeCurrentHeatmapViewValuesForCSV({
       headers,
     });
   }
 
-  getTooltipData(node) {
+  getTooltipData(node: $TSFixMe) {
     const { data, taxonFilterState, sampleIds, taxonIds } = this.props;
-    let sampleId = sampleIds[node.columnIndex];
-    let taxonId = taxonIds[node.rowIndex];
-    let sampleDetails = this.props.sampleDetails[sampleId];
-    let taxonDetails = this.props.taxonDetails[taxonId];
+    const sampleId = sampleIds[node.columnIndex];
+    const taxonId = taxonIds[node.rowIndex];
+    const sampleDetails = this.props.sampleDetails[sampleId];
+    const taxonDetails = this.props.taxonDetails[taxonId];
 
-    let nodeHasData = this.metrics.some(
-      metric => !!data[metric.key][node.rowIndex][node.columnIndex],
+    const nodeHasData = this.metrics.some(
+      (metric: $TSFixMe) => !!data[metric.key][node.rowIndex][node.columnIndex],
     );
 
     const isFiltered =
@@ -349,7 +417,7 @@ class SamplesHeatmapVis extends React.Component {
 
     let values = null;
     if (nodeHasData) {
-      values = this.metrics.map(metric => {
+      values = this.metrics.map((metric: $TSFixMe) => {
         const data = this.props.data[metric.key];
         const value = parseFloat(
           (data[node.rowIndex][node.columnIndex] || 0).toFixed(4),
@@ -405,20 +473,20 @@ class SamplesHeatmapVis extends React.Component {
     };
   }
 
-  handleKeyDown = currentEvent => {
+  handleKeyDown = (currentEvent: $TSFixMe) => {
     if (currentEvent.code === "Space") {
       this.setState({ spacePressed: true });
     }
   };
 
-  handleKeyUp = currentEvent => {
+  handleKeyUp = (currentEvent: $TSFixMe) => {
     if (currentEvent.code === "Space") {
       this.setState({ spacePressed: false });
       currentEvent.preventDefault();
     }
   };
 
-  handleCellClick = (cell, currentEvent) => {
+  handleCellClick = (cell: $TSFixMe, currentEvent: $TSFixMe) => {
     const { tempSelectedOptions } = this.props;
 
     // Disable cell click if spacebar is pressed to pan the heatmap.
@@ -426,9 +494,10 @@ class SamplesHeatmapVis extends React.Component {
       const sampleId = this.props.sampleIds[cell.columnIndex];
       const url = generateUrlToSampleView({
         sampleId,
+        // @ts-expect-error Type 'object' is not assignable to type 'TempSelectedOptionsShape | Record<string, never>'.
         tempSelectedOptions,
       });
-
+      // @ts-expect-error Expected 1 arguments, but got 2.
       openUrlInNewTab(url, currentEvent);
       trackEvent("SamplesHeatmapVis_cell_clicked", {
         sampleId,
@@ -436,7 +505,7 @@ class SamplesHeatmapVis extends React.Component {
     }
   };
 
-  handleAddTaxonClick = trigger => {
+  handleAddTaxonClick = (trigger: $TSFixMe) => {
     this.setState({
       addTaxonTrigger: trigger,
     });
@@ -445,7 +514,7 @@ class SamplesHeatmapVis extends React.Component {
     });
   };
 
-  handlePinSampleClick = trigger => {
+  handlePinSampleClick = (trigger: $TSFixMe) => {
     this.setState({
       pinSampleTrigger: trigger,
     });
@@ -473,7 +542,7 @@ class SamplesHeatmapVis extends React.Component {
     // taxonDetails includes entries mapping both
     // taxId => taxonDetails and taxName => taxonDetails,
     // so iterate over allTaxonIds to avoid duplicates.
-    let { allTaxonIds, taxonDetails } = this.props;
+    const { allTaxonIds, taxonDetails } = this.props;
     return allTaxonIds.map(taxId => {
       return {
         value: taxId,
@@ -491,7 +560,7 @@ class SamplesHeatmapVis extends React.Component {
     }
   }
 
-  handleAddColumnMetadataClick = trigger => {
+  handleAddColumnMetadataClick = (trigger: $TSFixMe) => {
     this.setState({
       addMetadataTrigger: trigger,
     });
@@ -500,10 +569,10 @@ class SamplesHeatmapVis extends React.Component {
     });
   };
 
-  handleSelectedMetadataChange = selectedMetadata => {
+  handleSelectedMetadataChange = (selectedMetadata: $TSFixMe) => {
     const { onMetadataChange } = this.props;
 
-    let intersection = new Set(
+    const intersection = new Set(
       [...this.state.selectedMetadata].filter(metadatum =>
         selectedMetadata.has(metadatum),
       ),
@@ -517,6 +586,7 @@ class SamplesHeatmapVis extends React.Component {
         this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
         onMetadataChange && onMetadataChange(selectedMetadata);
         trackEvent("SamplesHeatmapVis_selected-metadata_changed", {
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'length' does not exist on type 'Set<any>... Remove this comment to see the full error message
           selectedMetadata: current.length,
         });
       },
@@ -524,7 +594,8 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   getSelectedMetadata() {
-    const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1);
+    const sortByLabel = (a: $TSFixMe, b: $TSFixMe) =>
+      a.label > b.label ? 1 : -1;
 
     return Array.from(this.state.selectedMetadata)
       .filter(metadatum => !!this.metadataTypes[metadatum])
@@ -544,7 +615,7 @@ class SamplesHeatmapVis extends React.Component {
       });
   }
 
-  handleZoom(increment) {
+  handleZoom(increment: $TSFixMe) {
     const newZoom = Math.min(
       3, // max zoom factor
       Math.max(0.2, this.heatmap.options.zoom + increment),
@@ -639,7 +710,8 @@ class SamplesHeatmapVis extends React.Component {
               content="Unpin"
               open // Make sure the tooltip is visible as long as the container is visible.
               position="top center"
-              trigger={<div />} // Pass in an empty div because the tooltip requires a trigger element.
+              // Pass in an empty div because the tooltip requires a trigger element.
+              trigger={<div />}
             />
           </div>
         )}
@@ -658,10 +730,11 @@ class SamplesHeatmapVis extends React.Component {
         {addTaxonTrigger && (
           <TaxonSelector
             addTaxonTrigger={addTaxonTrigger}
+            // @ts-expect-error ts-migrate(2554) FIXME: Expected 0-1 arguments, but got 2.
             selectedTaxa={new Set(this.props.taxonIds, this.props.selectedTaxa)}
             availableTaxa={this.getAvailableTaxa()}
             sampleIds={this.props.sampleIds}
-            onTaxonSelectionChange={selected => {
+            onTaxonSelectionChange={(selected: $TSFixMe) => {
               this.props.onAddTaxon(selected);
             }}
             onTaxonSelectionClose={() => {
@@ -702,45 +775,9 @@ class SamplesHeatmapVis extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 SamplesHeatmapVis.defaultProps = {
   defaultMetadata: [],
-};
-
-SamplesHeatmapVis.propTypes = {
-  data: PropTypes.object,
-  taxonFilterState: PropTypes.objectOf(PropTypes.objectOf(PropTypes.bool)),
-  defaultMetadata: PropTypes.array,
-  metadataTypes: PropTypes.array,
-  metric: PropTypes.string,
-  metadataSortField: PropTypes.string,
-  metadataSortAsc: PropTypes.bool,
-  onMetadataSortChange: PropTypes.func,
-  onMetadataChange: PropTypes.func,
-  onAddTaxon: PropTypes.func,
-  newTaxon: PropTypes.number,
-  onRemoveTaxon: PropTypes.func,
-  onPinSample: PropTypes.func,
-  onPinSampleApply: PropTypes.func,
-  onPinSampleCancel: PropTypes.func,
-  onUnpinSample: PropTypes.func,
-  pendingPinnedSampleIds: PropTypes.array,
-  pinnedSampleIds: PropTypes.array,
-  onSampleLabelClick: PropTypes.func,
-  onTaxonLabelClick: PropTypes.func,
-  sampleDetails: PropTypes.object,
-  sampleIds: PropTypes.array,
-  scale: PropTypes.string,
-  taxLevel: PropTypes.string,
-  taxonCategories: PropTypes.array,
-  taxonDetails: PropTypes.object,
-  tempSelectedOptions: PropTypes.object,
-  allTaxonIds: PropTypes.array,
-  taxonIds: PropTypes.array,
-  selectedTaxa: PropTypes.object,
-  thresholdFilters: PropTypes.any,
-  sampleSortType: PropTypes.string,
-  fullScreen: PropTypes.bool,
-  taxaSortType: PropTypes.string,
 };
 
 SamplesHeatmapVis.contextType = UserContext;

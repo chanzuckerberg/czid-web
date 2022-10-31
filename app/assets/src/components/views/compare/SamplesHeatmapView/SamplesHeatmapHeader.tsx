@@ -1,5 +1,4 @@
 import { Icon } from "czifui";
-import PropTypes from "prop-types";
 import React, { useContext } from "react";
 
 import {
@@ -38,6 +37,22 @@ import { DOWNLOAD_OPTIONS } from "./constants";
 
 import cs from "./samples_heatmap_view.scss";
 
+interface SamplesHeatmapHeaderProps {
+  sampleIds?: number[];
+  loading?: boolean;
+  heatmapId?: string | number;
+  heatmapName?: string;
+  presets?: $TSFixMeUnknown[];
+  onDownloadClick?: $TSFixMeFunction;
+  onDownloadSvg: $TSFixMeFunction;
+  onDownloadPng: $TSFixMeFunction;
+  onDownloadAllHeatmapMetricsCsv: $TSFixMeFunction;
+  onDownloadCurrentHeatmapViewCsv: $TSFixMeFunction;
+  onNewPresetsClick?: $TSFixMeFunction;
+  onShareClick: $TSFixMeFunction;
+  onSaveClick: $TSFixMeFunction;
+}
+
 const SamplesHeatmapHeader = ({
   sampleIds,
   loading,
@@ -52,13 +67,13 @@ const SamplesHeatmapHeader = ({
   onNewPresetsClick,
   onShareClick,
   onSaveClick,
-}) => {
+}: SamplesHeatmapHeaderProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const hasMicrobiomeFeature = allowedFeatures.includes(
     MICROBIOME_DOWNLOAD_FEATURE,
   );
-  const handleDownloadClick = option => {
+  const handleDownloadClick = (option: string) => {
     switch (option) {
       case "svg":
         onDownloadSvg();
@@ -94,7 +109,7 @@ const SamplesHeatmapHeader = ({
     });
   };
 
-  const handleHeatmapRename = async name => {
+  const handleHeatmapRename = async (name: $TSFixMe) => {
     if (name === "heatmap") return "";
     let error = "";
 
@@ -112,7 +127,7 @@ const SamplesHeatmapHeader = ({
     return [error, name];
   };
 
-  const getWarningMessage = inputText => {
+  const getWarningMessage = (inputText: $TSFixMe) => {
     return testForSpecialCharacters(inputText)
       ? 'The special character(s) you entered will be converted to "-"'
       : "";
@@ -126,7 +141,9 @@ const SamplesHeatmapHeader = ({
         <ViewHeader.Pretitle>
           <>Comparing {sampleIds ? sampleIds.length : ""} Samples</>
         </ViewHeader.Pretitle>
+
         <ViewHeader.Title
+          // @ts-expect-error Type 'Element' is not assignable to type 'string'.
           label={
             heatmapId != null ? (
               <EditableInput
@@ -217,22 +234,6 @@ const SamplesHeatmapHeader = ({
       </ViewHeader.Controls>
     </ViewHeader>
   );
-};
-
-SamplesHeatmapHeader.propTypes = {
-  sampleIds: PropTypes.arrayOf(PropTypes.number),
-  loading: PropTypes.bool,
-  heatmapId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  heatmapName: PropTypes.string,
-  presets: PropTypes.array,
-  onDownloadClick: PropTypes.func,
-  onDownloadSvg: PropTypes.func.isRequired,
-  onDownloadPng: PropTypes.func.isRequired,
-  onDownloadAllHeatmapMetricsCsv: PropTypes.func.isRequired,
-  onDownloadCurrentHeatmapViewCsv: PropTypes.func.isRequired,
-  onNewPresetsClick: PropTypes.func,
-  onShareClick: PropTypes.func.isRequired,
-  onSaveClick: PropTypes.func.isRequired,
 };
 
 export default SamplesHeatmapHeader;

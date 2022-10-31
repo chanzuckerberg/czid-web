@@ -18,7 +18,6 @@ import {
   uniq,
   values,
 } from "lodash/fp";
-import PropTypes from "prop-types";
 import queryString from "query-string";
 import React from "react";
 import { connect } from "react-redux";
@@ -56,13 +55,16 @@ import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import { copyShortUrlToClipboard } from "~/helpers/url";
+import { SelectedOptions, Subcategories } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, SortIcon } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
 
 import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
-import SamplesHeatmapControls from "./SamplesHeatmapControls";
+import SamplesHeatmapControls, {
+  SamplesHeatmapControlsProps,
+} from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 import {
@@ -80,13 +82,77 @@ import {
 } from "./constants";
 import cs from "./samples_heatmap_view.scss";
 
-const parseAndCheckInt = (val, defaultVal) => {
-  let parsed = parseInt(val);
+const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
+  const parsed = parseInt(val);
   return isNaN(parsed) ? defaultVal : parsed;
 };
 
-class SamplesHeatmapView extends React.Component {
-  constructor(props) {
+interface SamplesHeatmapViewProps {
+  addedTaxonIds?: $TSFixMeUnknown[];
+  backgrounds?: { name?: string; value?: number }[];
+  categories?: string[];
+  heatmapTs?: number;
+  metrics?: { value: string }[];
+  name?: string;
+  prefilterConstants?: { topN: unknown; minReads: unknown };
+  removedTaxonIds?: $TSFixMeUnknown[];
+  projectIds?: $TSFixMeUnknown[];
+  sampleIds?: $TSFixMeUnknown[];
+  sampleIdsToProjectIds?: $TSFixMeUnknown[];
+  savedParamValues?: { id?: string | number };
+  subcategories?: Subcategories;
+  taxonLevels?: string[];
+  thresholdFilters?: object;
+  updateDiscoveryProjectIds?: $TSFixMeFunction;
+}
+
+interface SamplesHeatmapViewState {
+  selectedOptions: SelectedOptions;
+  heatmapCreationModalOpen: boolean;
+  downloadModalOpen: boolean;
+  loading: boolean;
+  loadingFailed: boolean;
+  selectedMetadata: string[];
+  sampleIds: $TSFixMe[];
+  invalidSampleNames: $TSFixMe[];
+  sampleDetails: object;
+  allTaxonIds: $TSFixMe[];
+  allSpeciesIds: $TSFixMe[];
+  allGeneraIds: $TSFixMe[];
+  taxonIds: $TSFixMe[];
+  addedTaxonIds: Set<$TSFixMe>;
+  notifiedFilteredOutTaxonIds: Set<$TSFixMe>;
+  allTaxonDetails: object;
+  allData: object;
+  data: Record<string, number[][]>;
+  hideFilters: boolean;
+  selectedSampleId: $TSFixMe;
+  sidebarMode: $TSFixMe;
+  sidebarVisible: boolean;
+  sidebarTaxonModeConfig: $TSFixMe;
+  taxonFilterState: $TSFixMe[];
+  pendingPinnedSampleIds: Set<$TSFixMe>;
+  pinnedSampleIds: Set<$TSFixMe>;
+  newestTaxonId?: $TSFixMe;
+  metadataTypes?: $TSFixMe;
+  enableMassNormalizedBackgrounds?: $TSFixMe;
+}
+
+class SamplesHeatmapView extends React.Component<
+  SamplesHeatmapViewProps,
+  SamplesHeatmapViewState
+> {
+  heatmapVis: $TSFixMe;
+  id: $TSFixMe;
+  lastRequestToken: $TSFixMe;
+  lastSavedParamValues: $TSFixMe;
+  metadataSortAsc: $TSFixMe;
+  metadataSortField: $TSFixMe;
+  removedTaxonIds: $TSFixMe;
+  s: $TSFixMe;
+  urlParams: $TSFixMe;
+  urlParser: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
@@ -208,7 +274,7 @@ class SamplesHeatmapView extends React.Component {
     }
   }
 
-  initOnBeforeUnload(savedParamValues) {
+  initOnBeforeUnload(savedParamValues: $TSFixMe) {
     // Initialize to the params passed from the database, then onSaveClick will
     // update on save.
     this.lastSavedParamValues = Object.assign({}, savedParamValues);
@@ -236,7 +302,7 @@ class SamplesHeatmapView extends React.Component {
   }
 
   parseUrlParams = () => {
-    let urlParams = queryString.parse(location.search, {
+    const urlParams = queryString.parse(location.search, {
       arrayFormat: "bracket",
     });
 
@@ -245,19 +311,23 @@ class SamplesHeatmapView extends React.Component {
       urlParams.sampleIds = urlParams.sampleIds.split(",");
     }
     if (typeof urlParams.addedTaxonIds === "string") {
+      // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
       urlParams.addedTaxonIds = new Set(
         urlParams.addedTaxonIds.split(",").map(parseInt),
       );
     } else if (typeof urlParams.addedTaxonIds === "object") {
+      // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
       urlParams.addedTaxonIds = new Set(
         urlParams.addedTaxonIds.map(id => parseInt(id)),
       );
     }
     if (typeof urlParams.removedTaxonIds === "string") {
+      // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
       urlParams.removedTaxonIds = new Set(
         urlParams.removedTaxonIds.split(",").map(parseInt),
       );
     } else if (typeof urlParams.removedTaxonIds === "object") {
+      // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
       urlParams.removedTaxonIds = new Set(
         urlParams.removedTaxonIds.map(id => parseInt(id)),
       );
@@ -278,6 +348,7 @@ class SamplesHeatmapView extends React.Component {
             "text",
             find(
               ["value", threshold.metric],
+              // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
               this.props.thresholdFilters.targets,
             ),
           ),
@@ -290,6 +361,7 @@ class SamplesHeatmapView extends React.Component {
       urlParams.selectedMetadata = urlParams.selectedMetadata.split(",");
     }
     if (typeof urlParams.metadataSortAsc === "string") {
+      // @ts-expect-error ts-migrate(2322) FIXME: Type 'boolean' is not assignable to type 'string |... Remove this comment to see the full error message
       urlParams.metadataSortAsc = urlParams.metadataSortAsc === "true";
     }
     return urlParams;
@@ -299,19 +371,23 @@ class SamplesHeatmapView extends React.Component {
     // If the saved threshold object doesn't have metricDisplay, add it. For backwards compatibility.
     // See also parseUrlParams().
     // TODO: should remove this when the Visualization table is cleaned up.
-    let savedParams = this.props.savedParamValues;
+    const savedParams = this.props.savedParamValues;
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholdFilters' does not exist on type... Remove this comment to see the full error message
     if (savedParams && savedParams.thresholdFilters) {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholdFilters' does not exist on type... Remove this comment to see the full error message
       savedParams.thresholdFilters = map(
         threshold => ({
           metricDisplay: get(
             "text",
             find(
               ["value", threshold.metric],
+              // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
               this.props.thresholdFilters.targets,
             ),
           ),
           ...threshold,
         }),
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'thresholdFilters' does not exist on type... Remove this comment to see the full error message
         savedParams.thresholdFilters,
       );
       return savedParams;
@@ -334,16 +410,18 @@ class SamplesHeatmapView extends React.Component {
   };
 
   prepareParams = () => {
-    let params = this.getUrlParams();
+    const params = this.getUrlParams();
 
     // Parameters stored as objects
+    // @ts-expect-error Type 'string' is not assignable to type 'any[]'.ts(2322)
     params.thresholdFilters = JSON.stringify(params.thresholdFilters);
+    // @ts-expect-error Type 'string' is not assignable to type 'object'.ts(2322)
     params.subcategories = JSON.stringify(params.subcategories);
     return queryString.stringify(params, { arrayFormat: "bracket" });
   };
 
   getUrlForCurrentParams = () => {
-    let url = new URL(location.pathname, window.origin);
+    const url = new URL(location.pathname, window.origin);
     return `${url.toString()}?${this.prepareParams()}`;
   };
 
@@ -384,12 +462,15 @@ class SamplesHeatmapView extends React.Component {
       if (val === undefined) continue;
       switch (name) {
         case "thresholdFilters": {
-          const thresholdFilters = val.reduce((result, threshold) => {
-            result.push(
-              `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
-            );
-            return result;
-          }, []);
+          const thresholdFilters = val.reduce(
+            (result: $TSFixMe, threshold: $TSFixMe) => {
+              result.push(
+                `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
+              );
+              return result;
+            },
+            [],
+          );
 
           if (!isEmpty(thresholdFilters)) {
             filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
@@ -403,10 +484,11 @@ class SamplesHeatmapView extends React.Component {
           break;
         }
         case "subcategories": {
-          let subcategories = [];
+          const subcategories = [];
           for (const [subcategoryName, subcategoryVal] of Object.entries(val)) {
             if (!isEmpty(subcategoryVal)) {
               subcategories.push(
+                // @ts-expect-error Property 'join' does not exist on type 'unknown'
                 `${subcategoryName} - ${subcategoryVal.join()}`,
               );
             }
@@ -467,7 +549,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handleDownloadCsv = () => {
-    let url = new URL("/visualizations/download_heatmap", window.origin);
+    const url = new URL("/visualizations/download_heatmap", window.origin);
     const href = `${url.toString()}?${this.prepareParams()}`;
     // target="_blank" is needed to avoid unload handler
     window.open(href, "_blank");
@@ -521,15 +603,15 @@ class SamplesHeatmapView extends React.Component {
     showBulkDownloadNotification();
   };
 
-  metricToSortField(metric) {
-    let fields = metric.split(".");
-    let countType = fields[0].toLowerCase();
-    let metricName = fields[1].toLowerCase();
+  metricToSortField(metric: $TSFixMe) {
+    const fields = metric.split(".");
+    const countType = fields[0].toLowerCase();
+    const metricName = fields[1].toLowerCase();
 
     return "highest_" + countType + "_" + metricName;
   }
 
-  async fetchHeatmapData(sampleIds) {
+  async fetchHeatmapData(sampleIds: $TSFixMe) {
     const { heatmapTs } = this.props;
     const {
       presets,
@@ -547,7 +629,7 @@ class SamplesHeatmapView extends React.Component {
 
     // If using client-side filtering, the server should still return info
     // related to removed taxa in case the user decides to add the taxon back.
-    const removedTaxonIds = [];
+    const removedTaxonIds: $TSFixMe = [];
 
     if (this.lastRequestToken) {
       this.lastRequestToken.cancel("Parameters changed");
@@ -575,6 +657,7 @@ class SamplesHeatmapView extends React.Component {
       this.lastRequestToken.token,
     );
     const fetchDataEnd = new Date();
+    // @ts-expect-error ts-migrate(2362) FIXME: The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
     const loadTimeInMilliseconds = fetchDataEnd - fetchDataStart;
 
     trackEvent(
@@ -588,7 +671,7 @@ class SamplesHeatmapView extends React.Component {
     return heatmapData;
   }
 
-  fetchMetadataFieldsBySampleIds(sampleIds) {
+  fetchMetadataFieldsBySampleIds(sampleIds: $TSFixMe) {
     if (this.state.metadataTypes) return null;
     return getSampleMetadataFields(sampleIds);
   }
@@ -607,15 +690,18 @@ class SamplesHeatmapView extends React.Component {
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
     });
 
-    this.setState({
-      sampleIds: validIds,
-      invalidSampleNames,
-    },
-    // If there are failed/waiting samples selected, display a warning
-    // to the user that they won't appear in the heatmap.
-    () => invalidSampleNames.length > 0 && this.showNotification(NOTIFICATION_TYPES.invalidSamples),
+    this.setState(
+      {
+        sampleIds: validIds,
+        invalidSampleNames,
+      },
+      // If there are failed/waiting samples selected, display a warning
+      // to the user that they won't appear in the heatmap.
+      () =>
+        invalidSampleNames.length > 0 &&
+        // @ts-expect-error ts-migrate(2554) FIXME: Expected 2 arguments, but got 1.
+        this.showNotification(NOTIFICATION_TYPES.invalidSamples),
     );
-
 
     let heatmapData, metadataFields;
     try {
@@ -637,6 +723,7 @@ class SamplesHeatmapView extends React.Component {
         ),
       );
     } else {
+      // @ts-expect-error ts-migrate(2554) FIXME: Expected 1 arguments, but got 2.
       pipelineVersions = compact(property("pipeline_version"), heatmapData);
     }
     const pipelineMajorVersionsSet = new Set(
@@ -662,8 +749,10 @@ class SamplesHeatmapView extends React.Component {
 
     // Only calculate the metadataTypes once.
     if (metadataFields !== null) {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'metadataTypes' does not exist on type '{... Remove this comment to see the full error message
       newState.metadataTypes = metadataFields;
     }
+    // @ts-expect-error Property 'loadingFailed' does not exist on type '{}'.
     newState.loadingFailed = false;
 
     this.updateHistoryState();
@@ -671,7 +760,7 @@ class SamplesHeatmapView extends React.Component {
     this.setState(newState, this.updateFilters);
   }
 
-  handleLoadingFailure = err => {
+  handleLoadingFailure = (err: $TSFixMe) => {
     const { allTaxonIds, sampleIds } = this.state;
     const { allowedFeatures = [] } = this.context || {};
     const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
@@ -681,13 +770,14 @@ class SamplesHeatmapView extends React.Component {
       loadingFailed: true,
     });
 
-    const logSingleError = e => {
+    const logSingleError = (e: $TSFixMe) => {
       logError({
         message: "SamplesHeatmapView: Error loading heatmap data",
         details: {
           err: e,
           href: window.location.href,
           message: e.message,
+          // @ts-expect-error Type 'any[]' is not assignable to type 'string'.
           sampleIds,
           status: e.status,
           statusText: e.statusText,
@@ -709,24 +799,24 @@ class SamplesHeatmapView extends React.Component {
     });
   };
 
-  extractDataFromService(rawData) {
+  extractDataFromService(rawData: $TSFixMe) {
     const { metrics } = this.props;
 
-    let sampleIds = [];
-    let sampleNamesCounts = new Map();
-    let sampleDetails = {};
-    let allTaxonIds = [];
-    let allSpeciesIds = [];
-    let allGeneraIds = [];
-    let allTaxonDetails = {};
-    let allData = {};
-    let taxonFilterState = {};
+    const sampleIds = [];
+    const sampleNamesCounts = new Map();
+    const sampleDetails = {};
+    const allTaxonIds = [];
+    const allSpeciesIds = [];
+    const allGeneraIds = [];
+    const allTaxonDetails = {};
+    const allData = {};
+    const taxonFilterState = {};
     // Check if all samples have ERCC counts > 0 to enable backgrounds generated
     // using normalized input mass.
     let enableMassNormalizedBackgrounds = true;
 
     for (let i = 0; i < rawData.samples.length; i++) {
-      let sample = rawData.samples[i];
+      const sample = rawData.samples[i];
 
       sampleIds.push(sample.id);
       const pipelineRun = sample.pipeline_run;
@@ -742,8 +832,8 @@ class SamplesHeatmapView extends React.Component {
       // a user selects samples from multiple projects.
       if (sampleNamesCounts.has(sample.name)) {
         // Append a number to a sample's name to differentiate between samples with the same name.
-        let count = sampleNamesCounts.get(sample.name);
-        let originalName = sample.name;
+        const count = sampleNamesCounts.get(sample.name);
+        const originalName = sample.name;
         sample.name = `${sample.name} (${count})`;
         sampleNamesCounts.set(originalName, count + 1);
       } else {
@@ -787,7 +877,10 @@ class SamplesHeatmapView extends React.Component {
     }
 
     const metricIndex = rawData.result_keys.reduce(
-      (acc, current, idx) => ({ ...acc, [current]: idx }),
+      (acc, current, idx) => ({
+        ...acc,
+        [current]: idx,
+      }),
       {},
     );
     for (const [sampleId, countsPerTaxa] of Object.entries(rawData.results)) {
@@ -799,7 +892,7 @@ class SamplesHeatmapView extends React.Component {
         const sampleIndex = sampleDetails[sampleId].index;
 
         metrics.forEach(metric => {
-          let [metricType, metricName] = metric.value.split(".");
+          const [metricType, metricName] = metric.value.split(".");
           allData[metric.value] = allData[metric.value] || [];
           allData[metric.value][taxonIndex] =
             allData[metric.value][taxonIndex] || [];
@@ -829,22 +922,22 @@ class SamplesHeatmapView extends React.Component {
     };
   }
 
-  extractData(rawData) {
-    let sampleIds = [];
-    let sampleNamesCounts = new Map();
-    let sampleDetails = {};
-    let allTaxonIds = [];
-    let allSpeciesIds = [];
-    let allGeneraIds = [];
-    let allTaxonDetails = {};
-    let allData = {};
-    let taxonFilterState = {};
+  extractData(rawData: $TSFixMe) {
+    const sampleIds = [];
+    const sampleNamesCounts = new Map();
+    const sampleDetails = {};
+    const allTaxonIds = [];
+    const allSpeciesIds = [];
+    const allGeneraIds = [];
+    const allTaxonDetails = {};
+    const allData = {};
+    const taxonFilterState = {};
     // Check if all samples have ERCC counts > 0 to enable backgrounds generated
     // using normalized input mass.
     let enableMassNormalizedBackgrounds = true;
 
     for (let i = 0; i < rawData.length; i++) {
-      let sample = rawData[i];
+      const sample = rawData[i];
       sampleIds.push(sample.sample_id);
 
       enableMassNormalizedBackgrounds =
@@ -859,8 +952,8 @@ class SamplesHeatmapView extends React.Component {
       // a user selects samples from multiple projects.
       if (sampleNamesCounts.has(sample.name)) {
         // Append a number to a sample's name to differentiate between samples with the same name.
-        let count = sampleNamesCounts.get(sample.name);
-        let originalName = sample.name;
+        const count = sampleNamesCounts.get(sample.name);
+        const originalName = sample.name;
         sample.name = `${sample.name} (${count})`;
         sampleNamesCounts.set(originalName, count + 1);
       } else {
@@ -878,8 +971,8 @@ class SamplesHeatmapView extends React.Component {
       };
       if (sample.taxons) {
         for (let j = 0; j < sample.taxons.length; j++) {
-          let taxon = sample.taxons[j];
-          let taxonIndex;
+          const taxon = sample.taxons[j];
+          let taxonIndex: $TSFixMe;
           if (taxon.tax_id in allTaxonDetails) {
             taxonIndex = allTaxonDetails[taxon.tax_id].index;
             allTaxonDetails[taxon.tax_id].sampleCount += 1;
@@ -911,7 +1004,7 @@ class SamplesHeatmapView extends React.Component {
           sampleDetails[sample.sample_id].taxa.push(taxon.tax_id);
 
           this.props.metrics.forEach(metric => {
-            let [metricType, metricName] = metric.value.split(".");
+            const [metricType, metricName] = metric.value.split(".");
             allData[metric.value] = allData[metric.value] || [];
             allData[metric.value][taxonIndex] =
               allData[metric.value][taxonIndex] || [];
@@ -967,21 +1060,25 @@ class SamplesHeatmapView extends React.Component {
       return; // Return early so that loadingFailed is not set to false later
     }
 
-    let newState = useHeatmapService
+    const newState = useHeatmapService
       ? this.extractBackgroundMetricsFromService(backgroundData)
       : this.extractBackgroundMetrics(backgroundData);
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'loadingFailed' does not exist on type '{... Remove this comment to see the full error message
     newState.loadingFailed = false;
 
     this.updateHistoryState();
     this.setState(newState, this.updateFilters);
   }
 
-  extractBackgroundMetricsFromService(rawData, updateBackground) {
-    let { sampleDetails, allTaxonDetails, allData } = this.state;
+  extractBackgroundMetricsFromService(rawData: $TSFixMe) {
+    const { sampleDetails, allTaxonDetails, allData } = this.state;
     const { metrics } = this.props;
 
     const metricIndex = rawData.result_keys.reduce(
-      (acc, current, idx) => ({ ...acc, [current]: idx }),
+      (acc, current, idx) => ({
+        ...acc,
+        [current]: idx,
+      }),
       {},
     );
     for (const [sampleId, countsPerTaxa] of Object.entries(rawData.results)) {
@@ -990,7 +1087,7 @@ class SamplesHeatmapView extends React.Component {
         const sampleIndex = sampleDetails[sampleId].index;
 
         metrics.forEach(metric => {
-          let [metricType, metricName] = metric.value.split(".");
+          const [metricType, metricName] = metric.value.split(".");
           if (countsPerType[metricType]) {
             const metricDatum =
               countsPerType[metricType][metricIndex[metricName]];
@@ -1006,23 +1103,23 @@ class SamplesHeatmapView extends React.Component {
     return { allData };
   }
 
-  extractBackgroundMetrics(rawData) {
-    let { sampleDetails, allTaxonDetails, allData } = this.state;
+  extractBackgroundMetrics(rawData: $TSFixMe) {
+    const { sampleDetails, allTaxonDetails, allData } = this.state;
 
     // The server should always pass back the same set of samples and taxa,
     // but possibly in a different order, so we need to match them up to their
     // respective indices based on their ids.
     for (let i = 0; i < rawData.length; i++) {
-      let sample = rawData[i];
-      let sampleIndex = sampleDetails[sample.sample_id].index;
+      const sample = rawData[i];
+      const sampleIndex = sampleDetails[sample.sample_id].index;
 
       if (sample.taxons) {
         for (let j = 0; j < sample.taxons.length; j++) {
-          let taxon = sample.taxons[j];
-          let taxonIndex = allTaxonDetails[taxon.tax_id].index;
+          const taxon = sample.taxons[j];
+          const taxonIndex = allTaxonDetails[taxon.tax_id].index;
 
-          BACKGROUND_METRICS.forEach(metric => {
-            let [metricType, metricName] = metric.value.split(".");
+          BACKGROUND_METRICS.forEach((metric: $TSFixMe) => {
+            const [metricType, metricName] = metric.value.split(".");
             allData[metric.value] = allData[metric.value] || [];
             allData[metric.value][taxonIndex] =
               allData[metric.value][taxonIndex] || [];
@@ -1037,23 +1134,22 @@ class SamplesHeatmapView extends React.Component {
   }
 
   filterTaxa() {
-    let {
+    const {
       taxonFilterState,
       taxonPassesThresholdFilters,
     } = this.getTaxonThresholdFilterState();
-    let {
+    const {
       allTaxonIds,
-      allTaxonDetails,
-      addedTaxonIds,
       notifiedFilteredOutTaxonIds,
-      newestTaxonId,
+      addedTaxonIds,
     } = this.state;
+    let { newestTaxonId, allTaxonDetails } = this.state;
     let taxonIds = new Set();
     let filteredData = {};
-    let addedTaxonIdsPassingFilters = new Set();
+    const addedTaxonIdsPassingFilters = new Set();
 
-    allTaxonIds.forEach(taxonId => {
-      let taxon = allTaxonDetails[taxonId];
+    allTaxonIds.forEach((taxonId: $TSFixMe) => {
+      const taxon = allTaxonDetails[taxonId];
       if (
         !taxonIds.has(taxonId) &&
         this.taxonPassesSelectedFilters(taxon) &&
@@ -1080,12 +1176,14 @@ class SamplesHeatmapView extends React.Component {
       taxonIds,
       addedTaxonIdsPassingFilters,
     );
+    // @ts-expect-error ts-migrate(2740) FIXME: Type 'unknown[]' is missing the following properti... Remove this comment to see the full error message
     taxonIds = Array.from(taxonIds);
 
     this.updateHistoryState();
 
     this.setState({
       taxonFilterState,
+      // @ts-expect-error Type 'Set<unknown>' is missing the following properties from type 'any[]'
       taxonIds,
       loading: false,
       data: filteredData,
@@ -1097,15 +1195,15 @@ class SamplesHeatmapView extends React.Component {
   getTaxonThresholdFilterState() {
     // Set the state of whether or not a taxon passes the custom threshold filters
     // for each selected sample.
-    let {
+    const {
       sampleDetails,
       allTaxonDetails,
       allData,
       taxonFilterState,
     } = this.state;
-    let taxonPassesThresholdFilters = {};
-    Object.values(sampleDetails).forEach(sample => {
-      Object.values(allTaxonDetails).forEach(taxon => {
+    const taxonPassesThresholdFilters = {};
+    Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
+      Object.values(allTaxonDetails).forEach((taxon: $TSFixMe) => {
         taxonFilterState[taxon["index"]] =
           taxonFilterState[taxon["index"]] || {};
         // eslint-disable-next-line standard/computed-property-even-spacing
@@ -1124,13 +1222,17 @@ class SamplesHeatmapView extends React.Component {
     };
   }
 
-  taxonThresholdFiltersCheck(sampleIndex, taxonDetails, data) {
-    let { thresholdFilters } = this.state.selectedOptions;
-    for (let filter of thresholdFilters) {
+  taxonThresholdFiltersCheck(
+    sampleIndex: $TSFixMe,
+    taxonDetails: $TSFixMe,
+    data: $TSFixMe,
+  ) {
+    const { thresholdFilters } = this.state.selectedOptions;
+    for (const filter of thresholdFilters) {
       // Convert metric name format from "NT_zscore" to "NT.zscore"
-      let metric = filter["metric"].split("_").join(".");
+      const metric = filter["metric"].split("_").join(".");
       if (Object.keys(data).includes(metric)) {
-        let value = data[metric][taxonDetails["index"]][sampleIndex];
+        const value = data[metric][taxonDetails["index"]][sampleIndex];
         if (!value) {
           return false;
         }
@@ -1148,14 +1250,14 @@ class SamplesHeatmapView extends React.Component {
     return true;
   }
 
-  taxonPassesSelectedFilters(taxonDetails) {
-    let {
+  taxonPassesSelectedFilters(taxonDetails: $TSFixMe) {
+    const {
       readSpecificity,
       categories,
       subcategories,
       species, // 0 for genus mode, 1 for species mode
     } = this.state.selectedOptions;
-    let phageSelected =
+    const phageSelected =
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
 
     if (species && taxonDetails["taxLevel"] !== 1) {
@@ -1205,44 +1307,44 @@ class SamplesHeatmapView extends React.Component {
     return true;
   }
 
-  getTopTaxaPerSample(filteredTaxonIds, addedTaxonIds) {
+  getTopTaxaPerSample(filteredTaxonIds: $TSFixMe, addedTaxonIds: $TSFixMe) {
     const { allowedFeatures = [] } = this.context || {};
     const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
 
     // Fetch the top N taxa from each sample, sorted by the selected metric,
     // that passed all selected filters.
-    let {
+    const {
       sampleDetails,
       allData,
       allTaxonDetails,
       selectedOptions,
     } = this.state;
-    let { metric, taxonsPerSample } = selectedOptions;
+    const { metric, taxonsPerSample } = selectedOptions;
     const { metrics } = this.props;
 
     if (useHeatmapES) return [filteredTaxonIds, allTaxonDetails, allData];
 
-    let topTaxIds = new Set();
-    let topTaxonDetails = {};
-    let filteredData = {};
-    Object.values(sampleDetails).forEach(sample => {
-      let filteredTaxaInSample = sample.taxa.filter(taxonId => {
+    const topTaxIds = new Set();
+    const topTaxonDetails = {};
+    const filteredData = {};
+    Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
+      const filteredTaxaInSample = sample.taxa.filter((taxonId: $TSFixMe) => {
         return filteredTaxonIds.has(taxonId);
       });
 
       filteredTaxaInSample.sort(
-        (taxId1, taxId2) =>
+        (taxId1: $TSFixMe, taxId2: $TSFixMe) =>
           allData[metric][allTaxonDetails[taxId2].index][sample.index] -
           allData[metric][allTaxonDetails[taxId1].index][sample.index],
       );
 
       let count = 0;
-      for (let taxId of filteredTaxaInSample) {
+      for (const taxId of filteredTaxaInSample) {
         if (count >= taxonsPerSample) {
           break;
         } else if (!topTaxIds.has(taxId)) {
           if (!this.removedTaxonIds.has(taxId)) {
-            let taxon = allTaxonDetails[taxId];
+            const taxon = allTaxonDetails[taxId];
             topTaxIds.add(taxId);
             topTaxonDetails[taxId] = allTaxonDetails[taxId];
             topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
@@ -1261,9 +1363,9 @@ class SamplesHeatmapView extends React.Component {
 
     // Make sure that taxa manually added by the user that pass filters
     // are included.
-    addedTaxonIds.forEach(taxId => {
+    addedTaxonIds.forEach((taxId: $TSFixMe) => {
       if (!topTaxIds.has(taxId)) {
-        let taxon = allTaxonDetails[taxId];
+        const taxon = allTaxonDetails[taxId];
         topTaxIds.add(taxId);
         topTaxonDetails[taxId] = allTaxonDetails[taxId];
         topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
@@ -1280,7 +1382,7 @@ class SamplesHeatmapView extends React.Component {
     return [topTaxIds, topTaxonDetails, filteredData];
   }
 
-  handleMetadataUpdate = (key, value) => {
+  handleMetadataUpdate = (key: $TSFixMe, value: $TSFixMe) => {
     this.setState({
       sampleDetails: set(
         [this.state.selectedSampleId, "metadata", key],
@@ -1294,7 +1396,7 @@ class SamplesHeatmapView extends React.Component {
     window.history.replaceState("", "", this.getUrlForCurrentParams());
   };
 
-  fetchNewTaxa(taxaMissingInfo) {
+  fetchNewTaxa(taxaMissingInfo: $TSFixMe) {
     return getTaxaDetails({
       sampleIds: this.state.sampleIds,
       taxonIds: taxaMissingInfo,
@@ -1305,7 +1407,8 @@ class SamplesHeatmapView extends React.Component {
     });
   }
 
-  async updateTaxa(taxaMissingInfo) {
+  async updateTaxa(taxaMissingInfo: $TSFixMe) {
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'allowedFeatures' does not exist on type ... Remove this comment to see the full error message
     const { allowedFeatures = [] } = (this.context = {});
     const { selectedOptions } = this.state;
     const presets = selectedOptions.presets;
@@ -1321,7 +1424,7 @@ class SamplesHeatmapView extends React.Component {
       ? this.extractDataFromService(newTaxaInfo)
       : this.extractData(newTaxaInfo);
 
-    let {
+    const {
       allData,
       allGeneraIds,
       allSpeciesIds,
@@ -1329,15 +1432,15 @@ class SamplesHeatmapView extends React.Component {
       allTaxonDetails,
       sampleDetails,
     } = this.state;
-    let tempAllData = extractedData.allData;
+    const tempAllData = extractedData.allData;
 
     allGeneraIds.concat(extractedData.allGeneraIds);
     allSpeciesIds.concat(extractedData.allSpeciesIds);
 
     extractedData.allTaxonIds.forEach(taxonId => {
-      let taxon = extractedData.allTaxonDetails[taxonId];
-      let tempTaxonIndex = taxon.index;
-      let taxonIndex = allTaxonIds.length;
+      const taxon = extractedData.allTaxonDetails[taxonId];
+      const tempTaxonIndex = taxon.index;
+      const taxonIndex = allTaxonIds.length;
       taxon.index = taxonIndex;
 
       allTaxonIds.push(taxonId);
@@ -1346,8 +1449,8 @@ class SamplesHeatmapView extends React.Component {
 
       Object.entries(sampleDetails).map(([sampleId, sample]) => {
         sample.taxa.concat(extractedData.sampleDetails[sampleId].taxa);
-        let sampleIndex = sample.index;
-        let tempSampleIndex = extractedData.sampleDetails[sampleId].index;
+        const sampleIndex = sample.index;
+        const tempSampleIndex = extractedData.sampleDetails[sampleId].index;
 
         this.props.metrics.forEach(metric => {
           allData[metric.value][taxonIndex] =
@@ -1370,7 +1473,7 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  handleAddedTaxonChange = selectedTaxonIds => {
+  handleAddedTaxonChange = (selectedTaxonIds: $TSFixMe) => {
     // selectedTaxonIds includes taxa that pass filters
     // and the taxa manually added by the user.
     const {
@@ -1397,14 +1500,17 @@ class SamplesHeatmapView extends React.Component {
 
     // Update notifiedFilteredOutTaxonIds to remove taxa that were unselected.
     const currentFilteredOutTaxonIds = new Set(
+      // @ts-expect-error ts-migrate(2769) FIXME: No overload matches this call.
       intersection(notifiedFilteredOutTaxonIds, currentAddedTaxa),
     );
 
     // removedTaxonIds are taxa that passed filters
     // but were manually unselected by the user.
-    let removedTaxonIds = new Set(difference(taxonIds, [...selectedTaxonIds]));
+    const removedTaxonIds = new Set(
+      difference(taxonIds, [...selectedTaxonIds]),
+    );
     removedTaxonIds.forEach(taxId => this.removedTaxonIds.add(taxId));
-    selectedTaxonIds.forEach(taxId => {
+    selectedTaxonIds.forEach((taxId: $TSFixMe) => {
       this.removedTaxonIds.delete(taxId);
     });
 
@@ -1432,9 +1538,9 @@ class SamplesHeatmapView extends React.Component {
     this.updateHistoryState();
   };
 
-  handleRemoveTaxon = taxonName => {
-    let { addedTaxonIds } = this.state;
-    let taxonId = this.state.allTaxonDetails[taxonName].id;
+  handleRemoveTaxon = (taxonName: $TSFixMe) => {
+    const { addedTaxonIds } = this.state;
+    const taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
 
     trackEvent("SamplesHeatmapView_taxon_removed", {
@@ -1451,7 +1557,7 @@ class SamplesHeatmapView extends React.Component {
     }
   };
 
-  handleMetadataChange = metadataFields => {
+  handleMetadataChange = (metadataFields: $TSFixMe) => {
     this.setState({
       selectedMetadata: Array.from(metadataFields),
     });
@@ -1461,7 +1567,7 @@ class SamplesHeatmapView extends React.Component {
     this.updateHistoryState();
   };
 
-  handleMetadataSortChange = (field, dir) => {
+  handleMetadataSortChange = (field: $TSFixMe, dir: $TSFixMe) => {
     this.metadataSortField = field;
     this.metadataSortAsc = dir;
     this.updateHistoryState();
@@ -1471,9 +1577,11 @@ class SamplesHeatmapView extends React.Component {
     });
   };
 
-  handlePinnedSampleChange = (_event, selectedSamples) => {
+  handlePinnedSampleChange = (_event: $TSFixMe, selectedSamples: $TSFixMe) => {
     const selectedSampleIds = new Set(
-      selectedSamples.map(sample => (sample.id ? sample.id : sample)),
+      selectedSamples.map((sample: $TSFixMe) =>
+        sample.id ? sample.id : sample,
+      ),
     );
     this.setState({ pendingPinnedSampleIds: selectedSampleIds });
     trackEvent(
@@ -1504,8 +1612,8 @@ class SamplesHeatmapView extends React.Component {
     );
   };
 
-  handleUnpinSample = sampleId => {
-    let { pinnedSampleIds } = this.state;
+  handleUnpinSample = (sampleId: $TSFixMe) => {
+    const { pinnedSampleIds } = this.state;
     pinnedSampleIds.delete(sampleId);
     this.setState({
       pinnedSampleIds,
@@ -1517,7 +1625,7 @@ class SamplesHeatmapView extends React.Component {
     );
   };
 
-  handleSampleLabelClick = sampleId => {
+  handleSampleLabelClick = (sampleId: $TSFixMe) => {
     if (!sampleId) {
       this.setState({
         sidebarVisible: false,
@@ -1550,7 +1658,7 @@ class SamplesHeatmapView extends React.Component {
     }
   };
 
-  handleTaxonLabelClick = taxonName => {
+  handleTaxonLabelClick = (taxonName: $TSFixMe) => {
     const taxonDetails = get(taxonName, this.state.allTaxonDetails);
 
     if (!taxonDetails) {
@@ -1569,7 +1677,9 @@ class SamplesHeatmapView extends React.Component {
         sidebarVisible: false,
       });
       trackEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
+        // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
         parentTaxonId: taxonDetails.parentId,
+        // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
         taxonId: taxonDetails.id,
         taxonName,
         sidebarMode: "taxonDetails",
@@ -1578,14 +1688,18 @@ class SamplesHeatmapView extends React.Component {
       this.setState({
         sidebarMode: "taxonDetails",
         sidebarTaxonModeConfig: {
+          // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
           parentTaxonId: taxonDetails.parentId,
+          // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
           taxonId: taxonDetails.id,
           taxonName,
         },
         sidebarVisible: true,
       });
       trackEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
+        // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
         parentTaxonId: taxonDetails.parentId,
+        // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
         taxonId: taxonDetails.id,
         taxonName,
         sidebarMode: "taxonDetails",
@@ -1624,7 +1738,7 @@ class SamplesHeatmapView extends React.Component {
     return {};
   };
 
-  getControlOptions = () => ({
+  getControlOptions = (): SamplesHeatmapControlsProps["options"] => ({
     // Server side options
     metrics: this.props.metrics.filter(metric =>
       METRIC_OPTIONS.includes(metric.value),
@@ -1645,7 +1759,7 @@ class SamplesHeatmapView extends React.Component {
     specificityOptions: SPECIFICITY_OPTIONS,
   });
 
-  handleSelectedOptionsChange = newOptions => {
+  handleSelectedOptionsChange = (newOptions: $TSFixMe) => {
     const { allowedFeatures = [] } = this.context || {};
     const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
 
@@ -1671,6 +1785,7 @@ class SamplesHeatmapView extends React.Component {
         callbackFn = async () => {
           // TODO: We can remove this notification once we pre-compute custom backgrounds or speed up Spark jobs
           if (newOptions?.background)
+            // @ts-expect-error ts-migrate(2554) FIXME: Expected 2 arguments, but got 1.
             this.showNotification(NOTIFICATION_TYPES.customBackground);
           await this.fetchViewData();
         };
@@ -1721,6 +1836,7 @@ class SamplesHeatmapView extends React.Component {
   renderHeatmap() {
     const { loadingFailed } = this.state;
 
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'taxonIds' does not exist on type 'Readon... Remove this comment to see the full error message
     let shownTaxa = new Set(this.state.taxonIds, this.state.addedTaxonIds);
     shownTaxa = new Set(
       [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId)),
@@ -1747,7 +1863,7 @@ class SamplesHeatmapView extends React.Component {
     ) {
       return <div className={cs.noDataMsg}>No data to render</div>;
     }
-    let scaleIndex = this.state.selectedOptions.dataScaleIdx;
+    const scaleIndex = this.state.selectedOptions.dataScaleIdx;
     return (
       <ErrorBoundary>
         <SamplesHeatmapVis
@@ -1770,7 +1886,7 @@ class SamplesHeatmapView extends React.Component {
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}
           onTaxonLabelClick={this.handleTaxonLabelClick}
-          ref={vis => {
+          ref={(vis: $TSFixMe) => {
             this.heatmapVis = vis;
           }}
           sampleIds={this.state.sampleIds}
@@ -1792,6 +1908,7 @@ class SamplesHeatmapView extends React.Component {
           taxonIds={Array.from(shownTaxa)}
           taxonCategories={this.state.selectedOptions.categories}
           taxonDetails={this.state.allTaxonDetails} // send allTaxonDetails in case of added taxa
+          // @ts-expect-error Index signature for type 'string' is missing in type 'any[]'
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
           sampleSortType={this.state.selectedOptions.sampleSortType}
@@ -1806,8 +1923,8 @@ class SamplesHeatmapView extends React.Component {
     this.setState(prevState => ({ hideFilters: !prevState.hideFilters }));
   };
 
-  renderInvalidSamplesWarning(onClose) {
-    let { invalidSampleNames } = this.state;
+  renderInvalidSamplesWarning(onClose: $TSFixMe) {
+    const { invalidSampleNames } = this.state;
 
     const header = (
       <div>
@@ -1822,7 +1939,7 @@ class SamplesHeatmapView extends React.Component {
 
     const content = (
       <span>
-        {invalidSampleNames.map((name, index) => {
+        {invalidSampleNames.map((name: $TSFixMe, index: $TSFixMe) => {
           return (
             <div key={index} className={cs.messageLine}>
               {name}
@@ -1844,8 +1961,9 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  renderFilteredOutWarning(onClose, taxon) {
+  renderFilteredOutWarning(onClose: $TSFixMe, taxon: $TSFixMe) {
     return (
+      // @ts-expect-error Property 'dismissDirection' is missing in type
       <Notification intent="warning" onClose={onClose}>
         <div>
           <span className={cs.highlight}>
@@ -1857,8 +1975,12 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  renderFilteredMultiplePipelineVersionsWarning(onClose, versions) {
+  renderFilteredMultiplePipelineVersionsWarning(
+    onClose: $TSFixMe,
+    versions: $TSFixMe,
+  ) {
     return (
+      // @ts-expect-error Property 'dismissDirection' is missing in type
       <Notification intent="warning" onClose={onClose}>
         <div>
           <span className={cs.highlight}>
@@ -1873,8 +1995,9 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  renderCustomBackgroundWarning(onClose) {
+  renderCustomBackgroundWarning(onClose: $TSFixMe) {
     return (
+      // @ts-expect-error Property 'dismissDirection' is missing in type
       <Notification intent="warning" onClose={onClose}>
         <div>
           We&apos;re busy generating your heatmap with a new background model.
@@ -1884,11 +2007,12 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  showNotification(notification, params) {
+  showNotification(notification: $TSFixMe, params: $TSFixMe) {
     switch (notification) {
       case NOTIFICATION_TYPES.invalidSamples:
         showToast(
-          ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
+          ({ closeToast }: $TSFixMe) =>
+            this.renderInvalidSamplesWarning(closeToast),
           {
             autoClose: 12000,
           },
@@ -1896,7 +2020,8 @@ class SamplesHeatmapView extends React.Component {
         break;
       case NOTIFICATION_TYPES.taxaFilteredOut:
         showToast(
-          ({ closeToast }) => this.renderFilteredOutWarning(closeToast, params),
+          ({ closeToast }: $TSFixMe) =>
+            this.renderFilteredOutWarning(closeToast, params),
           {
             autoClose: 12000,
           },
@@ -1904,7 +2029,7 @@ class SamplesHeatmapView extends React.Component {
         break;
       case NOTIFICATION_TYPES.multiplePipelineVersions:
         showToast(
-          ({ closeToast }) =>
+          ({ closeToast }: $TSFixMe) =>
             this.renderFilteredMultiplePipelineVersionsWarning(
               closeToast,
               params,
@@ -1916,7 +2041,8 @@ class SamplesHeatmapView extends React.Component {
         break;
       case NOTIFICATION_TYPES.customBackground:
         showToast(
-          ({ closeToast }) => this.renderCustomBackgroundWarning(closeToast),
+          ({ closeToast }: $TSFixMe) =>
+            this.renderCustomBackgroundWarning(closeToast),
           { autoClose: 12000 },
         );
         break;
@@ -1944,6 +2070,7 @@ class SamplesHeatmapView extends React.Component {
       taxonIds,
     } = this.state;
 
+    // @ts-expect-error ts-migrate(2554) FIXME: Expected 0-1 arguments, but got 2.
     let shownTaxa = new Set(taxonIds, addedTaxonIds);
     shownTaxa = new Set(
       [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId)),
@@ -2057,25 +2184,6 @@ class SamplesHeatmapView extends React.Component {
   }
 }
 
-SamplesHeatmapView.propTypes = {
-  addedTaxonIds: PropTypes.array,
-  backgrounds: PropTypes.array,
-  categories: PropTypes.array,
-  heatmapTs: PropTypes.number,
-  metrics: PropTypes.array,
-  name: PropTypes.string,
-  prefilterConstants: PropTypes.object,
-  removedTaxonIds: PropTypes.array,
-  projectIds: PropTypes.array,
-  sampleIds: PropTypes.array,
-  sampleIdsToProjectIds: PropTypes.array,
-  savedParamValues: PropTypes.object,
-  subcategories: PropTypes.object,
-  taxonLevels: PropTypes.array,
-  thresholdFilters: PropTypes.object,
-  updateDiscoveryProjectIds: PropTypes.func,
-};
-
 SamplesHeatmapView.contextType = UserContext;
 
 const mapDispatchToProps = { updateDiscoveryProjectIds: updateProjectIds };
@@ -2086,6 +2194,7 @@ const connectedComponent = connect(
   mapDispatchToProps,
 )(SamplesHeatmapView);
 
+// @ts-expect-error ts-migrate(2540) FIXME: Cannot assign to 'name' because it is a read-only ... Remove this comment to see the full error message
 connectedComponent.name = "SamplesHeatmapView";
 
 export default connectedComponent;

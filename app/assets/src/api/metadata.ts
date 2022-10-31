@@ -23,7 +23,7 @@ const getSampleMetadata = ({
 };
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
-const getSampleMetadataFields = (ids: $TSFixMe, snapshotShareId: $TSFixMe) =>
+const getSampleMetadataFields = (ids: $TSFixMe, snapshotShareId?: $TSFixMe) =>
   postWithCSRF(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       "/samples/metadata_fields",

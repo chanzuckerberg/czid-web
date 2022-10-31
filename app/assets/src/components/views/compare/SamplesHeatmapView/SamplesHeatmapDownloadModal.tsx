@@ -7,7 +7,7 @@ import { createBulkDownload } from "~/api/bulk_downloads";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { humanize } from "~/helpers/strings";
-import { ThresholdFilterData } from "~/interface/dropdown";
+import { SelectedOptions } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import RadioButton from "~ui/controls/RadioButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -23,7 +23,7 @@ interface SamplesHeatmapDownloadModalProps {
   onClose: () => void;
   onGenerateBulkDownload: () => void;
   open: boolean;
-  sampleIds: [number];
+  sampleIds: number[];
   heatmapParams: HeatmapParamType;
   onDownloadSvg: () => void;
   onDownloadPng: () => void;
@@ -31,23 +31,7 @@ interface SamplesHeatmapDownloadModalProps {
   onDownloadCurrentHeatmapViewCsv: () => string;
 }
 
-interface HeatmapParamType {
-  background: number;
-  categories: string[];
-  metric: string;
-  presets: string[];
-  readSpecificity: number;
-  sampleSortType: string;
-  species: number;
-  subcategories: SubcategoryType;
-  taxaSortType: string;
-  taxonsPerSample: number;
-  thresholdFilters: ThresholdFilterData[];
-}
-
-interface SubcategoryType {
-  Viruses: string[];
-}
+type HeatmapParamType = SelectedOptions;
 
 interface SelectedDownloadSubmissionType {
   downloadType: string;
@@ -128,7 +112,7 @@ const SamplesHeatmapDownloadModal = ({
               fluid
               placeholder={placeholder}
               options={dropdownOptions}
-              onChange={(value, displayName) => {
+              onChange={(value: string, displayName: string) => {
                 handleFieldSelect(downloadType, fieldType, value, displayName);
               }}
               value={selectedField}
@@ -247,6 +231,7 @@ const SamplesHeatmapDownloadModal = ({
       return (
         <div className={cs.category} key={category}>
           <div className={cs.title}>{humanize(category)}</div>
+          {/* @ts-expect-error Argument of type '({ description, display_name: displayName, fields, file_type_display: fileTypeDisplay, type, }: DownloadType) => JSX.Element' is not assignable to parameter of type  */}
           {categoryTypes.map(renderDownloadType)}
         </div>
       );

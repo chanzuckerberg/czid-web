@@ -5,7 +5,7 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import { URL_FIELDS } from "~/components/views/SampleView/constants";
 import { AnnotationFilterOption } from "~/interface/discovery";
 import { WorkflowValues, ThresholdFilterShape } from "~/interface/sample";
-import { LabelVal } from "~/interface/shared";
+import { LabelVal, SelectedOptions } from "~/interface/shared";
 
 const urlParser = new UrlQueryParser(URL_FIELDS);
 
@@ -54,8 +54,12 @@ const HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS = "heatmap";
 const DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS = "discovery";
 
 interface getTempSelectedParams {
-  optionsToTemporarilyPersist: string[];
-  selectedOptions: Record<string, any[]>;
+  optionsToTemporarilyPersist?: string[];
+  selectedOptions: SelectedOptions & {
+    annotationsSelected?: $TSFixMe;
+    taxonSelected?: $TSFixMe;
+    taxonThresholdsSelected?: $TSFixMe;
+  };
   source: "discovery" | "heatmap" | "";
 }
 

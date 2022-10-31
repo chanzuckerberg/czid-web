@@ -9,10 +9,10 @@ import cs from "./download_button_dropdown.scss";
 interface DownloadButtonDropdown {
   className: string;
   disabled: boolean;
-  items: React.ReactNode[];
+  items?: React.ReactNode[];
   options: $TSFixMe[];
   onClick: $TSFixMeFunction;
-  direction: "left" | "right";
+  direction?: "left" | "right";
 }
 
 const DownloadButtonDropdown = (props: DownloadButtonDropdown) => {
