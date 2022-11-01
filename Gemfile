@@ -157,8 +157,8 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 # HTTP library with a simpler, better designed API than the native Net::HTTP
 gem 'http'
-gem "omniauth-auth0", "~> 2.2"
-gem "omniauth-rails_csrf_protection", "~> 0.1.2"
+gem "omniauth-auth0", "~> 3.0"
+gem "omniauth-rails_csrf_protection", "~> 1.0"
 
 gem "jwt", "~> 2.2"
 
