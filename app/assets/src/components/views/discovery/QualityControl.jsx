@@ -255,7 +255,11 @@ function QualityControl({
       if (parseFloat(sampleData.pipelineVersion) >= 4) {
         sampleData.steps = sampleData.steps.filter(step => {
           // Cdhitdup required for backwards compatibility
-          return step.name !== "Idseq Dedup" && step.name !== "Cdhitdup";
+          return (
+            step.name !== "Idseq Dedup" &&
+            step.name !== "Cdhitdup" &&
+            step.name !== "Czid Dedup"
+          );
         });
       }
     });
