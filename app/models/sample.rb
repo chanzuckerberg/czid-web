@@ -172,6 +172,12 @@ class Sample < ApplicationRecord
     joins(joins_statement).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
   }
 
+  # "Get all samples created in a particular week": Sample.by_time(start_date: Date.parse("20220620"), end_date: Date.parse("20220624"))
+  scope :by_time, ->(start_date:, end_date:) { where(created_at: start_date.beginning_of_day..end_date.end_of_day) }
+  # "Get all samples that failed" : Sample.by_pipeline_result_status(results_finalized: PipelineRun::FINALIZED_FAIL)
+  # Get all failed samples within a particular week: Sample.by_time(start_date: Date.parse("20220620"), end_date: Date.parse("20220624")).by_pipeline_result_status(results_finalized: PipelineRun::FINALIZED_FAIL)
+  scope :by_pipeline_result_status, ->(results_finalized:) { joins(:pipeline_runs).where(pipeline_runs: { deprecated: false, results_finalized: results_finalized }) }
+
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id
 
