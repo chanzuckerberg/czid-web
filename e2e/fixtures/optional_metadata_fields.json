@@ -1,0 +1,47 @@
+{
+  "allOptinalFields": [
+    "Host Sex",
+    "Known Organism",
+    "Infection Class",
+    "Host Age",
+    "Host ID",
+    "Host Race / Ethnicity",
+    "Primary Diagnosis",
+    "Antibiotic Administered",
+    "Immunocompromised",
+    "Detection Method",
+    "Comorbidity",
+    "Library Prep",
+    "Sequencer",
+    "RNA / DNA Input(ng)",
+    "Host Genus Species",
+    "Isolate",
+    "Diseases and Conditions",
+    "Ct Value",
+    "Host Genus Species"
+  ],
+  "selectStringFields": [
+    "Host Sex",
+    "Known Organism",
+    "Infection Class",
+    "Host Race / Ethnicity",
+    "Primary Diagnosis",
+    "Antibiotic Administered",
+    "Immunocompromised",
+    "Detection Method",
+    "Comorbidity",
+    "Library Prep",
+    "Sequencer"
+  ],
+  "numberFields": [
+    "Host Age",
+    "RNA / DNA Input(ng)",
+    "Ct Value"
+  ],
+  "freeStyleFields": [
+    "Host Genus Species"
+  ],
+  "alphaNumericFields": [
+    "Host ID"
+  ]
+}

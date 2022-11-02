@@ -1,0 +1,139 @@
+{
+  "Host Organism": [
+    "Human",
+    "Mosquito",
+    "Tick",
+    "Mouse",
+    "Cat",
+    "Pig",
+    "C.elegans",
+    "Carp",
+    "Chicken",
+    "Bee",
+    "Salpingoeca rosetta",
+    "Bat",
+    "Rat",
+    "Field Vole",
+    "Bank Vole",
+    "Rabbit",
+    "Water Buffalo",
+    "Horse",
+    "Taurine Cattle",
+    "Turkey",
+    "Mosquito Non-Sharded Experimental Small",
+    "Mosquito Non-Sharded Experimental Large",
+    "Barred Hamlet",
+    "Orange Clownfish",
+    "Tiger Tail Seahorse",
+    "Torafugu",
+    "Dog",
+    "White Shrimp",
+    "Koala",
+    "Madagascan Flying Fox",
+    "Madagascan Fruit Bat",
+    "Madagascan Rousettes",
+    "Ascomycetes",
+    "Songbird",
+    "Cicada",
+    "European Woodmouse",
+    "Large Japanese Fieldmouse",
+    "Soybean",
+    "Boechera Stricta",
+    "Little Brown Bat"
+  ],
+  "Nucleotide Types": [
+    "DNA",
+    "RNA"
+  ],
+  "Sample Type": [
+    "Bronchoalveolar lavage",
+    "Cerebrospinal fluid",
+    "Nasopharyngeal swab",
+    "Plasma",
+    "Stool"
+  ],
+  "Antibiotic Administered": [
+    "Septrin",
+    "Penicillin",
+    "Eftriaxone"
+  ],
+  "Comorbidity": [
+    "HIV",
+    "Diabetes",
+    "Asthma",
+    "Cancer",
+    "Cardiovascular disease",
+    "COPD"
+  ],
+  "Diseases and Conditions": [
+    "Meningoencephalitis",
+    "Sepsis",
+    "Interstitial pneumonia",
+    "Tracheitis with inclusion bodies"
+  ],
+  "Host Race / Ethnicity": [
+    "Caucasian",
+    "Asian",
+    "African American",
+    "American Indian",
+    "Pacific Islander"
+  ],
+  "Immunocompromised": [
+    "Host has HIV/AIDS",
+    "Host has taken immunosuppressant drugs"
+  ],
+  "Primary Diagnosis": [
+    "Severe fever",
+    "Pneumonia",
+    "Septic shock during blood transfusion"
+  ],
+  "Detection Method": [
+    "PCR",
+    "Plate cultures",
+    "Agar slant",
+    "Antigen testing"
+  ],
+  "Infection Class": [
+    "Definite",
+    "No infection",
+    "Suspected",
+    "Unknown"
+  ],
+  "Known Organism": [
+    "MRSA",
+    "Staphylococcus aureus",
+    "Influenza",
+    "Hepatitis C"
+  ],
+  "Library Prep": [
+    "NEB Ultra II FS DNA",
+    "NEB Ultra II Directional RNA",
+    "Nextera DNA"
+  ],
+  "Sequencer": [
+    "Illumina MiSeq",
+    "Illumina HiSeq 2500",
+    "Illumina NextSeq 500"
+  ],
+  "Isolate": [
+    "Yes",
+    "No"
+  ],
+  "Host Sex": [
+    "Male",
+    "Female"
+  ],
+  "Host Genus Species": [
+    "Subfamily Anophelinae",
+    "Tribe Aedeomyiini",
+    "Tribe Aedini",
+    "Tribe Culicini",
+    "Tribe Culisetini",
+    "Tribe Ficalbiini",
+    "Tribe Hodgesiini",
+    "Tribe Mansoniini",
+    "Tribe Orthopodomyiini",
+    "Tribe Sabethini",
+    "Tribe Toxorhynchitini"
+  ]
+}

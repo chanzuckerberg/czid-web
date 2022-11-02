@@ -35,7 +35,7 @@ const LandingHeaderV2 = ({
         message="Looking for IDseq? You're in the right spot. As of December, our new name is Chan Zuckerberg ID."
         inverted={true}
       />
-      <div className={cs.header}>
+      <div className={cs.header} data-testid="home-top-nav-bar">
         <a aria-label="Go to the CZ ID homepage" href="/">
           <CZIDLogoReversed className={cs.headerLogo} />
         </a>

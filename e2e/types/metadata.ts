@@ -1,0 +1,27 @@
+export type Metadata = {
+  "Sample Name"?: string;
+  "Host Organism"?: string;
+  "Sample Type"?: string;
+  "Nucleotide Type"?: string;
+  "Collection Date"?: string;
+  "Water Control"?: string;
+  "Collection Location"?: string;
+  "Host Sex"?: string;
+  "Known Organism"?: string;
+  "Infection Class"?: string;
+  "Host Age"?: number;
+  "Host ID"?: string;
+  "Host Race / Ethnicity"?: string;
+  "Primary Diagnosis"?: string;
+  "Antibiotic Administered"?: string;
+  Immunocompromised?: string;
+  "Detection Method"?: string;
+  Comorbidity?: string;
+  "Library Prep"?: string;
+  Sequencer?: string;
+  "RNA / DNA Input(ng)"?: number;
+  "Host Genus Species"?: string;
+  Isolate?: string;
+  "Diseases and Conditions"?: string;
+  "Ct Value"?: number;
+};

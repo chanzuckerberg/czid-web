@@ -23,7 +23,7 @@ const config: PlaywrightTestConfig = {
   ],
   reporter: process.env.CI ? "github" : "list",
   testDir: "../tests",
-  timeout: 30000,
+  timeout: 10000,
   use: {
     actionTimeout: 0,
     channel: "chrome",
