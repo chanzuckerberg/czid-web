@@ -47,7 +47,7 @@ export const COLUMNS = [
     dataKey: "created_at",
     label: "Date",
     flexGrow: 1,
-    cellRenderer: ({ cellData }) => {
+    cellRenderer: ({ cellData }: $TSFixMe) => {
       if (cellData) {
         return <Moment fromNow date={cellData} />;
       }
@@ -64,7 +64,7 @@ export const COLUMNS = [
     dataKey: "coverage_breadth",
     label: "Coverage Breadth",
     flexGrow: 1,
-    cellDataGetter: ({ rowData }) => {
+    cellDataGetter: ({ rowData }: $TSFixMe) => {
       const numContigs = get("num_contigs", rowData);
       const coverageBreadth = get("coverage_breadth", rowData);
       const pipelineVersion = get("pipeline_version", rowData);
@@ -74,7 +74,7 @@ export const COLUMNS = [
       );
       return hasCoverageBreadth || numContigs === 0 ? coverageBreadth : "-";
     },
-    cellRenderer: ({ cellData }) => {
+    cellRenderer: ({ cellData }: $TSFixMe) => {
       if (cellData === "-") {
         return (
           <ColumnHeaderTooltip

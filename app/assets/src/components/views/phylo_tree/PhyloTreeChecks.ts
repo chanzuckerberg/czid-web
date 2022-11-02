@@ -1,21 +1,25 @@
 import { filter, some, zip } from "lodash/fp";
 
 class PhyloTreeChecks {
-  static passesCreateCondition(ntReads, nrReads) {
+  static RECOMMENDED_MIN_READS: number;
+  static MIN_READS: number;
+  static MIN_SAMPLES: number;
+  static MAX_SAMPLES: number;
+  static passesCreateCondition(ntReads: number, nrReads: number) {
     return (
       ntReads >= PhyloTreeChecks.MIN_READS ||
       nrReads >= PhyloTreeChecks.MIN_READS
     );
   }
 
-  static isNumberOfSamplesValid(sampleCount) {
+  static isNumberOfSamplesValid(sampleCount: number) {
     return (
       sampleCount >= PhyloTreeChecks.MIN_SAMPLES &&
       sampleCount <= PhyloTreeChecks.MAX_SAMPLES
     );
   }
 
-  static hasSamplesWithFewReads(nReadsArray) {
+  static hasSamplesWithFewReads(nReadsArray: number[]) {
     return some(
       nReads => nReads < PhyloTreeChecks.RECOMMENDED_MIN_READS,
       nReadsArray,
@@ -23,9 +27,12 @@ class PhyloTreeChecks {
   }
 
   // Counts number of samples with few reads in EITHER of the arrays
-  static countSamplesWithFewReads(ntReadsArray, nrReadsArray) {
+  static countSamplesWithFewReads(
+    ntReadsArray: number[],
+    nrReadsArray: number[],
+  ) {
     return filter(
-      nReads => PhyloTreeChecks.hasSamplesWithFewReads(nReads),
+      (nReads: number[]) => PhyloTreeChecks.hasSamplesWithFewReads(nReads),
       zip(ntReadsArray, nrReadsArray),
     ).length;
   }

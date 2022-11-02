@@ -25,7 +25,12 @@ import {
 } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React from "react";
-import { Dropdown as BaseDropdown } from "semantic-ui-react";
+import {
+  Dropdown as BaseDropdown,
+  DropdownDivider,
+  DropdownHeader,
+  DropdownItem,
+} from "semantic-ui-react";
 import Input from "~ui/controls/Input";
 import { IconArrowDownSmall, IconSearch } from "~ui/icons";
 import PortalDropdown from "./PortalDropdown";
@@ -104,6 +109,9 @@ class BareDropdown extends React.Component<
   BareDropdownState
 > {
   baseDropdownRef: $TSFixMe;
+  static Divider: typeof DropdownDivider;
+  static Header: typeof DropdownHeader;
+  static Item: typeof DropdownItem;
   constructor(props: BareDropdownProps) {
     super(props);
 
@@ -178,9 +186,7 @@ class BareDropdown extends React.Component<
       const itemsToZip = !isEmpty(sections)
         ? items.filter(
             (item: $TSFixMe) =>
-              // @ts-expect-error: Property 'Header' does not exist
               item.type !== BareDropdown.Header &&
-              // @ts-expect-error ts-migrate(2339) FIXME: Property 'Divider' does not exist on type 'typeof ... Remove this comment to see the full error message
               item.type !== BareDropdown.Divider &&
               get("props.flag", item) !== "unsearchable",
           )
@@ -231,13 +237,11 @@ class BareDropdown extends React.Component<
       }
 
       const header = (
-        // @ts-expect-error: Property 'Header' does not exist
         <BareDropdown.Header
           content={sectionName}
           key={`${sectionName}_header`}
         />
       );
-      // @ts-expect-error: Property 'Divider' does not exist
       const divider = <BareDropdown.Divider key={`${sectionName}_divider`} />;
       categorizedItems.push(header, ...sectionItems, divider);
     });
@@ -248,12 +252,10 @@ class BareDropdown extends React.Component<
   };
 
   renderNoResultsFoundInSection = () => (
-    // @ts-expect-error: Property 'Item' does not exist
     <BareDropdown.Item className={cs.emptySection} key={nanoid()}>
       <div className={cs.message}>
         There are no results matching your search.
       </div>
-      {/* @ts-expect-error: Property 'Item' does not exist */}
     </BareDropdown.Item>
   );
 
@@ -460,11 +462,8 @@ BareDropdown.defaultProps = {
   closeOnClick: true,
 };
 
-// @ts-expect-error ts-migrate(2339) FIXME: Property 'Header' does not exist on type 'typeof B... Remove this comment to see the full error message
 BareDropdown.Header = BaseDropdown.Header;
-// @ts-expect-error ts-migrate(2339) FIXME: Property 'Item' does not exist on type 'typeof Bar... Remove this comment to see the full error message
 BareDropdown.Item = BaseDropdown.Item;
-// @ts-expect-error ts-migrate(2339) FIXME: Property 'Divider' does not exist on type 'typeof ... Remove this comment to see the full error message
 BareDropdown.Divider = BaseDropdown.Divider;
 
 export default BareDropdown;

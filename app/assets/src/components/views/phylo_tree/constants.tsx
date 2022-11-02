@@ -2,7 +2,7 @@ import React from "react";
 import Moment from "react-moment";
 import { formatPercent } from "~/components/utils/format";
 
-function DateParser(date) {
+function DateParser(date: $TSFixMe) {
   return <Moment fromNow date={date} />;
 }
 

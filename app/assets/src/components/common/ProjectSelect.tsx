@@ -7,9 +7,9 @@ import { SubtextDropdown } from "~ui/controls/dropdowns";
 interface ProjectSelectProps {
   projects: Project[];
   value: number; // the project id
-  onChange: (project: Project) => Promise<void>; // the entire project object is returned
-  disabled: boolean;
-  erred: boolean;
+  onChange: $TSFixMeFunction; // the entire project object is returned
+  disabled?: boolean;
+  erred?: boolean;
   showSelectedItemSubtext: boolean; // Subtext in selected state
 }
 
@@ -33,6 +33,7 @@ const ProjectSelect = ({
   };
   return (
     <SubtextDropdown
+      // @ts-expect-error Property 'fluid' does not exist on type
       fluid
       options={getOptions()}
       onChange={(val: number) => onProjectChange(val)}

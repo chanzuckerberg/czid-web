@@ -1,7 +1,6 @@
 import cx from "classnames";
 import { ButtonIcon, Icon, Tooltip } from "czifui";
 import { set, find, isUndefined } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import {
@@ -62,8 +61,47 @@ const NG_STATUS_FAILED = "FAILED";
 const NG_STATUS_RUNNING = "RUNNING";
 const NG_STATUS_SUCCEEDED = "SUCCEEDED";
 
-class PhyloTreeListView extends React.Component {
-  constructor(props) {
+interface PhyloTreeListViewProps {
+  phyloTrees?: $TSFixMeUnknown[];
+  selectedPhyloTreeNgId?: number;
+}
+
+interface PhyloTreeListViewState {
+  adminToolsOpen: boolean;
+  currentTree: {
+    taxid: $TSFixMeUnknown;
+    name: string;
+    id: $TSFixMeUnknown;
+    parent_taxid: $TSFixMeUnknown;
+    tax_id: $TSFixMeUnknown;
+    tax_name: $TSFixMeUnknown;
+    sampleDetailsByNodeName: object;
+    nextGeneration: $TSFixMeUnknown;
+    log_url: string;
+    status: string | number;
+    clustermap_svg_url: string;
+    newick: string;
+  };
+  matrixErrorModalOpen: boolean;
+  phyloTrees: $TSFixMeUnknown[];
+  selectedPipelineRunId: $TSFixMeUnknown;
+  selectedSampleId: $TSFixMeUnknown;
+  selectedPhyloTreeId: $TSFixMeUnknown;
+  showLowCoverageWarning: boolean;
+  showOldTreeWarning: boolean;
+  selectedPhyloTreeNgId: number;
+  sidebarConfig: $TSFixMe;
+  sidebarMode?: "taxonDetails" | "sampleDetails";
+  sidebarVisible: boolean;
+  treeContainer: $TSFixMeUnknown;
+}
+
+class PhyloTreeListView extends React.Component<
+  PhyloTreeListViewProps,
+  PhyloTreeListViewState
+> {
+  selectedMetadata: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     const urlParams = parseUrlParams();
@@ -90,7 +128,7 @@ class PhyloTreeListView extends React.Component {
     this.selectedMetadata = urlParams.selectedMetadata;
   }
 
-  getDefaultSelectedTreeId(urlParams, phyloTrees = []) {
+  getDefaultSelectedTreeId(urlParams: $TSFixMe, phyloTrees = []) {
     const selectedId =
       urlParams.treeId || parseInt(window.sessionStorage.getItem("treeId"));
 
@@ -144,7 +182,10 @@ class PhyloTreeListView extends React.Component {
     this.setState({ phyloTrees: allPhyloTrees });
   }
 
-  handleTreeChange = async (newPhyloTreeId, nextGeneration = false) => {
+  handleTreeChange = async (
+    newPhyloTreeId: $TSFixMe,
+    nextGeneration = false,
+  ) => {
     if (nextGeneration) {
       const currentTree = await getPhyloTreeNg(newPhyloTreeId);
 
@@ -197,11 +238,11 @@ class PhyloTreeListView extends React.Component {
     }
   };
 
-  afterSelectedMetadataChange = selectedMetadata => {
+  afterSelectedMetadataChange = (selectedMetadata: $TSFixMe) => {
     this.persistInUrl("selectedMetadata", selectedMetadata);
   };
 
-  persistInUrl = (param, value) => {
+  persistInUrl = (param: $TSFixMe, value: $TSFixMe) => {
     try {
       const url = new URL(window.location.href);
       url.searchParams.set(param, value);
@@ -213,9 +254,10 @@ class PhyloTreeListView extends React.Component {
     }
   };
 
-  handleMetadataUpdate = (key, newValue) => {
+  handleMetadataUpdate = (key: $TSFixMe, newValue: $TSFixMe) => {
     // Update the metadata stored locally.
     this.setState({
+      // @ts-expect-error Type 'LodashSet1x5 is not compatiple
       currentTree: set(
         [
           "sampleDetailsByNodeName",
@@ -235,17 +277,18 @@ class PhyloTreeListView extends React.Component {
 
   handleSaveClick = async () => {
     // TODO (gdingle): add analytics tracking?
-    let params = parseUrlParams();
+    const params = parseUrlParams();
     const sampleIds = Object.values(
       this.state.currentTree.sampleDetailsByNodeName,
     )
-      .map(details => details.sample_id)
-      .filter(s => !!s);
+      .map((details: $TSFixMe) => details.sample_id)
+      .filter((s: $TSFixMe) => !!s);
+    // @ts-expect-error Type 'Set<any>' is not assignable to type 'string | number | boolean | (string | number | boolean)[]'.
     params.sampleIds = new Set(sampleIds);
     await saveVisualization("phylo_tree", params);
   };
 
-  getTreeStatus(tree) {
+  getTreeStatus(tree: $TSFixMe) {
     let statusMessage = "";
     switch (tree) {
       case NG_STATUS_CREATED:
@@ -299,7 +342,7 @@ class PhyloTreeListView extends React.Component {
     }
   };
 
-  handleSampleNodeClick = (sampleId, pipelineRunId) => {
+  handleSampleNodeClick = (sampleId: $TSFixMe, pipelineRunId: $TSFixMe) => {
     if (!sampleId) {
       this.setState({
         sidebarVisible: false,
@@ -395,6 +438,7 @@ class PhyloTreeListView extends React.Component {
           onMetadataUpdate={this.handleMetadataUpdate}
           onNewTreeContainer={t => this.setState({ treeContainer: t })}
           onSampleNodeClick={this.handleSampleNodeClick}
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedPhyloTreeId' does not exist on t... Remove this comment to see the full error message
           phyloTreeId={this.state.selectedPhyloTreeId}
         />
       );
@@ -480,10 +524,12 @@ class PhyloTreeListView extends React.Component {
             </ViewHeader.Pretitle>
             <ViewHeader.Title
               label={currentTree.name}
+              // @ts-expect-error ts-migrate(2339) FIXME: Property 'selectedPhyloTreeId' does not exist on t... Remove this comment to see the full error message
               id={this.state.selectedPhyloTreeId}
-              options={phyloTrees.map(tree => ({
+              options={phyloTrees.map((tree: $TSFixMe) => ({
                 label: tree.name,
                 id: `${tree.id}-${tree.nextGeneration}`,
+
                 onClick: () =>
                   this.handleTreeChange(tree.id, tree.nextGeneration),
               }))}
@@ -526,6 +572,7 @@ class PhyloTreeListView extends React.Component {
                 className={cs.controlElement}
                 showPhyloTreeNgOptions={!!selectedPhyloTreeNgId}
                 tree={currentTree}
+                // @ts-expect-error Type '{}' is missing the following properties from type 'Element'
                 treeContainer={treeContainer}
               />
             )}
@@ -535,7 +582,7 @@ class PhyloTreeListView extends React.Component {
                 flowId: clustermapSvgUrl
                   ? PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR
                   : PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
-                analyticsEventName: clustermapSvgUrl
+                analyticEventName: clustermapSvgUrl
                   ? ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_MATRIX_HELP_BUTTON_CLICKED
                   : ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_HELP_BUTTON_CLICKED,
               })}
@@ -684,11 +731,6 @@ class PhyloTreeListView extends React.Component {
     );
   }
 }
-
-PhyloTreeListView.propTypes = {
-  phyloTrees: PropTypes.array,
-  selectedPhyloTreeNgId: PropTypes.number,
-};
 
 PhyloTreeListView.contextType = UserContext;
 

@@ -1,5 +1,4 @@
 import { get, compact, pluck, values, sortBy, concat, find } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import { getSampleMetadataFields } from "~/api/metadata";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -13,7 +12,7 @@ import {
   SAMPLE_METRIC_FIELDS,
 } from "./constants";
 
-const getAbsentName = attribute =>
+const getAbsentName = (attribute: $TSFixMe) =>
   attribute === "project_name" ? "NCBI References" : "No data";
 
 const EXTRA_DROPDOWN_OPTIONS = [
@@ -27,8 +26,40 @@ const EXTRA_DROPDOWN_OPTIONS = [
   },
 ];
 
-class PhyloTreeVis extends React.Component {
-  constructor(props) {
+interface PhyloTreeVisProps {
+  afterSelectedMetadataChange?: $TSFixMeFunction;
+  defaultMetadata?: string;
+  newick?: string;
+  nodeData?: object;
+  onMetadataUpdate?: $TSFixMeFunction;
+  onNewTreeContainer?: $TSFixMeFunction;
+  onSampleNodeClick?: $TSFixMeFunction;
+  phyloTreeId?: number;
+}
+
+interface PhyloTreeVisState {
+  hoveredNode: { data: { accession: $TSFixMeUnknown } };
+  // If we made the sidebar visibility depend on sampleId !== null,
+  // there would be a visual flicker when sampleId is set to null as the sidebar closes.
+  selectedSampleId: $TSFixMeUnknown;
+  sidebarVisible: boolean;
+  metadataFields: $TSFixMeUnknown[];
+  selectedMetadataType: string;
+  showWarningTooltip: boolean;
+}
+
+class PhyloTreeVis extends React.Component<
+  PhyloTreeVisProps,
+  PhyloTreeVisState
+> {
+  ncbiFields: $TSFixMe;
+  newick: $TSFixMe;
+  nodeData: $TSFixMe;
+  tooltipContainer: $TSFixMe;
+  treeContainer: $TSFixMe;
+  treeVis: $TSFixMe;
+  warningTooltipContainer: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.state = {
@@ -56,7 +87,7 @@ class PhyloTreeVis extends React.Component {
   componentDidMount() {
     const { onNewTreeContainer } = this.props;
 
-    let tree = Tree.fromNewickString(this.props.newick, this.props.nodeData);
+    const tree = Tree.fromNewickString(this.props.newick, this.props.nodeData);
     this.treeVis = new Dendogram(this.treeContainer, tree, {
       defaultColor: "#cccccc",
       absentColor: "#999999",
@@ -81,7 +112,7 @@ class PhyloTreeVis extends React.Component {
     this.handleMetadataTypeChange(this.state.selectedMetadataType, "");
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: PhyloTreeVisProps) {
     if (
       this.props.newick !== this.newick ||
       this.props.nodeData !== this.nodeData
@@ -104,14 +135,14 @@ class PhyloTreeVis extends React.Component {
   fetchMetadataTypes = async () => {
     // Get ids and remove undefined, since nodeData includes NCBI and genbank.
     const sampleIds = compact(pluck("sample_id", values(this.props.nodeData)));
-    let metadataFields = await getSampleMetadataFields(sampleIds);
+    const metadataFields = await getSampleMetadataFields(sampleIds);
 
     this.setState({
       metadataFields,
     });
   };
 
-  handleNodeHover = node => {
+  handleNodeHover = (node: $TSFixMe) => {
     this.setState({ hoveredNode: node });
   };
 
@@ -123,9 +154,10 @@ class PhyloTreeVis extends React.Component {
     this.setState({ showWarningTooltip: false });
   };
 
-  handleNodeClick = node => {
+  handleNodeClick = (node: $TSFixMe) => {
     if (node.data.accession) {
-      let url = `https://www.ncbi.nlm.nih.gov/nuccore/${node.data.accession}`;
+      const url = `https://www.ncbi.nlm.nih.gov/nuccore/${node.data.accession}`;
+      // @ts-expect-error ts-migrate(2345) FIXME: Argument of type '"noreferrer"' is not assignable ... Remove this comment to see the full error message
       window.open(url, "_blank", "noopener", "noreferrer");
     } else if (node.data.sample_id) {
       this.props.onSampleNodeClick(
@@ -141,7 +173,10 @@ class PhyloTreeVis extends React.Component {
     });
   };
 
-  handleMetadataTypeChange = (selectedMetadataType, name) => {
+  handleMetadataTypeChange = (
+    selectedMetadataType: $TSFixMe,
+    name: $TSFixMe,
+  ) => {
     this.setState({
       selectedMetadataType,
     });
@@ -159,7 +194,7 @@ class PhyloTreeVis extends React.Component {
     this.props.afterSelectedMetadataChange(selectedMetadataType);
   };
 
-  getFieldValue(field) {
+  getFieldValue(field: $TSFixMe) {
     let value = this.state.hoveredNode.data[field.name];
     if (value && field.parser) {
       try {
@@ -173,7 +208,7 @@ class PhyloTreeVis extends React.Component {
     return value || field.default || "-";
   }
 
-  getMetadataFieldValue = field =>
+  getMetadataFieldValue = (field: $TSFixMe) =>
     get(`metadata.${field}`, this.state.hoveredNode.data);
 
   getTooltipData() {
@@ -184,7 +219,7 @@ class PhyloTreeVis extends React.Component {
         data: [
           {
             name: "NCBI Reference",
-            data: this.ncbiFields.map(f => [
+            data: this.ncbiFields.map((f: $TSFixMe) => [
               f.label,
               this.getFieldValue(f) || "-",
             ]),
@@ -222,14 +257,17 @@ class PhyloTreeVis extends React.Component {
   }
 
   getMetadataDropdownOptions = () => {
-    const metadataOptions = this.state.metadataFields.map(metadataType => ({
-      text: metadataType.name,
-      value: metadataType.key,
-    }));
+    const metadataOptions = this.state.metadataFields.map(
+      (metadataType: $TSFixMe) => ({
+        text: metadataType.name,
+        value: metadataType.key,
+      }),
+    );
 
     return sortBy(
       "text",
       concat(EXTRA_DROPDOWN_OPTIONS, metadataOptions),
+      // @ts-expect-error ts-migrate(2554) FIXME: Expected 1-2 arguments, but got 3.
       metadataOptions,
     );
   };
@@ -242,6 +280,7 @@ class PhyloTreeVis extends React.Component {
             fluid
             rounded
             search
+            // @ts-expect-error Type 'LodashSortBy1x2<unknown>' not assignable to type
             options={this.getMetadataDropdownOptions()}
             label="Color by"
             onChange={this.handleMetadataTypeChange}
@@ -263,6 +302,7 @@ class PhyloTreeVis extends React.Component {
         >
           {this.state.hoveredNode && !this.state.showWarningTooltip && (
             <TooltipVizTable
+              // @ts-expect-error Types of property 'data' are incompatible.
               data={this.getTooltipData().data}
               description={this.getTooltipData().description}
             />
@@ -286,16 +326,5 @@ class PhyloTreeVis extends React.Component {
     );
   }
 }
-
-PhyloTreeVis.propTypes = {
-  afterSelectedMetadataChange: PropTypes.func,
-  defaultMetadata: PropTypes.string,
-  newick: PropTypes.string,
-  nodeData: PropTypes.object,
-  onMetadataUpdate: PropTypes.func,
-  onNewTreeContainer: PropTypes.func,
-  onSampleNodeClick: PropTypes.func,
-  phyloTreeId: PropTypes.number,
-};
 
 export default PhyloTreeVis;

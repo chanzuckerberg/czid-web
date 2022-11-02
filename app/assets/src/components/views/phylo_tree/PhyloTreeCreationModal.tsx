@@ -9,7 +9,6 @@ import {
   isUndefined,
   map,
 } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import Moment from "react-moment";
 import { Link as RouterLink } from "react-router-dom";
@@ -35,6 +34,7 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
 import { showPhyloTreeNotification } from "~/components/views/phylo_tree/PhyloTreeNotification";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
+import { Project } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Link from "~ui/controls/Link";
 import { SubtextDropdown } from "~ui/controls/dropdowns";
@@ -49,8 +49,62 @@ import PhyloTreeChecks from "./PhyloTreeChecks";
 
 import cs from "./phylo_tree_creation_modal.scss";
 
-class PhyloTreeCreationModal extends React.Component {
-  constructor(props, context) {
+interface PhyloTreeCreationModalProps {
+  admin?: number;
+  onClose?(...args: unknown[]): unknown;
+  projectId?: number;
+  projectName?: string;
+  minCoverageBreadth?: number;
+  taxonId?: number;
+  taxonName?: string;
+}
+
+interface PhyloTreeCreationModalState {
+  defaultPage: number;
+  skipListTrees: boolean;
+  phyloTreesLoaded: boolean;
+  phyloTrees: $TSFixMeUnknown[];
+  projectPipelineRunsLoaded: boolean;
+  projectPipelineRunIds: Set<$TSFixMeUnknown>;
+  selectableProjectPipelineRuns: Set<number>;
+  selectedProjectPipelineRuns: Set<number>;
+  projectPipelineRunsSelectAllChecked: boolean;
+  projectCoverageBreadths: $TSFixMeUnknown;
+  otherPipelineRunsLoaded: boolean;
+  otherPipelineRunIds: Set<number>;
+  selectedOtherPipelineRuns: Set<number>;
+  otherPipelineRunsSelectAllChecked: boolean;
+  otherCoverageBreadths: $TSFixMeUnknown;
+  otherSamplesFilter: string;
+  taxonList: $TSFixMeUnknown[];
+  projectsLoaded: boolean;
+  projectList: Project[];
+  taxonId: number;
+  taxonName: string;
+  projectId: number;
+  projectName: string;
+  showErrorTaxonAndProject: boolean;
+  showErrorName: boolean;
+  showErrorSamples: boolean;
+  showLowCoverageWarning: boolean;
+  treeName: string;
+  taxonQuery: $TSFixMeUnknown;
+  treeNameValid?: $TSFixMeUnknown;
+}
+
+class PhyloTreeCreationModal extends React.Component<
+  PhyloTreeCreationModalProps,
+  PhyloTreeCreationModalState
+> {
+  handleTaxonSearchActionDebounced: $TSFixMe;
+  infiniteTable: $TSFixMe;
+  inputDelay: $TSFixMe;
+  inputTimeout: $TSFixMe;
+  isTreeNameValidDebounced: $TSFixMe;
+  phyloTreeHeaders: $TSFixMe;
+  skipSelectProjectAndTaxon: $TSFixMe;
+  wizard: $TSFixMe;
+  constructor(props: $TSFixMe, context: $TSFixMe) {
     super(props, context);
 
     this.state = {
@@ -158,11 +212,11 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  parsePhyloTreeData = phyloTreeData => {
+  parsePhyloTreeData = (phyloTreeData: $TSFixMe) => {
     if (isEmpty(phyloTreeData)) {
       return [];
     }
-    return phyloTreeData.map(row => ({
+    return phyloTreeData.map((row: $TSFixMe) => ({
       name: row.name,
       user: (row.user || {}).name,
       last_update: <Moment fromNow date={row.updated_at} />,
@@ -267,7 +321,7 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  rowRenderer = rowProps => {
+  rowRenderer = (rowProps: $TSFixMe) => {
     const data = rowProps.rowData;
 
     if (data) {
@@ -292,7 +346,10 @@ class PhyloTreeCreationModal extends React.Component {
     return defaultTableRowRenderer(rowProps);
   };
 
-  handleLoadProjectPipelineRunRows = async ({ startIndex, stopIndex }) => {
+  handleLoadProjectPipelineRunRows = async ({
+    startIndex,
+    stopIndex,
+  }: $TSFixMe) => {
     const { taxonId, projectPipelineRunIds } = this.state;
 
     const idsToLoad = Array.from(projectPipelineRunIds).slice(
@@ -308,7 +365,10 @@ class PhyloTreeCreationModal extends React.Component {
     return samples;
   };
 
-  handleLoadOtherPipelineRunRows = async ({ startIndex, stopIndex }) => {
+  handleLoadOtherPipelineRunRows = async ({
+    startIndex,
+    stopIndex,
+  }: $TSFixMe) => {
     const { taxonId, otherPipelineRunIds } = this.state;
 
     const idsToLoad = Array.from(otherPipelineRunIds).slice(
@@ -325,7 +385,7 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   loadProjectSearchContext = () => {
-    getProjectsToChooseFrom().then(projectList =>
+    getProjectsToChooseFrom().then((projectList: $TSFixMe) =>
       this.handleProjectSearchContextResponse(projectList),
     );
 
@@ -335,10 +395,10 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  handleProjectSearchContextResponse = projectList =>
+  handleProjectSearchContextResponse = (projectList: $TSFixMe) =>
     this.setState({ projectList, projectsLoaded: true });
 
-  handleSelectProject = result => {
+  handleSelectProject = (result: $TSFixMe) => {
     this.setState(
       {
         projectId: result.id,
@@ -374,8 +434,9 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  handleSelectTaxon = taxonId => {
+  handleSelectTaxon = (taxonId: $TSFixMe) => {
     const { taxonList } = this.state;
+    // @ts-expect-error Property 'title' does not exist on type 'unknown'.
     const taxonName = find({ value: taxonId }, taxonList).title;
 
     this.setState(
@@ -413,15 +474,15 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  setPage = defaultPage => this.setState({ defaultPage });
+  setPage = (defaultPage: $TSFixMe) => this.setState({ defaultPage });
 
-  handleSelectProjectPipelineRunsRow = (value, checked) => {
+  handleSelectProjectPipelineRunsRow = (value: $TSFixMe, checked: $TSFixMe) => {
     const {
       selectedProjectPipelineRuns: previousSelectedProjectPipelineRuns,
       selectableProjectPipelineRuns,
     } = this.state;
 
-    let newSelectedProjectPipelineRuns = clone(
+    const newSelectedProjectPipelineRuns = clone(
       previousSelectedProjectPipelineRuns,
     );
 
@@ -454,13 +515,15 @@ class PhyloTreeCreationModal extends React.Component {
     );
   };
 
-  handleSelectOtherPipelineRunsRow = (value, checked) => {
+  handleSelectOtherPipelineRunsRow = (value: $TSFixMe, checked: $TSFixMe) => {
     const {
       selectedOtherPipelineRuns: previousSelectedOtherPipelineRuns,
       otherPipelineRunIds,
     } = this.state;
 
-    let newSelectedOtherPipelineRuns = clone(previousSelectedOtherPipelineRuns);
+    const newSelectedOtherPipelineRuns = clone(
+      previousSelectedOtherPipelineRuns,
+    );
 
     if (checked) {
       newSelectedOtherPipelineRuns.add(value);
@@ -490,13 +553,13 @@ class PhyloTreeCreationModal extends React.Component {
     );
   };
 
-  handleSelectAllProjectPipelineRuns = checked => {
+  handleSelectAllProjectPipelineRuns = (checked: $TSFixMe) => {
     const {
       selectedProjectPipelineRuns: previousSelectedProjectPipelineRuns,
       selectableProjectPipelineRuns,
     } = this.state;
 
-    const newSelectedProjectPipelineRuns = checked
+    const newSelectedProjectPipelineRuns: Set<number> = checked
       ? clone(selectableProjectPipelineRuns)
       : new Set();
 
@@ -521,13 +584,13 @@ class PhyloTreeCreationModal extends React.Component {
     );
   };
 
-  handleSelectAllOtherPipelineRuns = checked => {
+  handleSelectAllOtherPipelineRuns = (checked: $TSFixMe) => {
     const {
       selectedOtherPipelineRuns: previousSelectedOtherPipelineRuns,
       otherPipelineRunIds,
     } = this.state;
 
-    const newSelectedOtherPipelineRuns = checked
+    const newSelectedOtherPipelineRuns: Set<number> = checked
       ? clone(otherPipelineRunIds)
       : new Set();
 
@@ -552,7 +615,7 @@ class PhyloTreeCreationModal extends React.Component {
     );
   };
 
-  handleFilterChange = newFilter => {
+  handleFilterChange = (newFilter: $TSFixMe) => {
     clearTimeout(this.inputTimeout);
     this.inputTimeout = setTimeout(() => {
       this.setState(
@@ -577,7 +640,7 @@ class PhyloTreeCreationModal extends React.Component {
 
   // We want to debounce isTreeNameValid because it does an API call, but not
   // handleNameChange because we want the search input to update immediately.
-  handleNameChange = newName => {
+  handleNameChange = (newName: $TSFixMe) => {
     this.setState({ treeName: newName.trim() }, this.isTreeNameValidDebounced);
   };
 
@@ -665,7 +728,7 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  handleTaxonInputChange = async value => {
+  handleTaxonInputChange = async (value: $TSFixMe) => {
     this.setState({ taxonQuery: value }, this.handleTaxonSearchActionDebounced);
   };
 
@@ -714,7 +777,7 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   isNumberOfSamplesValid() {
-    let nSamples =
+    const nSamples =
       this.state.selectedProjectPipelineRuns.size +
       this.state.selectedOtherPipelineRuns.size;
     return PhyloTreeChecks.isNumberOfSamplesValid(nSamples);
@@ -747,7 +810,7 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   getTotalPageRendering() {
-    let totalSelectedSamples =
+    const totalSelectedSamples =
       this.state.selectedProjectPipelineRuns.size +
       this.state.selectedOtherPipelineRuns.size;
     return `${totalSelectedSamples} Total Samples`;
@@ -823,7 +886,7 @@ class PhyloTreeCreationModal extends React.Component {
     return null;
   }
 
-  page = action => {
+  page = (action: $TSFixMe) => {
     const {
       projectList,
       projectId,
@@ -839,10 +902,11 @@ class PhyloTreeCreationModal extends React.Component {
       selectedOtherPipelineRuns,
     } = this.state;
 
-    let options = {
+    const options = {
       listTrees: (
         <Wizard.Page
           key="page_1"
+          // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; key: string; classNam... Remove this comment to see the full error message
           className="wizard__page-1"
           skipDefaultButtons={true}
           title="Phylogenetic Trees"
@@ -875,6 +939,7 @@ class PhyloTreeCreationModal extends React.Component {
       selectTaxonAndProject: (
         <Wizard.Page
           key="wizard__page_2"
+          // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; key: string; title: s... Remove this comment to see the full error message
           title="Select project and taxon"
           onLoad={this.loadProjectSearchContext}
           onContinue={this.canContinueWithTaxonAndProject}
@@ -903,6 +968,7 @@ class PhyloTreeCreationModal extends React.Component {
                 initialSelectedValue={this.state.taxonId}
                 onChange={this.handleSelectTaxon}
                 onFilterChange={this.handleTaxonInputChange}
+                // @ts-expect-error ts-migrate(2339) FIXME: Property 'taxonList' does not exist on type 'Reado... Remove this comment to see the full error message
                 options={this.state.taxonList}
                 placeholder="Select taxon"
                 search
@@ -919,6 +985,7 @@ class PhyloTreeCreationModal extends React.Component {
       selectNameAndProjectSamples: (
         <Wizard.Page
           key="wizard__page_3"
+          // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; key: string; title: s... Remove this comment to see the full error message
           title={`Name phylogenetic tree and select samples from project '${this.state.projectName}'`}
           onLoad={this.loadPipelineRunIds}
           onContinueAsync={this.canContinueWithTreeName}
@@ -937,6 +1004,7 @@ class PhyloTreeCreationModal extends React.Component {
                 }
                 placeholder="Tree Name"
                 onChange={this.handleNameChange}
+                // @ts-expect-error ts-migrate(2769) FIXME: No overload matches this call.
                 defaultValue={this.state.treeName}
               />
             </div>
@@ -952,7 +1020,7 @@ class PhyloTreeCreationModal extends React.Component {
                 rowRenderer={this.rowRenderer}
                 selectAllChecked={projectPipelineRunsSelectAllChecked}
                 selected={selectedProjectPipelineRuns}
-                selectRowDataGetter={({ rowData }) => {
+                selectRowDataGetter={({ rowData }: $TSFixMe) => {
                   // If a run has no contigs, disable the row from being selected.
                   const numContigs = get("num_contigs", rowData);
                   if (numContigs !== 0) {
@@ -962,7 +1030,9 @@ class PhyloTreeCreationModal extends React.Component {
                   }
                 }}
                 selectableKey="pipeline_run_id"
-                ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+                ref={(infiniteTable: $TSFixMe) =>
+                  (this.infiniteTable = infiniteTable)
+                }
                 defaultRowHeight={75}
               />
             ) : projectPipelineRunsLoaded &&
@@ -980,6 +1050,7 @@ class PhyloTreeCreationModal extends React.Component {
       addIdseqSamples: (
         <Wizard.Page
           key="wizard__page_4"
+          // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; key: string; title: s... Remove this comment to see the full error message
           title={`Add additional samples from CZ ID that contain ${this.state.taxonName}?`}
         >
           <div className="wizard__page-4__subtitle" />
@@ -1008,7 +1079,7 @@ class PhyloTreeCreationModal extends React.Component {
                 rowRenderer={this.rowRenderer}
                 selectAllChecked={otherPipelineRunsSelectAllChecked}
                 selected={selectedOtherPipelineRuns}
-                selectRowDataGetter={({ rowData }) => {
+                selectRowDataGetter={({ rowData }: $TSFixMe) => {
                   const numContigs = get("num_contigs", rowData);
                   // If a run has no contigs, disable the row from being selected.
                   if (numContigs !== 0) {
@@ -1018,7 +1089,9 @@ class PhyloTreeCreationModal extends React.Component {
                   }
                 }}
                 selectableKey="pipeline_run_id"
-                ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+                ref={(infiniteTable: $TSFixMe) =>
+                  (this.infiniteTable = infiniteTable)
+                }
                 defaultRowHeight={75}
               />
             ) : otherPipelineRunsLoaded && otherPipelineRunIds.size === 0 ? (
@@ -1037,7 +1110,7 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   getPages = () => {
-    let chosenPages = [];
+    const chosenPages = [];
     if (!this.state.skipListTrees) {
       chosenPages.push(this.page("listTrees"));
     }
@@ -1065,6 +1138,7 @@ class PhyloTreeCreationModal extends React.Component {
               this.handleComplete,
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_TREE_BUTTON_CLICKED,
             )}
+            // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: any[]; className: string; skipPa... Remove this comment to see the full error message
             defaultPage={defaultPage}
             labels={{
               finish: "Create Tree",
@@ -1082,18 +1156,9 @@ class PhyloTreeCreationModal extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 PhyloTreeCreationModal.defaultProps = {
   minCoverageBreadth: 25,
-};
-
-PhyloTreeCreationModal.propTypes = {
-  admin: PropTypes.number,
-  onClose: PropTypes.func,
-  projectId: PropTypes.number,
-  projectName: PropTypes.string,
-  minCoverageBreadth: PropTypes.number,
-  taxonId: PropTypes.number,
-  taxonName: PropTypes.string,
 };
 
 PhyloTreeCreationModal.contextType = UserContext;

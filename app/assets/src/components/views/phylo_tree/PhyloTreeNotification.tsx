@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -7,7 +6,11 @@ import Notification from "~ui/notifications/Notification";
 
 import cs from "./phylo_tree_notification.scss";
 
-const PhyloTreeNotification = ({ onClose }) => {
+interface PhyloTreeNotificationProps {
+  onClose: $TSFixMeFunction;
+}
+
+const PhyloTreeNotification = ({ onClose }: PhyloTreeNotificationProps) => {
   const label = (
     <div className={cs.label}>
       <div className={cs.message}>
@@ -41,15 +44,13 @@ const PhyloTreeNotification = ({ onClose }) => {
   );
 };
 
-PhyloTreeNotification.propTypes = {
-  onClose: PropTypes.func,
-};
-
 export default PhyloTreeNotification;
 
 export const showPhyloTreeNotification = () => {
   showToast(
-    ({ closeToast }) => <PhyloTreeNotification onClose={closeToast} />,
+    ({ closeToast }: $TSFixMe) => (
+      <PhyloTreeNotification onClose={closeToast} />
+    ),
     {
       autoClose: 12000,
     },

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
@@ -11,11 +10,17 @@ import ImgMatrixPrimary from "~ui/illustrations/ImgMatrixPrimary";
 
 import cs from "./pairwise_distance_matrix_error_modal.scss";
 
+interface PairwiseDistanceMatrixErrorModalProps {
+  onContinue: $TSFixMeFunction;
+  open?: boolean;
+  showLowCoverageWarning?: boolean;
+}
+
 const PairwiseDistanceMatrixErrorModal = ({
   onContinue,
   open,
-  showLowCoverageWarning,
-}) => {
+  showLowCoverageWarning = false,
+}: PairwiseDistanceMatrixErrorModalProps) => {
   const lowCoverageWarning =
     "Your samples were too divergent, possibly due to low coverage. To address this issue, try creating a new tree with samples that have coverage above 25%.";
 
@@ -79,16 +84,6 @@ const PairwiseDistanceMatrixErrorModal = ({
       </div>
     </Modal>
   );
-};
-
-PairwiseDistanceMatrixErrorModal.propTypes = {
-  onContinue: PropTypes.func.isRequired,
-  open: PropTypes.bool,
-  showLowCoverageWarning: PropTypes.bool,
-};
-
-PairwiseDistanceMatrixErrorModal.defaultProps = {
-  showLowCoverageWarning: false,
 };
 
 export default PairwiseDistanceMatrixErrorModal;

@@ -60,12 +60,12 @@ export const getURLParamString = params => {
   )(filtered);
 };
 
-export const copyShortUrlToClipboard = async url => {
+export const copyShortUrlToClipboard = async (url?: string) => {
   const shortUrl = await shortenUrl(url || window.location.href);
   copy(window.location.origin + "/" + shortUrl.unique_key);
 };
 
-export const copyUrlToClipboard = async url => {
+export const copyUrlToClipboard = async (url?: string) => {
   url = url || window.location.href;
   copy(url);
 };

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 import SvgSaver from "svgsaver";
 
@@ -7,8 +6,23 @@ import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
 
-class PhyloTreeDownloadButton extends React.Component {
-  constructor(props) {
+interface PhyloTreeDownloadButtonProps {
+  showPhyloTreeNgOptions?: boolean;
+  tree?: { clustermap_svg_url: string };
+  treeContainer?: Element;
+}
+
+class PhyloTreeDownloadButton extends React.Component<
+  PhyloTreeDownloadButtonProps
+> {
+  dataOptions: $TSFixMe;
+  matrixImageOptions: $TSFixMe;
+  matrixOnlyOptions: $TSFixMe;
+  phyloTreeNgOptions: $TSFixMe;
+  skaOptions: $TSFixMe;
+  svgSaver: $TSFixMe;
+  treeOptions: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.dataOptions = [
@@ -44,12 +58,14 @@ class PhyloTreeDownloadButton extends React.Component {
     this.svgSaver = new SvgSaver();
   }
 
-  download(option) {
+  download(option: $TSFixMe) {
     const { tree, treeContainer } = this.props;
 
-    if (this.dataOptions.map(o => o.value).includes(option)) {
+    if (this.dataOptions.map((o: $TSFixMe) => o.value).includes(option)) {
+      // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
       location.href = `/phylo_trees/${tree.id}/download?output=${option}`;
     } else if (this.phyloTreeNgOptions.includes(option)) {
+      // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
       location.href = `/phylo_tree_ngs/${tree.id}/download?output=${option}`;
     } else if (option === "svg") {
       // TODO (gdingle): filename per tree?
@@ -65,29 +81,33 @@ class PhyloTreeDownloadButton extends React.Component {
     }
     trackEvent("PhyloTreeDownloadButton_option_clicked", {
       option,
+      // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
       treeName: this.props.tree.name,
+      // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
       treeId: this.props.tree.id,
     });
   }
 
   getPhyloTreeOptions = () => {
     const { tree } = this.props;
-    let readyOptions = this.dataOptions.filter(opt => !!tree[opt.value]);
+    let readyOptions = this.dataOptions.filter(
+      (opt: $TSFixMe) => !!tree[opt.value],
+    );
 
     // Don't include the newick file unless it's a phyloTreeNg.
     readyOptions = readyOptions.concat(
       this.treeOptions.filter(
-        opt => !this.phyloTreeNgOptions.includes(opt.value),
+        (opt: $TSFixMe) => !this.phyloTreeNgOptions.includes(opt.value),
       ),
     );
     return readyOptions;
   };
 
   getPhyloTreeNgItems = () => {
-    let readyOptions = this.treeOptions.concat(this.matrixImageOptions);
+    const readyOptions = this.treeOptions.concat(this.matrixImageOptions);
 
     // Convert the options to BareDropdown Items and add the Divider.
-    let dropdownItems = readyOptions.map(option => {
+    let dropdownItems = readyOptions.map((option: $TSFixMe) => {
       return (
         <BareDropdown.Item
           key={option.value}
@@ -98,7 +118,7 @@ class PhyloTreeDownloadButton extends React.Component {
     });
     dropdownItems.push(<BareDropdown.Divider key="divider_one" />);
     dropdownItems = dropdownItems.concat(
-      this.skaOptions.map(option => {
+      this.skaOptions.map((option: $TSFixMe) => {
         return (
           <BareDropdown.Item
             key={option.value}
@@ -112,7 +132,7 @@ class PhyloTreeDownloadButton extends React.Component {
   };
 
   getMatrixItems = () => {
-    let dropdownItems = this.matrixImageOptions.map(option => {
+    let dropdownItems = this.matrixImageOptions.map((option: $TSFixMe) => {
       return (
         <BareDropdown.Item
           key={option.value}
@@ -123,7 +143,7 @@ class PhyloTreeDownloadButton extends React.Component {
     });
     dropdownItems.push(<BareDropdown.Divider key="divider_one" />);
     dropdownItems = dropdownItems.concat(
-      this.skaOptions.map(option => {
+      this.skaOptions.map((option: $TSFixMe) => {
         if (this.matrixOnlyOptions.includes(option.value)) {
           return (
             <BareDropdown.Item
@@ -142,6 +162,7 @@ class PhyloTreeDownloadButton extends React.Component {
     const {
       showPhyloTreeNgOptions,
       tree,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       treeContainer,
       ...props
     } = this.props;
@@ -151,6 +172,7 @@ class PhyloTreeDownloadButton extends React.Component {
         ? this.getMatrixItems()
         : this.getPhyloTreeNgItems();
       return (
+        // @ts-expect-error ts-migrate(2739) FIXME: Type '{ children?: ReactNode; items: any; disabled... Remove this comment to see the full error message
         <DownloadButtonDropdown
           items={downloadItems}
           disabled={downloadItems.length === 0}
@@ -160,6 +182,7 @@ class PhyloTreeDownloadButton extends React.Component {
     }
 
     return (
+      // @ts-expect-error ts-migrate(2739) FIXME: Type '{ children?: ReactNode; options: any; disabl... Remove this comment to see the full error message
       <DownloadButtonDropdown
         options={this.getPhyloTreeOptions()}
         disabled={this.getPhyloTreeOptions().length === 0}
@@ -169,11 +192,5 @@ class PhyloTreeDownloadButton extends React.Component {
     );
   }
 }
-
-PhyloTreeDownloadButton.propTypes = {
-  showPhyloTreeNgOptions: PropTypes.bool,
-  tree: PropTypes.object,
-  treeContainer: PropTypes.instanceOf(Element),
-};
 
 export default PhyloTreeDownloadButton;
