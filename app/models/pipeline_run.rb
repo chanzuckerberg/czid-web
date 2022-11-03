@@ -50,6 +50,7 @@ class PipelineRun < ApplicationRecord
     illumina: "Illumina",
     nanopore: "ONT",
   }.freeze
+  validates :technology, presence: true, inclusion: { in: TECHNOLOGY_INPUT.values }
 
   # Mapping the technology input to the outputs produced by the pipeline.
   TARGET_OUTPUTS = {
