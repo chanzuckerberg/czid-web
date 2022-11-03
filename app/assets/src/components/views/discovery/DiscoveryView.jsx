@@ -58,7 +58,6 @@ import {
   getTempSelectedOptions,
 } from "~/components/utils/urls";
 import {
-  getWorkflowLabelForWorkflow,
   workflowIsWorkflowRunEntity,
   WORKFLOWS,
   WORKFLOW_ENTITIES,
@@ -77,7 +76,10 @@ import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
 import ImgVizSecondary from "~ui/illustrations/ImgVizSecondary";
 
-import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
+import {
+  AMR_EXISTING_SAMPLES_LINK,
+  VISUALIZATIONS_DOC_LINK,
+} from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 
 import ProjectsView from "../projects/ProjectsView";
@@ -306,16 +308,42 @@ class DiscoveryView extends React.Component {
   setupWorkflowConfigs = () => {
     this.configForWorkflow = {
       [WORKFLOWS.AMR.value]: {
-        bannerTitle: `${WORKFLOWS.AMR.label} Samples`,
+        bannerTitle: `${WORKFLOWS.AMR.value.toUpperCase()} Samples`,
         objectCollection: this.amrWorkflowRuns,
+        noDataLinks: [
+          {
+            href: "/samples/upload",
+            text: `Upload new samples`,
+          },
+          {
+            external: true,
+            href: AMR_EXISTING_SAMPLES_LINK,
+            text: "Learn how to rerun samples",
+          },
+        ],
+        noDataMessage:
+          `No samples were processed by the AMR Pipeline. ` +
+          "You can upload new samples or rerun mNGS samples through the AMR pipeline.",
       },
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
-        bannerTitle: `${WORKFLOWS.CONSENSUS_GENOME.label}s`,
+        bannerTitle: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
         objectCollection: this.workflowRuns,
+        noDataLinks: {
+          href: "/samples/upload",
+          text: `Run ${WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel}`,
+        },
+        noDataMessage: `No samples were processed by the ${WORKFLOWS.CONSENSUS_GENOME.label} Pipeline.`,
       },
       [WORKFLOWS.SHORT_READ_MNGS.value]: {
         bannerTitle: `${WORKFLOWS.SHORT_READ_MNGS.label} Samples`,
         objectCollection: this.samples,
+        noDataLinks: [
+          {
+            href: "/samples/upload",
+            text: `Run ${WORKFLOWS.SHORT_READ_MNGS.pluralizedLabel}`,
+          },
+        ],
+        noDataMessage: `No samples were processed by the ${WORKFLOWS.SHORT_READ_MNGS.label} Pipeline.`,
       },
     };
   };
@@ -1820,20 +1848,21 @@ class DiscoveryView extends React.Component {
     return null;
   };
 
-  renderNoDataWorkflowBanner = workflow => {
-    const workflowLabel = getWorkflowLabelForWorkflow(workflow);
-    const emptyTitle = this.configForWorkflow[workflow].bannerTitle;
+  renderNoDataWorkflowBanner = () => {
+    const { workflow } = this.state;
+    const {
+      bannerTitle,
+      noDataLinks,
+      noDataMessage,
+    } = this.configForWorkflow?.[workflow];
 
     return (
       <InfoBanner
         className={cs.noResultsContainer}
         icon={<ImgSamplesSecondary />}
-        link={{
-          href: "/samples/upload",
-          text: `Run ${workflowLabel}s`,
-        }}
-        message={`No samples were processed by the ${workflowLabel} Pipeline.`}
-        title={`0 ${emptyTitle}`}
+        link={noDataLinks}
+        message={noDataMessage}
+        title={`0 ${bannerTitle}`}
         type={workflow}
       />
     );
@@ -2162,7 +2191,7 @@ class DiscoveryView extends React.Component {
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
               {userDataCounts &&
               !userDataCounts.sampleCountByWorkflow[workflow] ? (
-                this.renderNoDataWorkflowBanner(workflow)
+                this.renderNoDataWorkflowBanner()
               ) : (
                 <SamplesView
                   activeColumns={sampleActiveColumnsByWorkflow[workflow]}

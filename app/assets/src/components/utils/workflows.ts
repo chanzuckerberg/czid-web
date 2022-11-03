@@ -38,11 +38,6 @@ export const workflowIsWorkflowRunEntity = (workflow: WORKFLOW_VALUES) => {
   return WORKFLOWS[workflowKey].entity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
 };
 
-export const getWorkflowLabelForWorkflow = (workflow: WORKFLOW_VALUES) => {
-  const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
-  return WORKFLOWS[workflowKey].label;
-};
-
 export const WORKFLOW_ORDER = ["SHORT_READ_MNGS", "CONSENSUS_GENOME", "AMR"];
 
 /**

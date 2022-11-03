@@ -39,18 +39,26 @@ const InfoBanner = ({
     );
   };
 
-  const renderLink = () => {
-    if (link.external) {
+  const renderLinks = () => {
+    if (Array.isArray(link)) {
+      return link.map(linkObj => renderLink(linkObj));
+    } else {
+      return renderLink(link);
+    }
+  };
+
+  const renderLink = linkObj => {
+    if (linkObj.external) {
       return (
-        <ExternalLink className={cs.link} href={link.href}>
-          {link.text}
+        <ExternalLink className={cs.link} href={linkObj.href}>
+          {linkObj.text}
           <IconArrowRight />
         </ExternalLink>
       );
     } else {
       return (
-        <Link className={cs.link} href={link.href}>
-          {link.text}
+        <Link className={cs.link} href={linkObj.href}>
+          {linkObj.text}
           <IconArrowRight />
         </Link>
       );
@@ -65,7 +73,8 @@ const InfoBanner = ({
           <div className={cx(cs.message, messageClassName)}>{message}</div>
         )}
         {suggestion && <div className={cs.suggestion}>{suggestion}</div>}
-        {listenerLink ? renderListenerLink() : link && renderLink()}
+        {listenerLink && renderListenerLink()}
+        {!listenerLink && link && renderLinks()}
       </div>
       <div className={cx(cs.icon, iconClassName)}>{icon}</div>
     </div>
@@ -86,11 +95,20 @@ InfoBanner.propTypes = {
   }),
   icon: PropTypes.node,
   iconClassName: PropTypes.string,
-  link: PropTypes.shape({
-    text: PropTypes.string.isRequired,
-    href: PropTypes.string.isRequired,
-    external: PropTypes.bool,
-  }),
+  link: PropTypes.oneOfType([
+    PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      href: PropTypes.string.isRequired,
+      external: PropTypes.bool,
+    }),
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        text: PropTypes.string.isRequired,
+        href: PropTypes.string.isRequired,
+        external: PropTypes.bool,
+      }),
+    ),
+  ]),
   message: PropTypes.node,
   messageClassName: PropTypes.string,
   suggestion: PropTypes.string,

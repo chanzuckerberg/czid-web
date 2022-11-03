@@ -44,5 +44,7 @@ export const BULK_DOWNLOAD_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360042575714-Initiate-a-Bulk-Download";
 export const AMR_HELP_LINK =
   "https://docs.google.com/document/d/16qYFrijM3XgafTkodKtDGVOZDRY4D_TMBWix_hzZLvw/edit?usp=sharing";
+export const AMR_EXISTING_SAMPLES_LINK =
+  "https://docs.google.com/document/d/12a_0PQcTRbB-0JC1SMjhLvdQzhBF2Z0TZseFkoH-aRI/edit#bookmark=id.lqgywt4vgvg3";
 export const AMR_DEPRECATED_HELP_LINK =
   "https://docs.google.com/document/d/1BkkegYEu5hoo-6xqNL-A-eMuT-tTYsJu4Q5OlO_HI5s/edit?usp=sharing";
