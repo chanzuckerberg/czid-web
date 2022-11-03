@@ -64,7 +64,7 @@ class HandleSfnNotifications
 
       # If the run is still awaiting results, load in any new results to the database.
       unless pr.results_finalized?
-        # If a stage has completed, load in the outputs from that stage into the db.
+        # If a stage has completed in the Illumina mNGS pipeline, load in the outputs from that stage into the db.
         if stage_complete_event?(details)
           pr.load_stage_results(details["lastCompletedStage"])
           Rails.logger.info("Loading #{details['lastCompletedStage']} results for PipelineRun #{pr.id} #{arn} into the database")
@@ -75,7 +75,9 @@ class HandleSfnNotifications
             pr.id
           )
         # If the execution failed, try to load in any available results and mark the rest as failed.
-        elsif ["TIMED_OUT", "ABORTED", "FAILED"].include?(status)
+        # Otherwise, if it's an ONT run, there are no separate pipeline stages to load intermediate outputs from,
+        # so call monitor_results to load all available outputs.
+        elsif ["TIMED_OUT", "ABORTED", "FAILED"].include?(status) || pr.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
           Rails.logger.info("Loading results for PipelineRun #{pr.id} #{arn} into the database")
           pr.monitor_results
         end
