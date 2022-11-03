@@ -11,6 +11,7 @@ class SupportController < ApplicationController
 
   before_action :login_required, except: PUBLIC_ACTIONS
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: PUBLIC_ACTIONS
+  layout "impact", only: :impact
 
   def privacy
   end
