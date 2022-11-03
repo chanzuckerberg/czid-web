@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_10_25_163536) do
+ActiveRecord::Schema.define(version: 2022_10_25_165258) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -208,6 +208,7 @@ ActiveRecord::Schema.define(version: 2022_10_25_163536) do
     t.string "taxa_category", default: "unknown", comment: "An informal taxa name for grouping hosts. First implemented for sample type suggestions."
     t.integer "samples_count", default: 0, null: false, comment: "Added to enable ranking of host genomes by popularity"
     t.bigint "user_id", comment: "The user that created the host genome. Values previous to 2020-02 may be NULL."
+    t.string "s3_minimap2_index_path", comment: "The path to the index file to be used in the pipeline by minimap2 for host filtering."
     t.index ["name"], name: "index_host_genomes_on_name", unique: true
     t.index ["user_id"], name: "index_host_genomes_on_user_id"
   end
