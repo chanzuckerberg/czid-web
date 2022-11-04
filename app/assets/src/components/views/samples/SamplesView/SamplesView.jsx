@@ -47,6 +47,7 @@ import CollectionModal from "~/components/views/samples/CollectionModal";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import { IconLoading } from "~ui/icons";
 import Label from "~ui/labels/Label";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
@@ -747,7 +748,13 @@ class SamplesView extends React.Component {
 
     const { metadataFields, loading } = this.state;
 
-    if (loading) return null;
+    if (loading) {
+      return (
+        <div className={cs.loadingColumns}>
+          <IconLoading className={cs.iconLoading}/>
+        </div>
+      );
+    }
 
     const columns = computeColumnsByWorkflow({
       workflow,

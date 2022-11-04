@@ -133,3 +133,11 @@
   padding: $sds-spaces-xxs 0;
   margin-right: $sds-spaces-xl;
 }
+
+.loadingColumns {
+  margin: $sds-spaces-xxl auto 0;
+
+  .iconLoading {
+    fill: $sds-color-gray-500;
+  }
+}
