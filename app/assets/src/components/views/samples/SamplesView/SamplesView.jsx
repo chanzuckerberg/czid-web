@@ -506,6 +506,13 @@ class SamplesView extends React.Component {
       this.kickoffAmrPipelineForSamples(sampleIdsToKickoffAmr);
       this.renderAmrPipelineBulkKickedOffNotification();
 
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED,
+        {
+          sampleIds: sampleIdsToKickoffAmr,
+        },
+      );
+
       handleNewAmrCreationsFromMngs({
         numAmrRunsCreated: size(amrPipelineEligibility.eligible),
       });

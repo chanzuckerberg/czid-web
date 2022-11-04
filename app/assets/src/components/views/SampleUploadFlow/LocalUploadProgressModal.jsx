@@ -2,12 +2,14 @@ import { ChecksumAlgorithm, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import cx from "classnames";
 import {
+  compact,
   constant,
   filter,
   find,
   isEmpty,
   map,
   omit,
+  pluck,
   size,
   sum,
   times,
@@ -381,13 +383,25 @@ const LocalUploadProgressModal = ({
         sample => sampleUploadStatuses[sample.name] !== "error",
         samples,
       );
+
+      const getIdForSample = sample => {
+        const localSample = find({ name: sample.name }, locallyCreatedSamples);
+        return localSample?.id;
+      };
+
+      const createdSampleIds = compact(map(getIdForSample, createdSamples));
+
+      const erroredSampleIds = compact(map(getIdForSample, failedSamples));
+
       trackEvent(
         ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_FAILED,
         {
-          erroredSamples: failedSamples.length,
+          createdSampleIds,
           createdSamples: samples.length - failedSamples.length,
-          erroredSamplesFileSizes: sampleNameToFileSizes(failedSamples),
           createdSamplesFileSizes: sampleNameToFileSizes(createdSamples),
+          erroredSampleIds,
+          erroredSamples: failedSamples.length,
+          erroredSamplesFileSizes: sampleNameToFileSizes(failedSamples),
           projectId: project.id,
           uploadType,
         },
@@ -397,6 +411,7 @@ const LocalUploadProgressModal = ({
         ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_SUCCEEDED,
         {
           createdSamples: samples.length,
+          createdSampleIds: pluck("id", locallyCreatedSamples),
           createdSamplesFileSizes: sampleNameToFileSizes(samples),
           projectId: project.id,
           uploadType,
