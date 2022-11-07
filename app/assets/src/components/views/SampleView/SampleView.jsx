@@ -1518,6 +1518,8 @@ class SampleView extends React.Component {
           { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
           sample.workflow_runs,
         ) && WORKFLOWS.CONSENSUS_GENOME.label,
+        find({ workflow: WORKFLOWS.AMR.value }, sample.workflow_runs) &&
+          WORKFLOWS.AMR.label,
       ]);
 
       return {

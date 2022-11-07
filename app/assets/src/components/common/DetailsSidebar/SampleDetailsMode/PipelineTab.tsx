@@ -28,13 +28,16 @@ import LoadingMessage from "../../LoadingMessage";
 import MetadataSection from "./MetadataSection";
 import {
   PIPELINE_INFO_FIELDS,
-  WORKFLOW_INFO_FIELDS,
+  CG_WORKFLOW_INFO_FIELDS,
   HOST_FILTERING_WIKI,
+  AMR_WORKFLOW_INFO_FIELDS,
 } from "./constants";
 import cs from "./sample_details_mode.scss";
 
 const READ_COUNTS_TABLE = "readsRemaining";
 const ERCC_PLOT = "erccScatterplot";
+
+export type PipelineInfo = AmrPipelineTabInfo | MngsPipelineInfo;
 
 interface PipelineTabProps {
   pipelineInfo: PipelineInfo;
@@ -44,12 +47,25 @@ interface PipelineTabProps {
   pipelineRun?: PipelineRun;
 }
 
-export interface PipelineInfo {
+export interface MngsPipelineInfo {
   [key: string]: {
     text?: string;
     link?: string;
     linkLabel?: string;
   };
+}
+
+export interface AmrPipelineTabInfo {
+  workflow: { text: string };
+  technology: { text: string };
+  pipelineVersion: { text: string };
+  totalReads?: { text: string };
+  totalErccReads?: { text: string };
+  nonHostReads?: { text: string };
+  qcPercent?: { text: string };
+  compressionRatio?: { text: string };
+  meanInsertSize?: { text: string };
+  lastProcessedAt: { text: string };
 }
 
 interface PipelineTabState {
@@ -95,6 +111,12 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     graphWidth: 0,
     loading: [READ_COUNTS_TABLE],
     pipelineStepDict: {},
+  };
+
+  INFO_FIELDS_FOR_WORKFLOW = {
+    [WORKFLOWS.AMR.label]: AMR_WORKFLOW_INFO_FIELDS,
+    [WORKFLOWS.CONSENSUS_GENOME.label]: CG_WORKFLOW_INFO_FIELDS,
+    [WORKFLOWS.SHORT_READ_MNGS.label]: PIPELINE_INFO_FIELDS,
   };
 
   componentDidMount() {
@@ -336,11 +358,11 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
   render() {
     const { pipelineInfo, pipelineRun, sampleId, snapshotShareId } = this.props;
 
-    const workflow = get(["workflow", "text"], pipelineInfo);
-    const fields =
-      workflow === WORKFLOWS.CONSENSUS_GENOME.label
-        ? WORKFLOW_INFO_FIELDS
-        : PIPELINE_INFO_FIELDS;
+    const workflow =
+      get(["workflow", "text"], pipelineInfo) ||
+      WORKFLOWS.SHORT_READ_MNGS.label;
+
+    const fields = this.INFO_FIELDS_FOR_WORKFLOW[workflow];
 
     const pipelineInfoFields = fields.map(this.getPipelineInfoField);
 

@@ -1,28 +1,33 @@
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 import moment from "moment";
 
-import { WORKFLOWS } from "~/components/utils/workflows";
+import {
+  WORKFLOWS,
+  WORKFLOW_KEY_FOR_VALUE,
+} from "~/components/utils/workflows";
 import {
   CG_TECHNOLOGY_DISPLAY_NAMES,
   CG_TECHNOLOGY_OPTIONS,
   CG_WETLAB_OPTIONS,
+  ILLUMINA,
 } from "~/components/views/SampleUploadFlow/constants";
 import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
-import { PipelineInfo } from "./PipelineTab";
+import { WorkflowRun } from "~/interface/sample";
+import { AmrPipelineTabInfo, MngsPipelineInfo } from "./PipelineTab";
 import { AdditionalInfo } from "./SampleDetailsMode";
+
+const BLANK_TEXT = "unknown";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = (
   additionalInfo: AdditionalInfo,
-): PipelineInfo => {
+): MngsPipelineInfo => {
   const {
     pipeline_run: pipelineRun,
     summary_stats: summaryStats,
   } = additionalInfo;
 
-  const pipelineInfo: PipelineInfo = {};
-
-  const BLANK_TEXT = "unknown";
+  const pipelineInfo: MngsPipelineInfo = {};
 
   if (pipelineRun) {
     const totalErccReads = pipelineRun.total_ercc_reads
@@ -137,6 +142,73 @@ export const processCGWorkflowRunInfo = workflowRun => {
   };
 
   return mapValues(v => ({ text: v }), cgWorkflowRunInfo);
+};
+
+export const processAMRWorkflowRun = (
+  workflowRun: WorkflowRun,
+): AmrPipelineTabInfo => {
+  const {
+    workflow: workflowValue,
+    executed_at: executedAt,
+    wdl_version: pipelineVersion,
+    parsed_cached_results,
+  } = workflowRun;
+
+  const qualityMetrics = parsed_cached_results?.quality_metrics;
+
+  const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflowValue];
+  const workflow = WORKFLOWS[workflowKey].label;
+  const lastProcessedAt = moment(executedAt).format("YYYY-MM-DD");
+
+  if (qualityMetrics) {
+    const {
+      total_reads: totalReads,
+      total_ercc_reads: totalErccReads,
+      adjusted_remaining_reads: adjustedRemainingReads,
+      percent_remaining: percentRemaining,
+      qc_percent: qcPercentOriginal,
+      compression_ratio: compressionRatioOriginal,
+      insert_size_mean: insertSizeMean,
+      insert_size_standard_deviation: insertSizeStandardDeviation,
+    } = qualityMetrics;
+
+    const nonHostReads =
+      adjustedRemainingReads && percentRemaining
+        ? `${numberWithCommas(
+            adjustedRemainingReads,
+          )}${percentRemaining.toFixed(2)}%`
+        : BLANK_TEXT;
+    const qcPercent = qcPercentOriginal
+      ? `${qcPercentOriginal.toFixed(2)}%`
+      : BLANK_TEXT;
+    const compressionRatio = compressionRatioOriginal
+      ? compressionRatioOriginal.toFixed(2)
+      : BLANK_TEXT;
+    const meanInsertSize = numberWithPlusOrMinus(
+      insertSizeMean,
+      insertSizeStandardDeviation,
+    );
+
+    return {
+      workflow: { text: workflow },
+      technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
+      pipelineVersion: { text: pipelineVersion },
+      lastProcessedAt: { text: lastProcessedAt },
+      totalReads: { text: numberWithCommas(totalReads) },
+      totalErccReads: { text: numberWithCommas(totalErccReads) },
+      nonHostReads: { text: nonHostReads },
+      qcPercent: { text: qcPercent },
+      compressionRatio: { text: compressionRatio },
+      meanInsertSize: { text: meanInsertSize },
+    };
+  } else {
+    return {
+      workflow: { text: workflow },
+      technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
+      pipelineVersion: { text: pipelineVersion },
+      lastProcessedAt: { text: lastProcessedAt },
+    };
+  }
 };
 
 // Format the upload date.

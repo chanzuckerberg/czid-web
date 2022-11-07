@@ -17,7 +17,7 @@ import {
 import { WORKFLOWS } from "~/components/utils/workflows";
 import ConsensusGenomeDropdown from "~/components/views/SampleView/ConsensusGenomeDropdown";
 import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
-import Sample from "~/interface/sample";
+import Sample, { WorkflowRun } from "~/interface/sample";
 import {
   PipelineRun,
   SnapshotShareId,
@@ -32,17 +32,18 @@ import {
 } from "~utils/metadata";
 import MetadataTab from "./MetadataTab";
 import NotesTab from "./NotesTab";
-import PipelineTab, { PipelineInfo } from "./PipelineTab";
+import PipelineTab, { MngsPipelineInfo, PipelineInfo } from "./PipelineTab";
 
 import cs from "./sample_details_mode.scss";
 import {
   processPipelineInfo,
   processAdditionalInfo,
   processCGWorkflowRunInfo,
+  processAMRWorkflowRun,
 } from "./utils";
 
 export interface SampleDetailsModeProps {
-  currentRun: Record<string, string | number | null>;
+  currentRun: Record<string, string | number | null> | WorkflowRun;
   currentWorkflowTab: string;
   handleWorkflowTabChange: $TSFixMeFunction;
   sample: Sample;
@@ -69,6 +70,7 @@ export interface AdditionalInfo {
   summary_stats?: SummaryStats;
   pipeline_run?: PipelineRun;
 }
+
 type TabNames = "Metadata" | "Pipelines" | "Notes";
 const TABS: TabNames[] = ["Metadata", "Pipelines", "Notes"];
 
@@ -106,7 +108,9 @@ const SampleDetailsMode = ({
   const [metadataTypes, setMetadataTypes] = useState<MetadataTypes | null>(
     null,
   );
-  const [pipelineInfo, setPipelineInfo] = useState<PipelineInfo | null>(null);
+  const [pipelineInfo, setPipelineInfo] = useState<MngsPipelineInfo | null>(
+    null,
+  );
   const [pipelineRun, setPipelineRun] = useState<PipelineRun | null>(null);
   const [sampleTypes, setSampleTypes] = useState(null);
   const [singleKeyValueToSave, setSingleKeyValueToSave] = useState<
@@ -309,16 +313,19 @@ const SampleDetailsMode = ({
           </div>
         );
 
+      let pipelineInfoForTab: PipelineInfo = pipelineInfo;
+      if (currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME) {
+        pipelineInfoForTab = processCGWorkflowRunInfo(currentRun);
+      } else if (currentWorkflowTab === WORKFLOW_TABS.AMR) {
+        pipelineInfoForTab = processAMRWorkflowRun(currentRun as WorkflowRun);
+      }
+
       return (
         <>
           {workflowTabs}
           {consensusGenomeDropdown}
           <PipelineTab
-            pipelineInfo={
-              currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME
-                ? processCGWorkflowRunInfo(currentRun)
-                : pipelineInfo
-            }
+            pipelineInfo={pipelineInfoForTab}
             erccComparison={additionalInfo.ercc_comparison}
             pipelineRun={pipelineRun}
             sampleId={sampleId}

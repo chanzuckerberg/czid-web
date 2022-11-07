@@ -68,7 +68,7 @@ export const PIPELINE_INFO_FIELDS = [
   },
 ];
 
-export const WORKFLOW_INFO_FIELDS = [
+export const CG_WORKFLOW_INFO_FIELDS = [
   {
     name: "Analysis Type",
     key: "workflow",
@@ -104,6 +104,49 @@ export const WORKFLOW_INFO_FIELDS = [
   {
     name: "Mapped Reads",
     key: "mappedReads",
+  },
+  {
+    name: "Date Processed",
+    key: "lastProcessedAt",
+  },
+];
+
+export const AMR_WORKFLOW_INFO_FIELDS = [
+  {
+    name: "Analysis Type",
+    key: "workflow",
+  },
+  {
+    name: "Sequencing Platform",
+    key: "technology",
+  },
+  {
+    name: "Pipeline Version",
+    key: "pipelineVersion",
+  },
+  {
+    name: "Total Reads",
+    key: "totalReads",
+  },
+  {
+    name: "ERCC Reads",
+    key: "totalErccReads",
+  },
+  {
+    name: "Passed Filters",
+    key: "nonHostReads", // adjusted remaining reads
+  },
+  {
+    name: "Passed Quality Control",
+    key: "qcPercent",
+  },
+  {
+    name: "Compression Ratio",
+    key: "compressionRatio",
+  },
+  {
+    name: "Mean Insert Size",
+    key: "meanInsertSize",
   },
   {
     name: "Date Processed",

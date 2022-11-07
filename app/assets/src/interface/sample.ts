@@ -25,6 +25,18 @@ export interface WorkflowRun {
     technology: string;
     wetlab_protocol: string;
   };
+  parsed_cached_results?: {
+    quality_metrics?: {
+      total_reads: number;
+      total_ercc_reads: number;
+      adjusted_remaining_reads: number;
+      percent_remaining: number;
+      qc_percent: number;
+      compression_ratio: number;
+      insert_size_mean: number;
+      insert_size_standard_deviation: number;
+    };
+  };
 }
 
 export type WorkflowRuns = WorkflowRun[];
