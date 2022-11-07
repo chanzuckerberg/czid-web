@@ -16,7 +16,7 @@ module Queries
         argument :listAllIds, GraphQL::Types::Boolean, required: false
         argument :basic, GraphQL::Types::Boolean, required: false
         argument :sampleIds, [Integer], required: false
-        argument :host, [Integer], required: false
+        argument :hostIds, [Integer], required: false
         argument :location, String, required: false
         argument :locationV2, [String], required: false
         argument :taxIds, [Integer], required: false
@@ -65,7 +65,7 @@ module Queries
       list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
       filters = {
-        host: params[:host],
+        host: params[:hostIds],
         location: params[:location],
         locationV2: params[:locationV2],
         taxIds: params[:taxIds],

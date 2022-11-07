@@ -61,6 +61,7 @@ function QualityControlWrapper(props) {
     variables: {
       projectId: props.projectId,
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+      hostIds: props.filters.host,
       ...props.filters,
     },
   });

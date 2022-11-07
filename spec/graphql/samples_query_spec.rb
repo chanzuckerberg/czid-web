@@ -19,7 +19,7 @@ RSpec.describe GraphqlController, type: :request do
     $listAllIds: Boolean
     $basic: Boolean
     $sampleIds: [Int!]
-    $host: [Int!]
+    $hostIds: [Int!]
     $location: String
     $locationV2: [String!]
     $taxIds: [Int!]
@@ -44,7 +44,7 @@ RSpec.describe GraphqlController, type: :request do
       listAllIds: $listAllIds
       basic: $basic
       sampleIds: $sampleIds
-      host: $host
+      hostIds: $hostIds
       location: $location
       locationV2: $locationV2
       taxIds: $taxIds

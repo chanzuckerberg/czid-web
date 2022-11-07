@@ -12,7 +12,7 @@ const GET_SAMPLES_QUERY = gql`
     $listAllIds: Boolean
     $basic: Boolean
     $sampleIds: [Int!]
-    $host: [Int!]
+    $hostIds: [Int!]
     $location: String
     $locationV2: [String!]
     $taxIds: [Int!]
@@ -37,7 +37,7 @@ const GET_SAMPLES_QUERY = gql`
       listAllIds: $listAllIds
       basic: $basic
       sampleIds: $sampleIds
-      host: $host
+      hostIds: $hostIds
       location: $location
       locationV2: $locationV2
       taxIds: $taxIds
