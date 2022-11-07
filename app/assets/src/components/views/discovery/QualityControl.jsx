@@ -19,8 +19,6 @@ import memoize from "memoize-one";
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef, useState } from "react";
 import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
-import { GET_PROJECTS_QUERY } from "~/api/projects";
-import { GET_SAMPLES_QUERY } from "~/api/samples";
 import { GET_SAMPLES_READS_STATS_QUERY } from "~/api/samples_reads_stats";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import List from "~/components/ui/List";
@@ -40,6 +38,7 @@ import { apolloClient } from "~/index";
 import { TooltipVizTable } from "~ui/containers";
 import Notification from "~ui/notifications/Notification";
 import InfoBanner from "./InfoBanner";
+import { QUALITY_CONTROL_QUERY } from "./api/quality_control";
 import {
   BAR_FILL_COLOR,
   HOVER_BAR_FILL_COLOR,
@@ -58,15 +57,7 @@ import cs from "./quality_control.scss";
 // conversion for getSamples and getSamplesReadStats
 // is complete
 function QualityControlWrapper(props) {
-  const { loading, error, data } = useQuery(GET_PROJECTS_QUERY, {
-    variables: { projectId: parseInt(props.projectId) },
-  });
-
-  const {
-    loading: samplesLoading,
-    error: samplesError,
-    data: samples,
-  } = useQuery(GET_SAMPLES_QUERY, {
+  const { loading, error, data } = useQuery(QUALITY_CONTROL_QUERY, {
     variables: {
       projectId: props.projectId,
       workflow: WORKFLOWS.SHORT_READ_MNGS.value,
@@ -74,14 +65,14 @@ function QualityControlWrapper(props) {
     },
   });
 
-  if (loading || samplesLoading) return "Loading...";
-  if (error || samplesError)
-    return `Error! ${error.message} ${samplesError.message}`;
+  if (loading) return "Loading...";
+  if (error)
+    return `Error! ${error.message}`;
 
   return (
     <QualityControl
       project={data.project}
-      samples={samples.samplesList.samples}
+      samples={data.samplesList.samples}
       {...props}
     />
   );
