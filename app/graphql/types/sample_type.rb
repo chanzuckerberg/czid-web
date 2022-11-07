@@ -38,13 +38,50 @@ module Types
     field :initial_workflow, String, null: false
     field :public, Int, null: false
     field :details, Types::SampleDetailsType, null: false
-  end
+    field :project, Types::ProjectType, null: true
+    field :default_background_id, Int, null: true
 
-  # TODO: populate this class. It returns a non consistent set of
-  # keys unlike other types. It is not needed for this endpoint
-  # but will need to be addressed.
-  # class WorkflowRunsCountByWorkflowType < Types::BaseObject
-  # end
+    field :pipeline_runs, [Types::PipelineRunType], null: true, resolver_method: :sample_type_pipeline_runs
+    def sample_type_pipeline_runs
+      object.pipeline_runs_info.map { |h| h.deep_transform_keys! { |key| key.to_s.camelize(:lower) } }
+    end
+
+    field :default_pipeline_run_id, Int, null: true, resolver_method: :sample_type_default_pipeline_run_id
+    def sample_type_default_pipeline_run_id
+      object.first_pipeline_run.present? ? object.first_pipeline_run.id : nil
+    end
+
+    field :deletable, Boolean, null: true, resolver_method: :sample_type_deletable
+    def sample_type_deletable
+      current_user = context[:current_user]
+      object.deletable?(current_user)
+    end
+
+    field :editable, Boolean, null: true, resolver_method: :sample_type_editable
+    def sample_type_editable
+      current_power = context[:current_power]
+      current_power.updatable_sample?(object)
+    end
+
+    field :workflow_runs, [Types::WorkflowRunType], null: true, resolver_method: :sample_type_workflow_runs
+    def sample_type_workflow_runs
+      object.workflow_runs.non_deprecated.reverse.as_json(
+        only: [
+          :deprecated,
+          :executed_at,
+          :id,
+          :status,
+          :wdl_version,
+          :workflow,
+        ],
+        methods: [:input_error, :inputs, :parsed_cached_results]
+      )
+    end
+
+    def self.authorized?(object, context)
+      super && current_user_is_logged_in?(context)
+    end
+  end
 
   class SampleListType < Types::BaseObject
     field :samples, [Types::SampleType], null: false

@@ -7,6 +7,7 @@ module Types
     include SamplesHelper
     include Queries::PathogenListQuery
     include Queries::ProjectQuery
+    include Queries::SampleQuery
     include Queries::SampleListQuery
     include Queries::SampleReadsStatsListQuery
 

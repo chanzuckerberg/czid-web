@@ -1,5 +1,6 @@
 module Types
   class PipelineRunType < Types::BaseObject
+    field :id, Int, null: false
     field :adjustedRemainingReads, Int, null: true
     field :alertSent, Boolean, null: false
     field :alignmentConfigId, Int, null: true
@@ -35,5 +36,6 @@ module Types
     field :updatedAt, GraphQL::Types::ISO8601DateTime, null: false
     field :useTaxonWhitelist, Boolean, null: false
     field :wdlVersion, String, null: true
+    field :alignmentConfigName, String, null: true
   end
 end
