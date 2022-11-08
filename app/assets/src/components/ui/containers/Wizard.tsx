@@ -1,8 +1,7 @@
 import cx from "classnames";
+import { Button } from "czifui";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
-import PrimaryButton from "../controls/buttons/PrimaryButton";
-import SecondaryButton from "../controls/buttons/SecondaryButton";
 
 const WizardContext = React.createContext({
   currentPage: 0,
@@ -194,26 +193,32 @@ class Wizard extends React.Component<WizardProps, WizardState> {
           {!currentPage.props.skipDefaultButtons && (
             <div className="wizard__nav">
               {this.state.currentPage < this.props.children.length - 1 && (
-                <PrimaryButton
-                  text={this.labels.continue}
+                <Button
+                  sdsStyle="rounded"
+                  sdsType="primary"
                   onClick={this.handleContinueClick}
                   disabled={!this.state.continueEnabled}
-                  rounded={true}
-                />
+                >
+                  {this.labels.continue}
+                </Button>
               )}
               {this.state.currentPage === this.props.children.length - 1 && (
-                <PrimaryButton
-                  text={this.labels.finish}
+                <Button
+                  sdsStyle="rounded"
+                  sdsType="primary"
                   onClick={this.handleFinishClick}
-                  rounded={true}
-                />
+                >
+                  {this.labels.finish}
+                </Button>
               )}
               {this.state.currentPage > 0 && (
-                <SecondaryButton
-                  text={this.labels.back}
+                <Button
+                  sdsStyle="rounded"
+                  sdsType="secondary"
                   onClick={this.handleBackClick}
-                  rounded={true}
-                />
+                >
+                  {this.labels.back}
+                </Button>
               )}
             </div>
           )}

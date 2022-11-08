@@ -4,7 +4,6 @@ import Checkbox from "~ui/controls/Checkbox";
 import Slider from "~ui/controls/Slider";
 import Toggle from "~ui/controls/Toggle";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
-import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import ButtonDropdown from "~ui/controls/dropdowns/ButtonDropdown";
@@ -13,7 +12,6 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import MultipleNestedDropdown from "~ui/controls/dropdowns/MultipleNestedDropdown";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
-import BetaLabel from "~ui/labels/BetaLabel";
 
 interface ComponentCardProps {
   children: React.ReactNode;
@@ -75,25 +73,6 @@ class PlaygroundControls extends React.Component<
     return (
       <div className="playground">
         <div className="playground-grid">
-          <ComponentCard title="Primary Button" width={3}>
-            <PrimaryButton
-              key={0}
-              text="Submit"
-              onClick={() => this.setState({ event: "PrimaryButton:Click" })}
-            />
-            <PrimaryButton
-              key={1}
-              text="Submit"
-              disabled
-              onClick={() => this.setState({ event: "PrimaryButton:Click" })}
-            />
-            <PrimaryButton
-              key={1}
-              label={<BetaLabel />}
-              text="Submit"
-              onClick={() => this.setState({ event: "PrimaryButton:Click" })}
-            />
-          </ComponentCard>
           <ComponentCard title="Secondary Button" width={3}>
             <SecondaryButton
               key={0}
@@ -130,7 +109,7 @@ class PlaygroundControls extends React.Component<
               }
             />
           </ComponentCard>
-          <ComponentCard title="Secondary Button Dropdown" width={3}>
+          <ComponentCard title="Secondary Button Dropdown" width={4}>
             <ButtonDropdown
               secondary
               key={0}

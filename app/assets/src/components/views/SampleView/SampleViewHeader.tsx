@@ -1,3 +1,4 @@
+import { Button, Icon } from "czifui";
 import { get, isEmpty, size } from "lodash/fp";
 import React, { useContext, useState } from "react";
 
@@ -164,17 +165,22 @@ export default function SampleViewHeader({
       return (
         <ViewHeader.Controls>
           {succeeded && (
-            <DownloadButton
-              primary={true}
+            <Button
               className={cs.controlElement}
-              text="Download All"
               onClick={() => {
                 openUrl(getWorkflowRunZipLink(currentRun.id));
                 trackEvent("SampleViewHeader_amr-download-all-button_clicked", {
                   sampleId: sample.id,
                 });
               }}
-            />
+              sdsStyle="rounded"
+              sdsType="primary"
+              startIcon={
+                <Icon sdsIcon="download" sdsSize="xl" sdsType="button" />
+              }
+            >
+              Download All
+            </Button>
           )}
         </ViewHeader.Controls>
       );

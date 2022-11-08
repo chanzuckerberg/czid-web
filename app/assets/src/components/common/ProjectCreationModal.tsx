@@ -1,4 +1,4 @@
-import { Icon, Tooltip } from "czifui";
+import { Button, Icon, Tooltip } from "czifui";
 import React, { useState, useEffect } from "react";
 
 import { createProject } from "~/api";
@@ -10,8 +10,6 @@ import Modal from "~ui/containers/Modal";
 import Input from "~ui/controls/Input";
 import RadioButton from "~ui/controls/RadioButton";
 import Textarea from "~ui/controls/Textarea";
-import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
-import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 
 import cs from "./project_creation_modal.scss";
 
@@ -39,6 +37,7 @@ const ProjectCreationModal = ({
   const [error, setError] = useState("");
   const [description, setDescription] = useState("");
   const [showInfo, setShowInfo] = useState(false);
+  const [creatingProject, setCreatingProject] = useState(false);
   const [disableCreateButton, setDisableCreateButton] = useState(true);
 
   useEffect(() => {
@@ -58,6 +57,7 @@ const ProjectCreationModal = ({
 
   const handleCreateProject = async () => {
     setError("");
+    setCreatingProject(true);
 
     try {
       const newProject = await createProject({
@@ -74,7 +74,30 @@ const ProjectCreationModal = ({
         ? "This project name is already taken. Please enter another name."
         : "There was an error creating your project.";
       setError(errorMsg);
+    } finally {
+      setCreatingProject(false);
     }
+  };
+
+  const getCreateProjectButton = () => {
+    const renderCreateButton = () => (
+      <Button
+        disabled={disableCreateButton || creatingProject}
+        sdsStyle="rounded"
+        sdsType="primary"
+        onClick={handleCreateProject}
+      >
+        Create Project
+      </Button>
+    );
+
+    return disableCreateButton ? (
+      <Tooltip arrow placement="top" title="Fill in all fields to continue.">
+        <span>{renderCreateButton()}</span>
+      </Tooltip>
+    ) : (
+      <>{renderCreateButton()}</>
+    );
   };
 
   return (
@@ -185,27 +208,15 @@ const ProjectCreationModal = ({
         </div>
         {error && <div className={cs.error}>{error}</div>}
         <div className={cs.controls}>
-          {disableCreateButton ? (
-            <Tooltip
-              arrow
-              placement="top"
-              title="Fill in all fields to continue."
-            >
-              <span>
-                <PrimaryButton disabled text="Create Project" />
-              </span>
-            </Tooltip>
-          ) : (
-            <PrimaryButton
-              onClick={handleCreateProject}
-              text="Create Project"
-            />
-          )}
-          <SecondaryButton
+          {getCreateProjectButton()}
+          <Button
             className={cs.cancelButton}
+            sdsStyle="rounded"
+            sdsType="secondary"
             onClick={onCancel}
-            text="Cancel"
-          />
+          >
+            Cancel
+          </Button>
         </div>
       </div>
     </Modal>

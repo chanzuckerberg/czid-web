@@ -1,8 +1,8 @@
+import { Button } from "czifui";
 import React from "react";
 
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Modal from "~ui/containers/Modal";
-import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import { IconAlert } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 
@@ -50,10 +50,14 @@ const ErrorModal = ({
       </div>
       <div className={cs.actions}>
         <div className={cs.item}>
-          <PrimaryButton text="Try Again" rounded={true} onClick={onConfirm} />
+          <Button sdsStyle="rounded" sdsType="primary" onClick={onConfirm}>
+            Try Again
+          </Button>
         </div>
         <div className={cs.item}>
-          <SecondaryButton text="Cancel" rounded={true} onClick={onCancel} />
+          <Button sdsStyle="rounded" sdsType="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
         </div>
       </div>
     </Modal>

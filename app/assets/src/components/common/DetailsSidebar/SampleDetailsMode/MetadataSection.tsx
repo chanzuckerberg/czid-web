@@ -1,7 +1,7 @@
 import cx from "classnames";
+import { Button } from "czifui";
 import React from "react";
 import Accordion from "~/components/layout/Accordion";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import cs from "./metadata_section.scss";
 
 interface MetadataSectionProps {
@@ -117,11 +117,9 @@ class MetadataSection extends React.Component<
         {children}
         {editing && (
           <div className={cs.controls}>
-            <PrimaryButton
-              onClick={onEditToggle}
-              rounded={false}
-              text="Done Editing"
-            />
+            <Button sdsStyle="square" sdsType="primary" onClick={onEditToggle}>
+              Done Editing
+            </Button>
           </div>
         )}
       </Accordion>
