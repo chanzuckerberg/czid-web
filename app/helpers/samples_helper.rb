@@ -538,7 +538,6 @@ module SamplesHelper
   def upload_samples_with_metadata(samples_to_upload, metadata, user)
     samples = []
     errors = []
-    workflow_runs = []
 
     samples_to_upload.each do |sample_attributes|
       should_attempt_to_save_sample = true
@@ -663,10 +662,9 @@ module SamplesHelper
             end
           end
 
-          # In case the user uploads a large amount of samples: instantiate the WorkflowRun, add to workflow_runs array, then WorkflowRun.bulk_import them at once.
-          # We do this to prevent a large amount of individual insertions. Instead they're done in a bulk_import down below.
+          # Creating all the workflow runs and importing them later triggers a race condition and the first few samples don't kickoff.
           wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json&.to_json)
-          workflow_runs << wr
+          wr.save!
         end
       else
         errors << sample.errors unless sample.errors.empty?
@@ -677,11 +675,6 @@ module SamplesHelper
 
     metadata_errors = upload_metadata_for_samples(samples, metadata)
     errors.concat(metadata_errors)
-
-    workflow_run_import = WorkflowRun.bulk_import(workflow_runs)
-    workflow_run_import.failed_instances.each do |wr|
-      errors.push("Could not save WorkflowRun: Sample #{wr.sample_id}, #{wr.workflow}, #{wr.inputs_json}")
-    end
 
     # Report an error for ops awareness. Don't raise a blanket exception b/c you want a valid response if some samples succeeded.
     if errors.present?
