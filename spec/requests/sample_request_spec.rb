@@ -347,7 +347,8 @@ RSpec.describe "Sample request", type: :request do
       before do
         @domain = "my_data"
         @project = create(:project, users: [@joe])
-        @mngs_sample = create(:sample, project: @project, initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
+        @short_read_mngs_sample = create(:sample, project: @project, initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
+        @long_read_mngs_samples = create(:sample, project: @project, initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs])
         @cg_sample = create(
           :sample,
           project: @project,
@@ -381,11 +382,12 @@ RSpec.describe "Sample request", type: :request do
         stats_response = JSON.parse(response.body)
         expect(stats_response["countByWorkflow"]).to include(
           WorkflowRun::WORKFLOW[:short_read_mngs] => 1,
+          WorkflowRun::WORKFLOW[:long_read_mngs] => 1,
           WorkflowRun::WORKFLOW[:consensus_genome] => 2,
           WorkflowRun::WORKFLOW[:amr] => 3
         )
         expect(stats_response["consensusGenomesCount"]).to eq 1
-        expect(stats_response["count"]).to eq 6
+        expect(stats_response["count"]).to eq 7
         expect(stats_response["projectCount"]).to eq 1
         expect(stats_response["avgTotalReads"]).to eq 0
         expect(stats_response["avgAdjustedRemainingReads"]).to eq 0

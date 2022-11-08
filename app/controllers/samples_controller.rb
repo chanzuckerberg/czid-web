@@ -359,6 +359,7 @@ class SamplesController < ApplicationController
 
     workflow_count = {
       WorkflowRun::WORKFLOW[:short_read_mngs] => samples.where(initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs]).distinct.count,
+      WorkflowRun::WORKFLOW[:long_read_mngs] => samples.where(initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs]).distinct.count,
       WorkflowRun::WORKFLOW[:consensus_genome] => cg_count,
       WorkflowRun::WORKFLOW[:amr] => amr_count,
     }

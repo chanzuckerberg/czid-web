@@ -11,7 +11,9 @@ export const computeColumnsByWorkflow = ({
   metadataFields = [],
   basicIcon = false,
 } = {}) => {
-  if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
+  // At the moment, columns for long read mNGS are the same as for short read mNGS.
+  // To change that in the future, just add another function to compute columns.
+  if (workflow === WORKFLOWS.SHORT_READ_MNGS.value || workflow === WORKFLOWS.LONG_READ_MNGS.value) {
     return computeMngsColumns({ basicIcon, metadataFields });
   } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
     return computeConsensusGenomeColumns({ basicIcon, metadataFields });
@@ -468,6 +470,15 @@ const computeMetadataColumns = metadataFields => {
 
 export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
   [WORKFLOWS.SHORT_READ_MNGS.value]: [
+    "sample",
+    "createdAt",
+    "host",
+    "collection_location_v2",
+    "nonHostReads",
+    "qcPercent",
+  ],
+  // update these default columns if long read should be different from short read
+  [WORKFLOWS.LONG_READ_MNGS.value]: [
     "sample",
     "createdAt",
     "host",

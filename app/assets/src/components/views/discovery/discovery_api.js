@@ -277,6 +277,7 @@ const getDiscoverySamples = async ({
   orderDir,
   listAllIds = false,
   sampleIds,
+  workflow,
 } = {}) => {
   const sampleResults = await getSamples({
     domain,
@@ -290,7 +291,7 @@ const getDiscoverySamples = async ({
     orderDir,
     listAllIds,
     sampleIds,
-    workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+    workflow,
   });
   return {
     samples: map(processRawSample, sampleResults.samples),

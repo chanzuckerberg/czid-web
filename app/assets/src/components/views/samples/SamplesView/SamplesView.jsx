@@ -133,6 +133,10 @@ class SamplesView extends React.Component {
         singlularDisplay: "sample",
         pluralDisplay: "samples",
       },
+      [WORKFLOWS.LONG_READ_MNGS.value]: {
+        singlularDisplay: "sample",
+        pluralDisplay: "samples",
+      },
     };
   };
 
@@ -677,10 +681,11 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
-    const { hideAllTriggers } = this.props;
+    const { hideAllTriggers, workflow } = this.props;
+    const hideDisplaySwitcher = workflow === WORKFLOWS.LONG_READ_MNGS.value;
     return (
       <div className={cs.samplesToolbar}>
-        {this.renderDisplaySwitcher()}
+        {!hideDisplaySwitcher && this.renderDisplaySwitcher()}
         <div className={cs.fluidBlank} />
         {!hideAllTriggers && this.renderTriggers()}
       </div>

@@ -212,6 +212,7 @@ class DiscoveryDataLayer {
 
     this.projects = new ObjectCollection(domain, this.fetchProjects);
     this.samples = new ObjectCollection(domain, this.fetchSamples);
+    this.longReadMngsSamples = new ObjectCollection(domain, this.fetchSamples);
     this.visualizations = new ObjectCollection(
       domain,
       this.fetchVisualizations,

@@ -87,16 +87,25 @@ class DiscoveryFilters extends React.Component {
         disableTaxonFilter: true,
         disableTaxonThresholdFilter: true,
         disableAnnotationFilter: true,
+        tooltipTitle: WORKFLOWS.AMR.pluralizedLabel,
       },
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
         disableTaxonFilter: false,
         disableTaxonThresholdFilter: true,
         disableAnnotationFilter: true,
+        tooltipTitle: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
       },
       [WORKFLOWS.SHORT_READ_MNGS.value]: {
         disableTaxonFilter: false,
         disableTaxonThresholdFilter: false,
         disableAnnotationFilter: false,
+        tooltipTitle: WORKFLOWS.SHORT_READ_MNGS.pluralizedLabel,
+      },
+      [WORKFLOWS.LONG_READ_MNGS.value]: {
+        disableTaxonFilter: true,
+        disableTaxonThresholdFilter: true,
+        disableAnnotationFilter: true,
+        tooltipTitle: WORKFLOWS.LONG_READ_MNGS.label + " samples",
       },
     };
   };
@@ -381,7 +390,7 @@ class DiscoveryFilters extends React.Component {
         arrow
         placement="top-start"
         title={`Not available for ${
-          find({ value: workflow }, WORKFLOWS)?.pluralizedLabel
+          this.configForWorkflow[workflow].tooltipTitle
         }.`}
         classes={{
           tooltip: cs.disabledTooltip,

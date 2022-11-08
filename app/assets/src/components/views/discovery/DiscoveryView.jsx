@@ -50,6 +50,7 @@ import {
   SORTING_V0_FEATURE,
   TAXON_THRESHOLD_FILTERING_FEATURE,
   AMR_V1_FEATURE,
+  ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
@@ -58,6 +59,7 @@ import {
   getTempSelectedOptions,
 } from "~/components/utils/urls";
 import {
+  workflowIsBeta,
   workflowIsWorkflowRunEntity,
   WORKFLOWS,
   WORKFLOW_ENTITIES,
@@ -176,6 +178,7 @@ class DiscoveryView extends React.Component {
       filteredProjectDimensions: [],
       filteredSampleCountsByWorkflow: {
         [WORKFLOWS.SHORT_READ_MNGS.value]: null,
+        [WORKFLOWS.LONG_READ_MNGS.value]: null,
         [WORKFLOWS.AMR.value]: null,
         [WORKFLOWS.CONSENSUS_GENOME.value]: null,
       },
@@ -208,6 +211,7 @@ class DiscoveryView extends React.Component {
         [WORKFLOWS.AMR.value]: new Set(),
         [WORKFLOWS.CONSENSUS_GENOME.value]: new Set(),
         [WORKFLOWS.SHORT_READ_MNGS.value]: new Set(),
+        [WORKFLOWS.LONG_READ_MNGS.value]: new Set(),
       },
       showFilters: true,
       showStats: true,
@@ -242,7 +246,9 @@ class DiscoveryView extends React.Component {
         TAB_SAMPLES,
         WORKFLOWS.SHORT_READ_MNGS.value,
       ),
-      onViewChange: this.refreshSampleData,
+      onViewChange: () => {
+        this.refreshSampleData(WORKFLOWS.SHORT_READ_MNGS.value);
+      },
       displayName: WORKFLOWS.SHORT_READ_MNGS.value,
     });
 
@@ -264,6 +270,19 @@ class DiscoveryView extends React.Component {
           this.refreshWorkflowRunData(WORKFLOWS.AMR.value);
         },
         displayName: WORKFLOWS.AMR.value,
+      });
+    }
+
+    if (allowedFeatures.includes(ONT_V1_FEATURE)) {
+      this.longReadMngsSamples = this.dataLayer.longReadMngsSamples.createView({
+        conditions: this.getConditionsFor(
+          TAB_SAMPLES,
+          WORKFLOWS.LONG_READ_MNGS.value,
+        ),
+        onViewChange: () => {
+          this.refreshSampleData(WORKFLOWS.LONG_READ_MNGS.value);
+        },
+        displayName: WORKFLOWS.LONG_READ_MNGS.value,
       });
     }
 
@@ -300,6 +319,10 @@ class DiscoveryView extends React.Component {
       if (allowedFeatures.includes(AMR_V1_FEATURE)) {
         this.amrWorkflowRuns.loadPage(0);
       }
+
+      if (allowedFeatures.includes(ONT_V1_FEATURE)) {
+        this.longReadMngsSamples.loadPage(0);
+      }
     }
 
     this.updateBrowsingHistory("replace");
@@ -328,40 +351,42 @@ class DiscoveryView extends React.Component {
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
         bannerTitle: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
         objectCollection: this.workflowRuns,
-        noDataLinks: {
-          href: "/samples/upload",
-          text: `Run ${WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel}`,
-        },
-        noDataMessage: `No samples were processed by the ${WORKFLOWS.CONSENSUS_GENOME.label} Pipeline.`,
+        noDataLinks: this.getNoDataLinks(WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel),
+        noDataMessage: this.getNoDataBannerMessage(WORKFLOWS.CONSENSUS_GENOME.label),
       },
       [WORKFLOWS.SHORT_READ_MNGS.value]: {
         bannerTitle: `${WORKFLOWS.SHORT_READ_MNGS.label} Samples`,
         objectCollection: this.samples,
-        noDataLinks: [
-          {
-            href: "/samples/upload",
-            text: `Run ${WORKFLOWS.SHORT_READ_MNGS.pluralizedLabel}`,
-          },
-        ],
-        noDataMessage: `No samples were processed by the ${WORKFLOWS.SHORT_READ_MNGS.label} Pipeline.`,
+        noDataLinks: this.getNoDataLinks(WORKFLOWS.SHORT_READ_MNGS.pluralizedLabel),
+        noDataMessage: this.getNoDataBannerMessage(WORKFLOWS.SHORT_READ_MNGS.label),
+      },
+      [WORKFLOWS.LONG_READ_MNGS.value]: {
+        bannerTitle: `${WORKFLOWS.LONG_READ_MNGS.label} Samples`,
+        objectCollection: this.longReadMngsSamples,
+        noDataLinks: this.getNoDataLinks(WORKFLOWS.LONG_READ_MNGS.pluralizedLabel),
+        noDataMessage: this.getNoDataBannerMessage(WORKFLOWS.LONG_READ_MNGS.label),
       },
     };
   };
 
   getWorkflowToDisplay = (initialWorkflow, countByWorkflow) => {
     // If default workflow does not have any samples, switch to a tab with samples
-    // Order to check tabs is SHORT_READ_MNGS, CONSENSUS_GENOME, then AMR
+    // Order to check tabs is SHORT_READ_MNGS, LONG_READ_MNGS, CONSENSUS_GENOME, then AMR
+    const allowedFeatures = this.context?.allowedFeatures || [];
     const initialWorkflowCount = countByWorkflow?.[initialWorkflow] || 0;
     if (initialWorkflowCount > 0) {
       return initialWorkflow;
     }
 
-    const numOfMngsSamples = countByWorkflow?.[WORKFLOWS.SHORT_READ_MNGS.value];
+    const numOfShortReadMngsSamples = countByWorkflow?.[WORKFLOWS.SHORT_READ_MNGS.value];
+    const numOfLongReadMngsSamples = countByWorkflow?.[WORKFLOWS.LONG_READ_MNGS.value];
     const numOfCgSamples = countByWorkflow?.[WORKFLOWS.CONSENSUS_GENOME.value];
     const numOfAmrSamples = countByWorkflow?.[WORKFLOWS.AMR.value];
 
-    if (numOfMngsSamples > 0) {
+    if (numOfShortReadMngsSamples > 0) {
       return WORKFLOWS.SHORT_READ_MNGS.value;
+    } else if (numOfLongReadMngsSamples > 0 && allowedFeatures.includes(ONT_V1_FEATURE)) {
+      return WORKFLOWS.LONG_READ_MNGS.value;
     } else if (numOfCgSamples > 0) {
       return WORKFLOWS.CONSENSUS_GENOME.value;
     } else if (numOfAmrSamples > 0) {
@@ -418,7 +443,7 @@ class DiscoveryView extends React.Component {
       orderDir: orderDirection,
       filters: {
         ...this.preparedFilters(),
-        ...(workflowIsWorkflowRunEntity && { workflow }),
+        workflow,
       },
     };
   };
@@ -698,6 +723,12 @@ class DiscoveryView extends React.Component {
           loadFirstPage: true,
         });
       }
+      if (allowedFeatures.includes(ONT_V1_FEATURE)) {
+        this.longReadMngsSamples.reset({
+          conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.LONG_READ_MNGS.value),
+          loadFirstPage: true,
+        });
+      }
     }
     if (this.mapPreviewSamples !== this.samples) {
       this.mapPreviewSamples.reset({ conditions, loadFirstPage: true });
@@ -714,6 +745,7 @@ class DiscoveryView extends React.Component {
           [WORKFLOWS.AMR.value]: null,
           [WORKFLOWS.CONSENSUS_GENOME.value]: null,
           [WORKFLOWS.SHORT_READ_MNGS.value]: null,
+          [WORKFLOWS.LONG_READ_MNGS.value]: null,
         },
         filteredSampleDimensions: [],
         filteredVisualizationCount: null,
@@ -884,18 +916,24 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  refreshSampleData = () => {
+  refreshSampleData = workflowTypeToUpdate => {
+    const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
+    const collectionToUpdate = configToUpdate.objectCollection;
     this.setState(prevState => {
       const {
         filteredSampleCountsByWorkflow: prevFilteredSampleCountsByWorkflow,
+        workflow,
       } = prevState;
 
+      const currentWorkflowIsTypeToUpdate = workflow === workflowTypeToUpdate;
       return {
         filteredSampleCountsByWorkflow: {
           ...prevFilteredSampleCountsByWorkflow,
-          [WORKFLOWS.SHORT_READ_MNGS.value]: this.samples.length,
+          [workflowTypeToUpdate]: collectionToUpdate.length,
         },
-        selectableSampleIds: this.samples.getIds(),
+        ...(currentWorkflowIsTypeToUpdate && {
+          selectableSampleIds: collectionToUpdate.getIds(),
+        }),
       };
     });
   };
@@ -1641,6 +1679,8 @@ class DiscoveryView extends React.Component {
           filteredSampleCountsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value],
         filteredAmrWorkflowRunCount:
           filteredSampleCountsByWorkflow[WORKFLOWS.AMR.value],
+        filteredLongReadMngsSampleCount:
+          filteredSampleCountsByWorkflow[WORKFLOWS.LONG_READ_MNGS.value],
       };
 
       trackEvent(
@@ -1848,6 +1888,18 @@ class DiscoveryView extends React.Component {
     return null;
   };
 
+  getNoDataBannerMessage = (pipelineLabel) => {
+    return `No samples were processed by the ${pipelineLabel} Pipeline.`;
+  };
+
+  getNoDataLinks = (pluralizedPipelineLabel) => {
+    return [
+      {
+        href: "/samples/upload",
+        text: `Run ${pluralizedPipelineLabel}`,
+      },
+    ];
+  }
   renderNoDataWorkflowBanner = () => {
     const { workflow } = this.state;
     const {
@@ -1974,9 +2026,9 @@ class DiscoveryView extends React.Component {
 
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
     const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
-
-    // PLQC is currently only available for mNGS samples
-    if (currentDisplay === DISPLAY_PLQC && isWorkflowRunTab) {
+    // PLQC is currently only available for short read mNGS samples
+    const plqcWorkflows = [WORKFLOWS.SHORT_READ_MNGS];
+    if (currentDisplay === DISPLAY_PLQC && !plqcWorkflows.includes(workflow)) {
       currentDisplay = "table";
     }
 
@@ -2010,14 +2062,17 @@ class DiscoveryView extends React.Component {
     const { allowedFeatures = [] } = this.context || {};
     let workflows = WORKFLOW_ORDER;
     if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
-      workflows = pull("AMR", WORKFLOW_ORDER);
+      workflows = pull("AMR", workflows);
+    }
+    if (!allowedFeatures.includes(ONT_V1_FEATURE)) {
+      workflows = pull("LONG_READ_MNGS", workflows);
     }
 
     if (snapshotShareId) workflows = [workflows[0]]; // Only mngs
 
     return workflows.map(name => {
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
-      const isBeta = name === "AMR";
+      const isBeta = workflowIsBeta(name);
 
       let workflowCount = filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
 
@@ -2108,8 +2163,12 @@ class DiscoveryView extends React.Component {
     const amrHasLoaded = allowedFeatures.includes(AMR_V1_FEATURE)
       ? !this.amrWorkflowRuns.isLoading()
       : true;
+    const longReadSamplesHaveLoaded = allowedFeatures.includes(ONT_V1_FEATURE)
+      ? !this.longReadMngsSamples.isLoading()
+      : true;
     const tableHasLoaded =
       amrHasLoaded &&
+      longReadSamplesHaveLoaded &&
       !this.workflowRuns.isLoading() &&
       !this.samples.isLoading() &&
       currentDisplay === "table";
