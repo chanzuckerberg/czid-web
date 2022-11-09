@@ -84,6 +84,9 @@ const SamplesHeatmapControls = ({
   totalTaxaCount,
   prefilterConstants,
 }: SamplesHeatmapControlsProps) => {
+  const { allowedFeatures = [] } = useContext(UserContext) || {};
+  const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+
   const renderPresetTooltip = ({
     component,
     className,
@@ -162,9 +165,6 @@ const SamplesHeatmapControls = ({
       }
       return option;
     });
-
-    const { allowedFeatures = [] } = useContext(UserContext) || {};
-    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
 
     const categorySelect =
       // add apply/cancel buttons to the dropdown to allow users to select multiple categories before
@@ -636,7 +636,9 @@ const SamplesHeatmapControls = ({
       {displayFilterTags && (
         <div className={cs.filterTagsList}>{renderFilterTags()}</div>
       )}
-      {!loading && <div className={cs.statsRow}>{renderFilterStatsInfo()}</div>}
+      {!loading && !useHeatmapES && (
+        <div className={cs.statsRow}>{renderFilterStatsInfo()}</div>
+      )}
       <Divider />
     </div>
   );

@@ -650,7 +650,14 @@ class SamplesHeatmapView extends React.Component<
       readSpecificity: readSpecificity,
       background: background,
       heatmapTs: heatmapTs,
+      addedTaxonIds: null,
     };
+
+    if (useHeatmapES) {
+      fetchHeatmapDataParams.addedTaxonIds = Array.from(
+        this.state.addedTaxonIds,
+      );
+    }
 
     const heatmapData = await getSampleTaxons(
       fetchHeatmapDataParams,
@@ -1189,6 +1196,75 @@ class SamplesHeatmapView extends React.Component<
       data: filteredData,
       notifiedFilteredOutTaxonIds,
       newestTaxonId,
+    });
+  }
+
+  filterTaxaES() {
+    const {
+      sampleDetails,
+      allData,
+      allTaxonDetails,
+      taxonFilterState,
+      addedTaxonIds,
+    } = this.state;
+    const { metrics } = this.props;
+
+    const filteredData = {};
+    const filteredTaxIds = new Set();
+    Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
+      for (const taxId of sample.taxa) {
+        if (!filteredTaxIds.has(taxId) && !this.removedTaxonIds.has(taxId)) {
+          // build Set of all passing tax ids
+          filteredTaxIds.add(taxId);
+
+          // rebuilding the filteredData manually seems to be the easiest way
+          // to filter
+          const taxon = allTaxonDetails[taxId];
+          metrics.forEach(metric => {
+            filteredData[metric.value] = filteredData[metric.value] || [];
+            filteredData[metric.value].push(
+              allData[metric.value][taxon["index"]],
+            );
+          });
+        }
+      }
+    });
+
+    // Make sure that taxa manually added by the user that pass filters
+    // are included.
+    addedTaxonIds.forEach((taxId: $TSFixMe) => {
+      if (!filteredTaxIds.has(taxId)) {
+        filteredTaxIds.add(taxId);
+
+        const taxon = allTaxonDetails[taxId];
+        metrics.forEach(metric => {
+          filteredData[metric.value] = filteredData[metric.value] || [];
+          filteredData[metric.value].push(
+            allData[metric.value][taxon["index"]],
+          );
+        });
+      }
+    });
+
+    // create a dummy taxonFilterState that defaults all state to true
+    // because all filtering happened on the backend
+    // TODO remove Heatmap.js dependency on filterState
+    Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
+      Object.values(allTaxonDetails).forEach((taxon: $TSFixMe) => {
+        taxonFilterState[taxon["index"]] =
+          taxonFilterState[taxon["index"]] || {};
+        // eslint-disable-next-line standard/computed-property-even-spacing
+        taxonFilterState[taxon["index"]][sample["index"]] = true;
+      });
+    });
+
+    this.updateHistoryState();
+
+    this.setState({
+      taxonFilterState,
+      taxonIds: Array.from(filteredTaxIds),
+      loading: false,
+      data: filteredData,
     });
   }
 
@@ -1807,7 +1883,13 @@ class SamplesHeatmapView extends React.Component<
   }
 
   updateFilters() {
-    this.filterTaxa();
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+    if (useHeatmapES) {
+      this.filterTaxaES();
+    } else {
+      this.filterTaxa();
+    }
   }
 
   renderVisualization() {

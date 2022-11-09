@@ -2,9 +2,10 @@
 # visualization. See HeatmapElasticsearchHelperTest.
 # See selectedOptions in SamplesHeatmapView for client-side defaults, and
 # heatmap action in VisualizationsController.
-class HeatmapElasticsearchService
+class TopTaxonsElasticsearchService
   include Callable
   include ElasticsearchQueryHelper
+  include HeatmapHelper
 
   # Based on the trade-off between performance and information quantity, we
   # decided on 10 as the best default number of taxons to show per sample.
@@ -26,15 +27,13 @@ class HeatmapElasticsearchService
     return generate
   end
 
-  private
-
   # Samples and background are assumed here to be vieweable.
   def generate
     return {} if @samples.empty?
 
     filter_param = build_filter_param_hash
 
-    pr_id_to_sample_id = get_latest_pipeline_runs_for_samples(@samples)
+    pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(@samples)
 
     ElasticsearchQueryHelper.update_es_for_missing_data(
       filter_param[:background_id],
@@ -42,9 +41,10 @@ class HeatmapElasticsearchService
     )
     results_by_pr = fetch_top_taxons(
       filter_param,
-      pr_id_to_sample_id
+      pr_id_to_sample_id,
+      filter_param[:addedTaxonIds]
     )
-    dict = samples_taxons_details(
+    dict = ElasticsearchQueryHelper.samples_taxons_details(
       results_by_pr,
       @samples
     )
@@ -60,6 +60,7 @@ class HeatmapElasticsearchService
       nil
     end
     removed_taxon_ids = removed_taxon_ids.compact
+    filter_params[:addedTaxonIds] = @params[:addedTaxonIds] || []
     taxon_ids = @params[:taxonIds] || []
     taxon_ids = taxon_ids.compact
 
@@ -102,117 +103,22 @@ class HeatmapElasticsearchService
 
   def fetch_top_taxons(
     filter_param,
-    pr_id_to_sample_id
+    pr_id_to_sample_id,
+    added_taxon_ids
   )
     # get the top 10 taxa for each sample
     top_n_taxa_per_sample = ElasticsearchQueryHelper.top_n_taxa_per_sample(
       filter_param,
       pr_id_to_sample_id.keys()
     )
-
     # for each sample, get the scores for each of the above taxa
     all_metrics_per_sample_and_taxa = ElasticsearchQueryHelper.all_metrics_per_sample_and_taxa(
-      filter_param,
       pr_id_to_sample_id.keys(),
-      top_n_taxa_per_sample
+      top_n_taxa_per_sample + added_taxon_ids,
+      filter_param[:background_id]
     )
     # organizing the results by pipeline_run_id
-    hash = organize_data_by_pr(all_metrics_per_sample_and_taxa, pr_id_to_sample_id)
+    hash = ElasticsearchQueryHelper.organize_data_by_pr(all_metrics_per_sample_and_taxa, pr_id_to_sample_id)
     return hash
-  end
-
-  def organize_data_by_pr(sql_results, pr_id_to_sample_id)
-    # organizing taxons by pipeline_run_id
-    result_hash = {}
-
-    pipeline_run_ids = sql_results.map { |x| x["pipeline_run_id"] }
-    pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
-    pipeline_runs_by_id = pipeline_runs.index_by(&:id)
-    sql_results.each do |row|
-      pipeline_run_id = row["pipeline_run_id"]
-      if result_hash[pipeline_run_id]
-        pr = result_hash[pipeline_run_id]["pr"]
-      else
-        pr = pipeline_runs_by_id[pipeline_run_id]
-        result_hash[pipeline_run_id] = {
-          "pr" => pr,
-          "taxon_counts" => [],
-          "sample_id" => pr_id_to_sample_id[pipeline_run_id],
-        }
-      end
-      if pr.total_reads
-        result_hash[pipeline_run_id]["taxon_counts"] << row
-      end
-    end
-    return result_hash
-  end
-
-  def samples_taxons_details(
-    results_by_pr,
-    samples
-  )
-    results = {}
-
-    # Get sample results for the taxon ids
-    samples_by_id = samples.index_by(&:id)
-    results_by_pr.each do |_pr_id, res|
-      pr = res["pr"]
-      taxon_counts = res["taxon_counts"]
-      sample_id = pr.sample_id
-      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-
-      rows = []
-      tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-      compute_aggregate_scores_v2!(rows)
-
-      results[sample_id] = {
-        sample_id: sample_id,
-        pipeline_version: pr.pipeline_version,
-        name: samples_by_id[sample_id].name,
-        metadata: samples_by_id[sample_id].metadata_with_base_type,
-        host_genome_name: samples_by_id[sample_id].host_genome_name,
-        taxons: rows,
-        ercc_count: pr.total_ercc_reads,
-      }
-    end
-
-    # For samples that didn't have matching taxons, just throw in the metadata.
-    samples.each do |sample|
-      unless results.key?(sample.id)
-        results[sample.id] = {
-          sample_id: sample.id,
-          name: sample.name,
-          metadata: sample.metadata_with_base_type,
-          host_genome_name: sample.host_genome_name,
-          ercc_count: 0,
-        }
-      end
-    end
-    # Flatten the hash
-    results.values
-  end
-
-  def compute_aggregate_scores_v2!(rows)
-    rows.each do |taxon_info|
-      # NT and NR zscore are set to the same
-      taxon_info["NT"]["maxzscore"] = [taxon_info["NT"]["zscore"], taxon_info["NR"]["zscore"]].max
-      taxon_info["NR"]["maxzscore"] = taxon_info["NT"]["maxzscore"]
-    end
-  end
-
-  # NOTE: This was extracted from a subquery because mysql was not using the
-  # the resulting IDs for an indexed query.
-  # Return a map of pipeline run id to sample id.
-  def get_latest_pipeline_runs_for_samples(samples)
-    # not the ideal way to get the current pipeline but it is consistent with
-    # current logic elsewhere.
-    TaxonCount.connection.select_all(
-      "SELECT MAX(id) AS id, sample_id
-        FROM pipeline_runs
-        WHERE sample_id IN (#{samples.pluck(:id).to_set.to_a.join(',')})
-        GROUP BY sample_id"
-    )
-              .map { |r| [r["id"], r["sample_id"]] }
-              .to_h
   end
 end

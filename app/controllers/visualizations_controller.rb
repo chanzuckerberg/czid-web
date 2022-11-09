@@ -210,7 +210,7 @@ class VisualizationsController < ApplicationController
 
   def download_heatmap
     if current_user.allowed_feature?("heatmap_elasticsearch")
-      heatmap_es_dict = HeatmapElasticsearchService.call(
+      heatmap_es_dict = TopTaxonsElasticsearchService.call(
         params: params,
         samples_for_heatmap: samples_for_heatmap,
         background_for_heatmap: background_for_heatmap
@@ -238,7 +238,7 @@ class VisualizationsController < ApplicationController
       )
       render json: heatmap_dict
     elsif current_user.allowed_feature?("heatmap_elasticsearch")
-      heatmap_es_dict = HeatmapElasticsearchService.call(
+      heatmap_es_dict = TopTaxonsElasticsearchService.call(
         params: params,
         samples_for_heatmap: samples_for_heatmap,
         background_for_heatmap: background_for_heatmap
@@ -269,10 +269,14 @@ class VisualizationsController < ApplicationController
         background_id: background_for_heatmap
       )
     elsif current_user.allowed_feature?("heatmap_elasticsearch")
-      sample_taxons_dict = HeatmapElasticsearchService.call(
-        params: params,
-        samples_for_heatmap: samples_for_heatmap,
-        background_for_heatmap: background_for_heatmap
+      pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
+      taxon_ids = params[:taxonIds] || []
+
+      sample_taxons_dict = TaxonDetailsElasticsearchService.call(
+        pr_id_to_sample_id: pr_id_to_sample_id,
+        samples: samples_for_heatmap,
+        taxon_ids: taxon_ids.compact,
+        background_id: background_for_heatmap
       )
     else
       update_background_only = params[:updateBackgroundOnly]

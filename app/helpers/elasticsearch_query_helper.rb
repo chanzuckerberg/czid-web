@@ -143,9 +143,9 @@ module ElasticsearchQueryHelper
 
   # get all of the metrics for the given pipeline_run_ids X tax_ids
   def self.all_metrics_per_sample_and_taxa(
-    filter_param,
     pipeline_run_ids,
-    tax_ids
+    tax_ids,
+    background
   )
     tax_id_batches = batch_tax_ids(pipeline_run_ids, tax_ids)
 
@@ -154,9 +154,9 @@ module ElasticsearchQueryHelper
     # if multiple batches becomes more common we should consider parallelizing these requests
     tax_id_batches.each do |tax_id_batch|
       results += fetch_all_metrics_per_sample_and_taxa(
-        filter_param,
         pipeline_run_ids,
-        tax_id_batch
+        tax_id_batch,
+        background
       )
     end
     return results
@@ -164,9 +164,9 @@ module ElasticsearchQueryHelper
 
   # get all of the metrics for the given pipeline_run_ids X tax_ids
   def self.fetch_all_metrics_per_sample_and_taxa(
-    filter_param,
     pipeline_run_ids,
-    tax_ids
+    tax_ids,
+    background
   )
 
     search_body = {
@@ -187,12 +187,7 @@ module ElasticsearchQueryHelper
             },
             {
               "term": {
-                "background_id": filter_param[:background_id].to_s,
-              },
-            },
-            {
-              "term": {
-                "tax_level": filter_param[:taxon_level].to_s,
+                "background_id": background,
               },
             },
           ],
@@ -467,5 +462,84 @@ module ElasticsearchQueryHelper
     metric["zscore"] = metric["zscore"].round(4).to_f
     metric["r"] = metric["r"].round(4).to_f
     return metric
+  end
+
+  def self.organize_data_by_pr(sql_results, pr_id_to_sample_id)
+    # organizing taxons by pipeline_run_id
+    result_hash = {}
+
+    pipeline_run_ids = sql_results.map { |x| x["pipeline_run_id"] }
+    pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
+    pipeline_runs_by_id = pipeline_runs.index_by(&:id)
+    sql_results.each do |row|
+      pipeline_run_id = row["pipeline_run_id"]
+      if result_hash[pipeline_run_id]
+        pr = result_hash[pipeline_run_id]["pr"]
+      else
+        pr = pipeline_runs_by_id[pipeline_run_id]
+        result_hash[pipeline_run_id] = {
+          "pr" => pr,
+          "taxon_counts" => [],
+          "sample_id" => pr_id_to_sample_id[pipeline_run_id],
+        }
+      end
+      if pr.total_reads
+        result_hash[pipeline_run_id]["taxon_counts"] << row
+      end
+    end
+    return result_hash
+  end
+
+  def self.samples_taxons_details(
+    results_by_pr,
+    samples
+  )
+    results = {}
+
+    # Get sample results for the taxon ids
+    samples_by_id = samples.index_by(&:id)
+    results_by_pr.each do |_pr_id, res|
+      pr = res["pr"]
+      taxon_counts = res["taxon_counts"]
+      sample_id = pr.sample_id
+      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
+
+      rows = []
+      tax_2d.each { |_tax_id, tax_info| rows << tax_info }
+      compute_aggregate_scores_v2!(rows)
+
+      results[sample_id] = {
+        sample_id: sample_id,
+        pipeline_version: pr.pipeline_version,
+        name: samples_by_id[sample_id].name,
+        metadata: samples_by_id[sample_id].metadata_with_base_type,
+        host_genome_name: samples_by_id[sample_id].host_genome_name,
+        taxons: rows,
+        ercc_count: pr.total_ercc_reads,
+      }
+    end
+
+    # For samples that didn't have matching taxons, just throw in the metadata.
+    samples.each do |sample|
+      unless results.key?(sample.id)
+        results[sample.id] = {
+          sample_id: sample.id,
+          name: sample.name,
+          metadata: sample.metadata_with_base_type,
+          host_genome_name: sample.host_genome_name,
+          ercc_count: 0,
+        }
+      end
+    end
+    # Flatten the hash
+    results.values
+  end
+
+  def self.compute_aggregate_scores_v2!(rows)
+    rows.each do |taxon_info|
+      # NT and NR zscore are set to the same
+      taxon_info["NT"]["maxzscore"] = [taxon_info["NT"]["zscore"], taxon_info["NR"]["zscore"]].max
+      taxon_info["NR"]["maxzscore"] = taxon_info["NT"]["maxzscore"]
+    end
   end
 end
