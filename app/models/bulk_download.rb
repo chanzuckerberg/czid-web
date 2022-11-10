@@ -508,7 +508,7 @@ class BulkDownload < ApplicationRecord
   def create_biom_file(metrics_path, metadata_path, taxon_lineage_path)
     output_biom = "/tmp/#{id.to_s.shellescape}_output.biom"
     output_biom_metadata = "/tmp/#{id.to_s.shellescape}_output_metadata.biom"
-    stdout, stderr, status = Open3.capture3("biom", "convert", "-i", metrics_path, "-o", output_biom.shellescape, "--to-json")
+    stdout, stderr, status = Open3.capture3("biom", "convert", "-i", metrics_path, "-o", output_biom.shellescape, '--table-type=OTU table', "--to-json")
     if status.exitstatus.zero?
       stdout, stderr, status = Open3.capture3(
         "biom", "add-metadata", "-i", output_biom.shellescape, "-o", output_biom_metadata.shellescape,
