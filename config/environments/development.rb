@@ -21,6 +21,9 @@ Rails.application.configure do
                            # Needed for redis to evict keys in volatile-lru mode
                            expires_in: 30.days,
                          }
+    config.session_store = :cookie_store, {
+      key: '_czid_session',
+    }
     config.public_file_server.headers = {
       'Cache-Control' => "public, max-age=#{2.days.seconds.to_i}",
     }

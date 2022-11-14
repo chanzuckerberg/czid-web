@@ -99,7 +99,7 @@ module Auth0Helper
   private
 
   def auth0_session=(value)
-    session[:auth0_credentials] = value.present? && value["id_token"].present? ? value : nil
+    session[:auth0_credentials] = value.present? && value["id_token"].present? ? value.except("token") : nil
   end
 
   def http_token

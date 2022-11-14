@@ -6,7 +6,7 @@ require 'rails/all'
 # you've limited to :test, :development, or :prod.
 Bundler.require(*Rails.groups)
 
-module Idseq
+module Czid
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.1
