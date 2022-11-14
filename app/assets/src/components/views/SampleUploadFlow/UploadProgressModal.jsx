@@ -8,6 +8,7 @@ import RemoteUploadProgressModal from "./RemoteUploadProgressModal";
 const UploadProgressModal = ({
   adminOptions,
   clearlabs,
+  guppyBasecallerSetting,
   technology,
   medakaModel,
   metadata,
@@ -32,6 +33,7 @@ const UploadProgressModal = ({
         <LocalUploadProgressModal
           adminOptions={adminOptions}
           clearlabs={clearlabs}
+          guppyBasecallerSetting={guppyBasecallerSetting}
           technology={technology}
           medakaModel={medakaModel}
           metadata={processMetadataRows(metadata.rows)}
@@ -87,6 +89,7 @@ UploadProgressModal.propTypes = {
   ),
   adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
   clearlabs: PropTypes.bool,
+  guppyBasecallerSetting: PropTypes.string,
   medakaModel: PropTypes.string,
   metadata: PropTypes.objectOf(PropTypes.any),
   onUploadComplete: PropTypes.func.isRequired,

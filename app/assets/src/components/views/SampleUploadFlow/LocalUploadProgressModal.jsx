@@ -45,6 +45,7 @@ import {
 const LocalUploadProgressModal = ({
   adminOptions,
   clearlabs,
+  guppyBasecallerSetting,
   technology,
   medakaModel,
   metadata,
@@ -92,6 +93,7 @@ const LocalUploadProgressModal = ({
     const samplesToUpload = addFlagsToSamples({
       adminOptions,
       clearlabs,
+      guppyBasecallerSetting,
       medakaModel,
       samples,
       useStepFunctionPipeline,
@@ -624,6 +626,7 @@ LocalUploadProgressModal.propTypes = {
   ),
   adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
   clearlabs: PropTypes.bool,
+  guppyBasecallerSetting: PropTypes.string,
   medakaModel: PropTypes.string,
   metadata: PropTypes.objectOf(PropTypes.any),
   onUploadComplete: PropTypes.func.isRequired,

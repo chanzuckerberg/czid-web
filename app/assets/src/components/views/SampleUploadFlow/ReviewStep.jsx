@@ -345,7 +345,8 @@ class ReviewStep extends React.Component {
         workflow === WORKFLOWS.SHORT_READ_MNGS.value ||
         workflow === WORKFLOWS.CONSENSUS_GENOME.value;
       const workflowIsBeta = workflow === WORKFLOWS.AMR.value;
-      const sequencingPlatformIsBeta = workflow === WORKFLOWS.SHORT_READ_MNGS.value && technology === NANOPORE;
+      const sequencingPlatformIsBeta =
+        workflow === WORKFLOWS.SHORT_READ_MNGS.value && technology === NANOPORE;
 
       return (
         <div className={cs.section}>
@@ -359,7 +360,9 @@ class ReviewStep extends React.Component {
           <div className={cs.text}>
             <div className={cs.header}>
               <div className={cs.name}>{workflowDisplayName}</div>
-              {workflowIsBeta && <StatusLabel inline status="Beta" type="beta" />}
+              {workflowIsBeta && (
+                <StatusLabel inline status="Beta" type="beta" />
+              )}
             </div>
             {hasAnalysisTypeContent && (
               <div className={cs.analysisTypeContent}>
@@ -370,11 +373,15 @@ class ReviewStep extends React.Component {
                     are relevant for CG and mNGS. The default technology of Illumina can be deleted once
                     ONT v1 is launched to all users. */}
                     {CG_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
-                    {sequencingPlatformIsBeta && <StatusLabel inline status="Beta" type="beta" />}
+                    {sequencingPlatformIsBeta && (
+                      <StatusLabel inline status="Beta" type="beta" />
+                    )}
                   </div>
                 </div>
-                {workflow === WORKFLOWS.CONSENSUS_GENOME.value && this.renderCGAnalysisSection()}
-                {workflow === WORKFLOWS.SHORT_READ_MNGS.value && this.renderMngsAnalysisSection()}
+                {workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
+                  this.renderCGAnalysisSection()}
+                {workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
+                  this.renderMngsAnalysisSection()}
               </div>
             )}
           </div>
@@ -385,36 +392,40 @@ class ReviewStep extends React.Component {
   };
 
   renderCGAnalysisSection = () => {
-    const { clearlabs, medakaModel, technology, wetlabProtocol, workflows } = this.props;
+    const {
+      clearlabs,
+      medakaModel,
+      technology,
+      wetlabProtocol,
+      workflows,
+    } = this.props;
     return (
       <>
-      {technology === NANOPORE && (
-        <div className={cs.item}>
-          <div className={cs.subheader}>Used Clear Labs&#58;</div>
-          <div className={cs.description}>
-            {clearlabs ? "Yes" : "No"}
-          </div>
-        </div>
-      )}
-      {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
-        <div className={cs.item}>
-          <div className={cs.subheader}>Wetlab Protocol&#58;</div>
-          <div className={cs.description}>
-            {CG_WETLAB_DISPLAY_NAMES[wetlabProtocol]}
-          </div>
-        </div>
-      )}
-      <div className={cs.item}>
         {technology === NANOPORE && (
-          <>
-            <div className={cs.subheader}>Medaka Model&#58;</div>
-            <div className={cs.description}>{medakaModel}</div>
-          </>
+          <div className={cs.item}>
+            <div className={cs.subheader}>Used Clear Labs&#58;</div>
+            <div className={cs.description}>{clearlabs ? "Yes" : "No"}</div>
+          </div>
         )}
-      </div>
+        {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
+          <div className={cs.item}>
+            <div className={cs.subheader}>Wetlab Protocol&#58;</div>
+            <div className={cs.description}>
+              {CG_WETLAB_DISPLAY_NAMES[wetlabProtocol]}
+            </div>
+          </div>
+        )}
+        <div className={cs.item}>
+          {technology === NANOPORE && (
+            <>
+              <div className={cs.subheader}>Medaka Model&#58;</div>
+              <div className={cs.description}>{medakaModel}</div>
+            </>
+          )}
+        </div>
       </>
     );
-  }
+  };
 
   renderMngsAnalysisSection = () => {
     const { technology, guppyBasecallerSetting } = this.props;
@@ -432,7 +443,7 @@ class ReviewStep extends React.Component {
         )}
       </>
     );
-  }
+  };
 
   getWorkflowSectionOrder = () => {
     const { workflows } = this.props;
@@ -536,6 +547,7 @@ class ReviewStep extends React.Component {
 
     const {
       clearlabs,
+      guppyBasecallerSetting,
       technology,
       medakaModel,
       metadata,
@@ -601,6 +613,7 @@ class ReviewStep extends React.Component {
             <UploadProgressModal
               adminOptions={adminOptions}
               clearlabs={clearlabs}
+              guppyBasecallerSetting={guppyBasecallerSetting}
               technology={technology}
               medakaModel={medakaModel}
               metadata={metadata}

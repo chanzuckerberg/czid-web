@@ -584,7 +584,8 @@ module SamplesHelper
         errors << SampleUploadErrors.missing_required_technology_for_cg(sample_attributes[:project_id])
       end
 
-      if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+      is_nanopore_consensus_genome = workflows&.include?(WorkflowRun::WORKFLOW[:consensus_genome]) && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+      if is_nanopore_consensus_genome
         clearlabs = sample_attributes.delete(:clearlabs)
         medaka_model = sample_attributes[:medaka_model] ? sample_attributes.delete(:medaka_model) : ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL
         # TODO: current default values; to be exposed as a user-facing option in a future version
@@ -605,6 +606,10 @@ module SamplesHelper
 
       if sample_attributes.key?(:primer_bed)
         primer_bed = sample_attributes.delete(:primer_bed)
+      end
+
+      if sample_attributes.key?(:guppy_basecaller_setting)
+        guppy_basecaller_setting = sample_attributes.delete(:guppy_basecaller_setting)
       end
 
       sample = Sample.find_by(
@@ -665,6 +670,16 @@ module SamplesHelper
           # Creating all the workflow runs and importing them later triggers a race condition and the first few samples don't kickoff.
           wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json&.to_json)
           wr.save!
+
+          if workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
+            pr = PipelineRun.new(
+              sample: sample,
+              technology: technology,
+              guppy_basecaller_setting: guppy_basecaller_setting,
+              alignment_config: AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+            )
+            pr.save!
+          end
         end
       else
         errors << sample.errors unless sample.errors.empty?

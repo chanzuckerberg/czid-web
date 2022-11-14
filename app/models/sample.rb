@@ -656,6 +656,8 @@ class Sample < ApplicationRecord
     elsif initial_workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
       kickoff_pipeline
       amr_wrs_to_dispatch.all.map(&:dispatch) unless amr_wrs_to_dispatch.empty?
+    elsif initial_workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
+      pr.dispatch
     end
   end
 
@@ -814,6 +816,7 @@ class Sample < ApplicationRecord
     o.split[0]
   end
 
+  # Kickoff short read mngs pipeline
   def kickoff_pipeline
     # only kickoff pipeline when no active pipeline_run running
     return unless pipeline_runs.in_progress.empty?
@@ -834,6 +837,7 @@ class Sample < ApplicationRecord
 
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
     pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+    pr.technology = PipelineRun::TECHNOLOGY_INPUT[:illumina]
     mark_older_pipeline_runs_as_deprecated if pr.save!
 
     # If async notifications are enabled for mNGS, we dispatch the pipeline run as soon as it's created,
@@ -841,7 +845,7 @@ class Sample < ApplicationRecord
     if AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
       prs = pr.active_stage
       if prs && !prs.started? && prs.step_number == 1
-        pr.dispatch_sfn_pipeline
+        pr.dispatch
         prs.run_job
       end
     end

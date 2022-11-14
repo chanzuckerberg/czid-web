@@ -42,6 +42,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
       "client",
       "dag_vars",
       "do_not_process",
+      "guppy_basecaller_setting",
       "host_genome_id",
       "input_files_attributes",
       "max_input_fragments",

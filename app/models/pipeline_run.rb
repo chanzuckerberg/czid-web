@@ -269,6 +269,14 @@ class PipelineRun < ApplicationRecord
 
   scope :non_deprecated, -> { where(deprecated: false) }
 
+  def workflow
+    if technology == TECHNOLOGY_INPUT[:illumina]
+      WorkflowRun::WORKFLOW[:short_read_mngs]
+    else
+      WorkflowRun::WORKFLOW[:long_read_mngs]
+    end
+  end
+
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
   end
@@ -897,17 +905,17 @@ class PipelineRun < ApplicationRecord
 
   def workflow_version_tag
     # the tag used for docker container and idseq workflows definition
-    return "#{WorkflowRun::WORKFLOW[:short_read_mngs]}-v#{wdl_version}"
+    return "#{workflow}-v#{wdl_version}"
   end
 
   def version_key_subpath
     # the s3 subpath based on wdl version used to store results
-    return "#{WorkflowRun::WORKFLOW[:short_read_mngs]}-#{wdl_version.split('.')[0]}"
+    return "#{workflow}-#{wdl_version.split('.')[0]}"
   end
 
   def wdl_s3_folder
     if pipeline_version_at_least(pipeline_version, "5.0.0")
-      "s3://#{S3_WORKFLOWS_BUCKET}/#{WorkflowRun::WORKFLOW[:short_read_mngs]}-v#{wdl_version}"
+      "s3://#{S3_WORKFLOWS_BUCKET}/#{workflow}-v#{wdl_version}"
     else
       "s3://#{S3_WORKFLOWS_BUCKET}/v#{wdl_version}/#{WorkflowRun::WORKFLOW[:main]}"
     end
@@ -1187,10 +1195,14 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def dispatch_sfn_pipeline
+  def dispatch
     sfn_service_result = {}
     begin
-      sfn_service_result = SfnPipelineDispatchService.call(self)
+      if technology == TECHNOLOGY_INPUT[:illumina]
+        sfn_service_result = SfnPipelineDispatchService.call(self)
+      elsif technology == TECHNOLOGY_INPUT[:nanopore]
+        sfn_service_result = SfnLongReadMngsPipelineDispatchService.call(self)
+      end
       update(
         sfn_execution_arn: sfn_service_result[:sfn_execution_arn],
         pipeline_version: sfn_service_result[:pipeline_version]
@@ -1232,7 +1244,7 @@ class PipelineRun < ApplicationRecord
         # that this was the least intrusive place (vs. both downstream in run_job>host_filtering_command
         # and upstream)
         if step_function? && prs.step_number == 1
-          dispatch_sfn_pipeline
+          dispatch
         end
 
         # Run job will trigger dag pipeline for a particular stage

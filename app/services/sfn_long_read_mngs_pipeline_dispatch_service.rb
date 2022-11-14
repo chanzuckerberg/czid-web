@@ -6,8 +6,13 @@ class SfnLongReadMngsPipelineDispatchService
   include Callable
   include ParameterSanitization
 
-  # TODO(ihan): define WorkflowRun::WORKFLOW[:long_read_mngs] in workflow.ts
-  WORKFLOW_NAME = "long-read-mngs".freeze
+  # TODO(ihan): Host is hardcoded as Human for testing purposes. Remove after backfilling HostGenome.s3_minimap2_index_path
+  HUMAN_S3_MINIMAP2_INDEX_PATH = "s3://idseq-public-references/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_phiX_rRNA_mito_ERCC.fasta".freeze
+  MINIMAP2_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/nt_k14_w8_20_long".freeze
+  DIAMOND_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/diamond_index_chunksize_5500000000/".freeze
+
+  # TODO(ihan): Wdl version is hardcoded for testingpurposes. Swap to AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
+  WDL_VERSION = "0.1.7-beta".freeze
 
   class SfnArnMissingError < StandardError
     def initialize
@@ -28,7 +33,7 @@ class SfnLongReadMngsPipelineDispatchService
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_SINGLE_WDL_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
-    @wdl_version = AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
+    @wdl_version = WDL_VERSION
     raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
   end
 
@@ -54,6 +59,11 @@ class SfnLongReadMngsPipelineDispatchService
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample.sample_path}/#{@pipeline_run.id}"
   end
 
+  def retrieve_docker_image_id
+    resp = AwsClient[:sts].get_caller_identity
+    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/#{WorkflowRun::WORKFLOW[:long_read_mngs]}:v#{WDL_VERSION}"
+  end
+
   def generate_wdl_input
     {
       RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/run.wdl",
@@ -61,26 +71,18 @@ class SfnLongReadMngsPipelineDispatchService
         Run: {
           input_fastq: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
           library_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
-          guppy_basecaller_setting: "hac|fast|super",
-          # TODO(Todd): Add a new s3_minimap2_index_path column to host genomes
-          # minimap_host_db: @sample.host_genome.s3_minimap2_index_path,
-          # minimap_human_db: HostGenome.find_by(name: "Human").s3_minimap2_index_path,
-          # TODO: The human_bowtie2_genome is hardcoded as the current human genome for testing purposes.
-          # It should eventually be replaced with HostGenome.find_by(name: "Human").s3_bowtie2_index_path
-          human_bowtie2_genome: "s3://idseq-public-references/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_phiX_rRNA_mito_ERCC.fasta",
-          max_input_fragments: @pipeline_run.max_input_fragments, # optional input
+          guppy_basecaller_setting: @pipeline_run.guppy_basecaller_setting,
+          minimap_host_db: HUMAN_S3_MINIMAP2_INDEX_PATH,
+          minimap_human_db: HUMAN_S3_MINIMAP2_INDEX_PATH,
           subsample_depth: @pipeline_run.subsample, # optional input
           lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
           accession2taxid_db: @pipeline_run.alignment_config.s3_accession2taxid_path,
-          taxon_ignore_list: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
-          nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
-          nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
-          nr_db: @pipeline_run.alignment_config.s3_nr_db_path,
-          nr_loc_db: @pipeline_run.alignment_config.s3_nr_loc_db_path,
-          use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
+          taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
           deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
-          nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
-
+          docker_image_id: retrieve_docker_image_id,
+          minimap2_db: MINIMAP2_DB_PATH,
+          diamond_db: DIAMOND_DB_PATH,
+          s3_wd_uri: "#{output_prefix}/#{@pipeline_run.version_key_subpath}",
         },
       },
       OutputPrefix: output_prefix,
