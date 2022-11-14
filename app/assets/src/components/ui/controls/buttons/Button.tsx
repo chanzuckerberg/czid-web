@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React from "react";
-import { Button as BaseButton } from "semantic-ui-react";
+import { Button as BaseButton, StrictButtonProps } from "semantic-ui-react";
 
 import { IconArrowDownSmall } from "~ui/icons";
 
@@ -15,7 +15,7 @@ const Button = ({
   text,
   ...props
 }: ButtonProps) => {
-  let content = text;
+  let content: JSX.Element | string = text;
   if (icon || label) {
     content = (
       <div className={cx(labelClassName, "icon-label")}>
@@ -45,9 +45,9 @@ const Button = ({
   );
 };
 
-interface ButtonProps {
+export interface ButtonProps extends StrictButtonProps {
   circular?: boolean;
-  className: string;
+  className?: string;
   disabled?: boolean;
   hasDropdownArrow?: boolean;
   icon?: $TSFixMe;

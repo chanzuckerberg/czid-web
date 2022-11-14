@@ -1,6 +1,5 @@
 import { get } from "lodash/fp";
 import moment from "moment";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
@@ -13,14 +12,31 @@ import Modal from "~ui/containers/Modal";
 
 import cs from "./consensus_genome_previous_modal.scss";
 
+interface ConsensusGenomePreviousModalProps {
+  consensusGenomeData?: {
+    percentIdentity?: number;
+    previousRuns?: object[];
+    taxId?: number;
+    taxName?: string;
+  };
+  open?: boolean;
+  onClose: $TSFixMeFunction;
+  onNew: $TSFixMeFunction;
+  sample: object;
+  onRowClick: $TSFixMeFunction;
+}
+
 export default function ConsensusGenomePreviousModal({
   consensusGenomeData,
   onClose,
   onNew,
   onRowClick,
   open,
-}) {
-  const renderPrimaryCell = cellData => {
+}: ConsensusGenomePreviousModalProps) {
+  const renderPrimaryCell = (cellData: {
+    inputs: { accession_id: $TSFixMeUnknown; accession_name: $TSFixMeUnknown };
+    parsed_cached_results: any;
+  }) => {
     const { inputs, parsed_cached_results: results } = cellData;
 
     const coverage = get("coverage_viz.coverage_depth", results);
@@ -83,6 +99,7 @@ export default function ConsensusGenomePreviousModal({
         <span className={cs.taxonName}>{consensusGenomeData.taxName}</span>
       </div>
       <div className={cs.table}>
+        {/* @ts-expect-error Table has not been typed */}
         <Table
           columns={columns}
           data={previousRuns}
@@ -107,17 +124,3 @@ export default function ConsensusGenomePreviousModal({
     </Modal>
   );
 }
-
-ConsensusGenomePreviousModal.propTypes = {
-  consensusGenomeData: PropTypes.shape({
-    percentIdentity: PropTypes.number,
-    previousRuns: PropTypes.arrayOf(PropTypes.object),
-    taxId: PropTypes.number,
-    taxName: PropTypes.string,
-  }),
-  open: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
-  onNew: PropTypes.func.isRequired,
-  sample: PropTypes.object.isRequired,
-  onRowClick: PropTypes.func.isRequired,
-};

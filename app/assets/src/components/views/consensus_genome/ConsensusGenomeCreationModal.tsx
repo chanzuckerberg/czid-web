@@ -1,5 +1,4 @@
 import { isNull } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import {
@@ -17,8 +16,39 @@ import { SubtextDropdown } from "~ui/controls/dropdowns";
 
 import cs from "./consensus_genome_creation_modal.scss";
 
-export default class ConsensusGenomeCreationModal extends React.Component {
-  constructor(props) {
+interface ConsensusGenomeCreationModalProps {
+  consensusGenomeData?: {
+    accessionData?: {
+      best_accessions: {
+        id: string;
+        name: string;
+        coverage_depth: $TSFixMeUnknown;
+      }[];
+    };
+    percentIdentity?: number;
+    taxId?: number;
+    taxName?: string;
+    usedAccessions?: string[];
+  };
+  open?: boolean;
+  onClose: $TSFixMeFunction;
+  onCreation: $TSFixMeFunction;
+  sample: { id: $TSFixMeUnknown };
+}
+
+interface ConsensusGenomeCreationModalState {
+  selectedAccessionIndex: number;
+}
+
+export default class ConsensusGenomeCreationModal extends React.Component<
+  ConsensusGenomeCreationModalProps,
+  ConsensusGenomeCreationModalState
+> {
+  constructor(
+    props:
+      | ConsensusGenomeCreationModalProps
+      | Readonly<ConsensusGenomeCreationModalProps>,
+  ) {
     super(props);
 
     this.state = {
@@ -58,7 +88,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
     });
   };
 
-  getSequenceCompleteness = accessionName => {
+  getSequenceCompleteness = (accessionName: string) => {
     if (accessionName.includes("partial")) {
       return "Partial Sequence";
     } else if (accessionName.includes("complete")) {
@@ -66,7 +96,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
     }
   };
 
-  handleAccessionChange = accessionIndex => {
+  handleAccessionChange = (accessionIndex: number) => {
     const { selectedAccessionIndex } = this.state;
     const { consensusGenomeData, sample } = this.props;
     const accessionData = consensusGenomeData.accessionData;
@@ -160,6 +190,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
         </div>
         <SubtextDropdown
           className={cs.dropdown}
+          // @ts-expect-error Property 'fluid' does not exist on type
           fluid
           options={this.getReferenceAccessions()}
           onChange={this.handleAccessionChange}
@@ -175,17 +206,3 @@ export default class ConsensusGenomeCreationModal extends React.Component {
     );
   }
 }
-
-ConsensusGenomeCreationModal.propTypes = {
-  consensusGenomeData: PropTypes.shape({
-    accessionData: PropTypes.object,
-    percentIdentity: PropTypes.number,
-    taxId: PropTypes.number,
-    taxName: PropTypes.string,
-    usedAccessions: PropTypes.arrayOf(PropTypes.string),
-  }),
-  open: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
-  onCreation: PropTypes.func.isRequired,
-  sample: PropTypes.object.isRequired,
-};

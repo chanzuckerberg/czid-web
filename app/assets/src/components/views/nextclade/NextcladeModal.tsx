@@ -2,6 +2,7 @@ import cx from "classnames";
 import { difference, size } from "lodash/fp";
 import React from "react";
 
+import { PopupProps } from "semantic-ui-react";
 import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
 import { validateWorkflowRunIds } from "~/api/access_control";
 import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
@@ -18,7 +19,6 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import { WORKFLOWS } from "~utils/workflows";
-import { PopupProps } from "../../../../../../node_modules/semantic-ui-react/dist/commonjs/modules/Popup/index";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";

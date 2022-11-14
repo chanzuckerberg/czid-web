@@ -1,10 +1,10 @@
 import cx from "classnames";
 import React from "react";
-import Button from "./Button";
+import Button, { ButtonProps } from "./Button";
 
 import cs from "./button_text_primary.scss";
 
-const ButtonTextPrimary = (props: ButtonTextPrimaryProps) => {
+const ButtonTextPrimary = (props: ButtonProps) => {
   const { className } = props;
 
   return (
@@ -15,9 +15,5 @@ const ButtonTextPrimary = (props: ButtonTextPrimaryProps) => {
     />
   );
 };
-
-interface ButtonTextPrimaryProps {
-  className: string;
-}
 
 export default ButtonTextPrimary;
