@@ -94,6 +94,7 @@ export function getAlphaNumericString(
 export function getAFullDateInThePast(
   min = 0,
   max = 10,
+  isoString = false,
   refDate?: string,
 ): string {
   // default to current date as a refence date
@@ -105,7 +106,11 @@ export function getAFullDateInThePast(
     const randomNumber = Math.floor(Math.random() * delta);
     d.setDate(d.getDate() - randomNumber);
   } while (d.getTime() < fromDate.getTime());
-  return d.toISOString().substring(0, 10);
+  if (isoString) {
+    return d.toISOString();
+  } else {
+    return d.toISOString().substring(0, 10);
+  }
 }
 
 /**

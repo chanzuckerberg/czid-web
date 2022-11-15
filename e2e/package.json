@@ -16,7 +16,8 @@
     "@playwright/test": "^1.27.0",
     "dotenv": "^16.0.1",
     "playwright": "^1.27.0",
-    "playwright-chromium": "^1.27.0"
+    "playwright-chromium": "^1.27.0",
+    "@types/lodash": "^4.14.182"
   },
   "browserslist": {
     "development": [

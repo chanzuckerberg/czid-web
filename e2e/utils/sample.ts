@@ -1,5 +1,5 @@
 import * as faker from "@faker-js/faker";
-import { sample } from "lodash";
+import { sample } from "lodash/fp";
 import { AnalysisTypes } from "../types/analysisTypes";
 import { Metadata } from "../types/metadata";
 import {

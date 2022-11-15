@@ -1,0 +1,66 @@
+{
+  "id": 1193,
+  "workflow": "amr",
+  "created_at": "2022-10-12T02:06:34.000-07:00",
+  "status": "COMPLETE",
+  "cached_results": {
+    "quality_metrics": {
+      "total_reads": 561,
+      "qc_percent": 83.24420677361854,
+      "adjusted_remaining_reads": 291,
+      "compression_ratio": 1.0354767184035476,
+      "total_ercc_reads": 0,
+      "fraction_subsampled": 1.0,
+      "insert_size_mean": null,
+      "insert_size_standard_deviation": null,
+      "percent_remaining": 51.8716577540107
+    }
+  },
+  "inputs": {
+    "accession_id": null,
+    "accession_name": null,
+    "medaka_model": null,
+    "taxon_name": null,
+    "technology": null,
+    "wetlab_protocol": null,
+    "ref_fasta": null,
+    "primer_bed": null
+  },
+  "sample": {
+    "info": {
+      "id": 24233,
+      "created_at": "2022-10-12T02:06:34.000-07:00",
+      "host_genome_name": "ERCC only",
+      "name": "RR004_water_2_S23A_1",
+      "private_until": "2023-10-12T02:06:34.000-07:00",
+      "project_id": 869,
+      "sample_notes": null,
+      "public": 0
+    },
+    "metadata": {
+      "collection_date": "2022-08-12",
+      "collection_location_v2": {
+        "name": "Colombia",
+        "geo_level": "country",
+        "country_name": "Colombia",
+        "state_name": "",
+        "subdivision_name": "",
+        "city_name": "",
+        "lat": "2.89",
+        "lng": "-73.78",
+        "country_id": 54,
+        "state_id": null,
+        "subdivision_id": null,
+        "city_id": null
+      },
+      "nucleotide_type": "RNA",
+      "sample_type": "Mixed Tissue",
+      "water_control": "Yes"
+    },
+    "project_name": "QA",
+    "uploader": {
+      "name": "CZID Test Account",
+      "id": 403
+    }
+  }
+}
