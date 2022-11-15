@@ -40,6 +40,7 @@ const ReportFilters = ({
   enableMassNormalizedBackgrounds,
   shouldDisableFilters,
   snapshotShareId,
+  showBackgroundFilter,
 }) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
@@ -181,28 +182,30 @@ const ReportFilters = ({
           />
         </div>
         {/* from server */}
-        <div className={cs.filterListElement}>
-          <BackgroundModelFilter
-            allBackgrounds={backgrounds}
-            onClick={() =>
-              trackEvent(
-                ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED,
-              )
-            }
-            categorizeBackgrounds
-            ownedBackgrounds={ownedBackgrounds}
-            otherBackgrounds={otherBackgrounds}
-            value={selected.background}
-            onChange={value =>
-              handleFilterChange({
-                key: "background",
-                value,
-              })
-            }
-            enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
-            {...sharedFilterProps}
-          />
-        </div>
+        {showBackgroundFilter && (
+          <div className={cs.filterListElement}>
+            <BackgroundModelFilter
+              allBackgrounds={backgrounds}
+              onClick={() =>
+                trackEvent(
+                  ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED,
+                )
+              }
+              categorizeBackgrounds
+              ownedBackgrounds={ownedBackgrounds}
+              otherBackgrounds={otherBackgrounds}
+              value={selected.background}
+              onChange={value =>
+                handleFilterChange({
+                  key: "background",
+                  value,
+                })
+              }
+              enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+              {...sharedFilterProps}
+            />
+          </div>
+        )}
         {/* from server */}
         <div className={cs.filterListElement}>
           <CategoryFilter
@@ -337,6 +340,7 @@ ReportFilters.propTypes = {
   enableMassNormalizedBackgrounds: PropTypes.bool,
   shouldDisableFilters: PropTypes.bool,
   snapshotShareId: PropTypes.string,
+  showBackgroundFilter: PropTypes.bool,
 };
 
 export default ReportFilters;

@@ -49,6 +49,7 @@ const HoverActions = ({
   onNcbiActionClick,
   onPhyloTreeModalOpened,
   onPreviousConsensusGenomeClick,
+  onlyShowDownloadOption,
   percentIdentity,
   phyloTreeEnabled,
   pipelineVersion,
@@ -237,24 +238,28 @@ const HoverActions = ({
 
     // Build up the list of hover actions
     let hoverActions = [];
-    if (hasBlastv1Feature) {
-      hoverActions = [
-        HOVER_ACTIONS_VIZ,
-        HOVER_ACTIONS_BLAST_V1,
-        { divider: true },
-        HOVER_ACTIONS_PHYLO,
-        HOVER_ACTIONS_CONSENSUS,
-        HOVER_ACTIONS_DOWNLOAD,
-      ];
+    if (onlyShowDownloadOption) {
+      hoverActions = [HOVER_ACTIONS_DOWNLOAD];
     } else {
-      hoverActions = [
-        HOVER_ACTIONS_VIZ,
-        HOVER_ACTIONS_BLAST,
-        { divider: true },
-        HOVER_ACTIONS_PHYLO,
-        HOVER_ACTIONS_CONSENSUS,
-        HOVER_ACTIONS_DOWNLOAD,
-      ];
+      if (hasBlastv1Feature) {
+        hoverActions = [
+          HOVER_ACTIONS_VIZ,
+          HOVER_ACTIONS_BLAST_V1,
+          { divider: true },
+          HOVER_ACTIONS_PHYLO,
+          HOVER_ACTIONS_CONSENSUS,
+          HOVER_ACTIONS_DOWNLOAD,
+        ];
+      } else {
+        hoverActions = [
+          HOVER_ACTIONS_VIZ,
+          HOVER_ACTIONS_BLAST,
+          { divider: true },
+          HOVER_ACTIONS_PHYLO,
+          HOVER_ACTIONS_CONSENSUS,
+          HOVER_ACTIONS_DOWNLOAD,
+        ];
+      }
     }
     // Remove null actions (could happen with HOVER_ACTIONS_CONSENSUS)
     hoverActions = hoverActions.filter(d => d !== null);
@@ -394,6 +399,7 @@ HoverActions.propTypes = {
   onNcbiActionClick: PropTypes.func.isRequired,
   onPhyloTreeModalOpened: PropTypes.func,
   onPreviousConsensusGenomeClick: PropTypes.func,
+  onlyShowDownloadOption: PropTypes.bool,
   percentIdentity: PropTypes.number,
   phyloTreeEnabled: PropTypes.bool,
   pipelineVersion: PropTypes.string,

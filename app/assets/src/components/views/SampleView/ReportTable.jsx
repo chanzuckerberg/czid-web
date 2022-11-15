@@ -52,6 +52,7 @@ import {
   ANNOTATION_NOT_A_HIT,
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NONE,
+  TABS,
 } from "./constants";
 import cs from "./report_table.scss";
 
@@ -765,6 +766,7 @@ class ReportTable extends React.Component {
       alignVizAvailable,
       consensusGenomeData,
       consensusGenomeEnabled,
+      currentTab,
       fastaDownloadEnabled,
       onBlastClick,
       onConsensusGenomeClick,
@@ -864,6 +866,7 @@ class ReportTable extends React.Component {
         snapshotShareId={snapshotShareId}
         consensusGenomeEnabled={consensusGenomeEnabled}
         sampleId={sampleId}
+        onlyShowDownloadOption={currentTab === TABS.LONG_READ_MNGS}
       />
     );
   };
@@ -1085,6 +1088,7 @@ ReportTable.propTypes = {
   alignVizAvailable: PropTypes.bool.isRequired,
   consensusGenomeData: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.object)),
   consensusGenomeEnabled: PropTypes.bool.isRequired,
+  currentTab: PropTypes.string.isRequired,
   fastaDownloadEnabled: PropTypes.bool.isRequired,
   onAnnotationUpdate: PropTypes.func.isRequired,
   onBlastClick: PropTypes.func.isRequired,

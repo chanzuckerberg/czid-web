@@ -2194,6 +2194,7 @@ class SampleView extends React.Component {
   renderReport = ({ displayMergedNtNrValue = false } = {}) => {
     const {
       backgrounds,
+      currentTab,
       enableMassNormalizedBackgrounds,
       filteredReportData,
       lineageData,
@@ -2229,6 +2230,7 @@ class SampleView extends React.Component {
               view={view}
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
               snapshotShareId={snapshotShareId}
+              showBackgroundFilter={currentTab !== TABS.LONG_READ_MNGS}
             />
           </div>
           <div className={cs.reportHeader}>
@@ -2264,6 +2266,7 @@ class SampleView extends React.Component {
                 }
                 consensusGenomeData={this.getConsensusGenomeData()}
                 consensusGenomeEnabled={sample && sample.editable}
+                currentTab={currentTab}
                 data={filteredReportData}
                 displayMergedNtNrValue={displayMergedNtNrValue}
                 displayNoBackground={isNil(selectedOptions.background)}
