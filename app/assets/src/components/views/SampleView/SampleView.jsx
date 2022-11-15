@@ -68,6 +68,7 @@ import {
   AMR_DEPRECATED_FEATURE,
   BLAST_V1_FEATURE,
   MERGED_NT_NR_FEATURE,
+  ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
@@ -326,7 +327,13 @@ class SampleView extends React.Component {
     Object.keys(WORKFLOWS).forEach(workflow => {
       switch (WORKFLOWS[workflow].entity) {
         case WORKFLOW_ENTITIES.SAMPLES:
-          count[WORKFLOWS[workflow].value] = size(sample.pipeline_runs);
+          /* This line works to separate Illumina/Nanopore because all pipeline runs for a
+          sample will be of one technology type (Illumina or Nanopore).
+          Equivalently, to deprecate initial_workflow we could update samples_controller#show
+          to return technology and filter the pipeline runs by technology. */
+          count[WORKFLOWS[workflow].value] =
+            sample.initial_workflow === WORKFLOWS[workflow].value
+            && size(sample.pipeline_runs);
           break;
         case WORKFLOW_ENTITIES.WORKFLOW_RUNS:
           count[WORKFLOWS[workflow].value] = size(
@@ -345,13 +352,16 @@ class SampleView extends React.Component {
   determineInitialTab = ({
     initialWorkflow,
     workflowCount: {
-      [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
+      [WORKFLOWS.SHORT_READ_MNGS.value]: shortReadMngs,
+      [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
       [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
       [WORKFLOWS.AMR.value]: amr,
     },
   }) => {
-    if (mngs) {
+    if (shortReadMngs) {
       return TABS.SHORT_READ_MNGS;
+    } else if (longReadMngs) {
+      return TABS.LONG_READ_MNGS;
     } else if (cg) {
       return TABS.CONSENSUS_GENOME;
     } else if (amr) {
@@ -1713,11 +1723,15 @@ class SampleView extends React.Component {
     const { reportMetadata, sample } = this.state;
     const { allowedFeatures = [] } = this.context || {};
 
-    const customTab = (value, status) => ({
+    /* customLabel field was added for long read mNGS
+    because the display name does not match the label field passed in the URL
+    from DiscoveryView. If another tab is added that needs a customized display name,
+    we should think about adding a config to handle tab logic and rendering. */
+    const customTab = (value, status, customLabel) => ({
       value: value,
       label: (
         <>
-          {value}
+          {customLabel || value}
           <StatusLabel
             className={cs.statusLabel}
             inline
@@ -1730,9 +1744,11 @@ class SampleView extends React.Component {
 
     const mergedNtNrTab = customTab(TABS.MERGED_NT_NR, "Prototype");
     const amrTab = customTab(TABS.AMR, "Beta");
+    const ontTab = customTab(TABS.LONG_READ_MNGS, "Beta", WORKFLOWS.LONG_READ_MNGS.pluralizedLabel);
 
     const {
-      [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
+      [WORKFLOWS.SHORT_READ_MNGS.value]: shortReadMngs,
+      [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
       [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
       [WORKFLOWS.AMR.value]: amr,
     } = this.getWorkflowCount(sample);
@@ -1747,8 +1763,9 @@ class SampleView extends React.Component {
         TABS.AMR;
 
     const workflowTabs = compact([
-      mngs && TABS.SHORT_READ_MNGS,
-      mngs && allowedFeatures.includes(MERGED_NT_NR_FEATURE) && mergedNtNrTab,
+      shortReadMngs && TABS.SHORT_READ_MNGS,
+      longReadMngs && allowedFeatures.includes(ONT_V1_FEATURE) && ontTab,
+      shortReadMngs && allowedFeatures.includes(MERGED_NT_NR_FEATURE) && mergedNtNrTab,
       deprecatedAmrLabel,
       allowedFeatures.includes(AMR_V1_FEATURE) && amr && amrTab,
       cg && TABS.CONSENSUS_GENOME,
@@ -2430,6 +2447,7 @@ class SampleView extends React.Component {
             )}
           </div>
           {currentTab === TABS.SHORT_READ_MNGS && this.renderReport()}
+          {currentTab === TABS.LONG_READ_MNGS && this.renderReport()}
           {currentTab === TABS.MERGED_NT_NR &&
             this.renderReport({ displayMergedNtNrValue: true })}
           {currentTab === TABS.AMR_DEPRECATED && amrDeprecatedData && (

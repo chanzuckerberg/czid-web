@@ -34,7 +34,6 @@ import { openUrl } from "~utils/links";
 import PipelineRunSampleViewControls from "./PipelineRunSampleViewControls";
 import SampleDeletionConfirmationModal from "./SampleDeletionConfirmationModal";
 import WorkflowVersionHeader from "./WorkflowVersionHeader";
-import { PIPELINE_RUN_TABS } from "./constants";
 
 import cs from "./sample_view_header.scss";
 
@@ -63,13 +62,9 @@ export default function SampleViewHeader({
 
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
+  const workflow = WORKFLOWS[findInWorkflows(currentTab, "label")]?.value || WORKFLOWS.SHORT_READ_MNGS.value;
 
-  const workflow = PIPELINE_RUN_TABS.includes(currentTab)
-    ? WORKFLOWS.SHORT_READ_MNGS.value
-    : WORKFLOWS[findInWorkflows(currentTab, "label")]?.value;
-
-  // Leaving in for now, removing in CH-118827
-  const mngsWorkflow = workflow === WORKFLOWS.SHORT_READ_MNGS.value;
+  const mngsWorkflow = [WORKFLOWS.SHORT_READ_MNGS.value, WORKFLOWS.LONG_READ_MNGS.value].includes(workflow);
 
   const onSaveClick = async () => {
     if (view) {

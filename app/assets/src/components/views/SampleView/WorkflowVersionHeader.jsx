@@ -38,7 +38,7 @@ export default function WorkflowVersionHeader({
     if (!currentRun[versionKey]) return;
 
     let workflowKey = findInWorkflows(workflowType, "value");
-    let versionString = `${WORKFLOWS[workflowKey].label} Pipeline v${currentRun[versionKey]}`;
+    let versionString = `${WORKFLOWS[workflowKey].pipelineName} Pipeline v${currentRun[versionKey]}`;
 
     if (mngsWorkflow) {
       versionString += renderAlignmentConfigString();

@@ -56,10 +56,12 @@ export const TABS = {
   AMR_DEPRECATED: "Antimicrobial Resistance (Deprecated)",
   AMR: WORKFLOWS.AMR.label,
   MERGED_NT_NR: "Metagenomics - Simplified",
+  LONG_READ_MNGS: WORKFLOWS.LONG_READ_MNGS.label,
 };
 
 export const PIPELINE_RUN_TABS = [
   TABS.SHORT_READ_MNGS,
+  TABS.LONG_READ_MNGS,
   TABS.AMR_DEPRECATED,
   TABS.MERGED_NT_NR,
 ];

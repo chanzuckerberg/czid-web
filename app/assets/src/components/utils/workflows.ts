@@ -12,24 +12,28 @@ export const WORKFLOWS = {
     pluralizedLabel: "Antimicrobial Resistance",
     value: "amr",
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
+    pipelineName: "Antimicrobial Resistance",
   },
   CONSENSUS_GENOME: {
     label: "Consensus Genome",
     pluralizedLabel: "Consensus Genomes",
     value: "consensus-genome",
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
+    pipelineName: "Consensus Genome",
   },
   SHORT_READ_MNGS: {
     label: "Metagenomic",
     pluralizedLabel: "Metagenomics",
     value: "short-read-mngs",
     entity: WORKFLOW_ENTITIES.SAMPLES,
+    pipelineName: "Illumina mNGS",
   },
   LONG_READ_MNGS: {
     label: "Nanopore",
     pluralizedLabel: "Metagenomics - Nanopore",
     value: "long-read-mngs",
     entity: WORKFLOW_ENTITIES.SAMPLES,
+    pipelineName: "Nanopore mNGS",
   },
 };
 
