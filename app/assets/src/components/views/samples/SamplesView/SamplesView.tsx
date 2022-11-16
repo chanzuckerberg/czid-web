@@ -76,8 +76,13 @@ import cs from "./samples_view.scss";
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
 
-class SamplesView extends React.Component {
-  constructor(props, context) {
+interface SamplesViewProps {
+  userIsCollaborator: boolean;
+}
+
+
+class SamplesView extends React.Component<SamplesViewProps> {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -160,7 +165,7 @@ class SamplesView extends React.Component {
     const { objects, selectedIds, onUpdateSelectedIds, workflow } = this.props;
     const { referenceSelectId } = this;
 
-    let newSelected = new Set(selectedIds);
+    const newSelected = new Set(selectedIds);
     if (event.shiftKey && referenceSelectId) {
       const ids = objects.getIntermediateIds({
         id1: referenceSelectId,
@@ -199,7 +204,7 @@ class SamplesView extends React.Component {
     const { selectableIds, selectedIds, onUpdateSelectedIds } = this.props;
 
     this.referenceSelectId = null;
-    let newSelected = new Set(
+    const newSelected = new Set(
       checked
         ? union(Array.from(selectedIds), selectableIds)
         : difference(Array.from(selectedIds), selectableIds),
@@ -1006,6 +1011,7 @@ class SamplesView extends React.Component {
             selectedIds={selectedIds}
             workflow={workflow}
             workflowEntity={workflowEntity}
+	    userIsCollaborator={this.props.userIsCollaborator}
           />
         )}
         {heatmapCreationModalOpen && (

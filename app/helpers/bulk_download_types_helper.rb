@@ -165,7 +165,7 @@ module BulkDownloadTypesHelper
       description: "Host gene count outputs from STAR",
       category: "reports",
       execution_type: ECS_EXECUTION_TYPE,
-      admin_only: true,
+      admin_only: false,
       file_type_display: ".star.tab",
       workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },

@@ -40,6 +40,7 @@ module ApplicationHelper
       userId: current_user && current_user.id,
       userSettings: current_user && current_user.viewable_user_settings,
       userSignedIn: current_user.present?,
+      userProjects: current_user && current_user.project_ids,
     }
   end
 

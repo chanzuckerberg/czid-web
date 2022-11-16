@@ -77,6 +77,7 @@ interface BulkDownloadModalProps {
   onGenerate: $TSFixMeFunction;
   workflow: string;
   workflowEntity?: string;
+  userIsCollaborator: boolean;
 }
 
 class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
@@ -132,7 +133,8 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     });
     const backgroundOptionsRequest = this.fetchBackgrounds();
     const metricsOptionsRequest = getHeatmapMetrics();
-    const allObjectsUploadedByCurrentUserRequest = this.checkAllObjectsUploadedByCurrentUser();
+    const allObjectsUploadedByCurrentUserRequest =
+      this.checkAllObjectsUploadedByCurrentUser();
 
     const [
       bulkDownloadTypes,
@@ -151,7 +153,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     // Set any default bulk download field values.
     bulkDownloadTypes.forEach((type: $TSFixMe) => {
       if (type.fields) {
-        type.fields.forEach(field => {
+        type.fields.forEach((field) => {
           if (field.default_value) {
             newSelectedFields = set(
               [type.type, field.type],
@@ -214,9 +216,8 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
   async fetchBackgroundAvailability() {
     const { selectedIds } = this.props;
-    const {
-      massNormalizedBackgroundsAvailable,
-    } = await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
+    const { massNormalizedBackgroundsAvailable } =
+      await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
 
     this.setState({
       enableMassNormalizedBackgrounds: massNormalizedBackgroundsAvailable,
@@ -319,7 +320,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     displayName,
   ): $TSFixMe => {
     const { workflow } = this.props;
-    this.setState(prevState => {
+    this.setState((prevState) => {
       trackEvent(
         "BulkDownloadModal_dropdown-field-for-download-type_selected",
         {
@@ -451,6 +452,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
               handleHeatmapLink={this.handleHeatmapLink}
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
               objectDownloaded={objectDownloaded}
+              userIsCollaborator={this.props.userIsCollaborator}
             />
           </div>
           <div className={cs.footer}>
