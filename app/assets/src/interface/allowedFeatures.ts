@@ -4,4 +4,5 @@ export default interface AllowedFeaturesProps {
   allowedFeatures: string[];
   appConfig: object;
   userSettings: object;
+  userSignedIn: boolean;
 }

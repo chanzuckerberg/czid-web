@@ -81,8 +81,8 @@ const PathogenListView = () => {
   );
 
   const { data, loading, error } = usePathogenList();
-  if (loading) return "Loading...";
-  if (error) return `An error occurred: ${error.message}`;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{`An error occurred: ${error.message}`}</div>;
 
   const pathogenList = data.pathogenList;
   const alphabetizedPathogens = sortBy("name", data.pathogenList["pathogens"]);
