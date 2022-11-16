@@ -9,7 +9,7 @@ import {
 import { bulkUploadRemote, bulkUploadBasespace } from "~/api/upload";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
-import PropTypes from "~/components/utils/propTypes";
+import { Project, Sample } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { IconSuccess } from "~ui/icons";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
@@ -27,6 +27,22 @@ const BASESPACE_SAMPLE_FIELDS = [
 
 const NUM_FAILED_SAMPLES_TO_DISPLAY = 3;
 
+interface RemoteUploadProgressModalProps {
+  samples?: Sample[];
+  adminOptions: Record<string, string>;
+  clearlabs?: boolean;
+  medakaModel?: string;
+  metadata?: Record<string, any>;
+  onUploadComplete: $TSFixMeFunction;
+  project?: Project;
+  skipSampleProcessing?: boolean;
+  technology?: string;
+  uploadType: string;
+  useStepFunctionPipeline?: boolean;
+  wetlabProtocol?: string;
+  workflows?: Set<string>;
+}
+
 const RemoteUploadProgressModal = ({
   adminOptions,
   clearlabs,
@@ -41,7 +57,7 @@ const RemoteUploadProgressModal = ({
   useStepFunctionPipeline,
   wetlabProtocol,
   workflows,
-}) => {
+}: RemoteUploadProgressModalProps) => {
   const [uploadComplete, setUploadComplete] = useState(false);
   const [samplesToUpload, setSamplesToUpload] = useState([]);
   const [failedSampleNames, setFailedSampleNames] = useState([]);
@@ -54,7 +70,6 @@ const RemoteUploadProgressModal = ({
     let bulkUploadFn;
     let bulkUploadFnName;
     let samplesToFlag;
-    let samplesWithFlags;
 
     if (uploadType === "remote") {
       bulkUploadFn = bulkUploadRemote;
@@ -70,7 +85,7 @@ const RemoteUploadProgressModal = ({
       });
     }
 
-    samplesWithFlags = addFlagsToSamples({
+    const samplesWithFlags = addFlagsToSamples({
       adminOptions,
       clearlabs,
       medakaModel,
@@ -84,7 +99,11 @@ const RemoteUploadProgressModal = ({
 
     setSamplesToUpload(samplesWithFlags);
 
-    let response;
+    let response: {
+      errored_sample_names: $TSFixMeUnknown[];
+      errors: $TSFixMeUnknown[];
+      sample_ids: $TSFixMeUnknown[];
+    };
     try {
       response = await bulkUploadFn({
         samples: samplesWithFlags,
@@ -254,40 +273,6 @@ const RemoteUploadProgressModal = ({
       )}
     </Modal>
   );
-};
-
-RemoteUploadProgressModal.propTypes = {
-  samples: PropTypes.arrayOf(
-    PropTypes.shape({
-      host_genome_id: PropTypes.number.isRequired,
-      input_file_attributes: PropTypes.shape({
-        name: PropTypes.string,
-        source: PropTypes.string,
-        source_type: PropTypes.string,
-        upload_client: PropTypes.string,
-      }),
-      name: PropTypes.string,
-      project_id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      status: PropTypes.string,
-      // Basespace samples only.
-      file_size: PropTypes.number,
-      file_type: PropTypes.string,
-      basespace_project_name: PropTypes.string,
-      files: PropTypes.objectOf(PropTypes.instanceOf(File)),
-    }),
-  ),
-  adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
-  clearlabs: PropTypes.bool,
-  medakaModel: PropTypes.string,
-  metadata: PropTypes.objectOf(PropTypes.any),
-  onUploadComplete: PropTypes.func.isRequired,
-  project: PropTypes.Project,
-  skipSampleProcessing: PropTypes.bool,
-  technology: PropTypes.string,
-  uploadType: PropTypes.string.isRequired,
-  useStepFunctionPipeline: PropTypes.bool,
-  wetlabProtocol: PropTypes.string,
-  workflows: PropTypes.instanceOf(Set),
 };
 
 export default RemoteUploadProgressModal;

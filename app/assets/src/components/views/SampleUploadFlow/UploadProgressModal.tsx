@@ -1,9 +1,25 @@
 import { flow, keyBy, mapValues, omit } from "lodash/fp";
 import React from "react";
-
-import PropTypes from "~/components/utils/propTypes";
+import { Project, Sample, MetadataBasic } from "~/interface/shared";
 import LocalUploadProgressModal from "./LocalUploadProgressModal";
 import RemoteUploadProgressModal from "./RemoteUploadProgressModal";
+
+interface UploadProgressModalProps {
+  samples?: Sample[];
+  adminOptions: Record<string, string>;
+  clearlabs?: boolean;
+  medakaModel?: string;
+  metadata?: MetadataBasic;
+  onUploadComplete: $TSFixMeFunction;
+  project?: Project;
+  skipSampleProcessing?: boolean;
+  technology?: string;
+  uploadType: string;
+  useStepFunctionPipeline?: boolean;
+  wetlabProtocol?: string;
+  workflows?: Set<string>;
+  guppyBasecallerSetting: string;
+}
 
 const UploadProgressModal = ({
   adminOptions,
@@ -20,9 +36,10 @@ const UploadProgressModal = ({
   useStepFunctionPipeline,
   wetlabProtocol,
   workflows,
-}) => {
-  const processMetadataRows = metadataRows =>
+}: UploadProgressModalProps) => {
+  const processMetadataRows = (metadataRows: MetadataBasic["rows"]) =>
     flow(
+      // @ts-expect-error Property 'sample_name' does not exist on type 'unknown'.
       keyBy(row => row.sample_name || row["Sample Name"]),
       mapValues(omit(["sample_name", "Sample Name"])),
     )(metadataRows);
@@ -65,41 +82,6 @@ const UploadProgressModal = ({
       )}
     </>
   );
-};
-
-UploadProgressModal.propTypes = {
-  samples: PropTypes.arrayOf(
-    PropTypes.shape({
-      host_genome_id: PropTypes.number.isRequired,
-      input_file_attributes: PropTypes.shape({
-        name: PropTypes.string,
-        source: PropTypes.string,
-        source_type: PropTypes.string,
-        upload_client: PropTypes.string,
-      }),
-      name: PropTypes.string,
-      project_id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      status: PropTypes.string,
-      // Basespace samples only.
-      file_size: PropTypes.number,
-      file_type: PropTypes.string,
-      basespace_project_name: PropTypes.string,
-      files: PropTypes.objectOf(PropTypes.instanceOf(File)),
-    }),
-  ),
-  adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
-  clearlabs: PropTypes.bool,
-  guppyBasecallerSetting: PropTypes.string,
-  medakaModel: PropTypes.string,
-  metadata: PropTypes.objectOf(PropTypes.any),
-  onUploadComplete: PropTypes.func.isRequired,
-  project: PropTypes.Project,
-  skipSampleProcessing: PropTypes.bool,
-  technology: PropTypes.string,
-  uploadType: PropTypes.string.isRequired,
-  useStepFunctionPipeline: PropTypes.bool,
-  wetlabProtocol: PropTypes.string,
-  workflows: PropTypes.instanceOf(Set),
 };
 
 export default UploadProgressModal;

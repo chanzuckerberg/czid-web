@@ -13,16 +13,18 @@ interface SectionsDropdownProps {
   className?: string;
   menuClassName?: string;
   categories: {
-    displayName?: string;
-    emptyMessage?: string;
-    options?: {
-      default?: boolean;
-      disabled?: boolean;
-      subtext?: string;
-      text: string;
-      tooltip?: string;
-      value?: string | number;
-    }[];
+    [key: string]: {
+      displayName?: string;
+      emptySectionMessage?: string;
+      options?: {
+        default?: boolean;
+        disabled?: boolean;
+        subtext?: string;
+        text?: string;
+        tooltip?: string;
+        value?: string | number;
+      }[];
+    };
   };
   // Used to map the item to the item's name whenever the value of the item is not text.
   // e.g. BackgroundModel items' values are their numerical IDs however we want to display the names of the backgrounds,
@@ -50,7 +52,6 @@ const SectionsDropdown = ({
   const { label, rounded, ...restProps } = props;
   const renderMenuItem = (option: $TSFixMe) => {
     const trigger = (
-      // @ts-expect-error Item does not exist on BareDropdown
       <BareDropdown.Item
         className={cx(
           cs.option,
@@ -73,7 +74,6 @@ const SectionsDropdown = ({
           {option.text}
         </div>
         <div className={cs.optionSubtext}>{option.subtext}</div>
-        {/* @ts-expect-error Property 'Item' does not exist on type 'typeof BareDropdown' */}
       </BareDropdown.Item>
     );
     if (option.tooltip) {
@@ -96,11 +96,9 @@ const SectionsDropdown = ({
     const sections = {};
 
     Object.entries(categories).forEach(([category, categoryDetails]) => {
-      // @ts-expect-error ts-migrate(7053) FIXME: displayName does not exist on type string
       const categoryName = categoryDetails.displayName;
       // Creates a mapping between the section and the itemsSearchStrings in that section.
       sections[categoryName] = new Set([]);
-      // @ts-expect-error ts-migrate(7053) FIXME: options does not exist on type string
       const sectionItems = categoryDetails.options.map((option: $TSFixMe) => {
         if (search) {
           sections[categoryName].add(option.text);
@@ -111,19 +109,16 @@ const SectionsDropdown = ({
 
       if (isEmpty(sectionItems)) {
         sectionItems.push(
-          // @ts-expect-error ts-migrate(7053) FIXME: emptySectionMessage does not exist on type string
           renderEmptySectionMessage(categoryDetails.emptySectionMessage),
         );
       }
 
       const header = (
-        // @ts-expect-error Header does not exist on BareDropdown
         <BareDropdown.Header
           content={categoryName}
           key={`${category}_header`}
         />
       );
-      // @ts-expect-error Divider does not exist on BareDropdown
       const divider = <BareDropdown.Divider key={`${category}_divider`} />;
       items.push(header, ...sectionItems, divider);
     });
@@ -135,14 +130,12 @@ const SectionsDropdown = ({
   };
 
   const renderEmptySectionMessage = (message: $TSFixMe) => (
-    // @ts-expect-error Property 'Item' does not exist on type 'typeof BareDropdown'
     <BareDropdown.Item
       className={cs.emptySection}
       flag="unsearchable"
       key={nanoid()}
     >
       <div className={cs.message}>{message}</div>
-      {/* @ts-expect-error Property 'Item' does not exist on type 'typeof BareDropdown' */}
     </BareDropdown.Item>
   );
 

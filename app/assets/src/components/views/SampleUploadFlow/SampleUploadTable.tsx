@@ -9,9 +9,9 @@ import { SortDirection, defaultTableRowRenderer } from "react-virtualized";
 import { UserContext } from "~/components/common/UserContext";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
-import PropTypes from "~/components/utils/propTypes";
 import { Table } from "~/components/visualizations/table";
 
+import { SampleUploadType } from "~/interface/shared";
 import SampleUploadTableRenderers from "./SampleUploadTableRenderers";
 import { SELECT_ID_KEY } from "./constants";
 import cs from "./sample_upload_table.scss";
@@ -40,7 +40,8 @@ const FILE_SIZE_COLUMN = {
   label: "File Size",
   className: cs.cell,
   headerClassName: cs.header,
-  cellRenderer: ({ cellData }) => formatFileSize(cellData),
+  cellRenderer: ({ cellData }: { cellData: number }) =>
+    formatFileSize(cellData),
 };
 
 const FILE_TYPE_COLUMN = {
@@ -71,7 +72,27 @@ const FILE_NAMES_R2_COLUMN = {
   disableSort: true, // Hide R2 sorting since sorting on R1 == sorting on R2
 };
 
-export default class SampleUploadTable extends React.Component {
+interface SampleUploadTableProps {
+  samples?: {
+    name?: string;
+    file_size?: number;
+    file_type?: string;
+    file_names_R1?: string[];
+    file_names_R2?: string[];
+    basespace_project_name?: string;
+    _selectId?: string;
+  }[];
+  selectedSampleIds?: Set<string>;
+  onSamplesRemove: $TSFixMeFunction;
+  onSampleSelect: (value: string, checked: boolean) => void;
+  onAllSamplesSelect: $TSFixMeFunction;
+  sampleUploadType: SampleUploadType;
+  files?: unknown[];
+}
+
+export default class SampleUploadTable extends React.Component<
+  SampleUploadTableProps
+> {
   getColumns = () => {
     const { sampleUploadType } = this.props;
     if (sampleUploadType === "basespace") {
@@ -98,16 +119,16 @@ export default class SampleUploadTable extends React.Component {
     onSamplesRemove(unselectedSampleIds);
   };
 
-  onRowClick = ({ rowData }) => {
+  onRowClick = ({ rowData }: $TSFixMe) => {
     const { onSampleSelect, selectedSampleIds } = this.props;
     // Support rows that contain multiple selection IDs
     const sampleSelectIds = rowData[SELECT_ID_KEY].split(",");
-    sampleSelectIds.forEach(sampleSelectId => {
+    sampleSelectIds.forEach((sampleSelectId: string) => {
       onSampleSelect(sampleSelectId, !selectedSampleIds.has(sampleSelectId));
     });
   };
 
-  rowRenderer = rowProps => {
+  rowRenderer = (rowProps: $TSFixMe) => {
     const { sampleUploadType } = this.props;
     const { allowedFeatures = [] } = this.context || {};
     const data = rowProps.rowData;
@@ -171,6 +192,7 @@ export default class SampleUploadTable extends React.Component {
             Click to remove unselected samples
           </span>
         </div>
+        {/* @ts-expect-error Property 'draggableColumns' is missing in type */}
         <Table
           className={cs.table}
           columns={this.getColumns()}
@@ -185,7 +207,7 @@ export default class SampleUploadTable extends React.Component {
           sortable
           selectableKey={SELECT_ID_KEY}
           // Support selecting rows containing concatenated samples
-          onSelectRow={(values, checked) =>
+          onSelectRow={(values: string, checked: boolean) =>
             values.split(",").forEach(value => onSampleSelect(value, checked))
           }
           onSelectAllRows={onAllSamplesSelect}
@@ -213,23 +235,4 @@ export default class SampleUploadTable extends React.Component {
   }
 }
 
-SampleUploadTable.propTypes = {
-  samples: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      file_size: PropTypes.number,
-      file_type: PropTypes.string,
-      file_names_R1: PropTypes.arrayOf(PropTypes.string),
-      file_names_R2: PropTypes.arrayOf(PropTypes.string),
-      basespace_project_name: PropTypes.string,
-      _selectId: PropTypes.string,
-    }),
-  ),
-  selectedSampleIds: PropTypes.instanceOf(Set),
-  onSamplesRemove: PropTypes.func.isRequired,
-  onSampleSelect: PropTypes.func.isRequired,
-  onAllSamplesSelect: PropTypes.func.isRequired,
-  sampleUploadType: PropTypes.SampleUploadType.isRequired,
-  files: PropTypes.array,
-};
 SampleUploadTable.contextType = UserContext;

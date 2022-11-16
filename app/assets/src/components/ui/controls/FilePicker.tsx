@@ -1,11 +1,12 @@
 import cx from "classnames";
 import React, { useState, useContext } from "react";
-import Dropzone from "react-dropzone";
+import Dropzone, { FileWithPreview } from "react-dropzone";
 import { UserContext } from "~/components/common/UserContext";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 
 import Icon from "../icons/Icon";
 import cs from "./file_picker.scss";
+
 interface FilePickerProps {
   className?: string;
   accept?: string;
@@ -13,7 +14,7 @@ interface FilePickerProps {
   onChange: $TSFixMeFunction;
   message?: string;
   title?: string;
-  onRejected?: $TSFixMeFunction;
+  onRejected?: (rejectedFiles: FileWithPreview[]) => void;
   multiFile?: boolean;
   finishedValidating?: boolean;
 }

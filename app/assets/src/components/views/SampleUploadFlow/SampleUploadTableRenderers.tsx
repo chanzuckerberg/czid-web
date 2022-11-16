@@ -17,7 +17,12 @@ export default class SampleUploadTableRenderers extends React.Component {
     fixedWidth: true,
   });
 
-  static renderFileNames = ({ cellData, dataKey, parent, rowIndex }) => {
+  static renderFileNames = ({
+    cellData,
+    dataKey,
+    parent,
+    rowIndex,
+  }: $TSFixMe) => {
     return (
       <CellMeasurer
         cache={this.cache}
@@ -26,9 +31,9 @@ export default class SampleUploadTableRenderers extends React.Component {
         rowIndex={rowIndex}
       >
         <div>
-          {cellData.fileName.map(fileName => (
+          {cellData.fileName.map((fileName: $TSFixMe) => (
             <UserContext.Consumer key={fileName}>
-              {currentUser => (
+              {(currentUser: $TSFixMe) => (
                 <div
                   key={fileName}
                   className={cx(
@@ -63,7 +68,7 @@ export default class SampleUploadTableRenderers extends React.Component {
     );
   };
 
-  static getCellData = ({ dataKey, rowData }) => {
+  static getCellData = ({ dataKey, rowData }: $TSFixMe) => {
     const arr = {
       fileName: get(dataKey, rowData),
       finishedValidating: get("finishedValidating", rowData),
@@ -79,7 +84,7 @@ export default class SampleUploadTableRenderers extends React.Component {
     selected,
     onSelectRow,
     selectableCellClassName,
-  }) => {
+  }: $TSFixMe) => {
     // If any file is still being validated, disable the entire sample row.
     const finishedValidating = Object.values(cellData.finishedValidating).every(
       fileFinished => fileFinished,
@@ -92,7 +97,7 @@ export default class SampleUploadTableRenderers extends React.Component {
     return (
       <div>
         <UserContext.Consumer>
-          {currentUser => (
+          {(currentUser: $TSFixMe) => (
             <div>
               {!currentUser.allowedFeatures.includes(
                 PRE_UPLOAD_CHECK_FEATURE,

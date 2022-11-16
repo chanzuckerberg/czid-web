@@ -4,7 +4,7 @@ import React from "react";
 import { bulkImportRemoteSamples } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import List from "~/components/ui/List";
-import PropTypes from "~/components/utils/propTypes";
+import { Project } from "~/interface/shared";
 import Input from "~ui/controls/Input";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import Notification from "~ui/notifications/Notification";
@@ -15,8 +15,24 @@ import {
 } from "./constants";
 import cs from "./sample_upload_flow.scss";
 
-class RemoteSampleFileUpload extends React.Component {
-  state = {
+interface RemoteSampleFileUploadProps {
+  project?: Project;
+  onChange: $TSFixMeFunction;
+  onNoProject: $TSFixMeFunction;
+  showNoProjectError?: boolean;
+}
+
+interface RemoteSampleFileUploadState {
+  showInfo: boolean;
+  remoteS3Path: string;
+  lastPathChecked: string;
+  error?: string;
+}
+
+class RemoteSampleFileUpload extends React.Component<
+  RemoteSampleFileUploadProps
+> {
+  state: RemoteSampleFileUploadState = {
     showInfo: false,
     remoteS3Path: "",
     lastPathChecked: "",
@@ -46,7 +62,7 @@ class RemoteSampleFileUpload extends React.Component {
     );
   };
 
-  handleRemotePathChange = remoteS3Path => {
+  handleRemotePathChange = (remoteS3Path: string) => {
     this.setState({
       remoteS3Path,
     });
@@ -75,7 +91,7 @@ class RemoteSampleFileUpload extends React.Component {
 
       // Remove any nil files from input_file_attributes.
       // This happens when there is an R2 file without an R1 file.
-      newSamples = newSamples.samples.map(sample => ({
+      newSamples = newSamples.samples.map((sample: $TSFixMe) => ({
         ...sample,
         input_files_attributes: compact(sample.input_files_attributes),
       }));
@@ -184,12 +200,5 @@ class RemoteSampleFileUpload extends React.Component {
     );
   }
 }
-
-RemoteSampleFileUpload.propTypes = {
-  project: PropTypes.Project,
-  onChange: PropTypes.func.isRequired,
-  onNoProject: PropTypes.func.isRequired,
-  showNoProjectError: PropTypes.bool,
-};
 
 export default RemoteSampleFileUpload;

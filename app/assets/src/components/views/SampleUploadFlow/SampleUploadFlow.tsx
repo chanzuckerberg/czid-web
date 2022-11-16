@@ -7,16 +7,50 @@ import {
   HOST_GENOME_SYNONYMS,
 } from "~/components/common/Metadata/constants";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import PropTypes from "~/components/utils/propTypes";
 
+import { HostGenome, Project, Sample } from "~/interface/shared";
 import ReviewStep from "./ReviewStep";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 import UploadMetadataStep from "./UploadMetadataStep";
 import UploadSampleStep from "./UploadSampleStep";
 import cs from "./sample_upload_flow.scss";
 
-class SampleUploadFlow extends React.Component {
-  state = {
+interface SampleUploadFlowProps {
+  csrf?: string;
+  hostGenomes?: HostGenome[];
+  admin?: boolean;
+  biohubS3UploadEnabled?: boolean;
+  basespaceClientId: string;
+  basespaceOauthRedirectUri: string;
+}
+
+interface SampleUploadFlowState {
+  workflows: Set<string>;
+  currentStep: string;
+  samples?: Sample[];
+  uploadType: "remote" | "local" | "";
+  project: Project;
+  sampleNamesToFiles: $TSFixMeUnknown;
+  clearlabs: boolean;
+  guppyBasecallerSetting?: string;
+  medakaModel: string;
+  metadata?: {
+    headers?: string[];
+    rows?: Record<string, any>[];
+  };
+  metadataIssues: $TSFixMeUnknown;
+  technology?: string;
+  stepsEnabled: {
+    uploadSamples: boolean;
+    uploadMetadata: boolean;
+    review: boolean;
+  };
+  hostGenomes: HostGenome[];
+  wetlabProtocol?: string;
+}
+
+class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
+  state: SampleUploadFlowState = {
     currentStep: "uploadSamples",
     // Sample upload information
     samples: null,
@@ -61,7 +95,7 @@ class SampleUploadFlow extends React.Component {
     uploadType,
     wetlabProtocol,
     workflows,
-  }) => {
+  }: Partial<SampleUploadFlowState>) => {
     this.setState({
       clearlabs,
       technology,
@@ -78,11 +112,19 @@ class SampleUploadFlow extends React.Component {
     });
   };
 
-  handleUploadMetadata = ({ metadata, issues, newHostGenomes }) => {
+  handleUploadMetadata = ({
+    metadata,
+    issues,
+    newHostGenomes,
+  }: {
+    metadata: SampleUploadFlowState["metadata"];
+    issues: SampleUploadFlowState["metadataIssues"];
+    newHostGenomes: HostGenome[];
+  }) => {
     const updatedHostGenomes = this.props.hostGenomes.concat(newHostGenomes);
 
     // Populate host_genome_id in sample using metadata.
-    const newSamples = this.state.samples.map(sample => {
+    const newSamples: Sample[] = this.state.samples.map((sample: $TSFixMe) => {
       const metadataRow = find(
         row =>
           get("sample_name", row) === sample.name ||
@@ -90,7 +132,7 @@ class SampleUploadFlow extends React.Component {
         metadata.rows,
       );
       const hostGenomeName = HOST_GENOME_SYNONYMS.reduce(
-        (match, name) => metadataRow[name] || match,
+        (match: $TSFixMe, name: $TSFixMe) => metadataRow[name] || match,
         null,
       );
       const hostGenomeId = find(
@@ -105,7 +147,7 @@ class SampleUploadFlow extends React.Component {
       // Enforce hipaa compliant host age
       if (hostGenomeName.toLowerCase() === "human") {
         const maxValue = FIELDS_THAT_HAVE_MAX_INPUT["host_age"];
-        metadata.rows.map(row => {
+        metadata.rows.map((row: $TSFixMe) => {
           if ("Host Age" in row) {
             const parsedValue = Number.parseInt(row["Host Age"]);
             const hipaaCompliantVal = min([parsedValue, maxValue + 1]);
@@ -123,7 +165,7 @@ class SampleUploadFlow extends React.Component {
     });
 
     // Remove host_genome from metadata.
-    const newMetadata = flow(
+    const newMetadata: SampleUploadFlowState["metadata"] = flow(
       set("rows", metadata.rows.map(omit(HOST_GENOME_SYNONYMS))),
       set("headers", without(HOST_GENOME_SYNONYMS, metadata.headers)),
     )(metadata);
@@ -158,7 +200,7 @@ class SampleUploadFlow extends React.Component {
     });
   };
 
-  handleStepSelect = step => {
+  handleStepSelect = (step: string) => {
     this.setState({
       currentStep: step,
     });
@@ -202,6 +244,7 @@ class SampleUploadFlow extends React.Component {
             onUploadStatusChange={this.onUploadStatusChange}
             originalHostGenomes={this.props.hostGenomes}
             project={this.state.project}
+            // @ts-expect-error Property 'sampleNamesToFiles' does not exist on type
             sampleNamesToFiles={this.state.sampleNamesToFiles}
             samples={this.state.samples}
             uploadType={this.state.uploadType}
@@ -214,7 +257,7 @@ class SampleUploadFlow extends React.Component {
     );
   };
 
-  onUploadStatusChange = uploadStatus => {
+  onUploadStatusChange = (uploadStatus: boolean) => {
     this.setState({
       stepsEnabled: {
         uploadSamples: !uploadStatus,
@@ -241,14 +284,5 @@ class SampleUploadFlow extends React.Component {
     );
   }
 }
-
-SampleUploadFlow.propTypes = {
-  csrf: PropTypes.string,
-  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
-  admin: PropTypes.bool,
-  biohubS3UploadEnabled: PropTypes.bool,
-  basespaceClientId: PropTypes.string.isRequired,
-  basespaceOauthRedirectUri: PropTypes.string.isRequired,
-};
 
 export default SampleUploadFlow;

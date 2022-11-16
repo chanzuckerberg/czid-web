@@ -1,22 +1,30 @@
 import cx from "classnames";
 import { capitalize, every, keys, countBy, map } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import Accordion from "~/components/layout/Accordion";
+import { HostGenome, Sample } from "~/interface/shared";
 import ExternalLink from "~ui/controls/ExternalLink";
 import Notification from "~ui/notifications/Notification";
 
 import cs from "./host_organism_message.scss";
 
+interface HostOrganismMessageProps {
+  samples: Sample[];
+  hostGenomes: HostGenome[];
+}
+
+type CountUniqHosts = { [host: string]: number };
 /**
  * Shows a message depending on whether the selected host matches a
  * IDseq-supported host.
  */
-export default class HostOrganismMessage extends React.Component {
+export default class HostOrganismMessage extends React.Component<
+  HostOrganismMessageProps
+> {
   // By design, host names are case insensitive, so we don't
   // get duplicates.
-  hasMatch = host => {
+  hasMatch = (host: string) => {
     const filtered = this.props.hostGenomes.filter(
       hg => this.isERCC(hg.name) || !(hg.ercc_only || hg["ercc_only?"]),
     );
@@ -25,7 +33,7 @@ export default class HostOrganismMessage extends React.Component {
     );
   };
 
-  renderOneHost(host, count) {
+  renderOneHost(host: string, count: number) {
     return (
       <Notification
         type={this.hasMatch(host) ? "info" : "warning"}
@@ -52,7 +60,7 @@ export default class HostOrganismMessage extends React.Component {
     );
   }
 
-  renderTextLine(host, count) {
+  renderTextLine(host: string, count: number) {
     return (
       <span>
         {" "}
@@ -76,11 +84,11 @@ export default class HostOrganismMessage extends React.Component {
     );
   }
 
-  isERCC(host) {
+  isERCC(host: string) {
     return host.toLowerCase() === "ercc only";
   }
 
-  renderHostPhrase(host, count) {
+  renderHostPhrase(host: string, count: number) {
     // special case explict choice of ERCC to avoid awkward phrasing
     return (
       <span>
@@ -97,7 +105,7 @@ export default class HostOrganismMessage extends React.Component {
     );
   }
 
-  renderManyHosts(uniqHosts) {
+  renderManyHosts(uniqHosts: CountUniqHosts) {
     // Strangely, the " " spaces are not being ending up in the header so
     // we use &nbsp;
     const isWarn = !every(this.hasMatch, keys(uniqHosts));
@@ -135,7 +143,10 @@ export default class HostOrganismMessage extends React.Component {
   }
 
   render() {
-    const uniqHosts = countBy(null, this.getSelectedHostOrganisms());
+    const uniqHosts = (countBy(
+      null,
+      this.getSelectedHostOrganisms(),
+    ) as unknown) as CountUniqHosts;
     const length = keys(uniqHosts).length;
     if (length === 0) {
       return null;
@@ -147,13 +158,3 @@ export default class HostOrganismMessage extends React.Component {
     return this.renderManyHosts(uniqHosts);
   }
 }
-
-HostOrganismMessage.propTypes = {
-  samples: PropTypes.arrayOf(
-    PropTypes.shape({
-      host_genome_id: PropTypes.number,
-      host_genome_name: PropTypes.string,
-    }),
-  ).isRequired,
-  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
-};

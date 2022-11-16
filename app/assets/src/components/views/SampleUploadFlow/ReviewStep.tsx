@@ -14,9 +14,9 @@ import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { formatFileSize } from "~/components/utils/format";
-import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import DataTable from "~/components/visualizations/table/DataTable";
+import { HostGenome, Project, Sample } from "~/interface/shared";
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { returnHipaaCompliantMetadata } from "~utils/metadata";
@@ -33,8 +33,42 @@ import {
 
 import cs from "./sample_upload_flow.scss";
 
-class ReviewStep extends React.Component {
-  state = {
+interface ReviewStepProps {
+  metadata?: {
+    headers?: string[];
+    rows?: Record<string, any>[];
+  };
+  project?: Project;
+  samples?: Sample[];
+  uploadType: string;
+  hostGenomes?: HostGenome[];
+  originalHostGenomes?: HostGenome[];
+  visible?: boolean;
+  // Triggers when we start or stop uploading. Lets the parent know to disable header link.
+  onUploadStatusChange?: $TSFixMeFunction;
+  onStepSelect?: $TSFixMeFunction;
+  onUploadComplete: $TSFixMeFunction;
+  admin?: boolean;
+  clearlabs?: boolean;
+  technology?: string;
+  medakaModel?: string;
+  guppyBasecallerSetting?: string;
+  workflows?: Set<string>;
+  wetlabProtocol?: string;
+}
+
+interface ReviewStepState {
+  consentChecked: boolean;
+  projectMetadataFields: $TSFixMeUnknown;
+  showLessDescription: boolean;
+  showUploadModal: boolean;
+  skipSampleProcessing: boolean;
+  useStepFunctionPipeline: boolean;
+  adminOptions: Record<string, string>;
+}
+
+class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
+  state: ReviewStepState = {
     consentChecked: false,
     projectMetadataFields: null,
     showLessDescription: true,
@@ -68,7 +102,7 @@ class ReviewStep extends React.Component {
     this.setState({});
   };
 
-  getFieldDisplayName = key => {
+  getFieldDisplayName = (key: string) => {
     const { projectMetadataFields } = this.state;
     return projectMetadataFields[key] ? projectMetadataFields[key].name : key;
   };
@@ -115,12 +149,12 @@ class ReviewStep extends React.Component {
 
     const hostGenomesById = keyBy("id", this.props.hostGenomes);
 
-    const assembleDataForSample = sample => {
+    const assembleDataForSample = (sample: Sample) => {
       const sampleHostName = get(
         "name",
         hostGenomesById[sample.host_genome_id],
       );
-      let sampleMetadata = metadataBySample[sample.name];
+      const sampleMetadata = metadataBySample[sample.name];
 
       if (sampleHostName === "Human" && "Host Age" in sampleMetadata) {
         sampleMetadata["Host Age"] = returnHipaaCompliantMetadata(
@@ -164,13 +198,13 @@ class ReviewStep extends React.Component {
 
   linksEnabled = () => !this.state.showUploadModal;
 
-  onLinkClick = link => {
+  onLinkClick = (link: string) => {
     if (this.linksEnabled()) {
       this.props.onStepSelect(link);
     }
   };
 
-  getColumnWidth = column => {
+  getColumnWidth = (column: string) => {
     switch (column) {
       case "Sample Name":
         return 200;
@@ -192,7 +226,7 @@ class ReviewStep extends React.Component {
     }));
   };
 
-  countNewLines = text => {
+  countNewLines = (text?: string) => {
     // the code for newline in Windows is \r\n
     if (text) {
       return text.split(/\r*\n/).length;
@@ -200,7 +234,9 @@ class ReviewStep extends React.Component {
     return 0;
   };
 
-  handleAdminOptionsChanged = adminOptions => {
+  handleAdminOptionsChanged = (
+    adminOptions: ReviewStepState["adminOptions"],
+  ) => {
     this.setState({ adminOptions });
   };
 
@@ -271,6 +307,7 @@ class ReviewStep extends React.Component {
                 isPublic={project.public_access === 1}
                 // Offset required to align the carrot of the tooltip accurately on top of the IconInfoSmall.
                 // This issue is caused by nested div containers being passed to the prop "content" in the BasicPopup component
+                // @ts-expect-error Property 'offset' does not exist on type
                 offset={[-7, 0]}
                 position="top left"
               />
@@ -632,48 +669,6 @@ class ReviewStep extends React.Component {
     );
   }
 }
-
-ReviewStep.propTypes = {
-  metadata: PropTypes.shape({
-    headers: PropTypes.arrayOf(PropTypes.string),
-    rows: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any)),
-  }),
-  project: PropTypes.Project,
-  samples: PropTypes.arrayOf(
-    PropTypes.shape({
-      host_genome_id: PropTypes.number.isRequired,
-      input_file_attributes: PropTypes.shape({
-        name: PropTypes.string,
-        source: PropTypes.string,
-        source_type: PropTypes.string,
-        upload_client: PropTypes.string,
-      }),
-      name: PropTypes.string,
-      project_id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      status: PropTypes.string,
-      // Basespace samples only.
-      file_size: PropTypes.number,
-      file_type: PropTypes.string,
-      basespace_project_name: PropTypes.string,
-      files: PropTypes.objectOf(PropTypes.instanceOf(File)),
-    }),
-  ),
-  uploadType: PropTypes.string.isRequired,
-  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
-  originalHostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
-  visible: PropTypes.bool,
-  // Triggers when we start or stop uploading. Lets the parent know to disable header link.
-  onUploadStatusChange: PropTypes.func,
-  onStepSelect: PropTypes.func,
-  onUploadComplete: PropTypes.func.isRequired,
-  admin: PropTypes.bool,
-  clearlabs: PropTypes.bool,
-  technology: PropTypes.string,
-  medakaModel: PropTypes.string,
-  guppyBasecallerSetting: PropTypes.string,
-  workflows: PropTypes.instanceOf(Set),
-  wetlabProtocol: PropTypes.string,
-};
 
 ReviewStep.contextType = UserContext;
 

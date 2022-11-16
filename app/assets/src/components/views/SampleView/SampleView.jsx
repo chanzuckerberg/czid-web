@@ -332,8 +332,8 @@ class SampleView extends React.Component {
           Equivalently, to deprecate initial_workflow we could update samples_controller#show
           to return technology and filter the pipeline runs by technology. */
           count[WORKFLOWS[workflow].value] =
-            sample.initial_workflow === WORKFLOWS[workflow].value
-            && size(sample.pipeline_runs);
+            sample.initial_workflow === WORKFLOWS[workflow].value &&
+            size(sample.pipeline_runs);
           break;
         case WORKFLOW_ENTITIES.WORKFLOW_RUNS:
           count[WORKFLOWS[workflow].value] = size(
@@ -1744,7 +1744,11 @@ class SampleView extends React.Component {
 
     const mergedNtNrTab = customTab(TABS.MERGED_NT_NR, "Prototype");
     const amrTab = customTab(TABS.AMR, "Beta");
-    const ontTab = customTab(TABS.LONG_READ_MNGS, "Beta", WORKFLOWS.LONG_READ_MNGS.pluralizedLabel);
+    const ontTab = customTab(
+      TABS.LONG_READ_MNGS,
+      "Beta",
+      WORKFLOWS.LONG_READ_MNGS.pluralizedLabel,
+    );
 
     const {
       [WORKFLOWS.SHORT_READ_MNGS.value]: shortReadMngs,
@@ -1765,7 +1769,9 @@ class SampleView extends React.Component {
     const workflowTabs = compact([
       shortReadMngs && TABS.SHORT_READ_MNGS,
       longReadMngs && allowedFeatures.includes(ONT_V1_FEATURE) && ontTab,
-      shortReadMngs && allowedFeatures.includes(MERGED_NT_NR_FEATURE) && mergedNtNrTab,
+      shortReadMngs &&
+        allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
+        mergedNtNrTab,
       deprecatedAmrLabel,
       allowedFeatures.includes(AMR_V1_FEATURE) && amr && amrTab,
       cg && TABS.CONSENSUS_GENOME,

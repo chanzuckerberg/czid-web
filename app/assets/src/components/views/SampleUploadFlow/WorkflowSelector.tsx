@@ -20,7 +20,6 @@ import RadioButton from "~ui/controls/RadioButton";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import StatusLabel from "~ui/labels/StatusLabel";
-import PropTypes from "~utils/propTypes";
 import { WORKFLOWS } from "~utils/workflows";
 
 import {
@@ -32,6 +31,21 @@ import {
   WORKFLOW_DISPLAY_NAMES,
 } from "./constants";
 import cs from "./workflow_selector.scss";
+
+interface WorkflowSelectorProps {
+  onClearLabsChange?: $TSFixMeFunction;
+  onMedakaModelChange?: $TSFixMeFunction;
+  onTechnologyToggle?: $TSFixMeFunction;
+  onGuppyBasecallerSettingChange?: $TSFixMeFunction;
+  onWetlabProtocolChange?: $TSFixMeFunction;
+  onWorkflowToggle?: $TSFixMeFunction;
+  selectedMedakaModel?: string;
+  selectedGuppyBasecallerSetting?: string;
+  selectedTechnology?: string;
+  selectedWetlabProtocol?: string;
+  selectedWorkflows?: Set<string>;
+  usedClearLabs?: boolean;
+}
 
 const WorkflowSelector = ({
   onClearLabsChange,
@@ -46,12 +60,12 @@ const WorkflowSelector = ({
   selectedWetlabProtocol,
   selectedWorkflows,
   usedClearLabs,
-}) => {
+}: WorkflowSelectorProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const [workflowOptionHovered, setWorkflowOptionHovered] = useState(null);
 
-  const renderTechnologyOptions = workflowKey => {
+  const renderTechnologyOptions = (workflowKey: string) => {
     return (
       <div className={cs.optionText} onClick={e => e.stopPropagation()}>
         <div className={cx(cs.title, cs.technologyTitle)}>
@@ -65,7 +79,7 @@ const WorkflowSelector = ({
     );
   };
 
-  const renderIlluminaOption = workflowKey => {
+  const renderIlluminaOption = (workflowKey: string) => {
     const workflowObject = find(
       w => w.workflow === workflowKey,
       WORKFLOW_UPLOAD_OPTIONS,
@@ -129,7 +143,7 @@ const WorkflowSelector = ({
             initialChecked={usedClearLabs}
             onLabel={"Yes"}
             offLabel={"No"}
-            onChange={label => onClearLabsChange(label === "Yes")}
+            onChange={(label: string) => onClearLabsChange(label === "Yes")}
           />
         </div>
       </div>
@@ -153,9 +167,10 @@ const WorkflowSelector = ({
             <SectionsDropdown
               className={cs.dropdown}
               menuClassName={cs.dropdownMenu}
+              // @ts-expect-error Property 'fluid' does not exist on type
               fluid
               categories={MEDAKA_MODEL_OPTIONS}
-              onChange={val => onMedakaModelChange(val)}
+              onChange={(val: string) => onMedakaModelChange(val)}
               selectedValue={selectedMedakaModel}
             />
           </div>
@@ -192,7 +207,7 @@ const WorkflowSelector = ({
     </div>
   );
 
-  const renderNanoporeOption = workflowKey => {
+  const renderNanoporeOption = (workflowKey: string) => {
     const workflowObject = find(
       w => w.workflow === workflowKey,
       WORKFLOW_UPLOAD_OPTIONS,
@@ -221,7 +236,6 @@ const WorkflowSelector = ({
               <StatusLabel inline status="Beta" type="beta" />
             )}
           </div>
-
           <div className={cs.technologyDescription}>
             {workflowObject.nanoporeText}
             {createExternalLink({
@@ -242,7 +256,7 @@ const WorkflowSelector = ({
     analyticsEventName,
     content,
     link,
-  }) => (
+  }: $TSFixMe) => (
     <ExternalLink
       href={link}
       analyticsEventName={analyticsEventName}
@@ -252,13 +266,13 @@ const WorkflowSelector = ({
     </ExternalLink>
   );
 
-  const renderWetlabSelector = technology => {
+  const renderWetlabSelector = (technology: string) => {
     return (
       <div className={cs.item}>
         <div className={cs.subheader}>Wetlab Protocol&#58;</div>
         <Dropdown
           className={cs.dropdown}
-          onChange={value => {
+          onChange={(value: $TSFixMe) => {
             onWetlabProtocolChange(value);
             trackEvent("WorkflowSelector_wetlab-protocol_selected", {
               wetlabOption: value,
@@ -295,7 +309,7 @@ const WorkflowSelector = ({
           options={GUPPY_BASECALLER_SETTINGS}
           placeholder="Select"
           value={selectedGuppyBasecallerSetting}
-          onChange={value => onGuppyBasecallerSettingChange(value)}
+          onChange={(value: $TSFixMe) => onGuppyBasecallerSettingChange(value)}
         ></Dropdown>
       </div>
     );
@@ -313,7 +327,7 @@ const WorkflowSelector = ({
         ? () => renderTechnologyOptions(WORKFLOWS.SHORT_READ_MNGS.value)
         : null,
       beta: false,
-      sdsIcon: "dna",
+      sdsIcon: "dna" as const,
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
       illuminaLink: MNGS_ILLUMINA_PIPELINE_GITHUB_LINK, // TODO there might be a more specific link than the current one
       illuminaClickedLinkEvent: "", // TODO add analytics here and below
@@ -328,7 +342,7 @@ const WorkflowSelector = ({
       description:
         "Run your samples through our antimicrobial resistance pipeline. Our pipeline supports metagenomics or whole genome data. It only supports Illumina. You can also run the AMR pipeline from within an existing project by selecting previously uploaded mNGS samples.",
       beta: true,
-      sdsIcon: "bacteria",
+      sdsIcon: "bacteria" as const,
       shouldHideOption: !allowedFeatures.includes(AMR_V1_FEATURE),
     },
     {
@@ -339,7 +353,7 @@ const WorkflowSelector = ({
       otherOptions: () =>
         renderTechnologyOptions(WORKFLOWS.CONSENSUS_GENOME.value),
       beta: false,
-      sdsIcon: "virus",
+      sdsIcon: "virus" as const,
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
       illuminaLink: CG_ILLUMINA_PIPELINE_GITHUB_LINK,
       illuminaClickedLinkEvent:
@@ -353,7 +367,7 @@ const WorkflowSelector = ({
     },
   ];
 
-  const shouldDisableWorkflowOption = workflow => {
+  const shouldDisableWorkflowOption = (workflow: string) => {
     const workflowIsCurrentlySelected = selectedWorkflows.has(workflow);
     const selectedMNGSNanopore =
       selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
@@ -420,7 +434,6 @@ const WorkflowSelector = ({
               </Tooltip>
             );
           }
-
           return (
             <div
               className={cx(
@@ -433,6 +446,7 @@ const WorkflowSelector = ({
               }
               onMouseEnter={() => setWorkflowOptionHovered(workflow)}
               onMouseLeave={() => setWorkflowOptionHovered(null)}
+              key={title}
             >
               {radioOption}
               <div className={cs.iconSample}>
@@ -473,21 +487,6 @@ const WorkflowSelector = ({
       {renderAnalysisTypes()}
     </div>
   );
-};
-
-WorkflowSelector.propTypes = {
-  onClearLabsChange: PropTypes.func,
-  onMedakaModelChange: PropTypes.func,
-  onTechnologyToggle: PropTypes.func,
-  onGuppyBasecallerSettingChange: PropTypes.func,
-  onWetlabProtocolChange: PropTypes.func,
-  onWorkflowToggle: PropTypes.func,
-  selectedMedakaModel: PropTypes.string,
-  selectedGuppyBasecallerSetting: PropTypes.string,
-  selectedTechnology: PropTypes.string,
-  selectedWetlabProtocol: PropTypes.string,
-  selectedWorkflows: PropTypes.instanceOf(Set),
-  usedClearLabs: PropTypes.bool,
 };
 
 export default WorkflowSelector;

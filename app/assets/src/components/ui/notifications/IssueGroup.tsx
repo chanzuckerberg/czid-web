@@ -9,7 +9,7 @@ import { IconAlert, IconSuccess } from "~ui/icons";
 import cs from "./issue_group.scss";
 
 interface IssueGroupProps {
-  caption?: string;
+  caption?: string | React.ReactElement;
   className?: string;
   getColumnWidth?: $TSFixMeFunction;
   headers?: string[];

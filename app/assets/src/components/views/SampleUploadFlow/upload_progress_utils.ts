@@ -4,6 +4,20 @@ import {
   CG_TECHNOLOGY_OPTIONS,
   NANOPORE,
 } from "~/components/views/SampleUploadFlow/constants";
+import { Sample } from "~/interface/shared";
+
+interface addFlagsToSamplesProps {
+  adminOptions: Record<string, string>;
+  clearlabs: boolean;
+  medakaModel: string;
+  samples: Partial<Sample>[];
+  skipSampleProcessing: boolean;
+  technology: string;
+  workflows: Set<string>;
+  wetlabProtocol: string;
+  useStepFunctionPipeline: boolean;
+  guppyBasecallerSetting: string;
+}
 
 // Add flags selected by the user in the upload review Step
 export const addFlagsToSamples = ({
@@ -17,7 +31,7 @@ export const addFlagsToSamples = ({
   technology,
   workflows,
   wetlabProtocol,
-}) => {
+}: addFlagsToSamplesProps) => {
   const PIPELINE_EXECUTION_STRATEGIES = {
     directed_acyclic_graph: "directed_acyclic_graph",
     step_function: "step_function",
@@ -61,6 +75,11 @@ export const logUploadStepError = ({
   erroredSamples,
   uploadType,
   errors,
+}: {
+  step: $TSFixMeUnknown;
+  erroredSamples: $TSFixMeUnknown;
+  uploadType: $TSFixMeUnknown;
+  errors: $TSFixMeUnknown;
 }) => {
   trackEvent(
     ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_UPLOAD_STEP_ERROR,
@@ -73,6 +92,6 @@ export const logUploadStepError = ({
   );
 };
 
-export const redirectToProject = projectId => {
+export const redirectToProject = (projectId: number) => {
   location.href = `/home?project_id=${projectId}`;
 };

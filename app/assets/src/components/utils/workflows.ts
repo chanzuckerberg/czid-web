@@ -1,4 +1,8 @@
-export type WORKFLOW_VALUES = "amr" | "consensus-genome" | "short-read-mngs" | "long-read-mngs";
+export type WORKFLOW_VALUES =
+  | "amr"
+  | "consensus-genome"
+  | "short-read-mngs"
+  | "long-read-mngs";
 
 // Pipeline workflow options
 export const WORKFLOW_ENTITIES = {
@@ -49,7 +53,12 @@ export const workflowIsWorkflowRunEntity = (workflow: WORKFLOW_VALUES) => {
   return WORKFLOWS[workflowKey].entity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
 };
 
-export const WORKFLOW_ORDER = ["SHORT_READ_MNGS", "LONG_READ_MNGS", "CONSENSUS_GENOME", "AMR"];
+export const WORKFLOW_ORDER = [
+  "SHORT_READ_MNGS",
+  "LONG_READ_MNGS",
+  "CONSENSUS_GENOME",
+  "AMR",
+];
 
 export const workflowIsBeta = (workflow: WORKFLOW_VALUES) => {
   return ["AMR", "LONG_READ_MNGS"].includes(workflow);

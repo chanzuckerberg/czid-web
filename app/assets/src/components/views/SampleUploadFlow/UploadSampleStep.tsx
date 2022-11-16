@@ -48,8 +48,8 @@ import {
   ONT_V1_FEATURE,
   PRE_UPLOAD_CHECK_FEATURE,
 } from "~/components/utils/features";
-import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { SampleUploadType } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 
 import BasespaceSampleImport from "./BasespaceSampleImport";
@@ -86,13 +86,26 @@ const BASESPACE_UPLOAD_LABEL = "Upload from Basespace";
 
 const UPLOADSAMPLESTEP_SAMPLE_CHANGED = "UploadSampleStep_sample_changed";
 
-class UploadSampleStep extends React.Component {
+interface UploadSampleStepProps {
+  onUploadSamples: $TSFixMeFunction;
+  // Immediately called when the user changes anything, even before validation has returned.
+  // Used to disable later steps the header navigation if the data in previous steps has changed.
+  onDirty: $TSFixMeFunction;
+  visible?: boolean;
+  admin?: boolean;
+  biohubS3UploadEnabled?: boolean;
+  basespaceClientId: string;
+  basespaceOauthRedirectUri: string;
+}
+
+class UploadSampleStep extends React.Component<UploadSampleStepProps> {
+  _window: $TSFixMeUnknown;
   state = {
     basespaceAccessToken: null,
     basespaceSamples: [],
     basespaceSelectedSampleIds: new Set(),
     createProjectOpen: false,
-    currentTab: LOCAL_UPLOAD,
+    currentTab: LOCAL_UPLOAD as SampleUploadType,
     localSamples: [],
     // We generate a unique "selectId" for each sample, which we use to store which samples are selected.
     // This simplifies the logic, because sample names can change (they can get renamed when de-duped)
@@ -106,7 +119,7 @@ class UploadSampleStep extends React.Component {
     selectedProject: null,
     selectedMedakaModel: DEFAULT_MEDAKA_MODEL_OPTION,
     selectedWetlabProtocol: null,
-    selectedWorkflows: new Set(),
+    selectedWorkflows: new Set() as Set<string>,
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
     usedClearLabs: false,
     files: [],
@@ -126,10 +139,11 @@ class UploadSampleStep extends React.Component {
     });
 
     // Pre-populate the selected project from URL params.
-    let urlParams = QueryString.parse(location.search, {
+    const urlParams = QueryString.parse(location.search, {
       arrayFormat: "bracket",
     });
 
+    // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'string | string[] | null' is not... Remove this comment to see the full error message
     const projectId = parseInt(urlParams.projectId);
     if (projectId && !this.state.selectedProject) {
       const selectedProject = find(["id", projectId], projects);
@@ -153,7 +167,11 @@ class UploadSampleStep extends React.Component {
   // *** Basespace-related functions ***
 
   // Handle the message from the Basespace OAuth popup that authorizes CZ ID to read (i.e. download files) from user projects.
-  handleBasespaceOAuthMessageEvent = async event => {
+  handleBasespaceOAuthMessageEvent = async (event: {
+    source: unknown;
+    origin: string;
+    data: { basespaceAccessToken: any };
+  }) => {
     const {
       selectedProject,
       selectedMedakaModel,
@@ -181,6 +199,7 @@ class UploadSampleStep extends React.Component {
         basespaceSamples,
       );
 
+      // @ts-expect-error ts-migrate(2740) FIXME: Type '{}' is missing the following properties from... Remove this comment to see the full error message
       samplesWithToken = groupSamplesByLane(samplesWithToken, BASESPACE_UPLOAD);
 
       // Validate names of grouped samples after concatenation (need to do this
@@ -223,7 +242,7 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  handleBasespaceAccessTokenChange = basespaceAccessToken => {
+  handleBasespaceAccessTokenChange = (basespaceAccessToken: $TSFixMe) => {
     this.setState({
       basespaceAccessToken,
     });
@@ -238,7 +257,7 @@ class UploadSampleStep extends React.Component {
         value: LOCAL_UPLOAD,
         label: LOCAL_UPLOAD_LABEL,
       },
-      (admin || biohubS3UploadEnabled) &&{
+      (admin || biohubS3UploadEnabled) && {
         value: REMOTE_UPLOAD,
         label: REMOTE_UPLOAD_LABEL,
       },
@@ -249,7 +268,7 @@ class UploadSampleStep extends React.Component {
     ]);
   };
 
-  handleTabChange = tabIndex => {
+  handleTabChange = (tabIndex: number) => {
     this.props.onDirty();
     const tab = this.getUploadTabs()[tabIndex].value;
     this.setState({ currentTab: tab });
@@ -261,7 +280,7 @@ class UploadSampleStep extends React.Component {
   // *** Project-related functions ***
 
   // Modify the project_id in our samples, and validate the sample names again.
-  updateSamplesForNewProject = async ({ samples, project }) => {
+  updateSamplesForNewProject = async ({ samples, project }: $TSFixMe) => {
     const { samples: validatedSamples } = await this.validateSampleNames({
       samples,
       project,
@@ -272,7 +291,7 @@ class UploadSampleStep extends React.Component {
     };
   };
 
-  handleProjectCreate = async project => {
+  handleProjectCreate = async (project: $TSFixMe) => {
     this.props.onDirty();
     this.setState({
       validatingSamples: true,
@@ -316,7 +335,7 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  handleProjectChange = async project => {
+  handleProjectChange = async (project: $TSFixMe) => {
     this.props.onDirty();
     this.setState({
       validatingSamples: true,
@@ -378,10 +397,11 @@ class UploadSampleStep extends React.Component {
 
   // *** Pipeline workflow related functions ***
 
-  handleWorkflowToggle = workflow => {
+  handleWorkflowToggle = (workflow: string) => {
     this.props.onDirty();
     const { allowedFeatures } = this.context || {};
-    let { selectedWorkflows, selectedTechnology } = this.state;
+    let { selectedWorkflows } = this.state;
+    const { selectedTechnology } = this.state;
 
     if (allowedFeatures.includes(AMR_V1_FEATURE)) {
       const workflowIsAlreadySelected = selectedWorkflows.has(workflow);
@@ -413,15 +433,18 @@ class UploadSampleStep extends React.Component {
     trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
   };
 
-  limitWorkflowSelection = (workflowSelected, selectedTechnology) => {
-    let { selectedWorkflows } = this.state;
+  limitWorkflowSelection = (
+    workflowSelected: $TSFixMe,
+    selectedTechnology: $TSFixMe,
+  ) => {
+    const { selectedWorkflows } = this.state;
 
     // Based on workflowSelected and selectedTechnology, determine which workflows are permitted
-    let technology = selectedTechnology ?? ILLUMINA;
+    const technology = selectedTechnology ?? ILLUMINA;
     const permittedWorkflows =
       ALLOWED_WORKFLOWS_BY_TECHNOLOGY[workflowSelected][technology];
     // Then delete non-permitted workflows
-    let filteredWorkflows = new Set(selectedWorkflows);
+    const filteredWorkflows = new Set(selectedWorkflows);
     filteredWorkflows.forEach(workflow => {
       if (!permittedWorkflows.includes(workflow)) {
         filteredWorkflows.delete(workflow);
@@ -430,7 +453,7 @@ class UploadSampleStep extends React.Component {
     return filteredWorkflows;
   };
 
-  handleTechnologyToggle = technology => {
+  handleTechnologyToggle = (technology: string) => {
     this.props.onDirty();
     const { selectedWorkflows, usedClearLabs } = this.state;
 
@@ -469,18 +492,18 @@ class UploadSampleStep extends React.Component {
     }
   };
 
-  handleWetlabProtocolChange = selected => {
+  handleWetlabProtocolChange = (selected: string) => {
     this.props.onDirty();
     this.setState({ selectedWetlabProtocol: selected });
     trackEvent(`UploadSampleStep_${selected}-protocol_selected`);
   };
 
-  handleGuppyBasecallerSettingChange = selected => {
+  handleGuppyBasecallerSettingChange = (selected: string) => {
     this.props.onDirty();
     this.setState({ selectedGuppyBasecallerSetting: selected });
   };
 
-  handleMedakaModelChange = selected => {
+  handleMedakaModelChange = (selected: string) => {
     this.props.onDirty();
     this.setState({ selectedMedakaModel: selected });
     trackEvent(
@@ -489,7 +512,7 @@ class UploadSampleStep extends React.Component {
     );
   };
 
-  handleClearLabsChange = usedClearLabs => {
+  handleClearLabsChange = (usedClearLabs: boolean) => {
     this.props.onDirty();
     this.setState({
       usedClearLabs,
@@ -510,14 +533,15 @@ class UploadSampleStep extends React.Component {
   // *** Sample-related functions ***
 
   // Functions to get the state key by sample type, e.g. this.state.localSamples, this.state.basespaceSamples
-  getSelectedSampleIdsKey = sampleType => `${sampleType}SelectedSampleIds`;
-  getSamplesKey = sampleType => `${sampleType}Samples`;
+  getSelectedSampleIdsKey = (sampleType: SampleUploadType) =>
+    `${sampleType}SelectedSampleIds`;
+  getSamplesKey = (sampleType: SampleUploadType) => `${sampleType}Samples`;
 
-  getSelectedSampleIds = sampleType => {
+  getSelectedSampleIds = (sampleType: SampleUploadType) => {
     return this.state[this.getSelectedSampleIdsKey(sampleType)];
   };
 
-  getSelectedSamples = sampleType => {
+  getSelectedSamples = (sampleType: SampleUploadType) => {
     const selectedSampleIds = this.getSelectedSampleIds(sampleType);
     const samplesKey = this.getSamplesKey(sampleType);
     return filter(
@@ -527,7 +551,7 @@ class UploadSampleStep extends React.Component {
   };
 
   // Get fields for display in the SampleUploadTable.
-  getSampleDataForUploadTable = sampleType => {
+  getSampleDataForUploadTable = (sampleType: SampleUploadType) => {
     if (sampleType === BASESPACE_UPLOAD)
       // Show how lanes will be concatenated
       return groupSamplesByLane(this.state.basespaceSamples, BASESPACE_UPLOAD);
@@ -542,18 +566,18 @@ class UploadSampleStep extends React.Component {
         const sampleInfo = [];
         const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
 
-        for (let group in groups) {
+        for (const group in groups) {
           // Map errors/validation checks to each fileName
           // to inform if/how to display file errors in the SampleUploadtable.
           const pairedFiles = groups[group].files;
 
-          let finishedValidating = {};
-          let isValid = {};
-          let error = {};
+          const finishedValidating = {};
+          const isValid = {};
+          const error = {};
 
-          pairedFiles.forEach(pair => {
+          pairedFiles.forEach((pair: $TSFixMe) => {
             const files = pair.files;
-            for (let fileName in files) {
+            for (const fileName in files) {
               finishedValidating[fileName] = pair.finishedValidating;
               const correctSequenceTechnologySelected = this.validateCorrectFormat(
                 pair,
@@ -568,12 +592,16 @@ class UploadSampleStep extends React.Component {
           });
 
           sampleInfo.push({
-            file_names_R1: groups[group].filesR1.map(file => file.name),
-            file_names_R2: groups[group].filesR2.map(file => file.name),
+            file_names_R1: groups[group].filesR1.map(
+              (file: $TSFixMe) => file.name,
+            ),
+            file_names_R2: groups[group].filesR2.map(
+              (file: $TSFixMe) => file.name,
+            ),
             name: removeLaneFromName(pairedFiles[0].name),
             // If we concatenate samples 1 through 4, the selectId = "1,2,3,4"
             [SELECT_ID_KEY]: pairedFiles
-              .map(file => file[SELECT_ID_KEY])
+              .map((file: $TSFixMe) => file[SELECT_ID_KEY])
               .join(","),
             finishedValidating,
             isValid,
@@ -583,7 +611,7 @@ class UploadSampleStep extends React.Component {
         return sampleInfo;
       }
 
-      return samples.map(sample => {
+      return samples.map((sample: $TSFixMe) => {
         const fileNames = map(
           file => file.name || file.source,
           sample.input_files_attributes,
@@ -599,13 +627,14 @@ class UploadSampleStep extends React.Component {
   };
 
   // Add a unique select id to each sample, for tracking selection state.
-  addSelectIdToSamples = samples =>
+  addSelectIdToSamples = (samples: $TSFixMe) =>
+    // @ts-expect-error uniqueId(): Expected 1 arguments, but got 0
     map(sample => set(SELECT_ID_KEY, uniqueId(), sample), samples);
 
   // Merge newly added samples with the list of samples already added.
-  mergeSamples = (samples, newSamples) => {
-    let samplesByName = keyBy("name", samples);
-    let newSamplesByName = keyBy("name", newSamples);
+  mergeSamples = (samples: $TSFixMe, newSamples: $TSFixMe) => {
+    const samplesByName = keyBy("name", samples);
+    const newSamplesByName = keyBy("name", newSamples);
 
     // If a sample with the same name already exists, just merge their input_files_attributes and files.
     const mergedSamples = mergeWith(
@@ -643,7 +672,7 @@ class UploadSampleStep extends React.Component {
   };
 
   // Rename duplicated sample names if needed.
-  validateSampleNames = async ({ samples, project }) => {
+  validateSampleNames = async ({ samples, project }: $TSFixMe) => {
     const selectedProject = project || this.state.selectedProject;
     if (!selectedProject || size(samples) <= 0) {
       return {
@@ -663,7 +692,7 @@ class UploadSampleStep extends React.Component {
 
     // Replace samples name with their de-duped names.
     return {
-      samples: samples.map(sample => ({
+      samples: samples.map((sample: $TSFixMe) => ({
         ...sample,
         name: validatedNameMap[sample.name],
       })),
@@ -671,7 +700,7 @@ class UploadSampleStep extends React.Component {
   };
 
   // Perform sample validation and return the validated samples.
-  validateAddedSamples = async (samples, sampleType) => {
+  validateAddedSamples = async (samples: $TSFixMe, sampleType: $TSFixMe) => {
     // For non-local samples, we just need to de-dupe the name.
     if (sampleType !== LOCAL_UPLOAD) {
       return this.validateSampleNames({ samples });
@@ -691,6 +720,7 @@ class UploadSampleStep extends React.Component {
     // Get all the sample file names.
     const sampleFileNames = flatten(map(sample => keys(sample.files), samples));
 
+    // eslint-disable-next-line prefer-const
     let [{ samples: validatedSamples }, areFilesValid] = await Promise.all([
       // Call validateSampleNames to update sample names.
       this.validateSampleNames({ samples }),
@@ -700,14 +730,14 @@ class UploadSampleStep extends React.Component {
     const fileNamesValidMap = zipObject(sampleFileNames, areFilesValid);
 
     // For each sample, filter out files that aren't valid.
-    validatedSamples = validatedSamples.map(sample =>
+    validatedSamples = validatedSamples.map((sample: $TSFixMe) =>
       set(
         "files",
         pickBy((_file, fileName) => fileNamesValidMap[fileName], sample.files),
         sample,
       ),
     );
-    validatedSamples = validatedSamples.map(sample =>
+    validatedSamples = validatedSamples.map((sample: $TSFixMe) =>
       set(
         "input_files_attributes",
         filter(
@@ -733,7 +763,11 @@ class UploadSampleStep extends React.Component {
   };
 
   // When a sample is checked or unchecked.
-  handleSampleSelect = (value, checked, sampleType) => {
+  handleSampleSelect = (
+    value: string,
+    checked: boolean,
+    sampleType: SampleUploadType,
+  ) => {
     const { allowedFeatures } = this.context || {};
     this.props.onDirty();
     const samplesKey = this.getSamplesKey(sampleType);
@@ -745,7 +779,9 @@ class UploadSampleStep extends React.Component {
       allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
       sampleType === LOCAL_UPLOAD
     ) {
-      const sample = samples.find(sample => sample[SELECT_ID_KEY] === value);
+      const sample = samples.find(
+        (sample: $TSFixMe) => sample[SELECT_ID_KEY] === value,
+      );
       if (
         !sample ||
         sample.isValid === false ||
@@ -769,7 +805,11 @@ class UploadSampleStep extends React.Component {
   };
 
   // Callback for PreUploadQCCheck to remove invalid samples from selectedSamples.
-  handleInvalidSample = (value, checked, sampleType) => {
+  handleInvalidSample = (
+    value: $TSFixMe,
+    checked: $TSFixMe,
+    sampleType: SampleUploadType,
+  ) => {
     this.props.onDirty();
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
     const selectedSamples = this.state[selectedSampleIdsKey];
@@ -784,7 +824,7 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  handleAllSamplesSelect = (checked, sampleType) => {
+  handleAllSamplesSelect = (checked: $TSFixMe, sampleType: $TSFixMe) => {
     const { allowedFeatures } = this.context || {};
     this.props.onDirty();
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
@@ -798,7 +838,8 @@ class UploadSampleStep extends React.Component {
       sampleType === LOCAL_UPLOAD
     ) {
       samples = samples.filter(
-        sample => sample.isValid && this.validateCorrectFormat(sample),
+        (sample: $TSFixMe) =>
+          sample.isValid && this.validateCorrectFormat(sample),
       );
     }
 
@@ -810,7 +851,7 @@ class UploadSampleStep extends React.Component {
   };
 
   // Handle newly added samples
-  handleSamplesAdd = async (newSamples, sampleType) => {
+  handleSamplesAdd = async (newSamples: $TSFixMe, sampleType: $TSFixMe) => {
     this.props.onDirty();
     const samplesKey = this.getSamplesKey(sampleType);
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
@@ -826,6 +867,7 @@ class UploadSampleStep extends React.Component {
 
     const {
       samples: validatedNewSamples,
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'removedLocalFiles' does not exist on typ... Remove this comment to see the full error message
       removedLocalFiles,
     } = await this.validateAddedSamples(newSamplesWithSelectIds, sampleType);
 
@@ -867,7 +909,7 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  handleSamplesRemove = (sampleSelectIds, sampleType) => {
+  handleSamplesRemove = (sampleSelectIds: $TSFixMe, sampleType: $TSFixMe) => {
     this.props.onDirty();
     const samplesKey = this.getSamplesKey(sampleType);
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
@@ -920,6 +962,7 @@ class UploadSampleStep extends React.Component {
       // Provide concatenated lane files for next upload step
       if (currentTab === LOCAL_UPLOAD) {
         const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'concatenated' does not exist on type 'ne... Remove this comment to see the full error message
         samples = map(group => group.concatenated, groups);
         // Validate names of grouped samples after concatenation (need to do this
         // even if it's a group that only contains 1 lane file).
@@ -955,7 +998,7 @@ class UploadSampleStep extends React.Component {
   };
 
   // Change state for files
-  handleValidatedFilesChange = localSamples => {
+  handleValidatedFilesChange = (localSamples: $TSFixMe) => {
     this.setState({
       localSamples,
     });
@@ -1004,7 +1047,7 @@ class UploadSampleStep extends React.Component {
     } = this.state;
     const { allowedFeatures } = this.context || {};
 
-    let workflowsValid;
+    let workflowsValid: boolean;
     if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
       switch (selectedTechnology) {
         case CG_TECHNOLOGY_OPTIONS.ILLUMINA:
@@ -1076,7 +1119,7 @@ class UploadSampleStep extends React.Component {
     }
   };
 
-  validateCorrectFormat = file => {
+  validateCorrectFormat = (file: $TSFixMe) => {
     const sequenceTechnology = this.getSequenceTechnology();
     return file.format && sequenceTechnology
       ? file.format === sequenceTechnology
@@ -1118,7 +1161,7 @@ class UploadSampleStep extends React.Component {
     );
   };
 
-  renderUploadTab = (disabled, label) => {
+  renderUploadTab = (disabled: $TSFixMe, label: $TSFixMe) => {
     let tab = <Tab disabled={disabled} label={label}></Tab>;
     if (disabled) {
       tab = (
@@ -1141,7 +1184,9 @@ class UploadSampleStep extends React.Component {
       case LOCAL_UPLOAD:
         return (
           <LocalSampleFileUpload
-            onChange={samples => this.handleSamplesAdd(samples, LOCAL_UPLOAD)}
+            onChange={(samples: $TSFixMe) =>
+              this.handleSamplesAdd(samples, LOCAL_UPLOAD)
+            }
             project={selectedProject}
             samples={this.getSelectedSamples(LOCAL_UPLOAD)}
             hasSamplesLoaded={size(this.state.localSamples) > 0}
@@ -1159,7 +1204,7 @@ class UploadSampleStep extends React.Component {
         return (
           <BasespaceSampleImport
             project={selectedProject}
-            onChange={samples =>
+            onChange={(samples: $TSFixMe) =>
               this.handleSamplesAdd(samples, BASESPACE_UPLOAD)
             }
             accessToken={basespaceAccessToken}
@@ -1332,18 +1377,6 @@ class UploadSampleStep extends React.Component {
     );
   }
 }
-
-UploadSampleStep.propTypes = {
-  onUploadSamples: PropTypes.func.isRequired,
-  // Immediately called when the user changes anything, even before validation has returned.
-  // Used to disable later steps the header navigation if the data in previous steps has changed.
-  onDirty: PropTypes.func.isRequired,
-  visible: PropTypes.bool,
-  admin: PropTypes.bool,
-  biohubS3UploadEnabled: PropTypes.bool,
-  basespaceClientId: PropTypes.string.isRequired,
-  basespaceOauthRedirectUri: PropTypes.string.isRequired,
-};
 
 UploadSampleStep.contextType = UserContext;
 

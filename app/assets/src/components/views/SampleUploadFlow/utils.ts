@@ -2,13 +2,14 @@ import { groupBy, maxBy, sortBy, sum } from "lodash/fp";
 
 import { openUrlInPopupWindow } from "~/components/utils/links";
 import { getURLParamString } from "~/helpers/url";
+import { Sample, SampleUploadType } from "~/interface/shared";
 
 const BASESPACE_OAUTH_URL = "https://basespace.illumina.com/oauth/authorize";
 const BASESPACE_OAUTH_WINDOW_NAME = "BASESPACE_OAUTH_WINDOW";
 const BASESPACE_OAUTH_WINDOW_WIDTH = 1000;
 const BASESPACE_OAUTH_WINDOW_HEIGHT = 600;
 
-export const openBasespaceOAuthPopup = params => {
+export const openBasespaceOAuthPopup = (params: $TSFixMe) => {
   const urlParams = getURLParamString({
     ...params,
     response_type: "code",
@@ -24,7 +25,7 @@ export const openBasespaceOAuthPopup = params => {
 
 // The following three functions were extracted from SampleTypeSearchBox.
 // They aid client-side search of options.
-export const doesResultMatch = (result, query) => {
+export const doesResultMatch = (result: $TSFixMe, query: $TSFixMe) => {
   // If no query, return all possible
   if (query === "") return true;
 
@@ -38,9 +39,14 @@ export const doesResultMatch = (result, query) => {
 };
 
 // Sort matches by position of match. If no position, by func.
-export const sortResults = (matchedResults, query, func) => {
+export const sortResults = (
+  matchedResults: $TSFixMe,
+  query: $TSFixMe,
+  func: $TSFixMe,
+) => {
   let sortedResults = sortBy(func, matchedResults);
   if (query !== "") {
+    // @ts-expect-error ts-migrate(2322) FIXME: Type 'never[]' is not assignable to type 'LodashSo... Remove this comment to see the full error message
     sortedResults = sortBy(
       result => sortResultsByMatch(result, query),
       sortedResults,
@@ -49,7 +55,7 @@ export const sortResults = (matchedResults, query, func) => {
   return sortedResults;
 };
 
-export const sortResultsByMatch = (result, query) => {
+export const sortResultsByMatch = (result: { name: string }, query: string) => {
   const name = result.name.toLowerCase();
   const q = query.toLowerCase();
   const res =
@@ -57,11 +63,14 @@ export const sortResultsByMatch = (result, query) => {
   return res;
 };
 
-export const removeLaneFromName = name => {
+export const removeLaneFromName = (name: string) => {
   return name.replace(/_L00[1-8]/, "");
 };
 
-export const groupSamplesByLane = (samples, sampleType) => {
+export const groupSamplesByLane = (
+  samples: Sample[],
+  sampleType: SampleUploadType,
+) => {
   // BaseSpace uploads can't use the same logic as local uploads because data format is different:
   // BaseSpace groups R1/R2 for us, and we need to track dataset IDs and send them to the backend,
   // where concatenation happens (with local uploads, concatenation happens in the browser).
@@ -74,7 +83,7 @@ export const groupSamplesByLane = (samples, sampleType) => {
     }, samples);
 
     const sampleInfo = [];
-    for (let group in groups) {
+    for (const group in groups) {
       const files = groups[group];
       sampleInfo.push({
         ...files[0], // Most information is identical for all lanes
@@ -94,7 +103,7 @@ export const groupSamplesByLane = (samples, sampleType) => {
   // L1_R1, L1_R2, L2_R1, don't group them because we're missing L2_R2.
   const groups = groupBy(sample => {
     const sampleID = removeLaneFromName(sample.name);
-    const readPairs = sample.input_files_attributes.map(f =>
+    const readPairs = sample.input_files_attributes.map((f: $TSFixMe) =>
       removeLaneFromName(f.source),
     );
     readPairs.sort();
@@ -103,23 +112,23 @@ export const groupSamplesByLane = (samples, sampleType) => {
 
   // Concatenate selected samples but don't change state
   const result = {};
-  for (let group in groups) {
+  for (const group in groups) {
     const samples = groups[group];
 
     // For each sample, fetch R1/R2 filenames
-    let readPairs = [[], []]; // [ [list of R1 files], [list of R2 files] ]
-    let readPairsConcat = {}; // { R1.fastq: concatenatedR1, R2.fastq: concatenatedR2 ]
+    const readPairs: File[][] = [[], []]; // [ [list of R1 files], [list of R2 files] ]
+    const readPairsConcat = {}; // { R1.fastq: concatenatedR1, R2.fastq: concatenatedR2 ]
     samples.forEach(sample => {
       const files = sortBy(file => file.name, Object.values(sample.files));
       if (files.length > 0) readPairs[0].push(files[0]);
       if (files.length === 2) readPairs[1].push(files[1]);
     });
     // Sort file names by lane
-    for (let pairNb in readPairs)
+    for (const pairNb in readPairs)
       readPairs[pairNb] = sortBy(file => file.name, readPairs[pairNb]);
 
     // Concatenate each read pair separately to end up with 2 files: L00*_R1 and L00*_R2
-    for (let pairNb in readPairs) {
+    for (const pairNb in readPairs) {
       const laneFiles = readPairs[pairNb];
       if (laneFiles.length > 0) {
         const fileName = removeLaneFromName(laneFiles[0].name);

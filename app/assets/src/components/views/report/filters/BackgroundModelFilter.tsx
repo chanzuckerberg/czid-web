@@ -85,9 +85,9 @@ const BackgroundModelFilter = React.memo(
 
       return (
         <SectionsDropdown
-          // @ts-expect-error Type has no common properties with type
           categories={backgroundSections}
           disabled={disabled}
+          // @ts-expect-error Property 'fluid' does not exist on type
           fluid
           itemIdToName={backgroundIdToName}
           onChange={onChange}

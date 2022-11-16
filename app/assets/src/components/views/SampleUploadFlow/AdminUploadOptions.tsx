@@ -1,6 +1,5 @@
 import { set } from "lodash/fp";
-import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
 
 import HelpIcon from "~ui/containers/HelpIcon";
 import Input from "~ui/controls/Input";
@@ -37,26 +36,24 @@ const ADMIN_OPTIONS = {
   },
 };
 
-export default class AdminUploadOptions extends React.Component {
-  state = {
-    showOptions: false,
-  };
+interface AdminUploadOptionsProps {
+  adminOptions: Record<string, string>;
+  onAdminOptionsChanged: $TSFixMeFunction;
+}
 
-  handleChange = (key, newValue) => {
-    const { adminOptions, onAdminOptionsChanged } = this.props;
+const AdminUploadOptions = ({
+  adminOptions,
+  onAdminOptionsChanged,
+}: AdminUploadOptionsProps) => {
+  const [showOptions, setShowOptions] = useState(false);
+
+  const handleChange = (key: string, newValue: $TSFixMe) => {
     onAdminOptionsChanged(set(key, newValue, adminOptions));
   };
 
-  toggleShow = () => {
-    this.setState({
-      showOptions: !this.state.showOptions,
-    });
-  };
-
-  renderAdminOption = key => {
+  const renderAdminOption = (key: string) => {
     const optionMetadata = ADMIN_OPTIONS[key];
 
-    const { adminOptions } = this.props;
     return (
       <div className={cs.field} key={key}>
         <div className={cs.label}>
@@ -65,7 +62,7 @@ export default class AdminUploadOptions extends React.Component {
         </div>
         <Input
           className={cs.input}
-          onChange={val => this.handleChange(key, val)}
+          onChange={(val: $TSFixMe) => handleChange(key, val)}
           value={adminOptions[key] || ""}
           placeholder={optionMetadata.placeholder}
         />
@@ -73,30 +70,24 @@ export default class AdminUploadOptions extends React.Component {
     );
   };
 
-  render() {
-    const { showOptions } = this.state;
-
-    return (
-      <div>
-        <div className={cs.subheader}>
-          Admin options
-          <span className={cs.toggleLink} onClick={this.toggleShow}>
-            {showOptions ? "Hide" : "Show"} options
-          </span>
-        </div>
-        {showOptions && (
-          <div className={cs.adminUploadOptions}>
-            {Object.keys(ADMIN_OPTIONS).map(option =>
-              this.renderAdminOption(option),
-            )}
-          </div>
-        )}
+  return (
+    <div>
+      <div className={cs.subheader}>
+        Admin options
+        <span
+          className={cs.toggleLink}
+          onClick={() => setShowOptions(!showOptions)}
+        >
+          {showOptions ? "Hide" : "Show"} options
+        </span>
       </div>
-    );
-  }
-}
-
-AdminUploadOptions.propTypes = {
-  adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
-  onAdminOptionsChanged: PropTypes.func.isRequired,
+      {showOptions && (
+        <div className={cs.adminUploadOptions}>
+          {Object.keys(ADMIN_OPTIONS).map(option => renderAdminOption(option))}
+        </div>
+      )}
+    </div>
+  );
 };
+
+export default AdminUploadOptions;

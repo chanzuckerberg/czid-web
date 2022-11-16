@@ -11,28 +11,39 @@ import _fp, {
   keyBy,
 } from "lodash/fp";
 import React from "react";
+import { FileWithPreview } from "react-dropzone";
 
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
-import PropTypes from "~/components/utils/propTypes";
+import { Project, Sample } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
 
 import cs from "./sample_upload_flow.scss";
 
+// @ts-expect-error working with Lodash types
 const map = _fp.map.convert({ cap: false });
 
-class LocalSampleFileUpload extends React.Component {
+interface LocalSampleFileUploadProps {
+  project?: Project;
+  onChange: $TSFixMeFunction;
+  samples?: Sample[];
+  hasSamplesLoaded?: boolean;
+}
+
+class LocalSampleFileUpload extends React.Component<
+  LocalSampleFileUploadProps
+> {
   state = {
     showInfo: false,
   };
 
-  onDrop = acceptedFiles => {
+  onDrop = (acceptedFiles: Sample[]) => {
     // Group files by sample name.
     const sampleNamesToFiles = flow(
-      groupBy(file => sampleNameFromFileName(file.name)),
+      groupBy((file: Sample) => sampleNameFromFileName(file.name)),
       // Make sure R1 comes before R2 and there are at most 2 files.
       // Sort files by lower case file name, then take the first two.
       mapValues(
@@ -45,7 +56,7 @@ class LocalSampleFileUpload extends React.Component {
 
     // Create local samples.
     const localSamples = map(
-      (files, name) => ({
+      (files: Sample[], name: string) => ({
         name,
         project_id: get("id", this.props.project),
         // Set by the user in the Upload Metadata step.
@@ -67,9 +78,11 @@ class LocalSampleFileUpload extends React.Component {
     this.props.onChange(localSamples);
   };
 
-  onRejected = rejectedFiles => {
-    const emptyFiles = rejectedFiles.filter(f => f.size === 0);
-    const invalidFiles = rejectedFiles.filter(f => f.size > 0 && f.size < 5e9);
+  onRejected = (rejectedFiles: FileWithPreview[]) => {
+    const emptyFiles = rejectedFiles.filter((f: $TSFixMe) => f.size === 0);
+    const invalidFiles = rejectedFiles.filter(
+      (f: $TSFixMe) => f.size > 0 && f.size < 5e9,
+    );
     const mapNames = _fp.compose(_fp.join(", "), _fp.map("name"));
     let msg = "Some of your files cannot be uploaded.\n";
     if (emptyFiles.length > 0) {
@@ -181,12 +194,5 @@ class LocalSampleFileUpload extends React.Component {
 }
 
 LocalSampleFileUpload.contextType = UserContext;
-
-LocalSampleFileUpload.propTypes = {
-  project: PropTypes.Project,
-  onChange: PropTypes.func.isRequired,
-  samples: PropTypes.arrayOf(PropTypes.object),
-  hasSamplesLoaded: PropTypes.bool,
-};
 
 export default LocalSampleFileUpload;

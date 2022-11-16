@@ -16,9 +16,9 @@ export const WORKFLOW_DISPLAY_NAMES = {
 };
 
 export const WORKFLOW_ICONS = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: "dna",
-  [WORKFLOWS.CONSENSUS_GENOME.value]: "virus",
-  [WORKFLOWS.AMR.value]: "bacteria",
+  [WORKFLOWS.SHORT_READ_MNGS.value]: "dna" as const,
+  [WORKFLOWS.CONSENSUS_GENOME.value]: "virus" as const,
+  [WORKFLOWS.AMR.value]: "bacteria" as const,
 };
 
 export const GUPPY_BASECALLER_SETTINGS = [
@@ -315,7 +315,8 @@ export const MISMATCH_FORMAT_ERROR =
   "This file does not match the sequencing technology selected. Please make sure that you have selected the correct sequencing technology for this file.";
 export const MISMATCH_FILES_ERROR =
   "R1 and R2 files are paired-end mismatched. Please make sure that R1 and R2 files reads match up.";
-export const UNSUPPORTED_UPLOAD_OPTION_TOOLTIP = "This upload option is not supported for this pipeline.";
+export const UNSUPPORTED_UPLOAD_OPTION_TOOLTIP =
+  "This upload option is not supported for this pipeline.";
 export const R1CHECK = "_R1";
 export const R2CHECK = "_R2";
 export const AIOLI_LIBRARIES = ["htslib/htsfile/1.10", "seqtk/1.3"];

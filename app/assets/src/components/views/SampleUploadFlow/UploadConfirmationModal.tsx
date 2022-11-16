@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import Modal from "~ui/containers/Modal";
@@ -6,12 +5,19 @@ import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 
 import cs from "./upload_confirmation_modal.scss";
 
+interface UploadConfirmationModalProps {
+  numberOfFailedSamples: number;
+  open?: boolean;
+  onCancel: $TSFixMeFunction;
+  onConfirm: $TSFixMeFunction;
+}
+
 const UploadConfirmationModal = ({
   numberOfFailedSamples,
   open,
   onCancel,
   onConfirm,
-}) => {
+}: UploadConfirmationModalProps) => {
   return (
     <Modal className={cs.uploadConfirmationModal} narrowest open={open} tall>
       <div className={cs.title}>
@@ -39,13 +45,6 @@ const UploadConfirmationModal = ({
       </div>
     </Modal>
   );
-};
-
-UploadConfirmationModal.propTypes = {
-  numberOfFailedSamples: PropTypes.number.isRequired,
-  open: PropTypes.bool,
-  onCancel: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
 };
 
 export default UploadConfirmationModal;

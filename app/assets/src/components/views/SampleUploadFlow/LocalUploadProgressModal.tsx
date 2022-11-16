@@ -29,7 +29,7 @@ import {
 } from "~/api/upload";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
-import PropTypes from "~/components/utils/propTypes";
+import { Project, Sample } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import Notification from "~ui/notifications/Notification";
@@ -41,6 +41,23 @@ import {
   logUploadStepError,
   redirectToProject,
 } from "./upload_progress_utils";
+
+interface LocalUploadProgressModalProps {
+  samples?: Sample[];
+  adminOptions: Record<string, string>;
+  clearlabs?: boolean;
+  medakaModel?: string;
+  metadata?: Record<string, any>;
+  onUploadComplete: $TSFixMeFunction;
+  project?: Project;
+  skipSampleProcessing?: boolean;
+  technology?: string;
+  uploadType: string;
+  useStepFunctionPipeline?: boolean;
+  wetlabProtocol?: string;
+  workflows?: Set<$TSFixMe>;
+  guppyBasecallerSetting: string;
+}
 
 const LocalUploadProgressModal = ({
   adminOptions,
@@ -57,7 +74,7 @@ const LocalUploadProgressModal = ({
   useStepFunctionPipeline,
   wetlabProtocol,
   workflows,
-}) => {
+}: LocalUploadProgressModalProps) => {
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 
   // State variables to manage download state
@@ -106,7 +123,10 @@ const LocalUploadProgressModal = ({
     const createdSamples = await initiateBulkUploadLocalWithMetadata({
       samples: samplesToUpload,
       metadata,
-      onCreateSamplesError: (errors, erroredSampleNames) => {
+      onCreateSamplesError: (
+        errors: $TSFixMe,
+        erroredSampleNames: $TSFixMe,
+      ) => {
         logError({
           message: "UploadProgressModal: onCreateSamplesError",
           details: { errors },
@@ -135,24 +155,24 @@ const LocalUploadProgressModal = ({
     await uploadSamples(createdSamples);
   };
 
-  const uploadSamples = async samples => {
-    const heartbeatInterval = startUploadHeartbeat(map("id", samples));
+  const uploadSamples = async (samples: $TSFixMe) => {
+    const heartbeatInterval = await startUploadHeartbeat(map("id", samples));
 
     await Promise.all(
-      samples.map(async sample => {
+      samples.map(async (sample: $TSFixMe) => {
         try {
           const s3ClientForSample = await getS3Client(sample);
           updateSampleUploadPercentage(sample.name, 0);
 
           await Promise.all(
-            sample.input_files.map(async inputFile => {
+            sample.input_files.map(async (inputFile: $TSFixMe) => {
               await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
             }),
           );
 
           await completeSampleUpload({
             sample,
-            onSampleUploadSuccess: sample => {
+            onSampleUploadSuccess: (sample: $TSFixMe) => {
               updateSampleUploadStatus(sample.name, "success");
             },
             onMarkSampleUploadedError: handleSampleUploadError,
@@ -173,7 +193,7 @@ const LocalUploadProgressModal = ({
     );
   };
 
-  const getS3Client = async sample => {
+  const getS3Client = async (sample: $TSFixMe) => {
     const credentials = await getUploadCredentials(sample.id);
     const {
       access_key_id: accessKeyId,
@@ -195,7 +215,11 @@ const LocalUploadProgressModal = ({
     });
   };
 
-  const uploadInputFileToS3 = async (sample, inputFile, s3Client) => {
+  const uploadInputFileToS3 = async (
+    sample: $TSFixMe,
+    inputFile: $TSFixMe,
+    s3Client: $TSFixMe,
+  ) => {
     const {
       name: fileName,
       s3_bucket: s3Bucket,
@@ -229,7 +253,7 @@ const LocalUploadProgressModal = ({
       }),
     });
 
-    const removeS3KeyFromUploadIds = s3Key => {
+    const removeS3KeyFromUploadIds = (s3Key: $TSFixMe) => {
       setSampleFileUploadIds(prevState => omit(s3Key, prevState));
     };
 
@@ -263,7 +287,7 @@ const LocalUploadProgressModal = ({
     }));
   };
 
-  const updateSampleUploadStatus = (sampleName, status) => {
+  const updateSampleUploadStatus = (sampleName: $TSFixMe, status: $TSFixMe) => {
     setSampleUploadStatuses(prevState => ({
       ...prevState,
       [sampleName]: status,
@@ -275,9 +299,10 @@ const LocalUploadProgressModal = ({
     s3Key,
     percentage = 0,
     fileSize = null,
-  }) => {
+  }: $TSFixMe) => {
     const newSampleKeyState = { percentage };
     if (fileSize) {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'size' does not exist on type '{ percenta... Remove this comment to see the full error message
       newSampleKeyState.size = fileSize;
     }
 
@@ -301,14 +326,17 @@ const LocalUploadProgressModal = ({
     );
   };
 
-  const updateSampleUploadPercentage = (sampleName, percentage) => {
+  const updateSampleUploadPercentage = (
+    sampleName: $TSFixMe,
+    percentage: $TSFixMe,
+  ) => {
     setSampleUploadPercentages(prevState => ({
       ...prevState,
       [sampleName]: percentage,
     }));
   };
 
-  const calculatePercentageForSample = sampleFilePercentage => {
+  const calculatePercentageForSample = (sampleFilePercentage: $TSFixMe) => {
     const uploadedSize = sum(
       map(key => (key.percentage || 0) * key.size, sampleFilePercentage),
     );
@@ -318,7 +346,7 @@ const LocalUploadProgressModal = ({
     return uploadedSize / totalSize;
   };
 
-  const handleSampleUploadError = (sample, error = null) => {
+  const handleSampleUploadError = (sample: $TSFixMe, error = null) => {
     const message =
       "UploadProgressModal: Local sample upload error to S3 occured";
 
@@ -356,7 +384,7 @@ const LocalUploadProgressModal = ({
     );
   };
 
-  const retryFailedSampleUploads = async failedSamples => {
+  const retryFailedSampleUploads = async (failedSamples: $TSFixMe) => {
     setRetryingSampleUpload(true);
     setUploadComplete(false);
 
@@ -423,11 +451,15 @@ const LocalUploadProgressModal = ({
   };
 
   // Returns a map of sample names to a list of their file sizes
-  const sampleNameToFileSizes = samples => {
-    return samples.reduce(function(nameToFileSizes, sample) {
+  const sampleNameToFileSizes = (samples: $TSFixMe) => {
+    return samples.reduce(function(
+      nameToFileSizes: $TSFixMe,
+      sample: $TSFixMe,
+    ) {
       nameToFileSizes[sample.name] = map(file => file.size, sample.files);
       return nameToFileSizes;
-    }, {});
+    },
+    {});
   };
 
   /*
@@ -607,36 +639,6 @@ const LocalUploadProgressModal = ({
       )}
     </Modal>
   );
-};
-
-LocalUploadProgressModal.propTypes = {
-  samples: PropTypes.arrayOf(
-    PropTypes.shape({
-      host_genome_id: PropTypes.number.isRequired,
-      input_file_attributes: PropTypes.shape({
-        name: PropTypes.string,
-        source: PropTypes.string,
-        source_type: PropTypes.string,
-        upload_client: PropTypes.string,
-      }),
-      name: PropTypes.string,
-      project_id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      status: PropTypes.string,
-    }),
-  ),
-  adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
-  clearlabs: PropTypes.bool,
-  guppyBasecallerSetting: PropTypes.string,
-  medakaModel: PropTypes.string,
-  metadata: PropTypes.objectOf(PropTypes.any),
-  onUploadComplete: PropTypes.func.isRequired,
-  project: PropTypes.Project,
-  skipSampleProcessing: PropTypes.bool,
-  technology: PropTypes.string,
-  uploadType: PropTypes.string.isRequired,
-  useStepFunctionPipeline: PropTypes.bool,
-  wetlabProtocol: PropTypes.string,
-  workflows: PropTypes.instanceOf(Set),
 };
 
 export default LocalUploadProgressModal;

@@ -11,9 +11,85 @@ import {
   MetadataValue,
 } from "~/interface/shared";
 
-interface Issues {
+export interface Issues {
   errors: string[];
   warnings: string[];
+}
+
+export interface MetadataCSVLocationsMenuProps {
+  metadata: MetadataUploadProps["metadata"];
+  locationMetadataType: {
+    dataType: string;
+    key: string;
+    name: string;
+  };
+  onMetadataChange: ({ metadata }: { metadata: any }) => void;
+  hostGenomes: HostGenome[];
+}
+
+export type MetadataCSVUploadProps = Pick<
+  MetadataUploadProps,
+  | "samples"
+  | "project"
+  | "className"
+  | "onMetadataChange"
+  | "samplesAreNew"
+  | "onDirty"
+  | "visible"
+>;
+
+export interface MetadataCSVUploadState {
+  metadata: CSV;
+  validatingCSV: boolean;
+  lastSampleNamesValidated: string[];
+  lastProjectIdValidated: number;
+}
+
+export interface MetadataInputProps {
+  className: string;
+  value: MetadataValue | undefined;
+  metadataType: Pick<
+    MetadataType,
+    "dataType" | "key" | "options" | "isBoolean"
+  >;
+  // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".
+  // This is useful for the text input, where the parent wants to save onBlur, not onChange.
+  onChange: (key: string, value: MetadataValue, shouldSave?: boolean) => void;
+  onSave?: (key: string) => Promise<void>;
+  isHuman?: boolean;
+  sampleTypes?: SampleTypeProps[];
+  warning?: string;
+  withinModal?: boolean;
+  taxaCategory: string;
+}
+
+export interface MetadataManualInputProps
+  extends Pick<
+    MetadataUploadProps,
+    | "samples"
+    | "project"
+    | "className"
+    | "onMetadataChange"
+    | "samplesAreNew"
+    | "withinModal"
+  > {
+  projectMetadataFields?: MetadataTypes;
+  hostGenomes?: HostGenome[];
+  sampleTypes: SampleType[];
+}
+
+export interface MetadataManualInputState {
+  selectedFieldNames: MetadataType[];
+  projectMetadataFields: MetadataTypes;
+  headers: { [key: string]: string };
+  metadataFieldsToEdit: { [key: string]: unknown };
+  headersToEdit: string[];
+  hostGenomesByName: Dictionary<HostGenome>;
+  // Which cell the "Apply to All" button should appear on.
+  applyToAllCell: {
+    sampleName: string;
+    column: string;
+  };
 }
 
 export interface MetadataPreLocationSearch {
@@ -74,82 +150,6 @@ export interface Row {
   "Host Genome"?: string;
   "Host Organism"?: string;
   "Sample Name"?: string;
-}
-
-export interface MetadataCSVLocationsMenuProps {
-  metadata: MetadataUploadProps["metadata"];
-  locationMetadataType: {
-    dataType: string;
-    key: string;
-    name: string;
-  };
-  onMetadataChange: ({ metadata }: { metadata: any }) => void;
-  hostGenomes: HostGenome[];
-}
-
-export type MetadataCSVUploadProps = Pick<
-  MetadataUploadProps,
-  | "samples"
-  | "project"
-  | "className"
-  | "onMetadataChange"
-  | "samplesAreNew"
-  | "onDirty"
-  | "visible"
->;
-
-export interface MetadataCSVUploadState {
-  metadata: CSV;
-  validatingCSV: boolean;
-  lastSampleNamesValidated: string[];
-  lastProjectIdValidated: number;
-}
-
-export interface MetadataManualInputProps
-  extends Pick<
-    MetadataUploadProps,
-    | "samples"
-    | "project"
-    | "className"
-    | "onMetadataChange"
-    | "samplesAreNew"
-    | "withinModal"
-  > {
-  projectMetadataFields?: MetadataTypes;
-  hostGenomes?: HostGenome[];
-  sampleTypes: SampleType[];
-}
-
-export interface MetadataManualInputState {
-  selectedFieldNames: MetadataType[];
-  projectMetadataFields: MetadataTypes;
-  headers: { [key: string]: string };
-  metadataFieldsToEdit: { [key: string]: unknown };
-  headersToEdit: string[];
-  hostGenomesByName: Dictionary<HostGenome>;
-  // Which cell the "Apply to All" button should appear on.
-  applyToAllCell: {
-    sampleName: string;
-    column: string;
-  };
-}
-
-export interface MetadataInputProps {
-  className: string;
-  value: MetadataValue | undefined;
-  metadataType: Pick<
-    MetadataType,
-    "dataType" | "key" | "options" | "isBoolean"
-  >;
-  // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".
-  // This is useful for the text input, where the parent wants to save onBlur, not onChange.
-  onChange: (key: string, value: MetadataValue, shouldSave?: boolean) => void;
-  onSave?: (key: string) => Promise<void>;
-  isHuman?: boolean;
-  sampleTypes?: SampleTypeProps[];
-  warning?: string;
-  withinModal?: boolean;
-  taxaCategory: string;
 }
 
 interface SampleTypeProps {

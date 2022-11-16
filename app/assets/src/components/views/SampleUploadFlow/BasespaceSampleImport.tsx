@@ -8,7 +8,7 @@ import {
 } from "~/api/basespace";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import PropTypes from "~/components/utils/propTypes";
+import { Project } from "~/interface/shared";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import Notification from "~ui/notifications/Notification";
 
@@ -16,14 +16,34 @@ import cs from "./basespace_sample_import.scss";
 import { NO_TARGET_PROJECT_ERROR } from "./constants";
 import { openBasespaceOAuthPopup } from "./utils";
 
-export default class BasespaceSampleImport extends React.Component {
-  state = {
+interface BasespaceSampleImportProps {
+  onChange: $TSFixMeFunction;
+  accessToken?: string;
+  onAccessTokenChange: $TSFixMeFunction;
+  project?: { id: number; name: string };
+  basespaceClientId: string;
+  basespaceOauthRedirectUri: string;
+  onNoProject: $TSFixMeFunction;
+}
+
+interface BasespaceSampleImportState {
+  basespaceProjects: $TSFixMe;
+  selectedProjectId: $TSFixMe;
+  loadingSamples?: boolean;
+  error?: string;
+  errorType?: "success" | "info" | "warning" | "error";
+}
+
+export default class BasespaceSampleImport extends React.Component<
+  BasespaceSampleImportProps
+> {
+  state: BasespaceSampleImportState = {
     basespaceProjects: null,
     selectedProjectId: null,
     loadingSamples: false,
     error: "",
-    errorType: "",
   };
+  private _window: $TSFixMe;
 
   componentDidMount() {
     const { accessToken } = this.props;
@@ -48,7 +68,11 @@ export default class BasespaceSampleImport extends React.Component {
     window.removeEventListener("message", this.handleMessageEvent);
   }
 
-  handleMessageEvent = async event => {
+  handleMessageEvent = async (event: {
+    source: any;
+    origin: string;
+    data: { basespaceAccessToken: any };
+  }) => {
     const { onAccessTokenChange } = this.props;
     if (
       event.source === this._window &&
@@ -61,7 +85,7 @@ export default class BasespaceSampleImport extends React.Component {
     }
   };
 
-  handleProjectSelect = projectId => {
+  handleProjectSelect = (projectId: number) => {
     this.setState({
       selectedProjectId: projectId,
     });
@@ -81,7 +105,7 @@ export default class BasespaceSampleImport extends React.Component {
     const { basespaceProjects } = this.state;
 
     return map(
-      project => ({
+      (project: Project) => ({
         value: project.id,
         text: project.name,
       }),
@@ -89,10 +113,10 @@ export default class BasespaceSampleImport extends React.Component {
     );
   };
 
-  fetchBasespaceProjects = async accessToken => {
+  fetchBasespaceProjects = async (accessToken: $TSFixMe) => {
     const projects = await getBasespaceProjects(accessToken);
 
-    const newState = {
+    const newState: BasespaceSampleImportState = {
       basespaceProjects: projects,
       selectedProjectId: get("id", head(projects)),
     };
@@ -249,13 +273,3 @@ export default class BasespaceSampleImport extends React.Component {
     );
   }
 }
-
-BasespaceSampleImport.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  accessToken: PropTypes.string,
-  onAccessTokenChange: PropTypes.func.isRequired,
-  project: PropTypes.Project,
-  basespaceClientId: PropTypes.string.isRequired,
-  basespaceOauthRedirectUri: PropTypes.string.isRequired,
-  onNoProject: PropTypes.func.isRequired,
-};

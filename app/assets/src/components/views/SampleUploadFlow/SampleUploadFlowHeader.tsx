@@ -5,7 +5,7 @@ import React from "react";
 import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import PropTypes from "~/components/utils/propTypes";
+import { Project, Sample } from "~/interface/shared";
 import Label from "~ui/labels/Label";
 
 import cs from "./sample_upload_flow.scss";
@@ -25,12 +25,22 @@ const MENU_OPTIONS = [
   },
 ];
 
-class SampleUploadFlowHeader extends React.Component {
-  isStepEnabled = step => {
+interface SampleUploadFlowHeaderProps {
+  currentStep: string;
+  samples?: Sample[];
+  project?: Project;
+  onStepSelect: $TSFixMeFunction;
+  stepsEnabled?: Record<string, boolean>;
+}
+
+class SampleUploadFlowHeader extends React.Component<
+  SampleUploadFlowHeaderProps
+> {
+  isStepEnabled = (step: string) => {
     return this.props.stepsEnabled[step];
   };
 
-  onStepSelect = step => {
+  onStepSelect = (step: string) => {
     if (this.isStepEnabled(step)) {
       this.props.onStepSelect(step);
     }
@@ -99,13 +109,5 @@ class SampleUploadFlowHeader extends React.Component {
     );
   }
 }
-
-SampleUploadFlowHeader.propTypes = {
-  currentStep: PropTypes.string.isRequired,
-  samples: PropTypes.arrayOf(PropTypes.Sample),
-  project: PropTypes.Project,
-  onStepSelect: PropTypes.func.isRequired,
-  stepsEnabled: PropTypes.objectOf(PropTypes.bool),
-};
 
 export default SampleUploadFlowHeader;

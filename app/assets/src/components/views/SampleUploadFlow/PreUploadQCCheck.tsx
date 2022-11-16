@@ -1,9 +1,10 @@
+// @ts-expect-error '@biowasm/aioli' is not a typescript repo
 import Aioli from "@biowasm/aioli";
 import { isEmpty } from "lodash/fp";
-import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { Sample } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
   ERROR_MESSAGE,
@@ -25,22 +26,31 @@ import {
 } from "./constants";
 import cs from "./pre_upload_qc_check.scss";
 
+interface PreUploadQCCheckProps {
+  samples?: Sample[];
+  changeState?: $TSFixMeFunction;
+  handleSampleDeselect?: $TSFixMeFunction;
+  sequenceTechnology?: string;
+}
+
 const PreUploadQCCheck = ({
   samples,
   changeState,
   handleSampleDeselect,
   sequenceTechnology,
-}) => {
+}: PreUploadQCCheckProps) => {
   // CLI is used for calling some of the bioinformatics tools for PreUploadQC checks (biowasm, etc...)
-  let CLI;
+  let CLI: $TSFixMe;
   // Set for files that did not pass validateFileType
-  const [invalidFiles, setInvalidFiles] = useState(new Set());
+  const [invalidFiles, setInvalidFiles] = useState<Set<Sample>>(new Set());
   // Set for files that did not pass validateDuplicates
-  const [duplicateIds, setDuplicateIds] = useState(new Set());
+  const [duplicateIds, setDuplicateIds] = useState<Set<Sample>>(new Set());
   // Set for files that did not pass validateTruncatedFile
-  const [truncatedFiles, setTruncatedFiles] = useState(new Set());
+  const [truncatedFiles, setTruncatedFiles] = useState<Set<Sample>>(new Set());
   // Set for files that did not pass validateMismatchedFiles
-  const [mismatchedFiles, setMismatchedFiles] = useState(new Set());
+  const [mismatchedFiles, setMismatchedFiles] = useState<Set<Sample>>(
+    new Set(),
+  );
 
   const FASTA_FILE_TYPE = "FASTA";
   const FASTQ_FILE_TYPE = "FASTQ";
@@ -73,8 +83,8 @@ const PreUploadQCCheck = ({
     );
 
     for (let i = 0; i < samples.length; i++) {
-      let passedFile = samples[i];
-      for (var key in passedFile.files) {
+      const passedFile = samples[i];
+      for (const key in passedFile.files) {
         await CLI.mount(passedFile.files[key]);
       }
     }
@@ -90,7 +100,7 @@ const PreUploadQCCheck = ({
   // Removes files from each set that are no longer in samples
   const handleSamplesRemove = () => {
     setInvalidFiles(
-      arr =>
+      () =>
         new Set(
           [...invalidFiles].filter(object1 => {
             return samples.some(object2 => {
@@ -101,7 +111,7 @@ const PreUploadQCCheck = ({
     );
 
     setDuplicateIds(
-      arr =>
+      () =>
         new Set(
           [...duplicateIds].filter(object1 => {
             return samples.some(object2 => {
@@ -112,7 +122,7 @@ const PreUploadQCCheck = ({
     );
 
     setTruncatedFiles(
-      arr =>
+      () =>
         new Set(
           [...truncatedFiles].filter(object1 => {
             return samples.some(object2 => {
@@ -123,7 +133,7 @@ const PreUploadQCCheck = ({
     );
 
     setMismatchedFiles(
-      arr =>
+      () =>
         new Set(
           [...mismatchedFiles].filter(object1 => {
             return samples.some(object2 => {
@@ -135,7 +145,7 @@ const PreUploadQCCheck = ({
   };
 
   // Validate that the file is FASTA or FASTQ
-  const validateFileType = async fileName => {
+  const validateFileType = async (fileName: $TSFixMe) => {
     let result = "";
 
     try {
@@ -157,9 +167,9 @@ const PreUploadQCCheck = ({
   };
 
   // Validate if FASTA file has duplicate sequences
-  const validateDuplicates = async fileName => {
+  const validateDuplicates = async (fileName: $TSFixMe) => {
     try {
-      let slicedFileToNewFile = sliceFile(fileName, 0, MEGABYTE);
+      const slicedFileToNewFile = sliceFile(fileName, 0, MEGABYTE);
 
       // Returns string of file that is seperated by new line (common transformation of FASTA/Q)
       const seqtkSeqResult = await CLI.exec(
@@ -169,7 +179,7 @@ const PreUploadQCCheck = ({
       // Split string by new line and filter out only sequence IDs
       const arr = filterArrayByIndex(seqtkSeqResult, 2);
 
-      const ids = [];
+      const ids: $TSFixMe = [];
 
       // Iterate through the Sequence IDs and check if there are any duplicates
       for (let i = 0; i < arr.length; i++) {
@@ -189,21 +199,21 @@ const PreUploadQCCheck = ({
   };
 
   // Validate if the file FASTQ file is truncated
-  const validateTruncatedFile = async fileName => {
+  const validateTruncatedFile = async (fileName: $TSFixMe) => {
     try {
       // Get the last megabyte of the file
       const byteEnd = Math.ceil(fileName.size);
       const byteIndex = Math.max(0, byteEnd - 1000000);
-      let slicedFileToNewFile = sliceFile(fileName, byteIndex, byteEnd);
+      const slicedFileToNewFile = sliceFile(fileName, byteIndex, byteEnd);
 
       // Extract last four lines
       const fileContents = await slicedFileToNewFile.text();
       const arr = fileContents.trim().split(/\n/);
-      let lastFourLines = arr.slice(-4);
-      let fourLines = lastFourLines.join("\r\n");
+      const lastFourLines = arr.slice(-4);
+      const fourLines = lastFourLines.join("\r\n");
 
       // Create blob with last four lines and mount it
-      var blob = {
+      const blob = {
         name: fileName.name,
         data: new Blob([fourLines], { type: "text/plain" }),
       };
@@ -235,7 +245,10 @@ const PreUploadQCCheck = ({
   };
 
   // Validate if R1 and R2 file are paired-end mismatched
-  const validateMismatchedFiles = async (fileNameR1, fileNameR2) => {
+  const validateMismatchedFiles = async (
+    fileNameR1: $TSFixMe,
+    fileNameR2: $TSFixMe,
+  ) => {
     try {
       // Preprocessing to make sure the fileNameR1 includes R1 and fileNameR2 includes R2
       if (fileNameR1.name.includes(R2CHECK)) {
@@ -245,12 +258,12 @@ const PreUploadQCCheck = ({
       }
 
       // Slice file to first megabyte
-      let slicedFileToNewFileR1 = sliceFile(fileNameR1, 0, MEGABYTE);
-      let slicedFileToNewFileR2 = sliceFile(fileNameR2, 0, MEGABYTE);
+      const slicedFileToNewFileR1 = sliceFile(fileNameR1, 0, MEGABYTE);
+      const slicedFileToNewFileR2 = sliceFile(fileNameR2, 0, MEGABYTE);
 
       // Get File contents from file
-      let fileContentsR1 = await slicedFileToNewFileR1.text();
-      let fileContentsR2 = await slicedFileToNewFileR2.text();
+      const fileContentsR1 = await slicedFileToNewFileR1.text();
+      const fileContentsR2 = await slicedFileToNewFileR2.text();
 
       // Filter only the sequence identifier to array
       const arrR1 = filterArrayByIndex(fileContentsR1, 4);
@@ -274,10 +287,10 @@ const PreUploadQCCheck = ({
   };
 
   // Validate that there are no mismatch sequencing
-  const addFormatToFile = async (file, key) => {
+  const addFormatToFile = async (file: $TSFixMe, key: $TSFixMe) => {
     try {
-      let fileName = file.files[key];
-      let fileContents = await fileName.text();
+      const fileName = file.files[key];
+      const fileContents = await fileName.text();
 
       const arr = filterArrayByIndex(fileContents, 4);
       const nanoporeRegexExp = /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
@@ -350,23 +363,23 @@ const PreUploadQCCheck = ({
   };
 
   // Filter array by an index
-  const filterArrayByIndex = (fileContents, index) => {
+  const filterArrayByIndex = (fileContents: $TSFixMe, index: $TSFixMe) => {
     return fileContents
       .trim()
       .split(/\n/)
-      .filter((element, i) => {
+      .filter((_element: $TSFixMe, i: $TSFixMe) => {
         return i % index === 0;
       });
   };
 
   // Slice File
-  const sliceFile = (fileName, start, end) => {
+  const sliceFile = (fileName: $TSFixMe, start: $TSFixMe, end: $TSFixMe) => {
     const slicedFile = fileName.slice(start, end);
     return new File([slicedFile], fileName.name);
   };
 
   // Find difference between string, returns characters that are in str2 that are not in str1
-  const findDiff = (str1, str2) => {
+  const findDiff = (str1: string, str2: string) => {
     let diff = "";
     str2.split("").forEach((val, i) => {
       if (val !== str1.charAt(i)) diff += val;
@@ -379,10 +392,11 @@ const PreUploadQCCheck = ({
     let cumulativeInvalidFileSizes = 0;
 
     for (let i = 0; i < samples.length; i++) {
-      let passedFile = samples[i];
+      const passedFile = samples[i];
       if (passedFile.finishedValidating === true) {
         if (!passedFile.isValid) {
-          Object.entries(passedFile.files).forEach(([fileName, file]) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          Object.entries(passedFile.files).forEach(([_fileName, file]) => {
             cumulativeInvalidFileSizes += file.size;
           });
         }
@@ -391,7 +405,7 @@ const PreUploadQCCheck = ({
       }
       let fileIsValid = true;
 
-      for (var key in passedFile.files) {
+      for (const key in passedFile.files) {
         const validatedFastaOrFastq = await validateFileType(
           passedFile.files[key],
         );
@@ -443,7 +457,8 @@ const PreUploadQCCheck = ({
       passedFile.finishedValidating = true;
       passedFile.isValid = fileIsValid;
       if (!fileIsValid) {
-        Object.entries(passedFile.files).forEach(([fileName, file]) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        Object.entries(passedFile.files).forEach(([_fileName, file]) => {
           cumulativeInvalidFileSizes += file.size;
         });
       }
@@ -462,7 +477,7 @@ const PreUploadQCCheck = ({
   };
 
   // Delete samples from selected IDs if file is invalid
-  const handleCheckbox = passedFile => {
+  const handleCheckbox = (passedFile: Sample) => {
     if (!passedFile.isValid) {
       handleSampleDeselect(passedFile._selectId, false, "local");
     } else if (passedFile.format) {
@@ -482,26 +497,26 @@ const PreUploadQCCheck = ({
   };
 
   // Get all files of the given sequence technology
-  const getFiles = sequenceTechnologyType => {
-    let allFiles = [];
-    let filteredArrayOfSequenceTechnolgy = samples.filter(
+  const getFiles = (sequenceTechnologyType: string) => {
+    const allFiles: $TSFixMe = [];
+    const filteredArrayOfSequenceTechnolgy = samples.filter(
       element => element.format === sequenceTechnologyType,
     );
 
     filteredArrayOfSequenceTechnolgy.forEach(element => {
-      for (var key in element.files) allFiles.push(key);
+      for (const key in element.files) allFiles.push(key);
     });
     return allFiles;
   };
 
-  // Rerenders whenever samples, or sequence technolgoy changes
+  // Rerenders whenever samples, or sequence technology changes
   useEffect(() => {
     wrapper();
   }, [samples, sequenceTechnology]);
 
   // Adds every file into array
   const addAllFilesIntoArray = () => {
-    const allFiles = [];
+    const allFiles: File[] = [];
     samples.forEach(element =>
       Object.values(element.files).forEach(val => allFiles.push(val)),
     );
@@ -513,8 +528,8 @@ const PreUploadQCCheck = ({
   // For example: [[sample1_R1, sample1_R2], [sample2_R1, sample2_R2], ...]
   // Used for displaying the errored files in two separate columns in the warning callout.
   const pairMismatchedFileNames = () => {
-    let pairedFiles = new Set();
-    let fileNames = [];
+    const pairedFiles = new Set();
+    const fileNames: $TSFixMe = [];
     mismatchedFiles.forEach(file => {
       const fileName = file.name;
       if (!pairedFiles.has(fileName)) {
@@ -522,7 +537,7 @@ const PreUploadQCCheck = ({
           fileNames.push([fileName, fileName.replace(R1CHECK, R2CHECK)]);
           pairedFiles.add(fileName);
           pairedFiles.add(fileName.replace(R1CHECK, R2CHECK));
-        } else if (file.includes(R2CHECK)) {
+        } else if (fileName.includes(R2CHECK)) {
           fileNames.push([fileName.replace(R2CHECK, R1CHECK), fileName]);
           pairedFiles.add(fileName);
           pairedFiles.add(fileName.replace(R2CHECK, R1CHECK));
@@ -650,13 +665,6 @@ const PreUploadQCCheck = ({
       </div>
     </div>
   );
-};
-
-PreUploadQCCheck.propTypes = {
-  samples: PropTypes.array,
-  changeState: PropTypes.func,
-  handleSampleDeselect: PropTypes.func,
-  sequenceTechnology: PropTypes.string,
 };
 
 export default PreUploadQCCheck;
