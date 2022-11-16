@@ -13,7 +13,6 @@ module Types
     field :executedAt, GraphQL::Types::ISO8601DateTime, null: true
     field :finalized, Int, null: true
     field :fractionSubsampled, Float, null: true
-    field :id, Int, null: false
     field :jobStatus, String, null: true
     field :knownUserError, String, null: true
     field :maxInputFragments, Int, null: true

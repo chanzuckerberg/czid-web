@@ -9,7 +9,6 @@ module Types
     field :initialReads, Int, null: true
     field :name, String, null: true
     field :pipelineVersion, String, null: true
-    field :sampleId, Int, null: true
     field :wdlVersion, String, null: true
     field :steps, [Types::SampleSteps], null: true
   end
