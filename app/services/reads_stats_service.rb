@@ -15,7 +15,7 @@ class ReadsStatsService
       Rails.logger.warn("ReadsStatsService call with samples = nil")
       samples = []
     end
-    select_params = [:sample_id, :wdl_version, :pipeline_version, :pipeline_execution_strategy, :sfn_execution_arn]
+    select_params = [:sample_id, :wdl_version, :pipeline_version, :pipeline_execution_strategy, :sfn_execution_arn, :technology]
     @viewable_pipeline_runs = get_succeeded_pipeline_runs_for_samples(samples, false, select_params)
     @viewable_pipeline_run_ids = @viewable_pipeline_runs.map(&:id)
     @sample_names = {}

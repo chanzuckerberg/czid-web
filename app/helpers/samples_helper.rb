@@ -667,10 +667,6 @@ module SamplesHelper
             end
           end
 
-          # Creating all the workflow runs and importing them later triggers a race condition and the first few samples don't kickoff.
-          wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json&.to_json)
-          wr.save!
-
           if workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
             pr = PipelineRun.new(
               sample: sample,
@@ -679,6 +675,10 @@ module SamplesHelper
               alignment_config: AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
             )
             pr.save!
+          else
+            # Creating all the workflow runs and importing them later triggers a race condition and the first few samples don't kickoff.
+            wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json&.to_json)
+            wr.save!
           end
         end
       else
