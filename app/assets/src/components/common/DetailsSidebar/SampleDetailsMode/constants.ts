@@ -17,10 +17,10 @@ export const SAMPLE_ADDITIONAL_INFO = [
   },
 ];
 
-export const PIPELINE_INFO_FIELDS = [
+export const SHORT_READ_MNGS_INFO_FIELDS = [
   {
     name: "Analysis Type",
-    key: "workflow",
+    key: "analysisType",
   },
   {
     name: "Sequencing Platform",
@@ -61,6 +61,49 @@ export const PIPELINE_INFO_FIELDS = [
   {
     name: "Mean Insert Size",
     key: "meanInsertSize",
+  },
+  {
+    name: "Date Processed",
+    key: "lastProcessedAt",
+  },
+];
+
+export const LONG_READ_MNGS_INFO_FIELDS = [
+  {
+    name: "Analysis Type",
+    key: "analysisType",
+  },
+  {
+    name: "Sequencing Platform",
+    key: "technology",
+  },
+  {
+    name: "Pipeline Version",
+    key: "pipelineVersion",
+  },
+  {
+    name: "Host Subtracted",
+    key: "hostSubtracted",
+  },
+  {
+    name: "Total Reads",
+    key: "totalReads",
+  },
+  {
+    name: "ERCC Reads",
+    key: "totalErccReads",
+  },
+  {
+    name: "Passed Filters",
+    key: "nonhostReads",
+  },
+  {
+    name: "Unmapped Reads",
+    key: "unmappedReads",
+  },
+  {
+    name: "Passed Quality Control",
+    key: "qcPercent",
   },
   {
     name: "Date Processed",

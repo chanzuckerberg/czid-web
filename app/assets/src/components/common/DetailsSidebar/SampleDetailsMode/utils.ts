@@ -45,7 +45,7 @@ export const processPipelineInfo = (
     pipelineInfo.totalReads = {
       text: numberWithCommas(pipelineRun.total_reads),
     };
-    pipelineInfo.totalErccReads = { text: `${totalErccReads}${erccPercent}` };
+    pipelineInfo.totalErccReads = { text: totalErccReads? `${totalErccReads}${erccPercent}` : "--" };
     if (pipelineRun.version.pipeline) {
       pipelineInfo.pipelineVersion = {
         text: `v${pipelineRun.version.pipeline}`,
@@ -56,11 +56,18 @@ export const processPipelineInfo = (
     pipelineInfo.hostSubtracted = { text: pipelineRun.host_subtracted };
 
     pipelineInfo.workflow = {
+      text: get("technology", pipelineRun) === CG_TECHNOLOGY_OPTIONS.ILLUMINA ?
+        WORKFLOWS.SHORT_READ_MNGS.label
+        : WORKFLOWS.LONG_READ_MNGS.label,
+    };
+
+    // Analysis type for both Illumina & ONT mNGS is "Metagenomic", so decouple it from workflow field.
+    pipelineInfo.analysisType = {
       text: WORKFLOWS.SHORT_READ_MNGS.label,
     };
 
     pipelineInfo.technology = {
-      text: CG_TECHNOLOGY_DISPLAY_NAMES[CG_TECHNOLOGY_OPTIONS.ILLUMINA],
+      text: CG_TECHNOLOGY_DISPLAY_NAMES[get("technology", pipelineRun)],
     };
 
     if (summaryStats) {

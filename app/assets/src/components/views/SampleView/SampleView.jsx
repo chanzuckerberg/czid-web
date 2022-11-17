@@ -1523,7 +1523,8 @@ class SampleView extends React.Component {
       };
     } else if (sidebarMode === "sampleDetails") {
       const sampleWorkflowLabels = compact([
-        size(sample.pipeline_runs) && WORKFLOWS.SHORT_READ_MNGS.label,
+        sample.initial_workflow === WORKFLOWS.SHORT_READ_MNGS.value && size(sample.pipeline_runs) && WORKFLOWS.SHORT_READ_MNGS.label,
+        sample.initial_workflow === WORKFLOWS.LONG_READ_MNGS.value && size(sample.pipeline_runs) && WORKFLOWS.LONG_READ_MNGS.label,
         find(
           { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
           sample.workflow_runs,

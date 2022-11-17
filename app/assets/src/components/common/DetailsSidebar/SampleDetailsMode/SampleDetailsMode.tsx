@@ -280,7 +280,7 @@ const SampleDetailsMode = ({
       );
     }
     if (currentTab === "Pipelines") {
-      const workflowTabs = size(sampleWorkflowLabels) >= 1 && (
+      const workflowTabs = size(sampleWorkflowLabels) > 1 && (
         <Tabs
           className={cs.workflowTabs}
           tabStyling={cs.tabLabels}

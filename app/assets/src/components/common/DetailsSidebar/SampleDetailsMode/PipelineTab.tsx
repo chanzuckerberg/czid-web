@@ -27,10 +27,11 @@ import Link from "~ui/controls/Link";
 import LoadingMessage from "../../LoadingMessage";
 import MetadataSection from "./MetadataSection";
 import {
-  PIPELINE_INFO_FIELDS,
   CG_WORKFLOW_INFO_FIELDS,
   HOST_FILTERING_WIKI,
   AMR_WORKFLOW_INFO_FIELDS,
+  SHORT_READ_MNGS_INFO_FIELDS,
+  LONG_READ_MNGS_INFO_FIELDS,
 } from "./constants";
 import cs from "./sample_details_mode.scss";
 
@@ -116,7 +117,8 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
   INFO_FIELDS_FOR_WORKFLOW = {
     [WORKFLOWS.AMR.label]: AMR_WORKFLOW_INFO_FIELDS,
     [WORKFLOWS.CONSENSUS_GENOME.label]: CG_WORKFLOW_INFO_FIELDS,
-    [WORKFLOWS.SHORT_READ_MNGS.label]: PIPELINE_INFO_FIELDS,
+    [WORKFLOWS.SHORT_READ_MNGS.label]: SHORT_READ_MNGS_INFO_FIELDS,
+    [WORKFLOWS.LONG_READ_MNGS.label]: LONG_READ_MNGS_INFO_FIELDS,
   };
 
   componentDidMount() {
@@ -361,6 +363,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     const workflow =
       get(["workflow", "text"], pipelineInfo) ||
       WORKFLOWS.SHORT_READ_MNGS.label;
+    const workflowIsMngs = [WORKFLOWS.SHORT_READ_MNGS.label, WORKFLOWS.LONG_READ_MNGS.label].includes(workflow);
 
     const fields = this.INFO_FIELDS_FOR_WORKFLOW[workflow];
 
@@ -379,7 +382,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
             className={cs.pipelineInfoFields}
           />
         </MetadataSection>
-        {!snapshotShareId && workflow === WORKFLOWS.SHORT_READ_MNGS.label && (
+        {!snapshotShareId && workflowIsMngs && (
           <React.Fragment>
             <MetadataSection
               toggleable
