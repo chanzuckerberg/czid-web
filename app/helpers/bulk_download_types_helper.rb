@@ -157,7 +157,7 @@ module BulkDownloadTypesHelper
       category: "reports",
       execution_type: RESQUE_EXECUTION_TYPE,
       file_type_display: ".csv",
-      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]],
     },
     {
       type: HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE,

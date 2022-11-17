@@ -548,6 +548,59 @@ describe PipelineRun, type: :model do
     end
   end
 
+  context "write contig mapping table" do
+    let(:contig_mock) do
+      {
+        "NODE_1_length_100_cov_0.123" =>
+        ["NODE_1_length_100_cov_0.123", "CP000253.1", "97.794", "136", "3", "0", "1", "136", "213526", "213391", "1.13e-59", "235.0", "136", "2821361"],
+      }
+    end
+
+    before do
+      joe = create(:joe)
+      project = create(:project, users: [joe], name: "Test Project")
+      @sample_one = create(:sample, project: project, user: joe)
+      @sample_two = create(:sample, project: project, user: joe)
+      @pipeline_run_one = create(:pipeline_run, sample: @sample_one)
+      @pipeline_run_two = create(:pipeline_run, sample: @sample_two, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore])
+    end
+
+    context "when pipeline run is illumina and there are no contigs" do
+      it "doesn't write anything" do
+        pipeline_run = @sample_one.pipeline_runs.first
+        csv = []
+        pipeline_run.write_contig_mapping_table_csv(csv)
+        expect(csv.size).to eq(0)
+      end
+    end
+
+    context "when pipeline run is illumina and there are contigs" do
+      it "writes two rows" do
+        pipeline_run = @sample_one.pipeline_runs.first
+        create(:contig, name: "NODE_1_length_100_cov_0.123", pipeline_run_id: pipeline_run.id)
+        allow_any_instance_of(PipelineRun).to receive(:get_m8_mapping).and_return(contig_mock)
+        csv = []
+        pipeline_run.write_contig_mapping_table_csv(csv)
+        expect(csv.size).to eq(2) # 1 header row 1 contig
+        expect(csv[0][0]).to eq("contig_name")
+        expect(csv[1][0]).to eq("NODE_1_length_100_cov_0.123")
+      end
+    end
+
+    context "when pipeline run is ONT and there are contigs" do
+      it "writes two rows with base count column" do
+        pipeline_run = @sample_two.pipeline_runs.first
+        create(:contig, base_count: 42, name: "NODE_1_length_100_cov_0.123", pipeline_run_id: pipeline_run.id)
+        allow_any_instance_of(PipelineRun).to receive(:get_m8_mapping).and_return(contig_mock)
+        csv = []
+        pipeline_run.write_contig_mapping_table_csv(csv)
+        expect(csv.size).to eq(2) # 1 header row 1 contig
+        expect(csv[0][2]).to eq("base_count")
+        expect(csv[1][2]).to eq(42)
+      end
+    end
+  end
+
   context "loading qc_percent and compression_ratio from job_stats" do
     let(:job_stats) do
       [

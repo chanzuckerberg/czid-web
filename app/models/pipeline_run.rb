@@ -596,7 +596,9 @@ class PipelineRun < ApplicationRecord
     # TODO(omar): Get mapping for merged_NT_NR?
     nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
     nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
-    header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
+    header_row = ['contig_name', 'read_count']
+    header_row << 'base_count' if technology == "ONT"
+    header_row += ['contig_length', 'contig_coverage']
     header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
     header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NT.#{M8_FIELDS[idx]}" }
     header_row += TaxonLineage.names_a.map { |name| "NR.#{name}" }
@@ -607,6 +609,7 @@ class PipelineRun < ApplicationRecord
       nr_m8 = nr_m8_map[c.name] || []
       lineage = JSON.parse(c.lineage_json || "{}")
       row = [c.name, c.read_count]
+      row << c.base_count if technology == "ONT"
       cfs = c.name.split("_")
       row += [cfs[3], cfs[5]]
       row += (lineage['NT'] || TaxonLineage.null_array)
