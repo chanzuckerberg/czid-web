@@ -58,7 +58,11 @@ class HandleSfnNotifications
     if pr
       # If the run is still in progress, update its status.
       unless pr.finalized?
-        pr.async_update_job_status
+        if pr.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+          pr.update_single_stage_run_status
+        else
+          pr.async_update_job_status
+        end
         Rails.logger.info("Updated PipelineRun #{pr.id} #{arn} to #{status}")
       end
 
@@ -77,7 +81,7 @@ class HandleSfnNotifications
         # If the execution failed, try to load in any available results and mark the rest as failed.
         # Otherwise, if it's an ONT run, there are no separate pipeline stages to load intermediate outputs from,
         # so call monitor_results to load all available outputs.
-        elsif ["TIMED_OUT", "ABORTED", "FAILED"].include?(status) || pr.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+        elsif ["TIMED_OUT", "ABORTED", "FAILED"].include?(status) || (pr.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore] && ["SUCCEEDED", "SUCCEEDED_WITH_ISSUE"].include?(status))
           Rails.logger.info("Loading results for PipelineRun #{pr.id} #{arn} into the database")
           pr.monitor_results
         end

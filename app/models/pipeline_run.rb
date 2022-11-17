@@ -256,8 +256,7 @@ class PipelineRun < ApplicationRecord
 
   # Triggers a run for new samples by defining output states and run stages configurations.
   # *Exception* for cloned pipeline runs that already have results and finalized status
-  before_create :create_run_stages, unless: :results_finalized?
-  after_create :create_output_states
+  after_create :create_output_states, :create_run_stages, unless: :results_finalized?
   before_destroy :cleanup
 
   delegate :status_url, to: :sample
@@ -350,12 +349,14 @@ class PipelineRun < ApplicationRecord
   def create_run_stages
     run_stages = []
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
-    PipelineRunStage::STAGE_INFO.each do |step_number, info|
-      run_stages << PipelineRunStage.new(
-        step_number: step_number,
-        name: info[:name],
-        job_command_func: info[:job_command_func]
-      )
+    if technology == TECHNOLOGY_INPUT[:illumina]
+      PipelineRunStage::STAGE_INFO.each do |step_number, info|
+        run_stages << PipelineRunStage.new(
+          step_number: step_number,
+          name: info[:name],
+          job_command_func: info[:job_command_func]
+        )
+      end
     end
     self.pipeline_run_stages = run_stages
   end
@@ -991,7 +992,7 @@ class PipelineRun < ApplicationRecord
   def status_display(output_states_by_pipeline_run_id)
     return "COMPLETE - ISSUE" if known_user_error
 
-    status_display_helper(output_state_hash(output_states_by_pipeline_run_id), results_finalized)
+    status_display_helper(output_state_hash(output_states_by_pipeline_run_id), results_finalized, technology)
   end
 
   def pre_result_monitor?
@@ -1011,9 +1012,9 @@ class PipelineRun < ApplicationRecord
     state = output_state.state
     return unless [STATUS_UNKNOWN, STATUS_LOADING_ERROR].include?(state)
 
-    Rails.logger.info("[PR: #{id}] Checking output - finalized: #{finalized?}, last update: #{pipeline_run_stages.order(:step_number).last.updated_at}")
+    Rails.logger.info("[PR: #{id}] Checking output - finalized: #{finalized?}, last update: #{updated_at}")
     # If the run completed over a minute ago, the output should be available.
-    should_be_available = finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
+    should_be_available = finalized? && updated_at < 1.minute.ago
     if output_ready?(output)
       Rails.logger.info("[PR: #{id}] Enqueue for resque: #{output}")
       output_state.update(state: STATUS_LOADING_QUEUED)
@@ -1260,6 +1261,40 @@ class PipelineRun < ApplicationRecord
     end
     save!
     enqueue_new_pipeline_run if automatic_restart
+  end
+
+  # The long-reads-mngs pipeline doesn't have multiple stages,
+  # so we update the run's status directly from the SFN execution.
+  # This method follows the same logic/pattern of WorkflowRun#update_status.
+  def update_single_stage_run_status
+    remote_status = sfn_execution.description[:status]
+
+    if WorkflowRun::FAILED_REMOTE_STATUSES.include?(remote_status)
+      remote_status = STATUS_FAILED
+
+      error_message = nil
+      if input_error.present?
+        known_user_error, error_message = input_error
+      else
+        Rails.logger.error("SampleFailedEvent: Sample #{sample.id} by " \
+        "#{sample.user.role_name} failed PipelineRun #{id} (#{workflow}). See: #{sample.status_url}")
+      end
+      update(
+        time_to_finalized: time_since_executed_at,
+        known_user_error: known_user_error,
+        error_message: error_message,
+        job_status: remote_status
+      )
+    elsif remote_status == WorkflowRun::STATUS[:succeeded]
+      update(
+        finalized: 1,
+        time_to_finalized: time_since_executed_at,
+        job_status: STATUS_CHECKED
+      )
+    # prevent run status from reverting to RUNNING if messages are processed out of order
+    elsif !finalized? && remote_status != job_status
+      update(job_status: remote_status)
+    end
   end
 
   # This method should be renamed to update_job_status after fully transitioning to step functions
@@ -2137,6 +2172,23 @@ class PipelineRun < ApplicationRecord
   def time_since_executed_at
     if executed_at
       Time.now.utc - executed_at  # seconds
+    end
+  end
+
+  def sfn_execution
+    s3_path = s3_output_prefix || sample.sample_output_s3_path
+
+    @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: s3_path, finalized: finalized?)
+  end
+
+  def input_error
+    sfn_error, sfn_error_message = sfn_execution.pipeline_error
+
+    if WorkflowRun::INPUT_ERRORS.include?(sfn_error)
+      return {
+        label: sfn_error,
+        message: sfn_error_message,
+      }
     end
   end
 end

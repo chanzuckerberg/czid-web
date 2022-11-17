@@ -118,15 +118,30 @@ function showhide(id) {
               <td><%= run_stage.duration_hrs %></td>
             </tr>
           <% end %>
-          <% if pipeline_run.output_states.present? %>
-            <% pipeline_run.output_states.each do |output_state| %>
-              <tr>
-                <td>  <%= "#{pipeline_run.id} - Output - #{output_state.output}" %> </td>
-                <td> <%= output_state.state %> </td>
-                <td colspan=4> &nbsp; </td>
-                <td> <%= output_state.updated_at %> </td>
-              </tr>
+        <% end %>
+        <% if pipeline_run.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore] %>
+          <tr>
+            <td><%= pipeline_run.id %></td>
+            <td>
+              <%= pipeline_run.job_status %>
+            </td>
+            <% if pipeline_run.sfn_execution_arn %>
+              <td><u><%= link_to pipeline_run.sfn_execution_arn, AwsUtil.get_sfn_execution_url(pipeline_run.sfn_execution_arn), target: :_blank  %></u></td>
+            <% else %>
+              <td>Missing SFN Execution ARN</td>
             <% end %>
+            <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
+            <td><%= pipeline_run.wdl_version || pipeline_run.pipeline_version %> &nbsp;</td>
+          </tr>
+        <% end %>
+        <% if pipeline_run.output_states.present? %>
+          <% pipeline_run.output_states.each do |output_state| %>
+            <tr>
+              <td>  <%= "#{pipeline_run.id} - Output - #{output_state.output}" %> </td>
+              <td> <%= output_state.state %> </td>
+              <td colspan=4> &nbsp; </td>
+              <td> <%= output_state.updated_at %> </td>
+            </tr>
           <% end %>
         <% else %>
           <tr>

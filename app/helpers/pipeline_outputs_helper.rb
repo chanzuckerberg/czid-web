@@ -206,7 +206,7 @@ module PipelineOutputsHelper
     end
   end
 
-  def status_display_helper(states_by_output_hash, results_finalized_var)
+  def status_display_helper(states_by_output_hash, results_finalized_var, technology)
     # TODO(julie): Revisit if checking these outputs for the status still makes sense.
     # Status display for the frontend.
     h = states_by_output_hash
@@ -220,6 +220,8 @@ module PipelineOutputsHelper
       else
         "FAILED"
       end
+    elsif technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      "RUNNING"
     elsif h["taxon_counts"] == PipelineRun::STATUS_LOADED
       # Alignment succeeded, postprocessing in progress
       "POST PROCESSING"
