@@ -1035,14 +1035,6 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def load_stats_file
-    stats_s3 = "#{output_s3_path_with_version}/#{STATS_JSON_NAME}"
-    # TODO: Remove the datetime check?
-    if file_generated_since_jobstats?(stats_s3)
-      load_job_stats(stats_s3)
-    end
-  end
-
   def all_output_states_terminal?
     output_states.pluck(:state).all? { |s| [STATUS_LOADED, STATUS_FAILED].include?(s) }
   end
@@ -1105,9 +1097,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_job_stats
-    # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
-    compile_stats_file!
-    load_stats_file
+    MngsReadsStatsLoadService.call(self)
 
     job_stats_hash = job_stats.index_by(&:task)
     load_qc_percent(job_stats_hash)
@@ -1145,35 +1135,6 @@ class PipelineRun < ApplicationRecord
       sample.user,
       pipeline_run_id: id, project_id: sample.project.id, run_time: run_time
     )
-  end
-
-  def file_generated_since_jobstats?(s3_path)
-    # If there is no file, return false
-    stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
-    return false unless status.exitstatus.zero?
-
-    # If there is a file and there are no existing job_stats yet, return true
-    existing_jobstats = job_stats.first
-    return true unless existing_jobstats
-
-    # If there is a file and there are job_stats, check if the file supersedes the job_stats:
-    begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
-      return (s3_file_time && existing_jobstats.created_at && s3_file_time > existing_jobstats.created_at)
-    rescue StandardError
-      return nil
-    end
-  end
-
-  def load_job_stats(stats_json_s3_path)
-    downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
-    return unless downloaded_stats_path
-
-    stats_array = JSON.parse(File.read(downloaded_stats_path))
-    stats_array = stats_array.select { |entry| entry.key?("task") }
-    job_stats.destroy_all
-    update(job_stats_attributes: stats_array)
-    _stdout = Syscall.run("rm", "-f", downloaded_stats_path)
   end
 
   def check_job_stats
@@ -1382,133 +1343,6 @@ class PipelineRun < ApplicationRecord
         update(alert_sent: 1)
       end
     end
-  end
-
-  # Generate stats.json from all *.count files in results dir. Example:
-  # [
-  #   {
-  #     "reads_after": 8262,
-  #     "task": "unidentified_fasta"
-  #   },
-  #   {
-  #     "reads_after": 8558,
-  #     "task": "bowtie2_out"
-  #   },
-  #   ...
-  #   {
-  #     "total_reads": 10000
-  #   },
-  #   {
-  #     "fraction_subsampled": 1.0
-  #   },
-  #   {
-  #     "adjusted_remaining_reads": 8558
-  #   }
-  # ]
-  #
-  # IMPORTANT NOTE: This method ALSO sets attributes of pipeline run instance.
-  # For unmapped_reads, it will read a .count file from /postprocess s3 dir.
-  def compile_stats_file!
-    res_folder = output_s3_path_with_version
-    stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
-    unless status.exitstatus.zero?
-      return
-    end
-
-    all_counts = []
-    stdout.split("\n").each do |line|
-      fname = line.split(" ")[3] # Last col in line
-      contents = Syscall.s3_read_json("#{res_folder}/#{fname}")
-      # Ex: {"gsnap_filter_out": 194}
-      contents.each do |key, count|
-        all_counts << { task: key, reads_after: count }
-      end
-    end
-
-    # Load total reads
-    total = all_counts.detect { |entry| entry.value?("fastqs") }
-    if total
-      all_counts << { total_reads: total[:reads_after] }
-      self.total_reads = total[:reads_after]
-    end
-
-    # Load truncation
-    truncation = all_counts.detect { |entry| entry.value?("truncated") }
-    if truncation
-      self.truncated = truncation[:reads_after]
-    end
-
-    # Load subsample fraction
-    sub_before = all_counts.detect { |entry| entry.value?("bowtie2_out") }
-    sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
-    frac = -1
-    if sub_before && sub_after
-      frac = sub_before[:reads_after] > 0 ? ((1.0 * sub_after[:reads_after]) / sub_before[:reads_after]) : 1.0
-      all_counts << { fraction_subsampled: frac }
-      self.fraction_subsampled = frac
-    end
-
-    # Load remaining reads
-    # This is an approximation multiplied by the subsampled ratio so that it
-    # can be compared to total reads for the user. Number of reads after host
-    # filtering step vs. total reads as if subsampling had never occurred.
-    rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
-    if rem && frac > 0
-      adjusted_remaining_reads = (rem[:reads_after] * (1 / frac)).to_i
-      all_counts << { adjusted_remaining_reads: adjusted_remaining_reads }
-      self.adjusted_remaining_reads = adjusted_remaining_reads
-    else
-      # gsnap filter is not done. use bowtie output as remaining reads
-      bowtie = all_counts.detect { |entry| entry.value?("bowtie2_out") }
-      if bowtie
-        self.adjusted_remaining_reads = bowtie[:reads_after]
-      end
-    end
-
-    # Load unidentified reads
-    self.unmapped_reads = fetch_unmapped_reads(all_counts) || unmapped_reads
-
-    # Write JSON to a file
-    tmp = Tempfile.new
-    tmp.write(all_counts.to_json)
-    tmp.close
-
-    # Copy to S3. Overwrite if exists.
-    _stdout, stderr, status = Open3.capture3("aws s3 cp #{tmp.path} #{res_folder}/#{STATS_JSON_NAME}")
-    unless status.exitstatus.zero?
-      Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
-    end
-
-    save
-  end
-
-  # Fetch the unmapped reads count from alignment stage then refined counts from
-  # assembly stage, as each becomes available. Prior to Dec 2019, the count was
-  # only fetched from alignment.
-  def fetch_unmapped_reads(
-    all_counts,
-    s3_path = "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_COUNT_BASENAME}"
-  )
-    unmapped_reads = nil
-    unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
-    if unidentified
-      unmapped_reads = unidentified[:reads_after]
-
-      # This will fetch unconditionally on every iteration of the results
-      # monitor. My attempts to restrict fetching with "finalized?" and
-      # "step_number == 3" both failed to work in production.
-      if supports_assembly?
-        # see idseq_dag/steps/generate_annotated_fasta.py
-        begin
-          Rails.logger.info("Fetching file: #{s3_path}")
-          refined_annotated_out = Syscall.s3_read_json(s3_path)
-          unmapped_reads = refined_annotated_out["unidentified_fasta"]
-        rescue StandardError
-          Rails.logger.warn("Could not read file: #{s3_path}")
-        end
-      end
-    end
-    unmapped_reads
   end
 
   def local_json_path
