@@ -522,23 +522,31 @@ RSpec.describe SamplesController, type: :controller do
       end
 
       let(:good_sample_one) do
-        create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, technology: PipelineRun::TECHNOLOGY_INPUT[:illumina] }])
       end
 
       let(:good_sample_two) do
-        create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, technology: PipelineRun::TECHNOLOGY_INPUT[:illumina] }])
+      end
+
+      let(:ont_sample) do
+        create(:sample, project: @project, name: "ONT Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore] }])
       end
 
       let(:in_progress_sample) do
-        create(:sample, project: @project, name: "In Progress Sample", pipeline_runs_data: [{ finalized: 0, job_status: PipelineRun::STATUS_RUNNING }])
+        create(:sample, project: @project, name: "In Progress Sample", pipeline_runs_data: [{ finalized: 0, job_status: PipelineRun::STATUS_RUNNING, technology: PipelineRun::TECHNOLOGY_INPUT[:illumina] }])
+      end
+
+      let(:in_progress_ont_sample) do
+        create(:sample, project: @project, name: "In Progress ONT Sample", pipeline_runs_data: [{ finalized: 0, job_status: PipelineRun::STATUS_RUNNING, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore] }])
       end
 
       let(:failed_sample) do
-        create(:sample, project: @project, name: "Failed Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_FAILED }])
+        create(:sample, project: @project, name: "Failed Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_FAILED, technology: PipelineRun::TECHNOLOGY_INPUT[:illumina] }])
       end
 
       let(:different_owner_sample) do
-        create(:sample, project: @admin_project, name: "Admin Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        create(:sample, project: @admin_project, name: "Admin Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, technology: PipelineRun::TECHNOLOGY_INPUT[:illumina] }])
       end
 
       let(:good_workflow_sample) do
@@ -652,6 +660,23 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).not_to eq(nil)
         expect(json_response["validIds"]).to include(good_workflow_sample.id)
         expect(json_response["invalidSampleNames"]).to include(failed_workflow_sample.name)
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should fetch valid samples and filter in progress samples when the workflow is long read mNGS" do
+        validate_params = {
+          sampleIds: [ont_sample, good_sample_one, in_progress_sample, in_progress_ont_sample],
+          workflow: WorkflowRun::WORKFLOW[:long_read_mngs],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validIds"]).to include(ont_sample.id)
+        expect(json_response["invalidSampleNames"]).to include(good_sample_one.name, in_progress_sample.name, in_progress_ont_sample.name)
         expect(json_response["error"]).to be_nil
       end
     end

@@ -50,7 +50,7 @@ class BulkDownloadsController < ApplicationController
     begin
       viewable_objects = validate_bulk_download_create_params(create_params, current_user)
 
-      if create_params[:workflow] == WorkflowRun::WORKFLOW[:short_read_mngs]
+      if [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]].include? create_params[:workflow]
         pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_objects)
       else
         workflow_run_ids = viewable_objects.active.pluck(:id)

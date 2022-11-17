@@ -169,8 +169,9 @@ class SamplesController < ApplicationController
     validated_sample_info = SampleAccessValidationService.call(queried_sample_ids, current_user)
     viewable_samples = validated_sample_info[:viewable_samples]
     if validated_sample_info[:error].nil?
-      valid_sample_ids = if workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
-                           get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).pluck(:sample_id)
+      valid_sample_ids = if [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]].include? workflow
+                           technology = workflow == WorkflowRun::WORKFLOW[:short_read_mngs] ? PipelineRun::TECHNOLOGY_INPUT[:illumina] : PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+                           get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).where(technology: technology).pluck(:sample_id)
                          else
                            WorkflowRun.where(sample_id: viewable_samples.pluck(:id), workflow: workflow).active.pluck(:sample_id)
                          end
