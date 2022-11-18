@@ -12,7 +12,6 @@ class PipelineReportService
     :alignment_length,
     :alignment_length_decimal,
     :common_name,
-    :count,
     :count_type,
     :e_value,
     :genus_taxid,
@@ -20,18 +19,28 @@ class PipelineReportService
     :name,
     :percent_identity,
     :percent_identity_decimal,
-    :rpm,
-    :rpm_decimal,
     :source_count_type,
     :superkingdom_taxid,
     :tax_id,
     :tax_level,
   ].freeze
 
+  TAXON_COUNT_READS_FIELDS_TO_PLUCK = [
+    :count,
+    :rpm,
+    :rpm_decimal,
+  ].freeze
+
+  TAXON_COUNT_BASES_FIELDS_TO_PLUCK = [
+    :base_count,
+    :bpm,
+  ].freeze
+
   TAXON_COUNT_FIELDS_DEFAULTS = {
     alignment_length: 0,
     alignment_length_decimal: 0,
     count: 0,
+    base_count: 0,
     count_type: nil,
     e_value: 0,
     genus_taxid: nil,
@@ -40,6 +49,7 @@ class PipelineReportService
     percent_identity_decimal: 0,
     rpm: 0,
     rpm_decimal: 0,
+    bpm: 0,
     tax_id: nil,
     tax_level: nil,
   }.freeze
@@ -56,8 +66,18 @@ class PipelineReportService
     stdev: nil,
   }.freeze
 
-  TAXON_COUNT_FIELDS_INDEX = Hash[TAXON_COUNT_FIELDS_TO_PLUCK.map.with_index { |field, i| [field, i] }]
-  TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX = Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }]
+  ILLUMINA = PipelineRun::TECHNOLOGY_INPUT[:illumina]
+  NANOPORE = PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+
+  TAXON_COUNT_FIELDS_INDEX = {
+    ILLUMINA => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_READS_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
+    NANOPORE => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_BASES_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
+  }.freeze
+
+  TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX = {
+    ILLUMINA => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_READS_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
+    NANOPORE => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_BASES_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
+  }.freeze
 
   LINEAGE_COLUMNS = %w[
     taxid
@@ -109,11 +129,13 @@ class PipelineReportService
     "species_tax_ids",
   ].freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: PipelineRun::MIN_CONTIG_READS, parallel: true, merge_nt_nr: false, priority_pathogens: TaxonLineage::PRIORITY_PATHOGENS, show_annotations: false)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, priority_pathogens: TaxonLineage::PRIORITY_PATHOGENS, show_annotations: false)
     @pipeline_run = pipeline_run
+    @technology = pipeline_run.technology
+    # In ont_v1, we are not supporting backgrounds for nanopore mngs samples
     @background = background_id ? Background.find(background_id) : nil
     @csv = csv
-    @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS
+    @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS[@technology]
     @parallel = parallel
     @merge_nt_nr = merge_nt_nr
     @priority_pathogens = priority_pathogens
@@ -134,27 +156,29 @@ class PipelineReportService
     # taxon_counts (is report_ready), or if its results are finalized without errors.
     # Otherwise just return the metadata, which includes statuses and error messages to display.
     # TODO(julie): refactor + clarify pipeline run statuses (JIRA: https://jira.czi.team/browse/IDSEQ-1890)
-    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?)) && @pipeline_run.total_reads
+    total_count = @pipeline_run.fetch_total_count_by_technology
+    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?)) && total_count
       return JSON.dump(
         metadata: metadata
       )
     end
 
-    if @background&.mass_normalized? && @pipeline_run.total_reads.zero?
+    if @background&.mass_normalized? && total_count.zero?
       raise MassNormalizedBackgroundError.new(@background.id, @pipeline_run.id)
     end
 
-    adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
-    @timer.split("initialize_and_adjust_reads")
+    adjusted_total_count = @pipeline_run.fetch_adjusted_total_count_by_technology
+
+    @timer.split("initialize_and_adjust_reads_or_bases")
 
     # FETCH TAXON INFORMATION
     if @parallel
       parallel_steps = [
         -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads) },
-        -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id) },
-        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id) },
+        -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id, technology: @technology) },
+        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id, @technology) },
       ]
-      parallel_steps << -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_MERGED]) } if @merge_nt_nr
+      parallel_steps << -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_MERGED], technology: @technology) } if @merge_nt_nr
       results = nil
       ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
         results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
@@ -176,14 +200,14 @@ class PipelineReportService
       contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads)
       @timer.split("get_contig_summary")
 
-      taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id)
+      taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id, technology: @technology)
       @timer.split("fetch_taxon_counts_and_summaries")
 
-      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id)
+      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id, @pipeline_Run.technology)
       @timer.split("fetch_taxons_absent_from_sample")
 
       if @merge_nt_nr
-        merged_taxon_counts = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_MERGED])
+        merged_taxon_counts = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_MERGED], technology: @technology)
         @timer.split("fetch_merged_taxon_counts")
       end
     end
@@ -191,27 +215,27 @@ class PipelineReportService
     # PROCESS & TRANSFORM TAXON INFORMATION
     taxon_count_and_summary_default_values = TAXON_COUNT_FIELDS_DEFAULTS.merge(TAXON_SUMMARY_FIELDS_DEFAULTS)
     taxons_absent_from_sample.each do |taxon|
-      taxon_counts_and_summaries.concat([zero_metrics(taxon: taxon, field_index: TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX, default_values: taxon_count_and_summary_default_values)])
+      taxon_counts_and_summaries.concat([zero_metrics(taxon: taxon, field_index: TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX[@technology], default_values: taxon_count_and_summary_default_values)])
     end
     @timer.split("fill_zero_metrics")
 
-    counts_by_tax_level = split_by_tax_level(taxon_counts_and_summaries, TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX)
+    counts_by_tax_level = split_by_tax_level(taxon_counts_and_summaries, TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX[@technology])
     @timer.split("split_by_tax_level")
 
-    counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts, TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX) }
+    counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts, TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX[@technology]) }
     @timer.split("index_by_tax_id_and_count_type")
 
     merged_taxon_counts_by_tax_level = nil
     if @merge_nt_nr
-      merged_taxon_counts_by_tax_level = split_by_tax_level(merged_taxon_counts, TAXON_COUNT_FIELDS_INDEX)
+      merged_taxon_counts_by_tax_level = split_by_tax_level(merged_taxon_counts, TAXON_COUNT_FIELDS_INDEX[@technology])
       @timer.split("merged_taxon_counts_split_by_tax_level")
 
-      merged_taxon_counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts, TAXON_COUNT_FIELDS_INDEX) }
+      merged_taxon_counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts, TAXON_COUNT_FIELDS_INDEX[@technology]) }
       @timer.split("merged_nt_nr_index_by_tax_id_and_count_type")
     end
 
     # In the edge case where there are no matching species found, skip all this processing.
-    structured_lineage, sorted_genus_tax_ids, highlighted_tax_ids = process_taxon_counts_by_tax_level(taxon_counts: [counts_by_tax_level, merged_taxon_counts_by_tax_level], total_reads: adjusted_total_reads, contigs: contigs) if counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].present?
+    structured_lineage, sorted_genus_tax_ids, highlighted_tax_ids = process_taxon_counts_by_tax_level(taxon_counts: [counts_by_tax_level, merged_taxon_counts_by_tax_level], total_count: adjusted_total_count, contigs: contigs) if counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].present?
 
     has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
     align_viz_available = @pipeline_run.align_viz_available?
@@ -258,7 +282,7 @@ class PipelineReportService
     end
   end
 
-  def process_taxon_counts_by_tax_level(taxon_counts:, total_reads:, contigs:)
+  def process_taxon_counts_by_tax_level(taxon_counts:, total_count:, contigs:)
     # TODO(tiago): check if still necessary and move out of reports helper
     counts_by_tax_level, merged_count_types_by_tax_level = *taxon_counts
 
@@ -270,15 +294,15 @@ class PipelineReportService
 
     unless @use_decimal_columns
       counts_by_tax_level.each_value do |tax_level_taxa|
-        compute_rpm(count_types: [:nt, :nr], taxa_counts: tax_level_taxa, total_reads: total_reads)
+        compute_count_per_million(count_types: [:nt, :nr], taxa_counts: tax_level_taxa, total_count: total_count)
       end
-      @timer.split("compute_rpm")
+      @timer.split("compute_count_per_million")
 
       if merged_count_types_by_tax_level.present?
         merged_count_types_by_tax_level.each_value do |tax_level_taxa|
-          compute_rpm(count_types: [:merged_nt_nr], taxa_counts: tax_level_taxa, total_reads: total_reads)
+          compute_count_per_million(count_types: [:merged_nt_nr], taxa_counts: tax_level_taxa, total_count: total_count)
         end
-        @timer.split("compute_rpm_merged_count_type")
+        @timer.split("compute_count_per_million_merged_count_type")
       end
     end
 
@@ -396,7 +420,15 @@ class PipelineReportService
     }
   end
 
-  def fetch_taxon_counts(pipeline_run_id:, count_types:, background_id: nil)
+  def get_taxon_count_fields_to_pluck(technology)
+    if technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
+      TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_READS_FIELDS_TO_PLUCK
+    elsif technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_BASES_FIELDS_TO_PLUCK
+    end
+  end
+
+  def fetch_taxon_counts(pipeline_run_id:, count_types:, background_id: nil, technology:)
     taxon_counts_query = TaxonCount
     if background_id.present?
       taxon_counts_query = taxon_counts_query
@@ -420,8 +452,10 @@ class PipelineReportService
                            ].flatten
                          )
 
+    taxon_count_fields = get_taxon_count_fields_to_pluck(technology)
+
     # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
-    return background_id.nil? ? taxon_counts_query.pluck(*TAXON_COUNT_FIELDS_TO_PLUCK) : taxon_counts_query.pluck(*(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK))
+    return background_id.nil? ? taxon_counts_query.pluck(*taxon_count_fields) : taxon_counts_query.pluck(*(taxon_count_fields + TAXON_SUMMARY_FIELDS_TO_PLUCK))
   end
 
   def merge_taxon_count_structures(merged_count_types_by_taxon_level, count_types_by_taxon_level)
@@ -446,7 +480,7 @@ class PipelineReportService
     return taxon
   end
 
-  def fetch_taxons_absent_from_sample(pipeline_run_id, background_id)
+  def fetch_taxons_absent_from_sample(pipeline_run_id, background_id, technology)
     tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: pipeline_run_id).distinct
 
     taxons_absent_from_sample = TaxonSummary
@@ -475,7 +509,9 @@ class PipelineReportService
                                   }
                                 )
 
-    taxons_absent_from_sample.pluck(*(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK))
+    taxon_count_fields = get_taxon_count_fields_to_pluck(technology)
+
+    taxons_absent_from_sample.pluck(*(taxon_count_fields + TAXON_SUMMARY_FIELDS_TO_PLUCK))
   end
 
   def split_by_tax_level(counts_array, field_index)
@@ -556,16 +592,23 @@ class PipelineReportService
     end
   end
 
-  def compute_rpm(count_types:, taxa_counts:, total_reads:)
+  def compute_count_per_million(count_types:, taxa_counts:, total_count:)
     taxa_counts.each_value do |taxon_counts|
       count_types.each do |type|
-        taxon_counts[type][:rpm] = taxon_counts[type][:count] * 1E6 / total_reads if taxon_counts[type].present?
+        if taxon_counts[type].present?
+          count_per_million = taxon_counts[type][:count] * 1E6 / total_count
+          if @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
+            taxon_counts[type][:rpm] = count_per_million
+          elsif @technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+            taxon_counts[type][:bpm] = count_per_million
+          end
+        end
       end
     end
   end
 
   def compute_z_score_mass_normalized(
-    r,
+    count,
     mean_mass_normalized,
     stdev_mass_normalized,
     total_ercc_reads,
@@ -575,13 +618,18 @@ class PipelineReportService
   )
     return absent_z_score unless stdev_mass_normalized && (total_ercc_reads > 0)
 
-    r_mass_normalized = r / total_ercc_reads.to_f
-    value = (r_mass_normalized - mean_mass_normalized) / stdev_mass_normalized
+    if @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
+      count_mass_normalized = count / total_ercc_reads.to_f
+    elsif @technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      count_mass_normalized = count
+    end
+
+    value = (count_mass_normalized - mean_mass_normalized) / stdev_mass_normalized
     value.clamp(min_z_score, max_z_score)
   end
 
   def compute_z_score_standard(
-    rpm,
+    count_per_million,
     mean,
     stdev,
     min_z_score = Z_SCORE_MIN,
@@ -590,7 +638,7 @@ class PipelineReportService
   )
     return absent_z_score unless stdev
 
-    value = (rpm - mean) / stdev
+    value = (count_per_million - mean) / stdev
     value.clamp(min_z_score, max_z_score)
   end
 
@@ -601,8 +649,9 @@ class PipelineReportService
           nt_z_score = compute_z_score_mass_normalized(taxon_counts[:nt][:count], taxon_counts[:nt][:bg_mean_mass_normalized], taxon_counts[:nt][:bg_stdev_mass_normalized], @pipeline_run.total_ercc_reads) if taxon_counts[:nt].present?
           nr_z_score = compute_z_score_mass_normalized(taxon_counts[:nr][:count], taxon_counts[:nr][:bg_mean_mass_normalized], taxon_counts[:nr][:bg_stdev_mass_normalized], @pipeline_run.total_ercc_reads) if taxon_counts[:nr].present?
         else
-          nt_z_score = compute_z_score_standard(taxon_counts[:nt][:rpm], taxon_counts[:nt][:bg_mean], taxon_counts[:nt][:bg_stdev]) if taxon_counts[:nt].present?
-          nr_z_score = compute_z_score_standard(taxon_counts[:nr][:rpm], taxon_counts[:nr][:bg_mean], taxon_counts[:nr][:bg_stdev]) if taxon_counts[:nr].present?
+          count_per_million_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :rpm : :bpm
+          nt_z_score = compute_z_score_standard(taxon_counts[:nt][count_per_million_key], taxon_counts[:nt][:bg_mean], taxon_counts[:nt][:bg_stdev]) if taxon_counts[:nt].present?
+          nr_z_score = compute_z_score_standard(taxon_counts[:nr][count_per_million_key], taxon_counts[:nr][:bg_mean], taxon_counts[:nr][:bg_stdev]) if taxon_counts[:nr].present?
         end
         taxon_counts[:nt][:z_score] = nt_z_score if taxon_counts[:nt].present?
         taxon_counts[:nr][:z_score] = nr_z_score if taxon_counts[:nr].present?
@@ -631,8 +680,9 @@ class PipelineReportService
       end
 
       if @background
-        from_nt = species[:nt].present? ? genus_nt_zscore.abs * species[:nt][:z_score] * species[:nt][:rpm] : 0
-        from_nr = species[:nr].present? ? genus_nr_zscore.abs * species[:nr][:z_score] * species[:nr][:rpm] : 0
+        count_per_million_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :rpm : :bpm
+        from_nt = species[:nt].present? ? genus_nt_zscore.abs * species[:nt][:z_score] * species[:nt][count_per_million_key] : 0
+        from_nr = species[:nr].present? ? genus_nr_zscore.abs * species[:nr][:z_score] * species[:nr][count_per_million_key] : 0
         species[:agg_score] = from_nt + from_nr
 
         genus[:agg_score] = species[:agg_score] if genus[:agg_score].nil? || genus[:agg_score] < species[:agg_score]

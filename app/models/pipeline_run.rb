@@ -119,7 +119,12 @@ class PipelineRun < ApplicationRecord
   LOCAL_AMR_FULL_RESULTS_PATH = '/tmp/amr_full_results'.freeze
 
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
-  MIN_CONTIG_READS = 4 # minimal # reads mapped to the  contig
+  # minimal number of reads mapped to the contig
+  MIN_CONTIG_READS = {
+    TECHNOLOGY_INPUT[:illumina] => 4,
+    TECHNOLOGY_INPUT[:nanopore] => 1,
+  }.freeze
+
   M8_FIELDS = ["Query", "Accession", "Percentage Identity", "Alignment Length",
                "Number of mismatches", "Number of gap openings",
                "Start of alignment in query", "End of alignment in query",
@@ -698,7 +703,7 @@ class PipelineRun < ApplicationRecord
       while line
         if line[0] == '>'
           contig_hash = get_contig_hash.call(header, sequence)
-          if contig_hash[:read_count] >= MIN_CONTIG_READS && header != ''
+          if contig_hash[:read_count] >= MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]] && header != ''
             contig_array << contig_hash
           end
           header = line[1..line.size].rstrip
@@ -709,7 +714,7 @@ class PipelineRun < ApplicationRecord
         line = cf.gets
       end
       contig_hash = get_contig_hash.call(header, sequence)
-      if contig_hash[:read_count] >= MIN_CONTIG_READS
+      if contig_hash[:read_count] >= MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]]
         contig_array << contig_hash
       end
     end
@@ -1655,13 +1660,13 @@ class PipelineRun < ApplicationRecord
     # Once we decide to deploy the assembly pipeline, change "1000.1000" to the relevant version number of idseq-pipeline.
   end
 
-  def contig_lineages(min_contig_reads = MIN_CONTIG_READS)
+  def contig_lineages(min_contig_reads = MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]])
     contigs.select("id, read_count, lineage_json")
            .where("read_count >= ?", min_contig_reads)
            .where("lineage_json IS NOT NULL")
   end
 
-  def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS, db = "nt_and_nr")
+  def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]], db = "nt_and_nr")
     contig_ids = []
     contig_lineages(min_contig_reads).each do |c|
       lineage = JSON.parse(c.lineage_json)
@@ -1713,9 +1718,11 @@ class PipelineRun < ApplicationRecord
         end
       end
     end
+    # Minimum read count is relevant to both Illumina and Nanopore contigs
     contig_taxids = contigs.where("read_count >= ?", min_contig_reads)
                            .where.not(lineage_json: [nil, ""])
                            .pluck(:read_count, :species_taxid_nt, :species_taxid_nr, :species_taxid_merged_nt_nr, :genus_taxid_nt, :genus_taxid_nr, :genus_taxid_merged_nt_nr)
+
     contig_taxids.each do |c|
       read_count, species_taxid_nt, species_taxid_nr, species_taxid_merged_nt_nr, genus_taxid_nt, genus_taxid_nr, genus_taxid_merged_nt_nr = c
 
@@ -1730,7 +1737,7 @@ class PipelineRun < ApplicationRecord
     return summary_dict
   end
 
-  def get_taxid_list_with_contigs(min_contig_reads = MIN_CONTIG_READS)
+  def get_taxid_list_with_contigs(min_contig_reads = MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]])
     taxid_list = []
     contig_lineages(min_contig_reads).each do |c|
       lineage = JSON.parse(c.lineage_json)
@@ -1967,6 +1974,22 @@ class PipelineRun < ApplicationRecord
   def self.latest_by_sample(samples)
     dates = PipelineRun.select("sample_id, MAX(created_at) as created_at").where(sample: samples).group(:sample_id)
     return where("(sample_id, created_at) IN (?)", dates)
+  end
+
+  def fetch_total_count_by_technology
+    if technology == TECHNOLOGY_INPUT[:illumina]
+      total_reads
+    elsif technology == TECHNOLOGY_INPUT[:nanopore]
+      total_bases
+    end
+  end
+
+  def fetch_adjusted_total_count_by_technology
+    if technology == TECHNOLOGY_INPUT[:illumina]
+      (total_reads - total_ercc_reads.to_i) * subsample_fraction
+    elsif technology == TECHNOLOGY_INPUT[:nanopore]
+      total_bases
+    end
   end
 
   private

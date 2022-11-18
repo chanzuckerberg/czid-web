@@ -47,6 +47,7 @@ RSpec.describe PipelineReportService, type: :service do
       # have NT and NR reads in both the sample and the background model.
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
+                             technology: "Illumina",
                              sfn_execution_arn: fake_sfn_execution_arn,
                              job_status: "CHECKED",
                              finalized: 1,
@@ -203,6 +204,7 @@ RSpec.describe PipelineReportService, type: :service do
       # have NT and NR reads in both the sample and the background model.
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
+                             technology: "Illumina",
                              sfn_execution_arn: fake_sfn_execution_arn,
                              job_status: "CHECKED",
                              finalized: 1,
@@ -339,6 +341,7 @@ RSpec.describe PipelineReportService, type: :service do
       # the highest aggregate score of all the species within the genus.
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
+                             technology: "Illumina",
                              sfn_execution_arn: fake_sfn_execution_arn,
                              job_status: "CHECKED",
                              finalized: 1,

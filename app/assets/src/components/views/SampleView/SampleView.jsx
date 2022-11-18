@@ -15,6 +15,7 @@ import {
   isEmpty,
   isNull,
   isNil,
+  isUndefined,
   keys,
   map,
   mapValues,
@@ -587,7 +588,15 @@ class SampleView extends React.Component {
   fetchSampleReportData = async ({ backgroundId } = {}) => {
     const { snapshotShareId, sampleId } = this.props;
     const { allowedFeatures = [] } = this.context || {};
-    const { currentTab, selectedOptions, pipelineVersion } = this.state;
+    const {
+      currentTab,
+      selectedOptions,
+      pipelineRun,
+      pipelineVersion,
+    } = this.state;
+
+    // On consensus-genome-only report pages, pipelineRun is undefined and data is fetched via fetchWorkflowRunResults
+    if (isUndefined(pipelineRun)) return;
 
     const backgroundIdUsed = backgroundId || selectedOptions.background;
     const mergeNtNr =
@@ -1523,8 +1532,12 @@ class SampleView extends React.Component {
       };
     } else if (sidebarMode === "sampleDetails") {
       const sampleWorkflowLabels = compact([
-        sample.initial_workflow === WORKFLOWS.SHORT_READ_MNGS.value && size(sample.pipeline_runs) && WORKFLOWS.SHORT_READ_MNGS.label,
-        sample.initial_workflow === WORKFLOWS.LONG_READ_MNGS.value && size(sample.pipeline_runs) && WORKFLOWS.LONG_READ_MNGS.label,
+        sample.initial_workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
+          size(sample.pipeline_runs) &&
+          WORKFLOWS.SHORT_READ_MNGS.label,
+        sample.initial_workflow === WORKFLOWS.LONG_READ_MNGS.value &&
+          size(sample.pipeline_runs) &&
+          WORKFLOWS.LONG_READ_MNGS.label,
         find(
           { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
           sample.workflow_runs,

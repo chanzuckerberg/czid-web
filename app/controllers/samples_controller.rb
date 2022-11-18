@@ -794,7 +794,7 @@ class SamplesController < ApplicationController
   def report_csv
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
-    min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS
+    min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS[pipeline_run.technology]
     @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_reads: min_contig_reads)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
@@ -1023,7 +1023,7 @@ class SamplesController < ApplicationController
     return if HUMAN_TAX_IDS.include? taxid.to_i
 
     pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
-    contigs = pr.get_contigs_for_taxid(taxid.to_i, PipelineRun::MIN_CONTIG_READS, permitted_params[:count_type])
+    contigs = pr.get_contigs_for_taxid(taxid.to_i, PipelineRun::MIN_CONTIG_READS[pr.technology], permitted_params[:count_type])
 
     order_by = sanitize_order_by(Contig, order_by, :read_count)
     order_dir = sanitize_order_dir(order_dir, :desc)
@@ -1059,7 +1059,7 @@ class SamplesController < ApplicationController
 
   def summary_contig_counts
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS
+    min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS[pipeline_run.technology]
     contig_counts = pr.get_summary_contig_counts(min_contig_reads)
     render json: { min_contig_reads: min_contig_reads, contig_counts: contig_counts }
   end
