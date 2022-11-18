@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import path from "path";
 import dotenv from "dotenv";
 import { BasePage } from "../pages/basePage";
-import { footer, tag } from "../utils/constants";
+import { CZID, footer, tag } from "../utils/constants";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
@@ -11,7 +11,6 @@ test.describe("Home page tests", () => {
   test.use({ storageState: "storage/emptyStorageState.json" });
   test("Should verify home page", async ({ page }) => {
     const basePage = new BasePage(page);
-
     //now go to home page
     await basePage.gotoUrl(`${process.env.BASEURL}`);
 
@@ -19,7 +18,7 @@ test.describe("Home page tests", () => {
     await expect(await basePage.findByText(tag)).toBeVisible();
 
     // verify logo
-    await expect((await basePage.findByDataName("CZ ID")).nth(0)).toBeVisible();
+    await expect((await basePage.findByDataName(CZID)).nth(0)).toBeVisible();
 
     // verify footer links
     Object.keys(footer).forEach(async key => {

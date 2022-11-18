@@ -9,7 +9,7 @@ dotenv.config({
 
 const config: PlaywrightTestConfig = {
   expect: {
-    timeout: 10000,
+    timeout: 30000,
   },
   globalSetup: "./global-setup",
   outputDir: "../report",
@@ -18,20 +18,23 @@ const config: PlaywrightTestConfig = {
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
+        video: "on",
+        //  launchOptions:{slowMo:1000}
       },
     },
   ],
   reporter: process.env.CI ? "github" : "list",
   testDir: "../tests",
-  timeout: 10000,
+  timeout: 30000,
   use: {
     actionTimeout: 0,
-    channel: "chrome",
+    channel: "chromium",
     baseURL: "https://staging.czid.org",
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
     storageState: "/tmp/state.json",
     trace: "on-first-retry",
+    viewport: { width: 800, height: 7200 },
   },
 };
 export default config;

@@ -42,13 +42,20 @@ class TableRenderers extends React.Component {
         </div>
         <div className={cs.itemRightPane}>
           <BasicPopup
-            trigger={<div className={cs.itemName}>{nameRenderer(item)}</div>}
+            trigger={
+              <div className={cs.itemName} data-testid="project-name">
+                {nameRenderer(item)}
+              </div>
+            }
             content={nameRenderer(item)}
           />
           {descriptionRenderer && item && item.description && (
             <BasicPopup
               trigger={
-                <div className={cs.itemDescription}>
+                <div
+                  className={cs.itemDescription}
+                  data-testid="project-description"
+                >
                   {descriptionRenderer(item)}
                 </div>
               }
@@ -57,7 +64,9 @@ class TableRenderers extends React.Component {
               inverted={false}
             />
           )}
-          <div className={cs.itemDetails}>{detailsRenderer(item)}</div>
+          <div className={cs.itemDetails} data-testid="created-by">
+            {detailsRenderer(item)}
+          </div>
         </div>
       </div>
     );
@@ -76,10 +85,16 @@ class TableRenderers extends React.Component {
     return (
       hasAllCounts && (
         <div className={cs.counts}>
-          <div className={cs.sampleCount}>{`${numberOfSamples} Sample${
+          <div
+            className={cs.sampleCount}
+            data-testid="sample-counts"
+          >{`${numberOfSamples} Sample${
             numberOfSamples !== 1 ? "s" : ""
           }`}</div>
-          <div className={cs.analysesCounts}>
+          <div
+            className={cs.analysesCounts}
+            data-testid="nmgs-cg-sample-counts"
+          >
             {`${mngsAnalysisRunsCount} mNGS`} | {`${cgAnlaysisRunsCount} CG`}
           </div>
         </div>
@@ -88,7 +103,11 @@ class TableRenderers extends React.Component {
   };
 
   static baseRenderer = data => {
-    return <div className={cs.base}>{data}</div>;
+    return (
+      <div className={cs.base} data-testid={data}>
+        {data}
+      </div>
+    );
   };
 
   static renderList = ({ cellData: list }) => {
@@ -99,7 +118,7 @@ class TableRenderers extends React.Component {
 
   static renderDate = ({ cellData: date }) => {
     return (
-      <div className={cs.date}>
+      <div className={cs.date} data-testid="date-created">
         {date ? moment(date).format("YYYY-MM-DD") : ""}
       </div>
     );
@@ -109,7 +128,9 @@ class TableRenderers extends React.Component {
     return (
       <div className={cs.dateContainer}>
         {TableRenderers.renderDate({ cellData: date })}
-        <div className={cs.elapsed}>{date ? moment(date).fromNow() : ""}</div>
+        <div className={cs.elapsed} data-testid="days-elapsed">
+          {date ? moment(date).fromNow() : ""}
+        </div>
       </div>
     );
   };
@@ -200,7 +221,11 @@ class TableRenderers extends React.Component {
           {sample ? (
             <div className={cs.sampleNameAndStatus}>
               <BasicPopup
-                trigger={<div className={cs.sampleName}>{sampleName}</div>}
+                trigger={
+                  <div className={cs.sampleName} data-testid="sample-name">
+                    {sampleName}
+                  </div>
+                }
                 content={sampleName}
               />
               <StatusLabel
@@ -214,11 +239,16 @@ class TableRenderers extends React.Component {
           )}
           {sample ? (
             <div className={cs.sampleDetails}>
-              <span className={cs.user}>{sample.user}</span>|
-              <span className={cs.project}>{sample.project}</span>
+              <span className={cs.user} data-testid="uploaded-by">
+                {sample.user}
+              </span>
+              |
+              <span className={cs.project} data-testid="sample-project">
+                {sample.project}
+              </span>
             </div>
           ) : (
-            <div className={cs.sampleDetails} />
+            <div className={cs.sampleDetails} data-testid="uploaded-by" />
           )}
         </div>
       </div>

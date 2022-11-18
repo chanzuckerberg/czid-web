@@ -41,7 +41,7 @@
     "Boechera Stricta",
     "Little Brown Bat"
   ],
-  "Nucleotide Types": [
+  "Nucleotide Type": [
     "DNA",
     "RNA"
   ],
@@ -95,7 +95,7 @@
   ],
   "Infection Class": [
     "Definite",
-    "No infection",
+    "No Infection",
     "Suspected",
     "Unknown"
   ],
@@ -108,12 +108,9 @@
   "Library Prep": [
     "NEB Ultra II FS DNA",
     "NEB Ultra II Directional RNA",
-    "Nextera DNA"
-  ],
-  "Sequencer": [
-    "Illumina MiSeq",
-    "Illumina HiSeq 2500",
-    "Illumina NextSeq 500"
+    "Nextera DNA",
+    "NEB Utra II DNA",
+    "NEB RNA Ultra II"
   ],
   "Isolate": [
     "Yes",
@@ -124,16 +121,31 @@
     "Female"
   ],
   "Host Genus Species": [
-    "Subfamily Anophelinae",
-    "Tribe Aedeomyiini",
-    "Tribe Aedini",
-    "Tribe Culicini",
-    "Tribe Culisetini",
-    "Tribe Ficalbiini",
-    "Tribe Hodgesiini",
-    "Tribe Mansoniini",
-    "Tribe Orthopodomyiini",
-    "Tribe Sabethini",
-    "Tribe Toxorhynchitini"
+    "Aedes aegypti",
+    "Culex erythrothorax",
+    "Aedes sierrensis",
+    "Anopheles punctipennis",
+    "Anopheles freeborni",
+    "Culex tarsalis",
+    "Culex pipiens",
+    "Aedes albopictus"
+  ],
+  "Host Life Stage": [
+    "Larva",
+    "Nymth",
+    "Adult"
+  ],
+  "Sequencer": [
+    "MiSeq",
+    "NextSeq",
+    "HiSeq",
+    "NovaSeq"
+  ],
+  "Blood Fed": [
+    "Unfed",
+    "Partially Blood Fed",
+    "Blood Fed",
+    "Gravid",
+    "Gravid and Blood Fed"
   ]
 }

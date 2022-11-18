@@ -1,6 +1,4 @@
-import * as faker from "@faker-js/faker";
 import { sample } from "lodash/fp";
-import { AnalysisTypes } from "../types/analysisTypes";
 import { Metadata } from "../types/metadata";
 import {
   getAlphaNumericString,
@@ -10,6 +8,8 @@ import {
   getYearMonthInThePast,
 } from "./common";
 import fs from "fs";
+import { getByTestID } from "./selectors";
+import { Page } from "@playwright/test";
 
 const yesOrNo = ["Yes", "No"];
 // metadata fixture will possible values
@@ -17,7 +17,7 @@ const metadataFixture = getFixture("metadata");
 
 // collection of optional metadata fields and their data type
 // helps to determine how to generate value of an optional field: select from list, generate randon number or string
-const optionalFieldFixture = getFixture("optional_metadata_fields");
+const optionalFieldFixture = getFixture("metadata_fields");
 
 // user can force field values, for testing specific attributes
 let defaults: Metadata | undefined;
@@ -27,75 +27,54 @@ let excludedFields: Array<string> | undefined;
 
 /**
  * Generates metadata for manual setup
- * @param analysisType, required - should be one of the three analysis types
+ * @param sampleName, required
  * @param defaultData defaults values to set in the data
  * @param exclusions  list of fields to be optionally excluded
  * @returns Metadata object
  */
 export function getMetadata(
-  analysisType: keyof typeof AnalysisTypes,
+  sampleName: string,
   defaultData?: Metadata,
   exclusions?: Array<string>,
 ): Metadata {
   defaults = defaultData;
   excludedFields = exclusions;
-  return generateMetadata(analysisType);
+  return generateMetadata(sampleName);
 }
 
 /**
  * Generates metadata and writes to a CSV file; for testing upload with CSV metadata
- * @param analysisType, required - should be one of the three analysis types
  * @param defaultData defaults values to set in the data
  * @param exclusions  list of fields to be optionally excluded
  * @returns generated output file name
  */
-export function getMetadataFile(
-  analysisType: keyof typeof AnalysisTypes,
+export function generateMetadataFile(
+  fileName: string,
   defaultData?: Metadata,
   exclusions?: Array<string>,
-): string {
+) {
   defaults = defaultData;
   excludedFields = exclusions;
-  const data = generateMetadata(analysisType);
-  const fileName = generateSampleName(analysisType);
+  const data = generateMetadata(fileName);
   fs.writeFileSync(`/tmp/${fileName}.csv`, objToCsv(data));
-  return fileName;
 }
 
 /**
  * Helper function that generates the metadata
- * @param analysisType, required - should be one of the three analysis types
+ * @param sampleName, required
  * @returns metadata object
  */
-export function generateMetadata(
-  analysisType: keyof typeof AnalysisTypes,
-): Metadata {
+export function generateMetadata(sampleName: string): Metadata {
   let data: Metadata = {
-    "Sample Name": generateSampleName(analysisType),
+    "Sample Name": sampleName,
     "Host Organism": getAttributeValue("Host Organism"),
     "Sample Type": getAttributeValue("Sample Type"),
     "Nucleotide Type": getAttributeValue("Nucleotide Type"),
     "Collection Date": getYearMonthInThePast(),
     "Water Control": sample(yesOrNo),
-    "Collection Location": faker.faker.address.city(),
+    "Collection Location": "New York",
   };
   return setOptionalMetadataAtrribute(data);
-}
-
-/**
- * Helper function to generate sample name; helps avoid duplicate names
- * @param analysisType required - should be one of the three analysis types
- * @returns sample name string
- */
-export function generateSampleName(
-  analysisType: keyof typeof AnalysisTypes,
-): string {
-  const minNumber = 10000;
-  const maxNumber = 99999;
-  return `${analysisType.replace(" ", "-")}-${getRandomNumber(
-    minNumber,
-    maxNumber,
-  )}`;
 }
 
 /**
@@ -138,11 +117,11 @@ export function objToCsv(data) {
 export function getAttributeValue(attribute: string): any {
   const numberFields = optionalFieldFixture["numberFields"];
   const freeStyleFields = optionalFieldFixture["freeStyleFields"];
-  const selectStringFields = optionalFieldFixture["selectStringFields"];
+  const dropdownFields = optionalFieldFixture["dropdownFields"];
   const alphaNumericFields = optionalFieldFixture["alphaNumericFields"];
 
   let value: any;
-  if (selectStringFields.includes(attribute)) {
+  if (dropdownFields.includes(attribute)) {
     value = sample(metadataFixture[attribute]);
   } else if (numberFields.includes(attribute)) {
     value = getRandomNumber(2, 99);
@@ -152,4 +131,10 @@ export function getAttributeValue(attribute: string): any {
     value = getAlphaNumericString(10);
   }
   return getAttributeOrDefault(defaults, attribute, value);
+}
+
+export async function getGeneratedSampleName(
+  page: Page,
+): Promise<string | null> {
+  return page.locator(getByTestID("sample-name")).textContent();
 }

@@ -10,7 +10,8 @@ interface ProjectSelectProps {
   onChange: $TSFixMeFunction; // the entire project object is returned
   disabled?: boolean;
   erred?: boolean;
-  showSelectedItemSubtext?: boolean; // Subtext in selected state
+  showSelectedItemSubtext: boolean; // Subtext in selected state
+  "data-testid": string;
 }
 
 const ProjectSelect = ({
@@ -43,6 +44,7 @@ const ProjectSelect = ({
       disabled={disabled}
       erred={erred}
       showSelectedItemSubtext={showSelectedItemSubtext}
+      data-testid="select-project"
     />
   );
 };

@@ -88,6 +88,9 @@ class Tabs extends React.Component<TabsProps, TabsState> {
                 tabStyling || cs.tab,
                 value === tab.value && cs.selected,
               )}
+              data-testid={`${tab.value
+                .replaceAll(" ", "-")
+                .toLocaleLowerCase()}`}
             >
               {tab.label}
             </div>

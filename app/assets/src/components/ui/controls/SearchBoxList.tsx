@@ -104,7 +104,11 @@ class SearchBoxList extends React.Component<
     return (
       <div className={cs.searchBoxList}>
         {this.props.title && <div className={cs.title}>{this.props.title}</div>}
-        <div>
+        <div
+          data-testid={`search-${this.props.title
+            .replaceAll(" ", "-")
+            .toLocaleLowerCase()}`}
+        >
           <Input
             fluid
             className={cs.searchBox}
@@ -117,7 +121,12 @@ class SearchBoxList extends React.Component<
           {(this.props.labelTitle || this.props.countTitle) && (
             <div className={cs.listColumnTitles}>
               {this.props.labelTitle && (
-                <div className={cs.listColumnTitle}>
+                <div
+                  className={cs.listColumnTitle}
+                  data-testid={`column-${this.props.labelTitle
+                    .replaceAll(" ", "-")
+                    .toLocaleLowerCase()}`}
+                >
                   {this.props.labelTitle}
                 </div>
               )}
@@ -139,7 +148,14 @@ class SearchBoxList extends React.Component<
               <div className={cs.listCheckmark}>
                 {this.state.selected.has(option.value) && <IconCheckSmall />}
               </div>
-              <div className={cs.listLabel}>{option.label}</div>
+              <div
+                className={cs.listLabel}
+                data-testid={`column-${option.label
+                  .replaceAll(" ", "-")
+                  .toLocaleLowerCase()}`}
+              >
+                {option.label}
+              </div>
               {option.count && (
                 <div className={cs.listElementCount}>{option.count}</div>
               )}

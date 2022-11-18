@@ -9,7 +9,6 @@ export class BasePage {
   constructor(public readonly page: Page) {}
 
   async gotoUrl(url: string) {
-    this.page.waitForNavigation();
     await this.page.goto(url);
   }
 
@@ -98,10 +97,15 @@ export class BasePage {
     await this.page.click(`${type}[label="${label}"]`);
   }
 
-  async fillByPlaceHolder(placeholder: string, value: string) {
+  async fillByPlaceHolder(placeholder: string | undefined, value: string) {
     await this.page.fill(`[placeholder="${placeholder}"]`, value);
   }
 
+  async typeByPlaceHolder(placeholder: string, value: string) {
+    await this.page.type(`[placeholder="${placeholder}"]`, value, {
+      delay: 1000,
+    });
+  }
   async fillById(id: string, value: string) {
     await this.page.fill(`[id="${id}"]`, value);
   }
@@ -121,7 +125,9 @@ export class BasePage {
   async fillByText(text: string, value: string) {
     await this.page.fill(`text=${text}`, value);
   }
-
+  async findByClassName(className: string) {
+    return this.page.locator(`[class="${className}"]`);
+  }
   async findElement(selector: string) {
     return this.page.locator(`${selector}`);
   }
@@ -138,6 +144,11 @@ export class BasePage {
   async findByName(name: string) {
     return this.page.locator(`[name="${name}"]`);
   }
+
+  async findByLocator(name: string, i: number) {
+    return this.page.locator(name).nth(i);
+  }
+
   async findByDataName(name: string) {
     return this.page.locator(`[data-name="${name}"]`);
   }
@@ -168,20 +179,60 @@ export class BasePage {
   }
 
   async waitForSelector(selector: string, waitTime = 120000) {
-    return this.page.waitForSelector(selector, { timeout: waitTime });
+    await this.page.waitForSelector(selector, { timeout: waitTime });
   }
 
   async waitForTimeout(timeout: number) {
-    return this.page.waitForTimeout(timeout);
+    await this.page.waitForTimeout(timeout);
   }
 
   async selectFile(filePath: string) {
     this.page.setInputFiles("input[type='file']", path.resolve(filePath));
-    await this.page.waitForTimeout(3000);
+  }
+
+  async fileChooser(filePath: string) {
+    const [fileChooser] = await Promise.all([
+      // It is important to call waitForEvent before click to set up waiting.
+      this.page.waitForEvent("filechooser"),
+      // Opens the file chooser.
+      this.page.locator(".csvUpload-1c9NS").click(),
+    ]);
+    await fileChooser.setFiles([path.resolve(filePath)]);
   }
 
   async queryElement(selector: string) {
     return this.page.$(selector);
+  }
+
+  async waitForResponse(path: string) {
+    const resp = await this.page.waitForResponse(
+      response =>
+        response.url().includes(`/${path}/`) && response.status() === 200,
+    );
+    return resp.json();
+  }
+  async findByTextRole(name: string) {
+    return this.page.getByRole("textbox", { name: name });
+  }
+  async findByComboBoxRole() {
+    return this.page.getByRole("combobox");
+  }
+  async findByCheckboxRole(name: string) {
+    return this.page.getByRole("checkbox", { name: name });
+  }
+
+  async takeScreenshort(path: string) {
+    this.page.screenshot({ path: path, fullPage: true });
+  }
+
+  async pause() {
+    return this.page.pause();
+  }
+  async waitForDomContent() {
+    await this.page.waitForLoadState("domcontentloaded");
+  }
+  async waitForNetwrokIdle() {
+    await this.page.waitForLoadState("networkidle");
   }
   /**
    * Convenience method for this.page.keyboard.type.  Note that this requires

@@ -12,7 +12,7 @@ class TermsAgreement extends React.Component<TermsAgreementProps> {
     const { onChange, checked } = this.props;
 
     return (
-      <div className={cs.termsAgreement}>
+      <div className={cs.termsAgreement} data-testid="terms-agreement-checkbox">
         <Checkbox
           checked={checked}
           onChange={onChange}

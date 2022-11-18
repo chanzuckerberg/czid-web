@@ -86,6 +86,7 @@ const ProjectCreationModal = ({
         sdsStyle="rounded"
         sdsType="primary"
         onClick={handleCreateProject}
+        data-testid="create-project-btn"
       >
         Create Project
       </Button>
@@ -113,6 +114,7 @@ const ProjectCreationModal = ({
           <div
             className={cs.sharingOption}
             onClick={() => setAccessLevel(ACCESS_LEVEL.publicAccess)}
+            data-testid="public-project"
           >
             <div className={cs.radioButtonAndProjectIcon}>
               <RadioButton
@@ -138,6 +140,7 @@ const ProjectCreationModal = ({
           <div
             className={cs.sharingOption}
             onClick={() => setAccessLevel(ACCESS_LEVEL.privateAccess)}
+            data-testid="private-project"
           >
             <div className={cs.radioButtonAndProjectIcon}>
               <RadioButton
@@ -200,6 +203,7 @@ const ProjectCreationModal = ({
             className={cs.descriptionTextArea}
             maxLength={MAX_DESCRIPTION_LENGTH}
             placeholder="Enter your project goals, information about your study, where your samples came from, etc..."
+            data-testid="project-description"
           />
           <div className={cs.charCounter}>
             {MAX_DESCRIPTION_LENGTH - description.length}/
@@ -214,6 +218,7 @@ const ProjectCreationModal = ({
             sdsStyle="rounded"
             sdsType="secondary"
             onClick={onCancel}
+            data-testid="cancel-btn"
           >
             Cancel
           </Button>

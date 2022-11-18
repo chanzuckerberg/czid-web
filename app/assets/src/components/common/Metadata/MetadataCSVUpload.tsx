@@ -100,6 +100,7 @@ class MetadataCSVUpload extends React.Component<
           onCSV={this.onCSV}
           className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
           removeEmptyRows
+          data-testid="upload-metadata-file"
         />
       </div>
     );

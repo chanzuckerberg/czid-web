@@ -64,7 +64,9 @@ const FilePicker = ({
         <span>
           Drag and drop {multiFile ? "your files" : "a file"} here, or{" "}
         </span>
-        <span className={cs.browserLink}>click to use a file browser.</span>
+        <span className={cs.browserLink} data-testid="select-sample-files">
+          click to use a file browser.
+        </span>
       </div>
     );
   };
@@ -77,6 +79,7 @@ const FilePicker = ({
       onDrop={onChange || defaultOnChange}
       onDropRejected={onRejected || defaultOnRejected}
       className={cx(cs.filePicker, className, getFile() && cs.active)}
+      data-testid="drop-sample-files"
     >
       <div className={cs.inner}>
         <div className={cs.title}>

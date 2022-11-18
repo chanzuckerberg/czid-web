@@ -162,7 +162,7 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
           totalNumberOfProjects === 1 ? "" : "s"
         }`;
     return (
-      <div className={cs.filteredCount}>
+      <div className={cs.filteredCount} data-testid="project-count">
         {description}
         {hasAtLeastOneFilterApplied && (
           <Button

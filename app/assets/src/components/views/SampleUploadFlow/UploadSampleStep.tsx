@@ -1258,6 +1258,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
                 this.state.showNoProjectError &&
                 this.state.selectedProject === null
               }
+              data-testid="select-project"
             />
             {this.state.createProjectOpen ? (
               <div className={cs.projectCreationContainer}>
@@ -1277,6 +1278,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
                   this.openCreateProject,
                   "UploadSampleStep_create-project_opened",
                 )}
+                data-testid="create-project"
               >
                 + Create Project
               </div>

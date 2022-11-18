@@ -1,0 +1,61 @@
+{
+  "requiredFields": [
+    "Sample Type",
+    "Water Control",
+    "Nucleotide Type",
+    "Collection Date",
+    "Collection Location"
+  ],
+  "allOptinalFields": [
+    "Host Sex",
+    "Known Organism",
+    "Infection Class",
+    "Host Age",
+    "Detection Method",
+    "Library Prep",
+    "Sequencer",
+    "RNA/DNA Input (ng)",
+    "Host Genus Species",
+    "Isolate",
+    "Diseases and Conditions"
+  ],
+  "numberFields": [
+    "Host Age",
+    "RNA/DNA Input (ng)",
+    "Ct Value"
+  ],
+  "freeStyleFields": [],
+  "alphaNumericFields": [
+    "Host ID"
+  ],
+  "inputTextFields": [
+    "Collection Date",
+    "Collection Location",
+    "Host Age",
+    "RNA/DNA Input (ng)",
+    "Sample Type",
+    "Diseases and Conditions"
+  ],
+  "dropdownFields": [
+    "Nucleotide Type",
+    "Known Organism",
+    "Host Sex",
+    "Blood Fed",
+    "Host Genus Species",
+    "Host Life Stage",
+    "Sequencer",
+    "Library Prep",
+    "Infection Class",
+    "Host Race / Ethnicity",
+    "Primary Diagnosis",
+    "Antibiotic Administered",
+    "Immunocompromised",
+    "Detection Method",
+    "Comorbidity",
+    "Diseases and Conditions"
+  ],
+  "switchFields": [
+    "Water Control",
+    "Isolate"
+  ]
+}

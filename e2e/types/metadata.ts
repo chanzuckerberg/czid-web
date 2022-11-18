@@ -19,7 +19,7 @@ export type Metadata = {
   Comorbidity?: string;
   "Library Prep"?: string;
   Sequencer?: string;
-  "RNA / DNA Input(ng)"?: number;
+  "RNA/DNA Input (ng)"?: number;
   "Host Genus Species"?: string;
   Isolate?: string;
   "Diseases and Conditions"?: string;

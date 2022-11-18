@@ -1,5 +1,5 @@
 {
-  "allOptinalFields": [
+  "allOptionalFields": [
     "Host Sex",
     "Known Organism",
     "Infection Class",
@@ -13,7 +13,7 @@
     "Comorbidity",
     "Library Prep",
     "Sequencer",
-    "RNA / DNA Input(ng)",
+    "RNA/DNA Input (ng)",
     "Host Genus Species",
     "Isolate",
     "Diseases and Conditions",

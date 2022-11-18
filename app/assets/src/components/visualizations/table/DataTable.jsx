@@ -187,6 +187,7 @@ class DataTable extends React.Component {
                   )}
                   style={this.getCellStyle(column)}
                   key={colIdx}
+                  data-testid={column.toLowerCase().replaceAll(" ", "-")}
                 >
                   {/* If we want to display an object (e.g. location object), provide a 'name' field */}
                   {isObject(row[column]) && row[column].name !== undefined

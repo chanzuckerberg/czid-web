@@ -36,7 +36,12 @@ const CheckboxItem = ({
       >
         <IconCheckSmall className={cs.icon} />
       </div>
-      <div className={cs.listLabel}>{label}</div>
+      <div
+        className={cs.listLabel}
+        data-testid={`dropdown-${label.replaceAll(" ", "-").toLowerCase()}`}
+      >
+        {label}
+      </div>
     </div>
     {/* @ts-expect-error 'Item' does not exist on BareDropdown */}
   </BareDropdown.Item>

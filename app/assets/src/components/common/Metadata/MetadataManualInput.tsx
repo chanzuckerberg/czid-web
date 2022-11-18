@@ -321,6 +321,7 @@ class MetadataManualInput extends React.Component<
         trigger={<IconPlusCircleSmall className={cs.plusIcon} />}
         value={this.state.selectedFieldNames}
         className={cs.columnPicker}
+        data-testid="select-columns"
       />
     );
   };

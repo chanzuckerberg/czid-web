@@ -458,7 +458,12 @@ const WorkflowSelector = ({
                 />
               </div>
               <div className={cs.optionText}>
-                <div className={cx(cs.title, beta && cs.alignBetaIcon)}>
+                <div
+                  className={cx(cs.title, beta && cs.alignBetaIcon)}
+                  data-testid={`analysis-type-${title
+                    .replaceAll(" ", "-")
+                    .toLocaleLowerCase()}`}
+                >
                   <span>{title}</span>
                   {beta && (
                     <span className={cs.statusLabel}>
