@@ -412,10 +412,16 @@ class PipelineRun < ApplicationRecord
 
   # NOTE: not clear whether this is the complement of report_ready? method
   def report_failed?
-    # The report failed if host filtering or alignment failed.
-    host_filtering_status = output_states.find_by(output: "ercc_counts").state
-    alignment_status = output_states.find_by(output: "taxon_byteranges").state
-    host_filtering_status == STATUS_FAILED || alignment_status == STATUS_FAILED
+    # ONT samples don't have separate stages for Host Filtering or Alignment,
+    # so the report fails if the entire run failed.
+    if technology == TECHNOLOGY_INPUT[:nanopore]
+      job_status == STATUS_FAILED
+    else
+      # The report failed if host filtering or alignment failed.
+      host_filtering_status = output_states.find_by(output: "ercc_counts").state
+      alignment_status = output_states.find_by(output: "taxon_byteranges").state
+      host_filtering_status == STATUS_FAILED || alignment_status == STATUS_FAILED
+    end
   end
 
   def succeeded?
