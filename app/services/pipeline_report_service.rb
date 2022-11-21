@@ -92,7 +92,7 @@ class PipelineReportService
 
   DEFAULT_SORT_PARAM = :agg_score
 
-  CSV_COLUMNS = [
+  CSV_READS_COLUMNS = [
     "tax_id",
     "tax_level",
     "genus_tax_id",
@@ -128,6 +128,48 @@ class PipelineReportService
     "nr_bg_stdev_mass_normalized",
     "species_tax_ids",
   ].freeze
+
+  CSV_BASES_COLUMNS = [
+    "tax_id",
+    "tax_level",
+    "genus_tax_id",
+    "name",
+    "common_name",
+    "category",
+    "is_phage",
+    "agg_score",
+    "max_z_score",
+    "nt_z_score",
+    "nt_bpm",
+    "nt_count",
+    "nt_contigs",
+    "nt_contig_b",
+    "nt_percent_identity",
+    "nt_alignment_length",
+    "nt_e_value",
+    "nt_bg_mean",
+    "nt_bg_stdev",
+    "nt_bg_mean_mass_normalized",
+    "nt_bg_stdev_mass_normalized",
+    "nr_z_score",
+    "nr_bpm",
+    "nr_count",
+    "nr_contigs",
+    "nr_contig_b",
+    "nr_percent_identity",
+    "nr_alignment_length",
+    "nr_e_value",
+    "nr_bg_mean",
+    "nr_bg_stdev",
+    "nr_bg_mean_mass_normalized",
+    "nr_bg_stdev_mass_normalized",
+    "species_tax_ids",
+  ].freeze
+
+  CSV_COLUMNS = {
+    ILLUMINA => CSV_READS_COLUMNS,
+    NANOPORE => CSV_BASES_COLUMNS,
+  }.freeze
 
   def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, priority_pathogens: TaxonLineage::PRIORITY_PATHOGENS, show_annotations: false)
     @pipeline_run = pipeline_run
@@ -536,24 +578,26 @@ class PipelineReportService
         counts_hash[tax_id][:is_phage] = false
       end
 
+      count_per_million_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :rpm : :bpm
+      count_per_million_decimal_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :rpm_decimal : :bpm
       if @use_decimal_columns
         percent_identity = counts[field_index[:percent_identity_decimal]].to_f
         alignment_length = counts[field_index[:alignment_length_decimal]].to_f
-        rpm = counts[field_index[:rpm_decimal]].to_f
+        count_per_million = counts[field_index[count_per_million_decimal_key]].to_f
       else
         percent_identity = counts[field_index[:percent_identity]]
         alignment_length = counts[field_index[:alignment_length]]
-        rpm = counts[field_index[:rpm]]
+        count_per_million = counts[field_index[count_per_million_key]]
       end
 
       count_type = counts[field_index[:count_type]].downcase.to_sym
       counts_hash[tax_id][count_type] = {
-        count: counts[field_index[:count]],
-        e_value: counts[field_index[:e_value]],
-        source_count_type: counts[field_index[:source_count_type]],
-        percent_identity: percent_identity,
-        alignment_length: alignment_length,
-        rpm: rpm,
+        :count => counts[field_index[:count]],
+        :e_value => counts[field_index[:e_value]],
+        :source_count_type => counts[field_index[:source_count_type]],
+        :percent_identity => percent_identity,
+        :alignment_length => alignment_length,
+        count_per_million_key => count_per_million,
       }
 
       unless count_type == :merged_nt_nr
@@ -569,24 +613,26 @@ class PipelineReportService
   end
 
   def merge_contigs(contigs, counts_by_tax_level)
+    # Using "rb" as shorthand for "reads or bases"
+    contig_rb_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :contig_r : :contig_b
     contigs.each do |tax_id, contigs_per_db_type|
-      contigs_per_db_type.each do |db_type, contigs_per_read_count|
+      contigs_per_db_type.each do |db_type, contigs_per_rb_count|
         norm_count_type = db_type.downcase.to_sym
         counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_SPECIES, tax_id, norm_count_type)
         counts_per_db_type ||= counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_GENUS, tax_id, norm_count_type)
 
         if counts_per_db_type
           contigs = 0
-          contig_r = 0
-          contigs_per_read_count.each do |reads, count|
+          contig_rb = 0
+          contigs_per_rb_count.each do |rb, count|
             contigs += count
-            contig_r += count * reads
+            contig_rb += count * rb
           end
           counts_per_db_type[:contigs] = contigs
-          counts_per_db_type[:contig_r] = contig_r
+          counts_per_db_type[contig_rb_key] = contig_rb
         else
           # TODO(tiago): not sure if this case ever happens
-          Rails.logger.warn("[PR=#{@pipeline_run.id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
+          Rails.logger.warn("[PR=#{@pipeline_run.id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_rb_count}")
         end
       end
     end
@@ -747,9 +793,11 @@ class PipelineReportService
     ui_config = UiConfig.last
     return unless ui_config
 
+    count_per_million_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :rpm : :bpm
     meets_highlight_condition = lambda do |tax_id, counts|
-      return (counts.dig(:nt, :rpm) || 0) > ui_config.min_nt_rpm \
-        && (counts.dig(:nr, :rpm) || 0) > ui_config.min_nr_rpm \
+      # TODO: check with combio on min_nt_bpm and min_nr_bpm
+      return (counts.dig(:nt, count_per_million_key) || 0) > ui_config.min_nt_rpm \
+        && (counts.dig(:nr, count_per_million_key) || 0) > ui_config.min_nr_rpm \
         && (counts.dig(:nt, :z_score) || 0) > ui_config.min_nt_z \
         && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z \
         && tax_id > 0
@@ -862,14 +910,14 @@ class PipelineReportService
     end
 
     CSVSafe.generate(headers: true) do |csv|
-      csv << CSV_COLUMNS
+      csv << CSV_COLUMNS[@technology]
       rows.each do |row|
         tax_info = row.map { |k, v| [k.map(&:to_s).join("_"), v] }.to_h
         # e_value is stored as the base 10 log of the actual value, but for a
         # csv report we want to give the full direct value
         tax_info["nt_e_value"] = tax_info["nt_e_value"].nil? ? nil : "10^#{tax_info['nt_e_value']}"
         tax_info["nr_e_value"] = tax_info["nr_e_value"].nil? ? nil : "10^#{tax_info['nr_e_value']}"
-        csv << tax_info.values_at(*CSV_COLUMNS)
+        csv << tax_info.values_at(*CSV_COLUMNS[@technology])
       end
     end
   end
