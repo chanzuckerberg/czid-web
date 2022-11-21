@@ -22,6 +22,7 @@ const AnnotationPreview = ({ tag2Count }: AnnotationPreviewProps) => {
     <span className={cs.previewContainer}>
       {hitCount > 0 && (
         <span className={cs.tagContainer}>
+          <AnnotationLabel type={ANNOTATION_HIT} isSmall={true} />
           <span className={cs.count}>{hitCount}</span>
         </span>
       )}
