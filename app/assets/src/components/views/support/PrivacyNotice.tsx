@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
@@ -37,6 +37,18 @@ const PrivacyNotice = () => {
       </p>
     </>
   );
+
+  /* Added so we can share a link directly to the Data Collection section as required by California law. See https://app.shortcut.com/idseq/story/227851/ensure-there-is-a-link-that-takes-the-user-directly-to-the-data-cz-id-collects-section */
+  useEffect(function scrollToElementById() {
+    const hash = window.location.hash;
+    if (hash) {
+      const id = hash.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, []);
 
   const renderSummaryTable = () => (
     <>
@@ -138,7 +150,7 @@ const PrivacyNotice = () => {
           </tr>
           <tr className={cs.sectionRow}>
             <td colSpan={5}>
-              <b>Data CZ ID collects</b>
+              <b id="data_cz_id_collects">Data CZ ID collects</b>
             </td>
           </tr>
           <tr className={cs.contentRow}>
