@@ -12,7 +12,7 @@ class SfnLongReadMngsPipelineDispatchService
   DIAMOND_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/diamond_index_chunksize_5500000000/".freeze
 
   # TODO(ihan): Wdl version is hardcoded for testingpurposes. Swap to AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
-  WDL_VERSION = "0.1.7-beta".freeze
+  WDL_VERSION = "0.2.0-beta".freeze
 
   class SfnArnMissingError < StandardError
     def initialize
@@ -83,6 +83,7 @@ class SfnLongReadMngsPipelineDispatchService
           minimap2_db: MINIMAP2_DB_PATH,
           diamond_db: DIAMOND_DB_PATH,
           s3_wd_uri: "#{output_prefix}/#{@pipeline_run.version_key_subpath}",
+          nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
         },
       },
       OutputPrefix: output_prefix,

@@ -1,5 +1,3 @@
-require 'open3'
-
 class MngsReadsStatsLoadService
   include Callable
 
@@ -59,6 +57,14 @@ class MngsReadsStatsLoadService
   #   }
   # ]
   def compile_stats(pipeline_run, all_counts)
+    if pipeline_run.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      compile_nanopore_stats(pipeline_run, all_counts)
+    else
+      compile_illumina_stats(pipeline_run, all_counts)
+    end
+  end
+
+  def compile_illumina_stats(pipeline_run, all_counts)
     # Load total reads
     total = all_counts.detect { |entry| entry.value?("fastqs") }
     if total
@@ -77,7 +83,7 @@ class MngsReadsStatsLoadService
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
     frac = -1
     if sub_before && sub_after
-      frac = sub_before[:reads_after] > 0 ? ((1.0 * sub_after[:reads_after]) / sub_before[:reads_after]) : 1.0
+      frac = calculate_subsample_fraction(sub_before, sub_after)
       all_counts << { fraction_subsampled: frac }
       pipeline_run.fraction_subsampled = frac
     end
@@ -100,7 +106,67 @@ class MngsReadsStatsLoadService
     end
 
     # Load unidentified reads
-    pipeline_run.unmapped_reads = fetch_unmapped_reads(pipeline_run, all_counts) || pipeline_run.unmapped_reads
+    pipeline_run.unmapped_reads = fetch_unmapped_illumina_reads(pipeline_run, all_counts) || pipeline_run.unmapped_reads
+
+    pipeline_run.save!
+    all_counts
+  end
+
+  def compile_nanopore_stats(pipeline_run, all_counts)
+    # Load total reads/bases
+    total_reads = all_counts.detect { |entry| entry.value?("original_reads") }
+    if total_reads
+      all_counts << { total_reads: total_reads[:reads_after] }
+      pipeline_run.total_reads = total_reads[:reads_after]
+    end
+    total_bases = all_counts.detect { |entry| entry.value?("original_bases") }
+    if total_bases
+      all_counts << { total_bases: total_bases[:reads_after] }
+      pipeline_run.total_bases = total_bases[:reads_after]
+    end
+
+    # Load truncation
+    truncation = all_counts.detect { |entry| entry.value?("validated_reads") }
+    if truncation
+      pipeline_run.truncated = truncation[:reads_after]
+    end
+    truncated_bases = all_counts.detect { |entry| entry.value?("validated_bases") }
+    if truncated_bases
+      pipeline_run.truncated_bases = truncated_bases[:reads_after]
+    end
+
+    # Load subsample fraction
+    sub_before = all_counts.detect { |entry| entry.value?("human_filtered_reads") }
+    sub_after = all_counts.detect { |entry| entry.value?("subsampled_reads") }
+    if sub_before && sub_after
+      frac = calculate_subsample_fraction(sub_before, sub_after)
+      all_counts << { fraction_subsampled: frac }
+      pipeline_run.fraction_subsampled = frac
+    end
+    sub_before_bases = all_counts.detect { |entry| entry.value?("human_filtered_bases") }
+    sub_after_bases = all_counts.detect { |entry| entry.value?("subsampled_bases") }
+    if sub_before_bases && sub_after_bases
+      frac = calculate_subsample_fraction(sub_before_bases, sub_after_bases)
+      all_counts << { fraction_subsampled_bases: frac }
+      pipeline_run.fraction_subsampled_bases = frac
+    end
+
+    # Load remaining reads
+    remaining_reads = all_counts.detect { |entry| entry.value?("subsampled_reads") }
+    if remaining_reads
+      all_counts << { adjusted_remaining_reads: remaining_reads }
+      pipeline_run.adjusted_remaining_reads = remaining_reads
+    end
+
+    # Load unidentified reads/bases
+    unmapped_reads = all_counts.detect { |entry| entry.value?("unmapped_reads") }
+    if unmapped_reads
+      pipeline_run.unmapped_reads = unmapped_reads
+    end
+    unmapped_bases = all_counts.detect { |entry| entry.value?("unmapped_bases") }
+    if unmapped_bases
+      pipeline_run.unmapped_bases = unmapped_bases
+    end
 
     pipeline_run.save!
     all_counts
@@ -128,7 +194,7 @@ class MngsReadsStatsLoadService
   # Fetch the unmapped reads count from alignment stage then refined counts from
   # assembly stage, as each becomes available. Prior to Dec 2019, the count was
   # only fetched from alignment.
-  def fetch_unmapped_reads(
+  def fetch_unmapped_illumina_reads(
     pipeline_run,
     all_counts
   )
@@ -153,5 +219,9 @@ class MngsReadsStatsLoadService
       end
     end
     unmapped_reads
+  end
+
+  def calculate_subsample_fraction(sub_before, sub_after)
+    sub_before[:reads_after].to_i > 0 ? ((1.0 * sub_after[:reads_after].to_i) / sub_before[:reads_after].to_i) : 1.0
   end
 end
