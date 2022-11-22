@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_11_17_231251) do
+ActiveRecord::Schema.define(version: 2022_11_18_194348) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -511,12 +511,14 @@ ActiveRecord::Schema.define(version: 2022_11_17_231251) do
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["compression_ratio"], name: "index_pipeline_runs_on_compression_ratio"
     t.index ["fraction_subsampled"], name: "index_pipeline_runs_on_fraction_subsampled"
+    t.index ["fraction_subsampled_bases"], name: "index_pipeline_runs_on_fraction_subsampled_bases"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["pipeline_version"], name: "index_pipeline_runs_on_pipeline_version"
     t.index ["qc_percent"], name: "index_pipeline_runs_on_qc_percent"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
     t.index ["technology"], name: "index_pipeline_runs_on_technology"
     t.index ["time_to_finalized"], name: "index_pipeline_runs_on_time_to_finalized"
+    t.index ["total_bases"], name: "index_pipeline_runs_on_total_bases"
     t.index ["total_ercc_reads"], name: "index_pipeline_runs_on_total_ercc_reads"
     t.index ["total_reads"], name: "index_pipeline_runs_on_total_reads"
   end
