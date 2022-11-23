@@ -1148,14 +1148,17 @@ class Sample < ApplicationRecord
       ).where(Arel.sql(sanitized_filter_statement))
     end
 
-    case queries_by_count_type.keys
-    when [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], [TaxonCount::COUNT_TYPE_NR, TaxonCount::COUNT_TYPE_NT]
-      queries_by_count_type[TaxonCount::COUNT_TYPE_NT].or(queries_by_count_type[TaxonCount::COUNT_TYPE_NR]).distinct
-    when [TaxonCount::COUNT_TYPE_NT]
-      queries_by_count_type[TaxonCount::COUNT_TYPE_NT].distinct
-    when [TaxonCount::COUNT_TYPE_NR]
-      queries_by_count_type[TaxonCount::COUNT_TYPE_NR].distinct
-    end
+    query = case queries_by_count_type.keys
+            when [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], [TaxonCount::COUNT_TYPE_NR, TaxonCount::COUNT_TYPE_NT]
+              queries_by_count_type[TaxonCount::COUNT_TYPE_NT].or(queries_by_count_type[TaxonCount::COUNT_TYPE_NR])
+            when [TaxonCount::COUNT_TYPE_NT]
+              queries_by_count_type[TaxonCount::COUNT_TYPE_NT]
+            when [TaxonCount::COUNT_TYPE_NR]
+              queries_by_count_type[TaxonCount::COUNT_TYPE_NR]
+            end
+    # Perform a `where` operation here to return a basic ActiveRecord query to avoid sorting errors that would otherwise
+    # be caused if we just returned the query due to issues when double joining on pipeline runs in sorting queries and using `order_by` with `distinct`
+    where(id: query.distinct)
   end
 
   def self.filter_by_contig_threshold(tax_ids_with_levels, contig_threshold_filters)
