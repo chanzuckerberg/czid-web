@@ -118,6 +118,9 @@ class PipelineRun < ApplicationRecord
   LOCAL_JSON_PATH = '/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/tmp/amr_full_results'.freeze
 
+  # ONT specific constants
+  ONT_NONHOST_READS_NAME = 'sample.humanfiltered.fastq'.freeze
+
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
   # minimal number of reads mapped to the contig
   MIN_CONTIG_READS = {
@@ -537,16 +540,18 @@ class PipelineRun < ApplicationRecord
   end
 
   def nonhost_fastq_s3_paths(prefix = '')
-    input_file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+    if technology == TECHNOLOGY_INPUT[:illumina]
+      input_file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+      files = [
+        "#{postprocess_output_s3_path}/#{prefix}nonhost_R1.#{input_file_ext}",
+      ]
 
-    files = [
-      "#{postprocess_output_s3_path}/#{prefix}nonhost_R1.#{input_file_ext}",
-    ]
-
-    if sample.input_files.length == 2
-      files << "#{postprocess_output_s3_path}/#{prefix}nonhost_R2.#{input_file_ext}"
+      if sample.input_files.length == 2
+        files << "#{postprocess_output_s3_path}/#{prefix}nonhost_R2.#{input_file_ext}"
+      end
+    else
+      files = "#{postprocess_output_s3_path}/#{ONT_NONHOST_READS_NAME}"
     end
-
     files
   end
 
@@ -2032,7 +2037,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def supports_assembly?
-    pipeline_version_has_assembly(pipeline_version)
+    technology == TECHNOLOGY_INPUT[:nanopore] || pipeline_version_has_assembly(pipeline_version)
   end
 
   def time_since_executed_at

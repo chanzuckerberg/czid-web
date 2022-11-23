@@ -411,10 +411,16 @@ class BulkDownload < ApplicationRecord
       # Also, there might be duplicates between the original file names.
       download_tar_names = samples_ordered.map do |sample|
         # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
+        # Nanopore samples will only have one input file.
         sample.input_files.map.with_index do |input_file, input_file_index|
           # Include the project id because the cleaned project names might have duplicates as well.
-          "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-            "original_R#{input_file_index + 1}.#{input_file.file_type}"
+          if sample.initial_workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
+            "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+              "original_R#{input_file_index + 1}.#{input_file.file_type}"
+          else
+            "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+                "original.#{input_file.file_type}"
+          end
         end
       end.flatten
     end
@@ -444,12 +450,19 @@ class BulkDownload < ApplicationRecord
 
       download_tar_names = pipeline_runs_ordered.map do |pipeline_run|
         sample = pipeline_run.sample
+        # file_ext will always be fastq for ONT samples
         file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
-        # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
-        sample.input_files.map.with_index do |_input_file, input_file_index|
-          # Include the project id because the cleaned project names might have duplicates as well.
+        # We assume that the first input file is R1 and the second input file is R2 for Illumina. This is the convention that the pipeline follows.
+        # Nanopore samples will only have one input file and it will always be .fastq.
+        if sample.initial_workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
+          sample.input_files.map.with_index do |_input_file, input_file_index|
+            # Include the project id because the cleaned project names might have duplicates as well.
+            "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+              "reads_nh_R#{input_file_index + 1}.#{file_ext}"
+          end
+        else
           "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-            "reads_nh_R#{input_file_index + 1}.#{file_ext}"
+            "reads_nh.#{file_ext}"
         end
       end.flatten
     end

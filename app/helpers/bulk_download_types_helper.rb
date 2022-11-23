@@ -92,7 +92,7 @@ module BulkDownloadTypesHelper
       category: "raw_data",
       execution_type: ECS_EXECUTION_TYPE,
       uploader_only: true,
-      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]], # for CG downloads v0
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]], # for CG downloads v0
     },
 
     # Specific to short read mNGS workflows
@@ -210,7 +210,7 @@ module BulkDownloadTypesHelper
         },
       ],
       execution_type: VARIABLE_EXECUTION_TYPE,
-      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]],
     },
     {
       # DEPRECATED:
@@ -231,7 +231,7 @@ module BulkDownloadTypesHelper
         },
       ],
       execution_type: VARIABLE_EXECUTION_TYPE,
-      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]],
     },
     {
       type: UNMAPPED_READS_BULK_DOWNLOAD_TYPE,
@@ -239,7 +239,7 @@ module BulkDownloadTypesHelper
       description: "Reads that didn’t map to any taxa",
       category: "raw_data",
       execution_type: ECS_EXECUTION_TYPE,
-      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]],
     },
 
     # Consensus genome workflows
