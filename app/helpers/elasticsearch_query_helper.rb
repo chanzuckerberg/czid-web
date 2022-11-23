@@ -35,6 +35,34 @@ module ElasticsearchQueryHelper
     end
   end
 
+  # updates the last_read_at timestamp in the pipeline_runs index
+  # for use by the scheduled LRU eviction lambda
+  def self.update_last_read_at(background_id, pipeline_run_ids)
+    current_timestamp = Time.now.utc.iso8601(6)
+    bulk_body = pipeline_run_ids.map do |pipeline_run_id|
+      {
+        update: {
+          _index: "pipeline_runs",
+          _id: "#{pipeline_run_id}_#{background_id}",
+          data: {
+            "doc": {
+              last_read_at: current_timestamp,
+            },
+          },
+        },
+      }
+    end
+
+    begin
+      response = ES_CLIENT.bulk(body: bulk_body)
+      if response['errors']
+        LogUtil.log_message("Some bulk updates of last_read_at failed for #{pipeline_run_id}_#{background_id}", details: response['items'])
+      end
+    rescue StandardError => error
+      LogUtil.log_error("Failed to submit bulk update of last_read_at for #{pipeline_run_id}_#{background_id}", exception: error)
+    end
+  end
+
   # Based on the provided filter criteria, query ES index and return top N taxon for each sample
   # reduce the returned tax_ids to a unique set and return
   def self.top_n_taxa_per_sample(

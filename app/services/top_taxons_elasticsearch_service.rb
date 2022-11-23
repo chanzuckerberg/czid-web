@@ -39,6 +39,12 @@ class TopTaxonsElasticsearchService
       filter_param[:background_id],
       pr_id_to_sample_id.keys
     )
+
+    ElasticsearchQueryHelper.update_last_read_at(
+      filter_param[:background_id],
+      pr_id_to_sample_id.keys
+    )
+
     results_by_pr = fetch_top_taxons(
       filter_param,
       pr_id_to_sample_id,
