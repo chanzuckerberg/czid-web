@@ -15,7 +15,7 @@ const ProjectInfoIconTooltip = (props: ProjectInfoIconTooltipProps) => {
 
   const description = isPublic
     ? "This project is viewable and searchable by anyone in CZ ID. "
-    : "Samples added to this project will be private by default, visible only to you and other project members. Private samples will become public 1 year after their upload date. ";
+    : "Samples added to this project will be private by default, visible only to you and other project members. You can change your project from private to public at anytime.";
 
   const content = (
     <>

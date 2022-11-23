@@ -129,8 +129,9 @@ const ProjectCreationModal = ({
               <div className={cs.title}>Public Project</div>
               <div className={cs.description}>
                 This project is viewable and searchable by anyone in CZ ID.
-                They’ll be able to perform actions like create heatmaps and
-                download results. Public projects can’t be changed to Private.{" "}
+                They’ll be able to perform read-only actions like create
+                heatmaps and download results, but will not have access to your
+                raw data.{" "}
                 <ExternalLink href="https://help.czid.org">
                   Learn more
                 </ExternalLink>
@@ -155,9 +156,10 @@ const ProjectCreationModal = ({
               <div className={cs.title}>Private Project</div>
               <div className={cs.description}>
                 Samples added to this project will be private by default,
-                visible only to you and other project members. Private samples
-                will become public 1 year after their upload date. You can
-                change a Private project to Public at any time.{" "}
+                visible only to you and other project members. You choose if,
+                and when, to share your samples with others either by adding
+                them as members of your project or by changing your project from
+                Private to Public.{" "}
                 <ExternalLink href="https://help.czid.org">
                   Learn more
                 </ExternalLink>
