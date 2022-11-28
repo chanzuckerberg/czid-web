@@ -17,6 +17,8 @@ import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import PathogenListView from "~/components/views/pathogen_list/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
 import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoticeForUserResearch";
+import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";
+import TermsOfUsePreview from "~/components/views/support/TermsOfUsePreview";
 
 // These props come from Rails .html.erb views via the react_component function in app/assets/src/index.jsx (the entrypoint)
 interface DiscoveryViewRouterProps {
@@ -92,6 +94,12 @@ const DiscoveryViewRouter = ({
           />
         )}
       />
+      <Route exact path="/privacy_preview">
+        <PrivacyNoticePreview />
+      </Route>
+      <Route exact path="/terms_preview">
+        <TermsOfUsePreview />
+      </Route>
       {userSignedIn ? (
         <Route>
           <DiscoveryView

@@ -6,6 +6,8 @@ class SupportController < ApplicationController
     :privacy,
     :terms_changes,
     :terms,
+    :privacy_preview,
+    :terms_preview,
     :security_white_paper,
   ].freeze
 
@@ -20,6 +22,14 @@ class SupportController < ApplicationController
   end
 
   def terms_changes
+  end
+
+  def privacy_preview
+    render "home/discovery_view_router"
+  end
+
+  def terms_preview
+    render "home/discovery_view_router"
   end
 
   def faqs

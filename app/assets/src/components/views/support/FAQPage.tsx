@@ -54,13 +54,11 @@ export default class FAQPage extends React.Component {
                 with anyone you share your project with.
               </React.Fragment>,
               <React.Fragment key={nanoid()}>
-                Unless you choose to remove it <b>one year</b> after you
-                uploaded your sample, Report Data and the Sample Metadata
-                uploaded alongside it will be shared with <b>all CZ ID users</b>
-                . We will notify and remind you of this sharing of the Report
-                Data and Sample Metadata before the one year anniversary of your
-                upload by sending you a message to the contact information you
-                provided to us at registration.
+                You can decide to share your Report Data and the associated
+                Sample Metadata with all CZ ID users but that is completely up
+                to you. You can choose to share your Report Data with a small
+                group of CZ ID users, by adding them to a Project, or with all
+                other CZ ID users by marking a Project as {'"Public"'}.
               </React.Fragment>,
             ]}
           />
@@ -166,7 +164,8 @@ export default class FAQPage extends React.Component {
                 any fields where Protected Health Information (PHI) can be
                 derived.
               </React.Fragment>,
-            ]}/>
+            ]}
+          />
         </Accordion>
         <Accordion
           className={cs.question}

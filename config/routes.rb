@@ -118,6 +118,8 @@ Rails.application.routes.draw do
   get 'privacy', to: 'support#privacy'
   get 'terms_changes', to: 'support#terms_changes'
   get 'terms', to: 'support#terms'
+  get 'privacy_preview', to: 'support#privacy_preview'
+  get 'terms_preview', to: 'support#terms_preview'
   get 'security_white_paper', to: 'support#security_white_paper'
 
   resources :projects do
