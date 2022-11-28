@@ -682,10 +682,12 @@ class PipelineRun < ApplicationRecord
     contig_stats_json = JSON.parse(File.read(downloaded_contig_stats))
     return if contig_stats_json.empty?
 
-    contig_base_counts_path = s3_file_for("contig_bases")
-    downloaded_contig_base_counts = PipelineRun.download_file_with_retries(contig_base_counts_path,
-                                                                           LOCAL_JSON_PATH, 3)
-    contig_base_counts_json = JSON.parse(File.read(downloaded_contig_base_counts))
+    if technology == TECHNOLOGY_INPUT[:nanopore]
+      contig_base_counts_path = s3_file_for("contig_bases")
+      downloaded_contig_base_counts = PipelineRun.download_file_with_retries(contig_base_counts_path,
+                                                                             LOCAL_JSON_PATH, 3)
+      contig_base_counts_json = JSON.parse(File.read(downloaded_contig_base_counts))
+    end
 
     contig_fasta = PipelineRun.download_file_with_retries(contig_s3_path, LOCAL_JSON_PATH, 3)
     contig_array = []
@@ -697,7 +699,7 @@ class PipelineRun < ApplicationRecord
     # A lambda allows us to access variables in the enclosing scope, such as contig2taxid.
     get_contig_hash = lambda do |header, sequence|
       read_count = contig_stats_json[header] || 0
-      base_count = contig_base_counts_json[header] || 0
+      base_count = technology == TECHNOLOGY_INPUT[:nanopore] ? (contig_base_counts_json[header] || 0) : nil
       lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
 
       species_taxid_nt = lineage_json.dig(TaxonCount::COUNT_TYPE_NT, 0) || nil
