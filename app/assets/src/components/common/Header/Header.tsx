@@ -1,10 +1,9 @@
-import { isEmpty } from "lodash/fp";
 import React from "react";
-
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
+import Link from "~/components/ui/controls/Link";
 import ToastContainer from "~ui/containers/ToastContainer";
 import { CZIDLogoReversed } from "~ui/icons";
+
 import MainMenu from "./MainMenu";
 import UserMenuDropDown, { TermsMenuDropDown } from "./UserMenuDropDown";
 import cs from "./header.scss";
@@ -24,7 +23,6 @@ interface HeaderProps {
 const Header = ({
   adminUser,
   announcementBannerEnabled,
-  emergencyBannerMessage,
   disableNavigation,
   showBlank,
   userSignedIn,
@@ -49,25 +47,28 @@ const Header = ({
         message={emergencyBannerMessage}
       />
       <AnnouncementBanner
-        id="rebrand"
+        id="jan_1_policy_changes"
         visible={announcementBannerEnabled}
-        message="Looking for IDseq? You're in the right spot. As of December, our new name is Chan Zuckerberg ID."
         inverted={true}
-      />
-      <AnnouncementBanner
-        id="alignment-scalability"
-        visible={announcementBannerEnabled}
         message={
           <>
-            {" "}
-            We&#x27;re upgrading our pipeline to v7.0 on March 10. Learn more
-            <ExternalLink href="https://info.chanzuckerberg.com/cz-id-pipeline-update-making-our-pipeline-more-scalable">
-              {" "}
-              here{" "}
-            </ExternalLink>{" "}
+            {
+              "Effective today, samples will not automatically go public after 1 year. Our policies will update to reflect this and other changes on 1/1/23. Here is a "
+            }
+            <Link href="/terms_changes">
+              <span
+                style={{
+                  color: "white",
+                  textDecoration: "underline",
+                  textDecorationStyle: "dashed",
+                }}
+              >
+                preview of all updates
+              </span>
+            </Link>
+            {"."}
           </>
         }
-        inverted={false}
       />
       <div className={cs.header}>
         <div className={cs.logo}>
