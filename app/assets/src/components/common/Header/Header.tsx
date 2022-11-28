@@ -1,3 +1,4 @@
+import { isEmpty } from "lodash/fp";
 import React from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import Link from "~/components/ui/controls/Link";
@@ -26,6 +27,7 @@ const Header = ({
   disableNavigation,
   showBlank,
   userSignedIn,
+  emergencyBannerMessage,
   email,
   signOutEndpoint,
   userName,
