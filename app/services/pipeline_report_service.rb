@@ -245,7 +245,7 @@ class PipelineReportService
       taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id, technology: @technology)
       @timer.split("fetch_taxon_counts_and_summaries")
 
-      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id, @pipeline_Run.technology)
+      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id, @pipeline_run.technology)
       @timer.split("fetch_taxons_absent_from_sample")
 
       if @merge_nt_nr
@@ -591,8 +591,9 @@ class PipelineReportService
       end
 
       count_type = counts[field_index[:count_type]].downcase.to_sym
+      count_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :count : :base_count
       counts_hash[tax_id][count_type] = {
-        :count => counts[field_index[:count]],
+        count_key => counts[field_index[count_key]],
         :e_value => counts[field_index[:e_value]],
         :source_count_type => counts[field_index[:source_count_type]],
         :percent_identity => percent_identity,

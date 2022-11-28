@@ -493,6 +493,158 @@ RSpec.describe PipelineReportService, type: :service do
     end
   end
 
+  # The test below is a based on "converted report test for species taxid 573"
+  context "report with parallel data-fetching disabled (for species taxid 573)" do
+    before do
+      create(:taxon_lineage, tax_name: "Klebsiella pneumoniae", taxid: 573, genus_taxid: 570, superkingdom_taxid: 2)
+      create(:taxon_lineage, tax_name: "Klebsiella", taxid: 570, genus_taxid: 570, superkingdom_taxid: 2)
+
+      @pipeline_run = create(:pipeline_run,
+                             sample: create(:sample, project: create(:project)),
+                             technology: "Illumina",
+                             sfn_execution_arn: fake_sfn_execution_arn,
+                             job_status: "CHECKED",
+                             finalized: 1,
+                             total_reads: 1122,
+                             adjusted_remaining_reads: 316,
+                             subsample: 1_000_000,
+                             taxon_counts_data: [{
+                               tax_level: 1,
+                               taxon_name: "Klebsiella pneumoniae",
+                               nt: 209,
+                               percent_identity: 99.6995,
+                               alignment_length: 149.402,
+                               e_value: -89.5641,
+                             }, {
+                               tax_level: 1,
+                               taxon_name: "Klebsiella pneumoniae",
+                               nr: 69,
+                               percent_identity: 97.8565,
+                               alignment_length: 46.3623,
+                               e_value: -16.9101,
+                             }, {
+                               tax_level: 2,
+                               nt: 217,
+                               taxon_name: "Klebsiella",
+                               percent_identity: 99.7014,
+                               alignment_length: 149.424,
+                               e_value: -89.5822,
+                             }, {
+                               tax_level: 2,
+                               nr: 87,
+                               taxon_name: "Klebsiella",
+                               percent_identity: 97.9598,
+                               alignment_length: 46.4253,
+                               e_value: -16.9874,
+                             },],
+                             contigs_data: [{
+                               species_taxid_nt: 573,
+                               species_taxid_nr: 573,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 573,
+                               species_taxid_nr: 573,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 570,
+                               species_taxid_nr: 570,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 570,
+                               species_taxid_nr: 570,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             },])
+      @background = create(:background,
+                           pipeline_run_ids: [
+                             create(:pipeline_run,
+                                    sample: create(:sample, project: create(:project))).id,
+                             create(:pipeline_run,
+                                    sample: create(:sample, project: create(:project))).id,
+                           ],
+                           taxon_summaries_data: [{
+                             tax_id: 573,
+                             count_type: "NR",
+                             tax_level: 1,
+                             mean: 29.9171,
+                             stdev: 236.332,
+                           }, {
+                             tax_id: 573,
+                             count_type: "NT",
+                             tax_level: 1,
+                             mean: 9.35068,
+                             stdev: 26.4471,
+                           }, {
+                             tax_id: 570,
+                             count_type: "NR",
+                             tax_level: 2,
+                             mean: 35.0207,
+                             stdev: 238.639,
+                           }, {
+                             tax_id: 570,
+                             count_type: "NT",
+                             tax_level: 2,
+                             mean: 18.3311,
+                             stdev: 64.2056,
+                           },])
+
+      @report_without_parallel_fetch = PipelineReportService.call(@pipeline_run, @background.id, parallel: false)
+    end
+
+    it "should get correct values for species 573" do
+      species_result = {
+        "genus_tax_id" => 570,
+        "name" => "Klebsiella pneumoniae",
+        "nt" => {
+          "count" => 209,
+          "rpm" => 186_274.50980392157, # previously rounded to 186_274.509
+          "z_score" => 99.0,
+        },
+        "nr" => {
+          "count" => 69,
+          "rpm" => 61_497.326203208555, # previously rounded to 61_497.326
+          "z_score" => 99.0,
+        },
+        "agg_score" => 2_428_411_764.7058825, # previously rounded to 2_428_411_754.8
+      }
+
+      expect(JSON.parse(@report_without_parallel_fetch)["counts"]["1"]["573"]).to include_json(species_result)
+    end
+
+    it "should get correct values for genus 570" do
+      genus_result = {
+        "genus_tax_id" => 570,
+        "nt" => {
+          "count" => 217.0,
+          "rpm" => 193_404.63458110517, # previously rounded to 193_404.634
+          "z_score" => 99.0,
+          "e_value" => -89.5822,
+        },
+        "nr" => {
+          "count" => 87.0,
+          "rpm" => 77_540.10695187165, # previously rounded to 77_540.106
+          "z_score" => 99.0,
+          "e_value" => -16.9874,
+        },
+        "agg_score" => 2_428_411_764.7058825, # previously rounded to  2_428_411_754.8
+      }
+
+      expect(JSON.parse(@report_without_parallel_fetch)["counts"]["2"]["570"]).to include_json(genus_result)
+    end
+
+    it "should show correct values in CSV in consistent order" do
+      csv_report_without_parallel_fetch = PipelineReportService.call(@pipeline_run, @background.id, parallel: false, csv: true)
+      expect(csv_report_without_parallel_fetch).to eq(csv_output_standard_background)
+    end
+  end
+
   context "taxon missing from background" do
     before do
       create(:taxon_lineage, tax_name: "species", taxid: 1, genus_taxid: 2)
