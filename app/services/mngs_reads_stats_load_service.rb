@@ -155,17 +155,17 @@ class MngsReadsStatsLoadService
     remaining_reads = all_counts.detect { |entry| entry.value?("subsampled_reads") }
     if remaining_reads
       all_counts << { adjusted_remaining_reads: remaining_reads }
-      pipeline_run.adjusted_remaining_reads = remaining_reads
+      pipeline_run.adjusted_remaining_reads = remaining_reads[:reads_after]
     end
 
     # Load unidentified reads/bases
     unmapped_reads = all_counts.detect { |entry| entry.value?("unmapped_reads") }
     if unmapped_reads
-      pipeline_run.unmapped_reads = unmapped_reads
+      pipeline_run.unmapped_reads = unmapped_reads[:reads_after]
     end
     unmapped_bases = all_counts.detect { |entry| entry.value?("unmapped_bases") }
     if unmapped_bases
-      pipeline_run.unmapped_bases = unmapped_bases
+      pipeline_run.unmapped_bases = unmapped_bases[:reads_after]
     end
 
     pipeline_run.save!

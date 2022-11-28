@@ -1976,9 +1976,15 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_qc_percent(job_stats_hash)
-    star_stats = job_stats_hash['star_out']
-    priceseqfilter_stats = job_stats_hash['priceseq_out']
-    update!(qc_percent: (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after']) unless priceseqfilter_stats.nil? || star_stats.nil? || star_stats['reads_after'].zero?
+    if technology == TECHNOLOGY_INPUT[:nanopore]
+      quality_filtered_stats = job_stats_hash['quality_filtered_reads']
+      validated_stats = job_stats_hash['validated_reads']
+      update!(qc_percent: calculate_qc_percent(validated_stats['reads_after'], quality_filtered_stats['reads_after'])) unless quality_filtered_stats.nil? || validated_stats.nil? || validated_stats['reads_after'].zero?
+    else
+      star_stats = job_stats_hash['star_out']
+      priceseqfilter_stats = job_stats_hash['priceseq_out']
+      update!(qc_percent: calculate_qc_percent(star_stats['reads_after'], priceseqfilter_stats['reads_after'])) unless priceseqfilter_stats.nil? || star_stats.nil? || star_stats['reads_after'].zero?
+    end
   end
 
   # Given a list of samples, returns a list of the latest pipeline run for each of the samples.
@@ -2004,6 +2010,10 @@ class PipelineRun < ApplicationRecord
   end
 
   private
+
+  def calculate_qc_percent(before_qc, after_qc)
+    (100.0 * after_qc) / before_qc
+  end
 
   def extract_float_metric(metrics, metric_name)
     return nil unless metrics[metric_name]
