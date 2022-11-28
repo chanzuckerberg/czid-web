@@ -114,6 +114,7 @@ class PipelineRun < ApplicationRecord
   CONTIG_NT_TOP_M8 = 'gsnap.blast.top.m8'.freeze
   CONTIG_NR_TOP_M8 = 'rapsearch2.blast.top.m8'.freeze
   CONTIG_MAPPING_NAME = 'contig2taxon_lineage.csv'.freeze
+  CONTIG_BASE_COUNTS_NAME = 'contig_base_counts.json'.freeze
 
   LOCAL_JSON_PATH = '/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/tmp/amr_full_results'.freeze
@@ -681,6 +682,11 @@ class PipelineRun < ApplicationRecord
     contig_stats_json = JSON.parse(File.read(downloaded_contig_stats))
     return if contig_stats_json.empty?
 
+    contig_base_counts_path = s3_file_for("contig_bases")
+    downloaded_contig_base_counts = PipelineRun.download_file_with_retries(contig_base_counts_path,
+                                                                           LOCAL_JSON_PATH, 3)
+    contig_base_counts_json = JSON.parse(File.read(downloaded_contig_base_counts))
+
     contig_fasta = PipelineRun.download_file_with_retries(contig_s3_path, LOCAL_JSON_PATH, 3)
     contig_array = []
     taxid_list = []
@@ -691,6 +697,7 @@ class PipelineRun < ApplicationRecord
     # A lambda allows us to access variables in the enclosing scope, such as contig2taxid.
     get_contig_hash = lambda do |header, sequence|
       read_count = contig_stats_json[header] || 0
+      base_count = contig_base_counts_json[header] || 0
       lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
 
       species_taxid_nt = lineage_json.dig(TaxonCount::COUNT_TYPE_NT, 0) || nil
@@ -701,7 +708,7 @@ class PipelineRun < ApplicationRecord
       genus_taxid_merged_nt_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_MERGED, 1) || nil
 
       {
-        name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json,
+        name: header, sequence: sequence, read_count: read_count, base_count: base_count, lineage_json: lineage_json.to_json,
         species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr, species_taxid_merged_nt_nr: species_taxid_merged_nt_nr,
         genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr, genus_taxid_merged_nt_nr: genus_taxid_merged_nt_nr,
       }
@@ -995,6 +1002,9 @@ class PipelineRun < ApplicationRecord
                   "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
                 when "accession_coverage_stats"
                   coverage_viz_summary_s3_path
+                when "contig_bases"
+                  "#{assembly_s3_path}/#{CONTIG_BASE_COUNTS_NAME}"
+
                 end
     # Extra check in case prefix was nil/invalid:
     full_path.start_with?("/") ? nil : full_path

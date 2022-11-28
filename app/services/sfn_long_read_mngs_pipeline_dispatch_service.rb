@@ -12,7 +12,7 @@ class SfnLongReadMngsPipelineDispatchService
   DIAMOND_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/diamond_index_chunksize_5500000000/".freeze
 
   # TODO(ihan): Wdl version is hardcoded for testingpurposes. Swap to AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
-  WDL_VERSION = "0.2.0-beta".freeze
+  WDL_VERSION = "0.2.3-beta".freeze
 
   class SfnArnMissingError < StandardError
     def initialize
