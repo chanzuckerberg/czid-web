@@ -3,38 +3,47 @@
 one:
   name: Project 1
   public_access: 0
+  days_to_keep_sample_private: 365
   description: Test Project One
 
 two:
   name: Project 2
+  days_to_keep_sample_private: 365
   metadata_fields: [age]
   public_access: 0
 
 deletable_project:
+  days_to_keep_sample_private: 365
   name: Empty project
   public_access: 0
 
 public_project:
+  days_to_keep_sample_private: 365
   name: Public Project
   public_access: 1
+  days_to_keep_sample_private: 365
   metadata_fields: [sample_type, nucleotide_type]
 
 joe_project:
+  days_to_keep_sample_private: 365
   name: Project 3
   users: [joe, joe_dd]
   metadata_fields: [sample_type, nucleotide_type, age, admission_date, blood_fed, reported_sex, sex]
   public_access: 0
 
 not_joe_project:
+  days_to_keep_sample_private: 365
   name: Not Joe's Project
   public_access: 0
 
 admin_project:
+  days_to_keep_sample_private: 365
   name: Project of Admin user
   public_access: 0
   users: [admin]
 
 metadata_validation_project:
+  days_to_keep_sample_private: 365
   name: Metadata Project
   users: [admin_one]
   metadata_fields: [sample_type, nucleotide_type, collection_date, age, admission_date, blood_fed, reported_sex, sex]
@@ -42,6 +51,7 @@ metadata_validation_project:
 
 # This was added later to test water_control specifically.
 metadata_validation_project_with_water_control:
+  days_to_keep_sample_private: 365
   name: Metadata Project With Water Control
   users: [admin_one]
   metadata_fields: [sample_type, nucleotide_type, water_control]

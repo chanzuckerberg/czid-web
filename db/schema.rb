@@ -528,7 +528,7 @@ ActiveRecord::Schema.define(version: 2022_11_18_194348) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1, default: 0
-    t.integer "days_to_keep_sample_private", default: 365, null: false
+    t.integer "days_to_keep_sample_private", default: ProjectsController::FAR_FUTURE_DAYS, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
     t.integer "subsample_default", comment: "The default value of subsample for newly uploaded samples. Can be overridden by admin options."

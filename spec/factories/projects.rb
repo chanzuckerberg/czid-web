@@ -29,7 +29,7 @@ FactoryBot.define do
     # guarantees that a samples is public by explicitly setting
     # project's `days_to_keep_sample_private` and sample's `created_at` explicitly
     trait :with_public_sample do
-      days_to_keep_sample_private { 365.days.ago }
+      days_to_keep_sample_private { 365 }
       after :create do |project, options|
         create(:sample, project: project, host_genome_name: options.host_genome_name, created_at: 366.days.ago)
       end
@@ -58,6 +58,7 @@ FactoryBot.define do
   end
 
   factory :public_project, parent: :project do
+    days_to_keep_sample_private { 365 }
     public_access { 1 }
   end
 end

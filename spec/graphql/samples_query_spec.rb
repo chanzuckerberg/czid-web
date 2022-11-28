@@ -196,7 +196,7 @@ GQL
 
   describe "SamplesQuery Specs" do
     it "loads list of samples with correct visibilty" do
-      project = create(:project, users: [@joe])
+      project = create(:project, users: [@joe], days_to_keep_sample_private: 365)
       sample_private = create(:sample, project: project, user: @joe, created_at: 6.months.ago)
       sample_public = create(:sample, project: project, user: @joe, created_at: 2.years.ago)
 

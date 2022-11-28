@@ -143,7 +143,7 @@ namespace "load_test" do
     project ||= Project.create(
       name: args.project_name,
       description: "Project used for load testing the pipeline",
-      days_to_keep_sample_private: 1000 * 365,
+      days_to_keep_sample_private: ProjectsController::DEFAULT_DAYS_TO_KEEP_SAMPLE_PRIVATE,
       users: [user]
     )
 

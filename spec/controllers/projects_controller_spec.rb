@@ -204,8 +204,8 @@ RSpec.describe ProjectsController, type: :controller do
           expected_projects = []
           create(:project, users: [@user], samples_data: [{ created_at: 6.months.ago }])
           # Add 1.day to avoid borderline timing error:
-          expected_projects << create(:project, users: [other_user], samples_data: [{ created_at: (1.year + 1.day).ago }])
-          expected_projects << create(:project, users: [@user], samples_data: [{ created_at: (1.year + 1.day).ago }])
+          expected_projects << create(:project, days_to_keep_sample_private: 365, users: [other_user], samples_data: [{ created_at: (1.year + 1.day).ago }])
+          expected_projects << create(:project, days_to_keep_sample_private: 365, users: [@user], samples_data: [{ created_at: (1.year + 1.day).ago }])
 
           get :index, params: { format: "json", domain: "public" }
 
@@ -924,6 +924,10 @@ RSpec.describe ProjectsController, type: :controller do
           json_response = JSON.parse(response.body)
           expect(json_response).to eq(["Test One", "Test One_1", "Created", "Test Three_1"])
         end
+        it 'ensure default days_to_keep_sample_private is set to FAR_FUTURE_DAYS per sc-227848' do
+          project = create(:project, :with_sample, name: "Project", users: [@user])
+          expect(project.days_to_keep_sample_private).to eq(ProjectsController::FAR_FUTURE_DAYS)
+        end
       end
     end
   end
@@ -941,8 +945,8 @@ RSpec.describe ProjectsController, type: :request do
 
     @project = create(:project)
     @metadata_validation_project = create(:project) # , metadata_fields: ['sample_type', 'nucleotide_type', 'collection_date', 'age', 'admission_date', 'blood_fed', 'reported_sex', 'sex'])
-    @joe_project = create(:project, :with_sample, users: [@joe]) # , metadata_fields: ['sample_type', 'nucleotide_type', 'age', 'admission_date', 'blood_fed', 'reported_sex', 'sex'])
-    @public_project = create(:public_project, :with_sample) # , metadata_fields: [@metadata_field_sample_type, @metadata_field_nucleotide_type])
+    @joe_project = create(:project, :with_sample, users: [@joe], days_to_keep_sample_private: 365) # , metadata_fields: ['sample_type', 'nucleotide_type', 'age', 'admission_date', 'blood_fed', 'reported_sex', 'sex'])
+    @public_project = create(:public_project, :with_sample, days_to_keep_sample_private: 365) # , metadata_fields: [@metadata_field_sample_type, @metadata_field_nucleotide_type])
     @deletable_project = create(:project)
   end
 
