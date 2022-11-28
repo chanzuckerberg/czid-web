@@ -858,6 +858,11 @@ class PipelineRun < ApplicationRecord
       rpm_value = rpm(tcnt["count"])
       tcnt["rpm"] = rpm_value
       tcnt["rpm_decimal"] = rpm_value
+
+      if technology == TECHNOLOGY_INPUT[:nanopore]
+        tcnt["bpm"] = bpm(tcnt["base_count"])
+      end
+
       tcnt.merge!(tcnt_attrs_to_merge)
       # Format source count type as NT, NR or NT-NR (is currently an unordered array with possible unique value of ["NT", "NR"])
       tcnt["source_count_type"] = tcnt["source_count_type"] ? tcnt["source_count_type"].sort.reverse.join("-") : nil
@@ -1662,7 +1667,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def multihit?
-    after(pipeline_version || fetch_pipeline_version, "1.5")
+    technology == TECHNOLOGY_INPUT[:nanopore] || after(pipeline_version || fetch_pipeline_version, "1.5")
   end
 
   def assembly?
@@ -1966,6 +1971,10 @@ class PipelineRun < ApplicationRecord
 
   def rpm(raw_read_count)
     raw_read_count / ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+  end
+
+  def bpm(raw_bases_count)
+    raw_bases_count / (total_bases * fraction_subsampled_bases) * 1_000_000.0
   end
 
   def load_compression_ratio(job_stats_hash)
