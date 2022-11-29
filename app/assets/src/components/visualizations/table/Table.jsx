@@ -102,7 +102,7 @@ Table.propTypes = {
     PropTypes.shape({
       dataKey: PropTypes.string.isRequired,
       // sortFunction should have the following signature: sortFunction({ data, sortDirection }) => sortedData
-      sortFunction: PropTypes.function,
+      sortFunction: PropTypes.func,
     }),
   ).isRequired,
   data: PropTypes.array,
