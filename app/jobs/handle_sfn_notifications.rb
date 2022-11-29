@@ -69,7 +69,7 @@ class HandleSfnNotifications
       # If the run is still awaiting results, load in any new results to the database.
       unless pr.results_finalized?
         # If a stage has completed in the Illumina mNGS pipeline, load in the outputs from that stage into the db.
-        if stage_complete_event?(details)
+        if stage_complete_event?(details) && pr.technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
           pr.load_stage_results(details["lastCompletedStage"])
           Rails.logger.info("Loading #{details['lastCompletedStage']} results for PipelineRun #{pr.id} #{arn} into the database")
           # trigger lambda job that indexes the taxons in this pipeline run into ES for later heatmap generation

@@ -1088,13 +1088,13 @@ class PipelineRun < ApplicationRecord
     update_pipeline_version(self, :pipeline_version, pipeline_version_file) if pipeline_version.blank?
     return if pipeline_version.blank? && !finalized
 
+    # Update job stats:
+    compiling_stats_error = update_job_stats
+
     # Load any new outputs that have become available:
     output_states.each do |o|
       check_and_enqueue(o)
     end
-
-    # Update job stats:
-    compiling_stats_error = update_job_stats
 
     # Check if run is complete:
     if all_output_states_terminal?
@@ -1982,7 +1982,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def rpm(raw_read_count)
-    raw_read_count / ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+    raw_read_count / ((total_reads - (total_ercc_reads || 0).to_i) * subsample_fraction) * 1_000_000.0
   end
 
   def bpm(raw_bases_count)
