@@ -62,25 +62,19 @@ const PreUploadQCCheck = ({
   // Add libraries to CLI and mount each file
   const initializeCLI = async () => {
     const pathToAssets = `${location.origin}/assets`;
-    CLI = await new Aioli(
-      [
-        {
-          tool: "htslib",
-          program: "htsfile",
-          version: "1.10",
-          urlPrefix: `${pathToAssets}/htslib`,
-        },
-        {
-          tool: "seqtk",
-          version: "1.3",
-          urlPrefix: `${pathToAssets}/seqtk`,
-        },
-      ],
+    CLI = await new Aioli([
       {
-        urlAioli: `${pathToAssets}/aioli.worker.js`,
-        urlBaseModule: `${pathToAssets}/base`,
+        tool: "htslib",
+        program: "htsfile",
+        version: "1.10",
+        urlPrefix: pathToAssets,
       },
-    );
+      {
+        tool: "seqtk",
+        version: "1.3",
+        urlPrefix: pathToAssets,
+      },
+    ]);
 
     for (let i = 0; i < samples.length; i++) {
       const passedFile = samples[i];
