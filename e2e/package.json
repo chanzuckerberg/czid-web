@@ -8,6 +8,7 @@
     "pw:staging": "NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
     "pw:staging:": "DEBUG=pw:browser*,pw:api NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
     "pw:local": "NODE_ENV=development DEBUG=pw:api npx playwright test --headed -c ./setup/local.config.ts",
+    "pw:ci": "NODE_ENV=development CI=true DEBUG=pw:api npx playwright test -c ./setup/local.config.ts",
     "pw:staging:headless": "NODE_ENV=staging npx playwright test --headless -c ./setup/staging.config.ts",
     "pw:staging:debug": "DEBUG=pw:browser*,pw:api NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
     "pw:report": "npx playwright show-report"

@@ -36,7 +36,7 @@ const projectName = "QA Automation";
 const sampleFiles = ["RR004_water_2_S23A_R1_001.fastq"];
 
 test.describe("Metagenomics sample upload tests", () => {
-  test.only("Should upload mNGS sample with manual metadata", async ({
+  test.skip("Should upload mNGS sample with manual metadata", async ({
     page,
   }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
@@ -54,7 +54,7 @@ test.describe("Metagenomics sample upload tests", () => {
     await submitUpload(page);
   });
 
-  test.only("Should upload mNGS sample with metadata csv file", async ({
+  test.skip("Should upload mNGS sample with metadata csv file", async ({
     page,
   }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
