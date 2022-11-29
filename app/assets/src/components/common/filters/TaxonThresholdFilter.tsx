@@ -2,7 +2,7 @@ import { Button, DropdownPopper } from "czifui";
 import { find, isEqual, isEmpty, map, some } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";
-import { NON_BACKGROUND_DEPENDENT_THRESHOLDS } from "~/components/views/SampleView/constants";
+import { NON_BACKGROUND_DEPENDENT_READS_THRESHOLDS } from "~/components/views/SampleView/constants";
 import {
   ThresholdFilterData,
   ThresholdFilterOperator,
@@ -88,7 +88,7 @@ const TaxonThresholdFilter = ({
   };
 
   const handleAddThresholdItem = () => {
-    const firstMetric = NON_BACKGROUND_DEPENDENT_THRESHOLDS[0];
+    const firstMetric = NON_BACKGROUND_DEPENDENT_READS_THRESHOLDS[0];
 
     setThresholds((existingThresholds: ThresholdFilterData[]) => [
       ...(Array.isArray(existingThresholds) ? existingThresholds : []),
@@ -152,18 +152,22 @@ const TaxonThresholdFilter = ({
               Meets all of these thresholds:
             </div>
           )}
-          {thresholdFilterEnabled && <ThresholdFilterList
-            metrics={NON_BACKGROUND_DEPENDENT_THRESHOLDS}
-            operators={filterOperators}
-            thresholds={thresholds}
-            onChangeThreshold={(idx, threshold) => {
-              handleThresholdChange(idx, threshold);
-            }}
-            onRemoveThreshold={idx => {
-              handleThresholdRemove(idx);
-            }}
-            onAddThreshold={handleAddThresholdItem}
-          />}
+          {thresholdFilterEnabled && (
+            <ThresholdFilterList
+              // Taxon threshold filter is currently not available for long-read-mngs samples.
+              // For this reason, this filter only supports thresholds that correspond to reads (vs bases) data.
+              metrics={NON_BACKGROUND_DEPENDENT_READS_THRESHOLDS}
+              operators={filterOperators}
+              thresholds={thresholds}
+              onChangeThreshold={(idx, threshold) => {
+                handleThresholdChange(idx, threshold);
+              }}
+              onRemoveThreshold={idx => {
+                handleThresholdRemove(idx);
+              }}
+              onAddThreshold={handleAddThresholdItem}
+            />
+          )}
           <div className={cs.actions}>
             <div className={cs.action}>
               <Button

@@ -26,11 +26,12 @@ import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 
-import { CATEGORIES, THRESHOLDS, TREE_METRICS } from "./constants";
+import { CATEGORIES, TABS, THRESHOLDS, TREE_METRICS } from "./constants";
 import cs from "./report_filters.scss";
 
 interface ReportFiltersProps {
   backgrounds?: Background[];
+  currentTab: string;
   loadingReport?: boolean;
   onFilterChanged?: ({
     key,
@@ -63,6 +64,7 @@ interface ReportFiltersProps {
 
 const ReportFilters = ({
   backgrounds,
+  currentTab,
   loadingReport,
   onFilterChanged,
   onFilterRemoved,
@@ -74,10 +76,10 @@ const ReportFilters = ({
   enableMassNormalizedBackgrounds,
   shouldDisableFilters,
   snapshotShareId,
-  showBackgroundFilter,
 }: ReportFiltersProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
+  const showBackgroundFilter = currentTab === TABS.SHORT_READ_MNGS;
 
   const handleFilterChange = ({
     key,
@@ -322,7 +324,7 @@ const ReportFilters = ({
         <div className={cs.filterListElement}>
           <ThresholdFilterDropdown
             options={{
-              targets: THRESHOLDS,
+              targets: THRESHOLDS[currentTab],
               operators: [">=", "<="],
             }}
             thresholds={selected.thresholds}

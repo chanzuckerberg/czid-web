@@ -1613,7 +1613,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               view={view}
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
               snapshotShareId={snapshotShareId}
-              showBackgroundFilter={currentTab !== TABS.LONG_READ_MNGS}
+              currentTab={currentTab}
             />
           </div>
           <div className={cs.reportHeader}>
