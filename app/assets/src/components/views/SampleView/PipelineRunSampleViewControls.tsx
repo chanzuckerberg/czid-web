@@ -6,22 +6,39 @@ import SvgSaver from "svgsaver";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
-import PropTypes from "~/components/utils/propTypes";
 import { showToast } from "~/components/utils/toast";
 import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
   logDownloadOption,
 } from "~/components/views/report/utils/download";
+import ReportMetadata from "~/interface/reportMetaData";
+import Sample from "~/interface/sample";
+import { PipelineRun } from "~/interface/shared";
 import { ErrorButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
 import { TABS } from "./constants";
+
+interface PipelineRunSampleViewControlsProps {
+  backgroundId?: number;
+  className?: string;
+  currentTab?: string;
+  deletable?: boolean;
+  editable?: boolean;
+  getDownloadReportTableWithAppliedFiltersLink?: $TSFixMeFunction;
+  hasAppliedFilters?: boolean;
+  onDeleteSample?: $TSFixMeFunction;
+  pipelineRun?: PipelineRun;
+  reportMetadata?: ReportMetadata;
+  sample?: Sample;
+  view?: string;
+}
 
 const PipelineRunSampleViewControls = ({
   backgroundId,
   className,
   currentTab,
-  deletable,
+  deletable = false,
   editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
@@ -30,7 +47,7 @@ const PipelineRunSampleViewControls = ({
   reportMetadata,
   sample,
   view,
-}) => {
+}: PipelineRunSampleViewControlsProps) => {
   const downloadCSV = () => {
     const resParams = {
       ...(backgroundId && { background_id: backgroundId }),
@@ -44,7 +61,7 @@ const PipelineRunSampleViewControls = ({
     )}`;
   };
 
-  const handleDownload = option => {
+  const handleDownload = (option: $TSFixMe) => {
     switch (option) {
       case "download_csv":
         isNull(backgroundId) && renderNoBackgroundSelectedNotification();
@@ -95,7 +112,7 @@ const PipelineRunSampleViewControls = ({
 
   const renderNoBackgroundSelectedNotification = () =>
     showToast(
-      ({ closeToast }) => (
+      ({ closeToast }: $TSFixMe) => (
         <Notification
           type="info"
           displayStyle="elevated"
@@ -163,25 +180,6 @@ const PipelineRunSampleViewControls = ({
   } else {
     return null;
   }
-};
-
-PipelineRunSampleViewControls.defaultProps = {
-  deletable: false,
-};
-
-PipelineRunSampleViewControls.propTypes = {
-  backgroundId: PropTypes.number,
-  className: PropTypes.string,
-  currentTab: PropTypes.string,
-  deletable: PropTypes.bool,
-  editable: PropTypes.bool,
-  getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
-  hasAppliedFilters: PropTypes.bool,
-  onDeleteSample: PropTypes.func,
-  pipelineRun: PropTypes.PipelineRun,
-  reportMetadata: PropTypes.ReportMetadata,
-  sample: PropTypes.Sample,
-  view: PropTypes.string,
 };
 
 export default PipelineRunSampleViewControls;

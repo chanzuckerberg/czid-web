@@ -276,12 +276,15 @@ class DiscoveryFilters extends React.Component {
 
   renderTaxonFilterTags = () => {
     let selectedTaxa = this.state[KEY_TAXON_SELECTED];
-    const thresholdFilterDisabled = this.configForWorkflow[this.props.workflow].disableTaxonThresholdFilter;
+    const thresholdFilterDisabled = this.configForWorkflow[this.props.workflow]
+      .disableTaxonThresholdFilter;
     if (isEmpty(selectedTaxa)) return;
 
     return (
       <div className={cs.tags}>
-        {!thresholdFilterDisabled && (<div className={cs.descriptor}>Has at least one:</div>)}
+        {!thresholdFilterDisabled && (
+          <div className={cs.descriptor}>Has at least one:</div>
+        )}
         {selectedTaxa.map((selectedTaxon, i) => (
           <FilterTag
             className={cs.filterTag}
@@ -389,9 +392,7 @@ class DiscoveryFilters extends React.Component {
       <Tooltip
         arrow
         placement="top-start"
-        title={`Not available for ${
-          this.configForWorkflow[workflow].tooltipTitle
-        }.`}
+        title={`Not available for ${this.configForWorkflow[workflow].tooltipTitle}.`}
         classes={{
           tooltip: cs.disabledTooltip,
         }}
@@ -433,9 +434,15 @@ class DiscoveryFilters extends React.Component {
     );
 
     // Taxon threshold and annotations filters are not available for some workflows
-    const taxonFilterDisabled = currentTab === TAB_SAMPLES && this.configForWorkflow[workflow].disableTaxonFilter;
-    const annotationFilterDisabled = currentTab === TAB_SAMPLES && this.configForWorkflow[workflow].disableAnnotationFilter;
-    const disableTaxonThreshold = currentTab === TAB_SAMPLES && this.configForWorkflow[workflow].disableTaxonThresholdFilter;
+    const taxonFilterDisabled =
+      currentTab === TAB_SAMPLES &&
+      this.configForWorkflow[workflow].disableTaxonFilter;
+    const annotationFilterDisabled =
+      currentTab === TAB_SAMPLES &&
+      this.configForWorkflow[workflow].disableAnnotationFilter;
+    const disableTaxonThreshold =
+      currentTab === TAB_SAMPLES &&
+      this.configForWorkflow[workflow].disableTaxonThresholdFilter;
 
     return (
       <div className={cx(cs.filtersContainer, className)}>
@@ -469,7 +476,8 @@ class DiscoveryFilters extends React.Component {
                   {!hasTaxonThresholdFilterFeature && this.renderTags("taxon")}
                   {hasTaxonThresholdFilterFeature &&
                     this.renderTaxonFilterTags()}
-                  {hasTaxonThresholdFilterFeature && !disableTaxonThreshold &&
+                  {hasTaxonThresholdFilterFeature &&
+                    !disableTaxonThreshold &&
                     this.renderTaxonThresholdFilterTags()}
                 </>
               )}
@@ -480,7 +488,8 @@ class DiscoveryFilters extends React.Component {
                   disabled: annotationFilterDisabled,
                   workflow,
                 })}
-                {!annotationFilterDisabled && this.renderAnnotationsFilterTags()}
+                {!annotationFilterDisabled &&
+                  this.renderAnnotationsFilterTags()}
               </div>
             )}
             {hasTaxonThresholdFilterFeature && <div className={cs.divider} />}

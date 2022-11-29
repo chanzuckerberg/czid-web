@@ -45,7 +45,7 @@ const PipelineVizHeader = ({
           <div className={cs.pipelineInfo}>
             <span>PIPELINE {renderVersionDisplay()}</span>
             <PipelineVersionSelect
-              pipelineRun={pipelineRun}
+              analysisRun={pipelineRun}
               pipelineVersions={pipelineVersions}
               lastProcessedAt={lastProcessedAt}
               onPipelineVersionSelect={handlePipelineVersionSelect}

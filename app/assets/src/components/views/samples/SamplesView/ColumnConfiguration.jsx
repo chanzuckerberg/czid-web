@@ -13,7 +13,10 @@ export const computeColumnsByWorkflow = ({
 } = {}) => {
   // At the moment, columns for long read mNGS are the same as for short read mNGS.
   // To change that in the future, just add another function to compute columns.
-  if (workflow === WORKFLOWS.SHORT_READ_MNGS.value || workflow === WORKFLOWS.LONG_READ_MNGS.value) {
+  if (
+    workflow === WORKFLOWS.SHORT_READ_MNGS.value ||
+    workflow === WORKFLOWS.LONG_READ_MNGS.value
+  ) {
     return computeMngsColumns({ basicIcon, metadataFields });
   } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
     return computeConsensusGenomeColumns({ basicIcon, metadataFields });

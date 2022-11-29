@@ -22,7 +22,9 @@ import { getWorkflowRunZipLink } from "~/components/views/report/utils/download"
 import { parseUrlParams } from "~/helpers/url";
 import Project from "~/interface/project";
 import ReportMetadata from "~/interface/reportMetaData";
-import Sample, { PipelineRuns } from "~/interface/sample";
+import Sample, { WorkflowRun } from "~/interface/sample";
+import { CurrentTabSample } from "~/interface/sampleView";
+import { PipelineRun } from "~/interface/shared";
 import {
   DownloadButton,
   ErrorButton,
@@ -212,7 +214,7 @@ export default function SampleViewHeader({
             }
             onDeleteSample={() => setSampleDeletionConfirmationModalOpen(true)}
             hasAppliedFilters={hasAppliedFilters}
-            pipelineRun={currentRun}
+            pipelineRun={currentRun as PipelineRun}
             reportMetadata={reportMetadata}
             sample={sample}
             view={view}
@@ -242,7 +244,9 @@ export default function SampleViewHeader({
   const getAllRuns = () => {
     const runsByType =
       get("workflow_runs", sample) &&
-      get("workflow_runs", sample).filter(run => run.workflow === workflow);
+      get("workflow_runs", sample).filter(
+        (run: $TSFixMe) => run.workflow === workflow,
+      );
     return mngsWorkflow ? get("pipeline_runs", sample) : runsByType;
   };
 
@@ -323,8 +327,8 @@ SampleViewHeader.defaultProps = {
 
 interface SampleViewHeaderProps {
   backgroundId?: number;
-  currentRun: { id: number };
-  currentTab: string;
+  currentRun: WorkflowRun | PipelineRun;
+  currentTab: CurrentTabSample;
   deletable: boolean;
   editable: boolean;
   getDownloadReportTableWithAppliedFiltersLink?: $TSFixMeFunction;
@@ -332,13 +336,9 @@ interface SampleViewHeaderProps {
   onDetailsClick: $TSFixMeFunction;
   onPipelineVersionChange: $TSFixMeFunction;
   onShareClick: $TSFixMeFunction;
-  pipelineRun: PipelineRuns;
   pipelineVersions?: string[];
   project: Project;
-  projectSamples: {
-    id: number;
-    name: string;
-  }[];
+  projectSamples: Pick<Sample, "id" | "name">[];
   reportMetadata: ReportMetadata;
   sample: Sample;
   snapshotShareId?: $TSFixMe;

@@ -185,7 +185,6 @@ class BulkDownloadList extends React.Component {
       const outputFilePresignedUrl = await getPresignedOutputUrl(
         bulkDownload.id,
       );
-      // @ts-expect-error Expected 2 arguments, but got 1
       openUrl(outputFilePresignedUrl);
     }
   };

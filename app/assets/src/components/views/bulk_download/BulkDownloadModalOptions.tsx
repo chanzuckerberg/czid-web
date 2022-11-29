@@ -32,11 +32,11 @@ const triggersCondtionalFieldMetricList = (
   dependentField,
   selectedFields,
 ) => {
-  const thresholdMetrics = selectedFields["filter_by"].map((obj) =>
+  const thresholdMetrics = selectedFields["filter_by"].map(obj =>
     obj["metric"].replace("_", "."),
   ); // Heatmap metrics use underscore as separator, bulk downloads use periods
   return (
-    thresholdMetrics.filter((metric) =>
+    thresholdMetrics.filter(metric =>
       conditionalField.triggerValues.includes(metric),
     ).length > 0
   );
@@ -44,7 +44,7 @@ const triggersCondtionalFieldMetricList = (
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
   conditionalField.dependentFields
-    .map((dependentField) =>
+    .map(dependentField =>
       selectedFields &&
       selectedFields["filter_by"] &&
       dependentField === "filter_by"
@@ -76,8 +76,10 @@ interface BulkDownloadModalOptionsProps {
   userIsCollaborator: boolean;
 }
 
-class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsProps> {
-  sortTaxaWithReadsOptions = memoize((options) =>
+class BulkDownloadModalOptions extends React.Component<
+  BulkDownloadModalOptionsProps
+> {
+  sortTaxaWithReadsOptions = memoize(options =>
     orderBy(["sampleCount", "text"], ["desc", "asc"], options),
   );
 
@@ -120,7 +122,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
       // For other conditional fields, render nothing.
     } else if (
       CONDITIONAL_FIELDS.some(
-        (conditionalField) =>
+        conditionalField =>
           field.type === conditionalField.field &&
           downloadType.type === conditionalField.downloadType &&
           !triggersConditionalField(conditionalField, selectedFieldsForType),
@@ -141,7 +143,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
                 downloadType.type,
                 field.type,
                 isChecked /* value */,
-                isChecked ? "Yes" : "No", /* display name */
+                isChecked ? "Yes" : "No" /* display name */,
               )
             }
             // @ts-expect-error Type 'LodashGet9x2<string>' is not assignable to type 'boolean'
@@ -149,7 +151,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
           />
         );
       case "file_format":
-        dropdownOptions = field.options.map((option) => ({
+        dropdownOptions = field.options.map(option => ({
           text: option,
           value: option,
         }));
@@ -219,7 +221,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
           </div>
         );
       case "download_format":
-        dropdownOptions = field.options.map((option) => ({
+        dropdownOptions = field.options.map(option => ({
           text: option,
           value: option,
         }));
@@ -245,7 +247,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
               onFieldSelect(downloadType.type, field.type, value, displayName);
 
               // Reset conditional fields if they are no longer needed.
-              CONDITIONAL_FIELDS.forEach((conditionalField) => {
+              CONDITIONAL_FIELDS.forEach(conditionalField => {
                 if (
                   // @ts-expect-error Property 'dependentField' does not exist
                   field.type === conditionalField.dependentField &&
@@ -277,7 +279,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
               onFieldSelect(downloadType.type, field.type, value, displayName);
 
               // Reset conditional fields if they are no longer needed.
-              CONDITIONAL_FIELDS.forEach((conditionalField) => {
+              CONDITIONAL_FIELDS.forEach(conditionalField => {
                 if (
                   // @ts-expect-error Property 'dependentField' does not exist
                   field.type === conditionalField.dependentField &&
@@ -302,7 +304,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
     );
   };
 
-  renderDownloadType = (downloadType) => {
+  renderDownloadType = downloadType => {
     const {
       validObjectIds,
       onSelect,
@@ -406,7 +408,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
           </div>
           {downloadType.fields && selected && (
             <div className={cs.fields}>
-              {downloadType.fields.map((field) =>
+              {downloadType.fields.map(field =>
                 this.renderOption(downloadType, field),
               )}
               {downloadType.type === "biom_format" && (
@@ -417,7 +419,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
                     className={LinkCS.linkDefault}
                     // @ts-expect-error Type 'string' is not assignable to type 'number'
                     tabIndex="0"
-                    onClick={(e) => {
+                    onClick={e => {
                       handleHeatmapLink();
                       e.stopPropagation();
                     }}
@@ -455,7 +457,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
     }
 
     const visibleTypes = downloadTypes.filter(
-      (type) =>
+      type =>
         Object.prototype.hasOwnProperty.call(type, "category") &&
         // @ts-expect-error Property 'hide_in_creation_modal' does not exist on type 'unknown'
         !type.hide_in_creation_modal,
@@ -467,7 +469,7 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
     if (
       visibleTypes.some(
         // @ts-expect-error Property 'display_name' does not exist on type 'unknown'
-        (type) => type.display_name === WORKFLOWS.CONSENSUS_GENOME.label,
+        type => type.display_name === WORKFLOWS.CONSENSUS_GENOME.label,
       )
     ) {
       visibleTypes.sort(
@@ -486,14 +488,14 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
 
     const backendCategories = [
       // @ts-expect-error Property 'category' does not exist on type 'unknown'
-      ...new Set(visibleTypes.map((type) => type.category)),
+      ...new Set(visibleTypes.map(type => type.category)),
     ];
     const additionalCategories = backendCategories.filter(
-      (category) => !designatedOrder.includes(category),
+      category => !designatedOrder.includes(category),
     );
     const categories = designatedOrder.concat(additionalCategories);
 
-    const computedDownloadTypes = categories.map((category) => {
+    const computedDownloadTypes = categories.map(category => {
       const categoryTypes = filter(["category", category], visibleTypes);
       if (categoryTypes.length < 1) {
         return;

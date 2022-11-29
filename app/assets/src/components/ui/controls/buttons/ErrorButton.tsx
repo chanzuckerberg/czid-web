@@ -14,7 +14,7 @@ const ErrorButton = ({ className, ...props }: ErrorButtonProps) => {
 };
 
 interface ErrorButtonProps {
-  className: string;
+  className?: string;
   onClick?: $TSFixMeFunction;
   text?: string;
 }

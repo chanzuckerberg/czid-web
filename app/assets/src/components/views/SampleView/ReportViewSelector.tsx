@@ -1,10 +1,17 @@
-import PropTypes from "prop-types";
 import React from "react";
 import { Menu, Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";
 import { IconTableSmall, IconTreeSmall } from "~ui/icons";
 
-const ReportViewSelector = ({ view, onViewClick }) => {
+interface ReportViewSelectorProps {
+  view?: "table" | "tree";
+  onViewClick?: $TSFixMeFunction;
+}
+
+const ReportViewSelector = ({
+  view = "table",
+  onViewClick,
+}: ReportViewSelectorProps) => {
   return (
     <Menu icon floated="right">
       <Popup
@@ -43,15 +50,6 @@ const ReportViewSelector = ({ view, onViewClick }) => {
       />
     </Menu>
   );
-};
-
-ReportViewSelector.defaultProps = {
-  view: "table",
-};
-
-ReportViewSelector.propTypes = {
-  view: PropTypes.oneOf(["table", "tree"]),
-  onViewClick: PropTypes.func,
 };
 
 export default ReportViewSelector;

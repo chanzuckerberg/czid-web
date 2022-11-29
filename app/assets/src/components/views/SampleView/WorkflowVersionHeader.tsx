@@ -1,26 +1,39 @@
 import cx from "classnames";
-import { map, get } from "lodash/fp";
+import { get } from "lodash/fp";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
-import PropTypes from "~/components/utils/propTypes";
 import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
+import { WorkflowRun } from "~/interface/sample";
+import { PipelineRun } from "~/interface/shared";
 import { openUrlInNewTab } from "~utils/links";
 
 import PipelineVersionSelect from "./PipelineVersionSelect";
 import cs from "./workflow_version_header.scss";
 
+interface WorkflowVersionHeaderProps {
+  sampleId?: number;
+  currentRun?: WorkflowRun | PipelineRun;
+  allRuns?: WorkflowRun[] | PipelineRun[];
+  workflowType?: string;
+  mngsWorkflow?: boolean;
+  versionKey?: string;
+  timeKey?: string;
+  onVersionChange: $TSFixMeFunction;
+  snapshotShareId?: string;
+}
+
 export default function WorkflowVersionHeader({
   sampleId,
   currentRun,
-  allRuns,
+  allRuns = [],
   workflowType,
   mngsWorkflow,
   versionKey,
   timeKey,
   onVersionChange,
   snapshotShareId,
-}) {
+}: WorkflowVersionHeaderProps) {
   const renderAlignmentConfigString = () => {
     const alignmentConfigName = get("alignment_config_name", currentRun);
     const alignmentConfigNameString = alignmentConfigName
@@ -37,7 +50,7 @@ export default function WorkflowVersionHeader({
   const renderWorkflowVersionString = () => {
     if (!currentRun[versionKey]) return;
 
-    let workflowKey = findInWorkflows(workflowType, "value");
+    const workflowKey = findInWorkflows(workflowType, "value");
     let versionString = `${WORKFLOWS[workflowKey].pipelineName} Pipeline v${currentRun[versionKey]}`;
 
     if (mngsWorkflow) {
@@ -73,8 +86,12 @@ export default function WorkflowVersionHeader({
         {currentRun ? renderWorkflowVersionString() : " "}
       </span>
       <PipelineVersionSelect
-        pipelineRun={currentRun}
-        pipelineVersions={[...new Set(map(versionKey, allRuns))]}
+        analysisRun={currentRun}
+        pipelineVersions={[
+          ...new Set(
+            allRuns?.map((run: WorkflowRun | PipelineRun) => run[versionKey]),
+          ),
+        ]}
         versionKey={versionKey}
         lastProcessedAt={get(timeKey, currentRun)}
         onPipelineVersionSelect={version => {
@@ -89,15 +106,3 @@ export default function WorkflowVersionHeader({
     </div>
   );
 }
-
-WorkflowVersionHeader.propTypes = {
-  sampleId: PropTypes.number,
-  currentRun: PropTypes.object,
-  allRuns: PropTypes.array,
-  workflowType: PropTypes.string,
-  mngsWorkflow: PropTypes.bool,
-  versionKey: PropTypes.string,
-  timeKey: PropTypes.string,
-  onVersionChange: PropTypes.func.isRequired,
-  snapshotShareId: PropTypes.string,
-};

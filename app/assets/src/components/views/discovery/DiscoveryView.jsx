@@ -351,20 +351,32 @@ class DiscoveryView extends React.Component {
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
         bannerTitle: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
         objectCollection: this.workflowRuns,
-        noDataLinks: this.getNoDataLinks(WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel),
-        noDataMessage: this.getNoDataBannerMessage(WORKFLOWS.CONSENSUS_GENOME.label),
+        noDataLinks: this.getNoDataLinks(
+          WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
+        ),
+        noDataMessage: this.getNoDataBannerMessage(
+          WORKFLOWS.CONSENSUS_GENOME.label,
+        ),
       },
       [WORKFLOWS.SHORT_READ_MNGS.value]: {
         bannerTitle: `${WORKFLOWS.SHORT_READ_MNGS.label} Samples`,
         objectCollection: this.samples,
-        noDataLinks: this.getNoDataLinks(WORKFLOWS.SHORT_READ_MNGS.pluralizedLabel),
-        noDataMessage: this.getNoDataBannerMessage(WORKFLOWS.SHORT_READ_MNGS.label),
+        noDataLinks: this.getNoDataLinks(
+          WORKFLOWS.SHORT_READ_MNGS.pluralizedLabel,
+        ),
+        noDataMessage: this.getNoDataBannerMessage(
+          WORKFLOWS.SHORT_READ_MNGS.label,
+        ),
       },
       [WORKFLOWS.LONG_READ_MNGS.value]: {
         bannerTitle: `${WORKFLOWS.LONG_READ_MNGS.label} Samples`,
         objectCollection: this.longReadMngsSamples,
-        noDataLinks: this.getNoDataLinks(WORKFLOWS.LONG_READ_MNGS.pluralizedLabel),
-        noDataMessage: this.getNoDataBannerMessage(WORKFLOWS.LONG_READ_MNGS.label),
+        noDataLinks: this.getNoDataLinks(
+          WORKFLOWS.LONG_READ_MNGS.pluralizedLabel,
+        ),
+        noDataMessage: this.getNoDataBannerMessage(
+          WORKFLOWS.LONG_READ_MNGS.label,
+        ),
       },
     };
   };
@@ -378,14 +390,19 @@ class DiscoveryView extends React.Component {
       return initialWorkflow;
     }
 
-    const numOfShortReadMngsSamples = countByWorkflow?.[WORKFLOWS.SHORT_READ_MNGS.value];
-    const numOfLongReadMngsSamples = countByWorkflow?.[WORKFLOWS.LONG_READ_MNGS.value];
+    const numOfShortReadMngsSamples =
+      countByWorkflow?.[WORKFLOWS.SHORT_READ_MNGS.value];
+    const numOfLongReadMngsSamples =
+      countByWorkflow?.[WORKFLOWS.LONG_READ_MNGS.value];
     const numOfCgSamples = countByWorkflow?.[WORKFLOWS.CONSENSUS_GENOME.value];
     const numOfAmrSamples = countByWorkflow?.[WORKFLOWS.AMR.value];
 
     if (numOfShortReadMngsSamples > 0) {
       return WORKFLOWS.SHORT_READ_MNGS.value;
-    } else if (numOfLongReadMngsSamples > 0 && allowedFeatures.includes(ONT_V1_FEATURE)) {
+    } else if (
+      numOfLongReadMngsSamples > 0 &&
+      allowedFeatures.includes(ONT_V1_FEATURE)
+    ) {
       return WORKFLOWS.LONG_READ_MNGS.value;
     } else if (numOfCgSamples > 0) {
       return WORKFLOWS.CONSENSUS_GENOME.value;
@@ -725,7 +742,10 @@ class DiscoveryView extends React.Component {
       }
       if (allowedFeatures.includes(ONT_V1_FEATURE)) {
         this.longReadMngsSamples.reset({
-          conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.LONG_READ_MNGS.value),
+          conditions: this.getConditionsFor(
+            TAB_SAMPLES,
+            WORKFLOWS.LONG_READ_MNGS.value,
+          ),
           loadFirstPage: true,
         });
       }
@@ -1888,18 +1908,18 @@ class DiscoveryView extends React.Component {
     return null;
   };
 
-  getNoDataBannerMessage = (pipelineLabel) => {
+  getNoDataBannerMessage = pipelineLabel => {
     return `No samples were processed by the ${pipelineLabel} Pipeline.`;
   };
 
-  getNoDataLinks = (pluralizedPipelineLabel) => {
+  getNoDataLinks = pluralizedPipelineLabel => {
     return [
       {
         href: "/samples/upload",
         text: `Run ${pluralizedPipelineLabel}`,
       },
     ];
-  }
+  };
   renderNoDataWorkflowBanner = () => {
     const { workflow } = this.state;
     const {

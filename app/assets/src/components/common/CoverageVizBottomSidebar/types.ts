@@ -1,31 +1,44 @@
-import { OnBLASTClickProps, TooltipLocation } from "~/interface/shared";
+import { OnBLASTClickProps, Taxon, TooltipLocation } from "~/interface/shared";
 
 export interface CoverageVizBottomSidebarProps {
   visible?: boolean;
   onBlastClick?: (x: OnBLASTClickProps) => void;
   onClose: () => void;
-  params: {
-    taxonId: number;
-    taxonName: string;
-    taxonCommonName: string;
-    taxonLevel: string;
-    taxonStatsByCountType: {
-      ntContigs: number;
-      ntReads: number;
-      nrContigs: number;
-      nrReads: number;
-    };
-    accessionData: {
-      best_accessions: AccessionsSummary[];
-      num_accessions: number;
-    };
-    // Link to the old alignment viz.
-    alignmentVizUrl: string;
-  };
+  params: CoverageVizParams | Record<string, never>;
   sampleId: number;
   pipelineVersion: string;
   nameType: string;
   snapshotShareId: string;
+}
+
+export interface CoverageVizParamsRaw {
+  taxId: number;
+  taxName: string;
+  taxCommonName: string;
+  taxLevel: "genus" | "species";
+  taxSpecies: Taxon[];
+  alignmentVizUrl: string;
+  taxonStatsByCountType: {
+    ntContigs: number;
+    ntReads: number;
+    nrContigs: number;
+    nrReads: number;
+  };
+}
+
+export interface CoverageVizParams
+  extends Omit<
+    CoverageVizParamsRaw,
+    "taxId" | "taxName" | "taxCommonName" | "taxLevel" | "taxSpecies"
+  > {
+  taxonId: CoverageVizParamsRaw["taxId"];
+  taxonName: CoverageVizParamsRaw["taxName"];
+  taxonCommonName: CoverageVizParamsRaw["taxCommonName"];
+  taxonLevel: CoverageVizParamsRaw["taxLevel"];
+  accessionData: {
+    best_accessions: AccessionsSummary[];
+    num_accessions: number;
+  };
 }
 
 export interface AccessionsSummary {

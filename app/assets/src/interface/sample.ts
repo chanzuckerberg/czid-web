@@ -1,21 +1,13 @@
+import { WORKFLOW_VALUES } from "../components/utils/workflows";
+import { PipelineRun } from "./shared";
 import { DateString } from "./shared/generic";
-export interface PipelineRuns {
-  adjustedRemainingReads: number;
-  alignmentConfigName: string;
-  assembled: number;
-  createdAt: string;
-  errorMessage: string;
-  unownUserError: string;
-  pipelineVersion: string;
-  totalErccReads: number;
-}
 
 export interface WorkflowRun {
-  workflow: string;
-  status: string;
-  wdl_version: string;
   id: number;
+  wdl_version: string;
   executed_at: DateString;
+  workflow: WORKFLOW_VALUES;
+  status: string;
   input_error: string;
   inputs?: {
     accession_id: string;
@@ -39,8 +31,6 @@ export interface WorkflowRun {
   };
 }
 
-export type WorkflowRuns = WorkflowRun[];
-
 export enum WorkflowValues {
   CONSENSUS_GENOME = "consensus-genome",
   SHORT_READ_MNGS = "short-read-mngs",
@@ -54,8 +44,10 @@ export interface ThresholdFilterShape {
 }
 
 export default interface Sample {
-  pipeline_runs: PipelineRuns;
-  workflow_runs: WorkflowRuns | undefined;
+  error_message: string;
+  known_user_error: string;
+  pipeline_runs: PipelineRun[];
+  workflow_runs: WorkflowRun[] | undefined;
   id: number;
   name: string;
   createdAt: string;
@@ -63,6 +55,6 @@ export default interface Sample {
   defaultPipelineRunId: number;
   deletable: boolean;
   editable: boolean;
-  initialWorkflow: string;
+  initial_workflow: string;
   upload_error: string;
 }

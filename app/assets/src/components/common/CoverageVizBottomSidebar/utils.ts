@@ -1,10 +1,11 @@
-import { sortBy, filter } from "lodash/fp";
+import { sortBy, filter, get, map, flatten, compact, sum } from "lodash/fp";
 import memoize from "memoize-one";
 import { formatPercent } from "~/components/utils/format";
 import {
   AccessionsData,
   AccessionsSummary,
   CoverageVizBottomSidebarProps,
+  CoverageVizParams,
   HistogramTooltipData,
   Hit,
 } from "./types";
@@ -154,3 +155,72 @@ export const getSortedAccessionSummaries = (
   data: CoverageVizBottomSidebarProps["params"]["accessionData"],
 ): AccessionsSummary[] =>
   sortBy(summary => -summary.score, data.best_accessions);
+
+// Aggregate the accessions from multiple species into a single data object.
+// Used for coverage viz.
+export const getCombinedAccessionDataForSpecies = (
+  speciesTaxons: $TSFixMe,
+  coverageVizDataByTaxon,
+) => {
+  // This helper function gets the best accessions for a species taxon.
+  const getSpeciesBestAccessions = (taxon: $TSFixMe) => {
+    const speciesBestAccessions = get(
+      [taxon.taxId, "best_accessions"],
+      coverageVizDataByTaxon,
+    );
+    // Add the species taxon name to each accession.
+    return map(
+      accession => ({
+        ...accession,
+        // Use snake_case for consistency with other fields.
+        taxon_name: taxon.name,
+        taxon_common_name: taxon.commonName,
+      }),
+      speciesBestAccessions,
+    );
+  };
+
+  const speciesTaxIds = map("taxId", speciesTaxons);
+
+  return {
+    best_accessions: flatten(
+      compact(map(getSpeciesBestAccessions, speciesTaxons)),
+    ),
+    num_accessions: sum(
+      map(
+        taxId => get([taxId, "num_accessions"], coverageVizDataByTaxon),
+        speciesTaxIds,
+      ),
+    ),
+  };
+};
+
+export const getCoverageVizParams = (
+  coverageVizParams,
+  coverageVizDataByTaxon,
+): CoverageVizParams | Record<string, never> => {
+  if (!coverageVizParams) {
+    return {};
+  }
+
+  let accessionData = null;
+
+  // For genus-level taxons, we aggregate all the available species-level taxons for that genus.
+  if (coverageVizParams.taxLevel === "genus") {
+    accessionData = getCombinedAccessionDataForSpecies(
+      coverageVizParams.taxSpecies,
+      coverageVizDataByTaxon,
+    );
+  } else {
+    accessionData = get(coverageVizParams.taxId, coverageVizDataByTaxon);
+  }
+  return {
+    taxonId: coverageVizParams.taxId,
+    taxonName: coverageVizParams.taxName,
+    taxonCommonName: coverageVizParams.taxCommonName,
+    taxonLevel: coverageVizParams.taxLevel,
+    alignmentVizUrl: coverageVizParams.alignmentVizUrl,
+    accessionData,
+    taxonStatsByCountType: coverageVizParams.taxonStatsByCountType,
+  };
+};

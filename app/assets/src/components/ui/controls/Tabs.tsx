@@ -3,12 +3,13 @@ import React from "react";
 import cs from "./tabs.scss";
 
 interface TabsProps {
-  tabs:
-    | string[]
+  tabs: Array<
+    | string
     | {
         value: string;
-        label: React.ReactNode;
-      }[];
+        label: JSX.Element;
+      }
+  >;
   onChange: $TSFixMeFunction;
   value?: string;
   className?: string;

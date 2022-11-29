@@ -18,18 +18,16 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import ConsensusGenomeDropdown from "~/components/views/SampleView/ConsensusGenomeDropdown";
 import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
 import Sample, { WorkflowRun } from "~/interface/sample";
+import { CurrentTabSample } from "~/interface/sampleView";
 import {
   PipelineRun,
   SnapshotShareId,
   SummaryStats,
   MetadataTypes,
   LocationObject,
-} from "~/interface/shared";
-import {
-  processMetadata,
-  processMetadataTypes,
   Metadata,
-} from "~utils/metadata";
+} from "~/interface/shared";
+import { processMetadata, processMetadataTypes } from "~utils/metadata";
 import MetadataTab from "./MetadataTab";
 import NotesTab from "./NotesTab";
 import PipelineTab, { MngsPipelineInfo, PipelineInfo } from "./PipelineTab";
@@ -43,18 +41,18 @@ import {
 } from "./utils";
 
 export interface SampleDetailsModeProps {
-  currentRun: Record<string, string | number | null> | WorkflowRun;
-  currentWorkflowTab: string;
-  handleWorkflowTabChange: $TSFixMeFunction;
+  currentRun: WorkflowRun | PipelineRun;
+  currentWorkflowTab: CurrentTabSample;
+  handleWorkflowTabChange: (tab: CurrentTabSample) => void;
   sample: Sample;
   sampleId: number;
-  pipelineVersion: string; // Needs to be string for 3.1 vs. 3.10.
-  onMetadataUpdate: $TSFixMeFunction;
-  onWorkflowRunSelect: $TSFixMeFunction;
   sampleWorkflowLabels: string[];
-  showReportLink: boolean;
+  onMetadataUpdate: (key: $TSFixMeUnknown, value: $TSFixMeUnknown) => void;
+  onWorkflowRunSelect: $TSFixMeFunction;
   snapshotShareId: SnapshotShareId;
-  tempSelectedOptions: TempSelectedOptionsShape;
+  pipelineVersion?: string; // Needs to be string for 3.1 vs. 3.10.
+  showReportLink?: boolean;
+  tempSelectedOptions?: TempSelectedOptionsShape;
 }
 
 export interface AdditionalInfo {

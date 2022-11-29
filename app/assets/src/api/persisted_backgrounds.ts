@@ -2,7 +2,7 @@ import { get, putWithCSRF, postWithCSRF } from "./core";
 
 export const getPersistedBackgrounds = () => get("/persisted_backgrounds.json");
 
-export const getPersistedBackground = (projectId: $TSFixMe) =>
+export const getPersistedBackground = (projectId: number) =>
   get(`/persisted_backgrounds/${projectId}.json`);
 
 export const updatePersistedBackground = ({

@@ -13,6 +13,8 @@ import Histogram, {
 } from "~/components/visualizations/Histogram";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
+import Sample, { WorkflowRun } from "~/interface/sample";
+import { WorkflowRunResults } from "~/interface/sampleView";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconArrowRight } from "~ui/icons";
@@ -20,7 +22,6 @@ import {
   SARS_COV_2_CONSENSUS_GENOME_DOC_LINK,
   VIRAL_CONSENSUS_GENOME_DOC_LINK,
 } from "~utils/documentationLinks";
-import PropTypes from "~utils/propTypes";
 import { FIELDS_METADATA } from "~utils/tooltip";
 import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
 import SampleReportContent from "./SampleReportContent";
@@ -34,13 +35,23 @@ import {
   SARS_COV_2_ACCESSION_ID,
 } from "./constants";
 
+interface ConsensusGenomeViewProps {
+  link?: string;
+  loadingResults?: boolean;
+  onWorkflowRunSelect?: $TSFixMeFunction;
+  sample: Sample;
+  test?: string;
+  workflowRun?: WorkflowRun;
+  workflowRunResults?: WorkflowRunResults | Record<string, never>;
+}
+
 const ConsensusGenomeView = ({
   onWorkflowRunSelect,
   sample,
   loadingResults,
   workflowRun,
   workflowRunResults,
-}) => {
+}: ConsensusGenomeViewProps) => {
   const coverageVizContainerRef = useRef();
   const [histogramTooltipData, setHistogramTooltipData] = useState(null);
   const [histogramTooltipLocation, setHistogramTooltipLocation] = useState(
@@ -147,7 +158,7 @@ const ConsensusGenomeView = ({
     ];
   });
 
-  const handleHistogramBarEnter = hoverData => {
+  const handleHistogramBarEnter = (hoverData: $TSFixMe) => {
     if (hoverData && hoverData[0] === 0) {
       const tooltipData = getHistogramTooltipData(
         workflowRunResults.coverage_viz,
@@ -158,7 +169,7 @@ const ConsensusGenomeView = ({
     }
   };
 
-  const handleHistogramBarHover = (clientX, clientY) => {
+  const handleHistogramBarHover = (clientX: $TSFixMe, clientY: $TSFixMe) => {
     setHistogramTooltipLocation({
       left: clientX,
       top: clientY,
@@ -320,7 +331,7 @@ const ConsensusGenomeView = ({
     link = null,
     analytics = null,
     iconStyle = null,
-  }) => {
+  }: $TSFixMe) => {
     return (
       <HelpIcon
         text={
@@ -329,6 +340,7 @@ const ConsensusGenomeView = ({
           </>
         }
         className={cx(cs.helpIcon, iconStyle && iconStyle)}
+        // @ts-expect-error Working with Lodash types
         analyticsEventName={getOr(undefined, "analyticsEventName", analytics)}
         analyticsEventData={getOr(undefined, "analyticsEventData", analytics)}
       />
@@ -366,6 +378,7 @@ const ConsensusGenomeView = ({
           })}
         </div>
         <div className={cx(cs.metricsTable, cs.raisedContainer)}>
+          {/* @ts-expect-error Table has not yet been typed */}
           <Table
             columns={computeQualityMetricColumns()}
             data={[metricsData]}
@@ -383,7 +396,10 @@ const ConsensusGenomeView = ({
   };
 
   const computeQualityMetricColumns = () => {
-    const renderRowCell = ({ cellData }, options = {}) => (
+    const renderRowCell = (
+      { cellData }: $TSFixMe,
+      options: { percent?: $TSFixMeUnknown } = {},
+    ) => (
       <div className={cs.cell}>
         {cellData}
         {options && options.percent ? "%" : null}
@@ -402,7 +418,8 @@ const ConsensusGenomeView = ({
         width: 80,
       },
       {
-        cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
+        cellRenderer: (cellData: $TSFixMe) =>
+          renderRowCell(cellData, { percent: true }),
         dataKey: "gc_percent",
         width: 60,
       },
@@ -411,7 +428,8 @@ const ConsensusGenomeView = ({
         width: 20,
       },
       {
-        cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
+        cellRenderer: (cellData: $TSFixMe) =>
+          renderRowCell(cellData, { percent: true }),
         dataKey: "percent_identity",
         width: 30,
       },
@@ -420,7 +438,8 @@ const ConsensusGenomeView = ({
         width: 135,
       },
       {
-        cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
+        cellRenderer: (cellData: $TSFixMe) =>
+          renderRowCell(cellData, { percent: true }),
         dataKey: "percent_genome_called",
         width: 100,
       },
@@ -477,16 +496,6 @@ const ConsensusGenomeView = ({
       />
     </>
   );
-};
-
-ConsensusGenomeView.propTypes = {
-  link: PropTypes.string,
-  loadingResults: PropTypes.bool,
-  onWorkflowRunSelect: PropTypes.func,
-  sample: PropTypes.object.isRequired,
-  test: PropTypes.string,
-  workflowRun: PropTypes.object,
-  workflowRunResults: PropTypes.object,
 };
 
 export default ConsensusGenomeView;

@@ -6,7 +6,7 @@ import { DropdownOption } from "~/interface/shared";
 const ANNOTATION_OPTIONS = ["Hit", "Not a hit", "Inconclusive"];
 
 interface AnnotationFilterProps {
-  selectedAnnotations: DropdownOption[];
+  selectedAnnotations: DropdownOption[] | string[];
   onChange: (DropdownOption) => void;
 }
 

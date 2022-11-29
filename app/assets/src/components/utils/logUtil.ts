@@ -5,7 +5,7 @@ import * as Sentry from "@sentry/browser";
 interface LogErrorParams {
   message: string;
   exception?: Error;
-  details?: { [key: string]: string };
+  details?: { [key: string]: string | boolean | number | string[] };
 }
 
 export const logError = ({

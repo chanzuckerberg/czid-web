@@ -1,5 +1,26 @@
-import { head, isEmpty, isNumber, isString, tail } from "lodash/fp";
+import {
+  find,
+  flatten,
+  get,
+  getOr,
+  has,
+  head,
+  isEmpty,
+  isNumber,
+  isString,
+  tail,
+} from "lodash/fp";
 import Papa from "papaparse";
+import { FilterSelections } from "~/interface/sampleView";
+import { Entries } from "~/interface/shared";
+import {
+  TAXON_COUNT_TYPE_METRICS,
+  TAXON_GENERAL_FIELDS,
+} from "../views/SampleView/constants";
+import {
+  getAppliedFilters,
+  hasAppliedFilters,
+} from "../views/SampleView/setup";
 import { logError } from "./logUtil";
 
 // Assumes that the CSV has headers.
@@ -55,4 +76,161 @@ export const createCSVObjectURL = (headers: string[], rows: string[][]) => {
   const dataString = csvData.join("\n");
   const dataBlob = new Blob([dataString], { type: "text/csv" });
   return URL.createObjectURL(dataBlob);
+};
+
+export const createCSVRowForAppliedFilters = (
+  appliedFilters: Omit<FilterSelections, "nameType" | "metric" | "background">,
+  backgrounds,
+  selectedOptions,
+) => {
+  const filterRow = [];
+  if (selectedOptions.background) {
+    const selectedBackgroundName = find(
+      { id: selectedOptions.background },
+      backgrounds,
+    ).name;
+    filterRow.push(`\nBackground:, "${selectedBackgroundName}"`);
+  }
+
+  let numberOfFilters = 0;
+  const entries = Object.entries(appliedFilters) as Entries<FilterSelections>;
+  for (const [optionName, optionVal] of entries) {
+    if (!optionVal) continue;
+    switch (optionName) {
+      case "categories": {
+        const categoryFilters = [];
+
+        if (has("categories", optionVal)) {
+          const categories = get("categories", optionVal);
+          categoryFilters.push(categories);
+          numberOfFilters += categories.length;
+        }
+
+        if (has("subcategories", optionVal)) {
+          const subcategories = [];
+          for (const [subcategoryName, subcategoryVal] of Object.entries(
+            get("subcategories", optionVal),
+          )) {
+            if (!isEmpty(subcategoryVal)) {
+              subcategories.push(
+                `${subcategoryName} - ${subcategoryVal.join()}`,
+              );
+            }
+          }
+          categoryFilters.push(subcategories);
+          numberOfFilters += subcategories.length;
+        }
+
+        const flattenedCategoryFilters = flatten(categoryFilters).join();
+        if (!isEmpty(flattenedCategoryFilters)) {
+          // Explicitly add commas to create blank cells for formatting purposes
+          filterRow.push(`Categories:, ${flattenedCategoryFilters}`);
+        }
+
+        break;
+      }
+      case "taxa": {
+        optionVal.forEach((taxon: $TSFixMe) => {
+          filterRow.push(`Taxon Name:, ${get("name", taxon)}`);
+          numberOfFilters += 1;
+        });
+        break;
+      }
+      case "thresholds": {
+        const thresholdFilters = optionVal.reduce(
+          (result: $TSFixMe, threshold: $TSFixMe) => {
+            result.push(
+              `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
+            );
+            return result;
+          },
+          [],
+        );
+
+        if (!isEmpty(thresholdFilters)) {
+          filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
+          numberOfFilters += thresholdFilters.length;
+        }
+        break;
+      }
+      case "readSpecificity": {
+        const readSpecificityOptions = {
+          0: "All",
+          1: "Specific Only",
+        };
+
+        filterRow.push(
+          `Read Specificity:, "${readSpecificityOptions[optionVal]}"`,
+        );
+        numberOfFilters += 1;
+        break;
+      }
+      default:
+        logError({
+          message:
+            "SampleView: Invalid filter passed to createCSVRowForSelectedOptions()",
+          details: { optionName, optionVal },
+        });
+        break;
+    }
+  }
+
+  // Insert filter statement after Background
+  filterRow.splice(
+    1,
+    0,
+    `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`,
+  );
+  return [sanitizeCSVRow(filterRow).join()];
+};
+
+export const computeReportTableValuesForCSV = (
+  filteredReportData,
+  selectedOptions,
+  backgrounds,
+) => {
+  const csvRows = [];
+  const csvHeaders = [
+    ...TAXON_GENERAL_FIELDS,
+    ...Array.from(TAXON_COUNT_TYPE_METRICS, metric => "nt." + metric),
+    ...Array.from(TAXON_COUNT_TYPE_METRICS, metric => "nr." + metric),
+  ];
+
+  filteredReportData.forEach((datum: $TSFixMe) => {
+    const genusRow: $TSFixMe = [];
+    csvHeaders.forEach(column => {
+      let val = JSON.stringify(getOr("-", column, datum));
+      val = val === "null" ? '"-"' : val;
+
+      // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
+      genusRow.push(val.includes(",") ? `"${val}"` : val);
+    });
+    csvRows.push([sanitizeCSVRow(genusRow).join()]);
+
+    if (has("filteredSpecies", datum)) {
+      datum["filteredSpecies"].forEach((speciesTaxon: $TSFixMe) => {
+        const speciesRow: $TSFixMe = [];
+        csvHeaders.forEach(column => {
+          let val = JSON.stringify(getOr("-", column, speciesTaxon));
+          val = val === "null" ? '"-"' : val;
+
+          // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
+          speciesRow.push(val.includes(",") ? `"${val}"` : val);
+        });
+        csvRows.push([sanitizeCSVRow(speciesRow).join()]);
+      });
+    }
+  });
+
+  if (hasAppliedFilters(selectedOptions)) {
+    csvRows.push(
+      createCSVRowForAppliedFilters(
+        getAppliedFilters(selectedOptions),
+        backgrounds,
+        selectedOptions,
+      ),
+    );
+  }
+
+  return [[csvHeaders.join()], csvRows];
 };

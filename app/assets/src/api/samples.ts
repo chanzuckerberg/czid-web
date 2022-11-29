@@ -51,138 +51,135 @@ const GET_SAMPLES_QUERY = gql`
       requestedSampleIds: $requestedSampleIds
       workflow: $workflow
     ) {
-        samples
-          {
+      samples {
+        id
+        name
+        createdAt
+        projectId
+        hostGenomeId
+        privateUntil
+        public
+        details {
+          dbSample {
             id
             name
             createdAt
+            updatedAt
             projectId
+            status
+            sampleNotes
+            s3PreloadResultPath
+            s3StarIndexPath
+            s3Bowtie2IndexPath
             hostGenomeId
+            userId
+            subsample
+            pipelineBranch
+            alignmentConfigName
+            webCommit
+            pipelineCommit
+            dagVars
+            maxInputFragments
+            clientUpdatedAt
+            uploadedFromBasespace
+            uploadError
+            basespaceAccessToken
+            doNotProcess
+            pipelineExecutionStrategy
+            useTaxonWhitelist
+            initialWorkflow
+            inputFiles {
+              id
+              name
+              presignedUrl
+              sampleId
+              createdAt
+              updatedAt
+              sourceType
+              source
+              parts
+              uploadClient
+            }
+            hostGenomeName
             privateUntil
-            public
-            details {
-              dbSample {
-                id
-                name
-                createdAt
-                updatedAt
-                projectId
-                status
-                sampleNotes
-                s3PreloadResultPath
-                s3StarIndexPath
-                s3Bowtie2IndexPath
-                hostGenomeId
-                userId
-                subsample
-                pipelineBranch
-                alignmentConfigName
-                webCommit
-                pipelineCommit
-                dagVars
-                maxInputFragments
-                clientUpdatedAt
-                uploadedFromBasespace
-                uploadError
-                basespaceAccessToken
-                doNotProcess
-                pipelineExecutionStrategy
-                useTaxonWhitelist
-                initialWorkflow
-                inputFiles {
-                    id
-                    name
-                    presignedUrl
-                    sampleId
-                    createdAt
-                    updatedAt
-                    sourceType
-                    source
-                    parts
-                    uploadClient
-                  }
-
-                hostGenomeName
-                privateUntil
-              }
-              metadata {
-                collectionDate
-                collectionLocationV2
-                nucleotideType
-                sampleType
-                waterControl
-              }
-              derivedSampleOutput {
-                pipelineRun {
-                  id
-                  sampleId
-                  createdAt
-                  updatedAt
-                  jobStatus
-                  finalized
-                  totalReads
-                  adjustedRemainingReads
-                  unmappedReads
-                  subsample
-                  pipelineBranch
-                  totalErccReads
-                  fractionSubsampled
-                  pipelineVersion
-                  pipelineCommit
-                  truncated
-                  resultsFinalized
-                  alignmentConfigId
-                  alertSent
-                  dagVars
-                  assembled
-                  maxInputFragments
-                  errorMessage
-                  knownUserError
-                  pipelineExecutionStrategy
-                  sfnExecutionArn
-                  useTaxonWhitelist
-                  wdlVersion
-                  s3OutputPrefix
-                  executedAt
-                  timeToFinalized
-                  timeToResultsFinalized
-                  qcPercent
-                  compressionRatio
-                  deprecated
-                }
-                hostGenomeName
-                projectName
-                summaryStats {
-                  adjustedRemainingReads
-                  compressionRatio
-                  qcPercent
-                  percentRemaining
-                  unmappedReads
-                  insertSizeMean
-                  insertSizeStandardDeviation
-                  lastProcessedAt
-                  readsAfterStar
-                  readsAfterTrimmomatic
-                  readsAfterPriceseq
-                  readsAfterCzidDedup
-                }
-              }
-              uploader {
-                  name
-                  id
-              }
-              mngsRunInfo {
-                totalRuntime
-                withAssembly
-                resultStatusDescription
-                finalized
-                reportReady
-                createdAt
-              }
-              workflowRunsCountByWorkflow
+          }
+          metadata {
+            collectionDate
+            collectionLocationV2
+            nucleotideType
+            sampleType
+            waterControl
+          }
+          derivedSampleOutput {
+            pipelineRun {
+              id
+              sampleId
+              createdAt
+              updatedAt
+              jobStatus
+              finalized
+              totalReads
+              adjustedRemainingReads
+              unmappedReads
+              subsample
+              pipelineBranch
+              totalErccReads
+              fractionSubsampled
+              pipelineVersion
+              pipelineCommit
+              truncated
+              resultsFinalized
+              alignmentConfigId
+              alertSent
+              dagVars
+              assembled
+              maxInputFragments
+              errorMessage
+              knownUserError
+              pipelineExecutionStrategy
+              sfnExecutionArn
+              useTaxonWhitelist
+              wdlVersion
+              s3OutputPrefix
+              executedAt
+              timeToFinalized
+              timeToResultsFinalized
+              qcPercent
+              compressionRatio
+              deprecated
+            }
+            hostGenomeName
+            projectName
+            summaryStats {
+              adjustedRemainingReads
+              compressionRatio
+              qcPercent
+              percentRemaining
+              unmappedReads
+              insertSizeMean
+              insertSizeStandardDeviation
+              lastProcessedAt
+              readsAfterStar
+              readsAfterTrimmomatic
+              readsAfterPriceseq
+              readsAfterCzidDedup
             }
           }
-
+          uploader {
+            name
+            id
+          }
+          mngsRunInfo {
+            totalRuntime
+            withAssembly
+            resultStatusDescription
+            finalized
+            reportReady
+            createdAt
+          }
+          workflowRunsCountByWorkflow
+        }
+      }
       sampleIds
     }
   }

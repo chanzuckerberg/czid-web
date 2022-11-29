@@ -1,3 +1,4 @@
+import { cx } from "@emotion/css";
 import React, { useContext } from "react";
 import { SemanticCOLORS } from "semantic-ui-react";
 
@@ -39,10 +40,11 @@ interface PathogenLabelProps {
   type?: string;
   // TODO: make this prop required after deprecating legacy pathogen tags
   // legacy pathogen label colors are defined in CATEGORIES, not via this prop
-  color: SemanticCOLORS;
+  color?: SemanticCOLORS;
+  className?: string;
 }
 
-const PathogenLabel = ({ type, color }: PathogenLabelProps) => {
+const PathogenLabel = ({ type, color, className }: PathogenLabelProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -58,7 +60,7 @@ const PathogenLabel = ({ type, color }: PathogenLabelProps) => {
         text="Known Pathogen"
         color={color}
         size="medium"
-        className={cs.newPathogenLabel}
+        className={cx(cs.newPathogenLabel, className)}
       />
     </span>
   ) : (

@@ -1,14 +1,24 @@
 import cx from "classnames";
 import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconArrowRight } from "~ui/icons";
 import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 
 import cs from "./sample_message.scss";
 
-class SampleMessage extends React.Component {
+interface SampleMessageProps {
+  icon?: React.ReactElement;
+  link?: string;
+  linkText?: string;
+  message?: string;
+  status?: string;
+  subtitle?: string;
+  type?: string;
+  onClick?: $TSFixMeFunction;
+}
+
+class SampleMessage extends React.Component<SampleMessageProps> {
   render() {
     const {
       icon,
@@ -29,6 +39,7 @@ class SampleMessage extends React.Component {
           </div>
           <div className={cs.message}>{message}</div>
           <div className={cs.subtitle}>{subtitle}</div>
+          {/* @ts-expect-error Property 'onClick' does not exist on type */}
           <ExternalLink className={cs.actionLink} href={link} onClick={onClick}>
             {linkText}
             {linkText && <IconArrowRight />}
@@ -39,16 +50,5 @@ class SampleMessage extends React.Component {
     );
   }
 }
-
-SampleMessage.propTypes = {
-  icon: PropTypes.element,
-  link: PropTypes.string,
-  linkText: PropTypes.string,
-  message: PropTypes.string,
-  status: PropTypes.string,
-  subtitle: PropTypes.string,
-  type: PropTypes.string,
-  onClick: PropTypes.func,
-};
 
 export default SampleMessage;

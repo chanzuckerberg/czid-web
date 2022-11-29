@@ -8,7 +8,7 @@ import cs from "./download_button_dropdown.scss";
 
 interface DownloadButtonDropdown {
   className: string;
-  disabled: boolean;
+  disabled?: boolean;
   items?: React.ReactNode[];
   options: $TSFixMe[];
   onClick: $TSFixMeFunction;

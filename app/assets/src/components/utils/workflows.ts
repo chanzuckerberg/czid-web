@@ -1,51 +1,45 @@
-export type WORKFLOW_VALUES =
-  | "amr"
-  | "consensus-genome"
-  | "short-read-mngs"
-  | "long-read-mngs";
-
 // Pipeline workflow options
 export const WORKFLOW_ENTITIES = {
-  SAMPLES: "Samples",
-  WORKFLOW_RUNS: "WorkflowRuns",
+  SAMPLES: "Samples" as const,
+  WORKFLOW_RUNS: "WorkflowRuns" as const,
 };
 
 export const WORKFLOWS = {
   AMR: {
-    label: "Antimicrobial Resistance",
+    label: "Antimicrobial Resistance" as const,
     pluralizedLabel: "Antimicrobial Resistance",
-    value: "amr",
+    value: "amr" as const,
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
     pipelineName: "Antimicrobial Resistance",
   },
   CONSENSUS_GENOME: {
-    label: "Consensus Genome",
+    label: "Consensus Genome" as const,
     pluralizedLabel: "Consensus Genomes",
-    value: "consensus-genome",
+    value: "consensus-genome" as const,
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
     pipelineName: "Consensus Genome",
   },
   SHORT_READ_MNGS: {
-    label: "Metagenomic",
+    label: "Metagenomic" as const,
     pluralizedLabel: "Metagenomics",
-    value: "short-read-mngs",
+    value: "short-read-mngs" as const,
     entity: WORKFLOW_ENTITIES.SAMPLES,
     pipelineName: "Illumina mNGS",
   },
   LONG_READ_MNGS: {
-    label: "Nanopore",
+    label: "Nanopore" as const,
     pluralizedLabel: "Metagenomics - Nanopore",
-    value: "long-read-mngs",
+    value: "long-read-mngs" as const,
     entity: WORKFLOW_ENTITIES.SAMPLES,
     pipelineName: "Nanopore mNGS",
   },
 };
 
 export const WORKFLOW_KEY_FOR_VALUE = {
-  [WORKFLOWS.AMR.value]: "AMR",
-  [WORKFLOWS.CONSENSUS_GENOME.value]: "CONSENSUS_GENOME",
-  [WORKFLOWS.SHORT_READ_MNGS.value]: "SHORT_READ_MNGS",
-  [WORKFLOWS.LONG_READ_MNGS.value]: "LONG_READ_MNGS",
+  [WORKFLOWS.AMR.value]: "AMR" as const,
+  [WORKFLOWS.CONSENSUS_GENOME.value]: "CONSENSUS_GENOME" as const,
+  [WORKFLOWS.SHORT_READ_MNGS.value]: "SHORT_READ_MNGS" as const,
+  [WORKFLOWS.LONG_READ_MNGS.value]: "LONG_READ_MNGS" as const,
 };
 
 export const workflowIsWorkflowRunEntity = (workflow: WORKFLOW_VALUES) => {
@@ -79,9 +73,34 @@ export const workflowIsBeta = (workflow: WORKFLOW_VALUES) => {
  */
 export const findInWorkflows = (
   toCompare: string,
-  keyToSearch: string,
-): string => {
+  keyToSearch: WorkflowAttrs,
+): Workflows[WorkflowKeys][typeof keyToSearch] => {
   return Object.keys(WORKFLOWS).find(
     workflow => WORKFLOWS[workflow][keyToSearch] === toCompare,
   );
 };
+
+/**
+ * WORKFLOW TYPES
+ */
+
+export type MetagenomicTabsSample =
+  | "Metagenomic"
+  | "Antimicrobial Resistance (Deprecated)"
+  | "Metagenomics - Simplified";
+
+export type WorkflowTabsSample =
+  | "Consensus Genome"
+  | "Antimicrobial Resistance";
+
+export type LongReadTabsSample = "Nanopore";
+
+export type WorkflowCount = {
+  [key in WORKFLOW_VALUES]?: number;
+};
+
+type Workflows = typeof WORKFLOWS;
+type WorkflowKeys = keyof Workflows;
+export type WORKFLOW_VALUES = Workflows[WorkflowKeys]["value"];
+export type WORKFLOW_LABELS = Workflows[WorkflowKeys]["label"];
+type WorkflowAttrs = keyof Workflows[WorkflowKeys];

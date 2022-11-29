@@ -51,7 +51,7 @@ import {
 } from "~/components/utils/urls";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
-import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
+import { URL_FIELDS } from "~/components/views/SampleView/constants";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import { copyShortUrlToClipboard } from "~/helpers/url";
@@ -784,7 +784,6 @@ class SamplesHeatmapView extends React.Component<
           err: e,
           href: window.location.href,
           message: e.message,
-          // @ts-expect-error Type 'any[]' is not assignable to type 'string'.
           sampleIds,
           status: e.status,
           statusText: e.statusText,

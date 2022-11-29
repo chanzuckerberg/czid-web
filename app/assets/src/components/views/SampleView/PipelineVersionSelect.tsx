@@ -2,11 +2,22 @@ import moment from "moment";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
-import PropTypes from "~/components/utils/propTypes";
+import { WorkflowRun } from "~/interface/sample";
+import { PipelineRun } from "~/interface/shared";
 
 import cs from "./pipeline_version_select.scss";
 
-class PipelineVersionSelect extends React.Component {
+interface PipelineVersionSelectProps {
+  analysisRun?: PipelineRun | WorkflowRun;
+  pipelineVersions?: string[];
+  versionKey?: string;
+  lastProcessedAt?: string;
+  onPipelineVersionSelect: $TSFixMeFunction; // Actually a datestring.;
+}
+
+class PipelineVersionSelect extends React.Component<
+  PipelineVersionSelectProps
+> {
   getLastProcessedString = () => {
     const lastProcessedFormattedDate = moment(this.props.lastProcessedAt)
       .startOf("second")
@@ -18,12 +29,12 @@ class PipelineVersionSelect extends React.Component {
   renderPipelineVersionDropdown = () => {
     const {
       pipelineVersions,
-      pipelineRun,
+      analysisRun,
       versionKey,
       onPipelineVersionSelect,
     } = this.props;
     const otherVersions = pipelineVersions.filter(
-      v => v !== pipelineRun[versionKey],
+      v => v !== analysisRun[versionKey],
     );
 
     const trigger = (
@@ -51,7 +62,7 @@ class PipelineVersionSelect extends React.Component {
     const {
       pipelineVersions,
       lastProcessedAt,
-      pipelineRun,
+      analysisRun,
       versionKey,
     } = this.props;
 
@@ -62,7 +73,7 @@ class PipelineVersionSelect extends React.Component {
     if (
       pipelineVersions.length === 0 ||
       (pipelineVersions.length === 1 &&
-        pipelineVersions[0] === pipelineRun[versionKey])
+        pipelineVersions[0] === analysisRun[versionKey])
     ) {
       return (
         <span className={cs.pipelineVersionSelectContainer}>
@@ -84,13 +95,5 @@ class PipelineVersionSelect extends React.Component {
     return <BasicPopup trigger={trigger} content="Select Report Version" />;
   }
 }
-
-PipelineVersionSelect.propTypes = {
-  pipelineRun: PropTypes.PipelineRun,
-  pipelineVersions: PropTypes.arrayOf(PropTypes.string),
-  versionKey: PropTypes.string,
-  lastProcessedAt: PropTypes.string, // Actually a datestring.
-  onPipelineVersionSelect: PropTypes.func.isRequired,
-};
 
 export default PipelineVersionSelect;

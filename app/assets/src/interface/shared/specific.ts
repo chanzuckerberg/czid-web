@@ -1,3 +1,4 @@
+import { AccessionsSummary } from "~/components/common/CoverageVizBottomSidebar/types";
 import { ThresholdFilterData } from "../dropdown";
 import { BooleanNums, DateString, NameId, NumberId } from "./generic";
 
@@ -13,6 +14,18 @@ export interface BulkDownloadDetails extends NumberId {
   workflow_runs: Array<$TSFixMe>;
   description: string;
 }
+
+export interface ConsensusGenomeData {
+  accessionData?: {
+    best_accessions: AccessionsSummary[];
+    num_accessions: number;
+  };
+  percentIdentity?: number;
+  taxId?: number;
+  taxName?: string;
+  usedAccessions?: string[];
+}
+
 export interface DownloadType {
   display_name: string;
   admin_only: boolean;
@@ -113,6 +126,8 @@ export interface OnBLASTClickProps {
 
 export interface PipelineRun {
   id: number;
+  wdl_version: string;
+  executed_at: DateString;
   sample_id: number;
   created_at: DateString;
   updated_at: DateString;
@@ -134,14 +149,12 @@ export interface PipelineRun {
   dag_vars: string | null;
   assembled: number;
   max_input_fragments: number;
-  error_message: string | null;
-  known_user_error: null;
+  error_message?: string;
+  known_user_error?: string;
   pipeline_execution_strategy: "step_function" | string;
   sfn_execution_arn: string;
   use_taxon_whitelist: boolean;
-  wdl_version: string;
   s3_output_prefix: string;
-  executed_at: DateString;
   time_to_finalized: number;
   time_to_results_finalized: number;
   qc_percent: number;
@@ -177,12 +190,15 @@ export interface RawMetadata {
   updated_at: string;
 }
 
-export interface Sample {
+export interface SampleFromApi {
   _selectId: string;
+  id: number;
+  private_until: DateString;
   name?: string;
   host_genome_id: number;
   host_genome_name: string;
   project_id?: number | string;
+  created_at: DateString;
   status?: string;
   client: string;
   files?: Record<string, File>;
@@ -235,6 +251,61 @@ export interface SelectedOptions {
 
 export interface Subcategories {
   Viruses: string[];
+}
+
+export interface Taxon {
+  agg_score?: $TSFixMeUnknown;
+  annotation?: $TSFixMeUnknown;
+  category: string;
+  common_name: string;
+  genus_tax_id: number;
+  is_phage: boolean;
+  displayName: string;
+  max_z_score?: number;
+  name: string;
+  nr: NR;
+  filteredSpecies?: Taxon[];
+  highlightedChildren?: boolean;
+  highlighted?: boolean;
+  passedFilters?: boolean;
+  pathogens?: undefined;
+  species?: Taxon[];
+  species_annotations?: {
+    hit: number;
+    inconclusive: number;
+    not_a_hit: number;
+  };
+  species_tax_id?: number[];
+  taxId?: number;
+  taxLevel?: "genus" | "species";
+  pathogenTag?: string;
+  lineageRank?: string;
+}
+
+export interface NR {
+  alignment_length: number;
+  bg_mean: number;
+  bg_mean_mass_normalized?: $TSFixMeUnknown;
+  bg_stdev: number;
+  bg_stdev_mass_normalized?: $TSFixMeUnknown;
+  count: number;
+  e_value: number;
+  percent_identity: number;
+  rpm: number;
+  source_count_type?: $TSFixMeUnknown;
+  z_score: number;
+}
+
+export interface Background {
+  created_at: DateString;
+  description: string;
+  id: number;
+  mass_normalized: boolean;
+  name: string;
+  public_access?: boolean;
+  ready: 0 | 1;
+  updated_at: DateString;
+  user_id: boolean;
 }
 
 export interface SampleTypeProps {

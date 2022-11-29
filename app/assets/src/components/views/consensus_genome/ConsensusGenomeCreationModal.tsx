@@ -10,6 +10,7 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { IconInfoSmall } from "~/components/ui/icons";
 import { VIRAL_CONSENSUS_GENOME_DOC_LINK } from "~/components/utils/documentationLinks";
+import { ConsensusGenomeData } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { SubtextDropdown } from "~ui/controls/dropdowns";
@@ -17,19 +18,7 @@ import { SubtextDropdown } from "~ui/controls/dropdowns";
 import cs from "./consensus_genome_creation_modal.scss";
 
 interface ConsensusGenomeCreationModalProps {
-  consensusGenomeData?: {
-    accessionData?: {
-      best_accessions: {
-        id: string;
-        name: string;
-        coverage_depth: $TSFixMeUnknown;
-      }[];
-    };
-    percentIdentity?: number;
-    taxId?: number;
-    taxName?: string;
-    usedAccessions?: string[];
-  };
+  consensusGenomeData?: ConsensusGenomeData;
   open?: boolean;
   onClose: $TSFixMeFunction;
   onCreation: $TSFixMeFunction;

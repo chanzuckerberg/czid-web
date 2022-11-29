@@ -1,16 +1,11 @@
 import { Button } from "czifui";
 import deepEqual from "fast-deep-equal";
 import {
-  all,
   compact,
-  every,
   filter,
   find,
-  flatten,
   get,
-  getOr,
   groupBy,
-  has,
   head,
   isEmpty,
   isNull,
@@ -24,17 +19,12 @@ import {
   pick,
   pull,
   set,
-  size,
-  some,
-  snakeCase,
-  sum,
   uniq,
-  values,
+  size,
 } from "lodash/fp";
 import React from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
-
 import {
   getBackgrounds,
   getCoverageVizSummary,
@@ -57,13 +47,17 @@ import {
 } from "~/api/persisted_backgrounds";
 import DeprecatedAmrView from "~/components/DeprecatedAmrView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
-import DetailsSidebar from "~/components/common/DetailsSidebar";
+import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
+import { getCoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/utils";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
+import {
+  computeReportTableValuesForCSV,
+  createCSVObjectURL,
+} from "~/components/utils/csv";
 import {
   AMR_V1_FEATURE,
   AMR_DEPRECATED_FEATURE,
@@ -72,20 +66,13 @@ import {
   ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
-import { diff } from "~/components/utils/objectUtil";
 import {
   COVERAGE_VIZ_FEATURE,
   isPipelineFeatureAvailable,
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
-import PropTypes from "~/components/utils/propTypes";
 import { sampleErrorInfo } from "~/components/utils/sample";
-import { showToast } from "~/components/utils/toast";
-import {
-  findInWorkflows,
-  WORKFLOWS,
-  WORKFLOW_ENTITIES,
-} from "~/components/utils/workflows";
+import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
 import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
@@ -97,13 +84,23 @@ import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/Co
 import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/ConsensusGenomePreviousModal";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import { copyShortUrlToClipboard } from "~/helpers/url";
+import Sample, { WorkflowRun } from "~/interface/sample";
+import {
+  CurrentTabSample,
+  AmrDeprectatedData,
+  FilterSelections,
+  RawReportData,
+  SampleViewProps,
+  SampleViewState,
+} from "~/interface/sampleView";
+import { Background, Taxon } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
-import Notification from "~ui/notifications/Notification";
-
+import { WORKFLOW_VALUES } from "../../utils/workflows";
 import BlastSelectionModal from "../blast/BlastSelectionModal";
 import AmrView from "./AmrView";
+import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import ReportViewSelector from "./ReportViewSelector";
@@ -112,14 +109,11 @@ import TaxonTreeVis from "./TaxonTreeVis";
 import {
   GENUS_LEVEL_INDEX,
   LOCAL_STORAGE_FIELDS,
-  METRIC_DECIMAL_PLACES,
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
   SUCCEEDED_STATE,
   TABS,
-  TAXON_COUNT_TYPE_METRICS,
-  TAXON_GENERAL_FIELDS,
   TREE_METRICS,
   URL_FIELDS,
   TAX_LEVEL_GENUS,
@@ -127,13 +121,29 @@ import {
   KEY_SAMPLE_VIEW_OPTIONS,
   KEY_SELECTED_OPTIONS_BACKGROUND,
 } from "./constants";
+import {
+  adjustMetricPrecision,
+  countFilters,
+  filterReportData,
+  setDisplayName,
+} from "./filters";
+import { filteredMessage, renderReportInfo } from "./messages";
+import { showNotification } from "./notifications";
 import csSampleMessage from "./sample_message.scss";
 import cs from "./sample_view.scss";
+import {
+  getWorkflowCount,
+  getDefaultSelectedOptions,
+  determineInitialTab,
+  hasAppliedFilters,
+} from "./setup";
 
+// @ts-expect-error working with Lodash types
 const mapValuesWithKey = mapValues.convert({ cap: false });
 
-class SampleView extends React.Component {
-  constructor(props) {
+class SampleView extends React.Component<SampleViewProps, SampleViewState> {
+  urlParser: $TSFixMe;
+  constructor(props: SampleViewProps) {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
@@ -160,7 +170,9 @@ class SampleView extends React.Component {
     ].some(filter => !isEmpty(filter));
 
     if (persistedDiscoveryFiltersPresent) {
-      this.showNotification(NOTIFICATION_TYPES.discoveryViewFiltersPersisted);
+      showNotification(NOTIFICATION_TYPES.discoveryViewFiltersPersisted, {
+        revertToSampleViewFilters: this.revertToSampleViewFilters,
+      });
     }
 
     if (
@@ -210,7 +222,7 @@ class SampleView extends React.Component {
       reportMetadata: {},
       sample: null,
       selectedOptions: {
-        ...this.getDefaultSelectedOptions(),
+        ...getDefaultSelectedOptions(),
         ...(!isEmpty(tempSelectedOptions)
           ? tempSelectedOptions
           : {
@@ -243,14 +255,16 @@ class SampleView extends React.Component {
 
   componentDidMount = () => {
     // When we navigate to the SampleView via React Router, let Appcues know we are on this page.
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'analytics' does not exist on type 'Windo... Remove this comment to see the full error message
     if (window.analytics) {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'analytics' does not exist on type 'Windo... Remove this comment to see the full error message
       window.analytics.page();
     }
     // fetchBackgrounds will subsequently call fetchSample and fetchSampleReportData.
     this.fetchBackgrounds();
   };
 
-  componentDidUpdate(_, prevState) {
+  componentDidUpdate(_: unknown, prevState: SampleViewState) {
     const {
       amrDeprecatedData,
       currentTab,
@@ -264,7 +278,7 @@ class SampleView extends React.Component {
     }
 
     if (currentTab === TABS.CONSENSUS_GENOME || currentTab === TABS.AMR) {
-      const currentRun = this.getCurrentRun();
+      const currentRun = this.getCurrentRun() as WorkflowRun;
       const isFirstCGLoad = !isNil(currentRun) && isNil(workflowRunResults);
       const tabChanged = currentTab !== prevState.currentTab;
       const workflowRunChanged =
@@ -283,8 +297,7 @@ class SampleView extends React.Component {
     const { loadingWorkflowRunResults } = this.state;
     if (!loadingWorkflowRunResults) {
       this.setState({ loadingWorkflowRunResults: true });
-      const currentWorkflowRun = this.getCurrentRun();
-
+      const currentWorkflowRun = this.getCurrentRun() as WorkflowRun;
       // getWorkflowRunResults raises error unless successful
       const results =
         currentWorkflowRun.status === SUCCEEDED_STATE
@@ -298,7 +311,7 @@ class SampleView extends React.Component {
     }
   };
 
-  loadState = (store, key) => {
+  loadState = (store: Storage, key: string) => {
     try {
       return JSON.parse(store.getItem(key)) || {};
     } catch (e) {
@@ -307,71 +320,6 @@ class SampleView extends React.Component {
       console.warn(`Bad state: ${e}`);
     }
     return {};
-  };
-
-  getDefaultSelectedOptions = () => {
-    return {
-      annotations: [],
-      background: null,
-      categories: { categories: [], subcategories: { Viruses: [] } },
-      // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.
-      metric: find({ value: "nt_r" }, TREE_METRICS).value,
-      nameType: "Scientific name",
-      readSpecificity: 0,
-      taxa: [],
-      thresholds: [],
-    };
-  };
-
-  getWorkflowCount = sample => {
-    const count = {};
-    Object.keys(WORKFLOWS).forEach(workflow => {
-      switch (WORKFLOWS[workflow].entity) {
-        case WORKFLOW_ENTITIES.SAMPLES:
-          /* This line works to separate Illumina/Nanopore because all pipeline runs for a
-          sample will be of one technology type (Illumina or Nanopore).
-          Equivalently, to deprecate initial_workflow we could update samples_controller#show
-          to return technology and filter the pipeline runs by technology. */
-          count[WORKFLOWS[workflow].value] =
-            sample.initial_workflow === WORKFLOWS[workflow].value &&
-            size(sample.pipeline_runs);
-          break;
-        case WORKFLOW_ENTITIES.WORKFLOW_RUNS:
-          count[WORKFLOWS[workflow].value] = size(
-            sample.workflow_runs.filter(
-              run => run.workflow === WORKFLOWS[workflow].value,
-            ),
-          );
-          break;
-        default:
-          break;
-      }
-    });
-    return count;
-  };
-
-  determineInitialTab = ({
-    initialWorkflow,
-    workflowCount: {
-      [WORKFLOWS.SHORT_READ_MNGS.value]: shortReadMngs,
-      [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
-      [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
-      [WORKFLOWS.AMR.value]: amr,
-    },
-  }) => {
-    if (shortReadMngs) {
-      return TABS.SHORT_READ_MNGS;
-    } else if (longReadMngs) {
-      return TABS.LONG_READ_MNGS;
-    } else if (cg) {
-      return TABS.CONSENSUS_GENOME;
-    } else if (amr) {
-      return TABS.AMR;
-    } else if (initialWorkflow) {
-      return TABS[findInWorkflows(initialWorkflow, "value")];
-    } else {
-      return TABS.SHORT_READ_MNGS;
-    }
   };
 
   fetchSample = async () => {
@@ -405,9 +353,9 @@ class SampleView extends React.Component {
       );
     // If the currently selected background is mass normalized and the sample is incompatible,
     // then load the report with the default background instead.
-    let newSelectedOptions = { ...selectedOptions };
+    const newSelectedOptions = { ...selectedOptions };
     const selectedBackground = backgrounds.find(
-      background => selectedOptions.background === background.id,
+      (background: $TSFixMe) => selectedOptions.background === background.id,
     );
 
     if (
@@ -419,15 +367,15 @@ class SampleView extends React.Component {
       // and show a popup about why it is not compatible.
       newSelectedOptions.background = null;
       selectedBackground &&
-        this.showNotification(NOTIFICATION_TYPES.invalidBackground, {
+        showNotification(NOTIFICATION_TYPES.invalidBackground, {
           backgroundName: selectedBackground.name,
         });
     }
 
-    const workflowCount = this.getWorkflowCount(sample);
+    const workflowCount = getWorkflowCount(sample);
     const newCurrentTab =
       currentTab ||
-      this.determineInitialTab({
+      determineInitialTab({
         initialWorkflow: sample.initial_workflow,
         workflowCount,
       });
@@ -453,11 +401,11 @@ class SampleView extends React.Component {
     );
   };
 
-  fetchPersistedBackground = async ({ projectId }) => {
+  fetchPersistedBackground = async ({ projectId }: { projectId: number }) => {
     const { sharedWithNoBackground, selectedOptions } = this.state;
 
     if (projectId) {
-      let persistedBackground;
+      let persistedBackground: number;
       let hasPersistedBackground = false;
 
       await getPersistedBackground(projectId)
@@ -465,7 +413,7 @@ class SampleView extends React.Component {
           persistedBackground = persistedBackgroundFetched;
           hasPersistedBackground = true;
         })
-        .catch(error => {
+        .catch((error: $TSFixMe) => {
           persistedBackground = null;
           console.error(error);
         });
@@ -503,36 +451,37 @@ class SampleView extends React.Component {
 
     if (project) {
       // only really need sample names and ids, so request the basic version without extra details
-      const projectSamples = await getSamples({
+      const projectSamples: {
+        samples: Pick<Sample, "id" | "name">[];
+      } = await getSamples({
         projectId: project.id,
         snapshotShareId: snapshotShareId,
         basic: true,
       });
-
       this.setState({ projectSamples: projectSamples.samples });
     }
   };
 
-  processRawSampleReportData = rawReportData => {
+  processRawSampleReportData = (rawReportData: $TSFixMe) => {
     const { selectedOptions } = this.state;
 
-    const reportData = [];
+    const reportData: $TSFixMe = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     if (rawReportData.sortedGenus) {
       const generaPathogenCounts = getGeneraPathogenCounts(
         rawReportData.counts[SPECIES_LEVEL_INDEX],
       );
 
-      rawReportData.sortedGenus.forEach(genusTaxId => {
+      rawReportData.sortedGenus.forEach((genusTaxId: $TSFixMe) => {
         let hasHighlightedChildren = false;
         const childrenSpecies =
           rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
-        const speciesData = childrenSpecies.map(speciesTaxId => {
+        const speciesData = childrenSpecies.map((speciesTaxId: $TSFixMe) => {
           const isHighlighted = highlightedTaxIds.has(speciesTaxId);
           hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
           const speciesInfo =
             rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId];
-          const speciesWithAdjustedMetricPrecision = this.adjustMetricPrecision(
+          const speciesWithAdjustedMetricPrecision = adjustMetricPrecision(
             speciesInfo,
           );
           return merge(speciesWithAdjustedMetricPrecision, {
@@ -553,8 +502,8 @@ class SampleView extends React.Component {
       });
     }
 
-    this.setDisplayName({ reportData, ...selectedOptions });
-    const filteredReportData = this.filterReportData({
+    setDisplayName({ reportData, ...selectedOptions });
+    const filteredReportData = filterReportData({
       reportData,
       filters: selectedOptions,
     });
@@ -570,7 +519,11 @@ class SampleView extends React.Component {
     });
   };
 
-  handleInvalidBackgroundSelection = ({ invalidBackgroundId }) => {
+  handleInvalidBackgroundSelection = ({
+    invalidBackgroundId,
+  }: {
+    invalidBackgroundId: number;
+  }) => {
     const { backgrounds } = this.state;
 
     const invalidBackground = backgrounds.find(
@@ -578,14 +531,16 @@ class SampleView extends React.Component {
     );
 
     this.handleOptionChanged({ key: "background", value: null });
-    this.showNotification(NOTIFICATION_TYPES.invalidBackground, {
+    showNotification(NOTIFICATION_TYPES.invalidBackground, {
       backgroundName: invalidBackground.name,
     });
   };
 
   // backgroundId is an optional parameter here that can be omitted.
   // If omitted, the sample report data will be fetched with the selectedOptions.background
-  fetchSampleReportData = async ({ backgroundId } = {}) => {
+  fetchSampleReportData = async ({
+    backgroundId,
+  }: { backgroundId?: number } = {}) => {
     const { snapshotShareId, sampleId } = this.props;
     const { allowedFeatures = [] } = this.context || {};
     const {
@@ -608,7 +563,7 @@ class SampleView extends React.Component {
       sampleId,
     });
     try {
-      const rawReportData = await getSampleReportData({
+      const rawReportData: RawReportData = await getSampleReportData({
         snapshotShareId,
         sampleId,
         background: backgroundIdUsed,
@@ -651,7 +606,9 @@ class SampleView extends React.Component {
 
   fetchAmrDeprecatedData = async () => {
     const { sample } = this.state;
-    const amrDeprecatedData = await getAmrDeprecatedData(sample.id);
+    const amrDeprecatedData: AmrDeprectatedData[] = await getAmrDeprecatedData(
+      sample.id,
+    );
     this.setState({ amrDeprecatedData });
   };
 
@@ -662,6 +619,9 @@ class SampleView extends React.Component {
     const {
       owned_backgrounds: ownedBackgrounds,
       other_backgrounds: otherBackgrounds,
+    }: {
+      owned_backgrounds: Background[];
+      other_backgrounds: Background[];
     } = await getBackgrounds({
       snapshotShareId,
       categorizeBackgrounds: !snapshotShareId,
@@ -700,189 +660,7 @@ class SampleView extends React.Component {
     }
   };
 
-  applyFilters = ({
-    row,
-    categories,
-    subcategories,
-    thresholds,
-    readSpecificity,
-    taxa,
-    annotations,
-  }) => {
-    // When adding filters consider their order based on filter complexity (more complex later)
-    // and effeciency (filters more likely to filter out more taxa earlier)
-    return (
-      this.filterTaxa({ row, taxa }) &&
-      this.filterAnnotations({ row, annotations }) &&
-      this.filterCategories({ row, categories, subcategories }) &&
-      this.filterReadSpecificity({ row, readSpecificity }) &&
-      this.filterThresholds({ row, thresholds })
-    );
-  };
-
-  filterTaxa = ({ row, taxa }) => {
-    // If there's no taxa to filter, then return true
-    if (isEmpty(taxa)) return true;
-
-    return some(
-      taxon => row.taxId === taxon.id || row.genus_tax_id === taxon.id,
-      taxa,
-    );
-  };
-
-  filterAnnotations = ({ row, annotations }) => {
-    if (isEmpty(annotations)) return true;
-    // When this component is converted to typescript, we can define a type for the
-    // annotation filters and row data, and remove this comment
-    // Use snake case on filter options and raw data for consistent comparisons
-    // selected annotation options from filter are "Hit", "Not a hit", "Inconclusive"
-    // annotations options from the source data are "hit", "not_a_hit", "inconclusive"
-    const selectedAnnotationsInSnakeCase = map(a => snakeCase(a), annotations);
-    return selectedAnnotationsInSnakeCase.includes(snakeCase(row.annotation));
-  };
-
-  filterCategories = ({ row, categories, subcategories }) => {
-    // no category have been chosen: all pass
-    if (categories.size === 0 && subcategories.size === 0) {
-      return true;
-    }
-
-    // at least one of taxon's subcategory was selected
-    if (
-      some(
-        subcategory => subcategories.has(subcategory),
-        row.subcategories || [],
-      )
-    ) {
-      return true;
-    }
-
-    // taxon's category was selected and its subcategories were not excluded
-    let allSubcategoriesIncluded = all(
-      subcategory => subcategories.has(subcategory),
-      row.subcategories || [],
-    );
-    if (
-      (categories.has(row.category) && allSubcategoriesIncluded) ||
-      (categories.has("uncategorized") && row.category === null)
-    ) {
-      return true;
-    }
-
-    return false;
-  };
-
-  getTaxonMetricValue = (row, metric) => {
-    let parsedMetric = metric.split(":");
-    let parsedValue = get(parsedMetric, row);
-    return parsedValue;
-  };
-
-  adjustMetricPrecision = species => {
-    Object.entries(species).forEach(([key, metricValue]) => {
-      if (isNil(metricValue)) {
-        // Do nothing
-      } else if (key in METRIC_DECIMAL_PLACES) {
-        species[key] = parseFloat(
-          Number(metricValue).toFixed(METRIC_DECIMAL_PLACES[key]),
-        );
-      } else if (["nt", "nr", "merged_nt_nr"].includes(key)) {
-        Object.entries(species[key]).forEach(([metricKey, metricValue]) => {
-          if (metricKey in METRIC_DECIMAL_PLACES && metricValue) {
-            species[key][metricKey] = parseFloat(
-              Number(metricValue).toFixed(METRIC_DECIMAL_PLACES[metricKey]),
-            );
-          }
-        });
-      }
-    });
-    return species;
-  };
-
-  filterThresholds = ({ row, thresholds }) => {
-    if (thresholds && thresholds.length) {
-      const res = every(threshold => {
-        const { metric, operator, value } = threshold;
-        const parsedThresholdValue = parseFloat(value);
-        const parsedValue = this.getTaxonMetricValue(row, metric);
-
-        switch (operator) {
-          case ">=":
-            return parsedThresholdValue <= parsedValue;
-          case "<=":
-            return parsedThresholdValue >= parsedValue;
-        }
-        return true;
-      }, thresholds);
-      return res;
-    }
-
-    return true;
-  };
-
-  filterReadSpecificity = ({ row, readSpecificity }) => {
-    // for read specificity, species filtering is determined by their genus
-    return (
-      !readSpecificity ||
-      (row.taxLevel === "genus" ? row.taxId > 0 : row.genus_tax_id > 0)
-    );
-  };
-
-  setDisplayName = ({ reportData, nameType }) => {
-    const useScientific = nameType === "Scientific name";
-    reportData.forEach(genus => {
-      genus.displayName = useScientific ? genus.name : genus.common_name;
-      genus.species.forEach(species => {
-        species.displayName = useScientific
-          ? species.name
-          : species.common_name;
-      });
-    });
-  };
-
-  filterReportData = ({
-    reportData,
-    filters: { categories, thresholds, readSpecificity, taxa, annotations },
-  }) => {
-    const categoriesSet = new Set(
-      map(c => c.toLowerCase(), categories.categories || []),
-    );
-    const subcategoriesSet = new Set(
-      map(sc => sc.toLowerCase(), flatten(values(categories.subcategories))),
-    );
-
-    const filteredData = [];
-    reportData.forEach(genusRow => {
-      genusRow.passedFilters = this.applyFilters({
-        row: genusRow,
-        categories: categoriesSet,
-        subcategories: subcategoriesSet,
-        thresholds,
-        readSpecificity,
-        taxa,
-        annotations,
-      });
-
-      genusRow.filteredSpecies = genusRow.species.filter(speciesRow =>
-        this.applyFilters({
-          row: speciesRow,
-          categories: categoriesSet,
-          subcategories: subcategoriesSet,
-          thresholds,
-          readSpecificity,
-          taxa,
-          annotations,
-        }),
-      );
-      if (genusRow.passedFilters || genusRow.filteredSpecies.length) {
-        filteredData.push(genusRow);
-      }
-    });
-
-    return filteredData;
-  };
-
-  handlePipelineVersionSelect = newPipelineVersion => {
+  handlePipelineVersionSelect = (newPipelineVersion: string) => {
     const { currentTab, pipelineVersion, sample } = this.state;
 
     if (newPipelineVersion === pipelineVersion) {
@@ -911,7 +689,7 @@ class SampleView extends React.Component {
       currentTab === TABS.CONSENSUS_GENOME ||
       currentTab === TABS.AMR
     ) {
-      const workflowVal =
+      const workflowVal: WORKFLOW_VALUES =
         WORKFLOWS[findInWorkflows(currentTab, "label")]?.value;
       const newRun = find(
         { wdl_version: newPipelineVersion, workflow: workflowVal },
@@ -927,7 +705,7 @@ class SampleView extends React.Component {
     }
   };
 
-  handleWorkflowRunSelect = workflowRun => {
+  handleWorkflowRunSelect = (workflowRun: WorkflowRun) => {
     const updatedQueryParameters = this.urlParser.updateQueryStringParameter(
       location.search,
       "workflowRunId",
@@ -945,7 +723,7 @@ class SampleView extends React.Component {
     this.setState({ workflowRun, workflowRunId: workflowRun.id });
   };
 
-  handleTabChange = tab => {
+  handleTabChange = (tab: CurrentTabSample) => {
     this.setState({ currentTab: tab });
     const name = tab.replace(/\W+/g, "-").toLowerCase();
     trackEvent(`SampleView_tab-${name}_clicked`, {
@@ -956,9 +734,9 @@ class SampleView extends React.Component {
   updateHistoryAndPersistOptions = () => {
     const urlState = pick(keys(URL_FIELDS), this.state);
 
-    let localStorageFields = LOCAL_STORAGE_FIELDS;
+    const localStorageFields = LOCAL_STORAGE_FIELDS;
 
-    let localState = mapValuesWithKey((options, key) => {
+    const localState = mapValuesWithKey((options: $TSFixMe, key: $TSFixMe) => {
       return omit(options.excludePaths || [], this.state[key]);
     }, localStorageFields);
 
@@ -972,7 +750,7 @@ class SampleView extends React.Component {
     localStorage.setItem(KEY_SAMPLE_VIEW_OPTIONS, JSON.stringify(localState));
   };
 
-  handleOptionChanged = ({ key, value }) => {
+  handleOptionChanged = ({ key, value }: { key: string; value: unknown }) => {
     const { sample, project, selectedOptions } = this.state;
     if (deepEqual(selectedOptions[key], value)) {
       return;
@@ -993,7 +771,11 @@ class SampleView extends React.Component {
     this.refreshDataFromOptionsChange({ key, newSelectedOptions });
   };
 
-  persistNewBackgroundModelSelection = async ({ newBackgroundId }) => {
+  persistNewBackgroundModelSelection = async ({
+    newBackgroundId,
+  }: {
+    newBackgroundId: number;
+  }) => {
     const { hasPersistedBackground, project } = this.state;
 
     const persistBackgroundApi = !hasPersistedBackground
@@ -1003,7 +785,7 @@ class SampleView extends React.Component {
     await persistBackgroundApi({
       projectId: project.id,
       backgroundId: newBackgroundId,
-    }).catch(error => {
+    }).catch((error: $TSFixMe) => {
       logError({
         message: "SampleView: Failed to persist background model selection",
         details: {
@@ -1028,10 +810,18 @@ class SampleView extends React.Component {
     );
   };
 
-  handleFilterRemoved = ({ key, subpath, value }) => {
+  handleFilterRemoved = ({
+    key,
+    subpath,
+    value,
+  }: {
+    key: string;
+    subpath?: string;
+    value: $TSFixMe;
+  }) => {
     const { selectedOptions } = this.state;
 
-    let newSelectedOptions = { ...selectedOptions };
+    const newSelectedOptions = { ...selectedOptions };
     switch (key) {
       case "taxa":
       case "thresholds":
@@ -1052,7 +842,7 @@ class SampleView extends React.Component {
     this.refreshDataFromOptionsChange({ key, newSelectedOptions });
   };
 
-  handleCoverageVizClick = newCoverageVizParams => {
+  handleCoverageVizClick = (newCoverageVizParams: CoverageVizParamsRaw) => {
     const { coverageVizParams, coverageVizVisible } = this.state;
     if (!newCoverageVizParams.taxId) {
       this.setState({
@@ -1083,72 +873,13 @@ class SampleView extends React.Component {
     });
   };
 
-  // Aggregate the accessions from multiple species into a single data object.
-  // Used for coverage viz.
-  getCombinedAccessionDataForSpecies = speciesTaxons => {
-    const { coverageVizDataByTaxon } = this.state;
-    // This helper function gets the best accessions for a species taxon.
-    const getSpeciesBestAccessions = taxon => {
-      const speciesBestAccessions = get(
-        [taxon.taxId, "best_accessions"],
-        coverageVizDataByTaxon,
-      );
-      // Add the species taxon name to each accession.
-      return map(
-        accession => ({
-          ...accession,
-          // Use snake_case for consistency with other fields.
-          taxon_name: taxon.name,
-          taxon_common_name: taxon.commonName,
-        }),
-        speciesBestAccessions,
-      );
-    };
-
-    const speciesTaxIds = map("taxId", speciesTaxons);
-
-    return {
-      best_accessions: flatten(
-        compact(map(getSpeciesBestAccessions, speciesTaxons)),
-      ),
-      num_accessions: sum(
-        map(
-          taxId => get([taxId, "num_accessions"], coverageVizDataByTaxon),
-          speciesTaxIds,
-        ),
-      ),
-    };
-  };
-
-  getCoverageVizParams = () => {
-    const { coverageVizParams, coverageVizDataByTaxon } = this.state;
-
-    if (!coverageVizParams) {
-      return {};
-    }
-
-    let accessionData = null;
-
-    // For genus-level taxons, we aggregate all the available species-level taxons for that genus.
-    if (coverageVizParams.taxLevel === "genus") {
-      accessionData = this.getCombinedAccessionDataForSpecies(
-        coverageVizParams.taxSpecies,
-      );
-    } else {
-      accessionData = get(coverageVizParams.taxId, coverageVizDataByTaxon);
-    }
-    return {
-      taxonId: coverageVizParams.taxId,
-      taxonName: coverageVizParams.taxName,
-      taxonCommonName: coverageVizParams.taxCommonName,
-      taxonLevel: coverageVizParams.taxLevel,
-      alignmentVizUrl: coverageVizParams.alignmentVizUrl,
-      accessionData,
-      taxonStatsByCountType: coverageVizParams.taxonStatsByCountType,
-    };
-  };
-
-  refreshDataFromOptionsChange = ({ key, newSelectedOptions }) => {
+  refreshDataFromOptionsChange = ({
+    key,
+    newSelectedOptions,
+  }: {
+    key: string;
+    newSelectedOptions: FilterSelections;
+  }) => {
     const { reportData } = this.state;
 
     let updateSelectedOptions = true;
@@ -1156,7 +887,7 @@ class SampleView extends React.Component {
     switch (key) {
       // - name type: reset table to force a rerender
       case "nameType":
-        this.setDisplayName({ reportData, ...newSelectedOptions });
+        setDisplayName({ reportData, ...newSelectedOptions });
         this.setState({ reportData: [...reportData] });
         break;
 
@@ -1193,7 +924,7 @@ class SampleView extends React.Component {
       case "thresholds":
       case "readSpecificity":
         this.setState({
-          filteredReportData: this.filterReportData({
+          filteredReportData: filterReportData({
             reportData,
             filters: newSelectedOptions,
           }),
@@ -1219,7 +950,7 @@ class SampleView extends React.Component {
     }
   };
 
-  toggleSidebar = ({ mode }) => {
+  toggleSidebar = ({ mode }: { mode: "sampleDetails" | "taxonDetails" }) => {
     const { sidebarMode, sidebarVisible } = this.state;
     if (sidebarVisible && sidebarMode === mode) {
       this.setState({ sidebarVisible: false });
@@ -1231,7 +962,7 @@ class SampleView extends React.Component {
     }
   };
 
-  handleTaxonClick = clickedTaxonData => {
+  handleTaxonClick = (clickedTaxonData: Taxon) => {
     const { sidebarMode, sidebarVisible, sidebarTaxonData } = this.state;
 
     if (!clickedTaxonData.taxId) {
@@ -1281,7 +1012,7 @@ class SampleView extends React.Component {
     accessionName,
     taxonId,
     taxonName,
-  }) => {
+  }: $TSFixMe) => {
     const { sample } = this.state;
     const workflowRuns = await kickoffConsensusGenome({
       sampleId: sample.id,
@@ -1301,7 +1032,9 @@ class SampleView extends React.Component {
         workflow_runs: workflowRuns,
       },
     });
-    this.showNotification(NOTIFICATION_TYPES.consensusGenomeCreated);
+    showNotification(NOTIFICATION_TYPES.consensusGenomeCreated, {
+      handleTabChange: this.handleTabChange,
+    });
     this.handleCloseConsensusGenomeCreationModal();
 
     // Close both modals in case they came via the previous runs modal
@@ -1309,7 +1042,11 @@ class SampleView extends React.Component {
   };
 
   // Clicking the HoverAction to open the CG creation modal
-  handleConsensusGenomeClick = ({ percentIdentity, taxId, taxName }) => {
+  handleConsensusGenomeClick = ({
+    percentIdentity,
+    taxId,
+    taxName,
+  }: $TSFixMe) => {
     const { coverageVizDataByTaxon } = this.state;
 
     const accessionData = get(taxId, coverageVizDataByTaxon);
@@ -1333,7 +1070,7 @@ class SampleView extends React.Component {
     percentIdentity,
     taxId,
     taxName,
-  }) => {
+  }: $TSFixMe) => {
     const previousRuns = get(taxId, this.getConsensusGenomeData());
     this.setState({
       consensusGenomePreviousParams: {
@@ -1359,7 +1096,7 @@ class SampleView extends React.Component {
     taxName,
     taxLevel,
     taxId,
-  }) => {
+  }: $TSFixMe) => {
     const { allowedFeatures = [] } = this.context || {};
     const blastSelectionModalVisible = allowedFeatures.includes(
       BLAST_V1_FEATURE,
@@ -1388,7 +1125,7 @@ class SampleView extends React.Component {
     accessionName,
     taxonId,
     taxonName,
-  }) => {
+  }: $TSFixMe) => {
     const { sample } = this.state;
     try {
       // Save the creation parameters if kickoff fails and we need to retry.
@@ -1489,7 +1226,7 @@ class SampleView extends React.Component {
   };
 
   // Opening up a previous Consensus Genome run
-  handlePreviousConsensusGenomeReportClick = ({ rowData }) => {
+  handlePreviousConsensusGenomeReportClick = ({ rowData }: $TSFixMe) => {
     this.setState(
       {
         workflowRun: rowData,
@@ -1499,7 +1236,7 @@ class SampleView extends React.Component {
     );
   };
 
-  handleMetadataUpdate = (key, value) => {
+  handleMetadataUpdate = (key: $TSFixMe, value: $TSFixMe) => {
     const { sample } = this.state;
     if (key === "name") {
       this.setState({
@@ -1522,6 +1259,7 @@ class SampleView extends React.Component {
     if (sidebarMode === "taxonDetails") {
       return {
         background: find({ id: selectedOptions.background }, backgrounds),
+        // @ts-expect-error Property 'taxId' does not exist on type {}
         parentTaxonId: (sidebarTaxonData.genus || {}).taxId,
         taxonId: sidebarTaxonData.taxId,
         taxonName: sidebarTaxonData.name,
@@ -1561,96 +1299,6 @@ class SampleView extends React.Component {
     return {};
   };
 
-  countReportRows = () => {
-    const { currentTab, filteredReportData, reportData } = this.state;
-
-    let total = 0;
-    let filtered = 0;
-    if (currentTab === TABS.MERGED_NT_NR) {
-      reportData.forEach(genusRow => {
-        if (genusRow["merged_nt_nr"]) {
-          total += 1;
-          genusRow.species.forEach(speciesRow => {
-            if (speciesRow["merged_nt_nr"]) {
-              total += 1;
-            }
-          });
-        }
-      });
-      filteredReportData.forEach(genusRow => {
-        if (genusRow["merged_nt_nr"]) {
-          filtered += 1;
-          genusRow.filteredSpecies.forEach(speciesRow => {
-            if (speciesRow["merged_nt_nr"]) {
-              filtered += 1;
-            }
-          });
-        }
-      });
-    } else {
-      total = reportData.length;
-      filtered = filteredReportData.length;
-      reportData.forEach(genusRow => {
-        total += genusRow.species.length;
-        filtered += genusRow.filteredSpecies.length;
-      });
-    }
-
-    return { total, filtered };
-  };
-
-  filteredMessage = () => {
-    const { total, filtered } = this.countReportRows();
-
-    return filtered !== total
-      ? `${filtered} rows passing the above filters, out of ${total} total rows `
-      : `${total} rows `;
-  };
-
-  truncatedMessage = () => {
-    const {
-      reportMetadata: { truncatedReadsCount },
-    } = this.state;
-    return (
-      truncatedReadsCount &&
-      `Initial input was truncated to ${truncatedReadsCount} reads. `
-    );
-  };
-
-  subsamplingMessage = () => {
-    const {
-      reportMetadata: { subsampledReadsCount, adjustedRemainingReadsCount },
-    } = this.state;
-    return (
-      subsampledReadsCount &&
-      adjustedRemainingReadsCount &&
-      subsampledReadsCount !== adjustedRemainingReadsCount &&
-      `Report values are computed from ${subsampledReadsCount} unique reads subsampled \
-        randomly from the ${adjustedRemainingReadsCount} reads passing host and quality filters. `
-    );
-  };
-
-  whitelistedMessage = () => {
-    const {
-      reportMetadata: { taxonWhitelisted },
-    } = this.state;
-    return (
-      taxonWhitelisted &&
-      `Report was processed with a whitelist filter of respiratory pathogens. `
-    );
-  };
-
-  renderReportInfo = () => {
-    return compact([
-      this.truncatedMessage(),
-      this.subsamplingMessage(),
-      this.whitelistedMessage(),
-    ]).reduce((reportInfoMsg, msg) => {
-      reportInfoMsg += msg;
-      return reportInfoMsg;
-    }, "");
-  };
-
   clearAllFilters = () => {
     const { reportData, selectedOptions } = this.state;
 
@@ -1663,7 +1311,7 @@ class SampleView extends React.Component {
     this.setState(
       {
         selectedOptions: newSelectedOptions,
-        filteredReportData: this.filterReportData({
+        filteredReportData: filterReportData({
           reportData,
           filters: newSelectedOptions,
         }),
@@ -1673,21 +1321,6 @@ class SampleView extends React.Component {
       },
     );
     trackEvent("PipelineSampleReport_clear-filters-link_clicked");
-  };
-
-  countFilters = () => {
-    const {
-      selectedOptions: { categories, thresholds, taxa, annotations },
-    } = this.state;
-
-    let numFilters = taxa.length;
-    numFilters += thresholds.length;
-    numFilters += annotations.length;
-    numFilters += (categories.categories || []).length;
-    numFilters += sum(
-      map(v => v.length, values(categories.subcategories || {})),
-    );
-    return numFilters;
   };
 
   getCurrentRun = () => {
@@ -1709,7 +1342,7 @@ class SampleView extends React.Component {
       }
 
       const workflowType = Object.values(WORKFLOWS).find(
-        workflow => workflow.label === currentTab,
+        (workflow: $TSFixMe) => workflow.label === currentTab,
       ).value;
 
       if (workflowRun && workflowRun.workflow === workflowType) {
@@ -1717,7 +1350,7 @@ class SampleView extends React.Component {
       }
 
       if (pipelineVersion) {
-        const currentRun = sample.workflow_runs.find(run => {
+        const currentRun = sample.workflow_runs.find((run: $TSFixMe) => {
           if (run.workflow === workflowType && !!run.wdl_version) {
             return run.wdl_version === pipelineVersion;
           } else {
@@ -1727,7 +1360,9 @@ class SampleView extends React.Component {
         return currentRun;
       } else {
         return head(
-          sample.workflow_runs.filter(run => run.workflow === workflowType),
+          sample.workflow_runs.filter(
+            (run: $TSFixMe) => run.workflow === workflowType,
+          ),
         );
       }
     }
@@ -1741,7 +1376,11 @@ class SampleView extends React.Component {
     because the display name does not match the label field passed in the URL
     from DiscoveryView. If another tab is added that needs a customized display name,
     we should think about adding a config to handle tab logic and rendering. */
-    const customTab = (value, status, customLabel) => ({
+    const customTab = (
+      value: string,
+      status: string,
+      customLabel?: string,
+    ) => ({
       value: value,
       label: (
         <>
@@ -1769,7 +1408,7 @@ class SampleView extends React.Component {
       [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
       [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
       [WORKFLOWS.AMR.value]: amr,
-    } = this.getWorkflowCount(sample);
+    } = getWorkflowCount(sample);
 
     // only show deprecated label on old AMR tab to users who have the new AMR feature enabled
     const deprecatedAmrLabel = allowedFeatures.includes(AMR_V1_FEATURE)
@@ -1790,9 +1429,10 @@ class SampleView extends React.Component {
       allowedFeatures.includes(AMR_V1_FEATURE) && amr && amrTab,
       cg && TABS.CONSENSUS_GENOME,
     ]);
-
     if (isEmpty(workflowTabs)) {
-      return [findInWorkflows(sample.initial_workflow, "value")];
+      return [
+        WORKFLOWS[findInWorkflows(sample.initial_workflow, "value")]?.label,
+      ];
     } else {
       return workflowTabs;
     }
@@ -1802,7 +1442,7 @@ class SampleView extends React.Component {
     const { loadingReport, pipelineRun, reportMetadata, sample } = this.state;
     const { snapshotShareId } = this.props;
     const { pipelineRunStatus, jobStatus } = reportMetadata;
-    let status, message, subtitle, linkText, type, link, icon;
+    let status: $TSFixMe, message, subtitle, linkText, type, link, icon;
     // Error messages were previously sent from the server in the reportMetadata,
     // but after the switch to SFN are now sent as part of the sample's information.
     // Try to extract the error messages from the sample if possible, then try the
@@ -1844,15 +1484,7 @@ class SampleView extends React.Component {
           pipelineRun.known_user_error = knownUserError;
           pipelineRun.error_message = errorMessage;
         }
-        ({
-          status,
-          message,
-          subtitle,
-          linkText,
-          type,
-          link,
-          icon,
-        } = sampleErrorInfo({
+        ({ status, message, subtitle, linkText, type, link } = sampleErrorInfo({
           sample,
           pipelineRun,
         }));
@@ -1884,112 +1516,12 @@ class SampleView extends React.Component {
     );
   };
 
-  handleViewClick = ({ view }) => {
+  handleViewClick = ({ view }: $TSFixMe) => {
     trackEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
     this.setState({ view }, () => {
       this.updateHistoryAndPersistOptions();
     });
   };
-
-  showNotification = (notification, params = {}) => {
-    switch (notification) {
-      case NOTIFICATION_TYPES.invalidBackground: {
-        showToast(
-          ({ closeToast }) =>
-            this.renderIncompatibleBackgroundError(closeToast, params),
-          {
-            autoClose: 12000,
-          },
-        );
-        break;
-      }
-      case NOTIFICATION_TYPES.consensusGenomeCreated: {
-        showToast(
-          ({ closeToast }) => this.renderConsensusGenomeCreated(closeToast),
-          {
-            autoClose: 12000,
-          },
-        );
-        break;
-      }
-      case NOTIFICATION_TYPES.discoveryViewFiltersPersisted: {
-        showToast(
-          ({ closeToast }) =>
-            this.renderPersistedDiscoveryViewThresholds(closeToast),
-          {
-            autoClose: 12000,
-          },
-        );
-        break;
-      }
-    }
-  };
-
-  renderIncompatibleBackgroundError = (closeToast, { backgroundName }) => (
-    <Notification
-      type="info"
-      displayStyle="elevated"
-      onClose={closeToast}
-      closeWithIcon
-    >
-      The previous background &quot;{backgroundName}&quot; is not compatible
-      with this sample, please select another background.
-    </Notification>
-  );
-
-  renderConsensusGenomeCreated = closeToast => {
-    return (
-      <Notification
-        className={cs.notificationBody}
-        closeWithDismiss={false}
-        closeWithIcon={true}
-        type="info"
-      >
-        We&apos;re creating your requested consensus genome, you&apos;ll be able
-        to view it in the Consensus Genome tab.
-        <div
-          className={cs.consensusGenomeLink}
-          onClick={() => {
-            this.handleTabChange(TABS.CONSENSUS_GENOME);
-            closeToast();
-          }}
-          onKeyDown={() => {
-            this.handleTabChange(TABS.CONSENSUS_GENOME);
-            closeToast();
-          }}
-        >
-          View Consensus Genomes
-        </div>
-      </Notification>
-    );
-  };
-
-  renderPersistedDiscoveryViewThresholds = closeToast => (
-    <Notification
-      className={cs.notificationBody}
-      closeWithIcon
-      closeWithDismiss={false}
-      onClose={closeToast}
-      type="warning"
-    >
-      The taxon filters from the samples page have carried over. If you would
-      like to use filters previously applied to the report, click the button
-      below.
-      <div
-        className={cs.revertFiltersLink}
-        onClick={() => {
-          this.revertToSampleViewFilters();
-          closeToast();
-        }}
-        onKeyDown={() => {
-          this.revertToSampleViewFilters();
-          closeToast();
-        }}
-      >
-        Revert
-      </div>
-    </Notification>
-  );
 
   revertToSampleViewFilters = () => {
     const { selectedOptions: selectedOptionsFromLocal } = this.loadState(
@@ -1997,7 +1529,7 @@ class SampleView extends React.Component {
       KEY_SAMPLE_VIEW_OPTIONS,
     );
     const newSelectedOptions = {
-      ...this.getDefaultSelectedOptions(),
+      ...getDefaultSelectedOptions(),
       ...selectedOptionsFromLocal,
     };
 
@@ -2009,182 +1541,12 @@ class SampleView extends React.Component {
     });
   };
 
-  hasAppliedFilters = () => {
-    const { selectedOptions } = this.state;
-    const { categories, readSpecificity, taxa, thresholds } = selectedOptions;
-
-    const hasCategoryFilters =
-      !isEmpty(getOr([], "categories", categories)) ||
-      !isEmpty(getOr([], "subcategories.Viruses", categories));
-    const hasReadSpecificityFilters = readSpecificity !== 0;
-    const hasTaxonFilter = !isEmpty(taxa);
-    const hasThresholdFilters = !isEmpty(thresholds);
-
-    return (
-      hasCategoryFilters ||
-      hasReadSpecificityFilters ||
-      hasTaxonFilter ||
-      hasThresholdFilters
-    );
-  };
-
-  getAppliedFilters = () => {
-    const { selectedOptions } = this.state;
-
-    // Only Taxon, Category, Subcategories, Read Specifity, and Threshold Filters are considered "Applied Filters"
-    return omit(
-      ["nameType", "metric", "background"],
-      diff(selectedOptions, this.getDefaultSelectedOptions()),
-    );
-  };
-
-  createCSVRowForAppliedFilters = appliedFilters => {
-    const { backgrounds, selectedOptions } = this.state;
-
-    const filterRow = [];
-    if (selectedOptions.background) {
-      const selectedBackgroundName = find(
-        { id: selectedOptions.background },
-        backgrounds,
-      ).name;
-      filterRow.push(`\nBackground:, "${selectedBackgroundName}"`);
-    }
-
-    let numberOfFilters = 0;
-    for (const [optionName, optionVal] of Object.entries(appliedFilters)) {
-      if (!optionVal) continue;
-      switch (optionName) {
-        case "categories": {
-          const categoryFilters = [];
-
-          if (has("categories", optionVal)) {
-            const categories = get("categories", optionVal);
-            categoryFilters.push(categories);
-            numberOfFilters += categories.length;
-          }
-
-          if (has("subcategories", optionVal)) {
-            const subcategories = [];
-            for (const [subcategoryName, subcategoryVal] of Object.entries(
-              get("subcategories", optionVal),
-            )) {
-              if (!isEmpty(subcategoryVal)) {
-                subcategories.push(
-                  `${subcategoryName} - ${subcategoryVal.join()}`,
-                );
-              }
-            }
-            categoryFilters.push(subcategories);
-            numberOfFilters += subcategories.length;
-          }
-
-          const flattenedCategoryFilters = flatten(categoryFilters).join();
-          if (!isEmpty(flattenedCategoryFilters)) {
-            // Explicitly add commas to create blank cells for formatting purposes
-            filterRow.push(`Categories:, ${flattenedCategoryFilters}`);
-          }
-
-          break;
-        }
-        case "taxa": {
-          optionVal.forEach(taxon => {
-            filterRow.push(`Taxon Name:, ${get("name", taxon)}`);
-            numberOfFilters += 1;
-          });
-          break;
-        }
-        case "thresholds": {
-          const thresholdFilters = optionVal.reduce((result, threshold) => {
-            result.push(
-              `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
-            );
-            return result;
-          }, []);
-
-          if (!isEmpty(thresholdFilters)) {
-            filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
-            numberOfFilters += thresholdFilters.length;
-          }
-          break;
-        }
-        case "readSpecificity": {
-          const readSpecificityOptions = {
-            0: "All",
-            1: "Specific Only",
-          };
-
-          filterRow.push(
-            `Read Specificity:, "${readSpecificityOptions[optionVal]}"`,
-          );
-          numberOfFilters += 1;
-          break;
-        }
-        default:
-          logError({
-            message:
-              "SampleView: Invalid filter passed to createCSVRowForSelectedOptions()",
-            details: { optionName, optionVal },
-          });
-          break;
-      }
-    }
-
-    // Insert filter statement after Background
-    filterRow.splice(
-      1,
-      0,
-      `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`,
-    );
-    return [sanitizeCSVRow(filterRow).join()];
-  };
-
-  computeReportTableValuesForCSV = () => {
-    const { filteredReportData } = this.state;
-
-    const csvRows = [];
-    const csvHeaders = [
-      ...TAXON_GENERAL_FIELDS,
-      ...Array.from(TAXON_COUNT_TYPE_METRICS, metric => "nt." + metric),
-      ...Array.from(TAXON_COUNT_TYPE_METRICS, metric => "nr." + metric),
-    ];
-
-    filteredReportData.forEach(datum => {
-      const genusRow = [];
-      csvHeaders.forEach(column => {
-        let val = JSON.stringify(getOr("-", column, datum));
-        val = val === "null" ? '"-"' : val;
-
-        // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
-        genusRow.push(val.includes(",") ? `"${val}"` : val);
-      });
-      csvRows.push([sanitizeCSVRow(genusRow).join()]);
-
-      if (has("filteredSpecies", datum)) {
-        datum["filteredSpecies"].forEach(speciesTaxon => {
-          const speciesRow = [];
-          csvHeaders.forEach(column => {
-            let val = JSON.stringify(getOr("-", column, speciesTaxon));
-            val = val === "null" ? '"-"' : val;
-
-            // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
-            speciesRow.push(val.includes(",") ? `"${val}"` : val);
-          });
-          csvRows.push([sanitizeCSVRow(speciesRow).join()]);
-        });
-      }
-    });
-
-    if (this.hasAppliedFilters()) {
-      csvRows.push(
-        this.createCSVRowForAppliedFilters(this.getAppliedFilters()),
-      );
-    }
-
-    return [[csvHeaders.join()], csvRows];
-  };
-
   getDownloadReportTableWithAppliedFiltersLink = () => {
-    const [csvHeaders, csvRows] = this.computeReportTableValuesForCSV();
+    const [csvHeaders, csvRows] = computeReportTableValuesForCSV(
+      this.state.filteredReportData,
+      this.state.selectedOptions,
+      this.state.backgrounds,
+    );
 
     return createCSVObjectURL(csvHeaders, csvRows);
   };
@@ -2223,6 +1585,7 @@ class SampleView extends React.Component {
       otherBackgrounds,
       pipelineRun,
       project,
+      reportData,
       reportMetadata,
       sample,
       selectedOptions,
@@ -2255,10 +1618,10 @@ class SampleView extends React.Component {
           </div>
           <div className={cs.reportHeader}>
             <div className={cs.statsRow}>
-              {this.renderReportInfo()}
+              {renderReportInfo(this.state.reportMetadata)}
               <div className={cs.statsRowFilterInfo}>
-                {this.filteredMessage()}
-                {!!this.countFilters() && (
+                {filteredMessage(currentTab, filteredReportData, reportData)}
+                {!!countFilters(selectedOptions) && (
                   <span className={cs.clearAllFilters}>
                     <Button
                       sdsStyle="minimal"
@@ -2322,9 +1685,7 @@ class SampleView extends React.Component {
                 metric={selectedOptions.metric}
                 nameType={selectedOptions.nameType}
                 onTaxonClick={this.handleTaxonClick}
-                sample={sample}
                 taxa={filteredReportData}
-                useReportV2Format={true}
               />
             </div>
           )}
@@ -2349,7 +1710,7 @@ class SampleView extends React.Component {
           onWorkflowRunSelect={this.handleWorkflowRunSelect}
           sample={sample}
           loadingResults={loadingWorkflowRunResults}
-          workflowRun={this.getCurrentRun()}
+          workflowRun={this.getCurrentRun() as WorkflowRun}
           workflowRunResults={workflowRunResults}
         />
       )
@@ -2362,7 +1723,7 @@ class SampleView extends React.Component {
         <AmrView
           sample={this.state.sample}
           loadingResults={this.state.loadingWorkflowRunResults}
-          workflowRun={this.getCurrentRun()}
+          workflowRun={this.getCurrentRun() as WorkflowRun}
         />
       )
     );
@@ -2383,7 +1744,7 @@ class SampleView extends React.Component {
   handleBlastSelectionModalClose = () =>
     this.setState({ blastSelectionModalVisible: false });
 
-  handleBlastSelectionModalContinue = blastModalInfo => {
+  handleBlastSelectionModalContinue = (blastModalInfo: $TSFixMe) => {
     const { shouldBlastContigs } = blastModalInfo;
 
     this.setState({
@@ -2395,9 +1756,10 @@ class SampleView extends React.Component {
     });
   };
 
-  render = () => {
+  render() {
     const {
       amrDeprecatedData,
+      backgrounds,
       blastData,
       blastModalInfo,
       blastContigsModalVisible,
@@ -2411,6 +1773,8 @@ class SampleView extends React.Component {
       consensusGenomeErrorModalVisible,
       consensusGenomePreviousModalVisible,
       coverageVizVisible,
+      coverageVizParams,
+      coverageVizDataByTaxon,
       currentTab,
       pipelineRun,
       project,
@@ -2418,6 +1782,7 @@ class SampleView extends React.Component {
       reportMetadata,
       sample,
       selectedOptions,
+      sidebarTaxonData,
       sidebarVisible,
       sidebarMode,
       view,
@@ -2443,7 +1808,7 @@ class SampleView extends React.Component {
               getDownloadReportTableWithAppliedFiltersLink={
                 this.getDownloadReportTableWithAppliedFiltersLink
               }
-              hasAppliedFilters={this.hasAppliedFilters()}
+              hasAppliedFilters={hasAppliedFilters(selectedOptions)}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
               onShareClick={this.handleShareClick}
@@ -2481,18 +1846,20 @@ class SampleView extends React.Component {
             this.renderConsensusGenomeView()}
         </NarrowContainer>
         {sample && (
-          <DetailsSidebar
-            visible={sidebarVisible}
-            mode={sidebarMode}
-            onClose={withAnalytics(
-              this.closeSidebar,
-              "SampleView_details-sidebar_closed",
-              {
-                sampleId: sample.id,
-                sampleName: sample.name,
-              },
-            )}
-            params={this.getSidebarParams()}
+          <DetailsSidebarSwitcher
+            handleMetadataUpdate={this.handleMetadataUpdate}
+            handleWorkflowRunSelect={this.handleWorkflowRunSelect}
+            handleTabChange={this.handleTabChange}
+            getCurrentRun={this.getCurrentRun}
+            closeSidebar={this.closeSidebar}
+            currentTab={currentTab}
+            snapshotShareId={snapshotShareId}
+            sidebarVisible={sidebarVisible}
+            sidebarMode={sidebarMode}
+            sample={sample}
+            backgrounds={backgrounds}
+            selectedOptions={selectedOptions}
+            sidebarTaxonData={sidebarTaxonData}
           />
         )}
         {isPipelineFeatureAvailable(
@@ -2510,7 +1877,10 @@ class SampleView extends React.Component {
                 sampleName: sample.name,
               },
             )}
-            params={this.getCoverageVizParams()}
+            params={getCoverageVizParams(
+              coverageVizParams,
+              coverageVizDataByTaxon,
+            )}
             pipelineVersion={pipelineRun.pipeline_version}
             sampleId={sample.id}
             snapshotShareId={snapshotShareId}
@@ -2611,14 +1981,8 @@ class SampleView extends React.Component {
         )}
       </React.Fragment>
     );
-  };
+  }
 }
-
-SampleView.propTypes = {
-  sampleId: PropTypes.number,
-  snapshotShareId: PropTypes.string,
-  updateDiscoveryProjectId: PropTypes.func,
-};
 
 SampleView.contextType = UserContext;
 
@@ -2627,6 +1991,7 @@ const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectIds };
 // Don't need mapStateToProps yet so pass in null
 const connectedComponent = connect(null, mapDispatchToProps)(SampleView);
 
+// @ts-expect-error ts-migrate(2540) FIXME: Cannot assign to 'name' because it is a read-only ... Remove this comment to see the full error message
 connectedComponent.name = "SampleView";
 
 export default connectedComponent;

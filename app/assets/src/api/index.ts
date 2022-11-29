@@ -4,6 +4,7 @@
 import axios from "axios";
 
 import { getURLParamString } from "~/helpers/url";
+import { WorkflowRunResults } from "~/interface/sampleView";
 
 import {
   get,
@@ -397,7 +398,9 @@ const getCoverageVizData = ({
 const getWorkflowRunsInfo = (workflowRunIds: $TSFixMe) =>
   postWithCSRF("/workflow_runs/workflow_runs_info", { workflowRunIds });
 
-const getWorkflowRunResults = (workflowRunId: $TSFixMe) =>
+const getWorkflowRunResults = (
+  workflowRunId: number,
+): Promise<WorkflowRunResults> =>
   get(`/workflow_runs/${workflowRunId}/results`);
 
 const getContigsSequencesByByteranges = (

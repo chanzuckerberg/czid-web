@@ -16,7 +16,6 @@ import {
   CONSENSUS_GENOME_FEATURE,
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
-import PropTypes from "~/components/utils/propTypes";
 import {
   IconAlignmentSmall,
   IconBlastSmall,
@@ -34,19 +33,49 @@ import {
 } from "./constants";
 import cs from "./hover_actions.scss";
 
+interface HoverActionsProps {
+  className?: string;
+  consensusGenomeEnabled?: boolean;
+  contigVizEnabled?: boolean;
+  coverageVizEnabled?: boolean;
+  fastaEnabled?: boolean;
+  onlyShowDownloadOption: boolean;
+  onBlastClick: $TSFixMeFunction;
+  onConsensusGenomeClick: $TSFixMeFunction;
+  onContigVizClick: $TSFixMeFunction;
+  onCoverageVizClick: $TSFixMeFunction;
+  onFastaActionClick: $TSFixMeFunction;
+  onPhyloTreeModalOpened?: $TSFixMeFunction;
+  onPreviousConsensusGenomeClick?: $TSFixMeFunction;
+  percentIdentity?: number;
+  phyloTreeEnabled?: boolean;
+  pipelineVersion?: string;
+  previousConsensusGenomeRuns?: $TSFixMeUnknown[];
+  sampleId?: number;
+  snapshotShareId?: string;
+  taxonStatsByCountType?: {
+    ntContigs: $TSFixMeUnknown;
+    ntReads: $TSFixMeUnknown;
+  };
+  taxCategory?: string;
+  taxCommonName?: string;
+  taxId?: number;
+  taxLevel?: number;
+  taxName?: string;
+  taxSpecies?: $TSFixMeUnknown[];
+}
+
 const HoverActions = ({
   className,
   consensusGenomeEnabled,
   contigVizEnabled,
   coverageVizEnabled,
   fastaEnabled,
-  ncbiEnabled,
   onBlastClick,
   onConsensusGenomeClick,
   onContigVizClick,
   onCoverageVizClick,
   onFastaActionClick,
-  onNcbiActionClick,
   onPhyloTreeModalOpened,
   onPreviousConsensusGenomeClick,
   onlyShowDownloadOption,
@@ -63,7 +92,7 @@ const HoverActions = ({
   taxLevel,
   taxName,
   taxSpecies,
-}) => {
+}: HoverActionsProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const [showHoverActions, setShowHoverActions] = useState(false);
@@ -226,7 +255,7 @@ const HoverActions = ({
           disabled: !fastaEnabled,
         },
       ],
-      onChange: value => {
+      onChange: (value: typeof DOWNLOAD_CONTIGS | typeof DOWNLOAD_READS) => {
         if (value === DOWNLOAD_CONTIGS) onContigVizClick(params || {});
         else if (value === DOWNLOAD_READS) onFastaActionClick(params || {});
         else console.error("Unexpected dropdown value:", value);
@@ -286,8 +315,24 @@ const HoverActions = ({
   };
 
   // Render the hover action according to metadata.
-  const renderHoverAction = hoverAction => {
-    let trigger, tooltipMessage;
+  const renderHoverAction = (hoverAction: {
+    key: string;
+    iconComponentClass: React.ComponentType<{ className: string }>;
+    divider: boolean;
+    enabled: boolean;
+    handleClick: $TSFixMeFunction;
+    params: object;
+    count: $TSFixMeUnknown;
+    options?: {
+      text: string;
+      value: string;
+      disabled: boolean;
+    }[];
+    onChange: $TSFixMeFunction;
+    message: string;
+    disabledMessage: string;
+  }) => {
+    let trigger: JSX.Element, tooltipMessage: string;
     const IconComponent = hoverAction.iconComponentClass;
 
     // Show a vertical divider
@@ -379,40 +424,11 @@ const HoverActions = ({
         showHoverActions ? cs.hoverActionsDropdown : className,
       )}
     >
-      {getHoverActions().map(renderHoverAction)}
+      {getHoverActions().map((hoverAction, key) => (
+        <span key={key}>{renderHoverAction(hoverAction)}</span>
+      ))}
     </span>
   );
-};
-
-HoverActions.propTypes = {
-  className: PropTypes.string,
-  consensusGenomeEnabled: PropTypes.bool,
-  contigVizEnabled: PropTypes.bool,
-  coverageVizEnabled: PropTypes.bool,
-  fastaEnabled: PropTypes.bool,
-  ncbiEnabled: PropTypes.bool,
-  onBlastClick: PropTypes.func.isRequired,
-  onConsensusGenomeClick: PropTypes.func.isRequired,
-  onContigVizClick: PropTypes.func.isRequired,
-  onCoverageVizClick: PropTypes.func.isRequired,
-  onFastaActionClick: PropTypes.func.isRequired,
-  onNcbiActionClick: PropTypes.func.isRequired,
-  onPhyloTreeModalOpened: PropTypes.func,
-  onPreviousConsensusGenomeClick: PropTypes.func,
-  onlyShowDownloadOption: PropTypes.bool,
-  percentIdentity: PropTypes.number,
-  phyloTreeEnabled: PropTypes.bool,
-  pipelineVersion: PropTypes.string,
-  previousConsensusGenomeRuns: PropTypes.array,
-  sampleId: PropTypes.number,
-  snapshotShareId: PropTypes.string,
-  taxonStatsByCountType: PropTypes.object,
-  taxCategory: PropTypes.string,
-  taxCommonName: PropTypes.string,
-  taxId: PropTypes.number,
-  taxLevel: PropTypes.number,
-  taxName: PropTypes.string,
-  taxSpecies: PropTypes.array,
 };
 
 export default HoverActions;

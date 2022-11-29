@@ -80,7 +80,6 @@ interface SamplesViewProps {
   userIsCollaborator: boolean;
 }
 
-
 class SamplesView extends React.Component<SamplesViewProps> {
   constructor(props) {
     super(props);
@@ -761,7 +760,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
     if (loading) {
       return (
         <div className={cs.loadingColumns}>
-          <IconLoading className={cs.iconLoading}/>
+          <IconLoading className={cs.iconLoading} />
         </div>
       );
     }
@@ -1011,7 +1010,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
             selectedIds={selectedIds}
             workflow={workflow}
             workflowEntity={workflowEntity}
-	    userIsCollaborator={this.props.userIsCollaborator}
+            userIsCollaborator={this.props.userIsCollaborator}
           />
         )}
         {heatmapCreationModalOpen && (

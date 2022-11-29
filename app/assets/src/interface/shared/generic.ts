@@ -10,6 +10,7 @@ export interface DropdownOption {
 }
 
 export interface NumberId {
+  name: string;
   id: number;
 }
 
@@ -30,3 +31,7 @@ export interface CSV {
   headers: string[];
   rows: string[][];
 }
+
+export type Entries<T> = {
+  [K in keyof T]: [K, T[K]];
+}[keyof T][];

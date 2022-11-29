@@ -363,7 +363,10 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     const workflow =
       get(["workflow", "text"], pipelineInfo) ||
       WORKFLOWS.SHORT_READ_MNGS.label;
-    const workflowIsMngs = [WORKFLOWS.SHORT_READ_MNGS.label, WORKFLOWS.LONG_READ_MNGS.label].includes(workflow);
+    const workflowIsMngs = [
+      WORKFLOWS.SHORT_READ_MNGS.label,
+      WORKFLOWS.LONG_READ_MNGS.label,
+    ].includes(workflow);
 
     const fields = this.INFO_FIELDS_FOR_WORKFLOW[workflow];
 

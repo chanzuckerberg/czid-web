@@ -1,4 +1,6 @@
 export default interface ReportMetadata {
+  knownUserError: string;
+  errorMessage: string;
   adjustedRemainingReadsCount: number;
   alignVizAvailable: boolean;
   hasByteRanges: boolean;

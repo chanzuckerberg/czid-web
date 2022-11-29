@@ -1,15 +1,45 @@
 import { get, getOr, map } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import TidyTree from "~/components/visualizations/TidyTree";
+import { Taxon } from "~/interface/shared";
 
+// @ts-expect-error working with Lodash Types
 const mapWithKeys = map.convert({ cap: false });
 
-class TaxonTreeVis extends React.Component {
-  constructor(props) {
+interface TaxonTreeVisProps {
+  // hash of lineage parental realtionships per taxid
+  lineage?: object;
+  metric?: string;
+  nameType?: string;
+  taxa?: Taxon[];
+  onTaxonClick: $TSFixMeFunction;
+}
+
+interface TaxonTreeVisState {
+  nodeHover: {
+    data: { commonName: string; lineageRank; values; scientificName: string };
+    isAggregated: boolean;
+    parent: { collapsedChildren: $TSFixMeUnknown[] };
+  };
+  taxonSidebarData: $TSFixMeUnknown;
+}
+
+class TaxonTreeVis extends React.Component<
+  TaxonTreeVisProps,
+  TaxonTreeVisState
+> {
+  metric: $TSFixMe;
+  metrics: $TSFixMe;
+  nameType: $TSFixMe;
+  taxa: $TSFixMe;
+  tree: $TSFixMe;
+  treeContainer: $TSFixMe;
+  treeTooltip: $TSFixMe;
+  treeVis: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.state = {
@@ -27,16 +57,29 @@ class TaxonTreeVis extends React.Component {
     this.metrics = {
       aggregatescore: {
         label: "Aggregate Score",
-        agg: arr => Math.max(...arr),
+        agg: (arr: number[]) => Math.max(...arr),
       },
-      nt_r: { label: "NT r", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nt_rpm: { label: "NT rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_r: { label: "NR r", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
+      nt_r: {
+        label: "NT r",
+        agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+      },
+      nt_rpm: {
+        label: "NT rpm",
+        agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+      },
+      nr_r: {
+        label: "NR r",
+        agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+      },
+      nr_rpm: {
+        label: "NR rpm",
+        agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+      },
     };
   }
 
   componentDidMount() {
+    // @ts-expect-error ts-migrate(2554) FIXME: Expected 0 arguments, but got 1.
     const tree = this.createTree(this.taxa);
     this.treeVis = new TidyTree(this.treeContainer, tree, {
       attribute: this.metric,
@@ -54,8 +97,8 @@ class TaxonTreeVis extends React.Component {
     this.treeVis.update();
   }
 
-  persistCollapsedInUrl(node) {
-    function hasAllChildrenCollapsed(node) {
+  persistCollapsedInUrl(node: $TSFixMe) {
+    function hasAllChildrenCollapsed(node: $TSFixMe) {
       return !!(!node.children && node.collapsedChildren);
     }
     try {
@@ -75,7 +118,7 @@ class TaxonTreeVis extends React.Component {
   getCollapsedInUrl = () => {
     try {
       const href = new URL(window.location.href);
-      const collapsed = [];
+      const collapsed: $TSFixMe = [];
       href.searchParams.forEach((v, k) => {
         if (v === "c") {
           collapsed.push(k);
@@ -89,7 +132,10 @@ class TaxonTreeVis extends React.Component {
   };
 
   componentDidUpdate() {
-    let options = {};
+    const options: {
+      useCommonName?: boolean;
+      attribute?: $TSFixMeUnknown;
+    } = {};
     if (this.nameType !== this.props.nameType) {
       this.nameType = this.props.nameType;
       options.useCommonName = this.isCommonNameActive();
@@ -106,11 +152,12 @@ class TaxonTreeVis extends React.Component {
 
     if (this.taxa !== this.props.taxa) {
       this.taxa = this.props.taxa;
+      // @ts-expect-error ts-migrate(2554) FIXME: Expected 0 arguments, but got 1.
       this.treeVis.setTree(this.createTree(this.props.taxa));
     }
   }
 
-  handleNodeHover = node => {
+  handleNodeHover = (node: $TSFixMe) => {
     this.setState({ nodeHover: node });
     trackEvent("TaxonTreeVis_node_hovered", {
       id: node.id,
@@ -119,7 +166,7 @@ class TaxonTreeVis extends React.Component {
     });
   };
 
-  handleNodeLabelClick = node => {
+  handleNodeLabelClick = (node: { data: Taxon }) => {
     const { onTaxonClick } = this.props;
     if (["genus", "species"].includes(node.data.lineageRank)) {
       onTaxonClick(node.data);
@@ -135,19 +182,19 @@ class TaxonTreeVis extends React.Component {
     return this.nameType.toLowerCase() === "common name";
   };
 
-  fillNodeValues = root => {
+  fillNodeValues = (root: $TSFixMe) => {
     // this function computes the aggregated metric values
     // for higher levels of the tree (than species and genus)
 
     // cleaning up spurious nodes without children with data
-    root.leaves().forEach(leaf => {
+    root.leaves().forEach((leaf: $TSFixMe) => {
       if (!leaf.children && !leaf.data.values) {
         // delete node that has no children or values
-        let ancestors = leaf.ancestors();
+        const ancestors = leaf.ancestors();
         for (let i = 1; i < ancestors.length; i++) {
-          let ancestor = ancestors[i];
+          const ancestor = ancestors[i];
           ancestor.children = ancestor.children.filter(
-            child => child.id !== ancestors[i - 1].id,
+            (child: $TSFixMe) => child.id !== ancestors[i - 1].id,
           );
           if (ancestor.children && ancestor.children.length > 0) {
             // stop if ancestor still has children
@@ -157,21 +204,21 @@ class TaxonTreeVis extends React.Component {
       }
     });
 
-    root.eachAfter(node => {
+    root.eachAfter((node: $TSFixMe) => {
       if (node.data.highlight) {
         node.data.highlight = true;
-        node.ancestors().forEach(ancestor => {
+        node.ancestors().forEach((ancestor: $TSFixMe) => {
           ancestor.data.highlight = true;
         });
       }
 
-      for (let metric in this.metrics) {
+      for (const metric in this.metrics) {
         node.data.values || (node.data.values = {});
         if (!(metric in node.data.values)) {
           node.data.values[metric] = this.metrics[metric].agg(
             node.children
-              .filter(child => child.data.values[metric])
-              .map(child => child.data.values[metric]),
+              .filter((child: $TSFixMe) => child.data.values[metric])
+              .map((child: $TSFixMe) => child.data.values[metric]),
           );
         }
       }
@@ -184,7 +231,7 @@ class TaxonTreeVis extends React.Component {
     const nodes = [{ id: ROOT_ID }];
     const addedNodesIds = new Set();
 
-    const formatAndAddNode = ({ nodeData, parentId, fixedId }) => {
+    const formatAndAddNode = ({ nodeData, parentId, fixedId }: $TSFixMe) => {
       const formattedNode = {
         id: `${fixedId || nodeData.taxId}`,
         taxId: nodeData.taxId,
@@ -211,7 +258,7 @@ class TaxonTreeVis extends React.Component {
     taxa.forEach(genusData => {
       // loading the genus id from the species lineage handles
       // cases where genus id is negative
-      let genusIdFromLineage = null;
+      let genusIdFromLineage: $TSFixMe = null;
 
       genusData.filteredSpecies.forEach(speciesData => {
         const speciesLineage = lineage[speciesData.taxId] || {};
@@ -253,10 +300,11 @@ class TaxonTreeVis extends React.Component {
       });
     });
     // add remaining lineage nodes (above genus or negative genus)
-    mapWithKeys((nodeLineage, taxId) => {
+    mapWithKeys((nodeLineage: $TSFixMe, taxId: $TSFixMe) => {
       if (!addedNodesIds.has(taxId)) {
         nodes.push({
           id: `${taxId}`,
+          // @ts-expect-error ts-migrate(2345) FIXME: Argument of type '{ id: string; taxId: number; par... Remove this comment to see the full error message
           taxId: parseInt(taxId),
           parentId: `${nodeLineage.parent || ROOT_ID}`,
           scientificName: nodeLineage.name,
@@ -268,12 +316,12 @@ class TaxonTreeVis extends React.Component {
   };
 
   renderTooltip = () => {
-    let node = this.state.nodeHover;
+    const node = this.state.nodeHover;
     if (!node) {
       return null;
     }
-    let rows = [];
-    for (let metric in this.metrics) {
+    const rows = [];
+    for (const metric in this.metrics) {
       rows.push(
         <span
           key={`tt_${metric}`}
@@ -311,11 +359,12 @@ class TaxonTreeVis extends React.Component {
     );
   };
 
-  capitalize(str) {
+  capitalize(str: string) {
     if (!str) return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
-  renderPathogenLabel = (taxId, tagType) => {
+
+  renderPathogenLabel = (taxId: number, tagType: string) => {
     return (
       <div
         className={`node-overlay node-overlay__${taxId}`}
@@ -328,7 +377,7 @@ class TaxonTreeVis extends React.Component {
 
   renderPathogenLabels = () => {
     const { taxa } = this.props;
-    const labels = [];
+    const labels: JSX.Element[] = [];
     taxa.forEach(genusData => {
       if (genusData.pathogenTag) {
         labels.push(
@@ -372,18 +421,5 @@ class TaxonTreeVis extends React.Component {
     );
   }
 }
-
-TaxonTreeVis.defaultProps = {
-  useReportV2Format: false,
-};
-
-TaxonTreeVis.propTypes = {
-  // hash of lineage parental realtionships per taxid
-  lineage: PropTypes.object,
-  metric: PropTypes.string,
-  nameType: PropTypes.string,
-  taxa: PropTypes.array,
-  onTaxonClick: PropTypes.func.isRequired,
-};
 
 export default TaxonTreeVis;

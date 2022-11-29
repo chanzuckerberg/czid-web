@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import Modal from "~ui/containers/Modal";
@@ -7,7 +6,17 @@ import { ErrorButton } from "../../ui/controls/buttons";
 
 import cs from "./sample_deletion_confirmation_modal.scss";
 
-const SampleDeletionConfirmationModal = ({ onCancel, onConfirm, open }) => (
+interface SampleDeletionConfirmationModalProps {
+  onCancel: $TSFixMeFunction;
+  onConfirm: $TSFixMeFunction;
+  open: boolean;
+}
+
+const SampleDeletionConfirmationModal = ({
+  onCancel,
+  onConfirm,
+  open,
+}: SampleDeletionConfirmationModalProps) => (
   <Modal
     className={cs.sampleDeletionConfirmation}
     open={open}
@@ -27,11 +36,5 @@ const SampleDeletionConfirmationModal = ({ onCancel, onConfirm, open }) => (
     </div>
   </Modal>
 );
-
-SampleDeletionConfirmationModal.propTypes = {
-  onCancel: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-};
 
 export default SampleDeletionConfirmationModal;

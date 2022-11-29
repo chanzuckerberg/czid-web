@@ -7,6 +7,7 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import Histogram, {
   HISTOGRAM_SCALE,
 } from "~/components/visualizations/Histogram";
+import { Background } from "~/interface/shared/specific";
 import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./taxon_details_mode.scss";
@@ -14,11 +15,11 @@ import cs from "./taxon_details_mode.scss";
 const COLLAPSED_HEIGHT = 120;
 
 export interface TaxonDetailsModeProps {
+  background?: Background;
+  parentTaxonId?: number;
   taxonId: number;
   taxonName: string;
-  parentTaxonId?: number;
-  taxonValues?: { NT: { rpm: number }; NR: { rpm: number } };
-  background?: { id: number; name: string };
+  taxonValues?: { NT: { rpm: number | string }; NR: { rpm: number | string } };
 }
 
 interface TaxonDetailsModeState {
