@@ -147,10 +147,6 @@ class PipelineReportService
     "nt_percent_identity",
     "nt_alignment_length",
     "nt_e_value",
-    "nt_bg_mean",
-    "nt_bg_stdev",
-    "nt_bg_mean_mass_normalized",
-    "nt_bg_stdev_mass_normalized",
     "nr_z_score",
     "nr_bpm",
     "nr_count",
@@ -159,10 +155,6 @@ class PipelineReportService
     "nr_percent_identity",
     "nr_alignment_length",
     "nr_e_value",
-    "nr_bg_mean",
-    "nr_bg_stdev",
-    "nr_bg_mean_mass_normalized",
-    "nr_bg_stdev_mass_normalized",
     "species_tax_ids",
   ].freeze
 
@@ -643,7 +635,8 @@ class PipelineReportService
     taxa_counts.each_value do |taxon_counts|
       count_types.each do |type|
         if taxon_counts[type].present?
-          count_per_million = taxon_counts[type][:count] * 1E6 / total_count
+          count_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :count : :base_count
+          count_per_million = taxon_counts[type][count_key] * 1E6 / total_count
           if @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
             taxon_counts[type][:rpm] = count_per_million
           elsif @technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
@@ -791,14 +784,15 @@ class PipelineReportService
   end
 
   def find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+    # For ont_v1, we will not be highlighting any species-level taxa
+    return [] unless @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
+
     ui_config = UiConfig.last
     return unless ui_config
 
-    count_per_million_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :rpm : :bpm
     meets_highlight_condition = lambda do |tax_id, counts|
-      # TODO: check with combio on min_nt_bpm and min_nr_bpm
-      return (counts.dig(:nt, count_per_million_key) || 0) > ui_config.min_nt_rpm \
-        && (counts.dig(:nr, count_per_million_key) || 0) > ui_config.min_nr_rpm \
+      return (counts.dig(:nt, :rpm) || 0) > ui_config.min_nt_rpm \
+        && (counts.dig(:nr, :rpm) || 0) > ui_config.min_nr_rpm \
         && (counts.dig(:nt, :z_score) || 0) > ui_config.min_nt_z \
         && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z \
         && tax_id > 0
