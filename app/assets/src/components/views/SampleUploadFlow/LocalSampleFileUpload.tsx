@@ -9,6 +9,7 @@ import _fp, {
   slice,
   sumBy,
   keyBy,
+  compact,
 } from "lodash/fp";
 import React from "react";
 import { FileWithPreview } from "react-dropzone";
@@ -16,7 +17,7 @@ import { FileWithPreview } from "react-dropzone";
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
-import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
+import { PRE_UPLOAD_CHECK_FEATURE, ONT_V1_FEATURE } from "~/components/utils/features";
 import { Project, Sample } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
@@ -142,6 +143,7 @@ class LocalSampleFileUpload extends React.Component<
 
   render() {
     const { samples } = this.props;
+    const { allowedFeatures } = this.context || {};
     const finishedValidating = samples.every(
       element => element.finishedValidating,
     );
@@ -163,10 +165,11 @@ class LocalSampleFileUpload extends React.Component<
                 <>
                   Accepted file formats:
                   <List
-                    listItems={[
-                      `Metagenomics: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).`,
+                    listItems={compact([
+                      `Metagenomics Illumina: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).`,
+                      allowedFeatures.includes(ONT_V1_FEATURE) && `Metagenomics Nanopore: fastq (.fq), .fastq.gz (.fq.gz).`,
                       `SARS-CoV-2 Consensus Genome: fastq (.fq).`,
-                    ]}
+                    ])}
                   />
                 </>,
                 `Paired files must be labeled with "_R1" or
