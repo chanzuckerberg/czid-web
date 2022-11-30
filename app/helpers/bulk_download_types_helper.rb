@@ -95,6 +95,17 @@ module BulkDownloadTypesHelper
       workflows: [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]], # for CG downloads v0
     },
 
+    # Specific to long read mNGS workflows
+    {
+      type: SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
+      display_name: "Sample Taxon Reports",
+      description: "Computed metrics (e.g. total bases, bPM) and metadata for each taxon identified in the sample",
+      category: "reports",
+      execution_type: RESQUE_EXECUTION_TYPE,
+      file_type_display: ".csv",
+      workflows: [WorkflowRun::WORKFLOW[:long_read_mngs]],
+    },
+
     # Specific to short read mNGS workflows
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,

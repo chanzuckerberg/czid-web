@@ -720,48 +720,98 @@ describe BulkDownload, type: :model do
       create(:taxon_lineage, taxid: taxid, genus_taxid: taxid, version_start: "2022-01-03", version_end: "2022-01-05")
     end
 
-    it "correctly generates download file for download type sample_taxon_report" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background": {
-                                             "value": mock_background_id,
-                                             "displayName": "Mock Background",
-                                           })
+    context "for download type sample_taxon_report" do
+      context "and workflow short-read-mngs" do
+        it "correctly generates download file" do
+          bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {
+                                                 "workflow": "short-read-mngs",
+                                                 "background": {
+                                                   "value": mock_background_id,
+                                                   "displayName": "Mock Background",
+                                                 },
+                                               })
 
-      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
-      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv_2")
+          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
+          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv_2")
 
-      add_s3_tar_writer_expectations(
-        get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
-        get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2"
-      )
+          add_s3_tar_writer_expectations(
+            get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
+            get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2"
+          )
 
-      bulk_download.generate_download_file
+          bulk_download.generate_download_file
 
-      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
-    end
+          expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+        end
 
-    it "correctly updates the bulk_download status and progress as the sample_taxon_report runs" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background": {
-                                             "value": mock_background_id,
-                                             "displayName": "Mock Background",
-                                           })
+        it "correctly updates the bulk_download status and progress as the sample_taxon_report runs" do
+          bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {
+                                                 "workflow": "short-read-mngs",
+                                                 "background": {
+                                                   "value": mock_background_id,
+                                                   "displayName": "Mock Background",
+                                                 },
+                                               })
 
-      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
-      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv_2")
+          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
+          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv_2")
 
-      add_s3_tar_writer_expectations(
-        get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
-        get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2"
-      )
+          add_s3_tar_writer_expectations(
+            get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
+            get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2"
+          )
 
-      expect(bulk_download).to receive(:progress_update_delay).exactly(2).times.and_return(0)
+          expect(bulk_download).to receive(:progress_update_delay).exactly(2).times.and_return(0)
 
-      expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_RUNNING).exactly(1).times
-      expect(bulk_download).to receive(:update).with(progress: 0.5).exactly(1).times
-      expect(bulk_download).to receive(:update).with(progress: 1).exactly(1).times
-      expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_SUCCESS).exactly(1).times
-      expect(bulk_download).to receive(:update).with(output_file_size: mock_file_size).exactly(1).times
+          expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_RUNNING).exactly(1).times
+          expect(bulk_download).to receive(:update).with(progress: 0.5).exactly(1).times
+          expect(bulk_download).to receive(:update).with(progress: 1).exactly(1).times
+          expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_SUCCESS).exactly(1).times
+          expect(bulk_download).to receive(:update).with(output_file_size: mock_file_size).exactly(1).times
 
-      bulk_download.generate_download_file
+          bulk_download.generate_download_file
+        end
+      end
+
+      context "and workflow long-read-mngs" do
+        it "correctly generates download file for download type sample_taxon_report" do
+          bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "workflow": "long-read-mngs")
+
+          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true).exactly(1).times.and_return("mock_report_csv")
+          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true).exactly(1).times.and_return("mock_report_csv_2")
+
+          add_s3_tar_writer_expectations(
+            get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
+            get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2"
+          )
+
+          bulk_download.generate_download_file
+
+          expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+        end
+
+        it "correctly updates the bulk_download status and progress as the sample_taxon_report runs" do
+          bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "workflow": "long-read-mngs")
+
+          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true).exactly(1).times.and_return("mock_report_csv")
+          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true).exactly(1).times.and_return("mock_report_csv_2")
+
+          add_s3_tar_writer_expectations(
+            get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
+            get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2"
+          )
+
+          expect(bulk_download).to receive(:progress_update_delay).exactly(2).times.and_return(0)
+
+          expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_RUNNING).exactly(1).times
+          expect(bulk_download).to receive(:update).with(progress: 0.5).exactly(1).times
+          expect(bulk_download).to receive(:update).with(progress: 1).exactly(1).times
+          expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_SUCCESS).exactly(1).times
+          expect(bulk_download).to receive(:update).with(output_file_size: mock_file_size).exactly(1).times
+
+          bulk_download.generate_download_file
+        end
+      end
     end
 
     it "correctly generates download file for download type sample_overview" do

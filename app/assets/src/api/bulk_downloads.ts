@@ -13,6 +13,7 @@ export const createBulkDownload = (bulkDownload: $TSFixMe) =>
     workflow: bulkDownload.workflow,
     params: {
       sample_ids: { value: bulkDownload.validObjectIds },
+      workflow: bulkDownload.workflow,
       ...bulkDownload.fields,
     },
   });

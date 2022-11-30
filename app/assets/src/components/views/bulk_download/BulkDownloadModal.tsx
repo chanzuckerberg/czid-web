@@ -366,7 +366,11 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
     let objectIds;
 
-    if (workflow === WORKFLOWS.SHORT_READ_MNGS.value) {
+    if (
+      [WORKFLOWS.SHORT_READ_MNGS.value, WORKFLOWS.LONG_READ_MNGS].includes(
+        workflowEntity,
+      )
+    ) {
       objectIds = { sampleIds: selectedDownload.validObjectIds };
     } else if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
       objectIds = { workflowRunIds: selectedDownload.validObjectIds };
