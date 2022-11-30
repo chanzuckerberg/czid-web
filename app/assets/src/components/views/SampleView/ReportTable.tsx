@@ -128,6 +128,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       displayMergedNtNrValue,
       displayNoBackground,
       pipelineVersion,
+      currentTab,
     } = this.props;
 
     const countTypes = displayMergedNtNrValue ? ["merged_nt_nr"] : ["nt", "nr"];
@@ -135,7 +136,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       ASSEMBLY_FEATURE,
       pipelineVersion,
     );
-    return compact([
+    const nonNumericColumns = [
       {
         cellRenderer: this.renderExpandIcon,
         className: cs.expandHeader,
@@ -162,6 +163,9 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             limits: STRING_NULL_VALUES,
           }),
       },
+    ];
+
+    const illuminaColumns = [
       {
         cellRenderer: this.renderAggregateScore,
         columnData: displayMergedNtNrValue
@@ -295,6 +299,101 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           }),
         width: 75,
       },
+    ];
+
+    const nanoporeColumns = [
+      {
+        cellDataGetter: ({ rowData }) =>
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "bpm",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
+        cellRenderer: ({ cellData }) =>
+          this.renderCellValue({ cellData, decimalPlaces: 1 }),
+        columnData: REPORT_TABLE_COLUMNS["bpm"],
+        dataKey: "bpm",
+        label: "bPM",
+        sortFunction: ({ data, sortDirection }) =>
+          this.nestedNtNrSortFunction({
+            data,
+            sortDirection,
+            path: ["bpm"],
+            nullValue: 0,
+            limits: NUMBER_NULL_VALUES,
+          }),
+        width: 75,
+      },
+      {
+        cellDataGetter: ({ rowData }) =>
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "base_count",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
+        cellRenderer: this.renderCellValue,
+        columnData: REPORT_TABLE_COLUMNS["b"],
+        dataKey: "b",
+        label: "b",
+        sortFunction: ({ data, sortDirection }) =>
+          this.nestedNtNrSortFunction({
+            data,
+            sortDirection,
+            path: ["base_count"],
+            nullValue: 0,
+            limits: NUMBER_NULL_VALUES,
+          }),
+        width: 75,
+      },
+      {
+        cellDataGetter: ({ rowData }) =>
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "contigs",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
+        cellRenderer: this.renderCellValue,
+        columnData: REPORT_TABLE_COLUMNS["contigs"],
+        dataKey: "contigs",
+        label: "contig",
+        sortFunction: ({ data, sortDirection }) =>
+          this.nestedNtNrSortFunction({
+            data,
+            sortDirection,
+            path: ["contigs"],
+            nullValue: 0,
+            limits: NUMBER_NULL_VALUES,
+          }),
+        width: 75,
+      },
+      {
+        cellDataGetter: ({ rowData }) =>
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "contig_b",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
+        cellRenderer: this.renderCellValue,
+        columnData: REPORT_TABLE_COLUMNS["contigbases"],
+        dataKey: "contig_b",
+        label: "contig b",
+        sortFunction: ({ data, sortDirection }) =>
+          this.nestedNtNrSortFunction({
+            data,
+            sortDirection,
+            path: ["contig_b"],
+            nullValue: 0,
+            limits: NUMBER_NULL_VALUES,
+          }),
+        width: 75,
+      },
+    ];
+
+    const sharedColumns = [
       {
         cellDataGetter: ({ rowData }: $TSFixMe) =>
           this.getCountTypeValuesFromDataRow({
@@ -387,7 +486,14 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             headerRenderer: this.renderNtNrSelector,
             width: 40,
           },
-    ]);
+    ];
+    return compact(
+      nonNumericColumns.concat(
+        currentTab === TABS.SHORT_READ_MNGS && illuminaColumns,
+        currentTab === TABS.LONG_READ_MNGS && nanoporeColumns,
+        sharedColumns,
+      ),
+    );
   };
 
   renderAggregateScore = ({ cellData, rowData }: $TSFixMe) => {
@@ -1075,8 +1181,10 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       projectId,
       projectName,
       rowHeight,
+      currentTab,
     } = this.props;
     const { phyloTreeModalParams } = this.state;
+    const readsPerMillionKey = currentTab === TABS.SHORT_READ_MNGS ? "rpm" : "bpm";
     return (
       <>
         {/* @ts-expect-error Table has not been typed yet */}
@@ -1086,7 +1194,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           data={this.getTableRows()}
           defaultRowHeight={rowHeight}
           defaultSortBy={
-            displayNoBackground || displayMergedNtNrValue ? "rpm" : "agg_score"
+            displayNoBackground || displayMergedNtNrValue ? readsPerMillionKey : "agg_score"
           }
           defaultSortDirection={SortDirection.DESC}
           headerClassName={cs.header}
