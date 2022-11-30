@@ -1,14 +1,23 @@
 // TODO(mark): Add information about the sample input files and host genome into the table.
 // TODO(mark): Add UI for upload progress and status.
 import { cloneDeep, isUndefined } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import { HOST_GENOME_SYNONYMS } from "~/components/common/Metadata/constants";
 import { returnHipaaCompliantMetadata } from "~/components/utils/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
+import { ProjectSample } from "./MetadataUploadModal";
 import cs from "./metadata_upload_modal.scss";
 
-const ReviewPage = ({ metadata, samples }) => {
+interface ReviewPageProps {
+  metadata?: {
+    rows: { sample_name: string; [key: string]: string }[];
+    headers: string[];
+  };
+  samples?: ProjectSample[];
+  title?: JSX.Element;
+}
+
+const ReviewPage = ({ metadata, samples }: ReviewPageProps) => {
   if (isUndefined(metadata) || isUndefined(samples)) return null;
 
   // Create a copy of metadata that hides hipaa sensitive data
@@ -40,11 +49,6 @@ const ReviewPage = ({ metadata, samples }) => {
       />
     </div>
   );
-};
-
-ReviewPage.propTypes = {
-  metadata: PropTypes.object,
-  samples: PropTypes.arrayOf(PropTypes.Sample),
 };
 
 export default ReviewPage;

@@ -1,7 +1,6 @@
 import { Dictionary } from "lodash";
 import {
   NameId,
-  Sample,
   SampleType,
   MetadataType,
   MetadataTypes,
@@ -123,7 +122,7 @@ export interface MetadataUploadProps {
   onShowCSVInstructions: $TSFixMeFunction;
   project?: NameId;
   className?: string;
-  samples?: Sample[];
+  samples?: { name: string }[];
   visible?: boolean;
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.

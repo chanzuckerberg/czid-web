@@ -9,7 +9,6 @@ import cs from "./list_notification.scss";
 
 interface ListNotificationProps {
   className: string;
-  children: React.ReactNode;
   onClose: $TSFixMeFunction;
   type: "success" | "info" | "warning" | "error";
   label: React.ReactNode;

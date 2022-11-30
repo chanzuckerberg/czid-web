@@ -1,11 +1,23 @@
 import React from "react";
 import { validateManualMetadataForProject } from "~/api/metadata";
 import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
-import PropTypes from "~/components/utils/propTypes";
+import { NameId } from "~/interface/shared";
 import Instructions from "./Instructions";
+import { ProjectSample } from "./MetadataUploadModal";
 import cs from "./metadata_upload_modal.scss";
 
-class UploadPage extends React.Component {
+interface UploadPageProps {
+  onMetadataChange: $TSFixMeFunction;
+  project?: NameId;
+  wizardEnableContinue?: $TSFixMeFunction;
+  wizardSetOnContinueValidation?: $TSFixMeFunction;
+  wizardSetOverlay?: $TSFixMeFunction;
+  samples?: ProjectSample[];
+  workflow?: string;
+  title?: JSX.Element;
+}
+
+class UploadPage extends React.Component<UploadPageProps> {
   state = {
     showInstructions: false,
     metadata: null,
@@ -87,18 +99,5 @@ class UploadPage extends React.Component {
     );
   }
 }
-
-UploadPage.propTypes = {
-  onMetadataChange: PropTypes.func.isRequired,
-  project: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string,
-  }),
-  wizardEnableContinue: PropTypes.func,
-  wizardSetOnContinueValidation: PropTypes.func,
-  wizardSetOverlay: PropTypes.func,
-  samples: PropTypes.arrayOf(PropTypes.Sample),
-  workflow: PropTypes.string,
-};
 
 export default UploadPage;

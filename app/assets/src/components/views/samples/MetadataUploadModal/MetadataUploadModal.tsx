@@ -1,12 +1,12 @@
 // This modal contains a wizard that allows users to upload metadata to a project.
 import { flow, get, keyBy, mapValues, omit } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { getSamples } from "~/api";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { showToast } from "~/components/utils/toast";
+import { NameId } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import Wizard from "~ui/containers/Wizard";
 import ListNotification from "~ui/notifications/ListNotification";
@@ -16,8 +16,33 @@ import ReviewPage from "./ReviewPage";
 import UploadPage from "./UploadPage";
 import cs from "./metadata_upload_modal.scss";
 
-class MetadataUploadModal extends React.Component {
-  state = {
+interface MetadataUploadModalProps {
+  onClose?: $TSFixMeFunction;
+  onComplete?: $TSFixMeFunction;
+  project?: NameId;
+  workflow?: string;
+}
+
+interface MetadataUploadModalState {
+  metadata?: {
+    rows: { sample_name: string; [key: string]: string }[];
+    headers: string[];
+  };
+  issues?: $TSFixMeUnknown;
+  projectSamples?: ProjectSample[];
+}
+
+export interface ProjectSample {
+  details: { metadata: Record<string, string> };
+  metadata?: ProjectSample["details"]["metadata"];
+  name: string;
+}
+
+class MetadataUploadModal extends React.Component<
+  MetadataUploadModalProps,
+  MetadataUploadModalState
+> {
+  state: MetadataUploadModalState = {
     metadata: null,
     issues: null,
     projectSamples: null,
@@ -30,7 +55,7 @@ class MetadataUploadModal extends React.Component {
       projectId: project.id,
     });
 
-    projectSamples.forEach(sample => {
+    projectSamples.forEach((sample: ProjectSample) => {
       // This maintains compatibility with downstream MetadataManualInput,
       // which expects sample.metadata instead of sample.details.metadata.
       sample.metadata = get("metadata", sample.details);
@@ -55,7 +80,10 @@ class MetadataUploadModal extends React.Component {
     const response = await uploadMetadataForProject(
       this.props.project.id,
       flow(
-        keyBy(row => row.sample_name || row["Sample Name"]),
+        keyBy(
+          (row: MetadataUploadModalState["metadata"]["rows"][0]) =>
+            row.sample_name || row["Sample Name"],
+        ),
         mapValues(omit(["sample_name", "Sample Name"])),
       )(this.state.metadata.rows),
     );
@@ -153,15 +181,5 @@ class MetadataUploadModal extends React.Component {
     );
   }
 }
-
-MetadataUploadModal.propTypes = {
-  onClose: PropTypes.func,
-  onComplete: PropTypes.func,
-  project: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string,
-  }),
-  workflow: PropTypes.string,
-};
 
 export default MetadataUploadModal;
