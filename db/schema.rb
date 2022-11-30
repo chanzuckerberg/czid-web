@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_11_18_194348) do
+ActiveRecord::Schema.define(version: 2022_11_29_235749) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -255,6 +255,7 @@ ActiveRecord::Schema.define(version: 2022_11_18_194348) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "pipeline_run_id"
+    t.bigint "bases_after"
     t.index ["pipeline_run_id"], name: "index_job_stats_on_pipeline_run_id"
     t.index ["task"], name: "index_job_stats_on_task"
   end
