@@ -65,14 +65,15 @@ class SfnLongReadMngsPipelineDispatchService
   end
 
   def generate_wdl_input
+    library_type = @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || ""
     {
       RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/run.wdl",
       Input: {
         Run: {
           input_fastq: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
-          library_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
+          library_type: library_type,
           guppy_basecaller_setting: @pipeline_run.guppy_basecaller_setting,
-          minimap_host_db: HUMAN_S3_MINIMAP2_INDEX_PATH,
+          minimap_host_db: library_type.casecmp("dna").zero? ? @sample.host_genome.s3_minimap2_dna_index_path : @sample.host_genome.s3_minimap2_rna_index_path,
           minimap_human_db: HUMAN_S3_MINIMAP2_INDEX_PATH,
           subsample_depth: @pipeline_run.subsample, # optional input
           lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
