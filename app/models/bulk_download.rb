@@ -670,6 +670,13 @@ class BulkDownload < ApplicationRecord
     end
   end
 
+  def get_technology(pipeline_runs)
+    # check if only 1 technology
+    raise "Cannot run bulk download on mix of short-read-mngs and long-read-mngs" unless pipeline_runs.pluck(:technology).uniq.size == 1
+
+    pipeline_runs.first.technology
+  end
+
   def generate_download_file
     if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE
       update(status: STATUS_RUNNING)
@@ -714,9 +721,10 @@ class BulkDownload < ApplicationRecord
 
       if download_type == SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
         Rails.logger.info("Generating sample overviews for #{pipeline_runs.length} samples...")
+        technology = get_technology(pipeline_runs) # ONT or Illumina
         samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
         pipeline_runs_by_sample_id = pipeline_runs.index_by(&:sample_id)
-        sample_overviews_csv = generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, include_all_metadata: get_param_value("include_metadata"))
+        sample_overviews_csv = generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, include_all_metadata: get_param_value("include_metadata"), technology: technology)
 
         s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
       elsif download_type == CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE

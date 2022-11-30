@@ -125,7 +125,7 @@ module BulkDownloadTypesHelper
           },
         },
       ],
-      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]],
     },
     {
       type: SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,

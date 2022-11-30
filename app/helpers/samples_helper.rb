@@ -33,16 +33,89 @@ module SamplesHelper
     end
   end
 
+  def get_attributes_illumina_or_ont(technology)
+    if technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
+      %w[sample_name uploader upload_date overall_job_status runtime_seconds
+         total_reads passed_filters passed_filters_percent total_ercc_reads
+         subsampled_fraction quality_control compression_ratio reads_after_star
+         reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup
+         reads_after_idseq_dedup reads_after_czid_dedup host_organism notes
+         insert_size_median insert_size_mode insert_size_median_absolute_deviation
+         insert_size_min insert_size_max insert_size_mean
+         insert_size_standard_deviation insert_size_read_pairs]
+    elsif technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      %w[sample_name uploader upload_date overall_job_status runtime_seconds
+         total_reads total_bases passed_filters passed_filters_percent
+         subsampled_fraction_bases bases_after_quality_filter_percent bases_after_quality_filter
+         bases_after_minimap2_host_filtering host_organism notes
+         read_length_median read_length_mode read_length_median_absolute_deviation
+         read_length_min read_length_max read_length_mean
+         read_length_standard_deviation]
+    else
+      raise "Unknown technology"
+    end
+  end
+
+  def insert_size_metric_hash(pr)
+    metric_set = get_insert_size_metric_set(pr)
+    {
+      insert_size_median: metric_set&.median || '',
+      insert_size_mode: metric_set&.mode || '',
+      insert_size_median_absolute_deviation: metric_set&.median_absolute_deviation || '',
+      insert_size_min: metric_set&.min || '',
+      insert_size_max: metric_set&.max || '',
+      insert_size_mean: metric_set&.mean || '',
+      insert_size_standard_deviation: metric_set&.standard_deviation || '',
+      insert_size_read_pairs: metric_set&.read_pairs || '',
+    }
+  end
+
+  def summary_stats_hash(summary_stats)
+    summary_stats ||= {}
+    {
+      quality_control: summary_stats[:qc_percent] ? summary_stats[:qc_percent].round(3) : '',
+      compression_ratio: summary_stats[:compression_ratio] ? summary_stats[:compression_ratio].round(2) : '',
+      reads_after_star: summary_stats[:reads_after_star] || '',
+      reads_after_trimmomatic: summary_stats[:reads_after_trimmomatic] || '',
+      reads_after_priceseq: summary_stats[:reads_after_priceseq] || '',
+      # reads_after_cdhitdup required for backwards compatibility
+      reads_after_cdhitdup: summary_stats[:reads_after_cdhitdup] || '',
+      reads_after_idseq_dedup: summary_stats[:reads_after_idseq_dedup] || '',
+      reads_after_czid_dedup: summary_stats[:reads_after_czid_dedup] || '',
+      passed_filters_percent: summary_stats[:percent_remaining] ? summary_stats[:percent_remaining].round(3) : '',
+    }
+  end
+
+  def ont_read_length_hash
+    # TODO: (Ryan): Stub, implement this function once it exists
+    {
+      read_length_median: '',
+      read_length_mode: '',
+      read_length_median_absolute_deviation: '',
+      read_length_min: '',
+      read_length_max: '',
+      read_length_mean: '',
+      read_length_standard_deviation: '',
+    }
+  end
+
+  def ont_metric_hash(pr, summary_stats)
+    summary_stats ||= {}
+    {
+      total_bases: pr[:total_bases] || '',
+      subsampled_fraction_bases: pr[:fraction_subsampled_bases] || '',
+      bases_after_quality_filter_percent: summary_stats[:qc_percent] ? summary_stats[:qc_percent].round(3) : '',
+      bases_after_quality_filter: summary_stats[:bases_after_quality_filtered_bases] || '',
+      bases_after_minimap2_host_filtering: summary_stats[:bases_after_human_filtered_bases] || '',
+    }.merge(ont_read_length_hash)
+  end
+
   # If selected_pipeline_runs_by_sample_id is provided, use those pipelines runs instead of the latest pipeline run for each sample.
-  def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false)
+  def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false, technology: PipelineRun::TECHNOLOGY_INPUT[:illumina])
     formatted_samples = format_samples(samples, selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
 
     # reads_after_cdhitdup required for backwards compatibility
-    attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
-                    total_reads passed_filters passed_filters_percent total_ercc_reads subsampled_fraction
-                    quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup reads_after_idseq_dedup reads_after_czid_dedup
-                    host_organism notes
-                    insert_size_median insert_size_mode insert_size_median_absolute_deviation insert_size_min insert_size_max insert_size_mean insert_size_standard_deviation insert_size_read_pairs]
+    attributes = get_attributes_illumina_or_ont(technology)
 
     if include_all_metadata
       metadata_fields = MetadataHelper.get_unique_metadata_fields_for_samples(samples)
@@ -62,36 +135,23 @@ module SamplesHelper
         pipeline_run = derived_output[:pipeline_run]
         db_sample = sample_info[:db_sample]
         run_info = sample_info[:mngs_run_info]
-
-        data_values = { sample_name: db_sample ? db_sample[:name] : '',
-                        uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
-                        upload_date: db_sample ? db_sample[:created_at] : '',
-                        overall_job_status: run_info ? run_info[:result_status_description] : '',
-                        runtime_seconds: run_info ? run_info[:total_runtime] : '',
-                        total_reads: pipeline_run ? pipeline_run.total_reads : '',
-                        passed_filters: pipeline_run ? pipeline_run.adjusted_remaining_reads : '',
-                        passed_filters_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
-                        total_ercc_reads: pipeline_run ? pipeline_run.total_ercc_reads : '',
-                        subsampled_fraction: pipeline_run ? pipeline_run.fraction_subsampled : '',
-                        quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
-                        compression_ratio: derived_output[:summary_stats] && derived_output[:summary_stats][:compression_ratio] ? derived_output[:summary_stats][:compression_ratio].round(2) : '',
-                        reads_after_star: (derived_output[:summary_stats] || {})[:reads_after_star] || '',
-                        reads_after_trimmomatic: (derived_output[:summary_stats] || {})[:reads_after_trimmomatic] || '',
-                        reads_after_priceseq: (derived_output[:summary_stats] || {})[:reads_after_priceseq] || '',
-                        # reads_after_cdhitdup required for backwards compatibility
-                        reads_after_cdhitdup: (derived_output[:summary_stats] || {})[:reads_after_cdhitdup] || '',
-                        reads_after_idseq_dedup: (derived_output[:summary_stats] || {})[:reads_after_idseq_dedup] || '',
-                        reads_after_czid_dedup: (derived_output[:summary_stats] || {})[:reads_after_czid_dedup] || '',
-                        host_organism: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
-                        notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '',
-                        insert_size_median: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.median ? pipeline_run.insert_size_metric_set.median : '',
-                        insert_size_mode: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.mode ? pipeline_run.insert_size_metric_set.mode : '',
-                        insert_size_median_absolute_deviation: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.median_absolute_deviation ? pipeline_run.insert_size_metric_set.median_absolute_deviation : '',
-                        insert_size_min: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.min ? pipeline_run.insert_size_metric_set.min : '',
-                        insert_size_max: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.max ? pipeline_run.insert_size_metric_set.max : '',
-                        insert_size_mean: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.mean ? pipeline_run.insert_size_metric_set.mean : '',
-                        insert_size_standard_deviation: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.standard_deviation ? pipeline_run.insert_size_metric_set.standard_deviation : '',
-                        insert_size_read_pairs: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.read_pairs ? pipeline_run.insert_size_metric_set.read_pairs : '', }
+        data_values =
+          {
+            sample_name: db_sample ? db_sample[:name] : '',
+            uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
+            upload_date: db_sample ? db_sample[:created_at] : '',
+            overall_job_status: run_info ? run_info[:result_status_description] : '',
+            runtime_seconds: run_info ? run_info[:total_runtime] : '',
+            total_reads: pipeline_run ? pipeline_run.total_reads : '',
+            passed_filters: pipeline_run ? pipeline_run.adjusted_remaining_reads : '',
+            total_ercc_reads: pipeline_run ? pipeline_run.total_ercc_reads : '',
+            subsampled_fraction: pipeline_run ? pipeline_run.fraction_subsampled : '',
+            host_organism: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
+            notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '',
+          }
+          .merge(summary_stats_hash(derived_output[:summary_stats]))
+          .merge(insert_size_metric_hash(pipeline_run))
+          .merge(ont_metric_hash(pipeline_run, derived_output[:summary_stats]))
 
         # Convert metadata to HIPAA-compliant values
         metadata = sample_info[:metadata] || {}
@@ -129,10 +189,19 @@ module SamplesHelper
       last_processed_at: last_processed_at,
     }
 
-    # "idseq_dedup" required for backwards compatibility
-    dedup_step = job_stats_hash["czid_dedup_out"] ? "czid_dedup" : "idseq_dedup"
-    ["star", "trimmomatic", "priceseq", dedup_step].each do |step|
-      result["reads_after_#{step}".to_sym] = (job_stats_hash["#{step}_out"] || {})["reads_after"]
+    if pipeline_run.technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
+      # "idseq_dedup" required for backwards compatibility
+      dedup_step = job_stats_hash["czid_dedup_out"] ? "czid_dedup" : "idseq_dedup"
+      steps = ["star", "trimmomatic", "priceseq", dedup_step]
+      reads_or_bases = "reads"
+      out_suffix = "_out"
+    elsif pipeline_run.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      steps = ["original_bases", "quality_filtered_bases", "human_filtered_bases"]
+      reads_or_bases = "bases"
+      out_suffix = "" # don't expect nanopore job_stats to end with _out
+    end
+    steps.each do |step|
+      result["#{reads_or_bases}_after_#{step}".to_sym] = (job_stats_hash["#{step}#{out_suffix}"] || {})["reads_after"]
     end
     result
   end

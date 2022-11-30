@@ -484,6 +484,15 @@ RSpec.describe SamplesHelper, type: :helper do
       @sample_three = create(:sample, project: @project, name: "Test Sample 3", host_genome_name: "Human",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
                                       metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", custom_field_two: "Value Two", host_age: (MetadataField::MAX_HUMAN_AGE - 1).to_s })
+      @sample_four = create(:sample, project: @project, name: "Test Sample 4", host_genome_name: "Human",
+                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore] }])
+      @sample_five = create(:sample, project: @project, name: "Test Sample 5", host_genome_name: "Human",
+                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, total_bases: 42_424, qc_percent: 10.0001, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore] }])
+      create(:job_stat, task: "human_filtered_bases", reads_after: 4242, pipeline_run_id: @sample_four.pipeline_runs.first.id)
+      create(:job_stat, task: "quality_filtered_bases", reads_after: 14_242, pipeline_run_id: @sample_four.pipeline_runs.first.id)
+      create(:job_stat, task: "original_bases", reads_after: 142_420, pipeline_run_id: @sample_four.pipeline_runs.first.id)
+      create(:job_stat, task: "human_filtered_bases", reads_after: 123, pipeline_run_id: @sample_five.pipeline_runs.first.id)
+      create(:job_stat, task: "quality_filtered_bases", reads_after: 1234, pipeline_run_id: @sample_five.pipeline_runs.first.id)
     end
 
     it "includes specific metadata fields in basic case" do
@@ -517,6 +526,29 @@ RSpec.describe SamplesHelper, type: :helper do
       expect(sample1_metadata).to include("≥ #{MetadataField::MAX_HUMAN_AGE}")
       expect(sample2_metadata).to include(MetadataField::MAX_HUMAN_AGE.to_s)
       expect(sample3_metadata).to include((MetadataField::MAX_HUMAN_AGE - 1).to_s)
+    end
+
+    it "includes specific metadata fields for ONT" do
+      samples = Sample.where(id: [@sample_four.id, @sample_five.id])
+      csv_string = helper.generate_sample_list_csv(samples, include_all_metadata: true, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore])
+      output = csv_string.split("\n")
+      headers = output[0].split(",")
+      # Include ONT fields
+      expect(headers.include?("total_bases")).to be true
+      expect(headers.include?("bases_after_quality_filter_percent")).to be true
+      expect(headers.include?("bases_after_minimap2_host_filtering")).to be true
+      # Doesn't include Illumina fields
+      expect(headers.include?("total_ercc_reads")).to be false
+      expect(headers.include?("reads_after_star")).to be false
+      expect(headers.include?("insert_size_median")).to be false
+      # Contains correct ONT data sample 4
+      sample_four = output[1].split(",")
+      expect(sample_four[headers.find_index("bases_after_minimap2_host_filtering")]).to eq("4242")
+      expect(sample_four[headers.find_index("bases_after_quality_filter")]).to eq("14242")
+      # Contains correct ONT data sample 5
+      sample_five = output[2].split(",")
+      expect(sample_five[headers.find_index("total_bases")]).to eq("42424")
+      expect(sample_five[headers.find_index("bases_after_quality_filter_percent")]).to eq("10.0")
     end
   end
 
