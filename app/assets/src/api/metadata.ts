@@ -43,7 +43,7 @@ const getProjectMetadataFields = (ids: number | number[]) =>
 // Get MetadataField info for the workflow run(s) (either one ID or an array)
 const getWorkflowRunMetadataFields = (
   ids: $TSFixMe,
-  snapshotShareId: $TSFixMe,
+  snapshotShareId?: $TSFixMe,
 ) =>
   postWithCSRF(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +

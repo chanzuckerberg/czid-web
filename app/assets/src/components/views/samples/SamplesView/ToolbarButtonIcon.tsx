@@ -52,9 +52,9 @@ interface ToolbarButtonIconProps {
   className: string;
   icon: $TSFixMe;
   popupText: string;
-  popupSubtitle: string;
-  disabled: boolean;
-  onClick: $TSFixMeFunction;
+  popupSubtitle?: string;
+  disabled?: boolean;
+  onClick?: $TSFixMeFunction; // onClick does not need to be present if disabled is true.
   // The popup will re-render and re-position whenever any value in this array changes.
   // Allows us to gracefully handle popups with changing content.
   popperDependencies?: string[];

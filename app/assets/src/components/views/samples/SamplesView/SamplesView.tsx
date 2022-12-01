@@ -30,7 +30,6 @@ import {
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { AMR_V1_FEATURE } from "~/components/utils/features";
-import PropTypes from "~/components/utils/propTypes";
 import { showToast } from "~/components/utils/toast";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
@@ -57,6 +56,7 @@ import {
   WORKFLOW_ENTITIES,
 } from "~utils/workflows";
 
+import { WORKFLOW_VALUES } from "../../../utils/workflows";
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
 import {
   computeColumnsByWorkflow,
@@ -80,8 +80,69 @@ interface SamplesViewProps {
   userIsCollaborator: boolean;
 }
 
-class SamplesView extends React.Component<SamplesViewProps> {
-  constructor(props) {
+interface SamplesViewProps {
+  activeColumns?: string[];
+  admin?: boolean;
+  currentDisplay: string;
+  currentTab: string;
+  domain?: string;
+  filters?: object;
+  filtersSidebarOpen?: boolean;
+  hasAtLeastOneFilterApplied?: boolean;
+  handleNewAmrCreationsFromMngs?: $TSFixMeFunction;
+  hideAllTriggers?: boolean;
+  mapLevel?: string;
+  mapLocationData?: Record<string, unknown>;
+  mapPreviewedLocationId?: number;
+  mapTilerKey?: string;
+  numOfMngsSamples?: number;
+  objects?: ObjectCollectionView;
+  onActiveColumnsChange?: $TSFixMeFunction;
+  onClearFilters?: $TSFixMeFunction;
+  onDisplaySwitch?: $TSFixMeFunction;
+  onLoadRows: $TSFixMeFunction;
+  onMapClick?: $TSFixMeFunction;
+  onMapLevelChange?: $TSFixMeFunction;
+  onMapMarkerClick?: $TSFixMeFunction;
+  onMapTooltipTitleClick?: $TSFixMeFunction;
+  onPLQCHistogramBarClick?: $TSFixMeFunction;
+  onObjectSelected?: $TSFixMeFunction;
+  onUpdateSelectedIds?: $TSFixMeFunction;
+  onSortColumn?: $TSFixMeFunction;
+  projectId?: number;
+  protectedColumns?: unknown[];
+  sampleStatsSidebarOpen?: boolean;
+  selectableIds?: unknown[];
+  selectedIds?: Set<number>;
+  showAllMetadata?: boolean;
+  sortBy?: string;
+  sortDirection?: string;
+  snapshotShareId?: string;
+  sortable?: boolean;
+  userDataCounts?: object;
+  workflow?: WORKFLOW_VALUES;
+  workflowEntity?: string;
+}
+
+interface SamplesViewState {
+  phyloTreeCreationModalOpen: boolean;
+  bulkDownloadModalOpen: boolean;
+  heatmapCreationModalOpen: boolean;
+  actionsMenuAnchorEl?: $TSFixMeUnknown;
+  nextcladeModalOpen: boolean;
+  bulkDownloadButtonTempTooltip?: string;
+  sarsCov2Count: number;
+  referenceSelectId?: $TSFixMeUnknown;
+  metadataFields: $TSFixMeUnknown[];
+  loading: boolean;
+  recentlyKickedOffAmrWorkflowRunsForSampleIds: Set<$TSFixMeUnknown>;
+}
+
+class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
+  configForWorkflow: $TSFixMe;
+  infiniteTable: $TSFixMe;
+  referenceSelectId: $TSFixMe;
+  constructor(props: SamplesViewProps) {
     super(props);
 
     this.state = {
@@ -113,7 +174,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
     this.fetchMetadataFieldsBySampleIds();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: $TSFixMe) {
     const { selectedIds } = this.props;
     // Reset the tooltip whenever the selected samples changes.
     if (selectedIds !== prevProps.selectedIds) {
@@ -160,7 +221,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
     this.setState({ loading: false });
   };
 
-  handleSelectRow = (value, checked, event) => {
+  handleSelectRow = (value: $TSFixMe, checked: $TSFixMe, event: $TSFixMe) => {
     const { objects, selectedIds, onUpdateSelectedIds, workflow } = this.props;
     const { referenceSelectId } = this;
 
@@ -199,7 +260,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
     });
   };
 
-  handleSelectAllRows = checked => {
+  handleSelectAllRows = (checked: $TSFixMe) => {
     const { selectableIds, selectedIds, onUpdateSelectedIds } = this.props;
 
     this.referenceSelectId = null;
@@ -211,7 +272,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
     onUpdateSelectedIds(newSelected);
   };
 
-  handleSortColumn = ({ sortBy, sortDirection }) => {
+  handleSortColumn = ({ sortBy, sortDirection }: $TSFixMe) => {
     this.props.onSortColumn({ sortBy, sortDirection });
   };
 
@@ -244,7 +305,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
       { text: amrHeatmapText, value: "/amr_heatmap" },
     ];
 
-    const disabledToolbarIcon = subtitle => (
+    const disabledToolbarIcon = (subtitle: $TSFixMe) => (
       <ToolbarButtonIcon
         className={cs.action}
         icon={<Icon sdsIcon="grid" sdsSize="xl" sdsType="iconButton" />}
@@ -385,7 +446,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
           />
         }
         selectedSampleIds={selectedIds}
-        fetchedSamples={targetSamples.filter(sample =>
+        fetchedSamples={targetSamples.filter((sample: $TSFixMe) =>
           selectedIds.has(sample.id),
         )}
         workflow={workflow}
@@ -396,13 +457,15 @@ class SamplesView extends React.Component<SamplesViewProps> {
   renderNextcladeTrigger = () => {
     const { objects, selectedIds } = this.props;
 
-    const selectedObjects = objects.loaded.filter(object =>
+    const selectedObjects = objects.loaded.filter((object: $TSFixMe) =>
       selectedIds.has(object.id),
     );
 
     const sarsCov2Count = selectedObjects
-      .map(object => get(["referenceAccession", "taxonName"], object))
-      .reduce((n, taxonName) => {
+      .map((object: $TSFixMe) =>
+        get(["referenceAccession", "taxonName"], object),
+      )
+      .reduce((n: $TSFixMe, taxonName: $TSFixMe) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);
 
@@ -438,13 +501,15 @@ class SamplesView extends React.Component<SamplesViewProps> {
       return;
     }
 
-    const selectedObjects = objects.loaded.filter(object =>
+    const selectedObjects = objects.loaded.filter((object: $TSFixMe) =>
       selectedIds.has(object.id),
     );
 
     const sarsCov2Count = selectedObjects
-      .map(object => get(["referenceAccession", "taxonName"], object))
-      .reduce((n, taxonName) => {
+      .map((object: $TSFixMe) =>
+        get(["referenceAccession", "taxonName"], object),
+      )
+      .reduce((n: $TSFixMe, taxonName: $TSFixMe) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);
 
@@ -477,7 +542,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
       return;
     }
 
-    const selectedObjects = objects.loaded.filter(object =>
+    const selectedObjects = objects.loaded.filter((object: $TSFixMe) =>
       selectedIds.has(object.id),
     );
     const noObjectsSelected = size(selectedObjects) === 0;
@@ -551,7 +616,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
     }
   };
 
-  isNotEligibleForAmrPipeline = sample => {
+  isNotEligibleForAmrPipeline = (sample: $TSFixMe) => {
     const { recentlyKickedOffAmrWorkflowRunsForSampleIds } = this.state;
 
     const failedToUploadSample = !isEmpty(get("sample.uploadError", sample));
@@ -577,9 +642,9 @@ class SamplesView extends React.Component<SamplesViewProps> {
     );
   };
 
-  delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+  delay = (ms: $TSFixMe) => new Promise(resolve => setTimeout(resolve, ms));
 
-  kickoffAmrPipelineForSamples = sampleIds => {
+  kickoffAmrPipelineForSamples = (sampleIds: $TSFixMe) => {
     bulkKickoffWorkflowRuns({
       sampleIds,
       workflow: WORKFLOWS.AMR.value,
@@ -587,7 +652,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
   };
 
   renderAmrPipelineBulkKickedOffNotification = () => {
-    const renderAmrNotification = onClose => (
+    const renderAmrNotification = (onClose: $TSFixMe) => (
       <Notification displayStyle="elevated" type="info" onClose={onClose}>
         <div className={cs.amrNotification}>
           We&apos;ve started running your samples on the Antimicrobial
@@ -598,12 +663,14 @@ class SamplesView extends React.Component<SamplesViewProps> {
       </Notification>
     );
 
-    showToast(({ closeToast }) => renderAmrNotification(closeToast), {
+    showToast(({ closeToast }: $TSFixMe) => renderAmrNotification(closeToast), {
       autoClose: 12000,
     });
   };
 
-  renderIneligibleSamplesForBulkKickoffAmrNotification = invalidSampleNames => {
+  renderIneligibleSamplesForBulkKickoffAmrNotification = (
+    invalidSampleNames: $TSFixMe,
+  ) => {
     const header = (
       <div>
         <span className={cs.highlight}>
@@ -617,7 +684,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
 
     const content = (
       <span>
-        {invalidSampleNames.map((name, index) => {
+        {invalidSampleNames.map((name: $TSFixMe, index: $TSFixMe) => {
           return (
             <div key={index} className={cs.messageLine}>
               {name}
@@ -627,7 +694,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
       </span>
     );
 
-    const renderAmrNotification = onClose => (
+    const renderAmrNotification = (onClose: $TSFixMe) => (
       <AccordionNotification
         header={header}
         content={content}
@@ -638,7 +705,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
       />
     );
 
-    showToast(({ closeToast }) => renderAmrNotification(closeToast), {
+    showToast(({ closeToast }: $TSFixMe) => renderAmrNotification(closeToast), {
       autoClose: 12000,
     });
   };
@@ -660,7 +727,8 @@ class SamplesView extends React.Component<SamplesViewProps> {
       WORKFLOW_TRIGGERS_BY_DOMAIN[domain],
       WORKFLOW_TRIGGERS[workflow],
     );
-    const triggersToRender = triggersAvailable.map(trigger => (
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'map' does not exist on type 'LodashInter... Remove this comment to see the full error message
+    const triggersToRender = triggersAvailable.map((trigger: $TSFixMe) => (
       <React.Fragment key={`${workflow}-${trigger}`}>
         {triggers[trigger]()}
       </React.Fragment>
@@ -707,6 +775,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
 
     if (!isEmpty(userDataCounts)) {
       const totalNumberOfObjects =
+        // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
         userDataCounts.sampleCountByWorkflow[workflow];
 
       const workflowConfig = this.configForWorkflow[workflow];
@@ -774,7 +843,9 @@ class SamplesView extends React.Component<SamplesViewProps> {
     // Note: If the specified sortBy column (ie. a custom metadata field) is not available on this view,
     // we expect the fetched samples to be sorted by the default column and we will bold the default column header.
     // This will not overwrite the sortBy in session storage.
-    const sortByNotAvailable = !columns.some(c => c.dataKey === sortBy);
+    const sortByNotAvailable = !columns.some(
+      (c: $TSFixMe) => c.dataKey === sortBy,
+    );
     const sortedColumn = sortByNotAvailable
       ? DEFAULT_SORTED_COLUMN_BY_TAB["samples"]
       : sortBy;
@@ -785,7 +856,9 @@ class SamplesView extends React.Component<SamplesViewProps> {
     return (
       <div className={cs.table}>
         <InfiniteTable
-          ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+          ref={(infiniteTable: $TSFixMe) =>
+            (this.infiniteTable = infiniteTable)
+          }
           columns={columns}
           defaultRowHeight={rowHeight}
           draggableColumns
@@ -820,7 +893,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
     return (
       <DiscoveryViewToggle
         currentDisplay={currentDisplay}
-        onDisplaySwitch={display => {
+        onDisplaySwitch={(display: $TSFixMe) => {
           onDisplaySwitch(display);
           trackEvent(`SamplesView_${display}-switch_clicked`);
         }}
@@ -953,7 +1026,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
     this.setState({ nextcladeModalOpen: false });
   };
 
-  handleRowClick = ({ event, rowData }) => {
+  handleRowClick = ({ event, rowData }: $TSFixMe) => {
     const { onObjectSelected, objects, workflowEntity } = this.props;
     const object = objects.get(rowData.id);
     onObjectSelected && onObjectSelected({ object, currentEvent: event });
@@ -992,6 +1065,7 @@ class SamplesView extends React.Component<SamplesViewProps> {
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal
             // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
+            // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
             csrf={document.getElementsByName("csrf-token")[0].content}
             onClose={withAnalytics(
               this.handlePhyloModalClose,
@@ -1039,56 +1113,13 @@ class SamplesView extends React.Component<SamplesViewProps> {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 SamplesView.defaultProps = {
   activeColumns:
     DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[WORKFLOWS.SHORT_READ_MNGS.value],
   protectedColumns: ["sample"],
   currentDisplay: "table",
   workflow: WORKFLOWS.SHORT_READ_MNGS.value,
-};
-
-SamplesView.propTypes = {
-  activeColumns: PropTypes.arrayOf(PropTypes.string),
-  admin: PropTypes.bool,
-  currentDisplay: PropTypes.string.isRequired,
-  currentTab: PropTypes.string.isRequired,
-  domain: PropTypes.string,
-  filters: PropTypes.object,
-  filtersSidebarOpen: PropTypes.bool,
-  hasAtLeastOneFilterApplied: PropTypes.bool,
-  handleNewAmrCreationsFromMngs: PropTypes.func,
-  hideAllTriggers: PropTypes.bool,
-  mapLevel: PropTypes.string,
-  mapLocationData: PropTypes.objectOf(PropTypes.Location),
-  mapPreviewedLocationId: PropTypes.number,
-  mapTilerKey: PropTypes.string,
-  numOfMngsSamples: PropTypes.number,
-  objects: PropTypes.instanceOf(ObjectCollectionView),
-  onActiveColumnsChange: PropTypes.func,
-  onClearFilters: PropTypes.func,
-  onDisplaySwitch: PropTypes.func,
-  onLoadRows: PropTypes.func.isRequired,
-  onMapClick: PropTypes.func,
-  onMapLevelChange: PropTypes.func,
-  onMapMarkerClick: PropTypes.func,
-  onMapTooltipTitleClick: PropTypes.func,
-  onPLQCHistogramBarClick: PropTypes.func,
-  onObjectSelected: PropTypes.func,
-  onUpdateSelectedIds: PropTypes.func,
-  onSortColumn: PropTypes.func,
-  projectId: PropTypes.number,
-  protectedColumns: PropTypes.array,
-  sampleStatsSidebarOpen: PropTypes.bool,
-  selectableIds: PropTypes.array,
-  selectedIds: PropTypes.instanceOf(Set),
-  showAllMetadata: PropTypes.bool,
-  sortBy: PropTypes.string,
-  sortDirection: PropTypes.string,
-  snapshotShareId: PropTypes.string,
-  sortable: PropTypes.bool,
-  userDataCounts: PropTypes.object,
-  workflow: PropTypes.string,
-  workflowEntity: PropTypes.string,
 };
 
 SamplesView.contextType = UserContext;

@@ -66,8 +66,8 @@ function QualityControlWrapper(props) {
     },
   });
 
-  if (loading) return "Loading...";
-  if (error) return `Error! ${error.message}`;
+  if (loading) return <span>Loading...</span>;
+  if (error) return <span>`Error! ${error.message}`</span>;
 
   return (
     <QualityControl
