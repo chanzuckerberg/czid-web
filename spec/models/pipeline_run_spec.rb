@@ -60,6 +60,8 @@ describe PipelineRun, type: :model do
   let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
   let(:fake_error) { "fake_error" }
+  let(:failed_sfn_status) { "FAILED" }
+  let(:fake_sfn_status) { "SUCCESS" }
   let(:fake_sfn_execution_description) do
     {
       execution_arn: fake_sfn_arn,
@@ -67,7 +69,7 @@ describe PipelineRun, type: :model do
       # AWS SDK rounds to second
       start_date: Time.zone.now.round,
       state_machine_arn: fake_sfn_execution_arn,
-      status: "SUCCESS",
+      status: fake_sfn_status,
     }
   end
   let(:fake_error_sfn_execution_description) do
@@ -76,7 +78,7 @@ describe PipelineRun, type: :model do
       input: JSON.dump(OutputPrefix: fake_output_prefix),
       start_date: Time.zone.now.round,
       state_machine_arn: fake_sfn_execution_arn,
-      status: "FAILED",
+      status: failed_sfn_status,
     }
   end
   let(:fake_error_sfn_execution_history) do
@@ -93,6 +95,16 @@ describe PipelineRun, type: :model do
   end
   let(:fake_wdl_version) { "999".freeze }
   let(:fake_dag_version) { "9.999".freeze }
+
+  before do
+    @mock_aws_clients = {
+      s3: Aws::S3::Client.new(stub_responses: true),
+      states: Aws::States::Client.new(stub_responses: true),
+    }
+    allow(AwsClient).to receive(:[]) { |client|
+      @mock_aws_clients[client]
+    }
+  end
 
   context "#update_job_status" do
     let(:user) { build_stubbed(:user) }
@@ -657,6 +669,86 @@ describe PipelineRun, type: :model do
 
         @pipeline_run_two.load_qc_percent(job_stats_hash)
         expect(@pipeline_run_two.qc_percent).to eq(nil)
+      end
+    end
+  end
+
+  describe "#update_single_stage_run_status" do
+    before do
+      project = create(:project)
+      sample = create(:sample, project: project)
+      @pipeline_running = create(:pipeline_run, job_status: WorkflowRun::STATUS[:running], sample: sample, sfn_execution_arn: fake_sfn_execution_arn, executed_at: 1.minute.ago)
+    end
+
+    context "when remote status is 'FAILED'" do
+      let(:failed_sfn_status) { WorkflowRun::STATUS[:failed] }
+
+      it "sets job status to 'FAILED'" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_error_sfn_execution_description)
+        @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_error_sfn_execution_history)
+        @pipeline_running.update_single_stage_run_status
+        expect(@pipeline_running.job_status).to eq(WorkflowRun::STATUS[:failed])
+        expect(@pipeline_running.finalized).to eq(1)
+      end
+    end
+
+    context "when remote status is 'TIMED_OUT'" do
+      let(:failed_sfn_status) { WorkflowRun::STATUS[:timed_out] }
+
+      it "sets job status to 'FAILED'" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_error_sfn_execution_description)
+        @pipeline_running.update_single_stage_run_status
+        expect(@pipeline_running.job_status).to eq(WorkflowRun::STATUS[:failed])
+        expect(@pipeline_running.finalized).to eq(1)
+      end
+    end
+
+    context "when remote status is 'ABORTED'" do
+      let(:failed_sfn_status) { WorkflowRun::STATUS[:aborted] }
+
+      it "sets job status to 'FAILED'" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_error_sfn_execution_description)
+        @pipeline_running.update_single_stage_run_status
+        expect(@pipeline_running.job_status).to eq(WorkflowRun::STATUS[:failed])
+        expect(@pipeline_running.finalized).to eq(1)
+      end
+    end
+
+    it "reports run failures" do
+      @mock_aws_clients[:states].stub_responses(:describe_execution, fake_error_sfn_execution_description)
+      @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_error_sfn_execution_history)
+      expect(Rails.logger).to receive(:error).with(match(/SampleFailedEvent/))
+
+      @pipeline_running.update_single_stage_run_status
+      expect(@pipeline_running.job_status).to eq(WorkflowRun::STATUS[:failed])
+    end
+
+    context "when remote status is 'SUCCEEDED'" do
+      let(:fake_sfn_status) { WorkflowRun::STATUS[:succeeded] }
+
+      it "sets job status to 'CHECKED'" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
+        @pipeline_running.update_single_stage_run_status
+        expect(@pipeline_running.job_status).to eq(PipelineRun::STATUS_CHECKED)
+        expect(@pipeline_running.finalized).to eq(1)
+      end
+    end
+
+    context "when pipeline run is finalized and notification is processed out of order" do
+      let(:fake_sfn_status) { WorkflowRun::STATUS[:running] }
+
+      before do
+        allow(S3Util).to receive(:get_s3_file)
+          .and_return(fake_sfn_execution_description.to_json)
+      end
+
+      it "does not revert job status to 'RUNNING'" do
+        @pipeline_running.update(finalized: 1)
+        @pipeline_running.update(job_status: PipelineRun::STATUS_CHECKED)
+
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
+        @pipeline_running.update_single_stage_run_status
+        expect(@pipeline_running.job_status).to eq(PipelineRun::STATUS_CHECKED)
       end
     end
   end

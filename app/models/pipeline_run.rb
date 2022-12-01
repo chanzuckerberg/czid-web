@@ -1277,6 +1277,7 @@ class PipelineRun < ApplicationRecord
         "#{sample.user.role_name} failed PipelineRun #{id} (#{workflow}). See: #{sample.status_url}")
       end
       update(
+        finalized: 1,
         time_to_finalized: time_since_executed_at,
         known_user_error: known_user_error,
         error_message: error_message,
