@@ -1,7 +1,7 @@
 import { isEmpty } from "lodash/fp";
 import React from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
-import Link from "~/components/ui/controls/Link";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import ToastContainer from "~ui/containers/ToastContainer";
 import { CZIDLogoReversed } from "~ui/icons";
 
@@ -57,7 +57,7 @@ const Header = ({
             {
               "Effective today, samples will not automatically go public after 1 year. Our policies will update to reflect this and other changes on 1/1/23. Here is a "
             }
-            <Link href="/terms_changes">
+            <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/11278218026900">
               <span
                 style={{
                   color: "white",
@@ -67,7 +67,7 @@ const Header = ({
               >
                 preview of all updates
               </span>
-            </Link>
+            </ExternalLink>
             {"."}
           </>
         }
