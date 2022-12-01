@@ -207,7 +207,7 @@ class ApplicationController < ActionController::Base
       time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
       now = time_zone.now
       # This is for the data policy update banner in Header.tsx.
-      start_time = time_zone.parse("2023-01-01 00:00:00")
+      start_time = time_zone.parse("2022-12-01 00:00:00")
       end_time = time_zone.parse("2023-01-31 00:00:00")
 
       if start_time < now && now < end_time
