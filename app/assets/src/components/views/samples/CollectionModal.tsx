@@ -1,6 +1,5 @@
 import cx from "classnames";
 import { isNull, toLower, trim } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import {
@@ -32,12 +31,38 @@ import {
   PROHIBITED_BACKGROUND_MODEL_NAMES,
 } from "./constants";
 
+interface CollectionModalProps {
+  maxSamplesShown?: number;
+  numDescriptionRows?: number;
+  fetchedSamples?: {
+    id: number;
+    sample: { name: string; project: $TSFixMeUnknown };
+  }[];
+  selectedSampleIds?: Set<number>;
+  trigger: React.ReactNode;
+  workflow?: string;
+}
+
+interface CollectionModalState {
+  appliedMethod: string;
+  backgroundCreationResponse?: { status: string; message: string };
+  backgroundDescription?: unknown;
+  backgroundName: string;
+  enableMassNormalizedBackgrounds?: boolean;
+  invalidBackgroundName: unknown;
+  invalidSampleNames: string[];
+  modalOpen: boolean;
+}
+
 /**
  * NOTE: "Collections" were an unrealized generalization of the background concept.
  * For the time being, a collection is equivalent to a background.
  */
-class CollectionModal extends React.Component {
-  constructor(props) {
+class CollectionModal extends React.Component<
+  CollectionModalProps,
+  CollectionModalState
+> {
+  constructor(props: CollectionModalProps) {
     super(props);
     this.state = {
       appliedMethod: "",
@@ -55,7 +80,7 @@ class CollectionModal extends React.Component {
     this.fetchSampleValidation();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps: CollectionModalProps) {
     const prevSamples = prevProps.selectedSampleIds;
     if (prevSamples !== this.props.selectedSampleIds) {
       this.fetchBackgroundAvailability();
@@ -189,7 +214,7 @@ class CollectionModal extends React.Component {
 
   fetchBackgroundAvailability = async () => {
     const { selectedSampleIds } = this.props;
-    let enableMassNormalizedBackgrounds = await getMassNormalizedBackgroundAvailability(
+    const enableMassNormalizedBackgrounds = await getMassNormalizedBackgroundAvailability(
       Array.from(selectedSampleIds),
     );
 
@@ -227,7 +252,6 @@ class CollectionModal extends React.Component {
       dropdownOptions.massNormalized.tooltip =
         "Only for ERCC samples run on Pipeline v4.0 or later";
     }
-
     return (
       <div className={cs.form}>
         <div className={cs.sectionHeader}>
@@ -270,6 +294,7 @@ class CollectionModal extends React.Component {
           />
         </div>
         <SubtextDropdown
+          // @ts-expect-error Property 'fluid' does not exist on type
           fluid
           className={cs.dropdown}
           options={Object.values(dropdownOptions)}
@@ -288,7 +313,7 @@ class CollectionModal extends React.Component {
               this.handleCreateBackground,
               "CollectionModal_create-collection-button_clicked",
               {
-                selectedSampleIds: this.props.selectedSampleIds.length,
+                selectedSampleIds: this.props.selectedSampleIds.size,
               },
             )}
           />
@@ -371,19 +396,10 @@ class CollectionModal extends React.Component {
     );
   }
 }
-
+// @ts-expect-error Property 'defaultProps' does not exist on type 'typeof CollectionModal'
 CollectionModal.defaultProps = {
   maxSamplesShown: 10,
   numDescriptionRows: 7,
-};
-
-CollectionModal.propTypes = {
-  maxSamplesShown: PropTypes.number,
-  numDescriptionRows: PropTypes.number,
-  fetchedSamples: PropTypes.array,
-  selectedSampleIds: PropTypes.instanceOf(Set),
-  trigger: PropTypes.node.isRequired,
-  workflow: PropTypes.string,
 };
 
 CollectionModal.contextType = UserContext;

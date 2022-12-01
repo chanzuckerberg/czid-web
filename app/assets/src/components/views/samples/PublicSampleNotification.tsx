@@ -1,15 +1,23 @@
 import { minBy, map } from "lodash/fp";
 import moment from "moment";
-import PropTypes from "prop-types";
 import React from "react";
+import { DateString } from "~/interface/shared";
 import ListNotification from "~ui/notifications/ListNotification";
 import cs from "./public_sample_notification.scss";
 
-class PublicSampleNotification extends React.Component {
+interface PublicSampleNotificationProps {
+  projectName: string;
+  samples: { private_until: DateString }[];
+  onClose?: $TSFixMeFunction;
+}
+
+class PublicSampleNotification extends React.Component<
+  PublicSampleNotificationProps
+> {
   render() {
     const { samples, projectName, onClose } = this.props;
 
-    let minTimestamp = minBy(sample => moment(sample.private_until), samples);
+    const minTimestamp = minBy(sample => moment(sample.private_until), samples);
 
     const label = (
       <React.Fragment>
@@ -49,11 +57,5 @@ class PublicSampleNotification extends React.Component {
     );
   }
 }
-
-PublicSampleNotification.propTypes = {
-  projectName: PropTypes.string.isRequired,
-  samples: PropTypes.array.isRequired,
-  onClose: PropTypes.func,
-};
 
 export default PublicSampleNotification;

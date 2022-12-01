@@ -10,6 +10,10 @@ export const computeColumnsByWorkflow = ({
   workflow,
   metadataFields = [],
   basicIcon = false,
+}: {
+  workflow?: string;
+  metadataFields?: $TSFixMeUnknown[];
+  basicIcon?: boolean;
 } = {}) => {
   // At the moment, columns for long read mNGS are the same as for short read mNGS.
   // To change that in the future, just add another function to compute columns.

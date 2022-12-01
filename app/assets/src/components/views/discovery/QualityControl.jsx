@@ -28,7 +28,7 @@ import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import PropTypes from "~/components/utils/propTypes";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
+import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants";
 import Histogram from "~/components/visualizations/Histogram";
 import BarChartToggle from "~/components/visualizations/bar_charts/BarChartToggle";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";

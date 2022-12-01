@@ -1,9 +1,9 @@
 import cx from "classnames";
 import React from "react";
-import { TextArea as SemanticTextarea } from "semantic-ui-react";
+import { TextArea as SemanticTextarea, TextAreaProps } from "semantic-ui-react";
 import cs from "./textarea.scss";
 
-interface TextareaProps {
+interface TextareaProps extends TextAreaProps {
   value?: string;
   onChange?: $TSFixMeFunction;
   onBlur?: $TSFixMeFunction;

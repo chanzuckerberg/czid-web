@@ -88,13 +88,21 @@ export const BACKGROUND_CORRECTION_METHODS = {
     text: "Standard",
     subtext:
       "For samples without ERCCs, background correction done using relative abundances.",
-  },
+  } as CorrectionMethod,
   massNormalized: {
     value: "massNormalized",
     text: "Normalized by input mass",
     subtext:
       "For samples with ERCCs, background correction done using estimates of relative microbe mass.",
-  },
+  } as CorrectionMethod,
 };
 
 export const PROHIBITED_BACKGROUND_MODEL_NAMES = new Set(["none"]);
+
+interface CorrectionMethod {
+  value: string;
+  text: string;
+  subtext: string;
+  tooltip?: string;
+  disabled: boolean;
+}
