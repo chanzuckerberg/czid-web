@@ -167,7 +167,7 @@ class LocalSampleFileUpload extends React.Component<
                   <List
                     listItems={compact([
                       `Metagenomics Illumina: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).`,
-                      allowedFeatures.includes(ONT_V1_FEATURE) && `Metagenomics Nanopore: fastq (.fq), .fastq.gz (.fq.gz).`,
+                      allowedFeatures.includes(ONT_V1_FEATURE) && `Metagenomics Nanopore: fastq (.fq), fastq.gz (.fq.gz).`,
                       `SARS-CoV-2 Consensus Genome: fastq (.fq).`,
                     ])}
                   />
