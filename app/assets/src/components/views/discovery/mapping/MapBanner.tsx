@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
@@ -7,7 +6,13 @@ import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./map_banner.scss";
 
-class MapBanner extends React.Component {
+interface MapBannerProps {
+  item?: string;
+  itemCount?: number;
+  onClearFilters?: $TSFixMeFunction;
+}
+
+class MapBanner extends React.Component<MapBannerProps> {
   render() {
     const { item, itemCount, onClearFilters } = this.props;
     if (!itemCount) {
@@ -54,11 +59,5 @@ class MapBanner extends React.Component {
     }
   }
 }
-
-MapBanner.propTypes = {
-  item: PropTypes.string,
-  itemCount: PropTypes.number,
-  onClearFilters: PropTypes.func,
-};
 
 export default MapBanner;

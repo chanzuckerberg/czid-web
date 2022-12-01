@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 import MapGL, { NavigationControl } from "react-map-gl";
 
@@ -8,8 +7,34 @@ import cs from "./base_map.scss";
 // MapTiler map name: "2019-06-04"
 export const MAP_STYLE_ID = "e65c2178-ffbd-4e9a-bbeb-1250a61bd01b";
 
-class BaseMap extends React.Component {
-  constructor(props) {
+interface BaseMapProps {
+  banner?: object;
+  height?: string | number;
+  latitude?: number;
+  longitude?: number;
+  mapTilerKey: string;
+  markers?: unknown[];
+  onClick?: $TSFixMeFunction;
+  popups?: unknown[];
+  tooltip?: React.ReactNode;
+  updateViewport?: $TSFixMeFunction;
+  viewBounds?: Record<string, number>;
+  width?: string | number;
+  zoom?: number;
+}
+
+interface BaseMapState {
+  viewport: {
+    width;
+    height;
+    latitude;
+    longitude;
+    zoom;
+  };
+}
+
+class BaseMap extends React.Component<BaseMapProps, BaseMapState> {
+  constructor(props: BaseMapProps) {
     super(props);
 
     const { width, height, latitude, longitude, zoom } = this.props;
@@ -95,22 +120,7 @@ class BaseMap extends React.Component {
   }
 }
 
-BaseMap.propTypes = {
-  banner: PropTypes.object,
-  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  latitude: PropTypes.number,
-  longitude: PropTypes.number,
-  mapTilerKey: PropTypes.string.isRequired,
-  markers: PropTypes.array,
-  onClick: PropTypes.func,
-  popups: PropTypes.array,
-  tooltip: PropTypes.node,
-  updateViewport: PropTypes.func,
-  viewBounds: PropTypes.objectOf(PropTypes.number),
-  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  zoom: PropTypes.number,
-};
-
+// @ts-expect-error Property 'defaultProps' does not exist on type
 BaseMap.defaultProps = {
   width: "100%",
   height: "100%",

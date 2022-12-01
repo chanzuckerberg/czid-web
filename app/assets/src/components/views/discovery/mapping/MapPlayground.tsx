@@ -1,5 +1,4 @@
 import { get } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import { Marker } from "react-map-gl";
 
@@ -12,7 +11,33 @@ import cs from "./map_playground.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
 
-class MapPlayground extends React.Component {
+interface MapPlaygroundProps {
+  results?: {
+    location_validated_value: {
+      id: number;
+      lat: string;
+      lng: string;
+      name: string;
+    };
+    name: string;
+    id: number;
+  }[];
+  // Access tokens safe for clients
+  mapTilerKey?: string;
+}
+
+interface MapPlaygroundState {
+  locationsToItems: $TSFixMeUnknown;
+  viewport: $TSFixMeUnknown;
+  tooltip?: $TSFixMeUnknown;
+  tooltipShouldClose: boolean;
+  searchResult?: $TSFixMeUnknown;
+}
+
+class MapPlayground extends React.Component<
+  MapPlaygroundProps,
+  MapPlaygroundState
+> {
   constructor(props) {
     super(props);
     const { results } = this.props;
@@ -139,11 +164,5 @@ class MapPlayground extends React.Component {
     );
   }
 }
-
-MapPlayground.propTypes = {
-  results: PropTypes.array,
-  // Access tokens safe for clients
-  mapTilerKey: PropTypes.string,
-};
 
 export default MapPlayground;

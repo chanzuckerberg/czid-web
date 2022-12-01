@@ -1,10 +1,17 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import cs from "./rectangle_marker.scss";
 
-class RectangleMarker extends React.Component {
+interface RectangleMarkerProps {
+  active?: boolean;
+  onMouseEnter?: $TSFixMeFunction;
+  onMouseLeave?: $TSFixMeFunction;
+  onClick?: $TSFixMeFunction;
+  title?: string;
+}
+
+class RectangleMarker extends React.Component<RectangleMarkerProps> {
   render() {
     const { active, onMouseEnter, onMouseLeave, onClick, title } = this.props;
 
@@ -24,13 +31,5 @@ class RectangleMarker extends React.Component {
     );
   }
 }
-
-RectangleMarker.propTypes = {
-  active: PropTypes.bool,
-  onMouseEnter: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  title: PropTypes.string,
-};
 
 export default RectangleMarker;

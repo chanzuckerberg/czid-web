@@ -1,12 +1,21 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { Popup } from "react-map-gl";
 
 import cs from "./map_tooltip.scss";
 
-class MapTooltip extends React.Component {
+interface MapTooltipProps {
+  lat: number;
+  lng: number;
+  title?: string;
+  body?: string;
+  onMouseEnter?: $TSFixMeFunction;
+  onMouseLeave?: $TSFixMeFunction;
+  onTitleClick?: $TSFixMeFunction;
+}
+
+class MapTooltip extends React.Component<MapTooltipProps> {
   render() {
     const {
       lat,
@@ -49,15 +58,5 @@ class MapTooltip extends React.Component {
     );
   }
 }
-
-MapTooltip.propTypes = {
-  lat: PropTypes.number.isRequired,
-  lng: PropTypes.number.isRequired,
-  title: PropTypes.string,
-  body: PropTypes.string,
-  onMouseEnter: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onTitleClick: PropTypes.func,
-};
 
 export default MapTooltip;

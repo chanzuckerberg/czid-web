@@ -1,12 +1,30 @@
 import { clamp } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import { Marker } from "react-map-gl";
 
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import RectangleMarker from "~/components/views/discovery/mapping/RectangleMarker";
 
-class ShapeMarker extends React.Component {
+interface ShapeMarkerProps {
+  active?: boolean;
+  divisorConst?: number;
+  lat?: number;
+  lng?: number;
+  maxSize?: number;
+  minSize?: number;
+  onClick?: $TSFixMeFunction;
+  onMouseEnter?: $TSFixMeFunction;
+  onMouseLeave?: $TSFixMeFunction;
+  pointCount?: number;
+  rectangular?: boolean;
+  // Size override
+  size?: number;
+  sizeMultiple?: number;
+  title?: string;
+  zoom?: number;
+}
+
+class ShapeMarker extends React.Component<ShapeMarkerProps> {
   render() {
     const {
       active,
@@ -62,31 +80,13 @@ class ShapeMarker extends React.Component {
 }
 
 // Defaults determined via eyeballing.
+// @ts-expect-error Property 'defaultProps' does not exist on type
 ShapeMarker.defaultProps = {
   divisorConst: 400,
   maxSize: 90,
   minSize: 10,
   sizeMultiple: 60,
   zoom: 3,
-};
-
-ShapeMarker.propTypes = {
-  active: PropTypes.bool,
-  divisorConst: PropTypes.number,
-  lat: PropTypes.number,
-  lng: PropTypes.number,
-  maxSize: PropTypes.number,
-  minSize: PropTypes.number,
-  onClick: PropTypes.func,
-  onMouseEnter: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  pointCount: PropTypes.number,
-  rectangular: PropTypes.bool,
-  // Size override
-  size: PropTypes.number,
-  sizeMultiple: PropTypes.number,
-  title: PropTypes.string,
-  zoom: PropTypes.number,
 };
 
 export default ShapeMarker;

@@ -2,7 +2,6 @@ import { get, throttle, upperFirst, size, map, uniq, flatten } from "lodash/fp";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
-import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import MapBanner from "~/components/views/discovery/mapping/MapBanner";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
@@ -16,8 +15,35 @@ import {
 export const TOOLTIP_TIMEOUT_MS = 1000;
 export const DEFAULT_THROTTLE_MS = 500;
 
-class DiscoveryMap extends React.Component {
-  constructor(props) {
+interface DiscoveryMapProps {
+  currentDisplay?: string;
+  currentTab: string;
+  mapLevel?: string;
+  mapLocationData?: Record<string, unknown>;
+  mapTilerKey?: string;
+  onClearFilters?: $TSFixMeFunction;
+  onClick?: $TSFixMeFunction;
+  onMapLevelChange?: $TSFixMeFunction;
+  onMarkerClick?: $TSFixMeFunction;
+  onTooltipTitleClick?: $TSFixMeFunction;
+  previewedLocationId?: number;
+  zoomBoundaryCountry?: number;
+  zoomBoundaryState?: number;
+}
+
+interface DiscoveryMapState {
+  tooltip?: $TSFixMeUnknown;
+  tooltipShouldClose: boolean;
+  viewport?: $TSFixMeUnknown;
+}
+
+class DiscoveryMap extends React.Component<
+  DiscoveryMapProps,
+  DiscoveryMapState
+> {
+  onMapLevelChangeThrottled: $TSFixMe;
+  trackEventThrottled: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
     const { onMapLevelChange } = this.props;
 
@@ -37,7 +63,7 @@ class DiscoveryMap extends React.Component {
   }
 
   // updateViewport fires many times a second when moving, so we can throttle event calls.
-  updateViewport = viewport => {
+  updateViewport = (viewport: $TSFixMe) => {
     const { zoomBoundaryCountry, zoomBoundaryState } = this.props;
 
     this.setState({ viewport });
@@ -55,13 +81,13 @@ class DiscoveryMap extends React.Component {
     this.trackEventThrottled("DiscoveryMap_viewport_updated");
   };
 
-  handleMarkerClick = locationId => {
+  handleMarkerClick = (locationId: $TSFixMe) => {
     const { onMarkerClick } = this.props;
     onMarkerClick && onMarkerClick(locationId);
     trackEvent("DiscoveryMap_marker_clicked", { locationId });
   };
 
-  handleMarkerMouseEnter = locationInfo => {
+  handleMarkerMouseEnter = (locationInfo: $TSFixMe) => {
     const { currentTab } = this.props;
 
     // ex: samples -> Sample
@@ -100,7 +126,7 @@ class DiscoveryMap extends React.Component {
     this.setState({ tooltipShouldClose: false });
   };
 
-  handleTooltipTitleClick = locationInfo => {
+  handleTooltipTitleClick = (locationInfo: $TSFixMe) => {
     const { onTooltipTitleClick } = this.props;
     onTooltipTitleClick && onTooltipTitleClick(locationInfo.id);
 
@@ -115,7 +141,7 @@ class DiscoveryMap extends React.Component {
     trackEvent("DiscoveryMap_blank-area_clicked");
   };
 
-  renderMarker = locationInfo => {
+  renderMarker = (locationInfo: $TSFixMe) => {
     const { currentTab, mapLevel, previewedLocationId } = this.props;
     const { viewport } = this.state;
 
@@ -143,7 +169,6 @@ class DiscoveryMap extends React.Component {
     return (
       <ShapeMarker
         active={id === previewedLocationId}
-        id={id}
         key={`marker-${locationInfo.id}`}
         lat={lat}
         lng={lng}
@@ -195,26 +220,11 @@ class DiscoveryMap extends React.Component {
 }
 
 // Zoom boundaries determined via eyeballing.
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 DiscoveryMap.defaultProps = {
   currentTab: "samples",
   zoomBoundaryCountry: 3.5,
   zoomBoundaryState: 5,
-};
-
-DiscoveryMap.propTypes = {
-  currentDisplay: PropTypes.string,
-  currentTab: PropTypes.string.isRequired,
-  mapLevel: PropTypes.string,
-  mapLocationData: PropTypes.objectOf(PropTypes.Location),
-  mapTilerKey: PropTypes.string,
-  onClearFilters: PropTypes.func,
-  onClick: PropTypes.func,
-  onMapLevelChange: PropTypes.func,
-  onMarkerClick: PropTypes.func,
-  onTooltipTitleClick: PropTypes.func,
-  previewedLocationId: PropTypes.number,
-  zoomBoundaryCountry: PropTypes.number,
-  zoomBoundaryState: PropTypes.number,
 };
 
 export default DiscoveryMap;

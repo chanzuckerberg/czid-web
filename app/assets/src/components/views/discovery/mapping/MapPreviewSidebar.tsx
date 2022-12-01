@@ -13,7 +13,6 @@ import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 import Tabs from "~/components/ui/controls/Tabs";
-import PropTypes from "~/components/utils/propTypes";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
@@ -23,8 +22,35 @@ import { ObjectCollectionView } from "../DiscoveryDataLayer";
 
 import cs from "./map_preview_sidebar.scss";
 
-export default class MapPreviewSidebar extends React.Component {
-  constructor(props) {
+interface MapPreviewSidebarProps {
+  allowedFeatures?: string[];
+  className?: string;
+  currentTab?: string;
+  discoveryCurrentTab?: string;
+  loading?: boolean;
+  onFilterClick?: $TSFixMeFunction;
+  onProjectSelected?: $TSFixMeFunction;
+  onSampleClicked?: $TSFixMeFunction;
+  onSelectionUpdate: $TSFixMeFunction;
+  onTabChange?: $TSFixMeFunction;
+  projectDimensions?: unknown[];
+  projects?: ObjectCollectionView;
+  projectStats?: object;
+  sampleDimensions?: unknown[];
+  samples?: ObjectCollectionView;
+  sampleStats?: object;
+  selectedSampleIds?: Set<$TSFixMeUnknown>;
+}
+
+export default class MapPreviewSidebar extends React.Component<
+  MapPreviewSidebarProps
+> {
+  projectColumns: $TSFixMe;
+  projectsTable: $TSFixMe;
+  referenceSelectId: $TSFixMe;
+  sampleColumns: $TSFixMe;
+  samplesTable: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.sampleColumns = [
@@ -32,7 +58,7 @@ export default class MapPreviewSidebar extends React.Component {
         dataKey: "sample",
         flexGrow: 1,
         width: 150,
-        cellRenderer: ({ cellData }) =>
+        cellRenderer: ({ cellData }: $TSFixMe) =>
           TableRenderers.renderSample({ sample: cellData, full: false }),
         className: cs.sample,
         headerClassName: cs.sampleHeader,
@@ -60,7 +86,7 @@ export default class MapPreviewSidebar extends React.Component {
         label: "Total Reads",
         flexGrow: 1,
         className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
+        cellDataGetter: ({ dataKey, rowData }: $TSFixMe) =>
           TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
@@ -75,7 +101,7 @@ export default class MapPreviewSidebar extends React.Component {
         label: "Passed QC",
         flexGrow: 1,
         className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
+        cellDataGetter: ({ dataKey, rowData }: $TSFixMe) =>
           TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
@@ -83,7 +109,7 @@ export default class MapPreviewSidebar extends React.Component {
         label: "DCR",
         flexGrow: 1,
         className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
+        cellDataGetter: ({ dataKey, rowData }: $TSFixMe) =>
           TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
@@ -91,7 +117,7 @@ export default class MapPreviewSidebar extends React.Component {
         label: "ERCC Reads",
         flexGrow: 1,
         className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
+        cellDataGetter: ({ dataKey, rowData }: $TSFixMe) =>
           TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
@@ -116,7 +142,7 @@ export default class MapPreviewSidebar extends React.Component {
         label: "SubSampled Fraction",
         flexGrow: 1,
         className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
+        cellDataGetter: ({ dataKey, rowData }: $TSFixMe) =>
           TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
@@ -124,7 +150,7 @@ export default class MapPreviewSidebar extends React.Component {
         label: "Total Runtime",
         flexGrow: 1,
         className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
+        cellDataGetter: ({ dataKey, rowData }: $TSFixMe) =>
           TableRenderers.formatDuration(rowData[dataKey]),
       },
       {
@@ -140,18 +166,19 @@ export default class MapPreviewSidebar extends React.Component {
         dataKey: "project",
         flexGrow: 1,
         width: 350,
-        cellRenderer: ({ cellData }) => {
+        cellRenderer: ({ cellData }: $TSFixMe) => {
           return TableRenderers.renderItemDetails(
+            // @ts-expect-error Property 'descriptionRenderer' is missing in type
             merge(
               { cellData },
               {
-                nameRenderer: p => (p ? p.name : ""),
-                detailsRenderer: p => (
+                nameRenderer: (p: $TSFixMe) => (p ? p.name : ""),
+                detailsRenderer: (p: $TSFixMe) => (
                   <div>
                     <span>{p ? p.owner : ""}</span>
                   </div>
                 ),
-                visibilityIconRenderer: p =>
+                visibilityIconRenderer: (p: $TSFixMe) =>
                   p ? (
                     p.public_access ? (
                       <Icon
@@ -175,7 +202,7 @@ export default class MapPreviewSidebar extends React.Component {
         },
         headerClassName: cs.projectHeader,
         className: cs.project,
-        sortKey: p => ((p && p.name) || "").toLowerCase(),
+        sortKey: (p: $TSFixMe) => ((p && p.name) || "").toLowerCase(),
       },
       {
         dataKey: "created_at",
@@ -209,7 +236,7 @@ export default class MapPreviewSidebar extends React.Component {
     this.referenceSelectId = null;
   }
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps: $TSFixMe) => {
     if (
       this.props.samples !== prevProps.samples ||
       this.props.projects !== prevProps.projects
@@ -218,11 +245,11 @@ export default class MapPreviewSidebar extends React.Component {
     }
   };
 
-  handleSelectRow = (value, checked, event) => {
+  handleSelectRow = (value: $TSFixMe, checked: $TSFixMe, event: $TSFixMe) => {
     const { samples, selectedSampleIds, onSelectionUpdate } = this.props;
     const { referenceSelectId } = this;
 
-    let newSelected = new Set(selectedSampleIds);
+    const newSelected = new Set(selectedSampleIds);
     if (event.shiftKey && referenceSelectId) {
       const ids = samples.getIntermediateIds({
         id1: referenceSelectId,
@@ -252,7 +279,7 @@ export default class MapPreviewSidebar extends React.Component {
     });
   };
 
-  handleSampleRowClick = ({ event, rowData }) => {
+  handleSampleRowClick = ({ event, rowData }: $TSFixMe) => {
     const { onSampleClicked, samples } = this.props;
     const sample = samples.get(rowData.id);
     onSampleClicked && onSampleClicked({ object: sample, currentEvent: event });
@@ -262,7 +289,7 @@ export default class MapPreviewSidebar extends React.Component {
     });
   };
 
-  handleProjectRowClick = ({ rowData }) => {
+  handleProjectRowClick = ({ rowData }: $TSFixMe) => {
     const { onProjectSelected, projects } = this.props;
     const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
@@ -280,11 +307,11 @@ export default class MapPreviewSidebar extends React.Component {
     );
   };
 
-  handleSelectAllRows = checked => {
+  handleSelectAllRows = (checked: $TSFixMe) => {
     const { samples, selectedSampleIds, onSelectionUpdate } = this.props;
 
     this.referenceSelectId = null;
-    let newSelected = new Set(
+    const newSelected = new Set(
       checked
         ? union(Array.from(selectedSampleIds), samples.getIds())
         : difference(Array.from(selectedSampleIds), samples.getIds()),
@@ -294,7 +321,7 @@ export default class MapPreviewSidebar extends React.Component {
     trackEvent("MapPreviewSidebar_select-all-rows_clicked");
   };
 
-  handleTabChange = tab => {
+  handleTabChange = (tab: $TSFixMe) => {
     const { onTabChange } = this.props;
     onTabChange && onTabChange(tab);
     trackEvent("MapPreviewSidebar_tab_clicked", { tab });
@@ -302,6 +329,7 @@ export default class MapPreviewSidebar extends React.Component {
 
   computeTabs = () => {
     const { discoveryCurrentTab: tab, projectStats, sampleStats } = this.props;
+    // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
     const count = tab === "samples" ? sampleStats.count : projectStats.count;
     return [
       {
@@ -344,7 +372,7 @@ export default class MapPreviewSidebar extends React.Component {
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
             protectedColumns={["sample"]}
-            ref={samplesTable => {
+            ref={(samplesTable: $TSFixMe) => {
               this.samplesTable = samplesTable;
             }}
             rowClassName={cs.sampleRow}
@@ -385,11 +413,11 @@ export default class MapPreviewSidebar extends React.Component {
     );
   };
 
-  handleLoadRowsAndFormat = async args => {
+  handleLoadRowsAndFormat = async (args: $TSFixMe) => {
     const { projects } = this.props;
     const loadedProjects = await projects.handleLoadObjectRows(args);
 
-    return loadedProjects.map(project => {
+    return loadedProjects.map((project: $TSFixMe) => {
       return merge(
         {
           project: pick(
@@ -414,7 +442,7 @@ export default class MapPreviewSidebar extends React.Component {
         protectedColumns={["project"]}
         headerClassName={cs.tableHeader}
         onLoadRows={this.handleLoadRowsAndFormat}
-        ref={projectsTable => {
+        ref={(projectsTable: $TSFixMe) => {
           this.projectsTable = projectsTable;
         }}
         rowClassName={cs.projectRow}
@@ -423,7 +451,7 @@ export default class MapPreviewSidebar extends React.Component {
     );
   };
 
-  renderTabContent = tab => {
+  renderTabContent = (tab: $TSFixMe) => {
     switch (tab) {
       case "samples":
         return this.renderSamplesTab();
@@ -451,26 +479,7 @@ export default class MapPreviewSidebar extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 MapPreviewSidebar.defaultProps = {
   currentTab: "summary",
-};
-
-MapPreviewSidebar.propTypes = {
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  className: PropTypes.string,
-  currentTab: PropTypes.string,
-  discoveryCurrentTab: PropTypes.string,
-  loading: PropTypes.bool,
-  onFilterClick: PropTypes.func,
-  onProjectSelected: PropTypes.func,
-  onSampleClicked: PropTypes.func,
-  onSelectionUpdate: PropTypes.func.isRequired,
-  onTabChange: PropTypes.func,
-  projectDimensions: PropTypes.array,
-  projects: PropTypes.instanceOf(ObjectCollectionView),
-  projectStats: PropTypes.object,
-  sampleDimensions: PropTypes.array,
-  samples: PropTypes.instanceOf(ObjectCollectionView),
-  sampleStats: PropTypes.object,
-  selectedSampleIds: PropTypes.instanceOf(Set),
 };

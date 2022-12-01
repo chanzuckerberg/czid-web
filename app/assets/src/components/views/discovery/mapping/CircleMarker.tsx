@@ -1,10 +1,17 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import cs from "./circle_marker.scss";
 
-class CircleMarker extends React.Component {
+interface CircleMarkerProps {
+  active?: boolean;
+  size?: number;
+  onMouseEnter?: $TSFixMeFunction;
+  onMouseLeave?: $TSFixMeFunction;
+  onClick?: $TSFixMeFunction;
+}
+
+class CircleMarker extends React.Component<CircleMarkerProps> {
   render() {
     const { active, size, onMouseEnter, onMouseLeave, onClick } = this.props;
 
@@ -33,15 +40,7 @@ class CircleMarker extends React.Component {
     );
   }
 }
-
-CircleMarker.propTypes = {
-  active: PropTypes.bool,
-  size: PropTypes.number,
-  onMouseEnter: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-};
-
+// @ts-expect-error Property 'defaultProps' does not exist on type
 CircleMarker.defaultProps = {
   size: 20,
 };
