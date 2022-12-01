@@ -1,6 +1,5 @@
 import cx from "classnames";
 
-import PropTypes from "prop-types";
 import React from "react";
 
 import { saveProjectDescription } from "~/api";
@@ -9,8 +8,26 @@ import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 import Textarea from "~ui/controls/Textarea";
 import cs from "./project_description.scss";
 
-class ProjectDescription extends React.Component {
-  constructor(props) {
+interface ProjectDescriptionProps {
+  project: { description: string; editable: boolean; id: number };
+  onProjectDescriptionSave?: $TSFixMeFunction;
+}
+
+interface ProjectDescriptionState {
+  description: string;
+  lastValidDescription: string;
+  showLess: boolean;
+  editing: boolean;
+  changed: boolean;
+  savePending: boolean;
+  errors: boolean;
+}
+
+class ProjectDescription extends React.Component<
+  ProjectDescriptionProps,
+  ProjectDescriptionState
+> {
+  constructor(props: ProjectDescriptionProps) {
     super(props);
 
     this.toggleDisplayDescription = this.toggleDisplayDescription.bind(this);
@@ -66,7 +83,7 @@ class ProjectDescription extends React.Component {
       savePending: true,
     });
 
-    let lastValidDescription = this.state.lastValidDescription;
+    const lastValidDescription = this.state.lastValidDescription;
 
     const response = await saveProjectDescription(projectId, value);
 
@@ -150,10 +167,5 @@ class ProjectDescription extends React.Component {
     );
   }
 }
-
-ProjectDescription.propTypes = {
-  project: PropTypes.object.isRequired,
-  onProjectDescriptionSave: PropTypes.func,
-};
 
 export default ProjectDescription;

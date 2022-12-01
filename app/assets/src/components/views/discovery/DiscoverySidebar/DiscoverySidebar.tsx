@@ -6,13 +6,46 @@ import React from "react";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
-import PropTypes from "~/components/utils/propTypes";
-
 import ProjectDescription from "./ProjectDescription";
 import cs from "./discovery_sidebar.scss";
 
-export default class DiscoverySidebar extends React.Component {
-  constructor(props) {
+interface DiscoverySidebarProps {
+  allowedFeatures?: string[];
+  className?: string;
+  currentTab: string;
+  defaultNumberOfMetadataRows?: number;
+  loading?: boolean;
+  noDataAvailable?: boolean;
+  onFilterClick?: $TSFixMeFunction;
+  onProjectDescriptionSave?: $TSFixMeFunction;
+  projectDimensions?: unknown[];
+  projectStats?: object;
+  sampleDimensions?: unknown[];
+  sampleStats?: object;
+  project?: { description: string; editable: boolean; id: number };
+}
+
+interface DiscoverySidebarState {
+  stats: {
+    numSamples: string;
+    numProjects: string;
+    avgTotalReads: string;
+    avgAdjustedRemainingReads: string;
+  };
+  metadata: {
+    host: $TSFixMeUnknown[];
+    tissue: $TSFixMeUnknown[];
+    time: $TSFixMeUnknown[];
+    location: $TSFixMeUnknown[];
+  };
+  expandedMetadataGroups: Set<$TSFixMeUnknown>;
+}
+
+export default class DiscoverySidebar extends React.Component<
+  DiscoverySidebarProps,
+  DiscoverySidebarState
+> {
+  constructor(props: DiscoverySidebarProps) {
     super(props);
 
     this.state = {
@@ -85,6 +118,7 @@ export default class DiscoverySidebar extends React.Component {
     const { metadata } = this.state;
 
     let dates = metadata[field];
+    // @ts-expect-error Property 'count' does not exist on type
     const total = (maxBy("count", dates) || {}).count;
     const isIntervalBased = !!dates.length && dates[0].interval;
     const firstDate = dates.length
@@ -107,7 +141,7 @@ export default class DiscoverySidebar extends React.Component {
       <div className={cs.histogramContainer}>
         <div className={cs.dateHistogram}>
           {dates.map(entry => {
-            const percent = Math.round((100 * entry.count) / total, 0);
+            const percent = Math.round((100 * entry.count) / total);
             const element = (
               <div
                 className={cs.bar}
@@ -209,7 +243,7 @@ export default class DiscoverySidebar extends React.Component {
     const { onFilterClick } = this.props;
     return rows.map((entry, i) => {
       const { count, text, value } = entry;
-      const percent = Math.round((100 * count) / total, 0);
+      const percent = Math.round((100 * count) / total);
       const onClick = () => onFilterClick && onFilterClick(field, value);
       return (
         <div className={cs.barChartRow} key={`${value}_row_${i}`}>
@@ -379,23 +413,8 @@ export default class DiscoverySidebar extends React.Component {
   }
 }
 
+// @ts-expect-error Property 'defaultProps' does not exist on type 'typeof DiscoverySidebar'
 DiscoverySidebar.defaultProps = {
   defaultNumberOfMetadataRows: 4,
   noDataAvailable: false,
-};
-
-DiscoverySidebar.propTypes = {
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  className: PropTypes.string,
-  currentTab: PropTypes.string.isRequired,
-  defaultNumberOfMetadataRows: PropTypes.number,
-  loading: PropTypes.bool,
-  noDataAvailable: PropTypes.bool,
-  onFilterClick: PropTypes.func,
-  onProjectDescriptionSave: PropTypes.func,
-  projectDimensions: PropTypes.array,
-  projectStats: PropTypes.object,
-  sampleDimensions: PropTypes.array,
-  sampleStats: PropTypes.object,
-  project: PropTypes.object,
 };
