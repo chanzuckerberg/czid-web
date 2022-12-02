@@ -121,13 +121,8 @@
         color: $sds-color-gray-600;
 
         .externalLink {
-          color: black !important;
-          text-decoration: underline;
-          text-decoration-style: dashed;
-
-          &:hover {
-            text-decoration-style: solid;
-          }
+          color: $sds-color-primary-400;
+          cursor: pointer;
         }
       }
 

@@ -12,6 +12,7 @@ import {
   ARTIC_PIPELINE_LINK,
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
+  MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
   UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
 } from "~/components/utils/documentationLinks";
 import { AMR_V1_FEATURE, ONT_V1_FEATURE } from "~/components/utils/features";
@@ -260,7 +261,7 @@ const WorkflowSelector = ({
     <ExternalLink
       href={link}
       analyticsEventName={analyticsEventName}
-      className={cx(cs.externalLink, additionalStyle && additionalStyle)}
+      className={additionalStyle && additionalStyle}
     >
       {content}
     </ExternalLink>
@@ -329,10 +330,10 @@ const WorkflowSelector = ({
       beta: false,
       sdsIcon: "dna" as const,
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
-      illuminaLink: MNGS_ILLUMINA_PIPELINE_GITHUB_LINK, // TODO there might be a more specific link than the current one
+      illuminaLink: MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
       illuminaClickedLinkEvent: "", // TODO add analytics here and below
       nanoporeText: "You can check out the Nanopore pipeline on Github ",
-      nanoporeLink: "", // TODO add link once available
+      nanoporeLink: MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
       nanoporeClickedLinkEvent: "",
       nanoporeContent: renderMNGSNanoporeContent(),
     },

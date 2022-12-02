@@ -20,9 +20,11 @@ export const VISUALIZATIONS_DOC_LINK =
 export const ARTIC_PIPELINE_LINK =
   "https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html";
 export const CG_ILLUMINA_PIPELINE_GITHUB_LINK =
-  "https://github.com/chanzuckerberg/czid-workflows/blob/main/consensus-genome/run.wdl";
+  "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/consensus-genome";
 export const MNGS_ILLUMINA_PIPELINE_GITHUB_LINK =
-  "https://github.com/chanzuckerberg/czid-workflows";
+  "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/short-read-mngs";
+export const MNGS_NANOPORE_PIPELINE_GITHUB_LINK =
+  "https://github.com/chanzuckerberg/czid-workflows/blob/main/workflows/long-read-mngs/run.wdl";
 export const PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK =
   "https://help.czid.org/hc/en-us/articles/360058195412";
 export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =
@@ -48,3 +50,5 @@ export const AMR_EXISTING_SAMPLES_LINK =
   "https://docs.google.com/document/d/12a_0PQcTRbB-0JC1SMjhLvdQzhBF2Z0TZseFkoH-aRI/edit#bookmark=id.lqgywt4vgvg3";
 export const AMR_DEPRECATED_HELP_LINK =
   "https://docs.google.com/document/d/1BkkegYEu5hoo-6xqNL-A-eMuT-tTYsJu4Q5OlO_HI5s/edit?usp=sharing";
+export const WEB_UPLOAD_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-on-the-Web";
