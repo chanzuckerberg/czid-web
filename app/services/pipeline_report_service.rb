@@ -137,9 +137,6 @@ class PipelineReportService
     "common_name",
     "category",
     "is_phage",
-    "agg_score",
-    "max_z_score",
-    "nt_z_score",
     "nt_bpm",
     "nt_count",
     "nt_contigs",
@@ -147,7 +144,6 @@ class PipelineReportService
     "nt_percent_identity",
     "nt_alignment_length",
     "nt_e_value",
-    "nr_z_score",
     "nr_bpm",
     "nr_count",
     "nr_contigs",
@@ -271,10 +267,6 @@ class PipelineReportService
     # In the edge case where there are no matching species found, skip all this processing.
     structured_lineage, sorted_genus_tax_ids, highlighted_tax_ids = process_taxon_counts_by_tax_level(taxon_counts: [counts_by_tax_level, merged_taxon_counts_by_tax_level], total_count: adjusted_total_count, contigs: contigs) if counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].present?
 
-    has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
-    align_viz_available = @pipeline_run.align_viz_available?
-    @timer.split("compute_options_available_for_pipeline_run")
-
     all_tax_ids = if counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].nil?
                     []
                   else
@@ -290,13 +282,7 @@ class PipelineReportService
       @timer.split("generate_downloadable_csv")
       return csv_output
     else
-      metadata = metadata.merge(backgroundId: @background&.id,
-                                truncatedReadsCount: @pipeline_run.truncated,
-                                adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
-                                subsampledReadsCount: @pipeline_run.subsampled_reads,
-                                taxonWhitelisted: @pipeline_run.use_taxon_whitelist,
-                                hasByteRanges: has_byte_ranges,
-                                alignVizAvailable: align_viz_available)
+      metadata = get_metadata_by_technology(metadata)
 
       json_dump =
         Oj.dump(
@@ -452,6 +438,34 @@ class PipelineReportService
       jobStatus: pipeline_run.job_status_display,
       reportReady: pipeline_run && pipeline_run.report_ready?,
     }
+  end
+
+  def get_metadata_by_technology(metadata)
+    has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
+    align_viz_available = @pipeline_run.align_viz_available?
+    @timer.split("compute_options_available_for_pipeline_run")
+
+    if @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
+      metadata.merge(
+        backgroundId: @background&.id,
+        truncatedReadsCount: @pipeline_run.truncated,
+        adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
+        subsampledReadsCount: @pipeline_run.subsampled_reads,
+        taxonWhitelisted: @pipeline_run.use_taxon_whitelist,
+        hasByteRanges: has_byte_ranges,
+        alignVizAvailable: align_viz_available
+      )
+    elsif @technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      metadata.merge(
+        backgroundId: nil,
+        truncatedBasesCount: @pipeline_run.truncated_bases,
+        # TODO: return "bases after subsampling" and "bases after host-filtering"
+        # subsampledBasesCount: @pipeline_run.subsampled_bases,
+        taxonWhitelisted: @pipeline_run.use_taxon_whitelist,
+        hasByteRanges: has_byte_ranges,
+        alignVizAvailable: align_viz_available
+      )
+    end
   end
 
   def get_taxon_count_fields_to_pluck(technology)

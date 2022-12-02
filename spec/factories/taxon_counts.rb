@@ -8,6 +8,8 @@ FactoryBot.define do
       # Count type will be filled automaticlaly.
       nt { nil }
       nr { nil }
+      nt_base { nil }
+      nr_base { nil }
     end
 
     initialize_with do
@@ -27,10 +29,12 @@ FactoryBot.define do
 
     tax_level { 1 }
     count { nt || nr || 1 }
-    count_type { nt ? "NT" : "NR" }
+    base_count { nt_base || nr_base || 1 }
+    count_type { nt || nt_base ? "NT" : "NR" }
     percent_identity { 95.65 }
     alignment_length { 149.75 }
     e_value { 1.31 }
     rpm { 100 }
+    bpm { 100_000 }
   end
 end

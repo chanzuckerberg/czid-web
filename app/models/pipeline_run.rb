@@ -1747,21 +1747,24 @@ class PipelineRun < ApplicationRecord
         end
       end
     end
-    # Minimum read count is relevant to both Illumina and Nanopore contigs
+
+    count_key = technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :read_count : :base_count
+
+    # min_contig_reads is relevant to both Illumina and Nanopore contigs
     contig_taxids = contigs.where("read_count >= ?", min_contig_reads)
                            .where.not(lineage_json: [nil, ""])
-                           .pluck(:read_count, :species_taxid_nt, :species_taxid_nr, :species_taxid_merged_nt_nr, :genus_taxid_nt, :genus_taxid_nr, :genus_taxid_merged_nt_nr)
+                           .pluck(count_key, :species_taxid_nt, :species_taxid_nr, :species_taxid_merged_nt_nr, :genus_taxid_nt, :genus_taxid_nr, :genus_taxid_merged_nt_nr)
 
     contig_taxids.each do |c|
-      read_count, species_taxid_nt, species_taxid_nr, species_taxid_merged_nt_nr, genus_taxid_nt, genus_taxid_nr, genus_taxid_merged_nt_nr = c
+      count_key, species_taxid_nt, species_taxid_nr, species_taxid_merged_nt_nr, genus_taxid_nt, genus_taxid_nr, genus_taxid_merged_nt_nr = c
 
-      summary_dict[species_taxid_nt]["nt"][read_count] += 1 if species_taxid_nt
-      summary_dict[species_taxid_nr]["nr"][read_count] += 1 if species_taxid_nr
-      summary_dict[species_taxid_merged_nt_nr]["merged_nt_nr"][read_count] += 1 if species_taxid_merged_nt_nr
+      summary_dict[species_taxid_nt]["nt"][count_key] += 1 if species_taxid_nt
+      summary_dict[species_taxid_nr]["nr"][count_key] += 1 if species_taxid_nr
+      summary_dict[species_taxid_merged_nt_nr]["merged_nt_nr"][count_key] += 1 if species_taxid_merged_nt_nr
 
-      summary_dict[genus_taxid_nt]["nt"][read_count] += 1 if genus_taxid_nt
-      summary_dict[genus_taxid_nr]["nr"][read_count] += 1 if genus_taxid_nr
-      summary_dict[genus_taxid_merged_nt_nr]["merged_nt_nr"][read_count] += 1 if genus_taxid_merged_nt_nr
+      summary_dict[genus_taxid_nt]["nt"][count_key] += 1 if genus_taxid_nt
+      summary_dict[genus_taxid_nr]["nr"][count_key] += 1 if genus_taxid_nr
+      summary_dict[genus_taxid_merged_nt_nr]["merged_nt_nr"][count_key] += 1 if genus_taxid_merged_nt_nr
     end
     return summary_dict
   end
