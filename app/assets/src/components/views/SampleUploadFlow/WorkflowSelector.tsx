@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Checkbox, Icon, Tooltip } from "czifui";
+import { InputCheckbox, Icon, Tooltip } from "czifui";
 import { compact, find, map, size } from "lodash/fp";
 import React, { useState, useContext } from "react";
 
@@ -409,7 +409,7 @@ const WorkflowSelector = ({
             shouldDisableWorkflowOption(workflow);
 
           let radioOption = allowedFeatures.includes(AMR_V1_FEATURE) ? (
-            <Checkbox
+            <InputCheckbox
               disabled={shouldDisableOption}
               className={cs.checkbox}
               stage={analysisOptionSelected ? "checked" : "unchecked"}

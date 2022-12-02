@@ -115,7 +115,7 @@
     "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",
     "copy-to-clipboard": "^3.0.8",
     "core-js": "^3.13.1",
-    "czifui": "^7.15.0",
+    "czifui": "^10.7.1",
     "d3": "^3.5.17",
     "d3-array": "^2.12.1",
     "d3-axis": "^1.0.12",
