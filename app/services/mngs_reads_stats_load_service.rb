@@ -26,7 +26,11 @@ class MngsReadsStatsLoadService
       contents = Syscall.s3_read_json("#{res_folder}/#{fname}")
       # Ex: {"gsnap_filter_out": 194}
       contents.each do |key, count|
-        all_counts << { task: key, reads_after: count }
+        all_counts << if key.include? "_bases"
+                        { task: key, bases_after: count }
+                      else
+                        { task: key, reads_after: count }
+                      end
       end
     end
     all_counts
@@ -83,7 +87,7 @@ class MngsReadsStatsLoadService
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
     frac = -1
     if sub_before && sub_after
-      frac = calculate_subsample_fraction(sub_before, sub_after)
+      frac = calculate_subsample_fraction(sub_before[:reads_after], sub_after[:reads_after])
       all_counts << { fraction_subsampled: frac }
       pipeline_run.fraction_subsampled = frac
     end
@@ -121,8 +125,8 @@ class MngsReadsStatsLoadService
     end
     total_bases = all_counts.detect { |entry| entry.value?("original_bases") }
     if total_bases
-      all_counts << { total_bases: total_bases[:reads_after] }
-      pipeline_run.total_bases = total_bases[:reads_after]
+      all_counts << { total_bases: total_bases[:bases_after] }
+      pipeline_run.total_bases = total_bases[:bases_after]
     end
 
     # Load truncation
@@ -132,21 +136,21 @@ class MngsReadsStatsLoadService
     end
     truncated_bases = all_counts.detect { |entry| entry.value?("validated_bases") }
     if truncated_bases
-      pipeline_run.truncated_bases = truncated_bases[:reads_after]
+      pipeline_run.truncated_bases = truncated_bases[:bases_after]
     end
 
     # Load subsample fraction
     sub_before = all_counts.detect { |entry| entry.value?("human_filtered_reads") }
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_reads") }
     if sub_before && sub_after
-      frac = calculate_subsample_fraction(sub_before, sub_after)
+      frac = calculate_subsample_fraction(sub_before[:reads_after], sub_after[:reads_after])
       all_counts << { fraction_subsampled: frac }
       pipeline_run.fraction_subsampled = frac
     end
     sub_before_bases = all_counts.detect { |entry| entry.value?("human_filtered_bases") }
     sub_after_bases = all_counts.detect { |entry| entry.value?("subsampled_bases") }
     if sub_before_bases && sub_after_bases
-      frac = calculate_subsample_fraction(sub_before_bases, sub_after_bases)
+      frac = calculate_subsample_fraction(sub_before_bases[:bases_after], sub_after_bases[:bases_after])
       all_counts << { fraction_subsampled_bases: frac }
       pipeline_run.fraction_subsampled_bases = frac
     end
@@ -165,7 +169,7 @@ class MngsReadsStatsLoadService
     end
     unmapped_bases = all_counts.detect { |entry| entry.value?("unmapped_bases") }
     if unmapped_bases
-      pipeline_run.unmapped_bases = unmapped_bases[:reads_after]
+      pipeline_run.unmapped_bases = unmapped_bases[:bases_after]
     end
 
     pipeline_run.save!
@@ -222,6 +226,6 @@ class MngsReadsStatsLoadService
   end
 
   def calculate_subsample_fraction(sub_before, sub_after)
-    sub_before[:reads_after].to_i > 0 ? ((1.0 * sub_after[:reads_after].to_i) / sub_before[:reads_after].to_i) : 1.0
+    sub_before.to_i > 0 ? ((1.0 * sub_after.to_i) / sub_before.to_i) : 1.0
   end
 end

@@ -2,5 +2,6 @@ class JobStat < ApplicationRecord
   belongs_to :pipeline_run
   validates :pipeline_run, presence: true
   validates :task, presence: true
-  validates :reads_after, numericality: { greater_than_or_equal_to: 0 }
+  validates :reads_after, numericality: { greater_than_or_equal_to: 0 }, allow_blank: true
+  validates :bases_after, numericality: { greater_than_or_equal_to: 0 }, allow_blank: true
 end
