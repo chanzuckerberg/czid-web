@@ -629,11 +629,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
               ))}
             <span>
               {rowData.pathogenTag && (
-                <PathogenLabel
-                  type={rowData.pathogenTag}
-                  color={"red"}
-                  className={isDimmed ? "dimRed" : null}
-                />
+                <PathogenLabel type={rowData.pathogenTag} isDimmed={isDimmed} />
               )}
             </span>
             <span>{this.renderHoverActions({ rowData })}</span>

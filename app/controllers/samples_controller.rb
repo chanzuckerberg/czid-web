@@ -1709,7 +1709,7 @@ class SamplesController < ApplicationController
   end
 
   def fetch_priority_pathogens
-    if current_user && current_user.allowed_feature?("pathogen_label_v0")
+    if current_user
       pathogen_list_version = PathogenList.find_by(is_global: true).fetch_list_version()
       { "knownPathogen" => pathogen_list_version.fetch_pathogen_names() }
     else

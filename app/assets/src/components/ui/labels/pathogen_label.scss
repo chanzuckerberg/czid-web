@@ -5,19 +5,6 @@
 // Use .ui to make selector higher precedence than semantic-ui.
 :global(.ui) {
   &.pathogenLabel {
-    margin-left: $sds-spaces-m;
-
-    &:first-child {
-      margin-left: $sds-spaces-m;
-    }
-
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: lighter;
-    font-size: 9px;
-  }
-
-  &.newPathogenLabel {
     @include font-body-xxxs;
     padding: $sds-spaces-xxxs $sds-spaces-xs;
 
