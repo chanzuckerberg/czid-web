@@ -488,11 +488,11 @@ RSpec.describe SamplesHelper, type: :helper do
                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore] }])
       @sample_five = create(:sample, project: @project, name: "Test Sample 5", host_genome_name: "Human",
                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, total_bases: 42_424, qc_percent: 10.0001, technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore] }])
-      create(:job_stat, task: "human_filtered_bases", reads_after: 4242, pipeline_run_id: @sample_four.pipeline_runs.first.id)
-      create(:job_stat, task: "quality_filtered_bases", reads_after: 14_242, pipeline_run_id: @sample_four.pipeline_runs.first.id)
-      create(:job_stat, task: "original_bases", reads_after: 142_420, pipeline_run_id: @sample_four.pipeline_runs.first.id)
-      create(:job_stat, task: "human_filtered_bases", reads_after: 123, pipeline_run_id: @sample_five.pipeline_runs.first.id)
-      create(:job_stat, task: "quality_filtered_bases", reads_after: 1234, pipeline_run_id: @sample_five.pipeline_runs.first.id)
+      create(:job_stat, task: "human_filtered_bases", bases_after: 4242, pipeline_run_id: @sample_four.pipeline_runs.first.id)
+      create(:job_stat, task: "quality_filtered_bases", bases_after: 14_242, pipeline_run_id: @sample_four.pipeline_runs.first.id)
+      create(:job_stat, task: "original_bases", bases_after: 142_420, pipeline_run_id: @sample_four.pipeline_runs.first.id)
+      create(:job_stat, task: "human_filtered_bases", bases_after: 123, pipeline_run_id: @sample_five.pipeline_runs.first.id)
+      create(:job_stat, task: "quality_filtered_bases", bases_after: 1234, pipeline_run_id: @sample_five.pipeline_runs.first.id)
     end
 
     it "includes specific metadata fields in basic case" do

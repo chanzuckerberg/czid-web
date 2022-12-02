@@ -47,10 +47,11 @@ module SamplesHelper
       %w[sample_name uploader upload_date overall_job_status runtime_seconds
          total_reads total_bases passed_filters passed_filters_percent
          subsampled_fraction_bases bases_after_quality_filter_percent bases_after_quality_filter
-         bases_after_minimap2_host_filtering host_organism notes
-         read_length_median read_length_mode read_length_median_absolute_deviation
-         read_length_min read_length_max read_length_mean
-         read_length_standard_deviation]
+         bases_after_minimap2_host_filtering host_organism notes]
+    #  TODO: Uncomment and include the following read_length stats once they are available.
+    #  read_length_median read_length_mode read_length_median_absolute_deviation
+    #  read_length_min read_length_max read_length_mean
+    #  read_length_standard_deviation
     else
       raise "Unknown technology"
     end
@@ -201,7 +202,7 @@ module SamplesHelper
       out_suffix = "" # don't expect nanopore job_stats to end with _out
     end
     steps.each do |step|
-      result["#{reads_or_bases}_after_#{step}".to_sym] = (job_stats_hash["#{step}#{out_suffix}"] || {})["reads_after"]
+      result["#{reads_or_bases}_after_#{step}".to_sym] = (job_stats_hash["#{step}#{out_suffix}"] || {})["#{reads_or_bases}_after"]
     end
     result
   end
