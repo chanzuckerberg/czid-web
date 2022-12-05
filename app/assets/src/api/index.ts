@@ -555,6 +555,21 @@ const setWorkflowVersion = (workflowName: $TSFixMe, version: $TSFixMe) =>
     },
   });
 
+const modifyFeatureFlagForUsers = ({
+  featureFlag,
+  action,
+  userEmails,
+}: {
+  featureFlag: string;
+  action: "add" | "remove";
+  userEmails: string[];
+}) =>
+  postWithCSRF("/users/feature_flag", {
+    feature_flag_action: action,
+    feature_flag: featureFlag,
+    user_emails: userEmails,
+  });
+
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
 const getTaxaWithReadsSuggestions = (
   query: $TSFixMe,
@@ -711,6 +726,7 @@ export {
   kickoffConsensusGenome,
   kickoffAMR,
   markSampleUploaded,
+  modifyFeatureFlagForUsers,
   retryPhyloTree,
   saveProjectDescription,
   saveProjectName,

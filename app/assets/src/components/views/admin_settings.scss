@@ -1,12 +1,43 @@
-textarea { 
-    resize: none;
-  }
-.submit {
-    vertical-align: top;
-  }
-.workflow_versions {
-    padding: 20px;
+@import "~czifui/dist/variables";
+
+textarea {
+  resize: none;
 }
+.submit {
+  vertical-align: top;
+}
+.workflow_versions {
+  padding: $sds-spaces-xl;
+}
+
 .page {
-    padding: 10px;
+  margin: $sds-spaces-m;
+
+  .header {
+    font: $sds-font-header-xxl-600-font;
+  }
+
+  .title {
+    font: $sds-font-header-l-600-font;
+    margin-bottom: $sds-spaces-m;
+  }
+
+  .addFeatureFlagContainer {
+    margin: $sds-spaces-xl;
+
+    .actions {
+      display: flex;
+      gap: $sds-spaces-xl;
+    }
+
+    .formControl {
+      display: flex;
+      gap: $sds-spaces-m;
+      margin-bottom: $sds-spaces-m;
+    }
+  }
+
+  .featureFlagResponse {
+    margin-bottom: $sds-spaces-m;
+  }
 }

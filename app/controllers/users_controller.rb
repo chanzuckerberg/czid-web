@@ -79,6 +79,46 @@ class UsersController < ApplicationController
     render 'password_new'
   end
 
+  # POST /users/feature_flag
+  def feature_flag
+    if current_user.admin?
+      permitted_params = params.permit(:feature_flag_action, :feature_flag, user_emails: [])
+      emails = permitted_params[:user_emails]
+      users_that_already_had_feature_flag = []
+      users_with_no_accounts = []
+
+      emails.each do |email|
+        user = User.find_by(email: email)
+
+        if user.nil?
+          users_with_no_accounts << email
+          next
+        end
+
+        if permitted_params[:feature_flag_action] == "add"
+          if user.allowed_feature?(permitted_params[:feature_flag])
+            users_that_already_had_feature_flag << email
+            next
+          end
+
+          user.add_allowed_feature(permitted_params[:feature_flag])
+        elsif permitted_params[:feature_flag_action] == "remove"
+          user.remove_allowed_feature(permitted_params[:feature_flag])
+        end
+      end
+
+      render(
+        json: {
+          featureFlagAction: permitted_params[:feature_flag_action],
+          usersThatAlredyHadFeatureFlag: users_that_already_had_feature_flag,
+          usersWithNoAccounts: users_with_no_accounts,
+          usersWithUpdatedFeatureFlags: emails - users_that_already_had_feature_flag - users_with_no_accounts,
+        }.to_json,
+        status: :ok
+      )
+    end
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.

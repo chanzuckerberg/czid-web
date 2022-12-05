@@ -226,7 +226,11 @@ Rails.application.routes.draw do
   resources :persisted_backgrounds, only: [:index, :create]
   resources :persisted_backgrounds, only: [:update, :show], param: :projectId
 
-  resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
+  resources :users, only: [:create, :new, :edit, :update, :destroy, :index] do
+    collection do
+      post :feature_flag
+    end
+  end
 
   get 'users/:id', to: 'users#edit'
 
