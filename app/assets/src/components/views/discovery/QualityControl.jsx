@@ -50,7 +50,7 @@ import {
   MIN_NUM_BINS,
   MIN_BIN_WIDTH,
   MISSING_INSERT_SIZE_WARNING,
-} from "./constants.js";
+} from "./constants";
 import cs from "./quality_control.scss";
 
 // TODO: get rid of this wrapper once the graphql
@@ -65,7 +65,6 @@ function QualityControlWrapper(props) {
       ...props.filters,
     },
   });
-
   if (loading) return <span>Loading...</span>;
   if (error) return <span>`Error! ${error.message}`</span>;
 

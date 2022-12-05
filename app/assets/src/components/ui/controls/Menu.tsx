@@ -1,8 +1,11 @@
 import cx from "classnames";
 import React from "react";
-import { Menu as BaseMenu } from "semantic-ui-react";
+import {
+  Menu as BaseMenu,
+  MenuProps as BaseMenuProps,
+} from "semantic-ui-react";
 
-interface MenuProps {
+interface MenuProps extends BaseMenuProps {
   className?: string;
   children?: React.ReactNode[] | React.ReactNode;
 }

@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
@@ -9,7 +8,11 @@ import BacteriaCultureIcon from "~ui/icons/BacteriaCultureIcon";
 import InfoBanner from "./InfoBanner";
 import cs from "./modal_first_time_user.scss";
 
-const ModalFirstTimeUser = ({ onClose }) => {
+interface ModalFirstTimeUserProps {
+  onClose: $TSFixMeFunction;
+}
+
+const ModalFirstTimeUser = ({ onClose }: ModalFirstTimeUserProps) => {
   return (
     <Modal
       open
@@ -42,10 +45,6 @@ const ModalFirstTimeUser = ({ onClose }) => {
       />
     </Modal>
   );
-};
-
-ModalFirstTimeUser.propTypes = {
-  onClose: PropTypes.func.isRequired,
 };
 
 export default ModalFirstTimeUser;

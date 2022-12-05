@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
@@ -9,11 +8,39 @@ import { IconArrowRight } from "~ui/icons";
 import ImgSearchSecondary from "~ui/illustrations/ImgSearchSecondary";
 import cs from "./info_banner.scss";
 
+interface InfoBannerProps {
+  className?: string;
+  contentClassName?: string;
+  listenerLink?: {
+    text: string;
+    onClick: $TSFixMeFunction;
+  };
+  icon?: React.ReactNode;
+  iconClassName?: string;
+  link?:
+    | {
+        text: string;
+        href: string;
+        external?: boolean;
+      }
+    | {
+        text: string;
+        href: string;
+        external?: boolean;
+      }[];
+  message?: React.ReactNode;
+  messageClassName?: string;
+  suggestion?: string;
+  title?: string;
+  titleClassName?: string;
+  type?: string;
+}
+
 const InfoBanner = ({
   className,
   contentClassName,
   listenerLink,
-  icon,
+  icon = <ImgSearchSecondary className={cs.icon} />,
   iconClassName,
   link,
   message,
@@ -22,7 +49,7 @@ const InfoBanner = ({
   title,
   titleClassName,
   type,
-}) => {
+}: InfoBannerProps) => {
   // This is a hack to associate the event with the parent component, DiscoveryView
   trackEvent("DiscoveryView_no-results-banner_displayed", {
     message,
@@ -79,42 +106,6 @@ const InfoBanner = ({
       <div className={cx(cs.icon, iconClassName)}>{icon}</div>
     </div>
   );
-};
-
-InfoBanner.defaultProps = {
-  // Defaults to the most commonly used banner settings
-  icon: <ImgSearchSecondary className={cs.icon} />,
-};
-
-InfoBanner.propTypes = {
-  className: PropTypes.string,
-  contentClassName: PropTypes.string,
-  listenerLink: PropTypes.shape({
-    text: PropTypes.string.isRequired,
-    onClick: PropTypes.func.isRequired,
-  }),
-  icon: PropTypes.node,
-  iconClassName: PropTypes.string,
-  link: PropTypes.oneOfType([
-    PropTypes.shape({
-      text: PropTypes.string.isRequired,
-      href: PropTypes.string.isRequired,
-      external: PropTypes.bool,
-    }),
-    PropTypes.arrayOf(
-      PropTypes.shape({
-        text: PropTypes.string.isRequired,
-        href: PropTypes.string.isRequired,
-        external: PropTypes.bool,
-      }),
-    ),
-  ]),
-  message: PropTypes.node,
-  messageClassName: PropTypes.string,
-  suggestion: PropTypes.string,
-  title: PropTypes.string,
-  titleClassName: PropTypes.string,
-  type: PropTypes.string,
 };
 
 export default InfoBanner;

@@ -6,7 +6,8 @@ import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./project_info_icon_tooltip.scss";
 
-interface ProjectInfoIconTooltipProps extends TooltipProps {
+interface ProjectInfoIconTooltipProps
+  extends Omit<TooltipProps, "children" | "title"> {
   isPublic: boolean;
 }
 

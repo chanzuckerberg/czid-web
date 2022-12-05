@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
@@ -7,11 +6,28 @@ import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import cs from "./base_discovery_view.scss";
 import csTableRenderer from "./table_renderers.scss";
 
-class BaseDiscoveryView extends React.Component {
+interface BaseDiscoveryViewProps {
+  columns?: $TSFixMeUnknown[];
+  data?: $TSFixMeUnknown[];
+  handleRowClick?: $TSFixMeFunction;
+  headerClassName?: string;
+  initialActiveColumns?: string[];
+  onLoadRows: $TSFixMeFunction;
+  onSortColumn?: $TSFixMeFunction;
+  protectedColumns?: string[];
+  rowClassName?: string;
+  rowHeight?: number | ((...args: $TSFixMeUnknown[]) => $TSFixMeUnknown);
+  sortable?: boolean;
+  sortBy?: string;
+  sortDirection?: string;
+}
+
+class BaseDiscoveryView extends React.Component<BaseDiscoveryViewProps> {
   // Note: This class guarantees that a couple of settings are synced
   // between views that use it (at the time of this comment, ProjectsView and VisualizationsView)
   // We might be able to get rid of it once we implement dynamic row height on the tables.
-  constructor(props) {
+  infiniteTable: $TSFixMe;
+  constructor(props: BaseDiscoveryViewProps) {
     super(props);
     this.infiniteTable = null;
   }
@@ -57,26 +73,11 @@ class BaseDiscoveryView extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 BaseDiscoveryView.defaultProps = {
   columns: [],
   data: [],
   rowHeight: 68,
-};
-
-BaseDiscoveryView.propTypes = {
-  columns: PropTypes.array,
-  data: PropTypes.array,
-  handleRowClick: PropTypes.func,
-  headerClassName: PropTypes.string,
-  initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
-  onLoadRows: PropTypes.func.isRequired,
-  onSortColumn: PropTypes.func,
-  protectedColumns: PropTypes.arrayOf(PropTypes.string),
-  rowClassName: PropTypes.string,
-  rowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
-  sortable: PropTypes.bool,
-  sortBy: PropTypes.string,
-  sortDirection: PropTypes.string,
 };
 
 export default BaseDiscoveryView;

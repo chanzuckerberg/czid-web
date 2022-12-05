@@ -1,7 +1,6 @@
 import { Icon } from "czifui";
 import { assign, find, min } from "lodash/fp";
 import moment from "moment";
-import PropTypes from "prop-types";
 import React from "react";
 import { validateProjectName, saveProjectName } from "~/api";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -9,7 +8,23 @@ import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
 import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
+import { DateString } from "~/interface/shared";
 import cs from "./project_header.scss";
+
+interface ProjectHeaderProps {
+  fetchedSamples?: { privateUntil: DateString }[];
+  onMetadataUpdated?: $TSFixMeFunction;
+  onProjectUpdated?: $TSFixMeFunction;
+  project: {
+    users: { email: string }[];
+    name: string;
+    id: number;
+    editable: boolean;
+    public_access: 0 | 1;
+  };
+  snapshotProjectName?: string;
+  workflow?: string;
+}
 
 const ProjectHeader = ({
   project,
@@ -18,8 +33,8 @@ const ProjectHeader = ({
   onProjectUpdated,
   onMetadataUpdated,
   workflow,
-}) => {
-  const handleProjectUserAdded = (username, email) => {
+}: ProjectHeaderProps) => {
+  const handleProjectUserAdded = (username: string, email: string) => {
     const userFound = find({ email }, project.users);
     if (!userFound) {
       const newProject = assign(project, {
@@ -109,10 +124,7 @@ const ProjectHeader = ({
       )}
       {project.editable && (
         <React.Fragment>
-          <ProjectInfoIconTooltip
-            isPublic={project.public_access === 1}
-            position="bottom center"
-          />
+          <ProjectInfoIconTooltip isPublic={project.public_access === 1} />
           <div className={cs.item}>
             <Icon sdsIcon="people" sdsSize="s" sdsType="static" />{" "}
             {project.users.length
@@ -124,6 +136,7 @@ const ProjectHeader = ({
           <div className={cs.item}>
             <ProjectSettingsModal
               // TODO(tiago): remove csrf by restructuring api calls within ProjectSettingsModal
+              // @ts-expect-error Property 'content' does not exist on type 'HTMLElement'
               csrf={document.getElementsByName("csrf-token")[0].content}
               nextPublicSampleDate={nextPublicSampleDate}
               onUserAdded={handleProjectUserAdded}
@@ -146,15 +159,6 @@ const ProjectHeader = ({
       )}
     </div>
   );
-};
-
-ProjectHeader.propTypes = {
-  fetchedSamples: PropTypes.array,
-  onMetadataUpdated: PropTypes.func,
-  onProjectUpdated: PropTypes.func,
-  project: PropTypes.object.isRequired,
-  snapshotProjectName: PropTypes.string,
-  workflow: PropTypes.string,
 };
 
 export default ProjectHeader;
