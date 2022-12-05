@@ -1293,6 +1293,7 @@ class SamplesController < ApplicationController
     @file_list = []
     if pr
       @file_list = pr.outputs_by_step(can_see_stage1_results)
+      @pipeline_technology = pr.technology
     end
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|

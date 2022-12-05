@@ -149,6 +149,8 @@ def parse_input_item(reference):
         return parse_apply_expression(reference)
     elif isinstance(reference, WDL.Expr.Array):
         return parse_array_expression(reference)
+    elif isinstance(reference, (WDL.Expr.String, WDL.Expr.Int, WDL.Expr.Float, WDL.Expr.Boolean)):
+        return []  # ignore hard-coded constants
 
     raise Exception(f"Unsupported reference: {reference}")
 

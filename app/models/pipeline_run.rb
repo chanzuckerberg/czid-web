@@ -948,7 +948,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def wdl_s3_folder
-    if pipeline_version_at_least(pipeline_version, "5.0.0")
+    if pipeline_version_at_least(pipeline_version, "5.0.0") || technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
       "s3://#{S3_WORKFLOWS_BUCKET}/#{workflow}-v#{wdl_version}"
     else
       "s3://#{S3_WORKFLOWS_BUCKET}/v#{wdl_version}/#{WorkflowRun::WORKFLOW[:main]}"
@@ -1825,6 +1825,60 @@ class PipelineRun < ApplicationRecord
   end
 
   def sfn_outputs_by_step(can_see_stage1_results = false)
+    case technology
+    when TECHNOLOGY_INPUT[:illumina]
+      return illumina_sfn_outputs_by_step(can_see_stage1_results)
+    when TECHNOLOGY_INPUT[:nanopore]
+      return ont_sfn_outputs_by_step
+    end
+  end
+
+  STEP_TO_JOB_STAT = {
+    "RunValidateInput" => "validated_bases",
+    "RunQualityFilter" => "quality_filtered_bases",
+    "RunHostFilter" => "host_filtered_bases",
+    "RunHumanFilter" => "human_filtered_bases",
+    "RunSubsampling" => "subsampled_bases",
+  }.freeze
+
+  def ont_sfn_outputs_by_step
+    result_files = {}
+
+    data = SfnOntPipelineDataService.new(id).call
+    singular_stage_index = 0
+    steps_with_output_files = data[:stages][singular_stage_index][:steps]
+    job_stats_by_task = job_stats.index_by(&:task)
+
+    # could make this it's own helper func somewhere
+    camel_case = ->(string) { string.titleize.delete(" ").sub(string.chr, string.chr.downcase) }
+
+    steps = {}
+    # Collect step information
+    steps_with_output_files.each do |step|
+      step_dict = {
+        name: StringUtil.humanize_step_name(step[:name]),
+        stepDescription: step[:description],
+        fileList: step[:fileList],
+        readsAfter: (job_stats_by_task[STEP_TO_JOB_STAT[step[:name]]] || {})["bases_after"],
+      }
+      # Convert to camelCase
+      step_key = camel_case.call(step[:name])
+      steps[step_key] = step_dict
+    end
+
+    # The ONT pipeline doesn't have any PipelineRunStages. I added this for compatibility with the frontend
+    stage_name = "ONT Pipeline"
+    stage_key = camel_case.call(stage_name)
+    result_files[stage_key] = {
+      name: stage_name,
+      stageDescription: "this is the ONT pipeline 'stage' description",
+      steps: steps,
+    }
+
+    result_files
+  end
+
+  def illumina_sfn_outputs_by_step(can_see_stage1_results = false)
     result_files = {}
 
     remove_stage1_urls = !can_see_stage1_results
@@ -2036,6 +2090,14 @@ class PipelineRun < ApplicationRecord
       (total_reads - total_ercc_reads.to_i) * subsample_fraction
     elsif technology == TECHNOLOGY_INPUT[:nanopore]
       total_bases
+    end
+  end
+
+  def call_pipeline_data_service(show_experimental, remove_host_filtering_urls)
+    if technology == TECHNOLOGY_INPUT[:illumina]
+      SfnPipelineDataService.call(id, show_experimental, remove_host_filtering_urls)
+    elsif technology == TECHNOLOGY_INPUT[:nanopore]
+      SfnOntPipelineDataService.call(id)
     end
   end
 

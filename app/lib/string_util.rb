@@ -4,7 +4,7 @@ module StringUtil
   def self.humanize_step_name(step_name, stage_name = nil)
     # Support custom pipeline step names (e.g. "RunStar" becomes "STAR" instead of "Star")
     unless stage_name.nil?
-      stage_contains_custom_step_names = PipelineRunsHelper::STEP_DESCRIPTIONS[stage_name].key?("step_names")
+      stage_contains_custom_step_names = PipelineRunsHelper::STEP_DESCRIPTIONS&.[](stage_name)&.key?("step_names")
       if stage_contains_custom_step_names
         dag_name = SfnPipelineDataService::SFN_STEP_TO_DAG_STEP_NAME[stage_name][step_name]
         custom_step_names = PipelineRunsHelper::STEP_DESCRIPTIONS[stage_name]["step_names"]

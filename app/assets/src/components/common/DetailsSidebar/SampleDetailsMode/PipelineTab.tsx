@@ -16,6 +16,7 @@ import {
 } from "~/components/utils/resultsFolder";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
 import {
   ERCCComparisonShape,
@@ -205,6 +206,17 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     }
   };
 
+  getSequenceType = (technology: string) => {
+    switch (technology) {
+      case TECHNOLOGY_OPTIONS.ILLUMINA:
+        return "total_reads";
+      case TECHNOLOGY_OPTIONS.ONT:
+        return "total_bases";
+      default:
+        return undefined;
+    }
+  };
+
   renderReadCountsTable = (stepKey: string) => {
     const { pipelineRun } = this.props;
     const { pipelineStepDict } = this.state;
@@ -215,10 +227,14 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
       stepDescriptionKey,
     } = RESULTS_FOLDER_STEP_KEYS;
 
+    const totalCount = get(
+      this.getSequenceType(pipelineRun?.technology),
+      pipelineRun,
+    );
     const step = pipelineStepDict[stepsKey][stepKey];
     const stepName = step[stepNameKey];
 
-    const totalReads = pipelineRun.total_reads;
+    // Need to change this to total_bases if ONT
     let readsAfter = step[readsAfterKey];
     if (readsAfter === null) {
       return;
@@ -238,7 +254,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
       readsAfter = previousStep[readsAfterKey];
     }
 
-    const percentReads = ((readsAfter / totalReads) * 100).toFixed(2);
+    const percentReads = ((readsAfter / totalCount) * 100).toFixed(2);
 
     return (
       <div className={cs.readsRemainingRow}>
@@ -293,7 +309,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     return stepInformationPresent && readsPresent;
   };
 
-  renderReadsRemainingSection = () => {
+  renderReadsRemainingSection = (title: string) => {
     const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
     const { pipelineRun } = this.props;
     const { loading, pipelineStepDict } = this.state;
@@ -302,7 +318,11 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
       return <LoadingMessage message="Loading" className={cs.loading} />;
     }
 
-    if (!pipelineRun || !pipelineRun.total_reads || !this.readsPresent()) {
+    if (
+      !pipelineRun ||
+      (!pipelineRun.total_reads && !pipelineRun.total_bases) ||
+      !this.readsPresent()
+    ) {
       return <div className={cs.noData}>No data</div>;
     }
 
@@ -323,10 +343,10 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
             />
           </div>
           <div className={cs.narrowMetadataValueContainer}>
-            <div className={cs.labelText}>Reads Remaining</div>
+            <div className={cs.labelText}>{title}</div>
           </div>
           <div className={cs.narrowMetadataValueContainer}>
-            <div className={cs.labelText}>% Reads Remaining</div>
+            <div className={cs.labelText}>% {title}</div>
           </div>
         </div>
         {Object.keys(pipelineStepDict[stepsKey]).map(stepKey => (
@@ -371,6 +391,8 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     const fields = this.INFO_FIELDS_FOR_WORKFLOW[workflow];
 
     const pipelineInfoFields = fields.map(this.getPipelineInfoField);
+    const title =
+      pipelineRun?.technology === "ONT" ? "Bases Remaining" : "Reads Remaining";
 
     return (
       <div>
@@ -391,9 +413,9 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
               toggleable
               onToggle={() => this.toggleSection(READ_COUNTS_TABLE)}
               open={this.state.sectionOpen[READ_COUNTS_TABLE]}
-              title="Reads Remaining"
+              title={title}
             >
-              {this.renderReadsRemainingSection()}
+              {this.renderReadsRemainingSection(title)}
             </MetadataSection>
             <MetadataSection
               toggleable

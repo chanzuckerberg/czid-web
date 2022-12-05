@@ -20,7 +20,7 @@ class PipelineVizController < ApplicationController
       remove_host_filtering_urls = current_user.id != sample.user_id && !current_user.admin?
       begin
         if pipeline_run.step_function?
-          @results = SfnPipelineDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
+          @results = pipeline_run.call_pipeline_data_service(@show_experimental, remove_host_filtering_urls)
           # Give step names spaces between words and strip "out" from them
           @results[:stages].each { |stage| stage[:steps].each { |step| step[:name] = StringUtil.humanize_step_name(step[:name], stage[:name]) } }
         elsif pipeline_run.directed_acyclic_graph?
@@ -56,6 +56,7 @@ class PipelineVizController < ApplicationController
         return
       end
 
+      @pipeline_technology = pipeline_run.technology
       @pipeline_versions = sample.pipeline_versions
       @last_processed_at = pipeline_run.created_at
       @pipeline_run_display = curate_pipeline_run_display(pipeline_run)

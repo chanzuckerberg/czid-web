@@ -6,65 +6,52 @@ import {
 import Divider from "./layout/Divider";
 import cs from "./results_folder.scss";
 import { openUrl, downloadStringToFile } from "./utils/links";
+import { TECHNOLOGY_OPTIONS } from "./views/SampleUploadFlow/constants";
 
 interface OutputFileProps {
-  file?: object;
+  file?: {
+    url: string;
+  };
 }
 
-class OutputFile extends React.Component<OutputFileProps> {
-  file: $TSFixMe;
-  constructor(props: OutputFileProps, context: $TSFixMe) {
-    super(props, context);
-    this.file = props.file;
-  }
-
-  conditionalOpenUrl = (url: $TSFixMe) => {
+const OutputFile = ({ file }: OutputFileProps) => {
+  const conditionalOpenUrl = (url: $TSFixMe) => {
     if (url) {
-      openUrl(this.file.url);
+      openUrl(file.url);
     }
   };
 
-  render() {
-    return (
-      <tr
-        className={`${this.file.url ? "" : "disabled-"}file-link`}
-        onClick={this.conditionalOpenUrl.bind(this, this.file.url)}
-      >
-        <td className={cs.tableData}>
-          <i className="fa fa-file" />
-          {this.file["displayName"]}
-          <span className="size-tag"> -- {this.file["size"]}</span>
-        </td>
-      </tr>
-    );
-  }
-}
+  return (
+    <tr
+      className={`${file.url ? "" : "disabled-"}file-link`}
+      onClick={() => conditionalOpenUrl(file.url)}
+    >
+      <td className={cs.tableData}>
+        <i className="fa fa-file" />
+        {file["displayName"]}
+        <span className="size-tag"> -- {file["size"]}</span>
+      </td>
+    </tr>
+  );
+};
 
 interface ConfigFileProps {
-  stageDagJson?: object;
+  stageDagJson?: string;
 }
 
-class ConfigFile extends React.Component<ConfigFileProps> {
-  stageDagJson: $TSFixMe;
-  constructor(props: ConfigFileProps, context: $TSFixMe) {
-    super(props, context);
-    this.stageDagJson = props.stageDagJson;
-  }
-
-  render() {
-    return (
-      <tr
-        className="file-link"
-        onClick={downloadStringToFile.bind(this, this.stageDagJson)}
-      >
-        <td className={cs.tableData}>
-          <i className="fa fa-file" />
-          config.json
-        </td>
-      </tr>
-    );
-  }
-}
+const ConfigFile = ({ stageDagJson }: ConfigFileProps) => {
+  return (
+    <tr
+      className="file-link"
+      onClick={() => downloadStringToFile(stageDagJson)}
+    >
+      <td className={cs.tableData}>
+        <i className="fa fa-file" />
+        config.json
+      </td>
+    </tr>
+  );
+};
 
 const ResultsFolderStepDivider = () => {
   return (
@@ -78,68 +65,45 @@ const ResultsFolderStepDivider = () => {
 
 interface ResultsFolderStepProps {
   step?: object;
+  pipelineTechnology?: TECHNOLOGY_OPTIONS.ILLUMINA | TECHNOLOGY_OPTIONS.ONT;
 }
 
-class ResultsFolderStep extends React.Component<ResultsFolderStepProps> {
-  step: $TSFixMe;
-  constructor(props: $TSFixMe, context: $TSFixMe) {
-    super(props, context);
-    this.step = props.step;
-  }
+const ResultsFolderStep = ({
+  step,
+  pipelineTechnology,
+}: ResultsFolderStepProps) => {
+  const {
+    stepDescriptionKey,
+    readsAfterKey,
+    filesKey,
+    stepNameKey,
+  } = RESULTS_FOLDER_STEP_KEYS;
 
-  render() {
-    const {
-      stepDescriptionKey,
-      readsAfterKey,
-      filesKey,
-      stepNameKey,
-    } = RESULTS_FOLDER_STEP_KEYS;
+  const description = step[stepDescriptionKey];
+  const readsAfter = step[readsAfterKey];
+  const fileList = step[filesKey];
+  const stepName = step[stepNameKey];
 
-    const description = this.step[stepDescriptionKey];
-    const readsAfter = this.step[readsAfterKey];
-    const fileList = this.step[filesKey];
-    const stepName = this.step[stepNameKey];
-    return (
-      <tbody>
-        <tr key="first">
-          <td className={cs.tableData}>
-            Step <b>{stepName}</b>: {description}{" "}
-            {readsAfter ? (
-              <span>
-                (<b>{readsAfter}</b> reads remained.)
-              </span>
-            ) : null}
-          </td>
-        </tr>
-        {fileList.map((file: $TSFixMe, j: $TSFixMe) => {
-          return <OutputFile file={file} key={j} />;
-        })}
-        <ResultsFolderStepDivider />
-      </tbody>
-    );
-  }
-}
-
-interface ResultsFolderStepListProps {
-  stepDict?: object;
-}
-
-class ResultsFolderStepList extends React.Component<
-  ResultsFolderStepListProps
-> {
-  stepDict: $TSFixMe;
-  constructor(props: $TSFixMe, context: $TSFixMe) {
-    super(props, context);
-    this.stepDict = props.stepDict;
-  }
-
-  render() {
-    return Object.keys(this.stepDict).map((stepKey, i) => {
-      const step = this.stepDict[stepKey];
-      return <ResultsFolderStep step={step} key={i} />;
-    });
-  }
-}
+  return (
+    <tbody>
+      <tr key="first">
+        <td className={cs.tableData}>
+          Step <b>{stepName}</b>: {description}{" "}
+          {readsAfter ? (
+            <span>
+              (<b>{readsAfter}</b>{" "}
+              {`${pipelineTechnology === "ONT" ? "bases" : "reads"} remained.`})
+            </span>
+          ) : null}
+        </td>
+      </tr>
+      {fileList.map((file: $TSFixMe, j: $TSFixMe) => {
+        return <OutputFile file={file} key={j} />;
+      })}
+      <ResultsFolderStepDivider />
+    </tbody>
+  );
+};
 
 interface ResultsFolderProps {
   filePath?: string;
@@ -148,100 +112,95 @@ interface ResultsFolderProps {
   sampleName?: string;
   projectName?: string;
   rawResultsUrl?: string;
+  pipelineTechnology?: TECHNOLOGY_OPTIONS.ILLUMINA | TECHNOLOGY_OPTIONS.ONT;
 }
 
-class ResultsFolder extends React.Component<ResultsFolderProps> {
-  filePath: $TSFixMe;
-  fileUrl: $TSFixMe;
-  projectName: $TSFixMe;
-  rawResultsUrl: $TSFixMe;
-  sampleName: $TSFixMe;
-  stageDict: $TSFixMe;
-  constructor(props: $TSFixMe, context: $TSFixMe) {
-    super(props, context);
-    this.fileUrl = props.filePath;
-    this.filePath = this.fileUrl.split("/");
-    this.stageDict = props.fileList;
-    this.sampleName = props.sampleName;
-    this.projectName = props.projectName;
-    this.rawResultsUrl = props.rawResultsUrl;
-  }
+const ResultsFolder = ({
+  filePath: escapedFilePath,
+  fileList,
+  sampleName,
+  samplePath,
+  projectName,
+  rawResultsUrl,
+  pipelineTechnology,
+}: ResultsFolderProps) => {
+  const filePath = escapedFilePath.split("/");
 
-  render() {
-    const {
-      stageDescriptionKey,
-      // @ts-expect-error Property 'stageDagJsonKey' does not exist on type
-      stageDagJsonKey,
-      stepsKey,
-      stageNameKey,
-    } = RESULTS_FOLDER_STAGE_KEYS;
-    return (
-      <div className="results-folder">
-        <div className="header">
-          <span className="title">
-            <a href="/">{this.filePath[0]}</a>
-            <span className="path">{">"}</span>
+  const {
+    stageDescriptionKey,
+    // @ts-expect-error Property 'stageDagJsonKey' does not exist on type
+    stageDagJsonKey,
+    stepsKey,
+    stageNameKey,
+  } = RESULTS_FOLDER_STAGE_KEYS;
 
-            <a href={`/home?project_id=${this.filePath[1]}`}>
-              {this.projectName}
-            </a>
-            <span className="path">/</span>
+  return (
+    <div className="results-folder">
+      <div className="header">
+        <span className="title">
+          <a href="/">{filePath[0]}</a>
+          <span className="path">{">"}</span>
 
-            <a href={this.props.samplePath}>{this.sampleName}</a>
-            <span className="path">/</span>
+          <a href={`/home?project_id=${filePath[1]}`}>{projectName}</a>
+          <span className="path">/</span>
 
-            {this.filePath[3]}
-          </span>
-        </div>
-        <div className="header">
-          {!Object.keys(this.stageDict).length
-            ? "No files to show"
-            : Object.keys(this.stageDict).map((stageKey, k) => {
-                const stage = this.stageDict[stageKey];
-                const stageDescription = stage[stageDescriptionKey];
-                const stageDagJson = stage[stageDagJsonKey] || "None";
-                const stepDict = stage[stepsKey];
-                const stageName = stage[stageNameKey];
-                return (
-                  <table key={k}>
-                    <thead>
-                      <tr>
-                        <th className={cs.tableHeader}>
-                          {stageName}: {stageDescription}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <ConfigFile stageDagJson={stageDagJson} />
-                      <ResultsFolderStepDivider />
-                    </tbody>
-                    <ResultsFolderStepList stepDict={stepDict} />
-                  </table>
-                );
-              })}
-          {this.rawResultsUrl ? (
-            <table key="rawResults">
-              <thead>
-                <tr>
-                  <th className={cs.tableHeader}>
-                    Need an output that&apos;s not listed here?
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  className="file-link"
-                  onClick={openUrl.bind(this, this.rawResultsUrl)}
-                >
-                  <td className={cs.tableData}>Go to raw results folder</td>
-                </tr>
-              </tbody>
-            </table>
-          ) : null}
-        </div>
+          <a href={samplePath}>{sampleName}</a>
+          <span className="path">/</span>
+
+          {filePath[3]}
+        </span>
       </div>
-    );
-  }
-}
+      <div className="header">
+        {!Object.keys(fileList).length
+          ? "No files to show"
+          : Object.keys(fileList).map((stageKey, k) => {
+              const stage = fileList[stageKey];
+              const stageDescription = stage[stageDescriptionKey];
+              const stageDagJson = stage[stageDagJsonKey] || "None";
+              const stepDict = stage[stepsKey];
+              const stageName = stage[stageNameKey];
+              return (
+                <table key={k}>
+                  <thead>
+                    <tr>
+                      <th className={cs.tableHeader}>
+                        {stageName}: {stageDescription}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ConfigFile stageDagJson={stageDagJson} />
+                    <ResultsFolderStepDivider />
+                  </tbody>
+                  {Object.keys(stepDict).map((stepKey, i) => (
+                    <ResultsFolderStep
+                      pipelineTechnology={pipelineTechnology}
+                      step={stepDict[stepKey]}
+                      key={i}
+                    />
+                  ))}
+                </table>
+              );
+            })}
+        {rawResultsUrl ? (
+          <table key="rawResults">
+            <thead>
+              <tr>
+                <th className={cs.tableHeader}>
+                  Need an output that&apos;s not listed here?
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="file-link" onClick={() => openUrl(rawResultsUrl)}>
+                <td className={cs.tableData}>Go to raw results folder</td>
+              </tr>
+            </tbody>
+          </table>
+        ) : null}
+      </div>
+    </div>
+  );
+};
 
 export default ResultsFolder;

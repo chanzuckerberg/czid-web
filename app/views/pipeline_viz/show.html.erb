@@ -6,7 +6,8 @@
         pipelineRun: JSON.parse('<%= raw escape_json(@pipeline_run_display) %>'),
         sample: <%= raw escape_json(@sample) %>,
         pipelineVersions: <%= raw escape_json(@pipeline_versions) %>,
-        lastProcessedAt: <%= raw escape_json(@last_processed_at) %>
+        lastProcessedAt: <%= @last_processed_at %>,
+        pipelineTechnology: <%= @pipeline_technology %>,
     }, 'PipelineStageResults');
   <% end %>
 </div>

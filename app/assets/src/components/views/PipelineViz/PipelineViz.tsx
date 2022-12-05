@@ -13,6 +13,7 @@ import { getURLParamString, parseUrlParams } from "~/helpers/url";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import { IconCloseSmall, IconArrowPipelineStage } from "~ui/icons";
+import { TECHNOLOGY_OPTIONS } from "../SampleUploadFlow/constants";
 
 import PipelineVizHeader from "./PipelineVizHeader";
 import PipelineVizStatusIcon from "./PipelineVizStatusIcon";
@@ -45,6 +46,7 @@ interface PipelineVizProps {
   yLayoutInterval?: number;
   staggerLayoutMultiplier?: number;
   updateInterval?: number;
+  pipelineTechnology?: TECHNOLOGY_OPTIONS.ILLUMINA | TECHNOLOGY_OPTIONS.ONT;
 }
 
 interface PipelineVizState {
@@ -66,12 +68,16 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
   constructor(props: $TSFixMe) {
     super(props);
 
-    this.stageNames = [
-      "Host Filtering",
-      "Alignment",
-      "Post Processing",
-      ...(props.showExperimental ? ["Experimental"] : []),
-    ];
+    const { showExperimental, pipelineTechnology } = props;
+    this.stageNames =
+      pipelineTechnology === "ONT"
+        ? ["ONT mNGS Pipeline"]
+        : [
+            "Host Filtering",
+            "Alignment",
+            "Post Processing",
+            ...(showExperimental ? ["Experimental"] : []),
+          ];
 
     this.graphs = [];
     this.graphContainers = [];
