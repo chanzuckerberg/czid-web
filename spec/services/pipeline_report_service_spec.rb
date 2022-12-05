@@ -1011,7 +1011,7 @@ RSpec.describe PipelineReportService, type: :service do
 
       it "should show correct values in CSV in consistent order" do
         csv_report = PipelineReportService.call(@pipeline_run, background_id, csv: true)
-        expected_csv_output = "tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,nt_bpm,nt_count,nt_contigs,nt_contig_b,nt_percent_identity,nt_alignment_length,nt_e_value,nr_bpm,nr_count,nr_contigs,nr_contig_b,nr_percent_identity,nr_alignment_length,nr_e_value,species_tax_ids\n570,2,570,Klebsiella,,bacteria,false,490196.07843137253,,6,1800000,99.7014,1490.42,10^-89.5822,356506.23885918,,6,1800000,97.9598,460.425,10^-16.9874,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,false,445632.79857397504,,2,600000,99.6995,1149.4,10^-89.5641,329768.27094474155,,2,600000,97.8565,460.362,10^-16.9101,\n"
+        expected_csv_output = "tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,nt_bpm,nt_base_count,nt_contigs,nt_contig_b,nt_percent_identity,nt_alignment_length,nt_e_value,nr_bpm,nr_base_count,nr_contigs,nr_contig_b,nr_percent_identity,nr_alignment_length,nr_e_value,species_tax_ids\n570,2,570,Klebsiella,,bacteria,false,490196.07843137253,550000,6,1800000,99.7014,1490.42,10^-89.5822,356506.23885918,400000,6,1800000,97.9598,460.425,10^-16.9874,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,false,445632.79857397504,500000,2,600000,99.6995,1149.4,10^-89.5641,329768.27094474155,370000,2,600000,97.8565,460.362,10^-16.9101,\n"
         expect(csv_report).to eq(expected_csv_output)
       end
     end
