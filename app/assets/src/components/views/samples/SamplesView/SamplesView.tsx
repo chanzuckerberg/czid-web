@@ -77,10 +77,6 @@ const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
 
 interface SamplesViewProps {
-  userIsCollaborator: boolean;
-}
-
-interface SamplesViewProps {
   activeColumns?: string[];
   admin?: boolean;
   currentDisplay: string;
@@ -120,6 +116,7 @@ interface SamplesViewProps {
   snapshotShareId?: string;
   sortable?: boolean;
   userDataCounts?: object;
+  userIsCollaborator: boolean;
   workflow?: WORKFLOW_VALUES;
   workflowEntity?: string;
 }
