@@ -78,7 +78,7 @@ module PipelineRunsHelper
     PipelineRunStage::EXPT_STAGE_NAME => {
       "stage" => "Generate additional experimental output.",
       "steps" => {
-        "nonhost_fastq_out" => "Filter original fastq/fasta input files to only contain non-host reads processed by IdSeq.",
+        "nonhost_fastq_out" => "Filter original fastq/fasta input files to only contain non-host reads processed by CZ ID.",
       },
     },
   }.freeze
