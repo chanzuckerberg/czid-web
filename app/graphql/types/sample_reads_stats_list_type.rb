@@ -1,5 +1,5 @@
 module Types
-  class SampleSteps < Types::BaseObject
+  class SampleStepsType < Types::BaseObject
     field :name, String, null: true
     field :readsAfter, Int, null: true
   end
@@ -10,7 +10,7 @@ module Types
     field :name, String, null: true
     field :pipelineVersion, String, null: true
     field :wdlVersion, String, null: true
-    field :steps, [Types::SampleSteps], null: true
+    field :steps, [Types::SampleStepsType], null: true
   end
 
   class SampleReadsStatsListType < Types::BaseObject

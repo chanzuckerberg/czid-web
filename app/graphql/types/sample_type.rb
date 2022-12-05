@@ -40,42 +40,39 @@ module Types
     field :details, Types::SampleDetailsType, null: false
     field :project, Types::ProjectType, null: true
     field :default_background_id, Int, null: true
+    field :host_genome, Types::HostGenomeType, null: true
+    field :user, Types::UserType, null: true
 
     field :pipeline_runs, [Types::PipelineRunType], null: true, resolver_method: :sample_type_pipeline_runs
     def sample_type_pipeline_runs
-      object.pipeline_runs_info.map { |h| h.deep_transform_keys! { |key| key.to_s.camelize(:lower) } }
+      sample = Sample.find(object["id"])
+      sample.pipeline_runs_info.map { |h| h.deep_transform_keys! { |key| key.to_s.camelize(:lower) } }
     end
 
     field :default_pipeline_run_id, Int, null: true, resolver_method: :sample_type_default_pipeline_run_id
     def sample_type_default_pipeline_run_id
-      object.first_pipeline_run.present? ? object.first_pipeline_run.id : nil
+      sample = Sample.find(object["id"])
+      sample.first_pipeline_run.present? ? sample.first_pipeline_run.id : nil
     end
 
     field :deletable, Boolean, null: true, resolver_method: :sample_type_deletable
     def sample_type_deletable
+      sample = Sample.find(object["id"])
       current_user = context[:current_user]
-      object.deletable?(current_user)
+      sample.deletable?(current_user)
     end
 
     field :editable, Boolean, null: true, resolver_method: :sample_type_editable
     def sample_type_editable
+      sample = Sample.find(object["id"])
       current_power = context[:current_power]
-      current_power.updatable_sample?(object)
+      current_power.updatable_sample?(sample)
     end
 
     field :workflow_runs, [Types::WorkflowRunType], null: true, resolver_method: :sample_type_workflow_runs
     def sample_type_workflow_runs
-      object.workflow_runs.non_deprecated.reverse.as_json(
-        only: [
-          :deprecated,
-          :executed_at,
-          :id,
-          :status,
-          :wdl_version,
-          :workflow,
-        ],
-        methods: [:input_error, :inputs, :parsed_cached_results]
-      )
+      sample = Sample.find(object["id"])
+      sample.workflow_runs.non_deprecated.reverse
     end
 
     def self.authorized?(object, context)

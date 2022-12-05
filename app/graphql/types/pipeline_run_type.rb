@@ -36,5 +36,11 @@ module Types
     field :useTaxonWhitelist, Boolean, null: false
     field :wdlVersion, String, null: true
     field :alignmentConfigName, String, null: true
+
+    field :alignmentConfig, Types::AlignmentConfigType, null: true, resolver_method: :pipeline_run_type_alignment_config
+    def pipeline_run_type_alignment_config
+      pr = PipelineRun.find(object["id"])
+      pr.alignment_config
+    end
   end
 end
