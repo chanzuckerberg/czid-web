@@ -148,7 +148,7 @@ const SampleTypeProps = PropTypes.shape({
 });
 
 const ReportMetadata = PropTypes.shape({
-  adjustedRemainingReadsCount: PropTypes.number,
+  preSubsamplingCount: PropTypes.number,
   alignVizAvailable: PropTypes.bool,
   backgroundId: PropTypes.number,
   hasByteRanges: PropTypes.bool,
@@ -156,7 +156,7 @@ const ReportMetadata = PropTypes.shape({
   jobStatus: PropTypes.string,
   pipelineRunStatus: PropTypes.string,
   reportReady: PropTypes.bool,
-  subsampledReadsCount: PropTypes.number,
+  postSubsamplingCount: PropTypes.number,
 });
 
 export default {

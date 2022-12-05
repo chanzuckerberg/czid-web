@@ -1618,7 +1618,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
           </div>
           <div className={cs.reportHeader}>
             <div className={cs.statsRow}>
-              {renderReportInfo(this.state.reportMetadata)}
+              {renderReportInfo(currentTab, reportMetadata)}
               <div className={cs.statsRowFilterInfo}>
                 {filteredMessage(currentTab, filteredReportData, reportData)}
                 {!!countFilters(selectedOptions) && (

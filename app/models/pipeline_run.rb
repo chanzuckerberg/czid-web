@@ -1536,6 +1536,11 @@ class PipelineRun < ApplicationRecord
     ", id: id,]))
   end
 
+  def bases_before_and_after_subsampling
+    # the host filtering step occurs before the subsampling step
+    JobStat.where(pipeline_run: self, task: ["human_filtered_bases", "subsampled_bases"]).pluck(:bases_after)
+  end
+
   def subsampled_reads
     # number of non-host reads that actually went through non-host alignment
     res = adjusted_remaining_reads

@@ -449,18 +449,18 @@ class PipelineReportService
       metadata.merge(
         backgroundId: @background&.id,
         truncatedReadsCount: @pipeline_run.truncated,
-        adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
-        subsampledReadsCount: @pipeline_run.subsampled_reads,
+        preSubsamplingCount: @pipeline_run.adjusted_remaining_reads,
+        postSubsamplingCount: @pipeline_run.subsampled_reads,
         taxonWhitelisted: @pipeline_run.use_taxon_whitelist,
         hasByteRanges: has_byte_ranges,
         alignVizAvailable: align_viz_available
       )
     elsif @technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      host_filtered_bases, subsampled_bases = @pipeline_run.bases_before_and_after_subsampling
       metadata.merge(
         backgroundId: nil,
-        truncatedBasesCount: @pipeline_run.truncated_bases,
-        # TODO: return "bases after subsampling" and "bases after host-filtering"
-        # subsampledBasesCount: @pipeline_run.subsampled_bases,
+        preSubsamplingCount: host_filtered_bases,
+        postSubsamplingCount: subsampled_bases,
         taxonWhitelisted: @pipeline_run.use_taxon_whitelist,
         hasByteRanges: has_byte_ranges,
         alignVizAvailable: align_viz_available

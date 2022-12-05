@@ -57,15 +57,16 @@ export const truncatedMessage = truncatedReadsCount => {
 };
 
 export const subsamplingMessage = (
-  subsampledReadsCount,
-  adjustedRemainingReadsCount,
+  preSubsamplingCount,
+  postSubsamplingCount,
+  readsOrBases,
 ) => {
   return (
-    subsampledReadsCount &&
-    adjustedRemainingReadsCount &&
-    subsampledReadsCount !== adjustedRemainingReadsCount &&
-    `Report values are computed from ${subsampledReadsCount} unique reads subsampled \
-          randomly from the ${adjustedRemainingReadsCount} reads passing host and quality filters. `
+    preSubsamplingCount &&
+    postSubsamplingCount &&
+    preSubsamplingCount !== postSubsamplingCount &&
+    `Report values are computed from ${postSubsamplingCount} unique ${readsOrBases} subsampled \
+          randomly from the ${preSubsamplingCount} ${readsOrBases} passing host and quality filters. `
   );
 };
 
@@ -76,19 +77,34 @@ export const whitelistedMessage = taxonWhitelisted => {
   );
 };
 
-export const renderReportInfo = reportMetadata => {
-  const {
-    truncatedReadsCount,
-    subsampledReadsCount,
-    adjustedRemainingReadsCount,
-    taxonWhitelisted,
-  } = reportMetadata;
-  return compact([
-    truncatedMessage(truncatedReadsCount),
-    subsamplingMessage(subsampledReadsCount, adjustedRemainingReadsCount),
-    whitelistedMessage(taxonWhitelisted),
-  ]).reduce((reportInfoMsg, msg) => {
-    reportInfoMsg += msg;
-    return reportInfoMsg;
-  }, "");
+export const renderReportInfo = (currentTab, reportMetadata) => {
+  if (currentTab === TABS.SHORT_READ_MNGS) {
+    const {
+      truncatedReadsCount,
+      postSubsamplingCount,
+      preSubsamplingCount,
+      taxonWhitelisted,
+    } = reportMetadata;
+    return compact([
+      truncatedMessage(truncatedReadsCount),
+      subsamplingMessage(preSubsamplingCount, postSubsamplingCount, "reads"),
+      whitelistedMessage(taxonWhitelisted),
+    ]).reduce((reportInfoMsg, msg) => {
+      reportInfoMsg += msg;
+      return reportInfoMsg;
+    }, "");
+  } else if (currentTab === TABS.LONG_READ_MNGS) {
+    const {
+      postSubsamplingCount,
+      preSubsamplingCount,
+      taxonWhitelisted,
+    } = reportMetadata;
+    return compact([
+      subsamplingMessage(preSubsamplingCount, postSubsamplingCount, "bases"),
+      whitelistedMessage(taxonWhitelisted),
+    ]).reduce((reportInfoMsg, msg) => {
+      reportInfoMsg += msg;
+      return reportInfoMsg;
+    }, "");
+  }
 };
