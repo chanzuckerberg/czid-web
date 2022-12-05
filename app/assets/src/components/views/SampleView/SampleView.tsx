@@ -72,7 +72,11 @@ import {
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
 import { sampleErrorInfo } from "~/components/utils/sample";
-import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
+import {
+  findInWorkflows,
+  labelToVal,
+  WORKFLOWS,
+} from "~/components/utils/workflows";
 import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
@@ -724,6 +728,14 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   handleTabChange = (tab: CurrentTabSample) => {
+    if (tab === TABS.CONSENSUS_GENOME || tab === TABS.AMR) {
+      const workflow = find(
+        { workflow: labelToVal(tab) },
+        this.state.sample.workflow_runs,
+      );
+      this.handleWorkflowRunSelect(workflow);
+    }
+
     this.setState({ currentTab: tab });
     const name = tab.replace(/\W+/g, "-").toLowerCase();
     trackEvent(`SampleView_tab-${name}_clicked`, {

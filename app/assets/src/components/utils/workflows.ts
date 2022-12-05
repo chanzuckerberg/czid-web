@@ -80,6 +80,9 @@ export const findInWorkflows = (
   );
 };
 
+export const labelToVal = (label: string) =>
+  WORKFLOWS[findInWorkflows(label, "label")].value;
+
 /**
  * WORKFLOW TYPES
  */
