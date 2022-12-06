@@ -487,6 +487,7 @@ const SamplesHeatmapControls = ({
             return (
               <ThresholdFilterTag
                 className={cs.filterTag}
+                disabled={loading || !data}
                 key={`threshold_filter_tag_${i}`}
                 threshold={threshold}
                 onClose={() => {
@@ -522,6 +523,7 @@ const SamplesHeatmapControls = ({
                 className={cs.filterTag}
                 key={`category_filter_tag_${i}`}
                 text={category}
+                disabled={loading || !data}
                 onClose={() => {
                   handleRemoveCategory(category);
                   trackEvent(
@@ -554,6 +556,7 @@ const SamplesHeatmapControls = ({
                 className={cs.filterTag}
                 key={`subcat_filter_tag_${i}`}
                 text={subcat}
+                disabled={loading || !data}
                 onClose={() => {
                   handleRemoveSubcategory(subcat);
                   trackEvent(

@@ -9,20 +9,28 @@ import cs from "./filter_tag.scss";
 interface FilterTagProps {
   text?: string;
   onClose?: $TSFixMeFunction;
+  disabled?: boolean;
   className?: string;
 }
 
-const FilterTag = ({ text, onClose, className }: FilterTagProps) => {
+const FilterTag = ({ text, onClose, disabled, className }: FilterTagProps) => {
   const labelText = (
     <div className={cs.labelText}>
       {text}
-      {onClose && <IconCloseSmall className={cs.closeIcon} onClick={onClose} />}
+      {onClose && (
+        <IconCloseSmall
+          className={cs.closeIcon}
+          onClick={() => {
+            if (!disabled) onClose();
+          }}
+        />
+      )}
     </div>
   );
 
   return (
     <Label
-      className={cx(cs.filterTag, className)}
+      className={cx(cs.filterTag, className, disabled ? "disabled" : "")}
       size="tiny"
       text={labelText}
     />

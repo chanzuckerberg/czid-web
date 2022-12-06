@@ -6,6 +6,7 @@ import FilterTag from "~ui/controls/FilterTag";
 
 interface ThresholdFilterTagProps {
   onClose: () => void;
+  disabled?: boolean;
   threshold: ThresholdConditions;
   className: string;
 }
@@ -13,12 +14,20 @@ interface ThresholdFilterTagProps {
 const ThresholdFilterTag = ({
   threshold,
   onClose,
+  disabled,
   className,
 }: ThresholdFilterTagProps) => {
   const text = `${threshold.metricDisplay} ${threshold.operator} ${threshold.value}`;
 
   if (ThresholdMap.isThresholdValid(threshold)) {
-    return <FilterTag text={text} onClose={onClose} className={className} />;
+    return (
+      <FilterTag
+        text={text}
+        onClose={onClose}
+        className={className}
+        disabled={disabled}
+      />
+    );
   }
   return null;
 };
