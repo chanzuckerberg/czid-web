@@ -1117,8 +1117,8 @@ class PipelineRun < ApplicationRecord
       check_and_enqueue(o)
     end
 
-    # Job stats are compiled from *.count files, which are outputs of Host Filtering.
-    if last_completed_stage == PipelineRunStage::DAG_NAME_HOST_FILTER
+    # Job stats are compiled from *.count files, which are outputs of Host Filtering and Postprocessing
+    if last_completed_stage == PipelineRunStage::DAG_NAME_HOST_FILTER || last_completed_stage == PipelineRunStage::DAG_NAME_POSTPROCESS
       compiling_stats_error = update_job_stats
       if compiling_stats_error.present?
         LogUtil.log_error("SampleFailedEvent: Failure compiling stats for PipelineRun #{id}: #{compiling_stats_error}")
