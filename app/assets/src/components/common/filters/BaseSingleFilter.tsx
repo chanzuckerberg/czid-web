@@ -7,7 +7,7 @@ const BaseSingleFilter = ({
   label,
   onChange,
   options,
-  selected,
+  value,
 }: BaseSingleFilterProps) => {
   return (
     <Dropdown
@@ -15,13 +15,13 @@ const BaseSingleFilter = ({
       menuLabel={`Select ${label}`}
       options={options}
       onChange={onChange}
-      value={selected}
+      value={value}
     />
   );
 };
 
 interface BaseSingleFilterProps {
-  selected: string | number;
+  value: string | number;
   onChange: (selected: string) => void;
   options: FilterOption[];
   label: string;

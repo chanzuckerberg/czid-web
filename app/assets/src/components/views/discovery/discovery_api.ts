@@ -31,7 +31,7 @@ const getDiscoveryDimensions = async ({
   snapshotShareId,
   search,
   sampleIds,
-}) => {
+}: $TSFixMe) => {
   try {
     const actions = [
       getSampleDimensions({
@@ -63,7 +63,7 @@ const getDiscoveryStats = async ({
   snapshotShareId,
   search,
   sampleIds,
-}) => {
+}: $TSFixMe) => {
   try {
     const sampleStats = await getSampleStats({
       domain,
@@ -81,7 +81,7 @@ const getDiscoveryStats = async ({
   }
 };
 
-const processRawSample = sample => {
+const processRawSample = (sample: $TSFixMe) => {
   const meanInsertSize = get(
     "derived_sample_output.summary_stats.insert_size_mean",
     sample.details,
@@ -162,12 +162,14 @@ const processRawSample = sample => {
   return row;
 };
 
-const formatWetlabProtocol = str => replace(/_/g, " ", toUpper(str));
+const formatWetlabProtocol = (str: $TSFixMe) =>
+  replace(/_/g, " ", toUpper(str));
 
-const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
-  const getCachedResult = resultPath =>
+const processConsensusGenomeWorkflowRun = (cgWorkflowRun: $TSFixMe) => {
+  const getCachedResult = (resultPath: $TSFixMe) =>
     get(["cached_results", ...resultPath], cgWorkflowRun);
-  const getInput = inputPath => get(["inputs", ...inputPath], cgWorkflowRun);
+  const getInput = (inputPath: $TSFixMe) =>
+    get(["inputs", ...inputPath], cgWorkflowRun);
 
   return {
     medakaModel: getInput(["medaka_model"]),
@@ -201,7 +203,7 @@ const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
   };
 };
 
-const processAmrWorkflowRun = workflowRun => {
+const processAmrWorkflowRun = (workflowRun: $TSFixMe) => {
   const qualityMetrics = workflowRun?.cached_results?.quality_metrics;
 
   const insertSizeMean = qualityMetrics?.insert_size_mean;
@@ -226,8 +228,9 @@ const processAmrWorkflowRun = workflowRun => {
   };
 };
 
-const processRawWorkflowRun = workflowRun => {
-  const getSampleField = path => get(["sample", ...path], workflowRun);
+const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
+  const getSampleField = (path: $TSFixMe) =>
+    get(["sample", ...path], workflowRun);
 
   let workflowRunFields = null;
 
@@ -259,6 +262,7 @@ const processRawWorkflowRun = workflowRun => {
     privateUntil: getSampleField(["info", "private_until"]),
     projectId: getSampleField(["info", "project_id"]),
     ...workflowRunFields,
+    // @ts-expect-error ts-migrate(2698) FIXME: Spread types may only be created from object types... Remove this comment to see the full error message
     ...getSampleField(["metadata"]),
   };
 
@@ -278,7 +282,7 @@ const getDiscoverySamples = async ({
   listAllIds = false,
   sampleIds,
   workflow,
-} = {}) => {
+}: $TSFixMe = {}) => {
   const sampleResults = await getSamples({
     domain,
     filters,
@@ -310,7 +314,7 @@ const getDiscoveryWorkflowRuns = async ({
   orderDir,
   limit = 100,
   offset = 0,
-}) => {
+}: $TSFixMe) => {
   const workflowRunsResults = await getWorkflowRuns({
     projectId,
     domain,
@@ -342,7 +346,7 @@ const getDiscoveryProjects = async ({
   orderBy,
   orderDir,
   listAllIds = false,
-} = {}) => {
+}: $TSFixMe = {}) => {
   const projectResults = await getProjects({
     domain,
     filters,
@@ -369,7 +373,7 @@ const getDiscoveryVisualizations = async ({
   orderBy,
   orderDir,
   listAllIds = false,
-} = {}) => {
+}: $TSFixMe = {}) => {
   const visualizations = await getVisualizations({
     domain,
     filters,
@@ -383,7 +387,7 @@ const getDiscoveryVisualizations = async ({
   return {
     visualizations,
     visualizationIds: listAllIds
-      ? visualizations.map(visualization => visualization.id)
+      ? visualizations.map((visualization: $TSFixMe) => visualization.id)
       : null,
   };
 };
@@ -394,7 +398,7 @@ const getDiscoveryLocations = async ({
   projectId,
   snapshotShareId,
   search,
-}) => {
+}: $TSFixMe) => {
   try {
     return await getSamplesLocations({
       domain,

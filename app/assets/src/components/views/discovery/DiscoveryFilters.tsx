@@ -1,7 +1,6 @@
 import cx from "classnames";
-import { Dropdown, Tooltip } from "czifui";
+import { DefaultDropdownMenuOption, Dropdown, Tooltip } from "czifui";
 import { isEmpty, isEqual, find, forEach, pick, reject } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import {
@@ -16,6 +15,7 @@ import {
   LocationFilter,
   TaxonFilter,
 } from "~/components/common/filters";
+import { FilterOption } from "~/components/common/filters/BaseMultipleFilter";
 import TaxonThresholdFilter from "~/components/common/filters/TaxonThresholdFilter";
 import ThresholdMap from "~/components/utils/ThresholdMap";
 import {
@@ -23,6 +23,7 @@ import {
   TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { ThresholdFilterData } from "~/interface/dropdown";
 import FilterTag from "~ui/controls/FilterTag";
 import {
   KEY_ANNOTATIONS_SELECTED,
@@ -34,8 +35,59 @@ import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
 
 import cs from "./discovery_filters.scss";
 
-class DiscoveryFilters extends React.Component {
-  constructor(props) {
+interface DiscoveryFiltersProps {
+  allowedFeatures?: string[];
+  className?: string;
+  currentTab?: string;
+  domain?: string;
+  workflow?: string;
+  // Filter options and counters
+  host?: FilterOption[];
+  location?: $TSFixMeUnknown[];
+  locationV2?: {
+    count: number;
+    parents: string[];
+    text: string;
+    value: string;
+  }[];
+  time?: FilterOption[];
+  tissue?: FilterOption[];
+  visibility?: FilterOption[];
+  // Selected values
+  annotationsSelected?: DefaultDropdownMenuOption[];
+  hostSelected?: string[];
+  locationSelected?: string[];
+  locationV2Selected?: string[];
+  taxonSelected?: {
+    id: number;
+    level: string;
+    name: string;
+  }[];
+  taxonThresholdsSelected?: ThresholdFilterData[];
+  timeSelected?: string;
+  tissueSelected?: string[];
+  visibilitySelected?: string;
+  onFilterChange?: $TSFixMeFunction;
+}
+
+interface DiscoveryFiltersState {
+  taxonSelected: DiscoveryFiltersProps["taxonSelected"];
+  locationSelected: DiscoveryFiltersProps["locationSelected"];
+  locationV2Selected?: DiscoveryFiltersProps["locationV2Selected"];
+  timeSelected: DiscoveryFiltersProps["timeSelected"];
+  visibilitySelected: DiscoveryFiltersProps["visibilitySelected"];
+  hostSelected: DiscoveryFiltersProps["hostSelected"];
+  tissueSelected: DiscoveryFiltersProps["tissueSelected"];
+  taxonThresholdsSelected: DiscoveryFiltersProps["taxonThresholdsSelected"];
+  annotationsSelected: DiscoveryFiltersProps["annotationsSelected"];
+}
+
+class DiscoveryFilters extends React.Component<
+  DiscoveryFiltersProps,
+  DiscoveryFiltersState
+> {
+  configForWorkflow: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     this.state = {
@@ -55,8 +107,8 @@ class DiscoveryFilters extends React.Component {
     this.setupWorkflowConfigs();
   }
 
-  static getDerivedStateFromProps(props, state) {
-    let newState = state;
+  static getDerivedStateFromProps(props: $TSFixMe, state: $TSFixMe) {
+    const newState = state;
     forEach(
       key => {
         if (!state.prev || props[key] !== state.prev[key]) {
@@ -131,7 +183,7 @@ class DiscoveryFilters extends React.Component {
       onFilterChange({ selectedFilters, onFilterChangeCallback: callback });
   };
 
-  handleTaxonThresholdFilterChange = (taxa, thresholds) => {
+  handleTaxonThresholdFilterChange = (taxa: $TSFixMe, thresholds: $TSFixMe) => {
     const { domain } = this.props;
     const taxonFilterStateUpdate = {};
 
@@ -157,7 +209,7 @@ class DiscoveryFilters extends React.Component {
       );
     }
 
-    const callback = filteredSampleCount => {
+    const callback = (filteredSampleCount: $TSFixMe) => {
       trackEvent(ANALYTICS_EVENT_NAMES.TAXON_THRESHOLD_FILTER_APPLY_CLICKED, {
         domain,
         selectedTaxa: taxa,
@@ -171,22 +223,23 @@ class DiscoveryFilters extends React.Component {
     );
   };
 
-  handleChange(selectedKey, selected) {
+  handleChange(selectedKey: $TSFixMe, selected: $TSFixMe) {
     const newState = [];
     newState[selectedKey] = selected;
+    // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'any[]' is not assignable to para... Remove this comment to see the full error message
     this.setState(newState, this.notifyFilterChangeHandler);
     trackEvent(`DiscoveryFilters_${selectedKey.toLowerCase()}_changed`, {
       selectedKey: selected,
     });
   }
 
-  handleRemoveTag = ({ selectedKey, valueToRemove = "" }) => {
+  handleRemoveTag = ({ selectedKey, valueToRemove = "" }: $TSFixMe) => {
     let newSelected = null;
-    let newState = {};
+    const newState = {};
 
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
-        option =>
+        (option: $TSFixMe) =>
           (option.value || option.id || option.name || option) !==
           valueToRemove,
       );
@@ -199,18 +252,19 @@ class DiscoveryFilters extends React.Component {
     this.handleChange(selectedKey, newSelected);
   };
 
-  renderTags(optionsKey) {
-    let selectedKey = `${optionsKey}Selected`;
+  renderTags(optionsKey: $TSFixMe) {
+    const selectedKey = `${optionsKey}Selected`;
     let selectedOptions = this.state[selectedKey];
-    let options = this.props[optionsKey];
+    const options = this.props[optionsKey];
 
     if (!selectedOptions) return;
     if (!Array.isArray(selectedOptions)) selectedOptions = [selectedOptions];
 
     const tags = selectedOptions
+      // create the filter tag
       // Depending on the filter, selected options may be formatted as a hash or a string value
       // Taxon filter options are hashes with { text: string, value: number }
-      .map(option =>
+      .map((option: $TSFixMe) =>
         option.text
           ? option
           : find({ value: option }, options) || {
@@ -218,8 +272,7 @@ class DiscoveryFilters extends React.Component {
               value: option,
             },
       )
-      // create the filter tag
-      .map(option => {
+      .map((option: $TSFixMe) => {
         return (
           <FilterTag
             className={cs.filterTag}
@@ -247,7 +300,7 @@ class DiscoveryFilters extends React.Component {
   // Annotations filter options are hashes with { name: string }
   // Note: This function can be modified to render tags for any SDS Dropdown-based filter.
   renderAnnotationsFilterTags = () => {
-    let selectedOptions = this.state[KEY_ANNOTATIONS_SELECTED];
+    const selectedOptions = this.state[KEY_ANNOTATIONS_SELECTED];
     if (isEmpty(selectedOptions)) return;
 
     const tags = selectedOptions.map(option => {
@@ -275,7 +328,7 @@ class DiscoveryFilters extends React.Component {
   };
 
   renderTaxonFilterTags = () => {
-    let selectedTaxa = this.state[KEY_TAXON_SELECTED];
+    const selectedTaxa = this.state[KEY_TAXON_SELECTED];
     const thresholdFilterDisabled = this.configForWorkflow[this.props.workflow]
       .disableTaxonThresholdFilter;
     if (isEmpty(selectedTaxa)) return;
@@ -285,7 +338,7 @@ class DiscoveryFilters extends React.Component {
         {!thresholdFilterDisabled && (
           <div className={cs.descriptor}>Has at least one:</div>
         )}
-        {selectedTaxa.map((selectedTaxon, i) => (
+        {selectedTaxa.map((selectedTaxon: $TSFixMe) => (
           <FilterTag
             className={cs.filterTag}
             key={`taxon_filter_tag_${selectedTaxon.id}`}
@@ -308,18 +361,19 @@ class DiscoveryFilters extends React.Component {
     );
   };
 
-  handleRemoveThresholdFilterTag = threshold => {
+  handleRemoveThresholdFilterTag = (threshold: $TSFixMe) => {
     const filteredThresholds = reject(
       threshold,
       this.state[KEY_TAXON_THRESHOLDS_SELECTED],
     );
     const newState = { [KEY_TAXON_THRESHOLDS_SELECTED]: filteredThresholds };
 
+    // @ts-expect-error ts-migrate(2345) FIXME: Argument of type '{ taxonThresholdsSelected: _.Lod... Remove this comment to see the full error message
     this.setState(newState, this.notifyFilterChangeHandler);
   };
 
   renderTaxonThresholdFilterTags = () => {
-    let selectedThresholds = this.state[KEY_TAXON_THRESHOLDS_SELECTED];
+    const selectedThresholds = this.state[KEY_TAXON_THRESHOLDS_SELECTED];
     if (isEmpty(selectedThresholds)) return;
 
     return (
@@ -337,10 +391,11 @@ class DiscoveryFilters extends React.Component {
     );
   };
 
-  renderAnnotationsFilter = ({ disabled, workflow }) => {
+  renderAnnotationsFilter = ({ disabled, workflow }: $TSFixMe) => {
     const { annotationsSelected } = this.state;
     const annotationsFilter = (
       <Dropdown
+        // @ts-expect-error ts-migrate(2322) FIXME: Type 'Element' is not assignable to type 'string'.
         label={<div className={cs.filterLabel}>Annotation</div>}
         onChange={selectedValue => {
           // SDS Dropdown component has a bug where onChange is fired even when the value has not changed
@@ -362,7 +417,11 @@ class DiscoveryFilters extends React.Component {
       : annotationsFilter;
   };
 
-  renderTaxonThresholdFilter = ({ disabled, disableThreshold, workflow }) => {
+  renderTaxonThresholdFilter = ({
+    disabled,
+    disableThreshold,
+    workflow,
+  }: $TSFixMe) => {
     const { domain } = this.props;
     const { taxonSelected, taxonThresholdsSelected } = this.state;
 
@@ -371,7 +430,7 @@ class DiscoveryFilters extends React.Component {
         disabled={disabled}
         thresholdFilterEnabled={!disableThreshold}
         domain={domain}
-        onFilterApply={(taxa, thresholds) => {
+        onFilterApply={(taxa: $TSFixMe, thresholds: $TSFixMe) => {
           const validThresholds = thresholds?.filter(
             ThresholdMap.isThresholdValid,
           );
@@ -387,7 +446,7 @@ class DiscoveryFilters extends React.Component {
       : taxonThresholdFilter;
   };
 
-  renderDisabledFilter = (filter, workflow) => {
+  renderDisabledFilter = (filter: $TSFixMe, workflow: $TSFixMe) => {
     return (
       <Tooltip
         arrow
@@ -552,6 +611,7 @@ class DiscoveryFilters extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 DiscoveryFilters.defaultProps = {
   host: [],
   location: [],
@@ -559,35 +619,6 @@ DiscoveryFilters.defaultProps = {
   time: [],
   tissue: [],
   visibility: [],
-};
-
-DiscoveryFilters.propTypes = {
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  className: PropTypes.string,
-  currentTab: PropTypes.string,
-  domain: PropTypes.string,
-  workflow: PropTypes.string,
-
-  // Filter options and counters
-  host: PropTypes.array,
-  location: PropTypes.array,
-  locationV2: PropTypes.array,
-  time: PropTypes.array,
-  tissue: PropTypes.array,
-  visibility: PropTypes.array,
-
-  // Selected values
-  annotationsSelected: PropTypes.array,
-  hostSelected: PropTypes.array,
-  locationSelected: PropTypes.array,
-  locationV2Selected: PropTypes.array,
-  taxonSelected: PropTypes.array,
-  taxonThresholdsSelected: PropTypes.array,
-  timeSelected: PropTypes.string,
-  tissueSelected: PropTypes.array,
-  visibilitySelected: PropTypes.string,
-
-  onFilterChange: PropTypes.func,
 };
 
 export default DiscoveryFilters;

@@ -8,9 +8,13 @@ import {
 } from "./discovery_api";
 
 class ObjectCollection {
+  _displayName: $TSFixMe;
+  domain: $TSFixMe;
+  entries: $TSFixMe;
+  fetchDataCallback: $TSFixMe;
   constructor(
     // domain of the collection (my data, all data, public, snapshot)
-    domain,
+    domain: $TSFixMe,
     // function to fetch data from server
     // should take the following parameters:
     // - domain: my_data, public, all_data, snapshot
@@ -19,7 +23,7 @@ class ObjectCollection {
     // - offset: number of results to skip
     // - listAllIds: boolean that indicates if it should retrieve
     //   a list of all possible IDs
-    fetchDataCallback,
+    fetchDataCallback: $TSFixMe,
     // name of the view: mostly used for debug
     displayName = "",
   ) {
@@ -29,18 +33,26 @@ class ObjectCollection {
     this._displayName = displayName;
   }
 
-  createView = viewProps => {
+  createView = (viewProps: $TSFixMe) => {
     return new ObjectCollectionView(this, viewProps);
   };
 
-  update = entry => {
+  update = (entry: $TSFixMe) => {
     this.entries[entry.id] = entry;
   };
 }
 
 class ObjectCollectionView {
+  _activePromises: $TSFixMe;
+  _collection: $TSFixMe;
+  _conditions: $TSFixMe;
+  _displayName: $TSFixMe;
+  _loading: $TSFixMe;
+  _onViewChange: $TSFixMe;
+  _orderedIds: $TSFixMe;
+  _pageSize: $TSFixMe;
   constructor(
-    collection,
+    collection: $TSFixMe,
     {
       // conditions: Extra conditions to use for this view.
       // These will be sent to the fetchDataCallback of the corresponding collection when requesting new data.
@@ -66,8 +78,8 @@ class ObjectCollectionView {
 
   get loaded() {
     return (this._orderedIds || [])
-      .filter(id => id in this._collection.entries)
-      .map(id => this._collection.entries[id]);
+      .filter((id: $TSFixMe) => id in this._collection.entries)
+      .map((id: $TSFixMe) => this._collection.entries[id]);
   }
 
   get length() {
@@ -82,7 +94,7 @@ class ObjectCollectionView {
     return this._collection.entries;
   }
 
-  get = id => this._collection.entries[id];
+  get = (id: $TSFixMe) => this._collection.entries[id];
 
   getIds = () => this._orderedIds || [];
 
@@ -90,7 +102,7 @@ class ObjectCollectionView {
     return Object.keys(this._collection.entries).length;
   };
 
-  getIntermediateIds = ({ id1, id2 }) => {
+  getIntermediateIds = ({ id1, id2 }: $TSFixMe) => {
     const start = findIndex(v => v === id1 || v === id2, this._orderedIds);
     const end = findLastIndex(v => v === id1 || v === id2, this._orderedIds);
     return slice(start, end + 1, this._orderedIds);
@@ -98,7 +110,11 @@ class ObjectCollectionView {
 
   isLoading = () => this._loading;
 
-  reset = ({ conditions, loadFirstPage = false, logLoadTime = false } = {}) => {
+  reset = ({
+    conditions,
+    loadFirstPage = false,
+    logLoadTime = false,
+  }: $TSFixMe = {}) => {
     this._orderedIds = null;
     this._loading = true;
     this._conditions = conditions;
@@ -109,7 +125,7 @@ class ObjectCollectionView {
     }
   };
 
-  loadPage = async (pageNumber, logLoadTime = false) => {
+  loadPage = async (pageNumber: $TSFixMe, logLoadTime = false) => {
     const indices = {
       startIndex: pageNumber,
       stopIndex: this._pageSize * (1 + pageNumber) - 1,
@@ -124,6 +140,7 @@ class ObjectCollectionView {
         domain: this._collection.domain,
         displayName: this._displayName,
         allIdsCount: this._orderedIds.length,
+        // @ts-expect-error ts-migrate(2362) FIXME: The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
         loadTimeInMilleseconds: endLoad - startLoad,
         ...this._conditions,
       });
@@ -132,13 +149,15 @@ class ObjectCollectionView {
     return objectRows;
   };
 
-  handleLoadObjectRows = async ({ startIndex, stopIndex }) => {
+  handleLoadObjectRows = async ({ startIndex, stopIndex }: $TSFixMe) => {
     // Make sure we do not load the same information twice
     // If conditions change (see reset), then the active promises tracker is emptied
     // CAVEAT: we use a key based on 'startIndex,stopindex', thus, this only works if the request are exactly the same
     // Asking for a subset of an existing request (e.g. asking for 0,49 and then 10,19) will still lead to redundant requests
     const key = [startIndex, stopIndex];
+    // @ts-expect-error Type 'any[]' cannot be used as an index type.
     if (this._activePromises[key]) {
+      // @ts-expect-error Type 'any[]' cannot be used as an index type.
       const promiseLoadObjectRows = this._activePromises[key];
       const promiseResponse = await promiseLoadObjectRows;
       return promiseResponse;
@@ -147,14 +166,16 @@ class ObjectCollectionView {
         startIndex,
         stopIndex,
       });
+      // @ts-expect-error Type 'any[]' cannot be used as an index type.
       this._activePromises[key] = promiseLoadObjectRows;
       const result = await promiseLoadObjectRows;
+      // @ts-expect-error Type 'any[]' cannot be used as an index type.
       delete this._activePromises[key];
       return result;
     }
   };
 
-  fetchObjectRows = async ({ startIndex, stopIndex }) => {
+  fetchObjectRows = async ({ startIndex, stopIndex }: $TSFixMe) => {
     const domain = this._collection.domain;
 
     const minStopIndex = this._orderedIds
@@ -162,8 +183,9 @@ class ObjectCollectionView {
       : stopIndex;
     let missingIdxs = range(startIndex, minStopIndex + 1);
     if (this._orderedIds) {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'filter' does not exist on type 'LodashRa... Remove this comment to see the full error message
       missingIdxs = missingIdxs.filter(
-        idx => !(this._orderedIds[idx] in this._collection.entries),
+        (idx: $TSFixMe) => !(this._orderedIds[idx] in this._collection.entries),
       );
     }
     if (missingIdxs.length > 0) {
@@ -182,7 +204,7 @@ class ObjectCollectionView {
         listAllIds: this._orderedIds === null,
       });
 
-      fetchedObjects.forEach(object => {
+      fetchedObjects.forEach((object: $TSFixMe) => {
         this._collection.entries[object.id] = object;
       });
 
@@ -199,14 +221,24 @@ class ObjectCollectionView {
       }
     }
 
-    return range(startIndex, minStopIndex + 1)
-      .filter(idx => idx in this._orderedIds)
-      .map(idx => this._collection.entries[this._orderedIds[idx]]);
+    return (
+      range(startIndex, minStopIndex + 1)
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'filter' does not exist on type 'LodashRa... Remove this comment to see the full error message
+        .filter((idx: $TSFixMe) => idx in this._orderedIds)
+        .map((idx: $TSFixMe) => this._collection.entries[this._orderedIds[idx]])
+    );
   };
 }
 
 class DiscoveryDataLayer {
-  constructor(domain) {
+  amrWorkflowRuns: $TSFixMe;
+  domain: $TSFixMe;
+  longReadMngsSamples: $TSFixMe;
+  projects: $TSFixMe;
+  samples: $TSFixMe;
+  visualizations: $TSFixMe;
+  workflowRuns: $TSFixMe;
+  constructor(domain: $TSFixMe) {
     // TODO: Move domain to conditions object
     this.domain = domain;
 
@@ -221,7 +253,7 @@ class DiscoveryDataLayer {
     this.amrWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
   }
 
-  fetchSamples = async params => {
+  fetchSamples = async (params: $TSFixMe) => {
     const {
       samples: fetchedObjects,
       sampleIds: fetchedObjectIds,
@@ -229,7 +261,7 @@ class DiscoveryDataLayer {
     return { fetchedObjects, fetchedObjectIds };
   };
 
-  fetchProjects = async params => {
+  fetchProjects = async (params: $TSFixMe) => {
     const {
       projects: fetchedObjects,
       projectIds: fetchedObjectIds,
@@ -237,7 +269,7 @@ class DiscoveryDataLayer {
     return { fetchedObjects, fetchedObjectIds };
   };
 
-  fetchVisualizations = async params => {
+  fetchVisualizations = async (params: $TSFixMe) => {
     const {
       visualizations: fetchedObjects,
       visualizationIds: fetchedObjectIds,
@@ -245,7 +277,7 @@ class DiscoveryDataLayer {
     return { fetchedObjects, fetchedObjectIds };
   };
 
-  fetchWorkflowRuns = async params => {
+  fetchWorkflowRuns = async (params: $TSFixMe) => {
     const {
       workflowRuns: fetchedObjects,
       workflowRunIds: fetchedObjectIds,
