@@ -1203,10 +1203,14 @@ class SamplesHeatmapView extends React.Component<
       sampleDetails,
       allData,
       allTaxonDetails,
-      taxonFilterState,
       addedTaxonIds,
     } = this.state;
     const { metrics } = this.props;
+
+    // use the frontend filtering logic to identify all taxons that do not pass the filters
+    // these are still showed on the heatmap but they will be greyed out
+    // TODO figure out how to have the backend tag taxons that don't pass the filters
+    const { taxonFilterState } = this.getTaxonThresholdFilterState();
 
     const filteredData = {};
     const filteredTaxIds = new Set();
@@ -1243,18 +1247,6 @@ class SamplesHeatmapView extends React.Component<
           );
         });
       }
-    });
-
-    // create a dummy taxonFilterState that defaults all state to true
-    // because all filtering happened on the backend
-    // TODO remove Heatmap.js dependency on filterState
-    Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
-      Object.values(allTaxonDetails).forEach((taxon: $TSFixMe) => {
-        taxonFilterState[taxon["index"]] =
-          taxonFilterState[taxon["index"]] || {};
-        // eslint-disable-next-line standard/computed-property-even-spacing
-        taxonFilterState[taxon["index"]][sample["index"]] = true;
-      });
     });
 
     this.updateHistoryState();
