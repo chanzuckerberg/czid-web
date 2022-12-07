@@ -1437,7 +1437,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       shortReadMngs &&
         allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
         mergedNtNrTab,
-      deprecatedAmrLabel,
+      shortReadMngs && deprecatedAmrLabel,
       allowedFeatures.includes(AMR_V1_FEATURE) && amr && amrTab,
       cg && TABS.CONSENSUS_GENOME,
     ]);
