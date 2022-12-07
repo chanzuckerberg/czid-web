@@ -42,13 +42,7 @@ class ProjectSettingsModal extends React.Component {
   };
 
   render() {
-    const {
-      csrf,
-      nextPublicSampleDate,
-      onUserAdded,
-      project,
-      users,
-    } = this.props;
+    const { csrf, onUserAdded, project, users } = this.props;
     const { allowedFeatures = [], userId } = this.context || {};
 
     return (
@@ -135,14 +129,7 @@ class ProjectSettingsModal extends React.Component {
                       </div>
                       <div className={cs.note}>
                         Samples added will be private by default, visible only
-                        to project members. Private samples will become public 1
-                        year after upload date.{" "}
-                        {nextPublicSampleDate && (
-                          <span>
-                            Next project sample will become public on{" "}
-                            {nextPublicSampleDate}.
-                          </span>
-                        )}
+                        to project members.
                       </div>
                     </div>
                   </div>
@@ -184,7 +171,6 @@ ProjectSettingsModal.propTypes = {
     name: PropTypes.string,
     public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
   }).isRequired,
-  nextPublicSampleDate: PropTypes.string,
   users: PropTypes.array,
 };
 

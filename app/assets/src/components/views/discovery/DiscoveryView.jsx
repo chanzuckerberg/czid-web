@@ -2515,7 +2515,6 @@ class DiscoveryView extends React.Component {
             <ProjectHeader
               project={project || {}}
               snapshotProjectName={snapshotProjectName}
-              fetchedSamples={this.samples.loaded}
               onProjectUpdated={this.handleProjectUpdated}
               onMetadataUpdated={this.refreshDataFromProjectChange}
               workflow={workflow}

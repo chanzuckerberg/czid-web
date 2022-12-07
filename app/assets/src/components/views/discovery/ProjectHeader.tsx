@@ -1,6 +1,5 @@
 import { Icon } from "czifui";
-import { assign, find, min } from "lodash/fp";
-import moment from "moment";
+import { assign, find } from "lodash/fp";
 import React from "react";
 import { validateProjectName, saveProjectName } from "~/api";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -29,7 +28,6 @@ interface ProjectHeaderProps {
 const ProjectHeader = ({
   project,
   snapshotProjectName,
-  fetchedSamples,
   onProjectUpdated,
   onMetadataUpdated,
   workflow,
@@ -50,17 +48,6 @@ const ProjectHeader = ({
     });
     onProjectUpdated && onProjectUpdated({ project: newProject });
   };
-
-  const currentTimestamp = moment();
-  // TODO(tiago): fetched samples might not include all samples (legacy issue)
-  const nextPublicSampleTimestamp = min(
-    fetchedSamples
-      .map(sample => moment(sample.privateUntil))
-      .filter(timestamp => timestamp >= currentTimestamp),
-  );
-  const nextPublicSampleDate = nextPublicSampleTimestamp
-    ? nextPublicSampleTimestamp.format("MMM Do, YYYY")
-    : null;
 
   const handleProjectRename = async name => {
     if (name === project.name) return ["", name];
@@ -138,7 +125,6 @@ const ProjectHeader = ({
               // TODO(tiago): remove csrf by restructuring api calls within ProjectSettingsModal
               // @ts-expect-error Property 'content' does not exist on type 'HTMLElement'
               csrf={document.getElementsByName("csrf-token")[0].content}
-              nextPublicSampleDate={nextPublicSampleDate}
               onUserAdded={handleProjectUserAdded}
               onProjectPublished={handleProjectPublished}
               project={project}
