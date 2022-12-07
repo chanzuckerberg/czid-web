@@ -657,7 +657,20 @@ class Sample < ApplicationRecord
       kickoff_pipeline
       amr_wrs_to_dispatch.all.map(&:dispatch) unless amr_wrs_to_dispatch.empty?
     elsif initial_workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
-      pr.dispatch
+      if transient_status == STATUS_RERUN
+        # If we're rerunning an existing long read mngs sample, we need to create a new pipeline run to dispatch.
+        new_pr = PipelineRun.new(
+          sample: self,
+          technology: PipelineRun::TECHNOLOGY_INPUT[:nanopore],
+          guppy_basecaller_setting: pr.guppy_basecaller_setting,
+          alignment_config: AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+        )
+        mark_older_pipeline_runs_as_deprecated if new_pr.save!
+        new_pr.dispatch
+      else
+        # If this a new sample, just dispatch the pipeline run that was created on upload in SamplesHelper#upload_samples_with_metadata.
+        pr.dispatch
+      end
     end
   end
 
