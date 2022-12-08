@@ -71,7 +71,7 @@ export class BasePage {
    * @param value test ids added specifically for testing
    */
   async clickByTestId(value: string) {
-    await this.page.click(`[data-test-id="${value}"]`);
+    await this.page.click(`[data-testid="${value}"]`);
   }
 
   async clickCheckBox(index: number) {
@@ -120,7 +120,7 @@ export class BasePage {
     await this.page.fill(`${type}[label="${name}"]`, value);
   }
   async fillTestId(testId: string, value: string) {
-    await this.page.fill(`[data-test-id="${testId}"]`, value);
+    await this.page.fill(`[data-testid="${testId}"]`, value);
   }
   async fillByText(text: string, value: string) {
     await this.page.fill(`text=${text}`, value);

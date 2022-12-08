@@ -1180,7 +1180,8 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       currentTab,
     } = this.props;
     const { phyloTreeModalParams } = this.state;
-    const readsPerMillionKey = currentTab === TABS.SHORT_READ_MNGS ? "rpm" : "bpm";
+    const readsPerMillionKey =
+      currentTab === TABS.SHORT_READ_MNGS ? "rpm" : "bpm";
     return (
       <>
         {/* @ts-expect-error Table has not been typed yet */}
@@ -1190,7 +1191,9 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           data={this.getTableRows()}
           defaultRowHeight={rowHeight}
           defaultSortBy={
-            displayNoBackground || displayMergedNtNrValue ? readsPerMillionKey : "agg_score"
+            displayNoBackground || displayMergedNtNrValue
+              ? readsPerMillionKey
+              : "agg_score"
           }
           defaultSortDirection={SortDirection.DESC}
           headerClassName={cs.header}

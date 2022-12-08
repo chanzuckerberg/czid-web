@@ -1,0 +1,108 @@
+#!/bin/bash
+# Works for Ubuntu/Mint
+
+sudo test
+
+# Ensure you are executing in the root of the repo 
+#  for docker commands to work
+SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+cd $SCRIPT_PATH/..
+
+HAS_DOCKER=$(docker --version > /dev/null 2>&1 && echo 1 || echo 0)
+HAS_RUBY=$(ruby --version > /dev/null 2>&1 && echo 1 || echo 0)
+HAS_MYSQL=$(mysql --version > /dev/null 2>&1 && echo 1 || echo 0)
+HAS_HUB=$(hub --version > /dev/null 2>&1 && echo 1 || echo 0)
+HAS_BASH_COMPLETION=$(dpkg -l | grep -q bash-completion > /dev/null 2>&1 && echo 1 || echo 0)
+HAS_NODE=$(node --version > /dev/null 2>&1 && echo 1 || echo 0)
+
+if [ "$HAS_DOCKER" == "0" ] || [ "$HAS_RUBY" == "0" ] || [ "$HAS_MYSQL" == "0" ] || [ "$HAS_HUB" == "0" ] || [ "$HAS_BASH_COMPLETION" == "0" ] || [ "$HAS_NODE" == "0" ] ; then
+    sudo apt-get update
+fi
+
+if [ "$HAS_DOCKER" == "0" ] ; then
+    # https://docs.docker.com/install/linux/docker-ce/ubuntu/
+    echo "Installing docker"
+    sudo apt-get remove docker docker-engine docker.io containerd runc
+    sudo apt-get update
+    sudo apt-get install \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        gnupg-agent \
+        software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo apt-key fingerprint 0EBFCD88
+
+    # Compatibility for Linux Mint, you need to use the upstream Ubuntu codename
+    RELEASE="$(lsb_release -cs)"
+    if [ "$(lsb_release -is)" == LinuxMint ] ; then
+        RELEASE="$(cat /etc/upstream-release/lsb-release | grep -oP -o "(?<=DISTRIB_CODENAME=).*")"
+    fi
+
+    sudo add-apt-repository \
+        "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+        $RELEASE \
+        stable"
+    sudo apt-get update
+    sudo apt-get install docker-ce docker-ce-cli containerd.io
+    sudo usermod -aG docker $USER
+
+    # https://docs.docker.com/compose/install/
+    echo "Installing docker-compose"
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o docker-compose
+    sudo ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+    sudo chmod +x docker-compose
+fi
+
+if [ "$HAS_RUBY" == "0" ] ; then
+    # https://www.digitalocean.com/community/tutorials/how-to-install-ruby-on-rails-with-rbenv-on-ubuntu-16-04
+    echo "Installing ruby via rbenv"
+    sudo apt-get install -y autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
+    git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+    echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+    echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+    source ~/.bashrc
+    rbenv install 2.4.1
+    rbenv global 2.4.1
+fi
+
+if [ "$HAS_MYSQL" == "0" ] ; then
+    echo "Intalling mysql-client"
+    sudo apt-get install -y mysql-client libmysqlclient-dev
+fi
+
+if [ "$HAS_HUB" == "0" ] ; then
+    # https://github.com/github/hub
+    echo "Installing hub"
+    if !snap --version > /dev/null 2>&1 ; then
+        echo "Installing snap to install hub"
+        sudo apt-get install -y snapd
+    fi
+    snap install hub --classic
+fi
+
+if [ "$HAS_BASH_COMPLETION" == "0" ] ; then
+    echo "Installing bash-completion"
+    sudo apt-get -y install bash-completion
+fi
+
+echo "Switching to node 16.14.2"
+source /home/runner/.nvm/nvm.sh # load already installed nvm
+nvm install 16.14.2
+nvm use 16.14.2
+node -v
+
+# Make the docker volume directory and open permissions for elasticsearch
+mkdir -p docker_data/elasticsearch/data
+sudo chmod -R 777 docker_data/elasticsearch/data
+
+# Increase systemd max heap for elasticsearch
+sudo sysctl -w vm.max_map_count=262144
+
+gem install bundler --conservative
+
+echo "== Building docker compose config =="
+docker-compose build
+
+echo "== Running npm install and webpack =="
+npm install && ./node_modules/.bin/webpack --config webpack.config.dev.js

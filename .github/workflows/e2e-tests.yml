@@ -1,0 +1,106 @@
+name: idseq-web e2e tests
+
+on:
+  push
+env:
+  AWS_DEFAULT_OUTPUT: json
+  AWS_REGION: us-west-2
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  ENVIRONMENT: dev
+  EXECUTOR_ROLE: czid-staging-gh-actions-executor
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    permissions: # these permissions must be set for AWS auth to work!
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: ${{runner.os}}-cache
+
+      - name: Configure AWS Credentials
+        id: configure_aws_credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.DEV_AWS_ROLE }}
+          role-session-name: build-push-docker-img
+
+      - name: Login to ECR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DEV_ECR_REPO }}
+
+      - name: Export variables
+        run: |
+          AWS_ACCOUNT_ID=${{ steps.configure_aws_credentials.outputs.aws-account-id }}
+          echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> $GITHUB_ENV
+
+      - name: Configuring services
+        run:  bash ${GITHUB_WORKSPACE}/bin/setup-ci 
+
+      - name: Initialize dev DB
+        run: docker-compose run web rails db:drop db:create db:migrate 
+      
+      - name: Seed dev DB
+        run: docker-compose run web rails db:seed
+      
+      - name: Initialize test DB
+        run: docker-compose run -e RAILS_ENV=test web rails db:drop db:create db:migrate:with_data
+      
+      - name: Seed test DB
+        run: docker-compose run -e RAILS_ENV=test web rails db:seed
+
+      # start services
+      - name: Starting services
+        run: |
+          echo "DOCKER_REPO=${DOCKER_REPO}" > .env.ecr
+          echo "******** building app ************"
+          docker buildx build --progress=plain --cache-from=type=registry,ref=${{ secrets.DEV_ECR_REPO }}/idseq-web:latest -t ${{ secrets.DEV_ECR_REPO }}/idseq-web:latest .
+          mkdir -p app/build
+          chmod a+rwx app/build # TODO temp hack - need a better plan for the build dir.
+          echo "******** starting containers ******"
+          docker-compose up -d web
+          echo "******** running app **************"
+          docker-compose exec -T web wget -qO- -T 10 --timeout 20 --tries 60 localhost:3000/
+          
+      - name: Configure AWS Screts Executor Role Credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ci/${{ env.EXECUTOR_ROLE }}
+      
+      - name: Configure CZID Login Credentials
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1.0.0
+        with:
+          secret-ids: |
+            LOGIN, czid-login
+          parse-json-secrets: true
+
+      # run Playwright E2E tests
+      - name: Running Playwright tests
+        run: |
+          cd e2e
+          echo "******** running E2E tests ********"
+          npm install @playwright/test
+          npx playwright install
+          npm run pw:ci
+        env: 
+          CZID_USERNAME: ${{ env.LOGIN_USERNAME}}      
+          CZID_PASSWORD: ${{ env.LOGIN_PASSWORD }}
+      
+      # upload screenshots and videos
+      - name: Upload artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3.1.1
+        with: 
+          name: e2e-artifacts
+          path: ./e2e/report
+
+  

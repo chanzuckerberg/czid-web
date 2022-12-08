@@ -1,5 +1,5 @@
 export const ENVIRONMENT = {
-  DEV: "development",
+  DEV: "dev",
 };
 
 export const footer: Record<string, string> = {

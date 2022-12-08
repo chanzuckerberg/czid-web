@@ -32,7 +32,7 @@ const defaults: Metadata = {
 };
 
 const sampleType = "Metagenomics";
-const projectName = "QA Automation";
+const projectName = "Test Project";
 const sampleFiles = ["RR004_water_2_S23A_R1_001.fastq"];
 
 test.describe("Metagenomics sample upload tests", () => {

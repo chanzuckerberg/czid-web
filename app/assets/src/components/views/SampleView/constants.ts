@@ -161,7 +161,8 @@ export const CATEGORIES = [
 const DOC_BASE_LINK =
   "https://help.czid.org/hc/en-us/articles/360034790574-Single-Sample-Report-Table";
 
-const ONT_DOC_LINK = "https://docs.google.com/document/d/1ZsZ8ythCMrER7eZKbjZG93O6bNB37pJpsX2lf1sAs_I/edit#bookmark=id.h6dlo72hypko";
+const ONT_DOC_LINK =
+  "https://docs.google.com/document/d/1ZsZ8ythCMrER7eZKbjZG93O6bNB37pJpsX2lf1sAs_I/edit#bookmark=id.h6dlo72hypko";
 
 export const REPORT_TABLE_COLUMNS = {
   NT_aggregatescore: {
@@ -187,8 +188,7 @@ export const REPORT_TABLE_COLUMNS = {
     link: DOC_BASE_LINK + "#reads",
   },
   contigs: {
-    tooltip:
-      "Number of assembled contigs aligning to the taxon.",
+    tooltip: "Number of assembled contigs aligning to the taxon.",
     link: DOC_BASE_LINK + "#contig",
   },
   contigreads: {
@@ -218,7 +218,7 @@ export const REPORT_TABLE_COLUMNS = {
   bpm: {
     tooltip:
       "Number of bases within all the reads aligning to a given taxon, including those assembled into contigs that mapped to the taxon, per million bases sequenced.",
-    link: ONT_DOC_LINK ,
+    link: ONT_DOC_LINK,
   },
   b: {
     tooltip:
@@ -226,7 +226,8 @@ export const REPORT_TABLE_COLUMNS = {
     link: ONT_DOC_LINK,
   },
   contigbases: {
-    tooltip: "Number of bases within all the reads that assembled into contigs aligning to a given taxon.",
+    tooltip:
+      "Number of bases within all the reads that assembled into contigs aligning to a given taxon.",
     link: ONT_DOC_LINK,
   },
 };

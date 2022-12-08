@@ -3,7 +3,6 @@ results/
 report/
 .cache/
 .env.staging
-.env.development
 storage/state.json
 *.png
 

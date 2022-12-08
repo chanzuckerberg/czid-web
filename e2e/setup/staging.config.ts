@@ -11,7 +11,8 @@ const config: PlaywrightTestConfig = {
   expect: {
     timeout: 30000,
   },
-  globalSetup: "./global-setup",
+  fullyParallel: true,
+  globalSetup: "./globalSetup",
   outputDir: "../report",
   projects: [
     {
@@ -19,11 +20,10 @@ const config: PlaywrightTestConfig = {
       use: {
         ...devices["Desktop Chrome"],
         video: "on",
-        //  launchOptions:{slowMo:1000}
       },
     },
   ],
-  reporter: process.env.CI ? "github" : "list",
+  reporter: "list",
   testDir: "../tests",
   timeout: 30000,
   use: {

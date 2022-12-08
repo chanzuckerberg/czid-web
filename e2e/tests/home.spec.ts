@@ -9,7 +9,7 @@ dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 test.describe("Home page tests", () => {
   // overwrite global login with empty storage so we can visit home page
   test.use({ storageState: "storage/emptyStorageState.json" });
-  test("Should verify home page", async ({ page }) => {
+  test("Should verify home page @nologin", async ({ page }) => {
     const basePage = new BasePage(page);
     //now go to home page
     await basePage.gotoUrl(`${process.env.BASEURL}`);

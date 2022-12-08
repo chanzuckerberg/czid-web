@@ -17,7 +17,10 @@ import { FileWithPreview } from "react-dropzone";
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
-import { PRE_UPLOAD_CHECK_FEATURE, ONT_V1_FEATURE } from "~/components/utils/features";
+import {
+  PRE_UPLOAD_CHECK_FEATURE,
+  ONT_V1_FEATURE,
+} from "~/components/utils/features";
 import { Project, Sample } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
@@ -167,7 +170,8 @@ class LocalSampleFileUpload extends React.Component<
                   <List
                     listItems={compact([
                       `Metagenomics Illumina: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).`,
-                      allowedFeatures.includes(ONT_V1_FEATURE) && `Metagenomics Nanopore: fastq (.fq), fastq.gz (.fq.gz).`,
+                      allowedFeatures.includes(ONT_V1_FEATURE) &&
+                        `Metagenomics Nanopore: fastq (.fq), fastq.gz (.fq.gz).`,
                       `SARS-CoV-2 Consensus Genome: fastq (.fq).`,
                     ])}
                   />

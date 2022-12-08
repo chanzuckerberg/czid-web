@@ -1,4 +1,4 @@
-import { chromium, expect, Page, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 import path from "path";
 import dotenv from "dotenv";
 import { BasePage } from "../pages/basePage";
@@ -11,6 +11,7 @@ import {
   PROJECTS,
   SAMPLES,
   SEARCH_MY_DATA,
+  tag,
   TAXON_FILTERS,
   UPLOAD,
   VISUALIZATIONS,
@@ -23,7 +24,6 @@ let page: Page;
 let basePage: BasePage;
 const href = "href";
 
-// todo: replace selectors with data-testid
 test.describe("Landing page tests", () => {
   test("Should verify top nav elements", async ({ page }) => {
     basePage = new BasePage(page);
