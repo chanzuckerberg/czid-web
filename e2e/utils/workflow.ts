@@ -18,7 +18,7 @@ const metadataFixture = getFixture("metadata");
 export function generateWorkflowData(
   workflowName: string,
   projectId: number,
-  sampleName: string,
+  sampleName: string
 ): Workflow {
   const min = 1;
   const max = 5;

@@ -75,10 +75,7 @@ export class BasePage {
   }
 
   async clickCheckBox(index: number) {
-    await this.page
-      .locator('input[type="checkbox"]')
-      .nth(index)
-      .click();
+    await this.page.locator('input[type="checkbox"]').nth(index).click();
   }
 
   /**
@@ -206,8 +203,8 @@ export class BasePage {
 
   async waitForResponse(path: string) {
     const resp = await this.page.waitForResponse(
-      response =>
-        response.url().includes(`/${path}/`) && response.status() === 200,
+      (response) =>
+        response.url().includes(`/${path}/`) && response.status() === 200
     );
     return resp.json();
   }

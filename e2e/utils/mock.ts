@@ -17,10 +17,10 @@ export async function mockResponse(
   mockData: any,
   page: Page,
   context: BrowserContext,
-  elementToCheckOnThePage?: string,
+  elementToCheckOnThePage?: string
 ) {
   //create an intercept to stub response with mock data once we get response with status 200
-  await context.route(api, async route => {
+  await context.route(api, async (route) => {
     const response = await context.request.get(api);
     //check we get response 200, but we could also abort the call (route.abort() : route.continue();)
     expect(response.ok()).toBeTruthy();

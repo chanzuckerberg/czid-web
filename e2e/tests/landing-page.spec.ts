@@ -35,7 +35,7 @@ test.describe("Landing page tests", () => {
     // My Data menu item has correct url
     await expect(await basePage.findByText(MY_DATA)).toHaveAttribute(
       href,
-      HREF.MYDATA,
+      HREF.MYDATA
     );
 
     // Public menu item has correct url
@@ -46,14 +46,14 @@ test.describe("Landing page tests", () => {
     // Upload menu item has correct url
     await expect(await basePage.findByText(UPLOAD)).toHaveAttribute(
       href,
-      HREF.UPLOAD,
+      HREF.UPLOAD
     );
 
     // Info icon
     // todo: is this intended that this icon has not href
     const infoIconIndex = 0;
     await expect(
-      (await basePage.findByTestId(INCON_BUTTON)).nth(infoIconIndex),
+      (await basePage.findByTestId(INCON_BUTTON)).nth(infoIconIndex)
     ).toBeVisible();
   });
 
@@ -64,7 +64,7 @@ test.describe("Landing page tests", () => {
     // verify filter sections
     const taxonFilterIndex = 0;
     await expect(
-      (await basePage.findByText(TAXON_FILTERS)).nth(taxonFilterIndex),
+      (await basePage.findByText(TAXON_FILTERS)).nth(taxonFilterIndex)
     ).toBeVisible();
     await expect(await basePage.findByText(METADATA_FILTERS)).toBeVisible();
   });
@@ -77,24 +77,24 @@ test.describe("Landing page tests", () => {
     // todo: is this intended that this icon has not href
     const infoIconIndex = 0;
     await expect(
-      (await basePage.findByTestId(INCON_BUTTON)).nth(infoIconIndex),
+      (await basePage.findByTestId(INCON_BUTTON)).nth(infoIconIndex)
     ).toBeVisible();
 
     //filters
     const filterInconIndex = 1;
     await expect(
-      (await basePage.findByTestId(INCON_BUTTON)).nth(filterInconIndex),
+      (await basePage.findByTestId(INCON_BUTTON)).nth(filterInconIndex)
     ).toBeVisible();
 
     //search field
     await expect(
-      await basePage.findByPlaceHolder(SEARCH_MY_DATA),
+      await basePage.findByPlaceHolder(SEARCH_MY_DATA)
     ).toBeVisible();
 
     // verify discovery items
     const projectDiscoveryItemIndex = 0;
     await expect(
-      (await basePage.findByText(PROJECTS)).nth(projectDiscoveryItemIndex),
+      (await basePage.findByText(PROJECTS)).nth(projectDiscoveryItemIndex)
     ).toBeVisible();
     await expect(await basePage.findByText(SAMPLES)).toBeVisible();
     await expect(await basePage.findByText(VISUALIZATIONS)).toBeVisible();

@@ -35,7 +35,7 @@ let excludedFields: Array<string> | undefined;
 export function getMetadata(
   sampleName: string,
   defaultData?: Metadata,
-  exclusions?: Array<string>,
+  exclusions?: Array<string>
 ): Metadata {
   defaults = defaultData;
   excludedFields = exclusions;
@@ -51,7 +51,7 @@ export function getMetadata(
 export function generateMetadataFile(
   fileName: string,
   defaultData?: Metadata,
-  exclusions?: Array<string>,
+  exclusions?: Array<string>
 ) {
   defaults = defaultData;
   excludedFields = exclusions;
@@ -134,7 +134,7 @@ export function getAttributeValue(attribute: string): any {
 }
 
 export async function getGeneratedSampleName(
-  page: Page,
+  page: Page
 ): Promise<string | null> {
   return page.locator(getByTestID("sample-name")).textContent();
 }

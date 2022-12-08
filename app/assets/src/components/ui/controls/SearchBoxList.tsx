@@ -115,6 +115,7 @@ class SearchBoxList extends React.Component<
             icon={<IconSearch className={cs.searchBoxIcon} />}
             placeholder="Search"
             onChange={onFilterChange || this.handleFilterChange}
+            data-testid={search}
           />
         </div>
         <div className={cs.listBox}>

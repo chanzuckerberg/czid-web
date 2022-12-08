@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 export async function login(
   page: Page,
   username?: string,
-  password?: string,
+  password?: string
 ): Promise<void> {
   const email = username !== undefined ? username : process.env.CZID_USERNAME;
   const pwd = password !== undefined ? password : process.env.CZID_PASSWORD;
