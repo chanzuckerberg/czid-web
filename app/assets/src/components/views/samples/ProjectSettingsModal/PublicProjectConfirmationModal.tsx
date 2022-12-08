@@ -1,11 +1,27 @@
-import PropTypes from "prop-types";
 import React from "react";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import cs from "./public_project_confirmation_modal.scss";
 
-class PublicProjectConfirmationModal extends React.Component {
-  constructor(props) {
+interface PublicProjectConfirmationModalProps {
+  onConfirm: $TSFixMeFunction;
+  project: {
+    id?: number;
+    name?: string;
+    public_access?: boolean | number;
+  };
+  trigger?: React.ReactNode;
+}
+
+interface PublicProjectConfirmationModalState {
+  modalOpen: boolean;
+}
+
+class PublicProjectConfirmationModal extends React.Component<
+  PublicProjectConfirmationModalProps,
+  PublicProjectConfirmationModalState
+> {
+  constructor(props: PublicProjectConfirmationModalProps) {
     super(props);
 
     this.state = {
@@ -81,15 +97,5 @@ class PublicProjectConfirmationModal extends React.Component {
     );
   }
 }
-
-PublicProjectConfirmationModal.propTypes = {
-  onConfirm: PropTypes.func.isRequired,
-  project: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string,
-    public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
-  }).isRequired,
-  trigger: PropTypes.node,
-};
 
 export default PublicProjectConfirmationModal;

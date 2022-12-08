@@ -1,15 +1,15 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-
-import { NumberId } from "~/interface/shared";
 import SectionsDropdown from "~ui/controls/dropdowns/SectionsDropdown";
-import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
+import SubtextDropdown, {
+  Option,
+} from "~ui/controls/dropdowns/SubtextDropdown";
 
 interface BackgroundModelFilterProps {
-  allBackgrounds?: NumberId[];
+  allBackgrounds?: RawBackground[];
   categorizeBackgrounds?: boolean;
-  otherBackgrounds?: NumberId[];
-  ownedBackgrounds?: NumberId[];
+  otherBackgrounds?: RawBackground[];
+  ownedBackgrounds?: RawBackground[];
   disabled?: boolean;
   enableMassNormalizedBackgrounds?: boolean;
   label?: string;
@@ -17,6 +17,15 @@ interface BackgroundModelFilterProps {
   onClick?: $TSFixMeFunction;
   placeholder?: string;
   rounded?: boolean;
+  value?: number;
+  className?: string;
+}
+
+export interface RawBackground {
+  mass_normalized: boolean;
+  text: string;
+  name?: string;
+  id?: number;
   value?: number;
 }
 
@@ -34,8 +43,8 @@ const BackgroundModelFilter = React.memo(
   }: BackgroundModelFilterProps) => {
     let disabled = props.disabled || false;
 
-    const formatBackgroundOptions = (backgrounds: $TSFixMe) =>
-      backgrounds.map((background: $TSFixMe) => {
+    const formatBackgroundOptions = (backgrounds: RawBackground[]): Option[] =>
+      backgrounds.map(background => {
         const disabledOption =
           !enableMassNormalizedBackgrounds && background.mass_normalized;
         return {
@@ -51,7 +60,7 @@ const BackgroundModelFilter = React.memo(
         };
       });
 
-    let backgroundOptions = formatBackgroundOptions(allBackgrounds);
+    let backgroundOptions: Option[] = formatBackgroundOptions(allBackgrounds);
     if (backgroundOptions.length === 0) {
       backgroundOptions = [
         { text: "No background models to display", value: -1 },
@@ -78,7 +87,6 @@ const BackgroundModelFilter = React.memo(
         ...ownedBackgrounds,
         ...otherBackgrounds,
       ].reduce((result, bg) => {
-        // @ts-expect-error Property 'value' does not exist on type 'NumberId'
         result[bg.id || bg.value] = bg.name || bg.text;
         return result;
       }, {});

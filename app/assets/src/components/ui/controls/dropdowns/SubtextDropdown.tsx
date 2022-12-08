@@ -10,22 +10,23 @@ import cs from "./subtext_dropdown.scss";
 interface SubtextDropdownProps {
   className?: string;
   menuClassName?: string;
-  options: {
-    value?: string | number;
-    text: string;
-    subtext: string;
-    disabled?: boolean;
-    tooltip?: string;
-  }[];
+  options: Option[];
   onChange: $TSFixMeFunction;
   initialSelectedValue?: string | number;
   nullLabel?: string;
 }
 
+export interface Option {
+  value?: number;
+  text: string;
+  subtext?: string;
+  disabled?: boolean;
+  tooltip?: string;
+}
+
 class SubtextDropdown extends React.Component<SubtextDropdownProps> {
   renderMenuItem(option: $TSFixMe) {
     const trigger = (
-      // @ts-expect-error Item does not exist on BareDropdown
       <BareDropdown.Item
         onClick={(e: $TSFixMe) => {
           if (option.disabled) {
@@ -39,7 +40,6 @@ class SubtextDropdown extends React.Component<SubtextDropdownProps> {
       >
         <div className={cs.optionText}>{option.text}</div>
         <div className={cs.optionSubtext}>{option.subtext}</div>
-        {/* @ts-expect-error Item does not exist on BareDropdown */}
       </BareDropdown.Item>
     );
     if (option.tooltip) {

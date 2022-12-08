@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import Modal from "~ui/containers/Modal";
@@ -6,7 +5,17 @@ import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 
 import cs from "./disable_sharing_confirmation_modal.scss";
 
-const DisableSharingConfirmationModal = ({ open, onCancel, onConfirm }) => {
+interface DisableSharingConfirmationModalProps {
+  open?: boolean;
+  onCancel: $TSFixMeFunction;
+  onConfirm: $TSFixMeFunction;
+}
+
+const DisableSharingConfirmationModal = ({
+  open,
+  onCancel,
+  onConfirm,
+}: DisableSharingConfirmationModalProps) => {
   return (
     <Modal className={cs.confirmationModal} narrowest open={open} tall>
       <div className={cs.title}>
@@ -30,12 +39,6 @@ const DisableSharingConfirmationModal = ({ open, onCancel, onConfirm }) => {
       </div>
     </Modal>
   );
-};
-
-DisableSharingConfirmationModal.propTypes = {
-  open: PropTypes.bool,
-  onCancel: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
 };
 
 export default DisableSharingConfirmationModal;

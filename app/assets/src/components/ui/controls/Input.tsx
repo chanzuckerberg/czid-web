@@ -18,6 +18,7 @@ interface InputProps {
   onKeyPress?: $TSFixMeFunction;
   onKeyDown?: $TSFixMeFunction;
   type?: HTMLInputTypeAttribute;
+  id: string;
 }
 
 class Input extends React.Component<InputProps> {

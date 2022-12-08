@@ -1,5 +1,4 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import { getBackgrounds } from "~/api";
@@ -26,7 +25,35 @@ import DisableSharingConfirmationModal from "./DisableSharingConfirmationModal";
 
 import cs from "./view_only_link_form.scss";
 
-class ViewOnlyLinkForm extends React.Component {
+interface ViewOnlyLinkFormProps {
+  project: {
+    id?: number;
+  };
+}
+
+interface ViewOnlyLinkFormState {
+  backgroundId?: number;
+  backgroundOptions?: {
+    mass_normalized: boolean;
+    text: string;
+    name: string;
+    id: number;
+    value?: number;
+  }[];
+  disableSharingConfirmationModalOpen: boolean;
+  isLoading: boolean;
+  sharingEnabled: boolean;
+  enableMassNormalizedBackgrounds?: boolean;
+  automaticUpdateEnabled: boolean;
+  snapshotShareId: string;
+  snapshotNumSamples: number;
+  snapshotPipelineVersions: $TSFixMeUnknown[];
+  snapshotTimestamp: string;
+}
+class ViewOnlyLinkForm extends React.Component<
+  ViewOnlyLinkFormProps,
+  ViewOnlyLinkFormState
+> {
   constructor(props) {
     super(props);
     this.state = {
@@ -330,6 +357,7 @@ class ViewOnlyLinkForm extends React.Component {
                   enableMassNormalizedBackgrounds={
                     enableMassNormalizedBackgrounds
                   }
+                  // @ts-expect-error Property 'fluid' does not exist on type
                   fluid
                   label={null}
                   onChange={backgroundId =>
@@ -391,11 +419,5 @@ class ViewOnlyLinkForm extends React.Component {
     );
   }
 }
-
-ViewOnlyLinkForm.propTypes = {
-  project: PropTypes.shape({
-    id: PropTypes.number,
-  }).isRequired,
-};
 
 export default ViewOnlyLinkForm;
