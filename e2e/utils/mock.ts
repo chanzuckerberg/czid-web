@@ -1,5 +1,12 @@
 import { BrowserContext, expect, Page } from "@playwright/test";
+import { getFixture } from "./common";
+import path from "path";
+import dotenv from "dotenv";
+import { API } from "./constants";
 
+dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
+
+const baseUrl = process.env.BASEURL as string;
 /**
  * This function intercepts the response for a API call and stub it with mocked data
  * It helps testing functionalities listing listinf and filtering, where we need to know the
@@ -12,26 +19,57 @@ import { BrowserContext, expect, Page } from "@playwright/test";
  * @param elementToCheckOnThePage - optionally, we can verify that the expected data is displayed
  */
 export async function mockResponse(
-  api: string,
-  url: string,
-  mockData: any,
   page: Page,
   context: BrowserContext,
   elementToCheckOnThePage?: string
 ) {
-  //create an intercept to stub response with mock data once we get response with status 200
-  await context.route(api, async (route) => {
-    const response = await context.request.get(api);
-    //check we get response 200, but we could also abort the call (route.abort() : route.continue();)
-    expect(response.ok()).toBeTruthy();
-    //retain original response but replace body part with stubbed data we created
-    route.fulfill({
-      response,
-      body: JSON.stringify(mockData),
-    });
-  });
-  // make the actual call, wait until all responses have been received
-  await page.goto(url, { waitUntil: "networkidle" });
+  const workflowData = getFixture("workflows");
+  const projectData = getFixture("projects");
+  const locationData = getFixture("sampleLocations");
+  const projectApi = `${baseUrl}/${API.PROJECT}`;
+  const workflowApi = `${baseUrl}/${API.WORKFLOW}`;
+  const locationApi = `${baseUrl}/${API.SAMPLE_LOCATION}`;
+  const projectUrl = `${baseUrl}/public`;
+  const sampleUrl = `${baseUrl}/${API.SAMPLE_URL}`;
+
+  await Promise.all([
+    await context.route(locationApi, async route => {
+      const response = await context.request.get(locationApi);
+      expect(response.ok()).toBeTruthy();
+      route.fulfill({
+        response,
+        body: JSON.stringify(locationData),
+      });
+    }),
+    await context.route(workflowApi, async route => {
+      const response = await context.request.get(workflowApi);
+      expect(response.ok()).toBeTruthy();
+      route.fulfill({
+        response,
+        body: JSON.stringify(workflowData),
+      });
+    }),
+    await context.route(projectApi, async route => {
+      const response = await context.request.get(projectApi);
+      expect(response.ok()).toBeTruthy();
+      route.fulfill({
+        response,
+        body: JSON.stringify(projectData),
+      });
+    }),
+    page.waitForResponse(
+      resp =>
+        resp.url().includes(`${API.SAMPLE_LOCATION}`) && resp.status() === 200,
+    ),
+    page.waitForResponse(
+      resp => resp.url().includes(`${API.PROJECT}`) && resp.status() === 200,
+    ),
+    page.waitForResponse(
+      resp => resp.url().includes(`${API.WORKFLOW}`) && resp.status() === 200,
+    ),
+
+    await page.goto(projectUrl),
+  ]);
 
   if (elementToCheckOnThePage !== undefined) {
     await page.waitForSelector(elementToCheckOnThePage, {

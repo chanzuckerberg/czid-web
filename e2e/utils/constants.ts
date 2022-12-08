@@ -25,9 +25,6 @@ export const API = {
 };
 export const tag =
   "Chan Zuckerberg ID: The free, cloud-based metagenomics platform for researchers";
-export const CZID_TERMS =
-  "I agree that the data I am uploading to CZ ID has been lawfully collected and that I have all the necessary consents, permissions, and authorizations needed to collect, share, and export data to CZ ID as outlined in the Terms and Data Privacy Notice.";
-
 export const CZID = "CZ ID";
 export const MY_DATA = "My Data";
 export const PUBLIC = "Public";
@@ -49,6 +46,7 @@ export const NUMBERINPUT = 'input[type="number"]';
 export const APPLY = "Apply";
 export const CHOOSE_TAXON = "Choose Taxon";
 export const SAMPLE_NAME_SELECTOR = ".sampleName-1zqqT";
+export const SEARCH = "Search";
 export const ESCAPE = "Escape";
 export const CLOSE_ICON = ".closeIcon-yEIIr";
 export const ANNOTATION = "Annotation";
@@ -64,7 +62,9 @@ export const VISIBILITY = "Visibility";
 export const PRIVATE = "Private";
 export const TEXTBOX = "textbox";
 export const OPTION = "option";
+export const SAMPLE_TYPE = "Sample Type";
 export const HOST = "Host";
+export const MENU_ITEM_PUBLIC = "menu-item-public";
 export const ENTER = "Enter";
 export const PUBLIC_MENU_ITEM = "menu-item-public";
 export const PROJECT_NAME_SELECTOR = ".itemName-1WWBD";
@@ -72,7 +72,6 @@ export const PROJECT_COUNT = "project-count";
 export const METADATA_COUNT_SELECTOR = ".statsDd-24NuT";
 export const RESULT_COUNT_SELECTOR = ".filteredCount-3bajD";
 export const SELECT_PROJECT = "Select project";
-export const SEARCH = "Search";
 export const ANALYSIS_TYPE = "analysis-type";
 export const FIXTURE_DIR = "./fixtures/samples";
 export const ACCEPT_ALL_COOKIES = "Accept All Cookies";
@@ -95,7 +94,6 @@ export const DISEASES_CONDITIONS = "Diseases and Conditions";
 export const CHECKBOX = 'input[type="checkbox"]';
 export const START_UPLOAD = "Start Upload";
 export const HOST_ORGANISM = "Host Organism";
-export const SAMPLE_TYPE = "Sample Type";
 export const COLLECTION_DATE = "Collection Date";
 export const COLLECTION_LOCATION = "Collection Location";
 export const COLUMN_SELECTOR = ".listElement-3bAja";

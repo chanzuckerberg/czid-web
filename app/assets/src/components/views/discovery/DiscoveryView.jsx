@@ -2103,8 +2103,20 @@ class DiscoveryView extends React.Component {
       return {
         label: (
           <div className={isBeta && cs.alignBetaTag}>
-            <span className={cs.tabLabel}>{workflowName}</span>
-            <span className={cs.tabCounter}>{workflowCount || "0"}</span>
+            <span
+              className={cs.tabLabel}
+              data-testid={workflowName.toLowerCase().replaceAll(" ", "-")}
+            >
+              {workflowName}
+            </span>
+            <span
+              className={cs.tabCounter}
+              data-testid={`${workflowName
+                .toLowerCase()
+                .replaceAll(" ", "-")}-count`}
+            >
+              {workflowCount || "0"}
+            </span>
             {isBeta && (
               <StatusLabel
                 className={cs.statusLabel}

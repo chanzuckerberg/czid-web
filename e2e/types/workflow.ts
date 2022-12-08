@@ -4,6 +4,12 @@ export type Workflow = {
   created_at: string;
   status: string;
   cached_results: {
+    coverage_viz: {
+      coverage_breadth: number | undefined;
+      coverage_depth: number | undefined;
+      max_aligned_length: number | undefined;
+      total_length: number | undefined;
+    };
     quality_metrics: {
       total_reads: number;
       qc_percent: number;
@@ -14,6 +20,12 @@ export type Workflow = {
       insert_size_mean: string | undefined;
       insert_size_standard_deviation: string | undefined;
       percent_remaining: number;
+    };
+    taxon_info: {
+      accession_id: string | undefined;
+      accession_name: string | undefined;
+      taxon_id: number | undefined;
+      taxon_name: string | undefined;
     };
   };
   inputs: {
@@ -43,7 +55,7 @@ export type Workflow = {
         name: string;
         geo_level: string;
         country_name: string;
-        state_name: "";
+        state_name: string | undefined;
         subdivision_name: string;
         city_name: string;
         lat: number;

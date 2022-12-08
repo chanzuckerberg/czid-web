@@ -8,11 +8,13 @@ import {
   getYearMonthInThePast,
 } from "./common";
 import fs from "fs";
-import { getByTestID } from "./selectors";
-import { Page } from "@playwright/test";
+import { Filter } from "../types/filter";
+import { Workflow } from "../types/workflow";
+import { SampleLocation } from "../types/sampleLocation";
 
 const yesOrNo = ["Yes", "No"];
-// metadata fixture will possible values
+const zeroOrOne = [0, 1];
+const statuses = ["COMPLETE", "FAILED"];
 const metadataFixture = getFixture("metadata");
 
 // collection of optional metadata fields and their data type
@@ -133,8 +135,55 @@ export function getAttributeValue(attribute: string): any {
   return getAttributeOrDefault(defaults, attribute, value);
 }
 
-export async function getGeneratedSampleName(
-  page: Page
-): Promise<string | null> {
-  return page.locator(getByTestID("sample-name")).textContent();
+/**
+ *
+ * @param workflowName Function generated workflow data for stubbing the response
+ * for workflow API call
+ * @param projectId project ID for samples in the wrokflow
+ * @param sampleName name of the sample
+ * @returns Workflow object that will be passed to the mock service
+ */
+export function generateWorkflowData(
+  workflowName: string,
+  projectId: number,
+  sampleName: string,
+  filter: Filter,
+): Workflow {
+  const workflow = getFixture("workflows");
+  workflow.id = getRandomNumber(1000, 9999);
+  workflow.workflow = workflowName;
+  workflow.created_at = filter.created_at;
+  workflow.status = sample(statuses) as string;
+  workflow.cached_results.taxon_info.taxon_name = filter.taxon_name;
+  workflow.inputs.taxon_name = filter.taxon_name;
+  workflow.sample.info.name = sampleName;
+  workflow.sample.info.public = filter.public;
+  workflow.sample.info.project_id = projectId;
+  workflow.sample.info.host_genome_name = filter.host;
+  workflow.sample.metadata.sample_type = filter.sample_type;
+  workflow.sample.metadata.collection_date = filter.collection_date;
+  workflow.sample.metadata.collection_location_v2.name =
+    filter.collection_location_v2;
+
+  return workflow;
+}
+
+export function generateLocation(defaults: SampleLocation): SampleLocation {
+  return {
+    id: defaults.id,
+    name: defaults.name,
+    geo_level: "state",
+    country_name: defaults.country_name,
+    state_name: defaults.state_name,
+    subdivision_name: "",
+    city_name: "",
+    lat: "36.7",
+    lng: "-118.76",
+    country_id: defaults.country_id,
+    state_id: defaults.state_id,
+    subdivision_id: undefined,
+    city_id: undefined,
+    sample_ids: defaults.sample_ids,
+    project_ids: defaults.project_ids,
+  };
 }

@@ -9,7 +9,7 @@ dotenv.config({
 
 const config: PlaywrightTestConfig = {
   expect: {
-    timeout: 30000,
+    timeout: 60000,
   },
   fullyParallel: true,
   globalSetup: "./globalSetup",
@@ -25,9 +25,9 @@ const config: PlaywrightTestConfig = {
   ],
   reporter: "list",
   testDir: "../tests",
-  timeout: 30000,
+  timeout: 120000,
   use: {
-    actionTimeout: 0,
+    actionTimeout: 10000,
     channel: "chromium",
     baseURL: "https://staging.czid.org",
     ignoreHTTPSErrors: true,
