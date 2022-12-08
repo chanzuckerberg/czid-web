@@ -41,15 +41,15 @@ import {
 } from "./utils";
 
 export interface SampleDetailsModeProps {
-  currentRun: WorkflowRun | PipelineRun;
-  currentWorkflowTab: CurrentTabSample;
-  handleWorkflowTabChange: (tab: CurrentTabSample) => void;
-  sample: Sample;
+  currentRun?: WorkflowRun | PipelineRun;
+  currentWorkflowTab?: CurrentTabSample;
+  handleWorkflowTabChange?: (tab: CurrentTabSample) => void;
+  sample?: Sample;
   sampleId: number;
-  sampleWorkflowLabels: string[];
-  onMetadataUpdate: (key: $TSFixMeUnknown, value: $TSFixMeUnknown) => void;
-  onWorkflowRunSelect: $TSFixMeFunction;
-  snapshotShareId: SnapshotShareId;
+  sampleWorkflowLabels?: string[];
+  onMetadataUpdate?: (key: $TSFixMeUnknown, value: $TSFixMeUnknown) => void;
+  onWorkflowRunSelect?: $TSFixMeFunction;
+  snapshotShareId?: SnapshotShareId;
   pipelineVersion?: string; // Needs to be string for 3.1 vs. 3.10.
   showReportLink?: boolean;
   tempSelectedOptions?: TempSelectedOptionsShape;

@@ -31,7 +31,7 @@ class TableRenderers extends React.Component {
     nameRenderer,
     visibilityIconRenderer,
   }) => {
-    let icon = visibilityIconRenderer(item);
+    const icon = visibilityIconRenderer(item);
     return (
       <div className={cs.item}>
         <div className={cs.visibility}>
@@ -293,7 +293,7 @@ class TableRenderers extends React.Component {
     statusRenderer,
     visibilityIconRenderer,
   }) => {
-    let icon = visibilityIconRenderer(item);
+    const icon = visibilityIconRenderer(item);
     return (
       <div className={cs.visualization}>
         <div className={cs.visibility}>

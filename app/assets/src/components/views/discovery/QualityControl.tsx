@@ -21,11 +21,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { GET_SAMPLES_READS_STATS_QUERY } from "~/api/samples_reads_stats";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
 import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { IconInfoSmall } from "~/components/ui/icons";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
-import PropTypes from "~/components/utils/propTypes";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants";
@@ -35,6 +35,7 @@ import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/Ho
 import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
 import { numberWithPercent } from "~/helpers/strings";
 import { apolloClient } from "~/index";
+import Sample from "~/interface/sample";
 import { TooltipVizTable } from "~ui/containers";
 import Notification from "~ui/notifications/Notification";
 import InfoBanner from "./InfoBanner";
@@ -53,10 +54,18 @@ import {
 } from "./constants";
 import cs from "./quality_control.scss";
 
+interface QualityControlWrapperProps {
+  filters?: { host: $TSFixMeUnknown };
+  projectId?: number;
+  handleBarClick: $TSFixMeFunction;
+  sampleStatsSidebarOpen?: boolean;
+  filtersSidebarOpen?: boolean;
+}
+
 // TODO: get rid of this wrapper once the graphql
 // conversion for getSamples and getSamplesReadStats
 // is complete
-function QualityControlWrapper(props) {
+function QualityControlWrapper(props: QualityControlWrapperProps) {
   const { loading, error, data } = useQuery(QUALITY_CONTROL_QUERY, {
     variables: {
       projectId: props.projectId,
@@ -77,20 +86,30 @@ function QualityControlWrapper(props) {
   );
 }
 
+interface QualityControlProps {
+  filters?: object;
+  projectId?: number;
+  handleBarClick: $TSFixMeFunction;
+  sampleStatsSidebarOpen?: boolean;
+  filtersSidebarOpen?: boolean;
+  project?: object;
+  samples: Sample[];
+}
+
 function QualityControl({
   filters,
-  project,
-  projectId,
   samples,
   handleBarClick,
-}) {
+}: QualityControlProps) {
   const [loading, setLoading] = useState(true);
   const [
     showProcessingSamplesMessage,
     setShowProcessingSamplesMessage,
   ] = useState(true);
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [sidebarParams, setSidebarParams] = useState({ sampleId: null });
+  const [sidebarParams, setSidebarParams] = useState<SampleDetailsModeProps>({
+    sampleId: null,
+  });
   const [histogramTooltipData, setHistogramTooltipData] = useState(null);
   const [normalize, setNormalize] = useState(false);
   const [failedSamples, setFailedSamples] = useState(null);
@@ -174,7 +193,7 @@ function QualityControl({
         data: qcPercentBins,
         labelX: "Percentage",
         labelY: "Number of Samples",
-        tickFormat: d => numberWithPercent(d),
+        tickFormat: (d: number) => numberWithPercent(d),
       });
 
       renderHistogram({
@@ -197,7 +216,7 @@ function QualityControl({
 
   const fetchProjectData = async () => {
     setLoading(true);
-    let data = extractData(samples);
+    const data = extractData(samples);
     const totalSampleCount =
       data.validSamples.length +
       data.runningSamples.length +
@@ -214,7 +233,7 @@ function QualityControl({
     const { categories, legendColors, _readsLostData } = stackReadsLostData(
       samplesReadsStats,
     );
-    const chartColors = legendColors.map(({ color, label }) => color);
+    const chartColors = legendColors.map(({ color }) => color);
 
     setValidSamples(data.validSamples);
     setRunningSamples(data.runningSamples);
@@ -281,10 +300,10 @@ function QualityControl({
     });
 
     const _readsLostData = samplesWithInitialReads.map(sampleId => {
-      const dataRow = {};
+      const dataRow: { total?; name? } = {};
       let readsRemaining = samplesReadsStats[sampleId].initialReads;
       samplesReadsStats[sampleId].steps.forEach(step => {
-        let readsAfter = step.readsAfter || readsRemaining;
+        const readsAfter = step.readsAfter || readsRemaining;
         const readsLost = readsRemaining - readsAfter;
         dataRow[step.name] = readsLost;
         readsRemaining = readsAfter;
@@ -416,7 +435,18 @@ function QualityControl({
     );
   };
 
-  const extractBins = ({ data, numBins, minBinWidth }) => {
+  const extractBins = ({
+    data,
+    numBins,
+    minBinWidth,
+  }: {
+    data: {
+      id: string;
+      value: any;
+    }[];
+    numBins: number;
+    minBinWidth: number;
+  }) => {
     if (!data.length) {
       return [[], []];
     }
@@ -692,11 +722,23 @@ function QualityControl({
 
   /* --- render functions --- */
 
-  const renderHistogram = ({ container, data, labelX, labelY, tickFormat }) => {
+  const renderHistogram = ({
+    container,
+    data,
+    labelX,
+    labelY,
+    tickFormat,
+  }: {
+    container;
+    data: { x0: number; x1: number; length: number }[];
+    labelX: string;
+    labelY: string;
+    tickFormat?: $TSFixMeFunction;
+  }) => {
     const tickValues = data.map(d => d.x0);
     tickValues.push(last(data).x1);
 
-    let histogram = new Histogram(container, data, {
+    const histogram = new Histogram(container, data, {
       skipBins: true,
       domain: [0, last(data).x1],
       tickValues: tickValues,
@@ -747,7 +789,8 @@ function QualityControl({
 
   function renderHistograms() {
     const numSamplesWithInsertSize = meanInsertSizeHistogram
-      ? flatten(samplesByInsertSize).length
+      ? // @ts-expect-error Property 'length' is missing in type 'MutableRefObject<any[]>' but required in type 'ArrayLike<unknown>'.
+        flatten(samplesByInsertSize).length
       : 0;
     const showMeanInsertSizeWarning =
       meanInsertSizeHistogram && numSamplesWithInsertSize < validSamples.length;
@@ -1134,22 +1177,5 @@ function QualityControl({
   }
   return loading ? renderLoading() : renderVisualization();
 }
-
-QualityControlWrapper.propTypes = {
-  filters: PropTypes.object,
-  projectId: PropTypes.number,
-  handleBarClick: PropTypes.func.isRequired,
-  sampleStatsSidebarOpen: PropTypes.bool,
-  filtersSidebarOpen: PropTypes.bool,
-};
-
-QualityControl.propTypes = {
-  filters: PropTypes.object,
-  projectId: PropTypes.number,
-  handleBarClick: PropTypes.func.isRequired,
-  sampleStatsSidebarOpen: PropTypes.bool,
-  filtersSidebarOpen: PropTypes.bool,
-  project: PropTypes.object,
-};
 
 export default QualityControlWrapper;
