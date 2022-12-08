@@ -280,8 +280,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     if (currentTab === TABS.AMR_DEPRECATED && !amrDeprecatedData) {
       this.fetchAmrDeprecatedData();
     }
-
-    if (currentTab === TABS.CONSENSUS_GENOME || currentTab === TABS.AMR) {
+    // Only the Consensus Genome Tab needs workflowRunResults,
+    // here we fetch it and it can remain unchanged for all other tabs.
+    if (currentTab === TABS.CONSENSUS_GENOME) {
       const currentRun = this.getCurrentRun() as WorkflowRun;
       const isFirstCGLoad = !isNil(currentRun) && isNil(workflowRunResults);
       const tabChanged = currentTab !== prevState.currentTab;
