@@ -6,13 +6,11 @@ class SfnLongReadMngsPipelineDispatchService
   include Callable
   include ParameterSanitization
 
-  # TODO(ihan): Host is hardcoded as Human for testing purposes. Remove after backfilling HostGenome.s3_minimap2_index_path
+  WORKFLOW_NAME = WorkflowRun::WORKFLOW[:long_read_mngs]
+
   HUMAN_S3_MINIMAP2_INDEX_PATH = "s3://idseq-public-references/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_phiX_rRNA_mito_ERCC.fasta".freeze
   MINIMAP2_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/nt_k14_w8_20_long".freeze
   DIAMOND_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/diamond_index_chunksize_5500000000/".freeze
-
-  # TODO(ihan): Wdl version is hardcoded for testingpurposes. Swap to AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
-  WDL_VERSION = "0.2.3-beta".freeze
 
   class SfnArnMissingError < StandardError
     def initialize
@@ -33,7 +31,7 @@ class SfnLongReadMngsPipelineDispatchService
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_SINGLE_WDL_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
-    @wdl_version = WDL_VERSION
+    @wdl_version = AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
     raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
   end
 
@@ -61,7 +59,7 @@ class SfnLongReadMngsPipelineDispatchService
 
   def retrieve_docker_image_id
     resp = AwsClient[:sts].get_caller_identity
-    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/#{WorkflowRun::WORKFLOW[:long_read_mngs]}:v#{WDL_VERSION}"
+    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/#{WORKFLOW_NAME}:v#{@wdl_version}"
   end
 
   def generate_wdl_input
@@ -75,7 +73,7 @@ class SfnLongReadMngsPipelineDispatchService
           guppy_basecaller_setting: @pipeline_run.guppy_basecaller_setting,
           minimap_host_db: library_type.casecmp("dna").zero? ? @sample.host_genome.s3_minimap2_dna_index_path : @sample.host_genome.s3_minimap2_rna_index_path,
           minimap_human_db: HUMAN_S3_MINIMAP2_INDEX_PATH,
-          subsample_depth: @pipeline_run.subsample, # optional input
+          subsample_depth: @sample.subsample, # optional input specified in Admin Options
           lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
           accession2taxid_db: @pipeline_run.alignment_config.s3_accession2taxid_path,
           taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,

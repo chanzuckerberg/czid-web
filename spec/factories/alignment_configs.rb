@@ -2,6 +2,7 @@ FactoryBot.define do
   factory :alignment_config, class: AlignmentConfig do
     sequence(:name) { |n| Date.new(2022, 1, 1).next_day(n).strftime("%Y-%m-%d") }
     s3_nt_db_path { "s3://s3_nt_db_path" }
+    s3_nt_info_db_path { "s3://s3_nt_info_db_path" }
     s3_nt_loc_db_path { "s3://s3_nt_loc_db_path" }
     s3_nr_db_path { "s3://s3_nr_db_path" }
     s3_nr_loc_db_path { "s3://s3_nr_loc_db_path" }

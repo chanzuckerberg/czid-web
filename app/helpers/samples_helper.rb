@@ -655,6 +655,7 @@ module SamplesHelper
         errors << SampleUploadErrors.missing_required_technology_for_cg(sample_attributes[:project_id])
       end
 
+      # Nanopore Consensus genome attributes
       is_nanopore_consensus_genome = workflows&.include?(WorkflowRun::WORKFLOW[:consensus_genome]) && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
       if is_nanopore_consensus_genome
         clearlabs = sample_attributes.delete(:clearlabs)
@@ -663,6 +664,7 @@ module SamplesHelper
         vadr_options = ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS
       end
 
+      # Consensus genome attributes
       if sample_attributes.key?(:wetlab_protocol)
         wetlab_protocol = sample_attributes.delete(:wetlab_protocol)
       end
@@ -679,6 +681,7 @@ module SamplesHelper
         primer_bed = sample_attributes.delete(:primer_bed)
       end
 
+      # Long read mNGS attributes
       if sample_attributes.key?(:guppy_basecaller_setting)
         guppy_basecaller_setting = sample_attributes.delete(:guppy_basecaller_setting)
       end

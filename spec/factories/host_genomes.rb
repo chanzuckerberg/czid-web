@@ -1,5 +1,8 @@
 FactoryBot.define do
   factory :host_genome, class: HostGenome do
+    s3_minimap2_dna_index_path { "s3://s3_minimap2_dna_index_path" }
+    s3_minimap2_rna_index_path { "s3://s3_minimap2_rna_index_path" }
+
     transient do
       metadata_fields { [] }
     end
