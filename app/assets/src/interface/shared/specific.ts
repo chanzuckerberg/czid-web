@@ -282,6 +282,7 @@ export interface Taxon {
   taxId?: number;
   taxLevel?: "genus" | "species";
   pathogenTag?: string;
+  pathogenTags?: string[];
   lineageRank?: string;
 }
 

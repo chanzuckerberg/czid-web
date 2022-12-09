@@ -64,6 +64,7 @@ import {
   BLAST_V1_FEATURE,
   MERGED_NT_NR_FEATURE,
   ONT_V1_FEATURE,
+  MULTITAG_PATHOGENS_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
@@ -86,7 +87,10 @@ import BlastV1ContigsModal from "~/components/views/blast/BlastV1ContigsModal";
 import BlastV1ReadsModal from "~/components/views/blast/BlastV1ReadsModal";
 import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
 import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/ConsensusGenomePreviousModal";
-import { getGeneraPathogenCounts } from "~/helpers/taxon";
+import {
+  getGeneraPathogenCounts,
+  getAllGeneraPathogenCounts,
+} from "~/helpers/taxon";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
@@ -468,14 +472,17 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   processRawSampleReportData = (rawReportData: $TSFixMe) => {
+    const { allowedFeatures = [] } = this.context || {};
     const { selectedOptions } = this.state;
 
     const reportData: $TSFixMe = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     if (rawReportData.sortedGenus) {
-      const generaPathogenCounts = getGeneraPathogenCounts(
-        rawReportData.counts[SPECIES_LEVEL_INDEX],
-      );
+      const generaPathogenCounts = allowedFeatures.includes(
+        MULTITAG_PATHOGENS_FEATURE,
+      )
+        ? getAllGeneraPathogenCounts(rawReportData.counts[SPECIES_LEVEL_INDEX])
+        : getGeneraPathogenCounts(rawReportData.counts[SPECIES_LEVEL_INDEX]);
 
       rawReportData.sortedGenus.forEach((genusTaxId: $TSFixMe) => {
         let hasHighlightedChildren = false;

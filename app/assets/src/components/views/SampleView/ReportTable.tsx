@@ -25,7 +25,10 @@ import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import { BACKGROUND_MODELS_LINK } from "~/components/utils/documentationLinks";
-import { ANNOTATION_FEATURE } from "~/components/utils/features";
+import {
+  ANNOTATION_FEATURE,
+  MULTITAG_PATHOGENS_FEATURE,
+} from "~/components/utils/features";
 import {
   isPipelineFeatureAvailable,
   ASSEMBLY_FEATURE,
@@ -554,11 +557,10 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     const { allowedFeatures = [] } = this.context || {};
     const { displayMergedNtNrValue, onTaxonNameClick } = this.props;
     let childrenCount = 0;
-    let filteredSpeciesKnownPathogenCount =
-      get("pathogens.knownPathogens", rowData) || 0;
+    let filteredSpeciesPathogenCount;
 
     if (rowData.taxLevel === TAX_LEVEL_GENUS) {
-      filteredSpeciesKnownPathogenCount = size(
+      filteredSpeciesPathogenCount = size(
         compact(
           filter(
             filteredSpecies => get("pathogenTag", filteredSpecies),
@@ -566,6 +568,18 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           ),
         ),
       );
+
+      // how many species under the given genus has any pathogen tag
+      if (allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE)) {
+        filteredSpeciesPathogenCount = size(
+          compact(
+            filter(
+              filteredSpecies => get("pathogenTags", filteredSpecies),
+              rowData.filteredSpecies,
+            ),
+          ),
+        );
+      }
 
       childrenCount = displayMergedNtNrValue
         ? filter(species => species["merged_nt_nr"], rowData.filteredSpecies)
@@ -613,7 +627,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
                   </span>
                   {this.renderGenusLevelPreviews({
                     rowData,
-                    filteredSpeciesKnownPathogenCount,
+                    filteredSpeciesPathogenCount,
                   })}
                   {` )`}
                 </span>
@@ -627,11 +641,23 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
                   {` )`}
                 </span>
               ))}
-            <span>
-              {rowData.pathogenTag && (
-                <PathogenLabel type={rowData.pathogenTag} isDimmed={isDimmed} />
-              )}
-            </span>
+            {allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE) ? (
+              rowData.pathogenTags &&
+              rowData.pathogenTags.map(flag => (
+                <span key={flag}>
+                  <PathogenLabel type={flag} isDimmed={isDimmed} />
+                </span>
+              ))
+            ) : (
+              <span>
+                {rowData.pathogenTag && (
+                  <PathogenLabel
+                    type={rowData.pathogenTag}
+                    isDimmed={isDimmed}
+                  />
+                )}
+              </span>
+            )}
             <span>{this.renderHoverActions({ rowData })}</span>
           </div>
         </div>
@@ -641,7 +667,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
 
   renderGenusLevelPreviews = ({
     rowData,
-    filteredSpeciesKnownPathogenCount,
+    filteredSpeciesPathogenCount,
   }: $TSFixMe) => {
     const { allowedFeatures = [] } = this.context || {};
     const displayAnnotationPreviews =
@@ -661,7 +687,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         {rowData.pathogens && (
           <PathogenPreview
             tag2Count={rowData.pathogens}
-            totalPathogenCount={filteredSpeciesKnownPathogenCount}
+            totalPathogenCount={filteredSpeciesPathogenCount}
           />
         )}
         {displayAnnotationPreviews && (

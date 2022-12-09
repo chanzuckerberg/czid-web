@@ -2,7 +2,9 @@ import { get, getOr, map } from "lodash/fp";
 import React from "react";
 
 import { trackEvent, withAnalytics } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
+import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import TidyTree from "~/components/visualizations/TidyTree";
 import { Taxon } from "~/interface/shared";
 
@@ -376,24 +378,42 @@ class TaxonTreeVis extends React.Component<
   };
 
   renderPathogenLabels = () => {
+    const { allowedFeatures = [] } = this.context || {};
     const { taxa } = this.props;
     const labels: JSX.Element[] = [];
     taxa.forEach(genusData => {
-      if (genusData.pathogenTag) {
-        labels.push(
-          this.renderPathogenLabel(genusData.taxId, genusData.pathogenTag),
-        );
-      }
-      genusData.filteredSpecies.forEach(speciesData => {
-        if (speciesData.pathogenTag) {
+      if (allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE)) {
+        if (genusData.pathogenTags) {
+          genusData.pathogenTags.forEach(pathogenTag => {
+            labels.push(this.renderPathogenLabel(genusData.taxId, pathogenTag));
+          });
+        }
+        genusData.filteredSpecies.forEach(speciesData => {
+          if (speciesData.pathogenTags) {
+            speciesData.pathogenTags.forEach(pathogenTag => {
+              labels.push(
+                this.renderPathogenLabel(speciesData.taxId, pathogenTag),
+              );
+            });
+          }
+        });
+      } else {
+        if (genusData.pathogenTag) {
           labels.push(
-            this.renderPathogenLabel(
-              speciesData.taxId,
-              speciesData.pathogenTag,
-            ),
+            this.renderPathogenLabel(genusData.taxId, genusData.pathogenTag),
           );
         }
-      });
+        genusData.filteredSpecies.forEach(speciesData => {
+          if (speciesData.pathogenTag) {
+            labels.push(
+              this.renderPathogenLabel(
+                speciesData.taxId,
+                speciesData.pathogenTag,
+              ),
+            );
+          }
+        });
+      }
     });
     return labels;
   };
@@ -421,5 +441,7 @@ class TaxonTreeVis extends React.Component<
     );
   }
 }
+
+TaxonTreeVis.contextType = UserContext;
 
 export default TaxonTreeVis;

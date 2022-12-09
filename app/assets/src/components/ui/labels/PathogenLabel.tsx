@@ -26,6 +26,25 @@ export const CATEGORIES = {
       </>
     ),
   },
+  lcrp: {
+    text: "LCRP Pathogen",
+    color: "orange",
+    dimmedColor: "dimOrange",
+    tooltip: (
+      <>
+        {"TODO create doc describing LCRP algorithm and link it "}
+        <ExternalLink
+          href={"/pathogen_list"}
+          analyticsEventName={
+            ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
+          }
+        >
+          here
+        </ExternalLink>
+        {" so users can understand the tag."}
+      </>
+    ),
+  },
 };
 
 interface PathogenLabelProps {

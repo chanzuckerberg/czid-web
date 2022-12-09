@@ -51,3 +51,21 @@ export const getGeneraPathogenCounts = (speciesCounts: {
   });
   return genusPathogenCnt;
 };
+
+export const getAllGeneraPathogenCounts = (speciesCounts: {
+  [key: string]: { pathogenTags: string[]; genus_tax_id: string };
+}) => {
+  const genusPathogenCnt = {};
+  Object.values(speciesCounts).forEach(speciesInfo => {
+    (speciesInfo.pathogenTags || []).forEach(pathogenTag => {
+      genusPathogenCnt[speciesInfo.genus_tax_id] =
+        genusPathogenCnt[speciesInfo.genus_tax_id] || {};
+
+      const genusTaxid = speciesInfo.genus_tax_id;
+      const tag = pathogenTag;
+      genusPathogenCnt[genusTaxid][tag] =
+        (genusPathogenCnt[genusTaxid][tag] || 0) + 1;
+    });
+  });
+  return genusPathogenCnt;
+};
