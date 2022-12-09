@@ -145,6 +145,9 @@ export class BasePage {
   async findByLocator(name: string, i: number) {
     return this.page.locator(name).nth(i);
   }
+  async findBySelector(name: string) {
+    return this.page.locator(name);
+  }
 
   async findByDataName(name: string) {
     return this.page.locator(`[data-name="${name}"]`);
@@ -218,8 +221,8 @@ export class BasePage {
     return this.page.getByRole("checkbox", { name: name });
   }
 
-  async takeScreenshort(path: string) {
-    this.page.screenshot({ path: path, fullPage: true });
+  async takeScreenshot(path: string) {
+    this.page.screenshot({ path: path });
   }
 
   async pause() {

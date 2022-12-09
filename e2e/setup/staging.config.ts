@@ -37,4 +37,5 @@ const config: PlaywrightTestConfig = {
     viewport: { width: 800, height: 7200 },
   },
 };
+
 export default config;

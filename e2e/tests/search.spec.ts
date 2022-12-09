@@ -23,7 +23,7 @@ const projectsFound = "132 projects";
 const sampleName = "RNAEnr_10e4_viralcopies_RVOPv2_iSeq";
 const samplesFound = "5 samples";
 test.describe("Search data tests", () => {
-  test.only("Should search projects", async ({ page }) => {
+  test("Should search projects", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/${MY_DATA}`);
     await page.locator(getByTestID(PUBLIC_MENU_ITEM)).click();
     await page.locator(getByPlaceholder(SEARCH_PUBLIC)).fill(projectName);
@@ -35,16 +35,19 @@ test.describe("Search data tests", () => {
 
     //project count
     expect(await page.locator(getByTestID(PROJECT_COUNT)).textContent()).toBe(
-      projectsFound
+      projectsFound,
     );
 
     // metadata project count
     expect(
-      await page.locator(METADATA_COUNT_SELECTOR).nth(1).textContent()
+      await page
+        .locator(METADATA_COUNT_SELECTOR)
+        .nth(1)
+        .textContent(),
     ).toBe("1");
   });
 
-  test.only("Should search samples", async ({ page }) => {
+  test("Should search samples", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/${MY_DATA}`);
     await page.locator(getByTestID(PUBLIC_MENU_ITEM)).click();
     await page.locator(getByTestID(SAMPLES.toLowerCase())).click();
@@ -54,12 +57,15 @@ test.describe("Search data tests", () => {
 
     //sample count
     expect(await page.locator(RESULT_COUNT_SELECTOR).textContent()).toBe(
-      samplesFound
+      samplesFound,
     );
 
     // metadata sample count
     expect(
-      await page.locator(METADATA_COUNT_SELECTOR).nth(0).textContent()
+      await page
+        .locator(METADATA_COUNT_SELECTOR)
+        .nth(0)
+        .textContent(),
     ).toBe("5");
   });
 });

@@ -31,12 +31,94 @@ export const PUBLIC = "Public";
 export const UPLOAD = "Upload";
 export const INCON_BUTTON = "iconButton";
 export const SEARCH_MY_DATA = "Search My Data...";
+export const SEARCH_RESULT = "title";
+export const PAGE_TITLE = "name-2XtnE";
+export const TAXON_FILTER = "taxonFilterLabel-2GIb0";
+export const ANNOTATION_FILTER = "filterLabel-1PFBn";
+export const METADATA_FILTER = ".filterLabel-2d1-Y";
+export const SAMPLE_TYPE_SELECTOR = ".tabLabel-3vqpD";
+export const BUTTONS = ".action-2Pccm";
+export const VIEW_ICON = ".icon-n-1j6";
+export const PLUS_ICON = "plusIcon-1OBta";
+export const SIDEBAR_HEADER = "title-3Oy38";
+export const EDIT_BUTTON = "editLink-Nhfe2";
+export const SIDE_HEADERS = ".title-JNudy";
+export const SIDE_LABELS = ".rowLabel-3_lq2";
+export const TAB_COUNTER = ".tabCounter-13Gqy";
+export const SAMPLE_NUMBER = ".sampleName-1zqqT";
+export const SAMPLES_COLUMN = ".listElement-3bAja:visible";
+export const COLUMNS_LABEL = ".label-33v00";
+export const INFO_ICON = ".statsTrigger-3JRfy";
+export const OVERALL_AREA = ".statsDt-1b-F6";
 export const SEARCH_PUBLIC = "Search Public...";
+export const PROJECT_SELECTOR = "itemRightPane-2dZ6e";
 export const PROJECTS = "Projects";
 export const SAMPLES = "Samples";
 export const VISUALIZATIONS = "Visualizations";
 export const TAXON_FILTERS = "Taxon Filters";
 export const METADATA_FILTERS = "Metadata Filters";
+export const BAR_LABEL = ".barLabel-1JhFz";
+export const DATE_CREATED = ".dateHistogram-2Eix-";
+export const DATE_LABEL = ".label-zMCsY";
+export const CONSENSUS_GENOMES = "Consensus Genomes";
+export const FILTER_TAG = ".labelText-2faxp";
+export const CANCEL_ICON = ".closeIcon-yEIIr";
+export const ANNOTATION = "Annotation";
+export const LOCATION = "Location";
+export const TIMEFRAME = "Timeframe";
+export const VISIBILITY = "Visibility";
+export const HOST = "Host";
+export const METAGENOMICS = "Metagenomics";
+export const ANTIMICROBIAL_RESISTANCE = "Antimicrobial Resistance";
+export const DESCRIPTION = "Description";
+export const OVERALL = "Overall";
+export const DATE_CREATED_S = "Date created";
+export const METADATA = "Metadata";
+export const AVG_READS_PER_SAMPLE = "Avg. reads per sample";
+export const AVG_READS_FILTER_PER_SAMPLE =
+  "Avg. reads passing filters per sample";
+export const VISIBLE = "visible";
+export const COLUMN_DROPDOWN = {
+  Metagenomics: [
+    "Created On",
+    "Host",
+    "Location",
+    "Passed Filters",
+    "Passed QC",
+    "Total Reads",
+    "DCR",
+    "ERCC Reads",
+    "Nucleotide Type",
+    "Sample Type",
+    "Water Control",
+    "Notes",
+    "Pipeline Version",
+    "SubSampled Fraction",
+    "Total Runtime",
+    "Mean Insert Size",
+    "Collection Date",
+    "Collection Location v1",
+    "Host Sex",
+    "Known Organism",
+    "Infection Class",
+    "Host Age",
+    "Host ID",
+    "Host Race/Ethnicity",
+    "Primary Diagnosis",
+    "Antibiotic Administered",
+    "Immunocompromised",
+    "Detection Method",
+    "Comorbidity",
+    "Library Prep",
+    "Sequencer",
+    "RNA/DNA Input (ng)",
+    "Host Genus Species",
+    "s3_preload_result_path",
+    "s3_preload_result_path",
+  ],
+};
+
+export const SELECT_PROJECT = "Select project";
 export const TAXON = "taxon";
 export const BUTTON = "button";
 export const COMBOBOX = "combobox";
@@ -49,21 +131,15 @@ export const SAMPLE_NAME_SELECTOR = ".sampleName-1zqqT";
 export const SEARCH = "Search";
 export const ESCAPE = "Escape";
 export const CLOSE_ICON = ".closeIcon-yEIIr";
-export const ANNOTATION = "Annotation";
-export const MENU_ITEM = "menuitem";
-export const LOCATION = "Location";
 export const CLOSE_ICON_POLYGON = ".closeIcon-yEIIr > polygon";
-export const TIMEFRAME = "Timeframe";
 export const LAST_MONTH = "Last Month";
 export const LAST_THREE_MONTHS = "Last 3 Months";
 export const LAST_SIX_MONTHS = "Last 6 Months";
 export const LAST_WEEK = "Last Week";
-export const VISIBILITY = "Visibility";
 export const PRIVATE = "Private";
 export const TEXTBOX = "textbox";
 export const OPTION = "option";
 export const SAMPLE_TYPE = "Sample Type";
-export const HOST = "Host";
 export const MENU_ITEM_PUBLIC = "menu-item-public";
 export const ENTER = "Enter";
 export const PUBLIC_MENU_ITEM = "menu-item-public";
@@ -71,7 +147,6 @@ export const PROJECT_NAME_SELECTOR = ".itemName-1WWBD";
 export const PROJECT_COUNT = "project-count";
 export const METADATA_COUNT_SELECTOR = ".statsDd-24NuT";
 export const RESULT_COUNT_SELECTOR = ".filteredCount-3bajD";
-export const SELECT_PROJECT = "Select project";
 export const ANALYSIS_TYPE = "analysis-type";
 export const FIXTURE_DIR = "./fixtures/samples";
 export const ACCEPT_ALL_COOKIES = "Accept All Cookies";

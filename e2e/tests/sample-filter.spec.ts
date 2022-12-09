@@ -49,7 +49,7 @@ const ARGENTINA = "Argentina";
 const projectName = "floo Plutonium";
 test.describe("Sample filtering tests", () => {
   ["Metagenomics", "Consesus Genome"].forEach((workflow, index) => {
-    test.only(`Should filter ${workflow} by taxons`, async ({ page }) => {
+    test(`Should filter ${workflow} by taxons`, async ({ page }) => {
       const tabId = workflow.replace(" ", "-").toLowerCase();
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
@@ -89,7 +89,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} by annotations`, async ({ page }) => {
+    test(`Should filter ${workflow} by annotations`, async ({ page }) => {
       const tabId = workflow.replace(" ", "-").toLowerCase();
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
@@ -135,9 +135,7 @@ test.describe("Sample filtering tests", () => {
     });
   });
   workflows.forEach((workflow, index) => {
-    test.only(`Should filter ${workflow} samples by locations`, async ({
-      page,
-    }) => {
+    test(`Should filter ${workflow} samples by locations`, async ({ page }) => {
       const tabId = workflow.replace(" ", "-").toLowerCase();
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
@@ -177,7 +175,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} samples by timeframe - Last Week`, async ({
+    test(`Should filter ${workflow} samples by timeframe - Last Week`, async ({
       page,
     }) => {
       const tabId = workflow.replace(" ", "-").toLowerCase();
@@ -201,7 +199,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} samples by timeframe - Last Month`, async ({
+    test(`Should filter ${workflow} samples by timeframe - Last Month`, async ({
       page,
     }) => {
       // search project and display samples
@@ -224,7 +222,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} samples by timeframe - Last 3 Months`, async ({
+    test(`Should filter ${workflow} samples by timeframe - Last 3 Months`, async ({
       page,
     }) => {
       // search project and display samples
@@ -247,7 +245,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} samples by timeframe - Last 6 months`, async ({
+    test(`Should filter ${workflow} samples by timeframe - Last 6 months`, async ({
       page,
     }) => {
       // search project and display samples
@@ -270,7 +268,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} samples by timeframe - Last Year`, async ({
+    test(`Should filter ${workflow} samples by timeframe - Last Year`, async ({
       page,
     }) => {
       // search project and display samples
@@ -293,7 +291,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} samples by private visibility`, async ({
+    test(`Should filter ${workflow} samples by private visibility`, async ({
       page,
     }) => {
       // search project and display samples
@@ -316,7 +314,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} samples by public visibility`, async ({
+    test(`Should filter ${workflow} samples by public visibility`, async ({
       page,
     }) => {
       // search project and display samples
@@ -341,7 +339,7 @@ test.describe("Sample filtering tests", () => {
         await page.locator(SAMPLE_NAME_SELECTOR).count(),
       ).toBeGreaterThanOrEqual(0);
     });
-    test.only(`Should filter ${workflow} samples by host`, async ({ page }) => {
+    test(`Should filter ${workflow} samples by host`, async ({ page }) => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
       await page
@@ -378,7 +376,7 @@ test.describe("Sample filtering tests", () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    test.only(`Should filter ${workflow} samples by sample type`, async ({
+    test(`Should filter ${workflow} samples by sample type`, async ({
       page,
     }) => {
       // search project and display samples
