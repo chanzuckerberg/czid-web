@@ -1,8 +1,22 @@
 import cx from "classnames";
 import React from "react";
-import PropTypes from "~/components/utils/propTypes";
 
 import cs from "./y_axis.scss";
+
+interface YAxisProps {
+  y?;
+  labels?: unknown[];
+  width?: number;
+  height?: number;
+  barHeight?: number;
+  tickSize?: number;
+  ticksVisible?: boolean;
+  pathVisible?: boolean;
+  textClassName?: string;
+  onYAxisLabelClick?(...args: unknown[]): unknown;
+  onYAxisLabelEnter?(...args: unknown[]): unknown;
+  onYAxisLabelExit?(...args: unknown[]): unknown;
+}
 
 export default function YAxis({
   y,
@@ -17,10 +31,10 @@ export default function YAxis({
   onYAxisLabelClick,
   onYAxisLabelEnter,
   onYAxisLabelExit,
-}) {
+}: YAxisProps) {
   const renderText = () => {
     const textOffset = `translate(-${7 +
-      tickSize * (ticksVisible || pathVisible)}, 0)`;
+      tickSize * Number(ticksVisible || pathVisible)}, 0)`;
 
     const tickMapping = y.domain().map((yAttribute, index) => {
       const yPosition = y(yAttribute);
@@ -66,18 +80,3 @@ export default function YAxis({
     </svg>
   );
 }
-
-YAxis.propTypes = {
-  y: PropTypes.func,
-  labels: PropTypes.array,
-  width: PropTypes.number,
-  height: PropTypes.number,
-  barHeight: PropTypes.number,
-  tickSize: PropTypes.number,
-  ticksVisible: PropTypes.bool,
-  pathVisible: PropTypes.bool,
-  textClassName: PropTypes.string,
-  onYAxisLabelClick: PropTypes.func,
-  onYAxisLabelEnter: PropTypes.func,
-  onYAxisLabelExit: PropTypes.func,
-};

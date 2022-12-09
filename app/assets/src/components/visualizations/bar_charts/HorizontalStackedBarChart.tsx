@@ -4,7 +4,6 @@ import { scaleLinear, scaleBand, scaleOrdinal } from "d3-scale";
 import { stack } from "d3-shape";
 import { maxBy, round } from "lodash";
 import React from "react";
-import PropTypes from "~/components/utils/propTypes";
 import { normalizeData } from "~/components/visualizations/utils";
 import { numberWithPercent, numberWithSiPrefix } from "~/helpers/strings";
 
@@ -69,8 +68,82 @@ const defaults = {
   },
 };
 
-export default class HorizontalStackedBarChart extends React.Component {
-  constructor(props) {
+interface HorizontalStackedBarChartProps {
+  data?: $TSFixMeUnknown[];
+  keys?: string[];
+  options?: { colors; x; y };
+  events?: {
+    onYAxisLabelClick?: $TSFixMeFunction;
+    onYAxisLabelEnter?: $TSFixMeFunction;
+    onBarStackEnter?: $TSFixMeFunction;
+    onBarEmptySpaceEnter?: $TSFixMeFunction;
+    onChartHover?: $TSFixMeFunction;
+    onChartElementExit?: $TSFixMeFunction;
+  };
+  yAxisKey?: string;
+  className?: string;
+  normalize?: boolean;
+}
+
+interface HorizontalStackedBarChartState {
+  data: $TSFixMeUnknown[];
+  options: {
+    canvasClassName?: string;
+    y?;
+    x?: {
+      gridClassName: string;
+      axisTitleClassName: string;
+      axisTitle: string;
+      tickSpacing: number;
+      gridVisible: boolean;
+      tickSize: number;
+      ticksVisible: boolean;
+      pathVisible: boolean;
+      textClassName: string;
+    };
+    bars?: {
+      emptySpaceClassName?: string;
+      fullBarClassName?: string;
+      stackPieceClassName?: string;
+      strokeWidth: number;
+      height: number;
+      padding: number;
+    };
+    colors?: string[];
+  };
+  stackedData: [number, number][][];
+  keys: $TSFixMeUnknown;
+  dataKeys: $TSFixMeUnknown[];
+  mouseOverBar: $TSFixMeUnknown;
+  measurements: {
+    xTextHeight?;
+    xTextWidth?;
+    yTextWidthPairs?;
+    wideGlyphTextWidth?;
+    ellipsisTextWidth?;
+  };
+  redrawNeeded: boolean;
+  barHeight?: number;
+  x?;
+  y?: (...args: $TSFixMeUnknown[]) => number;
+  z?: (...args: $TSFixMeUnknown[]) => string;
+  width?: number;
+  labels?: string[];
+  xAxisHeight?: number;
+  barCanvasHeight?: number;
+  barCanvasWidth?: number;
+  yAxisWidth?: number;
+}
+
+export default class HorizontalStackedBarChart extends React.Component<
+  HorizontalStackedBarChartProps,
+  HorizontalStackedBarChartState
+> {
+  data: $TSFixMe;
+  normalizedData: $TSFixMe;
+  references: $TSFixMe;
+  stackGenerator: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
 
     const { data, keys, options, yAxisKey, normalize } = props;
@@ -81,6 +154,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     this.data = data;
     this.normalizedData = normalizeData(data, keys);
 
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'sort' does not exist on type '{}'.
     const sortedMergedOptions = mergedOptions.sort;
     if (sortedMergedOptions) {
       this.data.sort(sortedMergedOptions);
@@ -90,7 +164,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     const stateData = normalize ? this.normalizedData : this.data;
 
     // Create stack generator
-    const dataKeys = keys.filter(key => key !== yAxisKey);
+    const dataKeys = keys.filter((key: $TSFixMe) => key !== yAxisKey);
     this.stackGenerator = stack().keys(dataKeys);
 
     this.state = {
@@ -118,7 +192,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     window.addEventListener("resize", this.handleWindowResize);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: $TSFixMe) {
     const { redrawNeeded } = this.state;
     const scaleChanged = this.props.normalize !== prevProps.normalize;
     if (redrawNeeded || scaleChanged) {
@@ -133,7 +207,7 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   /* --- pre-mount functions --- */
 
-  mergeOptionsWithDefaults(defaults, options) {
+  mergeOptionsWithDefaults(defaults: $TSFixMe, options: $TSFixMe) {
     const mergedOptions = {};
     const valueOptionKeys = ["canvasClassName", "colors", "sort"];
     valueOptionKeys.forEach(option => {
@@ -182,19 +256,19 @@ export default class HorizontalStackedBarChart extends React.Component {
     const width = this.references.container.clientWidth * 0.98;
 
     const { barCanvasHeight, xAxisHeight } = this.measureHeights();
-    let { barCanvasWidth, yAxisWidth, truncatedLabels } = this.measureWidths(
+    const { barCanvasWidth, yAxisWidth, truncatedLabels } = this.measureWidths(
       width,
     );
 
     const { x, y, z } = this.createDimensions(barCanvasWidth, barCanvasHeight);
 
     y.domain(
-      stateData.map(d => {
+      stateData.map((d: $TSFixMe) => {
         return d[yAxisKey];
       }),
     );
 
-    const xDomainMax = max(stateData, d => d.total);
+    const xDomainMax = max(stateData, (d: $TSFixMe) => d.total);
     if (normalize) {
       x.domain([0, xDomainMax]);
     } else {
@@ -226,7 +300,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     const { data, options, measurements } = this.state;
 
     const xAxisHeight =
-      options.x.tickSize * (options.x.ticksVisible || options.x.pathVisible) +
+      options.x.tickSize * Number(options.x.ticksVisible || options.x.pathVisible) +
       measurements.xTextHeight;
     const barCanvasHeight =
       data.length * (options.bars.height + options.bars.padding);
@@ -234,10 +308,10 @@ export default class HorizontalStackedBarChart extends React.Component {
     return { barCanvasHeight, xAxisHeight };
   }
 
-  measureWidths(width) {
+  measureWidths(width: $TSFixMe) {
     const { measurements } = this.state;
 
-    let truncatedLabels = [];
+    const truncatedLabels: $TSFixMe = [];
     const longestLabel = maxBy(measurements.yTextWidthPairs, pair => pair[1]);
     const longestLabelLength = longestLabel[1];
 
@@ -251,7 +325,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     );
 
     if (longestLabelLength > yAxisWidth) {
-      measurements.yTextWidthPairs.forEach(pair => {
+      measurements.yTextWidthPairs.forEach((pair: $TSFixMe) => {
         const [label, labelWidth] = pair;
 
         let modifiedLabel = label;
@@ -276,7 +350,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     return { barCanvasWidth, yAxisWidth, truncatedLabels };
   }
 
-  createDimensions(barCanvasWidth, barCanvasHeight) {
+  createDimensions(barCanvasWidth: $TSFixMe, barCanvasHeight: $TSFixMe) {
     const { options } = this.state;
 
     const paddingScalar = options.bars.padding / options.bars.height;
@@ -297,7 +371,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     const { yAxisKey } = this.props;
     const { data, options } = this.state;
 
-    const elements = data.map(datum => {
+    const elements = data.map((datum: $TSFixMe) => {
       const yAttribute = datum[yAxisKey];
       return (
         <div
@@ -305,7 +379,7 @@ export default class HorizontalStackedBarChart extends React.Component {
           key={yAttribute}
           ref={ref => {
             const refLocation = this.references.yRef.findIndex(
-              ref => ref[0] === yAttribute,
+              (ref: $TSFixMe) => ref[0] === yAttribute,
             );
             if (refLocation >= 0 && ref !== null) {
               this.references.yRef[refLocation][1] = ref;
@@ -366,9 +440,9 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   measureYAxisText() {
     const yAxisRefs = this.references.yRef.filter(
-      refPair => refPair[1] !== null,
+      (refPair: $TSFixMe) => refPair[1] !== null,
     );
-    const measured = yAxisRefs.map(keyRefPair => [
+    const measured = yAxisRefs.map((keyRefPair: $TSFixMe) => [
       keyRefPair[0],
       keyRefPair[1].clientWidth,
     ]);
@@ -377,14 +451,14 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   /* --- callbacks --- */
 
-  handleYAxisLabelClick = (yAttribute, index) => {
+  handleYAxisLabelClick = (yAttribute: $TSFixMe, index: $TSFixMe) => {
     const { events } = this.props;
     const { data } = this.state;
 
     events.onYAxisLabelClick(yAttribute, data[index]);
   };
 
-  handleYAxisLabelEnter = (yAttribute, index) => {
+  handleYAxisLabelEnter = (yAttribute: $TSFixMe, index: $TSFixMe) => {
     const { events } = this.props;
     const { data } = this.state;
 
@@ -413,10 +487,10 @@ export default class HorizontalStackedBarChart extends React.Component {
 
     const strokeWidth = normalize ? 0 : options.bars.strokeWidth;
 
-    const coloredBars = dataKeys.map((key, keyIndex) => {
+    const coloredBars = dataKeys.map((key: $TSFixMe, keyIndex: $TSFixMe) => {
       const color = z(key);
       const colorStackComponent = stackedData[keyIndex].map(
-        (stackPieceRange, stackIndex) => {
+        (stackPieceRange: $TSFixMe, stackIndex: $TSFixMe) => {
           const yAttribute = data[stackIndex][yAxisKey];
           const xLeft = stackPieceRange[0];
           const xRight = stackPieceRange[1];
@@ -491,7 +565,7 @@ export default class HorizontalStackedBarChart extends React.Component {
     // of the bar. It also allows for the whole bar to be selected (e.g. via css) instead of
     // just pieces of the stack.
     const invisibleStackComponents = stackedData[stackedData.length - 1].map(
-      (stackPieceRange, stackIndex) => {
+      (stackPieceRange: $TSFixMe, stackIndex: $TSFixMe) => {
         const yAttribute = data[stackIndex][yAxisKey];
         const xLeft = 0;
         const xMid = stackPieceRange[1];
@@ -525,12 +599,14 @@ export default class HorizontalStackedBarChart extends React.Component {
               onMouseEnter={() =>
                 this.setState(
                   { mouseOverBar: yAttribute },
+                  // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
                   events.onBarEmptySpaceEnter(dataForStack),
                 )
               }
               onMouseLeave={() =>
                 this.setState(
                   { mouseOverBar: null },
+                  // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
                   events.onChartElementExit(),
                 )
               }
@@ -568,9 +644,9 @@ export default class HorizontalStackedBarChart extends React.Component {
     const tickCount = normalize
       ? round(barCanvasWidth / options.x.tickSpacing, -1)
       : Math.floor(barCanvasWidth / options.x.tickSpacing);
-    const xOffsets = x.ticks(tickCount, "s").map(value => x(value));
+    const xOffsets = x.ticks(tickCount, "s").map((value: $TSFixMe) => x(value));
 
-    const xGrid = xOffsets.map(xOffset => {
+    const xGrid = xOffsets.map((xOffset: $TSFixMe) => {
       return (
         <path
           d={`M ${xOffset} 0 v ${barCanvasHeight}`}
@@ -628,11 +704,10 @@ export default class HorizontalStackedBarChart extends React.Component {
             tickSize={options.x.tickSize}
             tickCount={tickCount}
             ticksVisible={options.x.ticksVisible}
-            tickFormat={d => tickFormat(d)}
+            tickFormat={(d: number) => tickFormat(d)}
             pathVisible={options.x.pathVisible}
             titleClassName={cx(options.x.axisTitleClassName, cs.xAxisTitle)}
             textClassName={cx(options.x.textClassName, cs.xAxisText)}
-            barCanvasWidth={barCanvasWidth}
           />
           <div className={cx(options.canvasClassName, cs.canvas)}>
             <div className={cs.yAxis}>
@@ -679,23 +754,7 @@ export default class HorizontalStackedBarChart extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 HorizontalStackedBarChart.defaultProps = {
   options: defaults,
-};
-
-HorizontalStackedBarChart.propTypes = {
-  data: PropTypes.array,
-  keys: PropTypes.array,
-  options: PropTypes.object,
-  events: PropTypes.shape({
-    onYAxisLabelClick: PropTypes.func,
-    onYAxisLabelEnter: PropTypes.func,
-    onBarStackEnter: PropTypes.func,
-    onBarEmptySpaceEnter: PropTypes.func,
-    onChartHover: PropTypes.func,
-    onChartElementExit: PropTypes.func,
-  }),
-  yAxisKey: PropTypes.string,
-  className: PropTypes.string,
-  normalize: PropTypes.bool,
 };

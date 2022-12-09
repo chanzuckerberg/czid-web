@@ -1,8 +1,22 @@
 import cx from "classnames";
 import React from "react";
-import PropTypes from "~/components/utils/propTypes";
 
 import cs from "./x_axis.scss";
+
+interface XAxisProps {
+  x?;
+  width?: number;
+  marginLeft?: number;
+  tickFormat?(...args: unknown[]): unknown;
+  tickSize?: number;
+  tickCount?: number;
+  ticksVisible?: boolean;
+  pathVisible?: boolean;
+  title?: string;
+  titleClassName?: string;
+  textClassName?: string;
+  height?: number;
+}
 
 export default function XAxis({
   x,
@@ -17,7 +31,7 @@ export default function XAxis({
   titleClassName,
   textClassName,
   height,
-}) {
+}: XAxisProps) {
   const renderAxis = () => {
     const ticks = x.ticks(tickCount, "s").map(value => ({
       value,
@@ -75,18 +89,3 @@ export default function XAxis({
     </div>
   );
 }
-
-XAxis.propTypes = {
-  x: PropTypes.func,
-  width: PropTypes.number,
-  marginLeft: PropTypes.number,
-  tickFormat: PropTypes.func,
-  tickSize: PropTypes.number,
-  tickCount: PropTypes.number,
-  ticksVisible: PropTypes.bool,
-  pathVisible: PropTypes.bool,
-  title: PropTypes.string,
-  titleClassName: PropTypes.string,
-  textClassName: PropTypes.string,
-  height: PropTypes.number,
-};

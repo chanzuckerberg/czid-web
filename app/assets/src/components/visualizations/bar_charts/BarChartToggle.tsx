@@ -1,6 +1,5 @@
 import cx from "classnames";
 import { capitalize } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 
 import BasicPopup from "~/components/BasicPopup";
@@ -10,7 +9,15 @@ import IconPercentageSmall from "~ui/icons/IconPercentageSmall";
 
 import cs from "./bar_chart_toggle.scss";
 
-const BarChartToggle = ({ currentDisplay, onDisplaySwitch }) => {
+interface BarChartToggleProps {
+  currentDisplay?: string;
+  onDisplaySwitch?: $TSFixMeFunction;
+}
+
+const BarChartToggle = ({
+  currentDisplay,
+  onDisplaySwitch,
+}: BarChartToggleProps) => {
   const displays = ["count", "percentage"];
 
   return (
@@ -52,11 +59,6 @@ const BarChartToggle = ({ currentDisplay, onDisplaySwitch }) => {
       </Menu>
     </div>
   );
-};
-
-BarChartToggle.propTypes = {
-  currentDisplay: PropTypes.string,
-  onDisplaySwitch: PropTypes.func,
 };
 
 export default BarChartToggle;
