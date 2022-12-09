@@ -39,7 +39,7 @@ interface HoverActionsProps {
   contigVizEnabled?: boolean;
   coverageVizEnabled?: boolean;
   fastaEnabled?: boolean;
-  onlyShowDownloadOption: boolean;
+  onlyShowLongReadMNGSOptions: boolean;
   onBlastClick: $TSFixMeFunction;
   onConsensusGenomeClick: $TSFixMeFunction;
   onContigVizClick: $TSFixMeFunction;
@@ -78,7 +78,7 @@ const HoverActions = ({
   onFastaActionClick,
   onPhyloTreeModalOpened,
   onPreviousConsensusGenomeClick,
-  onlyShowDownloadOption,
+  onlyShowLongReadMNGSOptions,
   percentIdentity,
   phyloTreeEnabled,
   pipelineVersion,
@@ -147,7 +147,7 @@ const HoverActions = ({
     const hasCoverageViz = isPipelineFeatureAvailable(
       COVERAGE_VIZ_FEATURE,
       pipelineVersion,
-    );
+    ) || onlyShowLongReadMNGSOptions;
     const hasBlastv1Feature = allowedFeatures.includes(BLAST_V1_FEATURE);
     const params = {
       pipelineVersion,
@@ -267,8 +267,8 @@ const HoverActions = ({
 
     // Build up the list of hover actions
     let hoverActions = [];
-    if (onlyShowDownloadOption) {
-      hoverActions = [HOVER_ACTIONS_DOWNLOAD];
+    if (onlyShowLongReadMNGSOptions) {
+      hoverActions = [HOVER_ACTIONS_VIZ, HOVER_ACTIONS_DOWNLOAD];
     } else {
       if (hasBlastv1Feature) {
         hoverActions = [

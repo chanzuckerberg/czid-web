@@ -55,7 +55,7 @@ class PipelineRun < ApplicationRecord
   # Mapping the technology input to the outputs produced by the pipeline.
   TARGET_OUTPUTS = {
     TECHNOLOGY_INPUT[:illumina] => %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metrics accession_coverage_stats],
-    TECHNOLOGY_INPUT[:nanopore] => %w[taxon_counts contig_counts taxon_byteranges],
+    TECHNOLOGY_INPUT[:nanopore] => %w[taxon_counts contig_counts taxon_byteranges accession_coverage_stats],
   }.freeze
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
@@ -509,7 +509,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def coverage_viz_data_s3_path(accession_id)
-    "#{coverage_viz_output_s3_path}/#{accession_id}_coverage_viz.json" if pipeline_version_has_coverage_viz(pipeline_version)
+    "#{coverage_viz_output_s3_path}/#{accession_id}_coverage_viz.json" if pipeline_version_has_coverage_viz(pipeline_version) || technology == TECHNOLOGY_INPUT[:nanopore]
   end
 
   def coverage_viz_output_s3_path

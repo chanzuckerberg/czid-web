@@ -653,13 +653,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
   fetchCoverageVizData = async () => {
     const { snapshotShareId } = this.props;
-    const { sample, pipelineRun } = this.state;
+    const { sample, pipelineRun, currentTab } = this.state;
 
     if (
       isPipelineFeatureAvailable(
         COVERAGE_VIZ_FEATURE,
         get("pipeline_version", pipelineRun),
-      )
+      ) || currentTab === TABS.LONG_READ_MNGS
     ) {
       const coverageVizSummary = await getCoverageVizSummary({
         sampleId: sample.id,
@@ -679,7 +679,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       return;
     }
 
-    if (currentTab === TABS.SHORT_READ_MNGS) {
+    if (currentTab === TABS.SHORT_READ_MNGS || currentTab === TABS.LONG_READ_MNGS) {
       const newRun = find(
         { pipeline_version: newPipelineVersion },
         sample.pipeline_runs,
@@ -1882,10 +1882,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             sidebarTaxonData={sidebarTaxonData}
           />
         )}
-        {isPipelineFeatureAvailable(
-          COVERAGE_VIZ_FEATURE,
-          get("pipeline_version", pipelineRun),
-        ) && (
+        { sample && (
           <CoverageVizBottomSidebar
             nameType={selectedOptions.nameType}
             onBlastClick={this.handleBlastClick}

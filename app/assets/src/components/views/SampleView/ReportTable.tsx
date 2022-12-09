@@ -880,6 +880,11 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     });
   };
 
+  isLongReadMNGS = () => {
+    const { currentTab } = this.props;
+    return (currentTab === TABS.LONG_READ_MNGS);
+  };
+
   handleCoverageVizClick = ({
     taxId,
     taxLevel,
@@ -891,7 +896,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     const { onCoverageVizClick, pipelineVersion, sampleId } = this.props;
     const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
-    if (isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion)) {
+    if (isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) || this.isLongReadMNGS() ) {
       onCoverageVizClick({
         taxId,
         taxName,
@@ -953,7 +958,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       get("nt.contigs", rowData) || get("nr.contigs", rowData)
     );
     const coverageVizEnabled =
-      alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0;
+      this.isLongReadMNGS() || (alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0);
     const phyloTreeEnabled =
       phyloTreeAllowed &&
       rowData.taxId > 0 &&
@@ -1030,7 +1035,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         snapshotShareId={snapshotShareId}
         consensusGenomeEnabled={consensusGenomeEnabled}
         sampleId={sampleId}
-        onlyShowDownloadOption={currentTab === TABS.LONG_READ_MNGS}
+        onlyShowLongReadMNGSOptions={currentTab === TABS.LONG_READ_MNGS}
       />
     );
   };
