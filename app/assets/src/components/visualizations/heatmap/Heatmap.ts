@@ -9,7 +9,7 @@ import SvgSaver from "svgsaver";
 import textWidth from "text-width";
 
 import { sanitizeCSVRow } from "~/components/utils/csv";
-import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.ts";
+import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
 import symlog from "../../utils/d3/scales/symlog";
 import addSvgColorFilter from "../../utils/d3/svg";
 import cs from "./heatmap.scss";
@@ -19,8 +19,8 @@ const COLOR_HOVER_LINK = cs.primaryLight;
 // TODO(tcarvalho): temporary hack to send elements to the back.
 // Remove once code is ported to d3 v4, which contains this function.
 d3.selection.prototype.lower = function() {
-  return this.each(function() {
-    var firstChild = this.parentNode.firstChild;
+  return this.each(function(this: $TSFixMe) {
+    const firstChild = this.parentNode.firstChild;
     if (firstChild) {
       this.parentNode.insertBefore(this, firstChild);
     }
@@ -28,7 +28,70 @@ d3.selection.prototype.lower = function() {
 };
 
 export default class Heatmap {
-  constructor(container, data, options) {
+  addMetadataTrigger: $TSFixMe;
+  addRowBackground: $TSFixMe;
+  addRowTrigger: $TSFixMe;
+  bgGrid: $TSFixMe;
+  bgPattern: $TSFixMe;
+  cell: $TSFixMe;
+  cells: $TSFixMe;
+  columnClusterHeight: $TSFixMe;
+  columnClustering: $TSFixMe;
+  columnLabels: $TSFixMe;
+  columnLabelsBackground: $TSFixMe;
+  columnLabelsHeight: $TSFixMe;
+  columnMetadataSortAsc: $TSFixMe;
+  columnMetadataSortField: $TSFixMe;
+  container: $TSFixMe;
+  data: $TSFixMe;
+  defs: $TSFixMe;
+  filteredCells: $TSFixMe;
+  filteredRowLabels: $TSFixMe;
+  g: $TSFixMe;
+  gAddRow: $TSFixMe;
+  gCaption: $TSFixMe;
+  gCellHover: $TSFixMe;
+  gCells: $TSFixMe;
+  gColumnDendogram: $TSFixMe;
+  gColumnLabels: $TSFixMe;
+  gColumnMetadata: $TSFixMe;
+  gPinColumn: $TSFixMe;
+  gRowDendogram: $TSFixMe;
+  gRowLabels: $TSFixMe;
+  height: $TSFixMe;
+  limits: $TSFixMe;
+  metadataColors: $TSFixMe;
+  metadataLabelsBackground: $TSFixMe;
+  mouseDown: $TSFixMe;
+  mouseX: $TSFixMe;
+  mouseY: $TSFixMe;
+  options: $TSFixMe;
+  overlays: $TSFixMe;
+  overlaysDebounce: $TSFixMe;
+  pinColumnTrigger: $TSFixMe;
+  previousNullHover: $TSFixMe;
+  rowClusterWidth: $TSFixMe;
+  rowClustering: $TSFixMe;
+  rowLabels: $TSFixMe;
+  rowLabelsBackground: $TSFixMe;
+  rowLabelsWidth: $TSFixMe;
+  scaleLimits: $TSFixMe;
+  scaleType: $TSFixMe;
+  spacePressed: $TSFixMe;
+  svg: $TSFixMe;
+  svgSaver: $TSFixMe;
+  totalMetadataHeight: $TSFixMe;
+  totalRowAddLinkHeight: $TSFixMe;
+  width: $TSFixMe;
+  constructor(
+    container: HTMLElement,
+    data: {
+      rowLabels: $TSFixMeUnknown;
+      columnLabels: $TSFixMeUnknown;
+      values: $TSFixMeUnknown;
+    },
+    options: Record<string, any>,
+  ) {
     this.mouseDown = false;
     this.svg = null;
     this.g = null;
@@ -89,7 +152,7 @@ export default class Heatmap {
       options,
     );
     if (!this.options.colors) {
-      let defaultColorScale = scaleSequential(interpolateYlOrRd);
+      const defaultColorScale = scaleSequential(interpolateYlOrRd);
       this.options.colors = this.range(this.options.numberOfLevels).map(i =>
         defaultColorScale(i / (this.options.numberOfLevels - 1)),
       );
@@ -121,7 +184,7 @@ export default class Heatmap {
     this.processData();
   }
 
-  processData(start) {
+  processData(start?: $TSFixMe) {
     // This function implements the pipeline for preparing data
     // and svg for heatmap display.
     // Starting point can be chosen given what data was changed.
@@ -154,72 +217,75 @@ export default class Heatmap {
     }
   }
 
-  updateZoom(zoom) {
+  updateZoom(zoom: $TSFixMe) {
     this.options.zoom = zoom;
     this.svg
       .attr("width", this.width * this.options.zoom)
       .attr("height", this.height * this.options.zoom);
   }
 
-  updateScale(scale) {
+  updateScale(scale: $TSFixMe) {
     this.options.scale = scale;
     this.scaleType = this.getScaleType();
     this.processData("cluster");
   }
 
-  updateSortColumns(shouldSortColumns) {
+  updateSortColumns(shouldSortColumns: $TSFixMe) {
     this.options.shouldSortColumns = shouldSortColumns;
     this.processData("cluster");
   }
 
-  updateSortRows(shouldSortRows) {
+  updateSortRows(shouldSortRows: $TSFixMe) {
     this.options.shouldSortRows = shouldSortRows;
     this.processData("cluster");
   }
 
-  updateColumnMetadata(metadata) {
+  updateColumnMetadata(metadata: $TSFixMe) {
     this.options.columnMetadata = metadata;
     this.processData("processMetadata");
   }
 
-  updateData(data) {
+  updateData(data: $TSFixMe) {
     this.data = Object.assign(this.data, data);
     this.processData("parse");
   }
 
-  updatePrintCaption(printCaption) {
+  updatePrintCaption(printCaption: $TSFixMe) {
     this.options.printCaption = printCaption;
   }
 
   parseData() {
-    this.rowLabels = this.data.rowLabels.map((row, pos) => {
+    this.rowLabels = this.data.rowLabels.map((row: $TSFixMe, pos: $TSFixMe) => {
       return Object.assign({ pos, shaded: false }, row);
     });
-    this.columnLabels = this.data.columnLabels.map((column, pos) => {
-      return Object.assign({ pos, shaded: false }, column);
-    });
+    this.columnLabels = this.data.columnLabels.map(
+      (column: $TSFixMe, pos: $TSFixMe) => {
+        return Object.assign({ pos, shaded: false }, column);
+      },
+    );
 
     // get heatmap size and margins from data
     this.rowLabelsWidth = 0;
     this.columnLabelsHeight = 0;
 
-    let labelWidth = label => textWidth(label, { size: this.options.fontSize });
+    const labelWidth = (label: $TSFixMe) =>
+      textWidth(label, { size: this.options.fontSize });
 
     for (let i = 0; i < this.rowLabels.length; i++) {
-      let label = this.rowLabels[i].label;
+      const label = this.rowLabels[i].label;
       this.rowLabelsWidth = Math.max(this.rowLabelsWidth, labelWidth(label));
     }
 
     for (let i = 0; i < this.options.columnMetadata.length; i++) {
       // Get label width and compensate for icon size
-      let label =
+      const label =
         this.options.columnMetadata[i].label +
         this.options.metadataSortIconSize;
       this.rowLabelsWidth = Math.max(this.rowLabelsWidth, labelWidth(label));
     }
 
     for (let j = 0; j < this.columnLabels.length; j++) {
-      let label = this.columnLabels[j].label;
+      const label = this.columnLabels[j].label;
       this.columnLabelsHeight = Math.max(
         this.columnLabelsHeight,
         labelWidth(label),
@@ -237,11 +303,11 @@ export default class Heatmap {
     // because it can mess up clustering
     this.limits = {
       min: Math.min(
-        d3.min(this.data.values, array => d3.min(array)),
+        d3.min(this.data.values, (array: $TSFixMe) => d3.min(array)),
         this.options.nullValue,
       ),
       max: Math.max(
-        d3.max(this.data.values, array => d3.max(array)),
+        d3.max(this.data.values, (array: $TSFixMe) => d3.max(array)),
         this.options.nullValue,
       ),
     };
@@ -275,12 +341,13 @@ export default class Heatmap {
   filterData() {
     this.filteredCells = this.cells.filter(
       // Don't render cells with value = null or undefined (but render cells with value 0)
-      cell => !this.rowLabels[cell.rowIndex].hidden && cell.value != null,
+      (cell: $TSFixMe) =>
+        !this.rowLabels[cell.rowIndex].hidden && cell.value != null,
     );
 
     // Initially sort so that genus seperators are placed correctly
     this.filteredRowLabels = orderBy(
-      this.rowLabels.filter(row => !row.hidden),
+      this.rowLabels.filter((row: $TSFixMe) => !row.hidden),
       label => label.sortKey || label.label,
     );
   }
@@ -540,10 +607,12 @@ export default class Heatmap {
     d3.event.stopPropagation(); // don't propagate the event to the element's parent
   }
 
-  scrollToRow(label) {
+  scrollToRow(label: $TSFixMe) {
     // If there's a specific row we want to focus on, auto-scroll the heatmap
     // so the row is centered on screen.
-    const row = this.rowLabels.filter(rowLabel => rowLabel.label === label)[0];
+    const row = this.rowLabels.filter(
+      (rowLabel: $TSFixMe) => rowLabel.label === label,
+    )[0];
     if (row) {
       const rowIndex = row.rowIndex;
 
@@ -574,25 +643,25 @@ export default class Heatmap {
     }
   }
 
-  pan(deltaX, deltaY, transition = false) {
+  pan(deltaX: $TSFixMe, deltaY: $TSFixMe, transition = false) {
     // Define the scrolling boundaries for the svg.
     // Upper limits are determined by the difference between the container and svg sizes,
     // scaled by the zoom factor.
-    let containerWidth = this.container[0][0].offsetWidth;
-    let containerHeight = this.container[0][0].offsetHeight;
-    let xScrollMax =
+    const containerWidth = this.container[0][0].offsetWidth;
+    const containerHeight = this.container[0][0].offsetHeight;
+    const xScrollMax =
       (containerWidth - this.svg.attr("width")) / this.options.zoom;
-    let yScrollMax =
+    const yScrollMax =
       (containerHeight - this.svg.attr("height")) / this.options.zoom;
 
     // Translating the svg:
-    let gCurrentTranslate = d3.transform(this.g.attr("transform")).translate;
+    const gCurrentTranslate = d3.transform(this.g.attr("transform")).translate;
     // Limit translation by the boundaries set for the svg.
-    let dx = Math.min(
+    const dx = Math.min(
       this.options.marginLeft,
       Math.max(deltaX + gCurrentTranslate[0], xScrollMax),
     );
-    let dy = Math.min(
+    const dy = Math.min(
       this.options.marginTop,
       Math.max(deltaY + gCurrentTranslate[1], yScrollMax),
     );
@@ -607,9 +676,9 @@ export default class Heatmap {
     }
 
     // Translating the row labels in the opposite x direction of the svg.
-    let rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
+    const rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
       .translate;
-    let labelsDx = clamp(
+    const labelsDx = clamp(
       0,
       -xScrollMax + this.options.marginLeft,
       rowLabelsCurrent[0] - deltaX,
@@ -619,14 +688,17 @@ export default class Heatmap {
     // Translating the metadata labels and "Add Metadata link" in
     // the opposite x direction of the svg (same as row labels).
     // Don't include the transition animation while rendering.
+    // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'LodashClamp1x5' is not assignabl... Remove this comment to see the full error message
     this.renderColumnMetadata(labelsDx, false);
     this.renderRowAddLink(labelsDx);
+    // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'LodashClamp1x5' is not assignabl... Remove this comment to see the full error message
     this.renderPinColumnLink(labelsDx);
 
     // Translating the column and metadata labels in the opposite y direction of the svg.
-    let columnLabelsCurrent = d3.transform(this.gColumnLabels.attr("transform"))
-      .translate;
-    let labelsDy = clamp(
+    const columnLabelsCurrent = d3.transform(
+      this.gColumnLabels.attr("transform"),
+    ).translate;
+    const labelsDy = clamp(
       this.columnLabelsHeight,
       this.columnLabelsHeight + this.options.marginTop - yScrollMax,
       columnLabelsCurrent[1] - deltaY,
@@ -636,7 +708,7 @@ export default class Heatmap {
     this.placeAddRowLinkContainer(labelsDy, transition);
   }
 
-  placeRowLabelContainers(x) {
+  placeRowLabelContainers(x: $TSFixMe) {
     const totalMetadataHeight = this.totalMetadataHeight;
     const totalRowAddLinkHeight = this.totalRowAddLinkHeight;
 
@@ -654,7 +726,7 @@ export default class Heatmap {
     this.metadataLabelsBackground.attr("x", x - this.options.marginLeft);
   }
 
-  placeColumnLabelAndMetadataContainers(y, transition = false) {
+  placeColumnLabelAndMetadataContainers(y: $TSFixMe, transition = false) {
     this.gColumnLabels
       .transition()
       .duration(transition ? this.options.transitionDuration : 0)
@@ -675,7 +747,7 @@ export default class Heatmap {
       .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
   }
 
-  placeAddRowLinkContainer(y, transition = false) {
+  placeAddRowLinkContainer(y: $TSFixMe, transition = false) {
     this.gAddRow
       .transition()
       .duration(transition ? this.options.transitionDuration : 0)
@@ -689,7 +761,7 @@ export default class Heatmap {
       );
   }
 
-  placePinColumnLinkContainer(y, transition = false) {
+  placePinColumnLinkContainer(y: $TSFixMe, transition = false) {
     this.gPinColumn
       .transition()
       .duration(transition ? this.options.transitionDuration : 0)
@@ -699,23 +771,23 @@ export default class Heatmap {
   processMetadata() {
     // count number of distinct pieces of metadata
     let metadatumCount = 0;
-    this.options.columnMetadata.forEach(metadata => {
-      let metadataSet = new Set();
-      this.columnLabels.forEach(column => {
-        let metadatumValue = (column.metadata || {})[metadata.value];
+    this.options.columnMetadata.forEach((metadata: $TSFixMe) => {
+      const metadataSet = new Set();
+      this.columnLabels.forEach((column: $TSFixMe) => {
+        const metadatumValue = (column.metadata || {})[metadata.value];
         if (metadatumValue) metadataSet.add(metadatumValue);
       });
       metadatumCount += metadataSet.size;
     });
 
-    let colors = this.options.metadataColorScale.getNScale(metadatumCount);
+    const colors = this.options.metadataColorScale.getNScale(metadatumCount);
     let idx = 0;
     this.metadataColors = {};
-    this.options.columnMetadata.forEach(metadata => {
-      let colorMap = {};
+    this.options.columnMetadata.forEach((metadata: $TSFixMe) => {
+      const colorMap = {};
 
-      this.columnLabels.forEach(column => {
-        let metadatumValue = (column.metadata || {})[metadata.value];
+      this.columnLabels.forEach((column: $TSFixMe) => {
+        const metadatumValue = (column.metadata || {})[metadata.value];
         if (metadatumValue && !colorMap[metadatumValue]) {
           colorMap[metadatumValue] = colors[idx++];
         }
@@ -802,14 +874,14 @@ export default class Heatmap {
   }
 
   getRows() {
-    let scale = this.getScale();
+    const scale = this.getScale();
     // getRows and getColumns replace null with option.nullValue
     // might be space-inneficient if the matrix is too sparse
     // alternative is to create a distance function that supports nulls
-    let rows = [];
+    const rows = [];
     for (let i = 0; i < this.rowLabels.length; i++) {
       if (!this.rowLabels[i].hidden) {
-        let row = this.data.values[i].slice();
+        const row = this.data.values[i].slice();
         for (let j = 0; j < this.columnLabels.length; j++) {
           row[j] = scale(row[j] || this.options.nullValue);
         }
@@ -821,8 +893,8 @@ export default class Heatmap {
   }
 
   getColumns() {
-    let scale = this.getScale();
-    let columns = [];
+    const scale = this.getScale();
+    const columns = [];
     for (let i = 0; i < this.columnLabels.length; i++) {
       for (let j = 0; j < this.rowLabels.length; j++) {
         if (!this.rowLabels[j].hidden) {
@@ -840,16 +912,16 @@ export default class Heatmap {
   }
 
   getPinnedColumns() {
-    return this.columnLabels.filter(col => col.pinned);
+    return this.columnLabels.filter((col: $TSFixMe) => col.pinned);
   }
 
   getUnpinnedColumns() {
-    return this.columnLabels.filter(col => !col.pinned);
+    return this.columnLabels.filter((col: $TSFixMe) => !col.pinned);
   }
 
   getUnpinnedColumnValues() {
-    let scale = this.getScale();
-    let columns = [];
+    const scale = this.getScale();
+    const columns = [];
     for (let i = 0; i < this.columnLabels.length; i++) {
       for (let j = 0; j < this.rowLabels.length; j++) {
         if (!this.rowLabels[j].hidden && !this.columnLabels[i].pinned) {
@@ -896,10 +968,10 @@ export default class Heatmap {
     return find({ columnIndex, rowIndex }, this.cells);
   }
 
-  sortTree(root) {
+  sortTree(root: $TSFixMe) {
     if (!root) return;
-    let scale = this.getScale();
-    let stack = [];
+    const scale = this.getScale();
+    const stack = [];
     while (true) {
       while (root) {
         if (root.right) stack.push(root.right);
@@ -914,7 +986,7 @@ export default class Heatmap {
         root = root.right;
       } else {
         if (root.value) {
-          root.mean = mean(root.value.map(d => scale(d)));
+          root.mean = mean(root.value.map((d: $TSFixMe) => scale(d)));
         } else {
           if (root.left.mean < root.right.mean) {
             [root.left, root.right] = [root.right, root.left];
@@ -930,12 +1002,12 @@ export default class Heatmap {
     }
   }
 
-  getDepth(root) {
+  getDepth(root: $TSFixMe) {
     if (!root) return 0;
-    let stack = [[root, 0]];
+    const stack = [[root, 0]];
     let maxDepth = 0;
     while (stack.length) {
-      let [node, depth] = stack.pop();
+      const [node, depth] = stack.pop();
       maxDepth = depth > maxDepth ? depth : maxDepth;
       if (node.left) stack.push([node.left, depth + 1]);
       if (node.right) stack.push([node.right, depth + 1]);
@@ -944,8 +1016,8 @@ export default class Heatmap {
     return maxDepth;
   }
 
-  setOrder(root, labels, offset = 0) {
-    let stack = [];
+  setOrder(root: $TSFixMe, labels: $TSFixMe, offset = 0) {
+    const stack = [];
 
     let done = false;
     let pos = offset;
@@ -970,14 +1042,14 @@ export default class Heatmap {
   }
 
   clusterRows() {
-    let rows = this.getRows();
+    const rows = this.getRows();
     this.rowClustering = Cluster.hcluster(rows);
 
     this.sortTree(this.rowClustering);
     this.setOrder(this.rowClustering, this.rowLabels);
   }
 
-  unpinColumn = column => {
+  unpinColumn = (column: $TSFixMe) => {
     this.options.onUnpinColumn && this.options.onUnpinColumn(column.id);
   };
 
@@ -993,7 +1065,7 @@ export default class Heatmap {
       });
 
       // Cluster the remaining unpinned columns.
-      let unpinnedColumnValues = this.getUnpinnedColumnValues();
+      const unpinnedColumnValues = this.getUnpinnedColumnValues();
       this.columnClustering = Cluster.hcluster(unpinnedColumnValues);
       this.sortTree(this.columnClustering);
       this.setOrder(
@@ -1002,7 +1074,7 @@ export default class Heatmap {
         this.getPinnedColumns().length,
       );
     } else {
-      let columns = this.getColumns();
+      const columns = this.getColumns();
       this.columnClustering = Cluster.hcluster(columns);
       this.sortTree(this.columnClustering);
       this.setOrder(this.columnClustering, this.columnLabels);
@@ -1011,20 +1083,24 @@ export default class Heatmap {
 
   // Re-sorts the columns. The rendered order of columns is determined solely by
   // the `pos` property of each columnLabel.
-  sortColumns(direction) {
+  sortColumns(direction: $TSFixMe) {
     this.columnClustering = null;
 
     if (this.options.onPinColumnClick) {
       orderBy(
         this.columnLabels,
+        // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
         [label => label.pinned, label => label.label],
         ["desc", direction],
       ).forEach((label, idx) => {
+        // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
         label.pos = idx;
       });
     } else {
+      // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
       orderBy(this.columnLabels, label => label.label, direction).forEach(
         (label, idx) => {
+          // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
           label.pos = idx;
         },
       );
@@ -1033,24 +1109,26 @@ export default class Heatmap {
 
   // Re-sorts the rows. The rendered order of rows is determined solely by
   // the `pos` property of each filteredRowLabel.
-  sortRows(direction) {
+  sortRows(direction: $TSFixMe) {
     this.rowClustering = null;
 
     orderBy(
       this.filteredRowLabels,
+      // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
       label => label.sortKey || label.label,
       direction,
     );
-    this.filteredRowLabels.forEach((label, idx) => {
+    this.filteredRowLabels.forEach((label: $TSFixMe, idx: $TSFixMe) => {
       label.pos = idx;
     });
   }
 
-  range(n) {
+  range(n: $TSFixMe) {
+    // eslint-disable-next-line prefer-spread
     return Array.apply(null, { length: n }).map(Number.call, Number);
   }
 
-  download(filename) {
+  download(filename: $TSFixMe) {
     this.svg.classed(cs.printMode, true);
     this.showPrintCaption();
     this.svgSaver.asSvg(this.svg.node(), filename || "heatmap.svg");
@@ -1058,7 +1136,7 @@ export default class Heatmap {
     this.hidePrintCaption();
   }
 
-  downloadAsPng(filename) {
+  downloadAsPng(filename: $TSFixMe) {
     this.svg.classed(cs.printMode, true);
     this.showPrintCaption();
     this.svgSaver.asPng(this.svg.node(), filename || "heatmap.png");
@@ -1068,7 +1146,7 @@ export default class Heatmap {
 
   computeCurrentHeatmapViewValuesForCSV({ headers = [] }) {
     const csvHeaders = [...headers];
-    let csvRows = [];
+    let csvRows: $TSFixMe = [];
 
     const sortedRows = sortBy(["pos"], this.rowLabels);
     const sortedColumns = sortBy(["pos"], this.columnLabels);
@@ -1119,7 +1197,7 @@ export default class Heatmap {
     this.gCaption.selectAll(`.${cs.caption}`).remove();
   };
 
-  removeRow = row => {
+  removeRow = (row: $TSFixMe) => {
     // Clear out any row/col highlighting overlays before we remove the row
     this.clearOverlays();
 
@@ -1130,7 +1208,7 @@ export default class Heatmap {
     this.processData("filter");
   };
 
-  handleRowLabelMouseEnter = rowLabelEntered => {
+  handleRowLabelMouseEnter = (rowLabelEntered: $TSFixMe) => {
     this.updateLabelHighlights(
       this.gRowLabels.selectAll(`.${cs.rowLabel}`),
       this.rowLabels,
@@ -1145,7 +1223,8 @@ export default class Heatmap {
       .selectAll(`.${cs.rowLabel}`)
       .classed(
         cs.rowLabelHover,
-        row => row.sortKey && row.sortKey === rowLabelEntered.sortKey,
+        (row: $TSFixMe) =>
+          row.sortKey && row.sortKey === rowLabelEntered.sortKey,
       );
 
     const currentGroup = this.gRowLabels.selectAll(
@@ -1164,7 +1243,7 @@ export default class Heatmap {
       );
   };
 
-  handleRowLabelMouseLeave = rowLabelLeft => {
+  handleRowLabelMouseLeave = (rowLabelLeft: $TSFixMe) => {
     this.updateLabelHighlights(
       this.gRowLabels.selectAll(`.${cs.rowLabel}`),
       this.rowLabels,
@@ -1179,7 +1258,7 @@ export default class Heatmap {
     this.options.onRowGroupLeave && this.options.onRowGroupLeave(rowLabelLeft);
   };
 
-  handleColumnLabelMouseEnter = columnLabelEntered => {
+  handleColumnLabelMouseEnter = (columnLabelEntered: $TSFixMe) => {
     this.updateLabelHighlights(
       this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
       this.columnLabels,
@@ -1187,7 +1266,7 @@ export default class Heatmap {
     this.highlightRowOrColumn(columnLabelEntered);
   };
 
-  handleColumnLabelMouseLeave = columnLabelLeft => {
+  handleColumnLabelMouseLeave = () => {
     this.updateLabelHighlights(
       this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
       this.columnLabels,
@@ -1195,7 +1274,7 @@ export default class Heatmap {
     this.highlightRowOrColumn(null);
   };
 
-  handleColumnMetadataLabelClick(value) {
+  handleColumnMetadataLabelClick(value: $TSFixMe) {
     const { onColumnMetadataSortChange } = this.options;
     if (this.columnMetadataSortField === value) {
       if (this.columnMetadataSortAsc) {
@@ -1217,7 +1296,7 @@ export default class Heatmap {
       );
   }
 
-  handleCellMouseOver = d => {
+  handleCellMouseOver = (d: $TSFixMe) => {
     // Highlight cell user hovered over
     this.gCellHover
       .attr("visibility", "visible")
@@ -1239,7 +1318,7 @@ export default class Heatmap {
     this.options.onNodeHover && this.options.onNodeHover(d);
   };
 
-  handleCellMouseLeave = d => {
+  handleCellMouseLeave = (d: $TSFixMe) => {
     // Stop highlighting cell
     this.gCellHover.attr("visibility", "hidden");
 
@@ -1258,44 +1337,48 @@ export default class Heatmap {
     this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
   };
 
-  handleCellClick = d => {
+  handleCellClick = (d: $TSFixMe) => {
     this.options.onCellClick && this.options.onCellClick(d, d3.event);
   };
 
-  applyScale(scale, value, min, max) {
+  applyScale(scale: $TSFixMe, value: $TSFixMe, min: $TSFixMe, max: $TSFixMe) {
     value = Math.min(Math.max(value, min), max);
     return Math.round(scale(value));
   }
 
-  cellYPosition(d) {
+  cellYPosition(d: $TSFixMe) {
     return d.pos * this.cell.height;
   }
 
   renderHeatmap() {
-    let colorScale = this.scaleType()
+    const colorScale = this.scaleType()
       .domain([this.scaleLimits.min, this.scaleLimits.max])
       .range([0, this.options.colors.length - 1]);
 
-    let applyFormat = nodes => {
+    const applyFormat = (nodes: $TSFixMe) => {
       nodes
         .attr("width", this.cell.width - 2)
         .attr("height", this.cell.height - 2)
         .attr(
           "x",
-          d => this.columnLabels[d.columnIndex].pos * this.cell.width + 1,
+          (d: $TSFixMe) =>
+            this.columnLabels[d.columnIndex].pos * this.cell.width + 1,
         )
-        .attr("y", d => this.cellYPosition(this.rowLabels[d.rowIndex]) + 1)
-        .style("fill", d => {
+        .attr(
+          "y",
+          (d: $TSFixMe) => this.cellYPosition(this.rowLabels[d.rowIndex]) + 1,
+        )
+        .style("fill", (d: $TSFixMe) => {
           if (!d.value && d.value !== 0) {
             return this.options.colorNoValue;
           }
-          let colorIndex = this.applyScale(
+          const colorIndex = this.applyScale(
             colorScale,
             d.value,
             this.scaleLimits.min,
             this.scaleLimits.max,
           );
-          let color = this.options.customColorCallback
+          const color = this.options.customColorCallback
             ? this.options.customColorCallback(
                 d.value,
                 d,
@@ -1354,7 +1437,7 @@ export default class Heatmap {
           this.previousNullHover = null;
         }
       })
-      .on("click", d => {
+      .on("click", () => {
         const cell = this.getCellFromCursorLocation();
         if (!cell) return;
         this.handleCellClick(cell);
@@ -1373,9 +1456,9 @@ export default class Heatmap {
       .attr("visibility", "hidden");
 
     // Render cells
-    let cells = this.gCells
+    const cells = this.gCells
       .selectAll(`.${cs.cell}`)
-      .data(this.filteredCells, d => d.id);
+      .data(this.filteredCells, (d: $TSFixMe) => d.id);
 
     cells
       .exit()
@@ -1385,15 +1468,15 @@ export default class Heatmap {
       .style("opacity", 0)
       .remove();
 
-    let cellsUpdate = cells
+    const cellsUpdate = cells
       .transition()
       .duration(this.options.transitionDuration);
     applyFormat(cellsUpdate);
 
-    let cellsEnter = cells
+    const cellsEnter = cells
       .enter()
       .append("rect")
-      .attr("class", d => cs.cell)
+      .attr("class", () => cs.cell)
       .on("mouseover", this.handleCellMouseOver)
       .on("mouseleave", this.handleCellMouseLeave)
       .on("click", this.handleCellClick);
@@ -1401,8 +1484,11 @@ export default class Heatmap {
   }
 
   renderRowLabels() {
-    let applyFormat = nodes => {
-      nodes.attr("transform", d => `translate(0, ${this.cellYPosition(d)})`);
+    const applyFormat = (nodes: $TSFixMe) => {
+      nodes.attr(
+        "transform",
+        (d: $TSFixMe) => `translate(0, ${this.cellYPosition(d)})`,
+      );
 
       // Update position of row labels
       nodes.select("rect").attr("width", this.rowLabelsWidth);
@@ -1418,9 +1504,9 @@ export default class Heatmap {
     // hides genus separators in cluster mode
     this.gRowLabels.classed(cs.rowClustering, this.rowClustering);
 
-    let rowLabel = this.gRowLabels
+    const rowLabel = this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
-      .data(this.filteredRowLabels, d => d.label)
+      .data(this.filteredRowLabels, (d: $TSFixMe) => d.label)
       .order();
 
     rowLabel
@@ -1431,12 +1517,12 @@ export default class Heatmap {
       .style("opacity", 0)
       .remove();
 
-    let rowLabelUpdate = rowLabel
+    const rowLabelUpdate = rowLabel
       .transition()
       .duration(this.options.transitionDuration);
     applyFormat(rowLabelUpdate);
 
-    let rowLabelEnter = rowLabel
+    const rowLabelEnter = rowLabel
       .enter()
       .append("g")
       .attr("class", cs.rowLabel)
@@ -1452,12 +1538,12 @@ export default class Heatmap {
 
     rowLabelEnter
       .append("text")
-      .text(d => d.label)
+      .text((d: $TSFixMe) => d.label)
       .style("dominant-baseline", "central")
       .style("text-anchor", "end")
       .on(
         "click",
-        d =>
+        (d: $TSFixMe) =>
           this.options.onRowLabelClick &&
           this.options.onRowLabelClick(d.label, d3.event),
       );
@@ -1470,7 +1556,7 @@ export default class Heatmap {
       .attr("y1", this.cell.height)
       .attr("y2", this.cell.height)
       .attr("class", cs.genusBorder)
-      .classed(cs.hideGenusBorder, (label, i, nodes) => {
+      .classed(cs.hideGenusBorder, (label: $TSFixMe, i: $TSFixMe) => {
         const nextLabel = this.filteredRowLabels[i + 1];
         if (nextLabel) {
           return label.sortKey === nextLabel.sortKey;
@@ -1496,7 +1582,7 @@ export default class Heatmap {
     applyFormat(rowLabelEnter);
   }
 
-  renderRowAddLink(dx) {
+  renderRowAddLink(dx: $TSFixMe) {
     if (this.options.onAddRowClick) {
       const handleAddRowClick = () => {
         this.options.onAddRowClick(addRowTrigger.node(), {
@@ -1505,11 +1591,11 @@ export default class Heatmap {
         });
       };
 
-      let addLink = this.gAddRow
+      const addLink = this.gAddRow
         .selectAll(`.${cs.columnMetadataAdd}`)
         .data([1]);
 
-      const applyFormat = nodes => {
+      const applyFormat = (nodes: $TSFixMe) => {
         nodes
           .select("text")
           .attr("x", this.rowLabelsWidth - this.options.marginAddLink);
@@ -1524,12 +1610,12 @@ export default class Heatmap {
         .duration(this.options.transitionDuration);
       applyFormat(addLinkUpdate);
 
-      let addLinkEnter = addLink
+      const addLinkEnter = addLink
         .enter()
         .append("g")
         .attr("class", cs.columnMetadataAdd);
 
-      let yPos = this.options.metadataAddLinkHeight / 2;
+      const yPos = this.options.metadataAddLinkHeight / 2;
 
       addLinkEnter.append("rect");
 
@@ -1541,7 +1627,7 @@ export default class Heatmap {
         .on("click", handleAddRowClick);
       applyFormat(addLinkEnter);
 
-      let addRowTrigger = addLinkEnter
+      const addRowTrigger = addLinkEnter
         .append("g")
         .attr("class", cs.metadataAddTrigger)
         .on("click", handleAddRowClick);
@@ -1585,7 +1671,7 @@ export default class Heatmap {
         });
       };
 
-      const applyFormat = nodes => {
+      const applyFormat = (nodes: $TSFixMe) => {
         nodes
           .select("text")
           .attr("x", this.rowLabelsWidth - this.options.marginAddLink);
@@ -1601,7 +1687,7 @@ export default class Heatmap {
           .attr("height", this.options.metadataAddLinkHeight);
       };
 
-      let addLink = this.gPinColumn
+      const addLink = this.gPinColumn
         .selectAll(`.${cs.columnMetadataAdd}`)
         .data([1]);
 
@@ -1611,12 +1697,12 @@ export default class Heatmap {
         .duration(this.options.transitionDuration);
       applyFormat(addLinkUpdate);
 
-      let addLinkEnter = addLink
+      const addLinkEnter = addLink
         .enter()
         .append("g")
         .attr("class", cs.columnMetadataAdd);
 
-      let yPos = this.options.metadataAddLinkHeight / 2;
+      const yPos = this.options.metadataAddLinkHeight / 2;
 
       addLinkEnter.append("rect");
 
@@ -1628,7 +1714,7 @@ export default class Heatmap {
         .on("click", handlePinColumnClick);
       applyFormat(addLinkEnter);
 
-      let pinColumnTrigger = addLinkEnter
+      const pinColumnTrigger = addLinkEnter
         .append("g")
         .attr("class", cs.metadataAddTrigger)
         .on("click", handlePinColumnClick);
@@ -1655,22 +1741,22 @@ export default class Heatmap {
   }
 
   renderColumnLabels() {
-    let applyFormat = nodes => {
-      nodes.attr("transform", d => {
+    const applyFormat = (nodes: $TSFixMe) => {
+      nodes.attr("transform", (d: $TSFixMe) => {
         return `translate(${d.pos * this.cell.width},-${this.options.spacing})`;
       });
     };
 
-    let columnLabel = this.gColumnLabels
+    const columnLabel = this.gColumnLabels
       .selectAll(`.${cs.columnLabel}`)
-      .data(this.columnLabels, d => d.label);
+      .data(this.columnLabels, (d: $TSFixMe) => d.label);
 
-    let columnLabelUpdate = columnLabel
+    const columnLabelUpdate = columnLabel
       .transition()
       .duration(this.options.transitionDuration);
     applyFormat(columnLabelUpdate);
 
-    let columnLabelEnter = columnLabel
+    const columnLabelEnter = columnLabel
       .enter()
       .append("g")
       .attr("class", cs.columnLabel)
@@ -1679,7 +1765,7 @@ export default class Heatmap {
 
     columnLabelEnter
       .append("text")
-      .text(d => d.label)
+      .text((d: $TSFixMe) => d.label)
       .style("text-anchor", "left")
       .attr(
         "transform",
@@ -1689,13 +1775,13 @@ export default class Heatmap {
       )
       .on("mousein", this.options.onColumnLabelMouseIn)
       .on("mouseout", this.options.onColumnLabelMouseOut)
-      .on("mouseover", d => {
+      .on("mouseover", (d: $TSFixMe) => {
         this.options.onColumnLabelHover && this.options.onColumnLabelHover(d);
       })
       .on("mouseleave", this.options.onColumnLabelOut)
       .on(
         "click",
-        d =>
+        (d: $TSFixMe) =>
           this.options.onColumnLabelClick &&
           this.options.onColumnLabelClick(d.id, d3.event),
       );
@@ -1713,7 +1799,7 @@ export default class Heatmap {
     applyFormat(columnLabelEnter);
 
     // Only display the pin icon if the column is pinned.
-    columnLabel.select(`.${cs.pinIcon}`).attr("display", d => {
+    columnLabel.select(`.${cs.pinIcon}`).attr("display", (d: $TSFixMe) => {
       if (d.pinned) {
         return "default";
       } else {
@@ -1728,15 +1814,15 @@ export default class Heatmap {
     this.renderColumnMetadataLabels(dx, transition);
   }
 
-  getColumnMetadataLabelOffset(d) {
+  getColumnMetadataLabelOffset(d: $TSFixMe) {
     return d.value === this.columnMetadataSortField
       ? this.options.metadataSortIconSize + this.options.spacing
       : 0;
   }
 
-  renderColumnMetadataLabels(dx, transition = true) {
-    let applyFormat = nodes => {
-      nodes.attr("transform", (d, idx) => {
+  renderColumnMetadataLabels(dx: $TSFixMe, transition = true) {
+    const applyFormat = (nodes: $TSFixMe) => {
+      nodes.attr("transform", (d: $TSFixMe, idx: $TSFixMe) => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
         return `translate(${dx - xOffset}, ${this.options
           .metadataAddLinkHeight +
@@ -1752,7 +1838,7 @@ export default class Heatmap {
             .options.minCellHeight / 2})`,
         );
       // Update rect use as a hover target
-      nodes.select("rect").attr("width", d => {
+      nodes.select("rect").attr("width", (d: $TSFixMe) => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
         return this.rowLabelsWidth + this.options.marginLeft + xOffset;
       });
@@ -1767,9 +1853,9 @@ export default class Heatmap {
         );
     };
 
-    let columnMetadataLabel = this.gColumnMetadata
+    const columnMetadataLabel = this.gColumnMetadata
       .selectAll(`.${cs.columnMetadataLabel}`)
-      .data(this.options.columnMetadata, d => d.value);
+      .data(this.options.columnMetadata, (d: $TSFixMe) => d.value);
 
     columnMetadataLabel
       .exit()
@@ -1779,7 +1865,7 @@ export default class Heatmap {
       .style("opacity", 0)
       .remove();
 
-    let columnMetadataLabelUpdate = columnMetadataLabel
+    const columnMetadataLabelUpdate = columnMetadataLabel
       .transition()
       .duration(this.options.transitionDuration);
 
@@ -1789,7 +1875,7 @@ export default class Heatmap {
       applyFormat(columnMetadataLabelUpdate);
     }
 
-    let columnMetadataLabelEnter = columnMetadataLabel
+    const columnMetadataLabelEnter = columnMetadataLabel
       .enter()
       .append("g")
       .attr("class", cs.columnMetadataLabel)
@@ -1806,28 +1892,30 @@ export default class Heatmap {
       .style("fill", "white");
     applyFormat(columnMetadataLabelEnter);
 
-    const handleColumnMetadataLabelClick = d => {
+    const handleColumnMetadataLabelClick = (d: $TSFixMe) => {
       this.options.onColumnMetadataLabelClick
         ? this.options.onColumnMetadataLabelClick(d.value, d3.event)
         : this.handleColumnMetadataLabelClick(d.value);
 
-      columnMetadataLabelEnter.selectAll("rect").attr("width", d => {
-        const xOffset = this.getColumnMetadataLabelOffset(d);
-        return this.rowLabelsWidth + this.options.marginLeft + xOffset;
-      });
+      columnMetadataLabelEnter
+        .selectAll("rect")
+        .attr("width", (d: $TSFixMe) => {
+          const xOffset = this.getColumnMetadataLabelOffset(d);
+          return this.rowLabelsWidth + this.options.marginLeft + xOffset;
+        });
     };
 
     columnMetadataLabelEnter
       .append("text")
-      .text(d => d.label)
+      .text((d: $TSFixMe) => d.label)
       .style("dominant-baseline", "central")
       .style("text-anchor", "end")
       .on("click", handleColumnMetadataLabelClick)
-      .on("mouseover", d => {
+      .on("mouseover", (d: $TSFixMe) => {
         this.options.onColumnMetadataLabelHover &&
           this.options.onColumnMetadataLabelHover(d);
       })
-      .on("mouseleave", d => {
+      .on("mouseleave", (d: $TSFixMe) => {
         this.options.onColumnMetadataLabelOut &&
           this.options.onColumnMetadataLabelOut(d);
       });
@@ -1845,7 +1933,7 @@ export default class Heatmap {
 
     columnMetadataLabel
       .select(".metadataSortIcon")
-      .attr("xlink:href", d =>
+      .attr("xlink:href", (d: $TSFixMe) =>
         d.value === this.columnMetadataSortField
           ? `${this.options.iconPath}/sort_${
               this.columnMetadataSortAsc ? "asc" : "desc"
@@ -1855,31 +1943,31 @@ export default class Heatmap {
   }
 
   renderColumnMetadataCells() {
-    let applyFormatForCells = nodes => {
+    const applyFormatForCells = (nodes: $TSFixMe) => {
       nodes
         .attr("width", this.cell.width - 2)
         .attr("height", this.options.minCellHeight - 2)
         .attr(
           "transform",
-          d =>
+          (d: $TSFixMe) =>
             `translate(${d.pos * this.cell.width +
               this.rowLabelsWidth +
               1}, 0)`,
         );
     };
 
-    let applyFormatForRows = nodes => {
+    const applyFormatForRows = (nodes: $TSFixMe) => {
       nodes.attr(
         "transform",
-        (_, i) =>
+        (_: $TSFixMe, i: $TSFixMe) =>
           `translate(0, ${this.options.metadataAddLinkHeight +
             this.options.minCellHeight * i})`,
       );
     };
 
-    let columnnMetadataCells = this.gColumnMetadata
+    const columnnMetadataCells = this.gColumnMetadata
       .selectAll(".columnMetadataCells")
-      .data(this.options.columnMetadata, d => d.value);
+      .data(this.options.columnMetadata, (d: $TSFixMe) => d.value);
 
     columnnMetadataCells
       .exit()
@@ -1889,28 +1977,28 @@ export default class Heatmap {
       .style("opacity", 0)
       .remove();
 
-    let rowsUpdate = columnnMetadataCells
+    const rowsUpdate = columnnMetadataCells
       .transition()
       .duration(this.options.transitionDuration);
     applyFormatForRows(rowsUpdate);
 
-    let rowsEnter = columnnMetadataCells
+    const rowsEnter = columnnMetadataCells
       .enter()
       .append("g")
-      .attr("class", d =>
+      .attr("class", (d: $TSFixMe) =>
         cx("columnMetadataCells", d.value.replace(/ /g, "_")),
       );
     applyFormatForRows(rowsEnter);
 
-    this.options.columnMetadata.forEach(metadata => {
-      let columnMetadataCell = this.gColumnMetadata
+    this.options.columnMetadata.forEach((metadata: $TSFixMe) => {
+      const columnMetadataCell = this.gColumnMetadata
         .select(
           `.columnMetadataCells.${CSS.escape(
             metadata.value.replace(/ /g, "_"),
           )}`,
         )
         .selectAll(".columnMetadataCell")
-        .data(this.columnLabels, d => d.label);
+        .data(this.columnLabels, (d: $TSFixMe) => d.label);
 
       columnMetadataCell
         .exit()
@@ -1920,27 +2008,27 @@ export default class Heatmap {
         .style("opacity", 0)
         .remove();
 
-      let columnMetadataCellUpdate = columnMetadataCell
+      const columnMetadataCellUpdate = columnMetadataCell
         .transition()
         .duration(this.options.transitionDuration);
       applyFormatForCells(columnMetadataCellUpdate);
 
-      let columnMetadataCellEnter = columnMetadataCell
+      const columnMetadataCellEnter = columnMetadataCell
         .enter()
         .append("rect")
         .attr("class", "columnMetadataCell")
-        .on("mouseover", d => {
+        .on("mouseover", (d: $TSFixMe) => {
           this.options.onMetadataNodeHover &&
             this.options.onMetadataNodeHover(d, metadata);
         })
-        .on("mouseleave", d => {
+        .on("mouseleave", (d: $TSFixMe) => {
           // use same hover out handler because we want the same behavior
           this.options.onColumnMetadataLabelOut &&
             this.options.onColumnMetadataLabelOut(d);
         });
 
-      columnMetadataCell.style("fill", d => {
-        let metadataValue = d.metadata[metadata.value];
+      columnMetadataCell.style("fill", (d: $TSFixMe) => {
+        const metadataValue = d.metadata[metadata.value];
         return metadataValue
           ? this.metadataColors[metadata.value][metadataValue]
           : this.options.colorNoValue;
@@ -1949,7 +2037,7 @@ export default class Heatmap {
     });
   }
 
-  renderColumnMetadataAddLink(dx) {
+  renderColumnMetadataAddLink(dx: $TSFixMe) {
     if (this.options.onAddColumnMetadataClick) {
       const handleAddColumnMetadataClick = () => {
         this.options.onAddColumnMetadataClick(addMetadataTrigger.node(), {
@@ -1958,11 +2046,11 @@ export default class Heatmap {
         });
       };
 
-      let addLink = this.gColumnMetadata
+      const addLink = this.gColumnMetadata
         .selectAll(`.${cs.columnMetadataAdd}`)
         .data([1]);
 
-      const applyFormat = nodes => {
+      const applyFormat = (nodes: $TSFixMe) => {
         nodes.select("rect").attr("width", this.rowLabelsWidth);
         nodes
           .select("text")
@@ -1978,12 +2066,12 @@ export default class Heatmap {
         .duration(this.options.transitionDuration);
       applyFormat(addLinkUpdate);
 
-      let addLinkEnter = addLink
+      const addLinkEnter = addLink
         .enter()
         .append("g")
         .attr("class", cs.columnMetadataAdd);
 
-      let yPos = this.options.metadataAddLinkHeight / 2;
+      const yPos = this.options.metadataAddLinkHeight / 2;
 
       addLinkEnter.append("rect");
 
@@ -1995,7 +2083,7 @@ export default class Heatmap {
         .on("click", handleAddColumnMetadataClick);
       applyFormat(addLinkEnter);
 
-      let addMetadataTrigger = addLinkEnter
+      const addMetadataTrigger = addLinkEnter
         .append("g")
         .attr("class", cs.metadataAddTrigger)
         .on("click", handleAddColumnMetadataClick);
@@ -2021,13 +2109,13 @@ export default class Heatmap {
   // Dendograms
   renderColumnDendrogram() {
     this.gColumnDendogram.select("g").remove();
-    let container = this.gColumnDendogram.append("g");
+    const container = this.gColumnDendogram.append("g");
     if (this.columnClustering) {
       const numColumns = this.options.onPinColumnClick
         ? this.getUnpinnedColumns().length
         : this.columnLabels.length;
-      let width = this.cell.width * numColumns;
-      let height = this.columnClusterHeight - this.options.spacing;
+      const width = this.cell.width * numColumns;
+      const height = this.columnClusterHeight - this.options.spacing;
 
       this.renderDendrogram(
         container,
@@ -2048,11 +2136,11 @@ export default class Heatmap {
   }
 
   renderRowDendrogram() {
-    let height = this.rowClusterWidth - 10;
-    let width = this.cell.height * this.filteredRowLabels.length;
+    const height = this.rowClusterWidth - 10;
+    const width = this.cell.height * this.filteredRowLabels.length;
 
     this.gRowDendogram.select("g").remove();
-    let container = this.gRowDendogram.append("g");
+    const container = this.gRowDendogram.append("g");
     if (this.rowClustering) {
       this.renderDendrogram(
         container,
@@ -2069,7 +2157,7 @@ export default class Heatmap {
   }
 
   renderCaption() {
-    let caption = this.gCaption
+    const caption = this.gCaption
       .selectAll(`.${cs.caption}`)
       .data(this.options.printCaption);
 
@@ -2077,16 +2165,17 @@ export default class Heatmap {
       .enter()
       .append("text")
       .attr("class", cs.caption)
-      .text(d => d)
+      .text((d: $TSFixMe) => d)
       .attr(
         "transform",
-        (_, idx) => `translate(0, ${idx * this.options.captionLineHeight})`,
+        (_: $TSFixMe, idx: $TSFixMe) =>
+          `translate(0, ${idx * this.options.captionLineHeight})`,
       );
   }
 
   // Highlight a row or column. The `nbCells` determines how many cells-wide the
   // highlighted region should be (it's > 1 for dendrogram hovers).
-  highlightRowOrColumn(rowOrColumn, nbCells = 1) {
+  highlightRowOrColumn(rowOrColumn: $TSFixMe, nbCells = 1) {
     // Add debouncing logic before we clear the overlays. That way, if the user
     // hovers quickly across rows/columns on a large heatmap, it won't flicker.
     if (!rowOrColumn) {
@@ -2141,7 +2230,7 @@ export default class Heatmap {
   }
 
   // Create a rectangle that overlays over the heatmap
-  createOverlay({ x, y, width, height }) {
+  createOverlay({ x, y, width, height }: $TSFixMe) {
     const overlay = this.gCells
       .append("rect")
       .style("fill", "white")
@@ -2156,31 +2245,37 @@ export default class Heatmap {
 
   // Clear previously drawn overlays
   clearOverlays() {
-    this.overlays.map(d => d.remove());
+    this.overlays.map((d: $TSFixMe) => d.remove());
     this.overlays = [];
   }
 
-  updateLabelHighlights(nodes, labels) {
+  updateLabelHighlights(nodes: $TSFixMe, labels: $TSFixMe) {
     nodes
-      .data(labels, d => d.label)
-      .classed(cs.highlighted, d => d.highlighted);
+      .data(labels, (d: $TSFixMe) => d.label)
+      .classed(cs.highlighted, (d: $TSFixMe) => d.highlighted);
   }
 
-  renderDendrogram(container, tree, targets, width, height) {
-    let cluster = d3.layout
+  renderDendrogram(
+    container: $TSFixMe,
+    tree: $TSFixMe,
+    targets: $TSFixMe,
+    width: $TSFixMe,
+    height: $TSFixMe,
+  ) {
+    const cluster = d3.layout
       .cluster()
       .size([width, height])
       .separation(function() {
         return 1;
       });
 
-    let diagonal = (d, useRectEdges) => {
+    const diagonal = (d: $TSFixMe, useRectEdges: $TSFixMe) => {
       if (useRectEdges === true) {
         return `M${d.source.y},${d.source.x}V${d.target.x}H${d.target.y}`;
       }
 
-      let radius = 4;
-      let dir = (d.source.x - d.target.x) / Math.abs(d.source.x - d.target.x);
+      const radius = 4;
+      const dir = (d.source.x - d.target.x) / Math.abs(d.source.x - d.target.x);
       return `M${d.source.y},${d.source.x}
                 L${d.source.y},${d.target.x + dir * radius}
                 A${radius} ${radius} 0, 0, ${(dir + 1) / 2}, ${d.source.y +
@@ -2188,16 +2283,16 @@ export default class Heatmap {
                 L${d.target.y},${d.target.x}`;
     };
 
-    let updateHighlights = (node, highlighted) => {
-      let stack = [node];
+    const updateHighlights = (node: $TSFixMe, highlighted: $TSFixMe) => {
+      const stack = [node];
 
-      targets.forEach(target => {
+      targets.forEach((target: $TSFixMe) => {
         target.shaded = highlighted;
       });
 
-      let toUpdate = [];
+      const toUpdate = [];
       while (stack.length) {
-        let node = stack.pop();
+        const node = stack.pop();
         node.highlighted = highlighted;
         if (node.left) stack.push(node.left);
         if (node.right) stack.push(node.right);
@@ -2210,7 +2305,7 @@ export default class Heatmap {
       container
         .selectAll(`.${cs.link}`)
         .data(cluster.links(nodes))
-        .classed(cs.highlighted, d => d.source.highlighted);
+        .classed(cs.highlighted, (d: $TSFixMe) => d.source.highlighted);
 
       // Highlight heatmap rows/columns
       if (!highlighted || toUpdate.length === 0)
@@ -2222,8 +2317,8 @@ export default class Heatmap {
       }
     };
 
-    cluster.children(function(d) {
-      let children = [];
+    cluster.children(function(d: $TSFixMe) {
+      const children = [];
       if (d.left) {
         children.push(d.left);
       }
@@ -2233,9 +2328,9 @@ export default class Heatmap {
       return children;
     });
 
-    var nodes = cluster.nodes(tree);
+    const nodes = cluster.nodes(tree);
 
-    let links = container
+    const links = container
       .selectAll(`.${cs.link}`)
       .data(cluster.links(nodes))
       .enter()
@@ -2250,17 +2345,17 @@ export default class Heatmap {
     links
       .append("rect")
       .attr("class", cs.hoverTarget)
-      .attr("x", d => Math.min(d.source.y, d.target.y))
-      .attr("y", d => Math.min(d.source.x, d.target.x))
-      .attr("width", d => {
-        let targetY = Math.max(d.source.left.y, d.source.right.y);
+      .attr("x", (d: $TSFixMe) => Math.min(d.source.y, d.target.y))
+      .attr("y", (d: $TSFixMe) => Math.min(d.source.x, d.target.x))
+      .attr("width", (d: $TSFixMe) => {
+        const targetY = Math.max(d.source.left.y, d.source.right.y);
         return Math.abs(targetY - d.source.y) + this.options.spacing;
       })
-      .attr("height", d => Math.abs(d.target.x - d.source.x))
-      .on("mouseover", d => {
+      .attr("height", (d: $TSFixMe) => Math.abs(d.target.x - d.source.x))
+      .on("mouseover", (d: $TSFixMe) => {
         updateHighlights(d.source, true);
       })
-      .on("mouseout", d => {
+      .on("mouseout", (d: $TSFixMe) => {
         updateHighlights(d.source, false);
       });
   }
@@ -2269,7 +2364,7 @@ export default class Heatmap {
     return this.addMetadataTrigger;
   }
 
-  getColumnMetadataLegend(value) {
+  getColumnMetadataLegend(value: $TSFixMe) {
     if (
       some(
         this.columnLabels,

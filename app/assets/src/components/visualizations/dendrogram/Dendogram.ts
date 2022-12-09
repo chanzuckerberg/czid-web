@@ -35,7 +35,24 @@ const LEGEND_POS = {
 };
 
 export default class Dendogram {
-  constructor(container, tree, options) {
+  _clickTimeout: $TSFixMe;
+  _highlighted: $TSFixMe;
+  allColorAttributeValues: $TSFixMe;
+  colors: $TSFixMe;
+  container: $TSFixMe;
+  legend: $TSFixMe;
+  margins: $TSFixMe;
+  minTreeSize: $TSFixMe;
+  nodeSize: $TSFixMe;
+  options: $TSFixMe;
+  root: $TSFixMe;
+  skipColoring: $TSFixMe;
+  svg: $TSFixMe;
+  tooltipContainer: $TSFixMe;
+  tree: $TSFixMe;
+  viz: $TSFixMe;
+  warningTooltipContainer: $TSFixMe;
+  constructor(container: $TSFixMe, tree: $TSFixMe, options: $TSFixMe) {
     this.svg = null;
     this.viz = null;
     this.container = container;
@@ -120,7 +137,7 @@ export default class Dendogram {
     this.warningTooltipContainer = select(this.options.warningTooltipContainer);
   }
 
-  adjustHeight(treeHeight) {
+  adjustHeight(treeHeight: $TSFixMe) {
     this.svg.attr(
       "height",
       Math.max(treeHeight, this.minTreeSize.height) +
@@ -129,15 +146,16 @@ export default class Dendogram {
     );
   }
 
-  getColorGroupAttrValForNode = node => {
-    let attrPath = this.options.colorGroupAttribute;
-    let absentName = this.options.colorGroupAbsentName;
-    let val = get(attrPath, node.data) || absentName;
+  getColorGroupAttrValForNode = (node: $TSFixMe) => {
+    const attrPath = this.options.colorGroupAttribute;
+    const absentName = this.options.colorGroupAbsentName;
+    const val = get(attrPath, node.data) || absentName;
     // Use .name if val is an object (e.g. location object)
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'name' does not exist on type 'object'.
     return isObject(val) ? val.name : val;
   };
 
-  setTree(tree) {
+  setTree(tree: $TSFixMe) {
     if (this.viz) {
       this.viz.selectAll("*").remove();
     }
@@ -153,7 +171,7 @@ export default class Dendogram {
     this.updateColors();
   }
 
-  computeDistanceToRoot(node, offset = 0) {
+  computeDistanceToRoot(node: $TSFixMe, offset = 0) {
     let maxDistance = 0;
     node.distanceToRoot = (node.data.distance || 0) + offset;
 
@@ -169,19 +187,19 @@ export default class Dendogram {
     return Math.max(maxDistance, node.distanceToRoot);
   }
 
-  detachFromParent(node) {
-    let childIndex = (node.parent.children || []).indexOf(node);
+  detachFromParent(node: $TSFixMe) {
+    const childIndex = (node.parent.children || []).indexOf(node);
     node.parent.children.splice(childIndex, 1);
     delete node.parent;
   }
 
-  rerootOriginalTree(nodeToRoot) {
+  rerootOriginalTree(nodeToRoot: $TSFixMe) {
     this.tree.rerootTree(nodeToRoot.data.id);
     this.root = hierarchy(this.tree.root);
     this.update();
   }
 
-  markAsHighlight(node) {
+  markAsHighlight(node: $TSFixMe) {
     if (this._highlighted.has(node.data.id)) {
       this._highlighted.delete(node.data.id);
     } else {
@@ -191,18 +209,20 @@ export default class Dendogram {
   }
 
   updateHighlights() {
-    this.root.descendants().forEach(n => (n.data.highlight = false));
+    this.root.descendants().forEach((n: $TSFixMe) => {
+      n.data.highlight = false;
+    });
 
-    this.root.leaves().forEach(leaf => {
+    this.root.leaves().forEach((leaf: $TSFixMe) => {
       if (this._highlighted.has(leaf.data.id)) {
-        leaf.ancestors().forEach(ancestor => {
+        leaf.ancestors().forEach((ancestor: $TSFixMe) => {
           ancestor.data.highlight = true;
         });
       }
     });
   }
 
-  updateOptions = options => {
+  updateOptions = (options: $TSFixMe) => {
     this.options = Object.assign(this.options, options);
     if (this.viz) {
       this.viz.selectAll("*").remove();
@@ -219,17 +239,17 @@ export default class Dendogram {
       return;
     }
 
-    let absentName = this.options.colorGroupAbsentName;
+    const absentName = this.options.colorGroupAbsentName;
 
     // Set up all attribute values. Colors end up looking like:
     // Uncolored (gray) | Absent attribute color (e.g. for NCBI References) + Actual seen values..
-    let allVals = new Set();
-    this.root.leaves().forEach(n => {
+    const allValsSet: Set<string> = new Set();
+    this.root.leaves().forEach((n: $TSFixMe) => {
       if (n.data) {
-        allVals.add(this.getColorGroupAttrValForNode(n));
+        allValsSet.add(this.getColorGroupAttrValForNode(n));
       }
     });
-    allVals = Array.from(allVals);
+    let allVals = Array.from(allValsSet);
 
     // Just leave everything the uncolored color if there is only the absent
     // value
@@ -256,7 +276,7 @@ export default class Dendogram {
       this.colors.splice(absentNameIndex, 0, this.options.absentColor);
     }
 
-    const colorNode = head => {
+    const colorNode = (head: $TSFixMe) => {
       // Color the nodes based on the attribute values
       if (!head.data) return 0; // 0 for uncolored default
       let colorResult = 0;
@@ -268,8 +288,8 @@ export default class Dendogram {
         colorResult = allVals.indexOf(this.getColorGroupAttrValForNode(head));
       } else {
         // Not a leaf node, get the colors of the children
-        let childrenColors = new Set();
-        for (let child of head.children) {
+        const childrenColors = new Set();
+        for (const child of head.children) {
           // Want to call all the children to get every node/link colored
           childrenColors.add(colorNode(child));
         }
@@ -293,7 +313,7 @@ export default class Dendogram {
       return;
     }
 
-    let allVals = this.allColorAttributeValues;
+    const allVals = this.allColorAttributeValues;
     this.legend = this.svg.select(".legend");
 
     if (this.legend.empty()) {
@@ -307,7 +327,7 @@ export default class Dendogram {
     let y = this.options.legendY;
 
     // Set legend title
-    let legendTitle = (this.options.colorGroupLegendTitle || "Legend") + ":";
+    const legendTitle = (this.options.colorGroupLegendTitle || "Legend") + ":";
     this.legend
       .append("text")
       .attr("class", "legend-title")
@@ -322,7 +342,7 @@ export default class Dendogram {
       // First of values and colors is the placeholder for 'Uncolored'
 
       // Add color circle
-      let color = this.colors[i];
+      const color = this.colors[i];
       this.legend
         .append("circle")
         .attr("r", 5)
@@ -338,8 +358,8 @@ export default class Dendogram {
     }
 
     // background rectangle
-    let bbox = this.legend.node().getBBox();
-    let bgMargin = 10;
+    const bbox = this.legend.node().getBBox();
+    const bgMargin = 10;
     this.legend
       .append("rect")
       .attr("class", "legend-background")
@@ -350,7 +370,11 @@ export default class Dendogram {
       .lower();
   }
 
-  clickHandler(clickCallback, dblClickCallback, delay = 250) {
+  clickHandler(
+    clickCallback: $TSFixMe,
+    dblClickCallback: $TSFixMe,
+    delay = 250,
+  ) {
     if (this._clickTimeout) {
       this._clickTimeout.stop();
       this._clickTimeout = null;
@@ -363,8 +387,9 @@ export default class Dendogram {
     }
   }
 
-  formatBase10(multiplier, power) {
+  formatBase10(multiplier: number, power: number) {
     if (power >= -1 && power <= 1) {
+      // @ts-expect-error ts-migrate(2362) FIXME: The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
       return Number.parseFloat(multiplier * Math.pow(10, power)).toFixed(2) * 1;
     } else {
       return `${multiplier}E${power}`;
@@ -374,7 +399,7 @@ export default class Dendogram {
   adjustXPositions() {
     let xMin = this.root.x;
     let xMax = this.root.x;
-    this.root.each(node => {
+    this.root.each((node: $TSFixMe) => {
       if (node.x < xMin) {
         xMin = node.x;
       }
@@ -383,24 +408,29 @@ export default class Dendogram {
       }
     });
     const xRange = xMax - xMin;
-    let finalTreeHeight =
+    const finalTreeHeight =
       xRange < this.minTreeSize.height ? this.minTreeSize.height : xRange;
 
-    this.root.each(node => {
+    this.root.each((node: $TSFixMe) => {
       node.x = ((node.x - xMin) * finalTreeHeight) / xRange;
     });
     this.adjustHeight(finalTreeHeight);
   }
 
-  adjustYPositions(maxDistance) {
-    this.root.each(node => {
+  adjustYPositions(maxDistance: $TSFixMe) {
+    this.root.each((node: $TSFixMe) => {
       node.y = (this.minTreeSize.width * node.distanceToRoot) / maxDistance;
     });
   }
 
-  createScale(x, y, width, distance) {
-    function createTicks(yMin, yMax, stepSize, multiplier) {
-      let ticks = [{ id: 0, y: yMin, multiplier: 0 }];
+  createScale(x: $TSFixMe, y: $TSFixMe, width: $TSFixMe, distance: $TSFixMe) {
+    function createTicks(
+      yMin: $TSFixMe,
+      yMax: $TSFixMe,
+      stepSize: $TSFixMe,
+      multiplier: $TSFixMe,
+    ) {
+      const ticks = [{ id: 0, y: yMin, multiplier: 0 }];
       for (let i = 0; i <= yMax / stepSize; i++) {
         ticks.push({
           id: i + 1,
@@ -411,18 +441,18 @@ export default class Dendogram {
       return ticks;
     }
 
-    function drawScale(xMax, yMin, yMax) {
+    function drawScale(xMax: $TSFixMe, yMin: $TSFixMe, yMax: $TSFixMe) {
       return `M${yMin} ${xMax} L${yMax} ${xMax}`;
     }
 
-    function drawTick(xMin, xMax, y) {
+    function drawTick(xMin: $TSFixMe, xMax: $TSFixMe, y: $TSFixMe) {
       return `M${y} ${xMin} L${y} ${xMax}`;
     }
 
     const tickWidth = 10;
     const initialScaleSize = 100;
 
-    let initialValue = (distance * initialScaleSize) / width;
+    const initialValue = (distance * initialScaleSize) / width;
     const power = Math.floor(Math.log10(initialValue));
     let scaleSize = (Math.pow(10, power) * initialScaleSize) / initialValue;
     const multiplier = Math.round(initialScaleSize / scaleSize);
@@ -463,15 +493,15 @@ export default class Dendogram {
         });
     }
 
-    let ticks = scale
+    const ticks = scale
       .selectAll(".scale-tick")
-      .data(tickElements, tick => tick.id);
+      .data(tickElements, (tick: $TSFixMe) => tick.id);
 
-    let enterTicks = ticks
+    const enterTicks = ticks
       .enter()
       .append("g")
       .attr("class", "scale-tick")
-      .attr("transform", tick => `translate(${tick.y},0)`);
+      .attr("transform", (tick: $TSFixMe) => `translate(${tick.y},0)`);
 
     enterTicks.append("path").attr("d", drawTick(0, tickWidth, 0));
 
@@ -479,7 +509,7 @@ export default class Dendogram {
       .append("text")
       .attr("dy", -3)
       .style("text-anchor", "middle")
-      .text(tick =>
+      .text((tick: $TSFixMe) =>
         tick.multiplier === undefined
           ? ""
           : this.formatBase10(tick.multiplier, power),
@@ -488,7 +518,7 @@ export default class Dendogram {
     ticks
       .transition()
       .duration(500)
-      .attr("transform", tick => `translate(${tick.y},0)`);
+      .attr("transform", (tick: $TSFixMe) => `translate(${tick.y},0)`);
 
     ticks
       .exit()
@@ -506,7 +536,7 @@ export default class Dendogram {
       this.initialize();
     }
 
-    function curveEdge(d) {
+    function curveEdge(d: $TSFixMe) {
       return (
         "M" +
         d.y +
@@ -527,30 +557,30 @@ export default class Dendogram {
       );
     }
 
-    function rectEdge(d) {
+    function rectEdge(d: $TSFixMe) {
       return `M${d.y} ${d.x} L${d.parent.y} ${d.x} L${d.parent.y} ${d.parent.x}`;
     }
 
-    function nodeId(node) {
+    function nodeId(node: $TSFixMe) {
       return node.data.id;
     }
 
-    function linkId(node) {
+    function linkId(node: $TSFixMe) {
       if (node.parent) {
-        let ids = [node.data.id, node.parent.data.id];
+        const ids = [node.data.id, node.parent.data.id];
         ids.sort();
         return `${ids[0]}-${ids[1]}`;
       }
       return null;
     }
 
-    let cluster = d3Cluster()
+    const cluster = d3Cluster()
       .size([this.minTreeSize.height, this.minTreeSize.width])
       .nodeSize([this.nodeSize.height, this.nodeSize.width]);
 
     cluster(this.root);
 
-    let maxDistance = this.computeDistanceToRoot(this.root);
+    const maxDistance = this.computeDistanceToRoot(this.root);
     this.updateHighlights();
     this.updateLegend();
     this.adjustXPositions();
@@ -563,7 +593,7 @@ export default class Dendogram {
       maxDistance,
     );
 
-    let link = this.viz
+    const link = this.viz
       .selectAll(".link")
       .data(this.root.descendants().slice(1), linkId);
 
@@ -579,7 +609,7 @@ export default class Dendogram {
       .attr("class", "link")
       .attr("d", this.options.curvedEdges ? curveEdge : rectEdge);
 
-    link.classed("highlight", function(d) {
+    link.classed("highlight", function(d: $TSFixMe) {
       return d.data.highlight && d.parent.data.highlight;
     });
 
@@ -593,11 +623,11 @@ export default class Dendogram {
     this.viz.selectAll(".link").style("stroke-width", 1);
 
     // Offset each node so it is at the end of the line rather than overlapping it.
-    this.root.each(node => {
+    this.root.each((node: $TSFixMe) => {
       node.y += node.children ? 1 : 2;
     });
 
-    let node = this.viz
+    const node = this.viz
       .selectAll(".node")
       .data(this.root.descendants(), nodeId);
 
@@ -612,11 +642,11 @@ export default class Dendogram {
     node
       .transition()
       .duration(500)
-      .attr("transform", function(node) {
+      .attr("transform", function(node: $TSFixMe) {
         return "translate(" + node.y + "," + node.x + ")";
       });
 
-    node.classed("highlight", function(d) {
+    node.classed("highlight", function(d: $TSFixMe) {
       return d.data.highlight;
     });
 
@@ -624,10 +654,10 @@ export default class Dendogram {
       .select("text")
       .transition()
       .duration(500)
-      .attr("stroke", function(d) {
+      .attr("stroke", function(this: $TSFixMe, d: $TSFixMe) {
         return this.colors[d.data.colorIndex];
       })
-      .attr("x", function(d) {
+      .attr("x", function(this: $TSFixMe, d: $TSFixMe) {
         return d.depth === 0
           ? -(this.getBBox().width + 15)
           : d.children
@@ -635,25 +665,25 @@ export default class Dendogram {
           : 15;
       });
 
-    let nodeEnter = node
+    const nodeEnter = node
       .enter()
       .append("g")
-      .attr("class", function(node) {
+      .attr("class", function(node: $TSFixMe) {
         return "node" + (node.children ? " node-internal" : " node-leaf");
       })
-      .attr("transform", function(node) {
+      .attr("transform", function(node: $TSFixMe) {
         return `translate(${node.y},${node.x})`;
       });
 
     if (!this.tooltipContainer.empty()) {
       nodeEnter
-        .on("mouseenter", node => {
+        .on("mouseenter", (node: $TSFixMe) => {
           if (!node.children) {
             this.options.onNodeHover && this.options.onNodeHover(node);
             this.tooltipContainer.classed("visible", true);
           }
         })
-        .on("mousemove", node => {
+        .on("mousemove", (node: $TSFixMe) => {
           if (!node.children) {
             this.tooltipContainer
               .style("left", currentEvent.pageX + 20 + "px")
@@ -669,10 +699,10 @@ export default class Dendogram {
 
     nodeEnter
       .append("circle")
-      .attr("r", function(node) {
+      .attr("r", function(node: $TSFixMe) {
         return node.children ? 1 : 2;
       })
-      .on("click", node => {
+      .on("click", (node: $TSFixMe) => {
         this.clickHandler(
           () => this.markAsHighlight(node),
           () => this.rerootOriginalTree(node),
@@ -681,18 +711,19 @@ export default class Dendogram {
 
     nodeEnter
       .append("text")
-      .attr("dy", function(d) {
+      .attr("dy", function(d: $TSFixMe) {
         return d.children ? -2 : 5;
       })
-      .attr("x", function(d) {
+      .attr("x", function(d: $TSFixMe) {
         return d.children ? -8 : 15;
       })
-      .text(function(d) {
+      .text(function(d: $TSFixMe) {
         return d.children ? "" : d.data.name.split("__")[0];
       })
       .on(
         "click",
-        d => this.options.onNodeTextClick && this.options.onNodeTextClick(d),
+        (d: $TSFixMe) =>
+          this.options.onNodeTextClick && this.options.onNodeTextClick(d),
       );
 
     // Create a orange color filters to match $warning-medium and $warning-dark
@@ -701,12 +732,13 @@ export default class Dendogram {
     addSvgColorFilter(defs, "warning-medium", WARNING_ICON_COLOR);
     addSvgColorFilter(defs, "warning-dark", WARNING_ICON_HOVER_COLOR);
 
+    // Only display the warning icon if coverage_breadth < 0.25 for this node
     nodeEnter
       .append("svg:image")
       .attr("xlink:href", `${this.options.iconPath}/IconAlertSmall.svg`)
       .attr("class", cs.warningIcon)
       .attr("y", -7)
-      .attr("x", function(d) {
+      .attr("x", function(this: $TSFixMe, d: $TSFixMe) {
         // Get the width of the label and its offset to properly set the position of the icon
         const labelWidth = d3
           .select(this.previousSibling)
@@ -715,15 +747,14 @@ export default class Dendogram {
         const labelOffset = d.children ? -8 : 15;
         return labelWidth + labelOffset + 4;
       })
-      // Only display the warning icon if coverage_breadth < 0.25 for this node
-      .attr("display", function(d) {
+      .attr("display", function(d: $TSFixMe) {
         if (d.data.coverage_breadth) {
           return d.data.coverage_breadth < 0.25 ? "default" : "none";
         } else {
           return "none";
         }
       })
-      .on("mouseenter", node => {
+      .on("mouseenter", (node: $TSFixMe) => {
         if (!node.children) {
           this.options.onWarningIconHover && this.options.onWarningIconHover();
           this.warningTooltipContainer
@@ -741,12 +772,12 @@ export default class Dendogram {
 
     if (this.options.colorGroupAttribute && !this.skipColoring) {
       // Apply colors to the nodes from data.colorIndex
-      let colors = this.colors;
-      this.viz.selectAll(".node").style("fill", function(d) {
+      const colors = this.colors;
+      this.viz.selectAll(".node").style("fill", function(d: $TSFixMe) {
         return colors[d.data.colorIndex];
       });
 
-      this.viz.selectAll(".link").style("stroke", function(d) {
+      this.viz.selectAll(".link").style("stroke", function(d: $TSFixMe) {
         return colors[d.data.colorIndex];
       });
     } else {

@@ -1,6 +1,6 @@
 export class CategoricalColormap {
   gradients: string[][];
-  constructor(gradientLimits) {
+  constructor(gradientLimits?) {
     this.gradients = gradientLimits || [
       "482778",
       "1F968B",
