@@ -76,7 +76,7 @@ class SfnOntPipelineDataService
 
   def call
     steps = create_step_structure
-    file_source_map = map_files_to_sources
+    file_source_map = map_output_files_to_sources
 
     steps_with_output_files = add_output_files_to_steps(steps, file_source_map)
     # the below is needed for the pipeline viz
@@ -102,12 +102,45 @@ class SfnOntPipelineDataService
         inputVariables: input_variables,
         inputFiles: input_files,
         status: "finished",
-        fileList: [],
+        outputFiles: [],
         inputEdges: [],
         outputEdges: [],
       }
     end
     steps
+  end
+
+  # Unites the output files declared by the WDL workflow
+  # with the result files found in sample.results_folder_files
+  def map_output_files_to_sources
+    file_source_map = {}
+    output_file_map = collect_step_output_files
+
+    @ont_info["task_names"].each_with_index do |step, step_index|
+      output_files = output_file_map[step]
+
+      output_files.each do |file|
+        file[:from] = {
+          stageIndex: 0,
+          stepIndex: step_index,
+        }
+        file[:to] = []
+        file[:data] = get_result_file_data(file[:file])
+        file_source_map[file[FILE_SOURCE_MAP_KEY]] = file
+      end
+    end
+    return file_source_map
+  end
+
+  def add_output_files_to_steps(steps, file_source_map)
+    file_source_map.each do |_key, file|
+      if file[:from].present?
+        step_index = file[:from][:stepIndex]
+        step = steps[step_index]
+        step[:outputFiles].push(file[:data])
+      end
+    end
+    return steps
   end
 
   def map_files_to_output_steps(steps, file_source_map)
@@ -180,19 +213,9 @@ class SfnOntPipelineDataService
       if edge[:to]
         to_step_index = edge[:to][:stepIndex]
         steps_with_nodes[to_step_index][:inputEdges].push(edge_index)
+        edge[:isIntraStage] = true
       end
     end
-  end
-
-  def add_output_files_to_steps(steps, file_source_map)
-    file_source_map.each do |_key, file|
-      if file[:from].present?
-        step_index = file[:from][:stepIndex]
-        step = steps[step_index]
-        step[:fileList].push(file[:data])
-      end
-    end
-    return steps
   end
 
   def find_file_map_key(filename, file_source_map)
@@ -220,39 +243,18 @@ class SfnOntPipelineDataService
     return key
   end
 
-  # Unites the output files declared by the WDL workflow
-  # with the result files found in sample.results_folder_files
-  def map_files_to_sources
-    file_source_map = {}
-    output_file_map = collect_step_output_files(@ont_info)
-
-    @ont_info["task_names"].each_with_index do |step, step_index|
-      output_files = output_file_map[step]
-
-      output_files.each do |file|
-        file[:from] = {
-          stageIndex: 0,
-          stepIndex: step_index,
-        }
-        file[:to] = []
-        file[:data] = get_result_file_data(file[:file])
-        file_source_map[file[FILE_SOURCE_MAP_KEY]] = file
-      end
-    end
-    return file_source_map
-  end
-
-  def collect_step_output_files(stage_info)
-    output_file_map = Hash[stage_info["task_names"].collect { |task_name| [task_name, []] }] # rubocop:disable Rails/IndexWith
-    stage_info["outputs"].each do |output_var, wdl_reference|
-      output_step, var_name = wdl_reference.split(".")
+  # Collect the output files of each task/step in the workflow from the basenames property in the parsed WDL
+  def collect_step_output_files
+    output_file_map = Hash[@ont_info["task_names"].collect { |task_name| [task_name, []] }] # rubocop:disable Rails/IndexWith
+    @ont_info["basenames"].each do |wdl_reference, raw_output_filename|
+      task_name, output_var_name = wdl_reference.split(".")
       output_info = {
-        name: output_var,
-        internal_name: var_name,
-        unprefixed_name: unprefix(output_var),
-        file: stage_info["basenames"][wdl_reference],
+        name: output_var_name,
+        internal_name: output_var_name,
+        unprefixed_name: unprefix(output_var_name),
+        file: raw_output_filename,
       }
-      output_file_map[output_step].push(output_info)
+      output_file_map[task_name].push(output_info)
     end
     return output_file_map
   end

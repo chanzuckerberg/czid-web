@@ -1858,7 +1858,7 @@ class PipelineRun < ApplicationRecord
       step_dict = {
         name: StringUtil.humanize_step_name(step[:name]),
         stepDescription: step[:description],
-        fileList: step[:fileList],
+        fileList: step[:outputFiles],
         readsAfter: (job_stats_by_task[STEP_TO_JOB_STAT[step[:name]]] || {})["bases_after"],
       }
       # Convert to camelCase
