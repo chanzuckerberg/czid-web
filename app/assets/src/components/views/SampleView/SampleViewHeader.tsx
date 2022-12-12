@@ -105,6 +105,36 @@ export default function SampleViewHeader({
     });
   };
 
+  const renderPipelineRunSampleViewControls = () => (
+    <PipelineRunSampleViewControls
+      className={cs.controlElement}
+      backgroundId={backgroundId}
+      currentTab={currentTab}
+      deletable={deletable}
+      editable={editable}
+      getDownloadReportTableWithAppliedFiltersLink={
+        getDownloadReportTableWithAppliedFiltersLink
+      }
+      onDeleteSample={() => setSampleDeletionConfirmationModalOpen(true)}
+      hasAppliedFilters={hasAppliedFilters}
+      pipelineRun={currentRun as PipelineRun}
+      reportMetadata={reportMetadata}
+      sample={sample}
+      view={view}
+    />
+  );
+
+  const renderShortReadMngsHelpButton = () => (
+    <HelpButton
+      className={cs.controlElement}
+      onClick={showAppcue({
+        flowId: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
+        analyticEventName:
+          ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
+      })}
+    />
+  );
+
   const renderConsensusGenomeHelpButton = () => (
     <HelpButton
       className={cs.controlElement}
@@ -186,6 +216,26 @@ export default function SampleViewHeader({
           )}
         </ViewHeader.Controls>
       );
+    } else if (workflow === WORKFLOWS.LONG_READ_MNGS.value) {
+      // This block is for long-read-mngs PipelineRun reports.
+      return (
+        <ViewHeader.Controls>
+          {!isEmpty(reportMetadata) && renderShareButton()}
+          {userContext.admin && (
+            <SaveButton
+              className={cs.controlElement}
+              onClick={withAnalytics(
+                onSaveClick,
+                "SampleView_save-button_clicked",
+                {
+                  sampleId: sample && sample.id,
+                },
+              )}
+            />
+          )}
+          {renderPipelineRunSampleViewControls()}
+        </ViewHeader.Controls>
+      );
     } else {
       // This block is for short-read-mngs PipelineRun reports.
       return (
@@ -203,32 +253,8 @@ export default function SampleViewHeader({
               )}
             />
           )}
-          <PipelineRunSampleViewControls
-            className={cs.controlElement}
-            backgroundId={backgroundId}
-            currentTab={currentTab}
-            deletable={deletable}
-            editable={editable}
-            getDownloadReportTableWithAppliedFiltersLink={
-              getDownloadReportTableWithAppliedFiltersLink
-            }
-            onDeleteSample={() => setSampleDeletionConfirmationModalOpen(true)}
-            hasAppliedFilters={hasAppliedFilters}
-            pipelineRun={currentRun as PipelineRun}
-            reportMetadata={reportMetadata}
-            sample={sample}
-            view={view}
-          />
-          {!isEmpty(reportMetadata) && (
-            <HelpButton
-              className={cs.controlElement}
-              onClick={showAppcue({
-                flowId: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
-                analyticEventName:
-                  ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
-              })}
-            />
-          )}
+          {renderPipelineRunSampleViewControls()}
+          {!isEmpty(reportMetadata) && renderShortReadMngsHelpButton()}
         </ViewHeader.Controls>
       );
     }
