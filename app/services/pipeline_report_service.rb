@@ -903,7 +903,7 @@ class PipelineReportService
                     .slice(0, 15)
 
     rpm_drops = top_15_by_rpm
-                .map { |tax_id| species_counts[tax_id][:nt][:rpm] }
+                .map { |tax_id| species_counts.dig(tax_id, :nt, :rpm) || 0 }
                 .each_cons(2)
                 .map { |rpms| rpms[0] - rpms[1] }
 
