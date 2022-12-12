@@ -1882,7 +1882,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             sidebarTaxonData={sidebarTaxonData}
           />
         )}
-        { sample && (
+        { sample && ( isPipelineFeatureAvailable(
+            COVERAGE_VIZ_FEATURE,
+            get("pipeline_version", pipelineRun),
+          ) || currentTab === TABS.LONG_READ_MNGS) && (
           <CoverageVizBottomSidebar
             nameType={selectedOptions.nameType}
             onBlastClick={this.handleBlastClick}
