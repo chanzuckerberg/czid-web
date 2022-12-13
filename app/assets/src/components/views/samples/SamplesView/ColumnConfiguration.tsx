@@ -1,8 +1,12 @@
-import { get } from "lodash/fp";
+import { get, merge } from "lodash/fp";
 
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants";
+import {
+  SHARED_SAMPLE_TABLE_COLUMNS,
+  LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS,
+  SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
+} from "~/components/views/samples/constants";
 import { WORKFLOWS } from "~utils/workflows";
 import cs from "./samples_view.scss";
 
@@ -21,7 +25,7 @@ export const computeColumnsByWorkflow = ({
     workflow === WORKFLOWS.SHORT_READ_MNGS.value ||
     workflow === WORKFLOWS.LONG_READ_MNGS.value
   ) {
-    return computeMngsColumns({ basicIcon, metadataFields });
+    return computeMngsColumns({ basicIcon, metadataFields, workflow });
   } else if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
     return computeConsensusGenomeColumns({ basicIcon, metadataFields });
   } else if (workflow === WORKFLOWS.AMR.value) {
@@ -29,7 +33,7 @@ export const computeColumnsByWorkflow = ({
   }
 };
 
-const computeMngsColumns = ({ basicIcon, metadataFields }) => {
+const computeMngsColumns = ({ basicIcon, metadataFields, workflow }) => {
   const fixedColumns = [
     {
       dataKey: "sample",
@@ -159,8 +163,15 @@ const computeMngsColumns = ({ basicIcon, metadataFields }) => {
 
   const columns = [...fixedColumns, ...computeMetadataColumns(metadataFields)];
 
+  const columnData = merge(
+    SHARED_SAMPLE_TABLE_COLUMNS,
+    workflow === WORKFLOWS.LONG_READ_MNGS.value
+      ? LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS
+      : SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
+  );
+
   for (const col of columns) {
-    col["columnData"] = SAMPLE_TABLE_COLUMNS_V2[col["dataKey"]];
+    col["columnData"] = columnData[col["dataKey"]];
   }
 
   return columns;
@@ -331,9 +342,9 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
   for (const col of columns) {
     const dataKey = col["dataKey"];
     if (
-      Object.prototype.hasOwnProperty.call(SAMPLE_TABLE_COLUMNS_V2, dataKey)
+      Object.prototype.hasOwnProperty.call(SHARED_SAMPLE_TABLE_COLUMNS, dataKey)
     ) {
-      col["columnData"] = SAMPLE_TABLE_COLUMNS_V2[dataKey];
+      col["columnData"] = SHARED_SAMPLE_TABLE_COLUMNS[dataKey];
     } else if (Object.prototype.hasOwnProperty.call(FIELDS_METADATA, dataKey)) {
       col["columnData"] = FIELDS_METADATA[dataKey];
       col["label"] = FIELDS_METADATA[dataKey].label;
@@ -436,9 +447,9 @@ const computeAmrColumns = ({ basicIcon, metadataFields }) => {
   for (const col of columns) {
     const dataKey = col["dataKey"];
     if (
-      Object.prototype.hasOwnProperty.call(SAMPLE_TABLE_COLUMNS_V2, dataKey)
+      Object.prototype.hasOwnProperty.call(SHARED_SAMPLE_TABLE_COLUMNS, dataKey)
     ) {
-      col["columnData"] = SAMPLE_TABLE_COLUMNS_V2[dataKey];
+      col["columnData"] = SHARED_SAMPLE_TABLE_COLUMNS[dataKey];
     } else if (Object.prototype.hasOwnProperty.call(FIELDS_METADATA, dataKey)) {
       col["columnData"] = FIELDS_METADATA[dataKey];
       col["label"] = FIELDS_METADATA[dataKey].label;

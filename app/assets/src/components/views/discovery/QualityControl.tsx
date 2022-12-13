@@ -28,7 +28,7 @@ import { IconInfoSmall } from "~/components/ui/icons";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants";
+import { SHARED_SAMPLE_TABLE_COLUMNS } from "~/components/views/samples/constants";
 import Histogram from "~/components/visualizations/Histogram";
 import BarChartToggle from "~/components/visualizations/bar_charts/BarChartToggle";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
@@ -820,8 +820,8 @@ function QualityControl({
                     </span>
                   }
                   title="Total Reads"
-                  content={SAMPLE_TABLE_COLUMNS_V2.totalReads.tooltip}
-                  link={SAMPLE_TABLE_COLUMNS_V2.totalReads.link}
+                  content={SHARED_SAMPLE_TABLE_COLUMNS.totalReads.tooltip}
+                  link={SHARED_SAMPLE_TABLE_COLUMNS.totalReads.link}
                 />
               </div>
               <div
@@ -853,8 +853,8 @@ function QualityControl({
                     </span>
                   }
                   title="Passed QC"
-                  content={SAMPLE_TABLE_COLUMNS_V2.qcPercent.tooltip}
-                  link={SAMPLE_TABLE_COLUMNS_V2.qcPercent.link}
+                  content={SHARED_SAMPLE_TABLE_COLUMNS.qcPercent.tooltip}
+                  link={SHARED_SAMPLE_TABLE_COLUMNS.qcPercent.link}
                 />
               </div>
               <div
@@ -887,9 +887,12 @@ function QualityControl({
                   }
                   title="DCR"
                   content={
-                    SAMPLE_TABLE_COLUMNS_V2.duplicateCompressionRatio.tooltip
+                    SHARED_SAMPLE_TABLE_COLUMNS.duplicateCompressionRatio
+                      .tooltip
                   }
-                  link={SAMPLE_TABLE_COLUMNS_V2.duplicateCompressionRatio.link}
+                  link={
+                    SHARED_SAMPLE_TABLE_COLUMNS.duplicateCompressionRatio.link
+                  }
                 />
               </div>
               <div
@@ -926,8 +929,8 @@ function QualityControl({
                     </span>
                   }
                   title="Mean Insert Size"
-                  content={SAMPLE_TABLE_COLUMNS_V2.meanInsertSize.tooltip}
-                  link={SAMPLE_TABLE_COLUMNS_V2.meanInsertSize.link}
+                  content={SHARED_SAMPLE_TABLE_COLUMNS.meanInsertSize.tooltip}
+                  link={SHARED_SAMPLE_TABLE_COLUMNS.meanInsertSize.link}
                 />
                 {showMeanInsertSizeWarning && (
                   <div className={cs.message}>
@@ -1031,8 +1034,8 @@ function QualityControl({
                     </span>
                   }
                   title="Reads Lost"
-                  content={SAMPLE_TABLE_COLUMNS_V2.readsLost.tooltip}
-                  link={SAMPLE_TABLE_COLUMNS_V2.readsLost.link}
+                  content={SHARED_SAMPLE_TABLE_COLUMNS.readsLost.tooltip}
+                  link={SHARED_SAMPLE_TABLE_COLUMNS.readsLost.link}
                 />
               </div>
               {readsLostCategories.length > 0 ? (
@@ -1057,7 +1060,7 @@ function QualityControl({
                     className={cs.noDataBannerContainer}
                     icon={<ImgVizSecondary />}
                     link={{
-                      href: SAMPLE_TABLE_COLUMNS_V2.readsLost.link,
+                      href: SHARED_SAMPLE_TABLE_COLUMNS.readsLost.link,
                       text: "Learn about sample QC",
                     }}
                     message="No reads lost data could be found for your samples."
