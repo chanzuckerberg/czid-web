@@ -1,14 +1,43 @@
 import { difference, find, isEmpty, map, orderBy } from "lodash/fp";
-import PropTypes from "prop-types";
 import React, { useState, useEffect } from "react";
 import { SortDirection } from "react-virtualized";
 
-import BaseTable from "./BaseTable";
+import BaseTable, { BaseTableProps } from "./BaseTable";
+
+interface Column {
+  sortKey?: string;
+  dataKey?: string;
+  sortFunction?: ({
+    data,
+    sortDirection,
+  }: {
+    data: $TSFixMeUnknown[];
+    sortDirection: string;
+  }) => $TSFixMeUnknown[];
+}
+interface TableProps extends BaseTableProps {
+  columns: Column[];
+  data?: $TSFixMeUnknown[];
+  draggableColumns?: boolean;
+  // This is supplemental to sortFunction since sortFunction is in render() and may be called without a user click.
+  onColumnSort?: $TSFixMeFunction;
+  onSelectRow?: $TSFixMeFunction;
+  onSelectAllRows?: $TSFixMeFunction;
+  selectableKey?: string;
+  selected?: Set<$TSFixMeUnknown>;
+  sortable?: boolean;
+  // Allows you to set a sort on table initialization, but still allows user to change the sort.
+  defaultSortBy?: string;
+  defaultSortDirection?: string;
+  // Allows to set a custom row height function that receives the row data, not just the ID
+  defaultRowHeight?: number | $TSFixMeFunction;
+  selectRowDataGetter?: $TSFixMeFunction;
+  rowRenderer?: $TSFixMeFunction;
+}
 
 const Table = ({
   columns,
   data = [],
-  draggableColumns,
   onColumnSort,
   onSelectRow,
   onSelectAllRows,
@@ -21,7 +50,7 @@ const Table = ({
   selectRowDataGetter,
   rowRenderer,
   ...props
-}) => {
+}: TableProps) => {
   const [sortBy, setSortBy] = useState(defaultSortBy);
   const [sortDirection, setSortDirection] = useState(
     defaultSortDirection || SortDirection.ASC,
@@ -58,7 +87,7 @@ const Table = ({
 
   let sortedData = data;
   if (sortable && sortBy) {
-    const sortColumn = find({ dataKey: sortBy }, columns) || {};
+    const sortColumn: Column = find({ dataKey: sortBy }, columns) || {};
     const sortDirectionStr =
       sortDirection === SortDirection.ASC ? "asc" : "desc";
     if (sortColumn.sortFunction) {
@@ -95,32 +124,6 @@ const Table = ({
       {...props}
     />
   );
-};
-
-Table.propTypes = {
-  columns: PropTypes.arrayOf(
-    PropTypes.shape({
-      dataKey: PropTypes.string.isRequired,
-      // sortFunction should have the following signature: sortFunction({ data, sortDirection }) => sortedData
-      sortFunction: PropTypes.func,
-    }),
-  ).isRequired,
-  data: PropTypes.array,
-  draggableColumns: PropTypes.bool,
-  // This is supplemental to sortFunction since sortFunction is in render() and may be called without a user click.
-  onColumnSort: PropTypes.func,
-  onSelectRow: PropTypes.func,
-  onSelectAllRows: PropTypes.func,
-  selectableKey: PropTypes.string,
-  selected: PropTypes.instanceOf(Set),
-  sortable: PropTypes.bool,
-  // Allows you to set a sort on table initialization, but still allows user to change the sort.
-  defaultSortBy: PropTypes.string,
-  defaultSortDirection: PropTypes.string,
-  // Allows to set a custom row height function that receives the row data, not just the ID
-  defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
-  selectRowDataGetter: PropTypes.func,
-  rowRenderer: PropTypes.func,
 };
 
 export default Table;

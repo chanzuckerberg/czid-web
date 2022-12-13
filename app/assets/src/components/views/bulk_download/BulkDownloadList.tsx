@@ -241,7 +241,6 @@ class BulkDownloadList extends React.Component {
               </span>
             </Notification>
           )}
-        {/* @ts-expect-error Missing the properties from type */}
         <Table
           rowClassName={cs.tableRow}
           headerClassName={cs.tableHeader}

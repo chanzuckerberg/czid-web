@@ -192,7 +192,6 @@ export default class SampleUploadTable extends React.Component<
             Click to remove unselected samples
           </span>
         </div>
-        {/* @ts-expect-error Property 'draggableColumns' is missing in type */}
         <Table
           className={cs.table}
           columns={this.getColumns()}

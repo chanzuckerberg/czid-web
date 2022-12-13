@@ -378,7 +378,6 @@ const ConsensusGenomeView = ({
           })}
         </div>
         <div className={cx(cs.metricsTable, cs.raisedContainer)}>
-          {/* @ts-expect-error Table has not yet been typed */}
           <Table
             columns={computeQualityMetricColumns()}
             data={[metricsData]}

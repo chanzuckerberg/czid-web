@@ -57,7 +57,6 @@ const BlastContigsTable = ({
   ];
 
   return (
-    // @ts-expect-error missing attribute draggableColumns, onColumnSort, defaultSortBy, defaultSortDirection ...
     <Table
       data={contigs}
       defaultRowHeight={BLAST_CONTIG_ROW_WIDTH}

@@ -1,13 +1,34 @@
 import cx from "classnames";
 import { get, set, isObject } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Checkbox from "../../ui/controls/Checkbox";
 import cs from "./data_table.scss";
-class DataTable extends React.Component {
+
+interface DataTableProps {
+  className?: string;
+  columns?: $TSFixMeUnknown[];
+  data?: $TSFixMeUnknown[];
+  filter?: string;
+  headers?: object;
+  onSelectedRowsChanged?: $TSFixMeFunction;
+  selectedRows?: number[];
+  striped?: boolean;
+  // TODO(mark): Make column width sizing more robust.
+  columnWidth?: number;
+  getColumnWidth?: $TSFixMeFunction;
+}
+
+interface DataTableState {
+  selectedRows?;
+  filter?: string;
+  originalData?: DataTableProps["data"];
+  indexedData?;
+}
+
+class DataTable extends React.Component<DataTableProps, DataTableState> {
   // TODO: async get data function
-  constructor(props) {
+  constructor(props: DataTableProps) {
     super(props);
 
     this.state = {
@@ -20,9 +41,12 @@ class DataTable extends React.Component {
     this.handleCheckBoxChange = this.handleCheckBoxChange.bind(this);
   }
 
-  static getDerivedStateFromProps(props, state) {
-    let newFilter = DataTable.prepareFilter(props.filter);
-    let newState = {};
+  static getDerivedStateFromProps(
+    props: DataTableProps,
+    state: DataTableState,
+  ) {
+    const newFilter = DataTable.prepareFilter(props.filter);
+    const newState: DataTableState = {};
     if (newFilter !== state.filter) {
       newState.filter = newFilter;
     }
@@ -34,7 +58,7 @@ class DataTable extends React.Component {
     return newState;
   }
 
-  static prepareFilter(filter) {
+  static prepareFilter(filter: unknown) {
     if (filter === undefined || filter === null) {
       return "";
     } else {
@@ -45,20 +69,20 @@ class DataTable extends React.Component {
     }
   }
 
-  filterData(data) {
+  filterData(data: $TSFixMe) {
     if (this.state.filter) {
       const filters = this.state.filter.split(/ +/);
-      return data.filter(row =>
-        filters.every(filter => this.filterRow(row, filter)),
+      return data.filter((row: $TSFixMe) =>
+        filters.every((filter: $TSFixMe) => this.filterRow(row, filter)),
       );
     }
     return data;
   }
 
-  filterRow(row, filter) {
+  filterRow(row: $TSFixMe, filter: $TSFixMe) {
     return Object.keys(row).some(column => {
       if (!column.startsWith("__")) {
-        let value =
+        const value =
           row[column] !== undefined &&
           row[column] !== null &&
           row[column].toString().toLowerCase();
@@ -69,19 +93,21 @@ class DataTable extends React.Component {
     });
   }
 
-  static indexData(originalData) {
-    return originalData.map((val, index) => set("__originalIndex", index, val));
+  static indexData(originalData: $TSFixMe) {
+    return originalData.map((val: $TSFixMe, index: $TSFixMe) =>
+      set("__originalIndex", index, val),
+    );
   }
 
-  handleCheckBoxChange(rowIndex, checked) {
+  handleCheckBoxChange(rowIndex: $TSFixMe, checked: $TSFixMe) {
     if (checked === undefined) {
       return;
     }
 
     let stateUpdate = {};
     if (rowIndex < 0) {
-      let allRows = this.state.selectedRows || new Set();
-      let filteredData = this.filterData(this.state.indexedData);
+      const allRows = this.state.selectedRows || new Set();
+      const filteredData = this.filterData(this.state.indexedData);
       for (let i = 0; i < filteredData.length; i++) {
         if (!get("shouldDisable", filteredData[i])) {
           if (checked) {
@@ -94,12 +120,12 @@ class DataTable extends React.Component {
       }
     } else {
       if (checked) {
-        stateUpdate = prevState => {
+        stateUpdate = (prevState: $TSFixMe) => {
           prevState.selectedRows.add(rowIndex);
           return { selectedRows: prevState.selectedRows };
         };
       } else {
-        stateUpdate = prevState => {
+        stateUpdate = (prevState: $TSFixMe) => {
           prevState.selectedRows.delete(rowIndex);
           return { selectedRows: prevState.selectedRows };
         };
@@ -111,7 +137,7 @@ class DataTable extends React.Component {
     );
   }
 
-  getCellStyle = column => {
+  getCellStyle = (column: $TSFixMe) => {
     const { columnWidth, getColumnWidth } = this.props;
 
     const style = {};
@@ -128,7 +154,7 @@ class DataTable extends React.Component {
     const filteredData = this.filterData(this.state.indexedData);
     const allChecked =
       filteredData.length > 0 &&
-      filteredData.every(row =>
+      filteredData.every((row: $TSFixMe) =>
         this.state.selectedRows.has(row.__originalIndex),
       );
 
@@ -152,7 +178,7 @@ class DataTable extends React.Component {
                 />
               </th>
             )}
-            {this.props.columns.map((column, idx) => (
+            {this.props.columns.map((column: string, idx) => (
               <th
                 className={`data-table__header column-${column}`}
                 key={idx}
@@ -164,7 +190,7 @@ class DataTable extends React.Component {
           </tr>
         </thead>
         <tbody>
-          {filteredData.map(row => {
+          {filteredData.map((row: $TSFixMe) => {
             const shouldDisable = get("shouldDisable", row);
             const checkbox = (
               <Checkbox
@@ -178,7 +204,7 @@ class DataTable extends React.Component {
             );
 
             const columnTooltips = get("columnTooltips", row);
-            const columns = this.props.columns.map((column, colIdx) => {
+            const columns = this.props.columns.map((column: string, colIdx) => {
               const col = (
                 <td
                   className={cx(
@@ -250,24 +276,7 @@ class DataTable extends React.Component {
   }
 }
 
-DataTable.propTypes = {
-  className: PropTypes.string,
-  columns: PropTypes.array,
-  data: PropTypes.array,
-  filter: PropTypes.string,
-  headers: PropTypes.object,
-  onSelectedRowsChanged: PropTypes.func,
-  selectedRows: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.number),
-    // allow Set = TODO: replace by custom function
-    PropTypes.object,
-  ]),
-  striped: PropTypes.bool,
-  // TODO(mark): Make column width sizing more robust.
-  columnWidth: PropTypes.number,
-  getColumnWidth: PropTypes.func,
-};
-
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 DataTable.defaultProps = {
   striped: true,
 };

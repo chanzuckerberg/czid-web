@@ -99,7 +99,6 @@ export default function ConsensusGenomePreviousModal({
         <span className={cs.taxonName}>{consensusGenomeData.taxName}</span>
       </div>
       <div className={cs.table}>
-        {/* @ts-expect-error Table has not been typed */}
         <Table
           columns={columns}
           data={previousRuns}

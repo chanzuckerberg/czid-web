@@ -1,6 +1,5 @@
 import cx from "classnames";
 import { concat, difference, find, includes, map } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import Draggable from "react-draggable";
 import {
@@ -23,14 +22,91 @@ import SortIcon from "~ui/icons/SortIcon";
 
 import cs from "./base_table.scss";
 
-class BaseTable extends React.Component {
+export interface BaseTableProps {
+  className?: string;
+  cellClassName?: string;
+  columns?: Column[];
+  defaultCellRenderer?: $TSFixMeFunction;
+  defaultColumnWidth?: number;
+  defaultHeaderHeight?: number;
+  defaultRowHeight?: number | $TSFixMeFunction;
+  defaultSelectColumnWidth?: number;
+  draggableColumns?: boolean;
+  gridClassName?: string;
+  headerClassName?: string;
+  headerHeight?: number;
+  headerLabelClassName?: string;
+  headerRowClassName?: string;
+  // Set of dataKeys of columns to be shown by default
+  initialActiveColumns?: string[];
+  onActiveColumnsChange?: $TSFixMeFunction;
+  onRowClick?: $TSFixMeFunction;
+  onRowsRendered?: $TSFixMeFunction;
+  onSort?: $TSFixMeFunction;
+  protectedColumns?: string[];
+  forwardRef?: (
+    ...args: $TSFixMeUnknown[]
+  ) =>
+    | $TSFixMeUnknown
+    | {
+        current?: Element;
+      };
+  rowClassName?: string;
+  rowHeight?: $TSFixMeUnknown;
+  rowRenderer?: $TSFixMeFunction;
+  selectableCellClassName?: string;
+  selectableCellRenderer?: $TSFixMeFunction;
+  selectableColumnClassName?: string;
+  sortable?: boolean;
+  sortBy?: string;
+  sortDirection?: string;
+  // make the table selectable, by setting a selectable key
+  // the tables will check for the selectable key in the selected set/array
+  sortedHeaderClassName?: string;
+  selectableKey?: string;
+  selected?: Set<$TSFixMeUnknown>;
+  onSelectRow?: $TSFixMeFunction;
+  onSelectAllRows?: $TSFixMeFunction;
+  selectAllChecked?: boolean;
+  selectRowDataGetter?: $TSFixMeFunction;
+}
+
+interface BaseTableCalculatedProps extends BaseTableProps {
+  rowCount: number;
+  rowGetter: $TSFixMeFunction;
+}
+
+interface BaseTableState {
+  activeColumns: string[];
+  columns: BaseTableProps["columns"];
+  columnWidthPercentages: Record<string, number>;
+  columnCurrentlyDragged: $TSFixMeUnknown;
+  mouseOverDraggableAreaForColumn: $TSFixMeUnknown;
+}
+
+interface Column {
+  dataKey?: string;
+  width?: number;
+  label?: string;
+  cellRenderer?: $TSFixMeFunction;
+  className?: string;
+  headerClassName?: string;
+  disableDrag?: boolean;
+  disableSort?: boolean;
+  columnData?: $TSFixMeUnknown;
+}
+
+class BaseTable extends React.Component<
+  BaseTableCalculatedProps,
+  BaseTableState
+> {
   // This class is a wrapper class to React Virtualized Table.
   // Sets some default values and style to guarantee consistency of
   // tables accross the site.
   // TODO: - limitations -
   // - needs dynamic row height (dynamic required use of CellMeasurer)
 
-  constructor(props, context) {
+  constructor(props: BaseTableCalculatedProps, context) {
     super(props, context);
 
     this.state = {
@@ -47,7 +123,7 @@ class BaseTable extends React.Component {
 
   // Need to update the columns immediately, otherwise there will be a render
   // where the data has been updated but the columns haven't.
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(props: BaseTableCalculatedProps, state) {
     if (props.columns !== state.prevPropsColumns) {
       return {
         activeColumns: props.initialActiveColumns,
@@ -62,7 +138,7 @@ class BaseTable extends React.Component {
   }
 
   // Add defaults to the columns.
-  static setColumnDefaults(columns, defaultColumnWidth) {
+  static setColumnDefaults(columns: Column[], defaultColumnWidth: number) {
     return columns.map(column => {
       column.label =
         column.label !== undefined ? column.label : humanize(column.dataKey);
@@ -154,6 +230,7 @@ class BaseTable extends React.Component {
               totalTableWidth,
             })
           }
+          // @ts-expect-error ts-migrate(2769) FIXME: No overload matches this call.
           position={{ x: 0 }}
           onStart={() => this.setState({ columnCurrentlyDragged: dataKey })}
           onStop={() => this.setState({ columnCurrentlyDragged: null })}
@@ -193,7 +270,17 @@ class BaseTable extends React.Component {
     );
   };
 
-  resizeRow = ({ dataKey, deltaX, nextDataKey, totalTableWidth }) => {
+  resizeRow = ({
+    dataKey,
+    deltaX,
+    nextDataKey,
+    totalTableWidth,
+  }: {
+    dataKey: string;
+    deltaX: number;
+    nextDataKey: string;
+    totalTableWidth: number;
+  }) => {
     const { columns } = this.state;
 
     this.setState(prevState => {
@@ -205,8 +292,8 @@ class BaseTable extends React.Component {
         columnWidthPercentages: {
           ...prevColumnWidthPercentages,
           [dataKey]:
-            // If the previous column width percentage does not exist (happens when you haven't dragged a column yet)
-            // calculate the percentage based on the column width / totalTableWidth.
+          // If the previous column width percentage does not exist (happens when you haven't dragged a column yet)
+          // calculate the percentage based on the column width / totalTableWidth.
             (prevColumnWidthPercentages[dataKey]
               ? prevColumnWidthPercentages[dataKey]
               : find({ dataKey }, columns).width / totalTableWidth) +
@@ -292,6 +379,7 @@ class BaseTable extends React.Component {
       <BasicPopup
         trigger={
           <MultipleDropdown
+            // @ts-expect-error Property 'direction' does not exist on type
             direction="left"
             hideArrow
             hideCounter
@@ -343,7 +431,7 @@ class BaseTable extends React.Component {
     return (
       <Checkbox
         checked={selectAllChecked}
-        onChange={(_value, checked, _event) => onSelectAllRows(checked)}
+        onChange={(_value, checked) => onSelectAllRows(checked)}
         value={"all"}
       />
     );
@@ -516,6 +604,7 @@ class BaseTable extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 BaseTable.defaultProps = {
   defaultColumnWidth: 60,
   defaultHeaderHeight: 50,
@@ -523,54 +612,6 @@ BaseTable.defaultProps = {
   defaultSelectColumnWidth: 30,
   selected: new Set(),
   draggableColumns: false,
-};
-
-BaseTable.propTypes = {
-  cellClassName: PropTypes.string,
-  columns: PropTypes.arrayOf(
-    PropTypes.shape({
-      dataKey: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
-  defaultCellRenderer: PropTypes.func,
-  defaultColumnWidth: PropTypes.number,
-  defaultHeaderHeight: PropTypes.number,
-  defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
-  defaultSelectColumnWidth: PropTypes.number,
-  draggableColumns: PropTypes.bool,
-  gridClassName: PropTypes.string,
-  headerClassName: PropTypes.string,
-  headerLabelClassName: PropTypes.string,
-  // Set of dataKeys of columns to be shown by default
-  initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
-  onActiveColumnsChange: PropTypes.func,
-  onRowClick: PropTypes.func,
-  onRowsRendered: PropTypes.func,
-  onSort: PropTypes.func,
-  protectedColumns: PropTypes.arrayOf(PropTypes.string),
-  forwardRef: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
-  ]),
-  rowClassName: PropTypes.string,
-  rowGetter: PropTypes.func.isRequired,
-  rowCount: PropTypes.number.isRequired,
-  rowRenderer: PropTypes.func,
-  selectableCellClassName: PropTypes.string,
-  selectableCellRenderer: PropTypes.func,
-  selectableColumnClassName: PropTypes.string,
-  sortable: PropTypes.bool,
-  sortBy: PropTypes.string,
-  sortDirection: PropTypes.string,
-
-  // make the table selectable, by setting a selectable key
-  // the tables will check for the selectable key in the selected set/array
-  selectableKey: PropTypes.string,
-  selected: PropTypes.instanceOf(Set),
-  onSelectRow: PropTypes.func,
-  onSelectAllRows: PropTypes.func,
-  selectAllChecked: PropTypes.bool,
-  selectRowDataGetter: PropTypes.func,
 };
 
 BaseTable.contextType = UserContext;

@@ -1,15 +1,15 @@
 import cx from "classnames";
 import { isObject } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
 import { defaultTableRowRenderer, InfiniteLoader } from "react-virtualized";
-import BaseTable from "./BaseTable";
+import BaseTable, { BaseTableProps } from "./BaseTable";
 import cs from "./infinite_table.scss";
 
 const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
 
 class CanceledPromiseError extends Error {
+  promise: $TSFixMeUnknown;
   constructor(promise) {
     super("cancelled promise");
     this.promise = promise;
@@ -38,7 +38,43 @@ const makeCancelable = promise => {
   };
 };
 
-class InfiniteTable extends React.Component {
+interface InfiniteTableProps extends BaseTableProps {
+  draggableColumns?: boolean;
+  defaultCellRenderer?: $TSFixMeFunction;
+  loadingClassName?: string;
+  minimumBatchSize?: number;
+  // function that retrieves rows from startIndex to stopIndex (inclusive),
+  // if it returns less rows than requested, InfiniteTable interprets that
+  // as end of page
+  onLoadRows?: $TSFixMeFunction;
+  onSelectRow?: $TSFixMeFunction;
+  onSelectAllRows?: $TSFixMeFunction;
+  onSortColumn?: $TSFixMeFunction;
+  rowCount?: number;
+  rowRenderer?: $TSFixMeFunction;
+  sortable?: boolean;
+  sortBy?: string;
+  sortDirection?: string;
+  defaultRowHeight?: number | $TSFixMeFunction;
+  threshold?: number;
+}
+
+interface InfiniteTableState {
+  rowCount: number;
+}
+
+class InfiniteTable extends React.Component<
+  InfiniteTableProps,
+  InfiniteTableState
+> {
+  loadedRowsMap: $TSFixMeUnknown[];
+  rows: $TSFixMeUnknown[];
+  cancelableLoadRowsPromise: {
+    cancel: $TSFixMeFunction;
+    promise: Promise<$TSFixMeUnknown>;
+  };
+  infiniteLoader: { resetLoadMoreRowsCache: (arg: boolean) => $TSFixMeUnknown };
+
   // Encapsulates Table in an InfiniteLoader component.
   // Keeps track of rows for which a load request was made, to avoid requesting the same row twice.
   // ATTENTION: This class does not automatically reload rows if data changes.
@@ -46,7 +82,7 @@ class InfiniteTable extends React.Component {
   //            This happens also because react virtualized memoizes responses and
   //            may not ask for the rows again.
 
-  constructor(props) {
+  constructor(props: InfiniteTableProps) {
     super(props);
 
     this.rows = [];
@@ -79,7 +115,7 @@ class InfiniteTable extends React.Component {
       onLoadRows({ startIndex, stopIndex }),
     );
     this.cancelableLoadRowsPromise.promise
-      .then(newRows => {
+      .then((newRows: unknown[]) => {
         const requestedNumberOfRows = stopIndex - startIndex + 1;
         this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
 
@@ -92,7 +128,6 @@ class InfiniteTable extends React.Component {
         for (let i = startIndex; i <= stopIndex; i++) {
           this.loadedRowsMap[i] = STATUS_LOADED;
         }
-
         this.cancelableLoadRowsPromise = null;
         return true;
       })
@@ -109,7 +144,7 @@ class InfiniteTable extends React.Component {
     return this.rows[index] || {};
   };
 
-  rowRenderer = rowProps => {
+  rowRenderer = (rowProps: { index: number; className: string }) => {
     const { loadingClassName, rowRenderer } = this.props;
     if (!this.rows[rowProps.index]) {
       rowProps.className = cx(rowProps.className, cs.loading, loadingClassName);
@@ -122,7 +157,7 @@ class InfiniteTable extends React.Component {
     }
   };
 
-  defaultCellRenderer = ({ cellData }) => {
+  defaultCellRenderer = ({ cellData }: { cellData: { name: string } }) => {
     // Guarantees that we have at least one child div in the cell
     return (
       <div className={cs.cellContent}>
@@ -168,6 +203,8 @@ class InfiniteTable extends React.Component {
       sortable,
       sortBy,
       sortDirection,
+      // here we are removing `defaultRowHeight` from `extraProps`
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       defaultRowHeight,
       threshold,
       ...extraProps
@@ -211,32 +248,12 @@ class InfiniteTable extends React.Component {
   }
 }
 
+// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
 InfiniteTable.defaultProps = {
   minimumBatchSize: 50,
   // should be at least as high as the minimumBatchSize
   rowCount: 50,
   threshold: 50,
-};
-
-InfiniteTable.propTypes = {
-  draggableColumns: PropTypes.bool,
-  defaultCellRenderer: PropTypes.func,
-  loadingClassName: PropTypes.string,
-  minimumBatchSize: PropTypes.number,
-  // function that retrieves rows from startIndex to stopIndex (inclusive),
-  // if it returns less rows than requested, InfiniteTable interprets that
-  // as end of page
-  onLoadRows: PropTypes.func,
-  onSelectRow: PropTypes.func,
-  onSelectAllRows: PropTypes.func,
-  onSortColumn: PropTypes.func,
-  rowCount: PropTypes.number,
-  rowRenderer: PropTypes.func,
-  sortable: PropTypes.bool,
-  sortBy: PropTypes.string,
-  sortDirection: PropTypes.string,
-  defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
-  threshold: PropTypes.number,
 };
 
 export default InfiniteTable;

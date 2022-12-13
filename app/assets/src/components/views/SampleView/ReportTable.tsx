@@ -882,7 +882,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
 
   isLongReadMNGS = () => {
     const { currentTab } = this.props;
-    return (currentTab === TABS.LONG_READ_MNGS);
+    return currentTab === TABS.LONG_READ_MNGS;
   };
 
   handleCoverageVizClick = ({
@@ -896,7 +896,10 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     const { onCoverageVizClick, pipelineVersion, sampleId } = this.props;
     const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
-    if (isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) || this.isLongReadMNGS() ) {
+    if (
+      isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) ||
+      this.isLongReadMNGS()
+    ) {
       onCoverageVizClick({
         taxId,
         taxName,
@@ -958,7 +961,8 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       get("nt.contigs", rowData) || get("nr.contigs", rowData)
     );
     const coverageVizEnabled =
-      this.isLongReadMNGS() || (alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0);
+      this.isLongReadMNGS() ||
+      (alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0);
     const phyloTreeEnabled =
       phyloTreeAllowed &&
       rowData.taxId > 0 &&
@@ -1215,7 +1219,6 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       currentTab === TABS.SHORT_READ_MNGS ? "rpm" : "bpm";
     return (
       <>
-        {/* @ts-expect-error Table has not been typed yet */}
         <Table
           cellClassName={cs.cell}
           columns={this.columns}

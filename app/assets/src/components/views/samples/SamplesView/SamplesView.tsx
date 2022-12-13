@@ -82,7 +82,9 @@ interface SamplesViewProps {
   currentDisplay: string;
   currentTab: string;
   domain?: string;
-  filters?: object;
+  filters?: {
+    host: $TSFixMeUnknown;
+  };
   filtersSidebarOpen?: boolean;
   hasAtLeastOneFilterApplied?: boolean;
   handleNewAmrCreationsFromMngs?: $TSFixMeFunction;
@@ -106,7 +108,7 @@ interface SamplesViewProps {
   onUpdateSelectedIds?: $TSFixMeFunction;
   onSortColumn?: $TSFixMeFunction;
   projectId?: number;
-  protectedColumns?: unknown[];
+  protectedColumns?: string[];
   sampleStatsSidebarOpen?: boolean;
   selectableIds?: unknown[];
   selectedIds?: Set<number>;
@@ -229,11 +231,11 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
         id2: value,
       });
       if (checked) {
-        forEach(v => {
+        forEach((v: number) => {
           newSelected.add(v);
         }, ids);
       } else {
-        forEach(v => {
+        forEach((v: number) => {
           newSelected.delete(v);
         }, ids);
       }

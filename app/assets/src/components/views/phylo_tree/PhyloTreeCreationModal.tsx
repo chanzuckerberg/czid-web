@@ -1004,7 +1004,6 @@ class PhyloTreeCreationModal extends React.Component<
                 }
                 placeholder="Tree Name"
                 onChange={this.handleNameChange}
-                // @ts-expect-error ts-migrate(2769) FIXME: No overload matches this call.
                 defaultValue={this.state.treeName}
               />
             </div>

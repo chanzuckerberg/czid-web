@@ -11,7 +11,7 @@ interface ProjectSelectProps {
   disabled?: boolean;
   erred?: boolean;
   showSelectedItemSubtext: boolean; // Subtext in selected state
-  "data-testid": string;
+  "data-testid"?: string;
 }
 
 const ProjectSelect = ({
