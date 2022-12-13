@@ -188,6 +188,7 @@ export const computeReportTableValuesForCSV = (
   filteredReportData,
   selectedOptions,
   backgrounds,
+  currentTab,
 ) => {
   const csvRows = [];
   const csvHeaders = [
@@ -225,7 +226,7 @@ export const computeReportTableValuesForCSV = (
   if (hasAppliedFilters(selectedOptions)) {
     csvRows.push(
       createCSVRowForAppliedFilters(
-        getAppliedFilters(selectedOptions),
+        getAppliedFilters(selectedOptions, currentTab),
         backgrounds,
         selectedOptions,
       ),

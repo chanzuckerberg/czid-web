@@ -43,7 +43,9 @@ export const getDefaultSelectedOptions = () => {
     background: null,
     categories: { categories: [], subcategories: { Viruses: [] } },
     // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.
-    metric: find({ value: "nt_r" }, TREE_METRICS).value,
+    metric: find({ value: "nt_r" }, TREE_METRICS[TABS.SHORT_READ_MNGS]).value,
+    metricBases: find({ value: "nt_b" }, TREE_METRICS[TABS.LONG_READ_MNGS])
+      .value,
     nameType: "Scientific name",
     readSpecificity: 0,
     taxa: [],
@@ -77,12 +79,18 @@ export const determineInitialTab = ({
 
 export const getAppliedFilters = (
   selectedOptions,
-): Omit<FilterSelections, "nameType" | "metric" | "background"> => {
+): Omit<
+  FilterSelections,
+  "nameType" | "metric" | "metricBases" | "background"
+> => {
   // Only Taxon, Category, Subcategories, Read Specifity, and Threshold Filters are considered "Applied Filters"
   return omit(
-    ["nameType", "metric", "background"],
+    ["nameType", "metric", "metricBases", "background"],
     diff(selectedOptions, getDefaultSelectedOptions()),
-  ) as Omit<FilterSelections, "nameType" | "metric" | "background">;
+  ) as Omit<
+    FilterSelections,
+    "nameType" | "metric" | "metricBases" | "background"
+  >;
 };
 
 export const hasAppliedFilters = selectedOptions => {

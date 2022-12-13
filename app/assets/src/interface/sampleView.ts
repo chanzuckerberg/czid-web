@@ -129,6 +129,7 @@ export interface FilterSelections {
   thresholds: ThresholdConditions[];
   taxa: { id: number; name: string; level: "genus" | "species" }[];
   metric: string;
+  metricBases: string;
   readSpecificity: number;
   background: number;
   nameType: string;

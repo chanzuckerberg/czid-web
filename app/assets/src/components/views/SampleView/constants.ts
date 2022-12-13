@@ -141,13 +141,64 @@ export const BACKGROUND_DEPENDENT_READS_THRESHOLDS = READS_THRESHOLDS.filter(
     ),
 );
 
-export const TREE_METRICS = [
-  { text: "Aggregate Score", value: "aggregatescore" },
-  { text: "NT r (total reads)", value: "nt_r" },
-  { text: "NT rPM", value: "nt_rpm" },
-  { text: "NR r (total reads)", value: "nr_r" },
-  { text: "NR rPM", value: "nr_rpm" },
-];
+export const TREE_METRICS = {
+  [TABS.SHORT_READ_MNGS]: [
+    { text: "Aggregate Score", value: "aggregatescore" },
+    { text: "NT r (total reads)", value: "nt_r" },
+    { text: "NT rPM", value: "nt_rpm" },
+    { text: "NR r (total reads)", value: "nr_r" },
+    { text: "NR rPM", value: "nr_rpm" },
+  ],
+  [TABS.LONG_READ_MNGS]: [
+    { text: "NT b (total bases)", value: "nt_b" },
+    { text: "NT bPM", value: "nt_bpm" },
+    { text: "NR b (total bases)", value: "nr_b" },
+    { text: "NR bPM", value: "nr_bpm" },
+  ],
+};
+
+export const TREE_VIZ_TOOLTIP_METRICS = {
+  [TABS.SHORT_READ_MNGS]: {
+    aggregatescore: {
+      label: "Aggregate Score",
+      agg: (arr: number[]) => Math.max(...arr),
+    },
+    nt_r: {
+      label: "NT r",
+      agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+    },
+    nt_rpm: {
+      label: "NT rpm",
+      agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+    },
+    nr_r: {
+      label: "NR r",
+      agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+    },
+    nr_rpm: {
+      label: "NR rpm",
+      agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+    },
+  },
+  [TABS.LONG_READ_MNGS]: {
+    nt_b: {
+      label: "NT b",
+      agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+    },
+    nt_bpm: {
+      label: "NT bpm",
+      agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+    },
+    nr_b: {
+      label: "NR b",
+      agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+    },
+    nr_bpm: {
+      label: "NR bpm",
+      agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
+    },
+  },
+};
 
 export const CATEGORIES = [
   { name: "Archaea" },

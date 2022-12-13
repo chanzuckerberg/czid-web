@@ -192,7 +192,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       // is computed once the user selects a background.
       selectedOptionsFromLocal["metric"] = find(
         { value: "nt_r" },
-        TREE_METRICS,
+        TREE_METRICS[TABS.SHORT_READ_MNGS],
       ).value;
     }
 
@@ -363,23 +363,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     // If the currently selected background is mass normalized and the sample is incompatible,
     // then load the report with the default background instead.
     const newSelectedOptions = { ...selectedOptions };
-    const selectedBackground = backgrounds.find(
-      (background: $TSFixMe) => selectedOptions.background === background.id,
-    );
-
-    if (
-      (!sharedWithNoBackground && isEmpty(selectedBackground)) ||
-      (!enableMassNormalizedBackgrounds &&
-        get("mass_normalized", selectedBackground))
-    ) {
-      // When the selectedBackground is incompatible with the sample, set it to "None"
-      // and show a popup about why it is not compatible.
-      newSelectedOptions.background = null;
-      selectedBackground &&
-        showNotification(NOTIFICATION_TYPES.invalidBackground, {
-          backgroundName: selectedBackground.name,
-        });
-    }
 
     const workflowCount = getWorkflowCount(sample);
     const newCurrentTab =
@@ -388,6 +371,26 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         initialWorkflow: sample.initial_workflow,
         workflowCount,
       });
+
+    if (newCurrentTab === TABS.SHORT_READ_MNGS) {
+      const selectedBackground = backgrounds.find(
+        (background: $TSFixMe) => selectedOptions.background === background.id,
+      );
+
+      if (
+        (!sharedWithNoBackground && isEmpty(selectedBackground)) ||
+        (!enableMassNormalizedBackgrounds &&
+          get("mass_normalized", selectedBackground))
+      ) {
+        // When the selectedBackground is incompatible with the sample, set it to "None"
+        // and show a popup about why it is not compatible.
+        newSelectedOptions.background = null;
+        selectedBackground &&
+          showNotification(NOTIFICATION_TYPES.invalidBackground, {
+            backgroundName: selectedBackground.name,
+          });
+      }
+    }
 
     this.setState(
       {
@@ -659,7 +662,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       isPipelineFeatureAvailable(
         COVERAGE_VIZ_FEATURE,
         get("pipeline_version", pipelineRun),
-      ) || currentTab === TABS.LONG_READ_MNGS
+      ) ||
+      currentTab === TABS.LONG_READ_MNGS
     ) {
       const coverageVizSummary = await getCoverageVizSummary({
         sampleId: sample.id,
@@ -679,7 +683,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       return;
     }
 
-    if (currentTab === TABS.SHORT_READ_MNGS || currentTab === TABS.LONG_READ_MNGS) {
+    if (
+      currentTab === TABS.SHORT_READ_MNGS ||
+      currentTab === TABS.LONG_READ_MNGS
+    ) {
       const newRun = find(
         { pipeline_version: newPipelineVersion },
         sample.pipeline_runs,
@@ -952,6 +959,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         break;
       // - metric: no need to update anything except for the option below
       case "metric":
+      case "metricBases":
         break;
       default:
         return;
@@ -1566,6 +1574,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       this.state.filteredReportData,
       this.state.selectedOptions,
       this.state.backgrounds,
+      this.state.currentTab,
     );
 
     return createCSVObjectURL(csvHeaders, csvRows);
@@ -1702,10 +1711,15 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             <div>
               <TaxonTreeVis
                 lineage={lineageData}
-                metric={selectedOptions.metric}
+                metric={
+                  currentTab === TABS.SHORT_READ_MNGS
+                    ? selectedOptions.metric
+                    : selectedOptions.metricBases
+                }
                 nameType={selectedOptions.nameType}
                 onTaxonClick={this.handleTaxonClick}
                 taxa={filteredReportData}
+                currentTab={currentTab}
               />
             </div>
           )}

@@ -201,8 +201,15 @@ const ReportFilters = ({
   // Only show aggregate score metric as a selectable option if the user has a background selected.
   // The aggregate score is computed by having background model applied.
   const treeMetrics = !selected.background
-    ? filter(metric => metric.value !== "aggregatescore", TREE_METRICS)
-    : TREE_METRICS;
+    ? filter(
+        metric => metric.value !== "aggregatescore",
+        TREE_METRICS[currentTab],
+      )
+    : TREE_METRICS[currentTab];
+  const selectedTreeMetric =
+    currentTab === TABS.SHORT_READ_MNGS
+      ? selected.metric
+      : selected.metricBases;
 
   return (
     <>
@@ -368,7 +375,7 @@ const ReportFilters = ({
           <div className={cs.filterListElement}>
             <MetricPicker
               options={treeMetrics}
-              value={selected.metric || treeMetrics[0].value}
+              value={selectedTreeMetric || treeMetrics[0].value}
               onChange={(value: string) =>
                 handleFilterChange({
                   key: "metric",

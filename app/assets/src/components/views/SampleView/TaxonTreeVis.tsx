@@ -7,6 +7,7 @@ import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import TidyTree from "~/components/visualizations/TidyTree";
 import { Taxon } from "~/interface/shared";
+import { TABS, TREE_VIZ_TOOLTIP_METRICS } from "./constants";
 
 // @ts-expect-error working with Lodash Types
 const mapWithKeys = map.convert({ cap: false });
@@ -17,6 +18,7 @@ interface TaxonTreeVisProps {
   metric?: string;
   nameType?: string;
   taxa?: Taxon[];
+  currentTab: string;
   onTaxonClick: $TSFixMeFunction;
 }
 
@@ -56,28 +58,7 @@ class TaxonTreeVis extends React.Component<
     this.tree = null;
     this.treeVis = null;
 
-    this.metrics = {
-      aggregatescore: {
-        label: "Aggregate Score",
-        agg: (arr: number[]) => Math.max(...arr),
-      },
-      nt_r: {
-        label: "NT r",
-        agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
-      },
-      nt_rpm: {
-        label: "NT rpm",
-        agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
-      },
-      nr_r: {
-        label: "NR r",
-        agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
-      },
-      nr_rpm: {
-        label: "NR rpm",
-        agg: (arr: number[]) => arr.reduce((a: number, b: number) => a + b, 0),
-      },
-    };
+    this.metrics = TREE_VIZ_TOOLTIP_METRICS[this.props.currentTab];
   }
 
   componentDidMount() {
@@ -243,15 +224,7 @@ class TaxonTreeVis extends React.Component<
         lineageRank: nodeData.taxLevel,
         commonName: nodeData.common_name,
         highlight: nodeData.highlighted,
-        values: {
-          aggregatescore: nodeData.agg_score,
-          nt_r: get("nt.count", nodeData) || 0,
-          nt_rpm: get("nt.rpm", nodeData) || 0,
-          nt_zscore: get("nt.z_score", nodeData) || 0,
-          nr_r: get("nr.count", nodeData) || 0,
-          nr_rpm: get("nr.rpm", nodeData) || 0,
-          nr_zscore: get("nr.z_score", nodeData) || 0,
-        },
+        values: this.getNodeValues(nodeData),
       };
       addedNodesIds.add(formattedNode.id);
       nodes.push(formattedNode);
@@ -315,6 +288,29 @@ class TaxonTreeVis extends React.Component<
       }
     }, lineage);
     return nodes;
+  };
+
+  getNodeValues = nodeData => {
+    const { currentTab } = this.props;
+
+    if (currentTab === TABS.SHORT_READ_MNGS) {
+      return {
+        aggregatescore: nodeData.agg_score,
+        nt_r: get("nt.count", nodeData) || 0,
+        nt_rpm: get("nt.rpm", nodeData) || 0,
+        nt_zscore: get("nt.z_score", nodeData) || 0,
+        nr_r: get("nr.count", nodeData) || 0,
+        nr_rpm: get("nr.rpm", nodeData) || 0,
+        nr_zscore: get("nr.z_score", nodeData) || 0,
+      };
+    } else if (currentTab === TABS.LONG_READ_MNGS) {
+      return {
+        nt_b: get("nt.base_count", nodeData) || 0,
+        nt_bpm: get("nt.bpm", nodeData) || 0,
+        nr_b: get("nr.base_count", nodeData) || 0,
+        nr_bpm: get("nr.bpm", nodeData) || 0,
+      };
+    }
   };
 
   renderTooltip = () => {
