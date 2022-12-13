@@ -5,7 +5,13 @@ import numberAbbreviate from "number-abbreviate";
 import textWidth from "text-width";
 
 export default class HeatmapLegend {
-  constructor(container, options) {
+  container: $TSFixMe;
+  g: $TSFixMe;
+  gCells: $TSFixMe;
+  gLabels: $TSFixMe;
+  options: $TSFixMe;
+  svg: $TSFixMe;
+  constructor(container: $TSFixMe, options: $TSFixMe) {
     this.svg = null;
     this.g = null;
     this.container = select(container);
@@ -27,7 +33,7 @@ export default class HeatmapLegend {
     );
 
     if (!this.options.colors) {
-      let defaultColorScale = scaleSequential(interpolateYlOrRd);
+      const defaultColorScale = scaleSequential(interpolateYlOrRd);
       this.options.colors = this.range(this.options.numberOfLevels).map(i =>
         defaultColorScale(i / (this.options.numberOfLevels - 1)),
       );
@@ -36,7 +42,8 @@ export default class HeatmapLegend {
     this.setup();
   }
 
-  range(n) {
+  range(n: $TSFixMe) {
+    // eslint-disable-next-line prefer-spread
     return Array.apply(null, { length: n }).map(Number.call, Number);
   }
 
@@ -52,17 +59,17 @@ export default class HeatmapLegend {
     this.gLabels = this.g.append("g");
   }
 
-  updateOptions(newOptions) {
+  updateOptions(newOptions: $TSFixMe) {
     this.options = Object.assign(this.options, newOptions);
   }
 
   update() {
-    let minLabel = numberAbbreviate(Math.round(this.options.min));
-    let maxLabel = numberAbbreviate(Math.round(this.options.max));
-    let minLabelSize = textWidth(minLabel, this.options.fontSize);
-    let maxLabelSize = textWidth(maxLabel, this.options.fontSize);
-    let cellsWidth = this.options.width - minLabelSize / 2 - maxLabelSize / 2;
-    let cellWidth = cellsWidth / this.options.colors.length;
+    const minLabel = numberAbbreviate(Math.round(this.options.min));
+    const maxLabel = numberAbbreviate(Math.round(this.options.max));
+    const minLabelSize = textWidth(minLabel, this.options.fontSize);
+    const maxLabelSize = textWidth(maxLabel, this.options.fontSize);
+    const cellsWidth = this.options.width - minLabelSize / 2 - maxLabelSize / 2;
+    const cellWidth = cellsWidth / this.options.colors.length;
 
     // remove svg elements leftover from old data
     this.gLabels.selectAll("text").remove();
@@ -97,10 +104,14 @@ export default class HeatmapLegend {
       .data(this.options.colors)
       .enter()
       .append("rect")
-      .attr("x", (_, i) => minLabelSize / 2 + Math.floor(cellWidth * i))
+      .attr(
+        "x",
+        (_: $TSFixMe, i: $TSFixMe) =>
+          minLabelSize / 2 + Math.floor(cellWidth * i),
+      )
       .attr("y", 0)
       .attr("width", Math.ceil(cellWidth))
       .attr("height", this.options.cellHeight)
-      .style("fill", d => d);
+      .style("fill", (d: $TSFixMe) => d);
   }
 }

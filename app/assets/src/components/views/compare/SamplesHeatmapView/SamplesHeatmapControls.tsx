@@ -17,7 +17,7 @@ import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import List from "~/components/ui/List";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
-import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
+import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import FilterTag from "~ui/controls/FilterTag";

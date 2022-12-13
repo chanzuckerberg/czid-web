@@ -1,19 +1,20 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import React from "react";
 
 import cs from "./categorical_legend.scss";
+
+interface CategoricalLegendProps {
+  className?: string;
+  data?: { label: string; color: string }[];
+}
 
 // This component takes in an array of objects, each having a color
 // and label key, and renders a colored circle and the label text just
 // to the right of it.
 // Schema:
 // this.props.data = [ { color: "#aeaeae", label: "Sample Label" } ]
-
-export default class CategoricalLegend extends React.Component {
-  renderCategories() {
-    const { data } = this.props;
-
+const CategoricalLegend = ({ data, className }: CategoricalLegendProps) => {
+  const renderCategories = () => {
     const categories = data.map(item => {
       return (
         <div className={cs.category} key={`${item.color}+${item.label}`}>
@@ -31,19 +32,13 @@ export default class CategoricalLegend extends React.Component {
     });
 
     return categories;
-  }
+  };
 
-  render() {
-    const { className } = this.props;
-    return (
-      <div className={cx(cs.legendContainer, className)}>
-        {this.renderCategories()}
-      </div>
-    );
-  }
-}
-
-CategoricalLegend.propTypes = {
-  className: PropTypes.string,
-  data: PropTypes.array,
+  return (
+    <div className={cx(cs.legendContainer, className)}>
+      {renderCategories()}
+    </div>
+  );
 };
+
+export default CategoricalLegend;

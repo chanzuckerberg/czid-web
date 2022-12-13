@@ -1,9 +1,16 @@
-import PropTypes from "prop-types";
 import React from "react";
 import SequentialLegend from "./SequentialLegend";
 
-class SequentialLegendVis extends React.Component {
-  constructor(props) {
+interface SequentialLegendVisProps {
+  max?: number;
+  min?: number;
+  scale?: string;
+}
+
+class SequentialLegendVis extends React.Component<SequentialLegendVisProps> {
+  legend: $TSFixMe;
+  legendContainer: $TSFixMe;
+  constructor(props: $TSFixMe) {
     super(props);
     this.legend = null;
   }
@@ -38,11 +45,5 @@ class SequentialLegendVis extends React.Component {
     );
   }
 }
-
-SequentialLegendVis.propTypes = {
-  max: PropTypes.number,
-  min: PropTypes.number,
-  scale: PropTypes.string,
-};
 
 export default SequentialLegendVis;
