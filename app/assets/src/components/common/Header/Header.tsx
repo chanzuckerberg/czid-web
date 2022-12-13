@@ -55,7 +55,7 @@ const Header = ({
         message={
           <>
             {
-              "Effective today, samples will not automatically go public after 1 year. Our policies will update to reflect this and other changes on 1/1/23. Here is a "
+              "Effective 12/1/2022, samples will not automatically go public after 1 year. Our policies will update to reflect this and other changes on 1/1/23. Here is a "
             }
             <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/11278218026900">
               <span
