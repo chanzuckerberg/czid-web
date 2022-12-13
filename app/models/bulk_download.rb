@@ -55,7 +55,7 @@ class BulkDownload < ApplicationRecord
       projects = Project.joins(:samples).where(samples: { id: sample_ids })
       projects.each do |project|
         if project.nil? then errors.add(:params, "project_id #{project_id} does not exist")
-        elsif !project.users.include?(user) then errors.add(:params, "User must be a collaborator in the project #{project.name} to download host gene counts.")
+        elsif !user.admin? && !project.users.include?(user) then errors.add(:params, "User must be a collaborator in the project #{project.name} to download host gene counts.")
         end
       end
     end
