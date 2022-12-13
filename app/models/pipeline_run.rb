@@ -723,7 +723,7 @@ class PipelineRun < ApplicationRecord
       while line
         if line[0] == '>'
           contig_hash = get_contig_hash.call(header, sequence)
-          if contig_hash[:read_count] >= MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]] && header != ''
+          if contig_hash[:read_count] >= MIN_CONTIG_READS[technology] && header != ''
             contig_array << contig_hash
           end
           header = line[1..line.size].rstrip
@@ -734,7 +734,7 @@ class PipelineRun < ApplicationRecord
         line = cf.gets
       end
       contig_hash = get_contig_hash.call(header, sequence)
-      if contig_hash[:read_count] >= MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]]
+      if contig_hash[:read_count] >= MIN_CONTIG_READS[technology]
         contig_array << contig_hash
       end
     end
@@ -1694,13 +1694,13 @@ class PipelineRun < ApplicationRecord
     # Once we decide to deploy the assembly pipeline, change "1000.1000" to the relevant version number of idseq-pipeline.
   end
 
-  def contig_lineages(min_contig_reads = MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]])
+  def contig_lineages(min_contig_reads = MIN_CONTIG_READS[technology])
     contigs.select("id, read_count, lineage_json")
            .where("read_count >= ?", min_contig_reads)
            .where("lineage_json IS NOT NULL")
   end
 
-  def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]], db = "nt_and_nr")
+  def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS[technology], db = "nt_and_nr")
     contig_ids = []
     contig_lineages(min_contig_reads).each do |c|
       lineage = JSON.parse(c.lineage_json)
@@ -1774,7 +1774,7 @@ class PipelineRun < ApplicationRecord
     return summary_dict
   end
 
-  def get_taxid_list_with_contigs(min_contig_reads = MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]])
+  def get_taxid_list_with_contigs(min_contig_reads = MIN_CONTIG_READS[technology])
     taxid_list = []
     contig_lineages(min_contig_reads).each do |c|
       lineage = JSON.parse(c.lineage_json)

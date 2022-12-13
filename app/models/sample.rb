@@ -1194,7 +1194,8 @@ class Sample < ApplicationRecord
     contig_arel_table = Contig.arel_table
     lowercase_count_type = count_type.downcase
 
-    filter_statement = contig_arel_table.where(contig_arel_table[:read_count].gteq(PipelineRun::MIN_CONTIG_READS))
+    # Contig filtering via DiscoveryView taxon filters is not available for ont_v1
+    filter_statement = contig_arel_table.where(contig_arel_table[:read_count].gteq(PipelineRun::MIN_CONTIG_READS[TECHNOLOGY_INPUT[:illumina]]))
     filter_statement = filter_statement.where(contig_arel_table["#{tax_level}_taxid_#{lowercase_count_type}"].eq(tax_id))
     filter_statement = filter_statement.where(PipelineRun.arel_table[:id].eq(contig_arel_table[:pipeline_run_id]))
     filter_statement = add_aggregate_arel_node_for_contig_metric(filter_statement, metric, operator, value)
