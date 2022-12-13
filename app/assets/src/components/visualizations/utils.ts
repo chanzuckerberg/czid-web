@@ -5,10 +5,10 @@
 //  { dataKey1: value2, dataKey2: value3, total: value3 + value4 },
 //  ...
 // ]
-export const normalizeData = (data, keys) => {
-  return data.map(d => {
-    var normD = Object.assign({}, d);
-    keys.forEach(key => {
+export const normalizeData = (data: $TSFixMe, keys: $TSFixMe) => {
+  return data.map((d: $TSFixMe) => {
+    const normD = Object.assign({}, d);
+    keys.forEach((key: $TSFixMe) => {
       normD[key] = (d[key] / d["total"]) * 100;
     });
     normD["total"] = 100;

@@ -22,7 +22,19 @@ const HISTOGRAM_SCALE_FUNCTIONS = {
 };
 
 export default class Histogram {
-  constructor(container, data, options) {
+  barCentersToIndices: $TSFixMe;
+  barWidth: $TSFixMe;
+  bins: $TSFixMe;
+  container: $TSFixMe;
+  data: $TSFixMe;
+  g: $TSFixMe;
+  lastHoveredBarX: $TSFixMe;
+  margins: $TSFixMe;
+  options: $TSFixMe;
+  size: $TSFixMe;
+  sortedBarCenters: $TSFixMe;
+  svg: $TSFixMe;
+  constructor(container: $TSFixMe, data: $TSFixMe, options: $TSFixMe) {
     this.g = null;
     this.container = select(container);
     this.data = this.parseData(data);
@@ -84,7 +96,7 @@ export default class Histogram {
       .attr("height", this.size.height);
   }
 
-  parseData(data) {
+  parseData(data: $TSFixMe) {
     // basic parsing to support multiple series
     // does not support all bad inputs
     if (!Array.isArray(data)) return null;
@@ -94,9 +106,9 @@ export default class Histogram {
     return data;
   }
 
-  xAxis(g, x) {
+  xAxis(g: $TSFixMe, x: $TSFixMe) {
     const axis = this.options.xTickFormat
-      ? axisBottom(x).tickFormat(d => this.options.xTickFormat(d))
+      ? axisBottom(x).tickFormat((d: $TSFixMe) => this.options.xTickFormat(d))
       : axisBottom(x);
 
     g.attr(
@@ -110,7 +122,7 @@ export default class Histogram {
       this.options.xScaleType === HISTOGRAM_SCALE.LOG ||
       this.options.xScaleType === HISTOGRAM_SCALE.SYM_LOG
     ) {
-      let nTicks = Math.log10(x.domain()[1]) + 1;
+      const nTicks = Math.log10(x.domain()[1]) + 1;
       g.call(axis.ticks(nTicks));
     }
 
@@ -150,7 +162,7 @@ export default class Histogram {
     g.selectAll(".tick text").attr("class", cs.xAxisTickText);
   }
 
-  yAxis(g, y) {
+  yAxis(g: $TSFixMe, y: $TSFixMe) {
     const axis = this.options.numTicksY
       ? axisLeft(y).ticks(this.options.numTicksY)
       : axisLeft(y);
@@ -201,17 +213,19 @@ export default class Histogram {
       return this.options.domain;
     }
 
-    let mins = [];
-    let maxs = [];
+    const mins = [];
+    const maxs = [];
     for (let i = 0; i < this.data.length; i++) {
-      let series = this.data[i];
-      let minMax = extent(series);
+      const series = this.data[i];
+      const minMax = extent(series);
       mins.push(minMax[0]);
       maxs.push(minMax[1]);
 
       // make the chart is large enough to hold reference lines
       if (this.options.refValues && this.options.refValues.length) {
-        let values = this.options.refValues.map(v => parseFloat(v.values[i]));
+        const values = this.options.refValues.map((v: $TSFixMe) =>
+          parseFloat(v.values[i]),
+        );
         mins.push(min(values));
         maxs.push(max(values));
       }
@@ -228,12 +242,12 @@ export default class Histogram {
     }
   };
 
-  getBins = x => {
+  getBins = (x: $TSFixMe) => {
     if (this.options.skipBins) {
       return this.data;
     }
 
-    let bins = [];
+    const bins = [];
     for (let i = 0; i < this.data.length; i++) {
       bins[i] = bin()
         .domain(x.domain())
@@ -242,7 +256,7 @@ export default class Histogram {
     return bins;
   };
 
-  getBarWidth = (x, bin) => {
+  getBarWidth = (x: $TSFixMe, bin: $TSFixMe) => {
     if (this.options.xScaleType === HISTOGRAM_SCALE.LOG) {
       // TO INVESTIGATE: why not do this in linear scale?
       return (x(bin.x1) - x(bin.x0)) / 2;
@@ -282,7 +296,11 @@ export default class Histogram {
     );
   };
 
-  onBarMouseOver = (bin, seriesIndex, barIndex) => {
+  onBarMouseOver = (
+    bin: $TSFixMe,
+    seriesIndex: $TSFixMe,
+    barIndex: $TSFixMe,
+  ) => {
     if (this.options.onHistogramBarEnter) {
       this.options.onHistogramBarEnter(bin, this.data[seriesIndex]);
     }
@@ -293,13 +311,13 @@ export default class Histogram {
     }
   };
 
-  onBarMouseOut = (seriesIndex, barIndex) => {
+  onBarMouseOut = (seriesIndex: $TSFixMe, barIndex: $TSFixMe) => {
     const colors = this.getColors();
     this.svg.select(`.rect-${barIndex}`).attr("fill", colors[seriesIndex]);
     this.options.onHistogramBarHover();
   };
 
-  onBarMouseDown = (seriesIndex, barIndex) => {
+  onBarMouseDown = (seriesIndex: $TSFixMe, barIndex: $TSFixMe) => {
     if (this.options.clickColors) {
       this.svg
         .select(`.rect-${barIndex}`)
@@ -307,7 +325,7 @@ export default class Histogram {
     }
   };
 
-  onBarMouseUp = (seriesIndex, barIndex) => {
+  onBarMouseUp = (seriesIndex: $TSFixMe, barIndex: $TSFixMe) => {
     if (this.options.hoverColors) {
       this.svg
         .select(`.rect-${barIndex}`)
@@ -315,7 +333,7 @@ export default class Histogram {
     }
   };
 
-  onBarClick = (seriesIndex, barIndex) => {
+  onBarClick = (seriesIndex: $TSFixMe, barIndex: $TSFixMe) => {
     if (this.options.onHistogramBarClick) {
       this.options.onHistogramBarClick(this.data[seriesIndex], barIndex);
     }
@@ -401,7 +419,7 @@ export default class Histogram {
     this.lastHoveredBarX = null;
   };
 
-  highlightBar = (dataIndices, shouldHighlight) => {
+  highlightBar = (dataIndices: $TSFixMe, shouldHighlight: $TSFixMe) => {
     if (!dataIndices || !this.options.hoverColors) {
       return;
     }
@@ -417,7 +435,7 @@ export default class Histogram {
       .attr("fill", highlightColor);
   };
 
-  fixSymLogScaleTicks = scale => {
+  fixSymLogScaleTicks = (scale: $TSFixMe) => {
     // Hack to use a log scale plus an initial 0 for SymLog scales
     // Context:
     // At the time of this code, d3 symlog scales uses a linear selection of ticks positions.
@@ -429,7 +447,7 @@ export default class Histogram {
       .domain([1, scale.domain()[1]])
       .nice();
 
-    scale.ticks = function(count) {
+    scale.ticks = function(count: $TSFixMe) {
       const logTicks = logScale.ticks(count);
       // The log scale ticks function also does not seem to respect the count variable for lower scales.
       // For instance, with count = 2 and for a domain 0-4, it returns ticks [1, 2, 3, ... , 10]
@@ -441,7 +459,7 @@ export default class Histogram {
       // * ticks all shorter than domain (returns -1), in which case we want to use all ticks
       // * more ticks than necessary (for domains <= 10), in which case we want to remove unnecessary ticks
       const firstIndexHigherThanMax = logTicks.findIndex(
-        v => v >= this.domain()[1],
+        (v: $TSFixMe) => v >= this.domain()[1],
       );
       const trimmedLogTicks = logTicks.slice(
         0,
@@ -465,10 +483,10 @@ export default class Histogram {
   update() {
     if (!this.data) return;
 
-    let colors = this.getColors();
+    const colors = this.getColors();
     const xDomain = this.getXDomain();
 
-    let x = HISTOGRAM_SCALE_FUNCTIONS[this.options.xScaleType]();
+    const x = HISTOGRAM_SCALE_FUNCTIONS[this.options.xScaleType]();
 
     // If there are explicit tick values, don't call .nice() since it may modify the domain
     // to differ from the given ticks.
@@ -485,11 +503,15 @@ export default class Histogram {
     const bins = this.getBins(x);
     this.bins = bins;
 
-    let y = HISTOGRAM_SCALE_FUNCTIONS[this.options.yScaleType]();
+    const y = HISTOGRAM_SCALE_FUNCTIONS[this.options.yScaleType]();
     const yScaleMin = this.options.yScaleType === HISTOGRAM_SCALE.LOG ? 1 : 0;
     y.domain([
       yScaleMin,
-      max(bins.map(seriesBins => max(seriesBins, d => d.length))),
+      max(
+        bins.map((seriesBins: $TSFixMe) =>
+          max(seriesBins, (d: $TSFixMe) => d.length),
+        ),
+      ),
     ])
       .nice()
       .range([this.size.height - this.margins.bottom, this.margins.top]);
@@ -510,7 +532,7 @@ export default class Histogram {
     // Maps from x-coordinate to the data plotted at that x-coordinate.
     // Used for hovering.
     const barCentersToIndices = {};
-    const barCenters = [];
+    const barCenters: $TSFixMe = [];
 
     // If there should be gaps between the bars, offset the bar positions by 1px.
     const barInsideTicks = this.options.spacedBars ? 1 : 0;
@@ -524,26 +546,36 @@ export default class Histogram {
         .data(bins[i])
         .enter()
         .append("rect")
-        .attr("class", (_, index) => `rect-${index}`)
-        .attr("x", d => barInsideTicks + x(d.x0) + i * this.getBarWidth(x, d))
-        .attr("width", d => this.getBarWidth(x, d))
-        .attr("y", d => y(d.length))
-        .attr("height", d => y(yScaleMin) - y(d.length))
+        .attr("class", (_: $TSFixMe, index: $TSFixMe) => `rect-${index}`)
+        .attr(
+          "x",
+          (d: $TSFixMe) =>
+            barInsideTicks + x(d.x0) + i * this.getBarWidth(x, d),
+        )
+        .attr("width", (d: $TSFixMe) => this.getBarWidth(x, d))
+        .attr("y", (d: $TSFixMe) => y(d.length))
+        .attr("height", (d: $TSFixMe) => y(yScaleMin) - y(d.length))
         .style("opacity", barOpacity)
         .on("mousemove", this.onBarMouseMove)
-        .on("mouseover", (d, index) => {
+        .on("mouseover", (d: $TSFixMe, index: $TSFixMe) => {
           this.onBarMouseOver(d, i, index);
         })
-        .on("mouseleave", (_, index) => this.onBarMouseOut(i, index))
-        .on("mousedown", (_, index) => this.onBarMouseDown(i, index))
-        .on("mouseup", (_, index) => this.onBarMouseUp(i, index))
-        .on("click", (_, index) => {
+        .on("mouseleave", (_: $TSFixMe, index: $TSFixMe) =>
+          this.onBarMouseOut(i, index),
+        )
+        .on("mousedown", (_: $TSFixMe, index: $TSFixMe) =>
+          this.onBarMouseDown(i, index),
+        )
+        .on("mouseup", (_: $TSFixMe, index: $TSFixMe) =>
+          this.onBarMouseUp(i, index),
+        )
+        .on("click", (_: $TSFixMe, index: $TSFixMe) => {
           this.onBarClick(i, index);
           currentEvent.stopPropagation();
         });
 
-      bins[i].forEach((bin, index) => {
-        let barWidth = this.getBarWidth(x, bin);
+      bins[i].forEach((bin: $TSFixMe, index: $TSFixMe) => {
+        const barWidth = this.getBarWidth(x, bin);
         this.barWidth = this.getBarWidth(x, bin);
         const xMidpoint = x(bin.x0) + i * barWidth + barWidth / 2;
         barCentersToIndices[xMidpoint] = [i, index];
@@ -551,10 +583,10 @@ export default class Histogram {
       });
 
       if (this.options.showStatistics) {
-        let avg = mean(this.data[i]);
-        let dev = deviation(this.data[i]);
+        const avg = mean(this.data[i]);
+        const dev = deviation(this.data[i]);
 
-        let stats = this.svg.append("g");
+        const stats = this.svg.append("g");
 
         stats
           .append("line")
@@ -564,9 +596,9 @@ export default class Histogram {
           .attr("y1", this.margins.top)
           .attr("y2", this.size.height - this.margins.bottom);
 
-        let rect0 = max([x(avg - dev), this.margins.left]);
-        let rect1 = min([x(avg + dev), this.size.width - this.margins.right]);
-        let rectWidth = rect1 - rect0;
+        const rect0 = max([x(avg - dev), this.margins.left]);
+        const rect1 = min([x(avg + dev), this.size.width - this.margins.right]);
+        const rectWidth = rect1 - rect0;
 
         stats
           .append("rect")
@@ -583,12 +615,12 @@ export default class Histogram {
       }
 
       if (this.options.refValues && this.options.refValues.length) {
-        let refs = this.svg.append("g").attr("class", "refs");
+        const refs = this.svg.append("g").attr("class", "refs");
 
-        for (let ref of this.options.refValues) {
+        for (const ref of this.options.refValues) {
           // cannot pass in 0 if using log scale, since log(0) is -Infinity,
           // so increment everything by 1
-          let xRef = x(ref.values[i]);
+          const xRef = x(ref.values[i]);
           refs
             .append("line")
             .attr("stroke", colors[i])
@@ -632,7 +664,7 @@ export default class Histogram {
     }
 
     if (this.options.seriesNames) {
-      let legend = this.svg
+      const legend = this.svg
         .append("g")
         .attr("class", "histogram__legend")
         .attr("font-family", "sans-serif")
@@ -643,14 +675,17 @@ export default class Histogram {
         .data(this.options.seriesNames)
         .enter()
         .append("g")
-        .attr("transform", (_, i) => `translate(-20,${(i + 1) * 20})`);
+        .attr(
+          "transform",
+          (_: $TSFixMe, i: $TSFixMe) => `translate(-20,${(i + 1) * 20})`,
+        );
 
       legend
         .append("rect")
         .attr("x", this.size.width - 5)
         .attr("width", 14)
         .attr("height", 14)
-        .attr("fill", (_, i) => colors[i]);
+        .attr("fill", (_: $TSFixMe, i: $TSFixMe) => colors[i]);
 
       legend
         .append("text")
@@ -658,7 +693,7 @@ export default class Histogram {
         .attr("y", this.margins.top)
         .attr("dy", -11)
         .attr("alignment-baseline", "middle")
-        .text(d => d);
+        .text((d: $TSFixMe) => d);
     }
   }
 }

@@ -7,7 +7,17 @@ import { flatten } from "lodash/fp";
 const DEFAULT_COLOR = "#3867FA";
 
 export default class GenomeViz {
-  constructor(container, data, options) {
+  barEndpoints: $TSFixMe;
+  container: $TSFixMe;
+  data: $TSFixMe;
+  g: $TSFixMe;
+  lastHoveredDataIndex: $TSFixMe;
+  margins: $TSFixMe;
+  options: $TSFixMe;
+  size: $TSFixMe;
+  svg: $TSFixMe;
+  x: $TSFixMe;
+  constructor(container: $TSFixMe, data: $TSFixMe, options: $TSFixMe) {
     this.g = null;
     this.container = select(container);
     // Data is of the form [xStart, xEnd]
@@ -51,11 +61,11 @@ export default class GenomeViz {
       return this.options.domain;
     }
 
-    let mins = [];
-    let maxs = [];
+    const mins = [];
+    const maxs = [];
     for (let i = 0; i < this.data.length; i++) {
-      let series = flatten(this.data[i]);
-      let minMax = extent(series);
+      const series = flatten(this.data[i]);
+      const minMax = extent(series);
       mins.push(minMax[0]);
       maxs.push(minMax[1]);
     }
@@ -65,13 +75,13 @@ export default class GenomeViz {
   // Get the smallest bar that overlaps svgX. If none exist, get the closest one within hoverBuffer.
   // svgX is an x coordinate relative to the svg container.
   // All the bar "endpoints" are within this same coordinate space.
-  getDataIndexForSvgX = svgX => {
+  getDataIndexForSvgX = (svgX: $TSFixMe) => {
     // The smallest bar that overlaps svgX.
-    let smallestBarIndex = null;
-    let smallestBarSize = null;
+    let smallestBarIndex: $TSFixMe = null;
+    let smallestBarSize: $TSFixMe = null;
     // The closest bar within hoverBuffer of svgX.
-    let closestBufferBarIndex = null;
-    let closestBufferBarDistance = null;
+    let closestBufferBarIndex: $TSFixMe = null;
+    let closestBufferBarDistance: $TSFixMe = null;
 
     this.barEndpoints.forEach(([start, end, dataIndex]) => {
       if (
@@ -152,7 +162,7 @@ export default class GenomeViz {
         const barBBox = this.svg
           .select(".bar-container")
           .selectAll("rect")
-          .filter((_d, i) => i === closestDataIndex)
+          .filter((_d: $TSFixMe, i: $TSFixMe) => i === closestDataIndex)
           .node()
           .getBoundingClientRect();
         this.options.onGenomeVizBarClick(
@@ -178,7 +188,7 @@ export default class GenomeViz {
   };
 
   // Re-draw the highlighted bar above all other bars, to ensure that it shows up at the top.
-  highlightBar = (barIndex, shouldHighlight) => {
+  highlightBar = (barIndex: $TSFixMe, shouldHighlight: $TSFixMe) => {
     // Remove all previous highlight bars.
     this.svg.selectAll(".highlight-container rect").remove();
 
@@ -206,7 +216,7 @@ export default class GenomeViz {
   // to shrink the rectangle by outlineBuffer.
   // Otherwise, the top and bottom border will overflow out of the parent <svg> (and be partially hidden),
   // but the left and right will not, which results in an uneven border around the bar.
-  outlineBar = (barIndex, shouldHighlight) => {
+  outlineBar = (barIndex: $TSFixMe, shouldHighlight: $TSFixMe) => {
     // Remove all previous outline bars.
     this.svg.selectAll(".outline-container rect").remove();
 
@@ -237,14 +247,14 @@ export default class GenomeViz {
 
     const domain = this.getDomain();
 
-    let x = scaleLinear()
+    const x = scaleLinear()
       .domain(domain)
       .nice()
       .range([this.margins.left, this.size.width - this.margins.right]);
 
     this.x = x;
 
-    const barEndpoints = [];
+    const barEndpoints: $TSFixMe = [];
 
     this.svg
       .append("g")
@@ -254,12 +264,12 @@ export default class GenomeViz {
       .enter()
       .append("rect")
       .attr("fill", this.options.color)
-      .attr("x", d => x(d[0]))
-      .attr("width", d => x(d[1]) - x(d[0]))
+      .attr("x", (d: $TSFixMe) => x(d[0]))
+      .attr("width", (d: $TSFixMe) => x(d[1]) - x(d[0]))
       .attr("y", () => 0)
       .attr("height", () => this.size.height);
 
-    this.data.forEach((datum, dataIndex) => {
+    this.data.forEach((datum: $TSFixMe, dataIndex: $TSFixMe) => {
       barEndpoints.push([x(datum[0]), x(datum[1]), dataIndex]);
     });
 

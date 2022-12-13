@@ -3,7 +3,16 @@ import { scaleLinear } from "d3-scale";
 import { select, event as currentEvent } from "d3-selection";
 
 export default class TidyTree {
-  constructor(container, nodes, options) {
+  container: $TSFixMe;
+  margins: $TSFixMe;
+  nodeContainer: $TSFixMe;
+  options: $TSFixMe;
+  pathContainer: $TSFixMe;
+  range: $TSFixMe;
+  root: $TSFixMe;
+  svg: $TSFixMe;
+  tooltipContainer: $TSFixMe;
+  constructor(container: $TSFixMe, nodes: $TSFixMe, options: $TSFixMe) {
     this.container = select(container);
     this.svg = null;
     this.pathContainer = null;
@@ -25,6 +34,7 @@ export default class TidyTree {
         minNonCollapsableChildren: 2,
         smallerFont: 8,
         largerFont: 12,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         onCollapsedStateChange: () => {},
         collapsed: new Set(),
         svgBackgroundColor: "white",
@@ -74,7 +84,7 @@ export default class TidyTree {
     this.tooltipContainer = select(this.options.tooltipContainer);
   }
 
-  setOptions(options) {
+  setOptions(options: $TSFixMe) {
     Object.assign(this.options, options);
 
     if (options.attribute || options.collapseThreshold) {
@@ -84,10 +94,10 @@ export default class TidyTree {
     this.update();
   }
 
-  setTree(nodes) {
-    let stratifier = stratify()
-      .id(node => node.id)
-      .parentId(node => node.parentId);
+  setTree(nodes: $TSFixMe) {
+    const stratifier = stratify()
+      .id((node: $TSFixMe) => node.id)
+      .parentId((node: $TSFixMe) => node.parentId);
 
     this.root = stratifier(nodes);
     this.options.onCreatedTree && this.options.onCreatedTree(this.root);
@@ -97,12 +107,14 @@ export default class TidyTree {
   }
 
   resetTree() {
-    this.root.eachBefore(d => {
+    this.root.eachBefore((d: $TSFixMe) => {
       if (d.children || d.collapsedChildren || d.hiddenChildren) {
         d.children = (d.children || [])
           .concat(d.collapsedChildren || [])
           .concat(d.hiddenChildren || []);
-        d.children = d.children.filter(child => !child.isAggregated);
+        d.children = d.children.filter(
+          (child: $TSFixMe) => !child.isAggregated,
+        );
         d.collapsedChildren = null;
         d.hiddenChildren = null;
       }
@@ -114,22 +126,24 @@ export default class TidyTree {
     this.resetTree();
 
     this.root.sort(
-      (a, b) =>
+      (a: $TSFixMe, b: $TSFixMe) =>
         b.data.values[this.options.attribute] -
         a.data.values[this.options.attribute],
     );
 
     this.range = [
       Math.min(
-        ...this.root.leaves().map(l => l.data.values[this.options.attribute]),
+        ...this.root
+          .leaves()
+          .map((l: $TSFixMe) => l.data.values[this.options.attribute]),
       ),
       this.root.data.values[this.options.attribute],
     ];
 
-    let collapsedScale = scaleLinear()
+    const collapsedScale = scaleLinear()
       .domain(this.range)
       .range([0, 1]);
-    this.root.eachAfter(d => {
+    this.root.eachAfter((d: $TSFixMe) => {
       if (this.options.collapsed.has(d.id)) {
         d.collapsedChildren = d.children;
         d.children = null;
@@ -142,7 +156,7 @@ export default class TidyTree {
         d.children = null;
       } else if (d.children) {
         d.collapsedChildren = d.children.filter(
-          child =>
+          (child: $TSFixMe) =>
             !child.data.highlight &&
             collapsedScale(child.data.values[this.options.attribute]) <
               this.options.collapseThreshold,
@@ -153,7 +167,7 @@ export default class TidyTree {
           d.collapsedChildren = null;
         } else {
           d.children = d.children.filter(
-            child =>
+            (child: $TSFixMe) =>
               child.data.highlight ||
               collapsedScale(child.data.values[this.options.attribute]) >=
                 this.options.collapseThreshold,
@@ -170,7 +184,7 @@ export default class TidyTree {
               data: {
                 commonName: `(${d.collapsedChildren.length})`,
                 highlight: d.collapsedChildren.some(
-                  child => child.data.highlight,
+                  (child: $TSFixMe) => child.data.highlight,
                 ),
                 scientificName: `(${d.collapsedChildren.length})`,
                 lineageRank: d.collapsedChildren[0].data.lineageRank,
@@ -183,14 +197,14 @@ export default class TidyTree {
     });
   }
 
-  toggleCollapseNode(node) {
+  toggleCollapseNode(node: $TSFixMe) {
     let updatedNode = node;
 
     if (
       this.hasAllChildrenCollapsed(node) ||
       this.hasAllChildrenVisible(node)
     ) {
-      var temp = node.children;
+      const temp = node.children;
       node.children = node.collapsedChildren;
       node.collapsedChildren = temp;
 
@@ -203,7 +217,7 @@ export default class TidyTree {
       node.collapsedChildren = node.children;
       node.children = null;
     } else if (node.isAggregated) {
-      let parent = node.parent;
+      const parent = node.parent;
       parent.children.pop();
       parent.children = parent.children.concat(parent.collapsedChildren);
       parent.collapsedChildren = null;
@@ -211,7 +225,7 @@ export default class TidyTree {
     }
 
     if (updatedNode.children) {
-      updatedNode.children.forEach(child => {
+      updatedNode.children.forEach((child: $TSFixMe) => {
         this.expandCollapsedWithFewChildrenOrNoName(child);
       });
     }
@@ -225,7 +239,7 @@ export default class TidyTree {
       this.options.onCollapsedStateChange(node);
   }
 
-  expandCollapsedWithFewChildrenOrNoName(node) {
+  expandCollapsedWithFewChildrenOrNoName(node: $TSFixMe) {
     if (!node) return;
 
     // keep expanding nodes with children that have either (a) few children or (b) no name
@@ -238,56 +252,56 @@ export default class TidyTree {
       node.children = (node.children || []).concat(node.collapsedChildren);
       node.collapsedChildren = null;
 
-      node.children.forEach(child => {
+      node.children.forEach((child: $TSFixMe) => {
         this.expandCollapsedWithFewChildrenOrNoName(child);
       });
     }
   }
 
-  curvedPath(source, target) {
+  curvedPath(source: $TSFixMe, target: $TSFixMe) {
     return `M ${source.y} ${source.x}
             C ${(source.y + target.y) / 2} ${source.x},
             ${(source.y + target.y) / 2} ${target.x},
             ${target.y} ${target.x}`;
   }
 
-  getNodeBoxRefSvg(d, node) {
-    let bbox = node.getBBox();
-    let y = d.y + this.margins.left;
-    let x = d.x + this.margins.top;
+  getNodeBoxRefSvg(d: $TSFixMe, node: $TSFixMe) {
+    const bbox = node.getBBox();
+    const y = d.y + this.margins.left;
+    const x = d.x + this.margins.top;
     return { x, y, width: bbox.width, height: bbox.height };
   }
 
-  hasAllChildrenCollapsed(d) {
+  hasAllChildrenCollapsed(d: $TSFixMe) {
     return !!(!d.children && d.collapsedChildren);
   }
 
-  hasAllChildrenVisible(d) {
+  hasAllChildrenVisible(d: $TSFixMe) {
     return !!(d.children && !d.collapsedChildren);
   }
 
-  hasChildren(d) {
+  hasChildren(d: $TSFixMe) {
     return !!(d.children || d.collapsedChildren);
   }
 
-  hasHiddenChildren(d) {
+  hasHiddenChildren(d: $TSFixMe) {
     return !!d.collapsedChildren;
   }
 
-  hasVisibleChildren(d) {
+  hasVisibleChildren(d: $TSFixMe) {
     return !!d.children;
   }
 
-  wrap(textSelection, width) {
-    textSelection.each((d, idx, textNodes) => {
-      let text = select(textNodes[idx]);
-      let words = text.text().split(/\s+/);
+  wrap(textSelection: $TSFixMe, width: $TSFixMe) {
+    textSelection.each((d: $TSFixMe, idx: $TSFixMe, textNodes: $TSFixMe) => {
+      const text = select(textNodes[idx]);
+      const words = text.text().split(/\s+/);
       let word;
       let line = [];
       let lineNumber = 1;
-      let textHeight = parseFloat(text.style("font-size"));
-      let lineHeight = textHeight * 1.2;
-      let x = text.attr("x");
+      const textHeight = parseFloat(text.style("font-size"));
+      const lineHeight = textHeight * 1.2;
+      const x = text.attr("x");
       let tspan = text
         .text(null)
         .append("tspan")
@@ -323,7 +337,7 @@ export default class TidyTree {
     });
   }
 
-  update(source) {
+  update(source?: $TSFixMe) {
     if (!this.svg) {
       this.initialize();
     }
@@ -335,8 +349,8 @@ export default class TidyTree {
     }
 
     // adjust dimensions
-    let width = this.options.minWidth;
-    let height = Math.max(
+    const width = this.options.minWidth;
+    const height = Math.max(
       this.options.minHeight,
       this.options.leafNodeHeight * this.root.leaves().length,
     );
@@ -357,47 +371,47 @@ export default class TidyTree {
     source = source || this.root;
 
     // compute scales for nodes
-    let nodeScale = scaleLinear()
+    const nodeScale = scaleLinear()
       .domain(this.range)
       .range([4, 20]);
-    let linkScale = scaleLinear()
+    const linkScale = scaleLinear()
       .domain(this.range)
       .range([1, 20]);
-    let fontScale = scaleLinear()
+    const fontScale = scaleLinear()
       .domain(this.range)
       .range([this.options.smallerFont, this.options.largerFont]);
 
-    let link = this.pathContainer
+    const link = this.pathContainer
       .selectAll(".link")
-      .data(this.root.links(), d => {
+      .data(this.root.links(), (d: $TSFixMe) => {
         return d.target.id;
       });
 
     // Enter - Links
-    let linkEnter = link
+    const linkEnter = link
       .enter()
       .append("path")
       .attr(
         "class",
-        d => `link ${d.target.data.highlight ? "highlighted" : ""}`,
+        (d: $TSFixMe) => `link ${d.target.data.highlight ? "highlighted" : ""}`,
       )
       .attr("d", () => {
-        let startPoint = { x: source.x0, y: source.y0 };
+        const startPoint = { x: source.x0, y: source.y0 };
         return this.curvedPath(startPoint, startPoint);
       });
 
     // Update - Links
-    let linkUpdate = linkEnter.merge(link);
+    const linkUpdate = linkEnter.merge(link);
     linkUpdate
       .lower()
       .transition()
       .duration(this.options.transitionDuration)
       .attr(
         "class",
-        d => `link ${d.target.data.highlight ? "highlighted" : ""}`,
+        (d: $TSFixMe) => `link ${d.target.data.highlight ? "highlighted" : ""}`,
       )
-      .attr("d", d => this.curvedPath(d.source, d.target))
-      .attr("stroke-width", d => {
+      .attr("d", (d: $TSFixMe) => this.curvedPath(d.source, d.target))
+      .attr("stroke-width", (d: $TSFixMe) => {
         return linkScale(d.target.data.values[this.options.attribute]);
       });
 
@@ -409,45 +423,45 @@ export default class TidyTree {
       .attr("d", this.curvedPath(source, source))
       .remove();
 
-    let node = this.nodeContainer
+    const node = this.nodeContainer
       .selectAll("g.node")
-      .data(this.root.descendants(), d => d.id);
+      .data(this.root.descendants(), (d: $TSFixMe) => d.id);
 
     // Enter - Nodes
-    let nodeEnter = node
+    const nodeEnter = node
       .enter()
       .append("g")
       .attr("class", "node")
       .attr("transform", () => {
-        let x = (source && source.x0) || this.root.x0;
-        let y = (source && source.y0) || this.root.y0;
+        const x = (source && source.x0) || this.root.x0;
+        const y = (source && source.y0) || this.root.y0;
         return `translate(${y},${x})`;
       });
 
-    let clickableNode = nodeEnter.append("g").attr("class", "clickable");
+    const clickableNode = nodeEnter.append("g").attr("class", "clickable");
 
     clickableNode.append("circle").attr("r", 0);
 
     clickableNode
-      .filter(d => {
+      .filter((d: $TSFixMe) => {
         return this.hasChildren(d) || d.isAggregated;
       })
       .append("path")
       .attr("class", "cross")
       .attr("d", "M0,0");
 
-    let textEnter = nodeEnter
+    const textEnter = nodeEnter
       .append("text")
       .style("fill-opacity", 0)
       .on("click", this.options.onNodeLabelClick);
 
     if (this.tooltipContainer) {
       nodeEnter
-        .on("mouseenter", d => {
+        .on("mouseenter", (d: $TSFixMe) => {
           this.options.onNodeHover && this.options.onNodeHover(d);
           this.tooltipContainer.classed("visible", true);
         })
-        .on("mousemove", node => {
+        .on("mousemove", () => {
           this.tooltipContainer
             .style("left", currentEvent.pageX + 20 + "px")
             .style("top", currentEvent.pageY + 20 + "px");
@@ -457,14 +471,14 @@ export default class TidyTree {
         });
     }
 
-    let nodeUpdate = node.merge(nodeEnter);
+    const nodeUpdate = node.merge(nodeEnter);
 
     // Update - Nodes
     nodeUpdate
       .transition()
       .duration(this.options.transitionDuration)
-      .attr("class", d => {
-        let classes =
+      .attr("class", (d: $TSFixMe) => {
+        const classes =
           "node " +
           `node-${d.id}` +
           (this.hasChildren(d) ? " node__internal" : " node__leaf") +
@@ -473,32 +487,34 @@ export default class TidyTree {
             : "");
         return classes;
       })
-      .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+      .attr("transform", (d: $TSFixMe) => "translate(" + d.y + "," + d.x + ")");
 
-    let textUpdate = textEnter.merge(node.select("text"));
+    const textUpdate = textEnter.merge(node.select("text"));
 
     textUpdate
-      .text(d => {
+      .text((d: $TSFixMe) => {
         return (
           (this.options.useCommonName ? d.data.commonName : null) ||
           d.data.scientificName
         );
       })
-      .style("text-anchor", d =>
+      .style("text-anchor", (d: $TSFixMe) =>
         this.hasVisibleChildren(d) ? "middle" : "start",
       )
-      .style("alignment-baseline", d =>
+      .style("alignment-baseline", (d: $TSFixMe) =>
         this.hasVisibleChildren(d) ? "baseline" : "middle",
       )
-      .style("font-size", d => fontScale(d.data.values[this.options.attribute]))
+      .style("font-size", (d: $TSFixMe) =>
+        fontScale(d.data.values[this.options.attribute]),
+      )
       .style("font-weight", 600)
       .style("letter-spacing", 0.3)
-      .attr("dy", d =>
+      .attr("dy", (d: $TSFixMe) =>
         this.hasVisibleChildren(d)
           ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
           : 0,
       )
-      .attr("x", d =>
+      .attr("x", (d: $TSFixMe) =>
         this.hasVisibleChildren(d)
           ? 0
           : 4 + 1.3 * nodeScale(d.data.values[this.options.attribute]),
@@ -508,7 +524,7 @@ export default class TidyTree {
     textUpdate
       .transition()
       .duration(this.options.transitionDuration)
-      .attr("class", d => {
+      .attr("class", (d: $TSFixMe) => {
         return this.options.useCommonName && !d.data.commonName
           ? "name-missing"
           : null;
@@ -517,18 +533,18 @@ export default class TidyTree {
 
     nodeUpdate
       .select(".clickable")
-      .on("click", d => this.toggleCollapseNode(d));
+      .on("click", (d: $TSFixMe) => this.toggleCollapseNode(d));
 
     nodeUpdate.select("circle").attr(
       "r",
       // hide nodes (except root) that do not have name (typically ranks not assigned)
-      d =>
+      (d: $TSFixMe) =>
         !d.parent || d.data.scientificName || this.hasHiddenChildren(d)
           ? nodeScale(d.data.values[this.options.attribute])
           : 0,
     );
 
-    nodeUpdate.select("path.cross").attr("d", d => {
+    nodeUpdate.select("path.cross").attr("d", (d: $TSFixMe) => {
       let r = nodeScale(d.data.values[this.options.attribute]) * 0.9;
       r = Math.min(r, 8);
       return `M${-r},0 L${r},0 M0,${-r} L0,${r}`;
@@ -538,19 +554,19 @@ export default class TidyTree {
     // TODO: overlays can be brittle and will be hard to scale if
     // we ever add features like zoom
     if (this.options.addOverlays) {
-      nodeUpdate.each((d, index, nodeList) => {
-        let overlay = this.container.select(`.node-overlay__${d.id}`);
+      nodeUpdate.each((d: $TSFixMe, index: $TSFixMe, nodeList: $TSFixMe) => {
+        const overlay = this.container.select(`.node-overlay__${d.id}`);
         if (!overlay.empty()) {
-          let text = select(nodeList[index]).select("text");
-          let nodeBox = this.getNodeBoxRefSvg(d, text.node());
+          const text = select(nodeList[index]).select("text");
+          const nodeBox = this.getNodeBoxRefSvg(d, text.node());
 
-          let y = this.hasVisibleChildren(d)
+          const y = this.hasVisibleChildren(d)
             ? nodeBox.y - nodeBox.width / 2 - 20
             : nodeBox.y +
               nodeScale(d.data.values[this.options.attribute]) +
               nodeBox.width;
 
-          let x = this.hasVisibleChildren(d)
+          const x = this.hasVisibleChildren(d)
             ? nodeBox.x -
               nodeScale(d.data.values[this.options.attribute]) -
               nodeBox.height -
@@ -574,18 +590,18 @@ export default class TidyTree {
     }
 
     // Exit - Nodes
-    let nodeExit = node
+    const nodeExit = node
       .exit()
       .transition()
       .duration(this.options.transitionDuration)
-      .attr("transform", d => {
+      .attr("transform", () => {
         return "translate(" + source.y + "," + source.x + ")";
       })
       .remove();
 
     // overlays
-    nodeExit.each(d => {
-      let overlay = this.container.select(`.node-overlay__${d.id}`);
+    nodeExit.each((d: $TSFixMe) => {
+      const overlay = this.container.select(`.node-overlay__${d.id}`);
       overlay
         .transition()
         .duration(this.options.transitionDuration)
