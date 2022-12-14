@@ -2030,17 +2030,31 @@ class PipelineRun < ApplicationRecord
   # This precaches reports for a selection of backgrounds (see Background:top_for_sample).
   def precache_report_info!
     params = report_info_params
-    Background.top_for_sample(sample).pluck(:id).each do |background_id|
+    if technology == TECHNOLOGY_INPUT[:nanopore]
+      # In ont_v1, we are not supporting backgrounds for nanopore mngs samples,
+      # so precache the report without any backgrounds.
       cache_key = PipelineReportService.report_info_cache_key(
-        "/samples/#{sample.id}/report_v2.json",
-        params.merge(background_id: background_id)
+        "/samples/#{sample.id}/report_v2.json", params
       )
-      Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
+      Rails.logger.info("Precaching #{cache_key}")
       Rails.cache.fetch(cache_key, expires_in: 30.days) do
-        PipelineReportService.call(self, background_id)
+        PipelineReportService.call(self, nil)
       end
 
       MetricUtil.log_analytics_event(EventDictionary::PIPELINE_REPORT_PRECACHED, nil)
+    else
+      Background.top_for_sample(sample).pluck(:id).each do |background_id|
+        cache_key = PipelineReportService.report_info_cache_key(
+          "/samples/#{sample.id}/report_v2.json",
+          params.merge(background_id: background_id)
+        )
+        Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
+        Rails.cache.fetch(cache_key, expires_in: 30.days) do
+          PipelineReportService.call(self, background_id)
+        end
+
+        MetricUtil.log_analytics_event(EventDictionary::PIPELINE_REPORT_PRECACHED, nil)
+      end
     end
   end
 
