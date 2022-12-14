@@ -1844,7 +1844,7 @@ class PipelineRun < ApplicationRecord
   def ont_sfn_outputs_by_step
     result_files = {}
 
-    data = SfnOntPipelineDataService.new(id).call
+    data = SfnSingleStagePipelineDataService.new(id, PipelineRun::TECHNOLOGY_INPUT[:nanopore]).call
     singular_stage_index = 0
     steps_with_output_files = data[:stages][singular_stage_index][:steps]
     job_stats_by_task = job_stats.index_by(&:task)
@@ -2111,7 +2111,7 @@ class PipelineRun < ApplicationRecord
     if technology == TECHNOLOGY_INPUT[:illumina]
       SfnPipelineDataService.call(id, show_experimental, remove_host_filtering_urls)
     elsif technology == TECHNOLOGY_INPUT[:nanopore]
-      SfnOntPipelineDataService.call(id)
+      SfnSingleStagePipelineDataService.call(id, technology)
     end
   end
 

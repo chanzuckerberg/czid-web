@@ -1,7 +1,4 @@
-class SfnOntPipelineDataService
-  # ONT mNGS pipeline runs don't have PipelineRunStages like the short-read-mngs pipeline
-  # This service is only for ONT mNGS pipeline runs
-
+class SfnSingleStagePipelineDataService
   include Callable
   include PipelineRunsHelper
 
@@ -45,23 +42,34 @@ class SfnOntPipelineDataService
     "GenerateCoverageViz" => "this is a step description",
   }.freeze
 
+  STEP_DESCRIPTIONS = {
+    PipelineRun::TECHNOLOGY_INPUT[:nanopore] => ONT_STEP_DESCRIPTIONS,
+  }.freeze
+
+  PIPELINE_NAMES = {
+    PipelineRun::TECHNOLOGY_INPUT[:nanopore] => "ONT mNGS Pipeline",
+  }.freeze
+
   class ParseWdlError < StandardError
     def initialize(error)
       super("Command to parse wdl failed (#{WDL_PARSER}). Error: #{error}")
     end
   end
 
-  def initialize(pipeline_run_id)
-    @pipeline_run = PipelineRun.find(pipeline_run_id)
+  def initialize(id, analysis_type)
+    # TODO: Update name to WorkflowRun when the PipelineRun model is deprecated
+    # An analysis run can be either a PipelineRun or a WorkflowRun.
+    set_analysis_run(id, analysis_type)
+    @analysis_type = analysis_type
 
     # Get the WDL workflow from the idseq-workflows S3 bucket and parse it with WDL parser found at script/parse_wdl_workflow.py
-    s3_folder = @pipeline_run.wdl_s3_folder
-    ont_wdl = retrieve_wdl(s3_folder)
-    @ont_info = parse_wdl(ont_wdl)
+    s3_folder = @analysis_run.wdl_s3_folder
+    raw_wdl = retrieve_wdl(s3_folder)
+    @wdl_info = parse_wdl(raw_wdl)
 
     # get results folder files
     @result_files = {}
-    pr_file_array = @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version)
+    pr_file_array = @analysis_run.sample.results_folder_files(@analysis_run.pipeline_version)
 
     # store results folder files as a hash, with the display_name as the key
     pr_file_array.each do |f|
@@ -75,7 +83,7 @@ class SfnOntPipelineDataService
   end
 
   def call
-    steps = create_step_structure
+    steps, pipeline_status = create_step_structure
     file_source_map = map_output_files_to_sources
 
     steps_with_output_files = add_output_files_to_steps(steps, file_source_map)
@@ -84,30 +92,100 @@ class SfnOntPipelineDataService
     edges = create_edges(file_source_map_with_destinations)
     populate_nodes_with_edges(steps_with_output_files, edges)
 
-    # The ONT mngs pipeline doesn't have PipelineRunStages, but the PipelineViz expects stages - so this is a workaround
+    # The single stage pipelines don't have PipelineRunStages, but the PipelineViz expects stages - so this is a workaround
     # to make the pipeline viz appear
-    single_stage = { name: "ONT mNGS Pipeline", steps: steps_with_output_files, jobStatus: "finished" }
-    data = { stages: [single_stage], edges: edges, status: "finished" }
+    single_stage = { name: PIPELINE_NAMES[@analysis_type], steps: steps_with_output_files, jobStatus: pipeline_status }
+    data = { stages: [single_stage], edges: edges, status: pipeline_status }
     return data
   end
 
   def create_step_structure
-    steps = @ont_info["task_names"].map.with_index do |step, _step_index|
-      step_description = ONT_STEP_DESCRIPTIONS[step]
+    step_statuses = single_stage_pipeline_step_statuses
+    step_statuses = update_step_keys(step_statuses)
+    step_descriptions = STEP_DESCRIPTIONS[@analysis_type]
+    all_redefined_statuses = []
+
+    steps = @wdl_info["task_names"].map do |step_name|
+      status_info = step_statuses[step_name] || {}
+      step_description = status_info["description"].presence || step_descriptions[step_name]
+      status = redefine_job_status(status_info["status"])
+      all_redefined_statuses << status
+
       # Retrieve variable and file information
-      input_variables, input_files = retrieve_step_inputs(step)
+      input_variables, input_files = retrieve_step_inputs(step_name)
       {
-        name: step,
+        name: step_name,
         description: step_description || "",
         inputVariables: input_variables,
         inputFiles: input_files,
-        status: "finished",
         outputFiles: [],
         inputEdges: [],
         outputEdges: [],
+        status: status,
+        startTime: status_info["start_time"],
+        endTime: status_info["end_time"],
+        resources: status_info["resources"].to_a.map { |name_and_url| { name: name_and_url[0], url: name_and_url[1] } },
       }
     end
-    steps
+
+    pipeline_status = pipeline_job_status(all_redefined_statuses)
+    [steps, pipeline_status]
+  end
+
+  def pipeline_job_status(statuses)
+    if statuses.include? "userErrored"
+      return "userErrored"
+    elsif statuses.include? "pipelineErrored"
+      return "pipelineErrored"
+    elsif statuses.include?("inProgress") || (statuses.include?("notStarted") && statuses.include?("finished"))
+      return "inProgress"
+    elsif statuses.include? "notStarted"
+      return "notStarted"
+    elsif statuses.include? "finished"
+      return "finished"
+    else
+      return "inProgress"
+    end
+  end
+
+  # This is only temporary until the pipeline updates these keys to match the task names in the WDL
+  def update_step_keys(step_statuses)
+    # Need to update the keys to match the task names in the WDL
+    if @analysis_type == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      step_statuses["CombineTaxonCounts"] = step_statuses.delete("refined_taxon_count_out") if step_statuses.key?("refined_taxon_count_out")
+      step_statuses["CombineJson"] = step_statuses.delete("contig_summary_out") if step_statses.key?("contig_summary_out")
+      step_statuses["GenerateTaxidLocator"] = step_statuses.delete("refined_taxid_locator_out") if step_statuses.key?("refined_taxid_locator_out")
+      step_statuses["GenerateCoverageViz"] = step_statuses.delete("coverage_viz_out") if step_statuses.key?("coverage_viz_out")
+    end
+
+    step_statuses
+  end
+
+  def redefine_job_status(step_status)
+    case step_status
+    when "instantiated", nil
+      "notStarted"
+    when "uploaded"
+      "finished"
+    when "pipeline_errored"
+      "pipelineErrored"
+    when "errored", "user_errored"
+      "userErrored"
+    # finished_running occurs when the outputs have been created, but hasn't been uploaded to aws yet. Since the file
+    # is not available to download yet, it is marked as "inProgress"
+    when "running", "finished_running"
+      # Should be errored if pipeline_run or workflow run is killed and the step_status file isn't updated.
+      analysis_run_status == WorkflowRun::STATUS[:failed] ? "pipelineErrored" : "inProgress"
+      "inProgress"
+    end
+  end
+
+  def analysis_run_status
+    if @analysis_type == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      @analysis_run.job_status
+    else
+      @analysis_run.status
+    end
   end
 
   # Unites the output files declared by the WDL workflow
@@ -116,11 +194,12 @@ class SfnOntPipelineDataService
     file_source_map = {}
     output_file_map = collect_step_output_files
 
-    @ont_info["task_names"].each_with_index do |step, step_index|
+    @wdl_info["task_names"].each_with_index do |step, step_index|
       output_files = output_file_map[step]
 
       output_files.each do |file|
         file[:from] = {
+          # This will always be 0 because the ONT pipeline only has one stage
           stageIndex: 0,
           stepIndex: step_index,
         }
@@ -213,8 +292,11 @@ class SfnOntPipelineDataService
       if edge[:to]
         to_step_index = edge[:to][:stepIndex]
         steps_with_nodes[to_step_index][:inputEdges].push(edge_index)
-        edge[:isIntraStage] = true
       end
+
+      # all edges are intra-stage because there's only one stage
+      # the reason this is needed is because the original pipeline viz has multiple stages
+      edge[:isIntraStage] = true if edge[:to].present? && edge[:from].present?
     end
   end
 
@@ -245,8 +327,8 @@ class SfnOntPipelineDataService
 
   # Collect the output files of each task/step in the workflow from the basenames property in the parsed WDL
   def collect_step_output_files
-    output_file_map = Hash[@ont_info["task_names"].collect { |task_name| [task_name, []] }] # rubocop:disable Rails/IndexWith
-    @ont_info["basenames"].each do |wdl_reference, raw_output_filename|
+    output_file_map = Hash[@wdl_info["task_names"].collect { |task_name| [task_name, []] }] # rubocop:disable Rails/IndexWith
+    @wdl_info["basenames"].each do |wdl_reference, raw_output_filename|
       task_name, output_var_name = wdl_reference.split(".")
       output_info = {
         name: output_var_name,
@@ -262,7 +344,7 @@ class SfnOntPipelineDataService
   def retrieve_step_inputs(step)
     variables = []
     files = []
-    step_inputs = @ont_info["task_inputs"][step]
+    step_inputs = @wdl_info["task_inputs"][step]
     step_inputs.each do |input|
       # add type information for input: variable (like string or int) or file
       # if type information is not in inputs, it's a file
@@ -273,9 +355,9 @@ class SfnOntPipelineDataService
       }
 
       if output_step == WORKFLOW_INPUT_PREFIX
-        input_info[:type] = @ont_info["inputs"][var_name]
+        input_info[:type] = @wdl_info["inputs"][var_name]
       else
-        input_info[:file] = File.basename(@ont_info["basenames"][input])
+        input_info[:file] = File.basename(@wdl_info["basenames"][input])
       end
 
       case input_info[:type]
@@ -342,5 +424,36 @@ class SfnOntPipelineDataService
 
     # gather every piece but the first
     return split_var.drop(1).join
+  end
+
+  # Fetches the status2.json file from S3 and parses it.
+  # The status2.json file is outputted by the pipeline and contains information about the status of each step.
+  # e.g. "RunValidateInput"=>{"status"=>"uploaded", "start_time"=>"1670355490.1407864", "end_time"=>"1670355519.6279788" (this is just one key/value pair)
+  def single_stage_pipeline_step_statuses
+    status_file_paths = {
+      PipelineRun::TECHNOLOGY_INPUT[:nanopore] => "long_read_mngs_status2.json",
+      # TODO: Add CG, AMR, and PhyloTree paths in the future since they're all single stage pipelines.
+    }
+
+    step_status_s3_file_path = "#{@analysis_run.sfn_results_path}/#{status_file_paths[@analysis_type]}"
+    step_status_json = S3Util.get_s3_file(step_status_s3_file_path)
+
+    if step_status_json
+      begin
+        return JSON.parse(step_status_json || "{}")
+      rescue JSON::ParserError
+        return {}
+      end
+    end
+    {}
+  end
+
+  def set_analysis_run(id, analysis_type)
+    @analysis_run = case analysis_type
+                    when PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+                      PipelineRun.find(id)
+                    else
+                      WorkflowRun.find(id)
+                    end
   end
 end

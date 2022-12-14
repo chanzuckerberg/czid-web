@@ -334,7 +334,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
               position="top left"
               trigger={
                 <div className={cx(cs.labelText, cs.header)}>
-                  Host Filtering Step
+                  Filtering Step
                 </div>
               }
               content={pipelineStepDict[stageDescriptionKey]}

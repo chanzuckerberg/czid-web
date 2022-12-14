@@ -137,6 +137,7 @@ services:
       - redis
       - elasticsearch
       - heatmap-elasticsearch
+      - shoryuken
     environment:
       <<: *web-variables
       <<: *aws-variables
