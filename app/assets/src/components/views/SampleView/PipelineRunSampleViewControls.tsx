@@ -7,6 +7,7 @@ import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadB
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
 import { showToast } from "~/components/utils/toast";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
@@ -64,11 +65,15 @@ const PipelineRunSampleViewControls = ({
   const handleDownload = (option: $TSFixMe) => {
     switch (option) {
       case "download_csv":
-        isNull(backgroundId) && renderNoBackgroundSelectedNotification();
+        isNull(backgroundId) &&
+          sample.initial_workflow !== WORKFLOWS.LONG_READ_MNGS.value &&
+          renderNoBackgroundSelectedNotification();
         downloadCSV();
         break;
       case "download_csv_with_filters":
-        isNull(backgroundId) && renderNoBackgroundSelectedNotification();
+        isNull(backgroundId) &&
+          sample.initial_workflow !== WORKFLOWS.LONG_READ_MNGS.value &&
+          renderNoBackgroundSelectedNotification();
         triggerFileDownload({
           downloadUrl: getDownloadReportTableWithAppliedFiltersLink(),
           fileName: `${sample.name}_report_with_applied_filters.csv`,
