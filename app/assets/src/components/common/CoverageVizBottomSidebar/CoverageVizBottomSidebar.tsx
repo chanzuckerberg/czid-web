@@ -36,6 +36,7 @@ import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { BLAST_V1_FEATURE } from "~/components/utils/features";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import Histogram from "~/components/visualizations/Histogram";
 import { HistogramShape, GenomeVizShape } from "~/interface/shared";
@@ -407,7 +408,13 @@ export default class CoverageVizBottomSidebar extends React.Component<
   };
 
   renderContentHeader = () => {
-    const { params, pipelineVersion, sampleId, snapshotShareId } = this.props;
+    const {
+      params,
+      pipelineVersion,
+      sampleId,
+      snapshotShareId,
+      workflow,
+    } = this.props;
     const { currentAccessionSummary } = this.state;
     const { taxonId } = params;
 
@@ -461,27 +468,29 @@ export default class CoverageVizBottomSidebar extends React.Component<
         <div className={cs.fill} />
         {!snapshotShareId && (
           <div className={cs.headerControls}>
-            <div className={cs.vizLinkContainer}>
-              <a
-                className={cs.linkWithArrow}
-                href={params.alignmentVizUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  trackEvent(
-                    "CoverageVizBottomSidebar_alignment-viz-link_clicked",
-                    {
-                      accessionId: currentAccessionSummary.id,
-                      taxonId: params.taxonId,
-                      sampleId,
-                    },
-                  )
-                }
-              >
-                View read-level visualization
-                <IconArrowRight />
-              </a>
-            </div>
+            {workflow === WORKFLOWS.SHORT_READ_MNGS.value && (
+              <div className={cs.vizLinkContainer}>
+                <a
+                  className={cs.linkWithArrow}
+                  href={params.alignmentVizUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    trackEvent(
+                      "CoverageVizBottomSidebar_alignment-viz-link_clicked",
+                      {
+                        accessionId: currentAccessionSummary.id,
+                        taxonId: params.taxonId,
+                        sampleId,
+                      },
+                    )
+                  }
+                >
+                  View read-level visualization
+                  <IconArrowRight />
+                </a>
+              </div>
+            )}
             <div className={cs.actionIcons}>
               {this.renderBlastAction()}
               <BasicPopup

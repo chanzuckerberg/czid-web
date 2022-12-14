@@ -1896,31 +1896,34 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             sidebarTaxonData={sidebarTaxonData}
           />
         )}
-        { sample && ( isPipelineFeatureAvailable(
+        {sample &&
+          (isPipelineFeatureAvailable(
             COVERAGE_VIZ_FEATURE,
             get("pipeline_version", pipelineRun),
-          ) || currentTab === TABS.LONG_READ_MNGS) && (
-          <CoverageVizBottomSidebar
-            nameType={selectedOptions.nameType}
-            onBlastClick={this.handleBlastClick}
-            onClose={withAnalytics(
-              this.closeCoverageViz,
-              "SampleView_coverage-viz-sidebar_closed",
-              {
-                sampleId: sample.id,
-                sampleName: sample.name,
-              },
-            )}
-            params={getCoverageVizParams(
-              coverageVizParams,
-              coverageVizDataByTaxon,
-            )}
-            pipelineVersion={pipelineRun.pipeline_version}
-            sampleId={sample.id}
-            snapshotShareId={snapshotShareId}
-            visible={coverageVizVisible}
-          />
-        )}
+          ) ||
+            currentTab === TABS.LONG_READ_MNGS) && (
+            <CoverageVizBottomSidebar
+              nameType={selectedOptions.nameType}
+              onBlastClick={this.handleBlastClick}
+              onClose={withAnalytics(
+                this.closeCoverageViz,
+                "SampleView_coverage-viz-sidebar_closed",
+                {
+                  sampleId: sample.id,
+                  sampleName: sample.name,
+                },
+              )}
+              params={getCoverageVizParams(
+                coverageVizParams,
+                coverageVizDataByTaxon,
+              )}
+              pipelineVersion={pipelineRun.pipeline_version}
+              sampleId={sample.id}
+              snapshotShareId={snapshotShareId}
+              visible={coverageVizVisible}
+              workflow={sample.initial_workflow}
+            />
+          )}
         {consensusGenomeCreationModalVisible && (
           <ConsensusGenomeCreationModal
             consensusGenomeData={consensusGenomeData}

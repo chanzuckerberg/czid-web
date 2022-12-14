@@ -9,6 +9,7 @@ export interface CoverageVizBottomSidebarProps {
   pipelineVersion: string;
   nameType: string;
   snapshotShareId: string;
+  workflow: string;
 }
 
 export interface CoverageVizParamsRaw {
