@@ -5,7 +5,7 @@ import {
   getAttributeOrDefault,
   getFixture,
   getRandomNumber,
-  getYearMonthInThePast,
+  getYearMonthInThePast
 } from "./common";
 import fs from "fs";
 import { Filter } from "../types/filter";
@@ -13,7 +13,6 @@ import { Workflow } from "../types/workflow";
 import { SampleLocation } from "../types/sampleLocation";
 
 const yesOrNo = ["Yes", "No"];
-const zeroOrOne = [0, 1];
 const statuses = ["COMPLETE", "FAILED"];
 const metadataFixture = getFixture("metadata");
 
@@ -74,7 +73,7 @@ export function generateMetadata(sampleName: string): Metadata {
     "Nucleotide Type": getAttributeValue("Nucleotide Type"),
     "Collection Date": getYearMonthInThePast(),
     "Water Control": sample(yesOrNo),
-    "Collection Location": "New York",
+    "Collection Location": "New York"
   };
   return setOptionalMetadataAtrribute(data);
 }

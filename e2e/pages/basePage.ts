@@ -100,7 +100,7 @@ export class BasePage {
 
   async typeByPlaceHolder(placeholder: string, value: string) {
     await this.page.type(`[placeholder="${placeholder}"]`, value, {
-      delay: 1000,
+      delay: 1000
     });
   }
   async fillById(id: string, value: string) {
@@ -195,7 +195,7 @@ export class BasePage {
       // It is important to call waitForEvent before click to set up waiting.
       this.page.waitForEvent("filechooser"),
       // Opens the file chooser.
-      this.page.locator(".csvUpload-1c9NS").click(),
+      this.page.locator(".csvUpload-1c9NS").click()
     ]);
     await fileChooser.setFiles([path.resolve(filePath)]);
   }

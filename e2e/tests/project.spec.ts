@@ -32,7 +32,7 @@ test.describe("Project discovery page tests", () => {
     }
     const projectMockData = {
       projects: projects,
-      all_projects_ids: projectIds,
+      all_projects_ids: projectIds
     };
     await page.goto(baseUrl);
     //intercept request and stub response
@@ -51,7 +51,7 @@ test.describe("Project discovery page tests", () => {
     }
     const workflowMockData = {
       workflow_runs: workflows,
-      all_workflow_run_ids: workflowIds,
+      all_workflow_run_ids: workflowIds
     };
     await page.goto(baseUrl);
     //intercept request and stub response

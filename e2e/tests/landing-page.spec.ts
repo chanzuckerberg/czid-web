@@ -14,7 +14,7 @@ import {
   tag,
   TAXON_FILTERS,
   UPLOAD,
-  VISUALIZATIONS,
+  VISUALIZATIONS
 } from "../utils/constants";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });

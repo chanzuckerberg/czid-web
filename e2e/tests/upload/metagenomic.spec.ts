@@ -4,14 +4,14 @@ import dotenv from "dotenv";
 import {
   generateMetadataFile,
   getGeneratedSampleName,
-  getMetadata,
+  getMetadata
 } from "../../utils/sample";
 import { Metadata } from "../../types/metadata";
 
 import {
   fillMetadata,
   submitUpload,
-  uploadSampleFiles,
+  uploadSampleFiles
 } from "../../utils/upload";
 import { getByTestID, getByText } from "../../utils/selectors";
 import { fileChooser } from "../../utils/page";
@@ -28,7 +28,7 @@ const defaults: Metadata = {
   "Host ID": "jeNhTLicCl",
   "RNA/DNA Input (ng)": 97,
   "Host Genus Species": "Aedes aegypti",
-  "Ct Value": 97,
+  "Ct Value": 97
 };
 
 const sampleType = "Metagenomics";

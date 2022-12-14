@@ -29,11 +29,11 @@ import {
   SELECT_PROJECT,
   START_UPLOAD,
   TEXT_INPUT,
-  UPLOAD_METADATA,
+  UPLOAD_METADATA
 } from "./constants";
 
 dotenv.config({
-  path: path.resolve(__dirname, "../../", `.env.${process.env.NODE_ENV}`),
+  path: path.resolve(__dirname, "../../", `.env.${process.env.NODE_ENV}`)
 });
 
 const metadataFieldFixture = getFixture("metadata_fields");

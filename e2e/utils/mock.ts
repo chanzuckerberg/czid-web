@@ -73,7 +73,7 @@ export async function mockResponse(
 
   if (elementToCheckOnThePage !== undefined) {
     await page.waitForSelector(elementToCheckOnThePage, {
-      timeout: 300000,
+      timeout: 300000
     });
   }
 }
