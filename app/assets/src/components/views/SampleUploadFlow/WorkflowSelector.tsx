@@ -299,7 +299,7 @@ const WorkflowSelector = ({
           <ColumnHeaderTooltip
             trigger={<IconInfoSmall className={cs.infoIcon} />}
             content={
-              "This specifies which version of the base calling software 'Guppy' was used to generate the data. This will affect the pipeline parameters."
+              "Specifies which basecalling model of 'Guppy' was used to generate the data. This will affect the pipeline parameters."
             }
             position={"top center"}
             link={""} // TODO update link for guppy basecaller
