@@ -1106,4 +1106,17 @@ module SamplesHelper
                                   role_session_name: session_name,
                                 })
   end
+
+  def validate_user_is_collaborator_or_admin(sample_ids, current_user)
+    is_collaborator = true
+    unless current_user.admin?
+      projects = Project.joins(:samples).where(samples: { id: sample_ids }).includes(:users)
+      projects.each do |project|
+        unless project.users.include?(current_user)
+          is_collaborator = false
+        end
+      end
+    end
+    is_collaborator
+  end
 end

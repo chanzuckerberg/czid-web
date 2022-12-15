@@ -8,6 +8,7 @@ import {
   samplesUploadedByCurrentUser,
   getHeatmapMetrics,
   workflowRunsCreatedByCurrentUser,
+  userIsCollaboratorOnAllSamples,
 } from "~/api";
 import {
   validateSampleIds,
@@ -77,7 +78,6 @@ interface BulkDownloadModalProps {
   onGenerate: $TSFixMeFunction;
   workflow: string;
   workflowEntity?: string;
-  userIsCollaborator: boolean;
 }
 
 class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
@@ -104,6 +104,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     waitingForCreate: false,
     createStatus: null,
     createError: null,
+    userIsCollaboratorOnAllSamples: false,
   };
 
   componentDidMount() {
@@ -134,6 +135,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     const backgroundOptionsRequest = this.fetchBackgrounds();
     const metricsOptionsRequest = getHeatmapMetrics();
     const allObjectsUploadedByCurrentUserRequest = this.checkAllObjectsUploadedByCurrentUser();
+    const userIsCollaboratorOnAllSamplesRequest = this.checkUserIsCollaboratorOnAllSamples();
 
     const [
       bulkDownloadTypes,
@@ -141,12 +143,14 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       backgroundOptions,
       metricsOptions,
       allObjectsUploadedByCurrentUser,
+      userIsCollaborator,
     ] = await Promise.all([
       bulkDownloadTypesRequest,
       validationInfoRequest,
       backgroundOptionsRequest,
       metricsOptionsRequest,
       allObjectsUploadedByCurrentUserRequest,
+      userIsCollaboratorOnAllSamplesRequest,
     ]);
 
     // Set any default bulk download field values.
@@ -180,6 +184,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       selectedFields: newSelectedFields,
       selectedFieldsDisplay: newSelectedFieldsDisplay,
       loading: false,
+      userIsCollaboratorOnAllSamples: userIsCollaborator,
     });
   }
 
@@ -234,6 +239,14 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
     return validationRequest;
   }
+
+  checkUserIsCollaboratorOnAllSamples = () => {
+    const { selectedIds, workflowEntity } = this.props;
+
+    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
+      ? false
+      : userIsCollaboratorOnAllSamples(Array.from(selectedIds));
+  };
 
   // *** Callbacks ***
 
@@ -456,7 +469,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
               handleHeatmapLink={this.handleHeatmapLink}
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
               objectDownloaded={objectDownloaded}
-              userIsCollaborator={this.props.userIsCollaborator}
+              userIsCollaborator={this.state.userIsCollaboratorOnAllSamples}
             />
           </div>
           <div className={cs.footer}>

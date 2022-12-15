@@ -118,7 +118,6 @@ interface SamplesViewProps {
   snapshotShareId?: string;
   sortable?: boolean;
   userDataCounts?: object;
-  userIsCollaborator: boolean;
   workflow?: WORKFLOW_VALUES;
   workflowEntity?: string;
 }
@@ -1083,7 +1082,6 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
             selectedIds={selectedIds}
             workflow={workflow}
             workflowEntity={workflowEntity}
-            userIsCollaborator={this.props.userIsCollaborator}
           />
         )}
         {heatmapCreationModalOpen && (

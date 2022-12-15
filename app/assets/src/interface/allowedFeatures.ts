@@ -11,6 +11,5 @@ export default interface AllowedFeaturesProps {
     show_skip_processing_option?: boolean;
   };
   userSignedIn: boolean;
-  userProjects?: number[];
   userId?: number;
 }

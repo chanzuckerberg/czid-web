@@ -50,16 +50,6 @@ class BulkDownload < ApplicationRecord
       errors.add(:params, "background value must be an integer") unless get_param_value("background").is_a? Integer
     end
 
-    if download_type == BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
-      sample_ids = get_param_value("sample_ids")
-      projects = Project.joins(:samples).where(samples: { id: sample_ids })
-      projects.each do |project|
-        if project.nil? then errors.add(:params, "project_id #{project_id} does not exist")
-        elsif !user.admin? && !project.users.include?(user) then errors.add(:params, "User must be a collaborator in the project #{project.name} to download host gene counts.")
-        end
-      end
-    end
-
     if download_type == BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
       metric = get_param_value("metric")
       errors.add(:params, "metrics value is invalid") unless HeatmapHelper::ALL_METRICS.pluck(:value).include?(metric)

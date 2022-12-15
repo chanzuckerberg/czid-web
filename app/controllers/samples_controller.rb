@@ -32,7 +32,8 @@ class SamplesController < ApplicationController
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
-                   :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export, :bulk_kickoff_workflow_runs,].freeze
+                   :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,
+                   :bulk_kickoff_workflow_runs, :user_is_collaborator,].freeze
   OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :upload_credentials].freeze
 
@@ -1603,6 +1604,17 @@ class SamplesController < ApplicationController
 
     render json: {
       uploaded_by_current_user: sample_ids.length == samples.length,
+    }
+  end
+
+  # POST /samples/user_is_collaborator
+  # Return whether the user is a collaborator on the projects for all samples
+  def user_is_collaborator
+    permitted_params = params.permit(sampleIds: [])
+    sample_ids = (permitted_params[:sampleIds] || []).map(&:to_i)
+
+    render json: {
+      user_is_collaborator: validate_user_is_collaborator_or_admin(sample_ids, current_user),
     }
   end
 

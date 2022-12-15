@@ -609,6 +609,15 @@ const workflowRunsCreatedByCurrentUser = async (workflowRunIds: $TSFixMe) => {
   return allWorkflowRunsCreatedByCurrentUser;
 };
 
+const userIsCollaboratorOnAllSamples = async (sampleIds: number[]) => {
+  const {
+    user_is_collaborator: userIsCollaborator,
+  } = await postWithCSRF("samples/user_is_collaborator.json", {
+      sampleIds,
+  });
+  return userIsCollaborator;
+};
+
 const getHeatmapMetrics = () => get("/visualizations/heatmap_metrics.json");
 
 const getUserSettingMetadataByCategory = () =>
@@ -738,6 +747,7 @@ export {
   updateUserSetting,
   samplesUploadedByCurrentUser,
   uploadFileToUrl,
+  userIsCollaboratorOnAllSamples,
   validatePhyloTreeName,
   validateProjectName,
   validateSampleFiles,

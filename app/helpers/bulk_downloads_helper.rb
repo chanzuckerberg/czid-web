@@ -1,5 +1,6 @@
 module BulkDownloadsHelper
   include PipelineRunsHelper
+  include SamplesHelper
 
   SAMPLE_NO_PERMISSION_ERROR = "You do not have permission to access all of the selected samples. Please contact us for help.".freeze
   WORKFLOW_RUN_NO_PERMISSION_ERROR = "You do not have permission to access all of the selected workflow runs. Please contact us for help.".freeze
@@ -19,6 +20,7 @@ module BulkDownloadsHelper
   UNKNOWN_DOWNLOAD_TYPE = "Could not find download type for bulk download".freeze
   ADMIN_ONLY_DOWNLOAD_TYPE = "You must be an admin to initiate this download type.".freeze
   UPLOADER_ONLY_DOWNLOAD_TYPE = "You must be the uploader of all selected samples to initiate this download type.".freeze
+  COLLABORATOR_ONLY_DOWNLOAD_TYPE = "You must be a collaborator on the respective projects of each sample to initiate this download type.".freeze
   BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
   READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE = "Unexpected error. Could not find valid taxon lineage for taxid %s".freeze
   TAXONOMY_LIST = ["superkingdom_name", "kingdom_name", "phylum_name", "class_name", "order_name", "family_name", "genus_name", "species_name"].freeze
@@ -160,8 +162,8 @@ module BulkDownloadsHelper
       raise BulkDownloadsHelper::UNKNOWN_DOWNLOAD_TYPE
     end
 
-    if type_data[:admin_only] && !user.admin?
-      raise BulkDownloadsHelper::ADMIN_ONLY_DOWNLOAD_TYPE
+    if type_data[:collaborator_only] && !validate_user_is_collaborator_or_admin(sample_ids, user)
+      raise BulkDownloadsHelper::COLLABORATOR_ONLY_DOWNLOAD_TYPE
     end
 
     if type_data[:uploader_only] && !user.admin?
