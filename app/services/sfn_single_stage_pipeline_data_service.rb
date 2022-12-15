@@ -7,39 +7,37 @@ class SfnSingleStagePipelineDataService
   FILE_SOURCE_MAP_KEY = :unprefixed_name
 
   ONT_STEP_DESCRIPTIONS = {
-    "RunValidateInput" => "this is a step description",
-    "RunQualityFilter" => "this is a step description",
-    "RunHostFilter" => "this is a step description",
-    "RunHumanFilter" => "this is a step description",
-    "RunSubsampling" => "this is a step description",
-    "PreAssemblyFasta" => "this is a step description",
-    "RunAssembly" => "this is a step description",
-    "RunReadsToContigs" => "this is a step description",
-    "GenerateContigStats" => "this is a step description",
-    "PrepareNTAlignmentInputs" => "this is a step description",
-    "RunNTAlignment" => "this is a step description",
-    "RunCallHitsNT" => "this is a step description",
-    "RunNRAlignment" => "this is a step description",
-    "RunCallHitsNR" => "this is a step description",
-    "FindTopHitsNT" => "this is a step description",
-    "FindTopHitsNR" => "this is a step description",
-    "SummarizeHitsNT" => "this is a step description",
-    "SummarizeHitsNR" => "this is a step description",
-    "GenerateCoverageStats" => "this is a step description",
-    "TallyHitsNT" => "this is a step description",
-    "UnmappedReads" => "this is a step description",
-    "TallyHitsNR" => "this is a step description",
-    "ReassignM8NT" => "this is a step description",
-    "ReassignM8NR" => "this is a step description",
-    "SummarizeContigsNT" => "this is a step description",
-    "SummarizeContigsNR" => "this is a step description",
-    "ComputeMergedTaxonCounts" => "this is a step description",
-    "CombineTaxonCounts" => "this is a step description",
-    "CombineJson" => "this is a step description",
-    "GenerateAnnotatedFasta" => "this is a step description",
-    "GenerateTaxidFasta" => "this is a step description",
-    "GenerateTaxidLocator" => "this is a step description",
-    "GenerateCoverageViz" => "this is a step description",
+    "RunValidateInput" => "Validates input files are FASTQ format",
+    "RunQualityFilter" => "Removes low quality bases, short reads, and low complexity reads",
+    "RunHostFilter" => "Removes host reads",
+    "RunHumanFilter" => "Removes human reads",
+    "ReadLengthMetrics" => "Generates read length summary metrics",
+    "RunSubsampling" => "Subsamples to 100,000 reads",
+    "PreAssemblyFasta" => "Converts subsampled read file from FASTQ to FASTA",
+    "RunAssembly" => "Assembles subsampled, non-host reads using metaFlye",
+    "RunReadsToContigs" => "Aligns reads back to contigs to identify reads associated with each contig and obtain non-contig reads",
+    "GenerateContigStats" => "Generates a count of the number of reads/bases that map to each contig",
+    "PrepareNTAlignmentInputs" => "Merges contigs and non-contig reads ahead of NT alignment",
+    "RunNTAlignment" => "Aligns contigs and non-contig reads to the NCBI NT database using minimap2",
+    "RunCallHitsNT" => "Assigns accessions from minimap2 to taxon IDs",
+    "RunNRAlignment" => "Aligns contigs to the NCBI NR database using DIAMOND",
+    "RunCallHitsNR" => "Assigns accessions from DIAMOND to taxon IDs",
+    "FindTopHitsNT" => "Gets the top hit for each read and contig alignment against NT",
+    "FindTopHitsNR" => "Gets the top hit for each contig alignment against NR",
+    "SummarizeHitsNT" => "Generates a summary of all the reads aligning to NT, including those assembled into contigs",
+    "SummarizeHitsNR" => "Generates a summary of reads assembled into contigs aligned to NR",
+    "GenerateCoverageStats" => "Calculates coverage statistics for assembled contigs",
+    "TallyHitsNT" => "Computes per-taxon statistics based on NT alignments",
+    "UnmappedReads" => "Generates output containing unmapped reads",
+    "TallyHitsNR" => "Computes per-taxon statistics based on NR alignments",
+    "SummarizeContigsNT" => "Generates a summary of the NT contig alignments",
+    "SummarizeContigsNR" => "Generates a summary of the NR contig alignments",
+    "ComputeMergedTaxonCounts" => "Merges taxon results from NT and NR databases",
+    "CombineTaxonCounts" => "Combines and merges taxon counts files from NT and NR databases",
+    "CombineJson" => "Combines and merges contig summary files from NT and NR databases",
+    "GenerateAnnotatedFasta" => "Annotates non-host FASTA with NCBI accession IDs",
+    "GenerateTaxidLocator" => "Generates and annotates non-host .fasta with taxonomy IDs",
+    "GenerateCoverageViz" => "Generates JSON files for coverage visualization to be consumed by the web app",
   }.freeze
 
   STEP_DESCRIPTIONS = {
@@ -153,7 +151,7 @@ class SfnSingleStagePipelineDataService
     # Need to update the keys to match the task names in the WDL
     if @analysis_type == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
       step_statuses["CombineTaxonCounts"] = step_statuses.delete("refined_taxon_count_out") if step_statuses.key?("refined_taxon_count_out")
-      step_statuses["CombineJson"] = step_statuses.delete("contig_summary_out") if step_statses.key?("contig_summary_out")
+      step_statuses["CombineJson"] = step_statuses.delete("contig_summary_out") if step_statuses.key?("contig_summary_out")
       step_statuses["GenerateTaxidLocator"] = step_statuses.delete("refined_taxid_locator_out") if step_statuses.key?("refined_taxid_locator_out")
       step_statuses["GenerateCoverageViz"] = step_statuses.delete("coverage_viz_out") if step_statuses.key?("coverage_viz_out")
     end
