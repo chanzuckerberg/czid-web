@@ -10,6 +10,8 @@ export const KEY_SELECTED_OPTIONS_BACKGROUND = "background";
 export const KEY_SELECTED_OPTIONS_TAXA = "taxa";
 export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholds";
 
+export const NANOPORE_DEFAULT_COLUMN_WIDTH = 80;
+
 export const LOCAL_STORAGE_FIELDS = {
   selectedOptions: { excludePaths: ["background", "taxon"] },
 };

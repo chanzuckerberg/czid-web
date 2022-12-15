@@ -57,6 +57,7 @@ import {
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NONE,
   TABS,
+  NANOPORE_DEFAULT_COLUMN_WIDTH,
 } from "./constants";
 import cs from "./report_table.scss";
 
@@ -326,7 +327,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 75,
+        width: NANOPORE_DEFAULT_COLUMN_WIDTH,
       },
       {
         cellDataGetter: ({ rowData }) =>
@@ -348,7 +349,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 75,
+        width: NANOPORE_DEFAULT_COLUMN_WIDTH,
       },
       {
         cellDataGetter: ({ rowData }) =>
@@ -370,7 +371,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 75,
+        width: NANOPORE_DEFAULT_COLUMN_WIDTH,
       },
       {
         cellDataGetter: ({ rowData }) =>
@@ -392,10 +393,11 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 75,
+        width: NANOPORE_DEFAULT_COLUMN_WIDTH,
       },
     ];
 
+    const useNanoporeColumnWidth = currentTab === TABS.LONG_READ_MNGS;
     const sharedColumns = [
       {
         cellDataGetter: ({ rowData }: $TSFixMe) =>
@@ -418,7 +420,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 60,
+        width: useNanoporeColumnWidth ? NANOPORE_DEFAULT_COLUMN_WIDTH : 60,
       },
       {
         cellDataGetter: ({ rowData }: $TSFixMe) =>
@@ -441,7 +443,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 70,
+        width: useNanoporeColumnWidth ? NANOPORE_DEFAULT_COLUMN_WIDTH : 70,
       },
       {
         cellDataGetter: ({ rowData }: $TSFixMe) =>
@@ -464,7 +466,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 70,
+        width: useNanoporeColumnWidth ? NANOPORE_DEFAULT_COLUMN_WIDTH : 70,
       },
       displayMergedNtNrValue
         ? {
