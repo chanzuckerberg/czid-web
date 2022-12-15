@@ -325,3 +325,9 @@ export const UNSUPPORTED_UPLOAD_OPTION_TOOLTIP =
 export const R1CHECK = "_R1";
 export const R2CHECK = "_R2";
 export const AIOLI_LIBRARIES = ["htslib/htsfile/1.10", "seqtk/1.3"];
+export const LOCAL_UPLOAD = "local";
+export const REMOTE_UPLOAD = "remote";
+export const BASESPACE_UPLOAD = "basespace";
+
+// TYPES
+export type Technology = "Illumina" | "ONT";

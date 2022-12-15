@@ -21,7 +21,7 @@ import RadioButton from "~ui/controls/RadioButton";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import StatusLabel from "~ui/labels/StatusLabel";
-import { WORKFLOWS } from "~utils/workflows";
+import { WORKFLOWS, WORKFLOW_VALUES } from "~utils/workflows";
 
 import {
   CG_WETLAB_OPTIONS,
@@ -30,6 +30,11 @@ import {
   GUPPY_BASECALLER_SETTINGS,
   MEDAKA_MODEL_OPTIONS,
   WORKFLOW_DISPLAY_NAMES,
+  LOCAL_UPLOAD,
+  REMOTE_UPLOAD,
+  BASESPACE_UPLOAD,
+  NANOPORE,
+  Technology,
 } from "./constants";
 import cs from "./workflow_selector.scss";
 
@@ -40,11 +45,13 @@ interface WorkflowSelectorProps {
   onGuppyBasecallerSettingChange?: $TSFixMeFunction;
   onWetlabProtocolChange?: $TSFixMeFunction;
   onWorkflowToggle?: $TSFixMeFunction;
+  currentTab?: string,
   selectedMedakaModel?: string;
   selectedGuppyBasecallerSetting?: string;
   selectedTechnology?: string;
   selectedWetlabProtocol?: string;
   selectedWorkflows?: Set<string>;
+  s3UploadEnabled?: boolean;
   usedClearLabs?: boolean;
 }
 
@@ -55,11 +62,13 @@ const WorkflowSelector = ({
   onGuppyBasecallerSettingChange,
   onWetlabProtocolChange,
   onWorkflowToggle,
+  currentTab,
   selectedMedakaModel,
   selectedGuppyBasecallerSetting,
   selectedTechnology,
   selectedWetlabProtocol,
   selectedWorkflows,
+  s3UploadEnabled,
   usedClearLabs,
 }: WorkflowSelectorProps) => {
   const userContext = useContext(UserContext);
@@ -215,34 +224,53 @@ const WorkflowSelector = ({
     );
     const nanoporeTechnologyOptionSelected =
       selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
+    const shouldDisableOption = shouldDisableTechnologyOption(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowObject.workflow);
+    let radioButton = (
+      <RadioButton
+        disabled={shouldDisableOption}
+        selected={nanoporeTechnologyOptionSelected}
+        className={cx(cs.radioButton, cs.alignTitle)}
+      />
+    );
+    if (shouldDisableOption) {
+      const tooltipText = workflowObject.nanoporeDisabledTooltipText;
+      radioButton = (
+        <Tooltip arrow placement="top" title={tooltipText}>
+          <span>{radioButton}</span>
+        </Tooltip>
+      );
+    }
     return (
       <div
         className={cx(
           cs.selectableOption,
           cs.technology,
           nanoporeTechnologyOptionSelected && cs.selected,
+          shouldDisableOption && cs.disabled,
         )}
         onClick={() =>
-          onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowKey)
+          shouldDisableOption ? null : onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowKey)
         }
       >
-        <RadioButton
-          selected={nanoporeTechnologyOptionSelected}
-          className={cx(cs.radioButton, cs.alignTitle)}
-        />
+        {radioButton}
         <div className={cs.optionText}>
           <div className={cs.title}>
             Nanopore
             {workflowKey === WORKFLOWS.SHORT_READ_MNGS.value && (
-              <StatusLabel inline status="Beta" type="beta" />
+              <StatusLabel
+                className={shouldDisableOption && cs.disabledStatus}
+                inline
+                status="Beta"
+                type="beta" />
             )}
           </div>
-          <div className={cs.technologyDescription}>
+          <div className={cx(cs.technologyDescription, shouldDisableOption && cs.disabled)}>
             {workflowObject.nanoporeText}
             {createExternalLink({
               analyticsEventName: workflowObject.nanoporeClickedLinkEvent,
               content: "here",
               link: workflowObject.nanoporeLink,
+              disabled: shouldDisableOption,
             })}
             .
           </div>
@@ -257,11 +285,13 @@ const WorkflowSelector = ({
     analyticsEventName,
     content,
     link,
+    disabled = false,
   }: $TSFixMe) => (
     <ExternalLink
       href={link}
       analyticsEventName={analyticsEventName}
       className={additionalStyle && additionalStyle}
+      disabled={disabled}
     >
       {content}
     </ExternalLink>
@@ -336,6 +366,7 @@ const WorkflowSelector = ({
       nanoporeLink: MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
       nanoporeClickedLinkEvent: "",
       nanoporeContent: renderMNGSNanoporeContent(),
+      nanoporeDisabledTooltipText: "This pipeline only supports upload from your computer.",
     },
     {
       workflow: WORKFLOWS.AMR.value,
@@ -365,6 +396,7 @@ const WorkflowSelector = ({
       nanoporeClickedLinkEvent:
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED,
       nanoporeContent: renderCGNanoporeContent(),
+      nanoporeDisabledTooltipText: `This pipeline only supports upload from your computer${s3UploadEnabled ? " or S3" : ""}.`,
     },
   ];
 
@@ -387,6 +419,17 @@ const WorkflowSelector = ({
         );
       case WORKFLOWS.CONSENSUS_GENOME.value:
         return !workflowIsCurrentlySelected && size(selectedWorkflows) > 0;
+    }
+  };
+
+  const shouldDisableTechnologyOption = (technology: Technology, workflow: WORKFLOW_VALUES) => {
+    switch (currentTab) {
+    case REMOTE_UPLOAD:
+      return technology === NANOPORE && workflow === WORKFLOWS.SHORT_READ_MNGS.value;
+    case BASESPACE_UPLOAD:
+      return technology === NANOPORE;
+    case LOCAL_UPLOAD:
+      return false;
     }
   };
 

@@ -68,6 +68,9 @@ import {
   MISMATCH_FORMAT_ERROR,
   ALLOWED_WORKFLOWS_BY_TECHNOLOGY,
   UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
+  LOCAL_UPLOAD,
+  REMOTE_UPLOAD,
+  BASESPACE_UPLOAD,
 } from "./constants";
 import cs from "./sample_upload_flow.scss";
 import {
@@ -75,10 +78,6 @@ import {
   openBasespaceOAuthPopup,
   removeLaneFromName,
 } from "./utils";
-
-const LOCAL_UPLOAD = "local";
-const REMOTE_UPLOAD = "remote";
-const BASESPACE_UPLOAD = "basespace";
 
 const LOCAL_UPLOAD_LABEL = "Upload from Your Computer";
 const REMOTE_UPLOAD_LABEL = "Upload from S3";
@@ -1131,14 +1130,18 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   renderUploadTabs = () => {
     const { admin, biohubS3UploadEnabled } = this.props;
     const { selectedWorkflows, selectedTechnology } = this.state;
-    const isLongReadMngs =
-      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
-      selectedTechnology === NANOPORE;
+    const shouldDisableS3Tab = selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
+    selectedTechnology === NANOPORE;
+    const shouldDisableBasespaceTab = (
+      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)
+      || selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value))
+      && selectedTechnology === NANOPORE;
 
-    // We're currently disabling S3 and basespace uploads for ONT v1, but they may be re-enabled in the future
-    const s3Tab = this.renderUploadTab(isLongReadMngs, REMOTE_UPLOAD_LABEL);
+    // We're currently disabling S3 tab for ONT v1, but it could be re-enabled in the future.
+    // Basespace upload is disabled for Nanopore pipelines because it only stores Illumina files.
+    const s3Tab = this.renderUploadTab(shouldDisableS3Tab, REMOTE_UPLOAD_LABEL);
     const basespaceTab = this.renderUploadTab(
-      isLongReadMngs,
+      shouldDisableBasespaceTab,
       BASESPACE_UPLOAD_LABEL,
     );
 
@@ -1220,6 +1223,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   };
 
   render() {
+    const { admin, biohubS3UploadEnabled } = this.props;
     const { allowedFeatures } = this.context || {};
     const {
       currentTab,
@@ -1293,11 +1297,13 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
             onWetlabProtocolChange={this.handleWetlabProtocolChange}
             onTechnologyToggle={this.handleTechnologyToggle}
             onWorkflowToggle={this.handleWorkflowToggle}
+            currentTab={currentTab}
             selectedMedakaModel={selectedMedakaModel}
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
             selectedTechnology={selectedTechnology}
             selectedWorkflows={selectedWorkflows}
             selectedWetlabProtocol={selectedWetlabProtocol}
+            s3UploadEnabled={admin || biohubS3UploadEnabled}
             usedClearLabs={usedClearLabs}
           />
           <div className={cs.fileUpload}>
