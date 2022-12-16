@@ -186,7 +186,7 @@ export const processAMRWorkflowRun = (
       adjustedRemainingReads && percentRemaining
         ? `${numberWithCommas(
             adjustedRemainingReads,
-          )}${percentRemaining.toFixed(2)}%`
+          )} (${percentRemaining.toFixed(2)}%)`
         : BLANK_TEXT;
     const qcPercent = qcPercentOriginal
       ? `${qcPercentOriginal.toFixed(2)}%`
