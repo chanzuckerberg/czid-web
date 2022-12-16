@@ -32,16 +32,19 @@ export const CATEGORIES = {
     dimmedColor: "dimOrange",
     tooltip: (
       <>
-        {"TODO create doc describing LCRP algorithm and link it "}
+        {
+          "Outlier organism with potential human disease significance. See documentation "
+        }
         <ExternalLink
-          href={"/pathogen_list"}
+          href={
+            "https://docs.google.com/document/d/1bhG7tEVBN8IFrRddw4CiCw0tZLMf8NPzxi1ZghcsvvM/edit?usp=sharing"
+          }
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
           }
         >
-          here
+          here.
         </ExternalLink>
-        {" so users can understand the tag."}
       </>
     ),
   },
