@@ -28,7 +28,10 @@ import { IconInfoSmall } from "~/components/ui/icons";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { SHARED_SAMPLE_TABLE_COLUMNS } from "~/components/views/samples/constants";
+import {
+  SHARED_SAMPLE_TABLE_COLUMNS,
+  SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
+} from "~/components/views/samples/constants";
 import Histogram from "~/components/visualizations/Histogram";
 import BarChartToggle from "~/components/visualizations/bar_charts/BarChartToggle";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
@@ -820,8 +823,10 @@ function QualityControl({
                     </span>
                   }
                   title="Total Reads"
-                  content={SHARED_SAMPLE_TABLE_COLUMNS.totalReads.tooltip}
-                  link={SHARED_SAMPLE_TABLE_COLUMNS.totalReads.link}
+                  content={
+                    SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.totalReads.tooltip
+                  }
+                  link={SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.totalReads.link}
                 />
               </div>
               <div
@@ -853,8 +858,10 @@ function QualityControl({
                     </span>
                   }
                   title="Passed QC"
-                  content={SHARED_SAMPLE_TABLE_COLUMNS.qcPercent.tooltip}
-                  link={SHARED_SAMPLE_TABLE_COLUMNS.qcPercent.link}
+                  content={
+                    SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.qcPercent.tooltip
+                  }
+                  link={SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.qcPercent.link}
                 />
               </div>
               <div
@@ -887,11 +894,12 @@ function QualityControl({
                   }
                   title="DCR"
                   content={
-                    SHARED_SAMPLE_TABLE_COLUMNS.duplicateCompressionRatio
-                      .tooltip
+                    SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS
+                      .duplicateCompressionRatio.tooltip
                   }
                   link={
-                    SHARED_SAMPLE_TABLE_COLUMNS.duplicateCompressionRatio.link
+                    SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS
+                      .duplicateCompressionRatio.link
                   }
                 />
               </div>
@@ -929,8 +937,12 @@ function QualityControl({
                     </span>
                   }
                   title="Mean Insert Size"
-                  content={SHARED_SAMPLE_TABLE_COLUMNS.meanInsertSize.tooltip}
-                  link={SHARED_SAMPLE_TABLE_COLUMNS.meanInsertSize.link}
+                  content={
+                    SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.meanInsertSize.tooltip
+                  }
+                  link={
+                    SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS.meanInsertSize.link
+                  }
                 />
                 {showMeanInsertSizeWarning && (
                   <div className={cs.message}>
