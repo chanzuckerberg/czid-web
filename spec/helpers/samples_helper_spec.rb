@@ -911,6 +911,58 @@ RSpec.describe SamplesHelper, type: :helper do
     end
   end
 
+  describe "#filter_samples" do
+    before do
+      project = create(:project)
+
+      @sample_one = create(:sample, project: project, initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs])
+      @sample_two = create(:sample, project: project, initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs])
+      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id])
+    end
+
+    it "does not apply annotation filters to long-read-mngs samples" do
+      filters = {
+        workflow: WorkflowRun::WORKFLOW[:long_read_mngs],
+        annotations: {
+          name: "Hit",
+        },
+      }
+      expect(helper).to receive(:filter_samples).and_return(@samples_input)
+      expect(helper).not_to receive(:filter_by_taxon_annotation)
+      helper.send(:filter_samples, @samples_input, filters)
+    end
+
+    it "does not apply taxon filters to long-read-mngs samples" do
+      filters = {
+        workflow: WorkflowRun::WORKFLOW[:long_read_mngs],
+        taxon: [570, 573],
+      }
+      expect(helper).to receive(:filter_samples).and_return(@samples_input)
+      expect(helper).not_to receive(:filter_by_taxid)
+      helper.send(:filter_samples, @samples_input, filters)
+    end
+
+    it "does not apply taxon threshold filters to long-read-mngs samples" do
+      threshold = [
+        {
+          metric: "e_value",
+          count_type: "NT",
+          operator: ">=",
+          value: 10,
+        }.to_json,
+      ]
+      filters = {
+        workflow: WorkflowRun::WORKFLOW[:long_read_mngs],
+        taxon: [570, 573],
+        taxaLevels: ["genus", "species"],
+        taxonThresholds: threshold,
+      }
+      expect(helper).to receive(:filter_samples).and_return(@samples_input)
+      expect(helper).not_to receive(:filter_by_taxon_threshold)
+      helper.send(:filter_samples, @samples_input, filters)
+    end
+  end
+
   describe "#format_samples" do
     # TODO: Backfill more tests.
   end

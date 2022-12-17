@@ -170,14 +170,14 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     } = this.loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
 
     const { annotations, taxa, thresholds } = tempSelectedOptions || {};
-
+    const { currentTab } = nonNestedUrlState;
     const persistedDiscoveryFiltersPresent = [
       annotations,
       taxa,
       thresholds,
     ].some(filter => !isEmpty(filter));
 
-    if (persistedDiscoveryFiltersPresent) {
+    if (persistedDiscoveryFiltersPresent && currentTab !== TABS.LONG_READ_MNGS) {
       showNotification(NOTIFICATION_TYPES.discoveryViewFiltersPersisted, {
         revertToSampleViewFilters: this.revertToSampleViewFilters,
       });
@@ -215,7 +215,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       coverageVizDataByTaxon: {},
       coverageVizParams: {},
       coverageVizVisible: false,
-      currentTab: null,
+      currentTab: currentTab,
       hasPersistedBackground: false,
       filteredReportData: [],
       loadingReport: false,
@@ -231,7 +231,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       sample: null,
       selectedOptions: {
         ...getDefaultSelectedOptions(),
-        ...(!isEmpty(tempSelectedOptions)
+        // for long read mNGS samples, do not allow taxon filters in tempSelectedOptions to persist from DiscoveryView
+        ...(!isEmpty(tempSelectedOptions && currentTab !== TABS.LONG_READ_MNGS)
           ? tempSelectedOptions
           : {
               ...selectedOptionsFromLocal,

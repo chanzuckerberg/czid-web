@@ -366,14 +366,14 @@ module SamplesHelper
       samples = filter_by_workflow(samples, workflow) if workflow.present?
 
       # Taxon filters
-      if tax_ids.present?
+      if tax_ids.present? && workflow != WorkflowRun::WORKFLOW[:long_read_mngs]
         samples = if threshold_filter_info.present?
                     filter_by_taxon_threshold(samples, tax_ids, tax_levels, threshold_filter_info)
                   else
                     filter_by_taxid(samples, tax_ids)
                   end
       end
-      samples = filter_by_taxon_annotation(samples, annotations, tax_ids) if annotations.present?
+      samples = filter_by_taxon_annotation(samples, annotations, tax_ids) if annotations.present? && workflow != WorkflowRun::WORKFLOW[:long_read_mngs]
     end
 
     samples
