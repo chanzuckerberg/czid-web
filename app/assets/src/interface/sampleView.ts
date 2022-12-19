@@ -55,18 +55,25 @@ export interface Lineage {
   rank: "kingdom" | "phylum" | "class" | "order" | "family" | "genus";
 }
 
+export interface BlastData {
+  context: object;
+  pipelineVersion: string;
+  sampleId: number;
+  taxName: string;
+  taxLevel: number;
+  taxId: number;
+  taxonStatsByCountType: {
+    ntContigs: number;
+    ntReads: number;
+    nrContigs: number;
+    nrReads: number;
+  };
+}
+
 export interface SampleViewState {
   amrDeprecatedData?: AmrDeprectatedData[];
   backgrounds: Background[];
-  blastData: {
-    context;
-    pipelineVersion;
-    sampleId;
-    taxName;
-    taxLevel;
-    taxId;
-    taxonStatsByCountType;
-  };
+  blastData: BlastData;
   blastModalInfo: BlastModalInfo;
   blastSelectionModalVisible: boolean;
   blastContigsModalVisible?: boolean;

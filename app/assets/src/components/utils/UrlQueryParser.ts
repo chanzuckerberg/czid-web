@@ -11,7 +11,7 @@ class UrlQueryParser {
     this._types = types;
   }
 
-  parse(query: $TSFixMe) {
+  parse(query: string) {
     const params = QueryString.parse(query);
     Object.entries(this._types).forEach(([key, type]) => {
       if (params[key]) {

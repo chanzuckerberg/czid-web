@@ -96,7 +96,10 @@ const BlastSelectionModal = ({
     const blastOptionIsSelected = blastOptionSelected === blastType;
 
     let blastTitle = (
-      <div className={cx(cs.title, blastOptionIsDisabled && cs.disabled)}>
+      <div
+        key={blastType}
+        className={cx(cs.title, blastOptionIsDisabled && cs.disabled)}
+      >
         {blastType}
       </div>
     );
@@ -121,6 +124,7 @@ const BlastSelectionModal = ({
         onClick={() =>
           blastOptionIsDisabled ? null : setBlastOptionSelected(blastType)
         }
+        key={nanoid()}
       >
         <RadioButton
           disabled={blastOptionIsDisabled}
