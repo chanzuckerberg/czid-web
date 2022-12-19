@@ -378,7 +378,10 @@ const ReportFilters = ({
               value={selectedTreeMetric || treeMetrics[0].value}
               onChange={(value: string) =>
                 handleFilterChange({
-                  key: "metric",
+                  key:
+                    currentTab === TABS.SHORT_READ_MNGS
+                      ? "metric"
+                      : "metricBases",
                   value,
                 })
               }
