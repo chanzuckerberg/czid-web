@@ -922,7 +922,7 @@ class SamplesController < ApplicationController
     permitted_params = params.permit(:id, :pipeline_version, :background, :skip_cache, :share_id, :merge_nt_nr)
     pipeline_run = select_pipeline_run(@sample, permitted_params[:pipeline_version])
     background_id = get_background_id(@sample, permitted_params[:background], permitted_params[:share_id])
-    priority_pathogens = fetch_priority_pathogens()
+    known_pathogens = fetch_known_pathogens()
 
     editable_sample = current_power.updatable_sample?(@sample)
     annotation_allowed = current_user && current_user.allowed_feature?("annotation")
@@ -953,10 +953,10 @@ class SamplesController < ApplicationController
 
       json =
         fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate) do
-          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], priority_pathogens: priority_pathogens, show_annotations: show_annotations)
+          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], known_pathogens: known_pathogens, show_annotations: show_annotations)
         end
     else
-      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], priority_pathogens: priority_pathogens, show_annotations: show_annotations)
+      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], known_pathogens: known_pathogens, show_annotations: show_annotations)
     end
     render json: json
   rescue PipelineReportService::MassNormalizedBackgroundError => e
@@ -1721,12 +1721,9 @@ class SamplesController < ApplicationController
     )
   end
 
-  def fetch_priority_pathogens
+  def fetch_known_pathogens
     if current_user
-      pathogen_list_version = PathogenList.find_by(is_global: true).fetch_list_version()
-      { "knownPathogen" => pathogen_list_version.fetch_pathogen_names() }
-    else
-      TaxonLineage::PRIORITY_PATHOGENS
+      PathogenList.find_by(is_global: true).fetch_list_version().fetch_pathogen_names()
     end
   end
 end

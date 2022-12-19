@@ -92,6 +92,9 @@ class PipelineReportService
 
   DEFAULT_SORT_PARAM = :agg_score
 
+  TAG_KNOWN_PATHOGEN = "knownPathogen".freeze
+  TAG_LCRP = "lcrp".freeze
+
   CSV_READS_COLUMNS = [
     "tax_id",
     "tax_level",
@@ -159,7 +162,7 @@ class PipelineReportService
     NANOPORE => CSV_BASES_COLUMNS,
   }.freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, priority_pathogens: TaxonLineage::PRIORITY_PATHOGENS, show_annotations: false)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, known_pathogens: {}, show_annotations: false)
     @pipeline_run = pipeline_run
     @technology = pipeline_run.technology
     # In ont_v1, we are not supporting backgrounds for nanopore mngs samples
@@ -168,7 +171,7 @@ class PipelineReportService
     @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS[@technology]
     @parallel = parallel
     @merge_nt_nr = merge_nt_nr
-    @priority_pathogens = priority_pathogens
+    @known_pathogens = known_pathogens
     @show_annotations = show_annotations
     @use_decimal_columns = AppConfigHelper.get_app_config(AppConfig::PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS, false) == "1"
   end
@@ -305,11 +308,10 @@ class PipelineReportService
   def process_taxon_counts_by_tax_level(taxon_counts:, total_count:, contigs:)
     # TODO(tiago): check if still necessary and move out of reports helper
     counts_by_tax_level, merged_count_types_by_tax_level = *taxon_counts
+    species_counts = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES]
+    genus_counts = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
 
-    ReportsHelper.cleanup_missing_genus_counts(
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
-    )
+    ReportsHelper.cleanup_missing_genus_counts(species_counts, genus_counts)
     @timer.split("cleanup_missing_genus_counts")
 
     unless @use_decimal_columns
@@ -331,16 +333,10 @@ class PipelineReportService
     end
     @timer.split("compute_z_scores")
 
-    compute_aggregate_scores(
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
-    )
+    compute_aggregate_scores(species_counts, genus_counts)
     @timer.split("compute_agg_scores")
 
-    add_children_species_to_genus(
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
-    )
+    add_children_species_to_genus(species_counts, genus_counts)
     @timer.split("add_children_species_to_genus")
 
     # TODO: we should try to use TaxonLineage::fetch_lineage_by_taxid
@@ -349,12 +345,12 @@ class PipelineReportService
                       .joins(:alignment_config)
                       .find(@pipeline_run.id)[:lineage_version]
 
-    tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
+    tax_ids = genus_counts.keys
     # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
     # species id rather than genus id, so select those species ids as well.
     # TODO: check if this step is still necessary after the data has been cleaned up.
     species_with_missing_genus = []
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
+    species_counts.each do |tax_id, species|
       species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
     end
     tax_ids.concat(species_with_missing_genus)
@@ -375,11 +371,12 @@ class PipelineReportService
     )
     @timer.split("fill_missing_names")
 
-    tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
+    # Tag pathogen from predefined list (sample-agnostic)
+    tag_known_pathogens(species_counts)
     @timer.split("tag_pathogens")
 
-    # for users with `pathogen_multitagging` feature flag on
-    tag_lcrp_pathogens(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES])
+    # And tag pathogens that are likely clinically relevant for this sample
+    tag_lcrp_pathogens(species_counts)
     @timer.split("tag_lcrp_pathogens")
 
     structured_lineage = encode_taxon_lineage(lineage_by_tax_id)
@@ -388,8 +385,8 @@ class PipelineReportService
     sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
     @timer.split("sort_genus_by_aggregate_score")
 
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
-      genus[:species_tax_ids] = genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
+    genus_counts.transform_values! do |genus|
+      genus[:species_tax_ids] = genus[:species_tax_ids].sort_by { |species_id| species_counts[species_id][DEFAULT_SORT_PARAM] }.reverse!
       genus
     end
     @timer.split("sort_species_within_each_genus")
@@ -865,12 +862,6 @@ class PipelineReportService
     end
   end
 
-  def tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
-    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES], lineage_by_tax_id)
-    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS], lineage_by_tax_id)
-    counts_by_tax_level
-  end
-
   def tag_lcrp_pathogens(species_counts)
     nonvirus_tax_ids = []
 
@@ -884,7 +875,7 @@ class PipelineReportService
       if taxon_passes_preliminary_filters
         if taxon_is_a_virus && tax_info.dig(:nt, :rpm) && tax_info[:nt][:rpm] > 1 && tax_info.dig(:nr, :rpm) && tax_info[:nr][:rpm] > 1
           # viruses have a simple check to determine if they are lcrp
-          (tax_info['pathogenTags'] ||= []).push('lcrp')
+          (tax_info['pathogenTags'] ||= []).push(TAG_LCRP)
         else
           # non-viruses are placed into an array for later top 15/largest rpm drop analysis
           nonvirus_tax_ids.append(tax_id)
@@ -912,37 +903,18 @@ class PipelineReportService
 
       tax_ids_above_drop = top_15_by_rpm.slice(0, largest_drop_index + 1)
 
-      # depends on get_best_pathogen_tag() being run previously
-      known_pathogen_tax_ids = tax_ids_above_drop.select { |tax_id| (species_counts[tax_id]['pathogenTags'] || []).include?('knownPathogen') }
+      # depends on tag_known_pathogens() being run previously
+      known_pathogen_tax_ids = tax_ids_above_drop.select { |tax_id| (species_counts[tax_id]['pathogenTags'] || []).include?(TAG_KNOWN_PATHOGEN) }
 
-      known_pathogen_tax_ids.each { |tax_id| (species_counts[tax_id]['pathogenTags'] ||= []).push('lcrp') }
+      known_pathogen_tax_ids.each { |tax_id| (species_counts[tax_id]['pathogenTags'] ||= []).push(TAG_LCRP) }
     end
   end
 
-  def get_best_pathogen_tag(tax_map, lineage_by_tax_id)
-    tax_map.each do |tax_id, tax_info|
-      pathogen_tags = []
-      if lineage_by_tax_id[tax_id]
-        lineage = lineage_by_tax_id[tax_id]
-      elsif lineage_by_tax_id[tax_info[:genus_tax_id]]
-        lineage = lineage_by_tax_id[tax_info[:genus_tax_id]]
-      end
-
-      @priority_pathogens.each do |category, pathogen_list|
-        if lineage
-          name_columns = lineage.keys.select { |cn| cn.include?("_name") }
-          name_columns.each do |col|
-            pathogen_tags |= [category] if pathogen_list.include?(lineage[col])
-          end
-        end
-        pathogen_tags |= [category] if pathogen_list.include?(tax_info[:name])
-      end
-
-      best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
-      if best_tag
-        tax_info['pathogenTag'] = best_tag
-        # for users with `pathogen_multitagging` feature flag on
-        (tax_info['pathogenTags'] ||= []).push(tax_info['pathogenTag'])
+  def tag_known_pathogens(tax_map)
+    tax_map.each do |_, tax_info|
+      if @known_pathogens.include?(tax_info[:name])
+        tax_info['pathogenTag'] = TAG_KNOWN_PATHOGEN
+        (tax_info['pathogenTags'] ||= []).push(TAG_KNOWN_PATHOGEN)
       end
     end
   end

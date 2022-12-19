@@ -740,15 +740,11 @@ RSpec.describe PipelineReportService, type: :service do
                                create(:pipeline_run,
                                       sample: create(:sample, project: create(:project))).id,
                              ])
-        @report = PipelineReportService.call(@pipeline_run, @background.id)
+        @report = PipelineReportService.call(@pipeline_run, @background.id, known_pathogens: ["Escherichia coli", "Salmonella enterica"])
       end
 
       it "should not tag nonpathogenic genera" do
         expect(JSON.parse(@report)["counts"]["2"]["1"]).not_to include("pathogenTag")
-      end
-
-      it "should tag pathogenic genera" do
-        expect(JSON.parse(@report)["counts"]["2"]["4"]).to include_json("pathogenTag" => "categoryB")
       end
 
       it "should not tag nonpathogenic species" do
@@ -756,11 +752,11 @@ RSpec.describe PipelineReportService, type: :service do
       end
 
       it "should tag pathogenic species" do
-        expect(JSON.parse(@report)["counts"]["1"]["3"]).to include_json("pathogenTag" => "categoryB")
+        expect(JSON.parse(@report)["counts"]["1"]["3"]).to include("pathogenTag")
       end
 
       it "should tag species belonging to a pathogenic genus" do
-        expect(JSON.parse(@report)["counts"]["1"]["5"]).to include_json("pathogenTag" => "categoryB")
+        expect(JSON.parse(@report)["counts"]["1"]["5"]).to include("pathogenTag")
       end
     end
 

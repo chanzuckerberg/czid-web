@@ -68,49 +68,6 @@ class TaxonLineage < ApplicationRecord
   # 9605 is the genus, 9606 the species.
   HOMO_SAPIENS_TAX_IDS = [9605, 9606].freeze
 
-  # From https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens
-  # Accessed 9/18/2018.
-  # Categories are listed in order of priority (A, B, C). So if a taxon is included by the rules of both
-  # category_A and category_C, for example, we will keep only category_A.
-  # (When iterating over the hash key order is guaranteed to be the same as insertion order.)
-  PRIORITY_PATHOGENS = {
-    "categoryA" => Set[
-      "Bacillus anthracis", "Clostridium botulinum", "Yersinia pestis",
-      "orthopoxvirus", "Variola virus", "parapoxvirus", "yatapoxvirus", "molluscipoxvirus",
-      "Francisella tularensis",
-      "Arenavirus", "Argentinian mammarenavirus", "Machupo mammarenavirus", "Guanarito mammarenavirus",
-      "Chapare mammarenavirus", "Lassa mammarenavirus", "Lujo mammarenavirus",
-      "Bunyavirales", "Hantaviridae",
-      "Flavivirus", "Dengue virus",
-      "Filoviridae", "Ebolavirus", "Marburgvirus"
-    ],
-    "categoryB" => Set[
-      "Burkholderia pseudomallei", "Coxiella burnetii", "Brucella", "Burkholderia mallei",
-      "Chlaydia psittaci", "Ricinus communis", "Clostridium perfringens", "Staphylococcus aureus",
-      "Rickettsia prowazekii", "Escherichia coli", "Vibrio cholerae", "Vibrio parahaemolyticus", "Vibrio vulnificus",
-      "Shigella", "Salmonella", "Listeria monocytogenes", "Campylobacter jejuni", "Yersinia enterocolitica",
-      "Caliciviridae", "Hepatovirus A", "Cryptosporidium parvum", "Cyclospora cayetanensis", "Giardia lamblia",
-      "Entamoeba histolytica", "Toxoplasma gondii", "Naegleria fowleri", "Balamuthia mandrillaris", "Microsporidia",
-      "West Nile virus", "California encephalitis orthobunyavirus", "Venezuelan equine encephalitis virus",
-      "Eastern equine encephalitis virus", "Western equine encephalitis virus", "Japanese encephalitis virus",
-      "Saint Louis encephalitis virus", "Yellow fever virus", "Chikungunya virus", "Zika virus"
-    ],
-    "categoryC" => Set[
-      "Nipah henipavirus", "Hendra henipavirus", "Severe fever with thrombocytopenia virus", "Heartland virus",
-      "Omsk hemorrhagic fever virus", "Kyasanur Forest disease virus", "Tick-borne encephalitis virus",
-      "Powassan virus", "Mycobacterium tuberculosis",
-      "unidentified influenza virus", "Influenza A virus", "Influenza B virus", "Influenza C virus",
-      "Rickettsia", "Rabies lyssavirus", "prion", "Coccidioides",
-      "Severe acute respiratory syndrome-related coronavirus", "Middle East respiratory syndrome-related coronavirus",
-      "Acanthamoeba", "Anaplasma phagocytophilum", "Australian bat lyssavirus", "Babesia",
-      "Bartonella henselae", "Human polyomavirus 1", "Bordetella pertussis", "Borrelia mayonii",
-      "Borrelia miyamotoi", "Ehrlichia", "Anaplasma", "Enterovirus D", "Enterovirus A",
-      "Hepacivirus C", "Orthohepevirus A", "Human betaherpesvirus 6", "Human gammaherpesvirus 8",
-      "Human polyomavirus 2", "Leptospira", "Mucorales", "Mucor", "Rhizopus", "Absidia", "Cunninghamella",
-      "Enterovirus C", "Measles morbillivirus", "Streptococcus sp. 'group A'"
-    ],
-  }.freeze
-
   CATEGORIES = {
     2 => "bacteria",
     2_157 => "archaea",
