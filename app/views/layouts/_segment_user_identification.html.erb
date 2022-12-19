@@ -1,0 +1,10 @@
+<% if ENV["SEGMENT_JS_ID"] && current_user && current_user.id %>
+  <!-- See https://segment.com/docs/connections/sources/catalog/libraries/website/javascript/ for more information on analytics.identify() -->
+  <!-- analytics.identify([userId], [traits], [options], [callback]) -->
+  <script type="text/plain" class="optanon-category-C0002">
+    analytics.identify(
+      <%= current_user.id %>,
+      <%= raw escape_json(current_user.traits_for_analytics(include_pii: true)) %>,
+    );
+  </script>
+<% end %>
