@@ -6,7 +6,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 const includedNodeModules = ["query-string", "strict-uri-encode"];
 
 const config = {
-  entry: `${path.resolve(__dirname, "app/assets/src/")}/index.jsx`,
+  entry: `${path.resolve(__dirname, "app/assets/src/")}/index.tsx`,
   output: {
     path: path.resolve(__dirname, "app/assets/"),
     filename: "dist/[name].bundle.min.js",

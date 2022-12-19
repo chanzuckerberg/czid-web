@@ -25,11 +25,12 @@ Sentry.init({
   release: window.GIT_RELEASE_SHA,
 });
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 if (!function f() {}.name) {
   // eslint-disable-next-line no-extend-native
   Object.defineProperty(Function.prototype, "name", {
     get: function() {
-      var name = (this.toString().match(/^function\s*([^\s(]+)/) || [])[1];
+      const name = (this.toString().match(/^function\s*([^\s(]+)/) || [])[1];
       Object.defineProperty(this, "name", { value: name });
       return name;
     },
