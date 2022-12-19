@@ -4,15 +4,9 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import { ICONS_TAXONOMY } from "~ui/icons";
 import cs from "./Icons.stories.scss";
 
-export default {
-  title: "Bases/Icons",
-  component: SvgIcons,
-  argTypes: {},
-};
-
 export const SvgIcons = () => {
   const customIcons = Object.values(
-    ICONS_TAXONOMY.CUSTOM
+    ICONS_TAXONOMY.CUSTOM,
   ).map(IconComponent => (
     <IconComponent key={IconComponent.name} className={cs.icon} />
   ));
@@ -29,4 +23,10 @@ export const SvgIcons = () => {
       </div>
     </NarrowContainer>
   );
+};
+
+export default {
+  title: "Bases/Icons",
+  component: SvgIcons,
+  argTypes: {},
 };

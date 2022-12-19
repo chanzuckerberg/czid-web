@@ -1,4 +1,5 @@
 const path = require("path");
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 module.exports = {
   stories: ["../stories/**/*.stories.@(js|jsx|ts|tsx)"],
@@ -10,7 +11,11 @@ module.exports = {
       "~utils": path.resolve(__dirname, "../app/assets/src/components/utils"),
       styles: path.resolve(__dirname, "../app/assets/src/styles"),
     };
-
+    config.resolve.plugins = [
+      new TsconfigPathsPlugin({
+        configFile: path.resolve(__dirname, "../stories/tsconfig.json"),
+      }),
+    ];
     config.module.rules.push({
       test: /\.scss$/,
       use: [

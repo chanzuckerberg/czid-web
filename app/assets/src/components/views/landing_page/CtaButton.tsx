@@ -3,7 +3,7 @@ import cs from "./CtaButton.scss";
 
 interface CtaButtonProps {
   text: string;
-  className: string;
+  className?: string;
   linkUrl?: string;
 }
 

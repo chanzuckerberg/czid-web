@@ -1,4 +1,5 @@
 import { storiesOf } from "@storybook/react";
+import cs from "./Dropdowns.stories.scss";
 import React from "react";
 
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
@@ -8,11 +9,10 @@ import {
   DEFAULT_MEDAKA_MODEL_OPTION,
   MEDAKA_MODEL_OPTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
-import cs from "./Dropdowns.stories.scss";
 
 const DefaultDropdown = () => {
   const [selectedValue, setSelectedValue] = React.useState(
-    DEFAULT_MEDAKA_MODEL_OPTION
+    DEFAULT_MEDAKA_MODEL_OPTION,
   );
 
   const handleSelectionChange = value => setSelectedValue(value);
@@ -33,7 +33,7 @@ const DefaultDropdown = () => {
 
 const Sections = () => {
   const [selectedValue, setSelectedValue] = React.useState(
-    DEFAULT_MEDAKA_MODEL_OPTION
+    DEFAULT_MEDAKA_MODEL_OPTION,
   );
 
   const handleSelectionChange = value => setSelectedValue(value);
@@ -51,7 +51,7 @@ const Sections = () => {
 
 const Subtext = () => {
   const [selectedValue, setSelectedValue] = React.useState(
-    DEFAULT_MEDAKA_MODEL_OPTION
+    DEFAULT_MEDAKA_MODEL_OPTION,
   );
 
   const handleSelectionChange = value => setSelectedValue(value);

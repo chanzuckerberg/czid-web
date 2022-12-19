@@ -2,12 +2,6 @@ import React, { useState } from "react";
 
 import TabbedGalleryTab from "~/components/views/landing_page/TabbedGalleryTab";
 
-export default {
-  title: "Kurt Noble Lander/Components",
-  component: KurtNobleTabbedGalleryTab,
-  argTypes: {},
-};
-
 export const KurtNobleTabbedGalleryTab = () => {
   const [activeTab, setActiveTab] = useState(null);
 
@@ -23,4 +17,10 @@ export const KurtNobleTabbedGalleryTab = () => {
       />
     </div>
   );
+};
+
+export default {
+  title: "Kurt Noble Lander/Components",
+  component: KurtNobleTabbedGalleryTab,
+  argTypes: {},
 };
