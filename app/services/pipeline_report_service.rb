@@ -130,6 +130,7 @@ class PipelineReportService
     "nr_bg_mean_mass_normalized",
     "nr_bg_stdev_mass_normalized",
     "species_tax_ids",
+    "known_pathogen",
   ].freeze
 
   CSV_BASES_COLUMNS = [
@@ -155,6 +156,7 @@ class PipelineReportService
     "nr_alignment_length",
     "nr_e_value",
     "species_tax_ids",
+    "known_pathogen",
   ].freeze
 
   CSV_COLUMNS = {
@@ -162,7 +164,7 @@ class PipelineReportService
     NANOPORE => CSV_BASES_COLUMNS,
   }.freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, known_pathogens: {}, show_annotations: false)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, known_pathogens: {}, show_annotations: false, lcrp: false)
     @pipeline_run = pipeline_run
     @technology = pipeline_run.technology
     # In ont_v1, we are not supporting backgrounds for nanopore mngs samples
@@ -174,6 +176,8 @@ class PipelineReportService
     @known_pathogens = known_pathogens
     @show_annotations = show_annotations
     @use_decimal_columns = AppConfigHelper.get_app_config(AppConfig::PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS, false) == "1"
+    # LCRP = Likely clinically relevant pathogens
+    @lcrp = lcrp
   end
 
   def call
@@ -943,16 +947,41 @@ class PipelineReportService
         rows << species_flat_hash
       end
     end
+    rows = rows.map { |row| row.map { |k, v| [k.map(&:to_s).join("_"), v] }.to_h }
 
     CSVSafe.generate(headers: true) do |csv|
-      csv << CSV_COLUMNS[@technology]
-      rows.each do |row|
-        tax_info = row.map { |k, v| [k.map(&:to_s).join("_"), v] }.to_h
+      columns = CSV_COLUMNS[@technology]
+      if @lcrp
+        columns += ["lcrp_pathogen"]
+      end
+
+      csv << columns
+      rows.each do |tax_info|
         # e_value is stored as the base 10 log of the actual value, but for a
         # csv report we want to give the full direct value
         tax_info["nt_e_value"] = tax_info["nt_e_value"].nil? ? nil : "10^#{tax_info['nt_e_value']}"
         tax_info["nr_e_value"] = tax_info["nr_e_value"].nil? ? nil : "10^#{tax_info['nr_e_value']}"
-        csv << tax_info.values_at(*CSV_COLUMNS[@technology])
+
+        # Pathogen/LCRP tags: for a genus, consider all its species rows; for a species, consider only itself
+        rows_to_consider = if tax_info["species_tax_ids"]
+                             rows.select { |r| tax_info["species_tax_ids"].include?(r["tax_id"]) }
+                           else
+                             [tax_info]
+                           end
+
+        # Count up the number of species that are known pathogen or LCRP
+        tax_info["known_pathogen"] = 0
+        tax_info["lcrp_pathogen"] = 0
+        rows_to_consider.each do |row|
+          if row["pathogenTag"] == TAG_KNOWN_PATHOGEN
+            tax_info["known_pathogen"] += 1
+          end
+          if (row["pathogenTags"] || []).include?(TAG_LCRP)
+            tax_info["lcrp_pathogen"] += 1
+          end
+        end
+
+        csv << tax_info.values_at(*columns)
       end
     end
   end

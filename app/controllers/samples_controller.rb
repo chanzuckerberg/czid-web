@@ -796,7 +796,8 @@ class SamplesController < ApplicationController
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
     min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS[pipeline_run.technology]
-    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_reads: min_contig_reads)
+    is_lcrp_enabled = current_user && current_user.allowed_feature?("multitag_pathogens")
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_reads: min_contig_reads, known_pathogens: fetch_known_pathogens(), lcrp: is_lcrp_enabled)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
