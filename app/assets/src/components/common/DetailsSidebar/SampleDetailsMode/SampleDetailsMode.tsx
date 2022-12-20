@@ -274,6 +274,7 @@ const SampleDetailsMode = ({
           metadataErrors={metadataErrors}
           sampleTypes={sampleTypes || []}
           snapshotShareId={snapshotShareId}
+          currentWorkflowTab={currentWorkflowTab}
         />
       );
     }

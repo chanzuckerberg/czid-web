@@ -6,6 +6,7 @@ import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
 
+import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
 import { MetadataType, MetadataTypes, SampleType } from "~/interface/shared";
 import { Metadata, returnHipaaCompliantMetadata } from "~utils/metadata";
 import MetadataSection from "./MetadataSection";
@@ -23,6 +24,7 @@ interface MetadataTabProps {
   metadataErrors?: { [key: string]: string };
   sampleTypes: SampleType[];
   snapshotShareId?: string;
+  currentWorkflowTab: string;
 }
 
 interface MetadataTabState {
@@ -181,6 +183,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
       onMetadataChange,
       onMetadataSave,
       snapshotShareId,
+      currentWorkflowTab,
     } = this.props;
     const { sectionEditing } = this.state;
 
@@ -235,12 +238,19 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     }
 
     validKeys.forEach(key => {
-      metadataFields.push({
-        label: metadataTypes[key].name,
-        value: isSectionEditing
-          ? this.renderInput(metadataTypes[key])
-          : this.renderMetadataType(metadataTypes[key]),
-      });
+      // We're temporarily hiding the "Library Prep" and "Sequencer" metadata fields for long-read-mngs samples
+      // TODO: Add long-read-mngs sequencer options and re-enable this metadata field
+      const hideMetadataField =
+        currentWorkflowTab === WORKFLOW_TABS.LONG_READ_MNGS &&
+        ["Library Prep", "Sequencer"].includes(metadataTypes[key].name);
+      if (!hideMetadataField) {
+        metadataFields.push({
+          label: metadataTypes[key].name,
+          value: isSectionEditing
+            ? this.renderInput(metadataTypes[key])
+            : this.renderMetadataType(metadataTypes[key]),
+        });
+      }
     });
 
     return <FieldList fields={metadataFields} className={cs.metadataFields} />;
