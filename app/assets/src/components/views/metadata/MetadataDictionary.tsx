@@ -17,6 +17,7 @@ import { getAllHostGenomes } from "../../../api";
 import { getGroupIndex } from "./constants";
 import cs from "./metadata_dictionary.scss";
 
+// @ts-expect-error Property 'convert' does not exist on type 'LodashMap'.ts(2339)
 const map = _fp.map.convert({ cap: false });
 
 const dictionaryHeaders = {

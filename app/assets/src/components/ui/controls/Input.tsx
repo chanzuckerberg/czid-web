@@ -12,7 +12,7 @@ interface InputProps {
   defaultValue?: string;
   disableAutocomplete?: boolean;
   fluid?: boolean;
-  icon?: string;
+  icon?: string | JSX.Element;
   loading?: boolean;
   placeholder?: string;
   onKeyPress?: $TSFixMeFunction;

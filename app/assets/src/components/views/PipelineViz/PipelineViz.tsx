@@ -25,7 +25,7 @@ const END_NODE_ID = -2;
 
 interface PipelineVizProps {
   showExperimental?: boolean;
-  graphData?: { stages: $TSFixMe; edges: $TSFixMe };
+  graphData?: { stages: $TSFixMe; edges: $TSFixMe; status: $TSFixMe };
   pipelineRun?: PipelineRun;
   sample?: Sample;
   pipelineVersions?: string[];
@@ -180,7 +180,6 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
 
   pipelineIsFinished() {
     const {
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'status' does not exist on type 'object |... Remove this comment to see the full error message
       graphData: { status },
     } = this.state;
     return ["finished", "userErrored", "pipelineErrored"].includes(status);
@@ -199,7 +198,6 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
     direction: $TSFixMe,
   ) {
     const {
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'edges' does not exist on type 'object | ... Remove this comment to see the full error message
       graphData: { edges },
     } = this.state;
     const stepData = this.getStepDataAtIndices({

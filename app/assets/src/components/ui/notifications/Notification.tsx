@@ -4,18 +4,25 @@ import { IconCheckSmall, IconAlert, IconInfo, IconCloseSmall } from "~ui/icons";
 import cs from "./notification.scss";
 
 interface NotificationProps {
-  className: string;
+  className?: string;
   children: React.ReactNode;
-  displayStyle: "flat" | "elevated";
-  onClose: $TSFixMeFunction;
+  displayStyle?: "flat" | "elevated";
+  onClose?: $TSFixMeFunction;
   type: "success" | "info" | "warning" | "error";
-  closeWithDismiss: boolean;
-  closeWithIcon: boolean;
+  closeWithDismiss?: boolean;
+  closeWithIcon?: boolean;
 }
 
-class Notification extends React.Component<NotificationProps> {
-  static defaultProps: NotificationProps;
-  getIcon(type) {
+const Notification = ({
+  children,
+  className,
+  displayStyle = "elevated",
+  onClose,
+  type,
+  closeWithDismiss = true,
+  closeWithIcon = false,
+}: NotificationProps) => {
+  const getIcon = (type: NotificationProps["type"]) => {
     switch (type) {
       case "warning":
       case "error":
@@ -28,42 +35,24 @@ class Notification extends React.Component<NotificationProps> {
         break;
     }
     return null;
-  }
+  };
 
-  render() {
-    const {
-      children,
-      className,
-      displayStyle,
-      onClose,
-      type,
-      closeWithDismiss,
-      closeWithIcon,
-    } = this.props;
-    return (
-      <div
-        className={cx(className, cs.notification, cs[type], cs[displayStyle])}
-      >
-        <div className={cs.icon}>{this.getIcon(type)}</div>
-        <div className={cs.content}>
-          <>{children}</>
-          {onClose && closeWithDismiss && (
-            <div className={cs.actions} onClick={onClose}>
-              Dismiss
-            </div>
-          )}
-        </div>
-        {onClose && closeWithIcon && (
-          <IconCloseSmall className={cs.removeIcon} onClick={onClose} />
+  return (
+    <div className={cx(className, cs.notification, cs[type], cs[displayStyle])}>
+      <div className={cs.icon}>{getIcon(type)}</div>
+      <div className={cs.content}>
+        <>{children}</>
+        {onClose && closeWithDismiss && (
+          <div className={cs.actions} onClick={onClose}>
+            Dismiss
+          </div>
         )}
       </div>
-    );
-  }
-}
-
-Notification.defaultProps = {
-  displayStyle: "elevated",
-  closeWithDismiss: true,
-  closeWithIcon: false,
+      {onClose && closeWithIcon && (
+        <IconCloseSmall className={cs.removeIcon} onClick={onClose} />
+      )}
+    </div>
+  );
 };
+
 export default Notification;

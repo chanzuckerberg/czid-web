@@ -180,7 +180,7 @@ class LiveSearchPopBox extends React.Component<
 
   renderDropdownItems = () => {
     const { results } = this.state;
-
+    // @ts-expect-error Property 'convert' does not exist on type 'LodashForEach'.ts(2339)
     const uncappedForEach = forEach.convert({ cap: false });
     const items = [];
     uncappedForEach((category, key) => {

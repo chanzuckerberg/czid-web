@@ -87,7 +87,7 @@ const MetadataAgeInput = ({
           cs.darkPlaceholder,
           hipaaWarning && ageChanged && "warning",
         )}
-        onChange={val => {
+        onChange={(val: MetadataValue) => {
           const definedVal = ensureDefinedValue({
             key: metadataType.key,
             value: val,
@@ -98,7 +98,7 @@ const MetadataAgeInput = ({
           setSafeHumanAge(definedVal);
           onChange(metadataType.key, definedVal.toString());
         }}
-        onKeyDown={e => handleKeyDown(e)}
+        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => handleKeyDown(e)}
         onBlur={() => onSave && onSave(metadataType.key)}
         value={hipaaWarning ? "" : safeHumanAge}
         type={"number"}

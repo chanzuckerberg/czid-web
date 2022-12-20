@@ -574,7 +574,7 @@ const modifyFeatureFlagForUsers = ({
 const getTaxaWithReadsSuggestions = (
   query: $TSFixMe,
   sampleIds: $TSFixMe,
-  taxLevel: $TSFixMe,
+  taxLevel?: $TSFixMe,
 ) =>
   postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
     query,
@@ -610,11 +610,12 @@ const workflowRunsCreatedByCurrentUser = async (workflowRunIds: $TSFixMe) => {
 };
 
 const userIsCollaboratorOnAllSamples = async (sampleIds: number[]) => {
-  const {
-    user_is_collaborator: userIsCollaborator,
-  } = await postWithCSRF("samples/user_is_collaborator.json", {
+  const { user_is_collaborator: userIsCollaborator } = await postWithCSRF(
+    "samples/user_is_collaborator.json",
+    {
       sampleIds,
-  });
+    },
+  );
   return userIsCollaborator;
 };
 

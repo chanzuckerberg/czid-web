@@ -1,6 +1,7 @@
 import cx from "classnames";
 import { isNil } from "lodash/fp";
 import React from "react";
+import { MetadataValue } from "~/interface/shared";
 import BareDropdown from "./BareDropdown";
 import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./dropdown.scss";
@@ -30,7 +31,7 @@ interface DropdownProps {
   itemSearchStrings?: string[];
   onChange: $TSFixMeFunction;
   onClick?: $TSFixMeFunction;
-  value?: string | number;
+  value?: string | number | MetadataValue;
   search?: boolean;
   menuLabel?: string;
   // Optional header that displays between the search box and the options.
@@ -49,7 +50,7 @@ interface DropdownProps {
 }
 
 interface DropdownState {
-  value: string | number;
+  value: string | number | MetadataValue;
   labels: object;
   subtexts?: $TSFixMe;
 }

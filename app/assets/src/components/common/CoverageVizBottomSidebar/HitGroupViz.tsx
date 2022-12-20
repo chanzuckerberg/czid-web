@@ -10,12 +10,12 @@ import BasicPopup from "~/components/BasicPopup";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import { getURLParamString } from "~/helpers/url";
-import { GenomeVizShape } from "~/interface/shared";
+import { GenomeVizShape, TooltipLocation } from "~/interface/shared";
 import { TooltipVizTable } from "~ui/containers";
 import { IconCopySmall, IconDownloadSmall } from "~ui/icons";
 
 import cs from "./coverage_viz_bottom_sidebar.scss";
-import { AccessionsData, TooltipLocation } from "./types";
+import { AccessionsData } from "./types";
 import { generateContigReadVizData, getGenomeVizTooltipData } from "./utils";
 
 const DEFAULT_CONTIG_COPY_MESSAGE = "Copy Contig Sequence to Clipboard";

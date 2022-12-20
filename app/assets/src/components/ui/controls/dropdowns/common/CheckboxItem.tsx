@@ -19,7 +19,6 @@ const CheckboxItem = ({
   onOptionClick,
   boxed,
 }: CheckboxItemProps) => (
-  // @ts-expect-error 'Item' does not exist on BareDropdown
   <BareDropdown.Item
     onClick={(e: $TSFixMe) => {
       e.stopPropagation();
@@ -43,7 +42,6 @@ const CheckboxItem = ({
         {label}
       </div>
     </div>
-    {/* @ts-expect-error 'Item' does not exist on BareDropdown */}
   </BareDropdown.Item>
 );
 

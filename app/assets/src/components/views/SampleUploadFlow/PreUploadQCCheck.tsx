@@ -1,10 +1,9 @@
-// @ts-expect-error '@biowasm/aioli' is not a typescript repo
 import Aioli from "@biowasm/aioli";
 import { isEmpty } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { Sample } from "~/interface/shared";
+import { SampleFromApi as Sample } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
   ERROR_MESSAGE,

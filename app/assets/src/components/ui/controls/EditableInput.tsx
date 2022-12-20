@@ -9,8 +9,10 @@ import cs from "./editable_input.scss";
 interface EditableInputProps {
   value?: string | number;
   className?: string;
-  onDoneEditing?: $TSFixMeFunction;
-  getWarningMessage?: $TSFixMeFunction;
+  onDoneEditing?: (
+    inputText: string | number,
+  ) => Promise<"" | [string, string]>;
+  getWarningMessage?: (inputText: string) => string;
 }
 
 const EditableInput = ({
@@ -85,7 +87,7 @@ const EditableInput = ({
     );
   };
 
-  const handleInputTextChange = val => {
+  const handleInputTextChange = (val: string) => {
     setInputText(val);
     setError("");
     setWarning(getWarningMessage(val));
@@ -98,7 +100,7 @@ const EditableInput = ({
           <Input
             type="header"
             value={inputText}
-            onChange={val => handleInputTextChange(val)}
+            onChange={handleInputTextChange}
             onKeyPress={e => handleKeyDown(e)}
             disableAutocomplete
             className={cx({

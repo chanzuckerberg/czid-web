@@ -109,7 +109,7 @@ const SamplesHeatmapHeader = ({
     });
   };
 
-  const handleHeatmapRename = async (name: $TSFixMe) => {
+  const handleHeatmapRename = async (name: string) => {
     if (name === "heatmap") return "";
     let error = "";
 
@@ -124,10 +124,10 @@ const SamplesHeatmapHeader = ({
     } catch (e) {
       error = "There was an error renaming your heatmap";
     }
-    return [error, name];
+    return [error, name] as [string, string];
   };
 
-  const getWarningMessage = (inputText: $TSFixMe) => {
+  const getWarningMessage = (inputText: string) => {
     return testForSpecialCharacters(inputText)
       ? 'The special character(s) you entered will be converted to "-"'
       : "";

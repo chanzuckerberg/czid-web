@@ -12,7 +12,6 @@ export const ANALYTICS_EVENT_NAMES = eventNames;
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
 const logAnalyticsEvent = async (eventName: $TSFixMe, eventData = {}) => {
-  // @ts-expect-error ts-migrate(2339) FIXME: Property 'analytics' does not exist on type 'Windo... Remove this comment to see the full error message
   if (window.analytics) {
     // Include high value user groups in event properties to avoid JOINs downstream.
     // @ts-expect-error ts-migrate(2339) FIXME: Property 'analytics' does not exist on type 'Windo... Remove this comment to see the full error message
@@ -78,7 +77,6 @@ export const withAnalytics = (
 };
 
 export const trackPageTransition = () => {
-  // @ts-expect-error ts-migrate(2339) FIXME: Property 'analytics' does not exist on type 'Windo... Remove this comment to see the full error message
   window.analytics && window.analytics.page();
   trackAppcuesPageTransition();
 };

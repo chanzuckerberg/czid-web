@@ -58,7 +58,7 @@ interface ReportFiltersProps {
   view?: SampleReportViewMode;
   enableMassNormalizedBackgrounds?: boolean;
   shouldDisableFilters?: boolean;
-  showBackgroundFilter: boolean;
+  showBackgroundFilter?: boolean;
   snapshotShareId?: string;
 }
 

@@ -2,6 +2,7 @@ import cx from "classnames";
 import { isArray } from "lodash/fp";
 import React, { useState } from "react";
 import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
+import { MetadataValue } from "~/interface/shared";
 import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
@@ -61,7 +62,9 @@ const MetadataInput = ({
         initialChecked={value === onLabel}
         onLabel={onLabel}
         offLabel={offLabel}
-        onChange={label => onChange(metadataType.key, label, true)}
+        onChange={(label: MetadataValue) =>
+          onChange(metadataType.key, label, true)
+        }
         className={className}
       />
     );
@@ -75,7 +78,7 @@ const MetadataInput = ({
         fluid
         floating
         options={options}
-        onChange={val => onChange(metadataType.key, val, true)}
+        onChange={(val: MetadataValue) => onChange(metadataType.key, val, true)}
         value={value}
         className={className}
         usePortal
@@ -86,7 +89,7 @@ const MetadataInput = ({
     return (
       <Input
         className={className}
-        onChange={val => onChange(metadataType.key, val)}
+        onChange={(val: MetadataValue) => onChange(metadataType.key, val)}
         onBlur={() => onSave && onSave(metadataType.key)}
         value={ensureDefinedValue({
           key: metadataType.key,
@@ -111,7 +114,6 @@ const MetadataInput = ({
               selection,
               taxaCategory === "human",
             );
-            // @ts-expect-error Argument of type 'string | LocationObject' is not assignable to parameter of type 'MetadataValue'.
             onChange(metadataType.key, result, true);
           }}
           value={typeof value === "number" ? value.toString() : value}
@@ -149,7 +151,7 @@ const MetadataInput = ({
     return (
       <Input
         className={className}
-        onChange={val => onChange(metadataType.key, val)}
+        onChange={(val: MetadataValue) => onChange(metadataType.key, val)}
         onBlur={() => onSave && onSave(metadataType.key)}
         value={ensureDefinedValue({
           key: metadataType.key,
