@@ -9,11 +9,6 @@ module Queries
     end
 
     def pathogen_list(version: nil)
-      launched = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
-      unless launched.include?("pathogen_list_v0")
-        redirect_to page_not_found_path
-      end
-
       global_pathogen_list = PathogenList.find_by(is_global: true)
       @list_version = nil
       if global_pathogen_list.present?

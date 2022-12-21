@@ -11,10 +11,6 @@ RSpec.describe GraphqlController, type: :request do
       @pathogen_b = create(:pathogen, citation_id: @citation.id, tax_id: @species_b.taxid)
     end
 
-    before do
-      expect(AppConfigHelper).to receive(:get_json_app_config).and_return(["pathogen_list_v0"])
-    end
-
     query = <<-GRAPHQL
       query GetPathogenList {
         pathogenList {
