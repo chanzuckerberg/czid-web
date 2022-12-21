@@ -121,6 +121,7 @@ import {
   TAX_LEVEL_SPECIES,
   KEY_SAMPLE_VIEW_OPTIONS,
   KEY_SELECTED_OPTIONS_BACKGROUND,
+  ONT_PIPELINE_RUNNING_STATUS,
 } from "./constants";
 import {
   adjustMetricPrecision,
@@ -1445,7 +1446,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   renderSampleMessage = () => {
-    const { loadingReport, pipelineRun, reportMetadata, sample } = this.state;
+    const {
+      currentTab,
+      loadingReport,
+      pipelineRun,
+      reportMetadata,
+      sample,
+    } = this.state;
     const { snapshotShareId } = this.props;
     const { pipelineRunStatus, jobStatus } = reportMetadata;
     let status: $TSFixMe, message, subtitle, linkText, type, link, icon;
@@ -1474,7 +1481,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     ) {
       // Note that the pipeline status "WAITING" is obtained from the API at `app/services/pipeline_report_service.rb`
       status = "IN PROGRESS";
-      message = jobStatus;
+      message = currentTab === TABS.LONG_READ_MNGS ? ONT_PIPELINE_RUNNING_STATUS : jobStatus;
       icon = <IconLoading className={csSampleMessage.icon} />;
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
