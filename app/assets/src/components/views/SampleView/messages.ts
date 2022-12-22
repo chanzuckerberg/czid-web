@@ -56,17 +56,29 @@ export const truncatedMessage = truncatedReadsCount => {
   );
 };
 
-export const subsamplingMessage = (
+export const subsamplingReadsMessage = (
   preSubsamplingCount,
   postSubsamplingCount,
-  readsOrBases,
 ) => {
   return (
     preSubsamplingCount &&
     postSubsamplingCount &&
     preSubsamplingCount !== postSubsamplingCount &&
-    `Report values are computed from ${postSubsamplingCount} unique ${readsOrBases} subsampled \
-          randomly from the ${preSubsamplingCount} ${readsOrBases} passing host and quality filters. `
+    `Report values are computed from ${postSubsamplingCount.toLocaleString()} unique reads subsampled \
+          randomly from the ${preSubsamplingCount.toLocaleString()} reads passing host and quality filters. `
+  );
+};
+
+export const subsamplingBasesMessage = (
+  preSubsamplingCount,
+  postSubsamplingCount,
+) => {
+  return (
+    preSubsamplingCount &&
+    postSubsamplingCount &&
+    preSubsamplingCount !== postSubsamplingCount &&
+    `Report values are computed from ${postSubsamplingCount.toLocaleString()} bases subsampled \
+          from the ${preSubsamplingCount.toLocaleString()} bases passing host and quality filters. `
   );
 };
 
@@ -87,7 +99,7 @@ export const renderReportInfo = (currentTab, reportMetadata) => {
     } = reportMetadata;
     return compact([
       truncatedMessage(truncatedReadsCount),
-      subsamplingMessage(preSubsamplingCount, postSubsamplingCount, "reads"),
+      subsamplingReadsMessage(preSubsamplingCount, postSubsamplingCount),
       whitelistedMessage(taxonWhitelisted),
     ]).reduce((reportInfoMsg, msg) => {
       reportInfoMsg += msg;
@@ -100,7 +112,7 @@ export const renderReportInfo = (currentTab, reportMetadata) => {
       taxonWhitelisted,
     } = reportMetadata;
     return compact([
-      subsamplingMessage(preSubsamplingCount, postSubsamplingCount, "bases"),
+      subsamplingBasesMessage(preSubsamplingCount, postSubsamplingCount),
       whitelistedMessage(taxonWhitelisted),
     ]).reduce((reportInfoMsg, msg) => {
       reportInfoMsg += msg;
