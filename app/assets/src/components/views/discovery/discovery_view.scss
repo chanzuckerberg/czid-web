@@ -83,19 +83,14 @@
     }
 
     .workflowTabs {
-      margin-top: $sds-spaces-xs;
-      margin-bottom: $sds-spaces-xs;
+      overflow-x: clip;
 
-      .alignBetaTag {
+      .betaTag {
         display: inline-flex;
-      }
-
-      .tabLabel {
-        @include font-header-xs;
-      }
-
-      .tabCounter {
-        @include font-header-xs;
+        margin-left: $sds-spaces-xs;
+        // Undo xxs right margin and xs bottom margin included in SDS Tag component
+        margin-right: -$sds-spaces-xxs;
+        margin-bottom: -$sds-spaces-xs;
       }
     }
   }

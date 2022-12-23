@@ -1,11 +1,10 @@
 import cx from "classnames";
-import { Icon, ButtonIcon } from "czifui";
-import { startCase } from "lodash/fp";
+import { ButtonIcon, Icon, Tabs } from "czifui";
+import { findIndex, startCase } from "lodash/fp";
 import React from "react";
 
 import BasicPopup from "~/components/BasicPopup";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
-import Tabs from "~ui/controls/Tabs";
 import Label from "~ui/labels/Label";
 
 import cs from "./discovery_header.scss";
@@ -23,13 +22,10 @@ interface DiscoveryHeaderProps {
   searchValue?: string;
   showFilters?: boolean;
   showStats?: boolean;
-  tabs: Array<
-    | string
-    | {
-        value: string;
-        label: JSX.Element;
-      }
-  >;
+  tabs: Array<{
+    value: string;
+    label: JSX.Element;
+  }>;
 }
 
 const DiscoveryHeader = ({
@@ -156,13 +152,15 @@ const DiscoveryHeader = ({
           />
         )}
       </div>
-      <Tabs
-        className={cs.tabs}
-        tabs={tabs}
-        value={currentTab}
-        onChange={onTabChange}
-        hideBorder
-      />
+      <div className={cs.tabs}>
+        <Tabs
+          sdsSize="large"
+          value={findIndex({ value: currentTab }, tabs)}
+          onChange={(_, selectedTabIndex) => onTabChange(selectedTabIndex)}
+        >
+          {tabs.map(tab => tab.label)}
+        </Tabs>
+      </div>
       <div className={cs.blankFill} />
       <div
         className={cx(cs.statsTrigger, disableSidebars && cs.disabled)}

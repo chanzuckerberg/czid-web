@@ -1,3 +1,4 @@
+import { Tab, Tabs } from "czifui";
 import {
   capitalize,
   clone,
@@ -5,6 +6,7 @@ import {
   concat,
   escapeRegExp,
   find,
+  findIndex,
   get as _get,
   isEmpty,
   isNull,
@@ -73,7 +75,6 @@ import {
 } from "~/components/views/samples/SamplesView/ColumnConfiguration";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
-import Tabs from "~ui/controls/Tabs";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
 import ImgVizSecondary from "~ui/illustrations/ImgVizSecondary";
@@ -1113,10 +1114,11 @@ class DiscoveryView extends React.Component {
 
     const renderTab = (label, count) => {
       return (
-        <div data-testid={label.toLowerCase()}>
-          <span className={cs.tabLabel}>{label}</span>
-          <span className={cs.tabCounter}>{count}</span>
-        </div>
+        <Tab
+          data-testid={label.toLowerCase()}
+          label={label}
+          count={count}
+        ></Tab>
       );
     };
     return compact([
@@ -1136,9 +1138,9 @@ class DiscoveryView extends React.Component {
     ]);
   };
 
-  handleTabChange = currentTab => {
+  handleTabChange = currentTabIndex => {
     const { mapSidebarTab, workflow } = this.state;
-
+    const currentTab = this.computeTabs()[currentTabIndex].value;
     this.setState(
       {
         currentTab,
@@ -2022,13 +2024,17 @@ class DiscoveryView extends React.Component {
     const { workflow } = this.state;
 
     return (
-      <Tabs
-        className={cs.workflowTabs}
-        tabs={this.computeWorkflowTabs()}
-        value={workflow}
-        onChange={this.handleWorkflowTabChange}
-        hideBorder
-      />
+      <div className={cs.workflowTabs}>
+        <Tabs
+          sdsSize="small"
+          value={findIndex({ value: workflow }, this.computeWorkflowTabs())}
+          onChange={(_, selectedTabIndex) =>
+            this.handleWorkflowTabChange(selectedTabIndex)
+          }
+        >
+          {this.computeWorkflowTabs().map(tab => tab.label)}
+        </Tabs>
+      </div>
     );
   };
 
@@ -2041,9 +2047,10 @@ class DiscoveryView extends React.Component {
     this.samplesView && this.samplesView.reset();
   };
 
-  handleWorkflowTabChange = workflow => {
+  handleWorkflowTabChange = workflowTabIndex => {
     let { currentDisplay, currentTab } = this.state;
 
+    const workflow = this.computeWorkflowTabs()[workflowTabIndex].value;
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
     const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
     // PLQC is currently only available for short read mNGS samples
@@ -2088,7 +2095,7 @@ class DiscoveryView extends React.Component {
       workflows = pull("LONG_READ_MNGS", workflows);
     }
 
-    if (snapshotShareId) workflows = [workflows[0]]; // Only mngs
+    if (snapshotShareId) workflows = [workflows[0]]; // Only short-read-mngs
 
     return workflows.map(name => {
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
@@ -2096,36 +2103,43 @@ class DiscoveryView extends React.Component {
 
       let workflowCount = filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
 
-      // this count is set to null when we reset data, so show "-" as loading state
-      // this is the same pattern used for the top level tabs
+      // This count is set to null when we reset data, so show "-" as loading state.
+      // This is the same pattern used for the top level tabs.
       if (workflowCount === null) workflowCount = "-";
 
       return {
         label: (
-          <div className={isBeta && cs.alignBetaTag}>
-            <span
-              className={cs.tabLabel}
-              data-testid={workflowName.toLowerCase().replaceAll(" ", "-")}
-            >
-              {workflowName}
-            </span>
-            <span
-              className={cs.tabCounter}
-              data-testid={`${workflowName
-                .toLowerCase()
-                .replaceAll(" ", "-")}-count`}
-            >
-              {workflowCount || "0"}
-            </span>
-            {isBeta && (
-              <StatusLabel
-                className={cs.statusLabel}
-                inline
-                status={"Beta"}
-                type="beta"
-              />
-            )}
-          </div>
+          <Tab
+            data-testid={workflowName.toLowerCase().replaceAll(" ", "-")}
+            label={workflowName}
+            count={
+              <span
+                data-testid={`${workflowName
+                  .toLowerCase()
+                  .replaceAll(" ", "-")}-count`}
+              >
+                {workflowCount || "0"}
+                {isBeta && (
+                  // TODO(ihan): Upgrade czifui to 13.1.1 and adopt Tag component
+                  // <span className={cs.betaTag}>
+                  //   <Tag
+                  //     sdsStyle="rounded"
+                  //     sdsType="secondary"
+                  //     label="Beta"
+                  //     color="beta"
+                  //     hover={false}
+                  //   />
+                  // </span>
+                  <StatusLabel
+                    className={cs.statusLabel}
+                    inline
+                    status={"Beta"}
+                    type="beta"
+                  />
+                )}
+              </span>
+            }
+          ></Tab>
         ),
         value: WORKFLOWS[name].value,
       };
