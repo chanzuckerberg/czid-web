@@ -44,17 +44,25 @@ export interface ThresholdFilterShape {
 }
 
 export default interface Sample {
-  error_message: string;
-  known_user_error: string;
+  error_message?: string;
+  known_user_error?: string;
   pipeline_runs: PipelineRun[];
   workflow_runs: WorkflowRun[] | undefined;
   id: number;
   name: string;
-  createdAt: string;
-  defaultBackgroundId: number;
-  defaultPipelineRunId: number;
+  created_at: DateString;
+  updated_at: DateString;
+  default_background_id: number;
+  default_pipeline_run_id: number;
   deletable: boolean;
   editable: boolean;
   initial_workflow: string;
   upload_error: string;
+  host_genome_id: number;
+  project: {
+    id: number;
+    name: string;
+  };
+  project_id: number;
+  status: string;
 }

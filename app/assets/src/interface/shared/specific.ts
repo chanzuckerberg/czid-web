@@ -25,6 +25,7 @@ export interface ConsensusGenomeData {
   taxId?: number;
   taxName?: string;
   usedAccessions?: string[];
+  previousRuns?: object[];
 }
 
 export interface DownloadType {
@@ -108,22 +109,6 @@ export type MetadataTypes = {
 };
 
 export type MetadataValue = string | number | LocationObject;
-
-export interface OnBLASTClickProps {
-  context: { blastedFrom: string };
-  pipelineVersion: string;
-  sampleId: number;
-  shouldBlastContigs: boolean;
-  taxName: string;
-  taxLevel?: string;
-  taxId: number;
-  taxonStatsByCountType: {
-    ntContigs: number;
-    ntReads: number;
-    nrContigs: number;
-    nrReads: number;
-  };
-}
 
 export interface PipelineRun {
   id: number;
@@ -261,7 +246,7 @@ export interface Taxon {
   annotation?: $TSFixMeUnknown;
   category: string;
   common_name: string;
-  genus_tax_id: number;
+  genus_tax_id: string;
   is_phage: boolean;
   displayName: string;
   max_z_score?: number;
@@ -273,16 +258,17 @@ export interface Taxon {
   passedFilters?: boolean;
   pathogens?: undefined;
   species?: Taxon[];
+  genus?: Taxon;
   species_annotations?: {
     hit: number;
     inconclusive: number;
     not_a_hit: number;
   };
-  species_tax_id?: number[];
+  species_tax_ids?: number[];
   taxId?: number;
   taxLevel?: "genus" | "species";
-  pathogenTag?: string;
-  pathogenTags?: string[];
+  pathogenTag: string;
+  pathogenTags: string[];
   lineageRank?: string;
 }
 

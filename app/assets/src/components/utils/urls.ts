@@ -22,7 +22,7 @@ export interface TempSelectedOptionsShape {
 
 interface generateUrlOptions {
   sampleId: number;
-  snapshotShareId?: number | null;
+  snapshotShareId?: string | null;
   tempSelectedOptions?: TempSelectedOptionsShape | Record<string, never>;
   workflow?: WorkflowValues | null;
   workflowRunId?: number | null;

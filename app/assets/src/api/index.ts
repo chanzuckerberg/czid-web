@@ -2,8 +2,10 @@
 // TODO(mark): Split this file up as more API methods get added.
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
+import { CoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/types";
 
 import { getURLParamString } from "~/helpers/url";
+import Sample from "~/interface/sample";
 import { WorkflowRunResults } from "~/interface/sampleView";
 
 import {
@@ -237,7 +239,13 @@ const getSampleStats = ({
     },
   );
 
-const getSample = ({ snapshotShareId, sampleId }: $TSFixMe) =>
+const getSample = ({
+  snapshotShareId,
+  sampleId,
+}: {
+  snapshotShareId: string;
+  sampleId: number;
+}): Promise<Sample> =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}.json`,
@@ -379,7 +387,13 @@ const getBackgrounds = ({
     },
   );
 
-const getCoverageVizSummary = ({ sampleId, snapshotShareId }: $TSFixMe = {}) =>
+const getCoverageVizSummary = ({
+  sampleId,
+  snapshotShareId,
+}: {
+  sampleId?: number;
+  snapshotShareId?: string;
+} = {}): Promise<CoverageVizParams["accessionData"]> =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
       `/samples/${sampleId}/coverage_viz_summary`,

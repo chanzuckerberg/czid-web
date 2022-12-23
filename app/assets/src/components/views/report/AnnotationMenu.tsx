@@ -69,8 +69,6 @@ const AnnotationMenu = ({
         keepMounted
         open={!!anchorEl}
         onClose={handleClose}
-        // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; anchorEl: null; ancho... Remove this comment to see the full error message
-        getContentAnchorEl={null}
       >
         <MenuItem
           className={cs.menuItem}

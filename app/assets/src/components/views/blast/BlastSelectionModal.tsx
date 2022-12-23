@@ -147,7 +147,7 @@ const BlastSelectionModal = ({
           </div>
           {blastOptionIsSelected && !isEmpty(listItems) && (
             <List>
-              {listItems.map(item => (
+              {listItems.map((item) => (
                 <ListItem fontSize="xs" key={nanoid()}>
                   {item}
                 </ListItem>
@@ -167,7 +167,7 @@ const BlastSelectionModal = ({
         <div className={cs.header}>Select a BLAST Type</div>
         <div className={cs.taxonName}>{taxonName}</div>
         <div className={cs.selectableOptions}>
-          {BLAST_OPTIONS.map(option => renderBlastOption(option))}
+          {BLAST_OPTIONS.map((option) => renderBlastOption(option))}
         </div>
         <div className={cs.actions}>
           <div className={cs.action}>

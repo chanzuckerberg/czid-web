@@ -37,7 +37,7 @@ interface BlastV1ContigsModalProps {
   onClose: () => void;
   open: boolean;
   sampleId: number;
-  pipelineVersion: number;
+  pipelineVersion: string;
   taxonName: string;
   taxonId: number;
 }

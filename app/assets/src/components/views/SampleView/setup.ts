@@ -7,7 +7,7 @@ import {
   WORKFLOW_ENTITIES,
 } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
-import { FilterSelections } from "~/interface/sampleView";
+import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
 import { TABS, TREE_METRICS } from "./constants";
 
 export const getWorkflowCount = (sample: Sample): WorkflowCount => {
@@ -37,7 +37,7 @@ export const getWorkflowCount = (sample: Sample): WorkflowCount => {
   return count;
 };
 
-export const getDefaultSelectedOptions = () => {
+export const getDefaultSelectedOptions = (): FilterSelections => {
   return {
     annotations: [],
     background: null,
@@ -61,7 +61,10 @@ export const determineInitialTab = ({
     [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
     [WORKFLOWS.AMR.value]: amr,
   },
-}: $TSFixMe) => {
+}: {
+  initialWorkflow: string;
+  workflowCount: WorkflowCount;
+}): CurrentTabSample => {
   if (shortReadMngs) {
     return TABS.SHORT_READ_MNGS;
   } else if (longReadMngs) {

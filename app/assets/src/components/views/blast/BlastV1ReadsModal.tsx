@@ -27,7 +27,7 @@ interface BlastV1ReadsModalProps {
   onClose: () => void;
   open: boolean;
   sampleId: number;
-  pipelineVersion: number;
+  pipelineVersion: string;
   taxonName: string;
   taxonLevel: number;
   taxonId: number;

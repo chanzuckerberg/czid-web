@@ -37,7 +37,7 @@ export const getGeneraContainingTags = (
 export const getGeneraPathogenCounts = (speciesCounts: {
   [key: string]: { pathogenTag: string; genus_tax_id: string };
 }) => {
-  const genusPathogenCnt = {};
+  const genusPathogenCnt: { [id: string]: { [tag: string]: number } } = {};
   Object.values(speciesCounts).forEach(speciesInfo => {
     if (speciesInfo.pathogenTag) {
       genusPathogenCnt[speciesInfo.genus_tax_id] =
@@ -55,7 +55,7 @@ export const getGeneraPathogenCounts = (speciesCounts: {
 export const getAllGeneraPathogenCounts = (speciesCounts: {
   [key: string]: { pathogenTags: string[]; genus_tax_id: string };
 }) => {
-  const genusPathogenCnt = {};
+  const genusPathogenCnt: { [id: string]: { [tag: string]: number } } = {};
   Object.values(speciesCounts).forEach(speciesInfo => {
     (speciesInfo.pathogenTags || []).forEach(pathogenTag => {
       genusPathogenCnt[speciesInfo.genus_tax_id] =

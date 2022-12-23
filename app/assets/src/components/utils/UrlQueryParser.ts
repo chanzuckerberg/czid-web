@@ -1,8 +1,20 @@
 import { has } from "lodash/fp";
 import QueryString from "query-string";
+import { FilterSelections } from "~/interface/sampleView";
+
+interface Params {
+  currentTab?: string;
+  pipelineVersion?: string;
+  selectedOptions?: { background: number; metric: $TSFixMe };
+  tempSelectedOptions?: FilterSelections;
+  view?: string;
+  workflowRunId?: number;
+}
+
+type ValueType = "object" | "boolean" | "number" | "string";
 
 class UrlQueryParser {
-  _types: $TSFixMe;
+  _types: Params;
   // This util class enhances query-string to enable parsing
   // string values to desired object types.
   // Also takes care of stringifying nested object values.
@@ -12,7 +24,7 @@ class UrlQueryParser {
   }
 
   parse(query: string) {
-    const params = QueryString.parse(query);
+    const params: Record<string, $TSFixMe> = QueryString.parse(query);
     Object.entries(this._types).forEach(([key, type]) => {
       if (params[key]) {
         params[key] = this.convertValue(params[key], type);
@@ -21,7 +33,7 @@ class UrlQueryParser {
     return params;
   }
 
-  stringify(object: $TSFixMe) {
+  stringify(object: object) {
     const convertedObject = Object.keys(object).reduce((hash, key) => {
       if (object[key]) {
         if (this._types[key]) {
@@ -35,7 +47,10 @@ class UrlQueryParser {
     return QueryString.stringify(convertedObject);
   }
 
-  convertValue(value: $TSFixMe, type: $TSFixMe) {
+  convertValue(
+    value: string,
+    type: ValueType,
+  ): string | number | { background: number } | FilterSelections | boolean {
     switch (type) {
       case "object":
         return JSON.parse(value);
@@ -54,7 +69,7 @@ class UrlQueryParser {
     }
   }
 
-  stringifyValue(value: $TSFixMe, type: $TSFixMe) {
+  stringifyValue(value: object, type: "object" | string) {
     switch (type) {
       case "object":
         return !value || Object.keys(value).length === 0
@@ -66,11 +81,7 @@ class UrlQueryParser {
   }
 
   // Updates a query string parameter that currently exist in the URL and returns the updated query paramters.
-  updateQueryStringParameter(
-    searchUrl: $TSFixMe,
-    key: $TSFixMe,
-    value: $TSFixMe,
-  ) {
+  updateQueryStringParameter(searchUrl: string, key: string, value: unknown) {
     const queryStringParams = this.parse(searchUrl);
 
     if (has(key, queryStringParams)) {

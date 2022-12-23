@@ -23,7 +23,7 @@ import { BlastModalInfo } from "../components/views/blast/constants";
 export interface SampleViewProps {
   sampleId?: number;
   snapshotShareId?: string;
-  updateDiscoveryProjectId?(...args: unknown[]): unknown;
+  updateDiscoveryProjectId?(projectId: number): void;
 }
 
 export type CurrentTabSample =
@@ -56,12 +56,13 @@ export interface Lineage {
 }
 
 export interface BlastData {
-  context: object;
+  context: { blastedFrom: string };
   pipelineVersion: string;
   sampleId: number;
   taxName: string;
-  taxLevel: number;
   taxId: number;
+  taxLevel?: number;
+  shouldBlastContigs?: boolean;
   taxonStatsByCountType: {
     ntContigs: number;
     ntReads: number;
@@ -70,10 +71,17 @@ export interface BlastData {
   };
 }
 
+export interface ConsensusGenomeParams {
+  accessionId: number;
+  accessionName: string;
+  taxonId: number;
+  taxonName: string;
+}
+
 export interface SampleViewState {
   amrDeprecatedData?: AmrDeprectatedData[];
   backgrounds: Background[];
-  blastData: BlastData;
+  blastData: BlastData | Record<string, never>;
   blastModalInfo: BlastModalInfo;
   blastSelectionModalVisible: boolean;
   blastContigsModalVisible?: boolean;
@@ -81,18 +89,8 @@ export interface SampleViewState {
   blastV1ContigsModalVisible?: boolean;
   blastV1ReadsModalVisible?: boolean;
   consensusGenomeData: ConsensusGenomeData;
-  consensusGenomeCreationParams: {
-    accessionId;
-    accessionName;
-    taxonId;
-    taxonName;
-  };
-  consensusGenomePreviousParams: {
-    percentIdentity;
-    previousRuns;
-    taxId;
-    taxName;
-  };
+  consensusGenomeCreationParams: ConsensusGenomeParams | Record<string, never>;
+  consensusGenomePreviousParams: ConsensusGenomeData | Record<string, never>;
   consensusGenomeCreationModalVisible: boolean;
   consensusGenomeErrorModalVisible: boolean;
   consensusGenomePreviousModalVisible: boolean;
@@ -102,9 +100,9 @@ export interface SampleViewState {
       num_accessions: number;
     };
   };
-  coverageVizParams: CoverageVizParamsRaw;
+  coverageVizParams: CoverageVizParamsRaw | Record<string, never>;
   coverageVizVisible: boolean;
-  currentTab?: CurrentTabSample;
+  currentTab?: CurrentTabSample | null;
   enableMassNormalizedBackgrounds?: boolean;
   hasPersistedBackground: boolean;
   filteredReportData: Taxon[];
@@ -117,7 +115,7 @@ export interface SampleViewState {
   pipelineVersion?: string;
   project?: NumberId;
   projectSamples: Pick<Sample, "id" | "name">[];
-  reportData: [];
+  reportData: Taxon[];
   reportMetadata: ReportMetadata;
   sample: Sample;
   selectedOptions: FilterSelections;
@@ -175,6 +173,6 @@ export interface RawReportData {
   lineage: {
     [id: string]: Lineage;
   };
-  metadata: $TSFixMeUnknown;
+  metadata: ReportMetadata;
   sortedGenus: number[];
 }

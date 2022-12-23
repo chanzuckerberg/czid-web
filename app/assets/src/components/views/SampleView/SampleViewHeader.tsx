@@ -270,9 +270,7 @@ export default function SampleViewHeader({
   const getAllRuns = () => {
     const runsByType =
       get("workflow_runs", sample) &&
-      get("workflow_runs", sample).filter(
-        (run: $TSFixMe) => run.workflow === workflow,
-      );
+      get("workflow_runs", sample).filter(run => run.workflow === workflow);
     return mngsWorkflow ? get("pipeline_runs", sample) : runsByType;
   };
 
@@ -357,16 +355,16 @@ interface SampleViewHeaderProps {
   currentTab: CurrentTabSample;
   deletable: boolean;
   editable: boolean;
-  getDownloadReportTableWithAppliedFiltersLink?: $TSFixMeFunction;
+  getDownloadReportTableWithAppliedFiltersLink?: () => string;
   hasAppliedFilters: boolean;
-  onDetailsClick: $TSFixMeFunction;
-  onPipelineVersionChange: $TSFixMeFunction;
-  onShareClick: $TSFixMeFunction;
+  onDetailsClick: () => void;
+  onPipelineVersionChange: (newPipelineVersion: string) => void;
+  onShareClick: () => void;
   pipelineVersions?: string[];
   project: Project;
   projectSamples: Pick<Sample, "id" | "name">[];
   reportMetadata: ReportMetadata;
   sample: Sample;
-  snapshotShareId?: $TSFixMe;
+  snapshotShareId?: string;
   view: string;
 }

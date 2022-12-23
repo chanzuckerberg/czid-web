@@ -2,13 +2,20 @@ import { get, putWithCSRF, postWithCSRF } from "./core";
 
 export const getPersistedBackgrounds = () => get("/persisted_backgrounds.json");
 
-export const getPersistedBackground = (projectId: number) =>
-  get(`/persisted_backgrounds/${projectId}.json`);
+export const getPersistedBackground = (
+  projectId: number,
+): Promise<{ background_id: number }> =>
+  get(`/persisted_bacgrounds/${projectId}.json`);
+
+interface BackgroundParams {
+  projectId: number;
+  backgroundId: number;
+}
 
 export const updatePersistedBackground = ({
   projectId,
   backgroundId,
-}: $TSFixMe) =>
+}: BackgroundParams) =>
   putWithCSRF(`/persisted_backgrounds/${projectId}.json`, {
     backgroundId,
   });
@@ -16,7 +23,7 @@ export const updatePersistedBackground = ({
 export const createPersistedBackground = ({
   projectId,
   backgroundId,
-}: $TSFixMe) =>
+}: BackgroundParams) =>
   postWithCSRF("/persisted_backgrounds.json", {
     projectId,
     backgroundId,

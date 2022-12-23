@@ -392,7 +392,6 @@ class BareDropdown extends React.Component<
             <Input
               fluid
               className={cs.searchInput}
-              // @ts-expect-error  Type 'Element' is not assignable to type 'string'.
               icon={<IconSearch className={cs.searchInputIcon} />}
               placeholder="Search"
               value={filterString}

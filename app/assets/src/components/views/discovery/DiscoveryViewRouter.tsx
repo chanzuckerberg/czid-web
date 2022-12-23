@@ -20,7 +20,7 @@ import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoti
 import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";
 import TermsOfUsePreview from "~/components/views/support/TermsOfUsePreview";
 
-// These props come from Rails .html.erb views via the react_component function in app/assets/src/index.jsx (the entrypoint)
+// These props come from Rails .html.erb views via the react_component function in app/assets/src/index.tsx (the entrypoint)
 interface DiscoveryViewRouterProps {
   admin: boolean;
   domain: string;

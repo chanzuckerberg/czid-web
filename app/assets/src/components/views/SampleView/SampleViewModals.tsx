@@ -1,57 +1,76 @@
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
-import { BlastData } from "~/interface/sampleView";
+import Sample, { WorkflowRun } from "~/interface/sample";
+import { BlastData, ConsensusGenomeParams } from "~/interface/sampleView";
+import { ConsensusGenomeData } from "~/interface/shared";
 import BlastContigsModal from "../blast/BlastContigsModal";
 import BlastReadsModal from "../blast/BlastReadsModal";
 import BlastSelectionModal from "../blast/BlastSelectionModal";
 import BlastV1ContigsModal from "../blast/BlastV1ContigsModal";
 import BlastV1ReadsModal from "../blast/BlastV1ReadsModal";
+import { BlastModalInfo } from "../blast/constants";
 import ConsensusGenomeCreationModal from "../consensus_genome/ConsensusGenomeCreationModal";
 import ConsensusGenomePreviousModal from "../consensus_genome/ConsensusGenomePreviousModal";
 
 interface SampleViewModalsProps {
-  consensusGenomeCreationModalVisible;
-  consensusGenomeData;
-  onConsensusGenomeCreation;
-  sample;
-  consensusGenomePreviousModalVisible;
-  consensusGenomePreviousParams;
-  handleConsensusGenomeClick;
-  handlePreviousConsensusGenomeReportClick;
-  consensusGenomeErrorModalVisible;
-  handleConsensusGenomeErrorModalRetry;
-  blastSelectionModalVisible;
-  handleBlastSelectionModalContinue;
-  blastData: BlastData;
-  blastModalInfo;
-  blastContigsModalVisible;
-  blastReadsModalVisible;
-  blastV1ContigsModalVisible;
-  blastV1ReadsModalVisible;
-  handleModalClose;
+  blastData: BlastData | Record<string, never>;
+  blastModalInfo: BlastModalInfo;
+  blastSelectionModalVisible: boolean;
+  blastContigsModalVisible: boolean;
+  blastReadsModalVisible: boolean;
+  blastV1ContigsModalVisible: boolean;
+  blastV1ReadsModalVisible: boolean;
+  consensusGenomeData: ConsensusGenomeData;
+  consensusGenomeCreationModalVisible: boolean;
+  consensusGenomeErrorModalVisible: boolean;
+  consensusGenomePreviousParams: ConsensusGenomeData;
+  consensusGenomePreviousModalVisible: boolean;
+  handleBlastSelectionModalContinue: (blastModalInfo: BlastModalInfo) => void;
+  handleConsensusGenomeClick: ({
+    percentIdentity,
+    taxId,
+    taxName,
+  }: Pick<
+    ConsensusGenomeData,
+    "taxName" | "taxId" | "percentIdentity"
+  >) => void;
+  handleConsensusGenomeErrorModalRetry: () => Promise<void>;
+  handleModalClose: (name: string) => void;
+  handlePreviousConsensusGenomeReportClick: ({
+    rowData,
+  }: {
+    rowData: WorkflowRun;
+  }) => void;
+  onConsensusGenomeCreation: ({
+    accessionId,
+    accessionName,
+    taxonId,
+    taxonName,
+  }: ConsensusGenomeParams) => Promise<void>;
+  sample: Sample;
 }
 
 const SampleViewModals = ({
-  consensusGenomeCreationModalVisible,
-  consensusGenomeData,
-  onConsensusGenomeCreation,
-  sample,
-  consensusGenomePreviousModalVisible,
-  consensusGenomePreviousParams,
-  handleConsensusGenomeClick,
-  handlePreviousConsensusGenomeReportClick,
-  consensusGenomeErrorModalVisible,
-  handleConsensusGenomeErrorModalRetry,
-  blastSelectionModalVisible,
-  handleBlastSelectionModalContinue,
+  blastContigsModalVisible,
   blastData,
   blastModalInfo,
-  blastContigsModalVisible,
   blastReadsModalVisible,
+  blastSelectionModalVisible,
   blastV1ContigsModalVisible,
   blastV1ReadsModalVisible,
+  consensusGenomeCreationModalVisible,
+  consensusGenomeData,
+  consensusGenomeErrorModalVisible,
+  consensusGenomePreviousModalVisible,
+  consensusGenomePreviousParams,
+  handleBlastSelectionModalContinue,
+  handleConsensusGenomeClick,
+  handleConsensusGenomeErrorModalRetry,
   handleModalClose,
+  handlePreviousConsensusGenomeReportClick,
+  onConsensusGenomeCreation,
+  sample,
 }: SampleViewModalsProps) => {
   return (
     <>

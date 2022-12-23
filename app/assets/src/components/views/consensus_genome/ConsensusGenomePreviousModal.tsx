@@ -8,17 +8,13 @@ import ButtonTextPrimary from "~/components/ui/controls/buttons/ButtonTextPrimar
 import { IconPlusSmall } from "~/components/ui/icons";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
+import { ConsensusGenomeData } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 
 import cs from "./consensus_genome_previous_modal.scss";
 
 interface ConsensusGenomePreviousModalProps {
-  consensusGenomeData?: {
-    percentIdentity?: number;
-    previousRuns?: object[];
-    taxId?: number;
-    taxName?: string;
-  };
+  consensusGenomeData?: ConsensusGenomeData;
   open?: boolean;
   onClose: $TSFixMeFunction;
   onNew: $TSFixMeFunction;

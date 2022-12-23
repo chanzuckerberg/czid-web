@@ -1,10 +1,29 @@
-import { find, get, compact, size } from "lodash";
+import { find, get, compact, size } from "lodash/fp";
 import React from "react";
 import { withAnalytics } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
 import { TaxonDetailsModeProps } from "~/components/common/DetailsSidebar/TaxonDetailsMode";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import Sample, { WorkflowRun } from "~/interface/sample";
+import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
+import { Background, PipelineRun, Taxon } from "~/interface/shared";
+
+interface DetailsSidebarSwitcherProps {
+  handleMetadataUpdate: (key: string, value: string) => void;
+  handleWorkflowRunSelect: (workflowRun: WorkflowRun) => void;
+  handleTabChange: (tab: CurrentTabSample) => void;
+  getCurrentRun: () => WorkflowRun | PipelineRun;
+  currentTab: CurrentTabSample;
+  snapshotShareId: string;
+  closeSidebar: () => void;
+  sidebarVisible: boolean;
+  sidebarMode: "taxonDetails" | "sampleDetails";
+  sample: Sample;
+  backgrounds: Background[];
+  selectedOptions: FilterSelections;
+  sidebarTaxonData: Taxon;
+}
 
 const DetailsSidebarSwitcher = ({
   handleMetadataUpdate,
@@ -20,7 +39,7 @@ const DetailsSidebarSwitcher = ({
   backgrounds,
   selectedOptions,
   sidebarTaxonData,
-}) => {
+}: DetailsSidebarSwitcherProps) => {
   const getTaxonSideBarParams = (): TaxonDetailsModeProps => {
     return {
       background: find({ id: selectedOptions.background }, backgrounds),

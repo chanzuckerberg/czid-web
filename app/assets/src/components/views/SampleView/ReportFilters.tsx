@@ -20,18 +20,21 @@ import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
 import MetricPicker from "~/components/views/report/filters/MetricPicker";
 import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
-import { FilterSelections, SampleReportViewMode } from "~/interface/sampleView";
+import {
+  FilterSelections,
+  SampleReportViewMode,
+  CurrentTabSample,
+} from "~/interface/sampleView";
 import { Background } from "~/interface/shared/specific";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
-
 import { CATEGORIES, TABS, THRESHOLDS, TREE_METRICS } from "./constants";
 import cs from "./report_filters.scss";
 
 interface ReportFiltersProps {
   backgrounds?: Background[];
-  currentTab: string;
+  currentTab: CurrentTabSample;
   loadingReport?: boolean;
   onFilterChanged?: ({
     key,

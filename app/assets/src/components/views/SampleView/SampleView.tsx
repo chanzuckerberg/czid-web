@@ -20,8 +20,8 @@ import {
   pull,
   set,
   uniq,
-  size,
 } from "lodash/fp";
+
 import React from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
@@ -85,6 +85,7 @@ import {
   getAllGeneraPathogenCounts,
 } from "~/helpers/taxon";
 import { copyShortUrlToClipboard } from "~/helpers/url";
+import { IconAlertType } from "~/interface/icon";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
   CurrentTabSample,
@@ -93,12 +94,16 @@ import {
   RawReportData,
   SampleViewProps,
   SampleViewState,
+  ConsensusGenomeParams,
+  SampleReportViewMode,
+  BlastData,
 } from "~/interface/sampleView";
 import { Background, Taxon } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { WORKFLOW_VALUES } from "../../utils/workflows";
+import { BlastModalInfo } from "../blast/constants";
 import AmrView from "./AmrView";
 import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import ReportFilters from "./ReportFilters";
@@ -144,7 +149,7 @@ import {
 const mapValuesWithKey = mapValues.convert({ cap: false });
 
 class SampleView extends React.Component<SampleViewProps, SampleViewState> {
-  urlParser: $TSFixMe;
+  urlParser: UrlQueryParser;
   constructor(props: SampleViewProps) {
     super(props);
 
@@ -169,9 +174,12 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       annotations,
       taxa,
       thresholds,
-    ].some((filter) => !isEmpty(filter));
+    ].some(filter => !isEmpty(filter));
 
-    if (persistedDiscoveryFiltersPresent && currentTab !== TABS.LONG_READ_MNGS) {
+    if (
+      persistedDiscoveryFiltersPresent &&
+      currentTab !== TABS.LONG_READ_MNGS
+    ) {
       showNotification(NOTIFICATION_TYPES.discoveryViewFiltersPersisted, {
         revertToSampleViewFilters: this.revertToSampleViewFilters,
       });
@@ -236,7 +244,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       sidebarMode: null,
       sidebarVisible: false,
       sidebarTaxonData: null,
-      view: "table",
+      view: "table" as const,
       workflowRun: null,
       workflowRunId: workflowRunIdFromUrl || null,
       workflowRunResults: null,
@@ -258,9 +266,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
   componentDidMount = () => {
     // When we navigate to the SampleView via React Router, let Appcues know we are on this page.
-    // @ts-expect-error ts-migrate(2339) FIXME: Property 'analytics' does not exist on type 'Windo... Remove this comment to see the full error message
     if (window.analytics) {
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'analytics' does not exist on type 'Windo... Remove this comment to see the full error message
       window.analytics.page();
     }
     // fetchBackgrounds will subsequently call fetchSample and fetchSampleReportData.
@@ -315,7 +321,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     }
   };
 
-  loadState = (store: Storage, key: string) => {
+  loadState = (
+    store: Storage,
+    key: string,
+  ): {
+    selectedOptions?: { background: number; metric: string };
+    [x: string]: unknown;
+  } => {
     try {
       return JSON.parse(store.getItem(key)) || {};
     } catch (e) {
@@ -369,7 +381,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
     if (newCurrentTab === TABS.SHORT_READ_MNGS) {
       const selectedBackground = backgrounds.find(
-        (background: $TSFixMe) => selectedOptions.background === background.id,
+        background => selectedOptions.background === background.id,
       );
 
       if (
@@ -420,7 +432,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
           persistedBackground = persistedBackgroundFetched;
           hasPersistedBackground = true;
         })
-        .catch((error: $TSFixMe) => {
+        .catch((error: object) => {
           persistedBackground = null;
           console.error(error);
         });
@@ -469,11 +481,11 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     }
   };
 
-  processRawSampleReportData = (rawReportData: $TSFixMe) => {
+  processRawSampleReportData = (rawReportData: RawReportData) => {
     const { allowedFeatures = [] } = this.context || {};
     const { selectedOptions } = this.state;
 
-    const reportData: $TSFixMe = [];
+    const reportData: Taxon[] = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     if (rawReportData.sortedGenus) {
       const generaPathogenCounts = allowedFeatures.includes(
@@ -482,11 +494,11 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         ? getAllGeneraPathogenCounts(rawReportData.counts[SPECIES_LEVEL_INDEX])
         : getGeneraPathogenCounts(rawReportData.counts[SPECIES_LEVEL_INDEX]);
 
-      rawReportData.sortedGenus.forEach((genusTaxId: $TSFixMe) => {
+      rawReportData.sortedGenus.forEach((genusTaxId: number) => {
         let hasHighlightedChildren = false;
         const childrenSpecies =
           rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
-        const speciesData = childrenSpecies.map((speciesTaxId: $TSFixMe) => {
+        const speciesData = childrenSpecies.map((speciesTaxId: number) => {
           const isHighlighted = highlightedTaxIds.has(speciesTaxId);
           hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
           const speciesInfo =
@@ -537,7 +549,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const { backgrounds } = this.state;
 
     const invalidBackground = backgrounds.find(
-      (background) => invalidBackgroundId === background.id,
+      background => invalidBackgroundId === background.id,
     );
 
     this.handleOptionChanged({ key: "background", value: null });
@@ -587,7 +599,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             ...(!isEmpty(rawReportData?.all_tax_ids) &&
               !isEmpty(selectedOptions.taxa) && {
                 taxa: filter(
-                  (taxon) => rawReportData?.all_tax_ids.includes(taxon.id),
+                  taxon => rawReportData?.all_tax_ids.includes(taxon.id),
                   selectedOptions.taxa,
                 ),
               }),
@@ -664,7 +676,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         sampleId: sample.id,
         snapshotShareId,
       });
-
       this.setState({
         coverageVizDataByTaxon: coverageVizSummary,
       });
@@ -758,9 +769,12 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
     const localStorageFields = LOCAL_STORAGE_FIELDS;
 
-    const localState = mapValuesWithKey((options: $TSFixMe, key: $TSFixMe) => {
-      return omit(options.excludePaths || [], this.state[key]);
-    }, localStorageFields);
+    const localState: Partial<Readonly<SampleViewState>> = mapValuesWithKey(
+      (options: { excludePaths: string[] }, key: string) => {
+        return omit(options.excludePaths || [], this.state[key]);
+      },
+      localStorageFields,
+    );
 
     // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
@@ -807,7 +821,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     await persistBackgroundApi({
       projectId: project.id,
       backgroundId: newBackgroundId,
-    }).catch((error: $TSFixMe) => {
+    }).catch((error: Error) => {
       logError({
         message: "SampleView: Failed to persist background model selection",
         details: {
@@ -837,12 +851,11 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     subpath,
     value,
   }: {
-    key: string;
     subpath?: string;
+    key: string;
     value: $TSFixMe;
   }) => {
     const { selectedOptions } = this.state;
-
     const newSelectedOptions = { ...selectedOptions };
     switch (key) {
       case "taxa":
@@ -921,7 +934,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
           this.fetchSampleReportData({
             backgroundId: newSelectedOptions.background,
           })
-            .then((successfullyFetchedSampleReportData) => {
+            .then(successfullyFetchedSampleReportData => {
               if (successfullyFetchedSampleReportData) {
                 this.persistNewBackgroundModelSelection({
                   newBackgroundId: newSelectedOptions.background,
@@ -932,7 +945,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
                 });
               }
             })
-            .catch((err) => console.error(err));
+            .catch(err => console.error(err));
         });
         break;
 
@@ -1035,7 +1048,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     accessionName,
     taxonId,
     taxonName,
-  }: $TSFixMe) => {
+  }: ConsensusGenomeParams) => {
     const { sample } = this.state;
     const workflowRuns = await kickoffConsensusGenome({
       sampleId: sample.id,
@@ -1069,7 +1082,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     percentIdentity,
     taxId,
     taxName,
-  }: $TSFixMe) => {
+  }: Pick<
+    SampleViewState["consensusGenomeData"],
+    "percentIdentity" | "taxId" | "taxName"
+  >) => {
     const { coverageVizDataByTaxon } = this.state;
 
     const accessionData = get(taxId, coverageVizDataByTaxon);
@@ -1093,7 +1109,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     percentIdentity,
     taxId,
     taxName,
-  }: $TSFixMe) => {
+  }: Pick<
+    SampleViewState["consensusGenomeData"],
+    "percentIdentity" | "taxId" | "taxName"
+  >) => {
     const previousRuns = get(taxId, this.getConsensusGenomeData());
     this.setState({
       consensusGenomePreviousParams: {
@@ -1119,7 +1138,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     taxName,
     taxLevel,
     taxId,
-  }: $TSFixMe) => {
+  }: BlastData) => {
     const { allowedFeatures = [] } = this.context || {};
     const blastSelectionModalVisible = allowedFeatures.includes(
       BLAST_V1_FEATURE,
@@ -1148,7 +1167,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     accessionName,
     taxonId,
     taxonName,
-  }: $TSFixMe) => {
+  }: ConsensusGenomeParams) => {
     const { sample } = this.state;
     try {
       // Save the creation parameters if kickoff fails and we need to retry.
@@ -1233,7 +1252,11 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   // Opening up a previous Consensus Genome run
-  handlePreviousConsensusGenomeReportClick = ({ rowData }: $TSFixMe) => {
+  handlePreviousConsensusGenomeReportClick = ({
+    rowData,
+  }: {
+    rowData: WorkflowRun;
+  }) => {
     this.setState(
       {
         workflowRun: rowData,
@@ -1243,67 +1266,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     );
   };
 
-  handleMetadataUpdate = (key: $TSFixMe, value: $TSFixMe) => {
+  handleMetadataUpdate = (key: string, value: string) => {
     const { sample } = this.state;
     if (key === "name") {
       this.setState({
         sample: Object.assign({}, sample, { name: value }),
       });
     }
-  };
-
-  getSidebarParams = () => {
-    const {
-      backgrounds,
-      currentTab,
-      sample,
-      selectedOptions,
-      sidebarMode,
-      sidebarTaxonData,
-    } = this.state;
-    const { snapshotShareId } = this.props;
-
-    if (sidebarMode === "taxonDetails") {
-      return {
-        background: find({ id: selectedOptions.background }, backgrounds),
-        // @ts-expect-error Property 'taxId' does not exist on type {}
-        parentTaxonId: (sidebarTaxonData.genus || {}).taxId,
-        taxonId: sidebarTaxonData.taxId,
-        taxonName: sidebarTaxonData.name,
-        taxonValues: {
-          NT: { rpm: get("nt.rpm", sidebarTaxonData) || 0 },
-          NR: { rpm: get("nr.rpm", sidebarTaxonData) || 0 },
-        },
-      };
-    } else if (sidebarMode === "sampleDetails") {
-      const sampleWorkflowLabels = compact([
-        sample.initial_workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
-          size(sample.pipeline_runs) &&
-          WORKFLOWS.SHORT_READ_MNGS.label,
-        sample.initial_workflow === WORKFLOWS.LONG_READ_MNGS.value &&
-          size(sample.pipeline_runs) &&
-          WORKFLOWS.LONG_READ_MNGS.label,
-        find(
-          { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
-          sample.workflow_runs,
-        ) && WORKFLOWS.CONSENSUS_GENOME.label,
-        find({ workflow: WORKFLOWS.AMR.value }, sample.workflow_runs) &&
-          WORKFLOWS.AMR.label,
-      ]);
-
-      return {
-        currentRun: this.getCurrentRun(),
-        currentWorkflowTab: currentTab,
-        handleWorkflowTabChange: this.handleTabChange,
-        onWorkflowRunSelect: this.handleWorkflowRunSelect,
-        sample,
-        sampleId: sample.id,
-        sampleWorkflowLabels,
-        snapshotShareId: snapshotShareId,
-        onMetadataUpdate: this.handleMetadataUpdate,
-      };
-    }
-    return {};
   };
 
   clearAllFilters = () => {
@@ -1349,7 +1318,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       }
 
       const workflowType = Object.values(WORKFLOWS).find(
-        (workflow: $TSFixMe) => workflow.label === currentTab,
+        workflow => workflow.label === currentTab,
       ).value;
 
       if (workflowRun && workflowRun.workflow === workflowType) {
@@ -1357,7 +1326,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       }
 
       if (pipelineVersion) {
-        const currentRun = sample.workflow_runs.find((run: $TSFixMe) => {
+        const currentRun = sample.workflow_runs.find(run => {
           if (run.workflow === workflowType && !!run.wdl_version) {
             return run.wdl_version === pipelineVersion;
           } else {
@@ -1367,9 +1336,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         return currentRun;
       } else {
         return head(
-          sample.workflow_runs.filter(
-            (run: $TSFixMe) => run.workflow === workflowType,
-          ),
+          sample.workflow_runs.filter(run => run.workflow === workflowType),
         );
       }
     }
@@ -1455,7 +1422,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     } = this.state;
     const { snapshotShareId } = this.props;
     const { pipelineRunStatus, jobStatus } = reportMetadata;
-    let status: $TSFixMe, message, subtitle, linkText, type, link, icon;
+    let status: string,
+      message: string,
+      subtitle: string,
+      linkText: string,
+      type: IconAlertType,
+      link: string,
+      icon: JSX.Element;
     // Error messages were previously sent from the server in the reportMetadata,
     // but after the switch to SFN are now sent as part of the sample's information.
     // Try to extract the error messages from the sample if possible, then try the
@@ -1481,7 +1454,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     ) {
       // Note that the pipeline status "WAITING" is obtained from the API at `app/services/pipeline_report_service.rb`
       status = "IN PROGRESS";
-      message = currentTab === TABS.LONG_READ_MNGS ? ONT_PIPELINE_RUNNING_STATUS : jobStatus;
+      message =
+        currentTab === TABS.LONG_READ_MNGS
+          ? ONT_PIPELINE_RUNNING_STATUS
+          : jobStatus;
       icon = <IconLoading className={csSampleMessage.icon} />;
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
@@ -1529,7 +1505,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     );
   };
 
-  handleViewClick = ({ view }: $TSFixMe) => {
+  handleViewClick = ({ view }: { view: SampleReportViewMode }) => {
     trackEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
     this.setState({ view }, () => {
       this.updateHistoryAndPersistOptions();
@@ -1595,7 +1571,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     this.setState(newState);
   };
 
-  handleBlastSelectionModalContinue = (blastModalInfo: $TSFixMe) => {
+  handleBlastSelectionModalContinue = (blastModalInfo: BlastModalInfo) => {
     const { shouldBlastContigs } = blastModalInfo;
 
     this.setState({
@@ -1897,35 +1873,35 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
             />
           )}
         <SampleViewModals
-          consensusGenomeData={consensusGenomeData}
-          sample={sample}
           blastData={blastData}
           blastModalInfo={blastModalInfo}
-          consensusGenomePreviousParams={consensusGenomePreviousParams}
-          consensusGenomeCreationModalVisible={
-            consensusGenomeCreationModalVisible
-          }
-          consensusGenomePreviousModalVisible={
-            consensusGenomePreviousModalVisible
-          }
-          consensusGenomeErrorModalVisible={consensusGenomeErrorModalVisible}
           blastSelectionModalVisible={blastSelectionModalVisible}
           blastContigsModalVisible={blastContigsModalVisible}
           blastReadsModalVisible={blastReadsModalVisible}
           blastV1ContigsModalVisible={blastV1ContigsModalVisible}
           blastV1ReadsModalVisible={blastV1ReadsModalVisible}
-          onConsensusGenomeCreation={this.onConsensusGenomeCreation}
-          handleConsensusGenomeClick={this.handleConsensusGenomeClick}
-          handlePreviousConsensusGenomeReportClick={
-            this.handlePreviousConsensusGenomeReportClick
+          consensusGenomeData={consensusGenomeData}
+          consensusGenomeCreationModalVisible={
+            consensusGenomeCreationModalVisible
           }
-          handleConsensusGenomeErrorModalRetry={
-            this.handleConsensusGenomeErrorModalRetry
+          consensusGenomeErrorModalVisible={consensusGenomeErrorModalVisible}
+          consensusGenomePreviousParams={consensusGenomePreviousParams}
+          consensusGenomePreviousModalVisible={
+            consensusGenomePreviousModalVisible
           }
           handleBlastSelectionModalContinue={
             this.handleBlastSelectionModalContinue
           }
+          handleConsensusGenomeClick={this.handleConsensusGenomeClick}
+          handleConsensusGenomeErrorModalRetry={
+            this.handleConsensusGenomeErrorModalRetry
+          }
           handleModalClose={this.handleModalClose}
+          handlePreviousConsensusGenomeReportClick={
+            this.handlePreviousConsensusGenomeReportClick
+          }
+          onConsensusGenomeCreation={this.onConsensusGenomeCreation}
+          sample={sample}
         />
       </React.Fragment>
     );

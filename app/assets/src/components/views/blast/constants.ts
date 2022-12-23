@@ -27,9 +27,9 @@ export interface BlastOption {
 export interface BlastModalInfo {
   availableCountTypeTabsForContigs?: string[];
   availableCountTypeTabsForReads?: string[];
-  selectedBlastType: string;
-  showCountTypeTabs: boolean;
-  shouldBlastContigs: boolean;
+  selectedBlastType?: string;
+  showCountTypeTabs?: boolean;
+  shouldBlastContigs?: boolean;
 }
 
 export interface Contig {

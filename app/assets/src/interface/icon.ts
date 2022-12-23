@@ -3,8 +3,9 @@ export interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 export interface IconAlertProps extends IconProps {
-  type?: "info" | "warning" | "error";
+  type?: IconAlertType;
 }
+export type IconAlertType = "info" | "warning" | "error" | "inProgress";
 
 export interface IconClickProps extends IconProps {
   onClick?: $TSFixMeFunction;

@@ -79,6 +79,7 @@ const SectionsDropdown = ({
     if (option.tooltip) {
       return (
         <ColumnHeaderTooltip
+          key={option.value}
           trigger={trigger}
           content={option.tooltip}
           position="top center"

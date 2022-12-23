@@ -1,8 +1,9 @@
-import { OnBLASTClickProps, Taxon, TooltipLocation } from "~/interface/shared";
+import { BlastData } from "~/interface/sampleView";
+import { Taxon, TooltipLocation } from "~/interface/shared";
 
 export interface CoverageVizBottomSidebarProps {
   visible?: boolean;
-  onBlastClick?: (x: OnBLASTClickProps) => void;
+  onBlastClick?: (x: BlastData) => void;
   onClose: () => void;
   params: CoverageVizParams | Record<string, never>;
   sampleId: number;
