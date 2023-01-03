@@ -10,7 +10,7 @@ export default function TermsOfUse() {
       <div className={cs.title}>
         <h1>Chan Zuckerberg ID (formerly IDseq) Terms of Use</h1>
         <h4 className={cs.subtitle}>
-          Last Updated: December 7, 2021.{" "}
+          Last Updated: January 1, 2023.{" "}
           <a href="/terms_changes">See Recent Changes</a>
         </h4>
       </div>
@@ -43,9 +43,8 @@ export default function TermsOfUse() {
       <p>
         Please carefully read these terms and indicate your acceptance by
         registering for CZ ID. If you do not agree to these Terms, do not
-        register for an account or use CZ ID and do not use it. For more
-        information about our privacy practices, please see our{" "}
-        <a href="/privacy">Privacy Notice</a>.
+        register for an account or use CZ ID. For more information about our
+        privacy practices, please see our <a href="/privacy">Privacy Notice</a>.
       </p>
     </>
   );
@@ -73,9 +72,9 @@ export default function TermsOfUse() {
               You are responsible for obtaining the permissions necessary to
               collect and submit the Upload Data. You represent that you have
               obtained, and will maintain, all consents, permissions, and
-              authorizations needed to collect, share, and export Upload Data
-              with CZ ID, and for CZ ID to use and share the information as
-              described in its <a href="/privacy">Privacy Notice</a>.
+              authorizations needed to collect, share, use, and export Upload
+              Data within CZ ID, and for CZ ID to use and share the information
+              as described in its <a href="/privacy">Privacy Notice</a>.
             </React.Fragment>,
             <React.Fragment key={nanoid()}>
               You may not attempt to re-identify Upload Data. By using CZ ID,
@@ -173,13 +172,14 @@ export default function TermsOfUse() {
             CZ ID by emailing{" "}
             <a href="mailto:privacy@czid.org">privacy@czid.org</a> and including
             a description of your Upload Data that you wish to have removed. We
-            will delete the requested Upload Data within 60 days of your
-            request. Please note, that our removal from CZ ID will not impact
-            any use of Upload Data by others you may have chosen to share it
-            with prior to the effective date of removal and we are not able to
-            require others Users to stop using Upload Data they accessed or
-            downloaded prior to removal. More information about Upload Data can
-            be found in our <a href="/privacy">Privacy Notice</a>.
+            will delete the requested Upload Data within the timelines set forth
+            under applicable privacy laws. Please note, that our removal of your
+            Upload Data from CZ ID will not impact any use of Upload Data by
+            others you may have chosen to share it with prior to the effective
+            date of removal and we are not able to require others Users to stop
+            using Upload Data they accessed or downloaded prior to removal. More
+            information about Upload Data can be found in our{" "}
+            <a href="/privacy">Privacy Notice</a>.
           </React.Fragment>,
           <React.Fragment key={nanoid()}>
             1.2 Use and Visibility of Your Report Data. You understand that your
@@ -197,8 +197,8 @@ export default function TermsOfUse() {
             GA4GH) (“Applicable Standards”), and you will otherwise comply with
             all Applicable Law in connection with CZ ID; (B) you have all
             consents, permissions, and authorizations necessary and sufficient
-            to provide and export the Upload Data to us for the purposes
-            described in these Terms and in our{" "}
+            to upload, share, use, and export the Upload Data to us for the
+            purposes described in these Terms and in our{" "}
             <a href="/privacy">Privacy Notice</a> and to grant the rights and
             permissions herein; and (C) the Upload Data -- and our use of the
             Upload Data in accordance with these Terms and our{" "}
@@ -223,9 +223,9 @@ export default function TermsOfUse() {
             subject, you also specifically represent and warrant to us and our
             service partners that (A) you have provided any required notice to,
             and obtained any necessary informed consent of, any such person for
-            the collection, use, and provision to CZ ID of the Research Data;
-            and (B) your provision of the Upload Data to CZ ID is covered under
-            all such notices and consents, as well as Applicable Standards and
+            the collection, use, and provision to CZ ID of the Upload Data; and
+            (B) your provision of the Upload Data to CZ ID is covered under all
+            such notices and consents, as well as Applicable Standards and
             Applicable Law. Please note that we filter out and discard human
             sequence data as part of generating Report Data because we don’t
             need this data for CZ ID. See <a href="/faqs">here</a> for more
@@ -243,7 +243,7 @@ export default function TermsOfUse() {
       </h2>
       <List
         listItems={[
-          `2.1 Subject to and conditioned on your compliance with these Terms, we grant you permission to access and use CZ ID in accordance with Applicable Law, solely for your own internal academic or internal scientific research purposes. You may not permit any third party to access or use or “share” your Account or CZ ID. All persons wishing to access the Service must create their own separate account and agree to these Terms.`,
+          `2.1 Subject to and conditioned on your compliance with these Terms, we grant you permission to access and use CZ ID in accordance with Applicable Law, solely for your own internal academic or internal scientific research purposes. You may not permit any third party to access or use or “share” your Account. All persons wishing to access the Service must create their own separate account and agree to these Terms.`,
           `2.2 CZ ID may not be used to provide medical or other services to any third party (for instance, to inform or provide disease diagnoses). CZ ID is not intended to diagnose, treat, cure, or prevent any disease and is not a substitute for medical advice.`,
           `2.3 You shall not disclose or distribute the Database, in whole or in part, or any works derived from the Database to any third party for any purpose, except for the following:`,
           `You may disclose the documents that you download from the Database using CZ ID’s intended functionality to your employees and agents who are registered Users of the Service and who are engaged in conducting your research (“Research Associates”) for the sole purpose of carrying out your internal research. Your Research Associates must also agree to use CZ ID and Database in accordance with these Terms.`,
@@ -317,7 +317,7 @@ export default function TermsOfUse() {
       </h2>
       <List
         listItems={[
-          `6.1 Intellectual Property Rights. Just because you upload data to CZ ID, you are not giving us any ownership of your intellectual property rights (see Section 1.1 above). Subject to these Terms, we grant you a limited right to access CZ ID, and we reserve all other of our intellectual property rights in CZ ID. Using CZ ID does not give you any ownership in our CZ ID, our services or the content or information made available through CZ ID that is not already yours. Trademarks and logos used in connection with CZ ID are the trademarks of their respective owners. Our logos and other trademarks, service marks, graphics, and logos used for our services are trademarks or registered trademarks of ours and these Terms do not grant you any rights to use them.`,
+          `6.1 Intellectual Property Rights. Just because you upload data to CZ ID, you are not giving us any ownership of your intellectual property rights (see Section 1.1 above). Subject to these Terms, we grant you a limited right to access CZ ID, and we reserve all other of our intellectual property rights in CZ ID. Using CZ ID does not give you any ownership in CZ ID, our services or the content or information made available through CZ ID that is not already yours. Trademarks and logos used in connection with CZ ID are the trademarks of their respective owners. Our logos and other trademarks, service marks, graphics, and logos used for our services are trademarks or registered trademarks of ours and these Terms do not grant you any rights to use them.`,
           <>
             6.2 Feedback. We’d love your feedback about how to improve CZ ID at{" "}
             {<a href="mailto:help@czid.org">help@czid.org</a>}. That said, by
@@ -375,8 +375,8 @@ export default function TermsOfUse() {
       </h2>
       <List
         listItems={[
-          `8.1 To the maximum extent permitted by Applicable Law, you agree to indemnify and hold harmless CZ Biohub, its affiliates (including without limitation the Chan Zuckerberg Initiative Foundation (CZIF), the Chan Zuckerberg Initiative, LLC (CZI LLC), and their successors, assigns, officers, directors, employees, and agents (collectively, the “CZ Biohub Protected Parties”) from and against any and all liabilities, costs, damages, charges, losses, penalties, judgments, settlements, and expenses (including reasonable attorney’s fees) (“Losses”) arising out of or related to any suit, demand, action, proceeding, or other claim by a third party (“Claims”) arising out of or relating to: (a) your actual or alleged failure to comply with Applicable Law or these Terms, (b) your Research Data, or (c) your actual or alleged violation of any third party rights.`,
-          `8.2 LIMITATION OF LIABILITY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE CZ BIOHUB PROTECTED PARTIES WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, PUNITIVE, OR CONSEQUENTIAL DAMAGES OF ANY KIND (INCLUDING LOST PROFITS, LOST DATA, BUSINESS INTERRUPTION, OR LOSS OF GOODWILL) IRRESPECTIVE OF WHETHER SUCH DAMAGES ARISE FROM CLAIMS BROUGHT IN CONTRACT, TORT, NEGLIGENCE, WARRANTY, STRICT LIABILITY, OR ANY OTHER THEORY AT LAW OR IN EQUITY, AND EVEN IF ANY CZ BIOHUB PROTECTED PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. WITHOUT LIMITING THE FOREGOING, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL THE CZ BIOHUB PROTECTED PARTIES’ AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THESE TERMS OR CZ ID EXCEED USD $100. THE EXCLUSIONS AND LIMITATIONS SET FORTH IN THIS SECTION 9 DO NOT APPLY TO LOSSES ARISING FROM A CZ BIOHUB PROTECTED PARTY’S GROSS NEGLIGENCE OR WILLFUL MISCONDUCT. IF ANY LIMITATION IN THIS SECTION 9 IS UNENFORCEABLE IN ANY INSTANCE, THEN SUCH LIMITATION WILL APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.`,
+          `8.1 To the maximum extent permitted by Applicable Law, you agree to indemnify and hold harmless CZ Biohub, its affiliates (including without limitation the Chan Zuckerberg Initiative Foundation (CZIF), the Chan Zuckerberg Initiative, LLC (CZI LLC), and their successors, assigns, officers, directors, employees, and agents (collectively, the “CZ Biohub Protected Parties”) from and against any and all liabilities, costs, damages, charges, losses, penalties, judgments, settlements, and expenses (including reasonable attorney’s fees) (“Losses”) arising out of or related to any suit, demand, action, proceeding, or other claim by a third party (“Claims”) arising out of or relating to: (a) your actual or alleged failure to comply with Applicable Law or these Terms, (b) your Upload Data, or (c) your actual or alleged violation of any third party rights.`,
+          `8.2 LIMITATION OF LIABILITY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE CZ BIOHUB PROTECTED PARTIES WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, PUNITIVE, OR CONSEQUENTIAL DAMAGES OF ANY KIND (INCLUDING LOST PROFITS, LOST DATA, BUSINESS INTERRUPTION, OR LOSS OF GOODWILL) IRRESPECTIVE OF WHETHER SUCH DAMAGES ARISE FROM CLAIMS BROUGHT IN CONTRACT, TORT, NEGLIGENCE, WARRANTY, STRICT LIABILITY, OR ANY OTHER THEORY AT LAW OR IN EQUITY, AND EVEN IF ANY CZ BIOHUB PROTECTED PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. WITHOUT LIMITING THE FOREGOING, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL THE CZ BIOHUB PROTECTED PARTIES’ AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THESE TERMS OR CZ ID EXCEED USD $100. THE EXCLUSIONS AND LIMITATIONS SET FORTH IN THIS SECTION 8 DO NOT APPLY TO LOSSES ARISING FROM A CZ BIOHUB PROTECTED PARTY’S GROSS NEGLIGENCE OR WILLFUL MISCONDUCT. IF ANY LIMITATION IN THIS SECTION 8 IS UNENFORCEABLE IN ANY INSTANCE, THEN SUCH LIMITATION WILL APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.`,
           `SOME LAWS DO NOT ALLOW THE LIMITATION OR EXCLUSION OF LIABILITY, SO THESE LIMITS MAY NOT APPLY TO YOU.`,
           `Choice of Law / Jurisdiction / Venue. These Terms, and all matters arising out of or relating to these Terms, whether sounding in contract, tort, or statute, will be governed by, and construed in accordance with, the laws of the State of California and/or applicable federal law (including the Federal Arbitration Act), without regard to conflict of law provisions. Subject to and without waiver of the arbitration provisions below, and unless prohibited by the laws of your country, you agree that any judicial proceedings (other than small claims actions as discussed above) will be brought in and you hereby consent to the exclusive jurisdiction and venue in the state courts in the City and County of San Mateo, California, or federal court for the Northern District of California. For countries where this is not permissible, this won’t deprive you of any protection you have under the law of the country where you live, or access to the courts in that country.`,
         ]}
@@ -426,7 +426,8 @@ export default function TermsOfUse() {
             <br />
             Attn: General Counsel
             <br />
-            2682 Middlefield Road, Suite i<br />
+            801 Jefferson Ave
+            <br />
             Redwood City, CA 94063
             <br />
             With a courtesy copy via email to:{" "}

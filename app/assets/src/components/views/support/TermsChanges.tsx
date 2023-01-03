@@ -436,68 +436,74 @@ const TermsChanges = () => {
     </>
   );
 
-  /* const termsUpdateForJanuary2023 = () => (
-   *   <>
-   *     <div className={cs.title}>
-   *       <h1>IDseq Terms and Privacy Notice Update for January 2023</h1>
-   *     </div>
-   *     <p className={cx(cs.large, cs.last)}>
-   *       Effective January 1, 2023, we have updated our{" "}
-   *       <a href="/terms">Terms of Use</a> and{" "}
-   *       <a href="/privacy">Privacy Policy</a>.
-   *     </p>
-   *     <h2>IDseq Terms of Use</h2>
-   *     <List
-   *       listItems={[
-   *         <React.Fragment key={nanoid()}>
-   *           We updated our timelines for addressing Users’ data privacy requests
-   *           and our Contact Information.
-   *         </React.Fragment>,
-   *       ]}
-   *     />
-   *     <h2>IDseq Privacy Policy</h2>
-   *     <List
-   *       listItems={[
-   *         <>
-   *           To give you more control over your data, we have removed the
-   *           automatic sharing of your Report Data and Sample Metadata after the
-   *           1-year anniversary of the Raw Sample Data being uploaded to CZ ID.
-   *           Users will still have the option to share their Report Data and
-   *           Sample Metadata with other Users at their discretion.
-   *         </>,
-   *         <>
-   *           We clarified our legal basis (consent) for collecting data through
-   *           the use of cookies when GDPR applies.{" "}
-   *         </>,
-   *         <>We added a section about Do Not Track signals.</>,
-   *         <>
-   *           We clarified that we use IP addresses to infer the approximate
-   *           location (i.e., country) of our Users so that we can comply with
-   *           applicable laws and to better understand the geographic distribution
-   *           of our Users.{" "}
-   *         </>,
-   *         <>
-   *           We updated the timelines for addressing a User’s data privacy
-   *           requests.
-   *         </>,
-   *         <>
-   *           We added additional information for California residents. We also
-   *           added additional information for Virginia, Colorado, Connecticut,
-   *           and Utah to keep up with changes in privacy law.{" "}
-   *         </>,
-   *       ]}
-   *     />
-   *     <p className={cx(cs.large, cs.last)}>
-   *       For questions about these changes, please contact us at{" "}
-   *       <a href="mailto:privacy@czid.org">privacy@czid.org</a>.
-   *     </p>
-   *   </>
-   * ); */
+  const termsUpdateForJanuary2023 = () => (
+    <>
+      <div className={cs.title}>
+        <h1>CZ ID Terms and Privacy Notice Update for January 2023</h1>
+      </div>
+      <p className={cx(cs.large, cs.last)}>
+        Effective January 1, 2023, we have updated our{" "}
+        <a href="/terms">Terms of Use</a> and{" "}
+        <a href="/privacy">Privacy Policy</a>.
+      </p>
+      <p className={cs.large}>
+        We periodically update our <a href="/terms">Terms of Use</a> and{" "}
+        <a href="/privacy">Privacy Policy</a> to help ensure that we are
+        providing useful information regarding how we collect, use, and protect
+        personal data and so our Users can understand their responsibilities and
+        rights when they use CZ ID. We have summarized key updates below:
+      </p>
+      <h2>CZ ID Terms of Use</h2>
+      <List
+        listItems={[
+          <React.Fragment key={nanoid()}>
+            We updated our timelines for addressing Users’ data privacy requests
+            and our Contact Information.
+          </React.Fragment>,
+        ]}
+      />
+      <h2>CZ ID Privacy Policy</h2>
+      <List
+        listItems={[
+          <>
+            To give you more control over your data, we have removed the
+            automatic sharing of your Report Data and Sample Metadata after the
+            1-year anniversary of the Raw Sample Data being uploaded to CZ ID.
+            Users will still have the option to share their Report Data and
+            Sample Metadata with other Users at their discretion.
+          </>,
+          <>
+            We clarified our legal basis (consent) for collecting data through
+            the use of cookies when GDPR applies.{" "}
+          </>,
+          <>We added a section about Do Not Track signals.</>,
+          <>
+            We clarified that we use IP addresses to infer the approximate
+            location (i.e., country) of our Users so that we can comply with
+            applicable laws and to better understand the geographic distribution
+            of our Users.{" "}
+          </>,
+          <>
+            We updated the timelines for addressing a User’s data privacy
+            requests.
+          </>,
+          <>
+            We added additional information for California residents. We also
+            added additional information for Virginia, Colorado, Connecticut,
+            and Utah to keep up with changes in privacy law.{" "}
+          </>,
+        ]}
+      />
+      <p className={cx(cs.large, cs.last)}>
+        For questions about these changes, please contact us at{" "}
+        <a href="mailto:privacy@czid.org">privacy@czid.org</a>.
+      </p>
+    </>
+  );
 
   return (
     <NarrowContainer className={cs.termsOfUse} size="small">
-      {/* Shouldn't go live until Jan 1 */}
-      {/* {termsUpdateForJanuary2023()} */}
+      {termsUpdateForJanuary2023()}
       {termsUpdateForDecember2021()}
       {termsUpdateForApril2021()}
       {termsUpdateForJune2019()}
