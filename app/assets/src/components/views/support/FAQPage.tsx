@@ -1,6 +1,7 @@
 import cx from "classnames";
 import { nanoid } from "nanoid";
 import React from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { Accordion, NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
 import cs from "./support.scss";
@@ -161,7 +162,10 @@ export default class FAQPage extends React.Component {
                 Other metadata can be uploaded to CZ ID but is not required and
                 may be deleted at any point. We have put together a metadata
                 ontology that you can find{" "}
-                <a href="/metadata/dictionary">here</a> that does not include
+                <RouterLink to="/metadata/dictionary">
+                  here{" "}
+                </RouterLink>
+                that does not include
                 any fields where Protected Health Information (PHI) can be
                 derived.
               </React.Fragment>,

@@ -18,6 +18,7 @@ import { trackEvent, withAnalytics } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
 import MetadataCSVLocationsMenu from "~/components/common/Metadata/MetadataCSVLocationsMenu";
 import MetadataCSVUpload from "~/components/common/Metadata/MetadataCSVUpload";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
 import { generateClientDownloadFromEndpoint } from "~/components/utils/clientDownload";
 import { WORKFLOWS } from "~/components/utils/workflows";
@@ -491,19 +492,17 @@ class MetadataUpload extends React.Component<
                 data and display the results:{" "}
                 {requiredFields && requiredFields.join(", ")}.{" "}
               </span>
-              <a
+              <ExternalLink
                 href="/metadata/dictionary"
                 className={cs.link}
-                target="_blank"
-                onClick={() =>
-                  trackEvent("MetadataUpload_full-dictionary-link_clicked", {
-                    projectId: this.props.project.id,
-                    projectName: this.props.project.name,
-                  })
-                }
+                analyticsEventName="MetadataUpload_full-dictionary-link_clicked"
+                analyticsEventData={{
+                  projectId: this.props.project.id,
+                  projectName: this.props.project.name,
+                }}
               >
                 View Full Metadata Dictionary
-              </a>
+              </ExternalLink>
               .
             </div>
             <div className={cs.details}>
@@ -524,19 +523,17 @@ class MetadataUpload extends React.Component<
         <div>
           {!samplesAreNew && (
             <span>
-              <a
+              <ExternalLink
                 href="/metadata/dictionary"
                 className={cs.link}
-                target="_blank"
-                onClick={() =>
-                  trackEvent("MetadataUpload_dictionary-link_clicked", {
-                    projectId: this.props.project.id,
-                    projectName: this.props.project.name,
-                  })
-                }
+                analyticsEventName="MetadataUpload_dictionary-link_clicked"
+                analyticsEventData={{
+                  projectId: this.props.project.id,
+                  projectName: this.props.project.name,
+                }}
               >
                 View Metadata Dictionary
-              </a>
+              </ExternalLink>
             </span>
           )}
         </div>

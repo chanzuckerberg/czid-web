@@ -2,6 +2,7 @@ import cx from "classnames";
 import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import List from "~/components/ui/List";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import cs from "./metadata_upload_modal.scss";
 
 interface UploadInstructionsProps {
@@ -30,14 +31,12 @@ const UploadInstructions = ({
           listItems={[
             <React.Fragment key={"metadata-dictionary"}>
               Review the fields in our{" "}
-              <a
+              <ExternalLink
                 href="/metadata/dictionary"
-                target="_blank"
-                rel="noopener noreferrer"
                 className={cs.link}
               >
                 metadata dictionary
-              </a>
+              </ExternalLink>
               , where you will find definitions and format requirements. Take
               special note of the <b>required</b> fields, which you must provide
               when uploading a new sample.

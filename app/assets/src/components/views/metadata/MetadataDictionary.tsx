@@ -13,7 +13,7 @@ import { getOfficialMetadataFields } from "~/api/metadata";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DataTable from "~/components/visualizations/table/DataTable";
 import { Dropdown } from "~ui/controls/dropdowns";
-import { getAllHostGenomes } from "../../../api";
+import { getAllHostGenomesPublic } from "../../../api";
 import { getGroupIndex } from "./constants";
 import cs from "./metadata_dictionary.scss";
 
@@ -41,7 +41,7 @@ class MetadataDictionary extends React.Component {
   async componentDidMount() {
     let [officialFields, hostGenomes] = await Promise.all([
       getOfficialMetadataFields(),
-      getAllHostGenomes(),
+      getAllHostGenomesPublic(),
     ]);
 
     officialFields = map(

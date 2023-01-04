@@ -54,8 +54,10 @@ class HostGenome < ApplicationRecord
 
   def as_json(options = {})
     hash = super(options)
-    hash[:ercc_only] = ercc_only?
     hash[:showAsOption] = show_as_option?
+    unless options[:public]
+      hash[:ercc_only] = ercc_only?
+    end
     hash
   end
 

@@ -1,6 +1,7 @@
 class HostGenomesController < ApplicationController
   before_action :set_host_genome, only: [:show, :edit, :update, :destroy]
-  before_action :admin_required, except: [:index]
+  before_action :admin_required, except: [:index, :index_public]
+  skip_before_action :authenticate_user!, only: [:index_public]
 
   # GET /host_genomes
   # GET /host_genomes.json
@@ -11,6 +12,12 @@ class HostGenomesController < ApplicationController
       format.html { render :index }
       format.json { render json: @host_genomes }
     end
+  end
+
+  # GET /host_genomes/index_public
+  def index_public
+    @host_genomes = HostGenome.all
+    render json: @host_genomes.as_json(only: [:id, :name], public: true)
   end
 
   # GET /host_genomes/1

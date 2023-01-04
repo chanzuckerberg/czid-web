@@ -14,8 +14,10 @@ import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
 import SampleView from "~/components/views/SampleView/SampleView";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
+import MetadataDictionary from "~/components/views/metadata/MetadataDictionary";
 import PathogenListView from "~/components/views/pathogen_list/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
+import FAQPage from "~/components/views/support/FAQPage";
 import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoticeForUserResearch";
 import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";
 import TermsOfUsePreview from "~/components/views/support/TermsOfUsePreview";
@@ -99,6 +101,12 @@ const DiscoveryViewRouter = ({
       </Route>
       <Route exact path="/terms_preview">
         <TermsOfUsePreview />
+      </Route>
+      <Route exact path="/metadata/dictionary">
+        <MetadataDictionary />
+      </Route>
+      <Route exact path="/faqs">
+        <FAQPage />
       </Route>
       {userSignedIn ? (
         <Route>

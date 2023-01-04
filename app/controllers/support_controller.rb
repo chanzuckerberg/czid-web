@@ -33,6 +33,7 @@ class SupportController < ApplicationController
   end
 
   def faqs
+    render "home/discovery_view_router"
   end
 
   def privacy_notice_for_user_research

@@ -222,7 +222,11 @@ Rails.application.routes.draw do
 
   resources :frontend_metrics, only: :create
 
-  resources :host_genomes
+  resources :host_genomes do
+    collection do
+      get :index_public
+    end
+  end
 
   resources :persisted_backgrounds, only: [:index, :create]
   resources :persisted_backgrounds, only: [:update, :show], param: :projectId

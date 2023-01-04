@@ -67,6 +67,9 @@ const getSummaryContigCounts = (id: $TSFixMe, minContigReads: $TSFixMe) =>
 
 const getAllHostGenomes = () => get("/host_genomes.json");
 
+const getAllHostGenomesPublic = () =>
+  get("/host_genomes/index_public");
+
 const getAllSampleTypes = () => get("/sample_types.json");
 
 const saveVisualization = (type: $TSFixMe, data: $TSFixMe) =>
@@ -712,6 +715,7 @@ export {
   deleteSample,
   getAlignmentData,
   getAllHostGenomes,
+  getAllHostGenomesPublic,
   getAllSampleTypes,
   getBackgrounds,
   getContigsSequencesByByteranges,

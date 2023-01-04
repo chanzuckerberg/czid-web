@@ -40,7 +40,7 @@ After any component conversion, you should verify that you can still load the pa
 
 ### Converting a direct link
 
-We want to replace the `<a href>` with the React Router `<Link>` component. This component will render an href but prevent the page load. See: https://reactrouter.com/web/api/Link
+We want to replace the `<a href>` with the React Router `<Link>` component. This component will render an href but prevent the page load. See: https://reactrouter.com/web/api/Link. Both the source and destination components should be children of DiscoveryViewRouter.
 
 Replace
 
