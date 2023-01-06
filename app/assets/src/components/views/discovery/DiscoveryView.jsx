@@ -1090,7 +1090,6 @@ class DiscoveryView extends React.Component {
         workflow,
         workflowEntity: find({ value: workflow }, values(WORKFLOWS)).entity,
         userDataCounts: {
-          numberOfConsensusGenomes: sampleStats.consensusGenomesCount,
           sampleCountByWorkflow: sampleStats.countByWorkflow,
           sampleCount: sampleStats.count,
           projectCount: sampleStats.projectCount,

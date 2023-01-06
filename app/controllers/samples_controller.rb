@@ -343,29 +343,14 @@ class SamplesController < ApplicationController
     project_ids = sample_data.map { |s| s[1] }.uniq
     avg_total_reads = nil
     avg_remaining_reads = nil
-
-    cg_count = samples
-               .left_outer_joins(:workflow_runs)
-               .where([
-                        "workflow_runs.workflow = :workflow OR samples.initial_workflow = :workflow",
-                        { workflow: WorkflowRun::WORKFLOW[:consensus_genome] },
-                      ])
-               .distinct.count
-    amr_count = samples
-                .left_outer_joins(:workflow_runs)
-                .where([
-                         "workflow_runs.workflow = :workflow OR samples.initial_workflow = :workflow",
-                         { workflow: WorkflowRun::WORKFLOW[:amr] },
-                       ])
-                .distinct.count
+    samples_workflow_runs = current_power.samples_workflow_runs(samples).non_deprecated
 
     workflow_count = {
       WorkflowRun::WORKFLOW[:short_read_mngs] => samples.where(initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs]).distinct.count,
       WorkflowRun::WORKFLOW[:long_read_mngs] => samples.where(initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs]).distinct.count,
-      WorkflowRun::WORKFLOW[:consensus_genome] => cg_count,
-      WorkflowRun::WORKFLOW[:amr] => amr_count,
+      WorkflowRun::WORKFLOW[:consensus_genome] => samples_workflow_runs.by_workflow(WorkflowRun::WORKFLOW[:consensus_genome]).count,
+      WorkflowRun::WORKFLOW[:amr] => samples_workflow_runs.by_workflow(WorkflowRun::WORKFLOW[:amr]).count,
     }
-    num_cgs = WorkflowRun.where(sample: samples, workflow: WorkflowRun::WORKFLOW[:consensus_genome]).non_deprecated.count
     total_project_count = domain == "snapshot" ? project_ids.count : current_power.projects_by_domain(domain).count
 
     if sample_ids.count > 0
@@ -380,7 +365,6 @@ class SamplesController < ApplicationController
       format.json do
         render json: {
           countByWorkflow: workflow_count,
-          consensusGenomesCount: num_cgs,
           count: sample_ids.count,
           projectCount: total_project_count,
           avgTotalReads: avg_total_reads.presence || 0,

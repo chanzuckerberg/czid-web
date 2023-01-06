@@ -348,29 +348,22 @@ RSpec.describe "Sample request", type: :request do
         @domain = "my_data"
         @project = create(:project, users: [@joe])
         @short_read_mngs_sample = create(:sample, project: @project, initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
-        @long_read_mngs_samples = create(:sample, project: @project, initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs])
+        @long_read_mngs_sample = create(:sample, project: @project, initial_workflow: WorkflowRun::WORKFLOW[:long_read_mngs])
         @cg_sample = create(
-          :sample,
-          project: @project,
-          initial_workflow: WorkflowRun::WORKFLOW[:consensus_genome],
-          workflow_runs_data: [{ workflow: WorkflowRun::WORKFLOW[:consensus_genome] }]
-        )
-        @cg_sample_without_workflow_run = create(
           :sample,
           project: @project,
           initial_workflow: WorkflowRun::WORKFLOW[:consensus_genome]
         )
+        create(:workflow_run, sample: @cg_sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: false)
+        create(:workflow_run, sample: @cg_sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: false)
+        create(:workflow_run, sample: @cg_sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: true)
         @amr_sample = create(
           :sample,
           project: @project,
-          initial_workflow: "amr",
-          workflow_runs_data: [
-            { workflow: WorkflowRun::WORKFLOW[:amr] },
-            { workflow: WorkflowRun::WORKFLOW[:amr], deprecated: true },
-          ]
+          initial_workflow: "amr"
         )
-        @amr_sample2 = create(:sample, project: @project, initial_workflow: "amr", workflow_runs_data: [{ workflow: WorkflowRun::WORKFLOW[:amr] }])
-        @amr_sample_without_workflow_run = create(:sample, project: @project, initial_workflow: "amr")
+        create(:workflow_run, sample: @amr_sample, workflow: WorkflowRun::WORKFLOW[:amr], deprecated: false)
+        create(:workflow_run, sample: @amr_sample, workflow: WorkflowRun::WORKFLOW[:amr], deprecated: true)
       end
 
       it "returns requested sample stats" do
@@ -384,10 +377,9 @@ RSpec.describe "Sample request", type: :request do
           WorkflowRun::WORKFLOW[:short_read_mngs] => 1,
           WorkflowRun::WORKFLOW[:long_read_mngs] => 1,
           WorkflowRun::WORKFLOW[:consensus_genome] => 2,
-          WorkflowRun::WORKFLOW[:amr] => 3
+          WorkflowRun::WORKFLOW[:amr] => 1
         )
-        expect(stats_response["consensusGenomesCount"]).to eq 1
-        expect(stats_response["count"]).to eq 7
+        expect(stats_response["count"]).to eq 4
         expect(stats_response["projectCount"]).to eq 1
         expect(stats_response["avgTotalReads"]).to eq 0
         expect(stats_response["avgAdjustedRemainingReads"]).to eq 0
