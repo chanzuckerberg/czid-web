@@ -363,7 +363,7 @@ class WorkflowRun < ApplicationRecord
   def cleanup
     return if sfn_results_path.blank?
 
-    S3Util.delete_s3_prefix(prefix)
+    S3Util.delete_s3_prefix(sfn_results_path)
   end
 
   def sfn_execution

@@ -443,6 +443,20 @@ describe WorkflowRun, type: :model do
     end
   end
 
+  describe "#handle workflow run destroy" do
+    before do
+      @project = create(:project)
+      @sample = create(:sample, project: @project)
+      @workflow_run = create(:workflow_run, sample: @sample, status: WorkflowRun::STATUS[:failed])
+    end
+
+    it "can destroy a workflow run" do
+      expect(@sample.workflow_runs.count).to eq(1)
+      @workflow_run.destroy!
+      expect(@sample.workflow_runs.count).to eq(0)
+    end
+  end
+
   describe "#parsed_cached_results" do
     let(:parsed_results) { { "accession_id" => "MN908947.3", "accession_name" => "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome", "taxon_id" => 463_676, "taxon_name" => "Severe acute respiratory syndrome coronavirus 2", "technology" => "Illumina", "wetlab_protocol" => "artic" } }
     let(:cached_results) { parsed_results.to_json }
