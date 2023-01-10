@@ -26,7 +26,7 @@ cluster = if env == "sandbox" or aws_account_alias == "idseq-prod"
             env
           end
 
-task = ecs_client.list_tasks(cluster: cluster, service_name: "idseq-#{env}-web").task_arns.first
+task = ecs_client.list_tasks(cluster: cluster, service_name: "czid-#{env}-web").task_arns.first
 
 tasks = ecs_client.describe_tasks(cluster: cluster, tasks: [task])
 instances = ecs_client.describe_container_instances(cluster: cluster,
