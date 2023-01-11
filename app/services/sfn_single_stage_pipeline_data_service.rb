@@ -4,7 +4,7 @@ class SfnSingleStagePipelineDataService
 
   WDL_PARSER = 'scripts/parse_wdl_workflow.py'.freeze
   WORKFLOW_INPUT_PREFIX = 'WorkflowInput'.freeze
-  FILE_SOURCE_MAP_KEY = :unprefixed_name
+  FILE_SOURCE_MAP_KEY = :name
 
   ONT_STEP_DESCRIPTIONS = {
     "RunValidateInput" => "Validates input files are FASTQ format",
@@ -300,20 +300,19 @@ class SfnSingleStagePipelineDataService
 
   def find_file_map_key(filename, file_source_map)
     key = nil
-    unprefixed_name = unprefix(filename)
     if file_source_map.key?(filename)
       key = filename
     elsif filename.include?("_out_") || filename.include?("_in_")
-      if file_source_map.key?(unprefixed_name)
-        key = unprefixed_name
+      if file_source_map.key?(filename)
+        key = filename
       end
     end
     if key.nil?
       # time to dig deep...
       file_source_map.each_value do |file_info|
-        [:name, :internal_name, :unprefixed_name].each do |symbol|
+        [:name, :internal_name].each do |symbol|
           other_name = file_info[symbol]
-          if other_name == filename || other_name == unprefixed_name
+          if other_name == filename
             key = file_info[FILE_SOURCE_MAP_KEY]
             break
           end
@@ -331,7 +330,6 @@ class SfnSingleStagePipelineDataService
       output_info = {
         name: output_var_name,
         internal_name: output_var_name,
-        unprefixed_name: unprefix(output_var_name),
         file: raw_output_filename,
       }
       output_file_map[task_name].push(output_info)
@@ -401,27 +399,6 @@ class SfnSingleStagePipelineDataService
 
     parsed = JSON.parse(stdout)
     return parsed
-  end
-
-  # This is just a workaround until we incorporate SFN execution history
-  # and get a one-to-one mapping of outputs to inputs
-  # See https://jira.czi.team/browse/IDSEQ-2967
-  def unprefix(var_name)
-    split_var = nil
-    if var_name.include?("_out_")
-      split_var = var_name.split("_out_")
-    elsif var_name.include?("_in_")
-      split_var = var_name.split("_in_")
-    elsif var_name.include?("/")
-      return File.basename(var_name)
-    end
-
-    if split_var.nil?
-      return var_name
-    end
-
-    # gather every piece but the first
-    return split_var.drop(1).join
   end
 
   # Fetches the status2.json file from S3 and parses it.
