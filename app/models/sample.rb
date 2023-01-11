@@ -680,6 +680,106 @@ class Sample < ApplicationRecord
     workflow_run
   end
 
+  def copy_to_project(new_project, copy_s3 = false)
+    # if project is the same as the current project, raise error
+    if project.id == new_project.id
+      raise "Projects can't be the same"
+    end
+
+    duplicate_sample = deep_clone include: [:metadata, :input_files] do |original, copy|
+      # Not ideal, but we keep original creation timestamp as it is used to infer uploading timestamp
+      copy.created_at = original.created_at
+    end
+    duplicate_sample.project = new_project
+    duplicate_sample.input_files.each do |input_file|
+      input_file.source_type = InputFile::SOURCE_TYPE_LOCAL
+      input_file.upload_client = InputFile::UPLOAD_CLIENT_WEB
+    end
+    if duplicate_sample.valid?
+      duplicate_sample.save!
+    end
+
+    begin
+      copy_pipeline_runs_to_sample(duplicate_sample, copy_s3)
+      copy_workflow_runs_to_sample(duplicate_sample, copy_s3)
+    rescue StandardError => error
+      # Destroy the duplicate sample if there was an error
+      duplicate_sample.destroy!
+      raise error
+    end
+    duplicate_sample
+  end
+
+  def copy_pipeline_runs_to_sample(new_sample, copy_s3 = false)
+    pipeline_runs.each do |pr|
+      new_pr = pr.deep_clone include: [
+        :taxon_counts,
+        :job_stats,
+        :output_states,
+        :taxon_byteranges,
+        :ercc_counts,
+        :amr_counts,
+        :contigs,
+        :pipeline_run_stages,
+        :accession_coverage_stats,
+        :insert_size_metric_set,
+        :annotations,
+      ] do |original, copy|
+        copy.created_at = original.created_at
+      end
+      new_pr.sample_id = new_sample.id
+      new_pr.save!
+      duplicate_pipeline_run_s3(new_sample, pr, new_pr) if copy_s3
+    end
+  end
+
+  def copy_workflow_runs_to_sample(new_sample, copy_s3 = false)
+    workflow_runs.each do |wr|
+      new_wr = wr.deep_clone do |original, copy|
+        copy.created_at = original.created_at
+      end
+      new_wr.sample_id = new_sample.id
+      new_wr.save!
+      duplicate_pipeline_run_s3(new_sample, wr, new_wr) if copy_s3
+    end
+  end
+
+  def list_objects(s3_path, start_after = nil, delimiter = "/")
+    prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
+    AwsClient[:s3].list_objects_v2(
+      bucket: SAMPLES_BUCKET_NAME,
+      prefix: "#{prefix}/",
+      start_after: start_after,
+      delimiter: delimiter
+    )
+  end
+
+  def duplicate_pipeline_run_s3(new_sample, old_pr, new_pr)
+    bucket = Aws::S3::Bucket.new(ENV['SAMPLES_BUCKET_NAME'])
+    new_pr.update(s3_output_prefix: "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{new_sample.sample_path}/#{new_pr.id}")
+
+    start_after = nil
+
+    begin
+      loop do
+        objects = list_objects(old_pr.sfn_results_path, start_after = start_after)
+        objects.contents.each do |object|
+          source_object = bucket.object(object[:key])
+          target_bucket, target_key = S3Util.parse_s3_path("#{new_pr.sfn_results_path}/#{File.basename(object[:key])}")
+          if source_object.size < 5_242_880 # 5MB
+            source_object.copy_to(bucket: target_bucket, key: target_key, multipart_copy: false)
+          else
+            source_object.copy_to(bucket: target_bucket, key: target_key, multipart_copy: true)
+          end
+        end
+        start_after = objects.next_continuation_token
+        break unless objects.is_truncated
+      end
+    rescue StandardError => e
+      raise e
+    end
+  end
+
   # Delay determined based on query of historical upload times, where 80%
   # of successful uploads took less than 3 hours by updated time.
   def self.current_stalled_local_uploads(delay = 3.hours)

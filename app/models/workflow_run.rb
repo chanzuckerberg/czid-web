@@ -355,19 +355,23 @@ class WorkflowRun < ApplicationRecord
   end
 
   def sfn_results_path
+    File.join(sfn_output_path, "#{workflow}-#{wdl_version.split('.')[0]}")
+  end
+
+  def sfn_output_path
     s3_output_prefix || sample.sample_output_s3_path
   end
 
   private
 
   def cleanup
-    return if sfn_results_path.blank?
+    return if sfn_output_path.blank?
 
-    S3Util.delete_s3_prefix(sfn_results_path)
+    S3Util.delete_s3_prefix(sfn_output_path)
   end
 
   def sfn_execution
-    @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_results_path, finalized: finalized?)
+    @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sfn_output_path, finalized: finalized?)
   end
 
   # TODO: Consider refactoring with a different OOP approach or asynchronous results loading.

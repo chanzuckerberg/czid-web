@@ -172,7 +172,8 @@ class Metadatum < ApplicationRecord
 
   def check_and_set_location_type
     # Skip if location was already resolved
-    return if location_id && !raw_value
+    # admin autofill creates string_validated_value without raw_value
+    return if (location_id || string_validated_value) && !raw_value
 
     # Increment this if you ever change the behavior of _determine_location_params or underlying functions.
     cache_version_key = 1
