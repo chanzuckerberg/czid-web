@@ -24,7 +24,7 @@ import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/co
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
-import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
+import { WORKFLOW_ENTITIES } from "~utils/workflows";
 
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
 import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
@@ -73,7 +73,7 @@ const assembleSelectedDownload = memoize(
 interface BulkDownloadModalProps {
   onClose: $TSFixMeFunction;
   open?: boolean;
-  selectedIds?: Set<$TSFixMeUnknown>;
+  selectedIds?: Set<number>;
   // called when a bulk download has successfully been kicked off
   onGenerate: $TSFixMeFunction;
   workflow: string;
@@ -379,11 +379,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
     let objectIds;
 
-    if (
-      [WORKFLOWS.SHORT_READ_MNGS.value, WORKFLOWS.LONG_READ_MNGS].includes(
-        workflowEntity,
-      )
-    ) {
+    if (workflowEntity === WORKFLOW_ENTITIES.SAMPLES) {
       objectIds = { sampleIds: selectedDownload.validObjectIds };
     } else if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
       objectIds = { workflowRunIds: selectedDownload.validObjectIds };
