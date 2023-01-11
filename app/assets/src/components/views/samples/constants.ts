@@ -98,7 +98,7 @@ export const LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS = {
     removing host and human reads (minimap2), and subsampling to 100,000 reads.`,
   },
   qcPercent: {
-    tooltip: `Percentage of reads remaining after QC filtering (fastqp) to remove
+    tooltip: `Percentage of reads remaining after QC filtering (fastp) to remove
     low quality bases, short reads, and low complexity reads.`,
   },
   duplicateCompressionRatio: {
