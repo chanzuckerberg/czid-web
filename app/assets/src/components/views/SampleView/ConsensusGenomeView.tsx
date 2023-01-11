@@ -62,12 +62,12 @@ const ConsensusGenomeView = ({
   );
   useEffect(() => {
     if (
-      !isNil(coverageVizContainerRef) &&
+      !isNil(coverageVizContainerRef.current) &&
       workflowRunResults &&
       workflowRunResults.coverage_viz
     )
       renderHistogram();
-  }, [coverageVizContainerRef, workflowRunResults]);
+  }, [coverageVizContainerRef.current, workflowRunResults]);
 
   const renderConsensusGenomeDropdown = () => {
     return (
