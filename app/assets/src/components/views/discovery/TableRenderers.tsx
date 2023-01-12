@@ -356,7 +356,7 @@ class TableRenderers extends React.Component {
     return hDisplay + mDisplay;
   };
 
-  static format10BaseExponent = logValue => {
+  static format10BaseExponent = (logValue: number) => {
     if (!logValue) return logValue;
     const roundedInteger = Math.round(logValue);
     return (

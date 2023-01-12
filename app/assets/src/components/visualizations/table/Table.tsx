@@ -1,6 +1,10 @@
 import { difference, find, isEmpty, map, orderBy } from "lodash/fp";
 import React, { useState, useEffect } from "react";
-import { SortDirection } from "react-virtualized";
+import {
+  SortDirection,
+  SortDirectionType,
+  TableRowProps,
+} from "react-virtualized";
 
 import BaseTable, { BaseTableProps } from "./BaseTable";
 
@@ -11,9 +15,9 @@ interface Column {
     data,
     sortDirection,
   }: {
-    data: $TSFixMeUnknown[];
+    data: $TSFixMe[];
     sortDirection: string;
-  }) => $TSFixMeUnknown[];
+  }) => $TSFixMe[];
 }
 interface TableProps extends BaseTableProps {
   columns: Column[];
@@ -28,11 +32,13 @@ interface TableProps extends BaseTableProps {
   sortable?: boolean;
   // Allows you to set a sort on table initialization, but still allows user to change the sort.
   defaultSortBy?: string;
-  defaultSortDirection?: string;
+  defaultSortDirection?: SortDirectionType;
   // Allows to set a custom row height function that receives the row data, not just the ID
-  defaultRowHeight?: number | $TSFixMeFunction;
+  defaultRowHeight?:
+    | number
+    | ((index: { index: number; row: $TSFixMe }) => number);
   selectRowDataGetter?: $TSFixMeFunction;
-  rowRenderer?: $TSFixMeFunction;
+  rowRenderer?: (rowProps: TableRowProps) => React.ReactNode;
 }
 
 const Table = ({
@@ -70,7 +76,7 @@ const Table = ({
       });
   };
 
-  const handleGetRowHeight = ({ index }) => {
+  const handleGetRowHeight = ({ index }: { index: number }) => {
     return typeof defaultRowHeight === "function"
       ? defaultRowHeight({ index, row: sortedData[index] })
       : defaultRowHeight;

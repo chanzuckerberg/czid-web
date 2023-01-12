@@ -51,12 +51,13 @@ import cs from "./phylo_tree_creation_modal.scss";
 
 interface PhyloTreeCreationModalProps {
   admin?: number;
-  onClose?(...args: unknown[]): unknown;
+  onClose?: $TSFixMeFunction;
   projectId?: number;
   projectName?: string;
   minCoverageBreadth?: number;
   taxonId?: number;
   taxonName?: string;
+  csrf?: string;
 }
 
 interface PhyloTreeCreationModalState {

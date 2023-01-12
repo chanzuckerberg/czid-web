@@ -1,7 +1,11 @@
 import cx from "classnames";
 import { isObject } from "lodash/fp";
 import React from "react";
-import { defaultTableRowRenderer, InfiniteLoader } from "react-virtualized";
+import {
+  defaultTableRowRenderer,
+  InfiniteLoader,
+  TableRowProps,
+} from "react-virtualized";
 import BaseTable, { BaseTableProps } from "./BaseTable";
 import cs from "./infinite_table.scss";
 
@@ -41,6 +45,9 @@ const makeCancelable = promise => {
 interface InfiniteTableProps extends BaseTableProps {
   draggableColumns?: boolean;
   defaultCellRenderer?: $TSFixMeFunction;
+  defaultRowHeight?:
+    | number
+    | ((index: { index: number; row: $TSFixMe }) => number);
   loadingClassName?: string;
   minimumBatchSize?: number;
   // function that retrieves rows from startIndex to stopIndex (inclusive),
@@ -54,8 +61,6 @@ interface InfiniteTableProps extends BaseTableProps {
   rowRenderer?: $TSFixMeFunction;
   sortable?: boolean;
   sortBy?: string;
-  sortDirection?: string;
-  defaultRowHeight?: number | $TSFixMeFunction;
   threshold?: number;
 }
 
@@ -144,7 +149,7 @@ class InfiniteTable extends React.Component<
     return this.rows[index] || {};
   };
 
-  rowRenderer = (rowProps: { index: number; className: string }) => {
+  rowRenderer = (rowProps: TableRowProps) => {
     const { loadingClassName, rowRenderer } = this.props;
     if (!this.rows[rowProps.index]) {
       rowProps.className = cx(rowProps.className, cs.loading, loadingClassName);

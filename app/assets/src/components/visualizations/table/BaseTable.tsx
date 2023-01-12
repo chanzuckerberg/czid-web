@@ -5,6 +5,9 @@ import Draggable from "react-draggable";
 import {
   AutoSizer,
   Column,
+  Index,
+  SortDirectionType,
+  TableCellProps,
   Table as VirtualizedTable,
 } from "react-virtualized";
 import "react-virtualized/styles.css";
@@ -15,6 +18,7 @@ import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { DRAGGABLE_COLUMNS_FEATURE } from "~/components/utils/features";
 import { humanize } from "~/helpers/strings";
+import { ColumnProps } from "~/interface/sampleView";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import { IconPlusCircleSmall } from "~ui/icons";
@@ -25,11 +29,11 @@ import cs from "./base_table.scss";
 export interface BaseTableProps {
   className?: string;
   cellClassName?: string;
-  columns?: Column[];
+  columns?: ColumnProps[];
   defaultCellRenderer?: $TSFixMeFunction;
   defaultColumnWidth?: number;
   defaultHeaderHeight?: number;
-  defaultRowHeight?: number | $TSFixMeFunction;
+  defaultRowHeight?: number | ((params: Index) => number);
   defaultSelectColumnWidth?: number;
   draggableColumns?: boolean;
   gridClassName?: string;
@@ -52,14 +56,14 @@ export interface BaseTableProps {
         current?: Element;
       };
   rowClassName?: string;
-  rowHeight?: $TSFixMeUnknown;
+  rowHeight?: number | ((params: Index) => number);
   rowRenderer?: $TSFixMeFunction;
   selectableCellClassName?: string;
   selectableCellRenderer?: $TSFixMeFunction;
   selectableColumnClassName?: string;
   sortable?: boolean;
   sortBy?: string;
-  sortDirection?: string;
+  sortDirection?: SortDirectionType;
   // make the table selectable, by setting a selectable key
   // the tables will check for the selectable key in the selected set/array
   sortedHeaderClassName?: string;
@@ -82,18 +86,6 @@ interface BaseTableState {
   columnWidthPercentages: Record<string, number>;
   columnCurrentlyDragged: $TSFixMeUnknown;
   mouseOverDraggableAreaForColumn: $TSFixMeUnknown;
-}
-
-interface Column {
-  dataKey?: string;
-  width?: number;
-  label?: string;
-  cellRenderer?: $TSFixMeFunction;
-  className?: string;
-  headerClassName?: string;
-  disableDrag?: boolean;
-  disableSort?: boolean;
-  columnData?: $TSFixMeUnknown;
 }
 
 class BaseTable extends React.Component<
@@ -138,7 +130,7 @@ class BaseTable extends React.Component<
   }
 
   // Add defaults to the columns.
-  static setColumnDefaults(columns: Column[], defaultColumnWidth: number) {
+  static setColumnDefaults(columns: ColumnProps[], defaultColumnWidth: number) {
     return columns.map(column => {
       column.label =
         column.label !== undefined ? column.label : humanize(column.dataKey);
@@ -398,7 +390,7 @@ class BaseTable extends React.Component<
     );
   };
 
-  renderSelectableCell = ({ cellData }) => {
+  renderSelectableCell = ({ cellData }: TableCellProps): React.ReactNode => {
     const {
       selected,
       onSelectRow,

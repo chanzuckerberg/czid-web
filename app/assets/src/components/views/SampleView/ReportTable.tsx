@@ -11,7 +11,11 @@ import {
   size,
 } from "lodash/fp";
 import React from "react";
-import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
+import {
+  defaultTableRowRenderer,
+  SortDirection,
+  TableRowProps,
+} from "react-virtualized";
 
 import {
   trackEvent,
@@ -21,6 +25,7 @@ import {
 import { createAnnotation } from "~/api/blast";
 import { getCsrfToken } from "~/api/utils";
 import BasicPopup from "~/components/BasicPopup";
+import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
@@ -43,8 +48,13 @@ import PathogenPreview from "~/components/views/report/PathogenPreview";
 import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { Table } from "~/components/visualizations/table";
-import { CurrentTabSample } from "~/interface/sampleView";
-import { Taxon } from "~/interface/shared";
+import {
+  CurrentTabSample,
+  ColumnProps,
+  BlastData,
+  SortFunctionsParams,
+} from "~/interface/sampleView";
+import { AnnotationType, ConsensusGenomeData, Taxon } from "~/interface/shared";
 import HoverActions from "./HoverActions";
 import {
   REPORT_TABLE_COLUMNS,
@@ -71,12 +81,17 @@ const TAX_LEVEL_INDICES = {
   genus: 2,
 };
 
+type PickConsensusGenomeData = Pick<
+  ConsensusGenomeData,
+  "percentIdentity" | "taxId" | "taxName"
+>;
+
 interface ReportTableProps {
   data?: Taxon[];
   displayMergedNtNrValue?: boolean;
   displayNoBackground?: boolean;
   initialDbType?: "nt" | "nr" | "merged_nt_nr";
-  onTaxonNameClick?: $TSFixMeFunction;
+  onTaxonNameClick?: (clickedTaxonData: Taxon) => void;
   rowHeight?: number;
   // Needed only for hover actions
   // Consider adding a callback to render the hover actions
@@ -85,11 +100,11 @@ interface ReportTableProps {
   consensusGenomeData?: Record<string, object[]>;
   consensusGenomeEnabled: boolean;
   fastaDownloadEnabled: boolean;
-  onAnnotationUpdate: $TSFixMeFunction;
-  onBlastClick: $TSFixMeFunction;
-  onConsensusGenomeClick: $TSFixMeFunction;
-  onCoverageVizClick: $TSFixMeFunction;
-  onPreviousConsensusGenomeClick: $TSFixMeFunction;
+  onAnnotationUpdate: () => void;
+  onBlastClick: (params: BlastData) => void;
+  onConsensusGenomeClick: (params: PickConsensusGenomeData) => void;
+  onCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void;
+  onPreviousConsensusGenomeClick: (params: PickConsensusGenomeData) => void;
   phyloTreeAllowed: boolean;
   pipelineRunId?: number;
   pipelineVersion?: string;
@@ -107,7 +122,7 @@ interface ReportTableState {
 }
 
 class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
-  columns: $TSFixMe;
+  columns: ColumnProps[];
   constructor(props: ReportTableProps) {
     super(props);
 
@@ -140,7 +155,8 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       ASSEMBLY_FEATURE,
       pipelineVersion,
     );
-    const nonNumericColumns = [
+
+    const nonNumericColumns: Array<ColumnProps> = [
       {
         cellRenderer: this.renderExpandIcon,
         className: cs.expandHeader,
@@ -158,7 +174,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         headerClassName: cs.taxonHeader,
         label: "Taxon",
         minWidth: 300,
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedSortFunction({
             data,
             sortDirection,
@@ -169,7 +185,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       },
     ];
 
-    const illuminaColumns = [
+    const illuminaColumns: Array<ColumnProps> = [
       {
         cellRenderer: this.renderAggregateScore,
         columnData: displayMergedNtNrValue
@@ -178,7 +194,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         dataKey: "agg_score",
         label: "Score",
         width: 130,
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedSortFunction({
             data,
             sortDirection,
@@ -189,7 +205,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         disableSort: displayNoBackground,
       },
       {
-        cellDataGetter: ({ rowData }: $TSFixMe) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           displayMergedNtNrValue
             ? null
             : this.getCountTypeValuesFromDataRow({
@@ -203,7 +219,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           ? REPORT_TABLE_COLUMNS["unavailable"]
           : REPORT_TABLE_COLUMNS["zscore"],
         dataKey: "z_score",
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -215,19 +231,19 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: 65,
       },
       {
-        cellDataGetter: ({ rowData }: $TSFixMe) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "rpm",
             defaultValue: 0,
             countTypes: countTypes,
           }),
-        cellRenderer: ({ cellData }: $TSFixMe) =>
+        cellRenderer: ({ cellData }: { cellData: number[] }) =>
           this.renderCellValue({ cellData, decimalPlaces: 1 }),
         columnData: REPORT_TABLE_COLUMNS["rpm"],
         dataKey: "rpm",
         label: "rPM",
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -238,7 +254,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: 75,
       },
       {
-        cellDataGetter: ({ rowData }: $TSFixMe) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "count",
@@ -249,7 +265,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         columnData: REPORT_TABLE_COLUMNS["r"],
         dataKey: "r",
         label: "r",
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -260,7 +276,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: 75,
       },
       assemblyEnabled && {
-        cellDataGetter: ({ rowData }: $TSFixMe) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "contigs",
@@ -271,7 +287,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         columnData: REPORT_TABLE_COLUMNS["contigs"],
         dataKey: "contigs",
         label: "contig",
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -282,7 +298,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: 75,
       },
       assemblyEnabled && {
-        cellDataGetter: ({ rowData }: $TSFixMe) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "contig_r",
@@ -293,7 +309,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         columnData: REPORT_TABLE_COLUMNS["contigreads"],
         dataKey: "contig_r",
         label: "contig r",
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -305,21 +321,21 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       },
     ];
 
-    const nanoporeColumns = [
+    const nanoporeColumns: Array<ColumnProps> = [
       {
-        cellDataGetter: ({ rowData }) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "bpm",
             defaultValue: 0,
             countTypes: countTypes,
           }),
-        cellRenderer: ({ cellData }) =>
+        cellRenderer: ({ cellData }: { cellData: number[] }) =>
           this.renderCellValue({ cellData, decimalPlaces: 1 }),
         columnData: REPORT_TABLE_COLUMNS["bpm"],
         dataKey: "bpm",
         label: "bPM",
-        sortFunction: ({ data, sortDirection }) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -330,7 +346,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: NANOPORE_DEFAULT_COLUMN_WIDTH,
       },
       {
-        cellDataGetter: ({ rowData }) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "base_count",
@@ -341,7 +357,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         columnData: REPORT_TABLE_COLUMNS["b"],
         dataKey: "b",
         label: "b",
-        sortFunction: ({ data, sortDirection }) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -352,7 +368,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: NANOPORE_DEFAULT_COLUMN_WIDTH,
       },
       {
-        cellDataGetter: ({ rowData }) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "contigs",
@@ -363,7 +379,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         columnData: REPORT_TABLE_COLUMNS["contigs"],
         dataKey: "contigs",
         label: "contig",
-        sortFunction: ({ data, sortDirection }) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -374,7 +390,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: NANOPORE_DEFAULT_COLUMN_WIDTH,
       },
       {
-        cellDataGetter: ({ rowData }) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "contig_b",
@@ -385,7 +401,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         columnData: REPORT_TABLE_COLUMNS["contigbases"],
         dataKey: "contig_b",
         label: "contig b",
-        sortFunction: ({ data, sortDirection }) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -400,19 +416,19 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     const useNanoporeColumnWidth = currentTab === TABS.LONG_READ_MNGS;
     const sharedColumns = [
       {
-        cellDataGetter: ({ rowData }: $TSFixMe) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "percent_identity",
             defaultValue: 0,
             countTypes: countTypes,
           }),
-        cellRenderer: ({ cellData }: $TSFixMe) =>
+        cellRenderer: ({ cellData }) =>
           this.renderCellValue({ cellData, decimalPlaces: 1 }),
         columnData: REPORT_TABLE_COLUMNS["percentidentity"],
         dataKey: "percent_identity",
         label: "%id",
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -423,19 +439,19 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: useNanoporeColumnWidth ? NANOPORE_DEFAULT_COLUMN_WIDTH : 60,
       },
       {
-        cellDataGetter: ({ rowData }: $TSFixMe) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "alignment_length",
             defaultValue: 0,
             countTypes: countTypes,
           }),
-        cellRenderer: ({ cellData }: $TSFixMe) =>
+        cellRenderer: ({ cellData }) =>
           this.renderCellValue({ cellData, decimalPlaces: 1 }),
         columnData: REPORT_TABLE_COLUMNS["alignmentlength"],
         dataKey: "alignment_length",
         label: "L",
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -446,19 +462,18 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         width: useNanoporeColumnWidth ? NANOPORE_DEFAULT_COLUMN_WIDTH : 70,
       },
       {
-        cellDataGetter: ({ rowData }: $TSFixMe) =>
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
             field: "e_value",
             defaultValue: 0,
             countTypes: countTypes,
           }),
-        cellRenderer: ({ cellData }: $TSFixMe) =>
-          this.render10BaseExponent(cellData),
+        cellRenderer: ({ cellData }) => this.render10BaseExponent(cellData),
         columnData: REPORT_TABLE_COLUMNS["evalue"],
         dataKey: "e_value",
         label: "E value",
-        sortFunction: ({ data, sortDirection }: $TSFixMe) =>
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
@@ -470,7 +485,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       },
       displayMergedNtNrValue
         ? {
-            cellDataGetter: ({ rowData }: $TSFixMe) =>
+            cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
               this.getCountTypeValuesFromDataRow({
                 rowData,
                 field: "source_count_type",
@@ -501,7 +516,13 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     );
   };
 
-  renderAggregateScore = ({ cellData, rowData }: $TSFixMe) => {
+  renderAggregateScore = ({
+    cellData,
+    rowData,
+  }: {
+    cellData: number;
+    rowData: Taxon;
+  }) => {
     const { displayNoBackground, displayMergedNtNrValue } = this.props;
     if (displayNoBackground || displayMergedNtNrValue) {
       return (
@@ -538,7 +559,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     }
   };
 
-  renderZscore = ({ cellData }: $TSFixMe) => {
+  renderZscore = ({ cellData }: { cellData: Array<number> }) => {
     const { displayNoBackground } = this.props;
     if (displayNoBackground) {
       return (
@@ -555,7 +576,13 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     }
   };
 
-  renderName = ({ cellData, rowData }: $TSFixMe) => {
+  renderName = ({
+    cellData,
+    rowData,
+  }: {
+    cellData: string;
+    rowData: Taxon;
+  }) => {
     const { allowedFeatures = [] } = this.context || {};
     const { displayMergedNtNrValue, onTaxonNameClick } = this.props;
     let childrenCount = 0;
@@ -604,7 +631,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             <span className={cs.annotationLabel}>
               <AnnotationMenu
                 currentLabelType={rowData.annotation || ANNOTATION_NONE}
-                onAnnotationSelected={(annotationType: $TSFixMe) =>
+                onAnnotationSelected={(annotationType: AnnotationType) =>
                   this.handleAnnotationCreation(rowData.taxId, annotationType)
                 }
                 analyticsContext={analyticsContext}
@@ -670,7 +697,10 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
   renderGenusLevelPreviews = ({
     rowData,
     filteredSpeciesPathogenCount,
-  }: $TSFixMe) => {
+  }: {
+    rowData: Taxon;
+    filteredSpeciesPathogenCount?: number;
+  }) => {
     const { allowedFeatures = [] } = this.context || {};
     const displayAnnotationPreviews =
       allowedFeatures.includes(ANNOTATION_FEATURE) &&
@@ -699,7 +729,10 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     );
   };
 
-  handleAnnotationCreation = (taxId: $TSFixMe, annotationType: $TSFixMe) => {
+  handleAnnotationCreation = (
+    taxId: number,
+    annotationType: AnnotationType,
+  ) => {
     const { onAnnotationUpdate, pipelineRunId } = this.props;
     createAnnotation({
       pipelineRunId,
@@ -710,7 +743,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     });
   };
 
-  renderExpandIcon = ({ rowData }: $TSFixMe) => {
+  renderExpandIcon = ({ rowData }: { rowData: Taxon }) => {
     const { expandedGenusIds } = this.state;
     return (
       <div className={cs.expandIcon}>
@@ -753,7 +786,13 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     );
   };
 
-  renderCellValue = ({ cellData, decimalPlaces }: $TSFixMe) => {
+  renderCellValue = ({
+    cellData,
+    decimalPlaces,
+  }: {
+    cellData: Array<number>;
+    decimalPlaces?: number;
+  }) => {
     if (!cellData.length) return "-";
 
     const hasMergedNtNrValue = cellData.length === 1;
@@ -768,7 +807,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     return hasMergedNtNrValue
       ? mergedNtNrValue
       : this.renderNtNrStack({
-          cellData: cellData.map((val: $TSFixMe) =>
+          cellData: cellData.map(val =>
             TableRenderers.formatNumberWithCommas(
               Number(val).toFixed(decimalPlaces || 0),
             ),
@@ -776,7 +815,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         });
   };
 
-  render10BaseExponent = (cellData: $TSFixMe) => {
+  render10BaseExponent = (cellData: Array<number>) => {
     if (!cellData.length) return "-";
 
     const hasMergedNtNrValue = cellData.length === 1;
@@ -787,7 +826,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     return hasMergedNtNrValue
       ? mergedNtNrValue
       : this.renderNtNrStack({
-          cellData: cellData.map((val: $TSFixMe) =>
+          cellData: cellData.map(val =>
             TableRenderers.format10BaseExponent(val),
           ),
         });
@@ -829,7 +868,13 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     );
   };
 
-  renderNtNrStack = ({ cellData, onClick }: $TSFixMe) => {
+  renderNtNrStack = ({
+    cellData,
+    onClick,
+  }: {
+    cellData: Array<string | number | JSX.Element>;
+    onClick?: Array<(x: string) => void>;
+  }) => {
     const { dbType } = this.state;
     return (
       <div className={cs.stack}>
@@ -850,19 +895,10 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
   };
 
   // Hover actions
-  // TODO(tiago): consider moving the action inside HoverActions
-  linkToNCBI = ({ taxId }: $TSFixMe) => {
-    let num = parseInt(taxId);
-    if (num < -1e8) {
-      num = -num % -1e8;
-    }
-    // @ts-expect-error ts-migrate(2322) FIXME: Type 'string' is not assignable to type 'number'.
-    num = num.toString();
-    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
-    window.open(ncbiLink, "hide_referrer");
-  };
-
-  downloadFastaUrl = ({ taxLevel, taxId }: $TSFixMe) => {
+  downloadFastaUrl = ({
+    taxLevel,
+    taxId,
+  }: Pick<Taxon, "taxLevel" | "taxId">) => {
     const { pipelineVersion, sampleId } = this.props;
     const taxLevelIndex = TAX_LEVEL_INDICES[taxLevel];
     if (!taxLevelIndex) {
@@ -873,7 +909,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     location.href = `/samples/${sampleId}/fasta/${taxLevelIndex}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
-  downloadContigUrl = ({ taxId }: $TSFixMe) => {
+  downloadContigUrl = ({ taxId }: Pick<Taxon, "taxId">) => {
     const { pipelineVersion, sampleId } = this.props;
     location.href = getDownloadContigUrl({
       pipelineVersion,
@@ -894,7 +930,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     taxCommonName,
     taxSpecies,
     taxonStatsByCountType,
-  }: $TSFixMe) => {
+  }: CoverageVizParamsRaw) => {
     const { onCoverageVizClick, pipelineVersion, sampleId } = this.props;
     const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
@@ -930,7 +966,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     });
   };
 
-  getAnalyticsContext = ({ rowData }: $TSFixMe) => {
+  getAnalyticsContext = ({ rowData }: { rowData: Taxon }) => {
     const { projectId, sampleId } = this.props;
     return {
       projectId: projectId,
@@ -941,7 +977,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     };
   };
 
-  renderHoverActions = ({ rowData }: $TSFixMe) => {
+  renderHoverActions = ({ rowData }: { rowData: Taxon }) => {
     const {
       alignVizAvailable,
       consensusGenomeData,
@@ -1046,7 +1082,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     );
   };
 
-  rowRenderer = (rowProps: $TSFixMe) => {
+  rowRenderer = (rowProps: TableRowProps) => {
     const data = rowProps.rowData;
     const isDimmed =
       data.taxLevel === TAX_LEVEL_SPECIES &&
@@ -1067,7 +1103,12 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     field,
     defaultValue,
     countTypes = ["nt", "nr"],
-  }: $TSFixMe) {
+  }: {
+    rowData: Taxon;
+    field: string;
+    defaultValue: number | string;
+    countTypes?: string[];
+  }): (number | string)[] {
     return reduce(
       (result, countType) => {
         result.push(getOr(defaultValue, [countType, field], rowData));
@@ -1084,7 +1125,13 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     sortDirection,
     nullValue,
     limits,
-  }: $TSFixMe) => {
+  }: {
+    data?: Taxon[];
+    path: string[];
+    sortDirection?: "asc" | "desc";
+    nullValue?: string | number;
+    limits?: number[] | string[];
+  }) => {
     // Uses lodash's orderBy function.
     // It uses a triple sorting key that enables nested sorting of genus and species, while guaranteeing that
     // genus is always on top of its children species
@@ -1093,7 +1140,6 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         // 1st value: value defined by path for the genus (guarantees all genus together)
         // note: a species row has a field .genus that points to their genus
         rowData =>
-          // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
           rowData.genus
             ? getOr(nullValue, [TAX_LEVEL_GENUS].concat(path), rowData)
             : getOr(nullValue, path, rowData),
@@ -1101,7 +1147,6 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         // this value guarantees that we keep species within their genus, even if the first value is duplicated
         // e.g. if two genus have 2 reads they would be together on top and they species after them,
         // adding tax id guarantees all the species are below their respective genus
-        // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
         rowData => (rowData.genus ? rowData.genus.taxId : rowData.taxId),
         // 3rd value: value defined by path for the species if species row;
         // using the limit value for genus based on direction guarantees that genus are always on top of their species.
@@ -1111,7 +1156,6 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         // without tax id, the ascending order would be A: [2, -], B: [2, -], A1: [2, 1], A2 [2, 1] B1: [2, 2]
         // with tax id, the ascending order would be A: [2, 1001, -], A1: [2, 1001, 1], A2: [2, 1001, 1], B: [2, 1002, -], B1: [2, 1002, 2]
         rowData =>
-          // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
           rowData.genus
             ? getOr(nullValue, path, rowData)
             : sortDirection === "asc"
@@ -1123,19 +1167,25 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     );
   };
 
-  nestedNtNrSortFunction = ({ path, ...props }: $TSFixMe) => {
+  nestedNtNrSortFunction = ({ path, ...props }) => {
     const { dbType } = this.state;
     return this.nestedSortFunction({ path: [dbType].concat(path), ...props });
   };
 
-  handleColumnSort = ({ sortBy, sortDirection }: $TSFixMe) => {
+  handleColumnSort = ({
+    sortBy,
+    sortDirection,
+  }: {
+    sortBy: string;
+    sortDirection: "ASC" | "DESC";
+  }) => {
     trackEvent(ANALYTICS_EVENT_NAMES.REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED, {
       sortBy,
       sortDirection,
     });
   };
 
-  toggleExpandGenus = ({ taxId }: $TSFixMe) => {
+  toggleExpandGenus = ({ taxId }: { taxId: number }) => {
     const { data } = this.props;
     const { expandedGenusIds, expandAllOpened } = this.state;
     expandedGenusIds.delete(taxId) || expandedGenusIds.add(taxId);
@@ -1170,7 +1220,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     }
   };
 
-  handleNtNrChange = (selectedDbType: $TSFixMe) => {
+  handleNtNrChange = (selectedDbType: "nr" | "nt") => {
     this.setState({
       dbType: selectedDbType,
     });
@@ -1182,7 +1232,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
 
     // flatten data for consumption of react virtualized table
     // removes collapsed rows
-    const tableRows: $TSFixMe = [];
+    const tableRows: Taxon[] = [];
     data.forEach(genusData => {
       if (displayMergedNtNrValue && !genusData["merged_nt_nr"]) {
         // skip lines without merged counts
@@ -1192,7 +1242,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       tableRows.push(genusData);
 
       if (expandedGenusIds.has(genusData.taxId)) {
-        genusData.filteredSpecies.forEach((speciesData: $TSFixMe) => {
+        genusData.filteredSpecies.forEach(speciesData => {
           if (displayMergedNtNrValue && !speciesData["merged_nt_nr"]) {
             // skip lines without merged counts
             return;
@@ -1243,7 +1293,6 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             {currentUser => (
               <PhyloTreeCreationModal
                 admin={currentUser.admin ? 1 : 0}
-                // @ts-expect-error csrf does not exist on type
                 csrf={getCsrfToken()}
                 taxonId={phyloTreeModalParams.taxId}
                 taxonName={phyloTreeModalParams.taxName}

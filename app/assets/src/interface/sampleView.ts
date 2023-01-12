@@ -176,3 +176,31 @@ export interface RawReportData {
   metadata: ReportMetadata;
   sortedGenus: number[];
 }
+
+export interface ColumnProps {
+  dataKey?: string;
+  cellRenderer?: ({
+    cellData,
+    rowData,
+  }: {
+    cellData?: Array<number> | number | string;
+    rowData?: Taxon;
+  }) => JSX.Element | "-";
+  className?: string;
+  columnData?: { [key: string]: any };
+  disableSort?: boolean;
+  disableDrag?: boolean;
+  flexGrow?: number;
+  headerClassName?: string;
+  headerRenderer?: () => JSX.Element;
+  label?: string;
+  minWidth?: number;
+  width?: number;
+  sortFunction?: ({ data, sortDirection }: SortFunctionsParams) => Taxon[];
+  cellDataGetter?: ({ rowData }: { rowData: Taxon }) => (string | number)[];
+}
+
+export interface SortFunctionsParams {
+  data: Taxon[];
+  sortDirection: "asc" | "desc";
+}

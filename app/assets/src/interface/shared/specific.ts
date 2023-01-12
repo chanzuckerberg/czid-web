@@ -241,9 +241,11 @@ export interface Subcategories {
   Viruses: string[];
 }
 
+export type AnnotationType = "not_a_hit" | "hit" | "inconclusive" | "none";
+
 export interface Taxon {
   agg_score?: $TSFixMeUnknown;
-  annotation?: $TSFixMeUnknown;
+  annotation?: AnnotationType;
   category: string;
   common_name: string;
   genus_tax_id: string;
