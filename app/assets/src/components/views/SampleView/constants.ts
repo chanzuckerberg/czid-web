@@ -294,11 +294,14 @@ export const TAXON_GENERAL_FIELDS = [
   "category",
   "is_phage",
   "species_tax_ids",
+];
+
+export const BACKGROUND_FIELDS = [
   "agg_score",
   "max_z_score",
 ];
 
-export const TAXON_COUNT_TYPE_METRICS = [
+export const SHORT_READ_TAXON_COUNT_TYPE_METRICS = [
   "z_score",
   "rpm",
   "count",
@@ -312,6 +315,21 @@ export const TAXON_COUNT_TYPE_METRICS = [
   "bg_mean_mass_normalized",
   "bg_stdev_mass_normalized",
 ];
+
+export const LONG_READ_TAXON_COUNT_TYPE_METRICS = [
+  "bpm",
+  "base_count",
+  "contigs",
+  "contig_b",
+  "percent_identity",
+  "alignment_length",
+  "e_value",
+];
+
+export const TAXON_COUNT_TYPE_METRICS = {
+  [WORKFLOWS.SHORT_READ_MNGS.value]: SHORT_READ_TAXON_COUNT_TYPE_METRICS,
+  [WORKFLOWS.LONG_READ_MNGS.value]: LONG_READ_TAXON_COUNT_TYPE_METRICS,
+};
 
 export const SARS_COV_2_ACCESSION_ID = "MN908947.3";
 

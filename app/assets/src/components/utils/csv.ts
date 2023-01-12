@@ -11,9 +11,11 @@ import {
   tail,
 } from "lodash/fp";
 import Papa from "papaparse";
+import { WORKFLOWS, labelToVal } from "~/components/utils/workflows";
 import { FilterSelections } from "~/interface/sampleView";
 import { Entries } from "~/interface/shared";
 import {
+  BACKGROUND_FIELDS,
   TAXON_COUNT_TYPE_METRICS,
   TAXON_GENERAL_FIELDS,
 } from "../views/SampleView/constants";
@@ -190,11 +192,13 @@ export const computeReportTableValuesForCSV = (
   backgrounds,
   currentTab,
 ) => {
+  const workflow = labelToVal(currentTab);
   const csvRows = [];
   const csvHeaders = [
     ...TAXON_GENERAL_FIELDS,
-    ...Array.from(TAXON_COUNT_TYPE_METRICS, metric => "nt." + metric),
-    ...Array.from(TAXON_COUNT_TYPE_METRICS, metric => "nr." + metric),
+    ...(workflow === WORKFLOWS.SHORT_READ_MNGS.value ? BACKGROUND_FIELDS : []),
+    ...Array.from(TAXON_COUNT_TYPE_METRICS[workflow], metric => "nt." + metric),
+    ...Array.from(TAXON_COUNT_TYPE_METRICS[workflow], metric => "nr." + metric),
   ];
 
   filteredReportData.forEach((datum: $TSFixMe) => {
