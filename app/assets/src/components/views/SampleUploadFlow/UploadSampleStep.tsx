@@ -1037,6 +1037,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   isValid = () => {
     const {
       currentTab,
+      selectedGuppyBasecallerSetting,
       selectedTechnology,
       selectedProject,
       selectedWetlabProtocol,
@@ -1047,7 +1048,27 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     const { allowedFeatures } = this.context || {};
 
     let workflowsValid: boolean;
-    if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
+    if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
+      // If ont_v1 is enabled, the user must select either Illumina or Nanopore before proceeding.
+      // If they select Nanopore, they must additionally select their Guppy Basecaller Setting.
+      if (allowedFeatures.includes(ONT_V1_FEATURE)) {
+        switch (selectedTechnology) {
+          case ILLUMINA:
+            workflowsValid = true;
+            break;
+          case NANOPORE:
+            workflowsValid = !!selectedGuppyBasecallerSetting;
+            break;
+          default:
+            workflowsValid = false;
+            break;
+        }
+      } else {
+        // If ont_v1 is not enabled, then metagenomics will automatically use Illumina as the sequencing platform,
+        // so no additional selections are required.
+        workflowsValid = true;
+      }
+    } else if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
       switch (selectedTechnology) {
         case CG_TECHNOLOGY_OPTIONS.ILLUMINA:
           workflowsValid = !!selectedWetlabProtocol;
@@ -1059,10 +1080,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
           workflowsValid = false;
           break;
       }
-    } else if (
-      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
-      selectedWorkflows.has(WORKFLOWS.AMR.value)
-    ) {
+    } else if (selectedWorkflows.has(WORKFLOWS.AMR.value)) {
       workflowsValid = true;
     }
 
@@ -1130,12 +1148,13 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   renderUploadTabs = () => {
     const { admin, biohubS3UploadEnabled } = this.props;
     const { selectedWorkflows, selectedTechnology } = this.state;
-    const shouldDisableS3Tab = selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
-    selectedTechnology === NANOPORE;
-    const shouldDisableBasespaceTab = (
-      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)
-      || selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value))
-      && selectedTechnology === NANOPORE;
+    const shouldDisableS3Tab =
+      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
+      selectedTechnology === NANOPORE;
+    const shouldDisableBasespaceTab =
+      (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
+        selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) &&
+      selectedTechnology === NANOPORE;
 
     // We're currently disabling S3 tab for ONT v1, but it could be re-enabled in the future.
     // Basespace upload is disabled for Nanopore pipelines because it only stores Illumina files.
