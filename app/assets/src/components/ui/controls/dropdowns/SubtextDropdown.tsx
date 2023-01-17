@@ -1,13 +1,14 @@
 import cx from "classnames";
 import React from "react";
 
+import { DropdownProps } from "semantic-ui-react";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import Dropdown from "./Dropdown";
 
 import cs from "./subtext_dropdown.scss";
 
-interface SubtextDropdownProps {
+interface SubtextDropdownProps extends DropdownProps {
   className?: string;
   menuClassName?: string;
   options: Option[];

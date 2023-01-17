@@ -1,11 +1,12 @@
 import cx from "classnames";
 import React from "react";
+import { DropdownProps } from "semantic-ui-react";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import PrimaryButton from "../buttons/PrimaryButton";
 import SecondaryButton from "../buttons/SecondaryButton";
 import cs from "./button_dropdown.scss";
 
-interface ButtonDropdownProps {
+interface ButtonDropdownProps extends DropdownProps {
   className?: string;
   disabled?: boolean;
   icon?: React.ReactElement;

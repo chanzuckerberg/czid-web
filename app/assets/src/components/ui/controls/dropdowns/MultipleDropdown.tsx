@@ -1,13 +1,14 @@
 import cx from "classnames";
 import { find, without, includes, omit } from "lodash/fp";
 import React from "react";
+import { DropdownProps } from "semantic-ui-react";
 import BareDropdown from "./BareDropdown";
 import CheckboxItem from "./common/CheckboxItem";
 import DropdownLabel from "./common/DropdownLabel";
 import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./multiple_dropdown.scss";
 
-interface MultipleDropdownProps {
+interface MultipleDropdownProps extends DropdownProps {
   arrowInsideTrigger?: boolean;
   boxed?: boolean;
   checkedOnTop?: boolean;

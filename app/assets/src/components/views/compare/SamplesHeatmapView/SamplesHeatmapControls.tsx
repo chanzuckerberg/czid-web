@@ -171,7 +171,6 @@ const SamplesHeatmapControls = ({
       useHeatmapES ? (
         <MultipleNestedConfirmDropdown
           boxed
-          // @ts-expect-error Property 'fluid' does not exist on type
           fluid
           rounded
           options={categoryOptions}
@@ -185,7 +184,6 @@ const SamplesHeatmapControls = ({
       ) : (
         <MultipleNestedDropdown
           boxed
-          // @ts-expect-error Property 'fluid' does not exist on type
           fluid
           rounded
           options={categoryOptions}

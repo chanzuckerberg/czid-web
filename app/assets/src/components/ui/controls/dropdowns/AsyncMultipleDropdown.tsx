@@ -98,7 +98,6 @@ class AsyncMultipleDropdown extends React.Component<
     return (
       <MultipleDropdown
         {...extraProps}
-        // @ts-expect-error: Property 'fluid' does not exist
         fluid
         hideCounter
         rounded

@@ -45,7 +45,7 @@ interface WorkflowSelectorProps {
   onGuppyBasecallerSettingChange?: $TSFixMeFunction;
   onWetlabProtocolChange?: $TSFixMeFunction;
   onWorkflowToggle?: $TSFixMeFunction;
-  currentTab?: string,
+  currentTab?: string;
   selectedMedakaModel?: string;
   selectedGuppyBasecallerSetting?: string;
   selectedTechnology?: string;
@@ -177,7 +177,6 @@ const WorkflowSelector = ({
             <SectionsDropdown
               className={cs.dropdown}
               menuClassName={cs.dropdownMenu}
-              // @ts-expect-error Property 'fluid' does not exist on type
               fluid
               categories={MEDAKA_MODEL_OPTIONS}
               onChange={(val: string) => onMedakaModelChange(val)}
@@ -224,7 +223,10 @@ const WorkflowSelector = ({
     );
     const nanoporeTechnologyOptionSelected =
       selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
-    const shouldDisableOption = shouldDisableTechnologyOption(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowObject.workflow);
+    const shouldDisableOption = shouldDisableTechnologyOption(
+      CG_TECHNOLOGY_OPTIONS.NANOPORE,
+      workflowObject.workflow,
+    );
     let radioButton = (
       <RadioButton
         disabled={shouldDisableOption}
@@ -249,7 +251,9 @@ const WorkflowSelector = ({
           shouldDisableOption && cs.disabled,
         )}
         onClick={() =>
-          shouldDisableOption ? null : onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowKey)
+          shouldDisableOption
+            ? null
+            : onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowKey)
         }
       >
         {radioButton}
@@ -261,10 +265,16 @@ const WorkflowSelector = ({
                 className={shouldDisableOption && cs.disabledStatus}
                 inline
                 status="Beta"
-                type="beta" />
+                type="beta"
+              />
             )}
           </div>
-          <div className={cx(cs.technologyDescription, shouldDisableOption && cs.disabled)}>
+          <div
+            className={cx(
+              cs.technologyDescription,
+              shouldDisableOption && cs.disabled,
+            )}
+          >
             {workflowObject.nanoporeText}
             {createExternalLink({
               analyticsEventName: workflowObject.nanoporeClickedLinkEvent,
@@ -366,7 +376,8 @@ const WorkflowSelector = ({
       nanoporeLink: MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
       nanoporeClickedLinkEvent: "",
       nanoporeContent: renderMNGSNanoporeContent(),
-      nanoporeDisabledTooltipText: "This pipeline only supports upload from your computer.",
+      nanoporeDisabledTooltipText:
+        "This pipeline only supports upload from your computer.",
     },
     {
       workflow: WORKFLOWS.AMR.value,
@@ -396,7 +407,9 @@ const WorkflowSelector = ({
       nanoporeClickedLinkEvent:
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED,
       nanoporeContent: renderCGNanoporeContent(),
-      nanoporeDisabledTooltipText: `This pipeline only supports upload from your computer${s3UploadEnabled ? " or S3" : ""}.`,
+      nanoporeDisabledTooltipText: `This pipeline only supports upload from your computer${
+        s3UploadEnabled ? " or S3" : ""
+      }.`,
     },
   ];
 
@@ -422,14 +435,20 @@ const WorkflowSelector = ({
     }
   };
 
-  const shouldDisableTechnologyOption = (technology: Technology, workflow: WORKFLOW_VALUES) => {
+  const shouldDisableTechnologyOption = (
+    technology: Technology,
+    workflow: WORKFLOW_VALUES,
+  ) => {
     switch (currentTab) {
-    case REMOTE_UPLOAD:
-      return technology === NANOPORE && workflow === WORKFLOWS.SHORT_READ_MNGS.value;
-    case BASESPACE_UPLOAD:
-      return technology === NANOPORE;
-    case LOCAL_UPLOAD:
-      return false;
+      case REMOTE_UPLOAD:
+        return (
+          technology === NANOPORE &&
+          workflow === WORKFLOWS.SHORT_READ_MNGS.value
+        );
+      case BASESPACE_UPLOAD:
+        return technology === NANOPORE;
+      case LOCAL_UPLOAD:
+        return false;
     }
   };
 

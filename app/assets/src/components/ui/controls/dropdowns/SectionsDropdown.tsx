@@ -3,13 +3,14 @@ import { isEmpty, isNil } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React from "react";
 
+import { DropdownProps } from "semantic-ui-react";
 import DropdownTrigger from "~/components/ui/controls/dropdowns/common/DropdownTrigger";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 
 import cs from "./subtext_dropdown.scss";
 
-interface SectionsDropdownProps {
+interface SectionsDropdownProps extends DropdownProps {
   className?: string;
   menuClassName?: string;
   categories: {

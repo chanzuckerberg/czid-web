@@ -95,7 +95,6 @@ const BackgroundModelFilter = React.memo(
         <SectionsDropdown
           categories={backgroundSections}
           disabled={disabled}
-          // @ts-expect-error Property 'fluid' does not exist on type
           fluid
           itemIdToName={backgroundIdToName}
           onChange={onChange}
@@ -113,7 +112,6 @@ const BackgroundModelFilter = React.memo(
           {...props}
           options={backgroundOptions}
           initialSelectedValue={value}
-          // @ts-expect-error Property 'disabled' does not exist on type
           disabled={disabled}
           onChange={onChange}
           onClick={onClick}

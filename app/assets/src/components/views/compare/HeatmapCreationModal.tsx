@@ -121,7 +121,6 @@ export default class HeatmapCreationModal extends React.Component<
 
     return (
       <MultipleNestedDropdown
-        // @ts-expect-error Property 'fluid' does not exist on type
         fluid
         options={options}
         onChange={this.onCategoryChange}

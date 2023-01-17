@@ -7,7 +7,7 @@ import ButtonDropdown from "./ButtonDropdown";
 import cs from "./download_button_dropdown.scss";
 
 interface DownloadButtonDropdown {
-  className: string;
+  className?: string;
   disabled?: boolean;
   items?: React.ReactNode[];
   options: $TSFixMe[];
@@ -20,7 +20,6 @@ const DownloadButtonDropdown = (props: DownloadButtonDropdown) => {
     <ButtonDropdown
       {...props}
       secondary
-      // @ts-expect-error Property 'fluid' does not exist
       fluid
       text="Download"
       icon={<IconDownload className={cs.iconDownload} />}

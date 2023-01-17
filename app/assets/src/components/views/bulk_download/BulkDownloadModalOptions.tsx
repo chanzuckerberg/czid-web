@@ -239,7 +239,6 @@ class BulkDownloadModalOptions extends React.Component<
         <div className={cs.label}>{field.display_name}:</div>
         {field.type === "background" ? (
           <BackgroundModelFilter
-            // @ts-expect-error Property fluid does not exist
             fluid
             placeholder={placeholder}
             allBackgrounds={dropdownOptions}

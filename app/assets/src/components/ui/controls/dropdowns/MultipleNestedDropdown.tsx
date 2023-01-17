@@ -1,5 +1,6 @@
 import { omit } from "lodash/fp";
 import React from "react";
+import { DropdownProps } from "semantic-ui-react";
 import ArrayUtils from "../../../utils/ArrayUtils";
 import BareDropdown from "./BareDropdown";
 import CheckboxItem from "./common/CheckboxItem";
@@ -7,7 +8,7 @@ import DropdownLabel from "./common/DropdownLabel";
 import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./multiple_nested_dropdown.scss";
 
-interface MultipleNestedDropdownProps {
+interface MultipleNestedDropdownProps extends DropdownProps {
   boxed?: boolean;
   label?: string;
   onChange?: $TSFixMeFunction;

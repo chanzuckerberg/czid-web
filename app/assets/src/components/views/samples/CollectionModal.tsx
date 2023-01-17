@@ -294,7 +294,6 @@ class CollectionModal extends React.Component<
           />
         </div>
         <SubtextDropdown
-          // @ts-expect-error Property 'fluid' does not exist on type
           fluid
           className={cs.dropdown}
           options={Object.values(dropdownOptions)}

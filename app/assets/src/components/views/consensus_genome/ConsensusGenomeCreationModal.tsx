@@ -179,7 +179,6 @@ export default class ConsensusGenomeCreationModal extends React.Component<
         </div>
         <SubtextDropdown
           className={cs.dropdown}
-          // @ts-expect-error Property 'fluid' does not exist on type
           fluid
           options={this.getReferenceAccessions()}
           onChange={this.handleAccessionChange}

@@ -34,7 +34,6 @@ const ProjectSelect = ({
   };
   return (
     <SubtextDropdown
-      // @ts-expect-error Property 'fluid' does not exist on type
       fluid
       options={getOptions()}
       onChange={(val: number) => onProjectChange(val)}
