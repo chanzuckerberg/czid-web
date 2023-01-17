@@ -131,6 +131,7 @@ export interface SampleViewState {
 
 export interface FilterSelections {
   annotations: string[];
+  flags: string[];
   thresholds: ThresholdConditions[];
   taxa: { id: number; name: string; level: "genus" | "species" }[];
   metric: string;

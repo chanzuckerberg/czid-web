@@ -379,32 +379,34 @@ class TaxonTreeVis extends React.Component<
     const labels: JSX.Element[] = [];
     taxa.forEach(genusData => {
       if (allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE)) {
-        if (genusData.pathogenTags) {
-          genusData.pathogenTags.forEach(pathogenTag => {
-            labels.push(this.renderPathogenLabel(genusData.taxId, pathogenTag));
+        if (genusData.pathogenFlags) {
+          genusData.pathogenFlags.forEach(pathogenFlag => {
+            labels.push(
+              this.renderPathogenLabel(genusData.taxId, pathogenFlag),
+            );
           });
         }
         genusData.filteredSpecies.forEach(speciesData => {
-          if (speciesData.pathogenTags) {
-            speciesData.pathogenTags.forEach(pathogenTag => {
+          if (speciesData.pathogenFlags) {
+            speciesData.pathogenFlags.forEach(pathogenFlag => {
               labels.push(
-                this.renderPathogenLabel(speciesData.taxId, pathogenTag),
+                this.renderPathogenLabel(speciesData.taxId, pathogenFlag),
               );
             });
           }
         });
       } else {
-        if (genusData.pathogenTag) {
+        if (genusData.pathogenFlag) {
           labels.push(
-            this.renderPathogenLabel(genusData.taxId, genusData.pathogenTag),
+            this.renderPathogenLabel(genusData.taxId, genusData.pathogenFlag),
           );
         }
         genusData.filteredSpecies.forEach(speciesData => {
-          if (speciesData.pathogenTag) {
+          if (speciesData.pathogenFlag) {
             labels.push(
               this.renderPathogenLabel(
                 speciesData.taxId,
-                speciesData.pathogenTag,
+                speciesData.pathogenFlag,
               ),
             );
           }

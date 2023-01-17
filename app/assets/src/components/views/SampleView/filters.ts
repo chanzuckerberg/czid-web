@@ -21,12 +21,14 @@ export const applyFilters = ({
   readSpecificity,
   taxa,
   annotations,
+  flags,
 }: $TSFixMe) => {
   // When adding filters consider their order based on filter complexity (more complex later)
   // and effeciency (filters more likely to filter out more taxa earlier)
   return (
     filterTaxa({ row, taxa }) &&
     filterAnnotations({ row, annotations }) &&
+    filterFlags({ row, flags }) &&
     filterCategories({ row, categories, subcategories }) &&
     filterReadSpecificity({ row, readSpecificity }) &&
     filterThresholds({ row, thresholds })
@@ -52,6 +54,18 @@ const filterAnnotations = ({ row, annotations }: $TSFixMe) => {
   // annotations options from the source data are "hit", "not_a_hit", "inconclusive"
   const selectedAnnotationsInSnakeCase = map(a => snakeCase(a), annotations);
   return selectedAnnotationsInSnakeCase.includes(snakeCase(row.annotation));
+};
+
+const filterFlags = ({ row, flags }: $TSFixMe) => {
+  if (isEmpty(flags)) return true;
+  // check if any of the selected filter flags are found in the row's flags
+  let rowFlags = [];
+  if (row.taxLevel === "genus") rowFlags = Object.keys(row.pathogens || {});
+  else if (row.taxLevel === "species") rowFlags = row.pathogenFlags || [];
+
+  return flags.reduce((result, flag) => {
+    return result || rowFlags.includes(flag);
+  }, false);
 };
 
 const filterCategories = ({ row, categories, subcategories }: $TSFixMe) => {
@@ -150,7 +164,14 @@ export const setDisplayName = ({ reportData, nameType }: $TSFixMe) => {
 
 export const filterReportData = ({
   reportData,
-  filters: { categories, thresholds, readSpecificity, taxa, annotations },
+  filters: {
+    categories,
+    thresholds,
+    readSpecificity,
+    taxa,
+    annotations,
+    flags,
+  },
 }: $TSFixMe) => {
   const categoriesSet = new Set(
     map(c => c.toLowerCase(), categories.categories || []),
@@ -169,6 +190,7 @@ export const filterReportData = ({
       readSpecificity,
       taxa,
       annotations,
+      flags,
     });
 
     genusRow.filteredSpecies = genusRow.species.filter((speciesRow: $TSFixMe) =>
@@ -180,6 +202,7 @@ export const filterReportData = ({
         readSpecificity,
         taxa,
         annotations,
+        flags,
       }),
     );
     if (genusRow.passedFilters || genusRow.filteredSpecies.length) {

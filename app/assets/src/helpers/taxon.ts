@@ -16,18 +16,18 @@ export const getTaxonName = (
 export const getGeneraContainingTags = (
   taxInfoArray: {
     tax_level: number;
-    pathogenTag: string;
+    pathogenFlag: string;
     genus_taxid: string;
   }[],
 ) => {
   // Map genus taxids to the number of species with pathogen tags contained within.
   const generaContainingTags = {};
   for (const taxInfo of taxInfoArray) {
-    if (taxInfo.tax_level === 1 && taxInfo.pathogenTag) {
+    if (taxInfo.tax_level === 1 && taxInfo.pathogenFlag) {
       generaContainingTags[taxInfo.genus_taxid] =
         generaContainingTags[taxInfo.genus_taxid] || {};
-      generaContainingTags[taxInfo.genus_taxid][taxInfo.pathogenTag] =
-        (generaContainingTags[taxInfo.genus_taxid][taxInfo.pathogenTag] || 0) +
+      generaContainingTags[taxInfo.genus_taxid][taxInfo.pathogenFlag] =
+        (generaContainingTags[taxInfo.genus_taxid][taxInfo.pathogenFlag] || 0) +
         1;
     }
   }
@@ -35,16 +35,16 @@ export const getGeneraContainingTags = (
 };
 
 export const getGeneraPathogenCounts = (speciesCounts: {
-  [key: string]: { pathogenTag: string; genus_tax_id: string };
+  [key: string]: { pathogenFlag: string; genus_tax_id: string };
 }) => {
   const genusPathogenCnt: { [id: string]: { [tag: string]: number } } = {};
   Object.values(speciesCounts).forEach(speciesInfo => {
-    if (speciesInfo.pathogenTag) {
+    if (speciesInfo.pathogenFlag) {
       genusPathogenCnt[speciesInfo.genus_tax_id] =
         genusPathogenCnt[speciesInfo.genus_tax_id] || {};
 
       const genusTaxid = speciesInfo.genus_tax_id;
-      const tag = speciesInfo.pathogenTag;
+      const tag = speciesInfo.pathogenFlag;
       genusPathogenCnt[genusTaxid][tag] =
         (genusPathogenCnt[genusTaxid][tag] || 0) + 1;
     }
@@ -53,16 +53,16 @@ export const getGeneraPathogenCounts = (speciesCounts: {
 };
 
 export const getAllGeneraPathogenCounts = (speciesCounts: {
-  [key: string]: { pathogenTags: string[]; genus_tax_id: string };
+  [key: string]: { pathogenFlags: string[]; genus_tax_id: string };
 }) => {
   const genusPathogenCnt: { [id: string]: { [tag: string]: number } } = {};
   Object.values(speciesCounts).forEach(speciesInfo => {
-    (speciesInfo.pathogenTags || []).forEach(pathogenTag => {
+    (speciesInfo.pathogenFlags || []).forEach(pathogenFlag => {
       genusPathogenCnt[speciesInfo.genus_tax_id] =
         genusPathogenCnt[speciesInfo.genus_tax_id] || {};
 
       const genusTaxid = speciesInfo.genus_tax_id;
-      const tag = pathogenTag;
+      const tag = pathogenFlag;
       genusPathogenCnt[genusTaxid][tag] =
         (genusPathogenCnt[genusTaxid][tag] || 0) + 1;
     });

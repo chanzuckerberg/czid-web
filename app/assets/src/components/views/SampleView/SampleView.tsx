@@ -954,6 +954,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       // - threshold filters: refresh filtered data
       // - read specificity: refresh filtered data
       case "annotations":
+      case "flags":
       case "taxa":
       case "categories":
       case "thresholds":

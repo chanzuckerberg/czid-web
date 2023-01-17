@@ -13,10 +13,14 @@ import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { UserContext } from "~/components/common/UserContext";
 
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
-import { ANNOTATION_FILTER_FEATURE } from "~/components/utils/features";
+import {
+  ANNOTATION_FILTER_FEATURE,
+  PATHOGEN_FLAG_FILTER_FEATURE,
+} from "~/components/utils/features";
 import AnnotationFilter from "~/components/views/report/filters/AnnotationFilter";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
+import FlagFilter from "~/components/views/report/filters/FlagFilter";
 import MetricPicker from "~/components/views/report/filters/MetricPicker";
 import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
@@ -367,6 +371,21 @@ const ReportFilters = ({
                 onChange={(value: string) =>
                   handleFilterChange({
                     key: "annotations",
+                    value,
+                  })
+                }
+                {...sharedFilterProps}
+              />
+            </div>
+          )}
+        {view === "table" &&
+          allowedFeatures.includes(PATHOGEN_FLAG_FILTER_FEATURE) && (
+            <div className={cs.filterListElement}>
+              <FlagFilter
+                selectedFlags={selected.flags}
+                onChange={(value: string) =>
+                  handleFilterChange({
+                    key: "flags",
                     value,
                   })
                 }

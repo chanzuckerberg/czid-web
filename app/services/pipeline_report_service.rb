@@ -92,8 +92,8 @@ class PipelineReportService
 
   DEFAULT_SORT_PARAM = :agg_score
 
-  TAG_KNOWN_PATHOGEN = "knownPathogen".freeze
-  TAG_LCRP = "lcrp".freeze
+  FLAG_KNOWN_PATHOGEN = "knownPathogen".freeze
+  FLAG_LCRP = "lcrp".freeze
 
   CSV_READS_COLUMNS = [
     "tax_id",
@@ -376,12 +376,12 @@ class PipelineReportService
     @timer.split("fill_missing_names")
 
     # Tag pathogen from predefined list (sample-agnostic)
-    tag_known_pathogens(species_counts)
+    flag_known_pathogens(species_counts)
     @timer.split("tag_pathogens")
 
     # And tag pathogens that are likely clinically relevant for this sample
-    tag_lcrp_pathogens(species_counts)
-    @timer.split("tag_lcrp_pathogens")
+    flag_lcrp_pathogens(species_counts)
+    @timer.split("flag_lcrp_pathogens")
 
     structured_lineage = encode_taxon_lineage(lineage_by_tax_id)
     @timer.split("encode_taxon_lineage")
@@ -866,7 +866,7 @@ class PipelineReportService
     end
   end
 
-  def tag_lcrp_pathogens(species_counts)
+  def flag_lcrp_pathogens(species_counts)
     nonvirus_tax_ids = []
 
     species_counts.each do |tax_id, tax_info|
@@ -879,7 +879,7 @@ class PipelineReportService
       if taxon_passes_preliminary_filters
         if taxon_is_a_virus && tax_info.dig(:nt, :rpm) && tax_info[:nt][:rpm] > 1 && tax_info.dig(:nr, :rpm) && tax_info[:nr][:rpm] > 1
           # viruses have a simple check to determine if they are lcrp
-          (tax_info['pathogenTags'] ||= []).push(TAG_LCRP)
+          (tax_info['pathogenFlags'] ||= []).push(FLAG_LCRP)
         else
           # non-viruses are placed into an array for later top 15/largest rpm drop analysis
           nonvirus_tax_ids.append(tax_id)
@@ -907,18 +907,18 @@ class PipelineReportService
 
       tax_ids_above_drop = top_15_by_rpm.slice(0, largest_drop_index + 1)
 
-      # depends on tag_known_pathogens() being run previously
-      known_pathogen_tax_ids = tax_ids_above_drop.select { |tax_id| (species_counts[tax_id]['pathogenTags'] || []).include?(TAG_KNOWN_PATHOGEN) }
+      # depends on flag_known_pathogens() being run previously
+      known_pathogen_tax_ids = tax_ids_above_drop.select { |tax_id| (species_counts[tax_id]['pathogenFlags'] || []).include?(FLAG_KNOWN_PATHOGEN) }
 
-      known_pathogen_tax_ids.each { |tax_id| (species_counts[tax_id]['pathogenTags'] ||= []).push(TAG_LCRP) }
+      known_pathogen_tax_ids.each { |tax_id| (species_counts[tax_id]['pathogenFlags'] ||= []).push(FLAG_LCRP) }
     end
   end
 
-  def tag_known_pathogens(tax_map)
+  def flag_known_pathogens(tax_map)
     tax_map.each do |_, tax_info|
       if @known_pathogens.include?(tax_info[:name])
-        tax_info['pathogenTag'] = TAG_KNOWN_PATHOGEN
-        (tax_info['pathogenTags'] ||= []).push(TAG_KNOWN_PATHOGEN)
+        tax_info['pathogenFlag'] = FLAG_KNOWN_PATHOGEN
+        (tax_info['pathogenFlags'] ||= []).push(FLAG_KNOWN_PATHOGEN)
       end
     end
   end
@@ -973,10 +973,10 @@ class PipelineReportService
         tax_info["known_pathogen"] = 0
         tax_info["lcrp_pathogen"] = 0
         rows_to_consider.each do |row|
-          if row["pathogenTag"] == TAG_KNOWN_PATHOGEN
+          if row["pathogenFlag"] == FLAG_KNOWN_PATHOGEN
             tax_info["known_pathogen"] += 1
           end
-          if (row["pathogenTags"] || []).include?(TAG_LCRP)
+          if (row["pathogenFlags"] || []).include?(FLAG_LCRP)
             tax_info["lcrp_pathogen"] += 1
           end
         end

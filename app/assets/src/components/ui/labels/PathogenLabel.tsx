@@ -9,6 +9,7 @@ import cs from "./pathogen_label.scss";
 export const CATEGORIES = {
   knownPathogen: {
     text: "Known Pathogen",
+    code: "knownPathogen",
     color: "red",
     dimmedColor: "dimRed",
     tooltip: (
@@ -28,6 +29,7 @@ export const CATEGORIES = {
   },
   lcrp: {
     text: "LCRP Pathogen",
+    code: "lcrp",
     color: "orange",
     dimmedColor: "dimOrange",
     tooltip: (

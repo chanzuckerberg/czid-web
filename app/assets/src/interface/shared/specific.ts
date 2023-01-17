@@ -269,8 +269,8 @@ export interface Taxon {
   species_tax_ids?: number[];
   taxId?: number;
   taxLevel?: "genus" | "species";
-  pathogenTag: string;
-  pathogenTags: string[];
+  pathogenFlag: string;
+  pathogenFlags: string[];
   lineageRank?: string;
 }
 

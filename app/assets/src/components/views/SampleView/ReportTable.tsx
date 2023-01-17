@@ -592,7 +592,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       filteredSpeciesPathogenCount = size(
         compact(
           filter(
-            filteredSpecies => get("pathogenTag", filteredSpecies),
+            filteredSpecies => get("pathogenFlag", filteredSpecies),
             rowData.filteredSpecies,
           ),
         ),
@@ -603,7 +603,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         filteredSpeciesPathogenCount = size(
           compact(
             filter(
-              filteredSpecies => get("pathogenTags", filteredSpecies),
+              filteredSpecies => get("pathogenFlags", filteredSpecies),
               rowData.filteredSpecies,
             ),
           ),
@@ -671,17 +671,17 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
                 </span>
               ))}
             {allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE) ? (
-              rowData.pathogenTags &&
-              rowData.pathogenTags.map(flag => (
+              rowData.pathogenFlags &&
+              rowData.pathogenFlags.map(flag => (
                 <span key={flag}>
                   <PathogenLabel type={flag} isDimmed={isDimmed} />
                 </span>
               ))
             ) : (
               <span>
-                {rowData.pathogenTag && (
+                {rowData.pathogenFlag && (
                   <PathogenLabel
-                    type={rowData.pathogenTag}
+                    type={rowData.pathogenFlag}
                     isDimmed={isDimmed}
                   />
                 )}
