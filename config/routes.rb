@@ -72,7 +72,6 @@ Rails.application.routes.draw do
       get :bulk_import
       get :upload
       post :metadata_fields
-      get :samples_going_public
       get :index_v2
       get :details
       get :dimensions

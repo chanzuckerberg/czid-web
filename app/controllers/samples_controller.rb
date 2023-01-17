@@ -30,7 +30,7 @@ class SamplesController < ApplicationController
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow, :move_to_project, :cancel_pipeline_run,].freeze
 
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
-                   :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
+                   :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
                    :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,
                    :bulk_kickoff_workflow_runs, :user_is_collaborator,].freeze
@@ -888,19 +888,6 @@ class SamplesController < ApplicationController
 
     # Duplicates PipelineSampleReport_sample_viewed to compare frontend vs. backend tracks
     MetricUtil.log_analytics_event(EventDictionary::SAMPLES_CONTROLLER_SAMPLE_VIEWED, current_user, { sample_id: @sample&.id }, request)
-  end
-
-  def samples_going_public
-    ahead = (params[:ahead] || 10).to_i
-    behind = params[:behind].to_i
-
-    start = Time.current - behind.days
-    samples = current_power.samples.samples_going_public_in_period(
-      [start, start + ahead.days],
-      params[:userId] ? User.find(params[:userId]) : current_user,
-      params[:projectId] ? Project.find(params[:projectId]) : nil
-    )
-    render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
   end
 
   def report_v2

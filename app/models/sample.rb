@@ -862,17 +862,6 @@ class Sample < ApplicationRecord
              Time.current)
   end
 
-  def self.samples_going_public_in_period(range, user = nil, project = nil)
-    query = joins(:project)
-            .where("projects.public_access != 1")
-            .where("DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) BETWEEN ? AND ?", range[0], range[1])
-
-    query = query.where(user: user) if user
-    query = query.where(project: project) if project
-
-    return query
-  end
-
   def archive_old_pipeline_runs
     old_pipeline_runs = pipeline_runs.order('id desc').offset(1)
     old_pipeline_runs.each do |pr|

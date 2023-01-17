@@ -16,7 +16,6 @@ import {
   mapKeys,
   mapValues,
   merge,
-  partition,
   pick,
   pull,
   replace,
@@ -39,7 +38,6 @@ import {
   trackEvent,
   trackPageTransition,
 } from "~/api/analytics";
-import { get } from "~/api/core";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -73,7 +71,6 @@ import {
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "~/components/views/samples/SamplesView/ColumnConfiguration";
-import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
@@ -416,10 +413,7 @@ class DiscoveryView extends React.Component {
   };
 
   async componentDidMount() {
-    const { domain } = this.props;
-
     this.initialLoad();
-    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.checkPublicSamples();
 
     // this event is triggered when a user clicks "Back" in their browser
     // to make sure session sorting parameters are preserved, we need
@@ -1786,37 +1780,6 @@ class DiscoveryView extends React.Component {
     }
 
     this.setState({ mapLocationData: clusteredData, mapLevel });
-  };
-
-  checkPublicSamples = () => {
-    get("/samples/samples_going_public.json").then(res => {
-      if ((res || []).length) this.displayPublicSampleNotifications(res);
-    });
-  };
-
-  displayPublicSampleNotifications = samplesGoingPublic => {
-    let previouslyDismissedSamples = new Set();
-    try {
-      previouslyDismissedSamples = new Set(
-        JSON.parse(localStorage.getItem("dismissedPublicSamples")),
-      );
-    } catch (_) {
-      // catch and ignore possible old formats
-    }
-
-    let [dismissedSamples, newSamples] = partition(
-      sample => previouslyDismissedSamples.has(sample.id),
-      samplesGoingPublic,
-    );
-    if (newSamples.length > 0) {
-      // The purpose of setItem here is to keep the dismissed list from growing indefinitely. The
-      // value here will no longer include samples that went public in the past.
-      localStorage.setItem(
-        "dismissedPublicSamples",
-        JSON.stringify(map("id", dismissedSamples)),
-      );
-      publicSampleNotificationsByProject(newSamples);
-    }
   };
 
   handleModalFirstTimeUserClose = () => {

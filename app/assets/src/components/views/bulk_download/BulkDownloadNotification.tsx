@@ -35,12 +35,7 @@ export default class BulkDownloadNotification extends React.Component<
     );
 
     return (
-      <Notification
-        className={cs.publicSampleNotification}
-        displayStyle="elevated"
-        type="info"
-        onClose={onClose}
-      >
+      <Notification displayStyle="elevated" type="info" onClose={onClose}>
         {label}
       </Notification>
     );

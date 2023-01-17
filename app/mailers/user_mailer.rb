@@ -59,23 +59,4 @@ class UserMailer < ApplicationMailer
       subject: "CZ ID | Could not locate an account with this email"
     )
   end
-
-  # See: app/views/user_mailer/sample_visibility_reminder.html.erb.
-  def sample_visibility_reminder(
-    email:,
-    name:,
-    period_name:,
-    projects:,
-    samples_by_project_id:,
-    total_count:
-  )
-    @name = name
-    @period_name = period_name
-    @projects = projects
-    @samples_by_project_id = samples_by_project_id
-    mail(
-      to: email,
-      subject: "Reminder: #{total_count} CZ ID samples will soon be visible to other users!"
-    )
-  end
 end

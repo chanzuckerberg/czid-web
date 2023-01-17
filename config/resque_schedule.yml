@@ -1,13 +1,6 @@
 # See: https://github.com/resque/resque-scheduler#static-schedules
 # Cron times are relative to config.time_zone.
 
-SendSampleVisibilityEmail:
-  # 9am Pacific Time on the 20th of every month
-  cron: "0 9 20 * *"
-  class: SendSampleVisibilityEmail
-  queue: send_sample_visiblity_email
-  description: "This job sends upcoming sample visibility reminders."
-
 HandleSfnNotificationsTimeout:
   every: 1h
   class: HandleSfnNotificationsTimeout
