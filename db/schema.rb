@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_11_30_235750) do
+ActiveRecord::Schema.define(version: 2023_01_12_235428) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -210,6 +210,9 @@ ActiveRecord::Schema.define(version: 2022_11_30_235750) do
     t.bigint "user_id", comment: "The user that created the host genome. Values previous to 2020-02 may be NULL."
     t.string "s3_minimap2_dna_index_path", comment: "The path to the index file to be used in the pipeline by minimap2 for host filtering DNA samples"
     t.string "s3_minimap2_rna_index_path", comment: "The path to the index file to be used in the pipeline by minimap2 for host filtering RNA samples"
+    t.string "s3_hisat2_index_path", comment: "The path to the index file to be used in the pipeline by hisat2 for host filtering."
+    t.string "s3_kallisto_index_path", comment: "The path to the index file to be used in the pipeline by kallisto for host filtering."
+    t.string "s3_bowtie2_index_path_v2", comment: "The path to the index file to be used in the pipeline by bowtie2 for host filtering."
     t.index ["name"], name: "index_host_genomes_on_name", unique: true
     t.index ["user_id"], name: "index_host_genomes_on_user_id"
   end
