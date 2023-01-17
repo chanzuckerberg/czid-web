@@ -11,6 +11,7 @@ import { IconInfoSmall } from "~/components/ui/icons";
 import {
   ARTIC_PIPELINE_LINK,
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
+  GUPPY_BASECALLER_DOC_LINK,
   MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
   MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
   UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
@@ -342,7 +343,7 @@ const WorkflowSelector = ({
               "Specifies which basecalling model of 'Guppy' was used to generate the data. This will affect the pipeline parameters."
             }
             position={"top center"}
-            link={""} // TODO update link for guppy basecaller
+            link={GUPPY_BASECALLER_DOC_LINK}
           />
         </div>
         <Dropdown
@@ -371,10 +372,10 @@ const WorkflowSelector = ({
       sdsIcon: "dna" as const,
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
       illuminaLink: MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
-      illuminaClickedLinkEvent: "", // TODO add analytics here and below
+      illuminaClickedLinkEvent: ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_ILLUMINA_PIPELINE_LINK_CLICKED,
       nanoporeText: "You can check out the Nanopore pipeline on Github ",
       nanoporeLink: MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
-      nanoporeClickedLinkEvent: "",
+      nanoporeClickedLinkEvent: ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_NANOPORE_PIPELINE_LINK_CLICKED,
       nanoporeContent: renderMNGSNanoporeContent(),
       nanoporeDisabledTooltipText:
         "This pipeline only supports upload from your computer.",

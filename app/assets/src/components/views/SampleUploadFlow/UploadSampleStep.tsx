@@ -428,8 +428,8 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         });
       }
     }
-
-    trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
+    const cleanedWorkflowName = workflow === WORKFLOWS.SHORT_READ_MNGS.value ? "mngs" : workflow;
+    trackEvent(`UploadSampleStep_${cleanedWorkflowName}-workflow_selected`);
   };
 
   limitWorkflowSelection = (
@@ -488,6 +488,11 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         selectedTechnology: technology,
         selectedWorkflows: filteredWorkflows,
       });
+
+      trackEvent(
+        ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_TECHNOLOGY_CLICKED,
+        { technology },
+      );
     }
   };
 

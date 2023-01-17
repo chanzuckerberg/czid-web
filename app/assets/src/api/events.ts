@@ -120,6 +120,10 @@ function EventDictionary() {
   this.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED =
     "UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED";
 
+  /** The user clicked a mNGS technology in the Sample Upload Flow. */
+  this.UPLOAD_SAMPLE_STEP_MNGS_TECHNOLOGY_CLICKED =
+    "UPLOAD_SAMPLE_STEP_MNGS_TECHNOLOGY_CLICKED";
+
   /** The user clicked the "here" link under the Consensus Genome Illumina technology option in the Sample Upload Flow. */
   this.UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED =
     "UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED";
@@ -135,6 +139,14 @@ function EventDictionary() {
   /** The user toggled the ClearLabs option for their Nanopore Conesnsus Genome sample(s) in the Sample Upload Flow. */
   this.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED =
     "UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED";
+
+  /** The user clicked the "here" link under the mNGS Illumina technology option. */
+  this.UPLOAD_SAMPLE_STEP_MNGS_ILLUMINA_PIPELINE_LINK_CLICKED =
+    "UPLOAD_SAMPLE_STEP_MNGS_ILLUMINA_PIPELINE_LINK_CLICKED";
+
+  /** The user clicked the "here" link under the mNGS Nanopore technology option. */
+  this.UPLOAD_SAMPLE_STEP_MNGS_NANOPORE_PIPELINE_LINK_CLICKED =
+    "UPLOAD_SAMPLE_STEP_MNGS_NANOPORE_PIPELINE_LINK_CLICKED";
 
   /** The user clicked the "Edit Analysis Type" link during the Review Step in the Sample Upload Flow. */
   this.REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED =
