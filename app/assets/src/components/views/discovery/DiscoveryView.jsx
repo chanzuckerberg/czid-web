@@ -306,7 +306,7 @@ class DiscoveryView extends React.Component {
 
     // hold references to the views to allow resetting the tables
     this.projectsView = null;
-    this.samplesView = null;
+    this.samplesView = React.createRef();
     this.mapPreviewSidebar = null;
     this.visualizationsView = null;
 
@@ -777,7 +777,7 @@ class DiscoveryView extends React.Component {
         mapSidebarSampleStats: null,
       },
       () => {
-        this.samplesView && this.samplesView.reset();
+        this.resetSamplesView();
         this.projectsView && this.projectsView.reset();
         this.visualizationsView && this.visualizationsView.reset();
         callback && callback();
@@ -829,6 +829,8 @@ class DiscoveryView extends React.Component {
     }
   };
 
+  resetSamplesView = () => this.samplesView?.current?.reset();
+
   resetSamplesData = () => {
     const { workflow } = this.state;
     const conditions = this.getConditions(workflow);
@@ -840,7 +842,7 @@ class DiscoveryView extends React.Component {
       logLoadTime: true,
     });
 
-    this.samplesView && this.samplesView.reset();
+    this.resetSamplesView();
   };
 
   resetProjectsData = () => {
@@ -2043,7 +2045,7 @@ class DiscoveryView extends React.Component {
       loadFirstPage: true,
     });
 
-    this.samplesView && this.samplesView.reset();
+    this.resetSamplesView();
   };
 
   handleWorkflowTabChange = workflowTabIndex => {
@@ -2076,7 +2078,7 @@ class DiscoveryView extends React.Component {
 
         workflow === WORKFLOWS.AMR.value
           ? this.resetAmrData()
-          : this.samplesView && this.samplesView.reset();
+          : this.resetSamplesView();
       },
     );
     trackEvent(`DiscoveryView_${workflow}-tab_clicked`);
@@ -2325,7 +2327,7 @@ class DiscoveryView extends React.Component {
                   projectId={projectId}
                   snapshotShareId={snapshotShareId}
                   sortable={sortable}
-                  ref={samplesView => (this.samplesView = samplesView)}
+                  ref={this.samplesView}
                   selectableIds={selectableIds}
                   selectedIds={selectedIds}
                   showAllMetadata={showAllMetadata}

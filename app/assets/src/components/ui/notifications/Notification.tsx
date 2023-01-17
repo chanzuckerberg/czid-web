@@ -7,7 +7,7 @@ interface NotificationProps {
   className?: string;
   children: React.ReactNode;
   displayStyle?: "flat" | "elevated";
-  onClose?: $TSFixMeFunction;
+  onClose?: () => void;
   type: "success" | "info" | "warning" | "error";
   closeWithDismiss?: boolean;
   closeWithIcon?: boolean;

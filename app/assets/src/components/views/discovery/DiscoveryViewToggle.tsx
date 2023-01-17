@@ -16,7 +16,7 @@ const PROJECT_DISPLAYS = ["table", DISPLAY_PLQC, "map"];
 
 interface DiscoveryViewToggleProps {
   currentDisplay?: string;
-  onDisplaySwitch?: $TSFixMeFunction;
+  onDisplaySwitch?: (display: string) => void;
   includePLQC?: boolean;
 }
 

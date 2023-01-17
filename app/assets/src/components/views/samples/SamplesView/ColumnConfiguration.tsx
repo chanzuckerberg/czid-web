@@ -7,6 +7,7 @@ import {
   LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS,
   SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
 } from "~/components/views/samples/constants";
+import { MetadataType } from "~/interface/shared";
 import { WORKFLOWS } from "~utils/workflows";
 import cs from "./samples_view.scss";
 
@@ -16,7 +17,7 @@ export const computeColumnsByWorkflow = ({
   basicIcon = false,
 }: {
   workflow?: string;
-  metadataFields?: $TSFixMeUnknown[];
+  metadataFields?: MetadataType[];
   basicIcon?: boolean;
 } = {}) => {
   // At the moment, columns for long read mNGS are the same as for short read mNGS.

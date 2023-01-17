@@ -14,9 +14,15 @@ import {
   size,
   values,
 } from "lodash/fp";
-import React from "react";
-
+import React, {
+  forwardRef,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import { Link as RouterLink } from "react-router-dom";
+import { SortDirectionType } from "react-virtualized";
 import { bulkKickoffWorkflowRuns } from "~/api";
 import {
   trackEvent,
@@ -35,7 +41,6 @@ import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModa
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import { TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM } from "~/components/views/compare/SamplesHeatmapView/constants";
-import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import QualityControl from "~/components/views/discovery/QualityControl";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -45,6 +50,8 @@ import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreat
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
+import { Entry, SamplesViewProps } from "~/interface/samplesView";
+import { MetadataType } from "~/interface/shared";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { IconLoading } from "~ui/icons";
 import Label from "~ui/labels/Label";
@@ -56,7 +63,6 @@ import {
   WORKFLOW_ENTITIES,
 } from "~utils/workflows";
 
-import { WORKFLOW_VALUES } from "../../../utils/workflows";
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
 import {
   computeColumnsByWorkflow,
@@ -76,114 +82,109 @@ import cs from "./samples_view.scss";
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
 
-interface SamplesViewProps {
-  activeColumns?: string[];
-  admin?: boolean;
-  currentDisplay: string;
-  currentTab: string;
-  domain?: string;
-  filters?: {
-    host: $TSFixMeUnknown;
+const SHORT_READ_MNGS_VALUE = WORKFLOWS.SHORT_READ_MNGS.value;
+
+/**
+ * Upon changing SamplesView from a class to a function component,
+ * forwardRef was added to receive a ref from DiscoveryView and
+ * use it to define reset() in the useImpertiveHandle hook.
+ * https://stackoverflow.com/questions/37949981/call-child-method-from-parent
+ * https://beta.reactjs.org/reference/react/forwardRef (01/2023 - smccany)
+ */
+
+const SamplesView = forwardRef(function SamplesView(
+  {
+    onObjectSelected,
+    workflowEntity,
+    onDisplaySwitch,
+    projectId,
+    selectedIds,
+    selectableIds,
+    currentDisplay = "table",
+    onSortColumn,
+    showAllMetadata,
+    objects,
+    workflow = WORKFLOWS.SHORT_READ_MNGS.value,
+    onUpdateSelectedIds,
+    handleNewAmrCreationsFromMngs,
+    domain,
+    hideAllTriggers,
+    hasAtLeastOneFilterApplied,
+    onClearFilters,
+    userDataCounts,
+    activeColumns = DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[SHORT_READ_MNGS_VALUE],
+    onActiveColumnsChange,
+    onLoadRows,
+    protectedColumns = ["sample"],
+    snapshotShareId,
+    sortable,
+    sortBy,
+    sortDirection,
+    currentTab,
+    mapLevel,
+    mapLocationData,
+    mapPreviewedLocationId,
+    mapTilerKey,
+    onMapLevelChange,
+    onMapClick,
+    onMapMarkerClick,
+    onMapTooltipTitleClick,
+    onPLQCHistogramBarClick,
+    filters,
+    filtersSidebarOpen,
+    sampleStatsSidebarOpen,
+  }: SamplesViewProps,
+  ref,
+) {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures, appConfig, admin } = userContext || {};
+
+  // useImperitiveHandle exposes the reset function as a ref to DiscoveryView.
+  useImperativeHandle(ref, () => ({
+    reset() {
+      if (currentDisplay === "table") infiniteTable?.reset();
+    },
+  }));
+
+  let configForWorkflow: {
+    [workflow: string]: { singlularDisplay: string; pluralDisplay: string };
   };
-  filtersSidebarOpen?: boolean;
-  hasAtLeastOneFilterApplied?: boolean;
-  handleNewAmrCreationsFromMngs?: $TSFixMeFunction;
-  hideAllTriggers?: boolean;
-  mapLevel?: string;
-  mapLocationData?: Record<string, unknown>;
-  mapPreviewedLocationId?: number;
-  mapTilerKey?: string;
-  numOfMngsSamples?: number;
-  objects?: ObjectCollectionView;
-  onActiveColumnsChange?: $TSFixMeFunction;
-  onClearFilters?: $TSFixMeFunction;
-  onDisplaySwitch?: $TSFixMeFunction;
-  onLoadRows: $TSFixMeFunction;
-  onMapClick?: $TSFixMeFunction;
-  onMapLevelChange?: $TSFixMeFunction;
-  onMapMarkerClick?: $TSFixMeFunction;
-  onMapTooltipTitleClick?: $TSFixMeFunction;
-  onPLQCHistogramBarClick?: $TSFixMeFunction;
-  onObjectSelected?: $TSFixMeFunction;
-  onUpdateSelectedIds?: $TSFixMeFunction;
-  onSortColumn?: $TSFixMeFunction;
-  projectId?: number;
-  protectedColumns?: string[];
-  sampleStatsSidebarOpen?: boolean;
-  selectableIds?: unknown[];
-  selectedIds?: Set<number>;
-  showAllMetadata?: boolean;
-  sortBy?: string;
-  sortDirection?: string;
-  snapshotShareId?: string;
-  sortable?: boolean;
-  userDataCounts?: object;
-  workflow?: WORKFLOW_VALUES;
-  workflowEntity?: string;
-}
+  let infiniteTable: InfiniteTable;
+  let referenceSelectId: number;
 
-interface SamplesViewState {
-  phyloTreeCreationModalOpen: boolean;
-  bulkDownloadModalOpen: boolean;
-  heatmapCreationModalOpen: boolean;
-  actionsMenuAnchorEl?: $TSFixMeUnknown;
-  nextcladeModalOpen: boolean;
-  bulkDownloadButtonTempTooltip?: string;
-  sarsCov2Count: number;
-  referenceSelectId?: $TSFixMeUnknown;
-  metadataFields: $TSFixMeUnknown[];
-  loading: boolean;
-  recentlyKickedOffAmrWorkflowRunsForSampleIds: Set<$TSFixMeUnknown>;
-}
+  const [phyloCreationModalOpen, setPhyloCreationModalOpen] = useState(false);
+  const [bulkDownloadModalOpen, setBulkDownloadModalOpen] = useState(false);
+  const [heatmapCreationModalOpen, setHeatmapCreationModalOpen] = useState(
+    false,
+  );
+  const [nextcladeModalOpen, setNextcladeModalOpen] = useState(false);
+  const [metadataFields, setMetadataFields] = useState<MetadataType[]>([]);
+  const [loading, setLoading] = useState(true);
+  /*
+  We need to keep track of samples that have been created from the web app so the user doesn't
+  create more than one AMR workflow run by clicking the BulkKickoffAmr trigger more than once.
+  If the page refreshes, the SampleView will fetch the number of AMR workflow runs
+  from the DB and will prevent the user from creating an AMR workflow run for that sample.
+  */
+  const [
+    recentlyKickedOffAmrWorkflowRunsForSampleIds,
+    setRecentlyKickedOffAmrWorkflowRunsForSampleIds,
+  ] = useState<Set<number>>(new Set([]));
 
-class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
-  configForWorkflow: $TSFixMe;
-  infiniteTable: $TSFixMe;
-  referenceSelectId: $TSFixMe;
-  constructor(props: SamplesViewProps) {
-    super(props);
+  // This tooltip is reset whenever the selectedIds changes.
+  const [
+    bulkDownloadButtonTempTooltip,
+    setBulkDownloadButtonTempTooltip,
+  ] = useState<string>(null);
 
-    this.state = {
-      phyloTreeCreationModalOpen: false,
-      bulkDownloadModalOpen: false,
-      heatmapCreationModalOpen: false,
-      actionsMenuAnchorEl: null,
-      nextcladeModalOpen: false,
-      // This tooltip is reset whenever the selectedIds changes.
-      bulkDownloadButtonTempTooltip: null,
-      sarsCov2Count: 0,
-      referenceSelectId: null,
-      metadataFields: [],
-      loading: true,
-      /*
-        We need to keep track of samples that have been created from the web app so the user doesn't
-          create more than one AMR workflow run by clicking the BulkKickoffAmr trigger more than once.
-        If the page refreshes, the SampleView will fetch the number of AMR workflow runs
-          from the DB and will prevent the user from creating an AMR workflow run for that sample.
-      */
-      recentlyKickedOffAmrWorkflowRunsForSampleIds: new Set([]),
-    };
+  useEffect(() => {
+    setBulkDownloadButtonTempTooltip(null);
+  }, [selectedIds]);
 
-    this.referenceSelectId = null;
-    this.setupWorkflowConfigs();
-  }
+  referenceSelectId = null;
 
-  componentDidMount() {
-    this.fetchMetadataFieldsBySampleIds();
-  }
-
-  componentDidUpdate(prevProps: $TSFixMe) {
-    const { selectedIds } = this.props;
-    // Reset the tooltip whenever the selected samples changes.
-    if (selectedIds !== prevProps.selectedIds) {
-      this.setState({
-        bulkDownloadButtonTempTooltip: null,
-      });
-    }
-  }
-
-  setupWorkflowConfigs = () => {
-    this.configForWorkflow = {
+  const setupWorkflowConfigs = () => {
+    configForWorkflow = {
       [WORKFLOWS.AMR.value]: {
         singlularDisplay: WORKFLOWS.AMR.label.toLowerCase(),
         pluralDisplay: WORKFLOWS.AMR.pluralizedLabel.toLowerCase(),
@@ -203,26 +204,31 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     };
   };
 
-  fetchMetadataFieldsBySampleIds = async () => {
-    const { selectableIds, showAllMetadata, workflow } = this.props;
+  setupWorkflowConfigs();
+
+  const fetchMetadataFieldsBySampleIds = async () => {
     if (selectableIds && showAllMetadata) {
-      let metadataFields = [];
+      let metadataFields = [] as MetadataType[];
 
       if (workflowIsWorkflowRunEntity(workflow)) {
         metadataFields = await getWorkflowRunMetadataFields(selectableIds);
       } else {
         metadataFields = await getSampleMetadataFields(selectableIds);
       }
-
-      this.setState({ metadataFields });
+      setMetadataFields(metadataFields);
     }
-    this.setState({ loading: false });
+    setLoading(false);
   };
 
-  handleSelectRow = (value: $TSFixMe, checked: $TSFixMe, event: $TSFixMe) => {
-    const { objects, selectedIds, onUpdateSelectedIds, workflow } = this.props;
-    const { referenceSelectId } = this;
+  useEffect(() => {
+    fetchMetadataFieldsBySampleIds();
+  }, []);
 
+  const handleSelectRow = (
+    value: number,
+    checked: boolean,
+    event: { shiftKey: boolean },
+  ) => {
     const newSelected = new Set(selectedIds);
     if (event.shiftKey && referenceSelectId) {
       const ids = objects.getIntermediateIds({
@@ -245,7 +251,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
         newSelected.delete(value);
       }
     }
-    this.referenceSelectId = value;
+    referenceSelectId = value;
 
     onUpdateSelectedIds(newSelected);
 
@@ -258,10 +264,8 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     });
   };
 
-  handleSelectAllRows = (checked: $TSFixMe) => {
-    const { selectableIds, selectedIds, onUpdateSelectedIds } = this.props;
-
-    this.referenceSelectId = null;
+  const handleSelectAllRows = (checked: boolean) => {
+    referenceSelectId = null;
     const newSelected = new Set(
       checked
         ? union(Array.from(selectedIds), selectableIds)
@@ -270,27 +274,24 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     onUpdateSelectedIds(newSelected);
   };
 
-  handleSortColumn = ({ sortBy, sortDirection }: $TSFixMe) => {
-    this.props.onSortColumn({ sortBy, sortDirection });
+  const handleSortColumn = ({
+    sortBy,
+    sortDirection,
+  }: {
+    sortBy: string;
+    sortDirection: SortDirectionType;
+  }) => {
+    onSortColumn({ sortBy, sortDirection });
   };
 
-  isSelectAllChecked = () => {
-    const { selectableIds, selectedIds } = this.props;
+  const isSelectAllChecked = () => {
     return (
       !isEmpty(selectableIds) &&
       isEmpty(difference(selectableIds, Array.from(selectedIds)))
     );
   };
 
-  reset = () => {
-    const { currentDisplay } = this.props;
-    if (currentDisplay === "table") this.infiniteTable?.reset();
-  };
-
-  renderHeatmapTrigger = () => {
-    const { selectedIds } = this.props;
-    const { allowedFeatures = {} } = this.context || {};
-
+  const renderHeatmapTrigger = () => {
     // Should still show deprecated after feature flag is removed
     // (until we've updated the heatmap)
     const amrHeatmapDeprecatedText = allowedFeatures.includes(AMR_V1_FEATURE)
@@ -303,7 +304,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
       { text: amrHeatmapText, value: "/amr_heatmap" },
     ];
 
-    const disabledToolbarIcon = (subtitle: $TSFixMe) => (
+    const disabledToolbarIcon = (subtitle: string) => (
       <ToolbarButtonIcon
         className={cs.action}
         icon={<Icon sdsIcon="grid" sdsSize="xl" sdsType="iconButton" />}
@@ -335,7 +336,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
                   key={option.text}
                   text={option.text}
                   onClick={withAnalytics(
-                    this.handleHeatmapCreationModalOpen,
+                    () => setHeatmapCreationModalOpen(true),
                     ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_OPENED,
                   )}
                 />
@@ -373,7 +374,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     }
   };
 
-  renderPhyloTreeTrigger = () => {
+  const renderPhyloTreeTrigger = () => {
     return (
       <ToolbarButtonIcon
         className={cs.action}
@@ -382,16 +383,14 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
         }
         popupText="Phylogenetic Tree"
         onClick={withAnalytics(
-          this.handlePhyloModalOpen,
+          () => setPhyloCreationModalOpen(true),
           "SamplesView_phylo-tree-modal-open_clicked",
         )}
       />
     );
   };
 
-  renderBulkDownloadTrigger = () => {
-    const { selectedIds, workflow } = this.props;
-    const { bulkDownloadButtonTempTooltip } = this.state;
+  const renderBulkDownloadTrigger = () => {
     return (
       <ToolbarButtonIcon
         className={cs.action}
@@ -401,7 +400,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
         popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
         disabled={selectedIds.size === 0}
         onClick={withAnalytics(
-          this.handleBulkDownloadModalOpen,
+          handleBulkDownloadModalOpen,
           "SamplesView_bulk-download-modal-open_clicked",
           { workflow },
         )}
@@ -409,9 +408,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  renderCollectionTrigger = () => {
-    const { objects, selectedIds, workflow } = this.props;
-
+  const renderCollectionTrigger = () => {
     const targetSamples = objects.loaded;
 
     return selectedIds.size < 2 ? (
@@ -444,7 +441,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
           />
         }
         selectedSampleIds={selectedIds}
-        fetchedSamples={targetSamples.filter((sample: $TSFixMe) =>
+        fetchedSamples={targetSamples.filter(sample =>
           selectedIds.has(sample.id),
         )}
         workflow={workflow}
@@ -452,20 +449,20 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  renderNextcladeTrigger = () => {
-    const { objects, selectedIds } = this.props;
-
-    const selectedObjects = objects.loaded.filter((object: $TSFixMe) =>
+  const getSarsCov2Count = () => {
+    const selectedObjects = objects.loaded.filter(object =>
       selectedIds.has(object.id),
     );
-
     const sarsCov2Count = selectedObjects
-      .map((object: $TSFixMe) =>
-        get(["referenceAccession", "taxonName"], object),
-      )
-      .reduce((n: $TSFixMe, taxonName: $TSFixMe) => {
+      .map(object => get(["referenceAccession", "taxonName"], object))
+      .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);
+    return sarsCov2Count;
+  };
+
+  const renderNextcladeTrigger = () => {
+    const sarsCov2Count = getSarsCov2Count();
 
     const getPopupSubtitle = () => {
       if (sarsCov2Count > MAX_NEXTCLADE_SAMPLES) {
@@ -484,32 +481,19 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
         popupSubtitle={getPopupSubtitle()}
         disabled={sarsCov2Count === 0 || sarsCov2Count > MAX_NEXTCLADE_SAMPLES}
         onClick={withAnalytics(
-          this.handleNextcladeModalOpen,
+          () => setNextcladeModalOpen(true),
           "SamplesView_nextclade-modal-open_clicked",
         )}
       />
     );
   };
 
-  renderGenEpiTrigger = () => {
-    const { objects, selectedIds } = this.props;
-    const { allowedFeatures = {} } = this.context || {};
+  const renderGenEpiTrigger = () => {
+    const sarsCov2Count = getSarsCov2Count();
 
     if (!allowedFeatures.includes("genepi")) {
       return;
     }
-
-    const selectedObjects = objects.loaded.filter((object: $TSFixMe) =>
-      selectedIds.has(object.id),
-    );
-
-    const sarsCov2Count = selectedObjects
-      .map((object: $TSFixMe) =>
-        get(["referenceAccession", "taxonName"], object),
-      )
-      .reduce((n: $TSFixMe, taxonName: $TSFixMe) => {
-        return n + (taxonName === SARS_COV_2);
-      }, 0);
 
     const getPopupSubtitle = () => {
       if (sarsCov2Count === 0) {
@@ -532,15 +516,12 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  renderBulkSamplesActionsMenu = () => {
-    const { allowedFeatures = {} } = this.context || {};
-    const { objects, selectedIds } = this.props;
-
+  const renderBulkSamplesActionsMenu = () => {
     if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
       return;
     }
 
-    const selectedObjects = objects.loaded.filter((object: $TSFixMe) =>
+    const selectedObjects = objects.loaded.filter(object =>
       selectedIds.has(object.id),
     );
     const noObjectsSelected = size(selectedObjects) === 0;
@@ -548,35 +529,33 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     return (
       <BulkSamplesActionsMenu
         disabled={noObjectsSelected}
-        handleBulkKickoffAmr={this.handleBulkKickoffAmr}
+        handleBulkKickoffAmr={handleBulkKickoffAmr}
       />
     );
   };
 
-  handleBulkKickoffAmr = async () => {
-    const { objects, selectedIds, handleNewAmrCreationsFromMngs } = this.props;
-
+  const handleBulkKickoffAmr = async () => {
     const selectedObjects = filter(
       object => selectedIds.has(object.id),
       objects.loaded,
     );
     const amrPipelineEligibility = reduce(
       (result, sample) => {
-        if (this.isNotEligibleForAmrPipeline(sample)) {
+        if (isNotEligibleForAmrPipeline(sample)) {
           result.ineligible.push(sample);
         } else {
           result.eligible.push(sample);
         }
         return result;
       },
-      { eligible: [], ineligible: [] },
+      { eligible: [] as Entry[], ineligible: [] as Entry[] },
       selectedObjects,
     );
 
     if (size(amrPipelineEligibility.eligible) > 0) {
       const sampleIdsToKickoffAmr = map("id", amrPipelineEligibility.eligible);
-      this.kickoffAmrPipelineForSamples(sampleIdsToKickoffAmr);
-      this.renderAmrPipelineBulkKickedOffNotification();
+      kickoffAmrPipelineForSamples(sampleIdsToKickoffAmr);
+      renderAmrPipelineBulkKickedOffNotification();
 
       trackEvent(
         ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED,
@@ -589,15 +568,12 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
         numAmrRunsCreated: size(amrPipelineEligibility.eligible),
       });
 
-      this.setState(
-        ({
-          recentlyKickedOffAmrWorkflowRunsForSampleIds: prevRecentlyKickedOffAmrWorkflowRunsForSampleIds,
-        }) => ({
-          recentlyKickedOffAmrWorkflowRunsForSampleIds: new Set([
+      setRecentlyKickedOffAmrWorkflowRunsForSampleIds(
+        prevRecentlyKickedOffAmrWorkflowRunsForSampleIds =>
+          new Set([
             ...Array.from(prevRecentlyKickedOffAmrWorkflowRunsForSampleIds),
             ...sampleIdsToKickoffAmr,
           ]),
-        }),
       );
     }
 
@@ -607,16 +583,14 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
         amrPipelineEligibility.ineligible,
       );
       // We need this 10ms delay to allow the first toast to render properly before showing the second toast
-      await this.delay(10);
-      this.renderIneligibleSamplesForBulkKickoffAmrNotification(
+      await delay(10);
+      renderIneligibleSamplesForBulkKickoffAmrNotification(
         ineligibleSampleNames,
       );
     }
   };
 
-  isNotEligibleForAmrPipeline = (sample: $TSFixMe) => {
-    const { recentlyKickedOffAmrWorkflowRunsForSampleIds } = this.state;
-
+  const isNotEligibleForAmrPipeline = (sample: Entry) => {
     const failedToUploadSample = !isEmpty(get("sample.uploadError", sample));
     const nonHostReadsUnavailable = !(
       get("sample.pipelineRunStatus", sample) === PipelineRunStatuses.Complete
@@ -640,17 +614,17 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  delay = (ms: $TSFixMe) => new Promise(resolve => setTimeout(resolve, ms));
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  kickoffAmrPipelineForSamples = (sampleIds: $TSFixMe) => {
+  const kickoffAmrPipelineForSamples = (sampleIds: number[]) => {
     bulkKickoffWorkflowRuns({
       sampleIds,
       workflow: WORKFLOWS.AMR.value,
     });
   };
 
-  renderAmrPipelineBulkKickedOffNotification = () => {
-    const renderAmrNotification = (onClose: $TSFixMe) => (
+  const renderAmrPipelineBulkKickedOffNotification = () => {
+    const renderAmrNotification = (onClose: () => void) => (
       <Notification displayStyle="elevated" type="info" onClose={onClose}>
         <div className={cs.amrNotification}>
           We&apos;ve started running your samples on the Antimicrobial
@@ -661,13 +635,13 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
       </Notification>
     );
 
-    showToast(({ closeToast }: $TSFixMe) => renderAmrNotification(closeToast), {
+    showToast(({ closeToast }) => renderAmrNotification(closeToast), {
       autoClose: 12000,
     });
   };
 
-  renderIneligibleSamplesForBulkKickoffAmrNotification = (
-    invalidSampleNames: $TSFixMe,
+  const renderIneligibleSamplesForBulkKickoffAmrNotification = (
+    invalidSampleNames: string[],
   ) => {
     const header = (
       <div>
@@ -682,7 +656,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
 
     const content = (
       <span>
-        {invalidSampleNames.map((name: $TSFixMe, index: $TSFixMe) => {
+        {invalidSampleNames.map((name, index) => {
           return (
             <div key={index} className={cs.messageLine}>
               {name}
@@ -692,7 +666,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
       </span>
     );
 
-    const renderAmrNotification = (onClose: $TSFixMe) => (
+    const renderAmrNotification = (onClose: () => void) => (
       <AccordionNotification
         header={header}
         content={content}
@@ -703,30 +677,28 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
       />
     );
 
-    showToast(({ closeToast }: $TSFixMe) => renderAmrNotification(closeToast), {
+    showToast(({ closeToast }) => renderAmrNotification(closeToast), {
       autoClose: 12000,
     });
   };
 
-  renderTriggers = () => {
-    const { domain, selectedIds, workflow } = this.props;
-
+  const renderTriggers = () => {
     const triggers = {
-      [TRIGGERS.backgroundModel]: this.renderCollectionTrigger,
-      [TRIGGERS.heatmap]: this.renderHeatmapTrigger,
-      [TRIGGERS.phylogeneticTree]: this.renderPhyloTreeTrigger,
-      [TRIGGERS.download]: this.renderBulkDownloadTrigger,
-      [TRIGGERS.nextclade]: this.renderNextcladeTrigger,
-      [TRIGGERS.genepi]: this.renderGenEpiTrigger,
-      [TRIGGERS.bulk_kickoff_amr]: this.renderBulkSamplesActionsMenu,
+      [TRIGGERS.backgroundModel]: renderCollectionTrigger,
+      [TRIGGERS.heatmap]: renderHeatmapTrigger,
+      [TRIGGERS.phylogeneticTree]: renderPhyloTreeTrigger,
+      [TRIGGERS.download]: renderBulkDownloadTrigger,
+      [TRIGGERS.nextclade]: renderNextcladeTrigger,
+      [TRIGGERS.genepi]: renderGenEpiTrigger,
+      [TRIGGERS.bulk_kickoff_amr]: renderBulkSamplesActionsMenu,
     };
     // Get workflows triggers available in the current domain and workflow tab
     const triggersAvailable = intersection(
       WORKFLOW_TRIGGERS_BY_DOMAIN[domain],
       WORKFLOW_TRIGGERS[workflow],
     );
-    // @ts-expect-error ts-migrate(2339) FIXME: Property 'map' does not exist on type 'LodashInter... Remove this comment to see the full error message
-    const triggersToRender = triggersAvailable.map((trigger: $TSFixMe) => (
+    // @ts-expect-error lodash/fp should return a usable type
+    const triggersToRender = triggersAvailable.map(trigger => (
       <React.Fragment key={`${workflow}-${trigger}`}>
         {triggers[trigger]()}
       </React.Fragment>
@@ -750,33 +722,23 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  renderToolbar = () => {
-    const { hideAllTriggers, workflow } = this.props;
+  const renderToolbar = () => {
     const hideDisplaySwitcher = workflow === WORKFLOWS.LONG_READ_MNGS.value;
     return (
       <div className={cs.samplesToolbar}>
-        {!hideDisplaySwitcher && this.renderDisplaySwitcher()}
+        {!hideDisplaySwitcher && renderDisplaySwitcher()}
         <div className={cs.fluidBlank} />
-        {!hideAllTriggers && this.renderTriggers()}
+        {!hideAllTriggers && renderTriggers()}
       </div>
     );
   };
 
-  renderFilteredCount = () => {
-    const {
-      hasAtLeastOneFilterApplied,
-      selectableIds,
-      onClearFilters,
-      userDataCounts,
-      workflow,
-    } = this.props;
-
+  const renderFilteredCount = () => {
     if (!isEmpty(userDataCounts)) {
       const totalNumberOfObjects =
-        // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
         userDataCounts.sampleCountByWorkflow[workflow];
 
-      const workflowConfig = this.configForWorkflow[workflow];
+      const workflowConfig = configForWorkflow[workflow];
 
       const workflowDisplayText =
         totalNumberOfObjects === 1
@@ -807,23 +769,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     }
   };
 
-  renderTable = () => {
-    const {
-      activeColumns,
-      hideAllTriggers,
-      onActiveColumnsChange,
-      onLoadRows,
-      protectedColumns,
-      selectedIds,
-      snapshotShareId,
-      sortable,
-      sortBy,
-      sortDirection,
-      workflow,
-    } = this.props;
-
-    const { metadataFields, loading } = this.state;
-
+  const renderTable = () => {
     if (loading) {
       return (
         <div className={cs.loadingColumns}>
@@ -841,22 +787,18 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     // Note: If the specified sortBy column (ie. a custom metadata field) is not available on this view,
     // we expect the fetched samples to be sorted by the default column and we will bold the default column header.
     // This will not overwrite the sortBy in session storage.
-    const sortByNotAvailable = !columns.some(
-      (c: $TSFixMe) => c.dataKey === sortBy,
-    );
+    const sortByNotAvailable = !columns.some(c => c.dataKey === sortBy);
     const sortedColumn = sortByNotAvailable
       ? DEFAULT_SORTED_COLUMN_BY_TAB["samples"]
       : sortBy;
 
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
-    const selectAllChecked = this.isSelectAllChecked();
+    const selectAllChecked = isSelectAllChecked();
     return (
       <div className={cs.table}>
         <InfiniteTable
-          ref={(infiniteTable: $TSFixMe) =>
-            (this.infiniteTable = infiniteTable)
-          }
+          ref={childInfiniteTable => (infiniteTable = childInfiniteTable)}
           columns={columns}
           defaultRowHeight={rowHeight}
           draggableColumns
@@ -865,12 +807,12 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
           onActiveColumnsChange={onActiveColumnsChange}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
-            this.handleSelectAllRows,
+            handleSelectAllRows,
             "SamplesView_select-all-rows_clicked",
           )}
-          onSelectRow={this.handleSelectRow}
-          onRowClick={this.handleRowClick}
-          onSortColumn={this.handleSortColumn}
+          onSelectRow={handleSelectRow}
+          onRowClick={handleRowClick}
+          onSortColumn={handleSortColumn}
           protectedColumns={protectedColumns}
           rowClassName={cs.tableDataRow}
           selectableKey={hideAllTriggers ? null : "id"}
@@ -885,13 +827,11 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  renderDisplaySwitcher = () => {
-    const { currentDisplay, onDisplaySwitch, projectId, workflow } = this.props;
-
+  const renderDisplaySwitcher = () => {
     return (
       <DiscoveryViewToggle
         currentDisplay={currentDisplay}
-        onDisplaySwitch={(display: $TSFixMe) => {
+        onDisplaySwitch={(display: string) => {
           onDisplaySwitch(display);
           trackEvent(`SamplesView_${display}-switch_clicked`);
         }}
@@ -902,20 +842,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  renderMap = () => {
-    const {
-      currentTab,
-      mapLevel,
-      mapLocationData,
-      mapPreviewedLocationId,
-      mapTilerKey,
-      onClearFilters,
-      onMapLevelChange,
-      onMapClick,
-      onMapMarkerClick,
-      onMapTooltipTitleClick,
-    } = this.props;
-
+  const renderMap = () => {
     return (
       <div className={cs.map}>
         <DiscoveryMap
@@ -934,14 +861,7 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  renderQualityControl = () => {
-    const {
-      projectId,
-      onPLQCHistogramBarClick,
-      filters,
-      filtersSidebarOpen,
-      sampleStatsSidebarOpen,
-    } = this.props;
+  const renderQualityControl = () => {
     return (
       <QualityControl
         projectId={projectId}
@@ -953,35 +873,22 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     );
   };
 
-  renderDisplay = () => {
-    const { currentDisplay } = this.props;
+  const renderDisplay = () => {
     switch (currentDisplay) {
       case "table":
-        return this.renderTable();
+        return renderTable();
       case "map":
-        return this.renderMap();
+        return renderMap();
       case "plqc":
-        return this.renderQualityControl();
+        return renderQualityControl();
     }
   };
 
-  handlePhyloModalOpen = () => {
-    this.setState({ phyloTreeCreationModalOpen: true });
-  };
-
-  handlePhyloModalClose = () => {
-    this.setState({ phyloTreeCreationModalOpen: false });
-  };
-
-  handleBulkDownloadModalOpen = () => {
-    const { selectedIds, workflowEntity } = this.props;
-    const { appConfig, admin } = this.context || {};
-
+  const handleBulkDownloadModalOpen = () => {
     if (!appConfig.maxObjectsBulkDownload) {
-      this.setState({
-        bulkDownloadButtonTempTooltip:
-          "Unexpected issue. Please contact us for help.",
-      });
+      setBulkDownloadButtonTempTooltip(
+        "Unexpected issue. Please contact us for help.",
+      );
     } else if (selectedIds.size > appConfig.maxObjectsBulkDownload && !admin) {
       // This check ensures that the # of selected objects does not surpass our max object limit that we allow in bulk downloads.
       // There is a separate check in BulkDownloadModal that looks for a max number of objects allowed and disables the
@@ -991,41 +898,26 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
           ? "consensus genomes"
           : "samples";
 
-      this.setState({
-        bulkDownloadButtonTempTooltip: `No more than ${appConfig.maxObjectsBulkDownload} ${objectToDownload} allowed in one download.`,
-      });
+      setBulkDownloadButtonTempTooltip(
+        `No more than ${appConfig.maxObjectsBulkDownload} ${objectToDownload} allowed in one download.`,
+      );
     } else {
-      this.setState({ bulkDownloadModalOpen: true });
+      setBulkDownloadModalOpen(true);
     }
   };
 
-  handleBulkDownloadModalClose = () => {
-    this.setState({ bulkDownloadModalOpen: false });
-  };
-
-  handleBulkDownloadGenerate = () => {
-    this.handleBulkDownloadModalClose();
+  const handleBulkDownloadGenerate = () => {
+    setBulkDownloadModalOpen(false);
     showBulkDownloadNotification();
   };
 
-  handleHeatmapCreationModalOpen = () => {
-    this.setState({ heatmapCreationModalOpen: true });
-  };
-
-  handleHeatmapCreationModalClose = () => {
-    this.setState({ heatmapCreationModalOpen: false });
-  };
-
-  handleNextcladeModalOpen = () => {
-    this.setState({ nextcladeModalOpen: true });
-  };
-
-  handleNextcladeModalClose = () => {
-    this.setState({ nextcladeModalOpen: false });
-  };
-
-  handleRowClick = ({ event, rowData }: $TSFixMe) => {
-    const { onObjectSelected, objects, workflowEntity } = this.props;
+  const handleRowClick = ({
+    event,
+    rowData,
+  }: {
+    event: React.SyntheticEvent;
+    rowData: { id: number };
+  }) => {
     const object = objects.get(rowData.id);
     onObjectSelected && onObjectSelected({ object, currentEvent: event });
 
@@ -1036,89 +928,62 @@ class SamplesView extends React.Component<SamplesViewProps, SamplesViewState> {
     });
   };
 
-  render() {
-    const {
-      currentDisplay,
-      selectedIds,
-      snapshotShareId,
-      workflow,
-      workflowEntity,
-    } = this.props;
-    const {
-      bulkDownloadModalOpen,
-      heatmapCreationModalOpen,
-      nextcladeModalOpen,
-      phyloTreeCreationModalOpen,
-    } = this.state;
-
-    return (
-      <div className={cs.container}>
-        {currentDisplay === "table" || currentDisplay === "plqc" ? (
-          !snapshotShareId && this.renderToolbar()
-        ) : (
-          <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
-        )}
-        {this.renderFilteredCount()}
-        {this.renderDisplay()}
-        {phyloTreeCreationModalOpen && (
-          <PhyloTreeCreationModal
-            // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
-            // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
-            csrf={document.getElementsByName("csrf-token")[0].content}
-            onClose={withAnalytics(
-              this.handlePhyloModalClose,
-              "SamplesView_phylo-tree-modal_closed",
-            )}
-          />
-        )}
-        {bulkDownloadModalOpen && (
-          <BulkDownloadModal
-            open
-            onClose={withAnalytics(
-              this.handleBulkDownloadModalClose,
-              "SamplesView_bulk-download-modal_closed",
-            )}
-            onGenerate={this.handleBulkDownloadGenerate}
-            selectedIds={selectedIds}
-            workflow={workflow}
-            workflowEntity={workflowEntity}
-          />
-        )}
-        {heatmapCreationModalOpen && (
-          <HeatmapCreationModal
-            open
-            onClose={withAnalytics(
-              this.handleHeatmapCreationModalClose,
-              ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED,
-            )}
-            selectedIds={selectedIds}
-          />
-        )}
-        {nextcladeModalOpen && (
-          <NextcladeModal
-            open
-            onClose={withAnalytics(
-              this.handleNextcladeModalClose,
-              "SamplesView_nextclade-modal_closed",
-            )}
-            selectedIds={selectedIds}
-            workflowEntity={workflowEntity}
-          />
-        )}
-      </div>
-    );
-  }
-}
-
-// @ts-expect-error ts-migrate(2339) FIXME: Property 'defaultProps' does not exist on type 'ty... Remove this comment to see the full error message
-SamplesView.defaultProps = {
-  activeColumns:
-    DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[WORKFLOWS.SHORT_READ_MNGS.value],
-  protectedColumns: ["sample"],
-  currentDisplay: "table",
-  workflow: WORKFLOWS.SHORT_READ_MNGS.value,
-};
-
-SamplesView.contextType = UserContext;
+  return (
+    <div className={cs.container}>
+      {currentDisplay === "table" || currentDisplay === "plqc" ? (
+        !snapshotShareId && renderToolbar()
+      ) : (
+        <NarrowContainer>{renderToolbar()}</NarrowContainer>
+      )}
+      {renderFilteredCount()}
+      {renderDisplay()}
+      {phyloCreationModalOpen && (
+        <PhyloTreeCreationModal
+          // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
+          // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
+          csrf={document.getElementsByName("csrf-token")[0].content}
+          onClose={withAnalytics(
+            () => setPhyloCreationModalOpen(false),
+            "SamplesView_phylo-tree-modal_closed",
+          )}
+        />
+      )}
+      {bulkDownloadModalOpen && (
+        <BulkDownloadModal
+          open
+          onClose={withAnalytics(
+            () => setBulkDownloadModalOpen(false),
+            "SamplesView_bulk-download-modal_closed",
+          )}
+          onGenerate={handleBulkDownloadGenerate}
+          selectedIds={selectedIds}
+          workflow={workflow}
+          workflowEntity={workflowEntity}
+        />
+      )}
+      {heatmapCreationModalOpen && (
+        <HeatmapCreationModal
+          open
+          onClose={withAnalytics(
+            () => setHeatmapCreationModalOpen(false),
+            ANALYTICS_EVENT_NAMES.SAMPLES_VIEW_HEATMAP_CREATION_MODAL_CLOSED,
+          )}
+          selectedIds={selectedIds}
+        />
+      )}
+      {nextcladeModalOpen && (
+        <NextcladeModal
+          open
+          onClose={withAnalytics(
+            () => setNextcladeModalOpen(false),
+            "SamplesView_nextclade-modal_closed",
+          )}
+          selectedIds={selectedIds}
+          workflowEntity={workflowEntity}
+        />
+      )}
+    </div>
+  );
+});
 
 export default SamplesView;

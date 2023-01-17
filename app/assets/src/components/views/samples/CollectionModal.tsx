@@ -34,10 +34,7 @@ import {
 interface CollectionModalProps {
   maxSamplesShown?: number;
   numDescriptionRows?: number;
-  fetchedSamples?: {
-    id: number;
-    sample: { name: string; project: $TSFixMeUnknown };
-  }[];
+  fetchedSamples?: { id: number; sample: { name: string; project: string } }[];
   selectedSampleIds?: Set<number>;
   trigger: React.ReactNode;
   workflow?: string;

@@ -1,6 +1,7 @@
 import cx from "classnames";
 import React from "react";
 
+import { SortDirectionType } from "react-virtualized";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 // CSS file must be loaded after any elements you might want to override
 import cs from "./base_discovery_view.scss";
@@ -16,10 +17,10 @@ interface BaseDiscoveryViewProps {
   onSortColumn?: $TSFixMeFunction;
   protectedColumns?: string[];
   rowClassName?: string;
-  rowHeight?: number | ((...args: $TSFixMeUnknown[]) => $TSFixMeUnknown);
+  rowHeight?: number | ((index: { index: number; row: any }) => number);
   sortable?: boolean;
   sortBy?: string;
-  sortDirection?: string;
+  sortDirection?: SortDirectionType;
 }
 
 class BaseDiscoveryView extends React.Component<BaseDiscoveryViewProps> {

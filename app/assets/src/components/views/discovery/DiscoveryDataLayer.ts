@@ -1,5 +1,7 @@
 import { findIndex, findLastIndex, range, slice } from "lodash/fp";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { ViewProps } from "~/interface/samplesView";
+import { MustHaveId } from "~/interface/shared";
 import {
   getDiscoveryProjects,
   getDiscoverySamples,
@@ -7,14 +9,14 @@ import {
   getDiscoveryWorkflowRuns,
 } from "./discovery_api";
 
-class ObjectCollection {
-  _displayName: $TSFixMe;
-  domain: $TSFixMe;
-  entries: $TSFixMe;
-  fetchDataCallback: $TSFixMe;
+class ObjectCollection<T extends MustHaveId> {
+  _displayName: string;
+  domain: string;
+  entries: { [id: number]: T } | Record<string, never>;
+  fetchDataCallback: (params) => Promise<{ fetchedObjects; fetchedObjectIds }>;
   constructor(
     // domain of the collection (my data, all data, public, snapshot)
-    domain: $TSFixMe,
+    domain: string,
     // function to fetch data from server
     // should take the following parameters:
     // - domain: my_data, public, all_data, snapshot
@@ -23,7 +25,7 @@ class ObjectCollection {
     // - offset: number of results to skip
     // - listAllIds: boolean that indicates if it should retrieve
     //   a list of all possible IDs
-    fetchDataCallback: $TSFixMe,
+    fetchDataCallback: ObjectCollection<T>["fetchDataCallback"],
     // name of the view: mostly used for debug
     displayName = "",
   ) {
@@ -33,26 +35,26 @@ class ObjectCollection {
     this._displayName = displayName;
   }
 
-  createView = (viewProps: $TSFixMe) => {
+  createView = (viewProps: ViewProps<typeof this.entries>) => {
     return new ObjectCollectionView(this, viewProps);
   };
 
-  update = (entry: $TSFixMe) => {
+  update = (entry: T) => {
     this.entries[entry.id] = entry;
   };
 }
 
-class ObjectCollectionView {
-  _activePromises: $TSFixMe;
-  _collection: $TSFixMe;
-  _conditions: $TSFixMe;
-  _displayName: $TSFixMe;
-  _loading: $TSFixMe;
-  _onViewChange: $TSFixMe;
-  _orderedIds: $TSFixMe;
-  _pageSize: $TSFixMe;
+class ObjectCollectionView<T extends MustHaveId> {
+  _activePromises: object;
+  _collection: ObjectCollection<T>;
+  _conditions: ViewProps<typeof this.entries>["conditions"];
+  _displayName: ViewProps<typeof this.entries>["displayName"];
+  _loading: boolean;
+  _onViewChange: ViewProps<typeof this.entries>["onViewChange"];
+  _orderedIds: number[];
+  _pageSize: ViewProps<typeof this.entries>["pageSize"];
   constructor(
-    collection: $TSFixMe,
+    collection: ObjectCollection<T>,
     {
       // conditions: Extra conditions to use for this view.
       // These will be sent to the fetchDataCallback of the corresponding collection when requesting new data.
@@ -78,8 +80,8 @@ class ObjectCollectionView {
 
   get loaded() {
     return (this._orderedIds || [])
-      .filter((id: $TSFixMe) => id in this._collection.entries)
-      .map((id: $TSFixMe) => this._collection.entries[id]);
+      .filter(id => id in this._collection.entries)
+      .map(id => this._collection.entries[id]);
   }
 
   get length() {
@@ -94,7 +96,7 @@ class ObjectCollectionView {
     return this._collection.entries;
   }
 
-  get = (id: $TSFixMe) => this._collection.entries[id];
+  get = (id: number) => this._collection.entries[id];
 
   getIds = () => this._orderedIds || [];
 
@@ -102,7 +104,7 @@ class ObjectCollectionView {
     return Object.keys(this._collection.entries).length;
   };
 
-  getIntermediateIds = ({ id1, id2 }: $TSFixMe) => {
+  getIntermediateIds = ({ id1, id2 }: { id1: number; id2: number }) => {
     const start = findIndex(v => v === id1 || v === id2, this._orderedIds);
     const end = findLastIndex(v => v === id1 || v === id2, this._orderedIds);
     return slice(start, end + 1, this._orderedIds);
@@ -114,7 +116,11 @@ class ObjectCollectionView {
     conditions,
     loadFirstPage = false,
     logLoadTime = false,
-  }: $TSFixMe = {}) => {
+  }: {
+    conditions?: ObjectCollectionView<T>["_conditions"];
+    loadFirstPage?: boolean;
+    logLoadTime?: boolean;
+  } = {}) => {
     this._orderedIds = null;
     this._loading = true;
     this._conditions = conditions;
@@ -125,7 +131,7 @@ class ObjectCollectionView {
     }
   };
 
-  loadPage = async (pageNumber: $TSFixMe, logLoadTime = false) => {
+  loadPage = async (pageNumber: number, logLoadTime = false) => {
     const indices = {
       startIndex: pageNumber,
       stopIndex: this._pageSize * (1 + pageNumber) - 1,
@@ -140,8 +146,7 @@ class ObjectCollectionView {
         domain: this._collection.domain,
         displayName: this._displayName,
         allIdsCount: this._orderedIds.length,
-        // @ts-expect-error ts-migrate(2362) FIXME: The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
-        loadTimeInMilleseconds: endLoad - startLoad,
+        loadTimeInMilleseconds: endLoad.valueOf() - startLoad.valueOf(),
         ...this._conditions,
       });
     }
@@ -149,15 +154,21 @@ class ObjectCollectionView {
     return objectRows;
   };
 
-  handleLoadObjectRows = async ({ startIndex, stopIndex }: $TSFixMe) => {
+  handleLoadObjectRows = async ({
+    startIndex,
+    stopIndex,
+  }: {
+    startIndex: number;
+    stopIndex: number;
+  }) => {
     // Make sure we do not load the same information twice
     // If conditions change (see reset), then the active promises tracker is emptied
     // CAVEAT: we use a key based on 'startIndex,stopindex', thus, this only works if the request are exactly the same
     // Asking for a subset of an existing request (e.g. asking for 0,49 and then 10,19) will still lead to redundant requests
     const key = [startIndex, stopIndex];
-    // @ts-expect-error Type 'any[]' cannot be used as an index type.
+    // @ts-expect-error Type 'number[]' cannot be used as an index type.
     if (this._activePromises[key]) {
-      // @ts-expect-error Type 'any[]' cannot be used as an index type.
+      // @ts-expect-error Type 'number[]' cannot be used as an index type.
       const promiseLoadObjectRows = this._activePromises[key];
       const promiseResponse = await promiseLoadObjectRows;
       return promiseResponse;
@@ -175,7 +186,13 @@ class ObjectCollectionView {
     }
   };
 
-  fetchObjectRows = async ({ startIndex, stopIndex }: $TSFixMe) => {
+  fetchObjectRows = async ({
+    startIndex,
+    stopIndex,
+  }: {
+    startIndex: number;
+    stopIndex: number;
+  }) => {
     const domain = this._collection.domain;
 
     const minStopIndex = this._orderedIds
@@ -183,7 +200,6 @@ class ObjectCollectionView {
       : stopIndex;
     let missingIdxs = range(startIndex, minStopIndex + 1);
     if (this._orderedIds) {
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'filter' does not exist on type 'LodashRa... Remove this comment to see the full error message
       missingIdxs = missingIdxs.filter(
         (idx: $TSFixMe) => !(this._orderedIds[idx] in this._collection.entries),
       );
@@ -221,24 +237,21 @@ class ObjectCollectionView {
       }
     }
 
-    return (
-      range(startIndex, minStopIndex + 1)
-        // @ts-expect-error ts-migrate(2339) FIXME: Property 'filter' does not exist on type 'LodashRa... Remove this comment to see the full error message
-        .filter((idx: $TSFixMe) => idx in this._orderedIds)
-        .map((idx: $TSFixMe) => this._collection.entries[this._orderedIds[idx]])
-    );
+    return range(startIndex, minStopIndex + 1)
+      .filter(idx => idx in this._orderedIds)
+      .map(idx => this._collection.entries[this._orderedIds[idx]]);
   };
 }
 
 class DiscoveryDataLayer {
   amrWorkflowRuns: $TSFixMe;
-  domain: $TSFixMe;
+  domain: string;
   longReadMngsSamples: $TSFixMe;
   projects: $TSFixMe;
   samples: $TSFixMe;
   visualizations: $TSFixMe;
   workflowRuns: $TSFixMe;
-  constructor(domain: $TSFixMe) {
+  constructor(domain: string) {
     // TODO: Move domain to conditions object
     this.domain = domain;
 
