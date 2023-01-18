@@ -180,8 +180,10 @@ module PipelineOutputsHelper
       resp.body.read
     rescue Aws::S3::Errors::NoSuchKey => e
       LogUtil.log_error("File not found: #{key}", exception: e)
+      return ''
     rescue Aws::S3::Errors::InvalidRange => e
       LogUtil.log_error("Invalid byterange requested: #{key} #{range}", exception: e)
+      return ''
     end
   end
 
