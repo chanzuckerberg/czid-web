@@ -26,17 +26,60 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
 
 ### Gem was updated
 
-- `Could not find gem-1.2.0 in any of the sources (Bundler::GemNotFound)`
-  - When a gem is added or updated, you need to update the Docker image as well.
-- Standard method is to rebuild the image:
-  - `aws-oidc exec -- docker-compose build web`
-- To avoid rebuilding your web image temporarily (e.g. after someone adds to the Gemfile), you can try this with your running container:
+**Typical error message**: `Could not find gem-1.2.0 in any of the sources (Bundler::GemNotFound)`
+
+**Resolution**: When a gem is added or updated, you need to update the Docker image as well. There are several options for this.
+
+- If working off `main` and gems are not modified locally, pull the latest image from AWS ECR
+
+    ```zsh
+    # set AWS account id
+    ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
+    # login to ecr so pulling cache succeeds
+    aws ecr get-login-password | docker login --username AWS --password-stdin $*ACCOUNT_ID**.dkr.ecr.us-west-2.amazonaws.com/idseq-web
+    # pull from ECR
+    docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:latest
+    # start containers
+    aws-oidc exec -- docker-compose up web
+    ```
+
+- If gems are modified locally or pulling from ECR fails, rebuild the image
+
+    ```zsh
+    # set AWS account id
+    ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
+    # login to ecr so pulling cache succeeds
+    aws ecr get-login-password | docker login --username AWS --password-stdin $*ACCOUNT_ID**.dkr.ecr.us-west-2.amazonaws.com/idseq-web
+    # build container
+    aws-oidc exec -- docker-compose build web
+    ```
+
+- To avoid rebuilding your web image temporarily (e.g. after someone adds to the Gemfile), you can try this with your running container
   - `aws-oidc exec -- docker-compose run --entrypoint='' web bundle install`
-- **Recommended**: Usually you can pull the latest image from AWS ECR (if working off `main`) and downloading is likely faster than rebuilding:
-  - `ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')`
-  - `aws ecr get-login-password | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web`
-  - `docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:branch-main`
-  - `aws-oidc exec -- docker-compose up web`
+
+#### Streamline commands with functions and aliases
+
+Add the following to .zshrc (or rc file for your shell) to run these command more easily
+
+```zsh
+function logintoecr {
+  ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
+  aws ecr get-login-password | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web
+}
+
+function pulllatestdocker {
+  logintoecr
+  docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:latest
+}
+
+function buildwebcontainer {
+  logintoecr
+  aws-oidc exec -- docker-compose build web
+}
+
+alias bweb="buildwebcontainer"
+alias pulldock="pulllatestdocker"
+```
 
 ### Container environment variables and overrides
 

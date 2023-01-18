@@ -120,8 +120,7 @@ services:
       # and https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#leverage-build-cache#leverage-build-cache
       cache_from:
         - ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
-        - ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -145,7 +144,7 @@ services:
       <<: *env-variables
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
   resque:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -161,7 +160,7 @@ services:
     command: bundle exec "COUNT=5 rake resque:workers"
   resque_scheduler:
     # See config/resque_schedule.yml for usages.
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -176,7 +175,7 @@ services:
       <<: *aws-variables
     command: bundle exec "rake resque:scheduler"
   resque_result_monitor:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -191,7 +190,7 @@ services:
       <<: *aws-variables
     command: bundle exec "rake result_monitor"
   resque_pipeline_monitor:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -206,7 +205,7 @@ services:
       <<: *aws-variables
     command: bundle exec "rake pipeline_monitor"
   shoryuken:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     volumes:
       - .:/app:ro
       - ./log:/app/log
