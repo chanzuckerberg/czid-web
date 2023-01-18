@@ -1,4 +1,4 @@
-import { Tab, Tabs } from "czifui";
+import { Tab, Tabs, Tag } from "czifui";
 import {
   capitalize,
   clone,
@@ -41,7 +41,6 @@ import {
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import StatusLabel from "~/components/ui/labels/StatusLabel";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
@@ -1109,11 +1108,7 @@ class DiscoveryView extends React.Component {
 
     const renderTab = (label, count) => {
       return (
-        <Tab
-          data-testid={label.toLowerCase()}
-          label={label}
-          count={count}
-        ></Tab>
+        <Tab data-testid={label.toLowerCase()} label={label} count={count} />
       );
     };
     return compact([
@@ -2084,26 +2079,19 @@ class DiscoveryView extends React.Component {
               >
                 {workflowCount || "0"}
                 {isBeta && (
-                  // TODO(ihan): Upgrade czifui to 13.1.1 and adopt Tag component
-                  // <span className={cs.betaTag}>
-                  //   <Tag
-                  //     sdsStyle="rounded"
-                  //     sdsType="secondary"
-                  //     label="Beta"
-                  //     color="beta"
-                  //     hover={false}
-                  //   />
-                  // </span>
-                  <StatusLabel
-                    className={cs.statusLabel}
-                    inline
-                    status={"Beta"}
-                    type="beta"
-                  />
+                  <span className={cs.betaTag}>
+                    <Tag
+                      sdsStyle="rounded"
+                      sdsType="secondary"
+                      label="BETA"
+                      color="beta"
+                      hover={false}
+                    />
+                  </span>
                 )}
               </span>
             }
-          ></Tab>
+          />
         ),
         value: WORKFLOWS[name].value,
       };

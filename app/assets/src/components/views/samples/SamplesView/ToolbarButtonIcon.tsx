@@ -20,11 +20,10 @@ export default function ToolbarButtonIcon({
       <ButtonIcon
         sdsSize="large"
         sdsType="primary"
+        sdsIcon={icon}
         disabled={disabled}
         onClick={disabled ? undefined : onClick}
-      >
-        {icon}
-      </ButtonIcon>
+      />
     </div>
   );
 

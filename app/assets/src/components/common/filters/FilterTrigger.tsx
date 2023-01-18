@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Icon, ButtonIcon } from "czifui";
+import { ButtonIcon } from "czifui";
 import React from "react";
 
 import cs from "./filter_trigger.scss";
@@ -22,9 +22,12 @@ const FilterTrigger = ({
     onClick={onClick}
   >
     {label}
-    <ButtonIcon className={cs.dropdownArrow} sdsSize="small">
-      <Icon sdsIcon="chevronDown" sdsSize="xs" sdsType="iconButton" />
-    </ButtonIcon>
+    <ButtonIcon
+      className={cs.dropdownArrow}
+      sdsSize="small"
+      sdsType="secondary"
+      sdsIcon="chevronDown"
+    />
   </div>
 );
 

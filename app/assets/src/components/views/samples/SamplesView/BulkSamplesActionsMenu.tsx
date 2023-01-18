@@ -1,5 +1,5 @@
 import { PopoverProps } from "@mui/material";
-import { Icon, Menu, MenuItem } from "czifui";
+import { Menu, MenuItem } from "czifui";
 import React, { useState } from "react";
 
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
@@ -30,9 +30,7 @@ const BulkSamplesActionsMenu = ({
     <>
       <ToolbarButtonIcon
         className={cs.action}
-        icon={
-          <Icon sdsIcon="dotsHorizontal" sdsSize="xl" sdsType="iconButton" />
-        }
+        icon="dotsHorizontal"
         popupText="Run Antimicrobial Resistance Pipeline (Beta)"
         popupSubtitle={disabled ? "Select at least 1 sample" : ""}
         disabled={disabled}

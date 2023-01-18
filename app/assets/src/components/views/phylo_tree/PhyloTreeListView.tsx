@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { ButtonIcon, Icon, Tooltip } from "czifui";
+import { ButtonIcon, Tooltip } from "czifui";
 import { set, find, isUndefined } from "lodash/fp";
 import React from "react";
 
@@ -707,12 +707,11 @@ class PhyloTreeListView extends React.Component<
               <ButtonIcon
                 sdsSize="large"
                 sdsType="primary"
+                sdsIcon="bacteria"
                 onClick={() => {
                   this.setState({ adminToolsOpen: !adminToolsOpen });
                 }}
-              >
-                <Icon sdsIcon="bacteria" sdsSize="xl" sdsType="iconButton" />
-              </ButtonIcon>
+              />
             </Tooltip>
           )}
           {adminToolsOpen && this.renderAdminPanel()}

@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Button, Icon } from "czifui";
+import { Button } from "czifui";
 import {
   difference,
   find,
@@ -307,7 +307,7 @@ const SamplesView = forwardRef(function SamplesView(
     const disabledToolbarIcon = (subtitle: string) => (
       <ToolbarButtonIcon
         className={cs.action}
-        icon={<Icon sdsIcon="grid" sdsSize="xl" sdsType="iconButton" />}
+        icon="grid"
         popupText="Heatmap"
         popupSubtitle={subtitle}
         disabled
@@ -365,7 +365,7 @@ const SamplesView = forwardRef(function SamplesView(
           trigger={
             <ToolbarButtonIcon
               className={cs.action}
-              icon={<Icon sdsIcon="grid" sdsSize="xl" sdsType="iconButton" />}
+              icon="grid"
               popupText="Heatmap"
             />
           }
@@ -378,9 +378,7 @@ const SamplesView = forwardRef(function SamplesView(
     return (
       <ToolbarButtonIcon
         className={cs.action}
-        icon={
-          <Icon sdsIcon="treeHorizontal" sdsSize="xl" sdsType="iconButton" />
-        }
+        icon="treeHorizontal"
         popupText="Phylogenetic Tree"
         onClick={withAnalytics(
           () => setPhyloCreationModalOpen(true),
@@ -394,7 +392,7 @@ const SamplesView = forwardRef(function SamplesView(
     return (
       <ToolbarButtonIcon
         className={cs.action}
-        icon={<Icon sdsIcon="download" sdsSize="xl" sdsType="iconButton" />}
+        icon="download"
         popperDependencies={[bulkDownloadButtonTempTooltip]}
         popupText={bulkDownloadButtonTempTooltip || "Download"}
         popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
@@ -414,13 +412,7 @@ const SamplesView = forwardRef(function SamplesView(
     return selectedIds.size < 2 ? (
       <ToolbarButtonIcon
         className={cs.action}
-        icon={
-          <Icon
-            sdsIcon="squareOnDashedSquare"
-            sdsSize="xl"
-            sdsType="iconButton"
-          />
-        }
+        icon="squareOnDashedSquare"
         popupText="Background Model"
         popupSubtitle="Select at least 2 samples"
         disabled
@@ -430,13 +422,7 @@ const SamplesView = forwardRef(function SamplesView(
         trigger={
           <ToolbarButtonIcon
             className={cs.action}
-            icon={
-              <Icon
-                sdsIcon="squareOnDashedSquare"
-                sdsSize="xl"
-                sdsType="iconButton"
-              />
-            }
+            icon="squareOnDashedSquare"
             popupText="Background Model"
           />
         }
@@ -476,7 +462,7 @@ const SamplesView = forwardRef(function SamplesView(
     return (
       <ToolbarButtonIcon
         className={cs.action}
-        icon={<Icon sdsIcon="treeDendogram" sdsSize="l" sdsType="iconButton" />}
+        icon="treeDendogram"
         popupText="Nextclade"
         popupSubtitle={getPopupSubtitle()}
         disabled={sarsCov2Count === 0 || sarsCov2Count > MAX_NEXTCLADE_SAMPLES}
@@ -508,7 +494,7 @@ const SamplesView = forwardRef(function SamplesView(
         className={cs.action}
         // TODO: this is currently a placeholder icon, replace with GenEpi
         // integration icon once it's created.
-        icon={<Icon sdsIcon="share" sdsSize="xl" sdsType="iconButton" />}
+        icon="share"
         popupText="Send samples to CZ Gen Epi"
         popupSubtitle={getPopupSubtitle()}
         disabled={sarsCov2Count === 0}

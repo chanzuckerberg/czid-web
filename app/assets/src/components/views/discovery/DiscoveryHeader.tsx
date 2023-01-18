@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { ButtonIcon, Icon, Tabs } from "czifui";
+import { ButtonIcon, Tabs } from "czifui";
 import { findIndex, startCase } from "lodash/fp";
 import React from "react";
 
@@ -104,15 +104,10 @@ const DiscoveryHeader = ({
               <ButtonIcon
                 sdsSize="large"
                 sdsType="primary"
-                active={showFilters}
+                sdsIcon="slidersHorizontal"
+                on={showFilters}
                 disabled={disableSidebars}
-              >
-                <Icon
-                  sdsIcon="slidersHorizontal"
-                  sdsSize="xl"
-                  sdsType="iconButton"
-                />
-              </ButtonIcon>
+              />
               {!disableSidebars && (
                 <Label
                   className={cs.filtersCounter}
@@ -172,15 +167,10 @@ const DiscoveryHeader = ({
               <ButtonIcon
                 sdsSize="large"
                 sdsType="primary"
-                active={showStats}
+                sdsIcon="infoSpeechBubble"
+                on={showStats}
                 disabled={disableSidebars}
-              >
-                <Icon
-                  sdsIcon="infoSpeechBubble"
-                  sdsSize="xl"
-                  sdsType="iconButton"
-                />
-              </ButtonIcon>
+              />
             </div>
           }
           content={

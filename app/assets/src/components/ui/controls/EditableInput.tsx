@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Icon, ButtonIcon } from "czifui";
+import { ButtonIcon } from "czifui";
 import { isEmpty } from "lodash/fp";
 import React, { useEffect, useState, useRef } from "react";
 import Input from "~ui/controls/Input";
@@ -121,9 +121,12 @@ const EditableInput = ({
             {inputText}
           </div>
           {editable && (
-            <ButtonIcon className={cs.editIcon} sdsSize="small">
-              <Icon sdsIcon="edit" sdsSize="s" sdsType="iconButton" />
-            </ButtonIcon>
+            <ButtonIcon
+              className={cs.editIcon}
+              sdsSize="small"
+              sdsType="secondary"
+              sdsIcon="edit"
+            />
           )}
         </div>
       )}

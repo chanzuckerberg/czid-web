@@ -1,6 +1,6 @@
 /* eslint-disable import/order */
 import cx from "classnames";
-import { Icon, ButtonIcon } from "czifui";
+import { ButtonIcon } from "czifui";
 import { sum, find, get, isEmpty } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -395,13 +395,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
             }
             sdsSize="large"
             sdsType="secondary"
-          >
-            <Icon
-              sdsIcon="searchLinesHorizontal"
-              sdsSize="xl"
-              sdsType="iconButton"
-            />
-          </ButtonIcon>
+            sdsIcon="searchLinesHorizontal"
+          />
         }
       />
     );
@@ -516,13 +511,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
                     }
                     sdsSize="large"
                     sdsType="secondary"
-                  >
-                    <Icon
-                      sdsIcon="download"
-                      sdsSize="xl"
-                      sdsType="iconButton"
-                    />
-                  </ButtonIcon>
+                    sdsIcon="download"
+                  />
                 }
               />
             </div>
