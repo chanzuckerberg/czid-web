@@ -6,7 +6,7 @@ import LoadingBar from "~/components/ui/controls/LoadingBar";
 import IconAlert from "~/components/ui/icons/IconAlert";
 import IconCheckSmall from "~/components/ui/icons/IconCheckSmall";
 import { formatFileSize } from "~/components/utils/format";
-import { Sample } from "~/interface/shared";
+import { SampleFromApi } from "~/interface/shared";
 import cs from "./upload_progress_modal_sample_list.scss";
 
 const ERROR_STATUS = "error";
@@ -21,10 +21,10 @@ type SampleUploadStatusMap = { [key: string]: SampleUploadStatus };
 type SampleUploadPercentageMap = { [key: string]: number };
 
 interface UploadProgressModalSampleListProps {
-  samples: Sample[];
+  samples: SampleFromApi[];
   sampleUploadPercentages: SampleUploadPercentageMap;
   sampleUploadStatuses: SampleUploadStatusMap;
-  onRetryUpload: (uploadsToRetry: Sample[]) => void;
+  onRetryUpload: (uploadsToRetry: SampleFromApi[]) => void;
 }
 
 const UploadProgressModalSampleList = ({
@@ -33,11 +33,11 @@ const UploadProgressModalSampleList = ({
   sampleUploadStatuses,
   onRetryUpload,
 }: UploadProgressModalSampleListProps) => {
-  const getUploadPercentageForSample = (sample: Sample) => {
+  const getUploadPercentageForSample = (sample: SampleFromApi) => {
     return sampleUploadPercentages[sample.name];
   };
 
-  const getUploadedPercentageText = (sample: Sample) => {
+  const getUploadedPercentageText = (sample: SampleFromApi) => {
     const uploadPercentage = getUploadPercentageForSample(sample);
     if (uploadPercentage === undefined) {
       return "Waiting to upload...";

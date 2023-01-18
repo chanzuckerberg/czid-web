@@ -5,7 +5,7 @@ import React from "react";
 import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { Project, Sample } from "~/interface/shared";
+import { Project, SampleFromApi } from "~/interface/shared";
 import Label from "~ui/labels/Label";
 
 import cs from "./sample_upload_flow.scss";
@@ -27,7 +27,7 @@ const MENU_OPTIONS = [
 
 interface SampleUploadFlowHeaderProps {
   currentStep: string;
-  samples?: Sample[];
+  samples?: SampleFromApi[];
   project?: Project;
   onStepSelect: $TSFixMeFunction;
   stepsEnabled?: Record<string, boolean>;

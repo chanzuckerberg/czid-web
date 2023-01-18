@@ -1,6 +1,7 @@
 import { Icon, Button } from "czifui";
 import { merge, pick } from "lodash/fp";
 import React from "react";
+import { SortDirectionType } from "react-virtualized";
 
 import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -40,7 +41,7 @@ interface ProjectsViewProps {
   projects: ObjectCollectionView;
   sortable?: boolean;
   sortBy?: string;
-  sortDirection?: string;
+  sortDirection?: SortDirectionType;
   totalNumberOfProjects?: number;
 }
 

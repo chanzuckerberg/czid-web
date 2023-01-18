@@ -21,7 +21,7 @@ import {
   PRE_UPLOAD_CHECK_FEATURE,
   ONT_V1_FEATURE,
 } from "~/components/utils/features";
-import { Project, Sample } from "~/interface/shared";
+import { Project, SampleFromApi } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
 
@@ -33,7 +33,7 @@ const map = _fp.map.convert({ cap: false });
 interface LocalSampleFileUploadProps {
   project?: Project;
   onChange: $TSFixMeFunction;
-  samples?: Sample[];
+  samples?: SampleFromApi[];
   hasSamplesLoaded?: boolean;
 }
 
@@ -44,10 +44,10 @@ class LocalSampleFileUpload extends React.Component<
     showInfo: false,
   };
 
-  onDrop = (acceptedFiles: Sample[]) => {
+  onDrop = (acceptedFiles: SampleFromApi[]) => {
     // Group files by sample name.
     const sampleNamesToFiles = flow(
-      groupBy((file: Sample) => sampleNameFromFileName(file.name)),
+      groupBy((file: SampleFromApi) => sampleNameFromFileName(file.name)),
       // Make sure R1 comes before R2 and there are at most 2 files.
       // Sort files by lower case file name, then take the first two.
       mapValues(
@@ -60,7 +60,7 @@ class LocalSampleFileUpload extends React.Component<
 
     // Create local samples.
     const localSamples = map(
-      (files: Sample[], name: string) => ({
+      (files: SampleFromApi[], name: string) => ({
         name,
         project_id: get("id", this.props.project),
         // Set by the user in the Upload Metadata step.

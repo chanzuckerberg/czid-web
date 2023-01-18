@@ -9,7 +9,7 @@ import {
 import { bulkUploadRemote, bulkUploadBasespace } from "~/api/upload";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
-import { Project, Sample } from "~/interface/shared";
+import { Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { IconSuccess } from "~ui/icons";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
@@ -28,7 +28,7 @@ const BASESPACE_SAMPLE_FIELDS = [
 const NUM_FAILED_SAMPLES_TO_DISPLAY = 3;
 
 interface RemoteUploadProgressModalProps {
-  samples?: Sample[];
+  samples?: SampleFromApi[];
   adminOptions: Record<string, string>;
   clearlabs?: boolean;
   medakaModel?: string;

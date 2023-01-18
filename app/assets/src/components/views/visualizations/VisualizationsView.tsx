@@ -2,6 +2,7 @@ import { Icon } from "czifui";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 
+import { SortDirectionType } from "react-virtualized";
 import { trackEvent } from "~/api/analytics";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
@@ -34,7 +35,7 @@ interface VisualizationsViewProps {
   onLoadRows: $TSFixMeFunction;
   onSortColumn?: $TSFixMeFunction;
   sortBy?: string;
-  sortDirection?: string;
+  sortDirection?: SortDirectionType;
   sortable?: boolean;
 }
 

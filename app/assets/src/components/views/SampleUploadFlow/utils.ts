@@ -2,7 +2,7 @@ import { groupBy, maxBy, sortBy, sum } from "lodash/fp";
 
 import { openUrlInPopupWindow } from "~/components/utils/links";
 import { getURLParamString } from "~/helpers/url";
-import { Sample, SampleUploadType } from "~/interface/shared";
+import { SampleFromApi, SampleUploadType } from "~/interface/shared";
 
 const BASESPACE_OAUTH_URL = "https://basespace.illumina.com/oauth/authorize";
 const BASESPACE_OAUTH_WINDOW_NAME = "BASESPACE_OAUTH_WINDOW";
@@ -68,7 +68,7 @@ export const removeLaneFromName = (name: string) => {
 };
 
 export const groupSamplesByLane = (
-  samples: Sample[],
+  samples: SampleFromApi[],
   sampleType: SampleUploadType,
 ) => {
   // BaseSpace uploads can't use the same logic as local uploads because data format is different:

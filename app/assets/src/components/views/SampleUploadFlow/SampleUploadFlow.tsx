@@ -8,7 +8,7 @@ import {
 } from "~/components/common/Metadata/constants";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 
-import { HostGenome, Project, Sample } from "~/interface/shared";
+import { HostGenome, Project, SampleFromApi } from "~/interface/shared";
 import ReviewStep from "./ReviewStep";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 import UploadMetadataStep from "./UploadMetadataStep";
@@ -27,7 +27,7 @@ interface SampleUploadFlowProps {
 interface SampleUploadFlowState {
   workflows: Set<string>;
   currentStep: string;
-  samples?: Sample[];
+  samples?: SampleFromApi[];
   uploadType: "remote" | "local" | "";
   project: Project;
   sampleNamesToFiles: $TSFixMeUnknown;
@@ -124,45 +124,47 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     const updatedHostGenomes = this.props.hostGenomes.concat(newHostGenomes);
 
     // Populate host_genome_id in sample using metadata.
-    const newSamples: Sample[] = this.state.samples.map((sample: $TSFixMe) => {
-      const metadataRow = find(
-        row =>
-          get("sample_name", row) === sample.name ||
-          get("Sample Name", row) === sample.name,
-        metadata.rows,
-      );
-      const hostGenomeName = HOST_GENOME_SYNONYMS.reduce(
-        (match: $TSFixMe, name: $TSFixMe) => metadataRow[name] || match,
-        null,
-      );
-      const hostGenomeId = find(
-        // Lowercase to allow for 'human' to match 'Human'. The same logic
-        // is replicated in MetadataHelper.
-        hg => {
-          return hg.name.toLowerCase() === hostGenomeName.toLowerCase();
-        },
-        updatedHostGenomes,
-      ).id;
+    const newSamples: SampleFromApi[] = this.state.samples.map(
+      (sample: $TSFixMe) => {
+        const metadataRow = find(
+          row =>
+            get("sample_name", row) === sample.name ||
+            get("Sample Name", row) === sample.name,
+          metadata.rows,
+        );
+        const hostGenomeName = HOST_GENOME_SYNONYMS.reduce(
+          (match: $TSFixMe, name: $TSFixMe) => metadataRow[name] || match,
+          null,
+        );
+        const hostGenomeId = find(
+          // Lowercase to allow for 'human' to match 'Human'. The same logic
+          // is replicated in MetadataHelper.
+          hg => {
+            return hg.name.toLowerCase() === hostGenomeName.toLowerCase();
+          },
+          updatedHostGenomes,
+        ).id;
 
-      // Enforce hipaa compliant host age
-      if (hostGenomeName.toLowerCase() === "human") {
-        const maxValue = FIELDS_THAT_HAVE_MAX_INPUT["host_age"];
-        metadata.rows.map((row: $TSFixMe) => {
-          if ("Host Age" in row) {
-            const parsedValue = Number.parseInt(row["Host Age"]);
-            const hipaaCompliantVal = min([parsedValue, maxValue + 1]);
-            row["Host Age"] = hipaaCompliantVal.toString();
-          }
-        });
-      }
+        // Enforce hipaa compliant host age
+        if (hostGenomeName.toLowerCase() === "human") {
+          const maxValue = FIELDS_THAT_HAVE_MAX_INPUT["host_age"];
+          metadata.rows.map((row: $TSFixMe) => {
+            if ("Host Age" in row) {
+              const parsedValue = Number.parseInt(row["Host Age"]);
+              const hipaaCompliantVal = min([parsedValue, maxValue + 1]);
+              row["Host Age"] = hipaaCompliantVal.toString();
+            }
+          });
+        }
 
-      return {
-        ...sample,
-        // Set the host_genome_id and name so it is available in review
-        host_genome_id: hostGenomeId,
-        host_genome_name: hostGenomeName,
-      };
-    });
+        return {
+          ...sample,
+          // Set the host_genome_id and name so it is available in review
+          host_genome_id: hostGenomeId,
+          host_genome_name: hostGenomeName,
+        };
+      },
+    );
 
     // Remove host_genome from metadata.
     const newMetadata: SampleUploadFlowState["metadata"] = flow(

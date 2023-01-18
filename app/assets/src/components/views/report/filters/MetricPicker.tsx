@@ -13,7 +13,6 @@ interface MetricPickerProps {
 const MetricPicker = ({ value, onChange, options }: MetricPickerProps) => {
   return (
     <Dropdown
-      // @ts-expect-error Type '{ text?: string; value?: string; }[]' is not assignable to type
       options={options}
       value={value}
       label="Tree Metric"

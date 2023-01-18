@@ -371,7 +371,6 @@ class BaseTable extends React.Component<
       <BasicPopup
         trigger={
           <MultipleDropdown
-            // @ts-expect-error Property 'direction' does not exist on type
             direction="left"
             hideArrow
             hideCounter

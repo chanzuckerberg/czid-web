@@ -16,7 +16,7 @@ import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { formatFileSize } from "~/components/utils/format";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import DataTable from "~/components/visualizations/table/DataTable";
-import { HostGenome, Project, Sample } from "~/interface/shared";
+import { HostGenome, Project, SampleFromApi } from "~/interface/shared";
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { returnHipaaCompliantMetadata } from "~utils/metadata";
@@ -39,7 +39,7 @@ interface ReviewStepProps {
     rows?: Record<string, any>[];
   };
   project?: Project;
-  samples?: Sample[];
+  samples?: SampleFromApi[];
   uploadType: string;
   hostGenomes?: HostGenome[];
   originalHostGenomes?: HostGenome[];
@@ -149,7 +149,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
     const hostGenomesById = keyBy("id", this.props.hostGenomes);
 
-    const assembleDataForSample = (sample: Sample) => {
+    const assembleDataForSample = (sample: SampleFromApi) => {
       const sampleHostName = get(
         "name",
         hostGenomesById[sample.host_genome_id],

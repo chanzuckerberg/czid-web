@@ -29,7 +29,7 @@ import {
 } from "~/api/upload";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
-import { Project, Sample } from "~/interface/shared";
+import { Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import Notification from "~ui/notifications/Notification";
@@ -43,7 +43,7 @@ import {
 } from "./upload_progress_utils";
 
 interface LocalUploadProgressModalProps {
-  samples?: Sample[];
+  samples?: SampleFromApi[];
   adminOptions: Record<string, string>;
   clearlabs?: boolean;
   medakaModel?: string;

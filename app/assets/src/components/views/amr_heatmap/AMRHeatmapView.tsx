@@ -99,7 +99,6 @@ export default class AMRHeatmapView extends React.Component<
   async requestSampleData(sampleIds) {
     const [rawSampleData, rawSamplesMetadataTypes] = await Promise.all([
       getAMRCounts(sampleIds),
-      // @ts-expect-error Expected 2 arguments, but got 1.
       getSampleMetadataFields(sampleIds),
     ]);
     const filteredSamples = rawSampleData.filter(
@@ -510,7 +509,6 @@ export default class AMRHeatmapView extends React.Component<
         visible={sidebarVisible}
         mode={sidebarMode}
         onClose={this.closeSidebar}
-        // @ts-expect-error 'params' signature does not match
         params={this.getSidebarParams()}
       />
     );

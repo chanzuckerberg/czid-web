@@ -1,11 +1,11 @@
 import { flow, keyBy, mapValues, omit } from "lodash/fp";
 import React from "react";
-import { Project, Sample, MetadataBasic } from "~/interface/shared";
+import { Project, SampleFromApi, MetadataBasic } from "~/interface/shared";
 import LocalUploadProgressModal from "./LocalUploadProgressModal";
 import RemoteUploadProgressModal from "./RemoteUploadProgressModal";
 
 interface UploadProgressModalProps {
-  samples?: Sample[];
+  samples?: SampleFromApi[];
   adminOptions: Record<string, string>;
   clearlabs?: boolean;
   medakaModel?: string;

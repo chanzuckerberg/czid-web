@@ -182,7 +182,6 @@ class PhyloTreeDownloadButton extends React.Component<
     }
 
     return (
-      // @ts-expect-error ts-migrate(2739) FIXME: Type '{ children?: ReactNode; options: any; disabl... Remove this comment to see the full error message
       <DownloadButtonDropdown
         options={this.getPhyloTreeOptions()}
         disabled={this.getPhyloTreeOptions().length === 0}

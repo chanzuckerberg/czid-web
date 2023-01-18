@@ -4,19 +4,19 @@ import {
   CG_TECHNOLOGY_OPTIONS,
   NANOPORE,
 } from "~/components/views/SampleUploadFlow/constants";
-import { Sample } from "~/interface/shared";
+import { SampleFromApi } from "~/interface/shared";
 
 interface addFlagsToSamplesProps {
   adminOptions: Record<string, string>;
   clearlabs: boolean;
   medakaModel: string;
-  samples: Partial<Sample>[];
+  samples: Partial<SampleFromApi>[];
   skipSampleProcessing: boolean;
   technology: string;
   workflows: Set<string>;
   wetlabProtocol: string;
   useStepFunctionPipeline: boolean;
-  guppyBasecallerSetting: string;
+  guppyBasecallerSetting?: string;
 }
 
 // Add flags selected by the user in the upload review Step

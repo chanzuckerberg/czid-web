@@ -3,14 +3,14 @@ import { capitalize, every, keys, countBy, map } from "lodash/fp";
 import React from "react";
 
 import Accordion from "~/components/layout/Accordion";
-import { HostGenome, Sample } from "~/interface/shared";
+import { HostGenome, SampleFromApi } from "~/interface/shared";
 import ExternalLink from "~ui/controls/ExternalLink";
 import Notification from "~ui/notifications/Notification";
 
 import cs from "./host_organism_message.scss";
 
 interface HostOrganismMessageProps {
-  samples: Sample[];
+  samples: SampleFromApi[];
   hostGenomes: HostGenome[];
 }
 

@@ -8,6 +8,7 @@ import {
   CSV,
   LocationObject,
   MetadataValue,
+  SampleFromApi,
 } from "~/interface/shared";
 
 export interface Issues {
@@ -122,7 +123,7 @@ export interface MetadataUploadProps {
   onShowCSVInstructions: $TSFixMeFunction;
   project?: NameId;
   className?: string;
-  samples?: { name: string }[];
+  samples?: SampleFromApi[];
   visible?: boolean;
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
