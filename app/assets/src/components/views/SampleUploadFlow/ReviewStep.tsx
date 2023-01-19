@@ -25,7 +25,7 @@ import HostOrganismMessage from "./HostOrganismMessage";
 import UploadProgressModal from "./UploadProgressModal";
 import {
   CG_WETLAB_DISPLAY_NAMES,
-  CG_TECHNOLOGY_DISPLAY_NAMES,
+  SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
   NANOPORE,
   WORKFLOW_DISPLAY_NAMES,
   WORKFLOW_ICONS,
@@ -406,10 +406,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                 <div className={cs.item}>
                   <div className={cs.subheader}>{"Sequencing Platform: "}</div>
                   <div className={cs.description}>
-                    {/* TODO: we should probably update this constant, now that technology display names
-                    are relevant for CG and mNGS. The default technology of Illumina can be deleted once
-                    ONT v1 is launched to all users. */}
-                    {CG_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
+                    {SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
                     {sequencingPlatformIsBeta && (
                       <StatusLabel inline status="Beta" type="beta" />
                     )}

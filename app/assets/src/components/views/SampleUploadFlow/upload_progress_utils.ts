@@ -1,7 +1,7 @@
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import {
-  CG_TECHNOLOGY_OPTIONS,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
   NANOPORE,
 } from "~/components/views/SampleUploadFlow/constants";
 import { SampleFromApi } from "~/interface/shared";
@@ -45,7 +45,7 @@ export const addFlagsToSamples = ({
     workflows.has(WORKFLOWS.SHORT_READ_MNGS.value) && technology === NANOPORE;
   const isNanoporeConsensusGenome =
     workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-    technology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
+    technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 
   return samples.map(sample => ({
     ...sample,

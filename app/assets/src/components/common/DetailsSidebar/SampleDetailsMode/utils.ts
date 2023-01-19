@@ -6,8 +6,8 @@ import {
   WORKFLOW_KEY_FOR_VALUE,
 } from "~/components/utils/workflows";
 import {
-  CG_TECHNOLOGY_DISPLAY_NAMES,
-  CG_TECHNOLOGY_OPTIONS,
+  SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
   CG_WETLAB_OPTIONS,
   ILLUMINA,
 } from "~/components/views/SampleUploadFlow/constants";
@@ -59,7 +59,7 @@ export const processPipelineInfo = (
 
     pipelineInfo.workflow = {
       text:
-        get("technology", pipelineRun) === CG_TECHNOLOGY_OPTIONS.ILLUMINA
+        get("technology", pipelineRun) === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
           ? WORKFLOWS.SHORT_READ_MNGS.label
           : WORKFLOWS.LONG_READ_MNGS.label,
     };
@@ -70,7 +70,7 @@ export const processPipelineInfo = (
     };
 
     pipelineInfo.technology = {
-      text: CG_TECHNOLOGY_DISPLAY_NAMES[get("technology", pipelineRun)],
+      text: SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[get("technology", pipelineRun)],
     };
 
     if (summaryStats) {
@@ -140,7 +140,7 @@ export const processCGWorkflowRunInfo = workflowRun => {
     totalReads: isUndefined(totalReads) ? "" : numberWithCommas(totalReads),
     pipelineVersion: get("wdl_version", workflowRun),
     technology:
-      CG_TECHNOLOGY_DISPLAY_NAMES[get("inputs.technology", workflowRun)],
+      SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[get("inputs.technology", workflowRun)],
     wetlabProtocol: get(
       "text",
       find(

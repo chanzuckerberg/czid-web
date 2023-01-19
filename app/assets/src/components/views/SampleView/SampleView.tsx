@@ -77,7 +77,7 @@ import {
   labelToVal,
   WORKFLOWS,
 } from "~/components/utils/workflows";
-import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import {
@@ -1058,7 +1058,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       accessionName,
       taxonId,
       taxonName,
-      technology: CG_TECHNOLOGY_OPTIONS.ILLUMINA,
+      technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
     });
 
     this.setState({

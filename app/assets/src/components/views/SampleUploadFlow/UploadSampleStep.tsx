@@ -59,11 +59,10 @@ import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
 import SampleUploadTable from "./SampleUploadTable";
 import WorkflowSelector from "./WorkflowSelector";
 import {
-  CG_TECHNOLOGY_OPTIONS,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
   SELECT_ID_KEY,
   DEFAULT_NANOPORE_WETLAB_OPTION,
   DEFAULT_MEDAKA_MODEL_OPTION,
-  ILLUMINA,
   NANOPORE,
   MISMATCH_FORMAT_ERROR,
   ALLOWED_WORKFLOWS_BY_TECHNOLOGY,
@@ -439,7 +438,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     const { selectedWorkflows } = this.state;
 
     // Based on workflowSelected and selectedTechnology, determine which workflows are permitted
-    const technology = selectedTechnology ?? ILLUMINA;
+    const technology = selectedTechnology ?? SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
     const permittedWorkflows =
       ALLOWED_WORKFLOWS_BY_TECHNOLOGY[workflowSelected][technology];
     // Then delete non-permitted workflows
@@ -1058,10 +1057,10 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
       // If they select Nanopore, they must additionally select their Guppy Basecaller Setting.
       if (allowedFeatures.includes(ONT_V1_FEATURE)) {
         switch (selectedTechnology) {
-          case ILLUMINA:
+          case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
             workflowsValid = true;
             break;
-          case NANOPORE:
+          case SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE:
             workflowsValid = !!selectedGuppyBasecallerSetting;
             break;
           default:
@@ -1075,10 +1074,10 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
       }
     } else if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
       switch (selectedTechnology) {
-        case CG_TECHNOLOGY_OPTIONS.ILLUMINA:
+        case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
           workflowsValid = !!selectedWetlabProtocol;
           break;
-        case CG_TECHNOLOGY_OPTIONS.NANOPORE:
+        case SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE:
           workflowsValid = !!selectedWetlabProtocol;
           break;
         default:
@@ -1117,10 +1116,10 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
 
     if (allowedFeatures.includes(ONT_V1_FEATURE)) {
       if (
-        selectedTechnology === ILLUMINA ||
+        selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA ||
         selectedWorkflows.has(WORKFLOWS.AMR.value)
       )
-        return ILLUMINA;
+        return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
       else if (selectedTechnology === NANOPORE) return NANOPORE;
     } else {
       // TODO: We currently assume all metagenomics samples are Illumina by default.
@@ -1130,9 +1129,9 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
         selectedWorkflows.has(WORKFLOWS.AMR.value) ||
         (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-          selectedTechnology === ILLUMINA)
+          selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA)
       )
-        return ILLUMINA;
+        return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
       else if (
         selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
         selectedTechnology === NANOPORE

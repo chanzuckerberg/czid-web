@@ -98,17 +98,12 @@ export const CG_WETLAB_DISPLAY_NAMES = {
   easyseq: "easyseq",
 };
 
-export enum TECHNOLOGY_OPTIONS {
+export enum SEQUENCING_TECHNOLOGY_OPTIONS {
   ILLUMINA = "Illumina",
-  ONT = "ONT",
-}
-
-export const CG_TECHNOLOGY_OPTIONS = {
-  ILLUMINA: TECHNOLOGY_OPTIONS.ILLUMINA,
-  NANOPORE: TECHNOLOGY_OPTIONS.ONT,
+  NANOPORE = "ONT",
 };
 
-export const CG_TECHNOLOGY_DISPLAY_NAMES = {
+export const SEQUENCING_TECHNOLOGY_DISPLAY_NAMES = {
   Illumina: "Illumina",
   ONT: "Nanopore",
 };

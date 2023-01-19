@@ -16,7 +16,7 @@ import {
 } from "~/components/utils/resultsFolder";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
 import {
   ERCCComparisonShape,
@@ -208,9 +208,9 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
 
   getSequenceType = (technology: string) => {
     switch (technology) {
-      case TECHNOLOGY_OPTIONS.ILLUMINA:
+      case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
         return "total_reads";
-      case TECHNOLOGY_OPTIONS.ONT:
+      case SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE:
         return "total_bases";
       default:
         return undefined;
@@ -392,7 +392,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
 
     const pipelineInfoFields = fields.map(this.getPipelineInfoField);
     const title =
-      pipelineRun?.technology === "ONT" ? "Bases Remaining" : "Reads Remaining";
+      pipelineRun?.technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE ? "Bases Remaining" : "Reads Remaining";
 
     return (
       <div>

@@ -26,7 +26,7 @@ import { WORKFLOWS, WORKFLOW_VALUES } from "~utils/workflows";
 
 import {
   CG_WETLAB_OPTIONS,
-  CG_TECHNOLOGY_OPTIONS,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
   CG_NANOPORE_WETLAB_OPTIONS,
   GUPPY_BASECALLER_SETTINGS,
   MEDAKA_MODEL_OPTIONS,
@@ -78,7 +78,7 @@ const WorkflowSelector = ({
 
   const renderTechnologyOptions = (workflowKey: string) => {
     return (
-      <div className={cs.optionText} onClick={e => e.stopPropagation()}>
+      <div className={cs.optionText} onClick={(e) => e.stopPropagation()}>
         <div className={cx(cs.title, cs.technologyTitle)}>
           Sequencing Platform:
           <div className={cs.technologyOptions}>
@@ -92,11 +92,11 @@ const WorkflowSelector = ({
 
   const renderIlluminaOption = (workflowKey: string) => {
     const workflowObject = find(
-      w => w.workflow === workflowKey,
+      (w) => w.workflow === workflowKey,
       WORKFLOW_UPLOAD_OPTIONS,
     );
     const illuminaTechnologyOptionSelected =
-      selectedTechnology === CG_TECHNOLOGY_OPTIONS.ILLUMINA;
+      selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
 
     return (
       <div
@@ -106,7 +106,10 @@ const WorkflowSelector = ({
           illuminaTechnologyOptionSelected && cs.selected,
         )}
         onClick={() =>
-          onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA, workflowKey)
+          onTechnologyToggle(
+            SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
+            workflowKey,
+          )
         }
       >
         <RadioButton
@@ -127,7 +130,7 @@ const WorkflowSelector = ({
           <div className={cs.technologyContent}>
             {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
               illuminaTechnologyOptionSelected &&
-              renderWetlabSelector(CG_TECHNOLOGY_OPTIONS.ILLUMINA)}
+              renderWetlabSelector(SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA)}
           </div>
         </div>
       </div>
@@ -148,7 +151,7 @@ const WorkflowSelector = ({
             link={"https://www.clearlabs.com/"}
           />
         </div>
-        <div className={cs.description} onClick={e => e.stopPropagation()}>
+        <div className={cs.description} onClick={(e) => e.stopPropagation()}>
           <Toggle
             className={cs.toggle}
             initialChecked={usedClearLabs}
@@ -162,7 +165,7 @@ const WorkflowSelector = ({
       {/* If uploading ClearLabs samples, only allow default wetlab and medaka model options. */}
       {!usedClearLabs ? (
         <>
-          {renderWetlabSelector(CG_TECHNOLOGY_OPTIONS.NANOPORE)}
+          {renderWetlabSelector(SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE)}
           <div className={cs.item}>
             <div className={cs.subheader}>
               Medaka Model:
@@ -219,13 +222,13 @@ const WorkflowSelector = ({
 
   const renderNanoporeOption = (workflowKey: string) => {
     const workflowObject = find(
-      w => w.workflow === workflowKey,
+      (w) => w.workflow === workflowKey,
       WORKFLOW_UPLOAD_OPTIONS,
     );
     const nanoporeTechnologyOptionSelected =
-      selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
+      selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
     const shouldDisableOption = shouldDisableTechnologyOption(
-      CG_TECHNOLOGY_OPTIONS.NANOPORE,
+      SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE,
       workflowObject.workflow,
     );
     let radioButton = (
@@ -254,7 +257,10 @@ const WorkflowSelector = ({
         onClick={() =>
           shouldDisableOption
             ? null
-            : onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE, workflowKey)
+            : onTechnologyToggle(
+                SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE,
+                workflowKey,
+              )
         }
       >
         {radioButton}
@@ -321,7 +327,7 @@ const WorkflowSelector = ({
             });
           }}
           options={
-            technology === CG_TECHNOLOGY_OPTIONS.ILLUMINA
+            technology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
               ? CG_WETLAB_OPTIONS
               : CG_NANOPORE_WETLAB_OPTIONS
           }
@@ -372,10 +378,12 @@ const WorkflowSelector = ({
       sdsIcon: "dna" as const,
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
       illuminaLink: MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
-      illuminaClickedLinkEvent: ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_ILLUMINA_PIPELINE_LINK_CLICKED,
+      illuminaClickedLinkEvent:
+        ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_ILLUMINA_PIPELINE_LINK_CLICKED,
       nanoporeText: "You can check out the Nanopore pipeline on Github ",
       nanoporeLink: MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
-      nanoporeClickedLinkEvent: ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_NANOPORE_PIPELINE_LINK_CLICKED,
+      nanoporeClickedLinkEvent:
+        ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_NANOPORE_PIPELINE_LINK_CLICKED,
       nanoporeContent: renderMNGSNanoporeContent(),
       nanoporeDisabledTooltipText:
         "This pipeline only supports upload from your computer.",
@@ -418,7 +426,7 @@ const WorkflowSelector = ({
     const workflowIsCurrentlySelected = selectedWorkflows.has(workflow);
     const selectedMNGSNanopore =
       selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
-      selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
+      selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
     switch (workflow) {
       case WORKFLOWS.SHORT_READ_MNGS.value:
         return (

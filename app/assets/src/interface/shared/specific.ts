@@ -1,5 +1,5 @@
 import { AccessionsSummary } from "~/components/common/CoverageVizBottomSidebar/types";
-import { TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { ThresholdFilterData } from "../dropdown";
 import { BooleanNums, DateString, NameId, NumberId } from "./generic";
 
@@ -141,7 +141,7 @@ export interface PipelineRun {
   sfn_execution_arn: string;
   use_taxon_whitelist: boolean;
   s3_output_prefix: string;
-  technology: TECHNOLOGY_OPTIONS.ILLUMINA | TECHNOLOGY_OPTIONS.ONT;
+  technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA | SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
   time_to_finalized: number;
   time_to_results_finalized: number;
   total_bases: number;

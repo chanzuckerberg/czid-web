@@ -6,7 +6,7 @@ import {
 import Divider from "./layout/Divider";
 import cs from "./results_folder.scss";
 import { openUrl, downloadStringToFile } from "./utils/links";
-import { TECHNOLOGY_OPTIONS } from "./views/SampleUploadFlow/constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "./views/SampleUploadFlow/constants";
 
 interface OutputFileProps {
   file?: {
@@ -65,7 +65,9 @@ const ResultsFolderStepDivider = () => {
 
 interface ResultsFolderStepProps {
   step?: object;
-  pipelineTechnology?: TECHNOLOGY_OPTIONS.ILLUMINA | TECHNOLOGY_OPTIONS.ONT;
+  pipelineTechnology?:
+    | SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
+    | SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 }
 
 const ResultsFolderStep = ({
@@ -112,7 +114,9 @@ interface ResultsFolderProps {
   sampleName?: string;
   projectName?: string;
   rawResultsUrl?: string;
-  pipelineTechnology?: TECHNOLOGY_OPTIONS.ILLUMINA | TECHNOLOGY_OPTIONS.ONT;
+  pipelineTechnology?:
+    | SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
+    | SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 }
 
 const ResultsFolder = ({
