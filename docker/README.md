@@ -34,24 +34,24 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
 
     ```zsh
     # set AWS account id
-    ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
+    $ ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
     # login to ecr so pulling cache succeeds
-    aws ecr get-login-password | docker login --username AWS --password-stdin $*ACCOUNT_ID**.dkr.ecr.us-west-2.amazonaws.com/idseq-web
+    $ aws ecr get-login-password | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web
     # pull from ECR
-    docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:latest
+    $ docker pull $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web:latest
     # start containers
-    aws-oidc exec -- docker-compose up web
+    $ aws-oidc exec -- docker-compose up web
     ```
 
 - If gems are modified locally or pulling from ECR fails, rebuild the image
 
     ```zsh
     # set AWS account id
-    ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
+    $ ACCOUNT_ID=$(aws sts get-caller-identity --query="Account" | tr -d '\"')
     # login to ecr so pulling cache succeeds
-    aws ecr get-login-password | docker login --username AWS --password-stdin $*ACCOUNT_ID**.dkr.ecr.us-west-2.amazonaws.com/idseq-web
+    $ aws ecr get-login-password | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/idseq-web
     # build container
-    aws-oidc exec -- docker-compose build web
+    $ aws-oidc exec -- docker-compose build web
     ```
 
 - To avoid rebuilding your web image temporarily (e.g. after someone adds to the Gemfile), you can try this with your running container
