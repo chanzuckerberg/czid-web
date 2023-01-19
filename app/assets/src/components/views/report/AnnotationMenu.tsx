@@ -77,7 +77,7 @@ const AnnotationMenu = ({
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_HIT}
-            isSmall={true}
+            isStatic={true}
             hideTooltip={true}
           />
           Hit
@@ -89,7 +89,7 @@ const AnnotationMenu = ({
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_NOT_A_HIT}
-            isSmall={true}
+            isStatic={true}
             hideTooltip={true}
           />
           Not a hit
@@ -101,7 +101,7 @@ const AnnotationMenu = ({
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_INCONCLUSIVE}
-            isSmall={true}
+            isStatic={true}
             hideTooltip={true}
           />
           Inconclusive
@@ -111,7 +111,7 @@ const AnnotationMenu = ({
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_NONE}
-            isSmall={true}
+            isStatic={true}
             hideTooltip={true}
           />
           None

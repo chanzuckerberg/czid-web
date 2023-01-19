@@ -12,20 +12,26 @@
   }
 }
 
-.annotationIcon {
+.interactiveFlag {
+  vertical-align: -10%;
+
   &:hover {
     cursor: pointer;
   }
 }
 
-.annotationIconLarge {
-  height: $sds-icon-sizes-s-height;
-  width: $sds-icon-sizes-s-height;
-  vertical-align: -10%;
+.staticFlag {
+  vertical-align: -4%;
 }
 
-.annotationIconSmall {
-  height: $sds-icon-sizes-xs-height;
-  width: $sds-icon-sizes-xs-height;
-  vertical-align: -4%;
+.flagCheck {
+  fill: $sds-color-success-400 !important;
+}
+
+.flagXmark {
+  fill: $sds-color-gray-500 !important;
+}
+
+.flagQuestionmark {
+  fill: $sds-color-primary-400 !important;
 }

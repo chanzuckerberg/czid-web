@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import React from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -8,30 +9,24 @@ import {
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NONE,
 } from "~/components/views/SampleView/constants";
-import {
-  IconAnnotationCheck,
-  IconAnnotationCross,
-  IconAnnotationOutline,
-  IconAnnotationQuestion,
-} from "~ui/icons";
+
 import BasicPopup from "../../BasicPopup";
 
 import cs from "./annotation_label.scss";
 
 const AnnotationLabel = ({
-  className,
   type,
-  isSmall = false,
+  isStatic = false,
   hideTooltip = false,
   ...props
 }: AnnotationLabelProps) => {
-  const IconAnnotation = {
-    [ANNOTATION_HIT]: IconAnnotationCheck,
-    [ANNOTATION_NOT_A_HIT]: IconAnnotationCross,
-    [ANNOTATION_INCONCLUSIVE]: IconAnnotationQuestion,
-    [ANNOTATION_NONE]: IconAnnotationOutline,
+  const icon = {
+    [ANNOTATION_HIT]: "flagCheck",
+    [ANNOTATION_NOT_A_HIT]: "flagXmark",
+    [ANNOTATION_INCONCLUSIVE]: "flagQuestionmark",
+    [ANNOTATION_NONE]: "flagOutline",
   }[type];
-  const description = !isSmall
+  const description = !isStatic
     ? "Annotate"
     : {
         [ANNOTATION_HIT]: "Contains species marked as hit.",
@@ -45,12 +40,11 @@ const AnnotationLabel = ({
         trackEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_LABEL_HOVERED)
       }
     >
-      <IconAnnotation
-        className={cx(
-          className,
-          cs.annotationIcon,
-          isSmall ? cs.annotationIconSmall : cs.annotationIconLarge,
-        )}
+      <Icon
+        className={cx(cs[icon], isStatic ? cs.staticFlag : cs.interactiveFlag)}
+        sdsIcon={icon}
+        sdsSize={isStatic ? "xs" : "s"}
+        sdsType={isStatic ? "static" : "interactive"}
       />
     </span>
   );
@@ -59,11 +53,11 @@ const AnnotationLabel = ({
     label
   ) : (
     <BasicPopup
-      className={isSmall ? cs.annotationPreviewPopup : cs.annotationPopup}
+      className={isStatic ? cs.annotationPreviewPopup : cs.annotationPopup}
       trigger={label}
       content={description}
       basic={false}
-      inverted={!isSmall} // Only invert color for large labels, which let the user set annotations
+      inverted={!isStatic} // Only invert color for large labels, which let the user set annotations
       position="top center"
     />
   );
@@ -72,7 +66,7 @@ const AnnotationLabel = ({
 interface AnnotationLabelProps {
   className?: string;
   type: "hit" | "not_a_hit" | "inconclusive" | "none";
-  isSmall?: boolean;
+  isStatic?: boolean;
   hideTooltip?: boolean;
   onClick?: $TSFixMeFunction;
 }
