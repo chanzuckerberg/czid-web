@@ -6,7 +6,6 @@ import {
   getBackgrounds,
   getMassNormalizedBackgroundAvailability,
   samplesUploadedByCurrentUser,
-  getHeatmapMetrics,
   workflowRunsCreatedByCurrentUser,
   userIsCollaboratorOnAllSamples,
 } from "~/api";
@@ -19,7 +18,11 @@ import {
   trackEvent,
   withAnalytics,
 } from "~/api/analytics";
-import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
+import {
+  createBulkDownload,
+  getBulkDownloadTypes,
+  getBulkDownloadMetrics,
+} from "~/api/bulk_downloads";
 import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
@@ -133,7 +136,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       workflow,
     });
     const backgroundOptionsRequest = this.fetchBackgrounds();
-    const metricsOptionsRequest = getHeatmapMetrics();
+    const metricsOptionsRequest = getBulkDownloadMetrics(workflow);
     const allObjectsUploadedByCurrentUserRequest = this.checkAllObjectsUploadedByCurrentUser();
     const userIsCollaboratorOnAllSamplesRequest = this.checkUserIsCollaboratorOnAllSamples();
 

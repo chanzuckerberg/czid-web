@@ -520,6 +520,41 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(json_response["error"]).to eq(BulkDownloadsHelper::OUTPUT_FILE_NOT_SUCCESSFUL)
       end
     end
+
+    describe "GET #metrics" do
+      it "should return nil for unspecified workflows" do
+        get :metrics
+
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to be nil
+      end
+
+      it "should return nil for workflows without mngs sample reports" do
+        workflows = [WorkflowRun::WORKFLOW[:consensus_genome], WorkflowRun::WORKFLOW[:amr]]
+        workflows.each do |workflow|
+          get :metrics, params: { workflow: workflow }
+
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          expect(json_response).to be nil
+        end
+      end
+
+      it "should return correct metrics for metagenomics workflows" do
+        workflows = [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]]
+        workflows.each do |workflow|
+          get :metrics, params: { workflow: workflow }
+
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+
+          # JSON stringify and parse workflow metrics to convert symbols to strings
+          workflow_metrics = WorkflowRun::WORKFLOW_METRICS[workflow]
+          expect(json_response).to eq(JSON.parse(workflow_metrics.to_json))
+        end
+      end
+    end
   end
 
   context "Admin user with bulk_downloads flag" do

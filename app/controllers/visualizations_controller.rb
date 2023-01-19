@@ -167,13 +167,15 @@ class VisualizationsController < ApplicationController
   # START OF HEATMAP METHODS
 
   def heatmap
+    # In ont_v1, we are not supporting heatmaps for nanopore mngs samples
+    workflow = WorkflowRun::WORKFLOW[:short_read_mngs]
     {
       taxonLevels: %w[Genus Species],
       categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
       subcategories: {
         Viruses: ["Phage"],
       },
-      metrics: HeatmapHelper::ALL_METRICS,
+      metrics: WorkflowRun::WORKFLOW_METRICS[workflow],
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id, mass_normalized: background.mass_normalized }
       end,
@@ -205,7 +207,9 @@ class VisualizationsController < ApplicationController
   end
 
   def heatmap_metrics
-    render json: HeatmapHelper::ALL_METRICS
+    # In ont_v1, we are not supporting heatmaps for nanopore mngs samples,
+    workflow = WorkflowRun::WORKFLOW[:short_read_mngs]
+    render json: WorkflowRun::WORKFLOW_METRICS[workflow]
   end
 
   def download_heatmap

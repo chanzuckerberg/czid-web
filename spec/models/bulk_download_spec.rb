@@ -909,54 +909,62 @@ describe BulkDownload, type: :model do
 
     let(:mock_background_id) { 26 }
 
-    it "correctly generates download file for download type combined_sample_taxon_results" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
-                                           "background": {
-                                             "value": mock_background_id,
-                                             "displayName": "Mock Background",
-                                           }, "metric": {
-                                             "value": "NT.rpm",
-                                             "displayName": "NT RPM",
-                                           })
+    context "download type combined_sample_taxon_results" do
+      context "and workflow short-read-mngs" do
+        it "correctly generates download file" do
+          bulk_download = create_bulk_download(BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
+                                               "background": {
+                                                 "value": mock_background_id,
+                                                 "displayName": "Mock Background",
+                                               }, "metric": {
+                                                 "value": "NT.rpm",
+                                                 "displayName": "NT rPM",
+                                               }, "workflow": {
+                                                 "value": WorkflowRun::WORKFLOW[:short_read_mngs],
+                                               })
 
-      expect(BulkDownloadsHelper).to receive(:generate_combined_sample_taxon_results_csv).with(
-        anything, mock_background_id, "NT.rpm"
-      ).exactly(1).times.and_return(csv_str: "mock_combined_sample_taxon_results_csv",
-                                    failed_sample_ids: [])
+          expect(BulkDownloadsHelper).to receive(:generate_combined_sample_taxon_results_csv).with(
+            anything, mock_background_id, "NT.rpm"
+          ).exactly(1).times.and_return(csv_str: "mock_combined_sample_taxon_results_csv",
+                                        failed_sample_ids: [])
 
-      add_s3_tar_writer_expectations(
-        "combined_sample_taxon_results_NT.rpm.csv" => "mock_combined_sample_taxon_results_csv"
-      )
+          add_s3_tar_writer_expectations(
+            "combined_sample_taxon_results_NT.rpm.csv" => "mock_combined_sample_taxon_results_csv"
+          )
 
-      bulk_download.generate_download_file
+          bulk_download.generate_download_file
 
-      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
-    end
+          expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+        end
 
-    it "correctly handles individual sample failures for download type combined_sample_taxon_results" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
-                                           "background": {
-                                             "value": mock_background_id,
-                                             "displayName": "Mock Background",
-                                           }, "metric": {
-                                             "value": "NT.rpm",
-                                             "displayName": "NT RPM",
-                                           })
+        it "correctly handles individual sample failures for download type combined_sample_taxon_results" do
+          bulk_download = create_bulk_download(BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
+                                               "background": {
+                                                 "value": mock_background_id,
+                                                 "displayName": "Mock Background",
+                                               }, "metric": {
+                                                 "value": "NT.rpm",
+                                                 "displayName": "NT rPM",
+                                               }, "workflow": {
+                                                 "value": WorkflowRun::WORKFLOW[:short_read_mngs],
+                                               })
 
-      expect(BulkDownloadsHelper).to receive(:generate_combined_sample_taxon_results_csv).with(
-        anything, mock_background_id, "NT.rpm"
-      ).exactly(1).times.and_return(csv_str: "mock_combined_sample_taxon_results_csv",
-                                    failed_sample_ids: [@sample_one.id])
+          expect(BulkDownloadsHelper).to receive(:generate_combined_sample_taxon_results_csv).with(
+            anything, mock_background_id, "NT.rpm"
+          ).exactly(1).times.and_return(csv_str: "mock_combined_sample_taxon_results_csv",
+                                        failed_sample_ids: [@sample_one.id])
 
-      add_s3_tar_writer_expectations(
-        "combined_sample_taxon_results_NT.rpm.csv" => "mock_combined_sample_taxon_results_csv"
-      )
+          add_s3_tar_writer_expectations(
+            "combined_sample_taxon_results_NT.rpm.csv" => "mock_combined_sample_taxon_results_csv"
+          )
 
-      bulk_download.generate_download_file
+          bulk_download.generate_download_file
 
-      # The bulk download succeeds and the failed sample is stored in the error message.
-      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
-      expect(bulk_download.error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 1)
+          # The bulk download succeeds and the failed sample is stored in the error message.
+          expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+          expect(bulk_download.error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 1)
+        end
+      end
     end
 
     it "correctly throws exception if taxon count not found for download type reads_non_host for single taxon" do

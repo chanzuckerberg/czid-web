@@ -37,6 +37,12 @@ class BulkDownloadsController < ApplicationController
     render json: download_types
   end
 
+  # GET /bulk_downloads/metrics
+  def metrics
+    workflow = params[:workflow]
+    render json: WorkflowRun::WORKFLOW_METRICS[workflow]
+  end
+
   # POST /bulk_downloads
   def create
     create_params = bulk_download_create_params

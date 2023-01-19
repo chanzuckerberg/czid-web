@@ -186,6 +186,7 @@ Rails.application.routes.draw do
 
   resources :bulk_downloads, only: [:create, :index, :show] do
     get :types, on: :collection
+    get :metrics, on: :collection
     get :presigned_output_url, on: :member
   end
   post 'bulk_downloads/:id/success/:access_token', to: 'bulk_downloads#success_with_token', as: :bulk_downloads_success

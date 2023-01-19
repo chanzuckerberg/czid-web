@@ -61,6 +61,37 @@ class WorkflowRun < ApplicationRecord
     WORKFLOW[:amr] => AmrWorkflowRun,
   }.freeze
 
+  SHORT_READ_MNGS_METRICS = [
+    { text: "NT rPM", value: "NT.rpm" },
+    { text: "NT Z Score", value: "NT.zscore" },
+    { text: "NT r (total reads)", value: "NT.r" },
+    { text: "NR rPM", value: "NR.rpm" },
+    { text: "NR Z Score", value: "NR.zscore" },
+    { text: "NR r (total reads)", value: "NR.r" },
+    { text: "NT %id", value: "NT.percentidentity" },
+    { text: "NT L (alignment length in bp)", value: "NT.alignmentlength" },
+    { text: "NT E Value", value: "NT.logevalue" },
+    { text: "NR %id", value: "NR.percentidentity" },
+    { text: "NR L (alignment length in bp)", value: "NR.alignmentlength" },
+    { text: "NR E Value", value: "NR.logevalue" },
+  ].freeze
+  LONG_READ_MNGS_METRICS = [
+    { text: "NT bPM", value: "NT.bpm" },
+    { text: "NT b (total bases)", value: "NT.b" },
+    { text: "NR bPM", value: "NR.bpm" },
+    { text: "NR b (total bases)", value: "NR.b" },
+    { text: "NT %id", value: "NT.percentidentity" },
+    { text: "NT L (alignment length in bp)", value: "NT.alignmentlength" },
+    { text: "NT E Value", value: "NT.logevalue" },
+    { text: "NR %id", value: "NR.percentidentity" },
+    { text: "NR L (alignment length in bp)", value: "NR.alignmentlength" },
+    { text: "NR E Value", value: "NR.logevalue" },
+  ].freeze
+  WORKFLOW_METRICS = {
+    WORKFLOW[:short_read_mngs] => SHORT_READ_MNGS_METRICS,
+    WORKFLOW[:long_read_mngs] => LONG_READ_MNGS_METRICS,
+  }.freeze
+
   STATUS = {
     created: "CREATED",
     running: "RUNNING",

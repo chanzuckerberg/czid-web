@@ -25,21 +25,6 @@ module HeatmapHelper
   #   b) any post-SQL filtering
   SERVER_FILTERING_OVERFETCH_FACTOR = 4
 
-  ALL_METRICS = [
-    { text: "NT rPM", value: "NT.rpm" },
-    { text: "NT Z Score", value: "NT.zscore" },
-    { text: "NT r (total reads)", value: "NT.r" },
-    { text: "NR rPM", value: "NR.rpm" },
-    { text: "NR Z Score", value: "NR.zscore" },
-    { text: "NR r (total reads)", value: "NR.r" },
-    { text: "NT %id", value: "NT.percentidentity" },
-    { text: "NT L (alignment length in bp)", value: "NT.alignmentlength" },
-    { text: "NT E Value", value: "NT.logevalue" },
-    { text: "NR %id", value: "NR.percentidentity" },
-    { text: "NR L (alignment length in bp)", value: "NR.alignmentlength" },
-    { text: "NR E Value", value: "NR.logevalue" },
-  ].freeze
-
   # Samples and background are assumed here to be vieweable.
   def self.sample_taxons_dict(params, samples, background_id)
     return {} if samples.empty?
@@ -57,8 +42,11 @@ module HeatmapHelper
                           JSON.parse(params[:thresholdFilters] || "[]")
                         end
 
+    # In ont_v1, we are not supporting heatmaps for nanopore mngs samples
+    workflow = WorkflowRun::WORKFLOW[:short_read_mngs]
+    all_metrics = WorkflowRun::WORKFLOW_METRICS[workflow]
     sort_by = params[:sortBy] &&
-              HeatmapHelper::ALL_METRICS.pluck(:value).include?(params[:sortBy]) ||
+              all_metrics.pluck(:value).include?(params[:sortBy]) ||
               HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] ? params[:species].to_i == 1 : false # Otherwise genus selected
 

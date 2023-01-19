@@ -4,6 +4,9 @@ import { get, postWithCSRF } from "./core";
 export const getBulkDownloadTypes = (workflow: $TSFixMe) =>
   get(`/bulk_downloads/types?workflow=${workflow}`);
 
+export const getBulkDownloadMetrics = (workflow: $TSFixMe) =>
+  get(`/bulk_downloads/metrics?workflow=${workflow}`);
+
 export const createBulkDownload = (bulkDownload: $TSFixMe) =>
   postWithCSRF("/bulk_downloads", {
     download_type: bulkDownload.downloadType,
@@ -13,7 +16,7 @@ export const createBulkDownload = (bulkDownload: $TSFixMe) =>
     workflow: bulkDownload.workflow,
     params: {
       sample_ids: { value: bulkDownload.validObjectIds },
-      workflow: bulkDownload.workflow,
+      workflow: { value: bulkDownload.workflow },
       ...bulkDownload.fields,
     },
   });
