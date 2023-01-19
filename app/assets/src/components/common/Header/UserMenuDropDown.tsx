@@ -61,6 +61,24 @@ const UserMenuDropDown = ({
         />,
       );
 
+    adminUser &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="admin_settings"
+          text={
+            <a
+              className={cs.option}
+              href="/admin_settings"
+              onClick={() =>
+                trackEvent("Header_dropdown-admin-settings-option_clicked")
+              }
+            >
+              Admin Settings
+            </a>
+          }
+        />,
+      );
+
     userDropdownItems.push(
       <BareDropdown.Item
         key="help"

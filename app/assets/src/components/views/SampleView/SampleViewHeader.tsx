@@ -63,7 +63,7 @@ export default function SampleViewHeader({
   ] = useState(false);
 
   const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
+  const { allowedFeatures, admin: userIsAdmin } = userContext || {};
   const workflow =
     WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
     WORKFLOWS.SHORT_READ_MNGS.value;
@@ -72,6 +72,17 @@ export default function SampleViewHeader({
     WORKFLOWS.SHORT_READ_MNGS.value,
     WORKFLOWS.LONG_READ_MNGS.value,
   ].includes(workflow);
+
+  const renderPipelineRunsPageButton = () => (
+    <Button
+      className={cs.controlElement}
+      sdsStyle="rounded"
+      sdsType="secondary"
+      onClick={() => (location.href = `/samples/${sample.id}/pipeline_runs`)}
+    >
+      Pipeline Runs
+    </Button>
+  );
 
   const onSaveClick = async () => {
     if (view) {
@@ -158,6 +169,7 @@ export default function SampleViewHeader({
       return (
         <ViewHeader.Controls>
           <>
+            {userIsAdmin && renderPipelineRunsPageButton()}
             {succeeded && (
               <>
                 {renderShareButton()}
@@ -196,6 +208,7 @@ export default function SampleViewHeader({
       const succeeded = get("status", currentRun) === "SUCCEEDED";
       return (
         <ViewHeader.Controls>
+          {userIsAdmin && renderPipelineRunsPageButton()}
           {succeeded && (
             <Button
               className={cs.controlElement}
@@ -220,6 +233,7 @@ export default function SampleViewHeader({
       // This block is for long-read-mngs PipelineRun reports.
       return (
         <ViewHeader.Controls>
+          {userIsAdmin && renderPipelineRunsPageButton()}
           {!isEmpty(reportMetadata) && renderShareButton()}
           {userContext.admin && (
             <SaveButton
@@ -240,6 +254,7 @@ export default function SampleViewHeader({
       // This block is for short-read-mngs PipelineRun reports.
       return (
         <ViewHeader.Controls>
+          {userIsAdmin && renderPipelineRunsPageButton()}
           {!isEmpty(reportMetadata) && renderShareButton()}
           {userContext.admin && (
             <SaveButton
