@@ -162,6 +162,10 @@ module BulkDownloadsHelper
       raise BulkDownloadsHelper::UNKNOWN_DOWNLOAD_TYPE
     end
 
+    if type_data[:admin_only] && !user.admin?
+      raise BulkDownloadsHelper::ADMIN_ONLY_DOWNLOAD_TYPE
+    end
+
     if type_data[:collaborator_only] && !validate_user_is_collaborator_or_admin(sample_ids, user)
       raise BulkDownloadsHelper::COLLABORATOR_ONLY_DOWNLOAD_TYPE
     end

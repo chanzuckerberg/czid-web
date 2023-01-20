@@ -46,6 +46,8 @@ export const BULK_DOWNLOAD_TYPES = {
     "consensus_genome_intermediate_output_files",
   BIOM_FORMAT_DOWNLOAD_TYPE: "biom_format",
   AMR_RESULTS_BULK_DOWNLOAD: "amr_results_bulk_download",
+  ORIGINAL_INPUT_FILES: "original_input_file",
+  HOST_GENE_COUNTS: "host_gene_counts",
 };
 
 export const BULK_DOWNLOAD_DOCUMENTATION_LINKS = {

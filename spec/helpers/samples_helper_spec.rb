@@ -963,6 +963,48 @@ RSpec.describe SamplesHelper, type: :helper do
     end
   end
 
+  describe "#validate_user_is_collaborator_or_admin" do
+    before do
+      @joe = create(:joe)
+      @admin = create(:admin)
+      sign_in @joe
+      @joe_project = create(:project, users: [@joe], name: "Project Joe")
+      @admin_project = create(:project, users: [@admin], name: "Admin Project")
+      @collaborative_project = create(:project,
+                                      users: [@admin, @joe],
+                                      creator: @admin,
+                                      name: "Collaborative Project")
+      @joe_sample = create(:sample, project: @joe_project, user: @joe)
+      @admin_sample = create(:sample, project: @admin_project, user: @admin)
+      @collaborative_sample = create(:sample, project: @collaborative_project, user: @admin)
+    end
+
+    it "returns true for user's own samples" do
+      sample_ids = [@joe_sample.id]
+      response = helper.send(:validate_user_is_collaborator_or_admin, sample_ids, @joe)
+      expect(response).to be(true)
+    end
+
+    it "returns true for samples in projects on which user is collaborator" do
+      sample_ids = [@collaborative_sample.id]
+      response = helper.send(:validate_user_is_collaborator_or_admin, sample_ids, @joe)
+      expect(response).to be(true)
+    end
+
+    it "returns false for samples on which user is not a collaborator" do
+      sample_ids = [@joe_sample.id, @admin_sample.id]
+      response = helper.send(:validate_user_is_collaborator_or_admin, sample_ids, @joe)
+      expect(response).to be(false)
+    end
+
+    it "returns true for admin users for all samples" do
+      sign_in @admin
+      sample_ids = [@joe_sample.id, @admin_sample.id, @collaborative_sample.id]
+      response = helper.send(:validate_user_is_collaborator_or_admin, sample_ids, @admin)
+      expect(response).to be(true)
+    end
+  end
+
   describe "#format_samples" do
     # TODO: Backfill more tests.
   end

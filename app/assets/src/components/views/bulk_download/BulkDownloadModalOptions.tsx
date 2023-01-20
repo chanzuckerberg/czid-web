@@ -23,6 +23,7 @@ import ThresholdFilterModal from "./ThresholdFilterModal";
 import cs from "./bulk_download_modal_options.scss";
 import {
   BULK_DOWNLOAD_DOCUMENTATION_LINKS,
+  BULK_DOWNLOAD_TYPES,
   CONDITIONAL_FIELDS,
 } from "./constants";
 
@@ -303,52 +304,54 @@ class BulkDownloadModalOptions extends React.Component<
     );
   };
 
-  renderDownloadType = downloadType => {
+  // Return a message to display to the user if the download option should be disabled.
+  getDisabledMessageForDownload = (downloadType) => {
     const {
-      validObjectIds,
-      onSelect,
       allObjectsUploadedByCurrentUser,
-      selectedDownloadTypeName,
       objectDownloaded,
-      handleHeatmapLink,
       userIsCollaborator,
-    } = this.props;
+      validObjectIds,
+      } = this.props;
     const { admin, appConfig } = this.context || {};
-
-    const selected = selectedDownloadTypeName === downloadType.type;
-    let disabled = false;
     let disabledMessage = "";
 
-    if (
-      downloadType.uploader_only &&
-      !allObjectsUploadedByCurrentUser &&
-      !admin
-    ) {
-      disabled = true;
-      disabledMessage = `To download ${
-        downloadType.display_name
-      }, you must be the original uploader of all selected ${objectDownloaded}${
-        validObjectIds.size !== 1 ? "s" : ""
-      }.`;
-    } else if (
-      downloadType.type === "original_input_file" &&
-      appConfig.maxSamplesBulkDownloadOriginalFiles &&
-      validObjectIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
-      !admin
-    ) {
-      disabled = true;
-      disabledMessage = `No more than ${appConfig.maxSamplesBulkDownloadOriginalFiles} samples
-        allowed for ${downloadType.display_name} downloads`;
+    switch (downloadType.type) {
+      case BULK_DOWNLOAD_TYPES.ORIGINAL_INPUT_FILES:
+        if (!admin && !allObjectsUploadedByCurrentUser) {
+          disabledMessage = `To download Original Input Files, you must be the original 
+            uploader of all selected ${objectDownloaded}s.`;
+        } else if (
+          appConfig.maxSamplesBulkDownloadOriginalFiles &&
+          validObjectIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
+          !admin
+        ) {
+          disabledMessage = `No more than ${appConfig.maxSamplesBulkDownloadOriginalFiles} samples
+            allowed for Original Input Files downloads`;
+        }
+        break;
+      case BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS:
+        if (!admin && !userIsCollaborator) {
+          disabledMessage = `To download host count data, you must be a collaborator on the respective project for all samples.`;
+        }
+        break;
+      default:
+        break;
     }
+    return disabledMessage;
+  };
 
-    const userIsNotAdminOrCollaborator = !(admin || userIsCollaborator);
-    if (
-      downloadType.type === "host_gene_counts" &&
-      userIsNotAdminOrCollaborator
-    ) {
-      disabled = true;
-      disabledMessage = `To download host count data, you must be a collaborator on the respective project for all samples.`;
-    }
+  renderDownloadType = (downloadType) => {
+    const {
+      onSelect,
+      selectedDownloadTypeName,
+      handleHeatmapLink,
+    } = this.props;
+
+    const selected = selectedDownloadTypeName === downloadType.type;
+    const disabledMessage = this.getDisabledMessageForDownload(
+      downloadType,
+    );
+    const disabled = disabledMessage !== "";
 
     const downloadTypeElement = (
       <div

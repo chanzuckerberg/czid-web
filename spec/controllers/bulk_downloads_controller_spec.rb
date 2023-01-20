@@ -259,43 +259,58 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(bulk_download.pipeline_run_ids).to include(@sample_one.first_pipeline_run.id)
       end
 
-      # it "should succeed if user attempts to bulk download their own samples" do
-      #   @sample_one = create(:sample, project: @project,
-      #                                 pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
-      #   @sample_two = create(:sample, project: @project,
-      #                                 pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      it "allows user to activate collaborator-only download type for all samples on which they are a collaborator" do
+        @sample_one = create(:sample,
+                             project: @project,
+                             user: @joe,
+                             pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @user = create(:user)
+        @collaborative_project = create(:project, users: [@user, @joe])
+        @collaborative_sample = create(:sample,
+                                       project: @collaborative_project,
+                                       user: @user,
+                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        # This runs "aegea ecs run", which won't succeed in CI, so we must mock it out.
+        allow(Open3).to receive(:capture3)
+          .and_return(
+            [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
+          )
 
-      #   bulk_download_params = {
-      #     download_type: "host_gene_counts",
+        bulk_download_params = {
+          # This download type is collaborator-only.
+          download_type: BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE,
+          sample_ids: [@sample_one.id, @collaborative_sample.id],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
+        }
 
-      #     sample_ids: [@sample_one.id, @sample_two.id],
-      #     workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
-      #   }
-      #   post :create, params: bulk_download_params
-      #   print "response: #{response.status}"
-      #   print "response: #{response.body}"
-      #   expect(response).to have_http_status(200)
-      #   json_response = JSON.parse(response.body)
-      #   expect(json_response["status"]).to eq("running")
-      # end
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(:ok)
+      end
 
-      # it "should error if user attempts to bulk download another project's samples" do
-      #   @sample_one = create(:sample, project: @admin_project,
-      #                                 pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
-      #   @sample_two = create(:sample, project: @admin_project,
-      #                                 pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      it "errors if user attempts to activate collaborator-only download type with samples on which they are not a collaborator" do
+        @sample_one = create(:sample,
+                             project: @project,
+                             user: @joe,
+                             pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @user = create(:user)
+        @public_project = create(:project, users: [@user], public_access: 1)
+        @public_sample = create(:sample,
+                                project: @public_project,
+                                pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-      #   bulk_download_params = {
-      #     download_type: "host_gene_counts",
+        bulk_download_params = {
+          # This download type is collaborator-only.
+          download_type: BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE,
+          sample_ids: [@sample_one.id, @public_sample.id],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
+        }
 
-      #     sample_ids: [@sample_one.id, @sample_two.id],
-      #     workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
-      #   }
-      #   post :create, params: bulk_download_params
-      #   expect(response).to have_http_status(422)
-      #   json_response = JSON.parse(response.body)
-      #   expect(json_response["error"]).to eq(BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR)
-      # end
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(:unprocessable_entity)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::COLLABORATOR_ONLY_DOWNLOAD_TYPE)
+      end
 
       it "should error if user attempts to activate uploader-only download type with sample they didn't upload" do
         @sample_one = create(:sample, project: @project,
@@ -649,37 +664,6 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(response).to have_http_status(200)
       end
 
-      it "should allow admin-only downloads" do
-        @sample_one = create(:sample, project: @project,
-                                      pipeline_runs_data: [{
-                                        finalized: 1,
-                                        job_status: PipelineRun::STATUS_CHECKED,
-                                        sfn_execution_arn: fake_sfn_execution_arn,
-                                      }])
-        @sample_two = create(:sample, project: @project,
-                                      pipeline_runs_data: [{
-                                        finalized: 1,
-                                        job_status: PipelineRun::STATUS_CHECKED,
-                                        sfn_execution_arn: fake_sfn_execution_arn,
-                                      }])
-
-        # This runs "aegea ecs run", which won't succeed in CI, so we must mock it out.
-        allow(Open3).to receive(:capture3)
-          .and_return(
-            [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
-          )
-
-        bulk_download_params = {
-          # This download type is admin-only.
-          download_type: "host_gene_counts",
-          sample_ids: [@sample_one, @sample_two],
-          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
-        }
-
-        post :create, params: bulk_download_params
-        expect(response).to have_http_status(200)
-      end
-
       it "should allow uploader-only downloads with samples the admin didn't upload" do
         @sample_one = create(:sample, project: @project,
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }], user: @joe)
@@ -701,6 +685,30 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         post :create, params: bulk_download_params
         expect(response).to have_http_status(200)
+      end
+
+      it "allows collaborator-only downloads with samples on which the admin is not a collaborator" do
+        @sample_one = create(:sample, project: @project, user: @joe, pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @user = create(:user)
+        @public_project = create(:project, users: [@user], public_access: 1)
+        @public_sample = create(:sample, project: @public_project, pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        # This runs "aegea ecs run", which won't succeed in CI, so we must mock it out.
+        allow(Open3).to receive(:capture3)
+          .and_return(
+            [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
+          )
+
+        bulk_download_params = {
+          # This download type is collaborator-only.
+          download_type: BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE,
+          sample_ids: [@sample_one.id, @public_sample.id],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
+        }
+
+        post :create, params: bulk_download_params
+        puts(response.body)
+        expect(response).to have_http_status(:ok)
       end
     end
   end
