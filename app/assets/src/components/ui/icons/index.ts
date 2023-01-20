@@ -19,14 +19,12 @@ import IconCheckSmall from "./IconCheckSmall";
 import IconClose from "./IconClose";
 import IconCloseSmall from "./IconCloseSmall";
 import IconConsensusSmall from "./IconConsensusSmall";
-import IconContigSmall from "./IconContigSmall";
 import IconCopySmall from "./IconCopySmall";
 import IconCoverage from "./IconCoverage";
 import IconCziLogo from "./IconCziLogo";
 import IconDoubleQuotes from "./IconDoubleQuotes";
 import IconDownload from "./IconDownload";
 import IconDownloadSmall from "./IconDownloadSmall";
-import IconHelp from "./IconHelp";
 import IconInfo from "./IconInfo";
 import IconInfoSmall from "./IconInfoSmall";
 import IconListSmall from "./IconListSmall";
@@ -74,13 +72,11 @@ export const ICONS_TAXONOMY = {
     IconClose,
     IconCloseSmall,
     IconConsensusSmall,
-    IconContigSmall,
     IconCopySmall,
     IconCoverage,
     IconDoubleQuotes,
     IconDownload,
     IconDownloadSmall,
-    IconHelp,
     IconInfo,
     IconInfoSmall,
     IconListSmall,
@@ -142,14 +138,12 @@ export {
   IconClose,
   IconCloseSmall,
   IconConsensusSmall,
-  IconContigSmall,
   IconCopySmall,
   IconCoverage,
   IconCziLogo,
   IconDoubleQuotes,
   IconDownload,
   IconDownloadSmall,
-  IconHelp,
   IconInfo,
   IconInfoSmall,
   IconListSmall,

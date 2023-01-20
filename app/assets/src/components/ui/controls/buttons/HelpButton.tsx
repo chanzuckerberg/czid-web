@@ -1,15 +1,22 @@
+import { cx } from "@emotion/css";
+import { Button, Icon } from "czifui";
 import React from "react";
-import { IconHelp } from "~ui/icons";
-import SecondaryButton from "./SecondaryButton";
 
 import cs from "./help_button.scss";
 
-const HelpButton = props => (
-  <SecondaryButton
-    circular={true}
-    icon={<IconHelp className={cs.iconHelp} />}
-    {...props}
+const HelpButton = ({ className, onClick }: HelpButtonProps) => (
+  <Button
+    className={cx(cs.helpButton, className)}
+    sdsType="secondary"
+    sdsStyle="rounded"
+    startIcon={<Icon sdsIcon="questionMark" sdsSize="l" sdsType="button" />}
+    onClick={onClick}
   />
 );
+
+interface HelpButtonProps {
+  className?: string;
+  onClick: $TSFixMeFunction;
+}
 
 export default HelpButton;
