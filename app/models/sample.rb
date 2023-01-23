@@ -744,12 +744,12 @@ class Sample < ApplicationRecord
     end
   end
 
-  def list_objects(s3_path, start_after = nil, delimiter = "/")
+  def list_objects(s3_path, continuation_token = nil, delimiter = "/")
     prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
     AwsClient[:s3].list_objects_v2(
       bucket: SAMPLES_BUCKET_NAME,
       prefix: "#{prefix}/",
-      start_after: start_after,
+      continuation_token: continuation_token,
       delimiter: delimiter
     )
   end
@@ -757,12 +757,14 @@ class Sample < ApplicationRecord
   def duplicate_pipeline_run_s3(new_sample, old_pr, new_pr)
     bucket = Aws::S3::Bucket.new(ENV['SAMPLES_BUCKET_NAME'])
     new_pr.update(s3_output_prefix: "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{new_sample.sample_path}/#{new_pr.id}")
+    Rails.logger.info("duplicating s3 bucket #{new_pr.s3_output_prefix}")
 
-    start_after = nil
+    continuation_token = nil
 
     begin
       loop do
-        objects = list_objects(old_pr.sfn_results_path, start_after = start_after)
+        objects = list_objects(old_pr.sfn_results_path, continuation_token = continuation_token)
+        Rails.logger.info("number of objects: #{objects.contents.count}")
         objects.contents.each do |object|
           source_object = bucket.object(object[:key])
           target_bucket, target_key = S3Util.parse_s3_path("#{new_pr.sfn_results_path}/#{File.basename(object[:key])}")
@@ -772,7 +774,9 @@ class Sample < ApplicationRecord
             source_object.copy_to(bucket: target_bucket, key: target_key, multipart_copy: true)
           end
         end
-        start_after = objects.next_continuation_token
+        continuation_token = objects.next_continuation_token
+        Rails.logger.info("objects is truncated?: #{objects.is_truncated}")
+
         break unless objects.is_truncated
       end
     rescue StandardError => e
