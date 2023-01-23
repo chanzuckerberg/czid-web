@@ -44,6 +44,13 @@ class SfnPipelineDataService
   SFN_STEP_TO_DAG_STEP_NAME = {
     PipelineRunStage::HOST_FILTERING_STAGE_NAME => {
       "RunValidateInput" => "validate_input_out",
+      "fastp_qc" => "fastp_out",
+      "kallisto" => "kallisto",
+      "bowtie2_filter" => "bowtie2_host_filtered_out",
+      "hisat2_filter" => "hisat2_host_filtered_out",
+      "collect_insert_size_metrics" => "insert_size_metrics",
+      "bowtie2_human_filter" => "bowtie2_human_filter",
+      "hisat2_human_filter" => "hisat2_human_filter",
       "RunStar" => "star_out",
       "RunTrimmomatic" => "trimmomatic_out",
       "RunPriceSeq" => "priceseq_out",
@@ -170,7 +177,7 @@ class SfnPipelineDataService
     stages = @stages_wdl_info.map.with_index do |stage_info, stage_index|
       stage_name = @stage_names[stage_index]
       step_statuses = step_statuses_by_stage[stage_index]
-      step_descriptions = STEP_DESCRIPTIONS[stage_name]["steps"]
+      step_descriptions = PipelineRunsHelper::STEP_DESCRIPTIONS[stage_name]["steps"]
 
       all_redefined_statuses = []
 
@@ -179,6 +186,10 @@ class SfnPipelineDataService
         # Descriptions for steps may be in the PipelineRunsHelper module,
         # or in the status.json files on S3.
         dag_name = SFN_STEP_TO_DAG_STEP_NAME[stage_name][step]
+        if dag_name.nil?
+          LogUtil.log_message("No dag name found for step #{step} in stage #{stage_name}")
+        end
+
         status_info = step_statuses[dag_name] || {}
         description = status_info["description"].presence || step_descriptions[dag_name]
         status = redefine_job_status(status_info["status"], @stage_job_statuses[stage_index])
@@ -212,6 +223,10 @@ class SfnPipelineDataService
     return stages
   end
 
+  def should_skip_intermediate_output?(step_name_or_input_name)
+    return pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version) && (step_name_or_input_name.starts_with?("bowtie2") || step_name_or_input_name.starts_with?("hisat2"))
+  end
+
   def retrieve_step_inputs(stage_info, step)
     variables = []
     files = []
@@ -228,7 +243,7 @@ class SfnPipelineDataService
       if output_step == WORKFLOW_INPUT_PREFIX
         input_info[:type] = stage_info["inputs"][var_name]
       else
-        input_info[:file] = File.basename(stage_info["basenames"][input])
+        input_info[:file] = File.basename(stage_info["basenames"][input]) unless should_skip_intermediate_output?(input)
       end
 
       case input_info[:type]

@@ -18,7 +18,7 @@ const metadataFixture = getFixture("metadata");
 export function generateWorkflowData(
   workflowName: string,
   projectId: number,
-  sampleName: string
+  sampleName: string,
 ): Workflow {
   const min = 1;
   const max = 5;
@@ -38,8 +38,8 @@ export function generateWorkflowData(
         fraction_subsampled: 1.0,
         insert_size_mean: undefined,
         insert_size_standard_deviation: undefined,
-        percent_remaining: 51.8716577540107
-      }
+        percent_remaining: 51.8716577540107,
+      },
     },
     inputs: {
       accession_id: undefined,
@@ -49,7 +49,7 @@ export function generateWorkflowData(
       technology: undefined,
       wetlab_protocol: undefined,
       ref_fasta: undefined,
-      primer_bed: undefined
+      primer_bed: undefined,
     },
     sample: {
       info: {
@@ -60,7 +60,7 @@ export function generateWorkflowData(
         private_until: getAFullDateInThePast(0, 5, true),
         project_id: projectId,
         sample_notes: undefined,
-        public: sample(zeroOrOne) as number
+        public: sample(zeroOrOne) as number,
       },
       metadata: {
         collection_date: getAFullDateInThePast(0, 5),
@@ -76,17 +76,17 @@ export function generateWorkflowData(
           country_id: 54,
           state_id: undefined,
           subdivision_id: undefined,
-          city_id: undefined
+          city_id: undefined,
         },
         nucleotide_type: "RNA",
         sample_type: "Mixed Tissue",
-        water_control: sample(yesOrNo) as string
+        water_control: sample(yesOrNo) as string,
       },
       project_name: "QA",
       uploader: {
         name: "CZID Test Account",
-        id: 403
-      }
-    }
+        id: 403,
+      },
+    },
   };
 }

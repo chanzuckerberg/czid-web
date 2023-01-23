@@ -28,7 +28,7 @@ export async function fileChooser(page: Page, filePath: string) {
     // It is important to call waitForEvent before click to set up waiting.
     page.waitForEvent("filechooser"),
     // Opens the file chooser.
-    page.locator(".csvUpload-1c9NS").click()
+    page.locator(".csvUpload-1c9NS").click(),
   ]);
   await fileChooser.setFiles([path.resolve(filePath)]);
 }

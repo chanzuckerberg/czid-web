@@ -5,7 +5,7 @@ import {
   getAttributeOrDefault,
   getFixture,
   getRandomNumber,
-  getYearMonthInThePast
+  getYearMonthInThePast,
 } from "./common";
 import fs from "fs";
 import { Filter } from "../types/filter";
@@ -36,7 +36,7 @@ let excludedFields: Array<string> | undefined;
 export function getMetadata(
   sampleName: string,
   defaultData?: Metadata,
-  exclusions?: Array<string>
+  exclusions?: Array<string>,
 ): Metadata {
   defaults = defaultData;
   excludedFields = exclusions;
@@ -52,7 +52,7 @@ export function getMetadata(
 export function generateMetadataFile(
   fileName: string,
   defaultData?: Metadata,
-  exclusions?: Array<string>
+  exclusions?: Array<string>,
 ) {
   defaults = defaultData;
   excludedFields = exclusions;
@@ -73,7 +73,7 @@ export function generateMetadata(sampleName: string): Metadata {
     "Nucleotide Type": getAttributeValue("Nucleotide Type"),
     "Collection Date": getYearMonthInThePast(),
     "Water Control": sample(yesOrNo),
-    "Collection Location": "New York"
+    "Collection Location": "New York",
   };
   return setOptionalMetadataAtrribute(data);
 }

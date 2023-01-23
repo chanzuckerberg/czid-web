@@ -31,10 +31,7 @@ const UploadInstructions = ({
           listItems={[
             <React.Fragment key={"metadata-dictionary"}>
               Review the fields in our{" "}
-              <ExternalLink
-                href="/metadata/dictionary"
-                className={cs.link}
-              >
+              <ExternalLink href="/metadata/dictionary" className={cs.link}>
                 metadata dictionary
               </ExternalLink>
               , where you will find definitions and format requirements. Take

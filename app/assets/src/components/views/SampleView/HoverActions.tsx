@@ -144,10 +144,9 @@ const HoverActions = ({
 
   // Metadata for each of the hover actions.
   const getHoverActions = () => {
-    const hasCoverageViz = isPipelineFeatureAvailable(
-      COVERAGE_VIZ_FEATURE,
-      pipelineVersion,
-    ) || onlyShowLongReadMNGSOptions;
+    const hasCoverageViz =
+      isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) ||
+      onlyShowLongReadMNGSOptions;
     const hasBlastv1Feature = allowedFeatures.includes(BLAST_V1_FEATURE);
     const params = {
       pipelineVersion,

@@ -75,7 +75,10 @@ export class BasePage {
   }
 
   async clickCheckBox(index: number) {
-    await this.page.locator('input[type="checkbox"]').nth(index).click();
+    await this.page
+      .locator('input[type="checkbox"]')
+      .nth(index)
+      .click();
   }
 
   /**
@@ -100,7 +103,7 @@ export class BasePage {
 
   async typeByPlaceHolder(placeholder: string, value: string) {
     await this.page.type(`[placeholder="${placeholder}"]`, value, {
-      delay: 1000
+      delay: 1000,
     });
   }
   async fillById(id: string, value: string) {
@@ -195,7 +198,7 @@ export class BasePage {
       // It is important to call waitForEvent before click to set up waiting.
       this.page.waitForEvent("filechooser"),
       // Opens the file chooser.
-      this.page.locator(".csvUpload-1c9NS").click()
+      this.page.locator(".csvUpload-1c9NS").click(),
     ]);
     await fileChooser.setFiles([path.resolve(filePath)]);
   }
@@ -206,8 +209,8 @@ export class BasePage {
 
   async waitForResponse(path: string) {
     const resp = await this.page.waitForResponse(
-      (response) =>
-        response.url().includes(`/${path}/`) && response.status() === 200
+      response =>
+        response.url().includes(`/${path}/`) && response.status() === 200,
     );
     return resp.json();
   }

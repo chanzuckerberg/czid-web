@@ -296,10 +296,7 @@ export const TAXON_GENERAL_FIELDS = [
   "species_tax_ids",
 ];
 
-export const BACKGROUND_FIELDS = [
-  "agg_score",
-  "max_z_score",
-];
+export const BACKGROUND_FIELDS = ["agg_score", "max_z_score"];
 
 export const SHORT_READ_TAXON_COUNT_TYPE_METRICS = [
   "z_score",

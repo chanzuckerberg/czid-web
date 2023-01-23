@@ -88,6 +88,7 @@ class PipelineRun < ApplicationRecord
   INVALID_STEP_NAME = "invalid_step_input.json".freeze
   NONHOST_FASTQ_OUTPUT_NAME = 'taxid_annot.fasta'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
+  MODERN_ERCC_OUTPUT_NAME = "abundance.tsv".freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
@@ -432,8 +433,12 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
+  def ercc_output_path
+    pipeline_version_uses_new_host_filtering_stage(pipeline_version) ? MODERN_ERCC_OUTPUT_NAME : ERCC_OUTPUT_NAME
+  end
+
   def db_load_ercc_counts
-    ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+    ercc_s3_path = "#{host_filter_output_s3_path}/#{ercc_output_path}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
 
@@ -456,8 +461,14 @@ class PipelineRun < ApplicationRecord
 
   def should_have_insert_size_metrics
     host_filtering_step_statuses = host_filtering_stage.step_statuses
-    additional_outputs = get_additional_outputs(host_filtering_step_statuses, "star_out")
-    return additional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
+
+    if pipeline_version_uses_new_host_filtering_stage(pipeline_version)
+      # Only paired-end samples should have insert size metrics.
+      return host_filtering_step_statuses.dig("collect_insert_size_metrics", "status") == "uploaded"
+    else
+      additional_outputs = get_additional_outputs(host_filtering_step_statuses, "star_out")
+      return additional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
+    end
   end
 
   def db_load_insert_size_metrics
@@ -989,7 +1000,7 @@ class PipelineRun < ApplicationRecord
 
     full_path = case output
                 when "ercc_counts"
-                  "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
+                  "#{host_filter_output_s3_path}/#{ercc_output_path}"
                 when "amr_counts"
                   "#{postprocess_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
                 when "taxon_counts"
@@ -2070,7 +2081,15 @@ class PipelineRun < ApplicationRecord
     # job_stats_hash['cdhitdup_out'] required for backwards compatibility
     czid_dedup_stats = job_stats_hash['czid_dedup_out'] || job_stats_hash['idseq_dedup_out'] || job_stats_hash['cdhitdup_out']
     priceseq_stats = job_stats_hash['priceseq_out']
-    update!(compression_ratio: (1.0 * priceseq_stats['reads_after']) / czid_dedup_stats['reads_after']) unless czid_dedup_stats.nil? || priceseq_stats.nil? || czid_dedup_stats['reads_after'].zero?
+    # use human if it exists, otherwise use host.
+    hisat2_stats = job_stats_hash['hisat2_human_filtered_out'] || job_stats_hash['hisat2_host_filtered_out']
+
+    # TODO: this condition should check the pipeline version rather than for the existence of hisat2_stat
+    if hisat2_stats
+      update!(compression_ratio: (1.0 * hisat2_stats['reads_after']) / czid_dedup_stats['reads_after']) unless hisat2_stats.nil? || czid_dedup_stats.nil? || czid_dedup_stats['reads_after'].zero?
+    else
+      update!(compression_ratio: (1.0 * priceseq_stats['reads_after']) / czid_dedup_stats['reads_after']) unless czid_dedup_stats.nil? || priceseq_stats.nil? || czid_dedup_stats['reads_after'].zero?
+    end
   end
 
   def load_qc_percent(job_stats_hash)
@@ -2081,7 +2100,15 @@ class PipelineRun < ApplicationRecord
     else
       star_stats = job_stats_hash['star_out']
       priceseqfilter_stats = job_stats_hash['priceseq_out']
-      update!(qc_percent: calculate_qc_percent(star_stats['reads_after'], priceseqfilter_stats['reads_after'])) unless priceseqfilter_stats.nil? || star_stats.nil? || star_stats['reads_after'].zero?
+
+      fastp_stats = job_stats_hash['fastp_out']
+      validate_input_stats = job_stats_hash['validate_input_out']
+      # TODO: this condition should check the pipeline version rather than for the existence of this priceseqfilter_stats
+      if priceseqfilter_stats
+        update!(qc_percent: (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after']) unless priceseqfilter_stats.nil? || star_stats.nil? || star_stats['reads_after'].zero?
+      else
+        update!(qc_percent: (100.0 * fastp_stats['reads_after']) / validate_input_stats['reads_after']) unless fastp_stats.nil? || validate_input_stats.nil? || validate_input_stats['reads_after'].zero?
+      end
     end
   end
 

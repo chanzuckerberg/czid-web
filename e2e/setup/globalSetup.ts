@@ -30,7 +30,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
     await login(page, username, password);
     await page.context().storageState({ path: storageState as string });
     const cookieJson = JSON.parse(
-      fs.readFileSync(storageState as string).toString()
+      fs.readFileSync(storageState as string).toString(),
     );
     await browser.close();
   }
@@ -49,7 +49,7 @@ function checkCookies(): boolean {
     const cookieJson = JSON.parse(fs.readFileSync(cookieFile).toString())[
       "cookies"
     ];
-    const cookie = cookieJson.find((cookie) => cookie.name === "auth0");
+    const cookie = cookieJson.find(cookie => cookie.name === "auth0");
     const expires = cookie["expires"] as number;
     const domain = cookie["domain"];
     if (expires > currentTime && domain.includes(process.env.DOMAIN)) {

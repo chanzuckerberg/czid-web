@@ -10,6 +10,12 @@ class ReadsStatsService
   RUN_STAR = "star_out".freeze
   ERCC = "ERCC".freeze
 
+  MODERN_HOST_FILTER_STEP_NAME_TO_JOB_STAT_TASK_NAME = {
+    "fastp_qc" => "fastp_out",
+    "bowtie2_filter" => "bowtie2_host_filtered_out",
+    "hisat2_filter" => "hisat2_host_filtered_out",
+  }.freeze
+
   def initialize(samples)
     if samples.nil?
       Rails.logger.warn("ReadsStatsService call with samples = nil")
@@ -66,7 +72,7 @@ class ReadsStatsService
       ordered_tasks = representative_run.host_filtering_stage.step_statuses.keys
 
       # Make sure to include ERCC as a step.
-      if ordered_tasks.present?
+      if ordered_tasks.present? && !pipeline_version_uses_new_host_filtering_stage(representative_run.pipeline_version)
         star_index = ordered_tasks.find_index(RUN_STAR)
         if star_index
           ordered_tasks.insert(star_index, ERCC)
@@ -103,11 +109,15 @@ class ReadsStatsService
         stats_hash[:steps] = host_filtering_stats.map { |stat| { name: StringUtil.humanize_step_name(stat[:name]), readsAfter: stat[:reads_after] } }
       else
         stats_hash[:steps] = step_order.map do |step|
-          step_stats = stats_hash[:steps].find { |step_hash| step_hash[:name] == step }
-          # Frontend can handle a nil case if step is not found
-          reads_after = step_stats.nil? ? nil : step_stats[:reads_after]
-          { name: StringUtil.humanize_step_name(step), readsAfter: reads_after }
-        end
+          step_stats = stats_hash[:steps].find do |step_hash|
+            step_name_to_step_hash_name = MODERN_HOST_FILTER_STEP_NAME_TO_JOB_STAT_TASK_NAME[step] || step
+            step_hash[:name] == step_name_to_step_hash_name
+          end
+
+          unless step_stats.nil?
+            { name: StringUtil.humanize_step_name(step), readsAfter: step_stats[:reads_after] }
+          end
+        end.compact
       end
       results[pr.sample_id] = stats_hash
     end

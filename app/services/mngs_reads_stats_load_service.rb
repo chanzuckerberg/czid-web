@@ -1,5 +1,6 @@
 class MngsReadsStatsLoadService
   include Callable
+  include PipelineRunsHelper
 
   def initialize(pipeline_run)
     @pipeline_run = pipeline_run
@@ -61,11 +62,47 @@ class MngsReadsStatsLoadService
   #   }
   # ]
   def compile_stats(pipeline_run, all_counts)
-    if pipeline_run.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+    case pipeline_run.technology
+    when PipelineRun::TECHNOLOGY_INPUT[:nanopore]
       compile_nanopore_stats(pipeline_run, all_counts)
-    else
-      compile_illumina_stats(pipeline_run, all_counts)
+    when PipelineRun::TECHNOLOGY_INPUT[:illumina]
+      # Pipeline runs that use the new host filtering stage are loaded/compiled in slightly differently
+      pipeline_version_uses_new_host_filtering_stage(pipeline_run.pipeline_version) ? compile_illumina_stats_v2(pipeline_run, all_counts) : compile_illumina_stats(pipeline_run, all_counts)
     end
+  end
+
+  # Compiles stats for illumina pipeline runs that use the new host filtering stage
+  def compile_illumina_stats_v2(pipeline_run, all_counts)
+    # Load total reads
+    total = all_counts.detect { |entry| entry.value?("fastqs") }
+    if total
+      all_counts << { total_reads: total[:reads_after] }
+      pipeline_run.total_reads = total[:reads_after]
+    end
+
+    # Load truncation
+    truncation = all_counts.detect { |entry| entry.value?("validate_input_out") }
+    if truncation
+      pipeline_run.truncated = truncation[:reads_after]
+    end
+
+    # Load subsample fraction which is subsampled_out_count / czid_dedup_out_count
+    sub_before = all_counts.detect { |entry| entry.value?("czid_dedup_out") }
+    sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
+
+    if sub_before && sub_after
+      frac = sub_before[:reads_after] > 0 ? ((1.0 * sub_after[:reads_after]) / sub_before[:reads_after]) : 1.0
+      all_counts << { fraction_subsampled: frac }
+      pipeline_run.fraction_subsampled = frac
+    end
+
+    # Load remaining reads
+    all_counts << { adjusted_remaining_reads: sub_before[:reads_after] }
+    pipeline_run.adjusted_remaining_reads = sub_before[:reads_after]
+
+    # Load unidentified reads
+    pipeline_run.unmapped_reads = fetch_unmapped_illumina_reads(pipeline_run, all_counts) || pipeline_run.unmapped_reads
+    all_counts
   end
 
   def compile_illumina_stats(pipeline_run, all_counts)

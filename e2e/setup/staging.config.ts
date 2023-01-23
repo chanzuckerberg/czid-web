@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import path from "path";
 
 dotenv.config({
-  path: path.resolve(__dirname, "../../", ".env.staging")
+  path: path.resolve(__dirname, "../../", ".env.staging"),
 });
 
 const config: PlaywrightTestConfig = {
@@ -34,8 +34,8 @@ const config: PlaywrightTestConfig = {
     screenshot: "only-on-failure",
     storageState: "/tmp/state.json",
     trace: "on-first-retry",
-    viewport: { width: 800, height: 7200 }
-  }
+    viewport: { width: 800, height: 7200 },
+  },
 };
 
 export default config;

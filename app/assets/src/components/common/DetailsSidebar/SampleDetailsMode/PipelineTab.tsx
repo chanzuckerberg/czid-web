@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { get, set, isEmpty } from "lodash/fp";
+import { get, filter, set, isEmpty, pick } from "lodash/fp";
 import React from "react";
 
 import { getSamplePipelineResults } from "~/api";
@@ -187,6 +187,8 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
 
   getReadCounts = async () => {
     const { sampleId, pipelineRun } = this.props;
+    const { stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
+
     const pipelineResults = await getSamplePipelineResults(
       sampleId,
       pipelineRun && pipelineRun.pipeline_version,
@@ -196,9 +198,27 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
       const hostFilteringStageKey = Object.keys(
         pipelineResults[RESULTS_FOLDER_ROOT_KEY],
       )[0];
+
+      // Remove the host filtering steps that have readsAfter === null;
+      // With the modern host filtering step (as of Nov, 2022) - the following steps may have no readsAfter
+      // (depends on sample type.. e.g. host genome type, paired-end vs single-end), DNA, RNA, etc...):
+      //    Bowtie2 Human Filter, Hisat2 Human Filter, CollectInsertSizeMetrics, Kallisto
+      const hostFilteringStageResults =
+        pipelineResults[RESULTS_FOLDER_ROOT_KEY][hostFilteringStageKey];
+      const readsRemainingByHostFilteringSteps =
+        hostFilteringStageResults[stepsKey];
+      const hostFilteringStepKeysWithReadsRemaining = filter(
+        (stepKey: string) =>
+          get("readsAfter", readsRemainingByHostFilteringSteps[stepKey]) > 0,
+        Object.keys(readsRemainingByHostFilteringSteps),
+      );
+      hostFilteringStageResults[stepsKey] = pick(
+        hostFilteringStepKeysWithReadsRemaining,
+        readsRemainingByHostFilteringSteps,
+      );
+
       this.setState(prevState => ({
-        pipelineStepDict:
-          pipelineResults[RESULTS_FOLDER_ROOT_KEY][hostFilteringStageKey],
+        pipelineStepDict: hostFilteringStageResults,
         loading: prevState.loading.filter(
           section => section !== READ_COUNTS_TABLE,
         ),

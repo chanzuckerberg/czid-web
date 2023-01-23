@@ -20,7 +20,7 @@ import {
   TOTAL_READ_POPOUP_CONTENT,
   BAR_CHARTS,
   BARS,
-  BAR_POPUP
+  BAR_POPUP,
 } from "../utils/constants";
 
 const DATA = {
@@ -29,29 +29,29 @@ const DATA = {
       "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
     header: "Do my samples have enough total reads?",
     pop_up:
-      "Total Reads:The total number of single-end reads uploaded. Each end of the paired-end reads count as one read. Learn more."
+      "Total Reads:The total number of single-end reads uploaded. Each end of the paired-end reads count as one read. Learn more.",
   },
   QUALITY_READ: {
     url:
       "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Passed-QC",
     header: "Do my samples have enough quality reads?",
     pop_up:
-      "Passed QC:The percentage of reads that came out of PriceSeq, step (3) of the host filtration and QC steps, compared to what went in to Trimmomatic, step (2). Learn more."
+      "Passed QC:The percentage of reads that came out of PriceSeq, step (3) of the host filtration and QC steps, compared to what went in to Trimmomatic, step (2). Learn more.",
   },
   DUPLICATE_READ: {
     url:
       "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
     header: "Are there too many duplicate reads in my library?",
     pop_up:
-      "DCR:Duplicate Compression Ratio is the ratio of the total number of sequences present prior to running czid-dedup (duplicate identification) vs the number of unique sequences. Learn more."
+      "DCR:Duplicate Compression Ratio is the ratio of the total number of sequences present prior to running czid-dedup (duplicate identification) vs the number of unique sequences. Learn more.",
   },
   INSERT_LENGTH: {
     url:
       "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Mean-Insert-Size",
     header: "Do my samples have sufficient insert lengths?",
     pop_up:
-      "Mean Insert Size:The average length of the nucleotide sequence that is inserted between the adapters. Learn more."
-  }
+      "Mean Insert Size:The average length of the nucleotide sequence that is inserted between the adapters. Learn more.",
+  },
 };
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
@@ -62,7 +62,7 @@ const readType = [
   "TOTAL_READ",
   "QUALITY_REA",
   "DUPLICATE_READ",
-  "INSERT_LENGTH"
+  "INSERT_LENGTH",
 ];
 
 async function getProject(basePage: BasePage, projectName: string) {
@@ -77,7 +77,7 @@ test.describe("Map view tests", () => {
   readType.forEach(readType => {
     test(`Should verify content displayed on  ${readType} bar chart`, async ({
       page,
-      context
+      context,
     }) => {
       const basePage = new BasePage(page);
       await getProject(basePage, projectName);
@@ -102,7 +102,7 @@ test.describe("Map view tests", () => {
 
       //header
       await expect(page.locator(HEADER_READS).nth(j)).toHaveText(
-        DATA[readType]["header"]
+        DATA[readType]["header"],
       );
       //The total number of single-end reads uploaded. Each end of the paired-end reads count as one read.
       //.infoIcon-pU_hl
@@ -112,13 +112,13 @@ test.describe("Map view tests", () => {
         .hover();
 
       await expect(page.locator(TOTAL_READ_POPOUP_CONTENT)).toHaveText(
-        DATA[readType]["pop_up"]
+        DATA[readType]["pop_up"],
       );
 
       const [newPage] = await Promise.all([
         context.waitForEvent("page"),
         // Opens a new tab
-        page.locator(LEARN_MORE).click()
+        page.locator(LEARN_MORE).click(),
       ]);
       await newPage.waitForLoadState();
       expect(newPage.url()).toEqual(DATA[readType]["url"]);
@@ -150,7 +150,7 @@ test.describe("Map view tests", () => {
   });
   test(`Should verify content displayed on pipeline bar chart`, async ({
     page,
-    context
+    context,
   }) => {
     const basePage = new BasePage(page);
 
@@ -165,19 +165,19 @@ test.describe("Map view tests", () => {
     await expect(page.locator(SAMPLE_AMOUNT)).toBeVisible();
     //header
     await expect(page.locator(HEADER_READS).nth(4)).toHaveText(
-      "How were my samples processed through the pipeline?"
+      "How were my samples processed through the pipeline?",
     );
     await page
       .locator(TOTAL_READ_INFO_ICON)
       .nth(6)
       .hover();
     await expect(page.locator(TOTAL_READ_POPOUP_CONTENT)).toHaveText(
-      READS_POPUP
+      READS_POPUP,
     );
     const [newPage] = await Promise.all([
       context.waitForEvent("page"),
       // Opens a new tab
-      page.locator(LEARN_MORE).click()
+      page.locator(LEARN_MORE).click(),
     ]);
     await newPage.waitForLoadState();
     expect(newPage.url()).toEqual(READ_URL);

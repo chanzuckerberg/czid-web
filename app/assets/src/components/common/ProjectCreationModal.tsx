@@ -133,9 +133,7 @@ const ProjectCreationModal = ({
                 They’ll be able to perform read-only actions like create
                 heatmaps and download results, but will not have access to your
                 raw data.{" "}
-                <ExternalLink href={WEB_UPLOAD_LINK}>
-                  Learn more
-                </ExternalLink>
+                <ExternalLink href={WEB_UPLOAD_LINK}>Learn more</ExternalLink>
               </div>
             </div>
           </div>
@@ -161,9 +159,7 @@ const ProjectCreationModal = ({
                 and when, to share your samples with others either by adding
                 them as members of your project or by changing your project from
                 Private to Public.{" "}
-                <ExternalLink href={WEB_UPLOAD_LINK}>
-                  Learn more
-                </ExternalLink>
+                <ExternalLink href={WEB_UPLOAD_LINK}>Learn more</ExternalLink>
               </div>
             </div>
           </div>

@@ -4,14 +4,14 @@ import dotenv from "dotenv";
 import {
   generateMetadataFile,
   getGeneratedSampleName,
-  getMetadata
+  getMetadata,
 } from "../../utils/sample";
 import { Metadata } from "../../types/metadata";
 
 import {
   fillMetadata,
   submitUpload,
-  uploadSampleFiles
+  uploadSampleFiles,
 } from "../../utils/upload";
 import { getByTestID, getByText } from "../../utils/selectors";
 import { fileChooser } from "../../utils/page";
@@ -28,7 +28,7 @@ const defaults: Metadata = {
   "Host ID": "jeNhTLicCl",
   "RNA/DNA Input (ng)": 97,
   "Host Genus Species": "Aedes aegypti",
-  "Ct Value": 97
+  "Ct Value": 97,
 };
 
 const sampleType = "Metagenomics";
@@ -36,9 +36,7 @@ const projectName = "Test Project";
 const sampleFiles = ["RR004_water_2_S23A_R1_001.fastq"];
 
 test.describe("Metagenomics sample upload tests", () => {
-  test("Should upload mNGS sample with manual metadata", async ({
-    page,
-  }) => {
+  test("Should upload mNGS sample with manual metadata", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
     await page.locator(getByTestID("menu-item-upload")).click();
 
@@ -54,9 +52,7 @@ test.describe("Metagenomics sample upload tests", () => {
     await submitUpload(page);
   });
 
-  test("Should upload mNGS sample with metadata csv file", async ({
-    page,
-  }) => {
+  test("Should upload mNGS sample with metadata csv file", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
     await page.locator(getByTestID("menu-item-upload")).click();
 
@@ -79,7 +75,10 @@ test.describe("Metagenomics sample upload tests", () => {
 
     //click continue button
     const continueButtonIndex = 1;
-    await page.locator(getByText(CONTINUE)).nth(continueButtonIndex).click();
+    await page
+      .locator(getByText(CONTINUE))
+      .nth(continueButtonIndex)
+      .click();
 
     //submit upload
     await submitUpload(page);

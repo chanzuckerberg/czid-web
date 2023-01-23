@@ -300,7 +300,8 @@ export default class HorizontalStackedBarChart extends React.Component<
     const { data, options, measurements } = this.state;
 
     const xAxisHeight =
-      options.x.tickSize * Number(options.x.ticksVisible || options.x.pathVisible) +
+      options.x.tickSize *
+        Number(options.x.ticksVisible || options.x.pathVisible) +
       measurements.xTextHeight;
     const barCanvasHeight =
       data.length * (options.bars.height + options.bars.padding);

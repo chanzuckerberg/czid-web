@@ -3,7 +3,7 @@ class SfnPipelineDispatchService
   # StepFunctions-based pipeline.
   # It generates jsons for all the pipeline run stages, converts them to WDL,
   # creates the Step Function's input JSON and start SFN execution
-
+  include PipelineRunsHelper
   include Callable
 
   # Constains SFN deployment stage names that differ from Rails.env
@@ -37,6 +37,8 @@ class SfnPipelineDispatchService
     @wdl_version = /\d+\.\d+\.\d+/ =~ pipeline_run.pipeline_branch ? pipeline_run.pipeline_branch : AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
     if current_user.allowed_feature_list.include?("legacy_pipeline_service")
       @wdl_version = "6.11.0"
+    elsif current_user.allowed_feature_list.include?("modern_host_filtering")
+      @wdl_version = AppConfigHelper.get_app_config(AppConfig::MODERN_SHORT_READ_MNGS_VERSION)
     end
     raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
   end
@@ -63,6 +65,28 @@ class SfnPipelineDispatchService
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample.sample_path}/#{@pipeline_run.id}"
   end
 
+  def new_host_filtering_inputs
+    hg = @sample.host_genome
+    {
+      fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
+      fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+      nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
+
+      adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
+
+      host_genome: hg.name.downcase,
+      bowtie2_index_tar: hg.s3_bowtie2_index_path_v2,
+      hisat2_index_tar: hg.s3_hisat2_index_path,
+      kallisto_idx: hg.s3_kallisto_index_path,
+      human_bowtie2_index_tar: HostGenome.find_by(name: "Human").s3_bowtie2_index_path_v2,
+      human_hisat2_index_tar: HostGenome.find_by(name: "Human").s3_hisat2_index_path,
+
+      max_input_fragments: @pipeline_run.max_input_fragments,
+      max_subsample_fragments: @pipeline_run.subsample,
+      file_ext: @sample.fasta_input? ? "fasta" : "fastq",
+    }
+  end
+
   def generate_wdl_input
     sfn_pipeline_input_json = {
       HOST_FILTER_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/host_filter.wdl",
@@ -71,43 +95,47 @@ class SfnPipelineDispatchService
       EXPERIMENTAL_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/experimental.wdl",
       STAGES_IO_MAP_JSON: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/stage_io_map.json",
       Input: {
-        HostFilter: {
-          fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
-          fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
-          file_ext: @sample.fasta_input? ? "fasta" : "fastq",
-          nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
-          host_genome: @sample.host_genome_name.downcase,
-          adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
-          star_genome: @sample.host_genome.s3_star_index_path,
-          bowtie2_genome: @sample.host_genome.s3_bowtie2_index_path,
-          human_star_genome: HostGenome.find_by(name: "Human").s3_star_index_path,
-          human_bowtie2_genome: HostGenome.find_by(name: "Human").s3_bowtie2_index_path,
-          max_input_fragments: @pipeline_run.max_input_fragments,
-          max_subsample_fragments: @pipeline_run.subsample,
-        }, NonHostAlignment: {
-          lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
-          accession2taxid_db: @pipeline_run.alignment_config.s3_accession2taxid_path,
-          taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
-          index_dir_suffix: @pipeline_run.alignment_config.index_dir_suffix,
-          use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
-          deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
-        }, Postprocess: {
-          nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
-          nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
-          nr_db: @pipeline_run.alignment_config.s3_nr_db_path,
-          nr_loc_db: @pipeline_run.alignment_config.s3_nr_loc_db_path,
-          lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
-          taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
-          use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
-          deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
-        }, Experimental: {
-          fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
-          fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
-          nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
-          nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
-          file_ext: @sample.fasta_input? ? "fasta" : "fastq",
-          nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
-        },
+        HostFilter: if pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version)
+                      new_host_filtering_inputs
+                    else
+                      {
+                        fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
+                        fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+                        file_ext: @sample.fasta_input? ? "fasta" : "fastq",
+                        nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
+                        host_genome: @sample.host_genome_name.downcase,
+                        adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
+                        star_genome: @sample.host_genome.s3_star_index_path,
+                        bowtie2_genome: @sample.host_genome.s3_bowtie2_index_path,
+                        human_star_genome: HostGenome.find_by(name: "Human").s3_star_index_path,
+                        human_bowtie2_genome: HostGenome.find_by(name: "Human").s3_bowtie2_index_path,
+                        max_input_fragments: @pipeline_run.max_input_fragments,
+                        max_subsample_fragments: @pipeline_run.subsample,
+                      }
+                    end, NonHostAlignment: {
+                      lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
+                      accession2taxid_db: @pipeline_run.alignment_config.s3_accession2taxid_path,
+                      taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
+                      index_dir_suffix: @pipeline_run.alignment_config.index_dir_suffix,
+                      use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
+                      deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
+                    }, Postprocess: {
+                      nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
+                      nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
+                      nr_db: @pipeline_run.alignment_config.s3_nr_db_path,
+                      nr_loc_db: @pipeline_run.alignment_config.s3_nr_loc_db_path,
+                      lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
+                      taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
+                      use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
+                      deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
+                    }, Experimental: {
+                      fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
+                      fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+                      nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
+                      nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
+                      file_ext: @sample.fasta_input? ? "fasta" : "fastq",
+                      nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
+                    },
       },
       OutputPrefix: output_prefix,
     }

@@ -1,5 +1,5 @@
 export enum AnalysisTypes {
   "Metagenomics",
   "Illumina",
-  "SARS-CoV-2"
+  "SARS-CoV-2",
 }

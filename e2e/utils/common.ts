@@ -28,7 +28,7 @@ export function getValueOrDefault<T>(value: T, defaultValue: T): T {
 export function getAttributeOrDefault<T>(
   obj: any,
   attribute: string,
-  defaultValue: T
+  defaultValue: T,
 ): T {
   if (obj === undefined) {
     return defaultValue;
@@ -70,7 +70,7 @@ export function getFixture(fileName: string) {
 export function getAlphaNumericString(
   stringLength: number,
   includeLowerCase = true,
-  includeNumbers = true
+  includeNumbers = true,
 ): string {
   let charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   if (includeLowerCase) {
@@ -95,7 +95,7 @@ export function getAFullDateInThePast(
   min = 0,
   max = 10,
   isoString = false,
-  refDate?: string
+  refDate?: string,
 ): string {
   // default to current date as a refence date
   const fromDate = refDate !== undefined ? new Date(refDate) : new Date();

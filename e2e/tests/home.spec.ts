@@ -21,10 +21,10 @@ test.describe("Home page tests", () => {
     await expect((await basePage.findByDataName(CZID)).nth(0)).toBeVisible();
 
     // verify footer links
-    Object.keys(footer).forEach(async (key) => {
+    Object.keys(footer).forEach(async key => {
       await expect((await basePage.findLinkByText(key)).nth(0)).toHaveAttribute(
         "href",
-        footer[key]
+        footer[key],
       );
     });
   });

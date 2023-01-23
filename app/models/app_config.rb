@@ -61,6 +61,8 @@ class AppConfig < ApplicationRecord
   BYPASS_ES_TAXON_SEARCH = "bypass_es_taxon_search".freeze
   # When this is "1", PipelineReportService will return the decimal type columns for rpm, percent_identity, and alignment_length (instead of the float type columns)
   PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS = "pipeline_report_service_use_decimal_type_columns".freeze
+  # Version of the short-read-mngs pipeline that uses the modern host filtering step. Initally set to "8.1.1-beta"
+  MODERN_SHORT_READ_MNGS_VERSION = "modern_short_read_mngs_version".freeze
 
   after_save :clear_cached_record
 

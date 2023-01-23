@@ -488,8 +488,8 @@ class MetadataUpload extends React.Component<
           <div className={cs.info}>
             <div className={cs.details}>
               <span className={cs.label}>
-                We require the following metadata to determine how to process your
-                data and display the results:{" "}
+                We require the following metadata to determine how to process
+                your data and display the results:{" "}
                 {requiredFields && requiredFields.join(", ")}.{" "}
               </span>
               <ExternalLink

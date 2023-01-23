@@ -8,6 +8,13 @@ module PipelineRunsHelper
       "stage" => "Filter out host reads and conduct quality control.",
       "steps" => {
         "validate_input_out" => "Validates input files are .fastq format; truncates to 75 million fragments",
+        "fastp_qc" => "This is the FASTP step",
+        "kallisto" => "This is the Kallisto step",
+        "bowtie2_filter" => "This is the bowtie2_filter",
+        "hisat2_filter" => "This is the hisat2_filter",
+        "insert_size_metrics" => "This is the collect_insert_size_metrics step",
+        "bowtie2_human_filter" => "This is the bowtie2_human_filter_out step",
+        "hisat2_human_filter" => "This is the hisat2_human_filter_out step",
         "star_out" => "Implements step for Host Subtraction",
         "trimmomatic_out" => "Removes adapter sequences",
         "priceseq_out" => "Removes low-quality reads",
@@ -303,6 +310,7 @@ module PipelineRunsHelper
   PIPELINE_VERSION_2 = '2.0'.freeze
   ASSEMBLY_PIPELINE_VERSION = '3.1'.freeze
   COVERAGE_VIZ_PIPELINE_VERSION = '3.6'.freeze
+  NEW_HOST_FILTERING_PIPELINE_VERSION = '8.1'.freeze
 
   def pipeline_version_at_least(pipeline_version, test_version)
     unless pipeline_version
@@ -326,6 +334,10 @@ module PipelineRunsHelper
     end
 
     return false
+  end
+
+  def pipeline_version_uses_new_host_filtering_stage(pipeline_version)
+    pipeline_version_at_least(pipeline_version, NEW_HOST_FILTERING_PIPELINE_VERSION)
   end
 
   def pipeline_version_has_assembly(pipeline_version)

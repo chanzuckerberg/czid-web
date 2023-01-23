@@ -56,11 +56,11 @@ export default class FAQPage extends React.Component {
                 with anyone you share your project with.
               </React.Fragment>,
               <React.Fragment key={nanoid()}>
-                You can decide to share your Report Data and associated
-                Sample Metadata with all CZ ID users but that is completely up
-                to you. You can choose to share your Report Data with a small
-                group of CZ ID users, by adding them to a Project, or with all
-                other CZ ID users by marking a Project as {'"Public"'}.
+                You can decide to share your Report Data and associated Sample
+                Metadata with all CZ ID users but that is completely up to you.
+                You can choose to share your Report Data with a small group of
+                CZ ID users, by adding them to a Project, or with all other CZ
+                ID users by marking a Project as {'"Public"'}.
               </React.Fragment>,
             ]}
           />
@@ -121,9 +121,9 @@ export default class FAQPage extends React.Component {
         >
           <p>
             You should make sure you have any permissions or consents necessary
-            in order to upload and use the samples within CZ ID. Please check with your
-            institution or organization if you have questions about meeting this
-            responsibility.
+            in order to upload and use the samples within CZ ID. Please check
+            with your institution or organization if you have questions about
+            meeting this responsibility.
           </p>
         </Accordion>
         <Accordion
@@ -162,12 +162,9 @@ export default class FAQPage extends React.Component {
                 Other metadata can be uploaded to CZ ID but is not required and
                 may be deleted at any point. We have put together a metadata
                 ontology that you can find{" "}
-                <RouterLink to="/metadata/dictionary">
-                  here{" "}
-                </RouterLink>
-                that does not include
-                any fields where Protected Health Information (PHI) can be
-                derived.
+                <RouterLink to="/metadata/dictionary">here </RouterLink>
+                that does not include any fields where Protected Health
+                Information (PHI) can be derived.
               </React.Fragment>,
             ]}
           />
@@ -222,8 +219,8 @@ export default class FAQPage extends React.Component {
         >
           <p>
             Yes, we use cookies and similar technologies to help improve the
-            website and provide a better experience while using the CZ ID service.
-            We do not use cookies for advertising purposes.
+            website and provide a better experience while using the CZ ID
+            service. We do not use cookies for advertising purposes.
           </p>
           <p>
             Cookies are small text files sent by your computer or device each
@@ -233,9 +230,7 @@ export default class FAQPage extends React.Component {
             ID account (including information about you, such as the email
             address you gave us) and other cookies are not.
           </p>
-          <p>
-            Cookies can be classified by their lifespan:
-          </p>
+          <p>Cookies can be classified by their lifespan:</p>
           <List
             listItems={[
               <React.Fragment key={nanoid()}>
@@ -250,10 +245,10 @@ export default class FAQPage extends React.Component {
               <React.Fragment key={nanoid()}>
                 <span className={cs.listItemLabel}>Persistent cookies</span>{" "}
                 which remember certain information about your preferences for
-                viewing CZ ID and allow us to recognize you each time you return.
-                Persistent cookies are stored on your browser cache or mobile
-                device until you choose to delete them, and otherwise delete
-                themselves in a standard period of time.
+                viewing CZ ID and allow us to recognize you each time you
+                return. Persistent cookies are stored on your browser cache or
+                mobile device until you choose to delete them, and otherwise
+                delete themselves in a standard period of time.
               </React.Fragment>,
             ]}
           />
@@ -336,12 +331,12 @@ export default class FAQPage extends React.Component {
           <p>Yes, you do.</p>
           <p>
             You have options to control or limit how we and our partners use
-            cookies and similar technologies on czid.org. You can learn more
-            and adjust your cookie preferences by visiting the {" "}
+            cookies and similar technologies on czid.org. You can learn more and
+            adjust your cookie preferences by visiting the{" "}
             <span className={cx(cs.cookieSettings, "optanon-show-settings")}>
               Cookie Settings
-            </span>.
-            You also have choices and control over the cookies that you allow
+            </span>
+            . You also have choices and control over the cookies that you allow
             onto your browser generally. For example, your browser may offer
             settings that allow you to choose whether browser cookies are set
             and to delete them.
@@ -365,11 +360,11 @@ export default class FAQPage extends React.Component {
           }
         >
           <p>
-            We rely on service providers to help us provide, improve, and
-            secure the service, including Chan Zuckerberg Initiative our
-            technology partner. In our terms with third party service providers,
-            we work with service providers to secure data from unauthorized access
-            and use and limit their use of data to providing and improving relevant
+            We rely on service providers to help us provide, improve, and secure
+            the service, including Chan Zuckerberg Initiative our technology
+            partner. In our terms with third party service providers, we work
+            with service providers to secure data from unauthorized access and
+            use and limit their use of data to providing and improving relevant
             services that we use. If you have more questions about our service
             providers, please contact us at{" "}
             <a href="mailto:privacy@czid.org">privacy@czid.org</a>.

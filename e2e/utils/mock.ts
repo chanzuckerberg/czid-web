@@ -21,7 +21,7 @@ const baseUrl = process.env.BASEURL as string;
 export async function mockResponse(
   page: Page,
   context: BrowserContext,
-  elementToCheckOnThePage?: string
+  elementToCheckOnThePage?: string,
 ) {
   const workflowData = getFixture("workflows");
   const projectData = getFixture("projects");
@@ -73,7 +73,7 @@ export async function mockResponse(
 
   if (elementToCheckOnThePage !== undefined) {
     await page.waitForSelector(elementToCheckOnThePage, {
-      timeout: 300000
+      timeout: 300000,
     });
   }
 }
