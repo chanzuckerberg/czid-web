@@ -2084,8 +2084,7 @@ class PipelineRun < ApplicationRecord
     # use human if it exists, otherwise use host.
     hisat2_stats = job_stats_hash['hisat2_human_filtered_out'] || job_stats_hash['hisat2_host_filtered_out']
 
-    # TODO: this condition should check the pipeline version rather than for the existence of hisat2_stat
-    if hisat2_stats
+    if pipeline_version_uses_new_host_filtering_stage(pipeline_version)
       update!(compression_ratio: (1.0 * hisat2_stats['reads_after']) / czid_dedup_stats['reads_after']) unless hisat2_stats.nil? || czid_dedup_stats.nil? || czid_dedup_stats['reads_after'].zero?
     else
       update!(compression_ratio: (1.0 * priceseq_stats['reads_after']) / czid_dedup_stats['reads_after']) unless czid_dedup_stats.nil? || priceseq_stats.nil? || czid_dedup_stats['reads_after'].zero?
@@ -2103,11 +2102,11 @@ class PipelineRun < ApplicationRecord
 
       fastp_stats = job_stats_hash['fastp_out']
       validate_input_stats = job_stats_hash['validate_input_out']
-      # TODO: this condition should check the pipeline version rather than for the existence of this priceseqfilter_stats
-      if priceseqfilter_stats
-        update!(qc_percent: (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after']) unless priceseqfilter_stats.nil? || star_stats.nil? || star_stats['reads_after'].zero?
-      else
+
+      if pipeline_version_uses_new_host_filtering_stage(pipeline_version)
         update!(qc_percent: (100.0 * fastp_stats['reads_after']) / validate_input_stats['reads_after']) unless fastp_stats.nil? || validate_input_stats.nil? || validate_input_stats['reads_after'].zero?
+      else
+        update!(qc_percent: (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after']) unless priceseqfilter_stats.nil? || star_stats.nil? || star_stats['reads_after'].zero?
       end
     end
   end

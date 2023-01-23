@@ -341,14 +341,7 @@ function QualityControl({
         const runInfo =
           get("uploadError", sample.details) ||
           get("mngsRunInfo", sample.details);
-        // The sample is marked as "FAILED" because ERCC counts weren't loaded in,
-        // but we can still display the reads lost in the other host filtering steps.
-        // Force the sample to be displayed in the Reads Lost Chart.
-        if (sample.id === 23621) {
-          // console.log(sample);
-          validSamples.push(sample);
-          samplesDict[sample.id] = sample;
-        } else if (
+        if (
           runInfo.resultStatusDescription === "FAILED" ||
           runInfo.resultStatusDescription === "COMPLETE - ISSUE" ||
           runInfo.resultStatusDescription === "COMPLETE*"
