@@ -17,7 +17,7 @@ interface DiscoveryHeaderProps {
   onStatsToggle?: $TSFixMeFunction;
   onSearchEnterPressed?: $TSFixMeFunction;
   onSearchResultSelected?: $TSFixMeFunction;
-  onSearchTriggered?: $TSFixMeFunction;
+  onSearchTriggered?: (query: string) => Promise<$TSFixMe>;
   onTabChange?: $TSFixMeFunction;
   searchValue?: string;
   showFilters?: boolean;

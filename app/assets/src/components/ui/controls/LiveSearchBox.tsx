@@ -12,7 +12,7 @@ interface LiveSearchBoxProps {
   placeholder?: string;
   value?: string;
   onEnter?: $TSFixMeFunction;
-  onSearchTriggered?: $TSFixMeFunction;
+  onSearchTriggered?: (query: string) => Promise<$TSFixMe>;
   onSearchChange?: $TSFixMeFunction;
   onResultSelect?: $TSFixMeFunction;
   rectangular?: boolean;
@@ -22,9 +22,9 @@ interface LiveSearchBoxProps {
 interface LiveSearchBoxState {
   isLoading: boolean;
   results: $TSFixMe;
-  value: $TSFixMe;
+  value: string;
   selectedResult: boolean;
-  lastSearchedTerm: boolean;
+  lastSearchedTerm: string;
 }
 
 class LiveSearchBox extends React.Component<

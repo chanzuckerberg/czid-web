@@ -1916,7 +1916,6 @@ const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectIds };
 // Don't need mapStateToProps yet so pass in null
 const connectedComponent = connect(null, mapDispatchToProps)(SampleView);
 
-// @ts-expect-error ts-migrate(2540) FIXME: Cannot assign to 'name' because it is a read-only ... Remove this comment to see the full error message
-connectedComponent.name = "SampleView";
+(connectedComponent.name as string) = "SampleView";
 
 export default connectedComponent;

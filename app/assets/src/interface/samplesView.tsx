@@ -1,4 +1,5 @@
 import { SortDirectionType } from "react-virtualized";
+import { ThresholdForAPI } from "~/components/utils/ThresholdMap";
 import { WORKFLOW_VALUES } from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { AnnotationValue } from "~/interface/discovery";
@@ -93,9 +94,10 @@ export interface FilterList {
   annotations: Array<{ name: AnnotationValue }>;
   host: Array<number>;
   locationV2: Array<string>;
-  taxon: Array<$TSFixMeUnknown>;
-  taxonThresholds: Array<$TSFixMeUnknown>;
-  time: Array<string>;
+  taxon: Array<number>;
+  taxonThresholds: Array<ThresholdForAPI>;
+  taxaLevels: Array<string>;
+  time: [string, string];
   tissue: Array<string>;
   visibility: string;
 }

@@ -37,7 +37,7 @@ export enum WorkflowValues {
 }
 
 export interface ThresholdFilterShape {
-  metric: string; // $TSFixMe this could be a Metric enum
+  metric: string;
   metricDisplay: string;
   operator: ">=" | "<=";
   value: number;

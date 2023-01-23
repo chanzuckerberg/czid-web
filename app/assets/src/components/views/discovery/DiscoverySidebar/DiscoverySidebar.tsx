@@ -6,6 +6,7 @@ import React from "react";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
+import { Optional, Project } from "~/interface/shared";
 import ProjectDescription from "./ProjectDescription";
 import cs from "./discovery_sidebar.scss";
 
@@ -17,12 +18,12 @@ interface DiscoverySidebarProps {
   loading?: boolean;
   noDataAvailable?: boolean;
   onFilterClick?: $TSFixMeFunction;
-  onProjectDescriptionSave?: $TSFixMeFunction;
+  onProjectDescriptionSave?: (value: string) => void;
   projectDimensions?: unknown[];
   projectStats?: object;
   sampleDimensions?: unknown[];
   sampleStats?: object;
-  project?: { description: string; editable: boolean; id: number };
+  project?: Optional<Project, "id">;
 }
 
 interface DiscoverySidebarState {

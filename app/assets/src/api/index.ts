@@ -67,8 +67,7 @@ const getSummaryContigCounts = (id: $TSFixMe, minContigReads: $TSFixMe) =>
 
 const getAllHostGenomes = () => get("/host_genomes.json");
 
-const getAllHostGenomesPublic = () =>
-  get("/host_genomes/index_public");
+const getAllHostGenomesPublic = () => get("/host_genomes/index_public");
 
 const getAllSampleTypes = () => get("/sample_types.json");
 
@@ -323,7 +322,10 @@ const saveProjectName = (projectId: $TSFixMe, projectName: $TSFixMe) =>
     name: projectName,
   });
 
-const validateProjectName = (projectId: $TSFixMe, projectName: $TSFixMe) =>
+const validateProjectName = (
+  projectId: number,
+  projectName: string,
+): Promise<{ valid: boolean; sanitizedName: string; message: string }> =>
   get(`/projects/${projectId}/validate_project_name.json`, {
     params: { name: projectName },
   });

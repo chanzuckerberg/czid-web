@@ -7,20 +7,14 @@ import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
 import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
-import { DateString } from "~/interface/shared";
+import { DateString, Project } from "~/interface/shared";
 import cs from "./project_header.scss";
 
 interface ProjectHeaderProps {
   fetchedSamples?: { privateUntil: DateString }[];
   onMetadataUpdated?: $TSFixMeFunction;
   onProjectUpdated?: $TSFixMeFunction;
-  project: {
-    users: { email: string }[];
-    name: string;
-    id: number;
-    editable: boolean;
-    public_access: 0 | 1;
-  };
+  project: Project | Record<string, never>;
   snapshotProjectName?: string;
   workflow?: string;
 }
@@ -49,7 +43,9 @@ const ProjectHeader = ({
     onProjectUpdated && onProjectUpdated({ project: newProject });
   };
 
-  const handleProjectRename = async name => {
+  const handleProjectRename = async (
+    name: string,
+  ): Promise<[string, string]> => {
     if (name === project.name) return ["", name];
 
     const { valid, sanitizedName, message } = await validateProjectName(

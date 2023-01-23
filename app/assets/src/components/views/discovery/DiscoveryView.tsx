@@ -27,11 +27,11 @@ import {
   xorBy,
 } from "lodash/fp";
 import moment from "moment";
-import PropTypes from "prop-types";
 import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router";
 
+import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
@@ -63,6 +63,8 @@ import {
   WORKFLOWS,
   WORKFLOW_ENTITIES,
   WORKFLOW_ORDER,
+  WORKFLOW_VALUES,
+  WorkflowCount,
 } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
@@ -70,6 +72,15 @@ import {
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "~/components/views/samples/SamplesView/ColumnConfiguration";
+import {
+  ConfigForWorkflow,
+  DiscoveryViewProps,
+  DiscoveryViewState,
+  FiltersPreFormatting,
+  MapEntry,
+  SelectedFilters,
+} from "~/interface/discoveryView";
+import { Project } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
@@ -81,6 +92,7 @@ import {
 } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 
+import { FilterList } from "../../../interface/samplesView";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
@@ -106,7 +118,6 @@ import {
   getDiscoveryLocations,
   getDiscoveryStats,
   getDiscoveryVisualizations,
-  DISCOVERY_DOMAINS,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
@@ -140,8 +151,30 @@ import {
 //   - load (A) non-filtered dimensions, (B) filtered dimensions and (C) filtered stats
 //     (synchronous data not needed for now because we do not show projects and visualizations)
 
-class DiscoveryView extends React.Component {
-  constructor(props, context) {
+class DiscoveryView extends React.Component<
+  DiscoveryViewProps,
+  DiscoveryViewState
+> {
+  amrWorkflowRuns: $TSFixMe;
+  configForWorkflow: ConfigForWorkflow;
+  dataLayer: DiscoveryDataLayer;
+  longReadMngsSamples: $TSFixMe;
+  mapPreviewProjects: $TSFixMe;
+  mapPreviewSamples: $TSFixMe;
+  mapPreviewSidebar: MapPreviewSidebar;
+  projects: $TSFixMe;
+  projectsView: ProjectsView;
+  samples: $TSFixMe;
+  samplesView: React.RefObject<$TSFixMe>;
+  urlParser: UrlQueryParser;
+  visualizations: $TSFixMe;
+  visualizationsView: VisualizationsView;
+  workflowEntity: string;
+  workflowRuns: $TSFixMe;
+  constructor(
+    props: DiscoveryViewProps,
+    context: React.ContextType<typeof UserContext>,
+  ) {
     super(props, context);
     const { domain, projectId, updateDiscoveryProjectId } = this.props;
     const allowedFeatures = context?.allowedFeatures || [];
@@ -154,11 +187,11 @@ class DiscoveryView extends React.Component {
     });
 
     const urlState = this.urlParser.parse(location.search);
-    let sessionState = this.loadState(
+    const sessionState = this.loadState(
       sessionStorage,
       KEY_DISCOVERY_VIEW_OPTIONS,
     );
-    let localState = this.loadState(localStorage, KEY_DISCOVERY_VIEW_OPTIONS);
+    const localState = this.loadState(localStorage, KEY_DISCOVERY_VIEW_OPTIONS);
 
     const projectIdToUpdate = projectId || urlState.projectId;
     // If the projectId was passed as props or is in the URL, update the projectIds in the redux state via the updateProjectIds action creator
@@ -224,9 +257,11 @@ class DiscoveryView extends React.Component {
     // ensure that currentDisplay defaults to "table" if they switch to a different view,
     // since the PLQC display only exists when viewing a single project.
     if (this.state.currentDisplay === "plqc" && !projectId) {
+      // @ts-expect-error Cannot assign to 'currentDisplay' because it is a read-only property
       this.state.currentDisplay = "table";
     }
     if (!this.state.sampleActiveColumnsByWorkflow) {
+      // @ts-expect-error Cannot assign to 'sampleActiveColumnsByWorkflow' because it is a read-only property
       this.state.sampleActiveColumnsByWorkflow = DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW;
     }
 
@@ -378,7 +413,10 @@ class DiscoveryView extends React.Component {
     };
   };
 
-  getWorkflowToDisplay = (initialWorkflow, countByWorkflow) => {
+  getWorkflowToDisplay = (
+    initialWorkflow: WORKFLOW_VALUES,
+    countByWorkflow: WorkflowCount,
+  ) => {
     // If default workflow does not have any samples, switch to a tab with samples
     // Order to check tabs is SHORT_READ_MNGS, LONG_READ_MNGS, CONSENSUS_GENOME, then AMR
     const allowedFeatures = this.context?.allowedFeatures || [];
@@ -435,14 +473,14 @@ class DiscoveryView extends React.Component {
     };
   }
 
-  getConditionsFor = (tab, workflow = null) => {
+  getConditionsFor = (tab: string, workflow: WORKFLOW_VALUES = null) => {
     return {
       ...this.getConditions(workflow),
       ...this.getDataLayerOrderStateFieldsFor(tab, workflow),
     };
   };
 
-  getConditions = workflow => {
+  getConditions = (workflow?: WORKFLOW_VALUES) => {
     const { projectId, search, orderBy, orderDirection } = this.state;
     const { snapshotShareId } = this.props;
 
@@ -459,7 +497,7 @@ class DiscoveryView extends React.Component {
     };
   };
 
-  loadState = (store, key) => {
+  loadState = (store: Storage, key: string) => {
     try {
       return JSON.parse(store.getItem(key)) || {};
     } catch (e) {
@@ -470,7 +508,11 @@ class DiscoveryView extends React.Component {
     return {};
   };
 
-  overwriteCGDefaultActiveColumns({ stateObject }) {
+  overwriteCGDefaultActiveColumns({
+    stateObject,
+  }: {
+    stateObject: Partial<DiscoveryViewState>;
+  }) {
     const defaultCGColumns =
       DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[WORKFLOWS.CONSENSUS_GENOME.value];
 
@@ -493,14 +535,23 @@ class DiscoveryView extends React.Component {
     return getOrderDirKeyFor(currentTab, workflow);
   }
 
-  getOrderStateFieldsFor = (tab, workflow = null) => {
+  getOrderStateFieldsFor = (
+    tab: string,
+    workflow: WORKFLOW_VALUES = null,
+  ): {
+    orderBy: string | undefined;
+    orderDirection: SortDirectionType | undefined;
+  } => {
     const sessionState = this.loadState(sessionStorage, "DiscoveryViewOptions");
     const orderBy = sessionState[`${getOrderByKeyFor(tab, workflow)}`];
     const orderDirection = sessionState[`${getOrderDirKeyFor(tab, workflow)}`];
     return { orderBy, orderDirection };
   };
 
-  getDataLayerOrderStateFieldsFor = (tab, workflow = null) => {
+  getDataLayerOrderStateFieldsFor = (
+    tab: string,
+    workflow: WORKFLOW_VALUES = null,
+  ) => {
     const { orderBy, orderDirection: orderDir } = this.getOrderStateFieldsFor(
       tab,
       workflow,
@@ -594,7 +645,7 @@ class DiscoveryView extends React.Component {
     if (urlQuery) {
       urlQuery = `?${urlQuery}`;
     }
-    let prefix = snapshotShareId ? this.getSnapshotPrefix() : `/${domain}`;
+    const prefix = snapshotShareId ? this.getSnapshotPrefix() : `/${domain}`;
 
     // History state may include some small fields that enable direct loading of previous pages
     // from browser history without having to request those fields from server (e.g. project)
@@ -634,11 +685,13 @@ class DiscoveryView extends React.Component {
     return firstSignIn && !localStorage.getItem("DiscoveryViewSeenBefore");
   };
 
-  preparedFilters = () => {
+  preparedFilters = (): FilterList => {
     const { allowedFeatures = [] } = this.context || {};
     const { filters } = this.state;
-    let preparedFilters = mapKeys(replace("Selected", ""), filters);
-
+    const preparedFilters = (mapKeys(
+      replace("Selected", ""),
+      filters,
+    ) as unknown) as FiltersPreFormatting;
     // Time is an exception: we translate values into date ranges
     if (preparedFilters.time) {
       const startDate = {
@@ -648,7 +701,7 @@ class DiscoveryView extends React.Component {
         "6_month": () => moment().subtract(6, "months"),
         "1_year": () => moment().subtract(1, "years"),
       };
-
+      // @ts-expect-error Type 'any[]' is not assignable to type 'string'.
       preparedFilters.time = [
         startDate[preparedFilters.time]().format("YYYYMMDD"),
         moment()
@@ -663,6 +716,7 @@ class DiscoveryView extends React.Component {
 
       if (allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)) {
         mapKey = "id";
+        // @ts-expect-error Property 'taxaLevels' does not exist on type 'FiltersPreFormatting'.
         preparedFilters.taxaLevels = map("level", preparedFilters.taxon);
       }
 
@@ -695,11 +749,10 @@ class DiscoveryView extends React.Component {
         [],
       );
     }
-
-    return preparedFilters;
+    return (preparedFilters as unknown) as FilterList;
   };
 
-  resetData = ({ callback } = {}) => {
+  resetData = ({ callback }: { callback?(): void } = {}) => {
     const { domain } = this.props;
     const conditions = this.getConditions();
     const allowedFeatures = this.context?.allowedFeatures || [];
@@ -822,7 +875,9 @@ class DiscoveryView extends React.Component {
     }
   };
 
-  resetSamplesView = () => this.samplesView?.current?.reset();
+  resetSamplesView = () => {
+    this.samplesView?.current?.reset();
+  };
 
   resetSamplesData = () => {
     const { workflow } = this.state;
@@ -932,7 +987,7 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  refreshSampleData = workflowTypeToUpdate => {
+  refreshSampleData = (workflowTypeToUpdate: WORKFLOW_VALUES) => {
     const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
     const collectionToUpdate = configToUpdate.objectCollection;
     this.setState(prevState => {
@@ -960,7 +1015,7 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  refreshWorkflowRunData = workflowTypeToUpdate => {
+  refreshWorkflowRunData = (workflowTypeToUpdate: WORKFLOW_VALUES) => {
     const configToUpdate = this.configForWorkflow[workflowTypeToUpdate];
     const collectionToUpdate = configToUpdate.objectCollection;
 
@@ -1106,11 +1161,12 @@ class DiscoveryView extends React.Component {
       filteredVisualizationCount,
     } = this.state;
 
-    const renderTab = (label, count) => {
+    const renderTab = (label: string, count: number | string) => {
       return (
         <Tab data-testid={label.toLowerCase()} label={label} count={count} />
       );
     };
+
     return compact([
       !projectId && {
         label: renderTab("Projects", filteredProjectCount || "-"),
@@ -1128,7 +1184,7 @@ class DiscoveryView extends React.Component {
     ]);
   };
 
-  handleTabChange = currentTabIndex => {
+  handleTabChange = (currentTabIndex: string) => {
     const { mapSidebarTab, workflow } = this.state;
     const currentTab = this.computeTabs()[currentTabIndex].value;
     this.setState(
@@ -1151,7 +1207,13 @@ class DiscoveryView extends React.Component {
     }
   };
 
-  handleFilterChange = ({ selectedFilters, onFilterChangeCallback = null }) => {
+  handleFilterChange = ({
+    selectedFilters,
+    onFilterChangeCallback = null,
+  }: {
+    selectedFilters: SelectedFilters | Record<string, never>;
+    onFilterChangeCallback?: (filteredSampleCount: $TSFixMeUnknown) => void;
+  }) => {
     this.setState({ filters: selectedFilters }, () => {
       this.updateBrowsingHistory("replace");
       this.resetDataFromFilterChange({
@@ -1163,7 +1225,7 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleSampleActiveColumnsChange = activeColumns => {
+  handleSampleActiveColumnsChange = (activeColumns: string[]) => {
     const { workflow, sampleActiveColumnsByWorkflow } = this.state;
 
     const previousColumns = sampleActiveColumnsByWorkflow[workflow];
@@ -1179,7 +1241,10 @@ class DiscoveryView extends React.Component {
 
   // From the right pane sidebar, we'll add the filter value they click on if not already selected.
   // Don't call this for single selection filters.
-  handleMetadataFilterClick = (field, value) => {
+  handleMetadataFilterClick = (
+    field: keyof FiltersPreFormatting,
+    value: $TSFixMeUnknown,
+  ) => {
     const { filters: selectedFilters } = this.state;
 
     const key = `${field}Selected`;
@@ -1194,15 +1259,15 @@ class DiscoveryView extends React.Component {
   };
 
   handleSearchSelected = (
-    { key, value, text, sdsTaxonFilterData },
-    currentEvent,
+    { key, value, text, sdsTaxonFilterData }: $TSFixMe,
+    currentEvent: $TSFixMe,
   ) => {
     const { allowedFeatures = [] } = this.context || {};
     const { filters, search } = this.state;
 
     const dimensions = this.getCurrentDimensions();
 
-    let newFilters = clone(filters);
+    const newFilters = clone(filters);
     const selectedKey = `${key}Selected`;
     let filtersChanged = false;
     switch (key) {
@@ -1272,10 +1337,10 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleStringSearch = search => {
+  handleStringSearch = (search: string) => {
     const { search: currentSearch } = this.state;
 
-    let parsedSearch = (search && search.trim()) || null;
+    const parsedSearch = (search && search.trim()) || null;
     if (currentSearch !== parsedSearch) {
       this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
@@ -1305,7 +1370,7 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleProjectSelected = ({ project }) => {
+  handleProjectSelected = ({ project }: { project: Project }) => {
     const { mapSidebarTab, workflow } = this.state;
     const { updateDiscoveryProjectId } = this.props;
 
@@ -1330,7 +1395,7 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  handleObjectSelected = ({ object, currentEvent }) => {
+  handleObjectSelected = ({ object, currentEvent }: $TSFixMe) => {
     const { snapshotShareId, history: RouterHistory } = this.props;
     const { filters, workflow, workflowEntity } = this.state;
     const {
@@ -1368,7 +1433,7 @@ class DiscoveryView extends React.Component {
       });
     }
 
-    let url = generateUrlToSampleView({
+    const url = generateUrlToSampleView({
       workflow,
       sampleId,
       workflowRunId,
@@ -1381,6 +1446,7 @@ class DiscoveryView extends React.Component {
       openUrl(url, currentEvent);
     } else {
       // Otherwise navigate via React Router:
+      // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
       RouterHistory.push(url);
     }
   };
@@ -1390,7 +1456,7 @@ class DiscoveryView extends React.Component {
     return snapshotShareId ? `/pub/${snapshotShareId}` : "";
   };
 
-  handleProjectUpdated = ({ project }) => {
+  handleProjectUpdated = ({ project }: { project: Project }) => {
     this.dataLayer.projects.update(project);
     this.setState({
       project,
@@ -1406,17 +1472,17 @@ class DiscoveryView extends React.Component {
     }[currentTab];
   };
 
-  getClientSideSuggestions = async query => {
+  getClientSideSuggestions = async (query: string) => {
     const dimensions = this.getCurrentDimensions();
 
-    let suggestions = {};
+    const suggestions = {};
     const re = new RegExp(escapeRegExp(query), "i");
     ["host", "tissue", "locationV2"].forEach(category => {
-      let dimension = find({ dimension: category }, dimensions);
+      const dimension = find({ dimension: category }, dimensions);
       if (dimension) {
         const results = dimension.values
-          .filter(entry => re.test(entry.text))
-          .map(entry => ({
+          .filter((entry: $TSFixMe) => re.test(entry.text))
+          .map((entry: $TSFixMe) => ({
             category,
             id: entry.value,
             title: entry.text,
@@ -1434,7 +1500,7 @@ class DiscoveryView extends React.Component {
     return suggestions;
   };
 
-  getName = category => {
+  getName = (category: string) => {
     if (category === "locationV2") {
       return "location";
     } else if (category === "tissue") {
@@ -1445,16 +1511,16 @@ class DiscoveryView extends React.Component {
     }
   };
 
-  handleProjectDescriptionSave = value => {
+  handleProjectDescriptionSave = (value: string) => {
     this.setState({
       project: { ...this.state.project, description: value },
     });
   };
 
-  getServerSideSuggestions = async query => {
+  getServerSideSuggestions = async (query: string) => {
     const { domain } = this.props;
 
-    let results = await getSearchSuggestions({
+    const results = await getSearchSuggestions({
       // NOTE: backend also supports "tissue", "location", "host" and more
       categories: ["sample", "project", "taxon"],
       query,
@@ -1463,7 +1529,7 @@ class DiscoveryView extends React.Component {
     return results;
   };
 
-  handleSearchTriggered = async query => {
+  handleSearchTriggered = async (query: string) => {
     const [clientSideSuggestions, serverSideSuggestions] = await Promise.all([
       // client side: for dimensions (host, location, tissue)
       this.getClientSideSuggestions(query),
@@ -1482,13 +1548,13 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  handleDisplaySwitch = currentDisplay => {
+  handleDisplaySwitch = (currentDisplay: string) => {
     this.setState({ currentDisplay }, () => {
       this.updateBrowsingHistory("replace");
     });
   };
 
-  handleMapTooltipTitleClick = locationId => {
+  handleMapTooltipTitleClick = (locationId: number) => {
     const { currentTab } = this.state;
     this.setState(
       {
@@ -1502,7 +1568,7 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  handleMapMarkerClick = locationId => {
+  handleMapMarkerClick = (locationId: number) => {
     this.setState(
       {
         mapPreviewedLocationId: locationId,
@@ -1543,7 +1609,7 @@ class DiscoveryView extends React.Component {
         mapSidebarSampleStats: {},
       });
     } else {
-      let conditions = this.getConditions();
+      const conditions = this.getConditions();
       conditions.filters.locationV2 = [
         mapLocationData[mapPreviewedLocationId].name,
       ];
@@ -1556,7 +1622,7 @@ class DiscoveryView extends React.Component {
     }
   };
 
-  handlePLQCHistogramBarClick = sampleIds => {
+  handlePLQCHistogramBarClick = (sampleIds: string[]) => {
     this.setState(
       {
         plqcPreviewedSamples: sampleIds,
@@ -1574,6 +1640,7 @@ class DiscoveryView extends React.Component {
     const conditions = this.getConditions();
 
     if (plqcPreviewedSamples && plqcPreviewedSamples.length > 0) {
+      // @ts-expect-error ts-migrate(2339) FIXME: Property 'sampleIds' does not exist on type '{ pro... Remove this comment to see the full error message
       conditions.sampleIds = plqcPreviewedSamples;
       this.mapPreviewSamples = this.dataLayer.samples.createView({
         conditions,
@@ -1615,7 +1682,7 @@ class DiscoveryView extends React.Component {
         mapSidebarProjectDimensions: [],
       });
     } else {
-      let conditions = this.getConditions();
+      const conditions = this.getConditions();
       conditions.filters.locationV2 = [
         mapLocationData[mapPreviewedLocationId].name,
       ];
@@ -1639,6 +1706,7 @@ class DiscoveryView extends React.Component {
     // Fetch stats and dimensions for the map sidebar. Special request with the current filters
     // and the previewed location.
     const params = this.getConditions();
+    // @ts-expect-error Type 'string' is not assignable to type 'string[]'.
     params.filters["locationV2"] = mapLocationData[mapPreviewedLocationId].name;
     const [
       { sampleStats },
@@ -1661,7 +1729,7 @@ class DiscoveryView extends React.Component {
     this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
   };
 
-  handleSelectedSamplesUpdate = selectedSampleIds => {
+  handleSelectedSamplesUpdate = (selectedSampleIds: Set<number>) => {
     const { workflow, selectedSampleIdsByWorkflow } = this.state;
     this.setState({
       selectedSampleIdsByWorkflow: {
@@ -1671,7 +1739,13 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleSortColumn = ({ sortBy, sortDirection }) => {
+  handleSortColumn = ({
+    sortBy,
+    sortDirection,
+  }: {
+    sortBy: string;
+    sortDirection: SortDirectionType;
+  }) => {
     const { domain } = this.props;
     const {
       currentTab,
@@ -1712,7 +1786,8 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleMapSidebarTabChange = mapSidebarTab => this.setState({ mapSidebarTab });
+  handleMapSidebarTabChange = (mapSidebarTab: string) =>
+    this.setState({ mapSidebarTab });
 
   handleClearFilters = () => {
     this.setState({ filters: {}, search: null }, () => {
@@ -1721,13 +1796,13 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleMapLevelChange = mapLevel => {
+  handleMapLevelChange = (mapLevel: string) => {
     const { rawMapLocationData, currentTab } = this.state;
 
     const ids = currentTab === TAB_SAMPLES ? "sample_ids" : "project_ids";
-    const clusteredData = {};
+    const clusteredData: DiscoveryViewState["rawMapLocationData"] = {};
 
-    const copyLocation = entry => {
+    const copyLocation = (entry: MapEntry) => {
       return {
         ...entry,
         [ids]: Object.assign([], entry[ids]),
@@ -1735,7 +1810,7 @@ class DiscoveryView extends React.Component {
       };
     };
 
-    const addToAncestor = (entry, ancestorLevel) => {
+    const addToAncestor = (entry: MapEntry, ancestorLevel: string) => {
       const ancestorId = entry[`${ancestorLevel}_id`];
       if (ancestorId && rawMapLocationData[ancestorId]) {
         if (!clusteredData[ancestorId]) {
@@ -1869,11 +1944,11 @@ class DiscoveryView extends React.Component {
     return null;
   };
 
-  getNoDataBannerMessage = pipelineLabel => {
+  getNoDataBannerMessage = (pipelineLabel: string) => {
     return `No samples were processed by the ${pipelineLabel} Pipeline.`;
   };
 
-  getNoDataLinks = pluralizedPipelineLabel => {
+  getNoDataLinks = (pluralizedPipelineLabel: string) => {
     return [
       {
         href: "/samples/upload",
@@ -1881,6 +1956,7 @@ class DiscoveryView extends React.Component {
       },
     ];
   };
+
   renderNoDataWorkflowBanner = () => {
     const { workflow } = this.state;
     const {
@@ -1901,7 +1977,7 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  getNoSearchResultsBannerData = type => {
+  getNoSearchResultsBannerData = (type: string) => {
     let bannerData = {
       searchType: "",
       icon: null,
@@ -1962,7 +2038,7 @@ class DiscoveryView extends React.Component {
     };
   };
 
-  renderNoSearchResultsBanner = type => {
+  renderNoSearchResultsBanner = (type: string) => {
     const {
       searchType,
       icon,
@@ -2006,14 +2082,16 @@ class DiscoveryView extends React.Component {
     this.resetSamplesView();
   };
 
-  handleWorkflowTabChange = workflowTabIndex => {
-    let { currentDisplay, currentTab } = this.state;
+  handleWorkflowTabChange = (workflowTabIndex: number) => {
+    let { currentDisplay } = this.state;
+    const { currentTab } = this.state;
 
     const workflow = this.computeWorkflowTabs()[workflowTabIndex].value;
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
     const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
     // PLQC is currently only available for short read mNGS samples
     const plqcWorkflows = [WORKFLOWS.SHORT_READ_MNGS];
+    // @ts-expect-error Argument of type 'string' is not assignable to parameter of type
     if (currentDisplay === DISPLAY_PLQC && !plqcWorkflows.includes(workflow)) {
       currentDisplay = "table";
     }
@@ -2060,7 +2138,8 @@ class DiscoveryView extends React.Component {
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
       const isBeta = workflowIsBeta(name);
 
-      let workflowCount = filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
+      let workflowCount: number | string =
+        filteredSampleCountsByWorkflow[WORKFLOWS[name].value];
 
       // This count is set to null when we reset data, so show "-" as loading state.
       // This is the same pattern used for the top level tabs.
@@ -2098,7 +2177,11 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleNewAmrCreationsFromMngs = ({ numAmrRunsCreated }) => {
+  handleNewAmrCreationsFromMngs = ({
+    numAmrRunsCreated,
+  }: {
+    numAmrRunsCreated: number;
+  }) => {
     // When AMR workflow runs are kicked off from existing mNGS, we need to update the counts appropriately
     this.setState(
       ({
@@ -2263,6 +2346,7 @@ class DiscoveryView extends React.Component {
                   mapLocationData={mapLocationData}
                   mapPreviewedLocationId={mapPreviewedLocationId}
                   mapTilerKey={mapTilerKey}
+                  // @ts-expect-error workflowObjects should be a ObjectCollectionView type
                   objects={workflowObjects}
                   onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                   onClearFilters={this.handleClearFilters}
@@ -2383,7 +2467,6 @@ class DiscoveryView extends React.Component {
               allowedFeatures={allowedFeatures}
               currentTab={mapSidebarTab}
               discoveryCurrentTab={currentTab}
-              domain={domain}
               loading={loading}
               onFilterClick={this.handleMetadataFilterClick}
               onProjectSelected={this.handleProjectSelected}
@@ -2505,7 +2588,6 @@ class DiscoveryView extends React.Component {
             onFilterToggle={this.handleFilterToggle}
             onStatsToggle={this.handleStatsToggle}
             onSearchTriggered={this.handleSearchTriggered}
-            onSearchSuggestionsReceived={this.handleSearchSuggestionsReceived}
             onSearchResultSelected={this.handleSearchSelected}
             onSearchEnterPressed={this.handleStringSearch}
             onTabChange={this.handleTabChange}
@@ -2519,8 +2601,10 @@ class DiscoveryView extends React.Component {
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
             {showFilters && dimensions && (
+              // @ts-expect-error Types of property 'hostSelected' are incompatible.
               <DiscoveryFilters
                 {...mapValues(
+                  // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
                   dim => dim.values,
                   keyBy("dimension", dimensions),
                 )}
@@ -2562,18 +2646,6 @@ class DiscoveryView extends React.Component {
   }
 }
 
-DiscoveryView.propTypes = {
-  admin: PropTypes.bool,
-  domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
-  history: PropTypes.object,
-  mapTilerKey: PropTypes.string,
-  projectId: PropTypes.number,
-  snapshotProjectDescription: PropTypes.string,
-  snapshotProjectName: PropTypes.string,
-  snapshotShareId: PropTypes.string,
-  updateDiscoveryProjectId: PropTypes.func,
-};
-
 DiscoveryView.contextType = UserContext;
 
 const mapDispatchToProps = {
@@ -2583,6 +2655,6 @@ const mapDispatchToProps = {
 // Don't need mapStateToProps yet so pass in null
 const connectedComponent = connect(null, mapDispatchToProps)(DiscoveryView);
 
-connectedComponent.name = "DiscoveryView";
+(connectedComponent.name as string) = "DiscoveryView";
 
 export default withRouter(connectedComponent);

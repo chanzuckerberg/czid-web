@@ -48,13 +48,13 @@ export const workflowIsWorkflowRunEntity = (workflow: WORKFLOW_VALUES) => {
 };
 
 export const WORKFLOW_ORDER = [
-  "SHORT_READ_MNGS",
-  "LONG_READ_MNGS",
-  "CONSENSUS_GENOME",
-  "AMR",
+  "SHORT_READ_MNGS" as const,
+  "LONG_READ_MNGS" as const,
+  "CONSENSUS_GENOME" as const,
+  "AMR" as const,
 ];
 
-export const workflowIsBeta = (workflow: WORKFLOW_VALUES) => {
+export const workflowIsBeta = (workflow: keyof typeof WORKFLOWS) => {
   return ["AMR", "LONG_READ_MNGS"].includes(workflow);
 };
 

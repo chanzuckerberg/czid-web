@@ -76,4 +76,10 @@ export interface ThresholdConditions {
   metricDisplay: string;
 }
 
+export interface ThresholdForAPI {
+  metric: string;
+  count_type: string;
+  operator: ">=" | "<=";
+  value: string;
+}
 export default ThresholdMap;

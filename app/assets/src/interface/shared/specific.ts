@@ -155,11 +155,22 @@ export interface PipelineRun {
   host_subtracted: string;
 }
 
-export interface Project extends NumberId {
-  name: string;
-  public_access?: 1 | 0;
+export interface Project {
+  created_at?: DateString;
+  creator?: string;
+  creator_id?: number;
   description?: string;
+  editable: boolean;
+  hosts?: string[];
+  id: number;
+  locations?: string[];
   number_of_samples?: number;
+  name?: string;
+  owner?: string;
+  public_access?: 1 | 0;
+  sample_counts?: { [key: string]: number };
+  tissues?: string[];
+  users?: { email: string; name: string }[];
 }
 
 export interface RawMetadata {

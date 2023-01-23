@@ -2267,7 +2267,6 @@ const connectedComponent = connect(
   mapDispatchToProps,
 )(SamplesHeatmapView);
 
-// @ts-expect-error ts-migrate(2540) FIXME: Cannot assign to 'name' because it is a read-only ... Remove this comment to see the full error message
-connectedComponent.name = "SamplesHeatmapView";
+(connectedComponent.name as string) = "SamplesHeatmapView";
 
 export default connectedComponent;

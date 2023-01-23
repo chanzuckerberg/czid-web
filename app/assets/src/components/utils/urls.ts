@@ -1,10 +1,10 @@
 import { find, isEmpty, map, toLower, pick, values } from "lodash/fp";
 
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WORKFLOWS, WORKFLOW_VALUES } from "~/components/utils/workflows";
 import { URL_FIELDS } from "~/components/views/SampleView/constants";
 import { AnnotationFilterOption } from "~/interface/discovery";
-import { WorkflowValues, ThresholdFilterShape } from "~/interface/sample";
+import { ThresholdFilterShape } from "~/interface/sample";
 import { LabelVal, SelectedOptions } from "~/interface/shared";
 
 const urlParser = new UrlQueryParser(URL_FIELDS);
@@ -24,7 +24,7 @@ interface generateUrlOptions {
   sampleId: number;
   snapshotShareId?: string | null;
   tempSelectedOptions?: TempSelectedOptionsShape | Record<string, never>;
-  workflow?: WorkflowValues | null;
+  workflow?: WORKFLOW_VALUES | null;
   workflowRunId?: number | null;
 }
 

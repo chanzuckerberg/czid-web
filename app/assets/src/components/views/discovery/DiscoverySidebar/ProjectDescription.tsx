@@ -5,12 +5,13 @@ import React from "react";
 import { saveProjectDescription } from "~/api";
 import MetadataSection from "~/components/common/DetailsSidebar/SampleDetailsMode/MetadataSection";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
+import { Optional, Project } from "~/interface/shared";
 import Textarea from "~ui/controls/Textarea";
 import cs from "./project_description.scss";
 
 interface ProjectDescriptionProps {
-  project: { description: string; editable: boolean; id: number };
-  onProjectDescriptionSave?: $TSFixMeFunction;
+  project: Optional<Project, "id">;
+  onProjectDescriptionSave?: (value: string) => void;
 }
 
 interface ProjectDescriptionState {
