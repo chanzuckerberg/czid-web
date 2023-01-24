@@ -1509,7 +1509,7 @@ GEM
     fugit (1.7.2)
       et-orbi (~> 1, >= 1.2.7)
       raabro (~> 1.4)
-    globalid (1.0.0)
+    globalid (1.0.1)
       activesupport (>= 5.0)
     graphiql-rails (1.8.0)
       railties
@@ -1578,7 +1578,7 @@ GEM
     mime-types-data (3.2022.0105)
     mini_mime (1.1.2)
     mini_portile2 (2.8.0)
-    minitest (5.16.3)
+    minitest (5.17.0)
     mono_logger (1.1.1)
     multi_json (1.15.0)
     multi_xml (0.6.0)
