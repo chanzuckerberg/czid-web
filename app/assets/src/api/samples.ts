@@ -18,7 +18,7 @@ const GET_SAMPLES_QUERY = gql`
     $taxIds: [Int!]
     $taxLevels: [String!]
     $thresholdFilterInfo: String
-    $annotations: [String!]
+    $annotations: [Annotation!]
     $time: [String!]
     $tissue: [String!]
     $visibility: [String!]

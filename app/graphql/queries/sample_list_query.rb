@@ -22,7 +22,7 @@ module Queries
         argument :taxIds, [Integer], required: false
         argument :taxLevels, [String], required: false
         argument :thresholdFilterInfo, String, required: false
-        argument :annotations, [String], required: false
+        argument :annotations, [Types::AnnotationType], required: false
         argument :time, [String], required: false
         argument :tissue, [String], required: false
         argument :visibility, [String], required: false

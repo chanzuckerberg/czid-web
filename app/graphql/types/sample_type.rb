@@ -8,6 +8,10 @@ module Types
     field :workflowRunsCountByWorkflow, String, null: true
   end
 
+  class AnnotationType < Types::BaseInputObject
+    argument :name, String, required: true
+  end
+
   class SampleType < Types::BaseObject
     field :id, Int, null: false
     field :name, String, null: false

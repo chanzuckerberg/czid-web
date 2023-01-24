@@ -1,4 +1,6 @@
 module ParameterSanitization
+  include Types
+
   def sanitize_order_by(model, order_by, default = nil)
     return model.column_names.include?(order_by) ? order_by : default
   end
@@ -39,6 +41,10 @@ module ParameterSanitization
   end
 
   def get_annotation_name(annotation_filter)
-    return JSON.parse(annotation_filter)["name"].downcase.parameterize(separator: '_')
+    if annotation_filter.is_a?(String)
+      JSON.parse(annotation_filter)["name"].downcase.parameterize(separator: '_')
+    else
+      annotation_filter.name.downcase.parameterize(separator: '_') || null
+    end
   end
 end
