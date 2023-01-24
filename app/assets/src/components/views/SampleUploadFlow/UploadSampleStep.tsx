@@ -427,7 +427,8 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         });
       }
     }
-    const cleanedWorkflowName = workflow === WORKFLOWS.SHORT_READ_MNGS.value ? "mngs" : workflow;
+    const cleanedWorkflowName =
+      workflow === WORKFLOWS.SHORT_READ_MNGS.value ? "mngs" : workflow;
     trackEvent(`UploadSampleStep_${cleanedWorkflowName}-workflow_selected`);
   };
 

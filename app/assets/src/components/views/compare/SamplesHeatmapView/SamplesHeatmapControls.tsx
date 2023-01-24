@@ -16,6 +16,7 @@ import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import List from "~/components/ui/List";
+import { HEATMAP_ELASTICSEARCH_FEATURE } from "~/components/utils/features";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
@@ -85,7 +86,7 @@ const SamplesHeatmapControls = ({
   prefilterConstants,
 }: SamplesHeatmapControlsProps) => {
   const { allowedFeatures = [] } = useContext(UserContext) || {};
-  const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+  const useHeatmapES = allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE);
 
   const renderPresetTooltip = ({
     component,

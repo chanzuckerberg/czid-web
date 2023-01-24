@@ -35,7 +35,10 @@ import {
 } from "~/api/metadata";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import { AMR_V1_FEATURE } from "~/components/utils/features";
+import {
+  AMR_V1_FEATURE,
+  HEATMAP_ELASTICSEARCH_FEATURE,
+} from "~/components/utils/features";
 import { showToast } from "~/components/utils/toast";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
@@ -329,7 +332,8 @@ const SamplesView = forwardRef(function SamplesView(
             if (
               allowedFeatures.includes("taxon_heatmap_presets") &&
               option.text === "Taxon Heatmap" &&
-              selectedIds.size > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM
+              selectedIds.size > TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM &&
+              !allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE)
             ) {
               return (
                 <BareDropdown.Item

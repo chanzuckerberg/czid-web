@@ -38,6 +38,7 @@ import ArrayUtils from "~/components/utils/ArrayUtils";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
+import { HEATMAP_ELASTICSEARCH_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
 import {
@@ -625,7 +626,9 @@ class SamplesHeatmapView extends React.Component<
       background,
     } = this.state.selectedOptions;
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+    const useHeatmapES = allowedFeatures.includes(
+      HEATMAP_ELASTICSEARCH_FEATURE,
+    );
 
     // If using client-side filtering, the server should still return info
     // related to removed taxa in case the user decides to add the taxon back.
@@ -770,7 +773,9 @@ class SamplesHeatmapView extends React.Component<
   handleLoadingFailure = (err: $TSFixMe) => {
     const { allTaxonIds, sampleIds } = this.state;
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+    const useHeatmapES = allowedFeatures.includes(
+      HEATMAP_ELASTICSEARCH_FEATURE,
+    );
 
     this.setState({
       loading: false,
@@ -1376,7 +1381,9 @@ class SamplesHeatmapView extends React.Component<
 
   getTopTaxaPerSample(filteredTaxonIds: $TSFixMe, addedTaxonIds: $TSFixMe) {
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+    const useHeatmapES = allowedFeatures.includes(
+      HEATMAP_ELASTICSEARCH_FEATURE,
+    );
 
     // Fetch the top N taxa from each sample, sorted by the selected metric,
     // that passed all selected filters.
@@ -1828,7 +1835,9 @@ class SamplesHeatmapView extends React.Component<
 
   handleSelectedOptionsChange = (newOptions: $TSFixMe) => {
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+    const useHeatmapES = allowedFeatures.includes(
+      HEATMAP_ELASTICSEARCH_FEATURE,
+    );
 
     // When using heatmap ES, all filtering operations happen on the backend
     let frontendFilters = [];
@@ -1875,7 +1884,9 @@ class SamplesHeatmapView extends React.Component<
 
   updateFilters() {
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes("heatmap_elasticsearch");
+    const useHeatmapES = allowedFeatures.includes(
+      HEATMAP_ELASTICSEARCH_FEATURE,
+    );
     if (useHeatmapES) {
       this.filterTaxaES();
     } else {
