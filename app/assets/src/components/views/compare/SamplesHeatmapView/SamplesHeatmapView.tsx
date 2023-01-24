@@ -783,8 +783,11 @@ class SamplesHeatmapView extends React.Component<
     });
 
     const logSingleError = (e: $TSFixMe) => {
+      const errorMessage = `SamplesHeatmapView: Error loading heatmap data${
+        useHeatmapES ? " from ElasticSearch" : ""
+      }`;
       logError({
-        message: "SamplesHeatmapView: Error loading heatmap data",
+        message: errorMessage,
         details: {
           err: e,
           href: window.location.href,
@@ -792,6 +795,7 @@ class SamplesHeatmapView extends React.Component<
           sampleIds,
           status: e.status,
           statusText: e.statusText,
+          usesElasticSearch: useHeatmapES,
         },
       });
     };
