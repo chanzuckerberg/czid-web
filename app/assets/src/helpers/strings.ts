@@ -81,8 +81,7 @@ export function numberWithSiPrefix(value: number) {
   if (value < 1000) {
     formatted = value.toString();
   } else if (value < 1000000) {
-    // display value in thousands, without decimals
-    formatted = ((value / 1000) >>> 0).toString().concat("K");
+    formatted = (value / 1000).toString().concat("K");
   } else {
     formatted = (value / 1000000).toString().concat("M");
   }
