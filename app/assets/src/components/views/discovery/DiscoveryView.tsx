@@ -156,6 +156,7 @@ class DiscoveryView extends React.Component<
   DiscoveryViewState
 > {
   amrWorkflowRuns: $TSFixMe;
+  cgWorkflowRuns: $TSFixMe;
   configForWorkflow: ConfigForWorkflow;
   dataLayer: DiscoveryDataLayer;
   longReadMngsSamples: $TSFixMe;
@@ -170,7 +171,6 @@ class DiscoveryView extends React.Component<
   visualizations: $TSFixMe;
   visualizationsView: VisualizationsView;
   workflowEntity: string;
-  workflowRuns: $TSFixMe;
   constructor(
     props: DiscoveryViewProps,
     context: React.ContextType<typeof UserContext>,
@@ -284,7 +284,7 @@ class DiscoveryView extends React.Component<
       displayName: WORKFLOWS.SHORT_READ_MNGS.value,
     });
 
-    this.workflowRuns = this.dataLayer.workflowRuns.createView({
+    this.cgWorkflowRuns = this.dataLayer.cgWorkflowRuns.createView({
       conditions: this.getConditionsFor(
         TAB_SAMPLES,
         WORKFLOWS.CONSENSUS_GENOME.value,
@@ -345,7 +345,7 @@ class DiscoveryView extends React.Component<
     this.samples.loadPage(0);
     if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
       this.projects.loadPage(0);
-      this.workflowRuns.loadPage(0);
+      this.cgWorkflowRuns.loadPage(0);
       this.visualizations.loadPage(0);
 
       if (allowedFeatures.includes(AMR_V1_FEATURE)) {
@@ -382,7 +382,7 @@ class DiscoveryView extends React.Component<
       },
       [WORKFLOWS.CONSENSUS_GENOME.value]: {
         bannerTitle: WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
-        objectCollection: this.workflowRuns,
+        objectCollection: this.cgWorkflowRuns,
         noDataLinks: this.getNoDataLinks(
           WORKFLOWS.CONSENSUS_GENOME.pluralizedLabel,
         ),
@@ -774,7 +774,7 @@ class DiscoveryView extends React.Component<
         conditions: this.getConditionsFor(TAB_VISUALIZATIONS),
         loadFirstPage: true,
       });
-      this.workflowRuns.reset({
+      this.cgWorkflowRuns.reset({
         conditions: this.getConditionsFor(
           TAB_SAMPLES,
           WORKFLOWS.CONSENSUS_GENOME.value,
@@ -2250,7 +2250,7 @@ class DiscoveryView extends React.Component<
     const tableHasLoaded =
       amrHasLoaded &&
       longReadSamplesHaveLoaded &&
-      !this.workflowRuns.isLoading() &&
+      !this.cgWorkflowRuns.isLoading() &&
       !this.samples.isLoading() &&
       currentDisplay === "table";
 

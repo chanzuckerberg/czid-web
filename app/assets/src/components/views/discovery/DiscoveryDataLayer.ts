@@ -245,12 +245,12 @@ class ObjectCollectionView<T extends MustHaveId> {
 
 class DiscoveryDataLayer {
   amrWorkflowRuns: $TSFixMe;
+  cgWorkflowRuns: $TSFixMe;
   domain: string;
   longReadMngsSamples: $TSFixMe;
   projects: $TSFixMe;
   samples: $TSFixMe;
   visualizations: $TSFixMe;
-  workflowRuns: $TSFixMe;
   constructor(domain: string) {
     // TODO: Move domain to conditions object
     this.domain = domain;
@@ -262,7 +262,7 @@ class DiscoveryDataLayer {
       domain,
       this.fetchVisualizations,
     );
-    this.workflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
+    this.cgWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
     this.amrWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
   }
 
