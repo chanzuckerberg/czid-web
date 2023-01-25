@@ -4,7 +4,6 @@ import BacteriaCultureIcon from "./BacteriaCultureIcon";
 import CZIDLogoReversed from "./CZIDLogoReversed";
 import IconAlert from "./IconAlert";
 import IconAlertSmall from "./IconAlertSmall";
-import IconAlignmentSmall from "./IconAlignmentSmall";
 import IconAnalyzeFigure from "./IconAnalyzeFigure";
 import IconArrowDownSmall from "./IconArrowDownSmall";
 import IconArrowPipelineStage from "./IconArrowPipelineStage";
@@ -13,14 +12,11 @@ import IconArrowUpSmall from "./IconArrowUpSmall";
 import IconBarChartHorizontal3Small from "./IconBarChartHorizontal3Small";
 import IconBiohubLogo from "./IconBiohubLogo";
 import IconBlast from "./IconBlast";
-import IconBlastSmall from "./IconBlastSmall";
 import IconChartSmall from "./IconChartSmall";
 import IconCheckSmall from "./IconCheckSmall";
 import IconClose from "./IconClose";
 import IconCloseSmall from "./IconCloseSmall";
-import IconConsensusSmall from "./IconConsensusSmall";
 import IconCopySmall from "./IconCopySmall";
-import IconCoverage from "./IconCoverage";
 import IconCziLogo from "./IconCziLogo";
 import IconDoubleQuotes from "./IconDoubleQuotes";
 import IconDownload from "./IconDownload";
@@ -34,7 +30,6 @@ import IconMatchesFigure from "./IconMatchesFigure";
 import IconMinusSmall from "./IconMinusSmall";
 import IconMobileNavClose from "./IconMobileNavClose";
 import IconPercentageSmall from "./IconPercentageSmall";
-import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
 import IconPlusCircleSmall from "./IconPlusCircleSmall";
 import IconPlusSmall from "./IconPlusSmall";
 import IconSampleFigure from "./IconSampleFigure";
@@ -59,21 +54,17 @@ export const ICONS_TAXONOMY = {
     BacteriaCultureIcon,
     IconAlert,
     IconAlertSmall,
-    IconAlignmentSmall,
     IconAnalyzeFigure,
     IconArrowDownSmall,
     IconArrowPipelineStage,
     IconArrowUpSmall,
     IconBarChartHorizontal3Small,
     IconBlast,
-    IconBlastSmall,
     IconChartSmall,
     IconCheckSmall,
     IconClose,
     IconCloseSmall,
-    IconConsensusSmall,
     IconCopySmall,
-    IconCoverage,
     IconDoubleQuotes,
     IconDownload,
     IconDownloadSmall,
@@ -86,7 +77,6 @@ export const ICONS_TAXONOMY = {
     IconMinusSmall,
     IconMobileNavClose,
     IconPercentageSmall,
-    IconPhyloTreeSmall,
     IconPlusCircleSmall,
     IconPlusSmall,
     IconSampleFigure,
@@ -123,7 +113,6 @@ export {
   CZIDLogoReversed,
   IconAlert,
   IconAlertSmall,
-  IconAlignmentSmall,
   IconAnalyzeFigure,
   IconArrowDownSmall,
   IconArrowPipelineStage,
@@ -132,14 +121,11 @@ export {
   IconBarChartHorizontal3Small,
   IconBiohubLogo,
   IconBlast,
-  IconBlastSmall,
   IconChartSmall,
   IconCheckSmall,
   IconClose,
   IconCloseSmall,
-  IconConsensusSmall,
   IconCopySmall,
-  IconCoverage,
   IconCziLogo,
   IconDoubleQuotes,
   IconDownload,
@@ -153,7 +139,6 @@ export {
   IconMinusSmall,
   IconMobileNavClose,
   IconPercentageSmall,
-  IconPhyloTreeSmall,
   IconPlusCircleSmall,
   IconPlusSmall,
   IconSampleFigure,

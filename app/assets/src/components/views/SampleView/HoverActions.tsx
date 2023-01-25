@@ -1,5 +1,6 @@
 // These are the buttons that appear on a Report table row when hovered.
 import cx from "classnames";
+import { ButtonIcon } from "czifui";
 import { filter, pick, size } from "lodash/fp";
 import React, { useContext, useState } from "react";
 
@@ -16,14 +17,6 @@ import {
   CONSENSUS_GENOME_FEATURE,
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
-import {
-  IconAlignmentSmall,
-  IconBlastSmall,
-  IconConsensusSmall,
-  IconCoverage,
-  IconDownloadSmall,
-  IconPhyloTreeSmall,
-} from "~ui/icons";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,
@@ -164,7 +157,7 @@ const HoverActions = ({
       ? {
           key: `coverage_viz_${params.taxId}`,
           message: "Coverage Visualization",
-          iconComponentClass: IconCoverage,
+          iconName: "barChartVertical4",
           handleClick: onCoverageVizClick,
           enabled: coverageVizEnabled,
           disabledMessage:
@@ -175,7 +168,7 @@ const HoverActions = ({
       : {
           key: `alignment_viz_${params.taxId}`,
           message: "Alignment Visualization",
-          iconComponentClass: IconAlignmentSmall,
+          iconName: "linesHorizontal",
           handleClick: onCoverageVizClick,
           enabled: coverageVizEnabled,
           disabledMessage:
@@ -186,7 +179,7 @@ const HoverActions = ({
     const HOVER_ACTIONS_BLAST_V1 = {
       key: `blast_${params.taxId}_v1`,
       message: "BLAST",
-      iconComponentClass: IconBlastSmall,
+      iconName: "searchLinesHorizontal",
       handleClick: handleBlastClick,
       enabled: true,
     };
@@ -194,7 +187,7 @@ const HoverActions = ({
     const HOVER_ACTIONS_BLAST = {
       key: `blast_${params.taxId}`,
       message: "BLASTN",
-      iconComponentClass: IconBlastSmall,
+      iconName: "searchLinesHorizontal",
       handleClick: handleBlastClick,
       enabled: !!ntContigs || !!ntReads,
       disabledMessage:
@@ -208,7 +201,7 @@ const HoverActions = ({
           Phylogenetic Analysis <BetaLabel />
         </div>
       ),
-      iconComponentClass: IconPhyloTreeSmall,
+      iconName: "treeHorizontal",
       handleClick: handlePhyloModalOpen,
       enabled: phyloTreeEnabled,
       disabledMessage:
@@ -221,7 +214,7 @@ const HoverActions = ({
         HOVER_ACTIONS_CONSENSUS = {
           key: `consensus_genome_${params.taxId}`,
           message: `Consensus Genome`,
-          iconComponentClass: IconConsensusSmall,
+          iconName: "linesDashed3Solid1",
           count: size(previousConsensusGenomeRuns),
           handleClick: handlePreviousConsensusGenomeClick,
           enabled: true,
@@ -230,7 +223,7 @@ const HoverActions = ({
         HOVER_ACTIONS_CONSENSUS = {
           key: `consensus_genome_${params.taxId}`,
           message: "Consensus Genome",
-          iconComponentClass: IconConsensusSmall,
+          iconName: "linesDashed3Solid1",
           handleClick: handleConsensusGenomeClick,
           enabled: !getConsensusGenomeError(),
           disabledMessage: getConsensusGenomeError(),
@@ -241,7 +234,7 @@ const HoverActions = ({
     const HOVER_ACTIONS_DOWNLOAD = {
       key: `download_${params.taxId}`,
       message: "Download Options",
-      iconComponentClass: IconDownloadSmall,
+      iconName: "download",
       options: [
         {
           text: "Contigs FASTA",
@@ -316,7 +309,7 @@ const HoverActions = ({
   // Render the hover action according to metadata.
   const renderHoverAction = (hoverAction: {
     key: string;
-    iconComponentClass: React.ComponentType<{ className: string }>;
+    iconName: string;
     divider: boolean;
     enabled: boolean;
     handleClick: $TSFixMeFunction;
@@ -331,54 +324,46 @@ const HoverActions = ({
     message: string;
     disabledMessage: string;
   }) => {
-    let trigger: JSX.Element, tooltipMessage: string;
-    const IconComponent = hoverAction.iconComponentClass;
-
     // Show a vertical divider
-    if (hoverAction.divider) {
-      return <span className={cs.divider} />;
-    }
+    if (hoverAction.divider) return <span className={cs.divider} />;
 
-    if (hoverAction.enabled) {
-      const onClickFn = () => hoverAction.handleClick(hoverAction.params || {});
+    const count = hoverAction.count ? (
+      <span className={cs.countCircle}>{hoverAction.count}</span>
+    ) : null;
 
-      const count = hoverAction.count ? (
-        <span className={cs.countCircle}>{hoverAction.count}</span>
-      ) : null;
+    const onClickFunction = () =>
+      hoverAction.handleClick(hoverAction.params || {});
 
-      // Support for a dropdown menu
-      if (!hoverAction.options) {
-        trigger = (
-          <div onClick={onClickFn} className={cs.actionDot} role="none">
-            <IconComponent className={cs.icon} />
-            {count}
-          </div>
-        );
-      } else {
-        trigger = (
-          <div onClick={onClickFn} className={cs.actionDot} role="none">
-            <BareDropdown
-              hideArrow
-              onOpen={() => setShowHoverActions(true)}
-              onClose={() => setShowHoverActions(false)}
-              trigger={<IconDownloadSmall className={cs.icon} />}
-              options={hoverAction.options}
-              onChange={hoverAction.onChange}
-            />
-          </div>
-        );
-      }
+    const buttonIconComponent = (
+      <div onClick={onClickFunction} className={cs.actionDot} role="none">
+        <ButtonIcon
+          sdsSize="small"
+          sdsType="primary"
+          sdsIcon={hoverAction.iconName}
+          onClick={onClickFunction}
+          disabled={!hoverAction.enabled}
+        />
+        {count}
+      </div>
+    );
 
-      tooltipMessage = hoverAction.message;
-    } else {
-      trigger = (
-        <div className={cs.actionDot}>
-          <IconComponent className={cx(cs.icon, cs.disabled)} />
-        </div>
-      );
+    // If the hoverActions contains options, display these options in a dropdown menu.
+    const trigger = hoverAction.options ? (
+      <BareDropdown
+        hideArrow
+        onOpen={() => setShowHoverActions(true)}
+        onClose={() => setShowHoverActions(false)}
+        trigger={buttonIconComponent}
+        options={hoverAction.options}
+        onChange={hoverAction.onChange}
+      />
+    ) : (
+      buttonIconComponent
+    );
 
-      tooltipMessage = hoverAction.disabledMessage;
-    }
+    const tooltipMessage = hoverAction.enabled
+      ? hoverAction.message
+      : hoverAction.disabledMessage;
 
     return (
       <BasicPopup

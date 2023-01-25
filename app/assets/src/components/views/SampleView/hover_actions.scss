@@ -37,28 +37,6 @@
     margin-left: $sds-spaces-s;
     border-left: 1px solid $sds-color-gray-300;
   }
-
-  .disabled {
-    color: $sds-color-gray-300;
-  }
-
-  .icon {
-    height: 14px;
-    width: 14px;
-    fill: $sds-color-primary-400;
-
-    &:hover {
-      fill: $sds-color-primary-600;
-    }
-
-    &.disabled {
-      fill: $sds-color-gray-300;
-    }
-
-    &:not(.disabled) {
-      cursor: pointer;
-    }
-  }
 }
 
 :global(.ui):global(.popup).hoverActionPopup {
