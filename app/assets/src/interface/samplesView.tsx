@@ -56,6 +56,35 @@ export interface SamplesViewProps {
   workflowEntity?: string;
 }
 
+export interface Conditions {
+  filters?: FilterList;
+  orderBy?: string;
+  orderDir?: SortDirectionType;
+  projectId?: number;
+  search?: string;
+  snapshotShareId?: string;
+  workflow?: WORKFLOW_VALUES;
+}
+
+export interface ViewProps {
+  conditions?: Conditions;
+  pageSize: number;
+  onViewChange: () => void;
+  displayName: string;
+}
+
+export interface FilterList {
+  annotations: Array<{ name: AnnotationValue }>;
+  host: Array<number>;
+  locationV2: Array<string>;
+  taxon: Array<number>;
+  taxonThresholds: Array<ThresholdForAPI>;
+  taxaLevels: Array<string>;
+  time: [string, string];
+  tissue: Array<string>;
+  visibility: string;
+}
+
 export interface Entry {
   collection_date: DateString;
   collection_location_v2: LocationObject;
@@ -83,21 +112,46 @@ export interface Entry {
   workflow: string;
 }
 
-export interface ViewProps<T> {
-  conditions: { entries?: T };
-  pageSize: number;
-  onViewChange: () => void;
-  displayName: string;
+export interface BaseRun {
+  collection_date: DateString;
+  collection_location_v2: LocationObject;
+  createdAt: DateString;
+  erccReads: number;
+  host: string;
+  id: number;
+  notes: string;
+  nucleotide_type: string;
+  privateUntil: DateString;
+  projectId: number;
+  sample: { name: string; project: string };
+  sample_type: string;
+  water_control: string;
 }
 
-export interface FilterList {
-  annotations: Array<{ name: AnnotationValue }>;
-  host: Array<number>;
-  locationV2: Array<string>;
-  taxon: Array<number>;
-  taxonThresholds: Array<ThresholdForAPI>;
-  taxaLevels: Array<string>;
-  time: [string, string];
-  tissue: Array<string>;
-  visibility: string;
+export interface BaseWorkflowRun extends BaseRun {
+  workflow: string;
+  status: string;
+}
+
+export interface CGRun extends BaseWorkflowRun {
+  wetlabProtocol: string;
+  technology: string;
+  referenceAccession: object;
+  medakaModel: string;
+}
+
+export interface PipelineTypeRun extends BaseRun {
+  duplicateCompressionRatio: number;
+  erccReads: number;
+  meanInsertSize: number;
+  nonHostReads: number;
+  pipelineVersion: string;
+  qcPercent: number;
+  totalReads: number;
+  totalRuntime: number;
+  subsampleFraction: number;
+}
+
+export interface SamplesViewHandle {
+  reset(): void;
 }

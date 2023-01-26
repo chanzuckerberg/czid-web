@@ -66,6 +66,7 @@ import {
   WORKFLOW_VALUES,
   WorkflowCount,
 } from "~/components/utils/workflows";
+import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import {
@@ -80,6 +81,13 @@ import {
   MapEntry,
   SelectedFilters,
 } from "~/interface/discoveryView";
+import {
+  PipelineTypeRun,
+  FilterList,
+  BaseWorkflowRun,
+  CGRun,
+  SamplesViewHandle,
+} from "~/interface/samplesView";
 import { Project } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
@@ -92,10 +100,11 @@ import {
 } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 
-import { FilterList } from "../../../interface/samplesView";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView/SamplesView";
-import VisualizationsView from "../visualizations/VisualizationsView";
+import VisualizationsView, {
+  Visualization,
+} from "../visualizations/VisualizationsView";
 import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
 import DiscoveryFilters from "./DiscoveryFilters";
 import DiscoveryHeader from "./DiscoveryHeader";
@@ -155,20 +164,20 @@ class DiscoveryView extends React.Component<
   DiscoveryViewProps,
   DiscoveryViewState
 > {
-  amrWorkflowRuns: $TSFixMe;
-  cgWorkflowRuns: $TSFixMe;
+  amrWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
+  cgWorkflowRuns: ObjectCollectionView<CGRun>;
   configForWorkflow: ConfigForWorkflow;
   dataLayer: DiscoveryDataLayer;
-  longReadMngsSamples: $TSFixMe;
+  longReadMngsSamples: ObjectCollectionView<PipelineTypeRun>;
   mapPreviewProjects: $TSFixMe;
   mapPreviewSamples: $TSFixMe;
   mapPreviewSidebar: MapPreviewSidebar;
-  projects: $TSFixMe;
+  projects: ObjectCollectionView<Project>;
   projectsView: ProjectsView;
-  samples: $TSFixMe;
-  samplesView: React.RefObject<$TSFixMe>;
+  samples: ObjectCollectionView<PipelineTypeRun>;
+  samplesView: React.RefObject<SamplesViewHandle>;
   urlParser: UrlQueryParser;
-  visualizations: $TSFixMe;
+  visualizations: ObjectCollectionView<Visualization>;
   visualizationsView: VisualizationsView;
   workflowEntity: string;
   constructor(

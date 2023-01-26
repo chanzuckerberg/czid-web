@@ -53,7 +53,11 @@ import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreat
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
-import { Entry, SamplesViewProps } from "~/interface/samplesView";
+import {
+  PipelineTypeRun,
+  SamplesViewProps,
+  SamplesViewHandle,
+} from "~/interface/samplesView";
 import { MetadataType } from "~/interface/shared";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { IconLoading } from "~ui/icons";
@@ -137,7 +141,7 @@ const SamplesView = forwardRef(function SamplesView(
     filtersSidebarOpen,
     sampleStatsSidebarOpen,
   }: SamplesViewProps,
-  ref,
+  ref: React.Ref<SamplesViewHandle>,
 ) {
   const userContext = useContext(UserContext);
   const { allowedFeatures, appConfig, admin } = userContext || {};
@@ -538,7 +542,10 @@ const SamplesView = forwardRef(function SamplesView(
         }
         return result;
       },
-      { eligible: [] as Entry[], ineligible: [] as Entry[] },
+      {
+        eligible: [] as PipelineTypeRun[],
+        ineligible: [] as PipelineTypeRun[],
+      },
       selectedObjects,
     );
 
@@ -580,7 +587,7 @@ const SamplesView = forwardRef(function SamplesView(
     }
   };
 
-  const isNotEligibleForAmrPipeline = (sample: Entry) => {
+  const isNotEligibleForAmrPipeline = (sample: PipelineTypeRun) => {
     const failedToUploadSample = !isEmpty(get("sample.uploadError", sample));
     const nonHostReadsUnavailable = !(
       get("sample.pipelineRunStatus", sample) === PipelineRunStatuses.Complete

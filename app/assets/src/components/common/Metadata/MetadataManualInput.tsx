@@ -26,7 +26,11 @@ import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import DataTable from "~/components/visualizations/table/DataTable";
-import { LocationObject, MetadataValue, Sample } from "~/interface/shared";
+import {
+  LocationObject,
+  MetadataValue,
+  SampleFromApi,
+} from "~/interface/shared";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import { IconPlusCircleSmall } from "~ui/icons";
 import MetadataInput from "./MetadataInput";
@@ -159,7 +163,11 @@ class MetadataManualInput extends React.Component<
   };
 
   // Update metadata field based on user's manual input.
-  updateMetadataField = (key: string, value: MetadataValue, sample: Sample) => {
+  updateMetadataField = (
+    key: string,
+    value: MetadataValue,
+    sample: SampleFromApi,
+  ) => {
     const newHeaders = union<string>([key], this.state.headersToEdit);
     const newFields = set(
       [sample.name, key],

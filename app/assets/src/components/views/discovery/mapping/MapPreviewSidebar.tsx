@@ -18,6 +18,8 @@ import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
+import { PipelineTypeRun } from "~/interface/samplesView";
+import { Project } from "~/interface/shared";
 import { ObjectCollectionView } from "../DiscoveryDataLayer";
 
 import cs from "./map_preview_sidebar.scss";
@@ -34,10 +36,10 @@ interface MapPreviewSidebarProps {
   onSelectionUpdate: $TSFixMeFunction;
   onTabChange?: $TSFixMeFunction;
   projectDimensions?: unknown[];
-  projects?: ObjectCollectionView;
+  projects?: ObjectCollectionView<Project>;
   projectStats?: object;
   sampleDimensions?: unknown[];
-  samples?: ObjectCollectionView;
+  samples?: ObjectCollectionView<PipelineTypeRun>;
   sampleStats?: object;
   selectedSampleIds?: Set<$TSFixMeUnknown>;
 }

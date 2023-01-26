@@ -13,7 +13,9 @@ class ObjectCollection<T extends MustHaveId> {
   _displayName: string;
   domain: string;
   entries: { [id: number]: T } | Record<string, never>;
-  fetchDataCallback: (params) => Promise<{ fetchedObjects; fetchedObjectIds }>;
+  fetchDataCallback: (
+    params,
+  ) => Promise<{ fetchedObjects: T[]; fetchedObjectIds: number[] }>;
   constructor(
     // domain of the collection (my data, all data, public, snapshot)
     domain: string,
@@ -35,7 +37,7 @@ class ObjectCollection<T extends MustHaveId> {
     this._displayName = displayName;
   }
 
-  createView = (viewProps: ViewProps<typeof this.entries>) => {
+  createView = (viewProps: ViewProps) => {
     return new ObjectCollectionView(this, viewProps);
   };
 
@@ -47,12 +49,12 @@ class ObjectCollection<T extends MustHaveId> {
 class ObjectCollectionView<T extends MustHaveId> {
   _activePromises: object;
   _collection: ObjectCollection<T>;
-  _conditions: ViewProps<typeof this.entries>["conditions"];
-  _displayName: ViewProps<typeof this.entries>["displayName"];
+  _conditions: ViewProps["conditions"];
+  _displayName: ViewProps["displayName"];
   _loading: boolean;
-  _onViewChange: ViewProps<typeof this.entries>["onViewChange"];
+  _onViewChange: ViewProps["onViewChange"];
   _orderedIds: number[];
-  _pageSize: ViewProps<typeof this.entries>["pageSize"];
+  _pageSize: ViewProps["pageSize"];
   constructor(
     collection: ObjectCollection<T>,
     {
@@ -266,7 +268,12 @@ class DiscoveryDataLayer {
     this.amrWorkflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
   }
 
-  fetchSamples = async (params: $TSFixMe) => {
+  fetchSamples = async (
+    params: $TSFixMe,
+  ): Promise<{
+    fetchedObjects: $TSFixMe[];
+    fetchedObjectIds: number[];
+  }> => {
     const {
       samples: fetchedObjects,
       sampleIds: fetchedObjectIds,

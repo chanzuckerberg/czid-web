@@ -29,9 +29,21 @@ const STATUS_TYPE = {
   FAILED: "error",
 };
 
+export interface Visualization {
+  id: number;
+  name: string;
+  project_name: string;
+  samples_count: number;
+  status: string;
+  updated_at: string;
+  user_id: number;
+  user_name: string;
+  visualization_type: string;
+}
+
 interface VisualizationsViewProps {
   currentDisplay: string;
-  visualizations: ObjectCollectionView;
+  visualizations: ObjectCollectionView<Visualization>;
   onLoadRows: $TSFixMeFunction;
   onSortColumn?: $TSFixMeFunction;
   sortBy?: string;
@@ -136,7 +148,7 @@ class VisualizationsView extends React.Component<VisualizationsViewProps> {
     }
   };
 
-  detailsRenderer(visualization: $TSFixMe) {
+  detailsRenderer(visualization: Visualization) {
     return <div>{visualization ? visualization.user_name : ""}</div>;
   }
 
@@ -156,7 +168,7 @@ class VisualizationsView extends React.Component<VisualizationsViewProps> {
     const visualizationsArray = await onLoadRows(args);
 
     // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
-    return visualizationsArray.map((visualization: $TSFixMe) => {
+    return visualizationsArray.map((visualization: Visualization) => {
       return merge(
         {
           visualization: pick(
@@ -178,7 +190,13 @@ class VisualizationsView extends React.Component<VisualizationsViewProps> {
     });
   };
 
-  handleSortColumn = ({ sortBy, sortDirection }: $TSFixMe) => {
+  handleSortColumn = ({
+    sortBy,
+    sortDirection,
+  }: {
+    sortBy: string;
+    sortDirection: SortDirectionType;
+  }) => {
     // Calls onSortColumn callback to fetch sorted data
     this.props.onSortColumn({ sortBy, sortDirection });
   };

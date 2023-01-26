@@ -9,6 +9,7 @@ import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import { Project } from "~/interface/shared";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import {
   DEFAULT_ROW_HEIGHT,
@@ -38,7 +39,7 @@ interface ProjectsViewProps {
   onMapTooltipTitleClick?: $TSFixMeFunction;
   onProjectSelected?: $TSFixMeFunction;
   onSortColumn?: $TSFixMeFunction;
-  projects: ObjectCollectionView;
+  projects: ObjectCollectionView<Project>;
   sortable?: boolean;
   sortBy?: string;
   sortDirection?: SortDirectionType;
