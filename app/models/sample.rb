@@ -712,6 +712,8 @@ class Sample < ApplicationRecord
 
   def copy_pipeline_runs_to_sample(new_sample, copy_s3 = false)
     pipeline_runs.each do |pr|
+      next if pr.deprecated # don't copy deprecated pipelines
+
       new_pr = pr.deep_clone include: [
         :taxon_counts,
         :job_stats,
@@ -735,6 +737,8 @@ class Sample < ApplicationRecord
 
   def copy_workflow_runs_to_sample(new_sample, copy_s3 = false)
     workflow_runs.each do |wr|
+      next if wr.deprecated # don't copy deprecated workflows
+
       new_wr = wr.deep_clone do |original, copy|
         copy.created_at = original.created_at
       end
