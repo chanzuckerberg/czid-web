@@ -1,5 +1,6 @@
 import React from "react";
 import Checkbox from "~ui/controls/Checkbox";
+import ExternalLink from "./ExternalLink";
 import cs from "./terms_agreement.scss";
 
 interface TermsAgreementProps {
@@ -24,21 +25,14 @@ class TermsAgreement extends React.Component<TermsAgreementProps> {
                   "I agree that the data I am uploading to CZ ID has been lawfully collected and that I have all the necessary consents, permissions, and authorizations needed to collect, share, and export data to CZ ID as outlined in the "
                 }
               </span>
-              <a
-                href="https://czid.org/terms"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Terms
-              </a>
+              <ExternalLink href="https://czid.org/terms">
+                Terms of Service
+              </ExternalLink>
               {" and "}
-              <a
-                href="https://czid.org/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Data Privacy Notice.
-              </a>
+              <ExternalLink href="https://czid.org/privacy">
+                Privacy Policy
+              </ExternalLink>
+              .
             </span>
           }
         />
