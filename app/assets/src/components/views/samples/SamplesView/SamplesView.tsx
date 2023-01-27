@@ -157,8 +157,7 @@ const SamplesView = forwardRef(function SamplesView(
     [workflow: string]: { singlularDisplay: string; pluralDisplay: string };
   };
   let infiniteTable: InfiniteTable;
-  let referenceSelectId: number;
-
+  const [referenceSelectId, setReferenceSelectId] = useState(null);
   const [phyloCreationModalOpen, setPhyloCreationModalOpen] = useState(false);
   const [bulkDownloadModalOpen, setBulkDownloadModalOpen] = useState(false);
   const [heatmapCreationModalOpen, setHeatmapCreationModalOpen] = useState(
@@ -187,8 +186,6 @@ const SamplesView = forwardRef(function SamplesView(
   useEffect(() => {
     setBulkDownloadButtonTempTooltip(null);
   }, [selectedIds]);
-
-  referenceSelectId = null;
 
   const setupWorkflowConfigs = () => {
     configForWorkflow = {
@@ -236,6 +233,7 @@ const SamplesView = forwardRef(function SamplesView(
     checked: boolean,
     event: { shiftKey: boolean },
   ) => {
+    // If the user is holding shift, we want to select all the rows between the last selected row and the current row.
     const newSelected = new Set(selectedIds);
     if (event.shiftKey && referenceSelectId) {
       const ids = objects.getIntermediateIds({
@@ -252,13 +250,14 @@ const SamplesView = forwardRef(function SamplesView(
         }, ids);
       }
     } else {
+      // Otherwise, we just want to select the current row.
       if (checked) {
         newSelected.add(value);
       } else {
         newSelected.delete(value);
       }
     }
-    referenceSelectId = value;
+    setReferenceSelectId(value);
 
     onUpdateSelectedIds(newSelected);
 
@@ -272,7 +271,7 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const handleSelectAllRows = (checked: boolean) => {
-    referenceSelectId = null;
+    setReferenceSelectId(null);
     const newSelected = new Set(
       checked
         ? union(Array.from(selectedIds), selectableIds)
