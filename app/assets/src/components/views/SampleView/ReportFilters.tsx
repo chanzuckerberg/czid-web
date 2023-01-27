@@ -164,7 +164,10 @@ const ReportFilters = ({
       threshold={threshold}
       onClose={() =>
         handleRemoveFilter({
-          key: "thresholds",
+          key:
+            currentTab === TABS.SHORT_READ_MNGS
+              ? "thresholds"
+              : "thresholdsBases",
           value: threshold,
         })
       }
@@ -213,10 +216,17 @@ const ReportFilters = ({
         TREE_METRICS[currentTab],
       )
     : TREE_METRICS[currentTab];
+
+  // Display reads OR bases metrics based on the sample's workflow
   const selectedTreeMetric =
     currentTab === TABS.SHORT_READ_MNGS
       ? selected.metric
       : selected.metricBases;
+
+  const selectedThresholds =
+    currentTab === TABS.SHORT_READ_MNGS
+      ? selected.thresholds
+      : selected.thresholdsBases;
 
   return (
     <>
@@ -341,10 +351,13 @@ const ReportFilters = ({
               targets: THRESHOLDS[currentTab],
               operators: [">=", "<="],
             }}
-            thresholds={selected.thresholds}
+            thresholds={selectedThresholds}
             onApply={(value: ThresholdConditions) =>
               handleFilterChange({
-                key: "thresholds",
+                key:
+                  currentTab === TABS.SHORT_READ_MNGS
+                    ? "thresholds"
+                    : "thresholdsBases",
                 value,
               })
             }
@@ -420,7 +433,7 @@ const ReportFilters = ({
               value: taxon,
             }),
           )}
-          {selected.thresholds.map((threshold, i) =>
+          {selectedThresholds.map((threshold, i) =>
             renderThresholdFilterTag({ threshold, idx: i }),
           )}
           {renderCategoryFilterTags()}

@@ -40,6 +40,7 @@ export const getWorkflowCount = (sample: Sample): WorkflowCount => {
 export const getDefaultSelectedOptions = (): FilterSelections => {
   return {
     annotations: [],
+    flags: [],
     background: null,
     categories: { categories: [], subcategories: { Viruses: [] } },
     // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.
@@ -50,6 +51,7 @@ export const getDefaultSelectedOptions = (): FilterSelections => {
     readSpecificity: 0,
     taxa: [],
     thresholds: [],
+    thresholdsBases: [],
   };
 };
 

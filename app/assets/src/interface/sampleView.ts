@@ -133,6 +133,7 @@ export interface FilterSelections {
   annotations: string[];
   flags: string[];
   thresholds: ThresholdConditions[];
+  thresholdsBases: ThresholdConditions[];
   taxa: { id: number; name: string; level: "genus" | "species" }[];
   metric: string;
   metricBases: string;

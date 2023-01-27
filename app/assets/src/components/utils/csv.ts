@@ -81,7 +81,10 @@ export const createCSVObjectURL = (headers: string[], rows: string[][]) => {
 };
 
 export const createCSVRowForAppliedFilters = (
-  appliedFilters: Omit<FilterSelections, "nameType" | "metric" | "background">,
+  appliedFilters: Omit<
+    FilterSelections,
+    "nameType" | "metric" | "metricBases" | "background"
+  >,
   backgrounds,
   selectedOptions,
 ) => {
@@ -138,7 +141,8 @@ export const createCSVRowForAppliedFilters = (
         });
         break;
       }
-      case "thresholds": {
+      case "thresholds":
+      case "thresholdsBases": {
         const thresholdFilters = optionVal.reduce(
           (result: $TSFixMe, threshold: $TSFixMe) => {
             result.push(
@@ -230,7 +234,7 @@ export const computeReportTableValuesForCSV = (
   if (hasAppliedFilters(selectedOptions)) {
     csvRows.push(
       createCSVRowForAppliedFilters(
-        getAppliedFilters(selectedOptions, currentTab),
+        getAppliedFilters(selectedOptions),
         backgrounds,
         selectedOptions,
       ),

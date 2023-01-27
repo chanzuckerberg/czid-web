@@ -18,6 +18,7 @@ export interface TempSelectedOptionsShape {
   taxa: LabelVal[];
   readSpecificity: number;
   thresholds?: ThresholdFilterShape[];
+  thresholdsBases?: ThresholdFilterShape[];
 }
 
 interface generateUrlOptions {
