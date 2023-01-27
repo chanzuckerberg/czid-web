@@ -179,7 +179,8 @@ module BulkDownloadsHelper
   end
 
   # Generate the metric values matrix.
-  def self.generate_metric_values(taxon_counts_by_pr, _samples, metric)
+  def self.generate_metric_values(taxon_counts_by_pr, samples, metric)
+    workflow = samples.first.initial_workflow
     metric_values = {}
     # Maintain a hash of all the taxons we've encountered.
     taxids_to_name = {}
@@ -194,7 +195,7 @@ module BulkDownloadsHelper
       sample_id = results["sample_id"]
 
       # Importantly, remove any homo sapiens counts.
-      taxid_to_taxon_counts = ReportHelper.taxon_counts_cleanup(results_taxon_counts)
+      taxid_to_taxon_counts = ReportHelper.taxon_counts_cleanup(results_taxon_counts, workflow)
       # Only consider species level counts.
       HeatmapHelper.only_species_level_counts!(taxid_to_taxon_counts)
 
@@ -411,7 +412,7 @@ module BulkDownloadsHelper
 
     # For each sample, fetch taxon counts for that sample.
     # By default, fetches top 1,000,000 taxons for each sample.
-    taxon_counts_by_pr = HeatmapHelper.fetch_top_taxons(
+    taxon_counts_by_pr = TopTaxonsSqlService.call(
       samples,
       background_id,
       min_reads: 0, # minimum read threshold

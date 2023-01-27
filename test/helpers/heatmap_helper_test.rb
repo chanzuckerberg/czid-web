@@ -24,7 +24,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       minReads: 1,
     }
 
-    @results_by_pr = HeatmapHelper.fetch_top_taxons(
+    @results_by_pr = TopTaxonsSqlService.call(
       @samples,
       @background.id,
       min_reads: @min_reads
@@ -88,7 +88,8 @@ class HeatmapHelperTest < ActiveSupport::TestCase
   test "top_taxons_details defaults" do
     details = HeatmapHelper.top_taxons_details(
       @results_by_pr,
-      @sort_by
+      @sort_by,
+      WorkflowRun::WORKFLOW[:short_read_mngs]
     )
     details.sort_by! { |d| d["tax_id"] }
     assert_equal 6, details.length
@@ -100,13 +101,14 @@ class HeatmapHelperTest < ActiveSupport::TestCase
   test "top_taxons_details sort_by" do
     details = HeatmapHelper.top_taxons_details(
       @results_by_pr,
-      "highest_nt_rpm"
+      "highest_nt_rpm",
+      WorkflowRun::WORKFLOW[:short_read_mngs]
     )
     assert_equal 1_000_000.0, details[0]["max_aggregate_score"]
   end
 
   test "fetch_top_taxons defaults" do
-    top_taxons = HeatmapHelper.fetch_top_taxons(
+    top_taxons = TopTaxonsSqlService.call(
       @samples,
       @background.id,
       min_reads: @min_reads

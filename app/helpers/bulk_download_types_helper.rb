@@ -105,22 +105,21 @@ module BulkDownloadTypesHelper
       file_type_display: ".csv",
       workflows: [WorkflowRun::WORKFLOW[:long_read_mngs]],
     },
-    # TODO(ihan): Enable this download option once backend implementation (SC-227182) is complete
-    # {
-    #   type: COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
-    #   display_name: "Combined Sample Taxon Results",
-    #   description: "The value of a particular metric (e.g. total bases, bPM) for all taxa in all selected samples, combined into a single file",
-    #   category: "reports",
-    #   fields: [
-    #     {
-    #       display_name: "Metric",
-    #       type: "metric",
-    #     },
-    #   ],
-    #   execution_type: RESQUE_EXECUTION_TYPE,
-    #   file_type_display: ".csv",
-    #   workflows: [WorkflowRun::WORKFLOW[:long_read_mngs]],
-    # },
+    {
+      type: COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
+      display_name: "Combined Sample Taxon Results",
+      description: "The value of a particular metric (e.g. total bases, bPM) for all taxa in all selected samples, combined into a single file",
+      category: "reports",
+      fields: [
+        {
+          display_name: "Metric",
+          type: "metric",
+        },
+      ],
+      execution_type: RESQUE_EXECUTION_TYPE,
+      file_type_display: ".csv",
+      workflows: [WorkflowRun::WORKFLOW[:long_read_mngs]],
+    },
 
     # Specific to short read mNGS workflows
     {

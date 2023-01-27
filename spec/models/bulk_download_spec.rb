@@ -965,6 +965,59 @@ describe BulkDownload, type: :model do
           expect(bulk_download.error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 1)
         end
       end
+
+      context "and workflow long-read-mngs" do
+        before do
+          @nil_background_id = nil
+        end
+
+        it "correctly generates download file" do
+          bulk_download = create_bulk_download(BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
+                                               "metric": {
+                                                 "value": "NT.bpm",
+                                                 "displayName": "NT bPM",
+                                               }, "workflow": {
+                                                 "value": WorkflowRun::WORKFLOW[:long_read_mngs],
+                                               })
+          expect(BulkDownloadsHelper).to receive(:generate_combined_sample_taxon_results_csv).with(
+            anything, @nil_background_id, "NT.bpm"
+          ).exactly(1).times.and_return(csv_str: "mock_combined_sample_taxon_results_csv",
+                                        failed_sample_ids: [])
+
+          add_s3_tar_writer_expectations(
+            "combined_sample_taxon_results_NT.bpm.csv" => "mock_combined_sample_taxon_results_csv"
+          )
+
+          bulk_download.generate_download_file
+
+          expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+        end
+
+        it "correctly handles individual sample failures for download type combined_sample_taxon_results" do
+          bulk_download = create_bulk_download(BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
+                                               "metric": {
+                                                 "value": "NT.bpm",
+                                                 "displayName": "NT bPM",
+                                               }, "workflow": {
+                                                 "value": WorkflowRun::WORKFLOW[:long_read_mngs],
+                                               })
+
+          expect(BulkDownloadsHelper).to receive(:generate_combined_sample_taxon_results_csv).with(
+            anything, @nil_background_id, "NT.bpm"
+          ).exactly(1).times.and_return(csv_str: "mock_combined_sample_taxon_results_csv",
+                                        failed_sample_ids: [@sample_one.id])
+
+          add_s3_tar_writer_expectations(
+            "combined_sample_taxon_results_NT.bpm.csv" => "mock_combined_sample_taxon_results_csv"
+          )
+
+          bulk_download.generate_download_file
+
+          # The bulk download succeeds and the failed sample is stored in the error message.
+          expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+          expect(bulk_download.error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 1)
+        end
+      end
     end
 
     it "correctly throws exception if taxon count not found for download type reads_non_host for single taxon" do

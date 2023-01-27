@@ -67,7 +67,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
 
     it "returns correct values in basic case" do
       samples = Sample.where(id: [@sample_one.id, @sample_two.id])
-      expect(HeatmapHelper).to receive(:fetch_top_taxons).with(
+      expect(TopTaxonsSqlService).to receive(:call).with(
         samples,
         mock_background_id,
         any_args
@@ -90,7 +90,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
 
     it "returns correct values in second basic case" do
       samples = Sample.where(id: [@sample_one.id, @sample_two.id])
-      expect(HeatmapHelper).to receive(:fetch_top_taxons).with(
+      expect(TopTaxonsSqlService).to receive(:call).with(
         samples,
         mock_background_id,
         any_args
@@ -113,7 +113,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
 
     it "filters out homo sapiens taxid" do
       samples = Sample.where(id: [@sample_one.id, @sample_two.id])
-      expect(HeatmapHelper).to receive(:fetch_top_taxons).with(
+      expect(TopTaxonsSqlService).to receive(:call).with(
         samples,
         mock_background_id,
         any_args
@@ -135,7 +135,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
 
     it "returns samples with no results as failed" do
       samples = Sample.where(id: [@sample_one.id, @sample_two.id])
-      expect(HeatmapHelper).to receive(:fetch_top_taxons).with(
+      expect(TopTaxonsSqlService).to receive(:call).with(
         samples,
         mock_background_id,
         any_args
@@ -164,7 +164,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       mock_fetch_taxon_response[@sample_one.first_pipeline_run.id]["taxon_counts"][0]["rpm"] = 0 # Set the NT.rpm of taxid 4 to 0.
       mock_fetch_taxon_response[@sample_one.first_pipeline_run.id]["taxon_counts"][4]["rpm"] = 0 # Set the NT.rpm of taxid 6 to 0.
 
-      expect(HeatmapHelper).to receive(:fetch_top_taxons).with(
+      expect(TopTaxonsSqlService).to receive(:call).with(
         samples,
         mock_background_id,
         any_args

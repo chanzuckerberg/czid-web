@@ -524,13 +524,15 @@ module ElasticsearchQueryHelper
   )
     results = {}
 
+    workflow = samples.first.initial_workflow
+
     # Get sample results for the taxon ids
     samples_by_id = samples.index_by(&:id)
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
-      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
+      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts, workflow)
 
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }

@@ -735,14 +735,20 @@ class BulkDownload < ApplicationRecord
         s3_tar_writer.add_file_with_data("combined_amr_results.csv", amr_combined_results_csv)
       elsif download_type == COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
         metric = get_param_value("metric")
+        workflow = get_param_value("workflow")
         Rails.logger.info("Generating combined sample taxon results for #{metric} for #{pipeline_runs.length} samples...")
         samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
-        # If the metric is NT.zscore or NR.zscore, the background param is required.
-        # For other metrics, it doesn't affect the metric calculation, so we set it to a default.
-        # Note that we are using heatmap helper functions to calculate all the metrics at once, so the background id is required even if we don't need it.
-        background_id = get_param_value("background") || samples.first.default_background_id
-        result = BulkDownloadsHelper.generate_combined_sample_taxon_results_csv(samples, background_id, metric)
 
+        # In ont_v1, backgrounds are not supported for long-read-mngs samples.
+        # For long-read-mngs samples, background_id is nil
+        background_id = if workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
+                          # If the metric is NT.zscore or NR.zscore, the background param is required.
+                          # For other metrics, it doesn't affect the metric calculation, so we set it to a default.
+                          # Note that we are using heatmap helper functions to calculate all the metrics at once, so the background id is required even if we don't need it.
+                          get_param_value("background") || samples.first.default_background_id
+                        end
+
+        result = BulkDownloadsHelper.generate_combined_sample_taxon_results_csv(samples, background_id, metric)
         s3_tar_writer.add_file_with_data("combined_sample_taxon_results_#{metric}.csv", result[:csv_str])
 
         unless result[:failed_sample_ids].empty?

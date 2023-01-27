@@ -31,7 +31,10 @@ module ReportHelper
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
-  METRICS = %w[r rpm zscore percentidentity alignmentlength logevalue aggregatescore maxzscore r_pct rpm_bg].freeze
+  METRICS = {
+    WorkflowRun::WORKFLOW[:short_read_mngs] => %w[r rpm zscore percentidentity alignmentlength logevalue aggregatescore maxzscore r_pct rpm_bg],
+    WorkflowRun::WORKFLOW[:long_read_mngs] => %w[b bpm percentidentity alignmentlength logevalue],
+  }.freeze
   COUNT_TYPES = %w[NT NR].freeze
   # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
   PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid genus_name family_taxid superkingdom_taxid category_name is_phage].freeze
@@ -158,7 +161,7 @@ module ReportHelper
     return nil unless COUNT_TYPES.include? count_type
 
     metric = parts[2]
-    return nil unless METRICS.include? metric
+    return nil unless METRICS[WorkflowRun::WORKFLOW[:short_read_mngs]].include? metric
 
     {
       direction: direction,
@@ -225,33 +228,44 @@ module ReportHelper
     "]).to_a
   end
 
-  def self.zero_metrics(count_type)
-    {
-      'count_type' => count_type,
-      'r' => 0,
-      'rpm' => 0,
-      'zscore' => ZSCORE_WHEN_ABSENT_FROM_SAMPLE,
-      'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
-      'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
-      'logevalue' => DEFAULT_SAMPLE_LOGEVALUE,
-      'aggregatescore' => nil,
-    }
+  def self.zero_metrics(count_type, workflow)
+    if workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
+      {
+        'count_type' => count_type,
+        'r' => 0,
+        'rpm' => 0,
+        'zscore' => ZSCORE_WHEN_ABSENT_FROM_SAMPLE,
+        'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
+        'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
+        'logevalue' => DEFAULT_SAMPLE_LOGEVALUE,
+        'aggregatescore' => nil,
+      }
+    elsif workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
+      {
+        'count_type' => count_type,
+        'b' => 0,
+        'bpm' => 0,
+        'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
+        'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
+        'logevalue' => DEFAULT_SAMPLE_LOGEVALUE,
+      }
+    end
   end
 
-  def self.tax_info_base(taxon)
+  def self.tax_info_base(taxon, workflow)
     tax_info_base = {}
     PROPERTIES_OF_TAXID.each do |prop|
       tax_info_base[prop] = taxon[prop]
     end
     COUNT_TYPES.each do |count_type|
-      tax_info_base[count_type] = zero_metrics(count_type)
+      tax_info_base[count_type] = zero_metrics(count_type, workflow)
     end
     tax_info_base
   end
 
-  def self.metric_props(taxon)
-    metric_props = zero_metrics(taxon['count_type'])
-    METRICS.each do |metric|
+  def self.metric_props(taxon, workflow)
+    metric_props = zero_metrics(taxon['count_type'], workflow)
+    METRICS[workflow].each do |metric|
       metric_props[metric] = taxon[metric].round(DECIMALS) if taxon[metric]
     end
     metric_props
@@ -276,8 +290,8 @@ module ReportHelper
     fake_genus_info
   end
 
-  def self.convert_2d(taxon_counts_from_sql)
-    # Return data structured as
+  def self.convert_2d(taxon_counts_from_sql, workflow)
+    # Returns short-read-mngs data structured as
     #    tax_id => {
     #       tax_id,
     #       tax_level,
@@ -301,10 +315,24 @@ module ReportHelper
     #         zscore
     #       }
     #    }
+    # Returns long-read-mngs data structured as above, but with bases NR/NT data
+    #    tax_id => {
+    #       ...
+    #       NR => {
+    #         count_type,
+    #         b,
+    #         bpm
+    #       }
+    #       NT => {
+    #         count_type,
+    #         b,
+    #         bpm
+    #       }
+    #    }
     taxon_counts_2d = {}
     taxon_counts_from_sql.each do |t|
-      taxon_counts_2d[t['tax_id']] ||= tax_info_base(t)
-      taxon_counts_2d[t['tax_id']][t['count_type']] = metric_props(t)
+      taxon_counts_2d[t['tax_id']] ||= tax_info_base(t, workflow)
+      taxon_counts_2d[t['tax_id']][t['count_type']] = metric_props(t, workflow)
     end
     taxon_counts_2d
   end
@@ -421,9 +449,9 @@ module ReportHelper
     taxon_counts_2d.delete_if { |tax_id, _tax_info| TaxonLineage::HOMO_SAPIENS_TAX_IDS.include?(tax_id) }
   end
 
-  def self.taxon_counts_cleanup(taxon_counts)
+  def self.taxon_counts_cleanup(taxon_counts, workflow)
     # convert_2d also does some filtering.
-    tax_2d = convert_2d(taxon_counts)
+    tax_2d = convert_2d(taxon_counts, workflow)
     cleanup_genus_ids!(tax_2d)
     validate_names!(tax_2d)
     # Remove any rows that correspond to homo sapiens. These should be mostly
