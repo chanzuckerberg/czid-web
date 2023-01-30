@@ -792,8 +792,7 @@ function QualityControl({
 
   function renderHistograms() {
     const numSamplesWithInsertSize = meanInsertSizeHistogram
-      ? // @ts-expect-error Property 'length' is missing in type 'MutableRefObject<any[]>' but required in type 'ArrayLike<unknown>'.
-        flatten(samplesByInsertSize).length
+      ? flatten(samplesByInsertSize.current).length
       : 0;
     const showMeanInsertSizeWarning =
       meanInsertSizeHistogram && numSamplesWithInsertSize < validSamples.length;
