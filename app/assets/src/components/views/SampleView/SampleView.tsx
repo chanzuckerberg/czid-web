@@ -234,7 +234,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       selectedOptions: {
         ...getDefaultSelectedOptions(),
         // for long read mNGS samples, do not allow taxon filters in tempSelectedOptions to persist from DiscoveryView
-        ...(!isEmpty(tempSelectedOptions && currentTab !== TABS.LONG_READ_MNGS)
+        ...(!isEmpty(tempSelectedOptions) && currentTab !== TABS.LONG_READ_MNGS
           ? tempSelectedOptions
           : {
               ...selectedOptionsFromLocal,
