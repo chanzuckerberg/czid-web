@@ -860,7 +860,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     switch (key) {
       case "taxa":
       case "thresholds":
-      case "thresholdBases":
+      case "thresholdsBases":
       case "annotations":
         newSelectedOptions[key] = pull(value, newSelectedOptions[key]);
         break;
