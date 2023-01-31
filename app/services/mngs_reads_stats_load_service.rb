@@ -19,12 +19,31 @@ class MngsReadsStatsLoadService
   # as an array of hashes.
   def fetch_counts(pipeline_run)
     res_folder = pipeline_run.output_s3_path_with_version
-    stdout = Syscall.pipe_with_output(["aws", "s3", "ls", "#{res_folder}/"], ["grep", "count$"])
+    bucket = ENV['SAMPLES_BUCKET_NAME']
+    # To get the prefix excluding the bucket name, split the res_folder
+    # into 4 parts and grab the last item from the split.
+    prefix = res_folder.split("/", 4)[-1]
+
+    # list_objects_v2 is limited to 1000 objects at a time, so loop
+    # while there are more objects to be fetched.
+    token = nil
+    filenames = []
+    loop do
+      resp = AwsClient[:s3].list_objects_v2({
+                                              bucket: bucket,
+                                              prefix: prefix,
+                                              continuation_token: token,
+                                            })
+      filenames.concat(resp.contents.map { |object| File.basename(object.key) }.grep(/count$/))
+      unless resp.is_truncated
+        break
+      end
+    end
 
     all_counts = []
-    stdout.split("\n").each do |line|
-      fname = line.split(" ")[3] # Last col in line
-      contents = Syscall.s3_read_json("#{res_folder}/#{fname}")
+    filenames.each do |fname|
+      resp = AwsClient[:s3].get_object(bucket: bucket, key: "#{prefix}/#{fname}")
+      contents = JSON.parse(resp.body.read)
       # Ex: {"gsnap_filter_out": 194}
       contents.each do |key, count|
         all_counts << if key.include? "_bases"
