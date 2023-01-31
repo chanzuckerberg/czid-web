@@ -13,7 +13,7 @@ import { getURLParamString, parseUrlParams } from "~/helpers/url";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import { IconCloseSmall, IconArrowPipelineStage } from "~ui/icons";
-import { TECHNOLOGY_OPTIONS } from "../SampleUploadFlow/constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../SampleUploadFlow/constants";
 
 import PipelineVizHeader from "./PipelineVizHeader";
 import PipelineVizStatusIcon from "./PipelineVizStatusIcon";
@@ -46,7 +46,9 @@ interface PipelineVizProps {
   yLayoutInterval?: number;
   staggerLayoutMultiplier?: number;
   updateInterval?: number;
-  pipelineTechnology?: TECHNOLOGY_OPTIONS.ILLUMINA | TECHNOLOGY_OPTIONS.ONT;
+  pipelineTechnology?:
+    | SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
+    | SEQUENCING_TECHNOLOGY_OPTIONS.ONT;
 }
 
 interface PipelineVizState {
