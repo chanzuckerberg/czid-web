@@ -43,7 +43,7 @@
     "@babel/preset-typescript": "^7.16.7",
     "@babel/register": "^7.13.16",
     "@storybook/addon-actions": "^6.3.8",
-    "@storybook/addon-essentials": "^6.3.8",
+    "@storybook/addon-essentials": "^6.5.16",
     "@storybook/addon-links": "^6.3.8",
     "@storybook/react": "^6.5.12",
     "@types/lodash": "^4.14.182",
