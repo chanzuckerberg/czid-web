@@ -1,5 +1,5 @@
 aegea==3.6.25
 pyOpenSSL==19.0.0
-setuptools==41.0.1
+setuptools==65.5.1
 miniwdl==0.7.4
 biom-format==2.1.12
