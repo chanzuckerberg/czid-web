@@ -63,6 +63,8 @@ class AppConfig < ApplicationRecord
   PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS = "pipeline_report_service_use_decimal_type_columns".freeze
   # Version of the short-read-mngs pipeline that uses the modern host filtering step. Initally set to "8.1.1-beta"
   MODERN_SHORT_READ_MNGS_VERSION = "modern_short_read_mngs_version".freeze
+  # Version of the AMR pipeline that uses the modern host filtering step. Initally set to "1.0.0-beta"
+  MODERN_AMR_VERSION = "modern_amr_version".freeze
 
   after_save :clear_cached_record
 

@@ -310,7 +310,7 @@ module PipelineRunsHelper
   PIPELINE_VERSION_2 = '2.0'.freeze
   ASSEMBLY_PIPELINE_VERSION = '3.1'.freeze
   COVERAGE_VIZ_PIPELINE_VERSION = '3.6'.freeze
-  NEW_HOST_FILTERING_PIPELINE_VERSION = '8.1'.freeze
+  NEW_HOST_FILTERING_PIPELINE_VERSION = '7.2'.freeze
 
   def pipeline_version_at_least(pipeline_version, test_version)
     unless pipeline_version

@@ -21,12 +21,21 @@ class SfnAmrPipelineDispatchService
   def initialize(workflow_run)
     @workflow_run = workflow_run
     @sample = workflow_run.sample
+    @current_user = User.find(@sample.user_id)
 
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_SINGLE_WDL_ARN) || AppConfigHelper.get_app_config(AppConfig::SFN_AMR_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
     @wdl_version = AppConfigHelper.get_workflow_version(@workflow_run.workflow)
     raise SfnVersionMissingError, @workflow_run.workflow if @wdl_version.blank?
+
+    # AMR uses the host filtering stage of the mNGS pipeline
+    @mngs_wdl_version = AppConfigHelper.get_workflow_version(WorkflowRun::WORKFLOW[:short_read_mngs])
+
+    if @current_user.allowed_feature_list.include?("modern_host_filtering")
+      @wdl_version = AppConfigHelper.get_app_config(AppConfig::MODERN_AMR_VERSION)
+      @mngs_wdl_version = AppConfigHelper.get_app_config(AppConfig::MODERN_SHORT_READ_MNGS_VERSION)
+    end
 
     @workflow_run.update(
       wdl_version: @wdl_version
@@ -76,7 +85,7 @@ class SfnAmrPipelineDispatchService
 
   def retrieve_mngs_docker_image_id
     resp = AwsClient[:sts].get_caller_identity
-    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/#{WorkflowRun::WORKFLOW[:short_read_mngs]}:v#{AppConfigHelper.get_workflow_version('short-read-mngs')}"
+    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/#{WorkflowRun::WORKFLOW[:short_read_mngs]}:v#{@mngs_wdl_version}"
   end
 
   def output_prefix
@@ -111,6 +120,41 @@ class SfnAmrPipelineDispatchService
     }
   end
 
+  def modern_host_filtering_parameters
+    hg = @sample.host_genome
+    {
+      "raw_reads_0": strtrue(@workflow_run.get_input("start_from_mngs")) ? nil : @sample.input_file_s3_paths[0],
+      "raw_reads_1": if strtrue(@workflow_run.get_input("start_from_mngs"))
+                       nil
+                     else
+                       (
+                             @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil
+                           )
+                     end,
+      "host_filtering_docker_image_id": retrieve_mngs_docker_image_id,
+      "host_filter_stage.adapter_fasta": PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
+
+      "host_filter_stage.host_genome": hg.name.downcase,
+      "host_filter_stage.bowtie2_index_tar": hg.s3_bowtie2_index_path_v2,
+      "host_filter_stage.hisat2_index_tar": hg.s3_hisat2_index_path,
+      "host_filter_stage.kallisto_idx": hg.s3_kallisto_index_path,
+      "host_filter_stage.human_bowtie2_index_tar": HostGenome.find_by(name: "Human").s3_bowtie2_index_path_v2,
+      "host_filter_stage.human_hisat2_index_tar": HostGenome.find_by(name: "Human").s3_hisat2_index_path,
+
+      "host_filter_stage.max_input_fragments": PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS,
+      "host_filter_stage.max_subsample_fragments": PipelineRun::DEFAULT_SUBSAMPLING,
+      "host_filter_stage.file_ext": @sample.fasta_input? ? "fasta" : "fastq",
+    }
+  end
+
+  def modern_nonhost_reads
+    sfn_results_path = @sample.pipeline_runs.non_deprecated.first.sfn_results_path
+    [
+      "#{sfn_results_path}/subsampled_1.fa",
+      @sample.input_files[1] ? "#{sfn_results_path}/subsampled_2.fa" : nil,
+    ].compact
+  end
+
   def nonhost_reads
     sfn_results_path = @sample.pipeline_runs.non_deprecated.first.sfn_results_path
     [
@@ -119,15 +163,26 @@ class SfnAmrPipelineDispatchService
     ].compact
   end
 
+  def nonhost_reads_params(has_modern_host_filtering_feature_flag = false)
+    params = nil
+    if strtrue(@workflow_run.get_input("start_from_mngs"))
+      params = has_modern_host_filtering_feature_flag ? modern_nonhost_reads : nonhost_reads
+    end
+
+    params
+  end
+
   def generate_wdl_input
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
+    has_modern_host_filtering_feature_flag = @current_user.allowed_feature?("modern_host_filtering")
+    host_filtering_params = has_modern_host_filtering_feature_flag ? modern_host_filtering_parameters : host_filtering_parameters
 
     run_inputs = {
       docker_image_id: retrieve_docker_image_id,
-      non_host_reads: strtrue(@workflow_run.get_input("start_from_mngs")) ? nonhost_reads : nil,
+      non_host_reads: nonhost_reads_params(has_modern_host_filtering_feature_flag),
       contigs: strtrue(@workflow_run.get_input("start_from_mngs")) ? "#{@sample.pipeline_runs.non_deprecated.first.sfn_results_path}/contigs.fasta" : nil,
       sample_name: @workflow_run.sample.name,
-    }.merge(host_filtering_parameters)
+    }.merge(host_filtering_params)
 
     sfn_pipeline_input_json = {
       RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@workflow_run.workflow_version_tag}/run.wdl.zip",

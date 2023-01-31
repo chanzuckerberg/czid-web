@@ -28,6 +28,10 @@ export const HUMAN_READABLE_STEP_NAMES = {
   "Star Downstream": "Filter human (STAR)",
   "Bowtie2 Bowtie2 Human": "Filter human (Bowtie2)",
   "Czid Dedup": "Mark duplicates (Czid Dedup)",
+  "Fastp Qc": "Quality control",
+  "Bowtie2 Filter": "Filter host (Bowtie2)",
+  "Hisat2 Filter": "Filter host (Hisat2)",
+  // Need "filter human (bowtie2)" and "filter human (hisat2)"
 };
 export const MIN_NUM_BINS = 10;
 export const MIN_BIN_WIDTH = {
