@@ -483,7 +483,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
   processRawSampleReportData = (rawReportData: RawReportData) => {
     const { allowedFeatures = [] } = this.context || {};
-    const { selectedOptions } = this.state;
+    const { currentTab, selectedOptions } = this.state;
 
     const reportData: Taxon[] = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
@@ -526,6 +526,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
     setDisplayName({ reportData, ...selectedOptions });
     const filteredReportData = filterReportData({
+      currentTab,
       reportData,
       filters: selectedOptions,
     });
@@ -916,7 +917,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     key: string;
     newSelectedOptions: FilterSelections;
   }) => {
-    const { reportData } = this.state;
+    const { currentTab, reportData } = this.state;
 
     let updateSelectedOptions = true;
     // different behavior given type of option
@@ -963,6 +964,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       case "readSpecificity":
         this.setState({
           filteredReportData: filterReportData({
+            currentTab,
             reportData,
             filters: newSelectedOptions,
           }),
@@ -1279,18 +1281,24 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   clearAllFilters = () => {
-    const { reportData, selectedOptions } = this.state;
+    const { currentTab, reportData, selectedOptions } = this.state;
 
     const newSelectedOptions = { ...selectedOptions };
     newSelectedOptions.categories = {};
     newSelectedOptions.taxa = [];
-    newSelectedOptions.thresholds = [];
+    // Only clear thresholds filters that apply to the current tab
+    if (currentTab === TABS.SHORT_READ_MNGS) {
+      newSelectedOptions.thresholds = [];
+    } else if (currentTab === TABS.LONG_READ_MNGS) {
+      newSelectedOptions.thresholdsBases = [];
+    }
     newSelectedOptions.annotations = [];
 
     this.setState(
       {
         selectedOptions: newSelectedOptions,
         filteredReportData: filterReportData({
+          currentTab,
           reportData,
           filters: newSelectedOptions,
         }),
@@ -1634,7 +1642,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               {renderReportInfo(currentTab, reportMetadata)}
               <div className={cs.statsRowFilterInfo}>
                 {filteredMessage(currentTab, filteredReportData, reportData)}
-                {!!countFilters(selectedOptions) && (
+                {!!countFilters(currentTab, selectedOptions) && (
                   <span className={cs.clearAllFilters}>
                     <Button
                       sdsStyle="minimal"

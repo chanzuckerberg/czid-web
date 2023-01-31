@@ -11,7 +11,7 @@ import {
   sum,
   values,
 } from "lodash/fp";
-import { METRIC_DECIMAL_PLACES } from "./constants";
+import { METRIC_DECIMAL_PLACES, TABS } from "./constants";
 
 export const applyFilters = ({
   row,
@@ -163,10 +163,12 @@ export const setDisplayName = ({ reportData, nameType }: $TSFixMe) => {
 };
 
 export const filterReportData = ({
+  currentTab,
   reportData,
   filters: {
     categories,
     thresholds,
+    thresholdsBases,
     readSpecificity,
     taxa,
     annotations,
@@ -186,7 +188,8 @@ export const filterReportData = ({
       row: genusRow,
       categories: categoriesSet,
       subcategories: subcategoriesSet,
-      thresholds,
+      thresholds:
+        currentTab === TABS.SHORT_READ_MNGS ? thresholds : thresholdsBases,
       readSpecificity,
       taxa,
       annotations,
@@ -198,7 +201,8 @@ export const filterReportData = ({
         row: speciesRow,
         categories: categoriesSet,
         subcategories: subcategoriesSet,
-        thresholds,
+        thresholds:
+          currentTab === TABS.SHORT_READ_MNGS ? thresholds : thresholdsBases,
         readSpecificity,
         taxa,
         annotations,
@@ -213,11 +217,22 @@ export const filterReportData = ({
   return filteredData;
 };
 
-export const countFilters = selectedOptions => {
-  const { categories, thresholds, taxa, annotations } = selectedOptions;
+export const countFilters = (currentTab, selectedOptions) => {
+  const {
+    categories,
+    thresholds,
+    thresholdsBases,
+    taxa,
+    annotations,
+  } = selectedOptions;
+
+  const numThresholdsFilters =
+    currentTab === TABS.SHORT_READ_MNGS
+      ? thresholds.length
+      : thresholdsBases.length;
 
   let numFilters = taxa.length;
-  numFilters += thresholds.length;
+  numFilters += numThresholdsFilters;
   numFilters += annotations.length;
   numFilters += (categories.categories || []).length;
   numFilters += sum(map(v => v.length, values(categories.subcategories || {})));
