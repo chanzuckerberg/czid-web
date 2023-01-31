@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_01_12_235428) do
+ActiveRecord::Schema.define(version: 2023_01_30_204438) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -213,6 +213,7 @@ ActiveRecord::Schema.define(version: 2023_01_12_235428) do
     t.string "s3_hisat2_index_path", comment: "The path to the index file to be used in the pipeline by hisat2 for host filtering."
     t.string "s3_kallisto_index_path", comment: "The path to the index file to be used in the pipeline by kallisto for host filtering."
     t.string "s3_bowtie2_index_path_v2", comment: "The path to the index file to be used in the pipeline by bowtie2 for host filtering."
+    t.string "s3_original_transcripts_gtf_index_path", comment: "The path to the index file to be used in the pipeline by kallisto for host filtering. Used to generate host gene counts"
     t.index ["name"], name: "index_host_genomes_on_name", unique: true
     t.index ["user_id"], name: "index_host_genomes_on_user_id"
   end
