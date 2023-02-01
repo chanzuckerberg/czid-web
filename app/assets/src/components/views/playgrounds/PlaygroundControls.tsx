@@ -86,29 +86,6 @@ class PlaygroundControls extends React.Component<
               onClick={() => this.setState({ event: "SecondaryButton:Click" })}
             />
           </ComponentCard>
-          <ComponentCard title="Button Dropdown" width={3}>
-            <ButtonDropdown
-              primary
-              key={0}
-              fluid
-              options={this.dropdownOptions}
-              text="Download"
-              onClick={option =>
-                this.setState({ event: "DropdownButton:Clicked", option })
-              }
-            />
-            <ButtonDropdown
-              primary
-              key={1}
-              fluid
-              disabled
-              options={this.dropdownOptions}
-              text="Download"
-              onClick={option =>
-                this.setState({ event: "DropdownButton:Change", option })
-              }
-            />
-          </ComponentCard>
           <ComponentCard title="Secondary Button Dropdown" width={4}>
             <ButtonDropdown
               secondary

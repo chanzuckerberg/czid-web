@@ -24,8 +24,11 @@
     align-items: center;
     white-space: nowrap;
 
-    svg {
+    .icon {
       color: $sds-color-gray-500;
+    }
+
+    svg {
       margin-right: $sds-spaces-xxxs;
     }
 

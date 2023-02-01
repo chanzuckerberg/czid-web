@@ -93,23 +93,45 @@ const ProjectHeader = ({
       <div className={cs.fillIn} />
       {snapshotProjectName ? (
         <div className={cs.item}>
-          <Icon sdsIcon="eyeOpen" sdsSize="s" sdsType="static" /> View-only
-          version
+          <Icon
+            className={cs.icon}
+            sdsIcon="eyeOpen"
+            sdsSize="s"
+            sdsType="static"
+          />{" "}
+          View-only version
         </div>
       ) : project.public_access ? (
         <div className={cs.item}>
-          <Icon sdsIcon="globe" sdsSize="s" sdsType="static" /> Public project
+          <Icon
+            className={cs.icon}
+            sdsIcon="globe"
+            sdsSize="s"
+            sdsType="static"
+          />{" "}
+          Public project
         </div>
       ) : (
         <div className={cs.item}>
-          <Icon sdsIcon="lock" sdsSize="s" sdsType="static" /> Private project
+          <Icon
+            className={cs.icon}
+            sdsIcon="lock"
+            sdsSize="s"
+            sdsType="static"
+          />{" "}
+          Private project
         </div>
       )}
       {project.editable && (
         <React.Fragment>
           <ProjectInfoIconTooltip isPublic={project.public_access === 1} />
           <div className={cs.item}>
-            <Icon sdsIcon="people" sdsSize="s" sdsType="static" />{" "}
+            <Icon
+              className={cs.icon}
+              sdsIcon="people"
+              sdsSize="s"
+              sdsType="static"
+            />{" "}
             {project.users.length
               ? `${project.users.length} member${
                   project.users.length > 1 ? "s" : ""

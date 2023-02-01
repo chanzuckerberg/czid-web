@@ -1,7 +1,7 @@
+import { Button } from "czifui";
 import React, { useState } from "react";
 
 import { trackEvent } from "~/api/analytics";
-import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 
 import MetadataUploadModal from "./MetadataUploadModal";
@@ -28,7 +28,9 @@ const ProjectUploadMenu = ({
 
   const trigger = (
     <div className={cs.trigger}>
-      <SecondaryButton text="Add Data" />
+      <Button sdsStyle="rounded" sdsType="secondary">
+        Add Data
+      </Button>
     </div>
   );
 

@@ -1,10 +1,7 @@
+import { Icon } from "czifui";
 import React from "react";
 
-import { IconDownload } from "~ui/icons";
-
 import ButtonDropdown from "./ButtonDropdown";
-
-import cs from "./download_button_dropdown.scss";
 
 interface DownloadButtonDropdown {
   className?: string;
@@ -22,7 +19,7 @@ const DownloadButtonDropdown = (props: DownloadButtonDropdown) => {
       secondary
       fluid
       text="Download"
-      icon={<IconDownload className={cs.iconDownload} />}
+      icon={<Icon sdsIcon="download" sdsSize="l" sdsType="button" />}
     />
   );
 };

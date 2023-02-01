@@ -1,8 +1,5 @@
+import { Button, Icon } from "czifui";
 import React from "react";
-import IconDownload from "~ui/icons/IconDownload";
-import SecondaryButton from "./SecondaryButton";
-
-import cs from "./download_button.scss";
 
 interface DownloadButtonProps {
   disabled?: boolean;
@@ -15,16 +12,19 @@ const DownloadButton = ({
   disabled,
   onClick,
   text,
-  ...props
+  className,
 }: DownloadButtonProps) => {
   return (
-    <SecondaryButton
-      {...props}
-      text={text}
+    <Button
+      className={className}
+      sdsStyle="rounded"
+      sdsType="secondary"
       disabled={disabled}
       onClick={onClick}
-      icon={<IconDownload className={cs.iconDownload} />}
-    />
+      startIcon={<Icon sdsIcon="download" sdsSize="l" sdsType="button" />}
+    >
+      {text}
+    </Button>
   );
 };
 

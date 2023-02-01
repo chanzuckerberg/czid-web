@@ -1,13 +1,20 @@
+import { Button, Icon } from "czifui";
 import React from "react";
 
 import BasicPopup from "~/components/BasicPopup";
-import { IconSave } from "~ui/icons";
-
-import SecondaryButton from "./SecondaryButton";
 
 export const SaveButton = props => (
   <BasicPopup
-    trigger={<SecondaryButton text="Save" {...props} icon={<IconSave />} />}
+    trigger={
+      <Button
+        {...props}
+        sdsStyle="rounded"
+        sdsType="secondary"
+        startIcon={<Icon sdsIcon="save" sdsSize="l" sdsType="button" />}
+      >
+        Save
+      </Button>
+    }
     content="Your visualization was saved!"
     on="click"
     hideOnScroll

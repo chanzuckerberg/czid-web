@@ -1,8 +1,5 @@
+import { Button, Icon } from "czifui";
 import React from "react";
-import IconShare from "~ui/icons/IconShare";
-
-import PrimaryButton from "./PrimaryButton";
-import SecondaryButton from "./SecondaryButton";
 
 interface ShareButtonProps {
   primary: boolean;
@@ -10,13 +7,16 @@ interface ShareButtonProps {
   onClick: $TSFixMeFunction;
 }
 
-const ShareButton = ({ primary, ...props }: ShareButtonProps) => {
-  if (primary) {
-    return <PrimaryButton text="Share" {...props} icon={<IconShare />} />;
-  } else {
-    return <SecondaryButton text="Share" {...props} icon={<IconShare />} />;
-  }
-};
+const ShareButton = ({ primary, ...props }: ShareButtonProps) => (
+  <Button
+    sdsStyle="rounded"
+    sdsType={primary ? "primary" : "secondary"}
+    {...props}
+    startIcon={<Icon sdsIcon="share" sdsSize="l" sdsType="button" />}
+  >
+    Share
+  </Button>
+);
 
 ShareButton.defaultProps = {
   primary: true,
