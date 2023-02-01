@@ -477,6 +477,15 @@ class BulkDownload < ApplicationRecord
       end
     end
 
+    if download_type == HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE_V2
+      download_src_urls = pipeline_runs_ordered.map(&:host_gene_count_s3_path)
+
+      download_tar_names = samples_ordered.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "#{PipelineRun::HOST_GENE_COUNTS_OUTPUT_NAME}"
+      end
+    end
+
     if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE
       download_src_urls = workflow_runs_ordered.map { |run| run.output_path(ConsensusGenomeWorkflowRun::OUTPUT_CONSENSUS) }
 

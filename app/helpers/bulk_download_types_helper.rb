@@ -12,6 +12,7 @@ module BulkDownloadTypesHelper
   COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE = "combined_sample_taxon_results".freeze
   CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE = "contig_summary_report".freeze
   HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE = "host_gene_counts".freeze
+  HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE_V2 = "host_gene_counts_v2".freeze
   READS_NON_HOST_BULK_DOWNLOAD_TYPE = "reads_non_host".freeze
   CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE = "contigs_non_host".freeze
   UNMAPPED_READS_BULK_DOWNLOAD_TYPE = "unmapped_reads".freeze
@@ -193,6 +194,19 @@ module BulkDownloadTypesHelper
       execution_type: ECS_EXECUTION_TYPE,
       collaborator_only: true,
       file_type_display: ".star.tab",
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+    },
+    # HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE_V2 uses the modern host filtering step which outputs kallisto.tsv
+    # The old host gene counts bulk download type uses the old host filtering step which outputs reads_per_gene.star.tab
+    {
+      type: HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE_V2,
+      display_name: "Host Gene Counts",
+      description: "Host gene count outputs from Kallisto",
+      category: "reports",
+      execution_type: ECS_EXECUTION_TYPE,
+      collaborator_only: true,
+      file_type_display: ".tsv",
+      required_allowed_feature: "modern_host_filtering",
       workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {

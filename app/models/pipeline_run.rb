@@ -88,7 +88,8 @@ class PipelineRun < ApplicationRecord
   INVALID_STEP_NAME = "invalid_step_input.json".freeze
   NONHOST_FASTQ_OUTPUT_NAME = 'taxid_annot.fasta'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
-  MODERN_ERCC_OUTPUT_NAME = "abundance.tsv".freeze
+  MODERN_ERCC_OUTPUT_NAME = "ERCC_counts.tsv".freeze
+  HOST_GENE_COUNTS_OUTPUT_NAME = "gene_abundance.tsv".freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
@@ -548,7 +549,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def host_gene_count_s3_path
-    return "#{host_filter_output_s3_path}/#{READS_PER_GENE_STAR_TAB_NAME}"
+    if pipeline_version_uses_new_host_filtering_stage(pipeline_version)
+      "#{host_filter_output_s3_path}/#{HOST_GENE_COUNTS_OUTPUT_NAME}"
+    else
+      "#{host_filter_output_s3_path}/#{READS_PER_GENE_STAR_TAB_NAME}"
+    end
   end
 
   def nonhost_fastq_s3_paths(prefix = '')

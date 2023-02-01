@@ -80,6 +80,7 @@ class SfnPipelineDispatchService
       kallisto_idx: hg.s3_kallisto_index_path,
       human_bowtie2_index_tar: HostGenome.find_by(name: "Human").s3_bowtie2_index_path_v2,
       human_hisat2_index_tar: HostGenome.find_by(name: "Human").s3_hisat2_index_path,
+      gtf_gz: hg.s3_original_transcripts_gtf_index_path,
 
       max_input_fragments: @pipeline_run.max_input_fragments,
       max_subsample_fragments: @pipeline_run.subsample,
