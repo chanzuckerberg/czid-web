@@ -3,11 +3,17 @@ import React from "react";
 
 import BasicPopup from "~/components/BasicPopup";
 
-export const SaveButton = props => (
+interface SaveButtonProps {
+  onClick: $TSFixMeFunction;
+  className?: string;
+}
+
+export const SaveButton = ({ onClick, className }: SaveButtonProps) => (
   <BasicPopup
     trigger={
       <Button
-        {...props}
+        className={className}
+        onClick={onClick}
         sdsStyle="rounded"
         sdsType="secondary"
         startIcon={<Icon sdsIcon="save" sdsSize="l" sdsType="button" />}
