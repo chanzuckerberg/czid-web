@@ -1,21 +1,18 @@
-import { expect, test } from "@playwright/test";
 import path from "path";
+import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
-import {
-  generateMetadataFile,
-  getGeneratedSampleName,
-  getMetadata,
-} from "../../utils/sample";
 import { Metadata } from "../../types/metadata";
+import { CONTINUE, GO_TO_PROJECT, LOADED } from "../../utils/constants";
+import { generateMetadataFile, getMetadata } from "../../utils/mockData";
 
+import { fileChooser } from "../../utils/page";
+import { getByTestID, getByText } from "../../utils/selectors";
 import {
   fillMetadata,
+  getGeneratedSampleName,
   submitUpload,
   uploadSampleFiles,
 } from "../../utils/upload";
-import { getByTestID, getByText } from "../../utils/selectors";
-import { fileChooser } from "../../utils/page";
-import { CONTINUE, GO_TO_PROJECT, LOADED } from "../../utils/constants";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
@@ -48,7 +45,7 @@ test.describe("Metagenomics sample upload tests", () => {
     const metadata = getMetadata(sampleName, defaults);
     await fillMetadata(page, metadata);
 
-    //submit
+    // submit
     await submitUpload(page);
   });
 
@@ -63,27 +60,24 @@ test.describe("Metagenomics sample upload tests", () => {
     const sampleName = (await page
       .locator(getByTestID("sample-name"))
       .textContent()) as string;
-    //switch to csv upload
+    // switch to csv upload
     await page.locator(getByText("CSV Upload")).click();
 
-    //upload csv
+    // upload csv
     generateMetadataFile(sampleName, defaults);
     await fileChooser(page, `/tmp/${sampleName}.csv`);
 
-    //sucessfull upload diologue
+    // successful upload dialogue
     expect(page.locator(getByText(LOADED))).toBeVisible();
 
-    //click continue button
+    // click continue button
     const continueButtonIndex = 1;
-    await page
-      .locator(getByText(CONTINUE))
-      .nth(continueButtonIndex)
-      .click();
+    await page.locator(getByText(CONTINUE)).nth(continueButtonIndex).click();
 
-    //submit upload
+    // submit upload
     await submitUpload(page);
 
-    //complete upload process
+    // complete upload process
     await page.locator(getByText(GO_TO_PROJECT)).click();
   });
 });

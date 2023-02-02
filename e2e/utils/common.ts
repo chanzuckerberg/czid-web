@@ -15,7 +15,7 @@ export function getValueOrDefault<T>(value: T, defaultValue: T): T {
 
 /**
  * Convenience function that returns either attribute value of
- * an object if object and attribue are both not null.
+ * an object if object and attribute are both not null.
  * Otherwise, it will return a supplied value.
  * This is handy in generating test data, where the user may or may provide
  * default value. The caller provides a randomly generated value to
@@ -28,7 +28,7 @@ export function getValueOrDefault<T>(value: T, defaultValue: T): T {
 export function getAttributeOrDefault<T>(
   obj: any,
   attribute: string,
-  defaultValue: T,
+  defaultValue: T
 ): T {
   if (obj === undefined) {
     return defaultValue;
@@ -70,7 +70,7 @@ export function getFixture(fileName: string) {
 export function getAlphaNumericString(
   stringLength: number,
   includeLowerCase = true,
-  includeNumbers = true,
+  includeNumbers = true
 ): string {
   let charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   if (includeLowerCase) {
@@ -95,7 +95,7 @@ export function getAFullDateInThePast(
   min = 0,
   max = 10,
   isoString = false,
-  refDate?: string,
+  refDate?: string
 ): string {
   // default to current date as a refence date
   const fromDate = refDate !== undefined ? new Date(refDate) : new Date();
@@ -121,7 +121,7 @@ export function getAFullDateInThePast(
  */
 export function getYearMonthInThePast(minYear = 5): string {
   const today = new Date();
-  let d = today;
+  const d = today;
   const randomNumber = Math.floor(Math.random() * minYear);
   d.setFullYear(d.getFullYear() - randomNumber);
   return d.toISOString().substring(0, 7);

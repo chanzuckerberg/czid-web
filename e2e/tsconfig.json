@@ -22,25 +22,13 @@
       "skipLibCheck": true,
       "sourceMap": true,
       "strictNullChecks": false,
-      "target": "esnext",
-      "baseUrl": "src",
-      "paths": {
-        "src/*": [
-          "./src/*",
-        ],
-        "~/*": ["./*"],
-        "~ui/*": ["./components/ui/*"],
-        "~utils/*": ["./components/utils/*"],
-        "styles/*": ["./styles/*"],
-        "e2e": ["./e2e/**/*.ts", "./e2e/**/*.json"]
-      }
+      "target": "esnext"
     },
     "include": [
-      "./src",
-      "declaration.d.ts",
-      "./e2e"
+      "./**/*.ts"
     ],
     "exclude": [
-      "node_modules"
+      "node_modules",
+      "@playwright/test"
     ]
   }

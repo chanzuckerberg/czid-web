@@ -1,5 +1,5 @@
-import { chromium, expect, Page, test } from "@playwright/test";
 import path from "path";
+import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
 import {
   ENTER,
@@ -8,7 +8,6 @@ import {
   PROJECT_COUNT,
   PROJECT_NAME_SELECTOR,
   PUBLIC_MENU_ITEM,
-  RESOUNT_COUNT_SELECTOR,
   RESULT_COUNT_SELECTOR,
   SAMPLES,
   SAMPLE_NAME_SELECTOR,
@@ -33,17 +32,14 @@ test.describe("Search data tests", () => {
     // row counts
     expect(await page.locator(PROJECT_NAME_SELECTOR).count()).toBe(1);
 
-    //project count
+    // project count
     expect(await page.locator(getByTestID(PROJECT_COUNT)).textContent()).toBe(
-      projectsFound,
+      projectsFound
     );
 
     // metadata project count
     expect(
-      await page
-        .locator(METADATA_COUNT_SELECTOR)
-        .nth(1)
-        .textContent(),
+      await page.locator(METADATA_COUNT_SELECTOR).nth(1).textContent()
     ).toBe("1");
   });
 
@@ -55,17 +51,14 @@ test.describe("Search data tests", () => {
     await page.keyboard.press(ENTER);
     await page.waitForSelector(SAMPLE_NAME_SELECTOR);
 
-    //sample count
+    // sample count
     expect(await page.locator(RESULT_COUNT_SELECTOR).textContent()).toBe(
-      samplesFound,
+      samplesFound
     );
 
     // metadata sample count
     expect(
-      await page
-        .locator(METADATA_COUNT_SELECTOR)
-        .nth(0)
-        .textContent(),
+      await page.locator(METADATA_COUNT_SELECTOR).nth(0).textContent()
     ).toBe("5");
   });
 });

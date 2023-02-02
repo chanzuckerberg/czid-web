@@ -1,5 +1,5 @@
-import { expect, test } from "@playwright/test";
 import path from "path";
+import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
 import { BasePage } from "../pages/basePage";
 import { CZID, footer, tag } from "../utils/constants";
@@ -11,7 +11,7 @@ test.describe("Home page tests", () => {
   test.use({ storageState: "storage/emptyStorageState.json" });
   test("Should verify home page @nologin", async ({ page }) => {
     const basePage = new BasePage(page);
-    //now go to home page
+    // now go to home page
     await basePage.gotoUrl(`${process.env.BASEURL}`);
 
     // verify tag is displayed
@@ -21,10 +21,10 @@ test.describe("Home page tests", () => {
     await expect((await basePage.findByDataName(CZID)).nth(0)).toBeVisible();
 
     // verify footer links
-    Object.keys(footer).forEach(async key => {
+    Object.keys(footer).forEach(async (key) => {
       await expect((await basePage.findLinkByText(key)).nth(0)).toHaveAttribute(
         "href",
-        footer[key],
+        footer[key]
       );
     });
   });

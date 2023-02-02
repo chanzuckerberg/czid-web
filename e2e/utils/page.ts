@@ -1,5 +1,5 @@
-import { Page } from "@playwright/test";
 import * as path from "path";
+import { Page } from "@playwright/test";
 
 export async function pressKey(page: Page, key: string) {
   await page.keyboard.press(key, { delay: 100 });

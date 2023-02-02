@@ -1,6 +1,6 @@
 import { sample } from "lodash";
-import { getAFullDateInThePast, getFixture, getRandomNumber } from "./common";
 import { Workflow } from "../types/workflow";
+import { getAFullDateInThePast, getFixture, getRandomNumber } from "./common";
 
 const yesOrNo = ["Yes", "No"];
 const zeroOrOne = [0, 1];
@@ -18,7 +18,7 @@ const metadataFixture = getFixture("metadata");
 export function generateWorkflowData(
   workflowName: string,
   projectId: number,
-  sampleName: string,
+  sampleName: string
 ): Workflow {
   const min = 1;
   const max = 5;

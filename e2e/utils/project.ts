@@ -1,13 +1,12 @@
-import { sample } from "lodash";
-import { getFixture, getRandomNumber } from "./common";
-import { Project } from "../types/project";
 import { Page } from "@playwright/test";
-import { getByPlaceholder, getByTestID } from "./selectors";
+import { sample } from "lodash";
+import { Project } from "../types/project";
+import { getFixture, getRandomNumber } from "./common";
+import { getByPlaceholder } from "./selectors";
 
 const trueOrFalse = [true, false];
 const zeroOrOne = [0, 1];
 const metadataFixture = getFixture("metadata");
-const locations = [];
 /**
  * Function generates data for mocking project response data
  * @param projectName
@@ -17,10 +16,10 @@ export function generateProjectData(projectName: string): Project {
   const today = new Date();
   const min = 1;
   const max = 5;
-  let d = today;
+  const d = today;
   const randomNumber = getRandomNumber(min, max);
   d.setFullYear(d.getFullYear() - randomNumber);
-  let hosts = Array<string>();
+  const hosts = Array<string>();
   for (let i = 1; i < randomNumber; i++) {
     hosts.push(sample(metadataFixture["Host Organism"]));
   }
@@ -60,7 +59,7 @@ export async function goToProjectSamples(
   page: Page,
   projectName: string,
   workflowIndex: number,
-  myData: boolean = false,
+  myData = false
 ) {
   const dataType = myData ? "my_data" : "public";
   const placeholderText = myData ? "Search My Data..." : "Search Public...";
@@ -68,17 +67,11 @@ export async function goToProjectSamples(
   await page.waitForTimeout(2000);
   await page.locator(getByPlaceholder(placeholderText)).fill(projectName);
   await page.keyboard.press("Enter");
-  await page
-    .getByText(projectName)
-    .nth(0)
-    .click();
+  await page.getByText(projectName).nth(0).click();
 
   // select workflow type
-  //todo: uncomment once testIds get to staging
-  //await page.locator(getByTestID(tabId)).click();
-  //todo: remove this line once testIds are in staging
-  await page
-    .locator(".tabLabel-3vqpD")
-    .nth(workflowIndex)
-    .click();
+  // todo: uncomment once testIds get to staging
+  // await page.locator(getByTestID(tabId)).click();
+  // todo: remove this line once testIds are in staging
+  await page.locator(".tabLabel-3vqpD").nth(workflowIndex).click();
 }

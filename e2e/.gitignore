@@ -5,4 +5,5 @@ report/
 .env.staging
 storage/state.json
 *.png
+playwright-report/
 

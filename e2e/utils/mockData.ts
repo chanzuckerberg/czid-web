@@ -1,5 +1,10 @@
+import fs from "fs";
 import { sample } from "lodash/fp";
+import { AnalysisTypes } from "../types/analysisTypes";
+import { Filter } from "../types/filter";
 import { Metadata } from "../types/metadata";
+import { SampleLocation } from "../types/sampleLocation";
+import { Workflow } from "../types/workflow";
 import {
   getAlphaNumericString,
   getAttributeOrDefault,
@@ -7,10 +12,6 @@ import {
   getRandomNumber,
   getYearMonthInThePast,
 } from "./common";
-import fs from "fs";
-import { Filter } from "../types/filter";
-import { Workflow } from "../types/workflow";
-import { SampleLocation } from "../types/sampleLocation";
 
 const yesOrNo = ["Yes", "No"];
 const statuses = ["COMPLETE", "FAILED"];
@@ -36,7 +37,7 @@ let excludedFields: Array<string> | undefined;
 export function getMetadata(
   sampleName: string,
   defaultData?: Metadata,
-  exclusions?: Array<string>,
+  exclusions?: Array<string>
 ): Metadata {
   defaults = defaultData;
   excludedFields = exclusions;
@@ -52,7 +53,7 @@ export function getMetadata(
 export function generateMetadataFile(
   fileName: string,
   defaultData?: Metadata,
-  exclusions?: Array<string>,
+  exclusions?: Array<string>
 ) {
   defaults = defaultData;
   excludedFields = exclusions;
@@ -66,7 +67,7 @@ export function generateMetadataFile(
  * @returns metadata object
  */
 export function generateMetadata(sampleName: string): Metadata {
-  let data: Metadata = {
+  const data: Metadata = {
     "Sample Name": sampleName,
     "Host Organism": getAttributeValue("Host Organism"),
     "Sample Type": getAttributeValue("Sample Type"),
@@ -75,7 +76,7 @@ export function generateMetadata(sampleName: string): Metadata {
     "Water Control": sample(yesOrNo),
     "Collection Location": "New York",
   };
-  return setOptionalMetadataAtrribute(data);
+  return setOptionalMetadataAttribute(data);
 }
 
 /**
@@ -84,7 +85,7 @@ export function generateMetadata(sampleName: string): Metadata {
  * @param data - sample data object, should have required fields defined at this stage but can be added after
  * @returns Metadata object
  */
-export function setOptionalMetadataAtrribute(data: Metadata): Metadata {
+export function setOptionalMetadataAttribute(data: Metadata): Metadata {
   const allOptionalFields = optionalFieldFixture["allOptinalFields"];
   for (const field of allOptionalFields) {
     if (!excludedFields?.includes(field)) {
@@ -146,7 +147,7 @@ export function generateWorkflowData(
   workflowName: string,
   projectId: number,
   sampleName: string,
-  filter: Filter,
+  filter: Filter
 ): Workflow {
   const workflow = getFixture("workflows");
   workflow.id = getRandomNumber(1000, 9999);
@@ -185,4 +186,20 @@ export function generateLocation(defaults: SampleLocation): SampleLocation {
     sample_ids: defaults.sample_ids,
     project_ids: defaults.project_ids,
   };
+}
+
+/**
+ * Helper function to generate sample name; helps avoid duplicate names
+ * @param analysisType required - should be one of the three analysis types
+ * @returns sample name string
+ */
+export function generateSampleName(
+  analysisType: keyof typeof AnalysisTypes
+): string {
+  const minNumber = 10000;
+  const maxNumber = 99999;
+  return `${analysisType.replace(" ", "-")}-${getRandomNumber(
+    minNumber,
+    maxNumber
+  )}`;
 }

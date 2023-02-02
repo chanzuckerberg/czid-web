@@ -1,9 +1,9 @@
 import path from "path";
-import dotenv from "dotenv";
-import { getByText } from "../utils/selectors";
 import { chromium, expect } from "@playwright/test";
-import { login } from "../utils/login";
+import dotenv from "dotenv";
 import { tag } from "../utils/constants";
+import { login } from "../utils/login";
+import { getByText } from "../utils/selectors";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 

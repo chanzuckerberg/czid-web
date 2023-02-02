@@ -1,26 +1,23 @@
-import { expect, Page, test } from "@playwright/test";
 import path from "path";
+import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
-import { BasePage } from "../pages/basePage";
 import {
   CZID,
   HREF,
-  INCON_BUTTON,
+  ICON_BUTTON,
   METADATA_FILTERS,
   MY_DATA,
   PROJECTS,
   SAMPLES,
   SEARCH_MY_DATA,
-  tag,
   TAXON_FILTERS,
   UPLOAD,
   VISUALIZATIONS,
-} from "../utils/constants";
+} from "../constants/common.const";
+import { BasePage } from "../pages/basePage";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
-const baseUrl: string = process.env.BASEURL || "";
-let page: Page;
 let basePage: BasePage;
 const href = "href";
 
@@ -35,7 +32,7 @@ test.describe("Landing page tests", () => {
     // My Data menu item has correct url
     await expect(await basePage.findByText(MY_DATA)).toHaveAttribute(
       href,
-      HREF.MYDATA,
+      HREF.MYDATA
     );
 
     // Public menu item has correct url
@@ -46,14 +43,14 @@ test.describe("Landing page tests", () => {
     // Upload menu item has correct url
     await expect(await basePage.findByText(UPLOAD)).toHaveAttribute(
       href,
-      HREF.UPLOAD,
+      HREF.UPLOAD
     );
 
     // Info icon
     // todo: is this intended that this icon has not href
     const infoIconIndex = 0;
     await expect(
-      (await basePage.findByTestId(INCON_BUTTON)).nth(infoIconIndex),
+      (await basePage.findByTestId(ICON_BUTTON)).nth(infoIconIndex)
     ).toBeVisible();
   });
 
@@ -64,7 +61,7 @@ test.describe("Landing page tests", () => {
     // verify filter sections
     const taxonFilterIndex = 0;
     await expect(
-      (await basePage.findByText(TAXON_FILTERS)).nth(taxonFilterIndex),
+      (await basePage.findByText(TAXON_FILTERS)).nth(taxonFilterIndex)
     ).toBeVisible();
     await expect(await basePage.findByText(METADATA_FILTERS)).toBeVisible();
   });
@@ -77,24 +74,24 @@ test.describe("Landing page tests", () => {
     // todo: is this intended that this icon has not href
     const infoIconIndex = 0;
     await expect(
-      (await basePage.findByTestId(INCON_BUTTON)).nth(infoIconIndex),
+      (await basePage.findByTestId(ICON_BUTTON)).nth(infoIconIndex)
     ).toBeVisible();
 
-    //filters
+    // filters
     const filterInconIndex = 1;
     await expect(
-      (await basePage.findByTestId(INCON_BUTTON)).nth(filterInconIndex),
+      (await basePage.findByTestId(ICON_BUTTON)).nth(filterInconIndex)
     ).toBeVisible();
 
-    //search field
+    // search field
     await expect(
-      await basePage.findByPlaceHolder(SEARCH_MY_DATA),
+      await basePage.findByPlaceHolder(SEARCH_MY_DATA)
     ).toBeVisible();
 
     // verify discovery items
     const projectDiscoveryItemIndex = 0;
     await expect(
-      (await basePage.findByText(PROJECTS)).nth(projectDiscoveryItemIndex),
+      (await basePage.findByText(PROJECTS)).nth(projectDiscoveryItemIndex)
     ).toBeVisible();
     await expect(await basePage.findByText(SAMPLES)).toBeVisible();
     await expect(await basePage.findByText(VISUALIZATIONS)).toBeVisible();
