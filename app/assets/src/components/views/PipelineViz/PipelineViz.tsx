@@ -48,7 +48,7 @@ interface PipelineVizProps {
   updateInterval?: number;
   pipelineTechnology?:
     | SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
-    | SEQUENCING_TECHNOLOGY_OPTIONS.ONT;
+    | SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 }
 
 interface PipelineVizState {

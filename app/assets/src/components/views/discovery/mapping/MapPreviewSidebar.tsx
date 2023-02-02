@@ -112,7 +112,7 @@ export default class MapPreviewSidebar extends React.Component<
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }: $TSFixMe) =>
-          TableRenderers.formatPercentage(rowData[dataKey]),
+          TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
         dataKey: "erccReads",
