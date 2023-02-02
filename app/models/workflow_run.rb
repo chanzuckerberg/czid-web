@@ -393,6 +393,27 @@ class WorkflowRun < ApplicationRecord
     s3_output_prefix || sample.sample_output_s3_path
   end
 
+  def workflow_version_at_least(version)
+    return false unless wdl_version
+
+    semantic_version = wdl_version.split("-").first
+    major, minor, patch = semantic_version.split(".").map(&:to_i)
+    test_major, test_minor, test_patch = version.split(".").map(&:to_i)
+
+    # check major version, then minor version, then patch version
+    if major > test_major
+      return true
+    elsif major == test_major
+      if minor > test_minor
+        return true
+      elsif minor == test_minor
+        return patch >= test_patch
+      end
+    end
+
+    false
+  end
+
   private
 
   def cleanup

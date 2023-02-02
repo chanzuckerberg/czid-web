@@ -10,6 +10,7 @@ class AmrWorkflowRun < WorkflowRun
   # * The idea is that the model should have one set of well-defined outputs
   #   that are consistently served, instead of having client pages compose
   #   different sets of results each time.
+  MODERN_HOST_FILTERING_VERSION = "0.3.1".freeze
   OUTPUT_ZIP = "amr.ZipOutputs.output_zip".freeze
   OUTPUT_REPORT = "amr.RunResultsPerSample.synthesized_report".freeze
 
@@ -41,5 +42,9 @@ class AmrWorkflowRun < WorkflowRun
       workflow_run_id: id
     )
     return nil
+  end
+
+  def uses_modern_host_filtering?
+    workflow_version_at_least(MODERN_HOST_FILTERING_VERSION)
   end
 end
