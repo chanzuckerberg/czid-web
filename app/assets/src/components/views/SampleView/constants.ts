@@ -8,7 +8,7 @@ export const KEY_SAMPLE_VIEW_OPTIONS = "SampleViewOptions";
 
 export const KEY_SELECTED_OPTIONS_BACKGROUND = "background";
 export const KEY_SELECTED_OPTIONS_TAXA = "taxa";
-export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholds";
+export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholdsReads";
 
 export const NANOPORE_DEFAULT_COLUMN_WIDTH = 80;
 

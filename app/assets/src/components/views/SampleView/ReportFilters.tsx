@@ -166,7 +166,7 @@ const ReportFilters = ({
         handleRemoveFilter({
           key:
             currentTab === TABS.SHORT_READ_MNGS
-              ? "thresholds"
+              ? "thresholdsReads"
               : "thresholdsBases",
           value: threshold,
         })
@@ -220,12 +220,12 @@ const ReportFilters = ({
   // Display reads OR bases metrics based on the sample's workflow
   const selectedTreeMetric =
     currentTab === TABS.SHORT_READ_MNGS
-      ? selected.metric
+      ? selected.metricReads
       : selected.metricBases;
 
   const selectedThresholds =
     currentTab === TABS.SHORT_READ_MNGS
-      ? selected.thresholds
+      ? selected.thresholdsReads
       : selected.thresholdsBases;
 
   return (
@@ -356,7 +356,7 @@ const ReportFilters = ({
               handleFilterChange({
                 key:
                   currentTab === TABS.SHORT_READ_MNGS
-                    ? "thresholds"
+                    ? "thresholdsReads"
                     : "thresholdsBases",
                 value,
               })
@@ -415,7 +415,7 @@ const ReportFilters = ({
                 handleFilterChange({
                   key:
                     currentTab === TABS.SHORT_READ_MNGS
-                      ? "metric"
+                      ? "metricReads"
                       : "metricBases",
                   value,
                 })

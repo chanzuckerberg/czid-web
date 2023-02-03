@@ -44,13 +44,14 @@ export const getDefaultSelectedOptions = (): FilterSelections => {
     background: null,
     categories: { categories: [], subcategories: { Viruses: [] } },
     // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.
-    metric: find({ value: "nt_r" }, TREE_METRICS[TABS.SHORT_READ_MNGS]).value,
+    metricReads: find({ value: "nt_r" }, TREE_METRICS[TABS.SHORT_READ_MNGS])
+      .value,
     metricBases: find({ value: "nt_b" }, TREE_METRICS[TABS.LONG_READ_MNGS])
       .value,
     nameType: "Scientific name",
     readSpecificity: 0,
     taxa: [],
-    thresholds: [],
+    thresholdsReads: [],
     thresholdsBases: [],
   };
 };
@@ -86,27 +87,32 @@ export const getAppliedFilters = (
   selectedOptions,
 ): Omit<
   FilterSelections,
-  "nameType" | "metric" | "metricBases" | "background"
+  "nameType" | "metricReads" | "metricBases" | "background"
 > => {
   // Only Taxon, Category, Subcategories, Read Specifity, and Threshold Filters are considered "Applied Filters"
   return omit(
-    ["nameType", "metric", "metricBases", "background"],
+    ["nameType", "metricReads", "metricBases", "background"],
     diff(selectedOptions, getDefaultSelectedOptions()),
   ) as Omit<
     FilterSelections,
-    "nameType" | "metric" | "metricBases" | "background"
+    "nameType" | "metricReads" | "metricBases" | "background"
   >;
 };
 
 export const hasAppliedFilters = selectedOptions => {
-  const { categories, readSpecificity, taxa, thresholds } = selectedOptions;
+  const {
+    categories,
+    readSpecificity,
+    taxa,
+    thresholdsReads,
+  } = selectedOptions;
 
   const hasCategoryFilters =
     !isEmpty(getOr([], "categories", categories)) ||
     !isEmpty(getOr([], "subcategories.Viruses", categories));
   const hasReadSpecificityFilters = readSpecificity !== 0;
   const hasTaxonFilter = !isEmpty(taxa);
-  const hasThresholdFilters = !isEmpty(thresholds);
+  const hasThresholdFilters = !isEmpty(thresholdsReads);
 
   return (
     hasCategoryFilters ||

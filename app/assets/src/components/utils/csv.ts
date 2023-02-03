@@ -83,7 +83,7 @@ export const createCSVObjectURL = (headers: string[], rows: string[][]) => {
 export const createCSVRowForAppliedFilters = (
   appliedFilters: Omit<
     FilterSelections,
-    "nameType" | "metric" | "metricBases" | "background"
+    "nameType" | "metricReads" | "metricBases" | "background"
   >,
   backgrounds,
   selectedOptions,
@@ -141,7 +141,7 @@ export const createCSVRowForAppliedFilters = (
         });
         break;
       }
-      case "thresholds":
+      case "thresholdsReads":
       case "thresholdsBases": {
         const thresholdFilters = optionVal.reduce(
           (result: $TSFixMe, threshold: $TSFixMe) => {

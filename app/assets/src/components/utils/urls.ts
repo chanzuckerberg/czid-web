@@ -17,7 +17,7 @@ export interface TempSelectedOptionsShape {
   };
   taxa: LabelVal[];
   readSpecificity: number;
-  thresholds?: ThresholdFilterShape[];
+  thresholdsReads?: ThresholdFilterShape[];
   thresholdsBases?: ThresholdFilterShape[];
 }
 
@@ -96,20 +96,20 @@ const getTempSelectedOptions = ({
     case HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS:
       // eslint-disable-next-line standard/computed-property-even-spacing
       sampleViewFormattedSelectedOptions[
-        "thresholds"
+        "thresholdsReads"
       ] = transformHeatmapThresholdsFormatForSampleView(
         tempSelectedOptions?.thresholdFilters,
       );
       break;
     case DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS:
-      sampleViewFormattedSelectedOptions["thresholds"] =
+      sampleViewFormattedSelectedOptions["thresholdsReads"] =
         tempSelectedOptions?.taxonThresholdsSelected;
       break;
     default: {
       console.error(
         `Failed to temporarily persist thresholds to SampleView from source: ${source}.`,
       );
-      sampleViewFormattedSelectedOptions["thresholds"] = [];
+      sampleViewFormattedSelectedOptions["thresholdsReads"] = [];
     }
   }
 
@@ -128,7 +128,7 @@ const transformAnnotationsFormatForSampleView = (
 
 // SampleView thresholds expect the metric format: nt:z_score
 // SamplesHeatmapView thresholds are in the format: NT_zscore so we convert them appropriately
-const transformHeatmapThresholdsFormatForSampleView = heatmapThresoldFilters =>
+const transformHeatmapThresholdsFormatForSampleView = heatmapThresholdFilters =>
   map(threshold => {
     // i.e. nt:r => count
     const mappedSampleViewThresholdValue = mapThresholdMetricName(
@@ -144,7 +144,7 @@ const transformHeatmapThresholdsFormatForSampleView = heatmapThresoldFilters =>
         `:${mappedSampleViewThresholdValue}`,
       ),
     };
-  }, heatmapThresoldFilters);
+  }, heatmapThresholdFilters);
 
 const mapThresholdMetricName = metricName => {
   switch (metricName) {
