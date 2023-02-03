@@ -16,6 +16,9 @@ on:
       developer_name:
         required: true
         type: string
+      deployment_reason:
+        required: true
+        type: string
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,10 +69,10 @@ jobs:
           aws configure set default.region $AWS_DEFAULT_REGION
       - name: Deploy ${{ inputs.source }} to production
         if: ${{ !inputs.force }}
-        run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }} ${{ inputs.developer_name }}
+        run: bin/deploy_automation/deploy_rev.sh prod origin/${{ inputs.source }} ${{ inputs.developer_name }} ${{ inputs.deployment_reason }}
       - name: Force deploy ${{ inputs.source }} to production
         if: ${{ inputs.force }}
-        run: bin/deploy_automation/deploy_rev.sh -f prod origin/${{ inputs.source }} ${{ inputs.developer_name }}
+        run: bin/deploy_automation/deploy_rev.sh -f prod origin/${{ inputs.source }} ${{ inputs.developer_name }} ${{ inputs.deployment_reason }}
 
   development-deploy:
     name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
@@ -107,7 +110,7 @@ jobs:
           aws configure set default.region $AWS_DEFAULT_REGION
       - name: Deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ !inputs.force }}
-        run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }} ${{ inputs.developer_name }}
+        run: bin/deploy_automation/deploy_rev.sh ${{ inputs.destination }} origin/${{ inputs.source }} ${{ inputs.developer_name }} ${{ inputs.deployment_reason }}
       - name: Force deploy ${{ inputs.source }} to ${{ inputs.destination }}
         if: ${{ inputs.force }}
-        run: bin/deploy_automation/deploy_rev.sh -f ${{ inputs.destination }} origin/${{ inputs.source }} ${{ inputs.developer_name }}
+        run: bin/deploy_automation/deploy_rev.sh -f ${{ inputs.destination }} origin/${{ inputs.source }} ${{ inputs.developer_name }} ${{ inputs.deployment_reason }}

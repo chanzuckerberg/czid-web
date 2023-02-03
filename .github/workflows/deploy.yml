@@ -11,6 +11,7 @@ on:
         required: true
       release_notes:
         description: Reason for the release (scheduled, hotfix, issue ID, etc.)
+        required: true
       force:
         description: Force release (set to `true` to release even if checks fail)
         default: 'false'
@@ -24,3 +25,4 @@ jobs:
       destination: ${{ github.event.inputs.destination }}
       force: ${{ github.event.inputs.force == 'true' }}
       developer_name: ${{ github.actor }}
+      deployment_reason: ${{ github.event.inputs.release_notes }}

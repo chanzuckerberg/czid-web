@@ -15,6 +15,7 @@ end
 env = ARGV.shift
 image = ARGV.shift
 deployed_by = ARGV.shift
+deployment_reason = ARGV.shift
 
 aws_account_alias = JSON.parse(`aws iam list-account-aliases --output json --query "AccountAliases[0]"`)
 
@@ -37,13 +38,14 @@ end
 
 puts "deploying #{image} to #{env}"
 
-def notify_slack(env, image, stage, deployed_by = nil)
+def notify_slack(env, image, stage, deployed_by = nil, deployment_reason = nil)
   slack_secret = JSON.parse(`aws secretsmanager get-secret-value --secret-id idseq/slack_hook`)
   slack_hook = slack_secret["SecretString"]
   if slack_hook
     if stage=="start"
       message = "Starting to deploy #{image} to #{env}.\n" + "   - refs: #{tags_and_branches(image).join(', ')}"
       message += "\n   - deployed_by: #{deployed_by}" if deployed_by
+      message += "\n   - deployment_reason: #{deployment_reason}" if deployment_reason
       post_slack_message({"icon_emoji": ":ghost:", "text": message}, slack_hook)
     elsif stage=="end"
       post_slack_message({"icon_emoji": ":sharkdance:", "text": "Finished deploying #{image} to #{env}."}, slack_hook)
@@ -73,7 +75,7 @@ def tags_and_branches(image)
       .split("\n")
 end
 
-notify_slack(env, image, "start", deployed_by)
+notify_slack(env, image, "start", deployed_by, deployment_reason)
 begin
   ENV['AWS_PAGER'] ||= ''  # awscli v2 auto-paginates
 

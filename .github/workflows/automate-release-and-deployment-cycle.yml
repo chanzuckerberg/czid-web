@@ -33,6 +33,8 @@ jobs:
       source: prod
       destination: prod
       developer_name: ${{ github.actor }}
+      deployment_reason: scheduled deployment of staging to prod
+
   deploy-staging:
     needs: [run-deployment-prerequisites, deploy-prod]
     uses: ./.github/workflows/reusable-deploy-workflow.yml
@@ -40,6 +42,7 @@ jobs:
       source: staging
       destination: staging
       developer_name: ${{ github.actor }}
+      deployment_reason: scheduled deployment of main to staging
   # Separated make-release-checklist into it's own job to prevent the failure of it from blocking deployment
   # The goal here is make make_release_checklist part of run-deployment-prerequisites eventually, but for the time being this will help debug the script better
   make-release-checklist:
