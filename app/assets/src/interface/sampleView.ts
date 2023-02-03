@@ -187,7 +187,7 @@ export interface ColumnProps {
   }: {
     cellData?: Array<number> | number | string;
     rowData?: Taxon;
-  }) => JSX.Element | "-";
+  }) => JSX.Element | string;
   className?: string;
   columnData?: { [key: string]: any };
   disableSort?: boolean;

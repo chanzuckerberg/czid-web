@@ -87,7 +87,7 @@ class SamplesHeatmapVis extends React.Component<
   metadataTypes: $TSFixMe;
   metrics: $TSFixMe;
   scale: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: SamplesHeatmapVisProps) {
     super(props);
 
     this.state = {
@@ -188,7 +188,7 @@ class SamplesHeatmapVis extends React.Component<
     document.removeEventListener("keyup", this.handleKeyUp, false);
   }
 
-  componentDidUpdate(prevProps: $TSFixMe) {
+  componentDidUpdate(prevProps: SamplesHeatmapVisProps) {
     if (this.props.scale !== this.scale) {
       this.scale = this.props.scale;
       this.heatmap.updateScale(this.props.scale);

@@ -339,6 +339,7 @@ const HoverActions = ({
         <ButtonIcon
           sdsSize="small"
           sdsType="primary"
+          // @ts-expect-error Type 'string' is not assignable to type 'keyof IconNameToSizes'
           sdsIcon={hoverAction.iconName}
           onClick={onClickFunction}
           disabled={!hoverAction.enabled}

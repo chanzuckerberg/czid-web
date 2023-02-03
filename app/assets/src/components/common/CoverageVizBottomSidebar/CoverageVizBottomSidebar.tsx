@@ -432,6 +432,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
           <BareDropdown
             options={this.getAccessionOptions()}
             value={get("id", currentAccessionSummary)}
+            // @ts-expect-error Property 'label' does not exist on type
             label="Accession"
             trigger={
               <div className={cs.accessionLabel}>

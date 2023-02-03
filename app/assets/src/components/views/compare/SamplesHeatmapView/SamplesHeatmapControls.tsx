@@ -156,11 +156,14 @@ const SamplesHeatmapControls = ({
     const disabled = loading || !data || isPreset;
 
     const categoryOptions = options.categories.map(category => {
-      const option = { text: category, value: category };
+      const option: {
+        text: string;
+        value: string;
+        suboptions?: { text: string; value: string }[];
+      } = { text: category, value: category };
       const subcategories = options.subcategories[category];
       if (Array.isArray(subcategories)) {
-        // @ts-expect-error ts-migrate(2339) FIXME: Property 'suboptions' does not exist on type '{ te... Remove this comment to see the full error message
-        option.suboptions = subcategories.map(subcategory => {
+        option.suboptions = subcategories.map((subcategory: string) => {
           return { text: subcategory, value: subcategory };
         });
       }
@@ -441,8 +444,8 @@ const SamplesHeatmapControls = ({
     const scaleIndex = selectedOptions.dataScaleIdx;
     return (
       <SequentialLegendVis
-        min={Math.max(0, min(values.map((array: $TSFixMe) => min(array))))}
-        max={max(values.map((array: $TSFixMe) => max(array)))}
+        min={Math.max(0, min(values.map(array => min(array))))}
+        max={max(values.map(array => max(array)))}
         scale={options.scales[scaleIndex][1]}
       />
     );

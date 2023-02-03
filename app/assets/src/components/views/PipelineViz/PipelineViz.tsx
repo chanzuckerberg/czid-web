@@ -67,7 +67,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
   panZoomContainer: $TSFixMe;
   stageNames: $TSFixMe;
   updateLoop: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: PipelineVizProps) {
     super(props);
 
     const { showExperimental, pipelineTechnology } = props;

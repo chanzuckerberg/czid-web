@@ -34,7 +34,7 @@ class MultipleNestedDropdown extends React.Component<
   MultipleNestedDropdownState
 > {
   suboptionsToOptionMap: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: MultipleNestedDropdownProps) {
     super(props);
 
     this.state = {

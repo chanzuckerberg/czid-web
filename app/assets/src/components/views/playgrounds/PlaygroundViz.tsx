@@ -124,6 +124,7 @@ export default class PlaygroundViz extends React.Component {
         <HorizontalStackedBarChart
           data={data}
           keys={keys}
+          // @ts-expect-error Property 'width' does not exist on type
           width={width}
           options={options}
           events={events}

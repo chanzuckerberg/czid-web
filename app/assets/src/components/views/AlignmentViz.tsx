@@ -30,13 +30,13 @@ class AlignmentViz extends React.Component<
   AlignmentVizProps,
   AlignmentVizState
 > {
-  alignmentQuery: $TSFixMe;
-  pipelineVersion: $TSFixMe;
-  readsPerPage: $TSFixMe;
-  sampleId: $TSFixMe;
-  taxId: $TSFixMe;
-  taxLevel: $TSFixMe;
-  taxName: $TSFixMe;
+  alignmentQuery: string;
+  pipelineVersion: string;
+  readsPerPage: number;
+  sampleId: number;
+  taxId: string;
+  taxLevel: string;
+  taxName: string;
   constructor(props: AlignmentVizProps) {
     super(props);
     this.sampleId = props.sampleId;

@@ -56,10 +56,12 @@ const PinSampleSelector = ({
       onClose={handleClose}
       open
       options={options}
+      // @ts-expect-error Property 'id' does not exist on type 'DefaultDropdownMenuOption'
       isOptionEqualToValue={(option, value) => option.id === value}
       PopperBaseProps={{ placement: "bottom-end", sx: { width: 300 } }}
       search
       title="Select Samples to Pin"
+      // @ts-expect-error Type 'number' is not assignable to type 'string | DefaultDropdownMenuOption'.
       value={selectedSamples}
     >
       <div className={cs.buttonsContainer}>

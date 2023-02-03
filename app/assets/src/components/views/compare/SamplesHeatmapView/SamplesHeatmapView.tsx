@@ -153,7 +153,7 @@ class SamplesHeatmapView extends React.Component<
   s: $TSFixMe;
   urlParams: $TSFixMe;
   urlParser: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: SamplesHeatmapViewProps) {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);

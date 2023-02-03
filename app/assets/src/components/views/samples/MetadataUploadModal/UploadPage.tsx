@@ -86,6 +86,7 @@ class UploadPage extends React.Component<UploadPageProps> {
     return (
       <div className={cs.uploadPage}>
         <MetadataUpload
+          // @ts-expect-error Type 'ProjectSample[]' is not assignable to type 'SampleFromApi[]'
           samples={this.props.samples}
           project={this.props.project}
           onMetadataChange={this.handleMetadataChange}

@@ -61,6 +61,7 @@ const ProjectUploadMenu = ({
         <MetadataUploadModal
           onClose={() => setModalOpen(false)}
           onComplete={onMetadataUpdated}
+          // @ts-expect-error Property 'name' is optional in type ProjectUploadMenuProps but required in MetadataUploadModal
           project={project}
           workflow={workflow}
         />

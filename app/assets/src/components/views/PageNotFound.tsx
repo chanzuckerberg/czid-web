@@ -8,8 +8,8 @@ import cs from "./page_not_found.scss";
 
 interface PageNotFoundProps {
   browserInfo?: {
-    supported: $TSFixMe;
-    browser: $TSFixMe;
+    supported: boolean;
+    browser: string;
   };
   showLandingHeader?: boolean;
 }

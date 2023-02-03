@@ -141,7 +141,9 @@ export interface PipelineRun {
   sfn_execution_arn: string;
   use_taxon_whitelist: boolean;
   s3_output_prefix: string;
-  technology: SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA | SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
+  technology:
+    | SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
+    | SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
   time_to_finalized: number;
   time_to_results_finalized: number;
   total_bases: number;
@@ -196,6 +198,7 @@ export interface SampleFromApi {
   name?: string;
   host_genome_id: number;
   host_genome_name: string;
+  ercc_only: boolean;
   project_id?: number | string;
   created_at: DateString;
   status?: string;

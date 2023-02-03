@@ -7,7 +7,7 @@ export const generateClientDownloadFromEndpoint = async ({
   fileType,
 }: {
   endpoint: string;
-  params?: { [key: string]: string };
+  params?: { [key: string]: string | number };
   fileName: string;
   fileType: string;
 }) => {

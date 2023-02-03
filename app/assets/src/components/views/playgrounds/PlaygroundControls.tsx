@@ -168,6 +168,7 @@ class PlaygroundControls extends React.Component<
           </ComponentCard>
           <ComponentCard title="Dropdown" width={4}>
             <Dropdown
+              // @ts-expect-error Property 'arrowInsideTrigger' does not exist on type
               arrowInsideTrigger={false}
               key={0}
               fluid

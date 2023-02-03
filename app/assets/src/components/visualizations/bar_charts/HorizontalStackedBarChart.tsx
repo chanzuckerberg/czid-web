@@ -71,7 +71,7 @@ const defaults = {
 interface HorizontalStackedBarChartProps {
   data?: $TSFixMeUnknown[];
   keys?: string[];
-  options?: { colors; x; y };
+  options?: { colors?; x; y };
   events?: {
     onYAxisLabelClick?: $TSFixMeFunction;
     onYAxisLabelEnter?: $TSFixMeFunction;
@@ -143,7 +143,7 @@ export default class HorizontalStackedBarChart extends React.Component<
   normalizedData: $TSFixMe;
   references: $TSFixMe;
   stackGenerator: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: HorizontalStackedBarChartProps) {
     super(props);
 
     const { data, keys, options, yAxisKey, normalize } = props;
@@ -192,7 +192,7 @@ export default class HorizontalStackedBarChart extends React.Component<
     window.addEventListener("resize", this.handleWindowResize);
   }
 
-  componentDidUpdate(prevProps: $TSFixMe) {
+  componentDidUpdate(prevProps: HorizontalStackedBarChartProps) {
     const { redrawNeeded } = this.state;
     const scaleChanged = this.props.normalize !== prevProps.normalize;
     if (redrawNeeded || scaleChanged) {

@@ -43,7 +43,7 @@ class TaxonTreeVis extends React.Component<
   treeContainer: $TSFixMe;
   treeTooltip: $TSFixMe;
   treeVis: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: TaxonTreeVisProps) {
     super(props);
 
     this.state = {

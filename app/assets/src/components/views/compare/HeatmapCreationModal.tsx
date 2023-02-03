@@ -46,7 +46,7 @@ export default class HeatmapCreationModal extends React.Component<
   HeatmapCreationModalProps,
   HeatmapCreationModalState
 > {
-  constructor(props: $TSFixMe) {
+  constructor(props: HeatmapCreationModalProps) {
     super(props);
 
     this.state = {
@@ -66,7 +66,7 @@ export default class HeatmapCreationModal extends React.Component<
     this.fetchBackgroundAvailability();
   }
 
-  componentDidUpdate(prevProps: $TSFixMe) {
+  componentDidUpdate(prevProps: HeatmapCreationModalProps) {
     if (prevProps.selectedIds !== this.props.selectedIds) {
       this.fetchBackgroundAvailability();
     }

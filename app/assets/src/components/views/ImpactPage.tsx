@@ -18,6 +18,7 @@ const ImpactPage = () => {
       <ImpactHero />
       <ImpactIntro
         setSelectedCountry={country => setSelectedCountry(country)}
+        // @ts-expect-error Property 'selectedCountry' does not exist on type
         selectedCountry={selectedCountry}
       />
       <ImpactCountryShowcase

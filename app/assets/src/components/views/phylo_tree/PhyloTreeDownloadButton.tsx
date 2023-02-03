@@ -22,7 +22,7 @@ class PhyloTreeDownloadButton extends React.Component<
   skaOptions: $TSFixMe;
   svgSaver: $TSFixMe;
   treeOptions: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: PhyloTreeDownloadButtonProps) {
     super(props);
 
     this.dataOptions = [

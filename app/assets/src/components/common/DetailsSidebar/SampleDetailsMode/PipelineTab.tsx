@@ -145,6 +145,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
 
     const newValue = !sectionOpen[section];
     this.setState({
+      // @ts-expect-error working with Lodash
       sectionOpen: set(section, newValue, sectionOpen),
     });
     trackEvent("PipelineTab_section_toggled", {
@@ -406,13 +407,16 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     const workflowIsMngs = [
       WORKFLOWS.SHORT_READ_MNGS.label,
       WORKFLOWS.LONG_READ_MNGS.label,
+      // @ts-expect-error Argument of type 'string' is not assignable to parameter of type '"Metagenomic" | "Nanopore"
     ].includes(workflow);
 
     const fields = this.INFO_FIELDS_FOR_WORKFLOW[workflow];
 
     const pipelineInfoFields = fields.map(this.getPipelineInfoField);
     const title =
-      pipelineRun?.technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE ? "Bases Remaining" : "Reads Remaining";
+      pipelineRun?.technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE
+        ? "Bases Remaining"
+        : "Reads Remaining";
 
     return (
       <div>

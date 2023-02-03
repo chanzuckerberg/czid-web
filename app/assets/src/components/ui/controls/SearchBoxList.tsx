@@ -89,6 +89,7 @@ class SearchBoxList extends React.Component<
 
     return (
       Array.from(selected)
+        // @ts-expect-error Type 'unknown' cannot be used as an index type.
         .map(optionValue => selectedOptions[optionValue])
         // Filter out any selected fields that aren't present. Otherwise, this will cause an error.
         .filter(option => option !== undefined)

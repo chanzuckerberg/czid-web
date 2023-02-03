@@ -7,8 +7,13 @@ import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
 
 import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
-import { MetadataType, MetadataTypes, SampleType } from "~/interface/shared";
-import { Metadata, returnHipaaCompliantMetadata } from "~utils/metadata";
+import {
+  Metadata,
+  MetadataType,
+  MetadataTypes,
+  SampleType,
+} from "~/interface/shared";
+import { returnHipaaCompliantMetadata } from "~utils/metadata";
 import MetadataSection from "./MetadataSection";
 import { AdditionalInfo } from "./SampleDetailsMode";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
@@ -169,6 +174,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     if (isHuman) {
       metadataValue = returnHipaaCompliantMetadata(
         metadataType.key,
+        // @ts-expect-error Type 'LocationObject' is not assignable to type 'string'
         metadataValue,
       );
     }

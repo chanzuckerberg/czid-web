@@ -2666,4 +2666,5 @@ const connectedComponent = connect(null, mapDispatchToProps)(DiscoveryView);
 
 (connectedComponent.name as string) = "DiscoveryView";
 
+// @ts-expect-error Property 'domain' is missing in type 'RouteComponentProps'
 export default withRouter(connectedComponent);

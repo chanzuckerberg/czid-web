@@ -59,7 +59,7 @@ class PhyloTreeVis extends React.Component<
   treeContainer: $TSFixMe;
   treeVis: $TSFixMe;
   warningTooltipContainer: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: PhyloTreeVisProps) {
     super(props);
 
     this.state = {

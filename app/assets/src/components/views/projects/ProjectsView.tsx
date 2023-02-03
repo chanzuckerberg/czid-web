@@ -49,7 +49,7 @@ interface ProjectsViewProps {
 class ProjectsView extends React.Component<ProjectsViewProps> {
   columns: $TSFixMe;
   discoveryView: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: ProjectsViewProps) {
     super(props);
 
     this.discoveryView = null;

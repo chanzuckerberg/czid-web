@@ -55,7 +55,7 @@ interface VisualizationsViewProps {
 class VisualizationsView extends React.Component<VisualizationsViewProps> {
   columns: $TSFixMe;
   discoveryView: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: VisualizationsViewProps) {
     super(props);
 
     this.discoveryView = null;

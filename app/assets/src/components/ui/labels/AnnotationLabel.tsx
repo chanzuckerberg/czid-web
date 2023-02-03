@@ -42,6 +42,7 @@ const AnnotationLabel = ({
     >
       <Icon
         className={cx(cs[icon], isStatic ? cs.staticFlag : cs.interactiveFlag)}
+        // @ts-expect-error Type 'string' is not assignable to type 'keyof IconNameToSizes'
         sdsIcon={icon}
         sdsSize={isStatic ? "xs" : "s"}
         sdsType={isStatic ? "static" : "interactive"}

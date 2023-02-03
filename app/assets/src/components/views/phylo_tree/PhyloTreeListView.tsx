@@ -101,7 +101,7 @@ class PhyloTreeListView extends React.Component<
   PhyloTreeListViewState
 > {
   selectedMetadata: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: PhyloTreeListViewProps) {
     super(props);
 
     const urlParams = parseUrlParams();

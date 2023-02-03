@@ -3,15 +3,18 @@ import { capitalize, every, keys, countBy, map } from "lodash/fp";
 import React from "react";
 
 import Accordion from "~/components/layout/Accordion";
-import { HostGenome, SampleFromApi } from "~/interface/shared";
+import { HostGenome, Optional, SampleFromApi } from "~/interface/shared";
 import ExternalLink from "~ui/controls/ExternalLink";
 import Notification from "~ui/notifications/Notification";
 
 import cs from "./host_organism_message.scss";
 
 interface HostOrganismMessageProps {
-  samples: SampleFromApi[];
-  hostGenomes: HostGenome[];
+  samples: Pick<SampleFromApi, "host_genome_id" | "host_genome_name">[];
+  hostGenomes: Optional<
+    Pick<HostGenome, "name" | "id" | "ercc_only">,
+    "ercc_only"
+  >[];
 }
 
 type CountUniqHosts = { [host: string]: number };

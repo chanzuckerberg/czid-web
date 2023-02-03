@@ -43,7 +43,7 @@ class DiscoveryMap extends React.Component<
 > {
   onMapLevelChangeThrottled: $TSFixMe;
   trackEventThrottled: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: DiscoveryMapProps) {
     super(props);
     const { onMapLevelChange } = this.props;
 

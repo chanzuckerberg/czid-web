@@ -105,7 +105,7 @@ class PhyloTreeCreationModal extends React.Component<
   phyloTreeHeaders: $TSFixMe;
   skipSelectProjectAndTaxon: $TSFixMe;
   wizard: $TSFixMe;
-  constructor(props: $TSFixMe, context: $TSFixMe) {
+  constructor(props: PhyloTreeCreationModalProps, context: $TSFixMe) {
     super(props, context);
 
     this.state = {

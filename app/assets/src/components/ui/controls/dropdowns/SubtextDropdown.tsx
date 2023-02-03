@@ -84,6 +84,7 @@ class SubtextDropdown extends React.Component<SubtextDropdownProps> {
     } = this.props;
 
     return (
+      // @ts-expect-error Types of property 'search' are incompatible
       <Dropdown
         {...props}
         className={className}

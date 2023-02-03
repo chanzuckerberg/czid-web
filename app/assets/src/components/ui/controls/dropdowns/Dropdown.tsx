@@ -56,7 +56,7 @@ interface DropdownState {
 }
 
 class Dropdown extends React.Component<DropdownProps, DropdownState> {
-  constructor(props: $TSFixMe) {
+  constructor(props: DropdownProps) {
     super(props);
     this.state = {
       value: this.props.value !== undefined ? this.props.value : null,
@@ -68,7 +68,7 @@ class Dropdown extends React.Component<DropdownProps, DropdownState> {
     this.buildLabels();
   }
 
-  componentDidUpdate(prevProps: $TSFixMe) {
+  componentDidUpdate(prevProps: DropdownProps) {
     // Also guard against NaN.
     if (
       prevProps.value !== this.props.value &&

@@ -10,7 +10,7 @@ interface SequentialLegendVisProps {
 class SequentialLegendVis extends React.Component<SequentialLegendVisProps> {
   legend: $TSFixMe;
   legendContainer: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: SequentialLegendVisProps) {
     super(props);
     this.legend = null;
   }

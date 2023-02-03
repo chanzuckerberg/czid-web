@@ -26,6 +26,7 @@ class CSVUpload extends React.Component<CSVUploadProps> {
 
     const fileReader = new FileReader();
     fileReader.onload = event => {
+      // @ts-expect-error Argument of type 'string | ArrayBuffer' is not assignable to parameter of type 'string'
       let csv = parseCSVBlob(event.target.result);
 
       if (removeEmptyRows) {

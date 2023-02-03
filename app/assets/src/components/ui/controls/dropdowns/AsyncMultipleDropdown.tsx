@@ -80,6 +80,7 @@ class AsyncMultipleDropdown extends React.Component<
     // If the query has since changed, discard the response (don't do anything).
     // Otherwise, update the state with the query response.
     if (query === this._lastQuery) {
+      // @ts-expect-error Property 'length' is missing in type '{}'
       this.setState({ options: unionBy("value", options, selectedOptions) });
     }
   });

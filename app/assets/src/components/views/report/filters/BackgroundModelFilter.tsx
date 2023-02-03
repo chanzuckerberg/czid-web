@@ -17,13 +17,13 @@ interface BackgroundModelFilterProps {
   onClick?: $TSFixMeFunction;
   placeholder?: string;
   rounded?: boolean;
-  value?: number;
+  value?: string | number;
   className?: string;
 }
 
 export interface RawBackground {
   mass_normalized: boolean;
-  text: string;
+  text?: string;
   name?: string;
   id?: number;
   value?: number;

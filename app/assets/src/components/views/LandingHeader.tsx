@@ -8,8 +8,8 @@ import cs from "./landing.scss";
 
 interface LandingHeaderProps {
   browserInfo?: {
-    supported: $TSFixMe;
-    browser: $TSFixMe;
+    supported: boolean;
+    browser: string;
   };
 }
 

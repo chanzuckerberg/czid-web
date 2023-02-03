@@ -243,7 +243,7 @@ class BulkDownloadModalOptions extends React.Component<
             fluid
             placeholder={placeholder}
             allBackgrounds={dropdownOptions}
-            onChange={(value, displayName) => {
+            onChange={(value: string, displayName) => {
               onFieldSelect(downloadType.type, field.type, value, displayName);
 
               // Reset conditional fields if they are no longer needed.
@@ -264,6 +264,7 @@ class BulkDownloadModalOptions extends React.Component<
               });
             }}
             enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+            // @ts-expect-error Type 'LodashGet9x2<string>' is not assignable to type 'number'
             value={selectedField}
             usePortal
             withinModal
@@ -275,7 +276,7 @@ class BulkDownloadModalOptions extends React.Component<
             fluid
             placeholder={placeholder}
             options={dropdownOptions}
-            onChange={(value, displayName) => {
+            onChange={(value: string, displayName) => {
               onFieldSelect(downloadType.type, field.type, value, displayName);
 
               // Reset conditional fields if they are no longer needed.
@@ -305,13 +306,13 @@ class BulkDownloadModalOptions extends React.Component<
   };
 
   // Return a message to display to the user if the download option should be disabled.
-  getDisabledMessageForDownload = (downloadType) => {
+  getDisabledMessageForDownload = downloadType => {
     const {
       allObjectsUploadedByCurrentUser,
       objectDownloaded,
       userIsCollaborator,
       validObjectIds,
-      } = this.props;
+    } = this.props;
     const { admin, appConfig } = this.context || {};
     let disabledMessage = "";
 
@@ -340,7 +341,7 @@ class BulkDownloadModalOptions extends React.Component<
     return disabledMessage;
   };
 
-  renderDownloadType = (downloadType) => {
+  renderDownloadType = downloadType => {
     const {
       onSelect,
       selectedDownloadTypeName,
@@ -348,9 +349,7 @@ class BulkDownloadModalOptions extends React.Component<
     } = this.props;
 
     const selected = selectedDownloadTypeName === downloadType.type;
-    const disabledMessage = this.getDisabledMessageForDownload(
-      downloadType,
-    );
+    const disabledMessage = this.getDisabledMessageForDownload(downloadType);
     const disabled = disabledMessage !== "";
 
     const downloadTypeElement = (

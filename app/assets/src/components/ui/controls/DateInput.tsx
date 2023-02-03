@@ -29,6 +29,7 @@ class DateInput extends React.Component<DateInputProps> {
         closable
         className={cx("idseq-ui", "input", cs.dateInput, className)}
         onChange={this.handleChange}
+        // @ts-expect-error Type 'string | number' is not assignable to type 'string'.
         value={this.props.value || ""}
         dateFormat="YYYY-MM-DD"
         popupPosition="bottom right"

@@ -227,6 +227,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
           <UploadMetadataStep
             onUploadMetadata={this.handleUploadMetadata}
             samples={this.state.samples}
+            // @ts-expect-error Property 'name' is optional in type this.state.project but required in UploadMetadataStep
             project={this.state.project}
             visible={this.state.currentStep === "uploadMetadata"}
             onDirty={this.metadataChanged}

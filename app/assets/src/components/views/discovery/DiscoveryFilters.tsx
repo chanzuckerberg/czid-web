@@ -87,7 +87,7 @@ class DiscoveryFilters extends React.Component<
   DiscoveryFiltersState
 > {
   configForWorkflow: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: DiscoveryFiltersProps) {
     super(props);
 
     this.state = {

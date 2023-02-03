@@ -293,6 +293,7 @@ class CollectionModal extends React.Component<
         <SubtextDropdown
           fluid
           className={cs.dropdown}
+          // @ts-expect-error Types of property 'value' are incompatible.
           options={Object.values(dropdownOptions)}
           initialSelectedValue={appliedMethod}
           onChange={withAnalytics(

@@ -33,7 +33,7 @@ class ThresholdFilterDropdown extends React.Component<
 > {
   metrics: $TSFixMe;
   operators: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: ThresholdFilterDropdownProps) {
     super(props);
 
     // @ts-expect-error ts-migrate(2339) FIXME: Property 'targets' does not exist on type 'Readonl... Remove this comment to see the full error message

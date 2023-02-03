@@ -40,13 +40,13 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
   handleEnter: $TSFixMeFunction;
   blankState: {
     isLoading: boolean;
-    results: any[];
+    results: $TSFixMe[];
     value: string;
     selectedResult: any;
   };
   handleServerSearchActionDebounced: any;
   static defaultProps: SearchBoxProps;
-  constructor(props) {
+  constructor(props: SearchBoxProps) {
     super(props);
 
     // 200 ms matches tuning done for AUTOCOMPLETE_DEBOUNCE_DELAY
@@ -79,7 +79,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
     };
   }
 
-  onKeyDown = e => {
+  onKeyDown = (e: { key: unknown }) => {
     // Defines action to be performed when user hits Enter without selecting one of the search results
     if (e.key === "Enter" && !this.state.selectedResult && this.props.onEnter) {
       this.props.onEnter(e);
@@ -96,7 +96,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
     });
   };
 
-  handleResultSelect(e, { result }) {
+  handleResultSelect(e: unknown, { result }: { result: { title: unknown } }) {
     const { clearOnSelect } = this.props;
     this.setState({ value: clearOnSelect ? "" : result.title });
     this.props.onResultSelect(e, { result });
@@ -127,7 +127,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
     });
   };
 
-  handleSearchChange = (e, { value }) => {
+  handleSearchChange = (_: unknown, { value }: { value: string }) => {
     const { serverSearchAction, clientSearchSource } = this.props;
 
     this.setState({ isLoading: true, selectedResult: null, value });
@@ -140,7 +140,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
 
     if (clientSearchSource) {
       const re = new RegExp(escapeRegExp(value), "i");
-      const isMatch = result => re.test(result.title);
+      const isMatch = (result: { title: string }) => re.test(result.title);
       const searchResults = clientSearchSource.filter(isMatch);
 
       this.setState({
@@ -173,7 +173,7 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
         value={value || ""}
         placeholder={this.placeholder}
         onResultSelect={this.handleResultSelect}
-        onSelectionChange={(e, { result }) => {
+        onSelectionChange={(_, { result }) => {
           this.setState({ selectedResult: result });
         }}
         onKeyDown={this.onKeyDown}

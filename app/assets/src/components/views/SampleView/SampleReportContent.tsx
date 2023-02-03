@@ -82,6 +82,7 @@ const SampleReportContent = ({
         type,
       } = sampleErrorInfo({
         sample,
+        // @ts-expect-error Type 'string' is not assignable to type 'Record<string, never> | { label?: string; message: string; }'
         error: workflowRun.input_error || {},
       });
       return (

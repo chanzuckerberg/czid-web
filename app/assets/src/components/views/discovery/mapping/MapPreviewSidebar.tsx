@@ -52,7 +52,7 @@ export default class MapPreviewSidebar extends React.Component<
   referenceSelectId: $TSFixMe;
   sampleColumns: $TSFixMe;
   samplesTable: $TSFixMe;
-  constructor(props: $TSFixMe) {
+  constructor(props: MapPreviewSidebarProps) {
     super(props);
 
     this.sampleColumns = [
