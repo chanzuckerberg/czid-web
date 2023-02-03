@@ -1,5 +1,6 @@
 import cx from "classnames";
 import copy from "copy-to-clipboard";
+import { Icon } from "czifui";
 import { get, map, sum, size } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -12,7 +13,6 @@ import GenomeViz from "~/components/visualizations/GenomeViz";
 import { getURLParamString } from "~/helpers/url";
 import { GenomeVizShape, TooltipLocation } from "~/interface/shared";
 import { TooltipVizTable } from "~ui/containers";
-import { IconCopySmall, IconDownloadSmall } from "~ui/icons";
 
 import cs from "./coverage_viz_bottom_sidebar.scss";
 import { AccessionsData } from "./types";
@@ -263,7 +263,7 @@ export default class HitGroupViz extends React.Component<
                 },
               )}
             >
-              <IconDownloadSmall />
+              <Icon sdsIcon="download" sdsSize="s" sdsType="button" />
             </div>
           }
           inverted
@@ -291,7 +291,7 @@ export default class HitGroupViz extends React.Component<
               )}
               onMouseEnter={this.restoreCopyIconMessage}
             >
-              <IconCopySmall />
+              <Icon sdsIcon="copy" sdsSize="s" sdsType="button" />
             </div>
           }
           inverted

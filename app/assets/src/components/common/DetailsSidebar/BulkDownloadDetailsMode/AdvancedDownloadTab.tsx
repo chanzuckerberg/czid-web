@@ -1,12 +1,12 @@
 import cx from "classnames";
 import copy from "copy-to-clipboard";
+import { Icon } from "czifui";
 import moment from "moment";
 import React, { useState } from "react";
 
 import { withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { BulkDownloadDetails } from "~/interface/shared";
-import { IconCopySmall } from "~ui/icons";
 
 import cs from "./bulk_download_details_mode.scss";
 
@@ -83,7 +83,7 @@ const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
       tabIndex={0}
     >
       <div className={cs.command}>{getCLICommand()}</div>
-      <IconCopySmall className={cs.icon} />
+      <Icon className={cs.icon} sdsIcon="copy" sdsSize="s" sdsType="static" />
     </div>
   );
 

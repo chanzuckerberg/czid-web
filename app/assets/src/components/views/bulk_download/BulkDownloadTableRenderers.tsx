@@ -1,9 +1,9 @@
+import { Icon } from "czifui";
 import { find, get } from "lodash/fp";
 import React from "react";
 
 import { WORKFLOWS } from "~/components/utils/workflows";
 import LoadingBar from "~ui/controls/LoadingBar";
-import { IconDownload } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import cs from "./bulk_download_table_renderers.scss";
 import { BULK_DOWNLOAD_TYPES } from "./constants";
@@ -16,7 +16,12 @@ export default class BulkDownloadTableRenderers extends React.Component {
 
     return (
       <div className={cs.downloadCell}>
-        <IconDownload className={cs.downloadIcon} />
+        <Icon
+          className={cs.downloadIcon}
+          sdsIcon="download"
+          sdsSize="xl"
+          sdsType="button"
+        />
         <div className={cs.downloadRightPane}>
           <div className={cs.downloadNameContainer}>
             <div className={cs.downloadName}>{rowData.download_name}</div>

@@ -16,11 +16,8 @@ import IconChartSmall from "./IconChartSmall";
 import IconCheckSmall from "./IconCheckSmall";
 import IconClose from "./IconClose";
 import IconCloseSmall from "./IconCloseSmall";
-import IconCopySmall from "./IconCopySmall";
 import IconCziLogo from "./IconCziLogo";
 import IconDoubleQuotes from "./IconDoubleQuotes";
-import IconDownload from "./IconDownload";
-import IconDownloadSmall from "./IconDownloadSmall";
 import IconInfo from "./IconInfo";
 import IconInfoSmall from "./IconInfoSmall";
 import IconListSmall from "./IconListSmall";
@@ -64,10 +61,7 @@ export const ICONS_TAXONOMY = {
     IconCheckSmall,
     IconClose,
     IconCloseSmall,
-    IconCopySmall,
     IconDoubleQuotes,
-    IconDownload,
-    IconDownloadSmall,
     IconInfo,
     IconInfoSmall,
     IconListSmall,
@@ -125,11 +119,8 @@ export {
   IconCheckSmall,
   IconClose,
   IconCloseSmall,
-  IconCopySmall,
   IconCziLogo,
   IconDoubleQuotes,
-  IconDownload,
-  IconDownloadSmall,
   IconInfo,
   IconInfoSmall,
   IconListSmall,
