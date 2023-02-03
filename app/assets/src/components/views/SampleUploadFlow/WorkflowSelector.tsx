@@ -22,20 +22,20 @@ import RadioButton from "~ui/controls/RadioButton";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import StatusLabel from "~ui/labels/StatusLabel";
-import { WORKFLOWS, WORKFLOW_VALUES } from "~utils/workflows";
 
 import {
+  UPLOAD_WORKFLOWS,
   CG_WETLAB_OPTIONS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
   CG_NANOPORE_WETLAB_OPTIONS,
   GUPPY_BASECALLER_SETTINGS,
   MEDAKA_MODEL_OPTIONS,
-  WORKFLOW_DISPLAY_NAMES,
   LOCAL_UPLOAD,
   REMOTE_UPLOAD,
   BASESPACE_UPLOAD,
   NANOPORE,
   Technology,
+  UploadWorkflows,
 } from "./constants";
 import cs from "./workflow_selector.scss";
 
@@ -78,7 +78,7 @@ const WorkflowSelector = ({
 
   const renderTechnologyOptions = (workflowKey: string) => {
     return (
-      <div className={cs.optionText} onClick={(e) => e.stopPropagation()}>
+      <div className={cs.optionText} onClick={e => e.stopPropagation()}>
         <div className={cx(cs.title, cs.technologyTitle)}>
           Sequencing Platform:
           <div className={cs.technologyOptions}>
@@ -92,7 +92,7 @@ const WorkflowSelector = ({
 
   const renderIlluminaOption = (workflowKey: string) => {
     const workflowObject = find(
-      (w) => w.workflow === workflowKey,
+      w => w.workflow === workflowKey,
       WORKFLOW_UPLOAD_OPTIONS,
     );
     const illuminaTechnologyOptionSelected =
@@ -128,7 +128,7 @@ const WorkflowSelector = ({
             .
           </div>
           <div className={cs.technologyContent}>
-            {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+            {selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) &&
               illuminaTechnologyOptionSelected &&
               renderWetlabSelector(SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA)}
           </div>
@@ -151,7 +151,7 @@ const WorkflowSelector = ({
             link={"https://www.clearlabs.com/"}
           />
         </div>
-        <div className={cs.description} onClick={(e) => e.stopPropagation()}>
+        <div className={cs.description} onClick={e => e.stopPropagation()}>
           <Toggle
             className={cs.toggle}
             initialChecked={usedClearLabs}
@@ -222,7 +222,7 @@ const WorkflowSelector = ({
 
   const renderNanoporeOption = (workflowKey: string) => {
     const workflowObject = find(
-      (w) => w.workflow === workflowKey,
+      w => w.workflow === workflowKey,
       WORKFLOW_UPLOAD_OPTIONS,
     );
     const nanoporeTechnologyOptionSelected =
@@ -267,7 +267,7 @@ const WorkflowSelector = ({
         <div className={cs.optionText}>
           <div className={cs.title}>
             Nanopore
-            {workflowKey === WORKFLOWS.SHORT_READ_MNGS.value && (
+            {workflowKey === UPLOAD_WORKFLOWS.MNGS.value && (
               <StatusLabel
                 className={shouldDisableOption && cs.disabledStatus}
                 inline
@@ -366,16 +366,16 @@ const WorkflowSelector = ({
   // `sdsIcon` maps directly with czifui Icon component prop: sdsIcon
   const WORKFLOW_UPLOAD_OPTIONS = [
     {
-      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
-      title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.SHORT_READ_MNGS.value],
+      workflow: UPLOAD_WORKFLOWS.MNGS.value,
+      title: UPLOAD_WORKFLOWS.MNGS.label,
       description: allowedFeatures.includes(ONT_V1_FEATURE)
         ? "Run your samples through our metagenomics pipeline. Our pipeline supports Illumina and Nanopore technologies."
         : "Run your samples through our metagenomics pipeline. Our pipeline only supports Illumina.",
       otherOptions: allowedFeatures.includes(ONT_V1_FEATURE)
-        ? () => renderTechnologyOptions(WORKFLOWS.SHORT_READ_MNGS.value)
+        ? () => renderTechnologyOptions(UPLOAD_WORKFLOWS.MNGS.value)
         : null,
       beta: false,
-      sdsIcon: "dna" as const,
+      sdsIcon: UPLOAD_WORKFLOWS.MNGS.icon,
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
       illuminaLink: MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
       illuminaClickedLinkEvent:
@@ -389,23 +389,23 @@ const WorkflowSelector = ({
         "This pipeline only supports upload from your computer.",
     },
     {
-      workflow: WORKFLOWS.AMR.value,
-      title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.AMR.value],
+      workflow: UPLOAD_WORKFLOWS.AMR.value,
+      title: UPLOAD_WORKFLOWS.AMR.label,
       description:
         "Run your samples through our antimicrobial resistance pipeline. Our pipeline supports metagenomics or whole genome data. It only supports Illumina. You can also run the AMR pipeline from within an existing project by selecting previously uploaded mNGS samples.",
       beta: true,
-      sdsIcon: "bacteria" as const,
+      sdsIcon: UPLOAD_WORKFLOWS.AMR.icon,
       shouldHideOption: !allowedFeatures.includes(AMR_V1_FEATURE),
     },
     {
-      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
-      title: WORKFLOW_DISPLAY_NAMES[WORKFLOWS.CONSENSUS_GENOME.value],
+      workflow: UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value,
+      title: UPLOAD_WORKFLOWS.CONSENSUS_GENOME.label,
       description:
         "Run your samples through our Illumina or Nanopore supported pipelines to get consensus genomes for SARS-CoV-2.",
       otherOptions: () =>
-        renderTechnologyOptions(WORKFLOWS.CONSENSUS_GENOME.value),
+        renderTechnologyOptions(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value),
       beta: false,
-      sdsIcon: "virus" as const,
+      sdsIcon: UPLOAD_WORKFLOWS.CONSENSUS_GENOME.icon,
       illuminaText: "You can check out the Illumina pipeline on GitHub ",
       illuminaLink: CG_ILLUMINA_PIPELINE_GITHUB_LINK,
       illuminaClickedLinkEvent:
@@ -425,34 +425,33 @@ const WorkflowSelector = ({
   const shouldDisableWorkflowOption = (workflow: string) => {
     const workflowIsCurrentlySelected = selectedWorkflows.has(workflow);
     const selectedMNGSNanopore =
-      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
+      selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value) &&
       selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
     switch (workflow) {
-      case WORKFLOWS.SHORT_READ_MNGS.value:
+      case UPLOAD_WORKFLOWS.MNGS.value:
         return (
           !workflowIsCurrentlySelected &&
-          selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)
+          selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value)
         );
-      case WORKFLOWS.AMR.value:
+      case UPLOAD_WORKFLOWS.AMR.value:
         return (
           !workflowIsCurrentlySelected &&
-          (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) ||
+          (selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) ||
             selectedMNGSNanopore)
         );
-      case WORKFLOWS.CONSENSUS_GENOME.value:
+      case UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value:
         return !workflowIsCurrentlySelected && size(selectedWorkflows) > 0;
     }
   };
 
   const shouldDisableTechnologyOption = (
     technology: Technology,
-    workflow: WORKFLOW_VALUES,
+    workflow: UploadWorkflows,
   ) => {
     switch (currentTab) {
       case REMOTE_UPLOAD:
         return (
-          technology === NANOPORE &&
-          workflow === WORKFLOWS.SHORT_READ_MNGS.value
+          technology === NANOPORE && workflow === UPLOAD_WORKFLOWS.MNGS.value
         );
       case BASESPACE_UPLOAD:
         return technology === NANOPORE;

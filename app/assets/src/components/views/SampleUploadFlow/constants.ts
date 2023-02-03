@@ -8,17 +8,78 @@ export const NO_VALID_SAMPLES_FOUND_ERROR = "No valid samples were found.";
 export const SELECT_ID_KEY = "_selectId";
 export const ILLUMINA = "Illumina";
 export const NANOPORE = "ONT";
+export const NO_TECHNOLOGY_SELECTED = "noTechnologySelected";
 
-export const WORKFLOW_DISPLAY_NAMES = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: "Metagenomics",
-  [WORKFLOWS.CONSENSUS_GENOME.value]: "SARS-CoV-2 Consensus Genome",
-  [WORKFLOWS.AMR.value]: "Antimicrobial Resistance",
+export const UPLOAD_WORKFLOWS = {
+  MNGS: {
+    label: "Metagenomics" as const,
+    value: "mngs" as const,
+    icon: "dna" as const,
+  },
+  CONSENSUS_GENOME: {
+    label: "SARS-CoV-2 Consensus Genome" as const,
+    value: WORKFLOWS.CONSENSUS_GENOME.value,
+    icon: "virus" as const,
+  },
+  AMR: {
+    label: "Antimicrobial Resistance" as const,
+    value: WORKFLOWS.AMR.value,
+    icon: "bacteria" as const,
+  },
 };
 
-export const WORKFLOW_ICONS = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: "dna" as const,
-  [WORKFLOWS.CONSENSUS_GENOME.value]: "virus" as const,
-  [WORKFLOWS.AMR.value]: "bacteria" as const,
+export const UPLOAD_WORKFLOW_KEY_FOR_VALUE = {
+  [UPLOAD_WORKFLOWS.MNGS.value]: "MNGS" as const,
+  [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value]: "CONSENSUS_GENOME" as const,
+  [UPLOAD_WORKFLOWS.AMR.value]: "AMR" as const,
+};
+
+export const ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY = {
+  [UPLOAD_WORKFLOWS.MNGS.value]: {
+    [ILLUMINA]: [UPLOAD_WORKFLOWS.MNGS.value, WORKFLOWS.AMR.value],
+    [NANOPORE]: [UPLOAD_WORKFLOWS.MNGS.value],
+    [NO_TECHNOLOGY_SELECTED]: [
+      UPLOAD_WORKFLOWS.MNGS.value,
+      WORKFLOWS.AMR.value,
+    ], // Case when user does not have access to ont_v1
+  },
+  [UPLOAD_WORKFLOWS.AMR.value]: {
+    [ILLUMINA]: [UPLOAD_WORKFLOWS.AMR.value, UPLOAD_WORKFLOWS.MNGS.value], // Case when short-read-mngs and amr are both selected
+    [NO_TECHNOLOGY_SELECTED]: [
+      UPLOAD_WORKFLOWS.AMR.value,
+      UPLOAD_WORKFLOWS.MNGS.value,
+    ], // Case when only amr is selected
+  },
+  [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value]: {
+    [ILLUMINA]: [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value],
+    [NANOPORE]: [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value],
+  },
+};
+
+export const WORKFLOWS_BY_UPLOAD_SELECTIONS = {
+  [UPLOAD_WORKFLOWS.MNGS.value]: {
+    [ILLUMINA]: WORKFLOWS.SHORT_READ_MNGS.value,
+    [NANOPORE]: WORKFLOWS.LONG_READ_MNGS.value,
+    [NO_TECHNOLOGY_SELECTED]: WORKFLOWS.SHORT_READ_MNGS.value, // Case when user does not have access to ont_v1
+  },
+  [UPLOAD_WORKFLOWS.AMR.value]: {
+    [ILLUMINA]: WORKFLOWS.AMR.value, // Case when short-read-mngs and amr are both selected
+    [NO_TECHNOLOGY_SELECTED]: WORKFLOWS.AMR.value, // Case when only amr is selected
+  },
+  [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value]: {
+    [ILLUMINA]: WORKFLOWS.CONSENSUS_GENOME.value,
+    [NANOPORE]: WORKFLOWS.CONSENSUS_GENOME.value,
+  },
+};
+
+export enum SEQUENCING_TECHNOLOGY_OPTIONS {
+  ILLUMINA = "Illumina",
+  NANOPORE = "ONT",
+}
+
+export const SEQUENCING_TECHNOLOGY_DISPLAY_NAMES = {
+  Illumina: "Illumina",
+  ONT: "Nanopore",
 };
 
 export const GUPPY_BASECALLER_SETTINGS = [
@@ -96,16 +157,6 @@ export const CG_WETLAB_DISPLAY_NAMES = {
   snap: "SNAP",
   varskip: "varskip",
   easyseq: "easyseq",
-};
-
-export enum SEQUENCING_TECHNOLOGY_OPTIONS {
-  ILLUMINA = "Illumina",
-  NANOPORE = "ONT",
-};
-
-export const SEQUENCING_TECHNOLOGY_DISPLAY_NAMES = {
-  Illumina: "Illumina",
-  ONT: "Nanopore",
 };
 
 // WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/czid-cli
@@ -282,20 +333,6 @@ export const MEDAKA_MODEL_OPTIONS = {
   },
 };
 
-export const ALLOWED_WORKFLOWS_BY_TECHNOLOGY = {
-  [WORKFLOWS.SHORT_READ_MNGS.value]: {
-    [ILLUMINA]: [WORKFLOWS.SHORT_READ_MNGS.value, WORKFLOWS.AMR.value],
-    [NANOPORE]: [WORKFLOWS.SHORT_READ_MNGS.value],
-  },
-  [WORKFLOWS.AMR.value]: {
-    [ILLUMINA]: [WORKFLOWS.AMR.value, WORKFLOWS.SHORT_READ_MNGS.value],
-  },
-  [WORKFLOWS.CONSENSUS_GENOME.value]: {
-    [ILLUMINA]: [WORKFLOWS.CONSENSUS_GENOME.value],
-    [NANOPORE]: [WORKFLOWS.CONSENSUS_GENOME.value],
-  },
-};
-
 export const MEGABYTE = 1000000;
 export const ERROR_MESSAGE = "Error has occured";
 export const SUCCESS_MESSAGE = "Success";
@@ -326,3 +363,4 @@ export const BASESPACE_UPLOAD = "basespace";
 
 // TYPES
 export type Technology = "Illumina" | "ONT";
+export type UploadWorkflows = "mngs" | "amr" | "consensus-genome";

@@ -48,7 +48,6 @@ import {
   ONT_V1_FEATURE,
   PRE_UPLOAD_CHECK_FEATURE,
 } from "~/components/utils/features";
-import { WORKFLOWS } from "~/components/utils/workflows";
 import { SampleUploadType } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 
@@ -59,17 +58,18 @@ import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
 import SampleUploadTable from "./SampleUploadTable";
 import WorkflowSelector from "./WorkflowSelector";
 import {
+  UPLOAD_WORKFLOWS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
   SELECT_ID_KEY,
   DEFAULT_NANOPORE_WETLAB_OPTION,
   DEFAULT_MEDAKA_MODEL_OPTION,
-  NANOPORE,
   MISMATCH_FORMAT_ERROR,
-  ALLOWED_WORKFLOWS_BY_TECHNOLOGY,
+  ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY,
   UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
   LOCAL_UPLOAD,
   REMOTE_UPLOAD,
   BASESPACE_UPLOAD,
+  NO_TECHNOLOGY_SELECTED,
 } from "./constants";
 import cs from "./sample_upload_flow.scss";
 import {
@@ -415,7 +415,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         selectedWorkflows,
         selectedWetlabProtocol: null,
         selectedTechnology:
-          workflow === WORKFLOWS.AMR.value ? selectedTechnology : null,
+          workflow === UPLOAD_WORKFLOWS.AMR.value ? selectedTechnology : null,
       });
     } else {
       // TODO: Remove this `else` branch once AMR v1 launches.
@@ -427,9 +427,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         });
       }
     }
-    const cleanedWorkflowName =
-      workflow === WORKFLOWS.SHORT_READ_MNGS.value ? "mngs" : workflow;
-    trackEvent(`UploadSampleStep_${cleanedWorkflowName}-workflow_selected`);
+    trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
   };
 
   limitWorkflowSelection = (
@@ -439,9 +437,9 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     const { selectedWorkflows } = this.state;
 
     // Based on workflowSelected and selectedTechnology, determine which workflows are permitted
-    const technology = selectedTechnology ?? SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
+    const technology = selectedTechnology || NO_TECHNOLOGY_SELECTED;
     const permittedWorkflows =
-      ALLOWED_WORKFLOWS_BY_TECHNOLOGY[workflowSelected][technology];
+      ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY[workflowSelected][technology];
     // Then delete non-permitted workflows
     const filteredWorkflows = new Set(selectedWorkflows);
     filteredWorkflows.forEach(workflow => {
@@ -456,11 +454,14 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     this.props.onDirty();
     const { selectedWorkflows, usedClearLabs } = this.state;
 
-    if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
+    if (selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value)) {
       // If user has selected Nanopore as their technology
       // and has previously toggled "Used Clear Labs" on,
       // then make sure to use the default wetlab + medaka model options.
-      if (technology === NANOPORE && usedClearLabs) {
+      if (
+        technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE &&
+        usedClearLabs
+      ) {
         this.setState({
           selectedTechnology: technology,
           selectedWetlabProtocol: DEFAULT_NANOPORE_WETLAB_OPTION,
@@ -477,9 +478,9 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
         { technology },
       );
-    } else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
+    } else if (selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value)) {
       const filteredWorkflows = this.limitWorkflowSelection(
-        WORKFLOWS.SHORT_READ_MNGS.value,
+        UPLOAD_WORKFLOWS.MNGS.value,
         technology,
       );
       // We can reuse the same selectedTechnology state because we
@@ -1053,7 +1054,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     const { allowedFeatures } = this.context || {};
 
     let workflowsValid: boolean;
-    if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
+    if (selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value)) {
       // If ont_v1 is enabled, the user must select either Illumina or Nanopore before proceeding.
       // If they select Nanopore, they must additionally select their Guppy Basecaller Setting.
       if (allowedFeatures.includes(ONT_V1_FEATURE)) {
@@ -1073,7 +1074,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         // so no additional selections are required.
         workflowsValid = true;
       }
-    } else if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
+    } else if (selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value)) {
       switch (selectedTechnology) {
         case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
           workflowsValid = !!selectedWetlabProtocol;
@@ -1085,7 +1086,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
           workflowsValid = false;
           break;
       }
-    } else if (selectedWorkflows.has(WORKFLOWS.AMR.value)) {
+    } else if (selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value)) {
       workflowsValid = true;
     }
 
@@ -1118,26 +1119,27 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     if (allowedFeatures.includes(ONT_V1_FEATURE)) {
       if (
         selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA ||
-        selectedWorkflows.has(WORKFLOWS.AMR.value)
+        selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value)
       )
         return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
-      else if (selectedTechnology === NANOPORE) return NANOPORE;
+      else if (selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE)
+        return SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
     } else {
       // TODO: We currently assume all metagenomics samples are Illumina by default.
       // Remove this block of logic after the metagenomics ONT pipeline has been
       // released to all users.
       if (
-        selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
-        selectedWorkflows.has(WORKFLOWS.AMR.value) ||
-        (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+        selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value) ||
+        selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value) ||
+        (selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) &&
           selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA)
       )
         return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
       else if (
-        selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-        selectedTechnology === NANOPORE
+        selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) &&
+        selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE
       )
-        return NANOPORE;
+        return SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
     }
   };
 
@@ -1154,12 +1156,12 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     const { admin, biohubS3UploadEnabled } = this.props;
     const { selectedWorkflows, selectedTechnology } = this.state;
     const shouldDisableS3Tab =
-      selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) &&
-      selectedTechnology === NANOPORE;
+      selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value) &&
+      selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
     const shouldDisableBasespaceTab =
-      (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value) ||
-        selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) &&
-      selectedTechnology === NANOPORE;
+      (selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value) ||
+        selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value)) &&
+      selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 
     // We're currently disabling S3 tab for ONT v1, but it could be re-enabled in the future.
     // Basespace upload is disabled for Nanopore pipelines because it only stores Illumina files.

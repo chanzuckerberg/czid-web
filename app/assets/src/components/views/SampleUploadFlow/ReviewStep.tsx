@@ -14,7 +14,6 @@ import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { formatFileSize } from "~/components/utils/format";
-import { WORKFLOWS } from "~/components/utils/workflows";
 import DataTable from "~/components/visualizations/table/DataTable";
 import { HostGenome, Project, SampleFromApi } from "~/interface/shared";
 import Checkbox from "~ui/controls/Checkbox";
@@ -24,11 +23,11 @@ import AdminUploadOptions from "./AdminUploadOptions";
 import HostOrganismMessage from "./HostOrganismMessage";
 import UploadProgressModal from "./UploadProgressModal";
 import {
+  UPLOAD_WORKFLOWS,
+  UPLOAD_WORKFLOW_KEY_FOR_VALUE,
   CG_WETLAB_DISPLAY_NAMES,
   SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
-  NANOPORE,
-  WORKFLOW_DISPLAY_NAMES,
-  WORKFLOW_ICONS,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
 } from "./constants";
 
 import cs from "./sample_upload_flow.scss";
@@ -377,19 +376,21 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     const { technology } = this.props;
 
     const sections = map(workflow => {
-      const workflowDisplayName = WORKFLOW_DISPLAY_NAMES[workflow];
+      const workflowKey = UPLOAD_WORKFLOW_KEY_FOR_VALUE[workflow];
+      const workflowDisplayName = UPLOAD_WORKFLOWS[workflowKey].label;
       const hasAnalysisTypeContent =
-        workflow === WORKFLOWS.SHORT_READ_MNGS.value ||
-        workflow === WORKFLOWS.CONSENSUS_GENOME.value;
-      const workflowIsBeta = workflow === WORKFLOWS.AMR.value;
+        workflow === UPLOAD_WORKFLOWS.MNGS.value ||
+        workflow === UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value;
+      const workflowIsBeta = workflow === UPLOAD_WORKFLOWS.AMR.value;
       const sequencingPlatformIsBeta =
-        workflow === WORKFLOWS.SHORT_READ_MNGS.value && technology === NANOPORE;
+        workflow === UPLOAD_WORKFLOWS.MNGS.value &&
+        technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 
       return (
         <div className={cs.section}>
           <div className={cs.icon}>
             <Icon
-              sdsIcon={WORKFLOW_ICONS[workflow]}
+              sdsIcon={UPLOAD_WORKFLOWS[workflowKey].icon}
               sdsSize="xl"
               sdsType="static"
             />
@@ -406,15 +407,16 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                 <div className={cs.item}>
                   <div className={cs.subheader}>{"Sequencing Platform: "}</div>
                   <div className={cs.description}>
-                    {SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
+                    {SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[technology] ||
+                      "Illumina"}
                     {sequencingPlatformIsBeta && (
                       <StatusLabel inline status="Beta" type="beta" />
                     )}
                   </div>
                 </div>
-                {workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
+                {workflow === UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value &&
                   this.renderCGAnalysisSection()}
-                {workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
+                {workflow === UPLOAD_WORKFLOWS.MNGS.value &&
                   this.renderMngsAnalysisSection()}
               </div>
             )}
@@ -435,13 +437,13 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     } = this.props;
     return (
       <>
-        {technology === NANOPORE && (
+        {technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE && (
           <div className={cs.item}>
             <div className={cs.subheader}>Used Clear Labs&#58;</div>
             <div className={cs.description}>{clearlabs ? "Yes" : "No"}</div>
           </div>
         )}
-        {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
+        {workflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) && (
           <div className={cs.item}>
             <div className={cs.subheader}>Wetlab Protocol&#58;</div>
             <div className={cs.description}>
@@ -450,7 +452,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
           </div>
         )}
         <div className={cs.item}>
-          {technology === NANOPORE && (
+          {technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE && (
             <>
               <div className={cs.subheader}>Medaka Model&#58;</div>
               <div className={cs.description}>{medakaModel}</div>
@@ -465,7 +467,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     const { technology, guppyBasecallerSetting } = this.props;
     return (
       <>
-        {technology === NANOPORE && (
+        {technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE && (
           <>
             <div className={cs.item}>
               <div className={cs.subheader}>{"Guppy Basecaller Setting: "}</div>
@@ -482,9 +484,9 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
   getWorkflowSectionOrder = () => {
     const { workflows } = this.props;
 
-    const mngs = WORKFLOWS.SHORT_READ_MNGS.value;
-    const amr = WORKFLOWS.AMR.value;
-    const cg = WORKFLOWS.CONSENSUS_GENOME.value;
+    const mngs = UPLOAD_WORKFLOWS.MNGS.value;
+    const amr = UPLOAD_WORKFLOWS.AMR.value;
+    const cg = UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value;
 
     return compact([
       workflows.has(mngs) && mngs,
@@ -607,7 +609,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
           {this.renderSampleInfo()}
         </div>
         <div className={cs.controls}>
-          {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) || (
+          {workflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) || (
             <HostOrganismMessage
               hostGenomes={originalHostGenomes}
               samples={samples}

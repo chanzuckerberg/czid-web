@@ -1,8 +1,9 @@
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import {
+  WORKFLOWS_BY_UPLOAD_SELECTIONS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
-  NANOPORE,
+  NO_TECHNOLOGY_SELECTED,
 } from "~/components/views/SampleUploadFlow/constants";
 import { SampleFromApi } from "~/interface/shared";
 
@@ -41,16 +42,23 @@ export const addFlagsToSamples = ({
     ? PIPELINE_EXECUTION_STRATEGIES.step_function
     : PIPELINE_EXECUTION_STRATEGIES.directed_acyclic_graph;
 
-  const isLongReadMngs =
-    workflows.has(WORKFLOWS.SHORT_READ_MNGS.value) && technology === NANOPORE;
-  const isNanoporeConsensusGenome =
-    workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+  // Converts UPLOAD_WORKFLOWS values to WORKFLOWS values, based on the selected workflow and technology
+  const selectedTechnology = technology || NO_TECHNOLOGY_SELECTED;
+  const workflowsConverted = Array.from(workflows).map(
+    workflow => WORKFLOWS_BY_UPLOAD_SELECTIONS[workflow][selectedTechnology],
+  );
+
+  const isLongReadMngs = workflowsConverted.includes(
+    WORKFLOWS.LONG_READ_MNGS.value,
+  );
+  const isConsensusGenomeNanopore =
+    workflowsConverted.includes(WORKFLOWS.CONSENSUS_GENOME.value) &&
     technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 
   return samples.map(sample => ({
     ...sample,
     do_not_process: skipSampleProcessing,
-    ...(isNanoporeConsensusGenome && {
+    ...(isConsensusGenomeNanopore && {
       clearlabs,
       medaka_model: medakaModel,
     }),
@@ -60,12 +68,7 @@ export const addFlagsToSamples = ({
     pipeline_execution_strategy: pipelineExecutionStrategy,
     technology,
     wetlab_protocol: wetlabProtocol,
-    // TODO: Because long-read-mngs is hidden behind the ont_v1 feature flag, we still by default assume that mngs workflows
-    // are short-read-mngs. For now, if beta users select long-reads-mngs, we will overwrite the workflows variable below.
-    // After ont_v1 is released, we should remove the logic for defaulting to short-read-mngs and overhaul this approach.
-    workflows: isLongReadMngs
-      ? [WORKFLOWS.LONG_READ_MNGS.value]
-      : Array.from(workflows),
+    workflows: workflowsConverted,
     ...adminOptions,
   }));
 };
