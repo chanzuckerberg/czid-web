@@ -173,7 +173,7 @@ class PipelineReportService
     @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS[@technology]
     @parallel = parallel
     @merge_nt_nr = merge_nt_nr
-    @known_pathogens = known_pathogens
+    @known_pathogens = known_pathogens || {}
     @show_annotations = show_annotations
     @use_decimal_columns = AppConfigHelper.get_app_config(AppConfig::PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS, false) == "1"
     # LCRP = Likely clinically relevant pathogens

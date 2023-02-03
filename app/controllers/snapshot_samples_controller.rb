@@ -51,6 +51,10 @@ class SnapshotSamplesController < SamplesController
             default_pipeline_run_id: @pipeline_run_id,
             background_id: background_id,
             pipeline_runs: @sample.pipeline_runs_info,
+            workflow_runs: @sample.workflow_runs.non_deprecated.reverse.as_json(
+              only: WORKFLOW_RUN_DEFAULT_FIELDS,
+              methods: [:input_error, :inputs, :parsed_cached_results]
+            ),
             deletable: false,
             editable: false
           )
