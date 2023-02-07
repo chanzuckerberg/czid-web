@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { InputCheckbox, Icon, Tooltip } from "czifui";
+import { InputCheckbox, InputRadio, Icon, Tooltip } from "czifui";
 import { compact, find, map, size } from "lodash/fp";
 import React, { useState, useContext } from "react";
 
@@ -18,7 +18,6 @@ import {
 } from "~/components/utils/documentationLinks";
 import { AMR_V1_FEATURE, ONT_V1_FEATURE } from "~/components/utils/features";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import RadioButton from "~ui/controls/RadioButton";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import StatusLabel from "~ui/labels/StatusLabel";
@@ -112,8 +111,8 @@ const WorkflowSelector = ({
           )
         }
       >
-        <RadioButton
-          selected={illuminaTechnologyOptionSelected}
+        <InputRadio
+          stage={illuminaTechnologyOptionSelected ? "checked" : "unchecked"}
           className={cx(cs.radioButton, cs.alignTitle)}
         />
         <div className={cs.optionText}>
@@ -232,9 +231,9 @@ const WorkflowSelector = ({
       workflowObject.workflow,
     );
     let radioButton = (
-      <RadioButton
+      <InputRadio
         disabled={shouldDisableOption}
-        selected={nanoporeTechnologyOptionSelected}
+        stage={nanoporeTechnologyOptionSelected ? "checked" : "unchecked"}
         className={cx(cs.radioButton, cs.alignTitle)}
       />
     );
@@ -486,8 +485,8 @@ const WorkflowSelector = ({
               stage={analysisOptionSelected ? "checked" : "unchecked"}
             />
           ) : (
-            <RadioButton
-              selected={analysisOptionSelected}
+            <InputRadio
+              stage={analysisOptionSelected ? "checked" : "unchecked"}
               className={cs.radioButton}
             />
           );

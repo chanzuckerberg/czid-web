@@ -49,9 +49,3 @@
     margin-bottom: $sds-spaces-l;
   }
 }
-
-.link {
-  // Overwrite <a> inherit rule in header.scss
-  color: $sds-color-primary-400 !important;
-  cursor: pointer;
-}

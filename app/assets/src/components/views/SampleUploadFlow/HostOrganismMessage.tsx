@@ -54,9 +54,9 @@ export default class HostOrganismMessage extends React.Component<
   renderLearnMoreLink() {
     return (
       <ExternalLink
-        className={cs.link}
         href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-on-the-Web#reviewing-data"
         analyticsEventName="HostOrganismMessage_learn-more-link_clicked"
+        coloredBackground={true}
       >
         Learn more
       </ExternalLink>
