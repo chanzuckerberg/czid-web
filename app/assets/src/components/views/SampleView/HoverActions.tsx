@@ -331,8 +331,9 @@ const HoverActions = ({
       <span className={cs.countCircle}>{hoverAction.count}</span>
     ) : null;
 
-    const onClickFunction = () =>
-      hoverAction.handleClick(hoverAction.params || {});
+    const onClickFunction = !hoverAction.handleClick
+      ? null
+      : () => hoverAction.handleClick(hoverAction.params || {});
 
     const buttonIconComponent = (
       <div onClick={onClickFunction} className={cs.actionDot} role="none">
