@@ -5,8 +5,7 @@
   "license": "ISC",
   "description": "E2E automated tests for CZID",
   "scripts": {
-    "pw:staging": "NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
-    "pw:staging:": "DEBUG=pw:browser*,pw:api NODE_ENV=staging npx playwright test --headed -c ./setup/staging.config.ts",
+    "pw:staging": "NODE_ENV=staging DEBUG=pw:api npx playwright test --headed -c ./setup/staging.config.ts",
     "pw:local": "NODE_ENV=dev DEBUG=pw:api npx playwright test --headed -c ./setup/local.config.ts",
     "pw:ci": "NODE_ENV=dev DEBUG=pw:api npx playwright test --grep @nologin -c ./setup/ci.config.ts",
     "pw:staging:headless": "NODE_ENV=staging npx playwright test --headless -c ./setup/staging.config.ts",

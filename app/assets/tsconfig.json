@@ -32,7 +32,7 @@
         "~ui/*": ["./components/ui/*"],
         "~utils/*": ["./components/utils/*"],
         "styles/*": ["./styles/*"],
-        "e2e": ["./e2e/**/*.ts", "./e2e/**/*.json"]
+        "e2e": ["./e2e/*.ts|json"],
       }
     },
     "include": [
