@@ -37,6 +37,7 @@ import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
   AMR_V1_FEATURE,
+  BULK_DELETION_FEATURE,
   HEATMAP_ELASTICSEARCH_FEATURE,
 } from "~/components/utils/features";
 import { showToast } from "~/components/utils/toast";
@@ -68,6 +69,7 @@ import {
   workflowIsWorkflowRunEntity,
   WORKFLOWS,
   WORKFLOW_ENTITIES,
+  WORKFLOW_KEY_FOR_VALUE,
 } from "~utils/workflows";
 
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
@@ -154,7 +156,10 @@ const SamplesView = forwardRef(function SamplesView(
   }));
 
   let configForWorkflow: {
-    [workflow: string]: { singlularDisplay: string; pluralDisplay: string };
+    [workflow: string]: {
+      singlularDisplay: string;
+      pluralDisplay: string;
+    };
   };
   let infiniteTable: InfiniteTable;
   const [referenceSelectId, setReferenceSelectId] = useState(null);
@@ -509,6 +514,24 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
+  const renderBulkDeleteTrigger = () => {
+    if (!allowedFeatures.includes(BULK_DELETION_FEATURE)) {
+      return;
+    }
+
+    const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
+
+    return (
+      <ToolbarButtonIcon
+        className={cs.action}
+        icon="trashCan"
+        popupText={`Delete ${WORKFLOWS[workflowKey].shorthand} Run`}
+        popupSubtitle={selectedIds.size === 0? "Select at least 1 sample" : ""}
+        disabled={selectedIds.size === 0}
+      />
+    );
+  };
+
   const renderBulkSamplesActionsMenu = () => {
     if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
       return;
@@ -529,7 +552,7 @@ const SamplesView = forwardRef(function SamplesView(
 
   const handleBulkKickoffAmr = async () => {
     const selectedObjects = filter(
-      object => selectedIds.has(object.id),
+      (object) => selectedIds.has(object.id),
       objects.loaded,
     );
     const amrPipelineEligibility = reduce(
@@ -686,6 +709,7 @@ const SamplesView = forwardRef(function SamplesView(
       [TRIGGERS.download]: renderBulkDownloadTrigger,
       [TRIGGERS.nextclade]: renderNextcladeTrigger,
       [TRIGGERS.genepi]: renderGenEpiTrigger,
+      [TRIGGERS.bulk_delete]: renderBulkDeleteTrigger,
       [TRIGGERS.bulk_kickoff_amr]: renderBulkSamplesActionsMenu,
     };
     // Get workflows triggers available in the current domain and workflow tab
@@ -694,7 +718,7 @@ const SamplesView = forwardRef(function SamplesView(
       WORKFLOW_TRIGGERS[workflow],
     );
     // @ts-expect-error lodash/fp should return a usable type
-    const triggersToRender = triggersAvailable.map(trigger => (
+    const triggersToRender = triggersAvailable.map((trigger: string) => (
       <React.Fragment key={`${workflow}-${trigger}`}>
         {triggers[trigger]()}
       </React.Fragment>

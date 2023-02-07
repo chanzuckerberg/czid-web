@@ -11,6 +11,7 @@ export const WORKFLOWS = {
     value: "amr" as const,
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
     pipelineName: "Antimicrobial Resistance",
+    shorthand: "AMR",
   },
   CONSENSUS_GENOME: {
     label: "Consensus Genome" as const,
@@ -18,6 +19,7 @@ export const WORKFLOWS = {
     value: "consensus-genome" as const,
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
     pipelineName: "Consensus Genome",
+    shorthand: "CG",
   },
   SHORT_READ_MNGS: {
     label: "Metagenomic" as const,
@@ -25,6 +27,7 @@ export const WORKFLOWS = {
     value: "short-read-mngs" as const,
     entity: WORKFLOW_ENTITIES.SAMPLES,
     pipelineName: "Illumina mNGS",
+    shorthand: "mNGS",
   },
   LONG_READ_MNGS: {
     label: "Nanopore" as const,
@@ -32,6 +35,7 @@ export const WORKFLOWS = {
     value: "long-read-mngs" as const,
     entity: WORKFLOW_ENTITIES.SAMPLES,
     pipelineName: "Nanopore mNGS",
+    shorthand: "mNGS",
   },
 };
 

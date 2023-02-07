@@ -15,6 +15,7 @@ export const TRIGGERS = {
   download: "download",
   nextclade: "nextclade",
   bulk_kickoff_amr: "bulk_kickoff_amr",
+  bulk_delete: "bulk_delete",
 };
 
 export const WORKFLOW_TRIGGERS = {
@@ -22,22 +23,30 @@ export const WORKFLOW_TRIGGERS = {
     TRIGGERS.nextclade,
     TRIGGERS.download,
     TRIGGERS.genepi,
+    TRIGGERS.bulk_delete,
   ],
   [WORKFLOWS.SHORT_READ_MNGS.value]: [
     TRIGGERS.backgroundModel,
     TRIGGERS.heatmap,
     TRIGGERS.phylogeneticTree,
     TRIGGERS.download,
+    TRIGGERS.bulk_delete,
     TRIGGERS.bulk_kickoff_amr,
   ],
-  [WORKFLOWS.AMR.value]: [TRIGGERS.download],
-  [WORKFLOWS.LONG_READ_MNGS.value]: [TRIGGERS.download],
+  [WORKFLOWS.AMR.value]: [
+    TRIGGERS.download,
+    TRIGGERS.bulk_delete,
+  ],
+  [WORKFLOWS.LONG_READ_MNGS.value]: [
+    TRIGGERS.download,
+    TRIGGERS.bulk_delete,
+  ],
 };
 
 export const WORKFLOW_TRIGGERS_BY_DOMAIN = {
   [Domain.MyData]: Object.values(TRIGGERS),
   [Domain.Public]: pullAll(
-    [TRIGGERS.bulk_kickoff_amr],
+    [TRIGGERS.bulk_kickoff_amr, TRIGGERS.bulk_delete],
     Object.values(TRIGGERS),
   ),
   [Domain.AllData]: Object.values(TRIGGERS),
