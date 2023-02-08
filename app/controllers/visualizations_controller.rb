@@ -9,10 +9,8 @@ class VisualizationsController < ApplicationController
     expires_in: 30.days,
     cache_path: proc do |c|
       sorted_params = c.request.params.to_h.sort.to_h
-      ["heatmap_service", "heatmap_elasticsearch"].each do |feature|
-        if current_user.allowed_feature?(feature)
-          sorted_params[feature.to_sym] = true
-        end
+      if current_user.allowed_feature?("heatmap_elasticsearch")
+        sorted_params[feature.to_sym] = true
       end
       sorted_params.to_query
     end
@@ -234,13 +232,6 @@ class VisualizationsController < ApplicationController
   def samples_taxons
     if samples_for_heatmap.blank?
       render json: {}
-    elsif current_user.allowed_feature?("heatmap_service") && params[:presets].blank?
-      pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
-      heatmap_dict = TaxonCountsHeatmapService.call(
-        pipeline_run_ids: pr_id_to_sample_id.keys,
-        background_id: background_for_heatmap
-      )
-      render json: heatmap_dict
     elsif current_user.allowed_feature?("heatmap_elasticsearch")
       heatmap_es_dict = TopTaxonsElasticsearchService.call(
         params: params,
@@ -263,16 +254,7 @@ class VisualizationsController < ApplicationController
   # If update_background_only is true, then returned object will only include
   # metrics affected by the background (e.g. z-score).
   def taxa_details
-    if current_user.allowed_feature?("heatmap_service") && params[:presets].blank?
-      pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
-      taxon_ids = params[:taxonIds] || []
-
-      sample_taxons_dict = TaxonCountsHeatmapService.call(
-        pipeline_run_ids: pr_id_to_sample_id.keys,
-        taxon_ids: taxon_ids.compact,
-        background_id: background_for_heatmap
-      )
-    elsif current_user.allowed_feature?("heatmap_elasticsearch")
+    if current_user.allowed_feature?("heatmap_elasticsearch")
       pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
       taxon_ids = params[:taxonIds] || []
 

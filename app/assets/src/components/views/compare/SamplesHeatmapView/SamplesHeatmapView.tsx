@@ -16,7 +16,6 @@ import {
   set,
   size,
   uniq,
-  values,
 } from "lodash/fp";
 import queryString from "query-string";
 import React from "react";
@@ -688,11 +687,7 @@ class SamplesHeatmapView extends React.Component<
   }
 
   async fetchViewData() {
-    const { allowedFeatures = [] } = this.context || {};
-    const { sampleIds, selectedOptions } = this.state;
-    const presets = selectedOptions.presets;
-    const useHeatmapService =
-      allowedFeatures.includes("heatmap_service") && presets.length === 0;
+    const { sampleIds } = this.state;
 
     this.setState({ loading: true }); // Gets false from this.updateFilters
 
@@ -726,17 +721,8 @@ class SamplesHeatmapView extends React.Component<
     }
 
     let pipelineVersions = [];
-    if (useHeatmapService) {
-      pipelineVersions = compact(
-        map(
-          property("pipeline_run.pipeline_version"),
-          values(heatmapData.samples),
-        ),
-      );
-    } else {
-      // @ts-expect-error ts-migrate(2554) FIXME: Expected 1 arguments, but got 2.
-      pipelineVersions = compact(property("pipeline_version"), heatmapData);
-    }
+    // @ts-expect-error ts-migrate(2554) FIXME: Expected 1 arguments, but got 2.
+    pipelineVersions = compact(property("pipeline_version"), heatmapData);
     const pipelineMajorVersionsSet = new Set(
       map(
         pipelineVersion => `${pipelineVersion.split(".")[0]}.x`,
@@ -752,10 +738,7 @@ class SamplesHeatmapView extends React.Component<
 
     let newState = {};
     if (!isEmpty(heatmapData)) {
-      newState =
-        useHeatmapService && !this.s
-          ? this.extractDataFromService(heatmapData)
-          : this.extractData(heatmapData);
+      newState = this.extractData(heatmapData);
     }
 
     // Only calculate the metadataTypes once.
@@ -814,129 +797,6 @@ class SamplesHeatmapView extends React.Component<
       useHeatmapES,
     });
   };
-
-  extractDataFromService(rawData: $TSFixMe) {
-    const { metrics } = this.props;
-
-    const sampleIds = [];
-    const sampleNamesCounts = new Map();
-    const sampleDetails = {};
-    const allTaxonIds = [];
-    const allSpeciesIds = [];
-    const allGeneraIds = [];
-    const allTaxonDetails = {};
-    const allData = {};
-    const taxonFilterState = {};
-    // Check if all samples have ERCC counts > 0 to enable backgrounds generated
-    // using normalized input mass.
-    let enableMassNormalizedBackgrounds = true;
-
-    for (let i = 0; i < rawData.samples.length; i++) {
-      const sample = rawData.samples[i];
-
-      sampleIds.push(sample.id);
-      const pipelineRun = sample.pipeline_run;
-      enableMassNormalizedBackgrounds =
-        pipelineRun.ercc_count > 0 &&
-        isPipelineFeatureAvailable(
-          MASS_NORMALIZED_FEATURE,
-          pipelineRun.pipeline_version,
-        ) &&
-        enableMassNormalizedBackgrounds;
-
-      // Keep track of samples with the same name, which may occur if
-      // a user selects samples from multiple projects.
-      if (sampleNamesCounts.has(sample.name)) {
-        // Append a number to a sample's name to differentiate between samples with the same name.
-        const count = sampleNamesCounts.get(sample.name);
-        const originalName = sample.name;
-        sample.name = `${sample.name} (${count})`;
-        sampleNamesCounts.set(originalName, count + 1);
-      } else {
-        sampleNamesCounts.set(sample.name, 1);
-      }
-
-      sampleDetails[sample.id] = {
-        id: sample.id,
-        name: sample.name,
-        index: i,
-        host_genome_name: sample.host_genome_name,
-        metadata: processMetadata({ metadata: sample.metadata, flatten: true }),
-        taxa: [],
-        duplicate: false,
-      };
-    }
-
-    for (let i = 0; i < rawData.taxa.length; i++) {
-      const taxonIndex = allTaxonIds.length;
-      const taxon = rawData.taxa[i];
-      allTaxonIds.push(taxon.tax_id);
-
-      if (taxon.tax_level === TAXON_LEVEL_OPTIONS["species"]) {
-        allSpeciesIds.push(taxon.tax_id);
-      } else {
-        allGeneraIds.push(taxon.tax_id);
-      }
-
-      allTaxonDetails[taxon.tax_id] = {
-        id: taxon.tax_id,
-        index: taxonIndex,
-        name: taxon.name,
-        category: taxon.category_name,
-        parentId: taxon.genus_taxid,
-        phage: !!taxon.is_phage,
-        genusName: taxon.genus_name,
-        taxLevel: taxon.tax_level,
-        sampleCount: 0,
-      };
-      allTaxonDetails[taxon.name] = allTaxonDetails[taxon.tax_id];
-    }
-
-    const metricIndex = rawData.result_keys.reduce(
-      (acc, current, idx) => ({
-        ...acc,
-        [current]: idx,
-      }),
-      {},
-    );
-    for (const [sampleId, countsPerTaxa] of Object.entries(rawData.results)) {
-      for (const [taxId, countsPerType] of Object.entries(countsPerTaxa)) {
-        allTaxonDetails[taxId].sampleCount += 1;
-        sampleDetails[sampleId].taxa.push(parseInt(taxId));
-
-        const taxonIndex = allTaxonDetails[taxId].index;
-        const sampleIndex = sampleDetails[sampleId].index;
-
-        metrics.forEach(metric => {
-          const [metricType, metricName] = metric.value.split(".");
-          allData[metric.value] = allData[metric.value] || [];
-          allData[metric.value][taxonIndex] =
-            allData[metric.value][taxonIndex] || [];
-          if (countsPerType[metricType]) {
-            const metricDatum =
-              countsPerType[metricType][metricIndex[metricName]];
-            allData[metric.value][taxonIndex][sampleIndex] = metricDatum;
-          } else {
-            allData[metric.value][taxonIndex][sampleIndex] = 0;
-          }
-        });
-      }
-    }
-
-    return {
-      // The server should always pass back the same set of sampleIds, but possibly in a different order.
-      // We overwrite both this.state.sampleDetails and this.state.sampleIds to make sure the two are in sync.
-      sampleIds,
-      sampleDetails,
-      allTaxonIds,
-      allSpeciesIds,
-      allGeneraIds,
-      allTaxonDetails,
-      allData,
-      taxonFilterState,
-      enableMassNormalizedBackgrounds,
-    };
-  }
 
   extractData(rawData: $TSFixMe) {
     const sampleIds = [];
@@ -1061,12 +921,6 @@ class SamplesHeatmapView extends React.Component<
   }
 
   async fetchBackground() {
-    const { allowedFeatures = [] } = this.context || {};
-    const { selectedOptions } = this.state;
-    const presets = selectedOptions.presets;
-    const useHeatmapService =
-      allowedFeatures.includes("heatmap_service") && presets.length === 0;
-
     this.setState({ loading: true }); // Gets false from this.updateFilters
     let backgroundData;
     try {
@@ -1076,47 +930,12 @@ class SamplesHeatmapView extends React.Component<
       return; // Return early so that loadingFailed is not set to false later
     }
 
-    const newState = useHeatmapService
-      ? this.extractBackgroundMetricsFromService(backgroundData)
-      : this.extractBackgroundMetrics(backgroundData);
+    const newState = this.extractBackgroundMetrics(backgroundData);
     // @ts-expect-error ts-migrate(2339) FIXME: Property 'loadingFailed' does not exist on type '{... Remove this comment to see the full error message
     newState.loadingFailed = false;
 
     this.updateHistoryState();
     this.setState(newState, this.updateFilters);
-  }
-
-  extractBackgroundMetricsFromService(rawData: $TSFixMe) {
-    const { sampleDetails, allTaxonDetails, allData } = this.state;
-    const { metrics } = this.props;
-
-    const metricIndex = rawData.result_keys.reduce(
-      (acc, current, idx) => ({
-        ...acc,
-        [current]: idx,
-      }),
-      {},
-    );
-    for (const [sampleId, countsPerTaxa] of Object.entries(rawData.results)) {
-      for (const [taxId, countsPerType] of Object.entries(countsPerTaxa)) {
-        const taxonIndex = allTaxonDetails[taxId].index;
-        const sampleIndex = sampleDetails[sampleId].index;
-
-        metrics.forEach(metric => {
-          const [metricType, metricName] = metric.value.split(".");
-          if (countsPerType[metricType]) {
-            const metricDatum =
-              countsPerType[metricType][metricIndex[metricName]];
-            allData[metric.value] = allData[metric.value] || [];
-            allData[metric.value][taxonIndex] =
-              allData[metric.value][taxonIndex] || [];
-            allData[metric.value][taxonIndex][sampleIndex] = metricDatum;
-          }
-        });
-      }
-    }
-
-    return { allData };
   }
 
   extractBackgroundMetrics(rawData: $TSFixMe) {
@@ -1487,21 +1306,13 @@ class SamplesHeatmapView extends React.Component<
   }
 
   async updateTaxa(taxaMissingInfo: $TSFixMe) {
-    // @ts-expect-error ts-migrate(2339) FIXME: Property 'allowedFeatures' does not exist on type ... Remove this comment to see the full error message
-    const { allowedFeatures = [] } = (this.context = {});
-    const { selectedOptions } = this.state;
-    const presets = selectedOptions.presets;
-    const useHeatmapService =
-      allowedFeatures.includes("heatmap_service") && presets.length === 0;
     // Given a list of taxa for which details are currently missing,
     // fetch the information for those taxa from the server and
     // update the appropriate data structures to include the new taxa.
     this.setState({ loading: true }); // Gets false from this.updateFilters
 
     const newTaxaInfo = await this.fetchNewTaxa(taxaMissingInfo);
-    const extractedData = useHeatmapService
-      ? this.extractDataFromService(newTaxaInfo)
-      : this.extractData(newTaxaInfo);
+    const extractedData = this.extractData(newTaxaInfo);
 
     const {
       allData,
