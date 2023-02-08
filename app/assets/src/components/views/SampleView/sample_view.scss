@@ -15,7 +15,6 @@
 
 .tabsContainer {
   flex: 0 0 auto;
-  height: 60px;
 }
 
 .reportViewContainer {
@@ -95,7 +94,7 @@
 }
 
 .tabs {
-  margin: 25px 0;
+  margin-top: $sds-spaces-l;
 
   .statusLabel {
     margin-left: $sds-spaces-xs;

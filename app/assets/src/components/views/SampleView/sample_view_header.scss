@@ -15,10 +15,6 @@
     }
   }
 
-  .sampleDetailsLinkContainer {
-    margin-top: 5px;
-  }
-
   .sampleDetailsLink {
     color: $sds-color-primary-400;
     font-weight: $font-weight-semibold;
@@ -27,6 +23,24 @@
     &:hover {
       opacity: 0.5;
     }
+  }
+
+  .controlsContainer {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .controlsTopRowContainer {
+    display: flex;
+    flex-direction: row;
+    margin: $sds-spaces-m 0 $sds-spaces-s 0;
+    justify-content: flex-end;
+  }
+
+  .controlsBottomRowContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
   }
 
   .warningIcon {

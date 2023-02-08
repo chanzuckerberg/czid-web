@@ -61,6 +61,7 @@ export interface AmrPipelineTabInfo {
   workflow: { text: string };
   technology: { text: string };
   pipelineVersion: { text: string };
+  cardDatabaseVersion?: { text: string };
   totalReads?: { text: string };
   totalErccReads?: { text: string };
   nonHostReads?: { text: string };

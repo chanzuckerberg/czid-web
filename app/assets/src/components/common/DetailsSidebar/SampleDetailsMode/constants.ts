@@ -31,9 +31,10 @@ export const SHORT_READ_MNGS_INFO_FIELDS = [
     key: "pipelineVersion",
   },
   {
-    name: "Host Subtracted",
-    key: "hostSubtracted",
+    name: "NCBI Index Date",
+    key: "ncbiIndexDate",
   },
+  { name: "Host Subtracted", key: "hostSubtracted" },
   {
     name: "Total Reads",
     key: "totalReads",
@@ -166,6 +167,10 @@ export const AMR_WORKFLOW_INFO_FIELDS = [
   {
     name: "Pipeline Version",
     key: "pipelineVersion",
+  },
+  {
+    name: "CARD Database Version",
+    key: "cardDatabaseVersion",
   },
   {
     name: "Total Reads",

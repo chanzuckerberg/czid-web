@@ -1,11 +1,24 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
 @import "~czifui/dist/variables";
 
 .pipelineVersionSelectContainer {
-  display: inline-block;
   padding-left: $sds-spaces-xxxs;
+  margin-left: $sds-spaces-s;
+  margin-right: $sds-spaces-s;
+  display: inline-flex;
+  align-items: center;
 
-  .pipelineVersionSelect {
-    display: flex;
+  .pipelineVersion {
+    @include font-body-xxxs;
+    color: $sds-color-gray-500;
+  }
+
+  .pipelineVersionDropdown {
+    @include font-body-xxxs;
+    color: "black";
+    margin-right: $sds-spaces-s;
   }
 
   .dropdownTrigger {

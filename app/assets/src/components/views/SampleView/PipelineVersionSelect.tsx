@@ -1,99 +1,160 @@
+import { get } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-import BasicPopup from "~/components/BasicPopup";
+import { Popup } from "semantic-ui-react";
+import { trackEvent } from "~/api/analytics";
+
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
+import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 
 import cs from "./pipeline_version_select.scss";
 
 interface PipelineVersionSelectProps {
-  analysisRun?: PipelineRun | WorkflowRun;
-  pipelineVersions?: string[];
+  sampleId?: number;
+  shouldIncludeDatabaseVersion: boolean;
+  currentRun?: WorkflowRun | PipelineRun;
+  allRuns?: WorkflowRun[] | PipelineRun[] | string[];
+  workflowType?: string;
   versionKey?: string;
-  lastProcessedAt?: string;
-  onPipelineVersionSelect: $TSFixMeFunction; // Actually a datestring.;
+  timeKey?: string;
+  onVersionChange: $TSFixMeFunction;
 }
 
-class PipelineVersionSelect extends React.Component<
-  PipelineVersionSelectProps
-> {
-  getLastProcessedString = () => {
-    const lastProcessedFormattedDate = moment(this.props.lastProcessedAt)
+export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
+  const {
+    sampleId,
+    shouldIncludeDatabaseVersion = false,
+    currentRun,
+    allRuns = [],
+    workflowType,
+    versionKey,
+    timeKey,
+    onVersionChange,
+  } = props;
+
+  // gather data for pipeline version and last processed
+
+  const lastProcessedAt = currentRun?.[timeKey];
+  const currentPipelineVersion = currentRun ? currentRun[versionKey] : "";
+
+  // if the pipeline never finished processing, return null
+  if (!lastProcessedAt || !currentPipelineVersion) return null;
+
+  // the pipeline viz header provides other versions as a list of strings, not PipelineRuns or WorkflowRuns
+  const allPipelineVersions: string[] =
+    allRuns.length > 0 && typeof allRuns[0] === "string"
+      ? allRuns
+      : [...new Set(allRuns?.map((run) => run[versionKey]))];
+
+  const otherPipelineVersions = allPipelineVersions.filter(
+    (otherPipelineVersion: string) =>
+      currentPipelineVersion !== otherPipelineVersion,
+  );
+
+  // grab strings for last processed date and workflow version
+  const getLastProcessedString = () => {
+    const lastProcessedFormattedDate = moment(lastProcessedAt)
       .startOf("second")
       .fromNow();
 
-    return `processed ${lastProcessedFormattedDate}`;
+    const suffixPipe = shouldIncludeDatabaseVersion ? "" : " |";
+
+    return `processed ${lastProcessedFormattedDate}${suffixPipe}`;
   };
 
-  renderPipelineVersionDropdown = () => {
-    const {
-      pipelineVersions,
-      analysisRun,
-      versionKey,
-      onPipelineVersionSelect,
-    } = this.props;
-    const otherVersions = pipelineVersions.filter(
-      v => v !== analysisRun[versionKey],
-    );
+  const getDatabaseVersionString = () => {
+    const dbVersion = get("version.alignment_db", currentRun);
 
-    const trigger = (
-      <span className={cs.dropdownTrigger}>
-        {this.getLastProcessedString()}
-      </span>
-    );
+    return dbVersion && shouldIncludeDatabaseVersion
+      ? `NCBI Index Date: ${dbVersion} | `
+      : "";
+  };
 
-    const options = otherVersions.map(version => ({
-      text: `Pipeline v${version}`,
-      value: version,
-    }));
+  const getWorkflowVersionString = () => {
+    if (!currentRun[versionKey]) return "";
 
+    const workflowKey = findInWorkflows(workflowType, "value");
+    const versionString = `${WORKFLOWS[workflowKey].pipelineName} Pipeline v${currentRun[versionKey]}`;
+
+    return versionString;
+  };
+
+  // construct the header
+  const renderSingleVersionTextHeader = () => {
     return (
-      <BareDropdown
-        trigger={trigger}
-        options={options}
-        onChange={onPipelineVersionSelect}
-        smallArrow
+      <Popup
+        content={"This is the only version available."}
+        inverted={false}
+        trigger={
+          <span className={cs.pipelineVersion}>
+            {`${getWorkflowVersionString()} | ${getDatabaseVersionString()}${getLastProcessedString()}`}
+          </span>
+        }
       />
     );
   };
 
-  render() {
-    const {
-      pipelineVersions,
-      lastProcessedAt,
-      analysisRun,
-      versionKey,
-    } = this.props;
+  const renderMultipleVersionsDropdownHeader = () => {
+    const options = otherPipelineVersions.map((version) => ({
+      text: `Pipeline v${version} `,
+      value: version,
+    }));
 
-    if (!lastProcessedAt) return null;
+    const onPipelineVersionSelect = (version: string) => {
+      trackEvent("SampleView_pipeline-select_clicked", {
+        sampleId,
+        pipelineVersion: version,
+        workflowType,
+      });
+      onVersionChange(version);
+    };
 
-    // Don't show selector if there's only 1 version and it's the current one.
-    // Note: If the latest/any run failed it won't be in the pipelineVersions.
-    if (
-      pipelineVersions.length === 0 ||
-      (pipelineVersions.length === 1 &&
-        pipelineVersions[0] === analysisRun[versionKey])
-    ) {
-      return (
-        <span className={cs.pipelineVersionSelectContainer}>
-          | {this.getLastProcessedString()}
-        </span>
-      );
-    }
+    return (
+      <>
+        <Popup
+          content={"Select pipeline version."}
+          inverted={true}
+          trigger={
+            <BareDropdown
+              className={cs.pipelineVersionDropdown}
+              trigger={getWorkflowVersionString()}
+              options={options}
+              onChange={(version: string) => onPipelineVersionSelect(version)}
+              smallArrow={true}
+              arrowInsideTrigger={false}
+            />
+          }
+        />
+        <span
+          className={cs.pipelineVersion}
+        >{`| ${getLastProcessedString()} | `}</span>
+      </>
+    );
+  };
 
-    // Show a dropdown menu for version selection.
-    const trigger = (
+  // figure out which version of the header to use and return it
+  // only one version, and it's the current one? return a string rather than a dropdown.
+  if (
+    allPipelineVersions.length === 0 ||
+    (allPipelineVersions.length === 1 &&
+      allPipelineVersions[0] === currentPipelineVersion)
+  ) {
+    return (
       <div className={cs.pipelineVersionSelectContainer}>
-        <div className={cs.pipelineVersionSelect}>
-          {"| "}
-          {this.renderPipelineVersionDropdown()}
-        </div>
+        {renderSingleVersionTextHeader()}
       </div>
     );
+  } else {
+    // multiple versions? create dropdown
 
-    return <BasicPopup trigger={trigger} content="Select Report Version" />;
+    return (
+      <div className={cs.pipelineVersionSelectContainer}>
+        {renderMultipleVersionsDropdownHeader()}
+      </div>
+    );
   }
-}
+};
 
 export default PipelineVersionSelect;

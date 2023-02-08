@@ -1,7 +1,6 @@
 import { Button, Icon } from "czifui";
 import { get, isEmpty, size } from "lodash/fp";
 import React, { useContext, useState } from "react";
-
 import { deleteSample, saveVisualization } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
@@ -34,8 +33,8 @@ import {
 } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import PipelineRunSampleViewControls from "./PipelineRunSampleViewControls";
+import PipelineVersionSelect from "./PipelineVersionSelect";
 import SampleDeletionConfirmationModal from "./SampleDeletionConfirmationModal";
-import WorkflowVersionHeader from "./WorkflowVersionHeader";
 
 import cs from "./sample_view_header.scss";
 
@@ -78,7 +77,7 @@ export default function SampleViewHeader({
       className={cs.controlElement}
       sdsStyle="rounded"
       sdsType="secondary"
-      onClick={() => (location.href = `/samples/${sample.id}/pipeline_runs`)}
+      onClick={() => (location.href = `/samples/${sample?.id}/pipeline_runs`)}
     >
       Pipeline Runs
     </Button>
@@ -87,7 +86,7 @@ export default function SampleViewHeader({
   const onSaveClick = async () => {
     if (view) {
       const params = parseUrlParams();
-      params.sampleIds = sample.id;
+      params.sampleIds = sample?.id;
       await saveVisualization(view, params);
     }
   };
@@ -108,12 +107,43 @@ export default function SampleViewHeader({
   };
 
   const handleDeleteSample = async () => {
-    await deleteSample(sample.id);
+    await deleteSample(sample?.id);
     location.href = `/home?project_id=${project.id}`;
     trackEvent("SampleViewHeader_delete-sample-button_clicked", {
-      sampleId: sample.id,
-      sampleName: sample.name,
+      sampleId: sample?.id,
+      sampleName: sample?.name,
     });
+  };
+
+  const renderSampleViewControlsTopRow = () => {
+    return (
+      <div className={cs.controlsTopRowContainer}>
+        <PipelineVersionSelect
+          sampleId={get("id", sample)}
+          shouldIncludeDatabaseVersion={false}
+          currentRun={currentRun}
+          allRuns={getAllRuns()}
+          workflowType={workflow}
+          versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
+          timeKey={mngsWorkflow ? "created_at" : "executed_at"}
+          onVersionChange={onPipelineVersionChange}
+        />
+        <Button
+          sdsType="primary"
+          sdsStyle="minimal"
+          isAllCap="true"
+          onClick={withAnalytics(
+            onDetailsClick,
+            "SampleView_sample-details-link_clicked",
+            {
+              sampleId: sample?.id,
+            },
+          )}
+        >
+          Sample Details
+        </Button>
+      </div>
+    );
   };
 
   const renderPipelineRunSampleViewControls = () => (
@@ -162,45 +192,48 @@ export default function SampleViewHeader({
     const shouldHideConsensusGenomeHelpButton =
       !allowedFeatures.includes("cg_appcues_help_button") ||
       (sample &&
-        isEmpty(sample.pipeline_runs) &&
-        size(sample.workflow_runs) === 1);
+        isEmpty(sample?.pipeline_runs) &&
+        size(sample?.workflow_runs) === 1);
     if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
       const succeeded = get("status", currentRun) === "SUCCEEDED";
       return (
         <ViewHeader.Controls>
-          <>
-            {userIsAdmin && renderPipelineRunsPageButton()}
-            {succeeded && (
-              <>
-                {renderShareButton()}
-                <DownloadButton
-                  className={cs.controlElement}
-                  text="Download All"
-                  onClick={() => {
-                    openUrl(getWorkflowRunZipLink(currentRun.id));
-                    trackEvent(
-                      "SampleViewHeader_consensus-genome-download-all-button_clicked",
-                      {
-                        sampleId: sample.id,
-                      },
-                    );
-                  }}
-                />
-              </>
-            )}
-            {!succeeded &&
-            editable &&
-            deletable &&
-            isEmpty(sample.pipeline_runs) && ( // wouldn't want to delete mngs report
-                <ErrorButton
-                  className={cs.controlElement}
-                  onClick={() => setSampleDeletionConfirmationModalOpen(true)}
-                  text="Delete Sample"
-                />
+          <div className={cs.controlsContainer}>
+            {renderSampleViewControlsTopRow()}
+            <div className={cs.controlsBottomRowContainer}>
+              {userIsAdmin && renderPipelineRunsPageButton()}
+              {succeeded && (
+                <>
+                  {renderShareButton()}
+                  <DownloadButton
+                    className={cs.controlElement}
+                    text="Download All"
+                    onClick={() => {
+                      openUrl(getWorkflowRunZipLink(currentRun.id));
+                      trackEvent(
+                        "SampleViewHeader_consensus-genome-download-all-button_clicked",
+                        {
+                          sampleId: sample?.id,
+                        },
+                      );
+                    }}
+                  />
+                </>
               )}
-            {shouldHideConsensusGenomeHelpButton ||
-              renderConsensusGenomeHelpButton()}
-          </>
+              {!succeeded &&
+              editable &&
+              deletable &&
+              isEmpty(sample?.pipeline_runs) && ( // wouldn't want to delete mngs report
+                  <ErrorButton
+                    className={cs.controlElement}
+                    onClick={() => setSampleDeletionConfirmationModalOpen(true)}
+                    text="Delete Sample"
+                  />
+                )}
+              {shouldHideConsensusGenomeHelpButton ||
+                renderConsensusGenomeHelpButton()}
+            </div>
+          </div>
         </ViewHeader.Controls>
       );
     } else if (workflow === WORKFLOWS.AMR.value) {
@@ -208,68 +241,86 @@ export default function SampleViewHeader({
       const succeeded = get("status", currentRun) === "SUCCEEDED";
       return (
         <ViewHeader.Controls>
-          {userIsAdmin && renderPipelineRunsPageButton()}
-          {succeeded && (
-            <Button
-              className={cs.controlElement}
-              onClick={() => {
-                openUrl(getWorkflowRunZipLink(currentRun.id));
-                trackEvent("SampleViewHeader_amr-download-all-button_clicked", {
-                  sampleId: sample.id,
-                });
-              }}
-              sdsStyle="rounded"
-              sdsType="primary"
-              startIcon={
-                <Icon sdsIcon="download" sdsSize="xl" sdsType="button" />
-              }
-            >
-              Download All
-            </Button>
-          )}
+          <div className={cs.controlsContainer}>
+            {renderSampleViewControlsTopRow()}
+            <div className={cs.controlsBottomRowContainer}>
+              {userIsAdmin && renderPipelineRunsPageButton()}
+              {succeeded && (
+                <Button
+                  className={cs.controlElement}
+                  onClick={() => {
+                    openUrl(getWorkflowRunZipLink(currentRun.id));
+                    trackEvent(
+                      "SampleViewHeader_amr-download-all-button_clicked",
+                      {
+                        sampleId: sample?.id,
+                      },
+                    );
+                  }}
+                  sdsStyle="rounded"
+                  sdsType="primary"
+                  startIcon={
+                    <Icon sdsIcon="download" sdsSize="xl" sdsType="button" />
+                  }
+                >
+                  Download All
+                </Button>
+              )}
+            </div>
+          </div>
         </ViewHeader.Controls>
       );
     } else if (workflow === WORKFLOWS.LONG_READ_MNGS.value) {
       // This block is for long-read-mngs PipelineRun reports.
       return (
         <ViewHeader.Controls>
-          {userIsAdmin && renderPipelineRunsPageButton()}
-          {!isEmpty(reportMetadata) && renderShareButton()}
-          {userContext.admin && (
-            <SaveButton
-              className={cs.controlElement}
-              onClick={withAnalytics(
-                onSaveClick,
-                "SampleView_save-button_clicked",
-                {
-                  sampleId: sample && sample.id,
-                },
+          <div className={cs.controlsContainer}>
+            {renderSampleViewControlsTopRow()}
+            <div className={cs.controlsBottomRowContainer}>
+              {userIsAdmin && renderPipelineRunsPageButton()}
+              {!isEmpty(reportMetadata) && renderShareButton()}
+              {userContext.admin && (
+                <SaveButton
+                  className={cs.controlElement}
+                  onClick={withAnalytics(
+                    onSaveClick,
+                    "SampleView_save-button_clicked",
+                    {
+                      sampleId: sample && sample?.id,
+                    },
+                  )}
+                />
               )}
-            />
-          )}
-          {renderPipelineRunSampleViewControls()}
+              {renderPipelineRunSampleViewControls()}
+            </div>
+          </div>
         </ViewHeader.Controls>
       );
     } else {
       // This block is for short-read-mngs PipelineRun reports.
       return (
         <ViewHeader.Controls>
-          {userIsAdmin && renderPipelineRunsPageButton()}
-          {!isEmpty(reportMetadata) && renderShareButton()}
-          {userContext.admin && (
-            <SaveButton
-              className={cs.controlElement}
-              onClick={withAnalytics(
-                onSaveClick,
-                "SampleView_save-button_clicked",
-                {
-                  sampleId: sample && sample.id,
-                },
+          <div className={cs.controlsContainer}>
+            {renderSampleViewControlsTopRow()}
+            <div>
+              {userIsAdmin && renderPipelineRunsPageButton()}
+              {!isEmpty(reportMetadata) && renderShareButton()}
+              {userContext.admin && (
+                <SaveButton
+                  className={cs.controlElement}
+                  onClick={withAnalytics(
+                    onSaveClick,
+                    "SampleView_save-button_clicked",
+                    {
+                      sampleId: sample && sample?.id,
+                    },
+                  )}
+                />
               )}
-            />
-          )}
-          {renderPipelineRunSampleViewControls()}
-          {!isEmpty(reportMetadata) && renderShortReadMngsHelpButton()}
+              {renderPipelineRunSampleViewControls()}
+              {!isEmpty(reportMetadata) && renderShortReadMngsHelpButton()}
+            </div>
+          </div>
         </ViewHeader.Controls>
       );
     }
@@ -285,59 +336,34 @@ export default function SampleViewHeader({
   const getAllRuns = () => {
     const runsByType =
       get("workflow_runs", sample) &&
-      get("workflow_runs", sample).filter(run => run.workflow === workflow);
+      get("workflow_runs", sample).filter((run) => run.workflow === workflow);
     return mngsWorkflow ? get("pipeline_runs", sample) : runsByType;
   };
 
   const renderViewHeaderContent = () => (
     <ViewHeader.Content>
-      <WorkflowVersionHeader
-        sampleId={get("id", sample)}
-        currentRun={currentRun}
-        allRuns={getAllRuns()}
-        workflowType={workflow}
-        mngsWorkflow={mngsWorkflow}
-        versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
-        timeKey={mngsWorkflow ? "created_at" : "executed_at"}
-        onVersionChange={onPipelineVersionChange}
-        snapshotShareId={snapshotShareId}
-      />
       <ViewHeader.Pretitle breadcrumbLink={getBreadcrumbLink()}>
         {project ? project.name : ""}
       </ViewHeader.Pretitle>
       <ViewHeader.Title
         label={get("name", sample)}
-        id={sample && sample.id}
-        options={projectSamples.map(sample => ({
-          label: sample.name,
-          id: sample.id,
+        id={sample && sample?.id}
+        options={projectSamples.map((sample) => ({
+          label: sample?.name,
+          id: sample?.id,
           onClick: () => {
             openUrl(
               generateUrlToSampleView({
-                sampleId: sample.id,
+                sampleId: sample?.id,
                 snapshotShareId,
               }),
             );
             trackEvent("SampleView_header-title_clicked", {
-              sampleId: sample.id,
+              sampleId: sample?.id,
             });
           },
         }))}
       />
-      <div className={cs.sampleDetailsLinkContainer}>
-        <span
-          className={cs.sampleDetailsLink}
-          onClick={withAnalytics(
-            onDetailsClick,
-            "SampleView_sample-details-link_clicked",
-            {
-              sampleId: sample && sample.id,
-            },
-          )}
-        >
-          Sample Details
-        </span>
-      </div>
     </ViewHeader.Content>
   );
 

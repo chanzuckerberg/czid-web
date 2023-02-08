@@ -46,7 +46,7 @@
   .pretitle {
     @include font-header-xxs;
     color: $sds-color-gray-500;
-    margin-bottom: 3px;
+    margin-bottom: $sds-spaces-xxxs;
     margin-left: 1px;
     display: flex;
 
@@ -62,8 +62,8 @@
       }
     }
 
-    .rightArrow {
-      margin-left: 5px;
+    .leftArrow {
+      margin-right: $sds-spaces-xs;
     }
   }
 }

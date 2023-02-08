@@ -73,6 +73,10 @@ export const processPipelineInfo = (
       text: SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[get("technology", pipelineRun)],
     };
 
+    pipelineInfo.ncbiIndexDate = {
+      text: pipelineRun?.version?.alignment_db,
+    };
+
     if (summaryStats) {
       const adjustedRemainingReads = summaryStats.adjusted_remaining_reads
         ? numberWithCommas(summaryStats.adjusted_remaining_reads)
@@ -203,6 +207,7 @@ export const processAMRWorkflowRun = (
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: { text: pipelineVersion },
+      cardDatabaseVersion: { text: "3.2.3" }, // Currently the only version for AMR
       lastProcessedAt: { text: lastProcessedAt },
       totalReads: { text: numberWithCommas(totalReads) },
       totalErccReads: { text: numberWithCommas(totalErccReads) },
