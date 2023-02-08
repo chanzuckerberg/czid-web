@@ -644,7 +644,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
           color={CONTIG_FILL_COLOR}
           hitGroups={contigHitGroups}
           key="contigHitGroupViz"
-          label={`Contigs (${totalContigs})`}
+          label={`NT Contigs (${totalContigs})`}
           pipelineVersion={pipelineVersion}
           sampleId={sampleId}
           snapshotShareId={snapshotShareId}
@@ -653,7 +653,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
         {!isEmpty(readHitGroups) && (
           <HitGroupViz
             key="readHitGroupViz"
-            label={`Loose Reads (${totalReads})`}
+            label={`Loose NT Reads (${totalReads})`}
             color={READ_FILL_COLOR}
             accessionData={currentAccessionData}
             hitGroups={readHitGroups}
