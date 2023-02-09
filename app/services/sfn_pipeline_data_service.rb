@@ -190,7 +190,7 @@ class SfnPipelineDataService
           LogUtil.log_message("No dag name found for step #{step} in stage #{stage_name}")
         end
 
-        status_info = step_statuses[dag_name] || {}
+        status_info = step_statuses[dag_name] || step_statuses[step] || {}
         description = status_info["description"].presence || step_descriptions[dag_name]
         status = redefine_job_status(status_info["status"], @stage_job_statuses[stage_index])
         all_redefined_statuses << status
