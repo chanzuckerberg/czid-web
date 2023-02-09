@@ -23,6 +23,7 @@ import {
   TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { SelectedFilters } from "~/interface/discoveryView";
 import { ThresholdFilterData } from "~/interface/dropdown";
 import FilterTag from "~ui/controls/FilterTag";
 import {
@@ -55,7 +56,7 @@ interface DiscoveryFiltersProps {
   visibility?: FilterOption[];
   // Selected values
   annotationsSelected?: DefaultDropdownMenuOption[];
-  hostSelected?: string[];
+  hostSelected?: number[];
   locationSelected?: string[];
   locationV2Selected?: string[];
   taxonSelected?: {
@@ -67,7 +68,10 @@ interface DiscoveryFiltersProps {
   timeSelected?: string;
   tissueSelected?: string[];
   visibilitySelected?: string;
-  onFilterChange?: $TSFixMeFunction;
+  onFilterChange?: (params: {
+    selectedFilters: SelectedFilters;
+    onFilterChangeCallback: (filteredSampleCount: number) => void;
+  }) => void;
 }
 
 interface DiscoveryFiltersState {
@@ -162,7 +166,9 @@ class DiscoveryFilters extends React.Component<
     };
   };
 
-  notifyFilterChangeHandler = (callback = null) => {
+  notifyFilterChangeHandler = (
+    callback: (filteredSampleCount: number) => void = null,
+  ) => {
     const { onFilterChange } = this.props;
     const selectedFilters = pick(
       [
@@ -209,7 +215,7 @@ class DiscoveryFilters extends React.Component<
       );
     }
 
-    const callback = (filteredSampleCount: $TSFixMe) => {
+    const callback = (filteredSampleCount: number) => {
       trackEvent(ANALYTICS_EVENT_NAMES.TAXON_THRESHOLD_FILTER_APPLY_CLICKED, {
         domain,
         selectedTaxa: taxa,

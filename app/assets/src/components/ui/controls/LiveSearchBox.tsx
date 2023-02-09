@@ -14,7 +14,12 @@ interface LiveSearchBoxProps {
   onEnter?: $TSFixMeFunction;
   onSearchTriggered?: (query: string) => Promise<$TSFixMe>;
   onSearchChange?: $TSFixMeFunction;
-  onResultSelect?: $TSFixMeFunction;
+  onResultSelect?: (params: {
+    currentEvent:
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      | React.KeyboardEvent;
+    result: unknown;
+  }) => void;
   rectangular?: boolean;
   inputMode?: boolean;
 }
@@ -33,7 +38,7 @@ class LiveSearchBox extends React.Component<
 > {
   lastestTimerId: any;
   static defaultProps: LiveSearchBoxProps;
-  constructor(props) {
+  constructor(props: LiveSearchBoxProps) {
     super(props);
 
     this.state = {
@@ -47,7 +52,13 @@ class LiveSearchBox extends React.Component<
     this.lastestTimerId = null;
   }
 
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(
+    props: LiveSearchBoxProps,
+    state: {
+      prevValue: string;
+      value: string;
+    },
+  ) {
     if (props.value !== state.prevValue) {
       return {
         prevValue: props.value,
@@ -62,7 +73,7 @@ class LiveSearchBox extends React.Component<
     this.setState({ value: lastSearchedTerm });
   };
 
-  handleKeyDown = keyEvent => {
+  handleKeyDown = (keyEvent: React.KeyboardEvent) => {
     const { onEnter, inputMode } = this.props;
     const { value, selectedResult, lastSearchedTerm } = this.state;
 
@@ -87,7 +98,12 @@ class LiveSearchBox extends React.Component<
     });
   };
 
-  handleResultSelect = (currentEvent, { result }) => {
+  handleResultSelect = (
+    currentEvent:
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      | React.KeyboardEvent,
+    { result },
+  ) => {
     const { onResultSelect } = this.props;
     this.resetComponent();
     onResultSelect && onResultSelect({ currentEvent, result });
@@ -112,7 +128,7 @@ class LiveSearchBox extends React.Component<
     }
   };
 
-  handleSearchChange = (_, { value }) => {
+  handleSearchChange = (_: unknown, { value }) => {
     const { delayTriggerSearch, minChars, onSearchChange } = this.props;
 
     this.setState({ value });
@@ -131,7 +147,7 @@ class LiveSearchBox extends React.Component<
     }
   };
 
-  handleSelectionChange = (_e, { result }) => {
+  handleSelectionChange = (_e: unknown, { result }) => {
     this.setState({ selectedResult: result });
   };
 

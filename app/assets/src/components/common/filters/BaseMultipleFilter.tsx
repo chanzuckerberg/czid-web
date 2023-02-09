@@ -30,7 +30,7 @@ export interface FilterOption {
 }
 
 export interface BaseMultipleFilterProps {
-  selected: string[];
+  selected: string[] | number[];
   onChange: (selected: string) => void;
   options: FilterOption[];
   label: string;

@@ -6,6 +6,11 @@ import React from "react";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
+import {
+  DimensionsDetailed,
+  DimensionValue,
+  FiltersPreFormatting,
+} from "~/interface/discoveryView";
 import { Optional, Project } from "~/interface/shared";
 import ProjectDescription from "./ProjectDescription";
 import cs from "./discovery_sidebar.scss";
@@ -19,9 +24,9 @@ interface DiscoverySidebarProps {
   noDataAvailable?: boolean;
   onFilterClick?: $TSFixMeFunction;
   onProjectDescriptionSave?: (value: string) => void;
-  projectDimensions?: unknown[];
+  projectDimensions?: DimensionsDetailed;
   projectStats?: object;
-  sampleDimensions?: unknown[];
+  sampleDimensions?: DimensionsDetailed;
   sampleStats?: object;
   project?: Optional<Project, "id">;
 }
@@ -34,10 +39,10 @@ interface DiscoverySidebarState {
     avgAdjustedRemainingReads: string;
   };
   metadata: {
-    host: $TSFixMeUnknown[];
-    tissue: $TSFixMeUnknown[];
-    time: $TSFixMeUnknown[];
-    location: $TSFixMeUnknown[];
+    host: DimensionValue[];
+    tissue: DimensionValue[];
+    time: DimensionValue[];
+    location: (DimensionValue & { parents: string[] })[];
   };
   expandedMetadataGroups: Set<$TSFixMeUnknown>;
 }
@@ -194,7 +199,7 @@ export default class DiscoverySidebar extends React.Component<
     );
   }
 
-  buildMetadataRows(field) {
+  buildMetadataRows(field: "host" | "tissue" | "time" | "locationV2") {
     const { metadata, expandedMetadataGroups } = this.state;
     const dataRows = metadata[field];
     // Sort by the value desc and then by the label alphabetically
@@ -240,7 +245,11 @@ export default class DiscoverySidebar extends React.Component<
     });
   }
 
-  renderMetadataRowBlock(rows, total, field) {
+  renderMetadataRowBlock(
+    rows: DimensionValue[],
+    total: number,
+    field: keyof FiltersPreFormatting,
+  ) {
     const { onFilterClick } = this.props;
     return rows.map((entry, i) => {
       const { count, text, value } = entry;

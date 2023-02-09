@@ -103,45 +103,45 @@ const SHORT_READ_MNGS_VALUE = WORKFLOWS.SHORT_READ_MNGS.value;
 
 const SamplesView = forwardRef(function SamplesView(
   {
-    onObjectSelected,
-    workflowEntity,
-    onDisplaySwitch,
-    projectId,
-    selectedIds,
-    selectableIds,
-    currentDisplay = "table",
-    onSortColumn,
-    showAllMetadata,
-    objects,
-    workflow = WORKFLOWS.SHORT_READ_MNGS.value,
-    onUpdateSelectedIds,
-    handleNewAmrCreationsFromMngs,
-    domain,
-    hideAllTriggers,
-    hasAtLeastOneFilterApplied,
-    onClearFilters,
-    userDataCounts,
     activeColumns = DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[SHORT_READ_MNGS_VALUE],
-    onActiveColumnsChange,
-    onLoadRows,
-    protectedColumns = ["sample"],
-    snapshotShareId,
-    sortable,
-    sortBy,
-    sortDirection,
+    currentDisplay = "table",
     currentTab,
+    domain,
+    filters,
+    filtersSidebarOpen,
+    handleNewAmrCreationsFromMngs,
+    hasAtLeastOneFilterApplied,
+    hideAllTriggers,
     mapLevel,
     mapLocationData,
     mapPreviewedLocationId,
     mapTilerKey,
-    onMapLevelChange,
+    objects,
+    onActiveColumnsChange,
+    onClearFilters,
+    onDisplaySwitch,
+    onLoadRows,
     onMapClick,
+    onMapLevelChange,
     onMapMarkerClick,
     onMapTooltipTitleClick,
+    onObjectSelected,
     onPLQCHistogramBarClick,
-    filters,
-    filtersSidebarOpen,
+    onSortColumn,
+    onUpdateSelectedIds,
+    projectId,
+    protectedColumns = ["sample"],
     sampleStatsSidebarOpen,
+    selectableIds,
+    selectedIds,
+    showAllMetadata,
+    snapshotShareId,
+    sortable,
+    sortBy,
+    sortDirection,
+    userDataCounts,
+    workflow = WORKFLOWS.SHORT_READ_MNGS.value,
+    workflowEntity,
   }: SamplesViewProps,
   ref: React.Ref<SamplesViewHandle>,
 ) {
@@ -633,7 +633,8 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   const kickoffAmrPipelineForSamples = (sampleIds: number[]) => {
     bulkKickoffWorkflowRuns({
@@ -935,7 +936,7 @@ const SamplesView = forwardRef(function SamplesView(
     event,
     rowData,
   }: {
-    event: React.SyntheticEvent;
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>;
     rowData: { id: number };
   }) => {
     const object = objects.get(rowData.id);

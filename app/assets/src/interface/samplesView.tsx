@@ -22,7 +22,10 @@ export interface SamplesViewProps {
   mapPreviewedLocationId?: number;
   mapTilerKey?: string;
   numOfMngsSamples?: number;
-  objects?: ObjectCollectionView<Entry>;
+  objects?:
+    | ObjectCollectionView<PipelineTypeRun>
+    | ObjectCollectionView<BaseWorkflowRun>
+    | ObjectCollectionView<CGRun>;
   onActiveColumnsChange?(activeColumns: string[]): void;
   onClearFilters?(): void;
   onDisplaySwitch?: (display: string) => void;
@@ -34,7 +37,7 @@ export interface SamplesViewProps {
   onPLQCHistogramBarClick?(sampleIds: string[]): void;
   onObjectSelected?(param: {
     object: Entry;
-    currentEvent: React.SyntheticEvent;
+    currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>;
   }): void;
   onUpdateSelectedIds?(selectedSampleIds: Set<number>): void;
   onSortColumn?(param: {
@@ -76,7 +79,7 @@ export interface ViewProps {
 export interface FilterList {
   annotations: Array<{ name: AnnotationValue }>;
   host: Array<number>;
-  locationV2: Array<string>;
+  locationV2: Array<string> | string;
   taxon: Array<number>;
   taxonThresholds: Array<ThresholdForAPI>;
   taxaLevels: Array<string>;

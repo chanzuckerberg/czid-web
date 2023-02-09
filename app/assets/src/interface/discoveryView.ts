@@ -1,13 +1,14 @@
+import { RouteComponentProps } from "react-router-dom";
 import { SortDirectionType } from "react-virtualized";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import { WORKFLOW_VALUES, WorkflowCount } from "~/components/utils/workflows";
-import { AnnotationValue } from "./discovery";
-import { Project } from "./shared";
+import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
+import { FilterList } from "./samplesView";
+import { MustHaveId, Project } from "./shared";
 
-export interface DiscoveryViewProps {
+export interface DiscoveryViewProps extends RouteComponentProps {
   admin?: boolean;
   domain: string;
-  history?: object;
   mapTilerKey?: string;
   projectId?: number;
   snapshotProjectDescription?: string;
@@ -16,30 +17,40 @@ export interface DiscoveryViewProps {
   updateDiscoveryProjectId?(...args: unknown[]): unknown;
 }
 
+export type DimensionsDetailed = Array<
+  Dimension | LocationV2Dimension | TimeBinDimension
+>;
+
 export interface Dimension {
   dimension: string;
-  values: string[];
+  values: DimensionValue[];
 }
-export interface FiltersPreFormatting {
-  annotations: Array<{ name: AnnotationValue }>;
-  host: Array<number>;
-  locationV2: Array<string>;
-  taxon: Array<{ id: number; name: string; level: string }>;
-  taxonThresholds: Array<ThresholdConditions>;
-  time: string;
-  tissue: string[];
-  visibility: string;
+
+type LocationV2Dimension = {
+  dimension: "locationV2";
+  values: (DimensionValue & { parents: string[] })[];
+};
+
+type TimeBinDimension = {
+  dimension: "time_bin";
+  values: (DimensionValue & { start: string; end: string })[];
+};
+
+export interface DimensionValue {
+  text: string;
+  value: string;
+  count: number;
 }
 
 export type SelectedFilters = {
-  annotationsSelected: Array<{ name: AnnotationValue }>;
-  hostSelected: Array<number>;
-  locationV2Selected: Array<string>;
-  taxonSelected: Array<{ id: number; name: string; level: string }>;
-  taxonThresholdsSelected: Array<ThresholdConditions>;
-  timeSelected: string;
-  tissueSelected: string[];
-  visibilitySelected: string;
+  annotationsSelected?: Array<{ name: string }>;
+  hostSelected?: Array<number>;
+  locationV2Selected?: Array<string>;
+  taxonSelected?: Array<{ id: number; name: string; level: string }>;
+  taxonThresholdsSelected?: Array<ThresholdConditions>;
+  timeSelected?: string;
+  tissueSelected?: string[];
+  visibilitySelected?: string;
 };
 
 export type WorkflowSets = {
@@ -79,12 +90,12 @@ export interface DiscoveryViewState {
   orderBy: string;
   orderDirection: SortDirectionType;
   project: Project;
-  projectDimensions: Dimension[];
+  projectDimensions: DimensionsDetailed;
   projectId: number;
   plqcPreviewedSamples?: string[];
   rawMapLocationData: Record<string, MapEntry>;
   sampleActiveColumnsByWorkflow: { [workflow: string]: string[] };
-  sampleDimensions: Dimension[];
+  sampleDimensions: DimensionsDetailed;
   search: string;
   selectableSampleIds: number[];
   selectableWorkflowRunIds: number[];
@@ -101,15 +112,23 @@ export interface DiscoveryViewState {
   workflowEntity: string;
 }
 
-export interface ConfigForWorkflow {
-  [key: string]: {
-    bannerTitle: string;
-    objectCollection: Record<string, $TSFixMe>;
-    noDataLinks: {
-      external?: boolean;
-      href: string;
-      text: string;
-    }[];
-    noDataMessage: string;
-  };
+export interface ConfigForWorkflow<T extends MustHaveId> {
+  bannerTitle: string;
+  objectCollection: ObjectCollectionView<T>;
+  noDataLinks: {
+    external?: boolean;
+    href: string;
+    text: string;
+  }[];
+  noDataMessage: string;
+}
+
+export interface Conditions {
+  projectId: number;
+  snapshotShareId: string;
+  search: string;
+  orderBy: string;
+  orderDir: SortDirectionType;
+  filters: FilterList & { workflow: WORKFLOW_VALUES };
+  sampleIds?: string[];
 }

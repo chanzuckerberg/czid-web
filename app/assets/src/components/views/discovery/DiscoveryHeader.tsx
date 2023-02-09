@@ -15,8 +15,22 @@ interface DiscoveryHeaderProps {
   filterCount?: number;
   onFilterToggle?: $TSFixMeFunction;
   onStatsToggle?: $TSFixMeFunction;
-  onSearchEnterPressed?: $TSFixMeFunction;
-  onSearchResultSelected?: $TSFixMeFunction;
+  onSearchEnterPressed?: (search: string) => void;
+  onSearchResultSelected?: (
+    result: {
+      key: string;
+      value: string | number;
+      text: string;
+      sdsTaxonFilterData:
+        | {
+            id: number;
+            level: string;
+            name: string;
+          }
+        | Record<string, never>;
+    },
+    currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>,
+  ) => void;
   onSearchTriggered?: (query: string) => Promise<$TSFixMe>;
   onTabChange?: $TSFixMeFunction;
   searchValue?: string;
@@ -43,7 +57,23 @@ const DiscoveryHeader = ({
   showStats,
   tabs,
 }: DiscoveryHeaderProps) => {
-  const handleSearchResultSelected = ({ currentEvent, result }: $TSFixMe) => {
+  const handleSearchResultSelected = ({
+    currentEvent,
+    result,
+  }: {
+    currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>;
+    result: {
+      category: string;
+      id: number;
+      key: string;
+      title: string;
+      taxid?: number;
+      description: string;
+      sample_id?: number;
+      project_id?: number;
+      level?: "species" | "genus";
+    };
+  }) => {
     // TODO(tiago): refactor search suggestions endpoint to return standard format data
     // category "Taxon": key: "taxon", value: taxid, text: title
     // category "Project": key: "project", value: id, text: title
@@ -55,7 +85,9 @@ const DiscoveryHeader = ({
     let category = result.category;
     if (category !== "locationV2") category = category.toLowerCase();
     let value = result.id;
-    let sdsTaxonFilterData = {};
+    let sdsTaxonFilterData:
+      | { id: number; level: string; name: string }
+      | Record<string, never> = {};
     switch (category) {
       case "taxon": {
         value = result.taxid;
@@ -85,7 +117,7 @@ const DiscoveryHeader = ({
       onSearchResultSelected(parsedResult, currentEvent);
   };
 
-  const handleSearchEnterPressed = ({ value }: $TSFixMe) => {
+  const handleSearchEnterPressed = ({ value }: { value: string }) => {
     const search = value;
     onSearchEnterPressed && onSearchEnterPressed(search);
   };

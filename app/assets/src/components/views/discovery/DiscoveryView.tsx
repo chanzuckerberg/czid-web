@@ -13,12 +13,10 @@ import {
   isUndefined,
   keyBy,
   map,
-  mapKeys,
   mapValues,
   merge,
   pick,
   pull,
-  replace,
   some,
   sumBy,
   union,
@@ -56,6 +54,7 @@ import {
   DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS,
   generateUrlToSampleView,
   getTempSelectedOptions,
+  TempSelectedOptionsShape,
 } from "~/components/utils/urls";
 import {
   workflowIsBeta,
@@ -74,10 +73,12 @@ import {
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "~/components/views/samples/SamplesView/ColumnConfiguration";
 import {
+  Conditions,
   ConfigForWorkflow,
+  Dimension,
+  DimensionValue,
   DiscoveryViewProps,
   DiscoveryViewState,
-  FiltersPreFormatting,
   MapEntry,
   SelectedFilters,
 } from "~/interface/discoveryView";
@@ -166,11 +167,16 @@ class DiscoveryView extends React.Component<
 > {
   amrWorkflowRuns: ObjectCollectionView<BaseWorkflowRun>;
   cgWorkflowRuns: ObjectCollectionView<CGRun>;
-  configForWorkflow: ConfigForWorkflow;
+  configForWorkflow: {
+    amr: ConfigForWorkflow<BaseWorkflowRun>;
+    "consensus-genome": ConfigForWorkflow<CGRun>;
+    "short-read-mngs": ConfigForWorkflow<PipelineTypeRun>;
+    "long-read-mngs": ConfigForWorkflow<PipelineTypeRun>;
+  };
   dataLayer: DiscoveryDataLayer;
   longReadMngsSamples: ObjectCollectionView<PipelineTypeRun>;
-  mapPreviewProjects: $TSFixMe;
-  mapPreviewSamples: $TSFixMe;
+  mapPreviewProjects: ObjectCollectionView<Project>;
+  mapPreviewSamples: ObjectCollectionView<PipelineTypeRun>;
   mapPreviewSidebar: MapPreviewSidebar;
   projects: ObjectCollectionView<Project>;
   projectsView: ProjectsView;
@@ -205,6 +211,8 @@ class DiscoveryView extends React.Component<
     const projectIdToUpdate = projectId || urlState.projectId;
     // If the projectId was passed as props or is in the URL, update the projectIds in the redux state via the updateProjectIds action creator
     updateDiscoveryProjectId(projectIdToUpdate || null);
+
+    const storedState = { ...localState, ...sessionState, ...urlState };
 
     this.state = {
       currentDisplay: "table",
@@ -241,7 +249,9 @@ class DiscoveryView extends React.Component<
       projectDimensions: [],
       projectId: projectId,
       rawMapLocationData: {},
-      sampleActiveColumnsByWorkflow: undefined,
+      sampleActiveColumnsByWorkflow: !storedState.sampleActiveColumnsByWorkflow
+        ? DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW
+        : undefined,
       sampleDimensions: [],
       search: null,
       selectableSampleIds: [],
@@ -261,18 +271,6 @@ class DiscoveryView extends React.Component<
       ...sessionState,
       ...urlState,
     };
-
-    // If a user had previously selected the PLQC view for a specific project,
-    // ensure that currentDisplay defaults to "table" if they switch to a different view,
-    // since the PLQC display only exists when viewing a single project.
-    if (this.state.currentDisplay === "plqc" && !projectId) {
-      // @ts-expect-error Cannot assign to 'currentDisplay' because it is a read-only property
-      this.state.currentDisplay = "table";
-    }
-    if (!this.state.sampleActiveColumnsByWorkflow) {
-      // @ts-expect-error Cannot assign to 'sampleActiveColumnsByWorkflow' because it is a read-only property
-      this.state.sampleActiveColumnsByWorkflow = DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW;
-    }
 
     this.workflowEntity = find(
       { value: this.state.workflow },
@@ -368,7 +366,6 @@ class DiscoveryView extends React.Component<
 
     this.updateBrowsingHistory("replace");
   }
-
   setupWorkflowConfigs = () => {
     this.configForWorkflow = {
       [WORKFLOWS.AMR.value]: {
@@ -459,6 +456,13 @@ class DiscoveryView extends React.Component<
   };
 
   async componentDidMount() {
+    // If a user had previously selected the PLQC view for a specific project,
+    // ensure that currentDisplay defaults to "table" if they switch to a different view,
+    // since the PLQC display only exists when viewing a single project.
+    if (this.state.currentDisplay === "plqc" && !this.state.projectId) {
+      this.setState({ currentDisplay: "table" });
+    }
+
     this.initialLoad();
 
     // this event is triggered when a user clicks "Back" in their browser
@@ -489,7 +493,7 @@ class DiscoveryView extends React.Component<
     };
   };
 
-  getConditions = (workflow?: WORKFLOW_VALUES) => {
+  getConditions = (workflow?: WORKFLOW_VALUES): Conditions => {
     const { projectId, search, orderBy, orderDirection } = this.state;
     const { snapshotShareId } = this.props;
 
@@ -694,47 +698,54 @@ class DiscoveryView extends React.Component<
     return firstSignIn && !localStorage.getItem("DiscoveryViewSeenBefore");
   };
 
-  preparedFilters = (): FilterList => {
+  preparedFilters = () => {
     const { allowedFeatures = [] } = this.context || {};
     const { filters } = this.state;
-    const preparedFilters = (mapKeys(
-      replace("Selected", ""),
-      filters,
-    ) as unknown) as FiltersPreFormatting;
-    // Time is an exception: we translate values into date ranges
-    if (preparedFilters.time) {
+    const preparedFilters = {} as FilterList;
+    const filtersToFormat = [
+      "timeSelected",
+      "taxonSelected",
+      "taxonThresholdSelected",
+    ];
+
+    // We remove the "Selected" suffix from non-formatted filter keys
+    Object.keys(filters).forEach((key) => {
+      if (!filtersToFormat.includes(key)) {
+        preparedFilters[key.replace("Selected", "")] = filters[key];
+      }
+    });
+
+    // Time is formatted: we translate values into date ranges
+    if (filters.timeSelected) {
       const startDate = {
-        "1_week": () => moment().subtract(7, "days"),
-        "1_month": () => moment().subtract(1, "months"),
-        "3_month": () => moment().subtract(3, "months"),
-        "6_month": () => moment().subtract(6, "months"),
-        "1_year": () => moment().subtract(1, "years"),
+        "1_week": [7, "days"],
+        "1_month": [1, "months"],
+        "3_month": [3, "months"],
+        "6_month": [6, "months"],
+        "1_year": [1, "years"],
       };
-      // @ts-expect-error Type 'any[]' is not assignable to type 'string'.
+
       preparedFilters.time = [
-        startDate[preparedFilters.time]().format("YYYYMMDD"),
-        moment()
-          .add(1, "days")
-          .format("YYYYMMDD"),
+        moment().subtract(...startDate[filters.timeSelected]).format("YYYYMMDD"),
+        moment().add(1, "days").format("YYYYMMDD"),
       ];
     }
 
-    // Taxon is an exception: this filter needs to store complete option, so need to convert to values only
-    if (preparedFilters.taxon && preparedFilters.taxon.length) {
+    // Taxon is formatted: this filter needs to store complete option, so need to convert to values only
+    if (filters.taxonSelected && filters.taxonSelected.length) {
       let mapKey = "value";
 
       if (allowedFeatures.includes(TAXON_THRESHOLD_FILTERING_FEATURE)) {
         mapKey = "id";
-        // @ts-expect-error Property 'taxaLevels' does not exist on type 'FiltersPreFormatting'.
-        preparedFilters.taxaLevels = map("level", preparedFilters.taxon);
+        preparedFilters.taxaLevels = map("level", filters.taxonSelected);
       }
 
-      preparedFilters.taxon = map(mapKey, preparedFilters.taxon);
+      preparedFilters.taxon = map(mapKey, filters.taxonSelected);
     }
 
-    // Format threshold filter data for API query
-    if (Array.isArray(preparedFilters.taxonThresholds)) {
-      preparedFilters.taxonThresholds = preparedFilters.taxonThresholds.reduce(
+    // Taxon Threshold is formatted: for compatibility with the API query
+    if (Array.isArray(filters.taxonThresholdsSelected)) {
+      preparedFilters.taxonThresholds = filters.taxonThresholdsSelected.reduce(
         (result, threshold) => {
           const parsedMetric = threshold["metric"].split(":");
 
@@ -758,7 +769,8 @@ class DiscoveryView extends React.Component<
         [],
       );
     }
-    return (preparedFilters as unknown) as FilterList;
+
+    return preparedFilters;
   };
 
   resetData = ({ callback }: { callback?(): void } = {}) => {
@@ -1221,7 +1233,7 @@ class DiscoveryView extends React.Component<
     onFilterChangeCallback = null,
   }: {
     selectedFilters: SelectedFilters | Record<string, never>;
-    onFilterChangeCallback?: (filteredSampleCount: $TSFixMeUnknown) => void;
+    onFilterChangeCallback?: (filteredSampleCount: number) => void;
   }) => {
     this.setState({ filters: selectedFilters }, () => {
       this.updateBrowsingHistory("replace");
@@ -1251,8 +1263,8 @@ class DiscoveryView extends React.Component<
   // From the right pane sidebar, we'll add the filter value they click on if not already selected.
   // Don't call this for single selection filters.
   handleMetadataFilterClick = (
-    field: keyof FiltersPreFormatting,
-    value: $TSFixMeUnknown,
+    field: keyof FilterList,
+    value: DimensionValue[],
   ) => {
     const { filters: selectedFilters } = this.state;
 
@@ -1268,8 +1280,22 @@ class DiscoveryView extends React.Component<
   };
 
   handleSearchSelected = (
-    { key, value, text, sdsTaxonFilterData }: $TSFixMe,
-    currentEvent: $TSFixMe,
+    {
+      key,
+      value,
+      text,
+      sdsTaxonFilterData,
+    }: {
+      key: string;
+      value: number;
+      text: string;
+      sdsTaxonFilterData: {
+        id: number;
+        level: string;
+        name: string;
+      };
+    },
+    currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
     const { allowedFeatures = [] } = this.context || {};
     const { filters, search } = this.state;
@@ -1404,7 +1430,13 @@ class DiscoveryView extends React.Component<
     );
   };
 
-  handleObjectSelected = ({ object, currentEvent }: $TSFixMe) => {
+  handleObjectSelected = ({
+    object,
+    currentEvent,
+  }: {
+    object: { id: number };
+    currentEvent: React.MouseEvent<HTMLDivElement, MouseEvent>;
+  }) => {
     const { snapshotShareId, history: RouterHistory } = this.props;
     const { filters, workflow, workflowEntity } = this.state;
     const {
@@ -1413,9 +1445,9 @@ class DiscoveryView extends React.Component<
       taxonThresholdsSelected,
     } = filters;
 
-    let sampleId;
-    let workflowRunId;
-    let tempSelectedOptions;
+    let sampleId: number;
+    let workflowRunId: number;
+    let tempSelectedOptions: TempSelectedOptionsShape;
 
     if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
       sampleId = _get("sample.id", object);
@@ -1455,7 +1487,6 @@ class DiscoveryView extends React.Component<
       openUrl(url, currentEvent);
     } else {
       // Otherwise navigate via React Router:
-      // @ts-expect-error ts-migrate(2532) FIXME: Object is possibly 'undefined'.
       RouterHistory.push(url);
     }
   };
@@ -1490,8 +1521,8 @@ class DiscoveryView extends React.Component<
       const dimension = find({ dimension: category }, dimensions);
       if (dimension) {
         const results = dimension.values
-          .filter((entry: $TSFixMe) => re.test(entry.text))
-          .map((entry: $TSFixMe) => ({
+          .filter(entry => re.test(entry.text))
+          .map(entry => ({
             category,
             id: entry.value,
             title: entry.text,
@@ -1649,7 +1680,6 @@ class DiscoveryView extends React.Component<
     const conditions = this.getConditions();
 
     if (plqcPreviewedSamples && plqcPreviewedSamples.length > 0) {
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'sampleIds' does not exist on type '{ pro... Remove this comment to see the full error message
       conditions.sampleIds = plqcPreviewedSamples;
       this.mapPreviewSamples = this.dataLayer.samples.createView({
         conditions,
@@ -1715,7 +1745,6 @@ class DiscoveryView extends React.Component<
     // Fetch stats and dimensions for the map sidebar. Special request with the current filters
     // and the previewed location.
     const params = this.getConditions();
-    // @ts-expect-error Type 'string' is not assignable to type 'string[]'.
     params.filters["locationV2"] = mapLocationData[mapPreviewedLocationId].name;
     const [
       { sampleStats },
@@ -2098,9 +2127,9 @@ class DiscoveryView extends React.Component<
     const workflow = this.computeWorkflowTabs()[workflowTabIndex].value;
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
     const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
+
     // PLQC is currently only available for short read mNGS samples
-    const plqcWorkflows = [WORKFLOWS.SHORT_READ_MNGS];
-    // @ts-expect-error Argument of type 'string' is not assignable to parameter of type
+    const plqcWorkflows = [WORKFLOWS.SHORT_READ_MNGS.value as typeof workflow];
     if (currentDisplay === DISPLAY_PLQC && !plqcWorkflows.includes(workflow)) {
       currentDisplay = "table";
     }
@@ -2345,7 +2374,6 @@ class DiscoveryView extends React.Component<
                 <SamplesView
                   activeColumns={sampleActiveColumnsByWorkflow[workflow]}
                   admin={admin}
-                  allowedFeatures={allowedFeatures}
                   currentDisplay={currentDisplay}
                   currentTab={currentTab}
                   domain={domain}
@@ -2355,7 +2383,6 @@ class DiscoveryView extends React.Component<
                   mapLocationData={mapLocationData}
                   mapPreviewedLocationId={mapPreviewedLocationId}
                   mapTilerKey={mapTilerKey}
-                  // @ts-expect-error workflowObjects should be a ObjectCollectionView type
                   objects={workflowObjects}
                   onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                   onClearFilters={this.handleClearFilters}
@@ -2610,11 +2637,9 @@ class DiscoveryView extends React.Component<
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
             {showFilters && dimensions && (
-              // @ts-expect-error Types of property 'hostSelected' are incompatible.
               <DiscoveryFilters
                 {...mapValues(
-                  // @ts-expect-error ts-migrate(2571) FIXME: Object is of type 'unknown'.
-                  dim => dim.values,
+                  (dim: Dimension) => dim.values,
                   keyBy("dimension", dimensions),
                 )}
                 {...filters}
