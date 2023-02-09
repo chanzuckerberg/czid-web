@@ -8,12 +8,18 @@ class ReadsStatsService
   BLOCKLIST = ["run_generate_unidentified_fasta", "unidentified_fasta", "subsampled"].freeze
 
   RUN_STAR = "star_out".freeze
+  RUN_FASTP_OUT = "fastp_out".freeze
   ERCC = "ERCC".freeze
+  FASTP_TOO_SHORT_READS = "fastp_too_short_reads".freeze
+  FASTP_LOW_QUALITY_READS = "fastp_low_quality_reads".freeze
+  FASTP_LOW_COMPLEXITY_READS = "fastp_low_complexity_reads".freeze
 
   MODERN_HOST_FILTER_STEP_NAME_TO_JOB_STAT_TASK_NAME = {
     "fastp_qc" => "fastp_out",
     "bowtie2_filter" => "bowtie2_host_filtered_out",
     "hisat2_filter" => "hisat2_host_filtered_out",
+    "bowtie2_human_filter" => "bowtie2_human_filtered_out",
+    "hisat2_human_filter" => "hisat2_human_filtered_out",
   }.freeze
 
   def initialize(samples)
@@ -48,8 +54,9 @@ class ReadsStatsService
       end
       if stat.task == INITIAL_READS_STAT
         reads_stats[stat.pipeline_run_id][:initialReads] = stat.reads_after
-      elsif stat.task == RUN_STAR
-        # If there are ERCC reads, separate them from STAR host filtering reads.
+      # TODO(omar): Cleanup references of old host filtering stage after modern host filtering launches.
+      elsif stat.task == RUN_STAR || stat.task == RUN_FASTP_OUT
+        # If there are ERCC reads, separate them from host filtering reads.
         pr = PipelineRun.find(stat.pipeline_run_id)
         ercc_counts = pr.total_ercc_reads
         if ercc_counts.present?
@@ -72,10 +79,20 @@ class ReadsStatsService
       ordered_tasks = representative_run.host_filtering_stage.step_statuses.keys
 
       # Make sure to include ERCC as a step.
-      if ordered_tasks.present? && !pipeline_version_uses_new_host_filtering_stage(representative_run.pipeline_version)
+      if ordered_tasks.present?
         star_index = ordered_tasks.find_index(RUN_STAR)
-        if star_index
-          ordered_tasks.insert(star_index, ERCC)
+        ordered_tasks.insert(star_index, ERCC) if star_index
+
+        if pipeline_version_uses_new_host_filtering_stage(representative_run.pipeline_version)
+          fastp_index = ordered_tasks.find_index("fastp_qc")
+
+          if fastp_index
+            ordered_tasks.delete_at(fastp_index)
+            ordered_tasks.insert(fastp_index, FASTP_LOW_QUALITY_READS)
+            ordered_tasks.insert(fastp_index, FASTP_LOW_COMPLEXITY_READS)
+            ordered_tasks.insert(fastp_index, FASTP_TOO_SHORT_READS)
+            ordered_tasks.insert(fastp_index, ERCC)
+          end
         end
       end
 

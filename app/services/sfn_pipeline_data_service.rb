@@ -49,8 +49,8 @@ class SfnPipelineDataService
       "bowtie2_filter" => "bowtie2_host_filtered_out",
       "hisat2_filter" => "hisat2_host_filtered_out",
       "collect_insert_size_metrics" => "insert_size_metrics",
-      "bowtie2_human_filter" => "bowtie2_human_filter",
-      "hisat2_human_filter" => "hisat2_human_filter",
+      "bowtie2_human_filter" => "bowtie2_human_filtered_out",
+      "hisat2_human_filter" => "hisat2_human_filtered_out",
       "RunStar" => "star_out",
       "RunTrimmomatic" => "trimmomatic_out",
       "RunPriceSeq" => "priceseq_out",
@@ -223,10 +223,6 @@ class SfnPipelineDataService
     return stages
   end
 
-  def should_skip_intermediate_output?(step_name_or_input_name)
-    return pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version) && (step_name_or_input_name.starts_with?("bowtie2") || step_name_or_input_name.starts_with?("hisat2"))
-  end
-
   def retrieve_step_inputs(stage_info, step)
     variables = []
     files = []
@@ -243,7 +239,7 @@ class SfnPipelineDataService
       if output_step == WORKFLOW_INPUT_PREFIX
         input_info[:type] = stage_info["inputs"][var_name]
       else
-        input_info[:file] = File.basename(stage_info["basenames"][input]) unless should_skip_intermediate_output?(input)
+        input_info[:file] = File.basename(stage_info["basenames"][input])
       end
 
       case input_info[:type]

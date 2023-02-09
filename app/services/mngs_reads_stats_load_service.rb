@@ -53,7 +53,24 @@ class MngsReadsStatsLoadService
                       end
       end
     end
+
+    if pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version)
+      total_reads = all_counts.detect { |entry| entry.value?("fastqs") }[:reads_after]
+      all_counts += fetch_fastp_qc_counts(prefix, total_reads)
+    end
     all_counts
+  end
+
+  def fetch_fastp_qc_counts(s3_prefix, total_reads)
+    fastp_qc_counts = []
+    bucket = ENV['SAMPLES_BUCKET_NAME']
+    resp = AwsClient[:s3].get_object(bucket: bucket, key: "#{s3_prefix}/#{PipelineRun::FASTP_JSON_FILE}")
+    contents = JSON.parse(resp.body.read)["filtering_result"]
+
+    fastp_qc_counts << { task: "fastp_low_quality_reads", reads_after: total_reads - contents["low_quality_reads"] }
+    fastp_qc_counts << { task: "fastp_low_complexity_reads", reads_after: total_reads - (contents["low_complexity_reads"] + contents["too_many_N_reads"]) }
+    fastp_qc_counts << { task: "fastp_too_short_reads", reads_after: total_reads - contents["too_short_reads"] }
+    fastp_qc_counts
   end
 
   # Given the stats fetched from all *.count files, calculates additional stats.
@@ -100,7 +117,7 @@ class MngsReadsStatsLoadService
     end
 
     # Load truncation
-    truncation = all_counts.detect { |entry| entry.value?("validate_input_out") }
+    truncation = all_counts.detect { |entry| entry.value?("truncated") }
     if truncation
       pipeline_run.truncated = truncation[:reads_after]
     end

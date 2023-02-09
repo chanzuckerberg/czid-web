@@ -302,6 +302,11 @@ function QualityControl({
       };
     });
 
+    const fastpFilters = [
+      "Filter low quality",
+      "Filter low complexity",
+      "Filter length",
+    ];
     const _readsLostData = samplesWithInitialReads.map(sampleId => {
       const dataRow: { total?; name? } = {};
       let readsRemaining = samplesReadsStats[sampleId].initialReads;
@@ -309,7 +314,10 @@ function QualityControl({
         const readsAfter = step.readsAfter || readsRemaining;
         const readsLost = readsRemaining - readsAfter;
         dataRow[step.name] = readsLost;
-        readsRemaining = readsAfter;
+
+        if (!fastpFilters.includes(step.name)) {
+          readsRemaining = readsAfter;
+        }
       });
       // account for every category
       categories.forEach(category => {

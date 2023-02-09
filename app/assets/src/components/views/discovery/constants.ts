@@ -31,7 +31,11 @@ export const HUMAN_READABLE_STEP_NAMES = {
   "Fastp Qc": "Quality control",
   "Bowtie2 Filter": "Filter host (Bowtie2)",
   "Hisat2 Filter": "Filter host (Hisat2)",
-  // Need "filter human (bowtie2)" and "filter human (hisat2)"
+  "Bowtie2 Human Filter": "Filter human (Bowtie2)",
+  "Hisat2 Human Filter": "Filter human (Hisat2)",
+  "Fastp Low Quality Reads": "Filter low quality",
+  "Fastp Low Complexity Reads": "Filter low complexity",
+  "Fastp Too Short Reads": "Filter length",
 };
 export const MIN_NUM_BINS = 10;
 export const MIN_BIN_WIDTH = {

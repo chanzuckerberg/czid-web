@@ -96,6 +96,7 @@ class PipelineRun < ApplicationRecord
   REFINED_TAXON_COUNTS_JSON_NAME = 'refined_taxon_counts_with_dcr.json'.freeze
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'refined_taxid_locations_combined.json'.freeze
   READS_PER_GENE_STAR_TAB_NAME = 'reads_per_gene.star.tab'.freeze
+  FASTP_JSON_FILE = 'fastp.json'.freeze
 
   # Insert size metrics constants
   INSERT_SIZE_METRICS_OUTPUT_NAME = 'picard_insert_metrics.txt'.freeze
