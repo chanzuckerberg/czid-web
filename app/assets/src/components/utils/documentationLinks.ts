@@ -54,3 +54,5 @@ export const WEB_UPLOAD_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-on-the-Web";
 export const GUPPY_BASECALLER_DOC_LINK =
   "https://docs.google.com/document/d/1ZsZ8ythCMrER7eZKbjZG93O6bNB37pJpsX2lf1sAs_I/edit#bookmark=id.w6xiktgro9k";
+export const CONCAT_FILES_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360051806072-How-to-concatenate-files";

@@ -17,6 +17,8 @@ import { FileWithPreview } from "react-dropzone";
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { CONCAT_FILES_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
   PRE_UPLOAD_CHECK_FEATURE,
   ONT_V1_FEATURE,
@@ -177,7 +179,16 @@ class LocalSampleFileUpload extends React.Component<
                   />
                 </>,
                 `Paired files must be labeled with "_R1" or
-                "_R2" at the end of the basename. If we detect multiple lane files, we will concatenate them for you.`,
+                "_R2" at the end of the basename.`,
+                <>
+                  Multiple lane FASTQ files (Illumina) for one sample will be
+                  automatically concatenated. To learn how to concatenate
+                  Nanopore FASTQ files before upload,{" "}
+                  <ExternalLink href={CONCAT_FILES_HELP_LINK}>
+                    click here
+                  </ExternalLink>
+                  .
+                </>,
                 `File names must be no longer than 120 characters and can only
                 contain letters from the English alphabet (A-Z, upper and lower
                 case), numbers (0-9), periods (.), hyphens (-) and underscores
