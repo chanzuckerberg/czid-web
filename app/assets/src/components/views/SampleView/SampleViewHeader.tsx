@@ -131,7 +131,7 @@ export default function SampleViewHeader({
         <Button
           sdsType="primary"
           sdsStyle="minimal"
-          isAllCap="true"
+          isAllCaps={true}
           onClick={withAnalytics(
             onDetailsClick,
             "SampleView_sample-details-link_clicked",
@@ -336,7 +336,7 @@ export default function SampleViewHeader({
   const getAllRuns = () => {
     const runsByType =
       get("workflow_runs", sample) &&
-      get("workflow_runs", sample).filter((run) => run.workflow === workflow);
+      get("workflow_runs", sample).filter(run => run.workflow === workflow);
     return mngsWorkflow ? get("pipeline_runs", sample) : runsByType;
   };
 
@@ -348,7 +348,7 @@ export default function SampleViewHeader({
       <ViewHeader.Title
         label={get("name", sample)}
         id={sample && sample?.id}
-        options={projectSamples.map((sample) => ({
+        options={projectSamples.map(sample => ({
           label: sample?.name,
           id: sample?.id,
           onClick: () => {

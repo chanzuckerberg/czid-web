@@ -25,6 +25,7 @@ import {
   xorBy,
 } from "lodash/fp";
 import moment from "moment";
+import { nanoid } from "nanoid";
 import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router";
@@ -1188,7 +1189,12 @@ class DiscoveryView extends React.Component<
 
     const renderTab = (label: string, count: number | string) => {
       return (
-        <Tab data-testid={label.toLowerCase()} label={label} count={count} />
+        <Tab
+          key={nanoid()}
+          data-testid={label.toLowerCase()}
+          label={label}
+          count={count}
+        />
       );
     };
 
@@ -2190,6 +2196,7 @@ class DiscoveryView extends React.Component<
       return {
         label: (
           <Tab
+            key={nanoid()}
             data-testid={workflowName.toLowerCase().replaceAll(" ", "-")}
             label={workflowName}
             count={
