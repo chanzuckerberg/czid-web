@@ -22,5 +22,6 @@ export const ONT_V1_FEATURE = "ont_v1";
 export const MULTITAG_PATHOGENS_FEATURE = "multitag_pathogens";
 export const HEATMAP_ELASTICSEARCH_FEATURE = "heatmap_elasticsearch";
 export const PATHOGEN_FLAG_FILTER_FEATURE = "pathogen_filter";
+export const HEATMAP_PATHOGEN_FLAGGING_FEATURE = "heatmap_pathogens";
 export const MODERN_HOST_FILTERING = "modern_host_filtering";
 export const BULK_DELETION_FEATURE = "bulk_deletion";

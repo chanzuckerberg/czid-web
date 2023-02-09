@@ -6,6 +6,7 @@ import {
   compact,
   difference,
   find,
+  flatten,
   get,
   intersection,
   isEmpty,
@@ -21,7 +22,13 @@ import queryString from "query-string";
 import React from "react";
 import { connect } from "react-redux";
 
-import { getSampleTaxons, getTaxaDetails, saveVisualization } from "~/api";
+import {
+  getSampleTaxons,
+  getKnownPathogens,
+  getPathogenFlags,
+  getTaxaDetails,
+  saveVisualization,
+} from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import {
   ANALYTICS_EVENT_NAMES,
@@ -37,7 +44,10 @@ import ArrayUtils from "~/components/utils/ArrayUtils";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
-import { HEATMAP_ELASTICSEARCH_FEATURE } from "~/components/utils/features";
+import {
+  HEATMAP_ELASTICSEARCH_FEATURE,
+  HEATMAP_PATHOGEN_FLAGGING_FEATURE,
+} from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
 import {
@@ -122,8 +132,12 @@ interface SamplesHeatmapViewState {
   taxonIds: $TSFixMe[];
   addedTaxonIds: Set<$TSFixMe>;
   notifiedFilteredOutTaxonIds: Set<$TSFixMe>;
-  allTaxonDetails: object;
+  allTaxonDetails: AllTaxonDetails;
   allData: object;
+  allPathogenFlagData: string[][][];
+  pathogenFlags?: PathogenFlags;
+  knownPathogenList?: number[];
+  pathogenFlagData: string[][][];
   data: Record<string, number[][]>;
   hideFilters: boolean;
   selectedSampleId: $TSFixMe;
@@ -136,6 +150,28 @@ interface SamplesHeatmapViewState {
   newestTaxonId?: $TSFixMe;
   metadataTypes?: $TSFixMe;
   enableMassNormalizedBackgrounds?: $TSFixMe;
+}
+
+interface TaxonDetails {
+  category?: string;
+  genusName?: string;
+  id?: number;
+  index?: number;
+  name?: string;
+  parentId?: number;
+  phage?: boolean;
+  sampleCount?: number;
+  taxLevel?: number;
+}
+
+interface PathogenFlags {
+  [key: string]: {
+    [key: string]: string[];
+  };
+}
+
+interface AllTaxonDetails {
+  [key: string]: TaxonDetails;
 }
 
 class SamplesHeatmapView extends React.Component<
@@ -226,6 +262,8 @@ class SamplesHeatmapView extends React.Component<
       // and are displayed on the heatmap. data is only a subset of allData if client-side
       // filtering is enabled, otherwise they should be identical.
       data: {},
+      allPathogenFlagData: [],
+      pathogenFlagData: [],
       hideFilters: false,
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
@@ -687,6 +725,10 @@ class SamplesHeatmapView extends React.Component<
   }
 
   async fetchViewData() {
+    const { allowedFeatures = [] } = this.context || {};
+    const useHeatmapPathogensFeature = allowedFeatures.includes(
+      HEATMAP_PATHOGEN_FLAGGING_FEATURE,
+    );
     const { sampleIds } = this.state;
 
     this.setState({ loading: true }); // Gets false from this.updateFilters
@@ -710,10 +752,23 @@ class SamplesHeatmapView extends React.Component<
     );
 
     let heatmapData, metadataFields;
+    let knownPathogenList: number[], pathogenFlags: PathogenFlags;
     try {
-      [heatmapData, metadataFields] = await Promise.all([
+      [
+        heatmapData,
+        metadataFields,
+        knownPathogenList,
+        pathogenFlags,
+      ] = await Promise.all([
         this.fetchHeatmapData(validIds),
         this.fetchMetadataFieldsBySampleIds(validIds),
+        useHeatmapPathogensFeature ? getKnownPathogens() : Promise.resolve([]),
+        useHeatmapPathogensFeature
+          ? getPathogenFlags({
+              sampleIds: validIds,
+              background: this.state.selectedOptions.background,
+            })
+          : Promise.resolve({}),
       ]);
     } catch (err) {
       this.handleLoadingFailure(err);
@@ -736,22 +791,24 @@ class SamplesHeatmapView extends React.Component<
       ]);
     }
 
-    let newState = {};
-    if (!isEmpty(heatmapData)) {
-      newState = this.extractData(heatmapData);
-    }
+    this.setState({ knownPathogenList, pathogenFlags }, () => {
+      let newState = {};
+      if (!isEmpty(heatmapData)) {
+        newState = this.extractData(heatmapData);
+      }
 
-    // Only calculate the metadataTypes once.
-    if (metadataFields !== null) {
-      // @ts-expect-error ts-migrate(2339) FIXME: Property 'metadataTypes' does not exist on type '{... Remove this comment to see the full error message
-      newState.metadataTypes = metadataFields;
-    }
-    // @ts-expect-error Property 'loadingFailed' does not exist on type '{}'.
-    newState.loadingFailed = false;
+      // Only calculate the metadataTypes once.
+      if (metadataFields !== null) {
+        // @ts-expect-error ts-migrate(2339) FIXME: Property 'metadataTypes' does not exist on type '{... Remove this comment to see the full error message
+        newState.metadataTypes = metadataFields;
+      }
+      // @ts-expect-error Property 'loadingFailed' does not exist on type '{}'.
+      newState.loadingFailed = false;
 
-    this.updateHistoryState();
-    // this.state.loading will be set to false at the end of updateFilters
-    this.setState(newState, this.updateFilters);
+      this.updateHistoryState();
+      // this.state.loading will be set to false at the end of updateFilters
+      this.setState(newState, this.updateFilters);
+    });
   }
 
   handleLoadingFailure = (err: $TSFixMe) => {
@@ -807,7 +864,9 @@ class SamplesHeatmapView extends React.Component<
     const allGeneraIds = [];
     const allTaxonDetails = {};
     const allData = {};
+    const allPathogenFlagData = [];
     const taxonFilterState = {};
+    const { knownPathogenList, pathogenFlags } = this.state;
     // Check if all samples have ERCC counts > 0 to enable backgrounds generated
     // using normalized input mass.
     let enableMassNormalizedBackgrounds = true;
@@ -887,6 +946,29 @@ class SamplesHeatmapView extends React.Component<
             allData[metric.value][taxonIndex][i] =
               taxon[metricType][metricName];
           });
+
+          // in the feature flag-off case, this array still needs to be constructed because
+          // we cannot do feature flag checks in Heatmap.js and this array must be passed
+          // to that component
+
+          // add to the 2D array of pathogen flags that will be rendered on the heatmap
+          const sampleCount = rawData.length;
+          allPathogenFlagData[taxonIndex] =
+            allPathogenFlagData[taxonIndex] || Array(sampleCount); // make a sparse array of the correct size
+          if (knownPathogenList && knownPathogenList.includes(taxon.tax_id)) {
+            allPathogenFlagData[taxonIndex][i] =
+              allPathogenFlagData[taxonIndex][i] || [];
+            allPathogenFlagData[taxonIndex][i].push("knownPathogen");
+          }
+          const computedFlags = get(
+            [sample.sample_id, taxon.tax_id],
+            pathogenFlags,
+          );
+          if (computedFlags) {
+            allPathogenFlagData[taxonIndex][i] =
+              allPathogenFlagData[taxonIndex][i] || [];
+            allPathogenFlagData[taxonIndex][i].push(...computedFlags);
+          }
         }
       }
     }
@@ -901,6 +983,7 @@ class SamplesHeatmapView extends React.Component<
       allGeneraIds,
       allTaxonDetails,
       allData,
+      allPathogenFlagData,
       taxonFilterState,
       enableMassNormalizedBackgrounds,
     };
@@ -1031,6 +1114,7 @@ class SamplesHeatmapView extends React.Component<
     const {
       sampleDetails,
       allData,
+      allPathogenFlagData,
       allTaxonDetails,
       addedTaxonIds,
     } = this.state;
@@ -1042,32 +1126,25 @@ class SamplesHeatmapView extends React.Component<
     const { taxonFilterState } = this.getTaxonThresholdFilterState();
 
     const filteredData = {};
+    const filteredPathogenFlagData = [];
     const filteredTaxIds = new Set();
-    Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
-      for (const taxId of sample.taxa) {
-        if (!filteredTaxIds.has(taxId) && !this.removedTaxonIds.has(taxId)) {
-          // build Set of all passing tax ids
-          filteredTaxIds.add(taxId);
 
-          // rebuilding the filteredData manually seems to be the easiest way
-          // to filter
-          const taxon = allTaxonDetails[taxId];
-          metrics.forEach(metric => {
-            filteredData[metric.value] = filteredData[metric.value] || [];
-            filteredData[metric.value].push(
-              allData[metric.value][taxon["index"]],
-            );
-          });
-        }
-      }
-    });
-
+    const taxIdsPerSample = Object.values(sampleDetails).map(d => d.taxa);
+    const sampleTaxIds = new Set(flatten(taxIdsPerSample));
     // Make sure that taxa manually added by the user that pass filters
     // are included.
-    addedTaxonIds.forEach((taxId: $TSFixMe) => {
-      if (!filteredTaxIds.has(taxId)) {
+    const sampleAndAddedTaxa = [...sampleTaxIds, ...addedTaxonIds];
+
+    // TODO this filtereData and filteredPathogenFlagData building may be able to occur
+    // in extractData instead. The only client-side filtering that appears to occur here
+    // is removing rows for taxa that have been manually removed by the user.
+    for (const taxId of sampleAndAddedTaxa) {
+      if (!filteredTaxIds.has(taxId) && !this.removedTaxonIds.has(taxId)) {
+        // build Set of all passing tax ids
         filteredTaxIds.add(taxId);
 
+        // rebuilding the filteredData manually seems to be the easiest way
+        // to filter
         const taxon = allTaxonDetails[taxId];
         metrics.forEach(metric => {
           filteredData[metric.value] = filteredData[metric.value] || [];
@@ -1075,8 +1152,11 @@ class SamplesHeatmapView extends React.Component<
             allData[metric.value][taxon["index"]],
           );
         });
+
+        // rebuild the filteredPathogenFlagData as well
+        filteredPathogenFlagData.push(allPathogenFlagData[taxon["index"]]);
       }
-    });
+    }
 
     this.updateHistoryState();
 
@@ -1085,6 +1165,7 @@ class SamplesHeatmapView extends React.Component<
       taxonIds: Array.from(filteredTaxIds),
       loading: false,
       data: filteredData,
+      pathogenFlagData: filteredPathogenFlagData,
     });
   }
 
@@ -1316,6 +1397,7 @@ class SamplesHeatmapView extends React.Component<
 
     const {
       allData,
+      allPathogenFlagData,
       allGeneraIds,
       allSpeciesIds,
       allTaxonIds,
@@ -1348,11 +1430,16 @@ class SamplesHeatmapView extends React.Component<
           allData[metric.value][taxonIndex][sampleIndex] =
             tempAllData[metric.value][tempTaxonIndex][tempSampleIndex];
         });
+
+        allPathogenFlagData[taxonIndex] = allPathogenFlagData[taxonIndex] || [];
+        allPathogenFlagData[taxonIndex][sampleIndex] =
+          extractedData.allPathogenFlagData[tempTaxonIndex][tempSampleIndex];
       });
     });
     this.setState(
       {
         allData,
+        allPathogenFlagData,
         allGeneraIds,
         allSpeciesIds,
         allTaxonIds,
@@ -1567,9 +1654,7 @@ class SamplesHeatmapView extends React.Component<
         sidebarVisible: false,
       });
       trackEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
-        // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
         parentTaxonId: taxonDetails.parentId,
-        // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
         taxonId: taxonDetails.id,
         taxonName,
         sidebarMode: "taxonDetails",
@@ -1578,18 +1663,14 @@ class SamplesHeatmapView extends React.Component<
       this.setState({
         sidebarMode: "taxonDetails",
         sidebarTaxonModeConfig: {
-          // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
           parentTaxonId: taxonDetails.parentId,
-          // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
           taxonId: taxonDetails.id,
           taxonName,
         },
         sidebarVisible: true,
       });
       trackEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
-        // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
         parentTaxonId: taxonDetails.parentId,
-        // @ts-expect-error Conversion of type 'LodashGet1x2<object>' to type
         taxonId: taxonDetails.id,
         taxonName,
         sidebarMode: "taxonDetails",
@@ -1768,6 +1849,7 @@ class SamplesHeatmapView extends React.Component<
       <ErrorBoundary>
         <SamplesHeatmapVis
           data={this.state.data}
+          pathogenFlagsData={this.state.pathogenFlagData}
           defaultMetadata={this.state.selectedMetadata}
           metadataTypes={this.state.metadataTypes}
           metadataSortField={this.metadataSortField}

@@ -526,7 +526,7 @@ const SamplesView = forwardRef(function SamplesView(
         className={cs.action}
         icon="trashCan"
         popupText={`Delete ${WORKFLOWS[workflowKey].shorthand} Run`}
-        popupSubtitle={selectedIds.size === 0? "Select at least 1 sample" : ""}
+        popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
         disabled={selectedIds.size === 0}
       />
     );
@@ -552,7 +552,7 @@ const SamplesView = forwardRef(function SamplesView(
 
   const handleBulkKickoffAmr = async () => {
     const selectedObjects = filter(
-      (object) => selectedIds.has(object.id),
+      object => selectedIds.has(object.id),
       objects.loaded,
     );
     const amrPipelineEligibility = reduce(
@@ -633,8 +633,7 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const kickoffAmrPipelineForSamples = (sampleIds: number[]) => {
     bulkKickoffWorkflowRuns({

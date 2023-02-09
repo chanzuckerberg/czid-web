@@ -709,7 +709,7 @@ class DiscoveryView extends React.Component<
     ];
 
     // We remove the "Selected" suffix from non-formatted filter keys
-    Object.keys(filters).forEach((key) => {
+    Object.keys(filters).forEach(key => {
       if (!filtersToFormat.includes(key)) {
         preparedFilters[key.replace("Selected", "")] = filters[key];
       }
@@ -726,8 +726,12 @@ class DiscoveryView extends React.Component<
       };
 
       preparedFilters.time = [
-        moment().subtract(...startDate[filters.timeSelected]).format("YYYYMMDD"),
-        moment().add(1, "days").format("YYYYMMDD"),
+        moment()
+          .subtract(...startDate[filters.timeSelected])
+          .format("YYYYMMDD"),
+        moment()
+          .add(1, "days")
+          .format("YYYYMMDD"),
       ];
     }
 

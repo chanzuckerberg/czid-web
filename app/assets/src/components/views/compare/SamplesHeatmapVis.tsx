@@ -29,6 +29,7 @@ const CAPTION_LINE_WIDTH = 180;
 
 interface SamplesHeatmapVisProps {
   data?: object;
+  pathogenFlagsData?: string[][][];
   taxonFilterState?: Record<string, Record<string, boolean>>;
   defaultMetadata?: $TSFixMe[];
   metadataTypes?: $TSFixMe[];
@@ -133,6 +134,7 @@ class SamplesHeatmapVis extends React.Component<
         rowLabels: this.extractTaxonLabels(),
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
         values: this.props.data[this.props.metric],
+        pathogenFlags: this.props.pathogenFlagsData,
       },
       {
         customColorCallback: this.colorScale,
@@ -204,6 +206,7 @@ class SamplesHeatmapVis extends React.Component<
     if (this.props.data !== prevProps.data) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
+        pathogenFlags: this.props.pathogenFlagsData,
         rowLabels: this.extractTaxonLabels(),
       });
       this.scrollToRow();
@@ -211,6 +214,7 @@ class SamplesHeatmapVis extends React.Component<
     if (!isEqual(this.props.taxonIds, prevProps.taxonIds)) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
+        pathogenFlags: this.props.pathogenFlagsData,
         rowLabels: this.extractTaxonLabels(),
       });
     }

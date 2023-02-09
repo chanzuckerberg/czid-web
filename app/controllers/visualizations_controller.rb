@@ -249,6 +249,19 @@ class VisualizationsController < ApplicationController
     end
   end
 
+  def known_pathogens
+    render json: PathogenList.find_by(is_global: true).fetch_list_version().fetch_pathogens_info()
+                             .pluck(:tax_id)
+  end
+
+  def pathogen_flags
+    pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
+    render json: LcrpPathogensService.call(
+      pr_id_to_sample_id: pr_id_to_sample_id,
+      background_id: background_for_heatmap
+    )
+  end
+
   # Given a list of taxon ids, samples, and a background, returns the
   # details for the specified taxa.
   # If update_background_only is true, then returned object will only include

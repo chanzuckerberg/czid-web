@@ -130,6 +130,14 @@ const getSampleTaxons = (params: $TSFixMe, cancelToken: $TSFixMe) =>
     cancelToken,
   });
 
+const getKnownPathogens = (): Promise<string[]> =>
+  get("/visualizations/known_pathogens.json");
+
+const getPathogenFlags = (params: $TSFixMe) =>
+  get("/visualizations/pathogen_flags.json", {
+    params,
+  });
+
 // TODO(tiago): still needs to accepts field to sort by
 const getSamples = ({
   projectId,
@@ -725,8 +733,10 @@ export {
   getCoverageVizSummary,
   getHeatmapMetrics,
   getMassNormalizedBackgroundAvailability,
+  getKnownPathogens,
   getNewPhyloTreePipelineRunIds,
   getNewPhyloTreePipelineRunInfo,
+  getPathogenFlags,
   getPhyloTree,
   getPhyloTrees,
   getProjectDimensions,

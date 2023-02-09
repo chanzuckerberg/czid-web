@@ -27,6 +27,25 @@ d3.selection.prototype.lower = function() {
   });
 };
 
+interface HeatmapData {
+  rowLabels: {
+    genusName: string;
+    label: string;
+    sortKey: number;
+  }[];
+  columnLabels: {
+    duplicateLabel: boolean;
+    id: number;
+    label: string;
+    metadata: object;
+    pinned: boolean;
+  }[];
+  values: RowWithIndex[];
+  pathogenFlags: string[][][];
+}
+
+type RowWithIndex = number[] & { idx?: number };
+
 export default class Heatmap {
   addMetadataTrigger: $TSFixMe;
   addRowBackground: $TSFixMe;
@@ -43,7 +62,7 @@ export default class Heatmap {
   columnMetadataSortAsc: $TSFixMe;
   columnMetadataSortField: $TSFixMe;
   container: $TSFixMe;
-  data: $TSFixMe;
+  data: HeatmapData;
   defs: $TSFixMe;
   filteredCells: $TSFixMe;
   filteredRowLabels: $TSFixMe;
@@ -85,11 +104,7 @@ export default class Heatmap {
   width: $TSFixMe;
   constructor(
     container: HTMLElement,
-    data: {
-      rowLabels: $TSFixMeUnknown;
-      columnLabels: $TSFixMeUnknown;
-      values: $TSFixMeUnknown;
-    },
+    data: HeatmapData,
     options: Record<string, any>,
   ) {
     this.mouseDown = false;
@@ -333,6 +348,7 @@ export default class Heatmap {
           rowIndex: i,
           columnIndex: j,
           value: this.data.values[i][j],
+          pathogenFlags: this.data.pathogenFlags[i][j] || [],
         });
       }
     }
@@ -873,7 +889,7 @@ export default class Heatmap {
       .range([0, 1]);
   }
 
-  getRows() {
+  getRows(): RowWithIndex[] {
     const scale = this.getScale();
     // getRows and getColumns replace null with option.nullValue
     // might be space-inneficient if the matrix is too sparse
@@ -881,7 +897,7 @@ export default class Heatmap {
     const rows = [];
     for (let i = 0; i < this.rowLabels.length; i++) {
       if (!this.rowLabels[i].hidden) {
-        const row = this.data.values[i].slice();
+        const row: RowWithIndex = this.data.values[i].slice();
         for (let j = 0; j < this.columnLabels.length; j++) {
           row[j] = scale(row[j] || this.options.nullValue);
         }
@@ -1388,6 +1404,15 @@ export default class Heatmap {
               )
             : this.options.colors[colorIndex];
           return color;
+        })
+        .style("stroke", (d: $TSFixMe) => {
+          if (d.pathogenFlags.includes("LCRP")) {
+            return "blue";
+          } else if (d.pathogenFlags.includes("knownPathogen")) {
+            return "green";
+          } else {
+            return "none";
+          }
         });
     };
 

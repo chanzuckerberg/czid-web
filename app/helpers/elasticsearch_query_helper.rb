@@ -63,6 +63,293 @@ module ElasticsearchQueryHelper
     end
   end
 
+  def self.lcrp_top_15_for_pipeline_runs(
+    pipeline_run_ids,
+    background_id
+  )
+    search_body = {
+      "_source": false,
+      "size": 0, # we get all results from aggregations so no top-level results required
+      "query": {
+        "bool": {
+          "filter": [
+            # taxons from samples the user selected
+            {
+              "terms": {
+                "pipeline_run_id": pipeline_run_ids,
+              },
+            },
+            {
+              "term": {
+                # if background not provided, use the default background record. zscore is ignored below.
+                "background_id": background_id || 26,
+              },
+            },
+            # no taxa with neither family nor genus classification
+            {
+              "range": {
+                "tax_id": {
+                  "gte": "0",
+                },
+              },
+            },
+            # all other metric-based conditions
+            {
+              "nested": {
+                "path": "metric_list",
+                "query": {
+                  "bool": {
+                    "filter": [
+                      {
+                        "term": {
+                          "metric_list.count_type": "NT",
+                        },
+                      },
+                      # only filter on zscore if a background was provided
+                      *(
+                        unless background_id.nil?
+                          [
+                            "range": {
+                              "metric_list.zscore": {
+                                "gt": 1,
+                              },
+                            },
+                          ]
+                        end
+                      ),
+                      {
+                        "range": {
+                          "metric_list.alignment_length": {
+                            "gt": 50,
+                          },
+                        },
+                      },
+                      {
+                        "exists": {
+                          "field": "metric_list.rpm",
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              "nested": {
+                "path": "metric_list",
+                "query": {
+                  "bool": {
+                    "filter": [
+                      {
+                        "term": {
+                          "metric_list.count_type": "NR",
+                        },
+                      },
+                      {
+                        "range": {
+                          "metric_list.counts": {
+                            "gt": 0,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      "aggs": {
+        "pipeline_runs": {
+          "terms": {
+            "field": "pipeline_run_id",
+            "size": pipeline_run_ids.length(),
+          },
+          "aggs": {
+            "top_taxons_by_rpm": {
+              "top_hits": {
+                "sort": [
+                  {
+                    "metric_list.rpm": {
+                      "order": "DESC",
+                      "nested": {
+                        "path": "metric_list",
+                        "filter": {
+                          "term": {
+                            "metric_list.count_type": "NT",
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+                "_source": true,
+                "size": 15,
+              },
+            },
+          },
+        },
+      },
+    }
+
+    response = ES_CLIENT.search(index: "scored_taxon_counts", body: search_body)
+    return response
+  end
+
+  def self.lcrp_viral_pathogens_for_pipeline_runs(
+    pipeline_run_ids,
+    background_id,
+    known_pathogens
+  )
+    # see https://docs.google.com/document/d/1h7Dtwy1_ipQao7NUfQsmuOEXqL7fouI_fhaRi4j-i24/edit?usp=sharing for requirements
+    search_body = {
+      "_source": [
+        "pipeline_run_id",
+        "tax_id",
+      ],
+      "size": 10_000,
+      "query": {
+        "bool": {
+          "filter": [
+            # taxons from samples the user selected
+            {
+              "terms": {
+                "pipeline_run_id": pipeline_run_ids,
+              },
+            },
+            {
+              "term": {
+                "background_id": background_id || 26,
+              },
+            },
+            # only viruses
+            {
+              "term": {
+                "superkingdom_taxid": ReportHelper::CATEGORIES_TAXID_BY_NAME["Viruses"],
+              },
+            },
+            # only known pathogens
+            {
+              "terms": {
+                "tax_id": known_pathogens,
+              },
+            },
+            # no taxa with neither family nor genus classification
+            {
+              "range": {
+                "tax_id": {
+                  "gte": "0",
+                },
+              },
+            },
+            # all other metric-based conditions
+            {
+              "nested": {
+                "path": "metric_list",
+                "query": {
+                  "bool": {
+                    "filter": [
+                      {
+                        "term": {
+                          "metric_list.count_type": "NT",
+                        },
+                      },
+                      *(
+                        unless background_id.nil?
+                          [
+                            "range": {
+                              "metric_list.zscore": {
+                                "gt": 1,
+                              },
+                            },
+                          ]
+                        end
+                      ),
+                      {
+                        "range": {
+                          "metric_list.alignment_length": {
+                            "gt": 50,
+                          },
+                        },
+                      },
+                      {
+                        "range": {
+                          "metric_list.rpm": {
+                            "gt": 1,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              "nested": {
+                "path": "metric_list",
+                "query": {
+                  "bool": {
+                    "filter": [
+                      {
+                        "term": {
+                          "metric_list.count_type": "NR",
+                        },
+                      },
+                      {
+                        "range": {
+                          "metric_list.rpm": {
+                            "gt": 1,
+                          },
+                        },
+                      },
+                      {
+                        "range": {
+                          "metric_list.counts": {
+                            "gt": 0,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    }
+
+    hits = paginate_all_results("scored_taxon_counts", search_body)
+    return hits
+  end
+
+  def self.paginate_all_results(index, search_body, search_after = nil)
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#search-after
+    # requires that no sort parameter has been provided
+    # any sort parameter will be overidden to sort by record id
+    search_body["sort"] = "_id"
+    unless search_after.nil?
+      search_body["search_after"] = search_after
+    end
+    result = ES_CLIENT.search(index: index, body: search_body)
+
+    hits = result["hits"]["hits"]
+    # if no results are returned, we have hit the end of the results and stop recursing
+    if hits.empty?
+      return hits
+    end
+
+    # for the last record of the result, get the property that was used to determine it's rank
+    # It will be passed to "search_after" so ES knows where to start the next page
+    search_after = hits.last["sort"]
+    # recurse to fetch the remaining pages
+    next_page_hits = paginate_all_results(index, search_body, search_after)
+
+    # combine all page results
+    return hits.concat(next_page_hits)
+  end
+
   # Based on the provided filter criteria, query ES index and return top N taxon for each sample
   # reduce the returned tax_ids to a unique set and return
   def self.top_n_taxa_per_sample(
@@ -103,6 +390,7 @@ module ElasticsearchQueryHelper
 
     search_body = {
       "_source": false,
+      "size": 0, # all results are pulled from aggregations so no top-level results required
       "query": {
         "bool": {
           "filter": base_query_filter_clause + threshold_filters_clause + categories_filter_clause + read_specificity_filter_clause,

@@ -165,6 +165,8 @@ Rails.application.routes.draw do
 
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
   post 'visualizations/taxa_details.json', to: 'visualizations#taxa_details'
+  get 'visualizations/known_pathogens', to: 'visualizations#known_pathogens'
+  get 'visualizations/pathogen_flags', to: 'visualizations#pathogen_flags'
   get 'visualizations/heatmap_metrics.json', to: 'visualizations#heatmap_metrics'
   get 'visualizations/download_heatmap', to: 'visualizations#download_heatmap'
   post 'visualizations/:type/save', to: 'visualizations#save'
