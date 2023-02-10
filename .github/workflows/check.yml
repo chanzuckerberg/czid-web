@@ -185,6 +185,8 @@ jobs:
     - name: Check for Unused Packages
       # Uses Depcheck to flag unused dependencies in package.json
       run: exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')
+    - name: TypeScript Checks
+      run: npx tsc -p ./app/assets/tsconfig.json --noemit
 
   python:
     name: Python

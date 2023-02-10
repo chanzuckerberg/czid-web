@@ -27,7 +27,7 @@ d3.selection.prototype.lower = function() {
   });
 };
 
-interface HeatmapData {
+export interface HeatmapData {
   rowLabels: {
     genusName: string;
     label: string;
@@ -41,7 +41,7 @@ interface HeatmapData {
     pinned: boolean;
   }[];
   values: RowWithIndex[];
-  pathogenFlags: string[][][];
+  pathogenFlags?: string[][][];
 }
 
 type RowWithIndex = number[] & { idx?: number };

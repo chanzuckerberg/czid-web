@@ -3,7 +3,9 @@ import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
-import Heatmap from "~/components/visualizations/heatmap/Heatmap";
+import Heatmap, {
+  HeatmapData,
+} from "~/components/visualizations/heatmap/Heatmap";
 
 import { STACKED_DATA_CSV } from "./constants";
 import cs from "./playground_viz.scss";
@@ -75,7 +77,7 @@ export default class PlaygroundViz extends React.Component {
           [1, 2, 3, 4, 5],
           [2, 3, 4, 5, 6],
         ],
-      },
+      } as HeatmapData,
       // Custom options.
       {
         marginLeft: 0,

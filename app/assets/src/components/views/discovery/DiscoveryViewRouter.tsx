@@ -31,7 +31,6 @@ interface DiscoveryViewRouterProps {
   snapshotProjectDescription: string;
   snapshotProjectName: string;
   snapshotShareId: string;
-  updateDiscoveryProjectId: $TSFixMeFunction;
   announcementBannerEnabled: boolean;
   emergencyBannerMessage: string;
 }
@@ -44,7 +43,6 @@ const DiscoveryViewRouter = ({
   snapshotProjectDescription,
   snapshotProjectName,
   snapshotShareId,
-  updateDiscoveryProjectId,
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
@@ -88,7 +86,6 @@ const DiscoveryViewRouter = ({
         path="/pub/:snapshotShareId"
         render={({ match }) => (
           <DiscoveryView
-            // @ts-expect-error Property 'domain' does not exist on type
             domain={domain}
             projectId={projectId}
             snapshotProjectDescription={snapshotProjectDescription}
@@ -112,7 +109,6 @@ const DiscoveryViewRouter = ({
       {userSignedIn ? (
         <Route>
           <DiscoveryView
-            // @ts-expect-error Property 'admin' does not exist on type
             admin={admin}
             domain={domain}
             mapTilerKey={mapTilerKey}
@@ -120,7 +116,6 @@ const DiscoveryViewRouter = ({
             snapshotProjectDescription={snapshotProjectDescription}
             snapshotProjectName={snapshotProjectName}
             snapshotShareId={snapshotShareId}
-            updateDiscoveryProjectId={updateDiscoveryProjectId}
           />
         </Route>
       ) : (

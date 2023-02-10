@@ -6,11 +6,8 @@ import React from "react";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { Accordion } from "~/components/layout";
-import {
-  DimensionsDetailed,
-  DimensionValue,
-  FiltersPreFormatting,
-} from "~/interface/discoveryView";
+import { DimensionsDetailed, DimensionValue } from "~/interface/discoveryView";
+import { FilterList } from "~/interface/samplesView";
 import { Optional, Project } from "~/interface/shared";
 import ProjectDescription from "./ProjectDescription";
 import cs from "./discovery_sidebar.scss";
@@ -115,7 +112,7 @@ export default class DiscoverySidebar extends React.Component<
     return moment(date).format("YYYY-MM-DD");
   }
 
-  static formatNumber(value) {
+  static formatNumber(value: number) {
     return (Math.round(value) || "").toLocaleString();
   }
 
@@ -248,7 +245,7 @@ export default class DiscoverySidebar extends React.Component<
   renderMetadataRowBlock(
     rows: DimensionValue[],
     total: number,
-    field: keyof FiltersPreFormatting,
+    field: keyof FilterList,
   ) {
     const { onFilterClick } = this.props;
     return rows.map((entry, i) => {
