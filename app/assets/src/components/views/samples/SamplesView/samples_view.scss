@@ -141,3 +141,29 @@
     fill: $sds-color-gray-500;
   }
 }
+
+.dropdownItem {
+  // TODO (nina): remove this once SDS fixes opacity on dropdown
+  opacity: 1 !important;
+  width: 250px;
+}
+
+.itemWrapper {
+  display: flex;
+  flex-direction: row;
+  white-space: normal;
+}
+
+.bulkActionsIcon {
+  margin-right: $sds-spaces-xs;
+
+  svg {
+    fill: $sds-color-gray-600;
+  }
+}
+
+.iconDisabled {
+  svg {
+    fill: $sds-color-gray-200;
+  }
+}

@@ -336,7 +336,7 @@ const SamplesView = forwardRef(function SamplesView(
         <BareDropdown
           hideArrow
           className={cx(cs.action)}
-          items={heatmapOptions.map(option => {
+          items={heatmapOptions.map((option) => {
             if (
               allowedFeatures.includes("taxon_heatmap_presets") &&
               option.text === "Taxon Heatmap" &&
@@ -386,14 +386,22 @@ const SamplesView = forwardRef(function SamplesView(
     }
   };
 
+  const handleClickPhyloTree = () => {
+    setPhyloCreationModalOpen(true);
+  };
+
   const renderPhyloTreeTrigger = () => {
+    if (allowedFeatures.includes(BULK_DELETION_FEATURE)) {
+      return;
+    }
+
     return (
       <ToolbarButtonIcon
         className={cs.action}
         icon="treeHorizontal"
         popupText="Phylogenetic Tree"
         onClick={withAnalytics(
-          () => setPhyloCreationModalOpen(true),
+          handleClickPhyloTree,
           "SamplesView_phylo-tree-modal-open_clicked",
         )}
       />
@@ -439,7 +447,7 @@ const SamplesView = forwardRef(function SamplesView(
           />
         }
         selectedSampleIds={selectedIds}
-        fetchedSamples={targetSamples.filter(sample =>
+        fetchedSamples={targetSamples.filter((sample) =>
           selectedIds.has(sample.id),
         )}
         workflow={workflow}
@@ -448,11 +456,11 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const getSarsCov2Count = () => {
-    const selectedObjects = objects.loaded.filter(object =>
+    const selectedObjects = objects.loaded.filter((object) =>
       selectedIds.has(object.id),
     );
     const sarsCov2Count = selectedObjects
-      .map(object => get(["referenceAccession", "taxonName"], object))
+      .map((object) => get(["referenceAccession", "taxonName"], object))
       .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);
@@ -521,38 +529,21 @@ const SamplesView = forwardRef(function SamplesView(
 
     const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
 
+    const disabled = selectedIds.size === 0;
     return (
       <ToolbarButtonIcon
         className={cs.action}
         icon="trashCan"
         popupText={`Delete ${WORKFLOWS[workflowKey].shorthand} Run`}
-        popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
-        disabled={selectedIds.size === 0}
-      />
-    );
-  };
-
-  const renderBulkSamplesActionsMenu = () => {
-    if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
-      return;
-    }
-
-    const selectedObjects = objects.loaded.filter(object =>
-      selectedIds.has(object.id),
-    );
-    const noObjectsSelected = size(selectedObjects) === 0;
-
-    return (
-      <BulkSamplesActionsMenu
-        disabled={noObjectsSelected}
-        handleBulkKickoffAmr={handleBulkKickoffAmr}
+        popupSubtitle={disabled ? "Select at least 1 sample" : ""}
+        disabled={disabled}
       />
     );
   };
 
   const handleBulkKickoffAmr = async () => {
     const selectedObjects = filter(
-      object => selectedIds.has(object.id),
+      (object) => selectedIds.has(object.id),
       objects.loaded,
     );
     const amrPipelineEligibility = reduce(
@@ -588,7 +579,7 @@ const SamplesView = forwardRef(function SamplesView(
       });
 
       setRecentlyKickedOffAmrWorkflowRunsForSampleIds(
-        prevRecentlyKickedOffAmrWorkflowRunsForSampleIds =>
+        (prevRecentlyKickedOffAmrWorkflowRunsForSampleIds) =>
           new Set([
             ...Array.from(prevRecentlyKickedOffAmrWorkflowRunsForSampleIds),
             ...sampleIdsToKickoffAmr,
@@ -598,7 +589,7 @@ const SamplesView = forwardRef(function SamplesView(
 
     if (size(amrPipelineEligibility.ineligible) > 0) {
       const ineligibleSampleNames = map(
-        sample => get("sample.name", sample),
+        (sample) => get("sample.name", sample),
         amrPipelineEligibility.ineligible,
       );
       // We need this 10ms delay to allow the first toast to render properly before showing the second toast
@@ -633,7 +624,8 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   const kickoffAmrPipelineForSamples = (sampleIds: number[]) => {
     bulkKickoffWorkflowRuns({
@@ -699,6 +691,25 @@ const SamplesView = forwardRef(function SamplesView(
     showToast(({ closeToast }) => renderAmrNotification(closeToast), {
       autoClose: 12000,
     });
+  };
+
+
+  const renderBulkSamplesActionsMenu = () => {
+    if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
+      return;
+    }
+
+    const selectedObjects = objects.loaded.filter(object =>
+      selectedIds.has(object.id),
+    );
+
+    return (
+      <BulkSamplesActionsMenu
+        noObjectsSelected={size(selectedObjects) === 0}
+        handleBulkKickoffAmr={handleBulkKickoffAmr}
+        handleClickPhyloTree={handleClickPhyloTree}
+      />
+    );
   };
 
   const renderTriggers = () => {
@@ -807,7 +818,7 @@ const SamplesView = forwardRef(function SamplesView(
     // Note: If the specified sortBy column (ie. a custom metadata field) is not available on this view,
     // we expect the fetched samples to be sorted by the default column and we will bold the default column header.
     // This will not overwrite the sortBy in session storage.
-    const sortByNotAvailable = !columns.some(c => c.dataKey === sortBy);
+    const sortByNotAvailable = !columns.some((c) => c.dataKey === sortBy);
     const sortedColumn = sortByNotAvailable
       ? DEFAULT_SORTED_COLUMN_BY_TAB["samples"]
       : sortBy;
@@ -818,7 +829,7 @@ const SamplesView = forwardRef(function SamplesView(
     return (
       <div className={cs.table}>
         <InfiniteTable
-          ref={childInfiniteTable => (infiniteTable = childInfiniteTable)}
+          ref={(childInfiniteTable) => (infiniteTable = childInfiniteTable)}
           columns={columns}
           defaultRowHeight={rowHeight}
           draggableColumns
