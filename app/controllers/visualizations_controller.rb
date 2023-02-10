@@ -10,7 +10,7 @@ class VisualizationsController < ApplicationController
     cache_path: proc do |c|
       sorted_params = c.request.params.to_h.sort.to_h
       if current_user.allowed_feature?("heatmap_elasticsearch")
-        sorted_params[feature.to_sym] = true
+        sorted_params[:heatmap_elasticsearch] = true
       end
       sorted_params.to_query
     end
