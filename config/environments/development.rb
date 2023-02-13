@@ -57,9 +57,10 @@ Rails.application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-  # Use an evented file watcher to asynchronously detect changes in source code,
-  # routes, locales, etc. This feature depends on the listen gem.
-  config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+  # Using default file watcher because inotify does not work with arm64
+  # dev environments.  If inotify eventually works with arm64 on qemu, consider
+  # switching back to the EventedFileUpdateChecker
+  config.file_watcher = ActiveSupport::FileUpdateChecker
 
   config.action_controller.asset_host = proc { |source|
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i

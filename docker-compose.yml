@@ -120,6 +120,7 @@ services:
       cache_from:
         - ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
+    platform: linux/amd64
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -144,6 +145,7 @@ services:
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
   resque:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
+    platform: linux/amd64
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -160,6 +162,7 @@ services:
   resque_scheduler:
     # See config/resque_schedule.yml for usages.
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
+    platform: linux/amd64
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -175,6 +178,7 @@ services:
     command: bundle exec "rake resque:scheduler"
   resque_result_monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
+    platform: linux/amd64
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -190,6 +194,7 @@ services:
     command: bundle exec "rake result_monitor"
   resque_pipeline_monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
+    platform: linux/amd64
     volumes:
       - .:/app:ro
       - ./log:/app/log
@@ -205,6 +210,7 @@ services:
     command: bundle exec "rake pipeline_monitor"
   shoryuken:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
+    platform: linux/amd64
     volumes:
       - .:/app:ro
       - ./log:/app/log
