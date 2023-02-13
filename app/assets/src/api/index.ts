@@ -582,6 +582,8 @@ const setWorkflowVersion = (workflowName: $TSFixMe, version: $TSFixMe) =>
     },
   });
 
+const getLaunchedFeatureList = () => get("/users/feature_flags");
+
 const modifyFeatureFlagForUsers = ({
   featureFlag,
   action,
@@ -727,6 +729,7 @@ export {
   getAllHostGenomes,
   getAllHostGenomesPublic,
   getAllSampleTypes,
+  getLaunchedFeatureList,
   getBackgrounds,
   getContigsSequencesByByteranges,
   getCoverageVizData,

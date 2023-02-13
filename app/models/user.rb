@@ -71,6 +71,10 @@ class User < ApplicationRecord
     JSON.parse(archetypes || "[]")
   end
 
+  def launched_feature_list
+    AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
+  end
+
   def allowed_feature_list
     launched = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
     JSON.parse(allowed_features || "[]") | launched

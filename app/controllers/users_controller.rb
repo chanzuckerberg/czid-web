@@ -79,6 +79,19 @@ class UsersController < ApplicationController
     render 'password_new'
   end
 
+  # GET /users/feature_flags
+  def feature_flags
+    if current_user.admin?
+      render(
+        json: {
+          launched_feature_list: current_user.launched_feature_list,
+          allowed_feature_list: current_user.allowed_feature_list,
+        }.to_json,
+        status: :ok
+      )
+    end
+  end
+
   # POST /users/feature_flag
   def feature_flag
     if current_user.admin?

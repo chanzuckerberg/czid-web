@@ -235,6 +235,7 @@ Rails.application.routes.draw do
 
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index] do
     collection do
+      get :feature_flags
       post :feature_flag
     end
   end

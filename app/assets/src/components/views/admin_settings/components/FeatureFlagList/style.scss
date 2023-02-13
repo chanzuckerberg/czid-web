@@ -1,0 +1,30 @@
+@import "~czifui/dist/variables";
+@import "~styles/themes/typography";
+
+.header {
+  @include font-header-m;
+}
+
+.text {
+  @include font-body-m;
+}
+
+.featureFlagList {
+  list-style: none;
+}
+
+.featureFlagListItem {
+  @include font-body-s;
+}
+
+button.styledButton {
+  justify-content: flex-start;
+}
+
+.iconWrapper {
+  margin-right: $sds-spaces-xs;
+  svg {
+    fill: $sds-color-primary-400;
+  }
+}
+

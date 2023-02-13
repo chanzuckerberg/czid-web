@@ -1,9 +1,15 @@
 import { FormControl } from "@mui/material";
 import { Button, Callout, InputText } from "czifui";
 import { compact, isEmpty, map, size, trim } from "lodash/fp";
-import React, { useState } from "react";
-import { modifyFeatureFlagForUsers, setWorkflowVersion } from "~/api/index";
+import React, { useEffect, useState } from "react";
+import {
+  getLaunchedFeatureList,
+  modifyFeatureFlagForUsers,
+  setWorkflowVersion,
+} from "~/api/index";
+import * as features from "~/components/utils/features";
 import cs from "./admin_settings.scss";
+import { FeatureFlagList } from "./components/FeatureFlagList";
 
 interface AdminSettingsProps {
   workflows: WorkflowType[];
@@ -17,6 +23,12 @@ interface WorkflowType {
 
 const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
   const [requestResult, setRequestResult] = useState<string>("");
+  const [launchedFeatureList, setLaunchedFeatureList] = useState<string[]>(
+    [],
+  );
+  const [allowedFeatureList, setAllowedFeatureList] = useState<string[]>(
+    [],
+  );
   const [featureFlagUsersList, setFeatureFlagUsersList] = useState<Set<string>>(
     new Set(),
   );
@@ -28,6 +40,18 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
     "error" | "info" | "success" | "warning" | undefined
   >();
 
+  useEffect(() => {
+    const fetchLaunchedFeatureList = async () => {
+      const {
+        launched_feature_list: launchedFeatureList,
+        allowed_feature_list: allowedFeatureList,
+      } = await getLaunchedFeatureList();
+      setLaunchedFeatureList(launchedFeatureList);
+      setAllowedFeatureList(allowedFeatureList);
+    };
+    fetchLaunchedFeatureList();
+  }, [featureFlagMsgResponse]);
+
   const handleSetWorkflows = async (event: React.SyntheticEvent) => {
     event.preventDefault(); // prevents redirect behaviour
     const workflow = event.target[0].value;
@@ -38,7 +62,7 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
 
   const renderWorkflowVersions = () => (
     <div className={cs.workflow_versions}>
-      <div className={cs.title}>Set Workflow Versions</div>
+      <h2 className={cs.title}>Set Workflow Versions</h2>
       {workflows.map((workflow: WorkflowType) => (
         <form key={workflow["key"]} onSubmit={handleSetWorkflows}>
           <textarea
@@ -130,9 +154,19 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
   };
 
   const renderControlFeatureFlags = () => {
+    const featuresList = Object.values(features);
+    const unlaunchedFeatures = featuresList
+      .filter(feature => !launchedFeatureList?.includes(feature))
+      .sort();
+
     return (
       <div className={cs.addFeatureFlagContainer}>
-        <div className={cs.title}>Set feature flags</div>
+        <h2 className={cs.title}>Set feature flags</h2>
+        <FeatureFlagList
+          flagNames={unlaunchedFeatures}
+          enabledFlags={allowedFeatureList}
+          setSelectedFeatureFlag={setFeatureFlag}
+        />
         <FormControl className={cs.formControl}>
           <InputText
             sdsType="textArea"
@@ -148,6 +182,7 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
             sdsType="textField"
             label="Feature flag"
             id="feature"
+            value={featureFlag}
             onChange={e => setFeatureFlag(e.target.value)}
           />
         </FormControl>
@@ -182,7 +217,7 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
 
   return (
     <div className={cs.page}>
-      <div className={cs.header}>Admin Settings</div>
+      <h1 className={cs.header}>Admin Settings</h1>
       {renderWorkflowVersions()}
       {renderFeatureFlagAdminControl()}
     </div>
