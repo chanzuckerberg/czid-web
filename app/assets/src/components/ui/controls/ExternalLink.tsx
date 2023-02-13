@@ -2,9 +2,7 @@ import React from "react";
 
 import Link, { LinkProps } from "./Link";
 
-type ExternalLinkProps = Omit<LinkProps, "externalLink">;
-
-const ExternalLink = (props: ExternalLinkProps) => {
+const ExternalLink = (props: LinkProps) => {
   return <Link external {...props} />;
 };
 

@@ -302,7 +302,13 @@ const WorkflowSelector = ({
     content,
     link,
     disabled = false,
-  }: $TSFixMe) => (
+  }: {
+    additionalStyle?: string;
+    analyticsEventName: string;
+    content: string;
+    link: string;
+    disabled?: boolean;
+  }) => (
     <ExternalLink
       href={link}
       analyticsEventName={analyticsEventName}

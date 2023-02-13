@@ -16,18 +16,19 @@ export interface LinkProps {
   // since there is already an on-click behavior (following the link href). trackEvent is an exception.
   analyticsEventName?: string;
   analyticsEventData?: object;
-  externalLink: boolean;
 }
 
-class Link extends React.Component<LinkProps> {
-  onClick = () => {
-    const {
-      analyticsEventData,
-      analyticsEventName,
-      external,
-      href,
-    } = this.props;
-
+const Link = ({
+  analyticsEventData = {},
+  analyticsEventName,
+  external = false,
+  href,
+  coloredBackground = false,
+  children,
+  className,
+  disabled,
+}: LinkProps) => {
+  const onClick = () => {
     if (analyticsEventName) {
       trackEvent(analyticsEventName, analyticsEventData);
     } else {
@@ -37,17 +38,6 @@ class Link extends React.Component<LinkProps> {
       });
     }
   };
-  static defaultProps: LinkProps;
-
-  render() {
-    const {
-      href,
-      coloredBackground,
-      className,
-      children,
-      disabled,
-      external,
-    } = this.props;
     return (
       <a
         href={href}
@@ -58,18 +48,11 @@ class Link extends React.Component<LinkProps> {
         )}
         target={external ? "_blank" : null}
         rel="noopener noreferrer"
-        onClick={this.onClick}
+        onClick={onClick}
       >
         {children}
       </a>
     );
-  }
-}
-
-Link.defaultProps = {
-  analyticsEventData: {},
-  coloredBackground: false,
-  externalLink: false,
-};
+  };
 
 export default Link;

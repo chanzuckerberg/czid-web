@@ -6,7 +6,7 @@ import cs from "./sample_details_mode.scss";
 interface NotesTabProps {
   notes: string;
   editable: boolean;
-  onNoteChange: (val: string | number, shouldSave?: boolean) => void;
+  onNoteChange: (val: string, shouldSave?: boolean) => void;
   onNoteSave: (key?: string) => Promise<void>;
   savePending: boolean;
 }

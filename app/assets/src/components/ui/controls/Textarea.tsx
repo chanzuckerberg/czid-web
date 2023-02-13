@@ -3,32 +3,23 @@ import React from "react";
 import { TextArea as SemanticTextarea, TextAreaProps } from "semantic-ui-react";
 import cs from "./textarea.scss";
 
-interface TextareaProps extends TextAreaProps {
-  value?: string;
-  onChange?: $TSFixMeFunction;
-  onBlur?: $TSFixMeFunction;
-  className?: string;
-  maxLength?: number;
-  placeholder?: string;
+interface TextAreaInternalProps extends Omit<TextAreaProps, "onChange"> {
+  onChange?: (val:string) => void;
 }
 
-class Textarea extends React.Component<TextareaProps> {
-  handleChange = (_, inputProps) => {
-    if (this.props.onChange) {
-      this.props.onChange(inputProps.value);
+const Textarea = ({ className, onChange, ...props }: TextAreaInternalProps) => {
+  const handleChange = (_: unknown, inputProps: TextAreaProps) => {
+    if (onChange) {
+      onChange(inputProps.value.toString());
     }
   };
-
-  render() {
-    const { className, ...props } = this.props;
-    return (
-      <SemanticTextarea
-        className={cx(cs.textarea, className)}
-        {...props}
-        onChange={this.handleChange}
-      />
-    );
-  }
-}
+  return (
+    <SemanticTextarea
+      className={cx(cs.textarea, className)}
+      {...props}
+      onChange={handleChange}
+    />
+  );
+};
 
 export default Textarea;
