@@ -567,7 +567,7 @@ module ElasticsearchQueryHelper
   end
 
   def self.call_taxon_indexing_lambda(background_id, pipeline_run_ids)
-    env = Rails.env.development? || Rails.env.test? ? "sandbox" : Rails.env
+    env = Rails.env.development? || Rails.env.test? ? "staging" : Rails.env
     function_name = "taxon-indexing-concurrency-manager-#{env}"
     payload = {
       background_id: background_id,
