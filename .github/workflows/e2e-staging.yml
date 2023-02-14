@@ -1,0 +1,72 @@
+name: e2e-staging-tests
+
+on:
+  workflow_dispatch:
+env:
+  AWS_DEFAULT_OUTPUT: json
+  AWS_REGION: us-west-2
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  ENVIRONMENT: dev
+  EXECUTOR_ROLE: czid-staging-gh-actions-executor
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    permissions: # these permissions must be set for AWS auth to work!
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: ${{runner.os}}-cache
+
+      - name: Configure AWS Credentials
+        id: configure_aws_credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.DEV_AWS_ROLE }}
+          role-session-name: e2e-staging-cicd
+
+      - name: Login to ECR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DEV_ECR_REPO }}
+
+      - name: Export variables
+        run: |
+          AWS_ACCOUNT_ID=${{ steps.configure_aws_credentials.outputs.aws-account-id }}
+          echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> $GITHUB_ENV
+      
+      - name: Configure CZID Login Credentials
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1.0.0
+        with:
+          secret-ids: |
+            LOGIN, czid-login
+          parse-json-secrets: true
+
+      # run Playwright E2E tests
+      - name: Running Playwright tests
+        run: |
+          cd e2e
+          echo "******** installing packages ********"
+          npm install
+          echo "******** running E2E tests ********"
+          npm run pw:staging:headless
+        env: 
+          CZID_USERNAME: ${{ env.LOGIN_USERNAME}}      
+          CZID_PASSWORD: ${{ env.LOGIN_PASSWORD }}
+      
+      # upload screenshots and videos
+      - name: Upload artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3.1.1
+        with: 
+          name: e2e-artifacts
+          path: ./e2e/report
+
+  

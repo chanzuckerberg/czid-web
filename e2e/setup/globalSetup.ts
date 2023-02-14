@@ -11,10 +11,12 @@ dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 /**
  * This function is run once at the start of the test
  * This is where we established shared cookies and other setups we want to
- * do before running an test
+ * do before running any test
  * @param config
  */
 async function globalSetup(config: FullConfig): Promise<void> {
+  const { storageState, baseURL } = config.projects[0].use;
+  process.env.BASEURL = baseURL;
   if (process.env.NODE_ENV === "ci") {
     process.env.CI = "true";
   }
@@ -27,7 +29,6 @@ async function globalSetup(config: FullConfig): Promise<void> {
     username = process.env.USERNAME;
     password = process.env.PASSWORD;
   }
-  const { storageState } = config.projects[0].use;
   if (process.env.NODE_ENV === "ci" || !checkCookies()) {
     const browser = await chromium.launch();
     const page = await browser.newPage();
@@ -45,7 +46,7 @@ export default globalSetup;
 
 /**
  * This function checks if there is already valid cookie and skips login process
- * This is very help during development when we run lots of tests
+ * This is very helpful during development when we run lots of tests
  * @returns
  */
 function checkCookies(): boolean {

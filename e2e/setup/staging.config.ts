@@ -1,7 +1,7 @@
-import { PlaywrightTestConfig } from "@playwright/test";
-import { devices } from "@playwright/test";
-import dotenv from "dotenv";
 import path from "path";
+import { PlaywrightTestConfig, devices } from "@playwright/test";
+
+import dotenv from "dotenv";
 
 dotenv.config({
   path: path.resolve(__dirname, "../../", ".env.staging"),
