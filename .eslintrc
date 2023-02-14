@@ -111,6 +111,7 @@
     "propWrapperFunctions": ["forbidExtraProps"],
     "react": {
       "version": "detect"
-    }
+    },
+    "max-len": 120
   }
 }
