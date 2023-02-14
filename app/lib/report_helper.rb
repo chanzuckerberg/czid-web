@@ -33,7 +33,7 @@ module ReportHelper
   # We do not allow underscores in metric names, sorry!
   METRICS = {
     WorkflowRun::WORKFLOW[:short_read_mngs] => %w[r rpm zscore percentidentity alignmentlength logevalue aggregatescore maxzscore r_pct rpm_bg],
-    WorkflowRun::WORKFLOW[:long_read_mngs] => %w[b bpm percentidentity alignmentlength logevalue],
+    WorkflowRun::WORKFLOW[:long_read_mngs] => %w[b r bpm percentidentity alignmentlength logevalue],
   }.freeze
   COUNT_TYPES = %w[NT NR].freeze
   # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
@@ -244,6 +244,7 @@ module ReportHelper
       {
         'count_type' => count_type,
         'b' => 0,
+        'r' => 0,
         'bpm' => 0,
         'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
         'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,

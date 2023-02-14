@@ -129,6 +129,7 @@ class TopTaxonsSqlService
         superkingdom_taxid,
         is_phage,
         base_count               AS  b,
+        count               AS  r,
         percent_identity    AS  percentidentity,
         alignment_length    AS  alignmentlength,
         COALESCE(e_value, #{ReportHelper::DEFAULT_SAMPLE_LOGEVALUE}) AS logevalue,

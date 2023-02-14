@@ -78,8 +78,10 @@ class WorkflowRun < ApplicationRecord
   LONG_READ_MNGS_METRICS = [
     { text: "NT bPM", value: "NT.bpm" },
     { text: "NT b (total bases)", value: "NT.b" },
+    { text: "NT r (total reads)", value: "NT.r" },
     { text: "NR bPM", value: "NR.bpm" },
     { text: "NR b (total bases)", value: "NR.b" },
+    { text: "NR r (total reads)", value: "NR.r" },
     { text: "NT %id", value: "NT.percentidentity" },
     { text: "NT L (alignment length in bp)", value: "NT.alignmentlength" },
     { text: "NT E Value", value: "NT.logevalue" },
