@@ -26,18 +26,13 @@ class MngsReadsStatsLoadService
 
     # list_objects_v2 is limited to 1000 objects at a time, so loop
     # while there are more objects to be fetched.
-    token = nil
     filenames = []
-    loop do
-      resp = AwsClient[:s3].list_objects_v2({
-                                              bucket: bucket,
-                                              prefix: prefix,
-                                              continuation_token: token,
-                                            })
+    pages = AwsClient[:s3].list_objects_v2({
+                                             bucket: bucket,
+                                             prefix: prefix,
+                                           })
+    pages.each do |resp|
       filenames.concat(resp.contents.map { |object| File.basename(object.key) }.grep(/count$/))
-      unless resp.is_truncated
-        break
-      end
     end
 
     all_counts = []
