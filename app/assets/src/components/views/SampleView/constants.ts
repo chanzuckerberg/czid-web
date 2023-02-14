@@ -283,6 +283,12 @@ export const REPORT_TABLE_COLUMNS = {
       "Number of bases within all the reads that assembled into contigs aligning to a given taxon.",
     link: ONT_DOC_LINK,
   },
+  // ONT-specific reads tooltip
+  r_ont: {
+    tooltip:
+      "Number of reads aligning to a given taxon, including those assembled into contigs that mapped to the taxon.",
+    link: ONT_DOC_LINK,
+  },
 };
 
 export const TAXON_GENERAL_FIELDS = [

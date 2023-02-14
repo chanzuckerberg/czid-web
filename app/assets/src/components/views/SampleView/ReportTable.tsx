@@ -371,6 +371,28 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
         cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
           this.getCountTypeValuesFromDataRow({
             rowData,
+            field: "count",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
+        cellRenderer: this.renderCellValue,
+        columnData: REPORT_TABLE_COLUMNS["r_ont"],
+        dataKey: "r",
+        label: "r",
+        sortFunction: ({ data, sortDirection }: SortFunctionsParams) =>
+          this.nestedNtNrSortFunction({
+            data,
+            sortDirection,
+            path: ["count"],
+            nullValue: 0,
+            limits: NUMBER_NULL_VALUES,
+          }),
+        width: NANOPORE_DEFAULT_COLUMN_WIDTH,
+      },
+      {
+        cellDataGetter: ({ rowData }: { rowData: Taxon }) =>
+          this.getCountTypeValuesFromDataRow({
+            rowData,
             field: "contigs",
             defaultValue: 0,
             countTypes: countTypes,

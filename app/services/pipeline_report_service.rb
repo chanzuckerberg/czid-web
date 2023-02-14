@@ -25,13 +25,14 @@ class PipelineReportService
     :tax_level,
   ].freeze
 
-  TAXON_COUNT_READS_FIELDS_TO_PLUCK = [
+  TAXON_COUNT_SHORT_READS_FIELDS_TO_PLUCK = [
     :count,
     :rpm,
     :rpm_decimal,
   ].freeze
 
-  TAXON_COUNT_BASES_FIELDS_TO_PLUCK = [
+  TAXON_COUNT_LONG_READS_FIELDS_TO_PLUCK = [
+    :count,
     :base_count,
     :bpm,
   ].freeze
@@ -70,13 +71,13 @@ class PipelineReportService
   NANOPORE = PipelineRun::TECHNOLOGY_INPUT[:nanopore]
 
   TAXON_COUNT_FIELDS_INDEX = {
-    ILLUMINA => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_READS_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
-    NANOPORE => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_BASES_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
+    ILLUMINA => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_SHORT_READS_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
+    NANOPORE => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_LONG_READS_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
   }.freeze
 
   TAXON_COUNT_AND_SUMMARY_FIELDS_INDEX = {
-    ILLUMINA => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_READS_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
-    NANOPORE => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_BASES_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
+    ILLUMINA => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_SHORT_READS_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
+    NANOPORE => Hash[(TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_LONG_READS_FIELDS_TO_PLUCK + TAXON_SUMMARY_FIELDS_TO_PLUCK).map.with_index { |field, i| [field, i] }],
   }.freeze
 
   LINEAGE_COLUMNS = %w[
@@ -95,7 +96,7 @@ class PipelineReportService
   FLAG_KNOWN_PATHOGEN = "knownPathogen".freeze
   FLAG_LCRP = "lcrp".freeze
 
-  CSV_READS_COLUMNS = [
+  CSV_SHORT_READS_COLUMNS = [
     "tax_id",
     "tax_level",
     "genus_tax_id",
@@ -133,7 +134,7 @@ class PipelineReportService
     "known_pathogen",
   ].freeze
 
-  CSV_BASES_COLUMNS = [
+  CSV_LONG_READS_COLUMNS = [
     "tax_id",
     "tax_level",
     "genus_tax_id",
@@ -143,6 +144,7 @@ class PipelineReportService
     "is_phage",
     "nt_bpm",
     "nt_base_count",
+    "nt_count",
     "nt_contigs",
     "nt_contig_b",
     "nt_percent_identity",
@@ -150,6 +152,7 @@ class PipelineReportService
     "nt_e_value",
     "nr_bpm",
     "nr_base_count",
+    "nr_count",
     "nr_contigs",
     "nr_contig_b",
     "nr_percent_identity",
@@ -160,8 +163,8 @@ class PipelineReportService
   ].freeze
 
   CSV_COLUMNS = {
-    ILLUMINA => CSV_READS_COLUMNS,
-    NANOPORE => CSV_BASES_COLUMNS,
+    ILLUMINA => CSV_SHORT_READS_COLUMNS,
+    NANOPORE => CSV_LONG_READS_COLUMNS,
   }.freeze
 
   def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, known_pathogens: {}, show_annotations: false, lcrp: false)
@@ -475,9 +478,9 @@ class PipelineReportService
 
   def get_taxon_count_fields_to_pluck(technology)
     if technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
-      TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_READS_FIELDS_TO_PLUCK
+      TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_SHORT_READS_FIELDS_TO_PLUCK
     elsif technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
-      TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_BASES_FIELDS_TO_PLUCK
+      TAXON_COUNT_FIELDS_TO_PLUCK + TAXON_COUNT_LONG_READS_FIELDS_TO_PLUCK
     end
   end
 
@@ -602,15 +605,16 @@ class PipelineReportService
       end
 
       count_type = counts[field_index[:count_type]].downcase.to_sym
-      count_key = @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :count : :base_count
       counts_hash[tax_id][count_type] = {
-        count_key => counts[field_index[count_key]],
+        :count => counts[field_index[:count]],
         :e_value => counts[field_index[:e_value]],
         :source_count_type => counts[field_index[:source_count_type]],
         :percent_identity => percent_identity,
         :alignment_length => alignment_length,
         count_per_million_key => count_per_million,
       }
+      include_base_count = @technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+      counts_hash[tax_id][count_type][:base_count] = counts[field_index[:base_count]] if include_base_count
 
       unless count_type == :merged_nt_nr
         counts_hash[tax_id][count_type].merge!({

@@ -912,6 +912,7 @@ RSpec.describe PipelineReportService, type: :service do
                                taxon_counts_data: [{
                                  tax_level: 1,
                                  taxon_name: "Klebsiella pneumoniae",
+                                 nt: 209,
                                  nt_base: 500_000,
                                  percent_identity: 99.6995,
                                  alignment_length: 1149.402,
@@ -919,12 +920,14 @@ RSpec.describe PipelineReportService, type: :service do
                                }, {
                                  tax_level: 1,
                                  taxon_name: "Klebsiella pneumoniae",
+                                 nr: 69,
                                  nr_base: 370_000,
                                  percent_identity: 97.8565,
                                  alignment_length: 460.3623,
                                  e_value: -16.9101,
                                }, {
                                  tax_level: 2,
+                                 nt: 217,
                                  nt_base: 550_000,
                                  taxon_name: "Klebsiella",
                                  percent_identity: 99.7014,
@@ -932,6 +935,7 @@ RSpec.describe PipelineReportService, type: :service do
                                  e_value: -89.5822,
                                }, {
                                  tax_level: 2,
+                                 nr: 87,
                                  nr_base: 400_000,
                                  taxon_name: "Klebsiella",
                                  percent_identity: 97.9598,
@@ -975,10 +979,12 @@ RSpec.describe PipelineReportService, type: :service do
           "genus_tax_id" => 570,
           "name" => "Klebsiella pneumoniae",
           "nt" => {
+            "count" => 209,
             "base_count" => 500_000,
             "bpm" => 445_632.79857397504,
           },
           "nr" => {
+            "count" => 69,
             "base_count" => 370_000,
             "bpm" => 329_768.27094474155,
           },
@@ -991,11 +997,13 @@ RSpec.describe PipelineReportService, type: :service do
         genus_result = {
           "genus_tax_id" => 570,
           "nt" => {
+            "count" => 217.0,
             "base_count" => 550_000,
             "bpm" => 490_196.07843137253,
             "e_value" => -89.5822,
           },
           "nr" => {
+            "count" => 87.0,
             "base_count" => 400_000,
             "bpm" => 356_506.23885918,
             "e_value" => -16.9874,
@@ -1007,7 +1015,7 @@ RSpec.describe PipelineReportService, type: :service do
 
       it "should show correct values in CSV in consistent order" do
         csv_report = PipelineReportService.call(@pipeline_run, background_id, csv: true)
-        expected_csv_output = "tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,nt_bpm,nt_base_count,nt_contigs,nt_contig_b,nt_percent_identity,nt_alignment_length,nt_e_value,nr_bpm,nr_base_count,nr_contigs,nr_contig_b,nr_percent_identity,nr_alignment_length,nr_e_value,species_tax_ids,known_pathogen\n570,2,570,Klebsiella,,bacteria,false,490196.07843137253,550000,6,1800000,99.7014,1490.42,10^-89.5822,356506.23885918,400000,6,1800000,97.9598,460.425,10^-16.9874,[573],0\n573,1,570,Klebsiella pneumoniae,,bacteria,false,445632.79857397504,500000,2,600000,99.6995,1149.4,10^-89.5641,329768.27094474155,370000,2,600000,97.8565,460.362,10^-16.9101,,0\n"
+        expected_csv_output = "tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,nt_bpm,nt_base_count,nt_count,nt_contigs,nt_contig_b,nt_percent_identity,nt_alignment_length,nt_e_value,nr_bpm,nr_base_count,nr_count,nr_contigs,nr_contig_b,nr_percent_identity,nr_alignment_length,nr_e_value,species_tax_ids,known_pathogen\n570,2,570,Klebsiella,,bacteria,false,490196.07843137253,550000,217,6,1800000,99.7014,1490.42,10^-89.5822,356506.23885918,400000,87,6,1800000,97.9598,460.425,10^-16.9874,[573],0\n573,1,570,Klebsiella pneumoniae,,bacteria,false,445632.79857397504,500000,209,2,600000,99.6995,1149.4,10^-89.5641,329768.27094474155,370000,69,2,600000,97.8565,460.362,10^-16.9101,,0\n"
         expect(csv_report).to eq(expected_csv_output)
       end
     end
