@@ -22,19 +22,9 @@ import queryString from "query-string";
 import React from "react";
 import { connect } from "react-redux";
 
-import {
-  getSampleTaxons,
-  getKnownPathogens,
-  getPathogenFlags,
-  getTaxaDetails,
-  saveVisualization,
-} from "~/api";
+import { getSampleTaxons, getKnownPathogens, getPathogenFlags, getTaxaDetails, saveVisualization } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
-import {
-  ANALYTICS_EVENT_NAMES,
-  trackEvent,
-  withAnalytics,
-} from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent, withAnalytics } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -47,18 +37,13 @@ import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
   HEATMAP_ELASTICSEARCH_FEATURE,
   HEATMAP_PATHOGEN_FLAGGING_FEATURE,
+  HEATMAP_FILTERS_LEFT_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
-import {
-  isPipelineFeatureAvailable,
-  MASS_NORMALIZED_FEATURE,
-} from "~/components/utils/pipeline_versions";
+import { isPipelineFeatureAvailable, MASS_NORMALIZED_FEATURE } from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
-import {
-  getTempSelectedOptions,
-  HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
-} from "~/components/utils/urls";
+import { getTempSelectedOptions, HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS } from "~/components/utils/urls";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import { URL_FIELDS } from "~/components/views/SampleView/constants";
@@ -72,10 +57,9 @@ import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
 
 import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
-import SamplesHeatmapControls, {
-  SamplesHeatmapControlsProps,
-} from "./SamplesHeatmapControls";
+import SamplesHeatmapControls, { SamplesHeatmapControlsProps } from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
+import SamplesHeatmapFiltersLeft from "./SamplesHeatmapFilterPanel";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 import {
   BACKGROUND_METRICS,
@@ -174,10 +158,7 @@ interface AllTaxonDetails {
   [key: string]: TaxonDetails;
 }
 
-class SamplesHeatmapView extends React.Component<
-  SamplesHeatmapViewProps,
-  SamplesHeatmapViewState
-> {
+class SamplesHeatmapView extends React.Component<SamplesHeatmapViewProps, SamplesHeatmapViewState> {
   heatmapVis: $TSFixMe;
   id: $TSFixMe;
   lastRequestToken: $TSFixMe;
@@ -207,10 +188,7 @@ class SamplesHeatmapView extends React.Component<
         metric: this.getSelectedMetric(),
         categories: this.urlParams.categories || [],
         subcategories: this.urlParams.subcategories || {},
-        background: parseAndCheckInt(
-          this.urlParams.background,
-          this.props.backgrounds[0].value,
-        ),
+        background: parseAndCheckInt(this.urlParams.background, this.props.backgrounds[0].value),
         species: parseAndCheckInt(this.urlParams.species, 1),
         sampleSortType: this.urlParams.sampleSortType || "cluster",
         taxaSortType: this.urlParams.taxaSortType || "cluster",
@@ -226,21 +204,15 @@ class SamplesHeatmapView extends React.Component<
       downloadModalOpen: false,
       loading: false,
       loadingFailed: false,
-      selectedMetadata: this.urlParams.selectedMetadata || [
-        "collection_location_v2",
-      ],
-      sampleIds: compact(
-        map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds),
-      ),
+      selectedMetadata: this.urlParams.selectedMetadata || ["collection_location_v2"],
+      sampleIds: compact(map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)),
       invalidSampleNames: [],
       sampleDetails: {},
       allTaxonIds: [],
       allSpeciesIds: [],
       allGeneraIds: [],
       taxonIds: [],
-      addedTaxonIds: new Set(
-        this.urlParams.addedTaxonIds || this.props.addedTaxonIds || [],
-      ),
+      addedTaxonIds: new Set(this.urlParams.addedTaxonIds || this.props.addedTaxonIds || []),
       // notifiedFilteredOutTaxonIds keeps track of the taxon ids for which
       // we have already notified the user that they have manually added
       // but did not pass filters.
@@ -249,9 +221,7 @@ class SamplesHeatmapView extends React.Component<
       // make a selection in the Add Taxon dropdown.
       // This will be reset whenever filters change, so the user will be
       // notified of which manually added taxa do not pass the new filters.
-      notifiedFilteredOutTaxonIds: new Set(
-        this.urlParams.addedTaxonIds || this.props.addedTaxonIds || [],
-      ),
+      notifiedFilteredOutTaxonIds: new Set(this.urlParams.addedTaxonIds || this.props.addedTaxonIds || []),
       allTaxonDetails: {},
       // allData is an object containing all the metric data for every taxa for each sample.
       // The key corresponds to the metric type (e.g. NT.rpm), and the value is 2D array;
@@ -276,9 +246,7 @@ class SamplesHeatmapView extends React.Component<
       pinnedSampleIds: new Set(),
     };
 
-    this.removedTaxonIds = new Set(
-      this.urlParams.removedTaxonIds || this.props.removedTaxonIds || [],
-    );
+    this.removedTaxonIds = new Set(this.urlParams.removedTaxonIds || this.props.removedTaxonIds || []);
     this.metadataSortField = this.urlParams.metadataSortField;
     this.metadataSortAsc = this.urlParams.metadataSortAsc;
 
@@ -319,10 +287,7 @@ class SamplesHeatmapView extends React.Component<
     window.onbeforeunload = () => {
       const urlParams = this.getUrlParams();
       // urlParams will be empty before the heatmap data has been fetched.
-      if (
-        !isEmpty(urlParams) &&
-        !DeepEqual(urlParams, this.lastSavedParamValues)
-      ) {
+      if (!isEmpty(urlParams) && !DeepEqual(urlParams, this.lastSavedParamValues)) {
         // NOTE: Starting with Firefox 44, Chrome 51, Opera 38, and Safari 9.1,
         // a generic string not under the control of the webpage will be shown
         // instead of the returned string. See
@@ -350,25 +315,17 @@ class SamplesHeatmapView extends React.Component<
     }
     if (typeof urlParams.addedTaxonIds === "string") {
       // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
-      urlParams.addedTaxonIds = new Set(
-        urlParams.addedTaxonIds.split(",").map(parseInt),
-      );
+      urlParams.addedTaxonIds = new Set(urlParams.addedTaxonIds.split(",").map(parseInt));
     } else if (typeof urlParams.addedTaxonIds === "object") {
       // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
-      urlParams.addedTaxonIds = new Set(
-        urlParams.addedTaxonIds.map(id => parseInt(id)),
-      );
+      urlParams.addedTaxonIds = new Set(urlParams.addedTaxonIds.map(id => parseInt(id)));
     }
     if (typeof urlParams.removedTaxonIds === "string") {
       // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
-      urlParams.removedTaxonIds = new Set(
-        urlParams.removedTaxonIds.split(",").map(parseInt),
-      );
+      urlParams.removedTaxonIds = new Set(urlParams.removedTaxonIds.split(",").map(parseInt));
     } else if (typeof urlParams.removedTaxonIds === "object") {
       // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
-      urlParams.removedTaxonIds = new Set(
-        urlParams.removedTaxonIds.map(id => parseInt(id)),
-      );
+      urlParams.removedTaxonIds = new Set(urlParams.removedTaxonIds.map(id => parseInt(id)));
     }
     if (typeof urlParams.categories === "string") {
       urlParams.categories = urlParams.categories.split(",");
@@ -488,28 +445,19 @@ class SamplesHeatmapView extends React.Component<
     const { selectedOptions } = this.state;
     const { metric, background } = selectedOptions;
 
-    const selectedBackgroundName = find({ value: background }, backgrounds)
-      .name;
+    const selectedBackgroundName = find({ value: background }, backgrounds).name;
     // We want to show the metric and background selected, but do not consider them as filters.
-    const filterRow = [
-      `\nMetric:, ${metric}`,
-      `Background:, "${selectedBackgroundName}"`,
-    ];
+    const filterRow = [`\nMetric:, ${metric}`, `Background:, "${selectedBackgroundName}"`];
     let numberOfFilters = 0;
 
     for (const [name, val] of Object.entries(this.getAppliedFilters())) {
       if (val === undefined) continue;
       switch (name) {
         case "thresholdFilters": {
-          const thresholdFilters = val.reduce(
-            (result: $TSFixMe, threshold: $TSFixMe) => {
-              result.push(
-                `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
-              );
-              return result;
-            },
-            [],
-          );
+          const thresholdFilters = val.reduce((result: $TSFixMe, threshold: $TSFixMe) => {
+            result.push(`${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`);
+            return result;
+          }, []);
 
           if (!isEmpty(thresholdFilters)) {
             filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
@@ -538,18 +486,13 @@ class SamplesHeatmapView extends React.Component<
           break;
         }
         case "readSpecificity": {
-          filterRow.push(
-            `Read Specificity:, "${
-              find({ value: val }, SPECIFICITY_OPTIONS).text
-            }"`,
-          );
+          filterRow.push(`Read Specificity:, "${find({ value: val }, SPECIFICITY_OPTIONS).text}"`);
           ++numberOfFilters;
           break;
         }
         default: {
           logError({
-            message:
-              "SamplesHeatmapView: Invalid filter passed to createCSVRowForSelectedOptions()",
+            message: "SamplesHeatmapView: Invalid filter passed to createCSVRowForSelectedOptions()",
             details: { name, val },
           });
           break;
@@ -575,10 +518,7 @@ class SamplesHeatmapView extends React.Component<
       csvHeaders = ['"Current heatmap view did not render any data"'];
       csvRows = [['"Please try adjusting the filters or samples selected"']];
     } else {
-      [
-        csvHeaders,
-        csvRows,
-      ] = this.heatmapVis.computeCurrentHeatmapViewValuesForCSV({
+      [csvHeaders, csvRows] = this.heatmapVis.computeCurrentHeatmapViewValuesForCSV({
         headers: compact(["Taxon", selectedOptions.species !== 0 && "Genus"]),
       });
     }
@@ -601,12 +541,7 @@ class SamplesHeatmapView extends React.Component<
   handleSaveClick = async () => {
     const resp = await saveVisualization("heatmap", this.getUrlParams());
     this.lastSavedParamValues = Object.assign({}, this.getUrlParams());
-    const url =
-      location.protocol +
-      "//" +
-      location.host +
-      "/visualizations/heatmap/" +
-      resp.id;
+    const url = location.protocol + "//" + location.host + "/visualizations/heatmap/" + resp.id;
     // Update URL without reloading the page
     history.replaceState(window.history.state, document.title, url);
   };
@@ -664,9 +599,7 @@ class SamplesHeatmapView extends React.Component<
       background,
     } = this.state.selectedOptions;
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
+    const useHeatmapES = allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE);
 
     // If using client-side filtering, the server should still return info
     // related to removed taxa in case the user decides to add the taxon back.
@@ -695,27 +628,19 @@ class SamplesHeatmapView extends React.Component<
     };
 
     if (useHeatmapES) {
-      fetchHeatmapDataParams.addedTaxonIds = Array.from(
-        this.state.addedTaxonIds,
-      );
+      fetchHeatmapDataParams.addedTaxonIds = Array.from(this.state.addedTaxonIds);
     }
 
-    const heatmapData = await getSampleTaxons(
-      fetchHeatmapDataParams,
-      this.lastRequestToken.token,
-    );
+    const heatmapData = await getSampleTaxons(fetchHeatmapDataParams, this.lastRequestToken.token);
     const fetchDataEnd = new Date();
     // @ts-expect-error ts-migrate(2362) FIXME: The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
     const loadTimeInMilliseconds = fetchDataEnd - fetchDataStart;
 
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED,
-      {
-        ...fetchHeatmapDataParams,
-        loadTimeInMilliseconds,
-        useHeatmapES,
-      },
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_HEATMAP_DATA_FETCHED, {
+      ...fetchHeatmapDataParams,
+      loadTimeInMilliseconds,
+      useHeatmapES,
+    });
     return heatmapData;
   }
 
@@ -726,9 +651,7 @@ class SamplesHeatmapView extends React.Component<
 
   async fetchViewData() {
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapPathogensFeature = allowedFeatures.includes(
-      HEATMAP_PATHOGEN_FLAGGING_FEATURE,
-    );
+    const useHeatmapPathogensFeature = allowedFeatures.includes(HEATMAP_PATHOGEN_FLAGGING_FEATURE);
     const { sampleIds } = this.state;
 
     this.setState({ loading: true }); // Gets false from this.updateFilters
@@ -754,12 +677,7 @@ class SamplesHeatmapView extends React.Component<
     let heatmapData, metadataFields;
     let knownPathogenList: number[], pathogenFlags: PathogenFlags;
     try {
-      [
-        heatmapData,
-        metadataFields,
-        knownPathogenList,
-        pathogenFlags,
-      ] = await Promise.all([
+      [heatmapData, metadataFields, knownPathogenList, pathogenFlags] = await Promise.all([
         this.fetchHeatmapData(validIds),
         this.fetchMetadataFieldsBySampleIds(validIds),
         useHeatmapPathogensFeature ? getKnownPathogens() : Promise.resolve([]),
@@ -779,16 +697,11 @@ class SamplesHeatmapView extends React.Component<
     // @ts-expect-error ts-migrate(2554) FIXME: Expected 1 arguments, but got 2.
     pipelineVersions = compact(property("pipeline_version"), heatmapData);
     const pipelineMajorVersionsSet = new Set(
-      map(
-        pipelineVersion => `${pipelineVersion.split(".")[0]}.x`,
-        pipelineVersions,
-      ),
+      map(pipelineVersion => `${pipelineVersion.split(".")[0]}.x`, pipelineVersions),
     );
 
     if (pipelineMajorVersionsSet.size > 1) {
-      this.showNotification(NOTIFICATION_TYPES.multiplePipelineVersions, [
-        ...pipelineMajorVersionsSet,
-      ]);
+      this.showNotification(NOTIFICATION_TYPES.multiplePipelineVersions, [...pipelineMajorVersionsSet]);
     }
 
     this.setState({ knownPathogenList, pathogenFlags }, () => {
@@ -814,9 +727,7 @@ class SamplesHeatmapView extends React.Component<
   handleLoadingFailure = (err: $TSFixMe) => {
     const { allTaxonIds, sampleIds } = this.state;
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
+    const useHeatmapES = allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE);
 
     this.setState({
       loading: false,
@@ -824,9 +735,7 @@ class SamplesHeatmapView extends React.Component<
     });
 
     const logSingleError = (e: $TSFixMe) => {
-      const errorMessage = `SamplesHeatmapView: Error loading heatmap data${
-        useHeatmapES ? " from ElasticSearch" : ""
-      }`;
+      const errorMessage = `SamplesHeatmapView: Error loading heatmap data${useHeatmapES ? " from ElasticSearch" : ""}`;
       logError({
         message: errorMessage,
         details: {
@@ -877,10 +786,7 @@ class SamplesHeatmapView extends React.Component<
 
       enableMassNormalizedBackgrounds =
         sample.ercc_count > 0 &&
-        isPipelineFeatureAvailable(
-          MASS_NORMALIZED_FEATURE,
-          sample.pipeline_version,
-        ) &&
+        isPipelineFeatureAvailable(MASS_NORMALIZED_FEATURE, sample.pipeline_version) &&
         enableMassNormalizedBackgrounds;
 
       // Keep track of samples with the same name, which may occur if
@@ -900,7 +806,10 @@ class SamplesHeatmapView extends React.Component<
         name: sample.name,
         index: i,
         host_genome_name: sample.host_genome_name,
-        metadata: processMetadata({ metadata: sample.metadata, flatten: true }),
+        metadata: processMetadata({
+          metadata: sample.metadata,
+          flatten: true,
+        }),
         taxa: [],
         duplicate: false,
       };
@@ -926,8 +835,7 @@ class SamplesHeatmapView extends React.Component<
               index: taxonIndex,
               name: taxon.name,
               category: taxon.category_name,
-              parentId:
-                taxon.tax_id === taxon.species_taxid && taxon.genus_taxid,
+              parentId: taxon.tax_id === taxon.species_taxid && taxon.genus_taxid,
               phage: !!taxon.is_phage,
               genusName: taxon.genus_name,
               taxLevel: taxon.tax_level,
@@ -941,10 +849,8 @@ class SamplesHeatmapView extends React.Component<
           this.props.metrics.forEach(metric => {
             const [metricType, metricName] = metric.value.split(".");
             allData[metric.value] = allData[metric.value] || [];
-            allData[metric.value][taxonIndex] =
-              allData[metric.value][taxonIndex] || [];
-            allData[metric.value][taxonIndex][i] =
-              taxon[metricType][metricName];
+            allData[metric.value][taxonIndex] = allData[metric.value][taxonIndex] || [];
+            allData[metric.value][taxonIndex][i] = taxon[metricType][metricName];
           });
 
           // in the feature flag-off case, this array still needs to be constructed because
@@ -953,20 +859,14 @@ class SamplesHeatmapView extends React.Component<
 
           // add to the 2D array of pathogen flags that will be rendered on the heatmap
           const sampleCount = rawData.length;
-          allPathogenFlagData[taxonIndex] =
-            allPathogenFlagData[taxonIndex] || Array(sampleCount); // make a sparse array of the correct size
+          allPathogenFlagData[taxonIndex] = allPathogenFlagData[taxonIndex] || Array(sampleCount); // make a sparse array of the correct size
           if (knownPathogenList && knownPathogenList.includes(taxon.tax_id)) {
-            allPathogenFlagData[taxonIndex][i] =
-              allPathogenFlagData[taxonIndex][i] || [];
+            allPathogenFlagData[taxonIndex][i] = allPathogenFlagData[taxonIndex][i] || [];
             allPathogenFlagData[taxonIndex][i].push("knownPathogen");
           }
-          const computedFlags = get(
-            [sample.sample_id, taxon.tax_id],
-            pathogenFlags,
-          );
+          const computedFlags = get([sample.sample_id, taxon.tax_id], pathogenFlags);
           if (computedFlags) {
-            allPathogenFlagData[taxonIndex][i] =
-              allPathogenFlagData[taxonIndex][i] || [];
+            allPathogenFlagData[taxonIndex][i] = allPathogenFlagData[taxonIndex][i] || [];
             allPathogenFlagData[taxonIndex][i].push(...computedFlags);
           }
         }
@@ -1039,10 +939,8 @@ class SamplesHeatmapView extends React.Component<
           BACKGROUND_METRICS.forEach((metric: $TSFixMe) => {
             const [metricType, metricName] = metric.value.split(".");
             allData[metric.value] = allData[metric.value] || [];
-            allData[metric.value][taxonIndex] =
-              allData[metric.value][taxonIndex] || [];
-            allData[metric.value][taxonIndex][sampleIndex] =
-              taxon[metricType][metricName];
+            allData[metric.value][taxonIndex] = allData[metric.value][taxonIndex] || [];
+            allData[metric.value][taxonIndex][sampleIndex] = taxon[metricType][metricName];
           });
         }
       }
@@ -1052,15 +950,8 @@ class SamplesHeatmapView extends React.Component<
   }
 
   filterTaxa() {
-    const {
-      taxonFilterState,
-      taxonPassesThresholdFilters,
-    } = this.getTaxonThresholdFilterState();
-    const {
-      allTaxonIds,
-      notifiedFilteredOutTaxonIds,
-      addedTaxonIds,
-    } = this.state;
+    const { taxonFilterState, taxonPassesThresholdFilters } = this.getTaxonThresholdFilterState();
+    const { allTaxonIds, notifiedFilteredOutTaxonIds, addedTaxonIds } = this.state;
     let { newestTaxonId, allTaxonDetails } = this.state;
     let taxonIds = new Set();
     let filteredData = {};
@@ -1080,20 +971,14 @@ class SamplesHeatmapView extends React.Component<
       } else {
         // Check notifiedFilteredOutTaxonIds to prevent filtered out taxa from
         // notifying the user every time a selection is made.
-        if (
-          addedTaxonIds.has(taxon["id"]) &&
-          !notifiedFilteredOutTaxonIds.has(taxon["id"])
-        ) {
+        if (addedTaxonIds.has(taxon["id"]) && !notifiedFilteredOutTaxonIds.has(taxon["id"])) {
           this.showNotification(NOTIFICATION_TYPES.taxaFilteredOut, taxon);
           notifiedFilteredOutTaxonIds.add(taxon["id"]);
           newestTaxonId = null;
         }
       }
     });
-    [taxonIds, allTaxonDetails, filteredData] = this.getTopTaxaPerSample(
-      taxonIds,
-      addedTaxonIdsPassingFilters,
-    );
+    [taxonIds, allTaxonDetails, filteredData] = this.getTopTaxaPerSample(taxonIds, addedTaxonIdsPassingFilters);
     // @ts-expect-error ts-migrate(2740) FIXME: Type 'unknown[]' is missing the following properti... Remove this comment to see the full error message
     taxonIds = Array.from(taxonIds);
 
@@ -1111,13 +996,7 @@ class SamplesHeatmapView extends React.Component<
   }
 
   filterTaxaES() {
-    const {
-      sampleDetails,
-      allData,
-      allPathogenFlagData,
-      allTaxonDetails,
-      addedTaxonIds,
-    } = this.state;
+    const { sampleDetails, allData, allPathogenFlagData, allTaxonDetails, addedTaxonIds } = this.state;
     const { metrics } = this.props;
 
     // use the frontend filtering logic to identify all taxons that do not pass the filters
@@ -1148,9 +1027,7 @@ class SamplesHeatmapView extends React.Component<
         const taxon = allTaxonDetails[taxId];
         metrics.forEach(metric => {
           filteredData[metric.value] = filteredData[metric.value] || [];
-          filteredData[metric.value].push(
-            allData[metric.value][taxon["index"]],
-          );
+          filteredData[metric.value].push(allData[metric.value][taxon["index"]]);
         });
 
         // rebuild the filteredPathogenFlagData as well
@@ -1172,25 +1049,20 @@ class SamplesHeatmapView extends React.Component<
   getTaxonThresholdFilterState() {
     // Set the state of whether or not a taxon passes the custom threshold filters
     // for each selected sample.
-    const {
-      sampleDetails,
-      allTaxonDetails,
-      allData,
-      taxonFilterState,
-    } = this.state;
+    const { sampleDetails, allTaxonDetails, allData, taxonFilterState } = this.state;
     const taxonPassesThresholdFilters = {};
     Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
       Object.values(allTaxonDetails).forEach((taxon: $TSFixMe) => {
-        taxonFilterState[taxon["index"]] =
-          taxonFilterState[taxon["index"]] || {};
+        taxonFilterState[taxon["index"]] = taxonFilterState[taxon["index"]] || {};
         // eslint-disable-next-line standard/computed-property-even-spacing
-        taxonFilterState[taxon["index"]][
-          sample["index"]
-        ] = this.taxonThresholdFiltersCheck(sample["index"], taxon, allData);
+        taxonFilterState[taxon["index"]][sample["index"]] = this.taxonThresholdFiltersCheck(
+          sample["index"],
+          taxon,
+          allData,
+        );
 
         taxonPassesThresholdFilters[taxon["index"]] =
-          taxonPassesThresholdFilters[taxon["index"]] ||
-          taxonFilterState[taxon["index"]][sample["index"]];
+          taxonPassesThresholdFilters[taxon["index"]] || taxonFilterState[taxon["index"]][sample["index"]];
       });
     });
     return {
@@ -1199,11 +1071,7 @@ class SamplesHeatmapView extends React.Component<
     };
   }
 
-  taxonThresholdFiltersCheck(
-    sampleIndex: $TSFixMe,
-    taxonDetails: $TSFixMe,
-    data: $TSFixMe,
-  ) {
+  taxonThresholdFiltersCheck(sampleIndex: $TSFixMe, taxonDetails: $TSFixMe, data: $TSFixMe) {
     const { thresholdFilters } = this.state.selectedOptions;
     for (const filter of thresholdFilters) {
       // Convert metric name format from "NT_zscore" to "NT.zscore"
@@ -1234,8 +1102,7 @@ class SamplesHeatmapView extends React.Component<
       subcategories,
       species, // 0 for genus mode, 1 for species mode
     } = this.state.selectedOptions;
-    const phageSelected =
-      subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
+    const phageSelected = subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
 
     if (species && taxonDetails["taxLevel"] !== 1) {
       return false;
@@ -1269,10 +1136,7 @@ class SamplesHeatmapView extends React.Component<
       if (
         // Consider using the regular array includes function,
         // once we guarantee that all data is lower case
-        !ArrayUtils.caseInsensitiveIncludes(
-          categories,
-          taxonDetails["category"],
-        ) &&
+        !ArrayUtils.caseInsensitiveIncludes(categories, taxonDetails["category"]) &&
         !(phageSelected && taxonDetails["phage"])
       ) {
         return false;
@@ -1286,18 +1150,11 @@ class SamplesHeatmapView extends React.Component<
 
   getTopTaxaPerSample(filteredTaxonIds: $TSFixMe, addedTaxonIds: $TSFixMe) {
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
+    const useHeatmapES = allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE);
 
     // Fetch the top N taxa from each sample, sorted by the selected metric,
     // that passed all selected filters.
-    const {
-      sampleDetails,
-      allData,
-      allTaxonDetails,
-      selectedOptions,
-    } = this.state;
+    const { sampleDetails, allData, allTaxonDetails, selectedOptions } = this.state;
     const { metric, taxonsPerSample } = selectedOptions;
     const { metrics } = this.props;
 
@@ -1330,9 +1187,7 @@ class SamplesHeatmapView extends React.Component<
 
             metrics.forEach(metric => {
               filteredData[metric.value] = filteredData[metric.value] || [];
-              filteredData[metric.value].push(
-                allData[metric.value][taxon["index"]],
-              );
+              filteredData[metric.value].push(allData[metric.value][taxon["index"]]);
             });
           }
         }
@@ -1351,9 +1206,7 @@ class SamplesHeatmapView extends React.Component<
 
         metrics.forEach(metric => {
           filteredData[metric.value] = filteredData[metric.value] || [];
-          filteredData[metric.value].push(
-            allData[metric.value][taxon["index"]],
-          );
+          filteredData[metric.value].push(allData[metric.value][taxon["index"]]);
         });
       }
     });
@@ -1363,11 +1216,7 @@ class SamplesHeatmapView extends React.Component<
 
   handleMetadataUpdate = (key: $TSFixMe, value: $TSFixMe) => {
     this.setState({
-      sampleDetails: set(
-        [this.state.selectedSampleId, "metadata", key],
-        value,
-        this.state.sampleDetails,
-      ),
+      sampleDetails: set([this.state.selectedSampleId, "metadata", key], value, this.state.sampleDetails),
     });
   };
 
@@ -1425,10 +1274,8 @@ class SamplesHeatmapView extends React.Component<
         const tempSampleIndex = extractedData.sampleDetails[sampleId].index;
 
         this.props.metrics.forEach(metric => {
-          allData[metric.value][taxonIndex] =
-            allData[metric.value][taxonIndex] || [];
-          allData[metric.value][taxonIndex][sampleIndex] =
-            tempAllData[metric.value][tempTaxonIndex][tempSampleIndex];
+          allData[metric.value][taxonIndex] = allData[metric.value][taxonIndex] || [];
+          allData[metric.value][taxonIndex][sampleIndex] = tempAllData[metric.value][tempTaxonIndex][tempSampleIndex];
         });
 
         allPathogenFlagData[taxonIndex] = allPathogenFlagData[taxonIndex] || [];
@@ -1453,26 +1300,12 @@ class SamplesHeatmapView extends React.Component<
   handleAddedTaxonChange = (selectedTaxonIds: $TSFixMe) => {
     // selectedTaxonIds includes taxa that pass filters
     // and the taxa manually added by the user.
-    const {
-      taxonIds,
-      addedTaxonIds,
-      notifiedFilteredOutTaxonIds,
-      allTaxonIds,
-    } = this.state;
+    const { taxonIds, addedTaxonIds, notifiedFilteredOutTaxonIds, allTaxonIds } = this.state;
 
     // currentAddedTaxa is all the taxa manually added by the user.
-    const newlyAddedTaxa = difference(
-      [...selectedTaxonIds],
-      [...new Set([...taxonIds, ...addedTaxonIds])],
-    );
-    const previouslyAddedTaxa = intersection(
-      [...addedTaxonIds],
-      [...selectedTaxonIds],
-    );
-    const currentAddedTaxa = new Set([
-      ...newlyAddedTaxa,
-      ...previouslyAddedTaxa,
-    ]);
+    const newlyAddedTaxa = difference([...selectedTaxonIds], [...new Set([...taxonIds, ...addedTaxonIds])]);
+    const previouslyAddedTaxa = intersection([...addedTaxonIds], [...selectedTaxonIds]);
+    const currentAddedTaxa = new Set([...newlyAddedTaxa, ...previouslyAddedTaxa]);
     const newestTaxonId = newlyAddedTaxa[newlyAddedTaxa.length - 1];
 
     // Update notifiedFilteredOutTaxonIds to remove taxa that were unselected.
@@ -1483,9 +1316,7 @@ class SamplesHeatmapView extends React.Component<
 
     // removedTaxonIds are taxa that passed filters
     // but were manually unselected by the user.
-    const removedTaxonIds = new Set(
-      difference(taxonIds, [...selectedTaxonIds]),
-    );
+    const removedTaxonIds = new Set(difference(taxonIds, [...selectedTaxonIds]));
     removedTaxonIds.forEach(taxId => this.removedTaxonIds.add(taxId));
     selectedTaxonIds.forEach((taxId: $TSFixMe) => {
       this.removedTaxonIds.delete(taxId);
@@ -1555,16 +1386,9 @@ class SamplesHeatmapView extends React.Component<
   };
 
   handlePinnedSampleChange = (_event: $TSFixMe, selectedSamples: $TSFixMe) => {
-    const selectedSampleIds = new Set(
-      selectedSamples.map((sample: $TSFixMe) =>
-        sample.id ? sample.id : sample,
-      ),
-    );
+    const selectedSampleIds = new Set(selectedSamples.map((sample: $TSFixMe) => (sample.id ? sample.id : sample)));
     this.setState({ pendingPinnedSampleIds: selectedSampleIds });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED,
-      selectedSamples,
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CHANGED, selectedSamples);
   };
 
   handlePinnedSampleChangeApply = () => {
@@ -1572,10 +1396,7 @@ class SamplesHeatmapView extends React.Component<
     this.setState({
       pinnedSampleIds: pendingPinnedSampleIds,
     });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED,
-      pendingPinnedSampleIds,
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_APPLIED, pendingPinnedSampleIds);
   };
 
   handlePinnedSampleChangeCancel = () => {
@@ -1583,10 +1404,7 @@ class SamplesHeatmapView extends React.Component<
     this.setState({
       pendingPinnedSampleIds: pinnedSampleIds,
     });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED,
-      pinnedSampleIds,
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_PINNED_SAMPLES_CANCELED, pinnedSampleIds);
   };
 
   handleUnpinSample = (sampleId: $TSFixMe) => {
@@ -1596,10 +1414,7 @@ class SamplesHeatmapView extends React.Component<
       pinnedSampleIds,
       pendingPinnedSampleIds: pinnedSampleIds,
     });
-    trackEvent(
-      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED,
-      sampleId,
-    );
+    trackEvent(ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_SAMPLE_UNPIN_ICON_CLICKED, sampleId);
   };
 
   handleSampleLabelClick = (sampleId: $TSFixMe) => {
@@ -1685,12 +1500,7 @@ class SamplesHeatmapView extends React.Component<
   };
 
   getSidebarParams = () => {
-    const {
-      selectedSampleId,
-      sidebarMode,
-      sidebarTaxonModeConfig,
-      selectedOptions,
-    } = this.state;
+    const { selectedSampleId, sidebarMode, sidebarTaxonModeConfig, selectedOptions } = this.state;
 
     if (sidebarMode === "taxonDetails") {
       return sidebarTaxonModeConfig;
@@ -1711,9 +1521,7 @@ class SamplesHeatmapView extends React.Component<
 
   getControlOptions = (): SamplesHeatmapControlsProps["options"] => ({
     // Server side options
-    metrics: this.props.metrics.filter(metric =>
-      METRIC_OPTIONS.includes(metric.value),
-    ),
+    metrics: this.props.metrics.filter(metric => METRIC_OPTIONS.includes(metric.value)),
     categories: this.props.categories || [],
     subcategories: this.props.subcategories || {},
     backgrounds: this.props.backgrounds,
@@ -1732,9 +1540,7 @@ class SamplesHeatmapView extends React.Component<
 
   handleSelectedOptionsChange = (newOptions: $TSFixMe) => {
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
+    const useHeatmapES = allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE);
 
     // When using heatmap ES, all filtering operations happen on the backend
     let frontendFilters = [];
@@ -1742,10 +1548,8 @@ class SamplesHeatmapView extends React.Component<
     if (useHeatmapES) backendFilters = backendFilters.concat(HEATMAP_FILTERS);
     else frontendFilters = HEATMAP_FILTERS;
 
-    const shouldRefetchData =
-      intersection(keys(newOptions), backendFilters).length > 0;
-    const shouldRefilterData =
-      intersection(keys(newOptions), frontendFilters).length > 0;
+    const shouldRefetchData = intersection(keys(newOptions), backendFilters).length > 0;
+    const shouldRefilterData = intersection(keys(newOptions), frontendFilters).length > 0;
 
     // Infer which function to use to either fetch the data or filter it in the front-end
     let callbackFn = null;
@@ -1781,9 +1585,7 @@ class SamplesHeatmapView extends React.Component<
 
   updateFilters() {
     const { allowedFeatures = [] } = this.context || {};
-    const useHeatmapES = allowedFeatures.includes(
-      HEATMAP_ELASTICSEARCH_FEATURE,
-    );
+    const useHeatmapES = allowedFeatures.includes(HEATMAP_ELASTICSEARCH_FEATURE);
     if (useHeatmapES) {
       this.filterTaxaES();
     } else {
@@ -1793,9 +1595,7 @@ class SamplesHeatmapView extends React.Component<
 
   renderVisualization() {
     return (
-      <div className="visualization-content">
-        {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
-      </div>
+      <div className="visualization-content">{this.state.loading ? this.renderLoading() : this.renderHeatmap()}</div>
     );
   }
 
@@ -1819,18 +1619,14 @@ class SamplesHeatmapView extends React.Component<
 
     // @ts-expect-error ts-migrate(2339) FIXME: Property 'taxonIds' does not exist on type 'Readon... Remove this comment to see the full error message
     let shownTaxa = new Set(this.state.taxonIds, this.state.addedTaxonIds);
-    shownTaxa = new Set(
-      [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId)),
-    );
+    shownTaxa = new Set([...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId)));
     if (loadingFailed) {
       return (
         <SampleMessage
           icon={<IconAlert className={cs.iconAlert} type="error" />}
           link={MAIL_TO_HELP_LINK}
           linkText={"Contact us for help."}
-          message={
-            "Oh no! Something went wrong. Please try again or contact us for help."
-          }
+          message={"Oh no! Something went wrong. Please try again or contact us for help."}
           status="error"
           type="error"
         />
@@ -1882,11 +1678,7 @@ class SamplesHeatmapView extends React.Component<
             selectedOptions: this.state.selectedOptions,
             source: HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
           })}
-          allTaxonIds={
-            this.state.selectedOptions.species
-              ? this.state.allSpeciesIds
-              : this.state.allGeneraIds
-          }
+          allTaxonIds={this.state.selectedOptions.species ? this.state.allSpeciesIds : this.state.allGeneraIds}
           taxonIds={Array.from(shownTaxa)}
           taxonCategories={this.state.selectedOptions.categories}
           taxonDetails={this.state.allTaxonDetails} // send allTaxonDetails in case of added taxa
@@ -1912,8 +1704,7 @@ class SamplesHeatmapView extends React.Component<
       <div>
         <span className={cs.highlight}>
           {invalidSampleNames.length} sample
-          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in
-          the heatmap
+          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in the heatmap
         </span>
         , because they either failed or are still processing:
       </div>
@@ -1948,30 +1739,23 @@ class SamplesHeatmapView extends React.Component<
       // @ts-expect-error Property 'dismissDirection' is missing in type
       <Notification intent="warning" onClose={onClose}>
         <div>
-          <span className={cs.highlight}>
-            {taxon.name} is filtered out by your current filter settings.
-          </span>{" "}
-          Remove some filters to see it appear.
+          <span className={cs.highlight}>{taxon.name} is filtered out by your current filter settings.</span> Remove
+          some filters to see it appear.
         </div>
       </Notification>
     );
   }
 
-  renderFilteredMultiplePipelineVersionsWarning(
-    onClose: $TSFixMe,
-    versions: $TSFixMe,
-  ) {
+  renderFilteredMultiplePipelineVersionsWarning(onClose: $TSFixMe, versions: $TSFixMe) {
     return (
       // @ts-expect-error Property 'dismissDirection' is missing in type
       <Notification intent="warning" onClose={onClose}>
         <div>
           <span className={cs.highlight}>
-            The selected samples come from multiple major pipeline versions:{" "}
-            {versions.join(", ")}.
+            The selected samples come from multiple major pipeline versions: {versions.join(", ")}.
           </span>{" "}
-          A major change in the pipeline may produce results that are not
-          comparable across all metrics. We recommend re-running samples on the
-          latest major pipeline version.
+          A major change in the pipeline may produce results that are not comparable across all metrics. We recommend
+          re-running samples on the latest major pipeline version.
         </div>
       </Notification>
     );
@@ -1982,8 +1766,7 @@ class SamplesHeatmapView extends React.Component<
       // @ts-expect-error Property 'dismissDirection' is missing in type
       <Notification intent="warning" onClose={onClose}>
         <div>
-          We&apos;re busy generating your heatmap with a new background model.
-          It may take a couple of minutes to load.
+          We&apos;re busy generating your heatmap with a new background model. It may take a couple of minutes to load.
         </div>
       </Notification>
     );
@@ -1992,57 +1775,126 @@ class SamplesHeatmapView extends React.Component<
   showNotification(notification: $TSFixMe, params: $TSFixMe) {
     switch (notification) {
       case NOTIFICATION_TYPES.invalidSamples:
-        showToast(
-          ({ closeToast }: $TSFixMe) =>
-            this.renderInvalidSamplesWarning(closeToast),
-          {
-            autoClose: 12000,
-          },
-        );
+        showToast(({ closeToast }: $TSFixMe) => this.renderInvalidSamplesWarning(closeToast), {
+          autoClose: 12000,
+        });
         break;
       case NOTIFICATION_TYPES.taxaFilteredOut:
-        showToast(
-          ({ closeToast }: $TSFixMe) =>
-            this.renderFilteredOutWarning(closeToast, params),
-          {
-            autoClose: 12000,
-          },
-        );
+        showToast(({ closeToast }: $TSFixMe) => this.renderFilteredOutWarning(closeToast, params), {
+          autoClose: 12000,
+        });
         break;
       case NOTIFICATION_TYPES.multiplePipelineVersions:
         showToast(
-          ({ closeToast }: $TSFixMe) =>
-            this.renderFilteredMultiplePipelineVersionsWarning(
-              closeToast,
-              params,
-            ),
+          ({ closeToast }: $TSFixMe) => this.renderFilteredMultiplePipelineVersionsWarning(closeToast, params),
           {
             autoClose: 12000,
           },
         );
         break;
       case NOTIFICATION_TYPES.customBackground:
-        showToast(
-          ({ closeToast }: $TSFixMe) =>
-            this.renderCustomBackgroundWarning(closeToast),
-          { autoClose: 12000 },
-        );
+        showToast(({ closeToast }: $TSFixMe) => this.renderCustomBackgroundWarning(closeToast), {
+          autoClose: 12000,
+        });
         break;
       default:
         break;
     }
   }
 
-  render() {
+  renderHeader = (sampleIds: number[], loading: boolean) => {
+    return (
+      <NarrowContainer>
+        <SamplesHeatmapHeader
+          sampleIds={sampleIds}
+          heatmapId={this.props.savedParamValues && this.props.savedParamValues.id}
+          loading={loading}
+          heatmapName={this.props.name}
+          presets={this.state.selectedOptions["presets"]}
+          onDownloadClick={this.handleDownloadModalOpen}
+          onDownloadSvg={this.handleDownloadSvg}
+          onDownloadPng={this.handleDownloadPng}
+          onDownloadCurrentHeatmapViewCsv={this.getDownloadCurrentViewHeatmapCSVLink}
+          onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
+          onNewPresetsClick={this.handleHeatmapCreationModalOpen}
+          onShareClick={this.handleShareClick}
+          onSaveClick={this.handleSaveClick}
+        />
+      </NarrowContainer>
+    );
+  };
+
+  // TODO (smb): remove this once new filters are fully rolled out
+  renderOriginalFilters = shownTaxa => {
     const {
-      addedTaxonIds,
       allGeneraIds,
       allSpeciesIds,
       data,
-      downloadModalOpen,
       enableMassNormalizedBackgrounds,
-      heatmapCreationModalOpen,
       hideFilters,
+      loading,
+      sampleIds,
+      selectedOptions,
+    } = this.state;
+
+    return (
+      <>
+        {!hideFilters && (
+          <div>
+            {this.renderHeader(sampleIds, loading)}
+            <NarrowContainer>
+              <SamplesHeatmapControls
+                options={this.getControlOptions()}
+                selectedOptions={selectedOptions}
+                onSelectedOptionsChange={this.handleSelectedOptionsChange}
+                loading={loading}
+                data={data}
+                filteredTaxaCount={shownTaxa.size}
+                totalTaxaCount={selectedOptions.species ? allSpeciesIds.length : allGeneraIds.length}
+                prefilterConstants={this.props.prefilterConstants}
+                enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+              />
+            </NarrowContainer>
+          </div>
+        )}
+        <div className={cs.filterToggleContainer}>
+          {hideFilters && <div className={cs.filterLine} />}
+          <div
+            className={cs.arrowIcon}
+            onClick={withAnalytics(this.toggleDisplayFilters, "SamplesHeatmapFilters_toggle_clicked")}
+          >
+            <SortIcon sortDirection={hideFilters ? "descending" : "ascending"} />
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  // TODO (smb): remove this once new filters are fully rolled out
+  renderFilters = (shownTaxa: Set<number>, sampleIds: number[], loading: boolean) => {
+    const { allowedFeatures = [] } = this.context || {};
+    const useNewFilters = allowedFeatures.includes(HEATMAP_FILTERS_LEFT_FEATURE);
+
+    return useNewFilters ? (
+      <>
+        {this.renderHeader(sampleIds, loading)}
+        <SamplesHeatmapFiltersLeft />
+      </>
+    ) : (
+      this.renderOriginalFilters(shownTaxa)
+    );
+  };
+
+  render() {
+    const {
+      addedTaxonIds,
+      // allGeneraIds,
+      // allSpeciesIds,
+      // data,
+      downloadModalOpen,
+      // enableMassNormalizedBackgrounds,
+      heatmapCreationModalOpen,
+      // hideFilters,
       loading,
       sampleIds,
       selectedOptions,
@@ -2054,82 +1906,20 @@ class SamplesHeatmapView extends React.Component<
 
     // @ts-expect-error ts-migrate(2554) FIXME: Expected 0-1 arguments, but got 2.
     let shownTaxa = new Set(taxonIds, addedTaxonIds);
-    shownTaxa = new Set(
-      [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId)),
-    );
+    shownTaxa = new Set([...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId)));
 
     return (
       <div className={cs.heatmap}>
-        {!hideFilters && (
-          <div>
-            <NarrowContainer>
-              <SamplesHeatmapHeader
-                sampleIds={sampleIds}
-                heatmapId={
-                  this.props.savedParamValues && this.props.savedParamValues.id
-                }
-                loading={loading}
-                heatmapName={this.props.name}
-                presets={this.state.selectedOptions["presets"]}
-                onDownloadClick={this.handleDownloadModalOpen}
-                onDownloadSvg={this.handleDownloadSvg}
-                onDownloadPng={this.handleDownloadPng}
-                onDownloadCurrentHeatmapViewCsv={
-                  this.getDownloadCurrentViewHeatmapCSVLink
-                }
-                onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
-                onNewPresetsClick={this.handleHeatmapCreationModalOpen}
-                onShareClick={this.handleShareClick}
-                onSaveClick={this.handleSaveClick}
-              />
-            </NarrowContainer>
-            <NarrowContainer>
-              <SamplesHeatmapControls
-                options={this.getControlOptions()}
-                selectedOptions={selectedOptions}
-                onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                loading={loading}
-                data={data}
-                filteredTaxaCount={shownTaxa.size}
-                totalTaxaCount={
-                  selectedOptions.species
-                    ? allSpeciesIds.length
-                    : allGeneraIds.length
-                }
-                prefilterConstants={this.props.prefilterConstants}
-                enableMassNormalizedBackgrounds={
-                  enableMassNormalizedBackgrounds
-                }
-              />
-            </NarrowContainer>
-          </div>
-        )}
-        <div className={cs.filterToggleContainer}>
-          {hideFilters && <div className={cs.filterLine} />}
-          <div
-            className={cs.arrowIcon}
-            onClick={withAnalytics(
-              this.toggleDisplayFilters,
-              "SamplesHeatmapFilters_toggle_clicked",
-            )}
-          >
-            <SortIcon
-              sortDirection={hideFilters ? "descending" : "ascending"}
-            />
-          </div>
-        </div>
+        {/* TODO (smb): switch this to the new component once filters are rolled out */}
+        {this.renderFilters(shownTaxa, sampleIds, loading)}
         {this.renderVisualization()}
         <DetailsSidebar
           visible={sidebarVisible}
           mode={sidebarMode}
-          onClose={withAnalytics(
-            this.closeSidebar,
-            "SamplesHeatmapView_details-sidebar_closed",
-            {
-              sampleId: selectedSampleId,
-              sidebarMode: sidebarMode,
-            },
-          )}
+          onClose={withAnalytics(this.closeSidebar, "SamplesHeatmapView_details-sidebar_closed", {
+            sampleId: selectedSampleId,
+            sidebarMode: sidebarMode,
+          })}
           params={this.getSidebarParams()}
         />
         {heatmapCreationModalOpen && (
@@ -2155,9 +1945,7 @@ class SamplesHeatmapView extends React.Component<
             heatmapParams={selectedOptions}
             onDownloadSvg={this.handleDownloadSvg}
             onDownloadPng={this.handleDownloadPng}
-            onDownloadCurrentHeatmapViewCsv={
-              this.getDownloadCurrentViewHeatmapCSVLink
-            }
+            onDownloadCurrentHeatmapViewCsv={this.getDownloadCurrentViewHeatmapCSVLink}
             onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
           />
         )}
@@ -2171,11 +1959,7 @@ SamplesHeatmapView.contextType = UserContext;
 const mapDispatchToProps = { updateDiscoveryProjectIds: updateProjectIds };
 
 // Don't need mapStateToProps yet so pass in null
-const connectedComponent = connect(
-  null,
-  mapDispatchToProps,
-)(SamplesHeatmapView);
-
+const connectedComponent = connect(null, mapDispatchToProps)(SamplesHeatmapView);
 (connectedComponent.name as string) = "SamplesHeatmapView";
 
 export default connectedComponent;
