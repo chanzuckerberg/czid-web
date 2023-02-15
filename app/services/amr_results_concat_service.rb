@@ -24,7 +24,7 @@ class AmrResultsConcatService
   private
 
   def generate_concatenated_results_file
-    workflow_runs = WorkflowRun.where(id: @workflow_run_ids)
+    workflow_runs = AmrWorkflowRun.where(id: @workflow_run_ids)
     missing_ids = @workflow_run_ids - workflow_runs.pluck(:id)
     raise WorkflowRunNotFoundError, missing_ids if missing_ids.present?
 
@@ -34,16 +34,30 @@ class AmrResultsConcatService
       workflow_runs.each do |wr|
         content = get_output_file_contents(wr)
 
+        headers_extra = ["total_reads", "rpm", "dpm"]
         unless content.empty?
           if headers.nil?
             headers = CSVSafe.parse(get_output_file_contents(workflow_runs.first), col_sep: "\t").first
-            csv << headers unless headers.nil?
+            unless headers.nil?
+              csv << headers + headers_extra
+            end
           end
 
+          # Add more data columns in the CSV
+          column_reads = headers.index { |c| c == "num_reads" }
+          column_depth = headers.index { |c| c == "read_coverage_depth" }
+
+          # Parse CSV, skip header and add extra columns
           parsed_csv = CSVSafe.parse(content, col_sep: "\t")
-          # skip the headers, we only care about the contents of the CSV because the headers were already added above
           parsed_csv.shift
-          parsed_csv.each { |row| csv << row }
+          parsed_csv.each do |row|
+            row_extra = [
+              wr.amr_metrics&.[]("total_reads"),
+              wr.rpm(row[column_reads].to_f),
+              wr.rpm(row[column_depth].to_f),
+            ]
+            csv << row + row_extra
+          end
         end
       end
     end

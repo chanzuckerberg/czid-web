@@ -33,6 +33,14 @@ class AmrWorkflowRun < WorkflowRun
     return nil
   end
 
+  def rpm(raw_read_count)
+    if amr_metrics.nil?
+      return nil
+    end
+
+    raw_read_count / ((amr_metrics["total_reads"] - (amr_metrics["total_ercc_reads"] || 0)) * amr_metrics["fraction_subsampled"]) * 1_000_000.0
+  end
+
   def zip_link
     WorkflowRunZipService.call(self)
   rescue StandardError => exception

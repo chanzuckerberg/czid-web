@@ -167,6 +167,8 @@ class WorkflowRun < ApplicationRecord
   }.freeze
 
   INPUT_SORT_KEYS = ["accession_id", "wetlab_protocol", "technology", "medaka_model"].freeze
+  CACHED_RESULT_QUALITY_METRICS_KEY = "quality_metrics".freeze
+  CACHED_RESULT_COVERAGE_VIZ_KEY = "coverage_viz".freeze
   CACHED_RESULT_SORT_KEYS = [
     "total_reads", "percent_genome_called", "vadr_pass_fail", "coverage_depth", "gc_percent",
     "ref_snps", "percent_identity", "n_actg", "n_missing", "n_ambiguous",
@@ -206,7 +208,7 @@ class WorkflowRun < ApplicationRecord
   }
 
   scope :sort_by_cached_result, lambda { |sort_key, order_dir|
-    cached_result_key = sort_key == "coverage_depth" ? "coverage_viz" : "quality_metrics"
+    cached_result_key = sort_key == "coverage_depth" ? CACHED_RESULT_COVERAGE_VIZ_KEY : CACHED_RESULT_QUALITY_METRICS_KEY
     order_statement = "JSON_EXTRACT(`cached_results`, '$.#{cached_result_key}.#{sort_key}') #{order_dir}, #{TIEBREAKER_SORT_KEY} #{order_dir}"
     order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))
   }
