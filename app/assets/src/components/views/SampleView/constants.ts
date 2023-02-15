@@ -8,7 +8,7 @@ export const KEY_SAMPLE_VIEW_OPTIONS = "SampleViewOptions";
 
 export const KEY_SELECTED_OPTIONS_BACKGROUND = "background";
 export const KEY_SELECTED_OPTIONS_TAXA = "taxa";
-export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholdsReads";
+export const KEY_SELECTED_OPTIONS_THRESHOLDS = "thresholdsShortReads";
 
 export const NANOPORE_DEFAULT_COLUMN_WIDTH = 80;
 
@@ -74,7 +74,7 @@ export const NOTIFICATION_TYPES = {
   discoveryViewFiltersPersisted: "discoveryViewFiltersPersisted",
 };
 
-export const NON_BACKGROUND_DEPENDENT_READS_THRESHOLDS = [
+export const NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS = [
   { text: "NT rPM", value: "nt:rpm" },
   { text: "NT r (total reads)", value: "nt:count" },
   { text: "NT contigs", value: "nt:contigs" },
@@ -91,7 +91,7 @@ export const NON_BACKGROUND_DEPENDENT_READS_THRESHOLDS = [
   { text: "NR E value (as a power of 10)", value: "nr:e_value" },
 ];
 
-export const READS_THRESHOLDS = [
+export const SHORT_READS_THRESHOLDS = [
   { text: "Score", value: "agg_score" },
   { text: "NT Z Score", value: "nt:z_score" },
   { text: "NT rPM", value: "nt:rpm" },
@@ -111,9 +111,10 @@ export const READS_THRESHOLDS = [
   { text: "NR E value (as a power of 10)", value: "nr:e_value" },
 ];
 
-export const BASES_THRESHOLDS = [
+export const LONG_READS_THRESHOLDS = [
   { text: "NT bPM", value: "nt:bpm" },
   { text: "NT b (total bases)", value: "nt:base_count" },
+  { text: "NT r (total reads)", value: "nt:count" },
   { text: "NT contigs", value: "nt:contigs" },
   { text: "NT contig bases", value: "nt:contig_b" },
   { text: "NT %id", value: "nt:percent_identity" },
@@ -121,6 +122,7 @@ export const BASES_THRESHOLDS = [
   { text: "NT E value (as a power of 10)", value: "nt:e_value" },
   { text: "NR bPM", value: "nr:bpm" },
   { text: "NR b (total bases)", value: "nr:base_count" },
+  { text: "NR r (total reads)", value: "nr:count" },
   { text: "NR contigs", value: "nr:contigs" },
   { text: "NR contig bases", value: "nr:contig_b" },
   { text: "NR %id", value: "nr:percent_identity" },
@@ -129,14 +131,14 @@ export const BASES_THRESHOLDS = [
 ];
 
 export const THRESHOLDS = {
-  [TABS.SHORT_READ_MNGS]: READS_THRESHOLDS,
-  [TABS.LONG_READ_MNGS]: BASES_THRESHOLDS,
+  [TABS.SHORT_READ_MNGS]: SHORT_READS_THRESHOLDS,
+  [TABS.LONG_READ_MNGS]: LONG_READS_THRESHOLDS,
 };
 
 // We intend to eventually support backgrounds for long-read-mngs in future iterations of ONT
-export const BACKGROUND_DEPENDENT_READS_THRESHOLDS = READS_THRESHOLDS.filter(
+export const BACKGROUND_DEPENDENT_READS_THRESHOLDS = SHORT_READS_THRESHOLDS.filter(
   threshold =>
-    !NON_BACKGROUND_DEPENDENT_READS_THRESHOLDS.some(
+    !NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS.some(
       nbdThreshold =>
         threshold.text === nbdThreshold.text &&
         threshold.value === nbdThreshold.value,

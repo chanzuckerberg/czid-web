@@ -168,12 +168,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       ...nonNestedLocalState
     } = this.loadState(localStorage, KEY_SAMPLE_VIEW_OPTIONS);
 
-    const { annotations, taxa, thresholdsReads } = tempSelectedOptions || {};
+    const { annotations, taxa, thresholdsShortReads } =
+      tempSelectedOptions || {};
     const { currentTab } = nonNestedUrlState;
     const persistedDiscoveryFiltersPresent = [
       annotations,
       taxa,
-      thresholdsReads,
+      thresholdsShortReads,
     ].some(filter => !isEmpty(filter));
 
     if (
@@ -187,12 +188,12 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
     if (
       !get("background", selectedOptionsFromLocal) &&
-      get("metricReads", selectedOptionsFromLocal) === "aggregatescore"
+      get("metricShortReads", selectedOptionsFromLocal) === "aggregatescore"
     ) {
       // If the user does not have a background and has metric 'aggregatescore', overwrite the selected option
       // 'metric' from 'aggregatescore' to 'NT r (total reads)' because the aggregatescore
       // is computed once the user selects a background.
-      selectedOptionsFromLocal["metricReads"] = find(
+      selectedOptionsFromLocal["metricShortReads"] = find(
         { value: "nt_r" },
         TREE_METRICS[TABS.SHORT_READ_MNGS],
       ).value;
@@ -860,8 +861,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const newSelectedOptions = { ...selectedOptions };
     switch (key) {
       case "taxa":
-      case "thresholdsReads":
-      case "thresholdsBases":
+      case "thresholdsShortReads":
+      case "thresholdsLongReads":
       case "annotations":
         newSelectedOptions[key] = pull(value, newSelectedOptions[key]);
         break;
@@ -959,8 +960,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       case "flags":
       case "taxa":
       case "categories":
-      case "thresholdsReads":
-      case "thresholdsBases":
+      case "thresholdsShortReads":
+      case "thresholdsLongReads":
       case "readSpecificity":
         this.setState({
           filteredReportData: filterReportData({
@@ -970,9 +971,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
           }),
         });
         break;
-      // - metricReads or metricBases: no need to update anything except for the option below
-      case "metricReads":
-      case "metricBases":
+      // - metricShortReads or metricLongReads: no need to update anything except for the option below
+      case "metricShortReads":
+      case "metricLongReads":
         break;
       default:
         return;
@@ -1288,9 +1289,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     newSelectedOptions.taxa = [];
     // Only clear thresholds filters that apply to the current tab
     if (currentTab === TABS.SHORT_READ_MNGS) {
-      newSelectedOptions.thresholdsReads = [];
+      newSelectedOptions.thresholdsShortReads = [];
     } else if (currentTab === TABS.LONG_READ_MNGS) {
-      newSelectedOptions.thresholdsBases = [];
+      newSelectedOptions.thresholdsLongReads = [];
     }
     newSelectedOptions.annotations = [];
 
@@ -1705,8 +1706,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
                 lineage={lineageData}
                 metric={
                   currentTab === TABS.SHORT_READ_MNGS
-                    ? selectedOptions.metricReads
-                    : selectedOptions.metricBases
+                    ? selectedOptions.metricShortReads
+                    : selectedOptions.metricLongReads
                 }
                 nameType={selectedOptions.nameType}
                 onTaxonClick={this.handleTaxonClick}

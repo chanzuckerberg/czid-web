@@ -44,15 +44,17 @@ export const getDefaultSelectedOptions = (): FilterSelections => {
     background: null,
     categories: { categories: [], subcategories: { Viruses: [] } },
     // Don't set the default metric as 'aggregatescore' because it computed based on the background model and will error if the background model is 'None'.
-    metricReads: find({ value: "nt_r" }, TREE_METRICS[TABS.SHORT_READ_MNGS])
-      .value,
-    metricBases: find({ value: "nt_b" }, TREE_METRICS[TABS.LONG_READ_MNGS])
+    metricShortReads: find(
+      { value: "nt_r" },
+      TREE_METRICS[TABS.SHORT_READ_MNGS],
+    ).value,
+    metricLongReads: find({ value: "nt_b" }, TREE_METRICS[TABS.LONG_READ_MNGS])
       .value,
     nameType: "Scientific name",
     readSpecificity: 0,
     taxa: [],
-    thresholdsReads: [],
-    thresholdsBases: [],
+    thresholdsShortReads: [],
+    thresholdsLongReads: [],
   };
 };
 
@@ -87,15 +89,15 @@ export const getAppliedFilters = (
   selectedOptions,
 ): Omit<
   FilterSelections,
-  "nameType" | "metricReads" | "metricBases" | "background"
+  "nameType" | "metricShortReads" | "metricLongReads" | "background"
 > => {
   // Only Taxon, Category, Subcategories, Read Specifity, and Threshold Filters are considered "Applied Filters"
   return omit(
-    ["nameType", "metricReads", "metricBases", "background"],
+    ["nameType", "metricShortReads", "metricLongReads", "background"],
     diff(selectedOptions, getDefaultSelectedOptions()),
   ) as Omit<
     FilterSelections,
-    "nameType" | "metricReads" | "metricBases" | "background"
+    "nameType" | "metricShortReads" | "metricLongReads" | "background"
   >;
 };
 
@@ -104,7 +106,7 @@ export const hasAppliedFilters = selectedOptions => {
     categories,
     readSpecificity,
     taxa,
-    thresholdsReads,
+    thresholdsShortReads,
   } = selectedOptions;
 
   const hasCategoryFilters =
@@ -112,7 +114,7 @@ export const hasAppliedFilters = selectedOptions => {
     !isEmpty(getOr([], "subcategories.Viruses", categories));
   const hasReadSpecificityFilters = readSpecificity !== 0;
   const hasTaxonFilter = !isEmpty(taxa);
-  const hasThresholdFilters = !isEmpty(thresholdsReads);
+  const hasThresholdFilters = !isEmpty(thresholdsShortReads);
 
   return (
     hasCategoryFilters ||

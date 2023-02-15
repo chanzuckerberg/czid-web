@@ -167,8 +167,8 @@ export const filterReportData = ({
   reportData,
   filters: {
     categories,
-    thresholdsReads,
-    thresholdsBases,
+    thresholdsShortReads,
+    thresholdsLongReads,
     readSpecificity,
     taxa,
     annotations,
@@ -189,7 +189,9 @@ export const filterReportData = ({
       categories: categoriesSet,
       subcategories: subcategoriesSet,
       thresholds:
-        currentTab === TABS.SHORT_READ_MNGS ? thresholdsReads : thresholdsBases,
+        currentTab === TABS.SHORT_READ_MNGS
+          ? thresholdsShortReads
+          : thresholdsLongReads,
       readSpecificity,
       taxa,
       annotations,
@@ -203,8 +205,8 @@ export const filterReportData = ({
         subcategories: subcategoriesSet,
         thresholds:
           currentTab === TABS.SHORT_READ_MNGS
-            ? thresholdsReads
-            : thresholdsBases,
+            ? thresholdsShortReads
+            : thresholdsLongReads,
         readSpecificity,
         taxa,
         annotations,
@@ -222,16 +224,16 @@ export const filterReportData = ({
 export const countFilters = (currentTab, selectedOptions) => {
   const {
     categories,
-    thresholdsReads,
-    thresholdsBases,
+    thresholdsShortReads,
+    thresholdsLongReads,
     taxa,
     annotations,
   } = selectedOptions;
 
   const numThresholdsFilters =
     currentTab === TABS.SHORT_READ_MNGS
-      ? thresholdsReads.length
-      : thresholdsBases.length;
+      ? thresholdsShortReads.length
+      : thresholdsLongReads.length;
 
   let numFilters = taxa.length;
   numFilters += numThresholdsFilters;

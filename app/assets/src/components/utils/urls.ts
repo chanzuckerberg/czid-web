@@ -17,8 +17,8 @@ export interface TempSelectedOptionsShape {
   };
   taxa: LabelVal[];
   readSpecificity: number;
-  thresholdsReads?: ThresholdFilterShape[];
-  thresholdsBases?: ThresholdFilterShape[];
+  thresholdsShortReads?: ThresholdFilterShape[];
+  thresholdsLongReads?: ThresholdFilterShape[];
 }
 
 interface generateUrlOptions {
@@ -96,20 +96,20 @@ const getTempSelectedOptions = ({
     case HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS:
       // eslint-disable-next-line standard/computed-property-even-spacing
       sampleViewFormattedSelectedOptions[
-        "thresholdsReads"
+        "thresholdsShortReads"
       ] = transformHeatmapThresholdsFormatForSampleView(
         tempSelectedOptions?.thresholdFilters,
       );
       break;
     case DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS:
-      sampleViewFormattedSelectedOptions["thresholdsReads"] =
+      sampleViewFormattedSelectedOptions["thresholdsShortReads"] =
         tempSelectedOptions?.taxonThresholdsSelected;
       break;
     default: {
       console.error(
         `Failed to temporarily persist thresholds to SampleView from source: ${source}.`,
       );
-      sampleViewFormattedSelectedOptions["thresholdsReads"] = [];
+      sampleViewFormattedSelectedOptions["thresholdsShortReads"] = [];
     }
   }
 
