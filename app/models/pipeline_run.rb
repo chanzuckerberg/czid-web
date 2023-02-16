@@ -473,6 +473,8 @@ class PipelineRun < ApplicationRecord
       additional_outputs = get_additional_outputs(host_filtering_step_statuses, "star_out")
       return additional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
     end
+  rescue Aws::S3::Errors::NotFound
+    return false
   end
 
   def db_load_insert_size_metrics

@@ -185,13 +185,13 @@ class SfnPipelineDataService
         # Get dag step name to retrieve step descriptions and status info.
         # Descriptions for steps may be in the PipelineRunsHelper module,
         # or in the status.json files on S3.
-        dag_name = SFN_STEP_TO_DAG_STEP_NAME[stage_name][step]
+        dag_name = SFN_STEP_TO_DAG_STEP_NAME[stage_name][step] || step
         if dag_name.nil?
           LogUtil.log_message("No dag name found for step #{step} in stage #{stage_name}")
         end
 
         status_info = step_statuses[dag_name] || step_statuses[step] || {}
-        description = status_info["description"].presence || step_descriptions[dag_name]
+        description = status_info["description"].presence || step_descriptions[dag_name] || step_descriptions[step]
         status = redefine_job_status(status_info["status"], @stage_job_statuses[stage_index])
         all_redefined_statuses << status
 
