@@ -348,7 +348,7 @@ export default class Heatmap {
           rowIndex: i,
           columnIndex: j,
           value: this.data.values[i][j],
-          pathogenFlags: this.data.pathogenFlags[i][j] || [],
+          pathogenFlags: this.data.pathogenFlags?.[i]?.[j] ?? [],
         });
       }
     }
