@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { trackEvent } from "~/api/analytics";
 import { getBulkDownload } from "~/api/bulk_downloads";
@@ -23,69 +23,49 @@ export interface BDDProps {
   bulkDownload: NumberId;
 }
 
-interface BulkDownloadDetailsState {
-  loading: boolean;
-  currentTab: TabNames;
-  bulkDownloadDetails?: BulkDownloadDetails;
-  downloadType?: DownloadType;
-}
+const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
+  const { admin } = useContext(UserContext) ?? {};
 
-export default class BulkDownloadDetailsMode extends React.Component<
-  BDDProps,
-  BulkDownloadDetailsState
-> {
-  state = {
-    loading: true,
-    currentTab: TABS[0],
-    bulkDownloadDetails: null,
-    downloadType: null,
-  };
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [currentTab, setCurrentTab] = useState<TabNames>(TABS[0]);
+  const [bulkDownloadDetails, setBulkDownloadDetails] = useState<
+    BulkDownloadDetails
+  >();
+  const [downloadType, setDownloadType] = useState<DownloadType>();
 
-  componentDidMount() {
-    this.fetchBulkDownload(this.props.bulkDownload.id);
-  }
-
-  async componentDidUpdate(prevProps: BDDProps) {
-    if (
-      this.props.bulkDownload &&
-      prevProps.bulkDownload !== this.props.bulkDownload
-    ) {
-      this.setState({
-        loading: true,
-      });
-
-      this.fetchBulkDownload(this.props.bulkDownload.id);
-    }
-  }
-
-  fetchBulkDownload = async (bulkDownloadId: number) => {
+  const fetchBulkDownload = async (bulkDownloadId: number) => {
     const {
-      bulk_download: bulkDownloadDetails,
-      download_type: downloadType,
+      bulk_download: newBulkDownloadDetails,
+      download_type: newDownloadType,
     } = await getBulkDownload(bulkDownloadId);
 
     // Guard against possible race conditions.
-    if (bulkDownloadDetails.id === bulkDownloadId) {
-      this.setState({
-        bulkDownloadDetails,
-        downloadType,
-        loading: false,
-      });
+    if (newBulkDownloadDetails.id === bulkDownloadId) {
+      setBulkDownloadDetails(newBulkDownloadDetails);
+      setDownloadType(newDownloadType);
+      setIsLoading(false);
     }
   };
 
-  onTabChange = (tab: TabNames) => {
-    this.setState({ currentTab: tab });
+  useEffect(() => {
+    setIsLoading(true);
+    fetchBulkDownload(bulkDownload.id);
+  }, [bulkDownload]);
+
+  const onTabChange = (tab: TabNames) => {
+    setCurrentTab(tab);
+
     trackEvent("bulkDownloadDetailsMode_tab_changed", {
-      bulkDownloadId: this.props.bulkDownload.id,
+      bulkDownloadId: bulkDownload.id,
       tab,
     });
   };
 
-  renderNotifications = () => {
-    const { bulkDownloadDetails } = this.state;
+  const { download_name, error_message, execution_type, log_url, id, status } =
+    bulkDownloadDetails ?? {};
 
-    if (bulkDownloadDetails.status === "error") {
+  const renderNotifications = () => {
+    if (status === "error") {
       return (
         <Notification
           type="error"
@@ -98,17 +78,14 @@ export default class BulkDownloadDetailsMode extends React.Component<
       );
     }
 
-    if (
-      bulkDownloadDetails.status === "success" &&
-      bulkDownloadDetails.error_message
-    ) {
+    if (status === "success" && error_message) {
       return (
         <Notification
           type="warning"
           displayStyle="flat"
           className={cs.notification}
         >
-          {bulkDownloadDetails.error_message}
+          {error_message}
         </Notification>
       );
     }
@@ -116,64 +93,48 @@ export default class BulkDownloadDetailsMode extends React.Component<
     return null;
   };
 
-  renderTab = () => {
-    const { bulkDownloadDetails, downloadType } = this.state;
+  if (isLoading) {
+    return (
+      <div className={cs.content}>
+        <div className={cs.loadingMsg}>Loading...</div>
+      </div>
+    );
+  }
 
-    if (this.state.currentTab === "Details") {
-      return (
+  return (
+    <div className={cs.content}>
+      <div className={cs.title}>{download_name}</div>
+      {admin && (
+        <div className={cs.adminDetails}>
+          ID: {id}, run in: {execution_type}
+          {log_url && (
+            <span>
+              ,{" "}
+              <ExternalLink className={cs.logUrl} href={log_url}>
+                log url
+              </ExternalLink>
+            </span>
+          )}
+        </div>
+      )}
+      {renderNotifications()}
+      <Tabs
+        className={cs.tabs}
+        tabs={TABS}
+        value={currentTab}
+        onChange={onTabChange}
+      />
+      {currentTab === "Details" && (
         <DetailsTab
           bulkDownload={bulkDownloadDetails}
           downloadType={downloadType}
         />
-      );
-    }
-    if (this.state.currentTab === "Advanced Download") {
-      return <AdvancedDownloadTab bulkDownload={bulkDownloadDetails} />;
-    }
-    return null;
-  };
+      )}
+      {currentTab === "Advanced Download" && (
+        <AdvancedDownloadTab bulkDownload={bulkDownloadDetails} />
+      )}
+    </div>
+  );
+};
 
-  render() {
-    const { bulkDownloadDetails, loading } = this.state;
-    const { admin } = this.context || {};
-
-    return (
-      <div className={cs.content}>
-        {loading ? (
-          <div className={cs.loadingMsg}>Loading...</div>
-        ) : (
-          <div className={cs.title}>{bulkDownloadDetails.download_name}</div>
-        )}
-        {!loading && admin && (
-          <div className={cs.adminDetails}>
-            ID: {bulkDownloadDetails.id}, run in:{" "}
-            {bulkDownloadDetails.execution_type}
-            {bulkDownloadDetails.log_url && (
-              <span>
-                ,{" "}
-                <ExternalLink
-                  className={cs.logUrl}
-                  href={bulkDownloadDetails.log_url}
-                >
-                  log url
-                </ExternalLink>
-              </span>
-            )}
-          </div>
-        )}
-        {!loading && this.renderNotifications()}
-        {!loading && (
-          <Tabs
-            className={cs.tabs}
-            tabs={TABS}
-            value={this.state.currentTab}
-            onChange={this.onTabChange}
-          />
-        )}
-        {!loading && this.renderTab()}
-      </div>
-    );
-  }
-}
-
-BulkDownloadDetailsMode.contextType = UserContext;
+export default BulkDownloadDetailsMode;

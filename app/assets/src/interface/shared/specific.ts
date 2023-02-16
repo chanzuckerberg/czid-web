@@ -14,6 +14,9 @@ export interface BulkDownloadDetails extends NumberId {
   pipeline_runs: { id: number; sample_name: string }[];
   workflow_runs: Array<$TSFixMe>;
   description: string;
+  error_message: string;
+  execution_type: string;
+  log_url: string;
 }
 
 export interface ConsensusGenomeData {
