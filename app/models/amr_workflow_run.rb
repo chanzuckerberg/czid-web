@@ -38,7 +38,8 @@ class AmrWorkflowRun < WorkflowRun
       return nil
     end
 
-    raw_read_count / ((amr_metrics["total_reads"] - (amr_metrics["total_ercc_reads"] || 0)) * amr_metrics["fraction_subsampled"]) * 1_000_000.0
+    value = raw_read_count / ((amr_metrics["total_reads"] - (amr_metrics["total_ercc_reads"] || 0)) * amr_metrics["fraction_subsampled"]) * 1_000_000.0
+    value.round(2)
   end
 
   def zip_link
