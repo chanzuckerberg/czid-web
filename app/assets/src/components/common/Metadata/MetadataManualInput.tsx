@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import _fp, {
   zipObject,
   filter,
@@ -32,7 +33,6 @@ import {
   SampleFromApi,
 } from "~/interface/shared";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
-import { IconPlusCircleSmall } from "~ui/icons";
 import MetadataInput from "./MetadataInput";
 import { AUTO_POPULATE_FIELDS, COLUMN_HEADER_TOOLTIPS } from "./constants";
 
@@ -326,7 +326,7 @@ class MetadataManualInput extends React.Component<
         menuLabel="Select Columns"
         onChange={this.handleColumnChange}
         options={options}
-        trigger={<IconPlusCircleSmall className={cs.plusIcon} />}
+        trigger={<Icon sdsIcon="plusCircle" sdsSize="s" sdsType="button" />}
         value={this.state.selectedFieldNames}
         className={cs.columnPicker}
         data-testid="select-columns"

@@ -1,7 +1,7 @@
 import cx from "classnames";
+import { ButtonIcon } from "czifui";
 import React from "react";
 
-import { IconMinusSmall, IconPlusSmall } from "~/components/ui/icons";
 import cs from "./plus_minus_control.scss";
 
 interface PlusMinusControlProps {
@@ -21,12 +21,22 @@ const PlusMinusControl = ({
 }: PlusMinusControlProps) => {
   return (
     <div className={cx(className, cs.plusMinusContainer)}>
-      <button disabled={plusDisabled} onClick={onPlusClick}>
-        <IconPlusSmall className={cs.icon} />
-      </button>
-      <button disabled={minusDisabled} onClick={onMinusClick}>
-        <IconMinusSmall className={cs.icon} />
-      </button>
+      <ButtonIcon
+        className={cs.button}
+        sdsIcon="plus"
+        sdsSize="small"
+        sdsType="tertiary"
+        disabled={plusDisabled}
+        onClick={onPlusClick}
+      />
+      <ButtonIcon
+        className={cs.button}
+        sdsIcon="minus"
+        sdsSize="small"
+        sdsType="tertiary"
+        disabled={minusDisabled}
+        onClick={onMinusClick}
+      />
     </div>
   );
 };

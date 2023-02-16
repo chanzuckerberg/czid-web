@@ -58,8 +58,7 @@
     }
   }
 
-  .icon {
-    height: 10px !important; // Override .idseq-ui.button
-    fill: $sds-color-primary-400;
+  .button {
+    margin: $sds-spaces-xs;
   }
 }

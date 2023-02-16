@@ -11,7 +11,6 @@ import IconArrowRight from "./IconArrowRight";
 import IconArrowUpSmall from "./IconArrowUpSmall";
 import IconBarChartHorizontal3Small from "./IconBarChartHorizontal3Small";
 import IconBiohubLogo from "./IconBiohubLogo";
-import IconBlast from "./IconBlast";
 import IconChartSmall from "./IconChartSmall";
 import IconCheckSmall from "./IconCheckSmall";
 import IconClose from "./IconClose";
@@ -24,20 +23,14 @@ import IconListSmall from "./IconListSmall";
 import IconLoading from "./IconLoading";
 import IconMapSmall from "./IconMapSmall";
 import IconMatchesFigure from "./IconMatchesFigure";
-import IconMinusSmall from "./IconMinusSmall";
 import IconMobileNavClose from "./IconMobileNavClose";
 import IconPercentageSmall from "./IconPercentageSmall";
-import IconPlusCircleSmall from "./IconPlusCircleSmall";
-import IconPlusSmall from "./IconPlusSmall";
 import IconSampleFigure from "./IconSampleFigure";
-import IconSave from "./IconSave";
 import IconSearch from "./IconSearch";
-import IconShare from "./IconShare";
 import IconSubmitArrow from "./IconSubmitArrow";
 import IconSuccess from "./IconSuccess";
 import IconSuccessSmall from "./IconSuccessSmall";
 import IconTableSmall from "./IconTableSmall";
-import IconTempSmall from "./IconTempSmall";
 import IconTreeSmall from "./IconTreeSmall";
 import IconUploadFigure from "./IconUploadFigure";
 import LogoLockupColor from "./LogoLockupColor";
@@ -56,7 +49,6 @@ export const ICONS_TAXONOMY = {
     IconArrowPipelineStage,
     IconArrowUpSmall,
     IconBarChartHorizontal3Small,
-    IconBlast,
     IconChartSmall,
     IconCheckSmall,
     IconClose,
@@ -68,20 +60,14 @@ export const ICONS_TAXONOMY = {
     IconLoading,
     IconMapSmall,
     IconMatchesFigure,
-    IconMinusSmall,
     IconMobileNavClose,
     IconPercentageSmall,
-    IconPlusCircleSmall,
-    IconPlusSmall,
     IconSampleFigure,
-    IconSave,
     IconSearch,
-    IconShare,
     IconSubmitArrow,
     IconSuccess,
     IconSuccessSmall,
     IconTableSmall,
-    IconTempSmall,
     IconTreeSmall,
     IconUploadFigure,
     SortIcon,
@@ -114,7 +100,6 @@ export {
   IconArrowUpSmall,
   IconBarChartHorizontal3Small,
   IconBiohubLogo,
-  IconBlast,
   IconChartSmall,
   IconCheckSmall,
   IconClose,
@@ -127,20 +112,14 @@ export {
   IconLoading,
   IconMapSmall,
   IconMatchesFigure,
-  IconMinusSmall,
   IconMobileNavClose,
   IconPercentageSmall,
-  IconPlusCircleSmall,
-  IconPlusSmall,
   IconSampleFigure,
-  IconSave,
   IconSearch,
-  IconShare,
   IconSubmitArrow,
   IconSuccess,
   IconSuccessSmall,
   IconTableSmall,
-  IconTempSmall,
   IconTreeSmall,
   IconUploadFigure,
   LogoLockupColor,

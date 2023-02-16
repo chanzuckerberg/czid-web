@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import { concat, difference, find, includes, map } from "lodash/fp";
 import React from "react";
 import Draggable from "react-draggable";
@@ -21,7 +22,6 @@ import { humanize } from "~/helpers/strings";
 import { ColumnProps } from "~/interface/sampleView";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
-import { IconPlusCircleSmall } from "~ui/icons";
 import SortIcon from "~ui/icons/SortIcon";
 
 import cs from "./base_table.scss";
@@ -380,7 +380,14 @@ class BaseTable extends React.Component<
             menuLabel="Select Columns"
             onChange={this.handleColumnChange}
             options={options}
-            trigger={<IconPlusCircleSmall className={cs.plusIcon} />}
+            trigger={
+              <Icon
+                sdsIcon="plusCircle"
+                sdsSize="s"
+                sdsType="button"
+                className={cs.plusIcon}
+              />
+            }
             value={value}
           />
         }

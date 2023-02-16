@@ -1,11 +1,10 @@
+import { Button, Icon } from "czifui";
 import { get } from "lodash/fp";
 import moment from "moment";
 import React from "react";
 
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import ButtonTextPrimary from "~/components/ui/controls/buttons/ButtonTextPrimary";
-import { IconPlusSmall } from "~/components/ui/icons";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
 import { ConsensusGenomeData } from "~/interface/shared";
@@ -108,14 +107,19 @@ export default function ConsensusGenomePreviousModal({
           )}
         />
       </div>
-      <ButtonTextPrimary
-        icon={<IconPlusSmall className={cs.icon} />}
-        label="Create a New Consensus Genome"
+      <Button
+        className={cs.button}
+        sdsType="primary"
+        sdsStyle="minimal"
+        isAllCaps={true}
+        startIcon={<Icon sdsIcon="plus" sdsSize="xs" sdsType="button" />}
         onClick={withAnalytics(
           () => onNew && onNew(consensusGenomeData),
           ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED,
         )}
-      />
+      >
+        Create a New Consensus Genome
+      </Button>
     </Modal>
   );
 }
