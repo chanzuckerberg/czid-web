@@ -61,3 +61,7 @@ export const WORKFLOW_OBJECT_LABELS = {
   [WORKFLOWS.AMR.value]: "sample",
   [WORKFLOWS.CONSENSUS_GENOME.value]: "consensus genome",
 };
+
+export const HOST_GENOME_NAMES = {
+  HUMAN: "Human",
+};

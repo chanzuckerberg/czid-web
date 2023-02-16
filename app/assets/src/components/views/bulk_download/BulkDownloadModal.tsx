@@ -25,6 +25,7 @@ import {
 } from "~/api/bulk_downloads";
 import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { getURLParamString } from "~/helpers/url";
+import { Entry } from "~/interface/samplesView";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import { WORKFLOW_ENTITIES } from "~utils/workflows";
@@ -76,6 +77,7 @@ const assembleSelectedDownload = memoize(
 interface BulkDownloadModalProps {
   onClose: $TSFixMeFunction;
   open?: boolean;
+  selectedObjects: Entry[];
   selectedIds?: Set<number>;
   // called when a bulk download has successfully been kicked off
   onGenerate: $TSFixMeFunction;
@@ -253,20 +255,19 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
   // *** Callbacks ***
 
-  handleDownloadRequest = () => {
+  handleDownloadRequest = (sampleIds: number[]) => {
     const { workflow, workflowEntity } = this.props;
     const {
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
-      validObjectIds,
     } = this.state;
 
     const selectedDownload = assembleSelectedDownload(
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
-      validObjectIds,
+      sampleIds,
       workflow,
       workflowEntity,
     );
@@ -423,7 +424,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   };
 
   render() {
-    const { open, onClose, workflow } = this.props;
+    const { open, onClose, selectedObjects, workflow } = this.props;
     const {
       bulkDownloadTypes,
       validObjectIds,
@@ -443,6 +444,16 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
     const numObjects = validObjectIds.size;
     const objectDownloaded = WORKFLOW_OBJECT_LABELS[workflow];
+    const sampleHostGenomes = selectedObjects
+      .filter(obj => validObjectIds.has(obj.id))
+      .reduce((result, obj) => {
+        result.push({
+          id: obj.id,
+          name: obj.sample.name,
+          hostGenome: obj.host,
+        });
+        return result;
+      }, []);
 
     return (
       <Modal narrow open={open} tall onClose={onClose}>
@@ -481,9 +492,12 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
               waitingForCreate={waitingForCreate}
               createStatus={createStatus}
               createError={createError}
+              sampleHostGenomes={sampleHostGenomes}
               selectedFields={selectedFields}
               selectedDownloadTypeName={selectedDownloadTypeName}
-              onDownloadRequest={this.handleDownloadRequest}
+              onDownloadRequest={(sampleIds: number[]) =>
+                this.handleDownloadRequest(sampleIds)
+              }
               workflow={workflow}
             />
           </div>

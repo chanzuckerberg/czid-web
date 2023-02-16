@@ -89,7 +89,7 @@ class PipelineRun < ApplicationRecord
   NONHOST_FASTQ_OUTPUT_NAME = 'taxid_annot.fasta'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   MODERN_ERCC_OUTPUT_NAME = "ERCC_counts.tsv".freeze
-  HOST_GENE_COUNTS_OUTPUT_NAME = "gene_abundance.tsv".freeze
+  HOST_GENE_COUNTS_OUTPUT_NAME = "reads_per_gene.kallisto.tsv".freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
@@ -466,7 +466,9 @@ class PipelineRun < ApplicationRecord
 
     if pipeline_version_uses_new_host_filtering_stage(pipeline_version)
       # Only paired-end samples should have insert size metrics.
-      return host_filtering_step_statuses.dig("collect_insert_size_metrics", "status") == "uploaded"
+      # Check if the s3 object for INSERT_SIZE_METRICS_OUTPUT_NAME exists.
+      prefix = output_s3_path_with_version.split("/", 4)[-1]
+      return AwsClient[:s3].head_object(bucket: SAMPLES_BUCKET_NAME, key: "#{prefix}/#{PipelineRun::INSERT_SIZE_METRICS_OUTPUT_NAME}").present?
     else
       additional_outputs = get_additional_outputs(host_filtering_step_statuses, "star_out")
       return additional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)

@@ -4,6 +4,7 @@ class BulkDownload < ApplicationRecord
   include AppConfigHelper
   include SamplesHelper
   include PipelineOutputsHelper
+  include PipelineRunsHelper
   include BulkDownloadTypesHelper
   include ParameterSanitization
   include Rails.application.routes.url_helpers
@@ -469,20 +470,13 @@ class BulkDownload < ApplicationRecord
     end
 
     if download_type == HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
-      download_src_urls = pipeline_runs_ordered.map(&:host_gene_count_s3_path)
+      download_src_urls, download_tar_names = pipeline_runs_ordered.each_with_object([[], []]).with_index do |(pr, result), pr_index|
+        # samples_ordered and pipeline_runs_ordered are ordered by sample_id, so we can use the pipeline run index to get the associated sample
+        download_tar_name = get_output_file_prefix(samples_ordered[pr_index], cleaned_project_names).to_s
+        download_tar_name += pipeline_version_uses_new_host_filtering_stage(pr.pipeline_version) ? "reads_per_gene.kallisto.tsv" : "reads_per_gene.star.tab"
 
-      download_tar_names = samples_ordered.map do |sample|
-        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-          "reads_per_gene.star.tab"
-      end
-    end
-
-    if download_type == HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE_V2
-      download_src_urls = pipeline_runs_ordered.map(&:host_gene_count_s3_path)
-
-      download_tar_names = samples_ordered.map do |sample|
-        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-          "#{PipelineRun::HOST_GENE_COUNTS_OUTPUT_NAME}"
+        result[0] << pr.host_gene_count_s3_path
+        result[1] << download_tar_name
       end
     end
 

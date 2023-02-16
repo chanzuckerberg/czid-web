@@ -128,8 +128,8 @@ class MngsReadsStatsLoadService
     end
 
     # Load remaining reads
-    all_counts << { adjusted_remaining_reads: sub_before[:reads_after] }
-    pipeline_run.adjusted_remaining_reads = sub_before[:reads_after]
+    all_counts << { adjusted_remaining_reads: sub_after[:reads_after] }
+    pipeline_run.adjusted_remaining_reads = sub_after[:reads_after]
 
     # Load unidentified reads
     pipeline_run.unmapped_reads = fetch_unmapped_illumina_reads(pipeline_run, all_counts) || pipeline_run.unmapped_reads

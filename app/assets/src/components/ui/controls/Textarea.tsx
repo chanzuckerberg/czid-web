@@ -4,7 +4,7 @@ import { TextArea as SemanticTextarea, TextAreaProps } from "semantic-ui-react";
 import cs from "./textarea.scss";
 
 interface TextAreaInternalProps extends Omit<TextAreaProps, "onChange"> {
-  onChange?: (val:string) => void;
+  onChange?: (val: string) => void;
 }
 
 const Textarea = ({ className, onChange, ...props }: TextAreaInternalProps) => {

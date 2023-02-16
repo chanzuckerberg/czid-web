@@ -10,7 +10,12 @@ interface ColumnHeaderTooltipProps extends PopupProps {
   link?: string;
 }
 
-const ColumnHeaderTooltip = ({content, title, link, ...popUpProps}: ColumnHeaderTooltipProps) => {
+const ColumnHeaderTooltip = ({
+  content,
+  title,
+  link,
+  ...popUpProps
+}: ColumnHeaderTooltipProps) => {
   return (
     <BasicPopup
       {...popUpProps}
@@ -35,7 +40,6 @@ const ColumnHeaderTooltip = ({content, title, link, ...popUpProps}: ColumnHeader
     />
   );
 };
-
 
 ColumnHeaderTooltip.defaultProps = {
   basic: false,

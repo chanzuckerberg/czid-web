@@ -23,12 +23,8 @@ interface WorkflowType {
 
 const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
   const [requestResult, setRequestResult] = useState<string>("");
-  const [launchedFeatureList, setLaunchedFeatureList] = useState<string[]>(
-    [],
-  );
-  const [allowedFeatureList, setAllowedFeatureList] = useState<string[]>(
-    [],
-  );
+  const [launchedFeatureList, setLaunchedFeatureList] = useState<string[]>([]);
+  const [allowedFeatureList, setAllowedFeatureList] = useState<string[]>([]);
   const [featureFlagUsersList, setFeatureFlagUsersList] = useState<Set<string>>(
     new Set(),
   );

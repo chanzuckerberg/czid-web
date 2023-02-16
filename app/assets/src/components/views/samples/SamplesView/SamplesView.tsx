@@ -336,7 +336,7 @@ const SamplesView = forwardRef(function SamplesView(
         <BareDropdown
           hideArrow
           className={cx(cs.action)}
-          items={heatmapOptions.map((option) => {
+          items={heatmapOptions.map(option => {
             if (
               allowedFeatures.includes("taxon_heatmap_presets") &&
               option.text === "Taxon Heatmap" &&
@@ -447,7 +447,7 @@ const SamplesView = forwardRef(function SamplesView(
           />
         }
         selectedSampleIds={selectedIds}
-        fetchedSamples={targetSamples.filter((sample) =>
+        fetchedSamples={targetSamples.filter(sample =>
           selectedIds.has(sample.id),
         )}
         workflow={workflow}
@@ -456,11 +456,11 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const getSarsCov2Count = () => {
-    const selectedObjects = objects.loaded.filter((object) =>
+    const selectedObjects = objects.loaded.filter(object =>
       selectedIds.has(object.id),
     );
     const sarsCov2Count = selectedObjects
-      .map((object) => get(["referenceAccession", "taxonName"], object))
+      .map(object => get(["referenceAccession", "taxonName"], object))
       .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);
@@ -543,7 +543,7 @@ const SamplesView = forwardRef(function SamplesView(
 
   const handleBulkKickoffAmr = async () => {
     const selectedObjects = filter(
-      (object) => selectedIds.has(object.id),
+      object => selectedIds.has(object.id),
       objects.loaded,
     );
     const amrPipelineEligibility = reduce(
@@ -579,7 +579,7 @@ const SamplesView = forwardRef(function SamplesView(
       });
 
       setRecentlyKickedOffAmrWorkflowRunsForSampleIds(
-        (prevRecentlyKickedOffAmrWorkflowRunsForSampleIds) =>
+        prevRecentlyKickedOffAmrWorkflowRunsForSampleIds =>
           new Set([
             ...Array.from(prevRecentlyKickedOffAmrWorkflowRunsForSampleIds),
             ...sampleIdsToKickoffAmr,
@@ -589,7 +589,7 @@ const SamplesView = forwardRef(function SamplesView(
 
     if (size(amrPipelineEligibility.ineligible) > 0) {
       const ineligibleSampleNames = map(
-        (sample) => get("sample.name", sample),
+        sample => get("sample.name", sample),
         amrPipelineEligibility.ineligible,
       );
       // We need this 10ms delay to allow the first toast to render properly before showing the second toast
@@ -624,8 +624,7 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const kickoffAmrPipelineForSamples = (sampleIds: number[]) => {
     bulkKickoffWorkflowRuns({
@@ -692,7 +691,6 @@ const SamplesView = forwardRef(function SamplesView(
       autoClose: 12000,
     });
   };
-
 
   const renderBulkSamplesActionsMenu = () => {
     if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
@@ -818,7 +816,7 @@ const SamplesView = forwardRef(function SamplesView(
     // Note: If the specified sortBy column (ie. a custom metadata field) is not available on this view,
     // we expect the fetched samples to be sorted by the default column and we will bold the default column header.
     // This will not overwrite the sortBy in session storage.
-    const sortByNotAvailable = !columns.some((c) => c.dataKey === sortBy);
+    const sortByNotAvailable = !columns.some(c => c.dataKey === sortBy);
     const sortedColumn = sortByNotAvailable
       ? DEFAULT_SORTED_COLUMN_BY_TAB["samples"]
       : sortBy;
@@ -829,7 +827,7 @@ const SamplesView = forwardRef(function SamplesView(
     return (
       <div className={cs.table}>
         <InfiniteTable
-          ref={(childInfiniteTable) => (infiniteTable = childInfiniteTable)}
+          ref={childInfiniteTable => (infiniteTable = childInfiniteTable)}
           columns={columns}
           defaultRowHeight={rowHeight}
           draggableColumns
@@ -959,6 +957,8 @@ const SamplesView = forwardRef(function SamplesView(
     });
   };
 
+  const selectedObjects = Array.from(selectedIds).map(id => objects.get(id));
+
   return (
     <div className={cs.container}>
       {currentDisplay === "table" || currentDisplay === "plqc" ? (
@@ -987,6 +987,7 @@ const SamplesView = forwardRef(function SamplesView(
             "SamplesView_bulk-download-modal_closed",
           )}
           onGenerate={handleBulkDownloadGenerate}
+          selectedObjects={selectedObjects}
           selectedIds={selectedIds}
           workflow={workflow}
           workflowEntity={workflowEntity}

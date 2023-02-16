@@ -1,15 +1,19 @@
-import { get, some, map, isUndefined, reject } from "lodash/fp";
+import { get, some, map, isUndefined, reject, filter, size } from "lodash/fp";
 import React from "react";
 import { withAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
-import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 
 import cs from "./bulk_download_modal_footer.scss";
-import { CONDITIONAL_FIELDS, OPTIONAL_FIELDS } from "./constants";
+import {
+  BULK_DOWNLOAD_TYPES,
+  CONDITIONAL_FIELDS,
+  HOST_GENOME_NAMES,
+  OPTIONAL_FIELDS,
+} from "./constants";
 
 const triggersCondtionalFieldMetricList = (
   conditionalField,
@@ -42,6 +46,16 @@ const triggersConditionalField = (conditionalField, selectedFields) =>
     )
     .some(Boolean);
 
+type BulkDownloadType = {
+  category: string;
+  collaborator_only: boolean;
+  description: string;
+  display_name: string;
+  execution_type: string;
+  type: string;
+  fields: unknown[];
+} | null;
+
 interface BulkDownloadModalFooterProps {
   loading?: boolean;
   downloadTypes?: $TSFixMeUnknown[];
@@ -49,6 +63,11 @@ interface BulkDownloadModalFooterProps {
   invalidSampleNames?: string[];
   validationError?: string;
   selectedDownloadTypeName?: string;
+  sampleHostGenomes: {
+    id: number;
+    name: string;
+    hostGenome: string;
+  }[];
   // The selected fields of the currently selected download type.
   selectedFields?: Record<string, string>;
   waitingForCreate?: boolean;
@@ -58,35 +77,48 @@ interface BulkDownloadModalFooterProps {
   workflow: string;
 }
 
-export default class BulkDownloadModalFooter extends React.Component<
-  BulkDownloadModalFooterProps
-> {
-  getSelectedDownloadType = () => {
-    const { downloadTypes, selectedDownloadTypeName } = this.props;
+export default function BulkDownloadModalFooter({
+  loading,
+  downloadTypes,
+  validObjectIds,
+  invalidSampleNames,
+  validationError,
+  selectedDownloadTypeName,
+  selectedFields,
+  waitingForCreate,
+  createStatus,
+  createError,
+  onDownloadRequest,
+  sampleHostGenomes,
+  workflow,
+}: BulkDownloadModalFooterProps) {
+  const samplesWithHumanHost = filter(
+    { hostGenome: HOST_GENOME_NAMES.HUMAN },
+    sampleHostGenomes,
+  );
+  const numSamplesWithHumanHost = size(samplesWithHumanHost);
 
+  const getSelectedDownloadType = (): BulkDownloadType => {
     if (!selectedDownloadTypeName) {
       return null;
     }
 
     return downloadTypes.find(
       item => item["type"] === selectedDownloadTypeName,
-    );
+    ) as BulkDownloadType;
   };
 
   // Get all the fields we need to validate for the selected download type.
-  getRequiredFieldsForSelectedType = () => {
-    const { selectedFields, selectedDownloadTypeName } = this.props;
+  const getRequiredFieldsForSelectedType = () => {
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
-    const downloadType = this.getSelectedDownloadType();
+    const downloadType = getSelectedDownloadType();
 
     if (!downloadType) return null;
-    // @ts-expect-error Property 'fields' does not exist on type 'unknown'
     let requiredFields = downloadType.fields;
 
     // Remove any conditional fields if they don't meet the criteria.
     CONDITIONAL_FIELDS.forEach(field => {
       if (
-        // @ts-expect-error Property 'type' does not exist on type 'unknown'
         downloadType.type === field.downloadType &&
         !triggersConditionalField(field, selectedFieldsForType)
       ) {
@@ -95,7 +127,6 @@ export default class BulkDownloadModalFooter extends React.Component<
     });
 
     OPTIONAL_FIELDS.forEach(field => {
-      // @ts-expect-error Property 'type' does not exist on type 'unknown'
       if (downloadType.type === field.downloadType) {
         requiredFields = reject(["type", field.field], requiredFields);
       }
@@ -104,27 +135,24 @@ export default class BulkDownloadModalFooter extends React.Component<
     return requiredFields;
   };
 
-  isSelectedDownloadValid = () => {
-    const {
-      validObjectIds,
-      selectedFields,
-      selectedDownloadTypeName,
-    } = this.props;
-
+  const isSelectedDownloadValid = () => {
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
-    const downloadType = this.getSelectedDownloadType();
+    const downloadType: BulkDownloadType = getSelectedDownloadType();
 
     if (!downloadType || validObjectIds.size < 1) {
       return false;
+    } else if (downloadType.type === BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS) {
+      return numSamplesWithHumanHost > 0;
     }
 
-    const requiredFields = this.getRequiredFieldsForSelectedType();
+    const requiredFields = getRequiredFieldsForSelectedType();
 
     if (requiredFields) {
       if (
         some(
           Boolean,
           map(
+            // @ts-expect-error Property 'fields' does not exist on type 'unknown'
             field => isUndefined(get(field.type, selectedFieldsForType)),
             requiredFields,
           ),
@@ -137,23 +165,42 @@ export default class BulkDownloadModalFooter extends React.Component<
     return true;
   };
 
-  renderInvalidSamplesWarning() {
-    const { invalidSampleNames } = this.props;
+  const renderInvalidSamplesWarning = () => {
+    return renderWarning({
+      message: " because they either failed or are still processing:",
+      sampleNames: invalidSampleNames,
+    });
+  };
 
+  const renderHostGeneCountsWarning = () => {
+    return renderWarning({
+      message:
+        " because currently we only support human hosts for this download type. Samples that will not be included are:",
+      sampleNames: map(
+        "name",
+        filter(
+          sample => sample.hostGenome !== HOST_GENOME_NAMES.HUMAN,
+          sampleHostGenomes,
+        ),
+      ),
+    });
+  };
+
+  const renderWarning = ({ message, sampleNames }) => {
     const header = (
       <div>
         <span className={cs.highlight}>
-          {invalidSampleNames.length} sample
-          {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be included in
-          the bulk download
+          {sampleNames.length} sample
+          {sampleNames.length > 1 ? "s" : ""} won&apos;t be included in the bulk
+          download
         </span>
-        , because they either failed or are still processing:
+        {message}
       </div>
     );
 
     const content = (
       <span>
-        {invalidSampleNames.map((name, index) => {
+        {sampleNames.map((name, index) => {
           return (
             <div key={index} className={cs.messageLine}>
               {name}
@@ -172,9 +219,9 @@ export default class BulkDownloadModalFooter extends React.Component<
         displayStyle={"flat"}
       />
     );
-  }
+  };
 
-  renderValidationError() {
+  const renderValidationError = () => {
     return (
       <div className={cs.notificationContainer}>
         <Notification type="error" displayStyle="flat">
@@ -184,9 +231,9 @@ export default class BulkDownloadModalFooter extends React.Component<
         </Notification>
       </div>
     );
-  }
+  };
 
-  renderNoValidSamplesError() {
+  const renderNoValidSamplesError = () => {
     return (
       <div className={cs.notificationContainer}>
         <Notification type="error" displayStyle="flat">
@@ -196,17 +243,9 @@ export default class BulkDownloadModalFooter extends React.Component<
         </Notification>
       </div>
     );
-  }
+  };
 
-  renderDownloadButton() {
-    const {
-      waitingForCreate,
-      createStatus,
-      createError,
-      onDownloadRequest,
-      workflow,
-    } = this.props;
-
+  const renderDownloadButton = () => {
     if (waitingForCreate) {
       return <LoadingMessage message="Starting your download..." />;
     }
@@ -217,10 +256,10 @@ export default class BulkDownloadModalFooter extends React.Component<
 
     return (
       <PrimaryButton
-        disabled={!this.isSelectedDownloadValid()}
+        disabled={!isSelectedDownloadValid()}
         text="Start Generating Download"
         onClick={withAnalytics(
-          onDownloadRequest,
+          () => onDownloadRequest(getValidSampleIds()),
           "BulkDownloadModalFooter_start-generating-button_clicked",
           {
             workflow,
@@ -228,32 +267,35 @@ export default class BulkDownloadModalFooter extends React.Component<
         )}
       />
     );
-  }
+  };
 
-  render() {
-    const {
-      validObjectIds,
-      invalidSampleNames,
-      validationError,
-      loading,
-    } = this.props;
+  const getValidSampleIds = () => {
+    if (selectedDownloadTypeName === BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS) {
+      return map("id", samplesWithHumanHost);
+    } else {
+      return validObjectIds;
+    }
+  };
 
-    const numSamples = validObjectIds.size;
+  const validSampleIds = getValidSampleIds();
+  const numSamples = size(validSampleIds);
+  const numNonHumanHostSamples =
+    size(validObjectIds) - size(samplesWithHumanHost);
 
-    return (
-      <div className={cs.footer}>
-        <div className={cs.notifications}>
-          {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
-          {validationError != null && this.renderValidationError()}
-          {numSamples < 1 && !loading && this.renderNoValidSamplesError()}
-        </div>
-        {this.renderDownloadButton()}
-        <div className={cs.downloadDisclaimer}>
-          Downloads for larger files can take multiple hours to generate.
-        </div>
+  return (
+    <div className={cs.footer}>
+      <div className={cs.notifications}>
+        {invalidSampleNames.length > 0 && renderInvalidSamplesWarning()}
+        {numNonHumanHostSamples > 0 &&
+          selectedDownloadTypeName === BULK_DOWNLOAD_TYPES.HOST_GENE_COUNTS &&
+          renderHostGeneCountsWarning()}
+        {validationError != null && renderValidationError()}
+        {numSamples < 1 && !loading && renderNoValidSamplesError()}
       </div>
-    );
-  }
+      {renderDownloadButton()}
+      <div className={cs.downloadDisclaimer}>
+        Downloads for larger files can take multiple hours to generate.
+      </div>
+    </div>
+  );
 }
-
-BulkDownloadModalFooter.contextType = UserContext;

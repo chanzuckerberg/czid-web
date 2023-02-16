@@ -38,21 +38,21 @@ const Link = ({
       });
     }
   };
-    return (
-      <a
-        href={href}
-        className={cx(
-          coloredBackground ? cs.linkBlack : cs.linkDefault,
-          disabled && cs.linkDisabled,
-          className,
-        )}
-        target={external ? "_blank" : null}
-        rel="noopener noreferrer"
-        onClick={onClick}
-      >
-        {children}
-      </a>
-    );
-  };
+  return (
+    <a
+      href={href}
+      className={cx(
+        coloredBackground ? cs.linkBlack : cs.linkDefault,
+        disabled && cs.linkDisabled,
+        className,
+      )}
+      target={external ? "_blank" : null}
+      rel="noopener noreferrer"
+      onClick={onClick}
+    >
+      {children}
+    </a>
+  );
+};
 
 export default Link;
