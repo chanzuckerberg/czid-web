@@ -229,9 +229,12 @@ class MetadataField < ApplicationRecord
     project_ids = samples.distinct.pluck(:project_id)
     host_genome_ids = samples.distinct.pluck(:host_genome_id)
 
-    project_fields = Project.where(id: project_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
-    host_genome_fields = HostGenome.where(id: host_genome_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
-    (project_fields.flatten & host_genome_fields.flatten).map(&:field_info)
+    # combined multiple lines into a single call for performance optimization
+    # The performance gains come largely from removing the nested `.includes` and
+    # using the union function to filter the results into only the fields in the given projects and host_genome
+    # some extra information can be found here: https://github.com/chanzuckerberg/czid-web-private/pull/2938
+    metadata_fields_union = (Project.where(id: project_ids).includes(:metadata_fields).map(&:metadata_fields).flatten & HostGenome.where(id: host_genome_ids).includes(:metadata_fields).map(&:metadata_fields).flatten)
+    metadata_fields_union.map(&:field_info)
   end
 
   private
