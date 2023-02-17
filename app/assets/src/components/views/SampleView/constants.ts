@@ -324,6 +324,7 @@ export const SHORT_READ_TAXON_COUNT_TYPE_METRICS = [
 export const LONG_READ_TAXON_COUNT_TYPE_METRICS = [
   "bpm",
   "base_count",
+  "count",
   "contigs",
   "contig_b",
   "percent_identity",

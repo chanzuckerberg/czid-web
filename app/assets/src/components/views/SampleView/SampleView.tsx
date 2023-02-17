@@ -1802,7 +1802,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               getDownloadReportTableWithAppliedFiltersLink={
                 this.getDownloadReportTableWithAppliedFiltersLink
               }
-              hasAppliedFilters={hasAppliedFilters(selectedOptions)}
+              hasAppliedFilters={hasAppliedFilters(currentTab, selectedOptions)}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
               onShareClick={this.handleShareClick}

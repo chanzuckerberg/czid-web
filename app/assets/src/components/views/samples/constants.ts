@@ -95,7 +95,7 @@ export const LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS = {
   },
   nonHostReads: {
     tooltip: `Percentage of reads remaining after QC filtering (fastp),
-    removing host and human reads (minimap2), and subsampling to 100,000 reads.`,
+    removing host and human reads (minimap2), and subsampling to 3 million reads.`,
   },
   qcPercent: {
     tooltip: `Percentage of reads remaining after QC filtering (fastp) to remove
@@ -112,7 +112,7 @@ export const LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS = {
     tooltip: "Mean insert size is not calculated for Nanopore.",
   },
   subsampledFraction: {
-    tooltip: `After QC filtering and host/human data removal, the remaining reads are subsampled to 100,000. 
+    tooltip: `After QC filtering and host/human data removal, the remaining reads are subsampled to 3 million. 
     This field reflects the ratio of subsampled reads to total reads passing QC filtering and host/human data removal.`,
   },
 };

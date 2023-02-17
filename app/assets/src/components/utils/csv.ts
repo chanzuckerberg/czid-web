@@ -231,7 +231,7 @@ export const computeReportTableValuesForCSV = (
     }
   });
 
-  if (hasAppliedFilters(selectedOptions)) {
+  if (hasAppliedFilters(currentTab, selectedOptions)) {
     csvRows.push(
       createCSVRowForAppliedFilters(
         getAppliedFilters(selectedOptions),

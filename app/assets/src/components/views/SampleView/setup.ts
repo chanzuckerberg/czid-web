@@ -101,12 +101,13 @@ export const getAppliedFilters = (
   >;
 };
 
-export const hasAppliedFilters = selectedOptions => {
+export const hasAppliedFilters = (currentTab, selectedOptions) => {
   const {
     categories,
     readSpecificity,
     taxa,
     thresholdsShortReads,
+    thresholdsLongReads,
   } = selectedOptions;
 
   const hasCategoryFilters =
@@ -114,7 +115,11 @@ export const hasAppliedFilters = selectedOptions => {
     !isEmpty(getOr([], "subcategories.Viruses", categories));
   const hasReadSpecificityFilters = readSpecificity !== 0;
   const hasTaxonFilter = !isEmpty(taxa);
-  const hasThresholdFilters = !isEmpty(thresholdsShortReads);
+  const thresholds =
+    currentTab === TABS.SHORT_READ_MNGS
+      ? thresholdsShortReads
+      : thresholdsLongReads;
+  const hasThresholdFilters = !isEmpty(thresholds);
 
   return (
     hasCategoryFilters ||
