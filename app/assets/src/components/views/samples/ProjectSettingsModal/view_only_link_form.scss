@@ -23,18 +23,9 @@
   }
 
   .helpIcon {
-    fill: $sds-color-gray-300;
     margin-left: $sds-spaces-xs;
     display: inline-flex;
     vertical-align: middle;
-
-    &:hover {
-      fill: $sds-color-primary-400;
-
-      svg {
-        fill: $sds-color-primary-400;
-      }
-    }
   }
 
   .toggleContainer {

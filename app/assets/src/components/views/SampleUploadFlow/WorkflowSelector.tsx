@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { InputCheckbox, InputRadio, Icon, Tooltip } from "czifui";
+import { Icon, InputCheckbox, InputRadio, Tooltip } from "czifui";
 import { compact, find, map, size } from "lodash/fp";
 import React, { useState, useContext } from "react";
 
@@ -7,7 +7,6 @@ import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
-import { IconInfoSmall } from "~/components/ui/icons";
 import {
   ARTIC_PIPELINE_LINK,
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
@@ -142,7 +141,16 @@ const WorkflowSelector = ({
         <div className={cs.subheader}>
           Used Clear Labs:
           <ColumnHeaderTooltip
-            trigger={<IconInfoSmall className={cs.infoIcon} />}
+            trigger={
+              <span>
+                <Icon
+                  sdsIcon="infoCircle"
+                  sdsSize="s"
+                  sdsType="interactive"
+                  className={cs.infoIcon}
+                />
+              </span>
+            }
             content={
               "Pipeline will be adjusted to accomodate Clear Lab fastq files which have undergone the length filtering and trimming steps."
             }
@@ -169,7 +177,16 @@ const WorkflowSelector = ({
             <div className={cs.subheader}>
               Medaka Model:
               <ColumnHeaderTooltip
-                trigger={<IconInfoSmall className={cs.infoIcon} />}
+                trigger={
+                  <span>
+                    <Icon
+                      sdsIcon="infoCircle"
+                      sdsSize="s"
+                      sdsType="interactive"
+                      className={cs.infoIcon}
+                    />
+                  </span>
+                }
                 content={
                   "For best results, specify the correct model. Where a version of Guppy has been used without a corresponding model, choose a model with the highest version equal to or less than the Guppy version."
                 }
@@ -197,7 +214,16 @@ const WorkflowSelector = ({
             <div className={cs.subheader}>
               Medaka Model:
               <ColumnHeaderTooltip
-                trigger={<IconInfoSmall className={cs.infoIcon} />}
+                trigger={
+                  <span>
+                    <Icon
+                      sdsIcon="infoCircle"
+                      sdsSize="s"
+                      sdsType="interactive"
+                      className={cs.infoIcon}
+                    />
+                  </span>
+                }
                 content={
                   "Medaka is a tool to create consensus sequences and variant calls from Nanopore sequencing data."
                 }
@@ -349,7 +375,16 @@ const WorkflowSelector = ({
         <div className={cs.subheader}>
           {"Guppy Basecaller Setting:"}
           <ColumnHeaderTooltip
-            trigger={<IconInfoSmall className={cs.infoIcon} />}
+            trigger={
+              <span>
+                <Icon
+                  sdsIcon="infoCircle"
+                  sdsSize="s"
+                  sdsType="interactive"
+                  className={cs.infoIcon}
+                />
+              </span>
+            }
             content={
               "Specifies which basecalling model of 'Guppy' was used to generate the data. This will affect the pipeline parameters."
             }

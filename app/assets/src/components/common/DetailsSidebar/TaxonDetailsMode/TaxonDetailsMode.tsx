@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import React from "react";
 
 import { getTaxonDescriptions, getTaxonDistributionForBackground } from "~/api";
@@ -8,7 +9,6 @@ import Histogram, {
   HISTOGRAM_SCALE,
 } from "~/components/visualizations/Histogram";
 import { Background } from "~/interface/shared/specific";
-import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./taxon_details_mode.scss";
 
@@ -361,7 +361,12 @@ export default class TaxonDetailsMode extends React.Component<
               <ColumnHeaderTooltip
                 trigger={
                   <span>
-                    <IconInfoSmall className={cs.infoIcon} />
+                    <Icon
+                      sdsIcon="infoCircle"
+                      sdsSize="s"
+                      sdsType="interactive"
+                      className={cs.infoIcon}
+                    />
                   </span>
                 }
                 content="This chart shows how abundant (rPM) this taxon is in your

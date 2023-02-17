@@ -24,16 +24,9 @@
     }
 
     .infoIcon {
-      fill: $sds-color-gray-500;
-      height: $icon-s;
-      width: $icon-s;
       margin-left: $sds-spaces-xxs;
       margin-top: $sds-spaces-xxxs;
       vertical-align: -$sds-spaces-xxxs;
-
-      &:hover {
-        fill: $sds-color-primary-400;
-      }
     }
   }
 

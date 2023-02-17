@@ -15,10 +15,7 @@
 }
 
 .iconInfo {
-  fill: $sds-color-error-400;
+  fill: $sds-color-error-400 !important;
   margin-bottom: -$sds-spaces-xxxs;
   margin-left: $sds-spaces-xs;
-  &:hover {
-    fill: $sds-color-error-600;
-  }
 }

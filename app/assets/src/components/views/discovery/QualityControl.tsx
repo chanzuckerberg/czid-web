@@ -1,5 +1,6 @@
 import { useQuery } from "@apollo/client";
 import cx from "classnames";
+import { Icon } from "czifui";
 
 import d3 from "d3";
 import {
@@ -24,7 +25,6 @@ import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
 import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import { IconInfoSmall } from "~/components/ui/icons";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
@@ -818,14 +818,23 @@ function QualityControl({
                 Total Reads
                 <ColumnHeaderTooltip
                   trigger={
-                    <span>
-                      <IconInfoSmall
+                    <span
+                      onFocus={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
+                        );
+                      }}
+                      onMouseOver={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
+                        );
+                      }}
+                    >
+                      <Icon
+                        sdsIcon="infoCircle"
+                        sdsSize="s"
+                        sdsType="interactive"
                         className={cs.infoIcon}
-                        onMouseOver={() => {
-                          trackEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
-                          );
-                        }}
                       />
                     </span>
                   }
@@ -853,14 +862,23 @@ function QualityControl({
                 Passed QC
                 <ColumnHeaderTooltip
                   trigger={
-                    <span>
-                      <IconInfoSmall
+                    <span
+                      onFocus={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
+                        );
+                      }}
+                      onMouseOver={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
+                        );
+                      }}
+                    >
+                      <Icon
+                        sdsIcon="infoCircle"
+                        sdsSize="s"
+                        sdsType="interactive"
                         className={cs.infoIcon}
-                        onMouseOver={() => {
-                          trackEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
-                          );
-                        }}
                       />
                     </span>
                   }
@@ -888,14 +906,23 @@ function QualityControl({
                 Duplicate Compression Ratio
                 <ColumnHeaderTooltip
                   trigger={
-                    <span>
-                      <IconInfoSmall
+                    <span
+                      onFocus={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
+                        );
+                      }}
+                      onMouseOver={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
+                        );
+                      }}
+                    >
+                      <Icon
+                        sdsIcon="infoCircle"
+                        sdsSize="s"
+                        sdsType="interactive"
                         className={cs.infoIcon}
-                        onMouseOver={() => {
-                          trackEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
-                          );
-                        }}
                       />
                     </span>
                   }
@@ -932,14 +959,23 @@ function QualityControl({
                 Mean Insert Size
                 <ColumnHeaderTooltip
                   trigger={
-                    <span>
-                      <IconInfoSmall
+                    <span
+                      onFocus={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
+                        );
+                      }}
+                      onMouseOver={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
+                        );
+                      }}
+                    >
+                      <Icon
+                        sdsIcon="infoCircle"
+                        sdsSize="s"
+                        sdsType="interactive"
                         className={cs.infoIcon}
-                        onMouseOver={() => {
-                          trackEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
-                          );
-                        }}
                       />
                     </span>
                   }
@@ -957,14 +993,23 @@ function QualityControl({
                     samples.
                     <ColumnHeaderTooltip
                       trigger={
-                        <span>
-                          <IconInfoSmall
+                        <span
+                          onFocus={() => {
+                            trackEvent(
+                              ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
+                            );
+                          }}
+                          onMouseOver={() => {
+                            trackEvent(
+                              ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
+                            );
+                          }}
+                        >
+                          <Icon
+                            sdsIcon="infoCircle"
+                            sdsSize="s"
+                            sdsType="interactive"
                             className={cs.infoIcon}
-                            onMouseOver={() => {
-                              trackEvent(
-                                ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
-                              );
-                            }}
                           />
                         </span>
                       }
@@ -1041,14 +1086,23 @@ function QualityControl({
                 Reads Lost
                 <ColumnHeaderTooltip
                   trigger={
-                    <span>
-                      <IconInfoSmall
+                    <span
+                      onFocus={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
+                        );
+                      }}
+                      onMouseOver={() => {
+                        trackEvent(
+                          ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
+                        );
+                      }}
+                    >
+                      <Icon
+                        sdsIcon="infoCircle"
+                        sdsSize="s"
+                        sdsType="interactive"
                         className={cs.infoIcon}
-                        onMouseOver={() => {
-                          trackEvent(
-                            ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
-                          );
-                        }}
                       />
                     </span>
                   }
@@ -1141,7 +1195,12 @@ function QualityControl({
           <ColumnHeaderTooltip
             trigger={
               <span>
-                <IconInfoSmall className={cs.infoIcon} />
+                <Icon
+                  sdsIcon="infoCircle"
+                  sdsSize="s"
+                  sdsType="interactive"
+                  className={cs.infoIcon}
+                />
               </span>
             }
             content={content}

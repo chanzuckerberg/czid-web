@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import { isNull, toLower, trim } from "lodash/fp";
 import React from "react";
 
@@ -14,7 +15,6 @@ import {
 } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { IconInfoSmall } from "~/components/ui/icons";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import Input from "~ui/controls/Input";
@@ -262,7 +262,12 @@ class CollectionModal extends React.Component<
         />
         {!isNull(invalidBackgroundName) && (
           <div className={cs.errorMessageContainer}>
-            <IconInfoSmall className={cx(cs.infoIcon, cs.error)} />
+            <Icon
+              sdsIcon="infoCircle"
+              sdsSize="s"
+              sdsType="static"
+              className={cx(cs.infoIcon, cs.error)}
+            />
             <div className={cs.errorMessage}>
               Background model cannot be named &quot;{invalidBackgroundName}
               &quot;, please enter a different name.
@@ -283,7 +288,12 @@ class CollectionModal extends React.Component<
           <ColumnHeaderTooltip
             trigger={
               <span>
-                <IconInfoSmall className={cx(cs.infoIcon, cs.extraSpacing)} />
+                <Icon
+                  sdsIcon="infoCircle"
+                  sdsSize="s"
+                  sdsType="interactive"
+                  className={cx(cs.infoIcon, cs.extraSpacing)}
+                />
               </span>
             }
             content="Applied Correction Method is the method used when comparing a chosen set of samples against a background model."

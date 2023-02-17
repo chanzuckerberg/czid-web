@@ -2,12 +2,7 @@
 @import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
-.helpIcon {
-  fill: $sds-color-gray-400;
-}
-
 .tooltip {
   @include font-body-xs;
-
   text-align: left;
 }

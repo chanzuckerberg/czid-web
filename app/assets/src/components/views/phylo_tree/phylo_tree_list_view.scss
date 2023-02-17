@@ -87,6 +87,6 @@
   .infoIcon {
     margin: 1px $sds-spaces-xxs 0 0; // top margin is to align the icon with the text
     vertical-align: text-top;
-    fill: $sds-color-gray-400;
+    fill: $sds-color-gray-400 !important;
   }
 }

@@ -304,7 +304,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
               </div>
               <ProjectInfoIconTooltip
                 isPublic={project.public_access === 1}
-                // Offset required to align the carrot of the tooltip accurately on top of the IconInfoSmall.
+                // Offset required to align the carrot of the tooltip accurately on top of the info Icon.
                 // This issue is caused by nested div containers being passed to the prop "content" in the BasicPopup component
                 // @ts-expect-error Property 'offset' does not exist on type
                 offset={[-7, 0]}

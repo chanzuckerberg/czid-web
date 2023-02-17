@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import React from "react";
 
 import { getBackgrounds } from "~/api";
@@ -12,7 +13,6 @@ import {
 import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import List from "~/components/ui/List";
-import { IconInfoSmall } from "~/components/ui/icons";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { copyUrlToClipboard } from "~/helpers/url";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -328,7 +328,12 @@ class ViewOnlyLinkForm extends React.Component<
             <ColumnHeaderTooltip
               trigger={
                 <span>
-                  <IconInfoSmall className={cs.helpIcon} />
+                  <Icon
+                    sdsIcon="infoCircle"
+                    sdsSize="s"
+                    sdsType="interactive"
+                    className={cs.helpIcon}
+                  />
                 </span>
               }
               content={viewOnlyHelpText}

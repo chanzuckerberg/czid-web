@@ -8,14 +8,7 @@
 
   .projectInfoIcon {
     margin: 5px $sds-spaces-xxs 5px $sds-spaces-xxs;
-    height: 14px;
-    width: 14px;
-    fill: $sds-color-gray-500;
     vertical-align: text-top;
-
-    &:hover {
-      fill: $sds-color-primary-400;
-    }
   }
 }
 

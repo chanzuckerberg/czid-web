@@ -1,3 +1,4 @@
+import { Icon } from "czifui";
 import {
   pull,
   isEqual,
@@ -29,7 +30,6 @@ import {
   MultipleNestedDropdown,
   ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
-import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -603,7 +603,12 @@ const SamplesHeatmapControls = ({
         <ColumnHeaderTooltip
           trigger={
             <span>
-              <IconInfoSmall className={cs.infoIcon} />
+              <Icon
+                sdsIcon="infoCircle"
+                sdsSize="s"
+                sdsType="interactive"
+                className={cs.infoIcon}
+              />
             </span>
           }
           content={content}

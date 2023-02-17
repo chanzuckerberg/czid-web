@@ -1,8 +1,8 @@
+import { Icon } from "czifui";
 import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./map_banner.scss";
 
@@ -49,7 +49,12 @@ class MapBanner extends React.Component<MapBannerProps> {
               size="mini"
               trigger={
                 <span>
-                  <IconInfoSmall className={cs.infoIcon} />
+                  <Icon
+                    sdsIcon="infoCircle"
+                    sdsSize="s"
+                    sdsType="interactive"
+                    className={cs.infoIcon}
+                  />
                 </span>
               }
             />

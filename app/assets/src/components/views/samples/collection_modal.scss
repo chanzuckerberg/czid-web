@@ -25,17 +25,10 @@
     }
 
     .infoIcon {
-      height: $sds-spaces-l;
-      width: $sds-spaces-l;
-      fill: $sds-color-gray-500;
       vertical-align: text-top;
 
       &.error {
-        fill: $sds-color-error-600;
-      }
-
-      &:hover {
-        fill: $sds-color-primary-400;
+        fill: $sds-color-error-600 !important;
       }
     }
 

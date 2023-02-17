@@ -1,3 +1,4 @@
+import { Icon } from "czifui";
 import { isNull } from "lodash/fp";
 import React from "react";
 
@@ -8,7 +9,6 @@ import {
 } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { IconInfoSmall } from "~/components/ui/icons";
 import { VIRAL_CONSENSUS_GENOME_DOC_LINK } from "~/components/utils/documentationLinks";
 import { ConsensusGenomeData } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -169,7 +169,16 @@ export default class ConsensusGenomeCreationModal extends React.Component<
         <div className={cs.label}>
           Reference Accession
           <ColumnHeaderTooltip
-            trigger={<IconInfoSmall className={cs.infoIcon} />}
+            trigger={
+              <span>
+                <Icon
+                  sdsIcon="infoCircle"
+                  sdsSize="s"
+                  sdsType="interactive"
+                  className={cs.infoIcon}
+                />
+              </span>
+            }
             content={
               "Choose the reference accession you would like to map the non-host reads against to create a consensus genome."
             }

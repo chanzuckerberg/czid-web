@@ -1,7 +1,8 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import React from "react";
 
-import { IconLoading, IconSuccessSmall, IconInfoSmall } from "~ui/icons";
+import { IconLoading, IconSuccessSmall } from "~ui/icons";
 
 import cs from "./pipeline_viz.scss";
 
@@ -14,6 +15,7 @@ const PipelineVizStatusIcon = ({
   type,
   className,
 }: PipelineVizStatusIconProps) => {
+  type = "pipelineErrored";
   switch (type) {
     case "inProgress":
       return <IconLoading className={cx(className, cs.inProgressIcon)} />;
@@ -21,10 +23,22 @@ const PipelineVizStatusIcon = ({
       return <IconSuccessSmall className={cx(className, cs.finishedIcon)} />;
     case "pipelineErrored":
       return (
-        <IconInfoSmall className={cx(className, cs.pipelineErroredIcon)} />
+        <Icon
+          sdsIcon="infoCircle"
+          sdsSize="s"
+          sdsType="static"
+          className={cx(className, cs.pipelineErroredIcon)}
+        />
       );
     case "userErrored":
-      return <IconInfoSmall className={cx(className, cs.userErroredIcon)} />;
+      return (
+        <Icon
+          sdsIcon="infoCircle"
+          sdsSize="s"
+          sdsType="static"
+          className={cx(className, cs.userErroredIcon)}
+        />
+      );
     default:
       return null;
   }

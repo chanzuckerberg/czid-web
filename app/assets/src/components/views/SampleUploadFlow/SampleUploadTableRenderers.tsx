@@ -1,10 +1,10 @@
 import { cx } from "@emotion/css";
+import { Icon } from "czifui";
 import { get, isEmpty } from "lodash/fp";
 import React from "react";
 import { CellMeasurer, CellMeasurerCache } from "react-virtualized";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import IconInfoSmall from "~/components/ui/icons/IconInfoSmall";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import Checkbox from "~ui/controls/Checkbox";
 import cs from "./sample_upload_table_renderers.scss";
@@ -53,7 +53,12 @@ export default class SampleUploadTableRenderers extends React.Component {
                       <ColumnHeaderTooltip
                         trigger={
                           <span>
-                            <IconInfoSmall className={cs.iconInfo} />
+                            <Icon
+                              sdsIcon="infoCircle"
+                              sdsSize="s"
+                              sdsType="interactive"
+                              className={cs.iconInfo}
+                            />
                           </span>
                         }
                         content={cellData.error[fileName]}

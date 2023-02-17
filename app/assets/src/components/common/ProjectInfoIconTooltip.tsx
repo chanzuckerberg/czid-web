@@ -1,8 +1,7 @@
-import { Tooltip, TooltipProps } from "czifui";
+import { Icon, Tooltip, TooltipProps } from "czifui";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./project_info_icon_tooltip.scss";
 
@@ -35,7 +34,12 @@ const ProjectInfoIconTooltip = (props: ProjectInfoIconTooltipProps) => {
   return (
     <Tooltip arrow title={content} {...rest}>
       <span className={cs.centerSpan}>
-        <IconInfoSmall className={cs.projectInfoIcon} />
+        <Icon
+          sdsIcon="infoCircle"
+          sdsSize="s"
+          sdsType="interactive"
+          className={cs.projectInfoIcon}
+        />
       </span>
     </Tooltip>
   );

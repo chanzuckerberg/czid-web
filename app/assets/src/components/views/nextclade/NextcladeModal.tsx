@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Icon } from "czifui";
 import { difference, size } from "lodash/fp";
 import React from "react";
 
@@ -9,7 +10,6 @@ import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
-import { IconInfoSmall } from "~/components/ui/icons";
 import {
   NEXTCLADE_APP_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
@@ -171,7 +171,14 @@ export default class NextcladeModal extends React.Component<
     return (
       <ColumnHeaderTooltip
         trigger={
-          <IconInfoSmall className={cx(cs.infoIcon, iconStyle && iconStyle)} />
+          <span>
+            <Icon
+              sdsIcon="infoCircle"
+              sdsSize="s"
+              sdsType="interactive"
+              className={cx(cs.infoIcon, iconStyle && iconStyle)}
+            />
+          </span>
         }
         content={content}
         link={link}

@@ -1,8 +1,8 @@
+import { Icon } from "czifui";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import { IconInfoSmall } from "~ui/icons";
 import cs from "./help_icon.scss";
 
 interface HelpIconProps {
@@ -26,7 +26,12 @@ class HelpIcon extends React.Component<HelpIconProps> {
       <BasicPopup
         trigger={
           <div className={className} onMouseEnter={this.handleTriggerEnter}>
-            <IconInfoSmall className={cs.helpIcon} />
+            <Icon
+              sdsIcon="infoCircle"
+              sdsSize="s"
+              sdsType="interactive"
+              className={cs.helpIcon}
+            />
           </div>
         }
         hoverable

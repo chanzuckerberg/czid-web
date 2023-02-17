@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { ButtonIcon, Tooltip } from "czifui";
+import { ButtonIcon, Icon, Tooltip } from "czifui";
 import { set, find, isUndefined } from "lodash/fp";
 import React from "react";
 
@@ -40,7 +40,7 @@ import {
 } from "~/helpers/url";
 import Link from "~ui/controls/Link";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
-import { IconAlert, IconInfoSmall, IconLoading } from "~ui/icons";
+import { IconAlert, IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 
 import Divider from "../../layout/Divider";
@@ -631,7 +631,12 @@ class PhyloTreeListView extends React.Component<
     const onlyMatrixAvailable = currentTree && currentTree.clustermap_svg_url;
     return (
       <div className={cs.attributionsBanner}>
-        <IconInfoSmall className={cs.infoIcon} />
+        <Icon
+          sdsIcon="infoCircle"
+          sdsSize="s"
+          sdsType="static"
+          className={cs.infoIcon}
+        />
         <ExternalLink
           href={"https://github.com/simonrharris/SKA"}
           analyticsEventName={
