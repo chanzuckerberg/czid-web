@@ -382,9 +382,11 @@ class PipelineReportService
     flag_known_pathogens(species_counts)
     @timer.split("tag_pathogens")
 
-    # And tag pathogens that are likely clinically relevant for this sample
-    flag_lcrp_pathogens(species_counts)
-    @timer.split("flag_lcrp_pathogens")
+    if @lcrp
+      # And tag pathogens that are likely clinically relevant for this sample
+      flag_lcrp_pathogens(species_counts)
+      @timer.split("flag_lcrp_pathogens")
+    end
 
     structured_lineage = encode_taxon_lineage(lineage_by_tax_id)
     @timer.split("encode_taxon_lineage")
@@ -871,56 +873,21 @@ class PipelineReportService
   end
 
   def flag_lcrp_pathogens(species_counts)
-    nonvirus_tax_ids = []
+    flagged_taxa_by_pr_id = LcrpPathogensService.call(
+      pipeline_run_ids: [@pipeline_run.id],
+      background_id: @background&.id
+    )
+    flagged_taxa = flagged_taxa_by_pr_id[@pipeline_run.id] || {}
 
-    species_counts.each do |tax_id, tax_info|
-      # do preliminary filtering
-      taxon_passes_preliminary_filters = tax_info.dig(:nt, :alignment_length) and tax_info[:nt][:alignment_length] > 50 and
-        tax_info.dig(:nr, :count) and tax_info[:nr][:count] > 0 and (!tax_info[:nr][:z_score] or tax_info[:nr][:z_score] < 10)
-
-      taxon_is_a_virus = tax_info[:category] == 'viruses'
-
-      if taxon_passes_preliminary_filters
-        if taxon_is_a_virus && tax_info.dig(:nt, :rpm) && tax_info[:nt][:rpm] > 1 && tax_info.dig(:nr, :rpm) && tax_info[:nr][:rpm] > 1
-          # viruses have a simple check to determine if they are lcrp
-          (tax_info['pathogenFlags'] ||= []).push(FLAG_LCRP)
-        else
-          # non-viruses are placed into an array for later top 15/largest rpm drop analysis
-          nonvirus_tax_ids.append(tax_id)
-        end
-      end
-    end
-
-    top_15_by_rpm = nonvirus_tax_ids
-                    .sort_by do |tax_id|
-        if !species_counts.dig(tax_id, :nt, :rpm)
-          0
-        else
-          -species_counts[tax_id][:nt][:rpm]
-        end
-      end
-                    .slice(0, 15)
-
-    rpm_drops = top_15_by_rpm
-                .map { |tax_id| species_counts.dig(tax_id, :nt, :rpm) || 0 }
-                .each_cons(2)
-                .map { |rpms| rpms[0] - rpms[1] }
-
-    unless rpm_drops.empty?
-      largest_drop_index = rpm_drops.each_with_index.max[1]
-
-      tax_ids_above_drop = top_15_by_rpm.slice(0, largest_drop_index + 1)
-
-      # depends on flag_known_pathogens() being run previously
-      known_pathogen_tax_ids = tax_ids_above_drop.select { |tax_id| (species_counts[tax_id]['pathogenFlags'] || []).include?(FLAG_KNOWN_PATHOGEN) }
-
-      known_pathogen_tax_ids.each { |tax_id| (species_counts[tax_id]['pathogenFlags'] ||= []).push(FLAG_LCRP) }
+    flagged_taxa.each do |tax_id, flags_for_taxon|
+      tax_info = species_counts[tax_id]
+      (tax_info['pathogenFlags'] ||= []).concat(flags_for_taxon)
     end
   end
 
   def flag_known_pathogens(tax_map)
-    tax_map.each do |_, tax_info|
-      if @known_pathogens.include?(tax_info[:name])
+    tax_map.each do |tax_id, tax_info|
+      if @known_pathogens.include?(tax_id)
         tax_info['pathogenFlag'] = FLAG_KNOWN_PATHOGEN
         (tax_info['pathogenFlags'] ||= []).push(FLAG_KNOWN_PATHOGEN)
       end

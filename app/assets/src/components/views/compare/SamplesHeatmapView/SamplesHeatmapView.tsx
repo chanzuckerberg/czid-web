@@ -166,7 +166,7 @@ interface TaxonDetails {
   taxLevel?: number;
 }
 
-interface PathogenFlags {
+export interface PathogenFlags {
   [key: string]: {
     [key: string]: string[];
   };
@@ -756,22 +756,19 @@ class SamplesHeatmapView extends React.Component<
     let heatmapData, metadataFields;
     let knownPathogenList: number[], pathogenFlags: PathogenFlags;
     try {
-      [
-        heatmapData,
-        metadataFields,
-        knownPathogenList,
-        pathogenFlags,
-      ] = await Promise.all([
+      [heatmapData, metadataFields, knownPathogenList] = await Promise.all([
         this.fetchHeatmapData(validIds),
         this.fetchMetadataFieldsBySampleIds(validIds),
         useHeatmapPathogensFeature ? getKnownPathogens() : Promise.resolve([]),
-        useHeatmapPathogensFeature
-          ? getPathogenFlags({
-              sampleIds: validIds,
-              background: this.state.selectedOptions.background,
-            })
-          : Promise.resolve({}),
       ]);
+      // request pathogenFlags after heatmapData to ensure that all data required
+      // for the heatmap is already is ES for the pathogenFlags computation to use
+      pathogenFlags = useHeatmapPathogensFeature
+        ? await getPathogenFlags({
+            sampleIds: validIds,
+            background: this.state.selectedOptions.background,
+          })
+        : Promise.resolve({});
     } catch (err) {
       this.handleLoadingFailure(err);
       return; // Return early so that loadingFailed is not set to false later

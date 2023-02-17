@@ -740,7 +740,7 @@ RSpec.describe PipelineReportService, type: :service do
                                create(:pipeline_run,
                                       sample: create(:sample, project: create(:project))).id,
                              ])
-        @report = PipelineReportService.call(@pipeline_run, @background.id, known_pathogens: ["Escherichia coli", "Salmonella enterica"])
+        @report = PipelineReportService.call(@pipeline_run, @background.id, known_pathogens: [3, 5])
       end
 
       it "should not tag nonpathogenic genera" do

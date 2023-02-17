@@ -130,7 +130,7 @@ const getSampleTaxons = (params: $TSFixMe, cancelToken: $TSFixMe) =>
     cancelToken,
   });
 
-const getKnownPathogens = (): Promise<string[]> =>
+const getKnownPathogens = (): Promise<number[]> =>
   get("/visualizations/known_pathogens.json");
 
 const getPathogenFlags = (params: $TSFixMe) =>

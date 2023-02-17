@@ -1406,7 +1406,7 @@ export default class Heatmap {
           return color;
         })
         .style("stroke", (d: $TSFixMe) => {
-          if (d.pathogenFlags.includes("LCRP")) {
+          if (d.pathogenFlags.includes("lcrp")) {
             return "blue";
           } else if (d.pathogenFlags.includes("knownPathogen")) {
             return "green";

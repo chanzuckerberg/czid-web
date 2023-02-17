@@ -256,10 +256,13 @@ class VisualizationsController < ApplicationController
 
   def pathogen_flags
     pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
-    render json: LcrpPathogensService.call(
-      pr_id_to_sample_id: pr_id_to_sample_id,
-      background_id: background_for_heatmap
+    flags_by_pr_id = LcrpPathogensService.call(
+      pipeline_run_ids: pr_id_to_sample_id.keys(),
+      background_id: background_for_heatmap,
+      es_preflight_success: true # the user has already loaded the heatmap at this point so all es records are present
     )
+    flags_by_sample_id = flags_by_pr_id.map { |pr_id, flags| [pr_id_to_sample_id[pr_id], flags] }.to_h
+    render json: flags_by_sample_id
   end
 
   # Given a list of taxon ids, samples, and a background, returns the

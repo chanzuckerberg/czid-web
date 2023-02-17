@@ -8,6 +8,7 @@ import {
   MetagenomicTabsSample,
   WorkflowTabsSample,
 } from "~/components/utils/workflows";
+import { PathogenFlags } from "~/components/views/compare/SamplesHeatmapView/SamplesHeatmapView";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
@@ -106,6 +107,8 @@ export interface SampleViewState {
   enableMassNormalizedBackgrounds?: boolean;
   hasPersistedBackground: boolean;
   filteredReportData: Taxon[];
+  knownPathogens?: number[];
+  pathogenFlags?: PathogenFlags;
   lineageData?: { [key: string]: Lineage };
   loadingReport: boolean;
   loadingWorkflowRunResults: boolean;
