@@ -12,7 +12,7 @@ class SfnSingleStagePipelineDataService
     "RunHostFilter" => "Removes host reads",
     "RunHumanFilter" => "Removes human reads",
     "ReadLengthMetrics" => "Generates read length summary metrics",
-    "RunSubsampling" => "Subsamples to 3 million reads",
+    "RunSubsampling" => "Subsamples to 1 million reads",
     "PreAssemblyFasta" => "Converts subsampled read file from FASTQ to FASTA",
     "RunAssembly" => "Assembles subsampled, non-host reads using metaFlye",
     "RunReadsToContigs" => "Aligns reads back to contigs to identify reads associated with each contig and obtain non-contig reads",
