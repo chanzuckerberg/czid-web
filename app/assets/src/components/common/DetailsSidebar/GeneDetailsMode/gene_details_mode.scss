@@ -24,14 +24,6 @@
     padding-bottom: $sds-spaces-m;
   }
 
-  .text {
-    @include font-body-s;
-  }
-
-  .textSynonym {
-    @include font-header-xxs;
-  }
-
   .linksSection {
     &:after {
       content: "";
@@ -49,15 +41,6 @@
   .link {
     color: $sds-color-primary-400;
     cursor: pointer;
-  }
-
-  .expandLink {
-    @include font-body-s;
-    color: $sds-color-primary-400;
-    margin: $sds-spaces-m 0 0 0;
-    background-color: transparent;
-    border: none;
-    padding: 0;
   }
 }
 
