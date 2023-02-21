@@ -170,12 +170,13 @@ const ProjectCreationModal = ({
             <span
               className={cs.infoLink}
               onClick={() => setShowInfo(!showInfo)}
+              data-testid="more-less-info-btn"
             >
               {showInfo ? "Less Info" : "More Info"}
             </span>
           </div>
           {showInfo && (
-            <div className={cs.info}>
+            <div className={cs.info} data-testid="project-description-info">
               <div className={cs.title}>A project description may include:</div>
               <List
                 listItems={[

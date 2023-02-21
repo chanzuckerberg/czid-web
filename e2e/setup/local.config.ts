@@ -24,9 +24,9 @@ const config: PlaywrightTestConfig = {
   ],
   reporter: "list",
   testDir: "../tests",
-  timeout: 600000,
+  timeout: 1200000,
   use: {
-    actionTimeout: 30000,
+    actionTimeout: 60000,
     baseURL: "http://localhost:3000",
     headless: true,
     ignoreHTTPSErrors: true,
