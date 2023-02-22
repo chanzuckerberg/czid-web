@@ -203,7 +203,7 @@ const PreUploadQCCheck = ({
       const fileContents = await slicedFileToNewFile.text();
       const arr = fileContents.trim().split(/\n/);
       const lastFourLines = arr.slice(-4);
-      const fourLines = lastFourLines.join("\r\n");
+      const fourLines = lastFourLines.join("\n");
 
       // Create blob with last four lines and mount it
       const blob = {
