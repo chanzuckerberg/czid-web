@@ -15,7 +15,6 @@ const PipelineVizStatusIcon = ({
   type,
   className,
 }: PipelineVizStatusIconProps) => {
-  type = "pipelineErrored";
   switch (type) {
     case "inProgress":
       return <IconLoading className={cx(className, cs.inProgressIcon)} />;
