@@ -80,3 +80,7 @@ docker-compose.override.yml
 
 # BlessConfig
 blessclientconfig.yml
+
+# local dev controls
+.env.localdev
+.database_imported

@@ -10,3 +10,10 @@ node_modules
 
 # docker_data folder contains volume data for db and elasticsearch
 docker_data
+
+# Other files/folders that don't need to be added to images
+.github
+Makefile
+*.md
+.env*
+.database_imported
