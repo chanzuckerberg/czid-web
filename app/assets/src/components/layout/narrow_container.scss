@@ -8,6 +8,8 @@
   max-width: $narrow-container-width + 2 * $narrow-container-margin;
   margin: 0 auto;
   width: calc(100% - #{2 * $narrow-container-margin});
+  position: relative;
+  z-index: 1;
 
   &.small {
     max-width: 800px;

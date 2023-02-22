@@ -6,6 +6,8 @@
 .viewHeader {
   display: flex;
   align-items: center;
+  position: relative;
+  z-index: 3;
 
   .content {
     margin-right: 20px;

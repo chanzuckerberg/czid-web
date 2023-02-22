@@ -1,4 +1,4 @@
-import { Icon } from "czifui";
+import { ButtonIcon, Icon } from "czifui";
 import React, { useContext } from "react";
 
 import {
@@ -17,7 +17,7 @@ import {
   SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
-import { MICROBIOME_DOWNLOAD_FEATURE } from "~/components/utils/features";
+import { MICROBIOME_DOWNLOAD_FEATURE , HEATMAP_FILTERS_LEFT_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { logDownloadOption } from "~/components/views/report/utils/download";
 import {
@@ -35,6 +35,8 @@ import {
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { DOWNLOAD_OPTIONS } from "./constants";
 
+
+
 import cs from "./samples_heatmap_view.scss";
 
 interface SamplesHeatmapHeaderProps {
@@ -51,6 +53,7 @@ interface SamplesHeatmapHeaderProps {
   onNewPresetsClick?: $TSFixMeFunction;
   onShareClick: $TSFixMeFunction;
   onSaveClick: $TSFixMeFunction;
+  onFilterToggleClick: $TSFixMeFunction;
 }
 
 const SamplesHeatmapHeader = ({
@@ -67,6 +70,7 @@ const SamplesHeatmapHeader = ({
   onNewPresetsClick,
   onShareClick,
   onSaveClick,
+  onFilterToggleClick,
 }: SamplesHeatmapHeaderProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
@@ -135,13 +139,66 @@ const SamplesHeatmapHeader = ({
 
   const showNewPresetsButton =
     allowedFeatures.includes("taxon_heatmap_presets") && !!presets.length;
-  return (
-    <ViewHeader className={cs.viewHeader}>
+
+  const showNewFilterButton = allowedFeatures.includes(
+    HEATMAP_FILTERS_LEFT_FEATURE,
+  );
+
+  const renderFilterToggleButton = () => {
+    return (
+      <ButtonIcon
+        onClick={onFilterToggleClick}
+        sdsIcon="slidersHorizontal"
+        sdsSize="large"
+        sdsType="primary"
+        sx={{ marginRight: "10px" }}
+      ></ButtonIcon>
+    );
+  };
+
+  // TODO (smb): rename this and remove old version once heatmap filters roll out
+  const renderNewViewHeaderContent = () => {
+    return (
+      <ViewHeader.Content>
+        <div className={cs.contentContainer}>
+          <div className={cs.contentColumn}>
+            {/* First column */}
+            <div className={cs.contentSpacer} />
+            {renderFilterToggleButton()}
+          </div>
+
+          <div className={cs.contentColumn}>
+            {/* Second column */}
+            <ViewHeader.Pretitle>
+              <>Comparing {sampleIds ? sampleIds.length : ""} Samples</>
+            </ViewHeader.Pretitle>
+            <ViewHeader.Title
+              // @ts-expect-error Type 'Element' is not assignable to type 'string'.
+              label={
+                heatmapId ? (
+                  <EditableInput
+                    value={heatmapName || "Heatmap"}
+                    className={cs.name}
+                    onDoneEditing={handleHeatmapRename}
+                    getWarningMessage={getWarningMessage}
+                  />
+                ) : (
+                  <>Heatmap</>
+                )
+              }
+            />
+          </div>
+        </div>
+      </ViewHeader.Content>
+    );
+  };
+
+  const renderOldViewHeaderContent = () => {
+    return (
       <ViewHeader.Content>
         <ViewHeader.Pretitle>
           <>Comparing {sampleIds ? sampleIds.length : ""} Samples</>
         </ViewHeader.Pretitle>
-
         <ViewHeader.Title
           // @ts-expect-error Type 'Element' is not assignable to type 'string'.
           label={
@@ -158,6 +215,16 @@ const SamplesHeatmapHeader = ({
           }
         />
       </ViewHeader.Content>
+    );
+  };
+
+  return (
+    <ViewHeader
+      className={!showNewFilterButton ? cs.newViewHeader : cs.viewHeader}
+    >
+      {showNewFilterButton
+        ? renderNewViewHeaderContent()
+        : renderOldViewHeaderContent()}
       <ViewHeader.Controls className={cs.controls}>
         {showNewPresetsButton && (
           <ColumnHeaderTooltip

@@ -40,6 +40,7 @@ import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
 import { NarrowContainer } from "~/components/layout";
+import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
@@ -77,7 +78,7 @@ import SamplesHeatmapControls, {
   SamplesHeatmapControlsProps,
 } from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
-import SamplesHeatmapFiltersLeft from "./SamplesHeatmapFilterPanel";
+import SamplesHeatmapFiltersContent from "./SamplesHeatmapFiltersContent";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 import {
   BACKGROUND_METRICS,
@@ -2058,6 +2059,7 @@ class SamplesHeatmapView extends React.Component<
           onNewPresetsClick={this.handleHeatmapCreationModalOpen}
           onShareClick={this.handleShareClick}
           onSaveClick={this.handleSaveClick}
+          onFilterToggleClick={this.toggleDisplayFilters}
         />
       </NarrowContainer>
     );
@@ -2131,10 +2133,16 @@ class SamplesHeatmapView extends React.Component<
       HEATMAP_FILTERS_LEFT_FEATURE,
     );
 
+    // TODO (smb): move this container div to the new header component once new filters are fully rolled out
     return useNewFilters ? (
       <>
-        {this.renderHeader(sampleIds, loading)}
-        <SamplesHeatmapFiltersLeft />
+        <div className={cs.newViewHeader}>
+          {this.renderHeader(sampleIds, loading)}
+        </div>
+        <FilterPanel
+          hideFilters={this.state.hideFilters}
+          content={<SamplesHeatmapFiltersContent />}
+        />
       </>
     ) : (
       this.renderOriginalFilters(shownTaxa)
