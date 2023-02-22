@@ -38,12 +38,12 @@ import {
 import cs from "./workflow_selector.scss";
 
 interface WorkflowSelectorProps {
-  onClearLabsChange?: $TSFixMeFunction;
-  onMedakaModelChange?: $TSFixMeFunction;
-  onTechnologyToggle?: $TSFixMeFunction;
-  onGuppyBasecallerSettingChange?: $TSFixMeFunction;
-  onWetlabProtocolChange?: $TSFixMeFunction;
-  onWorkflowToggle?: $TSFixMeFunction;
+  onClearLabsChange?: (usedClearLabs: boolean) => void;
+  onMedakaModelChange?: (selected: string) => void;
+  onTechnologyToggle?: (technology: string) => void;
+  onGuppyBasecallerSettingChange?: (selected: string) => void;
+  onWetlabProtocolChange?: (selected: string) => void;
+  onWorkflowToggle?: (workflow: string) => void;
   currentTab?: string;
   selectedMedakaModel?: string;
   selectedGuppyBasecallerSetting?: string;
@@ -104,10 +104,7 @@ const WorkflowSelector = ({
           illuminaTechnologyOptionSelected && cs.selected,
         )}
         onClick={() =>
-          onTechnologyToggle(
-            SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
-            workflowKey,
-          )
+          onTechnologyToggle(SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA)
         }
       >
         <InputRadio
@@ -282,10 +279,7 @@ const WorkflowSelector = ({
         onClick={() =>
           shouldDisableOption
             ? null
-            : onTechnologyToggle(
-                SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE,
-                workflowKey,
-              )
+            : onTechnologyToggle(SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE)
         }
       >
         {radioButton}
@@ -351,7 +345,7 @@ const WorkflowSelector = ({
         <div className={cs.subheader}>Wetlab Protocol&#58;</div>
         <Dropdown
           className={cs.dropdown}
-          onChange={(value: $TSFixMe) => {
+          onChange={(value: string) => {
             onWetlabProtocolChange(value);
             trackEvent("WorkflowSelector_wetlab-protocol_selected", {
               wetlabOption: value,

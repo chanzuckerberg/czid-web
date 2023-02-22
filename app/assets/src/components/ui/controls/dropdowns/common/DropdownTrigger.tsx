@@ -18,76 +18,49 @@ interface DropdownTriggerProps {
   disableMarginRight?: boolean;
 }
 
-interface DropdownTriggerState {
-  hideDropdownLabel: boolean;
-}
-
-class DropdownTrigger extends React.Component<
-  DropdownTriggerProps,
-  DropdownTriggerState
-> {
-  resizeObserver: $TSFixMe;
-  constructor(props: DropdownTriggerProps) {
-    super(props);
-
-    this.resizeObserver = null;
-
-    this.state = {
-      hideDropdownLabel: false,
-    };
-  }
-
-  render() {
-    const {
-      active,
-      className,
-      disabled,
-      erred,
-      disableMarginRight,
-      itemSubtext,
-      label,
-      onClick,
-      placeholder,
-      rounded,
-      value,
-    } = this.props;
-
-    return (
-      <div
-        className={cx(
-          className,
-          cs.dropdownTrigger,
-          rounded && cs.rounded,
-          active && cs.active,
-          disabled && cs.disabled,
-          erred && cs.erred,
-        )}
-        onClick={onClick}
-      >
-        <div className={cs.labelContainer}>
-          {label && (
-            <span
-              className={cx(
-                cs.label,
-                disableMarginRight && cs.disableMarginRight,
-              )}
-            >
-              {label}
-            </span>
-          )}
+const DropdownTrigger = ({
+  active,
+  className,
+  disabled,
+  erred,
+  disableMarginRight,
+  itemSubtext,
+  label,
+  onClick,
+  placeholder,
+  rounded,
+  value,
+}: DropdownTriggerProps) => {
+  return (
+    <div
+      className={cx(
+        className,
+        cs.dropdownTrigger,
+        rounded && cs.rounded,
+        active && cs.active,
+        disabled && cs.disabled,
+        erred && cs.erred,
+      )}
+      onClick={onClick}
+    >
+      <div className={cs.labelContainer}>
+        {label && (
           <span
             className={cx(
-              this.state.hideDropdownLabel && cs.hide,
-              isNil(value) && cs.placeholder,
+              cs.label,
+              disableMarginRight && cs.disableMarginRight,
             )}
           >
-            {value || placeholder}
+            {label}
           </span>
-          {itemSubtext && <span className={cs.itemSubtext}>{itemSubtext}</span>}
-        </div>
+        )}
+        <span className={cx(isNil(value) && cs.placeholder)}>
+          {value || placeholder}
+        </span>
+        {itemSubtext && <span className={cs.itemSubtext}>{itemSubtext}</span>}
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default DropdownTrigger;

@@ -9,7 +9,7 @@ const SPECIFICITY_OPTIONS = [
 
 interface SpecificityFilterProps {
   disabled?: boolean;
-  onChange: $TSFixMeFunction;
+  onChange: (value: string) => void;
   value: number;
 }
 

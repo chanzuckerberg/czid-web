@@ -276,7 +276,7 @@ class BulkDownloadModalOptions extends React.Component<
             fluid
             placeholder={placeholder}
             options={dropdownOptions}
-            onChange={(value: string, displayName) => {
+            onChange={(value: string, displayName: string) => {
               onFieldSelect(downloadType.type, field.type, value, displayName);
 
               // Reset conditional fields if they are no longer needed.
