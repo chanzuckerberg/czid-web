@@ -4,6 +4,7 @@ import {
   find,
   findIndex,
   filter,
+  kebabCase,
   keys,
   pick,
   pickBy,
@@ -1183,7 +1184,10 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
           this.handleTabChange(selectedTabIndex)
         }
       >
-        <Tab label={LOCAL_UPLOAD_LABEL}></Tab>
+        <Tab
+          label={LOCAL_UPLOAD_LABEL}
+          data-testid={kebabCase(LOCAL_UPLOAD_LABEL)}
+        ></Tab>
         {(admin || biohubS3UploadEnabled) && s3Tab}
         {basespaceTab}
       </Tabs>
@@ -1191,7 +1195,13 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   };
 
   renderUploadTab = (disabled: $TSFixMe, label: $TSFixMe) => {
-    let tab = <Tab disabled={disabled} label={label}></Tab>;
+    let tab = (
+      <Tab
+        disabled={disabled}
+        label={label}
+        data-testid={kebabCase(label)}
+      ></Tab>
+    );
     if (disabled) {
       tab = (
         <Tooltip

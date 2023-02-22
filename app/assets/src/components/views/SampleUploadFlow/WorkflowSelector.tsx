@@ -1,6 +1,6 @@
 import cx from "classnames";
 import { Icon, InputCheckbox, InputRadio, Tooltip } from "czifui";
-import { compact, find, map, size } from "lodash/fp";
+import { compact, find, kebabCase, map, size } from "lodash/fp";
 import React, { useState, useContext } from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -106,6 +106,9 @@ const WorkflowSelector = ({
         onClick={() =>
           onTechnologyToggle(SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA)
         }
+        data-testid={`sequencing-technology-${kebabCase(
+          SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA,
+        )}`}
       >
         <InputRadio
           stage={illuminaTechnologyOptionSelected ? "checked" : "unchecked"}
@@ -281,6 +284,9 @@ const WorkflowSelector = ({
             ? null
             : onTechnologyToggle(SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE)
         }
+        data-testid={`sequencing-technology-${kebabCase(
+          SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE,
+        )}`}
       >
         {radioButton}
         <div className={cs.optionText}>
@@ -552,6 +558,7 @@ const WorkflowSelector = ({
               onMouseEnter={() => setWorkflowOptionHovered(workflow)}
               onMouseLeave={() => setWorkflowOptionHovered(null)}
               key={title}
+              data-testid={`analysis-type-${kebabCase(title)}`}
             >
               {radioOption}
               <div className={cs.iconSample}>
@@ -563,12 +570,7 @@ const WorkflowSelector = ({
                 />
               </div>
               <div className={cs.optionText}>
-                <div
-                  className={cx(cs.title, beta && cs.alignBetaIcon)}
-                  data-testid={`analysis-type-${title
-                    .replaceAll(" ", "-")
-                    .toLocaleLowerCase()}`}
-                >
+                <div className={cx(cs.title, beta && cs.alignBetaIcon)}>
                   <span>{title}</span>
                   {beta && (
                     <span className={cs.statusLabel}>
