@@ -15,7 +15,7 @@ const config: PlaywrightTestConfig = {
 
   fullyParallel: true,
   globalSetup: "./globalSetup",
-  outputDir: "../report",
+  outputDir: "../reports",
   projects: [
     {
       name: "chromium",
@@ -35,7 +35,7 @@ const config: PlaywrightTestConfig = {
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
     storageState: "/tmp/state.json",
-    trace: "on-first-retry",
+    trace: "on",
     viewport: { width: 800, height: 7200 },
   },
 };

@@ -12,7 +12,7 @@ const config: PlaywrightTestConfig = {
   },
   fullyParallel: true,
   globalSetup: "./globalSetup",
-  outputDir: "../report",
+  outputDir: "../reports",
   projects: [
     {
       name: "chromium",
@@ -24,9 +24,9 @@ const config: PlaywrightTestConfig = {
   ],
   reporter: "list",
   testDir: "../tests",
-  timeout: 1200000,
+  timeout: 600000,
   use: {
-    actionTimeout: 60000,
+    actionTimeout: 30000,
     baseURL: "http://localhost:3000",
     headless: true,
     ignoreHTTPSErrors: true,

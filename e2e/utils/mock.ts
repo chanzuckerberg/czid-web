@@ -21,7 +21,7 @@ const baseUrl = process.env.BASEURL as string;
 export async function mockResponse(
   page: Page,
   context: BrowserContext,
-  elementToCheckOnThePage?: string
+  elementToCheckOnThePage?: string,
 ) {
   const workflowData = getFixture("workflows");
   const projectData = getFixture("projects");
@@ -32,7 +32,7 @@ export async function mockResponse(
   const projectUrl = `${baseUrl}/public`;
 
   await Promise.all([
-    await context.route(locationApi, async (route) => {
+    await context.route(locationApi, async route => {
       const response = await context.request.get(locationApi);
       expect(response.ok()).toBeTruthy();
       route.fulfill({
@@ -40,7 +40,7 @@ export async function mockResponse(
         body: JSON.stringify(locationData),
       });
     }),
-    await context.route(workflowApi, async (route) => {
+    await context.route(workflowApi, async route => {
       const response = await context.request.get(workflowApi);
       expect(response.ok()).toBeTruthy();
       route.fulfill({
@@ -48,7 +48,7 @@ export async function mockResponse(
         body: JSON.stringify(workflowData),
       });
     }),
-    await context.route(projectApi, async (route) => {
+    await context.route(projectApi, async route => {
       const response = await context.request.get(projectApi);
       expect(response.ok()).toBeTruthy();
       route.fulfill({
@@ -57,14 +57,14 @@ export async function mockResponse(
       });
     }),
     page.waitForResponse(
-      (resp) =>
-        resp.url().includes(`${API.SAMPLE_LOCATION}`) && resp.status() === 200
+      resp =>
+        resp.url().includes(`${API.SAMPLE_LOCATION}`) && resp.status() === 200,
     ),
     page.waitForResponse(
-      (resp) => resp.url().includes(`${API.PROJECT}`) && resp.status() === 200
+      resp => resp.url().includes(`${API.PROJECT}`) && resp.status() === 200,
     ),
     page.waitForResponse(
-      (resp) => resp.url().includes(`${API.WORKFLOW}`) && resp.status() === 200
+      resp => resp.url().includes(`${API.WORKFLOW}`) && resp.status() === 200,
     ),
 
     await page.goto(projectUrl),

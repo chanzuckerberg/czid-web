@@ -41,7 +41,7 @@ export async function uploadSampleFiles(
   page: Page,
   projectName: string,
   analysisType: string,
-  sampleFiles: Array<string>
+  sampleFiles: Array<string>,
 ): Promise<any> {
   // select project
   await page.locator(getByText(SELECT_PROJECT)).click();
@@ -64,13 +64,19 @@ export async function uploadSampleFiles(
 
 export async function fillMetadata(
   page: Page,
-  metaData: Metadata
+  metaData: Metadata,
 ): Promise<any> {
   // host organism
-  await page.locator(TEXT_INPUT).nth(0).fill(String(metaData[HOST_ORGANISM]));
+  await page
+    .locator(TEXT_INPUT)
+    .nth(0)
+    .fill(String(metaData[HOST_ORGANISM]));
 
   // sample type
-  await page.locator(TEXT_INPUT).nth(1).fill(String(metaData[SAMPLE_TYPE]));
+  await page
+    .locator(TEXT_INPUT)
+    .nth(1)
+    .fill(String(metaData[SAMPLE_TYPE]));
 
   // water control
   if (metaData["Water Control"] === "Yes") {
@@ -84,7 +90,10 @@ export async function fillMetadata(
     .fill(metaData[COLLECTION_DATE] as string);
 
   // nucleotide type
-  await page.locator(".dropdownTrigger-1fB9V").nth(1).click();
+  await page
+    .locator(".dropdownTrigger-1fB9V")
+    .nth(1)
+    .click();
   await page.locator(getByText(metaData["Nucleotide Type"] as string)).click();
 
   // collection location
@@ -132,7 +141,10 @@ export async function fillMetadata(
   await page.locator(getByText(metaData[INFECTION_CLASS] as string)).click();
 
   // host age
-  await page.locator(NUMBER_INPUT).nth(0).fill(String(metaData["Host Age"]));
+  await page
+    .locator(NUMBER_INPUT)
+    .nth(0)
+    .fill(String(metaData["Host Age"]));
 
   // detection method
   await page
@@ -149,7 +161,10 @@ export async function fillMetadata(
   await page.locator(getByText(metaData["Sequencer"] as string)).click();
 
   // rna/dna input (ng)
-  await page.locator(NUMBER_INPUT).nth(1).fill(String(metaData[RNA_DNA]));
+  await page
+    .locator(NUMBER_INPUT)
+    .nth(1)
+    .fill(String(metaData[RNA_DNA]));
 
   // host genus species
   const hostGenusSpecies = "host_genus_species";
@@ -171,7 +186,10 @@ export async function fillMetadata(
 
   // click continue button
   const continueButtonIndex = 1;
-  await page.locator(getByText(CONTINUE)).nth(continueButtonIndex).click();
+  await page
+    .locator(getByText(CONTINUE))
+    .nth(continueButtonIndex)
+    .click();
 }
 
 export async function submitUpload(page: Page): Promise<any> {
@@ -180,7 +198,7 @@ export async function submitUpload(page: Page): Promise<any> {
 }
 
 export async function getGeneratedSampleName(
-  page: Page
+  page: Page,
 ): Promise<string | null> {
   return page.locator(getByTestID("sample-name")).textContent();
 }

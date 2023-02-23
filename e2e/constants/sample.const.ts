@@ -1,7 +1,8 @@
 export const VIEWS = ".reportViewSelector-1i1wY a";
 export const TREE_NODES = ".clickable";
 export const KNOWN_PATHOGEN =
-  "(//div[@class='ui red medium label pathogenLabel-10iFi label-c76vR'][normalize-space()='Known Pathogen'])[1]";
+  "div[class='node-overlay node-overlay__573'] div[class='ui red medium label pathogenLabel-10iFi label-c76vR']";
+
 export const PATHOGEN_POPUP = ".pathogenLabelPopup-drI1l";
 export const PATHOGEN_POPUP_TEXT =
   "Organism with known human pathogenicity. See the full list of pathogens.";
@@ -96,34 +97,6 @@ export const PIPELINE_INFO = "Pipeline Info";
 export const READS_REMAINING = "Reads Remaining";
 export const ERCC = "ERCC Spike-In Counts";
 export const DOWNLOADS = "Downloads";
-export const ALL_SAMPLE_INFO = [
-  "Sample Name",
-  "Project",
-  "Upload Date",
-  "Host",
-  "Collection Date",
-  "Collection Location",
-  "Isolate",
-  "Nucleotide Type",
-  "Water Control",
-];
-export const ALL_HOST_INFO = [
-  "Antibiotic Administered",
-  "Comorbidity",
-  "Diseases and Conditions",
-  "Host Age",
-  "Host Genus Species",
-  "Host ID",
-  "Host Race/Ethnicity",
-  "Host Sex",
-  "Immunocompromised",
-  "Primary Diagnosis",
-];
-export const ALL_SEQUENCING_INFO = [
-  "Library Prep",
-  "RNA/DNA Input (ng)",
-  "Sequencer",
-];
 
 export const EDIT_METADATA = ".editLink-Nhfe2";
 export const METADATA_DROP_DOWN = ".field-2_Ouc  .dropdownTrigger-1fB9V";
@@ -177,13 +150,6 @@ export const SEQUENCING_INFO_DROP_DOWN = [
     "Other",
   ],
   ["MiSeq", "NextSeq", "HiSeq", "NovaSeq", "Other"],
-];
-
-export const All_INFECTION_INFO = [
-  "Ct Value",
-  "Detection Method",
-  "Infection Class",
-  "Known Organism",
 ];
 
 export const COLUMNS_LABEL = ".label-33v00";

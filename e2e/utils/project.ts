@@ -59,7 +59,7 @@ export async function goToProjectSamples(
   page: Page,
   projectName: string,
   workflowIndex: number,
-  myData = false
+  myData = false,
 ) {
   const dataType = myData ? "my_data" : "public";
   const placeholderText = myData ? "Search My Data..." : "Search Public...";
@@ -67,11 +67,17 @@ export async function goToProjectSamples(
   await page.waitForTimeout(2000);
   await page.locator(getByPlaceholder(placeholderText)).fill(projectName);
   await page.keyboard.press("Enter");
-  await page.getByText(projectName).nth(0).click();
+  await page
+    .getByText(projectName)
+    .nth(0)
+    .click();
 
   // select workflow type
   // todo: uncomment once testIds get to staging
   // await page.locator(getByTestID(tabId)).click();
   // todo: remove this line once testIds are in staging
-  await page.locator(".tabLabel-3vqpD").nth(workflowIndex).click();
+  await page
+    .locator(".tabLabel-3vqpD")
+    .nth(workflowIndex)
+    .click();
 }

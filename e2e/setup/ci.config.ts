@@ -1,7 +1,6 @@
-import { PlaywrightTestConfig } from "@playwright/test";
-import { devices } from "@playwright/test";
-import dotenv from "dotenv";
 import path from "path";
+import { devices, PlaywrightTestConfig } from "@playwright/test";
+import dotenv from "dotenv";
 
 dotenv.config({
   path: path.resolve(__dirname, "../../", ".env.dev"),
@@ -13,8 +12,7 @@ const config: PlaywrightTestConfig = {
   },
   fullyParallel: true,
   globalSetup: "./globalSetup",
-  // globalTeardown: "./globalTeardown",
-  outputDir: "../report",
+  outputDir: "../reports",
   projects: [
     {
       name: "chromium",

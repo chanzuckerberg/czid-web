@@ -37,7 +37,7 @@ let excludedFields: Array<string> | undefined;
 export function getMetadata(
   sampleName: string,
   defaultData?: Metadata,
-  exclusions?: Array<string>
+  exclusions?: Array<string>,
 ): Metadata {
   defaults = defaultData;
   excludedFields = exclusions;
@@ -53,7 +53,7 @@ export function getMetadata(
 export function generateMetadataFile(
   fileName: string,
   defaultData?: Metadata,
-  exclusions?: Array<string>
+  exclusions?: Array<string>,
 ) {
   defaults = defaultData;
   excludedFields = exclusions;
@@ -147,7 +147,7 @@ export function generateWorkflowData(
   workflowName: string,
   projectId: number,
   sampleName: string,
-  filter: Filter
+  filter: Filter,
 ): Workflow {
   const workflow = getFixture("workflows");
   workflow.id = getRandomNumber(1000, 9999);
@@ -194,12 +194,12 @@ export function generateLocation(defaults: SampleLocation): SampleLocation {
  * @returns sample name string
  */
 export function generateSampleName(
-  analysisType: keyof typeof AnalysisTypes
+  analysisType: keyof typeof AnalysisTypes,
 ): string {
   const minNumber = 10000;
   const maxNumber = 99999;
   return `${analysisType.replace(" ", "-")}-${getRandomNumber(
     minNumber,
-    maxNumber
+    maxNumber,
   )}`;
 }

@@ -20,15 +20,9 @@ async function globalSetup(config: FullConfig): Promise<void> {
   if (process.env.NODE_ENV === "ci") {
     process.env.CI = "true";
   }
-  let username;
-  let password;
-  if (process.env.NODE_ENV === "ci" || process.env.NODE_ENV === "local") {
-    username = process.env.CZID_USERNAME;
-    password = process.env.CZID_PASSWORD;
-  } else {
-    username = process.env.USERNAME;
-    password = process.env.PASSWORD;
-  }
+  const username = process.env.CZID_USERNAME;
+  const password = process.env.CZID_PASSWORD;
+
   if (process.env.NODE_ENV === "ci" || !checkCookies()) {
     const browser = await chromium.launch();
     const page = await browser.newPage();

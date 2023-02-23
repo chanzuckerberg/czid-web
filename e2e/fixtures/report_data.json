@@ -1,0 +1,145 @@
+{
+  "SAMPLE_INFO_DATA": [
+    { "id": 0, "name": "Sample Name", "value": "RR004_water_2_S23D_1" },
+    { "id": 1, "name": "Project", "value": "floo Neptunium" },
+    { "id": 2, "name": "Upload Date", "value": "2022-11-07" },
+    { "id": 3, "name": "Host", "value": "Human" },
+    { "id": 4, "name": "Collection Date", "value": "2022-12" },
+    { "id": 5, "name": "Collection Location", "value": "Colorado, USA" },
+    { "id": 6, "name": "Isolate", "value": "Yes" },
+    { "id": 7, "name": "Nucleotide Type", "value": "DNA" },
+    { "id": 8, "name": "Sample Type", "value": "Nasopharyngeal Swab" },
+    { "id": 9, "name": "Water Control", "value": "Yes" }
+  ],
+  "HOST_INFO_DATA": [
+    {
+      "id": 0,
+      "name": "Diseases and Conditions",
+      "value": "Meningoencephalitis"
+    },
+    { "id": 1, "name": "Host Age", "value": "43.0" },
+    { "id": 2, "name": "Host Genus Species", "value": "Aedes aegypti" },
+    { "id": 3, "name": "Host Sex", "value": "Male" }
+  ],
+  "SEQUENCING_INFO_DATA": [
+    { "id": 0, "name": "Library Prep", "value": "--" },
+    { "id": 1, "name": "RNA/DNA Input (ng)", "value": "--" },
+    { "id": 2, "name": "Sequencer", "value": "--" }
+  ],
+  "INFECTION_INFO_DATA": [
+    { "id": 0, "name": "Ct Value", "value": "--" },
+    { "id": 1, "name": "Detection Method", "value": "--" },
+    { "id": 2, "name": "Infection Class", "value": "--" },
+    { "id": 3, "name": "Known Organism", "value": "--" }
+  ],
+  "PIPELINE_INFO_DATA": [
+    { "id": 0, "name": "Analysis Type", "value": "Metagenomic" },
+    { "id": 1, "name": "Sequencing Platform", "value": "Illumina" },
+    {
+      "id": 2,
+      "name": "Pipeline Version",
+      "value": "v7.1View Pipeline Visualization>"
+    },
+    { "id": 3, "name": "NCBI Index Date", "value": "2021-01-22" },
+    { "id": 4, "name": "Host Subtracted", "value": "Human" },
+    { "id": 5, "name": "Total Reads", "value": "966,902" },
+    { "id": 6, "name": "ERCC Reads", "value": "--" },
+    { "id": 7, "name": "Passed Filters", "value": "35,632 (3.69%)" },
+    { "id": 8, "name": "Unmapped Reads", "value": "4,924" },
+    { "id": 9, "name": "Passed Quality Control", "value": "78.14%" },
+    { "id": 10, "name": "Compression Ratio", "value": "1.05" },
+    { "id": 11, "name": "Mean Insert Size", "value": "250±117" },
+    { "id": 12, "name": "Date Processed", "value": "2022-11-02" }
+  ],
+  "READS_REMAINING_DATA": [
+    {
+      "id": 0,
+      "step": "Validate Input",
+      "reads_remaining": "561",
+      "reads_remaining_percent": "100.00%"
+    },
+    {
+      "id": 1,
+      "step": "STAR",
+      "reads_remaining": "549",
+      "reads_remaining_percent": "97.86%"
+    },
+    {
+      "id": 2,
+      "step": "Trimmomatic",
+      "reads_remaining": "455",
+      "reads_remaining_percent": "81.11%"
+    },
+    {
+      "id": 3,
+      "step": "Price Seq",
+      "reads_remaining": "455",
+      "reads_remaining_percent": "81.11%"
+    },
+    {
+      "id": 4,
+      "step": "CZID-dedup",
+      "reads_remaining": "455 (440 unique)",
+      "reads_remaining_percent": "81.11%"
+    },
+    {
+      "id": 5,
+      "step": "LZW",
+      "reads_remaining": "427",
+      "reads_remaining_percent": "76.11%"
+    },
+    {
+      "id": 6,
+      "step": "Bowtie2",
+      "reads_remaining": "413",
+      "reads_remaining_percent": "73.62%"
+    },
+    {
+      "id": 7,
+      "step": "Subsample",
+      "reads_remaining": "413",
+      "reads_remaining_percent": "73.62%"
+    },
+    {
+      "id": 8,
+      "step": "STAR",
+      "reads_remaining": "293",
+      "reads_remaining_percent": "52.23%"
+    },
+    {
+      "id": 9,
+      "step": "Bowtie2",
+      "reads_remaining": "292",
+      "reads_remaining_percent": "52.05%"
+    },
+    {
+      "id": 10,
+      "step": "GSNAP",
+      "reads_remaining": "291",
+      "reads_remaining_percent": "51.87%"
+    }
+  ],
+  "ERCC_SPIKE_IN_COUNTS_DATA": [],
+  "DOWNLOADS": [
+    {
+      "id": 0,
+      "text": "Download Non-Host Reads (.fasta)",
+      "href": "/samples/SAMPLEID/nonhost_fasta?pipeline_version=7.1"
+    },
+    {
+      "id": 1,
+      "text": "Download Unmapped Reads (.fasta)",
+      "href": "/samples/SAMPLEID/unidentified_fasta?pipeline_version=7.1"
+    },
+    {
+      "id": 2,
+      "text": "View Results Folder",
+      "href": "/samples/SAMPLEID/results_folder?pipeline_version=7.1"
+    },
+    {
+      "id": 3,
+      "text": "View Pipeline Visualization",
+      "href": "/samples/SAMPLEID/pipeline_viz/7.1"
+    }
+  ]
+}

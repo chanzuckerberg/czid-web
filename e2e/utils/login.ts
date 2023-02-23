@@ -8,7 +8,7 @@ dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 export async function login(
   page: Page,
   username?: string,
-  password?: string
+  password?: string,
 ): Promise<void> {
   const email = username !== undefined ? username : process.env.CZID_USERNAME;
   const pwd = password !== undefined ? password : process.env.CZID_PASSWORD;
@@ -22,13 +22,13 @@ export async function login(
 
 export async function createProject(
   basePage: BasePage,
-  name: string
+  name: string,
 ): Promise<any> {
   await basePage.clickByText("Upload");
   await basePage.clickElement(".createProjectButton-2LwOb");
   await (
     await basePage.findBySelector(
-      "div[class='ui fluid input idseq-ui'] input[type='text']"
+      "div[class='ui fluid input idseq-ui'] input[type='text']",
     )
   ).fill(name);
   await basePage.clickElement('text="Private Project"');
