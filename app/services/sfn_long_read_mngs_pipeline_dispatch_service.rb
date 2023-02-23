@@ -11,6 +11,7 @@ class SfnLongReadMngsPipelineDispatchService
   HUMAN_S3_MINIMAP2_INDEX_PATH = "s3://idseq-public-references/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_phiX_rRNA_mito_ERCC.fasta".freeze
   MINIMAP2_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/nt_k14_w8_20_long".freeze
   DIAMOND_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/diamond_index_chunksize_5500000000/".freeze
+  ERCC_DIRECTORY_PATH = "s3://czid-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime".freeze
 
   class SfnArnMissingError < StandardError
     def initialize
@@ -62,6 +63,14 @@ class SfnLongReadMngsPipelineDispatchService
     return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/#{WORKFLOW_NAME}:v#{@wdl_version}"
   end
 
+  def host_genome(library_type)
+    if library_type.casecmp("dna").zero?
+      @sample.host_genome.s3_minimap2_dna_index_path || "#{ERCC_DIRECTORY_PATH}/ercc_minimap2_genome_dna.mmi"
+    else
+      @sample.host_genome.s3_minimap2_rna_index_path || "#{ERCC_DIRECTORY_PATH}/ercc_minimap2_genome_rna.mmi"
+    end
+  end
+
   def generate_wdl_input
     library_type = @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || ""
     {
@@ -71,7 +80,7 @@ class SfnLongReadMngsPipelineDispatchService
           input_fastq: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
           library_type: library_type,
           guppy_basecaller_setting: @pipeline_run.guppy_basecaller_setting,
-          minimap_host_db: library_type.casecmp("dna").zero? ? @sample.host_genome.s3_minimap2_dna_index_path : @sample.host_genome.s3_minimap2_rna_index_path,
+          minimap_host_db: host_genome(library_type),
           minimap_human_db: HUMAN_S3_MINIMAP2_INDEX_PATH,
           subsample_depth: @sample.subsample, # optional input specified in Admin Options
           lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
