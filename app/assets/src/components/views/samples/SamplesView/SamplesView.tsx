@@ -705,7 +705,7 @@ const SamplesView = forwardRef(function SamplesView(
       return;
     }
 
-    const selectedObjects = objects.loaded.filter(object =>
+    const selectedObjects = objects.loaded.filter((object) =>
       selectedIds.has(object.id),
     );
 

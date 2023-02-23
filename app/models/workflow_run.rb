@@ -345,6 +345,14 @@ class WorkflowRun < ApplicationRecord
     [STATUS[:failed], STATUS[:succeeded], STATUS[:succeeded_with_issue]].include?(status)
   end
 
+  def self.deletable(user)
+    scope = where(status: [STATUS[:failed], STATUS[:succeeded], STATUS[:succeeded_with_issue]])
+    unless user.admin?
+      scope = scope.joins(:sample).where(sample: { user_id: user.id })
+    end
+    scope
+  end
+
   def self.in_progress(workflow_name = nil)
     scope = where(status: STATUS[:running])
     scope = scope.where(workflow: workflow_name) if workflow_name.present?

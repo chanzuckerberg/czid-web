@@ -74,12 +74,20 @@ class Power
     PipelineRun.viewable(@user)
   end
 
+  power :deletable_pipeline_runs do
+    PipelineRun.deletable(@user)
+  end
+
   power :visualizations do
     Visualization.viewable(@user)
   end
 
   power :workflow_runs do
     WorkflowRun.viewable(@user)
+  end
+
+  power :deletable_workflow_runs do
+    WorkflowRun.deletable(@user)
   end
 
   power :samples_workflow_runs do |samples|

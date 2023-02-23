@@ -319,6 +319,14 @@ class PipelineRun < ApplicationRecord
     finalized == 1
   end
 
+  def self.deletable(user)
+    scope = where(finalized: 1)
+    unless user.admin?
+      scope = scope.joins(:sample).where(sample: { user_id: user.id })
+    end
+    scope
+  end
+
   def results_finalized?
     [FINALIZED_SUCCESS, FINALIZED_FAIL].include?(results_finalized)
   end

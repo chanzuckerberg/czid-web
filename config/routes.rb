@@ -88,6 +88,7 @@ Rails.application.routes.draw do
       post :uploaded_by_current_user
       post :bulk_kickoff_workflow_runs
       post :user_is_collaborator
+      post :validate_user_can_delete_objects
     end
   end
 

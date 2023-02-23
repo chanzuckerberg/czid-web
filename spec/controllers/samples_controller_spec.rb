@@ -1072,6 +1072,166 @@ RSpec.describe SamplesController, type: :controller do
         end
       end
     end
+
+    describe "POST #validate_user_can_delete_objects" do
+      before do
+        @project = create(:project, users: [@joe])
+        illumina = PipelineRun::TECHNOLOGY_INPUT[:illumina]
+        @sample1 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "completed Illumina mNGs sample",
+                                   pipeline_runs_data: [{ finalized: 1, technology: illumina }])
+
+        @sample2 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "in-progress Illumina mNGS sample",
+                                   pipeline_runs_data: [{ finalized: 0, technology: illumina }])
+
+        @sample_ids = [@sample1.id, @sample2.id]
+      end
+
+      context "when the workflow is mNGS and sample ids are passed in" do
+        it "returns valid ids and invalid sample names for pipeline runs" do
+          params = {
+            workflow: "short-read-mngs",
+            selectedIds: @sample_ids,
+          }
+
+          post :validate_user_can_delete_objects, params: params
+
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+
+          expect(json_response[:error]).to be_nil
+          expect(json_response[:validIds]).to eq([@sample1.id])
+          expect(json_response[:invalidSampleNames]).to eq([@sample2.name])
+        end
+
+        it "raises error if workflow is missing" do
+          params = {
+            selectedIds: @sample_ids,
+          }
+
+          expect do
+            post :validate_user_can_delete_objects, params: params
+          end.to raise_error(DeletionValidationService::WorkflowMissingError)
+        end
+
+        it "returns empty arrays if no query ids are passed in" do
+          params = {
+            workflow: "short-read-mngs",
+            selectedIds: [],
+          }
+
+          post :validate_user_can_delete_objects, params: params
+
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to be_nil
+          expect(json_response[:validIds]).to eq([])
+          expect(json_response[:invalidSampleNames]).to eq([])
+        end
+
+        it "returns empty arrays if unexpected error occurs in validation service" do
+          params = {
+            workflow: "short-read-mngs",
+            selectedIds: @sample_ids,
+          }
+
+          unexpected_error_response = {
+            valid_ids: [],
+            invalid_sample_ids: [],
+            error: DeletionValidationService::DELETION_VALIDATION_ERROR,
+          }
+
+          allow(DeletionValidationService).to receive(:call).with(anything).and_return(unexpected_error_response)
+
+          post :validate_user_can_delete_objects, params: params
+
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to eq(DeletionValidationService::DELETION_VALIDATION_ERROR)
+          expect(json_response[:validIds]).to eq([])
+          expect(json_response[:invalidSampleNames]).to eq([])
+        end
+      end
+
+      context "when workflow is CG/AMR and workflow run ids are passed in" do
+        before do
+          @completed_wr = create(:workflow_run, sample: @sample1, workflow: "consensus-genome", status: WorkflowRun::STATUS[:succeeded])
+          @in_prog_wr = create(:workflow_run, sample: @sample2, workflow: "consensus-genome", status: WorkflowRun::STATUS[:running])
+          @workflow_run_ids = [@completed_wr.id, @in_prog_wr.id]
+        end
+
+        it "returns valid ids and invalid sample names for workflow runs" do
+          params = {
+            workflow: "consensus-genome",
+            selectedIds: @workflow_run_ids,
+          }
+
+          post :validate_user_can_delete_objects, params: params
+
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body, symbolize_names: true)
+
+          expect(json_response[:error]).to be_nil
+          expect(json_response[:validIds]).to eq([@completed_wr.id])
+          expect(json_response[:invalidSampleNames]).to eq([@sample2.name])
+        end
+
+        it "raises error if workflow is missing" do
+          params = {
+            selectedIds: @workflow_run_ids,
+          }
+
+          expect do
+            post :validate_user_can_delete_objects, params: params
+          end.to raise_error(DeletionValidationService::WorkflowMissingError)
+        end
+
+        it "returns empty arrays if no query ids are passed in" do
+          params = {
+            workflow: "consensus-genome",
+            selectedIds: [],
+          }
+
+          post :validate_user_can_delete_objects, params: params
+
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to be_nil
+          expect(json_response[:validIds]).to eq([])
+          expect(json_response[:invalidSampleNames]).to eq([])
+        end
+
+        it "returns empty arrays if unexpected error occurs in validation service" do
+          params = {
+            workflow: "consensus-genome",
+            selectedIds: @workflow_run_ids,
+          }
+
+          unexpected_error_response = {
+            valid_ids: [],
+            invalid_sample_ids: [],
+            error: DeletionValidationService::DELETION_VALIDATION_ERROR,
+          }
+
+          allow(DeletionValidationService).to receive(:call).with(anything).and_return(unexpected_error_response)
+
+          post :validate_user_can_delete_objects, params: params
+
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body, symbolize_names: true)
+          expect(json_response[:error]).to eq(DeletionValidationService::DELETION_VALIDATION_ERROR)
+          expect(json_response[:validIds]).to eq([])
+          expect(json_response[:invalidSampleNames]).to eq([])
+        end
+      end
+    end
   end
 
   context "Admin user" do

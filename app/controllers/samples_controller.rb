@@ -33,7 +33,7 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
                    :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,
-                   :bulk_kickoff_workflow_runs, :user_is_collaborator,].freeze
+                   :bulk_kickoff_workflow_runs, :user_is_collaborator, :validate_user_can_delete_objects,].freeze
   OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :upload_credentials].freeze
 
@@ -578,6 +578,40 @@ class SamplesController < ApplicationController
     end
 
     render json: JSON.dump(results)
+  end
+
+  # POST /samples/validate_user_can_delete_objects.json
+  # Validate that the user can delete objects with selected ids (sample ids/workflow run ids)
+  # Using POST because a large number of sample ids can be passed in
+  def validate_user_can_delete_objects
+    permitted_params = params.permit(:workflow, selectedIds: [])
+    selected_ids = permitted_params[:selectedIds]
+    workflow = permitted_params[:workflow]
+
+    # For mngs, selected ids & validated ids are sample ids
+    # For cg/amr, selected ids & validated ids are workflow run ids
+    # This is because the Discovery View uses sample ids as selected ids for mNGS tabs
+    # and workflow run ids as selected ids for CG/AMR tabs
+    validated_objects = DeletionValidationService.call(
+      query_ids: selected_ids,
+      user: current_user,
+      workflow: workflow
+    )
+
+    invalid_sample_names = []
+    valid_ids = validated_objects[:valid_ids]
+    invalid_sample_ids = validated_objects[:invalid_sample_ids]
+    error = validated_objects[:error]
+
+    if error.nil? && !invalid_sample_ids.empty?
+      invalid_sample_names = current_power.samples.where(id: invalid_sample_ids).pluck(:name)
+    end
+
+    render json: {
+      validIds: valid_ids,
+      invalidSampleNames: invalid_sample_names,
+      error: error,
+    }
   end
 
   def bulk_import

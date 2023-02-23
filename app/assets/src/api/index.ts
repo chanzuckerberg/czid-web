@@ -3,6 +3,7 @@
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import { CoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/types";
+import { WORKFLOW_VALUES } from "~/components/utils/workflows";
 
 import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
@@ -717,6 +718,18 @@ const bulkKickoffWorkflowRuns = ({ sampleIds, workflow }: $TSFixMe) =>
     workflow,
   });
 
+const validateUserCanDeleteObjects = ({
+  selectedIds,
+  workflow,
+}: {
+  selectedIds: number[];
+  workflow: WORKFLOW_VALUES;
+}) =>
+  postWithCSRF(`/samples/validate_user_can_delete_objects.json`, {
+    selectedIds,
+    workflow,
+  });
+
 export {
   bulkImportRemoteSamples,
   bulkKickoffWorkflowRuns,
@@ -786,5 +799,6 @@ export {
   validateProjectName,
   validateSampleFiles,
   validateSampleNames,
+  validateUserCanDeleteObjects,
   workflowRunsCreatedByCurrentUser,
 };
