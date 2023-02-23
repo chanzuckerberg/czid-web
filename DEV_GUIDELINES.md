@@ -1,6 +1,6 @@
-# IDseq Frontend Development Guidelines (Perpetual WIP)
+# IDseq Frontend Development Guidelines (Perpetual WIP) - updated Feb 2023
 
-The goal of this document is to present a set of guidelines, conventions and best practices to develop frontend code for IDseq. It is an ongoing effort as opposed to a thorough document.
+The goal of this document is to present a set of guidelines, conventions and best practices to develop frontend code for CZID. It is an ongoing effort as opposed to a thorough document.
 These guidelines should be enforced for any new PRs.
 
 ---
@@ -9,11 +9,19 @@ These guidelines should be enforced for any new PRs.
 
 When in doubt, follow the [Airbnb JS Style Guide](https://github.com/airbnb/javascript).
 
-The following rules are particularly relevant to `czid-web`.
-
-### References
-
-Use `const` to define local references and `let` if you need to reassign them. Do not use `var`.
+The following norms are particularly relevant to `czid-web`.
+- Use named exports rather than default exports
+  - yes: export const SomeComponent…
+  - no: const SomeComponent…
+          export default SomeComponent
+- Use functional components over class components
+- Frontend variables should be camelCase and should share their names with the corresponding ruby snake_case variables
+- Component imports (lint-rule enforced) Imported components themselves should be alphabetical within each group. For import file order:
+  - libs
+  - absolute paths
+  - relative paths
+- Line length maximum 120 characters (lint-rule enforced)
+- Type definitions either at the top of the file or in a separate types.ts file in the component’s directory
 
 ### Naming
 
@@ -27,92 +35,119 @@ Use `const` to define local references and `let` if you need to reassign them. D
       2. `onClick` is a **hook** (kind of like a parameter), which allows a **handler** like `handlerButtonClick` to be supplied by a client.
    3. **Boolean methods**: should be prefixed with a verb `is` or `has`, e.g. `isThresholdValid`
 
-### Strings
-
-- Quotes: use double quotes (`"`) by default.
-- Prefer template strings over concatenation: `this string has a ${variable}` over `"this string has a " + variable`.
-
-### Type Checking
-
-- Always specify type checking of components properties using the `[prop-types](https://www.npmjs.com/package/prop-types)` module. Be as precise as possible.
-- [Airbnb's prop types validators](https://github.com/airbnb/prop-types) is installed and provides extra validators.
-- If your component does not pass any props to its children, always encapsulate your `propTypes` object in the `forbidExtraProps` function from the `airbnb-prop-types` package.
-
 ### `lodash/fp`
 
 [`lodash/fp`](https://github.com/lodash/lodash/wiki/FP-Guide) provides nice immutable utility functions (see React section below on immutability). We use `lodash/fp` exclusively (no `lodash`) in order to prevent confusion between the two variants.
 
-See [Higher-Order Functions in Lodash](https://blog.pragmatists.com/higher-order-functions-in-lodash-3283b7625175) for some examples of using `lodash/fp` in practice.
-
-`lodash/fp` has many useful functions, and you should use them whenever possible to simplify your code.
-
-A good rule of thumb: if you ever find yourself wanting to use a for loop, `lodash/fp` can help.
-
-### New language features
-
-To balance browser compatibility with ease of development, avoid using language features with less than 2 years of major browser support. When in doubt, check a site like https://caniuse.com/ in the "Date relative" view for Chrome/Safari/Firefox/Edge.
-
-## Imports
-
-- **Import Aliases:** Be aware of our [Webpack aliases](https://github.com/chanzuckerberg/czid-web-private/blob/main/webpack.config.common.js). Use them to avoid long relative paths (`../../../..`) in imports.
-
-- Group top-of-file imports into external libs, internal shared libs, and internal un-shared libs. For example
-
-```
-import React from "react";
-import PropTypes from "prop-types";
-import { merge, pick } from "lodash";
-import moment from "moment";
-import cx from "classnames";
-
-import { Table } from "~/components/visualizations/table";
-
-import cs from "./visualizations_view.scss";
-```
-
 ## _React Components_
 
-### Repository Structure
+### Component Fractal Directory Structure
 
-We define the following tree structure for the React `components` (changes to the structure will probably be need to accommodate new features but should be carefully considered):
+The basic way to build a React component is to follow the steps below. We use hygen code generator to set up this boilerplate - see below.
 
-- The `ui` folder contains generic, reusable components. This establishes a layer of indirection to component implementation, allowing us to easily change the underlying implementation (e.g. we currently use an external framework `semantic-ui` but could decide to switch a component to our own implementation)
-  - `controls` : contains components that allow the user to control the workflow of the page
-    - `buttons`
-    - `dropdowns`
-  - `layout` : contains components that allow you to organize content on a page (modal, buttons)
-  - `icons` : react components that encapsulated svg icons
-- `visualizations` : components for data visualizations. Most of these will be using d3. This components should be generic and not attached to any particular type of data, e.g. `Heatmap` does not need to be applied to samples comparison
-- `views` : these are IDSeq specific views like `SamplesView`. These are customized to a particular set of data and are **not** generic (they are specific to IDSeq). Views can be composed by other views.
+For illustration, we will create a view component named `Foo` in `.../views/Foo`
+```
+Foo
+├──Foo.tsx
+├──index.tsx
+├──foo.scss
+├──components
+├──├──Bar
+├──├──├──...
 
-If a React component required the use of utility Javascript classes, there are two options:
+```
+1. Create a component folder in the directory it belongs to. E.g., a view component lives in `./app/assets/src/components/views/*`.
 
-1. If the utility class is to be **shared** among components, consider putting it in `components/utils`.
-2. If the utility is built specifically for a given component, define a new folder `<ComponentName>`where the component was previously located and move the component and the utility class into that folder.
+1. Create a new file `.../views/Foo/Foo.tsx` - this is where the implementation details of `Foo` should live.
 
-### Reusable Components (`ui.[...]`)
+1. Create a new file `.../views/Foo/index.tsx` - this file simply imports Foo and exports it. This is how the call sites import the component.
 
-Try to use the reusable components in `ui` whenever possible.
+1. Create `./src/views/Foo/foo.scss` to host all styles you use in `.../views/Foo/Foo.tsx`. If your component name has multiple words like `FooComponent` then the scss file will be snake case `foo_component.scss`.
 
-If you need a custom component for your view, see whether you can wrap an existing component instead of writing your own.
+1. Create `.../views/Foo/components/` directory to host all sub-components you use in `.../views/Foo/Foo.tsx`. For example, if you use component `<Bar />` in `<Foo>`, you can create a directory `.../views/Foo/components/Bar` to encapsulate `Bar` component's implementation details.
 
-For example, if you need a specially styled button, try to wrap `<Button>` from `ui` instead of creating your own `<button>` element.
+1. And if `Bar` component uses `Baz`, we can create `.../views/Foo/components/Bar/components/Baz` to encapsulate `Baz` component's implementation details
+
+As you can see, a component is typically made of other components and/or sub-components, so we can use the basic component file structure illustrated above to recursively build out a component at any level. One benefit of this fractal is that the component interface and boundaries are well defined, so extracting a component to a different directory is as easy as cut and paste
+
+#### Using hygen
+We have a component template defined with [hygen](https://www.hygen.io/docs/quick-start). Templates live in any `_templates` directory. Feel free to add more templates.
+
+To use
+```
+$ brew tap jondot/tap
+$ brew install hygen
+```
+To generate a new component skeleton in our project:
+1. Copy the path where you want the component to live
+1. Run
+```
+$ hygen component new ComponentName
+```
+It will prompt you for the path and then create the component skeleton for you.
+
+There is also a vscode extension that will run the generator:
+1. Install the hygen extension
+1. Open command pallete (Shift+Cmd+P) and search for 'hygen'.
+1. Select the new component template
+1. Paste in the path when prompted
+
 
 ### Component Design
 
-- Prefer stateless functional components over class-based components for new components. Try `useEffect`, `useState`, and other [React Hooks](https://reactjs.org/docs/hooks-reference.html) if you need lifecycle methods, although we do not have in-app examples of this yet (as of 2021-03-22).
+- One component per file
+- Each component gets its own scss file. Style reuse should be limited to avoid bugs when updating or deleting styles.
+- Prefer stateless functional components over class-based components for new components. Try `useEffect`, `useState`, and other [React Hooks](https://reactjs.org/docs/hooks-reference.html) if you need lifecycle methods.
 - Avoid monolithic components. Break complex components up into smaller units.
-  - No strict guidelines for how to do this, but it's similar to the process of breaking up a complex function into smaller parts. Find small self-contained units. For example, a component whose job is to receive data and render a particular piece of UI. Strive for each component to have a single, well-defined responsibility.
+  - Each component should have a single use.  
+  - If the component has 3 or more variations, it should be split into multiple components
   - This makes code easier to reason about and encourages reusability.
 - Components should usually be no more than 250 lines.
 - Pull business logic out of the component and into pure utility functions whenever possible. Better readability, and easier to unit-test further down the line. Also keeps the component slim and focused on the core business logic and rendering.
-- If you find yourself passing a ton of props into a component, consider combining related props into a single object with a descriptive name. For example, if you have a bunch of sample-related props that you're passing into a phylo creation modal, combine them into a single object prop called phyloCreationSampleProps.
-  - You can also use this approach to reduce the number of top-level this.state variables.
-- See <SampleDetailsSidebar> (https://github.com/chanzuckerberg/czid-web-private/tree/main/app/assets/src/components/views/report/SampleDetailsSidebar) for a real-life example.
+### JSX
+- Prefer inline JSX over render functions. This will be difficult to do for existing giant components, but we should lean toward this going forward. If you find yourself making lots of render components, that might be a good sign that you need to break your components into several smaller components.
+  - yes:
+    ```
+      return (
+        <>
+          <Table />
+        </>
+      )
+    ```
+  - no:
+    ```
+      const renderTable = () => <Table />
+      return (
+        <>
+          {renderTable()}
+        </>
+      )
+    ```
+- Use semantic HTML elements (i.e. ul/li for lists, not divs for everything). This is important for accessibility.
 
-Resources:
-[Thinking in React](https://reactjs.org/docs/thinking-in-react.html)
-[Presentational and Container Components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0)
+### SCSS
+- Use camelCase class names
+- Use SDS components, mixins, etc whenever possible
+- Prefer full class names over nested css
+  - yes: 
+    ```
+    .header {
+      @include font-header-xs;
+    }
+
+    .headerIcon {
+      margin-right: $sds-spaces-xs;
+    }
+    ```
+  - no: 
+    ```
+    .header {
+      @include font-header-xs;
+      .icon {
+        margin-right: $sds-spaces-xs;
+      }
+    }
+    ```
 
 ### Component Naming
 
@@ -121,35 +156,6 @@ Resources:
   - `SamplesView`
   - `HeatmapVisualization`
 
-### Component Structure
-
-If your component is simple and has no styling, a single `.jsx` file will do.
-
-If your component has styling, you should create a `.scss` file in the same folder as the `.jsx`. (Also see styling section below)
-
-Once your component has more than a single `.jsx` and .`scss` file, you should create a separate folder to hold your component. Follow the convention below:
-
-- `Table`
-  - `index.jsx`
-  - `Table.jsx`
-  - `Table.scss`
-  - `Header.jsx`
-  - `Header.scss`
-  - `Row.jsx`
-  - `Row.scss`
-
-Where the `index.jsx` file is a simple redirect:
-
-`// Contents of index.jsx` \
-`export {default as Table} from "./Table";`
-
-### Views
-
-Views represent a page or a section of a page in IDSeq. Views are stored in the `views` folder.
-When designing your view, try to make as much use of the components in the `ui`and `visualizations` folders. This should be mostly plug-and-play components.
-If you need to place a ui component in a customized place for your view (i.e. if the layout elements cannot help you), wrap it in a `div` with a proper class name, and style it in the view's css file.
-
-Views content should be inside of a `NarrowContainer` for standard width.
 
 ### Shared Files
 
@@ -159,28 +165,6 @@ Put API calls in [`/api`](https://github.com/chanzuckerberg/czid-web-private/tre
 Start putting fetch methods like `fetchSampleMetadata` in `/api`, so that it's easy to see all the back-end endpoints the front-end is using.
 
 The main `index.js` file is quite large, so prefer putting methods in a more specific file in the `/api` folder if possible.
-
-### PropTypes
-
-When passing complex objects as props, add the structure of the object to a `propTypes.js` file. If the object is ad-hoc and very specific to the component, put the propTypes file inside the component directory. If the object will be used widely across the app, put it in [`utils/propTypes.js`](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/components/utils/propTypes.js)
-
-Proptypes should be alphabetized unless there is a natural grouping, in which case you should add a comment explaining the grouping. For example:
-
-```
-Table.propTypes = {
-  columns: PropTypes.arrayOf(
-    PropTypes.shape({
-      dataKey: PropTypes.string.isRequired
-    })
-  ).isRequired,
-  data: PropTypes.array,
-  defaultColumnWidth: PropTypes.number,
-  defaultHeaderHeight: PropTypes.number,
-  defaultRowHeight: PropTypes.number,
-  sortable: PropTypes.bool,
-  sortBy: PropTypes.string
-};
-```
 
 ### Accessibility (a11y)
 
@@ -192,7 +176,7 @@ We have some accessibility rules defined in `.eslintrc-a11y.json` (you can run `
   - Example: `onClick={this.handleClick} onKeyDown={this.handleClick}`
 
 #### _Static HTML elements with event handlers require a role_
-
+- Use the correct semantic HTML instead!
 - You can add an [ARIA role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques), although there may be other warnings resulting from the rule addition.
 
 ### Other Best Practices
