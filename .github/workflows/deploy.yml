@@ -26,3 +26,9 @@ jobs:
       force: ${{ github.event.inputs.force == 'true' }}
       developer_name: ${{ github.actor }}
       deployment_reason: ${{ github.event.inputs.release_notes }}
+
+  run_e2e:
+    if: ${{ github.event.inputs.destination == 'staging' }}
+    name: Run E2E tests on staging
+    needs: run_deployment
+    uses: ./.github/workflows/e2e-staging.yml

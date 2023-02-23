@@ -1,7 +1,7 @@
 name: e2e-staging-tests
 
 on:
-  workflow_dispatch:
+  workflow_call:
 env:
   AWS_DEFAULT_OUTPUT: json
   AWS_REGION: us-west-2
