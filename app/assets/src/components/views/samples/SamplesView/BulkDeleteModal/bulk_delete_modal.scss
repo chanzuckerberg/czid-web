@@ -1,0 +1,33 @@
+@import "~czifui/dist/variables";
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.dialog {
+  @include font-body-s;
+
+  .semibold {
+    font-weight: $font-weight-semibold;
+  }
+
+  .list {
+    margin: $sds-spaces-xs 0 $sds-spaces-l 0;
+  }
+
+  .dialogTitle {
+    @include font-header-xl;
+  }
+
+  .dialogActions {
+    justify-content: flex-start;
+    margin-top: $sds-spaces-xl;
+
+    .deleteButton {
+      background-color: $sds-color-error-400;
+
+      &:hover,
+      &:active {
+        background-color: $sds-color-error-600;
+      }
+    }
+  }
+}

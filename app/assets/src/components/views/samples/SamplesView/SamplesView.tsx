@@ -72,6 +72,7 @@ import {
   WORKFLOW_KEY_FOR_VALUE,
 } from "~utils/workflows";
 
+import { BulkDeleteModal } from "./BulkDeleteModal";
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
 import {
   computeColumnsByWorkflow,
@@ -165,6 +166,9 @@ const SamplesView = forwardRef(function SamplesView(
   const [referenceSelectId, setReferenceSelectId] = useState(null);
   const [phyloCreationModalOpen, setPhyloCreationModalOpen] = useState(false);
   const [bulkDownloadModalOpen, setBulkDownloadModalOpen] = useState(false);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(
+    false,
+  );
   const [heatmapCreationModalOpen, setHeatmapCreationModalOpen] = useState(
     false,
   );
@@ -522,21 +526,25 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
+  const getShorthandFromWorkflow = workflow => {
+    const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
+    return WORKFLOWS[workflowKey].shorthand;
+  };
+
   const renderBulkDeleteTrigger = () => {
     if (!allowedFeatures.includes(BULK_DELETION_FEATURE)) {
       return;
     }
-
-    const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
 
     const disabled = selectedIds.size === 0;
     return (
       <ToolbarButtonIcon
         className={cs.action}
         icon="trashCan"
-        popupText={`Delete ${WORKFLOWS[workflowKey].shorthand} Run`}
+        popupText={`Delete ${getShorthandFromWorkflow(workflow)} Run`}
         popupSubtitle={disabled ? "Select at least 1 sample" : ""}
         disabled={disabled}
+        onClick={() => setIsBulkDeleteModalOpen(true)}
       />
     );
   };
@@ -991,6 +999,14 @@ const SamplesView = forwardRef(function SamplesView(
           selectedIds={selectedIds}
           workflow={workflow}
           workflowEntity={workflowEntity}
+        />
+      )}
+      {isBulkDeleteModalOpen && (
+        <BulkDeleteModal
+          onDelete={() => setIsBulkDeleteModalOpen(false)}
+          onClose={() => setIsBulkDeleteModalOpen(false)}
+          sampleCount={selectedIds.size}
+          workflowLabel={getShorthandFromWorkflow(workflow)}
         />
       )}
       {heatmapCreationModalOpen && (
