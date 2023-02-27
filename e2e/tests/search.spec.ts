@@ -34,12 +34,15 @@ test.describe("Search data tests", () => {
 
     // project count
     expect(await page.locator(getByTestID(PROJECT_COUNT)).textContent()).toBe(
-      projectsFound
+      projectsFound,
     );
 
     // metadata project count
     expect(
-      await page.locator(METADATA_COUNT_SELECTOR).nth(1).textContent()
+      await page
+        .locator(METADATA_COUNT_SELECTOR)
+        .nth(1)
+        .textContent(),
     ).toBe("1");
   });
 
@@ -53,12 +56,15 @@ test.describe("Search data tests", () => {
 
     // sample count
     expect(await page.locator(RESULT_COUNT_SELECTOR).textContent()).toBe(
-      samplesFound
+      samplesFound,
     );
 
     // metadata sample count
     expect(
-      await page.locator(METADATA_COUNT_SELECTOR).nth(0).textContent()
+      await page
+        .locator(METADATA_COUNT_SELECTOR)
+        .nth(0)
+        .textContent(),
     ).toBe("5");
   });
 });

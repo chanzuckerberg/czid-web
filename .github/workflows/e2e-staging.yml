@@ -6,7 +6,6 @@ env:
   AWS_DEFAULT_OUTPUT: json
   AWS_REGION: us-west-2
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  ENVIRONMENT: dev
   EXECUTOR_ROLE: czid-staging-gh-actions-executor
 
 jobs:
@@ -67,6 +66,6 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         with: 
           name: e2e-artifacts
-          path: ./e2e/report
+          path: ./e2e/reports
 
   

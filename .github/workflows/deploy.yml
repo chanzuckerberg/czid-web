@@ -15,6 +15,10 @@ on:
       force:
         description: Force release (set to `true` to release even if checks fail)
         default: 'false'
+env:
+  AWS_DEFAULT_OUTPUT: json
+  AWS_REGION: us-west-2
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
 jobs:
   run_deployment:
@@ -32,3 +36,4 @@ jobs:
     name: Run E2E tests on staging
     needs: run_deployment
     uses: ./.github/workflows/e2e-staging.yml
+    secrets: inherit

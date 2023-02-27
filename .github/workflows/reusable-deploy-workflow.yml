@@ -40,12 +40,12 @@ jobs:
     container: ruby:3.1.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Determine Kernel Version
         run: |
           echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
       - name: Cache Ruby Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: vendor/bundle
           # Include kernel version for under-the-hood gem changes:
@@ -81,12 +81,12 @@ jobs:
     container: ruby:3.1.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Determine Kernel Version
         run: |
           echo "KERNEL_VERSION=`uname -r`" >> $GITHUB_ENV
       - name: Cache Ruby Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: vendor/bundle
           # Include kernel version for under-the-hood gem changes:
