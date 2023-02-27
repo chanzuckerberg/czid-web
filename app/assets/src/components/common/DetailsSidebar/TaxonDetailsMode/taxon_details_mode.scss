@@ -16,7 +16,7 @@
   word-break: break-all;
 }
 
-.subTitle {
+.subtitle {
   @include font-body-xs;
 
   color: $sds-color-gray-500;
@@ -25,73 +25,4 @@
 
 .taxonContents {
   padding: 0 $sds-spaces-m;
-
-  .subtitle {
-    padding-top: 25px;
-    padding-bottom: $sds-spaces-m;
-    font-size: 14px;
-    font-weight: 700;
-
-    .infoIcon {
-      margin-left: $sds-spaces-xxs;
-      margin-top: $sds-spaces-xxs;
-    }
-  }
-
-  .histogram {
-    width: 100%;
-    height: 160px;
-    margin: 0 auto;
-  }
-
-  .text {
-    line-height: 24px;
-
-    &.collapsed {
-      max-height: 120px;
-      overflow: hidden;
-    }
-  }
-
-  .linksSection {
-    &:after {
-      content: "";
-      display: table;
-      clear: both;
-    }
-  }
-
-  .linksList {
-    min-width: 200px;
-    float: left;
-    list-style: none;
-  }
-
-  .link {
-    color: $sds-color-primary-400;
-    line-height: 30px;
-    cursor: pointer;
-  }
-
-  .expandLink {
-    color: $sds-color-primary-400;
-    margin-top: $sds-spaces-m;
-    cursor: pointer;
-  }
-}
-
-.wikiLicense {
-  @include font-body-xxs;
-
-  padding-top: $sds-spaces-m;
-  color: $sds-color-gray-500;
-
-  .wikiLink {
-    color: $sds-color-gray-black !important;
-    cursor: pointer;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 }

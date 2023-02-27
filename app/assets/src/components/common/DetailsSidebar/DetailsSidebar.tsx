@@ -9,7 +9,7 @@ import BulkDownloadDetailsMode, { BDDProps } from "./BulkDownloadDetailsMode";
 import GeneDetailsMode, { GDMProps } from "./GeneDetailsMode";
 import PipelineStepDetailsMode, { PSDProps } from "./PipelineStepDetailsMode";
 import SampleDetailsMode, { SampleDetailsModeProps } from "./SampleDetailsMode";
-import TaxonDetailsMode, { TaxonDetailsModeProps } from "./TaxonDetailsMode";
+import { TaxonDetailsMode, TaxonDetailsModeProps } from "./TaxonDetailsMode";
 
 interface SidebarBase {
   visible: boolean;
