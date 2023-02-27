@@ -1,14 +1,14 @@
 ---
-to: <%= path %>/<%= Name %>/index.tsx
+to: <%= path %>/<%= name %>/index.tsx
 ---
-import { <%= Name %> } from "./<%= Name %>";
-export { <%= Name %> };
+import { <%= name %> } from "./<%= name %>";
+export { <%= name %> };
 
 /*
- NOTE: component code should go in <%= Name %>.tsx
+ NOTE: component code should go in <%= name %>.tsx
  This index file is here so our imports are cleaner.
  This way we can use
- import { <%= Name %> } from .../<%= Name %>
+ import { <%= name %> } from .../<%= name %>
  rather than
- import { <%= Name %> } from .../<%= Name %>/<%= Name %>.tsx
+ import { <%= name %> } from .../<%= name %>/<%= name %>.tsx
 */

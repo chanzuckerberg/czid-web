@@ -1,14 +1,14 @@
 ---
-to: <%= path %>/<%= Name %>/<%= Name %>.tsx
+to: <%= path %>/<%= name %>/<%= name %>.tsx
 ---
 import React from "react";
 import cs from "./<%= h.inflection.underscore(name, false)%>.scss";
 
-interface <%= Name %>Props {
+interface <%= name %>Props {
   // define types here
 }
 
-export const <%= Name %> = ({}: <%= Name %>Props) => {
+export const <%= name %> = ({}: <%= name %>Props) => {
   return (
     <div className={cs.wrapper}>Your new component</div>
   );
