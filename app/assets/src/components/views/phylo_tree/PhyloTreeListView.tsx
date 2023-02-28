@@ -443,7 +443,7 @@ class PhyloTreeListView extends React.Component<
         />
       );
     } else if (clustermapSvgUrl) {
-      return <img className={cs.matrix} src={clustermapSvgUrl} />;
+      return <img alt="Pairwise distance matrix" className={cs.matrix} src={clustermapSvgUrl} />;
     } else if ([STATUS_FAILED, NG_STATUS_FAILED].includes(currentTree.status)) {
       return (
         <SampleMessage
@@ -513,12 +513,12 @@ class PhyloTreeListView extends React.Component<
               {currentTree.tax_name && (
                 <span>
                   &nbsp;-&nbsp;
-                  <span
-                    className={cs.taxonName}
+                  <button
+                    className={cx("noStyle", cs.taxonName)}
                     onClick={this.handleTaxonModeOpen}
                   >
                     {currentTree.tax_name}
-                  </span>
+                  </button>
                 </span>
               )}
             </ViewHeader.Pretitle>

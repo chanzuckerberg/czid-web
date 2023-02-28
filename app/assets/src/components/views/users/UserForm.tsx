@@ -220,9 +220,9 @@ const UserForm = ({
             </div>
           ) : (
             // @ts-expect-error Type 'unknown' is not assignable to type 'MouseEventHandler<HTMLDivElement>'.
-            <div onClick={submitFunc()} className="center login-wrapper">
+            <button onClick={submitFunc()} className="center login-wrapper">
               Submit
-            </div>
+            </button>
           )}
         </form>
       </div>

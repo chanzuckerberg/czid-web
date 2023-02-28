@@ -1,5 +1,6 @@
 import React from "react";
 import Modal from "~ui/containers/Modal";
+import ExternalLink from "~ui/controls/ExternalLink";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import cs from "./public_project_confirmation_modal.scss";
 
@@ -43,7 +44,7 @@ class PublicProjectConfirmationModal extends React.Component<
     const { project, trigger } = this.props;
     return (
       <div>
-        <div onClick={this.openModal}>{trigger}</div>
+        <button className="noStyle" onClick={this.openModal}>{trigger}</button>
         {this.state.modalOpen && (
           <Modal className={cs.publicProjectConfirmation} narrowest open>
             <div className={cs.title}>
@@ -59,19 +60,13 @@ class PublicProjectConfirmationModal extends React.Component<
               </p>
               <p>
                 For more information, view our{" "}
-                <span
-                  className={cs.link}
-                  onClick={() => window.open("https://czid.org/privacy")}
-                >
+                <ExternalLink href={"http://czid.org/privacy"}>
                   privacy notice
-                </span>{" "}
+                </ExternalLink>{" "}
                 or{" "}
-                <span
-                  className={cs.link}
-                  onClick={() => window.open("https://czid.org/terms")}
-                >
+                <ExternalLink href={"https://czid.org/terms"}>
                   terms of service
-                </span>
+                </ExternalLink>
                 .
               </p>
             </div>

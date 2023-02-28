@@ -363,14 +363,15 @@ class CollectionModal extends React.Component<
 
     return (
       <div>
-        <div
+        <button
+          className="nostylebutton"
           onClick={withAnalytics(
             this.openModal,
             "CollectionModal_open-link_clicked",
           )}
         >
           {trigger}
-        </div>
+        </button>
         {this.state.modalOpen && (
           <Modal
             open
@@ -389,7 +390,7 @@ class CollectionModal extends React.Component<
               much a sample deviates from the mean of that background.{" "}
               <ExternalLink
                 className={cs.link}
-                href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035166174-How-do-I-create-and-use-background-models-in-IDseq-"
+                href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054-Background-Models"
               >
                 Learn More
               </ExternalLink>

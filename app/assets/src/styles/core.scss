@@ -8,6 +8,10 @@ html {
   scroll-behavior: smooth;
 }
 
+.noStyle {
+  all: unset
+}
+
 .nostylebutton {
   background: none;
   border: none;
