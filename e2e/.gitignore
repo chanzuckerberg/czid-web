@@ -1,5 +1,4 @@
 node_modules/
-results/
 reports/
 .cache/
 .env.staging

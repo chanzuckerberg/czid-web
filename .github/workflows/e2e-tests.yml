@@ -1,12 +1,8 @@
 name: idseq-web e2e tests
 
 on:
-  push:
-    branches:
-      - charles/e2e-ci-cd
-  pull_request:
-    branches:
-      - charles/e2e-ci-cd
+  workflow_dispatch:
+    
 env:
   AWS_DEFAULT_OUTPUT: json
   AWS_REGION: us-west-2

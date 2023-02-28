@@ -44,7 +44,9 @@ class PublicProjectConfirmationModal extends React.Component<
     const { project, trigger } = this.props;
     return (
       <div>
-        <button className="noStyle" onClick={this.openModal}>{trigger}</button>
+        <button className="noStyle" onClick={this.openModal}>
+          {trigger}
+        </button>
         {this.state.modalOpen && (
           <Modal className={cs.publicProjectConfirmation} narrowest open>
             <div className={cs.title}>

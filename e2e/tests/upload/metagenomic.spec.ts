@@ -31,7 +31,7 @@ const defaults: Metadata = {
 const sampleType = "Metagenomics";
 const projectName = "Test Project";
 const sampleFiles = ["RR004_water_2_S23A_R1_001.fastq"];
-
+// These tests verify user is able to upload metadata samples manually and via csv file.
 test.describe("Metagenomics sample upload tests", () => {
   test("Should upload mNGS sample with manual metadata", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);

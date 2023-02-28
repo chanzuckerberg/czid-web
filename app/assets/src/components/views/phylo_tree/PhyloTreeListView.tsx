@@ -443,7 +443,13 @@ class PhyloTreeListView extends React.Component<
         />
       );
     } else if (clustermapSvgUrl) {
-      return <img alt="Pairwise distance matrix" className={cs.matrix} src={clustermapSvgUrl} />;
+      return (
+        <img
+          alt="Pairwise distance matrix"
+          className={cs.matrix}
+          src={clustermapSvgUrl}
+        />
+      );
     } else if ([STATUS_FAILED, NG_STATUS_FAILED].includes(currentTree.status)) {
       return (
         <SampleMessage
