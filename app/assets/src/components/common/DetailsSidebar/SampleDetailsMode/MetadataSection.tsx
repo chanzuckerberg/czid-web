@@ -1,6 +1,6 @@
 import cx from "classnames";
 import { Button } from "czifui";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Accordion from "~/components/layout/Accordion";
 import cs from "./metadata_section.scss";
 
@@ -18,49 +18,31 @@ interface MetadataSectionProps {
   children: React.ReactNode;
 }
 
-interface MetadataSectionState {
-  hasSaved: boolean;
-  prevSavePending: boolean;
-  prevEditing: boolean;
-}
+const MetadataSection = ({
+  savePending,
+  editing,
+  title,
+  open,
+  onToggle,
+  editable,
+  toggleable,
+  children,
+  onEditToggle,
+  alwaysShowEditLink,
+  className,
+}: MetadataSectionProps) => {
+  const [hasSaved, setHasSaved] = useState(false);
+  const [isPrevSavePending, setIsPrevSavePending] = useState(false);
 
-class MetadataSection extends React.Component<
-  MetadataSectionProps,
-  MetadataSectionState
-> {
-  state = {
-    hasSaved: false,
-    prevSavePending: this.props.savePending,
-    prevEditing: this.props.editing,
-  };
-
-  static getDerivedStateFromProps(
-    props: MetadataSectionProps,
-    state: MetadataSectionState,
-  ) {
-    let hasSaved = state.hasSaved;
-
-    // If we just switched to editing, hide 'All changes saved'
-    if (props.editing && !state.prevEditing) {
-      hasSaved = false;
-    }
-
+  useEffect(() => {
     // If saving has just finished, show 'All changed saved'
-    if (!props.savePending && state.prevSavePending) {
-      hasSaved = true;
+    if (!savePending && isPrevSavePending) {
+      setHasSaved(true);
     }
+    setIsPrevSavePending(savePending);
+  }, [savePending]);
 
-    return {
-      hasSaved,
-      prevSavePending: props.savePending,
-      prevEditing: props.editing,
-    };
-  }
-
-  renderStatus = () => {
-    const { savePending } = this.props;
-    const { hasSaved } = this.state;
-
+  const renderStatus = () => {
     if (savePending) {
       return <div className={cs.status}>Saving...</div>;
     }
@@ -72,59 +54,52 @@ class MetadataSection extends React.Component<
     return null;
   };
 
-  render() {
-    const {
-      title,
-      open,
-      onToggle,
-      editing,
-      editable,
-      toggleable,
-      children,
-      onEditToggle,
-      alwaysShowEditLink,
-      className,
-    } = this.props;
-
-    const header = (
-      <React.Fragment>
-        <div className={cs.title}>{title}</div>
-        {editable &&
-          (editing ? (
-            this.renderStatus()
-          ) : (
-            <div
-              className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
-              onClick={e => {
-                onEditToggle();
-                e.stopPropagation();
-              }}
-            >
-              Edit
-            </div>
-          ))}
-      </React.Fragment>
-    );
-    return (
-      <Accordion
-        className={cx(cs.metadataSection, className)}
-        header={header}
-        onToggle={onToggle}
-        open={open}
-        toggleable={toggleable}
-        bottomContentPadding
-      >
-        {children}
-        {editing && (
-          <div className={cs.controls}>
-            <Button sdsStyle="square" sdsType="primary" onClick={onEditToggle}>
-              Done Editing
-            </Button>
+  const header = (
+    <React.Fragment>
+      <div className={cs.title}>{title}</div>
+      {editable &&
+        (editing ? (
+          renderStatus()
+        ) : (
+          <div
+            className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
+            onClick={e => {
+              onEditToggle();
+              e.stopPropagation();
+            }}
+          >
+            Edit
           </div>
-        )}
-      </Accordion>
-    );
-  }
-}
+        ))}
+    </React.Fragment>
+  );
+
+  return (
+    <Accordion
+      className={cx(cs.metadataSection, className)}
+      header={header}
+      onToggle={onToggle}
+      open={open}
+      toggleable={toggleable}
+      bottomContentPadding
+    >
+      {children}
+      {editing && (
+        <div className={cs.controls}>
+          <Button
+            sdsStyle="square"
+            sdsType="primary"
+            onClick={() => {
+              onEditToggle();
+              setHasSaved(false);
+            }}
+          >
+            Done Editing
+          </Button>
+        </div>
+      )}
+    </Accordion>
+  );
+};
 
 export default MetadataSection;

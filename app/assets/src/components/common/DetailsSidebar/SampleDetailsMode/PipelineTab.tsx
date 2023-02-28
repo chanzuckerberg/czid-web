@@ -1,6 +1,6 @@
 import cx from "classnames";
-import { get, filter, set, isEmpty, pick } from "lodash/fp";
-import React from "react";
+import { get, filter, isEmpty, pick } from "lodash/fp";
+import React, { useEffect, useRef, useState } from "react";
 
 import { getSamplePipelineResults } from "~/api";
 import { trackEvent } from "~/api/analytics";
@@ -15,7 +15,7 @@ import {
   RESULTS_FOLDER_ROOT_KEY,
 } from "~/components/utils/resultsFolder";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WORKFLOWS, WORKFLOW_LABELS } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
 import {
@@ -50,6 +50,7 @@ interface PipelineTabProps {
 }
 
 export interface MngsPipelineInfo {
+  workflow?: { text: WORKFLOW_LABELS };
   [key: string]: {
     text?: string;
     link?: string;
@@ -58,7 +59,7 @@ export interface MngsPipelineInfo {
 }
 
 export interface AmrPipelineTabInfo {
-  workflow: { text: string };
+  workflow: { text: WORKFLOW_LABELS };
   technology: { text: string };
   pipelineVersion: { text: string };
   cardDatabaseVersion?: { text: string };
@@ -71,93 +72,74 @@ export interface AmrPipelineTabInfo {
   lastProcessedAt: { text: string };
 }
 
-interface PipelineTabState {
-  sectionOpen: {
-    pipelineInfo: boolean;
-    [READ_COUNTS_TABLE]: boolean;
-    [ERCC_PLOT]: boolean;
-    downloads: boolean;
+type PipelineStepDictState = PiplineStepDictInterface | Record<string, never>;
+interface PiplineStepDictInterface {
+  name: string;
+  stageDescription: string;
+  steps: {
+    [key: string]: {
+      fileList: {
+        displayName: string;
+        key: string | null;
+        url: string | null;
+      }[];
+      name: string;
+      readsAfter: number | null;
+      stepDescription: string;
+    };
   };
-  sectionEditing: { [key: string]: boolean };
-  graphWidth: number;
-  loading: string[];
-  pipelineStepDict:
-    | {
-        name: string;
-        stageDescription: string;
-        steps: {
-          [key: string]: {
-            fileList: {
-              displayName: string;
-              key: string | null;
-              url: string | null;
-            }[];
-            name: string;
-            readsAfter: number | null;
-            stepDescription: string;
-          };
-        };
-      }
-    | Record<string, never>;
 }
 
-class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
-  private _graphContainer: { offsetWidth: number };
-  state: PipelineTabState = {
-    sectionOpen: {
-      pipelineInfo: true,
-      [READ_COUNTS_TABLE]: false,
-      [ERCC_PLOT]: false,
-      downloads: false,
-    },
-    sectionEditing: {},
-    graphWidth: 0,
-    loading: [READ_COUNTS_TABLE],
-    pipelineStepDict: {},
-  };
+const PipelineTab = ({
+  snapshotShareId,
+  sampleId,
+  pipelineInfo,
+  pipelineRun,
+  erccComparison,
+}: PipelineTabProps) => {
+  const _graphContainer = useRef(null);
+  const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
 
-  INFO_FIELDS_FOR_WORKFLOW = {
+  const [sectionOpen, setSectionOpen] = useState({
+    pipelineInfo: true,
+    [READ_COUNTS_TABLE]: false,
+    [ERCC_PLOT]: false,
+    downloads: false,
+  });
+  const [graphWidth, setGraphWidth] = useState(0);
+  const [loading, setLoading] = useState([READ_COUNTS_TABLE]);
+  const [pipelineStepDict, setPipelineStepDict] = useState<
+    PipelineStepDictState
+  >({});
+
+  const INFO_FIELDS_FOR_WORKFLOW = {
     [WORKFLOWS.AMR.label]: AMR_WORKFLOW_INFO_FIELDS,
     [WORKFLOWS.CONSENSUS_GENOME.label]: CG_WORKFLOW_INFO_FIELDS,
     [WORKFLOWS.SHORT_READ_MNGS.label]: SHORT_READ_MNGS_INFO_FIELDS,
     [WORKFLOWS.LONG_READ_MNGS.label]: LONG_READ_MNGS_INFO_FIELDS,
   };
 
-  componentDidMount() {
-    const { snapshotShareId } = this.props;
-    this.updateGraphDimensions();
-    !snapshotShareId && this.getReadCounts();
-  }
+  useEffect(() => {
+    !snapshotShareId && getReadCounts();
+  }, []);
 
-  componentDidUpdate() {
-    this.updateGraphDimensions();
-  }
-
-  updateGraphDimensions = () => {
-    if (this._graphContainer && this.state.graphWidth === 0) {
-      this.setState({
-        graphWidth: this._graphContainer.offsetWidth,
-      });
+  useEffect(() => {
+    if (_graphContainer.current && graphWidth === 0) {
+      setGraphWidth(_graphContainer.current.getBoundingClientRect().width);
     }
-  };
+  });
 
-  toggleSection = section => {
-    const { sectionOpen } = this.state;
-
-    const newValue = !sectionOpen[section];
-    this.setState({
-      // @ts-expect-error working with Lodash
-      sectionOpen: set(section, newValue, sectionOpen),
-    });
+  const toggleSection = (section: keyof typeof sectionOpen) => {
+    const toggleValue = !sectionOpen[section];
+    setSectionOpen({ ...sectionOpen, [section]: toggleValue });
     trackEvent("PipelineTab_section_toggled", {
       section: section,
-      sectionOpen: newValue,
-      sampleId: this.props.sampleId,
+      sectionOpen: toggleValue,
+      sampleId: sampleId,
     });
   };
 
-  getPipelineInfoField = field => {
-    const { pipelineInfo, snapshotShareId } = this.props;
+  const getPipelineInfoField = (field: { name: string; key: string }) => {
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
     const metadataLink = !snapshotShareId && linkLabel && link && (
@@ -187,10 +169,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     };
   };
 
-  getReadCounts = async () => {
-    const { sampleId, pipelineRun } = this.props;
-    const { stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
-
+  const getReadCounts = async () => {
     const pipelineResults = await getSamplePipelineResults(
       sampleId,
       pipelineRun && pipelineRun.pipeline_version,
@@ -218,17 +197,14 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
         hostFilteringStepKeysWithReadsRemaining,
         readsRemainingByHostFilteringSteps,
       );
-
-      this.setState(prevState => ({
-        pipelineStepDict: hostFilteringStageResults,
-        loading: prevState.loading.filter(
-          section => section !== READ_COUNTS_TABLE,
-        ),
-      }));
+      setPipelineStepDict(hostFilteringStageResults);
+      setLoading(prevState =>
+        prevState.filter(section => section !== READ_COUNTS_TABLE),
+      );
     }
   };
 
-  getSequenceType = (technology: string) => {
+  const getSequenceType = (technology: string) => {
     switch (technology) {
       case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
         return "total_reads";
@@ -239,10 +215,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     }
   };
 
-  renderReadCountsTable = (stepKey: string) => {
-    const { pipelineRun } = this.props;
-    const { pipelineStepDict } = this.state;
-    const { stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
+  const renderReadCountsTable = (stepKey: string) => {
     const {
       stepNameKey,
       readsAfterKey,
@@ -250,7 +223,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     } = RESULTS_FOLDER_STEP_KEYS;
 
     const totalCount = get(
-      this.getSequenceType(pipelineRun?.technology),
+      getSequenceType(pipelineRun?.technology),
       pipelineRun,
     );
     const step = pipelineStepDict[stepsKey][stepKey];
@@ -303,9 +276,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     );
   };
 
-  readsPresent = () => {
-    const { pipelineStepDict } = this.state;
-
+  const readsPresent = () => {
     if (isEmpty(pipelineStepDict)) {
       return false;
     }
@@ -331,11 +302,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     return stepInformationPresent && readsPresent;
   };
 
-  renderReadsRemainingSection = (title: string) => {
-    const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
-    const { pipelineRun } = this.props;
-    const { loading, pipelineStepDict } = this.state;
-
+  const renderReadsRemainingSection = (title: string) => {
     if (loading.includes(READ_COUNTS_TABLE)) {
       return <LoadingMessage message="Loading" className={cs.loading} />;
     }
@@ -343,7 +310,7 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     if (
       !pipelineRun ||
       (!pipelineRun.total_reads && !pipelineRun.total_bases) ||
-      !this.readsPresent()
+      !readsPresent()
     ) {
       return <div className={cs.noData}>No data</div>;
     }
@@ -372,16 +339,13 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
           </div>
         </div>
         {Object.keys(pipelineStepDict[stepsKey]).map(stepKey => (
-          <div key={stepKey}>{this.renderReadCountsTable(stepKey)}</div>
+          <div key={stepKey}>{renderReadCountsTable(stepKey)}</div>
         ))}
       </div>
     );
   };
 
-  renderErccComparison = () => {
-    const { pipelineRun, erccComparison } = this.props;
-    const { graphWidth } = this.state;
-
+  const renderErccComparison = () => {
     if (!pipelineRun) {
       return <LoadingMessage message="Loading" className={cs.loading} />;
     }
@@ -399,97 +363,89 @@ class PipelineTab extends React.Component<PipelineTabProps, PipelineTabState> {
     );
   };
 
-  render() {
-    const { pipelineInfo, pipelineRun, sampleId, snapshotShareId } = this.props;
+  const workflow: WORKFLOW_LABELS =
+    get(["workflow", "text"], pipelineInfo) ?? WORKFLOWS.SHORT_READ_MNGS.label;
+  const mngsWorkflows = [
+    WORKFLOWS.SHORT_READ_MNGS.label,
+    WORKFLOWS.LONG_READ_MNGS.label,
+  ] as WORKFLOW_LABELS[];
+  const workflowIsMngs = mngsWorkflows.includes(workflow);
 
-    const workflow =
-      get(["workflow", "text"], pipelineInfo) ||
-      WORKFLOWS.SHORT_READ_MNGS.label;
-    const workflowIsMngs = [
-      WORKFLOWS.SHORT_READ_MNGS.label,
-      WORKFLOWS.LONG_READ_MNGS.label,
-      // @ts-expect-error Argument of type 'string' is not assignable to parameter of type '"Metagenomic" | "Nanopore"
-    ].includes(workflow);
+  const fields = INFO_FIELDS_FOR_WORKFLOW[workflow];
 
-    const fields = this.INFO_FIELDS_FOR_WORKFLOW[workflow];
+  const pipelineInfoFields = fields.map(getPipelineInfoField);
+  const title =
+    pipelineRun?.technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE
+      ? "Bases Remaining"
+      : "Reads Remaining";
 
-    const pipelineInfoFields = fields.map(this.getPipelineInfoField);
-    const title =
-      pipelineRun?.technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE
-        ? "Bases Remaining"
-        : "Reads Remaining";
-
-    return (
-      <div>
-        <MetadataSection
-          toggleable
-          onToggle={() => this.toggleSection("pipelineInfo")}
-          open={this.state.sectionOpen.pipelineInfo}
-          title="Pipeline Info"
-        >
-          <FieldList
-            fields={pipelineInfoFields}
-            className={cs.pipelineInfoFields}
-          />
-        </MetadataSection>
-        {!snapshotShareId && workflowIsMngs && (
-          <React.Fragment>
-            <MetadataSection
-              toggleable
-              onToggle={() => this.toggleSection(READ_COUNTS_TABLE)}
-              open={this.state.sectionOpen[READ_COUNTS_TABLE]}
-              title={title}
-            >
-              {this.renderReadsRemainingSection(title)}
-            </MetadataSection>
-            <MetadataSection
-              toggleable
-              onToggle={() => this.toggleSection("erccScatterplot")}
-              open={this.state.sectionOpen.erccScatterplot}
-              title="ERCC Spike-In Counts"
-              className={cs.erccScatterplotSection}
-            >
-              <div
-                ref={c => (this._graphContainer = c)}
-                className={cs.graphContainer}
-              >
-                {this.renderErccComparison()}
-              </div>
-            </MetadataSection>
-            <MetadataSection
-              toggleable
-              onToggle={() => this.toggleSection("downloads")}
-              open={this.state.sectionOpen.downloads}
-              title="Downloads"
-            >
-              <div className={cs.downloadSectionContent}>
-                {pipelineRun &&
-                  getDownloadLinks(sampleId, pipelineRun).map(option => (
-                    <a
-                      key={option.label}
-                      className={cs.downloadLink}
-                      href={option.path}
-                      target={option.newPage ? "_blank" : "_self"}
-                      rel="noopener noreferrer"
-                      onClick={() =>
-                        trackEvent("PipelineTab_download-link_clicked", {
-                          newPage: option.newPage,
-                          label: option.label,
-                          href: option.path,
-                          sampleId: this.props.sampleId,
-                        })
-                      }
-                    >
-                      {option.label}
-                    </a>
-                  ))}
-              </div>
-            </MetadataSection>
-          </React.Fragment>
-        )}
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <MetadataSection
+        toggleable
+        onToggle={() => toggleSection("pipelineInfo")}
+        open={sectionOpen.pipelineInfo}
+        title="Pipeline Info"
+      >
+        <FieldList
+          fields={pipelineInfoFields}
+          className={cs.pipelineInfoFields}
+        />
+      </MetadataSection>
+      {!snapshotShareId && workflowIsMngs && (
+        <React.Fragment>
+          <MetadataSection
+            toggleable
+            onToggle={() => toggleSection(READ_COUNTS_TABLE)}
+            open={sectionOpen[READ_COUNTS_TABLE]}
+            title={title}
+          >
+            {renderReadsRemainingSection(title)}
+          </MetadataSection>
+          <MetadataSection
+            toggleable
+            onToggle={() => toggleSection("erccScatterplot")}
+            open={sectionOpen.erccScatterplot}
+            title="ERCC Spike-In Counts"
+            className={cs.erccScatterplotSection}
+          >
+            <div ref={_graphContainer} className={cs.graphContainer}>
+              {renderErccComparison()}
+            </div>
+          </MetadataSection>
+          <MetadataSection
+            toggleable
+            onToggle={() => toggleSection("downloads")}
+            open={sectionOpen.downloads}
+            title="Downloads"
+          >
+            <div className={cs.downloadSectionContent}>
+              {pipelineRun &&
+                getDownloadLinks(sampleId, pipelineRun).map(option => (
+                  <a
+                    key={option.label}
+                    className={cs.downloadLink}
+                    href={option.path}
+                    target={option.newPage ? "_blank" : "_self"}
+                    rel="noopener noreferrer"
+                    onClick={() =>
+                      trackEvent("PipelineTab_download-link_clicked", {
+                        newPage: option.newPage,
+                        label: option.label,
+                        href: option.path,
+                        sampleId,
+                      })
+                    }
+                  >
+                    {option.label}
+                  </a>
+                ))}
+            </div>
+          </MetadataSection>
+        </React.Fragment>
+      )}
+    </div>
+  );
+};
 
 export default PipelineTab;

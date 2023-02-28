@@ -1,5 +1,5 @@
-import { set, mapValues } from "lodash/fp";
-import React from "react";
+import { mapValues } from "lodash/fp";
+import React, { useMemo, useState } from "react";
 
 import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
@@ -18,7 +18,6 @@ import MetadataSection from "./MetadataSection";
 import { AdditionalInfo } from "./SampleDetailsMode";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_mode.scss";
-
 interface MetadataTabProps {
   metadata: Metadata;
   metadataTypes: MetadataTypes;
@@ -31,42 +30,31 @@ interface MetadataTabProps {
   snapshotShareId?: string;
   currentWorkflowTab: string;
 }
-
-interface MetadataTabState {
-  sectionOpen?: {
-    [key: Section["name"]]: boolean;
-  };
-  sectionEditing?: {
-    [key: Section["name"]]: boolean;
-  };
-  sections?: Section[];
-}
-
 interface Section {
   name: string;
   keys: string[];
 }
+type SectionEditingLookup = {
+  [key: Section["name"]]: boolean;
+};
 
-class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
-  constructor(props: MetadataTabProps) {
-    super(props);
-
-    const sections = this.getMetadataSections();
-    this.state = {
-      sectionOpen: {
-        // Open the first section by default.
-        [sections[0].name]: true,
-      },
-      sectionEditing: {},
-      sections,
-    };
-  }
-
-  getMetadataSections = () => {
+const MetadataTab = ({
+  metadataTypes,
+  metadata,
+  onMetadataChange,
+  onMetadataSave,
+  metadataErrors,
+  additionalInfo,
+  sampleTypes,
+  snapshotShareId,
+  currentWorkflowTab,
+  savePending,
+}: MetadataTabProps) => {
+  const getMetadataSections = () => {
     // Group the MetadataFields by group name
     // Include Sample Info by default so that special cases in SAMPLE_ADDITIONAL_INFO always show
     const nameToFields = { "Sample Info": [] };
-    Object.values(this.props.metadataTypes).forEach(field => {
+    Object.values(metadataTypes).forEach(field => {
       const name =
         field.group === null ? "Custom Metadata" : field.group + " Info";
       if (name in nameToFields) {
@@ -85,57 +73,47 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     });
   };
 
-  toggleSection = (section: Section) => {
-    const { sectionOpen, sectionEditing } = this.state;
-    const newValue = !sectionOpen[section.name];
-    const newState: MetadataTabState = {
-      sectionOpen: set(section.name, newValue, sectionOpen),
-    };
+  const sections = useMemo(getMetadataSections, [metadataTypes]);
+  const [isSectionOpen, setIsSectionOpen] = useState({
+    [sections[0].name]: true,
+  });
+  const [sectionEditing, setSectionEditing] = useState<SectionEditingLookup>(
+    {},
+  );
 
-    // If we are closing a section, stop editing it.
-    if (sectionOpen[section.name]) {
-      newState.sectionEditing = set(section.name, false, sectionEditing);
-    }
+  const toggleSection = (section: Section) => {
+    const toggleValue = !isSectionOpen[section.name];
+    setIsSectionOpen({
+      ...isSectionOpen,
+      [section.name]: toggleValue,
+    });
+    setSectionEditing({ ...sectionEditing, [section.name]: false });
 
-    this.setState(newState);
     trackEvent("MetadataTab_section_toggled", {
       section: section.name,
-      sectionOpen: newValue,
-      ...this.props.additionalInfo,
+      sectionOpen: toggleValue,
+      ...additionalInfo,
     });
   };
 
-  toggleSectionEdit = (section: Section) => {
-    const { sectionEditing, sectionOpen } = this.state;
-    const newValue = !sectionEditing[section.name];
-    const newState: MetadataTabState = {
-      sectionEditing: set(section.name, newValue, sectionEditing),
-    };
+  const toggleSectionEdit = (section: Section) => {
+    const toggleValue = !sectionEditing[section.name];
+    // Only one section can be edited at a time.
+    setSectionEditing({
+      ...mapValues(sectionEditing, () => false),
+      [section.name]: toggleValue,
+    });
+    // The section being edited should be opened.
+    setIsSectionOpen({ ...isSectionOpen, [section.name]: true });
 
-    if (!sectionEditing[section.name]) {
-      // Only one section can be edited at a time.
-      newState.sectionEditing = mapValues(sectionEditing, () => false);
-      newState.sectionEditing[section.name] = true;
-      // The edited section should be opened.
-      newState.sectionOpen = set(section.name, true, sectionOpen);
-    }
-    this.setState(newState);
     trackEvent("MetadataTab_section-edit_toggled", {
       section: section.name,
-      sectionEditing: newValue,
-      ...this.props.additionalInfo,
+      sectionEditing: toggleValue,
+      ...additionalInfo,
     });
   };
 
-  renderInput = (metadataType: MetadataType) => {
-    const {
-      metadata,
-      onMetadataChange,
-      onMetadataSave,
-      metadataErrors,
-      additionalInfo,
-      sampleTypes,
-    } = this.props;
+  const renderInput = (metadataType: MetadataType) => {
     return (
       <div className={cs.inputWrapper}>
         <MetadataInput
@@ -155,7 +133,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     );
   };
 
-  static renderMetadataValue = (val: string | { name: string }) => {
+  const renderMetadataValue = (val: string | { name: string }) => {
     return val === undefined || val === null || val === "" ? (
       <div className={cs.emptyValue}>--</div>
     ) : (
@@ -166,33 +144,21 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     );
   };
 
-  renderMetadataType = (metadataType: MetadataType) => {
-    const { metadata, additionalInfo } = this.props;
+  const renderMetadataType = (metadataType: MetadataType) => {
     let metadataValue = metadata[metadataType.key];
 
     const isHuman = additionalInfo.host_genome_taxa_category === "human";
-    if (isHuman) {
+    if (isHuman && typeof metadataValue === "string") {
       metadataValue = returnHipaaCompliantMetadata(
         metadataType.key,
-        // @ts-expect-error Type 'LocationObject' is not assignable to type 'string'
         metadataValue,
       );
     }
 
-    return MetadataTab.renderMetadataValue(metadataValue);
+    return renderMetadataValue(metadataValue);
   };
 
-  renderMetadataSectionContent = (section: Section) => {
-    const {
-      metadataTypes,
-      additionalInfo,
-      onMetadataChange,
-      onMetadataSave,
-      snapshotShareId,
-      currentWorkflowTab,
-    } = this.props;
-    const { sectionEditing } = this.state;
-
+  const renderMetadataSectionContent = (section: Section) => {
     const validKeys = section.keys.filter(key =>
       Object.keys(metadataTypes).includes(key),
     );
@@ -220,7 +186,7 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
                 {additionalInfo[info.key]}
               </a>
             ) : (
-              MetadataTab.renderMetadataValue(additionalInfo[info.key])
+              renderMetadataValue(additionalInfo[info.key])
             ),
         });
       });
@@ -253,8 +219,8 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
         metadataFields.push({
           label: metadataTypes[key].name,
           value: isSectionEditing
-            ? this.renderInput(metadataTypes[key])
-            : this.renderMetadataType(metadataTypes[key]),
+            ? renderInput(metadataTypes[key])
+            : renderMetadataType(metadataTypes[key]),
         });
       }
     });
@@ -262,27 +228,25 @@ class MetadataTab extends React.Component<MetadataTabProps, MetadataTabState> {
     return <FieldList fields={metadataFields} className={cs.metadataFields} />;
   };
 
-  render() {
-    return (
-      <div>
-        {this.state.sections.map(section => (
-          <MetadataSection
-            key={section.name}
-            editable={this.props.additionalInfo.editable}
-            toggleable
-            onToggle={() => this.toggleSection(section)}
-            open={this.state.sectionOpen[section.name]}
-            onEditToggle={() => this.toggleSectionEdit(section)}
-            editing={this.state.sectionEditing[section.name]}
-            title={section.name}
-            savePending={this.props.savePending}
-          >
-            {this.renderMetadataSectionContent(section)}
-          </MetadataSection>
-        ))}
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      {sections.map(section => (
+        <MetadataSection
+          key={section.name}
+          editable={additionalInfo.editable}
+          toggleable
+          onToggle={() => toggleSection(section)}
+          open={isSectionOpen[section.name]}
+          onEditToggle={() => toggleSectionEdit(section)}
+          editing={sectionEditing[section.name]}
+          title={section.name}
+          savePending={savePending}
+        >
+          {renderMetadataSectionContent(section)}
+        </MetadataSection>
+      ))}
+    </div>
+  );
+};
 
 export default MetadataTab;
