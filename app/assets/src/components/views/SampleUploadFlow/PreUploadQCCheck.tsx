@@ -262,6 +262,11 @@ const PreUploadQCCheck = ({
       const arrR1 = filterArrayByIndex(fileContentsR1, 4);
       const arrR2 = filterArrayByIndex(fileContentsR2, 4);
 
+      // Exclude the last line, since it might be truncated
+      // due to slicing the file to the first megabyte.
+      arrR1.pop();
+      arrR2.pop();
+
       // Iterate through Seqeunces Identifiers
       for (let i = 0; i < arrR1.length; i++) {
         const sequenceIsNotPairwise = findDiff(arrR1[i], arrR2[i]) !== "2";
