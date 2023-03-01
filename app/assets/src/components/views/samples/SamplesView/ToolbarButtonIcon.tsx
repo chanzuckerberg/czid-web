@@ -14,6 +14,7 @@ export default function ToolbarButtonIcon({
   disabled,
   onClick,
   popperDependencies,
+  inverted,
 }: ToolbarButtonIconProps) {
   const iconWrapper = (
     <div className={className}>
@@ -27,7 +28,7 @@ export default function ToolbarButtonIcon({
     </div>
   );
 
-  if (!popupText) {
+  if (!popupText && !popupSubtitle) {
     return iconWrapper;
   }
 
@@ -43,9 +44,14 @@ export default function ToolbarButtonIcon({
       position="top center"
       basic={false}
       popperDependencies={popperDependencies}
+      inverted={inverted}
     />
   );
 }
+
+ToolbarButtonIcon.defaultProps = {
+  inverted: true,
+};
 
 interface ToolbarButtonIconProps {
   className: string;
@@ -57,4 +63,5 @@ interface ToolbarButtonIconProps {
   // The popup will re-render and re-position whenever any value in this array changes.
   // Allows us to gracefully handle popups with changing content.
   popperDependencies?: string[];
+  inverted?: boolean;
 }

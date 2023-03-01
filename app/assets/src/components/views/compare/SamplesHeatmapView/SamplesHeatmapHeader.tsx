@@ -17,7 +17,10 @@ import {
   SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
-import { MICROBIOME_DOWNLOAD_FEATURE , HEATMAP_FILTERS_LEFT_FEATURE } from "~/components/utils/features";
+import {
+  MICROBIOME_DOWNLOAD_FEATURE,
+  HEATMAP_FILTERS_LEFT_FEATURE,
+} from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { logDownloadOption } from "~/components/views/report/utils/download";
 import {
@@ -34,8 +37,6 @@ import {
 
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { DOWNLOAD_OPTIONS } from "./constants";
-
-
 
 import cs from "./samples_heatmap_view.scss";
 

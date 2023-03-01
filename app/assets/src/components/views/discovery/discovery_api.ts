@@ -105,6 +105,7 @@ const processRawSample = (sample: $TSFixMe) => {
         get("mngs_run_info.result_status_description", sample.details),
       ),
       pipelineRunCreatedAt: get("mngs_run_info.created_at", sample.details),
+      pipelineRunFinalized: get("mngs_run_info.finalized", sample.details),
       uploadError: toLower(
         get("upload_error.result_status_description", sample.details),
       ),

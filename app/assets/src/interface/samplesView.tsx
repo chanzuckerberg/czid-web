@@ -6,6 +6,11 @@ import { AnnotationValue } from "~/interface/discovery";
 import { LocationObject } from "~/interface/shared";
 import { DateString } from "~/interface/shared/generic";
 
+export type ObjectsType =
+  | ObjectCollectionView<PipelineTypeRun>
+  | ObjectCollectionView<BaseWorkflowRun>
+  | ObjectCollectionView<CGRun>;
+
 export interface SamplesViewProps {
   activeColumns?: string[];
   admin?: boolean;
@@ -22,10 +27,7 @@ export interface SamplesViewProps {
   mapPreviewedLocationId?: number;
   mapTilerKey?: string;
   numOfMngsSamples?: number;
-  objects?:
-    | ObjectCollectionView<PipelineTypeRun>
-    | ObjectCollectionView<BaseWorkflowRun>
-    | ObjectCollectionView<CGRun>;
+  objects?: ObjectsType;
   onActiveColumnsChange?(activeColumns: string[]): void;
   onClearFilters?(): void;
   onDisplaySwitch?: (display: string) => void;
@@ -126,7 +128,12 @@ export interface BaseRun {
   nucleotide_type: string;
   privateUntil: DateString;
   projectId: number;
-  sample: { name: string; project: string };
+  sample: {
+    name: string;
+    project: string;
+    userId: number;
+    pipelineRunFinalized: number;
+  };
   sample_type: string;
   water_control: string;
 }

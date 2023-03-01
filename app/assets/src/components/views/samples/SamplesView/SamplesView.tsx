@@ -3,7 +3,6 @@ import { Button } from "czifui";
 import {
   difference,
   find,
-  filter,
   forEach,
   get,
   isEmpty,
@@ -69,10 +68,10 @@ import {
   workflowIsWorkflowRunEntity,
   WORKFLOWS,
   WORKFLOW_ENTITIES,
-  WORKFLOW_KEY_FOR_VALUE,
 } from "~utils/workflows";
 
 import { BulkDeleteModal } from "./BulkDeleteModal";
+import { BulkDeleteTrigger } from "./BulkDeleteTrigger";
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
 import {
   computeColumnsByWorkflow,
@@ -88,6 +87,7 @@ import {
   WORKFLOW_TRIGGERS_BY_DOMAIN,
 } from "./constants";
 import cs from "./samples_view.scss";
+import { getSelectedObjects, getShorthandFromWorkflow } from "./utils";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
@@ -236,6 +236,8 @@ const SamplesView = forwardRef(function SamplesView(
   useEffect(() => {
     fetchMetadataFieldsBySampleIds();
   }, []);
+
+  const selectedObjects = getSelectedObjects({ selectedIds, objects });
 
   const handleSelectRow = (
     value: number,
@@ -460,9 +462,6 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const getSarsCov2Count = () => {
-    const selectedObjects = objects.loaded.filter(object =>
-      selectedIds.has(object.id),
-    );
     const sarsCov2Count = selectedObjects
       .map(object => get(["referenceAccession", "taxonName"], object))
       .reduce((n, taxonName) => {
@@ -526,34 +525,7 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const getShorthandFromWorkflow = workflow => {
-    const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
-    return WORKFLOWS[workflowKey].shorthand;
-  };
-
-  const renderBulkDeleteTrigger = () => {
-    if (!allowedFeatures.includes(BULK_DELETION_FEATURE)) {
-      return;
-    }
-
-    const disabled = selectedIds.size === 0;
-    return (
-      <ToolbarButtonIcon
-        className={cs.action}
-        icon="trashCan"
-        popupText={`Delete ${getShorthandFromWorkflow(workflow)} Run`}
-        popupSubtitle={disabled ? "Select at least 1 sample" : ""}
-        disabled={disabled}
-        onClick={() => setIsBulkDeleteModalOpen(true)}
-      />
-    );
-  };
-
   const handleBulkKickoffAmr = async () => {
-    const selectedObjects = filter(
-      object => selectedIds.has(object.id),
-      objects.loaded,
-    );
     const amrPipelineEligibility = reduce(
       (result, sample) => {
         if (isNotEligibleForAmrPipeline(sample)) {
@@ -700,14 +672,19 @@ const SamplesView = forwardRef(function SamplesView(
     });
   };
 
+  const renderBulkDeleteTrigger = () => (
+    <BulkDeleteTrigger
+      onClick={() => setIsBulkDeleteModalOpen(true)}
+      selectedObjects={selectedObjects}
+      workflow={workflow}
+      workflowEntity={workflowEntity}
+    />
+  );
+
   const renderBulkSamplesActionsMenu = () => {
     if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
       return;
     }
-
-    const selectedObjects = objects.loaded.filter((object) =>
-      selectedIds.has(object.id),
-    );
 
     return (
       <BulkSamplesActionsMenu
@@ -964,8 +941,6 @@ const SamplesView = forwardRef(function SamplesView(
       workflowEntity,
     });
   };
-
-  const selectedObjects = Array.from(selectedIds).map(id => objects.get(id));
 
   return (
     <div className={cs.container}>
