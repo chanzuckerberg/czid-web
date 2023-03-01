@@ -1,6 +1,5 @@
-import { Page } from "@playwright/test";
 import * as path from "path";
-import { expect } from "@playwright/test";
+import { Page, expect } from "@playwright/test";
 
 /**
  * Base class with convenience wrappers for interactions
@@ -76,7 +75,10 @@ export class BasePage {
   }
 
   async clickCheckBox(index: number) {
-    await this.page.locator('input[type="checkbox"]').nth(index).click();
+    await this.page
+      .locator('input[type="checkbox"]')
+      .nth(index)
+      .click();
   }
 
   /**
@@ -103,7 +105,7 @@ export class BasePage {
     while (
       (await this.page
         .locator('[placeholder="Search Public..."]')
-        .getAttribute("value")) != "floo Neptunium"
+        .getAttribute("value")) !== value
     ) {
       await this.page.fill(`[placeholder="${placeholder}"]`, value);
     }
@@ -217,8 +219,8 @@ export class BasePage {
 
   async waitForResponse(path: string) {
     const resp = await this.page.waitForResponse(
-      (response) =>
-        response.url().includes(`/${path}/`) && response.status() === 200
+      response =>
+        response.url().includes(`/${path}/`) && response.status() === 200,
     );
     return resp.json();
   }

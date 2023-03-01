@@ -22,6 +22,10 @@ export const PIPELINE_READS_LABEL = ".narrowMetadataValueContainer-2CnKh";
 export const VIEW_PIPELINE_VISUALIZATION = ".metadataValue-2cDlV a";
 export const READS_REMAINING_LABELS = ".label--gcey";
 export const DOWNLOADS_LABELS = ".downloadLink-14o8v";
+export const SIDEBAR_PIPELINE_AMR_SELECTOR =
+  ".tabLabels-3dR_d[data-testid='antimicrobial-resistance']";
+export const ANTIMICROBIAL_RESISTANCE = "Antimicrobial Resistance";
+export const AMR_LABEL_SELECTOR = ".label-9CR8O";
 export const ALL_PIPELINE_INFO = [
   "Analysis Type",
   "Sequencing Platform",
@@ -69,7 +73,7 @@ export const NUMBER_INPUT = 'input[type="number"]';
 export const PIPELINE_LINK = ".pipelineInfo-Yfrsi";
 export const PIPELINE_LINK_PATH = "pipeline_viz/7.1?";
 export const SAMPLE_HEADER = ".sampleName-1xb-q";
-export const SAMPLE_DETAILS = ".sampleDetailsLink-1iKgK";
+export const SAMPLE_DETAILS = "text='Sample Details'";
 export const SEARCH_BAR = '[placeholder="Taxon name"]';
 export const ALL_COLUMN_HEADERS = [
   "Taxon",
