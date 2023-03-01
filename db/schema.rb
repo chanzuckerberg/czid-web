@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_01_30_204438) do
+ActiveRecord::Schema.define(version: 2023_02_26_185625) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -43,6 +43,9 @@ ActiveRecord::Schema.define(version: 2023_01_30_204438) do
     t.string "s3_taxon_blacklist_path", default: "s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
     t.integer "lineage_version_old", limit: 2
     t.string "lineage_version", limit: 10, null: false
+    t.text "minimap2_long_db_path", comment: "The S3 path prefix to the minimap2 index for short reads"
+    t.text "minimap2_short_db_path", comment: "The S3 path prefix to the minimap2 index for long reads"
+    t.text "diamond_db_path", comment: "The S3 path prefix to the diamond index"
   end
 
   create_table "amr_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
