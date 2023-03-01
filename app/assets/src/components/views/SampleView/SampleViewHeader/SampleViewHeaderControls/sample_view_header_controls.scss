@@ -1,0 +1,40 @@
+@import "~czifui/dist/variables";
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+
+.controlsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.controlsTopRowContainer {
+  display: flex;
+  flex-direction: row;
+  margin: $sds-spaces-m 0 $sds-spaces-s 0;
+  justify-content: flex-end;
+}
+
+.controlsBottomRowContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  .controlElement {
+    margin-left: $sds-spaces-m; 
+  
+    &:not(:last-child) {
+      margin-right: 0;
+    }
+  }
+}
+
+.warningIcon {
+  margin-left: $sds-spaces-xxxs;
+  transform: translateY(1px);
+}
+
+.seperator {
+  @include font-body-xxxs;
+  color: $sds-color-gray-500;
+  padding: $sds-spaces-xxs $sds-spaces-xs;
+}

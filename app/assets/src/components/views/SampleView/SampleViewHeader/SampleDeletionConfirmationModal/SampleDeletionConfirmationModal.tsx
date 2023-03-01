@@ -2,7 +2,7 @@ import React from "react";
 
 import Modal from "~ui/containers/Modal";
 import { SecondaryButton } from "~ui/controls/buttons";
-import { ErrorButton } from "../../ui/controls/buttons";
+import { ErrorButton } from "../../../../ui/controls/buttons";
 
 import cs from "./sample_deletion_confirmation_modal.scss";
 

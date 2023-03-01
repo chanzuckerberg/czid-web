@@ -109,7 +109,7 @@ import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import ReportViewSelector from "./ReportViewSelector";
-import SampleViewHeader from "./SampleViewHeader";
+import { SampleViewHeader } from "./SampleViewHeader";
 import SampleViewModals from "./SampleViewModals";
 import TaxonTreeVis from "./TaxonTreeVis";
 import {

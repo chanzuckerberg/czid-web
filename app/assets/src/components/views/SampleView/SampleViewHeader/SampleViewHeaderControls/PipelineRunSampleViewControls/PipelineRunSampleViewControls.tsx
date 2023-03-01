@@ -18,7 +18,7 @@ import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import { ErrorButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
-import { TABS } from "./constants";
+import { TABS } from "../../../constants";
 
 interface PipelineRunSampleViewControlsProps {
   backgroundId?: number;

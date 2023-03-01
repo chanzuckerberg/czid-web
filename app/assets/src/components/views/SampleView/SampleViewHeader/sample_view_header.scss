@@ -1,0 +1,27 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.viewHeader {
+  margin-bottom: 5px;
+
+  .legacyLink {
+    @include font-body-xxxs;
+    color: $sds-color-gray-500;
+    padding-left: $sds-spaces-xxxs;
+    &:hover {
+      color: $sds-color-primary-400;
+    }
+  }
+
+  .sampleDetailsLink {
+    color: $sds-color-primary-400;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.5;
+    }
+  }
+}
