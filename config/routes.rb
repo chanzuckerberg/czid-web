@@ -89,6 +89,7 @@ Rails.application.routes.draw do
       post :bulk_kickoff_workflow_runs
       post :user_is_collaborator
       post :validate_user_can_delete_objects
+      post :bulk_delete
     end
   end
 

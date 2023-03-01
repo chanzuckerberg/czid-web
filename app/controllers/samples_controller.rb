@@ -33,7 +33,7 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
                    :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,
-                   :bulk_kickoff_workflow_runs, :user_is_collaborator, :validate_user_can_delete_objects,].freeze
+                   :bulk_kickoff_workflow_runs, :user_is_collaborator, :validate_user_can_delete_objects, :bulk_delete,].freeze
   OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :upload_credentials].freeze
 
@@ -610,6 +610,57 @@ class SamplesController < ApplicationController
     render json: {
       validIds: valid_ids,
       invalidSampleNames: invalid_sample_names,
+      error: error,
+    }
+  end
+
+  # POST /samples/bulk_delete.json
+  # Accepts a list of ids (sample ids or workflow run ids) to delete
+  # and returns a list of successfully deleted ids and a nullable error.
+  # Only ids previously validated with validate_user_can_delete_objects
+  # should be passed to this endpoint, but validation is performed again
+  # as a final check before deleting.
+  def bulk_delete
+    permitted_params = params.permit(:workflow, selectedIds: [])
+    selected_ids = permitted_params[:selectedIds]
+    workflow = permitted_params[:workflow]
+    error = nil
+
+    # validate again that all selected ids are eligible for deletion
+    validated_objects = DeletionValidationService.call(
+      query_ids: selected_ids,
+      user: current_user,
+      workflow: workflow
+    )
+
+    unless validated_objects[:error].nil?
+      # error was logged in deletion validation service
+      render json: {
+        deletedIds: [],
+        error: validated_objects[:error],
+      }
+      return
+    end
+
+    valid_ids = validated_objects[:valid_ids]
+
+    if valid_ids.length != selected_ids.length
+      LogUtil.log_error(
+        "Bulk delete failed: not all objects valid for deletion",
+        selected_ids: selected_ids,
+        workflow: workflow
+      )
+      render json: {
+        deletedIds: [],
+        error: "Bulk delete failed: not all objects valid for deletion",
+      }
+      return
+    end
+
+    # call deletion service
+
+    render json: {
+      deletedIds: valid_ids,
       error: error,
     }
   end

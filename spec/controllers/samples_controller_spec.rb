@@ -1232,6 +1232,67 @@ RSpec.describe SamplesController, type: :controller do
         end
       end
     end
+
+    describe "POST #bulk_delete" do
+      before do
+        @project = create(:project, users: [@joe])
+        illumina = PipelineRun::TECHNOLOGY_INPUT[:illumina]
+        @sample1 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "completed Illumina mNGs sample",
+                                   pipeline_runs_data: [{ finalized: 1, technology: illumina }])
+
+        @sample2 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "in-progress Illumina mNGS sample",
+                                   pipeline_runs_data: [{ finalized: 0, technology: illumina }])
+
+        @sample_ids = [@sample1.id, @sample2.id]
+      end
+
+      it "returns empty array with error if error is raised in DeletionValidationService" do
+        params = {
+          workflow: "short-read-mngs",
+          selectedIds: @sample_ids,
+        }
+
+        unexpected_error_response = {
+          valid_ids: [],
+          invalid_sample_ids: [],
+          error: DeletionValidationService::DELETION_VALIDATION_ERROR,
+        }
+
+        allow(DeletionValidationService).to receive(:call).with(anything).and_return(unexpected_error_response)
+
+        post :bulk_delete, params: params
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body, symbolize_names: true)
+        expect(json_response[:error]).to eq(DeletionValidationService::DELETION_VALIDATION_ERROR)
+        expect(json_response[:deletedIds]).to be_empty
+      end
+
+      it "returns empty array with error if not all ids are valid for deletion" do
+        params = {
+          workflow: "short-read-mngs",
+          selectedIds: @sample_ids,
+        }
+
+        validation_response = {
+          error: nil,
+          valid_ids: [@sample1.id],
+          invalid_sample_ids: [@sample2.id],
+        }
+
+        expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_response)
+
+        post :bulk_delete, params: params
+
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body, symbolize_names: true)
+        expect(json_response[:error]).to eq("Bulk delete failed: not all objects valid for deletion")
+        expect(json_response[:deletedIds]).to be_empty
+      end
+    end
   end
 
   context "Admin user" do

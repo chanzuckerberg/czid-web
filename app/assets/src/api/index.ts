@@ -718,6 +718,18 @@ const bulkKickoffWorkflowRuns = ({ sampleIds, workflow }: $TSFixMe) =>
     workflow,
   });
 
+const bulkDeleteObjects = ({
+  selectedIds,
+  workflow,
+}: {
+  selectedIds: number[];
+  workflow: WORKFLOW_VALUES;
+}) =>
+  postWithCSRF(`samples/bulk_delete`, {
+    selectedIds,
+    workflow,
+  });
+
 const validateUserCanDeleteObjects = ({
   selectedIds,
   workflow,
@@ -731,6 +743,7 @@ const validateUserCanDeleteObjects = ({
   });
 
 export {
+  bulkDeleteObjects,
   bulkImportRemoteSamples,
   bulkKickoffWorkflowRuns,
   createBackground,
