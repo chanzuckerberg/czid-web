@@ -79,18 +79,6 @@ export const SampleViewHeader = ({
       : `/home?project_id=${project.id}`;
   };
 
-  const onTitleClick = () => {
-    openUrl(
-      generateUrlToSampleView({
-        sampleId: sample?.id,
-        snapshotShareId,
-      }),
-    );
-    trackEvent("SampleView_header-title_clicked", {
-      sampleId: sample?.id,
-    });
-  };
-
   return (
     <>
       <ViewHeader className={cs.viewHeader}>
@@ -104,7 +92,17 @@ export const SampleViewHeader = ({
             options={projectSamples.map(sample => ({
               label: sample?.name,
               id: sample?.id,
-              onClick: onTitleClick,
+              onClick: () => {
+                openUrl(
+                  generateUrlToSampleView({
+                    sampleId: sample?.id,
+                    snapshotShareId,
+                  }),
+                );
+                trackEvent("SampleView_header-title_clicked", {
+                  sampleId: sample?.id,
+                });
+              },
             }))}
           />
         </ViewHeader.Content>
