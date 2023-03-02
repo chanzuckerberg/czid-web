@@ -1407,13 +1407,14 @@ export default class Heatmap {
         })
         .style("stroke", (d: $TSFixMe) => {
           if (d.pathogenFlags.includes("lcrp")) {
-            return "blue";
+            return "black";
           } else if (d.pathogenFlags.includes("knownPathogen")) {
-            return "green";
+            return "blue";
           } else {
             return "none";
           }
-        });
+        })
+        .style("stroke-width", "5px");
     };
 
     // Define background pattern
