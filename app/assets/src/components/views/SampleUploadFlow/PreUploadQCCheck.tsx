@@ -1,12 +1,12 @@
 import Aioli from "@biowasm/aioli";
-import { isEmpty } from "lodash/fp";
+import { isEmpty, flatten } from "lodash/fp";
+import { nanoid } from "nanoid";
 import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { SampleFromApi as Sample } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
-  ERROR_MESSAGE,
   MEGABYTE,
   ILLUMINA,
   NANOPORE,
@@ -22,6 +22,8 @@ import {
   INVALID_FASTA_FASTQ_ERROR,
   TRUNCATED_FILE_ERROR,
   MISMATCH_FILES_ERROR,
+  REGEX_READ_ILLUMINA,
+  REGEX_READ_NANOPORE,
 } from "./constants";
 import cs from "./pre_upload_qc_check.scss";
 
@@ -41,15 +43,13 @@ const PreUploadQCCheck = ({
   // CLI is used for calling some of the bioinformatics tools for PreUploadQC checks (biowasm, etc...)
   let CLI: $TSFixMe;
   // Set for files that did not pass validateFileType
-  const [invalidFiles, setInvalidFiles] = useState<Set<Sample>>(new Set());
-  // Set for files that did not pass validateDuplicates
-  const [duplicateIds, setDuplicateIds] = useState<Set<Sample>>(new Set());
-  // Set for files that did not pass validateTruncatedFile
-  const [truncatedFiles, setTruncatedFiles] = useState<Set<Sample>>(new Set());
-  // Set for files that did not pass validateMismatchedFiles
-  const [mismatchedFiles, setMismatchedFiles] = useState<Set<Sample>>(
-    new Set(),
-  );
+  const [invalidFiles, setInvalidFiles] = useState<Set<File>>(new Set());
+  // Set for files that did not pass validateFASTADuplicates
+  const [duplicateIds, setDuplicateIds] = useState<Set<File>>(new Set());
+  // Set for files that did not pass validateFASTQTruncated
+  const [truncatedFiles, setTruncatedFiles] = useState<Set<File>>(new Set());
+  // Set for files that did not pass validateFASTQMatchingR1R2
+  const [mismatchedFiles, setMismatchedFiles] = useState<Set<File>>(new Set());
 
   const FASTA_FILE_TYPE = "FASTA";
   const FASTQ_FILE_TYPE = "FASTQ";
@@ -61,6 +61,7 @@ const PreUploadQCCheck = ({
   // Add libraries to CLI and mount each file
   const initializeCLI = async () => {
     const pathToAssets = `${location.origin}/assets`;
+
     CLI = await new Aioli([
       {
         tool: "htslib",
@@ -68,19 +69,12 @@ const PreUploadQCCheck = ({
         version: "1.10",
         urlPrefix: pathToAssets,
       },
-      {
-        tool: "seqtk",
-        version: "1.3",
-        urlPrefix: pathToAssets,
-      },
+      { tool: "seqtk", version: "1.3", urlPrefix: pathToAssets },
     ]);
 
-    for (let i = 0; i < samples.length; i++) {
-      const passedFile = samples[i];
-      for (const key in passedFile.files) {
-        await CLI.mount(passedFile.files[key]);
-      }
-    }
+    // For each sample, extract all the files the user wants to upload, and mount them
+    const files = flatten(samples.map(s => Object.values(s.files)));
+    await CLI.mount(files);
   };
 
   // Wrapper function to run all functions
@@ -138,52 +132,44 @@ const PreUploadQCCheck = ({
   };
 
   // Validate that the file is FASTA or FASTQ
-  const validateFileType = async (fileName: $TSFixMe) => {
-    let result = "";
-
+  const validateFileType = async (file: File) => {
     try {
-      const fileType = await CLI.exec(`htsfile ${fileName.name}`);
-
       // Will return either "FASTA text", "FASTQ sequence text", or "unknown text"
-      if (fileType.includes(UNKNOWN_FILE_TYPE) && !invalidFiles.has(fileName)) {
-        setInvalidFiles(arr => new Set([...arr, fileName]));
+      const fileType = await CLI.exec(`htsfile ${file.name}`);
+
+      // If htsfile doens't recognize it, it's a not a valid FASTA/FASTQ
+      if (fileType.includes(UNKNOWN_FILE_TYPE) && !invalidFiles.has(file)) {
+        setInvalidFiles(arr => new Set([...arr, file]));
         trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
           error: INVALID_FASTA_FASTQ,
         });
-        return ERROR_MESSAGE;
+        return false;
       }
-      result += fileType;
+
+      return fileType;
     } catch (e) {
-      result += ERROR_MESSAGE;
+      return false;
     }
-    return result;
   };
 
-  // Validate if FASTA file has duplicate sequences
-  const validateDuplicates = async (fileName: $TSFixMe) => {
+  // Validate that the FASTA file has no duplicate sequences
+  const validateFASTADuplicates = async (file: File) => {
     try {
-      const slicedFileToNewFile = sliceFile(fileName, 0, MEGABYTE);
+      // Get first 1MB of FASTA (we go through seqtk for this for .gz support)
+      const fileSlice = await sliceFile(file, 0, MEGABYTE);
+      const fastaContents = await CLI.exec(`seqtk seq -l0 ${fileSlice.name}`);
 
-      // Returns string of file that is seperated by new line (common transformation of FASTA/Q)
-      const seqtkSeqResult = await CLI.exec(
-        `seqtk seq -l0 ${slicedFileToNewFile.name}`,
-      );
-
-      // Split string by new line and filter out only sequence IDs
-      const arr = filterArrayByIndex(seqtkSeqResult, 2);
-
-      const ids: $TSFixMe = [];
-
-      // Iterate through the Sequence IDs and check if there are any duplicates
-      for (let i = 0; i < arr.length; i++) {
-        if (ids.includes(arr[i]) && !duplicateIds.has(fileName)) {
-          setDuplicateIds(dup => new Set([...dup, fileName]));
-          trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
-            error: DUPLICATE_ID,
-          });
-          return false;
-        }
-        ids.push(arr[i]);
+      // Check for duplicate FASTA IDs
+      const readIds = fastaContents
+        .split("\n")
+        .filter(line => line.startsWith(">"));
+      const readIdsUnique = new Set(readIds);
+      if (readIds.length !== readIdsUnique.size) {
+        setDuplicateIds(dup => new Set([...dup, file]));
+        trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
+          error: DUPLICATE_ID,
+        });
+        return false;
       }
     } catch (e) {
       return false;
@@ -191,41 +177,39 @@ const PreUploadQCCheck = ({
     return true;
   };
 
-  // Validate if the file FASTQ file is truncated
-  const validateTruncatedFile = async (fileName: $TSFixMe) => {
+  // Validate that the FASTQ file is not truncated
+  const validateFASTQTruncated = async (file: File) => {
     try {
       // Get the last megabyte of the file
-      const byteEnd = Math.ceil(fileName.size);
-      const byteIndex = Math.max(0, byteEnd - 1000000);
-      const slicedFileToNewFile = sliceFile(fileName, byteIndex, byteEnd);
+      const byteStart = Math.max(0, file.size - MEGABYTE);
+      const fastqContents = await sliceFile(file, byteStart, file.size);
 
-      // Extract last four lines
-      const fileContents = await slicedFileToNewFile.text();
-      const arr = fileContents.trim().split(/\n/);
-      const lastFourLines = arr.slice(-4);
-      const fourLines = lastFourLines.join("\n");
+      // Extract the last four lines, i.e. last FASTQ record of the file
+      const fileContents = await fastqContents.text();
+      const last4Lines = fileContents
+        .trim()
+        .split("\n")
+        .slice(-4)
+        .join("\n");
+      const fileLast4Lines = new File(
+        [last4Lines],
+        `${file.name}.${nanoid()}.last4`,
+      );
+      await CLI.mount(fileLast4Lines);
 
-      // Create blob with last four lines and mount it
-      const blob = {
-        name: fileName.name,
-        data: new Blob([fourLines], { type: "text/plain" }),
-      };
-      await CLI.mount(blob);
-      // Returns string of file that is seperated by new line (common transformation of FASTA/Q)
-      const seqtkSeqResult = await CLI.exec(`seqtk seq ${fileName.name}`);
-      const seqtkSeqResultFirstChar = seqtkSeqResult[0];
-
-      //  We can detect various scenarios based on the output of seqtk:
-      //  ""  seqtk did not detect a valid FASTA or FASTQ sequence in the last 4 lines
-      // "@"  seqtk detected a valid FASTQ read (FASTQ read names start with @)
-      //  ">" seqtk detected a valid FASTA record (FASTA sequence names start with >)
+      // Run seqtk on the file containing just the last FASTQ record
+      // We can detect various scenarios based on the output of seqtk:
+      // - ""  seqtk did not detect a valid FASTA or FASTQ sequence in the last 4 lines
+      // - "@"  seqtk detected a valid FASTQ read (FASTQ read names start with @)
+      // - ">" seqtk detected a valid FASTA record (FASTA sequence names start with >)
+      const lastRecord = await CLI.exec(`seqtk seq ${fileLast4Lines.name}`);
       if (
-        (seqtkSeqResultFirstChar !== VALID_FASTQ_READ ||
-          isEmpty(seqtkSeqResult) ||
-          seqtkSeqResultFirstChar === VALID_FASTA_READ) &&
-        !truncatedFiles.has(fileName)
+        (lastRecord[0] !== VALID_FASTQ_READ ||
+          isEmpty(lastRecord) ||
+          lastRecord[0] === VALID_FASTA_READ) &&
+        !truncatedFiles.has(file)
       ) {
-        setTruncatedFiles(arr => new Set([...arr, fileName]));
+        setTruncatedFiles(arr => new Set([...arr, file]));
         trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
           error: TRUNCATED_FILE,
         });
@@ -237,81 +221,64 @@ const PreUploadQCCheck = ({
     return true;
   };
 
-  // Validate if R1 and R2 file are paired-end mismatched
-  const validateMismatchedFiles = async (
-    fileNameR1: $TSFixMe,
-    fileNameR2: $TSFixMe,
-  ) => {
+  // Validate that the FASTQ read names match Illumina or Nanopore
+  const validateFASTQReads = async (file: File) => {
     try {
-      // Preprocessing to make sure the fileNameR1 includes R1 and fileNameR2 includes R2
-      if (fileNameR1.name.includes(R2CHECK)) {
-        const tempFileName = fileNameR1;
-        fileNameR1 = fileNameR2;
-        fileNameR2 = tempFileName;
+      // Get first 1MB of FASTQ (we go through seqtk for this for .gz support)
+      const fileSlice = await sliceFile(file, 0, MEGABYTE);
+      const fastqContents = await CLI.exec(`seqtk seq ${fileSlice.name}`);
+      const fastqReadNames = fastqContents
+        .split("\n")
+        .filter(line => line.startsWith("@"));
+
+      // Check whether read names are Illumina or Nanopore
+      const isIllumina = fastqReadNames.every(d => REGEX_READ_ILLUMINA.test(d));
+      if (isIllumina) return ILLUMINA;
+      const isNanopore = fastqReadNames.every(d => REGEX_READ_NANOPORE.test(d));
+      if (isNanopore) return NANOPORE;
+    } catch (e) {
+      return false;
+    }
+    return false;
+  };
+
+  // Validate if R1 and R2 files are paired-end mismatched
+  const validateFASTQMatchingR1R2 = async (fileR1: File, fileR2: File) => {
+    try {
+      // Preprocessing to make sure the fileR1 includes R1 and fileR2 includes R2
+      if (fileR1.name.includes(R2CHECK)) {
+        const temp = fileR1;
+        fileR1 = fileR2;
+        fileR2 = temp;
       }
 
-      // Slice file to first megabyte
-      const slicedFileToNewFileR1 = sliceFile(fileNameR1, 0, MEGABYTE);
-      const slicedFileToNewFileR2 = sliceFile(fileNameR2, 0, MEGABYTE);
+      // Get first 1MB of R1/R2 FASTQs (we go through seqtk for this for .gz support)
+      const fileSliceR1 = await sliceFile(fileR1, 0, MEGABYTE);
+      const fileSliceR2 = await sliceFile(fileR2, 0, MEGABYTE);
+      const fastqContentsR1 = await CLI.exec(`seqtk seq ${fileSliceR1.name}`);
+      const fastqContentsR2 = await CLI.exec(`seqtk seq ${fileSliceR2.name}`);
+      const fastqReadNamesR1 = fastqContentsR1
+        .split("\n")
+        .filter(line => line.startsWith("@"));
+      const fastqReadNamesR2 = fastqContentsR2
+        .split("\n")
+        .filter(line => line.startsWith("@"));
 
-      // Get File contents from file
-      const fileContentsR1 = await slicedFileToNewFileR1.text();
-      const fileContentsR2 = await slicedFileToNewFileR2.text();
-
-      // Filter only the sequence identifier to array
-      const arrR1 = filterArrayByIndex(fileContentsR1, 4);
-      const arrR2 = filterArrayByIndex(fileContentsR2, 4);
-
-      // Exclude the last line, since it might be truncated
-      // due to slicing the file to the first megabyte.
-      arrR1.pop();
-      arrR2.pop();
-
-      // Iterate through Seqeunces Identifiers
-      for (let i = 0; i < arrR1.length; i++) {
-        const sequenceIsNotPairwise = findDiff(arrR1[i], arrR2[i]) !== "2";
-        if (sequenceIsNotPairwise) {
-          setMismatchedFiles(arr => new Set([...arr, fileNameR1, fileNameR2]));
+      // Iterate through read names until find a mismatch
+      for (let i = 0; i < fastqReadNamesR1.length; i++) {
+        const isPaired =
+          findDiff(fastqReadNamesR1[i], fastqReadNamesR2[i]) === "2";
+        if (!isPaired) {
+          setMismatchedFiles(arr => new Set([...arr, fileR1, fileR2]));
           trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
             error: PAIRED_END_MISMATCHED,
           });
           return false;
         }
       }
+      return true;
     } catch (e) {
       return false;
-    }
-    return true;
-  };
-
-  // Validate that there are no mismatch sequencing
-  const addFormatToFile = async (file: $TSFixMe, key: $TSFixMe) => {
-    try {
-      const fileName = file.files[key];
-      const fileContents = await fileName.text();
-
-      const arr = filterArrayByIndex(fileContents, 4);
-      const nanoporeRegexExp = /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
-
-      const illuminiaRegexExp = /^@[a-zA-z0-9]+:[0-9]+:[a-zA-Z0-9]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+(:[ATGCN]+[+][ATGCN]+)*[ 12]{2}:[YN]:[0-9]+:[ATGCN]+([+][ATGCN]+)*$/i;
-
-      let isIlluminaFormat = true;
-      let isNanoporeFormat = true;
-
-      for (let i = 0; i < arr.length; i++) {
-        const sequenceIdentifer = arr[i];
-
-        if (isIlluminaFormat && !illuminiaRegexExp.test(sequenceIdentifer)) {
-          isIlluminaFormat = false;
-        }
-        if (isNanoporeFormat && !nanoporeRegexExp.test(sequenceIdentifer)) {
-          isNanoporeFormat = false;
-        }
-      }
-      if (isIlluminaFormat || isNanoporeFormat)
-        file.format = isIlluminaFormat ? ILLUMINA : NANOPORE;
-    } catch (e) {
-      return ERROR_MESSAGE;
     }
   };
 
@@ -360,22 +327,6 @@ const PreUploadQCCheck = ({
     }
   };
 
-  // Filter array by an index
-  const filterArrayByIndex = (fileContents: $TSFixMe, index: $TSFixMe) => {
-    return fileContents
-      .trim()
-      .split(/\n/)
-      .filter((_element: $TSFixMe, i: $TSFixMe) => {
-        return i % index === 0;
-      });
-  };
-
-  // Slice File
-  const sliceFile = (fileName: $TSFixMe, start: $TSFixMe, end: $TSFixMe) => {
-    const slicedFile = fileName.slice(start, end);
-    return new File([slicedFile], fileName.name);
-  };
-
   // Find difference between string, returns characters that are in str2 that are not in str1
   const findDiff = (str1: string, str2: string) => {
     let diff = "";
@@ -385,83 +336,99 @@ const PreUploadQCCheck = ({
     return diff;
   };
 
+  // Slice a File object, create a new File, and mount it on to filesystem
+  const sliceFile = async (file: File, start: number, end: number) => {
+    // Take a slice of the file and make it into a new file
+    const blob = file.slice(start, end);
+    const fileSlice = new File([blob], `${file.name}.${nanoid()}.slice`);
+
+    // Mount it so you can run CLI commands on the file
+    await CLI.mount(fileSlice);
+    return fileSlice;
+  };
+
   // Run each validation check for each file
   const runAllValidationChecks = async () => {
     let cumulativeInvalidFileSizes = 0;
 
-    for (let i = 0; i < samples.length; i++) {
-      const passedFile = samples[i];
-      if (passedFile.finishedValidating === true) {
-        if (!passedFile.isValid) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          Object.entries(passedFile.files).forEach(([_fileName, file]) => {
-            cumulativeInvalidFileSizes += file.size;
-          });
+    for (const sample of samples) {
+      // Skip validation if already done on this sample
+      if (sample.finishedValidating === true) {
+        if (!sample.isValid) {
+          Object.values(sample.files).forEach(
+            f => (cumulativeInvalidFileSizes += f.size),
+          );
         }
-        handleCheckbox(passedFile);
+        handleCheckbox(sample);
         continue;
       }
-      let fileIsValid = true;
 
-      for (const key in passedFile.files) {
-        const validatedFastaOrFastq = await validateFileType(
-          passedFile.files[key],
-        );
-        if (validatedFastaOrFastq === ERROR_MESSAGE) {
-          fileIsValid = false;
-          passedFile.error = INVALID_FASTA_FASTQ_ERROR;
+      // Assume sample is valid unless proven otherwise
+      let sampleIsValid = true;
+      for (const fileName in sample.files) {
+        const file = sample.files[fileName];
+
+        // 1. Valid FASTA or FASTQ file?
+        const fileType = await validateFileType(file);
+        if (fileType === false) {
+          sampleIsValid = false;
+          sample.error = INVALID_FASTA_FASTQ_ERROR;
           break;
-        } else if (validatedFastaOrFastq.includes(FASTA_FILE_TYPE)) {
-          const validatedDuplicates = await validateDuplicates(
-            passedFile.files[key],
-          );
-          if (!validatedDuplicates) {
-            fileIsValid = false;
-            passedFile.error = DUPLICATE_ID_ERROR;
+        } else if (fileType.includes(FASTA_FILE_TYPE)) {
+          // ------–------–------–------–--------
+          // FASTA File Validations
+          // ------–------–------–------–--------
+          // 2. Duplicate IDs in FASTA?
+          const isValidFASTA = await validateFASTADuplicates(file);
+          if (!isValidFASTA) {
+            sampleIsValid = false;
+            sample.error = DUPLICATE_ID_ERROR;
           }
-        } else if (validatedFastaOrFastq.includes(FASTQ_FILE_TYPE)) {
+        } else if (fileType.includes(FASTQ_FILE_TYPE)) {
+          // ------–------–------–------–--------
+          // FASTQ File Validations
+          // ------–------–------–------–--------
           // Don't check for truncation/matching paired-ends for .gz files
-          if (!passedFile.files[key].name.includes(GZ_FILE_TYPE)) {
-            const validatedTruncatedFile = await validateTruncatedFile(
-              passedFile.files[key],
-            );
-            if (!validatedTruncatedFile) {
-              fileIsValid = false;
-              passedFile.error = TRUNCATED_FILE_ERROR;
+          // 3. Truncated FASTQ file?
+          if (!file.name.includes(GZ_FILE_TYPE)) {
+            const isTruncated = await validateFASTQTruncated(file);
+            if (!isTruncated) {
+              sampleIsValid = false;
+              sample.error = TRUNCATED_FILE_ERROR;
             }
-            await addFormatToFile(passedFile, key);
-            // Check to see if FASTQ file has matching R1/R2 file
-            if (key.includes(R1CHECK) || key.includes(R2CHECK)) {
-              const pairedEndSample = key.includes(R1CHECK)
-                ? key.replace(R1CHECK, R2CHECK)
-                : key.replace(R2CHECK, R1CHECK);
-              if (
-                key in passedFile.files &&
-                pairedEndSample in passedFile.files
-              ) {
-                const validatedMismatchedFiles = await validateMismatchedFiles(
-                  passedFile.files[key],
-                  passedFile.files[pairedEndSample],
+
+            // 4. Validate FASTQ read names for Illumina/Nanopore
+            const technologyType = await validateFASTQReads(file);
+            if (technologyType) sample.format = technologyType;
+
+            // 5. Check to see if FASTQ file has matching R1/R2 file
+            if (fileName.includes(R1CHECK) || fileName.includes(R2CHECK)) {
+              const pairedEndSample = fileName.includes(R1CHECK)
+                ? fileName.replace(R1CHECK, R2CHECK)
+                : fileName.replace(R2CHECK, R1CHECK);
+              if (fileName in sample.files && pairedEndSample in sample.files) {
+                const isMatched = await validateFASTQMatchingR1R2(
+                  file,
+                  sample.files[pairedEndSample],
                 );
-                if (!validatedMismatchedFiles) {
-                  fileIsValid = false;
-                  passedFile.error = MISMATCH_FILES_ERROR;
+                if (!isMatched) {
+                  sampleIsValid = false;
+                  sample.error = MISMATCH_FILES_ERROR;
                 }
               }
             }
           }
         }
       }
-      passedFile.finishedValidating = true;
-      passedFile.isValid = fileIsValid;
-      if (!fileIsValid) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        Object.entries(passedFile.files).forEach(([_fileName, file]) => {
-          cumulativeInvalidFileSizes += file.size;
-        });
+      sample.finishedValidating = true;
+      sample.isValid = sampleIsValid;
+      if (!sampleIsValid) {
+        Object.values(sample.files).forEach(
+          f => (cumulativeInvalidFileSizes += f.size),
+        );
       }
       changeState(samples);
-      handleCheckbox(passedFile);
+      handleCheckbox(sample);
     }
     // If the files encountered errors, track the cumulative size of the failed file(s).
     if (cumulativeInvalidFileSizes > 0) {
@@ -475,20 +442,20 @@ const PreUploadQCCheck = ({
   };
 
   // Delete samples from selected IDs if file is invalid
-  const handleCheckbox = (passedFile: Sample) => {
-    if (!passedFile.isValid) {
-      handleSampleDeselect(passedFile._selectId, false, "local");
-    } else if (passedFile.format) {
-      if (passedFile.format === ILLUMINA)
+  const handleCheckbox = (sample: Sample) => {
+    if (!sample.isValid) {
+      handleSampleDeselect(sample._selectId, false, "local");
+    } else if (sample.format) {
+      if (sample.format === ILLUMINA)
         handleSampleDeselect(
-          passedFile._selectId,
-          passedFile.format === ILLUMINA && sequenceTechnology !== NANOPORE,
+          sample._selectId,
+          sample.format === ILLUMINA && sequenceTechnology !== NANOPORE,
           "local",
         );
-      else if (passedFile.format === NANOPORE)
+      else if (sample.format === NANOPORE)
         handleSampleDeselect(
-          passedFile._selectId,
-          passedFile.format === NANOPORE && sequenceTechnology !== ILLUMINA,
+          sample._selectId,
+          sample.format === NANOPORE && sequenceTechnology !== ILLUMINA,
           "local",
         );
     }

@@ -333,8 +333,10 @@ export const MEDAKA_MODEL_OPTIONS = {
   },
 };
 
+export const REGEX_READ_ILLUMINA = /^@[a-zA-z0-9]+:[0-9]+:[a-zA-Z0-9]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+(:[ATGCN]+[+][ATGCN]+)*[ 12]{2}:[YN]:[0-9]+:[ATGCN]+([+][ATGCN]+)*$/i;
+export const REGEX_READ_NANOPORE = /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
+
 export const MEGABYTE = 1000000;
-export const ERROR_MESSAGE = "Error has occured";
 export const SUCCESS_MESSAGE = "Success";
 export const INVALID_FASTA_FASTQ = "Invalid FASTA or FASTQ ";
 export const MISMATCH_SEQUENCING_PLATFORM = "Mismatch sequencing platform";
