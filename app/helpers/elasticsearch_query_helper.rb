@@ -324,6 +324,47 @@ module ElasticsearchQueryHelper
     return hits
   end
 
+  def self.known_pathogens_for_pipeline_runs(
+    pipeline_run_ids,
+    background_id,
+    known_pathogens
+  )
+    # see https://docs.google.com/document/d/1h7Dtwy1_ipQao7NUfQsmuOEXqL7fouI_fhaRi4j-i24/edit?usp=sharing for requirements
+    search_body = {
+      "_source": [
+        "pipeline_run_id",
+        "tax_id",
+      ],
+      "size": 10_000,
+      "query": {
+        "bool": {
+          "filter": [
+            # taxons from samples the user selected
+            {
+              "terms": {
+                "pipeline_run_id": pipeline_run_ids,
+              },
+            },
+            {
+              "term": {
+                "background_id": background_id || 26,
+              },
+            },
+            # only known pathogens
+            {
+              "terms": {
+                "tax_id": known_pathogens,
+              },
+            },
+          ],
+        },
+      },
+    }
+
+    hits = paginate_all_results("scored_taxon_counts", search_body)
+    return hits
+  end
+
   def self.paginate_all_results(index, search_body, search_after = nil)
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#search-after
     # requires that no sort parameter has been provided

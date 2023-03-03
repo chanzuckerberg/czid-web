@@ -131,9 +131,6 @@ const getSampleTaxons = (params: $TSFixMe, cancelToken: $TSFixMe) =>
     cancelToken,
   });
 
-const getKnownPathogens = (): Promise<number[]> =>
-  get("/visualizations/known_pathogens.json");
-
 const getPathogenFlags = (params: $TSFixMe) =>
   get("/visualizations/pathogen_flags.json", {
     params,
@@ -762,7 +759,6 @@ export {
   getCoverageVizSummary,
   getHeatmapMetrics,
   getMassNormalizedBackgroundAvailability,
-  getKnownPathogens,
   getNewPhyloTreePipelineRunIds,
   getNewPhyloTreePipelineRunInfo,
   getPathogenFlags,

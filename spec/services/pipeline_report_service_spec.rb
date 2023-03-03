@@ -34,6 +34,10 @@ RSpec.describe PipelineReportService, type: :service do
     }
   end
 
+  before(:each) do
+    allow(PathogenFlaggingService).to receive(:call).and_return({})
+  end
+
   context "Illumina sample report" do
     context "for species taxid 573" do
       before do
@@ -699,6 +703,15 @@ RSpec.describe PipelineReportService, type: :service do
 
     context "when sample contains pathogenic taxa" do
       before do
+        # mock the flagging service to flag tax_ids 3 and 5 for pipeline_run 1
+        allow(PathogenFlaggingService).to receive(:call).and_return(
+          {
+            1 => {
+              3 => [PipelineReportService::FLAG_KNOWN_PATHOGEN],
+              5 => [PipelineReportService::FLAG_KNOWN_PATHOGEN],
+            },
+          }
+        )
         create(:taxon_lineage, tax_name: "Escherichia", taxid: 1, genus_taxid: 1, genus_name: "Escherichia")
         create(:taxon_lineage, tax_name: "Escherichia albertii", taxid: 2, genus_taxid: 1, genus_name: "Escherichia")
         create(:taxon_lineage, tax_name: "Escherichia coli", taxid: 3, genus_taxid: 1, genus_name: "Escherichia")
@@ -706,6 +719,7 @@ RSpec.describe PipelineReportService, type: :service do
         create(:taxon_lineage, tax_name: "Salmonella enterica", taxid: 5, genus_taxid: 4, genus_name: "Salmonella")
 
         @pipeline_run = create(:pipeline_run,
+                               id: 1,
                                sample: create(:sample, project: create(:project)),
                                sfn_execution_arn: fake_sfn_execution_arn,
                                finalized: 1,
@@ -740,7 +754,7 @@ RSpec.describe PipelineReportService, type: :service do
                                create(:pipeline_run,
                                       sample: create(:sample, project: create(:project))).id,
                              ])
-        @report = PipelineReportService.call(@pipeline_run, @background.id, known_pathogens: [3, 5])
+        @report = PipelineReportService.call(@pipeline_run, @background.id)
       end
 
       it "should not tag nonpathogenic genera" do

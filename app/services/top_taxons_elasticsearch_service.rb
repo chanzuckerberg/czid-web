@@ -80,7 +80,7 @@ class TopTaxonsElasticsearchService
                                           JSON.parse(threshold_filters || "[]")
                                         end
 
-    filter_params[:background_id] = @background_id && @background_id > 0 ? @background_id : samples.first.default_background_id
+    filter_params[:background_id] = @background_id && @background_id > 0 ? @background_id : @samples.first.default_background_id
 
     if @params.include?("categories")
       filter_params[:categories] = @params[:categories]

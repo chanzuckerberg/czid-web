@@ -24,7 +24,6 @@ import { connect } from "react-redux";
 
 import {
   getSampleTaxons,
-  getKnownPathogens,
   getPathogenFlags,
   getTaxaDetails,
   saveVisualization,
@@ -139,7 +138,6 @@ interface SamplesHeatmapViewState {
   allData: object;
   allPathogenFlagData: string[][][];
   pathogenFlags?: PathogenFlags;
-  knownPathogenList?: number[];
   pathogenFlagData: string[][][];
   data: Record<string, number[][]>;
   hideFilters: boolean;
@@ -755,12 +753,11 @@ class SamplesHeatmapView extends React.Component<
     );
 
     let heatmapData, metadataFields;
-    let knownPathogenList: number[], pathogenFlags: PathogenFlags;
+    let pathogenFlags: PathogenFlags;
     try {
-      [heatmapData, metadataFields, knownPathogenList] = await Promise.all([
+      [heatmapData, metadataFields] = await Promise.all([
         this.fetchHeatmapData(validIds),
         this.fetchMetadataFieldsBySampleIds(validIds),
-        useHeatmapPathogensFeature ? getKnownPathogens() : Promise.resolve([]),
       ]);
       // request pathogenFlags after heatmapData to ensure that all data required
       // for the heatmap is already is ES for the pathogenFlags computation to use
@@ -791,7 +788,7 @@ class SamplesHeatmapView extends React.Component<
       ]);
     }
 
-    this.setState({ knownPathogenList, pathogenFlags }, () => {
+    this.setState({ pathogenFlags }, () => {
       let newState = {};
       if (!isEmpty(heatmapData)) {
         newState = this.extractData(heatmapData);
@@ -866,7 +863,7 @@ class SamplesHeatmapView extends React.Component<
     const allData = {};
     const allPathogenFlagData = [];
     const taxonFilterState = {};
-    const { knownPathogenList, pathogenFlags } = this.state;
+    const { pathogenFlags } = this.state;
     // Check if all samples have ERCC counts > 0 to enable backgrounds generated
     // using normalized input mass.
     let enableMassNormalizedBackgrounds = true;
@@ -958,19 +955,16 @@ class SamplesHeatmapView extends React.Component<
           const sampleCount = rawData.length;
           allPathogenFlagData[taxonIndex] =
             allPathogenFlagData[taxonIndex] || Array(sampleCount); // make a sparse array of the correct size
-          if (knownPathogenList && knownPathogenList.includes(taxon.tax_id)) {
-            allPathogenFlagData[taxonIndex][i] =
-              allPathogenFlagData[taxonIndex][i] || [];
-            allPathogenFlagData[taxonIndex][i].push("knownPathogen");
-          }
-          const computedFlags = get(
+          const pathogenFlagsForSampleAndTaxon = get(
             [sample.sample_id, taxon.tax_id],
             pathogenFlags,
           );
-          if (computedFlags) {
+          if (pathogenFlagsForSampleAndTaxon) {
             allPathogenFlagData[taxonIndex][i] =
               allPathogenFlagData[taxonIndex][i] || [];
-            allPathogenFlagData[taxonIndex][i].push(...computedFlags);
+            allPathogenFlagData[taxonIndex][i].push(
+              ...pathogenFlagsForSampleAndTaxon,
+            );
           }
         }
       }

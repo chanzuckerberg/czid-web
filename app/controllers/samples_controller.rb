@@ -866,7 +866,7 @@ class SamplesController < ApplicationController
     background_id = get_background_id(@sample, params[:background])
     min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS[pipeline_run.technology]
     is_lcrp_enabled = current_user && current_user.allowed_feature?("multitag_pathogens")
-    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_reads: min_contig_reads, known_pathogens: fetch_known_pathogen_tax_ids(), lcrp: is_lcrp_enabled)
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_reads: min_contig_reads, lcrp: is_lcrp_enabled)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -979,7 +979,6 @@ class SamplesController < ApplicationController
     permitted_params = params.permit(:id, :pipeline_version, :background, :skip_cache, :share_id, :merge_nt_nr)
     pipeline_run = select_pipeline_run(@sample, permitted_params[:pipeline_version])
     background_id = get_background_id(@sample, permitted_params[:background], permitted_params[:share_id])
-    known_pathogens = fetch_known_pathogen_tax_ids()
 
     editable_sample = current_power.updatable_sample?(@sample)
     annotation_allowed = current_user && current_user.allowed_feature?("annotation")
@@ -1012,10 +1011,10 @@ class SamplesController < ApplicationController
 
       json =
         fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate) do
-          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], known_pathogens: known_pathogens, show_annotations: show_annotations, lcrp: is_lcrp_enabled)
+          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], show_annotations: show_annotations, lcrp: is_lcrp_enabled)
         end
     else
-      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], known_pathogens: known_pathogens, show_annotations: show_annotations, lcrp: is_lcrp_enabled)
+      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr], show_annotations: show_annotations, lcrp: is_lcrp_enabled)
     end
     render json: json
   rescue PipelineReportService::MassNormalizedBackgroundError => e
@@ -1778,11 +1777,5 @@ class SamplesController < ApplicationController
       uploader: uploader,
       samples_count: samples.length
     )
-  end
-
-  def fetch_known_pathogen_tax_ids
-    if current_user
-      PathogenList.find_by(is_global: true).fetch_list_version().fetch_pathogens_info().pluck(:tax_id)
-    end
   end
 end

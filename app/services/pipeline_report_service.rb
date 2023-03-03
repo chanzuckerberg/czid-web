@@ -167,7 +167,7 @@ class PipelineReportService
     NANOPORE => CSV_LONG_READS_COLUMNS,
   }.freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, known_pathogens: {}, show_annotations: false, lcrp: false)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, show_annotations: false, lcrp: false)
     @pipeline_run = pipeline_run
     @technology = pipeline_run.technology
     # In ont_v1, we are not supporting backgrounds for nanopore mngs samples
@@ -176,7 +176,6 @@ class PipelineReportService
     @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS[@technology]
     @parallel = parallel
     @merge_nt_nr = merge_nt_nr
-    @known_pathogens = known_pathogens || {}
     @show_annotations = show_annotations
     @use_decimal_columns = AppConfigHelper.get_app_config(AppConfig::PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS, false) == "1"
     # LCRP = Likely clinically relevant pathogens
@@ -378,15 +377,15 @@ class PipelineReportService
     )
     @timer.split("fill_missing_names")
 
-    # Tag pathogen from predefined list (sample-agnostic)
-    flag_known_pathogens(species_counts)
+    # Flag pathogens (sample-agnostic)
     @timer.split("tag_pathogens")
-
-    if @lcrp
-      # And tag pathogens that are likely clinically relevant for this sample
-      flag_lcrp_pathogens(species_counts)
-      @timer.split("flag_lcrp_pathogens")
-    end
+    flag_pathogens(
+      species_counts: species_counts,
+      selected_flags: [
+        FLAG_KNOWN_PATHOGEN,
+        *(FLAG_LCRP if @lcrp),
+      ]
+    )
 
     structured_lineage = encode_taxon_lineage(lineage_by_tax_id)
     @timer.split("encode_taxon_lineage")
@@ -872,24 +871,20 @@ class PipelineReportService
     end
   end
 
-  def flag_lcrp_pathogens(species_counts)
-    flagged_taxa_by_pr_id = LcrpPathogensService.call(
+  def flag_pathogens(species_counts:, selected_flags:)
+    flagged_taxa_by_pr_id = PathogenFlaggingService.call(
       pipeline_run_ids: [@pipeline_run.id],
-      background_id: @background&.id
+      background_id: @background&.id,
+      selected_flags: selected_flags
     )
     flagged_taxa = flagged_taxa_by_pr_id[@pipeline_run.id] || {}
 
     flagged_taxa.each do |tax_id, flags_for_taxon|
       tax_info = species_counts[tax_id]
       (tax_info['pathogenFlags'] ||= []).concat(flags_for_taxon)
-    end
-  end
-
-  def flag_known_pathogens(tax_map)
-    tax_map.each do |tax_id, tax_info|
-      if @known_pathogens.include?(tax_id)
+      # for backwards compatibility with older feature flags
+      if flags_for_taxon.include?(FLAG_KNOWN_PATHOGEN)
         tax_info['pathogenFlag'] = FLAG_KNOWN_PATHOGEN
-        (tax_info['pathogenFlags'] ||= []).push(FLAG_KNOWN_PATHOGEN)
       end
     end
   end
@@ -944,7 +939,7 @@ class PipelineReportService
         tax_info["known_pathogen"] = 0
         tax_info["lcrp_pathogen"] = 0
         rows_to_consider.each do |row|
-          if row["pathogenFlag"] == FLAG_KNOWN_PATHOGEN
+          if row["pathogenFlag"] == FLAG_KNOWN_PATHOGEN || (row["pathogenFlags"] || []).include?(FLAG_KNOWN_PATHOGEN)
             tax_info["known_pathogen"] += 1
           end
           if (row["pathogenFlags"] || []).include?(FLAG_LCRP)
