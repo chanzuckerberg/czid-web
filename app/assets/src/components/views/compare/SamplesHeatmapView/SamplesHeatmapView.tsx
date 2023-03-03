@@ -2091,7 +2091,7 @@ class SamplesHeatmapView extends React.Component<
     return (
       <>
         {!hideFilters && (
-          <div className={cs.originalFilters}>
+          <div>
             {this.renderHeader(sampleIds, loading)}
             <NarrowContainer>
               <SamplesHeatmapControls

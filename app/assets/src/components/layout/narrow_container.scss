@@ -9,7 +9,6 @@
   margin: 0 auto;
   width: calc(100% - #{2 * $narrow-container-margin});
   position: relative;
-  z-index: 1;
 
   &.small {
     max-width: 800px;
