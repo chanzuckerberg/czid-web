@@ -13,7 +13,7 @@ class PathogenFlaggingService
       # make sure background exists
       Background.find(background_id)
     end
-    @background_id = background_id || 26
+    @background_id = background_id || 26 # default to human CSF background
     # boolean indicating whether or not the given pipeline_run_ids have been confirmed to be in ES
     @es_preflight_success = es_preflight_success
     @selected_flags = selected_flags
@@ -25,6 +25,9 @@ class PathogenFlaggingService
 
   private
 
+  # given a list of pipeline run ids and a background, return a hash that will return the list of pathogen flags
+  # for a given pipeline_run_id and tax_id
+  # e.g. { 123 => { 1234 => ["known_pathogen", "lcrp"], 1235 => ["lcrp"] } }
   def generate
     # load into ES any missing pipeline runs
     unless @es_preflight_success
@@ -37,24 +40,33 @@ class PathogenFlaggingService
     known_pathogens = PathogenList.find_by(is_global: true).fetch_list_version().fetch_pathogens_info().pluck(:tax_id)
 
     known_pathogens_by_pr_id = {}
+    # fetch the known pathogens for the given pipeline runs
     if !@selected_flags || @selected_flags.include?(PipelineReportService::FLAG_KNOWN_PATHOGEN)
       # this allows dynamically selected pathogen lists in the future
       known_pathogen_hits = ElasticsearchQueryHelper.known_pathogens_for_pipeline_runs(@pipeline_run_ids, @background_id, known_pathogens)
       known_pathogens_by_pr_id = parse_pathogens_for_pipeline_runs(known_pathogen_hits, PipelineReportService::FLAG_KNOWN_PATHOGEN)
     end
 
+    # compute the lcrp pathogens for the given pipeline runs
     lcrp_pathogens_by_pr_id = {}
     if !@selected_flags || @selected_flags.include?(PipelineReportService::FLAG_LCRP)
+      # compute the lcrp viral pathogens
       viral_pathogens_hits = ElasticsearchQueryHelper.lcrp_viral_pathogens_for_pipeline_runs(@pipeline_run_ids, @background_id, known_pathogens)
       viral_pathogens_by_pr_id = parse_pathogens_for_pipeline_runs(viral_pathogens_hits, PipelineReportService::FLAG_LCRP)
 
+      # compute the lcrp nonviral pathogens
       raw_nonviral_pathogens_result = ElasticsearchQueryHelper.lcrp_top_15_for_pipeline_runs(@pipeline_run_ids, @background_id)
       top_15_nonviral_pathogen_candidates_by_pr_id = parse_lcrp_nonviral_pathogens_for_pipeline_runs(raw_nonviral_pathogens_result)
       nonviral_pathogens_by_pr_id = compute_nonviral_lcrp_pathogens(top_15_nonviral_pathogen_candidates_by_pr_id, known_pathogens)
+
+      # merge viral and nonviral lcrp pathogens
       lcrp_pathogens_by_pr_id = viral_pathogens_by_pr_id.deep_merge(nonviral_pathogens_by_pr_id)
     end
 
-    return known_pathogens_by_pr_id.deep_merge(lcrp_pathogens_by_pr_id)
+    # merge the known pathogens and lcrp pathogens
+    return known_pathogens_by_pr_id.deep_merge(lcrp_pathogens_by_pr_id) do
+      |_key, known_pathogen_flags, lcrp_pathogen_flags| known_pathogen_flags.concat(lcrp_pathogen_flags)
+    end
   end
 
   def compute_nonviral_lcrp_pathogens(top_15_nonviral_pathogen_candidates_by_pr_id, known_pathogens)

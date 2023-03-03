@@ -151,6 +151,7 @@ interface SamplesHeatmapViewState {
   newestTaxonId?: $TSFixMe;
   metadataTypes?: $TSFixMe;
   enableMassNormalizedBackgrounds?: $TSFixMe;
+  includePathogens?: boolean;
 }
 
 interface TaxonDetails {
@@ -275,6 +276,7 @@ class SamplesHeatmapView extends React.Component<
       taxonFilterState: [],
       pendingPinnedSampleIds: new Set(),
       pinnedSampleIds: new Set(),
+      includePathogens: false, // this will be togglable by the user in the future
     };
 
     this.removedTaxonIds = new Set(
@@ -336,8 +338,21 @@ class SamplesHeatmapView extends React.Component<
   componentDidMount() {
     const { projectIds, updateDiscoveryProjectIds } = this.props;
 
-    this.fetchViewData();
-    updateDiscoveryProjectIds(uniq(projectIds));
+    // temporarily set includePathogens to true for all users with the
+    // heatmap_pathogens feature flag. Later this will be togglable by the user.
+    const { allowedFeatures = [] } = this.context || {};
+    const usePathogenFlagging = allowedFeatures.includes(
+      HEATMAP_PATHOGEN_FLAGGING_FEATURE,
+    );
+    if (usePathogenFlagging) {
+      this.setState({ includePathogens: true }, () => {
+        this.fetchViewData();
+        updateDiscoveryProjectIds(uniq(projectIds));
+      });
+    } else {
+      this.fetchViewData();
+      updateDiscoveryProjectIds(uniq(projectIds));
+    }
   }
 
   parseUrlParams = () => {
@@ -443,6 +458,7 @@ class SamplesHeatmapView extends React.Component<
         addedTaxonIds: Array.from(this.state.addedTaxonIds),
         removedTaxonIds: Array.from(this.removedTaxonIds),
         sampleIds: this.state.sampleIds,
+        includePathogens: this.state.includePathogens,
       },
       this.state.selectedOptions,
     );

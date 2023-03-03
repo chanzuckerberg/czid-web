@@ -217,7 +217,11 @@ class VisualizationsController < ApplicationController
         samples_for_heatmap: samples_for_heatmap,
         background_for_heatmap: background_for_heatmap
       )
-      output_csv = generate_heatmap_csv(heatmap_es_dict)
+      output_csv = if params[:includePathogens] == "true"
+                     generate_heatmap_csv(heatmap_es_dict, pathogen_flags_by_id())
+                   else
+                     generate_heatmap_csv(heatmap_es_dict)
+                   end
     else
       @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
         params,
@@ -250,14 +254,17 @@ class VisualizationsController < ApplicationController
   end
 
   def pathogen_flags
+    render json: pathogen_flags_by_id
+  end
+
+  def pathogen_flags_by_id
     pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
     flags_by_pr_id = PathogenFlaggingService.call(
       pipeline_run_ids: pr_id_to_sample_id.keys(),
       background_id: background_for_heatmap,
       es_preflight_success: true # the user has already loaded the heatmap at this point so all es records are present
     )
-    flags_by_sample_id = flags_by_pr_id.map { |pr_id, flags| [pr_id_to_sample_id[pr_id], flags] }.to_h
-    render json: flags_by_sample_id
+    return flags_by_pr_id.map { |pr_id, flags| [pr_id_to_sample_id[pr_id], flags] }.to_h
   end
 
   # Given a list of taxon ids, samples, and a background, returns the

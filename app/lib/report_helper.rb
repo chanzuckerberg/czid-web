@@ -92,9 +92,22 @@ module ReportHelper
   end
 
   # TODO: (gdingle): refactor to class method
-  def generate_heatmap_csv(sample_taxa_hash)
-    attribute_names = %w[sample_name tax_id genus_name taxon_name aggregatescore
-                         NT_r NT_rpm NT_zscore NR_r NR_rpm NR_zscore]
+  def generate_heatmap_csv(sample_taxa_hash, pathogen_flags_by_sample = nil)
+    attribute_names = [
+      "sample_name",
+      "tax_id",
+      "genus_name",
+      "taxon_name",
+      "aggregatescore",
+      "NT_r",
+      "NT_rpm",
+      "NT_zscore",
+      "NR_r",
+      "NR_rpm",
+      "NR_zscore",
+      *("known_pathogen" if pathogen_flags_by_sample),
+      *("lcrp_pathogen" if pathogen_flags_by_sample),
+    ]
     CSVSafe.generate(headers: true) do |csv|
       csv << attribute_names
       (sample_taxa_hash || []).each do |sample_record|
@@ -110,6 +123,11 @@ module ReportHelper
                           NR_r: (taxon_record["NR"] || {})["r"],
                           NR_rpm: (taxon_record["NR"] || {})["rpm"],
                           NR_zscore: (taxon_record["NR"] || {})["zscore"], }
+          unless pathogen_flags_by_sample.nil?
+            flags = pathogen_flags_by_sample.dig(sample_record[:sample_id], taxon_record["tax_id"]) || []
+            data_values[:known_pathogen] = flags.include?(PipelineReportService::FLAG_KNOWN_PATHOGEN) ? 1 : 0
+            data_values[:lcrp_pathogen] = flags.include?(PipelineReportService::FLAG_LCRP) ? 1 : 0
+          end
           csv << data_values.values_at(*attribute_names.map(&:to_sym))
         end
       end
