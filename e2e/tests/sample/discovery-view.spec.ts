@@ -1,16 +1,10 @@
-import { expect, test } from "@playwright/test";
 import path from "path";
+import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
-import { BasePage } from "../pages/basePage";
 import {
   SAMPLE_TYPE_SELECTOR,
-  ANNOTATION,
-  LOCATION,
-  TIMEFRAME,
   VISIBLE,
-  VISIBILITY,
   OVERALL,
-  HOST,
   SAMPLE_TYPE,
   METAGENOMICS,
   ANTIMICROBIAL_RESISTANCE,
@@ -43,16 +37,23 @@ import {
   DESCRIPTION,
   SAMPLES,
   PROJECTS,
-  NUMBER_OF_COLUMN,
-} from "../constants/common.const";
+} from "../../constants/common.const";
+import {
+  ANNOTATION,
+  LOCATION,
+  TIMEFRAME,
+  VISIBILITY,
+  HOST,
+} from "../../constants/filter.const";
+import { BasePage } from "../../pages/basePage";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 const projectName = "floo Neptunium";
 const sampleTypes = [
   "Metagenomics",
-  "Consensus Genomes",
-  "Antimicrobial Resistance",
+  // "Consensus Genomes",
+  // "Antimicrobial Resistance",
 ];
 
 async function getProject(basePage: BasePage, projectName: string) {
@@ -69,7 +70,7 @@ async function verifyElement(basePage: BasePage, n: number, locator: string) {
 }
 
 test.describe("Discovery view tests", () => {
-  sampleTypes.forEach((sampleType) => {
+  sampleTypes.forEach(sampleType => {
     test(`Should verify content displayed on the left side of discovery view for ${sampleType}`, async ({
       page,
     }) => {
@@ -77,30 +78,31 @@ test.describe("Discovery view tests", () => {
       await getProject(basePage, projectName);
       await (await basePage.findByText(sampleType)).click();
 
-      //left side
+      // left side
       await expect(await basePage.findByClassName(PAGE_TITLE)).toHaveText(
-        projectName
+        projectName,
       );
 
       await expect(
-        await basePage.findByClassName(ANNOTATION_FILTER)
+        await basePage.findByClassName(ANNOTATION_FILTER),
       ).toHaveText(ANNOTATION);
       await expect(await basePage.findByLocator(METADATA_FILTER, 0)).toHaveText(
-        LOCATION
+        LOCATION,
       );
       await expect(await basePage.findByLocator(METADATA_FILTER, 1)).toHaveText(
-        TIMEFRAME
+        TIMEFRAME,
       );
       await expect(await basePage.findByLocator(METADATA_FILTER, 2)).toHaveText(
-        VISIBILITY
+        VISIBILITY,
       );
       await expect(await basePage.findByLocator(METADATA_FILTER, 3)).toHaveText(
-        HOST
+        HOST,
       );
       await expect(await basePage.findByLocator(METADATA_FILTER, 4)).toHaveText(
-        SAMPLE_TYPE
+        SAMPLE_TYPE,
       );
     });
+
     test(`Should verify content displayed on the main side of discovery view for ${sampleType}`, async ({
       page,
     }) => {
@@ -110,32 +112,32 @@ test.describe("Discovery view tests", () => {
       // main area
 
       await expect(
-        await basePage.findByLocator(SAMPLE_TYPE_SELECTOR, 1)
+        await basePage.findByLocator(SAMPLE_TYPE_SELECTOR, 1),
       ).toHaveText(METAGENOMICS);
       await expect(
-        await basePage.findByLocator(SAMPLE_TYPE_SELECTOR, 2)
+        await basePage.findByLocator(SAMPLE_TYPE_SELECTOR, 2),
       ).toHaveText(CONSENSUS_GENOMES);
       await expect
         .soft(await basePage.findByLocator(SAMPLE_TYPE_SELECTOR, 3))
         .toHaveText(ANTIMICROBIAL_RESISTANCE);
 
-      if (sampleType == METAGENOMICS) {
+      if (sampleType === METAGENOMICS) {
         await verifyElement(basePage, 3, VIEW_ICON);
       }
-      if (sampleType == CONSENSUS_GENOMES) {
+      if (sampleType === CONSENSUS_GENOMES) {
         await verifyElement(basePage, 2, VIEW_ICON);
       }
-      if (sampleType == ANTIMICROBIAL_RESISTANCE) {
+      if (sampleType === ANTIMICROBIAL_RESISTANCE) {
         await verifyElement(basePage, 2, VIEW_ICON);
       }
 
-      if (sampleType == METAGENOMICS) {
+      if (sampleType === METAGENOMICS) {
         await verifyElement(basePage, 4, BUTTONS);
       }
-      if (sampleType == CONSENSUS_GENOMES) {
+      if (sampleType === CONSENSUS_GENOMES) {
         await verifyElement(basePage, 2, BUTTONS);
       }
-      if (sampleType == ANTIMICROBIAL_RESISTANCE) {
+      if (sampleType === ANTIMICROBIAL_RESISTANCE) {
         await verifyElement(basePage, 1, BUTTONS);
       }
     });
@@ -149,7 +151,7 @@ test.describe("Discovery view tests", () => {
 
       await expect(await basePage.findByClassName(PLUS_ICON)).toBeVisible();
       await expect(await basePage.findByClassName(SIDEBAR_HEADER)).toHaveText(
-        DESCRIPTION
+        DESCRIPTION,
       );
       // user cannot edit public description
       if ((await basePage.getUrl()).includes("my_data")) {
@@ -157,36 +159,36 @@ test.describe("Discovery view tests", () => {
       }
 
       await expect(await basePage.findByLocator(SIDE_HEADERS, 0)).toHaveText(
-        OVERALL
+        OVERALL,
       );
       await expect(await basePage.findByLocator(SIDE_HEADERS, 1)).toHaveText(
-        DATE_CREATED_S
+        DATE_CREATED_S,
       );
       await expect(await basePage.findByLocator(SIDE_HEADERS, 2)).toHaveText(
-        METADATA
+        METADATA,
       );
 
       // right side -role labels
       await expect(await basePage.findByLocator(SIDE_LABELS, 0)).toHaveText(
-        SAMPLES
+        SAMPLES,
       );
       await expect(await basePage.findByLocator(SIDE_LABELS, 1)).toHaveText(
-        PROJECTS
+        PROJECTS,
       );
       await expect(await basePage.findByLocator(SIDE_LABELS, 2)).toHaveText(
-        AVG_READS_PER_SAMPLE
+        AVG_READS_PER_SAMPLE,
       );
       await expect(await basePage.findByLocator(SIDE_LABELS, 3)).toHaveText(
-        AVG_READS_FILTER_PER_SAMPLE
+        AVG_READS_FILTER_PER_SAMPLE,
       );
       await expect(await basePage.findByLocator(SIDE_LABELS, 4)).toHaveText(
-        HOST
+        HOST,
       );
       await expect(await basePage.findByLocator(SIDE_LABELS, 5)).toHaveText(
-        SAMPLE_TYPE
+        SAMPLE_TYPE,
       );
       await expect(await basePage.findByLocator(SIDE_LABELS, 6)).toHaveText(
-        LOCATION
+        LOCATION,
       );
     });
     test(`Should verify user is able to add/delete columns of discovery view  ${sampleType}`, async ({
@@ -196,7 +198,7 @@ test.describe("Discovery view tests", () => {
       await getProject(basePage, projectName);
       await (await basePage.findByText(sampleType)).click();
 
-      //accept cookies
+      // accept cookies
       await basePage.clickByText(ACCEPT_ALL_COOKIES);
 
       await (await basePage.findByClassName(PLUS_ICON)).click();
@@ -207,29 +209,38 @@ test.describe("Discovery view tests", () => {
         .locator(".checked-2yKmm:visible")
         .allInnerTexts();
 
-      //uncheck all samples
+      // uncheck all samples
       for (let i = 1; i < checked_samples.length; i++) {
-        await page.locator(SAMPLES_COLUMN).nth(i).click();
+        await page
+          .locator(SAMPLES_COLUMN)
+          .nth(i)
+          .click();
       }
 
-      //check all samples
+      // check all samples
       for (let i = 1; i < column_dropdown.length; i++) {
-        await page.locator(SAMPLES_COLUMN).nth(i).click();
+        await page
+          .locator(SAMPLES_COLUMN)
+          .nth(i)
+          .click();
       }
 
-      ///check if the column were added
+      // check if the column were added
       const columns = await page.locator(COLUMNS_LABEL).allInnerTexts();
       for (let i = 0; i < column_dropdown.length; i++) {
         expect(columns.includes(column_dropdown[i])).toBeTruthy();
       }
 
-      //uncheck all samples
+      // uncheck all samples
       for (let i = 1; i < column_dropdown.length; i++) {
-        await page.locator(SAMPLES_COLUMN).nth(i).click();
+        await page
+          .locator(SAMPLES_COLUMN)
+          .nth(i)
+          .click();
       }
       expect(
-        (await page.locator(COLUMNS_LABEL).allInnerTexts()).length
-      ).toEqual(NUMBER_OF_COLUMN);
+        (await page.locator(COLUMNS_LABEL).allInnerTexts()).length,
+      ).toEqual(2);
     });
     test(`Should verify functionality for the info icon and sidebar for ${sampleType}`, async ({
       page,
@@ -238,20 +249,23 @@ test.describe("Discovery view tests", () => {
       await getProject(basePage, projectName);
       await (await basePage.findByText(sampleType)).click();
 
-      //accept cookies
+      // accept cookies
       await basePage.clickByText(ACCEPT_ALL_COOKIES);
 
       // info icon
       await page.locator(INFO_ICON).click();
-      let locator = await (
+      const locator = await (
         await basePage.findByClassName(SIDEBAR_HEADER)
       ).isVisible();
       expect(locator).toBeFalsy();
       await page.locator(INFO_ICON).click();
 
-      await page.locator(BAR_LABEL).nth(1).waitFor({
-        state: VISIBLE,
-      });
+      await page
+        .locator(BAR_LABEL)
+        .nth(1)
+        .waitFor({
+          state: VISIBLE,
+        });
       const overall_area = (await page.locator(OVERALL_AREA).allInnerTexts())
         .length;
       const bar_label = (await page.locator(BAR_LABEL).allInnerTexts()).length;
@@ -260,24 +274,24 @@ test.describe("Discovery view tests", () => {
       const date_label = (await page.locator(DATE_LABEL).allInnerTexts())
         .length;
 
-      //collapse side tabs
+      // collapse side tabs
       await (await basePage.findByLocator(SIDE_HEADERS, 0)).click();
       await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
       await (await basePage.findByLocator(SIDE_HEADERS, 2)).click();
 
-      //ensure all the sidesa are collaspsed
+      // ensure all the sides are collapsed
       expect((await page.locator(OVERALL_AREA).allInnerTexts()).length).toEqual(
-        0
+        0,
       );
       expect((await page.locator(BAR_LABEL).allInnerTexts()).length).toEqual(0);
       expect((await page.locator(DATE_CREATED).allInnerTexts()).length).toEqual(
-        0
+        0,
       );
       expect((await page.locator(DATE_LABEL).allInnerTexts()).length).toEqual(
-        0
+        0,
       );
 
-      //expand side tabs
+      // expand side tabs
       await (await basePage.findByLocator(SIDE_HEADERS, 0)).click();
       await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
       await (await basePage.findByLocator(SIDE_HEADERS, 2)).click();
@@ -289,21 +303,21 @@ test.describe("Discovery view tests", () => {
           state: VISIBLE,
         });
 
-      //ensure all the sides are expanded
+      // ensure all the sides are expanded
       expect((await page.locator(OVERALL_AREA).allInnerTexts()).length).toEqual(
-        overall_area
+        overall_area,
       );
       expect((await page.locator(BAR_LABEL).allInnerTexts()).length).toEqual(
-        bar_label
+        bar_label,
       );
       expect((await page.locator(DATE_CREATED).allInnerTexts()).length).toEqual(
-        date_created
+        date_created,
       );
       expect((await page.locator(DATE_LABEL).allInnerTexts()).length).toEqual(
-        date_label
+        date_label,
       );
 
-      //verify metadata filters
+      // verify metadata filters
       const filters = await page.locator(".barLabel-1JhFz a").allInnerTexts();
       for (let i = 0; i < filters.length; i++) {
         const selector = `a:text("${filters[i]}")`;

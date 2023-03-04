@@ -1,10 +1,9 @@
 import path from "path";
 import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
+import { CONTINUE, GO_TO_PROJECT, LOADED } from "../../constants/common.const";
 import { Metadata } from "../../types/metadata";
-import { CONTINUE, GO_TO_PROJECT, LOADED } from "../../utils/constants";
 import { generateMetadataFile, getMetadata } from "../../utils/mockData";
-
 import { fileChooser } from "../../utils/page";
 import { getByTestID, getByText } from "../../utils/selectors";
 import {
@@ -29,7 +28,7 @@ const defaults: Metadata = {
 };
 
 const sampleType = "Metagenomics";
-const projectName = "Test Project";
+const projectName = "Project 2";
 const sampleFiles = ["RR004_water_2_S23A_R1_001.fastq"];
 // These tests verify user is able to upload metadata samples manually and via csv file.
 test.describe("Metagenomics sample upload tests", () => {
@@ -72,7 +71,10 @@ test.describe("Metagenomics sample upload tests", () => {
 
     // click continue button
     const continueButtonIndex = 1;
-    await page.locator(getByText(CONTINUE)).nth(continueButtonIndex).click();
+    await page
+      .locator(getByText(CONTINUE))
+      .nth(continueButtonIndex)
+      .click();
 
     // submit upload
     await submitUpload(page);

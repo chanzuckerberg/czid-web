@@ -16,14 +16,13 @@ export const footer: Record<string, string> = {
 };
 export const tag =
   "Chan Zuckerberg ID: The free, cloud-based metagenomics platform for researchers";
-
 export const VISUALIZATIONS = "Visualizations";
 export const TAXON_FILTERS = "Taxon Filters";
 
 export const PAGE_TITLE = "name-2XtnE";
 export const ANNOTATION_FILTER = "filterLabel-1PFBn";
 export const METADATA_FILTER = ".filterLabel-2d1-Y";
-export const SAMPLE_TYPE_SELECTOR = ".tabLabel-3vqpD";
+export const SAMPLE_TYPE_SELECTOR = ".css-oihkq7";
 export const BUTTONS = ".action-2Pccm button";
 export const VIEW_ICON = ".icon-n-1j6";
 export const PLUS_ICON = "plusIcon-1OBta";
@@ -47,11 +46,6 @@ export const DATE_LABEL = ".label-zMCsY";
 export const CONSENSUS_GENOMES = "Consensus Genomes";
 export const FILTER_TAG = ".labelText-2faxp";
 export const CANCEL_ICON = ".closeIcon-yEIIr";
-export const ANNOTATION = "Annotation";
-export const LOCATION = "Location";
-export const TIMEFRAME = "Timeframe";
-export const VISIBILITY = "Visibility";
-export const HOST = "Host";
 export const METAGENOMICS = "Metagenomics";
 export const ANTIMICROBIAL_RESISTANCE = "Antimicrobial Resistance";
 export const DESCRIPTION = "Description";
@@ -65,3 +59,50 @@ export const VISIBLE = "visible";
 export const ACCEPT_ALL_COOKIES = "Accept All Cookies";
 export const SAMPLE_TYPE = "Sample Type";
 export const NUMBER_OF_COLUMN = 2;
+export const CHECKED_BOX = ".checked-2yKmm:visible";
+export const EDIT = "Edit";
+export const MYDATA = "my_data";
+export const FILTERS = ".barLabel-1JhFz a";
+export const HIDDEN = "hidden";
+export const ENTER = "Enter";
+export const PUBLIC_MENU_ITEM = "menu-item-public";
+export const PROJECT_NAME_SELECTOR = ".itemName-1WWBD";
+export const PROJECT_COUNT = "project-count";
+export const METADATA_COUNT_SELECTOR = ".statsDd-24NuT";
+export const RESULT_COUNT_SELECTOR = ".filteredCount-3bajD";
+export const TOTAL_READ_POPUP_CONTENT = ".tooltip-1Y1xx";
+export const GO_TO_PROJECT = "Go to Project";
+export const LOADED = "loaded";
+export const CONTINUE = "Continue";
+export const ACCEPT_UPLOAD_TERMS = ".label-wQ9z8";
+export const ANALYSIS_TYPE = "analysis-type";
+export const COLLECTION_DATE = "Collection Date";
+export const COLLECTION_LOCATION = "Collection Location";
+export const COLUMN_SELECTOR = ".listElement-3bAja";
+export const UPLOAD_METADATA = "Upload Metadata";
+export const TEXT_INPUT = 'input[type="text"]';
+export const RADIO_INPUT = 'input[type="radio"]';
+export const NUMBER_INPUT = 'input[type="number"]';
+export const HOST_SEX = "Host Sex";
+export const KNOWN_ORGANISM = "Known Organism";
+export const INFECTION_CLASS = "Infection Class";
+export const HOST_AGE = "Host Age";
+export const DETECTION_METHOD = "Detection Method";
+export const LIBRARY_PREP = "Library Prep";
+export const SEQUENCER = "Sequencer";
+export const RNA_DNA = "RNA/DNA Input (ng)";
+export const HOST_GENUS_SPECIES = "Host Genus Species";
+export const ISOLATE = "Isolate";
+export const DISEASES_CONDITIONS = "Diseases and Conditions";
+export const CHECKBOX = 'input[type="checkbox"]';
+export const START_UPLOAD = "Start Upload";
+export const HOST_ORGANISM = "Host Organism";
+export const FIXTURE_DIR = "./fixtures/samples";
+export const SELECT_PROJECT = "Select project";
+export const SEARCH = "Search";
+
+export const TEST_PROJECTS: Record<string, string> = {
+  DEV: "omar test",
+  STAGING: "floo Plutonium",
+  PROD: "floo Plutonium",
+};

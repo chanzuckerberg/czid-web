@@ -1,21 +1,15 @@
-import path from "path";
 import { Page } from "@playwright/test";
-import dotenv from "dotenv";
-import { BasePage } from "../pages/basePage";
 import { getByName } from "./selectors";
-
-dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
+import { BasePage } from "../pages/basePage";
 export async function login(
   page: Page,
   username?: string,
   password?: string,
 ): Promise<void> {
-  const email = username !== undefined ? username : process.env.CZID_USERNAME;
-  const pwd = password !== undefined ? password : process.env.CZID_PASSWORD;
-  await page.locator(getByName("email")).fill(email as string);
-  await page.locator(getByName("password")).fill(pwd as string);
+  await page.locator(getByName("email")).fill(username as string);
+  await page.locator(getByName("password")).fill(password as string);
   await Promise.all([
-    page.waitForNavigation({ waitUntil: "networkidle" }),
+    page.waitForNavigation(),
     page.locator(getByName("submit")).click(),
   ]);
 }

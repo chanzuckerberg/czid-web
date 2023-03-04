@@ -188,27 +188,31 @@ export const SAMPLE_DETAILS = ".sampleDetailsLink-1iKgK";
 export const SEARCH_BAR = '[placeholder="Taxon name"]';
 export const COLUMNS = ".label-1R-kb";
 
-export const DATA = {
+export const data = {
   Total_read: {
-    url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
+    url:
+      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
     header: "Do my samples have enough total reads?",
     pop_up:
       "Total Reads:The total number of single-end reads uploaded. Each end of the paired-end reads count as one read. Learn more.",
   },
   Quality_read: {
-    url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Passed-QC",
+    url:
+      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Passed-QC",
     header: "Do my samples have enough quality reads?",
     pop_up:
       "Passed QC:The percentage of reads that came out of PriceSeq, step (3) of the host filtration and QC steps, compared to what went in to Trimmomatic, step (2). Learn more.",
   },
   Duplicate_read: {
-    url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
+    url:
+      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
     header: "Are there too many duplicate reads in my library?",
     pop_up:
       "DCR:Duplicate Compression Ratio is the ratio of the total number of sequences present prior to running czid-dedup (duplicate identification) vs the number of unique sequences. Learn more.",
   },
   Insert_length: {
-    url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Mean-Insert-Size",
+    url:
+      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Mean-Insert-Size",
     header: "Do my samples have sufficient insert lengths?",
     pop_up:
       "Mean Insert Size:The average length of the nucleotide sequence that is inserted between the adapters. Learn more.",
@@ -339,191 +343,3 @@ export const SEQUENCING_INFO_DROP_DOWN = [
   ],
   ["MiSeq", "NextSeq", "HiSeq", "NovaSeq", "Other"],
 ];
-
-export const READS_REMAINING_LABELS = ".label--gcey";
-export const DOWNLOADS_LABELS = ".downloadLink-14o8v";
-export const ALL_PIPELINE_INFO = [
-  "Analysis Type",
-  "Sequencing Platform",
-  "Pipeline Version",
-  "Host Subtracted",
-  "Total Reads",
-  "ERCC Reads",
-  "Passed Filters",
-  "Unmapped Reads",
-  "Passed Quality Control",
-  "Compression Ratio",
-  "Mean Insert Size",
-  "Date Processed",
-];
-export const ALL_READS_REMAINING = [
-  "Host Filtering Step",
-  "Validate Input",
-  "Trimmomatic",
-  "Price Seq",
-  "CZID-dedup",
-  "LZW",
-  "Bowtie2",
-  "Subsample",
-  "GSNAP",
-];
-export const NO_DATA = ".noData-2AfzS";
-export const ALL_DOWNLOAD = [
-  "Download Non-Host Reads (.fasta)",
-  "Download Unmapped Reads (.fasta)",
-  "View Results Folder",
-  "View Pipeline Visualization",
-];
-
-export const DOWNLOAD_HREF = [
-  "nonhost_fasta?pipeline_version=7.1",
-  "unidentified_fasta?pipeline_version=7.1",
-  "results_folder?pipeline_version=7.1",
-  "pipeline_viz/7.1",
-];
-
-export const COLUMN_HEADER_PROP = {
-  Score: {
-    description:
-      "Score:Experimental ranking score for prioritizing microbes based on abundance within the sample (rPM) as well as compared to control samples (Z-score). Learn more.",
-    url: "Single-Sample-Report-Table#score",
-  },
-  "Z Score": {
-    description:
-      "Z Score:Statistic used for evaluating the prevalence of microbes in the sample as compared to background contaminants. Learn more.",
-    url: "Single-Sample-Report-Table#z-score",
-  },
-  rPM: {
-    description:
-      "rPM:Number of reads aligning to the taxon in the NCBI NR/NT database, per million reads sequenced. Learn more.",
-    url: "Single-Sample-Report-Table#rpm",
-  },
-
-  r: {
-    description:
-      "r:Number of reads aligning to the taxon in the NCBI NT/NR database. Learn more.",
-    url: "Single-Sample-Report-Table#reads",
-  },
-
-  contig: {
-    description:
-      "contig:Number of assembled contigs aligning to the taxon. Learn more.",
-    url: "Single-Sample-Report-Table#contig",
-  },
-  "contig r": {
-    description:
-      "contig r:Total number of reads across all assembled contigs. Learn more.",
-    url: "Single-Sample-Report-Table#contig-r",
-  },
-  "%id": {
-    description:
-      "%id:Average percent-identity of alignments to NCBI NT/NR. Learn more.",
-    url: "Single-Sample-Report-Table#identity-match",
-  },
-  L: {
-    description:
-      "%id:Average percent-identity of alignments to NCBI NT/NR. Learn more.",
-    url: "Single-Sample-Report-Table#average-length",
-  },
-
-  "E value": {
-    description:
-      "E value:Average expect value (e-value) of alignments to NCBI NT/NR. Learn more.",
-    url: "Single-Sample-Report-Table#e-value",
-  },
-};
-
-export const LEARN_MORE_LINK = ".tooltip-1Y1xx .linkDefault-34rbs";
-
-export const PIPELINE_LABELS_VALUE = ".metadataValue-2cDlV";
-export const ILLUMINA = "Illumina";
-export const HUMAN = "Human";
-export const METAGENOMIC = "Metagenomic";
-export const PIPELINE_READS_LABEL = ".narrowMetadataValueContainer-2CnKh";
-export const VIEW_PIPELINE_VISUALIZATION = ".metadataValue-2cDlV a";
-export const KLEBSIELLA = "Klebsiella";
-export const KLEBSIELLA_GENUS = "Klebsiella (genus)";
-export const FILTER_RESULT = ".taxonName-2Ct87";
-export const ARCHAEA_FILTER = '[data-testid="dropdown-archaea"]';
-export const BACTERIA_FILTER = '[data-testid="dropdown-bacteria"]';
-export const EUKARYOTA_FILTER = '[data-testid="dropdown-eukaryota"]';
-export const VIROIDS_FILTER = '[data-testid="dropdown-viroids"]';
-export const VIRUSES_FILTER = '[data-testid="dropdown-viruses"]';
-export const VIRUSES_PHAGE_FILTER = '[data-testid="dropdown-viruses---phage"]';
-export const UNCATEGORIZED_FILTER = '[data-testid="dropdown-uncategorized"]';
-export const CATEGORIES_FILTER = 'text="Categories"';
-export const FILTERS_DROPDOWN =
-  '[class="menu transition visible menu-3h-2s dropdownMenu-1gUyq"]    [role="option"]';
-export const THRESHOLD_FILTERS = [
-  "Score",
-  "NT Z Score",
-  "NT rPM",
-  "NT r (total reads)",
-  "NT contigs",
-  "NT contig reads",
-  "NT %id",
-  "NT L (alignment length in bp)",
-  "NT E value (as a power of 10)",
-  "NR Z Score",
-  "NR rPM",
-  "NR r (total reads)",
-  "NR contigs",
-  "NR contig reads",
-  "NR %id",
-  "NR L (alignment length in bp)",
-  "NR E value (as a power of 10)",
-];
-export const READ_SPECIFICITY_FILTERS = ["All", "Specific Only"];
-export const ANNOTATION_FILTERS = ["Hit", "Not a hit", "Inconclusive"];
-
-export const APPLY_BUTTON = ".button-PwU7o";
-export const APPLY = 'text="Apply"';
-export const THRESHOLD_FILTER = 'text="Threshold filters"';
-export const SCORE = 'text="Score"';
-export const READ_SPECIFICITY = 'text="Read Specificity:"';
-export const ANNOTATION_TEXT = 'text="Annotation"';
-export const VIEWS = ".reportViewSelector-1i1wY a";
-export const TREE_NODES = ".clickable";
-export const KNOWN_PATHOGEN = "text='Known Pathogen'";
-export const PATHOGEN_POPUP = ".pathogenLabelPopup-drI1l";
-export const PATHOGEN_POPUP_TEXT =
-  "Organism with known human pathogenicity. See the full list of pathogens.";
-export const PATHOGEN_LINk = 'a[class="linkDefault-34rbs"]';
-export const TREE_VIEW_TITLE = ".title-1oZTJ";
-
-export const API = {
-  DIMENSION: "samples/dimensions.json",
-  STATS: "samples/stats.json",
-  PROJECT: "projects.json?domain=public&limit=50&listAllIds=true&offset=0",
-  WORKFLOW:
-    "workflow_runs.json?domain=public&listAllIds=true&mode=with_sample_info&limit=50&offset=0&workflow=consensus-genome",
-  SAMPLE_LOCATION: "locations/sample_locations.json",
-  VISUALIZATION: "visualizations.json",
-  SAMPLE_URL:
-    "my_data?currentDisplay=table&currentTab=samples&mapSidebarTab=samples&projectId=869&showFilters=true&workflow=amr",
-};
-export const TAXON = "taxon";
-export const BUTTON = "button";
-export const COMBOBOX = "combobox";
-export const ADD_THRESHOLD = "+ ADD THRESHOLD";
-export const NUMBERINPUT = 'input[type="number"]';
-export const CHOOSE_TAXON = "Choose Taxon";
-export const SAMPLE_NAME_SELECTOR = ".sampleName-1zqqT";
-export const ESCAPE = "Escape";
-export const CLOSE_ICON = ".closeIcon-yEIIr";
-export const CLOSE_ICON_POLYGON = ".closeIcon-yEIIr > polygon";
-export const LAST_MONTH = "Last Month";
-export const LAST_THREE_MONTHS = "Last 3 Months";
-export const LAST_SIX_MONTHS = "Last 6 Months";
-export const LAST_WEEK = "Last Week";
-export const PRIVATE = "Private";
-export const TEXTBOX = "textbox";
-export const OPTION = "option";
-export const MENU_ITEM = "menuitem";
-export const ENTER = "Enter";
-export const PUBLIC_MENU_ITEM = "menu-item-public";
-export const PROJECT_NAME_SELECTOR = ".itemName-1WWBD";
-export const PROJECT_COUNT = "project-count";
-export const METADATA_COUNT_SELECTOR = ".statsDd-24NuT";
-export const RESULT_COUNT_SELECTOR = ".filteredCount-3bajD";
-export const TOTAL_READ_POPUP_CONTENT = ".tooltip-1Y1xx";

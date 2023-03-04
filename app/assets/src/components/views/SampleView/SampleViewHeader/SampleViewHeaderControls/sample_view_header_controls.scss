@@ -2,7 +2,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
-
 .controlsContainer {
   display: flex;
   flex-direction: column;
@@ -20,8 +19,8 @@
   flex-direction: row;
   justify-content: flex-end;
   .controlElement {
-    margin-left: $sds-spaces-m; 
-  
+    margin-left: $sds-spaces-m;
+
     &:not(:last-child) {
       margin-right: 0;
     }

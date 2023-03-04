@@ -7,7 +7,7 @@ export const HOST = "Host";
 export const SEARCH = "Search";
 export const SAMPLE_TYPE = "Sample Type";
 export const KLEBSIELLA = "Klebsiella";
-export const APPLY = 'text="Apply"';
+export const APPLY = "Apply";
 export const TAXON = "taxon";
 export const BUTTON = "button";
 export const COMBOBOX = "combobox";

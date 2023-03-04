@@ -45,7 +45,9 @@ export async function uploadSampleFiles(
 ): Promise<any> {
   // select project
   await page.locator(getByText(SELECT_PROJECT)).click();
-  await (await findByTextRole(page, SEARCH)).fill(projectName);
+  await (await findByTextRole(page, SEARCH)).type(projectName, {
+    timeout: 1000,
+  });
 
   await page.locator(getByText(projectName)).click();
 

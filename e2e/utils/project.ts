@@ -73,9 +73,6 @@ export async function goToProjectSamples(
     .click();
 
   // select workflow type
-  // todo: uncomment once testIds get to staging
-  // await page.locator(getByTestID(tabId)).click();
-  // todo: remove this line once testIds are in staging
   await page
     .locator(".tabLabel-3vqpD")
     .nth(workflowIndex)

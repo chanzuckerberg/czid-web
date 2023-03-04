@@ -28,8 +28,8 @@ import {
   SIDEBAR_PIPELINE_AMR_SELECTOR,
   ANTIMICROBIAL_RESISTANCE,
   AMR_LABEL_SELECTOR,
-} from "../constants/sample.const";
-import { BasePage } from "../pages/basePage";
+} from "../../constants/sample.const";
+import { BasePage } from "../../pages/basePage";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 

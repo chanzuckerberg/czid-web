@@ -2,9 +2,8 @@ import fs from "fs";
 import path from "path";
 import { chromium, expect, FullConfig } from "@playwright/test";
 import dotenv from "dotenv";
-import { tag } from "../utils/constants";
+import { tag } from "../constants/common.const";
 import { login } from "../utils/login";
-import { getByTestID, getByText } from "../utils/selectors";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
@@ -29,8 +28,8 @@ async function globalSetup(config: FullConfig): Promise<void> {
     await Promise.all([
       page.goto(`${process.env.BASEURL}`, { waitUntil: "networkidle" }),
     ]);
-    expect(page.locator(getByText(tag))).toBeVisible({ timeout: 120000 });
-    await page.locator(getByTestID("home-top-nav-login")).click();
+    expect(page.getByText(tag)).toBeVisible({ timeout: 120000 });
+    await page.getByTestId("home-top-nav-login").click();
     await login(page, username, password);
     await page.context().storageState({ path: storageState as string });
     await browser.close();
@@ -53,7 +52,10 @@ function checkCookies(): boolean {
     const cookie = cookieJson.find(cookie => cookie.name === "auth0");
     const expires = cookie["expires"] as number;
     const domain = cookie["domain"];
-    if (expires > currentTime && domain.includes(process.env.DOMAIN)) {
+    if (
+      expires > currentTime &&
+      domain.includes(process.env.NODE_ENV.toUpperCase())
+    ) {
       return true;
     } else {
       return false;

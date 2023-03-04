@@ -46,7 +46,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
   const allPipelineVersions: string[] =
     allRuns.length > 0 && typeof allRuns[0] === "string"
       ? allRuns
-      : [...new Set(allRuns?.map((run) => run[versionKey]))];
+      : [...new Set(allRuns?.map(run => run[versionKey]))];
 
   const otherPipelineVersions = allPipelineVersions.filter(
     (otherPipelineVersion: string) =>
@@ -97,7 +97,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
   };
 
   const renderMultipleVersionsDropdownHeader = () => {
-    const options = otherPipelineVersions.map((version) => ({
+    const options = otherPipelineVersions.map(version => ({
       text: `Pipeline v${version} `,
       value: version,
     }));

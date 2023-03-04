@@ -11,7 +11,7 @@ export type Project = {
     {
       name: string;
       email: string;
-    }
+    },
   ];
   creator: string;
   creator_id: number;
