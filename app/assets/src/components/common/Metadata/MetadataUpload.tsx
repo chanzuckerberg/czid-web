@@ -332,8 +332,8 @@ class MetadataUpload extends React.Component<
       return (
         <>
           <div>
-            <span
-              className={cs.link}
+            <button
+              className={cx(cs.link, "nostylebutton")}
               onClick={withAnalytics(
                 onShowCSVInstructions,
                 "MetadataUpload_instruction-link_clicked",
@@ -344,7 +344,7 @@ class MetadataUpload extends React.Component<
               )}
             >
               View CSV Upload Instructions
-            </span>
+            </button>
           </div>
           <MetadataCSVUpload
             className={cs.metadataCSVUpload}
@@ -355,8 +355,8 @@ class MetadataUpload extends React.Component<
             visible={visible}
             onDirty={onDirty}
           />
-          <div
-            className={cs.link}
+          <button
+            className={cx(cs.link, "nostylebutton")}
             onClick={() => {
               this.handleDownloadCSV();
               trackEvent("MetadataUpload_download-csv-template_clicked", {
@@ -373,7 +373,7 @@ class MetadataUpload extends React.Component<
             }}
           >
             Download Metadata CSV Template
-          </div>
+          </button>
           {this.state.validatingCSV && (
             <LoadingMessage
               message="Validating metadata..."

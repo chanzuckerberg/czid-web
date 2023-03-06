@@ -1,3 +1,4 @@
+import cx from "classnames";
 import { find, get } from "lodash/fp";
 import React, { useState } from "react";
 import { withAnalytics, trackEvent } from "~/api/analytics";
@@ -19,8 +20,8 @@ const MetadataCSVLocationsMenu = ({
   const [applyToAllSample, setApplyToAllSample] = useState<string | null>(null);
 
   const renderApplyToAll = () => (
-    <div
-      className={cs.applyToAll}
+    <button
+      className={cx(cs.applyToAll, "nostylebutton")}
       onClick={withAnalytics(
         () => applyToAll(applyToAllSample),
         "MetadataCsvLocationsMenu_apply-all_clicked",
@@ -30,7 +31,7 @@ const MetadataCSVLocationsMenu = ({
       )}
     >
       Apply to All
-    </div>
+    </button>
   );
 
   const applyToAll = (sample: string) => {

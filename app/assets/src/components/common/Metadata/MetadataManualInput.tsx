@@ -351,8 +351,8 @@ class MetadataManualInput extends React.Component<
   renderApplyToAll = (sample, column) => {
     return this.state.applyToAllCell.sampleName === sample.name &&
       this.state.applyToAllCell.column === column ? (
-      <div
-        className={cs.applyToAll}
+      <button
+        className={cx(cs.applyToAll, "nostylebutton")}
         onClick={() => {
           const newValue = this.getMetadataValue(sample, column);
           this.applyToAll(column, newValue);
@@ -363,7 +363,7 @@ class MetadataManualInput extends React.Component<
         }}
       >
         Apply to All
-      </div>
+      </button>
     ) : null;
   };
 
@@ -538,12 +538,12 @@ class MetadataManualInput extends React.Component<
           {this.renderColumnSelector()}
         </div>
         {admin && samplesAreNew && (
-          <div
-            className={cs.autoPopulateButton}
+          <button
+            className={cx(cs.autoPopulateButton, "nostylebutton")}
             onClick={this.autoPopulateMetadata}
           >
             Auto-populate metadata (Admin-only)
-          </div>
+          </button>
         )}
       </div>
     );

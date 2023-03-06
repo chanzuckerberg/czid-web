@@ -1,3 +1,4 @@
+import cx from "classnames";
 import { Button, Icon, Tooltip } from "czifui";
 import React, { useState, useEffect } from "react";
 
@@ -112,8 +113,8 @@ const ProjectCreationModal = ({
         </div>
         <div className={cs.field}>
           <div className={cs.label}>Project Sharing</div>
-          <div
-            className={cs.sharingOption}
+          <button
+            className={cx(cs.sharingOption, "nostylebutton")}
             onClick={() => setAccessLevel(ACCESS_LEVEL.publicAccess)}
             data-testid="public-project"
           >
@@ -136,9 +137,9 @@ const ProjectCreationModal = ({
                 <ExternalLink href={WEB_UPLOAD_LINK}>Learn more</ExternalLink>
               </div>
             </div>
-          </div>
-          <div
-            className={cs.sharingOption}
+          </button>
+          <button
+            className={cx(cs.sharingOption, "nostylebutton")}
             onClick={() => setAccessLevel(ACCESS_LEVEL.privateAccess)}
             data-testid="private-project"
           >
@@ -162,18 +163,18 @@ const ProjectCreationModal = ({
                 <ExternalLink href={WEB_UPLOAD_LINK}>Learn more</ExternalLink>
               </div>
             </div>
-          </div>
+          </button>
         </div>
         <div className={cs.field}>
           <div className={cs.label}>
             Project Description{" "}
-            <span
-              className={cs.infoLink}
+            <button
+              className={cx(cs.infoLink, "nostylebutton")}
               onClick={() => setShowInfo(!showInfo)}
               data-testid="more-less-info-btn"
             >
               {showInfo ? "Less Info" : "More Info"}
-            </span>
+            </button>
           </div>
           {showInfo && (
             <div className={cs.info} data-testid="project-description-info">
