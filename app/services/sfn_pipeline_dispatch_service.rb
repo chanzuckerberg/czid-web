@@ -120,6 +120,8 @@ class SfnPipelineDispatchService
                       index_dir_suffix: @pipeline_run.alignment_config.index_dir_suffix,
                       use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
                       deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
+                      minimap2_db: @pipeline_run.alignment_config.minimap2_short_db_path,
+                      diamond_db: @pipeline_run.alignment_config.diamond_db_path,
                     }, Postprocess: {
                       nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
                       nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,

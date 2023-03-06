@@ -9,8 +9,6 @@ class SfnLongReadMngsPipelineDispatchService
   WORKFLOW_NAME = WorkflowRun::WORKFLOW[:long_read_mngs]
 
   HUMAN_S3_MINIMAP2_INDEX_PATH = "s3://idseq-public-references/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_phiX_rRNA_mito_ERCC.fasta".freeze
-  MINIMAP2_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/nt_k14_w8_20_long".freeze
-  DIAMOND_DB_PATH = "s3://czid-public-references/ncbi-indexes-prod/2021-01-22/index-generation-2/diamond_index_chunksize_5500000000/".freeze
   ERCC_DIRECTORY_PATH = "s3://czid-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime".freeze
 
   class SfnArnMissingError < StandardError
@@ -88,8 +86,8 @@ class SfnLongReadMngsPipelineDispatchService
           taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
           deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
           docker_image_id: retrieve_docker_image_id,
-          minimap2_db: MINIMAP2_DB_PATH,
-          diamond_db: DIAMOND_DB_PATH,
+          minimap2_db: @pipeline_run.alignment_config.minimap2_long_db_path,
+          diamond_db: @pipeline_run.alignment_config.diamond_db_path,
           s3_wd_uri: "#{output_prefix}/#{@pipeline_run.version_key_subpath}",
           nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
         },
