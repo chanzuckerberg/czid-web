@@ -61,6 +61,16 @@ class WorkflowRun < ApplicationRecord
     WORKFLOW[:amr] => AmrWorkflowRun,
   }.freeze
 
+  MNGS_WORKFLOWS = [
+    WORKFLOW[:short_read_mngs],
+    WORKFLOW[:long_read_mngs],
+  ].freeze
+
+  MNGS_WORKFLOW_TO_TECHNOLOGY = {
+    WORKFLOW[:short_read_mngs] => PipelineRun::TECHNOLOGY_INPUT[:illumina],
+    WORKFLOW[:long_read_mngs] => PipelineRun::TECHNOLOGY_INPUT[:nanopore],
+  }.freeze
+
   SHORT_READ_MNGS_METRICS = [
     { text: "NT rPM", value: "NT.rpm" },
     { text: "NT Z Score", value: "NT.zscore" },

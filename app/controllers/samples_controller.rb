@@ -624,7 +624,6 @@ class SamplesController < ApplicationController
     permitted_params = params.permit(:workflow, selectedIds: [])
     selected_ids = permitted_params[:selectedIds]
     workflow = permitted_params[:workflow]
-    error = nil
 
     # validate again that all selected ids are eligible for deletion
     validated_objects = DeletionValidationService.call(
@@ -657,11 +656,15 @@ class SamplesController < ApplicationController
       return
     end
 
-    # call deletion service
+    deletion_response = BulkDeletionService.call(
+      object_ids: valid_ids,
+      user: current_user,
+      workflow: workflow
+    )
 
     render json: {
-      deletedIds: valid_ids,
-      error: error,
+      deletedIds: deletion_response[:deleted_ids],
+      error: deletion_response[:error],
     }
   end
 
