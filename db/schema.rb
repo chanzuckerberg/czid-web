@@ -43,9 +43,9 @@ ActiveRecord::Schema.define(version: 2023_02_26_185625) do
     t.string "s3_taxon_blacklist_path", default: "s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
     t.integer "lineage_version_old", limit: 2
     t.string "lineage_version", limit: 10, null: false
-    t.text "minimap2_long_db_path", comment: "The S3 path prefix to the minimap2 index for short reads"
-    t.text "minimap2_short_db_path", comment: "The S3 path prefix to the minimap2 index for long reads"
-    t.text "diamond_db_path", comment: "The S3 path prefix to the diamond index"
+    t.string "minimap2_long_db_path", comment: "The S3 path prefix to the minimap2 index for short reads"
+    t.string "minimap2_short_db_path", comment: "The S3 path prefix to the minimap2 index for long reads"
+    t.string "diamond_db_path", comment: "The S3 path prefix to the diamond index"
   end
 
   create_table "amr_counts", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
