@@ -1,0 +1,10 @@
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.semibold {
+  font-weight: $font-weight-semibold;
+}
+
+.list {
+  margin: $sds-spaces-xs 0 $sds-spaces-l 0;
+}

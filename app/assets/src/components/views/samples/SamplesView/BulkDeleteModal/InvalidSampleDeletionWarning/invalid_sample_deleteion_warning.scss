@@ -1,0 +1,16 @@
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.semibold {
+  font-weight: $font-weight-semibold;
+}
+
+.accordion {
+  margin-top: $sds-spaces-m;
+}
+
+.messageLine {
+  @include font-body-xxs;
+  padding: $sds-spaces-xxs 0;
+  margin-right: $sds-spaces-xl;
+}

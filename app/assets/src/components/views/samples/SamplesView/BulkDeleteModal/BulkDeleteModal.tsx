@@ -4,80 +4,122 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  List,
-  ListItem,
 } from "czifui";
-import React from "react";
-import { WORKFLOW_LABELS } from "~/components/utils/workflows";
+import React, { useEffect, useState } from "react";
+import { bulkDeleteObjects, validateUserCanDeleteObjects } from "~/api";
+import { showToast } from "~/components/utils/toast";
+import { WORKFLOW_VALUES } from "~/components/utils/workflows";
 
+import { getShorthandFromWorkflow } from "../utils";
+import { DeleteErrorNotification } from "./DeleteErrorNotification";
+import { DeleteSampleModalText } from "./DeleteSampleModalText";
+import { DeleteSuccessNotification } from "./DeleteSuccessNotification";
+import { InvalidSampleDeletionWarning } from "./InvalidSampleDeletionWarning";
 import cs from "./bulk_delete_modal.scss";
 
 interface BulkDeleteModalProps {
-  onDelete(): void;
+  isOpen: boolean;
   onClose(): void;
-  sampleCount: number;
-  workflowLabel: WORKFLOW_LABELS;
+  selectedIds: number[];
+  workflow: WORKFLOW_VALUES;
 }
 
 const BulkDeleteModal = ({
-  onDelete,
+  isOpen,
   onClose,
-  sampleCount,
-  workflowLabel,
-}: BulkDeleteModalProps) => (
-  <Dialog className={cs.dialog} open sdsSize="xs">
-    <DialogTitle className={cs.dialogTitle}>
-      Are you sure you want to delete {sampleCount} {workflowLabel} runs?
-    </DialogTitle>
-    <DialogContent>
-      <div>
-        <div>
-          Deleting your runs will permanently remove the following from CZ ID
-          for
-          <span className={cs.semibold}> you and any collaborators </span>
-          with access:
-        </div>
-        <List className={cs.list}>
-          <ListItem>The raw data, metadata, and results.</ListItem>
-          <ListItem>
-            Any bulk download files that contain the deleted run.
-          </ListItem>
-        </List>
-        <div>Here is how other artifacts will be affected:</div>
-        <List className={cs.list}>
-          <ListItem>
-            Any saved heatmap or phylotree that contains the deleted runs,
-            including saved visualizations, will remain and be re-run without
-            those runs.
-          </ListItem>
-          <ListItem>
-            Sample deletion will not affect existing background models.
-          </ListItem>
-          <ListItem>
-            Your collaborators will be notified about any runs that have been
-            deleted.
-          </ListItem>
-        </List>
-        <span className={cs.semibold}>
-          You will not be able to undo this action once completed.
-        </span>
-      </div>
-    </DialogContent>
-    <DialogActions className={cs.dialogActions}>
-      <Button
-        className={cs.deleteButton}
-        onClick={onDelete}
-        sdsStyle="rounded"
-        sdsType="primary"
-        color="error"
-      >
-        Delete
-      </Button>
-      <Button sdsStyle="rounded" sdsType="secondary" onClick={onClose}>
-        Cancel
-      </Button>
-    </DialogActions>
-  </Dialog>
-);
+  selectedIds,
+  workflow,
+}: BulkDeleteModalProps) => {
+  const [validIds, setValidsIds] = useState<number[]>([]);
+  const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
+
+  const validateSamplesCanBeDeleted = async () => {
+    const {
+      validIds: newIds,
+      invalidSampleNames: newInvalidNames,
+    } = await validateUserCanDeleteObjects({ selectedIds, workflow });
+
+    setValidsIds(newIds);
+    setInvalidSampleNames(newInvalidNames);
+  };
+
+  useEffect(() => {
+    setValidsIds([]);
+    setInvalidSampleNames([]);
+
+    if (!isOpen) return;
+
+    validateSamplesCanBeDeleted();
+  }, [selectedIds, workflow]);
+
+  const sampleCount = selectedIds.length;
+  const workflowLabel = getShorthandFromWorkflow(workflow);
+
+  const onDeleteSuccess = ({ successCount }) => {
+    showToast(({ closeToast }) => (
+      <DeleteSuccessNotification
+        onClose={closeToast}
+        sampleCount={successCount}
+        workflowLabel={workflowLabel}
+      />
+    ));
+  };
+
+  const onDeleteError = ({ errorCount }) => {
+    showToast(({ closeToast }) => (
+      <DeleteErrorNotification
+        onClose={closeToast}
+        sampleCount={errorCount}
+        workflowLabel={workflowLabel}
+      />
+    ));
+  };
+
+  const handleDeleteSamples = async () => {
+    onClose();
+
+    const { deletedIds, error } = await bulkDeleteObjects({
+      selectedIds: validIds,
+      workflow,
+    });
+
+    if (error) {
+      const failedCount = validIds.length - deletedIds.length;
+      onDeleteError({ errorCount: failedCount });
+    } else {
+      onDeleteSuccess({ successCount: deletedIds.length });
+    }
+  };
+
+  return (
+    <Dialog className={cs.dialog} open={isOpen} sdsSize="xs">
+      <DialogTitle className={cs.dialogTitle}>
+        Are you sure you want to delete {sampleCount} {workflowLabel} runs?
+      </DialogTitle>
+      <DialogContent>
+        <DeleteSampleModalText />
+        {invalidSampleNames.length > 0 && (
+          <InvalidSampleDeletionWarning
+            invalidSampleNames={invalidSampleNames}
+          />
+        )}
+      </DialogContent>
+      <DialogActions className={cs.dialogActions}>
+        <Button
+          className={cs.deleteButton}
+          onClick={handleDeleteSamples}
+          sdsStyle="rounded"
+          sdsType="primary"
+          color="error"
+        >
+          Delete
+        </Button>
+        <Button sdsStyle="rounded" sdsType="secondary" onClick={onClose}>
+          Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 export { BulkDeleteModal };

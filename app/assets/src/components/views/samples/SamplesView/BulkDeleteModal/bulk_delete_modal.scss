@@ -5,14 +5,6 @@
 .dialog {
   @include font-body-s;
 
-  .semibold {
-    font-weight: $font-weight-semibold;
-  }
-
-  .list {
-    margin: $sds-spaces-xs 0 $sds-spaces-l 0;
-  }
-
   .dialogTitle {
     @include font-header-xl;
   }

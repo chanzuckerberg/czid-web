@@ -87,7 +87,7 @@ import {
   WORKFLOW_TRIGGERS_BY_DOMAIN,
 } from "./constants";
 import cs from "./samples_view.scss";
-import { getSelectedObjects, getShorthandFromWorkflow } from "./utils";
+import { getSelectedObjects } from "./utils";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
@@ -976,14 +976,12 @@ const SamplesView = forwardRef(function SamplesView(
           workflowEntity={workflowEntity}
         />
       )}
-      {isBulkDeleteModalOpen && (
-        <BulkDeleteModal
-          onDelete={() => setIsBulkDeleteModalOpen(false)}
-          onClose={() => setIsBulkDeleteModalOpen(false)}
-          sampleCount={selectedIds.size}
-          workflowLabel={getShorthandFromWorkflow(workflow)}
-        />
-      )}
+      <BulkDeleteModal
+        isOpen={isBulkDeleteModalOpen}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        selectedIds={Array.from(selectedIds)}
+        workflow={workflow}
+      />
       {heatmapCreationModalOpen && (
         <HeatmapCreationModal
           open
