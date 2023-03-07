@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  .controlElement {
+  .controlElement , & button {
     margin-left: $sds-spaces-m;
 
     &:not(:last-child) {
@@ -32,8 +32,3 @@
   transform: translateY(1px);
 }
 
-.seperator {
-  @include font-body-xxxs;
-  color: $sds-color-gray-500;
-  padding: $sds-spaces-xxs $sds-spaces-xs;
-}

@@ -6,19 +6,21 @@ interface DownloadButtonProps {
   onClick?: $TSFixMeFunction;
   text?: string;
   className?: string;
+  primary?: boolean;
 }
 
 const DownloadButton = ({
   disabled,
   onClick,
-  text,
+  text = "Download",
   className,
+  primary = false,
 }: DownloadButtonProps) => {
   return (
     <Button
       className={className}
       sdsStyle="rounded"
-      sdsType="secondary"
+      sdsType={primary ? "primary" : "secondary"}
       disabled={disabled}
       onClick={onClick}
       startIcon={<Icon sdsIcon="download" sdsSize="l" sdsType="button" />}
@@ -26,11 +28,6 @@ const DownloadButton = ({
       {text}
     </Button>
   );
-};
-
-DownloadButton.defaultProps = {
-  primary: false,
-  text: "Download",
 };
 
 export default DownloadButton;

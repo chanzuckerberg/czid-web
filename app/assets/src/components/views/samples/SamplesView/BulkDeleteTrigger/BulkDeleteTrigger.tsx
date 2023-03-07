@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { BULK_DELETION_FEATURE } from "~/components/utils/features";
 import {
+  getShorthandFromWorkflow,
   WORKFLOW_ENTITIES,
   WORKFLOW_VALUES,
 } from "~/components/utils/workflows";
@@ -13,7 +14,6 @@ import {
 } from "~/interface/samplesView";
 import ToolbarButtonIcon from "../ToolbarButtonIcon";
 import cs from "../samples_view.scss";
-import { getShorthandFromWorkflow } from "../utils";
 
 type ObjectType = PipelineTypeRun | BaseWorkflowRun | CGRun;
 

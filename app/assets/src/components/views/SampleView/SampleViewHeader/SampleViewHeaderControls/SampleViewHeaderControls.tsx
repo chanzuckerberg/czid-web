@@ -1,4 +1,3 @@
-import { Button, Icon } from "czifui";
 import { get, isEmpty, size } from "lodash/fp";
 import React, { useContext } from "react";
 import { saveVisualization } from "~/api";
@@ -16,22 +15,23 @@ import {
   SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
 
-import { WORKFLOWS, findInWorkflows } from "~/components/utils/workflows";
+import { BULK_DELETION_FEATURE } from "~/components/utils/features";
+import {
+  WORKFLOWS,
+  WORKFLOW_VALUES,
+  findInWorkflows,
+} from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import { parseUrlParams } from "~/helpers/url";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
-import {
-  DownloadButton,
-  ErrorButton,
-  HelpButton,
-  SaveButton,
-} from "~ui/controls/buttons";
+import { DownloadButton, HelpButton, SaveButton } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
-import PipelineVersionSelect from "../../../components/PipelineVersionSelect";
-import { PipelineRunSampleViewControls } from "./PipelineRunSampleViewControls";
+import { ControlsTopRow } from "./ControlsTopRow";
+import { DownloadDropdown } from "./DownloadDropdown";
+import { OverflowMenu } from "./OverflowMenu";
 import { ShareButtonPopUp } from "./ShareButtonPopUp";
 
 import cs from "./sample_view_header_controls.scss";
@@ -73,6 +73,9 @@ export const SampleViewHeaderControls = ({
 }: SampleViewHeaderControlsProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures, admin: userIsAdmin } = userContext || {};
+  const succeeded = get("status", currentRun) === "SUCCEEDED";
+  const runIsLoaded = !isEmpty(reportMetadata);
+  const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
 
   const onSaveClick = async () => {
     if (view) {
@@ -82,241 +85,190 @@ export const SampleViewHeaderControls = ({
     }
   };
 
-  const workflow =
+  const workflow: WORKFLOW_VALUES =
     WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
     WORKFLOWS.SHORT_READ_MNGS.value;
 
-  const mngsWorkflow = [
+  const mngsWorkflows = [
     WORKFLOWS.SHORT_READ_MNGS.value,
     WORKFLOWS.LONG_READ_MNGS.value,
-  ].includes(workflow);
+  ] as string[];
+
+  const ismNGSWorkflow = mngsWorkflows.includes(workflow);
 
   const getAllRuns = () => {
     const runsByType =
       get("workflow_runs", sample) &&
       get("workflow_runs", sample).filter(run => run.workflow === workflow);
-    return mngsWorkflow ? get("pipeline_runs", sample) : runsByType;
+    return ismNGSWorkflow ? get("pipeline_runs", sample) : runsByType;
   };
 
-  const renderSampleViewControlsTopRow = () => {
+  const renderDownloadDropdown = () => {
     return (
-      <div className={cs.controlsTopRowContainer}>
-        <PipelineVersionSelect
-          sampleId={get("id", sample)}
-          shouldIncludeDatabaseVersion={false}
-          currentRun={currentRun}
-          allRuns={getAllRuns()}
-          workflowType={workflow}
-          versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
-          timeKey={mngsWorkflow ? "created_at" : "executed_at"}
-          onVersionChange={onPipelineVersionChange}
+      runIsLoaded && (
+        <DownloadDropdown
+          className={cs.controlElement}
+          backgroundId={backgroundId}
+          currentTab={currentTab}
+          deletable={deletable}
+          editable={editable}
+          getDownloadReportTableWithAppliedFiltersLink={
+            getDownloadReportTableWithAppliedFiltersLink
+          }
+          onDeleteSample={onDeleteSample}
+          hasAppliedFilters={hasAppliedFilters}
+          pipelineRun={currentRun as PipelineRun}
+          reportMetadata={reportMetadata}
+          sample={sample}
+          view={view}
         />
-        {userIsAdmin && workflow !== WORKFLOWS.CONSENSUS_GENOME.value && (
-          <>
-            <Button
-              className={cs.controlElement}
-              sdsType="primary"
-              sdsStyle="minimal"
-              isAllCaps={true}
-              onClick={() =>
-                (location.href = `/samples/${sample?.id}/pipeline_runs`)
-              }
-            >
-              Pipeline Runs
-            </Button>
-            <span className={cs.seperator}> | </span>
-          </>
-        )}
-        <Button
-          sdsType="primary"
-          sdsStyle="minimal"
-          isAllCaps={true}
-          onClick={withAnalytics(
-            onDetailsClick,
-            "SampleView_sample-details-link_clicked",
-            {
-              sampleId: sample?.id,
-            },
-          )}
-        >
-          Sample Details
-        </Button>
-      </div>
+      )
     );
   };
 
-  const renderPipelineRunSampleViewControls = () => (
-    <PipelineRunSampleViewControls
-      className={cs.controlElement}
-      backgroundId={backgroundId}
-      currentTab={currentTab}
-      deletable={deletable}
-      editable={editable}
-      getDownloadReportTableWithAppliedFiltersLink={
-        getDownloadReportTableWithAppliedFiltersLink
-      }
-      onDeleteSample={onDeleteSample}
-      hasAppliedFilters={hasAppliedFilters}
-      pipelineRun={currentRun as PipelineRun}
-      reportMetadata={reportMetadata}
-      sample={sample}
-      view={view}
-    />
-  );
-
-  const renderShortReadMngsHelpButton = () => (
-    <HelpButton
-      className={cs.controlElement}
-      onClick={showAppcue({
-        flowId: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
-        analyticEventName:
-          ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
-      })}
-    />
-  );
-
-  const renderConsensusGenomeHelpButton = () => (
-    <HelpButton
-      className={cs.controlElement}
-      onClick={showAppcue({
-        flowId: SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
-        analyticEventName:
-          ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED,
-      })}
-    />
-  );
-
-  const renderViewHeaderControls = () => {
-    // Should hide CG appcues help button if a sample doesn't have the feature flag or (has 0 mNGS runs & 1 CG run)
+  const renderHelpButton = () => {
+    // CG help button should only be shown if feature flag is on
+    // unless the sample has 0 mNGS runs & exactly 1 CG run.
     const shouldHideConsensusGenomeHelpButton =
       !allowedFeatures.includes("cg_appcues_help_button") ||
       (sample &&
         isEmpty(sample?.pipeline_runs) &&
         size(sample?.workflow_runs) === 1);
 
-    if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
-      const succeeded = get("status", currentRun) === "SUCCEEDED";
-      return (
-        <>
-          {renderSampleViewControlsTopRow()}
-          <div className={cs.controlsBottomRowContainer}>
-            {succeeded && (
-              <>
-                <ShareButtonPopUp onShareClick={onShareClick} />
-                <DownloadButton
-                  className={cs.controlElement}
-                  text="Download All"
-                  onClick={() => {
-                    openUrl(getWorkflowRunZipLink(currentRun.id));
-                    trackEvent(
-                      "SampleViewHeader_consensus-genome-download-all-button_clicked",
-                      {
-                        sampleId: sample?.id,
-                      },
-                    );
-                  }}
-                />
-              </>
-            )}
-            {!succeeded &&
-            editable &&
-            deletable &&
-            isEmpty(sample?.pipeline_runs) && ( // wouldn't want to delete mngs report
-                <ErrorButton
-                  className={cs.controlElement}
-                  onClick={onDeleteSample}
-                  text="Delete Sample"
-                />
-              )}
-            {shouldHideConsensusGenomeHelpButton ||
-              renderConsensusGenomeHelpButton()}
-          </div>
-        </>
-      );
-    } else if (workflow === WORKFLOWS.AMR.value) {
-      // This block is for amr PipelineRun reports.
-      const succeeded = get("status", currentRun) === "SUCCEEDED";
-      return (
-        <>
-          {renderSampleViewControlsTopRow()}
-          <div className={cs.controlsBottomRowContainer}>
-            {succeeded && (
-              <Button
-                className={cs.controlElement}
-                onClick={() => {
-                  openUrl(getWorkflowRunZipLink(currentRun.id));
-                  trackEvent(
-                    "SampleViewHeader_amr-download-all-button_clicked",
-                    {
-                      sampleId: sample?.id,
-                    },
-                  );
-                }}
-                sdsStyle="rounded"
-                sdsType="primary"
-                startIcon={
-                  <Icon sdsIcon="download" sdsSize="xl" sdsType="button" />
-                }
-              >
-                Download All
-              </Button>
-            )}
-          </div>
-        </>
-      );
-    } else if (workflow === WORKFLOWS.LONG_READ_MNGS.value) {
-      // This block is for long-read-mngs PipelineRun reports.
-      return (
-        <>
-          {renderSampleViewControlsTopRow()}
-          <div className={cs.controlsBottomRowContainer}>
-            {!isEmpty(reportMetadata) && (
-              <ShareButtonPopUp onShareClick={onShareClick} />
-            )}
-            {userContext.admin && (
-              <SaveButton
-                className={cs.controlElement}
-                onClick={withAnalytics(
-                  onSaveClick,
-                  "SampleView_save-button_clicked",
-                  {
-                    sampleId: sample && sample?.id,
-                  },
-                )}
-              />
-            )}
-            {renderPipelineRunSampleViewControls()}
-          </div>
-        </>
-      );
-    } else {
-      // This block is for short-read-mngs PipelineRun reports.
-      return (
-        <>
-          {renderSampleViewControlsTopRow()}
-          <div className={cs.controlsBottomRowContainer}>
-            {!isEmpty(reportMetadata) && (
-              <ShareButtonPopUp onShareClick={onShareClick} />
-            )}
-            {userContext.admin && (
-              <SaveButton
-                className={cs.controlElement}
-                onClick={withAnalytics(
-                  onSaveClick,
-                  "SampleView_save-button_clicked",
-                  {
-                    sampleId: sample && sample?.id,
-                  },
-                )}
-              />
-            )}
-            {renderPipelineRunSampleViewControls()}
-            {!isEmpty(reportMetadata) && renderShortReadMngsHelpButton()}
-          </div>
-        </>
-      );
+    if (
+      workflow === WORKFLOWS.AMR.value ||
+      workflow === WORKFLOWS.LONG_READ_MNGS.value ||
+      (workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
+        shouldHideConsensusGenomeHelpButton)
+    ) {
+      return;
+    }
+
+    // format appCueFlowId and anaylticsEventName based on workflow
+    const appCueFlowId = {
+      [WORKFLOWS.SHORT_READ_MNGS.value]: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
+      [WORKFLOWS.CONSENSUS_GENOME.value]: SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
+    };
+
+    const anaylticsEventName = {
+      [WORKFLOWS.SHORT_READ_MNGS.value]:
+        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
+      [WORKFLOWS.CONSENSUS_GENOME.value]:
+        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED,
+    };
+
+    return (
+      runIsLoaded && (
+        <HelpButton
+          className={cs.controlElement}
+          onClick={showAppcue({
+            flowId: appCueFlowId[workflow],
+            analyticEventName: anaylticsEventName[workflow],
+          })}
+        />
+      )
+    );
+  };
+
+  const onDownloadAll = (eventName: "amr" | "consensus-genome") => {
+    openUrl(getWorkflowRunZipLink(currentRun.id));
+    trackEvent(`SampleViewHeader_${eventName}-download-all-button_clicked`, {
+      sampleId: sample?.id,
+    });
+  };
+
+  const onSaveWithAnalytics = () => {
+    withAnalytics(onSaveClick, "SampleView_save-button_clicked", {
+      sampleId: sample && sample?.id,
+    });
+  };
+
+  const renderShareButton = () => {
+    switch (workflow) {
+      case WORKFLOWS.LONG_READ_MNGS.value:
+      case WORKFLOWS.SHORT_READ_MNGS.value:
+        return runIsLoaded && <ShareButtonPopUp onShareClick={onShareClick} />;
+      case WORKFLOWS.CONSENSUS_GENOME.value:
+        return succeeded && <ShareButtonPopUp onShareClick={onShareClick} />;
+      case WORKFLOWS.AMR.value:
+        return null;
     }
   };
 
-  return <>{renderViewHeaderControls()}</>;
+  const renderSaveButton = () => {
+    switch (workflow) {
+      case WORKFLOWS.LONG_READ_MNGS.value:
+      case WORKFLOWS.SHORT_READ_MNGS.value:
+        return (
+          userIsAdmin && (
+            <SaveButton
+              className={cs.controlElement}
+              onClick={onSaveWithAnalytics}
+            />
+          )
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderDownloadButton = () => {
+    switch (workflow) {
+      case WORKFLOWS.LONG_READ_MNGS.value:
+      case WORKFLOWS.SHORT_READ_MNGS.value:
+        return renderDownloadDropdown();
+      case WORKFLOWS.CONSENSUS_GENOME.value:
+      case WORKFLOWS.AMR.value:
+        return renderDownloadAll(workflow);
+    }
+  };
+
+  const renderDownloadAll = (workflow: "amr" | "consensus-genome") => {
+    return (
+      succeeded && (
+        <DownloadButton
+          className={cs.controlElement}
+          text="Download All"
+          onClick={() => onDownloadAll(workflow)}
+          primary={workflow === WORKFLOWS.AMR.value}
+        />
+      )
+    );
+  };
+
+  const renderOverflowMenu = () => {
+    return (
+      hasBulkDeletion && (
+        <OverflowMenu
+          className={cs.controlElement}
+          workflow={workflow}
+          sampleId={sample?.id}
+        />
+      )
+    );
+  };
+
+  return (
+    <>
+      <div className={cs.controlsTopRowContainer}>
+        <ControlsTopRow
+          sample={sample}
+          currentRun={currentRun}
+          getAllRuns={getAllRuns}
+          workflow={workflow}
+          mngsWorkflow={ismNGSWorkflow}
+          onPipelineVersionChange={onPipelineVersionChange}
+          userIsAdmin={userIsAdmin}
+          onDetailsClick={onDetailsClick}
+        />
+      </div>
+      <div className={cs.controlsBottomRowContainer}>
+        {renderShareButton()}
+        {renderSaveButton()}
+        {renderDownloadButton()}
+        {renderHelpButton()}
+        {renderOverflowMenu()}
+      </div>
+    </>
+  );
 };

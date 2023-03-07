@@ -1,0 +1,14 @@
+@import "~czifui/dist/variables";
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "../sample_view_header_controls.scss";
+
+.controlElement {
+  @extend .controlElement;
+}
+
+.seperator {
+  @include font-body-xxxs;
+  color: $sds-color-gray-500;
+  padding: $sds-spaces-xxs $sds-spaces-xs;
+}

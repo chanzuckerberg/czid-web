@@ -1,0 +1,20 @@
+@import "~czifui/dist/variables";
+@import "../sample_view_header_controls.scss";
+
+.dropdownItem{
+  color: $sds-color-error-400;
+  .icon{
+    fill: $sds-color-error-400;
+    margin-right: $sds-spaces-xxs;
+  }
+}
+
+.helpButton {
+  min-width: auto !important;
+  padding: 0 5px !important;
+
+  :global(.MuiButton-startIcon) {
+    margin: 0 !important;
+  }
+}
+

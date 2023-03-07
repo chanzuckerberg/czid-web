@@ -8,9 +8,11 @@ import {
 import React, { useEffect, useState } from "react";
 import { bulkDeleteObjects, validateUserCanDeleteObjects } from "~/api";
 import { showToast } from "~/components/utils/toast";
-import { WORKFLOW_VALUES } from "~/components/utils/workflows";
+import {
+  WORKFLOW_VALUES,
+  getLabelFromWorkflow,
+} from "~/components/utils/workflows";
 
-import { getShorthandFromWorkflow } from "../utils";
 import { DeleteErrorNotification } from "./DeleteErrorNotification";
 import { DeleteSampleModalText } from "./DeleteSampleModalText";
 import { DeleteSuccessNotification } from "./DeleteSuccessNotification";
@@ -53,7 +55,7 @@ const BulkDeleteModal = ({
   }, [selectedIds, workflow]);
 
   const sampleCount = selectedIds.length;
-  const workflowLabel = getShorthandFromWorkflow(workflow);
+  const workflowLabel = getLabelFromWorkflow(workflow);
 
   const onDeleteSuccess = ({ successCount }) => {
     showToast(({ closeToast }) => (

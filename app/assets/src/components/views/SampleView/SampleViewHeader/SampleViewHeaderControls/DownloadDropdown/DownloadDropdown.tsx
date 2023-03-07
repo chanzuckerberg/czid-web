@@ -1,4 +1,6 @@
 import querystring from "querystring";
+import cx from "classnames";
+import { Button } from "czifui";
 import { isEmpty, isNull } from "lodash/fp";
 import React from "react";
 import SvgSaver from "svgsaver";
@@ -16,11 +18,11 @@ import {
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-import { ErrorButton } from "~ui/controls/buttons";
+import cs from "~ui/controls/buttons/error_button.scss";
 import Notification from "~ui/notifications/Notification";
 import { TABS } from "../../../constants";
 
-interface PipelineRunSampleViewControlsProps {
+interface DownloadDropdownProps {
   backgroundId?: number;
   className?: string;
   currentTab?: string;
@@ -35,7 +37,7 @@ interface PipelineRunSampleViewControlsProps {
   view?: string;
 }
 
-const PipelineRunSampleViewControls = ({
+const DownloadDropdown = ({
   backgroundId,
   className,
   currentTab,
@@ -48,7 +50,7 @@ const PipelineRunSampleViewControls = ({
   reportMetadata,
   sample,
   view,
-}: PipelineRunSampleViewControlsProps) => {
+}: DownloadDropdownProps) => {
   const downloadCSV = () => {
     const resParams = {
       ...(backgroundId && { background_id: backgroundId }),
@@ -97,7 +99,7 @@ const PipelineRunSampleViewControls = ({
         } else {
           logError({
             message:
-              "PipelineRunSampleViewControls: Invalid option passed to handleDownload",
+              "SampleViewControls/DownloadDropdown: Invalid option passed to handleDownload",
             details: { option },
           });
         }
@@ -106,7 +108,7 @@ const PipelineRunSampleViewControls = ({
     }
 
     logDownloadOption({
-      component: "PipelineRunSampleViewControls",
+      component: "SampleViewControls/DownloadDropdown",
       option,
       details: {
         sampleId: sample.id,
@@ -176,15 +178,21 @@ const PipelineRunSampleViewControls = ({
     return renderDownloadButtonDropdown();
   } else if (!isEmpty(reportMetadata) && editable && deletable) {
     return (
-      <ErrorButton
-        className={className}
+      <Button
+        // these classes are temporarily needed to override the default styling of the czifui button
+        // until the czifui error button is ready
+        className={cx(cs.ui, cs.button, cs["idseq-ui"], cs.error, className)}
+        sdsType="primary"
+        color="error"
+        sdsStyle="rounded"
         onClick={onDeleteSample}
-        text="Delete Sample"
-      />
+      >
+        Delete Sample
+      </Button>
     );
   } else {
     return null;
   }
 };
 
-export default PipelineRunSampleViewControls;
+export default DownloadDropdown;

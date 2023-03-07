@@ -62,6 +62,16 @@ export const workflowIsBeta = (workflow: keyof typeof WORKFLOWS) => {
   return ["AMR", "LONG_READ_MNGS"].includes(workflow);
 };
 
+export const getShorthandFromWorkflow = (workflow: WORKFLOW_VALUES) => {
+  const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
+  return WORKFLOWS[workflowKey].shorthand;
+};
+
+export const getLabelFromWorkflow = (workflow: WORKFLOW_VALUES) => {
+  const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflow];
+  return WORKFLOWS[workflowKey].label;
+};
+
 /**
  *
  * Return key of matched element in WORKFLOWS object
