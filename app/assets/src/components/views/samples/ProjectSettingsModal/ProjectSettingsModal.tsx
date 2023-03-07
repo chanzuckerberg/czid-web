@@ -51,7 +51,6 @@ const ProjectSettingsModal = ({
   return (
     <div>
       <ShareButton
-        className={cs.projectSettingsTrigger}
         onClick={withAnalytics(
           () => setModalOpen(true),
           "ProjectSettingsModal_open-link_click",
