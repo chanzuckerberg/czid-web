@@ -9,7 +9,7 @@ import {
 import { updateHeatmapName } from "~/api/visualization";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
-import { ViewHeader } from "~/components/layout";
+import { NarrowContainer, ViewHeader } from "~/components/layout";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import {
@@ -36,9 +36,9 @@ import {
 } from "~ui/controls/buttons";
 
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { DOWNLOAD_OPTIONS } from "./constants";
+import { DOWNLOAD_OPTIONS } from "../constants";
 
-import cs from "./samples_heatmap_view.scss";
+import cs from "./samples_heatmap_header.scss";
 
 interface SamplesHeatmapHeaderProps {
   sampleIds?: number[];
@@ -57,7 +57,7 @@ interface SamplesHeatmapHeaderProps {
   onFilterToggleClick: $TSFixMeFunction;
 }
 
-const SamplesHeatmapHeader = ({
+export const SamplesHeatmapHeader = ({
   sampleIds,
   loading,
   heatmapId,
@@ -219,13 +219,9 @@ const SamplesHeatmapHeader = ({
     );
   };
 
-  return (
-    <ViewHeader
-      className={!showNewFilterButton ? cs.newViewHeader : cs.viewHeader}
-    >
-      {showNewFilterButton
-        ? renderNewViewHeaderContent()
-        : renderOldViewHeaderContent()}
+  // TODO: move this down into the body of the returned JSX once the new filters are rolled out
+  const renderViewHeaderControls = () => {
+    return (
       <ViewHeader.Controls className={cs.controls}>
         {showNewPresetsButton && (
           <ColumnHeaderTooltip
@@ -300,8 +296,26 @@ const SamplesHeatmapHeader = ({
           })}
         />
       </ViewHeader.Controls>
-    </ViewHeader>
+    );
+  };
+
+  return (
+    <>
+      {showNewFilterButton && (
+        <ViewHeader className={cs.newViewHeader}>
+          {renderNewViewHeaderContent()}
+          {renderViewHeaderControls()}
+        </ViewHeader>
+      )}
+
+      {!showNewFilterButton && (
+        <NarrowContainer>
+          <ViewHeader className={cs.oldViewHeader}>
+            {renderOldViewHeaderContent()}
+            {renderViewHeaderControls()}
+          </ViewHeader>
+        </NarrowContainer>
+      )}
+    </>
   );
 };
-
-export default SamplesHeatmapHeader;

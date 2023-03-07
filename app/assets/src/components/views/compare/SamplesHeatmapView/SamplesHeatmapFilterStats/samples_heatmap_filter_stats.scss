@@ -1,0 +1,33 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.statsRowContainer {
+  margin: $sds-spaces-l;
+  // Offset from the viewport to line up with the plus and minus controls. This will
+  // need to be adjusted if the position of the controls changes.
+  position: absolute;
+  top: 144px; // TODO - smb - ensure this is the right value once everything is finalized. header = 135; margin = sds-large = 14
+  left: 148px;
+  text-anchor: start;
+}
+
+.statsRow {
+  @include font-body-xs;
+  color: $sds-color-gray-500;
+  height: $sds-spaces-xxl;
+  margin-left: $sds-spaces-xxs;
+  padding: 0 $sds-spaces-default;
+}
+
+.conditionList {
+  margin-left: $sds-spaces-xl;
+}
+
+.infoIcon {
+  margin-top: $sds-spaces-xxxs;
+  margin-left: $sds-spaces-xxxs;
+  margin-right: $sds-spaces-xxxs;
+  vertical-align: text-top;
+}
