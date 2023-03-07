@@ -1146,7 +1146,7 @@ class DiscoveryView extends React.Component<
 
   loadUserDataStats = async () => {
     const { domain } = this.props;
-    const { projectId } = this.state;
+    const { currentTab, projectId } = this.state;
     let { workflow } = this.state;
 
     this.setState({
@@ -1160,6 +1160,8 @@ class DiscoveryView extends React.Component<
 
     const countByWorkflow = sampleStats?.countByWorkflow;
     workflow = this.getWorkflowToDisplay(workflow, countByWorkflow);
+    const isWorkflowRunTab = workflowIsWorkflowRunEntity(workflow);
+    const workflowObjects = this.configForWorkflow[workflow].objectCollection;
 
     this.setState(
       {
@@ -1171,6 +1173,13 @@ class DiscoveryView extends React.Component<
           projectCount: sampleStats.projectCount,
           visualizationCount: visualizations.length || 0,
         },
+        ...(isWorkflowRunTab && {
+          selectableWorkflowRunIds: workflowObjects.getIds(),
+        }),
+        ...(!isWorkflowRunTab && {
+          selectableSampleIds: workflowObjects.getIds(),
+        }),
+        ...this.getOrderStateFieldsFor(currentTab, workflow),
       },
       () => {
         this.updateBrowsingHistory("replace");
