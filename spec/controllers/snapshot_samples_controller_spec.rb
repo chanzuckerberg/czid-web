@@ -290,7 +290,8 @@ RSpec.describe SnapshotSamplesController, type: :controller do
                                       "sfn_execution_arn", "subsample", "total_ercc_reads", "total_reads", "truncated",
                                       "unmapped_reads", "updated_at", "use_taxon_whitelist", "version", "wdl_version", "s3_output_prefix",
                                       "executed_at", "time_to_finalized", "time_to_results_finalized", "qc_percent", "compression_ratio",
-                                      "guppy_basecaller_setting", "technology", "fraction_subsampled_bases", "total_bases", "truncated_bases", "unmapped_bases",]
+                                      "guppy_basecaller_setting", "technology", "fraction_subsampled_bases", "total_bases", "truncated_bases",
+                                      "unmapped_bases", "deleted_at",]
         expected_pipeline_version_keys = ["alignment_db", "pipeline"]
         expect(json_response.keys).to contain_exactly("metadata", "additional_info")
         expect(json_response["additional_info"].keys).to match_array(expected_additional_info_keys)
