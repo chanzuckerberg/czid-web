@@ -10,7 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_230_307_195_609) do
+
+ActiveRecord::Schema.define(version: 2023_03_07_231234) do
+
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -532,6 +534,13 @@ ActiveRecord::Schema.define(version: 20_230_307_195_609) do
     t.index ["total_reads"], name: "index_pipeline_runs_on_total_reads"
   end
 
+  create_table "project_workflow_versions", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.integer "project_id", null: false, comment: "The project to which this workflow version applies"
+    t.string "workflow", null: false, comment: "The workflow to which this version applies"
+    t.string "version_prefix", null: false, comment: "The version prefix that will be used to run the workflow - can be major, patch, or minor"
+    t.index ["project_id", "workflow"], name: "index_project_workflow_versions_on_project_id_and_workflow", unique: true
+  end
+
   create_table "projects", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -840,6 +849,14 @@ ActiveRecord::Schema.define(version: 20_230_307_195_609) do
     t.datetime "deleted_at", comment: "When the user triggered deletion of the workflow run"
     t.index ["created_at"], name: "index_workflow_runs_on_created_at"
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
+  end
+
+  create_table "workflow_versions", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.string "workflow", null: false, comment: "Name of the workflow (e.g. short-read-mngs)"
+    t.string "version", null: false, comment: "The specific version of the workflow (e.g. 1.2.3)"
+    t.boolean "deprecated", comment: "A workflow version is deprecated if it's no longer receiving patches, but is runnable"
+    t.boolean "runnable", comment: "A workflow version is runnable if the infrastructure can run it"
+    t.index ["workflow", "version"], name: "index_workflow_versions_on_workflow_and_version", unique: true
   end
 
   add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
