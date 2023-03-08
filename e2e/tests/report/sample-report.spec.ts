@@ -60,10 +60,7 @@ async function getProject(basePage: BasePage, projectName: string) {
 }
 
 async function clickSampleDetails(page) {
-  await page
-    .locator(SAMPLE_NUMBER)
-    .nth(0)
-    .click();
+  await page.locator(SAMPLE_NUMBER).nth(0).click();
   // expand side bar
   await page.locator(SAMPLE_DETAILS).click();
 }
@@ -79,10 +76,7 @@ test.describe("Sample report test", () => {
     await (await basePage.findByText(METAGENOMICS)).click();
 
     // select sample from list
-    await page
-      .locator(SAMPLE_NUMBER)
-      .nth(0)
-      .click();
+    await page.locator(SAMPLE_NUMBER).nth(0).click();
     expect(page.locator(PIPELINE_LINK)).toBeVisible();
     const [newPage] = await Promise.all([
       context.waitForEvent("page"),
@@ -166,49 +160,28 @@ test.describe("Sample report test", () => {
     for (let i = 0; i < sample_info.length; i++) {
       ALL_SAMPLE_INFO.includes(sample_info[i]);
     }
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(0)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(0).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(1)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(1).click();
     const host_info = await page.locator(METADATA_LABELS).allInnerTexts();
     for (let i = 0; i < host_info.length; i++) {
       ALL_HOST_INFO.includes(host_info[i]);
     }
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(1)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(1).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(2)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(2).click();
     const infection_info = await page.locator(METADATA_LABELS).allInnerTexts();
     for (let i = 0; i < infection_info.length; i++) {
       All_INFECTION_INFO.includes(host_info[i]);
     }
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(2)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(2).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(3)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(3).click();
     const sequencing_info = await page.locator(METADATA_LABELS).allInnerTexts();
     for (let i = 0; i < sequencing_info.length; i++) {
       ALL_SEQUENCING_INFO.includes(host_info[i]);
     }
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(3)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(3).click();
   });
 
   test(`Should verify content displayed on the sample info metadata section`, async ({
@@ -222,14 +195,8 @@ test.describe("Sample report test", () => {
 
     // Metadata tab
     await page.locator(META).click();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(0)
-      .hover();
-    await page
-      .locator(EDIT_METADATA)
-      .nth(0)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(0).hover();
+    await page.locator(EDIT_METADATA).nth(0).click();
     await page.locator(METADATA_DROP_DOWN).click();
 
     // verify content on dropdown
@@ -265,30 +232,15 @@ test.describe("Sample report test", () => {
 
     // Metadata tab
     await page.locator(META).click();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(0)
-      .click();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(1)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(0).click();
+    await page.locator(SIDE_BAR_HEADER).nth(1).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(1)
-      .hover();
-    await page
-      .locator(EDIT_METADATA)
-      .nth(1)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(1).hover();
+    await page.locator(EDIT_METADATA).nth(1).click();
 
     // verify content in dropdown
     for (let i = 0; i < 5; i++) {
-      await page
-        .locator(METADATA_DROP_DOWN)
-        .nth(i)
-        .click();
+      await page.locator(METADATA_DROP_DOWN).nth(i).click();
       for (let j = 0; j < HOST_INFO_DROPDOWNS[i].length; j++) {
         (await page.locator(META_DATA_DROP_DOWN_).allInnerTexts()).map(
           value => {
@@ -296,10 +248,7 @@ test.describe("Sample report test", () => {
           },
         );
       }
-      await page
-        .locator(METADATA_DROP_DOWN)
-        .nth(i)
-        .click();
+      await page.locator(METADATA_DROP_DOWN).nth(i).click();
     }
 
     // verify input variable allowed
@@ -318,23 +267,11 @@ test.describe("Sample report test", () => {
 
     // Metadata tab
     await page.locator(META).click();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(0)
-      .click();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(2)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(0).click();
+    await page.locator(SIDE_BAR_HEADER).nth(2).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(2)
-      .hover();
-    await page
-      .locator(EDIT_METADATA)
-      .nth(2)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(2).hover();
+    await page.locator(EDIT_METADATA).nth(2).click();
 
     await expect(page.locator(NUMBER_INPUT)).toBeVisible();
     await page.locator(METADATA_DROP_DOWN).click();
@@ -355,31 +292,16 @@ test.describe("Sample report test", () => {
 
     // Metadata tab
     await page.locator(META).click();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(0)
-      .click();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(3)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(0).click();
+    await page.locator(SIDE_BAR_HEADER).nth(3).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(3)
-      .hover();
-    await page
-      .locator(EDIT_METADATA)
-      .nth(3)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(3).hover();
+    await page.locator(EDIT_METADATA).nth(3).click();
     await expect(page.locator(NUMBER_INPUT)).toBeVisible();
 
     // verify drop d own content
     for (let i = 0; i < 2; i++) {
-      await page
-        .locator(METADATA_DROP_DOWN)
-        .nth(i)
-        .click();
+      await page.locator(METADATA_DROP_DOWN).nth(i).click();
       for (let j = 0; j < SEQUENCING_INFO_DROP_DOWN[i].length; j++) {
         (await page.locator(META_DATA_DROP_DOWN_).allInnerTexts()).map(
           value => {
@@ -387,10 +309,7 @@ test.describe("Sample report test", () => {
           },
         );
       }
-      await page
-        .locator(METADATA_DROP_DOWN)
-        .nth(i)
-        .click();
+      await page.locator(METADATA_DROP_DOWN).nth(i).click();
     }
   });
 });

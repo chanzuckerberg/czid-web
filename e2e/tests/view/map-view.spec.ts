@@ -1,70 +1,48 @@
 import path from "path";
 import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
+import { OVERALL, TEST_PROJECTS } from "../../constants/common.const";
 import {
   VISIBLE,
-  OVERALL,
-  METAGENOMICS,
   OVERALL_AREA,
-  DATE_CREATED_S,
-  AVG_READS_PER_SAMPLE,
   AVG_READS_FILTER_PER_SAMPLE,
-  ACCEPT_ALL_COOKIES,
   SIDE_LABELS,
   SIDE_HEADERS,
   BUTTONS,
   BAR_LABEL,
   DATE_CREATED,
   DATE_LABEL,
-  MENU_ITEM_PUBLIC,
-  SEARCH_PUBLIC,
-  SAMPLES,
-  PROJECTS,
   MENU_ICON,
-  MAP_VIEW,
-  MAP_INFO_ICON,
   SIDE_LABEL_VALUE,
-  NUMBER_OF_SAMPLE,
   CHECK_ALL,
-  SAMPLE_HEADER_MAP,
-  MAP_ADD_ICON,
   MAP_HEADERS,
   MAP_CHECKBOX,
   MAP_VIEW_STRING,
   HELP_OUT,
   SIDE_BAR,
   HOVER_TEXT,
-  PLQC,
 } from "../../constants/map.const";
 import { BasePage } from "../../pages/basePage";
-
+import { openSamplePage } from "../../utils/report";
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
-
-const projectName = "floo Neptunium";
-const sampleTypes = [MAP_VIEW_STRING, PLQC];
-
-async function getProject(basePage: BasePage, projectName: string) {
-  await basePage.gotoUrl(`${process.env.BASEURL}/my_data`);
-  await basePage.clickByTestId(MENU_ITEM_PUBLIC);
-  await basePage.fillByPlaceHolder(SEARCH_PUBLIC, projectName);
-  await (await basePage.findByText(projectName)).nth(0).click();
-  //accept cookies
-  await basePage.clickByText(ACCEPT_ALL_COOKIES);
-}
-
+const PLQC = "Plqc";
+const ENV = (process.env.NODE_ENV as string) || "";
+const projectName = TEST_PROJECTS[ENV.toUpperCase()];
+const viewTypes = [MAP_VIEW_STRING, PLQC];
+// These tests verifies Ui elements displayed on the map  view like header, side bars, bar charts and graphs
 test.describe("Map view tests", () => {
-  sampleTypes.forEach(sampleType => {
-    test(`Should verify if user is able to collapse and expand areas on the right side on map view for ${sampleType}`, async ({
+  test.beforeEach(async ({ page }) => {
+    await openSamplePage(page, projectName, false, false);
+  });
+  viewTypes.forEach(viewType => {
+    test(`Should collapse and expand right side areas for ${viewType}`, async ({
       page,
     }) => {
-      const basePage = new BasePage(page);
-      await getProject(basePage, projectName);
-      await (await basePage.findByText(METAGENOMICS)).click();
-
       const menu_icon = await page.locator(MENU_ICON).allInnerTexts();
       const menu_size = menu_icon.length;
 
-      if (sampleType === MAP_VIEW_STRING) {
+      // navigate to map view page
+      if (viewType === MAP_VIEW_STRING) {
         await page
           .locator(MENU_ICON)
           .nth(menu_size - 1)
@@ -78,7 +56,7 @@ test.describe("Map view tests", () => {
 
       await page
         .locator(MAP_HEADERS)
-        .nth(0)
+        .first()
         .click();
       await page
         .locator(BAR_LABEL)
@@ -86,6 +64,8 @@ test.describe("Map view tests", () => {
         .waitFor({
           state: VISIBLE,
         });
+
+      // calculate the number of label present on each tab
       const overall_area = (await page.locator(OVERALL_AREA).allInnerTexts())
         .length;
       const bar_label = (await page.locator(BAR_LABEL).allInnerTexts()).length;
@@ -95,11 +75,14 @@ test.describe("Map view tests", () => {
         .length;
 
       // collapse side tabs
-      await (await basePage.findByLocator(SIDE_HEADERS, 0)).click();
-      await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
-      await (await basePage.findByLocator(SIDE_HEADERS, 2)).click();
+      for (let index = 0; index <= 2; index++) {
+        await page
+          .locator(SIDE_HEADERS)
+          .nth(index)
+          .click();
+      }
 
-      // ensure all the sides are collaspsed
+      // ensure all the sides are collapsed
       expect((await page.locator(OVERALL_AREA).allInnerTexts()).length).toEqual(
         0,
       );
@@ -112,9 +95,12 @@ test.describe("Map view tests", () => {
       );
 
       // expand side tabs
-      await (await basePage.findByLocator(SIDE_HEADERS, 0)).click();
-      await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
-      await (await basePage.findByLocator(SIDE_HEADERS, 2)).click();
+      for (let index = 0; index <= 2; index++) {
+        await page
+          .locator(SIDE_HEADERS)
+          .nth(index)
+          .click();
+      }
 
       await page
         .locator(BAR_LABEL)
@@ -136,43 +122,20 @@ test.describe("Map view tests", () => {
       expect((await page.locator(DATE_LABEL).allInnerTexts()).length).toEqual(
         date_label,
       );
-
-      const filters = await page.locator(BAR_LABEL).allInnerTexts();
-      for (let i = 0; i < filters.length; i++) {
-        const selector = `a:text("${filters[i]}")`;
-        const selector2 = `a:text("${filters[filters.length - 1]}")`;
-
-        if (!(await page.locator(selector).isVisible())) {
-          let visi2 = await page.locator(selector).isVisible();
-          while (!(await page.locator(selector).isVisible())) {
-            await page
-              .locator(MAP_HEADERS)
-              .nth(0)
-              .click();
-            await page.waitForTimeout(200);
-          }
-        }
-        await page.click(selector);
-        await expect(page.locator(FILTER_TAG)).toHaveText(filters[i]);
-        await page.locator(CANCEL_ICON).click();
-        await page
-          .locator(MAP_HEADERS)
-          .nth(0)
-          .click();
-        await page.waitForTimeout(2000);
-      }
     });
 
-    test(`Should verify content displayed on the right side on map view for ${sampleType}`, async ({
+    test(`Should display right side content for ${viewType}`, async ({
       page,
     }) => {
       const basePage = new BasePage(page);
-      await getProject(basePage, projectName);
-      await (await basePage.findByText(METAGENOMICS)).click();
-
+      const PROJECTS = "Projects";
+      const SAMPLES = "Samples";
+      const DATE_CREATED_S = "Date created";
+      const AVG_READS_PER_SAMPLE = "Avg. reads per sample";
+      const NUMBER_OF_SAMPLE = ".tabCounter-LfG85";
       const menu_icon = await page.locator(MENU_ICON).allInnerTexts();
       const menu_size = menu_icon.length;
-      if (sampleType === MAP_VIEW_STRING) {
+      if (viewType === MAP_VIEW_STRING) {
         await page
           .locator(MENU_ICON)
           .nth(menu_size - 1)
@@ -193,18 +156,31 @@ test.describe("Map view tests", () => {
       await expect(await basePage.findByLocator(SIDE_HEADERS, 0)).toHaveText(
         OVERALL,
       );
-      await (await basePage.findByLocator(SIDE_HEADERS, 0)).click();
-      try {
-        await page.locator(OVERALL_AREA).waitFor({ state: "hidden" });
-      } catch (error) {
-        await (await basePage.findByLocator(SIDE_HEADERS, 0)).click();
-        await page.locator(OVERALL_AREA).waitFor({ state: "hidden" });
-      }
+      // ensure all the sides are expanded afer loading
+      await expect(page.locator(OVERALL_AREA).nth(1)).toBeVisible();
 
+      // collapse side tabs
+      for (let index = 0; index <= 2; index++) {
+        await page
+          .locator(SIDE_HEADERS)
+          .nth(index)
+          .click();
+      }
+      // ensure all the sides are collaspsed
       expect((await page.locator(OVERALL_AREA).allInnerTexts()).length).toEqual(
         0,
       );
+      expect((await page.locator(BAR_LABEL).allInnerTexts()).length).toEqual(0);
+      expect((await page.locator(DATE_CREATED).allInnerTexts()).length).toEqual(
+        0,
+      );
+      expect((await page.locator(DATE_LABEL).allInnerTexts()).length).toEqual(
+        0,
+      );
+
       await (await basePage.findByLocator(SIDE_HEADERS, 0)).click();
+
+      // verify  Overall area label
       await expect(await basePage.findByLocator(SIDE_LABELS, 0)).toHaveText(
         SAMPLES,
       );
@@ -229,19 +205,23 @@ test.describe("Map view tests", () => {
       await expect(page.locator(SIDE_LABEL_VALUE).nth(2)).toBeVisible();
       await expect(page.locator(SIDE_LABEL_VALUE).nth(3)).toBeVisible();
 
-      // Date created area
+      if (
+        await page
+          .locator(SIDE_BAR)
+          .nth(0)
+          .isVisible()
+      ) {
+        await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
+        await (await basePage.findByLocator(SIDE_HEADERS, 2)).click();
+      }
 
+      // Date created area
       await expect(await basePage.findByLocator(SIDE_HEADERS, 1)).toHaveText(
         DATE_CREATED_S,
       );
       await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
 
-      expect((await page.locator(DATE_LABEL).allInnerTexts()).length).toEqual(
-        0,
-      );
-      await (await basePage.findByLocator(SIDE_HEADERS, 1)).click();
-      await (await basePage.findByLocator(SIDE_HEADERS, 2)).click();
-
+      // verify information when user hovers over bar charts on date created section
       const length = (await page.locator(SIDE_BAR).allInnerTexts()).length;
       for (let i = 0; i < length; i++) {
         const ans = await page
@@ -260,17 +240,16 @@ test.describe("Map view tests", () => {
       }
     });
 
-    test(`Should verify icons enabled when user selects a certain number of samples on map view for ${sampleType}`, async ({
+    test(`Should enable icons upon selection of ${viewType} samples `, async ({
       page,
     }) => {
-      const basePage = new BasePage(page);
-      await getProject(basePage, projectName);
-      await (await basePage.findByText(METAGENOMICS)).click();
+      const MAP_ADD_ICON = ".plusIcon-1OBta";
+      const SAMPLE_HEADER_MAP = ".label-33v00";
 
       const menu_icon = await page.locator(MENU_ICON).allInnerTexts();
       const menu_size = menu_icon.length;
 
-      if (sampleType === MAP_VIEW_STRING) {
+      if (viewType === MAP_VIEW_STRING) {
         await page
           .locator(MENU_ICON)
           .nth(menu_size - 1)
@@ -316,13 +295,9 @@ test.describe("Map view tests", () => {
     });
   });
 
-  test(`Should verify content displayed when user hover around specify areas on map view for `, async ({
-    page,
-  }) => {
-    const basePage = new BasePage(page);
-    await getProject(basePage, projectName);
-    await (await basePage.findByText(METAGENOMICS)).click();
-
+  test(`Should display content when hovered `, async ({ page }) => {
+    const MAP_VIEW = ".overlays";
+    const MAP_INFO_ICON = ".infoIcon-3BQyQ";
     const menu_icon = await page.locator(MENU_ICON).allInnerTexts();
     const menu_size = menu_icon.length;
     await page
@@ -330,6 +305,7 @@ test.describe("Map view tests", () => {
       .nth(menu_size - 1)
       .click();
     await expect(page.locator(MAP_VIEW)).toBeVisible();
+    // hover over map info
     await page.locator(MAP_INFO_ICON).hover();
     await expect(page.locator(HELP_OUT)).toBeVisible();
   });

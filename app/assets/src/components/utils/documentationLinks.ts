@@ -56,3 +56,38 @@ export const GUPPY_BASECALLER_DOC_LINK =
   "https://docs.google.com/document/d/1ZsZ8ythCMrER7eZKbjZG93O6bNB37pJpsX2lf1sAs_I/edit#bookmark=id.w6xiktgro9k";
 export const CONCAT_FILES_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360051806072-How-to-concatenate-files";
+
+export const TOTAL_READ_HELP_LINK = {
+  url:
+    "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
+  header: "Do my samples have enough total reads?",
+  pop_up:
+    "Total Reads:The total number of single-end reads uploaded. Each end of the paired-end reads count as one read. Learn more.",
+};
+export const QUALITY_READ_HELP_LINK = {
+  url:
+    "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Passed-QC",
+  header: "Do my samples have enough quality reads?",
+  pop_up:
+    "Passed QC:The percentage of reads that came out of PriceSeq, step (3) of the host filtration and QC steps, compared to what went into Trimmomatic, step (2). Learn more.",
+};
+export const DUPLICATE_READ_HELP_LINK = {
+  url:
+    "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
+  header: "Are there too many duplicate reads in my library?",
+  pop_up:
+    "DCR:Duplicate Compression Ratio is the ratio of the total number of sequences present prior to running czid-dedup (duplicate identification) vs the number of unique sequences. Learn more.",
+};
+export const INSERT_LENGTH_HELP_LINK = {
+  url:
+    "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Mean-Insert-Size",
+  header: "Do my samples have sufficient insert lengths?",
+  pop_up:
+    "Mean Insert Size:The average length of the nucleotide sequence that is inserted between the adapters. Learn more.",
+};
+
+export const READ_URL_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Reads-Lost";
+
+export const READS_POPUP_HELP =
+  "Reads Lost:Reads filtered during each step of the pipeline. The full length of the bar represents the Total Reads. Passed Filters represent the reads that passed quality control and filtering steps. Learn more.";

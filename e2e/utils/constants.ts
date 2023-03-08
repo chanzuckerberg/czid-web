@@ -190,29 +190,25 @@ export const COLUMNS = ".label-1R-kb";
 
 export const data = {
   Total_read: {
-    url:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
+    url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
     header: "Do my samples have enough total reads?",
     pop_up:
       "Total Reads:The total number of single-end reads uploaded. Each end of the paired-end reads count as one read. Learn more.",
   },
   Quality_read: {
-    url:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Passed-QC",
+    url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Passed-QC",
     header: "Do my samples have enough quality reads?",
     pop_up:
       "Passed QC:The percentage of reads that came out of PriceSeq, step (3) of the host filtration and QC steps, compared to what went in to Trimmomatic, step (2). Learn more.",
   },
   Duplicate_read: {
-    url:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
+    url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
     header: "Are there too many duplicate reads in my library?",
     pop_up:
       "DCR:Duplicate Compression Ratio is the ratio of the total number of sequences present prior to running czid-dedup (duplicate identification) vs the number of unique sequences. Learn more.",
   },
   Insert_length: {
-    url:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Mean-Insert-Size",
+    url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Mean-Insert-Size",
     header: "Do my samples have sufficient insert lengths?",
     pop_up:
       "Mean Insert Size:The average length of the nucleotide sequence that is inserted between the adapters. Learn more.",

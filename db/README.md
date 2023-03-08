@@ -1,4 +1,4 @@
-# Dev Guidelines for working with the database
+ # Dev Guidelines for working with the database
 
 ## Guidelines for new tables and columns
 
@@ -9,8 +9,8 @@
 ## Database Schema Migration Safety
 
 - Writing safe, zero-downtime DB migrations requires special attention, particularly on large tables such as `taxon_counts` or frequently accessed fields. During deployment, there can be a  old and new versions of the code running against unmigrated or migrated versions of the DB, or a migration could lock columns/tables that are needed to fulfill requests.
-- This [CZI blog post describes the problem](https://medium.com/czi-technology/db-migrations-and-push-safety-in-rails-508bc877dd7e), and the team as previously conducted a [post-mortem on DB migration issues](https://czi.quip.com/SZigAbUTTNGa)
-- The [`strong_migrations` gem documentation describes potentially dangerous operations and provides safer recommmendations](https://github.com/ankane/strong_migrations#checks).  This gem will automatically raise an error if it detects a dangerous migration when they are run.
+- This [CZI blog post describes the problem](https://medium.com/czi-technology/db-migrations-and-push-safety-in-rails-508bc877dd7e), and the team as previously conducted a [post-mortem on 
+igrations` gem documentation describes potentially dangerous operations and provides safer recommmendations](https://github.com/ankane/strong_migrations#checks).  This gem will automatically raise an error if it detects a dangerous migration when they are run.
   - Sometimes it is necessary to perform a dangerous action in a migration.  As [documented in the strong migrations documentation, migrations steps can be marked as safe by wrapping them in a `safety_assured` block](https://github.com/ankane/strong_migrations#assuring-safety)
 
     ```ruby

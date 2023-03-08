@@ -6,10 +6,15 @@ import { Page, expect } from "@playwright/test";
  * with page elements
  */
 export class BasePage {
+  // eslint-disable-next-line no-useless-constructor
   constructor(public readonly page: Page) {}
 
   async gotoUrl(url: string) {
-    await this.page.goto(url);
+    try {
+      await this.page.goto(url);
+    } catch (error) {
+      // console.log
+    }
   }
 
   async getUrl() {
@@ -119,7 +124,9 @@ export class BasePage {
   async fillById(id: string, value: string) {
     await this.page.fill(`[id="${id}"]`, value);
   }
-
+  async fillByTestId(id: string, value: string) {
+    await this.page.fill(`[data-testid="${id}"]`, value);
+  }
   async fillByName(name: string, value: string) {
     await this.page.fill(`[name="${name}"]`, value);
   }

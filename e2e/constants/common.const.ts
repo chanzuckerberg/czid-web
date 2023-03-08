@@ -25,7 +25,7 @@ export const METADATA_FILTER = ".filterLabel-2d1-Y";
 export const SAMPLE_TYPE_SELECTOR = ".css-oihkq7";
 export const BUTTONS = ".action-2Pccm button";
 export const VIEW_ICON = ".icon-n-1j6";
-export const PLUS_ICON = "plusIcon-1OBta";
+export const PLUS_ICON = ".plusIcon-1OBta";
 export const SIDEBAR_HEADER = "title-3Oy38";
 
 export const SIDE_HEADERS = ".title-JNudy";
@@ -103,6 +103,6 @@ export const SEARCH = "Search";
 
 export const TEST_PROJECTS: Record<string, string> = {
   DEV: "omar test",
-  STAGING: "floo Plutonium",
-  PROD: "floo Plutonium",
+  STAGING: "floo Neptunium",
+  PROD: "floo Neptunium",
 };

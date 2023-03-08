@@ -71,10 +71,7 @@ test.describe("Metagenomics sample upload tests", () => {
 
     // click continue button
     const continueButtonIndex = 1;
-    await page
-      .locator(getByText(CONTINUE))
-      .nth(continueButtonIndex)
-      .click();
+    await page.locator(getByText(CONTINUE)).nth(continueButtonIndex).click();
 
     // submit upload
     await submitUpload(page);

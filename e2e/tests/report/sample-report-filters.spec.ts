@@ -53,10 +53,7 @@ async function getProject(basePage: BasePage, projectName: string) {
 }
 
 async function navigateToSampleReport(page) {
-  await page
-    .locator(SAMPLE_NUMBER)
-    .nth(0)
-    .click();
+  await page.locator(SAMPLE_NUMBER).nth(0).click();
 }
 
 test.describe("Sample report filter test", () => {
@@ -70,10 +67,7 @@ test.describe("Sample report filter test", () => {
     await expect(page.locator(COLUMNS_LABEL).nth(1)).toBeVisible();
     const n = await page.locator(COLUMNS_LABEL).allInnerTexts();
     for (let i = 1; i < n.length; i++) {
-      await page
-        .locator(COLUMNS_LABEL)
-        .nth(i)
-        .hover();
+      await page.locator(COLUMNS_LABEL).nth(i).hover();
       await expect(page.locator(TOTAL_READ_POPOUP_CONTENT)).toHaveText(
         COLUMN_HEADER_PROP[n[i]]["description"],
       );
@@ -110,10 +104,7 @@ test.describe("Sample report filter test", () => {
 
     await navigateToSampleReport(page);
 
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(CATEGORIES_FILTER)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(CATEGORIES_FILTER).click();
     const drop_down = [
       ARCHAEA_FILTER,
       BACTERIA_FILTER,
@@ -146,44 +137,23 @@ test.describe("Sample report filter test", () => {
     await (await basePage.findByText(METAGENOMICS)).click();
     await navigateToSampleReport(page);
 
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(THRESHOLD_FILTER)
-      .click();
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(SCORE)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(THRESHOLD_FILTER).click();
+    await page.locator(FILTER_HEADERS).locator(SCORE).click();
 
     // Verify drop down contains required elements
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
       THRESHOLD_FILTERS.includes(drop_down[i]);
     }
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(THRESHOLD_FILTER)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(THRESHOLD_FILTER).click();
 
     // Verify Threshold filter are applied
     for (let i = 0; i < drop_down.length; i++) {
-      await page
-        .locator(FILTER_HEADERS)
-        .locator(THRESHOLD_FILTER)
-        .click();
-      await page
-        .locator(FILTER_HEADERS)
-        .locator(SCORE)
-        .click();
-      await page
-        .locator(FILTERS_DROPDOWN)
-        .nth(i)
-        .click();
+      await page.locator(FILTER_HEADERS).locator(THRESHOLD_FILTER).click();
+      await page.locator(FILTER_HEADERS).locator(SCORE).click();
+      await page.locator(FILTERS_DROPDOWN).nth(i).click();
       await page.locator(NUMBER_INPUT).fill("10");
-      await page
-        .locator(APPLY_BUTTON)
-        .locator(APPLY)
-        .click();
+      await page.locator(APPLY_BUTTON).locator(APPLY).click();
       await expect(page.locator(FILTER_TAG)).toHaveText(
         drop_down[i] + " >= 10",
       );
@@ -198,10 +168,7 @@ test.describe("Sample report filter test", () => {
 
     await navigateToSampleReport(page);
 
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(READ_SPECIFICITY)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(READ_SPECIFICITY).click();
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
       READ_SPECIFICITY_FILTERS.includes(drop_down[i]);
@@ -214,34 +181,19 @@ test.describe("Sample report filter test", () => {
     await (await basePage.findByText(METAGENOMICS)).click();
     await navigateToSampleReport(page);
 
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(ANNOTATION_TEXT)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(ANNOTATION_TEXT).click();
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
       ANNOTATION_FILTERS.includes(drop_down[i]);
     }
 
-    await page
-      .locator(FILTER_HEADERS)
-      .locator(ANNOTATION_TEXT)
-      .click();
+    await page.locator(FILTER_HEADERS).locator(ANNOTATION_TEXT).click();
     // Verify Threshold filter are applied
     for (let i = 0; i < drop_down.length; i++) {
-      await page
-        .locator(FILTER_HEADERS)
-        .locator(ANNOTATION_TEXT)
-        .click();
-      await page
-        .locator(FILTERS_DROPDOWN)
-        .nth(i)
-        .click();
+      await page.locator(FILTER_HEADERS).locator(ANNOTATION_TEXT).click();
+      await page.locator(FILTERS_DROPDOWN).nth(i).click();
       await expect(page.locator(FILTER_TAG)).toHaveText(drop_down[i]);
-      await page
-        .locator(COLUMNS_LABEL)
-        .nth(0)
-        .click();
+      await page.locator(COLUMNS_LABEL).nth(0).click();
       await page.locator(CANCEL_ICON).click();
     }
   });

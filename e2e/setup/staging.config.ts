@@ -35,7 +35,7 @@ const config: PlaywrightTestConfig = {
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
     storageState: "/tmp/state.json",
-    trace: "on",
+    trace: "on-first-retry",
     viewport: { width: 800, height: 7200 },
   },
 };

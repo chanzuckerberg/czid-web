@@ -58,7 +58,7 @@ export function generateProjectData(projectName: string): Project {
 export async function goToProjectSamples(
   page: Page,
   projectName: string,
-  workflowIndex: number,
+  index: number,
   myData = false,
 ) {
   const dataType = myData ? "my_data" : "public";
@@ -67,14 +67,6 @@ export async function goToProjectSamples(
   await page.waitForTimeout(2000);
   await page.locator(getByPlaceholder(placeholderText)).fill(projectName);
   await page.keyboard.press("Enter");
-  await page
-    .getByText(projectName)
-    .nth(0)
-    .click();
-
-  // select workflow type
-  await page
-    .locator(".tabLabel-3vqpD")
-    .nth(workflowIndex)
-    .click();
+  await page.getByText(projectName).nth(0).click();
+  await page.locator(".tabLabel-3vqpD").nth(index).click();
 }

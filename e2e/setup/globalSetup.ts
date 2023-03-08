@@ -22,7 +22,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
   const username = process.env.CZID_USERNAME;
   const password = process.env.CZID_PASSWORD;
 
-  if (process.env.NODE_ENV === "ci" || !checkCookies()) {
+  if (!checkCookies()) {
     const browser = await chromium.launch();
     const page = await browser.newPage();
     await Promise.all([

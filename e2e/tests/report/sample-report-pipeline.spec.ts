@@ -43,10 +43,7 @@ async function getProject(basePage: BasePage, projectName: string) {
 }
 
 async function clickSampleDetails(page) {
-  await page
-    .locator(SAMPLE_NUMBER)
-    .nth(0)
-    .click();
+  await page.locator(SAMPLE_NUMBER).nth(0).click();
   // expand side bar
   await page.locator(SAMPLE_DETAILS).click();
 }
@@ -80,15 +77,9 @@ test.describe("Sample report pipeline test", () => {
     for (let i = 0; i < pipeline_info.length; i++) {
       expect(ALL_PIPELINE_INFO.includes(pipeline_info[i])).toBeTruthy();
     }
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(0)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(0).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(1)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(1).click();
     const reads_remaining = await page
       .locator(READS_REMAINING_LABELS)
       .allInnerTexts();
@@ -96,25 +87,13 @@ test.describe("Sample report pipeline test", () => {
     for (let i = 0; i < reads_remaining.length; i++) {
       expect(ALL_READS_REMAINING.includes(reads_remaining[i])).toBeTruthy();
     }
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(1)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(1).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(2)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(2).click();
     expect(page.locator(NO_DATA)).toBeVisible();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(2)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(2).click();
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(3)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(3).click();
     const downloads = await page.locator(DOWNLOADS_LABELS).allInnerTexts();
 
     for (let i = 0; i < downloads.length; i++) {
@@ -126,10 +105,7 @@ test.describe("Sample report pipeline test", () => {
       expect(link.includes(DOWNLOAD_HREF[i])).toBeTruthy();
     }
 
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(3)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(3).click();
   });
 
   test(`Should verify values of the labels displayed on side bar pipeline section of sample report page`, async ({
@@ -149,14 +125,8 @@ test.describe("Sample report pipeline test", () => {
       ILLUMINA,
     );
     await expect(page.locator(PIPELINE_LABELS_VALUE).nth(3)).toHaveText(HUMAN);
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(0)
-      .click();
-    await page
-      .locator(SIDE_BAR_HEADER)
-      .nth(1)
-      .click();
+    await page.locator(SIDE_BAR_HEADER).nth(0).click();
+    await page.locator(SIDE_BAR_HEADER).nth(1).click();
     await expect(page.locator(PIPELINE_READS_LABEL).nth(1)).toBeVisible();
     const reads_remaining = await page
       .locator(PIPELINE_READS_LABEL)

@@ -31,10 +31,7 @@ async function getProject(basePage: BasePage, projectName: string) {
 }
 
 async function navigeteToSampleReport(page) {
-  await page
-    .locator(SAMPLE_NUMBER)
-    .nth(0)
-    .click();
+  await page.locator(SAMPLE_NUMBER).nth(0).click();
 }
 
 test.describe("Sample report view test", () => {
@@ -48,34 +45,22 @@ test.describe("Sample report view test", () => {
     await navigeteToSampleReport(page);
 
     // navigate to table view
-    await page
-      .locator(VIEWS)
-      .nth(0)
-      .click();
+    await page.locator(VIEWS).nth(0).click();
     await expect(page.locator(FILTER_RESULT).nth(0)).toBeVisible();
-    await page
-      .locator(VIEWS)
-      .nth(1)
-      .click();
+    await page.locator(VIEWS).nth(1).click();
     await expect(page.locator(TREE_NODES).nth(0)).toBeVisible();
     await page.locator(KNOWN_PATHOGEN).hover();
     await expect(page.locator(PATHOGEN_POPUP)).toHaveText(PATHOGEN_POPUP_TEXT);
 
     const [newPage] = await Promise.all([
       context.waitForEvent("page"),
-      await page
-        .locator(PATHOGEN_LINk)
-        .locator(FULL_LIST)
-        .click(),
+      await page.locator(PATHOGEN_LINk).locator(FULL_LIST).click(),
     ]);
     await newPage.waitForLoadState();
     newPage.url().includes(PATHOGEN_LIST_URL);
     await expect(newPage.locator(TREE_VIEW_TITLE)).toBeVisible();
     await newPage.close();
-    await page
-      .locator(TREE_NODES)
-      .nth(0)
-      .click();
+    await page.locator(TREE_NODES).nth(0).click();
     await expect(page.locator(TREE_NODES).nth(1)).not.toBeVisible();
   });
 });

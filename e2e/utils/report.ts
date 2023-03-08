@@ -4,7 +4,6 @@ import {
   METAGENOMICS,
   SEARCH_PUBLIC,
 } from "../constants/common.const";
-import { SIDE_BAR_HEADER } from "../constants/map.const";
 import {
   SAMPLE_INFO,
   HOST_INFO,
@@ -62,30 +61,26 @@ export async function openSamplePage(
   page: Page,
   projectName: string,
   openDetails = true,
+  selectSample = true,
 ) {
   await page.goto(`${process.env.BASEURL}/my_data`);
-  await page.locator(getByTestID(MENU_ITEM_PUBLIC)).click();
+  await page.getByTestId(MENU_ITEM_PUBLIC).click();
   await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
-  if (await page.locator(getByClassName("title")).isVisible()) {
-    await page.locator(getByClassName("title")).click();
+  await page.locator("text='Accept All Cookies'").click();
+  if (await page.locator(".title").isVisible()) {
+    await page.locator(".title").click();
   } else {
     await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
-    await page.locator(getByClassName("title")).click();
+    await page.locator(".title").click();
   }
   // select metagenonomics samples
-  await page.locator(getByTestID(METAGENOMICS.toLowerCase())).click();
+  await page.getByTestId(METAGENOMICS.toLowerCase()).click();
 
-  // open sample details page
-  await page
-    .locator(getByTestID("sample-name"))
-    .nth(0)
-    .click();
+  // select sample
+  if (selectSample) await page.getByTestId("sample-name").first().click();
 
   // expand side bar
-  if (openDetails) await page.locator(getByText("Sample Details")).click();
-
-  // accept cookies
-  // await page.locator(getByText(ACCEPT_ALL_COOKIES)).click();
+  if (openDetails) await page.getByText("Sample Details").click();
 }
 
 export async function verifySectionTitles(
@@ -128,16 +123,10 @@ export async function verifySectionDetails(
     for (let i = 0; i < data.length; i++) {
       const item = getDataByIndex(data, i);
       expect(
-        await page
-          .locator(getByText(item.text))
-          .first()
-          .textContent(),
+        await page.locator(getByText(item.text)).first().textContent(),
       ).toBe(item.text);
       expect(
-        await page
-          .locator(".downloadLink-14o8v")
-          .nth(i)
-          .getAttribute("href"),
+        await page.locator(".downloadLink-14o8v").nth(i).getAttribute("href"),
       ).toBe(item.href.replace("SAMPLEID", sampleId.toString()));
     }
   }
@@ -145,12 +134,9 @@ export async function verifySectionDetails(
   for (let i = 0; i < data.length; i++) {
     const item = getDataByIndex(data, i);
     if (attributes.includes("name")) {
-      expect(
-        await page
-          .locator(".label-9CR8O")
-          .nth(i)
-          .textContent(),
-      ).toBe(item.name);
+      expect(await page.locator(".label-9CR8O").nth(i).textContent()).toBe(
+        item.name,
+      );
       // todo: validate values but this only be done after testids added
     }
     if (attributes.includes("step")) {
@@ -164,18 +150,12 @@ export async function verifySectionDetails(
 
       // verify reads remaining
       expect(
-        await row
-          .locator(".metadataValue-2cDlV")
-          .first()
-          .textContent(),
+        await row.locator(".metadataValue-2cDlV").first().textContent(),
       ).toBe(item.reads_remaining);
 
       // verify reads remaining percentage
       expect(
-        await row
-          .locator(".metadataValue-2cDlV")
-          .nth(1)
-          .textContent(),
+        await row.locator(".metadataValue-2cDlV").nth(1).textContent(),
       ).toBe(item.reads_remaining_percent);
     }
   }
@@ -183,6 +163,7 @@ export async function verifySectionDetails(
 // selects a section of tab or just the tab in case there is no section, for example Notes
 export async function getTabSection(page: Page, section?: string) {
   let index = 0;
+  const SIDE_BAR_HEADER = ".title-3Oy38";
   if (section !== undefined) {
     index = sectionIndices[section];
   }
