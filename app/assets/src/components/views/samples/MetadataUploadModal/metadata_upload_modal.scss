@@ -24,22 +24,17 @@
 
 .uploadInstructions {
   .backButton {
-    color: $sds-color-primary-400;
-    letter-spacing: 0.4px;
-    font-size: 13px;
-    cursor: pointer;
+    padding-left: 0;
+    margin-left: -$sds-spaces-m;
   }
 
   .title {
-    font-size: 22px;
-    letter-spacing: 0.4px;
-    line-height: 30px;
+    font: $sds-font-header-xl-600-font;
   }
 
   .sectionTitle {
-    margin-top: 40px;
-    font-size: 14px;
-    font-weight: 600;
+    margin-top: $sds-spaces-xl;
+    font: $sds-font-header-s-600-font;
   }
 
   .section {

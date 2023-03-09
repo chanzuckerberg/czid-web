@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { Button, Icon } from "czifui";
 import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import List from "~/components/ui/List";
@@ -19,7 +20,18 @@ const UploadInstructions = ({
     <div className={cx(cs.uploadInstructions, standalone && cs.standalone)}>
       <div className={cs.header}>
         {!standalone && (
-          <div className={cs.backButton} onClick={onClose}>{`< Back`}</div>
+          <Button
+            className={cs.backButton}
+            sdsStyle="minimal"
+            sdsType="primary"
+            isAllCaps={false}
+            startIcon={
+              <Icon sdsIcon="chevronLeft" sdsSize="xs" sdsType="static" />
+            }
+            onClick={onClose}
+          >
+            Back
+          </Button>
         )}
         <div className={cs.title}>How to Upload a Metadata CSV</div>
       </div>
