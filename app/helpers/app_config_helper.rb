@@ -78,8 +78,8 @@ module AppConfigHelper
 
   # TODO: Be able to mark workflows as not runnable/deprecated via the Admin Settings page.
   def create_workflow_version(workflow_name, workflow_version)
-    unless WorkflowVersion.find_by(name: workflow_name, version: workflow_version)
-      WorkflowVersion.create(name: workflow_name, version: workflow_version, deprecated: false, runnable: true)
+    unless WorkflowVersion.find_by(workflow: workflow_name, version: workflow_version)
+      WorkflowVersion.create(workflow: workflow_name, version: workflow_version, deprecated: false, runnable: true)
     end
   end
 end

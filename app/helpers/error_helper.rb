@@ -1,4 +1,18 @@
 module ErrorHelper
+  module PipelineVersionControlErrors
+    def self.workflow_version_not_found(workflow, version_prefix)
+      "WorkflowVersion for workflow=#{workflow} and version_prefix=#{version_prefix} does not exist"
+    end
+
+    def self.workflow_version_deprecated(workflow, version)
+      "WorkflowVersion for workflow=#{workflow} and version=#{version} is deprecated"
+    end
+
+    def self.workflow_version_not_runnable(workflow, version)
+      "WorkflowVersion for workflow=#{workflow} and version=#{version} is not runnable"
+    end
+  end
+
   module MetadataValidationErrors
     MISSING_COLUMN_HEADER = "Missing name for metadata field".freeze
     MISSING_SAMPLE_NAME_COLUMN = "\"Sample Name\" column is required.".freeze
