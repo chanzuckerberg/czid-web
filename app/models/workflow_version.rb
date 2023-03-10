@@ -1,0 +1,2 @@
+class WorkflowVersion < ApplicationRecord
+end

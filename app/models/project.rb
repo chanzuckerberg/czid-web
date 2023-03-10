@@ -19,6 +19,7 @@ class Project < ApplicationRecord
   has_one :background # rubocop:disable Rails/HasManyOrHasOneDependent
   has_and_belongs_to_many :metadata_fields
   belongs_to :creator, optional: true, class_name: 'User'
+  has_many :project_workflow_versions, dependent: :destroy
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   # NOTE: not sure why these columns were not created as booleans

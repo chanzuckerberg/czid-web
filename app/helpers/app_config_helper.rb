@@ -72,6 +72,14 @@ module AppConfigHelper
   def set_workflow_version(workflow_name, workflow_version)
     key = format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: workflow_name)
     Rails.logger.info("WorkflowUpgradeEvent: Setting #{key} to #{workflow_version}")
+    create_workflow_version(workflow_name, workflow_version)
     return set_app_config(key, workflow_version)
+  end
+
+  # TODO: Be able to mark workflows as not runnable/deprecated via the Admin Settings page.
+  def create_workflow_version(workflow_name, workflow_version)
+    unless WorkflowVersion.find_by(name: workflow_name, version: workflow_version)
+      WorkflowVersion.create(name: workflow_name, version: workflow_version, deprecated: false, runnable: true)
+    end
   end
 end
