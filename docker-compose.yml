@@ -77,7 +77,6 @@ services:
       context: ./docker/open_distro
       dockerfile: Dockerfile
     image: opendistro-for-elasticsearch-no-security
-    container_name: heatmap-elasticsearch
     environment:
       - node.name=heatmap-elasticsearch-node
       - discovery.type=single-node
@@ -95,7 +94,6 @@ services:
       - 9600:9600
   db:
     image: mysql:5.7
-    container_name: mysql
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
       - MYSQL_DATABASE=idseq_development
@@ -107,11 +105,20 @@ services:
       - ./docker_data/db/data:/var/lib/mysql
   redis:
     image: redis:5.0.3
-    container_name: redis
     ports:
       - 6379:6379
     volumes:
       - ./redis-data:/var/lib/redis/data
+  web-proxy:
+    image: nginx
+    volumes:
+      - ./docker/etc/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 3000:3000
+    depends_on:
+      - web
+    command:
+      ["/usr/sbin/nginx", "-c", "/etc/nginx/nginx.conf"]
   web:
     build:
       context: .
@@ -130,7 +137,7 @@ services:
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
     ports:
-      - 3000:3000
+      - 3001:3001
     depends_on:
       - db
       - redis
@@ -142,7 +149,7 @@ services:
       <<: *aws-variables
       <<: *auth0-variables
       <<: *env-variables
-    command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
+    command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3001"
   resque:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
@@ -159,7 +166,7 @@ services:
       <<: *web-variables
       <<: *aws-variables
     command: bundle exec "COUNT=5 rake resque:workers"
-  resque_scheduler:
+  resque-scheduler:
     # See config/resque_schedule.yml for usages.
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
@@ -176,7 +183,7 @@ services:
       <<: *web-variables
       <<: *aws-variables
     command: bundle exec "rake resque:scheduler"
-  resque_result_monitor:
+  resque-result-monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     volumes:
@@ -192,7 +199,7 @@ services:
       <<: *web-variables
       <<: *aws-variables
     command: bundle exec "rake result_monitor"
-  resque_pipeline_monitor:
+  resque-pipeline-monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
     platform: linux/amd64
     volumes:
@@ -222,3 +229,8 @@ services:
       <<: *aws-variables
       SFN_NOTIFICATIONS_QUEUE_ARN:
     command: bundle exec "shoryuken -R -C config/shoryuken.yml"
+networks:
+  default:
+    name: czidnet
+    driver: overlay
+    attachable: true
