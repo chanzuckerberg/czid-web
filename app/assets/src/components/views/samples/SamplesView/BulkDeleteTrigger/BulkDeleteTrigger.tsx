@@ -30,7 +30,8 @@ const BulkDeleteTrigger = ({
   workflow,
   workflowEntity,
 }: BulkDeleteTriggerProps) => {
-  const { allowedFeatures, userId } = useContext(UserContext) ?? {};
+  const { admin: isUserAdmin, allowedFeatures, userId } =
+    useContext(UserContext) ?? {};
 
   // if feature flag off, show nothing
   if (!allowedFeatures.includes(BULK_DELETION_FEATURE)) {
@@ -39,19 +40,22 @@ const BulkDeleteTrigger = ({
 
   const didUserUploadAtLeastOneObjectWithCompleteRun = () => {
     // selected samples uploaded by current user
-    const samplesUploadedByUser = filter(obj => {
-      const uploadedBy = obj.sample?.userId;
-      return uploadedBy === userId;
-    }, selectedObjects);
+    // (admin users are able to delete anyone's completed runs, even runs from others)
+    const filteredSamples = isUserAdmin
+      ? selectedObjects
+      : filter(obj => {
+          const uploadedBy = obj.sample?.userId;
+          return uploadedBy === userId;
+        }, selectedObjects);
 
     // if user didn't upload any of the selected samples,
     // we can return false without checking if any of them completed,
     // since the user can't delete these anyway
-    if (!samplesUploadedByUser) return false;
+    if (!filteredSamples) return false;
 
     // if user uploaded something, check if any of the ones they uploaded completed
     if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
-      const runStatuses = samplesUploadedByUser.map(object =>
+      const runStatuses = filteredSamples.map(object =>
         get(["status"], object),
       );
       const didAtLeastOneComplete = !isEmpty(
@@ -61,7 +65,7 @@ const BulkDeleteTrigger = ({
       return didAtLeastOneComplete;
     }
 
-    const statuses = samplesUploadedByUser.map(object =>
+    const statuses = filteredSamples.map(object =>
       get(["sample", "pipelineRunFinalized"], object),
     );
 

@@ -7,6 +7,7 @@ import {
 } from "czifui";
 import React, { useEffect, useState } from "react";
 import { bulkDeleteObjects, validateUserCanDeleteObjects } from "~/api";
+import { pluralize } from "~/components/utils/stringUtil";
 import { showToast } from "~/components/utils/toast";
 import {
   WORKFLOW_VALUES,
@@ -57,7 +58,6 @@ const BulkDeleteModal = ({
     validateSamplesCanBeDeleted();
   }, [selectedIds, workflow]);
 
-  const sampleCount = selectedIds.length;
   const workflowLabel = getLabelFromWorkflow(workflow);
 
   const onDeleteSuccess = ({ successCount }) => {
@@ -66,6 +66,7 @@ const BulkDeleteModal = ({
         onClose={closeToast}
         sampleCount={successCount}
         workflowLabel={workflowLabel}
+        data-testid="sample-delete-success-notif"
       />
     ));
   };
@@ -76,6 +77,7 @@ const BulkDeleteModal = ({
         onClose={closeToast}
         sampleCount={errorCount}
         workflowLabel={workflowLabel}
+        data-testid="sample-delete-error-notif"
       />
     ));
   };
@@ -96,10 +98,18 @@ const BulkDeleteModal = ({
     }
   };
 
+  if (isValidating) return null;
+
   return (
-    <Dialog className={cs.dialog} open={isOpen} sdsSize="xs">
+    <Dialog
+      className={cs.dialog}
+      open={isOpen}
+      sdsSize="xs"
+      data-testid="bulk-delete-modal"
+    >
       <DialogTitle className={cs.dialogTitle}>
-        Are you sure you want to delete {sampleCount} {workflowLabel} runs?
+        Are you sure you want to delete {validIds.length} {workflowLabel}{" "}
+        {pluralize("run", validIds.length)}?
       </DialogTitle>
       <DialogContent>
         <DeleteSampleModalText />
@@ -112,11 +122,11 @@ const BulkDeleteModal = ({
       <DialogActions className={cs.dialogActions}>
         <Button
           className={cs.deleteButton}
-          disabled={isValidating}
           onClick={handleDeleteSamples}
           sdsStyle="rounded"
           sdsType="primary"
           color="error"
+          data-testid="delete-samples-button"
         >
           Delete
         </Button>

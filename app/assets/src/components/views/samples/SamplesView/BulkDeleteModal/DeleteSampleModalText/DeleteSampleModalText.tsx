@@ -11,7 +11,9 @@ const DeleteSampleModalText = () => (
     </div>
     <List className={cs.list}>
       <ListItem>The raw data, metadata, and results.</ListItem>
-      <ListItem>Any bulk download files that contain the deleted run.</ListItem>
+      <ListItem>
+        Any bulk download files that contain the deleted runs.
+      </ListItem>
     </List>
     <div>Here is how other artifacts will be affected:</div>
     <List className={cs.list}>
