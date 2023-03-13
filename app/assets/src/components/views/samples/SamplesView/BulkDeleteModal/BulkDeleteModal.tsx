@@ -32,6 +32,7 @@ const BulkDeleteModal = ({
   selectedIds,
   workflow,
 }: BulkDeleteModalProps) => {
+  const [isValidating, setIsValidating] = useState<boolean>(true);
   const [validIds, setValidsIds] = useState<number[]>([]);
   const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
 
@@ -41,11 +42,13 @@ const BulkDeleteModal = ({
       invalidSampleNames: newInvalidNames,
     } = await validateUserCanDeleteObjects({ selectedIds, workflow });
 
+    setIsValidating(false);
     setValidsIds(newIds);
     setInvalidSampleNames(newInvalidNames);
   };
 
   useEffect(() => {
+    setIsValidating(true);
     setValidsIds([]);
     setInvalidSampleNames([]);
 
@@ -109,6 +112,7 @@ const BulkDeleteModal = ({
       <DialogActions className={cs.dialogActions}>
         <Button
           className={cs.deleteButton}
+          disabled={isValidating}
           onClick={handleDeleteSamples}
           sdsStyle="rounded"
           sdsType="primary"

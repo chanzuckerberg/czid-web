@@ -13,7 +13,7 @@
     justify-content: flex-start;
     margin-top: $sds-spaces-xl;
 
-    .deleteButton {
+    .deleteButton:not(:disabled) {
       background-color: $sds-color-error-400;
 
       &:hover,
