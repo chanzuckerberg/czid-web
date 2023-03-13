@@ -815,9 +815,9 @@ module ElasticsearchQueryHelper
 
   # field decimal value round up
   def self.round_decimal_value(metric)
-    metric["rpm"] = metric["rpm"].round(4).to_f
-    metric["zscore"] = metric["zscore"].round(4).to_f
-    metric["r"] = metric["r"].round(4).to_f
+    metric["rpm"] = metric["rpm"]&.round(4)&.to_f
+    metric["zscore"] = metric["zscore"]&.round(4)&.to_f
+    metric["r"] = metric["r"]&.round(4)&.to_f
     return metric
   end
 
