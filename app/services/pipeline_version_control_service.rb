@@ -5,23 +5,24 @@ class PipelineVersionControlService
   include ErrorHelper
   include Callable
 
-  def initialize(project, workflow, version_prefix = nil)
-    @project_id = project.id
+  def initialize(project_id, workflow, version_prefix = nil)
+    @project_id = project_id
     @workflow = workflow
     # version_prefix can be any MAJOR number (8), MAJOR.PATCH number (8.1), or MAJOR.PATCH.MINOR number (8.1.2)
     @version_prefix = version_prefix
   end
 
   def call
-    if @version_prefix.nil?
-      # If version_prefix is nil, simply return the latest version of the workflow (The project will not be pinned to any specific workflow version).
-      return AppConfigHelper.get_workflow_version(@workflow)
+    if ProjectWorkflowVersion.exists?(project_id: @project_id, workflow: @workflow)
+      version = prepare_specific_workflow_version_for_upload
+    elsif @version_prefix.nil?
+      version = AppConfigHelper.get_workflow_version(@workflow)
     else
-      # If the project isn't already pinned to a version for a workflow, pin the workflow for the project to the version_prefix specified
-      pin_project_to_workflow_version unless ProjectWorkflowVersion.exists?(project_id: @project_id, workflow: @workflow)
+      pin_project_to_workflow_version
+      version = prepare_specific_workflow_version_for_upload
     end
 
-    prepare_specific_workflow_version_for_upload
+    version
   end
 
   private

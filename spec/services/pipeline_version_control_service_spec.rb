@@ -11,7 +11,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
       @project = create(:project)
     end
 
-    subject { PipelineVersionControlService.call(@project, short_read_mngs_workflow, version_prefix) }
+    subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow, version_prefix) }
 
     it "should return the latest version of the workflow" do
       expect(subject).to eq(latest_short_read_mngs_workflow_version)
@@ -45,7 +45,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
         @project = create(:project)
       end
 
-      subject { PipelineVersionControlService.call(@project, short_read_mngs_workflow, version_prefix) }
+      subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow, version_prefix) }
 
       it "should pin the project to the latest workflow version for the version_prefix and return the latest workflow version" do
         expect(subject).to eq(latest_workflow_version_for_version_prefix)
@@ -53,7 +53,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
       end
     end
 
-    context "when the project is already pinned to a specific version for a workflow" do
+    context "when the project is already pinned to a specific version for one workflow" do
       let(:version_prefix) { "1" }
       let(:latest_workflow_version_for_version_prefix) { "1.9.9-beta" }
 
@@ -62,7 +62,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
         create(:project_workflow_version, project_id: @project.id, workflow: short_read_mngs_workflow, version_prefix: version_prefix)
       end
 
-      subject { PipelineVersionControlService.call(@project, short_read_mngs_workflow, version_prefix) }
+      subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow, version_prefix) }
 
       it "should return the latest version of the workflow for the version_prefix" do
         expect(subject).to eq(latest_workflow_version_for_version_prefix)
@@ -77,7 +77,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
           create(:project_workflow_version, project_id: @project.id, workflow: short_read_mngs_workflow, version_prefix: version_prefix)
         end
 
-        subject { PipelineVersionControlService.call(@project, short_read_mngs_workflow, version_prefix) }
+        subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow, version_prefix) }
 
         it "should raise an error" do
           expect { subject }.to raise_error(RuntimeError, ErrorHelper::PipelineVersionControlErrors.workflow_version_deprecated(short_read_mngs_workflow, latest_workflow_version_for_version_prefix))
@@ -93,7 +93,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
           create(:project_workflow_version, project_id: @project.id, workflow: short_read_mngs_workflow, version_prefix: version_prefix)
         end
 
-        subject { PipelineVersionControlService.call(@project, short_read_mngs_workflow, version_prefix) }
+        subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow, version_prefix) }
 
         it "should raise an error" do
           expect { subject }.to raise_error(RuntimeError, ErrorHelper::PipelineVersionControlErrors.workflow_version_not_runnable(short_read_mngs_workflow, latest_workflow_version_for_version_prefix))
@@ -108,7 +108,7 @@ RSpec.describe PipelineVersionControlService, type: :service do
           create(:project_workflow_version, project_id: @project.id, workflow: short_read_mngs_workflow, version_prefix: version_prefix)
         end
 
-        subject { PipelineVersionControlService.call(@project, short_read_mngs_workflow, version_prefix) }
+        subject { PipelineVersionControlService.call(@project.id, short_read_mngs_workflow, version_prefix) }
 
         it "should raise an error" do
           expect { subject }.to raise_error(RuntimeError, ErrorHelper::PipelineVersionControlErrors.workflow_version_not_found(short_read_mngs_workflow, version_prefix))

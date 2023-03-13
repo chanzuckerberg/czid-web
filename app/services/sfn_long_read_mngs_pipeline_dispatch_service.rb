@@ -30,7 +30,7 @@ class SfnLongReadMngsPipelineDispatchService
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_SINGLE_WDL_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
-    @wdl_version = AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
+    @wdl_version = PipelineVersionControlService.call(@sample.project.id, WORKFLOW_NAME, nil)
     raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
   end
 
