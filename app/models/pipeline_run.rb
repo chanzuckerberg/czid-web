@@ -269,7 +269,8 @@ class PipelineRun < ApplicationRecord
   # Triggers a run for new samples by defining output states and run stages configurations.
   # *Exception* for cloned pipeline runs that already have results and finalized status
   after_create :create_output_states, :create_run_stages, unless: :results_finalized?
-  before_destroy :cleanup
+  before_destroy :cleanup_relations
+  before_destroy :cleanup_s3
 
   delegate :status_url, to: :sample
 
@@ -960,7 +961,7 @@ class PipelineRun < ApplicationRecord
     return [error_type, error_cause]
   end
 
-  def cleanup
+  def cleanup_s3
     return if sfn_output_path.blank?
 
     S3Util.delete_s3_prefix(sfn_output_path)
@@ -2160,6 +2161,15 @@ class PipelineRun < ApplicationRecord
   end
 
   private
+
+  def cleanup_relations
+    TaxonByterange.where(pipeline_run_id: id).delete_all
+    TaxonCount.where(pipeline_run_id: id).delete_all
+    Contig.where(pipeline_run_id: id).delete_all
+    AmrCount.where(pipeline_run_id: id).delete_all
+    ErccCount.where(pipeline_run_id: id).delete_all
+    JobStat.where(pipeline_run_id: id).delete_all
+  end
 
   def calculate_qc_percent(before_qc, after_qc)
     (100.0 * after_qc) / before_qc

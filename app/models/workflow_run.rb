@@ -45,7 +45,7 @@ class WorkflowRun < ApplicationRecord
   extend ParameterSanitization
 
   belongs_to :sample
-  before_destroy :cleanup
+  before_destroy :cleanup_s3
 
   WORKFLOW = {
     # NOTE: 'main' is not yet supported in WorkflowRuns.
@@ -438,7 +438,7 @@ class WorkflowRun < ApplicationRecord
 
   private
 
-  def cleanup
+  def cleanup_s3
     return if sfn_output_path.blank?
 
     S3Util.delete_s3_prefix(sfn_output_path)

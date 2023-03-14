@@ -70,9 +70,11 @@ class BulkDeletionService
     # delete associated bulk downloads
 
     # launch async job for hard deletion
+    object_ids = deletable_objects.pluck(:id)
+    Resque.enqueue(HardDeleteObjects, object_ids, workflow, user.id)
 
     return {
-      deleted_ids: deletable_objects.pluck(:id),
+      deleted_ids: object_ids,
     }
   end
 end

@@ -43,7 +43,7 @@ class Power
   end
 
   power :destroyable_samples do
-    Sample.editable(@user)
+    Sample.owned_by_user(@user)
   end
 
   power :my_data_samples do
