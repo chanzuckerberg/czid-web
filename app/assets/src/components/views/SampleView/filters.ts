@@ -111,11 +111,22 @@ const filterThresholds = ({ row, thresholds }: $TSFixMe) => {
       const parsedThresholdValue = parseFloat(value);
       const parsedValue = getTaxonMetricValue(row, metric);
 
+      // e_value values/thresholds are stored/set as the base 10 log of the actual value
+      const isEValue = ["nr:e_value", "nt:e_value"].includes(metric);
+      let thresholdValue, rowValue;
+      if (isEValue) {
+        thresholdValue = Math.pow(10, parsedThresholdValue);
+        rowValue = Math.pow(10, parsedValue) || 0;
+      } else {
+        thresholdValue = parsedThresholdValue;
+        rowValue = parsedValue || 0;
+      }
+
       switch (operator) {
         case ">=":
-          return parsedThresholdValue <= parsedValue;
+          return thresholdValue <= rowValue;
         case "<=":
-          return parsedThresholdValue >= parsedValue;
+          return thresholdValue >= rowValue;
       }
       return true;
     }, thresholds);
