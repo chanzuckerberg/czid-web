@@ -34,7 +34,7 @@ class SfnPipelineDispatchService
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_MNGS_ARN) || AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
-    @wdl_version = /\d+\.\d+\.\d+/ =~ pipeline_run.pipeline_branch ? pipeline_run.pipeline_branch : PipelineVersionControlService.call(@sample.project.id, WORKFLOW_NAME, nil)
+    @wdl_version = /\d+\.\d+\.\d+/ =~ pipeline_run.pipeline_branch ? pipeline_run.pipeline_branch : PipelineVersionControlService.call(@sample.project.id, WORKFLOW_NAME)
     if current_user.allowed_feature_list.include?("legacy_pipeline_service")
       @wdl_version = "6.11.0"
     elsif current_user.allowed_feature_list.include?("modern_host_filtering")

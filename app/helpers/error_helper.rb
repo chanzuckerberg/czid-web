@@ -11,6 +11,10 @@ module ErrorHelper
     def self.workflow_version_not_runnable(workflow, version)
       "WorkflowVersion for workflow=#{workflow} and version=#{version} is not runnable"
     end
+
+    def self.project_workflow_version_already_pinned(project_id, workflow, version)
+      "Project #{project_id} is already pinned to a specific version of the workflow=#{workflow}. Please unpin the project from version #{version} before pinning it to a new version."
+    end
   end
 
   module MetadataValidationErrors
