@@ -84,15 +84,22 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
   // construct the header
   const renderSingleVersionTextHeader = () => {
     return (
-      <Popup
-        content={"This is the only version available."}
-        inverted={false}
-        trigger={
-          <span className={cs.pipelineVersion}>
-            {`${getWorkflowVersionString()} | ${getDatabaseVersionString()}${getLastProcessedString()}`}
-          </span>
-        }
-      />
+      <>
+        <Popup
+          content={"This is the only version available."}
+          position={"top center"}
+          inverted={false}
+          trigger={
+            <span className={cs.pipelineVersion}>
+              {getWorkflowVersionString()}
+            </span>
+          }
+        />
+
+        <span className={cs.pipelineVersion}>
+          {`| ${getDatabaseVersionString()}${getLastProcessedString()}`}
+        </span>
+      </>
     );
   };
 
@@ -115,11 +122,16 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
       <>
         <Popup
           content={"Select pipeline version."}
+          position={"top center"}
           inverted={true}
           trigger={
             <BareDropdown
               className={cs.pipelineVersionDropdown}
-              trigger={getWorkflowVersionString()}
+              trigger={
+                <span className={cs.pipelineVersionDropdown}>
+                  {`${getWorkflowVersionString()} `}
+                </span>
+              }
               options={options}
               onChange={(version: string) => onPipelineVersionSelect(version)}
               smallArrow={true}
@@ -129,7 +141,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
         />
         <span
           className={cs.pipelineVersion}
-        >{`| ${getLastProcessedString()} | `}</span>
+        >{`| ${getLastProcessedString()} `}</span>
       </>
     );
   };

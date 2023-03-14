@@ -1,4 +1,3 @@
-import { Icon } from "czifui";
 import React from "react";
 import cs from "./view_header.scss";
 
@@ -12,10 +11,10 @@ function Pretitle(props: PretitleProps) {
   if (breadcrumbLink) {
     return (
       <div className={cs.pretitle}>
-        <span className={cs.leftArrow}>
-          <Icon sdsType={"static"} sdsIcon={"chevronLeft"} sdsSize={"xs"} />
-        </span>
         <a href={breadcrumbLink} className={cs.link}>
+          <span className={cs.leftArrow}>
+            <i className="angle left icon"></i>
+          </span>
           {props.children}
         </a>
       </div>

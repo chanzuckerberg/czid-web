@@ -17,7 +17,7 @@
 
   .pipelineVersionDropdown {
     @include font-body-xxxs;
-    color: "black";
+    color: $sds-color-gray-500;
     margin-right: $sds-spaces-s;
   }
 
