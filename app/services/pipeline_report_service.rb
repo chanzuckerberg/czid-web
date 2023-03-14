@@ -91,6 +91,13 @@ class PipelineReportService
   Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
   Z_SCORE_WHEN_ABSENT_FROM_SAMPLE = -100
 
+  # These are criteria by which we choose which species to highlight in report
+  UI_HIGHLIGHT_MIN_NT_Z = 1
+  UI_HIGHLIGHT_MIN_NR_Z = 1
+  UI_HIGHLIGHT_MIN_NT_RPM = 1
+  UI_HIGHLIGHT_MIN_NR_RPM = 1
+  UI_HIGHLIGHT_TOP_N = 3 # we only highlight (up to) top 3 which meet criteria
+
   DEFAULT_SORT_PARAM = :agg_score
 
   FLAG_KNOWN_PATHOGEN = "knownPathogen".freeze
@@ -811,14 +818,11 @@ class PipelineReportService
     # For ont_v1, we will not be highlighting any species-level taxa
     return [] unless @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
 
-    ui_config = UiConfig.last
-    return unless ui_config
-
     meets_highlight_condition = lambda do |tax_id, counts|
-      return (counts.dig(:nt, :rpm) || 0) > ui_config.min_nt_rpm \
-        && (counts.dig(:nr, :rpm) || 0) > ui_config.min_nr_rpm \
-        && (counts.dig(:nt, :z_score) || 0) > ui_config.min_nt_z \
-        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z \
+      return (counts.dig(:nt, :rpm) || 0) > UI_HIGHLIGHT_MIN_NT_RPM \
+        && (counts.dig(:nr, :rpm) || 0) > UI_HIGHLIGHT_MIN_NR_RPM \
+        && (counts.dig(:nt, :z_score) || 0) > UI_HIGHLIGHT_MIN_NT_Z \
+        && (counts.dig(:nr, :z_score) || 0) > UI_HIGHLIGHT_MIN_NR_Z \
         && tax_id > 0
     end
 
@@ -826,7 +830,7 @@ class PipelineReportService
     sorted_genus_tax_ids.each do |genus_tax_id|
       genus_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][genus_tax_id]
       genus_taxon[:species_tax_ids].each do |species_tax_id|
-        return highlighted_tax_ids if highlighted_tax_ids.length >= ui_config.top_n
+        return highlighted_tax_ids if highlighted_tax_ids.length >= UI_HIGHLIGHT_TOP_N
 
         species_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_tax_id]
         if meets_highlight_condition.call(species_tax_id, species_taxon)
