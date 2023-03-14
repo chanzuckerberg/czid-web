@@ -43,7 +43,7 @@ const SampleReportContent = ({
     );
   };
   const renderContent = () => {
-    if (workflowRun.status === SUCCEEDED_STATE) {
+    if (workflowRun?.status === SUCCEEDED_STATE) {
       return renderResults();
     } else if (
       !sample.upload_error &&

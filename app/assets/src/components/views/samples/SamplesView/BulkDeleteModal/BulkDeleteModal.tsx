@@ -25,6 +25,7 @@ interface BulkDeleteModalProps {
   onClose(): void;
   selectedIds: number[];
   workflow: WORKFLOW_VALUES;
+  onSuccess?(): void;
 }
 
 const BulkDeleteModal = ({
@@ -32,6 +33,7 @@ const BulkDeleteModal = ({
   onClose,
   selectedIds,
   workflow,
+  onSuccess,
 }: BulkDeleteModalProps) => {
   const [isValidating, setIsValidating] = useState<boolean>(true);
   const [validIds, setValidsIds] = useState<number[]>([]);
@@ -69,6 +71,7 @@ const BulkDeleteModal = ({
         data-testid="sample-delete-success-notif"
       />
     ));
+    onSuccess && onSuccess();
   };
 
   const onDeleteError = ({ errorCount }) => {

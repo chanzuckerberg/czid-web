@@ -38,6 +38,7 @@ interface SampleViewHeaderProps {
   sample: Sample;
   snapshotShareId?: string;
   view: string;
+  onDeleteRunSuccess: () => void;
 }
 
 export const SampleViewHeader = ({
@@ -57,6 +58,7 @@ export const SampleViewHeader = ({
   snapshotShareId,
   view,
   onShareClick,
+  onDeleteRunSuccess,
 }: SampleViewHeaderProps) => {
   const [
     sampleDeletionConfirmationModalOpen,
@@ -129,6 +131,7 @@ export const SampleViewHeader = ({
                 sample={sample}
                 view={view}
                 currentRun={currentRun}
+                onDeleteRunSuccess={onDeleteRunSuccess}
               />
             </div>
           </ViewHeader.Controls>

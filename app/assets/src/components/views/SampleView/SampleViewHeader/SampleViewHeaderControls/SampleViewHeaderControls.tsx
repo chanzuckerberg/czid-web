@@ -20,6 +20,7 @@ import {
   WORKFLOWS,
   WORKFLOW_VALUES,
   findInWorkflows,
+  isMngsWorkflow,
 } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import { parseUrlParams } from "~/helpers/url";
@@ -27,7 +28,12 @@ import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
-import { DownloadButton, HelpButton, SaveButton } from "~ui/controls/buttons";
+import {
+  DownloadButton,
+  ErrorButton,
+  HelpButton,
+  SaveButton,
+} from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import { ControlsTopRow } from "./ControlsTopRow";
 import { DownloadDropdown } from "./DownloadDropdown";
@@ -48,6 +54,7 @@ interface SampleViewHeaderControlsProps {
   onDetailsClick: () => void;
   onPipelineVersionChange: (newPipelineVersion: string) => void;
   onShareClick: () => void;
+  onDeleteRunSuccess: () => void;
   pipelineVersions?: string[];
   reportMetadata: ReportMetadata;
   sample: Sample;
@@ -70,12 +77,24 @@ export const SampleViewHeaderControls = ({
   reportMetadata,
   sample,
   view,
+  onDeleteRunSuccess,
 }: SampleViewHeaderControlsProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures, admin: userIsAdmin } = userContext || {};
   const succeeded = get("status", currentRun) === "SUCCEEDED";
   const runIsLoaded = !isEmpty(reportMetadata);
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
+
+  const workflow: WORKFLOW_VALUES =
+    WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
+    WORKFLOWS.SHORT_READ_MNGS.value;
+
+  const getAllRunsPerWorkflow = () => {
+    const runsByType =
+      get("workflow_runs", sample) &&
+      get("workflow_runs", sample).filter(run => run.workflow === workflow);
+    return isMngsWorkflow(workflow) ? get("pipeline_runs", sample) : runsByType;
+  };
 
   const onSaveClick = async () => {
     if (view) {
@@ -85,45 +104,17 @@ export const SampleViewHeaderControls = ({
     }
   };
 
-  const workflow: WORKFLOW_VALUES =
-    WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
-    WORKFLOWS.SHORT_READ_MNGS.value;
-
-  const mngsWorkflows = [
-    WORKFLOWS.SHORT_READ_MNGS.value,
-    WORKFLOWS.LONG_READ_MNGS.value,
-  ] as string[];
-
-  const ismNGSWorkflow = mngsWorkflows.includes(workflow);
-
-  const getAllRuns = () => {
-    const runsByType =
-      get("workflow_runs", sample) &&
-      get("workflow_runs", sample).filter(run => run.workflow === workflow);
-    return ismNGSWorkflow ? get("pipeline_runs", sample) : runsByType;
+  const onDownloadAll = (eventName: "amr" | "consensus-genome") => {
+    openUrl(getWorkflowRunZipLink(currentRun.id));
+    trackEvent(`SampleViewHeader_${eventName}-download-all-button_clicked`, {
+      sampleId: sample?.id,
+    });
   };
 
-  const renderDownloadDropdown = () => {
-    return (
-      runIsLoaded && (
-        <DownloadDropdown
-          className={cs.controlElement}
-          backgroundId={backgroundId}
-          currentTab={currentTab}
-          deletable={deletable}
-          editable={editable}
-          getDownloadReportTableWithAppliedFiltersLink={
-            getDownloadReportTableWithAppliedFiltersLink
-          }
-          onDeleteSample={onDeleteSample}
-          hasAppliedFilters={hasAppliedFilters}
-          pipelineRun={currentRun as PipelineRun}
-          reportMetadata={reportMetadata}
-          sample={sample}
-          view={view}
-        />
-      )
-    );
+  const onSaveWithAnalytics = () => {
+    withAnalytics(onSaveClick, "SampleView_save-button_clicked", {
+      sampleId: sample?.id,
+    });
   };
 
   const renderHelpButton = () => {
@@ -170,17 +161,23 @@ export const SampleViewHeaderControls = ({
     );
   };
 
-  const onDownloadAll = (eventName: "amr" | "consensus-genome") => {
-    openUrl(getWorkflowRunZipLink(currentRun.id));
-    trackEvent(`SampleViewHeader_${eventName}-download-all-button_clicked`, {
-      sampleId: sample?.id,
-    });
-  };
-
-  const onSaveWithAnalytics = () => {
-    withAnalytics(onSaveClick, "SampleView_save-button_clicked", {
-      sampleId: sample && sample?.id,
-    });
+  const renderDownloadDropdown = () => {
+    return (
+      runIsLoaded && (
+        <DownloadDropdown
+          className={cs.controlElement}
+          backgroundId={backgroundId}
+          currentTab={currentTab}
+          getDownloadReportTableWithAppliedFiltersLink={
+            getDownloadReportTableWithAppliedFiltersLink
+          }
+          hasAppliedFilters={hasAppliedFilters}
+          pipelineRun={currentRun as PipelineRun}
+          sample={sample}
+          view={view}
+        />
+      )
+    );
   };
 
   const renderShareButton = () => {
@@ -193,6 +190,16 @@ export const SampleViewHeaderControls = ({
       case WORKFLOWS.AMR.value:
         return null;
     }
+  };
+
+  const renderDeleteSampleButton = () => {
+    return (
+      <ErrorButton
+        text="Delete Sample"
+        onClick={onDeleteSample}
+        className={cs.controlElement}
+      />
+    );
   };
 
   const renderSaveButton = () => {
@@ -211,18 +218,6 @@ export const SampleViewHeaderControls = ({
         return null;
     }
   };
-
-  const renderDownloadButton = () => {
-    switch (workflow) {
-      case WORKFLOWS.LONG_READ_MNGS.value:
-      case WORKFLOWS.SHORT_READ_MNGS.value:
-        return renderDownloadDropdown();
-      case WORKFLOWS.CONSENSUS_GENOME.value:
-      case WORKFLOWS.AMR.value:
-        return renderDownloadAll(workflow);
-    }
-  };
-
   const renderDownloadAll = (workflow: "amr" | "consensus-genome") => {
     return (
       succeeded && (
@@ -236,13 +231,78 @@ export const SampleViewHeaderControls = ({
     );
   };
 
+  const renderDownloadButton = () => {
+    switch (workflow) {
+      case WORKFLOWS.LONG_READ_MNGS.value:
+      case WORKFLOWS.SHORT_READ_MNGS.value:
+        if (!!reportMetadata.reportReady && currentRun) {
+          return renderDownloadDropdown();
+        } else if (!isEmpty(reportMetadata) && editable && deletable) {
+          return renderDeleteSampleButton();
+        }
+        break;
+      case WORKFLOWS.CONSENSUS_GENOME.value:
+        if (succeeded) {
+          return renderDownloadAll(workflow);
+        } else if (
+          editable &&
+          deletable &&
+          isEmpty(sample?.pipeline_runs) // if there are no mNGS runs
+        ) {
+          return renderDeleteSampleButton();
+        }
+        break;
+      case WORKFLOWS.AMR.value:
+        if (succeeded) {
+          return renderDownloadAll(workflow);
+        }
+        break;
+    }
+  };
+
+  const renderDownloadButtonUpdated = () => {
+    // created `renderDownloadButtonUpdated` to change the logic of the delete sample button behind the feature flag
+    // this will eventually replace renderDownloadButton for all users
+
+    const remainingWorkflowRuns =
+      !isMngsWorkflow(workflow) &&
+      sample.workflow_runs.filter(run => run.workflow !== workflow);
+
+    switch (workflow) {
+      case WORKFLOWS.LONG_READ_MNGS.value:
+      case WORKFLOWS.SHORT_READ_MNGS.value:
+        if (!!reportMetadata.reportReady && currentRun) {
+          return renderDownloadDropdown();
+        } else if (!isEmpty(reportMetadata) && editable && deletable) {
+          return renderDeleteSampleButton();
+        }
+        break;
+      case WORKFLOWS.CONSENSUS_GENOME.value:
+      case WORKFLOWS.AMR.value:
+        if (succeeded) {
+          return renderDownloadAll(workflow);
+        } else if (
+          editable &&
+          deletable &&
+          isEmpty(sample?.pipeline_runs) && // if there are no mNGS runs
+          remainingWorkflowRuns.length === 0 // if there are no other workflow runs
+        ) {
+          return renderDeleteSampleButton();
+        }
+        break;
+    }
+  };
+
   const renderOverflowMenu = () => {
     return (
       hasBulkDeletion && (
         <OverflowMenu
           className={cs.controlElement}
           workflow={workflow}
-          sampleId={sample?.id}
+          deleteId={isMngsWorkflow(workflow) ? sample?.id : currentRun?.id}
+          onDeleteRunSuccess={onDeleteRunSuccess}
+          editable={editable}
+          deletable={deletable}
         />
       )
     );
@@ -254,9 +314,8 @@ export const SampleViewHeaderControls = ({
         <ControlsTopRow
           sample={sample}
           currentRun={currentRun}
-          getAllRuns={getAllRuns}
+          getAllRuns={getAllRunsPerWorkflow}
           workflow={workflow}
-          mngsWorkflow={ismNGSWorkflow}
           onPipelineVersionChange={onPipelineVersionChange}
           userIsAdmin={userIsAdmin}
           onDetailsClick={onDetailsClick}
@@ -265,7 +324,9 @@ export const SampleViewHeaderControls = ({
       <div className={cs.controlsBottomRowContainer}>
         {renderShareButton()}
         {renderSaveButton()}
-        {renderDownloadButton()}
+        {!hasBulkDeletion
+          ? renderDownloadButton()
+          : renderDownloadButtonUpdated()}
         {renderHelpButton()}
         {renderOverflowMenu()}
       </div>

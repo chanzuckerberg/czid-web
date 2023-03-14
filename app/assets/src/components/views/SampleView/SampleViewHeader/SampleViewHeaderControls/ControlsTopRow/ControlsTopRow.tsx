@@ -2,7 +2,11 @@ import { Button } from "czifui";
 import { get } from "lodash/fp";
 import React from "react";
 import { withAnalytics } from "~/api/analytics";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import {
+  WORKFLOWS,
+  WORKFLOW_VALUES,
+  isMngsWorkflow,
+} from "~/components/utils/workflows";
 import PipelineVersionSelect from "~/components/views/components/PipelineVersionSelect";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
@@ -12,8 +16,7 @@ interface ControlRowProps {
   sample: Sample;
   currentRun: WorkflowRun | PipelineRun;
   getAllRuns: () => WorkflowRun[] | PipelineRun[];
-  workflow: string;
-  mngsWorkflow: boolean;
+  workflow: WORKFLOW_VALUES;
   onPipelineVersionChange: (newPipelineVersion: string) => void;
   userIsAdmin: boolean;
   onDetailsClick: () => void;
@@ -24,7 +27,6 @@ export const ControlsTopRow = ({
   currentRun,
   getAllRuns,
   workflow,
-  mngsWorkflow,
   onPipelineVersionChange,
   userIsAdmin,
   onDetailsClick,
@@ -37,8 +39,10 @@ export const ControlsTopRow = ({
         currentRun={currentRun}
         allRuns={getAllRuns()}
         workflowType={workflow}
-        versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
-        timeKey={mngsWorkflow ? "created_at" : "executed_at"}
+        versionKey={
+          isMngsWorkflow(workflow) ? "pipeline_version" : "wdl_version"
+        }
+        timeKey={isMngsWorkflow(workflow) ? "created_at" : "executed_at"}
         onVersionChange={onPipelineVersionChange}
       />
       {userIsAdmin && workflow !== WORKFLOWS.CONSENSUS_GENOME.value && (

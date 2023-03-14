@@ -72,6 +72,14 @@ export const getLabelFromWorkflow = (workflow: WORKFLOW_VALUES) => {
   return WORKFLOWS[workflowKey].label;
 };
 
+export const mngsWorkflows = [
+  WORKFLOWS.SHORT_READ_MNGS.value,
+  WORKFLOWS.LONG_READ_MNGS.value,
+] as string[];
+
+export const isMngsWorkflow = (workflow: WORKFLOW_VALUES) =>
+  mngsWorkflows.includes(workflow);
+
 /**
  *
  * Return key of matched element in WORKFLOWS object

@@ -1,7 +1,5 @@
 import querystring from "querystring";
-import cx from "classnames";
-import { Button } from "czifui";
-import { isEmpty, isNull } from "lodash/fp";
+import { isNull } from "lodash/fp";
 import React from "react";
 import SvgSaver from "svgsaver";
 
@@ -15,10 +13,8 @@ import {
   getLinkInfoForDownloadOption,
   logDownloadOption,
 } from "~/components/views/report/utils/download";
-import ReportMetadata from "~/interface/reportMetaData";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-import cs from "~ui/controls/buttons/error_button.scss";
 import Notification from "~ui/notifications/Notification";
 import { TABS } from "../../../constants";
 
@@ -26,13 +22,9 @@ interface DownloadDropdownProps {
   backgroundId?: number;
   className?: string;
   currentTab?: string;
-  deletable?: boolean;
-  editable?: boolean;
   getDownloadReportTableWithAppliedFiltersLink?: $TSFixMeFunction;
   hasAppliedFilters?: boolean;
-  onDeleteSample?: $TSFixMeFunction;
   pipelineRun?: PipelineRun;
-  reportMetadata?: ReportMetadata;
   sample?: Sample;
   view?: string;
 }
@@ -41,13 +33,9 @@ const DownloadDropdown = ({
   backgroundId,
   className,
   currentTab,
-  deletable = false,
-  editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
-  onDeleteSample,
   pipelineRun,
-  reportMetadata,
   sample,
   view,
 }: DownloadDropdownProps) => {
@@ -148,51 +136,29 @@ const DownloadDropdown = ({
     return [];
   };
 
-  const renderDownloadButtonDropdown = () => {
-    const downloadOptions = [
-      {
-        text: "Download Report Table (.csv)",
-        value: "download_csv",
-        disabled: currentTab === TABS.MERGED_NT_NR,
-      },
-      {
-        text: "Download Report Table with Applied Filters (.csv)",
-        value: "download_csv_with_filters",
-        disabled: !hasAppliedFilters,
-      },
-      ...getDownloadDropdownOptions(pipelineRun),
-      ...getImageDownloadOptions(),
-    ];
+  const downloadOptions = [
+    {
+      text: "Download Report Table (.csv)",
+      value: "download_csv",
+      disabled: currentTab === TABS.MERGED_NT_NR,
+    },
+    {
+      text: "Download Report Table with Applied Filters (.csv)",
+      value: "download_csv_with_filters",
+      disabled: !hasAppliedFilters,
+    },
+    ...getDownloadDropdownOptions(pipelineRun),
+    ...getImageDownloadOptions(),
+  ];
 
-    return (
-      <DownloadButtonDropdown
-        className={className}
-        options={downloadOptions}
-        onClick={handleDownload}
-        direction="left"
-      />
-    );
-  };
-
-  if (!!reportMetadata.reportReady && pipelineRun) {
-    return renderDownloadButtonDropdown();
-  } else if (!isEmpty(reportMetadata) && editable && deletable) {
-    return (
-      <Button
-        // these classes are temporarily needed to override the default styling of the czifui button
-        // until the czifui error button is ready
-        className={cx(cs.ui, cs.button, cs["idseq-ui"], cs.error, className)}
-        sdsType="primary"
-        color="error"
-        sdsStyle="rounded"
-        onClick={onDeleteSample}
-      >
-        Delete Sample
-      </Button>
-    );
-  } else {
-    return null;
-  }
+  return (
+    <DownloadButtonDropdown
+      className={className}
+      options={downloadOptions}
+      onClick={handleDownload}
+      direction="left"
+    />
+  );
 };
 
 export default DownloadDropdown;

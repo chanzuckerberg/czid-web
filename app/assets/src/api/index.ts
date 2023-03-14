@@ -722,7 +722,7 @@ const bulkDeleteObjects = ({
   selectedIds: number[];
   workflow: WORKFLOW_VALUES;
 }) =>
-  postWithCSRF(`samples/bulk_delete`, {
+  postWithCSRF(`/samples/bulk_delete`, {
     selectedIds,
     workflow,
   });

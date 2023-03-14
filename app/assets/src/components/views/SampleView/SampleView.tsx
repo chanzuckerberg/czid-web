@@ -74,6 +74,7 @@ import {
 import { sampleErrorInfo } from "~/components/utils/sample";
 import {
   findInWorkflows,
+  isMngsWorkflow,
   labelToVal,
   WORKFLOWS,
 } from "~/components/utils/workflows";
@@ -748,6 +749,58 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       `${location.pathname + "?" + stringifiedQueryParams}`,
     );
     this.setState({ workflowRun, workflowRunId: workflowRun.id });
+  };
+
+  handleDeleteCurrentRun = () => {
+    const { sample, currentTab } = this.state;
+    const workflowCount = getWorkflowCount(sample);
+
+    // add all the values of the workflowCount object
+    const totalWorkflowCount = Object.values(workflowCount).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    if (totalWorkflowCount === 1) {
+      // if there is only one workflow run, navigate to the project page
+      location.href = `/home?project_id=${sample.project_id}`;
+      return;
+    }
+
+    // choose pipeline runs or workflow runs based on current tab
+    const workflow = labelToVal(currentTab);
+    const runType = isMngsWorkflow(workflow)
+      ? "pipeline_runs"
+      : "workflow_runs";
+    const runs: { id: number }[] = sample[runType];
+
+    // filter out the current run
+    const newRuns = runs.filter(run => run.id !== this.getCurrentRun().id);
+
+    // update the workflowCount object
+    workflowCount[workflow] -= 1;
+
+    // if there are still runs of the current workflow, stay on current tab
+    // otherwise, switch to the next tab
+
+    const moreRunsInWorkflow = workflowCount[workflow] > 0;
+
+    const nextTab = moreRunsInWorkflow
+      ? currentTab
+      : determineInitialTab({
+          initialWorkflow: sample.initial_workflow,
+          workflowCount,
+        });
+
+    // update the state to remove the current run and change the tab
+    this.setState(
+      {
+        sample: {
+          ...sample,
+          [runType]: newRuns,
+        },
+      },
+      () => this.handleTabChange(nextTab),
+    );
   };
 
   handleTabChange = (tab: CurrentTabSample) => {
@@ -1812,6 +1865,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               sample={sample}
               snapshotShareId={snapshotShareId}
               view={view}
+              onDeleteRunSuccess={this.handleDeleteCurrentRun}
             />
           </div>
           <div className={cs.tabsContainer}>

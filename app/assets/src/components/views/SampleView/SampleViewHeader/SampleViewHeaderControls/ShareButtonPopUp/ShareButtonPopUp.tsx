@@ -2,7 +2,7 @@ import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import { ShareButton } from "~ui/controls/buttons";
 
-import cs from "./share_button.scss";
+import cs from "../sample_view_header_controls.scss";
 
 export const ShareButtonPopUp = ({
   onShareClick,

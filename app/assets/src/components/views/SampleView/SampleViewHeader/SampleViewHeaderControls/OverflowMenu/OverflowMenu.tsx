@@ -13,19 +13,22 @@ import cs from "./overflow_menu.scss";
 export const OverflowMenu = ({
   className,
   workflow,
-  sampleId,
+  deleteId,
+  onDeleteRunSuccess,
+  editable,
+  deletable,
 }: {
   className: string;
   workflow: WORKFLOW_VALUES;
-  sampleId: number;
+  deleteId: number;
+  onDeleteRunSuccess: () => void;
+  editable: boolean;
+  deletable: boolean;
 }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<PopoverProps["anchorEl"]>(
     null,
   );
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
-
-  // todo: check if user can delete
-  const userCanDelete = true;
 
   const openActionsMenu = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchorEl(event.currentTarget);
@@ -61,14 +64,17 @@ export const OverflowMenu = ({
         onClose={closeActionsMenu}
       >
         <MenuItem
-          disabled={!userCanDelete}
+          disabled={!(editable && deletable)}
           onClick={() => {
             closeActionsMenu();
             setIsBulkDeleteModalOpen(true);
           }}
         >
           <div
-            className={cx(cs.dropdownItem, !userCanDelete && cs.iconDisabled)}
+            className={cx(
+              cs.dropdownItem,
+              !(editable && deletable) && cs.iconDisabled,
+            )}
           >
             <Icon
               sdsIcon="trashCan"
@@ -83,8 +89,9 @@ export const OverflowMenu = ({
       <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
-        selectedIds={[sampleId]}
+        selectedIds={[deleteId]}
         workflow={workflow}
+        onSuccess={onDeleteRunSuccess}
       />
     </>
   );
