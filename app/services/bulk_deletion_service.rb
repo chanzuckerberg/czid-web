@@ -65,7 +65,7 @@ class BulkDeletionService
       deletable_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
     end
 
-    # mark objects as "deleted"
+    deletable_objects.update(deleted_at: Time.now.utc)
 
     # delete associated bulk downloads
 

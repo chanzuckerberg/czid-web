@@ -280,6 +280,7 @@ class PipelineRun < ApplicationRecord
   }
 
   scope :non_deprecated, -> { where(deprecated: false) }
+  scope :non_deleted, -> { where(deleted_at: nil) }
 
   def workflow
     if technology == TECHNOLOGY_INPUT[:illumina]

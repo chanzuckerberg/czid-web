@@ -51,6 +51,19 @@ RSpec.describe BulkDeletionService, type: :service do
       expect(response[:error]).to be_nil
       expect(response[:deleted_ids]).to contain_exactly(@pr1.id, @pr2.id)
     end
+
+    it "sets the deleted_at field to current time" do
+      response = BulkDeletionService.call(
+        object_ids: [@sample1.id, @sample2.id],
+        user: @joe,
+        workflow: "short-read-mngs"
+      )
+      expect(response[:error]).to be_nil
+      @pr1.reload
+      @pr2.reload
+      expect(@pr1.deleted_at).to be_within(1.minute).of(Time.now.utc)
+      expect(@pr2.deleted_at).to be_within(1.minute).of(Time.now.utc)
+    end
   end
 
   context "when workflow run ids are passed in for CG/AMR workflows" do
@@ -71,6 +84,19 @@ RSpec.describe BulkDeletionService, type: :service do
       )
       expect(response[:error]).to be_nil
       expect(response[:deleted_ids]).to contain_exactly(@completed_wr.id, @failed_wr.id)
+    end
+
+    it "sets the deleted_at field to current time" do
+      response = BulkDeletionService.call(
+        object_ids: [@completed_wr.id, @failed_wr.id],
+        user: @joe,
+        workflow: consensus_genome
+      )
+      expect(response[:error]).to be_nil
+      @completed_wr.reload
+      @failed_wr.reload
+      expect(@completed_wr.deleted_at).to be_within(1.minute).of(Time.now.utc)
+      expect(@failed_wr.deleted_at).to be_within(1.minute).of(Time.now.utc)
     end
   end
 end

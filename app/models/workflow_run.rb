@@ -248,6 +248,7 @@ class WorkflowRun < ApplicationRecord
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
   scope :amr, -> { where(workflow: WORKFLOW[:amr]) }
   scope :non_deprecated, -> { where(deprecated: false) }
+  scope :non_deleted, -> { where(deleted_at: nil) }
   scope :active, -> { where(status: WorkflowRun::STATUS[:succeeded], deprecated: false) }
   scope :viewable, ->(user) { where(sample: Sample.viewable(user)) }
   scope :created_by, ->(user) { includes(:sample).where(samples: { user: user }) }
