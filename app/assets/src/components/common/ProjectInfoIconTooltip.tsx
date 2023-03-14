@@ -2,6 +2,7 @@ import { Icon, Tooltip, TooltipProps } from "czifui";
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks";
 
 import cs from "./project_info_icon_tooltip.scss";
 
@@ -21,11 +22,13 @@ const ProjectInfoIconTooltip = (props: ProjectInfoIconTooltipProps) => {
     <>
       {description}
       <ExternalLink
-        href={"https://help.czid.org"}
+        href={PROJECT_SHARING_HELP_LINK}
         analyticsEventName={
           ANALYTICS_EVENT_NAMES.PROJECT_VISIBILITY_HELP_LINK_CLICKED
         }
-        analyticsEventData={{ link: "https://help.czid.org" }}
+        analyticsEventData={{
+          link: PROJECT_SHARING_HELP_LINK,
+        }}
       >
         Learn more.
       </ExternalLink>

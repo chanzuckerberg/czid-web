@@ -6,7 +6,7 @@ import { createProject } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { WEB_UPLOAD_LINK } from "~/components/utils/documentationLinks";
+import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 import Modal from "~ui/containers/Modal";
 import Input from "~ui/controls/Input";
@@ -134,7 +134,9 @@ const ProjectCreationModal = ({
                 They’ll be able to perform read-only actions like create
                 heatmaps and download results, but will not have access to your
                 raw data.{" "}
-                <ExternalLink href={WEB_UPLOAD_LINK}>Learn more</ExternalLink>
+                <ExternalLink href={PROJECT_SHARING_HELP_LINK}>
+                  Learn more
+                </ExternalLink>
               </div>
             </div>
           </button>
@@ -160,7 +162,9 @@ const ProjectCreationModal = ({
                 and when, to share your samples with others either by adding
                 them as members of your project or by changing your project from
                 Private to Public.{" "}
-                <ExternalLink href={WEB_UPLOAD_LINK}>Learn more</ExternalLink>
+                <ExternalLink href={PROJECT_SHARING_HELP_LINK}>
+                  Learn more
+                </ExternalLink>
               </div>
             </div>
           </button>
