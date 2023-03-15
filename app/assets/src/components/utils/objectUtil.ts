@@ -40,3 +40,22 @@ const iteratee = (baseObj: object) => (
 export const diff = (targetObj: object, baseObj: object) => {
   return _transform(iteratee(baseObj), null, targetObj);
 };
+
+export interface IdMap<T> {
+  [key: string]: T;
+}
+
+/**
+ * Reduces an array of objects to a mapping between the keyString arg and the objects
+ * that make up the array. Effective for quickly looking up objects by id, for example.
+ */
+export const reduceObjectArrayToLookupDict = <T extends Record<string, any>>(
+  arr: T[],
+  keyedOn: string,
+): IdMap<T> => {
+  const keyValuePairs = arr.map((obj: T) => {
+    const id = obj[keyedOn];
+    return [id, obj];
+  });
+  return Object.fromEntries(keyValuePairs);
+};

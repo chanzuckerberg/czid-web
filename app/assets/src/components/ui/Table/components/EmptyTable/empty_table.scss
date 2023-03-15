@@ -1,0 +1,76 @@
+@import "~czifui/dist/variables";
+
+.loadingBackgroundAnimation {
+  @keyframes loadingBackgroundAnimation {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: 10% 0;
+    }
+  }
+
+  animation-name: loadingBackgroundAnimation;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+
+  background: linear-gradient(
+    to right,
+    $sds-color-gray-100 10%,
+    $sds-color-gray-200 18%,
+    $sds-color-gray-200 22%,
+    $sds-color-gray-100 30%
+  );
+  background-position: 0% 0;
+  background-size: 200%;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+}
+
+.cellContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.cell {
+  width: 72px;
+  height: 12px;
+}
+
+.column {
+  display: flex;
+  width: 100%;
+}
+
+.square {
+  min-width: 40px;
+  height: 40px;
+  margin-right: $sds-spaces-l 0;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.long {
+  width: 80%;
+  height: 12px;
+  margin: $sds-spaces-xxs 0;
+}
+
+.short {
+  width: 70%;
+  height: 9px;
+  margin: $sds-spaces-xxs 0;
+}
+
+.wrapper {
+  margin: $sds-spaces-xs $sds-spaces-xxxs;
+}
