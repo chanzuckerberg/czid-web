@@ -1,14 +1,23 @@
+import { Link } from "czifui";
 import React from "react";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import { NOTIFICATION_TYPES, TABS } from "./constants";
 import cs from "./sample_view.scss";
 
-export const showNotification = (notification: $TSFixMe, params = {}) => {
+export const showNotification = (
+  notification: string,
+  params: {
+    sampleName?: string;
+    backgroundName?: string;
+    handleTabChange?: (tab: string) => void;
+    revertToSampleViewFilters?: () => void;
+  } = {},
+) => {
   switch (notification) {
     case NOTIFICATION_TYPES.invalidBackground: {
       showToast(
-        ({ closeToast }: $TSFixMe) =>
+        ({ closeToast }: { closeToast(): void }) =>
           renderIncompatibleBackgroundError(closeToast, params),
         {
           autoClose: 12000,
@@ -18,7 +27,7 @@ export const showNotification = (notification: $TSFixMe, params = {}) => {
     }
     case NOTIFICATION_TYPES.consensusGenomeCreated: {
       showToast(
-        ({ closeToast }: $TSFixMe) =>
+        ({ closeToast }: { closeToast(): void }) =>
           renderConsensusGenomeCreated(closeToast, params),
         {
           autoClose: 12000,
@@ -28,8 +37,28 @@ export const showNotification = (notification: $TSFixMe, params = {}) => {
     }
     case NOTIFICATION_TYPES.discoveryViewFiltersPersisted: {
       showToast(
-        ({ closeToast }: $TSFixMe) =>
+        ({ closeToast }: { closeToast(): void }) =>
           renderPersistedDiscoveryViewThresholds(closeToast, params),
+        {
+          autoClose: 12000,
+        },
+      );
+      break;
+    }
+    case NOTIFICATION_TYPES.sampleDeleteSuccess: {
+      showToast(
+        ({ closeToast }: { closeToast(): void }) =>
+          renderSampleDeleteSuccess(closeToast, params),
+        {
+          autoClose: 12000,
+        },
+      );
+      break;
+    }
+    case NOTIFICATION_TYPES.sampleDeleteError: {
+      showToast(
+        ({ closeToast }: { closeToast(): void }) =>
+          renderSampleDeleteError(closeToast, params),
         {
           autoClose: 12000,
         },
@@ -38,10 +67,47 @@ export const showNotification = (notification: $TSFixMe, params = {}) => {
     }
   }
 };
+const renderSampleDeleteError = (
+  closeToast: () => void,
+  params: { sampleName?: string },
+) => {
+  return (
+    <Notification
+      className={cs.notificationBody}
+      closeWithIcon
+      closeWithDismiss={true}
+      type="error"
+      onClose={closeToast}
+    >
+      {params.sampleName ?? "Sample"} failed to delete. Please try again. If the
+      problem persists, please contact us at{" "}
+      <Link sdsStyle="dashed" href="mailto:help@czid.org">
+        help@czid.org
+      </Link>
+      .
+    </Notification>
+  );
+};
+const renderSampleDeleteSuccess = (
+  closeToast: () => void,
+  params: { sampleName?: string },
+) => {
+  return (
+    <Notification
+      className={cs.notificationBody}
+      closeWithIcon
+      closeWithDismiss={true}
+      type="info"
+      onClose={closeToast}
+    >
+      {params.sampleName ?? "Sample"} has been successfully deleted.
+    </Notification>
+  );
+};
 
 const renderIncompatibleBackgroundError = (
-  closeToast: $TSFixMe,
-  { backgroundName }: $TSFixMe,
+  closeToast: () => void,
+  { backgroundName }: { backgroundName?: string },
 ) => (
   <Notification
     type="info"
@@ -55,8 +121,8 @@ const renderIncompatibleBackgroundError = (
 );
 
 const renderConsensusGenomeCreated = (
-  closeToast: $TSFixMe,
-  { handleTabChange }: $TSFixMe,
+  closeToast: () => void,
+  { handleTabChange }: { handleTabChange?: (tab: string) => void },
 ) => {
   return (
     <Notification
@@ -85,8 +151,8 @@ const renderConsensusGenomeCreated = (
 };
 
 const renderPersistedDiscoveryViewThresholds = (
-  closeToast: $TSFixMe,
-  { revertToSampleViewFilters }: $TSFixMe,
+  closeToast: () => void,
+  { revertToSampleViewFilters }: { revertToSampleViewFilters?: () => void },
 ) => (
   <Notification
     className={cs.notificationBody}

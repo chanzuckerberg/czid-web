@@ -8,7 +8,8 @@
   margin-right: 0;
 
   &:hover,
-  &.hover {
+  &.hover, 
+  &.disabled {
     // This border (or entire component) should be replaced by a variable from SDS when avaialble
     border: 1px solid $sds-color-error-600;
     background-color: $sds-color-error-600;

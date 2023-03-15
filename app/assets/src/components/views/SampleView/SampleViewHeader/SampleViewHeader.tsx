@@ -14,7 +14,8 @@ import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
 
 import { openUrl } from "~utils/links";
-
+import { NOTIFICATION_TYPES } from "../constants";
+import { showNotification } from "../notifications";
 import { SampleDeletionConfirmationModal } from "./SampleDeletionConfirmationModal";
 import { SampleViewHeaderControls } from "./SampleViewHeaderControls";
 
@@ -66,12 +67,16 @@ export const SampleViewHeader = ({
   ] = useState(false);
 
   const handleDeleteSample = async () => {
-    await deleteSample(sample?.id);
-    location.href = `/home?project_id=${project.id}`;
-    trackEvent("SampleViewHeader_delete-sample-button_clicked", {
-      sampleId: sample?.id,
-      sampleName: sample?.name,
-    });
+    try {
+      await deleteSample(sample?.id);
+      showNotification(NOTIFICATION_TYPES.sampleDeleteSuccess, {
+        sampleName: sample.name,
+      });
+      location.href = `/home?project_id=${project.id}`;
+    } catch (error) {
+      console.error("error deleting sample", error);
+      showNotification(NOTIFICATION_TYPES.sampleDeleteError);
+    }
   };
 
   const getBreadcrumbLink = () => {

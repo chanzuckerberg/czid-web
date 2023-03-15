@@ -72,6 +72,8 @@ export const NOTIFICATION_TYPES = {
   consensusGenomeCreated: "consensusGenomeCreated",
   invalidBackground: "invalidBackground",
   discoveryViewFiltersPersisted: "discoveryViewFiltersPersisted",
+  sampleDeleteSuccess: "sampleDeleteSuccess",
+  sampleDeleteError: "sampleDeleteError",
 };
 
 export const NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS = [

@@ -1,8 +1,8 @@
-import React from "react";
+import { Button, Icon } from "czifui";
+import React, { useState } from "react";
 
+import { ErrorButton } from "~/components/ui/controls/buttons";
 import Modal from "~ui/containers/Modal";
-import { SecondaryButton } from "~ui/controls/buttons";
-import { ErrorButton } from "../../../../ui/controls/buttons";
 
 import cs from "./sample_deletion_confirmation_modal.scss";
 
@@ -16,25 +16,47 @@ const SampleDeletionConfirmationModal = ({
   onCancel,
   onConfirm,
   open,
-}: SampleDeletionConfirmationModalProps) => (
-  <Modal
-    className={cs.sampleDeletionConfirmation}
-    open={open}
-    onClose={onCancel}
-    narrowest
-    sCloseIcon
-  >
-    <div className={cs.title}>Are you sure?</div>
-    <div className={cs.text}>The sample will be deleted permanently.</div>
-    <div className={cs.actions}>
-      <div className={cs.item}>
-        <ErrorButton text="Confirm" onClick={onConfirm} />
+}: SampleDeletionConfirmationModalProps) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const onConfirmClick = async () => {
+    setIsDeleting(true);
+    await onConfirm();
+    onCancel();
+    setIsDeleting(false);
+  };
+  return (
+    <Modal
+      className={cs.sampleDeletionConfirmation}
+      open={open}
+      onClose={onCancel}
+      narrowest
+      sCloseIcon
+    >
+      <div className={cs.title}>Are you sure?</div>
+      <div className={cs.text}>The sample will be deleted permanently.</div>
+      <div className={cs.actions}>
+        <div className={cs.item}>
+          <ErrorButton onClick={onConfirmClick} disabled={!isDeleting}>
+            {isDeleting ? (
+              "Confirm"
+            ) : (
+              <Icon sdsIcon={"loading"} sdsSize="l" sdsType="button" />
+            )}
+          </ErrorButton>
+        </div>
+        <div className={cs.item}>
+          <Button
+            disabled={!isDeleting}
+            sdsStyle="rounded"
+            sdsType="secondary"
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
-      <div className={cs.item}>
-        <SecondaryButton text="Cancel" onClick={onCancel} rounded />
-      </div>
-    </div>
-  </Modal>
-);
+    </Modal>
+  );
+};
 
 export default SampleDeletionConfirmationModal;
