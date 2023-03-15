@@ -6,3 +6,9 @@ HandleSfnNotificationsTimeout:
   class: HandleSfnNotificationsTimeout
   queue: handle_sfn_notifications_timeout
   description: "This job checks for SFN executions that fail to update (get notified) after a maximum timeout period."
+
+CheckSoftDeletedData:
+  every: 1d
+  class: CheckSoftDeletedData
+  queue: check_soft_deleted_data
+  description: "This job checks the database for any pipeline or workflow runs that were soft deleted but never hard deleted."
