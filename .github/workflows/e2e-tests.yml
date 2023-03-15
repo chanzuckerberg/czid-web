@@ -67,9 +67,9 @@ jobs:
           mkdir -p app/build
           chmod a+rwx app/build # TODO temp hack - need a better plan for the build dir.
           echo "******** starting containers ******"
-          docker-compose up -d web
+          docker-compose up -d web web-proxy
           echo "******** running app **************"
-          docker-compose exec -T web wget -qO- -T 10 --timeout 20 --tries 60 localhost:3000/
+          docker-compose exec -T web wget -qO- -T 10 --timeout 20 --tries 60 localhost:3001/
           
       - name: Configure AWS Screts Executor Role Credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
