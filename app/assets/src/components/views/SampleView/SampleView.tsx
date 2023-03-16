@@ -64,6 +64,7 @@ import {
   MERGED_NT_NR_FEATURE,
   ONT_V1_FEATURE,
   MULTITAG_PATHOGENS_FEATURE,
+  AMR_v2_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
@@ -105,6 +106,7 @@ import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { WORKFLOW_VALUES } from "../../utils/workflows";
 import { BlastModalInfo } from "../blast/constants";
+import { AmrSampleReport } from "./AmrSampleReport";
 import AmrView from "./AmrView";
 import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import ReportFilters from "./ReportFilters";
@@ -1799,6 +1801,11 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   renderAmrView = () => {
+    const { allowedFeatures = [] } = this.context || {};
+    if (allowedFeatures.includes(AMR_v2_FEATURE)) {
+      return this.state.sample && <AmrSampleReport />;
+    }
+
     return (
       this.state.sample && (
         <AmrView
