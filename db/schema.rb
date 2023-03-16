@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_03_07_231234) do
+ActiveRecord::Schema.define(version: 2023_03_15_220950) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -128,6 +128,7 @@ ActiveRecord::Schema.define(version: 2023_03_07_231234) do
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
     t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.text "description"
+    t.datetime "deleted_at", comment: "When the user triggered deletion of the bulk download"
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end
 
