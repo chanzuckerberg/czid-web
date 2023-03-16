@@ -1,6 +1,8 @@
 # This is a class of static helper methods to run SQL queries over elasticsearch rest APIs
 # This class is used in heatmap_helper to generate the data
 module ElasticsearchQueryHelper
+  require 'ostruct'
+
   config = { host: ENV["HEATMAP_ES_ADDRESS"], transport_options: { request: { timeout: 200 } } }
   ES_CLIENT = Elasticsearch::Client.new(config) unless Rails.env.test?
 
@@ -56,10 +58,10 @@ module ElasticsearchQueryHelper
     begin
       response = ES_CLIENT.bulk(body: bulk_body)
       if response['errors']
-        LogUtil.log_message("Some bulk updates of last_read_at failed for #{pipeline_run_id}_#{background_id}", details: response['items'])
+        LogUtil.log_message("Some bulk updates of last_read_at failed for #{pipeline_run_ids}_#{background_id}", details: response['items'])
       end
     rescue StandardError => error
-      LogUtil.log_error("Failed to submit bulk update of last_read_at for #{pipeline_run_id}_#{background_id}", exception: error)
+      LogUtil.log_error("Failed to submit bulk update of last_read_at for #{pipeline_run_ids}_#{background_id}", exception: error)
     end
   end
 
@@ -607,6 +609,29 @@ module ElasticsearchQueryHelper
     return missing_pipeline_run_ids.flatten
   end
 
+  def self.invoke_lambda(function_name, payload)
+    if ENV['INDEXING_LAMBDA_MODE'] == 'local'
+      begin
+        response = HTTP.post("http://#{ENV['LOCAL_TAXON_INDEXING_URL']}/2015-03-31/functions/function/invocations", json: payload)
+        return OpenStruct.new({
+                                "status_code": response.code,
+                                "payload": OpenStruct.new({
+                                                            "string": response.body,
+                                                          }),
+                              })
+      rescue StandardError => error
+        raise "Taxon indexing concurrency manager lambda invocation failure: #{error}"
+      end
+    else
+      return LAMBDA_CLIENT.invoke({
+                                    function_name: function_name,
+                                    invocation_type: 'RequestResponse',
+                                    log_type: "None",
+                                    payload: JSON.generate(payload),
+                                  })
+    end
+  end
+
   def self.call_taxon_indexing_lambda(background_id, pipeline_run_ids)
     env = Rails.env.development? || Rails.env.test? ? "staging" : Rails.env
     function_name = "taxon-indexing-concurrency-manager-#{env}"
@@ -616,12 +641,7 @@ module ElasticsearchQueryHelper
     }
     begin
       attempts ||= 1
-      resp = LAMBDA_CLIENT.invoke({
-                                    function_name: function_name,
-                                    invocation_type: 'RequestResponse',
-                                    log_type: "None",
-                                    payload: JSON.generate(payload),
-                                  })
+      resp = invoke_lambda(function_name, payload)
       if resp["status_code"] != 200 || !resp["function_error"].nil?
         raise "Taxon indexing concurrency manager lambda invocation failure"
       end

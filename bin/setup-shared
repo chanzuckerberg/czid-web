@@ -27,6 +27,7 @@ echo "== Creating ES indices =="
 aws-oidc exec -- docker-compose run web rake create_elasticsearch_indices
 
 echo "== Creating ES indices for heatmap=="
-aws-oidc exec -- docker-compose run web curl -H "Content-Type: application/x-ndjson" -POST http://heatmap-elasticsearch:9200/_index_template/scored_taxon_counts  --data-binary "@./docker/open_distro/scored_taxon_counts_template.json"
+aws-oidc exec -- docker-compose run web curl --retry 6 --retry-delay 10 --retry-connrefused -H "Content-Type: application/x-ndjson" -POST http://heatmap-elasticsearch:9200/_index_template/scored_taxon_counts  --data-binary "@./docker/open_distro/scored_taxon_counts_template.json"
+aws-oidc exec -- docker-compose run web curl -XPUT http://heatmap-elasticsearch:9200/scored_taxon_counts-v1
 aws-oidc exec -- docker-compose run web curl -H "Content-Type: application/x-ndjson" -POST http://heatmap-elasticsearch:9200/_index_template/pipeline_runs  --data-binary "@./docker/open_distro/pipeline_runs_template.json"
-aws-oidc exec -- docker-compose run web curl -H "Content-Type: application/x-ndjson" -POST http://heatmap-elasticsearch:9200/data/_bulk --data-binary "@./docker/open_distro/es_data.json"
+aws-oidc exec -- docker-compose run web curl -XPUT http://heatmap-elasticsearch:9200/pipeline_runs-v1

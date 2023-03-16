@@ -30,6 +30,8 @@ x-web-variables: &web-variables
   ? SMTP_PASSWORD
   ? SMTP_USER
   ? HEATMAP_ES_ADDRESS=http://heatmap-elasticsearch:9200
+  ? INDEXING_LAMBDA_MODE=local
+  ? LOCAL_TAXON_INDEXING_URL=concurrency-lambda:8080
 
 x-auth0-variables: &auth0-variables
   ? AUTH0_CLIENT_ID
@@ -88,10 +90,20 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./docker_data/heatmap_elasticsearch/data:/usr/share/elasticsearch/data
+      - ./docker_data/heatmap_elasticsearch/data:/usr/share/opensearch/data
     ports:
       - 9400:9200
       - 9600:9600
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:1.2.0
+    container_name: opensearch-dashboards
+    environment:
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+      - OPENSEARCH_HOSTS=http://heatmap-elasticsearch:9200
+    ports:
+      - 5601:5601
+    depends_on:
+      - heatmap-elasticsearch
   db:
     image: mysql:5.7
     environment:
@@ -229,6 +241,31 @@ services:
       <<: *aws-variables
       SFN_NOTIFICATIONS_QUEUE_ARN:
     command: bundle exec "shoryuken -R -C config/shoryuken.yml"
+  concurrency-lambda:
+    # image built from idseq repo main branch
+    # for other versions, clone idseq repo, build image locally and change image to `concurreny-lambda:local`
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-local-concurreny-lambda:latest
+    profiles: ["local-lambdas"]
+    environment:
+      - LOCAL_MODE=local
+      - LOCAL_LAMBDA_ENDPOINT=indexing-lambda:8080
+      - CONCURRENCY=1 # containerized lambdas cannot run concurrently
+    ports:
+      - 9090:8080    
+  indexing-lambda:
+    # image built from idseq repo main branch
+    # for other versions, clone idseq repo, build image locally and change image to `indexing-lambda:local`
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-local-indexing-lambda:latest
+    profiles: ["local-lambdas"]
+    environment:
+      - LOCAL_MODE=local
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_USERNAME=root
+      - MYSQL_DB=idseq_development
+      - ES_HOST=heatmap-elasticsearch:9200
+    ports:
+      - 9091:8080
 networks:
   default:
     name: czidnet
