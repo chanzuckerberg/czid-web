@@ -27,3 +27,4 @@ export const HEATMAP_PATHOGEN_FLAGGING_FEATURE = "heatmap_pathogens";
 export const MODERN_HOST_FILTERING = "modern_host_filtering";
 export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const HEATMAP_FILTERS_LEFT_FEATURE = "left_heatmap_filters";
+export const WGS_CG_UPLOAD_FEATURE = "wgs_cg_upload";
