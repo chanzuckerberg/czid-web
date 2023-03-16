@@ -46,7 +46,7 @@ const PreUploadQCCheck = ({
   const [invalidFiles, setInvalidFiles] = useState<Set<File>>(new Set());
   // Set for files that did not pass validateFASTADuplicates
   const [duplicateIds, setDuplicateIds] = useState<Set<File>>(new Set());
-  // Set for files that did not pass validateFASTQTruncated
+  // Set for files that did not pass validateFASTQNotTruncated
   const [truncatedFiles, setTruncatedFiles] = useState<Set<File>>(new Set());
   // Set for files that did not pass validateFASTQMatchingR1R2
   const [mismatchedFiles, setMismatchedFiles] = useState<Set<File>>(new Set());
@@ -178,7 +178,11 @@ const PreUploadQCCheck = ({
   };
 
   // Validate that the FASTQ file is not truncated
-  const validateFASTQTruncated = async (file: File) => {
+  const validateFASTQNotTruncated = async (file: File) => {
+    // Don't check for truncation for .gz files. This is because we can't
+    // parse the end of a .gz file without first reading the whole file!
+    if (file.name.includes(GZ_FILE_TYPE)) return true;
+
     try {
       // Get the last megabyte of the file
       const byteStart = Math.max(0, file.size - MEGABYTE);
@@ -388,33 +392,30 @@ const PreUploadQCCheck = ({
           // ------–------–------–------–--------
           // FASTQ File Validations
           // ------–------–------–------–--------
-          // Don't check for truncation/matching paired-ends for .gz files
           // 3. Truncated FASTQ file?
-          if (!file.name.includes(GZ_FILE_TYPE)) {
-            const isTruncated = await validateFASTQTruncated(file);
-            if (!isTruncated) {
-              sampleIsValid = false;
-              sample.error = TRUNCATED_FILE_ERROR;
-            }
+          const isValid = await validateFASTQNotTruncated(file);
+          if (!isValid) {
+            sampleIsValid = false;
+            sample.error = TRUNCATED_FILE_ERROR;
+          }
 
-            // 4. Validate FASTQ read names for Illumina/Nanopore
-            const technologyType = await validateFASTQReads(file);
-            if (technologyType) sample.format = technologyType;
+          // 4. Validate FASTQ read names for Illumina/Nanopore
+          const technologyType = await validateFASTQReads(file);
+          if (technologyType) sample.format = technologyType;
 
-            // 5. Check to see if FASTQ file has matching R1/R2 file
-            if (fileName.includes(R1CHECK) || fileName.includes(R2CHECK)) {
-              const pairedEndSample = fileName.includes(R1CHECK)
-                ? fileName.replace(R1CHECK, R2CHECK)
-                : fileName.replace(R2CHECK, R1CHECK);
-              if (fileName in sample.files && pairedEndSample in sample.files) {
-                const isMatched = await validateFASTQMatchingR1R2(
-                  file,
-                  sample.files[pairedEndSample],
-                );
-                if (!isMatched) {
-                  sampleIsValid = false;
-                  sample.error = MISMATCH_FILES_ERROR;
-                }
+          // 5. Check to see if FASTQ file has matching R1/R2 file
+          if (fileName.includes(R1CHECK) || fileName.includes(R2CHECK)) {
+            const pairedEndSample = fileName.includes(R1CHECK)
+              ? fileName.replace(R1CHECK, R2CHECK)
+              : fileName.replace(R2CHECK, R1CHECK);
+            if (fileName in sample.files && pairedEndSample in sample.files) {
+              const isMatched = await validateFASTQMatchingR1R2(
+                file,
+                sample.files[pairedEndSample],
+              );
+              if (!isMatched) {
+                sampleIsValid = false;
+                sample.error = MISMATCH_FILES_ERROR;
               }
             }
           }
