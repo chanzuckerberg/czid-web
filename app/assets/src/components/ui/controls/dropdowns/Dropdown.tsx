@@ -87,10 +87,10 @@ const Dropdown = ({
 
   useEffect(() => {
     // Guard against NaN values
-    if (!Number.isNaN(value)) {
-      setValue(value);
+    if (!Number.isNaN(propsValue)) {
+      setValue(propsValue);
     }
-  }, [value]);
+  }, [propsValue]);
 
   const buildLabels = () => {
     setLabels(
