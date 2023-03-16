@@ -61,14 +61,14 @@ module Auth0UserManagementHelper
 
   # Patch user fields in Auth0 database.
   # This method will patch users that match this email in all auth0 connections
-  def self.patch_auth0_user(email:, name:, role:)
-    auth0_user_ids = get_auth0_user_ids_by_email(email)
+  def self.patch_auth0_user(old_email:, email:, name:, role:)
+    auth0_user_ids = get_auth0_user_ids_by_email(old_email)
     if auth0_user_ids.empty?
       # Creates a user in auth0 if it is not already there (may have had a problem during legacy user migration)
       create_auth0_user(email: email, name: name, role: role)
     else
       auth0_user_ids.each do |auth0_user_id|
-        body = { name: name, app_metadata: { roles: role == User::ROLE_ADMIN ? ['admin'] : [] } }
+        body = { name: name, email: email, app_metadata: { roles: role == User::ROLE_ADMIN ? ['admin'] : [] } }
         # See:
         # - https://auth0.com/docs/api/management/v2#!/Users/patch_users_by_id
         # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb

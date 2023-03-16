@@ -46,7 +46,7 @@ class UsersController < ApplicationController
     input_params = user_params.to_h.symbolize_keys
     if @user.update(input_params)
       # Update user info on Auth0.
-      Auth0UserManagementHelper.patch_auth0_user(input_params.slice(:email, :name, :role))
+      Auth0UserManagementHelper.patch_auth0_user(old_email: @user.email, **input_params.slice(:email, :name, :role))
 
       respond_to do |format|
         format.html { redirect_to edit_user_path(@user), notice: 'User was successfully updated.' }
