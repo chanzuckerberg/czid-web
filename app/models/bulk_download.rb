@@ -12,6 +12,7 @@ class BulkDownload < ApplicationRecord
   has_and_belongs_to_many :workflow_runs
   belongs_to :user
   has_secure_token :access_token
+  after_destroy :cleanup_s3
 
   STATUS_WAITING = "waiting".freeze
   STATUS_RUNNING = "running".freeze
@@ -136,10 +137,8 @@ class BulkDownload < ApplicationRecord
                     ".tar.gz"
                   end
 
-      samples_bucket_name = AppConfigHelper.get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1) ? ENV['SAMPLES_BUCKET_NAME_V1'] : ENV['SAMPLES_BUCKET_NAME']
-
       return S3_PRESIGNER.presigned_url(:get_object,
-                                        bucket: samples_bucket_name,
+                                        bucket: download_bucket_name,
                                         key: download_output_key,
                                         expires_in: OUTPUT_DOWNLOAD_EXPIRATION,
                                         response_content_disposition: "attachment; filename=\"#{filename}\"").to_s
@@ -191,21 +190,13 @@ class BulkDownload < ApplicationRecord
   # Returned as an array of strings
   def aegea_ecs_submit_command(
     executable_file_path: nil,
-    task_role: "idseq-downloads-#{Rails.env}",
+    task_role: "czi-infectious-disease-downloads-#{Rails.env}",
     ecs_cluster: "idseq-fargate-tasks-#{Rails.env}",
     executable_s3_bucket: S3_AEGEA_ECS_EXECUTE_BUCKET,
     ecr_image: "idseq-s3-tar-writer:latest",
     fargate_cpu: "4096",
     fargate_memory: "8192"
   )
-
-    if get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1)
-      # This task role gives us read/write access to both the "idseq-samples-${env}" amd "czi-infectious-disease-downloads-#{Rails.env}" buckets.
-      # The new task role needs access to the old samples bucket to be able to read the source urls of an ecs type bulk download
-      # until we completely migrate to the new samples bucket.
-      task_role = "czi-infectious-disease-downloads-#{Rails.env}"
-    end
-
     config_ecr_image = get_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE)
     unless config_ecr_image.nil?
       ecr_image = config_ecr_image
@@ -267,8 +258,16 @@ class BulkDownload < ApplicationRecord
     command
   end
 
+  def download_bucket_name
+    ENV['SAMPLES_BUCKET_NAME_V1']
+  end
+
+  def download_output_prefix
+    "downloads/#{id}"
+  end
+
   def download_output_key
-    download_key = "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}"
+    download_key = "#{download_output_prefix}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}"
     if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE && get_param_value("download_format") == BulkDownloadTypesHelper::SINGLE_FILE_CONCATENATED_DOWNLOAD
       "#{download_key}.fa"
     elsif download_type == BIOM_FORMAT_DOWNLOAD_TYPE
@@ -279,8 +278,7 @@ class BulkDownload < ApplicationRecord
   end
 
   def fetch_output_file_size
-    samples_bucket_name = AppConfigHelper.get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1) ? ENV['SAMPLES_BUCKET_NAME_V1'] : ENV['SAMPLES_BUCKET_NAME']
-    s3_response = S3_CLIENT.head_object(bucket: samples_bucket_name, key: download_output_key)
+    s3_response = S3_CLIENT.head_object(bucket: download_bucket_name, key: download_output_key)
     return s3_response.content_length
   rescue StandardError => e
     LogUtil.log_error("BulkDownloadsFileSizeError: Failed to get file size for bulk download id #{id}: #{e}", exception: e, bulk_download_id: id)
@@ -288,8 +286,7 @@ class BulkDownload < ApplicationRecord
 
   # The s3 url that the tar.gz file will be uploaded to.
   def download_output_url
-    samples_bucket_name = AppConfigHelper.get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1) ? ENV['SAMPLES_BUCKET_NAME_V1'] : ENV['SAMPLES_BUCKET_NAME']
-    "s3://#{samples_bucket_name}/#{download_output_key}"
+    "s3://#{download_bucket_name}/#{download_output_key}"
   end
 
   def create_local_exec_file(shell_command)
@@ -678,7 +675,6 @@ class BulkDownload < ApplicationRecord
       update(status: STATUS_RUNNING)
       workflow_runs_ordered = workflow_runs.order(:sample_id)
       workflow_run_ids = workflow_runs_ordered.pluck(:id)
-      samples_bucket_name = AppConfigHelper.get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1) ? ENV['SAMPLES_BUCKET_NAME_V1'] : ENV['SAMPLES_BUCKET_NAME']
 
       # Add the accession ids to the fasta headers
       headers = {}
@@ -690,12 +686,11 @@ class BulkDownload < ApplicationRecord
       content = ConsensusGenomeConcatService.call(workflow_run_ids, headers: headers)
 
       Rails.logger.info("Uploading concatenated file to S3...")
-      S3Util.upload_to_s3(samples_bucket_name, download_output_key, content)
+      S3Util.upload_to_s3(download_bucket_name, download_output_key, content)
 
       Rails.logger.info("Success!")
     elsif download_type == BIOM_FORMAT_DOWNLOAD_TYPE
       Rails.logger.info("Generating biom file for #{pipeline_runs.length} samples...")
-      samples_bucket_name = AppConfigHelper.get_app_config(AppConfig::ENABLE_BULK_DOWNLOADS_V1) ? ENV['SAMPLES_BUCKET_NAME_V1'] : ENV['SAMPLES_BUCKET_NAME']
       metrics_path, metadata_path, taxon_lineage_path = BulkDownloadsHelper.generate_biom_format_file(
         pipeline_runs,
         get_param_value("metric"),
@@ -705,7 +700,7 @@ class BulkDownload < ApplicationRecord
         id
       )
       biom_file = create_biom_file(metrics_path, metadata_path, taxon_lineage_path)
-      S3Util.upload_to_s3(samples_bucket_name, download_output_key, IO.read(biom_file))
+      S3Util.upload_to_s3(download_bucket_name, download_output_key, File.read(biom_file))
     else
       start_time = Time.now.to_f
 
@@ -853,5 +848,9 @@ class BulkDownload < ApplicationRecord
     if current_execution_type == RESQUE_EXECUTION_TYPE
       kickoff_resque_task
     end
+  end
+
+  def cleanup_s3
+    S3Util.delete_s3_prefix("s3://#{download_bucket_name}/#{download_output_prefix}/")
   end
 end

@@ -11,6 +11,7 @@ describe BulkDownload, type: :model do
     before do
       @joe = create(:joe)
       @bulk_download = create(:bulk_download, user: @joe)
+      RSpec::Support::ObjectFormatter.default_instance.max_formatted_output_length = nil
     end
 
     it "returns correct success url for prod" do
@@ -105,7 +106,8 @@ describe BulkDownload, type: :model do
       @workflow_run_three = create(:workflow_run, sample: @sample_one, inputs_json: { accession_id: "IJK5432.1" }.to_json)
 
       stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://czid.org",
-                                          "SAMPLES_BUCKET_NAME" => "czid-samples-prod"))
+                                          "SAMPLES_BUCKET_NAME" => "czi-infectious-disease-development-samples",
+                                          "SAMPLES_BUCKET_NAME_V1" => "czi-infectious-disease-development-samples"))
     end
 
     it "returns the correct task command for original_input_file download type" do
@@ -118,17 +120,17 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "s3://czid-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[0].name}",
-        "s3://czid-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[1].name}",
-        "s3://czid-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
-        "s3://czid-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[0].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[1].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "original_R1.fastq.gz"),
         get_expected_tar_name(@project, @sample_one, "original_R2.fastq.gz"),
         get_expected_tar_name(@project, @sample_two, "original_R1.fastq.gz"),
         get_expected_tar_name(@project, @sample_two, "original_R2.fastq.gz"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -158,7 +160,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_one, "unmapped.fasta"),
         get_expected_tar_name(@project, @sample_two, "unmapped.fasta"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Unmapped Reads.tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Unmapped Reads.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -197,7 +199,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_one, "reads_nh.fasta"),
         get_expected_tar_name(@project, @sample_two, "reads_nh.fasta"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -240,7 +242,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -275,7 +277,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_one, "contigs_nh.fasta"),
         get_expected_tar_name(@project, @sample_two, "contigs_nh.fasta"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Contigs (Non-host).tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Contigs (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -305,7 +307,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_one, "reads_per_gene.star.tab"),
         get_expected_tar_name(@project, @sample_two, "reads_per_gene.star.tab"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Host Gene Counts.tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Host Gene Counts.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -349,7 +351,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -397,7 +399,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -439,7 +441,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -481,7 +483,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_one.inputs['accession_id']}_consensus.fa"),
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_two.inputs['accession_id']}_consensus.fa"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Consensus Genome.tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Consensus Genome.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -517,7 +519,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_one.inputs['accession_id']}/"),
         get_expected_tar_name(@project, @sample_three, "#{@workflow_run_two.inputs['accession_id']}/"),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Intermediate Output Files.tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Intermediate Output Files.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -553,7 +555,7 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_three, ""),
         get_expected_tar_name(@project, @sample_three, ""),
         "--dest-url",
-        "s3://czid-samples-prod/downloads/#{@bulk_download.id}/Antimicrobial Resistance Results.tar.gz",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Antimicrobial Resistance Results.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -581,7 +583,7 @@ describe BulkDownload, type: :model do
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
-        "--task-role", "idseq-downloads-test",
+        "--task-role", "czi-infectious-disease-downloads-test",
         "--task-name", BulkDownload::ECS_TASK_NAME,
         "--ecr-image", "idseq-s3-tar-writer:latest",
         "--fargate-cpu", "4096",
@@ -599,7 +601,7 @@ describe BulkDownload, type: :model do
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
-        "--task-role", "idseq-downloads-test",
+        "--task-role", "czi-infectious-disease-downloads-test",
         "--task-name", BulkDownload::ECS_TASK_NAME,
         "--ecr-image", "idseq-s3-tar-writer:v1.0",
         "--fargate-cpu", "4096",
@@ -613,11 +615,12 @@ describe BulkDownload, type: :model do
 
     it "outputs correct command in development" do
       allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new("development"))
-      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "czid-samples-development"))
+      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "czid-samples-development",
+                                          "SAMPLES_BUCKET_NAME_V1" => "czid-samples-development"))
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
-        "--task-role", "idseq-downloads-development",
+        "--task-role", "czi-infectious-disease-downloads-development",
         "--task-name", BulkDownload::ECS_TASK_NAME,
         "--ecr-image", "idseq-s3-tar-writer:latest",
         "--fargate-cpu", "4096",
