@@ -10,7 +10,10 @@ import {
   getWorkflowRuns,
 } from "~/api";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { numberWithPlusOrMinus } from "~/helpers/strings";
+import {
+  formatSemanticVersion,
+  numberWithPlusOrMinus,
+} from "~/helpers/strings";
 
 const DISCOVERY_DOMAIN_MY_DATA = "my_data";
 const DISCOVERY_DOMAIN_ALL_DATA = "all_data";
@@ -246,6 +249,7 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
     status: toLower(workflowRun.status),
     createdAt: workflowRun.created_at,
     workflow: workflowRun.workflow,
+    wdl_version: formatSemanticVersion(workflowRun.wdl_version),
     sample: {
       id: getSampleField(["info", "id"]),
       name: getSampleField(["info", "name"]),

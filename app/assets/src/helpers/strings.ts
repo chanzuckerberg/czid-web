@@ -74,6 +74,13 @@ export function numberWithPlusOrMinus(x: number, y: number): string | null {
   )}`;
 }
 
+export function formatSemanticVersion(version: string) {
+  if (version) {
+    const [major, minor] = version.split(".");
+    return `${major}.${minor}`;
+  }
+}
+
 // Convert a value into a string with at most 4 characters, 3 for the number and one for
 // either thousands ("K") or millions ("M")
 export function numberWithSiPrefix(value: number) {

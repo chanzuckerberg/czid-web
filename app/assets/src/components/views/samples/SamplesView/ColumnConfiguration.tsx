@@ -229,6 +229,12 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
       className: cs.basicCell,
     },
     {
+      dataKey: "wdl_version",
+      label: "Pipeline Version",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+    {
       dataKey: "notes",
       flexGrow: 1,
       disableSort: true,
@@ -379,6 +385,12 @@ const computeAmrColumns = ({ basicIcon, metadataFields }) => {
     {
       dataKey: "sample_type",
       label: "Sample Type",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
+    {
+      dataKey: "wdl_version",
+      label: "Pipeline Version",
       flexGrow: 1,
       className: cs.basicCell,
     },

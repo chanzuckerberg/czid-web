@@ -164,7 +164,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         }.as_json,
                                                         status: expected_workflow_run.status,
                                                         id: expected_workflow_run.id,
-                                                        workflow: expected_workflow_run.workflow)
+                                                        workflow: expected_workflow_run.workflow,
+                                                        wdl_version: expected_workflow_run.wdl_version)
         end
 
         it "sees basic fields with sample info included with 'with_sample_info' mode" do
@@ -190,6 +191,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         created_at: expected_workflow_run.created_at.as_json,
                                                         status: expected_workflow_run.status,
                                                         workflow: expected_workflow_run.workflow,
+                                                        wdl_version: expected_workflow_run.wdl_version,
                                                         inputs: {
                                                           accession_name: expected_workflow_run.get_input("accession_name"),
                                                           accession_id: expected_workflow_run.get_input("accession_id"),
@@ -231,6 +233,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                           created_at: expected_workflow_run.created_at.as_json,
                                                           status: expected_workflow_run.status,
                                                           workflow: expected_workflow_run.workflow,
+                                                          wdl_version: expected_workflow_run.wdl_version,
                                                           inputs: {
                                                             accession_name: expected_workflow_run.get_input("accession_name"),
                                                             accession_id: expected_workflow_run.get_input("accession_id"),
@@ -315,7 +318,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         }.as_json,
                                                         status: expected_workflow_run.status,
                                                         id: expected_workflow_run.id,
-                                                        workflow: expected_workflow_run.workflow)
+                                                        workflow: expected_workflow_run.workflow,
+                                                        wdl_version: expected_workflow_run.wdl_version)
         end
 
         it "sees basic fields with sample info included when 'with_sample_info' mode is specified" do
@@ -341,6 +345,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         created_at: expected_workflow_run.created_at.as_json,
                                                         status: expected_workflow_run.status,
                                                         workflow: expected_workflow_run.workflow,
+                                                        wdl_version: expected_workflow_run.wdl_version,
                                                         inputs: {
                                                           accession_name: expected_workflow_run.get_input("accession_name"),
                                                           accession_id: expected_workflow_run.get_input("accession_id"),
