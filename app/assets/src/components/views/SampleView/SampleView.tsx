@@ -1598,11 +1598,16 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   getDownloadReportTableWithAppliedFiltersLink = () => {
+    const { allowedFeatures = [] } = this.context || {};
+    const includePathogenFlags = allowedFeatures.includes(
+      MULTITAG_PATHOGENS_FEATURE,
+    );
     const [csvHeaders, csvRows] = computeReportTableValuesForCSV(
       this.state.filteredReportData,
       this.state.selectedOptions,
       this.state.backgrounds,
       this.state.currentTab,
+      includePathogenFlags,
     );
 
     return createCSVObjectURL(csvHeaders, csvRows);

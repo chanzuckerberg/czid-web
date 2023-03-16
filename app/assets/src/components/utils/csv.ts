@@ -11,6 +11,7 @@ import {
   tail,
 } from "lodash/fp";
 import Papa from "papaparse";
+import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
 import { WORKFLOWS, labelToVal } from "~/components/utils/workflows";
 import { FilterSelections } from "~/interface/sampleView";
 import { Entries } from "~/interface/shared";
@@ -171,6 +172,11 @@ export const createCSVRowForAppliedFilters = (
         numberOfFilters += 1;
         break;
       }
+      case "flags": {
+        filterRow.push(`Pathogen Flags:, ${optionVal.join(",")}`);
+        numberOfFilters += 1;
+        break;
+      }
       default:
         logError({
           message:
@@ -181,13 +187,42 @@ export const createCSVRowForAppliedFilters = (
     }
   }
 
-  // Insert filter statement after Background
+  // Insert filter statement after Background if background is selected
   filterRow.splice(
-    1,
+    selectedOptions.background ? 1 : 0,
     0,
     `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`,
   );
+
   return [sanitizeCSVRow(filterRow).join()];
+};
+
+const _addPathogenFlagColumns = (datum, withMultiFlags) => {
+  // get the genus count of pathogens out of datum.pathogens
+  const {
+    [CATEGORIES.knownPathogen.code]: known_pathogen,
+    [CATEGORIES.lcrp.code]: lcrp_pathogen,
+  } = datum.pathogens || {};
+
+  datum.known_pathogen = known_pathogen || 0;
+  if (withMultiFlags) {
+    datum.lcrp_pathogen = lcrp_pathogen || 0;
+  }
+
+  datum.filteredSpecies.forEach(species => {
+    species.known_pathogen = (species.pathogenFlags || []).includes(
+      CATEGORIES.knownPathogen.code,
+    )
+      ? 1
+      : 0;
+    if (withMultiFlags) {
+      species.lcrp_pathogen = (species.pathogenFlags || []).includes(
+        CATEGORIES.lcrp.code,
+      )
+        ? 1
+        : 0;
+    }
+  });
 };
 
 export const computeReportTableValuesForCSV = (
@@ -195,6 +230,7 @@ export const computeReportTableValuesForCSV = (
   selectedOptions,
   backgrounds,
   currentTab,
+  withMultiFlags = false,
 ) => {
   const workflow = labelToVal(currentTab);
   const csvRows = [];
@@ -204,8 +240,12 @@ export const computeReportTableValuesForCSV = (
     ...Array.from(TAXON_COUNT_TYPE_METRICS[workflow], metric => "nt." + metric),
     ...Array.from(TAXON_COUNT_TYPE_METRICS[workflow], metric => "nr." + metric),
   ];
+  const pathogenFlagHeaders = ["known_pathogen"];
+  if (withMultiFlags) pathogenFlagHeaders.push("lcrp_pathogen");
+  csvHeaders.push(...pathogenFlagHeaders);
 
   filteredReportData.forEach((datum: $TSFixMe) => {
+    _addPathogenFlagColumns(datum, withMultiFlags);
     const genusRow: $TSFixMe = [];
     csvHeaders.forEach(column => {
       let val = JSON.stringify(getOr("-", column, datum));
