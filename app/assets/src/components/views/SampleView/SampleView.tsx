@@ -145,6 +145,7 @@ import {
   determineInitialTab,
   hasAppliedFilters,
 } from "./setup";
+import { addSampleDeleteFlagToSessionStorage } from "./utils";
 
 // @ts-expect-error working with Lodash types
 const mapValuesWithKey = mapValues.convert({ cap: false });
@@ -762,6 +763,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     );
     if (totalWorkflowCount === 1) {
       // if there is only one workflow run, navigate to the project page
+      addSampleDeleteFlagToSessionStorage(sample?.name);
       location.href = `/home?project_id=${sample.project_id}`;
       return;
     }

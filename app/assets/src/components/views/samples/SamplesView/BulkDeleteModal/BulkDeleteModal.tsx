@@ -7,6 +7,7 @@ import {
 } from "czifui";
 import React, { useEffect, useState } from "react";
 import { bulkDeleteObjects, validateUserCanDeleteObjects } from "~/api";
+import { ErrorButton } from "~/components/ui/controls/buttons";
 import { pluralize } from "~/components/utils/stringUtil";
 import { showToast } from "~/components/utils/toast";
 import {
@@ -26,6 +27,7 @@ interface BulkDeleteModalProps {
   selectedIds: number[];
   workflow: WORKFLOW_VALUES;
   onSuccess?(): void;
+  redirectOnSuccess?: boolean;
 }
 
 const BulkDeleteModal = ({
@@ -34,10 +36,12 @@ const BulkDeleteModal = ({
   selectedIds,
   workflow,
   onSuccess,
+  redirectOnSuccess,
 }: BulkDeleteModalProps) => {
   const [isValidating, setIsValidating] = useState<boolean>(true);
   const [validIds, setValidsIds] = useState<number[]>([]);
   const [invalidSampleNames, setInvalidSampleNames] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const validateSamplesCanBeDeleted = async () => {
     const {
@@ -63,18 +67,24 @@ const BulkDeleteModal = ({
   const workflowLabel = getLabelFromWorkflow(workflow);
 
   const onDeleteSuccess = ({ successCount }) => {
-    showToast(({ closeToast }) => (
-      <DeleteSuccessNotification
-        onClose={closeToast}
-        sampleCount={successCount}
-        workflowLabel={workflowLabel}
-        data-testid="sample-delete-success-notif"
-      />
-    ));
+    if (!redirectOnSuccess) {
+      setIsDeleting(false);
+      onClose();
+      showToast(({ closeToast }) => (
+        <DeleteSuccessNotification
+          onClose={closeToast}
+          sampleCount={successCount}
+          workflowLabel={workflowLabel}
+          data-testid="sample-delete-success-notif"
+        />
+      ));
+    }
     onSuccess && onSuccess();
   };
 
   const onDeleteError = ({ errorCount }) => {
+    onClose();
+    setIsDeleting(false);
     showToast(({ closeToast }) => (
       <DeleteErrorNotification
         onClose={closeToast}
@@ -86,8 +96,7 @@ const BulkDeleteModal = ({
   };
 
   const handleDeleteSamples = async () => {
-    onClose();
-
+    setIsDeleting(true);
     const { deletedIds, error } = await bulkDeleteObjects({
       selectedIds: validIds,
       workflow,
@@ -123,16 +132,14 @@ const BulkDeleteModal = ({
         )}
       </DialogContent>
       <DialogActions className={cs.dialogActions}>
-        <Button
-          className={cs.deleteButton}
+        <ErrorButton
           onClick={handleDeleteSamples}
-          sdsStyle="rounded"
-          sdsType="primary"
-          color="error"
           data-testid="delete-samples-button"
+          disabled={isDeleting}
+          startIcon={isDeleting ? "loading" : "trashCan"}
         >
-          Delete
-        </Button>
+          {!isDeleting ? "Delete" : "Deleting"}
+        </ErrorButton>
         <Button sdsStyle="rounded" sdsType="secondary" onClick={onClose}>
           Cancel
         </Button>

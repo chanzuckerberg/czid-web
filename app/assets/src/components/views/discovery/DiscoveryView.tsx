@@ -101,7 +101,8 @@ import {
   VISUALIZATIONS_DOC_LINK,
 } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
-
+import { NOTIFICATION_TYPES } from "../SampleView/constants";
+import { showNotification } from "../SampleView/notifications";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView/SamplesView";
 import VisualizationsView, {
@@ -858,8 +859,15 @@ class DiscoveryView extends React.Component<
   };
 
   initialLoad = () => {
-    const { project } = this.state;
+    const { project, sampleWasDeleted } = this.state;
     const { domain } = this.props;
+
+    if (sampleWasDeleted) {
+      showNotification(NOTIFICATION_TYPES.sampleDeleteSuccess, {
+        sampleName: sampleWasDeleted,
+      });
+      this.setState({ sampleWasDeleted: null });
+    }
 
     domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.loadUserDataStats();
     // * Initial load:

@@ -102,8 +102,16 @@ export const findInWorkflows = (
   );
 };
 
-export const labelToVal = (label: string) =>
-  WORKFLOWS[findInWorkflows(label, "label")].value;
+export const labelToVal = (label: string) => {
+  const otherMngsTabLabels = [
+    "Antimicrobial Resistance (Deprecated)",
+    "Metagenomics - Simplified",
+  ] as string[];
+  if (otherMngsTabLabels.includes(label)) {
+    label = "Metagenomic";
+  }
+  return WORKFLOWS[findInWorkflows(label, "label")].value;
+};
 
 /**
  * WORKFLOW TYPES

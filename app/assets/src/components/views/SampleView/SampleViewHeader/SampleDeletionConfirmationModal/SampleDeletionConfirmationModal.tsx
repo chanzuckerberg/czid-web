@@ -1,4 +1,4 @@
-import { Button, Icon } from "czifui";
+import { Button } from "czifui";
 import React, { useState } from "react";
 
 import { ErrorButton } from "~/components/ui/controls/buttons";
@@ -20,9 +20,13 @@ const SampleDeletionConfirmationModal = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const onConfirmClick = async () => {
     setIsDeleting(true);
-    await onConfirm();
-    onCancel();
-    setIsDeleting(false);
+    try {
+      await onConfirm();
+    } catch (e) {
+      onCancel();
+      setIsDeleting(false);
+      console.error("error deleting sample", e);
+    }
   };
   return (
     <Modal
@@ -36,17 +40,17 @@ const SampleDeletionConfirmationModal = ({
       <div className={cs.text}>The sample will be deleted permanently.</div>
       <div className={cs.actions}>
         <div className={cs.item}>
-          <ErrorButton onClick={onConfirmClick} disabled={!isDeleting}>
-            {isDeleting ? (
-              "Confirm"
-            ) : (
-              <Icon sdsIcon={"loading"} sdsSize="l" sdsType="button" />
-            )}
+          <ErrorButton
+            onClick={onConfirmClick}
+            disabled={isDeleting}
+            startIcon={isDeleting ? "loading" : "trashCan"}
+          >
+            {!isDeleting ? "Delete" : "Deleting..."}
           </ErrorButton>
         </div>
         <div className={cs.item}>
           <Button
-            disabled={!isDeleting}
+            disabled={isDeleting}
             sdsStyle="rounded"
             sdsType="secondary"
             onClick={onCancel}

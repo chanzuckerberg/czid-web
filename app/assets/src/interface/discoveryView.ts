@@ -96,6 +96,7 @@ export interface DiscoveryViewState {
   rawMapLocationData: Record<string, MapEntry>;
   sampleActiveColumnsByWorkflow: { [workflow: string]: string[] };
   sampleDimensions: DimensionsDetailed;
+  sampleWasDeleted: string | null;
   search: string;
   selectableSampleIds: number[];
   selectableWorkflowRunIds: number[];

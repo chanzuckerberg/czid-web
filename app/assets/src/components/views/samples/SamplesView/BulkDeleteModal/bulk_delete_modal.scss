@@ -12,14 +12,5 @@
   .dialogActions {
     justify-content: flex-start;
     margin-top: $sds-spaces-xl;
-
-    .deleteButton:not(:disabled) {
-      background-color: $sds-color-error-400;
-
-      &:hover,
-      &:active {
-        background-color: $sds-color-error-600;
-      }
-    }
   }
 }

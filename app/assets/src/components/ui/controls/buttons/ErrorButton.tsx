@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Button, ButtonProps } from "czifui";
+import { Button, Icon, IconNameToSizes, ButtonProps } from "czifui";
 import React from "react";
 import cs from "./error_button.scss";
 
@@ -9,6 +9,7 @@ interface ErrorButtonProps extends ButtonProps {
   text?: string;
   children?: string | React.ReactNode;
   disabled?: boolean;
+  startIcon?: keyof IconNameToSizes;
 }
 
 const ErrorButton = ({
@@ -17,24 +18,19 @@ const ErrorButton = ({
   text,
   children,
   disabled,
+  startIcon,
 }: ErrorButtonProps) => {
   return (
     <Button
-      // these classes are temporarily needed to override the default styling of the czifui button
-      // until the czifui error button is ready
-      className={cx(
-        cs.ui,
-        cs.button,
-        cs["idseq-ui"],
-        cs.error,
-        disabled,
-        className,
-      )}
+      className={cx(cs.deleteButton, className)}
       sdsType="primary"
       color="error"
       sdsStyle="rounded"
       onClick={onClick}
       disabled={disabled}
+      startIcon={
+        startIcon && <Icon sdsIcon={startIcon} sdsSize="l" sdsType="button" />
+      }
     >
       {text || children}
     </Button>

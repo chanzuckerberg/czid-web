@@ -16,6 +16,7 @@ import { PipelineRun } from "~/interface/shared";
 import { openUrl } from "~utils/links";
 import { NOTIFICATION_TYPES } from "../constants";
 import { showNotification } from "../notifications";
+import { addSampleDeleteFlagToSessionStorage } from "../utils";
 import { SampleDeletionConfirmationModal } from "./SampleDeletionConfirmationModal";
 import { SampleViewHeaderControls } from "./SampleViewHeaderControls";
 
@@ -67,11 +68,10 @@ export const SampleViewHeader = ({
   ] = useState(false);
 
   const handleDeleteSample = async () => {
+    const sampleName = sample?.name;
     try {
       await deleteSample(sample?.id);
-      showNotification(NOTIFICATION_TYPES.sampleDeleteSuccess, {
-        sampleName: sample.name,
-      });
+      addSampleDeleteFlagToSessionStorage(sampleName);
       location.href = `/home?project_id=${project.id}`;
     } catch (error) {
       console.error("error deleting sample", error);

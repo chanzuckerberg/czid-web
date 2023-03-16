@@ -75,3 +75,4 @@ export const CURRENT_TAB_OPTIONS = [
   TAB_SAMPLES,
   TAB_VISUALIZATIONS,
 ];
+export const SAMPLE_WAS_DELETED = "sampleWasDeleted";

@@ -15,15 +15,15 @@ export const OverflowMenu = ({
   workflow,
   deleteId,
   onDeleteRunSuccess,
-  editable,
-  deletable,
+  redirectOnSuccess,
+  deleteDisabled,
 }: {
   className: string;
   workflow: WORKFLOW_VALUES;
   deleteId: number;
   onDeleteRunSuccess: () => void;
-  editable: boolean;
-  deletable: boolean;
+  redirectOnSuccess?: boolean;
+  deleteDisabled?: boolean;
 }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<PopoverProps["anchorEl"]>(
     null,
@@ -64,17 +64,14 @@ export const OverflowMenu = ({
         onClose={closeActionsMenu}
       >
         <MenuItem
-          disabled={!(editable && deletable)}
+          disabled={deleteDisabled}
           onClick={() => {
             closeActionsMenu();
             setIsBulkDeleteModalOpen(true);
           }}
         >
           <div
-            className={cx(
-              cs.dropdownItem,
-              !(editable && deletable) && cs.iconDisabled,
-            )}
+            className={cx(cs.dropdownItem, deleteDisabled && cs.iconDisabled)}
           >
             <Icon
               sdsIcon="trashCan"
@@ -92,6 +89,7 @@ export const OverflowMenu = ({
         selectedIds={[deleteId]}
         workflow={workflow}
         onSuccess={onDeleteRunSuccess}
+        redirectOnSuccess={redirectOnSuccess}
       />
     </>
   );

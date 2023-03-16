@@ -1,19 +1,11 @@
 @import "~czifui/dist/variables";
 
-.ui.button.idseq-ui.error {
-  border: $sds-borders-error-400;
+
+.deleteButton:not(:disabled) {
   background-color: $sds-color-error-400;
-  color: $sds-color-gray-white;
-  fill: $sds-color-error-400;
-  margin-right: 0;
 
   &:hover,
-  &.hover, 
-  &.disabled {
-    // This border (or entire component) should be replaced by a variable from SDS when avaialble
-    border: 1px solid $sds-color-error-600;
+  &:active {
     background-color: $sds-color-error-600;
-    color: $sds-color-gray-white;
-    fill: $sds-color-error-600;
   }
 }

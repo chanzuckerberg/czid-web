@@ -82,6 +82,7 @@ export const SampleViewHeaderControls = ({
   const userContext = useContext(UserContext);
   const { allowedFeatures, admin: userIsAdmin } = userContext || {};
   const succeeded = get("status", currentRun) === "SUCCEEDED";
+  const running = get("status", currentRun) === "RUNNING";
   const runIsLoaded = !isEmpty(reportMetadata);
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
 
@@ -266,7 +267,7 @@ export const SampleViewHeaderControls = ({
 
     const remainingWorkflowRuns =
       !isMngsWorkflow(workflow) &&
-      sample.workflow_runs.filter(run => run.workflow !== workflow);
+      sample?.workflow_runs?.filter(run => run.id !== currentRun?.id);
 
     switch (workflow) {
       case WORKFLOWS.LONG_READ_MNGS.value:
@@ -294,6 +295,8 @@ export const SampleViewHeaderControls = ({
   };
 
   const renderOverflowMenu = () => {
+    const redirectOnSuccess =
+      sample && [...sample.pipeline_runs, ...sample.workflow_runs].length === 1;
     return (
       hasBulkDeletion && (
         <OverflowMenu
@@ -301,8 +304,8 @@ export const SampleViewHeaderControls = ({
           workflow={workflow}
           deleteId={isMngsWorkflow(workflow) ? sample?.id : currentRun?.id}
           onDeleteRunSuccess={onDeleteRunSuccess}
-          editable={editable}
-          deletable={deletable}
+          deleteDisabled={!(editable && deletable) || running}
+          redirectOnSuccess={redirectOnSuccess}
         />
       )
     );
