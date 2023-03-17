@@ -134,7 +134,6 @@ const SectionsDropdown = ({
   const renderEmptySectionMessage = (message: $TSFixMe) => (
     <BareDropdown.Item
       className={cs.emptySection}
-      flag="unsearchable"
       key={nanoid()}
     >
       <div className={cs.message}>{message}</div>

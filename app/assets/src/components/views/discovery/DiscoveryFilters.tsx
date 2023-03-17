@@ -401,7 +401,6 @@ class DiscoveryFilters extends React.Component<
     const { annotationsSelected } = this.state;
     const annotationsFilter = (
       <Dropdown
-        // @ts-expect-error ts-migrate(2322) FIXME: Type 'Element' is not assignable to type 'string'.
         label={<div className={cs.filterLabel}>Annotation</div>}
         onChange={selectedValue => {
           // SDS Dropdown component has a bug where onChange is fired even when the value has not changed

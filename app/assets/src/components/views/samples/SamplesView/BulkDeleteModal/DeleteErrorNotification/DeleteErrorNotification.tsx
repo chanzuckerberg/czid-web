@@ -19,7 +19,7 @@ const DeleteErrorNotification = ({
     onClose={onClose}
     buttonText="dismiss"
     buttonOnClick={onClose}
-    dismissDirection="right"
+    slideDirection="right"
   >
     {sampleCount} {workflowLabel} {pluralize("run", sampleCount)} failed to
     delete. Please try again. If the problem persists, please contact us at{" "}
