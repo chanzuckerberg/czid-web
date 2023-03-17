@@ -124,7 +124,7 @@ const BulkDeleteModal = ({
         {pluralize("run", validIds.length)}?
       </DialogTitle>
       <DialogContent>
-        <DeleteSampleModalText />
+        <DeleteSampleModalText workflow={workflow} />
         {invalidSampleNames.length > 0 && (
           <InvalidSampleDeletionWarning
             invalidSampleNames={invalidSampleNames}
