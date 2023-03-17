@@ -36,7 +36,7 @@ import { getByText } from "../../utils/selectors";
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 const chosenHosts = ["Human"];
-const sampleTypes = ["Amniotic Fluid", "Nasopharyngeal Swab"];
+const sampleTypes = ["Ocular Fluid", "Nasopharyngeal Swab"];
 
 const workflows = [
   "Metagenomics",
@@ -44,7 +44,7 @@ const workflows = [
   "Antimicrobial Resistance",
 ];
 const CANADA = "Alberta, Canada";
-const ARGENTINA = "Argentina";
+const BEXAR = "Bexar County, Texas, USA";
 
 const ENV = (process.env.NODE_ENV as string) || "";
 const projectName = TEST_PROJECTS[ENV.toUpperCase()];
@@ -52,7 +52,10 @@ const projectName = TEST_PROJECTS[ENV.toUpperCase()];
 async function clearFilters(page: Page) {
   const totalFilters = await page.getByText(ADD_THRESHOLD).count();
   for (let i = 0; i < totalFilters; i += 1) {
-    await page.locator(CLOSE_ICON).nth(0).click();
+    await page
+      .locator(CLOSE_ICON)
+      .nth(0)
+      .click();
   }
 }
 test.describe("Sample filtering tests", () => {
@@ -61,12 +64,21 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.getByText(TAXON).nth(1).click();
+      await page
+        .getByText(TAXON)
+        .nth(1)
+        .click();
       await page.getByRole(BUTTON, { name: CHOOSE_TAXON }).click();
       await page.getByRole(COMBOBOX, { name: SEARCH }).click();
       await page.getByRole(COMBOBOX, { name: SEARCH }).fill(KLEBSIELLA);
-      await page.getByText(KLEBSIELLA).first().click();
-      await page.getByText("Taxon filter").first().click(); // close the popup window so we can fill other fields
+      await page
+        .getByText(KLEBSIELLA)
+        .first()
+        .click();
+      await page
+        .getByText("Taxon filter")
+        .first()
+        .click(); // close the popup window so we can fill other fields
 
       // todo: sometimes the add threshold is not available
       if ((await page.getByText(ADD_THRESHOLD).count()) > 0) {
@@ -75,7 +87,10 @@ test.describe("Sample filtering tests", () => {
         await page.locator(NUMBERINPUT).fill(".5");
       }
 
-      await page.getByText("Apply").nth(1).click();
+      await page
+        .getByText("Apply")
+        .nth(1)
+        .click();
 
       // check result
       expect(
@@ -86,6 +101,7 @@ test.describe("Sample filtering tests", () => {
       clearFilters(page);
 
       // check result
+
       expect(
         await page.locator(SAMPLE_NAME_SELECTOR).count(),
       ).toBeGreaterThanOrEqual(0);
@@ -123,11 +139,22 @@ test.describe("Sample filtering tests", () => {
       await goToProjectSamples(page, projectName, index);
 
       // click location dropdown
-      await page.locator(getByText(LOCATION)).nth(0).click();
+      await page
+        .locator(getByText(LOCATION))
+        .nth(0)
+        .click();
 
       // select two locations
-      await page.locator(getByText(CANADA)).nth(0).click();
-      await page.locator(getByText(ARGENTINA)).nth(0).click();
+      await page
+        .locator(".dropdownMenu-1gUyq")
+        .locator(getByText(CANADA))
+        .nth(0)
+        .click();
+      await page
+        .locator(".dropdownMenu-1gUyq")
+        .locator(getByText(BEXAR))
+        .nth(0)
+        .click();
       await page.keyboard.press(ESCAPE);
 
       // check result
@@ -289,7 +316,10 @@ test.describe("Sample filtering tests", () => {
       await goToProjectSamples(page, projectName, index);
 
       await page.locator(getByText(VISIBILITY)).click();
-      await page.locator(getByText(PUBLIC)).nth(1).click();
+      await page
+        .locator(getByText(PUBLIC))
+        .nth(1)
+        .click();
 
       // check result
       expect(
@@ -307,7 +337,10 @@ test.describe("Sample filtering tests", () => {
     test(`Should filter ${workflow} samples by host`, async ({ page }) => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
-      await page.getByText(HOST).nth(0).click();
+      await page
+        .getByText(HOST)
+        .nth(0)
+        .click();
 
       for (let i = 0; i < chosenHosts.length; i++) {
         await page.getByRole(TEXTBOX, { name: SEARCH }).fill(chosenHosts[i]);
@@ -339,7 +372,10 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.getByText(SAMPLE_TYPE).nth(0).click();
+      await page
+        .getByText(SAMPLE_TYPE)
+        .nth(0)
+        .click();
       for (let i = 0; i < sampleTypes.length; i++) {
         await page.getByRole(TEXTBOX, { name: SEARCH }).fill(sampleTypes[i]);
         await page

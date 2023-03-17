@@ -19,8 +19,16 @@ function EmptyCells({ numOfColumns = 0 }: EmptyTableProps): JSX.Element {
     <>
       {Array.from(Array(numOfColumns)).map((_, index) => {
         return (
-          <div className={cs.cellContainer} key={index} data-test-id="loading-cell">
-            {index ? <div className={cx(cs.loadingBackgroundAnimation, cs.cell)} /> : <FirstColumn />}
+          <div
+            className={cs.cellContainer}
+            key={index}
+            data-test-id="loading-cell"
+          >
+            {index ? (
+              <div className={cx(cs.loadingBackgroundAnimation, cs.cell)} />
+            ) : (
+              <FirstColumn />
+            )}
           </div>
         );
       })}

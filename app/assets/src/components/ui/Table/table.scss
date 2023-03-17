@@ -3,7 +3,7 @@
 .wrapper {
   /* needed to keep search bar sticky */
   flex: 1 1 auto;
-  overflow-y: auto; 
+  overflow-y: auto;
 
   tbody tr:hover {
     background-color: $sds-color-primary-100;

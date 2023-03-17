@@ -1,39 +1,32 @@
-import * as path from "path";
 import { expect, Page } from "@playwright/test";
-import dotenv from "dotenv";
-import { Metadata } from "../types/metadata";
-import { findByTextRole, pressKey, selectFile } from "../utils/page";
-import { getFixture } from "./common";
 import {
-  ACCEPT_ALL_COOKIES,
-  ACCEPT_UPLOAD_TERMS,
+  SELECT_PROJECT,
+  SEARCH,
   ANALYSIS_TYPE,
+  FIXTURE_DIR,
+  ACCEPT_ALL_COOKIES,
+  CONTINUE,
+  UPLOAD_METADATA,
+  START_UPLOAD,
+  ACCEPT_UPLOAD_TERMS,
   COLLECTION_DATE,
   COLLECTION_LOCATION,
   COLUMN_SELECTOR,
-  CONTINUE,
   DISEASES_CONDITIONS,
-  FIXTURE_DIR,
   HOST_GENUS_SPECIES,
   HOST_ORGANISM,
   HOST_SEX,
   INFECTION_CLASS,
   ISOLATE,
   KNOWN_ORGANISM,
-  NUMBER_INPUT,
   RNA_DNA,
   SAMPLE_TYPE,
-  SEARCH,
-  SELECT_PROJECT,
-  START_UPLOAD,
-  TEXT_INPUT,
-  UPLOAD_METADATA,
-} from "./constants";
-import { getByTestID, getByText, getMetadataField } from "./selectors";
+} from "../constants/common.const";
+import { Metadata } from "../types/metadata";
+import { findByTextRole, pressKey, selectFile } from "../utils/page";
+import { getFixture } from "./common";
 
-dotenv.config({
-  path: path.resolve(__dirname, "../../", `.env.${process.env.NODE_ENV}`),
-});
+import { getMetadataField } from "./selectors";
 
 const metadataFieldFixture = getFixture("metadata_fields");
 
@@ -44,26 +37,28 @@ export async function uploadSampleFiles(
   sampleFiles: Array<string>,
 ): Promise<any> {
   // select project
-  await page.locator(getByText(SELECT_PROJECT)).click();
-  await (
-    await findByTextRole(page, SEARCH)
-  ).type(projectName, {
+  await page.locator(SELECT_PROJECT).click();
+  await (await findByTextRole(page, SEARCH)).type(projectName, {
     timeout: 1000,
   });
 
-  await page.locator(getByText(projectName)).click();
+  await page.getByText(projectName).click();
 
   // select analysis type
   const analysisTypeId = analysisType.toLowerCase().replace(/ /g, "-");
-  await page.locator(getByTestID(`${ANALYSIS_TYPE}-${analysisTypeId}`)).click();
+  await page.getByTestId(`${ANALYSIS_TYPE}-${analysisTypeId}`).click();
+  await page
+    .getByTestId("sequencing-technology-illumina")
+    .locator('input[type="radio"]')
+    .check();
 
   // select files
   await selectFile(page, `${FIXTURE_DIR}/${sampleFiles}`);
-  await page.locator(getByText(ACCEPT_ALL_COOKIES)).click();
-  await page.locator(getByText(CONTINUE)).click();
+  await page.getByText(ACCEPT_ALL_COOKIES).click();
+  await page.getByText(CONTINUE).click();
 
   // wait for page and file data to be imported
-  expect(page.locator(getByText(UPLOAD_METADATA))).toBeVisible();
+  expect(page.getByText(UPLOAD_METADATA)).toBeVisible();
 }
 
 export async function fillMetadata(
@@ -71,10 +66,16 @@ export async function fillMetadata(
   metaData: Metadata,
 ): Promise<any> {
   // host organism
-  await page.locator(TEXT_INPUT).nth(0).fill(String(metaData[HOST_ORGANISM]));
+  await page
+    .locator('input[type="text"]')
+    .nth(0)
+    .fill(String(metaData[HOST_ORGANISM]));
 
   // sample type
-  await page.locator(TEXT_INPUT).nth(1).fill(String(metaData[SAMPLE_TYPE]));
+  await page
+    .locator('input[type="text"]')
+    .nth(1)
+    .fill(String(metaData[SAMPLE_TYPE]));
 
   // water control
   if (metaData["Water Control"] === "Yes") {
@@ -83,21 +84,28 @@ export async function fillMetadata(
   }
   // collection date
   await page
-    .locator(TEXT_INPUT)
+    .locator('input[type="text"]')
     .nth(2)
     .fill(metaData[COLLECTION_DATE] as string);
 
   // nucleotide type
-  await page.locator(".dropdownTrigger-1fB9V").nth(1).click();
-  await page.locator(getByText(metaData["Nucleotide Type"] as string)).click();
+  await page
+    .locator(".dropdownTrigger-1fB9V")
+    .nth(1)
+    .click();
+  await page
+    .getByRole("option", { name: metaData["Nucleotide Type"] as string })
+    .click();
+
+  // await page.getByText(metaData["Nucleotide Type"] as string).click();
 
   // collection location
   await page
-    .locator(TEXT_INPUT)
+    .locator('input[type="text"]')
     .nth(3)
     .fill(metaData[COLLECTION_LOCATION] as string);
   await page
-    .locator(getByText(metaData[COLLECTION_LOCATION] as string))
+    .getByText(metaData[COLLECTION_LOCATION] as string)
     .nth(0)
     .click();
 
@@ -105,7 +113,7 @@ export async function fillMetadata(
   const optionalFields: Array<string> =
     metadataFieldFixture["allOptinalFields"];
   // clicking the + icon
-  await page.locator(getByTestID("select-columns")).click();
+  await page.getByTestId("select-columns").click();
   const items = page.locator(COLUMN_SELECTOR);
   const indexOfFirstOptionalField = 5;
   for (let i = indexOfFirstOptionalField; i < (await items.count()); i++) {
@@ -122,43 +130,52 @@ export async function fillMetadata(
   // host sex
   const hostSex = "host_sex";
   await page.locator(getMetadataField(hostSex)).click();
-  await page.locator(getByText(metaData[HOST_SEX] as string)).click();
+  await page
+    .getByRole("option", { name: metaData[HOST_SEX] as string })
+    .click();
+  // await page.getByText(metaData[HOST_SEX] as string).click();
 
   // known organism
   await page
-    .locator(TEXT_INPUT)
+    .locator('input[type="text"]')
     .nth(4)
     .fill(metaData[KNOWN_ORGANISM] as string);
 
   // infection class
   const infectionClass = "infection_class";
   await page.locator(getMetadataField(infectionClass)).click();
-  await page.locator(getByText(metaData[INFECTION_CLASS] as string)).click();
+  await page.getByText(metaData[INFECTION_CLASS] as string).click();
 
   // host age
-  await page.locator(NUMBER_INPUT).nth(0).fill(String(metaData["Host Age"]));
+  await page
+    .locator('input[type="number"]')
+    .nth(0)
+    .fill(String(metaData["Host Age"]));
 
   // detection method
   await page
-    .locator(TEXT_INPUT)
+    .locator('input[type="text"]')
     .nth(5)
     .fill(metaData["Detection Method"] as string);
 
   // library prep
   await page.locator(getMetadataField("library_prep")).click();
-  await page.locator(getByText(metaData["Library Prep"] as string)).click();
+  await page.getByText(metaData["Library Prep"] as string).click();
 
   // sequencer
   await page.locator(getMetadataField("sequencer")).click();
-  await page.locator(getByText(metaData["Sequencer"] as string)).click();
+  await page.getByText(metaData["Sequencer"] as string).click();
 
   // rna/dna input (ng)
-  await page.locator(NUMBER_INPUT).nth(1).fill(String(metaData[RNA_DNA]));
+  await page
+    .locator('input[type="number"]')
+    .nth(1)
+    .fill(String(metaData[RNA_DNA]));
 
   // host genus species
   const hostGenusSpecies = "host_genus_species";
   await page.locator(getMetadataField(hostGenusSpecies)).click();
-  await page.locator(getByText(metaData[HOST_GENUS_SPECIES] as string)).click();
+  await page.getByText(metaData[HOST_GENUS_SPECIES] as string).click();
 
   // isolate
   const isolate = "isolate";
@@ -169,22 +186,25 @@ export async function fillMetadata(
 
   // diseases and conditions
   await page
-    .locator(TEXT_INPUT)
+    .locator('input[type="text"]')
     .nth(6)
     .fill(String(metaData[DISEASES_CONDITIONS]));
 
   // click continue button
   const continueButtonIndex = 1;
-  await page.locator(getByText(CONTINUE)).nth(continueButtonIndex).click();
+  await page
+    .getByText(CONTINUE)
+    .nth(continueButtonIndex)
+    .click();
 }
 
 export async function submitUpload(page: Page): Promise<any> {
   await page.locator(ACCEPT_UPLOAD_TERMS).click();
-  await page.locator(getByText(START_UPLOAD)).click();
+  await page.getByText(START_UPLOAD).click();
 }
 
 export async function getGeneratedSampleName(
   page: Page,
 ): Promise<string | null> {
-  return page.locator(getByTestID("sample-name")).textContent();
+  return page.getByTestId("sample-name").textContent();
 }

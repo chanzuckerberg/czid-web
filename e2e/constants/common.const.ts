@@ -80,9 +80,6 @@ export const COLLECTION_DATE = "Collection Date";
 export const COLLECTION_LOCATION = "Collection Location";
 export const COLUMN_SELECTOR = ".listElement-3bAja";
 export const UPLOAD_METADATA = "Upload Metadata";
-export const TEXT_INPUT = 'input[type="text"]';
-export const RADIO_INPUT = 'input[type="radio"]';
-export const NUMBER_INPUT = 'input[type="number"]';
 export const HOST_SEX = "Host Sex";
 export const KNOWN_ORGANISM = "Known Organism";
 export const INFECTION_CLASS = "Infection Class";
@@ -98,7 +95,7 @@ export const CHECKBOX = 'input[type="checkbox"]';
 export const START_UPLOAD = "Start Upload";
 export const HOST_ORGANISM = "Host Organism";
 export const FIXTURE_DIR = "./fixtures/samples";
-export const SELECT_PROJECT = "Select project";
+export const SELECT_PROJECT = ".labelContainer-3Rr0F";
 export const SEARCH = "Search";
 
 export const TEST_PROJECTS: Record<string, string> = {

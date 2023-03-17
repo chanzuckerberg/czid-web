@@ -4,6 +4,7 @@ export const getByCss = (className: string): string => `css=${className}`;
 export const getByClassName = (className: string): string =>
   `[class="${className}"]`;
 export const getByID = (id: string): string => `[id="${id}"]`;
+export const getByType = (type: string): string => `input[type="${type}"]`;
 export const getByName = (name: string): string => `[name="${name}"]`;
 export const getCheckBox = (): string => `'input[type="checkbox"]'`;
 export const getByPlaceholder = (placeholder: string): string =>

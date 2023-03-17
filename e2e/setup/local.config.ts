@@ -22,7 +22,18 @@ const config: PlaywrightTestConfig = {
       },
     },
   ],
-  reporter: "list",
+  reporter: [
+    ["list"],
+    [
+      "html",
+      {
+        open: "failure",
+        host: "localhost",
+        port: 9220,
+        outputFolder: "../html-reports",
+      },
+    ],
+  ],
   testDir: "../tests",
   timeout: 600000,
   use: {

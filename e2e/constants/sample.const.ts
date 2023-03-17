@@ -2,7 +2,7 @@ export const VIEWS = ".reportViewSelector-1i1wY a";
 export const TREE_NODES = ".clickable";
 export const KNOWN_PATHOGEN =
   "div[class='node-overlay node-overlay__573'] div[class='ui red medium label pathogenLabel-10iFi label-c76vR']";
-
+export const NUMBER_INPUT = 'input[type="number"]';
 export const PATHOGEN_POPUP = ".pathogenLabelPopup-drI1l";
 export const PATHOGEN_POPUP_TEXT =
   "Organism with known human pathogenicity. See the full list of pathogens.";
@@ -59,17 +59,6 @@ export const ALL_DOWNLOAD = [
   "View Pipeline Visualization",
 ];
 
-export const DOWNLOAD_HREF = [
-  "nonhost_fasta?pipeline_version=7.1",
-  "unidentified_fasta?pipeline_version=7.1",
-  "results_folder?pipeline_version=7.1",
-  "pipeline_viz/7.1",
-];
-export const SIDE_BAR_HEADER = ".title-3Oy38";
-export const METADATA_LABELS = ".label-9CR8O";
-export const PIPELINES = '[data-testid="pipelines"]';
-
-export const NUMBER_INPUT = 'input[type="number"]';
 export const PIPELINE_LINK = ".pipelineInfo-Yfrsi";
 export const PIPELINE_LINK_PATH = "pipeline_viz/7.1?";
 export const SAMPLE_HEADER = ".sampleName-1xb-q";
@@ -89,8 +78,6 @@ export const ALL_COLUMN_HEADERS = [
 ];
 
 export const FILTER_HEADERS = ".labelContainer-3Rr0F";
-export const META = '[data-testid="metadata"]';
-export const NOTES = '[data-testid="notes"]';
 
 export const SAMPLE_INFO = "Sample Info";
 export const HOST_INFO = "Host Info";
@@ -102,61 +89,9 @@ export const READS_REMAINING = "Reads Remaining";
 export const ERCC = "ERCC Spike-In Counts";
 export const DOWNLOADS = "Downloads";
 
-export const EDIT_METADATA = ".editLink-Nhfe2";
-export const METADATA_DROP_DOWN = ".field-2_Ouc  .dropdownTrigger-1fB9V";
-export const DROP_DOWN = '[role="option"]';
-export const DNA = "text='DNA'";
-export const RNA = "text='RNA'";
-export const COLLECTION_DATE_FIELD = '[placeholder="YYYY-MM"]';
-export const WRONG_DATE_FORMAT = [
-  "date",
-  "111111",
-  "111223112",
-  "0-=2-22",
-  "222342-223-234",
-];
-export const WRONG_DATE_ERROR_MSG =
-  "text='Please input a date in the format YYYY-MM or MM/YYYY. (for human samples)'";
-
-export const RIGHT_DATE_FORMAT = ["2022-12", "10-2022"];
-export const HOST_INFO_DROPDOWNS = [
-  ["Yes", "No"],
-  [
-    "Aedes sierrensis",
-    "Culex erythrothorax",
-    "Anopheles punctipennis",
-    "Anopheles freeborni",
-    "Culex tarsalis",
-    "Culex pipiens",
-    "Aedes albopictus",
-    "Other",
-  ],
-  ["White", "Hispanic", "Black", "Asian", "Other"],
-  ["Female", "Male"],
-  ["Yes", "No"],
-];
 export const SAMPLE_LANDING = ".link-NGF5S";
-export const META_DATA_DROP_DOWN_ = '[data-placement*="start"] [role="option"]';
-export const INFECTION_INFO_DROPDOWN = [
-  "Definite",
-  "No Infection",
-  "Suspected",
-  "Unknown",
-  "Water Control",
-];
-export const SEQUENCING_INFO_DROP_DOWN = [
-  [
-    "NEB Ultra II FS DNA",
-    "NEB RNA Ultra II",
-    "NEB Ultra II Directional RNA",
-    "NEB Utra II DNA",
-    "Nextera DNA",
-    "Other",
-  ],
-  ["MiSeq", "NextSeq", "HiSeq", "NovaSeq", "Other"],
-];
 
-export const COLUMNS_LABEL = ".label-33v00";
+export const COLUMNS_LABEL = ".label-33v00:visible";
 export const FILTER_TAG = ".labelText-2faxp";
 export const CANCEL_ICON = ".closeIcon-yEIIr";
 export const ACCEPT_ALL_COOKIES = "Accept All Cookies";
@@ -201,7 +136,7 @@ export const COLUMN_HEADER_PROP = {
   },
   L: {
     description:
-      "%id:Average percent-identity of alignments to NCBI NT/NR. Learn more.",
+      "L:Average length of the local alignment for all contigs and reads assigned to this taxon. Learn more.",
     url: "Single-Sample-Report-Table#average-length",
   },
 

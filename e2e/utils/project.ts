@@ -63,10 +63,23 @@ export async function goToProjectSamples(
 ) {
   const dataType = myData ? "my_data" : "public";
   const placeholderText = myData ? "Search My Data..." : "Search Public...";
-  await page.goto(`${process.env.BASEURL}/${dataType}`);
+  try {
+    await page.goto(`${process.env.BASEURL}/${dataType}`);
+  } catch (error) {
+    await page.goto(`${process.env.BASEURL}/${dataType}`);
+  }
+
   await page.waitForTimeout(2000);
   await page.locator(getByPlaceholder(placeholderText)).fill(projectName);
   await page.keyboard.press("Enter");
-  await page.getByText(projectName).nth(0).click();
-  await page.locator(".tabLabel-3vqpD").nth(index).click();
+  await page
+    .getByText(projectName)
+    .nth(0)
+    .click();
+  if (index === 0) {
+    await page.locator('[data-testid="metagenomics"]').click();
+  }
+  if (index === 1) {
+    await page.locator('[data-testid="consensus-genomes"]').click();
+  }
 }

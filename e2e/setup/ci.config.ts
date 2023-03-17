@@ -22,12 +22,20 @@ const config: PlaywrightTestConfig = {
       },
     },
   ],
-  reporter: "github",
+  reporter: [
+    ["github"],
+    [
+      "html",
+      {
+        open: "never",
+        outputFolder: "../html-reports",
+      },
+    ],
+  ],
   testDir: "../tests",
   timeout: 120000,
   use: {
     actionTimeout: 0,
-    contextOptions: { recordHar: { path: "traffic.har" } },
     baseURL: "http://localhost:3000",
     headless: true,
     ignoreHTTPSErrors: false,

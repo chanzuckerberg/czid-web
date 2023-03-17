@@ -122,7 +122,7 @@ export const Table = <T,>({
       (obj: Record<string | number, boolean>, row: T) => {
         // not getting row selection as expected? Make sure that your uniqueIdentifier
         // represents a field on your item that returns a unique string or number
-        const key = row[uniqueIdentifier] as unknown as string | number;
+        const key = (row[uniqueIdentifier] as unknown) as string | number;
         return {
           ...obj,
           [key]: true,

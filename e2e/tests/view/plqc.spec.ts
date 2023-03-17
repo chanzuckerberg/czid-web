@@ -37,10 +37,7 @@ async function verifyBarChartContent(
   await expect(page.getByTestId("samples")).toBeVisible();
 
   // click to switch display to bar chart
-  await page
-    .locator(".menuItem-25eT6")
-    .nth(1)
-    .click();
+  await page.locator(".menuItem-25eT6").nth(1).click();
 
   // 20 of 20 samples
   // todo: uncomment once testid gets to staging
@@ -74,10 +71,7 @@ async function verifyBarChartContent(
   const [newPage] = await Promise.all([
     context.waitForEvent("page"),
     // Opens a new tab
-    page
-      .locator(LEARN_MORE)
-      .locator(LEARN_MORE_TEXT)
-      .click(),
+    page.locator(LEARN_MORE).locator(LEARN_MORE_TEXT).click(),
   ]);
   await newPage.waitForLoadState();
   expect(newPage.url()).toEqual(data["url"]);
@@ -98,20 +92,9 @@ async function verifyBarChartContent(
       .getAttribute("height");
     // if the height of the chart is zero do not hover over it
     if (graphHeight !== "0") {
-      if (
-        await page
-          .locator(`.rect-${i}`)
-          .nth(index)
-          .isVisible()
-      ) {
-        await page
-          .locator(HEADER_READS)
-          .nth(index)
-          .hover();
-        await page
-          .locator(`.rect-${i}`)
-          .nth(index)
-          .hover();
+      if (await page.locator(`.rect-${i}`).nth(index).isVisible()) {
+        await page.locator(HEADER_READS).nth(index).hover();
+        await page.locator(`.rect-${i}`).nth(index).hover();
         await expect(page.locator(BAR_POPUP).nth(0)).toBeVisible();
         await expect(page.locator(BAR_POPUP).nth(1)).toBeVisible();
       }
@@ -154,10 +137,7 @@ test.describe("PLQC view tests", () => {
   }) => {
     const SAMPLE_AMOUNT = ".filteredCount-3bajD";
     await openSamplePage(page, projectName, false, false);
-    await page
-      .locator(MENU_ICON)
-      .nth(1)
-      .click();
+    await page.locator(MENU_ICON).nth(1).click();
     await expect(page.locator(SAMPLE_AMOUNT)).toBeVisible();
 
     // Verify text displayed after hovering
@@ -166,10 +146,7 @@ test.describe("PLQC view tests", () => {
     );
 
     // Verify text displayed after hovering
-    await page
-      .locator(TOTAL_READ_INFO_ICON)
-      .nth(6)
-      .hover();
+    await page.locator(TOTAL_READ_INFO_ICON).nth(6).hover();
     await expect(page.locator(TOTAL_READ_POPUP_CONTENT)).toHaveText(
       READS_POPUP_HELP,
     );
@@ -179,10 +156,7 @@ test.describe("PLQC view tests", () => {
       context.waitForEvent("page"),
 
       // Opens a new tab
-      page
-        .locator(LEARN_MORE)
-        .locator(LEARN_MORE_TEXT)
-        .click(),
+      page.locator(LEARN_MORE).locator(LEARN_MORE_TEXT).click(),
     ]);
     await newPage.waitForLoadState();
     expect(newPage.url()).toEqual(READ_URL_HELP_LINK);

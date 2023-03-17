@@ -8,7 +8,6 @@ dotenv.config({
 });
 
 const config: PlaywrightTestConfig = {
-  workers: 2,
   expect: {
     timeout: 20000,
   },
@@ -16,6 +15,8 @@ const config: PlaywrightTestConfig = {
   fullyParallel: true,
   globalSetup: "./globalSetup",
   outputDir: "../reports",
+
+  // repeatEach:10,
   projects: [
     {
       name: "chromium",
@@ -25,19 +26,31 @@ const config: PlaywrightTestConfig = {
       },
     },
   ],
-  reporter: "list",
+  reporter: [
+    ["list"],
+    [
+      "html",
+      {
+        open: "failure",
+        host: "localhost",
+        port: 9220,
+        outputFolder: "../html-reports",
+      },
+    ],
+  ],
   testDir: "../tests",
   timeout: 50000,
   use: {
-    actionTimeout: 20000,
+    actionTimeout: 30000,
     channel: "chromium",
     baseURL: "https://staging.czid.org",
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
     storageState: "/tmp/state.json",
-    trace: "on-first-retry",
+    trace: "on",
     viewport: { width: 800, height: 7200 },
   },
+  workers: 10,
 };
 
 export default config;

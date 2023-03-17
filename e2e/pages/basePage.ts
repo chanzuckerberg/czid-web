@@ -80,10 +80,7 @@ export class BasePage {
   }
 
   async clickCheckBox(index: number) {
-    await this.page
-      .locator('input[type="checkbox"]')
-      .nth(index)
-      .click();
+    await this.page.locator('input[type="checkbox"]').nth(index).click();
   }
 
   /**

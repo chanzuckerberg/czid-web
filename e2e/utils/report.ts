@@ -14,7 +14,7 @@ import {
   ERCC,
   DOWNLOADS,
 } from "../constants/sample.const";
-import { getByClassName, getByTestID, getByText } from "./selectors";
+import { getByText } from "./selectors";
 
 export const sectionIndices: Record<string, number> = {
   sampleInfo: 0,
@@ -70,14 +70,23 @@ export async function openSamplePage(
   if (await page.locator(".title").isVisible()) {
     await page.locator(".title").click();
   } else {
-    await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
+    while (
+      (await page.getByPlaceholder(SEARCH_PUBLIC).getAttribute("value")) !==
+      projectName
+    ) {
+      await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
+    }
     await page.locator(".title").click();
   }
   // select metagenonomics samples
   await page.getByTestId(METAGENOMICS.toLowerCase()).click();
 
   // select sample
-  if (selectSample) await page.getByTestId("sample-name").first().click();
+  if (selectSample)
+    await page
+      .getByTestId("sample-name")
+      .first()
+      .click();
 
   // expand side bar
   if (openDetails) await page.getByText("Sample Details").click();
@@ -123,10 +132,16 @@ export async function verifySectionDetails(
     for (let i = 0; i < data.length; i++) {
       const item = getDataByIndex(data, i);
       expect(
-        await page.locator(getByText(item.text)).first().textContent(),
+        await page
+          .locator(getByText(item.text))
+          .first()
+          .textContent(),
       ).toBe(item.text);
       expect(
-        await page.locator(".downloadLink-14o8v").nth(i).getAttribute("href"),
+        await page
+          .locator(".downloadLink-14o8v")
+          .nth(i)
+          .getAttribute("href"),
       ).toBe(item.href.replace("SAMPLEID", sampleId.toString()));
     }
   }
@@ -134,9 +149,12 @@ export async function verifySectionDetails(
   for (let i = 0; i < data.length; i++) {
     const item = getDataByIndex(data, i);
     if (attributes.includes("name")) {
-      expect(await page.locator(".label-9CR8O").nth(i).textContent()).toBe(
-        item.name,
-      );
+      expect(
+        await page
+          .locator(".label-9CR8O")
+          .nth(i)
+          .textContent(),
+      ).toBe(item.name);
       // todo: validate values but this only be done after testids added
     }
     if (attributes.includes("step")) {
@@ -150,12 +168,18 @@ export async function verifySectionDetails(
 
       // verify reads remaining
       expect(
-        await row.locator(".metadataValue-2cDlV").first().textContent(),
+        await row
+          .locator(".metadataValue-2cDlV")
+          .first()
+          .textContent(),
       ).toBe(item.reads_remaining);
 
       // verify reads remaining percentage
       expect(
-        await row.locator(".metadataValue-2cDlV").nth(1).textContent(),
+        await row
+          .locator(".metadataValue-2cDlV")
+          .nth(1)
+          .textContent(),
       ).toBe(item.reads_remaining_percent);
     }
   }
@@ -168,4 +192,12 @@ export async function getTabSection(page: Page, section?: string) {
     index = sectionIndices[section];
   }
   return page.locator(SIDE_BAR_HEADER).nth(index);
+}
+
+export async function goToUrl(page: Page, url) {
+  try {
+    await page.goto(url);
+  } catch (error) {
+    await page.goto(url);
+  }
 }
