@@ -734,8 +734,8 @@ describe BulkDownload, type: :model do
                                                  },
                                                })
 
-          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv")
-          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv_2")
+          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
+          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv_2")
 
           add_s3_tar_writer_expectations(
             get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
@@ -756,8 +756,8 @@ describe BulkDownload, type: :model do
                                                  },
                                                })
 
-          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv")
-          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv_2")
+          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
+          expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv_2")
 
           add_s3_tar_writer_expectations(
             get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
@@ -780,8 +780,8 @@ describe BulkDownload, type: :model do
         it "correctly generates download file for download type sample_taxon_report" do
           bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "workflow": "long-read-mngs")
 
-          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv")
-          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv_2")
+          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true).exactly(1).times.and_return("mock_report_csv")
+          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true).exactly(1).times.and_return("mock_report_csv_2")
 
           add_s3_tar_writer_expectations(
             get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
@@ -796,8 +796,8 @@ describe BulkDownload, type: :model do
         it "correctly updates the bulk_download status and progress as the sample_taxon_report runs" do
           bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "workflow": "long-read-mngs")
 
-          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv")
-          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv_2")
+          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true).exactly(1).times.and_return("mock_report_csv")
+          expect(PipelineReportService).to receive(:call).with(anything, nil, csv: true).exactly(1).times.and_return("mock_report_csv_2")
 
           add_s3_tar_writer_expectations(
             get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
@@ -1073,9 +1073,9 @@ describe BulkDownload, type: :model do
                                              "displayName": "Mock Background",
                                            })
 
-      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
       # The second sample raises an error while generating.
-      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true, parallel: false).exactly(1).times.and_raise("error")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_raise("error")
 
       add_s3_tar_writer_expectations(
         get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv"
@@ -1094,8 +1094,8 @@ describe BulkDownload, type: :model do
                                              "displayName": "Mock Background",
                                            })
 
-      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv")
-      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true, parallel: false).exactly(1).times.and_return("mock_report_csv_2")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv_2")
 
       add_s3_tar_writer_expectations(
         {
