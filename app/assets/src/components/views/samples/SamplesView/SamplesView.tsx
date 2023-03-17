@@ -682,7 +682,12 @@ const SamplesView = forwardRef(function SamplesView(
   );
 
   const renderBulkSamplesActionsMenu = () => {
-    if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
+    if (
+      !(
+        allowedFeatures.includes(AMR_V1_FEATURE) ||
+        allowedFeatures.includes(BULK_DELETION_FEATURE)
+      )
+    ) {
       return;
     }
 

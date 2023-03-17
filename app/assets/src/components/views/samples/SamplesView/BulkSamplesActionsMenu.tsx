@@ -4,7 +4,10 @@ import { Icon, Menu, MenuItem, Tooltip } from "czifui";
 import React, { useContext, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
-import { BULK_DELETION_FEATURE } from "~/components/utils/features";
+import {
+  AMR_V1_FEATURE,
+  BULK_DELETION_FEATURE,
+} from "~/components/utils/features";
 
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
 import cs from "./samples_view.scss";
@@ -27,6 +30,7 @@ const BulkSamplesActionsMenu = ({
   const { allowedFeatures } = userContext || {};
 
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
+  const hasAmr = allowedFeatures.includes(AMR_V1_FEATURE);
 
   const disableMenu = !hasBulkDeletion && noObjectsSelected;
 
@@ -126,7 +130,7 @@ const BulkSamplesActionsMenu = ({
         onClose={closeActionsMenu}
       >
         {hasBulkDeletion && renderKickoffPhyloTree()}
-        {renderBulkKickoffAmr()}
+        {hasAmr && renderBulkKickoffAmr()}
       </Menu>
     </>
   );
