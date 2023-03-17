@@ -26,6 +26,7 @@
 
     .filterLabel {
       @include font-caps-xxxs;
+      color: $sds-color-gray-500;
     }
 
     .tags {
@@ -57,4 +58,8 @@
 
 .disabledTooltip {
   max-width: 190px !important;
+}
+
+.styledMinimal {
+  padding-left: 0;
 }

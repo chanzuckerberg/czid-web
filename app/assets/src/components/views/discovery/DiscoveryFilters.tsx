@@ -401,6 +401,7 @@ class DiscoveryFilters extends React.Component<
     const { annotationsSelected } = this.state;
     const annotationsFilter = (
       <Dropdown
+        className={cs.styledMinimal}
         label={<div className={cs.filterLabel}>Annotation</div>}
         onChange={selectedValue => {
           // SDS Dropdown component has a bug where onChange is fired even when the value has not changed
