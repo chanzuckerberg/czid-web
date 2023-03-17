@@ -217,7 +217,6 @@ export const CATEGORIES = [
 
 const DOC_BASE_LINK =
   "https://help.czid.org/hc/en-us/articles/360034790574-Single-Sample-Report-Table";
-
 const ONT_DOC_LINK =
   "https://docs.google.com/document/d/1ZsZ8ythCMrER7eZKbjZG93O6bNB37pJpsX2lf1sAs_I/edit#bookmark=id.h6dlo72hypko";
 

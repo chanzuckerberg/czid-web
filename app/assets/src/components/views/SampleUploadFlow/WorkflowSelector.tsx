@@ -11,11 +11,16 @@ import {
   ARTIC_PIPELINE_LINK,
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   GUPPY_BASECALLER_DOC_LINK,
+  GUPPY_BASECALLER_HELP_LINK,
   MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
   MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
   UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
 } from "~/components/utils/documentationLinks";
-import { AMR_V1_FEATURE, ONT_V1_FEATURE } from "~/components/utils/features";
+import {
+  AMR_V1_FEATURE,
+  ONT_V1_FEATURE,
+  ONT_V1_HARD_LAUNCH_FEATURE,
+} from "~/components/utils/features";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -389,7 +394,11 @@ const WorkflowSelector = ({
               "Specifies which basecalling model of 'Guppy' was used to generate the data. This will affect the pipeline parameters."
             }
             position={"top center"}
-            link={GUPPY_BASECALLER_DOC_LINK}
+            link={
+              allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE)
+                ? GUPPY_BASECALLER_HELP_LINK
+                : GUPPY_BASECALLER_DOC_LINK
+            }
           />
         </div>
         <Dropdown

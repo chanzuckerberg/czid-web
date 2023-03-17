@@ -689,7 +689,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
   }
 
   renderNoDataContents() {
-    const { params, sampleId, snapshotShareId } = this.props;
+    const { params, sampleId, snapshotShareId, workflow } = this.props;
 
     return (
       <NarrowContainer className={cs.contents}>
@@ -704,26 +704,27 @@ export default class CoverageVizBottomSidebar extends React.Component<
                 Sorry, the coverage visualization is only available for taxons
                 with at least one assembled contig in NT.
               </div>
-              {!snapshotShareId && (
-                <a
-                  className={cs.linkWithArrow}
-                  href={params.alignmentVizUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() =>
-                    trackEvent(
-                      "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
-                      {
-                        taxonId: params.taxonId,
-                        sampleId,
-                      },
-                    )
-                  }
-                >
-                  View read-level visualization
-                  <IconArrowRight />
-                </a>
-              )}
+              {!snapshotShareId &&
+                workflow === WORKFLOWS.SHORT_READ_MNGS.value && (
+                  <a
+                    className={cs.linkWithArrow}
+                    href={params.alignmentVizUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() =>
+                      trackEvent(
+                        "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
+                        {
+                          taxonId: params.taxonId,
+                          sampleId,
+                        },
+                      )
+                    }
+                  >
+                    View read-level visualization
+                    <IconArrowRight />
+                  </a>
+                )}
             </div>
             <ImgMicrobePrimary className={cs.icon} />
           </div>

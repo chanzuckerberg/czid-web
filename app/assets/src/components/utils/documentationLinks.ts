@@ -52,6 +52,8 @@ export const AMR_DEPRECATED_HELP_LINK =
   "https://docs.google.com/document/d/1BkkegYEu5hoo-6xqNL-A-eMuT-tTYsJu4Q5OlO_HI5s/edit?usp=sharing";
 export const GUPPY_BASECALLER_DOC_LINK =
   "https://docs.google.com/document/d/1ZsZ8ythCMrER7eZKbjZG93O6bNB37pJpsX2lf1sAs_I/edit#bookmark=id.w6xiktgro9k";
+export const GUPPY_BASECALLER_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13830756964372-Upload-Nanopore-Data-#guppy-basecaller";
 export const CONCAT_FILES_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360051806072-How-to-concatenate-files";
 export const PROJECT_SHARING_HELP_LINK =
