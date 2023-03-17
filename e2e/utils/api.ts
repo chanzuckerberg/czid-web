@@ -18,3 +18,18 @@ export async function makeApiCall(
   //await page.goto(url, { waitUntil: "networkidle" });
   return response;
 }
+
+export async function stubRequest(
+  page: Page,
+  api: string,
+  statusCode: number,
+  response: object,
+): Promise<void> {
+  await page.route(api, async route => {
+    route.fulfill({
+      status: statusCode,
+      contentType: "application/json",
+      body: JSON.stringify(response),
+    });
+  });
+}

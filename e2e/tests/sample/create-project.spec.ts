@@ -3,6 +3,8 @@ import {
   HELP_CENTER_PROJECT_URL,
   PROJECT_NAME_NOT_AVAILABLE_ERROR,
 } from "../../constants/upload.const";
+import { stubRequest } from "../../utils/api";
+import { getByTestID, getByText } from "../../utils/selectors";
 
 const baseUrl = process.env.BASEURL;
 const projectApi = "projects.json";
@@ -36,21 +38,6 @@ function createResponse(project: Project) {
   };
 }
 
-async function stubRequest(
-  page: Page,
-  api: string,
-  statusCode: number,
-  response: object,
-): Promise<void> {
-  await page.route(api, async route => {
-    route.fulfill({
-      status: statusCode,
-      contentType: "application/json",
-      body: JSON.stringify(response),
-    });
-  });
-}
-
 test.describe("Create project test", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/samples/upload`);
@@ -78,6 +65,7 @@ test.describe("Create project test", () => {
     // Fill in project name
     await page.locator('.idseq-ui input[type="text"]').fill(data.name);
 
+
     // Select public project
     await page.getByTestId("public-project").click();
 
@@ -99,6 +87,7 @@ test.describe("Create project test", () => {
     page,
   }) => {
     // Fill in project name that already exists in test db
+
     await page.locator('.idseq-ui input[type="text"]').fill(`Test project`);
     await page.getByTestId("public-project").click();
     await page

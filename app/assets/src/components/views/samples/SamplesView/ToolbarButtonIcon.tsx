@@ -15,9 +15,10 @@ export default function ToolbarButtonIcon({
   onClick,
   popperDependencies,
   inverted,
+  testId,
 }: ToolbarButtonIconProps) {
   const iconWrapper = (
-    <div className={className}>
+    <div className={className} data-testid={testId}>
       <ButtonIcon
         sdsSize="large"
         sdsType="primary"
@@ -45,6 +46,7 @@ export default function ToolbarButtonIcon({
       basic={false}
       popperDependencies={popperDependencies}
       inverted={inverted}
+      data-testid={`${testId}-tooltip`}
     />
   );
 }
@@ -64,4 +66,5 @@ interface ToolbarButtonIconProps {
   // Allows us to gracefully handle popups with changing content.
   popperDependencies?: string[];
   inverted?: boolean;
+  testId?: string;
 }

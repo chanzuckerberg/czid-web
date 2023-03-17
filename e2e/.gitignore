@@ -1,9 +1,12 @@
 node_modules/
 reports/
+report/
 .cache/
 .env.staging
+.env.local
+.env.dev
 storage/state.json
 *.png
+playwright-report/
 html-reports/
 summary.json
-

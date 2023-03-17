@@ -14,20 +14,22 @@ const DeleteErrorNotification = ({
   sampleCount,
   workflowLabel,
 }: DeleteSuccessNotificationProps) => (
-  <Notification
-    intent="error"
-    onClose={onClose}
-    buttonText="dismiss"
-    buttonOnClick={onClose}
-    slideDirection="right"
-  >
-    {sampleCount} {workflowLabel} {pluralize("run", sampleCount)} failed to
-    delete. Please try again. If the problem persists, please contact us at{" "}
-    <Link sdsStyle="dashed" href="mailto:help@czid.org">
-      help@czid.org
-    </Link>
-    .
-  </Notification>
+  <div data-testid="sample-delete-error-notif">
+    <Notification
+      intent="error"
+      onClose={onClose}
+      buttonText="dismiss"
+      buttonOnClick={onClose}
+      slideDirection="right"
+    >
+      {sampleCount} {workflowLabel} {pluralize("run", sampleCount)} failed to
+      delete. Please try again. If the problem persists, please contact us at{" "}
+      <Link sdsStyle="dashed" href="mailto:help@czid.org">
+        help@czid.org
+      </Link>
+      .
+    </Notification>
+  </div>
 );
 
 export { DeleteErrorNotification };

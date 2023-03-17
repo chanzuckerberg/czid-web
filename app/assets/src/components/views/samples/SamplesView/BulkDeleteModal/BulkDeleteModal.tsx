@@ -75,7 +75,6 @@ const BulkDeleteModal = ({
           onClose={closeToast}
           sampleCount={successCount}
           workflowLabel={workflowLabel}
-          data-testid="sample-delete-success-notif"
         />
       ));
     }
@@ -90,7 +89,6 @@ const BulkDeleteModal = ({
         onClose={closeToast}
         sampleCount={errorCount}
         workflowLabel={workflowLabel}
-        data-testid="sample-delete-error-notif"
       />
     ));
   };

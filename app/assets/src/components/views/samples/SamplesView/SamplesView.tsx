@@ -736,7 +736,9 @@ const SamplesView = forwardRef(function SamplesView(
           <span className={cs.label}>Selected</span>
         </div>
         <div className={cs.separator} />
-        <div className={cs.actions}>{triggersToRender}</div>
+        <div className={cs.actions} data-testid="sample-view-actions">
+          {triggersToRender}
+        </div>
       </>
     );
   };

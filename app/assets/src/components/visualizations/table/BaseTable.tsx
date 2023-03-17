@@ -420,6 +420,7 @@ class BaseTable extends React.Component<
         onChange={onSelectRow}
         value={disabled ? -1 : cellData}
         disabled={disabled}
+        testId="row-select-checkbox"
       />
     );
   };

@@ -10,6 +10,7 @@ interface CheckboxProps {
   label?: string | React.ReactElement;
   onChange?: $TSFixMeFunction;
   value?: string | number;
+  testId?: string;
 }
 
 interface CheckboxState {
@@ -47,13 +48,14 @@ class Checkbox extends React.Component<CheckboxProps, CheckboxState> {
   }
 
   render() {
-    const { disabled, label, value, className } = this.props;
+    const { disabled, label, value, className, testId } = this.props;
     const { isChecked } = this.state;
 
     return (
       <div
         className={cx(cs.checkbox, className, disabled && cs.disabled)}
         onClick={disabled ? null : this.handleClick}
+        data-testid={testId}
       >
         <input
           type="checkbox"

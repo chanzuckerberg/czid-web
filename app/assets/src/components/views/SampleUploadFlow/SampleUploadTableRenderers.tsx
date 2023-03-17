@@ -113,6 +113,7 @@ export default class SampleUploadTableRenderers extends React.Component {
                   onChange={onSelectRow}
                   value={disabled ? -1 : cellData.id}
                   disabled={disabled}
+                  testId="row-select-checkbox"
                 />
               ) : finishedValidating ? (
                 <Checkbox
@@ -121,6 +122,7 @@ export default class SampleUploadTableRenderers extends React.Component {
                   onChange={onSelectRow}
                   value={disabled ? -1 : cellData.id}
                   disabled={disabled}
+                  testId="row-select-checkbox"
                 />
               ) : (
                 <i className="fa fa-spinner fa-pulse fa-fw" />

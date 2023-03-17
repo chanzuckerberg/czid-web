@@ -99,6 +99,7 @@ const BulkDeleteTrigger = ({
       popupText={primaryText}
       onClick={onClick}
       inverted={shouldInvertTooltip}
+      testId="bulk-delete-trigger"
     />
   );
 };

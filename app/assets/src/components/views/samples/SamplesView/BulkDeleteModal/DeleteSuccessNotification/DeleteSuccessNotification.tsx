@@ -14,16 +14,18 @@ const DeleteSuccessNotification = ({
   sampleCount,
   workflowLabel,
 }: DeleteSuccessNotificationProps) => (
-  <Notification
-    intent="info"
-    onClose={onClose}
-    buttonText="dismiss"
-    buttonOnClick={onClose}
-    slideDirection="right"
-  >
-    {sampleCount} {workflowLabel} {pluralize("run", sampleCount)}{" "}
-    {pluralize("was", sampleCount)} successfully deleted.
-  </Notification>
+  <div data-testid="sample-delete-success-notif">
+    <Notification
+      intent="info"
+      onClose={onClose}
+      buttonText="dismiss"
+      buttonOnClick={onClose}
+      slideDirection="right"
+    >
+      {sampleCount} {workflowLabel} {pluralize("run", sampleCount)}{" "}
+      {pluralize("was", sampleCount)} successfully deleted.
+    </Notification>
+  </div>
 );
 
 export { DeleteSuccessNotification };
