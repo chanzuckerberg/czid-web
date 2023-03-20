@@ -2201,7 +2201,7 @@ class DiscoveryView extends React.Component<
 
     return workflows.map(name => {
       const workflowName = `${WORKFLOWS[name].pluralizedLabel}`;
-      const isBeta = workflowIsBeta(name);
+      const isBeta = workflowIsBeta(name, allowedFeatures);
 
       let workflowCount: number | string =
         filteredSampleCountsByWorkflow[WORKFLOWS[name].value];

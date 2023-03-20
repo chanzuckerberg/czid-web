@@ -13,6 +13,7 @@ import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
+import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
 import DataTable from "~/components/visualizations/table/DataTable";
 import { HostGenome, Project, SampleFromApi } from "~/interface/shared";
@@ -374,6 +375,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
   renderAnalysesSections = () => {
     const { technology } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
 
     const sections = map(workflow => {
       const workflowKey = UPLOAD_WORKFLOW_KEY_FOR_VALUE[workflow];
@@ -383,6 +385,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
         workflow === UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value;
       const workflowIsBeta = workflow === UPLOAD_WORKFLOWS.AMR.value;
       const sequencingPlatformIsBeta =
+        !allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE) &&
         workflow === UPLOAD_WORKFLOWS.MNGS.value &&
         technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 

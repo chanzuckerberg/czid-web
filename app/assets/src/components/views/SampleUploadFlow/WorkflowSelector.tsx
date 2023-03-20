@@ -11,7 +11,6 @@ import {
   ARTIC_PIPELINE_LINK,
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   GUPPY_BASECALLER_DOC_LINK,
-  GUPPY_BASECALLER_HELP_LINK,
   MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
   MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
   UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
@@ -276,6 +275,9 @@ const WorkflowSelector = ({
         </Tooltip>
       );
     }
+    const isBeta =
+      workflowKey === UPLOAD_WORKFLOWS.MNGS.value &&
+      !allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE);
     return (
       <div
         className={cx(
@@ -297,7 +299,7 @@ const WorkflowSelector = ({
         <div className={cs.optionText}>
           <div className={cs.title}>
             Nanopore
-            {workflowKey === UPLOAD_WORKFLOWS.MNGS.value && (
+            {isBeta && (
               <StatusLabel
                 className={shouldDisableOption && cs.disabledStatus}
                 inline
@@ -394,11 +396,7 @@ const WorkflowSelector = ({
               "Specifies which basecalling model of 'Guppy' was used to generate the data. This will affect the pipeline parameters."
             }
             position={"top center"}
-            link={
-              allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE)
-                ? GUPPY_BASECALLER_HELP_LINK
-                : GUPPY_BASECALLER_DOC_LINK
-            }
+            link={GUPPY_BASECALLER_DOC_LINK}
           />
         </div>
         <Dropdown

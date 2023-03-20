@@ -1,3 +1,5 @@
+import { ONT_V1_HARD_LAUNCH_FEATURE } from "./features";
+
 // Pipeline workflow options
 export const WORKFLOW_ENTITIES = {
   SAMPLES: "Samples" as const,
@@ -58,8 +60,15 @@ export const WORKFLOW_ORDER = [
   "AMR" as const,
 ];
 
-export const workflowIsBeta = (workflow: keyof typeof WORKFLOWS) => {
-  return ["AMR", "LONG_READ_MNGS"].includes(workflow);
+export const workflowIsBeta = (
+  workflow: keyof typeof WORKFLOWS,
+  allowedFeatures: string[],
+) => {
+  const betaWorkflows = ["AMR"];
+  if (!allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE)) {
+    betaWorkflows.push("LONG_READ_MNGS");
+  }
+  return betaWorkflows.includes(workflow);
 };
 
 export const getShorthandFromWorkflow = (workflow: WORKFLOW_VALUES) => {
