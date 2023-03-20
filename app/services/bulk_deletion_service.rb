@@ -53,6 +53,7 @@ class BulkDeletionService
 
   def bulk_delete_objects(object_ids:, workflow:, user:)
     current_power = Power.new(user)
+    delete_timestamp = Time.now.utc
 
     # If mngs, get pipeline runs from sample ids
     # and clean up visualizations.
@@ -65,9 +66,17 @@ class BulkDeletionService
       deletable_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
     end
 
-    deletable_objects.update(deleted_at: Time.now.utc)
+    deletable_objects.update(deleted_at: delete_timestamp)
 
-    # delete associated bulk downloads
+    # Mark associated bulk downloads for deletion. Unlike `.update`, `.update_attribute` skips model validations (i.e.
+    # column X must satisfy certain conditions), and skips updating `updated_at`. This is needed to make sure we mark
+    # for deletion old rows that were created before we added new validations to the model (which would now fail, but
+    # we still want to delete them regardless), e.g. see `validate :params_checks` in bulk_download.rb.
+    # rubocop:disable Rails/SkipsModelValidations
+    deletable_objects.each do |run|
+      run.bulk_downloads.update_all(deleted_at: delete_timestamp)
+    end
+    # rubocop:enable Rails/SkipsModelValidations
 
     # launch async job for hard deletion
     object_ids = deletable_objects.pluck(:id)

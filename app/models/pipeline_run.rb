@@ -2170,6 +2170,7 @@ class PipelineRun < ApplicationRecord
     AmrCount.where(pipeline_run_id: id).delete_all
     ErccCount.where(pipeline_run_id: id).delete_all
     JobStat.where(pipeline_run_id: id).delete_all
+    bulk_downloads.each(&:destroy)
   end
 
   def calculate_qc_percent(before_qc, after_qc)

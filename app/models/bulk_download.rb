@@ -12,6 +12,7 @@ class BulkDownload < ApplicationRecord
   has_and_belongs_to_many :workflow_runs
   belongs_to :user
   has_secure_token :access_token
+  scope :non_deleted, -> { where(deleted_at: nil) }
   after_destroy :cleanup_s3
 
   STATUS_WAITING = "waiting".freeze
@@ -56,7 +57,7 @@ class BulkDownload < ApplicationRecord
       metric = get_param_value("metric")
       workflow = get_param_value("workflow")
       all_metrics = WorkflowRun::WORKFLOW_METRICS[workflow]
-      errors.add(:params, "metrics value is invalid") unless all_metrics.pluck(:value).include?(metric)
+      errors.add(:params, "metrics value is invalid") unless all_metrics && all_metrics.pluck(:value).include?(metric)
 
       if ["NT.zscore", "NR.zscore"].include?(metric)
         errors.add(:params, "background value must be an integer") unless get_param_value("background").is_a? Integer
@@ -109,13 +110,13 @@ class BulkDownload < ApplicationRecord
     end
   end
 
-  # Only bulk downloads created by the user
+  # Only bulk downloads created by the user, and not marked for deletion
   def self.viewable(user)
     if user.admin?
       all
     else
       user.bulk_downloads
-    end
+    end.non_deleted
   end
 
   def validate_access_token(access_token)

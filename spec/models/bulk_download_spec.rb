@@ -6,6 +6,8 @@ describe BulkDownload, type: :model do
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}:12345".freeze }
   let(:fake_wdl_version) { "4".freeze }
   let(:fake_dag_version) { "4.999".freeze }
+  let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
+  let(:consensus_genome) { WorkflowRun::WORKFLOW[:consensus_genome] }
 
   context "#success_url" do
     before do
@@ -1422,6 +1424,67 @@ describe BulkDownload, type: :model do
 
     it "returns nothing if no accession id" do
       expect(bulk_download.get_accession_id_prefix(workflow_run_without_accession_id)).to eq(nil)
+    end
+  end
+
+  context "bulk downloads associations" do
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe])
+
+      @sample1 = create(:sample, project: @project, user: @joe, name: "mNGS sample 1")
+      @sample2 = create(:sample, project: @project, user: @joe, name: "mNGS sample 2")
+
+      @pr1 = create(:pipeline_run, sample: @sample1, technology: illumina, finalized: 1)
+      @pr2 = create(:pipeline_run, sample: @sample2, technology: illumina, finalized: 1)
+
+      @wr1 = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+      @wr2 = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+
+      @download_pr = create(:bulk_download, user: @joe, pipeline_run_ids: [@pr1.id, @pr2.id], download_type: "unmapped_reads")
+      @download_wr = create(:bulk_download, user: @joe, workflow_run_ids: [@wr1.id, @wr2.id], download_type: "unmapped_reads")
+      @download_both = create(:bulk_download, user: @joe, workflow_run_ids: [@wr1.id, @wr2.id], pipeline_run_ids: [@pr1.id, @pr2.id], download_type: "unmapped_reads")
+    end
+
+    it "deletes bulk downloads when delete a pipeline run" do
+      @pr1.destroy
+      expect(PipelineRun.find_by(id: @pr1.id)).to be_nil
+      expect(PipelineRun.find_by(id: @pr2.id)).not_to be_nil
+      expect(BulkDownload.find_by(id: @download_pr.id)).to be_nil
+    end
+
+    it "deletes bulk downloads when delete a workflow run" do
+      @wr1.destroy
+      expect(WorkflowRun.find_by(id: @wr1.id)).to be_nil
+      expect(WorkflowRun.find_by(id: @wr2.id)).not_to be_nil
+      expect(BulkDownload.find_by(id: @download_wr.id)).to be_nil
+    end
+
+    it "deletes bulk downloads when delete a workflow run - bulk download associated with both pr and wr" do
+      @wr1.destroy
+      expect(WorkflowRun.find_by(id: @wr1.id)).to be_nil
+      expect(WorkflowRun.find_by(id: @wr2.id)).not_to be_nil
+      expect(PipelineRun.find_by(id: @pr1.id)).not_to be_nil
+      expect(PipelineRun.find_by(id: @pr2.id)).not_to be_nil
+      expect(BulkDownload.find_by(id: @download_both.id)).to be_nil
+    end
+
+    it "don't delete a workflow when delete a bulk download" do
+      @download_pr.destroy
+      @download_wr.destroy
+      @download_both.destroy
+      expect(WorkflowRun.find_by(id: @wr1.id)).not_to be_nil
+      expect(WorkflowRun.find_by(id: @wr2.id)).not_to be_nil
+      expect(PipelineRun.find_by(id: @pr1.id)).not_to be_nil
+      expect(PipelineRun.find_by(id: @pr2.id)).not_to be_nil
+    end
+
+    it "don't show a deleted bulk download" do
+      expect(BulkDownload.viewable(@joe).length).to eq 3
+      @download_pr.destroy
+      @download_wr.destroy
+      @download_both.destroy
+      expect(BulkDownload.viewable(@joe).length).to eq 0
     end
   end
 end

@@ -45,6 +45,9 @@ class WorkflowRun < ApplicationRecord
   extend ParameterSanitization
 
   belongs_to :sample
+  has_and_belongs_to_many :bulk_downloads
+
+  before_destroy :cleanup_relations
   before_destroy :cleanup_s3
 
   WORKFLOW = {
@@ -443,6 +446,10 @@ class WorkflowRun < ApplicationRecord
     return if sfn_output_path.blank?
 
     S3Util.delete_s3_prefix(sfn_output_path)
+  end
+
+  def cleanup_relations
+    bulk_downloads.each(&:destroy)
   end
 
   def sfn_execution
