@@ -29,7 +29,7 @@ help: ## display help for this makefile
 		echo AWS_REGION=us-west-2 >> .env.localdev; \
 		echo AWS_PROFILE=$(AWS_DEV_PROFILE) >> .env.localdev; \
 		echo DEPLOYMENT_ENVIRONMENT=dev >> .env.localdev; \
-		echo COMPOSE_PROFILES=local-lambdas
+		echo COMPOSE_PROFILES=local-lambdas >> .env.localdev; \
 	else \
 		false; \
 	fi

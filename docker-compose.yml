@@ -78,7 +78,6 @@ services:
     build:
       context: ./docker/open_distro
       dockerfile: Dockerfile
-    image: opendistro-for-elasticsearch-no-security
     environment:
       - node.name=heatmap-elasticsearch-node
       - discovery.type=single-node
