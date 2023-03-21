@@ -592,17 +592,19 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
         // Update children and add to back of bfs queue
         const newLevel = nodeToCurrentLevel[currentNode] + 1;
         fromToToEdgeMap[currentNode].forEach((edge: $TSFixMe) => {
-          const toNodeId = edge.to;
-          if (newLevel > nodeToCurrentLevel[toNodeId]) {
-            nodeToCurrentLevel[toNodeId] = newLevel;
-            if (toNodeId !== END_NODE_ID) {
-              nodeToCurrentLevel[END_NODE_ID] = Math.max(
-                nodeToCurrentLevel[END_NODE_ID],
-                newLevel + 1,
-              );
+          if (edge.color) {
+            const toNodeId = edge.to;
+            if (newLevel > nodeToCurrentLevel[toNodeId]) {
+              nodeToCurrentLevel[toNodeId] = newLevel;
+              if (toNodeId !== END_NODE_ID) {
+                nodeToCurrentLevel[END_NODE_ID] = Math.max(
+                  nodeToCurrentLevel[END_NODE_ID],
+                  newLevel + 1,
+                );
+              }
             }
+            bfs.push(toNodeId);
           }
-          bfs.push(toNodeId);
         });
       }
     }
