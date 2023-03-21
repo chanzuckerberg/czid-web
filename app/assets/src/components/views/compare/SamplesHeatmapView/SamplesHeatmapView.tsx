@@ -78,7 +78,7 @@ import SamplesHeatmapControls, {
 } from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
 import SamplesHeatmapFilterStats from "./SamplesHeatmapFilterStats";
-import SamplesHeatmapFiltersContent from "./SamplesHeatmapFiltersContent";
+import SamplesHeatmapFilters from "./SamplesHeatmapFilters";
 import { SamplesHeatmapHeader } from "./SamplesHeatmapHeader/SamplesHeatmapHeader";
 import SamplesHeatmapLegend from "./SamplesHeatmapLegend";
 import {
@@ -1817,6 +1817,9 @@ class SamplesHeatmapView extends React.Component<
       allGeneraIds,
     } = this.state;
 
+    const headerHeight = 130;
+    const drawerWidth = 200;
+
     return (
       <div className="visualization-content">
         {useNewFilters && (
@@ -1842,10 +1845,28 @@ class SamplesHeatmapView extends React.Component<
           {useNewFilters && (
             <FilterPanel
               hideFilters={this.state.hideFilters}
-              content={<SamplesHeatmapFiltersContent />}
+              content={
+                <SamplesHeatmapFilters
+                  options={this.getControlOptions()}
+                  selectedOptions={selectedOptions}
+                  onSelectedOptionsChange={this.handleSelectedOptionsChange}
+                  loading={loading}
+                  data={data}
+                  filteredTaxaCount={shownTaxa.size}
+                  totalTaxaCount={
+                    selectedOptions.species
+                      ? allSpeciesIds.length
+                      : allGeneraIds.length
+                  }
+                  prefilterConstants={this.props.prefilterConstants}
+                  enableMassNormalizedBackgrounds={
+                    this.state.enableMassNormalizedBackgrounds
+                  }
+                />
+              }
               anchorPosition={"left"}
-              customHeaderHeight={200}
-              customDrawerWidth={120}
+              customHeaderHeight={headerHeight}
+              customDrawerWidth={drawerWidth}
             />
           )}
           {this.state.loading ? this.renderLoading() : this.renderHeatmap()}

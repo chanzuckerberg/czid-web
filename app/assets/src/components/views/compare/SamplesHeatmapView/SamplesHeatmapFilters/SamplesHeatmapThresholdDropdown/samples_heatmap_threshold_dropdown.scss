@@ -1,0 +1,21 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.container {
+  width: 412px;
+  padding: $sds-spaces-m;
+}
+
+.thresholdButtons {
+  /* Override row css */
+  margin-top: $sds-spaces-xxl;
+  text-align: center;
+}
+.button {
+  margin-left: $sds-spaces-m;
+
+  &:first-child {
+    margin-left: 0;
+  }
+}

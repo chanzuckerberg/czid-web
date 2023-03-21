@@ -1,0 +1,10 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.popover {
+  &.MuiPopover-root {
+    padding: $sds-spaces-m;
+    width: 412px;
+  }
+}

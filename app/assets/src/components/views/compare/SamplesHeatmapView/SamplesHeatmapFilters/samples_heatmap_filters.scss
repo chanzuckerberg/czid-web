@@ -1,0 +1,55 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.panelContentsContainer {
+  // The SDS component spec calls for $sds-spaces-l padding, while the CZID spec calls for $sds-spaces-xl.
+  // The difference between these two is 8px, so we're using $sds-spaces-s here to make up the difference.
+  // Note that the top padding from the SDS component is not included here because it is hidden by the overlapping header.
+  padding: $sds-spaces-xl $sds-spaces-s $sds-spaces-s;
+}
+
+.topFilterSection {
+  // no top padding for the first section as this is taken care of by the container element
+  display: flex;
+  flex-direction: column;
+  margin-bottom: $sds-spaces-xl;
+}
+
+.lowerFilterSection {
+  display: flex;
+  flex-direction: column;
+  margin-top: $sds-spaces-xl;
+  margin-bottom: $sds-spaces-xl;
+}
+
+.sectionTitle {
+  @include font-caps-xxs;
+  line-height: 40px;
+  color: $sds-color-gray-black;
+  height: 40px;
+  margin-bottom: $sds-spaces-l;
+}
+
+.filterControl {
+  margin-bottom: $sds-spaces-l;
+}
+
+.filterTagsList {
+  margin-bottom: $sds-spaces-l;
+
+  .filterTag {
+    margin: 0;
+    margin-right: $sds-spaces-xs;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.taxaPerSampleSlider {
+  width: 200px;
+  margin: $sds-spaces-m;
+}
