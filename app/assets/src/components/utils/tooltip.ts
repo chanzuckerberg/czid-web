@@ -1,7 +1,4 @@
-import {
-  UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
-  VADR_ANCHOR_LINK,
-} from "~/components/utils/documentationLinks";
+import { UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK } from "~/components/utils/documentationLinks";
 
 const TOOLTIP_BUFFER = 10;
 const TOOLTIP_MAX_WIDTH = 400;
@@ -116,12 +113,6 @@ export const FIELDS_METADATA = {
   referenceAccessionLength: {
     label: "Reference Accession Length",
     tooltip: "Length of reference accession in basepairs.",
-  },
-  vadrPassFail: {
-    label: "VADR",
-    tooltip:
-      "Viral Annotation Definer: a suite of tools used to determine if your consensus genome will pass the upload validation steps for NCBI and GISAID. Download errors and annotations on the results page.",
-    link: VADR_ANCHOR_LINK,
   },
   medakaModel: {
     label: "Medaka Model",

@@ -707,7 +707,7 @@ describe WorkflowRun, type: :model do
 
     context "when sorting workflow runs by cached results" do
       let(:data_key_list) do
-        ["totalReadsCG", "percentGenomeCalled", "vadrPassFail", "coverageDepth", "gcPercent",
+        ["totalReadsCG", "percentGenomeCalled", "coverageDepth", "gcPercent",
          "refSnps", "percentIdentity", "nActg", "nMissing", "nAmbiguous", "referenceAccessionLength",]
       end
 
@@ -732,7 +732,6 @@ describe WorkflowRun, type: :model do
             gc_percent: 38.0,
             percent_genome_called: 99.7,
             reference_genome_length: 29_903,
-            vadr_pass_fail: "FAIL",
           },
         }.to_json
 
@@ -750,7 +749,6 @@ describe WorkflowRun, type: :model do
             gc_percent: 39.0,
             percent_genome_called: 99.8,
             reference_genome_length: 29_904,
-            vadr_pass_fail: "PASS",
           },
         }.to_json
 

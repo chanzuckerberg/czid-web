@@ -368,6 +368,7 @@ class DiscoveryView extends React.Component<
 
     this.updateBrowsingHistory("replace");
   }
+
   setupWorkflowConfigs = () => {
     this.configForWorkflow = {
       [WORKFLOWS.AMR.value]: {

@@ -29,8 +29,6 @@ export const PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK =
   "https://help.czid.org/hc/en-us/articles/360058195412";
 export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =
   "https://help.czid.org/hc/en-us/articles/360059656311#Upload";
-export const VADR_ANCHOR_LINK =
-  "https://help.czid.org/hc/en-us/articles/360049787632-Building-and-analyzing-a-SARS-CoV-2-consensus-genome#Viral-Annotation-DefineR-VADR";
 export const MAIL_TO_HELP_LINK = "mailto:help@czid.org";
 export const PHYLO_TREE_LINK =
   "https://help.czid.org/hc/en-us/articles/4404223662228";

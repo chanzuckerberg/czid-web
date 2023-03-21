@@ -202,7 +202,6 @@ const processConsensusGenomeWorkflowRun = (cgWorkflowRun: $TSFixMe) => {
         "quality_metrics",
         "reference_genome_length",
       ]),
-      vadrPassFail: getCachedResult(["quality_metrics", "vadr_pass_fail"]),
     }),
   };
 };

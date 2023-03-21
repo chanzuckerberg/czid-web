@@ -160,7 +160,6 @@ class WorkflowRun < ApplicationRecord
     "medakaModel" => "medaka_model",
     "totalReadsCG" => "total_reads",
     "percentGenomeCalled" => "percent_genome_called",
-    "vadrPassFail" => "vadr_pass_fail",
     "coverageDepth" => "coverage_depth",
     "gcPercent" => "gc_percent",
     "refSnps" => "ref_snps",
@@ -183,7 +182,7 @@ class WorkflowRun < ApplicationRecord
   CACHED_RESULT_QUALITY_METRICS_KEY = "quality_metrics".freeze
   CACHED_RESULT_COVERAGE_VIZ_KEY = "coverage_viz".freeze
   CACHED_RESULT_SORT_KEYS = [
-    "total_reads", "percent_genome_called", "vadr_pass_fail", "coverage_depth", "gc_percent",
+    "total_reads", "percent_genome_called", "coverage_depth", "gc_percent",
     "ref_snps", "percent_identity", "n_actg", "n_missing", "n_ambiguous",
     "reference_genome_length", QC_PERCENT_KEY, REMAINING_READS_KEY, COMPRESSION_RATIO_KEY,
     TOTAL_ERCC_READS_KEY, SUBSAMPLED_FRACTION_KEY, INSERT_SIZE_MEAN_KEY,

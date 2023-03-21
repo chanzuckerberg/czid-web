@@ -327,11 +327,6 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
     },
     {
-      dataKey: "vadrPassFail",
-      flexGrow: 1,
-      className: cs.basicCell,
-    },
-    {
       dataKey: "medakaModel",
       flexGrow: 1,
       className: cs.basicCell,
@@ -525,7 +520,6 @@ export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {
     "collection_location_v2",
     "totalReadsCG",
     "percentGenomeCalled",
-    "vadrPassFail",
   ],
   [WORKFLOWS.AMR.value]: [
     "sample",
