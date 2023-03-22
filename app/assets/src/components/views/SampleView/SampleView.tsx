@@ -560,7 +560,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
     this.handleOptionChanged({ key: "background", value: null });
     showNotification(NOTIFICATION_TYPES.invalidBackground, {
-      backgroundName: invalidBackground.name,
+      backgroundName: invalidBackground?.name,
     });
   };
 

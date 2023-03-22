@@ -4,7 +4,7 @@ import React from "react";
 import { trackEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import { LocationObject } from "~/interface/shared";
-import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
+import LiveSearchPopBox, { SearchResults } from "~ui/controls/LiveSearchPopBox";
 
 export const LOCATION_PRIVACY_WARNING =
   "Changed to county/district level for personal privacy.";
@@ -67,11 +67,23 @@ export const getLocationWarning = result => {
   return "";
 };
 
-// An input box that fetches and shows geosearch suggestions for user input of locations.
-class GeoSearchInputBox extends React.Component<GeoSearchInputBoxProps> {
+interface GeoSearchInputBoxProps {
+  className?: string;
+  inputClassName?: string;
+  onResultSelect?(params: any): void;
+  value?: { name: string } | string;
+}
+
+/** An input box that fetches and shows geosearch suggestions for user input of locations. */
+const GeoSearchInputBox = ({
+  className,
+  inputClassName,
+  onResultSelect,
+  value = "",
+}: GeoSearchInputBoxProps) => {
   // Fetch geosearch results and format into categories for LiveSearchBox
-  handleSearchTriggered = async query => {
-    const categories = {};
+  const handleSearchTriggered = async (query: string) => {
+    const categories: SearchResults = {};
     let serverSideSuggestions = [];
     try {
       serverSideSuggestions = await getGeoSearchSuggestions(query);
@@ -118,9 +130,7 @@ class GeoSearchInputBox extends React.Component<GeoSearchInputBoxProps> {
     return categories;
   };
 
-  handleResultSelected = ({ result }) => {
-    const { onResultSelect } = this.props;
-
+  const handleResultSelected = ({ result }) => {
     // Wrap plain text submission
     if (isString(result) && result !== "") result = { name: result };
 
@@ -132,35 +142,19 @@ class GeoSearchInputBox extends React.Component<GeoSearchInputBoxProps> {
 
     onResultSelect && onResultSelect({ result });
   };
-  static defaultProps: GeoSearchInputBoxProps;
 
-  render() {
-    const { className, inputClassName, value } = this.props;
-
-    return (
-      <LiveSearchPopBox
-        className={className}
-        inputClassName={inputClassName}
-        inputMode
-        onResultSelect={this.handleResultSelected}
-        onSearchTriggered={this.handleSearchTriggered}
-        placeholder="Enter a city, region or country"
-        rectangular
-        value={isString(value) ? value : value.name}
-      />
-    );
-  }
-}
-
-GeoSearchInputBox.defaultProps = {
-  value: "",
+  return (
+    <LiveSearchPopBox
+      className={className}
+      inputClassName={inputClassName}
+      inputMode
+      onResultSelect={handleResultSelected}
+      onSearchTriggered={handleSearchTriggered}
+      placeholder="Enter a city, region or country"
+      rectangular
+      value={isString(value) ? value : value.name}
+    />
+  );
 };
-
-interface GeoSearchInputBoxProps {
-  className?: string;
-  inputClassName?: string;
-  onResultSelect?: $TSFixMe;
-  value: { name: string } | string;
-}
 
 export default GeoSearchInputBox;

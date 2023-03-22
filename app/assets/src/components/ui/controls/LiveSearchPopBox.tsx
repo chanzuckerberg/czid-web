@@ -1,159 +1,157 @@
 import cx from "classnames";
 import { forEach, sumBy, values } from "lodash/fp";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Input from "~ui/controls/Input";
 import { BareDropdown } from "~ui/controls/dropdowns";
 import cs from "./live_search_pop_box.scss";
 
-interface LiveSearchPopBoxState {
-  isLoading: boolean;
-  results: $TSFixMe;
-  inputValue: $TSFixMe;
-  focus?: boolean;
+type SearchResult = {
+  title: string;
+  name: number | string;
+  description?: string;
+  [key: string]: any;
+};
+
+interface SearchCategory {
+  name: string;
+  results: SearchResult[];
 }
 
-class LiveSearchPopBox extends React.Component<
-  LiveSearchPopBoxProps,
-  LiveSearchPopBoxState
-> {
-  static defaultProps: LiveSearchPopBoxProps;
-  lastestTimerId: any;
-  constructor(props) {
-    super(props);
+export interface SearchResults {
+  [key: string]: SearchCategory;
+}
 
-    this.state = {
-      isLoading: false,
-      results: [],
-      // the current value of the search input
-      // Cannot be undefined or null. Must be a string.
-      inputValue: this.props.initialValue,
-    };
+interface LiveSearchPopBoxProps {
+  className?: string;
+  delayTriggerSearch?: number;
+  inputClassName?: string;
+  inputMode?: boolean;
+  minChars?: number;
+  onResultSelect?(params: any): void;
+  onSearchTriggered?(query: string): SearchResults | Promise<SearchResults>;
+  placeholder?: string;
+  rectangular?: boolean;
+  value?: string;
+  icon?: string;
+  shouldSearchOnFocus?: boolean;
+}
 
-    this.lastestTimerId = null;
-  }
+const LiveSearchPopBox = ({
+  className,
+  delayTriggerSearch = 200,
+  inputClassName,
+  minChars = 2,
+  placeholder = "Search",
+  rectangular = false,
+  inputMode = false,
+  icon = "search",
+  shouldSearchOnFocus = false,
+  onResultSelect,
+  onSearchTriggered,
+  value,
+}: LiveSearchPopBoxProps) => {
+  const [latestTimerId, setLatestTimerId] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [results, setResults] = useState<SearchResults>({});
+  const [inputValue, setInputValue] = useState<string>("");
 
-  static getDerivedStateFromProps(props, state) {
-    // If the value has changed, reset the input value.
-    // Store the prevValue to detect whether the value has changed.
-    if (props.value !== state.prevValue) {
-      return {
-        prevValue: props.value,
-        inputValue: props.value || "",
-      };
-    }
-    return null;
-  }
+  // If the value has changed, reset the input value.
+  // Store the prevValue to detect whether the value has changed.
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
 
-  handleKeyDown = keyEvent => {
-    const { onEnter, inputMode } = this.props;
-    const { inputValue } = this.state;
-
+  const handleKeyDown = keyEvent => {
     // Pressing enter selects what they currently typed.
     if (keyEvent.key === "Enter") {
       if (inputMode) {
-        this.handleResultSelect({
+        handleResultSelect({
           result: inputValue,
           currentEvent: {},
         });
       }
-      onEnter && onEnter({ current: keyEvent, value: inputValue });
     }
   };
 
-  handleResultSelect = ({ currentEvent, result }) => {
-    const { onResultSelect } = this.props;
+  const closeDropdown = () => {
+    setIsLoading(false);
+    setIsFocused(false);
+  };
+
+  const handleResultSelect = ({ currentEvent, result }) => {
     onResultSelect && onResultSelect({ currentEvent, result });
-    this.closeDropdown();
+    closeDropdown();
   };
 
-  closeDropdown = () => {
-    this.setState({
-      isLoading: false,
-      focus: false,
-    });
-  };
-
-  triggerSearch = async () => {
-    const { onSearchTriggered } = this.props;
-    const { inputValue } = this.state;
-
-    this.setState({ isLoading: true, focus: true });
-
-    const timerId = this.lastestTimerId;
+  const triggerSearch = async () => {
+    const timerId = latestTimerId;
     const results = await onSearchTriggered(inputValue);
 
-    if (timerId === this.lastestTimerId) {
-      this.setState({
-        isLoading: false,
-        results: results,
-      });
+    if (timerId === latestTimerId) {
+      setIsLoading(false);
+      setResults(results);
     }
   };
 
-  handleSearchChange = value => {
-    const { delayTriggerSearch, minChars, onSearchChange } = this.props;
-    this.setState({
-      inputValue: value,
-    });
-    onSearchChange && onSearchChange(value);
+  const handleSearchChange = value => {
+    setInputValue(value);
+
     // check minimum requirements for value
     const parsedValue = value.trim();
     if (parsedValue.length >= minChars) {
-      if (this.lastestTimerId) {
-        clearTimeout(this.lastestTimerId);
+      setIsFocused(true);
+      setIsLoading(true);
+
+      if (latestTimerId) {
+        clearTimeout(latestTimerId);
       }
-      this.lastestTimerId = setTimeout(this.triggerSearch, delayTriggerSearch);
+
+      const newTimerId = setTimeout(triggerSearch, delayTriggerSearch);
+      setLatestTimerId(newTimerId);
     }
   };
 
-  renderSearchBox = () => {
-    const { placeholder, rectangular, inputClassName, icon } = this.props;
-    const { isLoading, inputValue } = this.state;
+  const renderSearchBox = () => (
+    <div onFocus={handleFocus} onBlur={handleBlur}>
+      <Input
+        fluid
+        className={cx(
+          cs.searchInput,
+          rectangular && cs.rectangular,
+          inputClassName,
+        )}
+        icon={icon}
+        loading={isLoading}
+        placeholder={placeholder}
+        onChange={handleSearchChange}
+        onKeyPress={handleKeyDown}
+        value={inputValue}
+        disableAutocomplete
+      />
+    </div>
+  );
 
-    return (
-      <div onFocus={this.handleFocus} onBlur={this.handleBlur}>
-        <Input
-          fluid
-          className={cx(
-            cs.searchInput,
-            rectangular && cs.rectangular,
-            inputClassName,
-          )}
-          icon={icon}
-          loading={isLoading}
-          placeholder={placeholder}
-          onChange={this.handleSearchChange}
-          onKeyPress={this.handleKeyDown}
-          value={inputValue}
-          disableAutocomplete={true}
-        />
-      </div>
-    );
-  };
-
-  handleFocus = () => {
-    if (this.hasEnoughChars() && this.props.shouldSearchOnFocus) {
-      this.handleSearchChange(this.state.inputValue);
+  const handleFocus = () => {
+    if (hasEnoughChars() && shouldSearchOnFocus) {
+      handleSearchChange(inputValue);
     }
 
-    this.setState({ focus: true }); // open the dropdown
+    setIsFocused(true);
   };
 
-  // If a user selects an option, handleResultSelect will run and update this.props.value before this function runs.
-  // So inputValue will equal this.props.value when this function runs and onResultSelect will not be called, which is correct.
-  handleBlur = () => {
-    const { onResultSelect, value } = this.props;
-    const { inputValue } = this.state;
-
+  // If a user selects an option, handleResultSelect will run and update props.value before this function runs.
+  // So inputValue will equal props.value when this function runs and onResultSelect will not be called, which is correct.
+  const handleBlur = () => {
     // If the user has changed the input without selecting an option, select what they currently typed as plain-text.
     if (onResultSelect && inputValue !== value) {
       onResultSelect({ result: inputValue });
     }
 
-    this.closeDropdown();
+    closeDropdown();
   };
 
-  buildItem = (categoryKey, result, index) => (
+  const buildItem = (categoryKey, result, index) => (
     <BareDropdown.Item
       key={`${categoryKey}-${result.name}`}
       text={
@@ -166,95 +164,57 @@ class LiveSearchPopBox extends React.Component<
       }
       onMouseDown={currentEvent => {
         // use onMouseDown instead of onClick to work with handleBlur
-        this.handleResultSelect({ currentEvent, result });
+        handleResultSelect({ currentEvent, result });
       }}
       value={`${categoryKey}-${index}`}
     />
   );
 
-  buildSectionHeader = name => (
+  const buildSectionHeader = name => (
     <div key={name} className={cs.category}>
       {name}
     </div>
   );
 
-  renderDropdownItems = () => {
-    const { results } = this.state;
+  const renderDropdownItems = () => {
     // @ts-expect-error Property 'convert' does not exist on type 'LodashForEach'.ts(2339)
     const uncappedForEach = forEach.convert({ cap: false });
     const items = [];
     uncappedForEach((category, key) => {
-      items.push(this.buildSectionHeader(category.name));
+      items.push(buildSectionHeader(category.name));
       uncappedForEach((result, index) => {
-        items.push(this.buildItem(key, result, index));
+        items.push(buildItem(key, result, index));
       }, category.results);
     }, results);
 
     return items;
   };
 
-  getResultsLength = () => {
-    const { results } = this.state;
-    return sumBy(cat => ((cat || {}).results || []).length, values(results));
+  const getResultsLength = () => {
+    return sumBy(cat => cat?.results?.length, values(results));
   };
 
-  hasEnoughChars = () =>
-    this.state.inputValue.trim().length >= this.props.minChars;
+  const hasEnoughChars = () => inputValue.trim().length >= minChars;
+  const shouldOpen = getResultsLength() && isFocused && hasEnoughChars();
 
-  render() {
-    const { className, rectangular } = this.props;
-
-    const shouldOpen =
-      this.getResultsLength() && this.state.focus && this.hasEnoughChars();
-
-    return (
-      <BareDropdown
-        className={cx(
-          cs.liveSearchPopBox,
-          rectangular && cs.rectangular,
-          className,
-        )}
-        fluid
-        hideArrow
-        items={this.renderDropdownItems()}
-        onChange={this.handleResultSelect}
-        open={!!shouldOpen}
-        trigger={this.renderSearchBox()}
-        usePortal
-        withinModal
-        disableAutocomplete={true}
-      />
-    );
-  }
-}
-
-LiveSearchPopBox.defaultProps = {
-  delayTriggerSearch: 200,
-  initialValue: "",
-  minChars: 2,
-  placeholder: "Search",
-  rectangular: false,
-  inputMode: false,
-  icon: "search",
-  shouldSearchOnFocus: false,
+  return (
+    <BareDropdown
+      className={cx(
+        cs.liveSearchPopBox,
+        rectangular && cs.rectangular,
+        className,
+      )}
+      fluid
+      hideArrow
+      items={renderDropdownItems()}
+      onChange={handleResultSelect}
+      open={!!shouldOpen}
+      trigger={renderSearchBox()}
+      usePortal
+      withinModal
+      disableAutocomplete={true}
+    />
+  );
 };
-
-interface LiveSearchPopBoxProps {
-  className?: string;
-  delayTriggerSearch: number;
-  initialValue: string;
-  inputClassName?: string;
-  inputMode: boolean;
-  minChars: number;
-  onEnter?: $TSFixMeFunction;
-  onResultSelect?: $TSFixMeFunction;
-  onSearchChange?: $TSFixMeFunction;
-  onSearchTriggered?: $TSFixMeFunction;
-  placeholder: string;
-  rectangular: boolean;
-  value?: string;
-  icon: string;
-  shouldSearchOnFocus: boolean;
-}
 
 export default LiveSearchPopBox;

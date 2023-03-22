@@ -6,26 +6,18 @@ import {
 } from "~/components/views/SampleUploadFlow/utils";
 import { SampleTypeProps } from "~/interface/shared";
 
-import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
+import LiveSearchPopBox, { SearchResults } from "~ui/controls/LiveSearchPopBox";
 
 const SUGGESTED = "SUGGESTED";
 const ALL = "ALL";
 
 interface SampleTypeSearchBoxProps {
   className: string;
-  onResultSelect: $TSFixMeFunction;
+  onResultSelect(params: any): void;
   value: string;
   sampleTypes: SampleTypeProps[];
   taxaCategory: string;
   showDescription?: boolean;
-}
-export interface Result {
-  name: string;
-  results: {
-    title: string;
-    name: number | string;
-    description?: string;
-  }[];
 }
 
 const SampleTypeSearchBox = ({
@@ -79,11 +71,7 @@ const SampleTypeSearchBox = ({
         description: showDescription ? result.group : null,
       };
     };
-    const results = {} as {
-      suggested: Result;
-      all: Result;
-      noMatch: Result;
-    };
+    const results = {} as SearchResults;
     if (sampleTypesByCategory[SUGGESTED]) {
       results.suggested = {
         name: SUGGESTED,
@@ -116,7 +104,7 @@ const SampleTypeSearchBox = ({
       minChars={0}
       placeholder=""
       icon="chevron down"
-      shouldSearchOnFocus={true}
+      shouldSearchOnFocus
       delayTriggerSearch={0}
     />
   );

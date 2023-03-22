@@ -6,12 +6,11 @@ import {
 } from "~/components/views/SampleUploadFlow/utils";
 import { HostGenome } from "~/interface/shared";
 
-import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
-import { Result } from "./SampleTypeSearchBox";
+import LiveSearchPopBox, { SearchResults } from "~ui/controls/LiveSearchPopBox";
 
 interface HostOrganismSearchBoxProps {
   className?: string;
-  onResultSelect: $TSFixMeFunction;
+  onResultSelect(params: any): void;
   value?: string;
   hostGenomes: HostGenome[];
 }
@@ -59,10 +58,7 @@ const HostOrganismSearchBox = ({
           : null,
       };
     };
-    const results = {} as {
-      suggested: Result;
-      noMatch: Result;
-    };
+    const results = {} as SearchResults;
     if (sortedHostGenomes.length) {
       results.suggested = {
         name: "SUGGESTED",
@@ -93,7 +89,7 @@ const HostOrganismSearchBox = ({
       minChars={0}
       placeholder=""
       icon="chevron down"
-      shouldSearchOnFocus={true}
+      shouldSearchOnFocus
       delayTriggerSearch={0}
     />
   );
