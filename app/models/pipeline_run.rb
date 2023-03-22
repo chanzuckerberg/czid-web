@@ -2200,7 +2200,8 @@ class PipelineRun < ApplicationRecord
 
     "SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
       "after #{duration_hrs} hours. #{automatic_restart_text}#{known_user_error}"\
-      "See: #{status_url}"
+      "See: #{status_url}. "\
+      "SFN execution ARN: `#{sfn_execution_arn}`"
   end
 
   def report_failed_pipeline_run_stage(prs, known_user_error, automatic_restart = false)

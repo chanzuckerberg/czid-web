@@ -286,7 +286,8 @@ class WorkflowRun < ApplicationRecord
         error_message = input_error[:message]
       else
         Rails.logger.error("SampleFailedEvent: Sample #{sample.id} by " \
-        "#{sample.user.role_name} failed WorkflowRun #{id} (#{workflow}). See: #{sample.status_url}")
+        "#{sample.user.role_name} failed WorkflowRun #{id} (#{workflow}). See: #{sample.status_url}. " \
+        "SFN execution ARN: `#{sfn_execution_arn}`")
         error_message = parse_yaml_error_message
       end
       update(
