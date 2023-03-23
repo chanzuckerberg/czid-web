@@ -115,12 +115,6 @@ export const SampleViewHeaderControls = ({
     });
   };
 
-  const onSaveWithAnalytics = () => {
-    withAnalytics(onSaveClick, "SampleView_save-button_clicked", {
-      sampleId: sample?.id,
-    });
-  };
-
   const renderHelpButton = () => {
     // CG help button should only be shown if feature flag is on
     // unless the sample has 0 mNGS runs & exactly 1 CG run.
@@ -214,7 +208,13 @@ export const SampleViewHeaderControls = ({
           userIsAdmin && (
             <SaveButton
               className={cs.controlElement}
-              onClick={onSaveWithAnalytics}
+              onClick={withAnalytics(
+                onSaveClick,
+                "SampleView_save-button_clicked",
+                {
+                  sampleId: sample?.id,
+                },
+              )}
             />
           )
         );
