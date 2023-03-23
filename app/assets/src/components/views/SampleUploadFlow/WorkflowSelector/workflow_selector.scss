@@ -1,0 +1,106 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.workflowSelector {
+  margin-bottom: $sds-spaces-xxl;
+}
+
+.header {
+  @include font-header-xl;
+  margin-bottom: $sds-spaces-default;
+}
+
+.selectableOption {
+  border-radius: $sds-corners-corner-m;
+  cursor: pointer;
+  display: flex;
+  padding: $sds-spaces-l;
+  margin-bottom: $sds-spaces-xs;
+
+  &:hover {
+    background-color: $sds-color-gray-100;
+  }
+
+  &.selected {
+    background-color: $sds-color-gray-100;
+  }
+
+  &.disabled {
+    cursor: default;
+    background-color: initial;
+    color: $sds-color-gray-300;
+  }
+}
+
+.technologyOptions {
+  margin-top: $sds-spaces-xxxs;
+}
+
+.checkbox {
+  flex-shrink: 0;
+  align-items: flex-start;
+  margin-top: $sds-spaces-xxs;
+
+  &.alignTitle {
+    padding-top: $sds-spaces-xxs;
+    margin-top: 0px;
+  }
+}
+
+.radioButton {
+  flex-shrink: 0;
+  margin: $sds-spaces-l;
+
+  &.alignTitle {
+    margin-top: $sds-spaces-xxs;
+  }
+}
+
+.title {
+  @include font-header-s;
+}
+
+.technologyTitle {
+  padding-top: $sds-spaces-l;
+}
+
+.infoIcon {
+  margin-left: $sds-spaces-xs;
+  vertical-align: -$sds-spaces-xxxs;
+}
+
+.description {
+  @include font-body-s;
+}
+
+.technologyContent {
+  display: flex;
+  margin-top: $sds-spaces-l;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  margin-right: $sds-spaces-xl;
+}
+
+.subheader {
+  @include font-header-xs;
+  margin-bottom: $sds-spaces-xs;
+}
+
+.text {
+  margin-top: $sds-spaces-xs; // align plaintext with text in toggle and dropdown menus
+}
+
+.dropdown {
+  @include font-body-xs;
+  min-width: 215px;
+}
+
+.dropdownMenu {
+  min-width: max-content !important;
+}

@@ -57,7 +57,7 @@ import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import PreUploadQCCheck from "./PreUploadQCCheck";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
 import SampleUploadTable from "./SampleUploadTable";
-import WorkflowSelector from "./WorkflowSelector";
+import { WorkflowSelector } from "./WorkflowSelector";
 import {
   UPLOAD_WORKFLOWS,
   SEQUENCING_TECHNOLOGY_OPTIONS,

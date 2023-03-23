@@ -1,0 +1,34 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.disabledStatus {
+  background-color: $sds-color-gray-200;
+  color: $sds-color-gray-300;
+}
+
+.iconSample {
+  margin-top: $sds-spaces-xxs;
+  margin-right: $sds-spaces-default;
+}
+
+.disabledIcon {
+  color: $sds-color-gray-200;
+}
+
+.alignBetaIcon {
+  display: flex;
+  align-items: center;
+}
+
+.statusLabel {
+  padding-bottom: 3px;
+}
+
+.description {
+  @include font-body-s;
+}
+
+.tooltipArrow {
+  transform: translate(18px, 0px) !important;
+}

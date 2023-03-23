@@ -34,6 +34,14 @@ export const UPLOAD_WORKFLOW_KEY_FOR_VALUE = {
   [UPLOAD_WORKFLOWS.AMR.value]: "AMR" as const,
 };
 
+/**
+ * This constant specifies which workflows can be selected together during sample upload.
+ * The top-level key indicates which workflow was most recently selected. The second level
+ * key indicates which technology was selected for that workflow, if any. Given the
+ * already-selected workflows/technologies, we limit further selections depending on which
+ * workflow types are compatible with each other. The array (value) should always include the
+ * top level key, since you can always run the workflow you have already selected.
+ */
 export const ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY = {
   [UPLOAD_WORKFLOWS.MNGS.value]: {
     [ILLUMINA]: [UPLOAD_WORKFLOWS.MNGS.value, WORKFLOWS.AMR.value],
@@ -53,6 +61,7 @@ export const ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY = {
   [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value]: {
     [ILLUMINA]: [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value],
     [NANOPORE]: [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value],
+    [NO_TECHNOLOGY_SELECTED]: [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value],
   },
 };
 

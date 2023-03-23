@@ -1,0 +1,30 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.technologyDescription {
+  @include font-body-xxs;
+  color: $sds-color-gray-600;
+
+  .externalLink {
+    color: $sds-color-primary-400;
+    cursor: pointer;
+  }
+}
+
+.disabledStatus {
+  background-color: $sds-color-gray-200;
+  color: $sds-color-gray-300;
+}
+
+.technology {
+  padding: $sds-spaces-m;
+
+  &:hover {
+    background-color: $sds-color-gray-200;
+  }
+
+  &.selected {
+    background-color: $sds-color-gray-200;
+  }
+}
