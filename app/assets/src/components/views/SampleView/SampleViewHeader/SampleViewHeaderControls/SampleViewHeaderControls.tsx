@@ -1,5 +1,5 @@
 import { get, isEmpty, size } from "lodash/fp";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { saveVisualization } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
@@ -35,6 +35,7 @@ import {
   SaveButton,
 } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
+import { TABS } from "../../constants";
 import { ControlsTopRow } from "./ControlsTopRow";
 import { DownloadDropdown } from "./DownloadDropdown";
 import { OverflowMenu } from "./OverflowMenu";
@@ -85,6 +86,8 @@ export const SampleViewHeaderControls = ({
   const running = get("status", currentRun) === "RUNNING";
   const runIsLoaded = !isEmpty(reportMetadata);
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
+
+  const [showOverflowButton, setShowOverflowButton] = useState(false);
 
   const workflow: WORKFLOW_VALUES =
     WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
@@ -273,14 +276,17 @@ export const SampleViewHeaderControls = ({
       case WORKFLOWS.LONG_READ_MNGS.value:
       case WORKFLOWS.SHORT_READ_MNGS.value:
         if (!!reportMetadata.reportReady && currentRun) {
+          !showOverflowButton && setShowOverflowButton(true);
           return renderDownloadDropdown();
         } else if (!isEmpty(reportMetadata) && editable && deletable) {
+          showOverflowButton && setShowOverflowButton(false);
           return renderDeleteSampleButton();
         }
         break;
       case WORKFLOWS.CONSENSUS_GENOME.value:
       case WORKFLOWS.AMR.value:
         if (succeeded) {
+          !showOverflowButton && setShowOverflowButton(true);
           return renderDownloadAll(workflow);
         } else if (
           editable &&
@@ -288,6 +294,7 @@ export const SampleViewHeaderControls = ({
           isEmpty(sample?.pipeline_runs) && // if there are no mNGS runs
           remainingWorkflowRuns.length === 0 // if there are no other workflow runs
         ) {
+          showOverflowButton && setShowOverflowButton(false);
           return renderDeleteSampleButton();
         }
         break;
@@ -298,7 +305,9 @@ export const SampleViewHeaderControls = ({
     const redirectOnSuccess =
       sample && [...sample.pipeline_runs, ...sample.workflow_runs].length === 1;
     return (
-      hasBulkDeletion && (
+      hasBulkDeletion &&
+      showOverflowButton &&
+      currentTab !== TABS.AMR_DEPRECATED && (
         <OverflowMenu
           className={cs.controlElement}
           workflow={workflow}
