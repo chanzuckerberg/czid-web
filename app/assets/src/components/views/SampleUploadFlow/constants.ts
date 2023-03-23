@@ -333,7 +333,8 @@ export const MEDAKA_MODEL_OPTIONS = {
   },
 };
 
-export const REGEX_READ_ILLUMINA = /^@[a-zA-z0-9]+:[0-9]+:[a-zA-Z0-9]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+(:[ATGCN]+[+][ATGCN]+)*[ 12]{2}:[YN]:[0-9]+:[ATGCN]+([+][ATGCN]+)*$/i;
+// Note that the Illumina regex only matches the beginning of the read to support both Casava 1.8 and older read names
+export const REGEX_READ_ILLUMINA = /^@[a-zA-Z0-9]+:[0-9]+:[a-zA-Z0-9-]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+/i;
 export const REGEX_READ_NANOPORE = /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
 
 export const MEGABYTE = 1000000;

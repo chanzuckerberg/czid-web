@@ -34,6 +34,8 @@ interface PreUploadQCCheckProps {
   sequenceTechnology?: string;
 }
 
+const MAX_READS_TO_CHECK = 100;
+
 const PreUploadQCCheck = ({
   samples,
   changeState,
@@ -162,7 +164,8 @@ const PreUploadQCCheck = ({
       // Check for duplicate FASTA IDs
       const readIds = fastaContents
         .split("\n")
-        .filter(line => line.startsWith(">"));
+        .filter(line => line.startsWith(">"))
+        .slice(0, MAX_READS_TO_CHECK);
       const readIdsUnique = new Set(readIds);
       if (readIds.length !== readIdsUnique.size) {
         setDuplicateIds(dup => new Set([...dup, file]));
@@ -233,7 +236,8 @@ const PreUploadQCCheck = ({
       const fastqContents = await CLI.exec(`seqtk seq ${fileSlice.name}`);
       const fastqReadNames = fastqContents
         .split("\n")
-        .filter(line => line.startsWith("@"));
+        .filter(line => line.startsWith("@"))
+        .slice(0, MAX_READS_TO_CHECK);
 
       // Check whether read names are Illumina or Nanopore
       const isIllumina = fastqReadNames.every(d => REGEX_READ_ILLUMINA.test(d));
@@ -269,7 +273,12 @@ const PreUploadQCCheck = ({
         .filter(line => line.startsWith("@"));
 
       // Iterate through read names until find a mismatch
-      for (let i = 0; i < fastqReadNamesR1.length; i++) {
+      const count = Math.min(
+        MAX_READS_TO_CHECK,
+        fastqReadNamesR1.length,
+        fastqReadNamesR2.length,
+      );
+      for (let i = 0; i < count; i++) {
         const isPaired =
           findDiff(fastqReadNamesR1[i], fastqReadNamesR2[i]) === "2";
         if (!isPaired) {
@@ -404,7 +413,10 @@ const PreUploadQCCheck = ({
           if (technologyType) sample.format = technologyType;
 
           // 5. Check to see if FASTQ file has matching R1/R2 file
-          if (fileName.includes(R1CHECK) || fileName.includes(R2CHECK)) {
+          if (
+            technologyType === ILLUMINA &&
+            (fileName.includes(R1CHECK) || fileName.includes(R2CHECK))
+          ) {
             const pairedEndSample = fileName.includes(R1CHECK)
               ? fileName.replace(R1CHECK, R2CHECK)
               : fileName.replace(R2CHECK, R1CHECK);
