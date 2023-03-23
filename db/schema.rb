@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_03_17_125537) do
-
+ActiveRecord::Schema.define(version: 2023_03_23_181931) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -600,6 +599,7 @@ ActiveRecord::Schema.define(version: 2023_03_17_125537) do
     t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.string "initial_workflow", default: "short-read-mngs", null: false, comment: "A soft enum (string) describing the initial workflow the sample was run on"
+    t.datetime "deleted_at", comment: "When the user triggered deletion of the sample"
     t.index ["created_at"], name: "index_samples_on_created_at"
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["name"], name: "index_samples_on_name"
