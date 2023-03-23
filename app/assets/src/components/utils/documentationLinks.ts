@@ -3,7 +3,7 @@
 export const SARS_COV_2_CONSENSUS_GENOME_DOC_LINK =
   "https://help.czid.org/hc/en-us/articles/360049787632";
 export const VIRAL_CONSENSUS_GENOME_DOC_LINK =
-  "https://help.czid.org/hc/en-us/articles/360059664191";
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13619776085780-Consensus-Genome-Quality-Checks";
 export const NEXTCLADE_APP_LINK = "https://clades.nextstrain.org/";
 export const NEXTCLADE_DEFAULT_TREE_LINK =
   "https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html"; // Beware of link breaking
@@ -32,10 +32,12 @@ export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =
 export const MAIL_TO_HELP_LINK = "mailto:help@czid.org";
 export const PHYLO_TREE_LINK =
   "https://help.czid.org/hc/en-us/articles/4404223662228";
+export const PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13725914751380-Why-a-Pairwise-Distance-Matrix-Instead-of-a-Tree-";
 export const BACKGROUND_MODELS_LINK =
   "https://help.czid.org/hc/en-us/articles/360050883054-Background-Models";
 export const CG_QUALITY_CONTROL_LINK =
-  "https://help.czid.org/hc/en-us/articles/360049787632-Building-and-analyzing-a-SARS-CoV-2-consensus-genome#Quality-control";
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13623472033428-Download-Consensus-Genome-Data#intermediate-files";
 export const NCBI_POLICIES_AND_DISCLAIMERS_LINK =
   "https://www.ncbi.nlm.nih.gov/home/about/policies/";
 export const BLAST_HELP_LINK =

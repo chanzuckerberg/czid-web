@@ -3,7 +3,10 @@ import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import AccordionNotification from "~/components/ui/notifications/AccordionNotification";
-import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
+import {
+  PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK,
+  PHYLO_TREE_LINK,
+} from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton } from "~ui/controls/buttons";
 import ImgMatrixPrimary from "~ui/illustrations/ImgMatrixPrimary";
@@ -71,7 +74,7 @@ const PairwiseDistanceMatrixErrorModal = ({
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_HELP_LINK_CLICKED
             }
-            href={PHYLO_TREE_LINK}
+            href={PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK}
           >
             Learn more.
           </ExternalLink>

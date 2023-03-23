@@ -1,6 +1,6 @@
 import {
-  CG_QUALITY_CONTROL_LINK,
   BULK_DOWNLOAD_LINK,
+  CG_QUALITY_CONTROL_LINK,
 } from "~/components/utils/documentationLinks";
 import { WORKFLOWS } from "~/components/utils/workflows";
 
