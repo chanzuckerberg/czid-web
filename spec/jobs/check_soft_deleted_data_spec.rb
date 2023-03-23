@@ -33,8 +33,8 @@ RSpec.describe CheckSoftDeletedData, type: :job do
     end
 
     it "logs soft deleted pipeline run and workflow run ids to cloudwatch" do
-      expect(LogUtil).to receive(:log_error).with("Soft deleted pipeline runs found in database", pipeline_run_ids: [@pr1.id]).exactly(1).times
-      expect(LogUtil).to receive(:log_error).with("Soft deleted workflow runs found in database", workflow_run_ids: [@wr1.id]).exactly(1).times
+      expect(LogUtil).to receive(:log_error).with("Soft deleted pipeline runs found in database", exception: CheckSoftDeletedData::SoftDeletedDataError.new, pipeline_run_ids: [@pr1.id]).exactly(1).times
+      expect(LogUtil).to receive(:log_error).with("Soft deleted workflow runs found in database", exception: CheckSoftDeletedData::SoftDeletedDataError.new, workflow_run_ids: [@wr1.id]).exactly(1).times
       CheckSoftDeletedData.perform
     end
   end

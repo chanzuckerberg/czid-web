@@ -13,10 +13,10 @@ class HardDeleteObjects
   rescue StandardError => e
     LogUtil.log_error(
       "Bulk Deletion Failed: #{e}.",
+      exception: e,
       object_ids: object_ids,
       workflow: workflow,
-      user_id: user_id,
-      exception: e
+      user_id: user_id
     )
     raise e
   end
@@ -40,13 +40,13 @@ class HardDeleteObjects
 
     objects.each do |object|
       object.destroy!
-    rescue ActiveRecord::RecordNotDestroyed => e
+    rescue StandardError => e
       # If there's an error deleting one of the runs, log error to sentry but don't raise it
       LogUtil.log_error(
         "Bulk Deletion Error: Error destroying run.",
+        exception: e,
         object_id: object.id,
-        workflow: workflow,
-        exception: e
+        workflow: workflow
       )
     end
 
@@ -55,12 +55,12 @@ class HardDeleteObjects
       if sample.pipeline_runs.non_deprecated.count == 0 && sample.workflow_runs.non_deprecated.count == 0
         begin
           sample.destroy!
-        rescue ActiveRecord::RecordNotDestroyed => e
+        rescue StandardError => e
           # Log error to sentry but don't raise it
           LogUtil.log_error(
             "Bulk Deletion Error: Could not destroy sample.",
-            sample_id: sample.id,
-            exception: e
+            exception: e,
+            sample_id: sample.id
           )
         end
       end

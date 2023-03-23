@@ -10,6 +10,12 @@ class CheckSoftDeletedData
 
   DELAY = 3.hours
 
+  class SoftDeletedDataError < StandardError
+    def initialize
+      super("Hard deletion failed: soft deleted data found in database.")
+    end
+  end
+
   def self.perform
     Rails.logger.info("Checking database for old soft deleted data")
     check_for_soft_deleted_data
@@ -27,6 +33,7 @@ class CheckSoftDeletedData
     unless deleted_prs.empty?
       LogUtil.log_error(
         "Soft deleted pipeline runs found in database",
+        exception: SoftDeletedDataError.new,
         pipeline_run_ids: deleted_prs.pluck(:id)
       )
     end
@@ -35,6 +42,7 @@ class CheckSoftDeletedData
     unless deleted_wrs.empty?
       LogUtil.log_error(
         "Soft deleted workflow runs found in database",
+        exception: SoftDeletedDataError.new,
         workflow_run_ids: deleted_wrs.pluck(:id)
       )
     end
