@@ -206,9 +206,9 @@ class ApplicationController < ActionController::Base
     if get_app_config(AppConfig::SHOW_ANNOUNCEMENT_BANNER) == "1"
       time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
       now = time_zone.now
-      # This is for the data policy update banner in Header.tsx.
-      start_time = time_zone.parse("2022-12-01 00:00:00")
-      end_time = time_zone.parse("2023-01-31 00:00:00")
+      # This is for the ont banner in LandingHeaderV2.tsx.
+      start_time = time_zone.parse("2023-04-04 00:00:00")
+      end_time = time_zone.parse("2023-05-04 00:00:00")
 
       if start_time < now && now < end_time
         return true

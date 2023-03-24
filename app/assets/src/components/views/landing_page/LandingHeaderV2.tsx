@@ -1,6 +1,7 @@
 import { isEmpty } from "lodash/fp";
 import React, { useState } from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import IconMobileNavClose from "~/components/ui/icons/IconMobileNavClose";
 import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./LandingHeaderV2.scss";
@@ -30,9 +31,27 @@ const LandingHeaderV2 = ({
         message={emergencyBannerMessage}
       />
       <AnnouncementBanner
-        id="rebrand"
+        id="ont"
         visible={announcementBannerEnabled}
-        message="Looking for IDseq? You're in the right spot. As of December, our new name is Chan Zuckerberg ID."
+        message={
+          <>
+          {
+            "New! You can now run Nanopore sequencing data through CZ ID's metagenomic pipeline. "
+          }
+          <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/13830756964372-Upload-Nanopore-Data-">
+            <span
+              style={{
+                color: "white",
+                textDecoration: "underline",
+                textDecorationStyle: "dashed",
+              }}
+            >
+              Learn More
+            </span>
+          </ExternalLink>
+          {"."}
+        </>
+        }
         inverted={true}
       />
       <div className={cs.header} data-testid="home-top-nav-bar">

@@ -1,7 +1,6 @@
 import { isEmpty } from "lodash/fp";
 import React from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
 import ToastContainer from "~ui/containers/ToastContainer";
 import { CZIDLogoReversed } from "~ui/icons";
 
@@ -23,7 +22,6 @@ interface HeaderProps {
 
 const Header = ({
   adminUser,
-  announcementBannerEnabled,
   disableNavigation,
   showBlank,
   userSignedIn,
@@ -48,30 +46,7 @@ const Header = ({
         visible={!isEmpty(emergencyBannerMessage)}
         message={emergencyBannerMessage}
       />
-      <AnnouncementBanner
-        id="jan_1_policy_changes"
-        visible={announcementBannerEnabled}
-        inverted={true}
-        message={
-          <>
-            {
-              "Effective 12/1/2022, samples will not automatically go public after 1 year. Our policies will update to reflect this and other changes on 1/1/23. Here is a "
-            }
-            <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/11278218026900">
-              <span
-                style={{
-                  color: "white",
-                  textDecoration: "underline",
-                  textDecorationStyle: "dashed",
-                }}
-              >
-                preview of all updates
-              </span>
-            </ExternalLink>
-            {"."}
-          </>
-        }
-      />
+      {/* ONT AnnouncementBanner should only be displayed on the landing page */}
       <div className={cs.header}>
         <div className={cs.logo}>
           <a href="/">
