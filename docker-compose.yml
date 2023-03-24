@@ -261,6 +261,7 @@ services:
       - MYSQL_HOST=db
       - MYSQL_PORT=3306
       - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=local
       - MYSQL_DB=idseq_development
       - ES_HOST=heatmap-elasticsearch:9200
     ports:
