@@ -863,16 +863,6 @@ ActiveRecord::Schema.define(version: 2023_03_23_181931) do
     t.index ["background_id", "tax_id", "count_type", "tax_level"], name: "index_bg_tax_ct_level", unique: true
   end
 
-  create_table "ui_configs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.float "min_nt_z"
-    t.float "min_nr_z"
-    t.integer "min_nt_rpm"
-    t.integer "min_nr_rpm"
-    t.integer "top_n"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "user_settings", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "user_id"
     t.string "key", comment: "The name of the user setting, e.g. receives_bulk_download_success_emails"
