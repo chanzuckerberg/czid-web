@@ -60,8 +60,12 @@ class SfnCgPipelineDispatchService
     @wdl_version = PipelineVersionControlService.call(@sample.project.id, @workflow_run.workflow)
     raise SfnVersionMissingError, @workflow_run.workflow if @wdl_version.blank?
 
+    updated_inputs = JSON.parse(@workflow_run.inputs_json)
+    updated_inputs[:creation_source] = creation_source
+
     @workflow_run.update(
-      wdl_version: @wdl_version
+      wdl_version: @wdl_version,
+      inputs_json: updated_inputs.to_json
     )
   end
 
@@ -107,6 +111,18 @@ class SfnCgPipelineDispatchService
     return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/consensus-genome:v#{@workflow_run.wdl_version}"
   end
 
+  def creation_source
+    if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
+    elsif (ref_fasta_input || @workflow_run.inputs&.[]("reference_accession")) && primer_bed_input
+      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload]
+    elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
+      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
+    else
+      return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report]
+    end
+  end
+
   def technology
     wr_technology = @workflow_run.inputs&.[]("technology")
     raise TechnologyMissingError if wr_technology.nil?
@@ -125,6 +141,20 @@ class SfnCgPipelineDispatchService
       wr_medaka_model
     else
       raise InvalidMedakaModelError
+    end
+  end
+
+  def ref_fasta_input
+    ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
+    if ref_fasta_name
+      @sample.input_files.find { |i| i.name != ref_fasta_name }
+    end
+  end
+
+  def primer_bed_input
+    primer_bed_name = @workflow_run.inputs&.[]("primer_bed")
+    if primer_bed_name
+      @sample.input_files.find { |i| i.name != primer_bed_name }
     end
   end
 
@@ -192,14 +222,10 @@ class SfnCgPipelineDispatchService
   def generate_wdl_input
     ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
     primer_bed_name = @workflow_run.inputs&.[]("primer_bed")
-
     input_fastas = @sample.input_files.filter { |i| i.name != ref_fasta_name && i.name != primer_bed_name }
-    ref_fasta_input = ref_fasta_name && @sample.input_files.find { |i| i.name != ref_fasta_name }
-    primer_bed_input = primer_bed_name && @sample.input_files.find { |i| i.name != primer_bed_name }
 
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
-    additional_inputs = if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
-                          # ONT sars-cov-2 cg
+    additional_inputs = if creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
                           {
                             apply_length_filter: apply_length_filter,
                             medaka_model: medaka_model,
@@ -209,8 +235,7 @@ class SfnCgPipelineDispatchService
                             primer_set: nanopore_primer_set,
                             primer_schemes: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic-primer-schemes_v5.tar.gz",
                           }
-                        elsif (ref_fasta_input || @workflow_run.inputs&.[]("reference_accession")) && primer_bed_input
-                          # illumina gen cg custom reference + primers
+                        elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina]
                           {
                             ref_fasta: File.join(@sample.sample_input_s3_path, ref_fasta_name),
                             ref_accession_id: @workflow_run.inputs&.[]("reference_accession"),
@@ -218,14 +243,12 @@ class SfnCgPipelineDispatchService
                             # This option filters all except SARS-CoV-2 at the moment:
                             filter_reads: false,
                           }
-                        elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
-                          # illumina sars-cov-2 cg
+                        elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina]
                           {
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
                             primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{illumina_primer_file}",
                           }
-                        else
-                          # illumina gen viral cg
+                        elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina]
                           {
                             ref_accession_id: sanitize_accession_id(@workflow_run.inputs&.[]("accession_id")),
                             # This option filters all except SARS-CoV-2 at the moment:

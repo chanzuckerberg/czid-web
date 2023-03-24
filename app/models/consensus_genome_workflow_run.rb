@@ -73,6 +73,12 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   # Never interpolate user input into DEFAULT_VADR_OPTIONS to prevent command injection.
   DEFAULT_VADR_OPTIONS = "-s -r --nomisc --mkey NC_045512 --lowsim5term 2 --lowsim3term 2 --fstlowthr 0.0 --alt_fail lowscore,fsthicnf,fstlocnf".freeze
 
+  CREATION_SOURCE = {
+    sars_cov_2_upload: "SARS-CoV-2 Upload",
+    viral_cg_upload: "Viral CG Upload",
+    mngs_report: "mNGS Report",
+  }.freeze
+
   TECHNOLOGY_INPUT = {
     illumina: "Illumina",
     nanopore: "ONT",

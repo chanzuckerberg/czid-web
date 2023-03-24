@@ -93,532 +93,542 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
         create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: test_workflow_name), value: fake_wdl_version)
       end
 
-      it "returns correct json" do
-        expect(subject).to include_json({})
-      end
-
-      it "returns sfn input containing fastq input files" do
-        expect(subject).to include_json(
-          sfn_input_json: {
-            Input: {
-              Run: {
-                fastqs_0: format(s3_sample_input_files_path, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
-                fastqs_1: format(s3_sample_input_files_path, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
-              },
-            },
-          }
-        )
-      end
-
-      it "returns sfn input containing correct default sfn parameters" do
-        expect(subject).to include_json(
-          sfn_input_json: {
-            Input: {
-              Run: {
-                docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/consensus-genome:v#{fake_wdl_version}",
-                sample: sample.name.tr(" ", "_"),
-                ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
-                ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
-                kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",
-                primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/msspe_primers.bed",
-                ercc_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ercc_sequences.fasta",
-              },
-            },
-          }
-        )
-      end
-
-      it "returns sfn input containing wdl workflow" do
-        expect(subject).to include_json(
-          sfn_input_json: {
-            RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{workflow_run.workflow_version_tag}/run.wdl",
-          }
-        )
-      end
-
-      it "kicks off the CG run and updates the WorkflowRun as expected" do
-        subject
-        expect(workflow_run).to have_attributes(
-          sfn_execution_arn: fake_sfn_execution_arn,
-          status: WorkflowRun::STATUS[:running],
-          s3_output_prefix: "s3://#{fake_samples_bucket}/#{format(s3_samples_key_prefix, project_id: project.id, sample_id: sample.id)}/#{workflow_run.id}"
-        )
-      end
-
-      context "when start-execution or dispatch fails" do
-        it "raises original exception" do
-          @mock_aws_clients[:states].stub_responses(:start_execution, Aws::States::Errors::InvalidArn.new(nil, nil))
-          expect { subject }.to raise_error(Aws::States::Errors::InvalidArn)
-          expect(workflow_run).to have_attributes(sfn_execution_arn: nil, status: WorkflowRun::STATUS[:failed])
-        end
-      end
-
-      context "when artic wetlab protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+      context "and any creation source" do
+        it "returns correct json" do
+          expect(subject).to include_json({})
         end
 
-        it "returns sfn input with artic primer" do
+        it "returns sfn input containing fastq input files" do
           expect(subject).to include_json(
             sfn_input_json: {
               Input: {
                 Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v3_primers.bed",
+                  fastqs_0: format(s3_sample_input_files_path, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
+                  fastqs_1: format(s3_sample_input_files_path, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
                 },
               },
             }
           )
         end
-      end
 
-      context "when SNAP wetlab protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
-        end
-
-        it "returns sfn input with SNAP primer" do
+        it "returns sfn input containing correct default sfn parameters" do
           expect(subject).to include_json(
             sfn_input_json: {
               Input: {
                 Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/snap_primers.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when MSSPE+ARTIC wetlab protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:combined_msspe_artic] }.to_json)
-        end
-
-        it "returns sfn input with MSSPE + ARTIC primer" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/combined_msspe_artic_primers.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when midnight primers wetlab protocol is chosen with illumina" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:midnight] }.to_json)
-        end
-
-        it "returns sfn input with midnight primers and min + max lengths" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/midnight_primers.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when AmpliSeq wetlab protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
-        end
-
-        it "returns sfn input with AmpliSeq primer" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ampliseq_primers.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when ARTIC short amplicons protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic_short_amplicons] }.to_json)
-        end
-
-        it "returns sfn input with ARTIC short amplicons primer" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v3_short_275_primers.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when ARTIC v4 protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic_v4] }.to_json)
-        end
-
-        it "returns sfn input with ARTIC short amplicons primer" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v4_primers.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when COVIDseq wetlab protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:covidseq] }.to_json)
-        end
-
-        it "returns sfn input with COVIDseq primer" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/covidseq_primers.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when varskip wetlab protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:varskip] }.to_json)
-        end
-        it "returns sfn input with Varskip Primer" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/neb_vss1a.primer.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when easyseq wetlab protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:easyseq] }.to_json)
-        end
-        it "returns sfn input with Easyseq Primer" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/easyseq.bed",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when no wetlab protocol is supplied" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3" }.to_json)
-        end
-
-        it "throws an error" do
-          expect { subject }.to raise_error(SfnCgPipelineDispatchService::WetlabProtocolMissingError)
-        end
-      end
-
-      context "when an accession id is provided (General Viral CG)" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "ABC123" }.to_json)
-        end
-
-        it "returns sfn input containing correct sfn parameters" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  ref_accession_id: "ABC123",
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{SfnCgPipelineDispatchService::NA_PRIMER_FILE}",
-                },
-              },
-            }
-          )
-        end
-      end
-
-      context "when sars-cov-2 accession id is provided" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
-        end
-
-        it "returns sfn input containing correct sfn parameters for sars-cov-2" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
+                  docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/consensus-genome:v#{fake_wdl_version}",
+                  sample: sample.name.tr(" ", "_"),
                   ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v3_primers.bed",
+                  ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
+                  kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/msspe_primers.bed",
+                  ercc_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ercc_sequences.fasta",
                 },
               },
             }
           )
         end
-      end
 
-      context "when a nanopore run is selected" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
-        end
-
-        it "returns sfn input containing correct sfn parameters" do
+        it "returns sfn input containing wdl workflow" do
           expect(subject).to include_json(
             sfn_input_json: {
-              Input: {
-                Run: {
-                  apply_length_filter: true,
-                  technology: nanopore_technology,
-                  medaka_model: medaka_model,
-                  vadr_options: vadr_options,
-                  primer_set: "nCoV-2019/V3",
-                },
-              },
+              RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{workflow_run.workflow_version_tag}/run.wdl",
             }
           )
         end
-      end
 
-      context "when a nanopore run for a ClearLabs sample is selected" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { clearlabs: true, technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
-        end
-
-        it "returns sfn input containing correct sfn parameters" do
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  apply_length_filter: false,
-                  technology: nanopore_technology,
-                  medaka_model: medaka_model,
-                  vadr_options: vadr_options,
-                  primer_set: "nCoV-2019/V3",
-                },
-              },
-            }
+        it "kicks off the CG run and updates the WorkflowRun as expected" do
+          subject
+          expect(workflow_run).to have_attributes(
+            sfn_execution_arn: fake_sfn_execution_arn,
+            status: WorkflowRun::STATUS[:running],
+            s3_output_prefix: "s3://#{fake_samples_bucket}/#{format(s3_samples_key_prefix, project_id: project.id, sample_id: sample.id)}/#{workflow_run.id}"
           )
         end
+
+        context "when start-execution or dispatch fails" do
+          it "raises original exception" do
+            @mock_aws_clients[:states].stub_responses(:start_execution, Aws::States::Errors::InvalidArn.new(nil, nil))
+            expect { subject }.to raise_error(Aws::States::Errors::InvalidArn)
+            expect(workflow_run).to have_attributes(sfn_execution_arn: nil, status: WorkflowRun::STATUS[:failed])
+          end
+        end
       end
 
-      context "when Midnight wetlab protocol is chosen" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+      context "and created from SARS-CoV-2 Upload" do
+        context "when Illumina is selected" do
+          context "for any wetlab protocol" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+            end
 
-          it "returns sfn input with Midnight primer set"
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  apply_length_filter: true,
-                  technology: nanopore_technology,
-                  medaka_model: medaka_model,
-                  vadr_options: vadr_options,
-                  primer_set: "nCoV-2019/V1200",
+            it "correctly stores the creation source" do
+              subject
+              expect(JSON.parse(workflow_run.inputs_json)).to include_json({ creation_source: ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload] })
+            end
+          end
+
+          context "when artic wetlab protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+            end
+
+            it "returns sfn input with artic primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v3_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when SNAP wetlab protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
+            end
+
+            it "returns sfn input with SNAP primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/snap_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when MSSPE+ARTIC wetlab protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:combined_msspe_artic] }.to_json)
+            end
+
+            it "returns sfn input with MSSPE + ARTIC primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/combined_msspe_artic_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when midnight primers wetlab protocol is chosen with illumina" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:midnight] }.to_json)
+            end
+
+            it "returns sfn input with midnight primers and min + max lengths" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/midnight_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when AmpliSeq wetlab protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
+            end
+
+            it "returns sfn input with AmpliSeq primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ampliseq_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when ARTIC short amplicons protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic_short_amplicons] }.to_json)
+            end
+
+            it "returns sfn input with ARTIC short amplicons primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v3_short_275_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when ARTIC v4 protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic_v4] }.to_json)
+            end
+
+            it "returns sfn input with ARTIC short amplicons primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v4_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when COVIDseq wetlab protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:covidseq] }.to_json)
+            end
+
+            it "returns sfn input with COVIDseq primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/covidseq_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when varskip wetlab protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:varskip] }.to_json)
+            end
+            it "returns sfn input with Varskip Primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/neb_vss1a.primer.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when easyseq wetlab protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:easyseq] }.to_json)
+            end
+            it "returns sfn input with Easyseq Primer" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/easyseq.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when no wetlab protocol is supplied" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3" }.to_json)
+            end
+
+            it "throws an error" do
+              expect { subject }.to raise_error(SfnCgPipelineDispatchService::WetlabProtocolMissingError)
+            end
+          end
+
+          context "when sars-cov-2 accession id is provided" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+            end
+
+            it "returns sfn input containing correct sfn parameters for sars-cov-2" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
+                      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v3_primers.bed",
+                    },
+                  },
+                }
+              )
+            end
+          end
+        end
+
+        context "when Nanopore is selected" do
+          let(:workflow_run) do
+            create(:workflow_run,
+                   workflow: test_workflow_name,
+                   status: WorkflowRun::STATUS[:created],
+                   sample: sample,
+                   inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+          end
+
+          it "correctly stores the creation source" do
+            subject
+            expect(JSON.parse(workflow_run.inputs_json)).to include_json({ creation_source: ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload] })
+          end
+
+          it "returns sfn input containing correct sfn parameters" do
+            expect(subject).to include_json(
+              sfn_input_json: {
+                Input: {
+                  Run: {
+                    apply_length_filter: true,
+                    technology: nanopore_technology,
+                    medaka_model: medaka_model,
+                    vadr_options: vadr_options,
+                    primer_set: "nCoV-2019/V3",
+                  },
                 },
-              },
-            }
-          )
+              }
+            )
+          end
+
+          context "when a ClearLabs sample is selected" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { clearlabs: true, technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+            end
+
+            it "returns sfn input containing correct sfn parameters" do
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      apply_length_filter: false,
+                      technology: nanopore_technology,
+                      medaka_model: medaka_model,
+                      vadr_options: vadr_options,
+                      primer_set: "nCoV-2019/V3",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when Midnight wetlab protocol is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+
+              it "returns sfn input with Midnight primer set"
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      apply_length_filter: true,
+                      technology: nanopore_technology,
+                      medaka_model: medaka_model,
+                      vadr_options: vadr_options,
+                      primer_set: "nCoV-2019/V1200",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when Artic V4 primers are chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+
+              it "returns sfn input with artic v4 primer set"
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      apply_length_filter: true,
+                      technology: nanopore_technology,
+                      medaka_model: medaka_model,
+                      vadr_options: vadr_options,
+                      primer_set: "nCoV-2019/V4",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when Varskip primers are chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:varskip] }.to_json)
+
+              it "returns sfn input with varskip primer set"
+              expect(subject).to include_json(
+                sfn_input_json: {
+                  Input: {
+                    Run: {
+                      apply_length_filter: true,
+                      technology: nanopore_technology,
+                      medaka_model: medaka_model,
+                      vadr_options: vadr_options,
+                      primer_set: "NEB_VarSkip/V1a",
+                    },
+                  },
+                }
+              )
+            end
+          end
+
+          context "when an invalid wetlab protocol is supplied" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
+            end
+
+            it "throws an error" do
+              expect { subject }.to raise_error(SfnCgPipelineDispatchService::InvalidWetlabProtocolError, /Protocol ampliseq is not supported for technology #{nanopore_technology}./)
+            end
+          end
+
+          context "when no wetlab protocol is supplied" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
+            end
+
+            it "throws an error" do
+              expect { subject }.to raise_error(SfnCgPipelineDispatchService::WetlabProtocolMissingError)
+            end
+          end
+
+          context "when the workflow_runs does not contain the technology input" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+            end
+
+            it "fails with TechnologyMissingError" do
+              expect { subject }.to raise_error(SfnCgPipelineDispatchService::TechnologyMissingError)
+            end
+          end
+
+          context "when an unrecognized medaka model is chosen" do
+            let(:workflow_run) do
+              create(:workflow_run,
+                     workflow: test_workflow_name,
+                     status: WorkflowRun::STATUS[:created],
+                     sample: sample,
+                     inputs_json: { technology: nanopore_technology, medaka_model: "invalid option", vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+            end
+
+            it "fails with InvalidMedakaModelError" do
+              expect { subject }.to raise_error(SfnCgPipelineDispatchService::InvalidMedakaModelError)
+            end
+          end
         end
       end
 
-      context "when Artic V4 primers are chosen with ONT" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
-
-          it "returns sfn input with artic v4 primer set"
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  apply_length_filter: true,
-                  technology: nanopore_technology,
-                  medaka_model: medaka_model,
-                  vadr_options: vadr_options,
-                  primer_set: "nCoV-2019/V4",
-                },
-              },
-            }
-          )
-        end
-      end
-      context "when Varskip primers are chosen with ONT" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:varskip] }.to_json)
-
-          it "returns sfn input with varskip primer set"
-          expect(subject).to include_json(
-            sfn_input_json: {
-              Input: {
-                Run: {
-                  apply_length_filter: true,
-                  technology: nanopore_technology,
-                  medaka_model: medaka_model,
-                  vadr_options: vadr_options,
-                  primer_set: "NEB_VarSkip/V1a",
-                },
-              },
-            }
-          )
-        end
-      end
-      context "when an invalid wetlab protocol for nanopore is supplied" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
-        end
-
-        it "throws an error" do
-          expect { subject }.to raise_error(SfnCgPipelineDispatchService::InvalidWetlabProtocolError, /Protocol ampliseq is not supported for technology #{nanopore_technology}./)
-        end
-      end
-
-      context "when no wetlab protocol is supplied" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
-        end
-
-        it "throws an error" do
-          expect { subject }.to raise_error(SfnCgPipelineDispatchService::WetlabProtocolMissingError)
-        end
-      end
-
-      context "when a nanopore run is selected but the workflow_runs does not contain the technology input" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
-        end
-
-        it "fails with TechnologyMissingError" do
-          expect { subject }.to raise_error(SfnCgPipelineDispatchService::TechnologyMissingError)
-        end
-      end
-
-      context "when a nanopore run is given an unrecognized medaka model" do
-        let(:workflow_run) do
-          create(:workflow_run,
-                 workflow: test_workflow_name,
-                 status: WorkflowRun::STATUS[:created],
-                 sample: sample,
-                 inputs_json: { technology: nanopore_technology, medaka_model: "invalid option", vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
-        end
-
-        it "fails with InvalidMedakaModelError" do
-          expect { subject }.to raise_error(SfnCgPipelineDispatchService::InvalidMedakaModelError)
-        end
-      end
-
-      context "when custom ref_fasta and primer bed are chosen" do
+      context "and created from Viral CG Upload" do
         let(:workflow_run) do
           create(:workflow_run,
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
                  inputs_json: { technology: illumina_technology, ref_fasta: "ref.fasta", primer_bed: "primer.bed", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
+        end
+
+        it "correctly stores the creation source" do
+          subject
+          expect(JSON.parse(workflow_run.inputs_json)).to include_json({ creation_source: ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload] })
         end
 
         it "returns sfn input with SNAP primer" do
@@ -628,6 +638,34 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                 Run: {
                   ref_fasta: format(s3_sample_input_files_path, sample_id: sample.id, project_id: project.id, input_file_name: "ref.fasta"),
                   primer_bed: format(s3_sample_input_files_path, sample_id: sample.id, project_id: project.id, input_file_name: "primer.bed"),
+                },
+              },
+            }
+          )
+        end
+      end
+
+      context "and created from mNGS Report" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { technology: illumina_technology, accession_id: "ABC123" }.to_json)
+        end
+
+        it "correctly stores the creation source" do
+          subject
+          expect(JSON.parse(workflow_run.inputs_json)).to include_json({ creation_source: ConsensusGenomeWorkflowRun::CREATION_SOURCE[:mngs_report] })
+        end
+
+        it "returns sfn input containing correct sfn parameters" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  ref_accession_id: "ABC123",
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{SfnCgPipelineDispatchService::NA_PRIMER_FILE}",
                 },
               },
             }
