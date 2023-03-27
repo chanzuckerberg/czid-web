@@ -40,6 +40,14 @@ RSpec.describe BulkDeletionService, type: :service do
                                  user: @joe,
                                  name: "completed Illumina mNGs sample 2")
       @pr2 = create(:pipeline_run, sample: @sample2, technology: illumina, finalized: 1)
+      @sample3 = create(:sample, project: @project,
+                                 user: @joe,
+                                 name: "completed Illumina mNGs sample 3")
+      @pr3 = create(:pipeline_run, sample: @sample3, technology: illumina, finalized: 1)
+
+      @tree = create(:visualization, visualization_type: "tree", user_id: @joe.id, name: "Test Tree", samples: [@sample1])
+      @table = create(:visualization, visualization_type: "table", user_id: @joe.id, name: "Test Table", samples: [@sample1])
+      @heatmap = create(:visualization, visualization_type: "heatmap", user_id: @joe.id, name: "Test Heatmap", samples: [@sample1, @sample2, @sample3])
     end
 
     it "returns deletable pipeline run ids for samples" do
@@ -63,6 +71,35 @@ RSpec.describe BulkDeletionService, type: :service do
       @pr2.reload
       expect(@pr1.deleted_at).to be_within(1.minute).of(Time.now.utc)
       expect(@pr2.deleted_at).to be_within(1.minute).of(Time.now.utc)
+    end
+
+    it "deletes associated tables/trees" do
+      BulkDeletionService.call(
+        object_ids: [@sample1.id, @sample2.id],
+        user: @joe,
+        workflow: "short-read-mngs"
+      )
+      expect(Visualization.find_by(id: @tree.id)).to be_nil
+      expect(Visualization.find_by(id: @table.id)).to be_nil
+    end
+
+    it "deletes associated heatmaps - not enough samples left" do
+      BulkDeletionService.call(
+        object_ids: [@sample1.id, @sample2.id],
+        user: @joe,
+        workflow: "short-read-mngs"
+      )
+      expect(Visualization.find_by(id: @heatmap.id)).to be_nil
+    end
+
+    it "updates associated heatmaps - enough samples left" do
+      BulkDeletionService.call(
+        object_ids: [@sample1.id],
+        user: @joe,
+        workflow: "short-read-mngs"
+      )
+      expect(Visualization.find_by(id: @heatmap.id)).to_not be_nil
+      expect(Visualization.find_by(id: @heatmap.id).sample_ids).to contain_exactly(@sample2.id, @sample3.id)
     end
   end
 
