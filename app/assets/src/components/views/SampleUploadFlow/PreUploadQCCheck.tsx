@@ -157,17 +157,10 @@ const PreUploadQCCheck = ({
   // Validate that the FASTA file has no duplicate sequences
   const validateFASTADuplicates = async (file: File) => {
     try {
-      // Get first 1MB of FASTA (we go through seqtk for this for .gz support)
-      const fileSlice = await sliceFile(file, 0, MEGABYTE);
-      const fastaContents = await CLI.exec(`seqtk seq -l0 ${fileSlice.name}`);
-
       // Check for duplicate FASTA IDs
-      const readIds = fastaContents
-        .split("\n")
-        .filter(line => line.startsWith(">"))
-        .slice(0, MAX_READS_TO_CHECK);
-      const readIdsUnique = new Set(readIds);
-      if (readIds.length !== readIdsUnique.size) {
+      const readNames = await getReadNames(file);
+      const readNamesUnique = new Set(readNames);
+      if (readNames.length !== readNamesUnique.size) {
         setDuplicateIds(dup => new Set([...dup, file]));
         trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
           error: DUPLICATE_ID,
@@ -231,15 +224,8 @@ const PreUploadQCCheck = ({
   // Validate that the FASTQ read names match Illumina or Nanopore
   const validateFASTQReads = async (file: File) => {
     try {
-      // Get first 1MB of FASTQ (we go through seqtk for this for .gz support)
-      const fileSlice = await sliceFile(file, 0, MEGABYTE);
-      const fastqContents = await CLI.exec(`seqtk seq ${fileSlice.name}`);
-      const fastqReadNames = fastqContents
-        .split("\n")
-        .filter(line => line.startsWith("@"))
-        .slice(0, MAX_READS_TO_CHECK);
-
       // Check whether read names are Illumina or Nanopore
+      const fastqReadNames = await getReadNames(file);
       const isIllumina = fastqReadNames.every(d => REGEX_READ_ILLUMINA.test(d));
       if (isIllumina) return ILLUMINA;
       const isNanopore = fastqReadNames.every(d => REGEX_READ_NANOPORE.test(d));
@@ -260,17 +246,9 @@ const PreUploadQCCheck = ({
         fileR2 = temp;
       }
 
-      // Get first 1MB of R1/R2 FASTQs (we go through seqtk for this for .gz support)
-      const fileSliceR1 = await sliceFile(fileR1, 0, MEGABYTE);
-      const fileSliceR2 = await sliceFile(fileR2, 0, MEGABYTE);
-      const fastqContentsR1 = await CLI.exec(`seqtk seq ${fileSliceR1.name}`);
-      const fastqContentsR2 = await CLI.exec(`seqtk seq ${fileSliceR2.name}`);
-      const fastqReadNamesR1 = fastqContentsR1
-        .split("\n")
-        .filter(line => line.startsWith("@"));
-      const fastqReadNamesR2 = fastqContentsR2
-        .split("\n")
-        .filter(line => line.startsWith("@"));
+      // Get read names
+      const fastqReadNamesR1 = await getReadNames(fileR1);
+      const fastqReadNamesR2 = await getReadNames(fileR2);
 
       // Iterate through read names until find a mismatch
       const count = Math.min(
@@ -338,6 +316,26 @@ const PreUploadQCCheck = ({
       }
       return result;
     }
+  };
+
+  // Retrieve read names in first 1MB of a FASTA or FASTQ file
+  const getReadNames = async (file: File) => {
+    // Get first 1MB of file (we go through seqtk to ensure .gz support).
+    // Note: `-A` forces FASTA output (so this function can be used with FASTQ files too),
+    // and `-l0` forces FASTA/FASTQ output to be single line.
+    const fileSlice = await sliceFile(file, 0, MEGABYTE);
+    const fastaContents = await CLI.exec(`seqtk seq -A -l0 ${fileSlice.name}`);
+
+    // Extract read names
+    const fileType = await validateFileType(file);
+    return fastaContents
+      .split("\n")
+      .filter((line: string) => line.startsWith(">"))
+      .slice(0, MAX_READS_TO_CHECK)
+      .map(name => {
+        if (fileType.includes(FASTQ_FILE_TYPE)) return "@" + name.substring(1);
+        return name;
+      });
   };
 
   // Find difference between string, returns characters that are in str2 that are not in str1
