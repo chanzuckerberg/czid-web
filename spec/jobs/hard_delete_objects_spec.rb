@@ -15,13 +15,24 @@ RSpec.describe HardDeleteObjects, type: :job do
         @project = create(:project, users: [@joe])
         @sample1 = create(:sample, project: @project,
                                    user: @joe,
-                                   name: "completed Illumina mNGs sample 1")
-        @pr1 = create(:pipeline_run, sample: @sample1, technology: illumina, finalized: 1, sfn_execution_arn: fake_sfn_execution_arn)
+                                   name: "completed Illumina mNGs sample 1",
+                                   deleted_at: 5.minutes.ago)
+        @pr1 = create(:pipeline_run,
+                      sample: @sample1,
+                      technology: illumina,
+                      finalized: 1,
+                      sfn_execution_arn: fake_sfn_execution_arn,
+                      deleted_at: 5.minutes.ago)
 
         @sample2 = create(:sample, project: @project,
                                    user: @joe,
                                    name: "completed Illumina mNGs sample 2")
-        @pr2 = create(:pipeline_run, sample: @sample2, technology: illumina, finalized: 1, sfn_execution_arn: fake_sfn_execution_arn)
+        @pr2 = create(:pipeline_run,
+                      sample: @sample2,
+                      technology: illumina,
+                      finalized: 1,
+                      sfn_execution_arn: fake_sfn_execution_arn,
+                      deleted_at: 5.minutes.ago)
         @wr2 = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
       end
 
@@ -56,7 +67,7 @@ RSpec.describe HardDeleteObjects, type: :job do
         HardDeleteObjects.perform(object_ids, short_read_mngs, @joe.id)
       end
 
-      it "destroys the samples only if there are no remaining pipeline or workflow runs" do
+      it "destroys the samples only if deleted_at is not nil" do
         object_ids = [@pr1.id, @pr2.id]
         HardDeleteObjects.perform(object_ids, short_read_mngs, @joe.id)
 
@@ -87,11 +98,11 @@ RSpec.describe HardDeleteObjects, type: :job do
     context "when workflow run ids are passed in" do
       before do
         @project = create(:project, users: [@joe])
-        @sample1 = create(:sample, project: @project, user: @joe, name: "Joe sample 1")
-        @wr1 = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+        @sample1 = create(:sample, project: @project, user: @joe, name: "Joe sample 1", deleted_at: 5.minutes.ago)
+        @wr1 = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
 
         @sample2 = create(:sample, project: @project, user: @joe, name: "Joe sample 2")
-        @wr2 = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+        @wr2 = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
         @wr3 = create(:workflow_run, sample: @sample2, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
       end
 

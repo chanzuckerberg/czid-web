@@ -46,5 +46,14 @@ class CheckSoftDeletedData
         workflow_run_ids: deleted_wrs.pluck(:id)
       )
     end
+
+    deleted_samples = Sample.where("deleted_at < ?", Time.now.utc - DELAY)
+    unless deleted_wrs.empty?
+      LogUtil.log_error(
+        "Soft deleted samples found in database",
+        exception: SoftDeletedDataError.new,
+        sample_ids: deleted_samples.pluck(:id)
+      )
+    end
   end
 end

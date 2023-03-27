@@ -19,7 +19,8 @@ RSpec.describe CheckSoftDeletedData, type: :job do
       @project = create(:project, users: [@joe])
       @sample1 = create(:sample, project: @project,
                                  user: @joe,
-                                 name: "completed Illumina mNGs sample 1")
+                                 name: "completed Illumina mNGs sample 1",
+                                 deleted_at: Time.now.utc - CheckSoftDeletedData::DELAY - 1.minute)
       @pr1 = create(:pipeline_run,
                     sample: @sample1,
                     technology: illumina,
@@ -35,6 +36,7 @@ RSpec.describe CheckSoftDeletedData, type: :job do
     it "logs soft deleted pipeline run and workflow run ids to cloudwatch" do
       expect(LogUtil).to receive(:log_error).with("Soft deleted pipeline runs found in database", exception: CheckSoftDeletedData::SoftDeletedDataError.new, pipeline_run_ids: [@pr1.id]).exactly(1).times
       expect(LogUtil).to receive(:log_error).with("Soft deleted workflow runs found in database", exception: CheckSoftDeletedData::SoftDeletedDataError.new, workflow_run_ids: [@wr1.id]).exactly(1).times
+      expect(LogUtil).to receive(:log_error).with("Soft deleted samples found in database", exception: CheckSoftDeletedData::SoftDeletedDataError.new, sample_ids: [@sample1.id]).exactly(1).times
       CheckSoftDeletedData.perform
     end
   end

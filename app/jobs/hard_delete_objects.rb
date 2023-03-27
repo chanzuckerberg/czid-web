@@ -34,9 +34,8 @@ class HardDeleteObjects
       raise "Not all ids correspond to deletable objects"
     end
 
-    # Get associated samples before we destroy the objects
+    # Get associated sample ids before we destroy the objects
     sample_ids = objects.pluck(:sample_id)
-    samples = current_power.destroyable_samples.where(id: sample_ids).includes(:pipeline_runs, :workflow_runs)
 
     objects.each do |object|
       object.destroy!
@@ -50,7 +49,10 @@ class HardDeleteObjects
       )
     end
 
-    # check if samples should be destroyed as well
+    samples = current_power.destroyable_samples.where(id: sample_ids).where.not(deleted_at: nil).includes(:pipeline_runs, :workflow_runs)
+
+    # destroy samples with no remaining runs (should have non-nil deleted_at)
+    # double check pipeline/workflow runs to be sure
     samples.each do |sample|
       if sample.pipeline_runs.non_deprecated.count == 0 && sample.workflow_runs.non_deprecated.count == 0
         begin
