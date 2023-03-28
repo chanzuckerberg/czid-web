@@ -6,13 +6,9 @@ import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
 
 interface PathogenPreviewProps {
   tag2Count?: object;
-  totalPathogenCount?: number;
 }
 
-const PathogenPreview = ({
-  tag2Count,
-  totalPathogenCount,
-}: PathogenPreviewProps) => {
+const PathogenPreview = ({ tag2Count }: PathogenPreviewProps) => {
   const tags = Object.keys(tag2Count).sort();
   if (tags.length === 0) {
     return null;
@@ -20,11 +16,15 @@ const PathogenPreview = ({
     const display = (
       <span className="idseq-ui pathogen-preview">
         {tags.map(type => {
-          return (
-            <Label circular color={CATEGORIES[type]["color"]} key={type} />
-          );
+          if (tag2Count[type] > 0) {
+            return (
+              <span key={type}>
+                <Label circular color={CATEGORIES[type]["color"]} />
+                <span className="pathogen-count">{tag2Count[type]}</span>
+              </span>
+            );
+          }
         })}
-        <span className="pathogen-count">{totalPathogenCount}</span>
       </span>
     );
     return (

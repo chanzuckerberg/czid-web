@@ -1,15 +1,6 @@
 import cx from "classnames";
 import { Icon, Tooltip } from "czifui";
-import {
-  compact,
-  filter,
-  get,
-  getOr,
-  map,
-  orderBy,
-  reduce,
-  size,
-} from "lodash/fp";
+import { compact, filter, get, getOr, map, orderBy, reduce } from "lodash/fp";
 import React from "react";
 import {
   defaultTableRowRenderer,
@@ -608,30 +599,8 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     const { allowedFeatures = [] } = this.context || {};
     const { displayMergedNtNrValue, onTaxonNameClick } = this.props;
     let childrenCount = 0;
-    let filteredSpeciesPathogenCount;
 
     if (rowData.taxLevel === TAX_LEVEL_GENUS) {
-      filteredSpeciesPathogenCount = size(
-        compact(
-          filter(
-            filteredSpecies => get("pathogenFlag", filteredSpecies),
-            rowData.filteredSpecies,
-          ),
-        ),
-      );
-
-      // how many species under the given genus has any pathogen tag
-      if (allowedFeatures.includes(MULTITAG_PATHOGENS_FEATURE)) {
-        filteredSpeciesPathogenCount = size(
-          compact(
-            filter(
-              filteredSpecies => get("pathogenFlags", filteredSpecies),
-              rowData.filteredSpecies,
-            ),
-          ),
-        );
-      }
-
       childrenCount = displayMergedNtNrValue
         ? filter(species => species["merged_nt_nr"], rowData.filteredSpecies)
             .length
@@ -678,7 +647,6 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
                   </span>
                   {this.renderGenusLevelPreviews({
                     rowData,
-                    filteredSpeciesPathogenCount,
                   })}
                   {` )`}
                 </span>
@@ -716,13 +684,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     );
   };
 
-  renderGenusLevelPreviews = ({
-    rowData,
-    filteredSpeciesPathogenCount,
-  }: {
-    rowData: Taxon;
-    filteredSpeciesPathogenCount?: number;
-  }) => {
+  renderGenusLevelPreviews = ({ rowData }: { rowData: Taxon }) => {
     const { allowedFeatures = [] } = this.context || {};
     const displayAnnotationPreviews =
       allowedFeatures.includes(ANNOTATION_FEATURE) &&
@@ -738,12 +700,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           {(rowData.pathogens || displayAnnotationPreviews) && <span>:</span>}
         </span>
         {/* Show pathogen and annotation counts */}
-        {rowData.pathogens && (
-          <PathogenPreview
-            tag2Count={rowData.pathogens}
-            totalPathogenCount={filteredSpeciesPathogenCount}
-          />
-        )}
+        {rowData.pathogens && <PathogenPreview tag2Count={rowData.pathogens} />}
         {displayAnnotationPreviews && (
           <AnnotationPreview tag2Count={rowData.species_annotations} />
         )}

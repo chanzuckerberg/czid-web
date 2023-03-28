@@ -224,6 +224,19 @@ export const filterReportData = ({
         flags,
       }),
     );
+
+    const pathogenCountsByType = {};
+    genusRow.filteredSpecies.forEach((speciesRow: $TSFixMe) => {
+      (speciesRow.pathogenFlags || []).forEach((flag: $TSFixMe) => {
+        if (pathogenCountsByType[flag]) {
+          pathogenCountsByType[flag] += 1;
+        } else {
+          pathogenCountsByType[flag] = 1;
+        }
+      });
+    });
+    genusRow.pathogens = pathogenCountsByType;
+
     if (genusRow.passedFilters || genusRow.filteredSpecies.length) {
       filteredData.push(genusRow);
     }
