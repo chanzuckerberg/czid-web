@@ -30,6 +30,7 @@ export interface SamplesViewProps {
   objects?: ObjectsType;
   onActiveColumnsChange?(activeColumns: string[]): void;
   onClearFilters?(): void;
+  onDeleteSample(): void;
   onDisplaySwitch?: (display: string) => void;
   onLoadRows(param: { startIndex: number; stopIndex: number }): Promise<any>;
   onMapClick?(): void;

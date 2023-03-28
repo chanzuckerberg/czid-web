@@ -120,6 +120,7 @@ const SamplesView = forwardRef(function SamplesView(
     objects,
     onActiveColumnsChange,
     onClearFilters,
+    onDeleteSample,
     onDisplaySwitch,
     onLoadRows,
     onMapClick,
@@ -986,6 +987,10 @@ const SamplesView = forwardRef(function SamplesView(
       <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
+        onSuccess={() => {
+          onDeleteSample();
+          onUpdateSelectedIds(new Set());
+        }}
         selectedIds={Array.from(selectedIds)}
         workflow={workflow}
       />
