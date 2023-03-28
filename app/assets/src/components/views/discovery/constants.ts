@@ -76,3 +76,5 @@ export const CURRENT_TAB_OPTIONS = [
   TAB_VISUALIZATIONS,
 ];
 export const SAMPLE_WAS_DELETED = "sampleWasDeleted";
+
+export const MODERN_HOST_FILTERING_SHORT_READ_MNGS_VERSION = 8;

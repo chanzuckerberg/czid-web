@@ -54,6 +54,7 @@ import {
   MIN_NUM_BINS,
   MIN_BIN_WIDTH,
   MISSING_INSERT_SIZE_WARNING,
+  MODERN_HOST_FILTERING_SHORT_READ_MNGS_VERSION,
 } from "./constants";
 import cs from "./quality_control.scss";
 
@@ -309,13 +310,20 @@ function QualityControl({
     ];
     const _readsLostData = samplesWithInitialReads.map(sampleId => {
       const dataRow: { total?; name? } = {};
+      const sampleUsesModernHostFiltering =
+        parseFloat(samplesReadsStats[sampleId].pipelineVersion) >=
+        MODERN_HOST_FILTERING_SHORT_READ_MNGS_VERSION;
+
       let readsRemaining = samplesReadsStats[sampleId].initialReads;
       samplesReadsStats[sampleId].steps.forEach(step => {
         const readsAfter = step.readsAfter || readsRemaining;
         const readsLost = readsRemaining - readsAfter;
         dataRow[step.name] = readsLost;
 
-        if (!fastpFilters.includes(step.name)) {
+        if (
+          !sampleUsesModernHostFiltering ||
+          (sampleUsesModernHostFiltering && !fastpFilters.includes(step.name))
+        ) {
           readsRemaining = readsAfter;
         }
       });

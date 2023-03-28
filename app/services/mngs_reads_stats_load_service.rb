@@ -122,7 +122,7 @@ class MngsReadsStatsLoadService
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
 
     if sub_before && sub_after
-      frac = sub_before[:reads_after] > 0 ? ((1.0 * sub_after[:reads_after]) / sub_before[:reads_after]) : 1.0
+      frac = calculate_subsample_fraction(sub_before[:reads_after], sub_after[:reads_after])
       all_counts << { fraction_subsampled: frac }
       pipeline_run.fraction_subsampled = frac
     end
