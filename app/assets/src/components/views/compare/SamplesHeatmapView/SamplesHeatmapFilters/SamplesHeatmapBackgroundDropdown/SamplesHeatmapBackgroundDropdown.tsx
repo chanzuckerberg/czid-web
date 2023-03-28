@@ -4,7 +4,7 @@
 import { Dropdown } from "czifui";
 import React from "react";
 import { SDSFormattedOption } from "../SamplesHeatmapFilters";
-import { valueToName } from "../samplesHeatmapFilterHelpers";
+import { valueToName } from "../samplesHeatmapFilterUtils";
 
 interface SamplesHeatmapBackgroundDropdownProps {
   allBackgrounds?: RawBackground[];

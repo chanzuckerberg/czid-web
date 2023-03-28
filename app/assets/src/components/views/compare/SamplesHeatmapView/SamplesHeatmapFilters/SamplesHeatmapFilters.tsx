@@ -1,20 +1,22 @@
+import { Icon } from "czifui";
 import { isEqual } from "lodash/fp";
 import React from "react";
 
+import { Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";
 // import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { Divider } from "~/components/layout";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 // import FilterTag from "~ui/controls/FilterTag";
 import Slider from "~ui/controls/Slider";
 
 import PopoverMinimalButton from "../../../../ui/controls/PopoverMinimalButton";
 import SamplesHeatmapBackgroundDropdown from "./SamplesHeatmapBackgroundDropdown";
 import SamplesHeatmapCategoryDropdown from "./SamplesHeatmapCategoryDropdown/";
+import SamplesHeatmapPresetTooltip from "./SamplesHeatmapPresetTooltip";
 import SamplesHeatmapThresholdDropdown from "./SamplesHeatmapThresholdDropdown";
 import SamplesHeatmapViewOptionsDropdown from "./SamplesHeatmapViewOptionsDropdown";
-import { optionsToSDSFormat } from "./samplesHeatmapFilterHelpers";
+import { optionsToSDSFormat } from "./samplesHeatmapFilterUtils";
 import cs from "./samples_heatmap_filters.scss";
 
 export interface SDSFormattedOption {
@@ -74,25 +76,6 @@ const SamplesHeatmapFilters = ({
   selectedOptions,
   onSelectedOptionsChange,
 }: SamplesHeatmapFiltersPropsType) => {
-  const renderPresetTooltip = ({
-    component,
-    className,
-    key,
-  }: {
-    component: $TSFixMe;
-    className?: string;
-    key?: string;
-  }) => {
-    return (
-      <ColumnHeaderTooltip
-        key={key}
-        // need include a span for the tooltip to appear on hover
-        trigger={<span className={className}>{component}</span>}
-        content={`Presets cannot be modified. Click "New Presets" to adjust this filter.`}
-      />
-    );
-  };
-
   const onTaxonLevelChange = (taxonLevel: SDSFormattedOption) => {
     const value = taxonLevel.value;
     if (selectedOptions.species === value) {
@@ -121,7 +104,7 @@ const SamplesHeatmapFilters = ({
     );
 
     if (isPreset) {
-      return renderPresetTooltip({ component: taxonLevelSelect });
+      return <SamplesHeatmapPresetTooltip component={taxonLevelSelect} />;
     } else {
       return taxonLevelSelect;
     }
@@ -178,7 +161,7 @@ const SamplesHeatmapFilters = ({
     );
 
     if (isPreset) {
-      return renderPresetTooltip({ component: backgroundSelect });
+      return <SamplesHeatmapPresetTooltip component={backgroundSelect} />;
     } else {
       return backgroundSelect;
     }
@@ -202,6 +185,7 @@ const SamplesHeatmapFilters = ({
     const thresholdSelect = (
       <SamplesHeatmapThresholdDropdown
         options={options.thresholdFilters}
+        selectedOptions={selectedOptions}
         thresholds={selectedOptions.thresholdFilters}
         onApply={onThresholdFilterApply}
         disabled={disabled}
@@ -210,7 +194,7 @@ const SamplesHeatmapFilters = ({
     );
 
     if (isPreset) {
-      return renderPresetTooltip({ component: thresholdSelect });
+      return <SamplesHeatmapPresetTooltip component={thresholdSelect} />;
     } else {
       return thresholdSelect;
     }
@@ -221,17 +205,19 @@ const SamplesHeatmapFilters = ({
       selectedOptions.presets.includes("categories") ||
       selectedOptions.presets.includes("subcategories");
 
+    const disabled = loading || !data || isPreset;
+
     const categorySelect = (
       <SamplesHeatmapCategoryDropdown
         selectedOptions={selectedOptions}
-        disabled={isPreset || !data}
+        disabled={disabled}
         onSelectedOptionsChange={onSelectedOptionsChange}
         options={options}
       />
     );
 
     if (isPreset) {
-      return renderPresetTooltip({ component: categorySelect });
+      return <SamplesHeatmapPresetTooltip component={categorySelect} />;
     } else {
       return categorySelect;
     }
@@ -265,7 +251,7 @@ const SamplesHeatmapFilters = ({
     );
 
     if (isPreset) {
-      return renderPresetTooltip({ component: readSpecificitySelect });
+      return <SamplesHeatmapPresetTooltip component={readSpecificitySelect} />;
     } else {
       return readSpecificitySelect;
     }
@@ -382,119 +368,30 @@ const SamplesHeatmapFilters = ({
     );
   };
 
-  // TODO - smb: will add tags back in in the next PR
-
-  // const renderFilterTags = () => {
-  //   let filterTags: $TSFixMe = [];
-  //   const { presets } = selectedOptions;
-
-  //   if (selectedOptions.thresholdFilters) {
-  //     filterTags = filterTags.concat(
-  //       selectedOptions.thresholdFilters.map((threshold, i) => {
-  //         if (presets.includes("thresholdFilters")) {
-  //           return renderPresetTooltip({
-  //             // @ts-expect-errors Type '{ threshold: ThresholdConditions; }' is missing the following properties from type
-  //             component: <ThresholdFilterTag threshold={threshold} />,
-  //             className: `${cs.filterTag}`,
-  //             key: `threshold_filter_tag_${i}`,
-  //           });
-  //         } else {
-  //           return (
-  //             <ThresholdFilterTag
-  //               className={cs.filterTag}
-  //               disabled={loading || !data}
-  //               key={`threshold_filter_tag_${i}`}
-  //               threshold={threshold}
-  //               onClose={() => {
-  //                 handleRemoveThresholdFilter(threshold);
-  //                 trackEvent(
-  //                   "SamplesHeatmapControls_threshold-filter_removed",
-  //                   {
-  //                     value: threshold.value,
-  //                     operator: threshold.operator,
-  //                     metric: threshold.metric,
-  //                   },
-  //                 );
-  //               }}
-  //             />
-  //           );
-  //         }
-  //       }),
-  //     );
-  //   }
-
-  //   if (selectedOptions.categories) {
-  //     filterTags = filterTags.concat(
-  //       selectedOptions.categories.map((category, i) => {
-  //         if (presets.includes("categories")) {
-  //           return renderPresetTooltip({
-  //             component: <FilterTag text={category} />,
-  //             className: cs.filterTag,
-  //             key: `category_filter_tag_${i}`,
-  //           });
-  //         } else {
-  //           return (
-  //             <FilterTag
-  //               className={cs.filterTag}
-  //               key={`category_filter_tag_${i}`}
-  //               text={category}
-  //               disabled={loading || !data}
-  //               onClose={() => {
-  //                 handleRemoveCategory(category);
-  //                 trackEvent(
-  //                   "SamplesHeatmapControl_categories-filter_removed",
-  //                   {
-  //                     category,
-  //                   },
-  //                 );
-  //               }}
-  //             />
-  //           );
-  //         }
-  //       }),
-  //     );
-  //   }
-
-  //   if (selectedOptions.subcategories) {
-  //     const subcategoryList = flatten(values(selectedOptions.subcategories));
-  //     filterTags = filterTags.concat(
-  //       subcategoryList.map((subcat, i) => {
-  //         if (presets.includes("subcategories")) {
-  //           return renderPresetTooltip({
-  //             component: <FilterTag text={subcat} />,
-  //             className: cs.filterTag,
-  //             key: `subcat_filter_tag_${i}`,
-  //           });
-  //         } else {
-  //           return (
-  //             <FilterTag
-  //               className={cs.filterTag}
-  //               key={`subcat_filter_tag_${i}`}
-  //               text={subcat}
-  //               disabled={loading || !data}
-  //               onClose={() => {
-  //                 handleRemoveSubcategory(subcat);
-  //                 trackEvent(
-  //                   "SamplesHeatmapControl_categories-filter_removed",
-  //                   {
-  //                     subcat,
-  //                   },
-  //                 );
-  //               }}
-  //             />
-  //           );
-  //         }
-  //       }),
-  //     );
-  //   }
-
-  //   return filterTags;
-  // };
-
   return (
     <div className={cs.panelContentsContainer}>
       <div className={cs.topFilterSection}>
-        <span className={cs.sectionTitle}>Filters</span>
+        <div className={cs.sectionTitle}>
+          Filters
+          <Popup
+            content={
+              "Affects the underlying data that is shown in the heatmap."
+            }
+            position="top right"
+            trigger={
+              <span>
+                <Icon
+                  sdsIcon="infoCircle"
+                  sdsSize="s"
+                  sdsType="static"
+                  color="gray"
+                  shade={500}
+                  className={cs.infoIcon}
+                />
+              </span>
+            }
+          />
+        </div>
         <div className={cs.filterControl}>{renderCategoryFilter()}</div>
 
         <div className={cs.filterControl}>{renderThresholdFilterSelect()}</div>
@@ -504,7 +401,25 @@ const SamplesHeatmapFilters = ({
       </div>
       <Divider />
       <div className={cs.lowerFilterSection}>
-        <span className={cs.sectionTitle}>View Options</span>
+        <div className={cs.sectionTitle}>
+          View Options
+          <Popup
+            content={"Affects how data is presented in the heatmap."}
+            position="top right"
+            trigger={
+              <span>
+                <Icon
+                  sdsIcon="infoCircle"
+                  sdsSize="s"
+                  sdsType="static"
+                  color="gray"
+                  shade={500}
+                  className={cs.infoIcon}
+                />
+              </span>
+            }
+          />
+        </div>
         <div className={cs.filterControl}>{renderTaxonLevelSelect()}</div>
         <div className={cs.filterControl}>{renderMetricSelect()}</div>
         <div className={cs.filterControl}>{renderSortSamplesSelect()}</div>

@@ -5,15 +5,19 @@ import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import PopoverMinimalButton from "~/components/ui/controls/PopoverMinimalButton";
 import {
   PrimaryButton,
   SecondaryButton,
 } from "~/components/ui/controls/buttons";
 import ThresholdFilterList from "~/components/ui/controls/dropdowns/ThresholdFilterList";
+import { SelectedOptions } from "~/interface/shared";
+import SamplesHeatmapPresetTooltip from "../SamplesHeatmapPresetTooltip";
 import cs from "./samples_heatmap_threshold_dropdown.scss";
 
 interface SamplesHeatmapThresholdDropdownProps {
+  selectedOptions: SelectedOptions;
   disabled?: boolean;
   label?: string;
   thresholds?: $TSFixMe[];
@@ -158,47 +162,96 @@ export class SamplesHeatmapThresholdDropdown extends React.Component<
     this.setState({ popupIsOpen: true });
   };
 
+  renderFilterTags = () => {
+    const { presets } = this.props.selectedOptions;
+
+    if (this.props.selectedOptions.thresholdFilters.length === 0) return null;
+
+    const filterTags = this.props.selectedOptions.thresholdFilters.map(
+      (threshold, i) => {
+        if (presets.includes("thresholdFilters")) {
+          return (
+            <SamplesHeatmapPresetTooltip
+              // @ts-expect-errors Type '{ threshold: ThresholdConditions; }' is missing the following properties from type
+              component={<ThresholdFilterTag threshold={threshold} />}
+              className={`${cs.filterTag}`}
+              key={`threshold_filter_tag_${i}`}
+            />
+          );
+        } else {
+          return (
+            <ThresholdFilterTag
+              className={cs.filterTag}
+              disabled={this.props.disabled}
+              key={`threshold_filter_tag_${i}`}
+              threshold={threshold}
+              onClose={() => {
+                this.handleThresholdRemove(threshold);
+                trackEvent("SamplesHeatmapControls_threshold-filter_removed", {
+                  value: threshold.value,
+                  operator: threshold.operator,
+                  metric: threshold.metric,
+                });
+              }}
+            />
+          );
+        }
+      },
+    );
+
+    return <div className={cs.filterTagsContainer}>{filterTags}</div>;
+  };
+
   render() {
     const { disabled } = this.props;
     const { thresholds } = this.state;
     return (
-      <PopoverMinimalButton
-        disabled={disabled}
-        label={"Threshold Filters"}
-        details={this.state.thresholds.length.toString()}
-        content={
-          <div className={cs.container}>
-            <ThresholdFilterList
-              metrics={this.metrics}
-              operators={this.operators}
-              thresholds={thresholds}
-              onChangeThreshold={(idx: $TSFixMe, threshold: $TSFixMe) =>
-                this.handleThresholdChange(idx, threshold)
-              }
-              onRemoveThreshold={(idx: $TSFixMe) => {
-                this.handleThresholdRemove(idx);
-              }}
-              // @ts-expect-error Type '(event: $TSFixMe) => void' is not assignable to type '() => void'
-              onAddThreshold={(event: $TSFixMe) => {
-                // @ts-expect-error ts-migrate(2554) FIXME: Expected 0 arguments, but got 1.
-                this.handleAddThresholdItem(event);
-              }}
-            />
-            <div className={cs.thresholdButtons}>
-              <SecondaryButton
-                text="Cancel"
-                onClick={this.cancelFilterUpdates}
-                className={cs.button}
+      <div>
+        <PopoverMinimalButton
+          disabled={disabled}
+          label={"Threshold Filters"}
+          open={this.state.popupIsOpen}
+          setOpen={(isOpen: boolean) => {
+            this.setState({ popupIsOpen: isOpen });
+            if (isOpen) {
+              this.handleOpen();
+            }
+          }}
+          content={
+            <div className={cs.container}>
+              <ThresholdFilterList
+                metrics={this.metrics}
+                operators={this.operators}
+                thresholds={thresholds}
+                onChangeThreshold={(idx: $TSFixMe, threshold: $TSFixMe) =>
+                  this.handleThresholdChange(idx, threshold)
+                }
+                onRemoveThreshold={(idx: $TSFixMe) => {
+                  this.handleThresholdRemove(idx);
+                }}
+                // @ts-expect-error Type '(event: $TSFixMe) => void' is not assignable to type '() => void'
+                onAddThreshold={(event: $TSFixMe) => {
+                  // @ts-expect-error ts-migrate(2554) FIXME: Expected 0 arguments, but got 1.
+                  this.handleAddThresholdItem(event);
+                }}
               />
-              <PrimaryButton
-                text="Apply"
-                onClick={this.applyFilterUpdates}
-                className={cs.button}
-              />
+              <div className={cs.thresholdButtons}>
+                <SecondaryButton
+                  text="Cancel"
+                  onClick={this.cancelFilterUpdates}
+                  className={cs.button}
+                />
+                <PrimaryButton
+                  text="Apply"
+                  onClick={this.applyFilterUpdates}
+                  className={cs.button}
+                />
+              </div>
             </div>
-          </div>
-        }
-      />
+          }
+        />
+        {this.renderFilterTags()}
+      </div>
     );
   }
 }

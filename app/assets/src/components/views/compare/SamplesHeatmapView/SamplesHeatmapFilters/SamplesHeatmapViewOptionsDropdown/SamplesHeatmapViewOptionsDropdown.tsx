@@ -4,7 +4,7 @@ import { SDSFormattedOption } from "../SamplesHeatmapFilters";
 import {
   valueToName,
   valueToSDSFormatOption,
-} from "../samplesHeatmapFilterHelpers";
+} from "../samplesHeatmapFilterUtils";
 
 interface SamplesHeatmapViewOptionsDropdownPropsType {
   disabled: boolean;

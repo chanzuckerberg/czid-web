@@ -2132,6 +2132,7 @@ class SamplesHeatmapView extends React.Component<
         onShareClick={this.handleShareClick}
         onSaveClick={this.handleSaveClick}
         onFilterToggleClick={this.toggleDisplayFilters}
+        filterPanelOpen={!this.state.hideFilters}
       />
     );
   };

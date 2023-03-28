@@ -1,5 +1,6 @@
 import { ButtonIcon, Icon } from "czifui";
 import React, { useContext } from "react";
+import { Popup } from "semantic-ui-react";
 
 import {
   ANALYTICS_EVENT_NAMES,
@@ -55,6 +56,7 @@ interface SamplesHeatmapHeaderProps {
   onShareClick: $TSFixMeFunction;
   onSaveClick: $TSFixMeFunction;
   onFilterToggleClick: $TSFixMeFunction;
+  filterPanelOpen: boolean;
 }
 
 export const SamplesHeatmapHeader = ({
@@ -72,6 +74,7 @@ export const SamplesHeatmapHeader = ({
   onShareClick,
   onSaveClick,
   onFilterToggleClick,
+  filterPanelOpen,
 }: SamplesHeatmapHeaderProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
@@ -147,13 +150,20 @@ export const SamplesHeatmapHeader = ({
 
   const renderFilterToggleButton = () => {
     return (
-      <ButtonIcon
-        onClick={onFilterToggleClick}
-        sdsIcon="slidersHorizontal"
-        sdsSize="large"
-        sdsType="primary"
-        sx={{ marginRight: "10px" }}
-      ></ButtonIcon>
+      <Popup
+        content={filterPanelOpen ? "Close Controls" : "Open Controls"}
+        position="bottom right"
+        inverted
+        trigger={
+          <ButtonIcon
+            onClick={onFilterToggleClick}
+            sdsIcon="slidersHorizontal"
+            sdsSize="large"
+            sdsType="primary"
+            sx={{ marginRight: "10px" }}
+          />
+        }
+      />
     );
   };
 

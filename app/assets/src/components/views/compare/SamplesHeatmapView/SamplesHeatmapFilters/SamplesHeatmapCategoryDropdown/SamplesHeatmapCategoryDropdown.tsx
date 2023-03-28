@@ -1,31 +1,32 @@
 import { Dropdown } from "czifui";
 import React from "react";
 import { trackEvent } from "~/api/analytics";
+import FilterTag from "~/components/ui/controls/FilterTag";
 import { SelectedOptions } from "~/interface/shared";
 import { OptionsType, SDSFormattedOption } from "../SamplesHeatmapFilters";
+import SamplesHeatmapPresetTooltip from "../SamplesHeatmapPresetTooltip";
+import cs from "./samples_heatmap_category_dropdown.scss";
+
+type OnSelectedOptionsChangeCategoryType = (newOptions: {
+  categories?: string[];
+  subcategories?: { [key: string]: string[] };
+}) => void;
 
 interface SamplesHeatmapCategoryDropdownPropsType {
   selectedOptions: SelectedOptions;
+  onSelectedOptionsChange: OnSelectedOptionsChangeCategoryType;
   disabled: boolean;
-  onSelectedOptionsChange: {
-    ({
-      categoryNames,
-      subcategoryNames,
-    }: {
-      categoryNames: string[];
-      subcategoryNames: { [key: string]: string[] };
-    }): void;
-  };
   options: OptionsType;
 }
 
 export const SamplesHeatmapCategoryDropdown = ({
   disabled,
+  selectedOptions,
   onSelectedOptionsChange,
   options,
 }: SamplesHeatmapCategoryDropdownPropsType) => {
   const onCategoryChange = (categories: SDSFormattedOption[]) => {
-    let categoryNames = categories.map(category => category.name);
+    let categoryNames: string[] = categories.map(category => category.name);
 
     let subcategoryNames = {};
     if (categoryNames.includes("Viruses - Phage")) {
@@ -35,7 +36,10 @@ export const SamplesHeatmapCategoryDropdown = ({
       subcategoryNames = { Viruses: ["Phage"] };
     }
 
-    onSelectedOptionsChange({ categoryNames, subcategoryNames });
+    onSelectedOptionsChange({
+      categories: categoryNames,
+      subcategories: subcategoryNames,
+    });
     trackEvent("SamplesHeatmapControls_category-filter_changed", {
       categories: categories.length,
     });
@@ -66,33 +70,76 @@ export const SamplesHeatmapCategoryDropdown = ({
 
   categoryOptions.sort(sortCategoryOptions);
 
+  const handleRemoveCategory = (category: string) => {
+    const newCategories = selectedOptions.categories.filter(
+      (c: string) => c !== category,
+    );
+
+    const newSubcategories =
+      category === "Phage" ? {} : selectedOptions.subcategories;
+
+    onSelectedOptionsChange({
+      categories: newCategories,
+      subcategories: newSubcategories,
+    });
+  };
+
+  const renderFilterTags = () => {
+    const { presets } = selectedOptions;
+
+    if (
+      selectedOptions.categories.length === 0 &&
+      Object.keys(selectedOptions.subcategories).length === 0
+    ) {
+      return null;
+    }
+
+    const allTagNames = selectedOptions.categories.concat(
+      Object.values(selectedOptions.subcategories).flat(),
+    );
+    const filterTags = allTagNames.map((category, i) => {
+      if (presets.includes("categories")) {
+        return (
+          <SamplesHeatmapPresetTooltip
+            component={<FilterTag text={category} />}
+            className={cs.filterTag}
+            key={`category_filter_tag_${i}`}
+          />
+        );
+      } else {
+        return (
+          <FilterTag
+            className={cs.filterTag}
+            key={`category_filter_tag_${i}`}
+            text={category}
+            disabled={disabled}
+            onClose={() => {
+              handleRemoveCategory(category);
+              trackEvent("SamplesHeatmapControl_categories-filter_removed", {
+                category,
+              });
+            }}
+          />
+        );
+      }
+    });
+
+    return <div className={cs.filterTagsContainer}>{filterTags}</div>;
+  };
+
   return (
-    <Dropdown
-      options={categoryOptions}
-      onChange={newValue => {
-        onCategoryChange(newValue);
-      }}
-      label="Categories"
-      InputDropdownProps={{ sdsStyle: "minimal", disabled: disabled }}
-      buttons
-      multiple
-    />
+    <div>
+      <Dropdown
+        options={categoryOptions}
+        onChange={newValue => {
+          onCategoryChange(newValue);
+        }}
+        label="Categories"
+        InputDropdownProps={{ sdsStyle: "minimal", disabled: disabled }}
+        buttons
+        multiple
+      />
+      {renderFilterTags()}
+    </div>
   );
 };
-
-// const handleRemoveCategory = (category: $TSFixMe) => {
-//   const newCategories = pull(category, selectedOptions.categories);
-//   onSelectedOptionsChange({ categories: newCategories });
-// };
-
-// const handleRemoveSubcategory = (subcat: $TSFixMe) => {
-//   // For each category => [subcategories], remove subcat from subcategories.
-//   // Then omit all categories with empty subcategories.
-//   const newSubcategories = omitBy(
-//     isEmpty,
-//     mapValues(pull(subcat), selectedOptions.subcategories),
-//   );
-//   onSelectedOptionsChange({ subcategories: newSubcategories });
-// };
-
-//       );
