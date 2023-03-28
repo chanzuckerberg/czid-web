@@ -19,6 +19,24 @@
     }
   }
 
+  // TODO - smb - remove the old scss class and add a new one for the case when the filters are closed once we're ready to remove the feature flag
+  .newHeatmapContainer {
+    overflow: hidden;
+    // Set the height so the heatmap takes up the rest of the screen.
+    // 130px is the height of the elements above the heatmapContainer.
+    // We set it to less that the height of the elements so that the
+    // heatmap doesn't completely disappear when scrolled up.
+    // When open, the filter pane is 214px wide.
+    // These *will* need to change if the height of the elements above ever change.
+    height: calc(100vh - 100px);
+    margin-left: 214px + $sds-spaces-l;
+
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
   .heatmapContainer {
     overflow: hidden;
     // Set the height so the heatmap takes up the rest of the screen.

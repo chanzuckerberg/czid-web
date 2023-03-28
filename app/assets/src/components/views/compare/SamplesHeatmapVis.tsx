@@ -15,6 +15,7 @@ import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import TaxonSelector from "~/components/common/TaxonSelector";
 import { UserContext } from "~/components/common/UserContext";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
+import { HEATMAP_FILTERS_LEFT_FEATURE } from "~/components/utils/features";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
@@ -63,6 +64,7 @@ interface SamplesHeatmapVisProps {
   sampleSortType?: string;
   fullScreen?: boolean;
   taxaSortType?: string;
+  hideFilters?: boolean;
 }
 
 interface SamplesHeatmapVisState {
@@ -657,6 +659,11 @@ class SamplesHeatmapVis extends React.Component<
       pinSampleOptions,
     );
 
+    const { allowedFeatures = [] } = this.context || {};
+    const useNewFilters = allowedFeatures.includes(
+      HEATMAP_FILTERS_LEFT_FEATURE,
+    );
+
     return (
       <div className={cs.samplesHeatmapVis}>
         <PlusMinusControl
@@ -671,13 +678,17 @@ class SamplesHeatmapVis extends React.Component<
           className={cs.plusMinusControl}
         />
         <div
-          className={cx(
-            cs.heatmapContainer,
-            (!isEmpty(this.props.thresholdFilters) ||
-              !isEmpty(this.props.taxonCategories)) &&
-              cs.filtersApplied,
-            this.props.fullScreen && cs.fullScreen,
-          )}
+          className={
+            useNewFilters && !this.props.hideFilters
+              ? cs.newHeatmapContainer
+              : cx(
+                  cs.heatmapContainer,
+                  (!isEmpty(this.props.thresholdFilters) ||
+                    !isEmpty(this.props.taxonCategories)) &&
+                    cs.filtersApplied,
+                  this.props.fullScreen && cs.fullScreen,
+                )
+          }
           ref={container => {
             this.heatmapContainer = container;
           }}

@@ -1,16 +1,13 @@
 /* Note: this is a minor variant of the ThresholdDropdown component, specifically for the Taxon Heatmap. Most notably, it swaps out the button with an SDS `InputDropdown` and re-implements the popover with the MUI component per the design spec for the left side filters. I spent a lot of time working on a refactor of the original so I could modularly swap out just the button, and made some good progress which I'll push to a separate branch. However, doing this while also trying to keep all changes behind a feature flag ended up being a huge time sink and I dont' want to block the taxon heatmap filters release.
  Once we're ready to update the filters on other pages in the app we can make a switch. - SMB 2023-03 */
 
+import { Button } from "czifui";
 import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import PopoverMinimalButton from "~/components/ui/controls/PopoverMinimalButton";
-import {
-  PrimaryButton,
-  SecondaryButton,
-} from "~/components/ui/controls/buttons";
 import ThresholdFilterList from "~/components/ui/controls/dropdowns/ThresholdFilterList";
 import { SelectedOptions } from "~/interface/shared";
 import SamplesHeatmapPresetTooltip from "../SamplesHeatmapPresetTooltip";
@@ -165,39 +162,37 @@ export class SamplesHeatmapThresholdDropdown extends React.Component<
   renderFilterTags = () => {
     const { presets } = this.props.selectedOptions;
 
-    if (this.props.selectedOptions.thresholdFilters.length === 0) return null;
+    if (this.state.thresholds.length === 0) return null;
 
-    const filterTags = this.props.selectedOptions.thresholdFilters.map(
-      (threshold, i) => {
-        if (presets.includes("thresholdFilters")) {
-          return (
-            <SamplesHeatmapPresetTooltip
-              // @ts-expect-errors Type '{ threshold: ThresholdConditions; }' is missing the following properties from type
-              component={<ThresholdFilterTag threshold={threshold} />}
-              className={`${cs.filterTag}`}
-              key={`threshold_filter_tag_${i}`}
-            />
-          );
-        } else {
-          return (
-            <ThresholdFilterTag
-              className={cs.filterTag}
-              disabled={this.props.disabled}
-              key={`threshold_filter_tag_${i}`}
-              threshold={threshold}
-              onClose={() => {
-                this.handleThresholdRemove(threshold);
-                trackEvent("SamplesHeatmapControls_threshold-filter_removed", {
-                  value: threshold.value,
-                  operator: threshold.operator,
-                  metric: threshold.metric,
-                });
-              }}
-            />
-          );
-        }
-      },
-    );
+    const filterTags = this.state.thresholds.map((threshold, i) => {
+      if (presets.includes("thresholdFilters")) {
+        return (
+          <SamplesHeatmapPresetTooltip
+            // @ts-expect-errors Type '{ threshold: ThresholdConditions; }' is missing the following properties from type
+            component={<ThresholdFilterTag threshold={threshold} />}
+            className={`${cs.filterTag}`}
+            key={`threshold_filter_tag_${i}`}
+          />
+        );
+      } else {
+        return (
+          <ThresholdFilterTag
+            className={cs.filterTag}
+            disabled={this.props.disabled}
+            key={`threshold_filter_tag_${i}`}
+            threshold={threshold}
+            onClose={() => {
+              this.handleThresholdRemove(threshold);
+              trackEvent("SamplesHeatmapControls_threshold-filter_removed", {
+                value: threshold.value,
+                operator: threshold.operator,
+                metric: threshold.metric,
+              });
+            }}
+          />
+        );
+      }
+    });
 
     return <div className={cs.filterTagsContainer}>{filterTags}</div>;
   };
@@ -217,8 +212,10 @@ export class SamplesHeatmapThresholdDropdown extends React.Component<
               this.handleOpen();
             }
           }}
+          closeOnBlur={false}
           content={
             <div className={cs.container}>
+              <span className={cs.title}>Configure Thresholds</span>
               <ThresholdFilterList
                 metrics={this.metrics}
                 operators={this.operators}
@@ -236,16 +233,24 @@ export class SamplesHeatmapThresholdDropdown extends React.Component<
                 }}
               />
               <div className={cs.thresholdButtons}>
-                <SecondaryButton
-                  text="Cancel"
-                  onClick={this.cancelFilterUpdates}
+                <Button
+                  variant="contained"
+                  size="large"
                   className={cs.button}
-                />
-                <PrimaryButton
-                  text="Apply"
+                  color="primary"
                   onClick={this.applyFilterUpdates}
+                >
+                  Apply
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
                   className={cs.button}
-                />
+                  color="primary"
+                  onClick={this.cancelFilterUpdates}
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
           }

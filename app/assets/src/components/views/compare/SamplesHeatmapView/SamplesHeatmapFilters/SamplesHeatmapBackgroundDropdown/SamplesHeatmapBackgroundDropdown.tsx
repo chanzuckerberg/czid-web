@@ -74,13 +74,15 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
       <Dropdown
         label="Background"
         search={true}
-        onChange={newValue =>
+        onChange={newValue => {
           // @ts-expect-error -- complains about the default SDS dropdown option type not having a `value` field, but we're using objects with a superset of the SDS option type
-          onChange(newValue?.value)
-        }
+          onChange(newValue?.value);
+        }}
+        // @ts-expect-error -- complains about the default SDS dropdown option type not having a `value` field, but we're using objects with a superset of the SDS option type
+        value={{ name: valueToName(value, backgroundOptions), value: value }}
         DropdownMenuProps={{
-          value: value,
           getOptionDisabled: getOptionDisabled,
+          isOptionEqualToValue: (option, value) => option.value === value,
         }}
         InputDropdownProps={{
           sdsStyle: "minimal",

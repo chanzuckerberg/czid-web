@@ -1972,6 +1972,7 @@ class SamplesHeatmapView extends React.Component<
           sampleSortType={this.state.selectedOptions.sampleSortType}
           fullScreen={this.state.hideFilters}
           taxaSortType={this.state.selectedOptions.taxaSortType}
+          hideFilters={this.state.hideFilters}
         />
       </ErrorBoundary>
     );

@@ -25,6 +25,25 @@ export const SamplesHeatmapCategoryDropdown = ({
   onSelectedOptionsChange,
   options,
 }: SamplesHeatmapCategoryDropdownPropsType) => {
+  const formatOptionsForSDS = (options: string[]) => {
+    return options.map(option => {
+      return { name: option };
+    });
+  };
+
+  const sortCategoryOptions = (
+    a: SDSFormattedOption,
+    b: SDSFormattedOption,
+  ) => {
+    if (a.name === "Uncategorized") {
+      return 1;
+    } else if (b.name === "Uncategorized") {
+      return -1;
+    } else {
+      return a.name > b.name ? 1 : -1;
+    }
+  };
+
   const onCategoryChange = (categories: SDSFormattedOption[]) => {
     let categoryNames: string[] = categories.map(category => category.name);
 
@@ -44,31 +63,6 @@ export const SamplesHeatmapCategoryDropdown = ({
       categories: categories.length,
     });
   };
-
-  const categoryOptions = options.categories.map(option => {
-    return { name: option, value: option };
-  });
-
-  // Add one-off subcategory for phage
-  categoryOptions.push({
-    name: "Viruses - Phage",
-    value: "Viruses - Phage",
-  });
-
-  const sortCategoryOptions = (
-    a: SDSFormattedOption,
-    b: SDSFormattedOption,
-  ) => {
-    if (a.name === "Uncategorized") {
-      return 1;
-    } else if (b.name === "Uncategorized") {
-      return -1;
-    } else {
-      return a.name > b.name ? 1 : -1;
-    }
-  };
-
-  categoryOptions.sort(sortCategoryOptions);
 
   const handleRemoveCategory = (category: string) => {
     const newCategories = selectedOptions.categories.filter(
@@ -127,17 +121,41 @@ export const SamplesHeatmapCategoryDropdown = ({
     return <div className={cs.filterTagsContainer}>{filterTags}</div>;
   };
 
+  const categoryOptions = formatOptionsForSDS(options.categories);
+
+  // Add one-off subcategory for phage
+  categoryOptions.push({
+    name: "Viruses - Phage",
+  });
+
+  categoryOptions.sort(sortCategoryOptions);
+
+  const value = formatOptionsForSDS(
+    selectedOptions.categories.concat(
+      Object.values(selectedOptions.subcategories).flat(),
+    ),
+  );
+
   return (
     <div>
       <Dropdown
         options={categoryOptions}
         onChange={newValue => {
-          onCategoryChange(newValue);
+          if (newValue.length > 0) {
+            onCategoryChange(newValue);
+          }
         }}
         label="Categories"
         InputDropdownProps={{ sdsStyle: "minimal", disabled: disabled }}
         buttons
         multiple
+        value={value}
+        DropdownMenuProps={{
+          isOptionEqualToValue: (option, value) => {
+            return option.name === value.name;
+          },
+        }}
+        closeOnBlur={true}
       />
       {renderFilterTags()}
     </div>

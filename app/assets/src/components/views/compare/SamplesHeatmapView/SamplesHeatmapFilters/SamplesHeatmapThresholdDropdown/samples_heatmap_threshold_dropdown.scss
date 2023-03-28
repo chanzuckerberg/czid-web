@@ -2,6 +2,10 @@
 @import "~styles/themes/elements";
 @import "~czifui/dist/variables";
 
+.title {
+  font: $sds-font-header-s-600-font;
+}
+
 .container {
   width: 412px;
   padding: $sds-spaces-m;
@@ -10,7 +14,6 @@
 .thresholdButtons {
   /* Override row css */
   margin-top: $sds-spaces-xxl;
-  text-align: center;
 }
 .button {
   margin-left: $sds-spaces-m;
