@@ -46,6 +46,8 @@ jobs:
         with:
           secret-ids: |
             LOGIN, czid-login
+            SMTP, czid-smtp 
+            SLACK, czid-slack 
           parse-json-secrets: true
 
       # run Playwright E2E tests
@@ -67,5 +69,92 @@ jobs:
         with: 
           name: e2e-artifacts
           path: ./e2e/reports
+            # send email
+      # - name: Send mail
+      #   if: success() || failure()
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.gmail.com
+      #     server_port: 465
+      #     secure: true
+      #     username: ${{ env.SMTP_USERNAME }}
+      #     password: ${{ env.SMTP_PASSWORD }}
+      #     subject: E2E Test Results - CI
+      #     to: ${{ env.SMTP_RECIPIENTS }}
+      #     from: E2E Test Runner
+      #     html_body: file://./e2e/result-summary.txt
+      #     attachments: ./e2e/html-reports/index.html
 
+      - name: Read Summary Report
+        if: always()
+        run: |
+          STATUS=$(cat ./e2e/summary.json | jq -r '.status')
+          echo "STATUS=$STATUS" >> $GITHUB_ENV 
+          PASSED=$(cat ./e2e/summary.json | jq -r '.passed[]' | tr '\n' ' ')
+          echo "PASSED=$PASSED" >> $GITHUB_ENV 
+          TIMEOUT=$(cat ./e2e/summary.json | jq -r '.timedOut[]' | tr '\n' ' ' | sed 's/ /--->TIMEOUT /g')
+          FAILURES=$(cat ./e2e/summary.json | jq -r '.failed[]' | tr '\n' ' ')
+          FAILURES+=$TIMEOUT
+          echo "FAILURES=$FAILURES" >> $GITHUB_ENV
+      
+      - name: Pull Request URL
+        if: always()
+        uses: ammaratef45/pr-url-action@v1
+
+
+      - name: Post to Slack channel
+        if: failure() || success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: repo,eventName,workflow,job,took
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : 'danger',
+                title: `E2E Test Results :test_tube:`,
+                fields: [{
+                  title: 'Site Under Test',
+                  value: '${{ env.SITE }}',
+                  short: true
+                },
+                {
+                  title: 'Triggered By',
+                  value: `${{ github.event_name }}`,
+                  short: true
+                },
+                {
+                  title: 'Repo',
+                  value: `${process.env.AS_REPO}`,
+                  short: true
+                },
+                {
+                  title: 'Execution Time',
+                  value: `${process.env.AS_TOOK}`,
+                  short: true
+                },
+                {
+                  title: 'Workflow',
+                  value: `${process.env.AS_WORKFLOW}`,
+                  short: true
+                },
+                {
+                  title: 'Total Tests',
+                  value: (`${{ env.FAILURES }}`.match(/.spec.ts/g) || []).length + (`${{ env.PASSED }}`.match(/.spec.ts/g) || []).length,
+                  short: true
+                },
+                {
+                  title: 'Pull Request',
+                  value: `${{ steps.pr-url.outputs.url }}`,
+                  short: false
+                },
+                {
+                  title: 'Failures',
+                  value: `${{ env.FAILURES }}` === '' ? 'No failures' : `${{ env.FAILURES }}`.match(/.spec.ts/g).length > 10 ? `Too many failures to print. Please go to GitHub to see full list of failures` : '```${{ env.FAILURES }}```'.replace(/ /g, '\n'),
+                  short: false
+                }]
+              }]
+            }  
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK }}
   
