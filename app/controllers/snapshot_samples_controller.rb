@@ -80,7 +80,7 @@ class SnapshotSamplesController < SamplesController
     offset = snapshot_sample_params[:offset].to_i
 
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(snapshot_sample_params[:listAllIds])
-    samples = samples_by_share_id(share_id)
+    samples = samples_by_share_id(share_id).non_deleted
 
     samples = filter_samples(samples, snapshot_sample_params)
     samples = samples.order(Hash[order_by => order_dir])

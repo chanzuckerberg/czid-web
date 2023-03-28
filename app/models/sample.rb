@@ -178,6 +178,8 @@ class Sample < ApplicationRecord
   # Get all failed samples within a particular week: Sample.by_time(start_date: Date.parse("20220620"), end_date: Date.parse("20220624")).by_pipeline_result_status(results_finalized: PipelineRun::FINALIZED_FAIL)
   scope :by_pipeline_result_status, ->(results_finalized:) { joins(:pipeline_runs).where(pipeline_runs: { deprecated: false, results_finalized: results_finalized }) }
 
+  scope :non_deleted, -> { where(deleted_at: nil) }
+
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id
 

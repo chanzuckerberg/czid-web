@@ -279,7 +279,7 @@ class WorkflowRunsController < ApplicationController
     workflow_run_filters = filters.slice(:workflow, :time, :taxon)
 
     samples = fetch_samples(domain: domain, filters: sample_filters)
-    samples_workflow_runs = current_power.samples_workflow_runs(samples).non_deprecated
+    samples_workflow_runs = current_power.samples_workflow_runs(samples).non_deprecated.non_deleted
 
     filter_workflow_runs(workflow_runs: samples_workflow_runs, filters: workflow_run_filters)
   end

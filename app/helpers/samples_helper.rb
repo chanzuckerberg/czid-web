@@ -321,14 +321,14 @@ module SamplesHelper
   end
 
   def fetch_samples(domain:, filters: {})
-    samples = samples_by_domain(domain)
+    samples = samples_by_domain(domain).non_deleted
     samples = filter_samples(samples, filters)
 
     samples
   end
 
   def fetch_samples_with_current_power(current_power, domain:, filters: {})
-    samples = samples_by_domain_with_current_power(domain, current_power)
+    samples = samples_by_domain_with_current_power(domain, current_power).non_deleted
     samples = filter_samples(samples, filters)
 
     samples

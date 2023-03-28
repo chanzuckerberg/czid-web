@@ -632,6 +632,61 @@ RSpec.describe WorkflowRunsController, type: :controller do
               end
             end
           end
+
+          context "when some workflow runs are in the process of deleting" do
+            before do
+              @project = create(:public_project, users: [@user])
+              @sample1 = create(:sample, project: @project,
+                                         user: @user,
+                                         name: "Sample 1",
+                                         initial_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+              @deleting_wr = create(:workflow_run,
+                                    sample: @sample1,
+                                    workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                                    status: WorkflowRun::STATUS[:succeeded])
+              @non_deleting_wr = create(:workflow_run,
+                                        sample: @sample1,
+                                        workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                                        status: WorkflowRun::STATUS[:succeeded],
+                                        deleted_at: nil)
+            end
+
+            it "filters out workflow runs with non-nil deleted_at in domain '#{domain}' with mode '#{mode}'" do
+              allow(HardDeleteObjects).to receive(:perform)
+              BulkDeletionService.call(
+                object_ids: [@deleting_wr.id],
+                user: @user,
+                workflow: WorkflowRun::WORKFLOW[:consensus_genome]
+              )
+
+              @deleting_wr.reload
+              expect(@deleting_wr.deleted_at).to be_within(1.minute).of(Time.now.utc)
+
+              get :index, params: {
+                domain: domain,
+                mode: mode,
+                workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                listAllIds: true,
+              }
+              json_response = JSON.parse(response.body)
+              workflow_runs = json_response["workflow_runs"]
+              expect(workflow_runs.map { |wr| wr["id"] }).not_to include(@deleting_wr.id)
+              expect(json_response["all_workflow_run_ids"]).not_to include(@deleting_wr.id)
+            end
+
+            it "does not filter out workflow runs with nil deleted_at in domain '#{domain}' with mode '#{mode}'" do
+              get :index, params: {
+                domain: domain,
+                mode: mode,
+                workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                listAllIds: true,
+              }
+              json_response = JSON.parse(response.body)
+              workflow_runs = json_response["workflow_runs"]
+              expect(workflow_runs.map { |wr| wr["id"] }).to include(@non_deleting_wr.id)
+              expect(json_response["all_workflow_run_ids"]).to include(@non_deleting_wr.id)
+            end
+          end
         end
       end
 

@@ -3,9 +3,91 @@ require 'rails_helper'
 RSpec.describe "Sample request", type: :request do
   create_users
 
+  let(:short_read_mngs) { WorkflowRun::WORKFLOW[:short_read_mngs] }
+  let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
+
   context 'Joe' do
     before do
       sign_in @joe
+    end
+
+    describe "/samples/index_v2" do
+      before do
+        @project = create(:project, users: [@joe, @admin])
+        @sample1 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "completed Illumina mNGs sample 1",
+                                   initial_workflow: short_read_mngs,
+                                   created_at: 1.week.ago)
+        @pr1 = create(:pipeline_run, sample: @sample1, technology: illumina, finalized: 1)
+        @sample2 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "completed Illumina mNGs sample 2",
+                                   initial_workflow: short_read_mngs,
+                                   created_at: 2.weeks.ago)
+        @pr2 = create(:pipeline_run, sample: @sample2, technology: illumina, finalized: 1)
+
+        @params = {
+          domain: "my_data",
+          workflow: short_read_mngs,
+          listAllIds: true,
+          basic: false,
+          format: :json,
+        }
+      end
+
+      it "filters out samples in the process of deleting" do
+        # stub out call so we don't actually hard delete the objects
+        allow(HardDeleteObjects).to receive(:perform)
+        BulkDeletionService.call(
+          object_ids: [@sample1.id],
+          user: @joe,
+          workflow: short_read_mngs
+        )
+
+        @sample1.reload
+        expect(@sample1.deleted_at).to be_within(1.minute).of(Time.now.utc)
+
+        get "/samples/index_v2", params: @params
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+
+        samples_response = json_response["samples"]
+        expect(samples_response.map { |sample| sample["id"] }).not_to include(@sample1.id)
+        expect(json_response["samples"].length).to be(1)
+        expect(json_response["all_samples_ids"]).not_to include(@sample1.id)
+      end
+
+      it "does not filter out samples that have nil deleted_at field" do
+        get "/samples/index_v2", params: @params
+
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+
+        samples_response = json_response["samples"]
+        expect(samples_response.map { |sample| sample["id"] }).to include(@sample1.id, @sample2.id)
+        expect(json_response["samples"].length).to be(2)
+        expect(json_response["all_samples_ids"]).to contain_exactly(@sample2.id, @sample1.id)
+      end
+
+      it "does not filter out samples in the process of uploading" do
+        sample_uploading = create(:sample, project: @project,
+                                           user: @joe,
+                                           name: "uploading_sample",
+                                           initial_workflow: short_read_mngs,
+                                           status: Sample::STATUS_CREATED,
+                                           created_at: 1.month.ago)
+
+        get "/samples/index_v2", params: @params
+
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+
+        samples_response = json_response["samples"]
+        expect(samples_response.map { |sample| sample["id"] }).to include(sample_uploading.id)
+
+        expect(json_response["all_samples_ids"]).to include(sample_uploading.id)
+      end
     end
 
     describe "/samples/bulk_upload_with_metadata" do
