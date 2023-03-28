@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React from "react";
-import IconBiohubLogo from "~/components/ui/icons/IconBiohubLogo";
+import IconBiohubSFLogo from "~/components/ui/icons/IconBiohubSFLogo";
 import IconCziLogo from "~/components/ui/icons/IconCziLogo";
 import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./Footer.scss";
@@ -93,7 +93,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noreferrer"
               >
-                <IconBiohubLogo />
+                <IconBiohubSFLogo />
               </a>
             </div>
           </div>
