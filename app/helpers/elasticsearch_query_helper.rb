@@ -841,27 +841,17 @@ module ElasticsearchQueryHelper
     return metric
   end
 
-  def self.organize_data_by_pr(sql_results, pr_id_to_sample_id)
-    # organizing taxons by pipeline_run_id
-    result_hash = {}
+  def self.organize_data_by_pr(es_results, pr_id_to_sample_id)
+    # create result hash for all pipeline runs that were requested
+    pipeline_runs = PipelineRun.where(id: pr_id_to_sample_id.keys().uniq).includes([:sample])
+    result_hash = pipeline_runs.index_by(&:id).map { |id, pr| [id, { "pr" => pr, "taxon_counts" => [], "sample_id" => pr_id_to_sample_id[id] }] }.to_h
 
-    pipeline_run_ids = sql_results.map { |x| x["pipeline_run_id"] }
-    pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
-    pipeline_runs_by_id = pipeline_runs.index_by(&:id)
-    sql_results.each do |row|
-      pipeline_run_id = row["pipeline_run_id"]
-      if result_hash[pipeline_run_id]
-        pr = result_hash[pipeline_run_id]["pr"]
-      else
-        pr = pipeline_runs_by_id[pipeline_run_id]
-        result_hash[pipeline_run_id] = {
-          "pr" => pr,
-          "taxon_counts" => [],
-          "sample_id" => pr_id_to_sample_id[pipeline_run_id],
-        }
-      end
-      if pr.total_reads
-        result_hash[pipeline_run_id]["taxon_counts"] << row
+    # populate the taxon_counts for each pipeline run that has taxons that passed the filters
+    es_results.each do |row|
+      taxon_pipeline_run_id = row["pipeline_run_id"]
+      result_record = result_hash[taxon_pipeline_run_id]
+      if result_record["pr"]["total_reads"]
+        result_record["taxon_counts"] << row
       end
     end
     return result_hash
