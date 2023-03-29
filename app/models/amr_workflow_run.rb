@@ -10,9 +10,13 @@ class AmrWorkflowRun < WorkflowRun
   # * The idea is that the model should have one set of well-defined outputs
   #   that are consistently served, instead of having client pages compose
   #   different sets of results each time.
+  #
+  # * You can find all outputs of a particluar AMR workflow run in the AWS console
+  #   by visiting the "Execution Input and Outputs" section of the SFN execution.
   MODERN_HOST_FILTERING_VERSION = "0.3.1".freeze
   OUTPUT_ZIP = "amr.ZipOutputs.output_zip".freeze
   OUTPUT_REPORT = "amr.RunResultsPerSample.synthesized_report".freeze
+  OUTPUT_CONTIGS = "amr.RunSpades.contigs".freeze
 
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).

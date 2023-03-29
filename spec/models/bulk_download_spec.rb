@@ -570,6 +570,42 @@ describe BulkDownload, type: :model do
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
+
+    it "returns the correct task command for the antimicrobial resistance contigs download type" do
+      fake_output_path = "s3://contigs.fa"
+      allow_any_instance_of(SfnExecution).to receive(:output_path).and_return(fake_output_path)
+
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::AMR_CONTIGS_BULK_DOWNLOAD, workflow_run_ids: [
+                                @workflow_run_one.id,
+                                @workflow_run_two.id,
+                                @workflow_run_three.id,
+                              ])
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        fake_output_path,
+        fake_output_path,
+        fake_output_path,
+        "--tar-names",
+        get_expected_tar_name(@project, @sample_one, "contigs.fa"),
+        get_expected_tar_name(@project, @sample_three, "contigs.fa"),
+        get_expected_tar_name(@project, @sample_three, "contigs.fa"),
+        "--dest-url",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Contigs.tar.gz",
+        "--progress-delay",
+        15,
+        "--success-url",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
   end
 
   context "#aegea_ecs_submit_command" do

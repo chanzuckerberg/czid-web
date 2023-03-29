@@ -28,6 +28,7 @@ module BulkDownloadTypesHelper
   # Specific to antimicrobial resistance workflows
   AMR_RESULTS_BULK_DOWNLOAD = "amr_results_bulk_download".freeze
   AMR_COMBINED_RESULTS_BULK_DOWNLOAD = "amr_combined_results_bulk_download".freeze
+  AMR_CONTIGS_BULK_DOWNLOAD = "amr_contigs_bulk_download".freeze
 
   RESQUE_EXECUTION_TYPE = "resque".freeze
   VARIABLE_EXECUTION_TYPE = "variable".freeze
@@ -72,6 +73,14 @@ module BulkDownloadTypesHelper
       description: "Primary metrics (e.g. coverage, depth) for all AMR genes in all selected samples, combined into a single file.",
       category: "reports",
       execution_type: RESQUE_EXECUTION_TYPE,
+      workflows: [WorkflowRun::WORKFLOW[:amr]],
+    },
+    {
+      type: AMR_CONTIGS_BULK_DOWNLOAD,
+      display_name: "Contigs",
+      description: "Contigs with homology to AMR genes",
+      category: "raw_data",
+      execution_type: ECS_EXECUTION_TYPE,
       workflows: [WorkflowRun::WORKFLOW[:amr]],
     },
 
