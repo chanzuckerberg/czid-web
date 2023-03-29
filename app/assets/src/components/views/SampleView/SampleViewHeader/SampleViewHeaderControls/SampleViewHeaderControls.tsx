@@ -47,7 +47,6 @@ interface SampleViewHeaderControlsProps {
   backgroundId?: number;
   currentRun: WorkflowRun | PipelineRun;
   currentTab: CurrentTabSample;
-  deletable: boolean;
   editable: boolean;
   getDownloadReportTableWithAppliedFiltersLink?: () => string;
   hasAppliedFilters: boolean;
@@ -67,7 +66,6 @@ export const SampleViewHeaderControls = ({
   backgroundId,
   currentRun,
   currentTab,
-  deletable,
   editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
@@ -86,6 +84,7 @@ export const SampleViewHeaderControls = ({
   const running = get("status", currentRun) === "RUNNING";
   const runIsLoaded = !isEmpty(reportMetadata);
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
+  const sampleDeletable = sample?.sample_deletable;
 
   const [showOverflowButton, setShowOverflowButton] = useState(false);
 
@@ -241,7 +240,7 @@ export const SampleViewHeaderControls = ({
       case WORKFLOWS.SHORT_READ_MNGS.value:
         if (!!reportMetadata.reportReady && currentRun) {
           return renderDownloadDropdown();
-        } else if (!isEmpty(reportMetadata) && editable && deletable) {
+        } else if (!isEmpty(reportMetadata) && editable && sampleDeletable) {
           return renderDeleteSampleButton();
         }
         break;
@@ -250,7 +249,7 @@ export const SampleViewHeaderControls = ({
           return renderDownloadAll(workflow);
         } else if (
           editable &&
-          deletable &&
+          sampleDeletable &&
           isEmpty(sample?.pipeline_runs) // if there are no mNGS runs
         ) {
           return renderDeleteSampleButton();
@@ -278,7 +277,7 @@ export const SampleViewHeaderControls = ({
         if (!!reportMetadata.reportReady && currentRun) {
           !showOverflowButton && setShowOverflowButton(true);
           return renderDownloadDropdown();
-        } else if (!isEmpty(reportMetadata) && editable && deletable) {
+        } else if (!isEmpty(reportMetadata) && editable && sampleDeletable) {
           showOverflowButton && setShowOverflowButton(false);
           return renderDeleteSampleButton();
         }
@@ -290,7 +289,7 @@ export const SampleViewHeaderControls = ({
           return renderDownloadAll(workflow);
         } else if (
           editable &&
-          deletable &&
+          sampleDeletable &&
           isEmpty(sample?.pipeline_runs) && // if there are no mNGS runs
           remainingWorkflowRuns.length === 0 // if there are no other workflow runs
         ) {
@@ -313,7 +312,7 @@ export const SampleViewHeaderControls = ({
           workflow={workflow}
           deleteId={isMngsWorkflow(workflow) ? sample?.id : currentRun?.id}
           onDeleteRunSuccess={onDeleteRunSuccess}
-          deleteDisabled={!(editable && deletable) || running}
+          deleteDisabled={!(editable && sampleDeletable) || running}
           redirectOnSuccess={redirectOnSuccess}
         />
       )

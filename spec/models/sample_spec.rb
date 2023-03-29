@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 describe Sample, type: :model do
+  create_users
+
   let(:file_one_name) { "sample_one.fastq.gz" }
   let(:file_one_href_content) { "https://basespace.amazonaws.com/abc123/sample_one.fastq.gz" }
   let(:file_one_href) { "https://api.basespace.illumina.com/v2/files/1" }
@@ -30,6 +32,10 @@ describe Sample, type: :model do
       },
     ]
   end
+
+  let(:consensus_genome) { WorkflowRun::WORKFLOW[:consensus_genome] }
+  let(:amr) { WorkflowRun::WORKFLOW[:amr] }
+  let(:nanopore) { PipelineRun::TECHNOLOGY_INPUT[:nanopore] }
 
   context "#transfer_basespace_files" do
     before do
@@ -592,6 +598,65 @@ describe Sample, type: :model do
       it "returns samples in descending order by pipeline run info when order_dir is 'desc'" do
         desc_results = Sample.sort_samples(@samples_input_with_null_data, data_key, "desc")
         expect(desc_results.pluck(:id)).to eq([@sample_two.id, @sample_three.id, @sample_one.id, @sample_four.id])
+      end
+    end
+  end
+
+  context "#deletable?" do
+    before do
+      @project = create(:project, users: [@joe])
+    end
+
+    context "when the user has the bulk deletion feature" do
+      before do
+        @joe.add_allowed_feature("bulk_deletion")
+      end
+
+      context "non-admin user" do
+        it "returns false if the user did not upload the sample" do
+          sample = create(:sample, project: @project, user: @admin, name: "Sample 1")
+          expect(sample.deletable?(@joe)).to be(false)
+        end
+
+        it "returns true if the user has access to the sample and all runs failed" do
+          sample = create(:sample, project: @project, user: @joe, name: "Sample 1")
+          create(:pipeline_run, sample: sample, technology: nanopore, job_status: PipelineRun::STATUS_FAILED)
+          create(:workflow_run, sample: sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
+          expect(sample.deletable?(@joe)).to be(true)
+        end
+
+        it "returns false if not all pipeline runs failed" do
+          sample = create(:sample, project: @project, user: @joe, name: "Sample 1")
+          create(:pipeline_run, sample: sample, technology: nanopore, job_status: PipelineRun::STATUS_FAILED)
+          create(:pipeline_run, sample: sample, technology: nanopore, job_status: PipelineRun::STATUS_CHECKED)
+          create(:workflow_run, sample: sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
+
+          expect(sample.deletable?(@joe)).to be(false)
+        end
+
+        it "returns false if not all workflow runs failed" do
+          sample = create(:sample, project: @project, user: @joe, name: "Sample 1")
+          create(:workflow_run, sample: sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
+          create(:workflow_run, sample: sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+
+          expect(sample.deletable?(@joe)).to be(false)
+        end
+      end
+    end
+
+    context "when the user does not have the bulk deletion feature" do
+      context "non-admin user" do
+        it "returns false if the user did not upload the sample" do
+          sample = create(:sample, project: @project, user: @admin, name: "Sample 1")
+          expect(sample.deletable?(@joe)).to be(false)
+        end
+
+        it "returns true if the user has access to the sample and all pipeline runs failed" do
+          sample = create(:sample, project: @project, user: @joe, name: "Sample 1")
+          create(:pipeline_run, sample: sample, technology: nanopore, job_status: PipelineRun::STATUS_FAILED)
+          create(:workflow_run, sample: sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
+          expect(sample.deletable?(@joe)).to be(true)
+        end
       end
     end
   end

@@ -1864,7 +1864,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               }
               currentRun={currentRun}
               currentTab={currentTab}
-              deletable={sample ? sample.deletable : false}
               editable={sample ? sample.editable : false}
               getDownloadReportTableWithAppliedFiltersLink={
                 this.getDownloadReportTableWithAppliedFiltersLink

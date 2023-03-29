@@ -66,6 +66,7 @@ RSpec.configure do |config|
   config.extend UserMacros, type: :request
   config.extend UserMacros, type: :service
   config.extend UserMacros, type: :job
+  config.extend UserMacros, type: :model
 
   # Factory Bot
   config.include FactoryBot::Syntax::Methods

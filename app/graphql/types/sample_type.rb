@@ -59,7 +59,7 @@ module Types
       sample.first_pipeline_run.present? ? sample.first_pipeline_run.id : nil
     end
 
-    field :deletable, Boolean, null: true, resolver_method: :sample_type_deletable
+    field :sample_deletable, Boolean, null: true, resolver_method: :sample_type_deletable
     def sample_type_deletable
       sample = Sample.find(object["id"])
       current_user = context[:current_user]
@@ -76,7 +76,7 @@ module Types
     field :workflow_runs, [Types::WorkflowRunType], null: true, resolver_method: :sample_type_workflow_runs
     def sample_type_workflow_runs
       sample = Sample.find(object["id"])
-      sample.workflow_runs.non_deprecated.reverse
+      sample.workflow_runs_info.map { |h| h.deep_transform_keys! { |key| key.to_s.camelize(:lower) } }
     end
 
     def self.authorized?(object, context)

@@ -206,9 +206,23 @@ class Sample < ApplicationRecord
         assembled: pr.assembled.to_i,
         adjusted_remaining_reads: pr.adjusted_remaining_reads,
         total_ercc_reads: pr.total_ercc_reads,
+        run_finalized: pr.finalized?,
       }
     end
     prvs.values
+  end
+
+  def workflow_runs_info
+    workflow_runs_info = []
+    workflow_runs.non_deprecated.reverse_each do |wr|
+      wr_info = wr.as_json(
+        only: WorkflowRun::DEFAULT_FIELDS,
+        methods: [:input_error, :inputs, :parsed_cached_results]
+      )
+      wr_info["run_finalized"] = wr.finalized?
+      workflow_runs_info << wr_info
+    end
+    workflow_runs_info
   end
 
   def fasta_input?
@@ -848,13 +862,20 @@ class Sample < ApplicationRecord
   end
 
   def deletable?(user)
-    if user.admin?
+    uploaded_sample = user.admin? || user_id == user.id
+    all_prs_failed = pipeline_runs.all?(&:report_failed?)
+    all_wrs_failed = workflow_runs.all? { |wr| wr.status == WorkflowRun::STATUS[:failed] }
+
+    if user.allowed_feature?("bulk_deletion")
+      return uploaded_sample && all_prs_failed && all_wrs_failed
+    # TODO: (nina): remove remaining logic once bulk deletion launches
+    elsif user.admin?
       return pipeline_runs.all? { |pr| pr.report_failed? || pr.succeeded? }
     elsif user_id == user.id
       # Sample belongs to the user
       # Allow deletion if no pipeline runs, or report failed.
       # The following returns true for an empty array
-      return pipeline_runs.all?(&:report_failed?)
+      return all_prs_failed
     end
 
     false

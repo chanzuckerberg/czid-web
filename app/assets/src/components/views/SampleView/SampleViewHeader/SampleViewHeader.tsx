@@ -26,7 +26,6 @@ interface SampleViewHeaderProps {
   backgroundId?: number;
   currentRun: WorkflowRun | PipelineRun;
   currentTab: CurrentTabSample;
-  deletable: boolean;
   editable: boolean;
   getDownloadReportTableWithAppliedFiltersLink?: () => string;
   hasAppliedFilters: boolean;
@@ -46,7 +45,6 @@ interface SampleViewHeaderProps {
 export const SampleViewHeader = ({
   backgroundId,
   currentTab,
-  deletable = false,
   editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
@@ -119,7 +117,6 @@ export const SampleViewHeader = ({
               <SampleViewHeaderControls
                 backgroundId={backgroundId}
                 currentTab={currentTab}
-                deletable={deletable}
                 editable={editable}
                 getDownloadReportTableWithAppliedFiltersLink={
                   getDownloadReportTableWithAppliedFiltersLink

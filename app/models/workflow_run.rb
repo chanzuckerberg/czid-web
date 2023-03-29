@@ -189,6 +189,15 @@ class WorkflowRun < ApplicationRecord
   ].freeze
   TIEBREAKER_SORT_KEY = "id".freeze
 
+  DEFAULT_FIELDS = [
+    :deprecated,
+    :executed_at,
+    :id,
+    :status,
+    :wdl_version,
+    :workflow,
+  ].freeze
+
   scope :sort_by_sample_name, lambda { |order_dir|
     order_statement = "samples.name #{order_dir}, samples.#{TIEBREAKER_SORT_KEY} #{order_dir}"
     left_outer_joins(:sample).order(Arel.sql(ActiveRecord::Base.sanitize_sql_array(order_statement)))

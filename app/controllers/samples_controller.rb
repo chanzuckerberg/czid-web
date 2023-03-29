@@ -75,15 +75,7 @@ class SamplesController < ApplicationController
     :host_genome_id,
     :upload_error,
     :initial_workflow,
-  ].freeze
-
-  WORKFLOW_RUN_DEFAULT_FIELDS = [
-    :deprecated,
-    :executed_at,
-    :id,
-    :status,
-    :wdl_version,
-    :workflow,
+    :user_id,
   ].freeze
 
   def index_v2
@@ -967,13 +959,10 @@ class SamplesController < ApplicationController
           ).merge(
             default_background_id: @sample.default_background_id,
             default_pipeline_run_id: @sample.first_pipeline_run.present? ? @sample.first_pipeline_run.id : nil,
-            deletable: @sample.deletable?(current_user),
+            sample_deletable: @sample.deletable?(current_user),
             editable: current_power.updatable_sample?(@sample),
             pipeline_runs: @sample.pipeline_runs_info,
-            workflow_runs: @sample.workflow_runs.non_deprecated.reverse.as_json(
-              only: WORKFLOW_RUN_DEFAULT_FIELDS,
-              methods: [:input_error, :inputs, :parsed_cached_results]
-            )
+            workflow_runs: @sample.workflow_runs_info
           )
       end
     end
@@ -1543,7 +1532,7 @@ class SamplesController < ApplicationController
     inputs_json = collection_params[:inputs_json].to_json
     @sample.create_and_dispatch_workflow_run(workflow, inputs_json: inputs_json)
     render json: @sample.workflow_runs.non_deprecated.reverse.as_json(
-      only: WORKFLOW_RUN_DEFAULT_FIELDS,
+      only: WorkflowRun::DEFAULT_FIELDS,
       methods: [:input_error, :inputs, :parsed_cached_results]
     )
   end

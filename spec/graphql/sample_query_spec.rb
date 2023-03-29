@@ -20,7 +20,7 @@ RSpec.describe GraphqlController, type: :request do
       }
       defaultBackgroundId
       defaultPipelineRunId
-      deletable
+      sampleDeletable
       editable
       pipelineRuns {
         id
