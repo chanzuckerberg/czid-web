@@ -5,13 +5,16 @@ import { SortDirection } from "react-virtualized";
 import { withAnalytics, trackEvent } from "~/api/analytics";
 
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
+import { selectedBulkDownloadVar } from "~/cache/initialCache";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader, NarrowContainer, Divider } from "~/components/layout";
+import { APOLLO_CLIENT_STATE_MANAGEMENT } from "~/components/utils/features";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Table } from "~/components/visualizations/table";
+import { BulkDownloadDetails } from "~/interface/shared";
 import ImgDownloadPrimary from "~ui/illustrations/ImgDownloadPrimary";
 import Notification from "~ui/notifications/Notification";
 import { openUrl } from "~utils/links";
@@ -63,7 +66,6 @@ const getTooltipText = (bulkDownload: $TSFixMe) => {
 
   return null;
 };
-
 class BulkDownloadList extends React.Component {
   state = {
     bulkDownloads: null,
@@ -171,7 +173,15 @@ class BulkDownloadList extends React.Component {
   isEmpty = () =>
     this.state.bulkDownloads && this.state.bulkDownloads.length === 0;
 
-  handleStatusClick = (bulkDownload: $TSFixMe) => {
+  handleStatusClick = (bulkDownload: BulkDownloadDetails) => {
+    const { allowedFeatures } = this.context || {};
+    const apolloClientEnabled = allowedFeatures.includes(
+      APOLLO_CLIENT_STATE_MANAGEMENT,
+    );
+
+    if (apolloClientEnabled) {
+      selectedBulkDownloadVar({ bulkDownload: bulkDownload });
+    }
     this.setState({
       selectedBulkDownload: bulkDownload,
       sidebarOpen: true,

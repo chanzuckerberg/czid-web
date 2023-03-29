@@ -1,0 +1,111 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.content {
+  padding: $sds-spaces-xxl $sds-spaces-xl;
+  position: relative;
+}
+
+.title,
+.loadingMsg {
+  @include font-header-xl;
+  margin: 0 $sds-spaces-m;
+  // Leave room for the close button.
+  margin-right: 60px;
+  word-break: break-all;
+}
+
+.adminDetails {
+  margin: 0 $sds-spaces-m;
+  color: $sds-color-gray-500;
+  .logUrl {
+    text-decoration: underline;
+
+    &:hover {
+      color: $sds-color-gray-black;
+    }
+  }
+}
+
+.tabs {
+  margin: $sds-spaces-xl $sds-spaces-m;
+}
+
+.notification {
+  margin: 14px $sds-spaces-m -4px $sds-spaces-m;
+}
+
+.accordion {
+  border-bottom: $sds-borders-gray-300;
+
+  .header {
+    @include font-caps-xxs;
+
+    color: $sds-color-gray-black;
+    padding: $sds-spaces-m;
+    height: 40px;
+  }
+}
+
+.detailsTab {
+  .description {
+    padding: 0 $sds-spaces-m $sds-spaces-m;
+    @include font-body-s;
+  }
+  .samplesList {
+    max-height: 360px;
+    overflow: auto;
+    padding: 0 $sds-spaces-l;
+
+    .sampleName {
+      @include font-body-xs;
+      padding: $sds-spaces-xxs 0;
+      word-break: break-word;
+    }
+  }
+}
+
+.advancedDownloadTab {
+  margin: 0 $sds-spaces-m;
+
+  .header {
+    @include font-header-xs;
+    margin-bottom: $sds-spaces-xxs;
+  }
+
+  .description {
+    @include font-body-xs;
+    margin-bottom: $sds-spaces-m;
+  }
+
+  .cloudCommandContainer {
+    background-color: $sds-color-gray-100;
+    padding: $sds-spaces-m;
+    display: flex;
+    align-items: center;
+
+    &.enabled {
+      cursor: pointer;
+
+      &:hover {
+        background-color: $sds-color-gray-200;
+      }
+    }
+
+    .command {
+      @include font-code;
+      word-break: break-all;
+      overflow: hidden;
+      max-height: 48px;
+      flex: 1 1 0;
+    }
+
+    .icon {
+      color: $sds-color-gray-400;
+      margin-left: 18px;
+      margin-right: 16px;
+    }
+  }
+}

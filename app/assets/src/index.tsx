@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { ApolloClient, ApolloProvider } from "@apollo/client";
 import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import * as Sentry from "@sentry/react";
@@ -10,6 +10,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import { UserContext } from "~/components/common/UserContext";
 import store from "~/redux/store";
+import { initalCache, typeDefs } from "./cache";
 
 import "url-search-params-polyfill";
 import "font-awesome/scss/font-awesome.scss";
@@ -55,7 +56,8 @@ contextKeys.forEach(key => {
 // Initialize Apollo
 export const apolloClient = new ApolloClient({
   uri: "/graphql",
-  cache: new InMemoryCache(),
+  cache: initalCache,
+  typeDefs,
 });
 
 // Turn off camelcase rule

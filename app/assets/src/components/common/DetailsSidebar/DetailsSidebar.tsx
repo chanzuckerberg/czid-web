@@ -2,10 +2,13 @@
 // Currently used for sample details and taxon details.
 // You should add a new mode to this sidebar instead of adding a new sidebar.
 
-import React from "react";
+import React, { useContext } from "react";
 
 import Sidebar from "~/components/ui/containers/Sidebar";
+import { APOLLO_CLIENT_STATE_MANAGEMENT } from "~/components/utils/features";
+import { UserContext } from "../UserContext";
 import BulkDownloadDetailsMode, { BDDProps } from "./BulkDownloadDetailsMode";
+import { BulkDownloadDetailsModeWithApollo } from "./BulkDownloadDetailsModeWithApollo";
 import GeneDetailsMode, { GDMProps } from "./GeneDetailsMode";
 import PipelineStepDetailsMode, { PSDProps } from "./PipelineStepDetailsMode";
 import SampleDetailsMode, { SampleDetailsModeProps } from "./SampleDetailsMode";
@@ -50,6 +53,11 @@ const DetailsSidebar = ({
   params,
   visible,
 }: DetailsSidebarProps) => {
+  const { allowedFeatures = [] } = useContext(UserContext) || {};
+  const apolloClientEnabled = allowedFeatures.includes(
+    APOLLO_CLIENT_STATE_MANAGEMENT,
+  );
+
   const renderContents = () => {
     if (!visible) {
       return null;
@@ -65,6 +73,9 @@ const DetailsSidebar = ({
       case "geneDetails":
         return <GeneDetailsMode {...params} />;
       case "bulkDownloadDetails":
+        if (apolloClientEnabled) {
+          return <BulkDownloadDetailsModeWithApollo />;
+        }
         return <BulkDownloadDetailsMode {...params} />;
       default:
         return null;
