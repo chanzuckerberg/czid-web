@@ -816,7 +816,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       this.handleWorkflowRunSelect(workflow);
     }
 
-    this.setState({ currentTab: tab });
+    this.setState({ currentTab: tab }, () => {
+      this.updateHistoryAndPersistOptions();
+    });
     const name = tab.replace(/\W+/g, "-").toLowerCase();
     trackEvent(`SampleView_tab-${name}_clicked`, {
       tab: tab,

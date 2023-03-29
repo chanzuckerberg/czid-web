@@ -197,7 +197,7 @@ class Sample < ApplicationRecord
 
   def pipeline_runs_info
     prvs = {}
-    pipeline_runs.left_joins(:taxon_counts, :alignment_config).order(created_at: :desc).distinct.each do |pr|
+    pipeline_runs.non_deleted.left_joins(:taxon_counts, :alignment_config).order(created_at: :desc).distinct.each do |pr|
       prvs[pr.pipeline_version] ||= {
         id: pr.id,
         pipeline_version: pr.pipeline_version,
@@ -214,7 +214,7 @@ class Sample < ApplicationRecord
 
   def workflow_runs_info
     workflow_runs_info = []
-    workflow_runs.non_deprecated.reverse_each do |wr|
+    workflow_runs.non_deprecated.non_deleted.reverse_each do |wr|
       wr_info = wr.as_json(
         only: WorkflowRun::DEFAULT_FIELDS,
         methods: [:input_error, :inputs, :parsed_cached_results]

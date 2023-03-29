@@ -35,6 +35,10 @@ class SnapshotSamplesController < SamplesController
   def show
     background_id = JSON.parse(@snapshot.content)["background_id"]
 
+    unless @sample.deleted_at.nil?
+      redirect_to page_not_found_path
+    end
+
     respond_to do |format|
       format.html
       format.json do

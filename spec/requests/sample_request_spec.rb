@@ -472,7 +472,7 @@ RSpec.describe "Sample request", type: :request do
       before do
         @project = create(:project, users: [@joe])
         @illumina = PipelineRun::TECHNOLOGY_INPUT[:illumina]
-        @illumina = PipelineRun::TECHNOLOGY_INPUT[:nanopore]
+        @nanopore = PipelineRun::TECHNOLOGY_INPUT[:nanopore]
       end
 
       context "when user does not have bulk_deletion feature flag" do
@@ -520,7 +520,7 @@ RSpec.describe "Sample request", type: :request do
             @sample4 = create(:sample, project: @project,
                                        user: @joe,
                                        name: "completed nanopore mNGs sample")
-            @pr4 = create(:pipeline_run, sample: @sample4, technology: @illumina, finalized: 0)
+            @pr4 = create(:pipeline_run, sample: @sample4, technology: @nanopore, finalized: 1)
           end
 
           it "returns empty array with error if error is raised in DeletionValidationService" do
@@ -727,6 +727,39 @@ RSpec.describe "Sample request", type: :request do
             expect(json_response[:error]).to be_nil
             expect(json_response[:deletedIds]).to contain_exactly(@completed_wr.id, @failed_wr.id)
           end
+        end
+      end
+    end
+
+    describe "samples/:id/show" do
+      let(:short_read_mngs) { WorkflowRun::WORKFLOW[:short_read_mngs] }
+      let(:consensus_genome) { WorkflowRun::WORKFLOW[:consensus_genome] }
+      let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
+      before do
+        @project = create(:project, users: [@joe])
+        @sample1 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "completed Illumina mNGs sample 1")
+        @pr1 = create(:pipeline_run,
+                      sample: @sample1,
+                      technology: illumina,
+                      finalized: 1,
+                      deleted_at: Time.now.utc)
+      end
+
+      context "when the sample has been soft deleted" do
+        before do
+          allow(HardDeleteObjects).to receive(:perform)
+          BulkDeletionService.call(
+            object_ids: [@sample1.id],
+            user: @joe,
+            workflow: short_read_mngs
+          )
+        end
+
+        it "redirects to my_data" do
+          get "/samples/#{@sample1.id}"
+          expect(response).to redirect_to(my_data_path)
         end
       end
     end

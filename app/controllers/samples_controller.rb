@@ -944,6 +944,10 @@ class SamplesController < ApplicationController
   # GET /samples/1
   # GET /samples/1.json
   def show
+    unless @sample.deleted_at.nil?
+      redirect_to my_data_path
+    end
+
     respond_to do |format|
       format.html
       format.json do

@@ -660,4 +660,51 @@ describe Sample, type: :model do
       end
     end
   end
+
+  context "#pipeline_runs_info" do
+    let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
+    before do
+      @project = create(:project, users: [@joe])
+      @sample1 = create(:sample, project: @project,
+                                 user: @joe,
+                                 name: "completed Illumina mNGs sample 1")
+
+      @pr1 = create(:pipeline_run,
+                    sample: @sample1,
+                    technology: illumina,
+                    finalized: 1)
+    end
+
+    it "does not return pipeline runs in the process of being deleted" do
+      @pr1.update(deleted_at: Time.now.utc)
+      response = @sample1.pipeline_runs_info
+      expect(response).to be_empty
+    end
+  end
+
+  context "#workflow_runs_info" do
+    before do
+      @project = create(:project, users: [@joe])
+      @sample1 = create(:sample, project: @project,
+                                 user: @joe,
+                                 name: "sample 1")
+      @wr1 = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+    end
+
+    it "does not return workflow runs in the process of being deleted" do
+      @wr1.update(deleted_at: Time.now.utc)
+      response = @sample1.workflow_runs_info
+      expect(response).to be_empty
+    end
+
+    it "returns a hash with appropriate keys for each workflow run" do
+      @wr2 = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+      response = @sample1.workflow_runs_info
+      expect(response.length).to be(2)
+      expect(response[0]["id"]).to eq(@wr2.id)
+      expect(response[1]["id"]).to eq(@wr1.id)
+      expected_keys = WorkflowRun::DEFAULT_FIELDS.map(&:to_s) + ["input_error", "inputs", "parsed_cached_results", "run_finalized"]
+      expect(response[0].keys).to contain_exactly(*expected_keys)
+    end
+  end
 end
