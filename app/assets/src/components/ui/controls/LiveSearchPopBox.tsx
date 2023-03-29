@@ -80,6 +80,7 @@ const LiveSearchPopBox = ({
   };
 
   const handleResultSelect = ({ currentEvent, result }) => {
+    setInputValue(result.title);
     onResultSelect && onResultSelect({ currentEvent, result });
     closeDropdown();
   };
