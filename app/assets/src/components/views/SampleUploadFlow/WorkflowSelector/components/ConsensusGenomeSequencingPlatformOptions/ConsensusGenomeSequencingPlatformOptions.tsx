@@ -48,6 +48,7 @@ const ConsensusGenomeSequencingPlatformOptions = ({
             isCg
             isSelected={selectedTechnology === ILLUMINA}
             onClick={() => onTechnologyToggle(ILLUMINA)}
+            onWetlabProtocolChange={onWetlabProtocolChange}
           />
           <ConsensusGenomeWithNanopore
             isDisabled={shouldDisableSequencingPlatformOption(
