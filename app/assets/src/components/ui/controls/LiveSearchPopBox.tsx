@@ -195,7 +195,7 @@ const LiveSearchPopBox = ({
     return sumBy(cat => cat?.results?.length, values(results));
   };
 
-  const hasEnoughChars = () => inputValue.trim().length >= minChars;
+  const hasEnoughChars = () => inputValue?.trim()?.length >= minChars;
   const shouldOpen = getResultsLength() && isFocused && hasEnoughChars();
 
   return (

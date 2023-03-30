@@ -37,7 +37,7 @@ const CheckboxItem = ({
       </div>
       <div
         className={cs.listLabel}
-        data-testid={`dropdown-${label.replaceAll(" ", "-").toLowerCase()}`}
+        data-testid={`dropdown-${label.replace(/ /g, "-").toLowerCase()}`}
       >
         {label}
       </div>

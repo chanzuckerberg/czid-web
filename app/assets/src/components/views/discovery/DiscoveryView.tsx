@@ -2215,13 +2215,13 @@ class DiscoveryView extends React.Component<
         label: (
           <Tab
             key={nanoid()}
-            data-testid={workflowName.toLowerCase().replaceAll(" ", "-")}
+            data-testid={workflowName.toLowerCase().replace(/ /g, "-")}
             label={workflowName}
             count={
               <span
                 data-testid={`${workflowName
                   .toLowerCase()
-                  .replaceAll(" ", "-")}-count`}
+                  .replace(/ /g, "-")}-count`}
               >
                 {workflowCount || "0"}
                 {isBeta && (

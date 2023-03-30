@@ -65,9 +65,7 @@ const Tabs = ({
               tabStyling || cs.tab,
               value === tab.value && cs.selected,
             )}
-            data-testid={`${tab.value
-              .replaceAll(" ", "-")
-              .toLocaleLowerCase()}`}
+            data-testid={`${tab.value.replace(/ /g, "-").toLocaleLowerCase()}`}
           >
             {tab.label}
           </div>

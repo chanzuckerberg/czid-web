@@ -107,7 +107,7 @@ class SearchBoxList extends React.Component<
         {this.props.title && <div className={cs.title}>{this.props.title}</div>}
         <div
           data-testid={`search-${this.props.title
-            .replaceAll(" ", "-")
+            .replace(/ /g, "-")
             .toLocaleLowerCase()}`}
         >
           <Input
@@ -126,7 +126,7 @@ class SearchBoxList extends React.Component<
                 <div
                   className={cs.listColumnTitle}
                   data-testid={`column-${this.props.labelTitle
-                    .replaceAll(" ", "-")
+                    .replace(/ /g, "-")
                     .toLocaleLowerCase()}`}
                 >
                   {this.props.labelTitle}
@@ -153,7 +153,7 @@ class SearchBoxList extends React.Component<
               <div
                 className={cs.listLabel}
                 data-testid={`column-${option.label
-                  .replaceAll(" ", "-")
+                  .replace(/ /g, "-")
                   .toLocaleLowerCase()}`}
               >
                 {option.label}

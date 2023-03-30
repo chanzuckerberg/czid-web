@@ -106,7 +106,7 @@ export function numberWithPercent(value: string | number): string {
 const specialCharacters = /[^A-Za-z0-9_\- ]/g;
 
 export function replaceSpecialCharacters(value: string) {
-  value = value.replaceAll(specialCharacters, "-");
+  value = value.replace(specialCharacters, "-");
   return value;
 }
 

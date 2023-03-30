@@ -232,6 +232,9 @@ class BaseTable extends React.Component<
             onMouseOver={() =>
               this.setState({ mouseOverDraggableAreaForColumn: dataKey })
             }
+            onFocus={() =>
+              this.setState({ mouseOverDraggableAreaForColumn: dataKey })
+            }
             onMouseLeave={() =>
               this.setState({ mouseOverDraggableAreaForColumn: null })
             }

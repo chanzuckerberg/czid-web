@@ -213,7 +213,7 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
                   )}
                   style={this.getCellStyle(column)}
                   key={colIdx}
-                  data-testid={column.toLowerCase().replaceAll(" ", "-")}
+                  data-testid={column.toLowerCase().replace(/ /g, "-")}
                 >
                   {/* If we want to display an object (e.g. location object), provide a 'name' field */}
                   {isObject(row[column]) && row[column].name !== undefined

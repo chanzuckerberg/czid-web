@@ -27,7 +27,7 @@ export const openBasespaceOAuthPopup = (params: $TSFixMe) => {
 // They aid client-side search of options.
 export const doesResultMatch = (result: $TSFixMe, query: $TSFixMe) => {
   // If no query, return all possible
-  if (query === "") return true;
+  if (query === "" || query == null) return true;
 
   // Match chars in any position. Good for acronyms. Ignore spaces.
   const noSpaces = query.replace(/\s*/gi, "");
