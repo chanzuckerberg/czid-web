@@ -15,7 +15,10 @@ import {
   SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
 
-import { BULK_DELETION_FEATURE } from "~/components/utils/features";
+import {
+  AMR_V2_FEATURE,
+  BULK_DELETION_FEATURE,
+} from "~/components/utils/features";
 import {
   WORKFLOWS,
   WORKFLOW_VALUES,
@@ -185,6 +188,12 @@ export const SampleViewHeaderControls = ({
       case WORKFLOWS.CONSENSUS_GENOME.value:
         return succeeded && <ShareButtonPopUp onShareClick={onShareClick} />;
       case WORKFLOWS.AMR.value:
+        return (
+          allowedFeatures.includes(AMR_V2_FEATURE) && (
+            <ShareButtonPopUp onShareClick={onShareClick} />
+          )
+        );
+      default:
         return null;
     }
   };
