@@ -56,7 +56,8 @@ export const CONCAT_FILES_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360051806072-How-to-concatenate-files";
 export const PROJECT_SHARING_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-Data-through-the-Web-App#Project-Sharing";
-
+export const PIPELINE_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790554-Pipeline-Details#pipeline-intro";
 export const TOTAL_READ_HELP_LINK = {
   url:
     "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",

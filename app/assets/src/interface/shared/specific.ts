@@ -1,4 +1,5 @@
 import { AccessionsSummary } from "~/components/common/CoverageVizBottomSidebar/types";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { ThresholdFilterData } from "../dropdown";
 import { BooleanNums, DateString, NameId, NumberId } from "./generic";
@@ -158,6 +159,13 @@ export interface PipelineRun {
     alignment_db: string;
   };
   host_subtracted: string;
+}
+
+export interface ProjectPipelineVersions {
+  [WORKFLOWS.AMR.value]: string;
+  [WORKFLOWS.CONSENSUS_GENOME.value]: string;
+  [WORKFLOWS.LONG_READ_MNGS.value]: string;
+  [WORKFLOWS.SHORT_READ_MNGS.value]: string;
 }
 
 export interface Project {

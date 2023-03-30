@@ -5,6 +5,7 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 
 import commonStyles from "../../workflow_selector.scss";
+import { PipelineVersionIndicator } from "../PipelineVersionIndicator";
 import cs from "./sequencing_platform_option.scss";
 
 interface SequencingPlatformOptionProps {
@@ -15,6 +16,7 @@ interface SequencingPlatformOptionProps {
   isDisabled?: boolean;
   isSelected: boolean;
   onClick(): void;
+  pipelineVersion?: string;
   technologyName: string;
   technologyDetails: ReactNode;
   testId: string;
@@ -29,6 +31,7 @@ const SequencingPlatformOption = ({
   isDisabled = false,
   isSelected,
   onClick,
+  pipelineVersion,
   technologyName,
   technologyDetails,
   testId,
@@ -93,7 +96,14 @@ const SequencingPlatformOption = ({
           </ExternalLink>
           .
         </div>
-        {isSelected && technologyDetails}
+        <div>
+          {isSelected && (
+            <div className={commonStyles.technologyContent}>
+              {technologyDetails}
+              <PipelineVersionIndicator version={pipelineVersion} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

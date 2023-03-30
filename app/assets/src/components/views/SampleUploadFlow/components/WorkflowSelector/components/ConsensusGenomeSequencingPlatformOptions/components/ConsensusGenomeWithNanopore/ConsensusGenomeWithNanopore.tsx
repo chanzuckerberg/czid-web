@@ -1,7 +1,7 @@
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { ARTIC_PIPELINE_LINK } from "~/components/utils/documentationLinks";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../../constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../../../constants";
 import { SequencingPlatformOption } from "../../../SequencingPlatformOption";
 import { ConsensusGenomeNanoporeSettings } from "./components/ConsensusGenomeNanoporeSettings";
 
@@ -16,6 +16,7 @@ interface ConsensusGenomeWithNanoporeProps {
   usedClearLabs: boolean;
   onWetlabProtocolChange(value: string): void;
   selectedWetlabProtocol: string;
+  pipelineVersion?: string;
 }
 
 const ConsensusGenomeWithNanopore = ({
@@ -29,6 +30,7 @@ const ConsensusGenomeWithNanopore = ({
   usedClearLabs,
   onWetlabProtocolChange,
   selectedWetlabProtocol,
+  pipelineVersion,
 }: ConsensusGenomeWithNanoporeProps) => {
   const tooltipText = `This pipeline only supports upload from your computer${
     isS3UploadEnabled ? " or S3" : ""
@@ -58,6 +60,7 @@ const ConsensusGenomeWithNanopore = ({
       }
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE}
       tooltipText={tooltipText}
+      pipelineVersion={pipelineVersion}
     />
   );
 };

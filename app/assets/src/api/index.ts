@@ -9,6 +9,7 @@ import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
 import { WorkflowRunResults } from "~/interface/sampleView";
 
+import { ProjectPipelineVersions } from "~/interface/shared";
 import {
   get,
   postWithCSRF,
@@ -317,6 +318,11 @@ const getVisualizations = ({
       ...filters,
     },
   });
+
+const getProjectPipelineVersions = (
+  projectId: number,
+): Promise<ProjectPipelineVersions> =>
+  get(`/projects/${projectId}/pipeline_versions`);
 
 const createProject = (params: $TSFixMe) =>
   postWithCSRF("/projects.json", {
@@ -765,6 +771,7 @@ export {
   getPhyloTree,
   getPhyloTrees,
   getProjectDimensions,
+  getProjectPipelineVersions,
   getProjects,
   getProjectsToChooseFrom,
   getSample,

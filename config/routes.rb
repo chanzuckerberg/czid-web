@@ -153,6 +153,7 @@ Rails.application.routes.draw do
   end
 
   get 'projects/:id/csv', to: 'projects#send_project_csv'
+  get 'projects/:id/pipeline_versions', to: 'projects#project_pipeline_versions'
   get 'choose_project', to: 'projects#choose_project'
 
   get 'phylo_trees/index', to: 'phylo_trees#index'

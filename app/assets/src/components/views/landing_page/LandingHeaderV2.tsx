@@ -35,22 +35,22 @@ const LandingHeaderV2 = ({
         visible={announcementBannerEnabled}
         message={
           <>
-          {
-            "New! You can now run Nanopore sequencing data through CZ ID's metagenomic pipeline. "
-          }
-          <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/13830756964372-Upload-Nanopore-Data-">
-            <span
-              style={{
-                color: "white",
-                textDecoration: "underline",
-                textDecorationStyle: "dashed",
-              }}
-            >
-              Learn More
-            </span>
-          </ExternalLink>
-          {"."}
-        </>
+            {
+              "New! You can now run Nanopore sequencing data through CZ ID's metagenomic pipeline. "
+            }
+            <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/13830756964372-Upload-Nanopore-Data-">
+              <span
+                style={{
+                  color: "white",
+                  textDecoration: "underline",
+                  textDecorationStyle: "dashed",
+                }}
+              >
+                Learn More
+              </span>
+            </ExternalLink>
+            {"."}
+          </>
         }
         inverted={true}
       />

@@ -72,16 +72,19 @@ const FILE_NAMES_R2_COLUMN = {
   disableSort: true, // Hide R2 sorting since sorting on R1 == sorting on R2
 };
 
+export interface SampleForUploadTable {
+  name?: string;
+  file_size?: number;
+  file_type?: string;
+  file_names_R1?: string[];
+  file_names_R2?: string[];
+  basespace_project_name?: string;
+  _selectId?: string;
+}
+
 interface SampleUploadTableProps {
-  samples?: {
-    name?: string;
-    file_size?: number;
-    file_type?: string;
-    file_names_R1?: string[];
-    file_names_R2?: string[];
-    basespace_project_name?: string;
-    _selectId?: string;
-  }[];
+  // Basespace samples are formatted differently than local or remote samples
+  samples?: SampleForUploadTable[];
   selectedSampleIds?: Set<string>;
   onSamplesRemove: $TSFixMeFunction;
   onSampleSelect: (value: string, checked: boolean) => void;

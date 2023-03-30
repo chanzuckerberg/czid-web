@@ -3,7 +3,8 @@ import React, { useContext } from "react";
 
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_V1_FEATURE, ONT_V1_FEATURE } from "~/components/utils/features";
-import { SampleUploadType } from "~/interface/shared";
+import { WORKFLOWS } from "~/components/utils/workflows";
+import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
 
 import {
   UPLOAD_WORKFLOWS,
@@ -14,10 +15,11 @@ import {
   NANOPORE,
   Technology,
   UploadWorkflows,
-} from "../constants";
+} from "../../constants";
 import { AnalysisType } from "./components/AnalysisType";
 import { ConsensusGenomeSequencingPlatformOptions } from "./components/ConsensusGenomeSequencingPlatformOptions";
 import { MetagenomicsSequencingPlatformOptions } from "./components/MetagenomicsSequencingPlatformOptions";
+import { PipelineVersionIndicator } from "./components/PipelineVersionIndicator";
 import cs from "./workflow_selector.scss";
 
 interface WorkflowSelectorProps {
@@ -28,6 +30,7 @@ interface WorkflowSelectorProps {
   onWetlabProtocolChange?: (selected: string) => void;
   onWorkflowToggle?: (workflow: string) => void;
   currentTab?: SampleUploadType;
+  projectPipelineVersions: ProjectPipelineVersions;
   selectedMedakaModel?: string;
   selectedGuppyBasecallerSetting?: string;
   selectedTechnology?: string;
@@ -62,6 +65,7 @@ const WorkflowSelector = ({
   onWetlabProtocolChange,
   onWorkflowToggle,
   currentTab,
+  projectPipelineVersions,
   selectedMedakaModel,
   selectedGuppyBasecallerSetting,
   selectedTechnology,
@@ -114,6 +118,7 @@ const WorkflowSelector = ({
             onChangeGuppyBasecallerSetting={onGuppyBasecallerSettingChange}
             onTechnologyToggle={onTechnologyToggle}
             onWetlabProtocolChange={onWetlabProtocolChange}
+            projectPipelineVersions={projectPipelineVersions}
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
             selectedTechnology={selectedTechnology}
             selectedWetlabProtocol={selectedWetlabProtocol}
@@ -134,6 +139,13 @@ const WorkflowSelector = ({
         sdsIcon={UPLOAD_WORKFLOWS.AMR.icon}
         shouldHideOption={!allowedFeatures.includes(AMR_V1_FEATURE)}
         title={UPLOAD_WORKFLOWS.AMR.label}
+        sequencingPlatformOptions={
+          <div className={cs.technologyContent}>
+            <PipelineVersionIndicator
+              version={projectPipelineVersions?.[WORKFLOWS.AMR.value]}
+            />
+          </div>
+        }
       />
       <AnalysisType
         description="Run your samples through our Illumina or Nanopore supported pipelines to get consensus genomes for SARS-CoV-2."
@@ -158,6 +170,7 @@ const WorkflowSelector = ({
             onWetlabProtocolChange={onWetlabProtocolChange}
             selectedTechnology={selectedTechnology}
             onTechnologyToggle={onTechnologyToggle}
+            projectPipelineVersions={projectPipelineVersions}
           />
         }
         sdsIcon={UPLOAD_WORKFLOWS.CONSENSUS_GENOME.icon}

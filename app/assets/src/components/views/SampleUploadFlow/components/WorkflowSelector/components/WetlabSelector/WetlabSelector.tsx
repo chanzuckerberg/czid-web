@@ -1,12 +1,12 @@
 import React from "react";
 import { trackEvent } from "~/api/analytics";
 import { Dropdown } from "~/components/ui/controls/dropdowns";
-import cs from "~/components/views/SampleUploadFlow/WorkflowSelector/workflow_selector.scss";
+import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import {
   CG_NANOPORE_WETLAB_OPTIONS,
   CG_WETLAB_OPTIONS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
-} from "../../../constants";
+} from "../../../../constants";
 
 interface WetlabSelectorProps {
   onWetlabProtocolChange(value: string): void;

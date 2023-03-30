@@ -1,0 +1,32 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.wrapper {
+  max-width: 250px;
+}
+
+.headerRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.header {
+  @include font-header-xs;
+  margin-bottom: $sds-spaces-xs;
+}
+
+.tooltip {
+  margin-left: $sds-spaces-xs;
+}
+
+.version {
+  font: $sds-font-body-s-400-font;
+  margin-bottom: 0;
+}
+
+.subText {
+  font: $sds-font-body-xxs-400-font;
+  color: $sds-color-gray-600;
+}

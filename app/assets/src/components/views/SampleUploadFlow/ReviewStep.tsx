@@ -15,8 +15,14 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
+import { WORKFLOW_VALUES } from "~/components/utils/workflows";
 import DataTable from "~/components/visualizations/table/DataTable";
-import { HostGenome, Project, SampleFromApi } from "~/interface/shared";
+import {
+  HostGenome,
+  Project,
+  ProjectPipelineVersions,
+  SampleFromApi,
+} from "~/interface/shared";
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { returnHipaaCompliantMetadata } from "~utils/metadata";
@@ -29,6 +35,8 @@ import {
   CG_WETLAB_DISPLAY_NAMES,
   SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
   SEQUENCING_TECHNOLOGY_OPTIONS,
+  WORKFLOWS_BY_UPLOAD_SELECTIONS,
+  NO_TECHNOLOGY_SELECTED,
 } from "./constants";
 
 import cs from "./sample_upload_flow.scss";
@@ -38,6 +46,7 @@ interface ReviewStepProps {
     headers?: string[];
     rows?: Record<string, any>[];
   };
+  pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
   project?: Project;
   samples?: SampleFromApi[];
   uploadType: string;
@@ -380,14 +389,16 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     const sections = map(workflow => {
       const workflowKey = UPLOAD_WORKFLOW_KEY_FOR_VALUE[workflow];
       const workflowDisplayName = UPLOAD_WORKFLOWS[workflowKey].label;
-      const hasAnalysisTypeContent =
-        workflow === UPLOAD_WORKFLOWS.MNGS.value ||
-        workflow === UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value;
       const workflowIsBeta = workflow === UPLOAD_WORKFLOWS.AMR.value;
       const sequencingPlatformIsBeta =
         !allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE) &&
         workflow === UPLOAD_WORKFLOWS.MNGS.value &&
         technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
+
+      const technologyForUpload =
+        workflow === UPLOAD_WORKFLOWS.AMR.value
+          ? NO_TECHNOLOGY_SELECTED
+          : technology;
 
       return (
         <div className={cs.section}>
@@ -405,8 +416,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                 <StatusLabel inline status="Beta" type="beta" />
               )}
             </div>
-            {hasAnalysisTypeContent && (
-              <div className={cs.analysisTypeContent}>
+            <div className={cs.analysisTypeContent}>
+              {workflow !== UPLOAD_WORKFLOWS.AMR.value && (
                 <div className={cs.item}>
                   <div className={cs.subheader}>{"Sequencing Platform: "}</div>
                   <div className={cs.description}>
@@ -417,12 +428,15 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                     )}
                   </div>
                 </div>
-                {workflow === UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value &&
-                  this.renderCGAnalysisSection()}
-                {workflow === UPLOAD_WORKFLOWS.MNGS.value &&
-                  this.renderMngsAnalysisSection()}
-              </div>
-            )}
+              )}
+              {workflow === UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value &&
+                this.renderCGAnalysisSection()}
+              {workflow === UPLOAD_WORKFLOWS.MNGS.value &&
+                this.renderMngsAnalysisSection()}
+              {this.renderPipelineVersionForWorkflow(
+                WORKFLOWS_BY_UPLOAD_SELECTIONS[workflow][technologyForUpload],
+              )}
+            </div>
           </div>
         </div>
       );
@@ -476,12 +490,27 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
               <div className={cs.subheader}>{"Guppy Basecaller Setting: "}</div>
               <div className={cs.description}>{guppyBasecallerSetting}</div>
             </div>
-            {/* Empty item for spacing purposes */}
-            <div className={cs.item}></div>
           </>
         )}
       </>
     );
+  };
+
+  renderPipelineVersionForWorkflow = (workflow: WORKFLOW_VALUES) => {
+    return (
+      <div className={cs.item}>
+        <div className={cs.subheader}>{"Pipeline Version: "}</div>
+        <div className={cs.description}>
+          {this.getPipelineVersion(workflow)}
+        </div>
+      </div>
+    );
+  };
+
+  getPipelineVersion = workflow => {
+    const { pipelineVersions, project } = this.props;
+
+    return pipelineVersions[project.id][workflow];
   };
 
   getWorkflowSectionOrder = () => {

@@ -17,8 +17,9 @@ class ProjectsController < ApplicationController
 
   READ_ACTIONS = [
     :show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status,
-    :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status,
-    :send_project_reports_csv, :validate_project_name, :validate_sample_names,
+    :send_host_gene_counts, :make_project_reports_csv, :project_pipeline_versions,
+    :project_reports_csv_status, :send_project_reports_csv, :validate_project_name,
+    :validate_sample_names,
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility, :upload_metadata, :validate_metadata_csv].freeze
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
@@ -328,6 +329,15 @@ class ProjectsController < ApplicationController
     samples = samples.where(id: selected_sample_ids) unless selected_sample_ids.empty?
     project_csv = generate_sample_list_csv(samples)
     send_data project_csv, filename: project_name + '_sample-table.csv'
+  end
+
+  def project_pipeline_versions
+    render json: {
+      WorkflowRun::WORKFLOW[:amr] => PipelineVersionControlService.call(@project.id, WorkflowRun::WORKFLOW[:amr]),
+      WorkflowRun::WORKFLOW[:consensus_genome] => PipelineVersionControlService.call(@project.id, WorkflowRun::WORKFLOW[:consensus_genome]),
+      WorkflowRun::WORKFLOW[:long_read_mngs] => PipelineVersionControlService.call(@project.id, WorkflowRun::WORKFLOW[:long_read_mngs]),
+      WorkflowRun::WORKFLOW[:short_read_mngs] => PipelineVersionControlService.call(@project.id, WorkflowRun::WORKFLOW[:short_read_mngs]),
+    }
   end
 
   def update_project_visibility

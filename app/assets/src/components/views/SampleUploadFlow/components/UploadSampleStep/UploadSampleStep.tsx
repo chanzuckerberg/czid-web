@@ -52,12 +52,13 @@ import {
 import { SampleUploadType } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 
-import BasespaceSampleImport from "./BasespaceSampleImport";
-import LocalSampleFileUpload from "./LocalSampleFileUpload";
-import PreUploadQCCheck from "./PreUploadQCCheck";
-import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
-import SampleUploadTable from "./SampleUploadTable";
-import { WorkflowSelector } from "./WorkflowSelector";
+import BasespaceSampleImport from "../../BasespaceSampleImport";
+import LocalSampleFileUpload from "../../LocalSampleFileUpload";
+import PreUploadQCCheck from "../../PreUploadQCCheck";
+import RemoteSampleFileUpload from "../../RemoteSampleFileUpload";
+import SampleUploadTable, {
+  SampleForUploadTable,
+} from "../../SampleUploadTable";
 import {
   UPLOAD_WORKFLOWS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
@@ -71,13 +72,22 @@ import {
   REMOTE_UPLOAD,
   BASESPACE_UPLOAD,
   NO_TECHNOLOGY_SELECTED,
-} from "./constants";
-import cs from "./sample_upload_flow.scss";
+} from "../../constants";
+import cs from "../../sample_upload_flow.scss";
 import {
   groupSamplesByLane,
   openBasespaceOAuthPopup,
   removeLaneFromName,
-} from "./utils";
+} from "../../utils";
+import { WorkflowSelector } from "../WorkflowSelector";
+import {
+  SelectedSampleIdsRecord,
+  SelectedSampleIdsKeyType,
+  UploadSampleStepProps,
+  UploadSampleStepState,
+  SamplesKeyType,
+  SamplesRecord,
+} from "./types";
 
 const LOCAL_UPLOAD_LABEL = "Upload from Your Computer";
 const REMOTE_UPLOAD_LABEL = "Upload from S3";
@@ -85,33 +95,24 @@ const BASESPACE_UPLOAD_LABEL = "Upload from Basespace";
 
 const UPLOADSAMPLESTEP_SAMPLE_CHANGED = "UploadSampleStep_sample_changed";
 
-interface UploadSampleStepProps {
-  onUploadSamples: $TSFixMeFunction;
-  // Immediately called when the user changes anything, even before validation has returned.
-  // Used to disable later steps the header navigation if the data in previous steps has changed.
-  onDirty: $TSFixMeFunction;
-  visible?: boolean;
-  admin?: boolean;
-  biohubS3UploadEnabled?: boolean;
-  basespaceClientId: string;
-  basespaceOauthRedirectUri: string;
-}
-
-class UploadSampleStep extends React.Component<UploadSampleStepProps> {
+class UploadSampleStep extends React.Component<
+  UploadSampleStepProps,
+  UploadSampleStepState
+> {
   _window: $TSFixMeUnknown;
   state = {
     basespaceAccessToken: null,
     basespaceSamples: [],
-    basespaceSelectedSampleIds: new Set(),
+    basespaceSelectedSampleIds: new Set() as Set<string>,
     createProjectOpen: false,
     currentTab: LOCAL_UPLOAD as SampleUploadType,
     localSamples: [],
     // We generate a unique "selectId" for each sample, which we use to store which samples are selected.
     // This simplifies the logic, because sample names can change (they can get renamed when de-duped)
-    localSelectedSampleIds: new Set(),
+    localSelectedSampleIds: new Set() as Set<string>,
     projects: [],
     remoteSamples: [],
-    remoteSelectedSampleIds: new Set(),
+    remoteSelectedSampleIds: new Set() as Set<string>,
     removedLocalFiles: [], // Invalid local files that were removed.
     selectedGuppyBasecallerSetting: null,
     selectedTechnology: null,
@@ -253,15 +254,15 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     const { admin, biohubS3UploadEnabled } = this.props;
     return compact([
       {
-        value: LOCAL_UPLOAD,
+        value: LOCAL_UPLOAD as SampleUploadType,
         label: LOCAL_UPLOAD_LABEL,
       },
       (admin || biohubS3UploadEnabled) && {
-        value: REMOTE_UPLOAD,
+        value: REMOTE_UPLOAD as SampleUploadType,
         label: REMOTE_UPLOAD_LABEL,
       },
       {
-        value: BASESPACE_UPLOAD,
+        value: BASESPACE_UPLOAD as SampleUploadType,
         label: BASESPACE_UPLOAD_LABEL,
       },
     ]);
@@ -275,8 +276,6 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
       tab,
     });
   };
-
-  // *** Project-related functions ***
 
   // Modify the project_id in our samples, and validate the sample names again.
   updateSamplesForNewProject = async ({ samples, project }: $TSFixMe) => {
@@ -335,7 +334,8 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   };
 
   handleProjectChange = async (project: $TSFixMe) => {
-    this.props.onDirty();
+    const { getPipelineVersionsForExistingProject, onDirty } = this.props;
+    onDirty();
     this.setState({
       validatingSamples: true,
       showNoProjectError: false,
@@ -358,6 +358,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
         samples: this.state.basespaceSamples,
         project,
       }),
+      getPipelineVersionsForExistingProject(project.id),
     ]);
 
     this.setState({
@@ -539,12 +540,14 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   // *** Sample-related functions ***
 
   // Functions to get the state key by sample type, e.g. this.state.localSamples, this.state.basespaceSamples
-  getSelectedSampleIdsKey = (sampleType: SampleUploadType) =>
-    `${sampleType}SelectedSampleIds`;
-  getSamplesKey = (sampleType: SampleUploadType) => `${sampleType}Samples`;
+  getSelectedSampleIdsKey = (
+    sampleType: SampleUploadType,
+  ): SelectedSampleIdsKeyType => `${sampleType}SelectedSampleIds`;
+  getSamplesKey = (sampleType: SampleUploadType): SamplesKeyType =>
+    `${sampleType}Samples`;
 
-  getSelectedSampleIds = (sampleType: SampleUploadType) => {
-    return this.state[this.getSelectedSampleIdsKey(sampleType)];
+  getSelectedSampleIds = (sampleType: SampleUploadType): Set<string> => {
+    return this.state[this.getSelectedSampleIdsKey(sampleType)] as Set<string>;
   };
 
   getSelectedSamples = (sampleType: SampleUploadType) => {
@@ -557,7 +560,9 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   };
 
   // Get fields for display in the SampleUploadTable.
-  getSampleDataForUploadTable = (sampleType: SampleUploadType) => {
+  getSampleDataForUploadTable = (
+    sampleType: SampleUploadType,
+  ): SampleForUploadTable[] | Record<string, unknown> => {
     if (sampleType === BASESPACE_UPLOAD)
       // Show how lanes will be concatenated
       return groupSamplesByLane(this.state.basespaceSamples, BASESPACE_UPLOAD);
@@ -798,7 +803,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     }
 
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
-    const selectedSamples = this.state[selectedSampleIdsKey];
+    const selectedSamples: Set<$TSFixMe> = this.state[selectedSampleIdsKey];
     if (checked) {
       selectedSamples.add(value);
     } else {
@@ -807,7 +812,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
 
     this.setState({
       [selectedSampleIdsKey]: selectedSamples,
-    });
+    } as SelectedSampleIdsRecord);
   };
 
   // Callback for PreUploadQCCheck to remove invalid samples from selectedSamples.
@@ -827,7 +832,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     }
     this.setState({
       [selectedSampleIdsKey]: selectedSamples,
-    });
+    } as SelectedSampleIdsRecord);
   };
 
   handleAllSamplesSelect = (checked: $TSFixMe, sampleType: $TSFixMe) => {
@@ -853,7 +858,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
       [selectedSampleIdsKey]: checked
         ? new Set(map(SELECT_ID_KEY, samples))
         : new Set(),
-    });
+    } as SelectedSampleIdsRecord);
   };
 
   // Handle newly added samples
@@ -864,6 +869,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
 
     // If local samples, we also want to keep track of invalid files that were removed
     // so we can show a warning.
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'removedLocalFiles' does not exist on typ... Remove this comment to see the full error message
     this.setState({
       validatingSamples: true,
       ...(sampleType === LOCAL_UPLOAD ? { removedLocalFiles: [] } : {}),
@@ -896,6 +902,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
       union(Array.from(this.state[selectedSampleIdsKey]), newlyAddedSampleIds),
     );
 
+    // @ts-expect-error ts-migrate(2339) FIXME: Property 'removedLocalFiles' does not exist on typ... Remove this comment to see the full error message
     this.setState({
       validatingSamples: false,
       [samplesKey]: mergedSamples,
@@ -934,7 +941,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
     const newState = {
       [samplesKey]: newSamples,
       [selectedSampleIdsKey]: newSelectedSampleIds,
-    };
+    } as SamplesRecord & SelectedSampleIdsRecord;
 
     this.setState(newState);
 
@@ -1259,12 +1266,13 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
   };
 
   render() {
-    const { admin, biohubS3UploadEnabled } = this.props;
+    const { admin, biohubS3UploadEnabled, pipelineVersions } = this.props;
     const { allowedFeatures } = this.context || {};
     const {
       currentTab,
       selectedMedakaModel,
       selectedGuppyBasecallerSetting,
+      selectedProject,
       selectedTechnology,
       selectedWetlabProtocol,
       selectedWorkflows,
@@ -1334,6 +1342,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
             onTechnologyToggle={this.handleTechnologyToggle}
             onWorkflowToggle={this.handleWorkflowToggle}
             currentTab={currentTab}
+            projectPipelineVersions={pipelineVersions[selectedProject?.id]}
             selectedMedakaModel={selectedMedakaModel}
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
             selectedTechnology={selectedTechnology}
@@ -1357,6 +1366,7 @@ class UploadSampleStep extends React.Component<UploadSampleStepProps> {
               />
             )}
           <SampleUploadTable
+            // @ts-expect-error basespace samples are in a different format, causing a type error
             samples={this.getSampleDataForUploadTable(currentTab)}
             onSamplesRemove={sampleNames =>
               this.handleSamplesRemove(sampleNames, currentTab)

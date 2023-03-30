@@ -3,7 +3,7 @@ import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import { MNGS_NANOPORE_PIPELINE_GITHUB_LINK } from "~/components/utils/documentationLinks";
 import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../../constants";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../../../constants";
 import { SequencingPlatformOption } from "../../../SequencingPlatformOption";
 import { MetagenomicsNanoporeSettings } from "./components/MetagenomicsNanoporeSettings";
 
@@ -13,6 +13,7 @@ interface MetagenomicsWithNanoporeProps {
   onClick(): void;
   selectedGuppyBasecallerSetting: string;
   onChangeGuppyBasecallerSetting(selected: string): void;
+  pipelineVersion?: string;
 }
 
 const MetagenomicsWithNanopore = ({
@@ -21,6 +22,7 @@ const MetagenomicsWithNanopore = ({
   onClick,
   selectedGuppyBasecallerSetting,
   onChangeGuppyBasecallerSetting,
+  pipelineVersion,
 }: MetagenomicsWithNanoporeProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
@@ -46,6 +48,7 @@ const MetagenomicsWithNanopore = ({
       }
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE}
       tooltipText={tooltipText}
+      pipelineVersion={pipelineVersion}
     />
   );
 };

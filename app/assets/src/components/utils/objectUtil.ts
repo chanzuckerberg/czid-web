@@ -1,4 +1,4 @@
-import { transform, isEqual, isObject } from "lodash/fp";
+import { transform, isEqual, isObject, isArray, camelCase } from "lodash/fp";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -58,4 +58,29 @@ export const reduceObjectArrayToLookupDict = <T extends Record<string, any>>(
     return [id, obj];
   });
   return Object.fromEntries(keyValuePairs);
+};
+
+/**
+ * Accepts any object with arbitrary levels of nesting (the nested bits can be objs or arrays),
+ * and returns essentially the same object with all the keys camelCased instead of snake_cased.
+ * Useful for parsing backend responses.
+ * We prefer lodash/fp and transform does not work as expected:
+ * https://github.com/lodash/lodash/issues/4434
+ * As a work around, this function avoids lodash/fp all together
+ */
+export const camelize = (obj) => {
+  if (isObject(obj)) {
+    const n = {};
+    Object.keys(obj)
+      .forEach((k) => {
+        n[camelCase(k)] = camelize(obj[k]);
+      });
+    return n;
+  } else if (isArray(obj)) {
+    return obj.map((i) => {
+      return camelize(i);
+    });
+  }
+
+  return obj;
 };

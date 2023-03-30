@@ -2,17 +2,23 @@ import cx from "classnames";
 import { get, without, flow, omit, set, find, min } from "lodash/fp";
 import React from "react";
 
+import { getProjectPipelineVersions } from "~/api";
 import {
   FIELDS_THAT_HAVE_MAX_INPUT,
   HOST_GENOME_SYNONYMS,
 } from "~/components/common/Metadata/constants";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 
-import { HostGenome, Project, SampleFromApi } from "~/interface/shared";
+import {
+  HostGenome,
+  Project,
+  ProjectPipelineVersions,
+  SampleFromApi,
+} from "~/interface/shared";
 import ReviewStep from "./ReviewStep";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 import UploadMetadataStep from "./UploadMetadataStep";
-import UploadSampleStep from "./UploadSampleStep";
+import UploadSampleStep from "./components/UploadSampleStep/UploadSampleStep";
 import cs from "./sample_upload_flow.scss";
 
 interface SampleUploadFlowProps {
@@ -39,6 +45,7 @@ interface SampleUploadFlowState {
     rows?: Record<string, any>[];
   };
   metadataIssues: $TSFixMeUnknown;
+  pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
   technology?: string;
   stepsEnabled: {
     uploadSamples: boolean;
@@ -63,6 +70,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     medakaModel: null,
     metadata: null, //
     metadataIssues: null,
+    pipelineVersions: {} as { [projectId: string]: ProjectPipelineVersions },
     technology: null,
     stepsEnabled: {
       uploadSamples: true,
@@ -202,6 +210,22 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     });
   };
 
+  // *** Project-related functions ***
+  // Get pipeline versions associated with a project
+  getPipelineVersionsForExistingProject = async projectId => {
+    if (this.state.pipelineVersions[projectId]) {
+      return { pipelineVersions: this.state.pipelineVersions[projectId] };
+    }
+
+    const pipelineVersions = await getProjectPipelineVersions(projectId);
+    this.setState((prevState: SampleUploadFlowState) => ({
+      pipelineVersions: {
+        ...prevState.pipelineVersions,
+        [projectId]: pipelineVersions,
+      },
+    }));
+  };
+
   handleStepSelect = (step: string) => {
     this.setState({
       currentStep: step,
@@ -211,7 +235,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   // SLIGHT HACK: Keep steps mounted, so user can return to them if needed.
   // The internal state of some steps is difficult to recover if they are unmounted.
   renderSteps = () => {
-    const { workflows, wetlabProtocol } = this.state;
+    const { pipelineVersions, workflows, wetlabProtocol } = this.state;
     return (
       <div>
         <UploadSampleStep
@@ -222,6 +246,10 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
           basespaceOauthRedirectUri={this.props.basespaceOauthRedirectUri}
           admin={this.props.admin}
           biohubS3UploadEnabled={this.props.biohubS3UploadEnabled}
+          getPipelineVersionsForExistingProject={(projectId: number) =>
+            this.getPipelineVersionsForExistingProject(projectId)
+          }
+          pipelineVersions={pipelineVersions}
         />
         {this.state.samples && (
           <UploadMetadataStep
@@ -246,6 +274,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
             onUploadComplete={this.onUploadComplete}
             onUploadStatusChange={this.onUploadStatusChange}
             originalHostGenomes={this.props.hostGenomes}
+            pipelineVersions={pipelineVersions}
             project={this.state.project}
             // @ts-expect-error Property 'sampleNamesToFiles' does not exist on type
             sampleNamesToFiles={this.state.sampleNamesToFiles}

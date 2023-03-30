@@ -5,7 +5,7 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import Toggle from "~/components/ui/controls/Toggle";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
 import { UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK } from "~/components/utils/documentationLinks";
-import cs from "~/components/views/SampleUploadFlow/WorkflowSelector/workflow_selector.scss";
+import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import {
   MEDAKA_MODEL_OPTIONS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
@@ -41,8 +41,8 @@ const ConsensusGenomeNanoporeSettings = ({
   selectedWetlabProtocol,
 }: ConsensusGenomeNanoporeSettingsProps) => {
   return (
-    <div className={cs.technologyContent}>
-      <div className={cs.item}>
+    <>
+      <div className={cx(cs.item, cs.clearLabs)}>
         <div className={cs.subheader}>
           Used Clear Labs:
           <ColumnHeaderTooltip
@@ -101,7 +101,7 @@ const ConsensusGenomeNanoporeSettings = ({
           />
         )}
       </div>
-    </div>
+    </>
   );
 };
 
