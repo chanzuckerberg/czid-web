@@ -118,7 +118,9 @@ class MngsReadsStatsLoadService
     end
 
     # Load subsample fraction which is subsampled_out_count / czid_dedup_out_count
-    sub_before = all_counts.detect { |entry| entry.value?("czid_dedup_out") }
+    # If the sample is not a human host, remove remaining human reads by running hisat2 against the human genome.
+    last_filtering_step_name = pipeline_run.sample.host_genome.name == "Human" ? "hisat2_host_filtered_out" : "hisat2_human_filtered_out"
+    sub_before = all_counts.detect { |entry| entry.value?(last_filtering_step_name) }
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
 
     if sub_before && sub_after
