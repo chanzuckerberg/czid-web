@@ -54,7 +54,7 @@ class AmrResultsConcatService
             row_extra = [
               wr.amr_metrics&.[]("total_reads"),
               wr.rpm(row[column_reads].to_f),
-              wr.rpm(row[column_depth].to_f),
+              wr.dpm(row[column_depth].to_f),
             ]
             csv << row + row_extra
           end

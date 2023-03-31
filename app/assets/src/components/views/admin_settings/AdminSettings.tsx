@@ -112,9 +112,13 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
       } else {
         intent = "success";
       }
+
+      // Select correct past tense suffix based on whether last letter is "e".
+      const actionSuffix = actionToPerform.slice(-1) === "e" ? "d" : "ed";
+
       const messages = compact([
         !isEmpty(usersWithUpdatedFeatureFlags) &&
-          `Successfully ${actionToPerform}ed feature flag for ${usersWithUpdatedFeatureFlags.join(
+          `Successfully ${actionToPerform}${actionSuffix} feature flag for ${usersWithUpdatedFeatureFlags.join(
             ", ",
           )}`,
         !isEmpty(usersWithNoAccounts) &&

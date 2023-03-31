@@ -20,10 +20,14 @@ class AmrWorkflowRun < WorkflowRun
 
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).
-  def results(*)
-    {
-      "quality_metrics": amr_metrics,
-    }
+  def results(cacheable_only: false)
+    results = {}
+    results["quality_metrics"] = amr_metrics
+    unless cacheable_only
+      results["report_table_data"] = amr_report
+    end
+
+    results
   end
 
   def amr_metrics
@@ -37,13 +41,35 @@ class AmrWorkflowRun < WorkflowRun
     return nil
   end
 
-  def rpm(raw_read_count)
-    if amr_metrics.nil?
-      return nil
-    end
+  def amr_report
+    AmrReportDataService.call(self)
+  rescue StandardError => exception
+    LogUtil.log_error(
+      "Error loading report",
+      exception: exception,
+      workflow_run_id: id
+    )
+    return nil
+  end
 
-    value = raw_read_count / ((amr_metrics["total_reads"] - (amr_metrics["total_ercc_reads"] || 0)) * amr_metrics["fraction_subsampled"]) * 1_000_000.0
-    value.round(2)
+  def dpm(read_coverage_depth)
+    count_per_million(read_coverage_depth)
+  end
+
+  def rpm(read_count)
+    count_per_million(read_count)
+  end
+
+  def count_per_million(raw_count)
+    amr_metrics = parsed_cached_results&.dig("quality_metrics")
+    return nil if amr_metrics.nil?
+
+    total_reads = amr_metrics["total_reads"]
+    total_ercc_reads = amr_metrics["total_ercc_reads"] || 0
+    fraction_subsampled = amr_metrics["fraction_subsampled"]
+
+    count = raw_count / ((total_reads - total_ercc_reads) * fraction_subsampled) * 1_000_000.0
+    count.round(2)
   end
 
   def zip_link

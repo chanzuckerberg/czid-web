@@ -68,16 +68,15 @@ export const reduceObjectArrayToLookupDict = <T extends Record<string, any>>(
  * https://github.com/lodash/lodash/issues/4434
  * As a work around, this function avoids lodash/fp all together
  */
-export const camelize = (obj) => {
+export const camelize = obj => {
   if (isObject(obj)) {
     const n = {};
-    Object.keys(obj)
-      .forEach((k) => {
-        n[camelCase(k)] = camelize(obj[k]);
-      });
+    Object.keys(obj).forEach(k => {
+      n[camelCase(k)] = camelize(obj[k]);
+    });
     return n;
   } else if (isArray(obj)) {
-    return obj.map((i) => {
+    return obj.map(i => {
       return camelize(i);
     });
   }
