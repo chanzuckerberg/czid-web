@@ -436,7 +436,7 @@ RSpec.describe "Sample request", type: :request do
           project: @project,
           initial_workflow: WorkflowRun::WORKFLOW[:consensus_genome]
         )
-        create(:workflow_run, sample: @cg_sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: false)
+        @cg_wr = create(:workflow_run, sample: @cg_sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: false)
         create(:workflow_run, sample: @cg_sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: false)
         create(:workflow_run, sample: @cg_sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: true)
         @amr_sample = create(
@@ -444,7 +444,7 @@ RSpec.describe "Sample request", type: :request do
           project: @project,
           initial_workflow: "amr"
         )
-        create(:workflow_run, sample: @amr_sample, workflow: WorkflowRun::WORKFLOW[:amr], deprecated: false)
+        @amr_wr = create(:workflow_run, sample: @amr_sample, workflow: WorkflowRun::WORKFLOW[:amr], deprecated: false)
         create(:workflow_run, sample: @amr_sample, workflow: WorkflowRun::WORKFLOW[:amr], deprecated: true)
       end
 
@@ -462,6 +462,31 @@ RSpec.describe "Sample request", type: :request do
           WorkflowRun::WORKFLOW[:amr] => 1
         )
         expect(stats_response["count"]).to eq 4
+        expect(stats_response["projectCount"]).to eq 1
+        expect(stats_response["avgTotalReads"]).to eq 0
+        expect(stats_response["avgAdjustedRemainingReads"]).to eq 0
+      end
+
+      it "filters out soft-deleted data" do
+        timestamp = Time.now.utc
+        @short_read_mngs_sample.update(deleted_at: timestamp)
+        @long_read_mngs_sample.update(deleted_at: timestamp)
+        @cg_wr.update(deleted_at: timestamp)
+        @amr_wr.update(deleted_at: timestamp)
+
+        get "/samples/stats.json", params: { domain: @domain }
+
+        expect(response.content_type).to include("application/json")
+        expect(response).to have_http_status(:ok)
+
+        stats_response = JSON.parse(response.body)
+        expect(stats_response["countByWorkflow"]).to include(
+          WorkflowRun::WORKFLOW[:short_read_mngs] => 0,
+          WorkflowRun::WORKFLOW[:long_read_mngs] => 0,
+          WorkflowRun::WORKFLOW[:consensus_genome] => 1,
+          WorkflowRun::WORKFLOW[:amr] => 0
+        )
+        expect(stats_response["count"]).to eq 2
         expect(stats_response["projectCount"]).to eq 1
         expect(stats_response["avgTotalReads"]).to eq 0
         expect(stats_response["avgAdjustedRemainingReads"]).to eq 0

@@ -333,13 +333,13 @@ class SamplesController < ApplicationController
     share_id = params[:share_id]
 
     samples = domain == "snapshot" ? samples_by_share_id(share_id) : samples_by_domain(domain)
-    samples = filter_samples(samples, params)
+    samples = filter_samples(samples, params).non_deleted
     sample_data = samples.pluck(:id, :project_id)
     sample_ids = sample_data.map { |s| s[0] }
     project_ids = sample_data.map { |s| s[1] }.uniq
     avg_total_reads = nil
     avg_remaining_reads = nil
-    samples_workflow_runs = current_power.samples_workflow_runs(samples).non_deprecated
+    samples_workflow_runs = current_power.samples_workflow_runs(samples).non_deprecated.non_deleted
 
     workflow_count = {
       WorkflowRun::WORKFLOW[:short_read_mngs] => samples.where(initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs]).distinct.count,
@@ -353,6 +353,7 @@ class SamplesController < ApplicationController
       pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
       avg_total_reads, avg_remaining_reads = PipelineRun
                                              .where(id: pipeline_run_ids)
+                                             .non_deleted
                                              .pick(Arel.sql("ROUND(AVG(`pipeline_runs`.`total_reads`)), ROUND(AVG(`pipeline_runs`.`adjusted_remaining_reads`))"))
                                              &.map(&:to_i)
     end
