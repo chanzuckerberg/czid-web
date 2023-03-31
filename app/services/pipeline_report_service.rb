@@ -327,7 +327,10 @@ class PipelineReportService
     ReportsHelper.cleanup_missing_genus_counts(species_counts, genus_counts)
     @timer.split("cleanup_missing_genus_counts")
 
-    unless @use_decimal_columns
+    # Both Illumina and ONT pipeline runs store decimal rpm and/or bpm values.
+    # For Illumina pipeline runs, count per million (aka rpm) values will be re-calcalated
+    # if the PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS appconfig is on
+    if !@use_decimal_columns && @technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
       counts_by_tax_level.each_value do |tax_level_taxa|
         compute_count_per_million(count_types: [:nt, :nr], taxa_counts: tax_level_taxa, total_count: total_count)
       end
