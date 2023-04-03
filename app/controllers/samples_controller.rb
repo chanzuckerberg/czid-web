@@ -24,7 +24,7 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_v2, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
-                  :contig_taxid_list, :taxid_contigs_for_blast, :taxid_contigs_download, :taxon_five_longest_reads, :summary_contig_counts, :coverage_viz_summary,
+                  :taxid_contigs_for_blast, :taxid_contigs_download, :taxon_five_longest_reads, :coverage_viz_summary,
                   :coverage_viz_data, :upload_credentials, :pipeline_logs,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow, :move_to_project, :cancel_pipeline_run,].freeze
@@ -864,9 +864,8 @@ class SamplesController < ApplicationController
   def report_csv
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
-    min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS[pipeline_run.technology]
     is_lcrp_enabled = current_user && current_user.allowed_feature?("multitag_pathogens")
-    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_reads: min_contig_reads, lcrp: is_lcrp_enabled)
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, lcrp: is_lcrp_enabled)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -1059,11 +1058,6 @@ class SamplesController < ApplicationController
     }
   end
 
-  def contig_taxid_list
-    pr = select_pipeline_run(@sample, params[:pipeline_version])
-    render json: pr.get_taxid_list_with_contigs
-  end
-
   def taxid_contigs_download
     taxid = params[:taxid]
     return if HUMAN_TAX_IDS.include? taxid.to_i
@@ -1083,7 +1077,7 @@ class SamplesController < ApplicationController
     return if HUMAN_TAX_IDS.include? taxid.to_i
 
     pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
-    contigs = pr.get_contigs_for_taxid(taxid.to_i, PipelineRun::MIN_CONTIG_READS[pr.technology], permitted_params[:count_type])
+    contigs = pr.get_contigs_for_taxid(taxid.to_i, permitted_params[:count_type])
 
     order_by = sanitize_order_by(Contig, order_by, :read_count)
     order_dir = sanitize_order_dir(order_dir, :desc)
@@ -1115,13 +1109,6 @@ class SamplesController < ApplicationController
       json: response.to_json,
       status: :ok
     )
-  end
-
-  def summary_contig_counts
-    pr = select_pipeline_run(@sample, params[:pipeline_version])
-    min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS[pipeline_run.technology]
-    contig_counts = pr.get_summary_contig_counts(min_contig_reads)
-    render json: { min_contig_reads: min_contig_reads, contig_counts: contig_counts }
   end
 
   def show_taxid_fasta

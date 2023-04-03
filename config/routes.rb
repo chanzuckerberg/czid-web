@@ -49,11 +49,9 @@ Rails.application.routes.draw do
       get :raw_results_folder
       get :upload_credentials
       get :metadata
-      get :contig_taxid_list
       get :taxid_contigs_download
       get :taxid_contigs_for_blast
       get :taxon_five_longest_reads
-      get :summary_contig_counts
       get :coverage_viz_summary
       get :coverage_viz_data
       get :pipeline_logs

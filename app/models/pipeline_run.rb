@@ -1725,15 +1725,14 @@ class PipelineRun < ApplicationRecord
     # Once we decide to deploy the assembly pipeline, change "1000.1000" to the relevant version number of idseq-pipeline.
   end
 
-  def contig_lineages(min_contig_reads = MIN_CONTIG_READS[technology])
+  def contig_lineages
     contigs.select("id, read_count, lineage_json")
-           .where("read_count >= ?", min_contig_reads)
            .where("lineage_json IS NOT NULL")
   end
 
-  def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS[technology], db = "nt_and_nr")
+  def get_contigs_for_taxid(taxid, db = "nt_and_nr")
     contig_ids = []
-    contig_lineages(min_contig_reads).each do |c|
+    contig_lineages().each do |c|
       lineage = JSON.parse(c.lineage_json)
 
       if db.casecmp("NT").zero?
@@ -1749,31 +1748,7 @@ class PipelineRun < ApplicationRecord
     contigs.where(id: contig_ids).order("read_count DESC")
   end
 
-  def get_summary_contig_counts(min_contig_reads)
-    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
-    contig_lineages(min_contig_reads).each do |c|
-      lineage = JSON.parse(c.lineage_json)
-      lineage.each do |count_type, taxid_arr|
-        taxids = taxid_arr[0..1]
-        taxids.each do |taxid|
-          dict_key = "#{count_type}:#{taxid}"
-          summary_dict[dict_key] ||= { contigs: 0, contig_reads: 0 }
-          summary_dict[dict_key][:contigs] += 1
-          summary_dict[dict_key][:contig_reads] += c.read_count
-        end
-      end
-    end
-    output = []
-    summary_dict.each do |dict_key, info|
-      count_type, taxid = dict_key.split(':')
-      info[:count_type] = count_type
-      info[:taxid] = taxid.to_i
-      output << info
-    end
-    output
-  end
-
-  def get_summary_contig_counts_v2(min_contig_reads)
+  def summary_contig_counts_v2
     # Stores the number of contigs that match a given taxid, count_type (nt, nr, or merged_nt_nr), and read_count (number of reads aligned to that contig).
     # Create and store default values for the hash if the key doesn't exist yet
     summary_dict = Hash.new do |summary, taxid|
@@ -1786,9 +1761,7 @@ class PipelineRun < ApplicationRecord
 
     count_key = technology == PipelineRun::TECHNOLOGY_INPUT[:illumina] ? :read_count : :base_count
 
-    # min_contig_reads is relevant to both Illumina and Nanopore contigs
-    contig_taxids = contigs.where("read_count >= ?", min_contig_reads)
-                           .where.not(lineage_json: [nil, ""])
+    contig_taxids = contigs.where.not(lineage_json: [nil, ""])
                            .pluck(count_key, :species_taxid_nt, :species_taxid_nr, :species_taxid_merged_nt_nr, :genus_taxid_nt, :genus_taxid_nr, :genus_taxid_merged_nt_nr)
 
     contig_taxids.each do |c|
@@ -1803,15 +1776,6 @@ class PipelineRun < ApplicationRecord
       summary_dict[genus_taxid_merged_nt_nr]["merged_nt_nr"][count_key] += 1 if genus_taxid_merged_nt_nr
     end
     return summary_dict
-  end
-
-  def get_taxid_list_with_contigs(min_contig_reads = MIN_CONTIG_READS[technology])
-    taxid_list = []
-    contig_lineages(min_contig_reads).each do |c|
-      lineage = JSON.parse(c.lineage_json)
-      lineage.values.each { |taxid_arr| taxid_list += taxid_arr[0..1] }
-    end
-    taxid_list.uniq
   end
 
   def alignment_output_s3_path

@@ -174,13 +174,12 @@ class PipelineReportService
     NANOPORE => CSV_LONG_READS_COLUMNS,
   }.freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: nil, parallel: true, merge_nt_nr: false, show_annotations: false, lcrp: false)
+  def initialize(pipeline_run, background_id, csv: false, parallel: true, merge_nt_nr: false, show_annotations: false, lcrp: false)
     @pipeline_run = pipeline_run
     @technology = pipeline_run.technology
     # In ont_v1, we are not supporting backgrounds for nanopore mngs samples
     @background = background_id ? Background.find(background_id) : nil
     @csv = csv
-    @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS[@technology]
     @parallel = parallel
     @merge_nt_nr = merge_nt_nr
     @show_annotations = show_annotations
@@ -220,7 +219,7 @@ class PipelineReportService
     # FETCH TAXON INFORMATION
     if @parallel
       parallel_steps = [
-        -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads) },
+        -> { @pipeline_run.summary_contig_counts_v2() },
         -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id, technology: @technology) },
         -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id, @technology) },
       ]
@@ -243,7 +242,7 @@ class PipelineReportService
       @timer.split("parallel_fetch_report_data")
       contigs, taxon_counts_and_summaries, taxons_absent_from_sample, merged_taxon_counts = *results
     else
-      contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads)
+      contigs = @pipeline_run.summary_contig_counts_v2()
       @timer.split("get_contig_summary")
 
       taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id, technology: @technology)

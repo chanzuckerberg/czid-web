@@ -62,11 +62,6 @@ const getSampleReportData = ({
     },
   );
 
-const getSummaryContigCounts = (id: $TSFixMe, minContigReads: $TSFixMe) =>
-  get(
-    `/samples/${id}/summary_contig_counts?min_contig_reads=${minContigReads}`,
-  );
-
 const getAllHostGenomes = () => get("/host_genomes.json");
 
 const getAllHostGenomesPublic = () => get("/host_genomes/index_public");
@@ -784,7 +779,6 @@ export {
   getSampleStats,
   getSampleTaxons,
   getSearchSuggestions,
-  getSummaryContigCounts,
   getTaxaDetails,
   getTaxaWithContigsSuggestions,
   getTaxaWithReadsSuggestions,
