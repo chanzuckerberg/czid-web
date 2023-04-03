@@ -79,11 +79,25 @@ class BulkDeletionService
         end
       end
     else
-      # This is redundant for right now but will be used when we mark workflow runs as "deleted"
       deletable_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
     end
 
     deletable_objects.update(deleted_at: delete_timestamp)
+
+    # log soft deletion for GDPR compliance
+    deleted_objects_info = deletable_objects
+                           .joins(:sample)
+                           .select(:id, "sample_id", "samples.name AS sample_name", "samples.user_id AS sample_user_id").as_json
+
+    MetricUtil.log_analytics_event(
+      EventDictionary::GDPR_RUN_SOFT_DELETED,
+      user,
+      {
+        user_email: user.email,
+        deleted_objects: deleted_objects_info,
+        workflow: workflow,
+      }
+    )
 
     # if there are more remaining runs on the sample, update initial workflow
     # otherwise mark it for deletion

@@ -324,7 +324,7 @@ class PipelineRun < ApplicationRecord
   def self.deletable(user)
     scope = where(finalized: 1)
     unless user.admin?
-      scope = scope.joins(:sample).where(sample: { user_id: user.id })
+      scope = scope.joins(:sample).where(samples: { user_id: user.id })
     end
     scope
   end

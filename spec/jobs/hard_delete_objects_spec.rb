@@ -93,6 +93,68 @@ RSpec.describe HardDeleteObjects, type: :job do
         HardDeleteObjects.perform(object_ids, short_read_mngs, @joe.id)
         expect { @sample1.reload }.not_to raise_error
       end
+
+      it "logs deletion to Segment for GDPR compliance" do
+        object_ids = [@pr1.id]
+        run_data = {
+          "id" => @pr1.id,
+          "sample_id" => @sample1.id,
+          "sample_name" => @sample1.name,
+          "sample_user_id" => @sample1.user.id,
+        }
+        run_log_data = {
+          user_email: @joe.email,
+          deleted_objects: [run_data],
+          workflow: short_read_mngs,
+        }
+        # stub out destroy operations so we don't get more logs
+        allow_any_instance_of(PipelineRun).to receive(:destroy!).and_return(@pr1)
+
+        expect(MetricUtil).to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_RUN_HARD_DELETED,
+          @joe,
+          run_log_data
+        )
+
+        HardDeleteObjects.perform(object_ids, short_read_mngs, @joe.id)
+      end
+
+      it "logs only successfully deleted runs to Segment for GDPR compliance" do
+        object_ids = [@pr1.id]
+
+        # stub out destroy operations so we don't get more logs
+        allow_any_instance_of(PipelineRun).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
+
+        expect(MetricUtil).not_to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_RUN_HARD_DELETED,
+          anything,
+          anything
+        )
+
+        HardDeleteObjects.perform(object_ids, short_read_mngs, @joe.id)
+      end
+
+      it "logs only successfully deleted samples to Segment for GDPR compliance" do
+        object_ids = [@pr1.id]
+
+        # stub out destroy operations so we don't get more logs
+        allow_any_instance_of(PipelineRun).to receive(:destroy!).and_return(@pr1)
+        allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
+
+        expect(MetricUtil).to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_RUN_HARD_DELETED,
+          anything,
+          anything
+        ).exactly(1).times
+
+        expect(MetricUtil).not_to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_SAMPLE_HARD_DELETED,
+          anything,
+          anything
+        )
+
+        HardDeleteObjects.perform(object_ids, short_read_mngs, @joe.id)
+      end
     end
 
     context "when workflow run ids are passed in" do
@@ -163,10 +225,72 @@ RSpec.describe HardDeleteObjects, type: :job do
         HardDeleteObjects.perform(object_ids, consensus_genome, @joe.id)
         expect { @sample1.reload }.not_to raise_error
       end
+
+      it "logs deletion to Segment for GDPR compliance" do
+        object_ids = [@wr1.id]
+        run_data = {
+          "id" => @wr1.id,
+          "sample_id" => @sample1.id,
+          "sample_name" => @sample1.name,
+          "sample_user_id" => @sample1.user.id,
+        }
+        run_log_data = {
+          user_email: @joe.email,
+          deleted_objects: [run_data],
+          workflow: consensus_genome,
+        }
+        # stub out destroy operations so we don't get more logs
+        allow_any_instance_of(WorkflowRun).to receive(:destroy!).and_return(@wr1)
+
+        expect(MetricUtil).to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_RUN_HARD_DELETED,
+          @joe,
+          run_log_data
+        )
+
+        HardDeleteObjects.perform(object_ids, consensus_genome, @joe.id)
+      end
+
+      it "logs only successfully deleted runs to Segment for GDPR compliance" do
+        object_ids = [@wr1.id]
+
+        # stub out destroy operations so we don't get more logs
+        allow_any_instance_of(WorkflowRun).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
+
+        expect(MetricUtil).not_to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_RUN_HARD_DELETED,
+          anything,
+          anything
+        )
+
+        HardDeleteObjects.perform(object_ids, consensus_genome, @joe.id)
+      end
+
+      it "logs only successfully deleted samples to Segment for GDPR compliance" do
+        object_ids = [@wr1.id]
+
+        # stub out destroy operations so we don't get more logs
+        allow_any_instance_of(WorkflowRun).to receive(:destroy!).and_return(@wr1)
+        allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
+
+        expect(MetricUtil).to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_RUN_HARD_DELETED,
+          anything,
+          anything
+        ).exactly(1).times
+
+        expect(MetricUtil).not_to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_SAMPLE_HARD_DELETED,
+          anything,
+          anything
+        )
+
+        HardDeleteObjects.perform(object_ids, consensus_genome, @joe.id)
+      end
     end
 
     it "raises error and logs it if error occurs while performing deletions" do
-      allow(HardDeleteObjects).to receive(:hard_delete_objects).and_raise("Error")
+      allow(HardDeleteObjects).to receive(:hard_delete).and_raise("Error")
       expect(LogUtil).to receive(:log_error)
       expect do
         HardDeleteObjects.perform([], consensus_genome, @joe.id)

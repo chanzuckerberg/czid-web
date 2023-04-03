@@ -371,7 +371,7 @@ class WorkflowRun < ApplicationRecord
   def self.deletable(user)
     scope = where(status: [STATUS[:failed], STATUS[:succeeded], STATUS[:succeeded_with_issue]])
     unless user.admin?
-      scope = scope.joins(:sample).where(sample: { user_id: user.id })
+      scope = scope.joins(:sample).where(samples: { user_id: user.id })
     end
     scope
   end

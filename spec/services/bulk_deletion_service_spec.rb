@@ -50,10 +50,6 @@ RSpec.describe BulkDeletionService, type: :service do
                                  user: @joe,
                                  name: "completed Illumina mNGs sample 3")
       @pr3 = create(:pipeline_run, sample: @sample3, technology: illumina, finalized: 1)
-
-      @tree = create(:visualization, visualization_type: "tree", user_id: @joe.id, name: "Test Tree", samples: [@sample1])
-      @table = create(:visualization, visualization_type: "table", user_id: @joe.id, name: "Test Table", samples: [@sample1])
-      @heatmap = create(:visualization, visualization_type: "heatmap", user_id: @joe.id, name: "Test Heatmap", samples: [@sample1, @sample2, @sample3])
     end
 
     it "returns deletable pipeline run ids for samples" do
@@ -79,33 +75,73 @@ RSpec.describe BulkDeletionService, type: :service do
       expect(@pr2.deleted_at).to be_within(1.minute).of(Time.now.utc)
     end
 
-    it "deletes associated tables/trees" do
-      BulkDeletionService.call(
-        object_ids: [@sample1.id, @sample2.id],
-        user: @joe,
-        workflow: "short-read-mngs"
-      )
-      expect(Visualization.find_by(id: @tree.id)).to be_nil
-      expect(Visualization.find_by(id: @table.id)).to be_nil
+    context "when the samples have associated tables/trees" do
+      before do
+        @tree = create(:visualization, visualization_type: "tree", user_id: @joe.id, name: "Test Tree", samples: [@sample1])
+        @table = create(:visualization, visualization_type: "table", user_id: @joe.id, name: "Test Table", samples: [@sample1])
+      end
+
+      it "deletes associated tables/trees" do
+        BulkDeletionService.call(
+          object_ids: [@sample1.id, @sample2.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        expect(Visualization.find_by(id: @tree.id)).to be_nil
+        expect(Visualization.find_by(id: @table.id)).to be_nil
+      end
     end
 
-    it "deletes associated heatmaps - not enough samples left" do
-      BulkDeletionService.call(
-        object_ids: [@sample1.id, @sample2.id],
-        user: @joe,
-        workflow: "short-read-mngs"
-      )
-      expect(Visualization.find_by(id: @heatmap.id)).to be_nil
+    context "when the samples have associated heatmaps" do
+      before do
+        @heatmap = create(:visualization, visualization_type: "heatmap", user_id: @joe.id, name: "Test Heatmap", samples: [@sample1, @sample2, @sample3])
+      end
+
+      it "deletes associated heatmaps - not enough samples left" do
+        BulkDeletionService.call(
+          object_ids: [@sample1.id, @sample2.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        expect(Visualization.find_by(id: @heatmap.id)).to be_nil
+      end
+
+      it "updates associated heatmaps - enough samples left" do
+        BulkDeletionService.call(
+          object_ids: [@sample1.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        expect(Visualization.find_by(id: @heatmap.id)).to_not be_nil
+        expect(Visualization.find_by(id: @heatmap.id).sample_ids).to contain_exactly(@sample2.id, @sample3.id)
+      end
     end
 
-    it "updates associated heatmaps - enough samples left" do
+    it "logs to Segment for GDPR compliance" do
+      run_data = {
+        "id" => @pr1.id,
+        "sample_id" => @sample1.id,
+        "sample_name" => @sample1.name,
+        "sample_user_id" => @sample1.user.id,
+      }
+      log_data = {
+        "user_email": @joe.email,
+        "deleted_objects": [run_data],
+        "workflow": short_read_mngs,
+      }
+      # stub out updates so we don't get other logs
+      allow_any_instance_of(PipelineRun).to receive(:update)
+      allow_any_instance_of(Sample).to receive(:update)
+      expect(MetricUtil).to receive(:log_analytics_event).with(
+        EventDictionary::GDPR_RUN_SOFT_DELETED,
+        @joe,
+        log_data
+      )
       BulkDeletionService.call(
         object_ids: [@sample1.id],
         user: @joe,
-        workflow: "short-read-mngs"
+        workflow: short_read_mngs
       )
-      expect(Visualization.find_by(id: @heatmap.id)).to_not be_nil
-      expect(Visualization.find_by(id: @heatmap.id).sample_ids).to contain_exactly(@sample2.id, @sample3.id)
     end
 
     context "when the initial workflow is short read mNGS" do
@@ -255,6 +291,33 @@ RSpec.describe BulkDeletionService, type: :service do
       @failed_wr.reload
       expect(@completed_wr.deleted_at).to be_within(1.minute).of(Time.now.utc)
       expect(@failed_wr.deleted_at).to be_within(1.minute).of(Time.now.utc)
+    end
+
+    it "logs to segment for GDPR compliance" do
+      run_data = {
+        "id" => @completed_wr.id,
+        "sample_id" => @sample1.id,
+        "sample_name" => @sample1.name,
+        "sample_user_id" => @sample1.user.id,
+      }
+      log_data = {
+        "user_email": @joe.email,
+        "deleted_objects": [run_data],
+        "workflow": consensus_genome,
+      }
+      # stub out updates so we don't get other logs
+      allow_any_instance_of(WorkflowRun).to receive(:update)
+      allow_any_instance_of(Sample).to receive(:update)
+      expect(MetricUtil).to receive(:log_analytics_event).with(
+        EventDictionary::GDPR_RUN_SOFT_DELETED,
+        @joe,
+        log_data
+      )
+      BulkDeletionService.call(
+        object_ids: [@completed_wr.id],
+        user: @joe,
+        workflow: consensus_genome
+      )
     end
 
     context "when CG runs are deleted and the initial workflow is CG" do
