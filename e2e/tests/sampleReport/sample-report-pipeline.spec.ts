@@ -1,7 +1,6 @@
 import { test } from "@playwright/test";
 import { getFixture } from "../../utils/common";
 import { getTabSection, verifySectionDetails } from "../../utils/report";
-import { getByTestID, getByText } from "../../utils/selectors";
 
 const sampleId = 25307;
 const fixtures = getFixture("report_data");
@@ -12,10 +11,10 @@ test.describe("Sample report pipeline test", () => {
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     // click details link
-    await page.locator(getByText("Sample Details")).click();
+    await page.getByText("Sample Details").click();
 
     // select Pipeline tab
-    await page.locator(getByTestID("pipelines")).click();
+    await page.getByTestId("pipelines").click();
   });
 
   test(`Should verify pipeline info section on pipeline tab`, async ({

@@ -1,9 +1,4 @@
 import { expect, test } from "@playwright/test";
-import {
-  getByPlaceholder,
-  getByTestID,
-  getByText,
-} from "../../utils/selectors";
 const sampleId = 25307;
 
 const INVALID_DATES = ["date"];
@@ -54,15 +49,16 @@ test.describe("Sample report tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     // click details link
-    await page.locator(getByText("Sample Details")).click();
+    await page.getByText("Sample Details").click();
 
     // select the metadata tab
-    await page.locator(getByTestID("metadata")).click();
+    await page.getByTestId("metadata").click();
 
     // accept cookies
-    await page.locator(getByText("Accept All Cookies")).click();
+    await page.getByText("Accept All Cookies").click();
   });
   test(`Should edit sample info section`, async ({ page }) => {
+    await page.pause();
     // hover over the sample info section
     await page
       .locator(".title-3Oy38")
@@ -119,16 +115,14 @@ test.describe("Sample report tests", () => {
 
       // verify validate date formats
       for (let i = 0; i < VALID_DATES.length; i++) {
-        await page.locator(getByPlaceholder("YYYY-MM-DD")).fill(VALID_DATES[i]);
-        await page.locator(getByTestID("metadata")).click();
+        await page.getByPlaceholder("YYYY-MM-DD").fill(VALID_DATES[i]);
+        await page.getByTestId("metadata").click();
         await expect(page.locator(".error-3itiT")).not.toBeVisible();
       }
       // verify invalid dates will throw error
       for (let i = 0; i < INVALID_DATES.length; i++) {
-        await page
-          .locator(getByPlaceholder("YYYY-MM-DD"))
-          .fill(INVALID_DATES[i]);
-        await page.locator(getByTestID("metadata")).click();
+        await page.getByPlaceholder("YYYY-MM-DD").fill(INVALID_DATES[i]);
+        await page.getByTestId("metadata").click();
         await expect(page.locator(".error-3itiT")).toBeVisible();
       }
     },
@@ -186,7 +180,7 @@ test.describe("Sample report tests", () => {
       .locator(".labelContainer-3Rr0F")
       .textContent();
     const newHostSex = pickListElement(["Male", "Female"], currentHostSex);
-    await page.getByRole("option", { name: newHostSex }).click();
+    await page.getByText(newHostSex, { exact: true }).click();
   });
 
   test(`Should edit infection info section`, async ({ page }) => {

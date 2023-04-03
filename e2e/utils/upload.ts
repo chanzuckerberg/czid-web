@@ -47,10 +47,11 @@ export async function uploadSampleFiles(
   // select analysis type
   const analysisTypeId = analysisType.toLowerCase().replace(/ /g, "-");
   await page.getByTestId(`${ANALYSIS_TYPE}-${analysisTypeId}`).click();
-  await page
-    .getByTestId("sequencing-technology-illumina")
-    .locator('input[type="radio"]')
-    .check();
+  if (analysisTypeId === "metagenomics") {
+    await page
+      .getByTestId("sequencing-technology-Illumina") // todo: needs to be parametrized
+      .click();
+  }
 
   // select files
   await selectFile(page, `${FIXTURE_DIR}/${sampleFiles}`);
@@ -101,9 +102,8 @@ export async function fillMetadata(
 
   // collection location
   await page
-    .locator('input[type="text"]')
-    .nth(3)
-    .fill(metaData[COLLECTION_LOCATION] as string);
+    .getByPlaceholder("Enter a city, region or country")
+    .type(metaData[COLLECTION_LOCATION] as string);
   await page
     .getByText(metaData[COLLECTION_LOCATION] as string)
     .nth(0)
@@ -130,9 +130,7 @@ export async function fillMetadata(
   // host sex
   const hostSex = "host_sex";
   await page.locator(getMetadataField(hostSex)).click();
-  await page
-    .getByRole("option", { name: metaData[HOST_SEX] as string })
-    .click();
+  await page.getByText(metaData[HOST_SEX] as string, { exact: true }).click();
   // await page.getByText(metaData[HOST_SEX] as string).click();
 
   // known organism
@@ -191,15 +189,21 @@ export async function fillMetadata(
     .fill(String(metaData[DISEASES_CONDITIONS]));
 
   // click continue button
-  const continueButtonIndex = 1;
+  const continueButtonIndex = 0;
   await page
-    .getByText(CONTINUE)
-    .nth(continueButtonIndex)
+    // .getByText(CONTINUE)
+    // .nth(continueButtonIndex)
+    .locator(".continueButton-2Bayh")
+    .nth(1)
     .click();
 }
 
 export async function submitUpload(page: Page): Promise<any> {
-  await page.locator(ACCEPT_UPLOAD_TERMS).click();
+  await page
+    .locator(
+      "text=I agree that the data I am uploading to CZ ID has been lawfully collected",
+    )
+    .click();
   await page.getByText(START_UPLOAD).click();
 }
 

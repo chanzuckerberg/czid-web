@@ -1,7 +1,6 @@
 import { test } from "@playwright/test";
 import { getFixture } from "../../utils/common";
 import { verifySectionDetails, getTabSection } from "../../utils/report";
-import { getByTestID, getByText } from "../../utils/selectors";
 
 const sampleId = 25307;
 const fixtures = getFixture("report_data");
@@ -13,9 +12,9 @@ test.describe("Sample report metadata test", () => {
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     // click details link
-    await page.locator(getByText("Sample Details")).click();
+    await page.getByText("Sample Details").click();
     // select metadata tab
-    await page.locator(getByTestID("metadata")).click();
+    await page.getByTestId("metadata").click();
   });
 
   test(`Should verify sample info on metadata tab`, async ({ page }) => {

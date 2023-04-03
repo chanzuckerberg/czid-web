@@ -14,7 +14,6 @@ import {
   ERCC,
   DOWNLOADS,
 } from "../constants/sample.const";
-import { getByText } from "./selectors";
 
 export const sectionIndices: Record<string, number> = {
   sampleInfo: 0,
@@ -66,7 +65,7 @@ export async function openSamplePage(
   await page.goto(`${process.env.BASEURL}/my_data`);
   await page.getByTestId(MENU_ITEM_PUBLIC).click();
   await page.getByPlaceholder(SEARCH_PUBLIC).fill(projectName);
-  await page.locator("text='Accept All Cookies'").click();
+  await page.locator("text=Accept All Cookies").click();
   if (await page.locator(".title").isVisible()) {
     await page.locator(".title").click();
   } else {
@@ -133,7 +132,7 @@ export async function verifySectionDetails(
       const item = getDataByIndex(data, i);
       expect(
         await page
-          .locator(getByText(item.text))
+          .getByText(item.text)
           .first()
           .textContent(),
       ).toBe(item.text);

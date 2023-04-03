@@ -12,7 +12,7 @@ const config: PlaywrightTestConfig = {
   },
   fullyParallel: true,
   globalSetup: "./globalSetup",
-  outputDir: "../reports",
+  outputDir: "../playwright-report",
   projects: [
     {
       name: "chromium",

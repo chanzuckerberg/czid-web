@@ -44,7 +44,6 @@ import {
   VISIBILITY,
   HOST,
 } from "../../constants/filter.const";
-import { getByText } from "../../utils/selectors";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
@@ -69,7 +68,7 @@ test.describe("Discovery view tests", () => {
   test.beforeEach(async ({ page }) => {
     const fullUrl = `${baseUrl}/${url}`;
     await page.goto(fullUrl);
-    await page.locator(getByText("Accept All Cookies")).click();
+    await page.getByText("Accept All Cookies").click();
   });
   sampleTypes.forEach(sampleType => {
     test(`Should display left side content for ${sampleType}`, async ({

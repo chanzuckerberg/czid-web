@@ -5,7 +5,6 @@ import { TEST_PROJECTS } from "../../constants/common.const";
 import {
   ADD_THRESHOLD,
   ANNOTATION,
-  BUTTON,
   CHOOSE_TAXON,
   CLOSE_ICON,
   COMBOBOX,
@@ -17,7 +16,6 @@ import {
   LAST_THREE_MONTHS,
   LAST_WEEK,
   LOCATION,
-  MENU_ITEM,
   NUMBERINPUT,
   OPTION,
   PRIVATE,
@@ -26,12 +24,10 @@ import {
   SAMPLE_TYPE,
   SEARCH,
   TAXON,
-  TEXTBOX,
   TIMEFRAME,
   VISIBILITY,
 } from "../../constants/filter.const";
 import { goToProjectSamples } from "../../utils/project";
-import { getByText } from "../../utils/selectors";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
@@ -68,7 +64,7 @@ test.describe("Sample filtering tests", () => {
         .getByText(TAXON)
         .nth(1)
         .click();
-      await page.getByRole(BUTTON, { name: CHOOSE_TAXON }).click();
+      await page.getByText(CHOOSE_TAXON).click();
       await page.getByRole(COMBOBOX, { name: SEARCH }).click();
       await page.getByRole(COMBOBOX, { name: SEARCH }).fill(KLEBSIELLA);
       await page
@@ -113,14 +109,11 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      if (await page.locator(getByText(ANNOTATION)).isEnabled()) {
+      if (await page.getByText(ANNOTATION).isEnabled()) {
         // Hit annotation
         const annotation = "Hit";
-        await page.locator(getByText(ANNOTATION)).click();
-        await page
-          .getByRole(MENU_ITEM, { name: annotation })
-          .getByText(annotation)
-          .click();
+        await page.getByText(ANNOTATION).click();
+        await page.getByText(annotation, { exact: true }).click();
         await page.keyboard.press(ESCAPE);
 
         // check result
@@ -140,19 +133,19 @@ test.describe("Sample filtering tests", () => {
 
       // click location dropdown
       await page
-        .locator(getByText(LOCATION))
+        .getByText(LOCATION)
         .nth(0)
         .click();
 
       // select two locations
       await page
         .locator(".dropdownMenu-1gUyq")
-        .locator(getByText(CANADA))
+        .getByText(CANADA)
         .nth(0)
         .click();
       await page
         .locator(".dropdownMenu-1gUyq")
-        .locator(getByText(BEXAR))
+        .getByText(BEXAR)
         .nth(0)
         .click();
       await page.keyboard.press(ESCAPE);
@@ -177,8 +170,11 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.locator(getByText(TIMEFRAME)).click();
-      await page.locator(getByText(LAST_WEEK)).click();
+      await page
+        .getByText(TIMEFRAME)
+        .first()
+        .click();
+      await page.getByText(LAST_WEEK).click();
 
       // check result
       expect(
@@ -200,8 +196,11 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.locator(getByText(TIMEFRAME)).click();
-      await page.locator(getByText(LAST_MONTH)).click();
+      await page
+        .getByText(TIMEFRAME)
+        .first()
+        .click();
+      await page.getByText(LAST_MONTH).click();
 
       // check result
       expect(
@@ -223,8 +222,11 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.locator(getByText(TIMEFRAME)).click();
-      await page.locator(getByText(LAST_THREE_MONTHS)).click();
+      await page
+        .getByText(TIMEFRAME)
+        .first()
+        .click();
+      await page.getByText(LAST_THREE_MONTHS).click();
 
       // check result
       expect(
@@ -246,8 +248,11 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.locator(getByText(TIMEFRAME)).click();
-      await page.locator(getByText(LAST_SIX_MONTHS)).click();
+      await page
+        .getByText(TIMEFRAME)
+        .first()
+        .click();
+      await page.getByText(LAST_SIX_MONTHS).click();
 
       // check result
       expect(
@@ -269,8 +274,11 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.locator(getByText(TIMEFRAME)).click();
-      await page.locator(getByText(LAST_WEEK)).click();
+      await page
+        .getByText(TIMEFRAME)
+        .first()
+        .click();
+      await page.getByText(LAST_WEEK).click();
 
       // check result
       expect(
@@ -292,8 +300,14 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.locator(getByText(VISIBILITY)).click();
-      await page.locator(getByText(PRIVATE)).click();
+      await page
+        .getByText(VISIBILITY)
+        .first()
+        .click();
+      await page
+        .getByText(PRIVATE)
+        .first()
+        .click();
 
       // check result
       expect(
@@ -315,9 +329,12 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page.locator(getByText(VISIBILITY)).click();
       await page
-        .locator(getByText(PUBLIC))
+        .getByText(VISIBILITY)
+        .first()
+        .click();
+      await page
+        .getByText(PUBLIC)
         .nth(1)
         .click();
 
@@ -343,7 +360,10 @@ test.describe("Sample filtering tests", () => {
         .click();
 
       for (let i = 0; i < chosenHosts.length; i++) {
-        await page.getByRole(TEXTBOX, { name: SEARCH }).fill(chosenHosts[i]);
+        await page
+          .getByPlaceholder(SEARCH)
+          .first()
+          .fill(chosenHosts[i]);
         await page
           .getByRole(OPTION, { name: chosenHosts[i] })
           .getByText(chosenHosts[i])
@@ -377,7 +397,10 @@ test.describe("Sample filtering tests", () => {
         .nth(0)
         .click();
       for (let i = 0; i < sampleTypes.length; i++) {
-        await page.getByRole(TEXTBOX, { name: SEARCH }).fill(sampleTypes[i]);
+        await page
+          .getByPlaceholder(SEARCH)
+          .first()
+          .fill(sampleTypes[i]);
         await page
           .getByRole(OPTION, { name: sampleTypes[i] })
           .getByText(sampleTypes[i])

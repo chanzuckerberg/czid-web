@@ -8,7 +8,6 @@ import {
   pipelineSectionTitles,
   verifySectionTitles,
 } from "../../utils/report";
-import { getByTestID, getByText } from "../../utils/selectors";
 
 const sampleId = 25307;
 // These tests verify the ui displayed on the Table  for the sample report page
@@ -18,7 +17,7 @@ test.describe("Sample report tests", () => {
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     // click details link
-    await page.locator(getByText("Sample Details")).click();
+    await page.getByText("Sample Details").click();
   });
   test(`Should verify header of sample report page`, async ({ page }) => {
     const filter = await page.locator(FILTER_HEADERS).allInnerTexts();
@@ -34,15 +33,15 @@ test.describe("Sample report tests", () => {
   });
 
   test(`Should verify side bar on the sample report page`, async ({ page }) => {
-    await expect(page.locator(getByTestID("metadata"))).toBeVisible();
-    await expect(page.locator(getByTestID("pipelines"))).toBeVisible();
-    await expect(page.locator(getByTestID("notes"))).toBeVisible();
+    await expect(page.getByTestId("metadata")).toBeVisible();
+    await expect(page.getByTestId("pipelines")).toBeVisible();
+    await expect(page.getByTestId("notes")).toBeVisible();
 
     // verify metadata section titles
     await verifySectionTitles(page, metadataSectionTitles);
 
     // verify pipeline section titles
-    await page.locator(getByTestID("pipelines")).click();
+    await page.getByTestId("pipelines").click();
     await verifySectionTitles(page, pipelineSectionTitles);
   });
 });

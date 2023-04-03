@@ -1,10 +1,9 @@
-import { expect, test, Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import {
   HELP_CENTER_PROJECT_URL,
   PROJECT_NAME_NOT_AVAILABLE_ERROR,
 } from "../../constants/upload.const";
 import { stubRequest } from "../../utils/api";
-import { getByTestID, getByText } from "../../utils/selectors";
 
 const baseUrl = process.env.BASEURL;
 const projectApi = "projects.json";
@@ -64,7 +63,6 @@ test.describe("Create project test", () => {
 
     // Fill in project name
     await page.locator('.idseq-ui input[type="text"]').fill(data.name);
-
 
     // Select public project
     await page.getByTestId("public-project").click();

@@ -1,6 +1,4 @@
 node_modules/
-reports/
-report/
 .cache/
 .env.staging
 .env.local

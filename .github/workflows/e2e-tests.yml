@@ -102,6 +102,6 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         with: 
           name: e2e-artifacts
-          path: ./e2e/report
+          path: ./e2e/playwright-report
 
   

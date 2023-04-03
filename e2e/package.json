@@ -5,7 +5,7 @@
   "license": "ISC",
   "description": "E2E automated tests for CZID",
   "scripts": {
-    "pw:staging": "NODE_ENV=staging DEBUG=pw:api npx playwright test --headed -c ./setup/staging.config.ts",
+    "pw:staging": "NODE_ENV=staging DEBUG=pw:api playwright test --headed -c ./setup/staging.config.ts",
     "pw:local": "NODE_ENV=local DEBUG=pw:api npx playwright test --headed -c ./setup/local.config.ts",
     "pw:ci": "NODE_ENV=ci DEBUG=pw:api npx playwright test -c ./setup/ci.config.ts",
     "pw:staging:headless": "NODE_ENV=staging npx playwright test -c ./setup/staging.config.ts",
@@ -14,12 +14,12 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
-    "@playwright/test": "^1.27.0",
+    "@playwright/test": "^1.32.1",
     "@types/lodash": "^4.14.182",
     "dotenv": "^16.0.1",
     "lodash": "^4.14.182",
-    "playwright": "^1.30.0",
-    "playwright-chromium": "^1.30.0",
+    "playwright": "^1.32.1",
+    "playwright-chromium": "^1.32.1",
     "playwright-json-summary-reporter": "^1.0.0",
     "prettier": "^2.8.2"
   },

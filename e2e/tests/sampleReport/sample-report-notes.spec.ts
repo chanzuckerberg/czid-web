@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { getByTestID, getByText } from "../../utils/selectors";
 
 const sampleId = 25307;
 
@@ -10,10 +9,10 @@ test.describe("Sample report pipeline test", () => {
     await page.goto(`${process.env.BASEURL}/samples/${sampleId}`);
 
     // click details link
-    await page.locator(getByText("Sample Details")).click();
+    await page.getByText("Sample Details").click();
 
     // select Notes tab
-    await page.locator(getByTestID("notes")).click();
+    await page.getByTestId("notes").click();
   });
 
   test(`Should verify no data on notes tab`, async ({ page }) => {
@@ -22,7 +21,10 @@ test.describe("Sample report pipeline test", () => {
 
   test(`Should edit notes section`, async ({ page }) => {
     // Click the edit button
-    await page.getByText("Edit").nth(0).click();
+    await page
+      .getByText("Edit")
+      .nth(0)
+      .click();
 
     // edit Notes Text
     await page

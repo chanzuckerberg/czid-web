@@ -14,7 +14,7 @@ const config: PlaywrightTestConfig = {
 
   fullyParallel: true,
   globalSetup: "./globalSetup",
-  outputDir: "../reports",
+  outputDir: "../playwright-report",
 
   // repeatEach:10,
   projects: [
@@ -50,7 +50,7 @@ const config: PlaywrightTestConfig = {
     trace: "on",
     viewport: { width: 800, height: 7200 },
   },
-  workers: 10,
+  workers: 2,
 };
 
 export default config;

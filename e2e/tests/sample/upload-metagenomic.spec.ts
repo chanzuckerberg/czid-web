@@ -5,7 +5,6 @@ import { CONTINUE, GO_TO_PROJECT, LOADED } from "../../constants/common.const";
 import { Metadata } from "../../types/metadata";
 import { generateMetadataFile, getMetadata } from "../../utils/mockData";
 import { fileChooser } from "../../utils/page";
-import { getByTestID, getByText } from "../../utils/selectors";
 import {
   fillMetadata,
   getGeneratedSampleName,
@@ -28,13 +27,13 @@ const defaults: Metadata = {
 };
 
 const sampleType = "Metagenomics";
-const projectName = "Project 2";
+const projectName = "New QA Project";
 const sampleFiles = ["RR004_water_2_S23A_R1_001.fastq"];
 // These tests verify user is able to upload metadata samples manually and via csv file.
 test.describe("Metagenomics sample upload tests", () => {
   test("Should upload mNGS sample with manual metadata", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
-    await page.locator(getByTestID("menu-item-upload")).click();
+    await page.getByTestId("menu-item-upload").click();
 
     // upload files
     await uploadSampleFiles(page, projectName, sampleType, sampleFiles);
@@ -50,33 +49,36 @@ test.describe("Metagenomics sample upload tests", () => {
 
   test("Should upload mNGS sample with metadata csv file", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}/my_data`);
-    await page.locator(getByTestID("menu-item-upload")).click();
+    await page.getByTestId("menu-item-upload").click();
 
     // upload files
     await uploadSampleFiles(page, projectName, sampleType, sampleFiles);
     await page.waitForTimeout(2000);
 
     const sampleName = (await page
-      .locator(getByTestID("sample-name"))
+      .getByTestId("sample-name")
       .textContent()) as string;
     // switch to csv upload
-    await page.locator(getByText("CSV Upload")).click();
+    await page.getByText("CSV Upload").click();
 
     // upload csv
     generateMetadataFile(sampleName, defaults);
     await fileChooser(page, `/tmp/${sampleName}.csv`);
 
     // successful upload dialogue
-    expect(page.locator(getByText(LOADED))).toBeVisible();
+    expect(page.getByText(LOADED).nth(1)).toBeVisible();
 
     // click continue button
     const continueButtonIndex = 1;
-    await page.locator(getByText(CONTINUE)).nth(continueButtonIndex).click();
+    await page
+      .getByText(CONTINUE)
+      .nth(continueButtonIndex)
+      .click();
 
     // submit upload
     await submitUpload(page);
 
     // complete upload process
-    await page.locator(getByText(GO_TO_PROJECT)).click();
+    await page.getByText(GO_TO_PROJECT).click();
   });
 });
