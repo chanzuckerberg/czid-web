@@ -105,7 +105,7 @@ import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { WORKFLOW_VALUES } from "../../utils/workflows";
 import { BlastModalInfo } from "../blast/constants";
-import AmrView from "./AmrView";
+import { AmrView } from "./AmrView";
 import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
