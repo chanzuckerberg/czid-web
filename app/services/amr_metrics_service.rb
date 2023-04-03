@@ -52,6 +52,7 @@ class AmrMetricsService
 
   def initialize(workflow_run)
     @workflow_run = workflow_run
+    @last_filtering_step_name = workflow_run.sample.host_genome.name == "Human" ? "hisat2_host_filtered_out" : "hisat2_human_filtered_out"
   end
 
   def call
@@ -159,9 +160,10 @@ class AmrMetricsService
   end
 
   def retrieve_modern_subsampled_fraction(counts)
-    return unless counts["czid_dedup_out"] && counts["subsampled_out"]
+    counts_after_last_filtering_step = counts[@last_filtering_step_name]
+    return unless counts_after_last_filtering_step && counts["subsampled_out"]
 
-    counts["czid_dedup_out"] > 0 ? ((1.0 * counts["subsampled_out"]) / counts["czid_dedup_out"]) : 1.0
+    counts_after_last_filtering_step > 0 ? ((1.0 * counts["subsampled_out"]) / counts_after_last_filtering_step) : 1.0
   end
 
   def retrieve_subsampled_fraction(counts)
@@ -197,9 +199,10 @@ class AmrMetricsService
 
   def retrieve_modern_dcr(counts)
     # "DCR" is the same thing as "compression ratio"
-    return unless counts["czid_dedup_out"] && counts["hisat2_host_filtered_out"]
+    counts_after_last_filtering_step = counts[@last_filtering_step_name]
+    return unless counts["czid_dedup_out"] && counts_after_last_filtering_step
 
-    (1.0 * counts["hisat2_host_filtered_out"]) / counts["czid_dedup_out"]
+    (1.0 * counts_after_last_filtering_step) / counts["czid_dedup_out"]
   end
 
   def retrieve_dcr(counts)
