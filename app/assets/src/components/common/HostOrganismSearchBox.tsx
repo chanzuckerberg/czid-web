@@ -83,7 +83,7 @@ const HostOrganismSearchBox = ({
   return (
     <LiveSearchPopBox
       className={className}
-      value={value}
+      value={value || ""}
       onSearchTriggered={handleSearchTriggered}
       onResultSelect={onResultSelect}
       minChars={0}
