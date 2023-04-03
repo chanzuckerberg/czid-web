@@ -8,6 +8,7 @@ const UserContextValues: AllowedFeaturesProps = {
   appConfig: {},
   userSettings: {},
   userSignedIn: false,
+  userId: null,
 };
 
 export const UserContext = React.createContext(UserContextValues);

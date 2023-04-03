@@ -10,9 +10,9 @@ import {
 import PipelineVersionSelect from "~/components/views/components/PipelineVersionSelect";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-import cs from "./controls_top_row.scss";
+import cs from "./secondary_header_controls.scss";
 
-interface ControlRowProps {
+interface SecondaryHeaderControlsProps {
   sample: Sample;
   currentRun: WorkflowRun | PipelineRun;
   getAllRuns: () => WorkflowRun[] | PipelineRun[];
@@ -22,7 +22,7 @@ interface ControlRowProps {
   onDetailsClick: () => void;
 }
 
-export const ControlsTopRow = ({
+export const SecondaryHeaderControls = ({
   sample,
   currentRun,
   getAllRuns,
@@ -30,9 +30,9 @@ export const ControlsTopRow = ({
   onPipelineVersionChange,
   userIsAdmin,
   onDetailsClick,
-}: ControlRowProps) => {
+}: SecondaryHeaderControlsProps) => {
   return (
-    <>
+    <div className={cs.controlsTopRowContainer}>
       <PipelineVersionSelect
         sampleId={get("id", sample)}
         shouldIncludeDatabaseVersion={false}
@@ -75,6 +75,6 @@ export const ControlsTopRow = ({
       >
         Sample Details
       </Button>
-    </>
+    </div>
   );
 };

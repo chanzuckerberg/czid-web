@@ -1,25 +1,28 @@
 import { get } from "lodash/fp";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { deleteSample } from "~/api";
 import { trackEvent } from "~/api/analytics";
-
+import { UserContext } from "~/components/common/UserContext";
 import ViewHeader from "~/components/layout/ViewHeader";
-
 import { generateUrlToSampleView } from "~/components/utils/urls";
-
+import {
+  WORKFLOWS,
+  WORKFLOW_VALUES,
+  findInWorkflows,
+  isMngsWorkflow,
+} from "~/components/utils/workflows";
 import Project from "~/interface/project";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
-
 import { openUrl } from "~utils/links";
 import { NOTIFICATION_TYPES } from "../constants";
 import { showNotification } from "../notifications";
 import { addSampleDeleteFlagToSessionStorage } from "../utils";
+import { PrimaryHeaderControls } from "./PrimaryHeaderControls";
 import { SampleDeletionConfirmationModal } from "./SampleDeletionConfirmationModal";
-import { SampleViewHeaderControls } from "./SampleViewHeaderControls";
-
+import { SecondaryHeaderControls } from "./SecondaryHeaderControls";
 import cs from "./sample_view_header.scss";
 
 interface SampleViewHeaderProps {
@@ -60,6 +63,8 @@ export const SampleViewHeader = ({
   onShareClick,
   onDeleteRunSuccess,
 }: SampleViewHeaderProps) => {
+  const userContext = useContext(UserContext);
+  const { admin: userIsAdmin } = userContext || {};
   const [
     sampleDeletionConfirmationModalOpen,
     setSampleDeletionConfirmationModalOpen,
@@ -82,6 +87,17 @@ export const SampleViewHeader = ({
     return snapshotShareId
       ? `/pub/${snapshotShareId}`
       : `/home?project_id=${project.id}`;
+  };
+
+  const workflow: WORKFLOW_VALUES =
+    WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
+    WORKFLOWS.SHORT_READ_MNGS.value;
+
+  const getAllRunsPerWorkflow = () => {
+    const runsByType =
+      get("workflow_runs", sample) &&
+      get("workflow_runs", sample).filter(run => run.workflow === workflow);
+    return isMngsWorkflow(workflow) ? get("pipeline_runs", sample) : runsByType;
   };
 
   return (
@@ -113,29 +129,34 @@ export const SampleViewHeader = ({
         </ViewHeader.Content>
         {!snapshotShareId && (
           <ViewHeader.Controls>
-            <div className={cs.controlsContainer}>
-              <SampleViewHeaderControls
-                backgroundId={backgroundId}
-                currentTab={currentTab}
-                editable={editable}
-                getDownloadReportTableWithAppliedFiltersLink={
-                  getDownloadReportTableWithAppliedFiltersLink
-                }
-                hasAppliedFilters={hasAppliedFilters}
-                onDeleteSample={() =>
-                  setSampleDeletionConfirmationModalOpen(true)
-                }
-                onDetailsClick={onDetailsClick}
-                onPipelineVersionChange={onPipelineVersionChange}
-                onShareClick={onShareClick}
-                pipelineVersions={get("pipelineVersions", sample)}
-                reportMetadata={reportMetadata}
-                sample={sample}
-                view={view}
-                currentRun={currentRun}
-                onDeleteRunSuccess={onDeleteRunSuccess}
-              />
-            </div>
+            <SecondaryHeaderControls
+              sample={sample}
+              currentRun={currentRun}
+              getAllRuns={getAllRunsPerWorkflow}
+              workflow={workflow}
+              onPipelineVersionChange={onPipelineVersionChange}
+              userIsAdmin={userIsAdmin}
+              onDetailsClick={onDetailsClick}
+            />
+            <PrimaryHeaderControls
+              backgroundId={backgroundId}
+              currentRun={currentRun}
+              currentTab={currentTab}
+              editable={editable}
+              getDownloadReportTableWithAppliedFiltersLink={
+                getDownloadReportTableWithAppliedFiltersLink
+              }
+              hasAppliedFilters={hasAppliedFilters}
+              onDeleteSample={() =>
+                setSampleDeletionConfirmationModalOpen(true)
+              }
+              onShareClick={onShareClick}
+              onDeleteRunSuccess={onDeleteRunSuccess}
+              reportMetadata={reportMetadata}
+              sample={sample}
+              view={view}
+              workflow={workflow}
+            />
           </ViewHeader.Controls>
         )}
       </ViewHeader>

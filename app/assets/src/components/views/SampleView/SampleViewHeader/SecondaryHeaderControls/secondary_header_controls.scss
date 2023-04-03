@@ -1,7 +1,7 @@
 @import "~czifui/dist/variables";
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@import "../sample_view_header_controls.scss";
+@import "../PrimaryHeaderControls/primary_header_controls";
 
 .seperator {
   @include font-body-xxxs;

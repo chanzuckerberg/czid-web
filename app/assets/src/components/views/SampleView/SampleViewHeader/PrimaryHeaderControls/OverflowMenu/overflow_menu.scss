@@ -1,11 +1,17 @@
 @import "~czifui/dist/variables";
-@import "../sample_view_header_controls.scss";
+@import "../primary_header_controls.scss";
 
 .dropdownItem {
   color: $sds-color-error-400;
   .icon {
     fill: $sds-color-error-400;
     margin-right: $sds-spaces-xxs;
+  }
+  &.iconDisabled {
+    color: $sds-color-gray-200;
+    svg{
+      fill: $sds-color-gray-200;
+    }
   }
 }
 

@@ -132,6 +132,7 @@ export interface PipelineRun {
   fraction_subsampled: number;
   pipeline_version: string;
   pipeline_commit: string;
+  run_finalized: boolean;
   truncated: null;
   results_finalized: number;
   alignment_config_id: number;

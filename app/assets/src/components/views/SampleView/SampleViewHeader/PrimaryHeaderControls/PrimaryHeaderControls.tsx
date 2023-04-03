@@ -22,7 +22,6 @@ import {
 import {
   WORKFLOWS,
   WORKFLOW_VALUES,
-  findInWorkflows,
   isMngsWorkflow,
 } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
@@ -39,14 +38,13 @@ import {
 } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import { TABS } from "../../constants";
-import { ControlsTopRow } from "./ControlsTopRow";
 import { DownloadDropdown } from "./DownloadDropdown";
 import { OverflowMenu } from "./OverflowMenu";
 import { ShareButtonPopUp } from "./ShareButtonPopUp";
 
-import cs from "./sample_view_header_controls.scss";
+import cs from "./primary_header_controls.scss";
 
-interface SampleViewHeaderControlsProps {
+interface PrimaryHeaderControlsProps {
   backgroundId?: number;
   currentRun: WorkflowRun | PipelineRun;
   currentTab: CurrentTabSample;
@@ -54,18 +52,15 @@ interface SampleViewHeaderControlsProps {
   getDownloadReportTableWithAppliedFiltersLink?: () => string;
   hasAppliedFilters: boolean;
   onDeleteSample: () => void;
-  onDetailsClick: () => void;
-  onPipelineVersionChange: (newPipelineVersion: string) => void;
   onShareClick: () => void;
   onDeleteRunSuccess: () => void;
-  pipelineVersions?: string[];
   reportMetadata: ReportMetadata;
   sample: Sample;
-  snapshotShareId?: string;
   view: string;
+  workflow: WORKFLOW_VALUES;
 }
 
-export const SampleViewHeaderControls = ({
+export const PrimaryHeaderControls = ({
   backgroundId,
   currentRun,
   currentTab,
@@ -73,42 +68,21 @@ export const SampleViewHeaderControls = ({
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
   onDeleteSample,
-  onDetailsClick,
-  onPipelineVersionChange,
   onShareClick,
   reportMetadata,
   sample,
   view,
+  workflow,
   onDeleteRunSuccess,
-}: SampleViewHeaderControlsProps) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures, admin: userIsAdmin } = userContext || {};
+}: PrimaryHeaderControlsProps) => {
+  const { allowedFeatures, admin: userIsAdmin, userId } =
+    useContext(UserContext) || {};
   const succeeded = get("status", currentRun) === "SUCCEEDED";
-  const running = get("status", currentRun) === "RUNNING";
   const runIsLoaded = !isEmpty(reportMetadata);
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
   const sampleDeletable = sample?.sample_deletable;
 
   const [showOverflowButton, setShowOverflowButton] = useState(false);
-
-  const workflow: WORKFLOW_VALUES =
-    WORKFLOWS[findInWorkflows(currentTab, "label")]?.value ||
-    WORKFLOWS.SHORT_READ_MNGS.value;
-
-  const getAllRunsPerWorkflow = () => {
-    const runsByType =
-      get("workflow_runs", sample) &&
-      get("workflow_runs", sample).filter(run => run.workflow === workflow);
-    return isMngsWorkflow(workflow) ? get("pipeline_runs", sample) : runsByType;
-  };
-
-  const onSaveClick = async () => {
-    if (view) {
-      const params = parseUrlParams();
-      params.sampleIds = sample?.id;
-      await saveVisualization(view, params);
-    }
-  };
 
   const onDownloadAll = (eventName: "amr" | "consensus-genome") => {
     openUrl(getWorkflowRunZipLink(currentRun.id));
@@ -117,84 +91,11 @@ export const SampleViewHeaderControls = ({
     });
   };
 
-  const renderHelpButton = () => {
-    // CG help button should only be shown if feature flag is on
-    // unless the sample has 0 mNGS runs & exactly 1 CG run.
-    const shouldHideConsensusGenomeHelpButton =
-      !allowedFeatures.includes("cg_appcues_help_button") ||
-      (sample &&
-        isEmpty(sample?.pipeline_runs) &&
-        size(sample?.workflow_runs) === 1);
-
-    if (
-      workflow === WORKFLOWS.AMR.value ||
-      workflow === WORKFLOWS.LONG_READ_MNGS.value ||
-      (workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
-        shouldHideConsensusGenomeHelpButton)
-    ) {
-      return;
-    }
-
-    // format appCueFlowId and anaylticsEventName based on workflow
-    const appCueFlowId = {
-      [WORKFLOWS.SHORT_READ_MNGS.value]: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
-      [WORKFLOWS.CONSENSUS_GENOME.value]: SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
-    };
-
-    const anaylticsEventName = {
-      [WORKFLOWS.SHORT_READ_MNGS.value]:
-        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
-      [WORKFLOWS.CONSENSUS_GENOME.value]:
-        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED,
-    };
-
-    return (
-      runIsLoaded && (
-        <HelpButton
-          className={cs.controlElement}
-          onClick={showAppcue({
-            flowId: appCueFlowId[workflow],
-            analyticEventName: anaylticsEventName[workflow],
-          })}
-        />
-      )
-    );
-  };
-
-  const renderDownloadDropdown = () => {
-    return (
-      runIsLoaded && (
-        <DownloadDropdown
-          className={cs.controlElement}
-          backgroundId={backgroundId}
-          currentTab={currentTab}
-          getDownloadReportTableWithAppliedFiltersLink={
-            getDownloadReportTableWithAppliedFiltersLink
-          }
-          hasAppliedFilters={hasAppliedFilters}
-          pipelineRun={currentRun as PipelineRun}
-          sample={sample}
-          view={view}
-        />
-      )
-    );
-  };
-
-  const renderShareButton = () => {
-    switch (workflow) {
-      case WORKFLOWS.LONG_READ_MNGS.value:
-      case WORKFLOWS.SHORT_READ_MNGS.value:
-        return runIsLoaded && <ShareButtonPopUp onShareClick={onShareClick} />;
-      case WORKFLOWS.CONSENSUS_GENOME.value:
-        return succeeded && <ShareButtonPopUp onShareClick={onShareClick} />;
-      case WORKFLOWS.AMR.value:
-        return (
-          allowedFeatures.includes(AMR_V2_FEATURE) && (
-            <ShareButtonPopUp onShareClick={onShareClick} />
-          )
-        );
-      default:
-        return null;
+  const onSaveClick = async () => {
+    if (view) {
+      const params = parseUrlParams();
+      params.sampleIds = sample?.id;
+      await saveVisualization(view, params);
     }
   };
 
@@ -208,28 +109,6 @@ export const SampleViewHeaderControls = ({
     );
   };
 
-  const renderSaveButton = () => {
-    switch (workflow) {
-      case WORKFLOWS.LONG_READ_MNGS.value:
-      case WORKFLOWS.SHORT_READ_MNGS.value:
-        return (
-          userIsAdmin && (
-            <SaveButton
-              className={cs.controlElement}
-              onClick={withAnalytics(
-                onSaveClick,
-                "SampleView_save-button_clicked",
-                {
-                  sampleId: sample?.id,
-                },
-              )}
-            />
-          )
-        );
-      default:
-        return null;
-    }
-  };
   const renderDownloadAll = (workflow: "amr" | "consensus-genome") => {
     return (
       succeeded && (
@@ -309,6 +188,110 @@ export const SampleViewHeaderControls = ({
     }
   };
 
+  const renderDownloadDropdown = () => {
+    return (
+      runIsLoaded && (
+        <DownloadDropdown
+          className={cs.controlElement}
+          backgroundId={backgroundId}
+          currentTab={currentTab}
+          getDownloadReportTableWithAppliedFiltersLink={
+            getDownloadReportTableWithAppliedFiltersLink
+          }
+          hasAppliedFilters={hasAppliedFilters}
+          pipelineRun={currentRun as PipelineRun}
+          sample={sample}
+          view={view}
+        />
+      )
+    );
+  };
+
+  const renderHelpButton = () => {
+    // CG help button should only be shown if feature flag is on
+    // unless the sample has 0 mNGS runs & exactly 1 CG run.
+    const shouldHideConsensusGenomeHelpButton =
+      !allowedFeatures.includes("cg_appcues_help_button") ||
+      (sample &&
+        isEmpty(sample?.pipeline_runs) &&
+        size(sample?.workflow_runs) === 1);
+
+    if (
+      workflow === WORKFLOWS.AMR.value ||
+      workflow === WORKFLOWS.LONG_READ_MNGS.value ||
+      (workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
+        shouldHideConsensusGenomeHelpButton)
+    ) {
+      return;
+    }
+
+    // format appCueFlowId and anaylticsEventName based on workflow
+    const appCueFlowId = {
+      [WORKFLOWS.SHORT_READ_MNGS.value]: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
+      [WORKFLOWS.CONSENSUS_GENOME.value]: SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
+    };
+
+    const anaylticsEventName = {
+      [WORKFLOWS.SHORT_READ_MNGS.value]:
+        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
+      [WORKFLOWS.CONSENSUS_GENOME.value]:
+        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED,
+    };
+
+    return (
+      runIsLoaded && (
+        <HelpButton
+          className={cs.controlElement}
+          onClick={showAppcue({
+            flowId: appCueFlowId[workflow],
+            analyticEventName: anaylticsEventName[workflow],
+          })}
+        />
+      )
+    );
+  };
+
+  const renderSaveButton = () => {
+    switch (workflow) {
+      case WORKFLOWS.LONG_READ_MNGS.value:
+      case WORKFLOWS.SHORT_READ_MNGS.value:
+        return (
+          userIsAdmin && (
+            <SaveButton
+              className={cs.controlElement}
+              onClick={withAnalytics(
+                onSaveClick,
+                "SampleView_save-button_clicked",
+                {
+                  sampleId: sample?.id,
+                },
+              )}
+            />
+          )
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderShareButton = () => {
+    switch (workflow) {
+      case WORKFLOWS.LONG_READ_MNGS.value:
+      case WORKFLOWS.SHORT_READ_MNGS.value:
+        return runIsLoaded && <ShareButtonPopUp onShareClick={onShareClick} />;
+      case WORKFLOWS.CONSENSUS_GENOME.value:
+        return succeeded && <ShareButtonPopUp onShareClick={onShareClick} />;
+      case WORKFLOWS.AMR.value:
+        return (
+          allowedFeatures.includes(AMR_V2_FEATURE) && (
+            <ShareButtonPopUp onShareClick={onShareClick} />
+          )
+        );
+      default:
+        return null;
+    }
+  };
+
   const renderOverflowMenu = () => {
     const redirectOnSuccess =
       sample && [...sample.pipeline_runs, ...sample.workflow_runs].length === 1;
@@ -321,7 +304,8 @@ export const SampleViewHeaderControls = ({
           workflow={workflow}
           deleteId={isMngsWorkflow(workflow) ? sample?.id : currentRun?.id}
           onDeleteRunSuccess={onDeleteRunSuccess}
-          deleteDisabled={!(editable && sampleDeletable) || running}
+          runFinalized={currentRun?.run_finalized}
+          userOwnsRun={userId === sample?.user_id}
           redirectOnSuccess={redirectOnSuccess}
         />
       )
@@ -330,17 +314,6 @@ export const SampleViewHeaderControls = ({
 
   return (
     <>
-      <div className={cs.controlsTopRowContainer}>
-        <ControlsTopRow
-          sample={sample}
-          currentRun={currentRun}
-          getAllRuns={getAllRunsPerWorkflow}
-          workflow={workflow}
-          onPipelineVersionChange={onPipelineVersionChange}
-          userIsAdmin={userIsAdmin}
-          onDetailsClick={onDetailsClick}
-        />
-      </div>
       <div className={cs.controlsBottomRowContainer}>
         {renderShareButton()}
         {renderSaveButton()}

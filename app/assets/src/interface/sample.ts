@@ -17,6 +17,7 @@ export interface WorkflowRun {
     technology: string;
     wetlab_protocol: string;
   };
+  run_finalized: boolean;
   parsed_cached_results?: {
     quality_metrics?: {
       total_reads: number;
@@ -58,6 +59,7 @@ export default interface Sample {
   editable: boolean;
   initial_workflow: string;
   upload_error: string;
+  user_id: number;
   host_genome_id: number;
   project: {
     id: number;
