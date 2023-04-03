@@ -5,7 +5,7 @@ import { WORKFLOW_LABELS } from "~/components/utils/workflows";
 
 interface DeleteSuccessNotificationProps {
   onClose(): void;
-  sampleCount: number;
+  sampleCount: number | null;
   workflowLabel: WORKFLOW_LABELS;
 }
 
@@ -22,8 +22,14 @@ const DeleteErrorNotification = ({
       buttonOnClick={onClose}
       slideDirection="right"
     >
-      {sampleCount} {workflowLabel} {pluralize("run", sampleCount)} failed to
-      delete. Please try again. If the problem persists, please contact us at{" "}
+      {typeof sampleCount === "number"
+        ? `${sampleCount} ${workflowLabel} ${pluralize(
+            "run",
+            sampleCount,
+          )} failed to
+      delete.`
+        : "One or more runs failed to delete."}{" "}
+      Please try again. If the problem persists, please contact us at{" "}
       <Link sdsStyle="dashed" href="mailto:help@czid.org">
         help@czid.org
       </Link>

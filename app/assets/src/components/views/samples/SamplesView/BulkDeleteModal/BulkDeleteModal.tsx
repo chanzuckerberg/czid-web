@@ -95,16 +95,20 @@ const BulkDeleteModal = ({
 
   const handleDeleteSamples = async () => {
     setIsDeleting(true);
-    const { deletedIds, error } = await bulkDeleteObjects({
-      selectedIds: validIds,
-      workflow,
-    });
-
-    if (error) {
-      const failedCount = validIds.length - deletedIds.length;
-      onDeleteError({ errorCount: failedCount });
-    } else {
-      onDeleteSuccess({ successCount: deletedIds.length });
+    try {
+      const { deletedIds, error } = await bulkDeleteObjects({
+        selectedIds: validIds,
+        workflow,
+      });
+      if (error) {
+        const failedCount = validIds.length - deletedIds.length;
+        onDeleteError({ errorCount: failedCount });
+      } else {
+        onDeleteSuccess({ successCount: deletedIds.length });
+      }
+    } catch (error) {
+      console.error(error);
+      onDeleteError({ errorCount: null });
     }
   };
 
