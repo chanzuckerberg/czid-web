@@ -10,7 +10,7 @@ import cs from "./sequencing_platform_option.scss";
 
 interface SequencingPlatformOptionProps {
   analyticsEventName: string;
-  customDescription?: string;
+  customDescription?: string | ReactNode;
   githubLink: string;
   isBeta?: boolean;
   isDisabled?: boolean;

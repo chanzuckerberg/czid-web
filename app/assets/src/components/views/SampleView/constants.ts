@@ -217,8 +217,8 @@ export const CATEGORIES = [
 
 const DOC_BASE_LINK =
   "https://help.czid.org/hc/en-us/articles/360034790574-Single-Sample-Report-Table";
-const ONT_DOC_LINK =
-  "https://docs.google.com/document/d/1ZsZ8ythCMrER7eZKbjZG93O6bNB37pJpsX2lf1sAs_I/edit#bookmark=id.h6dlo72hypko";
+const ONT_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13832912199188-Analyze-Nanopore-Data#sample-report";
 
 export const REPORT_TABLE_COLUMNS = {
   NT_aggregatescore: {
@@ -274,23 +274,23 @@ export const REPORT_TABLE_COLUMNS = {
   bpm: {
     tooltip:
       "Number of bases within all the reads aligning to a given taxon, including those assembled into contigs that mapped to the taxon, per million bases sequenced.",
-    link: ONT_DOC_LINK,
+    link: ONT_HELP_LINK,
   },
   b: {
     tooltip:
       "Number of bases within all the reads aligning to a given taxon, including those assembled into contigs that mapped to the taxon.",
-    link: ONT_DOC_LINK,
+    link: ONT_HELP_LINK,
   },
   contigbases: {
     tooltip:
       "Number of bases within all the reads that assembled into contigs aligning to a given taxon.",
-    link: ONT_DOC_LINK,
+    link: ONT_HELP_LINK,
   },
   // ONT-specific reads tooltip
   r_ont: {
     tooltip:
       "Number of reads aligning to a given taxon, including those assembled into contigs that mapped to the taxon.",
-    link: ONT_DOC_LINK,
+    link: ONT_HELP_LINK,
   },
 };
 

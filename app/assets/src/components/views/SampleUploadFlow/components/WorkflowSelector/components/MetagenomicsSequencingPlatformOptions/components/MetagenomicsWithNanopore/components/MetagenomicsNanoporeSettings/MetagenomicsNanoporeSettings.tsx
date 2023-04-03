@@ -2,7 +2,7 @@ import { Icon } from "czifui";
 import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { Dropdown } from "~/components/ui/controls/dropdowns";
-import { GUPPY_BASECALLER_DOC_LINK } from "~/components/utils/documentationLinks";
+import { GUPPY_BASECALLER_HELP_LINK } from "~/components/utils/documentationLinks";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { GUPPY_BASECALLER_SETTINGS } from "~/components/views/SampleUploadFlow/constants";
 
@@ -31,7 +31,7 @@ const MetagenomicsNanoporeSettings = ({
         }
         content="Specifies which basecalling model of 'Guppy' was used to generate the data. This will affect the pipeline parameters."
         position="top center"
-        link={GUPPY_BASECALLER_DOC_LINK}
+        link={GUPPY_BASECALLER_HELP_LINK}
       />
     </div>
     <Dropdown
