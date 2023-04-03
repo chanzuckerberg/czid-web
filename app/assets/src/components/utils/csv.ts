@@ -202,11 +202,13 @@ const _addPathogenFlagColumns = (datum, withMultiFlags) => {
   const {
     [CATEGORIES.knownPathogen.code]: known_pathogen,
     [CATEGORIES.lcrp.code]: lcrp_pathogen,
+    [CATEGORIES.divergent.code]: divergent_pathogen,
   } = datum.pathogens || {};
 
   datum.known_pathogen = known_pathogen || 0;
   if (withMultiFlags) {
     datum.lcrp_pathogen = lcrp_pathogen || 0;
+    datum.divergent_pathogen = divergent_pathogen || 0;
   }
 
   datum.filteredSpecies.forEach(species => {
@@ -218,6 +220,11 @@ const _addPathogenFlagColumns = (datum, withMultiFlags) => {
     if (withMultiFlags) {
       species.lcrp_pathogen = (species.pathogenFlags || []).includes(
         CATEGORIES.lcrp.code,
+      )
+        ? 1
+        : 0;
+      species.divergent_pathogen = (species.pathogenFlags || []).includes(
+        CATEGORIES.divergent.code,
       )
         ? 1
         : 0;
@@ -241,7 +248,9 @@ export const computeReportTableValuesForCSV = (
     ...Array.from(TAXON_COUNT_TYPE_METRICS[workflow], metric => "nr." + metric),
   ];
   const pathogenFlagHeaders = ["known_pathogen"];
-  if (withMultiFlags) pathogenFlagHeaders.push("lcrp_pathogen");
+  if (withMultiFlags) {
+    pathogenFlagHeaders.push("lcrp_pathogen", "divergent_pathogen");
+  }
   csvHeaders.push(...pathogenFlagHeaders);
 
   filteredReportData.forEach((datum: $TSFixMe) => {

@@ -6,16 +6,10 @@ import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
 import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import { DropdownOption } from "~/interface/shared";
 
-const FLAG_OPTIONS = [
-  {
-    name: CATEGORIES.knownPathogen.text,
-    code: CATEGORIES.knownPathogen.code,
-  },
-  {
-    name: CATEGORIES.lcrp.text,
-    code: CATEGORIES.lcrp.code,
-  },
-];
+const FLAG_OPTIONS = Object.keys(CATEGORIES).map(key => ({
+  name: CATEGORIES[key].text,
+  code: CATEGORIES[key].code,
+}));
 
 interface FlagFilterProps {
   selectedFlags: DropdownOption[] | string[];

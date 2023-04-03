@@ -65,6 +65,90 @@ module ElasticsearchQueryHelper
     end
   end
 
+  def self.divergent_pathogens_for_pipeline_runs(
+    pipeline_run_ids,
+    background_id
+  )
+    # see https://docs.google.com/document/d/1QxjdvI3s-VAOW6NbTQGzfFImoWOo9k56G7XTyOcS7gY/edit for requirements
+    search_body = {
+      "_source": [
+        "pipeline_run_id",
+        "tax_id",
+      ],
+      "size": 10_000,
+      "query": {
+        "bool": {
+          "filter": [
+            # taxons from samples the user selected
+            {
+              "terms": {
+                "pipeline_run_id": pipeline_run_ids,
+              },
+            },
+            {
+              "term": {
+                "background_id": background_id || 26,
+              },
+            },
+            # only viruses
+            {
+              "term": {
+                "superkingdom_taxid": ReportHelper::CATEGORIES_TAXID_BY_NAME["Viruses"],
+              },
+            },
+            # not phages
+            {
+              "term": {
+                "is_phage": 0,
+              },
+            },
+            # all other metric-based conditions
+            {
+              "nested": {
+                "path": "metric_list",
+                "query": {
+                  "bool": {
+                    "filter": [
+                      {
+                        "term": {
+                          "metric_list.count_type": "NR",
+                        },
+                      },
+                      {
+                        "range": {
+                          "metric_list.counts": {
+                            "gte": 1,
+                          },
+                        },
+                      },
+                      {
+                        "range": {
+                          "metric_list.percent_identity": {
+                            "lte": 80,
+                          },
+                        },
+                      },
+                      {
+                        "range": {
+                          "metric_list.alignment_length": {
+                            "gte": 50,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    }
+
+    hits = paginate_all_results("scored_taxon_counts", search_body)
+    return hits
+  end
+
   def self.lcrp_top_15_for_pipeline_runs(
     pipeline_run_ids,
     background_id

@@ -102,6 +102,7 @@ class PipelineReportService
 
   FLAG_KNOWN_PATHOGEN = "knownPathogen".freeze
   FLAG_LCRP = "lcrp".freeze
+  FLAG_DIVERGENT = "divergent".freeze
 
   CSV_SHORT_READS_COLUMNS = [
     "tax_id",
@@ -174,7 +175,7 @@ class PipelineReportService
     NANOPORE => CSV_LONG_READS_COLUMNS,
   }.freeze
 
-  def initialize(pipeline_run, background_id, csv: false, parallel: true, merge_nt_nr: false, show_annotations: false, lcrp: false)
+  def initialize(pipeline_run, background_id, csv: false, parallel: true, merge_nt_nr: false, show_annotations: false, multitag: false)
     @pipeline_run = pipeline_run
     @technology = pipeline_run.technology
     # In ont_v1, we are not supporting backgrounds for nanopore mngs samples
@@ -184,8 +185,7 @@ class PipelineReportService
     @merge_nt_nr = merge_nt_nr
     @show_annotations = show_annotations
     @use_decimal_columns = AppConfigHelper.get_app_config(AppConfig::PIPELINE_REPORT_SERVICE_USE_DECIMAL_TYPE_COLUMNS, false) == "1"
-    # LCRP = Likely clinically relevant pathogens
-    @lcrp = lcrp
+    @multitag = multitag # feature flag for tagging pathogens above and beyond known_pathogens
   end
 
   def call
@@ -392,7 +392,8 @@ class PipelineReportService
       species_counts: species_counts,
       selected_flags: [
         FLAG_KNOWN_PATHOGEN,
-        *(FLAG_LCRP if @lcrp),
+        *(FLAG_LCRP if @multitag),
+        *(FLAG_DIVERGENT if @multitag),
       ]
     )
 
@@ -887,7 +888,9 @@ class PipelineReportService
 
     flagged_taxa.each do |tax_id, flags_for_taxon|
       tax_info = species_counts[tax_id]
-      (tax_info['pathogenFlags'] ||= []).concat(flags_for_taxon)
+      unless tax_info.nil?
+        (tax_info['pathogenFlags'] ||= []).concat(flags_for_taxon)
+      end
       # for backwards compatibility with older feature flags
       if flags_for_taxon.include?(FLAG_KNOWN_PATHOGEN)
         tax_info['pathogenFlag'] = FLAG_KNOWN_PATHOGEN
@@ -923,8 +926,8 @@ class PipelineReportService
 
     CSVSafe.generate(headers: true) do |csv|
       columns = CSV_COLUMNS[@technology]
-      if @lcrp
-        columns += ["lcrp_pathogen"]
+      if @multitag
+        columns += ["lcrp_pathogen", "divergent_pathogen"]
       end
 
       csv << columns
@@ -944,12 +947,16 @@ class PipelineReportService
         # Count up the number of species that are known pathogen or LCRP
         tax_info["known_pathogen"] = 0
         tax_info["lcrp_pathogen"] = 0
+        tax_info["divergent_pathogen"] = 0
         rows_to_consider.each do |row|
           if row["pathogenFlag"] == FLAG_KNOWN_PATHOGEN || (row["pathogenFlags"] || []).include?(FLAG_KNOWN_PATHOGEN)
             tax_info["known_pathogen"] += 1
           end
           if (row["pathogenFlags"] || []).include?(FLAG_LCRP)
             tax_info["lcrp_pathogen"] += 1
+          end
+          if (row["pathogenFlags"] || []).include?(FLAG_DIVERGENT)
+            tax_info["divergent_pathogen"] += 1
           end
         end
 

@@ -63,10 +63,27 @@ class PathogenFlaggingService
       lcrp_pathogens_by_pr_id = viral_pathogens_by_pr_id.deep_merge(nonviral_pathogens_by_pr_id)
     end
 
-    # merge the known pathogens and lcrp pathogens
-    return known_pathogens_by_pr_id.deep_merge(lcrp_pathogens_by_pr_id) do
-      |_key, known_pathogen_flags, lcrp_pathogen_flags| known_pathogen_flags.concat(lcrp_pathogen_flags)
+    # compute the divergent pathogens for the given pipeline runs
+    divergent_pathogens_by_pr_id = {}
+    if !@selected_flags || @selected_flags.include?(PipelineReportService::FLAG_DIVERGENT)
+      divergent_pathogen_hits = ElasticsearchQueryHelper.divergent_pathogens_for_pipeline_runs(@pipeline_run_ids, @background_id)
+      divergent_pathogens_by_pr_id = parse_pathogens_for_pipeline_runs(divergent_pathogen_hits, PipelineReportService::FLAG_DIVERGENT)
     end
+
+    # merge all flags into one hash
+    return _merge_pathogen_flags(
+      _merge_pathogen_flags(
+        known_pathogens_by_pr_id,
+        lcrp_pathogens_by_pr_id
+      ),
+      divergent_pathogens_by_pr_id
+    )
+  end
+
+  def _merge_pathogen_flags(flags_by_id, other_flags_by_id)
+    return flags_by_id.deep_merge(other_flags_by_id) do |_key, flags, other_flags|
+    flags.concat(other_flags)
+  end
   end
 
   def compute_nonviral_lcrp_pathogens(top_15_nonviral_pathogen_candidates_by_pr_id, known_pathogens)

@@ -50,6 +50,27 @@ export const CATEGORIES = {
       </>
     ),
   },
+  divergent: {
+    text: "Divergent Pathogen",
+    code: "divergent",
+    color: "purple",
+    dimmedColor: "dimPurple",
+    tooltip: (
+      <>
+        {"Divergent pathogen. See documentation "}
+        <ExternalLink
+          href={
+            "https://docs.google.com/document/d/1bhG7tEVBN8IFrRddw4CiCw0tZLMf8NPzxi1ZghcsvvM/edit?usp=sharing"
+          }
+          analyticsEventName={
+            ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
+          }
+        >
+          here.
+        </ExternalLink>
+      </>
+    ),
+  },
 };
 
 interface PathogenLabelProps {
