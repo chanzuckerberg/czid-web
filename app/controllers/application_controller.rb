@@ -153,6 +153,7 @@ class ApplicationController < ActionController::Base
 
   def set_application_view_variables
     @disable_header_navigation = false
+    @auto_account_creation_enabled = get_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1) == "1"
     @announcement_banner_enabled = announcement_banner_enabled
     @emergency_banner_message = get_app_config(AppConfig::SHOW_EMERGENCY_BANNER_MESSAGE)
   end

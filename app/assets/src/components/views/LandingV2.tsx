@@ -6,21 +6,24 @@ import Hero from "~/components/views/landing_page/Hero";
 import Header from "~/components/views/landing_page/LandingHeaderV2";
 
 interface LandingV2Props {
+  autoAcctCreationEnabled?: boolean;
   announcementBannerEnabled?: boolean;
   emergencyBannerMessage?: string;
 }
 
 const LandingV2 = ({
+  autoAcctCreationEnabled,
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: LandingV2Props) => {
   return (
     <div>
       <Header
+        autoAcctCreationEnabled={autoAcctCreationEnabled}
         announcementBannerEnabled={announcementBannerEnabled}
         emergencyBannerMessage={emergencyBannerMessage}
       />
-      <Hero />
+      <Hero autoAcctCreationEnabled={autoAcctCreationEnabled} />
       <Content />
       <Footer />
     </div>

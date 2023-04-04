@@ -13,6 +13,7 @@
       react_component('Header', {
         userSignedIn: false,
         disableNavigation: <%= @disable_header_navigation %>,
+        autoAccountCreationEnabled: <%= @auto_account_creation_enabled %>,
         announcementBannerEnabled: <%= @announcement_banner_enabled %>,
         emergencyBannerMessage: '<%= @emergency_banner_message %>', 
       }, 'page_header')
@@ -27,6 +28,7 @@
         userName: '<%= current_user.name %>',
         userSignedIn: true,
         disableNavigation: <%= @disable_header_navigation %>,
+        autoAccountCreationEnabled: <%= @auto_account_creation_enabled %>,
         announcementBannerEnabled: <%= @announcement_banner_enabled %>,
         emergencyBannerMessage: '<%= @emergency_banner_message %>',
       }, 'page_header', JSON.parse('<%= raw escape_json(user_context)%>'))

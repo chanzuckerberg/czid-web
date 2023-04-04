@@ -63,6 +63,8 @@ class AppConfig < ApplicationRecord
   MODERN_SHORT_READ_MNGS_VERSION = "modern_short_read_mngs_version".freeze
   # Version of the AMR pipeline that uses the modern host filtering step. Initally set to "1.0.0-beta"
   MODERN_AMR_VERSION = "modern_amr_version".freeze
+  # When this is "1", automatic account creation will be enabled.
+  AUTO_ACCOUNT_CREATION_V1 = "auto_account_creation_v1".freeze
 
   after_save :clear_cached_record
 

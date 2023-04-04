@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import HeroEmailForm from "~/components/views/landing_page/HeroEmailForm";
 import cs from "./Hero.scss";
 
-const Hero = () => {
+interface HeroProps {
+  autoAcctCreationEnabled?: boolean;
+}
+
+const Hero = ({ autoAcctCreationEnabled }: HeroProps) => {
   const [fade, setFade] = useState(false);
   const [moveUp, setMoveUp] = useState(false);
   const [shiftLeft, setShiftLeft] = useState(false);
@@ -61,7 +65,7 @@ const Hero = () => {
         Chan Zuckerberg ID: The free, cloud-based metagenomics platform for
         researchers
       </p>
-      <HeroEmailForm />
+      <HeroEmailForm autoAcctCreationEnabled={autoAcctCreationEnabled} />
     </div>
   );
 };
