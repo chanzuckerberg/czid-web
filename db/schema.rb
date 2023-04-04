@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_03_23_181931) do
+ActiveRecord::Schema.define(version: 2023_04_03_140845) do
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -893,6 +893,7 @@ ActiveRecord::Schema.define(version: 2023_03_23_181931) do
     t.text "archetypes"
     t.string "segments"
     t.string "salt", limit: 24
+    t.integer "profile_form_version", default: 0, null: false, comment: "Version of completed user profile form, or 0 to denote missing profile form."
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
