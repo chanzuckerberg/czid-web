@@ -51,7 +51,7 @@ export const TaxonDescription = ({
   if (!description) return null;
 
   return (
-    <div>
+    <section>
       <div className={cs.subtitle}>{subtitle}</div>
       <div className={cx(cs.text, shouldCollapse && cs.collapsed)}>
         <div ref={taxonDescriptionRef}>
@@ -60,10 +60,10 @@ export const TaxonDescription = ({
         </div>
       </div>
       {shouldCollapse && isTall && (
-        <div className={cs.expandLink} onClick={handleShowMore}>
+        <button className={cs.expandLink} onClick={handleShowMore}>
           Show More
-        </div>
+        </button>
       )}
-    </div>
+    </section>
   );
 };

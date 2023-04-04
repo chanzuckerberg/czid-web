@@ -21,7 +21,7 @@ const MetadataCSVLocationsMenu = ({
 
   const renderApplyToAll = () => (
     <button
-      className={cx(cs.applyToAll, "nostylebutton")}
+      className={cx(cs.applyToAll, "noStyleButton")}
       onClick={withAnalytics(
         () => applyToAll(applyToAllSample),
         "MetadataCsvLocationsMenu_apply-all_clicked",

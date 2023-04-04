@@ -114,7 +114,7 @@ const ProjectCreationModal = ({
         <div className={cs.field}>
           <div className={cs.label}>Project Sharing</div>
           <button
-            className={cx(cs.sharingOption, "nostylebutton")}
+            className={cx(cs.sharingOption, "noStyleButton")}
             onClick={() => setAccessLevel(ACCESS_LEVEL.publicAccess)}
             data-testid="public-project"
           >
@@ -141,7 +141,7 @@ const ProjectCreationModal = ({
             </div>
           </button>
           <button
-            className={cx(cs.sharingOption, "nostylebutton")}
+            className={cx(cs.sharingOption, "noStyleButton")}
             onClick={() => setAccessLevel(ACCESS_LEVEL.privateAccess)}
             data-testid="private-project"
           >
@@ -173,7 +173,7 @@ const ProjectCreationModal = ({
           <div className={cs.label}>
             Project Description{" "}
             <button
-              className={cx(cs.infoLink, "nostylebutton")}
+              className={cx(cs.infoLink, "noStyleButton")}
               onClick={() => setShowInfo(!showInfo)}
               data-testid="more-less-info-btn"
             >

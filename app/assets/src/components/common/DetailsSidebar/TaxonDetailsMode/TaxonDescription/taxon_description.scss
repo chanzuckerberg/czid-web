@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~czifui/dist/variables";
+@import "~styles/core";
 
 .subtitle {
   padding-top: 25px;
@@ -21,4 +22,5 @@
   color: $sds-color-primary-400;
   margin-top: $sds-spaces-m;
   cursor: pointer;
+  @extend .noStyleButton;
 }

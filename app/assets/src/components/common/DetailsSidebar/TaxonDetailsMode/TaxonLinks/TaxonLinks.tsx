@@ -1,5 +1,5 @@
 import React from "react";
-import { trackEvent } from "~/api/analytics";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import cs from "./taxon_links.scss";
 
 interface TaxonLinksProps {
@@ -15,7 +15,7 @@ export const TaxonLinks = ({
   parentTaxonId,
   wikiUrl,
 }: TaxonLinksProps) => {
-  const linkTo = (source: string) => {
+  const renderLink = (source: string, label: string) => {
     let url = null;
 
     switch (source) {
@@ -34,17 +34,21 @@ export const TaxonLinks = ({
       default:
         break;
     }
-
-    if (url) {
-      window.open(url, "_blank", "noreferrer");
-      trackEvent("TaxonDetailsMode_external-link_clicked", {
-        source,
-        url,
-        taxonId,
-        taxonName,
-        parentTaxonId,
-      });
-    }
+    return (
+      <ExternalLink
+        href={url}
+        analyticsEventName="TaxonDetailsMode_external-link_clicked"
+        analyticsEventData={{
+          source,
+          url,
+          taxonId,
+          taxonName,
+          parentTaxonId,
+        }}
+      >
+        {label}
+      </ExternalLink>
+    );
   };
 
   return (
@@ -52,22 +56,14 @@ export const TaxonLinks = ({
       <div className={cs.subtitle}>Links</div>
       <div className={cs.linksSection}>
         <ul className={cs.linksList}>
-          <li className={cs.link} onClick={() => linkTo("ncbi")}>
-            NCBI
-          </li>
-          <li className={cs.link} onClick={() => linkTo("google")}>
-            Google
-          </li>
+          <li className={cs.link}>{renderLink("ncbi", "NCBI")}</li>
+          <li className={cs.link}>{renderLink("google", "Google")}</li>
         </ul>
         <ul className={cs.linksList}>
           {wikiUrl && (
-            <li className={cs.link} onClick={() => linkTo("wikipedia")}>
-              Wikipedia
-            </li>
+            <li className={cs.link}>{renderLink("wikipedia", "Wikipedia")}</li>
           )}
-          <li className={cs.link} onClick={() => linkTo("pubmed")}>
-            Pubmed
-          </li>
+          <li className={cs.link}>{renderLink("pubmed", "Pubmed")}</li>
         </ul>
       </div>
     </>

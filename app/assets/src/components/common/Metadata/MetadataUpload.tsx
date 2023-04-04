@@ -333,7 +333,7 @@ class MetadataUpload extends React.Component<
         <>
           <div>
             <button
-              className={cx(cs.link, "nostylebutton")}
+              className={cx(cs.link, "noStyleButton")}
               onClick={withAnalytics(
                 onShowCSVInstructions,
                 "MetadataUpload_instruction-link_clicked",
@@ -356,7 +356,7 @@ class MetadataUpload extends React.Component<
             onDirty={onDirty}
           />
           <button
-            className={cx(cs.link, "nostylebutton")}
+            className={cx(cs.link, "noStyleButton")}
             onClick={() => {
               this.handleDownloadCSV();
               trackEvent("MetadataUpload_download-csv-template_clicked", {

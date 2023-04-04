@@ -364,7 +364,7 @@ class CollectionModal extends React.Component<
     return (
       <div>
         <button
-          className="nostylebutton"
+          className="noStyleButton"
           onClick={withAnalytics(
             this.openModal,
             "CollectionModal_open-link_clicked",
