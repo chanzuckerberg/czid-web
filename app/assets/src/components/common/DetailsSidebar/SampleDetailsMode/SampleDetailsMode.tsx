@@ -1,6 +1,6 @@
 import { some } from "lodash";
 import { get, isEmpty, find, size, set } from "lodash/fp";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { saveSampleName, saveSampleNotes, getAllSampleTypes } from "~/api";
 import { trackEvent } from "~/api/analytics";
@@ -10,6 +10,7 @@ import {
   getSampleMetadataFields,
 } from "~/api/metadata";
 import Tabs from "~/components/ui/controls/Tabs";
+import { APOLLO_CLIENT_STATE_MANAGEMENT } from "~/components/utils/features";
 import {
   generateUrlToSampleView,
   TempSelectedOptionsShape,
@@ -28,8 +29,10 @@ import {
   Metadata,
 } from "~/interface/shared";
 import { processMetadata, processMetadataTypes } from "~utils/metadata";
+import { UserContext } from "../../UserContext";
 import MetadataTab from "./MetadataTab";
 import NotesTab from "./NotesTab";
+import NotesTabWithApollo from "./NotesTabWithApollo";
 import PipelineTab, { MngsPipelineInfo, PipelineInfo } from "./PipelineTab";
 
 import cs from "./sample_details_mode.scss";
@@ -85,6 +88,7 @@ const SampleDetailsMode = ({
   tempSelectedOptions,
   sampleWorkflowLabels,
 }: SampleDetailsModeProps) => {
+  const { allowedFeatures } = useContext(UserContext);
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo | null>(
     null,
   );
@@ -334,6 +338,17 @@ const SampleDetailsMode = ({
       );
     }
     if (currentTab === "Notes") {
+      if (allowedFeatures.includes(APOLLO_CLIENT_STATE_MANAGEMENT)) {
+        return (
+          <NotesTabWithApollo
+            notes={additionalInfo.notes}
+            editable={additionalInfo.editable}
+            onNoteChange={val => handleMetadataChange("notes", val)}
+            onNoteSave={() => handleMetadataSave("notes")}
+            savePending={savePending}
+          />
+        );
+      }
       return (
         <NotesTab
           notes={additionalInfo.notes}
