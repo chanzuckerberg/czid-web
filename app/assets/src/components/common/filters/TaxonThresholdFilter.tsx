@@ -8,9 +8,9 @@ import {
   ThresholdFilterOperator,
 } from "~/interface/dropdown";
 import FilterTrigger from "./FilterTrigger";
+import cs from "./taxon_threshold_filter.scss";
 import TaxonFilterSDS, { TaxonOption } from "./TaxonFilterSDS";
 
-import cs from "./taxon_threshold_filter.scss";
 
 interface TaxonThresholdFilterProps {
   domain: string;

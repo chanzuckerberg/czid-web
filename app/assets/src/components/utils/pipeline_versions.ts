@@ -28,6 +28,7 @@ const pipelineVersionAtLeast = (
 
   if (toInt(pipelineNums[0]) > toInt(testNums[0])) {
     return true;
+  /* eslint-disable sonarjs/no-collapsible-if */
   } else if (toInt(pipelineNums[0]) === toInt(testNums[0])) {
     if (toInt(pipelineNums[1]) > toInt(testNums[1])) {
       return true;

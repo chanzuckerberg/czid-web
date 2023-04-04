@@ -106,53 +106,6 @@ export const GUPPY_BASECALLER_SETTINGS = [
   },
 ];
 
-// WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/czid-cli
-export const CG_WETLAB_OPTIONS = [
-  {
-    text: "ARTIC v4/ARTIC v4.1",
-    value: "artic_v4",
-  },
-  {
-    text: "ARTIC v3",
-    value: "artic",
-  },
-  {
-    text: "ARTIC v3 - Short Amplicons (275 bp)",
-    value: "artic_short_amplicons",
-  },
-  {
-    text: "MSSPE",
-    value: "msspe",
-  },
-  {
-    text: "Combined MSSPE & ARTIC v3",
-    value: "combined_msspe_artic",
-  },
-  {
-    text: "SNAP",
-    value: "snap",
-  },
-  {
-    text: "AmpliSeq",
-    value: "ampliseq",
-  },
-  {
-    text: "COVIDseq",
-    value: "covidseq",
-  },
-  {
-    text: "VarSkip",
-    value: "varskip",
-  },
-  {
-    text: "Midnight",
-    value: "midnight",
-  },
-  {
-    text: "Easyseq",
-    value: "easyseq",
-  },
-];
 
 export const CG_WETLAB_DISPLAY_NAMES = {
   ampliseq: "AmpliSeq",
@@ -164,26 +117,74 @@ export const CG_WETLAB_DISPLAY_NAMES = {
   midnight: "Midnight",
   msspe: "MSSPE",
   snap: "SNAP",
-  varskip: "varskip",
-  easyseq: "easyseq",
+  varskip: "VarSkip",
+  easyseq: "Easyseq",
 };
+
+// WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/czid-cli
+export const CG_WETLAB_OPTIONS = [
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.artic_v4,
+    value: "artic_v4",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.artic,
+    value: "artic",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.artic_short_amplicons,
+    value: "artic_short_amplicons",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.msspe,
+    value: "msspe",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.combined_msspe_artic,
+    value: "combined_msspe_artic",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.snap,
+    value: "snap",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.ampliseq,
+    value: "ampliseq",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.covidseq,
+    value: "covidseq",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.varskip,
+    value: "varskip",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.midnight,
+    value: "midnight",
+  },
+  {
+    text: CG_WETLAB_DISPLAY_NAMES.easyseq,
+    value: "easyseq",
+  },
+];
 
 // WARNING: If you are adding an option here, you probably also want to add it to: https://github.com/chanzuckerberg/czid-cli
 export const CG_NANOPORE_WETLAB_OPTIONS = [
   {
-    text: "ARTIC v3",
+    text: CG_WETLAB_DISPLAY_NAMES.artic,
     value: "artic",
   },
   {
-    text: "Midnight",
+    text: CG_WETLAB_DISPLAY_NAMES.midnight,
     value: "midnight",
   },
   {
-    text: "ARTIC v4/ARTIC v4.1",
+    text: CG_WETLAB_DISPLAY_NAMES.artic_v4,
     value: "artic_v4",
   },
   {
-    text: "VarSkip",
+    text: CG_WETLAB_DISPLAY_NAMES.varskip,
     value: "varskip",
   },
 ];

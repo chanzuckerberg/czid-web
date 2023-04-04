@@ -26,15 +26,21 @@ import { MetadataType } from "~/interface/shared";
 import { IconAlert } from "~ui/icons";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import LoadingMessage from "../LoadingMessage";
-import MetadataManualInput from "./MetadataManualInput";
 import { METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW } from "./constants";
 import cs from "./metadata_upload.scss";
+import MetadataManualInput from "./MetadataManualInput";
 import {
   MetadataCSVLocationsMenuProps,
   MetadataUploadProps,
   MetadataUploadState,
 } from "./types";
 import { geosearchCSVLocations } from "./utils";
+
+// String constants
+enum Tab {
+  MANUAL_INPUT = "Manual Input",
+  CSV_UPLOAD = "CSV Upload",
+}
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -45,7 +51,7 @@ class MetadataUpload extends React.Component<
   MetadataUploadState
 > {
   state: MetadataUploadState = {
-    currentTab: "Manual Input",
+    currentTab: Tab.MANUAL_INPUT,
     issues: {
       errors: [],
       warnings: [],
@@ -309,7 +315,7 @@ class MetadataUpload extends React.Component<
       sampleTypes,
     } = this.state;
 
-    if (currentTab === "Manual Input") {
+    if (currentTab === Tab.MANUAL_INPUT) {
       if (!samples || !projectMetadataFields) {
         return <div className={cs.loadingMsg}>Loading...</div>;
       } else {
@@ -328,7 +334,7 @@ class MetadataUpload extends React.Component<
       }
     }
 
-    if (currentTab === "CSV Upload") {
+    if (currentTab === Tab.CSV_UPLOAD) {
       return (
         <>
           <div>
@@ -425,7 +431,7 @@ class MetadataUpload extends React.Component<
 
     let error = "Fix the following errors.";
 
-    if (this.state.currentTab === "CSV Upload") {
+    if (this.state.currentTab === Tab.CSV_UPLOAD) {
       error = this.state.showMetadataCSVLocationsMenu
         ? "Fix these errors with your location selections."
         : "Fix the following errors.";
@@ -465,7 +471,7 @@ class MetadataUpload extends React.Component<
       hostGenomes,
     } = this.state;
 
-    return currentTab === "CSV Upload" && showMetadataCSVLocationsMenu ? (
+    return currentTab === Tab.CSV_UPLOAD && showMetadataCSVLocationsMenu ? (
       <MetadataCSVLocationsMenu
         locationMetadataType={this.getRequiredLocationMetadataType()}
         metadata={metadata}
@@ -539,7 +545,7 @@ class MetadataUpload extends React.Component<
         </div>
         <Tabs
           className={cs.tabs}
-          tabs={["Manual Input", "CSV Upload"]}
+          tabs={[Tab.MANUAL_INPUT, Tab.CSV_UPLOAD]}
           value={currentTab}
           onChange={this.handleTabChange}
         />

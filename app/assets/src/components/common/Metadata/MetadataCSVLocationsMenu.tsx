@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import { withAnalytics, trackEvent } from "~/api/analytics";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import IssueGroup from "~ui/notifications/IssueGroup";
-import MetadataInput from "./MetadataInput";
 import { NAME_COLUMN } from "./constants";
 import cs from "./metadata_csv_locations_menu.scss";
+import MetadataInput from "./MetadataInput";
 import { MetadataCSVLocationsMenuProps, Row } from "./types";
 import { isRowHuman } from "./utils";
 

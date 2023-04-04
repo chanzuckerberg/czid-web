@@ -2,8 +2,8 @@ import cx from "classnames";
 import { Button, Icon } from "czifui";
 import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import List from "~/components/ui/List";
 import cs from "./metadata_upload_modal.scss";
 
 interface UploadInstructionsProps {

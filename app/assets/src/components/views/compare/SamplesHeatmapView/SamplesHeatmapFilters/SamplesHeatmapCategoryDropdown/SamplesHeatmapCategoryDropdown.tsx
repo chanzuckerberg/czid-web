@@ -48,9 +48,9 @@ export const SamplesHeatmapCategoryDropdown = ({
     let categoryNames: string[] = categories.map(category => category.name);
 
     let subcategoryNames = {};
-    if (categoryNames.includes("Viruses - Phage")) {
+    if (categoryNames.includes(VIRUSES_PHAGE)) {
       categoryNames = categoryNames.filter(
-        (name: string) => name !== "Viruses - Phage",
+        (name: string) => name !== VIRUSES_PHAGE,
       );
       subcategoryNames = { Viruses: ["Phage"] };
     }
@@ -124,8 +124,9 @@ export const SamplesHeatmapCategoryDropdown = ({
   const categoryOptions = formatOptionsForSDS(options.categories);
 
   // Add one-off subcategory for phage
+  const VIRUSES_PHAGE = "Viruses - Phage";
   categoryOptions.push({
-    name: "Viruses - Phage",
+    name: VIRUSES_PHAGE,
   });
 
   categoryOptions.sort(sortCategoryOptions);

@@ -12,11 +12,11 @@ import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { UserContext } from "~/components/common/UserContext";
 
-import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import {
   ANNOTATION_FILTER_FEATURE,
   PATHOGEN_FLAG_FILTER_FEATURE,
 } from "~/components/utils/features";
+import { ThresholdConditions } from "~/components/utils/ThresholdMap";
 import AnnotationFilter from "~/components/views/report/filters/AnnotationFilter";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
@@ -30,9 +30,9 @@ import {
   CurrentTabSample,
 } from "~/interface/sampleView";
 import { Background } from "~/interface/shared/specific";
+import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
-import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import { CATEGORIES, TABS, THRESHOLDS, TREE_METRICS } from "./constants";
 import cs from "./report_filters.scss";
 

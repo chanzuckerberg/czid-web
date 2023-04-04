@@ -28,7 +28,7 @@ export const getSampleTableData = sample => {
     insertSizeStandardDeviation,
   );
 
-  const data = {
+  return {
     total_reads: numberWithCommas(
       get("pipeline_run.total_reads", derivedOutput),
     ),
@@ -55,6 +55,4 @@ export const getSampleTableData = sample => {
     notes: get("sample_notes", dbSample),
     insert_size_mean: meanInsertSizeString || "",
   };
-
-  return data;
 };

@@ -26,9 +26,7 @@ import {
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { returnHipaaCompliantMetadata } from "~utils/metadata";
-import AdminUploadOptions from "./AdminUploadOptions";
-import HostOrganismMessage from "./HostOrganismMessage";
-import UploadProgressModal from "./UploadProgressModal";
+import AdminUploadOptions from "../../AdminUploadOptions";
 import {
   UPLOAD_WORKFLOWS,
   UPLOAD_WORKFLOW_KEY_FOR_VALUE,
@@ -37,9 +35,12 @@ import {
   SEQUENCING_TECHNOLOGY_OPTIONS,
   WORKFLOWS_BY_UPLOAD_SELECTIONS,
   NO_TECHNOLOGY_SELECTED,
-} from "./constants";
+} from "../../constants";
+import HostOrganismMessage from "../../HostOrganismMessage";
+import cs from "../../sample_upload_flow.scss";
+import UploadProgressModal from "../../UploadProgressModal";
+import { DataHeaders } from "./types";
 
-import cs from "./sample_upload_flow.scss";
 
 interface ReviewStepProps {
   metadata?: {
@@ -127,18 +128,18 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
     if (uploadType !== "basespace") {
       return [
-        "Sample Name",
-        "Input Files",
-        "Host Organism",
+        DataHeaders.SAMPLE_NAME,
+        DataHeaders.INPUT_FILES,
+        DataHeaders.HOST_ORGANISM,
         ...metadataHeaders,
       ];
     } else {
       return [
-        "Sample Name",
-        "Basespace Project",
-        "File Size",
-        "File Type",
-        "Host Organism",
+        DataHeaders.SAMPLE_NAME,
+        DataHeaders.BASESPACE_PROJECT,
+        DataHeaders.FILE_SIZE,
+        DataHeaders.FILE_TYPE,
+        DataHeaders.HOST_ORGANISM,
         ...metadataHeaders,
       ];
     }
@@ -152,7 +153,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     );
 
     const metadataBySample = keyBy(
-      row => row["Sample Name"] || row.sample_name,
+      row => row[DataHeaders.SAMPLE_NAME] || row.sample_name,
       metadataRows,
     );
 
@@ -174,8 +175,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
       const sampleData = {
         ...sampleMetadata,
-        "Sample Name": <div className={cs.sampleName}>{sample.name}</div>,
-        "Host Organism": sampleHostName,
+        [DataHeaders.SAMPLE_NAME]: <div className={cs.sampleName}>{sample.name}</div>,
+        [DataHeaders.HOST_ORGANISM]: sampleHostName,
       };
 
       // We display different columns if the uploadType is basespace.
@@ -215,7 +216,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
   getColumnWidth = (column: string) => {
     switch (column) {
-      case "Sample Name":
+      case DataHeaders.SAMPLE_NAME:
         return 200;
       case "Input Files":
         return 300;
@@ -386,7 +387,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     const { technology } = this.props;
     const { allowedFeatures = [] } = this.context || {};
 
-    const sections = map(workflow => {
+    return map(workflow => {
       const workflowKey = UPLOAD_WORKFLOW_KEY_FOR_VALUE[workflow];
       const workflowDisplayName = UPLOAD_WORKFLOWS[workflowKey].label;
       const workflowIsBeta = workflow === UPLOAD_WORKFLOWS.AMR.value;
@@ -441,7 +442,6 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
         </div>
       );
     }, this.getWorkflowSectionOrder());
-    return sections;
   };
 
   renderCGAnalysisSection = () => {

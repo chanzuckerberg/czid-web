@@ -5,8 +5,8 @@ import { withAnalytics, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { NCBI_POLICIES_AND_DISCLAIMERS_LINK } from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
-import Checkbox from "~ui/controls/Checkbox";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
+import Checkbox from "~ui/controls/Checkbox";
 
 import cs from "./blast_redirection_modal.scss";
 

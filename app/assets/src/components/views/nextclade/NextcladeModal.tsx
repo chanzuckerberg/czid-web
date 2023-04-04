@@ -8,8 +8,8 @@ import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
 import { validateWorkflowRunIds } from "~/api/access_control";
 import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
-import List from "~/components/ui/List";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
+import List from "~/components/ui/List";
 import {
   NEXTCLADE_APP_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
@@ -19,11 +19,11 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import { WORKFLOWS } from "~utils/workflows";
+import cs from "./nextclade_modal.scss";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
 
-import cs from "./nextclade_modal.scss";
 
 interface NextcladeModalProps {
   onClose: $TSFixMeFunction;
@@ -176,7 +176,7 @@ export default class NextcladeModal extends React.Component<
               sdsIcon="infoCircle"
               sdsSize="s"
               sdsType="interactive"
-              className={cx(cs.infoIcon, iconStyle && iconStyle)}
+              className={cx(cs.infoIcon, !!iconStyle && iconStyle)}
             />
           </span>
         }

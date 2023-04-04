@@ -10,10 +10,10 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import ShareButton from "~ui/controls/buttons/ShareButton";
 
+import cs from "./project_settings_modal.scss";
 import PublicProjectConfirmationModal from "./PublicProjectConfirmationModal";
 import UserManagementForm from "./UserManagementForm";
 import ViewOnlyLinkForm from "./ViewOnlyLinkForm";
-import cs from "./project_settings_modal.scss";
 
 interface ProjectSettingsModalProps {
   csrf: string;

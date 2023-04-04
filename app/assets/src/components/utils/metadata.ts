@@ -20,11 +20,10 @@ export const processMetadata = ({
   );
   // If flatten, simplify objects (e.g. location objects) to .name
   if (flatten) {
-    const flatNewMetadata = mapValues(
+    return mapValues(
       val => (isObject(val) ? val.name : val),
       newMetadata,
     );
-    return flatNewMetadata;
   }
 
   return newMetadata;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import ImpactVRSection from "./ImpactVRSection";
 import cs from "./ImpactVideoSection.scss";
+import ImpactVRSection from "./ImpactVRSection";
 
 const ImpactVideoSection = () => {
   const [video, setVideo] = useState("video");

@@ -45,8 +45,8 @@ import { showBulkDownloadNotification } from "~/components/views/bulk_download/B
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import { TAXON_HEATMAP_MODAL_SAMPLES_MINIMUM } from "~/components/views/compare/SamplesHeatmapView/constants";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
-import QualityControl from "~/components/views/discovery/QualityControl";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import QualityControl from "~/components/views/discovery/QualityControl";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import NextcladeModal from "~/components/views/nextclade/NextcladeModal";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
@@ -78,7 +78,6 @@ import {
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "./ColumnConfiguration";
-import ToolbarButtonIcon from "./ToolbarButtonIcon";
 import {
   PipelineRunStatuses,
   SARS_COV_2,
@@ -87,6 +86,7 @@ import {
   WORKFLOW_TRIGGERS_BY_DOMAIN,
 } from "./constants";
 import cs from "./samples_view.scss";
+import ToolbarButtonIcon from "./ToolbarButtonIcon";
 import { getSelectedObjects } from "./utils";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
@@ -463,12 +463,11 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const getSarsCov2Count = () => {
-    const sarsCov2Count = selectedObjects
+    return selectedObjects
       .map(object => get(["referenceAccession", "taxonName"], object))
       .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);
-    return sarsCov2Count;
   };
 
   const renderNextcladeTrigger = () => {

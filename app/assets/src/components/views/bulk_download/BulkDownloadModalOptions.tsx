@@ -12,20 +12,20 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { humanize } from "~/helpers/strings";
 import Checkbox from "~ui/controls/Checkbox";
-import RadioButton from "~ui/controls/RadioButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LinkCS from "~ui/controls/link.scss";
+import RadioButton from "~ui/controls/RadioButton";
 import StatusLabel from "~ui/labels/StatusLabel";
 
 import { MICROBIOME_DOWNLOAD_METRIC_OPTIONS } from "../compare/SamplesHeatmapView/constants";
-import TaxonHitSelect from "./TaxonHitSelect";
-import ThresholdFilterModal from "./ThresholdFilterModal";
 import cs from "./bulk_download_modal_options.scss";
 import {
   BULK_DOWNLOAD_DOCUMENTATION_LINKS,
   BULK_DOWNLOAD_TYPES,
   CONDITIONAL_FIELDS,
 } from "./constants";
+import TaxonHitSelect from "./TaxonHitSelect";
+import ThresholdFilterModal from "./ThresholdFilterModal";
 
 const triggersCondtionalFieldMetricList = (
   conditionalField,

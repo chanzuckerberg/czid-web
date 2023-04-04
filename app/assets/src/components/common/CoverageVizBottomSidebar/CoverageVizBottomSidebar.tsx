@@ -1,62 +1,59 @@
 /* eslint-disable import/order */
 import cx from "classnames";
 import { ButtonIcon } from "czifui";
-import { sum, find, get, isEmpty } from "lodash/fp";
+import { find, get, isEmpty, sum } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
-
 // Helper Functions and Constants
 import { getCoverageVizData } from "~/api";
 import {
-  trackEvent,
   ANALYTICS_EVENT_NAMES,
+  trackEvent,
   withAnalytics,
 } from "~/api/analytics";
-import {
-  getHistogramTooltipData,
-  generateCoverageVizData,
-  getSortedAccessionSummaries,
-  selectContigsFromHitGroups,
-  selectReadsFromHitGroups,
-} from "./utils";
-import { formatPercent } from "~/components/utils/format";
-import { getTooltipStyle } from "~/components/utils/tooltip";
-import { getDownloadContigUrl } from "~/components/views/report/utils/download";
-import { getTaxonName } from "~/helpers/taxon";
-import { openUrl } from "~utils/links";
-import {
-  METRIC_COLUMNS,
-  REF_ACC_COLOR,
-  CONTIG_FILL_COLOR,
-  READ_FILL_COLOR,
-} from "./constants";
-
 // Components
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { BLAST_V1_FEATURE } from "~/components/utils/features";
+import { formatPercent } from "~/components/utils/format";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import Histogram from "~/components/visualizations/Histogram";
-import { HistogramShape, GenomeVizShape } from "~/interface/shared";
+import { getTaxonName } from "~/helpers/taxon";
+import { GenomeVizShape, HistogramShape } from "~/interface/shared";
 import { TooltipVizTable } from "~ui/containers";
 import HelpIcon from "~ui/containers/HelpIcon";
 import Sidebar from "~ui/containers/Sidebar";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import { IconArrowRight } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
+import { openUrl } from "~utils/links";
 import LoadingMessage from "../LoadingMessage";
-import HitGroupViz from "./HitGroupViz";
-
+import {
+  CONTIG_FILL_COLOR,
+  METRIC_COLUMNS,
+  READ_FILL_COLOR,
+  REF_ACC_COLOR,
+} from "./constants";
 // Types and Styles
 import cs from "./coverage_viz_bottom_sidebar.scss";
+import HitGroupViz from "./HitGroupViz";
 import {
+  AccessionsData,
+  AccessionsSummary,
   CoverageVizBottomSidebarProps,
   CoverageVizBottomSidebarsState,
-  AccessionsSummary,
-  AccessionsData,
 } from "./types";
+import {
+  generateCoverageVizData,
+  getHistogramTooltipData,
+  getSortedAccessionSummaries,
+  selectContigsFromHitGroups,
+  selectReadsFromHitGroups,
+} from "./utils";
 
 export default class CoverageVizBottomSidebar extends React.Component<
   CoverageVizBottomSidebarProps,
@@ -303,8 +300,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
                   taxonId: params.taxonId,
                   sampleId,
                 })
-              }
-            >
+              }>
               {currentAccessionSummary.id} - {currentAccessionSummary.name}
             </a>
           </div>
@@ -343,9 +339,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
       const speciesTaxonName = this.getAccessionTaxonName(
         currentAccessionSummary,
       );
-      const helpText =
-        currentAccessionSummary &&
-        `
+      const helpText = `
         The accession being displayed belongs to the species ${speciesTaxonName}, a member of genus ${taxonName}
       `;
       return (
@@ -403,13 +397,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
   };
 
   renderContentHeader = () => {
-    const {
-      params,
-      pipelineVersion,
-      sampleId,
-      snapshotShareId,
-      workflow,
-    } = this.props;
+    const { params, pipelineVersion, sampleId, snapshotShareId, workflow } =
+      this.props;
     const { currentAccessionSummary } = this.state;
     const { taxonId } = params;
 
@@ -419,8 +408,9 @@ export default class CoverageVizBottomSidebar extends React.Component<
     const onlySomeAccessionsShown = numBestAccessions < numAccessions;
 
     const helpText = `
-        ${numAccessions -
-          numBestAccessions} poor-quality accessions are omitted, as they have
+        ${
+          numAccessions - numBestAccessions
+        } poor-quality accessions are omitted, as they have
         no contig alignments and few read alignments.
         To see them, go to the read-level visualization.
       `;
@@ -480,8 +470,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
                         sampleId,
                       },
                     )
-                  }
-                >
+                  }>
                   View read-level visualization
                   <IconArrowRight />
                 </a>
@@ -556,8 +545,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
                       sampleId,
                     },
                   )
-                }
-              >
+                }>
                 Contact us for help
                 <IconArrowRight />
               </a>
@@ -624,8 +612,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
                       sampleId,
                     },
                   )
-                }
-              >
+                }>
                 <div
                   className={cs.genomeVizInner}
                   ref={refAccessionVizContainer => {
@@ -678,8 +665,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
           ReactDOM.createPortal(
             <div
               style={getTooltipStyle(histogramTooltipLocation)}
-              className={cs.hoverTooltip}
-            >
+              className={cs.hoverTooltip}>
               <TooltipVizTable data={histogramTooltipData} />
             </div>,
             document.body,
@@ -719,8 +705,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
                           sampleId,
                         },
                       )
-                    }
-                  >
+                    }>
                     View read-level visualization
                     <IconArrowRight />
                   </a>
@@ -741,8 +726,7 @@ export default class CoverageVizBottomSidebar extends React.Component<
         visible={visible}
         width="very wide"
         onClose={onClose}
-        direction="bottom"
-      >
+        direction="bottom">
         {get("accessionData.best_accessions", params) &&
         params.accessionData.best_accessions.length > 0
           ? this.renderSidebarContents()

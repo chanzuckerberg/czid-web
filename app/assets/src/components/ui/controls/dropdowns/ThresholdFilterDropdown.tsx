@@ -5,10 +5,10 @@ import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 
 import { PrimaryButton, SecondaryButton } from "../buttons";
-import ThresholdFilterList from "./ThresholdFilterList";
 import DropdownLabel from "./common/DropdownLabel";
 import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./threshold_filter_dropdown.scss";
+import ThresholdFilterList from "./ThresholdFilterList";
 
 interface ThresholdFilterDropdownProps {
   disabled?: boolean;

@@ -1,6 +1,6 @@
 import React from "react";
-import ScatterPlot from "./ScatterPlot";
 import cs from "./ercc_scatterplot.scss";
+import ScatterPlot from "./ScatterPlot";
 
 interface ERCCScatterPlotProps {
   width?: number;

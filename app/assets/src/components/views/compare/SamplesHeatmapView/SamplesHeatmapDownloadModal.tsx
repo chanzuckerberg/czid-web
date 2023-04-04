@@ -1,7 +1,6 @@
 import cx from "classnames";
-import { filter, get, set, unset, isEmpty } from "lodash/fp";
+import { filter, get, isEmpty, set, unset } from "lodash/fp";
 import React, { useState } from "react";
-
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { createBulkDownload } from "~/api/bulk_downloads";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -9,14 +8,13 @@ import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { humanize } from "~/helpers/strings";
 import { SelectedOptions } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
-import RadioButton from "~ui/controls/RadioButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import RadioButton from "~ui/controls/RadioButton";
 import {
   HEATMAP_DOWNLOAD_CATEGORIES,
   HEATMAP_DOWNLOAD_OPTIONS,
   MICROBIOME_DOWNLOAD_METRIC_OPTIONS,
 } from "./constants";
-
 import cs from "./heatmap_download_modal.scss";
 
 interface SamplesHeatmapDownloadModalProps {
@@ -101,26 +99,25 @@ const SamplesHeatmapDownloadModal = ({
     let dropdownOptions = null;
     let placeholder = "";
 
-    switch (fieldType) {
-      case "metric":
-        dropdownOptions = MICROBIOME_DOWNLOAD_METRIC_OPTIONS;
-        placeholder = "Select metric";
-        return (
-          <div className={cs.field} key={fieldType}>
-            <div className={cs.label}>{fieldDisplay}:</div>
-            <Dropdown
-              fluid
-              placeholder={placeholder}
-              options={dropdownOptions}
-              onChange={(value: string, displayName: string) => {
-                handleFieldSelect(downloadType, fieldType, value, displayName);
-              }}
-              value={selectedField}
-              usePortal
-              withinModal
-            />
-          </div>
-        );
+    if (fieldType === "metric") {
+      dropdownOptions = MICROBIOME_DOWNLOAD_METRIC_OPTIONS;
+      placeholder = "Select metric";
+      return (
+        <div className={cs.field} key={fieldType}>
+          <div className={cs.label}>{fieldDisplay}:</div>
+          <Dropdown
+            fluid
+            placeholder={placeholder}
+            options={dropdownOptions}
+            onChange={(value: string, displayName: string) => {
+              handleFieldSelect(downloadType, fieldType, value, displayName);
+            }}
+            value={selectedField}
+            usePortal
+            withinModal
+          />
+        </div>
+      );
     }
   };
 
@@ -133,13 +130,12 @@ const SamplesHeatmapDownloadModal = ({
   }: DownloadType) => {
     const selected = selectedDownloadType === type;
 
-    const downloadTypeElement = (
+    return (
       <div
         role="none" // silences linter error
         className={cx(cs.downloadType, selected && cs.selected)}
         key={type}
-        onClick={() => setSelectedDownloadType(type)}
-      >
+        onClick={() => setSelectedDownloadType(type)}>
         <RadioButton className={cs.radioButton} selected={selected} />
         <div className={cs.content}>
           <div className={cs.name}>
@@ -157,8 +153,6 @@ const SamplesHeatmapDownloadModal = ({
         </div>
       </div>
     );
-
-    return downloadTypeElement;
   };
 
   const submitBulkDownload = async (

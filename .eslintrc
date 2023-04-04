@@ -11,11 +11,12 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "standard",
+    "plugin:sonarjs/recommended",
     // disables rules that conflict with prettier
     // must come last
     "prettier"
   ],
-  "plugins": ["react"],
+  "plugins": ["react", "sonarjs"],
   "rules": {
     "camelcase": "warn",
     "comma-dangle": ["error", "always-multiline"],
@@ -43,6 +44,8 @@
     "react/prop-types": "warn",
     "react/no-danger": "error",
     "semi": ["error", "always"],
+    "sonarjs/cognitive-complexity": "off",
+    "sonarjs/prefer-single-boolean-return": "off",
     "no-extra-semi": "error",
     "space-before-function-paren": [
       "error",
@@ -79,7 +82,7 @@
             "group": "internal"
           }
         ],
-        "alphabetize": { "order": "asc" }
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
       }
     ]
   },
@@ -91,9 +94,7 @@
       "parserOptions": {
         "project": ["app/assets/tsconfig.json", "e2e/tsconfig.json"]
       },
-      "plugins": [
-        "@typescript-eslint/eslint-plugin"
-      ],
+      "plugins": ["@typescript-eslint/eslint-plugin"],
       "rules": {
         "no-use-before-define": "off",
         "@typescript-eslint/no-use-before-define": "off",

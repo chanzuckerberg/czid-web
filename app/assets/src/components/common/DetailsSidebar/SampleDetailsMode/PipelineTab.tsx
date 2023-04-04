@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { getSamplePipelineResults } from "~/api";
 import { trackEvent } from "~/api/analytics";
-import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
+import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { IconArrowRight } from "~/components/ui/icons";
 import {
@@ -16,8 +16,8 @@ import {
 } from "~/components/utils/resultsFolder";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import { WORKFLOWS, WORKFLOW_LABELS } from "~/components/utils/workflows";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import {
   ERCCComparisonShape,
   PipelineRun,
@@ -26,7 +26,6 @@ import {
 } from "~/interface/shared";
 import Link from "~ui/controls/Link";
 import LoadingMessage from "../../LoadingMessage";
-import MetadataSection from "./MetadataSection";
 import {
   CG_WORKFLOW_INFO_FIELDS,
   HOST_FILTERING_WIKI,
@@ -34,6 +33,7 @@ import {
   SHORT_READ_MNGS_INFO_FIELDS,
   LONG_READ_MNGS_INFO_FIELDS,
 } from "./constants";
+import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
 const READ_COUNTS_TABLE = "readsRemaining";

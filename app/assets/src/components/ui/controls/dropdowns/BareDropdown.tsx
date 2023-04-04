@@ -33,8 +33,8 @@ import {
 } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
 import { IconArrowDownSmall, IconSearch } from "~ui/icons";
-import PortalDropdown from "./PortalDropdown";
 import cs from "./bare_dropdown.scss";
+import PortalDropdown from "./PortalDropdown";
 
 interface BareDropdownProps {
   // Custom props

@@ -1,5 +1,5 @@
 import Aioli from "@biowasm/aioli";
-import { isEmpty, flatten } from "lodash/fp";
+import { flatten, isEmpty } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
@@ -7,23 +7,23 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { SampleFromApi as Sample } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
-  MEGABYTE,
+  DUPLICATE_ID,
+  DUPLICATE_ID_ERROR,
   ILLUMINA,
+  INVALID_FASTA_FASTQ,
+  INVALID_FASTA_FASTQ_ERROR,
+  MEGABYTE,
+  MISMATCH_FILES_ERROR,
+  MISMATCH_SEQUENCING_PLATFORM,
   NANOPORE,
+  NO_VALID_SAMPLES,
+  PAIRED_END_MISMATCHED,
   R1CHECK,
   R2CHECK,
-  INVALID_FASTA_FASTQ,
-  MISMATCH_SEQUENCING_PLATFORM,
-  TRUNCATED_FILE,
-  PAIRED_END_MISMATCHED,
-  DUPLICATE_ID,
-  NO_VALID_SAMPLES,
-  DUPLICATE_ID_ERROR,
-  INVALID_FASTA_FASTQ_ERROR,
-  TRUNCATED_FILE_ERROR,
-  MISMATCH_FILES_ERROR,
   REGEX_READ_ILLUMINA,
   REGEX_READ_NANOPORE,
+  TRUNCATED_FILE,
+  TRUNCATED_FILE_ERROR,
 } from "./constants";
 import cs from "./pre_upload_qc_check.scss";
 
@@ -186,11 +186,7 @@ const PreUploadQCCheck = ({
 
       // Extract the last four lines, i.e. last FASTQ record of the file
       const fileContents = await fastqContents.text();
-      const last4Lines = fileContents
-        .trim()
-        .split("\n")
-        .slice(-4)
-        .join("\n");
+      const last4Lines = fileContents.trim().split("\n").slice(-4).join("\n");
       const fileLast4Lines = new File(
         [last4Lines],
         `${file.name}.${nanoid()}.last4`,
@@ -281,20 +277,12 @@ const PreUploadQCCheck = ({
         if (element.isValid) {
           // File is FASTA or FASTQ file does not have format
           if (!element.format) result = false;
-          // Illumina Technology is selected and format is illumina
-          else if (
-            sequenceTechnology === ILLUMINA &&
-            element.format === ILLUMINA
-          ) {
-            result = false;
-            trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
-              error: MISMATCH_SEQUENCING_PLATFORM,
-            });
-          }
-          // Nanopore is selected and format is nanopore
-          else if (
-            sequenceTechnology === NANOPORE &&
-            element.format === NANOPORE
+          /* Illumina Technology is selected and format is illumina
+             -OR-
+             Nanopore is selected and format is nanopore
+          */ else if (
+            (sequenceTechnology === ILLUMINA && element.format === ILLUMINA) ||
+            (sequenceTechnology === NANOPORE && element.format === NANOPORE)
           ) {
             result = false;
             trackEvent(ANALYTICS_EVENT_NAMES.PRE_UPLOAD_QC_CHECK_WARNING_TYPE, {
@@ -551,8 +539,7 @@ const PreUploadQCCheck = ({
                 out SeqKit documentation{" "}
                 <ExternalLink
                   coloredBackground={true}
-                  href="https://bioinf.shenwei.me/seqkit/usage/#rename"
-                >
+                  href="https://bioinf.shenwei.me/seqkit/usage/#rename">
                   {"here"}
                 </ExternalLink>
                 .
@@ -588,8 +575,7 @@ const PreUploadQCCheck = ({
                 out SeqKit documentation{" "}
                 <ExternalLink
                   coloredBackground={true}
-                  href="https://bioinf.shenwei.me/seqkit/usage/#pair"
-                >
+                  href="https://bioinf.shenwei.me/seqkit/usage/#pair">
                   {"here"}
                 </ExternalLink>
                 .

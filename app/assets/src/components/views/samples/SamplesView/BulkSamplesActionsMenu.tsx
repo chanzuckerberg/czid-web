@@ -9,8 +9,8 @@ import {
   BULK_DELETION_FEATURE,
 } from "~/components/utils/features";
 
-import ToolbarButtonIcon from "./ToolbarButtonIcon";
 import cs from "./samples_view.scss";
+import ToolbarButtonIcon from "./ToolbarButtonIcon";
 
 interface BulkSamplesActionsMenuProps {
   noObjectsSelected: boolean;

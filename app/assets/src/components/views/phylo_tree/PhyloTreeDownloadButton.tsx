@@ -6,6 +6,11 @@ import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
 
+// Options Constants
+const PHYLOTREE_CLUSTERMAP_SVG = "phylotree.clustermap_svg";
+const PHYLOTREE_CLUSTERMAP_PNG = "phylotree.clustermap_png";
+const PHYLOTREE_SKA_DISTANCES = "phylotree.ska_distances";
+
 interface PhyloTreeDownloadButtonProps {
   showPhyloTreeNgOptions?: boolean;
   tree?: { clustermap_svg_url: string };
@@ -35,24 +40,24 @@ class PhyloTreeDownloadButton extends React.Component<
       { text: "Tree Image (.png)", value: "png" },
     ];
     this.matrixImageOptions = [
-      { text: "Matrix Image (.svg)", value: "phylotree.clustermap_svg" },
-      { text: "Matrix Image (.png)", value: "phylotree.clustermap_png" },
+      { text: "Matrix Image (.svg)", value: PHYLOTREE_CLUSTERMAP_SVG },
+      { text: "Matrix Image (.png)", value: PHYLOTREE_CLUSTERMAP_PNG },
     ];
     this.skaOptions = [
-      { text: "SKA Distances (.tsv)", value: "phylotree.ska_distances" },
+      { text: "SKA Distances (.tsv)", value: PHYLOTREE_SKA_DISTANCES },
       { text: "SKA Variants (.aln)", value: "phylotree.variants" },
     ];
     this.phyloTreeNgOptions = [
       "phylotree.phylotree_newick",
-      "phylotree.clustermap_svg",
-      "phylotree.clustermap_png",
-      "phylotree.ska_distances",
+      PHYLOTREE_CLUSTERMAP_SVG,
+      PHYLOTREE_CLUSTERMAP_PNG,
+      PHYLOTREE_SKA_DISTANCES,
       "phylotree.variants",
     ];
     this.matrixOnlyOptions = [
-      "phylotree.clustermap_svg",
-      "phylotree.clustermap_png",
-      "phylotree.ska_distances",
+      PHYLOTREE_CLUSTERMAP_SVG,
+      PHYLOTREE_CLUSTERMAP_PNG,
+      PHYLOTREE_SKA_DISTANCES,
     ];
     this.download = this.download.bind(this);
     this.svgSaver = new SvgSaver();

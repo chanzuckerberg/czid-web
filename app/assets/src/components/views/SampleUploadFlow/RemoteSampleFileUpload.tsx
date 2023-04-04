@@ -5,8 +5,8 @@ import { bulkImportRemoteSamples } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import List from "~/components/ui/List";
 import { Project } from "~/interface/shared";
-import Input from "~ui/controls/Input";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
+import Input from "~ui/controls/Input";
 import Notification from "~ui/notifications/Notification";
 
 import {

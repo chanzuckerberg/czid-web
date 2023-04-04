@@ -70,14 +70,12 @@ class UrlQueryParser {
   }
 
   stringifyValue(value: object, type: "object" | string) {
-    switch (type) {
-      case "object":
-        return !value || Object.keys(value).length === 0
-          ? undefined
-          : JSON.stringify(value);
-      default:
-        return value;
+    if (type === "object") {
+      return !value || Object.keys(value).length === 0
+      ? undefined
+      : JSON.stringify(value);
     }
+    return value;
   }
 
   // Updates a query string parameter that currently exist in the URL and returns the updated query paramters.

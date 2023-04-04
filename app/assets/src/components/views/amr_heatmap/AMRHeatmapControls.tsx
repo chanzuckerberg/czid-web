@@ -40,7 +40,7 @@ const AMRHeatmapControls = ({
   };
 
   const renderControlDropdowns = () => {
-    const controlsList = controls.map(control => {
+    return controls.map(control => {
       return (
         <div className={cs.filterControl} key={control.key}>
           <Dropdown
@@ -57,7 +57,6 @@ const AMRHeatmapControls = ({
         </div>
       );
     });
-    return controlsList;
   };
 
   const renderLegend = () => {

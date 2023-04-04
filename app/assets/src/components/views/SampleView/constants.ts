@@ -76,60 +76,80 @@ export const NOTIFICATION_TYPES = {
   sampleDeleteError: "sampleDeleteError",
 };
 
+// Text constants
+const NT_R_TOTAL_READS = "NT r (total reads)";
+const NT_CONTIGS = "NT contigs";
+const NT_LENGTH = "NT L (alignment length in bp)";
+const NT_E = "NT E value (as a power of 10)";
+const NR_R_TOTAL_READS = "NR r (total reads)";
+const NR_CONTIGS = "NR contigs";
+const NR_LENGTH = "NR L (alignment length in bp)";
+const NR_E = "NR E value (as a power of 10)";
+
+// value constants
+const VALUE_NT_CONTIGS = "nt:contigs";
+const VALUE_NT_PERCENT_IDENTITY = "nt:percent_identity";
+const VALUE_NT_LENGTH = "nt:alignment_length";
+const VALUE_NT_E = "nt:e_value";
+const VALUE_NR_CONTIGS = "nr:contigs";
+const VALUE_NR_PERCENT_IDENTITY = "nr:percent_identity";
+const VALUE_NR_LENGTH = "nr:alignment_length";
+const VALUE_NR_E = "nr:e_value";
+
 export const NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS = [
   { text: "NT rPM", value: "nt:rpm" },
-  { text: "NT r (total reads)", value: "nt:count" },
-  { text: "NT contigs", value: "nt:contigs" },
+  { text: NT_R_TOTAL_READS, value: "nt:count" },
+  { text: NT_CONTIGS, value: VALUE_NT_CONTIGS },
   { text: "NT contig reads", value: "nt:contig_r" },
-  { text: "NT %id", value: "nt:percent_identity" },
-  { text: "NT L (alignment length in bp)", value: "nt:alignment_length" },
-  { text: "NT E value (as a power of 10)", value: "nt:e_value" },
+  { text: "NT %id", value: VALUE_NT_PERCENT_IDENTITY },
+  { text: NT_LENGTH, value: VALUE_NT_LENGTH },
+  { text: NT_E, value: VALUE_NT_E },
   { text: "NR rPM", value: "nr:rpm" },
-  { text: "NR r (total reads)", value: "nr:count" },
-  { text: "NR contigs", value: "nr:contigs" },
+  { text: NR_R_TOTAL_READS, value: "nr:count" },
+  { text: NR_CONTIGS, value: VALUE_NR_CONTIGS },
   { text: "NR contig reads", value: "nr:contig_r" },
-  { text: "NR %id", value: "nr:percent_identity" },
-  { text: "NR L (alignment length in bp)", value: "nr:alignment_length" },
-  { text: "NR E value (as a power of 10)", value: "nr:e_value" },
+  { text: "NR %id", value: VALUE_NR_PERCENT_IDENTITY },
+  { text: NR_LENGTH, value: VALUE_NR_LENGTH },
+  { text: NR_E, value: VALUE_NR_E },
 ];
 
 export const SHORT_READS_THRESHOLDS = [
   { text: "Score", value: "agg_score" },
   { text: "NT Z Score", value: "nt:z_score" },
   { text: "NT rPM", value: "nt:rpm" },
-  { text: "NT r (total reads)", value: "nt:count" },
-  { text: "NT contigs", value: "nt:contigs" },
+  { text: NT_R_TOTAL_READS, value: "nt:count" },
+  { text: NT_CONTIGS, value: VALUE_NT_CONTIGS },
   { text: "NT contig reads", value: "nt:contig_r" },
-  { text: "NT %id", value: "nt:percent_identity" },
-  { text: "NT L (alignment length in bp)", value: "nt:alignment_length" },
-  { text: "NT E value (as a power of 10)", value: "nt:e_value" },
+  { text: "NT %id", value: VALUE_NT_PERCENT_IDENTITY },
+  { text: NT_LENGTH, value: VALUE_NT_LENGTH },
+  { text: NT_E, value: VALUE_NT_E },
   { text: "NR Z Score", value: "nr:z_score" },
   { text: "NR rPM", value: "nr:rpm" },
-  { text: "NR r (total reads)", value: "nr:count" },
-  { text: "NR contigs", value: "nr:contigs" },
+  { text: NR_R_TOTAL_READS, value: "nr:count" },
+  { text: NR_CONTIGS, value: VALUE_NR_CONTIGS },
   { text: "NR contig reads", value: "nr:contig_r" },
-  { text: "NR %id", value: "nr:percent_identity" },
-  { text: "NR L (alignment length in bp)", value: "nr:alignment_length" },
-  { text: "NR E value (as a power of 10)", value: "nr:e_value" },
+  { text: "NR %id", value: VALUE_NR_PERCENT_IDENTITY },
+  { text: NR_LENGTH, value: VALUE_NR_LENGTH },
+  { text: NR_E, value: VALUE_NR_E },
 ];
 
 export const LONG_READS_THRESHOLDS = [
   { text: "NT bPM", value: "nt:bpm" },
   { text: "NT b (total bases)", value: "nt:base_count" },
-  { text: "NT r (total reads)", value: "nt:count" },
-  { text: "NT contigs", value: "nt:contigs" },
+  { text: NT_R_TOTAL_READS, value: "nt:count" },
+  { text: NT_CONTIGS, value: VALUE_NT_CONTIGS },
   { text: "NT contig bases", value: "nt:contig_b" },
-  { text: "NT %id", value: "nt:percent_identity" },
-  { text: "NT L (alignment length in bp)", value: "nt:alignment_length" },
-  { text: "NT E value (as a power of 10)", value: "nt:e_value" },
+  { text: "NT %id", value: VALUE_NT_PERCENT_IDENTITY },
+  { text: NT_LENGTH, value: VALUE_NT_LENGTH },
+  { text: NT_E, value: VALUE_NT_E },
   { text: "NR bPM", value: "nr:bpm" },
   { text: "NR b (total bases)", value: "nr:base_count" },
-  { text: "NR r (total reads)", value: "nr:count" },
-  { text: "NR contigs", value: "nr:contigs" },
+  { text: NR_R_TOTAL_READS, value: "nr:count" },
+  { text: NR_CONTIGS, value: VALUE_NR_CONTIGS },
   { text: "NR contig bases", value: "nr:contig_b" },
-  { text: "NR %id", value: "nr:percent_identity" },
-  { text: "NR L (alignment length in bp)", value: "nr:alignment_length" },
-  { text: "NR E value (as a power of 10)", value: "nr:e_value" },
+  { text: "NR %id", value: VALUE_NR_PERCENT_IDENTITY },
+  { text: NR_LENGTH, value: VALUE_NR_LENGTH },
+  { text: NR_E, value: VALUE_NR_E },
 ];
 
 export const THRESHOLDS = {
@@ -150,9 +170,9 @@ export const BACKGROUND_DEPENDENT_READS_THRESHOLDS = SHORT_READS_THRESHOLDS.filt
 export const TREE_METRICS = {
   [TABS.SHORT_READ_MNGS]: [
     { text: "Aggregate Score", value: "aggregatescore" },
-    { text: "NT r (total reads)", value: "nt_r" },
+    { text: NT_R_TOTAL_READS, value: "nt_r" },
     { text: "NT rPM", value: "nt_rpm" },
-    { text: "NR r (total reads)", value: "nr_r" },
+    { text: NR_R_TOTAL_READS, value: "nr_r" },
     { text: "NR rPM", value: "nr_rpm" },
   ],
   [TABS.LONG_READ_MNGS]: [

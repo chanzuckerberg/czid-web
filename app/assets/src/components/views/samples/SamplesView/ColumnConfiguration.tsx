@@ -11,6 +11,11 @@ import { MetadataType } from "~/interface/shared";
 import { WORKFLOWS } from "~utils/workflows";
 import cs from "./samples_view.scss";
 
+// Label constants
+const CREATED_ON = "Created On";
+const PIPELINE_VERSION = "Pipeline Version";
+const SAMPLE_TYPE = "Sample Type";
+
 export const computeColumnsByWorkflow = ({
   workflow,
   metadataFields = [],
@@ -50,7 +55,7 @@ const computeMngsColumns = ({ basicIcon, metadataFields, workflow }) => {
     },
     {
       dataKey: "createdAt",
-      label: "Created On",
+      label: CREATED_ON,
       width: 120,
       className: cs.basicCell,
       cellRenderer: TableRenderers.renderDateWithElapsed,
@@ -116,7 +121,7 @@ const computeMngsColumns = ({ basicIcon, metadataFields, workflow }) => {
     },
     {
       dataKey: "sample_type",
-      label: "Sample Type",
+      label: SAMPLE_TYPE,
       flexGrow: 1,
       className: cs.basicCell,
     },
@@ -134,7 +139,7 @@ const computeMngsColumns = ({ basicIcon, metadataFields, workflow }) => {
     },
     {
       dataKey: "pipelineVersion",
-      label: "Pipeline Version",
+      label: PIPELINE_VERSION,
       flexGrow: 1,
       className: cs.basicCell,
     },
@@ -194,7 +199,7 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
     },
     {
       dataKey: "createdAt",
-      label: "Created On",
+      label: CREATED_ON,
       width: 120,
       className: cs.basicCell,
       cellRenderer: TableRenderers.renderDateWithElapsed,
@@ -218,7 +223,7 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
     },
     {
       dataKey: "sample_type",
-      label: "Sample Type",
+      label: SAMPLE_TYPE,
       flexGrow: 1,
       className: cs.basicCell,
     },
@@ -230,7 +235,7 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
     },
     {
       dataKey: "wdl_version",
-      label: "Pipeline Version",
+      label: PIPELINE_VERSION,
       flexGrow: 1,
       className: cs.basicCell,
     },
@@ -372,20 +377,20 @@ const computeAmrColumns = ({ basicIcon, metadataFields }) => {
     },
     {
       dataKey: "createdAt",
-      label: "Created On",
+      label: CREATED_ON,
       width: 120,
       className: cs.basicCell,
       cellRenderer: TableRenderers.renderDateWithElapsed,
     },
     {
       dataKey: "sample_type",
-      label: "Sample Type",
+      label: SAMPLE_TYPE,
       flexGrow: 1,
       className: cs.basicCell,
     },
     {
       dataKey: "wdl_version",
-      label: "Pipeline Version",
+      label: PIPELINE_VERSION,
       flexGrow: 1,
       className: cs.basicCell,
     },
@@ -482,7 +487,7 @@ const computeMetadataColumns = metadataFields => {
     mf => !fixedMetadata.includes(mf["key"]),
   );
 
-  const metadataColumns = additionalMetadata.map(mf => {
+  return additionalMetadata.map(mf => {
     return {
       dataKey: mf["key"],
       label: mf["name"],
@@ -490,8 +495,6 @@ const computeMetadataColumns = metadataFields => {
       className: cs.basicCell,
     };
   }, []);
-
-  return metadataColumns;
 };
 
 export const DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW = {

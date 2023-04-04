@@ -1,8 +1,8 @@
 import cx from "classnames";
 import { forEach, sumBy, values } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-import Input from "~ui/controls/Input";
 import { BareDropdown } from "~ui/controls/dropdowns";
+import Input from "~ui/controls/Input";
 import cs from "./live_search_pop_box.scss";
 
 type SearchResult = {
@@ -64,13 +64,11 @@ const LiveSearchPopBox = ({
 
   const handleKeyDown = keyEvent => {
     // Pressing enter selects what they currently typed.
-    if (keyEvent.key === "Enter") {
-      if (inputMode) {
-        handleResultSelect({
-          result: inputValue,
-          currentEvent: {},
-        });
-      }
+    if (keyEvent.key === "Enter" && inputMode) {
+      handleResultSelect({
+        result: inputValue,
+        currentEvent: {},
+      });
     }
   };
 

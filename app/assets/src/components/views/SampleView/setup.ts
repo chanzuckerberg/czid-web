@@ -6,6 +6,7 @@ import {
   WorkflowCount,
   WORKFLOWS,
   WORKFLOW_ENTITIES,
+  WorkflowTabsSample,
 } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
@@ -83,7 +84,7 @@ export const determineInitialTab = ({
   } else if (cg) {
     return TABS.CONSENSUS_GENOME;
   } else if (amr) {
-    return TABS.AMR;
+    return TABS.AMR as WorkflowTabsSample;
   } else if (initialWorkflow) {
     return TABS[findInWorkflows(initialWorkflow, "value")];
   } else {

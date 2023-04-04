@@ -13,8 +13,12 @@ import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
 import symlog from "../../utils/d3/scales/symlog";
 import addSvgColorFilter from "../../utils/d3/svg";
 import cs from "./heatmap.scss";
+
 // used for filter to make plus icon blue
 const COLOR_HOVER_LINK = cs.primaryLight;
+// CSS Field constants
+const TEXT_ANCHOR = "text-anchor";
+const XLINK_HREF = "xlink:href";
 
 // TODO(tcarvalho): temporary hack to send elements to the back.
 // Remove once code is ported to d3 v4, which contains this function.
@@ -1394,7 +1398,7 @@ export default class Heatmap {
             this.scaleLimits.min,
             this.scaleLimits.max,
           );
-          const color = this.options.customColorCallback
+          return this.options.customColorCallback
             ? this.options.customColorCallback(
                 d.value,
                 d,
@@ -1403,7 +1407,6 @@ export default class Heatmap {
                 this.options.colorNoValue,
               )
             : this.options.colors[colorIndex];
-          return color;
         });
     };
 
@@ -1603,13 +1606,13 @@ export default class Heatmap {
       .attr("class", cs.hoverTarget)
       .attr("width", this.rowLabelsWidth)
       .attr("height", this.cell.height)
-      .style("text-anchor", "end");
+      .style(TEXT_ANCHOR, "end");
 
     rowLabelEnter
       .append("text")
       .text((d: $TSFixMe) => d.label)
       .style("dominant-baseline", "central")
-      .style("text-anchor", "end")
+      .style(TEXT_ANCHOR, "end")
       .on(
         "click",
         (d: $TSFixMe) =>
@@ -1645,7 +1648,7 @@ export default class Heatmap {
         `translate(${this.options.spacing},
         ${(this.cell.height - this.options.spacing) / 2})`,
       )
-      .attr("xlink:href", `${this.options.iconPath}/IconCloseSmall.svg`)
+      .attr(XLINK_HREF, `${this.options.iconPath}/IconCloseSmall.svg`)
       .on("click", this.removeRow);
 
     applyFormat(rowLabelEnter);
@@ -1706,7 +1709,7 @@ export default class Heatmap {
         .attr("class", cs.metadataAddIcon)
         .attr("width", this.options.metadataAddLinkHeight)
         .attr("height", this.options.metadataAddLinkHeight)
-        .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
+        .attr(XLINK_HREF, `${this.options.iconPath}/plus.svg`);
       applyFormat(addRowTrigger);
 
       // setup triggers
@@ -1793,7 +1796,7 @@ export default class Heatmap {
         .attr("class", cs.metadataAddIcon)
         .attr("width", this.options.metadataAddLinkHeight)
         .attr("height", this.options.metadataAddLinkHeight)
-        .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
+        .attr(XLINK_HREF, `${this.options.iconPath}/plus.svg`);
       applyFormat(pinColumnTrigger);
 
       // setup triggers
@@ -1835,7 +1838,7 @@ export default class Heatmap {
     columnLabelEnter
       .append("text")
       .text((d: $TSFixMe) => d.label)
-      .style("text-anchor", "left")
+      .style(TEXT_ANCHOR, "left")
       .attr(
         "transform",
         `translate(${this.cell.width / 2},-${this.options.spacing}) rotate (${
@@ -1860,7 +1863,7 @@ export default class Heatmap {
       .attr("class", cs.pinIcon)
       // Center the icon in the column, offset by the half the icon width.
       .attr("transform", `translate(${this.cell.width / 2 - 7}, 0)`)
-      .attr("xlink:href", `${this.options.iconPath}/IconPin.svg`)
+      .attr(XLINK_HREF, `${this.options.iconPath}/IconPin.svg`)
       .on("mouseenter", this.options.onPinIconHover)
       .on("mouseleave", this.options.onPinIconExit)
       .on("click", this.unpinColumn);
@@ -1957,7 +1960,7 @@ export default class Heatmap {
       .attr("x", -this.options.marginLeft)
       .attr("y", -1)
       .attr("height", this.options.minCellHeight + 1)
-      .style("text-anchor", "end")
+      .style(TEXT_ANCHOR, "end")
       .style("fill", "white");
     applyFormat(columnMetadataLabelEnter);
 
@@ -1978,7 +1981,7 @@ export default class Heatmap {
       .append("text")
       .text((d: $TSFixMe) => d.label)
       .style("dominant-baseline", "central")
-      .style("text-anchor", "end")
+      .style(TEXT_ANCHOR, "end")
       .on("click", handleColumnMetadataLabelClick)
       .on("mouseover", (d: $TSFixMe) => {
         this.options.onColumnMetadataLabelHover &&
@@ -2002,7 +2005,7 @@ export default class Heatmap {
 
     columnMetadataLabel
       .select(".metadataSortIcon")
-      .attr("xlink:href", (d: $TSFixMe) =>
+      .attr(XLINK_HREF, (d: $TSFixMe) =>
         d.value === this.columnMetadataSortField
           ? `${this.options.iconPath}/sort_${
               this.columnMetadataSortAsc ? "asc" : "desc"
@@ -2162,7 +2165,7 @@ export default class Heatmap {
         .attr("class", cs.metadataAddIcon)
         .attr("width", this.options.metadataAddLinkHeight)
         .attr("height", this.options.metadataAddLinkHeight)
-        .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
+        .attr(XLINK_HREF, `${this.options.iconPath}/plus.svg`);
       applyFormat(addMetadataTrigger);
 
       // setup triggers

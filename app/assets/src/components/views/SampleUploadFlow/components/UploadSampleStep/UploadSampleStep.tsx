@@ -1,38 +1,37 @@
 import cx from "classnames";
 import { Tab, Tabs, Tooltip } from "czifui";
 import {
+  compact,
+  concat,
+  difference,
+  filter,
   find,
   findIndex,
-  filter,
+  flatten,
+  flow,
+  get,
+  includes,
+  intersection,
   kebabCase,
+  keyBy,
   keys,
+  map,
+  mergeWith,
   pick,
   pickBy,
-  includes,
-  flatten,
-  set,
   reject,
+  set,
   size,
-  flow,
-  values,
-  keyBy,
-  get,
-  concat,
-  map,
-  zipObject,
-  mergeWith,
-  uniqBy,
-  uniq,
-  compact,
-  difference,
   union,
+  uniq,
+  uniqBy,
   uniqueId,
-  intersection,
+  values,
+  zipObject,
 } from "lodash/fp";
 import QueryString from "query-string";
 import React from "react";
-
-import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
+import { getProjects, validateSampleFiles, validateSampleNames } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
   trackEvent,
@@ -51,29 +50,28 @@ import {
 } from "~/components/utils/features";
 import { SampleUploadType } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
-
 import BasespaceSampleImport from "../../BasespaceSampleImport";
+import {
+  ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY,
+  BASESPACE_UPLOAD,
+  DEFAULT_MEDAKA_MODEL_OPTION,
+  DEFAULT_NANOPORE_WETLAB_OPTION,
+  LOCAL_UPLOAD,
+  MISMATCH_FORMAT_ERROR,
+  NO_TECHNOLOGY_SELECTED,
+  REMOTE_UPLOAD,
+  SELECT_ID_KEY,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
+  UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
+  UPLOAD_WORKFLOWS,
+} from "../../constants";
 import LocalSampleFileUpload from "../../LocalSampleFileUpload";
 import PreUploadQCCheck from "../../PreUploadQCCheck";
 import RemoteSampleFileUpload from "../../RemoteSampleFileUpload";
+import cs from "../../sample_upload_flow.scss";
 import SampleUploadTable, {
   SampleForUploadTable,
 } from "../../SampleUploadTable";
-import {
-  UPLOAD_WORKFLOWS,
-  SEQUENCING_TECHNOLOGY_OPTIONS,
-  SELECT_ID_KEY,
-  DEFAULT_NANOPORE_WETLAB_OPTION,
-  DEFAULT_MEDAKA_MODEL_OPTION,
-  MISMATCH_FORMAT_ERROR,
-  ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY,
-  UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
-  LOCAL_UPLOAD,
-  REMOTE_UPLOAD,
-  BASESPACE_UPLOAD,
-  NO_TECHNOLOGY_SELECTED,
-} from "../../constants";
-import cs from "../../sample_upload_flow.scss";
 import {
   groupSamplesByLane,
   openBasespaceOAuthPopup,
@@ -81,12 +79,12 @@ import {
 } from "../../utils";
 import { WorkflowSelector } from "../WorkflowSelector";
 import {
-  SelectedSampleIdsRecord,
-  SelectedSampleIdsKeyType,
-  UploadSampleStepProps,
-  UploadSampleStepState,
   SamplesKeyType,
   SamplesRecord,
+  SelectedSampleIdsKeyType,
+  SelectedSampleIdsRecord,
+  UploadSampleStepProps,
+  UploadSampleStepState,
 } from "./types";
 
 const LOCAL_UPLOAD_LABEL = "Upload from Your Computer";
@@ -590,9 +588,8 @@ class UploadSampleStep extends React.Component<
             const files = pair.files;
             for (const fileName in files) {
               finishedValidating[fileName] = pair.finishedValidating;
-              const correctSequenceTechnologySelected = this.validateCorrectFormat(
-                pair,
-              );
+              const correctSequenceTechnologySelected =
+                this.validateCorrectFormat(pair);
               isValid[fileName] =
                 pair.isValid && correctSequenceTechnologySelected;
               const errorMsg = !correctSequenceTechnologySelected
@@ -1031,10 +1028,10 @@ class UploadSampleStep extends React.Component<
     // Note: we currently only run validation checks on locally uploaded samples
     if (
       currentTab === LOCAL_UPLOAD &&
-      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE)
+      allowedFeatures.includes(PRE_UPLOAD_CHECK_FEATURE) &&
+      !localSamples.every(element => element.finishedValidating)
     ) {
-      if (!localSamples.every(element => element.finishedValidating))
-        return "Please wait for file validation to complete";
+      return "Please wait for file validation to complete";
     }
     if (!selectedProject) return "Please select a project to continue";
     else if (size(this.getSelectedSamples(currentTab)) < 1)
@@ -1189,12 +1186,10 @@ class UploadSampleStep extends React.Component<
         )}
         onChange={(_, selectedTabIndex) =>
           this.handleTabChange(selectedTabIndex)
-        }
-      >
+        }>
         <Tab
           label={LOCAL_UPLOAD_LABEL}
-          data-testid={kebabCase(LOCAL_UPLOAD_LABEL)}
-        ></Tab>
+          data-testid={kebabCase(LOCAL_UPLOAD_LABEL)}></Tab>
         {(admin || biohubS3UploadEnabled) && s3Tab}
         {basespaceTab}
       </Tabs>
@@ -1206,8 +1201,7 @@ class UploadSampleStep extends React.Component<
       <Tab
         disabled={disabled}
         label={label}
-        data-testid={kebabCase(label)}
-      ></Tab>
+        data-testid={kebabCase(label)}></Tab>
     );
     if (disabled) {
       tab = (
@@ -1215,8 +1209,7 @@ class UploadSampleStep extends React.Component<
           arrow
           placement="top"
           title={UNSUPPORTED_UPLOAD_OPTION_TOOLTIP}
-          leaveDelay={0}
-        >
+          leaveDelay={0}>
           <span>{tab}</span>
         </Tooltip>
       );
@@ -1289,8 +1282,7 @@ class UploadSampleStep extends React.Component<
           cs.uploadSampleStep,
           cs.uploadFlowStep,
           this.props.visible && cs.visible,
-        )}
-      >
+        )}>
         <div className={cs.flexContent}>
           <div className={cs.projectSelect}>
             <div className={cs.header} role="heading">
@@ -1326,8 +1318,7 @@ class UploadSampleStep extends React.Component<
                   this.openCreateProject,
                   "UploadSampleStep_create-project_opened",
                 )}
-                data-testid="create-project"
-              >
+                data-testid="create-project">
                 + Create Project
               </div>
             )}
@@ -1412,8 +1403,7 @@ class UploadSampleStep extends React.Component<
                   text={readyForBasespaceAuth ? "Authorize" : "Continue"}
                 />
               </span>
-            }
-          >
+            }>
             {this.handleContinueButtonTooltip()}
           </BasicPopup>
           <a href="/home">

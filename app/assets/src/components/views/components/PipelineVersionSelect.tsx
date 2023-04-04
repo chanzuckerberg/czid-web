@@ -76,9 +76,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
     if (!currentRun[versionKey]) return "";
 
     const workflowKey = findInWorkflows(workflowType, "value");
-    const versionString = `${WORKFLOWS[workflowKey].pipelineName} Pipeline v${currentRun[versionKey]}`;
-
-    return versionString;
+    return `${WORKFLOWS[workflowKey].pipelineName} Pipeline v${currentRun[versionKey]}`;
   };
 
   // construct the header

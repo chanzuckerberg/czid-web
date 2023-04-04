@@ -41,6 +41,9 @@ export const getHistogramTooltipData = memoize(
   },
 );
 
+// String constants
+const NT_CONTIG_READ_COUNT = "NT Contig Read Count";
+
 // Gets called on every mouse move, so need to memoize.
 export const getGenomeVizTooltipData = memoize(
   (
@@ -66,7 +69,7 @@ export const getGenomeVizTooltipData = memoize(
       counts = [
         ["# NT Contigs", numContigs],
         ["# Loose NT Reads", numReads],
-        ["NT Contig Read Count", hitObj[2]],
+        [NT_CONTIG_READ_COUNT, hitObj[2]],
       ];
     } else if (numReads > 1) {
       name = "Aggregated Loose NT Reads";
@@ -77,11 +80,11 @@ export const getGenomeVizTooltipData = memoize(
       name = "Aggregated Contigs";
       counts = [
         ["# NT Contigs", numContigs],
-        ["NT Contig Read Count", hitObj[2]],
+        [NT_CONTIG_READ_COUNT, hitObj[2]],
       ];
     } else if (numContigs === 1) {
       name = "NT Contig";
-      counts = [["NT Contig Read Count", hitObj[2]]];
+      counts = [[NT_CONTIG_READ_COUNT, hitObj[2]]];
     }
 
     const averagePrefix = multipleHits ? "Avg. " : "";

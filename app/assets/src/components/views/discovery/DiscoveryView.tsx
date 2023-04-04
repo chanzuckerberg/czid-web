@@ -40,7 +40,6 @@ import {
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
@@ -51,6 +50,7 @@ import {
   ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS,
   generateUrlToSampleView,
@@ -101,21 +101,13 @@ import {
   VISUALIZATIONS_DOC_LINK,
 } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
-import { NOTIFICATION_TYPES } from "../SampleView/constants";
-import { showNotification } from "../SampleView/notifications";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView/SamplesView";
+import { NOTIFICATION_TYPES } from "../SampleView/constants";
+import { showNotification } from "../SampleView/notifications";
 import VisualizationsView, {
   Visualization,
 } from "../visualizations/VisualizationsView";
-import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
-import DiscoveryFilters from "./DiscoveryFilters";
-import DiscoveryHeader from "./DiscoveryHeader";
-import DiscoverySidebar from "./DiscoverySidebar";
-import InfoBanner from "./InfoBanner";
-import ModalFirstTimeUser from "./ModalFirstTimeUser";
-import NoSearchResultsBanner from "./NoSearchResultsBanner";
-import ProjectHeader from "./ProjectHeader";
 import {
   CURRENT_TAB_OPTIONS,
   DISPLAY_PLQC,
@@ -135,14 +127,24 @@ import {
   DISCOVERY_DOMAIN_PUBLIC,
   DISCOVERY_DOMAIN_SNAPSHOT,
 } from "./discovery_api";
-
 import cs from "./discovery_view.scss";
+import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
+import DiscoveryFilters from "./DiscoveryFilters";
+import DiscoveryHeader from "./DiscoveryHeader";
+import DiscoverySidebar from "./DiscoverySidebar";
+import InfoBanner from "./InfoBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
+import ModalFirstTimeUser from "./ModalFirstTimeUser";
+import NoSearchResultsBanner from "./NoSearchResultsBanner";
+import ProjectHeader from "./ProjectHeader";
+
 import {
   getOrderByKeyFor,
   getOrderDirKeyFor,
   getSessionOrderFieldsKeys,
 } from "./utils";
+
+const SAMPLES_UPLOAD_URL = "/samples/upload";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -376,7 +378,7 @@ class DiscoveryView extends React.Component<
         objectCollection: this.amrWorkflowRuns,
         noDataLinks: [
           {
-            href: "/samples/upload",
+            href: SAMPLES_UPLOAD_URL,
             text: `Upload new samples`,
           },
           {
@@ -1588,13 +1590,12 @@ class DiscoveryView extends React.Component<
   getServerSideSuggestions = async (query: string) => {
     const { domain } = this.props;
 
-    const results = await getSearchSuggestions({
+    return getSearchSuggestions({
       // NOTE: backend also supports "tissue", "location", "host" and more
       categories: ["sample", "project", "taxon"],
       query,
       domain,
     });
-    return results;
   };
 
   handleSearchTriggered = async (query: string) => {
@@ -1952,7 +1953,7 @@ class DiscoveryView extends React.Component<
                 className={cs.noDataBannerContainer}
                 icon={<ImgProjectsSecondary />}
                 link={{
-                  href: "/samples/upload",
+                  href: SAMPLES_UPLOAD_URL,
                   text: "Upload your data",
                 }}
                 message="You will see your projects here after you upload data or when you are invited to a project."
@@ -1971,7 +1972,7 @@ class DiscoveryView extends React.Component<
                 className={cs.noDataBannerContainer}
                 icon={<ImgSamplesSecondary />}
                 link={{
-                  href: "/samples/upload",
+                  href: SAMPLES_UPLOAD_URL,
                   text: "Upload your data",
                 }}
                 message={`You will see your samples here after you upload data ${
@@ -2017,7 +2018,7 @@ class DiscoveryView extends React.Component<
   getNoDataLinks = (pluralizedPipelineLabel: string) => {
     return [
       {
-        href: "/samples/upload",
+        href: SAMPLES_UPLOAD_URL,
         text: `Run ${pluralizedPipelineLabel}`,
       },
     ];

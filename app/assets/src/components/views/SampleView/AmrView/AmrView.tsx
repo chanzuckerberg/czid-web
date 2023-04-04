@@ -1,13 +1,12 @@
-/* eslint-disable import/order */
 import React, { useContext, useEffect, useState } from "react";
-import SampleReportContent from "../SampleReportContent";
-import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
-import Sample, { WorkflowRun } from "~/interface/sample";
 import { getWorkflowRunResults } from "~/api";
 import { UserContext } from "~/components/common/UserContext";
+import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V2_FEATURE } from "~/components/utils/features";
-import { AmrSampleReport } from "./components/AmrSampleReport";
+import Sample, { WorkflowRun } from "~/interface/sample";
+import SampleReportContent from "../SampleReportContent";
 import { AmrOutputDownloadView } from "./components/AmrOutputDownloadView";
+import { AmrSampleReport } from "./components/AmrSampleReport";
 
 interface AmrViewProps {
   workflowRun: WorkflowRun;

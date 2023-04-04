@@ -106,7 +106,7 @@ const filterReadSpecificity = ({ row, readSpecificity }: $TSFixMe) => {
 
 const filterThresholds = ({ row, thresholds }: $TSFixMe) => {
   if (thresholds && thresholds.length) {
-    const res = every(threshold => {
+    return every(threshold => {
       const { metric, operator, value } = threshold;
       const parsedThresholdValue = parseFloat(value);
       const parsedValue = getTaxonMetricValue(row, metric);
@@ -130,7 +130,6 @@ const filterThresholds = ({ row, thresholds }: $TSFixMe) => {
       }
       return true;
     }, thresholds);
-    return res;
   }
 
   return true;
@@ -138,8 +137,7 @@ const filterThresholds = ({ row, thresholds }: $TSFixMe) => {
 
 const getTaxonMetricValue = (row: $TSFixMe, metric: $TSFixMe) => {
   const parsedMetric = metric.split(":");
-  const parsedValue = get(parsedMetric, row);
-  return parsedValue;
+  return get(parsedMetric, row);
 };
 
 export const adjustMetricPrecision = (species: $TSFixMe) => {

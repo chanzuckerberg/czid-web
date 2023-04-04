@@ -7,10 +7,10 @@ import React from "react";
 import { normalizeData } from "~/components/visualizations/utils";
 import { numberWithPercent, numberWithSiPrefix } from "~/helpers/strings";
 
+import cs from "./horizontal_stacked_bar_chart.scss";
 import XAxis from "./XAxis";
 import YAxis from "./YAxis";
 
-import cs from "./horizontal_stacked_bar_chart.scss";
 
 // Data passed into this chart should be an array of objects in the form:
 // [
@@ -443,11 +443,10 @@ export default class HorizontalStackedBarChart extends React.Component<
     const yAxisRefs = this.references.yRef.filter(
       (refPair: $TSFixMe) => refPair[1] !== null,
     );
-    const measured = yAxisRefs.map((keyRefPair: $TSFixMe) => [
+    return yAxisRefs.map((keyRefPair: $TSFixMe) => [
       keyRefPair[0],
       keyRefPair[1].clientWidth,
     ]);
-    return measured;
   }
 
   /* --- callbacks --- */
@@ -647,7 +646,7 @@ export default class HorizontalStackedBarChart extends React.Component<
       : Math.floor(barCanvasWidth / options.x.tickSpacing);
     const xOffsets = x.ticks(tickCount, "s").map((value: $TSFixMe) => x(value));
 
-    const xGrid = xOffsets.map((xOffset: $TSFixMe) => {
+    return xOffsets.map((xOffset: $TSFixMe) => {
       return (
         <path
           d={`M ${xOffset} 0 v ${barCanvasHeight}`}
@@ -656,8 +655,6 @@ export default class HorizontalStackedBarChart extends React.Component<
         />
       );
     });
-
-    return xGrid;
   }
 
   render() {

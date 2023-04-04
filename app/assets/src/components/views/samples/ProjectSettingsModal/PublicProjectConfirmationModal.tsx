@@ -1,7 +1,7 @@
 import React from "react";
 import Modal from "~ui/containers/Modal";
-import ExternalLink from "~ui/controls/ExternalLink";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
+import ExternalLink from "~ui/controls/ExternalLink";
 import cs from "./public_project_confirmation_modal.scss";
 
 interface PublicProjectConfirmationModalProps {

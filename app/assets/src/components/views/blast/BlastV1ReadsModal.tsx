@@ -8,10 +8,10 @@ import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
+import cs from "./blast_v1_reads_modal.scss";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
 
-import cs from "./blast_v1_reads_modal.scss";
 import {
   BlastModalInfo,
   CountTypes,

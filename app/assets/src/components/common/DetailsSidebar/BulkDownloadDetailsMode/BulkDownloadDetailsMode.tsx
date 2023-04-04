@@ -13,8 +13,8 @@ import {
 import Notification from "~ui/notifications/Notification";
 
 import AdvancedDownloadTab from "./AdvancedDownloadTab";
-import DetailsTab from "./DetailsTab";
 import cs from "./bulk_download_details_mode.scss";
+import DetailsTab from "./DetailsTab";
 
 type TabNames = "Details" | "Advanced Download";
 const TABS: TabNames[] = ["Details", "Advanced Download"];

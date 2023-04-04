@@ -23,10 +23,8 @@ import {
   VIRAL_CONSENSUS_GENOME_DOC_LINK,
 } from "~utils/documentationLinks";
 import { FIELDS_METADATA } from "~utils/tooltip";
-import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
-import SampleReportContent from "./SampleReportContent";
-
 import cs from "./consensus_genome_view.scss";
+import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
 import {
   CG_HISTOGRAM_FILL_COLOR,
   CG_HISTOGRAM_HOVER_FILL_COLOR,
@@ -34,6 +32,8 @@ import {
   RUNNING_STATE,
   SARS_COV_2_ACCESSION_ID,
 } from "./constants";
+import SampleReportContent from "./SampleReportContent";
+
 
 interface ConsensusGenomeViewProps {
   link?: string;
@@ -339,7 +339,7 @@ const ConsensusGenomeView = ({
             {text} {link}
           </>
         }
-        className={cx(cs.helpIcon, iconStyle && iconStyle)}
+        className={cx(cs.helpIcon, !!iconStyle && iconStyle)}
         // @ts-expect-error Working with Lodash types
         analyticsEventName={getOr(undefined, "analyticsEventName", analytics)}
         analyticsEventData={getOr(undefined, "analyticsEventData", analytics)}

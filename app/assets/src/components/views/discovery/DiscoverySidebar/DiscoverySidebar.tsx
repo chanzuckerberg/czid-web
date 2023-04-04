@@ -9,8 +9,8 @@ import { Accordion } from "~/components/layout";
 import { DimensionsDetailed, DimensionValue } from "~/interface/discoveryView";
 import { FilterList } from "~/interface/samplesView";
 import { Optional, Project } from "~/interface/shared";
-import ProjectDescription from "./ProjectDescription";
 import cs from "./discovery_sidebar.scss";
+import ProjectDescription from "./ProjectDescription";
 
 interface DiscoverySidebarProps {
   allowedFeatures?: string[];

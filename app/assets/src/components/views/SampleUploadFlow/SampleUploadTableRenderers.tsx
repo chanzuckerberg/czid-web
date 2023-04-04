@@ -74,14 +74,13 @@ export default class SampleUploadTableRenderers extends React.Component {
   };
 
   static getCellData = ({ dataKey, rowData }: $TSFixMe) => {
-    const arr = {
+    return {
       fileName: get(dataKey, rowData),
       finishedValidating: get("finishedValidating", rowData),
       id: get("_selectId", rowData),
       isValid: get("isValid", rowData),
       error: get("error", rowData),
     };
-    return arr;
   };
 
   static renderSelectableCell = ({

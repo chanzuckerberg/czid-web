@@ -5,10 +5,10 @@ import { StickyContainer, Sticky } from "react-sticky";
 import { getAMRCounts } from "~/api/amr";
 import { trackEvent } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
-import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
+import ErrorBoundary from "~/components/ErrorBoundary";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { AMR_DEPRECATED_HELP_LINK } from "~/components/utils/documentationLinks";
@@ -172,7 +172,7 @@ export default class AMRHeatmapView extends React.Component<
   }
 
   findMaxValues(samplesWithAMRCounts: $TSFixMe[]) {
-    const maxValues = samplesWithAMRCounts.reduce(
+    return samplesWithAMRCounts.reduce(
       (accum, currentSample) => {
         currentSample.amrCounts.forEach((amrCount: $TSFixMe) => {
           accum.depth = Math.max(accum.depth, amrCount.depth);
@@ -188,7 +188,6 @@ export default class AMRHeatmapView extends React.Component<
       },
       { depth: 0, coverage: 0, rpm: 0, dpm: 0, total_reads: 0 },
     );
-    return maxValues;
   }
 
   hasDataToDisplay(samplesWithAMRCounts: $TSFixMe[]) {
@@ -218,14 +217,13 @@ export default class AMRHeatmapView extends React.Component<
   }
 
   extractSampleLabels(sampleData: $TSFixMe[]) {
-    const sampleLabels = sampleData.map(sample => {
+    return sampleData.map(sample => {
       return {
         label: sample.sampleName,
         id: sample.sampleId,
         metadata: sample.metadata,
       };
     });
-    return sampleLabels;
   }
 
   extractGeneAndAlleleLabels(sampleData: $TSFixMe[]) {

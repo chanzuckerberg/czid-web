@@ -3,10 +3,10 @@ import React from "react";
 
 import { trackEvent } from "~/api/analytics";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
+import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import MapBanner from "~/components/views/discovery/mapping/MapBanner";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
 import ShapeMarker from "~/components/views/discovery/mapping/ShapeMarker";
-import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import {
   indexOfMapLevel,
   isValidCoordinate,

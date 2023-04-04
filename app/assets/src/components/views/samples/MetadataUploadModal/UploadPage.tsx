@@ -3,8 +3,8 @@ import { validateManualMetadataForProject } from "~/api/metadata";
 import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
 import { NameId } from "~/interface/shared";
 import Instructions from "./Instructions";
-import { ProjectSample } from "./MetadataUploadModal";
 import cs from "./metadata_upload_modal.scss";
+import { ProjectSample } from "./MetadataUploadModal";
 
 interface UploadPageProps {
   onMetadataChange: $TSFixMeFunction;

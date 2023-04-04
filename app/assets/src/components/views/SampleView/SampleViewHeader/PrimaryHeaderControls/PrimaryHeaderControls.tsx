@@ -40,9 +40,9 @@ import { openUrl } from "~utils/links";
 import { TABS } from "../../constants";
 import { DownloadDropdown } from "./DownloadDropdown";
 import { OverflowMenu } from "./OverflowMenu";
+import cs from "./primary_header_controls.scss";
 import { ShareButtonPopUp } from "./ShareButtonPopUp";
 
-import cs from "./primary_header_controls.scss";
 
 interface PrimaryHeaderControlsProps {
   backgroundId?: number;

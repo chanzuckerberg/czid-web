@@ -8,8 +8,8 @@ import Tabs from "~/components/ui/controls/Tabs";
 import Notification from "~ui/notifications/Notification";
 
 import { AdvancedDownloadTabWithApollo } from "./AdvancedDownloadTabWithApollo";
-import { DetailsTabWithApollo } from "./DetailsTabWithApollo";
 import cs from "./bulk_download_details_mode_with_apollo.scss";
+import { DetailsTabWithApollo } from "./DetailsTabWithApollo";
 
 type TabNames = "Details" | "Advanced Download";
 const TABS: TabNames[] = ["Details", "Advanced Download"];

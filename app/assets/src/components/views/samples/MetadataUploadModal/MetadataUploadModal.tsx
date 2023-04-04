@@ -12,9 +12,9 @@ import Wizard from "~ui/containers/Wizard";
 import ListNotification from "~ui/notifications/ListNotification";
 import Notification from "~ui/notifications/Notification";
 
+import cs from "./metadata_upload_modal.scss";
 import ReviewPage from "./ReviewPage";
 import UploadPage from "./UploadPage";
-import cs from "./metadata_upload_modal.scss";
 
 interface MetadataUploadModalProps {
   onClose?: $TSFixMeFunction;

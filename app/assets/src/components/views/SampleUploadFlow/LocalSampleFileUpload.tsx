@@ -16,8 +16,8 @@ import { FileWithPreview } from "react-dropzone";
 
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
-import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import List from "~/components/ui/List";
 import { CONCAT_FILES_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
   PRE_UPLOAD_CHECK_FEATURE,

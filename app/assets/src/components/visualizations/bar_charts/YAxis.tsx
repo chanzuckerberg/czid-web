@@ -36,7 +36,7 @@ export default function YAxis({
     const textOffset = `translate(-${7 +
       tickSize * Number(ticksVisible || pathVisible)}, 0)`;
 
-    const tickMapping = y.domain().map((yAttribute, index) => {
+    return y.domain().map((yAttribute, index) => {
       const yPosition = y(yAttribute);
       const displayName = labels[index];
       return (
@@ -61,8 +61,6 @@ export default function YAxis({
         </g>
       );
     });
-
-    return tickMapping;
   };
 
   return (

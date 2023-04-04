@@ -1,5 +1,6 @@
 import d3 from "d3";
 import React from "react";
+import { TRANSFORM, TRANSLATE } from "~/helpers/cssConstants";
 
 interface ScatterPlotProps {
   data: $TSFixMe[];
@@ -33,9 +34,7 @@ class ScatterPlot extends React.Component<ScatterPlotProps> {
 
   // eslint-disable-next-line camelcase
   UNSAFE_componentWillReceiveProps(nextProps: ScatterPlotProps) {
-    d3.select(this.container)
-      .select("svg")
-      .remove();
+    d3.select(this.container).select("svg").remove();
     this.renderD3(nextProps);
   }
 
@@ -70,13 +69,9 @@ class ScatterPlot extends React.Component<ScatterPlotProps> {
     });
     this.yMinMax = [this.yMinMax[0] - 1, this.yMinMax[1] + 1];
 
-    this.xScale = this.scale()
-      .domain(this.xMinMax)
-      .range([0, this.width]);
+    this.xScale = this.scale().domain(this.xMinMax).range([0, this.width]);
 
-    this.yScale = this.scale()
-      .domain(this.yMinMax)
-      .range([this.height, 0]);
+    this.yScale = this.scale().domain(this.yMinMax).range([this.height, 0]);
 
     this.svg = d3
       .select(this.container)
@@ -100,12 +95,8 @@ class ScatterPlot extends React.Component<ScatterPlotProps> {
       .append("g")
       .attr("class", "x axis")
       .attr(
-        "transform",
-        "translate(" +
-          this.margin.left +
-          "," +
-          (this.height + this.margin.top) +
-          ")",
+        TRANSFORM,
+        `${TRANSLATE}(${this.margin.left},${this.height + this.margin.top})`,
       )
       .call(xAxis)
       .append("text")
@@ -126,10 +117,7 @@ class ScatterPlot extends React.Component<ScatterPlotProps> {
     this.svg
       .append("g")
       .attr("class", "y axis")
-      .attr(
-        "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")",
-      )
+      .attr(TRANSFORM, `${TRANSLATE}(${this.margin.left},${this.margin.top})`)
       .call(yAxis)
       .append("text")
       .attr("class", "label")
@@ -143,7 +131,7 @@ class ScatterPlot extends React.Component<ScatterPlotProps> {
       .append("g")
       .attr("class", "points")
       .attr(
-        "transform",
+        TRANSFORM,
         "translate(" + this.margin.left + "," + this.margin.top + ")",
       )
       .selectAll(".point")
@@ -176,7 +164,7 @@ class ScatterPlot extends React.Component<ScatterPlotProps> {
     this.svg
       .append("g")
       .attr(
-        "transform",
+        TRANSFORM,
         "translate(" + this.margin.left + "," + this.margin.top + ")",
       )
       .append("line")

@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { getOntology } from "~/api/amr";
 
 import { FooterLinks } from "./FooterLinks";
-import { Ontology } from "./Ontology";
 import cs from "./gene_details_mode.scss";
+import { Ontology } from "./Ontology";
 
 export interface GDMProps {
   geneName: string;

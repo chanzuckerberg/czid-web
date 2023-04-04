@@ -1,7 +1,7 @@
 import { Icon } from "czifui";
 import React from "react";
-import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import List from "~/components/ui/List";
 import cs from "./samples_heatmap_filter_stats.scss";
 
 interface SamplesHeatmapFilterStatsPropsType {

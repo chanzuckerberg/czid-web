@@ -565,12 +565,11 @@ const getSamplesReadStats = async (sampleIds: $TSFixMe) => {
 
   const response = await Promise.all(requests);
   // flatten into one object
-  const result = response
+  return response
     .flat()
     .reduce((accum: $TSFixMe, current: $TSFixMe) => {
       return Object.assign(accum, current);
     }, {});
-  return result;
 };
 
 const setWorkflowVersion = (workflowName: $TSFixMe, version: $TSFixMe) =>

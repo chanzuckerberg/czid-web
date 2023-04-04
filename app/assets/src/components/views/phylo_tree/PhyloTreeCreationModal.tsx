@@ -36,8 +36,8 @@ import { showPhyloTreeNotification } from "~/components/views/phylo_tree/PhyloTr
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { Project } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import Link from "~ui/controls/Link";
 import { SubtextDropdown } from "~ui/controls/dropdowns";
+import Link from "~ui/controls/Link";
 import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import Modal from "../../ui/containers/Modal";
@@ -45,9 +45,9 @@ import Wizard from "../../ui/containers/Wizard";
 import Input from "../../ui/controls/Input";
 import DataTable from "../../visualizations/table/DataTable";
 import { COLUMNS } from "./ColumnConfiguration";
+import cs from "./phylo_tree_creation_modal.scss";
 import PhyloTreeChecks from "./PhyloTreeChecks";
 
-import cs from "./phylo_tree_creation_modal.scss";
 
 interface PhyloTreeCreationModalProps {
   admin?: number;

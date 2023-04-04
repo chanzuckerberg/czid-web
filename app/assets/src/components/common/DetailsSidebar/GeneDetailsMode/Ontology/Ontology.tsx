@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { trackEvent } from "~/api/analytics";
-import { OntologyType } from "../GeneDetailsMode";
 import gcs from "../gene_details_mode.scss";
+import { OntologyType } from "../GeneDetailsMode";
 import { CARDLicense } from "./CARDLicense";
+import cs from "./ontology.scss";
 import { PropertyList } from "./PropertyList";
 import { Publications } from "./Publications";
-import cs from "./ontology.scss";
 
 interface OntologyProps {
   geneName: string;

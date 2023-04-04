@@ -50,7 +50,7 @@ const Accordion = ({
           cs.header,
           toggleable && cs.toggleable,
           cs[toggleArrowAlignment],
-          headerClassName && headerClassName,
+          !!headerClassName && headerClassName,
         )}
         onClick={propsOnToggle || onToggle}
       >

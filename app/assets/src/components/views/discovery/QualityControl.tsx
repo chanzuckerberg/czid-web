@@ -23,25 +23,24 @@ import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { GET_SAMPLES_READS_STATS_QUERY } from "~/api/samples_reads_stats";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
-import List from "~/components/ui/List";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
+import List from "~/components/ui/List";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import {
   SHARED_SAMPLE_TABLE_COLUMNS,
   SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
 } from "~/components/views/samples/constants";
-import Histogram from "~/components/visualizations/Histogram";
 import BarChartToggle from "~/components/visualizations/bar_charts/BarChartToggle";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
+import Histogram from "~/components/visualizations/Histogram";
 import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
 import { numberWithPercent } from "~/helpers/strings";
 import { apolloClient } from "~/index";
 import Sample from "~/interface/sample";
 import { TooltipVizTable } from "~ui/containers";
 import Notification from "~ui/notifications/Notification";
-import InfoBanner from "./InfoBanner";
 import { QUALITY_CONTROL_QUERY } from "./api/quality_control";
 import {
   BAR_FILL_COLOR,
@@ -56,7 +55,10 @@ import {
   MISSING_INSERT_SIZE_WARNING,
   MODERN_HOST_FILTERING_SHORT_READ_MNGS_VERSION,
 } from "./constants";
+import InfoBanner from "./InfoBanner";
 import cs from "./quality_control.scss";
+
+const NUMBER_OF_SAMPLES = "Number of Samples";
 
 interface QualityControlWrapperProps {
   filters?: { host: $TSFixMeUnknown };
@@ -186,7 +188,7 @@ function QualityControl({
         container: totalReadsHistogramContainer.current,
         data: totalReadsBins,
         labelX: "Total Reads",
-        labelY: "Number of Samples",
+        labelY: NUMBER_OF_SAMPLES,
         tickFormat: d => {
           return totalReadsFormat(d);
         },
@@ -196,7 +198,7 @@ function QualityControl({
         container: qualityReadsHistogramContainer.current,
         data: qcPercentBins,
         labelX: "Percentage",
-        labelY: "Number of Samples",
+        labelY: NUMBER_OF_SAMPLES,
         tickFormat: (d: number) => numberWithPercent(d),
       });
 
@@ -204,14 +206,14 @@ function QualityControl({
         container: dcrHistogramContainer.current,
         data: dcrBins,
         labelX: "DCR",
-        labelY: "Number of Samples",
+        labelY: NUMBER_OF_SAMPLES,
       });
       if (meanInsertSizeBins.length > 0) {
         const _meanInsertSizeHistogram = renderHistogram({
           container: meanInsertSizeHistogramContainer.current,
           data: meanInsertSizeBins,
           labelX: "Base pairs",
-          labelY: "Number of Samples",
+          labelY: NUMBER_OF_SAMPLES,
         });
         setMeanInsertSizeHistogram(_meanInsertSizeHistogram);
       }
@@ -492,13 +494,12 @@ function QualityControl({
       while (sampleIndex < data.length) {
         const value = data[sampleIndex].value;
         const sampleId = data[sampleIndex].id;
-        if (x0 <= value && value < x1) {
-          sampleBin.push(sampleId);
-          binLength++;
-          sampleIndex++;
-        } else if (i === numBins - 1 && value === x1) {
-          // If this is the last bin and the value is equal to bin's upper limit,
-          // then include it in the last bin.
+        if ((x0 <= value && value < x1) || (i === numBins - 1 && value === x1)) {
+          /* If the value falls within the bin, include it
+             -OR-
+             If this is the last bin and the value is equal to bin's upper limit,
+             then include it in the last bin.
+          */
           sampleBin.push(sampleId);
           binLength++;
           sampleIndex++;

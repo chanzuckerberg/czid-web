@@ -15,9 +15,9 @@ import { PipelineRun } from "~/interface/shared";
 import { IconCloseSmall, IconArrowPipelineStage } from "~ui/icons";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../SampleUploadFlow/constants";
 
+import cs from "./pipeline_viz.scss";
 import PipelineVizHeader from "./PipelineVizHeader";
 import PipelineVizStatusIcon from "./PipelineVizStatusIcon";
-import cs from "./pipeline_viz.scss";
 import { inverseTransformDOMCoordinates } from "./utils";
 
 const START_NODE_ID = -1;

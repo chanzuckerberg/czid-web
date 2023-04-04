@@ -178,11 +178,9 @@ class InfiniteTable extends React.Component<
 
   handleGetRowHeight = ({ index }) => {
     const { defaultRowHeight } = this.props;
-    const height =
-      typeof defaultRowHeight === "function"
-        ? defaultRowHeight({ index, row: this.rows[index] })
-        : defaultRowHeight;
-    return height;
+    return typeof defaultRowHeight === "function"
+      ? defaultRowHeight({ index, row: this.rows[index] })
+      : defaultRowHeight;
   };
 
   reset = () => {
@@ -222,8 +220,7 @@ class InfiniteTable extends React.Component<
         loadMoreRows={this.loadMoreRows}
         minimumBatchSize={minimumBatchSize}
         rowCount={rowCount}
-        threshold={threshold}
-      >
+        threshold={threshold}>
         {({ onRowsRendered, registerChild }) => {
           return (
             <BaseTable

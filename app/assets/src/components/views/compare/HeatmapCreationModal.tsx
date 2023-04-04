@@ -6,13 +6,13 @@ import { withAnalytics, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import { CATEGORIES } from "~/components/views/SampleView/constants";
 import {
   SPECIFICITY_OPTIONS,
   SPECIES_SELECTION_OPTIONS,
   THRESHOLDS,
 } from "~/components/views/compare/SamplesHeatmapView/constants";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
+import { CATEGORIES } from "~/components/views/SampleView/constants";
 import { getURLParamString } from "~/helpers/url";
 import Modal from "~ui/containers/Modal";
 import {

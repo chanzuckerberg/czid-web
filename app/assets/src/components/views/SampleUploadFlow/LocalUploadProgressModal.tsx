@@ -33,14 +33,14 @@ import { Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import Notification from "~ui/notifications/Notification";
-import UploadConfirmationModal from "./UploadConfirmationModal";
-import UploadProgressModalSampleList from "./UploadProgressModalSampleList";
 import cs from "./upload_progress_modal.scss";
 import {
   addFlagsToSamples,
   logUploadStepError,
   redirectToProject,
 } from "./upload_progress_utils";
+import UploadConfirmationModal from "./UploadConfirmationModal";
+import UploadProgressModalSampleList from "./UploadProgressModalSampleList";
 
 interface LocalUploadProgressModalProps {
   samples?: SampleFromApi[];

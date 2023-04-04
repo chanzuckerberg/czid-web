@@ -73,6 +73,18 @@ function subtextError(message: string) {
   }
 }
 
+// String constants
+const UPLOAD_URL = "/samples/upload";
+const MAILTO_LINK = "mailto:help@czid.org";
+const CONTACT_US = "Contact us for help.";
+
+enum Status {
+  COMPLETE_ISSUE = "COMPLETE - ISSUE",
+  INCOMPLETE_ISSUE = "INCOMPLETE - ISSUE",
+  PROCESSING_SKIPPED = "PROCESSING SKIPPED",
+  SAMPLE_FAILED = "SAMPLE FAILED",
+}
+
 export const sampleErrorInfo = ({
   sample,
   pipelineRun = {},
@@ -82,7 +94,7 @@ export const sampleErrorInfo = ({
   pipelineRun: PipelineRun | Record<string, never>;
   error?: { label?: string; message: string } | Record<string, never>;
 }) => {
-  let status, message, subtitle, linkText, type, link, pipelineVersionUrlParam;
+  let status: Status, message, subtitle, linkText, type, link, pipelineVersionUrlParam;
   switch (
     sample.upload_error ||
     (pipelineRun && pipelineRun.known_user_error) ||
@@ -92,31 +104,21 @@ export const sampleErrorInfo = ({
     // this function just sets the status, error type, and followup link
     // for frontend display.
     case "InvalidInputFileError":
-      status = "COMPLETE - ISSUE";
+      status = Status.INCOMPLETE_ISSUE;
       message = pipelineRun.error_message || error.message;
       subtitle = subtextError(message);
       linkText = subtitle
         ? ""
         : "Please check your file format and reupload your file.";
       type = "warning";
-      link = "/samples/upload";
-      break;
-    case "InvalidFileFormatError":
-      status = "COMPLETE - ISSUE";
-      message = pipelineRun.error_message || error.message;
-      subtitle = subtextError(message);
-      linkText = subtitle
-        ? ""
-        : "Please check your file format and reupload your file.";
-      type = "warning";
-      link = "/samples/upload";
+      link = UPLOAD_URL;
       break;
     case "InsufficientReadsError":
-      status = "COMPLETE - ISSUE";
+      status = Status.COMPLETE_ISSUE;
       message = pipelineRun.error_message || error.message;
       subtitle = subtextError(message);
       linkText = isEmpty(pipelineRun)
-        ? "Contact us for help."
+        ? CONTACT_US
         : "Check where your reads were filtered out.";
       type = "warning";
       pipelineVersionUrlParam =
@@ -124,65 +126,65 @@ export const sampleErrorInfo = ({
           ? `?pipeline_version=${pipelineRun.pipeline_version}`
           : "";
       link = isEmpty(pipelineRun)
-        ? "mailto:help@czid.org"
+        ? MAILTO_LINK
         : `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
       break;
     case "BrokenReadPairError":
-      status = "COMPLETE - ISSUE";
+      status = Status.COMPLETE_ISSUE;
       message = pipelineRun.error_message || error.message;
       linkText = "Please fix the read pairing, then reupload.";
       type = "warning";
-      link = "/samples/upload";
+      link = UPLOAD_URL;
       break;
     // The following cases are for older samples that do not have the error messages
     // sent from the server.
     case "BASESPACE_UPLOAD_FAILED":
-      status = "SAMPLE FAILED";
+      status = Status.SAMPLE_FAILED;
       message =
         "Oh no! There was an issue uploading your sample file from Basespace.";
-      linkText = "Contact us for help.";
+      linkText = CONTACT_US;
       type = "error";
-      link = "mailto:help@czid.org";
+      link = MAILTO_LINK;
       break;
     case "S3_UPLOAD_FAILED":
-      status = "SAMPLE FAILED";
+      status = Status.SAMPLE_FAILED;
       message = "Oh no! There was an issue uploading your sample file from S3.";
-      linkText = "Contact us for help.";
+      linkText = CONTACT_US;
       type = "error";
-      link = "mailto:help@czid.org";
+      link = MAILTO_LINK;
       break;
     case "LOCAL_UPLOAD_FAILED":
-      status = "SAMPLE FAILED";
+      status = Status.SAMPLE_FAILED;
       message = "Oh no! It took too long to upload your sample file.";
-      linkText = "Contact us for help.";
+      linkText = CONTACT_US;
       type = "error";
-      link = "mailto:help@czid.org";
+      link = MAILTO_LINK;
       break;
     case "LOCAL_UPLOAD_STALLED":
-      status = "INCOMPLETE - ISSUE";
+      status = Status.INCOMPLETE_ISSUE;
       message =
         "It looks like it is taking a long time to upload your sample file.";
-      linkText = "Contact us for help.";
+      linkText = CONTACT_US;
       type = "warning";
-      link = "mailto:help@czid.org";
+      link = MAILTO_LINK;
       break;
     case "DO_NOT_PROCESS":
-      status = "PROCESSING SKIPPED";
+      status = Status.PROCESSING_SKIPPED;
       message =
         "Sample processing has been skipped due to user selection during upload.";
       type = "info";
       break;
     case "FAULTY_INPUT":
-      status = "COMPLETE - ISSUE";
+      status = Status.COMPLETE_ISSUE;
       message = `Sorry, something was wrong with your input file. ${
         pipelineRun ? pipelineRun.error_message : ""
       }.`;
       linkText = "Please check your file format and reupload your file.";
       type = "warning";
-      link = "/samples/upload";
+      link = UPLOAD_URL;
       break;
     case "INSUFFICIENT_READS":
-      status = "COMPLETE - ISSUE";
+      status = Status.COMPLETE_ISSUE;
       message =
         "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
       linkText = "Check where your reads were filtered out.";
@@ -194,21 +196,21 @@ export const sampleErrorInfo = ({
       link = `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
       break;
     case "BROKEN_PAIRS":
-      status = "COMPLETE - ISSUE";
+      status = Status.COMPLETE_ISSUE;
       message =
         "Sorry, something was wrong with your input files. " +
         "Either the paired reads were not named using the same identifiers in both files, " +
         "or some reads were missing a mate.";
       linkText = "Please fix the read pairing, then reupload.";
       type = "warning";
-      link = "/samples/upload";
+      link = UPLOAD_URL;
       break;
     default:
-      status = "SAMPLE FAILED";
+      status = Status.SAMPLE_FAILED;
       message = "Oh no! There was an issue processing your sample.";
       linkText = "Contact us for help re-running your sample.";
       type = "error";
-      link = "mailto:help@czid.org";
+      link = MAILTO_LINK;
       break;
   }
 

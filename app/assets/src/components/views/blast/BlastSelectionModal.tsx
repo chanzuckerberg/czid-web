@@ -112,8 +112,7 @@ const BlastSelectionModal = ({
       );
     }
 
-    const blastLabel = (
-      <div
+    return <div
         className={cx(
           cs.selectableOption,
           blastOptionIsSelected && cs.selected,
@@ -155,10 +154,7 @@ const BlastSelectionModal = ({
             </List>
           )}
         </div>
-      </div>
-    );
-
-    return blastLabel;
+      </div>;
   };
 
   return (

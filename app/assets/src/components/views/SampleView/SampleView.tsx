@@ -45,14 +45,13 @@ import {
   createPersistedBackground,
   updatePersistedBackground,
 } from "~/api/persisted_backgrounds";
-import DeprecatedAmrView from "~/components/DeprecatedAmrView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { getCoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/utils";
 import { UserContext } from "~/components/common/UserContext";
+import DeprecatedAmrView from "~/components/DeprecatedAmrView";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
-import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   computeReportTableValuesForCSV,
   createCSVObjectURL,
@@ -72,6 +71,7 @@ import {
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
 import { sampleErrorInfo } from "~/components/utils/sample";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   findInWorkflows,
   isMngsWorkflow,
@@ -106,13 +106,6 @@ import StatusLabel from "~ui/labels/StatusLabel";
 import { WORKFLOW_VALUES } from "../../utils/workflows";
 import { BlastModalInfo } from "../blast/constants";
 import { AmrView } from "./AmrView";
-import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
-import ReportFilters from "./ReportFilters";
-import ReportTable from "./ReportTable";
-import ReportViewSelector from "./ReportViewSelector";
-import { SampleViewHeader } from "./SampleViewHeader";
-import SampleViewModals from "./SampleViewModals";
-import TaxonTreeVis from "./TaxonTreeVis";
 import {
   GENUS_LEVEL_INDEX,
   LOCAL_STORAGE_FIELDS,
@@ -129,6 +122,7 @@ import {
   KEY_SELECTED_OPTIONS_BACKGROUND,
   ONT_PIPELINE_RUNNING_STATUS,
 } from "./constants";
+import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import {
   adjustMetricPrecision,
   countFilters,
@@ -137,14 +131,20 @@ import {
 } from "./filters";
 import { filteredMessage, renderReportInfo } from "./messages";
 import { showNotification } from "./notifications";
+import ReportFilters from "./ReportFilters";
+import ReportTable from "./ReportTable";
+import ReportViewSelector from "./ReportViewSelector";
 import csSampleMessage from "./sample_message.scss";
 import cs from "./sample_view.scss";
+import { SampleViewHeader } from "./SampleViewHeader";
+import SampleViewModals from "./SampleViewModals";
 import {
   getWorkflowCount,
   getDefaultSelectedOptions,
   determineInitialTab,
   hasAppliedFilters,
 } from "./setup";
+import TaxonTreeVis from "./TaxonTreeVis";
 import { addSampleDeleteFlagToSessionStorage } from "./utils";
 
 // @ts-expect-error working with Lodash types
@@ -1392,14 +1392,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       }
 
       if (pipelineVersion) {
-        const currentRun = sample.workflow_runs.find(run => {
+        return sample.workflow_runs.find(run => {
           if (run.workflow === workflowType && !!run.wdl_version) {
             return run.wdl_version === pipelineVersion;
           } else {
             return false;
           }
         });
-        return currentRun;
       } else {
         return head(
           sample.workflow_runs.filter(run => run.workflow === workflowType),

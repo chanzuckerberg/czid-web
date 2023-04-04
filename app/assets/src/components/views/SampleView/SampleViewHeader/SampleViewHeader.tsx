@@ -21,9 +21,9 @@ import { NOTIFICATION_TYPES } from "../constants";
 import { showNotification } from "../notifications";
 import { addSampleDeleteFlagToSessionStorage } from "../utils";
 import { PrimaryHeaderControls } from "./PrimaryHeaderControls";
+import cs from "./sample_view_header.scss";
 import { SampleDeletionConfirmationModal } from "./SampleDeletionConfirmationModal";
 import { SecondaryHeaderControls } from "./SecondaryHeaderControls";
-import cs from "./sample_view_header.scss";
 
 interface SampleViewHeaderProps {
   backgroundId?: number;

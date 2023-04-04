@@ -1,12 +1,10 @@
-import { get, some, map, isUndefined, reject, filter, size } from "lodash/fp";
+import { filter, get, isUndefined, map, reject, size, some } from "lodash/fp";
 import React from "react";
 import { withAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
-
 import cs from "./bulk_download_modal_footer.scss";
 import {
   BULK_DOWNLOAD_TYPES,
@@ -147,19 +145,18 @@ export default function BulkDownloadModalFooter({
 
     const requiredFields = getRequiredFieldsForSelectedType();
 
-    if (requiredFields) {
-      if (
-        some(
-          Boolean,
-          map(
-            // @ts-expect-error Property 'fields' does not exist on type 'unknown'
-            field => isUndefined(get(field.type, selectedFieldsForType)),
-            requiredFields,
-          ),
-        )
-      ) {
-        return false;
-      }
+    if (
+      requiredFields &&
+      some(
+        Boolean,
+        map(
+          // @ts-expect-error Property 'fields' does not exist on type 'unknown'
+          field => isUndefined(get(field.type, selectedFieldsForType)),
+          requiredFields,
+        ),
+      )
+    ) {
+      return false;
     }
 
     return true;

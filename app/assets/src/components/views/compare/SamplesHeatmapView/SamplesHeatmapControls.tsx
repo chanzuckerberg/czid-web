@@ -22,14 +22,14 @@ import BackgroundModelFilter from "~/components/views/report/filters/BackgroundM
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import FilterTag from "~ui/controls/FilterTag";
-import Slider from "~ui/controls/Slider";
 import {
   Dropdown,
   MultipleNestedConfirmDropdown,
   MultipleNestedDropdown,
   ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
+import FilterTag from "~ui/controls/FilterTag";
+import Slider from "~ui/controls/Slider";
 
 import cs from "./samples_heatmap_view.scss";
 

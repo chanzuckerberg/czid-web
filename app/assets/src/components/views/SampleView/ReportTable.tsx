@@ -46,7 +46,6 @@ import {
   SortFunctionsParams,
 } from "~/interface/sampleView";
 import { AnnotationType, ConsensusGenomeData, Taxon } from "~/interface/shared";
-import HoverActions from "./HoverActions";
 import {
   REPORT_TABLE_COLUMNS,
   TAX_LEVEL_GENUS,
@@ -60,6 +59,7 @@ import {
   TABS,
   NANOPORE_DEFAULT_COLUMN_WIDTH,
 } from "./constants";
+import HoverActions from "./HoverActions";
 import cs from "./report_table.scss";
 
 // Values for null values when sorting ascending and descending

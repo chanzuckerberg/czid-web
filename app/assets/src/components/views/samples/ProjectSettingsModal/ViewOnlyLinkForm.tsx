@@ -18,8 +18,8 @@ import { copyUrlToClipboard } from "~/helpers/url";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import HelpIcon from "~ui/containers/HelpIcon";
 import { Input } from "~ui/controls";
-import Toggle from "~ui/controls/Toggle";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
+import Toggle from "~ui/controls/Toggle";
 
 import DisableSharingConfirmationModal from "./DisableSharingConfirmationModal";
 

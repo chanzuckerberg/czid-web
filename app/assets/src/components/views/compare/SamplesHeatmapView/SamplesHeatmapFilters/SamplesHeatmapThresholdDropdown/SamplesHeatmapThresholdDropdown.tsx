@@ -7,8 +7,8 @@ import React from "react";
 import { trackEvent } from "~/api/analytics";
 
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
-import PopoverMinimalButton from "~/components/ui/controls/PopoverMinimalButton";
 import ThresholdFilterList from "~/components/ui/controls/dropdowns/ThresholdFilterList";
+import PopoverMinimalButton from "~/components/ui/controls/PopoverMinimalButton";
 import { SelectedOptions } from "~/interface/shared";
 import SamplesHeatmapPresetTooltip from "../SamplesHeatmapPresetTooltip";
 import cs from "./samples_heatmap_threshold_dropdown.scss";

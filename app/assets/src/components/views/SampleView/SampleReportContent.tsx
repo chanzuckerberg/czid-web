@@ -3,10 +3,10 @@ import { trackEvent } from "~/api/analytics";
 import { IconLoading, IconAlert } from "~/components/ui/icons";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import SampleMessage from "./SampleMessage";
 import cs from "./consensus_genome_view.scss";
 import { SUCCEEDED_STATE, RUNNING_STATE, CREATED_STATE } from "./constants";
 import csSampleMessage from "./sample_message.scss";
+import SampleMessage from "./SampleMessage";
 
 export interface SampleReportContentProps {
   loadingResults: boolean;

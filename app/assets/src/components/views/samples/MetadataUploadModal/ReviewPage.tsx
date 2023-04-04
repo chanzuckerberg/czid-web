@@ -5,8 +5,8 @@ import React from "react";
 import { HOST_GENOME_SYNONYMS } from "~/components/common/Metadata/constants";
 import { returnHipaaCompliantMetadata } from "~/components/utils/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
-import { ProjectSample } from "./MetadataUploadModal";
 import cs from "./metadata_upload_modal.scss";
+import { ProjectSample } from "./MetadataUploadModal";
 
 interface ReviewPageProps {
   metadata?: {

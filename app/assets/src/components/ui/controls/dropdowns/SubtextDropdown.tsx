@@ -60,7 +60,7 @@ class SubtextDropdown extends React.Component<SubtextDropdownProps> {
   renderMenuItems() {
     const { options } = this.props;
 
-    const dropdownOptions = options.map((option: $TSFixMe) => ({
+    return options.map((option: $TSFixMe) => ({
       text: option.text,
       value: option.value,
       subtext: option.subtext,
@@ -69,7 +69,6 @@ class SubtextDropdown extends React.Component<SubtextDropdownProps> {
         ? option.customNode
         : this.renderMenuItem(option),
     }));
-    return dropdownOptions;
   }
 
   render() {

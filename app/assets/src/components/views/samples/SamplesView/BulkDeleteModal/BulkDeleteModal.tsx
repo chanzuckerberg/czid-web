@@ -15,11 +15,11 @@ import {
   getLabelFromWorkflow,
 } from "~/components/utils/workflows";
 
+import cs from "./bulk_delete_modal.scss";
 import { DeleteErrorNotification } from "./DeleteErrorNotification";
 import { DeleteSampleModalText } from "./DeleteSampleModalText";
 import { DeleteSuccessNotification } from "./DeleteSuccessNotification";
 import { InvalidSampleDeletionWarning } from "./InvalidSampleDeletionWarning";
-import cs from "./bulk_delete_modal.scss";
 
 interface BulkDeleteModalProps {
   isOpen: boolean;

@@ -7,8 +7,8 @@ import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Project } from "~/interface/shared";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import {

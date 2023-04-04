@@ -3,6 +3,7 @@
   "arrowParens": "avoid",
   "tabWidth": 2,
   "bracketSameLine": true,
+  "importOrderCaseInsensitive": true,
   "semi": true,
   "singleQuote": false
 }

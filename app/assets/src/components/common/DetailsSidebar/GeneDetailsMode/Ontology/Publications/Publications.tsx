@@ -1,8 +1,8 @@
 import React from "react";
 import { trackEvent } from "~/api/analytics";
 
-import { OntologyType } from "../../GeneDetailsMode";
 import cs from "../../gene_details_mode.scss";
+import { OntologyType } from "../../GeneDetailsMode";
 import { Urls } from "../../utils";
 
 interface PublicationsProps {

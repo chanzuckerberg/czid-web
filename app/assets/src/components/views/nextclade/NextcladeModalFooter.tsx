@@ -91,6 +91,8 @@ const NextcladeModalFooter = ({
           "An error occurred when verifying your selected consensus genomes.",
         type: "error",
       });
+    } else {
+      return null;
     }
   };
 

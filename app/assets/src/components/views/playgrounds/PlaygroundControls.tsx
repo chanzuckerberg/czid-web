@@ -1,10 +1,7 @@
 import React from "react";
-
-import Checkbox from "~ui/controls/Checkbox";
-import Slider from "~ui/controls/Slider";
-import Toggle from "~ui/controls/Toggle";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
+import Checkbox from "~ui/controls/Checkbox";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import ButtonDropdown from "~ui/controls/dropdowns/ButtonDropdown";
 import DownloadButtonDropdown from "~ui/controls/dropdowns/DownloadButtonDropdown";
@@ -12,6 +9,12 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import MultipleNestedDropdown from "~ui/controls/dropdowns/MultipleNestedDropdown";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
+import Slider from "~ui/controls/Slider";
+import Toggle from "~ui/controls/Toggle";
+
+// Event constants
+const DROPDOWN_BUTTON_CLICKED = "DropdownButton:Clicked";
+const MULTIPLE_DROPDOWN_CHANGE = "MultipleDropdown:Change";
 
 interface ComponentCardProps {
   children: React.ReactNode;
@@ -94,7 +97,7 @@ class PlaygroundControls extends React.Component<
               options={this.dropdownOptions}
               text="Download"
               onClick={option =>
-                this.setState({ event: "DropdownButton:Clicked", option })
+                this.setState({ event: DROPDOWN_BUTTON_CLICKED, option })
               }
             />
             <ButtonDropdown
@@ -114,7 +117,7 @@ class PlaygroundControls extends React.Component<
               key={0}
               text="Download"
               onClick={option =>
-                this.setState({ event: "DropdownButton:Clicked", option })
+                this.setState({ event: DROPDOWN_BUTTON_CLICKED, option })
               }
             />
             <DownloadButton
@@ -122,7 +125,7 @@ class PlaygroundControls extends React.Component<
               disabled
               text="Download"
               onClick={option =>
-                this.setState({ event: "DropdownButton:Clicked", option })
+                this.setState({ event: DROPDOWN_BUTTON_CLICKED, option })
               }
             />
           </ComponentCard>
@@ -131,7 +134,7 @@ class PlaygroundControls extends React.Component<
               key={0}
               options={this.dropdownOptions}
               onClick={option =>
-                this.setState({ event: "DropdownButton:Clicked", option })
+                this.setState({ event: DROPDOWN_BUTTON_CLICKED, option })
               }
             />
             <DownloadButtonDropdown
@@ -139,7 +142,7 @@ class PlaygroundControls extends React.Component<
               disabled
               options={this.dropdownOptions}
               onClick={option =>
-                this.setState({ event: "DropdownButton:Clicked", option })
+                this.setState({ event: DROPDOWN_BUTTON_CLICKED, option })
               }
             />
           </ComponentCard>
@@ -196,7 +199,7 @@ class PlaygroundControls extends React.Component<
               options={this.dropdownOptions}
               label="Options"
               onChange={() =>
-                this.setState({ event: "MultipleDropdown:Change" })
+                this.setState({ event: MULTIPLE_DROPDOWN_CHANGE })
               }
             />
             <MultipleDropdown
@@ -207,7 +210,7 @@ class PlaygroundControls extends React.Component<
               options={this.dropdownOptions}
               label="Options"
               onChange={() =>
-                this.setState({ event: "MultipleDropdown:Change" })
+                this.setState({ event: MULTIPLE_DROPDOWN_CHANGE })
               }
             />
           </ComponentCard>
@@ -219,7 +222,7 @@ class PlaygroundControls extends React.Component<
               options={this.dropdownOptions}
               label="Options"
               onChange={() => {
-                this.setState({ event: "MultipleDropdown:Change" });
+                this.setState({ event: MULTIPLE_DROPDOWN_CHANGE });
               }}
             />
           </ComponentCard>
@@ -298,8 +301,7 @@ const ComponentCard = ({ title, width, children }: ComponentCardProps) => {
   return (
     <div
       className="component-card"
-      style={{ gridColumn: `auto / span ${width}` }}
-    >
+      style={{ gridColumn: `auto / span ${width}` }}>
       <div className="title">{title}</div>
       {React.Children.map(children, (component, idx) => (
         <div key={idx} className="component">

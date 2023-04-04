@@ -14,10 +14,10 @@ import {
   SampleType,
 } from "~/interface/shared";
 import { returnHipaaCompliantMetadata } from "~utils/metadata";
-import MetadataSection from "./MetadataSection";
-import { AdditionalInfo } from "./SampleDetailsMode";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
+import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
+import { AdditionalInfo } from "./SampleDetailsMode";
 interface MetadataTabProps {
   metadata: Metadata;
   metadataTypes: MetadataTypes;

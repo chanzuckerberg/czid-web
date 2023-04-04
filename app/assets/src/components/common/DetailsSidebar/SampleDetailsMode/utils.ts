@@ -17,6 +17,7 @@ import { AmrPipelineTabInfo, MngsPipelineInfo } from "./PipelineTab";
 import { AdditionalInfo } from "./SampleDetailsMode";
 
 const BLANK_TEXT = "unknown";
+const YYYY_MM_DD = "YYYY-MM-DD";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = (
@@ -105,7 +106,7 @@ export const processPipelineInfo = (
       pipelineInfo.qcPercent = { text: qcPercent };
       pipelineInfo.compressionRatio = { text: compressionRatio };
       pipelineInfo.lastProcessedAt = {
-        text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
+        text: moment(summaryStats.last_processed_at).format(YYYY_MM_DD),
       };
 
       const meanInsertSize = numberWithPlusOrMinus(
@@ -136,7 +137,7 @@ export const processCGWorkflowRunInfo = workflowRun => {
       ? ""
       : numberWithCommas(erccMappedReads),
     lastProcessedAt: moment(get("executed_at", workflowRun)).format(
-      "YYYY-MM-DD",
+      YYYY_MM_DD,
     ),
     hostSubtracted: "Human",
     mappedReads: isUndefined(mappedReads) ? "" : numberWithCommas(mappedReads),
@@ -172,7 +173,7 @@ export const processAMRWorkflowRun = (
 
   const workflowKey = WORKFLOW_KEY_FOR_VALUE[workflowValue];
   const workflow = WORKFLOWS[workflowKey].label;
-  const lastProcessedAt = moment(executedAt).format("YYYY-MM-DD");
+  const lastProcessedAt = moment(executedAt).format(YYYY_MM_DD);
 
   if (qualityMetrics) {
     const {
@@ -229,5 +230,5 @@ export const processAMRWorkflowRun = (
 // Format the upload date.
 export const processAdditionalInfo = (additionalInfo: AdditionalInfo) => ({
   ...additionalInfo,
-  upload_date: moment(additionalInfo.upload_date).format("YYYY-MM-DD"),
+  upload_date: moment(additionalInfo.upload_date).format(YYYY_MM_DD),
 });

@@ -1,8 +1,13 @@
 import { groupBy, maxBy, sortBy, sum } from "lodash/fp";
-
 import { openUrlInPopupWindow } from "~/components/utils/links";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { getURLParamString } from "~/helpers/url";
-import { SampleFromApi, SampleUploadType } from "~/interface/shared";
+import {
+  ProjectPipelineVersions,
+  SampleFromApi,
+  SampleUploadType,
+} from "~/interface/shared";
+import { SEQUENCING_TECHNOLOGY_OPTIONS } from "./constants";
 
 const BASESPACE_OAUTH_URL = "https://basespace.illumina.com/oauth/authorize";
 const BASESPACE_OAUTH_WINDOW_NAME = "BASESPACE_OAUTH_WINDOW";
@@ -58,9 +63,7 @@ export const sortResults = (
 export const sortResultsByMatch = (result: { name: string }, query: string) => {
   const name = result.name.toLowerCase();
   const q = query.toLowerCase();
-  const res =
-    name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
-  return res;
+  return name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
 };
 
 export const removeLaneFromName = (name: string) => {
@@ -167,4 +170,24 @@ export const groupSamplesByLane = (
   }
 
   return result;
+};
+
+export const getPipelineVersionString = (
+  projectPipelineVersions: ProjectPipelineVersions,
+  workflow: "amr" | "consensus-genome" | "mngs",
+  technology: SEQUENCING_TECHNOLOGY_OPTIONS,
+): string => {
+  if (workflow === "amr") {
+    return projectPipelineVersions[WORKFLOWS.AMR.value];
+  } else if (workflow === "consensus-genome") {
+    return projectPipelineVersions[WORKFLOWS.CONSENSUS_GENOME.value];
+  } else {
+    // workflow is "mngs"
+    if (technology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA) {
+      return projectPipelineVersions[WORKFLOWS.SHORT_READ_MNGS.value];
+    } else {
+      // technology is NANOPORE
+      return projectPipelineVersions[WORKFLOWS.LONG_READ_MNGS.value];
+    }
+  }
 };

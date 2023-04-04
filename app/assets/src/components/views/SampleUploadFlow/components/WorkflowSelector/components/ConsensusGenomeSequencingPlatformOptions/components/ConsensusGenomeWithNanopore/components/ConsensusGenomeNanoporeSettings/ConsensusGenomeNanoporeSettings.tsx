@@ -2,8 +2,8 @@ import cx from "classnames";
 import { Icon } from "czifui";
 import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import Toggle from "~/components/ui/controls/Toggle";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
+import Toggle from "~/components/ui/controls/Toggle";
 import { UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK } from "~/components/utils/documentationLinks";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import {

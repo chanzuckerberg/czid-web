@@ -35,13 +35,12 @@ import {
   withAnalytics,
 } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
-import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
+import ErrorBoundary from "~/components/ErrorBoundary";
 import { NarrowContainer } from "~/components/layout";
 import FilterPanel from "~/components/layout/FilterPanel";
 import ArrayUtils from "~/components/utils/ArrayUtils";
-import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
@@ -56,15 +55,16 @@ import {
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   getTempSelectedOptions,
   HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS,
 } from "~/components/utils/urls";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import SampleMessage from "~/components/views/SampleView/SampleMessage";
-import { URL_FIELDS } from "~/components/views/SampleView/constants";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
+import { URL_FIELDS } from "~/components/views/SampleView/constants";
+import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
@@ -73,14 +73,6 @@ import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
 
 import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
-import SamplesHeatmapControls, {
-  SamplesHeatmapControlsProps,
-} from "./SamplesHeatmapControls";
-import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
-import SamplesHeatmapFilterStats from "./SamplesHeatmapFilterStats";
-import SamplesHeatmapFilters from "./SamplesHeatmapFilters";
-import { SamplesHeatmapHeader } from "./SamplesHeatmapHeader/SamplesHeatmapHeader";
-import SamplesHeatmapLegend from "./SamplesHeatmapLegend";
 import {
   BACKGROUND_METRICS,
   METRIC_OPTIONS,
@@ -95,6 +87,14 @@ import {
   HEATMAP_FILTERS,
 } from "./constants";
 import cs from "./samples_heatmap_view.scss";
+import SamplesHeatmapControls, {
+  SamplesHeatmapControlsProps,
+} from "./SamplesHeatmapControls";
+import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
+import SamplesHeatmapFilters from "./SamplesHeatmapFilters";
+import SamplesHeatmapFilterStats from "./SamplesHeatmapFilterStats";
+import { SamplesHeatmapHeader } from "./SamplesHeatmapHeader/SamplesHeatmapHeader";
+import SamplesHeatmapLegend from "./SamplesHeatmapLegend";
 
 const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
   const parsed = parseInt(val);
@@ -1232,10 +1232,8 @@ class SamplesHeatmapView extends React.Component<
           if (value < parseFloat(filter["value"])) {
             return false;
           }
-        } else if (filter["operator"] === "<=") {
-          if (value > parseFloat(filter["value"])) {
-            return false;
-          }
+        } else if ((filter["operator"] === "<=") && (value > parseFloat(filter["value"]))) {
+          return false;
         }
       }
     }
@@ -1252,9 +1250,7 @@ class SamplesHeatmapView extends React.Component<
     const phageSelected =
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
 
-    if (species && taxonDetails["taxLevel"] !== 1) {
-      return false;
-    } else if (!species && taxonDetails["taxLevel"] !== 2) {
+    if ((species && taxonDetails["taxLevel"] !== 1) || (!species && taxonDetails["taxLevel"] !== 2)) {
       return false;
     }
     if (readSpecificity && taxonDetails["id"] < 0) {
@@ -1336,20 +1332,18 @@ class SamplesHeatmapView extends React.Component<
       for (const taxId of filteredTaxaInSample) {
         if (count >= taxonsPerSample) {
           break;
-        } else if (!topTaxIds.has(taxId)) {
-          if (!this.removedTaxonIds.has(taxId)) {
-            const taxon = allTaxonDetails[taxId];
-            topTaxIds.add(taxId);
-            topTaxonDetails[taxId] = allTaxonDetails[taxId];
-            topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
+        } else if ((!topTaxIds.has(taxId)) && (!this.removedTaxonIds.has(taxId))) {
+          const taxon = allTaxonDetails[taxId];
+          topTaxIds.add(taxId);
+          topTaxonDetails[taxId] = allTaxonDetails[taxId];
+          topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
 
-            metrics.forEach(metric => {
-              filteredData[metric.value] = filteredData[metric.value] || [];
-              filteredData[metric.value].push(
-                allData[metric.value][taxon["index"]],
-              );
-            });
-          }
+          metrics.forEach(metric => {
+            filteredData[metric.value] = filteredData[metric.value] || [];
+            filteredData[metric.value].push(
+              allData[metric.value][taxon["index"]],
+            );
+          });
         }
         count++;
       }
@@ -1421,7 +1415,11 @@ class SamplesHeatmapView extends React.Component<
     } = this.state;
     const tempAllData = extractedData.allData;
 
+    // THESE LINT ERRORS LOOK LIKE BUGS - including the two concats and the map below
+    // I (ehoops) am not changing functionality in this PR, but we should look into this.
+    // eslint-disable-next-line
     allGeneraIds.concat(extractedData.allGeneraIds);
+    // eslint-disable-next-line
     allSpeciesIds.concat(extractedData.allSpeciesIds);
 
     extractedData.allTaxonIds.forEach(taxonId => {
@@ -1434,6 +1432,7 @@ class SamplesHeatmapView extends React.Component<
       allTaxonDetails[taxon.id] = taxon;
       allTaxonDetails[taxon.name] = taxon;
 
+      // eslint-disable-next-line
       Object.entries(sampleDetails).map(([sampleId, sample]) => {
         sample.taxa.concat(extractedData.sampleDetails[sampleId].taxa);
         const sampleIndex = sample.index;

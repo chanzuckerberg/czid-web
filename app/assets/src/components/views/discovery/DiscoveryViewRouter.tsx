@@ -10,13 +10,13 @@ import React, { useContext } from "react";
 import { Route, Switch } from "react-router-dom";
 
 import { UserContext } from "~/components/common/UserContext";
+import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
-import SampleView from "~/components/views/SampleView/SampleView";
-import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import MetadataDictionary from "~/components/views/metadata/MetadataDictionary";
 import PathogenListView from "~/components/views/pathogen_list/PathogenListView";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
+import SampleView from "~/components/views/SampleView/SampleView";
 import FAQPage from "~/components/views/support/FAQPage";
 import PrivacyNoticeForUserResearch from "~/components/views/support/PrivacyNoticeForUserResearch";
 import PrivacyNoticePreview from "~/components/views/support/PrivacyNoticePreview";

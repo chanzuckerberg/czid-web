@@ -22,13 +22,12 @@ const TaxonFilter = ({
       categories: ["taxon"],
       domain,
     });
-    const options = (((searchResults || {}).Taxon || {}).results || [])
+    return (((searchResults || {}).Taxon || {}).results || [])
       .filter(result => result.taxid > 0)
       .map(result => ({
         value: result.taxid,
         text: result.title,
       }));
-    return options;
   };
 
   return (

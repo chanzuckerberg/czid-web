@@ -19,38 +19,35 @@ const postToFrontendMetrics = async (
     .catch(e => Promise.reject(new Error(e?.response?.data)));
 
 const instrument = (func: $TSFixMe) => {
-  const wrapper = async (url: $TSFixMe, ...args: $TSFixMe[]) => {
+  return async (url: $TSFixMe, ...args: $TSFixMe[]) => {
     const startTime = performance.now();
     try {
-      const result = await func
+      return await func
         .apply(this, [url, ...args])
         .then(async (resp: $TSFixMe) => {
           !DEVELOPMENT_MODE &&
             postToFrontendMetrics(url, resp, performance.now() - startTime);
           return resp.data;
         });
-
-      return result;
     } catch (errorResp) {
       !DEVELOPMENT_MODE &&
         postToFrontendMetrics(url, errorResp, performance.now() - startTime);
       return Promise.reject(errorResp);
     }
   };
-  return wrapper;
 };
+
+const CSRF_TOKEN = "csrf-token";
 
 const postWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
   try {
-    const resp = await axios.post(url, {
+    // resp also contains headers, status, etc. that we might use later.
+    return await axios.post(url, {
       ...params,
       // Fetch the CSRF token from the DOM.
       // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
-      authenticity_token: document.getElementsByName("csrf-token")[0].content,
+      authenticity_token: document.getElementsByName(CSRF_TOKEN)[0].content,
     });
-
-    // resp also contains headers, status, etc. that we might use later.
-    return resp;
   } catch (e) {
     return Promise.reject(e.response);
   }
@@ -59,15 +56,13 @@ const postWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
 // TODO(mark): Remove redundancy in CSRF methods.
 const putWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
   try {
-    const resp = await axios.put(url, {
+    // resp also contains headers, status, etc. that we might use later.
+    return await axios.put(url, {
       ...params,
       // Fetch the CSRF token from the DOM.
       // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
-      authenticity_token: document.getElementsByName("csrf-token")[0].content,
+      authenticity_token: document.getElementsByName(CSRF_TOKEN)[0].content,
     });
-
-    // resp also contains headers, status, etc. that we might use later.
-    return resp;
   } catch (e) {
     return Promise.reject(e.response);
   }
@@ -75,29 +70,25 @@ const putWithCSRF = instrument(async (url: $TSFixMe, params: $TSFixMe) => {
 
 const get = instrument(async (url: $TSFixMe, config: $TSFixMe) => {
   try {
-    const resp = await axios.get(url, config);
-    return resp;
+    return await axios.get(url, config);
   } catch (e) {
     return Promise.reject(e.response);
   }
 });
 
 const deleteAsync = instrument(async (url: $TSFixMe, config: $TSFixMe) => {
-  const resp = await axios.delete(url, config);
-  return resp;
+  return axios.delete(url, config);
 });
 
 const deleteWithCSRF = instrument(async (url: $TSFixMe) => {
   try {
-    const resp = await axios.delete(url, {
+    return await axios.delete(url, {
       data: {
         // Fetch the CSRF token from the DOM.
         // @ts-expect-error ts-migrate(2339) FIXME: Property 'content' does not exist on type 'HTMLEle... Remove this comment to see the full error message
-        authenticity_token: document.getElementsByName("csrf-token")[0].content,
+        authenticity_token: document.getElementsByName(CSRF_TOKEN)[0].content,
       },
     });
-
-    return resp;
   } catch (e) {
     return Promise.reject(e.response);
   }

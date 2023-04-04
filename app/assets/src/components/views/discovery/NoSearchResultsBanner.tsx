@@ -26,10 +26,10 @@ const NoSearchResultsBanner = ({
 }: NoSearchResultsBannerProps) => {
   return (
     <InfoBanner
-      className={className && className}
+      className={!!className && className}
       icon={icon}
-      link={link && link}
-      listenerLink={listenerLink && listenerLink}
+      link={!!link && link}
+      listenerLink={!!listenerLink && listenerLink}
       message={`Sorry, no ${searchType} results were found, please try another search.`}
       title={`0 ${searchType} Search Results`}
       type={searchType}

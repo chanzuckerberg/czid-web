@@ -12,8 +12,8 @@ import {
   CGRun,
   PipelineTypeRun,
 } from "~/interface/samplesView";
-import ToolbarButtonIcon from "../ToolbarButtonIcon";
 import cs from "../samples_view.scss";
+import ToolbarButtonIcon from "../ToolbarButtonIcon";
 
 type ObjectType = PipelineTypeRun | BaseWorkflowRun | CGRun;
 
@@ -58,11 +58,9 @@ const BulkDeleteTrigger = ({
       const runStatuses = filteredSamples.map(object =>
         get(["status"], object),
       );
-      const didAtLeastOneComplete = !isEmpty(
+      return !isEmpty(
         pullAll(["running", "created"], runStatuses),
       );
-
-      return didAtLeastOneComplete;
     }
 
     const statuses = filteredSamples.map(object =>

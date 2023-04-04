@@ -13,11 +13,11 @@ import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
+import cs from "./blast_v1_contigs_modal.scss";
 import BlastContigsTable from "./BlastContigsTable";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
 
-import cs from "./blast_v1_contigs_modal.scss";
 import {
   BLAST_CONTIG_ROW_WIDTH,
   BLAST_CONTIG_HEADER_ROW_WIDTH,

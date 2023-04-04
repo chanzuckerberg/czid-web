@@ -1,3 +1,5 @@
+const KENYA_MAP_ALT_TEXT = "outline map of Kenya";
+
 export const ImpactCountryData = [
   {
     countryName: "Brazil",
@@ -198,7 +200,7 @@ export const ImpactCountryData = [
     },
     mapImage: {
       src: require("~/images/impact_page/country-kenya-1.svg"),
-      alt: "outline map of Kenya",
+      alt: KENYA_MAP_ALT_TEXT,
     },
     prevCountryIndex: 7,
     nextCountryIndex: 9,
@@ -218,7 +220,7 @@ export const ImpactCountryData = [
     },
     mapImage: {
       src: require("~/images/impact_page/country-kenya-2.svg"),
-      alt: "outline map of Kenya",
+      alt: KENYA_MAP_ALT_TEXT,
     },
     headshot: {
       src: require("~/images/impact_page/headshot-victor-jeza.png"),
@@ -242,7 +244,7 @@ export const ImpactCountryData = [
     },
     mapImage: {
       src: require("~/images/impact_page/country-kenya-2.svg"),
-      alt: "outline map of Kenya",
+      alt: KENYA_MAP_ALT_TEXT,
     },
     headshot: {
       src: require("~/images/impact_page/headshot-solomon-langat.png"),

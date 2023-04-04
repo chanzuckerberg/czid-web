@@ -19,8 +19,8 @@ import BasicPopup from "~/components/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import {
   showAppcue,
   PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
@@ -30,24 +30,24 @@ import {
   PHYLO_TREE_LINK,
   MAIL_TO_HELP_LINK,
 } from "~/components/utils/documentationLinks";
-import SampleMessage from "~/components/views/SampleView/SampleMessage";
-import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
 import PairwiseDistanceMatrixErrorModal from "~/components/views/phylo_tree/PairwiseDistanceMatrixErrorModal";
+import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
+import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import {
   copyShortUrlToClipboard,
   getURLParamString,
   parseUrlParams,
 } from "~/helpers/url";
-import Link from "~ui/controls/Link";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
+import Link from "~ui/controls/Link";
 import { IconAlert, IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 
 import Divider from "../../layout/Divider";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
+import cs from "./phylo_tree_list_view.scss";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import PhyloTreeVis from "./PhyloTreeVis";
-import cs from "./phylo_tree_list_view.scss";
 
 // Old PhyloTree statuses:
 const STATUS_INITIALIZED = 0;

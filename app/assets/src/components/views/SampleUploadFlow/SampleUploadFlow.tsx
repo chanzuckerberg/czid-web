@@ -1,25 +1,23 @@
 import cx from "classnames";
-import { get, without, flow, omit, set, find, min } from "lodash/fp";
+import { find, flow, get, min, omit, set, without } from "lodash/fp";
 import React from "react";
-
 import { getProjectPipelineVersions } from "~/api";
 import {
   FIELDS_THAT_HAVE_MAX_INPUT,
   HOST_GENOME_SYNONYMS,
 } from "~/components/common/Metadata/constants";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-
 import {
   HostGenome,
   Project,
   ProjectPipelineVersions,
   SampleFromApi,
 } from "~/interface/shared";
-import ReviewStep from "./ReviewStep";
-import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
-import UploadMetadataStep from "./UploadMetadataStep";
+import { ReviewStep } from "./components/ReviewStep";
 import UploadSampleStep from "./components/UploadSampleStep/UploadSampleStep";
 import cs from "./sample_upload_flow.scss";
+import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
+import UploadMetadataStep from "./UploadMetadataStep";
 
 interface SampleUploadFlowProps {
   csrf?: string;
@@ -156,6 +154,9 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
         // Enforce hipaa compliant host age
         if (hostGenomeName.toLowerCase() === "human") {
           const maxValue = FIELDS_THAT_HAVE_MAX_INPUT["host_age"];
+          // THIS LINT ERROR LOOKS LIKE A BUG.
+          // I (ehoops) am not changing functionality in this PR.
+          // eslint-disable-next-line
           metadata.rows.map((row: $TSFixMe) => {
             if ("Host Age" in row) {
               const parsedValue = Number.parseInt(row["Host Age"]);

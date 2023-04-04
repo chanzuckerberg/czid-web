@@ -12,9 +12,9 @@ import { formatFileSize } from "~/components/utils/format";
 import { Table } from "~/components/visualizations/table";
 
 import { SampleUploadType } from "~/interface/shared";
-import SampleUploadTableRenderers from "./SampleUploadTableRenderers";
 import { SELECT_ID_KEY } from "./constants";
 import cs from "./sample_upload_table.scss";
+import SampleUploadTableRenderers from "./SampleUploadTableRenderers";
 
 const NAME_COLUMN = {
   dataKey: "name",

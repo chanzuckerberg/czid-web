@@ -8,7 +8,6 @@ import {
   trackEvent,
   withAnalytics,
 } from "~/api/analytics";
-import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
@@ -17,11 +16,12 @@ import {
 } from "~/components/common/filters";
 import { FilterOption } from "~/components/common/filters/BaseMultipleFilter";
 import TaxonThresholdFilter from "~/components/common/filters/TaxonThresholdFilter";
-import ThresholdMap from "~/components/utils/ThresholdMap";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import {
   ANNOTATION_FILTER_FEATURE,
   TAXON_THRESHOLD_FILTERING_FEATURE,
 } from "~/components/utils/features";
+import ThresholdMap from "~/components/utils/ThresholdMap";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { SelectedFilters } from "~/interface/discoveryView";
 import { ThresholdFilterData } from "~/interface/dropdown";

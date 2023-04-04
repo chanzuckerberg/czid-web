@@ -1,8 +1,8 @@
 import React from "react";
 
 import ImgMicrobeSecondary from "~/components/ui/illustrations/ImgMicrobeSecondary";
-import LandingHeader from "~/components/views/LandingHeader";
 import InfoBanner from "~/components/views/discovery/InfoBanner";
+import LandingHeader from "~/components/views/LandingHeader";
 
 import cs from "./page_not_found.scss";
 

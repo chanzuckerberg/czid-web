@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 
 import { createProject } from "~/api";
 import { trackEvent } from "~/api/analytics";
-import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import List from "~/components/ui/List";
 import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 import Modal from "~ui/containers/Modal";

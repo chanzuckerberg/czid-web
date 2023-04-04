@@ -15,7 +15,7 @@ interface CategoricalLegendProps {
 // this.props.data = [ { color: "#aeaeae", label: "Sample Label" } ]
 const CategoricalLegend = ({ data, className }: CategoricalLegendProps) => {
   const renderCategories = () => {
-    const categories = data.map(item => {
+    return data.map(item => {
       return (
         <div className={cs.category} key={`${item.color}+${item.label}`}>
           <svg className={cs.colorCircle}>
@@ -30,8 +30,6 @@ const CategoricalLegend = ({ data, className }: CategoricalLegendProps) => {
         </div>
       );
     });
-
-    return categories;
   };
 
   return (

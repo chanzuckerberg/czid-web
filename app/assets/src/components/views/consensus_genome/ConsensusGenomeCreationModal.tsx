@@ -7,8 +7,8 @@ import {
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { VIRAL_CONSENSUS_GENOME_DOC_LINK } from "~/components/utils/documentationLinks";
 import { ConsensusGenomeData } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";

@@ -30,9 +30,9 @@ import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import { WORKFLOW_ENTITIES } from "~utils/workflows";
 
+import cs from "./bulk_download_modal.scss";
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
 import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
-import cs from "./bulk_download_modal.scss";
 import { DEFAULT_BACKGROUND_MODEL, WORKFLOW_OBJECT_LABELS } from "./constants";
 
 const DEFAULT_CREATION_ERROR =
@@ -196,7 +196,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   async fetchValidationInfo({ ids, workflow }) {
     const { workflowEntity } = this.props;
 
-    const validationRequest = await (workflowEntity ===
+    return (workflowEntity ===
     WORKFLOW_ENTITIES.WORKFLOW_RUNS
       ? validateWorkflowRunIds({
           workflowRunIds: ids,
@@ -206,21 +206,17 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
           sampleIds: ids,
           workflow,
         }));
-
-    return validationRequest;
   }
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
   async fetchBackgrounds() {
     const { backgrounds } = await getBackgrounds();
 
-    const backgroundOptions = backgrounds.map((background: $TSFixMe) => ({
+    return backgrounds.map((background: $TSFixMe) => ({
       text: background.name,
       value: background.id,
       mass_normalized: background.mass_normalized,
     }));
-
-    return backgroundOptions;
   }
 
   async fetchBackgroundAvailability() {
@@ -237,12 +233,10 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   async checkAllObjectsUploadedByCurrentUser() {
     const { selectedIds, workflowEntity } = this.props;
 
-    const validationRequest = await (workflowEntity ===
+    return (workflowEntity ===
     WORKFLOW_ENTITIES.WORKFLOW_RUNS
       ? workflowRunsCreatedByCurrentUser(Array.from(selectedIds))
       : samplesUploadedByCurrentUser(Array.from(selectedIds)));
-
-    return validationRequest;
   }
 
   checkUserIsCollaboratorOnAllSamples = () => {

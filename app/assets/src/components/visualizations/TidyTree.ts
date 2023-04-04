@@ -1,6 +1,7 @@
 import { stratify, tree as d3Tree } from "d3-hierarchy";
 import { scaleLinear } from "d3-scale";
-import { select, event as currentEvent } from "d3-selection";
+import { event as currentEvent, select } from "d3-selection";
+import { FILL_OPACITY, TRANSFORM, TRANSLATE } from "~/helpers/cssConstants";
 
 export default class TidyTree {
   container: $TSFixMe;
@@ -70,15 +71,15 @@ export default class TidyTree {
     this.pathContainer = this.svg
       .append("g")
       .attr(
-        "transform",
-        "translate(" + this.margins.left + "," + this.margins.top + ")",
+        TRANSFORM,
+        `${TRANSLATE}(${this.margins.left},${this.margins.top})`,
       );
 
     this.nodeContainer = this.svg
       .append("g")
       .attr(
-        "transform",
-        "translate(" + this.margins.left + "," + this.margins.top + ")",
+        TRANSFORM,
+        `${TRANSLATE}(${this.margins.left},${this.margins.top})`,
       );
 
     this.tooltipContainer = select(this.options.tooltipContainer);
@@ -140,18 +141,13 @@ export default class TidyTree {
       this.root.data.values[this.options.attribute],
     ];
 
-    const collapsedScale = scaleLinear()
-      .domain(this.range)
-      .range([0, 1]);
+    const collapsedScale = scaleLinear().domain(this.range).range([0, 1]);
     this.root.eachAfter((d: $TSFixMe) => {
-      if (this.options.collapsed.has(d.id)) {
-        d.collapsedChildren = d.children;
-        d.children = null;
-      } else if (
+      if (this.options.collapsed.has(d.id) || (
         !d.data.highlight &&
         collapsedScale(d.data.values[this.options.attribute]) <
           this.options.collapseThreshold
-      ) {
+      )){
         d.collapsedChildren = d.children;
         d.children = null;
       } else if (d.children) {
@@ -302,10 +298,7 @@ export default class TidyTree {
       const textHeight = parseFloat(text.style("font-size"));
       const lineHeight = textHeight * 1.2;
       const x = text.attr("x");
-      let tspan = text
-        .text(null)
-        .append("tspan")
-        .attr("x", x);
+      let tspan = text.text(null).append("tspan").attr("x", x);
 
       if (words.length === 1) {
         tspan.text(words[0]);
@@ -371,12 +364,8 @@ export default class TidyTree {
     source = source || this.root;
 
     // compute scales for nodes
-    const nodeScale = scaleLinear()
-      .domain(this.range)
-      .range([4, 20]);
-    const linkScale = scaleLinear()
-      .domain(this.range)
-      .range([1, 20]);
+    const nodeScale = scaleLinear().domain(this.range).range([4, 20]);
+    const linkScale = scaleLinear().domain(this.range).range([1, 20]);
     const fontScale = scaleLinear()
       .domain(this.range)
       .range([this.options.smallerFont, this.options.largerFont]);
@@ -432,7 +421,7 @@ export default class TidyTree {
       .enter()
       .append("g")
       .attr("class", "node")
-      .attr("transform", () => {
+      .attr(TRANSFORM, () => {
         const x = (source && source.x0) || this.root.x0;
         const y = (source && source.y0) || this.root.y0;
         return `translate(${y},${x})`;
@@ -452,7 +441,7 @@ export default class TidyTree {
 
     const textEnter = nodeEnter
       .append("text")
-      .style("fill-opacity", 0)
+      .style(FILL_OPACITY, 0)
       .on("click", this.options.onNodeLabelClick);
 
     if (this.tooltipContainer) {
@@ -478,16 +467,16 @@ export default class TidyTree {
       .transition()
       .duration(this.options.transitionDuration)
       .attr("class", (d: $TSFixMe) => {
-        const classes =
+        return (
           "node " +
           `node-${d.id}` +
           (this.hasChildren(d) ? " node__internal" : " node__leaf") +
           (this.hasAllChildrenCollapsed(d) || d.isAggregated
             ? "--collapsed"
-            : "");
-        return classes;
+            : "")
+        );
       })
-      .attr("transform", (d: $TSFixMe) => "translate(" + d.y + "," + d.x + ")");
+      .attr(TRANSFORM, (d: $TSFixMe) => `${TRANSLATE}(${d.y},${d.x})`);
 
     const textUpdate = textEnter.merge(node.select("text"));
 
@@ -529,7 +518,7 @@ export default class TidyTree {
           ? "name-missing"
           : null;
       })
-      .style("fill-opacity", 1);
+      .style(FILL_OPACITY, 1);
 
     nodeUpdate
       .select(".clickable")
@@ -595,7 +584,7 @@ export default class TidyTree {
       .transition()
       .duration(this.options.transitionDuration)
       .attr("transform", () => {
-        return "translate(" + source.y + "," + source.x + ")";
+        return `${TRANSLATE}(${source.y},${source.x})`;
       })
       .remove();
 
@@ -609,6 +598,6 @@ export default class TidyTree {
     });
 
     nodeExit.select("circle").attr("r", 1e-6);
-    nodeExit.select("text").style("fill-opacity", 1e-6);
+    nodeExit.select("text").style(FILL_OPACITY, 1e-6);
   }
 }

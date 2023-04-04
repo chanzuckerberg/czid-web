@@ -6,13 +6,16 @@ export const WORKFLOW_ENTITIES = {
   WORKFLOW_RUNS: "WorkflowRuns" as const,
 };
 
+// String constants
+const ANTIMICROBIAL_RESISTANCE = "Antimicrobial Resistance";
+
 export const WORKFLOWS = {
   AMR: {
-    label: "Antimicrobial Resistance" as const,
-    pluralizedLabel: "Antimicrobial Resistance",
+    label: ANTIMICROBIAL_RESISTANCE,
+    pluralizedLabel: ANTIMICROBIAL_RESISTANCE,
     value: "amr" as const,
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
-    pipelineName: "Antimicrobial Resistance",
+    pipelineName: ANTIMICROBIAL_RESISTANCE,
     shorthand: "AMR",
   },
   CONSENSUS_GENOME: {

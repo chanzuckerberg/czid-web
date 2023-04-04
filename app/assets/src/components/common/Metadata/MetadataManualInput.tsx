@@ -1,31 +1,31 @@
 import cx from "classnames";
 import { Icon } from "czifui";
 import _fp, {
-  zipObject,
   filter,
-  keyBy,
-  mapValues,
-  set,
-  union,
-  get,
-  values,
-  includes,
   find,
-  isEmpty,
-  pickBy,
+  get,
   has,
-  orderBy,
-  merge,
+  includes,
+  isEmpty,
+  keyBy,
   keys,
   LodashZipObject1x2,
+  mapValues,
+  merge,
+  orderBy,
+  pickBy,
+  set,
+  union,
+  values,
+  zipObject,
 } from "lodash/fp";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
+import { DataHeaders } from "~/components/views/SampleUploadFlow/components/ReviewStep/types";
 import DataTable from "~/components/visualizations/table/DataTable";
 import {
   LocationObject,
@@ -33,10 +33,9 @@ import {
   SampleFromApi,
 } from "~/interface/shared";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
-import MetadataInput from "./MetadataInput";
 import { AUTO_POPULATE_FIELDS, COLUMN_HEADER_TOOLTIPS } from "./constants";
-
 import cs from "./metadata_manual_input.scss";
+import MetadataInput from "./MetadataInput";
 import { MetadataManualInputProps, MetadataManualInputState } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -105,8 +104,10 @@ class MetadataManualInput extends React.Component<
         ),
         hostGenomesByName: keyBy("name", hostGenomes),
         headers: {
-          "Sample Name": "Sample Name",
-          ...(samplesAreNew ? { "Host Organism": "Host Organism" } : {}),
+          [DataHeaders.SAMPLE_NAME]: DataHeaders.SAMPLE_NAME,
+          ...(samplesAreNew
+            ? { [DataHeaders.HOST_ORGANISM]: DataHeaders.HOST_ORGANISM }
+            : {}),
           ...mapValues("name", keyBy("key", projectMetadataFields)),
         },
       },
@@ -127,8 +128,8 @@ class MetadataManualInput extends React.Component<
 
   getManualInputColumns = (): string[] => {
     return [
-      "Sample Name",
-      ...(this.props.samplesAreNew ? ["Host Organism"] : []),
+      DataHeaders.SAMPLE_NAME,
+      ...(this.props.samplesAreNew ? [DataHeaders.HOST_ORGANISM] : []),
       ...this.state.selectedFieldNames,
     ];
   };
@@ -206,7 +207,7 @@ class MetadataManualInput extends React.Component<
         let value = newValue;
         // If the field is location-type, return a less-specific location if necessary.
         if (
-          column !== "Host Organism" &&
+          column !== DataHeaders.HOST_ORGANISM &&
           this.state.projectMetadataFields[column].dataType === "location"
         ) {
           const isHuman =
@@ -341,7 +342,7 @@ class MetadataManualInput extends React.Component<
       this.props.hostGenomes,
     );
     this.updateMetadataField(
-      "Host Organism",
+      DataHeaders.HOST_ORGANISM,
       // Convert the id to a name.
       hostGenome ? hostGenome.name : hostGenomeIdOrNewName,
       sample,
@@ -360,8 +361,7 @@ class MetadataManualInput extends React.Component<
             sampleName: sample.name,
             column,
           });
-        }}
-      >
+        }}>
         Apply to All
       </button>
     ) : null;
@@ -373,7 +373,7 @@ class MetadataManualInput extends React.Component<
           "id",
           // eslint-disable-next-line standard/computed-property-even-spacing
           this.state.hostGenomesByName[
-            this.getMetadataValue(sample, "Host Organism")
+            this.getMetadataValue(sample, DataHeaders.HOST_ORGANISM)
           ],
         )
       : sample.host_genome_id;
@@ -381,12 +381,12 @@ class MetadataManualInput extends React.Component<
   getSampleHostGenome = sample =>
     // eslint-disable-next-line standard/computed-property-even-spacing
     this.state.hostGenomesByName[
-      this.getMetadataValue(sample, "Host Organism")
+      this.getMetadataValue(sample, DataHeaders.HOST_ORGANISM)
     ];
 
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     // Special-case "Host Organism" (the field that lets you change the Host Genome)
-    field === "Host Organism" ||
+    field === DataHeaders.HOST_ORGANISM ||
     get([field, "is_required"], this.props.projectMetadataFields) ||
     includes(
       hostGenomeId,
@@ -405,7 +405,7 @@ class MetadataManualInput extends React.Component<
         columns,
         // Render the table cell.
         columns.map(column => {
-          if (column === "Sample Name") {
+          if (column === DataHeaders.SAMPLE_NAME) {
             return (
               <div className={cs.sampleName} key="Sample Name">
                 {sample.name}
@@ -420,7 +420,10 @@ class MetadataManualInput extends React.Component<
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
-          if (this.props.samplesAreNew && column === "Host Organism") {
+          if (
+            this.props.samplesAreNew &&
+            column === DataHeaders.HOST_ORGANISM
+          ) {
             return (
               <div>
                 <HostOrganismSearchBox
@@ -478,7 +481,7 @@ class MetadataManualInput extends React.Component<
   getColumnWidth = column => {
     // The width of the input needs to be about 15px smaller than the width of
     // the column to maintain some padding. See also getColumnWidth.
-    if (["Sample Name", "collection_location_v2"].includes(column)) {
+    if ([DataHeaders.SAMPLE_NAME, "collection_location_v2"].includes(column)) {
       return parseInt(cs.metadataInputExtraWidth) + 15;
     } else {
       return parseInt(cs.metadataInputWidth) + 15;
@@ -492,7 +495,10 @@ class MetadataManualInput extends React.Component<
         const label = (this.state.headers || {})[column];
         const content = COLUMN_HEADER_TOOLTIPS[column];
         if (content) {
-          const showLink = !["Sample Name", "Host Organism"].includes(column);
+          const showLink = ![
+            DataHeaders.SAMPLE_NAME,
+            DataHeaders.HOST_ORGANISM,
+          ].includes(column);
           return (
             // Disable the preventOverflow popper.js modifer as it is flipping
             // the tooltip unnecessarily.

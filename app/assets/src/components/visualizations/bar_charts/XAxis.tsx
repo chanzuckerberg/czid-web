@@ -39,7 +39,7 @@ export default function XAxis({
       xOffset: x(value),
     }));
 
-    const tickMapping = ticks.map(({ value, formatted, xOffset }) => {
+    return ticks.map(({ value, formatted, xOffset }) => {
       return (
         <g key={value} transform={`translate(${xOffset}, 0)`}>
           <g key={`tick-at-${value}`} transform={`translate(0, ${height})`}>
@@ -59,8 +59,6 @@ export default function XAxis({
         </g>
       );
     });
-
-    return tickMapping;
   };
 
   const range = x.range();

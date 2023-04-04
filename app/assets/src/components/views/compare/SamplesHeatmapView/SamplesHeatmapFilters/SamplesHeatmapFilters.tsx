@@ -11,13 +11,13 @@ import { SelectedOptions, Subcategories } from "~/interface/shared";
 import Slider from "~ui/controls/Slider";
 
 import PopoverMinimalButton from "../../../../ui/controls/PopoverMinimalButton";
+import cs from "./samples_heatmap_filters.scss";
 import SamplesHeatmapBackgroundDropdown from "./SamplesHeatmapBackgroundDropdown";
 import SamplesHeatmapCategoryDropdown from "./SamplesHeatmapCategoryDropdown/";
+import { optionsToSDSFormat } from "./samplesHeatmapFilterUtils";
 import SamplesHeatmapPresetTooltip from "./SamplesHeatmapPresetTooltip";
 import SamplesHeatmapThresholdDropdown from "./SamplesHeatmapThresholdDropdown";
 import SamplesHeatmapViewOptionsDropdown from "./SamplesHeatmapViewOptionsDropdown";
-import { optionsToSDSFormat } from "./samplesHeatmapFilterUtils";
-import cs from "./samples_heatmap_filters.scss";
 
 export interface SDSFormattedOption {
   name: string;

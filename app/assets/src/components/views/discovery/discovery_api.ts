@@ -98,7 +98,7 @@ const processRawSample = (sample: $TSFixMe) => {
     insertSizeStandardDeviation,
   );
 
-  const row = {
+  return {
     sample: {
       initialWorkflow: get("db_sample.initial_workflow", sample.details),
       name: sample.name,
@@ -163,7 +163,6 @@ const processRawSample = (sample: $TSFixMe) => {
     totalRuntime: get("mngs_run_info.total_runtime", sample.details),
     ...get("metadata", sample.details),
   };
-  return row;
 };
 
 const formatWetlabProtocol = (str: $TSFixMe) =>
@@ -243,7 +242,7 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
     workflowRunFields = processAmrWorkflowRun(workflowRun);
   }
 
-  const row = {
+  return {
     id: workflowRun.id,
     status: toLower(workflowRun.status),
     createdAt: workflowRun.created_at,
@@ -269,8 +268,6 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
     // @ts-expect-error ts-migrate(2698) FIXME: Spread types may only be created from object types... Remove this comment to see the full error message
     ...getSampleField(["metadata"]),
   };
-
-  return row;
 };
 
 const getDiscoverySamples = async ({

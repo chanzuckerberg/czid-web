@@ -4,9 +4,9 @@ import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import ToastContainer from "~ui/containers/ToastContainer";
 import { CZIDLogoReversed } from "~ui/icons";
 
+import cs from "./header.scss";
 import MainMenu from "./MainMenu";
 import UserMenuDropDown, { TermsMenuDropDown } from "./UserMenuDropDown";
-import cs from "./header.scss";
 
 interface HeaderProps {
   adminUser: boolean;

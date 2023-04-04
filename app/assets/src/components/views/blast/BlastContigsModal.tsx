@@ -9,18 +9,18 @@ import {
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
-import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import List from "~/components/ui/List";
 import { BLAST_HELP_LINK } from "~/components/utils/documentationLinks";
 import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
+import cs from "./blast_contigs_modal.scss";
 import BlastContigsTable from "./BlastContigsTable";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
 
-import cs from "./blast_contigs_modal.scss";
 import {
   BLAST_CONTIG_ROW_WIDTH,
   BLAST_CONTIG_HEADER_ROW_WIDTH,

@@ -3,16 +3,16 @@ import { isArray } from "lodash/fp";
 import React, { useState } from "react";
 import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
 import { MetadataValue } from "~/interface/shared";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
 } from "~ui/controls/GeoSearchInputBox";
 import Input from "~ui/controls/Input";
 import Toggle from "~ui/controls/Toggle";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import { IconAlertSmall } from "~ui/icons";
-import MetadataAgeInput from "./MetadataAgeInput";
 import cs from "./metadata_input.scss";
+import MetadataAgeInput from "./MetadataAgeInput";
 import { MetadataInputProps } from "./types";
 import { ensureDefinedValue } from "./utils";
 

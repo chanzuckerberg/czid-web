@@ -4,16 +4,16 @@ import React, { useEffect, useState } from "react";
 
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { fetchLongestReadsForTaxonId } from "~/api/blast";
-import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import List from "~/components/ui/List";
 import { BLAST_HELP_LINK } from "~/components/utils/documentationLinks";
 import { openUrlInNewTab } from "~/components/utils/links";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
+import cs from "./blast_reads_modal.scss";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
 
-import cs from "./blast_reads_modal.scss";
 import { SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY } from "./constants";
 import { prepareBlastQuery } from "./utils";
 
