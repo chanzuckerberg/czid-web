@@ -2,6 +2,7 @@ import { size, find, omit, isEmpty, getOr } from "lodash/fp";
 import { diff } from "~/components/utils/objectUtil";
 import {
   findInWorkflows,
+  labelToVal,
   WorkflowCount,
   WORKFLOWS,
   WORKFLOW_ENTITIES,
@@ -60,17 +61,22 @@ export const getDefaultSelectedOptions = (): FilterSelections => {
 
 export const determineInitialTab = ({
   initialWorkflow,
-  workflowCount: {
+  workflowCount,
+  currentTab,
+}: {
+  initialWorkflow: string;
+  workflowCount: WorkflowCount;
+  currentTab: CurrentTabSample | null;
+}): CurrentTabSample => {
+  const {
     [WORKFLOWS.SHORT_READ_MNGS.value]: shortReadMngs,
     [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
     [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
     [WORKFLOWS.AMR.value]: amr,
-  },
-}: {
-  initialWorkflow: string;
-  workflowCount: WorkflowCount;
-}): CurrentTabSample => {
-  if (shortReadMngs) {
+  } = workflowCount;
+  if (currentTab && workflowCount[labelToVal(currentTab)] > 0) {
+    return currentTab;
+  } else if (shortReadMngs) {
     return TABS.SHORT_READ_MNGS;
   } else if (longReadMngs) {
     return TABS.LONG_READ_MNGS;

@@ -36,6 +36,7 @@ class SamplesController < ApplicationController
                    :bulk_kickoff_workflow_runs, :user_is_collaborator, :validate_user_can_delete_objects, :bulk_delete,].freeze
   OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :upload_credentials].freeze
+  ACTIONS_TO_REDIRECT = [:show].freeze
 
   # For API-like access
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
@@ -1698,6 +1699,10 @@ class SamplesController < ApplicationController
     assert_access
   rescue ActiveRecord::RecordNotFound
     Rails.logger.error("Sample #{params[:id]} was requested but not in samples_scope")
+    if ACTIONS_TO_REDIRECT.include?(params[:action].to_sym)
+      redirect_to my_data_path
+      return
+    end
     render json: { error: "Oh no! This page isn't available." }, status: :not_found
   end
 

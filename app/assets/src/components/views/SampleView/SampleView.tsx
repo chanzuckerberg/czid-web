@@ -375,12 +375,12 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const newSelectedOptions = { ...selectedOptions };
 
     const workflowCount = getWorkflowCount(sample);
-    const newCurrentTab =
-      currentTab ||
-      determineInitialTab({
-        initialWorkflow: sample.initial_workflow,
-        workflowCount,
-      });
+    const newCurrentTab = determineInitialTab({
+      initialWorkflow: sample.initial_workflow,
+      workflowCount,
+      currentTab,
+    });
+    const tabChanged = newCurrentTab !== currentTab;
 
     if (newCurrentTab === TABS.SHORT_READ_MNGS) {
       const selectedBackground = backgrounds.find(
@@ -419,6 +419,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         updateDiscoveryProjectId(sample.project.id);
         this.fetchProjectSamples();
         this.fetchCoverageVizData();
+        if (tabChanged) {
+          this.handleTabChange(newCurrentTab);
+        }
       },
     );
   };
@@ -781,17 +784,11 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     // update the workflowCount object
     workflowCount[workflow] -= 1;
 
-    // if there are still runs of the current workflow, stay on current tab
-    // otherwise, switch to the next tab
-
-    const moreRunsInWorkflow = workflowCount[workflow] > 0;
-
-    const nextTab = moreRunsInWorkflow
-      ? currentTab
-      : determineInitialTab({
-          initialWorkflow: sample.initial_workflow,
-          workflowCount,
-        });
+    const nextTab = determineInitialTab({
+      initialWorkflow: sample.initial_workflow,
+      workflowCount,
+      currentTab,
+    });
 
     // update the state to remove the current run and change the tab
     this.setState(

@@ -251,7 +251,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @sample = samples(:one)
 
     get sample_url(@sample)
-    assert_response :not_found
+    assert_response :redirect
   end
 
   # visible samples in private project
