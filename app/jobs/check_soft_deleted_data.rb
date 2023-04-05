@@ -48,7 +48,7 @@ class CheckSoftDeletedData
     end
 
     deleted_samples = Sample.where("deleted_at < ?", Time.now.utc - DELAY)
-    unless deleted_wrs.empty?
+    unless deleted_samples.empty?
       LogUtil.log_error(
         "Soft deleted samples found in database",
         exception: SoftDeletedDataError.new,
