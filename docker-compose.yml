@@ -32,6 +32,7 @@ x-web-variables: &web-variables
   ? HEATMAP_ES_ADDRESS=http://heatmap-elasticsearch:9200
   ? INDEXING_LAMBDA_MODE=local
   ? LOCAL_TAXON_INDEXING_URL=concurrency-lambda:8080
+  ? LOCAL_EVICTION_URL=eviction-lambda:8080
 
 x-auth0-variables: &auth0-variables
   ? AUTH0_CLIENT_ID
@@ -266,6 +267,16 @@ services:
       - ES_HOST=heatmap-elasticsearch:9200
     ports:
       - 9091:8080
+  eviction-lambda:
+    # image built from idseq repo main branch
+    # for other versions, clone idseq repo, build image locally and change image to `eviction-lambda:local`
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-local-eviction-lambda:latest
+    profiles: ["local-lambdas"]
+    environment:
+      - LOCAL_MODE=local
+      - ES_HOST=heatmap-elasticsearch:9200
+    ports:
+      - 9092:8080
 networks:
   default:
     name: czidnet

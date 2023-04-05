@@ -3,6 +3,8 @@
 module ElasticsearchQueryHelper
   require 'ostruct'
 
+  LAMBDA_ENV = Rails.env.development? || Rails.env.test? ? "staging" : Rails.env
+
   config = { host: ENV["HEATMAP_ES_ADDRESS"], transport_options: { request: { timeout: 200 } } }
   ES_CLIENT = Elasticsearch::Client.new(config) unless Rails.env.test?
 
@@ -695,8 +697,12 @@ module ElasticsearchQueryHelper
 
   def self.invoke_lambda(function_name, payload)
     if ENV['INDEXING_LAMBDA_MODE'] == 'local'
+      local_lambda_host = {
+        "taxon-indexing-concurrency-manager-#{LAMBDA_ENV}" => ENV['LOCAL_TAXON_INDEXING_URL'],
+        "taxon-indexing-eviction-#{LAMBDA_ENV}-evict_expired_taxons" => ENV['LOCAL_EVICTION_URL'],
+      }[function_name]
       begin
-        response = HTTP.post("http://#{ENV['LOCAL_TAXON_INDEXING_URL']}/2015-03-31/functions/function/invocations", json: payload)
+        response = HTTP.post("http://#{local_lambda_host}/2015-03-31/functions/function/invocations", json: payload)
         return OpenStruct.new({
                                 "status_code": response.code,
                                 "payload": OpenStruct.new({
@@ -704,7 +710,7 @@ module ElasticsearchQueryHelper
                                                           }),
                               })
       rescue StandardError => error
-        raise "Taxon indexing concurrency manager lambda invocation failure: #{error}"
+        raise "Lambda invocation failure: #{error}"
       end
     else
       return LAMBDA_CLIENT.invoke({
@@ -716,27 +722,31 @@ module ElasticsearchQueryHelper
     end
   end
 
-  def self.call_taxon_indexing_lambda(background_id, pipeline_run_ids)
-    env = Rails.env.development? || Rails.env.test? ? "staging" : Rails.env
-    function_name = "taxon-indexing-concurrency-manager-#{env}"
-    payload = {
-      background_id: background_id,
-      pipeline_run_ids: pipeline_run_ids,
-    }
+  def self.call_lambda(function_name, payload)
     begin
       attempts ||= 1
       resp = invoke_lambda(function_name, payload)
       if resp["status_code"] != 200 || !resp["function_error"].nil?
-        raise "Taxon indexing concurrency manager lambda invocation failure"
+        raise "#{function_name} invocation failure"
       end
     rescue StandardError => error
-      LogUtil.log_error("Taxon indexing concurrency manager lambda invocation failure", exception: error)
+      LogUtil.log_error("#{function_name} invocation failure", exception: error)
       if (attempts += 1) <= 2
         sleep(3.seconds)
         retry
       end
       raise error
     end
+    return resp
+  end
+
+  def self.call_taxon_indexing_lambda(background_id, pipeline_run_ids)
+    function_name = "taxon-indexing-concurrency-manager-#{LAMBDA_ENV}"
+    payload = {
+      background_id: background_id,
+      pipeline_run_ids: pipeline_run_ids,
+    }
+    resp = call_lambda(function_name, payload)
 
     resp_payload = JSON.parse(resp.payload.string)
     failure_count = resp_payload.count { |invocation| invocation["FunctionError"] }
@@ -746,6 +756,28 @@ module ElasticsearchQueryHelper
       LogUtil.log_error("Some taxon indexing jobs failed", exception: resp_payload)
       raise "Some taxon indexing jobs failed"
     end
+  end
+
+  def self.call_taxon_eviction_lambda(pipeline_run_ids)
+    ## if the delete fails, partially or completely, an error will be raised by `call_lambda`
+    # if the delete succeeds, we will have a response of the structure:
+    # {
+    #   "eviction_type"=>"selected", # the type of eviction that was performed
+    #   "eviction_candidates"=>[ # the list of pipeline_run_ids/background_ids that were evicted
+    #     {
+    #       "pipeline_run_id"=>29202,
+    #       "background_id"=>1
+    #     }
+    #   ],
+    #   "selected_pipeline_run_ids"=>[29202] # the list of pipeline_run_ids that were passed in
+    # }
+    function_name = "taxon-indexing-eviction-#{LAMBDA_ENV}-evict_expired_taxons"
+    payload = {
+      pipeline_run_ids: pipeline_run_ids,
+    }
+    resp = call_lambda(function_name, payload)
+
+    return JSON.parse(resp.payload.string)
   end
 
   def self.build_categories_filter_clause(categories, include_phage)
