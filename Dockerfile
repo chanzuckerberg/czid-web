@@ -11,6 +11,10 @@ RUN apt-get update && \
       lsb-release \
       apt-transport-https
 
+# Install samtools (note: `apt-get install samtools` installs samtools 1.9, which is missing features such as the "-X" flag)
+RUN curl -L https://github.com/samtools/samtools/releases/download/1.17/samtools-1.17.tar.bz2 | \
+  tar xj && cd samtools-1.17/ && make && make install
+
 # Install node + npm
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install -y nodejs

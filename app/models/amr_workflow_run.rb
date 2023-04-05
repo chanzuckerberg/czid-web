@@ -17,6 +17,8 @@ class AmrWorkflowRun < WorkflowRun
   OUTPUT_ZIP = "amr.ZipOutputs.output_zip".freeze
   OUTPUT_REPORT = "amr.RunResultsPerSample.synthesized_report".freeze
   OUTPUT_CONTIGS = "amr.RunSpades.contigs".freeze
+  OUTPUT_READS_BAM = "amr.RunRgiBwtKma.output_sorted_length_100".freeze
+  OUTPUT_READS_BAI = "amr.RunRgiBwtKma.output_sorted_length_100_bai".freeze
 
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).
@@ -81,6 +83,11 @@ class AmrWorkflowRun < WorkflowRun
       workflow_run_id: id
     )
     return nil
+  end
+
+  # Download the reads that map to a gene
+  def download_gene_level_reads(gene_id)
+    AmrGeneLevelDownloadsService.call(self, AmrGeneLevelDownloadsService::DOWNLOAD_TYPE_READS, gene_id)
   end
 
   def uses_modern_host_filtering?

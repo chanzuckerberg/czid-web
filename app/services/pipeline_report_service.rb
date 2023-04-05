@@ -219,7 +219,7 @@ class PipelineReportService
     # FETCH TAXON INFORMATION
     if @parallel
       parallel_steps = [
-        -> { @pipeline_run.summary_contig_counts_v2() },
+        -> { @pipeline_run.summary_contig_counts() },
         -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id, technology: @technology) },
         -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background&.id, @technology) },
       ]
@@ -242,7 +242,7 @@ class PipelineReportService
       @timer.split("parallel_fetch_report_data")
       contigs, taxon_counts_and_summaries, taxons_absent_from_sample, merged_taxon_counts = *results
     else
-      contigs = @pipeline_run.summary_contig_counts_v2()
+      contigs = @pipeline_run.summary_contig_counts()
       @timer.split("get_contig_summary")
 
       taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background&.id, technology: @technology)

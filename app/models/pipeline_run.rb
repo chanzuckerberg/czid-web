@@ -1748,7 +1748,7 @@ class PipelineRun < ApplicationRecord
     contigs.where(id: contig_ids).order("read_count DESC")
   end
 
-  def summary_contig_counts_v2
+  def summary_contig_counts
     # Stores the number of contigs that match a given taxid, count_type (nt, nr, or merged_nt_nr), and read_count (number of reads aligned to that contig).
     # Create and store default values for the hash if the key doesn't exist yet
     summary_dict = Hash.new do |summary, taxid|
