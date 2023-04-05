@@ -1,0 +1,19 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.filterContainer {
+  margin: $sds-spaces-s;
+  color: $sds-color-gray-black;
+  width: 412px;
+  .title {
+    font: $sds-font-header-m-600-font;
+    margin-bottom: $sds-spaces-l;
+  }
+
+  .actions {
+    margin-top: $sds-spaces-xxl;
+    display: flex;
+    gap: $sds-spaces-s;
+  }
+}
