@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe AmrMetricsService, type: :service do
   let(:project) { create(:project) }
   let(:sample) { create(:sample, project: project) }
-  let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:amr]).becomes(AmrWorkflowRun) }
+  let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:amr]) }
 
   let(:input_read_val) { 40 }
   let(:input_read_count) { { fastqs: input_read_val }.to_json }

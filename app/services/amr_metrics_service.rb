@@ -9,10 +9,11 @@ class AmrMetricsService
   COUNT_PRICESEQ_OUT = "priceseq_out_count".freeze
   COUNT_STAR_OUT = "star_out_count".freeze
 
-  COUNT_INPUT_READS = "reads_in_count".freeze
   COUNT_FASTP_OUT = "fastp_out_count".freeze
   COUNT_BOWTIE2_HOST_FILTERED_OUT = "bowtie2_host_filtered_out_count".freeze
   COUNT_HISAT2_HOST_FILTERED_OUT = "hisat2_host_filtered_out_count".freeze
+  COUNT_BOWTIE2_HUMAN_FILTERED_OUT = "bowtie2_human_filtered_out_count".freeze
+  COUNT_HISAT2_HUMAN_FILTERED_OUT = "hisat2_human_filtered_out_count".freeze
   COUNT_VALIDATE_INPUT = "validate_input_out_count".freeze
 
   COUNTS = [
@@ -26,13 +27,23 @@ class AmrMetricsService
   ].freeze
 
   MODERN_COUNTS = [
-    COUNT_INPUT_READS,
+    COUNT_INPUT_READ,
     COUNT_FASTP_OUT,
-    COUNT_BOWTIE2_HOST_FILTERED_OUT,
-    COUNT_HISAT2_HOST_FILTERED_OUT,
     COUNT_CZID_DEDUP_OUT,
     COUNT_SUBSAMPLED_OUT,
     COUNT_VALIDATE_INPUT,
+  ].freeze
+
+  # If the host is human, only the host is filtered out
+  HUMAN_HOST_FILTER_COUNTS = [
+    COUNT_BOWTIE2_HOST_FILTERED_OUT,
+    COUNT_HISAT2_HOST_FILTERED_OUT,
+  ].freeze
+
+  # If the host is non-human, the host and any human reads are filtered out
+  NON_HUMAN_HOST_FILTER_COUNTS = HUMAN_HOST_FILTER_COUNTS + [
+    COUNT_BOWTIE2_HUMAN_FILTERED_OUT,
+    COUNT_HISAT2_HUMAN_FILTERED_OUT,
   ].freeze
 
   MODERN_ERCC_FILE = "kallisto_ERCC_counts_tsv".freeze
@@ -40,6 +51,8 @@ class AmrMetricsService
   ERCC_FILE = "output_gene_file".freeze
   MODERN_INSERT_SIZE_METRICS = "insert_size_metrics".freeze
   INSERT_SIZE_METRICS = "output_metrics_file".freeze
+  HISAT2_HUMAN_FILTERED_OUT_STEP_NAME = "hisat2_human_filtered_out".freeze
+  HISAT2_HOST_FILTERED_OUT_STEP_NAME = "hisat2_host_filtered_out".freeze
 
   PIPELINE_RUN_METRIC_KEYS = [
     WorkflowRun::TOTAL_READS_KEY,
@@ -52,7 +65,8 @@ class AmrMetricsService
 
   def initialize(workflow_run)
     @workflow_run = workflow_run
-    @last_filtering_step_name = workflow_run.sample.host_genome.name == "Human" ? "hisat2_host_filtered_out" : "hisat2_human_filtered_out"
+    @uses_modern_host_filtering = workflow_run.workflow_by_class.uses_modern_host_filtering?
+    @last_filtering_step_name = workflow_run.sample.host_genome.name != "Human" ? HISAT2_HUMAN_FILTERED_OUT_STEP_NAME : HISAT2_HOST_FILTERED_OUT_STEP_NAME
   end
 
   def call
@@ -60,7 +74,7 @@ class AmrMetricsService
       return metrics_from_pipeline_run
     else
       counts = retrieve_counts
-      return @workflow_run.uses_modern_host_filtering? ? calculate_modern_metrics(counts) : calculate_metrics(counts)
+      return @uses_modern_host_filtering ? calculate_modern_metrics(counts) : calculate_metrics(counts)
     end
   end
 
@@ -132,10 +146,14 @@ class AmrMetricsService
   end
 
   def retrieve_counts
-    counts_to_retrieve = @workflow_run.uses_modern_host_filtering? ? MODERN_COUNTS : COUNTS
+    counts_to_retrieve = if @uses_modern_host_filtering
+                           MODERN_COUNTS + (@last_filtering_step_name == HISAT2_HUMAN_FILTERED_OUT_STEP_NAME ? NON_HUMAN_HOST_FILTER_COUNTS : HUMAN_HOST_FILTER_COUNTS)
+                         else
+                           COUNTS
+                         end
     counts_to_retrieve.each_with_object({}) do |count, hash|
       step_name = count.chomp("_count")
-      step_key = step_name == "input_read" || step_name == "reads_in" ? "fastqs" : step_name
+      step_key = step_name == "input_read" ? "fastqs" : step_name
       hash[step_name] = JSON.parse(@workflow_run.output("#{@workflow_run.workflow}.#{HOST_FILTER_STAGE_NAME}.#{count}"))[step_key]&.to_i
     rescue SfnExecution::OutputNotFoundError
       # if the host is Human, should not have bowtie2_human_out_count or star_human_out_count files
@@ -144,7 +162,7 @@ class AmrMetricsService
   end
 
   def retrieve_total_reads(counts)
-    counts["input_read"] || counts ["reads_in"]
+    counts["input_read"]
   end
 
   def retrieve_modern_passed_qc(counts)
@@ -212,7 +230,7 @@ class AmrMetricsService
   end
 
   def retrieve_ercc_counts
-    ercc_file = @workflow_run.uses_modern_host_filtering? ? MODERN_ERCC_FILE : ERCC_FILE
+    ercc_file = @uses_modern_host_filtering ? MODERN_ERCC_FILE : ERCC_FILE
 
     ercc = @workflow_run.output("#{@workflow_run.workflow}.#{HOST_FILTER_STAGE_NAME}.#{ercc_file}").split("\n").select { |str| str.starts_with?("ERCC") }
     ercc.each_with_object({}) do |ercc_line, hash|

@@ -52,7 +52,7 @@ class AmrResultsConcatService
           parsed_csv.shift
           parsed_csv.each do |row|
             row_extra = [
-              wr.amr_metrics&.[]("total_reads"),
+              wr.parsed_cached_results&.dig("quality_metrics", "total_reads"),
               wr.rpm(row[column_reads].to_f),
               wr.dpm(row[column_depth].to_f),
             ]
