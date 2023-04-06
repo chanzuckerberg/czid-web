@@ -11,6 +11,7 @@ import { Route, Switch } from "react-router-dom";
 
 import { UserContext } from "~/components/common/UserContext";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
+import UserProfileForm from "~/components/views/discovery/UserProfileForm";
 import ImpactPage from "~/components/views/ImpactPage";
 import LandingV2 from "~/components/views/LandingV2";
 import MetadataDictionary from "~/components/views/metadata/MetadataDictionary";
@@ -96,6 +97,11 @@ const DiscoveryViewRouter = ({
           />
         )}
       />
+      {autoAcctCreationEnabled && (
+        <Route exact path="/user_profile_form">
+          <UserProfileForm />
+        </Route>
+      )}
       <Route exact path="/privacy_preview">
         <PrivacyNoticePreview />
       </Route>

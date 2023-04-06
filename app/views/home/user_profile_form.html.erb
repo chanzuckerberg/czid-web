@@ -1,0 +1,11 @@
+<!--Show a "mobile-friendly" page -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div id="user_profile_form">
+  <%= javascript_tag do %>
+    react_component(
+      'DiscoveryViewRouter', {
+        autoAcctCreationEnabled: <%= @auto_account_creation_enabled %>,
+      }, 'page_content', JSON.parse('<%= raw escape_json(user_context)%>')
+    );
+  <% end %>
+</div>

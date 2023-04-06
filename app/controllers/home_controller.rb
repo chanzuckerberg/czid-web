@@ -159,6 +159,9 @@ class HomeController < ApplicationController
   def admin_settings
   end
 
+  def user_profile_form
+  end
+
   def set_workflow_version
     workflow_name = params["app_config"]["key"].gsub("-version", "")
     version = params["app_config"]["value"]
