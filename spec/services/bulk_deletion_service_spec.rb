@@ -29,7 +29,7 @@ RSpec.describe BulkDeletionService, type: :service do
         user: @joe,
         workflow: short_read_mngs
       )
-      expect(validate_samples[:deleted_ids]).to be_empty
+      expect(validate_samples[:deleted_run_ids]).to be_empty
     end
   end
 
@@ -50,16 +50,29 @@ RSpec.describe BulkDeletionService, type: :service do
                                  user: @joe,
                                  name: "completed Illumina mNGs sample 3")
       @pr3 = create(:pipeline_run, sample: @sample3, technology: illumina, finalized: 1)
+
+      @sample_with_deprecated_pr = create(:sample, project: @project,
+                                                   user: @joe,
+                                                   name: "Illumina mNGs sample with deprecated pr",
+                                                   initial_workflow: short_read_mngs)
+      @deprecated_pr = create(:pipeline_run, sample: @sample_with_deprecated_pr, technology: illumina, finalized: 1, deprecated: true)
+      @active_pr = create(:pipeline_run, sample: @sample_with_deprecated_pr, technology: illumina, finalized: 1, deprecated: false)
+
+      @sample_no_prs = create(:sample, project: @project,
+                                       user: @joe,
+                                       name: "failed upload Illumina mNGs sample 1",
+                                       initial_workflow: short_read_mngs)
     end
 
-    it "returns deletable pipeline run ids for samples" do
+    it "returns deletable pipeline run ids and sample ids for samples" do
       response = BulkDeletionService.call(
         object_ids: [@sample1.id, @sample2.id],
         user: @joe,
         workflow: short_read_mngs
       )
       expect(response[:error]).to be_nil
-      expect(response[:deleted_ids]).to contain_exactly(@pr1.id, @pr2.id)
+      expect(response[:deleted_run_ids]).to contain_exactly(@pr1.id, @pr2.id)
+      expect(response[:deleted_sample_ids]).to contain_exactly(@sample1.id, @sample2.id)
     end
 
     it "sets the deleted_at field to current time" do
@@ -117,6 +130,20 @@ RSpec.describe BulkDeletionService, type: :service do
       end
     end
 
+    it "marks deprecated pipeline runs as deleted" do
+      response = BulkDeletionService.call(
+        object_ids: [@sample_with_deprecated_pr.id],
+        user: @joe,
+        workflow: short_read_mngs
+      )
+      expect(response[:deleted_run_ids]).to contain_exactly(@deprecated_pr.id, @active_pr.id)
+      expect(response[:deleted_sample_ids]).to contain_exactly(@sample_with_deprecated_pr.id)
+      @deprecated_pr.reload
+      expect(@deprecated_pr.deleted_at).to be_within(1.minute).of(Time.now.utc)
+      @active_pr.reload
+      expect(@active_pr.deleted_at).to be_within(1.minute).of(Time.now.utc)
+    end
+
     it "logs to Segment for GDPR compliance" do
       run_data = {
         "id" => @pr1.id,
@@ -130,8 +157,7 @@ RSpec.describe BulkDeletionService, type: :service do
         "workflow": short_read_mngs,
       }
       # stub out updates so we don't get other logs
-      allow_any_instance_of(PipelineRun).to receive(:update)
-      allow_any_instance_of(Sample).to receive(:update)
+      allow_any_instance_of(Sample).to receive(:update_attribute)
       expect(MetricUtil).to receive(:log_analytics_event).with(
         EventDictionary::GDPR_RUN_SOFT_DELETED,
         @joe,
@@ -144,6 +170,22 @@ RSpec.describe BulkDeletionService, type: :service do
       )
     end
 
+    it "allows deletion of failed uploads" do
+      expect(Resque).to receive(:enqueue).with(
+        HardDeleteObjects, [], [@sample_no_prs.id], short_read_mngs, @joe.id
+      )
+      response = BulkDeletionService.call(
+        object_ids: [@sample_no_prs.id],
+        user: @joe,
+        workflow: "short-read-mngs"
+      )
+      expect(response[:error]).to be_nil
+      expect(response[:deleted_run_ids]).to be_empty
+      expect(response[:deleted_sample_ids]).to contain_exactly(@sample_no_prs.id)
+      @sample_no_prs.reload
+      expect(@sample_no_prs.deleted_at).to be_within(1.minute).of(Time.now.utc)
+    end
+
     context "when the initial workflow is short read mNGS" do
       context "when the sample has CG and AMR runs" do
         before do
@@ -152,7 +194,7 @@ RSpec.describe BulkDeletionService, type: :service do
         end
 
         it "sets the initial workflow to CG" do
-          BulkDeletionService.call(
+          response = BulkDeletionService.call(
             object_ids: [@sample1.id],
             user: @joe,
             workflow: short_read_mngs
@@ -161,6 +203,18 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(consensus_genome)
           expect(@sample1.deleted_at).to be_nil
+          expect(response[:deleted_sample_ids]).to be_empty
+        end
+
+        it "does not send the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@pr1.id, @pr2.id], [@sample2.id], short_read_mngs, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@sample1.id, @sample2.id],
+            user: @joe,
+            workflow: short_read_mngs
+          )
         end
       end
 
@@ -170,7 +224,7 @@ RSpec.describe BulkDeletionService, type: :service do
         end
 
         it "sets the initial workflow to AMR" do
-          BulkDeletionService.call(
+          response = BulkDeletionService.call(
             object_ids: [@sample1.id],
             user: @joe,
             workflow: short_read_mngs
@@ -179,12 +233,24 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(amr)
           expect(@sample1.deleted_at).to be_nil
+          expect(response[:deleted_sample_ids]).to be_empty
+        end
+
+        it "does not send the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@pr1.id, @pr2.id], [@sample2.id], short_read_mngs, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@sample1.id, @sample2.id],
+            user: @joe,
+            workflow: short_read_mngs
+          )
         end
       end
 
       context "when the sample has no other runs" do
         it "sets the deleted_at column to the current timestamp" do
-          BulkDeletionService.call(
+          response = BulkDeletionService.call(
             object_ids: [@sample1.id],
             user: @joe,
             workflow: short_read_mngs
@@ -193,6 +259,18 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(short_read_mngs)
           expect(@sample1.deleted_at).to be_within(1.minute).of(Time.now.utc)
+          expect(response[:deleted_sample_ids]).to include(@sample1.id)
+        end
+
+        it "sends the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@pr1.id], [@sample1.id], short_read_mngs, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@sample1.id],
+            user: @joe,
+            workflow: short_read_mngs
+          )
         end
       end
     end
@@ -209,11 +287,13 @@ RSpec.describe BulkDeletionService, type: :service do
       end
 
       context "when the sample has CG runs and AMR runs" do
-        it "sets the initial workflow to CG" do
+        before do
           create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
           create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+        end
 
-          BulkDeletionService.call(
+        it "sets the initial workflow to CG" do
+          response = BulkDeletionService.call(
             object_ids: [@sample1.id],
             user: @joe,
             workflow: "long-read-mngs"
@@ -222,14 +302,28 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(consensus_genome)
           expect(@sample1.deleted_at).to be_nil
+          expect(response[:deleted_sample_ids]).to be_empty
+        end
+
+        it "does not send the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@pr1.id], [], long_read_mngs, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@sample1.id],
+            user: @joe,
+            workflow: long_read_mngs
+          )
         end
       end
 
       context "when the sample has AMR runs and no CG runs" do
-        it "sets the initial workflow to AMR" do
+        before do
           create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+        end
 
-          BulkDeletionService.call(
+        it "sets the initial workflow to AMR" do
+          response = BulkDeletionService.call(
             object_ids: [@sample1.id],
             user: @joe,
             workflow: "long-read-mngs"
@@ -238,12 +332,24 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(amr)
           expect(@sample1.deleted_at).to be_nil
+          expect(response[:deleted_sample_ids]).to be_empty
+        end
+
+        it "does not send the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@pr1.id], [], long_read_mngs, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@sample1.id],
+            user: @joe,
+            workflow: long_read_mngs
+          )
         end
       end
 
       context "when the sample has no other runs" do
         it "sets the deleted_at column to the current timestamp" do
-          BulkDeletionService.call(
+          response = BulkDeletionService.call(
             object_ids: [@sample1.id],
             user: @joe,
             workflow: long_read_mngs
@@ -252,6 +358,18 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(long_read_mngs)
           expect(@sample1.deleted_at).to be_within(1.minute).of(Time.now.utc)
+          expect(response[:deleted_sample_ids]).to include(@sample1.id)
+        end
+
+        it "sends the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@pr1.id], [@sample1.id], long_read_mngs, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@sample1.id],
+            user: @joe,
+            workflow: long_read_mngs
+          )
         end
       end
     end
@@ -270,14 +388,15 @@ RSpec.describe BulkDeletionService, type: :service do
       @completed_amr_wr = create(:workflow_run, sample: @sample3, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
     end
 
-    it "returns deletable workflow run ids for workflow runs" do
+    it "returns deletable workflow run ids and sample ids for workflow runs" do
       response = BulkDeletionService.call(
         object_ids: [@completed_wr.id, @failed_wr.id],
         user: @joe,
         workflow: consensus_genome
       )
       expect(response[:error]).to be_nil
-      expect(response[:deleted_ids]).to contain_exactly(@completed_wr.id, @failed_wr.id)
+      expect(response[:deleted_run_ids]).to contain_exactly(@completed_wr.id, @failed_wr.id)
+      expect(response[:deleted_sample_ids]).to contain_exactly(@sample1.id, @sample2.id)
     end
 
     it "sets the deleted_at field to current time" do
@@ -306,8 +425,7 @@ RSpec.describe BulkDeletionService, type: :service do
         "workflow": consensus_genome,
       }
       # stub out updates so we don't get other logs
-      allow_any_instance_of(WorkflowRun).to receive(:update)
-      allow_any_instance_of(Sample).to receive(:update)
+      allow_any_instance_of(Sample).to receive(:update_attribute)
       expect(MetricUtil).to receive(:log_analytics_event).with(
         EventDictionary::GDPR_RUN_SOFT_DELETED,
         @joe,
@@ -322,10 +440,12 @@ RSpec.describe BulkDeletionService, type: :service do
 
     context "when CG runs are deleted and the initial workflow is CG" do
       context "when the sample has more CG runs" do
-        it "maintains an initial workflow of CG" do
+        before do
           create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+        end
 
-          BulkDeletionService.call(
+        it "maintains an initial workflow of CG" do
+          response = BulkDeletionService.call(
             object_ids: [@completed_wr.id],
             user: @joe,
             workflow: consensus_genome
@@ -334,14 +454,28 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(consensus_genome)
           expect(@sample1.deleted_at).to be_nil
+          expect(response[:deleted_sample_ids]).to be_empty
+        end
+
+        it "sends only samples that are soft-deleted to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@completed_wr.id], [], consensus_genome, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@completed_wr.id],
+            user: @joe,
+            workflow: consensus_genome
+          )
         end
       end
 
       context "when the sample has AMR runs" do
-        it "sets the initial workflow to AMR" do
+        before do
           create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+        end
 
-          BulkDeletionService.call(
+        it "sets the initial workflow to AMR" do
+          response = BulkDeletionService.call(
             object_ids: [@completed_wr.id],
             user: @joe,
             workflow: consensus_genome
@@ -350,12 +484,24 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(amr)
           expect(@sample1.deleted_at).to be_nil
+          expect(response[:deleted_sample_ids]).to be_empty
+        end
+
+        it "does not send the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@completed_wr.id], [], consensus_genome, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@completed_wr.id],
+            user: @joe,
+            workflow: consensus_genome
+          )
         end
       end
 
       context "when the sample has no more runs" do
         it "sets the deleted_at column on the sample to the current timestamp" do
-          BulkDeletionService.call(
+          response = BulkDeletionService.call(
             object_ids: [@completed_wr.id],
             user: @joe,
             workflow: consensus_genome
@@ -364,6 +510,18 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample1.initial_workflow).to eq(consensus_genome)
           expect(@sample1.deleted_at).to be_within(1.minute).of(Time.now.utc)
+          expect(response[:deleted_sample_ids]).to contain_exactly(@sample1.id)
+        end
+
+        it "sends the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@completed_wr.id], [@sample1.id], consensus_genome, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@completed_wr.id],
+            user: @joe,
+            workflow: consensus_genome
+          )
         end
       end
     end
@@ -371,7 +529,7 @@ RSpec.describe BulkDeletionService, type: :service do
     context "when AMR runs are deleted and the initial workflow is AMR" do
       context "when the sample has no more runs" do
         it "sets the deleted_at column on the sample to the current timestamp" do
-          BulkDeletionService.call(
+          response = BulkDeletionService.call(
             object_ids: [@completed_amr_wr.id],
             user: @joe,
             workflow: amr
@@ -380,6 +538,18 @@ RSpec.describe BulkDeletionService, type: :service do
 
           expect(@sample3.initial_workflow).to eq(amr)
           expect(@sample3.deleted_at).to be_within(1.minute).of(Time.now.utc)
+          expect(response[:deleted_sample_ids]).to contain_exactly(@sample3.id)
+        end
+
+        it "sends the soft-deleted sample id to the async hard-delete job" do
+          expect(Resque).to receive(:enqueue).with(
+            HardDeleteObjects, [@completed_amr_wr.id], [@sample3.id], amr, @joe.id
+          )
+          BulkDeletionService.call(
+            object_ids: [@completed_amr_wr.id],
+            user: @joe,
+            workflow: amr
+          )
         end
       end
     end

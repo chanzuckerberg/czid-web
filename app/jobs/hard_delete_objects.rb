@@ -6,40 +6,45 @@ class HardDeleteObjects
   @queue = :hard_delete_objects
 
   # object ids are pipeline run ids or workflow run ids
-  def self.perform(object_ids, workflow, user_id)
+  def self.perform(object_ids, sample_ids, workflow, user_id)
     Rails.logger.info("Starting to hard delete runs with ids #{object_ids} and workflow #{workflow}")
-    hard_delete(object_ids, workflow, user_id)
+    hard_delete(object_ids, sample_ids, workflow, user_id)
     Rails.logger.info("Successfully deleted runs with ids #{object_ids} and workflow #{workflow}")
   rescue StandardError => e
     LogUtil.log_error(
       "Bulk Deletion Failed: #{e}.",
       exception: e,
       object_ids: object_ids,
+      sample_ids: sample_ids,
       workflow: workflow,
       user_id: user_id
     )
     raise e
   end
 
-  def self.hard_delete(object_ids, workflow, user_id)
+  def self.hard_delete(object_ids, sample_ids, workflow, user_id)
     user = User.find(user_id)
     current_power = Power.new(user)
+
+    if object_ids.empty? && sample_ids.empty?
+      raise "No runs or samples to delete"
+    end
+
     objects = if [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]].include?(workflow)
                 current_power.deletable_pipeline_runs.where(id: object_ids)
               else
                 current_power.deletable_workflow_runs.where(id: object_ids)
               end
 
-    if objects.blank? || objects.count != object_ids.length
+    samples_to_delete = current_power.destroyable_samples.where(id: sample_ids).where.not(deleted_at: nil).includes(:pipeline_runs, :workflow_runs)
+
+    if (objects.count != object_ids.length) || (samples_to_delete.count != sample_ids.length)
       raise "Not all ids correspond to deletable objects"
     end
 
-    # Get associated sample ids before we destroy the objects
-    sample_ids = objects.pluck(:sample_id)
-    hard_delete_runs(objects, user, workflow)
+    hard_delete_runs(objects, user, workflow) if objects.present?
 
-    samples_to_delete = current_power.destroyable_samples.where(id: sample_ids).where.not(deleted_at: nil).includes(:pipeline_runs, :workflow_runs)
-    hard_delete_samples(samples_to_delete, user)
+    hard_delete_samples(samples_to_delete, user) if samples_to_delete.present?
   end
 
   def self.hard_delete_runs(objects, user, workflow)

@@ -1,4 +1,4 @@
-import { filter, get, isEmpty, pullAll } from "lodash/fp";
+import { compact, filter, get, isEmpty, pullAll } from "lodash/fp";
 import React, { useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import { BULK_DELETION_FEATURE } from "~/components/utils/features";
@@ -58,16 +58,19 @@ const BulkDeleteTrigger = ({
       const runStatuses = filteredSamples.map(object =>
         get(["status"], object),
       );
-      return !isEmpty(
-        pullAll(["running", "created"], runStatuses),
-      );
+      return !isEmpty(pullAll(["running", "created"], runStatuses));
     }
 
     const statuses = filteredSamples.map(object =>
       get(["sample", "pipelineRunFinalized"], object),
     );
 
-    return statuses.includes(1);
+    // Allow deletion if a sample failed to upload (no pipeline runs, short read mNGS only)
+    const uploadErrors = compact(
+      filteredSamples.map(object => get(["sample", "uploadError"], object)),
+    );
+
+    return statuses.includes(1) || !isEmpty(uploadErrors);
   };
 
   let disabled = false;

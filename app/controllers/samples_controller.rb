@@ -661,7 +661,7 @@ class SamplesController < ApplicationController
     )
 
     render json: {
-      deletedIds: deletion_response[:deleted_ids],
+      deletedIds: deletion_response[:deleted_run_ids],
       error: deletion_response[:error],
     }
   end

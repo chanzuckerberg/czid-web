@@ -11,10 +11,9 @@ import { ErrorButton } from "~/components/ui/controls/buttons";
 import { pluralize } from "~/components/utils/stringUtil";
 import { showToast } from "~/components/utils/toast";
 import {
-  WORKFLOW_VALUES,
   getLabelFromWorkflow,
+  WORKFLOW_VALUES,
 } from "~/components/utils/workflows";
-
 import cs from "./bulk_delete_modal.scss";
 import { DeleteErrorNotification } from "./DeleteErrorNotification";
 import { DeleteSampleModalText } from "./DeleteSampleModalText";
@@ -96,15 +95,14 @@ const BulkDeleteModal = ({
   const handleDeleteSamples = async () => {
     setIsDeleting(true);
     try {
-      const { deletedIds, error } = await bulkDeleteObjects({
+      const { error } = await bulkDeleteObjects({
         selectedIds: validIds,
         workflow,
       });
       if (error) {
-        const failedCount = validIds.length - deletedIds.length;
-        onDeleteError({ errorCount: failedCount });
+        onDeleteError({ errorCount: validIds.length });
       } else {
-        onDeleteSuccess({ successCount: deletedIds.length });
+        onDeleteSuccess({ successCount: validIds.length });
       }
     } catch (error) {
       console.error(error);

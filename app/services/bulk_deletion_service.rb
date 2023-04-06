@@ -2,7 +2,8 @@
 # deletion of pipeline or workflow runs, then kicks off an async job
 # to hard delete the runs.
 # It accepts deletable workflow run ids or sample ids as object_ids argument, user,
-# and workflow. It returns an array of deleted pipeline run or workflow run ids.
+# and workflow. It returns an array of deleted pipeline run or workflow run ids and
+# an array of deleted sample ids.
 class BulkDeletionService
   include Callable
 
@@ -24,7 +25,8 @@ class BulkDeletionService
 
   def call
     error = nil
-    deleted_ids = []
+    deleted_run_ids = []
+    deleted_sample_ids = []
 
     begin
       deleted_objects = bulk_delete_objects(object_ids: @object_ids, workflow: @workflow, user: @user)
@@ -40,11 +42,13 @@ class BulkDeletionService
     end
 
     if error.nil?
-      deleted_ids = deleted_objects[:deleted_ids]
+      deleted_run_ids = deleted_objects[:deleted_run_ids]
+      deleted_sample_ids = deleted_objects[:deleted_sample_ids]
     end
 
     return {
-      deleted_ids: deleted_ids,
+      deleted_run_ids: deleted_run_ids,
+      deleted_sample_ids: deleted_sample_ids,
       error: error,
     }
   end
@@ -59,30 +63,25 @@ class BulkDeletionService
     # If workflow runs, get workflow run objects from workflow run ids.
     if WorkflowRun::MNGS_WORKFLOWS.include?(workflow)
       technology = WorkflowRun::MNGS_WORKFLOW_TO_TECHNOLOGY[workflow]
-      deletable_objects = current_power.deletable_pipeline_runs.where(sample_id: object_ids, technology: technology).non_deprecated
-      visualizations = Visualization.joins(:samples).where("sample_id IN (?)", object_ids).distinct
-
-      # Table/Tree visualizations are only associated with one sample (unrelated to phylotree).
-      visualizations.where(visualization_type: ["table", "tree"]).each(&:destroy)
-
-      # Remove samples from existing heatmaps (heatmaps have >2 samples).
-      heatmaps = visualizations.where(visualization_type: "heatmap")
-      heatmaps.each do |heatmap|
-        n_samples_after_deletion = heatmap.sample_ids.length - heatmap.sample_ids.to_a.count { |sample_id| object_ids.include? sample_id }
-
-        # If too few samples will be left after deletion, remove the heatmap entirely
-        if n_samples_after_deletion < 2
-          heatmap.destroy!
-        # Otherwise, only remove the samples from the heatmap
-        else
-          heatmap.samples = heatmap.samples.select { |sample| object_ids.exclude? sample.id }
-        end
-      end
+      deletable_objects = current_power.deletable_pipeline_runs.where(sample_id: object_ids, technology: technology)
+      sample_ids = object_ids # allows us to delete samples with failed uploads but no pipeline runs
+      handle_visualizations(sample_ids)
     else
       deletable_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
+      sample_ids = deletable_objects.pluck(:sample_id)
     end
 
-    deletable_objects.update(deleted_at: delete_timestamp)
+    handle_bulk_downloads(deletable_objects, delete_timestamp)
+
+    # Skip validations so that we can update old samples that would otherwise fail
+    # new validation checks added since they were created
+    # rubocop:disable Rails/SkipsModelValidations
+    deletable_objects.update_all(deleted_at: delete_timestamp)
+    # rubocop:enable Rails/SkipsModelValidations
+
+    count_by_workflow = get_workflow_counts(sample_ids)
+    samples = current_power.destroyable_samples.where(id: sample_ids)
+    soft_deleted_sample_ids = update_initial_workflows_or_soft_delete(samples, workflow, delete_timestamp, count_by_workflow)
 
     # log soft deletion for GDPR compliance
     deleted_objects_info = deletable_objects
@@ -99,32 +98,12 @@ class BulkDeletionService
       }
     )
 
-    # if there are more remaining runs on the sample, update initial workflow
-    # otherwise mark it for deletion
-    sample_ids = deletable_objects.pluck(:sample_id)
-    count_by_workflow = get_workflow_counts(sample_ids)
-    samples = current_power.destroyable_samples.where(id: sample_ids)
-
-    samples.each do |sample|
-      update_initial_workflow(sample, workflow, delete_timestamp, count_by_workflow)
-    end
-
-    # Mark associated bulk downloads for deletion. Unlike `.update`, `.update_attribute` skips model validations (i.e.
-    # column X must satisfy certain conditions), and skips updating `updated_at`. This is needed to make sure we mark
-    # for deletion old rows that were created before we added new validations to the model (which would now fail, but
-    # we still want to delete them regardless), e.g. see `validate :params_checks` in bulk_download.rb.
-    # rubocop:disable Rails/SkipsModelValidations
-    deletable_objects.each do |run|
-      run.bulk_downloads.update_all(deleted_at: delete_timestamp)
-    end
-    # rubocop:enable Rails/SkipsModelValidations
-
-    # launch async job for hard deletion
-    object_ids = deletable_objects.pluck(:id)
-    Resque.enqueue(HardDeleteObjects, object_ids, workflow, user.id)
+    ids_to_hard_delete = deletable_objects.pluck(:id)
+    Resque.enqueue(HardDeleteObjects, ids_to_hard_delete, soft_deleted_sample_ids, workflow, user.id)
 
     return {
-      deleted_ids: object_ids,
+      deleted_run_ids: ids_to_hard_delete,
+      deleted_sample_ids: soft_deleted_sample_ids,
     }
   end
 
@@ -164,19 +143,28 @@ class BulkDeletionService
     counts
   end
 
-  def update_initial_workflow(sample, workflow_to_delete, timestamp, count_by_workflow)
-    if sample.initial_workflow == workflow_to_delete
-      new_initial_workflow = get_new_initial_workflow(sample.id, workflow_to_delete, count_by_workflow)
-
-      if new_initial_workflow.nil?
-        # no more remaining pipeline/workflow runs
-        sample.update(deleted_at: timestamp)
-      else
-        sample.update(initial_workflow: new_initial_workflow)
+  # If there are more remaining runs on the sample, update initial workflow
+  # otherwise mark it for deletion
+  def update_initial_workflows_or_soft_delete(samples, workflow_to_delete, timestamp, count_by_workflow)
+    soft_deleted_sample_ids = []
+    samples.each do |sample|
+      if sample.initial_workflow == workflow_to_delete
+        new_initial_workflow = get_new_initial_workflow(sample.id, workflow_to_delete, count_by_workflow)
+        # rubocop:disable Rails/SkipsModelValidations
+        if new_initial_workflow.nil?
+          # no more remaining pipeline/workflow runs
+          sample.update_attribute(:deleted_at, timestamp)
+          soft_deleted_sample_ids << sample.id
+        else
+          sample.update_attribute(:initial_workflow, new_initial_workflow)
+        end
+        # rubocop:enable Rails/SkipsModelValidations
       end
     end
+    return soft_deleted_sample_ids
   end
 
+  # Find new initial workflow to reflect remaining analysis types on the sample
   def get_new_initial_workflow(sample_id, workflow_to_delete, count_by_workflow)
     # keep same initial workflow if there are more runs of that type (CG only right now)
     if count_by_workflow[workflow_to_delete].include?(sample_id)
@@ -191,5 +179,40 @@ class BulkDeletionService
       end
     end
     return nil
+  end
+
+  # Update or delete visualizations associated with the samples for these pipeline runs
+  def handle_visualizations(sample_ids)
+    visualizations = Visualization.joins(:samples).where("sample_id IN (?)", sample_ids).distinct
+
+    # Table/Tree visualizations are only associated with one sample (unrelated to phylotree).
+    visualizations.where(visualization_type: ["table", "tree"]).each(&:destroy)
+
+    # Remove samples from existing heatmaps (heatmaps have >2 samples).
+    heatmaps = visualizations.where(visualization_type: "heatmap")
+    heatmaps.each do |heatmap|
+      n_samples_after_deletion = heatmap.sample_ids.length - heatmap.sample_ids.to_a.count { |sample_id| sample_ids.include? sample_id }
+
+      # If too few samples will be left after deletion, remove the heatmap entirely
+      if n_samples_after_deletion < 2
+        heatmap.destroy!
+      # Otherwise, only remove the samples from the heatmap
+      else
+        heatmap.samples = heatmap.samples.select { |sample| sample_ids.exclude? sample.id }
+      end
+    end
+  end
+
+  # Mark associated bulk downloads for deletion.
+  def handle_bulk_downloads(deletable_objects, delete_timestamp)
+    # Unlike `.update`, `.update_attribute` & `.update_all` skip model validations (i.e.
+    # column X must satisfy certain conditions), and skips updating `updated_at`. This is needed to make sure we mark
+    # for deletion old rows that were created before we added new validations to the model (which would now fail, but
+    # we still want to delete them regardless), e.g. see `validate :params_checks` in bulk_download.rb.
+    # rubocop:disable Rails/SkipsModelValidations
+    deletable_objects.each do |run|
+      run.bulk_downloads.update_all(deleted_at: delete_timestamp)
+    end
+    # rubocop:enable Rails/SkipsModelValidations
   end
 end

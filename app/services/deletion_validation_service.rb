@@ -78,8 +78,10 @@ class DeletionValidationService
                    PipelineRun::TECHNOLOGY_INPUT[:nanopore]
                  end
 
+    sample_ids_failed_to_upload = current_power.destroyable_samples.where(id: sample_ids).where.not(upload_error: nil).pluck(:id)
     deletable_pipeline_runs = current_power.deletable_pipeline_runs.where(sample_id: sample_ids, technology: technology).non_deprecated
-    valid_sample_ids = deletable_pipeline_runs.pluck(:sample_id)
+    valid_sample_ids = deletable_pipeline_runs.pluck(:sample_id) | sample_ids_failed_to_upload
+
     invalid_sample_ids = sample_ids.reject { |id| valid_sample_ids.include?(id) }
 
     return {

@@ -627,7 +627,7 @@ RSpec.describe "Sample request", type: :request do
 
             deletion_service_response = {
               error: nil,
-              deleted_ids: [@pr1.id, @pr2.id],
+              deleted_run_ids: [@pr1.id, @pr2.id],
             }
             expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_service_response)
 
@@ -738,7 +738,7 @@ RSpec.describe "Sample request", type: :request do
 
             deletion_service_response = {
               error: nil,
-              deleted_ids: [@completed_wr.id, @failed_wr.id],
+              deleted_run_ids: [@completed_wr.id, @failed_wr.id],
             }
 
             expect(DeletionValidationService).to receive(:call).with(anything).and_return(validation_service_response)

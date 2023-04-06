@@ -49,13 +49,25 @@ RSpec.describe DeletionValidationService, type: :service do
                                                 { finalized: 0, technology: illumina, deprecated: false },
                                                 { finalized: 1, technology: illumina, deprecated: true },
                                               ])
+      @joe_rerun_sample = create(:sample, project: @project,
+                                          user: @joe,
+                                          name: "rerun Illumina mNGS sample",
+                                          pipeline_runs_data: [
+                                            { finalized: 1, technology: illumina, deprecated: false },
+                                            { finalized: 1, technology: illumina, deprecated: true },
+                                          ])
+      @joe_failed_upload = create(:sample, project: @project,
+                                           user: @joe,
+                                           name: "failed upload Illumina mNGS sample",
+                                           upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED)
+
       @admin_complete_sample = create(:sample, project: @project, user: @admin,
                                                name: "completed admin Illumina mNGS sample",
                                                pipeline_runs_data: [{ finalized: 1, technology: illumina }])
       @admin_in_prog_sample = create(:sample, project: @project, user: @admin,
                                               name: "in-progress admin Illumina mNGS sample",
                                               pipeline_runs_data: [{ finalized: 0, technology: illumina }])
-      @sample_ids = [@joe_complete_sample.id, @joe_in_prog_sample.id, @joe_rerunning_sample.id, @admin_complete_sample.id, @admin_in_prog_sample.id]
+      @sample_ids = [@joe_complete_sample.id, @joe_in_prog_sample.id, @joe_rerunning_sample.id, @admin_complete_sample.id, @admin_in_prog_sample.id, @joe_rerun_sample.id, @joe_failed_upload.id]
     end
 
     context "when user is not an admin" do
@@ -90,7 +102,15 @@ RSpec.describe DeletionValidationService, type: :service do
       end
 
       it "allows user to access their own samples with no in-progress pipeline runs" do
-        expect(@validate_sample_response[:valid_ids]).to eq([@joe_complete_sample.id])
+        expect(@validate_sample_response[:valid_ids]).to include(@joe_complete_sample.id)
+      end
+
+      it "allows deletion of runs on samples with deprecated pipeline runs" do
+        expect(@validate_sample_response[:valid_ids]).to include(@joe_rerun_sample.id)
+      end
+
+      it "allows deletion of samples that failed to upload (no pipeline runs)" do
+        expect(@validate_sample_response[:valid_ids]).to include(@joe_failed_upload.id)
       end
     end
 
@@ -114,7 +134,7 @@ RSpec.describe DeletionValidationService, type: :service do
       end
 
       it "allows admin to access completed samples uploaded by other users" do
-        expect(@validate_sample_response[:valid_ids]).to eq([@joe_complete_sample.id, @admin_complete_sample.id])
+        expect(@validate_sample_response[:valid_ids]).to include(@joe_complete_sample.id, @admin_complete_sample.id)
       end
 
       it "filters out samples with in-progress pipeline runs" do
@@ -123,6 +143,14 @@ RSpec.describe DeletionValidationService, type: :service do
 
       it "filters out rerunning samples in progress" do
         expect(@validate_sample_response[:invalid_sample_ids]).to include(@joe_rerunning_sample.id)
+      end
+
+      it "allows deletion of runs on samples with deprecated pipeline runs" do
+        expect(@validate_sample_response[:valid_ids]).to include(@joe_rerun_sample.id)
+      end
+
+      it "allows deletion of samples that failed to upload (no pipeline runs)" do
+        expect(@validate_sample_response[:valid_ids]).to include(@joe_failed_upload.id)
       end
     end
   end
@@ -140,6 +168,10 @@ RSpec.describe DeletionValidationService, type: :service do
       @joe_sample3 = create(:sample, project: @project, user: @joe, name: "Joe sample 3")
       @in_prog_joe_wr = create(:workflow_run, sample: @joe_sample3, workflow: consensus_genome, status: WorkflowRun::STATUS[:running])
 
+      @joe_rerun_sample = create(:sample, project: @project, user: @joe, name: "Joe rerun sample")
+      @deprecated_wr = create(:workflow_run, sample: @joe_rerun_sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deprecated: true)
+      @rerun_wr = create(:workflow_run, sample: @joe_rerun_sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deprecated: false)
+
       @admin_sample1 = create(:sample, project: @project, user: @admin, name: "Admin sample 1")
       @completed_admin_wr = create(:workflow_run, sample: @admin_sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
 
@@ -149,7 +181,7 @@ RSpec.describe DeletionValidationService, type: :service do
       @joe_sample4 = create(:sample, project: @project, user: @joe, name: "Joe sample 4")
       @amr_wr = create(:workflow_run, sample: @joe_sample4, workflow: WorkflowRun::WORKFLOW[:amr], status: WorkflowRun::STATUS[:succeeded])
 
-      @workflow_run_ids = [@completed_joe_wr1.id, @in_prog_joe_wr.id, @failed_joe_wr.id, @completed_admin_wr.id, @in_prog_admin_wr.id, @amr_wr.id]
+      @workflow_run_ids = [@completed_joe_wr1.id, @in_prog_joe_wr.id, @failed_joe_wr.id, @completed_admin_wr.id, @in_prog_admin_wr.id, @amr_wr.id, @rerun_wr.id]
 
       @completed_joe_wr2 = create(:workflow_run, sample: @joe_sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
     end
@@ -186,6 +218,11 @@ RSpec.describe DeletionValidationService, type: :service do
         expect(@validate_wr_response[:valid_ids]).not_to include(@completed_joe_wr2.id)
         expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@completed_joe_wr2.sample_id)
       end
+
+      it "allows deletion of runs on samples with deprecated workflow runs" do
+        expect(@validate_wr_response[:valid_ids]).to include(@rerun_wr.id)
+        expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@rerun_wr.sample_id)
+      end
     end
 
     context "when user is an admin" do
@@ -215,6 +252,11 @@ RSpec.describe DeletionValidationService, type: :service do
       it "returns only the specified workflow runs when multiple active CG workflow runs exist on one sample" do
         expect(@validate_wr_response[:valid_ids]).not_to include(@completed_joe_wr2.id)
         expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@completed_joe_wr2.sample_id)
+      end
+
+      it "allows deletion of runs on samples with deprecated workflow runs" do
+        expect(@validate_wr_response[:valid_ids]).to include(@rerun_wr.id)
+        expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@rerun_wr.sample_id)
       end
     end
   end
