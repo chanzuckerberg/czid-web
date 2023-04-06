@@ -21,10 +21,9 @@ import {
 import queryString from "query-string";
 import React from "react";
 import { connect } from "react-redux";
-
 import {
-  getSampleTaxons,
   getPathogenFlags,
+  getSampleTaxons,
   getTaxaDetails,
   saveVisualization,
 } from "~/api";
@@ -45,8 +44,8 @@ import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
   HEATMAP_ELASTICSEARCH_FEATURE,
-  HEATMAP_PATHOGEN_FLAGGING_FEATURE,
   HEATMAP_FILTERS_LEFT_FEATURE,
+  HEATMAP_PATHOGEN_FLAGGING_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { diff } from "~/components/utils/objectUtil";
@@ -71,10 +70,14 @@ import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, SortIcon } from "~ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
-
 import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
+import SamplesHeatmapFilters from "./components/SamplesHeatmapFilters";
+import SamplesHeatmapFilterStats from "./components/SamplesHeatmapFilterStats";
+import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
+import SamplesHeatmapLegend from "./components/SamplesHeatmapLegend";
 import {
   BACKGROUND_METRICS,
+  HEATMAP_FILTERS,
   METRIC_OPTIONS,
   NOTIFICATION_TYPES,
   SCALE_OPTIONS,
@@ -84,17 +87,12 @@ import {
   TAXONS_PER_SAMPLE_RANGE,
   TAXON_LEVEL_OPTIONS,
   TAXON_LEVEL_SELECTED,
-  HEATMAP_FILTERS,
 } from "./constants";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls, {
   SamplesHeatmapControlsProps,
 } from "./SamplesHeatmapControls";
 import SamplesHeatmapDownloadModal from "./SamplesHeatmapDownloadModal";
-import SamplesHeatmapFilters from "./SamplesHeatmapFilters";
-import SamplesHeatmapFilterStats from "./SamplesHeatmapFilterStats";
-import { SamplesHeatmapHeader } from "./SamplesHeatmapHeader/SamplesHeatmapHeader";
-import SamplesHeatmapLegend from "./SamplesHeatmapLegend";
 
 const parseAndCheckInt = (val: $TSFixMe, defaultVal: $TSFixMe) => {
   const parsed = parseInt(val);
@@ -507,8 +505,10 @@ class SamplesHeatmapView extends React.Component<
     const { selectedOptions } = this.state;
     const { metric, background } = selectedOptions;
 
-    const selectedBackgroundName = find({ value: background }, backgrounds)
-      .name;
+    const selectedBackgroundName = find(
+      { value: background },
+      backgrounds,
+    ).name;
     // We want to show the metric and background selected, but do not consider them as filters.
     const filterRow = [
       `\nMetric:, ${metric}`,
@@ -594,12 +594,10 @@ class SamplesHeatmapView extends React.Component<
       csvHeaders = ['"Current heatmap view did not render any data"'];
       csvRows = [['"Please try adjusting the filters or samples selected"']];
     } else {
-      [
-        csvHeaders,
-        csvRows,
-      ] = this.heatmapVis.computeCurrentHeatmapViewValuesForCSV({
-        headers: compact(["Taxon", selectedOptions.species !== 0 && "Genus"]),
-      });
+      [csvHeaders, csvRows] =
+        this.heatmapVis.computeCurrentHeatmapViewValuesForCSV({
+          headers: compact(["Taxon", selectedOptions.species !== 0 && "Genus"]),
+        });
     }
 
     csvRows.push(this.createCSVRowForSelectedOptions());
@@ -847,10 +845,10 @@ class SamplesHeatmapView extends React.Component<
         details: {
           err: e,
           href: window.location.href,
-          message: e.message,
+          message: e?.message ?? errorMessage,
           sampleIds,
-          status: e.status,
-          statusText: e.statusText,
+          status: e?.status,
+          statusText: e?.statusText,
           usesElasticSearch: useHeatmapES,
         },
       });
@@ -1067,15 +1065,10 @@ class SamplesHeatmapView extends React.Component<
   }
 
   filterTaxa() {
-    const {
-      taxonFilterState,
-      taxonPassesThresholdFilters,
-    } = this.getTaxonThresholdFilterState();
-    const {
-      allTaxonIds,
-      notifiedFilteredOutTaxonIds,
-      addedTaxonIds,
-    } = this.state;
+    const { taxonFilterState, taxonPassesThresholdFilters } =
+      this.getTaxonThresholdFilterState();
+    const { allTaxonIds, notifiedFilteredOutTaxonIds, addedTaxonIds } =
+      this.state;
     let { newestTaxonId, allTaxonDetails } = this.state;
     let taxonIds = new Set();
     let filteredData = {};
@@ -1187,21 +1180,16 @@ class SamplesHeatmapView extends React.Component<
   getTaxonThresholdFilterState() {
     // Set the state of whether or not a taxon passes the custom threshold filters
     // for each selected sample.
-    const {
-      sampleDetails,
-      allTaxonDetails,
-      allData,
-      taxonFilterState,
-    } = this.state;
+    const { sampleDetails, allTaxonDetails, allData, taxonFilterState } =
+      this.state;
     const taxonPassesThresholdFilters = {};
     Object.values(sampleDetails).forEach((sample: $TSFixMe) => {
       Object.values(allTaxonDetails).forEach((taxon: $TSFixMe) => {
         taxonFilterState[taxon["index"]] =
           taxonFilterState[taxon["index"]] || {};
         // eslint-disable-next-line standard/computed-property-even-spacing
-        taxonFilterState[taxon["index"]][
-          sample["index"]
-        ] = this.taxonThresholdFiltersCheck(sample["index"], taxon, allData);
+        taxonFilterState[taxon["index"]][sample["index"]] =
+          this.taxonThresholdFiltersCheck(sample["index"], taxon, allData);
 
         taxonPassesThresholdFilters[taxon["index"]] =
           taxonPassesThresholdFilters[taxon["index"]] ||
@@ -1232,7 +1220,10 @@ class SamplesHeatmapView extends React.Component<
           if (value < parseFloat(filter["value"])) {
             return false;
           }
-        } else if ((filter["operator"] === "<=") && (value > parseFloat(filter["value"]))) {
+        } else if (
+          filter["operator"] === "<=" &&
+          value > parseFloat(filter["value"])
+        ) {
           return false;
         }
       }
@@ -1250,7 +1241,10 @@ class SamplesHeatmapView extends React.Component<
     const phageSelected =
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
 
-    if ((species && taxonDetails["taxLevel"] !== 1) || (!species && taxonDetails["taxLevel"] !== 2)) {
+    if (
+      (species && taxonDetails["taxLevel"] !== 1) ||
+      (!species && taxonDetails["taxLevel"] !== 2)
+    ) {
       return false;
     }
     if (readSpecificity && taxonDetails["id"] < 0) {
@@ -1303,12 +1297,8 @@ class SamplesHeatmapView extends React.Component<
 
     // Fetch the top N taxa from each sample, sorted by the selected metric,
     // that passed all selected filters.
-    const {
-      sampleDetails,
-      allData,
-      allTaxonDetails,
-      selectedOptions,
-    } = this.state;
+    const { sampleDetails, allData, allTaxonDetails, selectedOptions } =
+      this.state;
     const { metric, taxonsPerSample } = selectedOptions;
     const { metrics } = this.props;
 
@@ -1332,7 +1322,7 @@ class SamplesHeatmapView extends React.Component<
       for (const taxId of filteredTaxaInSample) {
         if (count >= taxonsPerSample) {
           break;
-        } else if ((!topTaxIds.has(taxId)) && (!this.removedTaxonIds.has(taxId))) {
+        } else if (!topTaxIds.has(taxId) && !this.removedTaxonIds.has(taxId)) {
           const taxon = allTaxonDetails[taxId];
           topTaxIds.add(taxId);
           topTaxonDetails[taxId] = allTaxonDetails[taxId];
@@ -1808,15 +1798,10 @@ class SamplesHeatmapView extends React.Component<
   renderVisualization(shownTaxa, useNewFilters) {
     // TODO (smb): remove this once new filters are fully rolled out
 
-    const {
-      data,
-      loading,
-      selectedOptions,
-      allSpeciesIds,
-      allGeneraIds,
-    } = this.state;
+    const { data, loading, selectedOptions, allSpeciesIds, allGeneraIds } =
+      this.state;
 
-    const headerHeight = 130;
+    const headerHeight = 116;
     const drawerWidth = 200;
 
     return (
@@ -2183,8 +2168,7 @@ class SamplesHeatmapView extends React.Component<
             onClick={withAnalytics(
               this.toggleDisplayFilters,
               "SamplesHeatmapFilters_toggle_clicked",
-            )}
-          >
+            )}>
             <SortIcon
               sortDirection={hideFilters ? "descending" : "ascending"}
             />

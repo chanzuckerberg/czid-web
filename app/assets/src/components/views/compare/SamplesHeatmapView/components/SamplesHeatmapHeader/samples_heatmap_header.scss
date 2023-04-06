@@ -16,7 +16,6 @@
   .contentContainer {
     display: flex;
     flex-direction: row;
-    margin-bottom: $sds-spaces-l;
   }
 
   .contentColumn {
@@ -26,7 +25,7 @@
   }
 
   .contentSpacer {
-    height: $sds-spaces-l;
+    height: $sds-spaces-m;
   }
 
   .controls {

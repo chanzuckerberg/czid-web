@@ -4,6 +4,7 @@
 import { Button, DropdownPopper, InputDropdown } from "czifui";
 import { find, isEmpty, some } from "lodash/fp";
 import React, { useEffect, useState } from "react";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";
 import {
   MetricOption,
@@ -15,23 +16,28 @@ import cs from "./threshold_filter_sds.scss";
 interface ThresholdFilterSDSPropsType {
   selectedThresholds: ThresholdFilterData[];
   onApply: (thresholds: ThresholdFilterData[]) => void;
-  isDisabled: boolean;
+  disabled: boolean;
   metricOptions: MetricOption[];
+  shouldShowTags?: boolean;
 }
 
 export const ThresholdFilterSDS = ({
   selectedThresholds,
   onApply,
   metricOptions,
-  isDisabled,
+  disabled,
+  shouldShowTags = true,
 }: ThresholdFilterSDSPropsType) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [hasModifiedFilters, setHasModifiedFilters] = useState<boolean>(false);
-  // Threshold selections are only stored in this component's state until they
-  // are applied, at which point they are passed to the parent component via callback
-  const [thresholds, setThresholds] = useState<ThresholdFilterData[]>(
-    selectedThresholds,
-  );
+
+  /* Threshold selections are only stored in this component's state until they
+  are applied, at which point they are passed to the parent component via callback.
+
+  Note that this list of thresholds can be quite long, and the user may have multiple
+  thresholds for the same `metric`, which is why we can't structure this as a nicely named object / have to rely on indexing a list of thresholds */
+  const [thresholds, setThresholds] =
+    useState<ThresholdFilterData[]>(selectedThresholds);
 
   const filterOperators: ThresholdFilterOperator[] = [">=", "<="];
 
@@ -41,7 +47,7 @@ export const ThresholdFilterSDS = ({
 
   const handleCancel = () => {
     setAnchorEl(null);
-    setThresholds(selectedThresholds);
+    setThresholds(null);
   };
 
   const handleThresholdChange = (
@@ -68,6 +74,15 @@ export const ThresholdFilterSDS = ({
     setThresholds(newThresholds);
   };
 
+  const handleThresholdFilterTagRemove = (thresholdIdx: number) => {
+    const newThresholds = [
+      ...thresholds.slice(0, thresholdIdx),
+      ...thresholds.slice(thresholdIdx + 1, thresholds.length),
+    ];
+
+    onApply(newThresholds);
+  };
+
   const handleAddThresholdItem = () => {
     const firstMetric = metricOptions[0];
 
@@ -85,6 +100,7 @@ export const ThresholdFilterSDS = ({
   const handleApply = () => {
     setAnchorEl(null);
     onApply(thresholds);
+    setThresholds(null);
   };
 
   // If any of the newThresholds were not found in the existing selected thresholds, then the threshold filters were modified
@@ -109,64 +125,85 @@ export const ThresholdFilterSDS = ({
 
   const handleDropdownInputClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
-    if (!thresholds) {
+    setThresholds(selectedThresholds);
+    if (thresholds.length === 0) {
       handleAddThresholdItem();
     }
   };
 
   return (
     <>
-      <InputDropdown
-        disabled={isDisabled}
-        onClick={handleDropdownInputClick}
-        label="Thresholds"
-        sdsStyle="minimal"
-        sdsStage="default"
-      />
-      <DropdownPopper
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        placement="bottom-start"
-      >
-        <div className={cs.filterContainer}>
-          <div className={cs.title}>Configure Thresholds</div>
+      <div>
+        <InputDropdown
+          disabled={disabled}
+          onClick={handleDropdownInputClick}
+          label={<div className={cs.label}>Thresholds</div>}
+          sdsStyle="minimal"
+          sdsStage="default"
+        />
+        <DropdownPopper
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          placement="bottom-start">
+          <div className={cs.filterContainer}>
+            <div className={cs.title}>Configure Thresholds</div>
 
-          <ThresholdFilterList
-            metrics={metricOptions}
-            operators={filterOperators}
-            thresholds={thresholds}
-            onChangeThreshold={(idx, threshold) => {
-              handleThresholdChange(idx, threshold);
-            }}
-            onRemoveThreshold={idx => {
-              handleThresholdRemove(idx);
-            }}
-            onAddThreshold={handleAddThresholdItem}
-          />
+            <ThresholdFilterList
+              metrics={metricOptions}
+              operators={filterOperators}
+              thresholds={thresholds}
+              onChangeThreshold={(idx, threshold) => {
+                handleThresholdChange(idx, threshold);
+              }}
+              onRemoveThreshold={idx => {
+                handleThresholdRemove(idx);
+              }}
+              onAddThreshold={handleAddThresholdItem}
+            />
 
-          <div className={cs.actions}>
-            <div className={cs.action}>
-              <Button
-                sdsStyle="square"
-                sdsType="primary"
-                disabled={!hasModifiedFilters}
-                onClick={handleApply}
-              >
-                Apply
-              </Button>
-            </div>
-            <div className={cs.action}>
-              <Button
-                sdsStyle="square"
-                sdsType="secondary"
-                onClick={handleCancel}
-              >
-                Cancel
-              </Button>
+            <div className={cs.actions}>
+              <div className={cs.action}>
+                <Button
+                  sdsStyle="square"
+                  sdsType="primary"
+                  disabled={!hasModifiedFilters}
+                  onClick={handleApply}>
+                  Apply
+                </Button>
+              </div>
+              <div className={cs.action}>
+                <Button
+                  sdsStyle="square"
+                  sdsType="secondary"
+                  onClick={handleCancel}>
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
+        </DropdownPopper>
+      </div>
+      {shouldShowTags && (
+        <div className={cs.filterTagsList}>
+          {selectedThresholds.map((threshold, index) => {
+            return (
+              <div
+                className={cs.filterTagContainer}
+                key={`threshold-tag-container-${index}`}>
+                <ThresholdFilterTag
+                  threshold={threshold}
+                  onClose={() => {
+                    handleThresholdFilterTagRemove(index);
+                  }}
+                  disabled={disabled}
+                  className={cs.filterTag}
+                  key={`threshold-filter-tag-${index}`}
+                />
+              </div>
+            );
+          })}
         </div>
-      </DropdownPopper>
+      )}
     </>
   );
 };

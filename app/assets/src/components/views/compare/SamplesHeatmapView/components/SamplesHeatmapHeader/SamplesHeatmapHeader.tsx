@@ -1,11 +1,10 @@
 import { ButtonIcon, Icon } from "czifui";
 import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
-
 import {
   ANALYTICS_EVENT_NAMES,
-  withAnalytics,
   trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import { updateHeatmapName } from "~/api/visualization";
 import BasicPopup from "~/components/BasicPopup";
@@ -14,13 +13,13 @@ import { NarrowContainer, ViewHeader } from "~/components/layout";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";
 import {
-  showAppcue,
   SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
+  showAppcue,
 } from "~/components/utils/appcues";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import {
-  MICROBIOME_DOWNLOAD_FEATURE,
   HEATMAP_FILTERS_LEFT_FEATURE,
+  MICROBIOME_DOWNLOAD_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { logDownloadOption } from "~/components/views/report/utils/download";
@@ -30,15 +29,13 @@ import {
 } from "~/helpers/strings";
 import {
   DownloadButton,
-  PrimaryButton,
   HelpButton,
+  PrimaryButton,
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
-
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { DOWNLOAD_OPTIONS } from "../constants";
-
+import { DOWNLOAD_OPTIONS } from "../../constants";
 import cs from "./samples_heatmap_header.scss";
 
 interface SamplesHeatmapHeaderProps {
@@ -161,6 +158,7 @@ export const SamplesHeatmapHeader = ({
             sdsSize="large"
             sdsType="primary"
             sx={{ marginRight: "10px" }}
+            on={filterPanelOpen}
           />
         }
       />

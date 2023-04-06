@@ -8,7 +8,7 @@
   // Offset from the viewport to line up with the plus and minus controls. This will
   // need to be adjusted if the position of the controls changes.
   position: absolute;
-  top: 144px; // TODO - smb - ensure this is the right value once everything is finalized. header = 130; margin = sds-large = 14
+  top: 130px; // TODO - smb - ensure this is the right value once everything is finalized. header = 130.
   left: 228px;
   text-anchor: start;
 }

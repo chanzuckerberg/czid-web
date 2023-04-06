@@ -1,10 +1,11 @@
 import { Dropdown } from "czifui";
 import React from "react";
-import { SDSFormattedOption } from "../SamplesHeatmapFilters";
+import { SDSFormattedOption } from "../../SamplesHeatmapFilters";
 import {
   valueToName,
   valueToSDSFormatOption,
-} from "../samplesHeatmapFilterUtils";
+} from "../../samplesHeatmapFilterUtils";
+import cs from "./samples_heatmap_view_options_dropdown.scss";
 
 interface SamplesHeatmapViewOptionsDropdownPropsType {
   disabled: boolean;
@@ -40,7 +41,7 @@ export const SamplesHeatmapViewOptionsDropdown = ({
         options,
       )}
       onChange={(newValue: SDSFormattedOption) => onChange(newValue)}
-      label={label}
+      label={<div className={cs.label}>{label}</div>}
       options={options}
       InputDropdownProps={{
         sdsStyle: "minimal",

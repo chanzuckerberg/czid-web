@@ -3,8 +3,9 @@
 /* eslint-disable react/prop-types */
 import { Dropdown } from "czifui";
 import React from "react";
-import { SDSFormattedOption } from "../SamplesHeatmapFilters";
-import { valueToName } from "../samplesHeatmapFilterUtils";
+import { SDSFormattedOption } from "../../SamplesHeatmapFilters";
+import { valueToName } from "../../samplesHeatmapFilterUtils";
+import cs from "./samples_heatmap_background_dropdown.scss";
 
 interface SamplesHeatmapBackgroundDropdownProps {
   allBackgrounds?: RawBackground[];
@@ -72,7 +73,7 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
     const getOptionDisabled = (option: any) => option.disabled;
     return (
       <Dropdown
-        label="Background"
+        label={<div className={cs.label}>Background</div>}
         search={true}
         onChange={newValue => {
           // @ts-expect-error -- complains about the default SDS dropdown option type not having a `value` field, but we're using objects with a superset of the SDS option type

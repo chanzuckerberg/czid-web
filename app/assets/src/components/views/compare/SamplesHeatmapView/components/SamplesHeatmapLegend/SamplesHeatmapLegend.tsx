@@ -21,25 +21,11 @@ export const SamplesHeatmapLegend = ({
   const values = data[selectedOptions.metric];
   const scaleIndex = selectedOptions.dataScaleIdx;
 
-  const getNestedMin = (
-    arrayOfArrays: Array<Array<number>>,
-    lowerBound = 0,
-  ) => {
-    const minOfEachArray = arrayOfArrays.map(array => Math.min(...array));
-    const minOfAllArrays = Math.min(...minOfEachArray);
-    return Math.max(minOfAllArrays, lowerBound);
-  };
-
-  const getNestedMax = (arrayOfArrays: Array<Array<number>>) => {
-    const maxOfEachArray = arrayOfArrays.map(array => Math.max(...array));
-    return Math.max(...maxOfEachArray);
-  };
-
   return (
     <div className={cs.samplesHeatmapLegend}>
       <SequentialLegendVis
-        min={getNestedMin(values, 0)}
-        max={getNestedMax(values)}
+        min={Math.min(...values.flat())}
+        max={Math.max(...values.flat())}
         scale={options.scales[scaleIndex][1]}
       />
     </div>

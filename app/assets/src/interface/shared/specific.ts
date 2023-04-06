@@ -264,7 +264,7 @@ export interface SelectedOptions {
 }
 
 export interface Subcategories {
-  Viruses: string[];
+  Viruses?: string[];
 }
 
 export type AnnotationType = "not_a_hit" | "hit" | "inconclusive" | "none";

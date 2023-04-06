@@ -1,0 +1,15 @@
+@import "~czifui/dist/variables";
+
+.taxaPerSampleSliderContainer {
+  width: 200px;
+  height: 75px;
+  padding: $sds-spaces-l;
+  font-size: 8px;
+}
+
+.label {
+  font: $sds-font-caps-xxxs-600-font;
+  color: $sds-color-gray-500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
