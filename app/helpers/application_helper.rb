@@ -40,6 +40,7 @@ module ApplicationHelper
       userId: current_user && current_user.id,
       userSettings: current_user && current_user.viewable_user_settings,
       userSignedIn: current_user.present?,
+      profileCompleted: current_user && !current_user.profile_form_version.zero?,
     }
   end
 
