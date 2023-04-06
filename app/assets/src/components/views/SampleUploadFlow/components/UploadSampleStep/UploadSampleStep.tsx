@@ -288,7 +288,8 @@ class UploadSampleStep extends React.Component<
   };
 
   handleProjectCreate = async (project: $TSFixMe) => {
-    this.props.onDirty();
+    const { getPipelineVersionsForExistingProject, onDirty } = this.props;
+    onDirty();
     this.setState({
       validatingSamples: true,
       showNoProjectError: false,
@@ -311,6 +312,7 @@ class UploadSampleStep extends React.Component<
         samples: this.state.basespaceSamples,
         project,
       }),
+      getPipelineVersionsForExistingProject(project.id),
     ]);
 
     this.setState({
@@ -588,8 +590,9 @@ class UploadSampleStep extends React.Component<
             const files = pair.files;
             for (const fileName in files) {
               finishedValidating[fileName] = pair.finishedValidating;
-              const correctSequenceTechnologySelected =
-                this.validateCorrectFormat(pair);
+              const correctSequenceTechnologySelected = this.validateCorrectFormat(
+                pair,
+              );
               isValid[fileName] =
                 pair.isValid && correctSequenceTechnologySelected;
               const errorMsg = !correctSequenceTechnologySelected
@@ -1186,10 +1189,12 @@ class UploadSampleStep extends React.Component<
         )}
         onChange={(_, selectedTabIndex) =>
           this.handleTabChange(selectedTabIndex)
-        }>
+        }
+      >
         <Tab
           label={LOCAL_UPLOAD_LABEL}
-          data-testid={kebabCase(LOCAL_UPLOAD_LABEL)}></Tab>
+          data-testid={kebabCase(LOCAL_UPLOAD_LABEL)}
+        ></Tab>
         {(admin || biohubS3UploadEnabled) && s3Tab}
         {basespaceTab}
       </Tabs>
@@ -1201,7 +1206,8 @@ class UploadSampleStep extends React.Component<
       <Tab
         disabled={disabled}
         label={label}
-        data-testid={kebabCase(label)}></Tab>
+        data-testid={kebabCase(label)}
+      ></Tab>
     );
     if (disabled) {
       tab = (
@@ -1209,7 +1215,8 @@ class UploadSampleStep extends React.Component<
           arrow
           placement="top"
           title={UNSUPPORTED_UPLOAD_OPTION_TOOLTIP}
-          leaveDelay={0}>
+          leaveDelay={0}
+        >
           <span>{tab}</span>
         </Tooltip>
       );
@@ -1282,7 +1289,8 @@ class UploadSampleStep extends React.Component<
           cs.uploadSampleStep,
           cs.uploadFlowStep,
           this.props.visible && cs.visible,
-        )}>
+        )}
+      >
         <div className={cs.flexContent}>
           <div className={cs.projectSelect}>
             <div className={cs.header} role="heading">
@@ -1318,7 +1326,8 @@ class UploadSampleStep extends React.Component<
                   this.openCreateProject,
                   "UploadSampleStep_create-project_opened",
                 )}
-                data-testid="create-project">
+                data-testid="create-project"
+              >
                 + Create Project
               </div>
             )}
@@ -1403,7 +1412,8 @@ class UploadSampleStep extends React.Component<
                   text={readyForBasespaceAuth ? "Authorize" : "Continue"}
                 />
               </span>
-            }>
+            }
+          >
             {this.handleContinueButtonTooltip()}
           </BasicPopup>
           <a href="/home">
