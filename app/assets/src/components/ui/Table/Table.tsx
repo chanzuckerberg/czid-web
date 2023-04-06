@@ -8,19 +8,19 @@ import {
   TableOptions,
   useReactTable,
 } from "@tanstack/react-table";
-import { Table as SDSTable, TableRow } from "czifui";
+import { Table as SDSTable, TableHeader, TableRow } from "czifui";
 import { isEqual, map } from "lodash";
 import React, { useEffect, useState } from "react";
 import { TableVirtuoso } from "react-virtuoso";
 import { IdMap } from "~/components/utils/objectUtil";
 import { rowSelectionColumn } from "./columnDefinitions/RowSelectionColumn";
 import { EmptyTable } from "./components/EmptyTable";
-import cs from "./table.scss";
 
 interface TableProps<T> {
   columns: ColumnDef<T, any>[];
   tableData: IdMap<T> | undefined;
   initialSortKey?: string;
+  isInitialSortDescending?: boolean;
   isLoading?: boolean;
   uniqueIdentifier: keyof T;
   // the following three props should either
@@ -45,6 +45,7 @@ export const Table = <T,>({
   columns,
   tableData,
   initialSortKey,
+  isInitialSortDescending,
   isLoading,
   checkedRows = [],
   onSetCheckedRows,
@@ -62,7 +63,10 @@ export const Table = <T,>({
     setSorting([
       {
         id: initialSortKey ?? "",
-        desc: true,
+        desc:
+          isInitialSortDescending !== undefined
+            ? isInitialSortDescending
+            : true,
       },
     ]);
   }, []);
@@ -122,7 +126,7 @@ export const Table = <T,>({
       (obj: Record<string | number, boolean>, row: T) => {
         // not getting row selection as expected? Make sure that your uniqueIdentifier
         // represents a field on your item that returns a unique string or number
-        const key = (row[uniqueIdentifier] as unknown) as string | number;
+        const key = row[uniqueIdentifier] as unknown as string | number;
         return {
           ...obj,
           [key]: true,
@@ -145,39 +149,35 @@ export const Table = <T,>({
   }
 
   return (
-    <div className={cs.wrapper}>
-      <TableVirtuoso
-        totalCount={rows.length}
-        components={{
-          Table: SDSTable,
-        }}
-        fixedHeaderContent={() => {
-          return table.getHeaderGroups().map(headerGroup => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map(header => {
-                return flexRender(
-                  header.column.columnDef.header,
-                  header.getContext(),
-                );
-              })}
-            </TableRow>
-          ));
-        }}
-        itemContent={index => {
-          const row = rows[index];
-          return (
-            <>
-              {row.getVisibleCells().map(cell => {
-                return (
-                  <td style={{ height: "20px" }} key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                );
-              })}
-            </>
-          );
-        }}
-      />
-    </div>
+    <TableVirtuoso
+      totalCount={rows.length}
+      components={{
+        Table: SDSTable,
+        TableHead: TableHeader,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        TableRow: TableRow,
+      }}
+      fixedHeaderContent={() => {
+        return table.getHeaderGroups().map(headerGroup =>
+          headerGroup.headers.map(header => {
+            return flexRender(
+              header.column.columnDef.header,
+              header.getContext(),
+            );
+          }),
+        );
+      }}
+      itemContent={index => {
+        const row = rows[index];
+        return (
+          <>
+            {row.getVisibleCells().map(cell => {
+              return flexRender(cell.column.columnDef.cell, cell.getContext());
+            })}
+          </>
+        );
+      }}
+    />
   );
 };

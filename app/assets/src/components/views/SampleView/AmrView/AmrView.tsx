@@ -3,6 +3,7 @@ import { getWorkflowRunResults } from "~/api";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V2_FEATURE } from "~/components/utils/features";
+import { camelize } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import SampleReportContent from "../SampleReportContent";
 import { AmrOutputDownloadView } from "./components/AmrOutputDownloadView";
@@ -17,7 +18,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const [loadingResults, setLoadingResults] = useState(false);
-  // const [reportData, setReportData] = useState(null);
+  const [reportTableData, setReportTableData] = useState(null);
 
   useEffect(() => {
     if (!allowedFeatures.includes(AMR_V2_FEATURE)) return;
@@ -25,10 +26,9 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     const fetchResults = async () => {
       // some of the below code is commented out to avoid linter errors
       // API call is still made to get the report data for future development
-      // const reportTableData = await getWorkflowRunResults(workflowRun.id);
-      await getWorkflowRunResults(workflowRun.id);
-      // TODO: update TS type with report data format and store only report data
-      // setReportData(reportTableData);
+      const reportDataRaw = await getWorkflowRunResults(workflowRun.id);
+      const reportData = camelize(reportDataRaw);
+      setReportTableData(reportData.reportTableData);
       setLoadingResults(false);
     };
 
@@ -37,7 +37,13 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
 
   const renderResults = () => {
     if (allowedFeatures.includes(AMR_V2_FEATURE)) {
-      return <AmrSampleReport />;
+      return (
+        <AmrSampleReport
+          reportTableData={reportTableData}
+          sample={sample}
+          workflowRun={workflowRun}
+        />
+      );
     } else {
       return (
         <AmrOutputDownloadView workflowRun={workflowRun} sample={sample} />

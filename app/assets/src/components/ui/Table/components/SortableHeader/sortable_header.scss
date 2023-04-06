@@ -1,0 +1,10 @@
+@import "~czifui/dist/variables";
+
+.wrapper {
+  background-color: $sds-color-gray-white;
+  span {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
