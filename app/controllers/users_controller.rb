@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   skip_before_action :authenticate_user!, only: [:password_new]
-  before_action :admin_required, except: [:password_new]
+  before_action :admin_required, except: [:password_new, :update]
   before_action :set_user, only: [:edit, :update, :destroy]
 
   # GET /users
@@ -43,8 +43,28 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1
   # PATCH/PUT /users/1.json
   def update
+    # Unless AppConfig::AUTO_ACCOUNT_CREATION_V1 is enabled, only admins can update users.
+    if !current_user.admin? && get_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1) != "1"
+      render json: { message: "Nonadmin users are not allowed to modify user info" }, status: :forbidden
+      return
+    end
+
+    # Non-admins can only update their own user info.
+    if !current_user.admin? && current_user.id != @user.id
+      render json: { message: "Users are not allowed to modify other users' info" }, status: :forbidden
+      return
+    end
+
     input_params = user_params.to_h.symbolize_keys
     old_email = @user.email
+    unless current_user.admin?
+      # Only admins can change roles.
+      if input_params[:role] && (input_params[:role] != @user.role)
+        LogUtil.log_error("Non-admin #{current_user.id} attempted to change role of user #{@user.id} from #{@user.role} to #{input_params[:role]}.")
+      end
+      # user_params automatically filters out :role for non-admins, but we need to set it for Auth0UserManagementHelper.patch_auth0_user.
+      input_params[:role] = @user.role
+    end
     if @user.update(input_params)
       # Update user info on Auth0.
       Auth0UserManagementHelper.patch_auth0_user(old_email: old_email, **input_params.slice(:email, :name, :role))
@@ -146,6 +166,10 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:role, :email, :institution, :name, :send_activation, :segments, :archetypes, project_ids: [])
+    if current_user.admin?
+      params.require(:user).permit(:role, :email, :institution, :name, :send_activation, :segments, :archetypes, :profile_form_version, project_ids: [])
+    else
+      params.require(:user).permit(:email, :institution, :name, :send_activation, :segments, :archetypes, :profile_form_version, project_ids: [])
+    end
   end
 end

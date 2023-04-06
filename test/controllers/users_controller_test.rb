@@ -35,7 +35,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   test 'non admin shouldnt update user' do
     put user_url @user, params: { user: { name: "abc xyz" } }
-    assert_redirected_to root_url
+    assert_response :forbidden
   end
 
   # Host Genomes

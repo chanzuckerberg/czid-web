@@ -7,7 +7,7 @@
       "check_name": "FileAccess",
       "message": "Model attribute used in file name",
       "file": "app/models/pipeline_run.rb",
-      "line": 683,
+      "line": 720,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "File.read(PipelineRun.download_file_with_retries(s3_file_for(\"contig_bases\"), \"/tmp/results_json\", 3))",
       "render_path": null,
@@ -30,7 +30,7 @@
       "check_name": "FileAccess",
       "message": "Model attribute used in file name",
       "file": "app/models/pipeline_run.rb",
-      "line": 677,
+      "line": 713,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "File.read(PipelineRun.download_file_with_retries(s3_file_for(\"contigs\"), \"/tmp/results_json\", 3))",
       "render_path": null,
@@ -45,6 +45,29 @@
         22
       ],
       "note": ""
+    },
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 105,
+      "fingerprint": "ac8b34ab93cfdad7ec386eab04d8095190a5ca6988beed2fba236a2fa712d205",
+      "check_name": "PermitAttributes",
+      "message": "Potentially dangerous key allowed for mass assignment",
+      "file": "app/controllers/users_controller.rb",
+      "line": 170,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.require(:user).permit(:role, :email, :institution, :name, :send_activation, :segments, :archetypes, :profile_form_version, :project_ids => ([]))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "UsersController",
+        "method": "user_params"
+      },
+      "user_input": ":role",
+      "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
+      "note": "role is filtered out if current_user is nonadmin"
     },
     {
       "warning_type": "Mass Assignment",
@@ -70,6 +93,6 @@
       "note": ""
     }
   ],
-  "updated": "2022-11-28 11:31:47 -0800",
-  "brakeman_version": "5.3.1"
+  "updated": "2023-04-05 22:47:27 +0000",
+  "brakeman_version": "5.4.1"
 }

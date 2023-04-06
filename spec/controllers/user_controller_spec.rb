@@ -112,9 +112,48 @@ RSpec.describe UsersController, type: :request do
       assert_redirected_to root_url
     end
 
-    it "shouldnt update user" do
-      put user_url @joe, params: { user: { name: "abc xyz" } }
-      assert_redirected_to root_url
+    context "with AppConfig::AUTO_ACCOUNT_CREATION_V1 disabled" do
+      it "shouldn't update user" do
+        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "")
+        put user_url @joe, params: { user: { name: "abc xyz" } }
+        expect(response).to have_http_status :forbidden
+        expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Nonadmin users are not allowed to modify user info")
+      end
+
+      it "shouldn't update the user's role" do
+        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "")
+        put user_url @joe, params: { user: { role: 1, name: @joe.name, email: @joe.email } }
+        expect(response).to have_http_status :forbidden
+        expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Nonadmin users are not allowed to modify user info")
+        @joe.reload
+        expect(@joe.admin?).to eq(false)
+      end
+    end
+
+    context "with AppConfig::AUTO_ACCOUNT_CREATION_V1 enabled" do
+      it "should update user" do
+        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
+        expect(Auth0UserManagementHelper).to receive(:patch_auth0_user).with(old_email: @joe.email, email: @joe.email, name: "abc xyz", role: @joe.role)
+        put user_url @joe, params: { user: { name: "abc xyz", email: @joe.email } }
+        @joe.reload
+        expect(@joe.name).to eq("abc xyz")
+      end
+
+      it "shouldn't update a different user's info" do
+        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
+        put user_url @admin, params: { user: { name: "abc xyz", email: @admin.email } }
+        expect(response).to have_http_status :forbidden
+        expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Users are not allowed to modify other users' info")
+      end
+
+      it "shouldn't update the user's role" do
+        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
+        expect(Auth0UserManagementHelper).to receive(:patch_auth0_user).with(old_email: @joe.email, email: @joe.email, name: "abc xyz", role: @joe.role)
+        put user_url @joe, params: { user: { role: 1, name: "abc xyz", email: @joe.email } }
+        @joe.reload
+        expect(@joe.name).to eq("abc xyz")
+        expect(@joe.admin?).to eq(false)
+      end
     end
   end
 
