@@ -2395,7 +2395,7 @@ class DiscoveryView extends React.Component<
                   objects={workflowObjects}
                   onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                   onClearFilters={this.handleClearFilters}
-                  onDeleteSample={this.resetData}
+                  onDeleteSample={this.resetDataFromFilterChange}
                   onDisplaySwitch={this.handleDisplaySwitch}
                   onLoadRows={workflowObjects.handleLoadObjectRows}
                   onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}

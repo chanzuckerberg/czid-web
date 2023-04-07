@@ -788,6 +788,40 @@ RSpec.describe "Sample request", type: :request do
         end
       end
     end
+
+    describe "samples/search_suggestions" do
+      let(:illumina) { PipelineRun::TECHNOLOGY_INPUT[:illumina] }
+      before do
+        @project = create(:project, users: [@joe])
+        @sample1 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "completed Illumina mNGs sample 1")
+        @pr1 = create(:pipeline_run,
+                      sample: @sample1,
+                      technology: illumina,
+                      finalized: 1)
+      end
+
+      it "does not return soft-deleted samples" do
+        allow(HardDeleteObjects).to receive(:perform)
+        BulkDeletionService.call(
+          object_ids: [@sample1.id],
+          user: @joe,
+          workflow: short_read_mngs
+        )
+
+        get "/search_suggestions", params: { query: "completed" }
+        res = JSON.parse(response.body)
+        expect(res).to be_empty
+      end
+
+      it "does return non-soft-deleted samples" do
+        get "/search_suggestions", params: { query: "completed" }
+        res = JSON.parse(response.body)
+        samples_shown = res["Sample"]["results"].map { |h| h["sample_id"] }.flatten
+        expect(samples_shown).to include(@sample1.id)
+      end
+    end
   end
 
   context 'admin' do

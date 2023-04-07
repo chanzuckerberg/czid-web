@@ -385,6 +385,30 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(json_response.keys).to contain_exactly(:pipelineRunIds, :coverageBreadths, :runsWithContigs)
         expect(json_response[:runsWithContigs]).to eq([@pr_one.id])
       end
+
+      it "only includes non-soft-deleted pipeline runs if additional samples were requested" do
+        @pr_three.update(deleted_at: Time.now.utc)
+
+        get :new_pr_ids, format: :json, params: { projectId: @project.id, taxId: 1, getAdditionalSamples: true }
+
+        expect(response).to have_http_status :ok
+        json_response = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json_response.keys).to contain_exactly(:pipelineRunIds, :coverageBreadths)
+        expect(json_response[:pipelineRunIds]).to be_empty
+      end
+
+      it "only includes non-soft-deleted pipeline runs if project-specific runs were requested" do
+        @pr_one.update(deleted_at: Time.now.utc)
+
+        get :new_pr_ids, format: :json, params: { projectId: @project.id, taxId: 1, getAdditionalSamples: false }
+
+        expect(response).to have_http_status :ok
+        json_response = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json_response.keys).to contain_exactly(:pipelineRunIds, :coverageBreadths, :runsWithContigs)
+        expect(json_response[:pipelineRunIds]).to eq([@pr_two.id])
+      end
     end
 
     context "fetching pipeline run information" do

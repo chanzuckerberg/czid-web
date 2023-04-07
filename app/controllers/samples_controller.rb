@@ -224,7 +224,7 @@ class SamplesController < ApplicationController
     unless param_sample_ids.empty?
       samples = samples.where(id: param_sample_ids)
     end
-    samples = filter_samples(samples, params)
+    samples = filter_samples(samples, params).non_deleted
 
     sample_ids = samples.pluck(:id)
     samples_count = samples.count
@@ -418,7 +418,7 @@ class SamplesController < ApplicationController
 
     # Permission-dependent
     if !categories || ["sample", "location", "tissue", "taxon"].any? { |i| categories.include? i }
-      constrained_samples = samples_by_domain(domain)
+      constrained_samples = samples_by_domain(domain).non_deleted
       constrained_samples = filter_samples(constrained_samples, params)
       constrained_sample_ids = constrained_samples.pluck(:id)
 

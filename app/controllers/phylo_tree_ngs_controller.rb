@@ -171,7 +171,7 @@ class PhyloTreeNgsController < ApplicationController
                                               .where("pipeline_runs.id in (select max(id) from pipeline_runs where job_status = 'CHECKED' and sample_id in (select id from samples) group by sample_id)")
                                end
 
-      eligible_pipeline_run_ids = eligible_pipeline_runs.pluck(:id)
+      eligible_pipeline_run_ids = eligible_pipeline_runs.non_deleted.pluck(:id)
       # If there are no runs of interest, return an empty list.
       if eligible_pipeline_run_ids.empty?
         render json: {
@@ -201,7 +201,7 @@ class PhyloTreeNgsController < ApplicationController
       }
     else
       project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: tax_id, samples: { project_id: project_id }).pluck(:pipeline_run_id)
-      top_project_pipeline_runs_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs
+      top_project_pipeline_runs_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).non_deleted.top_completed_runs
       top_project_pipeline_runs_ids = top_project_pipeline_runs_with_taxid.pluck(:id)
       # If there are no runs of interest, return an empty list.
       if top_project_pipeline_runs_ids.empty?
