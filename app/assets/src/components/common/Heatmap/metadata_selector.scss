@@ -2,6 +2,39 @@
 @import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
+.newMetadataContainer {
+  position: relative;
+  z-index: 3;
+
+  .hasBackground {
+    padding-left: $sds-spaces-m;
+    padding-right: 5px;
+
+    &:not(.statsRow) {
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+  }
+
+  .hasBackground:nth-child(odd) {
+    background-color: $sds-color-gray-100;
+  }
+
+  .title {
+    @include font-caps-xxs;
+
+    color: $sds-color-gray-black;
+    padding: 0 $sds-spaces-m;
+    height: 40px;
+  }
+
+  .rowLabel {
+    @include font-header-xxs;
+    display: block;
+    margin: 3px 0;
+  }
+}
+
 .metadataContainer {
   .hasBackground {
     padding-left: $sds-spaces-m;

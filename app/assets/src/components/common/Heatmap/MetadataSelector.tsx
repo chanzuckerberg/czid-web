@@ -2,7 +2,9 @@
 // and Taxon heatmaps that displays a dropdown checklist (with search box)
 // when a user clicks on the "Add Metadata" button on the Heatmap. ***
 
-import React from "react";
+import React, { useContext } from "react";
+import { UserContext } from "~/components/common/UserContext";
+import { HEATMAP_FILTERS_LEFT_FEATURE } from "~/components/utils/features";
 import { LabelVal } from "~/interface/shared";
 import { ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
@@ -23,6 +25,11 @@ const MetadataSelector = ({
   onMetadataSelectionClose,
   selectedMetadata,
 }: MetadataSelectorProps) => {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
+
+  const useNewFilters = allowedFeatures.includes(HEATMAP_FILTERS_LEFT_FEATURE);
+
   return (
     <ContextPlaceholder
       closeOnOutsideClick
@@ -31,7 +38,10 @@ const MetadataSelector = ({
       verticalOffset={10}
       onClose={onMetadataSelectionClose}
       position="bottom right">
-      <div className={cs.metadataContainer}>
+      <div
+        className={
+          useNewFilters ? cs.newMetadataContainer : cs.metadataContainer
+        }>
         <SearchBoxList
           options={metadataTypes}
           onChange={onMetadataSelectionChange}

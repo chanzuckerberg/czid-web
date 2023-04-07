@@ -3,6 +3,7 @@ import React from "react";
 import { getTaxaWithReadsSuggestions } from "~/api";
 import { ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
+import { HEATMAP_FILTERS_LEFT_FEATURE } from "../utils/features";
 import cs from "./Heatmap/metadata_selector.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
@@ -70,6 +71,11 @@ export default class TaxonSelector extends React.Component<TaxonSelectorProps> {
     } = this.props;
     const { options } = this.state;
 
+    const { allowedFeatures = [] } = this.context || {};
+    const useNewFilters = allowedFeatures.includes(
+      HEATMAP_FILTERS_LEFT_FEATURE,
+    );
+
     return (
       <ContextPlaceholder
         closeOnOutsideClick
@@ -78,7 +84,10 @@ export default class TaxonSelector extends React.Component<TaxonSelectorProps> {
         verticalOffset={10}
         onClose={onTaxonSelectionClose}
         position="top left">
-        <div className={cs.metadataContainer}>
+        <div
+          className={
+            useNewFilters ? cs.newMetadataContainer : cs.metadataContainer
+          }>
           <SearchBoxList
             options={options}
             onChange={onTaxonSelectionChange}

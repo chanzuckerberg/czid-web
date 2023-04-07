@@ -177,7 +177,7 @@ const SamplesHeatmapFilters = ({
         <ThresholdFilterSDS
           isDisabled={disabled}
           // @ts-expect-error Type 'TextValueString' is not assignable to type 'MetricOption'. Property 'text' is optional in type 'TextValueString' but required in type 'MetricOption'.ts(2322)
-          metricOptions={options.metrics}
+          metricOptions={options.thresholdFilters.targets}
           selectedThresholds={selectedOptions["thresholdFilters"]}
           onApply={onThresholdFilterApply}
         />

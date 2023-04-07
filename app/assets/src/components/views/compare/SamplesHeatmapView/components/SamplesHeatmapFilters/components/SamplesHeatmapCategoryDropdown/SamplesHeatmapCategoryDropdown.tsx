@@ -47,12 +47,16 @@ const formatDropdownOptionsforExisting = (
 const unflattenPhageSubcategory = (
   categories: Categories = [],
 ): { categories: Categories; subcategories: Subcategories } => {
+  const categoriesExceptPhage = categories.filter(
+    category => category !== VIRUSES_PHAGE,
+  );
+
   const subcategories = {};
   if (categories.includes(VIRUSES_PHAGE)) {
     categories = categories.filter(category => category !== VIRUSES_PHAGE);
     subcategories["Viruses"] = ["Phage"];
   }
-  return { categories, subcategories };
+  return { categories: categoriesExceptPhage, subcategories };
 };
 
 const flattenPhageSubcategory = (
@@ -61,7 +65,8 @@ const flattenPhageSubcategory = (
 ): Categories => {
   if (
     Object.keys(subcategories).includes("Viruses") &&
-    Object.keys(subcategories).includes("Phage")
+    subcategories["Viruses"].includes("Phage") &&
+    !categories.includes(VIRUSES_PHAGE)
   ) {
     categories.push(VIRUSES_PHAGE);
   }
@@ -120,10 +125,15 @@ export const SamplesHeatmapCategoryDropdown = ({
 
     const oldCategoriesIncludesViruses =
       selectedOptions.categories.includes("Viruses");
+    const oldCategoriesIncludesPhage = newCategories.includes(VIRUSES_PHAGE);
     const newCategoriesIncludesViruses = newCategories.includes("Viruses");
 
     // if they just added "Viruses", add "Viruses - Phage" as well
-    if (!oldCategoriesIncludesViruses && newCategoriesIncludesViruses) {
+    if (
+      !oldCategoriesIncludesViruses &&
+      !oldCategoriesIncludesPhage &&
+      newCategoriesIncludesViruses
+    ) {
       newCategories.push(VIRUSES_PHAGE);
     }
 
