@@ -46,17 +46,17 @@ const formatDropdownOptionsforExisting = (
 
 const unflattenPhageSubcategory = (
   categories: Categories = [],
+  shouldAddPhageSubcategory = false,
 ): { categories: Categories; subcategories: Subcategories } => {
-  const categoriesExceptPhage = categories.filter(
-    category => category !== VIRUSES_PHAGE,
-  );
-
   const subcategories = {};
-  if (categories.includes(VIRUSES_PHAGE)) {
-    categories = categories.filter(category => category !== VIRUSES_PHAGE);
+  if (shouldAddPhageSubcategory) {
     subcategories["Viruses"] = ["Phage"];
   }
-  return { categories: categoriesExceptPhage, subcategories };
+
+  return {
+    categories: categories,
+    subcategories: subcategories,
+  };
 };
 
 const flattenPhageSubcategory = (
@@ -116,28 +116,28 @@ export const SamplesHeatmapCategoryDropdown = ({
     [selectedOptions],
   );
 
-  /* Define event handlers */
-  const onCategoryChange = (newCategoryOptions: SDSFormattedOption[]) => {
-    if (!selectedOptions) return;
-
-    const newCategories: Categories =
-      formatDropdownOptionsforExisting(newCategoryOptions);
-
+  const shouldAddPhageSubcategory = (selectedOptions, newCategories) => {
     const oldCategoriesIncludesViruses =
       selectedOptions.categories.includes("Viruses");
     const oldCategoriesIncludesPhage = newCategories.includes(VIRUSES_PHAGE);
     const newCategoriesIncludesViruses = newCategories.includes("Viruses");
+    return (
+      (!oldCategoriesIncludesViruses &&
+        !oldCategoriesIncludesPhage &&
+        newCategoriesIncludesViruses) ||
+      newCategories.includes(VIRUSES_PHAGE)
+    );
+  };
 
-    // if they just added "Viruses", add "Viruses - Phage" as well
-    if (
-      !oldCategoriesIncludesViruses &&
-      !oldCategoriesIncludesPhage &&
-      newCategoriesIncludesViruses
-    ) {
-      newCategories.push(VIRUSES_PHAGE);
-    }
+  /* Define event handlers */
+  const onCategoryChange = (newCategoryOptions: SDSFormattedOption[]) => {
+    const newCategories: Categories =
+      formatDropdownOptionsforExisting(newCategoryOptions);
 
-    const unflattenedNewCategories = unflattenPhageSubcategory(newCategories);
+    const unflattenedNewCategories = unflattenPhageSubcategory(
+      newCategories,
+      shouldAddPhageSubcategory(selectedOptions, newCategories),
+    );
 
     const haveCategoriesChanged =
       !isEqual(

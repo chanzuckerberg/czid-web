@@ -50,7 +50,7 @@ export const SamplesHeatmapCategoryFilterTags = ({
   );
 
   if (allTagNames.includes(VIRUSES_PHAGE)) {
-    allTagNames = allTagNames.filter(tag => tag !== "Phage");
+    allTagNames = allTagNames.filter(tag => tag !== VIRUSES_PHAGE);
     allTagNames.push("Phage");
   }
 
