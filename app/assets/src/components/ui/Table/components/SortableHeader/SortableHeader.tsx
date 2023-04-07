@@ -1,4 +1,5 @@
 import { Header } from "@tanstack/react-table";
+import cx from "classnames";
 import { CellHeader } from "czifui";
 import React, { CSSProperties, ReactNode } from "react";
 import { TooltipText } from "./components/TooltipText";
@@ -6,6 +7,7 @@ import { TooltipTextType } from "./components/TooltipText/types";
 import cs from "./sortable_header.scss";
 
 interface SortableProps {
+  className?: string;
   header: Header<any, any>;
   children: ReactNode & string;
   tooltipStrings?: TooltipTextType;
@@ -13,6 +15,7 @@ interface SortableProps {
 }
 
 export const SortableHeader = ({
+  className,
   header,
   children,
   tooltipStrings,
@@ -27,7 +30,7 @@ export const SortableHeader = ({
 
   return (
     <CellHeader
-      className={cs.wrapper}
+      className={cx(cs.wrapper, className)}
       key={header.id}
       onClick={onClick}
       direction={sortDirection}

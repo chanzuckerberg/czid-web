@@ -1,7 +1,7 @@
-import React, { ComponentType, PropsWithChildren } from "react";
+import React, { ComponentType, FC, PropsWithChildren } from "react";
 
 export const memo = <P extends Record<string, unknown>>(
-  Component: ComponentType<any>,
+  Component: ComponentType<any> | FC,
   propsAreEqual?: (
     prevProps: Readonly<PropsWithChildren<P>>,
     nextProps: Readonly<PropsWithChildren<P>>,

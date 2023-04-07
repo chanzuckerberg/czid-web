@@ -1,0 +1,25 @@
+@import "~czifui/dist/variables";
+
+.rightAlignedHeader {
+  div {
+    justify-content: flex-end;
+  }
+}
+
+.rightAlignedCell {
+  text-align: right;
+  padding-right: 30px; // This is awkwardly in between sds sizes
+  height: 50px;
+  span {
+    font: $sds-font-body-s-600-font;
+    word-break: break-word;
+  }
+}
+
+.leftAlignedCell {
+  height: 50px;
+  span {
+    font: $sds-font-body-s-600-font;
+    word-break: break-word;
+  }
+}

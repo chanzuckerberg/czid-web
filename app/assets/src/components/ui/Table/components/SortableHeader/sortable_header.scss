@@ -3,6 +3,8 @@
 .wrapper {
   background-color: $sds-color-gray-white;
   span {
+    font: $sds-font-header-s-600-font;
+    color: $sds-color-gray-500;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;

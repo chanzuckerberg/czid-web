@@ -3,8 +3,8 @@ import { CellBasic } from "czifui";
 import React from "react";
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";
 import { memo } from "~/components/utils/memo";
-import { AmrResult } from "../../types";
-import cs from "./default_cell.scss";
+import { AmrResult } from "../../../types";
+import cs from "../../column_definitions.scss";
 
 // * This file should not be changed unless you intend the change the basic default behavior
 // * for all cells in the table. If you need a cell to do something other than this, consider
@@ -17,10 +17,8 @@ interface DefaultCellProps {
 
 function defaultCell({ getValue, cell }: DefaultCellProps): JSX.Element {
   return (
-    // TODO: this will be a component including buttons to open the gene-info panel
-    // and download gene-level contigs
     <CellBasic
-      className={cs.defaultCell}
+      className={cs.leftAlignedCell}
       key={cell.id}
       primaryText={getValue() || NO_CONTENT_FALLBACK}
       shouldTextWrap

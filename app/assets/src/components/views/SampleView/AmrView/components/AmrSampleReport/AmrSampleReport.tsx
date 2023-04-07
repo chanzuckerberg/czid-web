@@ -4,7 +4,13 @@ import { Table } from "~/components/ui/Table";
 import { IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import cs from "./amr_sample_report.scss";
-import { geneColumn } from "./columnDefinitions/gene";
+import {
+  contigPercentCoverageColumn,
+  contigPercentIdColumn,
+  contigsColumn,
+  cutoffColumn,
+  geneColumn,
+} from "./columnDefinitions";
 import { AmrResult } from "./types";
 
 interface AmrSampleReportProps {
@@ -22,7 +28,13 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
 
   // Add new columns to the columns directory and then add them to this list
   // We will need to modify for hiding/showing columns in the future.
-  const columns: ColumnDef<AmrResult, any>[] = [geneColumn];
+  const columns: ColumnDef<AmrResult, any>[] = [
+    geneColumn,
+    contigsColumn,
+    cutoffColumn,
+    contigPercentCoverageColumn,
+    contigPercentIdColumn,
+  ];
 
   return (
     <>
