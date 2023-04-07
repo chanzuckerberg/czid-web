@@ -28,8 +28,7 @@ const UploadInstructions = ({
             startIcon={
               <Icon sdsIcon="chevronLeft" sdsSize="xs" sdsType="static" />
             }
-            onClick={onClose}
-          >
+            onClick={onClose}>
             Back
           </Button>
         )}
@@ -56,8 +55,7 @@ const UploadInstructions = ({
                 href="/metadata/metadata_template_csv"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={cs.link}
-              >
+                className={cs.link}>
                 CSV template.
               </a>
               <p>
@@ -68,8 +66,7 @@ const UploadInstructions = ({
                   href="https://help.czid.org/hc/en-us/articles/360034790814-How-do-I-request-a-new-host-genome-be-added-to-CZID"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={cs.link}
-                >
+                  className={cs.link}>
                   here.
                 </a>
               </p>

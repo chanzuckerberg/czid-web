@@ -11,7 +11,6 @@ import React, { useContext } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { UserContext } from "~/components/common/UserContext";
-
 import {
   ANNOTATION_FILTER_FEATURE,
   PATHOGEN_FLAG_FILTER_FEATURE,
@@ -25,9 +24,9 @@ import MetricPicker from "~/components/views/report/filters/MetricPicker";
 import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
 import {
+  CurrentTabSample,
   FilterSelections,
   SampleReportViewMode,
-  CurrentTabSample,
 } from "~/interface/sampleView";
 import { Background } from "~/interface/shared/specific";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";

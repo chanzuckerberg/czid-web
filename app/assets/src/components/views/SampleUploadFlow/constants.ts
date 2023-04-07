@@ -106,7 +106,6 @@ export const GUPPY_BASECALLER_SETTINGS = [
   },
 ];
 
-
 export const CG_WETLAB_DISPLAY_NAMES = {
   ampliseq: "AmpliSeq",
   artic_short_amplicons: "ARTIC v3 - Short Amplicons (275 bp)",
@@ -344,8 +343,10 @@ export const MEDAKA_MODEL_OPTIONS = {
 };
 
 // Note that the Illumina regex only matches the beginning of the read to support both Casava 1.8 and older read names
-export const REGEX_READ_ILLUMINA = /^@[a-zA-Z0-9]+:[0-9]+:[a-zA-Z0-9-]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+/i;
-export const REGEX_READ_NANOPORE = /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
+export const REGEX_READ_ILLUMINA =
+  /^@[a-zA-Z0-9]+:[0-9]+:[a-zA-Z0-9-]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+/i;
+export const REGEX_READ_NANOPORE =
+  /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
 
 export const MEGABYTE = 1000000;
 export const SUCCESS_MESSAGE = "Success";

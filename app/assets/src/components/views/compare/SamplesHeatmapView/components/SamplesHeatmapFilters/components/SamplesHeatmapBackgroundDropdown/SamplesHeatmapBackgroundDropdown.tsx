@@ -60,9 +60,8 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
       });
     };
 
-    let backgroundOptions: SDSFormattedOption[] = formatBackgroundOptions(
-      allBackgrounds,
-    );
+    let backgroundOptions: SDSFormattedOption[] =
+      formatBackgroundOptions(allBackgrounds);
     if (backgroundOptions.length === 0) {
       backgroundOptions = [
         { name: "No background models to display", value: -1 },

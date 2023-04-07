@@ -1,9 +1,7 @@
 import { Icon } from "czifui";
 import React from "react";
-
 import { withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-
 import cs from "./map_banner.scss";
 
 interface MapBannerProps {
@@ -28,8 +26,7 @@ class MapBanner extends React.Component<MapBannerProps> {
                 {
                   currentTab: item,
                 },
-              )}
-            >
+              )}>
               Clear all
             </span>
           </div>

@@ -209,16 +209,14 @@ class ObjectCollectionView<T extends MustHaveId> {
       // could eventually lead to redundant fetches if data is not requested in regular-sized chunks
       const minNeededIdx = missingIdxs[0];
       const maxNeededIdx = missingIdxs[missingIdxs.length - 1];
-      const {
-        fetchedObjects,
-        fetchedObjectIds,
-      } = await this._collection.fetchDataCallback({
-        domain,
-        ...this._conditions,
-        limit: maxNeededIdx - minNeededIdx + 1,
-        offset: minNeededIdx,
-        listAllIds: this._orderedIds === null,
-      });
+      const { fetchedObjects, fetchedObjectIds } =
+        await this._collection.fetchDataCallback({
+          domain,
+          ...this._conditions,
+          limit: maxNeededIdx - minNeededIdx + 1,
+          offset: minNeededIdx,
+          listAllIds: this._orderedIds === null,
+        });
 
       fetchedObjects.forEach((object: $TSFixMe) => {
         this._collection.entries[object.id] = object;
@@ -272,18 +270,14 @@ class DiscoveryDataLayer {
     fetchedObjects: $TSFixMe[];
     fetchedObjectIds: number[];
   }> => {
-    const {
-      samples: fetchedObjects,
-      sampleIds: fetchedObjectIds,
-    } = await getDiscoverySamples(params);
+    const { samples: fetchedObjects, sampleIds: fetchedObjectIds } =
+      await getDiscoverySamples(params);
     return { fetchedObjects, fetchedObjectIds };
   };
 
   fetchProjects = async (params: $TSFixMe) => {
-    const {
-      projects: fetchedObjects,
-      projectIds: fetchedObjectIds,
-    } = await getDiscoveryProjects(params);
+    const { projects: fetchedObjects, projectIds: fetchedObjectIds } =
+      await getDiscoveryProjects(params);
     return { fetchedObjects, fetchedObjectIds };
   };
 
@@ -296,10 +290,8 @@ class DiscoveryDataLayer {
   };
 
   fetchWorkflowRuns = async (params: $TSFixMe) => {
-    const {
-      workflowRuns: fetchedObjects,
-      workflowRunIds: fetchedObjectIds,
-    } = await getDiscoveryWorkflowRuns(params);
+    const { workflowRuns: fetchedObjects, workflowRunIds: fetchedObjectIds } =
+      await getDiscoveryWorkflowRuns(params);
     return { fetchedObjects, fetchedObjectIds };
   };
 }

@@ -1,8 +1,6 @@
 import { difference, find, get, map, pick } from "lodash/fp";
-
 import { markSampleUploaded } from "~/api";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
-
 import { get as httpGet, postWithCSRF } from "./core";
 
 export const MAX_MARK_SAMPLE_RETRIES = 10;

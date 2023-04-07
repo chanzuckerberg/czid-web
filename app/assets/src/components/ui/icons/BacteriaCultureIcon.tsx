@@ -8,8 +8,7 @@ const BacteriaCultureIcon = ({ className }: IconProps) => {
       viewBox="0 0 144 144"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
-      xmlnsXlink="http://www.w3.org/1999/xlink"
-    >
+      xmlnsXlink="http://www.w3.org/1999/xlink">
       <g stroke="none" strokeWidth="1" fillRule="evenodd">
         <g>
           <g>

@@ -1,9 +1,7 @@
 import cx from "classnames";
 import React from "react";
-
 import Label from "~/components/ui/labels/Label";
 import IconCloseSmall from "../icons/IconCloseSmall";
-
 import cs from "./filter_tag.scss";
 
 interface FilterTagProps {

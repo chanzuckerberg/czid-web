@@ -1,15 +1,14 @@
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 import moment from "moment";
-
 import {
   WORKFLOWS,
   WORKFLOW_KEY_FOR_VALUE,
 } from "~/components/utils/workflows";
 import {
-  SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
-  SEQUENCING_TECHNOLOGY_OPTIONS,
   CG_WETLAB_OPTIONS,
   ILLUMINA,
+  SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
 import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 import { WorkflowRun } from "~/interface/sample";
@@ -23,10 +22,8 @@ const YYYY_MM_DD = "YYYY-MM-DD";
 export const processPipelineInfo = (
   additionalInfo: AdditionalInfo,
 ): MngsPipelineInfo => {
-  const {
-    pipeline_run: pipelineRun,
-    summary_stats: summaryStats,
-  } = additionalInfo;
+  const { pipeline_run: pipelineRun, summary_stats: summaryStats } =
+    additionalInfo;
 
   const pipelineInfo: MngsPipelineInfo = {};
 
@@ -60,7 +57,8 @@ export const processPipelineInfo = (
 
     pipelineInfo.workflow = {
       text:
-        get("technology", pipelineRun) === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
+        get("technology", pipelineRun) ===
+        SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA
           ? WORKFLOWS.SHORT_READ_MNGS.label
           : WORKFLOWS.LONG_READ_MNGS.label,
     };
@@ -136,16 +134,16 @@ export const processCGWorkflowRunInfo = workflowRun => {
     erccMappedReads: isUndefined(erccMappedReads)
       ? ""
       : numberWithCommas(erccMappedReads),
-    lastProcessedAt: moment(get("executed_at", workflowRun)).format(
-      YYYY_MM_DD,
-    ),
+    lastProcessedAt: moment(get("executed_at", workflowRun)).format(YYYY_MM_DD),
     hostSubtracted: "Human",
     mappedReads: isUndefined(mappedReads) ? "" : numberWithCommas(mappedReads),
     medakaModel: get("inputs.medaka_model", workflowRun),
     totalReads: isUndefined(totalReads) ? "" : numberWithCommas(totalReads),
     pipelineVersion: get("wdl_version", workflowRun),
     technology:
-      SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[get("inputs.technology", workflowRun)],
+      SEQUENCING_TECHNOLOGY_DISPLAY_NAMES[
+        get("inputs.technology", workflowRun)
+      ],
     wetlabProtocol: get(
       "text",
       find(

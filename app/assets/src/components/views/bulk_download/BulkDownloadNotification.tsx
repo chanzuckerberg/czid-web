@@ -1,18 +1,14 @@
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
-
 import cs from "./bulk_download_notification.scss";
 
 interface BulkDownloadNotificationProps {
   onClose?: $TSFixMeFunction;
 }
 
-export default class BulkDownloadNotification extends React.Component<
-  BulkDownloadNotificationProps
-> {
+export default class BulkDownloadNotification extends React.Component<BulkDownloadNotificationProps> {
   render() {
     const { onClose } = this.props;
 
@@ -25,8 +21,7 @@ export default class BulkDownloadNotification extends React.Component<
             href="/bulk_downloads"
             onClick={() =>
               trackEvent("BulkDownloadNotification_downloads-page-link-clicked")
-            }
-          >
+            }>
             Downloads page
           </a>
           .

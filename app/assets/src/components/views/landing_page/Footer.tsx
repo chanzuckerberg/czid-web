@@ -17,8 +17,7 @@ const Footer = () => {
             href="https://github.com/chanzuckerberg/czid-workflows"
             aria-label="View the repo for czid-workflows on GitHub (opens in new window)"
             target="_blank"
-            rel="noreferrer"
-          >
+            rel="noreferrer">
             Github
           </a>
           <a
@@ -26,16 +25,14 @@ const Footer = () => {
             href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/3293983"
             aria-label="View the Chan Zuckerberg Initiative careers page (opens in new window)"
             target="_blank"
-            rel="noreferrer"
-          >
+            rel="noreferrer">
             Careers
           </a>
           <a
             href="http://help.czid.org"
             aria-label="View the CZ ID help page (opens in new window)"
             target="_blank"
-            rel="noreferrer"
-          >
+            rel="noreferrer">
             Resources
           </a>
         </div>
@@ -47,8 +44,7 @@ const Footer = () => {
               href="http://czid.org/privacy"
               aria-label="View the CZ ID privacy notice (opens in new window)"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               Privacy
             </a>
             <span>|</span>
@@ -56,8 +52,7 @@ const Footer = () => {
               href="http://czid.org/terms"
               aria-label="View the CZ ID terms of use (opens in new window)"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               Terms
             </a>
             <span>|</span>
@@ -65,8 +60,7 @@ const Footer = () => {
             <span>|</span>
             <span
               aria-label="View the CZ ID cookie settings (opens in a modal)"
-              className={cx(cs.cookieSettings, "optanon-show-settings")}
-            >
+              className={cx(cs.cookieSettings, "optanon-show-settings")}>
               Cookie Settings
             </span>
           </div>
@@ -79,8 +73,7 @@ const Footer = () => {
                 className={cs.cziLogo}
                 aria-label="View the Chan Zuckerberg Initiative website (opens in new window)"
                 target="_blank"
-                rel="noreferrer"
-              >
+                rel="noreferrer">
                 <IconCziLogo />
               </a>
             </div>
@@ -91,8 +84,7 @@ const Footer = () => {
                 className={cs.biohubLogo}
                 aria-label="View the Chan Zuckerberg Biohub website (opens in new window)"
                 target="_blank"
-                rel="noreferrer"
-              >
+                rel="noreferrer">
                 <IconBiohubSFLogo />
               </a>
             </div>

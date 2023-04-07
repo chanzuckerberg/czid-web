@@ -1,32 +1,30 @@
 import cx from "classnames";
 import _fp, {
-  size,
-  get,
-  flow,
-  groupBy,
-  mapValues,
-  sortBy,
-  slice,
-  sumBy,
-  keyBy,
   compact,
+  flow,
+  get,
+  groupBy,
+  keyBy,
+  mapValues,
+  size,
+  slice,
+  sortBy,
+  sumBy,
 } from "lodash/fp";
 import React from "react";
 import { FileWithPreview } from "react-dropzone";
-
 import { trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { CONCAT_FILES_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
-  PRE_UPLOAD_CHECK_FEATURE,
   ONT_V1_FEATURE,
+  PRE_UPLOAD_CHECK_FEATURE,
 } from "~/components/utils/features";
 import { Project, SampleFromApi } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
-
 import cs from "./sample_upload_flow.scss";
 
 // @ts-expect-error working with Lodash types
@@ -39,9 +37,7 @@ interface LocalSampleFileUploadProps {
   hasSamplesLoaded?: boolean;
 }
 
-class LocalSampleFileUpload extends React.Component<
-  LocalSampleFileUploadProps
-> {
+class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> {
   state = {
     showInfo: false,
   };

@@ -1,13 +1,11 @@
 import { groupBy, sortBy } from "lodash/fp";
 import throttle from "lodash/throttle";
-import React, { useState, useMemo } from "react";
-
+import React, { useMemo, useState } from "react";
 import { usePathogenList } from "~/api/pathogen_lists";
 import SectionNavigation from "~/components/common/AnchorMenu/SectionNavigation";
 import Sections from "~/components/common/AnchorMenu/Sections";
 import { NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
-
 import cs from "./pathogen_list_view.scss";
 
 const PathogenListView = () => {
@@ -75,8 +73,7 @@ const PathogenListView = () => {
       <List
         listClassName={cs.list}
         listItems={[...pathogenList["citations"]].sort()}
-        ordered={true}
-      ></List>
+        ordered={true}></List>
     </div>
   );
 

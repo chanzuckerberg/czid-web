@@ -2,11 +2,10 @@ import cx from "classnames";
 import { Icon } from "czifui";
 import { difference, size } from "lodash/fp";
 import React from "react";
-
 import { PopupProps } from "semantic-ui-react";
 import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
 import { validateWorkflowRunIds } from "~/api/access_control";
-import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
 import List from "~/components/ui/List";
@@ -23,7 +22,6 @@ import cs from "./nextclade_modal.scss";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
-
 
 interface NextcladeModalProps {
   onClose: $TSFixMeFunction;
@@ -78,15 +76,12 @@ export default class NextcladeModal extends React.Component<
   fetchValidationInfo = async () => {
     const { selectedIds } = this.props;
 
-    const {
-      validIds,
-      invalidSampleNames,
-      error,
-    } = await validateWorkflowRunIds({
-      basic: false,
-      workflowRunIds: Array.from(selectedIds),
-      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
-    });
+    const { validIds, invalidSampleNames, error } =
+      await validateWorkflowRunIds({
+        basic: false,
+        workflowRunIds: Array.from(selectedIds),
+        workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+      });
 
     const { workflowRunInfo } = await getWorkflowRunsInfo(validIds);
 
@@ -127,11 +122,8 @@ export default class NextcladeModal extends React.Component<
   };
 
   openExportLink = async () => {
-    const {
-      validWorkflowRunIds,
-      referenceTreeContents,
-      selectedTreeType,
-    } = this.state;
+    const { validWorkflowRunIds, referenceTreeContents, selectedTreeType } =
+      this.state;
     const link = await createConsensusGenomeCladeExport({
       workflowRunIds: Array.from(validWorkflowRunIds),
       referenceTree:

@@ -45,8 +45,7 @@ export const rowSelectionColumn: ColumnDef<any, any> = {
       <CellHeader
         key={header.id}
         hideSortIcon
-        style={generateWidthStyles(column)}
-      >
+        style={generateWidthStyles(column)}>
         <InputCheckbox
           className={cs.inputCheckbox}
           stage={checkboxStage}

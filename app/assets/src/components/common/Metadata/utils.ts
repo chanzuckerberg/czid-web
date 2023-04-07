@@ -1,14 +1,14 @@
 import {
-  isUndefined,
+  chunk,
+  filter,
   isNaN,
   isNull,
+  isUndefined,
+  map,
   max,
   min,
-  uniq,
-  chunk,
   random,
-  filter,
-  map,
+  uniq,
   zip,
 } from "lodash/fp";
 import { getGeoSearchSuggestions } from "~/api/locations";
@@ -16,17 +16,17 @@ import { processLocationSelection } from "~/components/ui/controls/GeoSearchInpu
 import { CSV, MetadataValue } from "~/interface/shared";
 import {
   CONCURRENT_REQUESTS_LIMIT,
-  REQUEST_DELAY_MAX,
-  REQUEST_DELAY_MIN,
   FIELDS_THAT_HAVE_MAX_INPUT,
   FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT,
+  REQUEST_DELAY_MAX,
+  REQUEST_DELAY_MIN,
 } from "./constants";
 import {
   MetadataCSVLocationsMenuProps,
-  Row,
+  MetadataInputProps,
   MetadataPreLocationSearch,
   MetadataTable,
-  MetadataInputProps,
+  Row,
 } from "./types";
 
 // Batch geosearch CSV locations for matches

@@ -8,7 +8,6 @@ import {
   AMR_V1_FEATURE,
   BULK_DELETION_FEATURE,
 } from "~/components/utils/features";
-
 import cs from "./samples_view.scss";
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
 
@@ -23,9 +22,8 @@ const BulkSamplesActionsMenu = ({
   handleBulkKickoffAmr,
   handleClickPhyloTree,
 }: BulkSamplesActionsMenuProps) => {
-  const [menuAnchorEl, setMenuAnchorEl] = useState<PopoverProps["anchorEl"]>(
-    null,
-  );
+  const [menuAnchorEl, setMenuAnchorEl] =
+    useState<PopoverProps["anchorEl"]>(null);
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
@@ -50,16 +48,14 @@ const BulkSamplesActionsMenu = ({
         onClick={() => {
           closeActionsMenu();
           handleBulkKickoffAmr();
-        }}
-      >
+        }}>
         <div className={cs.itemWrapper}>
           {hasBulkDeletion && (
             <div
               className={cx(
                 cs.bulkActionsIcon,
                 noObjectsSelected && cs.iconDisabled,
-              )}
-            >
+              )}>
               <Icon sdsIcon={"bacteria"} sdsSize="xs" sdsType="static" />
             </div>
           )}
@@ -73,8 +69,7 @@ const BulkSamplesActionsMenu = ({
         <Tooltip
           arrow
           placement="top"
-          title={"Select at least 1 mNGS run to perform this action."}
-        >
+          title={"Select at least 1 mNGS run to perform this action."}>
           <span>{bulkKickoffAmrMenuItem}</span>
         </Tooltip>
       );
@@ -89,8 +84,7 @@ const BulkSamplesActionsMenu = ({
         onClick={withAnalytics(() => {
           closeActionsMenu();
           handleClickPhyloTree();
-        }, "SamplesView_phylo-tree-modal-open_clicked")}
-      >
+        }, "SamplesView_phylo-tree-modal-open_clicked")}>
         <div className={cs.itemWrapper}>
           <div className={cs.bulkActionsIcon}>
             <Icon sdsIcon={"treeHorizontal"} sdsSize="xs" sdsType="static" />
@@ -127,8 +121,7 @@ const BulkSamplesActionsMenu = ({
         }}
         keepMounted
         open={Boolean(menuAnchorEl)}
-        onClose={closeActionsMenu}
-      >
+        onClose={closeActionsMenu}>
         {hasBulkDeletion && renderKickoffPhyloTree()}
         {hasAmr && renderBulkKickoffAmr()}
       </Menu>

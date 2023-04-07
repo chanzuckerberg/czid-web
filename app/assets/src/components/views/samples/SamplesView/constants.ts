@@ -33,14 +33,8 @@ export const WORKFLOW_TRIGGERS = {
     TRIGGERS.bulk_delete,
     TRIGGERS.bulk_kickoff_amr,
   ],
-  [WORKFLOWS.AMR.value]: [
-    TRIGGERS.download,
-    TRIGGERS.bulk_delete,
-  ],
-  [WORKFLOWS.LONG_READ_MNGS.value]: [
-    TRIGGERS.download,
-    TRIGGERS.bulk_delete,
-  ],
+  [WORKFLOWS.AMR.value]: [TRIGGERS.download, TRIGGERS.bulk_delete],
+  [WORKFLOWS.LONG_READ_MNGS.value]: [TRIGGERS.download, TRIGGERS.bulk_delete],
 };
 
 export const WORKFLOW_TRIGGERS_BY_DOMAIN = {

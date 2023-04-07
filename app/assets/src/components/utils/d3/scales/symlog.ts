@@ -63,12 +63,7 @@ function rescale(range: $TSFixMe, domain: $TSFixMe) {
       const ratio = part.extent / rangeExtent;
       const next =
         i === parts.length - 1 ? range[1] : rangeStart + ratio * rangeSize;
-      scales.push(
-        part
-          .type()
-          .domain(part.domain)
-          .range([rangeStart, next]),
-      );
+      scales.push(part.type().domain(part.domain).range([rangeStart, next]));
       rangeStart = next;
     }
   }

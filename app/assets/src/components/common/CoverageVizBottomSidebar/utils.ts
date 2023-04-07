@@ -1,4 +1,4 @@
-import { sortBy, filter, get, map, flatten, compact, sum } from "lodash/fp";
+import { compact, filter, flatten, get, map, sortBy, sum } from "lodash/fp";
 import memoize from "memoize-one";
 import { formatPercent } from "~/components/utils/format";
 import {

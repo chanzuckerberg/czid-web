@@ -1,16 +1,14 @@
 import cx from "classnames";
 import { max } from "d3-array";
-import { scaleLinear, scaleBand, scaleOrdinal } from "d3-scale";
+import { scaleBand, scaleLinear, scaleOrdinal } from "d3-scale";
 import { stack } from "d3-shape";
 import { maxBy, round } from "lodash";
 import React from "react";
 import { normalizeData } from "~/components/visualizations/utils";
 import { numberWithPercent, numberWithSiPrefix } from "~/helpers/strings";
-
 import cs from "./horizontal_stacked_bar_chart.scss";
 import XAxis from "./XAxis";
 import YAxis from "./YAxis";
-
 
 // Data passed into this chart should be an array of objects in the form:
 // [
@@ -256,9 +254,8 @@ export default class HorizontalStackedBarChart extends React.Component<
     const width = this.references.container.clientWidth * 0.98;
 
     const { barCanvasHeight, xAxisHeight } = this.measureHeights();
-    const { barCanvasWidth, yAxisWidth, truncatedLabels } = this.measureWidths(
-      width,
-    );
+    const { barCanvasWidth, yAxisWidth, truncatedLabels } =
+      this.measureWidths(width);
 
     const { x, y, z } = this.createDimensions(barCanvasWidth, barCanvasHeight);
 
@@ -387,8 +384,7 @@ export default class HorizontalStackedBarChart extends React.Component<
             } else if (ref !== null) {
               this.references.yRef.push([yAttribute, ref]);
             }
-          }}
-        >
+          }}>
           {yAttribute}
         </div>
       );
@@ -405,8 +401,7 @@ export default class HorizontalStackedBarChart extends React.Component<
         key={"W"}
         ref={ref => {
           this.references.wRef = ref;
-        }}
-      >
+        }}>
         {"W"}
       </div>,
       <div
@@ -414,8 +409,7 @@ export default class HorizontalStackedBarChart extends React.Component<
         key={"x-axis-text"}
         ref={ref => {
           this.references.xRef = ref;
-        }}
-      >
+        }}>
         {"999M" /* for the x-axis */}
       </div>,
       <div
@@ -423,8 +417,7 @@ export default class HorizontalStackedBarChart extends React.Component<
         key={"ellipsis"}
         ref={ref => {
           this.references.ellipsis = ref;
-        }}
-      >
+        }}>
         {"..."}
       </div>,
     );
@@ -533,8 +526,7 @@ export default class HorizontalStackedBarChart extends React.Component<
           fill={color}
           stroke={color}
           strokeWidth={strokeWidth}
-          key={`${color}+${keyIndex}`}
-        >
+          key={`${color}+${keyIndex}`}>
           {colorStackComponent}
         </g>
       );
@@ -630,8 +622,7 @@ export default class HorizontalStackedBarChart extends React.Component<
       <g
         key={"invisibleStack"}
         fillOpacity={0}
-        strokeWidth={options.bars.strokeWidth}
-      >
+        strokeWidth={options.bars.strokeWidth}>
         {invisibleStackComponents}
       </g>
     );
@@ -691,8 +682,7 @@ export default class HorizontalStackedBarChart extends React.Component<
             events.onChartHover(event.clientX, event.clientY);
             events.onChartElementExit();
           }}
-          ref={ref => (this.references.container = ref)}
-        >
+          ref={ref => (this.references.container = ref)}>
           <XAxis
             x={x}
             width={width}
@@ -743,8 +733,7 @@ export default class HorizontalStackedBarChart extends React.Component<
       return (
         <div
           className={cx(className, cs.chart)}
-          ref={ref => (this.references.container = ref)}
-        >
+          ref={ref => (this.references.container = ref)}>
           {this.renderAxisBaselines()}
         </div>
       );

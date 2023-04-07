@@ -9,8 +9,7 @@ const IconPercentageSmall = ({ className }: IconProps) => {
       height="14"
       viewBox="0 0 14 14"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+      xmlns="http://www.w3.org/2000/svg">
       <g stroke="none" strokeWidth="1" fillRule="evenodd">
         <path d="M10.9764 12.4764C11.8049 12.4764 12.4764 11.8049 12.4764 10.9764C12.4764 10.148 11.8049 9.47641 10.9764 9.47641C10.148 9.47641 9.47641 10.148 9.47641 10.9764C9.47641 11.8049 10.148 12.4764 10.9764 12.4764Z" />
         <rect

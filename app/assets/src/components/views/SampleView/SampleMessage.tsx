@@ -1,10 +1,8 @@
 import cx from "classnames";
 import React from "react";
-
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconArrowRight } from "~ui/icons";
 import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
-
 import cs from "./sample_message.scss";
 
 interface SampleMessageProps {
@@ -20,16 +18,8 @@ interface SampleMessageProps {
 
 class SampleMessage extends React.Component<SampleMessageProps> {
   render() {
-    const {
-      icon,
-      link,
-      linkText,
-      message,
-      status,
-      subtitle,
-      type,
-      onClick,
-    } = this.props;
+    const { icon, link, linkText, message, status, subtitle, type, onClick } =
+      this.props;
     return (
       <div className={cs.sampleMessage}>
         <div className={cs.textContainer}>

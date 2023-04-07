@@ -1,9 +1,7 @@
 import { set } from "lodash/fp";
 import React, { useState } from "react";
-
 import HelpIcon from "~ui/containers/HelpIcon";
 import Input from "~ui/controls/Input";
-
 import cs from "./admin_upload_options.scss";
 
 const ADMIN_OPTIONS = {
@@ -76,8 +74,7 @@ const AdminUploadOptions = ({
         Admin options
         <span
           className={cs.toggleLink}
-          onClick={() => setShowOptions(!showOptions)}
-        >
+          onClick={() => setShowOptions(!showOptions)}>
           {showOptions ? "Hide" : "Show"} options
         </span>
       </div>

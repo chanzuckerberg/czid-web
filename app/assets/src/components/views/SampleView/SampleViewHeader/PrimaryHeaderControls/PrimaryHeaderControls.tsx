@@ -3,26 +3,23 @@ import React, { useContext, useState } from "react";
 import { saveVisualization } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
-  withAnalytics,
   trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
-
 import { UserContext } from "~/components/common/UserContext";
-
 import {
-  showAppcue,
-  SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
   SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
+  SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
+  showAppcue,
 } from "~/components/utils/appcues";
-
 import {
   AMR_V2_FEATURE,
   BULK_DELETION_FEATURE,
 } from "~/components/utils/features";
 import {
+  isMngsWorkflow,
   WORKFLOWS,
   WORKFLOW_VALUES,
-  isMngsWorkflow,
 } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import { parseUrlParams } from "~/helpers/url";
@@ -42,7 +39,6 @@ import { DownloadDropdown } from "./DownloadDropdown";
 import { OverflowMenu } from "./OverflowMenu";
 import cs from "./primary_header_controls.scss";
 import { ShareButtonPopUp } from "./ShareButtonPopUp";
-
 
 interface PrimaryHeaderControlsProps {
   backgroundId?: number;
@@ -75,8 +71,11 @@ export const PrimaryHeaderControls = ({
   workflow,
   onDeleteRunSuccess,
 }: PrimaryHeaderControlsProps) => {
-  const { allowedFeatures, admin: userIsAdmin, userId } =
-    useContext(UserContext) || {};
+  const {
+    allowedFeatures,
+    admin: userIsAdmin,
+    userId,
+  } = useContext(UserContext) || {};
   const succeeded = get("status", currentRun) === "SUCCEEDED";
   const runIsLoaded = !isEmpty(reportMetadata);
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);

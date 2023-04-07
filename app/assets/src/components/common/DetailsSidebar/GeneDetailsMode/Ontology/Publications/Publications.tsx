@@ -1,6 +1,5 @@
 import React from "react";
 import { trackEvent } from "~/api/analytics";
-
 import cs from "../../gene_details_mode.scss";
 import { OntologyType } from "../../GeneDetailsMode";
 import { Urls } from "../../utils";
@@ -36,8 +35,7 @@ const Publications = ({ geneName, ontology }: PublicationsProps) => {
                     ontologyLabel: label,
                     geneName,
                   })
-                }
-              >
+                }>
                 {pmidText}
               </a>
             </span>

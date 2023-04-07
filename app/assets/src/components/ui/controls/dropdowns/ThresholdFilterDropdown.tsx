@@ -1,9 +1,7 @@
 import { get } from "lodash/fp";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-
 import { PrimaryButton, SecondaryButton } from "../buttons";
 import DropdownLabel from "./common/DropdownLabel";
 import DropdownTrigger from "./common/DropdownTrigger";
@@ -215,8 +213,7 @@ class ThresholdFilterDropdown extends React.Component<
         }}
         open={this.state.popupIsOpen}
         closeOnClick={false}
-        disabled={disabled}
-      >
+        disabled={disabled}>
         <div className={cs.container}>
           <ThresholdFilterList
             metrics={this.metrics}

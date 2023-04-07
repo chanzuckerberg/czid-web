@@ -1,12 +1,10 @@
 import { set } from "lodash/fp";
 import React from "react";
-
 import { getUserSettingMetadataByCategory, updateUserSetting } from "~/api";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import { NarrowContainer, ViewHeader } from "~/components/layout";
 import Checkbox from "~ui/controls/Checkbox";
-
 import cs from "./user_settings_view.scss";
 
 interface UserSettingsViewProps {

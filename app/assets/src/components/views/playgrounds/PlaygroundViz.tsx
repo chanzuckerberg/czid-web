@@ -1,12 +1,10 @@
 import React from "react";
-
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
 import Heatmap, {
   HeatmapData,
 } from "~/components/visualizations/heatmap/Heatmap";
-
 import { STACKED_DATA_CSV } from "./constants";
 import cs from "./playground_viz.scss";
 

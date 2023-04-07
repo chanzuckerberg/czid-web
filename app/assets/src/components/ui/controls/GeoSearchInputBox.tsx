@@ -1,6 +1,5 @@
 import { compact, get, isString } from "lodash/fp";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import { LocationObject } from "~/interface/shared";

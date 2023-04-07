@@ -1,11 +1,9 @@
 import { Button } from "czifui";
 import React from "react";
-
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Modal from "~ui/containers/Modal";
 import { IconAlert } from "~ui/icons";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
-
 import cs from "./error_modal.scss";
 
 interface ErrorModalProps {
@@ -39,8 +37,7 @@ const ErrorModal = ({
             <ExternalLink
               className={cs.actionLink}
               href="mailto:help@czid.org"
-              analyticsEventName={helpLinkEvent}
-            >
+              analyticsEventName={helpLinkEvent}>
               contact us
             </ExternalLink>
             .

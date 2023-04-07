@@ -8,8 +8,8 @@ import {
   groupBy,
   head,
   isEmpty,
-  isNull,
   isNil,
+  isNull,
   isUndefined,
   keys,
   map,
@@ -21,7 +21,6 @@ import {
   set,
   uniq,
 } from "lodash/fp";
-
 import React from "react";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
@@ -36,13 +35,13 @@ import {
 } from "~/api";
 import { getAmrDeprecatedData } from "~/api/amr";
 import {
+  ANALYTICS_EVENT_NAMES,
   trackEvent,
   withAnalytics,
-  ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import {
-  getPersistedBackground,
   createPersistedBackground,
+  getPersistedBackground,
   updatePersistedBackground,
 } from "~/api/persisted_backgrounds";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
@@ -57,12 +56,12 @@ import {
   createCSVObjectURL,
 } from "~/components/utils/csv";
 import {
-  AMR_V1_FEATURE,
   AMR_DEPRECATED_FEATURE,
+  AMR_V1_FEATURE,
   BLAST_V1_FEATURE,
   MERGED_NT_NR_FEATURE,
-  ONT_V1_FEATURE,
   MULTITAG_PATHOGENS_FEATURE,
+  ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
@@ -82,22 +81,22 @@ import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFl
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import {
-  getGeneraPathogenCounts,
   getAllGeneraPathogenCounts,
+  getGeneraPathogenCounts,
 } from "~/helpers/taxon";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { IconAlertType } from "~/interface/icon";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
-  CurrentTabSample,
   AmrDeprectatedData,
+  BlastData,
+  ConsensusGenomeParams,
+  CurrentTabSample,
   FilterSelections,
   RawReportData,
+  SampleReportViewMode,
   SampleViewProps,
   SampleViewState,
-  ConsensusGenomeParams,
-  SampleReportViewMode,
-  BlastData,
 } from "~/interface/sampleView";
 import { Background, Taxon } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
@@ -108,19 +107,19 @@ import { BlastModalInfo } from "../blast/constants";
 import { AmrView } from "./AmrView";
 import {
   GENUS_LEVEL_INDEX,
+  KEY_SAMPLE_VIEW_OPTIONS,
+  KEY_SELECTED_OPTIONS_BACKGROUND,
   LOCAL_STORAGE_FIELDS,
   NOTIFICATION_TYPES,
+  ONT_PIPELINE_RUNNING_STATUS,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
   SUCCEEDED_STATE,
   TABS,
-  TREE_METRICS,
-  URL_FIELDS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
-  KEY_SAMPLE_VIEW_OPTIONS,
-  KEY_SELECTED_OPTIONS_BACKGROUND,
-  ONT_PIPELINE_RUNNING_STATUS,
+  TREE_METRICS,
+  URL_FIELDS,
 } from "./constants";
 import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import {
@@ -139,9 +138,9 @@ import cs from "./sample_view.scss";
 import { SampleViewHeader } from "./SampleViewHeader";
 import SampleViewModals from "./SampleViewModals";
 import {
-  getWorkflowCount,
-  getDefaultSelectedOptions,
   determineInitialTab,
+  getDefaultSelectedOptions,
+  getWorkflowCount,
   hasAppliedFilters,
 } from "./setup";
 import TaxonTreeVis from "./TaxonTreeVis";
@@ -509,9 +508,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
           hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
           const speciesInfo =
             rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId];
-          const speciesWithAdjustedMetricPrecision = adjustMetricPrecision(
-            speciesInfo,
-          );
+          const speciesWithAdjustedMetricPrecision =
+            adjustMetricPrecision(speciesInfo);
           return merge(speciesWithAdjustedMetricPrecision, {
             highlighted: isHighlighted,
             taxId: speciesTaxId,
@@ -572,12 +570,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   }: { backgroundId?: number } = {}) => {
     const { snapshotShareId, sampleId } = this.props;
     const { allowedFeatures = [] } = this.context || {};
-    const {
-      currentTab,
-      selectedOptions,
-      pipelineRun,
-      pipelineVersion,
-    } = this.state;
+    const { currentTab, selectedOptions, pipelineRun, pipelineVersion } =
+      this.state;
 
     // On consensus-genome-only report pages, pipelineRun is undefined and data is fetched via fetchWorkflowRunResults
     if (isUndefined(pipelineRun)) return;
@@ -1200,9 +1194,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     taxId,
   }: BlastData) => {
     const { allowedFeatures = [] } = this.context || {};
-    const blastSelectionModalVisible = allowedFeatures.includes(
-      BLAST_V1_FEATURE,
-    );
+    const blastSelectionModalVisible =
+      allowedFeatures.includes(BLAST_V1_FEATURE);
 
     this.setState({
       blastSelectionModalVisible,
@@ -1270,12 +1263,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
   handleConsensusGenomeErrorModalRetry = async () => {
     const { consensusGenomeCreationParams, sample } = this.state;
-    const {
-      accessionId,
-      accessionName,
-      taxonId,
-      taxonName,
-    } = consensusGenomeCreationParams;
+    const { accessionId, accessionName, taxonId, taxonName } =
+      consensusGenomeCreationParams;
 
     try {
       await this.handleConsensusGenomeKickoff({
@@ -1478,13 +1467,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   renderSampleMessage = () => {
-    const {
-      currentTab,
-      loadingReport,
-      pipelineRun,
-      reportMetadata,
-      sample,
-    } = this.state;
+    const { currentTab, loadingReport, pipelineRun, reportMetadata, sample } =
+      this.state;
     const { snapshotShareId } = this.props;
     const { pipelineRunStatus, jobStatus } = reportMetadata;
     let status: string,
@@ -1633,7 +1617,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   handleModalClose = (name: string) => {
-    const newState = ({ [name]: false } as unknown) as Pick<
+    const newState = { [name]: false } as unknown as Pick<
       SampleViewState,
       keyof SampleViewState
     >;
@@ -1706,8 +1690,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
                     <Button
                       sdsStyle="minimal"
                       sdsType="secondary"
-                      onClick={this.clearAllFilters}
-                    >
+                      onClick={this.clearAllFilters}>
                       Clear Filters
                     </Button>
                   </span>

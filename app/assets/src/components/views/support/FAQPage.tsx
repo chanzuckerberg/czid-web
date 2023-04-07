@@ -15,8 +15,9 @@ export default class FAQPage extends React.Component {
         </div>
         <Accordion
           className={cs.question}
-          header={<h3>Does CZ ID own any of the data I upload to the tool?</h3>}
-        >
+          header={
+            <h3>Does CZ ID own any of the data I upload to the tool?</h3>
+          }>
           <p>
             No. The data you upload into CZ ID is yours and so is any research
             you create with it. We don’t own it and will never sell it. You do,
@@ -25,16 +26,14 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Does CZ ID sell the data I upload?</h3>}
-        >
+          header={<h3>Does CZ ID sell the data I upload?</h3>}>
           <p>No.</p>
         </Accordion>
         <Accordion
           className={cs.question}
           header={
             <h3>How does CZ ID share the data I upload with other users?</h3>
-          }
-        >
+          }>
           <List
             listItems={[
               <React.Fragment key={nanoid()}>
@@ -69,14 +68,12 @@ export default class FAQPage extends React.Component {
           className={cs.question}
           header={
             <h3>Will CZ ID use my Upload Data to write research papers?</h3>
-          }
-        >
+          }>
           <p>No, we will not.</p>
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>How is human genomic data handled and protected?</h3>}
-        >
+          header={<h3>How is human genomic data handled and protected?</h3>}>
           <List
             listItems={[
               <React.Fragment key={nanoid()}>
@@ -106,8 +103,7 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Can I use CZ ID for clinical diagnostic purposes?</h3>}
-        >
+          header={<h3>Can I use CZ ID for clinical diagnostic purposes?</h3>}>
           <p>
             No. CZ ID is for research use only. It is not for diagnostic,
             clinical or commercial use.
@@ -117,8 +113,7 @@ export default class FAQPage extends React.Component {
           className={cs.question}
           header={
             <h3>What should I think about before uploading data to CZ ID?</h3>
-          }
-        >
+          }>
           <p>
             You should make sure you have any permissions or consents necessary
             in order to upload and use the samples within CZ ID. Please check
@@ -133,8 +128,7 @@ export default class FAQPage extends React.Component {
               What Metadata about the uploaded samples do you collect, and how
               do you make sure the metadata is non-identifiable?
             </h3>
-          }
-        >
+          }>
           <List
             listItems={[
               <React.Fragment key={nanoid()}>
@@ -176,8 +170,7 @@ export default class FAQPage extends React.Component {
               Under what circumstances would CZ ID transfer rights to the data?
               Why, and what choices would I have?
             </h3>
-          }
-        >
+          }>
           <p>
             If we can no longer keep operating CZ ID (which we hope won’t
             happen) or believe the community is better served by someone else
@@ -190,8 +183,7 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Where do I go for more questions?</h3>}
-        >
+          header={<h3>Where do I go for more questions?</h3>}>
           <p>
             Please contact{" "}
             <a href="mailto:security@czid.org">security@czid.org</a> if you have
@@ -202,8 +194,7 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>What is your address?</h3>}
-        >
+          header={<h3>What is your address?</h3>}>
           <List
             listItems={[
               `Chan Zuckerberg Biohub, 499 Illinois Street, Fourth Floor San
@@ -215,8 +206,7 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Do you use Cookies in CZ ID?</h3>}
-        >
+          header={<h3>Do you use Cookies in CZ ID?</h3>}>
           <p>
             Yes, we use cookies and similar technologies to help improve the
             website and provide a better experience while using the CZ ID
@@ -281,8 +271,7 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Why do you use cookies?</h3>}
-        >
+          header={<h3>Why do you use cookies?</h3>}>
           <p>
             We use cookies to help operate, improve, and make our services
             function securely:
@@ -326,8 +315,7 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
-          header={<h3>Do I have choices with respect to cookies?</h3>}
-        >
+          header={<h3>Do I have choices with respect to cookies?</h3>}>
           <p>Yes, you do.</p>
           <p>
             You have options to control or limit how we and our partners use
@@ -357,8 +345,7 @@ export default class FAQPage extends React.Component {
           className={cs.question}
           header={
             <h3>Which Third Party Vendors will get access to my data?</h3>
-          }
-        >
+          }>
           <p>
             We rely on service providers to help us provide, improve, and secure
             the service, including Chan Zuckerberg Initiative our technology
@@ -377,8 +364,7 @@ export default class FAQPage extends React.Component {
               Where can I learn more information about CZ ID’s commitment to
               security?
             </h3>
-          }
-        >
+          }>
           <p>
             The best place to start is CZ ID’s{" "}
             <a href="/privacy">Privacy Policy</a> and{" "}

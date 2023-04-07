@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import cs from "./link.scss";
 
@@ -48,8 +47,7 @@ const Link = ({
       )}
       target={external ? "_blank" : null}
       rel="noopener noreferrer"
-      onClick={onClick}
-    >
+      onClick={onClick}>
       {children}
     </a>
   );

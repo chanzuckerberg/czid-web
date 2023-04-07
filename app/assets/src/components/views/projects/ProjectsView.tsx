@@ -1,8 +1,7 @@
-import { Icon, Button } from "czifui";
+import { Button, Icon } from "czifui";
 import { merge, pick } from "lodash/fp";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";
-
 import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
@@ -16,7 +15,6 @@ import {
   MAX_PROJECT_ROW_HEIGHT,
   PROJECT_TABLE_COLUMNS,
 } from "./constants";
-
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
 
@@ -170,8 +168,7 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
           <Button
             sdsStyle="minimal"
             sdsType="secondary"
-            onClick={onClearFilters}
-          >
+            onClick={onClearFilters}>
             Clear Filters
           </Button>
         )}

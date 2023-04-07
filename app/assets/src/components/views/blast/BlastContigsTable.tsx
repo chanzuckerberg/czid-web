@@ -1,12 +1,11 @@
 import cx from "classnames";
 import React from "react";
-
 import { Table } from "~/components/visualizations/table";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import cs from "./blast_contigs_table.scss";
 import {
-  BLAST_CONTIG_ROW_WIDTH,
   BLAST_CONTIG_HEADER_ROW_WIDTH,
+  BLAST_CONTIG_ROW_WIDTH,
 } from "./constants";
 
 interface BlastContigsTableProps {

@@ -1,10 +1,9 @@
 import { get, merge } from "lodash/fp";
-
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import {
-  SHARED_SAMPLE_TABLE_COLUMNS,
   LONG_READ_MNGS_SAMPLE_TABLE_COLUMNS,
+  SHARED_SAMPLE_TABLE_COLUMNS,
   SHORT_READ_MNGS_SAMPLE_TABLE_COLUMNS,
 } from "~/components/views/samples/constants";
 import { MetadataType } from "~/interface/shared";

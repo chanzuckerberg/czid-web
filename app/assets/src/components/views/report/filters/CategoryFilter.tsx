@@ -1,5 +1,4 @@
 import React from "react";
-
 import MultipleNestedDropdown from "../../../ui/controls/dropdowns/MultipleNestedDropdown";
 
 interface CategoryFilterProps {

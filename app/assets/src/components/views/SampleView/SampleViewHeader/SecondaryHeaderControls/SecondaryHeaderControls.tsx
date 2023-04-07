@@ -3,9 +3,9 @@ import { get } from "lodash/fp";
 import React from "react";
 import { withAnalytics } from "~/api/analytics";
 import {
+  isMngsWorkflow,
   WORKFLOWS,
   WORKFLOW_VALUES,
-  isMngsWorkflow,
 } from "~/components/utils/workflows";
 import PipelineVersionSelect from "~/components/views/components/PipelineVersionSelect";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -54,8 +54,7 @@ export const SecondaryHeaderControls = ({
             isAllCaps
             onClick={() =>
               (location.href = `/samples/${sample?.id}/pipeline_runs`)
-            }
-          >
+            }>
             Pipeline Runs
           </Button>
           <span className={cs.seperator}> | </span>
@@ -71,8 +70,7 @@ export const SecondaryHeaderControls = ({
           {
             sampleId: sample?.id,
           },
-        )}
-      >
+        )}>
         Sample Details
       </Button>
     </div>

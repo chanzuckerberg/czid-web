@@ -1,6 +1,6 @@
 import { flow, keyBy, mapValues, omit } from "lodash/fp";
 import React from "react";
-import { Project, SampleFromApi, MetadataBasic } from "~/interface/shared";
+import { MetadataBasic, Project, SampleFromApi } from "~/interface/shared";
 import LocalUploadProgressModal from "./LocalUploadProgressModal";
 import RemoteUploadProgressModal from "./RemoteUploadProgressModal";
 

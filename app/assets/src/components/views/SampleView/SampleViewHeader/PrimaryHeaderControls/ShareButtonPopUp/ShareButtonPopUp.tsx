@@ -1,7 +1,6 @@
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import { ShareButton } from "~ui/controls/buttons";
-
 import cs from "../primary_header_controls.scss";
 
 export const ShareButtonPopUp = ({

@@ -1,6 +1,5 @@
 import { Icon } from "czifui";
 import React from "react";
-
 import ButtonDropdown from "./ButtonDropdown";
 
 interface DownloadButtonDropdown {

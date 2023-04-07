@@ -1,5 +1,4 @@
-import { set, flatten } from "lodash/fp";
-
+import { flatten, set } from "lodash/fp";
 import { get, postWithCSRF } from "./core";
 
 // Get metadata for a particular sample.

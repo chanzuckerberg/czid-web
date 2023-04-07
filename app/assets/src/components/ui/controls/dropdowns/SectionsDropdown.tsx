@@ -2,12 +2,10 @@ import cx from "classnames";
 import { isEmpty, isNil } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React from "react";
-
 import { DropdownProps } from "semantic-ui-react";
 import DropdownTrigger from "~/components/ui/controls/dropdowns/common/DropdownTrigger";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-
 import cs from "./subtext_dropdown.scss";
 
 interface SectionsDropdownProps extends DropdownProps {
@@ -64,14 +62,12 @@ const SectionsDropdown = ({
           if (!option.disabled) {
             onChange(option.value);
           }
-        }}
-      >
+        }}>
         <div
           className={cx(
             cs.optionText,
             option.value === selectedValue && cs.selectedOption,
-          )}
-        >
+          )}>
           {option.text}
         </div>
         <div className={cs.optionSubtext}>{option.subtext}</div>
@@ -132,10 +128,7 @@ const SectionsDropdown = ({
   };
 
   const renderEmptySectionMessage = (message: $TSFixMe) => (
-    <BareDropdown.Item
-      className={cs.emptySection}
-      key={nanoid()}
-    >
+    <BareDropdown.Item className={cs.emptySection} key={nanoid()}>
       <div className={cs.message}>{message}</div>
     </BareDropdown.Item>
   );

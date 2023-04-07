@@ -1,8 +1,6 @@
 import cx from "classnames";
 import React from "react";
-
 import { Popup } from "react-map-gl";
-
 import cs from "./map_tooltip.scss";
 
 interface MapTooltipProps {
@@ -17,15 +15,8 @@ interface MapTooltipProps {
 
 class MapTooltip extends React.Component<MapTooltipProps> {
   render() {
-    const {
-      lat,
-      lng,
-      title,
-      body,
-      onMouseEnter,
-      onMouseLeave,
-      onTitleClick,
-    } = this.props;
+    const { lat, lng, title, body, onMouseEnter, onMouseLeave, onTitleClick } =
+      this.props;
 
     return (
       <Popup
@@ -35,18 +26,15 @@ class MapTooltip extends React.Component<MapTooltipProps> {
         latitude={lat}
         longitude={lng}
         closeButton={false}
-        offsetTop={-20}
-      >
+        offsetTop={-20}>
         <div
           className={cs.content}
           onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-        >
+          onMouseLeave={onMouseLeave}>
           <div>
             <span
               className={cx(cs.title, onTitleClick && cs.hoverable)}
-              onClick={onTitleClick}
-            >
+              onClick={onTitleClick}>
               {title}
             </span>
           </div>

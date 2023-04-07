@@ -3,8 +3,7 @@ import cx from "classnames";
 import { ButtonIcon } from "czifui";
 import { filter, pick, size } from "lodash/fp";
 import React, { useContext, useState } from "react";
-
-import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
@@ -12,17 +11,17 @@ import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
 import { BLAST_V1_FEATURE } from "~/components/utils/features";
 import {
-  isPipelineFeatureAvailable,
-  COVERAGE_VIZ_FEATURE,
   CONSENSUS_GENOME_FEATURE,
+  COVERAGE_VIZ_FEATURE,
+  isPipelineFeatureAvailable,
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,
+  SPECIES_LEVEL_INDEX,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
-  SPECIES_LEVEL_INDEX,
 } from "./constants";
 import cs from "./hover_actions.scss";
 
@@ -408,8 +407,7 @@ const HoverActions = ({
       className={cx(
         cs.hoverActions,
         showHoverActions ? cs.hoverActionsDropdown : className,
-      )}
-    >
+      )}>
       {getHoverActions().map((hoverAction, key) => (
         <span key={key}>{renderHoverAction(hoverAction)}</span>
       ))}

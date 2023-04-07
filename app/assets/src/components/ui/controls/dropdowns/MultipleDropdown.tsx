@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { find, without, includes, omit } from "lodash/fp";
+import { find, includes, omit, without } from "lodash/fp";
 import React from "react";
 import { DropdownProps } from "semantic-ui-react";
 import BareDropdown from "./BareDropdown";
@@ -143,12 +143,8 @@ class MultipleDropdown extends React.Component<
   };
 
   render() {
-    const {
-      arrowInsideTrigger,
-      trigger,
-      className,
-      ...otherProps
-    } = this.props;
+    const { arrowInsideTrigger, trigger, className, ...otherProps } =
+      this.props;
 
     const filteredProps = omit(
       [

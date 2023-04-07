@@ -1,17 +1,16 @@
 import { Icon } from "czifui";
 import {
-  pull,
-  isEqual,
-  min,
-  max,
   flatten,
-  values,
-  omitBy,
-  mapValues,
   isEmpty,
+  isEqual,
+  mapValues,
+  max,
+  min,
+  omitBy,
+  pull,
+  values,
 } from "lodash/fp";
 import React, { useContext } from "react";
-
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { UserContext } from "~/components/common/UserContext";
@@ -30,7 +29,6 @@ import {
 } from "~ui/controls/dropdowns";
 import FilterTag from "~ui/controls/FilterTag";
 import Slider from "~ui/controls/Slider";
-
 import cs from "./samples_heatmap_view.scss";
 
 interface TextValueString {

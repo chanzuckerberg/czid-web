@@ -1,11 +1,10 @@
 import { difference, find, isEmpty, map, orderBy } from "lodash/fp";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SortDirection,
   SortDirectionType,
   TableRowProps,
 } from "react-virtualized";
-
 import BaseTable, { BaseTableProps } from "./BaseTable";
 
 interface Column {

@@ -84,8 +84,7 @@ export const ImpactCountryData = [
     },
     publications: [
       {
-        src:
-          "https://www.frontiersin.org/articles/10.3389/fepid.2022.926695/full?&utm_source=Email_to_authors_&utm_medium=Email&utm_content=T1_11.5e1_author&utm_campaign=Email_publication&field=&journalName=Frontiers_in_Epidemiology&id=926695",
+        src: "https://www.frontiersin.org/articles/10.3389/fepid.2022.926695/full?&utm_source=Email_to_authors_&utm_medium=Email&utm_content=T1_11.5e1_author&utm_campaign=Email_publication&field=&journalName=Frontiers_in_Epidemiology&id=926695",
       },
       {
         src: "https://www.pnas.org/doi/10.1073/pnas.2115285119",

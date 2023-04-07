@@ -1,4 +1,4 @@
-import { get, putWithCSRF, postWithCSRF } from "./core";
+import { get, postWithCSRF, putWithCSRF } from "./core";
 
 export const getPersistedBackgrounds = () => get("/persisted_backgrounds.json");
 

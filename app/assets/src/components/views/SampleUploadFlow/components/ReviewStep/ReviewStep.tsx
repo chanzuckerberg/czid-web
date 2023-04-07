@@ -2,7 +2,6 @@ import cx from "classnames";
 import { Icon } from "czifui";
 import { compact, flatten, get, keyBy, map, mapKeys, without } from "lodash/fp";
 import React from "react";
-
 import {
   ANALYTICS_EVENT_NAMES,
   trackEvent,
@@ -28,19 +27,18 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import { returnHipaaCompliantMetadata } from "~utils/metadata";
 import AdminUploadOptions from "../../AdminUploadOptions";
 import {
-  UPLOAD_WORKFLOWS,
-  UPLOAD_WORKFLOW_KEY_FOR_VALUE,
   CG_WETLAB_DISPLAY_NAMES,
+  NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_DISPLAY_NAMES,
   SEQUENCING_TECHNOLOGY_OPTIONS,
+  UPLOAD_WORKFLOWS,
+  UPLOAD_WORKFLOW_KEY_FOR_VALUE,
   WORKFLOWS_BY_UPLOAD_SELECTIONS,
-  NO_TECHNOLOGY_SELECTED,
 } from "../../constants";
 import HostOrganismMessage from "../../HostOrganismMessage";
 import cs from "../../sample_upload_flow.scss";
 import UploadProgressModal from "../../UploadProgressModal";
 import { DataHeaders } from "./types";
-
 
 interface ReviewStepProps {
   metadata?: {
@@ -175,7 +173,9 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
       const sampleData = {
         ...sampleMetadata,
-        [DataHeaders.SAMPLE_NAME]: <div className={cs.sampleName}>{sample.name}</div>,
+        [DataHeaders.SAMPLE_NAME]: (
+          <div className={cs.sampleName}>{sample.name}</div>
+        ),
         [DataHeaders.HOST_ORGANISM]: sampleHostName,
       };
 
@@ -291,8 +291,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   projectName: project.name,
                   uploadType,
                 });
-              }}
-            >
+              }}>
               Edit Project
             </div>
           </div>
@@ -332,15 +331,13 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                     shouldTruncateDescription &&
                       showLessDescription &&
                       cs.truncated,
-                  )}
-                >
+                  )}>
                   {project.description}
                 </div>
                 {shouldTruncateDescription && (
                   <div
                     className={cs.showHide}
-                    onClick={this.toggleDisplayDescription}
-                  >
+                    onClick={this.toggleDisplayDescription}>
                     {showLessDescription ? "Show More" : "Show Less"}
                   </div>
                 )}
@@ -374,8 +371,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   uploadType,
                 },
               );
-            }}
-          >
+            }}>
             Edit Analysis Type
           </div>
         </div>
@@ -445,13 +441,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
   };
 
   renderCGAnalysisSection = () => {
-    const {
-      clearlabs,
-      medakaModel,
-      technology,
-      wetlabProtocol,
-      workflows,
-    } = this.props;
+    const { clearlabs, medakaModel, technology, wetlabProtocol, workflows } =
+      this.props;
     return (
       <>
         {technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE && (
@@ -573,8 +564,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   projectName: project.name,
                   uploadType,
                 });
-              }}
-            >
+              }}>
               Edit Samples
             </div>
             <div className={cs.divider}>|</div>
@@ -587,8 +577,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   projectName: project.name,
                   uploadType,
                 });
-              }}
-            >
+              }}>
               Edit Metadata
             </div>
           </div>
@@ -633,8 +622,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
     return (
       <div
-        className={cx(cs.reviewStep, cs.uploadFlowStep, visible && cs.visible)}
-      >
+        className={cx(cs.reviewStep, cs.uploadFlowStep, visible && cs.visible)}>
         <div className={cs.flexContent}>
           {this.renderProjectInfo()}
           {this.renderAnalysisTypeInfo()}

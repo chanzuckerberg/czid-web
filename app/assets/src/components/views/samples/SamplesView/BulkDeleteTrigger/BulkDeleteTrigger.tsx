@@ -30,8 +30,11 @@ const BulkDeleteTrigger = ({
   workflow,
   workflowEntity,
 }: BulkDeleteTriggerProps) => {
-  const { admin: isUserAdmin, allowedFeatures, userId } =
-    useContext(UserContext) ?? {};
+  const {
+    admin: isUserAdmin,
+    allowedFeatures,
+    userId,
+  } = useContext(UserContext) ?? {};
 
   // if feature flag off, show nothing
   if (!allowedFeatures.includes(BULK_DELETION_FEATURE)) {

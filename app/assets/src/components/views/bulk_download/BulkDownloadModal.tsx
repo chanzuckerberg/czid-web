@@ -1,13 +1,12 @@
-import { unset, get, set } from "lodash/fp";
+import { get, set, unset } from "lodash/fp";
 import memoize from "memoize-one";
 import React from "react";
-
 import {
   getBackgrounds,
   getMassNormalizedBackgroundAvailability,
   samplesUploadedByCurrentUser,
-  workflowRunsCreatedByCurrentUser,
   userIsCollaboratorOnAllSamples,
+  workflowRunsCreatedByCurrentUser,
 } from "~/api";
 import {
   validateSampleIds,
@@ -20,8 +19,8 @@ import {
 } from "~/api/analytics";
 import {
   createBulkDownload,
-  getBulkDownloadTypes,
   getBulkDownloadMetrics,
+  getBulkDownloadTypes,
 } from "~/api/bulk_downloads";
 import { METRIC_OPTIONS } from "~/components/views/compare/SamplesHeatmapView/constants";
 import { getURLParamString } from "~/helpers/url";
@@ -29,7 +28,6 @@ import { Entry } from "~/interface/samplesView";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import { WORKFLOW_ENTITIES } from "~utils/workflows";
-
 import cs from "./bulk_download_modal.scss";
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
 import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
@@ -139,8 +137,10 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
     });
     const backgroundOptionsRequest = this.fetchBackgrounds();
     const metricsOptionsRequest = getBulkDownloadMetrics(workflow);
-    const allObjectsUploadedByCurrentUserRequest = this.checkAllObjectsUploadedByCurrentUser();
-    const userIsCollaboratorOnAllSamplesRequest = this.checkUserIsCollaboratorOnAllSamples();
+    const allObjectsUploadedByCurrentUserRequest =
+      this.checkAllObjectsUploadedByCurrentUser();
+    const userIsCollaboratorOnAllSamplesRequest =
+      this.checkUserIsCollaboratorOnAllSamples();
 
     const [
       bulkDownloadTypes,
@@ -196,8 +196,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   async fetchValidationInfo({ ids, workflow }) {
     const { workflowEntity } = this.props;
 
-    return (workflowEntity ===
-    WORKFLOW_ENTITIES.WORKFLOW_RUNS
+    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
       ? validateWorkflowRunIds({
           workflowRunIds: ids,
           workflow,
@@ -205,7 +204,7 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
       : validateSampleIds({
           sampleIds: ids,
           workflow,
-        }));
+        });
   }
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
@@ -221,9 +220,8 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
   async fetchBackgroundAvailability() {
     const { selectedIds } = this.props;
-    const {
-      massNormalizedBackgroundsAvailable,
-    } = await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
+    const { massNormalizedBackgroundsAvailable } =
+      await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
 
     this.setState({
       enableMassNormalizedBackgrounds: massNormalizedBackgroundsAvailable,
@@ -233,10 +231,9 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
   async checkAllObjectsUploadedByCurrentUser() {
     const { selectedIds, workflowEntity } = this.props;
 
-    return (workflowEntity ===
-    WORKFLOW_ENTITIES.WORKFLOW_RUNS
+    return workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
       ? workflowRunsCreatedByCurrentUser(Array.from(selectedIds))
-      : samplesUploadedByCurrentUser(Array.from(selectedIds)));
+      : samplesUploadedByCurrentUser(Array.from(selectedIds));
   }
 
   checkUserIsCollaboratorOnAllSamples = () => {
@@ -251,11 +248,8 @@ class BulkDownloadModal extends React.Component<BulkDownloadModalProps> {
 
   handleDownloadRequest = (sampleIds: number[]) => {
     const { workflow, workflowEntity } = this.props;
-    const {
-      selectedDownloadTypeName,
-      selectedFields,
-      selectedFieldsDisplay,
-    } = this.state;
+    const { selectedDownloadTypeName, selectedFields, selectedFieldsDisplay } =
+      this.state;
 
     const selectedDownload = assembleSelectedDownload(
       selectedDownloadTypeName,

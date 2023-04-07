@@ -3,7 +3,6 @@ import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import BasicPopup from "../../BasicPopup";
 import Label from "./Label";
-
 import cs from "./pathogen_label.scss";
 
 export const CATEGORIES = {
@@ -19,8 +18,7 @@ export const CATEGORIES = {
           href={"/pathogen_list"}
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
-          }
-        >
+          }>
           full list
         </ExternalLink>
         {" of pathogens."}
@@ -43,8 +41,7 @@ export const CATEGORIES = {
           }
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
-          }
-        >
+          }>
           here.
         </ExternalLink>
       </>
@@ -64,8 +61,7 @@ export const CATEGORIES = {
           }
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
-          }
-        >
+          }>
           here.
         </ExternalLink>
       </>

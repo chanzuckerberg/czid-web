@@ -2,11 +2,10 @@
 import { Tooltip } from "czifui";
 import { filter, map, reduce, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-
 import {
-  withAnalytics,
-  trackEvent,
   ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -20,10 +19,9 @@ import cs from "./blast_contigs_modal.scss";
 import BlastContigsTable from "./BlastContigsTable";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
-
 import {
-  BLAST_CONTIG_ROW_WIDTH,
   BLAST_CONTIG_HEADER_ROW_WIDTH,
+  BLAST_CONTIG_ROW_WIDTH,
   BLAST_SEQUENCE_CHARACTER_LIMIT,
   SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY,
 } from "./constants";
@@ -50,9 +48,8 @@ const BlastContigsModal = ({
 }: BlastContigsModalProps) => {
   const [contigs, setContigs] = useState([]);
   const [selectedContigIds, setSelectedContigIds] = useState(new Set());
-  const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
-    false,
-  );
+  const [showBlastRedirectionModal, setShowBlastRedirectModal] =
+    useState(false);
   const [blastUrls, setBlastUrls] = useState([]);
   const [sequencesAreTooLong, setSequencesAreTooLong] = useState(false);
 
@@ -135,8 +132,7 @@ const BlastContigsModal = ({
           height:
             BLAST_CONTIG_ROW_WIDTH * size(contigs) +
             BLAST_CONTIG_HEADER_ROW_WIDTH,
-        }}
-      >
+        }}>
         <BlastContigsTable
           contigs={contigs}
           onContigSelection={(value, isChecked) =>
@@ -234,8 +230,7 @@ const BlastContigsModal = ({
     <Notification
       type="info"
       displayStyle="flat"
-      className={cs.longContigNotification}
-    >
+      className={cs.longContigNotification}>
       For selected contig(s) that exceeds ~7500 base pairs (bp), up to the
       middle 7500 bp will be used due to NCBI{`'`}s server limitation.
     </Notification>
@@ -248,8 +243,7 @@ const BlastContigsModal = ({
           <Tooltip
             arrow
             placement="top"
-            title="Select at least 1 contig to continue"
-          >
+            title="Select at least 1 contig to continue">
             <span>
               <PrimaryButton text="Continue" rounded disabled />
             </span>
@@ -277,8 +271,7 @@ const BlastContigsModal = ({
       )}
       tall
       narrow
-      xlCloseIcon
-    >
+      xlCloseIcon>
       <div className={cs.blastContigsModal}>
         <div className={cs.header}>BLASTN Contig</div>
         <div className={cs.taxonName}>{taxonName}</div>
@@ -289,8 +282,7 @@ const BlastContigsModal = ({
             href={BLAST_HELP_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_LEARN_MORE_CLICKED
-            }
-          >
+            }>
             Learn more
           </ExternalLink>
         </div>

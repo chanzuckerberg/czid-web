@@ -13,8 +13,7 @@ const WhitePaper = () => {
         openUrlInNewTab(
           "https://academic.oup.com/gigascience/article/doi/10.1093/gigascience/giaa111/5918865",
         )
-      }
-    >
+      }>
       <div className={cs.whitePaper__Inner_Image}>
         <img src={WhitePaperImage} alt="" />
       </div>

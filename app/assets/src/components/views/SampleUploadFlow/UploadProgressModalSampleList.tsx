@@ -1,6 +1,5 @@
 import { map, sum } from "lodash/fp";
 import React from "react";
-
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import LoadingBar from "~/components/ui/controls/LoadingBar";
 import IconAlert from "~/components/ui/icons/IconAlert";
@@ -72,8 +71,7 @@ const UploadProgressModalSampleList = ({
                           sampleName: sample.name,
                         },
                       )}
-                      className={cs.sampleRetry}
-                    >
+                      className={cs.sampleRetry}>
                       Retry
                     </div>
                   </>

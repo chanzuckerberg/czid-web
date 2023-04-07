@@ -1,12 +1,10 @@
 import React, { useContext, useState } from "react";
-
 import { trackEvent } from "~/api/analytics";
 import { selectedBulkDownloadVar } from "~/cache/initialCache";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
 import Notification from "~ui/notifications/Notification";
-
 import { AdvancedDownloadTabWithApollo } from "./AdvancedDownloadTabWithApollo";
 import cs from "./bulk_download_details_mode_with_apollo.scss";
 import { DetailsTabWithApollo } from "./DetailsTabWithApollo";
@@ -39,8 +37,7 @@ export const BulkDownloadDetailsModeWithApollo = () => {
         <Notification
           type="error"
           displayStyle="flat"
-          className={cs.notification}
-        >
+          className={cs.notification}>
           There was an error generating your download files. Please contact us
           for help.
         </Notification>
@@ -52,8 +49,7 @@ export const BulkDownloadDetailsModeWithApollo = () => {
         <Notification
           type="warning"
           displayStyle="flat"
-          className={cs.notification}
-        >
+          className={cs.notification}>
           {error_message}
         </Notification>
       );

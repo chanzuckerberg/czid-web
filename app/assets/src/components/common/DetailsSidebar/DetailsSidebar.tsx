@@ -3,7 +3,6 @@
 // You should add a new mode to this sidebar instead of adding a new sidebar.
 
 import React, { useContext } from "react";
-
 import Sidebar from "~/components/ui/containers/Sidebar";
 import { APOLLO_CLIENT_STATE_MANAGEMENT } from "~/components/utils/features";
 import { UserContext } from "../UserContext";

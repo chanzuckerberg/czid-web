@@ -1,8 +1,6 @@
 import cx from "classnames";
 import React from "react";
-
 import BasicPopup from "~/components/BasicPopup";
-
 import cs from "./status_label.scss";
 
 interface StatusLabelProps {
@@ -20,8 +18,7 @@ class StatusLabel extends React.Component<StatusLabelProps> {
     const label = (
       <div
         className={cx(className, cs.statusLabel, inline && cs.inline, cs[type])}
-        data-testid={status}
-      >
+        data-testid={status}>
         {status}
       </div>
     );

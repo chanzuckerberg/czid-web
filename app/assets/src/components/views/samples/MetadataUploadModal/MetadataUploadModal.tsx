@@ -1,7 +1,6 @@
 // This modal contains a wizard that allows users to upload metadata to a project.
 import { flow, get, keyBy, mapValues, omit } from "lodash/fp";
 import React from "react";
-
 import { getSamples } from "~/api";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import { uploadMetadataForProject } from "~/api/metadata";
@@ -11,7 +10,6 @@ import Modal from "~ui/containers/Modal";
 import Wizard from "~ui/containers/Wizard";
 import ListNotification from "~ui/notifications/ListNotification";
 import Notification from "~ui/notifications/Notification";
-
 import cs from "./metadata_upload_modal.scss";
 import ReviewPage from "./ReviewPage";
 import UploadPage from "./UploadPage";
@@ -174,8 +172,7 @@ class MetadataUploadModal extends React.Component<
           this.props.onClose,
           "MetadataUploadModal_modal_closed",
         )}
-        className={cs.metadataUploadModal}
-      >
+        className={cs.metadataUploadModal}>
         <Wizard onComplete={this.handleComplete}>{this.getPages()}</Wizard>
       </Modal>
     );

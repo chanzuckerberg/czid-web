@@ -40,8 +40,7 @@ const FooterLinks = ({
                   destination: source,
                   geneName,
                 })
-              }
-            >
+              }>
               {source}
             </a>
           </li>

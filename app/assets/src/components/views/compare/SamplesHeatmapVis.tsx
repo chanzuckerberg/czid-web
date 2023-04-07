@@ -1,11 +1,10 @@
 import cx from "classnames";
-import { size, map, keyBy, isEqual, isEmpty, orderBy } from "lodash/fp";
+import { isEmpty, isEqual, keyBy, map, orderBy, size } from "lodash/fp";
 import React from "react";
-
 import {
   ANALYTICS_EVENT_NAMES,
-  withAnalytics,
   trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
@@ -23,7 +22,6 @@ import { splitIntoMultipleLines } from "~/helpers/strings";
 import { TooltipVizTable } from "~ui/containers";
 import { IconAlertSmall, IconCloseSmall } from "~ui/icons";
 import { openUrlInNewTab } from "~utils/links";
-
 import cs from "./samples_heatmap_vis.scss";
 
 const CAPTION_LINE_WIDTH = 180;
@@ -123,11 +121,8 @@ class SamplesHeatmapVis extends React.Component<
   }
 
   componentDidMount() {
-    const {
-      onMetadataSortChange,
-      metadataSortField,
-      metadataSortAsc,
-    } = this.props;
+    const { onMetadataSortChange, metadataSortField, metadataSortAsc } =
+      this.props;
     const { allowedFeatures = [] } = this.context || {};
 
     this.heatmap = new Heatmap(
@@ -701,8 +696,7 @@ class SamplesHeatmapVis extends React.Component<
               below: true,
               // so we can show the tooltip above the cursor if need be
               height: nodeHoverInfo.nodeHasData ? 300 : 180,
-            })}
-          >
+            })}>
             <TooltipVizTable {...nodeHoverInfo} />
           </div>
         )}
@@ -718,8 +712,7 @@ class SamplesHeatmapVis extends React.Component<
             style={{
               left: tooltipLocation.left,
               top: tooltipLocation.top - 10,
-            }}
-          >
+            }}>
             <BasicPopup
               basic={false}
               content="Unpin"
@@ -775,8 +768,7 @@ class SamplesHeatmapVis extends React.Component<
           className={cx(
             cs.bannerContainer,
             this.state.displayControlsBanner ? cs.show : cs.hide,
-          )}
-        >
+          )}>
           <div className={cs.bannerText}>
             Hold SHIFT to scroll horizontally and SPACE BAR to pan.
             <IconCloseSmall

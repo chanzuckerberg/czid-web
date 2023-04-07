@@ -1,13 +1,11 @@
 import cx from "classnames";
 import { Icon } from "czifui";
-import { at, isNil, get } from "lodash/fp";
+import { at, get, isNil } from "lodash/fp";
 import moment from "moment";
 import React from "react";
-
 import BasicPopup from "~/components/BasicPopup";
 import { numberWithCommas } from "~/helpers/strings";
 import StatusLabel from "~ui/labels/StatusLabel";
-
 // CSS file must be loaded after any elements you might want to override
 import cs from "./table_renderers.scss";
 
@@ -54,8 +52,7 @@ class TableRenderers extends React.Component {
               trigger={
                 <div
                   className={cs.itemDescription}
-                  data-testid="project-description"
-                >
+                  data-testid="project-description">
                   {descriptionRenderer(item)}
                 </div>
               }
@@ -87,14 +84,12 @@ class TableRenderers extends React.Component {
         <div className={cs.counts}>
           <div
             className={cs.sampleCount}
-            data-testid="sample-counts"
-          >{`${numberOfSamples} Sample${
+            data-testid="sample-counts">{`${numberOfSamples} Sample${
             numberOfSamples !== 1 ? "s" : ""
           }`}</div>
           <div
             className={cs.analysesCounts}
-            data-testid="nmgs-cg-sample-counts"
-          >
+            data-testid="nmgs-cg-sample-counts">
             {`${mngsAnalysisRunsCount} mNGS`} | {`${cgAnlaysisRunsCount} CG`}
           </div>
         </div>

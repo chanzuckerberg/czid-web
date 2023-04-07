@@ -1,4 +1,4 @@
-import { Matrix, inverse } from "ml-matrix";
+import { inverse, Matrix } from "ml-matrix";
 
 export const inverseTransformDOMCoordinates = (transformedElement, x, y) => {
   const cssMatrixString = window

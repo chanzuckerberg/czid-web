@@ -1,12 +1,9 @@
 import cx from "classnames";
-import React, { useEffect, useState, KeyboardEvent } from "react";
-
+import React, { KeyboardEvent, useEffect, useState } from "react";
 import { MetadataValue } from "~/interface/shared";
 import Input from "~ui/controls/Input";
 import { IconAlertSmall } from "~ui/icons";
-
 import { FIELDS_THAT_HAVE_MAX_INPUT } from "./constants";
-
 import cs from "./metadata_age_input.scss";
 import { MetadataInputProps } from "./types";
 

@@ -1,4 +1,4 @@
-import { omit, set, get } from "lodash/fp";
+import { get, omit, set } from "lodash/fp";
 import ThresholdMap from "~/components/utils/ThresholdMap";
 
 export const computeThresholdedTaxons = (

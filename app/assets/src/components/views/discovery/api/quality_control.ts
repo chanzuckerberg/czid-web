@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 const QUALITY_CONTROL_QUERY = gql`
-  query(
+  query (
     $projectId: Int!
     # $search: String!
     $domain: String

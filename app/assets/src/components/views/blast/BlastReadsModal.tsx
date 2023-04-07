@@ -1,7 +1,6 @@
 // BlastReadssModal.jsx is only used for Blast V0
 import { size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -13,7 +12,6 @@ import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import cs from "./blast_reads_modal.scss";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
-
 import { SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY } from "./constants";
 import { prepareBlastQuery } from "./utils";
 
@@ -41,24 +39,20 @@ const BlastReadsModal = ({
   const [shortestAlignmentLength, setShortestAlignmentLength] = useState();
   const [longestAlignmentLength, setLongestAlignmentLength] = useState();
   const [reads, setReads] = useState([]);
-  const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
-    false,
-  );
+  const [showBlastRedirectionModal, setShowBlastRedirectModal] =
+    useState(false);
   const [blastUrl, setBlastUrl] = useState("");
 
   useEffect(() => {
     // Run async logic in separate function since `useEffect(async () => ...)` is not supported
     async function run() {
-      const {
-        reads,
-        shortestAlignmentLength,
-        longestAlignmentLength,
-      } = await fetchLongestReadsForTaxonId({
-        sampleId,
-        pipelineVersion,
-        taxonId,
-        taxonLevel,
-      });
+      const { reads, shortestAlignmentLength, longestAlignmentLength } =
+        await fetchLongestReadsForTaxonId({
+          sampleId,
+          pipelineVersion,
+          taxonId,
+          taxonLevel,
+        });
       const blastUrl = prepareBlastQuery({ sequences: reads.join("") });
 
       setShortestAlignmentLength(shortestAlignmentLength);
@@ -175,8 +169,7 @@ const BlastReadsModal = ({
             href={BLAST_HELP_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.BLAST_READS_MODAL_LEARN_MORE_CLICKED
-            }
-          >
+            }>
             Learn more
           </ExternalLink>
         </div>

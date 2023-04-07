@@ -1,8 +1,6 @@
 import React from "react";
 import SvgSaver from "svgsaver";
-
 import { trackEvent } from "~/api/analytics";
-
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
 
@@ -17,9 +15,7 @@ interface PhyloTreeDownloadButtonProps {
   treeContainer?: Element;
 }
 
-class PhyloTreeDownloadButton extends React.Component<
-  PhyloTreeDownloadButtonProps
-> {
+class PhyloTreeDownloadButton extends React.Component<PhyloTreeDownloadButtonProps> {
   dataOptions: $TSFixMe;
   matrixImageOptions: $TSFixMe;
   matrixOnlyOptions: $TSFixMe;

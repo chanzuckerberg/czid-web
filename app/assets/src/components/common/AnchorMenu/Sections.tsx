@@ -5,12 +5,9 @@ import React, {
   useEffect,
   useState,
 } from "react";
-
 import Section from "~/components/common/AnchorMenu/Section";
 import Pathogens from "~/components/views/pathogen_list/Pathogens";
-
 import { getSectionId } from "./SectionNavigation";
-
 import cs from "./sections.scss";
 
 interface SectionsProps {
@@ -61,8 +58,7 @@ const Sections = ({
           id={getSectionId(header)}
           key={`section-${getSectionId(header)}`}
           name={header}
-          observer={observer}
-        >
+          observer={observer}>
           <Pathogens pathogens={sectionContentByHeader[header]} />
         </Section>
       ))}

@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-
 import { SortDirectionType } from "react-virtualized";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 // CSS file must be loaded after any elements you might want to override

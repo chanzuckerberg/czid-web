@@ -1,7 +1,6 @@
 import cx from "classnames";
-import { get, filter, isEmpty, pick } from "lodash/fp";
+import { filter, get, isEmpty, pick } from "lodash/fp";
 import React, { useEffect, useRef, useState } from "react";
-
 import { getSamplePipelineResults } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
@@ -9,10 +8,10 @@ import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { IconArrowRight } from "~/components/ui/icons";
 import {
-  RESULTS_FOLDER_STAGE_KEYS,
-  RESULTS_FOLDER_STEP_KEYS,
   READ_DEDUP_KEYS,
   RESULTS_FOLDER_ROOT_KEY,
+  RESULTS_FOLDER_STAGE_KEYS,
+  RESULTS_FOLDER_STEP_KEYS,
 } from "~/components/utils/resultsFolder";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import { WORKFLOWS, WORKFLOW_LABELS } from "~/components/utils/workflows";
@@ -27,11 +26,11 @@ import {
 import Link from "~ui/controls/Link";
 import LoadingMessage from "../../LoadingMessage";
 import {
+  AMR_WORKFLOW_INFO_FIELDS,
   CG_WORKFLOW_INFO_FIELDS,
   HOST_FILTERING_WIKI,
-  AMR_WORKFLOW_INFO_FIELDS,
-  SHORT_READ_MNGS_INFO_FIELDS,
   LONG_READ_MNGS_INFO_FIELDS,
+  SHORT_READ_MNGS_INFO_FIELDS,
 } from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
@@ -108,9 +107,8 @@ const PipelineTab = ({
   });
   const [graphWidth, setGraphWidth] = useState(0);
   const [loading, setLoading] = useState([READ_COUNTS_TABLE]);
-  const [pipelineStepDict, setPipelineStepDict] = useState<
-    PipelineStepDictState
-  >({});
+  const [pipelineStepDict, setPipelineStepDict] =
+    useState<PipelineStepDictState>({});
 
   const INFO_FIELDS_FOR_WORKFLOW = {
     [WORKFLOWS.AMR.label]: AMR_WORKFLOW_INFO_FIELDS,
@@ -159,8 +157,7 @@ const PipelineTab = ({
             className={cs.metadataValue}
             onClick={() =>
               trackEvent("PipelineTab_pipeline-visualization-link_clicked")
-            }
-          >
+            }>
             {text}
             {metadataLink}
           </div>
@@ -216,11 +213,8 @@ const PipelineTab = ({
   };
 
   const renderReadCountsTable = (stepKey: string) => {
-    const {
-      stepNameKey,
-      readsAfterKey,
-      stepDescriptionKey,
-    } = RESULTS_FOLDER_STEP_KEYS;
+    const { stepNameKey, readsAfterKey, stepDescriptionKey } =
+      RESULTS_FOLDER_STEP_KEYS;
 
     const totalCount = get(
       getSequenceType(pipelineRun?.technology),
@@ -385,8 +379,7 @@ const PipelineTab = ({
         toggleable
         onToggle={() => toggleSection("pipelineInfo")}
         open={sectionOpen.pipelineInfo}
-        title="Pipeline Info"
-      >
+        title="Pipeline Info">
         <FieldList
           fields={pipelineInfoFields}
           className={cs.pipelineInfoFields}
@@ -398,8 +391,7 @@ const PipelineTab = ({
             toggleable
             onToggle={() => toggleSection(READ_COUNTS_TABLE)}
             open={sectionOpen[READ_COUNTS_TABLE]}
-            title={title}
-          >
+            title={title}>
             {renderReadsRemainingSection(title)}
           </MetadataSection>
           <MetadataSection
@@ -407,8 +399,7 @@ const PipelineTab = ({
             onToggle={() => toggleSection("erccScatterplot")}
             open={sectionOpen.erccScatterplot}
             title="ERCC Spike-In Counts"
-            className={cs.erccScatterplotSection}
-          >
+            className={cs.erccScatterplotSection}>
             <div ref={_graphContainer} className={cs.graphContainer}>
               {renderErccComparison()}
             </div>
@@ -417,8 +408,7 @@ const PipelineTab = ({
             toggleable
             onToggle={() => toggleSection("downloads")}
             open={sectionOpen.downloads}
-            title="Downloads"
-          >
+            title="Downloads">
             <div className={cs.downloadSectionContent}>
               {pipelineRun &&
                 getDownloadLinks(sampleId, pipelineRun).map(option => (
@@ -435,8 +425,7 @@ const PipelineTab = ({
                         href: option.path,
                         sampleId,
                       })
-                    }
-                  >
+                    }>
                     {option.label}
                   </a>
                 ))}

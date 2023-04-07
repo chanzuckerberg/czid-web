@@ -1,12 +1,12 @@
 import _fp, {
+  compact,
   filter,
-  groupBy,
-  set,
-  sortBy,
-  partition,
   first,
   get,
-  compact,
+  groupBy,
+  partition,
+  set,
+  sortBy,
 } from "lodash/fp";
 import React from "react";
 import { getOfficialMetadataFields } from "~/api/metadata";

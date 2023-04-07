@@ -2,7 +2,6 @@ import cx from "classnames";
 import { Icon } from "czifui";
 import { isNull, toLower, trim } from "lodash/fp";
 import React from "react";
-
 import {
   createBackground,
   getMassNormalizedBackgroundAvailability,
@@ -24,7 +23,6 @@ import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
-
 import cs from "./collection_modal.scss";
 import {
   BACKGROUND_CORRECTION_METHODS,
@@ -109,8 +107,9 @@ class CollectionModal extends React.Component<
             <li key={sample.id}>
               <span className={cs.sampleName}>{sample.sample.name}</span>
               <span
-                className={cs.sampleDetails}
-              >{`(Project: ${sample.sample.project})`}</span>
+                className={
+                  cs.sampleDetails
+                }>{`(Project: ${sample.sample.project})`}</span>
             </li>
           ))}
         </ul>
@@ -211,9 +210,10 @@ class CollectionModal extends React.Component<
 
   fetchBackgroundAvailability = async () => {
     const { selectedSampleIds } = this.props;
-    const enableMassNormalizedBackgrounds = await getMassNormalizedBackgroundAvailability(
-      Array.from(selectedSampleIds),
-    );
+    const enableMassNormalizedBackgrounds =
+      await getMassNormalizedBackgroundAvailability(
+        Array.from(selectedSampleIds),
+      );
 
     this.setState({
       enableMassNormalizedBackgrounds:
@@ -368,8 +368,7 @@ class CollectionModal extends React.Component<
           onClick={withAnalytics(
             this.openModal,
             "CollectionModal_open-link_clicked",
-          )}
-        >
+          )}>
           {trigger}
         </button>
         {this.state.modalOpen && (
@@ -380,8 +379,7 @@ class CollectionModal extends React.Component<
               this.closeModal,
               "CollectionModal_close-link_clicked",
             )}
-            className={cs.collectionModal}
-          >
+            className={cs.collectionModal}>
             <div className={cs.title}>Create a Background Model</div>
             <div className={cs.description}>
               A background is a group of samples. You can use a background as a
@@ -390,8 +388,7 @@ class CollectionModal extends React.Component<
               much a sample deviates from the mean of that background.{" "}
               <ExternalLink
                 className={cs.link}
-                href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054-Background-Models"
-              >
+                href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054-Background-Models">
                 Learn More
               </ExternalLink>
               .

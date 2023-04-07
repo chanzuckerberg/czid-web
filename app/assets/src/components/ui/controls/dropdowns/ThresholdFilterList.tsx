@@ -6,7 +6,6 @@ import {
   ThresholdFilterOperator,
 } from "~/interface/dropdown";
 import { ThresholdFilter } from "~ui/controls/dropdowns";
-
 import cs from "./threshold_filter_list.scss";
 
 interface ThresholdFilterListProps {
@@ -34,8 +33,7 @@ const ThresholdFilterList = ({
       <Grid
         className={cs.thresholdFilterGrid}
         verticalAlign="middle"
-        columns="equal"
-      >
+        columns="equal">
         {Array.isArray(thresholds) &&
           thresholds.map((threshold: ThresholdFilterData, idx: number) => (
             <ThresholdFilter
@@ -57,8 +55,7 @@ const ThresholdFilterList = ({
               className={cs.addThresholdLink}
               onClick={() => {
                 onAddThreshold();
-              }}
-            >
+              }}>
               + ADD THRESHOLD
             </span>
           </Grid.Column>

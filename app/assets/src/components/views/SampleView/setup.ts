@@ -1,12 +1,12 @@
-import { size, find, omit, isEmpty, getOr } from "lodash/fp";
+import { find, getOr, isEmpty, omit, size } from "lodash/fp";
 import { diff } from "~/components/utils/objectUtil";
 import {
   findInWorkflows,
   labelToVal,
   WorkflowCount,
   WORKFLOWS,
-  WORKFLOW_ENTITIES,
   WorkflowTabsSample,
+  WORKFLOW_ENTITIES,
 } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";

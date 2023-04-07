@@ -1,12 +1,11 @@
 import { cx } from "@emotion/css";
 import { PopoverProps } from "@mui/material";
-import { Menu, MenuItem, Icon, Button, Tooltip } from "czifui";
+import { Button, Icon, Menu, MenuItem, Tooltip } from "czifui";
 import React, { useContext, useState } from "react";
-
 import { UserContext } from "~/components/common/UserContext";
 import {
-  WORKFLOW_VALUES,
   getShorthandFromWorkflow,
+  WORKFLOW_VALUES,
 } from "~/components/utils/workflows";
 import { BulkDeleteModal } from "~/components/views/samples/SamplesView/BulkDeleteModal";
 import cs from "./overflow_menu.scss";
@@ -29,9 +28,8 @@ export const OverflowMenu = ({
   userOwnsRun: boolean;
 }) => {
   const { admin: userIsAdmin } = useContext(UserContext) || {};
-  const [menuAnchorEl, setMenuAnchorEl] = useState<PopoverProps["anchorEl"]>(
-    null,
-  );
+  const [menuAnchorEl, setMenuAnchorEl] =
+    useState<PopoverProps["anchorEl"]>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
   const openActionsMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -51,8 +49,7 @@ export const OverflowMenu = ({
         onClick={() => {
           closeActionsMenu();
           setIsBulkDeleteModalOpen(true);
-        }}
-      >
+        }}>
         <div className={cx(cs.dropdownItem, deleteDisabled && cs.iconDisabled)}>
           <Icon
             sdsIcon="trashCan"
@@ -102,8 +99,7 @@ export const OverflowMenu = ({
         }}
         keepMounted
         open={Boolean(menuAnchorEl)}
-        onClose={closeActionsMenu}
-      >
+        onClose={closeActionsMenu}>
         {renderDeleteRunMenuItem()}
       </Menu>
       <BulkDeleteModal

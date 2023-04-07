@@ -1,8 +1,6 @@
 import cx from "classnames";
-
 import { clamp } from "lodash/fp";
 import React from "react";
-
 import cs from "./loading_bar.scss";
 
 interface LoadingBarProps {
@@ -27,8 +25,7 @@ const LoadingBar = ({
         cs.loadingBarBackground,
         tiny && cs.tiny,
         error || cs.loading,
-      )}
-    >
+      )}>
       <div
         className={cx(
           cs.loadingBar,

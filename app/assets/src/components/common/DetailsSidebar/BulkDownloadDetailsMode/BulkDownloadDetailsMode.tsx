@@ -1,17 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
-
 import { trackEvent } from "~/api/analytics";
 import { getBulkDownload } from "~/api/bulk_downloads";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
 import {
-  DownloadType,
   BulkDownloadDetails,
+  DownloadType,
   NumberId,
 } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
-
 import AdvancedDownloadTab from "./AdvancedDownloadTab";
 import cs from "./bulk_download_details_mode.scss";
 import DetailsTab from "./DetailsTab";
@@ -28,9 +26,8 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentTab, setCurrentTab] = useState<TabNames>(TABS[0]);
-  const [bulkDownloadDetails, setBulkDownloadDetails] = useState<
-    BulkDownloadDetails
-  >();
+  const [bulkDownloadDetails, setBulkDownloadDetails] =
+    useState<BulkDownloadDetails>();
   const [downloadType, setDownloadType] = useState<DownloadType>();
 
   const fetchBulkDownload = async (bulkDownloadId: number) => {
@@ -70,8 +67,7 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
         <Notification
           type="error"
           displayStyle="flat"
-          className={cs.notification}
-        >
+          className={cs.notification}>
           There was an error generating your download files. Please contact us
           for help.
         </Notification>
@@ -83,8 +79,7 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
         <Notification
           type="warning"
           displayStyle="flat"
-          className={cs.notification}
-        >
+          className={cs.notification}>
           {error_message}
         </Notification>
       );

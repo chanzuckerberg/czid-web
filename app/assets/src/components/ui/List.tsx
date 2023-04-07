@@ -1,7 +1,6 @@
 import cx from "classnames";
 import { nanoid } from "nanoid";
 import React, { ReactFragment } from "react";
-
 import cs from "./list.scss";
 
 interface ListProps {
@@ -36,8 +35,7 @@ const List = ({
           xsmallSpacing && cs.xsmallSpacing,
           xxsmallSpacing && cs.xxsmallSpacing,
         )}
-        key={dynamic ? nanoid() : index}
-      >
+        key={dynamic ? nanoid() : index}>
         {item}
       </li>
     );

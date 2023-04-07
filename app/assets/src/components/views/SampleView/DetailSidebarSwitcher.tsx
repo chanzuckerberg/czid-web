@@ -1,4 +1,4 @@
-import { find, get, compact, size } from "lodash/fp";
+import { compact, find, get, size } from "lodash/fp";
 import React from "react";
 import { withAnalytics } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar";

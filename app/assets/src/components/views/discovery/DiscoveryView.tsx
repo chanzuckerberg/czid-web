@@ -29,7 +29,6 @@ import { nanoid } from "nanoid";
 import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router";
-
 import { SortDirectionType } from "react-virtualized";
 import { getSearchSuggestions } from "~/api";
 import {
@@ -41,13 +40,13 @@ import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
-  SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
+  AMR_V1_FEATURE,
+  ONT_V1_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
+  SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
   SORTING_V0_ADMIN_FEATURE,
   SORTING_V0_FEATURE,
   TAXON_THRESHOLD_FILTERING_FEATURE,
-  AMR_V1_FEATURE,
-  ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
@@ -58,13 +57,13 @@ import {
   TempSelectedOptionsShape,
 } from "~/components/utils/urls";
 import {
+  WorkflowCount,
   workflowIsBeta,
   workflowIsWorkflowRunEntity,
   WORKFLOWS,
   WORKFLOW_ENTITIES,
   WORKFLOW_ORDER,
   WORKFLOW_VALUES,
-  WorkflowCount,
 } from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
@@ -84,10 +83,10 @@ import {
   SelectedFilters,
 } from "~/interface/discoveryView";
 import {
-  PipelineTypeRun,
-  FilterList,
   BaseWorkflowRun,
   CGRun,
+  FilterList,
+  PipelineTypeRun,
   SamplesViewHandle,
 } from "~/interface/samplesView";
 import { Project } from "~/interface/shared";
@@ -95,7 +94,6 @@ import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import ImgProjectsSecondary from "~ui/illustrations/ImgProjectsSecondary";
 import ImgSamplesSecondary from "~ui/illustrations/ImgSamplesSecondary";
 import ImgVizSecondary from "~ui/illustrations/ImgVizSecondary";
-
 import {
   AMR_EXISTING_SAMPLES_LINK,
   VISUALIZATIONS_DOC_LINK,
@@ -118,14 +116,14 @@ import {
   TAB_VISUALIZATIONS,
 } from "./constants";
 import {
-  getDiscoveryDimensions,
-  getDiscoveryLocations,
-  getDiscoveryStats,
-  getDiscoveryVisualizations,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
   DISCOVERY_DOMAIN_SNAPSHOT,
+  getDiscoveryDimensions,
+  getDiscoveryLocations,
+  getDiscoveryStats,
+  getDiscoveryVisualizations,
 } from "./discovery_api";
 import cs from "./discovery_view.scss";
 import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
@@ -137,7 +135,6 @@ import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 import ModalFirstTimeUser from "./ModalFirstTimeUser";
 import NoSearchResultsBanner from "./NoSearchResultsBanner";
 import ProjectHeader from "./ProjectHeader";
-
 import {
   getOrderByKeyFor,
   getOrderDirKeyFor,
@@ -591,9 +588,8 @@ class DiscoveryView extends React.Component<
       "DiscoveryViewOptions",
     );
 
-    const {
-      updatedAt: updatedAtFromSessionStorage,
-    } = currentSessionStorageState;
+    const { updatedAt: updatedAtFromSessionStorage } =
+      currentSessionStorageState;
 
     // prevent existing order fields from being removed from session storage
     const orderFieldsInSessionStorage = pick(
@@ -734,9 +730,7 @@ class DiscoveryView extends React.Component<
         moment()
           .subtract(...startDate[filters.timeSelected])
           .format("YYYYMMDD"),
-        moment()
-          .add(1, "days")
-          .format("YYYYMMDD"),
+        moment().add(1, "days").format("YYYYMMDD"),
       ];
     }
 
@@ -971,14 +965,12 @@ class DiscoveryView extends React.Component<
       loadingDimensions: true,
     });
 
-    const {
-      projectDimensions,
-      sampleDimensions,
-    } = await getDiscoveryDimensions({
-      domain,
-      projectId,
-      snapshotShareId,
-    });
+    const { projectDimensions, sampleDimensions } =
+      await getDiscoveryDimensions({
+        domain,
+        projectId,
+        snapshotShareId,
+      });
 
     this.setState({
       projectDimensions,
@@ -1469,11 +1461,8 @@ class DiscoveryView extends React.Component<
   }) => {
     const { snapshotShareId, history: RouterHistory } = this.props;
     const { filters, workflow, workflowEntity } = this.state;
-    const {
-      annotationsSelected,
-      taxonSelected,
-      taxonThresholdsSelected,
-    } = filters;
+    const { annotationsSelected, taxonSelected, taxonThresholdsSelected } =
+      filters;
 
     let sampleId: number;
     let workflowRunId: number;
@@ -1775,13 +1764,11 @@ class DiscoveryView extends React.Component<
     // and the previewed location.
     const params = this.getConditions();
     params.filters["locationV2"] = mapLocationData[mapPreviewedLocationId].name;
-    const [
-      { sampleStats },
-      { projectDimensions, sampleDimensions },
-    ] = await Promise.all([
-      getDiscoveryStats({ domain, ...params }),
-      getDiscoveryDimensions({ domain, ...params }),
-    ]);
+    const [{ sampleStats }, { projectDimensions, sampleDimensions }] =
+      await Promise.all([
+        getDiscoveryStats({ domain, ...params }),
+        getDiscoveryDimensions({ domain, ...params }),
+      ]);
     this.setState({
       mapSidebarProjectDimensions: projectDimensions,
       mapSidebarSampleDimensions: sampleDimensions,
@@ -2026,11 +2013,8 @@ class DiscoveryView extends React.Component<
 
   renderNoDataWorkflowBanner = () => {
     const { workflow } = this.state;
-    const {
-      bannerTitle,
-      noDataLinks,
-      noDataMessage,
-    } = this.configForWorkflow?.[workflow];
+    const { bannerTitle, noDataLinks, noDataMessage } =
+      this.configForWorkflow?.[workflow];
 
     return (
       <InfoBanner
@@ -2106,11 +2090,8 @@ class DiscoveryView extends React.Component<
   };
 
   renderNoSearchResultsBanner = (type: string) => {
-    const {
-      searchType,
-      icon,
-      listenerLink,
-    } = this.getNoSearchResultsBannerData(type);
+    const { searchType, icon, listenerLink } =
+      this.getNoSearchResultsBannerData(type);
 
     return (
       <NoSearchResultsBanner
@@ -2132,8 +2113,7 @@ class DiscoveryView extends React.Component<
           value={findIndex({ value: workflow }, this.computeWorkflowTabs())}
           onChange={(_, selectedTabIndex) =>
             this.handleWorkflowTabChange(selectedTabIndex)
-          }
-        >
+          }>
           {this.computeWorkflowTabs().map(tab => tab.label)}
         </Tabs>
       </div>
@@ -2222,8 +2202,7 @@ class DiscoveryView extends React.Component<
               <span
                 data-testid={`${workflowName
                   .toLowerCase()
-                  .replace(/ /g, "-")}-count`}
-              >
+                  .replace(/ /g, "-")}-count`}>
                 {workflowCount || "0"}
                 {isBeta && (
                   <span className={cs.betaTag}>

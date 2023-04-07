@@ -1,10 +1,9 @@
 import cx from "classnames";
 import copy from "copy-to-clipboard";
 import { Icon } from "czifui";
-import { get, map, sum, size } from "lodash/fp";
+import { get, map, size, sum } from "lodash/fp";
 import React from "react";
 import ReactDOM from "react-dom";
-
 import { getContigsSequencesByByteranges } from "~/api";
 import { withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
@@ -13,7 +12,6 @@ import GenomeViz from "~/components/visualizations/GenomeViz";
 import { getURLParamString } from "~/helpers/url";
 import { GenomeVizShape, TooltipLocation } from "~/interface/shared";
 import { TooltipVizTable } from "~ui/containers";
-
 import cs from "./coverage_viz_bottom_sidebar.scss";
 import { AccessionsData } from "./types";
 import { generateContigReadVizData, getGenomeVizTooltipData } from "./utils";
@@ -222,8 +220,7 @@ export default class HitGroupViz extends React.Component<
     return ReactDOM.createPortal(
       <div
         style={getTooltipStyle(genomeVizTooltipLocation)}
-        className={cs.hoverTooltip}
-      >
+        className={cs.hoverTooltip}>
         <TooltipVizTable data={genomeVizTooltipData} />
       </div>,
       document.body,
@@ -241,8 +238,7 @@ export default class HitGroupViz extends React.Component<
           top: contigDownloaderLocation.top - 5,
         }}
         className={cs.contigDownloader}
-        ref={c => (this._contigDownloader = c)}
-      >
+        ref={c => (this._contigDownloader = c)}>
         <BasicPopup
           trigger={
             <div
@@ -261,8 +257,7 @@ export default class HitGroupViz extends React.Component<
                   taxonId,
                   sampleId,
                 },
-              )}
-            >
+              )}>
               <Icon sdsIcon="download" sdsSize="s" sdsType="button" />
             </div>
           }
@@ -289,8 +284,7 @@ export default class HitGroupViz extends React.Component<
                   sampleId,
                 },
               )}
-              onMouseEnter={this.restoreCopyIconMessage}
-            >
+              onMouseEnter={this.restoreCopyIconMessage}>
               <Icon sdsIcon="copy" sdsSize="s" sdsType="button" />
             </div>
           }

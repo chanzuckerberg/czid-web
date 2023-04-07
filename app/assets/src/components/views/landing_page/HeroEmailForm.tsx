@@ -10,7 +10,8 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
   const [enteredEmail, setEnteredEmail] = useState("");
 
   function isValidEmail(enteredEmail: string) {
-    const emailRegex = /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const emailRegex =
+      /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return emailRegex.test(enteredEmail);
   }
 
@@ -41,8 +42,7 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
   const requestAccessButton = (
     <button
       aria-label="Request access to CZ ID via the CZ ID intro survey (opens in new window)"
-      onClick={e => requestAccess(e)}
-    >
+      onClick={e => requestAccess(e)}>
       Request Access
       <span>
         <ArrowSubmit />
@@ -53,8 +53,7 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
   const registerNowButton = (
     <button
       aria-label="Register for a CZ ID account with your email address"
-      onClick={e => createAccount(e)}
-    >
+      onClick={e => createAccount(e)}>
       Register Now
       <span>
         <ArrowSubmit />

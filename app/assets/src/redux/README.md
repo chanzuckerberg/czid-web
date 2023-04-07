@@ -10,26 +10,24 @@ For each unique feature within IDseq that ulitizes Redux, create a module if it 
 
 - [Example](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/redux/modules/discovery)
 
-
 ## Slices
 
 Our Redux state is typically organized into "slices" and those slices being dedicated to a particular feature. Redux Toolkit includes a [createSlice](https://redux-toolkit.js.org/usage/usage-guide#creating-slices-of-state) function that will auto-generate the action types and action creators for you, based on the names of the reducer functions you provide.
 
- See:
+See:
 
 - [Example](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/redux/modules/discovery/slice.js)
 
-
 ## Selectors
 
-Selectors are used to select certain information from the Redux global state tree. Redux Toolkit re-exports the [createSelector](https://redux-toolkit.js.org/api/createSelector) utility from the [Reselect](https://github.com/reduxjs/reselect) library for ease of use. 
+Selectors are used to select certain information from the Redux global state tree. Redux Toolkit re-exports the [createSelector](https://redux-toolkit.js.org/api/createSelector) utility from the [Reselect](https://github.com/reduxjs/reselect) library for ease of use.
 
 - [Example](https://github.com/chanzuckerberg/czid-web-private/blob/main/app/assets/src/redux/modules/discovery/selectors.js)
 
-
-## Reducers 
+## Reducers
 
 Reducers are functions that must follow special some rules:
+
 - They should only calculate the new state value based on the state and action arguments
 - They are not allowed to modify the existing state. Instead, they must make immutable updates, by copying the existing state and making changes to the copied values.
 - They must not do any asynchronous logic or other "side effects"

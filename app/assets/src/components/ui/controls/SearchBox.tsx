@@ -1,8 +1,7 @@
 import cx from "classnames";
-import { escapeRegExp, debounce } from "lodash";
+import { debounce, escapeRegExp } from "lodash";
 import React from "react";
 import { Search } from "semantic-ui-react";
-
 import { get } from "~/api/core";
 import { getURLParamString } from "~/helpers/url";
 import { IconSearch } from "~ui/icons";
@@ -103,11 +102,8 @@ class SearchBox extends React.Component<SearchBoxProps, SearchBoxState> {
   }
 
   handleServerSearchAction = async () => {
-    const {
-      levelLabel,
-      serverSearchAction,
-      serverSearchActionArgs,
-    } = this.props;
+    const { levelLabel, serverSearchAction, serverSearchActionArgs } =
+      this.props;
     const { value } = this.state;
 
     let url = `/${serverSearchAction}?query=${value}`;

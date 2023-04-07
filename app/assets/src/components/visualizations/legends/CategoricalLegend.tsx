@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-
 import cs from "./categorical_legend.scss";
 
 interface CategoricalLegendProps {

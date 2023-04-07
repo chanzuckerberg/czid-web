@@ -14,9 +14,10 @@
     "plugin:sonarjs/recommended",
     // disables rules that conflict with prettier
     // must come last
-    "prettier"
+    "prettier",
+    "prettier/standard"
   ],
-  "plugins": ["react", "sonarjs"],
+  "plugins": ["react", "sonarjs", "standard"],
   "rules": {
     "camelcase": "warn",
     "comma-dangle": ["error", "always-multiline"],
@@ -56,7 +57,7 @@
       }
     ],
     "standard/object-curly-even-spacing": "warn",
-    "standard/computed-property-even-spacing": "warn",
+    "standard/computed-property-even-spacing": "off",
     "import/order": [
       "warn",
       {

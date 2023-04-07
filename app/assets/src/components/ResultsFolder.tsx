@@ -5,7 +5,7 @@ import {
 } from "~/components/utils/resultsFolder";
 import Divider from "./layout/Divider";
 import cs from "./results_folder.scss";
-import { openUrl, downloadStringToFile } from "./utils/links";
+import { downloadStringToFile, openUrl } from "./utils/links";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "./views/SampleUploadFlow/constants";
 
 interface OutputFileProps {
@@ -24,8 +24,7 @@ const OutputFile = ({ file }: OutputFileProps) => {
   return (
     <tr
       className={`${file.url ? "" : "disabled-"}file-link`}
-      onClick={() => conditionalOpenUrl(file.url)}
-    >
+      onClick={() => conditionalOpenUrl(file.url)}>
       <td className={cs.tableData}>
         <i className="fa fa-file" />
         {file["displayName"]}
@@ -43,8 +42,7 @@ const ConfigFile = ({ stageDagJson }: ConfigFileProps) => {
   return (
     <tr
       className="file-link"
-      onClick={() => downloadStringToFile(stageDagJson)}
-    >
+      onClick={() => downloadStringToFile(stageDagJson)}>
       <td className={cs.tableData}>
         <i className="fa fa-file" />
         config.json
@@ -74,12 +72,8 @@ const ResultsFolderStep = ({
   step,
   pipelineTechnology,
 }: ResultsFolderStepProps) => {
-  const {
-    stepDescriptionKey,
-    readsAfterKey,
-    filesKey,
-    stepNameKey,
-  } = RESULTS_FOLDER_STEP_KEYS;
+  const { stepDescriptionKey, readsAfterKey, filesKey, stepNameKey } =
+    RESULTS_FOLDER_STEP_KEYS;
 
   const description = step[stepDescriptionKey];
   const readsAfter = step[readsAfterKey];

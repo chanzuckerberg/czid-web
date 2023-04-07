@@ -9,7 +9,5 @@ export const getSelectedObjects = ({
 }) => {
   if (!selectedIds || !objects) return [];
 
-  return objects.loaded.filter(object =>
-    selectedIds.has(object.id),
-  );
+  return objects.loaded.filter(object => selectedIds.has(object.id));
 };

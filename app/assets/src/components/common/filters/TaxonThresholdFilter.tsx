@@ -1,5 +1,5 @@
 import { Button, DropdownPopper } from "czifui";
-import { find, isEqual, isEmpty, map, some } from "lodash/fp";
+import { find, isEmpty, isEqual, map, some } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { ThresholdFilterList } from "~/components/ui/controls/dropdowns";
 import { NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS } from "~/components/views/SampleView/constants";
@@ -10,7 +10,6 @@ import {
 import FilterTrigger from "./FilterTrigger";
 import cs from "./taxon_threshold_filter.scss";
 import TaxonFilterSDS, { TaxonOption } from "./TaxonFilterSDS";
-
 
 interface TaxonThresholdFilterProps {
   domain: string;
@@ -36,12 +35,10 @@ const TaxonThresholdFilter = ({
   const [hasModifiedFilters, setHasModifiedFilters] = useState<boolean>(false);
   // Taxa and threshold selections are only stored in this component's state until they
   // are applied, at which point they are passed to the parent component via callback
-  const [selectedTaxa, setSelectedTaxa] = React.useState<TaxonOption[]>(
-    selectedOptions,
-  );
-  const [thresholds, setThresholds] = useState<ThresholdFilterData[]>(
-    selectedThresholds,
-  );
+  const [selectedTaxa, setSelectedTaxa] =
+    React.useState<TaxonOption[]>(selectedOptions);
+  const [thresholds, setThresholds] =
+    useState<ThresholdFilterData[]>(selectedThresholds);
 
   const filterOperators: ThresholdFilterOperator[] = [">=", "<="];
 
@@ -128,8 +125,7 @@ const TaxonThresholdFilter = ({
       <DropdownPopper
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        placement="bottom-start"
-      >
+        placement="bottom-start">
         <div className={cs.filterContainer}>
           <div className={cs.title}>Taxon Filter</div>
           <div className={cs.filterDescriptor}>
@@ -174,8 +170,7 @@ const TaxonThresholdFilter = ({
                 sdsStyle="square"
                 sdsType="primary"
                 disabled={!hasModifiedFilters || isEmpty(selectedTaxa)}
-                onClick={handleApply}
-              >
+                onClick={handleApply}>
                 Apply
               </Button>
             </div>
@@ -183,8 +178,7 @@ const TaxonThresholdFilter = ({
               <Button
                 sdsStyle="square"
                 sdsType="secondary"
-                onClick={handleCancel}
-              >
+                onClick={handleCancel}>
                 Cancel
               </Button>
             </div>

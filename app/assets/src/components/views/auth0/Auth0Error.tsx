@@ -1,9 +1,7 @@
 import { upperFirst } from "lodash/fp";
 import React from "react";
-
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
-
 import cs from "./auth0_error.scss";
 
 interface Auth0ErrorProps {

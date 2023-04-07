@@ -7,7 +7,6 @@ import Histogram, {
 } from "~/components/visualizations/Histogram";
 import { Background } from "~/interface/shared/specific";
 import { TaxonValuesType } from "../TaxonDetailsMode";
-
 import cs from "./taxon_histogram.scss";
 
 interface TaxonHistogramProps {
@@ -22,12 +21,10 @@ export const TaxonHistogram = ({
   taxonValues,
 }: TaxonHistogramProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [shouldShowHistogram, setShouldShowHistogram] = useState<boolean>(
-    false,
-  );
-  const [histogramRpmSeries, setHistogramRpmSeries] = useState<number[][]>(
-    null,
-  );
+  const [shouldShowHistogram, setShouldShowHistogram] =
+    useState<boolean>(false);
+  const [histogramRpmSeries, setHistogramRpmSeries] =
+    useState<number[][]>(null);
 
   const histogramContainerRef: LegacyRef<HTMLDivElement> = useRef(null);
   let histogram: Histogram;

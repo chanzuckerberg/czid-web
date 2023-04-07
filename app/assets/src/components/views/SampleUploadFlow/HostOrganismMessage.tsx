@@ -1,12 +1,10 @@
 import cx from "classnames";
-import { capitalize, every, keys, countBy, map } from "lodash/fp";
+import { capitalize, countBy, every, keys, map } from "lodash/fp";
 import React from "react";
-
 import Accordion from "~/components/layout/Accordion";
 import { HostGenome, Optional, SampleFromApi } from "~/interface/shared";
 import ExternalLink from "~ui/controls/ExternalLink";
 import Notification from "~ui/notifications/Notification";
-
 import cs from "./host_organism_message.scss";
 
 interface HostOrganismMessageProps {
@@ -22,9 +20,7 @@ type CountUniqHosts = { [host: string]: number };
  * Shows a message depending on whether the selected host matches a
  * IDseq-supported host.
  */
-export default class HostOrganismMessage extends React.Component<
-  HostOrganismMessageProps
-> {
+export default class HostOrganismMessage extends React.Component<HostOrganismMessageProps> {
   // By design, host names are case insensitive, so we don't
   // get duplicates.
   hasMatch = (host: string) => {
@@ -41,8 +37,7 @@ export default class HostOrganismMessage extends React.Component<
       <Notification
         type={this.hasMatch(host) ? "info" : "warning"}
         displayStyle="flat"
-        className={cs.messageContainer}
-      >
+        className={cs.messageContainer}>
         <strong>Host Subtraction:</strong>{" "}
         {!this.hasMatch(host) &&
           " We don't have any hosts matching your selection."}
@@ -56,8 +51,7 @@ export default class HostOrganismMessage extends React.Component<
       <ExternalLink
         href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-on-the-Web#reviewing-data"
         analyticsEventName="HostOrganismMessage_learn-more-link_clicked"
-        coloredBackground={true}
-      >
+        coloredBackground={true}>
         Learn more
       </ExternalLink>
     );
@@ -117,8 +111,7 @@ export default class HostOrganismMessage extends React.Component<
       <Notification
         type={isWarn ? "warning" : "info"}
         displayStyle="flat"
-        className={cs.messageContainer}
-      >
+        className={cs.messageContainer}>
         <strong>Host Subtraction:</strong>
         &nbsp;Based on your selections for Host Organism, we will subtract out
         reads from your samples that align to different genomes.{" "}
@@ -130,8 +123,7 @@ export default class HostOrganismMessage extends React.Component<
         bottomContentPadding
         header={header}
         open={false}
-        className={cx(cs.listContainer, color)}
-      >
+        className={cx(cs.listContainer, color)}>
         {keys(uniqHosts).map(host => (
           <div key={host} className={cx(cs.messageLine, color)}>
             {this.renderTextLine(host, uniqHosts[host])}
@@ -146,10 +138,10 @@ export default class HostOrganismMessage extends React.Component<
   }
 
   render() {
-    const uniqHosts = (countBy(
+    const uniqHosts = countBy(
       null,
       this.getSelectedHostOrganisms(),
-    ) as unknown) as CountUniqHosts;
+    ) as unknown as CountUniqHosts;
     const length = keys(uniqHosts).length;
     if (length === 0) {
       return null;

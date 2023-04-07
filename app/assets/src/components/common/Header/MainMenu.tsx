@@ -1,10 +1,9 @@
 import cx from "classnames";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import {
-  DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
+  DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
 } from "~/components/views/discovery/discovery_api";
 import cs from "./header.scss";
@@ -29,8 +28,7 @@ const MainMenu = ({ adminUser, userSignedIn }: MainMenuProps) => {
           /* eslint-disable-next-line react/jsx-no-target-blank */
           target="_blank"
           onClick={() => trackEvent("MainMenu_help_clicked")}
-          data-testid="menu-item-help-center"
-        >
+          data-testid="menu-item-help-center">
           Help Center
         </a>
       </div>
@@ -45,8 +43,7 @@ const MainMenu = ({ adminUser, userSignedIn }: MainMenuProps) => {
           isSelected(DISCOVERY_DOMAIN_MY_DATA) && cs.selected,
         )}
         href={`/${DISCOVERY_DOMAIN_MY_DATA}`}
-        data-testid="menu-item-mydata"
-      >
+        data-testid="menu-item-mydata">
         My Data
       </a>
       <a
@@ -55,8 +52,7 @@ const MainMenu = ({ adminUser, userSignedIn }: MainMenuProps) => {
           isSelected(DISCOVERY_DOMAIN_PUBLIC) && cs.selected,
         )}
         href={`/${DISCOVERY_DOMAIN_PUBLIC}`}
-        data-testid="menu-item-public"
-      >
+        data-testid="menu-item-public">
         Public
       </a>
       {adminUser && (
@@ -66,8 +62,7 @@ const MainMenu = ({ adminUser, userSignedIn }: MainMenuProps) => {
             isSelected(DISCOVERY_DOMAIN_ALL_DATA) && cs.selected,
           )}
           href={`/${DISCOVERY_DOMAIN_ALL_DATA}`}
-          data-testid="menu-item-all-data"
-        >
+          data-testid="menu-item-all-data">
           All Data
         </a>
       )}
@@ -75,8 +70,7 @@ const MainMenu = ({ adminUser, userSignedIn }: MainMenuProps) => {
         className={cx(cs.item, isSelected("samples/upload") && cs.selected)}
         href={"/samples/upload"}
         onClick={() => trackEvent("Header_upload-link_clicked")}
-        data-testid="menu-item-upload"
-      >
+        data-testid="menu-item-upload">
         Upload
       </a>
     </div>

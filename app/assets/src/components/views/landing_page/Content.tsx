@@ -9,7 +9,7 @@ import HealthQuestionsFigure from "~/images/landing_page/health-questions-figure
 import HealthQuestionsMobileFigure from "~/images/landing_page/health-questions-mobile.svg";
 import KniAccordion from "./Accordion";
 import cs from "./Content.scss";
-import { Publications, News } from "./PublicationsAndNews";
+import { News, Publications } from "./PublicationsAndNews";
 import PublicationStyles from "./PublicationsAndNews.scss";
 import QuoteSlider from "./QuoteSlider";
 import TabbedGallery from "./TabbedGallery";

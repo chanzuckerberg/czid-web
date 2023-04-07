@@ -1,11 +1,9 @@
 import React from "react";
-
 import { Image } from "semantic-ui-react";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
-
 import cs from "./nextclade_confirmation_modal.scss";
 
 interface NextcladeConfirmationModalProps {
@@ -36,8 +34,7 @@ const NextcladeConfirmationModal = ({
           href="https://clades.nextstrain.org"
           analyticsEventName={
             "NextcladeConfirmationModal_nextclade-link_clicked"
-          }
-        >
+          }>
           clades.nextstrain.org
         </ExternalLink>
         .

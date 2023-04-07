@@ -2,7 +2,6 @@ import cx from "classnames";
 import { getOr } from "lodash/fp";
 import React from "react";
 import { HistogramTooltipData } from "~/components/common/CoverageVizBottomSidebar";
-
 import cs from "./tooltip_viz_table.scss";
 
 interface TooltipVizTableProps {
@@ -37,8 +36,7 @@ const TooltipVizTable = ({
     return (
       <div
         className={cx(cs.section, disabled && cs.disabled)}
-        key={`section-${name}`}
-      >
+        key={`section-${name}`}>
         <div className={cx(cs.name, disabled && cs.disabled)}>{name}</div>
         <div className={cs.data}>
           {data.map((datum, index) => {

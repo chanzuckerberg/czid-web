@@ -94,7 +94,13 @@ export const sampleErrorInfo = ({
   pipelineRun: PipelineRun | Record<string, never>;
   error?: { label?: string; message: string } | Record<string, never>;
 }) => {
-  let status: Status, message, subtitle, linkText, type, link, pipelineVersionUrlParam;
+  let status: Status,
+    message,
+    subtitle,
+    linkText,
+    type,
+    link,
+    pipelineVersionUrlParam;
   switch (
     sample.upload_error ||
     (pipelineRun && pipelineRun.known_user_error) ||

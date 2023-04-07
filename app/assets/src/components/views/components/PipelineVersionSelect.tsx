@@ -3,12 +3,10 @@ import moment from "moment";
 import React from "react";
 import { Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";
-
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-
 import cs from "./pipeline_version_select.scss";
 
 interface PipelineVersionSelectProps {
@@ -138,8 +136,9 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
           }
         />
         <span
-          className={cs.pipelineVersion}
-        >{`| ${getLastProcessedString()} `}</span>
+          className={
+            cs.pipelineVersion
+          }>{`| ${getLastProcessedString()} `}</span>
       </>
     );
   };

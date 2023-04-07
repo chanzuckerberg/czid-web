@@ -5,8 +5,8 @@ import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
 import { MetadataValue } from "~/interface/shared";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
-  processLocationSelection,
   getLocationWarning,
+  processLocationSelection,
 } from "~ui/controls/GeoSearchInputBox";
 import Input from "~ui/controls/Input";
 import Toggle from "~ui/controls/Toggle";

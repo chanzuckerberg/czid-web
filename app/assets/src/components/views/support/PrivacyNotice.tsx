@@ -1,11 +1,9 @@
 import { nanoid } from "nanoid";
 import React from "react";
-
 import { NarrowContainer } from "~/components/layout";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { NEXTCLADE_APP_LINK } from "~/components/utils/documentationLinks";
-
 import cs from "./support.scss";
 
 const PrivacyNotice = () => {
@@ -346,9 +344,9 @@ const PrivacyNotice = () => {
         <div className={cs.underlineHeader}>How We Share Upload Data</div>
       </p>
       <p>
-        Raw Sample Data is <b>never</b> disclosed to any other CZ ID User
-        other than the User that uploaded the Sample, but it is disclosed to
-        service providers in order to provide the Services, such as AWS for data
+        Raw Sample Data is <b>never</b> disclosed to any other CZ ID User other
+        than the User that uploaded the Sample, but it is disclosed to service
+        providers in order to provide the Services, such as AWS for data
         storage. Even staff working on CZ ID cannot access this information
         except as specifically instructed by a User, such as to debug an issue.
       </p>

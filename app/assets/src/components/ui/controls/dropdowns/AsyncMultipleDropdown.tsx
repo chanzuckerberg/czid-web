@@ -1,4 +1,4 @@
-import { find, unionBy, debounce } from "lodash/fp";
+import { debounce, find, unionBy } from "lodash/fp";
 import React from "react";
 import MultipleDropdown from "./MultipleDropdown";
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
@@ -9,9 +9,7 @@ interface AsyncMultipleDropdownProps {
   onFilterChange?: $TSFixMeFunction;
 }
 
-class AsyncMultipleDropdown extends React.Component<
-  AsyncMultipleDropdownProps
-> {
+class AsyncMultipleDropdown extends React.Component<AsyncMultipleDropdownProps> {
   _lastQuery: $TSFixMe;
   constructor(props: AsyncMultipleDropdownProps) {
     super(props);

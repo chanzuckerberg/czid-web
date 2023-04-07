@@ -1,19 +1,17 @@
 import { Menu, MenuItem } from "czifui";
 import React, { useState } from "react";
-
 import {
+  ANALYTICS_EVENT_NAMES,
   trackEvent,
   withAnalytics,
-  ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import AnnotationLabel from "~/components/ui/labels/AnnotationLabel";
 import {
   ANNOTATION_HIT,
-  ANNOTATION_NOT_A_HIT,
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NONE,
+  ANNOTATION_NOT_A_HIT,
 } from "../SampleView/constants";
-
 import cs from "./annotation_menu.scss";
 
 interface AnnotationMenuProps {
@@ -68,12 +66,10 @@ const AnnotationMenu = ({
         }}
         keepMounted
         open={!!anchorEl}
-        onClose={handleClose}
-      >
+        onClose={handleClose}>
         <MenuItem
           className={cs.menuItem}
-          onClick={() => onItemSelected(ANNOTATION_HIT)}
-        >
+          onClick={() => onItemSelected(ANNOTATION_HIT)}>
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_HIT}
@@ -84,8 +80,7 @@ const AnnotationMenu = ({
         </MenuItem>
         <MenuItem
           className={cs.menuItem}
-          onClick={() => onItemSelected(ANNOTATION_NOT_A_HIT)}
-        >
+          onClick={() => onItemSelected(ANNOTATION_NOT_A_HIT)}>
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_NOT_A_HIT}
@@ -96,8 +91,7 @@ const AnnotationMenu = ({
         </MenuItem>
         <MenuItem
           className={cs.menuItem}
-          onClick={() => onItemSelected(ANNOTATION_INCONCLUSIVE)}
-        >
+          onClick={() => onItemSelected(ANNOTATION_INCONCLUSIVE)}>
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_INCONCLUSIVE}

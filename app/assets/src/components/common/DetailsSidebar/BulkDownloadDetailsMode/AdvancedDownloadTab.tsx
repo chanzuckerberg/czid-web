@@ -3,11 +3,9 @@ import copy from "copy-to-clipboard";
 import { Icon } from "czifui";
 import moment from "moment";
 import React, { useState } from "react";
-
 import { withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { BulkDownloadDetails } from "~/interface/shared";
-
 import cs from "./bulk_download_details_mode.scss";
 
 interface AdvancedDownloadTabProps {
@@ -80,8 +78,7 @@ const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
       onKeyDown={handleCLICommandClick}
       onMouseLeave={resetTooltip}
       role="button"
-      tabIndex={0}
-    >
+      tabIndex={0}>
       <div className={cs.command}>{getCLICommand()}</div>
       <Icon className={cs.icon} sdsIcon="copy" sdsSize="s" sdsType="static" />
     </div>

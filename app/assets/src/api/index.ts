@@ -4,18 +4,16 @@
 import axios from "axios";
 import { CoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/types";
 import { WORKFLOW_VALUES } from "~/components/utils/workflows";
-
 import { getURLParamString } from "~/helpers/url";
 import Sample from "~/interface/sample";
 import { WorkflowRunResults } from "~/interface/sampleView";
-
 import { ProjectPipelineVersions } from "~/interface/shared";
 import {
+  deleteWithCSRF,
   get,
+  MAX_SAMPLES_FOR_GET_REQUEST,
   postWithCSRF,
   putWithCSRF,
-  deleteWithCSRF,
-  MAX_SAMPLES_FOR_GET_REQUEST,
 } from "./core";
 
 // Save fields on the sample model (NOT sample metadata)
@@ -107,10 +105,7 @@ const uploadFileToUrl = async (
     onUploadProgress,
   };
 
-  return axios
-    .put(url, file, config)
-    .then(onSuccess)
-    .catch(onError);
+  return axios.put(url, file, config).then(onSuccess).catch(onError);
 };
 
 const getTaxonDescriptions = (taxonList: $TSFixMe) =>
@@ -565,11 +560,9 @@ const getSamplesReadStats = async (sampleIds: $TSFixMe) => {
 
   const response = await Promise.all(requests);
   // flatten into one object
-  return response
-    .flat()
-    .reduce((accum: $TSFixMe, current: $TSFixMe) => {
-      return Object.assign(accum, current);
-    }, {});
+  return response.flat().reduce((accum: $TSFixMe, current: $TSFixMe) => {
+    return Object.assign(accum, current);
+  }, {});
 };
 
 const setWorkflowVersion = (workflowName: $TSFixMe, version: $TSFixMe) =>
@@ -617,21 +610,19 @@ const getTaxaWithContigsSuggestions = (query: $TSFixMe, sampleIds: $TSFixMe) =>
   });
 
 const samplesUploadedByCurrentUser = async (sampleIds: $TSFixMe) => {
-  const {
-    uploaded_by_current_user: allSamplesUploadedByCurrentUser,
-  } = await postWithCSRF("samples/uploaded_by_current_user", {
-    sampleIds,
-  });
+  const { uploaded_by_current_user: allSamplesUploadedByCurrentUser } =
+    await postWithCSRF("samples/uploaded_by_current_user", {
+      sampleIds,
+    });
 
   return allSamplesUploadedByCurrentUser;
 };
 
 const workflowRunsCreatedByCurrentUser = async (workflowRunIds: $TSFixMe) => {
-  const {
-    created_by_current_user: allWorkflowRunsCreatedByCurrentUser,
-  } = await postWithCSRF("workflow_runs/created_by_current_user", {
-    workflowRunIds,
-  });
+  const { created_by_current_user: allWorkflowRunsCreatedByCurrentUser } =
+    await postWithCSRF("workflow_runs/created_by_current_user", {
+      workflowRunIds,
+    });
 
   return allWorkflowRunsCreatedByCurrentUser;
 };

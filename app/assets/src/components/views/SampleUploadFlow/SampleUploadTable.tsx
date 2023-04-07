@@ -2,15 +2,13 @@
 // Allows users to select and unselect samples, and remove unselected samples.
 
 import { cx } from "@emotion/css";
-import { difference, flatten, isEmpty, map, size, get } from "lodash/fp";
+import { difference, flatten, get, isEmpty, map, size } from "lodash/fp";
 import React from "react";
-import { SortDirection, defaultTableRowRenderer } from "react-virtualized";
-
+import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 import { UserContext } from "~/components/common/UserContext";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
 import { Table } from "~/components/visualizations/table";
-
 import { SampleUploadType } from "~/interface/shared";
 import { SELECT_ID_KEY } from "./constants";
 import cs from "./sample_upload_table.scss";
@@ -93,9 +91,7 @@ interface SampleUploadTableProps {
   files?: unknown[];
 }
 
-export default class SampleUploadTable extends React.Component<
-  SampleUploadTableProps
-> {
+export default class SampleUploadTable extends React.Component<SampleUploadTableProps> {
   getColumns = () => {
     const { sampleUploadType } = this.props;
     if (sampleUploadType === "basespace") {
@@ -190,8 +186,7 @@ export default class SampleUploadTable extends React.Component<
           Select samples that you want to upload. &nbsp;
           <span
             className={cs.removeLink}
-            onClick={this.removeUnselectedSamples}
-          >
+            onClick={this.removeUnselectedSamples}>
             Click to remove unselected samples
           </span>
         </div>

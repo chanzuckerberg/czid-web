@@ -1,7 +1,7 @@
 import { Icon } from "czifui";
 import { assign, find } from "lodash/fp";
 import React from "react";
-import { validateProjectName, saveProjectName } from "~/api";
+import { saveProjectName, validateProjectName } from "~/api";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import EditableInput from "~/components/ui/controls/EditableInput";

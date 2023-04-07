@@ -1,11 +1,9 @@
 import React from "react";
-
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ViewHeader from "~/components/layout/ViewHeader";
 import PipelineVersionSelect from "~/components/views/components/PipelineVersionSelect";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-
 import cs from "./pipeline_viz.scss";
 
 interface PipelineVizHeaderProps {

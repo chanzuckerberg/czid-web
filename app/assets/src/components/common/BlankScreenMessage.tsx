@@ -1,5 +1,4 @@
 import React from "react";
-
 import cs from "./blank_screen_message.scss";
 
 interface BlankScreenMessageProps {

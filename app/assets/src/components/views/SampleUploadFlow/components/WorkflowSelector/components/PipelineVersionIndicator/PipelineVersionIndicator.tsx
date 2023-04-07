@@ -32,8 +32,7 @@ export const PipelineVersionIndicator = ({
           leaveDelay={1000}
           title={PIPELINE_VERSION_TOOLTIP_TEXT}
           placement="top"
-          data-test-id="pipeline-version-tooltip"
-        >
+          data-test-id="pipeline-version-tooltip">
           <div>
             <Icon sdsIcon="infoCircle" sdsSize="s" sdsType="interactive" />
           </div>

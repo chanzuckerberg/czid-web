@@ -1,6 +1,6 @@
-import { keyBy, mapValues, isObject } from "lodash/fp";
+import { isObject, keyBy, mapValues } from "lodash/fp";
 import { FIELDS_THAT_HAVE_MAX_INPUT } from "~/components/common/Metadata/constants";
-import { Metadata, RawMetadata, MetadataType } from "~/interface/shared";
+import { Metadata, MetadataType, RawMetadata } from "~/interface/shared";
 
 // Transform the server metadata response to a simple key => value map.
 export const processMetadata = ({
@@ -20,10 +20,7 @@ export const processMetadata = ({
   );
   // If flatten, simplify objects (e.g. location objects) to .name
   if (flatten) {
-    return mapValues(
-      val => (isObject(val) ? val.name : val),
-      newMetadata,
-    );
+    return mapValues(val => (isObject(val) ? val.name : val), newMetadata);
   }
 
   return newMetadata;

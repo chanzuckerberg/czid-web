@@ -1,4 +1,4 @@
-import { transform, isEqual, isObject, isArray, camelCase } from "lodash/fp";
+import { camelCase, isArray, isEqual, isObject, transform } from "lodash/fp";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -6,16 +6,13 @@ const _transform = transform.convert({
   cap: false,
 });
 
-const iteratee = (baseObj: object) => (
-  result: unknown,
-  value: object,
-  key: string,
-) => {
-  if (!isEqual(value, baseObj[key])) {
-    const valueIsObject = isObject(value) && isObject(baseObj[key]);
-    result[key] = valueIsObject === true ? diff(value, baseObj[key]) : value;
-  }
-};
+const iteratee =
+  (baseObj: object) => (result: unknown, value: object, key: string) => {
+    if (!isEqual(value, baseObj[key])) {
+      const valueIsObject = isObject(value) && isObject(baseObj[key]);
+      result[key] = valueIsObject === true ? diff(value, baseObj[key]) : value;
+    }
+  };
 
 // Given two objects, return the differences between the two in a new object.
 // See: https://gist.github.com/Yimiprod/7ee176597fef230d1451

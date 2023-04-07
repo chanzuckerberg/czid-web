@@ -1,7 +1,7 @@
 import cx from "classnames";
 import { ButtonIcon } from "czifui";
 import { isEmpty } from "lodash/fp";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Input from "~ui/controls/Input";
 import { IconAlertSmall } from "~ui/icons";
 import cs from "./editable_input.scss";
@@ -76,8 +76,7 @@ const EditableInput = ({
         className={cx(
           cs.alertContainer,
           isEmpty(error) ? cs.warning : cs.error,
-        )}
-      >
+        )}>
         <IconAlertSmall
           className={cs.alertIcon}
           type={isEmpty(error) ? "warning" : "error"}
@@ -115,8 +114,7 @@ const EditableInput = ({
           className={cs.editableInput}
           onMouseEnter={() => setEditable(true)}
           onMouseLeave={() => setEditable(false)}
-          onClick={() => setInputVisible(true)}
-        >
+          onClick={() => setInputVisible(true)}>
           <div className={cx(className, editable && cs.editableText)}>
             {inputText}
           </div>

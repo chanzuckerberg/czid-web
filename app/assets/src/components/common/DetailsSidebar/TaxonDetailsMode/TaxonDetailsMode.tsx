@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-
 import { getTaxonDescriptions } from "~/api";
 import { Background } from "~/interface/shared/specific";
 import cs from "./taxon_details_mode.scss";
 import { TaxonDescription } from "./TaxonDescription";
 import { TaxonHistogram } from "./TaxonHistogram";
 import { TaxonLinks } from "./TaxonLinks";
-
 
 export type TaxonValuesType = {
   NT: { rpm: number | string };
@@ -30,9 +28,8 @@ export const TaxonDetailsMode = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [taxonDescription, setTaxonDescription] = useState<string>("");
   const [taxonParentName, setTaxonParentName] = useState<string>("");
-  const [taxonParentDescription, setTaxonParentDescription] = useState<string>(
-    "",
-  );
+  const [taxonParentDescription, setTaxonParentDescription] =
+    useState<string>("");
   const [wikiUrl, setWikiUrl] = useState<string>("");
   const [parentWikiUrl, setParentWikiUrl] = useState<string>("");
 

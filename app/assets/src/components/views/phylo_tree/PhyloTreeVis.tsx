@@ -1,4 +1,4 @@
-import { get, compact, pluck, values, sortBy, concat, find } from "lodash/fp";
+import { compact, concat, find, get, pluck, sortBy, values } from "lodash/fp";
 import React from "react";
 import { getSampleMetadataFields } from "~/api/metadata";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -298,8 +298,7 @@ class PhyloTreeVis extends React.Component<
           className="phylo-tree-vis__tooltip-container"
           ref={tooltip => {
             this.tooltipContainer = tooltip;
-          }}
-        >
+          }}>
           {this.state.hoveredNode && !this.state.showWarningTooltip && (
             <TooltipVizTable
               // @ts-expect-error Types of property 'data' are incompatible.
@@ -312,8 +311,7 @@ class PhyloTreeVis extends React.Component<
           className="phylo-tree-vis__tooltip-container"
           ref={tooltip => {
             this.warningTooltipContainer = tooltip;
-          }}
-        >
+          }}>
           {this.state.showWarningTooltip && (
             <ColumnHeaderTooltip
               content="Coverage breadth is less than 25%. This is low and may affect analysis quality. Learn more in our Help Center."

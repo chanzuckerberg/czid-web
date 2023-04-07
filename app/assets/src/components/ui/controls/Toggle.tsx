@@ -1,7 +1,6 @@
 import cx from "classnames";
 import React from "react";
 import { CheckboxProps, Radio } from "semantic-ui-react";
-
 import cs from "./toggle.scss";
 
 interface ToggleProps {

@@ -1,8 +1,6 @@
 import cx from "classnames";
 import React from "react";
-
 import { IconLoading } from "~ui/icons";
-
 import cs from "./loading_message.scss";
 
 interface LoadingMessageProps {

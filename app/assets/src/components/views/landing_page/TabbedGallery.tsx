@@ -15,10 +15,9 @@ import SarsMobileImg1x from "~/images/landing_page/sars-mobile-screenshot-1x.png
 import SarsMobileImg2x from "~/images/landing_page/sars-mobile-screenshot-2x.png";
 import SarsImg1x from "~/images/landing_page/sars-screenshot-1x.png";
 import SarsImg2x from "~/images/landing_page/sars-screenshot-2x.png";
-
 import cs from "./TabbedGallery.scss";
-import "./transitions.css";
 import TabbedGalleryTab from "./TabbedGalleryTab";
+import "./transitions.css";
 
 const TabbedGallery = () => {
   const [activeTab, setActiveTab] = useState(0);

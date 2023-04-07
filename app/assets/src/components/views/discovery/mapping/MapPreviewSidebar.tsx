@@ -10,7 +10,6 @@ import {
   upperFirst,
 } from "lodash/fp";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import Tabs from "~/components/ui/controls/Tabs";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
@@ -22,7 +21,6 @@ import { DimensionsDetailed } from "~/interface/discoveryView";
 import { PipelineTypeRun } from "~/interface/samplesView";
 import { Project } from "~/interface/shared";
 import { ObjectCollectionView } from "../DiscoveryDataLayer";
-
 import cs from "./map_preview_sidebar.scss";
 
 interface MapPreviewSidebarProps {
@@ -45,9 +43,7 @@ interface MapPreviewSidebarProps {
   selectedSampleIds?: Set<$TSFixMeUnknown>;
 }
 
-export default class MapPreviewSidebar extends React.Component<
-  MapPreviewSidebarProps
-> {
+export default class MapPreviewSidebar extends React.Component<MapPreviewSidebarProps> {
   projectColumns: $TSFixMe;
   projectsTable: $TSFixMe;
   referenceSelectId: $TSFixMe;

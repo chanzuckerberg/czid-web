@@ -1,13 +1,12 @@
 import { some } from "lodash";
-import { get, isEmpty, find, size, set } from "lodash/fp";
+import { find, get, isEmpty, set, size } from "lodash/fp";
 import React, { useContext, useEffect, useState } from "react";
-
-import { saveSampleName, saveSampleNotes, getAllSampleTypes } from "~/api";
+import { getAllSampleTypes, saveSampleName, saveSampleNotes } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import {
   getSampleMetadata,
-  saveSampleMetadata,
   getSampleMetadataFields,
+  saveSampleMetadata,
 } from "~/api/metadata";
 import Tabs from "~/components/ui/controls/Tabs";
 import { APOLLO_CLIENT_STATE_MANAGEMENT } from "~/components/utils/features";
@@ -21,12 +20,12 @@ import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import {
+  LocationObject,
+  Metadata,
+  MetadataTypes,
   PipelineRun,
   SnapshotShareId,
   SummaryStats,
-  MetadataTypes,
-  LocationObject,
-  Metadata,
 } from "~/interface/shared";
 import { processMetadata, processMetadataTypes } from "~utils/metadata";
 import { UserContext } from "../../UserContext";
@@ -34,13 +33,12 @@ import MetadataTab from "./MetadataTab";
 import NotesTab from "./NotesTab";
 import NotesTabWithApollo from "./NotesTabWithApollo";
 import PipelineTab, { MngsPipelineInfo, PipelineInfo } from "./PipelineTab";
-
 import cs from "./sample_details_mode.scss";
 import {
-  processPipelineInfo,
   processAdditionalInfo,
-  processCGWorkflowRunInfo,
   processAMRWorkflowRun,
+  processCGWorkflowRunInfo,
+  processPipelineInfo,
 } from "./utils";
 
 export interface SampleDetailsModeProps {
@@ -150,19 +148,16 @@ const SampleDetailsMode = ({
       return;
     }
 
-    const [
-      fetchedMetadata,
-      fetchedMetadataTypes,
-      fetchedSampleTypes,
-    ] = await Promise.all([
-      getSampleMetadata({
-        id: sampleId,
-        pipelineVersion: get("pipeline_version", currentRun),
-        snapshotShareId,
-      }),
-      getSampleMetadataFields(sampleId, snapshotShareId),
-      !snapshotShareId && getAllSampleTypes(),
-    ]);
+    const [fetchedMetadata, fetchedMetadataTypes, fetchedSampleTypes] =
+      await Promise.all([
+        getSampleMetadata({
+          id: sampleId,
+          pipelineVersion: get("pipeline_version", currentRun),
+          snapshotShareId,
+        }),
+        getSampleMetadataFields(sampleId, snapshotShareId),
+        !snapshotShareId && getAllSampleTypes(),
+      ]);
 
     const processedMetadata = processMetadata({
       metadata: fetchedMetadata.metadata,
@@ -382,8 +377,7 @@ const SampleDetailsMode = ({
               trackEvent("SampleDetailsMode_see-report-link_clicked", {
                 withTempSelectedOptions: !isEmpty(tempSelectedOptions),
               })
-            }
-          >
+            }>
             See Report
           </a>
         </div>

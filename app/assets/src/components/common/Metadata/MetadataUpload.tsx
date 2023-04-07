@@ -1,18 +1,17 @@
 import cx from "classnames";
 import _fp, {
+  concat,
+  filter,
+  find,
+  flatten,
+  get,
   isEmpty,
   isEqual,
-  filter,
-  get,
   keyBy,
-  concat,
-  find,
-  sortBy,
   remove,
-  flatten,
+  sortBy,
 } from "lodash/fp";
 import React from "react";
-
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
@@ -79,15 +78,13 @@ class MetadataUpload extends React.Component<
   };
 
   async componentDidMount() {
-    const [
-      projectMetadataFields,
-      hostGenomes,
-      sampleTypes,
-    ] = await Promise.all([
-      getProjectMetadataFields(this.props.project.id),
-      getAllHostGenomes(),
-      getAllSampleTypes(),
-    ]);
+    const [projectMetadataFields, hostGenomes, sampleTypes] = await Promise.all(
+      [
+        getProjectMetadataFields(this.props.project.id),
+        getAllHostGenomes(),
+        getAllSampleTypes(),
+      ],
+    );
     this.setState({
       allProjectMetadataFields: projectMetadataFields,
       projectMetadataFields: this.processProjectMetadataFields(
@@ -106,9 +103,8 @@ class MetadataUpload extends React.Component<
         projectMetadataFields: null,
       });
 
-      const projectMetadataFields: MetadataUploadState["allProjectMetadataFields"] = await getProjectMetadataFields(
-        this.props.project.id,
-      );
+      const projectMetadataFields: MetadataUploadState["allProjectMetadataFields"] =
+        await getProjectMetadataFields(this.props.project.id);
 
       this.setState({
         allProjectMetadataFields: projectMetadataFields,
@@ -289,14 +285,15 @@ class MetadataUpload extends React.Component<
     });
   };
 
-  getRequiredLocationMetadataType = (): MetadataCSVLocationsMenuProps["locationMetadataType"] => {
-    const { projectMetadataFields } = this.state;
-    // Use the first required location MetadataField
-    return find(
-      { dataType: "location", is_required: 1 },
-      Object.values(projectMetadataFields),
-    );
-  };
+  getRequiredLocationMetadataType =
+    (): MetadataCSVLocationsMenuProps["locationMetadataType"] => {
+      const { projectMetadataFields } = this.state;
+      // Use the first required location MetadataField
+      return find(
+        { dataType: "location", is_required: 1 },
+        Object.values(projectMetadataFields),
+      );
+    };
 
   renderTab = () => {
     const {
@@ -308,12 +305,8 @@ class MetadataUpload extends React.Component<
       visible,
       withinModal,
     } = this.props;
-    const {
-      currentTab,
-      hostGenomes,
-      projectMetadataFields,
-      sampleTypes,
-    } = this.state;
+    const { currentTab, hostGenomes, projectMetadataFields, sampleTypes } =
+      this.state;
 
     if (currentTab === Tab.MANUAL_INPUT) {
       if (!samples || !projectMetadataFields) {
@@ -347,8 +340,7 @@ class MetadataUpload extends React.Component<
               onKeyDown={withAnalytics(
                 onShowCSVInstructions,
                 "MetadataUpload_instruction-link_clicked",
-              )}
-            >
+              )}>
               View CSV Upload Instructions
             </button>
           </div>
@@ -376,8 +368,7 @@ class MetadataUpload extends React.Component<
                 projectId: project.id,
                 projectName: project.name,
               });
-            }}
-          >
+            }}>
             Download Metadata CSV Template
           </button>
           {this.state.validatingCSV && (
@@ -465,11 +456,8 @@ class MetadataUpload extends React.Component<
 
   renderCSVLocationsMenu = () => {
     const { metadata } = this.props;
-    const {
-      currentTab,
-      showMetadataCSVLocationsMenu,
-      hostGenomes,
-    } = this.state;
+    const { currentTab, showMetadataCSVLocationsMenu, hostGenomes } =
+      this.state;
 
     return currentTab === Tab.CSV_UPLOAD && showMetadataCSVLocationsMenu ? (
       <MetadataCSVLocationsMenu
@@ -505,8 +493,7 @@ class MetadataUpload extends React.Component<
                 analyticsEventData={{
                   projectId: this.props.project.id,
                   projectName: this.props.project.name,
-                }}
-              >
+                }}>
                 View Full Metadata Dictionary
               </ExternalLink>
               .
@@ -536,8 +523,7 @@ class MetadataUpload extends React.Component<
                 analyticsEventData={{
                   projectId: this.props.project.id,
                   projectName: this.props.project.name,
-                }}
-              >
+                }}>
                 View Metadata Dictionary
               </ExternalLink>
             </span>

@@ -1,12 +1,10 @@
 import cx from "classnames";
 import React from "react";
-
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import IconChartSmall from "~ui/icons/IconChartSmall";
 import IconListSmall from "~ui/icons/IconListSmall";
 import IconMapSmall from "~ui/icons/IconMapSmall";
 import { DISPLAY_PLQC } from "./constants";
-
 import cs from "./discovery_view_toggle.scss";
 
 // TODO: replace strings here with contants
@@ -34,8 +32,7 @@ const DiscoveryViewToggle = ({
             className={cs.menuItem}
             active={currentDisplay === display}
             onClick={() => onDisplaySwitch(display)}
-            key={`item-${display}`}
-          >
+            key={`item-${display}`}>
             {display === "map" && (
               <IconMapSmall
                 className={cx(cs.icon, currentDisplay === display && cs.active)}

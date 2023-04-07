@@ -66,8 +66,7 @@ const MetadataSection = ({
             onClick={e => {
               onEditToggle();
               e.stopPropagation();
-            }}
-          >
+            }}>
             Edit
           </div>
         ))}
@@ -81,8 +80,7 @@ const MetadataSection = ({
       onToggle={onToggle}
       open={open}
       toggleable={toggleable}
-      bottomContentPadding
-    >
+      bottomContentPadding>
       {children}
       {editing && (
         <div className={cs.controls}>
@@ -92,8 +90,7 @@ const MetadataSection = ({
             onClick={() => {
               onEditToggle();
               setHasSaved(false);
-            }}
-          >
+            }}>
             Done Editing
           </Button>
         </div>

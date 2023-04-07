@@ -1,8 +1,8 @@
 import d3 from "d3";
 import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
-import "d3-transition";
-import { select, event as currentEvent } from "d3-selection";
+import { event as currentEvent, select } from "d3-selection";
 import { timeout } from "d3-timer";
+import "d3-transition";
 import { get, isObject } from "lodash/fp";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
 import addSvgColorFilter from "../../utils/d3/svg";
@@ -520,11 +520,7 @@ export default class Dendogram {
       .duration(500)
       .attr("transform", (tick: $TSFixMe) => `translate(${tick.y},0)`);
 
-    ticks
-      .exit()
-      .transition(500)
-      .style("opacity", 0)
-      .remove();
+    ticks.exit().transition(500).style("opacity", 0).remove();
   }
 
   update() {
@@ -597,11 +593,7 @@ export default class Dendogram {
       .selectAll(".link")
       .data(this.root.descendants().slice(1), linkId);
 
-    link
-      .exit()
-      .transition(500)
-      .style("opacity", 0)
-      .remove();
+    link.exit().transition(500).style("opacity", 0).remove();
 
     link
       .enter()
@@ -631,11 +623,7 @@ export default class Dendogram {
       .selectAll(".node")
       .data(this.root.descendants(), nodeId);
 
-    node
-      .exit()
-      .transition(500)
-      .style("opacity", 0)
-      .remove();
+    node.exit().transition(500).style("opacity", 0).remove();
 
     node.raise();
 

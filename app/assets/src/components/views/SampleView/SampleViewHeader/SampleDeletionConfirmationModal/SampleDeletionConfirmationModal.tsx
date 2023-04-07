@@ -1,9 +1,7 @@
 import { Button } from "czifui";
 import React, { useState } from "react";
-
 import { ErrorButton } from "~/components/ui/controls/buttons";
 import Modal from "~ui/containers/Modal";
-
 import cs from "./sample_deletion_confirmation_modal.scss";
 
 interface SampleDeletionConfirmationModalProps {
@@ -34,8 +32,7 @@ const SampleDeletionConfirmationModal = ({
       open={open}
       onClose={onCancel}
       narrowest
-      sCloseIcon
-    >
+      sCloseIcon>
       <div className={cs.title}>Are you sure?</div>
       <div className={cs.text}>The sample will be deleted permanently.</div>
       <div className={cs.actions}>
@@ -43,8 +40,7 @@ const SampleDeletionConfirmationModal = ({
           <ErrorButton
             onClick={onConfirmClick}
             disabled={isDeleting}
-            startIcon={isDeleting ? "loading" : "trashCan"}
-          >
+            startIcon={isDeleting ? "loading" : "trashCan"}>
             {!isDeleting ? "Delete" : "Deleting..."}
           </ErrorButton>
         </div>
@@ -53,8 +49,7 @@ const SampleDeletionConfirmationModal = ({
             disabled={isDeleting}
             sdsStyle="rounded"
             sdsType="secondary"
-            onClick={onCancel}
-          >
+            onClick={onCancel}>
             Cancel
           </Button>
         </div>

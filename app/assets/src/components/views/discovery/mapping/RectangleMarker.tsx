@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-
 import cs from "./rectangle_marker.scss";
 
 interface RectangleMarkerProps {
@@ -24,8 +23,7 @@ class RectangleMarker extends React.Component<RectangleMarkerProps> {
         )}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        onClick={onClick}
-      >
+        onClick={onClick}>
         {title}
       </div>
     );

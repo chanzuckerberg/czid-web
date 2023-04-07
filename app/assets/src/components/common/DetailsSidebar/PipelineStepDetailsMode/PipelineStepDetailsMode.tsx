@@ -3,14 +3,12 @@ import moment from "moment";
 import React, { ReactNode } from "react";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
-
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import { Accordion } from "~/components/layout";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
 import Sample from "~/interface/sample";
-import { PipelineRun, FileList, InputFile, NameUrl } from "~/interface/shared";
-
+import { FileList, InputFile, NameUrl, PipelineRun } from "~/interface/shared";
 import cs from "./pipeline_step_details_mode.scss";
 
 export interface PSDProps {
@@ -112,9 +110,9 @@ const PipelineStepDetailsMode = ({
     const fileGroupList = inputFiles.map((inputFileGroup, i) => {
       return (
         <div className={cs.fileGroup} key={`inputFileGroup.fromStepName-${i}`}>
-          <div
-            className={cs.fileGroupHeader}
-          >{`From ${inputFileGroup.fromStepName || "Sample"} Step:`}</div>
+          <div className={cs.fileGroupHeader}>{`From ${
+            inputFileGroup.fromStepName || "Sample"
+          } Step:`}</div>
           {renderFileList(inputFileGroup.files)}
         </div>
       );
@@ -135,8 +133,7 @@ const PipelineStepDetailsMode = ({
         <Accordion
           className={cs.accordion}
           header={outputFilesHeader}
-          open={true}
-        >
+          open={true}>
           <div className={cx(cs.accordionContent, cs.fileGroup)}>
             <div className={cs.fileGroupHeader}>{`From ${stepName} Step:`}</div>
             {renderFileList(outputFiles)}
@@ -157,8 +154,7 @@ const PipelineStepDetailsMode = ({
               fileName: file.fileName,
               url: file.url,
             })
-          }
-        >
+          }>
           {file.fileName}
         </a>
       ) : (
@@ -188,8 +184,7 @@ const PipelineStepDetailsMode = ({
                 () => {},
                 "PipelineStepDetailsMode_resource-link_clicked",
                 { linkName: linkInfo.name, linkUrl: linkInfo.url },
-              )}
-            >
+              )}>
               {linkInfo.name}
             </a>
           </span>
@@ -200,8 +195,7 @@ const PipelineStepDetailsMode = ({
         <Accordion
           className={cs.accordion}
           header={resourcesHeader}
-          open={true}
-        >
+          open={true}>
           <div className={cx(cs.resourcesContainer, cs.accordionContent)}>
             {resourceLinks}
           </div>

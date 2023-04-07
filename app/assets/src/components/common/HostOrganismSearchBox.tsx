@@ -5,7 +5,6 @@ import {
   sortResults,
 } from "~/components/views/SampleUploadFlow/utils";
 import { HostGenome } from "~/interface/shared";
-
 import LiveSearchPopBox, { SearchResults } from "~ui/controls/LiveSearchPopBox";
 
 interface HostOrganismSearchBoxProps {

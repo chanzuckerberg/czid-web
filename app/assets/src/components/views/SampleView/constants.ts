@@ -158,14 +158,15 @@ export const THRESHOLDS = {
 };
 
 // We intend to eventually support backgrounds for long-read-mngs in future iterations of ONT
-export const BACKGROUND_DEPENDENT_READS_THRESHOLDS = SHORT_READS_THRESHOLDS.filter(
-  threshold =>
-    !NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS.some(
-      nbdThreshold =>
-        threshold.text === nbdThreshold.text &&
-        threshold.value === nbdThreshold.value,
-    ),
-);
+export const BACKGROUND_DEPENDENT_READS_THRESHOLDS =
+  SHORT_READS_THRESHOLDS.filter(
+    threshold =>
+      !NON_BACKGROUND_DEPENDENT_SHORT_READS_THRESHOLDS.some(
+        nbdThreshold =>
+          threshold.text === nbdThreshold.text &&
+          threshold.value === nbdThreshold.value,
+      ),
+  );
 
 export const TREE_METRICS = {
   [TABS.SHORT_READ_MNGS]: [

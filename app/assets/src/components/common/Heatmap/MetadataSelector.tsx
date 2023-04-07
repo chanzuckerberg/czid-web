@@ -4,10 +4,8 @@
 
 import React from "react";
 import { LabelVal } from "~/interface/shared";
-
 import { ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
-
 import cs from "./metadata_selector.scss";
 
 interface MetadataSelectorProps {
@@ -32,8 +30,7 @@ const MetadataSelector = ({
       horizontalOffset={5}
       verticalOffset={10}
       onClose={onMetadataSelectionClose}
-      position="bottom right"
-    >
+      position="bottom right">
       <div className={cs.metadataContainer}>
         <SearchBoxList
           options={metadataTypes}

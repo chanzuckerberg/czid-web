@@ -1,6 +1,5 @@
-import { get, throttle, upperFirst, size, map, uniq, flatten } from "lodash/fp";
+import { flatten, get, map, size, throttle, uniq, upperFirst } from "lodash/fp";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";

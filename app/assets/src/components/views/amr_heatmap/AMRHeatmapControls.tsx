@@ -1,10 +1,8 @@
 import cx from "classnames";
 import React from "react";
-
 import { Divider } from "~/components/layout";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis";
 import { Dropdown } from "~ui/controls/dropdowns";
-
 import cs from "./amr_heatmap_view.scss";
 
 interface AMRHeatmapControlsProps {

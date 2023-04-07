@@ -3,8 +3,7 @@ import { diff } from "deep-object-diff";
 import { groupBy } from "lodash/fp";
 import React from "react";
 import { PanZoom } from "react-easy-panzoom";
-
-import { withAnalytics, trackEvent } from "~/api/analytics";
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import { getGraph } from "~/api/pipelineViz";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -12,9 +11,8 @@ import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import { getURLParamString, parseUrlParams } from "~/helpers/url";
 import Sample from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
-import { IconCloseSmall, IconArrowPipelineStage } from "~ui/icons";
+import { IconArrowPipelineStage, IconCloseSmall } from "~ui/icons";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../SampleUploadFlow/constants";
-
 import cs from "./pipeline_viz.scss";
 import PipelineVizHeader from "./PipelineVizHeader";
 import PipelineVizStatusIcon from "./PipelineVizStatusIcon";
@@ -982,8 +980,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
             () => this.toggleStage(i),
             "PipelineViz_stage-expand-button_clicked",
             { stage: this.stageNames[i] },
-          )}
-        >
+          )}>
           {stageNameAndIcon}
         </div>
         {stageContainer}
@@ -1061,8 +1058,7 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
             maxZoom={zoomMax}
             zoomSpeed={zoomSpeed}
             disableScrollZoom={true}
-            ref={this.panZoomContainer}
-          >
+            ref={this.panZoomContainer}>
             <div className={cs.pipelineViz}>{stageContainers}</div>
           </PanZoom>
 

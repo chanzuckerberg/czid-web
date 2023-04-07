@@ -1,9 +1,9 @@
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import {
-  WORKFLOWS_BY_UPLOAD_SELECTIONS,
-  SEQUENCING_TECHNOLOGY_OPTIONS,
   NO_TECHNOLOGY_SELECTED,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
+  WORKFLOWS_BY_UPLOAD_SELECTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
 import { SampleFromApi } from "~/interface/shared";
 

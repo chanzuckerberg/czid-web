@@ -1,7 +1,7 @@
 import React from "react";
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
 import LaptopImageOne1x from "~/images/landing_page/laptop-image-1-1x.png";
 import LaptopImageOne2x from "~/images/landing_page/laptop-image-1-2x.png";
 import LaptopImageTwo1x from "~/images/landing_page/laptop-image-2-1x.png";

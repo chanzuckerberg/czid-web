@@ -1,10 +1,10 @@
 import React from "react";
 import { trackEvent } from "~/api/analytics";
-import { IconLoading, IconAlert } from "~/components/ui/icons";
+import { IconAlert, IconLoading } from "~/components/ui/icons";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import cs from "./consensus_genome_view.scss";
-import { SUCCEEDED_STATE, RUNNING_STATE, CREATED_STATE } from "./constants";
+import { CREATED_STATE, RUNNING_STATE, SUCCEEDED_STATE } from "./constants";
 import csSampleMessage from "./sample_message.scss";
 import SampleMessage from "./SampleMessage";
 
@@ -73,18 +73,12 @@ const SampleReportContent = ({
       );
     } else {
       // FAILED
-      const {
-        link,
-        linkText,
-        subtitle,
-        message,
-        status,
-        type,
-      } = sampleErrorInfo({
-        sample,
-        // @ts-expect-error Type 'string' is not assignable to type 'Record<string, never> | { label?: string; message: string; }'
-        error: workflowRun.input_error || {},
-      });
+      const { link, linkText, subtitle, message, status, type } =
+        sampleErrorInfo({
+          sample,
+          // @ts-expect-error Type 'string' is not assignable to type 'Record<string, never> | { label?: string; message: string; }'
+          error: workflowRun.input_error || {},
+        });
       return (
         <SampleMessage
           icon={<IconAlert className={cs.iconAlert} type={type} />}

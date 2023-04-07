@@ -1,6 +1,6 @@
 import cx from "classnames";
 import React from "react";
-import { IconCheckSmall, IconAlert, IconInfo, IconCloseSmall } from "~ui/icons";
+import { IconAlert, IconCheckSmall, IconCloseSmall, IconInfo } from "~ui/icons";
 import cs from "./notification.scss";
 
 interface NotificationProps {

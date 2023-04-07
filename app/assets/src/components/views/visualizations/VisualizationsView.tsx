@@ -1,7 +1,6 @@
 import { Icon } from "czifui";
 import { merge, pick } from "lodash/fp";
 import React from "react";
-
 import { SortDirectionType } from "react-virtualized";
 import { trackEvent } from "~/api/analytics";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
@@ -126,10 +125,8 @@ class VisualizationsView extends React.Component<VisualizationsViewProps> {
   visibilityIconRenderer = (visualization: $TSFixMe) => {
     if (!visualization) return <div className={cs.icon} />;
 
-    const {
-      visualization_type: visualizationType,
-      publicAccess,
-    } = visualization;
+    const { visualization_type: visualizationType, publicAccess } =
+      visualization;
     if (visualizationType === "heatmap") {
       return publicAccess ? (
         <Icon sdsIcon="gridPublic" sdsSize="xl" sdsType="static" />

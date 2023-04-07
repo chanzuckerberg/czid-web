@@ -1,8 +1,6 @@
 import React from "react";
-
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
-
 import cs from "./maintenance.scss";
 
 class Maintenance extends React.Component {

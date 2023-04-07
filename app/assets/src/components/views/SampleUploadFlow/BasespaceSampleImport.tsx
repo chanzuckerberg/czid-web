@@ -1,6 +1,5 @@
-import { set, isEmpty, map, get, head, find, isArray } from "lodash/fp";
+import { find, get, head, isArray, isEmpty, map, set } from "lodash/fp";
 import React from "react";
-
 import { withAnalytics } from "~/api/analytics";
 import {
   getBasespaceProjects,
@@ -11,7 +10,6 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { Project } from "~/interface/shared";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import Notification from "~ui/notifications/Notification";
-
 import cs from "./basespace_sample_import.scss";
 import { NO_TARGET_PROJECT_ERROR } from "./constants";
 import { openBasespaceOAuthPopup } from "./utils";
@@ -34,9 +32,7 @@ interface BasespaceSampleImportState {
   errorType?: "success" | "info" | "warning" | "error";
 }
 
-export default class BasespaceSampleImport extends React.Component<
-  BasespaceSampleImportProps
-> {
+export default class BasespaceSampleImport extends React.Component<BasespaceSampleImportProps> {
   state: BasespaceSampleImportState = {
     basespaceProjects: null,
     selectedProjectId: null,
@@ -255,8 +251,7 @@ export default class BasespaceSampleImport extends React.Component<
           <Notification
             type={errorType}
             displayStyle="flat"
-            className={cs.notification}
-          >
+            className={cs.notification}>
             {error}
           </Notification>
         )}

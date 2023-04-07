@@ -2,7 +2,6 @@ import cx from "classnames";
 import { filter, get, orderBy } from "lodash/fp";
 import memoize from "memoize-one";
 import React from "react";
-
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
@@ -16,7 +15,6 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LinkCS from "~ui/controls/link.scss";
 import RadioButton from "~ui/controls/RadioButton";
 import StatusLabel from "~ui/labels/StatusLabel";
-
 import { MICROBIOME_DOWNLOAD_METRIC_OPTIONS } from "../compare/SamplesHeatmapView/constants";
 import cs from "./bulk_download_modal_options.scss";
 import {
@@ -77,9 +75,7 @@ interface BulkDownloadModalOptionsProps {
   userIsCollaborator: boolean;
 }
 
-class BulkDownloadModalOptions extends React.Component<
-  BulkDownloadModalOptionsProps
-> {
+class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsProps> {
   sortTaxaWithReadsOptions = memoize(options =>
     orderBy(["sampleCount", "text"], ["desc", "asc"], options),
   );
@@ -342,11 +338,8 @@ class BulkDownloadModalOptions extends React.Component<
   };
 
   renderDownloadType = downloadType => {
-    const {
-      onSelect,
-      selectedDownloadTypeName,
-      handleHeatmapLink,
-    } = this.props;
+    const { onSelect, selectedDownloadTypeName, handleHeatmapLink } =
+      this.props;
 
     const selected = selectedDownloadTypeName === downloadType.type;
     const disabledMessage = this.getDisabledMessageForDownload(downloadType);
@@ -360,8 +353,7 @@ class BulkDownloadModalOptions extends React.Component<
           disabled && cs.disabled,
         )}
         key={downloadType.type}
-        onClick={() => !disabled && onSelect(downloadType.type)}
-      >
+        onClick={() => !disabled && onSelect(downloadType.type)}>
         <RadioButton
           disabled={disabled}
           className={cs.radioButton}
@@ -399,8 +391,7 @@ class BulkDownloadModalOptions extends React.Component<
                 href={BULK_DOWNLOAD_DOCUMENTATION_LINKS[downloadType.type]}
                 analyticsEventName={
                   ANALYTICS_EVENT_NAMES.CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED
-                }
-              >
+                }>
                 Learn More
               </ExternalLink>
             ) : (
@@ -424,8 +415,7 @@ class BulkDownloadModalOptions extends React.Component<
                       handleHeatmapLink();
                       e.stopPropagation();
                     }}
-                    onKeyDown={handleHeatmapLink}
-                  >
+                    onKeyDown={handleHeatmapLink}>
                     {" "}
                     heatmap
                   </span>

@@ -1,15 +1,13 @@
 import axios from "axios";
 import cx from "classnames";
 import { Icon } from "czifui";
-import React, { useState, useContext } from "react";
-
+import React, { useContext, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import Divider from "~/components/layout/Divider";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import ShareButton from "~ui/controls/buttons/ShareButton";
-
 import cs from "./project_settings_modal.scss";
 import PublicProjectConfirmationModal from "./PublicProjectConfirmationModal";
 import UserManagementForm from "./UserManagementForm";
@@ -72,8 +70,7 @@ const ProjectSettingsModal = ({
               projectName: project.name,
             },
           )}
-          className={cs.projectSettingsModal}
-        >
+          className={cs.projectSettingsModal}>
           <div className={cs.projectSettingsContent}>
             <div className={cs.title}>
               Share <span className={cs.highlight}>{project.name}</span>

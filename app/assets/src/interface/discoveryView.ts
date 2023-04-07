@@ -1,7 +1,7 @@
 import { RouteComponentProps } from "react-router-dom";
 import { SortDirectionType } from "react-virtualized";
 import { ThresholdConditions } from "~/components/utils/ThresholdMap";
-import { WORKFLOW_VALUES, WorkflowCount } from "~/components/utils/workflows";
+import { WorkflowCount, WORKFLOW_VALUES } from "~/components/utils/workflows";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import { FilterList } from "./samplesView";
 import { MustHaveId, Project } from "./shared";

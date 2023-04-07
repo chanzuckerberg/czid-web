@@ -3,7 +3,6 @@ import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { PROJECT_SHARING_HELP_LINK } from "~/components/utils/documentationLinks";
-
 import cs from "./project_info_icon_tooltip.scss";
 
 interface ProjectInfoIconTooltipProps
@@ -28,8 +27,7 @@ const ProjectInfoIconTooltip = (props: ProjectInfoIconTooltipProps) => {
         }
         analyticsEventData={{
           link: PROJECT_SHARING_HELP_LINK,
-        }}
-      >
+        }}>
         Learn more.
       </ExternalLink>
     </>

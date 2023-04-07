@@ -1,7 +1,5 @@
 import cx from "classnames";
-
 import React from "react";
-
 import { saveProjectDescription } from "~/api";
 import MetadataSection from "~/components/common/DetailsSidebar/SampleDetailsMode/MetadataSection";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
@@ -122,8 +120,7 @@ class ProjectDescription extends React.Component<
         savePending={this.state.savePending}
         alwaysShowEditLink={this.props.project.editable}
         open={true}
-        toggleable={true}
-      >
+        toggleable={true}>
         {this.state.editing ? (
           <div className={cs.descriptionContainer}>
             <Textarea
@@ -146,15 +143,13 @@ class ProjectDescription extends React.Component<
                 <div
                   className={cx(
                     shouldTruncateDescription && showLess && cs.truncated,
-                  )}
-                >
+                  )}>
                   {description}
                 </div>
                 {shouldTruncateDescription && (
                   <div
                     className={cs.showHide}
-                    onClick={this.toggleDisplayDescription}
-                  >
+                    onClick={this.toggleDisplayDescription}>
                     {showLess ? "Show More" : "Show Less"}
                   </div>
                 )}

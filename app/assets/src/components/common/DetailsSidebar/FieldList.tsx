@@ -1,9 +1,7 @@
 import cx from "classnames";
-
 import { get } from "lodash/fp";
 import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-
 import cs from "./field_list.scss";
 
 interface FieldListProps {

@@ -8,7 +8,6 @@
 
 import React, { useContext } from "react";
 import { Route, Switch } from "react-router-dom";
-
 import { UserContext } from "~/components/common/UserContext";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";

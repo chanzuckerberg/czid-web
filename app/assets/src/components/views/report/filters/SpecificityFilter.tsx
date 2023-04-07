@@ -1,5 +1,4 @@
 import React from "react";
-
 import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
 
 const SPECIFICITY_OPTIONS = [

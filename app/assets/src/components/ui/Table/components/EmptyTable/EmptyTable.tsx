@@ -22,8 +22,7 @@ function EmptyCells({ numOfColumns = 0 }: EmptyTableProps): JSX.Element {
           <div
             className={cs.cellContainer}
             key={index}
-            data-test-id="loading-cell"
-          >
+            data-test-id="loading-cell">
             {index ? (
               <div className={cx(cs.loadingBackgroundAnimation, cs.cell)} />
             ) : (

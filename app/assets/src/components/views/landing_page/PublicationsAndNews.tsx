@@ -1,7 +1,7 @@
 import React from "react";
 import { IconArrowRight } from "~ui/icons";
 import cs from "./PublicationsAndNews.scss";
-import { publicationsData, newsData } from "./PublicationsAndNewsData";
+import { newsData, publicationsData } from "./PublicationsAndNewsData";
 
 interface EntryListProps {
   className: string;
@@ -27,8 +27,7 @@ const EntryList = (props: EntryListProps) => {
                 <a
                   href={entry.publicationLink}
                   target="_blank"
-                  rel="noopener noreferrer"
-                >
+                  rel="noopener noreferrer">
                   <time className={cs.date}>
                     {entry.publicationDate} - {entry.publicationCompany}
                   </time>

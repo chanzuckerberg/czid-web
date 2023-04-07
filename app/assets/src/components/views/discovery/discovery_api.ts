@@ -1,11 +1,11 @@
-import { get, map, toLower, toUpper, replace } from "lodash/fp";
+import { get, map, replace, toLower, toUpper } from "lodash/fp";
 import {
   getProjectDimensions,
   getProjects,
   getSampleDimensions,
-  getSampleStats,
   getSamples,
   getSamplesLocations,
+  getSampleStats,
   getVisualizations,
   getWorkflowRuns,
 } from "~/api";

@@ -1,12 +1,10 @@
 import React from "react";
-
 import AnnotationLabel from "~/components/ui/labels/AnnotationLabel";
 import {
   ANNOTATION_HIT,
-  ANNOTATION_NOT_A_HIT,
   ANNOTATION_INCONCLUSIVE,
+  ANNOTATION_NOT_A_HIT,
 } from "~/components/views/SampleView/constants";
-
 import cs from "./annotation_preview.scss";
 
 interface AnnotationPreviewProps {

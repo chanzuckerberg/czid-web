@@ -4,10 +4,8 @@
 
 import cx from "classnames";
 import React from "react";
-
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { TooltipLocation } from "~/interface/shared";
-
 import cs from "./metadata_legend.scss";
 
 interface MetadataLegend {
@@ -25,8 +23,7 @@ const MetadataLegend = ({
       style={getTooltipStyle(tooltipLocation, {
         buffer: 20,
         below: true,
-      })}
-    >
+      })}>
       <div className={cs.legend}>
         {Object.keys(metadataColors)
           .sort()

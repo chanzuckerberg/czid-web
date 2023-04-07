@@ -24,8 +24,7 @@ const ImpactVRSection = () => {
                 className={cs.vrInlineLink}
                 href="https://youtu.be/dnf63o22CWA"
                 target="_blank"
-                rel="noopener noreferrer"
-              >
+                rel="noopener noreferrer">
                 CZ ID video
               </a>
               .
@@ -46,8 +45,7 @@ const ImpactVRSection = () => {
                 className={cs.vrInlineLink}
                 href="https://youtu.be/dnf63o22CWA"
                 target="_blank"
-                rel="noopener noreferrer"
-              >
+                rel="noopener noreferrer">
                 CZ ID video
               </a>
               .

@@ -1,20 +1,18 @@
 import { size } from "lodash/fp";
 import React, { useContext } from "react";
-
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_V1_FEATURE, ONT_V1_FEATURE } from "~/components/utils/features";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
-
 import {
-  UPLOAD_WORKFLOWS,
-  SEQUENCING_TECHNOLOGY_OPTIONS,
-  LOCAL_UPLOAD,
-  REMOTE_UPLOAD,
   BASESPACE_UPLOAD,
+  LOCAL_UPLOAD,
   NANOPORE,
+  REMOTE_UPLOAD,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
   Technology,
   UploadWorkflows,
+  UPLOAD_WORKFLOWS,
 } from "../../constants";
 import { AnalysisType } from "./components/AnalysisType";
 import { ConsensusGenomeSequencingPlatformOptions } from "./components/ConsensusGenomeSequencingPlatformOptions";

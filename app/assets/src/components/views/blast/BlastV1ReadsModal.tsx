@@ -2,7 +2,6 @@ import cx from "classnames";
 import { Tab, Tabs, Tooltip } from "czifui";
 import { size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { fetchLongestReadsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
@@ -11,7 +10,6 @@ import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import cs from "./blast_v1_reads_modal.scss";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
-
 import {
   BlastModalInfo,
   CountTypes,
@@ -47,9 +45,8 @@ const BlastV1ReadsModal = ({
   const [shortestAlignmentLength, setShortestAlignmentLength] = useState();
   const [longestAlignmentLength, setLongestAlignmentLength] = useState();
   const [reads, setReads] = useState([]);
-  const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState(
-    false,
-  );
+  const [showBlastRedirectionModal, setShowBlastRedirectModal] =
+    useState(false);
   const [blastUrl, setBlastUrl] = useState("");
   // BlastN will not have any count type tabs available since the option is only for NT contigs/reads.
   const [selectedCountTypeTab, setSelectedCountTypeTab] = useState<
@@ -65,17 +62,14 @@ const BlastV1ReadsModal = ({
       : CountTypes.NT;
 
   const fetchReads = async () => {
-    const {
-      reads,
-      shortestAlignmentLength,
-      longestAlignmentLength,
-    } = await fetchLongestReadsForTaxonId({
-      countType: currentCountType,
-      sampleId,
-      pipelineVersion,
-      taxonId,
-      taxonLevel,
-    });
+    const { reads, shortestAlignmentLength, longestAlignmentLength } =
+      await fetchLongestReadsForTaxonId({
+        countType: currentCountType,
+        sampleId,
+        pipelineVersion,
+        taxonId,
+        taxonLevel,
+      });
     const blastUrl = prepareBlastQuery({
       program: blastModalInfo?.selectedBlastType,
       sequences: reads.join(""),
@@ -149,20 +143,21 @@ const BlastV1ReadsModal = ({
 
   const handleRedirectionModalClose = () => setShowBlastRedirectModal(false);
 
-  const handleRedirectionModalContinue = shouldAutoRedirectBlastForCurrentSession => {
-    shouldAutoRedirectBlastForCurrentSession &&
-      autoRedirectBlastForCurrentSession();
+  const handleRedirectionModalContinue =
+    shouldAutoRedirectBlastForCurrentSession => {
+      shouldAutoRedirectBlastForCurrentSession &&
+        autoRedirectBlastForCurrentSession();
 
-    openUrlInNewTab(blastUrl);
+      openUrlInNewTab(blastUrl);
 
-    logBlastEvent({
-      analyticsEventName:
-        ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONTINUE_BUTTON_CLICKED,
-      automaticallyRedirectedToNCBI: shouldAutoRedirectBlastForCurrentSession,
-    });
-    showBlastNotification();
-    onClose();
-  };
+      logBlastEvent({
+        analyticsEventName:
+          ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONTINUE_BUTTON_CLICKED,
+        automaticallyRedirectedToNCBI: shouldAutoRedirectBlastForCurrentSession,
+      });
+      showBlastNotification();
+      onClose();
+    };
 
   const renderReadsIdentificationSection = () => (
     <div className={cs.readsIdentification}>
@@ -188,12 +183,10 @@ const BlastV1ReadsModal = ({
   );
 
   const renderCountTypeTabs = () => {
-    const shouldDisableNtTab = !blastModalInfo?.availableCountTypeTabsForReads.includes(
-      CountTypes.NT,
-    );
-    const shouldDisableNrTab = !blastModalInfo?.availableCountTypeTabsForReads.includes(
-      CountTypes.NR,
-    );
+    const shouldDisableNtTab =
+      !blastModalInfo?.availableCountTypeTabsForReads.includes(CountTypes.NT);
+    const shouldDisableNrTab =
+      !blastModalInfo?.availableCountTypeTabsForReads.includes(CountTypes.NR);
     let ntTab = (
       <Tab disabled={shouldDisableNtTab} label={`${CountTypes.NT} hits`}></Tab>
     );
@@ -224,8 +217,7 @@ const BlastV1ReadsModal = ({
         value={selectedCountTypeTab}
         onChange={(_, selectedTabIndex) =>
           setSelectedCountTypeTab(selectedTabIndex)
-        }
-      >
+        }>
         {ntTab}
         {nrTab}
       </Tabs>
@@ -242,8 +234,7 @@ const BlastV1ReadsModal = ({
           className={cx(
             cs.title,
             !blastModalInfo?.showCountTypeTabs && cs.spacing,
-          )}
-        >
+          )}>
           Confirm reads
         </div>
         {renderReadsIdentificationSection()}

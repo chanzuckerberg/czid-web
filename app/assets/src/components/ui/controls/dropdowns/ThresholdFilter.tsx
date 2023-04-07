@@ -1,7 +1,6 @@
-import { get, find } from "lodash/fp";
+import { find, get } from "lodash/fp";
 import React from "react";
 import { Grid } from "semantic-ui-react";
-
 import Input from "~/components/ui/controls/Input";
 import IconCloseSmall from "~/components/ui/icons/IconCloseSmall";
 import {
@@ -11,7 +10,6 @@ import {
   ThresholdFilterOperator,
 } from "~/interface/dropdown";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-
 import cs from "./threshold_filter.scss";
 
 interface ThresholdFilterProps {

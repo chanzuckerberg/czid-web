@@ -6,8 +6,7 @@ const CZIDLogoReversed = (props: IconProps) => {
     <svg
       className={props.className}
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 211.46 68.91"
-    >
+      viewBox="0 0 211.46 68.91">
       <g id="CZ_ID" data-name="CZ ID" fillRule="nonzero" fill="#FFFFFF">
         <path
           fill="#93c151"

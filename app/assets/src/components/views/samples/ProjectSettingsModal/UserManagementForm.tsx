@@ -1,12 +1,10 @@
 import axios from "axios";
 import cx from "classnames";
 import React, { useState } from "react";
-
 import { withAnalytics } from "~/api/analytics";
 import StringHelper from "~/helpers/StringHelper";
 import { Input } from "~ui/controls";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
-
 import cs from "./user_management_form.scss";
 
 interface UserManagementFormProps {

@@ -2,7 +2,6 @@ import cx from "classnames";
 import React, { useEffect, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-
 import { IconAlert, IconCloseSmall } from "~ui/icons";
 import cs from "./announcement_banner.scss";
 

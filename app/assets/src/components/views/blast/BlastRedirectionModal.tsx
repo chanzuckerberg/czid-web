@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-
 import { Image } from "semantic-ui-react";
-import { withAnalytics, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { NCBI_POLICIES_AND_DISCLAIMERS_LINK } from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import Checkbox from "~ui/controls/Checkbox";
-
 import cs from "./blast_redirection_modal.scss";
 
 interface BlastRedirectionModalProps {
@@ -63,8 +61,7 @@ const BlastRedirectionModal = ({
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED
             }
-            href={NCBI_POLICIES_AND_DISCLAIMERS_LINK}
-          >
+            href={NCBI_POLICIES_AND_DISCLAIMERS_LINK}>
             Policies and Disclaimers
           </ExternalLink>
           .

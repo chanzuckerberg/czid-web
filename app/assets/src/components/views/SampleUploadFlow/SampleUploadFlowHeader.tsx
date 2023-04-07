@@ -1,13 +1,11 @@
 import cx from "classnames";
 import { startCase } from "lodash/fp";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { Project, SampleFromApi } from "~/interface/shared";
 import Label from "~ui/labels/Label";
-
 import cs from "./sample_upload_flow.scss";
 
 const MENU_OPTIONS = [
@@ -33,9 +31,7 @@ interface SampleUploadFlowHeaderProps {
   stepsEnabled?: Record<string, boolean>;
 }
 
-class SampleUploadFlowHeader extends React.Component<
-  SampleUploadFlowHeaderProps
-> {
+class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps> {
   isStepEnabled = (step: string) => {
     return this.props.stepsEnabled[step];
   };
@@ -59,8 +55,7 @@ class SampleUploadFlowHeader extends React.Component<
                   Rather use our command-line interface?
                   <ExternalLink
                     href="/cli_user_instructions"
-                    className={cs.link}
-                  >
+                    className={cs.link}>
                     View CLI Instructions.
                   </ExternalLink>
                 </div>
@@ -96,8 +91,7 @@ class SampleUploadFlowHeader extends React.Component<
                       step: val.step,
                       text: val.text,
                     });
-                  }}
-                >
+                  }}>
                   <Label className={cs.circle} circular text={index + 1} />
                   <div className={cs.text}>{val.text}</div>
                 </div>

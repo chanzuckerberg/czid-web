@@ -1,7 +1,6 @@
 import cx from "classnames";
 import { Button, Icon, Tooltip } from "czifui";
-import React, { useState, useEffect } from "react";
-
+import React, { useEffect, useState } from "react";
 import { createProject } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -12,7 +11,6 @@ import Modal from "~ui/containers/Modal";
 import Input from "~ui/controls/Input";
 import RadioButton from "~ui/controls/RadioButton";
 import Textarea from "~ui/controls/Textarea";
-
 import cs from "./project_creation_modal.scss";
 
 const ACCESS_LEVEL = Object.freeze({
@@ -88,8 +86,7 @@ const ProjectCreationModal = ({
         sdsStyle="rounded"
         sdsType="primary"
         onClick={handleCreateProject}
-        data-testid="create-project-btn"
-      >
+        data-testid="create-project-btn">
         Create Project
       </Button>
     );
@@ -116,8 +113,7 @@ const ProjectCreationModal = ({
           <button
             className={cx(cs.sharingOption, "noStyleButton")}
             onClick={() => setAccessLevel(ACCESS_LEVEL.publicAccess)}
-            data-testid="public-project"
-          >
+            data-testid="public-project">
             <div className={cs.radioButtonAndProjectIcon}>
               <RadioButton
                 selected={accessLevel === ACCESS_LEVEL.publicAccess}
@@ -143,8 +139,7 @@ const ProjectCreationModal = ({
           <button
             className={cx(cs.sharingOption, "noStyleButton")}
             onClick={() => setAccessLevel(ACCESS_LEVEL.privateAccess)}
-            data-testid="private-project"
-          >
+            data-testid="private-project">
             <div className={cs.radioButtonAndProjectIcon}>
               <RadioButton
                 selected={accessLevel === ACCESS_LEVEL.privateAccess}
@@ -175,8 +170,7 @@ const ProjectCreationModal = ({
             <button
               className={cx(cs.infoLink, "noStyleButton")}
               onClick={() => setShowInfo(!showInfo)}
-              data-testid="more-less-info-btn"
-            >
+              data-testid="more-less-info-btn">
               {showInfo ? "Less Info" : "More Info"}
             </button>
           </div>
@@ -223,8 +217,7 @@ const ProjectCreationModal = ({
             sdsStyle="rounded"
             sdsType="secondary"
             onClick={onCancel}
-            data-testid="cancel-btn"
-          >
+            data-testid="cancel-btn">
             Cancel
           </Button>
         </div>

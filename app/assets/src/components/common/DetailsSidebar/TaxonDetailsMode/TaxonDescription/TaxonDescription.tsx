@@ -2,7 +2,6 @@ import cx from "classnames";
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
 import { WikipediaLicense } from "../WikipediaLicense";
-
 import cs from "./taxon_description.scss";
 
 const COLLAPSED_HEIGHT = 120;

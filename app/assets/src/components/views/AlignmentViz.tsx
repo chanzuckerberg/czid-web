@@ -4,8 +4,8 @@ import { Popup } from "semantic-ui-react";
 import { getAlignmentData } from "~/api";
 import { getSampleMetadata } from "~/api/metadata";
 import {
-  isPipelineFeatureAvailable,
   ASSEMBLY_FEATURE,
+  isPipelineFeatureAvailable,
 } from "~/components/utils/pipeline_versions";
 import AccessionViz from "../AccessionViz";
 import cs from "./alignment_viz.scss";

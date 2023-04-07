@@ -1,4 +1,4 @@
-import { get, postWithCSRF, deleteWithCSRF, putWithCSRF } from "./core";
+import { deleteWithCSRF, get, postWithCSRF, putWithCSRF } from "./core";
 
 const createSnapshot = (projectId: $TSFixMe) =>
   postWithCSRF(`/pub/projects/${projectId}/create`);

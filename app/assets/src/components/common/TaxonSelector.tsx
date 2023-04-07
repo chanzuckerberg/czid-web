@@ -1,10 +1,8 @@
 import { debounce } from "lodash/fp";
 import React from "react";
-
 import { getTaxaWithReadsSuggestions } from "~/api";
 import { ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
-
 import cs from "./Heatmap/metadata_selector.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
@@ -79,8 +77,7 @@ export default class TaxonSelector extends React.Component<TaxonSelectorProps> {
         horizontalOffset={5}
         verticalOffset={10}
         onClose={onTaxonSelectionClose}
-        position="top left"
-      >
+        position="top left">
         <div className={cs.metadataContainer}>
           <SearchBoxList
             options={options}

@@ -1,9 +1,7 @@
 import { Button } from "czifui";
 import React, { useState } from "react";
-
 import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-
 import MetadataUploadModal from "./MetadataUploadModal";
 import cs from "./project_upload_menu.scss";
 

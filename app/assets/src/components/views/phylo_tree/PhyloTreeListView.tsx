@@ -1,8 +1,7 @@
 import cx from "classnames";
 import { ButtonIcon, Icon, Tooltip } from "czifui";
-import { set, find, isUndefined } from "lodash/fp";
+import { find, isUndefined, set } from "lodash/fp";
 import React from "react";
-
 import {
   getPhyloTree,
   getPhyloTrees,
@@ -22,13 +21,13 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import {
-  showAppcue,
   PHYLO_TREE_LIST_VIEW_HELP_SIDEBAR,
   PHYLO_TREE_LIST_VIEW_MATRIX_HELP_SIDEBAR,
+  showAppcue,
 } from "~/components/utils/appcues";
 import {
-  PHYLO_TREE_LINK,
   MAIL_TO_HELP_LINK,
+  PHYLO_TREE_LINK,
 } from "~/components/utils/documentationLinks";
 import PairwiseDistanceMatrixErrorModal from "~/components/views/phylo_tree/PairwiseDistanceMatrixErrorModal";
 import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
@@ -42,7 +41,6 @@ import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import Link from "~ui/controls/Link";
 import { IconAlert, IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
-
 import Divider from "../../layout/Divider";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 import cs from "./phylo_tree_list_view.scss";
@@ -500,12 +498,8 @@ class PhyloTreeListView extends React.Component<
   };
 
   renderHeader = () => {
-    const {
-      currentTree,
-      phyloTrees,
-      selectedPhyloTreeNgId,
-      treeContainer,
-    } = this.state;
+    const { currentTree, phyloTrees, selectedPhyloTreeNgId, treeContainer } =
+      this.state;
     const clustermapSvgUrl = currentTree
       ? currentTree.clustermap_svg_url
       : false;
@@ -521,8 +515,7 @@ class PhyloTreeListView extends React.Component<
                   &nbsp;-&nbsp;
                   <button
                     className={cx("noStyle", cs.taxonName)}
-                    onClick={this.handleTaxonModeOpen}
-                  >
+                    onClick={this.handleTaxonModeOpen}>
                     {currentTree.tax_name}
                   </button>
                 </span>
@@ -608,8 +601,7 @@ class PhyloTreeListView extends React.Component<
         displayStyle="flat"
         onClose={this.hideOldTreeWarning}
         closeWithDismiss={false}
-        closeWithIcon={true}
-      >
+        closeWithIcon={true}>
         <div className={cs.notificationContent}>
           <span className={cs.warning}>
             This tree was created with a previous version of our phylogenetic
@@ -622,8 +614,7 @@ class PhyloTreeListView extends React.Component<
             href={PHYLO_TREE_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED
-            }
-          >
+            }>
             Learn more
           </ExternalLink>
           .
@@ -647,8 +638,7 @@ class PhyloTreeListView extends React.Component<
           href={"https://github.com/simonrharris/SKA"}
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED
-          }
-        >
+          }>
           SKA v1.0
         </ExternalLink>
         {!onlyMatrixAvailable && (
@@ -659,8 +649,7 @@ class PhyloTreeListView extends React.Component<
               href={"https://github.com/Cibiv/IQ-TREE"}
               analyticsEventName={
                 ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IQTREE_LINK_CLICKED
-              }
-            >
+              }>
               IQTree v1.6.1
             </ExternalLink>
           </span>

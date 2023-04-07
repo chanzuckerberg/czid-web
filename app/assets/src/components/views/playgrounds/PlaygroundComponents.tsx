@@ -1,10 +1,8 @@
 import React from "react";
-
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import HostOrganismMessage from "~/components/views/SampleUploadFlow/HostOrganismMessage";
 import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
-
 import cs from "./playground_components.scss";
 
 const TABS = ["Host Organism Message", "Geo Search Box"];

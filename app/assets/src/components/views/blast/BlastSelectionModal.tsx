@@ -1,20 +1,17 @@
 import cx from "classnames";
 import { Button, List, ListItem, Tooltip } from "czifui";
-import { compact, isEmpty, getOr } from "lodash/fp";
+import { compact, getOr, isEmpty } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React, { useState } from "react";
-
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Modal from "~ui/containers/Modal";
 import RadioButton from "~ui/controls/RadioButton";
-
 import cs from "./blast_selection_modal.scss";
-
 import {
-  BlastOption,
-  BLAST_OPTIONS,
   BlastMethods,
   BlastModalInfo,
+  BlastOption,
+  BLAST_OPTIONS,
 } from "./constants";
 
 interface BlastSelectionModalProps {
@@ -98,8 +95,7 @@ const BlastSelectionModal = ({
     let blastTitle = (
       <div
         key={blastType}
-        className={cx(cs.title, blastOptionIsDisabled && cs.disabled)}
-      >
+        className={cx(cs.title, blastOptionIsDisabled && cs.disabled)}>
         {blastType}
       </div>
     );
@@ -112,7 +108,8 @@ const BlastSelectionModal = ({
       );
     }
 
-    return <div
+    return (
+      <div
         className={cx(
           cs.selectableOption,
           blastOptionIsSelected && cs.selected,
@@ -123,8 +120,7 @@ const BlastSelectionModal = ({
         onClick={() =>
           blastOptionIsDisabled ? null : setBlastOptionSelected(blastType)
         }
-        key={nanoid()}
-      >
+        key={nanoid()}>
         <RadioButton
           disabled={blastOptionIsDisabled}
           selected={blastOptionIsSelected}
@@ -133,14 +129,15 @@ const BlastSelectionModal = ({
         <div className={cs.optionText}>
           {blastTitle}
           <div
-            className={cx(cs.description, blastOptionIsDisabled && cs.disabled)}
-          >
+            className={cx(
+              cs.description,
+              blastOptionIsDisabled && cs.disabled,
+            )}>
             {description}
             <ExternalLink
               className={cs.link}
               disabled={blastOptionIsDisabled}
-              href={learnMoreLink}
-            >
+              href={learnMoreLink}>
               Learn More
             </ExternalLink>
           </div>
@@ -154,7 +151,8 @@ const BlastSelectionModal = ({
             </List>
           )}
         </div>
-      </div>;
+      </div>
+    );
   };
 
   return (
@@ -171,8 +169,7 @@ const BlastSelectionModal = ({
               sdsStyle="rounded"
               sdsType="primary"
               disabled={!blastOptionSelected}
-              onClick={() => onContinue(getBlastModalInformation())}
-            >
+              onClick={() => onContinue(getBlastModalInformation())}>
               Continue
             </Button>
           </div>

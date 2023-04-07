@@ -3,21 +3,19 @@ import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import * as Sentry from "@sentry/react";
 import { defaultTheme } from "czifui";
+import "font-awesome/scss/font-awesome.scss";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
-
+import "semantic-ui-css/semantic.min.css";
+import "url-search-params-polyfill";
 import { UserContext } from "~/components/common/UserContext";
 import store from "~/redux/store";
 import { initalCache, typeDefs } from "./cache";
-
-import "url-search-params-polyfill";
-import "font-awesome/scss/font-awesome.scss";
-import "semantic-ui-css/semantic.min.css";
 import "./loader.scss";
-import "./styles/core.scss";
 import "./styles/appcues.scss";
+import "./styles/core.scss";
 
 // Sentry Basic Configuration Options: https://docs.sentry.io/platforms/javascript/guides/react/config/basics/
 Sentry.init({

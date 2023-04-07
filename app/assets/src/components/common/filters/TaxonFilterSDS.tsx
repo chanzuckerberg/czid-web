@@ -1,9 +1,9 @@
 import { Dropdown, DropdownPopper, LoadingIndicator } from "czifui";
-import { get, unionBy, debounce, size } from "lodash/fp";
+import { debounce, get, size, unionBy } from "lodash/fp";
 import React, { useEffect, useMemo, useState } from "react";
 import { getSearchSuggestions } from "~/api";
-
 import cs from "./taxon_filter_sds.scss";
+
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 600;
 const NO_SEARCH_RESULTS_TEXT = "No results";
 const MIN_SEARCH_LENGTH = 2;

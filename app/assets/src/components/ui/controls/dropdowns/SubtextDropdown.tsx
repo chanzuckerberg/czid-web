@@ -1,11 +1,9 @@
 import cx from "classnames";
 import React from "react";
-
 import { DropdownProps } from "semantic-ui-react";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import Dropdown from "./Dropdown";
-
 import cs from "./subtext_dropdown.scss";
 
 interface SubtextDropdownProps extends DropdownProps {
@@ -37,8 +35,7 @@ class SubtextDropdown extends React.Component<SubtextDropdownProps> {
         className={cx(cs.option, option.disabled && cs.disabledOption)}
         data-testid={`dropdown-${option.text
           .replace("/ /g", "")
-          .toLowerCase()}`}
-      >
+          .toLowerCase()}`}>
         <div className={cs.optionText}>{option.text}</div>
         <div className={cs.optionSubtext}>{option.subtext}</div>
       </BareDropdown.Item>

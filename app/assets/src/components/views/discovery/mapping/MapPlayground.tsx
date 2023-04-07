@@ -1,12 +1,10 @@
 import { get } from "lodash/fp";
 import React from "react";
 import { Marker } from "react-map-gl";
-
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
 import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
-
 import cs from "./map_playground.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;

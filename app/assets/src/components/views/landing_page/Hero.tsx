@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import HeroEmailForm from "~/components/views/landing_page/HeroEmailForm";
 import cs from "./Hero.scss";
 
@@ -56,8 +56,7 @@ const Hero = ({ autoAcctCreationEnabled }: HeroProps) => {
         <span
           className={`rotating-text ${fade ? cs.fade : ""} ${
             moveUp ? cs.moveUp : ""
-          }`}
-        >
+          }`}>
           Pathogen Detection
         </span>
       </h1>

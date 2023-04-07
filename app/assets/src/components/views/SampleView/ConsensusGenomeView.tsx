@@ -1,8 +1,7 @@
 import cx from "classnames";
-import { camelCase, getOr, find, isEmpty, size, get, isNil } from "lodash/fp";
+import { camelCase, find, get, getOr, isEmpty, isNil, size } from "lodash/fp";
 import memoize from "memoize-one";
-import React, { useEffect, useState, useRef } from "react";
-
+import React, { useEffect, useRef, useState } from "react";
 import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { formatPercent } from "~/components/utils/format";
@@ -34,7 +33,6 @@ import {
 } from "./constants";
 import SampleReportContent from "./SampleReportContent";
 
-
 interface ConsensusGenomeViewProps {
   link?: string;
   loadingResults?: boolean;
@@ -54,9 +52,8 @@ const ConsensusGenomeView = ({
 }: ConsensusGenomeViewProps) => {
   const coverageVizContainerRef = useRef();
   const [histogramTooltipData, setHistogramTooltipData] = useState(null);
-  const [histogramTooltipLocation, setHistogramTooltipLocation] = useState(
-    null,
-  );
+  const [histogramTooltipLocation, setHistogramTooltipLocation] =
+    useState(null);
   const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
     run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
   );
@@ -92,8 +89,7 @@ const ConsensusGenomeView = ({
         className={cx(
           cs.headerContainer,
           !shouldRenderCGDropdown && cs.removeBottomMargin,
-        )}
-      >
+        )}>
         {shouldRenderCGDropdown && renderConsensusGenomeDropdown()}
         {get("status", workflowRun) !== RUNNING_STATE && (
           <ExternalLink
@@ -102,8 +98,7 @@ const ConsensusGenomeView = ({
               !shouldRenderCGDropdown && cs.alignRight,
             )}
             href={computeHelpLink()}
-            analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
-          >
+            analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}>
             Learn more about consensus genomes <IconArrowRight />
           </ExternalLink>
         )}
@@ -125,8 +120,7 @@ const ConsensusGenomeView = ({
         {histogramTooltipLocation && histogramTooltipData && (
           <div
             style={getTooltipStyle(histogramTooltipLocation)}
-            className={cs.hoverTooltip}
-          >
+            className={cs.hoverTooltip}>
             <TooltipVizTable data={histogramTooltipData} />
           </div>
         )}
@@ -250,8 +244,7 @@ const ConsensusGenomeView = ({
                 accessionId,
                 taxonId,
                 sampleId: sample.id,
-              }}
-            >
+              }}>
               {accessionId}
             </ExternalLink>
           </div>
@@ -273,8 +266,7 @@ const ConsensusGenomeView = ({
     const helpLink = (
       <ExternalLink
         href={computeHelpLink()}
-        analyticsEventName={"ConsensusGenomeView_help-link_clicked"}
-      >
+        analyticsEventName={"ConsensusGenomeView_help-link_clicked"}>
         Learn more.
       </ExternalLink>
     );
@@ -285,8 +277,7 @@ const ConsensusGenomeView = ({
         <div className={cs.title}>
           How good is the coverage?
           {renderHelpIcon({
-            text:
-              "These metrics and chart help determine the coverage of the reference accession.",
+            text: "These metrics and chart help determine the coverage of the reference accession.",
             link: helpLink,
             analytics: {
               analyticsEventName:
@@ -357,8 +348,7 @@ const ConsensusGenomeView = ({
         href={computeHelpLink()}
         analyticsEventName={
           "ConsensusGenomeView_quality-metrics-help-link_clicked"
-        }
-      >
+        }>
         Learn more.
       </ExternalLink>
     );
@@ -367,8 +357,7 @@ const ConsensusGenomeView = ({
         <div className={cs.title}>
           Is my consensus genome complete?
           {renderHelpIcon({
-            text:
-              "These metrics help determine the quality of the reference accession.",
+            text: "These metrics help determine the quality of the reference accession.",
             link: helpLink,
             analytics: {
               analyticsEventName:

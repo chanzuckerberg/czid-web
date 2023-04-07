@@ -1,5 +1,4 @@
-import { find, isEmpty, map, toLower, pick, values } from "lodash/fp";
-
+import { find, isEmpty, map, pick, toLower, values } from "lodash/fp";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS, WORKFLOW_VALUES } from "~/components/utils/workflows";
 import { URL_FIELDS } from "~/components/views/SampleView/constants";
@@ -95,11 +94,10 @@ const getTempSelectedOptions = ({
   switch (source) {
     case HEATMAP_SOURCE_TEMP_PERSISTED_OPTIONS:
       // eslint-disable-next-line standard/computed-property-even-spacing
-      sampleViewFormattedSelectedOptions[
-        "thresholdsShortReads"
-      ] = transformHeatmapThresholdsFormatForSampleView(
-        tempSelectedOptions?.thresholdFilters,
-      );
+      sampleViewFormattedSelectedOptions["thresholdsShortReads"] =
+        transformHeatmapThresholdsFormatForSampleView(
+          tempSelectedOptions?.thresholdFilters,
+        );
       break;
     case DISCOVERY_VIEW_SOURCE_TEMP_PERSISTED_OPTIONS:
       sampleViewFormattedSelectedOptions["thresholdsShortReads"] =

@@ -14,8 +14,7 @@ const ImpactBottomCTA = () => {
           sdsType="primary"
           href="https://airtable.com/shrBGT42xVBR6JAVv"
           target="_blank"
-          rel="noreferrer"
-        >
+          rel="noreferrer">
           Request Access
         </Button>
       </div>

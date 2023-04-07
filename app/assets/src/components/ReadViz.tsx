@@ -70,10 +70,7 @@ function ReadViz({ metrics, name, refInfo, sequence }: ReadVizProps) {
 
     if (readInfo.metrics[6] > readInfo.metrics[7]) {
       reversed = 1;
-      sequence = sequence
-        .split("")
-        .reverse()
-        .join("");
+      sequence = sequence.split("").reverse().join("");
     }
 
     if (
@@ -166,8 +163,7 @@ function ReadViz({ metrics, name, refInfo, sequence }: ReadVizProps) {
           whiteSpace: "pre",
           fontFamily: "monospace",
           overflow: "scroll",
-        }}
-      >
+        }}>
         <table>
           <tbody>
             <tr>

@@ -48,7 +48,8 @@ export const COLUMN_HEADER_TOOLTIPS = {
     "Date on which sample was originally collected. For privacy reasons, only use month and/or year for human data.",
   collection_location_v2:
     "Location from which sample was originally collected. For privacy, we do not allow city-level data for human hosts.",
-  nucleotide_type: "Nucleotide type of sample will influence the pipeline. Nanopore does not support dRNA libraries.",
+  nucleotide_type:
+    "Nucleotide type of sample will influence the pipeline. Nanopore does not support dRNA libraries.",
   sample_type:
     "Tissue or site from which the sample was originally collected. Suggested list is dependent on host selection.",
   water_control: "Whether or not sample is a water control.",

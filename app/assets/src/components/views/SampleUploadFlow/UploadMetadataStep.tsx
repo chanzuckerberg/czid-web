@@ -1,17 +1,15 @@
 import cx from "classnames";
 import React, { useState } from "react";
-
 import { trackEvent } from "~/api/analytics";
 import { validateManualMetadataForNewSamples } from "~/api/metadata";
 import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
 import {
-  MetadataUploadProps,
   Issues,
+  MetadataUploadProps,
 } from "~/components/common/Metadata/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import Instructions from "~/components/views/samples/MetadataUploadModal/Instructions";
-
 import { HostGenome, MetadataBasic } from "~/interface/shared/";
 import cs from "./sample_upload_flow.scss";
 
@@ -102,8 +100,7 @@ const UploadMetadataStep = ({
           cs.uploadFlowStep,
           showInstructions && cs.hide,
           visible && cs.visible,
-        )}
-      >
+        )}>
         <div className={cs.flexContent}>
           <MetadataUpload
             onShowCSVInstructions={() => setShowInstructions(true)}

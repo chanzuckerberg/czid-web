@@ -1,10 +1,8 @@
 import React from "react";
-
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
-
 import cs from "./blast_notification.scss";
 import { NCBI_SUPPORT_CENTER_LINK } from "./constants";
 
@@ -23,8 +21,7 @@ const BlastNotification = ({ onClose }: BlastNotificationProps) => {
             ANALYTICS_EVENT_NAMES.BLAST_NOTIFICATION_NCBI_SUPPORT_CENTER_LINK_CLICKED
           }
           coloredBackground
-          href={NCBI_SUPPORT_CENTER_LINK}
-        >
+          href={NCBI_SUPPORT_CENTER_LINK}>
           NCBI Support Center
         </ExternalLink>
         .

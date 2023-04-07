@@ -21,8 +21,7 @@ class Sidebar extends React.Component<SidebarProps> {
       <SemanticSidebar
         {...props}
         animation="overlay"
-        className={cx(cs.sidebar, className, cs[this.props.direction])}
-      >
+        className={cx(cs.sidebar, className, cs[this.props.direction])}>
         {children}
         <div onClick={this.props.onClose}>
           <IconClose className={cs.closeIcon} />

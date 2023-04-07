@@ -1,6 +1,5 @@
 import React from "react";
 import MapGL, { NavigationControl } from "react-map-gl";
-
 import { limitToRange } from "~/components/utils/format";
 import cs from "./base_map.scss";
 
@@ -82,14 +81,8 @@ class BaseMap extends React.Component<BaseMapProps, BaseMapState> {
   };
 
   render() {
-    const {
-      banner,
-      mapTilerKey,
-      markers,
-      onClick,
-      popups,
-      tooltip,
-    } = this.props;
+    const { banner, mapTilerKey, markers, onClick, popups, tooltip } =
+      this.props;
     const { viewport } = this.state;
 
     const styleURL = `https://api.maptiler.com/maps/${MAP_STYLE_ID}/style.json?key=${mapTilerKey}`;
@@ -102,8 +95,7 @@ class BaseMap extends React.Component<BaseMapProps, BaseMapState> {
           onViewportChange={this.updateViewport}
           // Style prop applies to the container and all overlays
           style={{ position: "absolute" }}
-          {...viewport}
-        >
+          {...viewport}>
           {banner}
           {markers}
           {popups}

@@ -20,8 +20,7 @@ const DeleteErrorNotification = ({
       onClose={onClose}
       buttonText="dismiss"
       buttonOnClick={onClose}
-      slideDirection="right"
-    >
+      slideDirection="right">
       {typeof sampleCount === "number"
         ? `${sampleCount} ${workflowLabel} ${pluralize(
             "run",

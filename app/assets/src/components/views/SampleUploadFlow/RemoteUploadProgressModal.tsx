@@ -1,19 +1,18 @@
 import cx from "classnames";
-import { map, take, pick, size } from "lodash/fp";
+import { map, pick, size, take } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
   trackEvent,
   withAnalytics,
 } from "~/api/analytics";
-import { bulkUploadRemote, bulkUploadBasespace } from "~/api/upload";
+import { bulkUploadBasespace, bulkUploadRemote } from "~/api/upload";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
 import { Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { IconSuccess } from "~ui/icons";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
-
 import cs from "./upload_progress_modal.scss";
 import { addFlagsToSamples, redirectToProject } from "./upload_progress_utils";
 
@@ -177,8 +176,7 @@ const RemoteUploadProgressModal = ({
                 trackEvent(
                   ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
                 )
-              }
-            >
+              }>
               Contact us for help
             </a>
           </div>
@@ -250,8 +248,7 @@ const RemoteUploadProgressModal = ({
       className={cx(
         cs.uploadProgressModal,
         uploadComplete && cs.uploadComplete,
-      )}
-    >
+      )}>
       <div className={cs.header}>
         <ImgUploadPrimary className={cs.uploadImg} />
         {renderTitle()}

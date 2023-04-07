@@ -1,11 +1,10 @@
 import { Icon } from "czifui";
 import { isNull } from "lodash/fp";
 import React from "react";
-
 import {
+  ANALYTICS_EVENT_NAMES,
   trackEvent,
   withAnalytics,
-  ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
@@ -14,7 +13,6 @@ import { ConsensusGenomeData } from "~/interface/shared";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { SubtextDropdown } from "~ui/controls/dropdowns";
-
 import cs from "./consensus_genome_creation_modal.scss";
 
 interface ConsensusGenomeCreationModalProps {
@@ -47,11 +45,8 @@ export default class ConsensusGenomeCreationModal extends React.Component<
 
   getReferenceAccessions = () => {
     const { consensusGenomeData } = this.props;
-    const {
-      accessionData,
-      percentIdentity,
-      usedAccessions,
-    } = consensusGenomeData;
+    const { accessionData, percentIdentity, usedAccessions } =
+      consensusGenomeData;
 
     // If accessionData doesn't exist, just pass an empty list.
     if (!accessionData) {
@@ -146,8 +141,7 @@ export default class ConsensusGenomeCreationModal extends React.Component<
         onClose={withAnalytics(
           onClose,
           ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_CLOSED,
-        )}
-      >
+        )}>
         <div className={cs.title}>Generate Consensus Genome</div>
         <div className={cs.description}>
           Align non-host reads to the reference accession of choice to generate
@@ -157,8 +151,7 @@ export default class ConsensusGenomeCreationModal extends React.Component<
             href={VIRAL_CONSENSUS_GENOME_DOC_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_HELP_LINK_CLICKED
-            }
-          >
+            }>
             Learn more.
           </ExternalLink>
         </div>

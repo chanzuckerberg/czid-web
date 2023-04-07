@@ -1,8 +1,6 @@
 import React from "react";
-
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
-
 import cs from "./disable_sharing_confirmation_modal.scss";
 
 interface DisableSharingConfirmationModalProps {

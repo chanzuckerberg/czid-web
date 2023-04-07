@@ -35,8 +35,7 @@ export const FeatureFlagList = ({
                 sdsType="secondary"
                 isAllCaps={false}
                 onClick={() => handleCopyClick(flagName)}
-                className={cs.styledButton}
-              >
+                className={cs.styledButton}>
                 <div className={cs.iconWrapper}>
                   <Icon
                     sdsIcon={isEnabledIcon}

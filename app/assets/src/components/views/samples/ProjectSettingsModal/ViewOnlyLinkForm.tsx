@@ -1,13 +1,12 @@
 import cx from "classnames";
 import { Icon } from "czifui";
 import React from "react";
-
 import { getBackgrounds } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import {
   createSnapshot,
-  getSnapshotInfo,
   deleteSnapshot,
+  getSnapshotInfo,
   updateSnapshotBackground,
 } from "~/api/snapshot_links";
 import BasicPopup from "~/components/BasicPopup";
@@ -20,9 +19,7 @@ import HelpIcon from "~ui/containers/HelpIcon";
 import { Input } from "~ui/controls";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import Toggle from "~ui/controls/Toggle";
-
 import DisableSharingConfirmationModal from "./DisableSharingConfirmationModal";
-
 import cs from "./view_only_link_form.scss";
 
 interface ViewOnlyLinkFormProps {

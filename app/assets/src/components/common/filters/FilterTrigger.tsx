@@ -1,7 +1,6 @@
 import cx from "classnames";
 import { ButtonIcon } from "czifui";
 import React from "react";
-
 import cs from "./filter_trigger.scss";
 
 interface FilterTriggerProps {
@@ -19,8 +18,7 @@ const FilterTrigger = ({
 }: FilterTriggerProps) => (
   <div
     className={cx(cs.taxonFilterLabel, disabled && cs.disabled, extraStyling)}
-    onClick={onClick}
-  >
+    onClick={onClick}>
     {label}
     <ButtonIcon
       className={cs.dropdownArrow}

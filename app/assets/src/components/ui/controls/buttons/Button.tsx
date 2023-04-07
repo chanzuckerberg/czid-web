@@ -1,7 +1,6 @@
 import cx from "classnames";
 import React from "react";
 import { Button as BaseButton, StrictButtonProps } from "semantic-ui-react";
-
 import { IconArrowDownSmall } from "~ui/icons";
 
 const Button = ({
@@ -35,8 +34,7 @@ const Button = ({
         !rounded && "rectangular",
         circular && "circular",
         hasDropdownArrow && "has-dropdown-arrow",
-      )}
-    >
+      )}>
       {content}
       {hasDropdownArrow && (
         <IconArrowDownSmall className="icon-dropdown-arrow" />

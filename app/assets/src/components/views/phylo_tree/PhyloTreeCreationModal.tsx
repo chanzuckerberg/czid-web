@@ -13,7 +13,6 @@ import React from "react";
 import Moment from "react-moment";
 import { Link as RouterLink } from "react-router-dom";
 import { defaultTableRowRenderer } from "react-virtualized";
-
 import {
   createPhyloTree,
   getNewPhyloTreePipelineRunIds,
@@ -47,7 +46,6 @@ import DataTable from "../../visualizations/table/DataTable";
 import { COLUMNS } from "./ColumnConfiguration";
 import cs from "./phylo_tree_creation_modal.scss";
 import PhyloTreeChecks from "./PhyloTreeChecks";
-
 
 interface PhyloTreeCreationModalProps {
   admin?: number;
@@ -229,8 +227,7 @@ class PhyloTreeCreationModal extends React.Component<
               { treeId: row.id },
             );
           }}
-          to={`/phylo_tree_ngs/${row.id}`}
-        >
+          to={`/phylo_tree_ngs/${row.id}`}>
           View
         </RouterLink>
       ) : (
@@ -239,8 +236,7 @@ class PhyloTreeCreationModal extends React.Component<
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_VIEW_PHYLO_TREE_LINK_CLICKED
           }
-          href={`/phylo_trees/index?treeId=${row.id}`}
-        >
+          href={`/phylo_trees/index?treeId=${row.id}`}>
           View
         </Link>
       ),
@@ -253,24 +249,17 @@ class PhyloTreeCreationModal extends React.Component<
   };
 
   loadProjectPipelineRunIds = async () => {
-    const {
-      taxonId,
-      projectId,
-      treeName,
-      projectPipelineRunsLoaded,
-    } = this.state;
+    const { taxonId, projectId, treeName, projectPipelineRunsLoaded } =
+      this.state;
 
     // Don't refetch the runs if they've already been loaded.
     if (!projectPipelineRunsLoaded) {
-      const {
-        pipelineRunIds,
-        coverageBreadths,
-        runsWithContigs,
-      } = await getNewPhyloTreePipelineRunIds({
-        getAdditionalSamples: false,
-        projectId,
-        taxId: taxonId,
-      });
+      const { pipelineRunIds, coverageBreadths, runsWithContigs } =
+        await getNewPhyloTreePipelineRunIds({
+          getAdditionalSamples: false,
+          projectId,
+          taxId: taxonId,
+        });
 
       this.setState({
         projectPipelineRunIds: new Set(reverse(pipelineRunIds)),
@@ -298,15 +287,13 @@ class PhyloTreeCreationModal extends React.Component<
 
     // Don't refetch the runs if they've already been loaded.
     if (!otherPipelineRunsLoaded) {
-      const {
-        pipelineRunIds,
-        coverageBreadths,
-      } = await getNewPhyloTreePipelineRunIds({
-        getAdditionalSamples: true,
-        projectId,
-        taxId: taxonId,
-        filter: otherSamplesFilter,
-      });
+      const { pipelineRunIds, coverageBreadths } =
+        await getNewPhyloTreePipelineRunIds({
+          getAdditionalSamples: true,
+          projectId,
+          taxId: taxonId,
+          filter: otherSamplesFilter,
+        });
 
       this.setState({
         otherPipelineRunIds: new Set(reverse(pipelineRunIds)),
@@ -877,8 +864,7 @@ class PhyloTreeCreationModal extends React.Component<
             href={PHYLO_TREE_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_LOW_COVERAGE_WARNING_BANNER_HELP_LINK_CLICKED
-            }
-          >
+            }>
             Learn more
           </ExternalLink>
         </Notification>
@@ -911,8 +897,7 @@ class PhyloTreeCreationModal extends React.Component<
           className="wizard__page-1"
           skipDefaultButtons={true}
           title="Phylogenetic Trees"
-          small
-        >
+          small>
           <div className="wizard__page-1__subtitle">{this.state.taxonName}</div>
           <div className="wizard__page-1__table">
             {this.state.phyloTreesLoaded && (
@@ -930,8 +915,7 @@ class PhyloTreeCreationModal extends React.Component<
                 trackEvent(
                   ANALYTICS_EVENT_NAMES.PHYLO_TREE_CREATION_MODAL_CREATE_NEW_TREE_BUTTON_CLICKED,
                 )
-              }
-            >
+              }>
               + Create new tree
             </Wizard.Action>
           </div>
@@ -943,8 +927,7 @@ class PhyloTreeCreationModal extends React.Component<
           // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; key: string; title: s... Remove this comment to see the full error message
           title="Select project and taxon"
           onLoad={this.loadProjectSearchContext}
-          onContinue={this.canContinueWithTaxonAndProject}
-        >
+          onContinue={this.canContinueWithTaxonAndProject}>
           <div className="wizard__page-2__subtitle" />
           <div className="wizard__page-2__searchbar">
             <div className={cs.searchTitle}>Project</div>
@@ -989,8 +972,7 @@ class PhyloTreeCreationModal extends React.Component<
           // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; key: string; title: s... Remove this comment to see the full error message
           title={`Name phylogenetic tree and select samples from project '${this.state.projectName}'`}
           onLoad={this.loadPipelineRunIds}
-          onContinueAsync={this.canContinueWithTreeName}
-        >
+          onContinueAsync={this.canContinueWithTreeName}>
           <div className="wizard__page-3__subtitle">{this.state.taxonName}</div>
           <div className="wizard__page-3__form">
             <div>
@@ -1051,8 +1033,7 @@ class PhyloTreeCreationModal extends React.Component<
         <Wizard.Page
           key="wizard__page_4"
           // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element[]; key: string; title: s... Remove this comment to see the full error message
-          title={`Add additional samples from CZ ID that contain ${this.state.taxonName}?`}
-        >
+          title={`Add additional samples from CZ ID that contain ${this.state.taxonName}?`}>
           <div className="wizard__page-4__subtitle" />
           <div className="wizard__page-4__searchbar">
             <div className="wizard__page-4__searchbar__container">
@@ -1144,8 +1125,7 @@ class PhyloTreeCreationModal extends React.Component<
               finish: "Create Tree",
             }}
             wizardType="PhyloTreeCreationWizard"
-            ref={this.wizard}
-          >
+            ref={this.wizard}>
             {this.getPages()}
           </Wizard>
         ) : (

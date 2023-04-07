@@ -1,13 +1,11 @@
 import cx from "classnames";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { TooltipVizTable } from "~ui/containers";
-
 import cs from "./amr_heatmap_vis.scss";
 
 const VIEW_LEVEL_ALLELES = "allele";
@@ -414,8 +412,7 @@ export default class AMRHeatmapVis extends React.Component<
         style={getTooltipStyle(tooltipLocation, {
           buffer: 20,
           below: true,
-        })}
-      >
+        })}>
         <TooltipVizTable data={nodeHoverInfo} />
       </div>
     );

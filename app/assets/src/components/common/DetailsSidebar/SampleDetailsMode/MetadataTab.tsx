@@ -1,11 +1,9 @@
 import { mapValues } from "lodash/fp";
 import React, { useMemo, useState } from "react";
-
 import { trackEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
-
 import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
 import {
   Metadata,
@@ -18,6 +16,7 @@ import { SAMPLE_ADDITIONAL_INFO } from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 import { AdditionalInfo } from "./SampleDetailsMode";
+
 interface MetadataTabProps {
   metadata: Metadata;
   metadataTypes: MetadataTypes;
@@ -240,8 +239,7 @@ const MetadataTab = ({
           onEditToggle={() => toggleSectionEdit(section)}
           editing={sectionEditing[section.name]}
           title={section.name}
-          savePending={savePending}
-        >
+          savePending={savePending}>
           {renderMetadataSectionContent(section)}
         </MetadataSection>
       ))}

@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-
 import cs from "./x_axis.scss";
 
 interface XAxisProps {
@@ -52,8 +51,7 @@ export default function XAxis({
             key={value}
             textAnchor={"middle"}
             dominantBaseline={"middle"}
-            transform={`translate(0, ${height / 2})`}
-          >
+            transform={`translate(0, ${height / 2})`}>
             {formatted}
           </text>
         </g>

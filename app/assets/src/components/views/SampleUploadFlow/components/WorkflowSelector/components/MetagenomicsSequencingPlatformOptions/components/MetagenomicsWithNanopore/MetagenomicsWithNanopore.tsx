@@ -3,8 +3,8 @@ import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import {
-  MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
   CONCAT_FILES_HELP_LINK,
+  MNGS_NANOPORE_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
 import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../../../constants";
@@ -46,8 +46,7 @@ const MetagenomicsWithNanopore = ({
               ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_NANOPORE_PIPELINE_LINK_CLICKED
             }
             href={MNGS_NANOPORE_PIPELINE_GITHUB_LINK}
-            disabled={isDisabled}
-          >
+            disabled={isDisabled}>
             here
           </ExternalLink>
           .{" "}

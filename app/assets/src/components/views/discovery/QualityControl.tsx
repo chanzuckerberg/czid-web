@@ -1,12 +1,11 @@
 import { useQuery } from "@apollo/client";
 import cx from "classnames";
 import { Icon } from "czifui";
-
 import d3 from "d3";
 import {
   ceil,
-  compact,
   cloneDeep,
+  compact,
   debounce,
   flatten,
   get,
@@ -19,7 +18,7 @@ import {
 import memoize from "memoize-one";
 import { nanoid } from "nanoid";
 import React, { useEffect, useRef, useState } from "react";
-import { trackEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { GET_SAMPLES_READS_STATS_QUERY } from "~/api/samples_reads_stats";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import { SampleDetailsModeProps } from "~/components/common/DetailsSidebar/SampleDetailsMode";
@@ -43,17 +42,17 @@ import { TooltipVizTable } from "~ui/containers";
 import Notification from "~ui/notifications/Notification";
 import { QUALITY_CONTROL_QUERY } from "./api/quality_control";
 import {
+  BAR_CLICK_FILL_COLOR,
   BAR_FILL_COLOR,
   HOVER_BAR_FILL_COLOR,
-  BAR_CLICK_FILL_COLOR,
-  READS_LOST_STACK_COLORS,
-  READS_REMAINING_COLOR,
-  READS_REMAINING,
   HUMAN_READABLE_STEP_NAMES,
-  MIN_NUM_BINS,
   MIN_BIN_WIDTH,
+  MIN_NUM_BINS,
   MISSING_INSERT_SIZE_WARNING,
   MODERN_HOST_FILTERING_SHORT_READ_MNGS_VERSION,
+  READS_LOST_STACK_COLORS,
+  READS_REMAINING,
+  READS_REMAINING_COLOR,
 } from "./constants";
 import InfoBanner from "./InfoBanner";
 import cs from "./quality_control.scss";
@@ -108,10 +107,8 @@ function QualityControl({
   handleBarClick,
 }: QualityControlProps) {
   const [loading, setLoading] = useState(true);
-  const [
-    showProcessingSamplesMessage,
-    setShowProcessingSamplesMessage,
-  ] = useState(true);
+  const [showProcessingSamplesMessage, setShowProcessingSamplesMessage] =
+    useState(true);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarParams, setSidebarParams] = useState<SampleDetailsModeProps>({
     sampleId: null,
@@ -170,12 +167,8 @@ function QualityControl({
 
   const redrawHistograms = () => {
     if (!loading && validSamples.length > 0) {
-      const {
-        totalReadsBins,
-        qcPercentBins,
-        dcrBins,
-        meanInsertSizeBins,
-      } = getBins();
+      const { totalReadsBins, qcPercentBins, dcrBins, meanInsertSizeBins } =
+        getBins();
 
       const totalReadsFormat = d => {
         if (d === 0) {
@@ -236,9 +229,8 @@ function QualityControl({
     });
     const samplesReadsStats = result.data.sampleReadsStats.sampleReadsStats;
 
-    const { categories, legendColors, _readsLostData } = stackReadsLostData(
-      samplesReadsStats,
-    );
+    const { categories, legendColors, _readsLostData } =
+      stackReadsLostData(samplesReadsStats);
     const chartColors = legendColors.map(({ color }) => color);
 
     setValidSamples(data.validSamples);
@@ -494,7 +486,10 @@ function QualityControl({
       while (sampleIndex < data.length) {
         const value = data[sampleIndex].value;
         const sampleId = data[sampleIndex].id;
-        if ((x0 <= value && value < x1) || (i === numBins - 1 && value === x1)) {
+        if (
+          (x0 <= value && value < x1) ||
+          (i === numBins - 1 && value === x1)
+        ) {
           /* If the value falls within the bin, include it
              -OR-
              If this is the last bin and the value is equal to bin's upper limit,
@@ -837,8 +832,7 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
                         );
-                      }}
-                    >
+                      }}>
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -881,8 +875,7 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
                         );
-                      }}
-                    >
+                      }}>
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -925,8 +918,7 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
                         );
-                      }}
-                    >
+                      }}>
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -963,8 +955,7 @@ function QualityControl({
                 className={cx(
                   cs.subtitle,
                   showMeanInsertSizeWarning && cs.messageIncluded,
-                )}
-              >
+                )}>
                 Mean Insert Size
                 <ColumnHeaderTooltip
                   trigger={
@@ -978,8 +969,7 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
                         );
-                      }}
-                    >
+                      }}>
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -1012,8 +1002,7 @@ function QualityControl({
                             trackEvent(
                               ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
                             );
-                          }}
-                        >
+                          }}>
                           <Icon
                             sdsIcon="infoCircle"
                             sdsSize="s"
@@ -1105,8 +1094,7 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
                         );
-                      }}
-                    >
+                      }}>
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -1192,8 +1180,7 @@ function QualityControl({
             displayStyle="flat"
             onClose={hideprocessingSamplesMessage}
             closeWithDismiss={false}
-            closeWithIcon={true}
-          >
+            closeWithIcon={true}>
             {runningSamples.length}{" "}
             {runningSamples.length === 1 ? "sample is" : "samples are"} still
             being processed.
@@ -1257,8 +1244,7 @@ function QualityControl({
         {tooltipLocation && histogramTooltipData && (
           <div
             style={getTooltipStyle(tooltipLocation)}
-            className={cx(cs.hoverTooltip, tooltipClass)}
-          >
+            className={cx(cs.hoverTooltip, tooltipClass)}>
             <TooltipVizTable data={histogramTooltipData} />
           </div>
         )}

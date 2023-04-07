@@ -1,14 +1,10 @@
 import cx from "classnames";
 import React from "react";
-
 import Accordion from "~/components/layout/Accordion";
 import Notification from "~ui/notifications/Notification";
-
 import cs from "./accordion_notification.scss";
 
-export default class AccordionNotification extends React.Component<
-  AccordionNotificationProps
-> {
+export default class AccordionNotification extends React.Component<AccordionNotificationProps> {
   static defaultProps: AccordionNotificationProps;
   render() {
     const {
@@ -32,8 +28,7 @@ export default class AccordionNotification extends React.Component<
         open={open}
         toggleable={toggleable}
         className={cx(cs.listContainer, cs[type])}
-        toggleArrowAlignment="topRight"
-      >
+        toggleArrowAlignment="topRight">
         {content && <div className={cs.messageContainer}>{content}</div>}
       </Accordion>
     );
@@ -44,8 +39,7 @@ export default class AccordionNotification extends React.Component<
           type={type}
           displayStyle={displayStyle}
           className={cx(cs.notificationContainer, notificationClassName)}
-          onClose={onClose}
-        >
+          onClose={onClose}>
           {accordion}
         </Notification>
       </div>

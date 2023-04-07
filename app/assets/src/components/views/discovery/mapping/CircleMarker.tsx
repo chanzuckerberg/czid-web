@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-
 import cs from "./circle_marker.scss";
 
 interface CircleMarkerProps {
@@ -20,8 +19,7 @@ class CircleMarker extends React.Component<CircleMarkerProps> {
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         // Place the viewBox over the point
-        style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
-      >
+        style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}>
         <circle
           className={cx(
             cs.circle,

@@ -72,8 +72,8 @@ class UrlQueryParser {
   stringifyValue(value: object, type: "object" | string) {
     if (type === "object") {
       return !value || Object.keys(value).length === 0
-      ? undefined
-      : JSON.stringify(value);
+        ? undefined
+        : JSON.stringify(value);
     }
     return value;
   }

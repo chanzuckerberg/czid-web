@@ -1,8 +1,7 @@
 import cx from "classnames";
 import { DefaultDropdownMenuOption, Dropdown, Tooltip } from "czifui";
-import { isEmpty, isEqual, find, forEach, pick, reject } from "lodash/fp";
+import { find, forEach, isEmpty, isEqual, pick, reject } from "lodash/fp";
 import React from "react";
-
 import {
   ANALYTICS_EVENT_NAMES,
   trackEvent,
@@ -33,7 +32,6 @@ import {
 } from "../SampleView/constants";
 import { ANNOTATION_FILTER_OPTIONS, TAB_SAMPLES } from "./constants";
 import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
-
 import cs from "./discovery_filters.scss";
 
 interface DiscoveryFiltersProps {
@@ -335,8 +333,8 @@ class DiscoveryFilters extends React.Component<
 
   renderTaxonFilterTags = () => {
     const selectedTaxa = this.state[KEY_TAXON_SELECTED];
-    const thresholdFilterDisabled = this.configForWorkflow[this.props.workflow]
-      .disableTaxonThresholdFilter;
+    const thresholdFilterDisabled =
+      this.configForWorkflow[this.props.workflow].disableTaxonThresholdFilter;
     if (isEmpty(selectedTaxa)) return;
 
     return (
@@ -460,8 +458,7 @@ class DiscoveryFilters extends React.Component<
         title={`Not available for ${this.configForWorkflow[workflow].tooltipTitle}.`}
         classes={{
           tooltip: cs.disabledTooltip,
-        }}
-      >
+        }}>
         <span>{filter}</span>
       </Tooltip>
     );
@@ -520,8 +517,7 @@ class DiscoveryFilters extends React.Component<
                 cs.filterContainer,
                 hasTaxonThresholdFilterFeature &&
                   cs.taxonThresholdFilterContainer,
-              )}
-            >
+              )}>
               {hasTaxonThresholdFilterFeature ? (
                 this.renderTaxonThresholdFilter({
                   disabled: taxonFilterDisabled,

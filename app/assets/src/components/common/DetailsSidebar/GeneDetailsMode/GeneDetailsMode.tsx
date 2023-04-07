@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-
 import { getOntology } from "~/api/amr";
-
 import { FooterLinks } from "./FooterLinks";
 import cs from "./gene_details_mode.scss";
 import { Ontology } from "./Ontology";
@@ -30,9 +28,8 @@ export interface OntologyType {
 const GeneDetailsMode = ({ geneName }: GDMProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [wasCardEntryFound, setWasCardEntryFound] = useState<boolean>(false);
-  const [wasOntologyInfoFound, setWasOntologyInfoFound] = useState<boolean>(
-    false,
-  );
+  const [wasOntologyInfoFound, setWasOntologyInfoFound] =
+    useState<boolean>(false);
   const [ontology, setOntology] = useState<OntologyType>({
     accession: "",
     label: "",

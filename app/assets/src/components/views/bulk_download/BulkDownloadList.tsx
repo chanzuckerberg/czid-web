@@ -2,15 +2,14 @@ import cx from "classnames";
 import { some } from "lodash/fp";
 import React from "react";
 import { SortDirection } from "react-virtualized";
-import { withAnalytics, trackEvent } from "~/api/analytics";
-
+import { trackEvent, withAnalytics } from "~/api/analytics";
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
 import { selectedBulkDownloadVar } from "~/cache/initialCache";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
-import { ViewHeader, NarrowContainer, Divider } from "~/components/layout";
+import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
 import { APOLLO_CLIENT_STATE_MANAGEMENT } from "~/components/utils/features";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Table } from "~/components/visualizations/table";
@@ -18,7 +17,6 @@ import { BulkDownloadDetails } from "~/interface/shared";
 import ImgDownloadPrimary from "~ui/illustrations/ImgDownloadPrimary";
 import Notification from "~ui/notifications/Notification";
 import { openUrl } from "~utils/links";
-
 import cs from "./bulk_download_list.scss";
 import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
 
@@ -243,8 +241,7 @@ class BulkDownloadList extends React.Component {
             <Notification
               type="warning"
               displayStyle="flat"
-              className={cs.autoUpdateWarning}
-            >
+              className={cs.autoUpdateWarning}>
               This page is no longer auto-updating.{" "}
               <span onClick={this.initiateAutoUpdate} className={cs.link}>
                 Click here to see additional updates.
@@ -275,8 +272,7 @@ class BulkDownloadList extends React.Component {
           cs.bulkDownloadList,
           this.isEmpty() && cs.empty,
           this.isLoading() && cs.loading,
-        )}
-      >
+        )}>
         <NarrowContainer>
           <ViewHeader className={cs.viewHeader}>
             <ViewHeader.Content>

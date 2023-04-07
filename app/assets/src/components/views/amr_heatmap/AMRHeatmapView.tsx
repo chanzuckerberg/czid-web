@@ -1,7 +1,6 @@
 import { Callout } from "czifui";
 import React from "react";
-import { StickyContainer, Sticky } from "react-sticky";
-
+import { Sticky, StickyContainer } from "react-sticky";
 import { getAMRCounts } from "~/api/amr";
 import { trackEvent } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
@@ -9,7 +8,7 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import ErrorBoundary from "~/components/ErrorBoundary";
-import { ViewHeader, NarrowContainer } from "~/components/layout";
+import { NarrowContainer, ViewHeader } from "~/components/layout";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { AMR_DEPRECATED_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V1_FEATURE } from "~/components/utils/features";
@@ -21,7 +20,6 @@ import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControl
 import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { createCSVObjectURL } from "~utils/csv";
-
 import cs from "./amr_heatmap_view.scss";
 
 const METRICS = [
@@ -116,9 +114,8 @@ export default class AMRHeatmapView extends React.Component<
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
     const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
     const sampleLabels = this.extractSampleLabels(samplesWithAMRCounts);
-    const [geneLabels, alleleLabels] = this.extractGeneAndAlleleLabels(
-      samplesWithAMRCounts,
-    );
+    const [geneLabels, alleleLabels] =
+      this.extractGeneAndAlleleLabels(samplesWithAMRCounts);
     const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
     this.setState({
       rawSampleData,
@@ -351,8 +348,9 @@ export default class AMRHeatmapView extends React.Component<
           const row = [
             `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
               amrCount.coverage
-            },${amrCount.depth},${amrCount.rpm || "N/A"},${amrCount.dpm ||
-              "N/A"},${amrCount.total_reads || "N/A"}`,
+            },${amrCount.depth},${amrCount.rpm || "N/A"},${
+              amrCount.dpm || "N/A"
+            },${amrCount.total_reads || "N/A"}`,
           ];
 
           csvRows.push(row);
@@ -395,8 +393,7 @@ export default class AMRHeatmapView extends React.Component<
         target="_blank"
         rel="noopener noreferrer"
         key={"Download_CSV_link"}
-        onClick={() => trackEvent("AMRHeatmapView_download-csv-table_clicked")}
-      >
+        onClick={() => trackEvent("AMRHeatmapView_download-csv-table_clicked")}>
         Download CSV
       </a>
     );
@@ -528,9 +525,11 @@ export default class AMRHeatmapView extends React.Component<
             )}
           </Sticky>
           <NarrowContainer>
-            {/* This should still be displayed even after feature flag is removed (until we've updated the heatmap) */
-            allowedFeatures.includes(AMR_V1_FEATURE) &&
-              this.renderDeprecationWarning()}
+            {
+              /* This should still be displayed even after feature flag is removed (until we've updated the heatmap) */
+              allowedFeatures.includes(AMR_V1_FEATURE) &&
+                this.renderDeprecationWarning()
+            }
           </NarrowContainer>
           {this.renderVisualization()}
         </StickyContainer>

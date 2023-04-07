@@ -1,11 +1,10 @@
 import { get } from "lodash/fp";
 import React from "react";
 import Moment from "react-moment";
-
 import { formatPercent } from "~/components/utils/format";
 import {
-  isPipelineFeatureAvailable,
   ACCESSION_COVERAGE_STATS_FEATURE,
+  isPipelineFeatureAvailable,
 } from "~/components/utils/pipeline_versions";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import cs from "./phylo_tree_creation_modal.scss";

@@ -5,7 +5,6 @@ import {
   InputProps as InputPropsBase,
 } from "semantic-ui-react";
 import { MetadataValue } from "~/interface/shared";
-
 import { APP_CSS_CLASS_PREFIX } from "./constants";
 
 interface InputProps extends Omit<InputPropsBase, "onChange"> {

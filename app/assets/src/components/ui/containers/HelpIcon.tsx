@@ -1,6 +1,5 @@
 import { Icon } from "czifui";
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import cs from "./help_icon.scss";

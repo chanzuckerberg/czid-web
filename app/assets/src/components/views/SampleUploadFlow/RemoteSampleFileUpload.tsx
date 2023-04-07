@@ -1,6 +1,5 @@
 import { compact } from "lodash/fp";
 import React from "react";
-
 import { bulkImportRemoteSamples } from "~/api";
 import { trackEvent } from "~/api/analytics";
 import List from "~/components/ui/List";
@@ -8,7 +7,6 @@ import { Project } from "~/interface/shared";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import Input from "~ui/controls/Input";
 import Notification from "~ui/notifications/Notification";
-
 import {
   NO_TARGET_PROJECT_ERROR,
   NO_VALID_SAMPLES_FOUND_ERROR,
@@ -29,9 +27,7 @@ interface RemoteSampleFileUploadState {
   error?: string;
 }
 
-class RemoteSampleFileUpload extends React.Component<
-  RemoteSampleFileUploadProps
-> {
+class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps> {
   state: RemoteSampleFileUploadState = {
     showInfo: false,
     remoteS3Path: "",
@@ -191,8 +187,7 @@ class RemoteSampleFileUpload extends React.Component<
           <Notification
             type="error"
             displayStyle="flat"
-            className={cs.notification}
-          >
+            className={cs.notification}>
             {this.state.error}
           </Notification>
         )}

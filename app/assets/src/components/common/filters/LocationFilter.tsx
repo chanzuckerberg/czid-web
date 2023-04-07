@@ -1,4 +1,4 @@
-import { forEach, values, sortBy } from "lodash/fp";
+import { forEach, sortBy, values } from "lodash/fp";
 import React from "react";
 import { BaseMultipleFilter } from "~/components/common/filters";
 import { BaseMultipleFilterProps, FilterOption } from "./BaseMultipleFilter";

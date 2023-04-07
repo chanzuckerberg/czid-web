@@ -46,8 +46,7 @@ const LandingHeaderV2 = ({
                   color: "white",
                   textDecoration: "underline",
                   textDecorationStyle: "dashed",
-                }}
-              >
+                }}>
                 Learn More
               </span>
             </ExternalLink>
@@ -68,8 +67,7 @@ const LandingHeaderV2 = ({
               }`}
               href="/impact"
               aria-label="View the CZ ID impact page"
-              data-testid="home-top-nav-impact"
-            >
+              data-testid="home-top-nav-impact">
               Impact
             </a>
             <a
@@ -78,8 +76,7 @@ const LandingHeaderV2 = ({
               target="_blank"
               rel="noreferrer"
               aria-label="View the CZ ID help page (opens in new window)"
-              data-testid="home-top-nav-resources"
-            >
+              data-testid="home-top-nav-resources">
               Resources
             </a>
             {!autoAcctCreationEnabled && (
@@ -89,16 +86,14 @@ const LandingHeaderV2 = ({
                 target="_blank"
                 rel="noreferrer"
                 aria-label="View the CZ ID intro survey (opens in new window)"
-                data-testid="home-top-nav-request-access"
-              >
+                data-testid="home-top-nav-request-access">
                 Request Access
               </a>
             )}
             <a
               className={cs.buttonLink}
               href="/auth0/login"
-              data-testid="home-top-nav-login"
-            >
+              data-testid="home-top-nav-login">
               Sign in
             </a>
           </span>
@@ -106,23 +101,20 @@ const LandingHeaderV2 = ({
             onClick={toggleMobileNav}
             onKeyDown={toggleMobileNav}
             className={cs.hamburgerIcon}
-            data-testid="home-mobile-hamburger"
-          >
+            data-testid="home-mobile-hamburger">
             <div className={cs.bar1}></div>
             <div className={cs.bar2}></div>
             <div className={cs.bar3}></div>
           </div>
           <div
             className={cs.mobileNav}
-            style={menuOpen ? { width: "100%" } : { width: "0" }}
-          >
+            style={menuOpen ? { width: "100%" } : { width: "0" }}>
             <div className={cs.mobileNavCloseContainer}>
               <span
                 className={cs.mobileNavClose}
                 onClick={toggleMobileNav}
                 onKeyDown={toggleMobileNav}
-                data-testid="home-mobile-close-hamburger"
-              >
+                data-testid="home-mobile-close-hamburger">
                 <IconMobileNavClose />
               </span>
             </div>
@@ -134,8 +126,7 @@ const LandingHeaderV2 = ({
                 target="_blank"
                 rel="noreferrer"
                 aria-label="View the CZ ID impact page (opens in new window)"
-                data-testid="home-mobile-menu-impact"
-              >
+                data-testid="home-mobile-menu-impact">
                 Impact
               </a>
               <a
@@ -145,20 +136,17 @@ const LandingHeaderV2 = ({
                 target="_blank"
                 rel="noreferrer"
                 aria-label="View the CZ ID help page (opens in new window)"
-                data-testid="home-mobile-menu-resources"
-              >
+                data-testid="home-mobile-menu-resources">
                 Resources
               </a>
               <div
                 className={cs.mobileNavSeparator}
-                style={menuOpen ? { opacity: "1" } : { opacity: "0" }}
-              ></div>
+                style={menuOpen ? { opacity: "1" } : { opacity: "0" }}></div>
               <a
                 className={cs.mobileNavLink}
                 href="/auth0/login"
                 style={menuOpen ? { opacity: "1" } : { opacity: "0" }}
-                data-testid="home-mobile-menu-login"
-              >
+                data-testid="home-mobile-menu-login">
                 Sign In
               </a>
               <a
@@ -168,8 +156,7 @@ const LandingHeaderV2 = ({
                 target="_blank"
                 rel="noreferrer"
                 aria-label="View the CZ ID intro survey (opens in new window)"
-                data-testid="home-mobile-menu-request-access"
-              >
+                data-testid="home-mobile-menu-request-access">
                 Request Access
               </a>
             </div>

@@ -4,13 +4,11 @@
 import { debounce, orderBy } from "lodash/fp";
 import memoize from "memoize-one";
 import React from "react";
-
 import {
   getTaxaWithContigsSuggestions,
   getTaxaWithReadsSuggestions,
 } from "~/api";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-
 import cs from "./taxon_hit_select.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;

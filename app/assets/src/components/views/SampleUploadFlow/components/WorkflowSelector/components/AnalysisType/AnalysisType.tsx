@@ -12,7 +12,6 @@ import React, { ReactNode, useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { AMR_V1_FEATURE } from "~/components/utils/features";
-
 import commonStyles from "../../workflow_selector.scss";
 import cs from "./analysis_type.scss";
 
@@ -68,8 +67,7 @@ const AnalysisType = ({
       title={tooltipText}
       disableHoverListener={
         !allowedFeatures.includes(AMR_V1_FEATURE) || !isDisabled
-      }
-    >
+      }>
       <div
         className={cx(
           commonStyles.selectableOption,
@@ -78,8 +76,7 @@ const AnalysisType = ({
         )}
         onClick={() => (isDisabled ? null : onClick())}
         key={title}
-        data-testid={`analysis-type-${kebabCase(title)}`}
-      >
+        data-testid={`analysis-type-${kebabCase(title)}`}>
         {radioOption}
         <div className={cs.iconSample}>
           <Icon

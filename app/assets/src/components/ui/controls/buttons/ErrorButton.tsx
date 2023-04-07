@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Button, Icon, IconNameToSizes, ButtonProps } from "czifui";
+import { Button, ButtonProps, Icon, IconNameToSizes } from "czifui";
 import React from "react";
 import cs from "./error_button.scss";
 
@@ -30,8 +30,7 @@ const ErrorButton = ({
       disabled={disabled}
       startIcon={
         startIcon && <Icon sdsIcon={startIcon} sdsSize="l" sdsType="button" />
-      }
-    >
+      }>
       {text || children}
     </Button>
   );

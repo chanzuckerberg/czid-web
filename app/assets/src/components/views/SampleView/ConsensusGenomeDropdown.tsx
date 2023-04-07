@@ -2,7 +2,6 @@ import React from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { WorkflowRun } from "~/interface/sample";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
-
 import cs from "./consensus_genome_dropdown.scss";
 
 interface ConsensusGenomeDropdownProps {

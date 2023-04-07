@@ -1,9 +1,7 @@
 import cx from "classnames";
 import { Icon } from "czifui";
 import React from "react";
-
 import { IconLoading, IconSuccessSmall } from "~ui/icons";
-
 import cs from "./pipeline_viz.scss";
 
 interface PipelineVizStatusIconProps {

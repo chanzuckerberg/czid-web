@@ -44,8 +44,7 @@ export const TaxonLinks = ({
           taxonId,
           taxonName,
           parentTaxonId,
-        }}
-      >
+        }}>
         {label}
       </ExternalLink>
     );

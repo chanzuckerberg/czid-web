@@ -42,8 +42,7 @@ export const FilterPanel = ({
     <StyledFilterPanel
       anchor={anchorPosition}
       open={!hideFilters}
-      variant="persistent"
-    >
+      variant="persistent">
       {/* Padding acts as a top gutter so as to not overlap header. Inline styles so we can use props. */}
       <div style={{ paddingTop: headerHeight, width: drawerWidth }}>
         {content}

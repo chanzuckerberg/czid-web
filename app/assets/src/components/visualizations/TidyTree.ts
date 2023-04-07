@@ -143,11 +143,12 @@ export default class TidyTree {
 
     const collapsedScale = scaleLinear().domain(this.range).range([0, 1]);
     this.root.eachAfter((d: $TSFixMe) => {
-      if (this.options.collapsed.has(d.id) || (
-        !d.data.highlight &&
-        collapsedScale(d.data.values[this.options.attribute]) <
-          this.options.collapseThreshold
-      )){
+      if (
+        this.options.collapsed.has(d.id) ||
+        (!d.data.highlight &&
+          collapsedScale(d.data.values[this.options.attribute]) <
+            this.options.collapseThreshold)
+      ) {
         d.collapsedChildren = d.children;
         d.children = null;
       } else if (d.children) {

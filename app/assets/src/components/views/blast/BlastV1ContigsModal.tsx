@@ -1,12 +1,11 @@
 import cx from "classnames";
-import { Tooltip, Tab, Tabs } from "czifui";
+import { Tab, Tabs, Tooltip } from "czifui";
 import { filter, map, reduce, size } from "lodash/fp";
 import React, { useEffect, useState } from "react";
-
 import {
-  withAnalytics,
-  trackEvent,
   ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
 } from "~/api/analytics";
 import { fetchLongestContigsForTaxonId } from "~/api/blast";
 import { openUrlInNewTab } from "~/components/utils/links";
@@ -17,17 +16,16 @@ import cs from "./blast_v1_contigs_modal.scss";
 import BlastContigsTable from "./BlastContigsTable";
 import { showBlastNotification } from "./BlastNotification";
 import BlastRedirectionModal from "./BlastRedirectionModal";
-
 import {
-  BLAST_CONTIG_ROW_WIDTH,
-  BLAST_CONTIG_HEADER_ROW_WIDTH,
-  BLAST_SEQUENCE_CHARACTER_LIMIT,
-  SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY,
   BlastModalInfo,
+  BLAST_CONTIG_HEADER_ROW_WIDTH,
+  BLAST_CONTIG_ROW_WIDTH,
+  BLAST_SEQUENCE_CHARACTER_LIMIT,
   Contig,
   CountTypes,
   CountTypeToIndex,
   IndexToCountType,
+  SESSION_STORAGE_AUTO_REDIRECT_BLAST_KEY,
 } from "./constants";
 import { prepareBlastQuery } from "./utils";
 
@@ -65,13 +63,11 @@ const BlastV1ContigsModal = ({
       ? CountTypeToIndex[blastModalInfo?.availableCountTypeTabsForContigs[0]]
       : null,
   );
-  const [showBlastRedirectionModal, setShowBlastRedirectModal] = useState<
-    boolean
-  >(false);
+  const [showBlastRedirectionModal, setShowBlastRedirectModal] =
+    useState<boolean>(false);
   const [blastUrls, setBlastUrls] = useState<string[]>([]);
-  const [sequencesAreTooLong, setSequencesAreTooLong] = useState<boolean>(
-    false,
-  );
+  const [sequencesAreTooLong, setSequencesAreTooLong] =
+    useState<boolean>(false);
   const currentCountType =
     selectedCountTypeTab !== null
       ? IndexToCountType[selectedCountTypeTab]
@@ -169,8 +165,7 @@ const BlastV1ContigsModal = ({
           height:
             BLAST_CONTIG_ROW_WIDTH * size(contigs) +
             BLAST_CONTIG_HEADER_ROW_WIDTH,
-        }}
-      >
+        }}>
         <BlastContigsTable
           contigs={contigs}
           onContigSelection={(value, isChecked) =>
@@ -215,21 +210,22 @@ const BlastV1ContigsModal = ({
 
   const handleRedirectionModalClose = () => setShowBlastRedirectModal(false);
 
-  const handleRedirectionModalContinue = shouldAutoRedirectBlastForCurrentSession => {
-    shouldAutoRedirectBlastForCurrentSession &&
-      autoRedirectBlastForCurrentSession();
+  const handleRedirectionModalContinue =
+    shouldAutoRedirectBlastForCurrentSession => {
+      shouldAutoRedirectBlastForCurrentSession &&
+        autoRedirectBlastForCurrentSession();
 
-    blastUrls.forEach(url => openUrlInNewTab(url));
+      blastUrls.forEach(url => openUrlInNewTab(url));
 
-    logBlastEvent({
-      analyticEventName:
-        ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONTINUE_BUTTON_CLICKED,
-      automaticallyRedirectedToNCBI: shouldAutoRedirectBlastForCurrentSession,
-    });
-    setShowBlastRedirectModal(false);
-    showBlastNotification();
-    onClose();
-  };
+      logBlastEvent({
+        analyticEventName:
+          ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONTINUE_BUTTON_CLICKED,
+        automaticallyRedirectedToNCBI: shouldAutoRedirectBlastForCurrentSession,
+      });
+      setShowBlastRedirectModal(false);
+      showBlastNotification();
+      onClose();
+    };
 
   const logBlastEvent = ({
     analyticEventName,
@@ -267,8 +263,7 @@ const BlastV1ContigsModal = ({
     <Notification
       type="info"
       displayStyle="flat"
-      className={cs.longContigNotification}
-    >
+      className={cs.longContigNotification}>
       For selected contig(s) that exceeds ~7500 base pairs (bp), up to the
       middle 7500 bp will be used due to NCBI{`'`}s server limitation.
     </Notification>
@@ -281,8 +276,7 @@ const BlastV1ContigsModal = ({
           <Tooltip
             arrow
             placement="top"
-            title="Select at least 1 contig to continue"
-          >
+            title="Select at least 1 contig to continue">
             <span>
               <PrimaryButton text="Continue" rounded disabled />
             </span>
@@ -302,12 +296,10 @@ const BlastV1ContigsModal = ({
   );
 
   const renderCountTypeTabs = () => {
-    const shouldDisableNtTab = !blastModalInfo?.availableCountTypeTabsForContigs.includes(
-      CountTypes.NT,
-    );
-    const shouldDisableNrTab = !blastModalInfo?.availableCountTypeTabsForContigs.includes(
-      CountTypes.NR,
-    );
+    const shouldDisableNtTab =
+      !blastModalInfo?.availableCountTypeTabsForContigs.includes(CountTypes.NT);
+    const shouldDisableNrTab =
+      !blastModalInfo?.availableCountTypeTabsForContigs.includes(CountTypes.NR);
     let ntTab = (
       <Tab disabled={shouldDisableNtTab} label={`${CountTypes.NT} hits`}></Tab>
     );
@@ -340,8 +332,7 @@ const BlastV1ContigsModal = ({
           setSelectedCountTypeTab(selectedTabIndex);
           // Reset user contig selections when they switch NT/NR tabs
           setSelectedContigIds(new Set());
-        }}
-      >
+        }}>
         {ntTab}
         {nrTab}
       </Tabs>
@@ -357,8 +348,7 @@ const BlastV1ContigsModal = ({
       )}
       tall
       narrow
-      xlCloseIcon
-    >
+      xlCloseIcon>
       <div className={cs.blastContigsModal}>
         <div className={cs.header}>{blastModalInfo?.selectedBlastType}</div>
         <div className={cs.taxonName}>{taxonName}</div>
@@ -367,8 +357,7 @@ const BlastV1ContigsModal = ({
           className={cx(
             cs.contigSelection,
             !blastModalInfo?.showCountTypeTabs && cs.spacing,
-          )}
-        >
+          )}>
           <div className={cs.title}>Select a contig</div>
           <div className={cs.instructions}>
             Up to 3 of the longest contigs are available to BLAST. The more

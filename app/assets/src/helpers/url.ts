@@ -1,16 +1,16 @@
 import copy from "copy-to-clipboard";
 import {
   filter,
-  isObject,
+  flatten,
+  flow,
   isArray,
-  toPairs,
-  pickBy,
+  isObject,
   isPlainObject,
   isUndefined,
-  flow,
-  map,
-  flatten,
   join,
+  map,
+  pickBy,
+  toPairs,
 } from "lodash/fp";
 import QueryString from "query-string";
 import { shortenUrl } from "~/api";

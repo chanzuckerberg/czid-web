@@ -1,0 +1,57 @@
+on:
+  pull_request:
+    paths:
+      - .github/**
+      - app/assets/src/**
+
+name: lint-bot
+jobs:
+  prettier-eslint-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: chanzuckerberg/github-app-token@v1.1.4
+        with:
+          app_id: ${{ secrets.CZI_GITHUB_HELPER_APP_ID }}
+          private_key: ${{ secrets.CZI_GITHUB_HELPER_PK }}
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Cache Node Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Check the Lockfile Version
+        run: |
+          VERSION=`cat package-lock.json | jq '.lockfileVersion'`
+          if [ "$VERSION" -lt "2"  ]; then
+            echo "Check the lockfileVersion in package-lock.json."
+            exit 1
+          fi
+      - name: Switch git to use HTTP
+        # See: https://github.com/actions/setup-node/issues/214#issuecomment-842538631
+        run: >
+          git config --global url."https://github.com/".insteadOf
+          ssh://git@github.com/
+      - name: Install older version of npm
+        run: npm install -g npm@v8.5.5
+      - name: Install Dependencies
+        # Verifies that package.json and package-lock.json match.
+        # See: https://docs.npmjs.com/cli/v7/commands/npm-ci
+        run: npm ci
+      - name: Prettier --write
+        run: npx prettier app/assets/src --ext .js,.jsx,.ts,.tsx --write
+      - name: ESLint --fix
+        run: npx eslint --fix app/assets/src --ext .js,.jsx,.ts,.tsx
+      - uses: EndBug/add-and-commit@v9
+        with:
+          add: -A
+          message: ci - prettier and eslint fixes 

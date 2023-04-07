@@ -1,8 +1,6 @@
 import cx from "classnames";
 import React, { useState } from "react";
-
 import { IconArrowDownSmall, IconArrowUpSmall } from "~ui/icons";
-
 import cs from "./accordion.scss";
 
 interface AccordionProps {
@@ -52,8 +50,7 @@ const Accordion = ({
           cs[toggleArrowAlignment],
           !!headerClassName && headerClassName,
         )}
-        onClick={propsOnToggle || onToggle}
-      >
+        onClick={propsOnToggle || onToggle}>
         {header}
         <div className={cs.fill} />
         {toggleable && (
@@ -80,8 +77,7 @@ const Accordion = ({
       </div>
       {(open || !toggleable) && (
         <div
-          className={cx(cs.content, bottomContentPadding && cs.bottomPadding)}
-        >
+          className={cx(cs.content, bottomContentPadding && cs.bottomPadding)}>
           {children}
         </div>
       )}

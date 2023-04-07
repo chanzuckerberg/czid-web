@@ -11,22 +11,22 @@ class PlaygroundIcons extends React.Component {
     const customIcons = values(ICONS_TAXONOMY.CUSTOM).map(IconComponent => (
       <IconComponent key={IconComponent.name} className={cs.icon} />
     ));
-    const fontAwesomeIcons = values(
-      ICONS_TAXONOMY.FONT_AWESOME,
-    ).map(IconComponent => (
-      <IconComponent key={IconComponent.name} className={cs.icon} />
-    ));
+    const fontAwesomeIcons = values(ICONS_TAXONOMY.FONT_AWESOME).map(
+      IconComponent => (
+        <IconComponent key={IconComponent.name} className={cs.icon} />
+      ),
+    );
     const logoIcons = values(ICONS_TAXONOMY.LOGO).map(IconComponent => (
       <IconComponent key={IconComponent.name} className={cs.logoIcon} />
     ));
-    const logoReversedIcons = values(
-      ICONS_TAXONOMY.LOGO_REVERSED,
-    ).map(IconComponent => (
-      <IconComponent
-        key={IconComponent.name}
-        className={cx(cs.icon, cs.logoReversedIcon)}
-      />
-    ));
+    const logoReversedIcons = values(ICONS_TAXONOMY.LOGO_REVERSED).map(
+      IconComponent => (
+        <IconComponent
+          key={IconComponent.name}
+          className={cx(cs.icon, cs.logoReversedIcon)}
+        />
+      ),
+    );
     const illustrations = values(ILLUSTRATIONS).map(IconComponent => (
       <IconComponent key={IconComponent.name} className={cs.logoIcon} />
     ));
@@ -47,8 +47,7 @@ class PlaygroundIcons extends React.Component {
           {fontAwesomeIcons.map(iconInstance => (
             <div
               className={cx(cs.iconContainer, cs.faIconContainer)}
-              key={iconInstance.type.name}
-            >
+              key={iconInstance.type.name}>
               <div className={cs.faIconContainer}>{iconInstance}</div>
               <span className={cs.iconLabel}>{iconInstance.type.name}</span>
             </div>

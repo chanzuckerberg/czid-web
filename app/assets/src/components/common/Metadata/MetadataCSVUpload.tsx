@@ -1,16 +1,16 @@
 // A CSV Upload component for uploading metadata.
 // Sends uploaded to server for validation and displays errors and warnings.
 import cx from "classnames";
-import { map, isNull, isEqual } from "lodash/fp";
+import { isEqual, isNull, map } from "lodash/fp";
 import React from "react";
 import {
-  validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
+  validateMetadataCSVForProject,
 } from "~/api/metadata";
 import { CSV } from "~/interface/shared";
 import CSVUpload from "~ui/controls/CSVUpload";
 import cs from "./metadata_csv_upload.scss";
-import { MetadataCSVUploadState, MetadataCSVUploadProps } from "./types";
+import { MetadataCSVUploadProps, MetadataCSVUploadState } from "./types";
 import { processCSVMetadata } from "./utils";
 
 class MetadataCSVUpload extends React.Component<

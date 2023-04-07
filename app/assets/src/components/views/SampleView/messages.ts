@@ -106,11 +106,8 @@ export const renderReportInfo = (currentTab, reportMetadata) => {
       return reportInfoMsg;
     }, "");
   } else if (currentTab === TABS.LONG_READ_MNGS) {
-    const {
-      postSubsamplingCount,
-      preSubsamplingCount,
-      taxonWhitelisted,
-    } = reportMetadata;
+    const { postSubsamplingCount, preSubsamplingCount, taxonWhitelisted } =
+      reportMetadata;
     return compact([
       subsamplingBasesMessage(preSubsamplingCount, postSubsamplingCount),
       whitelistedMessage(taxonWhitelisted),

@@ -3,7 +3,6 @@ import { InputRadio, Tooltip } from "czifui";
 import React, { ReactNode } from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
-
 import commonStyles from "../../workflow_selector.scss";
 import { PipelineVersionIndicator } from "../PipelineVersionIndicator";
 import cs from "./sequencing_platform_option.scss";
@@ -62,8 +61,7 @@ const SequencingPlatformOption = ({
         isDisabled && commonStyles.disabled,
       )}
       onClick={() => (isDisabled ? null : onClick())}
-      data-testid={`sequencing-technology-${testId}`}
-    >
+      data-testid={`sequencing-technology-${testId}`}>
       {radioButton}
       <div className={commonStyles.optionText}>
         <div className={commonStyles.title}>
@@ -81,8 +79,7 @@ const SequencingPlatformOption = ({
           className={cx(
             cs.technologyDescription,
             isDisabled && commonStyles.disabled,
-          )}
-        >
+          )}>
           <span>
             {customDescription ??
               `You can check out the ${technologyName} pipeline on Github `}
@@ -90,8 +87,7 @@ const SequencingPlatformOption = ({
           <ExternalLink
             analyticsEventName={analyticsEventName}
             href={githubLink}
-            disabled={isDisabled}
-          >
+            disabled={isDisabled}>
             here
           </ExternalLink>
           .

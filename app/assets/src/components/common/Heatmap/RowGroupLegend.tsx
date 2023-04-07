@@ -4,7 +4,6 @@
 import cx from "classnames";
 import React from "react";
 import { TooltipLocation } from "~/interface/shared";
-
 import cs from "./row_group_legend.scss";
 
 interface RowGroupLegendProps {
@@ -20,8 +19,7 @@ const RowGroupLegend = ({ tooltipLocation, label }: RowGroupLegendProps) => {
         transform: "translate(-50%)",
         left: tooltipLocation.left + 4, // offset because of right-alignment of labels
         top: tooltipLocation.top - 44, // depends on heights defined in CSS
-      }}
-    >
+      }}>
       <div className={cs.legend}>{label}</div>
       <div className={cs.arrow} />
     </div>

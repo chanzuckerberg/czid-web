@@ -1,11 +1,10 @@
-import { groupBy, get } from "lodash/fp";
+import { get, groupBy } from "lodash/fp";
 import React from "react";
 import {
   doesResultMatch,
   sortResults,
 } from "~/components/views/SampleUploadFlow/utils";
 import { SampleTypeProps } from "~/interface/shared";
-
 import LiveSearchPopBox, { SearchResults } from "~ui/controls/LiveSearchPopBox";
 
 const SUGGESTED = "SUGGESTED";

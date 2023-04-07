@@ -1,14 +1,13 @@
 import { isEqual, isNull, size, startCase } from "lodash/fp";
 import React from "react";
-
 import { getBackgrounds, getMassNormalizedBackgroundAvailability } from "~/api";
-import { withAnalytics, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import {
-  SPECIFICITY_OPTIONS,
   SPECIES_SELECTION_OPTIONS,
+  SPECIFICITY_OPTIONS,
   THRESHOLDS,
 } from "~/components/views/compare/SamplesHeatmapView/constants";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
@@ -21,7 +20,6 @@ import {
   ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
 import { openUrl, openUrlInNewTab } from "~utils/links";
-
 import cs from "./heatmap_creation_modal.scss";
 
 interface HeatmapCreationModalProps {
@@ -88,9 +86,8 @@ export default class HeatmapCreationModal extends React.Component<
 
   async fetchBackgroundAvailability() {
     const { selectedIds } = this.props;
-    const {
-      massNormalizedBackgroundsAvailable,
-    } = await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
+    const { massNormalizedBackgroundsAvailable } =
+      await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
 
     this.setState({
       enableMassNormalizedBackgrounds: massNormalizedBackgroundsAvailable,

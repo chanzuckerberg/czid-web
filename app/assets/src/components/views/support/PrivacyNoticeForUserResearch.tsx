@@ -1,8 +1,6 @@
 import React from "react";
-
 import { NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
-
 import cs from "./privacy_notice_for_user_research.scss";
 
 const PrivacyNoticeForUserResearch = () => {

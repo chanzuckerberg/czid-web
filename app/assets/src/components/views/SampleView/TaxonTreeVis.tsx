@@ -1,6 +1,5 @@
 import { get, getOr, map } from "lodash/fp";
 import React from "react";
-
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
@@ -325,8 +324,7 @@ class TaxonTreeVis extends React.Component<
           key={`tt_${metric}`}
           className={`taxon_tooltip__row ${
             this.props.metric === metric ? "taxon_tooltip__row--active" : ""
-          }`}
-        >
+          }`}>
           <div className="taxon_tooltip__row__label">
             {this.metrics[metric].label}:
           </div>
@@ -366,8 +364,7 @@ class TaxonTreeVis extends React.Component<
     return (
       <div
         className={`node-overlay node-overlay__${taxId}`}
-        key={`label-${taxId}`}
-      >
+        key={`label-${taxId}`}>
         <PathogenLabel type={tagType} />
       </div>
     );
@@ -423,16 +420,14 @@ class TaxonTreeVis extends React.Component<
           className="taxon-tree-vis__container"
           ref={container => {
             this.treeContainer = container;
-          }}
-        >
+          }}>
           <div className="pathogen-labels">{this.renderPathogenLabels()}</div>
         </div>
         <div
           className="taxon-tree-vis__tooltip"
           ref={tooltip => {
             this.treeTooltip = tooltip;
-          }}
-        >
+          }}>
           {this.renderTooltip()}
         </div>
       </div>

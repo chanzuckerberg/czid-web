@@ -1,7 +1,6 @@
 import { clamp } from "lodash/fp";
 import React from "react";
 import { Marker } from "react-map-gl";
-
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import RectangleMarker from "~/components/views/discovery/mapping/RectangleMarker";
 

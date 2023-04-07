@@ -19,8 +19,7 @@ export const WikipediaLicense = ({
       , which is released under the{" "}
       <a
         href="https://creativecommons.org/licenses/by-sa/3.0/"
-        className={cs.wikiLink}
-      >
+        className={cs.wikiLink}>
         Creative Commons Attribution-Share-Alike License 3.0
       </a>
       .

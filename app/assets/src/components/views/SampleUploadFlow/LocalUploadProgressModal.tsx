@@ -506,8 +506,7 @@ const LocalUploadProgressModal = ({
                 trackEvent(
                   ANALYTICS_EVENT_NAMES.LOCAL_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
                 )
-              }
-            >
+              }>
               Contact us for help
             </a>
           </div>
@@ -536,8 +535,7 @@ const LocalUploadProgressModal = ({
       <Notification
         className={cs.notificationContainer}
         type="error"
-        displayStyle="flat"
-      >
+        displayStyle="flat">
         <div className={cs.content}>
           <div className={cs.errorMessage}>
             {numberOfLocalSamplesFailed} upload
@@ -552,8 +550,7 @@ const LocalUploadProgressModal = ({
               {
                 numberOfLocalSamplesFailed,
               },
-            )}
-          >
+            )}>
             Retry all failed
           </div>
         </div>
@@ -593,8 +590,7 @@ const LocalUploadProgressModal = ({
       className={cx(
         cs.uploadProgressModal,
         uploadComplete && cs.uploadComplete,
-      )}
-    >
+      )}>
       <div className={cs.header}>
         <ImgUploadPrimary className={cs.uploadImg} />
         {renderTitle()}

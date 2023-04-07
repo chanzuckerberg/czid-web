@@ -1,10 +1,8 @@
 import cx from "classnames";
-import { keys, filter } from "lodash/fp";
+import { filter, keys } from "lodash/fp";
 import React from "react";
-
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Checkbox from "~ui/controls/Checkbox";
-
 import cs from "./playground_typography.scss";
 
 class PlaygroundTypography extends React.Component {
@@ -67,8 +65,7 @@ class PlaygroundTypography extends React.Component {
                         cs.container,
                         cs[fontClass],
                         upperCase && cs.upperCase,
-                      )}
-                    >
+                      )}>
                       {fontClass}
                     </div>
                   </div>

@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import React from "react";
-
 import NavLink from "~/components/common/AnchorMenu/NavLink";
 import cs from "./section_navigation.scss";
 

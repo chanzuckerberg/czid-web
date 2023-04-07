@@ -1,4 +1,4 @@
-import { omit, get } from "lodash/fp";
+import { get, omit } from "lodash/fp";
 import React from "react";
 import { DropdownProps } from "semantic-ui-react";
 import ArrayUtils from "../../../utils/ArrayUtils";
@@ -321,8 +321,7 @@ class MultipleNestedConfirmDropdown extends React.Component<
             this.cancelApplyCategories();
           }
         }}
-        open={this.state.popupIsOpen}
-      >
+        open={this.state.popupIsOpen}>
         <div className={cs.container}>{this.renderItems()}</div>
         <div className={cs.multipleNestedDropdownButtons}>
           <SecondaryButton

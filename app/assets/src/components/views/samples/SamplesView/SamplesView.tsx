@@ -5,12 +5,12 @@ import {
   find,
   forEach,
   get,
-  isEmpty,
   intersection,
+  isEmpty,
   map,
-  union,
   reduce,
   size,
+  union,
   values,
 } from "lodash/fp";
 import React, {
@@ -24,9 +24,9 @@ import { Link as RouterLink } from "react-router-dom";
 import { SortDirectionType } from "react-virtualized";
 import { bulkKickoffWorkflowRuns } from "~/api";
 import {
+  ANALYTICS_EVENT_NAMES,
   trackEvent,
   withAnalytics,
-  ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import {
   getSampleMetadataFields,
@@ -55,8 +55,8 @@ import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
 import {
   PipelineTypeRun,
-  SamplesViewProps,
   SamplesViewHandle,
+  SamplesViewProps,
 } from "~/interface/samplesView";
 import { MetadataType } from "~/interface/shared";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
@@ -69,7 +69,6 @@ import {
   WORKFLOWS,
   WORKFLOW_ENTITIES,
 } from "~utils/workflows";
-
 import { BulkDeleteModal } from "./BulkDeleteModal";
 import { BulkDeleteTrigger } from "./BulkDeleteTrigger";
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
@@ -167,12 +166,10 @@ const SamplesView = forwardRef(function SamplesView(
   const [referenceSelectId, setReferenceSelectId] = useState(null);
   const [phyloCreationModalOpen, setPhyloCreationModalOpen] = useState(false);
   const [bulkDownloadModalOpen, setBulkDownloadModalOpen] = useState(false);
-  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState<boolean>(
-    false,
-  );
-  const [heatmapCreationModalOpen, setHeatmapCreationModalOpen] = useState(
-    false,
-  );
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] =
+    useState<boolean>(false);
+  const [heatmapCreationModalOpen, setHeatmapCreationModalOpen] =
+    useState(false);
   const [nextcladeModalOpen, setNextcladeModalOpen] = useState(false);
   const [metadataFields, setMetadataFields] = useState<MetadataType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -188,10 +185,8 @@ const SamplesView = forwardRef(function SamplesView(
   ] = useState<Set<number>>(new Set([]));
 
   // This tooltip is reset whenever the selectedIds changes.
-  const [
-    bulkDownloadButtonTempTooltip,
-    setBulkDownloadButtonTempTooltip,
-  ] = useState<string>(null);
+  const [bulkDownloadButtonTempTooltip, setBulkDownloadButtonTempTooltip] =
+    useState<string>(null);
 
   useEffect(() => {
     setBulkDownloadButtonTempTooltip(null);
@@ -374,8 +369,7 @@ const SamplesView = forwardRef(function SamplesView(
                   to={`${option.value}?${params}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={log}
-                >
+                  onClick={log}>
                   <BareDropdown.Item key={option.text} text={option.text} />
                 </RouterLink>
               );
@@ -592,9 +586,8 @@ const SamplesView = forwardRef(function SamplesView(
       ) > 0;
     // `recentlyKickedOffAmrWorkflowRunsForSampleIds` only gets updated when the user sucessfully
     // kicks off new AMR workflow runs by clicking the BulkKickoffAmr trigger
-    const alreadyKickedOffAmrWorkflowRun = recentlyKickedOffAmrWorkflowRunsForSampleIds.has(
-      sample.id,
-    );
+    const alreadyKickedOffAmrWorkflowRun =
+      recentlyKickedOffAmrWorkflowRunsForSampleIds.has(sample.id);
 
     return (
       failedToUploadSample ||
@@ -766,8 +759,9 @@ const SamplesView = forwardRef(function SamplesView(
           ? workflowConfig.singlularDisplay
           : workflowConfig.pluralDisplay;
 
-      const filteredCountByWorkflowMessage = `${selectableIds?.length ||
-        0} out of ${totalNumberOfObjects} ${workflowDisplayText}`;
+      const filteredCountByWorkflowMessage = `${
+        selectableIds?.length || 0
+      } out of ${totalNumberOfObjects} ${workflowDisplayText}`;
 
       const description = hasAtLeastOneFilterApplied
         ? filteredCountByWorkflowMessage
@@ -780,8 +774,7 @@ const SamplesView = forwardRef(function SamplesView(
             <Button
               sdsStyle="minimal"
               sdsType="secondary"
-              onClick={onClearFilters}
-            >
+              onClick={onClearFilters}>
               Clear Filters
             </Button>
           )}

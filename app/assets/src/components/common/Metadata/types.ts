@@ -1,14 +1,14 @@
 import { Dictionary } from "lodash";
 import {
-  NameId,
-  SampleType,
+  CSV,
+  HostGenome,
+  LocationObject,
   MetadataType,
   MetadataTypes,
-  HostGenome,
-  CSV,
-  LocationObject,
   MetadataValue,
+  NameId,
   SampleFromApi,
+  SampleType,
 } from "~/interface/shared";
 
 export interface Issues {

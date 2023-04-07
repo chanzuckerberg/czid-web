@@ -1,11 +1,9 @@
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import Archetypes from "~/interface/archetypes";
 import Segments from "~/interface/segments";
 import Checkbox from "~ui/controls/Checkbox";
 import Input from "~ui/controls/Input";
-
 import cs from "./user_form.scss";
 
 const UserForm = ({

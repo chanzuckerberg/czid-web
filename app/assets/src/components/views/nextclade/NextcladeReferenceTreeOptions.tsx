@@ -7,10 +7,8 @@ import {
   NEXTCLADE_TREE_FORMAT_LINK,
   NEXTCLADE_TREE_ROOT_LINK,
 } from "~/components/utils/documentationLinks";
-
 import FilePicker from "~ui/controls/FilePicker";
 import RadioButton from "~ui/controls/RadioButton";
-
 import cs from "./nextclade_modal_tree_options.scss";
 
 interface NextcladeReferenceTreeOptionsProps {
@@ -20,9 +18,7 @@ interface NextcladeReferenceTreeOptionsProps {
   selectedType?: string;
 }
 
-class NextcladeReferenceTreeOptions extends React.Component<
-  NextcladeReferenceTreeOptionsProps
-> {
+class NextcladeReferenceTreeOptions extends React.Component<NextcladeReferenceTreeOptionsProps> {
   onDrop = acceptedFile => {
     this.props.onChange(head(acceptedFile));
   };
@@ -48,8 +44,7 @@ class NextcladeReferenceTreeOptions extends React.Component<
       <div className={cs.treeTypeContainer}>
         <div
           className={cx(cs.treeType, !uploadSelected && cs.selected)}
-          onClick={() => onSelect("global")}
-        >
+          onClick={() => onSelect("global")}>
           <RadioButton className={cs.radioButton} selected={!uploadSelected} />
           <div className={cs.content}>
             <div className={cs.name}>Nextclade Default Tree</div>
@@ -63,8 +58,7 @@ class NextcladeReferenceTreeOptions extends React.Component<
         </div>
         <div
           className={cx(cs.treeType, uploadSelected && cs.selected)}
-          onClick={() => onSelect("upload")}
-        >
+          onClick={() => onSelect("upload")}>
           <RadioButton className={cs.radioButton} selected={uploadSelected} />
           <div className={cs.content}>
             <div className={cs.name}>Upload a Tree</div>

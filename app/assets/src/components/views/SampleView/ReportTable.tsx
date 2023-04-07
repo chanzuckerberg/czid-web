@@ -7,11 +7,10 @@ import {
   SortDirection,
   TableRowProps,
 } from "react-virtualized";
-
 import {
+  ANALYTICS_EVENT_NAMES,
   trackEvent,
   withAnalytics,
-  ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import { createAnnotation } from "~/api/blast";
 import { getCsrfToken } from "~/api/utils";
@@ -26,9 +25,9 @@ import {
   MULTITAG_PATHOGENS_FEATURE,
 } from "~/components/utils/features";
 import {
-  isPipelineFeatureAvailable,
   ASSEMBLY_FEATURE,
   COVERAGE_VIZ_FEATURE,
+  isPipelineFeatureAvailable,
 } from "~/components/utils/pipeline_versions";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
@@ -40,24 +39,24 @@ import { getDownloadContigUrl } from "~/components/views/report/utils/download";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { Table } from "~/components/visualizations/table";
 import {
-  CurrentTabSample,
-  ColumnProps,
   BlastData,
+  ColumnProps,
+  CurrentTabSample,
   SortFunctionsParams,
 } from "~/interface/sampleView";
 import { AnnotationType, ConsensusGenomeData, Taxon } from "~/interface/shared";
 import {
-  REPORT_TABLE_COLUMNS,
-  TAX_LEVEL_GENUS,
-  TAX_LEVEL_SPECIES,
-  SPECIES_LEVEL_INDEX,
-  GENUS_LEVEL_INDEX,
   ANNOTATION_HIT,
-  ANNOTATION_NOT_A_HIT,
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NONE,
-  TABS,
+  ANNOTATION_NOT_A_HIT,
+  GENUS_LEVEL_INDEX,
   NANOPORE_DEFAULT_COLUMN_WIDTH,
+  REPORT_TABLE_COLUMNS,
+  SPECIES_LEVEL_INDEX,
+  TABS,
+  TAX_LEVEL_GENUS,
+  TAX_LEVEL_SPECIES,
 } from "./constants";
 import HoverActions from "./HoverActions";
 import cs from "./report_table.scss";
@@ -556,8 +555,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
                 arrow
                 placement="top"
                 sdsStyle="light"
-                title="Highest-scoring organisms satisfying certain thresholds"
-              >
+                title="Highest-scoring organisms satisfying certain thresholds">
                 <span>
                   <Icon sdsIcon="lightBulb" sdsSize="s" sdsType="static" />
                 </span>
@@ -632,8 +630,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           <div className={cs.taxonInfo}>
             <span
               className={cx(cs.taxonName, !!cellData || cs.missingName)}
-              onClick={() => onTaxonNameClick({ ...rowData })}
-            >
+              onClick={() => onTaxonNameClick({ ...rowData })}>
               {cellData || rowData.name}
             </span>
             {rowData.taxLevel === TAX_LEVEL_GENUS &&
@@ -859,14 +856,12 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       <div className={cs.stack}>
         <div
           className={cx(cs.stackElement, dbType === "nt" || cs.lowlightValue)}
-          onClick={onClick ? () => onClick[0]("nt") : null}
-        >
+          onClick={onClick ? () => onClick[0]("nt") : null}>
           {cellData ? cellData[0] : "-"}
         </div>
         <div
           className={cx(cs.stackElement, dbType === "nr" || cs.lowlightValue)}
-          onClick={onClick ? () => onClick[1]("nr") : null}
-        >
+          onClick={onClick ? () => onClick[1]("nr") : null}>
           {cellData ? cellData[1] : "-"}
         </div>
       </div>

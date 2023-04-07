@@ -2,7 +2,6 @@ import querystring from "querystring";
 import { isNull } from "lodash/fp";
 import React from "react";
 import SvgSaver from "svgsaver";
-
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
@@ -112,8 +111,7 @@ const DownloadDropdown = ({
           type="info"
           displayStyle="elevated"
           onClose={closeToast}
-          closeWithIcon
-        >
+          closeWithIcon>
           The downloaded report will not contain the aggregate and z-score
           columns because a background model was not selected.
         </Notification>

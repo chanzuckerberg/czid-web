@@ -1,7 +1,6 @@
 import { Icon } from "czifui";
 import { find, get } from "lodash/fp";
 import React from "react";
-
 import { WORKFLOWS } from "~/components/utils/workflows";
 import LoadingBar from "~ui/controls/LoadingBar";
 import StatusLabel from "~ui/labels/StatusLabel";

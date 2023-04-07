@@ -1,17 +1,13 @@
 import React from "react";
-
 import { trackEvent } from "~/api/analytics";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-
 import cs from "./basespace_integration.scss";
 
 interface BasespaceIntegrationProps {
   accessToken?: string;
 }
 
-export default class BasespaceIntegration extends React.Component<
-  BasespaceIntegrationProps
-> {
+export default class BasespaceIntegration extends React.Component<BasespaceIntegrationProps> {
   componentDidMount() {
     const { accessToken } = this.props;
     if (window.opener && accessToken) {

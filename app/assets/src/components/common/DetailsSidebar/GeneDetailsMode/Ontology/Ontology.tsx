@@ -13,17 +13,11 @@ interface OntologyProps {
 }
 
 const Ontology = ({ geneName, ontology }: OntologyProps) => {
-  const {
-    synonyms,
-    description,
-    geneFamily,
-    drugClass,
-    publications,
-  } = ontology;
+  const { synonyms, description, geneFamily, drugClass, publications } =
+    ontology;
 
-  const [shouldCollapseOntology, setShouldCollapseOntology] = useState<boolean>(
-    true,
-  );
+  const [shouldCollapseOntology, setShouldCollapseOntology] =
+    useState<boolean>(true);
 
   useEffect(() => {
     setShouldCollapseOntology(true);

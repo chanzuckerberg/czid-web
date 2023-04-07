@@ -1,17 +1,14 @@
 import cx from "classnames";
 import { Icon } from "czifui";
 import React from "react";
-
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import {
   ANNOTATION_HIT,
-  ANNOTATION_NOT_A_HIT,
   ANNOTATION_INCONCLUSIVE,
   ANNOTATION_NONE,
+  ANNOTATION_NOT_A_HIT,
 } from "~/components/views/SampleView/constants";
-
 import BasicPopup from "../../BasicPopup";
-
 import cs from "./annotation_label.scss";
 
 const AnnotationLabel = ({
@@ -38,8 +35,7 @@ const AnnotationLabel = ({
       {...props}
       onMouseEnter={() =>
         trackEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_LABEL_HOVERED)
-      }
-    >
+      }>
       <Icon
         className={cx(cs[icon], isStatic ? cs.staticFlag : cs.interactiveFlag)}
         // @ts-expect-error Type 'string' is not assignable to type 'keyof IconNameToSizes'

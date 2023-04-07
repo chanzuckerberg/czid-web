@@ -1,9 +1,8 @@
 import cx from "classnames";
-import React, { useState, useContext } from "react";
+import React, { useContext, useState } from "react";
 import Dropzone, { FileWithPreview } from "react-dropzone";
 import { UserContext } from "~/components/common/UserContext";
 import { PRE_UPLOAD_CHECK_FEATURE } from "~/components/utils/features";
-
 import Icon from "../icons/Icon";
 import cs from "./file_picker.scss";
 
@@ -79,8 +78,7 @@ const FilePicker = ({
       onDrop={onChange || defaultOnChange}
       onDropRejected={onRejected || defaultOnRejected}
       className={cx(cs.filePicker, className, getFile() && cs.active)}
-      data-testid="drop-sample-files"
-    >
+      data-testid="drop-sample-files">
       <div className={cs.inner}>
         <div className={cs.title}>
           {title &&

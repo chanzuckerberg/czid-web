@@ -77,8 +77,7 @@ const renderSampleDeleteError = (
       closeWithIcon
       closeWithDismiss={true}
       type="error"
-      onClose={closeToast}
-    >
+      onClose={closeToast}>
       {params.sampleName ?? "Sample"} failed to delete. Please try again. If the
       problem persists, please contact us at{" "}
       <Link sdsStyle="dashed" href="mailto:help@czid.org">
@@ -98,8 +97,7 @@ const renderSampleDeleteSuccess = (
       closeWithIcon
       closeWithDismiss={true}
       type="info"
-      onClose={closeToast}
-    >
+      onClose={closeToast}>
       {params.sampleName ?? "Sample"} has been successfully deleted.
     </Notification>
   );
@@ -113,8 +111,7 @@ const renderIncompatibleBackgroundError = (
     type="info"
     displayStyle="elevated"
     onClose={closeToast}
-    closeWithIcon
-  >
+    closeWithIcon>
     The previous background &quot;{backgroundName}&quot; is not compatible with
     this sample, please select another background.
   </Notification>
@@ -129,8 +126,7 @@ const renderConsensusGenomeCreated = (
       className={cs.notificationBody}
       closeWithDismiss={false}
       closeWithIcon={true}
-      type="info"
-    >
+      type="info">
       We&apos;re creating your requested consensus genome, you&apos;ll be able
       to view it in the Consensus Genome tab.
       <div
@@ -142,8 +138,7 @@ const renderConsensusGenomeCreated = (
         onKeyDown={() => {
           handleTabChange(TABS.CONSENSUS_GENOME);
           closeToast();
-        }}
-      >
+        }}>
         View Consensus Genomes
       </div>
     </Notification>
@@ -159,8 +154,7 @@ const renderPersistedDiscoveryViewThresholds = (
     closeWithIcon
     closeWithDismiss={false}
     onClose={closeToast}
-    type="warning"
-  >
+    type="warning">
     The taxon filters from the samples page have carried over. If you would like
     to use filters previously applied to the report, click the button below.
     <div
@@ -172,8 +166,7 @@ const renderPersistedDiscoveryViewThresholds = (
       onKeyDown={() => {
         revertToSampleViewFilters();
         closeToast();
-      }}
-    >
+      }}>
       Revert
     </div>
   </Notification>

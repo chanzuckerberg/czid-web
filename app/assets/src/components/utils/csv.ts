@@ -12,7 +12,7 @@ import {
 } from "lodash/fp";
 import Papa from "papaparse";
 import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
-import { WORKFLOWS, labelToVal } from "~/components/utils/workflows";
+import { labelToVal, WORKFLOWS } from "~/components/utils/workflows";
 import { FilterSelections } from "~/interface/sampleView";
 import { Entries } from "~/interface/shared";
 import {

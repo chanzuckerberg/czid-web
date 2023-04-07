@@ -4,10 +4,9 @@ import d3 from "d3";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
 import { compact, orderBy, some } from "lodash";
-import { clamp, find, mean, sortBy, minBy, isEqual } from "lodash/fp";
+import { clamp, find, isEqual, mean, minBy, sortBy } from "lodash/fp";
 import SvgSaver from "svgsaver";
 import textWidth from "text-width";
-
 import { sanitizeCSVRow } from "~/components/utils/csv";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
 import symlog from "../../utils/d3/scales/symlog";
@@ -543,9 +542,11 @@ export default class Heatmap {
     this.gCells.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
-        ${totalColumnLabelsHeight +
+        ${
+          totalColumnLabelsHeight +
           this.totalMetadataHeight +
-          this.totalRowAddLinkHeight})`,
+          this.totalRowAddLinkHeight
+        })`,
     );
 
     // Draw dendrogram
@@ -553,30 +554,36 @@ export default class Heatmap {
       "transform",
       `translate(
         ${this.rowLabelsWidth + totalCellWidth},
-        ${totalColumnLabelsHeight +
+        ${
+          totalColumnLabelsHeight +
           this.totalMetadataHeight +
-          this.totalRowAddLinkHeight}
+          this.totalRowAddLinkHeight
+        }
       )`,
     );
     this.gColumnDendogram.attr(
       "transform",
       `translate(
         ${this.rowLabelsWidth},
-        ${totalColumnLabelsHeight +
+        ${
+          totalColumnLabelsHeight +
           this.totalMetadataHeight +
           this.totalRowAddLinkHeight +
-          totalCellHeight}
+          totalCellHeight
+        }
       )`,
     );
     this.gCaption.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
-        ${totalColumnLabelsHeight +
+        ${
+          totalColumnLabelsHeight +
           this.totalMetadataHeight +
           this.totalRowAddLinkHeight +
           totalCellHeight +
           totalColumnClusterHeight +
-          this.options.spacing}
+          this.options.spacing
+        }
       )`,
     );
 
@@ -696,8 +703,9 @@ export default class Heatmap {
     }
 
     // Translating the row labels in the opposite x direction of the svg.
-    const rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
-      .translate;
+    const rowLabelsCurrent = d3.transform(
+      this.gRowLabels.attr("transform"),
+    ).translate;
     const labelsDx = clamp(
       0,
       -xScrollMax + this.options.marginLeft,
@@ -734,9 +742,9 @@ export default class Heatmap {
 
     this.gRowLabels.attr(
       "transform",
-      `translate(${x}, ${this.columnLabelsHeight +
-        totalMetadataHeight +
-        totalRowAddLinkHeight})`,
+      `translate(${x}, ${
+        this.columnLabelsHeight + totalMetadataHeight + totalRowAddLinkHeight
+      })`,
     );
     // Placing the white background rectangle behind the row labels.
     this.rowLabelsBackground
@@ -1568,8 +1576,9 @@ export default class Heatmap {
         .select("text")
         .attr(
           "transform",
-          `translate(${this.rowLabelsWidth - this.options.spacing}, ${this.cell
-            .height / 2})`,
+          `translate(${this.rowLabelsWidth - this.options.spacing}, ${
+            this.cell.height / 2
+          })`,
         );
     };
 
@@ -1720,8 +1729,9 @@ export default class Heatmap {
       // update
       addLink.attr(
         "transform",
-        `translate(${dx}, ${(1 + this.options.columnMetadata.length) *
-          this.options.minCellHeight})`,
+        `translate(${dx}, ${
+          (1 + this.options.columnMetadata.length) * this.options.minCellHeight
+        })`,
       );
 
       addLink
@@ -1896,9 +1906,10 @@ export default class Heatmap {
     const applyFormat = (nodes: $TSFixMe) => {
       nodes.attr("transform", (d: $TSFixMe, idx: $TSFixMe) => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
-        return `translate(${dx - xOffset}, ${this.options
-          .metadataAddLinkHeight +
-          (1 + idx * this.options.minCellHeight)})`;
+        return `translate(${dx - xOffset}, ${
+          this.options.metadataAddLinkHeight +
+          (1 + idx * this.options.minCellHeight)
+        })`;
       });
 
       // Update metadata name
@@ -1906,8 +1917,9 @@ export default class Heatmap {
         .select("text")
         .attr(
           "transform",
-          `translate(${this.rowLabelsWidth - this.options.spacing}, ${this
-            .options.minCellHeight / 2})`,
+          `translate(${this.rowLabelsWidth - this.options.spacing}, ${
+            this.options.minCellHeight / 2
+          })`,
         );
       // Update rect use as a hover target
       nodes.select("rect").attr("width", (d: $TSFixMe) => {
@@ -1919,9 +1931,9 @@ export default class Heatmap {
         .select("image")
         .attr(
           "transform",
-          `translate(${this.rowLabelsWidth},${(this.options.minCellHeight +
-            this.options.metadataSortIconSize) /
-            2})`,
+          `translate(${this.rowLabelsWidth},${
+            (this.options.minCellHeight + this.options.metadataSortIconSize) / 2
+          })`,
         );
     };
 
@@ -2022,9 +2034,9 @@ export default class Heatmap {
         .attr(
           "transform",
           (d: $TSFixMe) =>
-            `translate(${d.pos * this.cell.width +
-              this.rowLabelsWidth +
-              1}, 0)`,
+            `translate(${
+              d.pos * this.cell.width + this.rowLabelsWidth + 1
+            }, 0)`,
         );
     };
 
@@ -2032,8 +2044,9 @@ export default class Heatmap {
       nodes.attr(
         "transform",
         (_: $TSFixMe, i: $TSFixMe) =>
-          `translate(0, ${this.options.metadataAddLinkHeight +
-            this.options.minCellHeight * i})`,
+          `translate(0, ${
+            this.options.metadataAddLinkHeight + this.options.minCellHeight * i
+          })`,
       );
     };
 
@@ -2350,8 +2363,9 @@ export default class Heatmap {
       const dir = (d.source.x - d.target.x) / Math.abs(d.source.x - d.target.x);
       return `M${d.source.y},${d.source.x}
                 L${d.source.y},${d.target.x + dir * radius}
-                A${radius} ${radius} 0, 0, ${(dir + 1) / 2}, ${d.source.y +
-        radius} ${d.target.x}
+                A${radius} ${radius} 0, 0, ${(dir + 1) / 2}, ${
+        d.source.y + radius
+      } ${d.target.x}
                 L${d.target.y},${d.target.x}`;
     };
 
@@ -2409,10 +2423,7 @@ export default class Heatmap {
       .append("g")
       .attr("class", cs.link);
 
-    links
-      .append("path")
-      .attr("class", cs.linkPath)
-      .attr("d", diagonal);
+    links.append("path").attr("class", cs.linkPath).attr("d", diagonal);
 
     links
       .append("rect")
