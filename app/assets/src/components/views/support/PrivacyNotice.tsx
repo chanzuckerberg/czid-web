@@ -346,7 +346,7 @@ const PrivacyNotice = () => {
         <div className={cs.underlineHeader}>How We Share Upload Data</div>
       </p>
       <p>
-        Raw Sample Data is <b>never</b> never disclosed to any other CZ ID User
+        Raw Sample Data is <b>never</b> disclosed to any other CZ ID User
         other than the User that uploaded the Sample, but it is disclosed to
         service providers in order to provide the Services, such as AWS for data
         storage. Even staff working on CZ ID cannot access this information
