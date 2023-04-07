@@ -1,0 +1,7 @@
+@import "~czifui/dist/variables";
+
+.parent-container {
+  display: flex;
+  justify-content: center;
+  padding: $sds-spaces-xxl;
+}

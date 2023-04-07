@@ -114,3 +114,10 @@ local-rebuild: local-ecr-login ## Rebuild containers locally
 .PHONY: local-logs
 local-logs: ## Tail the logs of the dev env containers. ex: make local-logs CONTAINER=web
 	$(docker_compose_simple) logs -f $(CONTAINER)
+
+.PHONY: frontend-lint
+frontend-lint:
+	npx eslint app/assets/src --ext .js,.jsx,.ts,.tsx --max-warnings 0 --fix
+	npx eslint app/assets/src -c .eslintrc-a11y.json --ext .js,.jsx,.ts,.tsx --max-warnings 146
+	exit $(npx depcheck --ignores="core-js" --json | jq '.dependencies | length')
+	npx tsc -p ./app/assets/tsconfig.json --noemit
