@@ -54,10 +54,13 @@ export function CZIDUsecaseFormField({
   ];
 
   return (
-    <>
+    <div className={cs.main}>
       <div className={cs.titleSection}>
         <span className={cs.titleMainText}>How do you plan to use CZ ID?</span>
-        <span className={cs.titleSubText}> (select up to 3)</span>
+        <span className={cs.titleSubText}>
+          {" "}
+          (select up to {MAX_SELECTIONS})
+        </span>
       </div>
 
       <div className={cs.checkBoxSection}>
@@ -70,6 +73,6 @@ export function CZIDUsecaseFormField({
           />
         ))}
       </div>
-    </>
+    </div>
   );
 }

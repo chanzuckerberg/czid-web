@@ -11,9 +11,15 @@
   font: $sds-font-body-s-400-font;
   color: $sds-color-gray-500;
 }
-.checkBoxSection {
+.radioSection {
   padding-left: $sds-spaces-xl;
 }
 .main {
   padding: $sds-spaces-l;
+}
+.label {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
 }
