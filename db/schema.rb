@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_03_140845) do
+ActiveRecord::Schema.define(version: 2023_04_07_221803) do
+
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
     t.string "accession_id", null: false, comment: "The NCBI GenBank id of the accession the coverage stats were created for"
@@ -399,6 +400,7 @@ ActiveRecord::Schema.define(version: 2023_04_03_140845) do
     t.bigint "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at", comment: "When the user triggered deletion of the phylo tree"
     t.index ["name"], name: "index_phylo_tree_ngs_on_name"
     t.index ["project_id", "tax_id"], name: "index_phylo_tree_ngs_on_project_id_and_tax_id"
     t.index ["user_id"], name: "index_phylo_tree_ngs_on_user_id"
@@ -436,6 +438,7 @@ ActiveRecord::Schema.define(version: 2023_04_03_140845) do
     t.datetime "ready_at"
     t.string "vcf"
     t.text "dag_vars"
+    t.datetime "deleted_at", comment: "When the user triggered deletion of the phylo tree"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
