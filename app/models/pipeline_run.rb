@@ -1302,7 +1302,7 @@ class PipelineRun < ApplicationRecord
 
       error_message = nil
       if input_error.present?
-        known_user_error, error_message = input_error
+        known_user_error, error_message = input_error.values_at(:label, :message)
       else
         Rails.logger.error("SampleFailedEvent: Sample #{sample.id} by " \
         "#{sample.user.role_name} failed PipelineRun #{id} (#{workflow}). See: #{sample.status_url}")

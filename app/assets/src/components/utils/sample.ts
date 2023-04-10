@@ -109,6 +109,7 @@ export const sampleErrorInfo = ({
     // For samples run using SFN, error messages are sent from the server;
     // this function just sets the status, error type, and followup link
     // for frontend display.
+    case "InvalidFileFormatError":
     case "InvalidInputFileError":
       status = Status.INCOMPLETE_ISSUE;
       message = pipelineRun.error_message || error.message;
