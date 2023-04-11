@@ -3,7 +3,7 @@ import { InputRadio, Tooltip } from "czifui";
 import React, { ReactNode } from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
-import commonStyles from "../../workflow_selector.scss";
+import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { PipelineVersionIndicator } from "../PipelineVersionIndicator";
 import cs from "./sequencing_platform_option.scss";
 

@@ -18,6 +18,7 @@
   display: flex;
   padding: $sds-spaces-l;
   margin-bottom: $sds-spaces-xs;
+  width: 100%;
 
   &:hover {
     background-color: $sds-color-gray-100;
@@ -66,11 +67,6 @@
   padding-top: $sds-spaces-l;
 }
 
-.infoIcon {
-  margin-left: $sds-spaces-xs;
-  vertical-align: -$sds-spaces-xxxs;
-}
-
 .description {
   @include font-body-s;
 }
@@ -107,4 +103,10 @@
 
 .clearLabs {
   min-width: 130px;
+}
+
+.disabledSvgIcon {
+  path {
+    fill: $sds-color-gray-200;
+  }
 }

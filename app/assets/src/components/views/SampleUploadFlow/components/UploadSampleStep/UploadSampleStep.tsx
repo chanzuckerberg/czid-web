@@ -9,6 +9,7 @@ import {
   findIndex,
   flatten,
   flow,
+  forEach,
   get,
   includes,
   intersection,
@@ -63,6 +64,7 @@ import {
   SELECT_ID_KEY,
   SEQUENCING_TECHNOLOGY_OPTIONS,
   UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
+  UploadWorkflows,
   UPLOAD_WORKFLOWS,
 } from "../../constants";
 import LocalSampleFileUpload from "../../LocalSampleFileUpload";
@@ -104,6 +106,8 @@ class UploadSampleStep extends React.Component<
     basespaceSelectedSampleIds: new Set() as Set<string>,
     createProjectOpen: false,
     currentTab: LOCAL_UPLOAD as SampleUploadType,
+    // enable all workflows on first load
+    enabledWorkflows: map(w => w.value, UPLOAD_WORKFLOWS),
     localSamples: [],
     // We generate a unique "selectId" for each sample, which we use to store which samples are selected.
     // This simplifies the logic, because sample names can change (they can get renamed when de-duped)
@@ -112,12 +116,15 @@ class UploadSampleStep extends React.Component<
     remoteSamples: [],
     remoteSelectedSampleIds: new Set() as Set<string>,
     removedLocalFiles: [], // Invalid local files that were removed.
+    // TODO (mlila): move the following technology-specific state/callbacks as sub-state within selectedWorkflows
     selectedGuppyBasecallerSetting: null,
+    // we can only select one technology at a time. If the user attempts to select a second technology
+    // the first will automatically be deselected for them and we will use the tech most recently chosen
     selectedTechnology: null,
     selectedProject: null,
     selectedMedakaModel: DEFAULT_MEDAKA_MODEL_OPTION,
     selectedWetlabProtocol: null,
-    selectedWorkflows: new Set() as Set<string>,
+    selectedWorkflows: new Set() as Set<UploadWorkflows>,
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
     usedClearLabs: false,
     files: [],
@@ -396,28 +403,35 @@ class UploadSampleStep extends React.Component<
   };
 
   // *** Pipeline workflow related functions ***
-
-  handleWorkflowToggle = (workflow: string) => {
+  handleWorkflowToggle = (
+    workflow: UploadWorkflows,
+    technology?: SEQUENCING_TECHNOLOGY_OPTIONS,
+  ) => {
     this.props.onDirty();
     const { allowedFeatures } = this.context || {};
-    let { selectedWorkflows } = this.state;
-    const { selectedTechnology } = this.state;
+    const { selectedWorkflows } = this.state;
 
     if (allowedFeatures.includes(AMR_V1_FEATURE)) {
-      const workflowIsAlreadySelected = selectedWorkflows.has(workflow);
-      workflowIsAlreadySelected
-        ? selectedWorkflows.delete(workflow)
-        : selectedWorkflows.add(workflow);
+      // deselecting a workflow
+      if (this.isWorkflowSelected(workflow)) {
+        const newSelectedWorkflows = new Set(selectedWorkflows);
+        newSelectedWorkflows.delete(workflow);
 
-      selectedWorkflows = this.limitWorkflowSelection(
-        workflow,
-        selectedTechnology,
-      );
+        this.setState(
+          {
+            selectedWorkflows: newSelectedWorkflows,
+          },
+          () => {
+            this.updateAllowedWorkflows();
+          },
+        );
+        // selecting a workflow
+      } else {
+        this.updateAllowedWorkflows(workflow, technology);
+      }
+
       this.setState({
-        selectedWorkflows,
         selectedWetlabProtocol: null,
-        selectedTechnology:
-          workflow === UPLOAD_WORKFLOWS.AMR.value ? selectedTechnology : null,
       });
     } else {
       // TODO: Remove this `else` branch once AMR v1 launches.
@@ -432,31 +446,100 @@ class UploadSampleStep extends React.Component<
     trackEvent(`UploadSampleStep_${workflow}-workflow_selected`);
   };
 
-  limitWorkflowSelection = (
-    workflowSelected: $TSFixMe,
-    selectedTechnology: $TSFixMe,
-  ) => {
-    const { selectedWorkflows } = this.state;
+  getPermittedSelectedWorkflows = ({
+    selectedWorkflows,
+    permittedWorkflows,
+    technology,
+  }): Set<UploadWorkflows> => {
+    // Then iterate over all the selected workflows. The only workflows that should be allowed are
+    // the ones that are allowed for _all_ of the workflows which are already selected.
+    // (ie: an intersection of the "allowed" lists for selected workflows)
+    forEach(selectedWorkflows, workflow => {
+      // Figure out what is permitted for this specific workflow
+      const allowedConcurrentWorkflows =
+        ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY[workflow][technology];
 
-    // Based on workflowSelected and selectedTechnology, determine which workflows are permitted
-    const technology = selectedTechnology || NO_TECHNOLOGY_SELECTED;
-    const permittedWorkflows =
-      ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY[workflowSelected][technology];
-    // Then delete non-permitted workflows
-    const filteredWorkflows = new Set(selectedWorkflows);
-    filteredWorkflows.forEach(workflow => {
-      if (!permittedWorkflows.includes(workflow)) {
-        filteredWorkflows.delete(workflow);
-      }
+      // Then delete any of the ones that aren't allowed
+      permittedWorkflows = permittedWorkflows.filter(w =>
+        allowedConcurrentWorkflows.includes(w),
+      );
     });
-    return filteredWorkflows;
+
+    // Uncheck any previously selected workflows that are incompatible with the new option
+    // (for example, if the technologies conflict)
+    return new Set(
+      filter(
+        w => permittedWorkflows.includes(w),
+        Array.from(selectedWorkflows),
+      ),
+    ) as Set<UploadWorkflows>;
   };
 
-  handleTechnologyToggle = (technology: string) => {
-    this.props.onDirty();
-    const { selectedWorkflows, usedClearLabs } = this.state;
+  // TODO (mlila): when we refactor this component, we should calculate permitted workflows in
+  // TODO          a useEffect dependent on selectedWorkflows
+  updateAllowedWorkflows = (
+    newSelectedWorkflow?: UploadWorkflows,
+    newSelectedTechnology?: SEQUENCING_TECHNOLOGY_OPTIONS,
+  ) => {
+    const { selectedWorkflows, selectedTechnology } = this.state;
 
-    if (selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value)) {
+    let newTechnology;
+    let permittedWorkflows = [];
+    let filteredWorkflows: Set<UploadWorkflows>;
+
+    if (newSelectedWorkflow) {
+      // new selection happened
+      // We start with the workflows that are allowed for the workflow/technology combo that was *just* selected.
+      // This facilitates the behavior that deselects incompatible, previously-chosen options.
+      newTechnology =
+        newSelectedTechnology ?? selectedTechnology ?? NO_TECHNOLOGY_SELECTED;
+      permittedWorkflows =
+        ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY[newSelectedWorkflow][
+          newTechnology
+        ];
+      filteredWorkflows = this.getPermittedSelectedWorkflows({
+        permittedWorkflows,
+        selectedWorkflows,
+        technology: newSelectedTechnology,
+      });
+
+      filteredWorkflows.add(newSelectedWorkflow);
+    } else {
+      // deselection happens
+      // if this action is a deselection, then start off with all workflows allowed before
+      // narrowing the list, since no technology needs priority order -- you can't become
+      // more restrictive when you choose fewer workflows
+      permittedWorkflows = map(w => w.value, UPLOAD_WORKFLOWS);
+      filteredWorkflows = this.getPermittedSelectedWorkflows({
+        permittedWorkflows,
+        selectedWorkflows,
+        technology: newSelectedTechnology,
+      });
+      newTechnology =
+        filteredWorkflows.size > 0
+          ? selectedTechnology
+          : NO_TECHNOLOGY_SELECTED;
+    }
+
+    // let the workflow selector know which workflows are now chosen and can be chosen
+    // given the new/current selection
+    this.setState({
+      enabledWorkflows: permittedWorkflows,
+      selectedWorkflows: filteredWorkflows,
+      selectedTechnology: newTechnology,
+    });
+  };
+
+  handleTechnologyToggle = (
+    workflow: UploadWorkflows,
+    technology: SEQUENCING_TECHNOLOGY_OPTIONS,
+  ) => {
+    this.props.onDirty();
+    const { usedClearLabs } = this.state;
+
+    if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value)
+    ) {
       // If user has selected Nanopore as their technology
       // and has previously toggled "Used Clear Labs" on,
       // then make sure to use the default wetlab + medaka model options.
@@ -480,23 +563,14 @@ class UploadSampleStep extends React.Component<
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
         { technology },
       );
-    } else if (selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value)) {
-      const filteredWorkflows = this.limitWorkflowSelection(
-        UPLOAD_WORKFLOWS.MNGS.value,
-        technology,
-      );
-      // We can reuse the same selectedTechnology state because we
-      // could never have different technologies selected for mNGS and Consensus Genome.
-      this.setState({
-        selectedTechnology: technology,
-        selectedWorkflows: filteredWorkflows,
-      });
-
+    } else if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value)) {
       trackEvent(
         ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_TECHNOLOGY_CLICKED,
         { technology },
       );
     }
+
+    this.updateAllowedWorkflows(workflow, technology);
   };
 
   handleWetlabProtocolChange = (selected: string) => {
@@ -1046,6 +1120,11 @@ class UploadSampleStep extends React.Component<
       return "Please select an analysis type to continue";
   };
 
+  isWorkflowSelected = (workflow: UploadWorkflows) => {
+    const { selectedWorkflows } = this.state;
+    return selectedWorkflows.has(workflow);
+  };
+
   // Whether the current user input is valid. Determines whether the Continue button is enabled.
   isValid = () => {
     const {
@@ -1054,14 +1133,13 @@ class UploadSampleStep extends React.Component<
       selectedTechnology,
       selectedProject,
       selectedWetlabProtocol,
-      selectedWorkflows,
       validatingSamples,
       localSamples,
     } = this.state;
     const { allowedFeatures } = this.context || {};
 
     let workflowsValid: boolean;
-    if (selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value)) {
+    if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value)) {
       // If ont_v1 is enabled, the user must select either Illumina or Nanopore before proceeding.
       // If they select Nanopore, they must additionally select their Guppy Basecaller Setting.
       if (allowedFeatures.includes(ONT_V1_FEATURE)) {
@@ -1081,11 +1159,11 @@ class UploadSampleStep extends React.Component<
         // so no additional selections are required.
         workflowsValid = true;
       }
-    } else if (selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value)) {
+    } else if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value)
+    ) {
       switch (selectedTechnology) {
         case SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA:
-          workflowsValid = !!selectedWetlabProtocol;
-          break;
         case SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE:
           workflowsValid = !!selectedWetlabProtocol;
           break;
@@ -1093,7 +1171,7 @@ class UploadSampleStep extends React.Component<
           workflowsValid = false;
           break;
       }
-    } else if (selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value)) {
+    } else if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.AMR.value)) {
       workflowsValid = true;
     }
 
@@ -1120,13 +1198,13 @@ class UploadSampleStep extends React.Component<
   };
 
   getSequenceTechnology = () => {
-    const { selectedWorkflows, selectedTechnology } = this.state;
+    const { selectedTechnology } = this.state;
     const { allowedFeatures } = this.context || {};
 
     if (allowedFeatures.includes(ONT_V1_FEATURE)) {
       if (
         selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA ||
-        selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value)
+        this.isWorkflowSelected(UPLOAD_WORKFLOWS.AMR.value)
       )
         return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
       else if (selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE)
@@ -1136,14 +1214,21 @@ class UploadSampleStep extends React.Component<
       // Remove this block of logic after the metagenomics ONT pipeline has been
       // released to all users.
       if (
-        selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value) ||
-        selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value) ||
-        (selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) &&
+        this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value) ||
+        this.isWorkflowSelected(UPLOAD_WORKFLOWS.AMR.value) ||
+        this.isWorkflowSelected(
+          UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
+        ) ||
+        (this.isWorkflowSelected(
+          UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
+        ) &&
           selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA)
       )
         return SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA;
       else if (
-        selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) &&
+        this.isWorkflowSelected(
+          UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
+        ) &&
         selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE
       )
         return SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
@@ -1161,13 +1246,15 @@ class UploadSampleStep extends React.Component<
 
   renderUploadTabs = () => {
     const { admin, biohubS3UploadEnabled } = this.props;
-    const { selectedWorkflows, selectedTechnology } = this.state;
+    const { selectedTechnology } = this.state;
     const shouldDisableS3Tab =
-      selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value) &&
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value) &&
       selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
     const shouldDisableBasespaceTab =
-      (selectedWorkflows.has(UPLOAD_WORKFLOWS.MNGS.value) ||
-        selectedWorkflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value)) &&
+      (this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value) ||
+        this.isWorkflowSelected(
+          UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
+        )) &&
       selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
 
     // We're currently disabling S3 tab for ONT v1, but it could be re-enabled in the future.
@@ -1265,6 +1352,7 @@ class UploadSampleStep extends React.Component<
     const { allowedFeatures } = this.context || {};
     const {
       currentTab,
+      enabledWorkflows,
       selectedMedakaModel,
       selectedGuppyBasecallerSetting,
       selectedProject,
@@ -1326,6 +1414,7 @@ class UploadSampleStep extends React.Component<
             )}
           </div>
           <WorkflowSelector
+            enabledWorkflows={enabledWorkflows}
             onClearLabsChange={this.handleClearLabsChange}
             onMedakaModelChange={this.handleMedakaModelChange}
             onGuppyBasecallerSettingChange={

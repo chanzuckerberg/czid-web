@@ -5,6 +5,7 @@ import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
 import {
   SEQUENCING_TECHNOLOGY_OPTIONS,
+  UploadWorkflows,
   UPLOAD_WORKFLOWS,
 } from "../../../../constants";
 import { shouldDisableSequencingPlatformOption } from "../../WorkflowSelector";
@@ -16,7 +17,10 @@ interface ConsensusGenomeSequencingPlatformOptionsProps {
   isS3UploadEnabled: boolean;
   onClearLabsChange?: (usedClearLabs: boolean) => void;
   onMedakaModelChange?: (selected: string) => void;
-  onTechnologyToggle(value: SEQUENCING_TECHNOLOGY_OPTIONS): void;
+  onTechnologyToggle(
+    workflow: UploadWorkflows,
+    technology: SEQUENCING_TECHNOLOGY_OPTIONS,
+  ): void;
   onWetlabProtocolChange(value: string): void;
   selectedMedakaModel: string;
   selectedTechnology: string;
@@ -39,18 +43,20 @@ const ConsensusGenomeSequencingPlatformOptions = ({
   projectPipelineVersions,
 }: ConsensusGenomeSequencingPlatformOptionsProps) => {
   const { ILLUMINA, NANOPORE } = SEQUENCING_TECHNOLOGY_OPTIONS;
-  const { CONSENSUS_GENOME } = UPLOAD_WORKFLOWS;
-  const CG = CONSENSUS_GENOME.value;
+  const { COVID_CONSENSUS_GENOME } = UPLOAD_WORKFLOWS;
+  const CG = COVID_CONSENSUS_GENOME.value;
 
   return (
-    <div className={cs.optionText} onClick={e => e.stopPropagation()}>
+    <button
+      className={cx(cs.optionText, "noStyleButton")}
+      onClick={e => e.stopPropagation()}>
       <div className={cx(cs.title, cs.technologyTitle)}>
         Sequencing Platform:
         <div className={cs.technologyOptions}>
           <IlluminaSequencingPlatformOption
             isCg
             isSelected={selectedTechnology === ILLUMINA}
-            onClick={() => onTechnologyToggle(ILLUMINA)}
+            onClick={() => onTechnologyToggle(CG, ILLUMINA)}
             pipelineVersion={
               projectPipelineVersions?.[WORKFLOWS.CONSENSUS_GENOME.value]
             }
@@ -64,7 +70,7 @@ const ConsensusGenomeSequencingPlatformOptions = ({
             )}
             isSelected={selectedTechnology === NANOPORE}
             isS3UploadEnabled={isS3UploadEnabled}
-            onClick={() => onTechnologyToggle(NANOPORE)}
+            onClick={() => onTechnologyToggle(CG, NANOPORE)}
             onClearLabsChange={onClearLabsChange}
             onMedakaModelChange={onMedakaModelChange}
             selectedMedakaModel={selectedMedakaModel}
@@ -77,7 +83,7 @@ const ConsensusGenomeSequencingPlatformOptions = ({
           />
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 

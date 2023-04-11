@@ -149,7 +149,7 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
                   <List
                     listItems={[
                       `Metagenomics: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).`,
-                      `SARS-CoV-2 Consensus Genome: fastq (.fq).`,
+                      `Consensus Genome: fastq (.fq).`,
                     ]}
                   />
                 </>,

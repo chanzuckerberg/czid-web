@@ -5,6 +5,7 @@ import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
 import {
   SEQUENCING_TECHNOLOGY_OPTIONS,
+  UploadWorkflows,
   UPLOAD_WORKFLOWS,
 } from "../../../../constants";
 import { shouldDisableSequencingPlatformOption } from "../../WorkflowSelector";
@@ -14,10 +15,13 @@ import { MetagenomicsWithNanopore } from "./components/MetagenomicsWithNanopore"
 interface MetagenomicsSequencingPlatformOptionsProps {
   currentTab: SampleUploadType;
   onChangeGuppyBasecallerSetting(selected: string): void;
-  onTechnologyToggle(value: SEQUENCING_TECHNOLOGY_OPTIONS): void;
+  onTechnologyToggle(
+    workflow: UploadWorkflows,
+    technology: SEQUENCING_TECHNOLOGY_OPTIONS,
+  ): void;
   onWetlabProtocolChange(value: string): void;
   selectedGuppyBasecallerSetting: string;
-  selectedTechnology: string;
+  selectedTechnology: SEQUENCING_TECHNOLOGY_OPTIONS;
   selectedWetlabProtocol: string;
   projectPipelineVersions?: ProjectPipelineVersions;
 }
@@ -33,17 +37,19 @@ const MetagenomicsSequencingPlatformOptions = ({
   projectPipelineVersions,
 }: MetagenomicsSequencingPlatformOptionsProps) => {
   const { ILLUMINA, NANOPORE } = SEQUENCING_TECHNOLOGY_OPTIONS;
-  const { MNGS } = UPLOAD_WORKFLOWS;
+  const MNGS = UPLOAD_WORKFLOWS.MNGS.value;
 
   return (
-    <div className={cs.optionText} onClick={e => e.stopPropagation()}>
+    <button
+      className={cx(cs.optionText, "noStyleButton")}
+      onClick={e => e.stopPropagation()}>
       <div className={cx(cs.title, cs.technologyTitle)}>
         Sequencing Platform:
         <div className={cs.technologyOptions}>
           <IlluminaSequencingPlatformOption
             isCg={false}
             isSelected={selectedTechnology === ILLUMINA}
-            onClick={() => onTechnologyToggle(ILLUMINA)}
+            onClick={() => onTechnologyToggle(MNGS, ILLUMINA)}
             selectedWetlabProtocol={selectedWetlabProtocol}
             onWetlabProtocolChange={onWetlabProtocolChange}
             pipelineVersion={
@@ -54,10 +60,10 @@ const MetagenomicsSequencingPlatformOptions = ({
             isDisabled={shouldDisableSequencingPlatformOption(
               currentTab,
               NANOPORE,
-              MNGS.value,
+              MNGS,
             )}
             isSelected={selectedTechnology === NANOPORE}
-            onClick={() => onTechnologyToggle(NANOPORE)}
+            onClick={() => onTechnologyToggle(MNGS, NANOPORE)}
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
             onChangeGuppyBasecallerSetting={onChangeGuppyBasecallerSetting}
             pipelineVersion={
@@ -66,7 +72,7 @@ const MetagenomicsSequencingPlatformOptions = ({
           />
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 

@@ -15,6 +15,7 @@ import IconChartSmall from "./IconChartSmall";
 import IconCheckSmall from "./IconCheckSmall";
 import IconClose from "./IconClose";
 import IconCloseSmall from "./IconCloseSmall";
+import IconCovidVirusXLarge from "./IconCovidVirusXLarge";
 import IconCziLogo from "./IconCziLogo";
 import IconDoubleQuotes from "./IconDoubleQuotes";
 import IconInfo from "./IconInfo";
@@ -102,6 +103,7 @@ export {
   IconCheckSmall,
   IconClose,
   IconCloseSmall,
+  IconCovidVirusXLarge,
   IconCziLogo,
   IconDoubleQuotes,
   IconInfo,

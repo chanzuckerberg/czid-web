@@ -1,0 +1,1 @@
+export { ViralConsensusGenomeSequencingPlatformOptions } from "./ViralConsensusGenomeSequencingPlatformOptions";

@@ -1,4 +1,8 @@
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
+import {
+  SEQUENCING_TECHNOLOGY_OPTIONS,
+  UploadWorkflows,
+} from "../../constants";
 
 export interface UploadSampleStepProps {
   onUploadSamples: $TSFixMeFunction;
@@ -22,6 +26,7 @@ export interface UploadSampleStepState {
   basespaceSelectedSampleIds: Set<string>;
   createProjectOpen: boolean;
   currentTab: SampleUploadType;
+  enabledWorkflows: UploadWorkflows[];
   localSamples: $TSFixMe[];
   localSelectedSampleIds: Set<string>;
   projects: $TSFixMe[];
@@ -29,11 +34,11 @@ export interface UploadSampleStepState {
   remoteSelectedSampleIds: Set<string>;
   removedLocalFiles: $TSFixMe[];
   selectedGuppyBasecallerSetting: $TSFixMe;
-  selectedTechnology: $TSFixMe;
+  selectedTechnology: SEQUENCING_TECHNOLOGY_OPTIONS;
   selectedProject: $TSFixMe;
   selectedMedakaModel: string; // TODO: This should be an enum of available models
   selectedWetlabProtocol: string; // TODO: This should be an enum of available protocols
-  selectedWorkflows: Set<string>; // TODO: This should be a Set of an enum of available workflows
+  selectedWorkflows: Set<UploadWorkflows>;
   showNoProjectError: boolean;
   usedClearLabs: boolean;
   files: $TSFixMe[];

@@ -401,6 +401,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
         <div className={cs.section}>
           <div className={cs.icon}>
             <Icon
+              // TODO (mlila): need to add option for custom icon here
               sdsIcon={UPLOAD_WORKFLOWS[workflowKey].icon}
               sdsSize="xl"
               sdsType="static"
@@ -426,7 +427,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   </div>
                 </div>
               )}
-              {workflow === UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value &&
+              {workflow === UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value && // TODO (mlila): should be with viral cg as well?
                 this.renderCGAnalysisSection()}
               {workflow === UPLOAD_WORKFLOWS.MNGS.value &&
                 this.renderMngsAnalysisSection()}
@@ -451,7 +452,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
             <div className={cs.description}>{clearlabs ? "Yes" : "No"}</div>
           </div>
         )}
-        {workflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) && (
+        {workflows.has(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value) && ( // TODO (mlila): should be with viral cg as well?
           <div className={cs.item}>
             <div className={cs.subheader}>Wetlab Protocol&#58;</div>
             <div className={cs.description}>
@@ -509,7 +510,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
     const mngs = UPLOAD_WORKFLOWS.MNGS.value;
     const amr = UPLOAD_WORKFLOWS.AMR.value;
-    const cg = UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value;
+    const cg = UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value; // TODO (mlila): should be with viral cg as well?
 
     return compact([
       workflows.has(mngs) && mngs,
@@ -629,7 +630,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
           {this.renderSampleInfo()}
         </div>
         <div className={cs.controls}>
-          {workflows.has(UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value) || (
+          {workflows.has(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value) || ( // TODO (mlila): should be with viral cg as well?
             <HostOrganismMessage
               hostGenomes={originalHostGenomes}
               samples={samples}

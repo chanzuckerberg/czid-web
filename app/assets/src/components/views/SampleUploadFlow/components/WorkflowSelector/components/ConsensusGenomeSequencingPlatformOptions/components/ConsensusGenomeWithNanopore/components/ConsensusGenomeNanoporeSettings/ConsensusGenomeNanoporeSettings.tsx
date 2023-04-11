@@ -1,5 +1,4 @@
 import cx from "classnames";
-import { Icon } from "czifui";
 import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
@@ -10,18 +9,8 @@ import {
   MEDAKA_MODEL_OPTIONS,
   SEQUENCING_TECHNOLOGY_OPTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
+import { TooltipIcon } from "../../../../../TooltipIcon";
 import { WetlabSelector } from "../../../../../WetlabSelector";
-
-const infoIcon = (
-  <span>
-    <Icon
-      sdsIcon="infoCircle"
-      sdsSize="s"
-      sdsType="interactive"
-      className={cs.infoIcon}
-    />
-  </span>
-);
 
 interface ConsensusGenomeNanoporeSettingsProps {
   onClearLabsChange(toggle: boolean): void;
@@ -46,20 +35,22 @@ const ConsensusGenomeNanoporeSettings = ({
         <div className={cs.subheader}>
           Used Clear Labs:
           <ColumnHeaderTooltip
-            trigger={infoIcon}
+            trigger={<TooltipIcon />}
             content="Pipeline will be adjusted to accomodate Clear Lab fastq files which have undergone the length filtering and trimming steps."
             position="top center"
             link="https://www.clearlabs.com/"
           />
         </div>
-        <div className={cs.description} onClick={e => e.stopPropagation()}>
+        <button
+          className={cx(cs.description, "noStyleButton")}
+          onClick={e => e.stopPropagation()}>
           <Toggle
             initialChecked={usedClearLabs}
             onLabel="Yes"
             offLabel="No"
             onChange={(label: string) => onClearLabsChange(label === "Yes")}
           />
-        </div>
+        </button>
       </div>
 
       {/* If uploading ClearLabs samples, only allow default wetlab and medaka model options. */}
@@ -79,7 +70,7 @@ const ConsensusGenomeNanoporeSettings = ({
         <div className={cs.subheader}>
           Medaka Model:
           <ColumnHeaderTooltip
-            trigger={infoIcon}
+            trigger={<TooltipIcon />}
             content={
               usedClearLabs
                 ? "Medaka is a tool to create consensus sequences and variant calls from Nanopore sequencing data."

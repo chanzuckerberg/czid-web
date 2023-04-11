@@ -12,24 +12,24 @@ import React, { ReactNode, useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { AMR_V1_FEATURE } from "~/components/utils/features";
-import commonStyles from "../../workflow_selector.scss";
+import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import cs from "./analysis_type.scss";
 
 interface AnalysisTypeProps {
   description: string;
-  shouldHideOption?: boolean;
+  customIcon?: ReactNode;
   isBeta?: boolean;
   isDisabled: boolean;
   isSelected: boolean;
   onClick(): void;
   sequencingPlatformOptions?: ReactNode | null;
-  sdsIcon: keyof IconNameToSizes;
+  sdsIcon?: keyof IconNameToSizes;
   title: string;
 }
 
 const AnalysisType = ({
   description,
-  shouldHideOption = false,
+  customIcon,
   isBeta = false,
   isDisabled,
   isSelected,
@@ -40,8 +40,6 @@ const AnalysisType = ({
 }: AnalysisTypeProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
-
-  if (shouldHideOption) return;
 
   const radioOption = allowedFeatures.includes(AMR_V1_FEATURE) ? (
     <InputCheckbox
@@ -69,6 +67,9 @@ const AnalysisType = ({
         !allowedFeatures.includes(AMR_V1_FEATURE) || !isDisabled
       }>
       <div
+        // re:role, typically, we would want an actual button, but this is a container that holds
+        // buttons, and you can't have a button be a descendant of a button
+        role="button"
         className={cx(
           commonStyles.selectableOption,
           isSelected && commonStyles.selected,
@@ -79,12 +80,15 @@ const AnalysisType = ({
         data-testid={`analysis-type-${kebabCase(title)}`}>
         {radioOption}
         <div className={cs.iconSample}>
-          <Icon
-            sdsIcon={sdsIcon}
-            sdsSize="xl"
-            sdsType="static"
-            className={isDisabled && cs.disabledIcon}
-          />
+          {/* use a custom icon if one is given, otherwise generate an SDS icon */}
+          {customIcon ?? (
+            <Icon
+              sdsIcon={sdsIcon}
+              sdsSize="xl"
+              sdsType="static"
+              className={isDisabled && cs.disabledIcon}
+            />
+          )}
         </div>
         <div className={commonStyles.optionText}>
           <div className={cx(commonStyles.title, isBeta && cs.alignBetaIcon)}>
@@ -95,7 +99,7 @@ const AnalysisType = ({
                   className={isDisabled && cs.disabledStatus}
                   inline
                   status="Beta"
-                  type="beta"
+                  type={isDisabled ? "default" : "beta"}
                 />
               </span>
             )}

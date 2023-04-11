@@ -16,10 +16,15 @@ export const UPLOAD_WORKFLOWS = {
     value: "mngs" as const,
     icon: "dna" as const,
   },
-  CONSENSUS_GENOME: {
-    label: "SARS-CoV-2 Consensus Genome" as const,
-    value: WORKFLOWS.CONSENSUS_GENOME.value,
+  VIRAL_CONSENSUS_GENOME: {
+    label: "Viral Consensus Genome" as const,
+    value: "viral-consensus-genome" as const,
     icon: "virus" as const,
+  },
+  COVID_CONSENSUS_GENOME: {
+    label: "SARS-CoV-2 Consensus Genome" as const,
+    value: "covid-consensus-genome" as const,
+    icon: "virus" as const, // TODO (mlila): remove this once custom icon added to Review page
   },
   AMR: {
     label: "Antimicrobial Resistance" as const,
@@ -30,7 +35,10 @@ export const UPLOAD_WORKFLOWS = {
 
 export const UPLOAD_WORKFLOW_KEY_FOR_VALUE = {
   [UPLOAD_WORKFLOWS.MNGS.value]: "MNGS" as const,
-  [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value]: "CONSENSUS_GENOME" as const,
+  [UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value]:
+    "COVID_CONSENSUS_GENOME" as const,
+  [UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value]:
+    "VIRAL_CONSENSUS_GENOME" as const,
   [UPLOAD_WORKFLOWS.AMR.value]: "AMR" as const,
 };
 
@@ -44,11 +52,16 @@ export const UPLOAD_WORKFLOW_KEY_FOR_VALUE = {
  */
 export const ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY = {
   [UPLOAD_WORKFLOWS.MNGS.value]: {
-    [ILLUMINA]: [UPLOAD_WORKFLOWS.MNGS.value, WORKFLOWS.AMR.value],
+    [ILLUMINA]: [
+      UPLOAD_WORKFLOWS.MNGS.value,
+      UPLOAD_WORKFLOWS.AMR.value,
+      UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
+    ],
     [NANOPORE]: [UPLOAD_WORKFLOWS.MNGS.value],
     [NO_TECHNOLOGY_SELECTED]: [
       UPLOAD_WORKFLOWS.MNGS.value,
-      WORKFLOWS.AMR.value,
+      UPLOAD_WORKFLOWS.AMR.value,
+      UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
     ], // Case when user does not have access to ont_v1
   },
   [UPLOAD_WORKFLOWS.AMR.value]: {
@@ -58,10 +71,21 @@ export const ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY = {
       UPLOAD_WORKFLOWS.MNGS.value,
     ], // Case when only amr is selected
   },
-  [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value]: {
-    [ILLUMINA]: [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value],
-    [NANOPORE]: [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value],
-    [NO_TECHNOLOGY_SELECTED]: [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value],
+  [UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value]: {
+    [ILLUMINA]: [UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value],
+    [NANOPORE]: [UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value],
+    [NO_TECHNOLOGY_SELECTED]: [UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value],
+  },
+  [UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value]: {
+    [ILLUMINA]: [
+      UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
+      UPLOAD_WORKFLOWS.MNGS.value,
+    ],
+    [NANOPORE]: [UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value],
+    [NO_TECHNOLOGY_SELECTED]: [
+      UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
+      UPLOAD_WORKFLOWS.MNGS.value,
+    ],
   },
 };
 
@@ -75,9 +99,12 @@ export const WORKFLOWS_BY_UPLOAD_SELECTIONS = {
     [ILLUMINA]: WORKFLOWS.AMR.value, // Case when short-read-mngs and amr are both selected
     [NO_TECHNOLOGY_SELECTED]: WORKFLOWS.AMR.value, // Case when only amr is selected
   },
-  [UPLOAD_WORKFLOWS.CONSENSUS_GENOME.value]: {
+  [UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value]: {
     [ILLUMINA]: WORKFLOWS.CONSENSUS_GENOME.value,
     [NANOPORE]: WORKFLOWS.CONSENSUS_GENOME.value,
+  },
+  [UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value]: {
+    [NO_TECHNOLOGY_SELECTED]: WORKFLOWS.CONSENSUS_GENOME.value,
   },
 };
 
@@ -377,4 +404,8 @@ export const BASESPACE_UPLOAD = "basespace";
 
 // TYPES
 export type Technology = "Illumina" | "ONT";
-export type UploadWorkflows = "mngs" | "amr" | "consensus-genome";
+export type UploadWorkflows =
+  | "mngs"
+  | "amr"
+  | "covid-consensus-genome"
+  | "viral-consensus-genome";
