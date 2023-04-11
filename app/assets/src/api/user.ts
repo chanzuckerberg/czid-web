@@ -5,13 +5,13 @@ const CREATE_USER = gql`
   # Creates a new user
 
   mutation CreateUser(
-    $name: String!
+    $name: String
     $email: String!
-    $institution: String!
-    $role: Int!
-    $sendActivation: Boolean!
-    $archetypes: String!
-    $segments: String!
+    $institution: String
+    $role: Int
+    $sendActivation: Boolean
+    $archetypes: String
+    $segments: String
   ) {
     createUser(
       name: $name
@@ -22,12 +22,7 @@ const CREATE_USER = gql`
       archetypes: $archetypes
       segments: $segments
     ) {
-      name
       email
-      institution
-      role
-      archetypes
-      segments
     }
   }
 `;

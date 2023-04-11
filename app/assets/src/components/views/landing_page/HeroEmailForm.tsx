@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useCreateUser } from "~/api/user";
 import ArrowSubmit from "~/components/ui/icons/IconSubmitArrow";
 import cs from "./HeroEmailForm.scss";
 
@@ -8,6 +9,7 @@ interface HeroEmailFormProps {
 
 const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
   const [enteredEmail, setEnteredEmail] = useState("");
+  const userCreator = useCreateUser();
 
   function isValidEmail(enteredEmail: string) {
     const emailRegex =
@@ -28,12 +30,23 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
     }
   }
 
-  function createAccount(e: React.MouseEvent<HTMLButtonElement>) {
+  async function createAccount(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
 
     if (isValidEmail(enteredEmail)) {
-      // TODO(ihan): connect to createUser GraphQL endpt
-      // console.log("Registering...");
+      try {
+        // @ts-expect-error This expression is not callable.
+        await userCreator({
+          variables: {
+            email: enteredEmail,
+          },
+        });
+        // TODO(ihan): redirect to confirmation pg
+      } catch (err) {
+        // TODO(ihan): handle error
+        // eslint-disable-next-line no-console
+        console.log([err.message]);
+      }
     } else {
       alert("Please enter a valid email address.");
     }

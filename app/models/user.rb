@@ -34,7 +34,7 @@ class User < ApplicationRecord
     # instead of automatically lower-casing.
     with: /\A(?~[A-Z])\z/, message: "may not contain capital letters",
   }
-  validates :name, presence: true, format: {
+  validates :name, allow_nil: true, format: {
     # See https://www.ascii-code.com/. These were the ranges that captured the
     # common accented chars I knew from experience, leaving out pure symbols.
     with: /\A[- 'a-zA-ZÀ-ÖØ-öø-ÿ]+\z/, message: "must contain only letters, apostrophes, dashes or spaces",
@@ -135,11 +135,15 @@ class User < ApplicationRecord
 
   # "Greg  L.  Dingle" -> "Greg L."
   def first_name
+    return nil if name.nil?
+
     name.split[0..-2].join " "
   end
 
   # "Greg  L.  Dingle" -> "Dingle"
   def last_name
+    return nil if name.nil?
+
     name.split[-1]
   end
 
