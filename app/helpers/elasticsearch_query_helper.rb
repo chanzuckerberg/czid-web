@@ -145,6 +145,24 @@ module ElasticsearchQueryHelper
           ],
         },
       },
+      # sort parameters required for pagination
+      "sort": [
+        {
+          "tax_id": {
+            "order": "asc",
+          },
+        },
+        {
+          "pipeline_run_id": {
+            "order": "asc",
+          },
+        },
+        {
+          "background_id": {
+            "order": "asc",
+          },
+        },
+      ],
     }
 
     hits = paginate_all_results("scored_taxon_counts", search_body)
@@ -406,6 +424,24 @@ module ElasticsearchQueryHelper
           ],
         },
       },
+      # sort parameters required for pagination
+      "sort": [
+        {
+          "tax_id": {
+            "order": "asc",
+          },
+        },
+        {
+          "pipeline_run_id": {
+            "order": "asc",
+          },
+        },
+        {
+          "background_id": {
+            "order": "asc",
+          },
+        },
+      ],
     }
 
     hits = paginate_all_results("scored_taxon_counts", search_body)
@@ -447,6 +483,24 @@ module ElasticsearchQueryHelper
           ],
         },
       },
+      # sort parameters required for pagination
+      "sort": [
+        {
+          "tax_id": {
+            "order": "asc",
+          },
+        },
+        {
+          "pipeline_run_id": {
+            "order": "asc",
+          },
+        },
+        {
+          "background_id": {
+            "order": "asc",
+          },
+        },
+      ],
     }
 
     hits = paginate_all_results("scored_taxon_counts", search_body)
@@ -455,9 +509,11 @@ module ElasticsearchQueryHelper
 
   def self.paginate_all_results(index, search_body, search_after = nil)
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#search-after
-    # requires that no sort parameter has been provided
-    # any sort parameter will be overidden to sort by record id
-    search_body["sort"] = "_id"
+    # requires that a sort parameter has been provided
+    if search_body[:sort].nil?
+      raise "search_body must include a sort parameter when paginating results"
+    end
+
     unless search_after.nil?
       search_body["search_after"] = search_after
     end
