@@ -28,7 +28,7 @@
     // heatmap doesn't completely disappear when scrolled up.
     // When open, the filter pane is 214px wide.
     // These *will* need to change if the height of the elements above ever change.
-    height: calc(100vh - 100px);
+    height: calc(100vh - 220px);
     margin-left: 214px + $sds-spaces-l;
     margin-top: 48px + $sds-spaces-l; //
 

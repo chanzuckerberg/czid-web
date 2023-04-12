@@ -5,6 +5,7 @@ import { ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
 import { HEATMAP_FILTERS_LEFT_FEATURE } from "../utils/features";
 import cs from "./Heatmap/metadata_selector.scss";
+import { UserContext } from "./UserContext";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
@@ -104,3 +105,4 @@ export default class TaxonSelector extends React.Component<TaxonSelectorProps> {
     );
   }
 }
+TaxonSelector.contextType = UserContext;

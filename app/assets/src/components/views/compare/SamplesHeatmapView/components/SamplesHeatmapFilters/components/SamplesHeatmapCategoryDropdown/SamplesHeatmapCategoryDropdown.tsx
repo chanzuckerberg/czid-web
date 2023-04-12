@@ -9,6 +9,8 @@ import cs from "./samples_heatmap_category_dropdown.scss";
 
 // N.B. A lot of the code in this component serves as an adapter between the data format expected by the SDS 'Dropdown' component (i.e., {name: foo}, with no hierarchies supported) and our existing heatmap filter data format used by all the existing state management machinery (i.e., the OnSelectedOptionsChangeDataType type below)
 
+// IMPORTANT NOTE -- I have *temporarily* put in a few patches to treat `Viruses` and `Viruses - Phage` as independent, mutually exclusive categories until the SDS team has a workaround that will enable us to show the input value change to include 'phage' whenever 'virueses' is selected in the dropdown UI, before the apply button is clicked. Once their change lands, we should revert the noted code below which will handle the auto-addition of 'phage'. See backlog ticket for this work: https://app.shortcut.com/idseq/story/230514/update-our-category-filter-to-handle-the-hierarchical-relationship-between-viruses-and-viruses-phage
+
 type Categories = string[];
 
 interface OnSelectedOptionsChangeDataType {
@@ -34,14 +36,19 @@ const formatExistingOptionsForDropdown = (
   if (!categoryOptions) return [];
 
   return categoryOptions.map(option => {
-    return { name: option };
+    // N.B. - TODO - temporary change until SDS change described above is available
+    const name = option === "Viruses" ? "Viruses - Non-phage" : option;
+    return { name: name };
   });
 };
 
 const formatDropdownOptionsforExisting = (
   dropdownOptions: SDSFormattedOption[] = [],
 ): Categories => {
-  return dropdownOptions.map(option => option.name);
+  return dropdownOptions.map(option =>
+    // N.B. - TODO - temporary change until SDS change described above is available
+    option.name === "Viruses - Non-phage" ? "Viruses" : option.name,
+  );
 };
 
 const unflattenPhageSubcategory = (
@@ -116,18 +123,19 @@ export const SamplesHeatmapCategoryDropdown = ({
     [selectedOptions],
   );
 
-  const shouldAddPhageSubcategory = (selectedOptions, newCategories) => {
-    const oldCategoriesIncludesViruses =
-      selectedOptions.categories.includes("Viruses");
-    const oldCategoriesIncludesPhage = newCategories.includes(VIRUSES_PHAGE);
-    const newCategoriesIncludesViruses = newCategories.includes("Viruses");
-    return (
-      (!oldCategoriesIncludesViruses &&
-        !oldCategoriesIncludesPhage &&
-        newCategoriesIncludesViruses) ||
-      newCategories.includes(VIRUSES_PHAGE)
-    );
-  };
+  // N.B. - TODO - temporary change until SDS change described above is available
+  const shouldAddPhageSubcategory = false;
+
+  // const shouldAddPhageSubcategory = (selectedOptions, newCategories) => {
+  // const oldCategoriesIncludesViruses =
+  //   selectedOptions.categories.includes("Viruses");
+  // const oldCategoriesIncludesPhage = newCategories.includes(VIRUSES_PHAGE);
+  // const newCategoriesIncludesViruses = newCategories.includes("Viruses");
+  // (!oldCategoriesIncludesViruses &&
+  //   !oldCategoriesIncludesPhage &&
+  //   newCategoriesIncludesViruses) ||
+  // newCategories.includes(VIRUSES_PHAGE)
+  // };
 
   /* Define event handlers */
   const onCategoryChange = (newCategoryOptions: SDSFormattedOption[]) => {
@@ -136,7 +144,9 @@ export const SamplesHeatmapCategoryDropdown = ({
 
     const unflattenedNewCategories = unflattenPhageSubcategory(
       newCategories,
-      shouldAddPhageSubcategory(selectedOptions, newCategories),
+      // N.B. - TODO - temporary change until SDS change described above is available
+      shouldAddPhageSubcategory,
+      // shouldAddPhageSubcategory(selectedOptions, newCategories),
     );
 
     const haveCategoriesChanged =

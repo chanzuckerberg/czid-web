@@ -1,4 +1,5 @@
-import { DropdownPopper, InputDropdown, InputSlider } from "czifui";
+import Popover from "@mui/material/Popover";
+import { InputDropdown, InputSlider } from "czifui";
 import React, { useState } from "react";
 import cs from "./samples_heatmap_taxon_slider.scss";
 
@@ -33,6 +34,7 @@ export const SamplesHeatmapTaxonSlider = ({
   value,
 }: SamplesHeatmapTaxonSliderPropsType) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [inputValue, setInputValue] = useState<number>(value);
 
   const handleDropdownInputClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -48,25 +50,32 @@ export const SamplesHeatmapTaxonSlider = ({
         sdsStage="default"
         details={value.toString()}
       />
-      <DropdownPopper
+      <Popover
         anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
         open={Boolean(anchorEl)}
-        placement="bottom-start"
+        onClose={() => setAnchorEl(null)}
       >
         <div className={cs.taxaPerSampleSliderContainer}>
           <InputSlider
             disabled={isDisabled}
             max={max}
             min={min}
-            onChangeCommitted={(_event, value: number) =>
-              onChangeCommitted(value)
+            onChange={(_event, newInputValue: number) =>
+              setInputValue(newInputValue)
+            }
+            onChangeCommitted={(_event, currentInputValue: number) =>
+              onChangeCommitted(currentInputValue)
             }
             marks={marks}
-            value={value}
+            value={inputValue}
             valueLabelDisplay="on"
           />
         </div>
-      </DropdownPopper>
+      </Popover>
     </>
   );
 };

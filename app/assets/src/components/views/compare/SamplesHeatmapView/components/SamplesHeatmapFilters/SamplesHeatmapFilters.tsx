@@ -364,7 +364,7 @@ const SamplesHeatmapFilters = ({
               <span>
                 <Icon
                   sdsIcon="infoCircle"
-                  sdsSize="s"
+                  sdsSize="xs"
                   sdsType="static"
                   color="gray"
                   shade={500}
@@ -400,7 +400,7 @@ const SamplesHeatmapFilters = ({
               <span>
                 <Icon
                   sdsIcon="infoCircle"
-                  sdsSize="s"
+                  sdsSize="xs"
                   sdsType="static"
                   color="gray"
                   shade={500}

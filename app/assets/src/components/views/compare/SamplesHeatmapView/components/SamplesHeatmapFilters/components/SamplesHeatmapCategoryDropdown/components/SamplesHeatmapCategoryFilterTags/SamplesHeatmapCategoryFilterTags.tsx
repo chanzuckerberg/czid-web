@@ -31,7 +31,13 @@ export const SamplesHeatmapCategoryFilterTags = ({
 
   const handleRemoveCategoryFromTags = (tagLabel: string) => {
     // The filter tags get labeled as 'Phage' instead of as 'Viruses - Phage', but all the other logic is based on 'Viruses - Phage'
-    const categoryToRemove = tagLabel === "Phage" ? VIRUSES_PHAGE : tagLabel;
+    let categoryToRemove = tagLabel;
+    if (tagLabel === "Phage") {
+      categoryToRemove = VIRUSES_PHAGE;
+    } else if (tagLabel === "Viruses") {
+      categoryToRemove = "Viruses - Non-phage";
+    }
+    // const categoryToRemove = tagLabel === "Phage" ? VIRUSES_PHAGE : tagLabel;
     const currentCategories: SDSFormattedOption[] = currentDropdownValue;
 
     const newCategories = currentCategories.filter(
