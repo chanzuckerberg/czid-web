@@ -1,18 +1,18 @@
 import { InputCheckbox } from "czifui";
 import React from "react";
-import cs from "./czid_usecase_checkbox.scss";
+import cs from "./checkbox.scss";
 
-interface CZIDUsecaseCheckboxProps {
+interface CheckboxProps {
   checkBoxValue: string;
   selectedCheckboxes: string[];
   handleCheckboxChange: (checkBoxValue: string) => void;
 }
 
-export function CZIDUsecaseCheckbox({
+export function Checkbox({
   checkBoxValue,
   selectedCheckboxes,
   handleCheckboxChange,
-}: CZIDUsecaseCheckboxProps) {
+}: CheckboxProps) {
   // add keyboard support for checkboxes
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {

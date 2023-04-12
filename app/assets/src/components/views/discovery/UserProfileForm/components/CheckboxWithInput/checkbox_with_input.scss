@@ -1,0 +1,13 @@
+@import "~czifui/dist/variables";
+
+.otherCheckboxSection {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.otherInput {
+  padding-left: $sds-spaces-m;
+}
+.otherLabel {
+  vertical-align: middle;
+}

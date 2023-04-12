@@ -4,6 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { updateUser as userUpdater } from "~/api/user";
 import { UserContext } from "~/components/common/UserContext";
 import { openUrl } from "~/components/utils/links";
+import CZIDReferralFormField from "./components/CZIDReferralFormField";
 import CZIDUsecaseFormField from "./components/CZIDUsecaseFormField";
 import NameField from "./components/NameField";
 import SequencingExpertiseFormField from "./components/SequencingExpertiseFormField";
@@ -15,6 +16,9 @@ export function UserProfileForm() {
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [selectedUsecaseCheckboxes, setSelectedUsecaseCheckboxes] = useState<
+    string[]
+  >([]);
+  const [selectedReferralCheckboxes, setSelectedReferralCheckboxes] = useState<
     string[]
   >([]);
   const [selectedSequencingExpertise, setSelectedSequencingExpertise] =
@@ -63,6 +67,10 @@ export function UserProfileForm() {
         <SequencingExpertiseFormField
           selectedSequencingExpertise={selectedSequencingExpertise}
           setSelectedSequencingExpertise={setSelectedSequencingExpertise}
+        />
+        <CZIDReferralFormField
+          selectedReferralCheckboxes={selectedReferralCheckboxes}
+          setSelectedReferralCheckboxes={setSelectedReferralCheckboxes}
         />
         <div className={cs["submit-button"]}>
           <Button

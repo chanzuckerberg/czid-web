@@ -1,0 +1,19 @@
+@import "~czifui/dist/variables";
+
+.titleSection {
+  padding-bottom: $sds-spaces-l;
+}
+.titleMainText {
+  font: $sds-font-body-m-600-font;
+  color: $sds-color-gray-black;
+}
+.titleSubText {
+  font: $sds-font-body-s-400-font;
+  color: $sds-color-gray-500;
+}
+.checkBoxSection {
+  padding-left: $sds-spaces-xl;
+}
+.main {
+  padding: $sds-spaces-l;
+}

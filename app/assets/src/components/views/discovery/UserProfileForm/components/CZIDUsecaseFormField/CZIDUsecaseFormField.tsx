@@ -1,17 +1,10 @@
-import React from "react";
-import CZIDUsecaseCheckbox from "./components/CZIDUsecaseCheckbox";
+import React, { useEffect, useState } from "react";
+import Checkbox from "../Checkbox";
+import CheckboxWithInput from "../CheckboxWithInput";
 import {
-  AMR_DETECTION_OPTION,
-  CLINICAL_RESEARCH_OPTION,
-  DISCOVER_NOVEL_VIRUSES_OPTION,
-  IDENTIFY_KNOWN_PATHOGEN_OPTION,
+  CHECKBOX_WITH_INPUT_PREFIX,
+  CZID_USECASE_OPTIONS,
   MAX_SELECTIONS,
-  MICROBIOME_ANALYSIS_OPTION,
-  PHYLOGENETIC_TREE_OPTION,
-  SC2_CONSENSUS_GENOME_OPTION,
-  SURVEILLANCE_OF_VECTORS_OPTION,
-  TRAINING_TOOL_OPTION,
-  VIRAL_CONSENSUS_GENOME_NON_SC2_OPTION,
 } from "./constants";
 import cs from "./czid_usecase_form_field.scss";
 
@@ -24,11 +17,21 @@ export function CZIDUsecaseFormField({
   selectedUsecaseCheckboxes,
   setSelectedUsecaseCheckboxes,
 }: CZIDUsecaseFormFieldProps) {
+  const [isOtherCheckboxChecked, setIsOtherCheckboxChecked] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    const isChecked = selectedUsecaseCheckboxes.some(entry =>
+      entry.includes(CHECKBOX_WITH_INPUT_PREFIX),
+    );
+    setIsOtherCheckboxChecked(isChecked);
+  }, [selectedUsecaseCheckboxes]);
+
   const handleCheckboxChange = (checkboxValue: string) => {
     const isChecked = selectedUsecaseCheckboxes.includes(checkboxValue);
     let newSelectedCheckboxes = [...selectedUsecaseCheckboxes];
     if (isChecked) {
-      // user wants to remove checkbox from the list
+      // User un-checked the checkbox
       newSelectedCheckboxes = newSelectedCheckboxes.filter(
         v => v !== checkboxValue,
       );
@@ -39,19 +42,6 @@ export function CZIDUsecaseFormField({
     }
     setSelectedUsecaseCheckboxes(newSelectedCheckboxes);
   };
-
-  const allUseCaseOptions = [
-    IDENTIFY_KNOWN_PATHOGEN_OPTION,
-    CLINICAL_RESEARCH_OPTION,
-    DISCOVER_NOVEL_VIRUSES_OPTION,
-    MICROBIOME_ANALYSIS_OPTION,
-    SURVEILLANCE_OF_VECTORS_OPTION,
-    AMR_DETECTION_OPTION,
-    VIRAL_CONSENSUS_GENOME_NON_SC2_OPTION,
-    SC2_CONSENSUS_GENOME_OPTION,
-    PHYLOGENETIC_TREE_OPTION,
-    TRAINING_TOOL_OPTION,
-  ];
 
   return (
     <div className={cs.main}>
@@ -64,14 +54,20 @@ export function CZIDUsecaseFormField({
       </div>
 
       <div className={cs.checkBoxSection}>
-        {allUseCaseOptions.map(option => (
-          <CZIDUsecaseCheckbox
+        {CZID_USECASE_OPTIONS.map(option => (
+          <Checkbox
             key={option}
             checkBoxValue={option}
             selectedCheckboxes={selectedUsecaseCheckboxes}
             handleCheckboxChange={handleCheckboxChange}
           />
         ))}
+        <CheckboxWithInput
+          selectedCheckboxes={selectedUsecaseCheckboxes}
+          setSelectedCheckboxes={setSelectedUsecaseCheckboxes}
+          isCheckboxChecked={isOtherCheckboxChecked}
+          prefix={CHECKBOX_WITH_INPUT_PREFIX}
+        />
       </div>
     </div>
   );
