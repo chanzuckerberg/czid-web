@@ -154,6 +154,51 @@ RSpec.describe UsersController, type: :request do
         expect(@joe.name).to eq("abc xyz")
         expect(@joe.admin?).to eq(false)
       end
+
+      it "should send user profile data to AirTable" do
+        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
+        # Params from user profile form
+        form_params = {
+          first_name: @joe.first_name,
+          last_name: @joe.last_name,
+          ror_institution: "Fake Institution",
+          ror_id: "1234",
+          country: "United States",
+          world_bank_income: "10000",
+          czid_usecase: ["medical detective"],
+          expertise_level: "expert",
+          referral_source: ["conference"],
+          signup_path: "landing page",
+        }
+
+        # Params for UsersController#update endpoint
+        sign_up_params = {
+          name: "abc xyz",
+          email: @joe.email,
+          profile_form_version: 2,
+        }.merge(form_params)
+
+        # Expected parameters for posting to AirTable
+        airtable_params = {
+          user_id: @joe.id,
+          admin: @joe.admin?,
+          email: @joe.email,
+          date_created: @joe.created_at.strftime("%Y-%m-%d"),
+          quarter_year: UsersHelper.calculate_quarter_year,
+          survey_version: "2",
+        }.merge(form_params)
+
+        expect(Auth0UserManagementHelper).to receive(:patch_auth0_user).with(old_email: @joe.email, email: @joe.email, name: "abc xyz", role: @joe.role)
+        expect(MetricUtil).to receive(:post_to_airtable).with(
+          "TEST - CZ ID User Profiles", # TODO: replace this with the actual table name
+          { fields: airtable_params }.to_json
+        )
+
+        params = { user: sign_up_params }
+        put user_url @joe, params: params
+
+        assert_redirected_to edit_user_path(@joe)
+      end
     end
   end
 

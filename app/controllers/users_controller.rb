@@ -69,6 +69,14 @@ class UsersController < ApplicationController
       # Update user info on Auth0.
       Auth0UserManagementHelper.patch_auth0_user(old_email: old_email, **input_params.slice(:email, :name, :role))
 
+      if get_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1) == "1"
+        # Post user data to AirTable.
+        profile_form_params = profile_params.to_h.symbolize_keys
+        if profile_params[:profile_form_version].present?
+          UsersHelper.send_profile_form_to_airtable(@user, profile_form_params)
+        end
+      end
+
       respond_to do |format|
         format.html { redirect_to edit_user_path(@user), notice: 'User was successfully updated.' }
         format.json { render :show, status: :ok, location: @user }
@@ -171,5 +179,9 @@ class UsersController < ApplicationController
     else
       params.require(:user).permit(:email, :institution, :name, :send_activation, :segments, :archetypes, :profile_form_version, project_ids: [])
     end
+  end
+
+  def profile_params
+    params.require(:user).permit(:first_name, :last_name, :email, :profile_form_version, :ror_institution, :ror_id, :country, :world_bank_income, :expertise_level, :signup_path, czid_usecase: [], referral_source: [])
   end
 end
