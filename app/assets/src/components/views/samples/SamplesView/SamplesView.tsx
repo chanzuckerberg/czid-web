@@ -380,7 +380,8 @@ const SamplesView = forwardRef(function SamplesView(
                   to={`${option.value}?${params}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={log}>
+                  onClick={log}
+                >
                   <BareDropdown.Item key={option.text} text={option.text} />
                 </RouterLink>
               );
@@ -785,7 +786,8 @@ const SamplesView = forwardRef(function SamplesView(
             <Button
               sdsStyle="minimal"
               sdsType="secondary"
-              onClick={onClearFilters}>
+              onClick={onClearFilters}
+            >
               Clear Filters
             </Button>
           )}

@@ -32,7 +32,8 @@ const DiscoveryViewToggle = ({
             className={cs.menuItem}
             active={currentDisplay === display}
             onClick={() => onDisplaySwitch(display)}
-            key={`item-${display}`}>
+            key={`item-${display}`}
+          >
             {display === "map" && (
               <IconMapSmall
                 className={cx(cs.icon, currentDisplay === display && cs.active)}

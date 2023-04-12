@@ -217,7 +217,8 @@ const BlastV1ReadsModal = ({
         value={selectedCountTypeTab}
         onChange={(_, selectedTabIndex) =>
           setSelectedCountTypeTab(selectedTabIndex)
-        }>
+        }
+      >
         {ntTab}
         {nrTab}
       </Tabs>
@@ -234,7 +235,8 @@ const BlastV1ReadsModal = ({
           className={cx(
             cs.title,
             !blastModalInfo?.showCountTypeTabs && cs.spacing,
-          )}>
+          )}
+        >
           Confirm reads
         </div>
         {renderReadsIdentificationSection()}

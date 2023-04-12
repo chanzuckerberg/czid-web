@@ -55,7 +55,8 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
                   Rather use our command-line interface?
                   <ExternalLink
                     href="/cli_user_instructions"
-                    className={cs.link}>
+                    className={cs.link}
+                  >
                     View CLI Instructions.
                   </ExternalLink>
                 </div>
@@ -91,7 +92,8 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
                       step: val.step,
                       text: val.text,
                     });
-                  }}>
+                  }}
+                >
                   <Label className={cs.circle} circular text={index + 1} />
                   <div className={cs.text}>{val.text}</div>
                 </div>

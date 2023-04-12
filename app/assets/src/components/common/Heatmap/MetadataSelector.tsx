@@ -37,11 +37,13 @@ const MetadataSelector = ({
       horizontalOffset={5}
       verticalOffset={10}
       onClose={onMetadataSelectionClose}
-      position="bottom right">
+      position="bottom right"
+    >
       <div
         className={
           useNewFilters ? cs.newMetadataContainer : cs.metadataContainer
-        }>
+        }
+      >
         <SearchBoxList
           options={metadataTypes}
           onChange={onMetadataSelectionChange}

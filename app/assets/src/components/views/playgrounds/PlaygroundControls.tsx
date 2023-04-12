@@ -301,7 +301,8 @@ const ComponentCard = ({ title, width, children }: ComponentCardProps) => {
   return (
     <div
       className="component-card"
-      style={{ gridColumn: `auto / span ${width}` }}>
+      style={{ gridColumn: `auto / span ${width}` }}
+    >
       <div className="title">{title}</div>
       {React.Children.map(children, (component, idx) => (
         <div key={idx} className="component">

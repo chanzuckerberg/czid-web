@@ -300,7 +300,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
                   taxonId: params.taxonId,
                   sampleId,
                 })
-              }>
+              }
+            >
               {currentAccessionSummary.id} - {currentAccessionSummary.name}
             </a>
           </div>
@@ -470,7 +471,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
                         sampleId,
                       },
                     )
-                  }>
+                  }
+                >
                   View read-level visualization
                   <IconArrowRight />
                 </a>
@@ -545,7 +547,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
                       sampleId,
                     },
                   )
-                }>
+                }
+              >
                 Contact us for help
                 <IconArrowRight />
               </a>
@@ -612,7 +615,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
                       sampleId,
                     },
                   )
-                }>
+                }
+              >
                 <div
                   className={cs.genomeVizInner}
                   ref={refAccessionVizContainer => {
@@ -665,7 +669,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
           ReactDOM.createPortal(
             <div
               style={getTooltipStyle(histogramTooltipLocation)}
-              className={cs.hoverTooltip}>
+              className={cs.hoverTooltip}
+            >
               <TooltipVizTable data={histogramTooltipData} />
             </div>,
             document.body,
@@ -705,7 +710,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
                           sampleId,
                         },
                       )
-                    }>
+                    }
+                  >
                     View read-level visualization
                     <IconArrowRight />
                   </a>
@@ -726,7 +732,8 @@ export default class CoverageVizBottomSidebar extends React.Component<
         visible={visible}
         width="very wide"
         onClose={onClose}
-        direction="bottom">
+        direction="bottom"
+      >
         {get("accessionData.best_accessions", params) &&
         params.accessionData.best_accessions.length > 0
           ? this.renderSidebarContents()

@@ -141,7 +141,8 @@ export default class ConsensusGenomeCreationModal extends React.Component<
         onClose={withAnalytics(
           onClose,
           ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_CLOSED,
-        )}>
+        )}
+      >
         <div className={cs.title}>Generate Consensus Genome</div>
         <div className={cs.description}>
           Align non-host reads to the reference accession of choice to generate
@@ -151,7 +152,8 @@ export default class ConsensusGenomeCreationModal extends React.Component<
             href={VIRAL_CONSENSUS_GENOME_DOC_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_HELP_LINK_CLICKED
-            }>
+            }
+          >
             Learn more.
           </ExternalLink>
         </div>

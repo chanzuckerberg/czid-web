@@ -377,7 +377,8 @@ const SampleDetailsMode = ({
               trackEvent("SampleDetailsMode_see-report-link_clicked", {
                 withTempSelectedOptions: !isEmpty(tempSelectedOptions),
               })
-            }>
+            }
+          >
             See Report
           </a>
         </div>

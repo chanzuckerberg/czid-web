@@ -251,7 +251,8 @@ export default class BasespaceSampleImport extends React.Component<BasespaceSamp
           <Notification
             type={errorType}
             displayStyle="flat"
-            className={cs.notification}>
+            className={cs.notification}
+          >
             {error}
           </Notification>
         )}

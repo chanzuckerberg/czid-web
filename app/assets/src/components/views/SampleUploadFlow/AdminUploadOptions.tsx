@@ -74,7 +74,8 @@ const AdminUploadOptions = ({
         Admin options
         <span
           className={cs.toggleLink}
-          onClick={() => setShowOptions(!showOptions)}>
+          onClick={() => setShowOptions(!showOptions)}
+        >
           {showOptions ? "Hide" : "Show"} options
         </span>
       </div>

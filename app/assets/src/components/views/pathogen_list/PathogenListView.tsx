@@ -73,7 +73,8 @@ const PathogenListView = () => {
       <List
         listClassName={cs.list}
         listItems={[...pathogenList["citations"]].sort()}
-        ordered={true}></List>
+        ordered={true}
+      ></List>
     </div>
   );
 

@@ -555,7 +555,8 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
                 arrow
                 placement="top"
                 sdsStyle="light"
-                title="Highest-scoring organisms satisfying certain thresholds">
+                title="Highest-scoring organisms satisfying certain thresholds"
+              >
                 <span>
                   <Icon sdsIcon="lightBulb" sdsSize="s" sdsType="static" />
                 </span>
@@ -630,7 +631,8 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
           <div className={cs.taxonInfo}>
             <span
               className={cx(cs.taxonName, !!cellData || cs.missingName)}
-              onClick={() => onTaxonNameClick({ ...rowData })}>
+              onClick={() => onTaxonNameClick({ ...rowData })}
+            >
               {cellData || rowData.name}
             </span>
             {rowData.taxLevel === TAX_LEVEL_GENUS &&
@@ -856,12 +858,14 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
       <div className={cs.stack}>
         <div
           className={cx(cs.stackElement, dbType === "nt" || cs.lowlightValue)}
-          onClick={onClick ? () => onClick[0]("nt") : null}>
+          onClick={onClick ? () => onClick[0]("nt") : null}
+        >
           {cellData ? cellData[0] : "-"}
         </div>
         <div
           className={cx(cs.stackElement, dbType === "nr" || cs.lowlightValue)}
-          onClick={onClick ? () => onClick[1]("nr") : null}>
+          onClick={onClick ? () => onClick[1]("nr") : null}
+        >
           {cellData ? cellData[1] : "-"}
         </div>
       </div>

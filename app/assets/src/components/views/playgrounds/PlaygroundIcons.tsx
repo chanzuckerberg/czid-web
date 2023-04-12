@@ -47,7 +47,8 @@ class PlaygroundIcons extends React.Component {
           {fontAwesomeIcons.map(iconInstance => (
             <div
               className={cx(cs.iconContainer, cs.faIconContainer)}
-              key={iconInstance.type.name}>
+              key={iconInstance.type.name}
+            >
               <div className={cs.faIconContainer}>{iconInstance}</div>
               <span className={cs.iconLabel}>{iconInstance.type.name}</span>
             </div>

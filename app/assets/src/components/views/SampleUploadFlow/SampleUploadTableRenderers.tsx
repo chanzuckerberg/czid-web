@@ -28,7 +28,8 @@ export default class SampleUploadTableRenderers extends React.Component {
         cache={this.cache}
         key={dataKey}
         parent={parent}
-        rowIndex={rowIndex}>
+        rowIndex={rowIndex}
+      >
         <div>
           {cellData.fileName.map((fileName: $TSFixMe) => (
             <UserContext.Consumer key={fileName}>
@@ -40,7 +41,8 @@ export default class SampleUploadTableRenderers extends React.Component {
                     cellData.isValid &&
                       cellData.isValid[fileName] === false &&
                       cs.disabled,
-                  )}>
+                  )}
+                >
                   {fileName}
                   {currentUser.allowedFeatures.includes(
                     PRE_UPLOAD_CHECK_FEATURE,

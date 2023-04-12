@@ -106,7 +106,8 @@ class SearchBoxList extends React.Component<
         <div
           data-testid={`search-${this.props.title
             .replace(/ /g, "-")
-            .toLocaleLowerCase()}`}>
+            .toLocaleLowerCase()}`}
+        >
           <Input
             fluid
             className={cs.searchBox}
@@ -124,7 +125,8 @@ class SearchBoxList extends React.Component<
                   className={cs.listColumnTitle}
                   data-testid={`column-${this.props.labelTitle
                     .replace(/ /g, "-")
-                    .toLocaleLowerCase()}`}>
+                    .toLocaleLowerCase()}`}
+                >
                   {this.props.labelTitle}
                 </div>
               )}
@@ -141,7 +143,8 @@ class SearchBoxList extends React.Component<
                 active: this.state.selected.has(option.value),
               })}
               key={`option-${option.value}`}
-              onClick={() => this.handleOptionClick(option.value)}>
+              onClick={() => this.handleOptionClick(option.value)}
+            >
               <div className={cs.listCheckmark}>
                 {this.state.selected.has(option.value) && <IconCheckSmall />}
               </div>
@@ -149,7 +152,8 @@ class SearchBoxList extends React.Component<
                 className={cs.listLabel}
                 data-testid={`column-${option.label
                   .replace(/ /g, "-")
-                  .toLocaleLowerCase()}`}>
+                  .toLocaleLowerCase()}`}
+              >
                 {option.label}
               </div>
               {option.count && (

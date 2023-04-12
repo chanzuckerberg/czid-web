@@ -15,7 +15,8 @@ const Pathogens = ({ pathogens }: PathogensProps) => {
             href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${pathogen.taxId}`}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.PATHOGEN_LIST_VIEW_NCBI_LINK_CLICKED
-            }>
+            }
+          >
             Tax ID: {pathogen.taxId}
           </ExternalLink>
         </Grid.Column>

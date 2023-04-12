@@ -136,9 +136,8 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
           }
         />
         <span
-          className={
-            cs.pipelineVersion
-          }>{`| ${getLastProcessedString()} `}</span>
+          className={cs.pipelineVersion}
+        >{`| ${getLastProcessedString()} `}</span>
       </>
     );
   };

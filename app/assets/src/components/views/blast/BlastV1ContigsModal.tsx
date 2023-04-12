@@ -165,7 +165,8 @@ const BlastV1ContigsModal = ({
           height:
             BLAST_CONTIG_ROW_WIDTH * size(contigs) +
             BLAST_CONTIG_HEADER_ROW_WIDTH,
-        }}>
+        }}
+      >
         <BlastContigsTable
           contigs={contigs}
           onContigSelection={(value, isChecked) =>
@@ -263,7 +264,8 @@ const BlastV1ContigsModal = ({
     <Notification
       type="info"
       displayStyle="flat"
-      className={cs.longContigNotification}>
+      className={cs.longContigNotification}
+    >
       For selected contig(s) that exceeds ~7500 base pairs (bp), up to the
       middle 7500 bp will be used due to NCBI{`'`}s server limitation.
     </Notification>
@@ -276,7 +278,8 @@ const BlastV1ContigsModal = ({
           <Tooltip
             arrow
             placement="top"
-            title="Select at least 1 contig to continue">
+            title="Select at least 1 contig to continue"
+          >
             <span>
               <PrimaryButton text="Continue" rounded disabled />
             </span>
@@ -332,7 +335,8 @@ const BlastV1ContigsModal = ({
           setSelectedCountTypeTab(selectedTabIndex);
           // Reset user contig selections when they switch NT/NR tabs
           setSelectedContigIds(new Set());
-        }}>
+        }}
+      >
         {ntTab}
         {nrTab}
       </Tabs>
@@ -348,7 +352,8 @@ const BlastV1ContigsModal = ({
       )}
       tall
       narrow
-      xlCloseIcon>
+      xlCloseIcon
+    >
       <div className={cs.blastContigsModal}>
         <div className={cs.header}>{blastModalInfo?.selectedBlastType}</div>
         <div className={cs.taxonName}>{taxonName}</div>
@@ -357,7 +362,8 @@ const BlastV1ContigsModal = ({
           className={cx(
             cs.contigSelection,
             !blastModalInfo?.showCountTypeTabs && cs.spacing,
-          )}>
+          )}
+        >
           <div className={cs.title}>Select a contig</div>
           <div className={cs.instructions}>
             Up to 3 of the longest contigs are available to BLAST. The more

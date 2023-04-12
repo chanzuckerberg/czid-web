@@ -21,7 +21,8 @@ export default class BulkDownloadNotification extends React.Component<BulkDownlo
             href="/bulk_downloads"
             onClick={() =>
               trackEvent("BulkDownloadNotification_downloads-page-link-clicked")
-            }>
+            }
+          >
             Downloads page
           </a>
           .

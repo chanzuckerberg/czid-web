@@ -61,20 +61,23 @@ const PinSampleSelector = ({
       search
       title="Select Samples to Pin"
       // @ts-expect-error Type 'number' is not assignable to type 'string | DefaultDropdownMenuOption'.
-      value={selectedSamples}>
+      value={selectedSamples}
+    >
       <div className={cs.buttonsContainer}>
         <Button
           className={cs.button}
           onClick={handleApply}
           sdsStyle="square"
-          sdsType="primary">
+          sdsType="primary"
+        >
           Apply
         </Button>
         <Button
           className={cs.button}
           onClick={handleCancel}
           sdsStyle="square"
-          sdsType="secondary">
+          sdsType="secondary"
+        >
           Cancel
         </Button>
       </div>

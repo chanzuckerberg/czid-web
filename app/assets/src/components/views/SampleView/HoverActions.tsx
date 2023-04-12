@@ -407,7 +407,8 @@ const HoverActions = ({
       className={cx(
         cs.hoverActions,
         showHoverActions ? cs.hoverActionsDropdown : className,
-      )}>
+      )}
+    >
       {getHoverActions().map((hoverAction, key) => (
         <span key={key}>{renderHoverAction(hoverAction)}</span>
       ))}

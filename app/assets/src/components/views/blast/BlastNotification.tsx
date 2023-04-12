@@ -21,7 +21,8 @@ const BlastNotification = ({ onClose }: BlastNotificationProps) => {
             ANALYTICS_EVENT_NAMES.BLAST_NOTIFICATION_NCBI_SUPPORT_CENTER_LINK_CLICKED
           }
           coloredBackground
-          href={NCBI_SUPPORT_CENTER_LINK}>
+          href={NCBI_SUPPORT_CENTER_LINK}
+        >
           NCBI Support Center
         </ExternalLink>
         .

@@ -18,7 +18,8 @@ const FilterTrigger = ({
 }: FilterTriggerProps) => (
   <div
     className={cx(cs.taxonFilterLabel, disabled && cs.disabled, extraStyling)}
-    onClick={onClick}>
+    onClick={onClick}
+  >
     {label}
     <ButtonIcon
       className={cs.dropdownArrow}

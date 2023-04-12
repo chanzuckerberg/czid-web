@@ -832,7 +832,8 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_TOTAL_READS_INFO_ICON_HOVERED,
                         );
-                      }}>
+                      }}
+                    >
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -875,7 +876,8 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_PASSED_QC_INFO_ICON_HOVERED,
                         );
-                      }}>
+                      }}
+                    >
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -918,7 +920,8 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_DCR_INFO_ICON_HOVERED,
                         );
-                      }}>
+                      }}
+                    >
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -955,7 +958,8 @@ function QualityControl({
                 className={cx(
                   cs.subtitle,
                   showMeanInsertSizeWarning && cs.messageIncluded,
-                )}>
+                )}
+              >
                 Mean Insert Size
                 <ColumnHeaderTooltip
                   trigger={
@@ -969,7 +973,8 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
                         );
-                      }}>
+                      }}
+                    >
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -1002,7 +1007,8 @@ function QualityControl({
                             trackEvent(
                               ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_MEAN_INSERT_SIZE_INFO_ICON_HOVERED,
                             );
-                          }}>
+                          }}
+                        >
                           <Icon
                             sdsIcon="infoCircle"
                             sdsSize="s"
@@ -1094,7 +1100,8 @@ function QualityControl({
                         trackEvent(
                           ANALYTICS_EVENT_NAMES.QUALITY_CONTROL_STACKED_BAR_CHART_INFO_ICON_HOVERED,
                         );
-                      }}>
+                      }}
+                    >
                       <Icon
                         sdsIcon="infoCircle"
                         sdsSize="s"
@@ -1180,7 +1187,8 @@ function QualityControl({
             displayStyle="flat"
             onClose={hideprocessingSamplesMessage}
             closeWithDismiss={false}
-            closeWithIcon={true}>
+            closeWithIcon={true}
+          >
             {runningSamples.length}{" "}
             {runningSamples.length === 1 ? "sample is" : "samples are"} still
             being processed.
@@ -1244,7 +1252,8 @@ function QualityControl({
         {tooltipLocation && histogramTooltipData && (
           <div
             style={getTooltipStyle(tooltipLocation)}
-            className={cx(cs.hoverTooltip, tooltipClass)}>
+            className={cx(cs.hoverTooltip, tooltipClass)}
+          >
             <TooltipVizTable data={histogramTooltipData} />
           </div>
         )}

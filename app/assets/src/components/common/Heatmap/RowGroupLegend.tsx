@@ -19,7 +19,8 @@ const RowGroupLegend = ({ tooltipLocation, label }: RowGroupLegendProps) => {
         transform: "translate(-50%)",
         left: tooltipLocation.left + 4, // offset because of right-alignment of labels
         top: tooltipLocation.top - 44, // depends on heights defined in CSS
-      }}>
+      }}
+    >
       <div className={cs.legend}>{label}</div>
       <div className={cs.arrow} />
     </div>

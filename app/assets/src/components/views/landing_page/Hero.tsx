@@ -56,7 +56,8 @@ const Hero = ({ autoAcctCreationEnabled }: HeroProps) => {
         <span
           className={`rotating-text ${fade ? cs.fade : ""} ${
             moveUp ? cs.moveUp : ""
-          }`}>
+          }`}
+        >
           Pathogen Detection
         </span>
       </h1>

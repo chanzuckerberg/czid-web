@@ -84,7 +84,8 @@ export default function ConsensusGenomePreviousModal({
       onClose={withAnalytics(
         onClose,
         ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED,
-      )}>
+      )}
+    >
       <div className={cs.title}>Consensus Genome</div>
       <div className={cs.label}>
         Taxon:{" "}
@@ -113,7 +114,8 @@ export default function ConsensusGenomePreviousModal({
         onClick={withAnalytics(
           () => onNew && onNew(consensusGenomeData),
           ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED,
-        )}>
+        )}
+      >
         Create a New Consensus Genome
       </Button>
     </Modal>

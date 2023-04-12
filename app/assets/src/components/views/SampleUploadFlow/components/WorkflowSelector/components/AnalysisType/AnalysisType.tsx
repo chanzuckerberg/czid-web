@@ -65,7 +65,8 @@ const AnalysisType = ({
       title={tooltipText}
       disableHoverListener={
         !allowedFeatures.includes(AMR_V1_FEATURE) || !isDisabled
-      }>
+      }
+    >
       <div
         // re:role, typically, we would want an actual button, but this is a container that holds
         // buttons, and you can't have a button be a descendant of a button
@@ -77,7 +78,8 @@ const AnalysisType = ({
         )}
         onClick={() => (isDisabled ? null : onClick())}
         key={title}
-        data-testid={`analysis-type-${kebabCase(title)}`}>
+        data-testid={`analysis-type-${kebabCase(title)}`}
+      >
         {radioOption}
         <div className={cs.iconSample}>
           {/* use a custom icon if one is given, otherwise generate an SDS icon */}

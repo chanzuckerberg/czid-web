@@ -219,7 +219,8 @@ class BaseTable extends React.Component<
           // @ts-expect-error ts-migrate(2769) FIXME: No overload matches this call.
           position={{ x: 0 }}
           onStart={() => this.setState({ columnCurrentlyDragged: dataKey })}
-          onStop={() => this.setState({ columnCurrentlyDragged: null })}>
+          onStop={() => this.setState({ columnCurrentlyDragged: null })}
+        >
           <div
             className={cs.draggableArea}
             onMouseOver={() =>
@@ -230,7 +231,8 @@ class BaseTable extends React.Component<
             }
             onMouseLeave={() =>
               this.setState({ mouseOverDraggableAreaForColumn: null })
-            }>
+            }
+          >
             <div className={cs.dragHandleIcon} />
             {(columnCurrentlyDragged === dataKey ||
               mouseOverDraggableAreaForColumn === dataKey) &&
@@ -468,7 +470,8 @@ class BaseTable extends React.Component<
     return (
       <div
         className={cs.tableContainer}
-        style={{ flexBasis: defaultHeaderHeight }}>
+        style={{ flexBasis: defaultHeaderHeight }}
+      >
         <AutoSizer>
           {({ width, height }) => (
             <VirtualizedTable
@@ -492,7 +495,8 @@ class BaseTable extends React.Component<
               sortDirection={sortable ? sortDirection : "DESC"}
               width={width}
               onRowClick={onRowClick}
-              {...extraTableProps}>
+              {...extraTableProps}
+            >
               {selectableKey && (
                 <Column
                   className={selectableColumnClassName}
@@ -586,7 +590,8 @@ class BaseTable extends React.Component<
               cs.columnSelector,
               cs.row,
               "ReactVirtualized__Table__headerRow",
-            )}>
+            )}
+          >
             {this.renderColumnSelector()}
           </div>
         )}

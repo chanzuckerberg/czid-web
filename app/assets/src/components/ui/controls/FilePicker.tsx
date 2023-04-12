@@ -78,7 +78,8 @@ const FilePicker = ({
       onDrop={onChange || defaultOnChange}
       onDropRejected={onRejected || defaultOnRejected}
       className={cx(cs.filePicker, className, getFile() && cs.active)}
-      data-testid="drop-sample-files">
+      data-testid="drop-sample-files"
+    >
       <div className={cs.inner}>
         <div className={cs.title}>
           {title &&

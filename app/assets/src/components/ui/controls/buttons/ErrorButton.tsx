@@ -30,7 +30,8 @@ const ErrorButton = ({
       disabled={disabled}
       startIcon={
         startIcon && <Icon sdsIcon={startIcon} sdsSize="l" sdsType="button" />
-      }>
+      }
+    >
       {text || children}
     </Button>
   );

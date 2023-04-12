@@ -26,15 +26,18 @@ class MapTooltip extends React.Component<MapTooltipProps> {
         latitude={lat}
         longitude={lng}
         closeButton={false}
-        offsetTop={-20}>
+        offsetTop={-20}
+      >
         <div
           className={cs.content}
           onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}>
+          onMouseLeave={onMouseLeave}
+        >
           <div>
             <span
               className={cx(cs.title, onTitleClick && cs.hoverable)}
-              onClick={onTitleClick}>
+              onClick={onTitleClick}
+            >
               {title}
             </span>
           </div>

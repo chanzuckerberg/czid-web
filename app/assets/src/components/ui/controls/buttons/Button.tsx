@@ -34,7 +34,8 @@ const Button = ({
         !rounded && "rectangular",
         circular && "circular",
         hasDropdownArrow && "has-dropdown-arrow",
-      )}>
+      )}
+    >
       {content}
       {hasDropdownArrow && (
         <IconArrowDownSmall className="icon-dropdown-arrow" />

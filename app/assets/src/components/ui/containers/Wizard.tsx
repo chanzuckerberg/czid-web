@@ -166,14 +166,16 @@ class Wizard extends React.Component<WizardProps, WizardState> {
 
     return (
       <WizardContext.Provider
-        value={{ currentPage: this.state.currentPage, actions: wizardActions }}>
+        value={{ currentPage: this.state.currentPage, actions: wizardActions }}
+      >
         {this.state.overlay}
         <div
           className={cx(
             "wizard",
             this.props.className,
             this.state.overlay && "wizard__hidden",
-          )}>
+          )}
+        >
           <div className="wizard__header">
             {pageInfo && <div className="wizard__header__page">{pageInfo}</div>}
             <div className="wizard__header__title">
@@ -195,7 +197,8 @@ class Wizard extends React.Component<WizardProps, WizardState> {
                   sdsStyle="rounded"
                   sdsType="primary"
                   onClick={this.handleContinueClick}
-                  disabled={!this.state.continueEnabled}>
+                  disabled={!this.state.continueEnabled}
+                >
                   {this.labels.continue}
                 </Button>
               )}
@@ -203,7 +206,8 @@ class Wizard extends React.Component<WizardProps, WizardState> {
                 <Button
                   sdsStyle="rounded"
                   sdsType="primary"
-                  onClick={this.handleFinishClick}>
+                  onClick={this.handleFinishClick}
+                >
                   {this.labels.finish}
                 </Button>
               )}
@@ -211,7 +215,8 @@ class Wizard extends React.Component<WizardProps, WizardState> {
                 <Button
                   sdsStyle="rounded"
                   sdsType="secondary"
-                  onClick={this.handleBackClick}>
+                  onClick={this.handleBackClick}
+                >
                   {this.labels.back}
                 </Button>
               )}
@@ -277,7 +282,8 @@ const Action = ({ action, onAfterAction, children }: ActionProps) => {
         return (
           <div
             className={`wizard__action wizard__action--${action}`}
-            onClick={() => handleOnClick(actions[action])}>
+            onClick={() => handleOnClick(actions[action])}
+          >
             {children}
           </div>
         );

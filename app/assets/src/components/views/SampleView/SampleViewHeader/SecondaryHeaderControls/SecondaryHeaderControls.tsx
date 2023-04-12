@@ -54,7 +54,8 @@ export const SecondaryHeaderControls = ({
             isAllCaps
             onClick={() =>
               (location.href = `/samples/${sample?.id}/pipeline_runs`)
-            }>
+            }
+          >
             Pipeline Runs
           </Button>
           <span className={cs.seperator}> | </span>
@@ -70,7 +71,8 @@ export const SecondaryHeaderControls = ({
           {
             sampleId: sample?.id,
           },
-        )}>
+        )}
+      >
         Sample Details
       </Button>
     </div>

@@ -17,7 +17,8 @@ export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
       <SortableHeader
         className={cs.rightAlignedHeader}
         header={header}
-        style={generateWidthStyles(column)}>
+        style={generateWidthStyles(column)}
+      >
         %Cov
       </SortableHeader>
     );

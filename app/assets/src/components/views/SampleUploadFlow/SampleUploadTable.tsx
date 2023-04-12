@@ -186,7 +186,8 @@ export default class SampleUploadTable extends React.Component<SampleUploadTable
           Select samples that you want to upload. &nbsp;
           <span
             className={cs.removeLink}
-            onClick={this.removeUnselectedSamples}>
+            onClick={this.removeUnselectedSamples}
+          >
             Click to remove unselected samples
           </span>
         </div>

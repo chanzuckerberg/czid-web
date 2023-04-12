@@ -393,7 +393,8 @@ export default class AMRHeatmapView extends React.Component<
         target="_blank"
         rel="noopener noreferrer"
         key={"Download_CSV_link"}
-        onClick={() => trackEvent("AMRHeatmapView_download-csv-table_clicked")}>
+        onClick={() => trackEvent("AMRHeatmapView_download-csv-table_clicked")}
+      >
         Download CSV
       </a>
     );

@@ -2168,7 +2168,8 @@ class SamplesHeatmapView extends React.Component<
             onClick={withAnalytics(
               this.toggleDisplayFilters,
               "SamplesHeatmapFilters_toggle_clicked",
-            )}>
+            )}
+          >
             <SortIcon
               sortDirection={hideFilters ? "descending" : "ascending"}
             />

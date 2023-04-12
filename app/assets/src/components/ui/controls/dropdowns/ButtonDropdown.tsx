@@ -32,7 +32,8 @@ const ButtonDropdown = ({
       disabled={disabled}
       sdsStyle="rounded"
       sdsType="secondary"
-      icon={icon}>
+      icon={icon}
+    >
       {text}
     </SDSButtonDropdown>
   );

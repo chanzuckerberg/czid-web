@@ -21,7 +21,8 @@ const PhyloTreeNotification = ({ onClose }: PhyloTreeNotificationProps) => {
               trackEvent(
                 ANALYTICS_EVENT_NAMES.PHYLO_TREE_NOTIFICATION_VIEW_VISUALIZATIONS_LINK_CLICKED,
               );
-            }}>
+            }}
+          >
             View Visualizations
           </a>
         </div>
@@ -34,7 +35,8 @@ const PhyloTreeNotification = ({ onClose }: PhyloTreeNotificationProps) => {
       closeWithDismiss={false}
       displayStyle="elevated"
       type="info"
-      onClose={onClose}>
+      onClose={onClose}
+    >
       {label}
     </Notification>
   );

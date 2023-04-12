@@ -163,7 +163,8 @@ function ReadViz({ metrics, name, refInfo, sequence }: ReadVizProps) {
           whiteSpace: "pre",
           fontFamily: "monospace",
           overflow: "scroll",
-        }}>
+        }}
+      >
         <table>
           <tbody>
             <tr>

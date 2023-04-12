@@ -17,7 +17,8 @@ const ModalFirstTimeUser = ({ onClose }: ModalFirstTimeUserProps) => {
       narrow
       tall
       className={cs.emptyStateModal}
-      onClose={withAnalytics(onClose, "EmptyStatesModal_close-modal_clicked")}>
+      onClose={withAnalytics(onClose, "EmptyStatesModal_close-modal_clicked")}
+    >
       <InfoBanner
         className={cs.emptyStateBanner}
         contentClassName={cs.content}

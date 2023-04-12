@@ -75,7 +75,8 @@ export const AdvancedDownloadTabWithApollo = () => {
       onKeyDown={handleCLICommandClick}
       onMouseLeave={resetTooltip}
       role="button"
-      tabIndex={0}>
+      tabIndex={0}
+    >
       <div className={cs.command}>{getCLICommand()}</div>
       <Icon className={cs.icon} sdsIcon="copy" sdsSize="s" sdsType="static" />
     </div>

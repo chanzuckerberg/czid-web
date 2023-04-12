@@ -58,7 +58,8 @@ const Sections = ({
           id={getSectionId(header)}
           key={`section-${getSectionId(header)}`}
           name={header}
-          observer={observer}>
+          observer={observer}
+        >
           <Pathogens pathogens={sectionContentByHeader[header]} />
         </Section>
       ))}

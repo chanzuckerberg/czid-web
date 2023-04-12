@@ -144,7 +144,8 @@ export const ThresholdFilterSDS = ({
         <DropdownPopper
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
-          placement="bottom-start">
+          placement="bottom-start"
+        >
           <div className={cs.filterContainer}>
             <div className={cs.title}>Configure Thresholds</div>
 
@@ -167,7 +168,8 @@ export const ThresholdFilterSDS = ({
                   sdsStyle="square"
                   sdsType="primary"
                   disabled={!hasModifiedFilters}
-                  onClick={handleApply}>
+                  onClick={handleApply}
+                >
                   Apply
                 </Button>
               </div>
@@ -175,7 +177,8 @@ export const ThresholdFilterSDS = ({
                 <Button
                   sdsStyle="square"
                   sdsType="secondary"
-                  onClick={handleCancel}>
+                  onClick={handleCancel}
+                >
                   Cancel
                 </Button>
               </div>
@@ -189,7 +192,8 @@ export const ThresholdFilterSDS = ({
             return (
               <div
                 className={cs.filterTagContainer}
-                key={`threshold-tag-container-${index}`}>
+                key={`threshold-tag-container-${index}`}
+              >
                 <ThresholdFilterTag
                   threshold={threshold}
                   onClose={() => {

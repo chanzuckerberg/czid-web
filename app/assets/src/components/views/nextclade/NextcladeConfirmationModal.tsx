@@ -34,7 +34,8 @@ const NextcladeConfirmationModal = ({
           href="https://clades.nextstrain.org"
           analyticsEventName={
             "NextcladeConfirmationModal_nextclade-link_clicked"
-          }>
+          }
+        >
           clades.nextstrain.org
         </ExternalLink>
         .

@@ -44,7 +44,8 @@ class NextcladeReferenceTreeOptions extends React.Component<NextcladeReferenceTr
       <div className={cs.treeTypeContainer}>
         <div
           className={cx(cs.treeType, !uploadSelected && cs.selected)}
-          onClick={() => onSelect("global")}>
+          onClick={() => onSelect("global")}
+        >
           <RadioButton className={cs.radioButton} selected={!uploadSelected} />
           <div className={cs.content}>
             <div className={cs.name}>Nextclade Default Tree</div>
@@ -58,7 +59,8 @@ class NextcladeReferenceTreeOptions extends React.Component<NextcladeReferenceTr
         </div>
         <div
           className={cx(cs.treeType, uploadSelected && cs.selected)}
-          onClick={() => onSelect("upload")}>
+          onClick={() => onSelect("upload")}
+        >
           <RadioButton className={cs.radioButton} selected={uploadSelected} />
           <div className={cs.content}>
             <div className={cs.name}>Upload a Tree</div>

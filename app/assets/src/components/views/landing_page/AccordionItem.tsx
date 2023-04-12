@@ -14,7 +14,8 @@ const AccordionItem = (props: AccordionItemProps) => {
     <div
       onClick={props.onClick}
       onKeyDown={props.onClick}
-      className={`${cs.accordion} accordionItem`}>
+      className={`${cs.accordion} accordionItem`}
+    >
       {props.isOpen ? (
         <svg
           className="icon"
@@ -22,7 +23,8 @@ const AccordionItem = (props: AccordionItemProps) => {
           height="21"
           viewBox="0 0 20 21"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <circle cx="9.80701" cy="10.2426" r="9.80701" fill="#3867FA" />
           <path d="M5.00977 10.2422L14.6045 10.2422" stroke="white" />
         </svg>
@@ -33,7 +35,8 @@ const AccordionItem = (props: AccordionItemProps) => {
           height="20"
           viewBox="0 0 20 20"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <circle
             className={cs.plusStroke}
             cx="9.80701"
@@ -55,7 +58,8 @@ const AccordionItem = (props: AccordionItemProps) => {
       )}
       <span
         className={cs.accordionTitle}
-        style={props.isOpen ? { color: "#3867FA" } : null}>
+        style={props.isOpen ? { color: "#3867FA" } : null}
+      >
         {props.accordionTitle}
       </span>
       <div className={cs.panel}>

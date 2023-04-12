@@ -49,7 +49,8 @@ export const OverflowMenu = ({
         onClick={() => {
           closeActionsMenu();
           setIsBulkDeleteModalOpen(true);
-        }}>
+        }}
+      >
         <div className={cx(cs.dropdownItem, deleteDisabled && cs.iconDisabled)}>
           <Icon
             sdsIcon="trashCan"
@@ -99,7 +100,8 @@ export const OverflowMenu = ({
         }}
         keepMounted
         open={Boolean(menuAnchorEl)}
-        onClose={closeActionsMenu}>
+        onClose={closeActionsMenu}
+      >
         {renderDeleteRunMenuItem()}
       </Menu>
       <BulkDeleteModal

@@ -458,7 +458,8 @@ class DiscoveryFilters extends React.Component<
         title={`Not available for ${this.configForWorkflow[workflow].tooltipTitle}.`}
         classes={{
           tooltip: cs.disabledTooltip,
-        }}>
+        }}
+      >
         <span>{filter}</span>
       </Tooltip>
     );
@@ -517,7 +518,8 @@ class DiscoveryFilters extends React.Component<
                 cs.filterContainer,
                 hasTaxonThresholdFilterFeature &&
                   cs.taxonThresholdFilterContainer,
-              )}>
+              )}
+            >
               {hasTaxonThresholdFilterFeature ? (
                 this.renderTaxonThresholdFilter({
                   disabled: taxonFilterDisabled,

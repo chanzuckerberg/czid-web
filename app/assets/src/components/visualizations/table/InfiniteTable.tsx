@@ -220,7 +220,8 @@ class InfiniteTable extends React.Component<
         loadMoreRows={this.loadMoreRows}
         minimumBatchSize={minimumBatchSize}
         rowCount={rowCount}
-        threshold={threshold}>
+        threshold={threshold}
+      >
         {({ onRowsRendered, registerChild }) => {
           return (
             <BaseTable

@@ -129,7 +129,8 @@ class AccessionViz extends React.Component<
                 allReads: this.allReads.length,
               },
             )}
-            style={{ cursor: "pointer" }}>
+            style={{ cursor: "pointer" }}
+          >
             View more reads
           </a>
         </div>

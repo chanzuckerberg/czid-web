@@ -32,7 +32,8 @@ const BarChartToggle = ({
                 className={cs.menuItem}
                 active={currentDisplay === display}
                 onClick={() => onDisplaySwitch(display)}
-                key={`item-${display}`}>
+                key={`item-${display}`}
+              >
                 {display === "count" && (
                   <IconBarChartHorizontal3Small
                     className={cx(

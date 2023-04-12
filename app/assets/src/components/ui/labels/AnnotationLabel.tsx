@@ -35,7 +35,8 @@ const AnnotationLabel = ({
       {...props}
       onMouseEnter={() =>
         trackEvent(ANALYTICS_EVENT_NAMES.ANNOTATION_LABEL_HOVERED)
-      }>
+      }
+    >
       <Icon
         className={cx(cs[icon], isStatic ? cs.staticFlag : cs.interactiveFlag)}
         // @ts-expect-error Type 'string' is not assignable to type 'keyof IconNameToSizes'

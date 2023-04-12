@@ -18,7 +18,8 @@ export const CATEGORIES = {
           href={"/pathogen_list"}
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
-          }>
+          }
+        >
           full list
         </ExternalLink>
         {" of pathogens."}
@@ -41,7 +42,8 @@ export const CATEGORIES = {
           }
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
-          }>
+          }
+        >
           here.
         </ExternalLink>
       </>
@@ -61,7 +63,8 @@ export const CATEGORIES = {
           }
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PATHOGEN_LABEL_PATHOGEN_LIST_LINK_CLICKED
-          }>
+          }
+        >
           here.
         </ExternalLink>
       </>

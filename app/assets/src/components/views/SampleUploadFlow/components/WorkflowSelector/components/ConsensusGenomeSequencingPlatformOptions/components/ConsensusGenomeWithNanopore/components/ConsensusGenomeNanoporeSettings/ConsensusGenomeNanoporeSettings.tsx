@@ -43,7 +43,8 @@ const ConsensusGenomeNanoporeSettings = ({
         </div>
         <button
           className={cx(cs.description, "noStyleButton")}
-          onClick={e => e.stopPropagation()}>
+          onClick={e => e.stopPropagation()}
+        >
           <Toggle
             initialChecked={usedClearLabs}
             onLabel="Yes"

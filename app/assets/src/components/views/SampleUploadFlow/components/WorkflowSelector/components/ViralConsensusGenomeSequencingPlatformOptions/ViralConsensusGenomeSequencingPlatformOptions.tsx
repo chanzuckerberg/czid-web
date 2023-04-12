@@ -9,14 +9,16 @@ const ViralConsensusGenomeSequencingPlatformOptions = () => {
   return (
     <button
       className={cx(cs.technologyContent, "noStyleButton")}
-      onClick={e => e.stopPropagation()}>
+      onClick={e => e.stopPropagation()}
+    >
       <div className={cs.item}>
         <div className={cs.subheader}>
           Taxon Name
           <Tooltip
             arrow
             placement="top"
-            title="Include the taxon name of the reference sequence to help you search generated genomes.">
+            title="Include the taxon name of the reference sequence to help you search generated genomes."
+          >
             <TooltipIcon />
           </Tooltip>
         </div>

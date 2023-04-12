@@ -156,7 +156,8 @@ export default class DiscoverySidebar extends React.Component<
                     count: entry.count,
                     percent,
                   });
-                }}>
+                }}
+              >
                 &nbsp;
               </div>
             );
@@ -223,7 +224,8 @@ export default class DiscoverySidebar extends React.Component<
                 extraRows: extraRows.length,
                 linkText,
               });
-            }}>
+            }}
+          >
             {linkText}
           </div>
         )}
@@ -262,7 +264,8 @@ export default class DiscoverySidebar extends React.Component<
                   percent,
                   rows: rows.length,
                 },
-              )}>
+              )}
+            >
               {value === "not_set" ? <i>{text}</i> : text}
             </a>
           </dt>
@@ -332,7 +335,8 @@ export default class DiscoverySidebar extends React.Component<
             bottomContentPadding
             key={dataKey}
             open={this.hasData()}
-            header={<div className={cs.title}>Overall</div>}>
+            header={<div className={cs.title}>Overall</div>}
+          >
             <div className={cx(cs.hasBackground, cs.statsRow)}>
               <dl className={cs.dataList}>
                 <dt className={cs.statsDt}>
@@ -383,7 +387,8 @@ export default class DiscoverySidebar extends React.Component<
             className={cs.metadataSection}
             bottomContentPadding
             open={this.hasData()}
-            header={<div className={cs.title}>Date created</div>}>
+            header={<div className={cs.title}>Date created</div>}
+          >
             <div>{this.buildDateHistogram("time")}</div>
           </Accordion>
         </div>
@@ -393,7 +398,8 @@ export default class DiscoverySidebar extends React.Component<
             className={cs.metadataSection}
             bottomContentPadding
             open={this.hasData()}
-            header={<div className={cs.title}>Metadata</div>}>
+            header={<div className={cs.title}>Metadata</div>}
+          >
             <div className={cs.hasBackground}>
               <span className={cs.rowLabel}>Host</span>
               {this.buildMetadataRows("host")}

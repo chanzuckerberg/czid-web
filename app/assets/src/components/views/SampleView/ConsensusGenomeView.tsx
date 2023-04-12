@@ -89,7 +89,8 @@ const ConsensusGenomeView = ({
         className={cx(
           cs.headerContainer,
           !shouldRenderCGDropdown && cs.removeBottomMargin,
-        )}>
+        )}
+      >
         {shouldRenderCGDropdown && renderConsensusGenomeDropdown()}
         {get("status", workflowRun) !== RUNNING_STATE && (
           <ExternalLink
@@ -98,7 +99,8 @@ const ConsensusGenomeView = ({
               !shouldRenderCGDropdown && cs.alignRight,
             )}
             href={computeHelpLink()}
-            analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}>
+            analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
+          >
             Learn more about consensus genomes <IconArrowRight />
           </ExternalLink>
         )}
@@ -120,7 +122,8 @@ const ConsensusGenomeView = ({
         {histogramTooltipLocation && histogramTooltipData && (
           <div
             style={getTooltipStyle(histogramTooltipLocation)}
-            className={cs.hoverTooltip}>
+            className={cs.hoverTooltip}
+          >
             <TooltipVizTable data={histogramTooltipData} />
           </div>
         )}
@@ -244,7 +247,8 @@ const ConsensusGenomeView = ({
                 accessionId,
                 taxonId,
                 sampleId: sample.id,
-              }}>
+              }}
+            >
               {accessionId}
             </ExternalLink>
           </div>
@@ -266,7 +270,8 @@ const ConsensusGenomeView = ({
     const helpLink = (
       <ExternalLink
         href={computeHelpLink()}
-        analyticsEventName={"ConsensusGenomeView_help-link_clicked"}>
+        analyticsEventName={"ConsensusGenomeView_help-link_clicked"}
+      >
         Learn more.
       </ExternalLink>
     );
@@ -348,7 +353,8 @@ const ConsensusGenomeView = ({
         href={computeHelpLink()}
         analyticsEventName={
           "ConsensusGenomeView_quality-metrics-help-link_clicked"
-        }>
+        }
+      >
         Learn more.
       </ExternalLink>
     );

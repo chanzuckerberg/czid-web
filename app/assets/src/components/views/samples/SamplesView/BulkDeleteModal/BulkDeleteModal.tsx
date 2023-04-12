@@ -115,7 +115,8 @@ const BulkDeleteModal = ({
       className={cs.dialog}
       open={isOpen}
       sdsSize="xs"
-      data-testid="bulk-delete-modal">
+      data-testid="bulk-delete-modal"
+    >
       <DialogTitle className={cs.dialogTitle}>
         Are you sure you want to delete {validIds.length} {workflowLabel}{" "}
         {pluralize("run", validIds.length)}?
@@ -133,7 +134,8 @@ const BulkDeleteModal = ({
           onClick={handleDeleteSamples}
           data-testid="delete-samples-button"
           disabled={isDeleting}
-          startIcon={isDeleting ? "loading" : "trashCan"}>
+          startIcon={isDeleting ? "loading" : "trashCan"}
+        >
           {!isDeleting ? "Delete" : "Deleting"}
         </ErrorButton>
         <Button sdsStyle="rounded" sdsType="secondary" onClick={onClose}>

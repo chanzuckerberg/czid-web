@@ -220,7 +220,8 @@ export default class HitGroupViz extends React.Component<
     return ReactDOM.createPortal(
       <div
         style={getTooltipStyle(genomeVizTooltipLocation)}
-        className={cs.hoverTooltip}>
+        className={cs.hoverTooltip}
+      >
         <TooltipVizTable data={genomeVizTooltipData} />
       </div>,
       document.body,
@@ -238,7 +239,8 @@ export default class HitGroupViz extends React.Component<
           top: contigDownloaderLocation.top - 5,
         }}
         className={cs.contigDownloader}
-        ref={c => (this._contigDownloader = c)}>
+        ref={c => (this._contigDownloader = c)}
+      >
         <BasicPopup
           trigger={
             <div
@@ -257,7 +259,8 @@ export default class HitGroupViz extends React.Component<
                   taxonId,
                   sampleId,
                 },
-              )}>
+              )}
+            >
               <Icon sdsIcon="download" sdsSize="s" sdsType="button" />
             </div>
           }
@@ -284,7 +287,8 @@ export default class HitGroupViz extends React.Component<
                   sampleId,
                 },
               )}
-              onMouseEnter={this.restoreCopyIconMessage}>
+              onMouseEnter={this.restoreCopyIconMessage}
+            >
               <Icon sdsIcon="copy" sdsSize="s" sdsType="button" />
             </div>
           }

@@ -31,7 +31,8 @@ const NotesTab = ({
       savePending={savePending}
       alwaysShowEditLink={notesEmpty}
       className={cs.notesSection}
-      toggleable={false}>
+      toggleable={false}
+    >
       {!editing &&
         (notesEmpty ? (
           <div className={cs.noData}>No data</div>

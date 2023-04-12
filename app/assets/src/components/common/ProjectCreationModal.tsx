@@ -86,7 +86,8 @@ const ProjectCreationModal = ({
         sdsStyle="rounded"
         sdsType="primary"
         onClick={handleCreateProject}
-        data-testid="create-project-btn">
+        data-testid="create-project-btn"
+      >
         Create Project
       </Button>
     );
@@ -113,7 +114,8 @@ const ProjectCreationModal = ({
           <button
             className={cx(cs.sharingOption, "noStyleButton")}
             onClick={() => setAccessLevel(ACCESS_LEVEL.publicAccess)}
-            data-testid="public-project">
+            data-testid="public-project"
+          >
             <div className={cs.radioButtonAndProjectIcon}>
               <RadioButton
                 selected={accessLevel === ACCESS_LEVEL.publicAccess}
@@ -139,7 +141,8 @@ const ProjectCreationModal = ({
           <button
             className={cx(cs.sharingOption, "noStyleButton")}
             onClick={() => setAccessLevel(ACCESS_LEVEL.privateAccess)}
-            data-testid="private-project">
+            data-testid="private-project"
+          >
             <div className={cs.radioButtonAndProjectIcon}>
               <RadioButton
                 selected={accessLevel === ACCESS_LEVEL.privateAccess}
@@ -170,7 +173,8 @@ const ProjectCreationModal = ({
             <button
               className={cx(cs.infoLink, "noStyleButton")}
               onClick={() => setShowInfo(!showInfo)}
-              data-testid="more-less-info-btn">
+              data-testid="more-less-info-btn"
+            >
               {showInfo ? "Less Info" : "More Info"}
             </button>
           </div>
@@ -217,7 +221,8 @@ const ProjectCreationModal = ({
             sdsStyle="rounded"
             sdsType="secondary"
             onClick={onCancel}
-            data-testid="cancel-btn">
+            data-testid="cancel-btn"
+          >
             Cancel
           </Button>
         </div>

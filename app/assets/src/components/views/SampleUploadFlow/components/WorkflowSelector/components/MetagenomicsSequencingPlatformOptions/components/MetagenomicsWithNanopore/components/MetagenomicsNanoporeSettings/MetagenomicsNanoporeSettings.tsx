@@ -30,9 +30,8 @@ const MetagenomicsNanoporeSettings = ({
       options={GUPPY_BASECALLER_SETTINGS}
       placeholder="Select"
       value={selectedGuppyBasecallerSetting}
-      onChange={(value: string) =>
-        onChangeGuppyBasecallerSetting(value)
-      }></Dropdown>
+      onChange={(value: string) => onChangeGuppyBasecallerSetting(value)}
+    ></Dropdown>
   </div>
 );
 

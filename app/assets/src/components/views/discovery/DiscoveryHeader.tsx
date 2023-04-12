@@ -126,7 +126,8 @@ const DiscoveryHeader = ({
     <div className={cs.header}>
       <div
         className={cx(cs.filtersTrigger, disableSidebars && cs.disabled)}
-        onClick={disableSidebars ? undefined : onFilterToggle}>
+        onClick={disableSidebars ? undefined : onFilterToggle}
+      >
         <BasicPopup
           trigger={
             <div>
@@ -180,14 +181,16 @@ const DiscoveryHeader = ({
         <Tabs
           sdsSize="large"
           value={findIndex({ value: currentTab }, tabs)}
-          onChange={(_, selectedTabIndex) => onTabChange(selectedTabIndex)}>
+          onChange={(_, selectedTabIndex) => onTabChange(selectedTabIndex)}
+        >
           {tabs.map(tab => tab.label)}
         </Tabs>
       </div>
       <div className={cs.blankFill} />
       <div
         className={cx(cs.statsTrigger, disableSidebars && cs.disabled)}
-        onClick={disableSidebars ? undefined : onStatsToggle}>
+        onClick={disableSidebars ? undefined : onStatsToggle}
+      >
         <BasicPopup
           trigger={
             <div>

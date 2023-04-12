@@ -35,7 +35,8 @@ const List = ({
           xsmallSpacing && cs.xsmallSpacing,
           xxsmallSpacing && cs.xxsmallSpacing,
         )}
-        key={dynamic ? nanoid() : index}>
+        key={dynamic ? nanoid() : index}
+      >
         {item}
       </li>
     );

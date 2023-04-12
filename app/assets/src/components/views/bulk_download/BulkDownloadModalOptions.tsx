@@ -353,7 +353,8 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
           disabled && cs.disabled,
         )}
         key={downloadType.type}
-        onClick={() => !disabled && onSelect(downloadType.type)}>
+        onClick={() => !disabled && onSelect(downloadType.type)}
+      >
         <RadioButton
           disabled={disabled}
           className={cs.radioButton}
@@ -391,7 +392,8 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
                 href={BULK_DOWNLOAD_DOCUMENTATION_LINKS[downloadType.type]}
                 analyticsEventName={
                   ANALYTICS_EVENT_NAMES.CG_INTERMEDIATE_OUTPUT_FILES_BULK_DOWNLOAD_HELP_LINK_CLICKED
-                }>
+                }
+              >
                 Learn More
               </ExternalLink>
             ) : (
@@ -415,7 +417,8 @@ class BulkDownloadModalOptions extends React.Component<BulkDownloadModalOptionsP
                       handleHeatmapLink();
                       e.stopPropagation();
                     }}
-                    onKeyDown={handleHeatmapLink}>
+                    onKeyDown={handleHeatmapLink}
+                  >
                     {" "}
                     heatmap
                   </span>

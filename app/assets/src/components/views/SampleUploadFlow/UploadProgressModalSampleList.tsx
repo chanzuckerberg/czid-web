@@ -71,7 +71,8 @@ const UploadProgressModalSampleList = ({
                           sampleName: sample.name,
                         },
                       )}
-                      className={cs.sampleRetry}>
+                      className={cs.sampleRetry}
+                    >
                       Retry
                     </div>
                   </>

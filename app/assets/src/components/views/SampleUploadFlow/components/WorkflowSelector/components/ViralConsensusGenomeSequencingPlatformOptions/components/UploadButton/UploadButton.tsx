@@ -8,7 +8,8 @@ const UploadButton = props => (
     sdsType="primary"
     sdsStyle="minimal"
     isAllCaps
-    {...props}>
+    {...props}
+  >
     <Icon
       className={cs.icon}
       sdsIcon="download"

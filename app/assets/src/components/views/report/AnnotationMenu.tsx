@@ -66,10 +66,12 @@ const AnnotationMenu = ({
         }}
         keepMounted
         open={!!anchorEl}
-        onClose={handleClose}>
+        onClose={handleClose}
+      >
         <MenuItem
           className={cs.menuItem}
-          onClick={() => onItemSelected(ANNOTATION_HIT)}>
+          onClick={() => onItemSelected(ANNOTATION_HIT)}
+        >
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_HIT}
@@ -80,7 +82,8 @@ const AnnotationMenu = ({
         </MenuItem>
         <MenuItem
           className={cs.menuItem}
-          onClick={() => onItemSelected(ANNOTATION_NOT_A_HIT)}>
+          onClick={() => onItemSelected(ANNOTATION_NOT_A_HIT)}
+        >
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_NOT_A_HIT}
@@ -91,7 +94,8 @@ const AnnotationMenu = ({
         </MenuItem>
         <MenuItem
           className={cs.menuItem}
-          onClick={() => onItemSelected(ANNOTATION_INCONCLUSIVE)}>
+          onClick={() => onItemSelected(ANNOTATION_INCONCLUSIVE)}
+        >
           <AnnotationLabel
             className={cs.labelContainer}
             type={ANNOTATION_INCONCLUSIVE}

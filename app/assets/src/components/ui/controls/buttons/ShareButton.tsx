@@ -12,7 +12,8 @@ const ShareButton = ({ primary, ...props }: ShareButtonProps) => (
     sdsStyle="rounded"
     sdsType={primary ? "primary" : "secondary"}
     {...props}
-    startIcon={<Icon sdsIcon="share" sdsSize="l" sdsType="button" />}>
+    startIcon={<Icon sdsIcon="share" sdsSize="l" sdsType="button" />}
+  >
     Share
   </Button>
 );

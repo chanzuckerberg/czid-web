@@ -107,9 +107,8 @@ class CollectionModal extends React.Component<
             <li key={sample.id}>
               <span className={cs.sampleName}>{sample.sample.name}</span>
               <span
-                className={
-                  cs.sampleDetails
-                }>{`(Project: ${sample.sample.project})`}</span>
+                className={cs.sampleDetails}
+              >{`(Project: ${sample.sample.project})`}</span>
             </li>
           ))}
         </ul>
@@ -368,7 +367,8 @@ class CollectionModal extends React.Component<
           onClick={withAnalytics(
             this.openModal,
             "CollectionModal_open-link_clicked",
-          )}>
+          )}
+        >
           {trigger}
         </button>
         {this.state.modalOpen && (
@@ -379,7 +379,8 @@ class CollectionModal extends React.Component<
               this.closeModal,
               "CollectionModal_close-link_clicked",
             )}
-            className={cs.collectionModal}>
+            className={cs.collectionModal}
+          >
             <div className={cs.title}>Create a Background Model</div>
             <div className={cs.description}>
               A background is a group of samples. You can use a background as a
@@ -388,7 +389,8 @@ class CollectionModal extends React.Component<
               much a sample deviates from the mean of that background.{" "}
               <ExternalLink
                 className={cs.link}
-                href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054-Background-Models">
+                href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054-Background-Models"
+              >
                 Learn More
               </ExternalLink>
               .

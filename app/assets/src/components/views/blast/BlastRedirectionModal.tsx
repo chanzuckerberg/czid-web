@@ -61,7 +61,8 @@ const BlastRedirectionModal = ({
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.BLAST_REDIRECTION_MODAL_CONDITIONS_OF_USE_LINK_CLICKED
             }
-            href={NCBI_POLICIES_AND_DISCLAIMERS_LINK}>
+            href={NCBI_POLICIES_AND_DISCLAIMERS_LINK}
+          >
             Policies and Disclaimers
           </ExternalLink>
           .

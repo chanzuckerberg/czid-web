@@ -23,7 +23,8 @@ const CARDLicense = ({ geneName, ontology }: CARDLicenseProps) => (
       rel="noopener noreferrer"
       onClick={() =>
         trackEvent("GeneDetailsMode_card-ontology-attribution_clicked")
-      }>
+      }
+    >
       CARD Antibiotic Resistance Ontology
     </a>
     , which is released under the{" "}
@@ -34,7 +35,8 @@ const CARDLicense = ({ geneName, ontology }: CARDLicenseProps) => (
       rel="noopener noreferrer"
       onClick={() =>
         trackEvent("GeneDetailsMode_creative-commons-license_clicked")
-      }>
+      }
+    >
       Creative Commons CC-BY license version 4.0
     </a>{" "}
     by McMaster University.

@@ -62,12 +62,14 @@ const SectionsDropdown = ({
           if (!option.disabled) {
             onChange(option.value);
           }
-        }}>
+        }}
+      >
         <div
           className={cx(
             cs.optionText,
             option.value === selectedValue && cs.selectedOption,
-          )}>
+          )}
+        >
           {option.text}
         </div>
         <div className={cs.optionSubtext}>{option.subtext}</div>

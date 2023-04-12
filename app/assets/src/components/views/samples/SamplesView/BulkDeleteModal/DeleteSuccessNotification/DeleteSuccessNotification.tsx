@@ -20,7 +20,8 @@ const DeleteSuccessNotification = ({
       onClose={onClose}
       buttonText="dismiss"
       buttonOnClick={onClose}
-      slideDirection="right">
+      slideDirection="right"
+    >
       {sampleCount} {workflowLabel} {pluralize("run", sampleCount)}{" "}
       {pluralize("was", sampleCount)} successfully deleted.
     </Notification>

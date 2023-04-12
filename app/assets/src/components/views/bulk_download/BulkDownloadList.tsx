@@ -241,7 +241,8 @@ class BulkDownloadList extends React.Component {
             <Notification
               type="warning"
               displayStyle="flat"
-              className={cs.autoUpdateWarning}>
+              className={cs.autoUpdateWarning}
+            >
               This page is no longer auto-updating.{" "}
               <span onClick={this.initiateAutoUpdate} className={cs.link}>
                 Click here to see additional updates.
@@ -272,7 +273,8 @@ class BulkDownloadList extends React.Component {
           cs.bulkDownloadList,
           this.isEmpty() && cs.empty,
           this.isLoading() && cs.loading,
-        )}>
+        )}
+      >
         <NarrowContainer>
           <ViewHeader className={cs.viewHeader}>
             <ViewHeader.Content>

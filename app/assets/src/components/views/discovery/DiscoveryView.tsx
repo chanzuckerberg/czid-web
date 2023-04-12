@@ -2113,7 +2113,8 @@ class DiscoveryView extends React.Component<
           value={findIndex({ value: workflow }, this.computeWorkflowTabs())}
           onChange={(_, selectedTabIndex) =>
             this.handleWorkflowTabChange(selectedTabIndex)
-          }>
+          }
+        >
           {this.computeWorkflowTabs().map(tab => tab.label)}
         </Tabs>
       </div>
@@ -2202,7 +2203,8 @@ class DiscoveryView extends React.Component<
               <span
                 data-testid={`${workflowName
                   .toLowerCase()
-                  .replace(/ /g, "-")}-count`}>
+                  .replace(/ /g, "-")}-count`}
+              >
                 {workflowCount || "0"}
                 {isBeta && (
                   <span className={cs.betaTag}>

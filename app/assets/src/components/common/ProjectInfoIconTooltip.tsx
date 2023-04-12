@@ -27,7 +27,8 @@ const ProjectInfoIconTooltip = (props: ProjectInfoIconTooltipProps) => {
         }
         analyticsEventData={{
           link: PROJECT_SHARING_HELP_LINK,
-        }}>
+        }}
+      >
         Learn more.
       </ExternalLink>
     </>

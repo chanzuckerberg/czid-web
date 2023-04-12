@@ -37,7 +37,8 @@ const ErrorModal = ({
             <ExternalLink
               className={cs.actionLink}
               href="mailto:help@czid.org"
-              analyticsEventName={helpLinkEvent}>
+              analyticsEventName={helpLinkEvent}
+            >
               contact us
             </ExternalLink>
             .

@@ -35,7 +35,8 @@ const Publications = ({ geneName, ontology }: PublicationsProps) => {
                     ontologyLabel: label,
                     geneName,
                   })
-                }>
+                }
+              >
                 {pmidText}
               </a>
             </span>

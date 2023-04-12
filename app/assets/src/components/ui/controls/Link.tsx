@@ -47,7 +47,8 @@ const Link = ({
       )}
       target={external ? "_blank" : null}
       rel="noopener noreferrer"
-      onClick={onClick}>
+      onClick={onClick}
+    >
       {children}
     </a>
   );

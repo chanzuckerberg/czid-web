@@ -18,7 +18,8 @@ class StatusLabel extends React.Component<StatusLabelProps> {
     const label = (
       <div
         className={cx(className, cs.statusLabel, inline && cs.inline, cs[type])}
-        data-testid={status}>
+        data-testid={status}
+      >
         {status}
       </div>
     );

@@ -37,7 +37,8 @@ export default class HostOrganismMessage extends React.Component<HostOrganismMes
       <Notification
         type={this.hasMatch(host) ? "info" : "warning"}
         displayStyle="flat"
-        className={cs.messageContainer}>
+        className={cs.messageContainer}
+      >
         <strong>Host Subtraction:</strong>{" "}
         {!this.hasMatch(host) &&
           " We don't have any hosts matching your selection."}
@@ -51,7 +52,8 @@ export default class HostOrganismMessage extends React.Component<HostOrganismMes
       <ExternalLink
         href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-on-the-Web#reviewing-data"
         analyticsEventName="HostOrganismMessage_learn-more-link_clicked"
-        coloredBackground={true}>
+        coloredBackground={true}
+      >
         Learn more
       </ExternalLink>
     );
@@ -111,7 +113,8 @@ export default class HostOrganismMessage extends React.Component<HostOrganismMes
       <Notification
         type={isWarn ? "warning" : "info"}
         displayStyle="flat"
-        className={cs.messageContainer}>
+        className={cs.messageContainer}
+      >
         <strong>Host Subtraction:</strong>
         &nbsp;Based on your selections for Host Organism, we will subtract out
         reads from your samples that align to different genomes.{" "}
@@ -123,7 +126,8 @@ export default class HostOrganismMessage extends React.Component<HostOrganismMes
         bottomContentPadding
         header={header}
         open={false}
-        className={cx(cs.listContainer, color)}>
+        className={cx(cs.listContainer, color)}
+      >
         {keys(uniqHosts).map(host => (
           <div key={host} className={cx(cs.messageLine, color)}>
             {this.renderTextLine(host, uniqHosts[host])}

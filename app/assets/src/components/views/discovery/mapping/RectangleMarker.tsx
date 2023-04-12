@@ -23,7 +23,8 @@ class RectangleMarker extends React.Component<RectangleMarkerProps> {
         )}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        onClick={onClick}>
+        onClick={onClick}
+      >
         {title}
       </div>
     );

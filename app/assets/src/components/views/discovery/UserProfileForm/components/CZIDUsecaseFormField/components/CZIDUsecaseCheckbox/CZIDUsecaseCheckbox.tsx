@@ -31,7 +31,8 @@ export function CZIDUsecaseCheckbox({
       tabIndex={0}
       aria-checked={selectedCheckboxes.includes(checkBoxValue)}
       onClick={() => handleCheckboxChange(checkBoxValue)}
-      onKeyDown={handleKeyDown}>
+      onKeyDown={handleKeyDown}
+    >
       <InputCheckbox stage={isChecked} />
       {checkBoxValue}
     </div>

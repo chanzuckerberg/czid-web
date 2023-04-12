@@ -64,7 +64,8 @@ class RawResultsFolder extends React.Component<RawResultsFolderProps> {
                     <tr
                       className="file-link"
                       onClick={this.download.bind(this, file.url)}
-                      key={i}>
+                      key={i}
+                    >
                       <td>
                         <i className="fa fa-file" />
                         {file["display_name"]}

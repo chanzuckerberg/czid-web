@@ -132,7 +132,8 @@ const BlastContigsModal = ({
           height:
             BLAST_CONTIG_ROW_WIDTH * size(contigs) +
             BLAST_CONTIG_HEADER_ROW_WIDTH,
-        }}>
+        }}
+      >
         <BlastContigsTable
           contigs={contigs}
           onContigSelection={(value, isChecked) =>
@@ -230,7 +231,8 @@ const BlastContigsModal = ({
     <Notification
       type="info"
       displayStyle="flat"
-      className={cs.longContigNotification}>
+      className={cs.longContigNotification}
+    >
       For selected contig(s) that exceeds ~7500 base pairs (bp), up to the
       middle 7500 bp will be used due to NCBI{`'`}s server limitation.
     </Notification>
@@ -243,7 +245,8 @@ const BlastContigsModal = ({
           <Tooltip
             arrow
             placement="top"
-            title="Select at least 1 contig to continue">
+            title="Select at least 1 contig to continue"
+          >
             <span>
               <PrimaryButton text="Continue" rounded disabled />
             </span>
@@ -271,7 +274,8 @@ const BlastContigsModal = ({
       )}
       tall
       narrow
-      xlCloseIcon>
+      xlCloseIcon
+    >
       <div className={cs.blastContigsModal}>
         <div className={cs.header}>BLASTN Contig</div>
         <div className={cs.taxonName}>{taxonName}</div>
@@ -282,7 +286,8 @@ const BlastContigsModal = ({
             href={BLAST_HELP_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.BLAST_CONTIGS_MODAL_LEARN_MORE_CLICKED
-            }>
+            }
+          >
             Learn more
           </ExternalLink>
         </div>

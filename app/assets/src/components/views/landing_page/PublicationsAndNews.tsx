@@ -27,7 +27,8 @@ const EntryList = (props: EntryListProps) => {
                 <a
                   href={entry.publicationLink}
                   target="_blank"
-                  rel="noopener noreferrer">
+                  rel="noopener noreferrer"
+                >
                   <time className={cs.date}>
                     {entry.publicationDate} - {entry.publicationCompany}
                   </time>

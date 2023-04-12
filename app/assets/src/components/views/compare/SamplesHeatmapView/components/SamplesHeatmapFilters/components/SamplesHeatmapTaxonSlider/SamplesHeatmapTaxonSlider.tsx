@@ -51,7 +51,8 @@ export const SamplesHeatmapTaxonSlider = ({
       <DropdownPopper
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        placement="bottom-start">
+        placement="bottom-start"
+      >
         <div className={cs.taxaPerSampleSliderContainer}>
           <InputSlider
             disabled={isDisabled}

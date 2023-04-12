@@ -321,7 +321,8 @@ class MultipleNestedConfirmDropdown extends React.Component<
             this.cancelApplyCategories();
           }
         }}
-        open={this.state.popupIsOpen}>
+        open={this.state.popupIsOpen}
+      >
         <div className={cs.container}>{this.renderItems()}</div>
         <div className={cs.multipleNestedDropdownButtons}>
           <SecondaryButton

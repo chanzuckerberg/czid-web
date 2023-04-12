@@ -132,7 +132,8 @@ class BareDropdown extends React.Component<
           className={cx(
             cs.item,
             this.props.value === option.value && cs.active,
-          )}>
+          )}
+        >
           {option.customNode}
         </div>
       ) : (
@@ -141,7 +142,8 @@ class BareDropdown extends React.Component<
           onClick={() => this.props.onChange(option.value)}
           active={this.props.value === option.value}
           className={cs.item}
-          disabled={option.disabled || false}>
+          disabled={option.disabled || false}
+        >
           {option.text}
         </BaseDropdown.Item>
       ),
@@ -349,7 +351,8 @@ class BareDropdown extends React.Component<
           onBlur={e => e.stopPropagation()}
           icon={
             hideArrow || <IconArrowDownSmall className={cs.dropdownArrow} />
-          }>
+          }
+        >
           <BaseDropdown.Menu onClick={this.handleMenuClick}>
             {children}
           </BaseDropdown.Menu>
@@ -378,12 +381,14 @@ class BareDropdown extends React.Component<
           (menuLabel || search) && cs.extraPadding,
           menuClassName,
         )}
-        onClick={this.handleMenuClick}>
+        onClick={this.handleMenuClick}
+      >
         {menuLabel && <div className={cs.menuLabel}>{menuLabel}</div>}
         {search && (
           <div
             onClick={e => e.stopPropagation()}
-            className={cs.searchContainer}>
+            className={cs.searchContainer}
+          >
             <Input
               fluid
               className={cs.searchInput}
@@ -443,9 +448,8 @@ class BareDropdown extends React.Component<
         onBlur={e => e.stopPropagation()}
         search={search ? identity : undefined}
         ref={this.baseDropdownRef}
-        icon={
-          !hideArrow && <IconArrowDownSmall className={cs.dropdownArrow} />
-        }>
+        icon={!hideArrow && <IconArrowDownSmall className={cs.dropdownArrow} />}
+      >
         {menu}
       </BaseDropdown>
     );

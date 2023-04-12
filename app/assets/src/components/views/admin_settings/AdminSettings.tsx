@@ -190,13 +190,15 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
           <Button
             onClick={() => handleModifyFeatureFlagClick("add")}
             sdsStyle="square"
-            sdsType="primary">
+            sdsType="primary"
+          >
             Add feature flag
           </Button>
           <Button
             onClick={() => handleModifyFeatureFlagClick("remove")}
             sdsStyle="square"
-            sdsType="secondary">
+            sdsType="secondary"
+          >
             Remove feature flag
           </Button>
         </div>

@@ -100,7 +100,8 @@ const UploadMetadataStep = ({
           cs.uploadFlowStep,
           showInstructions && cs.hide,
           visible && cs.visible,
-        )}>
+        )}
+      >
         <div className={cs.flexContent}>
           <MetadataUpload
             onShowCSVInstructions={() => setShowInstructions(true)}

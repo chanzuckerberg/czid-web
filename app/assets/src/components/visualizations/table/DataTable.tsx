@@ -162,7 +162,8 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
           this.props.striped && "striped",
           this.props.className,
           this.props.onSelectedRowsChanged && "selectable",
-        )}>
+        )}
+      >
         <thead>
           <tr>
             {this.props.onSelectedRowsChanged && (
@@ -178,7 +179,8 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
               <th
                 className={`data-table__header column-${column}`}
                 key={idx}
-                style={this.getCellStyle(column)}>
+                style={this.getCellStyle(column)}
+              >
                 {this.props.headers ? this.props.headers[column] : column}
               </th>
             ))}
@@ -208,7 +210,8 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
                   )}
                   style={this.getCellStyle(column)}
                   key={colIdx}
-                  data-testid={column.toLowerCase().replace(/ /g, "-")}>
+                  data-testid={column.toLowerCase().replace(/ /g, "-")}
+                >
                   {/* If we want to display an object (e.g. location object), provide a 'name' field */}
                   {isObject(row[column]) && row[column].name !== undefined
                     ? row[column].name
@@ -235,7 +238,8 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
                     trigger={
                       <tr
                         key={row.__originalIndex}
-                        className={shouldDisable && cs.disabled}>
+                        className={shouldDisable && cs.disabled}
+                      >
                         {this.props.onSelectedRowsChanged && (
                           <td className="data-table__data column-reserved-selectable">
                             {React.cloneElement(checkbox, { disabled: true })}
@@ -250,7 +254,8 @@ class DataTable extends React.Component<DataTableProps, DataTableState> {
                 ) : (
                   <tr
                     key={row.__originalIndex}
-                    className={shouldDisable && cs.disabled}>
+                    className={shouldDisable && cs.disabled}
+                  >
                     {this.props.onSelectedRowsChanged && (
                       <td className="data-table__data column-reserved-selectable">
                         {checkbox}

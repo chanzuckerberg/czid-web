@@ -239,7 +239,8 @@ const MetadataTab = ({
           onEditToggle={() => toggleSectionEdit(section)}
           editing={sectionEditing[section.name]}
           title={section.name}
-          savePending={savePending}>
+          savePending={savePending}
+        >
           {renderMetadataSectionContent(section)}
         </MetadataSection>
       ))}

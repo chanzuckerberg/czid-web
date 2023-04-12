@@ -46,7 +46,8 @@ const MetagenomicsWithNanopore = ({
               ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_MNGS_NANOPORE_PIPELINE_LINK_CLICKED
             }
             href={MNGS_NANOPORE_PIPELINE_GITHUB_LINK}
-            disabled={isDisabled}>
+            disabled={isDisabled}
+          >
             here
           </ExternalLink>
           .{" "}

@@ -42,7 +42,8 @@ export default function YAxis({
       return (
         <g
           key={yAttribute}
-          transform={`translate(0, ${yPosition + barHeight / 2})`}>
+          transform={`translate(0, ${yPosition + barHeight / 2})`}
+        >
           {ticksVisible && <line x1={-1 * tickSize} stroke={"currentColor"} />}
           <text
             className={cx(textClassName, cs.text)}
@@ -53,7 +54,8 @@ export default function YAxis({
             transform={textOffset}
             onClick={() => onYAxisLabelClick(yAttribute, index)}
             onMouseEnter={() => onYAxisLabelEnter(yAttribute)}
-            onMouseLeave={() => onYAxisLabelExit()}>
+            onMouseLeave={() => onYAxisLabelExit()}
+          >
             {displayName}
           </text>
         </g>

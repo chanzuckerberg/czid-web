@@ -168,7 +168,8 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
           <Button
             sdsStyle="minimal"
             sdsType="secondary"
-            onClick={onClearFilters}>
+            onClick={onClearFilters}
+          >
             Clear Filters
           </Button>
         )}

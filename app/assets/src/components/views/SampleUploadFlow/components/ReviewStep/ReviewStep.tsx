@@ -291,7 +291,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   projectName: project.name,
                   uploadType,
                 });
-              }}>
+              }}
+            >
               Edit Project
             </div>
           </div>
@@ -331,13 +332,15 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                     shouldTruncateDescription &&
                       showLessDescription &&
                       cs.truncated,
-                  )}>
+                  )}
+                >
                   {project.description}
                 </div>
                 {shouldTruncateDescription && (
                   <div
                     className={cs.showHide}
-                    onClick={this.toggleDisplayDescription}>
+                    onClick={this.toggleDisplayDescription}
+                  >
                     {showLessDescription ? "Show More" : "Show Less"}
                   </div>
                 )}
@@ -371,7 +374,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   uploadType,
                 },
               );
-            }}>
+            }}
+          >
             Edit Analysis Type
           </div>
         </div>
@@ -565,7 +569,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   projectName: project.name,
                   uploadType,
                 });
-              }}>
+              }}
+            >
               Edit Samples
             </div>
             <div className={cs.divider}>|</div>
@@ -578,7 +583,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
                   projectName: project.name,
                   uploadType,
                 });
-              }}>
+              }}
+            >
               Edit Metadata
             </div>
           </div>
@@ -623,7 +629,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
 
     return (
       <div
-        className={cx(cs.reviewStep, cs.uploadFlowStep, visible && cs.visible)}>
+        className={cx(cs.reviewStep, cs.uploadFlowStep, visible && cs.visible)}
+      >
         <div className={cs.flexContent}>
           {this.renderProjectInfo()}
           {this.renderAnalysisTypeInfo()}

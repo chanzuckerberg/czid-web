@@ -70,7 +70,8 @@ const ProjectSettingsModal = ({
               projectName: project.name,
             },
           )}
-          className={cs.projectSettingsModal}>
+          className={cs.projectSettingsModal}
+        >
           <div className={cs.projectSettingsContent}>
             <div className={cs.title}>
               Share <span className={cs.highlight}>{project.name}</span>

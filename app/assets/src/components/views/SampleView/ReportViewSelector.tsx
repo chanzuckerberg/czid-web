@@ -22,7 +22,8 @@ const ReportViewSelector = ({
             onClick={() => {
               onViewClick({ view: "table" });
               trackEvent("ReportViewSelector_table-view_selected");
-            }}>
+            }}
+          >
             <IconTableSmall />
           </Menu.Item>
         }
@@ -38,7 +39,8 @@ const ReportViewSelector = ({
             onClick={() => {
               onViewClick({ view: "tree" });
               trackEvent("ReportViewSelector_taxonomic-tree-view_selected");
-            }}>
+            }}
+          >
             <IconTreeSmall />
           </Menu.Item>
         }

@@ -48,14 +48,16 @@ const BulkSamplesActionsMenu = ({
         onClick={() => {
           closeActionsMenu();
           handleBulkKickoffAmr();
-        }}>
+        }}
+      >
         <div className={cs.itemWrapper}>
           {hasBulkDeletion && (
             <div
               className={cx(
                 cs.bulkActionsIcon,
                 noObjectsSelected && cs.iconDisabled,
-              )}>
+              )}
+            >
               <Icon sdsIcon={"bacteria"} sdsSize="xs" sdsType="static" />
             </div>
           )}
@@ -69,7 +71,8 @@ const BulkSamplesActionsMenu = ({
         <Tooltip
           arrow
           placement="top"
-          title={"Select at least 1 mNGS run to perform this action."}>
+          title={"Select at least 1 mNGS run to perform this action."}
+        >
           <span>{bulkKickoffAmrMenuItem}</span>
         </Tooltip>
       );
@@ -84,7 +87,8 @@ const BulkSamplesActionsMenu = ({
         onClick={withAnalytics(() => {
           closeActionsMenu();
           handleClickPhyloTree();
-        }, "SamplesView_phylo-tree-modal-open_clicked")}>
+        }, "SamplesView_phylo-tree-modal-open_clicked")}
+      >
         <div className={cs.itemWrapper}>
           <div className={cs.bulkActionsIcon}>
             <Icon sdsIcon={"treeHorizontal"} sdsSize="xs" sdsType="static" />
@@ -121,7 +125,8 @@ const BulkSamplesActionsMenu = ({
         }}
         keepMounted
         open={Boolean(menuAnchorEl)}
-        onClose={closeActionsMenu}>
+        onClose={closeActionsMenu}
+      >
         {hasBulkDeletion && renderKickoffPhyloTree()}
         {hasAmr && renderBulkKickoffAmr()}
       </Menu>

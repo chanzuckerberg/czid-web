@@ -36,7 +36,8 @@ const TooltipVizTable = ({
     return (
       <div
         className={cx(cs.section, disabled && cs.disabled)}
-        key={`section-${name}`}>
+        key={`section-${name}`}
+      >
         <div className={cx(cs.name, disabled && cs.disabled)}>{name}</div>
         <div className={cs.data}>
           {data.map((datum, index) => {

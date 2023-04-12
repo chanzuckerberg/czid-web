@@ -50,7 +50,8 @@ const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
         className={cs.accordion}
         header={<div className={cs.header}>Details</div>}
         bottomContentPadding
-        open>
+        open
+      >
         {bulkDownload.description && (
           <div className={cs.description}>{bulkDownload.description}</div>
         )}
@@ -60,12 +61,14 @@ const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
         <Accordion
           className={cs.accordion}
           header={<div className={cs.header}>Samples in this Download</div>}
-          bottomContentPadding>
+          bottomContentPadding
+        >
           <div className={cs.samplesList}>
             {allRuns.map(run => (
               <div
                 key={`${run.id}+${run.sample_name}`}
-                className={cs.sampleName}>
+                className={cs.sampleName}
+              >
                 {run.sample_name}
               </div>
             ))}

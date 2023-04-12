@@ -37,7 +37,8 @@ export const BulkDownloadDetailsModeWithApollo = () => {
         <Notification
           type="error"
           displayStyle="flat"
-          className={cs.notification}>
+          className={cs.notification}
+        >
           There was an error generating your download files. Please contact us
           for help.
         </Notification>
@@ -49,7 +50,8 @@ export const BulkDownloadDetailsModeWithApollo = () => {
         <Notification
           type="warning"
           displayStyle="flat"
-          className={cs.notification}>
+          className={cs.notification}
+        >
           {error_message}
         </Notification>
       );

@@ -340,7 +340,8 @@ class MetadataUpload extends React.Component<
               onKeyDown={withAnalytics(
                 onShowCSVInstructions,
                 "MetadataUpload_instruction-link_clicked",
-              )}>
+              )}
+            >
               View CSV Upload Instructions
             </button>
           </div>
@@ -368,7 +369,8 @@ class MetadataUpload extends React.Component<
                 projectId: project.id,
                 projectName: project.name,
               });
-            }}>
+            }}
+          >
             Download Metadata CSV Template
           </button>
           {this.state.validatingCSV && (
@@ -493,7 +495,8 @@ class MetadataUpload extends React.Component<
                 analyticsEventData={{
                   projectId: this.props.project.id,
                   projectName: this.props.project.name,
-                }}>
+                }}
+              >
                 View Full Metadata Dictionary
               </ExternalLink>
               .
@@ -523,7 +526,8 @@ class MetadataUpload extends React.Component<
                 analyticsEventData={{
                   projectId: this.props.project.id,
                   projectName: this.props.project.name,
-                }}>
+                }}
+              >
                 View Metadata Dictionary
               </ExternalLink>
             </span>

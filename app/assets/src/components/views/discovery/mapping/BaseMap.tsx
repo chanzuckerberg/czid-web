@@ -95,7 +95,8 @@ class BaseMap extends React.Component<BaseMapProps, BaseMapState> {
           onViewportChange={this.updateViewport}
           // Style prop applies to the container and all overlays
           style={{ position: "absolute" }}
-          {...viewport}>
+          {...viewport}
+        >
           {banner}
           {markers}
           {popups}

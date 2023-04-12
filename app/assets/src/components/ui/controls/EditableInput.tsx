@@ -76,7 +76,8 @@ const EditableInput = ({
         className={cx(
           cs.alertContainer,
           isEmpty(error) ? cs.warning : cs.error,
-        )}>
+        )}
+      >
         <IconAlertSmall
           className={cs.alertIcon}
           type={isEmpty(error) ? "warning" : "error"}
@@ -114,7 +115,8 @@ const EditableInput = ({
           className={cs.editableInput}
           onMouseEnter={() => setEditable(true)}
           onMouseLeave={() => setEditable(false)}
-          onClick={() => setInputVisible(true)}>
+          onClick={() => setInputVisible(true)}
+        >
           <div className={cx(className, editable && cs.editableText)}>
             {inputText}
           </div>

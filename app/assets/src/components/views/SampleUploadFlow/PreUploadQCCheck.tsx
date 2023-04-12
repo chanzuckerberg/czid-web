@@ -539,7 +539,8 @@ const PreUploadQCCheck = ({
                 out SeqKit documentation{" "}
                 <ExternalLink
                   coloredBackground={true}
-                  href="https://bioinf.shenwei.me/seqkit/usage/#rename">
+                  href="https://bioinf.shenwei.me/seqkit/usage/#rename"
+                >
                   {"here"}
                 </ExternalLink>
                 .
@@ -575,7 +576,8 @@ const PreUploadQCCheck = ({
                 out SeqKit documentation{" "}
                 <ExternalLink
                   coloredBackground={true}
-                  href="https://bioinf.shenwei.me/seqkit/usage/#pair">
+                  href="https://bioinf.shenwei.me/seqkit/usage/#pair"
+                >
                   {"here"}
                 </ExternalLink>
                 .

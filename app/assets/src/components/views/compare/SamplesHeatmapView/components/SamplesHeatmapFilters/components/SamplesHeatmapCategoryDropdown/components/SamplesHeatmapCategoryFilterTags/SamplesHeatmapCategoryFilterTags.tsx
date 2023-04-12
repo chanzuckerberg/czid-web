@@ -58,7 +58,8 @@ export const SamplesHeatmapCategoryFilterTags = ({
     return (
       <div
         className={cs.filterTagContainer}
-        key={`category-filter-tag-container-${i}`}>
+        key={`category-filter-tag-container-${i}`}
+      >
         {presets.includes("categories") ? (
           <SamplesHeatmapPresetTooltip
             component={<FilterTag text={category} />}

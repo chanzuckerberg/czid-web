@@ -1700,7 +1700,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
                     <Button
                       sdsStyle="minimal"
                       sdsType="secondary"
-                      onClick={this.clearAllFilters}>
+                      onClick={this.clearAllFilters}
+                    >
                       Clear Filters
                     </Button>
                   </span>

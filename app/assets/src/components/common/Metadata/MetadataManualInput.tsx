@@ -361,7 +361,8 @@ class MetadataManualInput extends React.Component<
             sampleName: sample.name,
             column,
           });
-        }}>
+        }}
+      >
         Apply to All
       </button>
     ) : null;
@@ -546,7 +547,8 @@ class MetadataManualInput extends React.Component<
         {admin && samplesAreNew && (
           <button
             className={cx(cs.autoPopulateButton, "noStyleButton")}
-            onClick={this.autoPopulateMetadata}>
+            onClick={this.autoPopulateMetadata}
+          >
             Auto-populate metadata (Admin-only)
           </button>
         )}

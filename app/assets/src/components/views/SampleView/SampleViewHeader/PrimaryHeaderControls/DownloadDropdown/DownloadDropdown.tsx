@@ -111,7 +111,8 @@ const DownloadDropdown = ({
           type="info"
           displayStyle="elevated"
           onClose={closeToast}
-          closeWithIcon>
+          closeWithIcon
+        >
           The downloaded report will not contain the aggregate and z-score
           columns because a background model was not selected.
         </Notification>

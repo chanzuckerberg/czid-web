@@ -83,11 +83,13 @@ export default class TaxonSelector extends React.Component<TaxonSelectorProps> {
         horizontalOffset={5}
         verticalOffset={10}
         onClose={onTaxonSelectionClose}
-        position="top left">
+        position="top left"
+      >
         <div
           className={
             useNewFilters ? cs.newMetadataContainer : cs.metadataContainer
-          }>
+          }
+        >
           <SearchBoxList
             options={options}
             onChange={onTaxonSelectionChange}

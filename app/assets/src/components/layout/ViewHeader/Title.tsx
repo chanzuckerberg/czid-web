@@ -56,7 +56,8 @@ class Title extends React.Component<TitleProps> {
     let sampleName = (
       <div
         ref={c => (this._nameContainer = c)}
-        className={cx(cs.sampleName, multipleOptions && cs.trigger)}>
+        className={cx(cs.sampleName, multipleOptions && cs.trigger)}
+      >
         <span ref={c => (this._name = c)}>{label}</span>
       </div>
     );

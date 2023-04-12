@@ -50,7 +50,8 @@ class Modal extends React.Component<ModalProps> {
           minimumHeight && cs.minimumHeight,
         )}
         dimmer={"inverted"}
-        trigger={<span />}>
+        trigger={<span />}
+      >
         {this.props.title && (
           <SemanticModal.Header>{this.props.title}</SemanticModal.Header>
         )}

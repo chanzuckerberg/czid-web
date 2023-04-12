@@ -117,7 +117,8 @@ class PortalDropdown extends React.Component<PortalDropdownProps> {
                   ref(c);
                   this._triggerRef = c;
                 }}
-                onClick={this.toggleOpen}>
+                onClick={this.toggleOpen}
+              >
                 {/* @ts-expect-error ts-migrate(2339) FIXME: Property 'trigger' */}
                 {React.cloneElement(this.props.trigger, {
                   active: open,
@@ -138,7 +139,8 @@ class PortalDropdown extends React.Component<PortalDropdownProps> {
               modifiers={{
                 preventOverflow: { enabled: false },
                 hide: { enabled: false },
-              }}>
+              }}
+            >
               {({ ref, style, placement }) => {
                 // This is a dirty but necessary hack.
                 // react-popper doesn't seem to handle outOfBoundaries properly, so we
@@ -176,7 +178,8 @@ class PortalDropdown extends React.Component<PortalDropdownProps> {
                       this.state.triggerWidth
                         ? { minWidth: this.state.triggerWidth, ...style }
                         : style
-                    }>
+                    }
+                  >
                     {this.props.menu}
                   </div>
                 );

@@ -23,7 +23,8 @@ const MetadataLegend = ({
       style={getTooltipStyle(tooltipLocation, {
         buffer: 20,
         below: true,
-      })}>
+      })}
+    >
       <div className={cs.legend}>
         {Object.keys(metadataColors)
           .sort()

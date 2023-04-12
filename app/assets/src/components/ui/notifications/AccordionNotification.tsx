@@ -28,7 +28,8 @@ export default class AccordionNotification extends React.Component<AccordionNoti
         open={open}
         toggleable={toggleable}
         className={cx(cs.listContainer, cs[type])}
-        toggleArrowAlignment="topRight">
+        toggleArrowAlignment="topRight"
+      >
         {content && <div className={cs.messageContainer}>{content}</div>}
       </Accordion>
     );
@@ -39,7 +40,8 @@ export default class AccordionNotification extends React.Component<AccordionNoti
           type={type}
           displayStyle={displayStyle}
           className={cx(cs.notificationContainer, notificationClassName)}
-          onClose={onClose}>
+          onClose={onClose}
+        >
           {accordion}
         </Notification>
       </div>

@@ -176,7 +176,8 @@ const RemoteUploadProgressModal = ({
                 trackEvent(
                   ANALYTICS_EVENT_NAMES.REMOTE_UPLOAD_PROGRESS_MODAL_CONTACT_US_LINK_CLICKED,
                 )
-              }>
+              }
+            >
               Contact us for help
             </a>
           </div>
@@ -248,7 +249,8 @@ const RemoteUploadProgressModal = ({
       className={cx(
         cs.uploadProgressModal,
         uploadComplete && cs.uploadComplete,
-      )}>
+      )}
+    >
       <div className={cs.header}>
         <ImgUploadPrimary className={cs.uploadImg} />
         {renderTitle()}

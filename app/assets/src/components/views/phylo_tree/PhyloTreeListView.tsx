@@ -515,7 +515,8 @@ class PhyloTreeListView extends React.Component<
                   &nbsp;-&nbsp;
                   <button
                     className={cx("noStyle", cs.taxonName)}
-                    onClick={this.handleTaxonModeOpen}>
+                    onClick={this.handleTaxonModeOpen}
+                  >
                     {currentTree.tax_name}
                   </button>
                 </span>
@@ -601,7 +602,8 @@ class PhyloTreeListView extends React.Component<
         displayStyle="flat"
         onClose={this.hideOldTreeWarning}
         closeWithDismiss={false}
-        closeWithIcon={true}>
+        closeWithIcon={true}
+      >
         <div className={cs.notificationContent}>
           <span className={cs.warning}>
             This tree was created with a previous version of our phylogenetic
@@ -614,7 +616,8 @@ class PhyloTreeListView extends React.Component<
             href={PHYLO_TREE_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED
-            }>
+            }
+          >
             Learn more
           </ExternalLink>
           .
@@ -638,7 +641,8 @@ class PhyloTreeListView extends React.Component<
           href={"https://github.com/simonrharris/SKA"}
           analyticsEventName={
             ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_SKA_LINK_CLICKED
-          }>
+          }
+        >
           SKA v1.0
         </ExternalLink>
         {!onlyMatrixAvailable && (
@@ -649,7 +653,8 @@ class PhyloTreeListView extends React.Component<
               href={"https://github.com/Cibiv/IQ-TREE"}
               analyticsEventName={
                 ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IQTREE_LINK_CLICKED
-              }>
+              }
+            >
               IQTree v1.6.1
             </ExternalLink>
           </span>

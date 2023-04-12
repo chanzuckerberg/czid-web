@@ -49,7 +49,8 @@ export const AmrOutputDownloadView = ({
       <section className={cs.section}>
         <div className={cs.list}>
           <List
-            subheader={<ListSubheader>This is what you’ll get:</ListSubheader>}>
+            subheader={<ListSubheader>This is what you’ll get:</ListSubheader>}
+          >
             {listItems.map((items, key) => {
               return (
                 <ListItem key={key}>
@@ -69,7 +70,8 @@ export const AmrOutputDownloadView = ({
             trackEvent("AmrView_download-all-button_clicked", {
               sampleId: sample.id,
             });
-          }}>
+          }}
+        >
           Download All
         </Button>
       </section>
@@ -87,7 +89,8 @@ export const AmrOutputDownloadView = ({
             trackEvent("AmrView_docs-button_clicked", {
               sampleId: sample.id,
             });
-          }}>
+          }}
+        >
           View Help Docs
         </Button>
       </section>

@@ -23,7 +23,8 @@ const Label = ({
       size={size}
       circular={circular}
       floating={floating}
-      onClick={onClick}>
+      onClick={onClick}
+    >
       {text}
     </BaseLabel>
   );

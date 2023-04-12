@@ -41,7 +41,8 @@ const IssueGroup = ({
           {caption}
         </div>
       }
-      open={initialOpen}>
+      open={initialOpen}
+    >
       <div className={cs.tableContainer}>
         <DataTable
           columns={headers}

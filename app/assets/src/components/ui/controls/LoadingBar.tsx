@@ -25,7 +25,8 @@ const LoadingBar = ({
         cs.loadingBarBackground,
         tiny && cs.tiny,
         error || cs.loading,
-      )}>
+      )}
+    >
       <div
         className={cx(
           cs.loadingBar,

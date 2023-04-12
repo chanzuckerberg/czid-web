@@ -26,7 +26,8 @@ class MapBanner extends React.Component<MapBannerProps> {
                 {
                   currentTab: item,
                 },
-              )}>
+              )}
+            >
               Clear all
             </span>
           </div>

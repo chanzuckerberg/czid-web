@@ -42,7 +42,8 @@ const MetagenomicsSequencingPlatformOptions = ({
   return (
     <button
       className={cx(cs.optionText, "noStyleButton")}
-      onClick={e => e.stopPropagation()}>
+      onClick={e => e.stopPropagation()}
+    >
       <div className={cx(cs.title, cs.technologyTitle)}>
         Sequencing Platform:
         <div className={cs.technologyOptions}>

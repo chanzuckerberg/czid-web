@@ -35,7 +35,8 @@ class SubtextDropdown extends React.Component<SubtextDropdownProps> {
         className={cx(cs.option, option.disabled && cs.disabledOption)}
         data-testid={`dropdown-${option.text
           .replace("/ /g", "")
-          .toLowerCase()}`}>
+          .toLowerCase()}`}
+      >
         <div className={cs.optionText}>{option.text}</div>
         <div className={cs.optionSubtext}>{option.subtext}</div>
       </BareDropdown.Item>

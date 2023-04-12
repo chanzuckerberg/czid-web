@@ -169,7 +169,8 @@ const BlastReadsModal = ({
             href={BLAST_HELP_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.BLAST_READS_MODAL_LEARN_MORE_CLICKED
-            }>
+            }
+          >
             Learn more
           </ExternalLink>
         </div>

@@ -213,7 +213,8 @@ class ThresholdFilterDropdown extends React.Component<
         }}
         open={this.state.popupIsOpen}
         closeOnClick={false}
-        disabled={disabled}>
+        disabled={disabled}
+      >
         <div className={cs.container}>
           <ThresholdFilterList
             metrics={this.metrics}

@@ -35,7 +35,8 @@ const UserMenuDropDown = ({
             href="/bulk_downloads"
             onClick={() =>
               trackEvent("Header_dropdown-downloads-option_clicked")
-            }>
+            }
+          >
             Downloads
           </a>
         }
@@ -52,7 +53,8 @@ const UserMenuDropDown = ({
               href="/user_settings"
               onClick={() =>
                 trackEvent("Header_dropdown-user-settings-option_clicked")
-              }>
+              }
+            >
               Settings
             </a>
           }
@@ -69,7 +71,8 @@ const UserMenuDropDown = ({
               href="/admin_settings"
               onClick={() =>
                 trackEvent("Header_dropdown-admin-settings-option_clicked")
-              }>
+              }
+            >
               Admin Settings
             </a>
           }
@@ -83,7 +86,8 @@ const UserMenuDropDown = ({
           <ExternalLink
             className={cs.option}
             href="https://help.czid.org"
-            analyticsEventName={"Header_dropdown-help-option_clicked"}>
+            analyticsEventName={"Header_dropdown-help-option_clicked"}
+          >
             Help Center
           </ExternalLink>
         }
@@ -96,7 +100,8 @@ const UserMenuDropDown = ({
             href={`mailto:${email}?Subject=Report%20Feedback`}
             onClick={() =>
               trackEvent("Header_dropdown-feedback-option_clicked")
-            }>
+            }
+          >
             Contact Us
           </a>
         }
@@ -111,7 +116,8 @@ const UserMenuDropDown = ({
             <a
               className={cs.option}
               href="/users/new"
-              data-testid="create-user">
+              data-testid="create-user"
+            >
               Create User
             </a>
           }
@@ -159,7 +165,8 @@ export const TermsDropdownItem = (
         target="_blank"
         rel="noopener noreferrer"
         href="/terms"
-        onClick={() => trackEvent("Header_dropdown-terms-option_clicked")}>
+        onClick={() => trackEvent("Header_dropdown-terms-option_clicked")}
+      >
         Terms of Use
       </a>
     }
@@ -177,7 +184,8 @@ export const PrivacyDropdownItem = (
         href="/privacy"
         onClick={() =>
           trackEvent("Header_dropdown-privacy-notice-option_clicked")
-        }>
+        }
+      >
         Privacy Notice
       </a>
     }

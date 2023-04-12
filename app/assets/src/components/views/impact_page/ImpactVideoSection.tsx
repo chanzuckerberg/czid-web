@@ -14,21 +14,24 @@ const ImpactVideoSection = () => {
             onClick={() => {
               setVideo("video");
             }}
-            className={`${video === "video" ? cs.active : null}`}>
+            className={`${video === "video" ? cs.active : null}`}
+          >
             Video
           </button>
           <button
             onClick={() => {
               setVideo("360");
             }}
-            className={`${video === "360" ? cs.active : null}`}>
+            className={`${video === "360" ? cs.active : null}`}
+          >
             360&deg;
           </button>
           <button
             onClick={() => {
               setVideo("vr");
             }}
-            className={`${video === "vr" ? cs.active : null}`}>
+            className={`${video === "vr" ? cs.active : null}`}
+          >
             VR
           </button>
         </div>
@@ -42,7 +45,8 @@ const ImpactVideoSection = () => {
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen></iframe>
+                allowFullScreen
+              ></iframe>
             </div>
           </div>
         )}
@@ -56,7 +60,8 @@ const ImpactVideoSection = () => {
                 title="360&deg; VR Tour with Infectious Disease Detectives – Bangladesh"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen></iframe>
+                allowFullScreen
+              ></iframe>
             </div>
           </div>
         )}

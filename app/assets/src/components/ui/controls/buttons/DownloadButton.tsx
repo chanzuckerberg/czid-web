@@ -23,7 +23,8 @@ const DownloadButton = ({
       sdsType={primary ? "primary" : "secondary"}
       disabled={disabled}
       onClick={onClick}
-      startIcon={<Icon sdsIcon="download" sdsSize="l" sdsType="button" />}>
+      startIcon={<Icon sdsIcon="download" sdsSize="l" sdsType="button" />}
+    >
       {text}
     </Button>
   );

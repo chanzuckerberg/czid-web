@@ -135,7 +135,8 @@ const SamplesHeatmapDownloadModal = ({
         role="none" // silences linter error
         className={cx(cs.downloadType, selected && cs.selected)}
         key={type}
-        onClick={() => setSelectedDownloadType(type)}>
+        onClick={() => setSelectedDownloadType(type)}
+      >
         <RadioButton className={cs.radioButton} selected={selected} />
         <div className={cs.content}>
           <div className={cs.name}>

@@ -980,7 +980,8 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
             () => this.toggleStage(i),
             "PipelineViz_stage-expand-button_clicked",
             { stage: this.stageNames[i] },
-          )}>
+          )}
+        >
           {stageNameAndIcon}
         </div>
         {stageContainer}
@@ -1058,7 +1059,8 @@ class PipelineViz extends React.Component<PipelineVizProps, PipelineVizState> {
             maxZoom={zoomMax}
             zoomSpeed={zoomSpeed}
             disableScrollZoom={true}
-            ref={this.panZoomContainer}>
+            ref={this.panZoomContainer}
+          >
             <div className={cs.pipelineViz}>{stageContainers}</div>
           </PanZoom>
 

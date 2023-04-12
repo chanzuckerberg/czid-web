@@ -40,14 +40,16 @@ const DropdownTrigger = ({
         disabled && cs.disabled,
         erred && cs.erred,
       )}
-      onClick={onClick}>
+      onClick={onClick}
+    >
       <div className={cs.labelContainer}>
         {label && (
           <span
             className={cx(
               cs.label,
               disableMarginRight && cs.disableMarginRight,
-            )}>
+            )}
+          >
             {label}
           </span>
         )}

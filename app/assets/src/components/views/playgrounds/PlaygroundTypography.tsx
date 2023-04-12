@@ -65,7 +65,8 @@ class PlaygroundTypography extends React.Component {
                         cs.container,
                         cs[fontClass],
                         upperCase && cs.upperCase,
-                      )}>
+                      )}
+                    >
                       {fontClass}
                     </div>
                   </div>

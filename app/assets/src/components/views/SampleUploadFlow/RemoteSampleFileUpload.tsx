@@ -187,7 +187,8 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
           <Notification
             type="error"
             displayStyle="flat"
-            className={cs.notification}>
+            className={cs.notification}
+          >
             {this.state.error}
           </Notification>
         )}

@@ -125,7 +125,8 @@ const TaxonThresholdFilter = ({
       <DropdownPopper
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        placement="bottom-start">
+        placement="bottom-start"
+      >
         <div className={cs.filterContainer}>
           <div className={cs.title}>Taxon Filter</div>
           <div className={cs.filterDescriptor}>
@@ -170,7 +171,8 @@ const TaxonThresholdFilter = ({
                 sdsStyle="square"
                 sdsType="primary"
                 disabled={!hasModifiedFilters || isEmpty(selectedTaxa)}
-                onClick={handleApply}>
+                onClick={handleApply}
+              >
                 Apply
               </Button>
             </div>
@@ -178,7 +180,8 @@ const TaxonThresholdFilter = ({
               <Button
                 sdsStyle="square"
                 sdsType="secondary"
-                onClick={handleCancel}>
+                onClick={handleCancel}
+              >
                 Cancel
               </Button>
             </div>

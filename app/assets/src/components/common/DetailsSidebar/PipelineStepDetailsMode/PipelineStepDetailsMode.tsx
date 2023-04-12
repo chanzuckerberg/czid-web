@@ -133,7 +133,8 @@ const PipelineStepDetailsMode = ({
         <Accordion
           className={cs.accordion}
           header={outputFilesHeader}
-          open={true}>
+          open={true}
+        >
           <div className={cx(cs.accordionContent, cs.fileGroup)}>
             <div className={cs.fileGroupHeader}>{`From ${stepName} Step:`}</div>
             {renderFileList(outputFiles)}
@@ -154,7 +155,8 @@ const PipelineStepDetailsMode = ({
               fileName: file.fileName,
               url: file.url,
             })
-          }>
+          }
+        >
           {file.fileName}
         </a>
       ) : (
@@ -184,7 +186,8 @@ const PipelineStepDetailsMode = ({
                 () => {},
                 "PipelineStepDetailsMode_resource-link_clicked",
                 { linkName: linkInfo.name, linkUrl: linkInfo.url },
-              )}>
+              )}
+            >
               {linkInfo.name}
             </a>
           </span>
@@ -195,7 +198,8 @@ const PipelineStepDetailsMode = ({
         <Accordion
           className={cs.accordion}
           header={resourcesHeader}
-          open={true}>
+          open={true}
+        >
           <div className={cx(cs.resourcesContainer, cs.accordionContent)}>
             {resourceLinks}
           </div>

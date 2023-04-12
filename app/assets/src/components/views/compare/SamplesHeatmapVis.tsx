@@ -696,7 +696,8 @@ class SamplesHeatmapVis extends React.Component<
               below: true,
               // so we can show the tooltip above the cursor if need be
               height: nodeHoverInfo.nodeHasData ? 300 : 180,
-            })}>
+            })}
+          >
             <TooltipVizTable {...nodeHoverInfo} />
           </div>
         )}
@@ -712,7 +713,8 @@ class SamplesHeatmapVis extends React.Component<
             style={{
               left: tooltipLocation.left,
               top: tooltipLocation.top - 10,
-            }}>
+            }}
+          >
             <BasicPopup
               basic={false}
               content="Unpin"
@@ -768,7 +770,8 @@ class SamplesHeatmapVis extends React.Component<
           className={cx(
             cs.bannerContainer,
             this.state.displayControlsBanner ? cs.show : cs.hide,
-          )}>
+          )}
+        >
           <div className={cs.bannerText}>
             Hold SHIFT to scroll horizontally and SPACE BAR to pan.
             <IconCloseSmall

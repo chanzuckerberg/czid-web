@@ -54,7 +54,8 @@ const Accordion = () => {
               href="https://czid.org/privacy"
               aria-label="View the CZ ID privacy notice (opens in new window)"
               target="_blank"
-              rel="noreferrer">
+              rel="noreferrer"
+            >
               Privacy Notice
             </a>
             .
@@ -78,7 +79,8 @@ const Accordion = () => {
               href="https://czid.org/privacy"
               aria-label="View the CZ ID privacy notice (opens in new window)"
               target="_blank"
-              rel="noreferrer">
+              rel="noreferrer"
+            >
               Privacy Notice
             </a>
             .
@@ -98,7 +100,8 @@ const Accordion = () => {
               href="https://czid.org/terms"
               aria-label="View the CZ ID terms of use (opens in new window)"
               target="_blank"
-              rel="noreferrer">
+              rel="noreferrer"
+            >
               Terms of Use
             </a>
             . You can request to delete your account at any time by{" "}

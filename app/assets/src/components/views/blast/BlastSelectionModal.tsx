@@ -95,7 +95,8 @@ const BlastSelectionModal = ({
     let blastTitle = (
       <div
         key={blastType}
-        className={cx(cs.title, blastOptionIsDisabled && cs.disabled)}>
+        className={cx(cs.title, blastOptionIsDisabled && cs.disabled)}
+      >
         {blastType}
       </div>
     );
@@ -120,7 +121,8 @@ const BlastSelectionModal = ({
         onClick={() =>
           blastOptionIsDisabled ? null : setBlastOptionSelected(blastType)
         }
-        key={nanoid()}>
+        key={nanoid()}
+      >
         <RadioButton
           disabled={blastOptionIsDisabled}
           selected={blastOptionIsSelected}
@@ -129,15 +131,14 @@ const BlastSelectionModal = ({
         <div className={cs.optionText}>
           {blastTitle}
           <div
-            className={cx(
-              cs.description,
-              blastOptionIsDisabled && cs.disabled,
-            )}>
+            className={cx(cs.description, blastOptionIsDisabled && cs.disabled)}
+          >
             {description}
             <ExternalLink
               className={cs.link}
               disabled={blastOptionIsDisabled}
-              href={learnMoreLink}>
+              href={learnMoreLink}
+            >
               Learn More
             </ExternalLink>
           </div>
@@ -169,7 +170,8 @@ const BlastSelectionModal = ({
               sdsStyle="rounded"
               sdsType="primary"
               disabled={!blastOptionSelected}
-              onClick={() => onContinue(getBlastModalInformation())}>
+              onClick={() => onContinue(getBlastModalInformation())}
+            >
               Continue
             </Button>
           </div>

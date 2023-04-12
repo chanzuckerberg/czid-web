@@ -20,7 +20,8 @@ const ImpactIntro = props => {
             className={cs.introTextLink}
             href="https://chanzuckerberg.com/"
             target="_blank"
-            rel="noopener noreferrer">
+            rel="noopener noreferrer"
+          >
             Chan Zuckerberg Initiative (CZI)
           </Link>{" "}
           and the{" "}
@@ -28,7 +29,8 @@ const ImpactIntro = props => {
             className={cs.introTextLink}
             href="https://www.czbiohub.org/"
             target="_blank"
-            rel="noopener noreferrer">
+            rel="noopener noreferrer"
+          >
             Chan Zuckerberg Biohub (CZ Biohub)
           </Link>{" "}
           are partnering with researchers around the world to characterize
@@ -49,21 +51,24 @@ const ImpactIntro = props => {
             className={cs.logoLink}
             href="https://www.czbiohub.org/"
             target="_blank"
-            rel="noreferrer">
+            rel="noreferrer"
+          >
             <img src={IconBiohubLogo} alt="" />
           </a>
           <a
             className={cs.logoLink}
             href="https://chanzuckerberg.com/"
             target="_blank"
-            rel="noreferrer">
+            rel="noreferrer"
+          >
             <img src={IconCziLogoColor} alt="" />
           </a>
           <a
             className={cs.logoLink}
             href="https://www.gatesfoundation.org/"
             target="_blank"
-            rel="noreferrer">
+            rel="noreferrer"
+          >
             <img src={IconGatesFoundationLogo} alt="" />
           </a>
         </div>
@@ -82,7 +87,8 @@ const ImpactIntro = props => {
             style={{
               bottom: `${country.mapPosition.bottom}`,
               left: `${country.mapPosition.left}`,
-            }}>
+            }}
+          >
             <span className={cs.impactMapDotLabel}>{country.countryName}</span>
           </div>
         ))}

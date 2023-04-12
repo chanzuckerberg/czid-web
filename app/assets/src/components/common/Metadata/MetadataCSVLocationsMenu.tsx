@@ -28,7 +28,8 @@ const MetadataCSVLocationsMenu = ({
         {
           sampleName: applyToAllSample,
         },
-      )}>
+      )}
+    >
       Apply to All
     </button>
   );

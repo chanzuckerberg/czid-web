@@ -23,19 +23,22 @@ const CheckboxItem = ({
     onClick={(e: $TSFixMe) => {
       e.stopPropagation();
       onOptionClick(value, !checked);
-    }}>
+    }}
+  >
     <div className={cs.listElement}>
       <div
         className={cx(
           checked && cs.checked,
           cs.listCheckmark,
           boxed && cs.boxed,
-        )}>
+        )}
+      >
         <IconCheckSmall className={cs.icon} />
       </div>
       <div
         className={cs.listLabel}
-        data-testid={`dropdown-${label.replace(/ /g, "-").toLowerCase()}`}>
+        data-testid={`dropdown-${label.replace(/ /g, "-").toLowerCase()}`}
+      >
         {label}
       </div>
     </div>

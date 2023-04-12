@@ -101,7 +101,8 @@ export const DetailsTabWithApollo = () => {
         className={cs.accordion}
         header={<div className={cs.header}>Details</div>}
         bottomContentPadding
-        open>
+        open
+      >
         {description && <div className={cs.description}>{description}</div>}
         {downloadType && <FieldList fields={getFields()} />}
       </Accordion>
@@ -109,12 +110,14 @@ export const DetailsTabWithApollo = () => {
         <Accordion
           className={cs.accordion}
           header={<div className={cs.header}>Samples in this Download</div>}
-          bottomContentPadding>
+          bottomContentPadding
+        >
           <div className={cs.samplesList}>
             {allRuns.map(run => (
               <div
                 key={`${run.id}+${run.sample_name}`}
-                className={cs.sampleName}>
+                className={cs.sampleName}
+              >
                 {run.sample_name}
               </div>
             ))}

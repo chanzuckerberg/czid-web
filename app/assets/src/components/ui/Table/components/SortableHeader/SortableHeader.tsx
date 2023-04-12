@@ -44,7 +44,8 @@ export const SortableHeader = ({
         enterDelay: 1000,
         enterNextDelay: 300,
       }}
-      {...props}>
+      {...props}
+    >
       {children}
     </CellHeader>
   );

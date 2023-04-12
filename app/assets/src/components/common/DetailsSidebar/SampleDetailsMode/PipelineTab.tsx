@@ -157,7 +157,8 @@ const PipelineTab = ({
             className={cs.metadataValue}
             onClick={() =>
               trackEvent("PipelineTab_pipeline-visualization-link_clicked")
-            }>
+            }
+          >
             {text}
             {metadataLink}
           </div>
@@ -379,7 +380,8 @@ const PipelineTab = ({
         toggleable
         onToggle={() => toggleSection("pipelineInfo")}
         open={sectionOpen.pipelineInfo}
-        title="Pipeline Info">
+        title="Pipeline Info"
+      >
         <FieldList
           fields={pipelineInfoFields}
           className={cs.pipelineInfoFields}
@@ -391,7 +393,8 @@ const PipelineTab = ({
             toggleable
             onToggle={() => toggleSection(READ_COUNTS_TABLE)}
             open={sectionOpen[READ_COUNTS_TABLE]}
-            title={title}>
+            title={title}
+          >
             {renderReadsRemainingSection(title)}
           </MetadataSection>
           <MetadataSection
@@ -399,7 +402,8 @@ const PipelineTab = ({
             onToggle={() => toggleSection("erccScatterplot")}
             open={sectionOpen.erccScatterplot}
             title="ERCC Spike-In Counts"
-            className={cs.erccScatterplotSection}>
+            className={cs.erccScatterplotSection}
+          >
             <div ref={_graphContainer} className={cs.graphContainer}>
               {renderErccComparison()}
             </div>
@@ -408,7 +412,8 @@ const PipelineTab = ({
             toggleable
             onToggle={() => toggleSection("downloads")}
             open={sectionOpen.downloads}
-            title="Downloads">
+            title="Downloads"
+          >
             <div className={cs.downloadSectionContent}>
               {pipelineRun &&
                 getDownloadLinks(sampleId, pipelineRun).map(option => (
@@ -425,7 +430,8 @@ const PipelineTab = ({
                         href: option.path,
                         sampleId,
                       })
-                    }>
+                    }
+                  >
                     {option.label}
                   </a>
                 ))}

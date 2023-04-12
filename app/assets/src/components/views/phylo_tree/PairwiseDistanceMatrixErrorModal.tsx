@@ -36,7 +36,8 @@ const PairwiseDistanceMatrixErrorModal = ({
           ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED
         }
         coloredBackground={true}
-        href={PHYLO_TREE_LINK}>
+        href={PHYLO_TREE_LINK}
+      >
         Learn more.
       </ExternalLink>
     </>
@@ -71,7 +72,8 @@ const PairwiseDistanceMatrixErrorModal = ({
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.PAIRWISE_DISTANCE_MATRIX_ERROR_MODAL_HELP_LINK_CLICKED
             }
-            href={PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK}>
+            href={PAIRWISE_DISTANCE_MATRIX_INSTEAD_OF_TREE_LINK}
+          >
             Learn more.
           </ExternalLink>
         </div>

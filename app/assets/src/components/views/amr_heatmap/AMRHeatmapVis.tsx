@@ -412,7 +412,8 @@ export default class AMRHeatmapVis extends React.Component<
         style={getTooltipStyle(tooltipLocation, {
           buffer: 20,
           below: true,
-        })}>
+        })}
+      >
         <TooltipVizTable data={nodeHoverInfo} />
       </div>
     );

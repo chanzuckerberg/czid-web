@@ -15,7 +15,8 @@ export const SaveButton = ({ onClick, className }: SaveButtonProps) => (
         onClick={onClick}
         sdsStyle="rounded"
         sdsType="secondary"
-        startIcon={<Icon sdsIcon="save" sdsSize="l" sdsType="button" />}>
+        startIcon={<Icon sdsIcon="save" sdsSize="l" sdsType="button" />}
+      >
         Save
       </Button>
     }

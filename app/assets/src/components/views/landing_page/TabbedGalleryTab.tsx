@@ -13,7 +13,8 @@ const TabbedGalleryTab = (props: TabbedGalleryTabProps) => {
     <div onClick={props.onClick} className={`${cs.tabContainer} tabContainer`}>
       <div
         className={cs.tabIndicator}
-        style={props.activeClass ? { backgroundColor: "#3867fa" } : null}></div>
+        style={props.activeClass ? { backgroundColor: "#3867fa" } : null}
+      ></div>
       <div className={cs.tabContent}>
         <svg
           className={cs.tabCheckIcon}
@@ -21,7 +22,8 @@ const TabbedGalleryTab = (props: TabbedGalleryTabProps) => {
           height="22"
           viewBox="0 0 21 22"
           fill={props.activeClass === "active" ? "#3867fa" : "none"}
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             className={cs.outerCircle}
             fillRule="evenodd"
