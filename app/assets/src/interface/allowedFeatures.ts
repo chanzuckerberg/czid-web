@@ -3,6 +3,7 @@ export default interface AllowedFeaturesProps {
   firstSignIn: boolean;
   allowedFeatures: string[];
   appConfig: {
+    autoAccountCreationEnabled?: boolean;
     maxObjectsBulkDownload?: number;
     maxSamplesBulkDownloadOriginalFiles?: number;
   };

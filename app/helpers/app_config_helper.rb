@@ -53,13 +53,14 @@ module AppConfigHelper
     # Fetch all app configs in one query.
     app_configs = AppConfig
                   .where(key: [
+                           AppConfig::AUTO_ACCOUNT_CREATION_V1,
                            AppConfig::MAX_OBJECTS_BULK_DOWNLOAD,
                            AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES,
                          ])
                   .map { |app_config| [app_config.key, app_config.value] }
                   .to_h
-
     {
+      autoAccountCreationEnabled: app_configs[AppConfig::AUTO_ACCOUNT_CREATION_V1] == "1",
       maxObjectsBulkDownload: app_configs[AppConfig::MAX_OBJECTS_BULK_DOWNLOAD].to_i,
       maxSamplesBulkDownloadOriginalFiles: app_configs[AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES].to_i,
     }

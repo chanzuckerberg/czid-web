@@ -51,10 +51,22 @@ RSpec.describe UserFactoryService do
   end
 
   context "when create is successful" do
-    it "adds a new user" do
-      expect { user_factory_instance.call }.to change { User.count }.by(1)
-      expect(User.last.name).to eq(new_user_name)
-      expect(User.last.email).to eq(new_user_email)
+    context "when new user name is not nil" do
+      it "adds a new user" do
+        expect { user_factory_instance.call }.to change { User.count }.by(1)
+        expect(User.last.name).to eq(new_user_name)
+        expect(User.last.email).to eq(new_user_email)
+      end
+    end
+
+    context "when new user name is nil" do
+      let(:new_user_name) { nil }
+
+      it "adds a new user" do
+        expect { user_factory_instance.call }.to change { User.count }.by(1)
+        expect(User.last.name).to eq(new_user_name)
+        expect(User.last.email).to eq(new_user_email)
+      end
     end
 
     context "when new user email has capital letters" do
@@ -69,7 +81,7 @@ RSpec.describe UserFactoryService do
   context "#record_new_user_in_airtable" do
     let(:airtable_accounts_table) { "CZ ID Accounts" }
 
-    context "when signup is not through a project" do
+    context "when signup is through admin-settings" do
       it "make API call to add info to airtable with General signupPath" do
         user_factory_instance.call
         created_user = User.last
@@ -89,8 +101,9 @@ RSpec.describe UserFactoryService do
 
     context "when signup is through a project" do
       let(:project_id) { create(:project).id }
+      let(:new_user_name) { nil }
 
-      it "make API call to add info to airtable with General signupPath" do
+      it "make API call to add info to airtable with Project signupPath" do
         user_factory_instance.call
         created_user = User.last
         airtable_data = {
@@ -120,15 +133,32 @@ RSpec.describe UserFactoryService do
   end
 
   context "#create_auth0_user_and_save_user_id" do
-    it "creates auth0 user" do
-      user_factory_instance.call
-      created_user = User.last
+    context "when new user name is not nil" do
+      it "creates auth0 user" do
+        user_factory_instance.call
+        created_user = User.last
 
-      expect(Auth0UserManagementHelper).to have_received(:create_auth0_user).with(
-        email: created_user.email,
-        name: created_user.name,
-        role: created_user.role
-      )
+        expect(Auth0UserManagementHelper).to have_received(:create_auth0_user).with(
+          email: created_user.email,
+          name: created_user.name,
+          role: created_user.role
+        )
+      end
+    end
+
+    context "when new user name is nil" do
+      let(:new_user_name) { nil }
+
+      it "creates auth0 user" do
+        user_factory_instance.call
+        created_user = User.last
+
+        expect(Auth0UserManagementHelper).to have_received(:create_auth0_user).with(
+          email: created_user.email,
+          name: created_user.name,
+          role: created_user.role
+        )
+      end
     end
 
     it "sets auth0_user_id from response" do

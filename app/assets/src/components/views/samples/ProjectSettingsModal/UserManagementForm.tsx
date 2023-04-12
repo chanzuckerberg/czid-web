@@ -1,7 +1,8 @@
 import axios from "axios";
 import cx from "classnames";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import StringHelper from "~/helpers/StringHelper";
 import { Input } from "~ui/controls";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
@@ -29,23 +30,33 @@ const UserManagementForm = ({
   const [statusMessage, setStatusMessage] = useState("");
   const [statusClass, setStatusClass] = useState(null);
 
+  const userContext = useContext(UserContext);
+  const { appConfig } = userContext || {};
+  // When auto account creation is enabled, username will no longer be collected nor displayed,
+  // for project memebers, invited users will be added to the project with a null username,
+  // and the "Add" button will be renamed to "Send Invite"
+  const autoAccountCreationEnabled = appConfig.autoAccountCreationEnabled;
+
   const handleAddUser = () => {
     const fieldsValidation = {
       email: StringHelper.validateEmail(email),
-      name: StringHelper.validateName(name),
+      ...(!autoAccountCreationEnabled && {
+        name: StringHelper.validateName(name),
+      }),
     };
 
+    const userNameToAdd = autoAccountCreationEnabled ? null : name;
     if (Object.values(fieldsValidation).every(valid => !!valid)) {
       setStatusClass(cs.infoMessage);
       setStatusMessage("Sending invitation");
       axios
         .put(`/projects/${project.id}}/add_user`, {
-          user_name_to_add: name,
+          user_name_to_add: userNameToAdd,
           user_email_to_add: email,
           authenticity_token: csrf,
         })
         .then(() => {
-          onUserAdded(name, email);
+          onUserAdded(userNameToAdd, email);
           setName("");
           setEmail("");
           setStatusMessage("Invitation sent! User added.");
@@ -81,16 +92,18 @@ const UserManagementForm = ({
       </div>
       <div className={cx(cs.userManagementBody, cs.background)}>
         <div className={cs.addMemberForm}>
-          <div className={cs.addMemberFormField}>
-            <div className={cs.label}>Full Name</div>
-            <Input
-              fluid
-              type="text"
-              id="fullName"
-              onChange={handleChangeName}
-              value={name}
-            />
-          </div>
+          {!autoAccountCreationEnabled && (
+            <div className={cs.addMemberFormField}>
+              <div className={cs.label}>Full Name</div>
+              <Input
+                fluid
+                type="text"
+                id="fullName"
+                onChange={handleChangeName}
+                value={name}
+              />
+            </div>
+          )}
           <div className={cs.addMemberFormField}>
             <div className={cs.label}>Email</div>
             <Input
@@ -104,7 +117,7 @@ const UserManagementForm = ({
           <div className={cs.addMemberFormField}>
             <SecondaryButton
               className={cs.button}
-              text="Add"
+              text={autoAccountCreationEnabled ? "Send Invite" : "Add"}
               rounded={false}
               onClick={withAnalytics(
                 handleAddUser,
@@ -122,7 +135,9 @@ const UserManagementForm = ({
           {users.map(user => {
             return (
               <div className={cs.userEntry} key={user.email}>
-                {user.name} ({user.email})
+                {autoAccountCreationEnabled
+                  ? `${user.email}`
+                  : `${user.name} (${user.email})`}
               </div>
             );
           })}
