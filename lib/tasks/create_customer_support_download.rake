@@ -19,7 +19,7 @@ task create_customer_support_download: :environment do
                                       description: description,
                                       user_id: user.id)
   puts "BulkDownload record of type customer_support_request has been created."
-  s3_uri = "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{bulk_download.download_output_key}"
+  s3_uri = "s3://#{ENV['SAMPLES_BUCKET_NAME_V1']}/#{bulk_download.download_output_key}"
   puts "Please make sure the file you wish to transfer is in tar.gz format, then upload it to '#{s3_uri}' using a command like:"
   puts "\n  aws s3 cp <your file> '#{s3_uri}'"
   puts "\n(Note the quotes around the destination path to take care of spaces in the destination file name.)"
