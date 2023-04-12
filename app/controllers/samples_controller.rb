@@ -1537,6 +1537,7 @@ class SamplesController < ApplicationController
     sample_ids = collection_params[:sampleIds]
     new_workflow_run_ids = bulk_create_and_dispatch_workflow_runs(sample_ids,
                                                                   workflow,
+                                                                  current_user,
                                                                   inputs_json: {
                                                                     # start_from_mngs creates the amr run using the already host filtered reads
                                                                     # and assembled contigs

@@ -903,20 +903,24 @@ module SamplesHelper
     sample_ids.size
   end
 
-  def bulk_create_and_dispatch_workflow_runs(sample_ids, workflow, inputs_json: nil)
+  def bulk_create_and_dispatch_workflow_runs(sample_ids, workflow, current_user, inputs_json: nil)
     # update_all and insert_all skip validations so do a manual check for a valid workflow type
     unless WorkflowRun::WORKFLOW.value?(workflow)
       raise WorkflowNotFoundError
     end
 
     # select only samples with no running workflows of this type
-    samples_with_no_amr_wrs = Sample.includes(:workflow_runs).where(id: sample_ids, workflow_runs: { sample_id: nil })
-    sample_ids_with_non_running_amr_wrs = Sample.includes(:workflow_runs).where(id: sample_ids, workflow_runs: {
-                                                                                  workflow: workflow,
-                                                                                  deprecated: false,
-                                                                                  status: [WorkflowRun::STATUS[:succeeded], WorkflowRun::STATUS[:succeeded_with_issue], WorkflowRun::STATUS[:failed]],
-                                                                                })
-    sample_ids_filtered = sample_ids_with_non_running_amr_wrs.or(samples_with_no_amr_wrs).pluck(:id)
+    current_power = Power.new(current_user)
+
+    # get samples the user has access to and reject those with in-progress workflows of this type
+    updatable_sample_ids = current_power.updatable_samples.where(id: sample_ids).pluck(:id)
+    sample_ids_with_in_prog_wr = WorkflowRun.where(
+      sample_id: updatable_sample_ids,
+      workflow: workflow,
+      status: [WorkflowRun::STATUS[:running], WorkflowRun::STATUS[:created]],
+      deprecated: false
+    ).pluck(:sample_id)
+    sample_ids_filtered = updatable_sample_ids.reject { |id| sample_ids_with_in_prog_wr.include?(id) }
     if sample_ids_filtered.empty?
       return []
     end
