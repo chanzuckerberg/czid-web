@@ -1117,6 +1117,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const workflowRuns = await kickoffConsensusGenome({
       sampleId: sample.id,
       workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+      alignment_config_name: sample?.pipeline_runs[0]?.alignment_config_name,
       accessionId,
       accessionName,
       taxonId,

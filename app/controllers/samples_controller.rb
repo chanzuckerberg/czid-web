@@ -1713,9 +1713,9 @@ class SamplesController < ApplicationController
                                :basespace_dataset_id, :basespace_access_token, :skip_cache,
                                :do_not_process, :pipeline_execution_strategy, :wetlab_protocol,
                                :share_id, :technology, :medaka_model, :vadr_options, :clearlabs,
-                               :ref_fasta, :primer_bed, :guppy_basecaller_setting,
+                               :ref_fasta, :primer_bed, :guppy_basecaller_setting, :alignment_config_name,
                                { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts, :upload_client] },]
-    permitted_sample_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
+    permitted_sample_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :subsample, :max_input_fragments]) if current_user.admin?
 
     new_params = params.permit(samples: permitted_sample_params)
     new_params[:samples] if new_params
@@ -1726,15 +1726,15 @@ class SamplesController < ApplicationController
                         :s3_bowtie2_index_path, :host_genome_id, :host_genome_name, :sample_notes,
                         :search, :basespace_dataset_id, :basespace_access_token, :client,
                         :do_not_process, :pipeline_execution_strategy, :clearlabs, :technology, :medaka_model, :wetlab_protocol,
-                        :share_id, :ref_fasta, :primer_bed,
+                        :share_id, :ref_fasta, :primer_bed, :alignment_config_name,
                         { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts, :upload_client] },]
-    permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
+    permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :subsample, :max_input_fragments]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
   end
 
   # Doesn't require :sample or :samples
   def collection_params
-    permitted_params = [:referenceTree, :workflow, { sampleIds: [], workflowRunIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology, :start_from_mngs] }]
+    permitted_params = [:referenceTree, :workflow, { sampleIds: [], workflowRunIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology, :start_from_mngs, :alignment_config_name] }]
     params.permit(*permitted_params)
   end
 

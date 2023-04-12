@@ -675,6 +675,7 @@ const createConsensusGenomeCladeExport = ({
 const kickoffConsensusGenome = ({
   sampleId,
   workflow,
+  alignment_config_name,
   accessionId,
   accessionName,
   taxonId,
@@ -688,6 +689,7 @@ const kickoffConsensusGenome = ({
       accession_name: accessionName,
       taxon_id: taxonId,
       taxon_name: taxonName,
+      alignment_config_name: alignment_config_name,
       technology,
     },
   });

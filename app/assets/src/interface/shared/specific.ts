@@ -135,6 +135,7 @@ export interface PipelineRun {
   run_finalized: boolean;
   truncated: null;
   results_finalized: number;
+  alignment_config_name: string;
   alignment_config_id: number;
   alert_sent: number;
   dag_vars: string | null;

@@ -272,7 +272,9 @@ class SfnCgPipelineDispatchService
     }.merge(additional_inputs)
 
     if Gem::Version.new(@wdl_version) >= Gem::Version.new("3.4.13")
-      alignment_config = AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+      alignment_config_name = @workflow_run.inputs&.[]("alignment_config_name")
+      alignment_config = AlignmentConfig.find_by(name: alignment_config_name || AlignmentConfig::DEFAULT_NAME)
+
       run_inputs[:nt_s3_path] = alignment_config.s3_nt_db_path
       run_inputs[:nt_loc_db] = alignment_config.s3_nt_loc_db_path
       run_inputs[:nr_s3_path] = alignment_config.s3_nr_db_path
