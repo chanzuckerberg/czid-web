@@ -19,6 +19,7 @@ class AmrReportDataService
       report_row = {
         "drug_class" => row["drug_class"],
         "gene" => row["gene_name"],
+        "gene_family" => row["gene_family"],
         "mechanism" => row["resistance_mechanism"],
         "model" => row["model_type"],
         "contigs" => row["num_contigs"],

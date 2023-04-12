@@ -15,11 +15,11 @@ export const getGeneInfoColumnGroup = (
       return (
         <th
           key={`header-${header.id}`}
-          className={cs.rowCount}
+          className={cs.rowCountHeader}
           colSpan={header.colSpan}
           style={generateHeaderWidthStyles(header)}
         >
-          {!!nRows && `${nRows} Rows`}
+          {!!nRows && <span className={cs.rowCount}>{`${nRows} Rows`}</span>}
         </th>
       );
     },

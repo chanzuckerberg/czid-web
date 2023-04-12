@@ -4,7 +4,7 @@ import { SortableHeader } from "~/components/ui/Table/components/SortableHeader"
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
-import { getDefaultCell } from "./components/DefaultCell";
+import { Align, getDefaultCell } from "./components/DefaultCell";
 
 export const cutoffColumn: ColumnDef<AmrResult, any> = {
   id: "cutoff",
@@ -21,5 +21,5 @@ export const cutoffColumn: ColumnDef<AmrResult, any> = {
       </SortableHeader>
     );
   },
-  cell: getDefaultCell(rowStyles.contigsColumnGroup),
+  cell: getDefaultCell(Align.LEFT, rowStyles.contigsColumnGroup),
 };

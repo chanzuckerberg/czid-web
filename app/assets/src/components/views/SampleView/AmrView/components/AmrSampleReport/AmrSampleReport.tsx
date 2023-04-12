@@ -9,7 +9,11 @@ import {
   contigPercentIdColumn,
   contigsColumn,
   cutoffColumn,
+  drugClassColumn,
   geneColumn,
+  geneFamilyColumn,
+  mechanismColumn,
+  modelColumn,
 } from "./columnDefinitions";
 import { getContigsColumnGroup } from "./columnDefinitions/contigsColumnGroup";
 import { getGeneInfoColumnGroup } from "./columnDefinitions/geneInfoColumnGroup";
@@ -36,12 +40,18 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
   const columns: ColumnDef<AmrResult, any>[] = useMemo<ColumnDef<AmrResult>[]>(
     () => [
       getGeneInfoColumnGroup(
-        [geneColumn],
+        [
+          geneColumn,
+          geneFamilyColumn,
+          drugClassColumn,
+          mechanismColumn,
+          modelColumn,
+        ],
         !!reportTableData && Object.keys(reportTableData).length,
       ),
       getContigsColumnGroup([
-        contigsColumn,
         cutoffColumn,
+        contigsColumn,
         contigPercentCoverageColumn,
         contigPercentIdColumn,
       ]),

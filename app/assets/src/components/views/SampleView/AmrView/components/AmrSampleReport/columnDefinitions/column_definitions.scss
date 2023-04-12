@@ -34,9 +34,12 @@
   margin: $sds-spaces-s;
 }
 
+.rowCountHeader {
+  height: 26px;
+}
+
 .rowCount {
   color: $sds-color-gray-500;
   display: flex;
   font: $sds-font-body-xxs-400-font;
-  height: 26px;
 }

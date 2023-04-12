@@ -6,6 +6,7 @@ export interface AmrResult {
   dpm: number | null;
   drugClass: string | null;
   gene: string | null;
+  geneFamily: string | null;
   mechanism: string | null;
   model: string | null;
   readCoverageBreadth: string | null;
