@@ -750,8 +750,19 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
   };
 
   handleDeleteCurrentRun = () => {
-    const { sample, currentTab } = this.state;
+    const { currentTab, reportMetadata, sample, project, workflowRun } =
+      this.state;
     const workflowCount = getWorkflowCount(sample);
+    const workflow = labelToVal(currentTab);
+
+    const status = isMngsWorkflow(workflow)
+      ? reportMetadata.pipelineRunStatus
+      : workflowRun.status;
+    trackEvent("SampleView_single_run_deleted", {
+      workflow: workflow,
+      runStatus: status.toLowerCase(),
+      projectId: project?.id,
+    });
 
     // add all the values of the workflowCount object
     const totalWorkflowCount = Object.values(workflowCount).reduce(
@@ -766,7 +777,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     }
 
     // choose pipeline runs or workflow runs based on current tab
-    const workflow = labelToVal(currentTab);
     const runType = isMngsWorkflow(workflow)
       ? "pipeline_runs"
       : "workflow_runs";

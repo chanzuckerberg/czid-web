@@ -7,15 +7,9 @@ import {
   WORKFLOW_ENTITIES,
   WORKFLOW_VALUES,
 } from "~/components/utils/workflows";
-import {
-  BaseWorkflowRun,
-  CGRun,
-  PipelineTypeRun,
-} from "~/interface/samplesView";
+import { ObjectType } from "~/interface/samplesView";
 import cs from "../samples_view.scss";
 import ToolbarButtonIcon from "../ToolbarButtonIcon";
-
-type ObjectType = PipelineTypeRun | BaseWorkflowRun | CGRun;
 
 interface BulkDeleteTriggerProps {
   onClick(): void;

@@ -11,6 +11,8 @@ export type ObjectsType =
   | ObjectCollectionView<BaseWorkflowRun>
   | ObjectCollectionView<CGRun>;
 
+export type ObjectType = PipelineTypeRun | BaseWorkflowRun | CGRun;
+
 export interface SamplesViewProps {
   activeColumns?: string[];
   admin?: boolean;
@@ -107,7 +109,13 @@ export interface Entry {
   projectId: number;
   qcPercent: number;
   referenceAccession: object;
-  sample: { name: string; project: string };
+  sample: {
+    name: string;
+    project: string;
+    userId: number;
+    pipelineRunFinalized: number;
+    pipelineRunStatus: string;
+  };
   sample_type: string;
   status: string;
   technology: string;
@@ -134,6 +142,7 @@ export interface BaseRun {
     project: string;
     userId: number;
     pipelineRunFinalized: number;
+    pipelineRunStatus: string;
   };
   sample_type: string;
   water_control: string;

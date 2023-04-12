@@ -86,7 +86,7 @@ import {
 } from "./constants";
 import cs from "./samples_view.scss";
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
-import { getSelectedObjects } from "./utils";
+import { getSelectedObjects, getStatusCounts } from "./utils";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
 const MAX_TAXON_HEATMAP_SAMPLES = 500;
@@ -295,6 +295,17 @@ const SamplesView = forwardRef(function SamplesView(
     sortDirection: SortDirectionType;
   }) => {
     onSortColumn({ sortBy, sortDirection });
+  };
+
+  const onBulkDeleteSuccess = () => {
+    const statusCounts = getStatusCounts(selectedObjects, workflowEntity);
+    trackEvent("SamplesView_runs_bulk_deleted", {
+      workflow: workflow,
+      runStatusCounts: statusCounts,
+      projectId: projectId,
+    });
+    onDeleteSample();
+    onUpdateSelectedIds(new Set());
   };
 
   const isSelectAllChecked = () => {
@@ -979,10 +990,7 @@ const SamplesView = forwardRef(function SamplesView(
       <BulkDeleteModal
         isOpen={isBulkDeleteModalOpen}
         onClose={() => setIsBulkDeleteModalOpen(false)}
-        onSuccess={() => {
-          onDeleteSample();
-          onUpdateSelectedIds(new Set());
-        }}
+        onSuccess={onBulkDeleteSuccess}
         selectedIds={Array.from(selectedIds)}
         workflow={workflow}
       />
