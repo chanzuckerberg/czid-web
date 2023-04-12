@@ -19,6 +19,8 @@ class AmrWorkflowRun < WorkflowRun
   OUTPUT_CONTIGS = "amr.RunSpades.contigs".freeze
   OUTPUT_READS_BAM = "amr.RunRgiBwtKma.output_sorted_length_100".freeze
   OUTPUT_READS_BAI = "amr.RunRgiBwtKma.output_sorted_length_100_bai".freeze
+  OUTPUT_CONTIGS_BAM = "amr.tsvToSam.output_sorted".freeze
+  OUTPUT_CONTIGS_BAI = "amr.tsvToSam.output_sorted_bai".freeze
 
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).
