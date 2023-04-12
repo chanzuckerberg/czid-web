@@ -7,7 +7,7 @@
 // - See https://reactrouter.com/web/api/match for the properties you can get from 'match' (params, isExact, path, and url).
 
 import React, { useContext } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import { UserContext } from "~/components/common/UserContext";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
@@ -48,10 +48,15 @@ const DiscoveryViewRouter = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
-  const { userSignedIn } = useContext(UserContext);
+  const { userSignedIn, profileCompleted } = useContext(UserContext);
+
+  // New users must first submit a profile form in order to access CZ ID
+  const shouldShowUserProfileForm =
+    userSignedIn && !profileCompleted && autoAcctCreationEnabled;
 
   return (
     <Switch>
+      {shouldShowUserProfileForm && <Redirect to="/user_profile_form" />}
       <Route exact path="/impact">
         <ImpactPage />
       </Route>

@@ -1,0 +1,20 @@
+@import "~czifui/dist/variables";
+
+.titleMainText {
+  font: $sds-font-body-m-600-font;
+  color: $sds-color-gray-black;
+  padding-bottom: $sds-spaces-l;
+}
+.titleSubText {
+  font: $sds-font-body-s-400-font;
+  color: $sds-color-gray-500;
+}
+.main {
+  padding: $sds-spaces-l;
+}
+.nameFields {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
