@@ -885,6 +885,13 @@ module ElasticsearchQueryHelper
           },
         },
       }
+      read_specificity_filter_clause << {
+        "range": {
+          "genus_taxid": {
+            "gte": "0",
+          },
+        },
+      }
     end
     read_specificity_filter_clause
   end
