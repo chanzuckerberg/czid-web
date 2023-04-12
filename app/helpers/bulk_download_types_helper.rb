@@ -78,7 +78,7 @@ module BulkDownloadTypesHelper
     {
       type: AMR_CONTIGS_BULK_DOWNLOAD,
       display_name: "Contigs",
-      description: "Contigs with homology to AMR genes",
+      description: "All contigs with host data subtracted",
       category: "raw_data",
       execution_type: ECS_EXECUTION_TYPE,
       workflows: [WorkflowRun::WORKFLOW[:amr]],
