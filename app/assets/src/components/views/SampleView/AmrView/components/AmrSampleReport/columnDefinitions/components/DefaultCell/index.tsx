@@ -1,5 +1,7 @@
-import { DefaultCell } from "./DefaultCell";
-export { DefaultCell };
+import { Align, getDefaultCell } from "./DefaultCell";
+
+export { getDefaultCell };
+export { Align };
 
 /*
  NOTE: component code should go in DefaultCell.tsx

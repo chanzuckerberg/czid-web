@@ -1,0 +1,14 @@
+@import "~czifui/dist/variables";
+
+// Select all elements with contigsColumnGroup class inside of styledTableRow
+// Give them all a left border
+.styledTableRow > .contigsColumnGroup {
+  border-left: $sds-borders-gray-300;
+}
+
+// Select all elements with contigsColumnGroup class inside of styledTableRow
+// except for the first one
+// Remove the border
+.styledTableRow > .contigsColumnGroup ~ .contigsColumnGroup {
+  border: none;
+}

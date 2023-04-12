@@ -23,3 +23,20 @@
     word-break: break-word;
   }
 }
+
+.groupedHeader {
+  align-items: center;
+  background-color: $sds-color-gray-100;
+  border-left: $sds-borders-gray-300;
+  color: $sds-font-color;
+  font: $sds-font-header-xxs-600-font;
+  height: 26px;
+  margin: $sds-spaces-s;
+}
+
+.rowCount {
+  color: $sds-color-gray-500;
+  display: flex;
+  font: $sds-font-body-xxs-400-font;
+  height: 26px;
+}

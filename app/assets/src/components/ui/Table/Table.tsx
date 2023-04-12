@@ -8,13 +8,14 @@ import {
   TableOptions,
   useReactTable,
 } from "@tanstack/react-table";
-import { Table as SDSTable, TableHeader, TableRow } from "czifui";
+import { Table as SDSTable, TableRow, TableRowProps } from "czifui";
 import { isEqual, map } from "lodash";
 import React, { useEffect, useState } from "react";
 import { TableVirtuoso } from "react-virtuoso";
 import { IdMap } from "~/components/utils/objectUtil";
 import { rowSelectionColumn } from "./columnDefinitions/RowSelectionColumn";
 import { EmptyTable } from "./components/EmptyTable";
+import { HeaderContent } from "./components/HeaderContent";
 
 interface TableProps<T> {
   columns: ColumnDef<T, any>[];
@@ -23,6 +24,8 @@ interface TableProps<T> {
   isInitialSortDescending?: boolean;
   isLoading?: boolean;
   uniqueIdentifier: keyof T;
+  // If you want to override the default row component, you can pass in a custom one here.
+  tableRowComponent?: React.ComponentType<TableRowProps>;
   // the following three props should either
   // 1) always appear together
   // 2) none appear at all
@@ -30,7 +33,6 @@ interface TableProps<T> {
   checkedRows?: T[];
   onSetCheckedRows?(rowData: T[]): void;
   enableMultiRowSelection?: boolean;
-  // define types here
 }
 
 /**
@@ -50,6 +52,7 @@ export const Table = <T,>({
   checkedRows = [],
   onSetCheckedRows,
   uniqueIdentifier,
+  tableRowComponent,
   ...props
 }: TableProps<T> & Partial<TableOptions<any>>): JSX.Element => {
   const { enableMultiRowSelection } = props;
@@ -148,26 +151,20 @@ export const Table = <T,>({
     return <EmptyTable numOfColumns={columns.length} />;
   }
 
+  const TableRowComponent = tableRowComponent || TableRow;
+
   return (
     <TableVirtuoso
       totalCount={rows.length}
       components={{
         Table: SDSTable,
-        TableHead: TableHeader,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        TableRow: TableRow,
+        TableRow: TableRowComponent,
       }}
-      fixedHeaderContent={() => {
-        return table.getHeaderGroups().map(headerGroup =>
-          headerGroup.headers.map(header => {
-            return flexRender(
-              header.column.columnDef.header,
-              header.getContext(),
-            );
-          }),
-        );
-      }}
+      fixedHeaderContent={() => (
+        <HeaderContent table={table} tableRowComponent={tableRowComponent} />
+      )}
       itemContent={index => {
         const row = rows[index];
         return (

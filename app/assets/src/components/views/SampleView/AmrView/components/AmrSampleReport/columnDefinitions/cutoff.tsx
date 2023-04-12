@@ -2,8 +2,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import React from "react";
 import { SortableHeader } from "~/components/ui/Table/components/SortableHeader";
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
+import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
-import { DefaultCell } from "./components/DefaultCell";
+import { getDefaultCell } from "./components/DefaultCell";
 
 export const cutoffColumn: ColumnDef<AmrResult, any> = {
   id: "cutoff",
@@ -11,10 +12,14 @@ export const cutoffColumn: ColumnDef<AmrResult, any> = {
   size: 100,
   header: function cutoffHeader({ header, column }) {
     return (
-      <SortableHeader header={header} style={generateWidthStyles(column)}>
+      <SortableHeader
+        className={rowStyles.contigsColumnGroup}
+        header={header}
+        style={generateWidthStyles(column)}
+      >
         Cutoff
       </SortableHeader>
     );
   },
-  cell: DefaultCell,
+  cell: getDefaultCell(rowStyles.contigsColumnGroup),
 };

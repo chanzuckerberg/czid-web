@@ -1,3 +1,4 @@
+import { cx } from "@emotion/css";
 import { ColumnDef } from "@tanstack/react-table";
 import { CellBasic } from "czifui";
 import React from "react";
@@ -5,17 +6,18 @@ import { SortableHeader } from "~/components/ui/Table/components/SortableHeader"
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { memo } from "~/components/utils/memo";
+import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
 import cs from "./column_definitions.scss";
 
 export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
   id: "contig-coverage-breadth",
   accessorKey: "contigCoverageBreadth",
-  size: 70,
+  size: 100,
   header: function contigPercentCoverageHeader({ header, column }) {
     return (
       <SortableHeader
-        className={cs.rightAlignedHeader}
+        className={cx(cs.rightAlignedHeader, rowStyles.contigsColumnGroup)}
         header={header}
         style={generateWidthStyles(column)}
       >
@@ -36,8 +38,9 @@ export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
 
     return (
       <CellBasic
-        className={cs.rightAlignedCell}
+        className={cx(cs.rightAlignedCell, rowStyles.contigsColumnGroup)}
         key={cell.id}
+        style={generateWidthStyles(cell.column)}
         shouldTextWrap
         primaryText={value}
         primaryTextWrapLineCount={2}
