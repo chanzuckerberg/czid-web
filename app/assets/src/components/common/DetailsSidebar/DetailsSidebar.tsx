@@ -12,7 +12,11 @@ import GeneDetailsMode, { GDMProps } from "./GeneDetailsMode";
 import PipelineStepDetailsMode, { PSDProps } from "./PipelineStepDetailsMode";
 import { PipelineStepDetailsModeWithApollo } from "./PipelineStepDetailsModeWithApollo";
 import SampleDetailsMode, { SampleDetailsModeProps } from "./SampleDetailsMode";
-import { TaxonDetailsMode, TaxonDetailsModeProps } from "./TaxonDetailsMode";
+import {
+  TaxonDetailsMode,
+  TaxonDetailsModeProps,
+  TaxonDetailsModeWithApollo,
+} from "./TaxonDetailsMode";
 
 interface SidebarBase {
   visible: boolean;
@@ -66,6 +70,9 @@ const DetailsSidebar = ({
       case "sampleDetails":
         return <SampleDetailsMode {...params} />;
       case "taxonDetails":
+        if (apolloClientEnabled) {
+          return <TaxonDetailsModeWithApollo {...params} />;
+        }
         return <TaxonDetailsMode {...params} />;
       case "pipelineStepDetails":
         if (apolloClientEnabled) {

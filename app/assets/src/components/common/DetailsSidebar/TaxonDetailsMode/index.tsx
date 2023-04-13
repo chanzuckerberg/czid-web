@@ -1,2 +1,2 @@
-import { TaxonDetailsMode, TaxonDetailsModeProps } from "./TaxonDetailsMode";
-export { TaxonDetailsModeProps, TaxonDetailsMode };
+export { TaxonDetailsMode, TaxonDetailsModeProps } from "./TaxonDetailsMode";
+export { TaxonDetailsModeWithApollo } from "./TaxonDetailsModeWithApollo";
