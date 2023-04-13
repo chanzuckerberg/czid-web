@@ -115,6 +115,8 @@ RSpec.describe HardDeleteObjects, type: :job do
           "sample_id" => @sample1.id,
           "sample_name" => @sample1.name,
           "sample_user_id" => @sample1.user.id,
+          "project_name" => @sample1.project.name,
+          "project_id" => @sample1.project.id,
         }
         run_log_data = {
           user_email: @joe.email,
@@ -262,6 +264,8 @@ RSpec.describe HardDeleteObjects, type: :job do
           "sample_id" => @sample1.id,
           "sample_name" => @sample1.name,
           "sample_user_id" => @sample1.user.id,
+          "project_name" => @sample1.project.name,
+          "project_id" => @sample1.project.id,
         }
         run_log_data = {
           user_email: @joe.email,

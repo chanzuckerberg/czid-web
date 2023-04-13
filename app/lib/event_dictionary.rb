@@ -58,7 +58,13 @@ class EventDictionary
   # @param workflow: The workflow the user requested be deleted (e.g. short read mNGS, AMR)
   GDPR_RUN_HARD_DELETED = "GDPR_RUN_HARD_DELETED".freeze
 
-  # We deleted a sample because there were no more active runs after the user
+  # We soft-deleted a sample because there were no more active runs after the user
+  # deleted pipeline/workflow runs. Log for GDPR compliance
+  # @param user_email: The email of the user who initiated the deletion
+  # @param deleted_samples: Information about the samples being deleted
+  GDPR_SAMPLE_SOFT_DELETED = "GDPR_SAMPLE_SOFT_DELETED".freeze
+
+  # We hard-deleted a sample because there were no more active runs after the user
   # deleted pipeline/workflow runs. Log for GDPR compliance
   # @param user_email: The email of the user who initiated the deletion
   # @param deleted_samples: Information about the samples being deleted

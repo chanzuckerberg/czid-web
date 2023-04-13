@@ -1451,7 +1451,24 @@ class SamplesController < ApplicationController
     deletable = @sample.deletable?(current_user)
     success = false
     project = @sample.project
+    sample_info = {
+      id: @sample.id,
+      sample_name: @sample.name,
+      sample_user_id: @sample.user_id,
+      project_id: project.id,
+      project_name: project.name,
+    }
     success = @sample.destroy if deletable
+    if success
+      MetricUtil.log_analytics_event(
+        EventDictionary::GDPR_SAMPLE_HARD_DELETED,
+        current_user,
+        {
+          user_email: current_user.email,
+          deleted_samples: [sample_info],
+        }
+      )
+    end
     respond_to do |format|
       if success
         format.html { redirect_to project, notice: 'Sample was successfully destroyed.' }

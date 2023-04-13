@@ -150,6 +150,8 @@ RSpec.describe BulkDeletionService, type: :service do
         "sample_id" => @sample1.id,
         "sample_name" => @sample1.name,
         "sample_user_id" => @sample1.user.id,
+        "project_name" => @sample1.project.name,
+        "project_id" => @sample1.project.id,
       }
       log_data = {
         "user_email": @joe.email,
@@ -162,6 +164,18 @@ RSpec.describe BulkDeletionService, type: :service do
         EventDictionary::GDPR_RUN_SOFT_DELETED,
         @joe,
         log_data
+      )
+
+      sample_data = run_data.except("id")
+      sample_log_data = {
+        "user_email": @joe.email,
+        "deleted_samples": [sample_data],
+      }
+
+      expect(MetricUtil).to receive(:log_analytics_event).with(
+        EventDictionary::GDPR_SAMPLE_SOFT_DELETED,
+        @joe,
+        sample_log_data
       )
       BulkDeletionService.call(
         object_ids: [@sample1.id],
@@ -418,6 +432,8 @@ RSpec.describe BulkDeletionService, type: :service do
         "sample_id" => @sample1.id,
         "sample_name" => @sample1.name,
         "sample_user_id" => @sample1.user.id,
+        "project_name" => @sample1.project.name,
+        "project_id" => @sample1.project.id,
       }
       log_data = {
         "user_email": @joe.email,
@@ -430,6 +446,17 @@ RSpec.describe BulkDeletionService, type: :service do
         EventDictionary::GDPR_RUN_SOFT_DELETED,
         @joe,
         log_data
+      )
+      sample_data = run_data.except("id")
+      sample_log_data = {
+        "user_email": @joe.email,
+        "deleted_samples": [sample_data],
+      }
+
+      expect(MetricUtil).to receive(:log_analytics_event).with(
+        EventDictionary::GDPR_SAMPLE_SOFT_DELETED,
+        @joe,
+        sample_log_data
       )
       BulkDeletionService.call(
         object_ids: [@completed_wr.id],

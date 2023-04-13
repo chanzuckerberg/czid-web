@@ -50,8 +50,15 @@ class HardDeleteObjects
   def self.hard_delete_runs(objects, user, workflow)
     deleted_object_ids = []
     objects_info = objects
-                   .joins(:sample)
-                   .select(:id, "sample_id", "samples.name AS sample_name", "samples.user_id AS sample_user_id").as_json
+                   .joins(:sample, sample: :project)
+                   .select(
+                     :id,
+                     "sample_id",
+                     "samples.name AS sample_name",
+                     "samples.user_id AS sample_user_id",
+                     "projects.name AS project_name",
+                     "projects.id AS project_id"
+                   ).as_json
 
     objects.each do |object|
       object.destroy!
@@ -84,7 +91,14 @@ class HardDeleteObjects
     # destroy samples with no remaining runs (should have non-nil deleted_at)
     # double check pipeline/workflow runs in case any of them failed to delete
     deleted_sample_ids = []
-    samples_info = samples_to_delete.select(:id, "name AS sample_name", "user_id AS sample_user_id").as_json({ methods: [] })
+    samples_info = samples_to_delete.joins(:project).select(
+      "samples.id AS sample_id",
+      "samples.name AS sample_name",
+      "samples.user_id AS sample_user_id",
+      "projects.name AS project_name",
+      "projects.id AS project_id"
+    ).as_json({ methods: [] })
+
     samples_to_delete.each do |sample|
       if sample.pipeline_runs.non_deprecated.count == 0 && sample.workflow_runs.non_deprecated.count == 0
         begin

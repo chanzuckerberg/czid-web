@@ -85,8 +85,15 @@ class BulkDeletionService
 
     # log soft deletion for GDPR compliance
     deleted_objects_info = deletable_objects
-                           .joins(:sample)
-                           .select(:id, "sample_id", "samples.name AS sample_name", "samples.user_id AS sample_user_id").as_json
+                           .joins(:sample, sample: :project)
+                           .select(
+                             :id,
+                             "sample_id",
+                             "samples.name AS sample_name",
+                             "samples.user_id AS sample_user_id",
+                             "projects.name AS project_name",
+                             "projects.id AS project_id"
+                           ).as_json
 
     MetricUtil.log_analytics_event(
       EventDictionary::GDPR_RUN_SOFT_DELETED,
@@ -97,6 +104,21 @@ class BulkDeletionService
         workflow: workflow,
       }
     )
+
+    unless soft_deleted_sample_ids.empty?
+      deleted_samples_info = deleted_objects_info
+                             .select { |object_hash| soft_deleted_sample_ids.include?(object_hash["sample_id"]) }
+                             .map { |object_hash| object_hash.except("id") }
+
+      MetricUtil.log_analytics_event(
+        EventDictionary::GDPR_SAMPLE_SOFT_DELETED,
+        user,
+        {
+          user_email: user.email,
+          deleted_samples: deleted_samples_info,
+        }
+      )
+    end
 
     ids_to_hard_delete = deletable_objects.pluck(:id)
     Resque.enqueue(HardDeleteObjects, ids_to_hard_delete, soft_deleted_sample_ids, workflow, user.id)
