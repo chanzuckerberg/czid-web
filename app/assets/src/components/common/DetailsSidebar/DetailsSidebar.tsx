@@ -10,6 +10,7 @@ import BulkDownloadDetailsMode, { BDDProps } from "./BulkDownloadDetailsMode";
 import { BulkDownloadDetailsModeWithApollo } from "./BulkDownloadDetailsModeWithApollo";
 import GeneDetailsMode, { GDMProps } from "./GeneDetailsMode";
 import PipelineStepDetailsMode, { PSDProps } from "./PipelineStepDetailsMode";
+import { PipelineStepDetailsModeWithApollo } from "./PipelineStepDetailsModeWithApollo";
 import SampleDetailsMode, { SampleDetailsModeProps } from "./SampleDetailsMode";
 import { TaxonDetailsMode, TaxonDetailsModeProps } from "./TaxonDetailsMode";
 
@@ -56,7 +57,6 @@ const DetailsSidebar = ({
   const apolloClientEnabled = allowedFeatures.includes(
     APOLLO_CLIENT_STATE_MANAGEMENT,
   );
-
   const renderContents = () => {
     if (!visible) {
       return null;
@@ -68,6 +68,10 @@ const DetailsSidebar = ({
       case "taxonDetails":
         return <TaxonDetailsMode {...params} />;
       case "pipelineStepDetails":
+        if (apolloClientEnabled) {
+          return <PipelineStepDetailsModeWithApollo {...params} />;
+        }
+
         return <PipelineStepDetailsMode {...params} />;
       case "geneDetails":
         return <GeneDetailsMode {...params} />;

@@ -8,6 +8,6 @@
         pipelineVersions: <%= raw escape_json(@pipeline_versions) %>,
         lastProcessedAt: '<%= @last_processed_at %>',
         pipelineTechnology: '<%= @pipeline_technology %>',
-    }, 'PipelineStageResults');
+    }, 'PipelineStageResults', JSON.parse('<%= raw escape_json(user_context)%>'));
   <% end %>
 </div>
