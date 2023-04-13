@@ -55,5 +55,23 @@ class CheckSoftDeletedData
         sample_ids: deleted_samples.pluck(:id)
       )
     end
+
+    deleted_phylo_tree = PhyloTree.where("deleted_at < ?", Time.now.utc - DELAY)
+    unless deleted_phylo_tree.empty?
+      LogUtil.log_error(
+        "Soft deleted phylo trees (deprecated) found in database",
+        exception: SoftDeletedDataError.new,
+        phylo_tree_ids: deleted_phylo_tree.pluck(:id)
+      )
+    end
+
+    deleted_phylo_tree_ng = PhyloTreeNg.where("deleted_at < ?", Time.now.utc - DELAY)
+    unless deleted_phylo_tree_ng.empty?
+      LogUtil.log_error(
+        "Soft deleted phylo trees found in database",
+        exception: SoftDeletedDataError.new,
+        phylo_tree_ng_ids: deleted_phylo_tree_ng.pluck(:id)
+      )
+    end
   end
 end

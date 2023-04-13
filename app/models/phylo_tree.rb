@@ -30,6 +30,7 @@ class PhyloTree < ApplicationRecord
   ] }
 
   after_create :create_visualization
+  before_destroy :cleanup_s3
 
   def self.in_progress
     where(status: STATUS_IN_PROGRESS)
@@ -306,5 +307,11 @@ class PhyloTree < ApplicationRecord
 
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
+  end
+
+  def cleanup_s3
+    return if phylo_tree_output_s3_path.blank?
+
+    S3Util.delete_s3_prefix(phylo_tree_output_s3_path)
   end
 end

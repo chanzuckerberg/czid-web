@@ -130,6 +130,50 @@ RSpec.describe BulkDeletionService, type: :service do
       end
     end
 
+    context "when the samples have associated phylo trees" do
+      before do
+        @pr4 = create(:pipeline_run, sample: @sample3, technology: illumina, finalized: 1)
+        @pr5 = create(:pipeline_run, sample: @sample3, technology: illumina, finalized: 1)
+        @phylo_tree = create(:phylo_tree, user_id: @joe.id, name: "Test Phylo Tree", pipeline_runs: [@pr1, @pr2])
+        @phylo_tree_ng = create(:phylo_tree_ng, user_id: @joe.id, name: "Test Phylo Tree Ng", pipeline_runs: [@pr1, @pr2, @pr3, @pr4, @pr5])
+      end
+
+      it "marks deprecated phylo trees for deletion" do
+        BulkDeletionService.call(
+          object_ids: [@sample1.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        @phylo_tree.reload
+        expect(@phylo_tree.deleted_at).to be_within(1.minute).of(Time.now.utc)
+        expect(Visualization.find_by(data: { treeId: @phylo_tree.id })).to be_nil
+      end
+
+      it "updates phylotrees - enough samples left" do
+        BulkDeletionService.call(
+          object_ids: [@sample1.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        @phylo_tree_ng.reload
+        expect(@phylo_tree_ng.deprecated).to be true
+        expect(@phylo_tree_ng.deleted_at).to be_within(1.minute).of(Time.now.utc)
+        expect(Visualization.find_by(data: { treeId: @phylo_tree_ng.id })).to be_nil
+      end
+
+      it "deletes phylotrees - not enough samples left" do
+        BulkDeletionService.call(
+          object_ids: [@sample1.id, @sample2.id],
+          user: @joe,
+          workflow: "short-read-mngs"
+        )
+        @phylo_tree_ng.reload
+        expect(@phylo_tree_ng.deprecated).to be false
+        expect(@phylo_tree_ng.deleted_at).to be_within(1.minute).of(Time.now.utc)
+        expect(Visualization.find_by(data: { treeId: @phylo_tree_ng.id })).to be_nil
+      end
+    end
+
     it "marks deprecated pipeline runs as deleted" do
       response = BulkDeletionService.call(
         object_ids: [@sample_with_deprecated_pr.id],

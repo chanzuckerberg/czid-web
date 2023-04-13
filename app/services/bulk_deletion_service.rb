@@ -65,7 +65,7 @@ class BulkDeletionService
       technology = WorkflowRun::MNGS_WORKFLOW_TO_TECHNOLOGY[workflow]
       deletable_objects = current_power.deletable_pipeline_runs.where(sample_id: object_ids, technology: technology)
       sample_ids = object_ids # allows us to delete samples with failed uploads but no pipeline runs
-      handle_visualizations(sample_ids)
+      handle_visualizations(sample_ids, delete_timestamp)
     else
       deletable_objects = current_power.deletable_workflow_runs.where(id: object_ids).by_workflow(workflow).non_deprecated
       sample_ids = deletable_objects.pluck(:sample_id)
@@ -204,23 +204,53 @@ class BulkDeletionService
   end
 
   # Update or delete visualizations associated with the samples for these pipeline runs
-  def handle_visualizations(sample_ids)
-    visualizations = Visualization.joins(:samples).where("sample_id IN (?)", sample_ids).distinct
+  def handle_visualizations(sample_ids, delete_timestamp)
+    viz = Visualization.joins(:samples).where("sample_id IN (?)", sample_ids).distinct
+    viz_tables_trees = viz.where(visualization_type: ["table", "tree"])
+    viz_phylo_trees = viz.where(visualization_type: ["phylo_tree"])
+    viz_phylo_tree_ngs = viz.where(visualization_type: ["phylo_tree_ng"])
+    viz_heatmaps = viz.where(visualization_type: "heatmap")
 
-    # Table/Tree visualizations are only associated with one sample (unrelated to phylotree).
-    visualizations.where(visualization_type: ["table", "tree"]).each(&:destroy)
+    # Tables/Trees: Delete them since they are only associated with one sample (unrelated to phylotree).
+    viz_tables_trees.each(&:destroy!)
 
-    # Remove samples from existing heatmaps (heatmaps have >2 samples).
-    heatmaps = visualizations.where(visualization_type: "heatmap")
-    heatmaps.each do |heatmap|
-      n_samples_after_deletion = heatmap.sample_ids.length - heatmap.sample_ids.to_a.count { |sample_id| sample_ids.include? sample_id }
+    # Heatmaps: Remove samples from existing heatmaps (heatmaps have >2 samples).
+    viz_heatmaps.each do |viz_heatmap|
+      n_samples_after_deletion = viz_heatmap.sample_ids.length - viz_heatmap.sample_ids.to_a.count { |sample_id| sample_ids.include? sample_id }
 
       # If too few samples will be left after deletion, remove the heatmap entirely
       if n_samples_after_deletion < 2
-        heatmap.destroy!
+        viz_heatmap.destroy!
       # Otherwise, only remove the samples from the heatmap
       else
-        heatmap.samples = heatmap.samples.select { |sample| sample_ids.exclude? sample.id }
+        viz_heatmap.samples = viz_heatmap.samples.select { |sample| sample_ids.exclude? sample.id }
+      end
+    end
+
+    # Deprecated phylo-trees: Delete them (associated with multiple samples but no longer supported)
+    viz_phylo_trees.each do |viz_phylo_tree|
+      phylo_tree = PhyloTree.find_by(id: viz_phylo_tree.data["treeId"])
+
+      # Mark phylo tree/S3 data for deletion and unlist from UI
+      phylo_tree.update(deleted_at: delete_timestamp)
+      viz_phylo_tree.destroy!
+    end
+
+    # Phylo-trees: Handle non-deprecated phylo trees.
+    viz_phylo_tree_ngs.each do |viz_phylo_tree_ng|
+      phylo_tree_ng = PhyloTreeNg.find_by(id: viz_phylo_tree_ng.data["treeNgId"])
+      n_samples_after_deletion = phylo_tree_ng.pipeline_run_ids.length - phylo_tree_ng.pipeline_runs.pluck(:sample_id).count { |sample_id| sample_ids.include? sample_id }
+
+      # Mark phylo tree/S3 data for deletion and unlist from UI (whether re-run or not).
+      phylo_tree_ng.update(deleted_at: delete_timestamp)
+      viz_phylo_tree_ng.destroy!
+
+      # If we still have enough samples deletion, re-run it without the current samples to delete.
+      if n_samples_after_deletion >= 4
+        phylo_tree_ng.pipeline_runs = phylo_tree_ng.pipeline_runs.select { |pr| sample_ids.exclude? pr.sample_id }
+
+        # Re-run the phylo tree, which creates a new phylo tree entirely.
+        phylo_tree_ng.rerun
       end
     end
   end

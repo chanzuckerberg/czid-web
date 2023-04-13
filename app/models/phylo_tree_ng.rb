@@ -32,9 +32,11 @@ class PhyloTreeNg < ApplicationRecord
   validates :name, presence: true
 
   after_create :create_visualization
+  before_destroy :cleanup_s3
 
   scope :by_time, ->(start_date:, end_date:) { where(created_at: start_date.beginning_of_day..end_date.end_of_day) }
   scope :non_deprecated, -> { where(deprecated: false) }
+  scope :non_deleted, -> { where(deleted_at: nil) }
   scope :active, -> { non_deprecated.where(status: WorkflowRun::STATUS[:succeeded]) }
 
   class RerunDeprecatedPhyloTreeNgError < StandardError
@@ -66,7 +68,7 @@ class PhyloTreeNg < ApplicationRecord
       viewable_pipeline_run_ids = PipelineRun.viewable(user).pluck(:id)
       viewable_trees = PhyloTreeNg.includes(:pipeline_runs).where(pipeline_runs: { id: viewable_pipeline_run_ids }).references(:pipeline_runs)
       where(id: viewable_trees)
-    end
+    end.non_deleted
   end
 
   def self.editable(user)
@@ -175,5 +177,11 @@ class PhyloTreeNg < ApplicationRecord
     s3_path = s3_output_prefix # will be set in the dispatch service
 
     @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: s3_path, finalized: finalized?)
+  end
+
+  def cleanup_s3
+    return if s3_output_prefix.blank?
+
+    S3Util.delete_s3_prefix(s3_output_prefix)
   end
 end

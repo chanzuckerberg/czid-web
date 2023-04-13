@@ -34,6 +34,9 @@ RSpec.describe HardDeleteObjects, type: :job do
                       sfn_execution_arn: fake_sfn_execution_arn,
                       deleted_at: 5.minutes.ago)
         @wr2 = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+
+        @phylo_tree = create(:phylo_tree, user_id: @joe.id, name: "Test Phylo Tree", pipeline_runs: [@pr1, @pr2])
+        @phylo_tree_ng = create(:phylo_tree_ng, user_id: @joe.id, name: "Test Phylo Tree Ng", pipeline_runs: [@pr1, @pr2], s3_output_prefix: "s3://fake_bucket/fake/path")
       end
 
       it "raises error if both sample ids and object ids are empty" do
@@ -72,6 +75,8 @@ RSpec.describe HardDeleteObjects, type: :job do
         sample_ids = [@sample1.id]
         expect(S3Util).to receive(:delete_s3_prefix).with(@pr1.sfn_output_path)
         expect(S3Util).to receive(:delete_s3_prefix).with(@pr2.sfn_output_path)
+        expect(S3Util).to receive(:delete_s3_prefix).with("s3://#{ENV['SAMPLES_BUCKET_NAME']}/phylo_trees/#{@phylo_tree.id}")
+        expect(S3Util).to receive(:delete_s3_prefix).with(@phylo_tree_ng.s3_output_prefix)
         expect(S3Util).to receive(:delete_s3_prefix).with("s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample1.sample_path}/")
         expect(S3Util).not_to receive(:delete_s3_prefix).with("s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample2.sample_path}/")
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
