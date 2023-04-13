@@ -26,7 +26,9 @@ class Mutations::CreateUser < Mutations::BaseMutation
         archetypes: archetypes,
         segments: segments,
         role: role,
-        send_activation: send_activation
+        send_activation: send_activation,
+        # All users created via admin-settings are considered to have completed a profile form
+        profile_form_version: 1
       )
     elsif !current_user_is_logged_in?(context) && auto_account_creation_enabled
       # User created automatically via the landing pg

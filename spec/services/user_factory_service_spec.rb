@@ -76,6 +76,23 @@ RSpec.describe UserFactoryService do
         expect(User.last.email).to eq("capital_letters@email.com")
       end
     end
+
+    context "when new_user_params includes a profile_form_version" do
+      let(:new_user_params) do
+        {
+          name: new_user_name,
+          email: new_user_email,
+          role: 0,
+          created_by_user_id: admin_user.id,
+          profile_form_version: 1,
+        }
+      end
+
+      it "adds a new user with the profile_form_version" do
+        user_factory_instance.call
+        expect(User.last.profile_form_version).to eq(1)
+      end
+    end
   end
 
   context "#record_new_user_in_airtable" do
