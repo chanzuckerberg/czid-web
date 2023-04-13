@@ -2,14 +2,12 @@ import { ChecksumAlgorithm, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import cx from "classnames";
 import {
-  compact,
   constant,
   filter,
   find,
   isEmpty,
   map,
   omit,
-  pluck,
   size,
   sum,
   times,
@@ -402,7 +400,11 @@ const LocalUploadProgressModal = ({
     setUploadComplete(true);
     setRetryingSampleUpload(false);
 
-    const numFailedSamples = size(getLocalSamplesFailed());
+    // TODO(nina): These analytics events are creating unique table names
+    // for each occurrence and clogging up our analytics pipeline. Commenting
+    // out until we can figure out why and fix the root issue.
+
+    /* const numFailedSamples = size(getLocalSamplesFailed());
 
     if (numFailedSamples > 0) {
       const failedSamples = filter(
@@ -447,11 +449,11 @@ const LocalUploadProgressModal = ({
           uploadType,
         },
       );
-    }
+    } */
   };
 
   // Returns a map of sample names to a list of their file sizes
-  const sampleNameToFileSizes = (samples: $TSFixMe) => {
+  /*   const sampleNameToFileSizes = (samples: $TSFixMe) => {
     return samples.reduce(function(
       nameToFileSizes: $TSFixMe,
       sample: $TSFixMe,
@@ -460,7 +462,7 @@ const LocalUploadProgressModal = ({
       return nameToFileSizes;
     },
     {});
-  };
+  }; */
 
   /*
     START Component rendering methods
