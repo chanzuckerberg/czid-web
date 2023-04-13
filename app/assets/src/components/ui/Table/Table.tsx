@@ -8,7 +8,7 @@ import {
   TableOptions,
   useReactTable,
 } from "@tanstack/react-table";
-import { Table as SDSTable, TableRow, TableRowProps } from "czifui";
+import { TableRow, TableRowProps } from "czifui";
 import { isEqual, map } from "lodash";
 import React, { useEffect, useState } from "react";
 import { TableVirtuoso } from "react-virtuoso";
@@ -16,6 +16,7 @@ import { IdMap } from "~/components/utils/objectUtil";
 import { rowSelectionColumn } from "./columnDefinitions/RowSelectionColumn";
 import { EmptyTable } from "./components/EmptyTable";
 import { HeaderContent } from "./components/HeaderContent";
+import { StyledSdsTable } from "./components/StyledSdsTable";
 
 interface TableProps<T> {
   columns: ColumnDef<T, any>[];
@@ -157,7 +158,7 @@ export const Table = <T,>({
     <TableVirtuoso
       totalCount={rows.length}
       components={{
-        Table: SDSTable,
+        Table: StyledSdsTable,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         TableRow: TableRowComponent,

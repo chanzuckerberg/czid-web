@@ -1,25 +1,27 @@
+import { cx } from "@emotion/css";
 import { ColumnDef } from "@tanstack/react-table";
 import React from "react";
 import { SortableHeader } from "~/components/ui/Table/components/SortableHeader";
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
+import cs from "./column_definitions.scss";
 import { Align, getDefaultCell } from "./components/DefaultCell";
 
-export const cutoffColumn: ColumnDef<AmrResult, any> = {
-  id: "cutoff",
-  accessorKey: "cutoff",
+export const readsPerMillionColumn: ColumnDef<AmrResult, any> = {
+  id: "reads-per-million",
+  accessorKey: "rpm",
   size: 85,
-  header: function cutoffHeader({ header, column }) {
+  header: function readsPerMillionHeader({ header, column }) {
     return (
       <SortableHeader
-        className={rowStyles.contigsColumnGroup}
+        className={cx(cs.rightAlignedHeader, rowStyles.readsColumnGroup)}
         header={header}
         style={generateWidthStyles(column)}
       >
-        Cutoff
+        rPM
       </SortableHeader>
     );
   },
-  cell: getDefaultCell(Align.LEFT, rowStyles.contigsColumnGroup),
+  cell: getDefaultCell(Align.RIGHT, rowStyles.readsColumnGroup),
 };

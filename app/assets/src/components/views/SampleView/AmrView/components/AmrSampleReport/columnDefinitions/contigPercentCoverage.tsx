@@ -13,7 +13,7 @@ import cs from "./column_definitions.scss";
 export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
   id: "contig-coverage-breadth",
   accessorKey: "contigCoverageBreadth",
-  size: 100,
+  size: 85,
   header: function contigPercentCoverageHeader({ header, column }) {
     return (
       <SortableHeader

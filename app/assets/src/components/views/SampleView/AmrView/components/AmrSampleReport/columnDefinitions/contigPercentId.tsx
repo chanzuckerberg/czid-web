@@ -13,7 +13,7 @@ import cs from "./column_definitions.scss";
 export const contigPercentIdColumn: ColumnDef<AmrResult, any> = {
   id: "contig-percent-id",
   accessorKey: "contigPercentId",
-  size: 100,
+  size: 85,
   header: function contigPercentIdHeader({ header, column }) {
     return (
       <SortableHeader

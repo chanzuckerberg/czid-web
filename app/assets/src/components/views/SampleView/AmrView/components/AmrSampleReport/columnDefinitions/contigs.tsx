@@ -11,7 +11,7 @@ import { Align, getDefaultCell } from "./components/DefaultCell";
 export const contigsColumn: ColumnDef<AmrResult, any> = {
   id: "contigs",
   accessorKey: "contigs",
-  size: 100,
+  size: 85,
   header: function contigsHeader({ header, column }) {
     return (
       <SortableHeader

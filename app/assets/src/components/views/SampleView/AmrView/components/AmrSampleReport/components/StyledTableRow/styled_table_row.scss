@@ -12,3 +12,16 @@
 .styledTableRow > .contigsColumnGroup ~ .contigsColumnGroup {
   border: none;
 }
+
+// Select all elements with readsColumnGroup class inside of styledTableRow
+// Give them all a left border
+.styledTableRow > .readsColumnGroup {
+  border-left: $sds-borders-gray-300;
+}
+
+// Select all elements with readsColumnGroup class inside of styledTableRow
+// except for the first one
+// Remove the border
+.styledTableRow > .readsColumnGroup ~ .readsColumnGroup {
+  border: none;
+}

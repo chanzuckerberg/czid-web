@@ -5,15 +5,15 @@ import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { AmrResult } from "../types";
 import { getDefaultCell } from "./components/DefaultCell";
 
-export const mechanismColumn: ColumnDef<AmrResult, any> = {
-  id: "mechanism",
-  accessorKey: "mechanism",
-  size: 200,
+export const modelColumn: ColumnDef<AmrResult, any> = {
+  id: "model",
+  accessorKey: "model",
+  size: 120,
   maxSize: 200,
-  header: function mechanismHeader({ header, column }) {
+  header: function modelHeader({ header, column }) {
     return (
       <SortableHeader header={header} style={generateWidthStyles(column)}>
-        Mechanism
+        Model
       </SortableHeader>
     );
   },

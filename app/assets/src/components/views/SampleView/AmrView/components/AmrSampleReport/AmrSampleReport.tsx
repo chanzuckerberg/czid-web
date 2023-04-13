@@ -12,8 +12,14 @@ import {
   drugClassColumn,
   geneColumn,
   geneFamilyColumn,
+  getReadsColumnGroup,
   mechanismColumn,
   modelColumn,
+  readCoverageDepthColumn,
+  readDepthPerMillionColumn,
+  readPercentCoverageColumn,
+  readsColumn,
+  readsPerMillionColumn,
 } from "./columnDefinitions";
 import { getContigsColumnGroup } from "./columnDefinitions/contigsColumnGroup";
 import { getGeneInfoColumnGroup } from "./columnDefinitions/geneInfoColumnGroup";
@@ -54,6 +60,13 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
         contigsColumn,
         contigPercentCoverageColumn,
         contigPercentIdColumn,
+      ]),
+      getReadsColumnGroup([
+        readsColumn,
+        readsPerMillionColumn,
+        readPercentCoverageColumn,
+        readCoverageDepthColumn,
+        readDepthPerMillionColumn,
       ]),
     ],
     [reportTableData],
