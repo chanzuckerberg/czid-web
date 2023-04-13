@@ -239,6 +239,11 @@ Rails.application.routes.draw do
       get :feature_flags
       post :feature_flag
     end
+
+    member do
+      post :update_user_data
+      post :post_user_data_to_airtable
+    end
   end
 
   get 'users/:id', to: 'users#edit'

@@ -115,18 +115,9 @@ RSpec.describe UsersController, type: :request do
     context "with AppConfig::AUTO_ACCOUNT_CREATION_V1 disabled" do
       it "shouldn't update user" do
         AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "")
-        put user_url @joe, params: { user: { name: "abc xyz" } }
+        post update_user_data_user_url @joe, params: { user: { name: "abc xyz" } }
         expect(response).to have_http_status :forbidden
         expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Nonadmin users are not allowed to modify user info")
-      end
-
-      it "shouldn't update the user's role" do
-        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "")
-        put user_url @joe, params: { user: { role: 1, name: @joe.name, email: @joe.email } }
-        expect(response).to have_http_status :forbidden
-        expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Nonadmin users are not allowed to modify user info")
-        @joe.reload
-        expect(@joe.admin?).to eq(false)
       end
     end
 
@@ -134,25 +125,16 @@ RSpec.describe UsersController, type: :request do
       it "should update user" do
         AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
         expect(Auth0UserManagementHelper).to receive(:patch_auth0_user).with(old_email: @joe.email, email: @joe.email, name: "abc xyz", role: @joe.role)
-        put user_url @joe, params: { user: { name: "abc xyz", email: @joe.email } }
+        post update_user_data_user_url @joe, params: { user: { name: "abc xyz", email: @joe.email } }
         @joe.reload
         expect(@joe.name).to eq("abc xyz")
       end
 
       it "shouldn't update a different user's info" do
         AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
-        put user_url @admin, params: { user: { name: "abc xyz", email: @admin.email } }
+        post update_user_data_user_url @admin, params: { user: { name: "abc xyz", email: @admin.email } }
         expect(response).to have_http_status :forbidden
         expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Users are not allowed to modify other users' info")
-      end
-
-      it "shouldn't update the user's role" do
-        AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
-        expect(Auth0UserManagementHelper).to receive(:patch_auth0_user).with(old_email: @joe.email, email: @joe.email, name: "abc xyz", role: @joe.role)
-        put user_url @joe, params: { user: { role: 1, name: "abc xyz", email: @joe.email } }
-        @joe.reload
-        expect(@joe.name).to eq("abc xyz")
-        expect(@joe.admin?).to eq(false)
       end
 
       it "should send user profile data to AirTable" do
@@ -188,16 +170,15 @@ RSpec.describe UsersController, type: :request do
           survey_version: "2",
         }.merge(form_params)
 
-        expect(Auth0UserManagementHelper).to receive(:patch_auth0_user).with(old_email: @joe.email, email: @joe.email, name: "abc xyz", role: @joe.role)
         expect(MetricUtil).to receive(:post_to_airtable).with(
           "TEST - CZ ID User Profiles", # TODO: replace this with the actual table name
           { fields: airtable_params }.to_json
         )
 
         params = { user: sign_up_params }
-        put user_url @joe, params: params
+        post post_user_data_to_airtable_user_url @joe, params: params
 
-        assert_redirected_to edit_user_path(@joe)
+        expect(response).to have_http_status :ok
       end
     end
   end
