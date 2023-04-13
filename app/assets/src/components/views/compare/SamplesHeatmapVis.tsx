@@ -672,22 +672,37 @@ class SamplesHeatmapVis extends React.Component<
           )}
           className={cs.plusMinusControl}
         />
-        <div
-          className={
-            useNewFilters && !this.props.hideFilters
-              ? cs.newHeatmapContainer
-              : cx(
-                  cs.heatmapContainer,
-                  (!isEmpty(this.props.thresholdFilters) ||
-                    !isEmpty(this.props.taxonCategories)) &&
-                    cs.filtersApplied,
-                  this.props.fullScreen && cs.fullScreen,
-                )
-          }
-          ref={container => {
-            this.heatmapContainer = container;
-          }}
-        />
+
+        {/* anchor div here just to prevent the rest of the elements on the page (header, filters) from scrolling when the heatmap is scrolled */}
+        {useNewFilters && (
+          <div className={cs.heatmapLayoutAnchor}>
+            <div
+              className={
+                this.props.hideFilters
+                  ? cs.newHeatmapContainerFiltersClosed
+                  : cs.newHeatmapContainerFiltersOpen
+              }
+              ref={container => {
+                this.heatmapContainer = container;
+              }}
+            />
+          </div>
+        )}
+        {!useNewFilters && (
+          <div
+            className={cx(
+              cs.heatmapContainer,
+              (!isEmpty(this.props.thresholdFilters) ||
+                !isEmpty(this.props.taxonCategories)) &&
+                cs.filtersApplied,
+              this.props.fullScreen && cs.fullScreen,
+            )}
+            ref={container => {
+              this.heatmapContainer = container;
+            }}
+          />
+        )}
+
         {nodeHoverInfo && tooltipLocation && (
           <div
             className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}

@@ -19,18 +19,22 @@
     }
   }
 
-  // TODO - smb - remove the old scss class and add a new one for the case when the filters are closed once we're ready to remove the feature flag
-  .newHeatmapContainer {
+  .heatmapLayoutAnchor {
     overflow: hidden;
-    // Set the height so the heatmap takes up the rest of the screen.
-    // 48px is the height of the legend and 'filter stats row' above the heatmap vis that we're positioning relative to.
-    // We set it to less that the height of the elements so that the
-    // heatmap doesn't completely disappear when scrolled up.
-    // When open, the filter pane is 214px wide.
-    // These *will* need to change if the height of the elements above ever change.
-    height: calc(100vh - 220px);
-    margin-left: 214px + $sds-spaces-l;
-    margin-top: 48px + $sds-spaces-l; //
+    // the headers above are 135px tall
+    height: calc(100vh - 135px);
+  }
+
+  .newHeatmapContainerFiltersOpen {
+    position: relative;
+    // the legend and 'showing x our of x taxa' text are 60px tall
+    top: 60px;
+    // the filters are 214px wide
+    left: 214px;
+    height: calc(100% - 65px);
+    overflow: auto;
+    margin-left: $sds-spaces-l;
+    margin-top: $sds-spaces-l;
 
     svg {
       display: block;
@@ -38,6 +42,22 @@
     }
   }
 
+  .newHeatmapContainerFiltersClosed {
+    position: relative;
+    // the legend and 'showing x our of x taxa' text are 60px tall
+    top: 60px;
+    height: calc(100% - 65px);
+    overflow: auto;
+    margin-left: $sds-spaces-l;
+    margin-top: $sds-spaces-l;
+
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
+  // TODO - smb - remove this old scss class once we're ready to remove the feature flag
   .heatmapContainer {
     overflow: hidden;
     // Set the height so the heatmap takes up the rest of the screen.
