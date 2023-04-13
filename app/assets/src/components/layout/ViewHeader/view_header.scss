@@ -29,6 +29,7 @@
   .sampleName {
     @include font-header-xl;
     color: $sds-color-gray-black;
+    margin: 0;
     max-width: 800px;
     text-overflow: ellipsis;
     overflow: hidden;

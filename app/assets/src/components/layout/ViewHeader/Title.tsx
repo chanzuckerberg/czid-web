@@ -54,12 +54,12 @@ class Title extends React.Component<TitleProps> {
     const multipleOptions = options && options.length > 1;
 
     let sampleName = (
-      <div
+      <h1
         ref={c => (this._nameContainer = c)}
         className={cx(cs.sampleName, multipleOptions && cs.trigger)}
       >
         <span ref={c => (this._name = c)}>{label}</span>
-      </div>
+      </h1>
     );
 
     // if the name overflows, show the full name in a popup.
