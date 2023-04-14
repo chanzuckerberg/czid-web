@@ -49,7 +49,6 @@ import {
   MIN_BIN_WIDTH,
   MIN_NUM_BINS,
   MISSING_INSERT_SIZE_WARNING,
-  MODERN_HOST_FILTERING_SHORT_READ_MNGS_VERSION,
   READS_LOST_STACK_COLORS,
   READS_REMAINING,
   READS_REMAINING_COLOR,
@@ -297,29 +296,15 @@ function QualityControl({
       };
     });
 
-    const fastpFilters = [
-      "Filter low quality",
-      "Filter low complexity",
-      "Filter length",
-    ];
     const _readsLostData = samplesWithInitialReads.map(sampleId => {
       const dataRow: { total?; name? } = {};
-      const sampleUsesModernHostFiltering =
-        parseFloat(samplesReadsStats[sampleId].pipelineVersion) >=
-        MODERN_HOST_FILTERING_SHORT_READ_MNGS_VERSION;
 
       let readsRemaining = samplesReadsStats[sampleId].initialReads;
       samplesReadsStats[sampleId].steps.forEach(step => {
         const readsAfter = step.readsAfter || readsRemaining;
         const readsLost = readsRemaining - readsAfter;
         dataRow[step.name] = readsLost;
-
-        if (
-          !sampleUsesModernHostFiltering ||
-          (sampleUsesModernHostFiltering && !fastpFilters.includes(step.name))
-        ) {
-          readsRemaining = readsAfter;
-        }
+        readsRemaining = readsAfter;
       });
       // account for every category
       categories.forEach(category => {

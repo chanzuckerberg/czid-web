@@ -62,9 +62,13 @@ class MngsReadsStatsLoadService
     resp = AwsClient[:s3].get_object(bucket: bucket, key: "#{s3_prefix}/#{PipelineRun::FASTP_JSON_FILE}")
     contents = JSON.parse(resp.body.read)["filtering_result"]
 
-    fastp_qc_counts << { task: "fastp_low_quality_reads", reads_after: total_reads - contents["low_quality_reads"] }
-    fastp_qc_counts << { task: "fastp_low_complexity_reads", reads_after: total_reads - (contents["low_complexity_reads"] + contents["too_many_N_reads"]) }
-    fastp_qc_counts << { task: "fastp_too_short_reads", reads_after: total_reads - contents["too_short_reads"] }
+    reads_after_quality = total_reads - contents["low_quality_reads"]
+    reads_after_length = reads_after_quality - (contents["too_short_reads"] + contents["too_long_reads"])
+    reads_after_complexity = reads_after_length - (contents["low_complexity_reads"] + contents["too_many_N_reads"])
+
+    fastp_qc_counts << { task: "fastp_low_quality_reads", reads_after: reads_after_quality }
+    fastp_qc_counts << { task: "fastp_too_short_reads", reads_after: reads_after_length }
+    fastp_qc_counts << { task: "fastp_low_complexity_reads", reads_after: reads_after_complexity }
     fastp_qc_counts
   end
 
@@ -110,6 +114,13 @@ class MngsReadsStatsLoadService
       all_counts << { total_reads: total[:reads_after] }
       pipeline_run.total_reads = total[:reads_after]
     end
+
+    # Load reads after bowtie2 host filtering
+    # reads_after_bowtie2_and_ercc = reads_after complexity - (reads_lost_in_bowtie2 - pipeline_run.total_ercc_reads)
+    bowtie2 = all_counts.detect { |entry| entry.value?("bowtie2_host_filtered_out") }
+    reads_after_fastp_low_complexity = all_counts.detect { |entry| entry.value?("fastp_low_complexity_reads") }[:reads_after]
+    reads_lost_in_bowtie2 = reads_after_fastp_low_complexity - bowtie2[:reads_after].to_i
+    bowtie2[:reads_after] = reads_after_fastp_low_complexity - (reads_lost_in_bowtie2 - pipeline_run.total_ercc_reads)
 
     # Load truncation
     truncation = all_counts.detect { |entry| entry.value?("truncated") }

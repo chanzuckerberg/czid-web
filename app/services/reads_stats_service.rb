@@ -55,12 +55,20 @@ class ReadsStatsService
       if stat.task == INITIAL_READS_STAT
         reads_stats[stat.pipeline_run_id][:initialReads] = stat.reads_after
       # TODO(omar): Cleanup references of old host filtering stage after modern host filtering launches.
-      elsif stat.task == RUN_STAR || stat.task == RUN_FASTP_OUT
+      elsif stat.task == RUN_STAR
         # If there are ERCC reads, separate them from host filtering reads.
         pr = PipelineRun.find(stat.pipeline_run_id)
         ercc_counts = pr.total_ercc_reads
         if ercc_counts.present?
           reads_stats[stat.pipeline_run_id][:steps].push(name: ERCC, reads_after: pr.total_reads - ercc_counts)
+        end
+        reads_stats[stat.pipeline_run_id][:steps].push(name: stat.task, reads_after: stat.reads_after)
+      elsif stat.task == RUN_FASTP_OUT
+        pr = PipelineRun.find(stat.pipeline_run_id)
+        ercc_counts = pr.total_ercc_reads
+        if ercc_counts.present?
+          reads_after_fastp_complexity = pr.job_stats.find_by(task: FASTP_LOW_COMPLEXITY_READS).reads_after
+          reads_stats[stat.pipeline_run_id][:steps].push(name: ERCC, reads_after: reads_after_fastp_complexity - pr.total_ercc_reads)
         end
         reads_stats[stat.pipeline_run_id][:steps].push(name: stat.task, reads_after: stat.reads_after)
       elsif !BLOCKLIST.include?(stat.task)
@@ -88,10 +96,10 @@ class ReadsStatsService
 
           if fastp_index
             ordered_tasks.delete_at(fastp_index)
-            ordered_tasks.insert(fastp_index, FASTP_LOW_QUALITY_READS)
+            ordered_tasks.insert(fastp_index, ERCC)
             ordered_tasks.insert(fastp_index, FASTP_LOW_COMPLEXITY_READS)
             ordered_tasks.insert(fastp_index, FASTP_TOO_SHORT_READS)
-            ordered_tasks.insert(fastp_index, ERCC)
+            ordered_tasks.insert(fastp_index, FASTP_LOW_QUALITY_READS)
           end
         end
       end
