@@ -81,6 +81,7 @@ import {
   PipelineRunStatuses,
   SARS_COV_2,
   TRIGGERS,
+  UPLOAD_FAILED,
   WORKFLOW_TRIGGERS,
   WORKFLOW_TRIGGERS_BY_DOMAIN,
 } from "./constants";
@@ -301,7 +302,9 @@ const SamplesView = forwardRef(function SamplesView(
     const statusCounts = getStatusCounts(selectedObjects, workflowEntity);
     trackEvent("SamplesView_runs_bulk_deleted", {
       workflow: workflow,
-      runStatusCounts: statusCounts,
+      uploadFailedCount: statusCounts[UPLOAD_FAILED],
+      succeededCount: statusCounts[PipelineRunStatuses.Complete],
+      failedCount: statusCounts[PipelineRunStatuses.Failed],
       projectId: projectId,
     });
     onDeleteSample();

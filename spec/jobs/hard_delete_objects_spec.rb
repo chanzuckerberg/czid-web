@@ -45,7 +45,7 @@ RSpec.describe HardDeleteObjects, type: :job do
         end.to raise_error("No runs or samples to delete")
       end
 
-      it "raises error if no deletable runs are found" do
+      it "raises error if no deletable runs or samples are found" do
         object_ids = [-1]
         sample_ids = [-1]
         expect do
@@ -115,17 +115,15 @@ RSpec.describe HardDeleteObjects, type: :job do
       it "logs deletion to Segment for GDPR compliance" do
         object_ids = [@pr1.id]
         sample_ids = [@sample1.id]
-        run_data = {
-          "id" => @pr1.id,
-          "sample_id" => @sample1.id,
-          "sample_name" => @sample1.name,
-          "sample_user_id" => @sample1.user.id,
-          "project_name" => @sample1.project.name,
-          "project_id" => @sample1.project.id,
-        }
+
         run_log_data = {
           user_email: @joe.email,
-          deleted_objects: [run_data],
+          run_id: @pr1.id,
+          sample_id: @sample1.id,
+          sample_name: @sample1.name,
+          sample_user_id: @sample1.user.id,
+          project_name: @sample1.project.name,
+          project_id: @sample1.project.id,
           workflow: short_read_mngs,
         }
         # stub out destroy operations so we don't get more logs
@@ -173,6 +171,40 @@ RSpec.describe HardDeleteObjects, type: :job do
           EventDictionary::GDPR_SAMPLE_HARD_DELETED,
           anything,
           anything
+        )
+
+        HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
+      end
+    end
+
+    context "when sample ids are passed in but no run ids are passed in" do
+      before do
+        @project = create(:project, users: [@joe])
+        @sample1 = create(:sample, project: @project,
+                                   user: @joe,
+                                   name: "Illumina sample with no pipeline runs",
+                                   deleted_at: 5.minutes.ago)
+      end
+
+      it "successfully destroys the samples and logs to Segment for GDPR" do
+        object_ids = []
+        sample_ids = [@sample1.id]
+
+        sample_log_data = {
+          user_email: @joe.email,
+          sample_id: @sample1.id,
+          sample_name: @sample1.name,
+          sample_user_id: @sample1.user.id,
+          project_name: @sample1.project.name,
+          project_id: @sample1.project.id,
+        }
+        # stub out destroy operations so we don't get more logs
+        allow_any_instance_of(Sample).to receive(:destroy!).and_return(@sample1)
+
+        expect(MetricUtil).to receive(:log_analytics_event).with(
+          EventDictionary::GDPR_SAMPLE_HARD_DELETED,
+          @joe,
+          sample_log_data
         )
 
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
@@ -264,17 +296,14 @@ RSpec.describe HardDeleteObjects, type: :job do
       it "logs deletion to Segment for GDPR compliance" do
         object_ids = [@wr1.id]
         sample_ids = [@sample1.id]
-        run_data = {
-          "id" => @wr1.id,
-          "sample_id" => @sample1.id,
-          "sample_name" => @sample1.name,
-          "sample_user_id" => @sample1.user.id,
-          "project_name" => @sample1.project.name,
-          "project_id" => @sample1.project.id,
-        }
         run_log_data = {
           user_email: @joe.email,
-          deleted_objects: [run_data],
+          run_id: @wr1.id,
+          sample_id: @sample1.id,
+          sample_name: @sample1.name,
+          sample_user_id: @sample1.user.id,
+          project_name: @sample1.project.name,
+          project_id: @sample1.project.id,
           workflow: consensus_genome,
         }
         # stub out destroy operations so we don't get more logs

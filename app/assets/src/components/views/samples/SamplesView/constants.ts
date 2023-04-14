@@ -53,3 +53,5 @@ export enum PipelineRunStatuses {
   Complete = "complete",
   // TODO: Add other statuses
 }
+
+export const UPLOAD_FAILED = "upload_failed";

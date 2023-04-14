@@ -1452,6 +1452,7 @@ class SamplesController < ApplicationController
     success = false
     project = @sample.project
     sample_info = {
+      user_email: current_user.email,
       id: @sample.id,
       sample_name: @sample.name,
       sample_user_id: @sample.user_id,
@@ -1463,10 +1464,7 @@ class SamplesController < ApplicationController
       MetricUtil.log_analytics_event(
         EventDictionary::GDPR_SAMPLE_HARD_DELETED,
         current_user,
-        {
-          user_email: current_user.email,
-          deleted_samples: [sample_info],
-        }
+        sample_info
       )
     end
     respond_to do |format|

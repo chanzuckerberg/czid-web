@@ -74,13 +74,18 @@ class HardDeleteObjects
     end
 
     successful_deleted_objects_info = objects_info.select { |object| deleted_object_ids.include?(object["id"]) }
-    unless successful_deleted_objects_info.empty?
+    successful_deleted_objects_info.each do |object|
       MetricUtil.log_analytics_event(
         EventDictionary::GDPR_RUN_HARD_DELETED,
         user,
         {
           user_email: user.email,
-          deleted_objects: successful_deleted_objects_info,
+          run_id: object["id"],
+          sample_id: object["sample_id"],
+          sample_name: object["sample_name"],
+          sample_user_id: object["sample_user_id"],
+          project_name: object["project_name"],
+          project_id: object["project_id"],
           workflow: workflow,
         }
       )
@@ -115,14 +120,18 @@ class HardDeleteObjects
       end
     end
 
-    successful_deleted_samples_info = samples_info.select { |sample| deleted_sample_ids.include?(sample["id"]) }
-    unless successful_deleted_samples_info.empty?
+    successful_deleted_samples_info = samples_info.select { |sample_info| deleted_sample_ids.include?(sample_info["sample_id"]) }
+    successful_deleted_samples_info.each do |sample_info|
       MetricUtil.log_analytics_event(
         EventDictionary::GDPR_SAMPLE_HARD_DELETED,
         user,
         {
           user_email: user.email,
-          deleted_samples: successful_deleted_samples_info,
+          sample_id: sample_info["sample_id"],
+          sample_name: sample_info["sample_name"],
+          sample_user_id: sample_info["sample_user_id"],
+          project_name: sample_info["project_name"],
+          project_id: sample_info["project_id"],
         }
       )
     end

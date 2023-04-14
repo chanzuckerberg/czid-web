@@ -1,6 +1,7 @@
 import { countBy, identity } from "lodash/fp";
 import { Entry, ObjectsType } from "~/interface/samplesView";
 import { WORKFLOW_ENTITIES } from "~utils/workflows";
+import { PipelineRunStatuses, UPLOAD_FAILED } from "./constants";
 
 export const getSelectedObjects = ({
   selectedIds,
@@ -22,7 +23,12 @@ export const getStatusCounts = (objects: Entry[], workflowEntity: string) => {
     } else {
       status = object?.sample?.pipelineRunStatus;
     }
-    return status || "upload failed";
+    if (status === "") {
+      status = UPLOAD_FAILED;
+    } else if (status !== PipelineRunStatuses.Complete) {
+      status = PipelineRunStatuses.Failed;
+    }
+    return status;
   });
 
   return countBy(identity, statuses);

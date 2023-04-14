@@ -972,22 +972,19 @@ RSpec.describe "Sample request", type: :request do
 
       it "logs to Segment for GDPR compliance" do
         sample_data = {
+          user_email: @joe.email,
           id: @joe_sample.id,
           sample_name: @joe_sample.name,
           sample_user_id: @joe_sample.user.id,
           project_name: @joe_sample.project.name,
           project_id: @joe_sample.project.id,
         }
-        sample_log_data = {
-          user_email: @joe.email,
-          deleted_samples: [sample_data],
-        }
         # stub out destroy operations so we don't get more logs
         allow_any_instance_of(Sample).to receive(:destroy).and_return(@joe_sample)
         expect(MetricUtil).to receive(:log_analytics_event).with(
           EventDictionary::GDPR_SAMPLE_HARD_DELETED,
           @joe,
-          sample_log_data
+          sample_data
         )
         delete "/samples/#{@joe_sample.id}", params: { format: :json }
       end

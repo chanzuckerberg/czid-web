@@ -189,32 +189,25 @@ RSpec.describe BulkDeletionService, type: :service do
     end
 
     it "logs to Segment for GDPR compliance" do
-      run_data = {
-        "id" => @pr1.id,
-        "sample_id" => @sample1.id,
-        "sample_name" => @sample1.name,
-        "sample_user_id" => @sample1.user.id,
-        "project_name" => @sample1.project.name,
-        "project_id" => @sample1.project.id,
-      }
-      log_data = {
-        "user_email": @joe.email,
-        "deleted_objects": [run_data],
-        "workflow": short_read_mngs,
+      run_log_data = {
+        user_email: @joe.email,
+        run_id: @pr1.id,
+        sample_id: @sample1.id,
+        sample_name: @sample1.name,
+        sample_user_id: @sample1.user.id,
+        project_name: @sample1.project.name,
+        project_id: @sample1.project.id,
+        workflow: short_read_mngs,
       }
       # stub out updates so we don't get other logs
       allow_any_instance_of(Sample).to receive(:update_attribute)
       expect(MetricUtil).to receive(:log_analytics_event).with(
         EventDictionary::GDPR_RUN_SOFT_DELETED,
         @joe,
-        log_data
+        run_log_data
       )
 
-      sample_data = run_data.except("id")
-      sample_log_data = {
-        "user_email": @joe.email,
-        "deleted_samples": [sample_data],
-      }
+      sample_log_data = run_log_data.except(:run_id, :workflow)
 
       expect(MetricUtil).to receive(:log_analytics_event).with(
         EventDictionary::GDPR_SAMPLE_SOFT_DELETED,
@@ -471,31 +464,24 @@ RSpec.describe BulkDeletionService, type: :service do
     end
 
     it "logs to segment for GDPR compliance" do
-      run_data = {
-        "id" => @completed_wr.id,
-        "sample_id" => @sample1.id,
-        "sample_name" => @sample1.name,
-        "sample_user_id" => @sample1.user.id,
-        "project_name" => @sample1.project.name,
-        "project_id" => @sample1.project.id,
-      }
-      log_data = {
-        "user_email": @joe.email,
-        "deleted_objects": [run_data],
-        "workflow": consensus_genome,
+      run_log_data = {
+        user_email: @joe.email,
+        run_id: @completed_wr.id,
+        sample_id: @sample1.id,
+        sample_name: @sample1.name,
+        sample_user_id: @sample1.user.id,
+        project_name: @sample1.project.name,
+        project_id: @sample1.project.id,
+        workflow: consensus_genome,
       }
       # stub out updates so we don't get other logs
       allow_any_instance_of(Sample).to receive(:update_attribute)
       expect(MetricUtil).to receive(:log_analytics_event).with(
         EventDictionary::GDPR_RUN_SOFT_DELETED,
         @joe,
-        log_data
+        run_log_data
       )
-      sample_data = run_data.except("id")
-      sample_log_data = {
-        "user_email": @joe.email,
-        "deleted_samples": [sample_data],
-      }
+      sample_log_data = run_log_data.except(:run_id, :workflow)
 
       expect(MetricUtil).to receive(:log_analytics_event).with(
         EventDictionary::GDPR_SAMPLE_SOFT_DELETED,
