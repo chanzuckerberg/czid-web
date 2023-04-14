@@ -78,8 +78,6 @@ class UserFactoryService
   end
 
   def send_activation_email
-    # TODO(ihan): To be fixed - auto-account creation throwing SMTPAuthenticationError "530 Authentication required"
-    # Get their password reset link so they can set a password.
     reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_user_id)
     reset_url = reset_response["ticket"]
 

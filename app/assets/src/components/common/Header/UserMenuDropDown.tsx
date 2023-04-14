@@ -186,7 +186,7 @@ export const PrivacyDropdownItem = (
           trackEvent("Header_dropdown-privacy-notice-option_clicked")
         }
       >
-        Privacy Notice
+        Data Privacy Notice
       </a>
     }
   />
