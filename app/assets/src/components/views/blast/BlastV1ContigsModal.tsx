@@ -84,10 +84,6 @@ const BlastV1ContigsModal = ({
     setContigs(contigs);
   };
 
-  useEffect(() => {
-    fetchContigs();
-  }, []);
-
   // We shouldn't fetch reads from NT or NR every time the user switches tabs.
   // Ideally we'd fetch them once and just render them based on the tab that they're on.
   // However this component is still pretty snappy, but we should probably refactor this later

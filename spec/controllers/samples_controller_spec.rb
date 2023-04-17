@@ -852,21 +852,25 @@ RSpec.describe SamplesController, type: :controller do
                                  genus_taxid_nt: 570,
                                  read_count: 101,
                                  lineage_json: contig_lineage_json,
+                                 sequence: "ACGT",
                                }, {
                                  species_taxid_nt: 573,
                                  genus_taxid_nt: 570,
                                  read_count: 102,
                                  lineage_json: contig_lineage_json,
+                                 sequence: "AC",
                                }, {
                                  species_taxid_nt: 573,
                                  genus_taxid_nt: 570,
                                  read_count: 103,
                                  lineage_json: contig_lineage_json,
+                                 sequence: "ACGTACGT",
                                }, {
                                  species_taxid_nt: 570,
                                  genus_taxid_nt: 570,
                                  read_count: 104,
                                  lineage_json: contig_lineage_json,
+                                 sequence: "ACGTAC",
                                },])
 
         sign_in @joe
@@ -879,10 +883,13 @@ RSpec.describe SamplesController, type: :controller do
 
         json_response = JSON.parse(response.body)
         contigs = json_response["contigs"]
-        read_counts = contigs.map { |c| c["num_reads"] }
 
         expect(contigs.count).to eq(3)
-        expect(read_counts).to contain_exactly(104, 103, 102)
+        expect(contigs.map { |x| x["fasta_sequence"] }).to contain_exactly(
+          ">:103:{\"NT\":[573, 570]}\nACGTACGT",
+          ">:101:{\"NT\":[573, 570]}\nACGT", # note: the sequence "ACGTAC" is longer than this one but doesn't have taxid 573
+          ">:102:{\"NT\":[573, 570]}\nAC"
+        )
       end
     end
 

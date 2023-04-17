@@ -1074,16 +1074,21 @@ class SamplesController < ApplicationController
   def taxid_contigs_for_blast
     permitted_params = params.permit(:taxid, :pipeline_version, :count_type)
 
+    # Input validation: only support non-human taxa and NT or NR
     taxid = permitted_params[:taxid]
+    taxid_type = permitted_params[:count_type].downcase
     return if HUMAN_TAX_IDS.include? taxid.to_i
+    return if ["nt", "nr"].exclude? taxid_type
 
-    pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
-    contigs = pr.get_contigs_for_taxid(taxid.to_i, permitted_params[:count_type])
-
-    order_by = sanitize_order_by(Contig, order_by, :read_count)
-    order_dir = sanitize_order_dir(order_dir, :desc)
     # Only return up to the 3 longest contigs
-    contigs = contigs.order(Hash[order_by => order_dir]).limit(3)
+    taxid_column_species = taxid_type == "nt" ? "species_taxid_nt" : "species_taxid_nr"
+    taxid_column_genus = taxid_type == "nt" ? "genus_taxid_nt" : "genus_taxid_nr"
+    pr = select_pipeline_run(@sample, permitted_params[:pipeline_version])
+    contigs = pr.contigs
+                .where(taxid_column_species => taxid)
+                .or(pr.contigs.where(taxid_column_genus => taxid))
+                .order("LENGTH(sequence) DESC")
+                .limit(3)
 
     formatted_contigs = contigs.reduce([]) do |result, contig|
       result << {}.tap do |formatted_contig|
