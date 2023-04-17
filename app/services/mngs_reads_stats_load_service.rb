@@ -118,9 +118,11 @@ class MngsReadsStatsLoadService
     # Load reads after bowtie2 host filtering
     # reads_after_bowtie2_and_ercc = reads_after complexity - (reads_lost_in_bowtie2 - pipeline_run.total_ercc_reads)
     bowtie2 = all_counts.detect { |entry| entry.value?("bowtie2_host_filtered_out") }
-    reads_after_fastp_low_complexity = all_counts.detect { |entry| entry.value?("fastp_low_complexity_reads") }[:reads_after]
-    reads_lost_in_bowtie2 = reads_after_fastp_low_complexity - bowtie2[:reads_after].to_i
-    bowtie2[:reads_after] = reads_after_fastp_low_complexity - (reads_lost_in_bowtie2 - pipeline_run.total_ercc_reads)
+    fastp_low_complexity = all_counts.detect { |entry| entry.value?("fastp_low_complexity_reads") }
+    if bowtie2 && fastp_low_complexity && pipeline_run&.total_ercc_reads
+      reads_lost_in_bowtie2 = fastp_low_complexity[:reads_after] - bowtie2[:reads_after].to_i
+      bowtie2[:reads_after] = fastp_low_complexity[:reads_after] - (reads_lost_in_bowtie2 - pipeline_run.total_ercc_reads)
+    end
 
     # Load truncation
     truncation = all_counts.detect { |entry| entry.value?("truncated") }
