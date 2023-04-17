@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { useCreateUser } from "~/api/user";
 import ArrowSubmit from "~/components/ui/icons/IconSubmitArrow";
 import cs from "./HeroEmailForm.scss";
@@ -10,6 +11,7 @@ interface HeroEmailFormProps {
 const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
   const [enteredEmail, setEnteredEmail] = useState("");
   const userCreator = useCreateUser();
+  const RouterHistory = useHistory();
 
   function isValidEmail(enteredEmail: string) {
     const emailRegex =
@@ -30,7 +32,7 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
     }
   }
 
-  async function createAccount(e: React.MouseEvent<HTMLButtonElement>) {
+  async function registerAccount(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
 
     if (isValidEmail(enteredEmail)) {
@@ -40,8 +42,10 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
           variables: {
             email: enteredEmail,
           },
+        }).then(() => {
+          RouterHistory.push("/users/register");
+          location.reload();
         });
-        // TODO(ihan): redirect to confirmation pg
       } catch (err) {
         // TODO(ihan): handle error
         // eslint-disable-next-line no-console
@@ -67,7 +71,7 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
   const registerNowButton = (
     <button
       aria-label="Register for a CZ ID account with your email address"
-      onClick={e => createAccount(e)}
+      onClick={e => registerAccount(e)}
     >
       Register Now
       <span>

@@ -1,0 +1,18 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~czifui/dist/variables";
+
+.container {
+  width: 350px;
+  margin: 0 auto;
+  box-shadow: $sds-drop-shadows-shadow-m;
+  margin-top: 150px;
+  border-radius: $sds-corners-corner-l;
+  padding-top: $sds-spaces-default;
+
+  .text {
+    @include font-body-s;
+    padding: $sds-spaces-xl;
+  }
+}

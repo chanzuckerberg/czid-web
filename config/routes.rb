@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     get :failure
   end
   get 'users/password/new' => 'users#password_new'
+  get 'users/register', to: 'users#register'
 
   resources :samples do
     member do

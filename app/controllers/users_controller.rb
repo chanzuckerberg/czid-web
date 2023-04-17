@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:password_new]
-  before_action :admin_required, except: [:password_new, :update_user_data, :post_user_data_to_airtable]
+  skip_before_action :authenticate_user!, only: [:password_new, :register]
+  before_action :admin_required, except: [:password_new, :register, :update_user_data, :post_user_data_to_airtable]
   before_action :set_user, only: [:edit, :update, :destroy, :update_user_data, :post_user_data_to_airtable]
 
   # GET /users
@@ -118,6 +118,10 @@ class UsersController < ApplicationController
       format.html { redirect_to users_url, notice: 'User was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+
+  # GET /users/register
+  def register
   end
 
   # GET /users/password/new

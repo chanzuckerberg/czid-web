@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { requestPasswordReset } from "~/api/user";
 import Input from "~ui/controls/Input";
+import ConfirmationMessage from "./ConfirmationMessage";
 import cs from "./forgot_password.scss";
 
 const ForgotPassword = () => {
@@ -15,13 +16,7 @@ const ForgotPassword = () => {
   };
 
   if (sent) {
-    return (
-      <div className={cs.form}>
-        <div className={cs.text}>
-          Form submitted! Please check your email for next steps.
-        </div>
-      </div>
-    );
+    return <ConfirmationMessage />;
   }
 
   return (
