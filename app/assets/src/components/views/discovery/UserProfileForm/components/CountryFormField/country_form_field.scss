@@ -1,0 +1,15 @@
+@import "~czifui/dist/variables";
+
+.titleSection {
+  padding-bottom: $sds-spaces-l;
+}
+.titleMainText {
+  font: $sds-font-body-m-600-font;
+  color: $sds-color-gray-black;
+}
+.main {
+  padding: $sds-spaces-l;
+}
+.autocomplete {
+  width: 50%;
+}

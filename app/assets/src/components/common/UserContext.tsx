@@ -9,6 +9,7 @@ const UserContextValues: AllowedFeaturesProps = {
   userSettings: {},
   userSignedIn: false,
   userId: null,
+  userEmail: null,
   profileCompleted: false,
 };
 

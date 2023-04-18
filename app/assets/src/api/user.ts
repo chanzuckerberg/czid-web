@@ -101,10 +101,75 @@ const updateUser = ({
   });
 };
 
+interface userPostAirtableData {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  profileFormVersion: number;
+  rorInstitution: string;
+  rorId: string;
+  country: string;
+  worldBankIncome: string;
+  expertiseLevel: string;
+  signUpPath?: string;
+  czidUsecases: string[];
+  referralSource: string[];
+}
+
+interface userPostAirtableDataAPI {
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_form_version: number;
+  ror_institution: string;
+  ror_id: string;
+  country?: string;
+  world_bank_income?: string;
+  expertise_level: string;
+  sign_up_path: string;
+  czid_usecase: string[];
+  referral_source: string[];
+}
+
+const postToAirtable = ({
+  userId,
+  firstName,
+  lastName,
+  email,
+  profileFormVersion,
+  rorInstitution,
+  rorId,
+  country,
+  worldBankIncome,
+  expertiseLevel,
+  signUpPath,
+  czidUsecases,
+  referralSource,
+}: userPostAirtableData) => {
+  const userAirtableData: userPostAirtableDataAPI = {
+    first_name: firstName,
+    last_name: lastName,
+    email: email,
+    profile_form_version: profileFormVersion,
+    ror_institution: rorInstitution,
+    ror_id: rorId,
+    country: country,
+    world_bank_income: worldBankIncome,
+    expertise_level: expertiseLevel,
+    sign_up_path: signUpPath,
+    czid_usecase: czidUsecases,
+    referral_source: referralSource,
+  };
+  return postWithCSRF(`/users/${userId}/post_user_data_to_airtable`, {
+    user: userAirtableData,
+  });
+};
+
 const requestPasswordReset = (email: $TSFixMe) => {
   return postWithCSRF("/auth0/request_password_reset", {
     user: { email },
   });
 };
 
-export { useCreateUser, updateUser, requestPasswordReset };
+export { useCreateUser, updateUser, requestPasswordReset, postToAirtable };

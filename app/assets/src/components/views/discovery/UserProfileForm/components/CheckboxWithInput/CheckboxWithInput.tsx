@@ -42,7 +42,7 @@ export function CheckboxWithInput({
   }
   // add keyboard support for checkboxes
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
+    if (event.key === "Enter") {
       handleOtherCheckboxChange();
     }
   };

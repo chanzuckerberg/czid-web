@@ -13,5 +13,6 @@ export default interface AllowedFeaturesProps {
   };
   userSignedIn: boolean;
   userId?: number | null;
+  userEmail?: string | null;
   profileCompleted: boolean;
 }
