@@ -49,9 +49,9 @@ class MngsReadsStatsLoadService
       end
     end
 
-    if pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version)
-      total_reads = all_counts.detect { |entry| entry.value?("fastqs") }[:reads_after]
-      all_counts += fetch_fastp_qc_counts(prefix, total_reads)
+    total = all_counts.detect { |entry| entry.value?("fastqs") }
+    if pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version) && total
+      all_counts += fetch_fastp_qc_counts(prefix, total[:reads_after])
     end
     all_counts
   end
