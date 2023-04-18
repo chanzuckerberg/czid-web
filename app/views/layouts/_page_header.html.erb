@@ -18,6 +18,13 @@
         emergencyBannerMessage: '<%= @emergency_banner_message %>', 
       }, 'page_header')
     <% end %>
+  <% elsif current_user && current_user.id && !@show_landing_header && AppConfigHelper::get_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1) == "1" && current_user.profile_form_version.zero? %>
+    <%= javascript_tag do %>
+      react_component('Header', {
+        signOutEndpoint: '<%=destroy_user_session_path%>',
+        showLogOut: <%= current_user.profile_form_version.zero? %>
+      }, 'page_header')
+    <% end %>
   <% elsif current_user && current_user.id && !@show_landing_header %>
     <%= javascript_tag do %>
       react_component('Header', {

@@ -3,6 +3,7 @@ import React from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import ToastContainer from "~ui/containers/ToastContainer";
 import { CZIDLogoReversed } from "~ui/icons";
+import { postToUrlWithCSRF } from "~utils/links";
 import cs from "./header.scss";
 import MainMenu from "./MainMenu";
 import UserMenuDropDown, { TermsMenuDropDown } from "./UserMenuDropDown";
@@ -13,6 +14,7 @@ interface HeaderProps {
   emergencyBannerMessage: string;
   disableNavigation: boolean;
   showBlank: boolean;
+  showLogOut: boolean;
   userSignedIn: boolean;
   email: string;
   signOutEndpoint: string;
@@ -23,6 +25,7 @@ const Header = ({
   adminUser,
   disableNavigation,
   showBlank,
+  showLogOut,
   userSignedIn,
   emergencyBannerMessage,
   email,
@@ -34,6 +37,32 @@ const Header = ({
       <div className={cs.header}>
         <div className={cs.logo}>
           <CZIDLogoReversed className={cs.icon} />
+        </div>
+      </div>
+    );
+  }
+  if (showLogOut) {
+    return (
+      <div className={cs.header}>
+        <div className={cs.logo}>
+          <CZIDLogoReversed className={cs.icon} />
+        </div>
+        <div className={cs.fill} />
+        <div className={cs.logout}>
+          <span
+            onClick={() => {
+              sessionStorage.clear();
+              postToUrlWithCSRF(signOutEndpoint);
+            }}
+            onKeyDown={() => {
+              sessionStorage.clear();
+              postToUrlWithCSRF(signOutEndpoint);
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            Log Out
+          </span>
         </div>
       </div>
     );

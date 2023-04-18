@@ -111,6 +111,17 @@
       }
     }
   }
+
+  .logout {
+    font: $sds-font-header-xs-600-font;
+    display: flex;
+    color: $sds-color-gray-white;
+    margin-right: $sds-spaces-s;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
 }
 
 .notificationLink {
