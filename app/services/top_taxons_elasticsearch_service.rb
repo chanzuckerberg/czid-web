@@ -59,7 +59,6 @@ class TopTaxonsElasticsearchService
 
   def build_filter_param_hash
     filter_params = {}
-    filter_params[:min_reads] = @params[:minReads] ? @params[:minReads].to_i : MINIMUM_READ_THRESHOLD
     removed_taxon_ids = (@params[:removedTaxonIds] || []).map do |x|
       Integer(x)
     rescue ArgumentError
@@ -96,14 +95,6 @@ class TopTaxonsElasticsearchService
     filter_params[:sort_by] = @params[:sortBy] || DEFAULT_TAXON_SORT_PARAM
     filter_params[:taxons_per_sample] = @params[:taxonsPerSample] || DEFAULT_MAX_NUM_TAXONS
 
-    # add the mandatory counts > 5 threshold filter to the `threshold_filters` to be later parsed by `elasticsearch_query_helper#parse_custom_filters`
-    metric_count_type = filter_params[:sort_by].split("_")[1].upcase # TODO: I am extracting the metric details out of sort_by when they should probably be passed directly from the frontend
-    filter_params[:threshold_filters] << \
-      {
-        "metric" => "#{metric_count_type}_r",
-        "value" => filter_params[:min_reads],
-        "operator" => ">=",
-      }
     return filter_params
   end
 
