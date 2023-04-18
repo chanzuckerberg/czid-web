@@ -10,11 +10,8 @@ interface SamplesHeatmapCategoryFilterTagsPropsType {
   selectedOptions: SelectedOptions;
   currentDropdownValue: SDSFormattedOption[];
   disabled: boolean;
-  onCategoryChange: (newOptions: SDSFormattedOption[]) => void;
-  flattenPhageSubcategory: (
-    categories: string[],
-    subcategories: any,
-  ) => string[];
+  handleRemoveCategoryFromTags: (categoryToRemove: string) => void;
+  convertSelectedOptionsToSdsFormattedOptions: any;
 }
 
 // selectedOptions refers to the current state of the filter
@@ -22,73 +19,59 @@ interface SamplesHeatmapCategoryFilterTagsPropsType {
 // the difference is largely formatting; see parent component for more details
 export const SamplesHeatmapCategoryFilterTags = ({
   selectedOptions,
-  currentDropdownValue,
   disabled,
-  onCategoryChange,
-  flattenPhageSubcategory,
+  handleRemoveCategoryFromTags,
+  convertSelectedOptionsToSdsFormattedOptions,
 }: SamplesHeatmapCategoryFilterTagsPropsType) => {
   const VIRUSES_PHAGE = "Viruses - Phage";
 
-  const handleRemoveCategoryFromTags = (tagLabel: string) => {
-    // The filter tags get labeled as 'Phage' instead of as 'Viruses - Phage', but all the other logic is based on 'Viruses - Phage'
-    let categoryToRemove = tagLabel;
-    if (tagLabel === "Phage") {
-      categoryToRemove = VIRUSES_PHAGE;
-    } else if (tagLabel === "Viruses") {
-      categoryToRemove = "Viruses - Non-phage";
-    }
-    // const categoryToRemove = tagLabel === "Phage" ? VIRUSES_PHAGE : tagLabel;
-    const currentCategories: SDSFormattedOption[] = currentDropdownValue;
-
-    const newCategories = currentCategories.filter(
-      c => c.name !== categoryToRemove,
+  // The filter tag should show "Phage" instead of "Viruses - Phage"
+  const flattenedCategories: Array<SDSFormattedOption> =
+    convertSelectedOptionsToSdsFormattedOptions(
+      selectedOptions.categories,
+      selectedOptions.subcategories,
     );
 
-    onCategoryChange(newCategories);
-  };
-
-  const { presets } = selectedOptions;
-
-  // The filter tag should show "Phage" instead of "Viruses - Phage"
-  let allTagNames: string[] = flattenPhageSubcategory(
-    selectedOptions.categories,
-    selectedOptions.subcategories,
-  );
-
+  let allTagNames = flattenedCategories.map(c => c.name);
   if (allTagNames.includes(VIRUSES_PHAGE)) {
     allTagNames = allTagNames.filter(tag => tag !== VIRUSES_PHAGE);
     allTagNames.push("Phage");
   }
 
-  const filterTags = allTagNames.map((category, i) => {
-    return (
-      <div
-        className={cs.filterTagContainer}
-        key={`category-filter-tag-container-${i}`}
-      >
-        {presets.includes("categories") ? (
-          <SamplesHeatmapPresetTooltip
-            component={<FilterTag text={category} />}
-            className={cs.filterTag}
-            key={`category_filter_tag_${i}`}
-          />
-        ) : (
-          <FilterTag
-            className={cs.filterTag}
-            key={`category_filter_tag_${i}`}
-            text={category}
-            disabled={disabled}
-            onClose={() => {
-              handleRemoveCategoryFromTags(category);
-              trackEvent("SamplesHeatmapControl_categories-filter_removed", {
-                category,
-              });
-            }}
-          />
-        )}
-      </div>
-    );
-  });
-
-  return <div className={cs.filterTagsList}>{filterTags}</div>;
+  return (
+    <div className={cs.filterTagsList}>
+      {allTagNames.map((category, i) => {
+        return (
+          <div
+            className={cs.filterTagContainer}
+            key={`category-filter-tag-container-${i}`}
+          >
+            {selectedOptions.presets.includes("categories") ? (
+              <SamplesHeatmapPresetTooltip
+                component={<FilterTag text={category} />}
+                className={cs.filterTag}
+                key={`category_filter_tag_${i}`}
+              />
+            ) : (
+              <FilterTag
+                className={cs.filterTag}
+                key={`category_filter_tag_${i}`}
+                text={category}
+                disabled={disabled}
+                onClose={() => {
+                  handleRemoveCategoryFromTags(category);
+                  trackEvent(
+                    "SamplesHeatmapControl_categories-filter_removed",
+                    {
+                      category,
+                    },
+                  );
+                }}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 };

@@ -72,7 +72,6 @@ import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { processMetadata } from "~utils/metadata";
 import { showBulkDownloadNotification } from "../../bulk_download/BulkDownloadNotification";
 import SamplesHeatmapFilters from "./components/SamplesHeatmapFilters";
-import SamplesHeatmapFilterStats from "./components/SamplesHeatmapFilterStats";
 import { SamplesHeatmapHeader } from "./components/SamplesHeatmapHeader/SamplesHeatmapHeader";
 import SamplesHeatmapLegend from "./components/SamplesHeatmapLegend";
 import {
@@ -1812,17 +1811,6 @@ class SamplesHeatmapView extends React.Component<
             data={data}
             selectedOptions={selectedOptions}
             options={this.getControlOptions()}
-          />
-        )}
-        {useNewFilters && (
-          <SamplesHeatmapFilterStats
-            filteredTaxaCount={shownTaxa.size}
-            totalTaxaCount={
-              selectedOptions.species
-                ? allSpeciesIds.length
-                : allGeneraIds.length
-            }
-            prefilterConstants={this.props.prefilterConstants}
           />
         )}
         <div>

@@ -75,8 +75,11 @@ export const SamplesHeatmapBackgroundDropdown = React.memo(
         label={<div className={cs.label}>Background</div>}
         search={true}
         onChange={newValue => {
-          // @ts-expect-error -- complains about the default SDS dropdown option type not having a `value` field, but we're using objects with a superset of the SDS option type
-          onChange(newValue?.value);
+          // @ts-expect-error -- same as the line below
+          if (newValue?.value !== undefined) {
+            // @ts-expect-error -- complains about the default SDS dropdown option type not having a `value` field, but we're using objects with a superset of the SDS option type
+            onChange(newValue?.value);
+          }
         }}
         // @ts-expect-error -- complains about the default SDS dropdown option type not having a `value` field, but we're using objects with a superset of the SDS option type
         value={{ name: valueToName(value, backgroundOptions), value: value }}
