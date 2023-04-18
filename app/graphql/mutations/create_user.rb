@@ -31,6 +31,11 @@ class Mutations::CreateUser < Mutations::BaseMutation
         profile_form_version: 1
       )
     elsif !current_user_is_logged_in?(context) && auto_account_creation_enabled
+      existing_user = User.find_by(email: email)
+      if existing_user
+        raise GraphQL::ExecutionError, "Email has already been taken"
+      end
+
       # User created automatically via the landing pg
       @user = UserFactoryService.call(
         email: email,

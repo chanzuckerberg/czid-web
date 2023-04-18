@@ -9,10 +9,14 @@
   box-shadow: $sds-drop-shadows-shadow-m;
   margin-top: 150px;
   border-radius: $sds-corners-corner-l;
-  padding-top: $sds-spaces-default;
 
   .text {
     @include font-body-s;
     padding: $sds-spaces-xl;
+
+    a {
+      // Override _header.scss
+      color: $sds-color-primary-400 !important;
+    }
   }
 }

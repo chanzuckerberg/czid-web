@@ -28,6 +28,9 @@ const CREATE_USER = gql`
   }
 `;
 
+// create_user.rb errors
+const EMAIL_TAKEN_ERROR = "Email has already been taken";
+
 const useCreateUser = () => {
   const [create, { loading, error }] = useMutation(CREATE_USER);
 
@@ -172,4 +175,10 @@ const requestPasswordReset = (email: $TSFixMe) => {
   });
 };
 
-export { useCreateUser, updateUser, requestPasswordReset, postToAirtable };
+export {
+  useCreateUser,
+  updateUser,
+  requestPasswordReset,
+  postToAirtable,
+  EMAIL_TAKEN_ERROR,
+};

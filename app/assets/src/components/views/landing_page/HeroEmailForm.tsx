@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { useCreateUser } from "~/api/user";
+import { EMAIL_TAKEN_ERROR, useCreateUser } from "~/api/user";
 import ArrowSubmit from "~/components/ui/icons/IconSubmitArrow";
 import cs from "./HeroEmailForm.scss";
 
@@ -44,13 +44,15 @@ const HeroEmailForm = ({ autoAcctCreationEnabled }: HeroEmailFormProps) => {
           },
         }).then(() => {
           RouterHistory.push("/users/register");
-          location.reload();
         });
       } catch (err) {
-        // TODO(ihan): handle error
-        // eslint-disable-next-line no-console
-        console.log([err.message]);
+        if (err.message === EMAIL_TAKEN_ERROR) {
+          RouterHistory.push("/users/register?error=email");
+        } else {
+          RouterHistory.push("/users/register?error=unknown");
+        }
       }
+      location.reload();
     } else {
       alert("Please enter a valid email address.");
     }

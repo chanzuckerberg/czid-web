@@ -177,21 +177,45 @@ RSpec.describe GraphqlController, type: :request do
 
       # Account created via landing page
       context "and the current user is nil (logged out)" do
-        it "should create a user with only an email" do
-          expect do
-            post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-              query: query,
-              context: { current_user: nil },
-              variables: { email: fake_email },
-            }.to_json
-          end.to change { User.count }.by(1)
-          expect(response).to have_http_status :success
+        context "and the email is unique" do
+          it "should create a user with only an email" do
+            expect do
+              post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
+                query: query,
+                context: { current_user: nil },
+                variables: { email: fake_email },
+              }.to_json
+            end.to change { User.count }.by(1)
+            expect(response).to have_http_status :success
 
-          result = JSON.parse response.body
-          result = result["data"]["createUser"]
-          expect(result).to include_json(
-            { name: nil, email: fake_email, institution: nil, role: 0, archetypes: nil, segments: nil }
-          )
+            result = JSON.parse response.body
+            result = result["data"]["createUser"]
+            expect(result).to include_json(
+              { name: nil, email: fake_email, institution: nil, role: 0, archetypes: nil, segments: nil }
+            )
+          end
+        end
+
+        context "and the email is claimed by an existing user" do
+          before do
+            @existing_user = create(:user, email: fake_email)
+          end
+
+          it "should not create a user and raise an error" do
+            expect do
+              post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
+                query: query,
+                context: { current_user: nil },
+                variables: { email: fake_email },
+              }.to_json
+            end.to change { User.count }.by(0)
+            expect(response).to have_http_status :success
+
+            result = JSON.parse response.body
+            expect(result).to include_json(
+              { "errors" => [{ "message" => "Email has already been taken" }] }
+            )
+          end
         end
       end
     end
