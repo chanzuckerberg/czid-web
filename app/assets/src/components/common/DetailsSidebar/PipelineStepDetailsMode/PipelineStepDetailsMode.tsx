@@ -120,7 +120,12 @@ const PipelineStepDetailsMode = ({
 
     const fileGroupHeader = <div className={cs.title}>Input Files</div>;
     return (
-      <Accordion className={cs.accordion} header={fileGroupHeader} open={true}>
+      <Accordion
+        className={cs.accordion}
+        header={fileGroupHeader}
+        open={true}
+        data-testid={"input-files"}
+      >
         <div className={cs.accordionContent}>{fileGroupList}</div>
       </Accordion>
     );
@@ -134,6 +139,7 @@ const PipelineStepDetailsMode = ({
           className={cs.accordion}
           header={outputFilesHeader}
           open={true}
+          data-testid={"output-files"}
         >
           <div className={cx(cs.accordionContent, cs.fileGroup)}>
             <div className={cs.fileGroupHeader}>{`From ${stepName} Step:`}</div>
@@ -210,7 +216,9 @@ const PipelineStepDetailsMode = ({
 
   return (
     <div className={cs.content}>
-      <div className={cs.stepName}>{stepName}</div>
+      <div className={cs.stepName} data-testid={"stepName"}>
+        {stepName}
+      </div>
       {renderStatusBox()}
       {renderStepInfo()}
       {renderInputFiles()}

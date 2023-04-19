@@ -23,7 +23,9 @@ export default class BulkDownloadTableRenderers extends React.Component {
         />
         <div className={cs.downloadRightPane}>
           <div className={cs.downloadNameContainer}>
-            <div className={cs.downloadName}>{rowData.download_name}</div>
+            <div className={cs.downloadName} data-testid="download-name">
+              {rowData.download_name}
+            </div>
             <StatusLabel
               className={cs.downloadStatus}
               status={rowData.statusDisplay}
@@ -32,7 +34,11 @@ export default class BulkDownloadTableRenderers extends React.Component {
             />
           </div>
           <div className={cs.metadata}>
-            <span className={cs.detailsLink} onClick={rowData.onStatusClick}>
+            <span
+              className={cs.detailsLink}
+              onClick={rowData.onStatusClick}
+              data-testid={"download-details-link"}
+            >
               Details
             </span>
             {admin && (

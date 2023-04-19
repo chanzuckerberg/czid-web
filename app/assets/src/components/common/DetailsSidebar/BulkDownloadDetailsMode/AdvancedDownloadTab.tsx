@@ -79,6 +79,7 @@ const AdvancedDownloadTab = ({ bulkDownload }: AdvancedDownloadTabProps) => {
       onMouseLeave={resetTooltip}
       role="button"
       tabIndex={0}
+      data-test-id="cloud-command-container"
     >
       <div className={cs.command}>{getCLICommand()}</div>
       <Icon className={cs.icon} sdsIcon="copy" sdsSize="s" sdsType="static" />

@@ -53,7 +53,7 @@ export const TaxonDescription = ({
     <section>
       <div className={cs.subtitle}>{subtitle}</div>
       <div className={cx(cs.text, shouldCollapse && cs.collapsed)}>
-        <div ref={taxonDescriptionRef}>
+        <div ref={taxonDescriptionRef} data-testid={"taxon-description"}>
           {description}
           <WikipediaLicense taxonName={name} wikiUrl={wikiUrl} />
         </div>

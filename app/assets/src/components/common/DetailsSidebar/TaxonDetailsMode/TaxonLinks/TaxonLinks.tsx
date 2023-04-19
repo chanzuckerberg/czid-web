@@ -37,6 +37,7 @@ export const TaxonLinks = ({
     return (
       <ExternalLink
         href={url}
+        data-testid={"taxon-link"}
         analyticsEventName="TaxonDetailsMode_external-link_clicked"
         analyticsEventData={{
           source,

@@ -25,7 +25,10 @@ class Sidebar extends React.Component<SidebarProps> {
       >
         {children}
         <div onClick={this.props.onClose}>
-          <IconClose className={cs.closeIcon} />
+          <IconClose
+            className={cs.closeIcon}
+            data-testid={"sidebar-close-icon"}
+          />
         </div>
       </SemanticSidebar>
     );

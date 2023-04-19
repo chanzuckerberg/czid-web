@@ -281,7 +281,7 @@ const ReportFilters = ({
         </div>
         {/* from server */}
         {showBackgroundFilter && (
-          <div className={cs.filterListElement}>
+          <div className={cs.filterListElement} data-testid="background-filter">
             <BackgroundModelFilter
               allBackgrounds={backgrounds}
               onClick={() =>

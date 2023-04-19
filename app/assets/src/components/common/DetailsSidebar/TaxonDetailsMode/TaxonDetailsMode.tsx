@@ -90,8 +90,14 @@ export const TaxonDetailsMode = ({
 
   return (
     <div className={cs.content}>
-      <div className={cs.title}>{taxonName}</div>
-      {taxonId > 0 && <div className={cs.subtitle}>Taxonomy ID: {taxonId}</div>}
+      <div className={cs.title} data-testid={"taxon-name"}>
+        {taxonName}
+      </div>
+      {taxonId > 0 && (
+        <div className={cs.subtitle} data-testid={"taxon-id"}>
+          Taxonomy ID: {taxonId}
+        </div>
+      )}
       <div className={cs.taxonContents}>
         {/* Describe taxon first */}
         <TaxonDescription

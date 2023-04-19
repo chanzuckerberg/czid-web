@@ -93,7 +93,12 @@ const DetailsSidebar = ({
   };
 
   return (
-    <Sidebar visible={visible} width="very wide" onClose={onClose}>
+    <Sidebar
+      visible={visible}
+      width="very wide"
+      onClose={onClose}
+      data-testid="details-sidebar"
+    >
       {renderContents()}
     </Sidebar>
   );

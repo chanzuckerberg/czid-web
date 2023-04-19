@@ -100,7 +100,9 @@ const BulkDownloadDetailsMode = ({ bulkDownload }: BDDProps) => {
 
   return (
     <div className={cs.content}>
-      <div className={cs.title}>{download_name}</div>
+      <div className={cs.title} data-testid={"sidebar-download-name"}>
+        {download_name}
+      </div>
       {admin && (
         <div className={cs.adminDetails}>
           ID: {id}, run in: {execution_type}

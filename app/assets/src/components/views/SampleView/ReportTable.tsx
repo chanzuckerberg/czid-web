@@ -724,7 +724,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
   renderExpandIcon = ({ rowData }: { rowData: Taxon }) => {
     const { expandedGenusIds } = this.state;
     return (
-      <div className={cs.expandIcon}>
+      <div className={cs.expandIcon} data-testid="expand-taxon-parent">
         {rowData.taxLevel === TAX_LEVEL_GENUS ? (
           <i
             className={cx(

@@ -110,7 +110,11 @@ export const TaxonHistogram = ({
           higher the likelihood that this taxon is unique to your sample."
         />
       </div>
-      <div className={cs.histogram} ref={histogramContainerRef} />
+      <div
+        className={cs.histogram}
+        ref={histogramContainerRef}
+        data-testid={"taxon-histogram"}
+      />
     </>
   );
 };
