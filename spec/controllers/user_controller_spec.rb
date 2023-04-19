@@ -172,7 +172,7 @@ RSpec.describe UsersController, type: :request do
 
         expect(MetricUtil).to receive(:post_to_airtable).with(
           "TEST - CZ ID User Profiles", # TODO: replace this with the actual table name
-          { fields: airtable_params }.to_json
+          { fields: airtable_params, typecast: true }.to_json
         )
 
         params = { user: sign_up_params }

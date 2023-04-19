@@ -26,6 +26,7 @@ module UsersHelper
         referral_source: params[:referral_source] || [],
         signup_path: params[:signup_path] || "",
       },
+      typecast: true, # enables us to send new options for multiselect fields (e.g. "Other: <free text>" for Referral Source)
     }
     MetricUtil.post_to_airtable(table_name, data.to_json)
   end

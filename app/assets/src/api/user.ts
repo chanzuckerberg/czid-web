@@ -40,6 +40,36 @@ const useCreateUser = () => {
   return create;
 };
 
+const updateUser = ({
+  userId,
+  name,
+  email,
+  institution,
+  isAdmin,
+  archetypes,
+  segments,
+}: {
+  userId: number;
+  name: string;
+  email?: string;
+  isAdmin?: boolean;
+  institution?: string;
+  archetypes?: string;
+  segments?: string;
+  userProfileFormVersion?: number;
+}) => {
+  return putWithCSRF(`/users/${userId}.json`, {
+    user: {
+      name,
+      email,
+      institution,
+      archetypes,
+      segments,
+      role: isAdmin ? 1 : 0,
+    },
+  });
+};
+
 interface userUpdateData {
   name: string;
   role?: number;
@@ -47,10 +77,10 @@ interface userUpdateData {
   institution?: string;
   archetypes?: string;
   segments?: string;
-  user_profile_form_version?: number;
+  profile_form_version?: number;
 }
 
-const updateUser = ({
+const updateUserData = ({
   userId,
   name,
   email,
@@ -97,9 +127,9 @@ const updateUser = ({
   }
 
   if (!isNull(userProfileFormVersion)) {
-    userUpdateData.user_profile_form_version = userProfileFormVersion;
+    userUpdateData.profile_form_version = userProfileFormVersion;
   }
-  return putWithCSRF(`/users/${userId}.json`, {
+  return postWithCSRF(`/users/${userId}/update_user_data.json`, {
     user: userUpdateData,
   });
 };
@@ -128,7 +158,7 @@ interface userPostAirtableDataAPI {
   country?: string;
   world_bank_income?: string;
   expertise_level: string;
-  sign_up_path: string;
+  signup_path: string;
   czid_usecase: string[];
   referral_source: string[];
 }
@@ -156,7 +186,7 @@ const postToAirtable = ({
     country: country,
     world_bank_income: worldBankIncome,
     expertise_level: expertiseLevel,
-    sign_up_path: signUpPath,
+    signup_path: signUpPath,
     czid_usecase: czidUsecases,
     referral_source: referralSource,
   };
@@ -174,6 +204,7 @@ const requestPasswordReset = (email: $TSFixMe) => {
 export {
   useCreateUser,
   updateUser,
+  updateUserData,
   requestPasswordReset,
   postToAirtable,
   EMAIL_TAKEN_ERROR,

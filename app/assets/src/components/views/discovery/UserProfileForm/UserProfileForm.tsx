@@ -3,7 +3,7 @@ import { isEmpty } from "lodash";
 import React, { useContext, useEffect, useState } from "react";
 import {
   postToAirtable as airtablePost,
-  updateUser as userUpdater,
+  updateUserData as userUpdater,
 } from "~/api/user";
 import { UserContext } from "~/components/common/UserContext";
 import { openUrl } from "~/components/utils/links";
