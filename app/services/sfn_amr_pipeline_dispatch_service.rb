@@ -19,7 +19,7 @@ class SfnAmrPipelineDispatchService
   end
 
   def initialize(workflow_run)
-    @workflow_run = workflow_run
+    @workflow_run = workflow_run.workflow_by_class
     @sample = workflow_run.sample
     @current_user = User.find(@sample.user_id)
 
@@ -163,10 +163,10 @@ class SfnAmrPipelineDispatchService
     ].compact
   end
 
-  def nonhost_reads_params(has_modern_host_filtering_feature_flag = false)
+  def nonhost_reads_params
     params = nil
     if strtrue(@workflow_run.get_input("start_from_mngs"))
-      params = has_modern_host_filtering_feature_flag ? modern_nonhost_reads : nonhost_reads
+      params = @workflow_run.uses_modern_host_filtering? ? modern_nonhost_reads : nonhost_reads
     end
 
     params
@@ -174,12 +174,11 @@ class SfnAmrPipelineDispatchService
 
   def generate_wdl_input
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
-    has_modern_host_filtering_feature_flag = @current_user.allowed_feature?("modern_host_filtering")
-    host_filtering_params = has_modern_host_filtering_feature_flag ? modern_host_filtering_parameters : host_filtering_parameters
+    host_filtering_params = @workflow_run.uses_modern_host_filtering? ? modern_host_filtering_parameters : host_filtering_parameters
 
     run_inputs = {
       docker_image_id: retrieve_docker_image_id,
-      non_host_reads: nonhost_reads_params(has_modern_host_filtering_feature_flag),
+      non_host_reads: nonhost_reads_params,
       contigs: strtrue(@workflow_run.get_input("start_from_mngs")) ? "#{@sample.pipeline_runs.non_deprecated.first.sfn_results_path}/contigs.fasta" : nil,
       sample_name: @workflow_run.sample.name,
     }.merge(host_filtering_params)
