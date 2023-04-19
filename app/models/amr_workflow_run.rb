@@ -92,6 +92,11 @@ class AmrWorkflowRun < WorkflowRun
     AmrGeneLevelDownloadsService.call(self, AmrGeneLevelDownloadsService::DOWNLOAD_TYPE_READS, gene_id)
   end
 
+  # Download the contigs that map to a gene
+  def download_gene_level_contigs(gene_id)
+    AmrGeneLevelDownloadsService.call(self, AmrGeneLevelDownloadsService::DOWNLOAD_TYPE_CONTIGS, gene_id)
+  end
+
   def uses_modern_host_filtering?
     workflow_version_at_least(MODERN_HOST_FILTERING_VERSION)
   end
