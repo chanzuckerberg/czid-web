@@ -56,7 +56,7 @@ const Accordion = () => {
               target="_blank"
               rel="noreferrer"
             >
-              Data Privacy Notice
+              Privacy Policy
             </a>
             .
           </>
@@ -81,7 +81,7 @@ const Accordion = () => {
               target="_blank"
               rel="noreferrer"
             >
-              Data Privacy Notice
+              Privacy Policy
             </a>
             .
           </>
