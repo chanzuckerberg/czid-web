@@ -812,10 +812,41 @@ RSpec.describe ProjectsController, type: :controller do
             allow(UserMailer).to receive(:new_auth0_user_new_project).and_return(email_message_double)
           end
 
-          it "calls UserFactoryService to create a new user" do
-            expect(UserFactoryService).to receive(:call)
+          context "with AUTO_ACCOUNT_CREATION_V1 disabled" do
+            before do
+              AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "")
+            end
 
-            subject
+            it "calls UserFactoryService to create a new user" do
+              expect(UserFactoryService).to receive(:call).with(a_collection_including(
+                                                                  name: name_to_add,
+                                                                  email: email_to_add,
+                                                                  profile_form_version: 1,
+                                                                  project_id: project.id,
+                                                                  send_activation: true,
+                                                                  signup_path: User::SIGNUP_PATH[:project]
+                                                                ))
+
+              subject
+            end
+          end
+
+          context "with AUTO_ACCOUNT_CREATION_V1 enabled" do
+            before do
+              AppConfigHelper.set_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1, "1")
+            end
+
+            it "calls UserFactoryService to create a new user" do
+              expect(UserFactoryService).to receive(:call).with(a_collection_including(
+                                                                  name: name_to_add,
+                                                                  email: email_to_add,
+                                                                  project_id: project.id,
+                                                                  send_activation: true,
+                                                                  signup_path: User::SIGNUP_PATH[:project]
+                                                                ))
+
+              subject
+            end
           end
 
           it "sets @user instance variable" do

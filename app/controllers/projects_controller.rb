@@ -630,7 +630,7 @@ class ProjectsController < ApplicationController
       user_params[:profile_form_version] = 1
     end
 
-    return UserFactoryService.call(current_user: current_user, project_id: @project.id, send_activation: true, **user_params)
+    return UserFactoryService.call(current_user: current_user, project_id: @project.id, send_activation: true, signup_path: User::SIGNUP_PATH[:project], **user_params)
   end
 
   def shared_project_email_arguments

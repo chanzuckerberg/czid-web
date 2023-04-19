@@ -6,6 +6,7 @@ RSpec.describe UserFactoryService do
   let(:new_user_name) { "UserFactory User" }
   let(:project_id) { nil }
   let(:send_activation) { false }
+  let(:signup_path) { nil }
   let(:new_user_params) do
     {
       name: new_user_name,
@@ -22,6 +23,7 @@ RSpec.describe UserFactoryService do
       current_user: admin_user,
       project_id: project_id,
       send_activation: send_activation,
+      signup_path: signup_path,
       created_by_user_id: admin_user.id,
       **new_user_params
     )
@@ -99,6 +101,8 @@ RSpec.describe UserFactoryService do
     let(:airtable_accounts_table) { "CZ ID Accounts" }
 
     context "when signup is through admin-settings" do
+      let(:signup_path) { User::SIGNUP_PATH[:general] }
+
       it "make API call to add info to airtable with General signupPath" do
         user_factory_instance.call
         created_user = User.last
@@ -106,7 +110,7 @@ RSpec.describe UserFactoryService do
           fields: {
             name: created_user.name,
             email: created_user.email,
-            signupPath: "General",
+            signupPath: User::SIGNUP_PATH[:general],
             userId: created_user.id,
           },
         }
@@ -117,8 +121,9 @@ RSpec.describe UserFactoryService do
     end
 
     context "when signup is through a project" do
-      let(:project_id) { create(:project).id }
       let(:new_user_name) { nil }
+      let(:project_id) { create(:project).id }
+      let(:signup_path) { User::SIGNUP_PATH[:project] }
 
       it "make API call to add info to airtable with Project signupPath" do
         user_factory_instance.call
@@ -127,7 +132,28 @@ RSpec.describe UserFactoryService do
           fields: {
             name: created_user.name,
             email: created_user.email,
-            signupPath: "Project",
+            signupPath: User::SIGNUP_PATH[:project],
+            userId: created_user.id,
+          },
+        }
+
+        expect(MetricUtil).to have_received(:post_to_airtable)
+          .with(airtable_accounts_table, airtable_data.to_json)
+      end
+    end
+
+    context "when signup is through the landing page" do
+      let(:new_user_name) { nil }
+      let(:signup_path) { User::SIGNUP_PATH[:self_registered] }
+
+      it "make API call to add info to airtable with Self-registered signupPath" do
+        user_factory_instance.call
+        created_user = User.last
+        airtable_data = {
+          fields: {
+            name: created_user.name,
+            email: created_user.email,
+            signupPath: User::SIGNUP_PATH[:self_registered],
             userId: created_user.id,
           },
         }

@@ -16,7 +16,6 @@ class Mutations::CreateUser < Mutations::BaseMutation
     # This endpoint is not called in the project-invite flow,
     # so it is not accessible by non-admin users.
     if current_user_is_admin?(context)
-      # User created via admin-settings
       @user = UserFactoryService.call(
         current_user: current_user,
         created_by_user_id: current_user.id,
@@ -27,8 +26,9 @@ class Mutations::CreateUser < Mutations::BaseMutation
         segments: segments,
         role: role,
         send_activation: send_activation,
-        # All users created via admin-settings are considered to have completed a profile form
-        profile_form_version: 1
+        # All users created via /users/new are considered to have completed a profile form
+        profile_form_version: 1,
+        signup_path: User::SIGNUP_PATH[:general]
       )
     elsif !current_user_is_logged_in?(context) && auto_account_creation_enabled
       existing_user = User.find_by(email: email)
@@ -36,11 +36,11 @@ class Mutations::CreateUser < Mutations::BaseMutation
         raise GraphQL::ExecutionError, "Email has already been taken"
       end
 
-      # User created automatically via the landing pg
       @user = UserFactoryService.call(
         email: email,
         role: 0,
-        send_activation: true
+        send_activation: true,
+        signup_path: User::SIGNUP_PATH[:self_registered]
       )
     else
       raise GraphQL::ExecutionError, "Permission denied"

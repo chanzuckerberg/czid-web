@@ -1,7 +1,7 @@
 class UserFactoryService
   include Callable
   attr_accessor :auth0_user_id, :current_user, :new_user, :new_user_params,
-                :project_id, :send_activation
+                :project_id, :send_activation, :signup_path
 
   def initialize(
     email:,
@@ -9,11 +9,13 @@ class UserFactoryService
     current_user: nil,
     project_id: nil,
     send_activation: false,
+    signup_path: nil,
     created_by_user_id: nil,
     **other_user_attrs
   )
     @project_id = project_id
     @send_activation = send_activation
+    @signup_path = signup_path
     @new_user_params = {
       email: email.downcase,
       name: name,
@@ -51,7 +53,7 @@ class UserFactoryService
       fields: {
         name: new_user.name,
         email: new_user.email,
-        signupPath: project_id.present? ? "Project" : "General",
+        signupPath: signup_path,
         userId: new_user.id,
       },
     }

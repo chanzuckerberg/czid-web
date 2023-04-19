@@ -63,14 +63,32 @@ RSpec.describe GraphqlController, type: :request do
           sign_in @admin
         end
 
-        it "should create a new user" do
-          expect do
-            post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-              query: query,
-              context: { current_user: @admin },
-              variables: { name: fake_user_name, email: fake_email, institution: fake_institution, role: 0, sendActivation: true, archetypes: mock_archetypes, segments: mock_segments },
-            }.to_json
-          end.to change { User.count }.by(1)
+        subject do
+          post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
+            query: query,
+            context: { current_user: @admin },
+            variables: { name: fake_user_name, email: fake_email, institution: fake_institution, role: 0, sendActivation: true, archetypes: mock_archetypes, segments: mock_segments },
+          }.to_json
+        end
+
+        it "should call UserFactoryService to create a new user" do
+          expect(UserFactoryService).to receive(:call).with(a_collection_including(
+                                                              name: fake_user_name,
+                                                              email: fake_email,
+                                                              role: 0,
+                                                              institution: fake_institution,
+                                                              archetypes: mock_archetypes,
+                                                              segments: mock_segments,
+                                                              profile_form_version: 1,
+                                                              send_activation: true,
+                                                              signup_path: User::SIGNUP_PATH[:general]
+                                                            ))
+
+          subject
+        end
+
+        it "should return the new user" do
+          subject
           expect(response).to have_http_status :success
 
           result = JSON.parse response.body
@@ -86,15 +104,23 @@ RSpec.describe GraphqlController, type: :request do
           sign_in @joe
         end
 
+        subject do
+          post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
+            query: query,
+            context: { current_user: @joe },
+            variables: { name: fake_user_name, email: fake_email, role: 0, sendActivation: true },
+          }.to_json
+        end
+
+        it "should not call UserFactoryService to create a new user" do
+          expect(UserFactoryService).not_to receive(:call)
+
+          subject
+        end
+
         # This endpoint is not being called in the project-invite flow
-        it "should not create a user and raise an error" do
-          expect do
-            post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-              query: query,
-              context: { current_user: @joe },
-              variables: { name: fake_user_name, email: fake_email, role: 0, sendActivation: true },
-            }.to_json
-          end.to change { User.count }.by(0)
+        it "should raise an error" do
+          subject
           expect(response).to have_http_status :success
 
           result = JSON.parse response.body
@@ -105,14 +131,22 @@ RSpec.describe GraphqlController, type: :request do
       end
 
       context "and the current user is nil (logged out)" do
-        it "should not create a user and raise an error" do
-          expect do
-            post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-              query: query,
-              context: { current_user: nil },
-              variables: { email: fake_email },
-            }.to_json
-          end.to change { User.count }.by(0)
+        subject do
+          post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
+            query: query,
+            context: { current_user: nil },
+            variables: { email: fake_email },
+          }.to_json
+        end
+
+        it "should not call UserFactoryService to create a new user" do
+          expect(UserFactoryService).not_to receive(:call)
+
+          subject
+        end
+
+        it "should raise an error" do
+          subject
           expect(response).to have_http_status :success
 
           result = JSON.parse response.body
@@ -134,14 +168,32 @@ RSpec.describe GraphqlController, type: :request do
           sign_in @admin
         end
 
-        it "should create a new user" do
-          expect do
-            post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-              query: query,
-              context: { current_user: @admin },
-              variables: { name: fake_user_name, email: fake_email, institution: fake_institution, role: 0, sendActivation: true, archetypes: mock_archetypes, segments: mock_segments },
-            }.to_json
-          end.to change { User.count }.by(1)
+        subject do
+          post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
+            query: query,
+            context: { current_user: @admin },
+            variables: { name: fake_user_name, email: fake_email, institution: fake_institution, role: 0, sendActivation: true, archetypes: mock_archetypes, segments: mock_segments },
+          }.to_json
+        end
+
+        it "should call UserFactoryService to create a new user" do
+          expect(UserFactoryService).to receive(:call).with(a_collection_including(
+                                                              name: fake_user_name,
+                                                              email: fake_email,
+                                                              role: 0,
+                                                              institution: fake_institution,
+                                                              archetypes: mock_archetypes,
+                                                              segments: mock_segments,
+                                                              profile_form_version: 1,
+                                                              send_activation: true,
+                                                              signup_path: User::SIGNUP_PATH[:general]
+                                                            ))
+
+          subject
+        end
+
+        it "should return the new user" do
+          subject
           expect(response).to have_http_status :success
 
           result = JSON.parse response.body
@@ -157,15 +209,23 @@ RSpec.describe GraphqlController, type: :request do
           sign_in @joe
         end
 
+        subject do
+          post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
+            query: query,
+            context: { current_user: @joe },
+            variables: { name: fake_user_name, email: fake_email, role: 0, sendActivation: true },
+          }.to_json
+        end
+
+        it "should not call UserFactoryService to create a new user" do
+          expect(UserFactoryService).not_to receive(:call)
+
+          subject
+        end
+
         # This endpoint is not being called in the project-invite flow
-        it "should not create a user and raise an error" do
-          expect do
-            post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-              query: query,
-              context: { current_user: @joe },
-              variables: { name: fake_user_name, email: fake_email, role: 0, sendActivation: true },
-            }.to_json
-          end.to change { User.count }.by(0)
+        it "should raise an error" do
+          subject
           expect(response).to have_http_status :success
 
           result = JSON.parse response.body
@@ -177,15 +237,28 @@ RSpec.describe GraphqlController, type: :request do
 
       # Account created via landing page
       context "and the current user is nil (logged out)" do
+        subject do
+          post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
+            query: query,
+            context: { current_user: nil },
+            variables: { name: nil, email: fake_email },
+          }.to_json
+        end
+
         context "and the email is unique" do
-          it "should create a user with only an email" do
-            expect do
-              post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-                query: query,
-                context: { current_user: nil },
-                variables: { email: fake_email },
-              }.to_json
-            end.to change { User.count }.by(1)
+          it "should call UserFactoryService to create a new user" do
+            expect(UserFactoryService).to receive(:call).with(a_collection_including(
+                                                                email: fake_email,
+                                                                role: 0,
+                                                                send_activation: true,
+                                                                signup_path: User::SIGNUP_PATH[:self_registered]
+                                                              ))
+
+            subject
+          end
+
+          it "should return the new user" do
+            subject
             expect(response).to have_http_status :success
 
             result = JSON.parse response.body
@@ -201,14 +274,14 @@ RSpec.describe GraphqlController, type: :request do
             @existing_user = create(:user, email: fake_email)
           end
 
-          it "should not create a user and raise an error" do
-            expect do
-              post "/graphql", headers: { "Content-Type" => "application/json" }, params: {
-                query: query,
-                context: { current_user: nil },
-                variables: { email: fake_email },
-              }.to_json
-            end.to change { User.count }.by(0)
+          it "should not call UserFactoryService to create a new user" do
+            expect(UserFactoryService).not_to receive(:call)
+
+            subject
+          end
+
+          it "should raise an error" do
+            subject
             expect(response).to have_http_status :success
 
             result = JSON.parse response.body

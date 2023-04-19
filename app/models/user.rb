@@ -34,11 +34,11 @@ class User < ApplicationRecord
     # instead of automatically lower-casing.
     with: /\A(?~[A-Z])\z/, message: "may not contain capital letters",
   }
-  validates :name, allow_nil: true, format: {
+  validates :name, format: {
     # See https://www.ascii-code.com/. These were the ranges that captured the
     # common accented chars I knew from experience, leaving out pure symbols.
     with: /\A[- 'a-zA-ZÀ-ÖØ-öø-ÿ]+\z/, message: "must contain only letters, apostrophes, dashes or spaces",
-  }
+  }, allow_nil: true
   attr_accessor :email_arguments
 
   ROLE_REGULAR_USER = 0
@@ -47,6 +47,12 @@ class User < ApplicationRecord
     ROLE_REGULAR_USER,
     ROLE_ADMIN,
   ] }, allow_nil: true
+
+  SIGNUP_PATH = {
+    general: "General", # Registered by an admin via /users/new
+    project: "Project", # Invited to a project by an existing user
+    self_registered: "Self-Registered", # Self-registered via the landing pg
+  }.freeze
 
   IDSEQ_BUCKET_PREFIXES = ['idseq-'].freeze
   CZBIOHUB_BUCKET_PREFIXES = ['czb-', 'czbiohub-'].freeze
