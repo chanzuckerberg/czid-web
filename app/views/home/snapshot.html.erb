@@ -2,6 +2,7 @@
   react_component('DiscoveryViewRouter', {
     domain: "snapshot",
     snapshotShareId: '<%= @share_id %>',
+    autoAcctCreationEnabled: <%= @auto_account_creation_enabled %>,
     snapshotProjectName: '<%= @project_name %>',
     snapshotProjectDescription: JSON.parse('<%= raw escape_json(@project_description) %>'),
     projectId: <%= @project_id %>,

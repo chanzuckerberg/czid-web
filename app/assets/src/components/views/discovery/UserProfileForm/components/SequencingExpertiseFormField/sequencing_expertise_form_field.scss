@@ -1,25 +1,23 @@
 @import "~czifui/dist/variables";
 
 .titleSection {
-  padding-bottom: $sds-spaces-l;
+  padding-bottom: $sds-spaces-m;
 }
 .titleMainText {
-  font: $sds-font-body-m-600-font;
+  font: $sds-font-header-s-600-font;
   color: $sds-color-gray-black;
 }
 .titleSubText {
   font: $sds-font-body-s-400-font;
-  color: $sds-color-gray-500;
-}
-.radioSection {
-  padding-left: $sds-spaces-xl;
+  color: $sds-color-gray-black;
 }
 .main {
-  padding: $sds-spaces-l;
+  padding-bottom: $sds-spaces-xl;
 }
 .label {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+  padding-bottom: $sds-spaces-l;
 }

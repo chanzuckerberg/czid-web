@@ -34,7 +34,6 @@ export function SequencingExpertiseFormField({
       <RadioGroup
         aria-labelledby="userform-radio-buttons-group-label"
         name="userform-radio-buttons-group"
-        className={cs.radioSection}
       >
         {allExpertiseOptions.map((expertiseOption, index) => (
           <label key={index} className={cs.label}>

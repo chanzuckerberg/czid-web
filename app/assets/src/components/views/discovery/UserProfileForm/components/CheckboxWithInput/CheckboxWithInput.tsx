@@ -40,26 +40,14 @@ export function CheckboxWithInput({
     setSelectedCheckboxes(newSelectedReferralCheckboxes);
     setInputValue(event.target.value);
   }
-  // add keyboard support for checkboxes
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter") {
-      handleOtherCheckboxChange();
-    }
-  };
 
   return (
-    <div
-      className={cs.otherCheckboxSection}
-      role="checkbox"
-      tabIndex={0}
-      aria-checked={selectedCheckboxes.includes(inputValue)}
-      onClick={handleOtherCheckboxChange}
-      onKeyDown={handleKeyDown}
-    >
+    <div className={cs.otherCheckboxSection}>
       <InputCheckbox
         stage={isCheckboxChecked ? "checked" : "unchecked"}
         label="Checkbox with input"
         id="checkbox-w-input"
+        onClick={handleOtherCheckboxChange}
       />
       <div className={cs.otherLabel}>{prefix}</div>
       <InputText

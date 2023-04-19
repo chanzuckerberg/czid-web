@@ -53,7 +53,7 @@ export function CZIDUsecaseFormField({
         </span>
       </div>
 
-      <div className={cs.checkBoxSection}>
+      <div>
         {CZID_USECASE_OPTIONS.map(option => (
           <Checkbox
             key={option}

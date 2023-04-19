@@ -108,7 +108,6 @@ interface userPostAirtableData {
   userId: number;
   firstName: string;
   lastName: string;
-  email: string;
   profileFormVersion: number;
   rorInstitution: string;
   rorId: string;
@@ -123,7 +122,6 @@ interface userPostAirtableData {
 interface userPostAirtableDataAPI {
   first_name: string;
   last_name: string;
-  email: string;
   profile_form_version: number;
   ror_institution: string;
   ror_id: string;
@@ -139,7 +137,6 @@ const postToAirtable = ({
   userId,
   firstName,
   lastName,
-  email,
   profileFormVersion,
   rorInstitution,
   rorId,
@@ -153,7 +150,6 @@ const postToAirtable = ({
   const userAirtableData: userPostAirtableDataAPI = {
     first_name: firstName,
     last_name: lastName,
-    email: email,
     profile_form_version: profileFormVersion,
     ror_institution: rorInstitution,
     ror_id: rorId,

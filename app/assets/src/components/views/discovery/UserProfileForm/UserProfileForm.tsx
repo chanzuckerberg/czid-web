@@ -1,4 +1,4 @@
-import { Button } from "czifui";
+import { Button, Link } from "czifui";
 import { isEmpty } from "lodash";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -68,7 +68,6 @@ export function UserProfileForm() {
     await airtablePost({
       userId: currentUser.userId,
       profileFormVersion: USER_PROFILE_FORM_VERSION,
-      email: currentUser.userEmail,
       firstName: firstName,
       lastName: lastName,
       rorInstitution: rorInstitution,
@@ -92,16 +91,20 @@ export function UserProfileForm() {
   }
 
   return (
-    <div className={cs["parent-container"]}>
+    <div className={cs.parentContainer}>
       <form>
+        <div className={cs.formTitle}>Finish Setting Up Your Account</div>
+        <div className={cs.formSubtitle}>
+          Set up your profile so you can start using CZ ID!
+        </div>
         <NameField setFirstName={setFirstName} setLastName={setLastName} />
-        <InstitutionFormField
-          setInstitution={setRORInstitution}
-          setRORId={setRORId}
-        />
         <CountryFormField
           setCountry={setCountry}
           setWorldBankIncome={setWorldBankIncome}
+        />
+        <InstitutionFormField
+          setInstitution={setRORInstitution}
+          setRORId={setRORId}
         />
         <CZIDUsecaseFormField
           selectedUsecaseCheckboxes={selectedUsecaseCheckboxes}
@@ -122,8 +125,19 @@ export function UserProfileForm() {
             onClick={handleFormSubmit}
             disabled={isSubmitDisabled}
           >
-            Submit
+            Complete Setup
           </Button>
+        </div>
+        <div className={cs.linkContainer}>
+          You can view our Privacy Policy{" "}
+          <Link
+            target="_blank"
+            rel="noopener"
+            href="/privacy"
+            className={cs.dataPrivacyLink}
+          >
+            here.
+          </Link>
         </div>
       </form>
     </div>

@@ -1,20 +1,28 @@
 @import "~czifui/dist/variables";
 
 .titleMainText {
-  font: $sds-font-body-m-600-font;
+  font: $sds-font-header-s-600-font;
   color: $sds-color-gray-black;
-  padding-bottom: $sds-spaces-l;
+  padding-bottom: $sds-spaces-xs;
 }
 .titleSubText {
   font: $sds-font-body-s-400-font;
   color: $sds-color-gray-500;
 }
 .main {
-  padding: $sds-spaces-l;
+  padding-bottom: $sds-spaces-l;
 }
 .nameFields {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+  padding-top: 0px;
+}
+.InputContainerLeft {
+  width: 245px;
+}
+.InputContainerRight {
+  padding-left: $sds-spaces-m;
+  width: 245px;
 }
