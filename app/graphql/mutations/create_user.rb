@@ -27,7 +27,7 @@ class Mutations::CreateUser < Mutations::BaseMutation
         role: role,
         send_activation: send_activation,
         # All users created via /users/new are considered to have completed a profile form
-        profile_form_version: 1,
+        profile_form_version: User::PROFILE_FORM_VERSION[:interest_form],
         signup_path: User::SIGNUP_PATH[:general]
       )
     elsif !current_user_is_logged_in?(context) && auto_account_creation_enabled
@@ -38,7 +38,7 @@ class Mutations::CreateUser < Mutations::BaseMutation
 
       @user = UserFactoryService.call(
         email: email,
-        role: 0,
+        role: User::ROLE_REGULAR_USER,
         send_activation: true,
         signup_path: User::SIGNUP_PATH[:self_registered]
       )

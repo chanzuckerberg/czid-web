@@ -157,7 +157,7 @@ RSpec.describe UsersController, type: :request do
         sign_up_params = {
           name: "abc xyz",
           email: @joe.email,
-          profile_form_version: 2,
+          profile_form_version: User::PROFILE_FORM_VERSION[:in_app_form],
         }.merge(form_params)
 
         # Expected parameters for posting to AirTable
@@ -167,7 +167,7 @@ RSpec.describe UsersController, type: :request do
           email: @joe.email,
           date_created: @joe.created_at.strftime("%Y-%m-%d"),
           quarter_year: UsersHelper.calculate_quarter_year,
-          survey_version: "2",
+          survey_version: User::PROFILE_FORM_VERSION[:in_app_form].to_s,
         }.merge(form_params)
 
         expect(MetricUtil).to receive(:post_to_airtable).with(

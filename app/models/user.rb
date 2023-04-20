@@ -48,6 +48,17 @@ class User < ApplicationRecord
     ROLE_ADMIN,
   ] }, allow_nil: true
 
+  PROFILE_FORM_VERSION = {
+    incomplete: 0,
+    interest_form: 1, # https://airtable.com/shrBGT42xVBR6JAVv
+    in_app_form: 2, # UserProfileForm.tsx
+  }.freeze
+  validates :profile_form_version, presence: true, inclusion: { in: [
+    PROFILE_FORM_VERSION[:incomplete],
+    PROFILE_FORM_VERSION[:interest_form],
+    PROFILE_FORM_VERSION[:in_app_form],
+  ] }, allow_nil: false
+
   SIGNUP_PATH = {
     general: "General", # Registered by an admin via /users/new
     project: "Project", # Invited to a project by an existing user

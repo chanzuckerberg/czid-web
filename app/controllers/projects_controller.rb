@@ -627,7 +627,7 @@ class ProjectsController < ApplicationController
 
     # All users prior to auto account creation v1 are considered to have completed a profile form
     if AppConfigHelper.get_app_config(AppConfig::AUTO_ACCOUNT_CREATION_V1) != "1"
-      user_params[:profile_form_version] = 1
+      user_params[:profile_form_version] = User::PROFILE_FORM_VERSION[:interest_form]
     end
 
     return UserFactoryService.call(current_user: current_user, project_id: @project.id, send_activation: true, signup_path: User::SIGNUP_PATH[:project], **user_params)

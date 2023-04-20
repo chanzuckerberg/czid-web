@@ -86,13 +86,13 @@ RSpec.describe UserFactoryService do
           email: new_user_email,
           role: 0,
           created_by_user_id: admin_user.id,
-          profile_form_version: 1,
+          profile_form_version: User::PROFILE_FORM_VERSION[:interest_form],
         }
       end
 
       it "adds a new user with the profile_form_version" do
         user_factory_instance.call
-        expect(User.last.profile_form_version).to eq(1)
+        expect(User.last.profile_form_version).to eq(User::PROFILE_FORM_VERSION[:interest_form])
       end
     end
   end
