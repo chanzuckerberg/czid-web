@@ -97,6 +97,10 @@
               "type": "keyword",
               "null_value": "NULL"
             },
+            "contigs": {
+              "type": "long",
+              "null_value": "0"
+            },
             "e_value": {
               "type": "float",
               "null_value": "0"

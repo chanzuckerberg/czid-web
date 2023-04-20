@@ -118,7 +118,7 @@ module ElasticsearchQueryHelper
                       },
                       {
                         "range": {
-                          "metric_list.counts": {
+                          "metric_list.contigs": {
                             "gte": 1,
                           },
                         },
