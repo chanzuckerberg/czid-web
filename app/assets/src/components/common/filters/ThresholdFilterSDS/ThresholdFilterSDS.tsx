@@ -126,7 +126,7 @@ export const ThresholdFilterSDS = ({
   const handleDropdownInputClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
     setThresholds(selectedThresholds);
-    if (thresholds.length === 0) {
+    if (isEmpty(thresholds)) {
       handleAddThresholdItem();
     }
   };
