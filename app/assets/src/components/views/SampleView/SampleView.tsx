@@ -142,6 +142,7 @@ import {
   getDefaultSelectedOptions,
   getWorkflowCount,
   hasAppliedFilters,
+  hasMngsRuns,
 } from "./setup";
 import TaxonTreeVis from "./TaxonTreeVis";
 import { addSampleDeleteFlagToSessionStorage } from "./utils";
@@ -573,7 +574,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const { currentTab, selectedOptions, pipelineRun, pipelineVersion } =
       this.state;
 
-    // On consensus-genome-only report pages, pipelineRun is undefined and data is fetched via fetchWorkflowRunResults
+    // On consensus-genome-only or amr-only report pages, pipelineRun is undefined and data is fetched via fetchWorkflowRunResults
     if (isUndefined(pipelineRun)) return;
 
     const backgroundIdUsed = backgroundId || selectedOptions.background;
@@ -992,6 +993,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         // Only update the background in the selectedOptions if the report loaded successfully.
         updateSelectedOptions = false;
         this.setState({ sharedWithNoBackground: false, reportData: [] }, () => {
+          // if there are no mngs runs, we do not need to update the background
+          if (!hasMngsRuns(this.state.sample)) return;
           this.fetchSampleReportData({
             backgroundId: newSelectedOptions.background,
           })

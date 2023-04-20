@@ -2,11 +2,13 @@ import { find, getOr, isEmpty, omit, size } from "lodash/fp";
 import { diff } from "~/components/utils/objectUtil";
 import {
   findInWorkflows,
+  isMngsWorkflow,
   labelToVal,
   WorkflowCount,
   WORKFLOWS,
   WorkflowTabsSample,
   WORKFLOW_ENTITIES,
+  WORKFLOW_VALUES,
 } from "~/components/utils/workflows";
 import Sample from "~/interface/sample";
 import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
@@ -134,4 +136,15 @@ export const hasAppliedFilters = (currentTab, selectedOptions) => {
     hasTaxonFilter ||
     hasThresholdFilters
   );
+};
+
+export const hasMngsRuns = (sample: Sample) => {
+  const workflowCount = getWorkflowCount(sample);
+  // remove keys of workflowCount that are falsy
+  // and count how many of the remaining keys are mngs workflows
+  const mngsWorkflowsCount = Object.entries(workflowCount).filter(
+    ([workflow, count]: [WORKFLOW_VALUES, number]) =>
+      isMngsWorkflow(workflow) && count > 0,
+  ).length;
+  return mngsWorkflowsCount > 0;
 };
