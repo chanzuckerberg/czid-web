@@ -50,13 +50,13 @@ export const CATEGORIES = {
     ),
   },
   divergent: {
-    text: "Divergent Pathogen",
+    text: "Divergent Virus",
     code: "divergent",
     color: "purple",
     dimmedColor: "dimPurple",
     tooltip: (
       <>
-        {"Divergent pathogen. See documentation "}
+        {"Divergent virus. See documentation "}
         <ExternalLink
           href={
             "https://docs.google.com/document/d/1bhG7tEVBN8IFrRddw4CiCw0tZLMf8NPzxi1ZghcsvvM/edit?usp=sharing"
