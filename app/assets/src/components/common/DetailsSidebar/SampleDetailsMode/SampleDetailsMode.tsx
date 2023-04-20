@@ -31,7 +31,7 @@ import { processMetadata, processMetadataTypes } from "~utils/metadata";
 import { UserContext } from "../../UserContext";
 import MetadataTab from "./MetadataTab";
 import NotesTab from "./NotesTab";
-import NotesTabWithApollo from "./NotesTabWithApollo";
+import { NotesTabWithApollo } from "./NotesTabWithApollo";
 import PipelineTab, { MngsPipelineInfo, PipelineInfo } from "./PipelineTab";
 import cs from "./sample_details_mode.scss";
 import {
@@ -336,11 +336,8 @@ const SampleDetailsMode = ({
       if (allowedFeatures.includes(APOLLO_CLIENT_STATE_MANAGEMENT)) {
         return (
           <NotesTabWithApollo
-            notes={additionalInfo.notes}
+            sampleId={sampleId}
             editable={additionalInfo.editable}
-            onNoteChange={val => handleMetadataChange("notes", val)}
-            onNoteSave={() => handleMetadataSave("notes")}
-            savePending={savePending}
           />
         );
       }

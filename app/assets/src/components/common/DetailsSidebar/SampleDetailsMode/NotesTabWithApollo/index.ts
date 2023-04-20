@@ -1,0 +1,1 @@
+export { NotesTabWithApollo } from "./NotesTabWithApollo";
