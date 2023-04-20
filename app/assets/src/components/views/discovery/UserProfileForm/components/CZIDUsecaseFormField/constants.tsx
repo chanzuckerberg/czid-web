@@ -13,7 +13,7 @@ export const SC2_CONSENSUS_GENOME_OPTION =
 export const PHYLOGENETIC_TREE_OPTION = "Building phylogenetic trees";
 export const TRAINING_TOOL_OPTION = "As a training tool";
 export const MAX_SELECTIONS = 3;
-export const CHECKBOX_WITH_INPUT_PREFIX = "Other: ";
+export const CHECKBOX_WITH_INPUT_PREFIX = "Other";
 export const CZID_USECASE_OPTIONS = [
   IDENTIFY_KNOWN_PATHOGEN_OPTION,
   CLINICAL_RESEARCH_OPTION,

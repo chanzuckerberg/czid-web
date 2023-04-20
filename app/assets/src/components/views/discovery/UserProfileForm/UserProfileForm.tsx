@@ -33,7 +33,6 @@ export function UserProfileForm() {
   const [country, setCountry] = useState<string>("");
   const [worldBankIncome, setWorldBankIncome] = useState<string>("");
   const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(true);
-
   const areRequiredFieldsFilled = () => {
     return (
       !isEmpty(firstName) &&

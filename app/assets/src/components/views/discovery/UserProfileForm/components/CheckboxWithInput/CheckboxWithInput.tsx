@@ -7,6 +7,7 @@ type CheckboxWithInputProps = {
   setSelectedCheckboxes: (values: string[]) => void;
   isCheckboxChecked: boolean;
   prefix: string;
+  maxSelections?: number;
 };
 
 export function CheckboxWithInput({
@@ -14,6 +15,7 @@ export function CheckboxWithInput({
   setSelectedCheckboxes,
   isCheckboxChecked,
   prefix,
+  maxSelections,
 }: CheckboxWithInputProps) {
   const [inputValue, setInputValue] = useState<string>("");
 
@@ -26,19 +28,36 @@ export function CheckboxWithInput({
       setSelectedCheckboxes(newSelectedReferralCheckboxes);
       setInputValue("");
     } else {
-      setSelectedCheckboxes([...selectedCheckboxes, prefix]);
+      if (maxSelections) {
+        if (selectedCheckboxes.length < maxSelections) {
+          setSelectedCheckboxes([...selectedCheckboxes, `${prefix}: `]);
+        }
+      } else {
+        setSelectedCheckboxes([...selectedCheckboxes, `${prefix}: `]);
+      }
     }
   }
 
   function handleCheckboxChangeWithInput(
     event: React.ChangeEvent<HTMLInputElement>,
   ) {
-    const newSelectedReferralCheckboxes = selectedCheckboxes.filter(
+    const newSelectedCheckboxes = selectedCheckboxes.filter(
       item => !item.includes(prefix),
     );
-    newSelectedReferralCheckboxes.push(`${prefix}: ${event.target.value}`);
-    setSelectedCheckboxes(newSelectedReferralCheckboxes);
-    setInputValue(event.target.value);
+    if (maxSelections) {
+      if (newSelectedCheckboxes.length < maxSelections) {
+        newSelectedCheckboxes.push(`${prefix}: ${event.target.value}`);
+        setInputValue(event.target.value);
+        setSelectedCheckboxes(newSelectedCheckboxes);
+      } else {
+        // don't allow user to input text if max selections reached
+        setInputValue("");
+      }
+    } else {
+      newSelectedCheckboxes.push(`${prefix}: ${event.target.value}`);
+      setInputValue(event.target.value);
+      setSelectedCheckboxes(newSelectedCheckboxes);
+    }
   }
 
   return (

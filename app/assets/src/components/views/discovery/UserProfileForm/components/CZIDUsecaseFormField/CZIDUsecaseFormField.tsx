@@ -67,6 +67,7 @@ export function CZIDUsecaseFormField({
           setSelectedCheckboxes={setSelectedUsecaseCheckboxes}
           isCheckboxChecked={isOtherCheckboxChecked}
           prefix={CHECKBOX_WITH_INPUT_PREFIX}
+          maxSelections={MAX_SELECTIONS}
         />
       </div>
     </div>
