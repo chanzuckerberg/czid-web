@@ -136,15 +136,17 @@ class MngsReadsStatsLoadService
     sub_before = all_counts.detect { |entry| entry.value?(last_filtering_step_name) }
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
 
-    if sub_before && sub_after
-      frac = calculate_subsample_fraction(sub_before[:reads_after], sub_after[:reads_after])
-      all_counts << { fraction_subsampled: frac }
-      pipeline_run.fraction_subsampled = frac
-    end
+    if sub_after
+      # Load remaining reads
+      all_counts << { adjusted_remaining_reads: sub_after[:reads_after] }
+      pipeline_run.adjusted_remaining_reads = sub_after[:reads_after]
 
-    # Load remaining reads
-    all_counts << { adjusted_remaining_reads: sub_after[:reads_after] }
-    pipeline_run.adjusted_remaining_reads = sub_after[:reads_after]
+      if sub_before
+        frac = calculate_subsample_fraction(sub_before[:reads_after], sub_after[:reads_after])
+        all_counts << { fraction_subsampled: frac }
+        pipeline_run.fraction_subsampled = frac
+      end
+    end
 
     # Load unidentified reads
     pipeline_run.unmapped_reads = fetch_unmapped_illumina_reads(pipeline_run, all_counts) || pipeline_run.unmapped_reads
