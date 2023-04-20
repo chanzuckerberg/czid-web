@@ -35,7 +35,8 @@ export const SecondaryHeaderControls = ({
     <div className={cs.controlsTopRowContainer}>
       <PipelineVersionSelect
         sampleId={get("id", sample)}
-        shouldIncludeDatabaseVersion={false}
+        // show the CARD db version for AMR but not for other workflows
+        shouldIncludeDatabaseVersion={workflow === "amr"}
         currentRun={currentRun}
         allRuns={getAllRuns()}
         workflowType={workflow}

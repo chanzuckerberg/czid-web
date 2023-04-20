@@ -57,24 +57,27 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
       .startOf("second")
       .fromNow();
 
-    const suffixPipe = shouldIncludeDatabaseVersion ? "" : " |";
-
-    return `processed ${lastProcessedFormattedDate}${suffixPipe}`;
+    return ` processed ${lastProcessedFormattedDate} |`;
   };
 
   const getDatabaseVersionString = () => {
-    const dbVersion = get("version.alignment_db", currentRun);
-
-    return dbVersion && shouldIncludeDatabaseVersion
-      ? `NCBI Index Date: ${dbVersion} | `
-      : "";
+    if (!shouldIncludeDatabaseVersion) return "";
+    let dbVersion = get("version.alignment_db", currentRun);
+    if (workflowType === "amr") {
+      dbVersion = "CARD DB: 3.2.3";
+    }
+    return dbVersion ? `${dbVersion} | ` : "";
   };
 
   const getWorkflowVersionString = () => {
     if (!currentRun[versionKey]) return "";
 
     const workflowKey = findInWorkflows(workflowType, "value");
-    return `${WORKFLOWS[workflowKey].pipelineName} Pipeline v${currentRun[versionKey]}`;
+    // we special case abbreviate AMR because it's so long
+    const workflowName =
+      workflowType === "amr" ? "AMR" : WORKFLOWS[workflowKey].pipelineName;
+
+    return `${workflowName} Pipeline v${currentRun[versionKey]}`;
   };
 
   // construct the header
@@ -93,7 +96,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
         />
 
         <span className={cs.pipelineVersion}>
-          {`| ${getDatabaseVersionString()}${getLastProcessedString()}`}
+          {` | ${getDatabaseVersionString()}${getLastProcessedString()}`}
         </span>
       </>
     );
@@ -125,7 +128,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
               className={cs.pipelineVersionDropdown}
               trigger={
                 <span className={cs.pipelineVersionDropdown}>
-                  {`${getWorkflowVersionString()} `}
+                  {`${getWorkflowVersionString()}`}
                 </span>
               }
               options={options}
@@ -137,7 +140,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
         />
         <span
           className={cs.pipelineVersion}
-        >{`| ${getLastProcessedString()} `}</span>
+        >{` | ${getDatabaseVersionString()}${getLastProcessedString()}`}</span>
       </>
     );
   };
