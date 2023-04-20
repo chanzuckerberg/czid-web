@@ -43,25 +43,7 @@ const UserMenuDropDown = ({
       />,
     );
 
-    adminUser &&
-      userDropdownItems.push(
-        <BareDropdown.Item
-          key="user_settings"
-          text={
-            <a
-              className={cs.option}
-              href="/user_settings"
-              onClick={() =>
-                trackEvent("Header_dropdown-user-settings-option_clicked")
-              }
-            >
-              Settings
-            </a>
-          }
-        />,
-      );
-
-    adminUser &&
+    if (adminUser) {
       userDropdownItems.push(
         <BareDropdown.Item
           key="admin_settings"
@@ -77,7 +59,32 @@ const UserMenuDropDown = ({
             </a>
           }
         />,
+        <BareDropdown.Item
+          key="list_users"
+          text={
+            <a
+              className={cs.option}
+              href={`/users?search_by=${userName}`}
+              data-testid="list-users"
+            >
+              List Users
+            </a>
+          }
+        />,
+        <BareDropdown.Item
+          key="create_user"
+          text={
+            <a
+              className={cs.option}
+              href="/users/new"
+              data-testid="create-user"
+            >
+              Create User
+            </a>
+          }
+        />,
       );
+    }
 
     userDropdownItems.push(
       <BareDropdown.Item
@@ -107,22 +114,6 @@ const UserMenuDropDown = ({
         }
       />,
     );
-
-    adminUser &&
-      userDropdownItems.push(
-        <BareDropdown.Item
-          key="create_user"
-          text={
-            <a
-              className={cs.option}
-              href="/users/new"
-              data-testid="create-user"
-            >
-              Create User
-            </a>
-          }
-        />,
-      );
 
     userDropdownItems.push(
       <BareDropdown.Divider key="divider_one" />,

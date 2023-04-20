@@ -6,7 +6,12 @@ class UsersController < ApplicationController
   # GET /users
   # GET /users.json
   def index
-    @users = User.includes(:projects).all
+    @search_by = params["search_by"]
+    @users = if @search_by
+               User.where("name like ? OR email like ?", "%#{@search_by}%", "%#{@search_by}%").includes(:projects)
+             else
+               User.includes(:projects).all
+             end
   end
 
   # GET /users/new

@@ -2,6 +2,12 @@
   function confirmDeleteUser(user) {
     return confirm("Do you want to delete user " + user + "?");
   }
+
+  function search(event) {
+    if(event.key === "Enter") {
+      window.location = "/users?search_by=" + event.target.value;
+    }
+  }
 </script>
 <div id='user_create_page' style="height: calc(100vh - 60px); display: flex; flex-direction: column">
   <% if current_user && current_user.admin %>
@@ -14,6 +20,10 @@
       <p>
         <%= link_to 'New User', new_user_path %> |
         <%= link_to 'Front portal', root_path %>
+      </p>
+      <br/>
+      <p>
+        Search by name or email: <input type="text" value="<%= @search_by %>" onkeydown="search(event)">
       </p>
     </div>
     <div style="flex: 1 0 0; overflow: auto;">
