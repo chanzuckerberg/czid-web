@@ -104,6 +104,8 @@ class UploadSampleStep extends React.Component<
     basespaceAccessToken: null,
     basespaceSamples: [],
     basespaceSelectedSampleIds: new Set() as Set<string>,
+    bedFile: null,
+    refSeqFile: null,
     createProjectOpen: false,
     currentTab: LOCAL_UPLOAD as SampleUploadType,
     // enable all workflows on first load
@@ -571,6 +573,16 @@ class UploadSampleStep extends React.Component<
     }
 
     this.updateAllowedWorkflows(workflow, technology);
+  };
+
+  handleBedFileChanged = (newFile?: File) => {
+    this.props.onDirty();
+    this.setState({ bedFile: newFile });
+  };
+
+  handleRefSeqFileChanged = (newFile?: File) => {
+    this.props.onDirty();
+    this.setState({ refSeqFile: newFile });
   };
 
   handleWetlabProtocolChange = (selected: string) => {
@@ -1355,6 +1367,8 @@ class UploadSampleStep extends React.Component<
     const { admin, biohubS3UploadEnabled, pipelineVersions } = this.props;
     const { allowedFeatures } = this.context || {};
     const {
+      bedFile,
+      refSeqFile,
       currentTab,
       enabledWorkflows,
       selectedMedakaModel,
@@ -1380,7 +1394,7 @@ class UploadSampleStep extends React.Component<
       >
         <div className={cs.flexContent}>
           <div className={cs.projectSelect}>
-            <div className={cs.header} role="heading">
+            <div className={cs.header} role="heading" aria-level={2}>
               Select Project
             </div>
             <div className={cs.label}>Project</div>
@@ -1407,8 +1421,8 @@ class UploadSampleStep extends React.Component<
                 />
               </div>
             ) : (
-              <div
-                className={cs.createProjectButton}
+              <button
+                className={cx(cs.createProjectButton, "noStyleButton")}
                 onClick={withAnalytics(
                   this.openCreateProject,
                   "UploadSampleStep_create-project_opened",
@@ -1416,13 +1430,15 @@ class UploadSampleStep extends React.Component<
                 data-testid="create-project"
               >
                 + Create Project
-              </div>
+              </button>
             )}
           </div>
           <WorkflowSelector
             enabledWorkflows={enabledWorkflows}
+            onBedFileChanged={this.handleBedFileChanged}
             onClearLabsChange={this.handleClearLabsChange}
             onMedakaModelChange={this.handleMedakaModelChange}
+            onRefSeqFileChanged={this.handleRefSeqFileChanged}
             onGuppyBasecallerSettingChange={
               this.handleGuppyBasecallerSettingChange
             }
@@ -1431,6 +1447,8 @@ class UploadSampleStep extends React.Component<
             onWorkflowToggle={this.handleWorkflowToggle}
             currentTab={currentTab}
             projectPipelineVersions={pipelineVersions[selectedProject?.id]}
+            bedFileName={bedFile?.name}
+            refSeqFileName={refSeqFile?.name}
             selectedMedakaModel={selectedMedakaModel}
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
             selectedTechnology={selectedTechnology}

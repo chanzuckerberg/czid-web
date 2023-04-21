@@ -1,0 +1,15 @@
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.uploadedFileName {
+  @include font-body-xs;
+
+  background-color: $sds-color-gray-200;
+  height: 34px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 $sds-spaces-m;
+  align-items: center;
+  border-radius: $sds-corners-corner-m;
+}

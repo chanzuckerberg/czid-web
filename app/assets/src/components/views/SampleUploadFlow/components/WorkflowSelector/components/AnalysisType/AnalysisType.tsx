@@ -70,7 +70,8 @@ const AnalysisType = ({
       <div
         // re:role, typically, we would want an actual button, but this is a container that holds
         // buttons, and you can't have a button be a descendant of a button
-        role="button"
+        role="checkbox"
+        aria-checked={isSelected}
         className={cx(
           commonStyles.selectableOption,
           isSelected && commonStyles.selected,

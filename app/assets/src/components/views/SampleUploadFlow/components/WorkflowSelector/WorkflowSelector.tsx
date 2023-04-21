@@ -27,9 +27,13 @@ import { ViralConsensusGenomeSequencingPlatformOptions } from "./components/Vira
 import cs from "./workflow_selector.scss";
 
 interface WorkflowSelectorProps {
+  bedFileName: string;
+  refSeqFileName: string;
   enabledWorkflows: UploadWorkflows[];
+  onBedFileChanged(file?: File): void;
   onClearLabsChange?: (usedClearLabs: boolean) => void;
   onMedakaModelChange?: (selected: string) => void;
+  onRefSeqFileChanged(file?: File): void;
   onTechnologyToggle?: (
     workflow: UploadWorkflows,
     technology: SEQUENCING_TECHNOLOGY_OPTIONS,
@@ -69,9 +73,13 @@ export const shouldDisableSequencingPlatformOption = (
 };
 
 const WorkflowSelector = ({
+  bedFileName,
+  refSeqFileName,
   enabledWorkflows,
+  onBedFileChanged,
   onClearLabsChange,
   onMedakaModelChange,
+  onRefSeqFileChanged,
   onTechnologyToggle,
   onGuppyBasecallerSettingChange,
   onWetlabProtocolChange,
@@ -184,7 +192,12 @@ const WorkflowSelector = ({
           sdsIcon={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.icon}
           title={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.label}
           sequencingPlatformOptions={
-            <ViralConsensusGenomeSequencingPlatformOptions />
+            <ViralConsensusGenomeSequencingPlatformOptions
+              bedFileName={bedFileName}
+              refSeqFileName={refSeqFileName}
+              onBedFileChanged={onBedFileChanged}
+              onRefSeqFileChanged={onRefSeqFileChanged}
+            />
           }
         />
       )}

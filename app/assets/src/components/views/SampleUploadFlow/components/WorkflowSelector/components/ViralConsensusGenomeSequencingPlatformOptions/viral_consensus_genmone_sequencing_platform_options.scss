@@ -1,0 +1,7 @@
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.optional {
+  @include font-header-xxs;
+  color: $sds-color-gray-500;
+}

@@ -24,12 +24,14 @@ export interface UploadSampleStepState {
   basespaceAccessToken: $TSFixMe;
   basespaceSamples: $TSFixMe[];
   basespaceSelectedSampleIds: Set<string>;
+  bedFile: File;
   createProjectOpen: boolean;
   currentTab: SampleUploadType;
   enabledWorkflows: UploadWorkflows[];
   localSamples: $TSFixMe[];
   localSelectedSampleIds: Set<string>;
   projects: $TSFixMe[];
+  refSeqFile: File;
   remoteSamples: $TSFixMe[];
   remoteSelectedSampleIds: Set<string>;
   removedLocalFiles: $TSFixMe[];

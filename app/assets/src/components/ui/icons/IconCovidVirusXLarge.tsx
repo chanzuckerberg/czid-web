@@ -1,9 +1,10 @@
+import cx from "classnames";
 import React from "react";
 
 const IconCovidVirusXLarge = ({ className }: { className: string }) => {
   return (
     <svg
-      className={className}
+      className={cx(className)}
       width="32"
       height="32"
       viewBox="0 0 32 32"
