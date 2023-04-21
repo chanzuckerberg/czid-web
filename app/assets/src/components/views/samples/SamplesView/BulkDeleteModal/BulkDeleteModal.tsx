@@ -98,6 +98,7 @@ const BulkDeleteModal = ({
         workflow,
       });
       if (error) {
+        console.error(error);
         onDeleteError({ errorCount: validIds.length });
       } else {
         onDeleteSuccess({ successCount: validIds.length });

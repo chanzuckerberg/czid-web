@@ -82,8 +82,8 @@ export const PrimaryHeaderControls = ({
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
   const sampleDeletable = sample?.sample_deletable;
 
-  const readyToInteract = workflow => {
-    if (!isMngsWorkflow(workflow) && succeeded) {
+  const readyToInteract = (workflow: WORKFLOW_VALUES) => {
+    if (!isMngsWorkflow(workflow) && currentRun) {
       return true;
     } else if (isMngsWorkflow(workflow) && runIsLoaded) {
       return true;
