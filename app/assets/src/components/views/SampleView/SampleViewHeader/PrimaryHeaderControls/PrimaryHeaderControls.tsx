@@ -35,7 +35,8 @@ import {
 } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import { TABS } from "../../constants";
-import { DownloadDropdown } from "./DownloadDropdown";
+import { AmrDownloadDropdown } from "./AmrDownloadDropdown";
+import { MngsDownloadDropdown } from "./MngsDownloadDropdown";
 import { OverflowMenu } from "./OverflowMenu";
 import cs from "./primary_header_controls.scss";
 import { ShareButtonPopUp } from "./ShareButtonPopUp";
@@ -178,7 +179,11 @@ export const PrimaryHeaderControls = ({
       case WORKFLOWS.CONSENSUS_GENOME.value:
       case WORKFLOWS.AMR.value:
         if (succeeded) {
-          return renderDownloadAll(workflow);
+          if (allowedFeatures.includes(AMR_V2_FEATURE)) {
+            return renderDownloadDropdown();
+          } else {
+            return renderDownloadAll(workflow);
+          }
         } else if (
           editable &&
           sampleDeletable &&
@@ -192,22 +197,45 @@ export const PrimaryHeaderControls = ({
   };
 
   const renderDownloadDropdown = () => {
-    return (
-      runIsLoaded && (
-        <DownloadDropdown
-          className={cs.controlElement}
-          backgroundId={backgroundId}
-          currentTab={currentTab}
-          getDownloadReportTableWithAppliedFiltersLink={
-            getDownloadReportTableWithAppliedFiltersLink
-          }
-          hasAppliedFilters={hasAppliedFilters}
-          pipelineRun={currentRun as PipelineRun}
-          sample={sample}
-          view={view}
-        />
-      )
-    );
+    switch (workflow) {
+      case WORKFLOWS.SHORT_READ_MNGS.value: {
+        return (
+          runIsLoaded && (
+            <MngsDownloadDropdown
+              className={cs.controlElement}
+              backgroundId={backgroundId}
+              currentTab={currentTab}
+              getDownloadReportTableWithAppliedFiltersLink={
+                getDownloadReportTableWithAppliedFiltersLink
+              }
+              hasAppliedFilters={hasAppliedFilters}
+              pipelineRun={currentRun as PipelineRun}
+              sample={sample}
+              view={view}
+            />
+          )
+        );
+      }
+
+      case WORKFLOWS.AMR.value: {
+        return (
+          runIsLoaded && (
+            <AmrDownloadDropdown
+              className={cs.controlElement}
+              backgroundId={backgroundId}
+              currentTab={currentTab}
+              getDownloadReportTableWithAppliedFiltersLink={
+                getDownloadReportTableWithAppliedFiltersLink
+              }
+              hasAppliedFilters={hasAppliedFilters}
+              workflowRun={currentRun as WorkflowRun}
+              sample={sample}
+              view={view}
+            />
+          )
+        );
+      }
+    }
   };
 
   const renderHelpButton = () => {

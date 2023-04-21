@@ -17,7 +17,7 @@ import { PipelineRun } from "~/interface/shared";
 import Notification from "~ui/notifications/Notification";
 import { TABS } from "../../../constants";
 
-interface DownloadDropdownProps {
+interface MngsDownloadDropdownProps {
   backgroundId?: number;
   className?: string;
   currentTab?: string;
@@ -28,7 +28,7 @@ interface DownloadDropdownProps {
   view?: string;
 }
 
-const DownloadDropdown = ({
+const MngsDownloadDropdown = ({
   backgroundId,
   className,
   currentTab,
@@ -37,7 +37,7 @@ const DownloadDropdown = ({
   pipelineRun,
   sample,
   view,
-}: DownloadDropdownProps) => {
+}: MngsDownloadDropdownProps) => {
   const downloadCSV = () => {
     const resParams = {
       ...(backgroundId && { background_id: backgroundId }),
@@ -160,4 +160,4 @@ const DownloadDropdown = ({
   );
 };
 
-export default DownloadDropdown;
+export default MngsDownloadDropdown;

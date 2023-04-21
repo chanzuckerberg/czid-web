@@ -1,4 +1,4 @@
-class AmrWorkflowRun < WorkflowRun
+﻿class AmrWorkflowRun < WorkflowRun
   # Model Notes:
   #
   # Where is the schema for this model?
@@ -21,6 +21,7 @@ class AmrWorkflowRun < WorkflowRun
   OUTPUT_READS_BAI = "amr.RunRgiBwtKma.output_sorted_length_100_bai".freeze
   OUTPUT_CONTIGS_BAM = "amr.tsvToSam.output_sorted".freeze
   OUTPUT_CONTIGS_BAI = "amr.tsvToSam.output_sorted_bai".freeze
+  OUTPUT_COMPREHENSIVE_AMR_METRICS_TSV = "amr.RunResultsPerSample.final_summary".freeze
 
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).

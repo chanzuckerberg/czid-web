@@ -1,8 +1,9 @@
 class WorkflowRunsController < ApplicationController
   include SamplesHelper
   include ParameterSanitization
+  include PipelineOutputsHelper
 
-  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link]
+  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :comprehensive_amr_metrics_tsv]
   before_action :admin_required, only: [:rerun]
 
   MAX_PAGE_SIZE = 100
@@ -254,6 +255,22 @@ class WorkflowRunsController < ApplicationController
       json: { status: message },
       status: :internal_server_error
     )
+  end
+
+  # AMR outputs
+  def comprehensive_amr_metrics_tsv
+    s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_COMPREHENSIVE_AMR_METRICS_TSV)
+    sample_name = @workflow_run.sample.name
+    presigned_url = get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_#{@workflow_run.id}_comprehensive_amr_metrics.tsv")
+
+    if presigned_url
+      redirect_to presigned_url
+    else
+      render(
+        json: { status: "Output not available" },
+        status: :not_found
+      )
+    end
   end
 
   private

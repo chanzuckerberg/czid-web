@@ -284,7 +284,7 @@ Rails.application.routes.draw do
     member do
       get :results
       get :zip_link
-
+      get :comprehensive_amr_metrics_tsv
       put :rerun
     end
 
