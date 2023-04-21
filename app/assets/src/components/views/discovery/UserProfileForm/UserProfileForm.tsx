@@ -1,6 +1,7 @@
 import { Button, Link } from "czifui";
 import { isEmpty } from "lodash";
 import React, { useContext, useEffect, useState } from "react";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import {
   postToAirtable as airtablePost,
   updateUserData as userUpdater,
@@ -121,7 +122,13 @@ export function UserProfileForm() {
           <Button
             sdsType="primary"
             sdsStyle="rounded"
-            onClick={handleFormSubmit}
+            onClick={withAnalytics(
+              handleFormSubmit,
+              ANALYTICS_EVENT_NAMES.USER_PROFILE_FORM_COMPLETE_SETUP_CLICKED,
+              {
+                userId: currentUser.userId,
+              },
+            )}
             disabled={isSubmitDisabled}
           >
             Complete Setup

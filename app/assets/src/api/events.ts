@@ -580,6 +580,21 @@ function EventDictionary() {
   /** The user has clicked the Bulk Kickoff AMR Trigger on the SamplesView */
   this.SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED =
     "SAMPLES_VIEW_BULK_KICKOFF_AMR_WORKFLOW_TRIGGER_CLICKED";
+
+  /** The user has clicked the "Register Now" button on the LandingPage */
+  this.LANDING_PAGE_REGISTER_NOW_BUTTON_CLICKED =
+    "LANDING_PAGE_REGISTER_NOW_BUTTON_CLICKED";
+
+  /** The user has signed in for the first time */
+  this.DISCOVERY_VIEW_ROUTER_USER_FIRST_SIGN_IN =
+    "DISCOVERY_VIEW_ROUTER_USER_FIRST_SIGN_IN";
+
+  /** The user has clicked the "Complete Setup" button on the UserProfileForm */
+  this.USER_PROFILE_FORM_COMPLETE_SETUP_CLICKED =
+    "USER_PROFILE_FORM_COMPLETE_SETUP_CLICKED";
+
+  /** The welcome modal was shown to a first time user on the DiscoveryView */
+  this.MODAL_FIRST_TIME_USER_SHOWN = "MODAL_FIRST_TIME_USER_SHOWN";
 }
 
 const eventNames = new EventDictionary();

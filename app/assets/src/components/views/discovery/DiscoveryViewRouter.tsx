@@ -8,6 +8,7 @@
 
 import React, { useContext } from "react";
 import { Route, Switch, useHistory } from "react-router-dom";
+import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import UserProfileForm from "~/components/views/discovery/UserProfileForm";
@@ -48,7 +49,8 @@ const DiscoveryViewRouter = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
-  const { userSignedIn, profileCompleted } = useContext(UserContext);
+  const { firstSignIn, userSignedIn, userId, profileCompleted } =
+    useContext(UserContext);
   const history = useHistory();
 
   // New users must first submit a profile form in order to access CZ ID
@@ -57,6 +59,12 @@ const DiscoveryViewRouter = ({
 
   if (shouldShowUserProfileForm) {
     history.push("/user_profile_form");
+  }
+
+  if (firstSignIn) {
+    trackEvent(ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_ROUTER_USER_FIRST_SIGN_IN, {
+      userId: userId,
+    });
   }
 
   return (

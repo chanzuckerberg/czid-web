@@ -1,5 +1,10 @@
-import React from "react";
-import { withAnalytics } from "~/api/analytics";
+import React, { useContext, useEffect } from "react";
+import {
+  ANALYTICS_EVENT_NAMES,
+  trackEvent,
+  withAnalytics,
+} from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import Modal from "~ui/containers/Modal";
 import Link from "~ui/controls/Link";
 import BacteriaCultureIcon from "~ui/icons/BacteriaCultureIcon";
@@ -11,6 +16,14 @@ interface ModalFirstTimeUserProps {
 }
 
 const ModalFirstTimeUser = ({ onClose }: ModalFirstTimeUserProps) => {
+  const { userId } = useContext(UserContext);
+
+  useEffect(() => {
+    trackEvent(ANALYTICS_EVENT_NAMES.MODAL_FIRST_TIME_USER_SHOWN, {
+      userId: userId,
+    });
+  }, []);
+
   return (
     <Modal
       open
