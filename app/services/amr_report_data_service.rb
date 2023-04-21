@@ -31,6 +31,8 @@ class AmrReportDataService
         "read_coverage_breadth" => row["read_coverage_breadth"],
         "read_coverage_depth" => row["read_coverage_depth"],
         "dpm" => @workflow_run.dpm(row["read_coverage_depth"].to_f),
+        "read_species" => row["read_species"],
+        "contig_species" => row["contig_species"],
       }
 
       report_data << report_row

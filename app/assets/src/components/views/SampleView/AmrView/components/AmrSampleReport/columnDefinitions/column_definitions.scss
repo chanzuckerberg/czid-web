@@ -24,6 +24,17 @@
   }
 }
 
+.headerWithTagContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.tag {
+  margin-right: 0px;
+  margin-left: $sds-spaces-xs;
+  margin-bottom: 0px;
+}
+
 .groupedHeader {
   align-items: center;
   background-color: $sds-color-gray-100;

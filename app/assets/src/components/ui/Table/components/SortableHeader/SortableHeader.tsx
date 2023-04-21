@@ -9,7 +9,7 @@ import cs from "./sortable_header.scss";
 interface SortableProps {
   className?: string;
   header: Header<any, any>;
-  children: ReactNode & string;
+  children: ReactNode | string;
   tooltipStrings?: TooltipTextType;
   style?: CSSProperties;
 }

@@ -22,7 +22,9 @@ import {
   readsPerMillionColumn,
 } from "./columnDefinitions";
 import { getContigsColumnGroup } from "./columnDefinitions/contigsColumnGroup";
+import { contigSpeciesColumn } from "./columnDefinitions/contigSpecies";
 import { getGeneInfoColumnGroup } from "./columnDefinitions/geneInfoColumnGroup";
+import { readSpeciesColumn } from "./columnDefinitions/readSpecies";
 import { StyledTableRow } from "./components/StyledTableRow";
 import { AmrResult } from "./types";
 
@@ -60,6 +62,7 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
         contigsColumn,
         contigPercentCoverageColumn,
         contigPercentIdColumn,
+        contigSpeciesColumn,
       ]),
       getReadsColumnGroup([
         readsColumn,
@@ -67,6 +70,7 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
         readPercentCoverageColumn,
         readCoverageDepthColumn,
         readDepthPerMillionColumn,
+        readSpeciesColumn,
       ]),
     ],
     [reportTableData],
