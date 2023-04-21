@@ -22,8 +22,8 @@ test.describe("Bulk Downloads View tests", () => {
     await expect(page.getByTestId("details-sidebar")).toBeVisible();
 
     // check that there are two sections in the first tab
-    await expect(page.locator("bulk-download-details")).toBeVisible();
-    await expect(page.locator("bulk-download-runs")).toBeVisible();
+    await expect(page.getByTestId("bulk-download-details")).toBeVisible();
+    await expect(page.getByTestId("bulk-download-runs")).toBeVisible();
 
     // select the second tab
     await page.getByTestId("advanced-download").click();

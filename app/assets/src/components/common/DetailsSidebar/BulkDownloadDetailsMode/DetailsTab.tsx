@@ -51,7 +51,7 @@ const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
         header={<div className={cs.header}>Details</div>}
         bottomContentPadding
         open
-        data-test-id="bulk-download-details"
+        data-testid="bulk-download-details"
       >
         {bulkDownload.description && (
           <div className={cs.description}>{bulkDownload.description}</div>
@@ -63,7 +63,7 @@ const DetailsTab = ({ bulkDownload, downloadType }: DetailsTabProps) => {
           className={cs.accordion}
           header={<div className={cs.header}>Samples in this Download</div>}
           bottomContentPadding
-          data-test-id="bulk-download-runs"
+          data-testid="bulk-download-runs"
         >
           <div className={cs.samplesList}>
             {allRuns.map(run => (

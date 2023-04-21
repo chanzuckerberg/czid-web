@@ -54,7 +54,7 @@ test.describe("Taxon Sidebar on Sample Report", () => {
     );
 
     // parent description should be visible
-    const parentDescription = page.locator(descriptionText).nth(1);
+    const parentDescription = page.getByTestId(descriptionText).nth(1);
     await expect(parentDescription).toContainText(
       "Klebsiella is a genus of nonmotile, Gram-negative, oxidase-negative, rod-shaped bacteria with a prominent polysaccharide-based capsule.",
     );

@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
 
 const baseUrl = (process.env.BASEURL as string) || "";
-const sampleId = "25655";
+const sampleId = "25609";
 const url = `samples/${sampleId}/pipeline_viz/7.1`;
 
 // Note (04/12/2023): These tests currently verify the Pipeline Viz Sidebar UI elements
