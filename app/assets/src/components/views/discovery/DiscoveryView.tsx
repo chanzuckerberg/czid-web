@@ -695,8 +695,9 @@ class DiscoveryView extends React.Component<
   };
 
   isFirstTimeUser = () => {
-    const { firstSignIn } = this.context || {};
-    return firstSignIn && !localStorage.getItem("DiscoveryViewSeenBefore");
+    // we can tell if a user is new to the platform if they have just completed the profile form
+    const queryParams = new URLSearchParams(window.location.search);
+    return queryParams.get("profile_form_submitted");
   };
 
   preparedFilters = () => {
@@ -1925,7 +1926,6 @@ class DiscoveryView extends React.Component<
     if (!userDataCounts) return null;
 
     if (emptyStateModalOpen) {
-      localStorage.setItem("DiscoveryViewSeenBefore", "1");
       return (
         <ModalFirstTimeUser onClose={this.handleModalFirstTimeUserClose} />
       );

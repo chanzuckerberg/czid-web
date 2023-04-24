@@ -1,13 +1,8 @@
 @import "~czifui/dist/variables";
 
 .parentContainer {
-  display: flex;
-  justify-content: center;
-  padding: $sds-spaces-xxl;
-  margin-left: 40px;
-  margin-right: 40px;
-  max-width: 600px;
-  width: 100%;
+  margin-top: 90px;
+  margin-bottom: 90px;
 }
 
 .submitButton {

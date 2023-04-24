@@ -4,6 +4,7 @@
   <%= javascript_tag do %>
     react_component(
       'DiscoveryViewRouter', {
+        domain: "my_data",
         autoAcctCreationEnabled: <%= @auto_account_creation_enabled %>,
       }, 'page_content', JSON.parse('<%= raw escape_json(user_context)%>')
     );

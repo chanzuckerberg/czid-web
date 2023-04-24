@@ -1,13 +1,15 @@
 import { Button, Link } from "czifui";
 import { isEmpty } from "lodash";
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
 import {
   postToAirtable as airtablePost,
   updateUserData as userUpdater,
 } from "~/api/user";
 import { UserContext } from "~/components/common/UserContext";
-import { openUrl } from "~/components/utils/links";
+import { NarrowContainer } from "~/components/layout";
+import { DISCOVERY_DOMAIN_MY_DATA } from "../discovery_api";
 import CountryFormField from "./components/CountryFormField";
 import CZIDReferralFormField from "./components/CZIDReferralFormField";
 import CZIDUsecaseFormField from "./components/CZIDUsecaseFormField";
@@ -19,6 +21,7 @@ import cs from "./user_profile_form.scss";
 
 export function UserProfileForm() {
   const currentUser = useContext(UserContext);
+  const history = useHistory();
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [selectedUsecaseCheckboxes, setSelectedUsecaseCheckboxes] = useState<
@@ -77,21 +80,20 @@ export function UserProfileForm() {
       czidUsecases: selectedUsecaseCheckboxes,
       referralSource: selectedReferralCheckboxes,
       expertiseLevel: selectedSequencingExpertise,
-      signUpPath: `POST /user/${currentUser.userId}/post_user_data_to_airtable`,
     });
   }
 
   async function handleFormSubmit() {
     try {
       await Promise.all([updateUser(), postToAirtable()]);
-      openUrl("/");
+      history.push(`/${DISCOVERY_DOMAIN_MY_DATA}?profile_form_submitted=true`);
     } catch (err) {
       alert("post failed: " + err.message);
     }
   }
 
   return (
-    <div className={cs.parentContainer}>
+    <NarrowContainer className={cs.parentContainer} size="small">
       <form>
         <div className={cs.formTitle}>Finish Setting Up Your Account</div>
         <div className={cs.formSubtitle}>
@@ -146,6 +148,6 @@ export function UserProfileForm() {
           </Link>
         </div>
       </form>
-    </div>
+    </NarrowContainer>
   );
 }
