@@ -23,6 +23,8 @@
     overflow: hidden;
     // the headers above are 135px tall
     height: calc(100vh - 135px);
+    display: flex;
+    justify-content: left;
   }
 
   .newHeatmapContainerFiltersOpen {
@@ -35,6 +37,7 @@
     overflow: auto;
     margin-left: $sds-spaces-l;
     margin-top: $sds-spaces-l;
+    width: calc(100% - 228px);
 
     svg {
       display: block;
@@ -45,11 +48,12 @@
   .newHeatmapContainerFiltersClosed {
     position: relative;
     // the legend and 'showing x our of x taxa' text are 60px tall
-    top: 60px;
+    top: 45px;
     height: calc(100% - 65px);
     overflow: auto;
     margin-left: $sds-spaces-l;
     margin-top: $sds-spaces-l;
+    width: calc(100% - 14px);
 
     svg {
       display: block;
