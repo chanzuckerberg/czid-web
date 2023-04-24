@@ -4,6 +4,7 @@ import { SortableHeader } from "~/components/ui/Table/components/SortableHeader"
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { AmrResult } from "../types";
 import { getDefaultCell } from "./components/DefaultCell";
+import { MODEL_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const modelColumn: ColumnDef<AmrResult, any> = {
   id: "model",
@@ -12,7 +13,11 @@ export const modelColumn: ColumnDef<AmrResult, any> = {
   maxSize: 200,
   header: function modelHeader({ header, column }) {
     return (
-      <SortableHeader header={header} style={generateWidthStyles(column)}>
+      <SortableHeader
+        header={header}
+        style={generateWidthStyles(column)}
+        tooltipStrings={MODEL_COLUMN_TOOLTIP_STRINGS}
+      >
         Model
       </SortableHeader>
     );

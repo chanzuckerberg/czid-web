@@ -4,6 +4,7 @@ import { SortableHeader } from "~/components/ui/Table/components/SortableHeader"
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { AmrResult } from "../types";
 import { getDefaultCell } from "./components/DefaultCell";
+import { GENE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const geneColumn: ColumnDef<AmrResult, any> = {
   id: "gene",
@@ -12,7 +13,11 @@ export const geneColumn: ColumnDef<AmrResult, any> = {
   maxSize: 120,
   header: function geneHeader({ header, column }) {
     return (
-      <SortableHeader header={header} style={generateWidthStyles(column)}>
+      <SortableHeader
+        header={header}
+        style={generateWidthStyles(column)}
+        tooltipStrings={GENE_COLUMN_TOOLTIP_STRINGS}
+      >
         Gene
       </SortableHeader>
     );

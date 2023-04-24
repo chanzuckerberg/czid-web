@@ -7,6 +7,7 @@ import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
 import cs from "./column_definitions.scss";
 import { Align, getDefaultCell } from "./components/DefaultCell";
+import { READS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const readPercentCoverageColumn: ColumnDef<AmrResult, any> = {
   id: "read-percent-coverage",
@@ -18,6 +19,7 @@ export const readPercentCoverageColumn: ColumnDef<AmrResult, any> = {
         className={cx(cs.rightAlignedHeader, rowStyles.readsColumnGroup)}
         header={header}
         style={generateWidthStyles(column)}
+        tooltipStrings={READS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS}
       >
         %Cov
       </SortableHeader>

@@ -9,6 +9,7 @@ import { memo } from "~/components/utils/memo";
 import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
 import cs from "./column_definitions.scss";
+import { CONTIGS_PERCENT_IDENTITY_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const contigPercentIdColumn: ColumnDef<AmrResult, any> = {
   id: "contig-percent-id",
@@ -20,6 +21,7 @@ export const contigPercentIdColumn: ColumnDef<AmrResult, any> = {
         className={cx(cs.rightAlignedHeader, rowStyles.contigsColumnGroup)}
         header={header}
         style={generateWidthStyles(column)}
+        tooltipStrings={CONTIGS_PERCENT_IDENTITY_COLUMN_TOOLTIP_STRINGS}
       >
         %Id
       </SortableHeader>
