@@ -1,4 +1,4 @@
-import { Button, Link } from "czifui";
+import { Button, Link, Tooltip } from "czifui";
 import { isEmpty } from "lodash";
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
@@ -16,7 +16,10 @@ import CZIDUsecaseFormField from "./components/CZIDUsecaseFormField";
 import InstitutionFormField from "./components/InstitutionFormField";
 import NameField from "./components/NameField";
 import SequencingExpertiseFormField from "./components/SequencingExpertiseFormField";
-import { USER_PROFILE_FORM_VERSION } from "./constants";
+import {
+  SUBMIT_BUTTON_DISABLED_TOOLTIP_TEXT,
+  USER_PROFILE_FORM_VERSION,
+} from "./constants";
 import cs from "./user_profile_form.scss";
 
 export function UserProfileForm() {
@@ -92,6 +95,39 @@ export function UserProfileForm() {
     }
   }
 
+  const submitButton = () => {
+    const button = (
+      <Button
+        sdsType="primary"
+        sdsStyle="rounded"
+        onClick={withAnalytics(
+          handleFormSubmit,
+          ANALYTICS_EVENT_NAMES.USER_PROFILE_FORM_COMPLETE_SETUP_CLICKED,
+          {
+            userId: currentUser.userId,
+          },
+        )}
+        disabled={isSubmitDisabled}
+      >
+        Complete Setup
+      </Button>
+    );
+
+    if (isSubmitDisabled) {
+      return (
+        <Tooltip
+          arrow
+          placement="top"
+          title={SUBMIT_BUTTON_DISABLED_TOOLTIP_TEXT}
+        >
+          <span>{button}</span>
+        </Tooltip>
+      );
+    }
+
+    return button;
+  };
+
   return (
     <NarrowContainer className={cs.parentContainer} size="small">
       <form>
@@ -120,22 +156,7 @@ export function UserProfileForm() {
           selectedReferralCheckboxes={selectedReferralCheckboxes}
           setSelectedReferralCheckboxes={setSelectedReferralCheckboxes}
         />
-        <div className={cs["submit-button"]}>
-          <Button
-            sdsType="primary"
-            sdsStyle="rounded"
-            onClick={withAnalytics(
-              handleFormSubmit,
-              ANALYTICS_EVENT_NAMES.USER_PROFILE_FORM_COMPLETE_SETUP_CLICKED,
-              {
-                userId: currentUser.userId,
-              },
-            )}
-            disabled={isSubmitDisabled}
-          >
-            Complete Setup
-          </Button>
-        </div>
+        <div className={cs["submit-button"]}>{submitButton()}</div>
         <div className={cs.linkContainer}>
           You can view our Privacy Policy{" "}
           <Link

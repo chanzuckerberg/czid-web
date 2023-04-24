@@ -1,16 +1,19 @@
-import { InputCheckbox } from "czifui";
+import { InputCheckbox, Tooltip } from "czifui";
 import React from "react";
+import { CHECKBOX_SELECTION_DISABLED_TOOLTIP_TEXT } from "../../constants";
 import cs from "./checkbox.scss";
 
 interface CheckboxProps {
   checkBoxValue: string;
   selectedCheckboxes: string[];
+  isSelectionDisabled?: boolean;
   handleCheckboxChange: (checkBoxValue: string) => void;
 }
 
 export function Checkbox({
   checkBoxValue,
   selectedCheckboxes,
+  isSelectionDisabled = false,
   handleCheckboxChange,
 }: CheckboxProps) {
   // add keyboard support for checkboxes
@@ -24,6 +27,24 @@ export function Checkbox({
     ? "checked"
     : "unchecked";
 
+  const checkBox = () => {
+    const inputCheckbox = <InputCheckbox stage={isChecked} />;
+
+    if (isSelectionDisabled && isChecked === "unchecked") {
+      return (
+        <Tooltip
+          arrow
+          placement="top"
+          title={CHECKBOX_SELECTION_DISABLED_TOOLTIP_TEXT}
+        >
+          <span>{inputCheckbox}</span>
+        </Tooltip>
+      );
+    }
+
+    return inputCheckbox;
+  };
+
   return (
     <div
       className={cs.checkbox}
@@ -33,7 +54,7 @@ export function Checkbox({
       onClick={() => handleCheckboxChange(checkBoxValue)}
       onKeyDown={handleKeyDown}
     >
-      <InputCheckbox stage={isChecked} />
+      {checkBox()}
       {checkBoxValue}
     </div>
   );

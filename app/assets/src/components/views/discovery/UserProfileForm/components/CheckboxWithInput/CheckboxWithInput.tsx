@@ -1,21 +1,22 @@
-import { InputCheckbox, InputText } from "czifui";
+import { InputCheckbox, InputText, Tooltip } from "czifui";
 import React, { useState } from "react";
+import { CHECKBOX_SELECTION_DISABLED_TOOLTIP_TEXT } from "../../constants";
 import cs from "./checkbox_with_input.scss";
 
 type CheckboxWithInputProps = {
   selectedCheckboxes: string[];
   setSelectedCheckboxes: (values: string[]) => void;
+  isSelectionDisabled?: boolean;
   isCheckboxChecked: boolean;
   prefix: string;
-  maxSelections?: number;
 };
 
 export function CheckboxWithInput({
   selectedCheckboxes,
   setSelectedCheckboxes,
+  isSelectionDisabled = false,
   isCheckboxChecked,
   prefix,
-  maxSelections,
 }: CheckboxWithInputProps) {
   const [inputValue, setInputValue] = useState<string>("");
 
@@ -28,11 +29,7 @@ export function CheckboxWithInput({
       setSelectedCheckboxes(newSelectedReferralCheckboxes);
       setInputValue("");
     } else {
-      if (maxSelections) {
-        if (selectedCheckboxes.length < maxSelections) {
-          setSelectedCheckboxes([...selectedCheckboxes, `${prefix}: `]);
-        }
-      } else {
+      if (!isSelectionDisabled) {
         setSelectedCheckboxes([...selectedCheckboxes, `${prefix}: `]);
       }
     }
@@ -44,15 +41,9 @@ export function CheckboxWithInput({
     const newSelectedCheckboxes = selectedCheckboxes.filter(
       item => !item.includes(prefix),
     );
-    if (maxSelections) {
-      if (newSelectedCheckboxes.length < maxSelections) {
-        newSelectedCheckboxes.push(`${prefix}: ${event.target.value}`);
-        setInputValue(event.target.value);
-        setSelectedCheckboxes(newSelectedCheckboxes);
-      } else {
-        // don't allow user to input text if max selections reached
-        setInputValue("");
-      }
+    if (isSelectionDisabled && !isCheckboxChecked) {
+      // don't allow user to input text if max selections reached
+      setInputValue("");
     } else {
       newSelectedCheckboxes.push(`${prefix}: ${event.target.value}`);
       setInputValue(event.target.value);
@@ -60,14 +51,34 @@ export function CheckboxWithInput({
     }
   }
 
-  return (
-    <div className={cs.otherCheckboxSection}>
+  const checkbox = () => {
+    const inputCheckbox = (
       <InputCheckbox
         stage={isCheckboxChecked ? "checked" : "unchecked"}
         label="Checkbox with input"
         id="checkbox-w-input"
         onClick={handleOtherCheckboxChange}
       />
+    );
+
+    if (isSelectionDisabled && !isCheckboxChecked) {
+      return (
+        <Tooltip
+          arrow
+          placement="top"
+          title={CHECKBOX_SELECTION_DISABLED_TOOLTIP_TEXT}
+        >
+          <span>{inputCheckbox}</span>
+        </Tooltip>
+      );
+    }
+
+    return inputCheckbox;
+  };
+
+  return (
+    <div className={cs.otherCheckboxSection}>
+      {checkbox()}
       <div className={cs.otherLabel}>{prefix}</div>
       <InputText
         className={cs.otherInput}

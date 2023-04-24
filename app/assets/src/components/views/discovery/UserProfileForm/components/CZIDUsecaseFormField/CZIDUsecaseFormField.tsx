@@ -58,6 +58,9 @@ export function CZIDUsecaseFormField({
           <Checkbox
             key={option}
             checkBoxValue={option}
+            isSelectionDisabled={
+              selectedUsecaseCheckboxes.length >= MAX_SELECTIONS
+            }
             selectedCheckboxes={selectedUsecaseCheckboxes}
             handleCheckboxChange={handleCheckboxChange}
           />
@@ -65,9 +68,11 @@ export function CZIDUsecaseFormField({
         <CheckboxWithInput
           selectedCheckboxes={selectedUsecaseCheckboxes}
           setSelectedCheckboxes={setSelectedUsecaseCheckboxes}
+          isSelectionDisabled={
+            selectedUsecaseCheckboxes.length >= MAX_SELECTIONS
+          }
           isCheckboxChecked={isOtherCheckboxChecked}
           prefix={CHECKBOX_WITH_INPUT_PREFIX}
-          maxSelections={MAX_SELECTIONS}
         />
       </div>
     </div>
