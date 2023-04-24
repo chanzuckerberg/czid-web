@@ -144,7 +144,6 @@ interface userPostAirtableData {
   country: string;
   worldBankIncome: string;
   expertiseLevel: string;
-  signUpPath?: string;
   czidUsecases: string[];
   referralSource: string[];
 }
@@ -158,7 +157,6 @@ interface userPostAirtableDataAPI {
   country?: string;
   world_bank_income?: string;
   expertise_level: string;
-  signup_path: string;
   czid_usecase: string[];
   referral_source: string[];
 }
@@ -173,7 +171,6 @@ const postToAirtable = ({
   country,
   worldBankIncome,
   expertiseLevel,
-  signUpPath,
   czidUsecases,
   referralSource,
 }: userPostAirtableData) => {
@@ -186,7 +183,6 @@ const postToAirtable = ({
     country: country,
     world_bank_income: worldBankIncome,
     expertise_level: expertiseLevel,
-    signup_path: signUpPath,
     czid_usecase: czidUsecases,
     referral_source: referralSource,
   };

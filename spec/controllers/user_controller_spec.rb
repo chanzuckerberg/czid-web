@@ -150,7 +150,6 @@ RSpec.describe UsersController, type: :request do
           czid_usecase: ["medical detective"],
           expertise_level: "expert",
           referral_source: ["conference"],
-          signup_path: "landing page",
         }
 
         # Params for UsersController#update endpoint

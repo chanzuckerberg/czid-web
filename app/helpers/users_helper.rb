@@ -24,7 +24,6 @@ module UsersHelper
         czid_usecase: params[:czid_usecase] || [],
         expertise_level: params[:expertise_level] || "",
         referral_source: params[:referral_source] || [],
-        signup_path: params[:signup_path] || "",
       },
       typecast: true, # enables us to send new options for multiselect fields (e.g. "Other: <free text>" for Referral Source)
     }
