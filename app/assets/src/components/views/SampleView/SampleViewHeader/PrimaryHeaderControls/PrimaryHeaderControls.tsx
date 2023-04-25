@@ -8,6 +8,7 @@ import {
 } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import {
+  SAMPLE_VIEW_HEADER_AMR_HELP_SIDEBAR,
   SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
   SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
   showAppcue,
@@ -234,7 +235,6 @@ export const PrimaryHeaderControls = ({
         size(sample?.workflow_runs) === 1);
 
     if (
-      workflow === WORKFLOWS.AMR.value ||
       workflow === WORKFLOWS.LONG_READ_MNGS.value ||
       (workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
         shouldHideConsensusGenomeHelpButton)
@@ -246,6 +246,7 @@ export const PrimaryHeaderControls = ({
     const appCueFlowId = {
       [WORKFLOWS.SHORT_READ_MNGS.value]: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
       [WORKFLOWS.CONSENSUS_GENOME.value]: SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
+      [WORKFLOWS.AMR.value]: SAMPLE_VIEW_HEADER_AMR_HELP_SIDEBAR,
     };
 
     const anaylticsEventName = {
@@ -253,6 +254,8 @@ export const PrimaryHeaderControls = ({
         ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
       [WORKFLOWS.CONSENSUS_GENOME.value]:
         ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED,
+      [WORKFLOWS.AMR.value]:
+        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_AMR_HELP_BUTTON_CLICKED,
     };
 
     return (

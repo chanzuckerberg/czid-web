@@ -199,6 +199,10 @@ function EventDictionary() {
   this.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED =
     "SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED";
 
+  /** The user clicked the help button in the AMR report page. */
+  this.SAMPLE_VIEW_HEADER_AMR_HELP_BUTTON_CLICKED =
+    "SAMPLE_VIEW_HEADER_AMR_HELP_BUTTON_CLICKED";
+
   /** The user clicked the help button in a heatmap. */
   this.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED =
     "SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED";
