@@ -162,18 +162,11 @@ export const PrimaryHeaderControls = ({
   const renderDownloadButtonUpdated = () => {
     // created `renderDownloadButtonUpdated` to change the logic of the delete sample button behind the feature flag
     // this will eventually replace renderDownloadButton for all users
-
-    const remainingWorkflowRuns =
-      !isMngsWorkflow(workflow) &&
-      sample?.workflow_runs?.filter(run => run.id !== currentRun?.id);
-
     switch (workflow) {
       case WORKFLOWS.LONG_READ_MNGS.value:
       case WORKFLOWS.SHORT_READ_MNGS.value:
         if (!!reportMetadata.reportReady && currentRun) {
           return renderDownloadDropdown();
-        } else if (!isEmpty(reportMetadata) && editable && sampleDeletable) {
-          return renderDeleteSampleButton();
         }
         break;
       case WORKFLOWS.CONSENSUS_GENOME.value:
@@ -184,13 +177,6 @@ export const PrimaryHeaderControls = ({
           } else {
             return renderDownloadAll(workflow);
           }
-        } else if (
-          editable &&
-          sampleDeletable &&
-          isEmpty(sample?.pipeline_runs) && // if there are no mNGS runs
-          remainingWorkflowRuns.length === 0 // if there are no other workflow runs
-        ) {
-          return renderDeleteSampleButton();
         }
         break;
     }
