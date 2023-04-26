@@ -12,7 +12,7 @@ import cs from "./column_definitions.scss";
 import { CONTIGS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
-  id: "contig-coverage-breadth",
+  id: "contigCoverageBreadth",
   accessorKey: "contigCoverageBreadth",
   size: 85,
   header: function contigPercentCoverageHeader({ header, column }) {

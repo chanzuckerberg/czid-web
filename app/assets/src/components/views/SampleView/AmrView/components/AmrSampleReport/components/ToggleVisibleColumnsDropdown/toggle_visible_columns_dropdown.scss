@@ -1,0 +1,22 @@
+@import "~czifui/dist/variables";
+
+.sectionWrapper {
+  padding: $sds-spaces-s;
+  border-bottom: $sds-borders-gray-200;
+}
+
+.sectionWrapper:last-of-type {
+  border-bottom: none;
+}
+
+.titleWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleText {
+  font: $sds-font-caps-xxxxs-600-font;
+  color: $sds-color-gray-500;
+  text-transform: $sds-font-caps-xxxxs-600-text-transform;
+}

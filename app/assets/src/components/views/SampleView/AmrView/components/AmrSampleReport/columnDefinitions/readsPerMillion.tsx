@@ -10,7 +10,7 @@ import { Align, getDefaultCell } from "./components/DefaultCell";
 import { READS_RPM_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const readsPerMillionColumn: ColumnDef<AmrResult, any> = {
-  id: "reads-per-million",
+  id: "readsPerMillion",
   accessorKey: "rpm",
   size: 85,
   header: function readsPerMillionHeader({ header, column }) {

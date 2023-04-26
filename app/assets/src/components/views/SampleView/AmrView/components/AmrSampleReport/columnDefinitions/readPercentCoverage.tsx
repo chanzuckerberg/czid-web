@@ -10,7 +10,7 @@ import { Align, getDefaultCell } from "./components/DefaultCell";
 import { READS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const readPercentCoverageColumn: ColumnDef<AmrResult, any> = {
-  id: "read-percent-coverage",
+  id: "readPercentCoverage",
   accessorKey: "readCoverageBreadth",
   size: 85,
   header: function readPercentCoverageHeader({ header, column }) {

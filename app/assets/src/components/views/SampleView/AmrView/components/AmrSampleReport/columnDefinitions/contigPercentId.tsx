@@ -12,7 +12,7 @@ import cs from "./column_definitions.scss";
 import { CONTIGS_PERCENT_IDENTITY_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const contigPercentIdColumn: ColumnDef<AmrResult, any> = {
-  id: "contig-percent-id",
+  id: "contigPercentId",
   accessorKey: "contigPercentId",
   size: 85,
   header: function contigPercentIdHeader({ header, column }) {

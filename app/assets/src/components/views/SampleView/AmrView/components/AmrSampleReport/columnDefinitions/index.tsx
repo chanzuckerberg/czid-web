@@ -4,6 +4,7 @@ export { contigsColumn } from "./contigs";
 export { getContigsColumnGroup } from "./contigsColumnGroup";
 export { contigSpeciesColumn } from "./contigSpecies";
 export { cutoffColumn } from "./cutoff";
+export { dropdownColumnGroup } from "./dropdownColumnGroup";
 export { drugClassColumn } from "./drugClass";
 export { geneColumn } from "./gene";
 export { geneFamilyColumn } from "./geneFamily";

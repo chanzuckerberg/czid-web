@@ -9,7 +9,7 @@ export const getGeneInfoColumnGroup = (
   nRows: number,
 ) => {
   return {
-    id: "gene-info-header-group",
+    id: "geneInfoHeaderGroup",
     colspan: columns.length,
     header: function geneInfoGroupHeader({ header }) {
       return (

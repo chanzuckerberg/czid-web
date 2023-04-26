@@ -6,7 +6,7 @@ import cs from "./column_definitions.scss";
 
 export const getReadsColumnGroup = (columns: ColumnDef<AmrResult, any>[]) => {
   return {
-    id: "reads-header-group",
+    id: "readsHeaderGroup",
     colspan: columns.length,
     header: function readsGroupHeader({ header }) {
       return (

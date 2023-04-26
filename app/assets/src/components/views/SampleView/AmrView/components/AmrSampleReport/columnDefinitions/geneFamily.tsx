@@ -7,7 +7,7 @@ import { getDefaultCell } from "./components/DefaultCell";
 import { GENE_FAMILY_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const geneFamilyColumn: ColumnDef<AmrResult, any> = {
-  id: "gene-family",
+  id: "geneFamily",
   accessorKey: "geneFamily",
   size: 200,
   maxSize: 200,

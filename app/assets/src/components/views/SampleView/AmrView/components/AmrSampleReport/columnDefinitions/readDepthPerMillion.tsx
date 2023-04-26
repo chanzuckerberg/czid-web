@@ -10,7 +10,7 @@ import { Align, getDefaultCell } from "./components/DefaultCell";
 import { READS_DPM_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const readDepthPerMillionColumn: ColumnDef<AmrResult, any> = {
-  id: "read-depth-per-million",
+  id: "readDepthPerMillion",
   accessorKey: "dpm",
   size: 85,
   header: function readDepthPerMillionHeader({ header, column }) {

@@ -80,3 +80,67 @@ export const camelize = obj => {
 
   return obj;
 };
+
+/*
+ * Given a map with string keys and string values
+ * allow lookup in either direction
+ * get: key --> value
+ * revGet: value --> key
+ * There cannot be duplicate values in the map
+ */
+export class TwoWayKeyStringMap {
+  map: { [key: string]: string };
+  reverseMap: { [key: string]: string };
+
+  constructor(map: { [key: string]: string }) {
+    this.map = map;
+    this.reverseMap = {};
+    for (const key in map) {
+      const value = map[key];
+      if (Object.prototype.hasOwnProperty.call(this.reverseMap, value)) {
+        throw new Error(`Duplicate value, ${value}, in TwoWayMap`);
+      }
+      this.reverseMap[value] = key;
+    }
+  }
+  get(key) {
+    return this.map[key];
+  }
+  revGet(key) {
+    return this.reverseMap[key];
+  }
+}
+
+/*
+ * Given a map with string keys and string[] values
+ * allow lookups in either direction
+ * get: key --> value[]
+ * revGet: value --> key
+ * A given value can only appear in one of the value lists
+ */
+export class TwoWayKeyListMap {
+  map: { [key: string]: string[] };
+  reverseMap: { [key: string]: string };
+
+  constructor(map: { [key: string]: string[] }) {
+    this.map = map;
+    this.reverseMap = {};
+    for (const key in map) {
+      const values = map[key];
+      for (const value of values) {
+        if (Object.prototype.hasOwnProperty.call(this.reverseMap, value)) {
+          throw new Error(
+            `Duplicate value, ${value}, in TwoWayKeyListMap. Is this value in multiple lists?`,
+          );
+        }
+        this.reverseMap[value] = key;
+      }
+    }
+  }
+  get(key) {
+    return this.map[key];
+  }
+  revGet(key) {
+    return this.reverseMap[key];
+  }
+}

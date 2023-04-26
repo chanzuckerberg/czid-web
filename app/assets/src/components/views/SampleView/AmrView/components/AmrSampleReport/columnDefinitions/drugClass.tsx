@@ -7,7 +7,7 @@ import { getDefaultCell } from "./components/DefaultCell";
 import { DRUG_CLASS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const drugClassColumn: ColumnDef<AmrResult, any> = {
-  id: "drug-class",
+  id: "drugClass",
   accessorKey: "drugClass",
   size: 200,
   maxSize: 200,

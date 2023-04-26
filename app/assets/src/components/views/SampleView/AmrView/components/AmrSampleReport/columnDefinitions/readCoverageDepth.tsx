@@ -10,7 +10,7 @@ import { Align, getDefaultCell } from "./components/DefaultCell";
 import { READS_COVERAGE_DEPTH_TOOLTIP_STRINGS } from "./constants";
 
 export const readCoverageDepthColumn: ColumnDef<AmrResult, any> = {
-  id: "read-coverage-depth",
+  id: "readCoverageDepth",
   accessorKey: "readCoverageDepth",
   size: 100,
   header: function readCoverageDepthHeader({ header, column }) {

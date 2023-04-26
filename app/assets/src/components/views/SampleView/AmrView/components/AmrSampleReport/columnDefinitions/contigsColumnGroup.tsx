@@ -6,7 +6,7 @@ import cs from "./column_definitions.scss";
 
 export const getContigsColumnGroup = (columns: ColumnDef<AmrResult, any>[]) => {
   return {
-    id: "contigs-header-group",
+    id: "contigsHeaderGroup",
     colspan: columns.length,
     header: function contigsGroupHeader({ header }) {
       return (

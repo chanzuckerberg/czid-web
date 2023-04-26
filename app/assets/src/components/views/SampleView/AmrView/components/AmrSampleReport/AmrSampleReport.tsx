@@ -8,7 +8,9 @@ import {
   contigPercentCoverageColumn,
   contigPercentIdColumn,
   contigsColumn,
+  contigSpeciesColumn,
   cutoffColumn,
+  dropdownColumnGroup,
   drugClassColumn,
   geneColumn,
   geneFamilyColumn,
@@ -19,12 +21,11 @@ import {
   readDepthPerMillionColumn,
   readPercentCoverageColumn,
   readsColumn,
+  readSpeciesColumn,
   readsPerMillionColumn,
 } from "./columnDefinitions";
 import { getContigsColumnGroup } from "./columnDefinitions/contigsColumnGroup";
-import { contigSpeciesColumn } from "./columnDefinitions/contigSpecies";
 import { getGeneInfoColumnGroup } from "./columnDefinitions/geneInfoColumnGroup";
-import { readSpeciesColumn } from "./columnDefinitions/readSpecies";
 import { StyledTableRow } from "./components/StyledTableRow";
 import { AmrResult } from "./types";
 
@@ -42,9 +43,6 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
 
   // The table component will contain the dropdown for hiding/showing columns (?)
   // The dropdown to change the visible columns
-
-  // Add new columns to the columns directory and then add them to this list
-  // We will need to modify for hiding/showing columns in the future.
   const columns: ColumnDef<AmrResult, any>[] = useMemo<ColumnDef<AmrResult>[]>(
     () => [
       getGeneInfoColumnGroup(
@@ -72,6 +70,7 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
         readDepthPerMillionColumn,
         readSpeciesColumn,
       ]),
+      dropdownColumnGroup,
     ],
     [reportTableData],
   );
