@@ -758,7 +758,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
 
     const status = isMngsWorkflow(workflow)
       ? reportMetadata.pipelineRunStatus
-      : workflowRun.status;
+      : workflowRun?.status ?? "no workflow run status";
     trackEvent("SampleView_single_run_deleted", {
       workflow: workflow,
       runStatus: status.toLowerCase(),
