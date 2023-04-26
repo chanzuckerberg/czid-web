@@ -1,0 +1,10 @@
+#!/bin/bash
+# removes the data directory for the heatmap elasticsearch container and recreates it with updated mappings
+
+echo "== Removing ES indices =="
+make local-stop
+rm -rf docker_data/heatmap_elasticsearch/data
+bash bin/setup-heatmap-es
+
+echo "== Pulling Latest Local Lambda Images=="
+make local-pull
