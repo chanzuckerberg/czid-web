@@ -89,7 +89,7 @@ module ElasticsearchQueryHelper
             },
             {
               "term": {
-                "background_id": background_id || 26,
+                "background_id": background_id || Rails.configuration.x.constants.default_background,
               },
             },
             # only viruses
@@ -188,7 +188,7 @@ module ElasticsearchQueryHelper
             {
               "term": {
                 # if background not provided, use the default background record. zscore is ignored below.
-                "background_id": background_id || 26,
+                "background_id": background_id || Rails.configuration.x.constants.default_background,
               },
             },
             # no taxa with neither family nor genus classification
@@ -211,18 +211,6 @@ module ElasticsearchQueryHelper
                           "metric_list.count_type": "NT",
                         },
                       },
-                      # only filter on zscore if a background was provided
-                      *(
-                        unless background_id.nil?
-                          [
-                            "range": {
-                              "metric_list.zscore": {
-                                "gt": 1,
-                              },
-                            },
-                          ]
-                        end
-                      ),
                       {
                         "range": {
                           "metric_list.alignment_length": {
@@ -326,7 +314,7 @@ module ElasticsearchQueryHelper
             },
             {
               "term": {
-                "background_id": background_id || 26,
+                "background_id": background_id || Rails.configuration.x.constants.default_background,
               },
             },
             # only viruses
@@ -366,7 +354,7 @@ module ElasticsearchQueryHelper
                           [
                             "range": {
                               "metric_list.zscore": {
-                                "gt": 1,
+                                "gt": 2,
                               },
                             },
                           ]
@@ -471,7 +459,7 @@ module ElasticsearchQueryHelper
             },
             {
               "term": {
-                "background_id": background_id || 26,
+                "background_id": background_id || Rails.configuration.x.constants.default_background,
               },
             },
             # only known pathogens

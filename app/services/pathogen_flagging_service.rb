@@ -13,7 +13,7 @@ class PathogenFlaggingService
       # make sure background exists
       Background.find(background_id)
     end
-    @background_id = background_id || 26 # default to human CSF background
+    @background_id = background_id # will be null if the user has not selected a background
     # boolean indicating whether or not the given pipeline_run_ids have been confirmed to be in ES
     @es_preflight_success = es_preflight_success
     @selected_flags = selected_flags
@@ -32,7 +32,7 @@ class PathogenFlaggingService
     # load into ES any missing pipeline runs
     unless @es_preflight_success
       ElasticsearchQueryHelper.update_es_for_missing_data(
-        @background_id,
+        @background_id || Rails.configuration.x.constants.default_background,
         @pipeline_run_ids
       )
     end
@@ -57,7 +57,7 @@ class PathogenFlaggingService
       # compute the lcrp nonviral pathogens
       raw_nonviral_pathogens_result = ElasticsearchQueryHelper.lcrp_top_15_for_pipeline_runs(@pipeline_run_ids, @background_id)
       top_15_nonviral_pathogen_candidates_by_pr_id = parse_lcrp_nonviral_pathogens_for_pipeline_runs(raw_nonviral_pathogens_result)
-      nonviral_pathogens_by_pr_id = compute_nonviral_lcrp_pathogens(top_15_nonviral_pathogen_candidates_by_pr_id, known_pathogens)
+      nonviral_pathogens_by_pr_id = compute_nonviral_lcrp_pathogens(top_15_nonviral_pathogen_candidates_by_pr_id, known_pathogens, @background_id)
 
       # merge viral and nonviral lcrp pathogens
       lcrp_pathogens_by_pr_id = viral_pathogens_by_pr_id.deep_merge(nonviral_pathogens_by_pr_id)
@@ -86,7 +86,7 @@ class PathogenFlaggingService
   end
   end
 
-  def compute_nonviral_lcrp_pathogens(top_15_nonviral_pathogen_candidates_by_pr_id, known_pathogens)
+  def compute_nonviral_lcrp_pathogens(top_15_nonviral_pathogen_candidates_by_pr_id, known_pathogens, background_id)
     flagged_taxa_by_pr_id = {}
 
     top_15_nonviral_pathogen_candidates_by_pr_id.each do |pr_id, pathogen_candidates|
@@ -106,7 +106,13 @@ class PathogenFlaggingService
         taxa_above_drop = sorted_by_rpm.slice(0, largest_drop_index + 1)
 
         # filter further for those taxa above the drop that are on the known pathogens list
-        flagged_taxa = taxa_above_drop.filter { |candidate| known_pathogens.include?(candidate["tax_id"]) }
+        # and pass the zscore threshold to avoid water controls
+        flagged_taxa = taxa_above_drop.filter do |candidate|
+          known_pathogens.include?(candidate["tax_id"]) && (
+            background_id.nil? ||
+            candidate["metric_list"].detect { |c| c["count_type"] == "NT" }["zscore"] > 2
+          )
+        end
 
         # add the flagged taxa to output object
         flagged_taxa_hash = flagged_taxa.map { |taxon| [taxon["tax_id"], [PipelineReportService::FLAG_LCRP]] }.to_h
