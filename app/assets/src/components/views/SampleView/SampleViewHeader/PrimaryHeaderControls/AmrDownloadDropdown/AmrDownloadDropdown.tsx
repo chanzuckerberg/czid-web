@@ -1,4 +1,3 @@
-import querystring from "querystring";
 import React from "react";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
@@ -29,15 +28,7 @@ const AmrDownloadDropdown = ({
   sample,
 }: AmrDownloadDropdownProps) => {
   const downloadCSV = () => {
-    const resParams = {
-      ...(workflowRun &&
-        workflowRun.wdl_version && {
-          pipeline_version: workflowRun.wdl_version,
-        }),
-    };
-    location.href = `/samples/${sample.id}/report_csv?${querystring.stringify(
-      resParams,
-    )}`;
+    location.href = `/workflow_runs/${workflowRun.id}/amr_report_downloads?downloadType=report_csv`;
   };
 
   const handleDownload = (option: $TSFixMe) => {
@@ -88,7 +79,6 @@ const AmrDownloadDropdown = ({
     {
       text: "Download Report Table (.csv)",
       value: "download_csv",
-      disabled: true, // TODO: remove this once this download is implemented
     },
     {
       text: "Download Report Table with Applied Filters (.csv)",

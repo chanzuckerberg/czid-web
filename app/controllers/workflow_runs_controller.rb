@@ -276,6 +276,9 @@ class WorkflowRunsController < ApplicationController
     when "zip_link"
       s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_ZIP)
       filename = "outputs.zip"
+    when "report_csv"
+      send_data AmrReportDataService.call(@workflow_run, csv: true), filename: @workflow_run.sample.name + '_report.csv'
+      return
     else
       render(
         json: { status: "Output not found" },

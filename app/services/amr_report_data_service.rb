@@ -1,12 +1,39 @@
 class AmrReportDataService
   include Callable
 
-  def initialize(workflow_run)
+  # The order is important here as it determines the order of the columns in the CSV
+  CSV_COLUMNS = [
+    "gene",
+    "gene_family",
+    "drug_class",
+    "mechanism",
+    "model",
+    "cutoff",
+    "contigs",
+    "contig_coverage_breadth",
+    "contig_percent_id",
+    "contig_species",
+    "reads",
+    "rpm",
+    "read_coverage_breadth",
+    "read_coverage_depth",
+    "dpm",
+    "read_species",
+  ].freeze
+
+  def initialize(workflow_run, csv: false)
     @workflow_run = workflow_run
+    @csv = csv
   end
 
   def call
-    return amr_report_data
+    report_data = amr_report_data
+
+    if @csv
+      return generate_report_csv(report_data)
+    else
+      return report_data
+    end
   end
 
   private
@@ -19,6 +46,7 @@ class AmrReportDataService
       report_row = {
         "drug_class" => row["drug_class"],
         "gene" => row["gene_name"],
+        "gene_id" => row["read_gene_id"],
         "gene_family" => row["gene_family"],
         "mechanism" => row["resistance_mechanism"],
         "model" => row["model_type"],
@@ -39,5 +67,12 @@ class AmrReportDataService
     end
 
     report_data
+  end
+
+  def generate_report_csv(report_data)
+    CSVSafe.generate(headers: true) do |csv|
+      csv << CSV_COLUMNS
+      report_data.each { |row| csv << row.values_at(*CSV_COLUMNS) }
+    end
   end
 end
