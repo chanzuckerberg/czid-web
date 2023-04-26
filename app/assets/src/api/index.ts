@@ -193,9 +193,6 @@ const getWorkflowRuns = ({
     },
   });
 
-const getAmrComprehensiveMetricsTsv = (workflowRunId: number) =>
-  get(`/workflow_runs/${workflowRunId}/comprehensive_amr_metrics_tsv`);
-
 const getSampleDimensions = ({
   domain,
   filters,
@@ -748,7 +745,6 @@ export {
   getAllHostGenomes,
   getAllHostGenomesPublic,
   getAllSampleTypes,
-  getAmrComprehensiveMetricsTsv,
   getLaunchedFeatureList,
   getBackgrounds,
   getContigsSequencesByByteranges,

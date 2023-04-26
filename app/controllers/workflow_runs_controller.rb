@@ -3,7 +3,7 @@ class WorkflowRunsController < ApplicationController
   include ParameterSanitization
   include PipelineOutputsHelper
 
-  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :comprehensive_amr_metrics_tsv]
+  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :amr_report_downloads]
   before_action :admin_required, only: [:rerun]
 
   MAX_PAGE_SIZE = 100
@@ -257,19 +257,43 @@ class WorkflowRunsController < ApplicationController
     )
   end
 
-  # AMR outputs
-  def comprehensive_amr_metrics_tsv
-    s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_COMPREHENSIVE_AMR_METRICS_TSV)
+  # AMR pipeline outputs that are available for download directly from the AMR sample report
+  def amr_report_downloads
+    permitted_params = params.permit(:downloadType)
+    download_type = permitted_params[:downloadType]
     sample_name = @workflow_run.sample.name
-    presigned_url = get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_#{@workflow_run.id}_comprehensive_amr_metrics.tsv")
 
-    if presigned_url
-      redirect_to presigned_url
+    case download_type
+    when "comprehensive_amr_metrics_tsv"
+      s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_COMPREHENSIVE_AMR_METRICS_TSV)
+      filename = "comprehensive_amr_metrics.tsv"
+    when "non_host_reads"
+      s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_NON_HOST_READS)
+      filename = "non_host_reads.fasta"
+    when "non_host_contigs"
+      s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_NON_HOST_CONTIGS)
+      filename = "contigs.fasta"
+    when "zip_link"
+      s3_path = @workflow_run.output_path(@workflow_run.workflow_by_class.class::OUTPUT_ZIP)
+      filename = "outputs.zip"
     else
       render(
-        json: { status: "Output not available" },
+        json: { status: "Output not found" },
         status: :not_found
       )
+    end
+
+    if s3_path.present? && filename.present?
+      presigned_url = get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_#{@workflow_run.id}_#{filename}")
+
+      if presigned_url
+        redirect_to presigned_url
+      else
+        render(
+          json: { status: "Output not available" },
+          status: :not_found
+        )
+      end
     end
   end
 

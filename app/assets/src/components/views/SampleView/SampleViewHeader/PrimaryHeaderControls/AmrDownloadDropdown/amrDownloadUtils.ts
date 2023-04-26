@@ -17,6 +17,8 @@ const downloadOptionLabels = [
 const implementedDownloadOptions = [
   COMPREHENSIVE_AMR_METRICS_LABEL,
   INTERMEDIATE_FILES_LABEL,
+  NON_HOST_READS_LABEL,
+  NON_HOST_CONTIGS_LABEL,
 ];
 
 // Convert download option labels to dropdown options.
@@ -28,10 +30,12 @@ export const getAmrDownloadDropdownOptions = (): Array<{
   return downloadOptionLabels.map(option => ({
     text: option,
     value: option,
-    // TODO - remove this once all options are implemented.
     disabled: !implementedDownloadOptions.includes(option),
   }));
 };
+
+const generateDownloadUrl = (workflowRunId: number, downloadType: string) =>
+  `/workflow_runs/${workflowRunId}/amr_report_downloads?downloadType=${downloadType}`;
 
 // Get a map of download option to download path and
 // whether to open link in new page.
@@ -44,19 +48,22 @@ export const getAmrDownloadLink = (
   let fileName = "";
   switch (option) {
     case NON_HOST_READS_LABEL:
-      downloadUrl = "";
-      fileName = "disabledOption1";
+      downloadUrl = generateDownloadUrl(workflowRun.id, "non_host_reads");
+      fileName = `${sample.name}_${workflowRun.id}_non_host_reads.fasta.gz`;
       break;
     case NON_HOST_CONTIGS_LABEL:
-      downloadUrl = "";
-      fileName = "disabledOption2";
+      downloadUrl = generateDownloadUrl(workflowRun.id, "non_host_contigs");
+      fileName = `${sample.name}_${workflowRun.id}_contigs.fasta`;
       break;
     case COMPREHENSIVE_AMR_METRICS_LABEL:
-      downloadUrl = `/workflow_runs/${workflowRun.id}/comprehensive_amr_metrics_tsv`;
+      downloadUrl = generateDownloadUrl(
+        workflowRun.id,
+        "comprehensive_amr_metrics_tsv",
+      );
       fileName = `${sample.name}_${workflowRun.id}_comprehensive_amr_metrics.tsv`;
       break;
     case INTERMEDIATE_FILES_LABEL:
-      downloadUrl = `/workflow_runs/${workflowRun.id}/zip_link`;
+      downloadUrl = generateDownloadUrl(workflowRun.id, "zip_link");
       fileName = `${sample.name}_${workflowRun.id}_amr_intermediate_files.zip`;
       break;
   }
