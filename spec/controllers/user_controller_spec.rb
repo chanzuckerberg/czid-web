@@ -170,7 +170,7 @@ RSpec.describe UsersController, type: :request do
         }.merge(form_params)
 
         expect(MetricUtil).to receive(:post_to_airtable).with(
-          "TEST - CZ ID User Profiles", # TODO: replace this with the actual table name
+          "CZ ID User Profiles",
           { fields: airtable_params, typecast: true }.to_json
         )
 

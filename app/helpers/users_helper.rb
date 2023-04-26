@@ -5,8 +5,7 @@ module UsersHelper
   end
 
   def self.send_profile_form_to_airtable(user, params)
-    # TODO: replace this with the actual table name
-    table_name = "TEST - CZ ID User Profiles"
+    table_name = "CZ ID User Profiles"
     data = {
       fields: {
         user_id: user.id,

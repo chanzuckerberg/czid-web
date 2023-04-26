@@ -90,6 +90,7 @@ export function UserProfileForm() {
     try {
       await Promise.all([updateUser(), postToAirtable()]);
       history.push(`/${DISCOVERY_DOMAIN_MY_DATA}?profile_form_submitted=true`);
+      location.reload();
     } catch (err) {
       alert("post failed: " + err.message);
     }
