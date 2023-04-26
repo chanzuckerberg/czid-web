@@ -4,7 +4,7 @@
 @import "~czifui/dist/variables";
 
 .panelContentsContainer {
-  padding: $sds-spaces-l;
+  padding: 0 $sds-spaces-l $sds-spaces-l $sds-spaces-l;
 }
 
 .topFilterSection {

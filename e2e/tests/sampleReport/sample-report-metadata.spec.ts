@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
 import { getFixture } from "../../utils/common";
-import { verifySectionDetails, getTabSection } from "../../utils/report";
+import { getTabSection, verifySectionDetails } from "../../utils/report";
 
 const sampleId = 25307;
 const fixtures = getFixture("report_data");

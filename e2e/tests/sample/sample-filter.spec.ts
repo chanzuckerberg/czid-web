@@ -1,6 +1,6 @@
-import path from "path";
-import { Page, expect, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 import dotenv from "dotenv";
+import path from "path";
 import { TEST_PROJECTS } from "../../constants/common.const";
 import {
   ADD_THRESHOLD,
@@ -48,10 +48,7 @@ const projectName = TEST_PROJECTS[ENV.toUpperCase()];
 async function clearFilters(page: Page) {
   const totalFilters = await page.getByText(ADD_THRESHOLD).count();
   for (let i = 0; i < totalFilters; i += 1) {
-    await page
-      .locator(CLOSE_ICON)
-      .nth(0)
-      .click();
+    await page.locator(CLOSE_ICON).nth(0).click();
   }
 }
 test.describe("Sample filtering tests", () => {
@@ -60,21 +57,12 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(TAXON)
-        .nth(1)
-        .click();
+      await page.getByText(TAXON).nth(1).click();
       await page.getByText(CHOOSE_TAXON).click();
       await page.getByRole(COMBOBOX, { name: SEARCH }).click();
       await page.getByRole(COMBOBOX, { name: SEARCH }).fill(KLEBSIELLA);
-      await page
-        .getByText(KLEBSIELLA)
-        .first()
-        .click();
-      await page
-        .getByText("Taxon filter")
-        .first()
-        .click(); // close the popup window so we can fill other fields
+      await page.getByText(KLEBSIELLA).first().click();
+      await page.getByText("Taxon filter").first().click(); // close the popup window so we can fill other fields
 
       // todo: sometimes the add threshold is not available
       if ((await page.getByText(ADD_THRESHOLD).count()) > 0) {
@@ -83,10 +71,7 @@ test.describe("Sample filtering tests", () => {
         await page.locator(NUMBERINPUT).fill(".5");
       }
 
-      await page
-        .getByText("Apply")
-        .nth(1)
-        .click();
+      await page.getByText("Apply").nth(1).click();
 
       // check result
       expect(
@@ -132,10 +117,7 @@ test.describe("Sample filtering tests", () => {
       await goToProjectSamples(page, projectName, index);
 
       // click location dropdown
-      await page
-        .getByText(LOCATION)
-        .nth(0)
-        .click();
+      await page.getByText(LOCATION).nth(0).click();
 
       // select two locations
       await page
@@ -143,11 +125,7 @@ test.describe("Sample filtering tests", () => {
         .getByText(CANADA)
         .nth(0)
         .click();
-      await page
-        .locator(".dropdownMenu-1gUyq")
-        .getByText(BEXAR)
-        .nth(0)
-        .click();
+      await page.locator(".dropdownMenu-1gUyq").getByText(BEXAR).nth(0).click();
       await page.keyboard.press(ESCAPE);
 
       // check result
@@ -170,10 +148,7 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(TIMEFRAME)
-        .first()
-        .click();
+      await page.getByText(TIMEFRAME).first().click();
       await page.getByText(LAST_WEEK).click();
 
       // check result
@@ -196,10 +171,7 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(TIMEFRAME)
-        .first()
-        .click();
+      await page.getByText(TIMEFRAME).first().click();
       await page.getByText(LAST_MONTH).click();
 
       // check result
@@ -222,10 +194,7 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(TIMEFRAME)
-        .first()
-        .click();
+      await page.getByText(TIMEFRAME).first().click();
       await page.getByText(LAST_THREE_MONTHS).click();
 
       // check result
@@ -248,10 +217,7 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(TIMEFRAME)
-        .first()
-        .click();
+      await page.getByText(TIMEFRAME).first().click();
       await page.getByText(LAST_SIX_MONTHS).click();
 
       // check result
@@ -274,10 +240,7 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(TIMEFRAME)
-        .first()
-        .click();
+      await page.getByText(TIMEFRAME).first().click();
       await page.getByText(LAST_WEEK).click();
 
       // check result
@@ -300,14 +263,8 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(VISIBILITY)
-        .first()
-        .click();
-      await page
-        .getByText(PRIVATE)
-        .first()
-        .click();
+      await page.getByText(VISIBILITY).first().click();
+      await page.getByText(PRIVATE).first().click();
 
       // check result
       expect(
@@ -329,14 +286,8 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(VISIBILITY)
-        .first()
-        .click();
-      await page
-        .getByText(PUBLIC)
-        .nth(1)
-        .click();
+      await page.getByText(VISIBILITY).first().click();
+      await page.getByText(PUBLIC).nth(1).click();
 
       // check result
       expect(
@@ -354,16 +305,10 @@ test.describe("Sample filtering tests", () => {
     test(`Should filter ${workflow} samples by host`, async ({ page }) => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
-      await page
-        .getByText(HOST)
-        .nth(0)
-        .click();
+      await page.getByText(HOST).nth(0).click();
 
       for (let i = 0; i < chosenHosts.length; i++) {
-        await page
-          .getByPlaceholder(SEARCH)
-          .first()
-          .fill(chosenHosts[i]);
+        await page.getByPlaceholder(SEARCH).first().fill(chosenHosts[i]);
         await page
           .getByRole(OPTION, { name: chosenHosts[i] })
           .getByText(chosenHosts[i])
@@ -392,15 +337,9 @@ test.describe("Sample filtering tests", () => {
       // search project and display samples
       await goToProjectSamples(page, projectName, index);
 
-      await page
-        .getByText(SAMPLE_TYPE)
-        .nth(0)
-        .click();
+      await page.getByText(SAMPLE_TYPE).nth(0).click();
       for (let i = 0; i < sampleTypes.length; i++) {
-        await page
-          .getByPlaceholder(SEARCH)
-          .first()
-          .fill(sampleTypes[i]);
+        await page.getByPlaceholder(SEARCH).first().fill(sampleTypes[i]);
         await page
           .getByRole(OPTION, { name: sampleTypes[i] })
           .getByText(sampleTypes[i])

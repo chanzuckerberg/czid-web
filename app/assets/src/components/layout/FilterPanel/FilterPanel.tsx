@@ -18,6 +18,7 @@ const StyledFilterPanel = styled(Drawer)<DrawerProps>(() => ({
   zIndex: 2,
   "& .MuiDrawer-paper": {
     boxSizing: "border-box",
+    top: "inherit",
     padding: "14px", // TODO - smb - make this sds-l
   },
   "& .MuiDrawer-paperAnchorLeft": {
@@ -32,10 +33,8 @@ export const FilterPanel = ({
   hideFilters,
   content,
   anchorPosition,
-  customHeaderHeight,
   customDrawerWidth,
 }: FilterPanelPropsType) => {
-  const headerHeight = customHeaderHeight || 120;
   const drawerWidth = customDrawerWidth || 240;
 
   return (
@@ -45,9 +44,7 @@ export const FilterPanel = ({
       variant="persistent"
     >
       {/* Padding acts as a top gutter so as to not overlap header. Inline styles so we can use props. */}
-      <div style={{ paddingTop: headerHeight, width: drawerWidth }}>
-        {content}
-      </div>
+      <div style={{ width: drawerWidth }}>{content}</div>
     </StyledFilterPanel>
   );
 };

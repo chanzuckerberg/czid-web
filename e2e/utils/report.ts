@@ -5,14 +5,14 @@ import {
   SEARCH_PUBLIC,
 } from "../constants/common.const";
 import {
-  SAMPLE_INFO,
+  DOWNLOADS,
+  ERCC,
   HOST_INFO,
   INFECTION_INFO,
-  SEQUENCING_INFO,
   PIPELINE_INFO,
   READS_REMAINING,
-  ERCC,
-  DOWNLOADS,
+  SAMPLE_INFO,
+  SEQUENCING_INFO,
 } from "../constants/sample.const";
 
 export const sectionIndices: Record<string, number> = {
@@ -81,11 +81,7 @@ export async function openSamplePage(
   await page.getByTestId(METAGENOMICS.toLowerCase()).click();
 
   // select sample
-  if (selectSample)
-    await page
-      .getByTestId("sample-name")
-      .first()
-      .click();
+  if (selectSample) await page.getByTestId("sample-name").first().click();
 
   // expand side bar
   if (openDetails) await page.getByText("Sample Details").click();
@@ -130,17 +126,11 @@ export async function verifySectionDetails(
     // verify links
     for (let i = 0; i < data.length; i++) {
       const item = getDataByIndex(data, i);
+      expect(await page.getByText(item.text).first().textContent()).toBe(
+        item.text,
+      );
       expect(
-        await page
-          .getByText(item.text)
-          .first()
-          .textContent(),
-      ).toBe(item.text);
-      expect(
-        await page
-          .locator(".downloadLink-14o8v")
-          .nth(i)
-          .getAttribute("href"),
+        await page.locator(".downloadLink-14o8v").nth(i).getAttribute("href"),
       ).toBe(item.href.replace("SAMPLEID", sampleId.toString()));
     }
   }
@@ -148,12 +138,9 @@ export async function verifySectionDetails(
   for (let i = 0; i < data.length; i++) {
     const item = getDataByIndex(data, i);
     if (attributes.includes("name")) {
-      expect(
-        await page
-          .locator(".label-9CR8O")
-          .nth(i)
-          .textContent(),
-      ).toBe(item.name);
+      expect(await page.locator(".label-9CR8O").nth(i).textContent()).toBe(
+        item.name,
+      );
       // todo: validate values but this only be done after testids added
     }
     if (attributes.includes("step")) {
@@ -167,18 +154,12 @@ export async function verifySectionDetails(
 
       // verify reads remaining
       expect(
-        await row
-          .locator(".metadataValue-2cDlV")
-          .first()
-          .textContent(),
+        await row.locator(".metadataValue-2cDlV").first().textContent(),
       ).toBe(item.reads_remaining);
 
       // verify reads remaining percentage
       expect(
-        await row
-          .locator(".metadataValue-2cDlV")
-          .nth(1)
-          .textContent(),
+        await row.locator(".metadataValue-2cDlV").nth(1).textContent(),
       ).toBe(item.reads_remaining_percent);
     }
   }

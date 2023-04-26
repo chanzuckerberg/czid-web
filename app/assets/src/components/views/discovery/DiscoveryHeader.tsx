@@ -3,8 +3,8 @@ import { ButtonIcon, Tabs } from "czifui";
 import { findIndex, startCase } from "lodash/fp";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
+import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
-import Label from "~ui/labels/Label";
 import cs from "./discovery_header.scss";
 
 interface DiscoveryHeaderProps {
@@ -124,47 +124,13 @@ const DiscoveryHeader = ({
 
   return (
     <div className={cs.header}>
-      <div
-        className={cx(cs.filtersTrigger, disableSidebars && cs.disabled)}
-        onClick={disableSidebars ? undefined : onFilterToggle}
-      >
-        <BasicPopup
-          trigger={
-            <div>
-              <ButtonIcon
-                sdsSize="large"
-                sdsType="primary"
-                sdsIcon="slidersHorizontal"
-                on={showFilters}
-                disabled={disableSidebars}
-              />
-              {!disableSidebars && (
-                <Label
-                  className={cs.filtersCounter}
-                  circular
-                  text={filterCount}
-                />
-              )}
-            </div>
-          }
-          content={
-            disableSidebars ? (
-              <div className={cs.popupText}>
-                Filters
-                <div className={cs.popupSubtitle}>
-                  Not available on this tab
-                </div>
-              </div>
-            ) : (
-              "Filters"
-            )
-          }
-          basic={false}
-          mouseEnterDelay={600}
-          mouseLeaveDelay={200}
-          position={disableSidebars ? "top left" : "bottom center"}
-        />
-      </div>
+      <FilterButtonWithCounter
+        isDisabled={disableSidebars}
+        filterCounter={filterCount}
+        onFilterToggle={onFilterToggle}
+        popupDisabledSubtitle="Not available on this tab"
+        showFilters={showFilters}
+      />
       <div className={cs.searchContainer}>
         {/* TODO(ihan): enable search box for snapshot view */}
         {domain !== "snapshot" && (

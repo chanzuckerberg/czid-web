@@ -60,16 +60,10 @@ test.describe("Sample report tests", () => {
   test(`Should edit sample info section`, async ({ page }) => {
     await page.pause();
     // hover over the sample info section
-    await page
-      .locator(".title-3Oy38")
-      .nth(0)
-      .hover();
+    await page.locator(".title-3Oy38").nth(0).hover();
 
     // Click the edit button which is visible after hovering
-    await page
-      .getByText("Edit")
-      .nth(0)
-      .click();
+    await page.getByText("Edit").nth(0).click();
 
     // edit Sample Name
     await page
@@ -103,15 +97,9 @@ test.describe("Sample report tests", () => {
     `Should validate collection date of sample info section`,
     async ({ page }) => {
       // hover over the sample info section
-      await page
-        .locator(".title-3Oy38")
-        .nth(0)
-        .hover();
+      await page.locator(".title-3Oy38").nth(0).hover();
       // Click the edit button which is visible after hovering
-      await page
-        .getByText("Edit")
-        .nth(0)
-        .click();
+      await page.getByText("Edit").nth(0).click();
 
       // verify validate date formats
       for (let i = 0; i < VALID_DATES.length; i++) {
@@ -130,17 +118,11 @@ test.describe("Sample report tests", () => {
 
   test(`Should edit host info section`, async ({ page }) => {
     // collapse sample info section
-    await page
-      .locator(".toggleIcon-235ie")
-      .first()
-      .click();
+    await page.locator(".toggleIcon-235ie").first().click();
 
     // expand host info section and click edit
     await page.getByText("Host InfoEdit").click();
-    await page
-      .getByText("Edit")
-      .nth(1)
-      .click();
+    await page.getByText("Edit").nth(1).click();
 
     // edit diseases & conditions
     await page
@@ -168,10 +150,7 @@ test.describe("Sample report tests", () => {
     await page.getByRole("option", { name: newHostGenus }).click();
 
     // edit host sex; first get current value, then choose a new value differnt than current and then click select
-    await page
-      .locator(METADATA_DROP_DOWN)
-      .nth(1)
-      .click();
+    await page.locator(METADATA_DROP_DOWN).nth(1).click();
 
     // get current host sex
     const currentHostSex = await page
@@ -186,17 +165,11 @@ test.describe("Sample report tests", () => {
   test(`Should edit infection info section`, async ({ page }) => {
     const ct_value = randomNumber;
     // collapse sample info section
-    await page
-      .locator(".toggleIcon-235ie")
-      .first()
-      .click();
+    await page.locator(".toggleIcon-235ie").first().click();
 
     // expand host info section and click edit
     await page.getByText("Infection InfoEdit").click();
-    await page
-      .getByText("Edit")
-      .nth(2)
-      .click();
+    await page.getByText("Edit").nth(2).click();
 
     // edit Ct Value
     await page.locator('input[type="number"]').fill(`${ct_value}`);
@@ -235,17 +208,11 @@ test.describe("Sample report tests", () => {
   test(`Should edit sequencing info section`, async ({ page }) => {
     const rnaDnaInputng = randomNumber;
     // collapse sample info section
-    await page
-      .locator(".toggleIcon-235ie")
-      .first()
-      .click();
+    await page.locator(".toggleIcon-235ie").first().click();
 
     // expand sequencing info  section and click edit
     await page.getByText("Sequencing infoEdit").click();
-    await page
-      .getByText("Edit")
-      .nth(3)
-      .click();
+    await page.getByText("Edit").nth(3).click();
 
     // edit RNA/DNA Input (ng)
     await page.locator('input[type="number"]').fill(`${rnaDnaInputng}`);

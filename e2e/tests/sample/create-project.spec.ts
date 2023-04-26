@@ -127,10 +127,7 @@ test.describe("Create project test", () => {
       // Clicking Learn more opens a new tab, so get the new page
       const [newPage] = await Promise.all([
         context.waitForEvent("page"),
-        page
-          .getByText("Learn more")
-          .first()
-          .click(),
+        page.getByText("Learn more").first().click(),
       ]);
       // New page should be help center
       expect(newPage.url()).toContain(HELP_CENTER_PROJECT_URL);

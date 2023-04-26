@@ -1,0 +1,36 @@
+@import "~czifui/dist/variables";
+
+.filtersTrigger {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  position: relative;
+  margin-right: 25px;
+  width: fit-content;
+
+  .filtersCounter {
+    background-color: $sds-color-gray-200;
+    color: $sds-color-primary-400;
+    font-size: 11px;
+    min-height: 18px;
+    min-width: 18px;
+    // Override semantic-ui
+    padding: 3px !important;
+    position: absolute;
+    right: calc(-1 * $sds-spaces-xs);
+    vertical-align: middle;
+  }
+}
+
+.disabled {
+  cursor: default !important;
+}
+
+.popupText {
+  font: $sds-font-body-xxs-400-font;
+
+  .popupSubtitle {
+    color: $sds-color-gray-500;
+  }
+}

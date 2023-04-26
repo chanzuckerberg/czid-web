@@ -1,6 +1,6 @@
-import path from "path";
 import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
+import path from "path";
 import { CONTINUE, GO_TO_PROJECT, LOADED } from "../../constants/common.const";
 import { Metadata } from "../../types/metadata";
 import { generateMetadataFile, getMetadata } from "../../utils/mockData";
@@ -70,10 +70,7 @@ test.describe("Metagenomics sample upload tests", () => {
 
     // click continue button
     const continueButtonIndex = 1;
-    await page
-      .getByText(CONTINUE)
-      .nth(continueButtonIndex)
-      .click();
+    await page.getByText(CONTINUE).nth(continueButtonIndex).click();
 
     // submit upload
     await submitUpload(page);

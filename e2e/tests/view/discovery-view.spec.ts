@@ -1,48 +1,47 @@
-import path from "path";
-import { Page, expect, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 import dotenv from "dotenv";
+import path from "path";
 import {
-  VISIBLE,
-  OVERALL,
-  SAMPLE_TYPE,
-  METAGENOMICS,
   ANTIMICROBIAL_RESISTANCE,
-  CANCEL_ICON,
-  FILTER_TAG,
-  OVERALL_AREA,
-  DATE_CREATED_S,
-  METADATA,
-  AVG_READS_PER_SAMPLE,
   AVG_READS_FILTER_PER_SAMPLE,
-  SAMPLES_COLUMN,
-  COLUMNS_LABEL,
-  SIDE_LABELS,
-  SIDE_HEADERS,
-  VIEW_ICON,
-  BUTTONS,
-  METADATA_FILTER,
+  AVG_READS_PER_SAMPLE,
   BAR_LABEL,
-  DATE_CREATED,
+  BUTTONS,
+  CANCEL_ICON,
+  CHECKED_BOX,
+  COLUMNS_LABEL,
   CONSENSUS_GENOMES,
+  DATE_CREATED,
+  DATE_CREATED_S,
   DATE_LABEL,
   DESCRIPTION,
-  SAMPLES,
-  NUMBER_OF_COLUMN,
-  CHECKED_BOX,
   EDIT,
-  MYDATA,
   FILTERS,
+  FILTER_TAG,
   HIDDEN,
-  TEST_PROJECTS,
+  METADATA,
+  METADATA_FILTER,
+  METAGENOMICS,
+  MYDATA,
+  NUMBER_OF_COLUMN,
+  OVERALL,
+  OVERALL_AREA,
   PROJECTS,
+  SAMPLES,
+  SAMPLES_COLUMN,
+  SAMPLE_TYPE,
+  SIDE_HEADERS,
+  SIDE_LABELS,
+  TEST_PROJECTS,
+  VIEW_ICON,
+  VISIBLE,
 } from "../../constants/common.const";
-
 import {
   ANNOTATION,
+  HOST,
   LOCATION,
   TIMEFRAME,
   VISIBILITY,
-  HOST,
 } from "../../constants/filter.const";
 
 dotenv.config({ path: path.resolve(`.env.${process.env.NODE_ENV}`) });
@@ -175,18 +174,12 @@ test.describe("Discovery view tests", () => {
 
       // uncheck all samples
       for (let i = 1; i < checked_samples.length; i++) {
-        await page
-          .locator(SAMPLES_COLUMN)
-          .nth(i)
-          .click();
+        await page.locator(SAMPLES_COLUMN).nth(i).click();
       }
 
       // check all samples
       for (let i = 1; i < column_dropdown.length; i++) {
-        await page
-          .locator(SAMPLES_COLUMN)
-          .nth(i)
-          .click();
+        await page.locator(SAMPLES_COLUMN).nth(i).click();
       }
 
       // check if the column were added
@@ -197,10 +190,7 @@ test.describe("Discovery view tests", () => {
 
       // uncheck all samples
       for (let i = 1; i < column_dropdown.length; i++) {
-        await page
-          .locator(SAMPLES_COLUMN)
-          .nth(i)
-          .click();
+        await page.locator(SAMPLES_COLUMN).nth(i).click();
       }
       expect(
         (await page.locator(COLUMNS_LABEL).allInnerTexts()).length,
@@ -215,12 +205,9 @@ test.describe("Discovery view tests", () => {
       // info icon used to hide and unhide  columns on the page
       await page.locator(".plusIcon-1OBta").click();
 
-      await page
-        .locator(BAR_LABEL)
-        .nth(1)
-        .waitFor({
-          state: VISIBLE,
-        });
+      await page.locator(BAR_LABEL).nth(1).waitFor({
+        state: VISIBLE,
+      });
       const overall_area = (await page.locator(OVERALL_AREA).allInnerTexts())
         .length;
       const bar_label = (await page.locator(BAR_LABEL).allInnerTexts()).length;
@@ -231,17 +218,11 @@ test.describe("Discovery view tests", () => {
 
       // collapse side tabs
       for (let index = 0; index <= 2; index++) {
-        await page
-          .locator(SIDE_HEADERS)
-          .nth(index)
-          .click();
+        await page.locator(SIDE_HEADERS).nth(index).click();
       }
-      await page
-        .locator(OVERALL_AREA)
-        .nth(0)
-        .waitFor({
-          state: HIDDEN,
-        });
+      await page.locator(OVERALL_AREA).nth(0).waitFor({
+        state: HIDDEN,
+      });
 
       // ensure all the sides are collapsed
       expect((await page.locator(OVERALL_AREA).allInnerTexts()).length).toEqual(
@@ -257,10 +238,7 @@ test.describe("Discovery view tests", () => {
 
       // expand side tabs
       for (let index = 0; index <= 2; index++) {
-        await page
-          .locator(SIDE_HEADERS)
-          .nth(index)
-          .click();
+        await page.locator(SIDE_HEADERS).nth(index).click();
       }
 
       await page

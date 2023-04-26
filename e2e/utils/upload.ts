@@ -1,18 +1,13 @@
 import { expect, Page } from "@playwright/test";
 import {
-  SELECT_PROJECT,
-  SEARCH,
-  ANALYSIS_TYPE,
-  FIXTURE_DIR,
   ACCEPT_ALL_COOKIES,
-  CONTINUE,
-  UPLOAD_METADATA,
-  START_UPLOAD,
-  ACCEPT_UPLOAD_TERMS,
+  ANALYSIS_TYPE,
   COLLECTION_DATE,
   COLLECTION_LOCATION,
   COLUMN_SELECTOR,
+  CONTINUE,
   DISEASES_CONDITIONS,
+  FIXTURE_DIR,
   HOST_GENUS_SPECIES,
   HOST_ORGANISM,
   HOST_SEX,
@@ -21,11 +16,14 @@ import {
   KNOWN_ORGANISM,
   RNA_DNA,
   SAMPLE_TYPE,
+  SEARCH,
+  SELECT_PROJECT,
+  START_UPLOAD,
+  UPLOAD_METADATA,
 } from "../constants/common.const";
 import { Metadata } from "../types/metadata";
 import { findByTextRole, pressKey, selectFile } from "../utils/page";
 import { getFixture } from "./common";
-
 import { getMetadataField } from "./selectors";
 
 const metadataFieldFixture = getFixture("metadata_fields");
@@ -38,7 +36,9 @@ export async function uploadSampleFiles(
 ): Promise<any> {
   // select project
   await page.locator(SELECT_PROJECT).click();
-  await (await findByTextRole(page, SEARCH)).type(projectName, {
+  await (
+    await findByTextRole(page, SEARCH)
+  ).type(projectName, {
     timeout: 1000,
   });
 
@@ -90,10 +90,7 @@ export async function fillMetadata(
     .fill(metaData[COLLECTION_DATE] as string);
 
   // nucleotide type
-  await page
-    .locator(".dropdownTrigger-1fB9V")
-    .nth(1)
-    .click();
+  await page.locator(".dropdownTrigger-1fB9V").nth(1).click();
   await page
     .getByRole("option", { name: metaData["Nucleotide Type"] as string })
     .click();

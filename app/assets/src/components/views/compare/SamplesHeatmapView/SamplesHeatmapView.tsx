@@ -1800,7 +1800,6 @@ class SamplesHeatmapView extends React.Component<
     const { data, loading, selectedOptions, allSpeciesIds, allGeneraIds } =
       this.state;
 
-    const headerHeight = 116;
     const drawerWidth = 200;
 
     return (
@@ -1837,7 +1836,6 @@ class SamplesHeatmapView extends React.Component<
                 />
               }
               anchorPosition={"left"}
-              customHeaderHeight={headerHeight}
               customDrawerWidth={drawerWidth}
             />
           )}

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
-  FILTER_HEADERS,
   ALL_COLUMN_HEADERS,
+  FILTER_HEADERS,
 } from "../../constants/sample.const";
 import {
   metadataSectionTitles,

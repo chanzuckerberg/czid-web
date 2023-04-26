@@ -6,6 +6,7 @@ import { AMR_V2_FEATURE } from "~/components/utils/features";
 import { camelize } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import SampleReportContent from "../SampleReportContent";
+import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { AmrOutputDownloadView } from "./components/AmrOutputDownloadView";
 import { AmrSampleReport } from "./components/AmrSampleReport";
 
@@ -52,20 +53,23 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   };
 
   return (
-    <SampleReportContent
-      renderResults={renderResults}
-      loadingResults={loadingResults}
-      workflowRun={workflowRun}
-      sample={sample}
-      loadingInfo={{
-        message: "Your antimicrobial resistance results are being generated!",
-        linkText: "Learn More about our antimicrobial resistance pipeline",
-        helpLink: AMR_HELP_LINK,
-      }}
-      eventNames={{
-        error: "AmrView_sample-error-info-link_clicked",
-        loading: "AmrView_amr-doc-link_clicked",
-      }}
-    />
+    <>
+      <AmrFiltersContainer />
+      <SampleReportContent
+        renderResults={renderResults}
+        loadingResults={loadingResults}
+        workflowRun={workflowRun}
+        sample={sample}
+        loadingInfo={{
+          message: "Your antimicrobial resistance results are being generated!",
+          linkText: "Learn More about our antimicrobial resistance pipeline",
+          helpLink: AMR_HELP_LINK,
+        }}
+        eventNames={{
+          error: "AmrView_sample-error-info-link_clicked",
+          loading: "AmrView_amr-doc-link_clicked",
+        }}
+      />
+    </>
   );
 };

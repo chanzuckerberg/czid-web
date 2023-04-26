@@ -5,6 +5,7 @@
 
 .viewHeader {
   margin-bottom: 5px;
+  z-index: 3;
 
   .legacyLink {
     @include font-body-xxxs;

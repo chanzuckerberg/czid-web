@@ -1,7 +1,6 @@
-import path from "path";
 import { expect, test } from "@playwright/test";
-
 import dotenv from "dotenv";
+import path from "path";
 import {
   ENTER,
   METADATA_COUNT_SELECTOR,
@@ -39,10 +38,7 @@ test.describe("Search data tests", () => {
 
     // metadata project count
     const metadataProjectCount = String(
-      await page
-        .locator(METADATA_COUNT_SELECTOR)
-        .nth(1)
-        .textContent(),
+      await page.locator(METADATA_COUNT_SELECTOR).nth(1).textContent(),
     ).replace(/\D/g, "");
     expect(Number(metadataProjectCount)).toBeGreaterThanOrEqual(1);
   });
@@ -50,29 +46,20 @@ test.describe("Search data tests", () => {
   test("Should search samples", async ({ page }) => {
     await page.goto(`${process.env.BASEURL}`);
     await page.getByTestId(PUBLIC_MENU_ITEM).click();
-    await page
-      .getByTestId(SAMPLES.toLowerCase())
-      .nth(0)
-      .click();
+    await page.getByTestId(SAMPLES.toLowerCase()).nth(0).click();
     await page.getByPlaceholder(SEARCH_PUBLIC).fill(sampleName);
     await page.keyboard.press(ENTER);
     await page.waitForSelector(SAMPLE_NAME_SELECTOR);
 
     // sample count
     const sampleCount = String(
-      await page
-        .locator(RESULT_COUNT_SELECTOR)
-        .nth(0)
-        .textContent(),
+      await page.locator(RESULT_COUNT_SELECTOR).nth(0).textContent(),
     ).replace(/\D/g, "");
     expect(Number(sampleCount)).toBeGreaterThanOrEqual(1);
 
     // metadata sample count
     const metadataSampleCount = String(
-      await page
-        .locator(METADATA_COUNT_SELECTOR)
-        .nth(0)
-        .textContent(),
+      await page.locator(METADATA_COUNT_SELECTOR).nth(0).textContent(),
     ).replace(/\D/g, "");
     expect(Number(metadataSampleCount)).toBeGreaterThanOrEqual(1);
   });
