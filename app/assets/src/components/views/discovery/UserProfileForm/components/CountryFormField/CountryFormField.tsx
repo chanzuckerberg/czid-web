@@ -17,7 +17,7 @@ export function CountryFormField({
   const [inputValue, setInputValue] = useState<string>("");
 
   useEffect(() => {
-    setCountry(inputValue);
+    setCountry(inputValue?.trim());
     setWorldBankIncome(""); // clear previous value
     if (inputValue in countryNameToInfo) {
       setWorldBankIncome(countryNameToInfo[inputValue]["incomeLevel"]);
@@ -61,7 +61,7 @@ export function CountryFormField({
   return (
     <div className={cs.main}>
       <div className={cs.titleSection}>
-        <span className={cs.titleMainText}>Country:</span>
+        <span className={cs.titleMainText}>Country</span>
       </div>
 
       <div>
@@ -81,6 +81,7 @@ export function CountryFormField({
             <TextField
               {...params}
               value={inputValue}
+              placeholder="Choose Country"
               onChange={event => setInputValue(event.target.value)}
             />
           )}

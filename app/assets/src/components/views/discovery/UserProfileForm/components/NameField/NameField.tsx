@@ -11,17 +11,17 @@ export function NameField({ setFirstName, setLastName }: NameFieldProps) {
   const handleFirstNameInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    setFirstName(event.target.value);
+    setFirstName(event.target.value?.trim());
   };
   const handleLastNameInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    setLastName(event.target.value);
+    setLastName(event.target.value?.trim());
   };
 
   return (
     <div className={cs.main}>
-      <div className={cs.titleMainText}>Full Name:</div>
+      <div className={cs.titleMainText}>Full Name</div>
       <div className={cs.nameFields}>
         <div className={cs.InputContainerLeft}>
           <InputText

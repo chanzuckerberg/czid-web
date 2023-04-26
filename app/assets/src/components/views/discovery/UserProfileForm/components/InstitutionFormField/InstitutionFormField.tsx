@@ -27,7 +27,7 @@ export function InstitutionFormField({
         return acc;
       }, {});
       setRORInstitutions(Object.keys(institutionNameToInfo));
-      setInstitution(inputValue);
+      setInstitution(inputValue?.trim());
       setRORId(""); // clear previous value
       if (inputValue in institutionNameToInfo) {
         setRORId(institutionNameToInfo[inputValue]["id"]);
@@ -70,7 +70,7 @@ export function InstitutionFormField({
   return (
     <div className={cs.main}>
       <div className={cs.titleSection}>
-        <span className={cs.titleMainText}>Institution:</span>
+        <span className={cs.titleMainText}>Institution</span>
       </div>
 
       <div>
@@ -84,7 +84,13 @@ export function InstitutionFormField({
           options={rorInstitutions}
           onInputChange={handleInputChange}
           onSelect={handleSelectChange}
-          renderInput={params => <TextField value={inputValue} {...params} />}
+          renderInput={params => (
+            <TextField
+              value={inputValue}
+              placeholder="Institution Name"
+              {...params}
+            />
+          )}
         />
       </div>
     </div>

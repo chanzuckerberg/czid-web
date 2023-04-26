@@ -88,7 +88,6 @@ export function CheckboxWithInput({
         label={"label"}
         hideLabel={true}
         id={prefix}
-        variant="standard"
       />
     </div>
   );

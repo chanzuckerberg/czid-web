@@ -25,27 +25,36 @@ export function SequencingExpertiseFormField({
   return (
     <div className={cs.main}>
       <div className={cs.titleSection}>
-        <span className={cs.titleMainText}>
-          Which statement best describes your expertise level in analyzing
-          sequencing data?
-        </span>
-        <span className={cs.titleSubText}> (select 1)</span>
+        Which statement best describes your expertise level in analyzing
+        sequencing data?
       </div>
       <RadioGroup
         aria-labelledby="userform-radio-buttons-group-label"
         name="userform-radio-buttons-group"
       >
-        {allExpertiseOptions.map((expertiseOption, index) => (
-          <label key={index} className={cs.label}>
-            <InputRadio
-              label={expertiseOption}
-              value="expertiseOption"
-              onClick={() => handleRadioSelectChange(expertiseOption)}
-              stage={isChecked(expertiseOption) ? "checked" : "unchecked"}
-            />
-            <span>{expertiseOption}</span>
-          </label>
-        ))}
+        {allExpertiseOptions.map((expertiseOption, index) => {
+          const expertiseOptionLabel =
+            expertiseOption.text || expertiseOption.subtext;
+          return (
+            <label key={index} className={cs.label}>
+              <InputRadio
+                label={expertiseOptionLabel}
+                value="expertiseOption"
+                onClick={() => handleRadioSelectChange(expertiseOptionLabel)}
+                stage={
+                  isChecked(expertiseOptionLabel) ? "checked" : "unchecked"
+                }
+              />
+              <span>
+                {expertiseOption.text && (
+                  <span className={cs.boldText}>{expertiseOption.text}</span>
+                )}
+                {expertiseOption.text && " - "}
+                {expertiseOption.subtext}
+              </span>
+            </label>
+          );
+        })}
       </RadioGroup>
     </div>
   );

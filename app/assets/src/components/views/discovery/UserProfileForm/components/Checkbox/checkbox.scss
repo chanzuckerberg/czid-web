@@ -1,8 +1,14 @@
+@import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
 .checkbox {
+  @include font-body-xxs;
   display: flex;
   align-items: center;
   justify-content: left;
-  padding-bottom: $sds-spaces-m;
+  margin-bottom: $sds-spaces-l;
+  // Clear InputCheckbox top/bottom/left padding
+  :global(.MuiButtonBase-root.MuiCheckbox-root) {
+    padding: 0 9px 0 0;
+  }
 }

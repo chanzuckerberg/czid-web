@@ -1,16 +1,30 @@
+@import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
 .titleSection {
   padding-bottom: $sds-spaces-m;
 }
 .titleMainText {
-  font: $sds-font-header-s-600-font;
+  @include font-header-s;
   color: $sds-color-gray-black;
 }
 .titleSubText {
-  font: $sds-font-body-s-400-font;
+  @include font-body-s;
   color: $sds-color-gray-black;
 }
 .main {
   padding-bottom: $sds-spaces-xl;
+}
+
+@media (min-width: 992px) {
+  .optionsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: $sds-spaces-xxl;
+  }
+
+  .option {
+    width: 50%;
+    max-width: 381px;
+  }
 }

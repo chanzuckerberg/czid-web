@@ -53,27 +53,30 @@ export function CZIDUsecaseFormField({
         </span>
       </div>
 
-      <div>
+      <div className={cs.optionsContainer}>
         {CZID_USECASE_OPTIONS.map(option => (
-          <Checkbox
-            key={option}
-            checkBoxValue={option}
+          <div className={cs.option} key={option}>
+            <Checkbox
+              checkBoxValue={option}
+              isSelectionDisabled={
+                selectedUsecaseCheckboxes.length >= MAX_SELECTIONS
+              }
+              selectedCheckboxes={selectedUsecaseCheckboxes}
+              handleCheckboxChange={handleCheckboxChange}
+            />
+          </div>
+        ))}
+        <div className={cs.option}>
+          <CheckboxWithInput
+            selectedCheckboxes={selectedUsecaseCheckboxes}
+            setSelectedCheckboxes={setSelectedUsecaseCheckboxes}
             isSelectionDisabled={
               selectedUsecaseCheckboxes.length >= MAX_SELECTIONS
             }
-            selectedCheckboxes={selectedUsecaseCheckboxes}
-            handleCheckboxChange={handleCheckboxChange}
+            isCheckboxChecked={isOtherCheckboxChecked}
+            prefix={CHECKBOX_WITH_INPUT_PREFIX}
           />
-        ))}
-        <CheckboxWithInput
-          selectedCheckboxes={selectedUsecaseCheckboxes}
-          setSelectedCheckboxes={setSelectedUsecaseCheckboxes}
-          isSelectionDisabled={
-            selectedUsecaseCheckboxes.length >= MAX_SELECTIONS
-          }
-          isCheckboxChecked={isOtherCheckboxChecked}
-          prefix={CHECKBOX_WITH_INPUT_PREFIX}
-        />
+        </div>
       </div>
     </div>
   );

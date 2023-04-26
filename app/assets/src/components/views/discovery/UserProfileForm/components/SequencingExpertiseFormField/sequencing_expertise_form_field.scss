@@ -1,23 +1,32 @@
+@import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
 .titleSection {
   padding-bottom: $sds-spaces-m;
+  @include font-header-s;
 }
-.titleMainText {
-  font: $sds-font-header-s-600-font;
-  color: $sds-color-gray-black;
-}
-.titleSubText {
-  font: $sds-font-body-s-400-font;
-  color: $sds-color-gray-black;
-}
+
 .main {
   padding-bottom: $sds-spaces-xl;
 }
+
 .label {
+  @include font-body-xs;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding-bottom: $sds-spaces-l;
+
+  &:not(:last-child) {
+    padding-bottom: $sds-spaces-l;
+  }
+
+  // Clear SDS InputRadio top/bottom/left padding
+  :global(.MuiButtonBase-root.MuiRadio-root) {
+    padding: 0 9px 0 0 !important;
+  }
+
+  .boldText {
+    @include font-header-xs;
+  }
 }
