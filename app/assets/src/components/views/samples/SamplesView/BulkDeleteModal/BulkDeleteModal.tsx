@@ -135,7 +135,7 @@ const BulkDeleteModal = ({
           onClick={handleDeleteSamples}
           data-testid="delete-samples-button"
           disabled={isDeleting}
-          startIcon={isDeleting ? "loading" : "trashCan"}
+          startIcon={isDeleting ? "loading" : null}
         >
           {!isDeleting ? "Delete" : "Deleting"}
         </ErrorButton>

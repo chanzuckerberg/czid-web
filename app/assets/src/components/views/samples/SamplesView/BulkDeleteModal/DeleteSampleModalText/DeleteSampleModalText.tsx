@@ -6,7 +6,7 @@ import cs from "./delete_sample_modal_text.scss";
 const DeleteSampleModalText = ({ workflow }: { workflow: WORKFLOW_VALUES }) => (
   <div>
     <div>
-      Deleting your runs will permanently remove the following from CZ ID for
+      Deleting your runs will remove the following from CZ ID for
       <span className={cs.semibold}> you and any collaborators </span>
       with access:
     </div>
