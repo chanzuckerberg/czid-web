@@ -83,7 +83,6 @@ import {
   TRIGGERS,
   UPLOAD_FAILED,
   WORKFLOW_TRIGGERS,
-  WORKFLOW_TRIGGERS_BY_DOMAIN,
 } from "./constants";
 import cs from "./samples_view.scss";
 import ToolbarButtonIcon from "./ToolbarButtonIcon";
@@ -107,7 +106,6 @@ const SamplesView = forwardRef(function SamplesView(
     activeColumns = DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[SHORT_READ_MNGS_VALUE],
     currentDisplay = "table",
     currentTab,
-    domain,
     filters,
     filtersSidebarOpen,
     handleNewAmrCreationsFromMngs,
@@ -719,12 +717,11 @@ const SamplesView = forwardRef(function SamplesView(
       [TRIGGERS.bulk_delete]: renderBulkDeleteTrigger,
       [TRIGGERS.bulk_kickoff_amr]: renderBulkSamplesActionsMenu,
     };
-    // Get workflows triggers available in the current domain and workflow tab
+    // Get workflows triggers available in the current workflow tab
     const triggersAvailable = intersection(
-      WORKFLOW_TRIGGERS_BY_DOMAIN[domain],
+      Object.values(TRIGGERS),
       WORKFLOW_TRIGGERS[workflow],
     );
-    // @ts-expect-error lodash/fp should return a usable type
     const triggersToRender = triggersAvailable.map((trigger: string) => (
       <React.Fragment key={`${workflow}-${trigger}`}>
         {triggers[trigger]()}
