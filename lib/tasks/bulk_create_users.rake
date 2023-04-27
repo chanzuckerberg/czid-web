@@ -13,7 +13,7 @@ desc 'Bulk create users'
 #       "Outbreak Surveyor",
 #       "Microbiome Investigator"
 #     ],
-#     "group": [                      # optional
+#     "segments": [                      # optional
 #       "Africa CDC",
 #       "Biohub",
 #       "DPH",
@@ -37,8 +37,9 @@ task 'bulk_create_users', [:new_users_info, :current_user_id] => :environment do
     send_activation = new_user_params.delete(:send_activation)
 
     begin
-      UserFactoryService.call(
+      new_user = UserFactoryService.call(
         current_user: User.find(args[:current_user_id]),
+        created_by_user_id: args[:current_user_id],
         send_activation: send_activation,
         **new_user_params
       )
