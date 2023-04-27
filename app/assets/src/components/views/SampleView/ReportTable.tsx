@@ -71,7 +71,7 @@ const TAX_LEVEL_INDICES = {
   genus: 2,
 };
 
-type PickConsensusGenomeData = Pick<
+export type PickConsensusGenomeData = Pick<
   ConsensusGenomeData,
   "percentIdentity" | "taxId" | "taxName"
 >;

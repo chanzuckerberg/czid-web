@@ -1,11 +1,12 @@
 // These are the buttons that appear on a Report table row when hovered.
 import cx from "classnames";
-import { ButtonIcon } from "czifui";
+import { ButtonIcon, IconNameToSizes } from "czifui";
 import { filter, pick, size } from "lodash/fp";
 import React, { useContext, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
+import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { UserContext } from "~/components/common/UserContext";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
@@ -16,6 +17,7 @@ import {
   isPipelineFeatureAvailable,
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
+import { BlastData } from "~/interface/sampleView";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,
@@ -24,6 +26,7 @@ import {
   TAX_LEVEL_SPECIES,
 } from "./constants";
 import cs from "./hover_actions.scss";
+import { PickConsensusGenomeData } from "./ReportTable";
 
 interface HoverActionsProps {
   className?: string;
@@ -32,13 +35,13 @@ interface HoverActionsProps {
   coverageVizEnabled?: boolean;
   fastaEnabled?: boolean;
   onlyShowLongReadMNGSOptions: boolean;
-  onBlastClick: $TSFixMeFunction;
-  onConsensusGenomeClick: $TSFixMeFunction;
-  onContigVizClick: $TSFixMeFunction;
-  onCoverageVizClick: $TSFixMeFunction;
-  onFastaActionClick: $TSFixMeFunction;
-  onPhyloTreeModalOpened?: $TSFixMeFunction;
-  onPreviousConsensusGenomeClick?: $TSFixMeFunction;
+  onBlastClick: (params: BlastData) => void;
+  onConsensusGenomeClick: (options: PickConsensusGenomeData) => void;
+  onContigVizClick: (options: object) => void;
+  onCoverageVizClick: (newCoverageVizParams: CoverageVizParamsRaw) => void;
+  onFastaActionClick: (options: object) => void;
+  onPhyloTreeModalOpened?: (options: object) => void;
+  onPreviousConsensusGenomeClick?: (params: PickConsensusGenomeData) => void;
   percentIdentity?: number;
   phyloTreeEnabled?: boolean;
   pipelineVersion?: string;
@@ -46,8 +49,10 @@ interface HoverActionsProps {
   sampleId?: number;
   snapshotShareId?: string;
   taxonStatsByCountType?: {
-    ntContigs: $TSFixMeUnknown;
-    ntReads: $TSFixMeUnknown;
+    ntContigs: number;
+    ntReads: number;
+    nrContigs: number;
+    nrReads: number;
   };
   taxCategory?: string;
   taxCommonName?: string;
@@ -308,7 +313,7 @@ const HoverActions = ({
   // Render the hover action according to metadata.
   const renderHoverAction = (hoverAction: {
     key: string;
-    iconName: string;
+    iconName: keyof IconNameToSizes;
     divider: boolean;
     enabled: boolean;
     handleClick: $TSFixMeFunction;
@@ -335,11 +340,10 @@ const HoverActions = ({
       : () => hoverAction.handleClick(hoverAction.params || {});
 
     const buttonIconComponent = (
-      <div onClick={onClickFunction} className={cs.actionDot} role="none">
+      <div className={cs.actionDot} role="none">
         <ButtonIcon
           sdsSize="small"
           sdsType="primary"
-          // @ts-expect-error Type 'string' is not assignable to type 'keyof IconNameToSizes'
           sdsIcon={hoverAction.iconName}
           onClick={onClickFunction}
           disabled={!hoverAction.enabled}
