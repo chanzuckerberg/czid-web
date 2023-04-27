@@ -39,11 +39,14 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   const renderResults = () => {
     if (allowedFeatures.includes(AMR_V2_FEATURE)) {
       return (
-        <AmrSampleReport
-          reportTableData={reportTableData}
-          sample={sample}
-          workflowRun={workflowRun}
-        />
+        <>
+          <AmrFiltersContainer />
+          <AmrSampleReport
+            reportTableData={reportTableData}
+            sample={sample}
+            workflowRun={workflowRun}
+          />
+        </>
       );
     } else {
       return (
@@ -54,7 +57,6 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
 
   return (
     <>
-      <AmrFiltersContainer />
       <SampleReportContent
         renderResults={renderResults}
         loadingResults={loadingResults}
