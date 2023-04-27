@@ -139,7 +139,12 @@ const BulkDeleteModal = ({
         >
           {!isDeleting ? "Delete" : "Deleting"}
         </ErrorButton>
-        <Button sdsStyle="rounded" sdsType="secondary" onClick={onClose}>
+        <Button
+          sdsStyle="rounded"
+          sdsType="secondary"
+          onClick={onClose}
+          disabled={isDeleting}
+        >
           Cancel
         </Button>
       </DialogActions>
