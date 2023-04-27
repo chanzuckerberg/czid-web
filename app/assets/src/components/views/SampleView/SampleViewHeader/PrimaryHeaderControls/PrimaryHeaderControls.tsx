@@ -324,7 +324,10 @@ export const PrimaryHeaderControls = ({
           workflow={workflow}
           deleteId={isMngsWorkflow(workflow) ? sample?.id : currentRun?.id}
           onDeleteRunSuccess={onDeleteRunSuccess}
-          runFinalized={currentRun?.run_finalized}
+          runFinalized={
+            currentRun?.run_finalized ||
+            sample?.upload_error === "LOCAL_UPLOAD_FAILED"
+          }
           userOwnsRun={userId === sample?.user_id}
           redirectOnSuccess={redirectOnSuccess}
         />
