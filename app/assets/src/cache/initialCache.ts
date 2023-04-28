@@ -18,5 +18,8 @@ export const initalCache = new InMemoryCache({
         },
       },
     },
+    TaxonDescription: {
+      keyFields: ["taxId"],
+    },
   },
 });

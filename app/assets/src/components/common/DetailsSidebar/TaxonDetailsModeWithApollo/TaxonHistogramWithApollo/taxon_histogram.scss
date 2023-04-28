@@ -1,0 +1,19 @@
+@import "~czifui/dist/variables";
+
+.histogram {
+  width: 100%;
+  height: 160px;
+  margin: 0 auto;
+}
+
+.subtitle {
+  padding-top: 25px;
+  padding-bottom: $sds-spaces-m;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.infoIcon {
+  margin-left: $sds-spaces-xxs;
+  margin-top: $sds-spaces-xxs;
+}

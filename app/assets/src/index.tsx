@@ -60,11 +60,11 @@ export const apolloClient = new ApolloClient({
 
 // TODO: (smccanny): delete this once the servers are integrated either under the federated server or in the front end
 // federated Apollo client for testing
-// export const federationClient = new ApolloClient({
-//   uri: "/graphqlfed",
-//   cache: initalCache,
-//   typeDefs,
-// });
+export const federationClient = new ApolloClient({
+  uri: "/graphqlfed",
+  cache: initalCache,
+  typeDefs,
+});
 
 // Turn off camelcase rule
 /* eslint camelcase: 0 */

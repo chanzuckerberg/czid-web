@@ -12,12 +12,8 @@ import GeneDetailsMode, { GDMProps } from "./GeneDetailsMode";
 import PipelineStepDetailsMode, { PSDProps } from "./PipelineStepDetailsMode";
 import { PipelineStepDetailsModeWithApollo } from "./PipelineStepDetailsModeWithApollo";
 import SampleDetailsMode, { SampleDetailsModeProps } from "./SampleDetailsMode";
-import {
-  TaxonDetailsMode,
-  TaxonDetailsModeProps,
-  TaxonDetailsModeWithApollo,
-} from "./TaxonDetailsMode";
-
+import { TaxonDetailsMode, TaxonDetailsModeProps } from "./TaxonDetailsMode";
+import { TaxonDetailsModeWithApollo } from "./TaxonDetailsModeWithApollo";
 interface SidebarBase {
   visible: boolean;
   onClose: () => void;

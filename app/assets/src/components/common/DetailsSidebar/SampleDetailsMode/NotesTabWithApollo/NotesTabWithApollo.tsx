@@ -1,6 +1,6 @@
-import { useQuery } from "@apollo/client";
 import React, { useEffect, useState } from "react";
 import Textarea from "~/components/ui/controls/Textarea";
+import { useSimpleQuery } from "~/customHooks/useSimpleQuery";
 import { QueryResult } from "../../../QueryResult";
 import MetadataSection from "../MetadataSection";
 import cs from "../sample_details_mode.scss";
@@ -16,8 +16,8 @@ export const NotesTabWithApollo = ({ sampleId, editable }: NotesTabProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inProgessNotes, setInProgessNotes] = useState<string>("");
 
-  const { loading, error, data } = useQuery(GET_SAMPLE_NOTES, {
-    variables: { sampleId },
+  const { loading, error, data } = useSimpleQuery(GET_SAMPLE_NOTES, {
+    sampleId,
   });
 
   const { updateSampleNotes, isSavePending, isSaveError } = useNotesMutation();

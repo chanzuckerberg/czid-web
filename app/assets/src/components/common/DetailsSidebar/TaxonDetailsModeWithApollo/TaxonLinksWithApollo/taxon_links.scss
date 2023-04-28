@@ -1,0 +1,29 @@
+@import "~styles/themes/colors";
+@import "~czifui/dist/variables";
+
+.subtitle {
+  padding-top: 25px;
+  padding-bottom: $sds-spaces-m;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.linksSection {
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+.linksList {
+  min-width: 200px;
+  float: left;
+  list-style: none;
+}
+
+.link {
+  color: $sds-color-primary-400;
+  line-height: 30px;
+  cursor: pointer;
+}
