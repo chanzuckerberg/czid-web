@@ -973,7 +973,7 @@ RSpec.describe "Sample request", type: :request do
       it "logs to Segment for GDPR compliance" do
         sample_data = {
           user_email: @joe.email,
-          id: @joe_sample.id,
+          sample_id: @joe_sample.id,
           sample_name: @joe_sample.name,
           sample_user_id: @joe_sample.user.id,
           project_name: @joe_sample.project.name,

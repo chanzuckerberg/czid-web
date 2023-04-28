@@ -1458,7 +1458,7 @@ class SamplesController < ApplicationController
     project = @sample.project
     sample_info = {
       user_email: current_user.email,
-      id: @sample.id,
+      sample_id: @sample.id,
       sample_name: @sample.name,
       sample_user_id: @sample.user_id,
       project_id: project.id,
