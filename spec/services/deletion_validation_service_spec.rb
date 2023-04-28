@@ -181,7 +181,10 @@ RSpec.describe DeletionValidationService, type: :service do
       @joe_sample4 = create(:sample, project: @project, user: @joe, name: "Joe sample 4")
       @amr_wr = create(:workflow_run, sample: @joe_sample4, workflow: WorkflowRun::WORKFLOW[:amr], status: WorkflowRun::STATUS[:succeeded])
 
-      @workflow_run_ids = [@completed_joe_wr1.id, @in_prog_joe_wr.id, @failed_joe_wr.id, @completed_admin_wr.id, @in_prog_admin_wr.id, @amr_wr.id, @rerun_wr.id]
+      @joe_sample5 = create(:sample, project: @project, user: @joe, name: "Joe sample 5", upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED)
+      @historical_failed_upload_wr = create(:workflow_run, sample: @joe_sample5, workflow: consensus_genome, status: WorkflowRun::STATUS[:created])
+
+      @workflow_run_ids = [@completed_joe_wr1.id, @in_prog_joe_wr.id, @failed_joe_wr.id, @completed_admin_wr.id, @in_prog_admin_wr.id, @amr_wr.id, @rerun_wr.id, @historical_failed_upload_wr.id]
 
       @completed_joe_wr2 = create(:workflow_run, sample: @joe_sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
     end
@@ -223,6 +226,11 @@ RSpec.describe DeletionValidationService, type: :service do
         expect(@validate_wr_response[:valid_ids]).to include(@rerun_wr.id)
         expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@rerun_wr.sample_id)
       end
+
+      it "allows deletion of historical CG samples that failed to upload" do
+        expect(@validate_wr_response[:valid_ids]).to include(@historical_failed_upload_wr.id)
+        expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@historical_failed_upload_wr.sample_id)
+      end
     end
 
     context "when user is an admin" do
@@ -257,6 +265,11 @@ RSpec.describe DeletionValidationService, type: :service do
       it "allows deletion of runs on samples with deprecated workflow runs" do
         expect(@validate_wr_response[:valid_ids]).to include(@rerun_wr.id)
         expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@rerun_wr.sample_id)
+      end
+
+      it "allows deletion of historical CG samples that failed to upload" do
+        expect(@validate_wr_response[:valid_ids]).to include(@historical_failed_upload_wr.id)
+        expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@historical_failed_upload_wr.sample_id)
       end
     end
   end

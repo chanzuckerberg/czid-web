@@ -35,7 +35,7 @@ const BulkDeleteTrigger = ({
     return null;
   }
 
-  const didUserUploadAtLeastOneObjectWithCompleteRun = () => {
+  const isAtLeastOneObjectValidForDeletion = () => {
     // selected samples uploaded by current user
     // (admin users are able to delete anyone's completed runs, even runs from others)
     const filteredSamples = isUserAdmin
@@ -50,6 +50,14 @@ const BulkDeleteTrigger = ({
     // since the user can't delete these anyway
     if (!filteredSamples) return false;
 
+    // Allow deletion if a sample failed to upload
+    const uploadErrors = compact(
+      filteredSamples.map(object => get(["sample", "uploadError"], object)),
+    );
+    if (!isEmpty(uploadErrors)) {
+      return true;
+    }
+
     // if user uploaded something, check if any of the ones they uploaded completed
     if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
       const runStatuses = filteredSamples.map(object =>
@@ -62,12 +70,7 @@ const BulkDeleteTrigger = ({
       get(["sample", "pipelineRunFinalized"], object),
     );
 
-    // Allow deletion if a sample failed to upload (no pipeline runs, short read mNGS only)
-    const uploadErrors = compact(
-      filteredSamples.map(object => get(["sample", "uploadError"], object)),
-    );
-
-    return statuses.includes(1) || !isEmpty(uploadErrors);
+    return statuses.includes(1);
   };
 
   let disabled = false;
@@ -80,7 +83,7 @@ const BulkDeleteTrigger = ({
     disabled = true;
     disabledMessage = "Select at least 1 sample";
     // disabled because all selected samples cannot be deleted by this user at this time
-  } else if (!didUserUploadAtLeastOneObjectWithCompleteRun()) {
+  } else if (!isAtLeastOneObjectValidForDeletion()) {
     disabled = true;
     shouldInvertTooltip = false;
     primaryText = "";

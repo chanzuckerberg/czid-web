@@ -55,11 +55,11 @@ class MonitorPipelineResults
       Rails.logger.error(
         "UploadFailedEvent: Failed to upload local samples after 18 hours #{samples.pluck(:id)}"
       )
+      WorkflowRun.handle_sample_upload_failure(samples)
       samples.update_all( # rubocop:disable Rails/SkipsModelValidations
         status: Sample::STATUS_CHECKED,
         upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
       )
-      WorkflowRun.handle_sample_upload_failure(samples)
     end
   end
 
