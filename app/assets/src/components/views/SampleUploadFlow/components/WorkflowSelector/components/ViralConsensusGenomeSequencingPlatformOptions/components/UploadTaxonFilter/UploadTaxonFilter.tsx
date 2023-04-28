@@ -1,18 +1,20 @@
 import { Dropdown, DropdownPopper, LoadingIndicator } from "czifui";
-import { debounce, get, size, unionBy } from "lodash/fp";
+import { debounce, get, unionBy } from "lodash/fp";
 import React, { useEffect, useMemo, useState } from "react";
 import { getSearchSuggestions } from "~/api";
-import cs from "./taxon_filter_sds.scss";
-import { TaxonOption, TaxonSearchResult } from "./types";
+import {
+  TaxonOption,
+  TaxonSearchResult,
+} from "~/components/common/filters/types";
+import cs from "./upload_taxon_filter.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 600;
 const NO_SEARCH_RESULTS_TEXT = "No results";
 const MIN_SEARCH_LENGTH = 2;
 
-interface TaxonFilterSDSProps {
-  domain: string;
-  selectedTaxa: TaxonOption[];
-  handleChange: (selected: TaxonOption[]) => void;
+interface UploadTaxonFilterProps {
+  selectedTaxon: TaxonOption;
+  onChange: (taxonOption: TaxonOption) => void;
   disabled?: boolean;
 }
 
@@ -26,18 +28,27 @@ const StyledDropdownPopper = (props: any) => {
   );
 };
 
-const TaxonFilterSDS = ({
-  domain,
-  selectedTaxa = [],
-  handleChange,
-}: TaxonFilterSDSProps) => {
-  const [options, setOptions] = useState<TaxonOption[] | []>(selectedTaxa);
+const UNKNOWN_TAXON = {
+  id: null,
+  name: "Unknown",
+};
+
+const UploadTaxonFilter = ({
+  selectedTaxon,
+  onChange,
+}: UploadTaxonFilterProps) => {
+  const [options, setOptions] = useState<TaxonOption[]>();
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [noOptionsText, setNoOptionsText] = useState("");
 
-  const numTaxaSelected = size(selectedTaxa);
-  const label =
-    numTaxaSelected > 0 ? `${numTaxaSelected} Taxa Selected` : "Choose Taxon";
+  useEffect(() => {
+    // ensure the "unknown" taxon option is always available
+    if (!options) {
+      setOptions([UNKNOWN_TAXON]);
+    } else if (!options.includes(UNKNOWN_TAXON)) {
+      setOptions([...options, UNKNOWN_TAXON]);
+    }
+  }, [options]);
 
   useEffect(() => {
     // Stop the invocation of the debounced function after unmounting this component
@@ -49,8 +60,8 @@ const TaxonFilterSDS = ({
   const getTaxaOptionsForQuery = async (query: string) => {
     const searchResults = await getSearchSuggestions({
       query,
-      categories: ["taxon"],
-      domain,
+      categories: ["virus"],
+      domain: "upload",
     });
 
     // elasticsearch returns an empty object if there are no results
@@ -79,18 +90,17 @@ const TaxonFilterSDS = ({
         // Empty queries return no results from ES, and single character queries
         // are inefficient and not very helpful, so don't run a query in those cases
         if (query?.length >= MIN_SEARCH_LENGTH) {
-          // setSearchQueryInProgress(true);
           noOptionsText = NO_SEARCH_RESULTS_TEXT;
           newOptions = await getTaxaOptionsForQuery(query);
         }
 
-        setOptions(unionBy("id", newOptions, selectedTaxa));
+        setOptions(unionBy("id", newOptions, [selectedTaxon]));
         setNoOptionsText(noOptionsText);
         setOptionsLoading(false);
 
         return newOptions;
       }),
-    [selectedTaxa],
+    [selectedTaxon],
   );
 
   const onInputChange = (event: React.SyntheticEvent, value: string) => {
@@ -111,12 +121,14 @@ const TaxonFilterSDS = ({
     // long running search results replace an empty search
     if (value?.length < MIN_SEARCH_LENGTH) {
       setNoOptionsText("");
-      setOptions(unionBy("id", [], selectedTaxa));
+      setOptions([selectedTaxon]);
       setOptionsLoading(false);
     }
 
     loadOptionsForQuery(value);
   };
+
+  const label = "Select Taxon Name";
 
   return (
     <Dropdown
@@ -125,16 +137,14 @@ const TaxonFilterSDS = ({
         label,
         intent: "default",
         sdsStyle: "square",
-        sdsType: "multiSelect",
+        sdsType: "singleSelect",
       }}
-      label={label}
-      multiple
       isTriggerChangeOnOptionClick
       search
+      label={label}
       options={options}
-      onChange={handleChange}
-      onClose={() => setOptions(selectedTaxa)}
-      value={selectedTaxa}
+      onChange={onChange}
+      value={selectedTaxon}
       DropdownMenuProps={{
         keepSearchOnSelect: true,
         loading: optionsLoading,
@@ -149,4 +159,4 @@ const TaxonFilterSDS = ({
   );
 };
 
-export default TaxonFilterSDS;
+export { UploadTaxonFilter };

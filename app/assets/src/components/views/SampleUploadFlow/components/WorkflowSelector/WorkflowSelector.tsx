@@ -1,5 +1,6 @@
 import { size } from "lodash/fp";
 import React, { useContext } from "react";
+import { TaxonOption } from "~/components/common/filters/types";
 import { UserContext } from "~/components/common/UserContext";
 import {
   AMR_V1_FEATURE,
@@ -34,6 +35,7 @@ interface WorkflowSelectorProps {
   onClearLabsChange?: (usedClearLabs: boolean) => void;
   onMedakaModelChange?: (selected: string) => void;
   onRefSeqFileChanged(file?: File): void;
+  onTaxonChange(taxon: TaxonOption): void;
   onTechnologyToggle?: (
     workflow: UploadWorkflows,
     technology: SEQUENCING_TECHNOLOGY_OPTIONS,
@@ -48,6 +50,7 @@ interface WorkflowSelectorProps {
   projectPipelineVersions: ProjectPipelineVersions;
   selectedMedakaModel?: string;
   selectedGuppyBasecallerSetting?: string;
+  selectedTaxon: TaxonOption;
   selectedTechnology?: SEQUENCING_TECHNOLOGY_OPTIONS;
   selectedWetlabProtocol?: string;
   selectedWorkflows?: Set<UploadWorkflows>;
@@ -80,6 +83,7 @@ const WorkflowSelector = ({
   onClearLabsChange,
   onMedakaModelChange,
   onRefSeqFileChanged,
+  onTaxonChange,
   onTechnologyToggle,
   onGuppyBasecallerSettingChange,
   onWetlabProtocolChange,
@@ -88,6 +92,7 @@ const WorkflowSelector = ({
   projectPipelineVersions,
   selectedMedakaModel,
   selectedGuppyBasecallerSetting,
+  selectedTaxon,
   selectedTechnology,
   selectedWetlabProtocol,
   selectedWorkflows,
@@ -195,8 +200,10 @@ const WorkflowSelector = ({
             <ViralConsensusGenomeSequencingPlatformOptions
               bedFileName={bedFileName}
               refSeqFileName={refSeqFileName}
+              selectedTaxon={selectedTaxon}
               onBedFileChanged={onBedFileChanged}
               onRefSeqFileChanged={onRefSeqFileChanged}
+              onTaxonChange={onTaxonChange}
             />
           }
         />

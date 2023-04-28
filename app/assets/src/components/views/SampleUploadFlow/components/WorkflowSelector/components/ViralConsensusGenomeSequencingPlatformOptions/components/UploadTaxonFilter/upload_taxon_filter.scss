@@ -1,0 +1,16 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+$FILTER_WIDTH: 200px;
+
+.dropdown {
+  width: $FILTER_WIDTH;
+  margin-bottom: 0px !important;
+}
+
+.dropdownPopper {
+  min-width: $FILTER_WIDTH;
+  width: fit-content;
+  margin-top: $sds-spaces-xs;
+}

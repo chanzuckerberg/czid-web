@@ -58,60 +58,60 @@ const AnalysisType = ({
     "This is disabled because this pipeline cannot be run with the current selection.";
 
   return (
-    <Tooltip
-      classes={{ arrow: cs.tooltipArrow }}
-      arrow
-      placement="top-start"
-      title={tooltipText}
-      disableHoverListener={
-        !allowedFeatures.includes(AMR_V1_FEATURE) || !isDisabled
-      }
+    <div
+      // re:role, typically, we would want an actual button, but this is a container that holds
+      // buttons, and you can't have a button be a descendant of a button
+      role="checkbox"
+      aria-checked={isSelected}
+      className={cx(
+        commonStyles.selectableOption,
+        isSelected && commonStyles.selected,
+        isDisabled && commonStyles.disabled,
+      )}
+      onClick={() => (isDisabled ? null : onClick())}
+      key={title}
+      data-testid={`analysis-type-${kebabCase(title)}`}
     >
-      <div
-        // re:role, typically, we would want an actual button, but this is a container that holds
-        // buttons, and you can't have a button be a descendant of a button
-        role="checkbox"
-        aria-checked={isSelected}
-        className={cx(
-          commonStyles.selectableOption,
-          isSelected && commonStyles.selected,
-          isDisabled && commonStyles.disabled,
-        )}
-        onClick={() => (isDisabled ? null : onClick())}
-        key={title}
-        data-testid={`analysis-type-${kebabCase(title)}`}
+      <Tooltip
+        classes={{ arrow: cs.tooltipArrow }}
+        arrow
+        placement="top-start"
+        title={tooltipText}
+        disableHoverListener={
+          !allowedFeatures.includes(AMR_V1_FEATURE) || !isDisabled
+        }
       >
-        {radioOption}
-        <div className={cs.iconSample}>
-          {/* use a custom icon if one is given, otherwise generate an SDS icon */}
-          {customIcon ?? (
-            <Icon
-              sdsIcon={sdsIcon}
-              sdsSize="xl"
-              sdsType="static"
-              className={isDisabled && cs.disabledIcon}
-            />
+        <span>{radioOption}</span>
+      </Tooltip>
+      <div className={cs.iconSample}>
+        {/* use a custom icon if one is given, otherwise generate an SDS icon */}
+        {customIcon ?? (
+          <Icon
+            sdsIcon={sdsIcon}
+            sdsSize="xl"
+            sdsType="static"
+            className={isDisabled && cs.disabledIcon}
+          />
+        )}
+      </div>
+      <div className={commonStyles.optionText}>
+        <div className={cx(commonStyles.title, isBeta && cs.alignBetaIcon)}>
+          <span>{title}</span>
+          {isBeta && (
+            <span className={cs.statusLabel}>
+              <StatusLabel
+                className={isDisabled && cs.disabledStatus}
+                inline
+                status="Beta"
+                type={isDisabled ? "default" : "beta"}
+              />
+            </span>
           )}
         </div>
-        <div className={commonStyles.optionText}>
-          <div className={cx(commonStyles.title, isBeta && cs.alignBetaIcon)}>
-            <span>{title}</span>
-            {isBeta && (
-              <span className={cs.statusLabel}>
-                <StatusLabel
-                  className={isDisabled && cs.disabledStatus}
-                  inline
-                  status="Beta"
-                  type={isDisabled ? "default" : "beta"}
-                />
-              </span>
-            )}
-          </div>
-          <div className={cs.description}>{description}</div>
-          {isSelected && sequencingPlatformOptions}
-        </div>
+        <div className={cs.description}>{description}</div>
+        {isSelected && sequencingPlatformOptions}
       </div>
-    </Tooltip>
+    </div>
   );
 };
 

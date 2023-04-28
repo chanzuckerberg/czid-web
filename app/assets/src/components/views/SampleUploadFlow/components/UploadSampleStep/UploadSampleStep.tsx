@@ -13,6 +13,7 @@ import {
   get,
   includes,
   intersection,
+  isEqual,
   kebabCase,
   keyBy,
   keys,
@@ -39,6 +40,7 @@ import {
   withAnalytics,
 } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import { TaxonOption } from "~/components/common/filters/types";
 import ProjectCreationModal from "~/components/common/ProjectCreationModal";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import { UserContext } from "~/components/common/UserContext";
@@ -120,6 +122,7 @@ class UploadSampleStep extends React.Component<
     removedLocalFiles: [], // Invalid local files that were removed.
     // TODO (mlila): move the following technology-specific state/callbacks as sub-state within selectedWorkflows
     selectedGuppyBasecallerSetting: null,
+    selectedTaxon: null,
     // we can only select one technology at a time. If the user attempts to select a second technology
     // the first will automatically be deselected for them and we will use the tech most recently chosen
     selectedTechnology: null,
@@ -583,6 +586,14 @@ class UploadSampleStep extends React.Component<
   handleRefSeqFileChanged = (newFile?: File) => {
     this.props.onDirty();
     this.setState({ refSeqFile: newFile });
+  };
+
+  handleTaxonChange = (newTaxon: TaxonOption) => {
+    // prevent infinite loop
+    if (isEqual(newTaxon, this.state.selectedTaxon)) return;
+
+    this.props.onDirty();
+    this.setState({ selectedTaxon: newTaxon });
   };
 
   handleWetlabProtocolChange = (selected: string) => {
@@ -1374,6 +1385,7 @@ class UploadSampleStep extends React.Component<
       selectedMedakaModel,
       selectedGuppyBasecallerSetting,
       selectedProject,
+      selectedTaxon,
       selectedTechnology,
       selectedWetlabProtocol,
       selectedWorkflows,
@@ -1443,6 +1455,7 @@ class UploadSampleStep extends React.Component<
               this.handleGuppyBasecallerSettingChange
             }
             onWetlabProtocolChange={this.handleWetlabProtocolChange}
+            onTaxonChange={this.handleTaxonChange}
             onTechnologyToggle={this.handleTechnologyToggle}
             onWorkflowToggle={this.handleWorkflowToggle}
             currentTab={currentTab}
@@ -1451,6 +1464,7 @@ class UploadSampleStep extends React.Component<
             refSeqFileName={refSeqFile?.name}
             selectedMedakaModel={selectedMedakaModel}
             selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
+            selectedTaxon={selectedTaxon}
             selectedTechnology={selectedTechnology}
             selectedWorkflows={selectedWorkflows}
             selectedWetlabProtocol={selectedWetlabProtocol}

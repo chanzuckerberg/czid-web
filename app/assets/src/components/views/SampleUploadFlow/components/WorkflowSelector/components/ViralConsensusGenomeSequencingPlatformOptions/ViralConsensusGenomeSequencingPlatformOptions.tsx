@@ -1,25 +1,31 @@
 import cx from "classnames";
 import { Tooltip } from "czifui";
 import React from "react";
+import { TaxonOption } from "~/components/common/filters/types";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import { TooltipIcon } from "../TooltipIcon";
 import { UploadButton } from "./components/UploadButton";
 import { UploadedFileName } from "./components/UploadedFileName";
+import { UploadTaxonFilter } from "./components/UploadTaxonFilter";
 import cs from "./viral_consensus_genmone_sequencing_platform_options.scss";
 
 interface ViralConsensusGenomeSequencingPlatformOptionsProps {
   bedFileName: string;
   refSeqFileName: string;
+  selectedTaxon: TaxonOption;
   onBedFileChanged(file?: File): void;
   onRefSeqFileChanged(file?: File): void;
+  onTaxonChange(taxa: TaxonOption): void;
 }
 
 const ViralConsensusGenomeSequencingPlatformOptions = ({
   bedFileName,
   refSeqFileName,
+  selectedTaxon,
   onBedFileChanged,
   onRefSeqFileChanged,
+  onTaxonChange,
 }: ViralConsensusGenomeSequencingPlatformOptionsProps) => {
   const refFileTooltipText = (
     <div>
@@ -55,6 +61,12 @@ const ViralConsensusGenomeSequencingPlatformOptions = ({
           >
             <TooltipIcon />
           </Tooltip>
+        </div>
+        <div className={cs.dropdown}>
+          <UploadTaxonFilter
+            selectedTaxon={selectedTaxon}
+            onChange={onTaxonChange}
+          />
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+import { TaxonOption } from "~/components/common/filters/types";
 import { ProjectPipelineVersions, SampleUploadType } from "~/interface/shared";
 import {
   SEQUENCING_TECHNOLOGY_OPTIONS,
@@ -36,6 +37,7 @@ export interface UploadSampleStepState {
   remoteSelectedSampleIds: Set<string>;
   removedLocalFiles: $TSFixMe[];
   selectedGuppyBasecallerSetting: $TSFixMe;
+  selectedTaxon: TaxonOption;
   selectedTechnology: SEQUENCING_TECHNOLOGY_OPTIONS;
   selectedProject: $TSFixMe;
   selectedMedakaModel: string; // TODO: This should be an enum of available models
