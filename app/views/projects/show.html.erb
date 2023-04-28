@@ -51,7 +51,7 @@
             <td><%= sample.id %></td>
             <td class='small'><%= sample.user.email if sample.user %></td>
             <td class='small'><u><%= link_to sample.project.name, sample.project %></u></td>
-            <td class='small'><%= run.class == PipelineRun ? WorkflowRun::WORKFLOW[:short_read_mngs] : run.workflow %></td>
+            <td class='small'><%= run.workflow %></td>
             <td><%= sample.status %>
               <% if sample.status.to_s == 'created' and sample.created_at < 30.minutes.ago %>
                   <%= button_to 'reupload', reupload_source_sample_path(sample), method: :put %>
