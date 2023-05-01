@@ -1544,10 +1544,7 @@ class SamplesController < ApplicationController
     workflow = collection_params[:workflow]
     inputs_json = collection_params[:inputs_json].to_json
     @sample.create_and_dispatch_workflow_run(workflow, inputs_json: inputs_json)
-    render json: @sample.workflow_runs.non_deprecated.reverse.as_json(
-      only: WorkflowRun::DEFAULT_FIELDS,
-      methods: [:input_error, :inputs, :parsed_cached_results]
-    )
+    render json: @sample.workflow_runs_info
   end
 
   # POST /samples/bulk_kickoff_workflow_runs
