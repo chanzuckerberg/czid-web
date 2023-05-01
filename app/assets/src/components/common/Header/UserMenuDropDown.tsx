@@ -32,7 +32,11 @@ const UserMenuDropDown = ({
         text={
           <a
             className={cs.option}
-            href="/bulk_downloads"
+            href={
+              !adminUser
+                ? "/bulk_downloads"
+                : `/bulk_downloads?searchBy=${userName}&n=10`
+            }
             onClick={() =>
               trackEvent("Header_dropdown-downloads-option_clicked")
             }

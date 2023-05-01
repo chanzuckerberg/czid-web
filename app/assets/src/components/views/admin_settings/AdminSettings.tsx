@@ -1,12 +1,13 @@
 import { FormControl } from "@mui/material";
 import { Button, Callout, InputText } from "czifui";
 import { compact, isEmpty, map, size, trim } from "lodash/fp";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   getLaunchedFeatureList,
   modifyFeatureFlagForUsers,
   setWorkflowVersion,
 } from "~/api/index";
+import { UserContext } from "~/components/common/UserContext";
 import * as features from "~/components/utils/features";
 import cs from "./admin_settings.scss";
 import { FeatureFlagList } from "./components/FeatureFlagList";
@@ -158,6 +159,7 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
     const unlaunchedFeatures = featuresList
       .filter(feature => !launchedFeatureList?.includes(feature))
       .sort();
+    const { userEmail } = useContext(UserContext) ?? {};
 
     return (
       <div className={cs.addFeatureFlagContainer}>
@@ -173,6 +175,7 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
             label="User(s)"
             id="users"
             style={{ minWidth: "400px" }}
+            defaultValue={userEmail}
             inputProps={{ style: { minWidth: "400px" } }}
             onChange={e =>
               setFeatureFlagUsersList(new Set(e.target.value.split(",")))

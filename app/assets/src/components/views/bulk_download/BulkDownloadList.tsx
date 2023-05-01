@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { InputText } from "czifui";
 import { some } from "lodash/fp";
 import React from "react";
 import { SortDirection } from "react-virtualized";
@@ -10,6 +11,7 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
+import Label from "~/components/ui/labels/Label";
 import { APOLLO_CLIENT_STATE_MANAGEMENT } from "~/components/utils/features";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Table } from "~/components/visualizations/table";
@@ -64,15 +66,27 @@ const getTooltipText = (bulkDownload: $TSFixMe) => {
 
   return null;
 };
+
 class BulkDownloadList extends React.Component {
   state = {
     bulkDownloads: null,
     modalOpen: false,
     selectedBulkDownload: null,
     autoUpdateCount: 0,
+    sidebarOpen: false,
+    searchBy: null,
+    searchLimit: null,
   };
 
+  get urlParams() {
+    return new URL(window.location.href).searchParams;
+  }
+
   componentDidMount() {
+    this.setState({
+      searchBy: this.urlParams.get("searchBy"),
+      searchLimit: this.urlParams.get("n"),
+    });
     this.autoUpdateBulkDownloads();
   }
 
@@ -85,7 +99,10 @@ class BulkDownloadList extends React.Component {
   };
 
   autoUpdateBulkDownloads = async () => {
-    const bulkDownloads = await getBulkDownloads();
+    const bulkDownloads = await getBulkDownloads({
+      searchBy: this.urlParams.get("searchBy"),
+      n: this.urlParams.get("n"),
+    });
     const newAutoUpdateCount = this.state.autoUpdateCount + 1;
 
     this.setState({
@@ -209,6 +226,13 @@ class BulkDownloadList extends React.Component {
     };
   };
 
+  handleSearchKeyDown = event => {
+    if (event.key === "Enter") {
+      const { searchBy, searchLimit } = this.state;
+      window.location.href = `/bulk_downloads?searchBy=${searchBy}&n=${searchLimit}`;
+    }
+  };
+
   renderBody() {
     const { autoUpdateCount } = this.state;
 
@@ -265,8 +289,9 @@ class BulkDownloadList extends React.Component {
   }
 
   render() {
-    // @ts-expect-error sidebarOpen does not exist on this.state
+    const { admin } = this.context;
     const { selectedBulkDownload, sidebarOpen } = this.state;
+
     return (
       <div
         className={cx(
@@ -283,6 +308,38 @@ class BulkDownloadList extends React.Component {
               </ViewHeader.Pretitle>
               <ViewHeader.Title label={"Downloads"} />
             </ViewHeader.Content>
+            <ViewHeader.Controls>
+              {admin && (
+                <>
+                  <Label text="Admin Settings" color="blue" size="mini" />
+                  <br />
+                  <small>Show downloads for:</small>
+                  <InputText
+                    sdsType="textField"
+                    size="small"
+                    id="searchBy"
+                    label="Show downloads for"
+                    hideLabel
+                    defaultValue={this.urlParams.get("searchBy")}
+                    onChange={e => this.setState({ searchBy: e.target.value })}
+                    onKeyDown={this.handleSearchKeyDown}
+                  />
+                  <small>Downloads to show:</small>
+                  <InputText
+                    sdsType="textField"
+                    size="small"
+                    id="n"
+                    label="Downloads to show"
+                    hideLabel
+                    defaultValue={this.urlParams.get("n")}
+                    onChange={e =>
+                      this.setState({ searchLimit: e.target.value })
+                    }
+                    onKeyDown={this.handleSearchKeyDown}
+                  />
+                </>
+              )}
+            </ViewHeader.Controls>
           </ViewHeader>
         </NarrowContainer>
         <Divider />

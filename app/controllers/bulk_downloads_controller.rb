@@ -121,9 +121,27 @@ class BulkDownloadsController < ApplicationController
     respond_to do |format|
       format.html
       format.json do
-        render json: current_power.viewable_bulk_downloads
-                                  .includes(:pipeline_runs, :workflow_runs, :user)
-                                  .map { |bulk_download| format_bulk_download(bulk_download, admin: current_user.admin?) }
+        scope = current_power.viewable_bulk_downloads
+
+        # Allow admins to narrow down which bulk downloads they get
+        search_by = params["searchBy"]
+        max_items = params["n"]
+        if current_user.admin?
+          # Filter by user name or email
+          if search_by.present?
+            user_ids = User.where("name like ? OR email like ?", "%#{search_by}%", "%#{search_by}%").pluck(:id)
+            scope = scope.where(user_id: user_ids)
+          end
+
+          # Set a max number of items
+          if max_items.present?
+            scope = scope.order(id: :desc).limit(max_items)
+          end
+        end
+
+        render json: scope
+          .includes(:pipeline_runs, :workflow_runs, :user)
+          .map { |bulk_download| format_bulk_download(bulk_download, admin: current_user.admin?) }
       end
     end
   end

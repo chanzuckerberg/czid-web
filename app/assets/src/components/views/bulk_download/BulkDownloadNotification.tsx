@@ -1,5 +1,6 @@
 import React from "react";
 import { trackEvent } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import cs from "./bulk_download_notification.scss";
@@ -11,6 +12,7 @@ interface BulkDownloadNotificationProps {
 export default class BulkDownloadNotification extends React.Component<BulkDownloadNotificationProps> {
   render() {
     const { onClose } = this.props;
+    const { admin, userName } = this.context || {};
 
     const label = (
       <div className={cs.label}>
@@ -18,7 +20,11 @@ export default class BulkDownloadNotification extends React.Component<BulkDownlo
           We&apos;ve received your download request and are busy preparing your
           data. To check the status of your download, visit the{" "}
           <a
-            href="/bulk_downloads"
+            href={
+              !admin
+                ? "/bulk_downloads"
+                : `/bulk_downloads?searchBy=${userName}&n=10`
+            }
             onClick={() =>
               trackEvent("BulkDownloadNotification_downloads-page-link-clicked")
             }
@@ -46,3 +52,5 @@ export const showBulkDownloadNotification = () => {
     },
   );
 };
+
+BulkDownloadNotification.contextType = UserContext;
