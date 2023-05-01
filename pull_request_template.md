@@ -1,6 +1,6 @@
 # Description
 
-[Shortcut Ticket](https://app.shortcut.com/idseq/story/#####)
+Ticket: CZID-XXXXX
 
 *The intended change, motivation and consequences.*
 
