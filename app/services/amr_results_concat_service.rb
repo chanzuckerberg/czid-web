@@ -7,9 +7,9 @@ class AmrResultsConcatService
     end
   end
 
-  class EmptyS3FileError < StandardError
+  class S3FileNotFound < StandardError
     def initialize(s3_path)
-      super("Failed to read data at: #{s3_path}")
+      super("The s3 file was not found: #{s3_path}")
     end
   end
 
@@ -37,7 +37,7 @@ class AmrResultsConcatService
         headers_extra = ["total_reads", "rpm", "dpm"]
         unless content.empty?
           if headers.nil?
-            headers = CSVSafe.parse(get_output_file_contents(workflow_runs.first), col_sep: "\t").first
+            headers = CSVSafe.parse(content, col_sep: "\t").first
             unless headers.nil?
               csv << headers + headers_extra
             end
@@ -66,7 +66,7 @@ class AmrResultsConcatService
   def get_output_file_contents(wr)
     s3_path = wr.output_path(AmrWorkflowRun::OUTPUT_REPORT)
     content = S3Util.get_s3_file(s3_path)
-    raise EmptyS3FileError, s3_path unless content
+    raise S3FileNotFound, s3_path if content.blank?
 
     return content
   end

@@ -311,6 +311,7 @@ module PipelineRunsHelper
   ASSEMBLY_PIPELINE_VERSION = '3.1'.freeze
   COVERAGE_VIZ_PIPELINE_VERSION = '3.6'.freeze
   NEW_HOST_FILTERING_PIPELINE_VERSION = '8'.freeze
+  BOWTIE2_ERCC_READS_PIPELINE_VERSION = "8.1".freeze
 
   def pipeline_version_at_least(pipeline_version, test_version)
     unless pipeline_version
@@ -338,6 +339,10 @@ module PipelineRunsHelper
 
   def pipeline_version_uses_new_host_filtering_stage(pipeline_version)
     pipeline_version_at_least(pipeline_version, NEW_HOST_FILTERING_PIPELINE_VERSION)
+  end
+
+  def pipeline_version_uses_bowtie2_to_calculate_ercc_reads(pipeline_version)
+    pipeline_version_at_least(pipeline_version, BOWTIE2_ERCC_READS_PIPELINE_VERSION)
   end
 
   def pipeline_version_has_assembly(pipeline_version)

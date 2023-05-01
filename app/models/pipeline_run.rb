@@ -88,7 +88,8 @@ class PipelineRun < ApplicationRecord
   INVALID_STEP_NAME = "invalid_step_input.json".freeze
   NONHOST_FASTQ_OUTPUT_NAME = 'taxid_annot.fasta'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
-  MODERN_ERCC_OUTPUT_NAME = "ERCC_counts.tsv".freeze
+  BOWTIE2_ERCC_OUTPUT_NAME = "bowtie2_ERCC_counts.tsv".freeze
+  KALLISTO_ERCC_OUTPUT_NAME = "ERCC_counts.tsv".freeze
   HOST_GENE_COUNTS_OUTPUT_NAME = "reads_per_gene.kallisto.tsv".freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
@@ -449,7 +450,14 @@ class PipelineRun < ApplicationRecord
   end
 
   def ercc_output_path
-    pipeline_version_uses_new_host_filtering_stage(pipeline_version) ? MODERN_ERCC_OUTPUT_NAME : ERCC_OUTPUT_NAME
+    if pipeline_version_uses_new_host_filtering_stage(pipeline_version)
+      if pipeline_version_uses_bowtie2_to_calculate_ercc_reads(pipeline_version)
+        return BOWTIE2_ERCC_OUTPUT_NAME
+      else
+        return KALLISTO_ERCC_OUTPUT_NAME
+      end
+    end
+    ERCC_OUTPUT_NAME
   end
 
   def db_load_ercc_counts
@@ -466,7 +474,9 @@ class PipelineRun < ApplicationRecord
       ercc_counts_array << { name: name, count: count }
     end
     update(ercc_counts_attributes: ercc_counts_array)
-    total_ercc_reads = ercc_counts_array.pluck(:count).sum * sample.input_files.count
+    total_ercc_reads = ercc_counts_array.pluck(:count).sum
+    total_ercc_reads *= sample.input_files.count unless pipeline_version_uses_bowtie2_to_calculate_ercc_reads(pipeline_version)
+
     update(total_ercc_reads: total_ercc_reads)
   end
 

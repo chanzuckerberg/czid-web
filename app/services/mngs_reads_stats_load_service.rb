@@ -69,7 +69,9 @@ class MngsReadsStatsLoadService
     fastp_qc_counts << { task: "fastp_low_quality_reads", reads_after: reads_after_quality }
     fastp_qc_counts << { task: "fastp_too_short_reads", reads_after: reads_after_length }
     fastp_qc_counts << { task: "fastp_low_complexity_reads", reads_after: reads_after_complexity }
-    fastp_qc_counts
+    return fastp_qc_counts
+  rescue Aws::S3::Errors::NoSuchKey => e
+    LogUtil.log_error("MngsReadsStatsLoadService - File not found: #{key}", exception: e)
   end
 
   # Given the stats fetched from all *.count files, calculates additional stats.
@@ -113,15 +115,6 @@ class MngsReadsStatsLoadService
     if total
       all_counts << { total_reads: total[:reads_after] }
       pipeline_run.total_reads = total[:reads_after]
-    end
-
-    # Load reads after bowtie2 host filtering
-    # reads_after_bowtie2_and_ercc = reads_after complexity - (reads_lost_in_bowtie2 - pipeline_run.total_ercc_reads)
-    bowtie2 = all_counts.detect { |entry| entry.value?("bowtie2_host_filtered_out") }
-    fastp_low_complexity = all_counts.detect { |entry| entry.value?("fastp_low_complexity_reads") }
-    if bowtie2 && fastp_low_complexity && pipeline_run&.total_ercc_reads
-      reads_lost_in_bowtie2 = fastp_low_complexity[:reads_after] - bowtie2[:reads_after].to_i
-      bowtie2[:reads_after] = fastp_low_complexity[:reads_after] - (reads_lost_in_bowtie2 - pipeline_run.total_ercc_reads)
     end
 
     # Load truncation
