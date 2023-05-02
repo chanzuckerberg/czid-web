@@ -453,13 +453,22 @@ class UploadSampleStep extends React.Component<
 
   getPermittedSelectedWorkflows = ({
     selectedWorkflows,
-    permittedWorkflows,
+    workflowsForNewSelection,
     technology,
-  }): Set<UploadWorkflows> => {
+  }): UploadWorkflows[] => {
+    let permittedWorkflows = [...workflowsForNewSelection];
+
+    // Disallow any previously selected workflows that are incompatible with the new option
+    // (for example, if the technologies conflict)
+    selectedWorkflows = filter(
+      w => permittedWorkflows.includes(w),
+      Array.from(selectedWorkflows),
+    );
+
     // Then iterate over all the selected workflows. The only workflows that should be allowed are
     // the ones that are allowed for _all_ of the workflows which are already selected.
     // (ie: an intersection of the "allowed" lists for selected workflows)
-    forEach(selectedWorkflows, workflow => {
+    forEach((workflow: UploadWorkflows) => {
       // Figure out what is permitted for this specific workflow
       const allowedConcurrentWorkflows =
         ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY[workflow][technology];
@@ -468,16 +477,9 @@ class UploadSampleStep extends React.Component<
       permittedWorkflows = permittedWorkflows.filter(w =>
         allowedConcurrentWorkflows.includes(w),
       );
-    });
+    }, Array.from(selectedWorkflows));
 
-    // Uncheck any previously selected workflows that are incompatible with the new option
-    // (for example, if the technologies conflict)
-    return new Set(
-      filter(
-        w => permittedWorkflows.includes(w),
-        Array.from(selectedWorkflows),
-      ),
-    ) as Set<UploadWorkflows>;
+    return permittedWorkflows;
   };
 
   // TODO (mlila): when we refactor this component, we should calculate permitted workflows in
@@ -489,8 +491,9 @@ class UploadSampleStep extends React.Component<
     const { selectedWorkflows, selectedTechnology } = this.state;
 
     let newTechnology;
+    let workflowsForNewSelection = [];
     let permittedWorkflows = [];
-    let filteredWorkflows: Set<UploadWorkflows>;
+    let newSelectedWorkflows: Set<UploadWorkflows>;
 
     if (newSelectedWorkflow) {
       // new selection happened
@@ -498,39 +501,52 @@ class UploadSampleStep extends React.Component<
       // This facilitates the behavior that deselects incompatible, previously-chosen options.
       newTechnology =
         newSelectedTechnology ?? selectedTechnology ?? NO_TECHNOLOGY_SELECTED;
-      permittedWorkflows =
+
+      workflowsForNewSelection =
         ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY[newSelectedWorkflow][
           newTechnology
         ];
-      filteredWorkflows = this.getPermittedSelectedWorkflows({
-        permittedWorkflows,
-        selectedWorkflows,
-        technology: newSelectedTechnology,
+
+      // Uncheck any previously selected workflows that are incompatible with the new option
+      // (for example, if the technologies conflict)
+      newSelectedWorkflows = new Set(
+        filter(
+          w => workflowsForNewSelection.includes(w),
+          Array.from(selectedWorkflows),
+        ),
+      );
+
+      permittedWorkflows = this.getPermittedSelectedWorkflows({
+        workflowsForNewSelection,
+        selectedWorkflows: newSelectedWorkflows,
+        technology: newTechnology,
       });
 
-      filteredWorkflows.add(newSelectedWorkflow);
+      // ensure the new option added as checked
+      newSelectedWorkflows.add(newSelectedWorkflow);
     } else {
       // deselection happens
       // if this action is a deselection, then start off with all workflows allowed before
       // narrowing the list, since no technology needs priority order -- you can't become
       // more restrictive when you choose fewer workflows
-      permittedWorkflows = map(w => w.value, UPLOAD_WORKFLOWS);
-      filteredWorkflows = this.getPermittedSelectedWorkflows({
-        permittedWorkflows,
-        selectedWorkflows,
-        technology: newSelectedTechnology,
-      });
+      workflowsForNewSelection = map(w => w.value, UPLOAD_WORKFLOWS);
       newTechnology =
-        filteredWorkflows.size > 0
+        selectedWorkflows.size > 0
           ? selectedTechnology
           : NO_TECHNOLOGY_SELECTED;
+      newSelectedWorkflows = selectedWorkflows;
+      permittedWorkflows = this.getPermittedSelectedWorkflows({
+        workflowsForNewSelection,
+        selectedWorkflows,
+        technology: newTechnology,
+      });
     }
 
     // let the workflow selector know which workflows are now chosen and can be chosen
     // given the new/current selection
     this.setState({
       enabledWorkflows: permittedWorkflows,
-      selectedWorkflows: filteredWorkflows,
+      selectedWorkflows: newSelectedWorkflows,
       selectedTechnology: newTechnology,
     });
   };
