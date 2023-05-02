@@ -9,11 +9,11 @@ import cs from "./column_definitions.scss";
 import { Align, getDefaultCell } from "./components/DefaultCell";
 import { READS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
-export const readPercentCoverageColumn: ColumnDef<AmrResult, any> = {
-  id: "readPercentCoverage",
+export const readCoverageBreadthColumn: ColumnDef<AmrResult, any> = {
+  id: "readCoverageBreadth",
   accessorKey: "readCoverageBreadth",
   size: 85,
-  header: function readPercentCoverageHeader({ header, column }) {
+  header: function readCoverageBreadthHeader({ header, column }) {
     return (
       <SortableHeader
         className={cx(cs.rightAlignedHeader, rowStyles.readsColumnGroup)}

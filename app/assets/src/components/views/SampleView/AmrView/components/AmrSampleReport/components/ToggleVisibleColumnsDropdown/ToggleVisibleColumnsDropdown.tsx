@@ -5,7 +5,7 @@ import {
   ColumnSection,
   COLUMN_ID_TO_NAME,
   SECTION_TO_COLUMN_IDS,
-} from "../../constants";
+} from "../../../../constants";
 import { AmrResult } from "../../types";
 import { ToggleAllButton } from "./components/ToggleAllButton";
 import cs from "./toggle_visible_columns_dropdown.scss";

@@ -4,7 +4,7 @@ import {
   ColumnSection,
   COLUMN_ID_TO_NAME,
   SECTION_TO_COLUMN_IDS,
-} from "../../../../constants";
+} from "../../../../../../constants";
 import { FormattedDropdownOption } from "../../ToggleVisibleColumnsDropdown";
 
 interface ToggleAllButtonProps {

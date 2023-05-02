@@ -1,14 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V2_FEATURE } from "~/components/utils/features";
-import { camelize } from "~/components/utils/objectUtil";
+import { camelize, IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import SampleReportContent from "../SampleReportContent";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
+import { FilterType } from "./components/AmrFiltersContainer/types";
 import { AmrOutputDownloadView } from "./components/AmrOutputDownloadView";
 import { AmrSampleReport } from "./components/AmrSampleReport";
+import { AmrResult } from "./components/AmrSampleReport/types";
 
 interface AmrViewProps {
   workflowRun: WorkflowRun;
@@ -19,14 +21,23 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const [loadingResults, setLoadingResults] = useState(false);
-  const [reportTableData, setReportTableData] = useState(null);
+  const [reportTableData, setReportTableData] =
+    useState<IdMap<AmrResult>>(null);
+  const [dataFilterFunc, setDataFilterFunc] =
+    useState<(data: AmrResult[]) => IdMap<AmrResult>>();
+  const [, setActiveFilters] = useState<FilterType[]>([]);
+
+  // Apply the active filters to get the rows to display
+  const displayedRows = useMemo(() => {
+    if (!reportTableData) return {} as IdMap<AmrResult>;
+    if (!dataFilterFunc) return reportTableData;
+    return dataFilterFunc(Object.values(reportTableData));
+  }, [dataFilterFunc, reportTableData]);
 
   useEffect(() => {
     if (!allowedFeatures.includes(AMR_V2_FEATURE)) return;
     setLoadingResults(true);
     const fetchResults = async () => {
-      // some of the below code is commented out to avoid linter errors
-      // API call is still made to get the report data for future development
       const reportDataRaw = await getWorkflowRunResults(workflowRun.id);
       const reportData = camelize(reportDataRaw);
       setReportTableData(reportData.reportTableData);
@@ -40,9 +51,12 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     if (allowedFeatures.includes(AMR_V2_FEATURE)) {
       return (
         <>
-          <AmrFiltersContainer />
+          <AmrFiltersContainer
+            setActiveFilters={setActiveFilters}
+            setDataFilterFunc={setDataFilterFunc}
+          />
           <AmrSampleReport
-            reportTableData={reportTableData}
+            reportTableData={displayedRows}
             sample={sample}
             workflowRun={workflowRun}
           />

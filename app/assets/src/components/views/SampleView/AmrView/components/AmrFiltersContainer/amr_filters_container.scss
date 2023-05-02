@@ -7,3 +7,14 @@
 .hideFilters {
   display: none;
 }
+
+.filters {
+  margin-top: $sds-spaces-xl;
+}
+
+.sectionTitle {
+  font: $sds-font-header-s-600-font;
+  color: $sds-color-gray-black;
+  margin-bottom: $sds-spaces-l;
+  margin-left: $sds-spaces-xs;
+}
