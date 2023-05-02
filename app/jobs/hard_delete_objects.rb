@@ -42,6 +42,15 @@ class HardDeleteObjects
       raise "Not all ids correspond to deletable objects"
     end
 
+    # Remove any data from Elasticsearch before hard deleting samples/runs
+    if !Rails.env.test? && objects.present? && [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]].include?(workflow)
+      begin
+        ElasticsearchQueryHelper.call_taxon_eviction_lambda(objects.pluck(:id))
+      rescue StandardError
+        raise "Could not delete data from Elasticsearch"
+      end
+    end
+
     hard_delete_runs(objects, user, workflow) if objects.present?
 
     hard_delete_samples(samples_to_delete, user) if samples_to_delete.present?
