@@ -128,7 +128,7 @@ const UploadTaxonFilter = ({
     loadOptionsForQuery(value);
   };
 
-  const label = "Select Taxon Name";
+  const label = selectedTaxon?.name ?? "Select Taxon Name";
 
   return (
     <Dropdown

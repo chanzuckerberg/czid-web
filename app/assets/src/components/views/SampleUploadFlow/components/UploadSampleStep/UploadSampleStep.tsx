@@ -1117,10 +1117,11 @@ class UploadSampleStep extends React.Component<
     const {
       currentTab,
       localSamples,
+      refSeqFile,
       selectedProject,
+      selectedTaxon,
       selectedTechnology,
       selectedWorkflows,
-      selectedWetlabProtocol,
     } = this.state;
     const { allowedFeatures } = this.context || {};
 
@@ -1132,15 +1133,30 @@ class UploadSampleStep extends React.Component<
     ) {
       return "Please wait for file validation to complete";
     }
+
     if (!selectedProject) return "Please select a project to continue";
-    else if (size(this.getSelectedSamples(currentTab)) < 1)
-      return "Please select a sample to continue";
-    else if (
-      !selectedWorkflows ||
-      !selectedTechnology ||
-      !selectedWetlabProtocol
-    )
+
+    if (!selectedWorkflows || !selectedTechnology) {
       return "Please select an analysis type to continue";
+    }
+
+    if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value) &&
+      !selectedTaxon
+    ) {
+      return "Please select a taxon to continue.";
+    }
+
+    if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value) &&
+      !refSeqFile
+    ) {
+      return "Please upload a reference sequence to continue.";
+    }
+
+    if (size(this.getSelectedSamples(currentTab)) < 1) {
+      return "Please select a sample to continue";
+    }
   };
 
   isWorkflowSelected = (workflow: UploadWorkflows) => {
@@ -1152,9 +1168,11 @@ class UploadSampleStep extends React.Component<
   isValid = () => {
     const {
       currentTab,
+      refSeqFile,
       selectedGuppyBasecallerSetting,
       selectedTechnology,
       selectedProject,
+      selectedTaxon,
       selectedWetlabProtocol,
       validatingSamples,
       localSamples,
@@ -1196,6 +1214,10 @@ class UploadSampleStep extends React.Component<
       }
     } else if (this.isWorkflowSelected(UPLOAD_WORKFLOWS.AMR.value)) {
       workflowsValid = true;
+    } else if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value)
+    ) {
+      workflowsValid = !!refSeqFile && !!selectedTaxon;
     }
 
     // Note: we currently only run validation checks on locally uploaded samples
