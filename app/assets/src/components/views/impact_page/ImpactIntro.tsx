@@ -1,8 +1,8 @@
 import { Link } from "czifui";
 import PropTypes from "prop-types";
 import React from "react";
+import IconBiohubSFLogoColor from "~/components/ui/icons/IconBiohubSFLogoColor";
 import ImpactMap from "~/images/impact_page/ImpactMap.svg";
-import IconBiohubLogo from "~/images/impact_page/logo-cz-biohub-color.png";
 import IconCziLogoColor from "~/images/impact_page/logo-czi-color.png";
 import IconGatesFoundationLogo from "~/images/impact_page/logo-gates-foundation.png";
 import { ImpactCountryData } from "./ImpactCountryData";
@@ -53,7 +53,7 @@ const ImpactIntro = props => {
             target="_blank"
             rel="noreferrer"
           >
-            <img src={IconBiohubLogo} alt="" />
+            <IconBiohubSFLogoColor />
           </a>
           <a
             className={cs.logoLink}
