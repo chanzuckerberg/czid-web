@@ -159,6 +159,12 @@ RSpec.describe BulkDeletionService, type: :service do
         expect(@phylo_tree_ng.deprecated).to be true
         expect(@phylo_tree_ng.deleted_at).to be_within(1.minute).of(Time.now.utc)
         expect(Visualization.find_by(data: { treeId: @phylo_tree_ng.id })).to be_nil
+
+        # check that phylo tree was rerun with subset of pipeline runs
+        # should be rerun without pr1
+        @pr2.reload
+        new_phylo_tree = @pr2.phylo_tree_ngs.non_deleted.first
+        expect(new_phylo_tree.pipeline_run_ids).to match_array([@pr2, @pr3, @pr4, @pr5].map(&:id))
       end
 
       it "deletes phylotrees - not enough samples left" do

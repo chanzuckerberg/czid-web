@@ -129,16 +129,20 @@ class PhyloTreeNg < ApplicationRecord
     return S3Util.get_s3_file(path)
   end
 
-  def rerun
+  # Allow optional parameter to specify new pipeline run ids
+  # if rerun tree should have different ids from the original
+  def rerun(new_pipeline_run_ids = nil)
     raise RerunDeprecatedPhyloTreeNgError if deprecated?
 
     # Deprecate the phylo tree and do not show it to the user.
     update!(deprecated: true)
 
+    new_pipeline_run_ids ||= pipeline_run_ids
+
     phylo_tree = PhyloTreeNg.create(
       inputs_json: inputs_json,
       name: name,
-      pipeline_run_ids: pipeline_run_ids,
+      pipeline_run_ids: new_pipeline_run_ids,
       project_id: project_id,
       rerun_from: id,
       user_id: user_id

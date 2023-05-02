@@ -98,28 +98,77 @@ RSpec.describe PhyloTreeNg, type: :model do
   end
 
   describe "#rerun" do
-    let(:phylo_tree_ng) do
-      create(:phylo_tree_ng,
-             name: "old_tree",
-             inputs_json: @inputs_json)
-    end
-
-    subject { phylo_tree_ng.rerun }
-
-    context "phylo tree is deprecated" do
+    context "when the phylo tree is rerun with no arguments" do
       let(:phylo_tree_ng) do
         create(:phylo_tree_ng,
-               name: "deprecated_tree",
-               inputs_json: @inputs_json,
-               deprecated: true)
+               name: "old_tree",
+               inputs_json: @inputs_json)
       end
 
-      it "raises an error" do
-        expect { subject }.to raise_error(PhyloTreeNg::RerunDeprecatedPhyloTreeNgError)
+      subject { phylo_tree_ng.rerun }
+
+      context "phylo tree is deprecated" do
+        let(:phylo_tree_ng) do
+          create(:phylo_tree_ng,
+                 name: "deprecated_tree",
+                 inputs_json: @inputs_json,
+                 deprecated: true)
+        end
+
+        it "raises an error" do
+          expect { subject }.to raise_error(PhyloTreeNg::RerunDeprecatedPhyloTreeNgError)
+        end
+      end
+
+      context "phylo tree is active" do
+        before do
+          allow(SfnPhyloTreeNgDispatchService).to receive(:call) {
+            {
+              sfn_input_json: {},
+              sfn_execution_arn: "fake_sfn_execution_arn",
+            }
+          }
+        end
+
+        it "updates current phylo tree to be deprecated" do
+          expect(phylo_tree_ng.deprecated?).to be(false)
+          subject
+          expect(phylo_tree_ng.deprecated?).to be(true)
+        end
+
+        it "creates and returns new phylo tree with appropriate fields" do
+          new_tree = subject
+
+          expect(new_tree).to have_attributes(
+            name: phylo_tree_ng.name,
+            rerun_from: phylo_tree_ng.id,
+            inputs_json: phylo_tree_ng.inputs_json,
+            project_id: phylo_tree_ng.project_id,
+            user_id: phylo_tree_ng.user_id,
+            status: WorkflowRun::STATUS[:created]
+          )
+        end
       end
     end
 
-    context "phylo tree is active" do
+    context "when the phylo tree is rerun with a list of ids" do
+      let(:user) { create(:user) }
+      let(:project) { create(:project, users: [user]) }
+
+      let(:sample) { create(:sample, project: project) }
+      let(:pipeline_run) { create(:pipeline_run, sample: sample) }
+
+      let(:other_sample) { create(:sample, project: project) }
+      let(:other_pipeline_run) { create(:pipeline_run, sample: other_sample) }
+      let(:phylo_tree_ng) do
+        create(:phylo_tree_ng,
+               name: "old_tree",
+               inputs_json: @inputs_json,
+               pipeline_runs: [pipeline_run])
+      end
+
+      subject { phylo_tree_ng.rerun([other_pipeline_run.id]) }
+
       before do
         allow(SfnPhyloTreeNgDispatchService).to receive(:call) {
           {
@@ -129,13 +178,7 @@ RSpec.describe PhyloTreeNg, type: :model do
         }
       end
 
-      it "updates current phylo tree to be deprecated" do
-        expect(phylo_tree_ng.deprecated?).to be(false)
-        subject
-        expect(phylo_tree_ng.deprecated?).to be(true)
-      end
-
-      it "creates and returns new phylo tree with appropriate fields" do
+      it "creates a new tree with the specified pipeline runs" do
         new_tree = subject
 
         expect(new_tree).to have_attributes(
@@ -144,7 +187,8 @@ RSpec.describe PhyloTreeNg, type: :model do
           inputs_json: phylo_tree_ng.inputs_json,
           project_id: phylo_tree_ng.project_id,
           user_id: phylo_tree_ng.user_id,
-          status: WorkflowRun::STATUS[:created]
+          status: WorkflowRun::STATUS[:created],
+          pipeline_run_ids: [other_pipeline_run.id]
         )
       end
     end
