@@ -256,7 +256,7 @@ class BulkDeletionService
       viz_phylo_tree_ng.destroy!
 
       # If we still have enough samples deletion, re-run it without the current samples to delete.
-      if n_samples_after_deletion >= 4
+      if n_samples_after_deletion >= 4 && !phylo_tree_ng.deprecated
         new_pipeline_run_ids = phylo_tree_ng.pipeline_runs.select { |pr| sample_ids.exclude? pr.sample_id }.pluck(:id)
         # Re-run the phylo tree, which creates a new phylo tree entirely.
         phylo_tree_ng.rerun(new_pipeline_run_ids)
