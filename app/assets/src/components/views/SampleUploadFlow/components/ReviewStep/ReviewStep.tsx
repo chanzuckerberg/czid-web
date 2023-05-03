@@ -12,7 +12,10 @@ import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
-import { ONT_V1_HARD_LAUNCH_FEATURE } from "~/components/utils/features";
+import {
+  AMR_V2_FEATURE,
+  ONT_V1_HARD_LAUNCH_FEATURE,
+} from "~/components/utils/features";
 import { formatFileSize } from "~/components/utils/format";
 import { WORKFLOW_VALUES } from "~/components/utils/workflows";
 import DataTable from "~/components/visualizations/table/DataTable";
@@ -390,7 +393,9 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     return map(workflow => {
       const workflowKey = UPLOAD_WORKFLOW_KEY_FOR_VALUE[workflow];
       const workflowDisplayName = UPLOAD_WORKFLOWS[workflowKey].label;
-      const workflowIsBeta = workflow === UPLOAD_WORKFLOWS.AMR.value;
+      const workflowIsBeta =
+        workflow === UPLOAD_WORKFLOWS.AMR.value &&
+        !allowedFeatures.includes(AMR_V2_FEATURE);
       const sequencingPlatformIsBeta =
         !allowedFeatures.includes(ONT_V1_HARD_LAUNCH_FEATURE) &&
         workflow === UPLOAD_WORKFLOWS.MNGS.value &&

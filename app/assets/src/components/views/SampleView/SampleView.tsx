@@ -58,6 +58,7 @@ import {
 import {
   AMR_DEPRECATED_FEATURE,
   AMR_V1_FEATURE,
+  AMR_V2_FEATURE,
   BLAST_V1_FEATURE,
   MERGED_NT_NR_FEATURE,
   MULTITAG_PATHOGENS_FEATURE,
@@ -1438,7 +1439,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     });
 
     const mergedNtNrTab = customTab(TABS.MERGED_NT_NR, "Prototype");
-    const amrTab = customTab(TABS.AMR, "Beta");
+    const amrBetaTab = customTab(TABS.AMR, "Beta");
     const ontTab = customTab(
       TABS.LONG_READ_MNGS,
       "Beta",
@@ -1468,7 +1469,11 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
         mergedNtNrTab,
       shortReadMngs && deprecatedAmrLabel,
-      allowedFeatures.includes(AMR_V1_FEATURE) && amr && amrTab,
+      allowedFeatures.includes(AMR_V1_FEATURE) &&
+        !allowedFeatures.includes(AMR_V2_FEATURE) &&
+        amr &&
+        amrBetaTab,
+      allowedFeatures.includes(AMR_V2_FEATURE) && amr && TABS.AMR,
       cg && TABS.CONSENSUS_GENOME,
     ]);
     if (isEmpty(workflowTabs)) {

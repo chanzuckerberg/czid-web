@@ -36,6 +36,7 @@ import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
   AMR_V1_FEATURE,
+  AMR_V2_FEATURE,
   BULK_DELETION_FEATURE,
   HEATMAP_ELASTICSEARCH_FEATURE,
 } from "~/components/utils/features";
@@ -639,14 +640,17 @@ const SamplesView = forwardRef(function SamplesView(
   const renderIneligibleSamplesForBulkKickoffAmrNotification = (
     invalidSampleNames: string[],
   ) => {
+    const AMR_PIPELINE_LABEL = allowedFeatures.includes(AMR_V2_FEATURE)
+      ? " Antimicrobial Resistance "
+      : " Antimicrobial Resistance (Beta) ";
     const header = (
       <div>
         <span className={cs.highlight}>
           {invalidSampleNames.length} sample
           {invalidSampleNames.length > 1 ? "s" : ""} won&apos;t be run
         </span>{" "}
-        on the Antimicrobial Resistance (Beta) pipeline because they either
-        failed, are still processing, or were already run.
+        on the {AMR_PIPELINE_LABEL} pipeline because they either failed, are
+        still processing, or were already run.
       </div>
     );
 
