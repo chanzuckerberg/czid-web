@@ -1454,7 +1454,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     } = getWorkflowCount(sample);
 
     // only show deprecated label on old AMR tab to users who have the new AMR feature enabled
-    const deprecatedAmrLabel = allowedFeatures.includes(AMR_V1_FEATURE)
+    const deprecatedAmrLabel = allowedFeatures.includes(
+      AMR_V1_FEATURE || AMR_V2_FEATURE,
+    )
       ? allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
         reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
         TABS.AMR_DEPRECATED

@@ -48,6 +48,7 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import {
   AMR_V1_FEATURE,
+  AMR_V2_FEATURE,
   ONT_V1_FEATURE,
   PRE_UPLOAD_CHECK_FEATURE,
 } from "~/components/utils/features";
@@ -416,7 +417,7 @@ class UploadSampleStep extends React.Component<
     const { allowedFeatures } = this.context || {};
     const { selectedWorkflows } = this.state;
 
-    if (allowedFeatures.includes(AMR_V1_FEATURE)) {
+    if (allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE)) {
       // deselecting a workflow
       if (this.isWorkflowSelected(workflow)) {
         const newSelectedWorkflows = new Set(selectedWorkflows);

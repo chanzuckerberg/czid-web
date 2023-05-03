@@ -162,7 +162,7 @@ const WorkflowSelector = ({
         sdsIcon={UPLOAD_WORKFLOWS.MNGS.icon}
         title={UPLOAD_WORKFLOWS.MNGS.label}
       />
-      {allowedFeatures.includes(AMR_V1_FEATURE) && (
+      {allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE) && (
         <AnalysisType
           description="Run your samples through our antimicrobial resistance pipeline. Our pipeline supports metagenomics or whole genome data. It only supports Illumina. You can also run the AMR pipeline from within an existing project by selecting previously uploaded mNGS samples."
           isBeta={!allowedFeatures.includes(AMR_V2_FEATURE)}

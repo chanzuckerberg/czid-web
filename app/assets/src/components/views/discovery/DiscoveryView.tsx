@@ -41,6 +41,7 @@ import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
   AMR_V1_FEATURE,
+  AMR_V2_FEATURE,
   ONT_V1_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_ADMIN_FEATURE,
   SAMPLES_TABLE_METADATA_COLUMNS_FEATURE,
@@ -303,7 +304,7 @@ class DiscoveryView extends React.Component<
       displayName: WORKFLOWS.CONSENSUS_GENOME.value,
     });
 
-    if (allowedFeatures.includes(AMR_V1_FEATURE)) {
+    if (allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE)) {
       this.amrWorkflowRuns = this.dataLayer.amrWorkflowRuns.createView({
         conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
         onViewChange: () => {
@@ -356,7 +357,7 @@ class DiscoveryView extends React.Component<
       this.cgWorkflowRuns.loadPage(0);
       this.visualizations.loadPage(0);
 
-      if (allowedFeatures.includes(AMR_V1_FEATURE)) {
+      if (allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE)) {
         this.amrWorkflowRuns.loadPage(0);
       }
 
@@ -806,7 +807,7 @@ class DiscoveryView extends React.Component<
         ),
         loadFirstPage: true,
       });
-      if (allowedFeatures.includes(AMR_V1_FEATURE)) {
+      if (allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE)) {
         this.amrWorkflowRuns.reset({
           conditions: this.getConditionsFor(TAB_SAMPLES, WORKFLOWS.AMR.value),
           loadFirstPage: true,
@@ -2173,7 +2174,7 @@ class DiscoveryView extends React.Component<
     const { filteredSampleCountsByWorkflow } = this.state;
     const { allowedFeatures = [] } = this.context || {};
     let workflows = WORKFLOW_ORDER;
-    if (!allowedFeatures.includes(AMR_V1_FEATURE)) {
+    if (!allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE)) {
       workflows = pull("AMR", workflows);
     }
     if (!allowedFeatures.includes(ONT_V1_FEATURE)) {
@@ -2290,7 +2291,9 @@ class DiscoveryView extends React.Component<
       workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
 
     const workflowObjects = this.configForWorkflow[workflow].objectCollection;
-    const amrHasLoaded = allowedFeatures.includes(AMR_V1_FEATURE)
+    const amrHasLoaded = allowedFeatures.includes(
+      AMR_V1_FEATURE || AMR_V2_FEATURE,
+    )
       ? !this.amrWorkflowRuns.isLoading()
       : true;
     const longReadSamplesHaveLoaded = allowedFeatures.includes(ONT_V1_FEATURE)

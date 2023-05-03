@@ -11,7 +11,7 @@ import { kebabCase } from "lodash/fp";
 import React, { ReactNode, useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
-import { AMR_V1_FEATURE } from "~/components/utils/features";
+import { AMR_V1_FEATURE, AMR_V2_FEATURE } from "~/components/utils/features";
 import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
 import cs from "./analysis_type.scss";
 
@@ -41,7 +41,9 @@ const AnalysisType = ({
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
 
-  const radioOption = allowedFeatures.includes(AMR_V1_FEATURE) ? (
+  const radioOption = allowedFeatures.includes(
+    AMR_V1_FEATURE || AMR_V2_FEATURE,
+  ) ? (
     <InputCheckbox
       disabled={isDisabled}
       className={commonStyles.checkbox}
@@ -78,7 +80,8 @@ const AnalysisType = ({
         placement="top-start"
         title={tooltipText}
         disableHoverListener={
-          !allowedFeatures.includes(AMR_V1_FEATURE) || !isDisabled
+          !allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE) ||
+          !isDisabled
         }
       >
         <span>{radioOption}</span>

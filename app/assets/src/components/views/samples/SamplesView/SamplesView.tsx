@@ -320,7 +320,9 @@ const SamplesView = forwardRef(function SamplesView(
   const renderHeatmapTrigger = () => {
     // Should still show deprecated after feature flag is removed
     // (until we've updated the heatmap)
-    const amrHeatmapDeprecatedText = allowedFeatures.includes(AMR_V1_FEATURE)
+    const amrHeatmapDeprecatedText = allowedFeatures.includes(
+      AMR_V1_FEATURE || AMR_V2_FEATURE,
+    )
       ? " (Deprecated)"
       : "";
     const amrHeatmapText = `AMR Heatmap${amrHeatmapDeprecatedText}`;
@@ -694,7 +696,7 @@ const SamplesView = forwardRef(function SamplesView(
   const renderBulkSamplesActionsMenu = () => {
     if (
       !(
-        allowedFeatures.includes(AMR_V1_FEATURE) ||
+        allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE) ||
         allowedFeatures.includes(BULK_DELETION_FEATURE)
       )
     ) {
