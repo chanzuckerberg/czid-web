@@ -8,15 +8,11 @@ import cs from "./samples_heatmap_category_filter_tags.scss";
 
 interface SamplesHeatmapCategoryFilterTagsPropsType {
   selectedOptions: SelectedOptions;
-  currentDropdownValue: SDSFormattedOption[];
   disabled: boolean;
   handleRemoveCategoryFromTags: (categoryToRemove: string) => void;
   convertSelectedOptionsToSdsFormattedOptions: any;
 }
 
-// selectedOptions refers to the current state of the filter
-// currentDropdownValue refers to the current state of the dropdown
-// the difference is largely formatting; see parent component for more details
 export const SamplesHeatmapCategoryFilterTags = ({
   selectedOptions,
   disabled,

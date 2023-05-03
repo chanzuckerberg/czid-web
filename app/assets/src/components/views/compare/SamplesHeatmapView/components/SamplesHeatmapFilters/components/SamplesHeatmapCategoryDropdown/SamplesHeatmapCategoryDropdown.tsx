@@ -1,5 +1,6 @@
 import { Dropdown } from "czifui";
-import React, { useState } from "react";
+import { filter } from "lodash/fp";
+import React, { useMemo } from "react";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import { OptionsType, SDSFormattedOption } from "../../SamplesHeatmapFilters";
 import SamplesHeatmapCategoryFilterTags from "./components/SamplesHeatmapCategoryFilterTags";
@@ -44,17 +45,20 @@ export const SamplesHeatmapCategoryDropdown = ({
   disabled,
   options,
 }: SamplesHeatmapCategoryDropdownPropsType) => {
-  /* Because our options are objects and we need to do a fair amount of manipulation on their values to manage the phage / virus hierarchy in the parent View component's state data structure, we need to be careful to avoid mutating the original options object's reference.
-  We do this in two ways: (1) managing state locally as much as possible and (2) using `splice` to manipulate values without changing the reference.
+  /**
+    Because our options are objects and we need to do a fair amount of manipulation on their values
+    to manage the phage / virus hierarchy in the parent View component's state data structure, we need
+    to be careful to avoid mutating the original options object's reference. We do this in two ways:
+    (1) using memoization on the dropdown value, and
+    (2) using `splice` to manipulate values without changing the reference.
   */
-  const [sdsFormattedValue, setSdsFormattedValue] = useState<
-    SDSFormattedOption[]
-  >(
-    convertSelectedOptionsToSdsFormattedOptions(
+
+  const dropdownValue = useMemo(() => {
+    return convertSelectedOptionsToSdsFormattedOptions(
       selectedOptions.categories,
       selectedOptions.subcategories,
-    ),
-  );
+    );
+  }, [selectedOptions.categories, selectedOptions.subcategories]);
 
   const categoryOptions = options.categories.map((category: string) => {
     const name = category !== "Viruses" ? category : VIRUSES_NON_PHAGE;
@@ -63,9 +67,9 @@ export const SamplesHeatmapCategoryDropdown = ({
   categoryOptions.splice(-2, 0, { name: VIRUSES_PHAGE });
 
   // Reformats the selected options to be compatible with the parent component's state data structure
-  const onApply = (newOptions: SDSFormattedOption[]) => {
+  const saveDropdownSelectedOptions = (newOptions: SDSFormattedOption[]) => {
     const newSubcategories = {};
-    const newCategoriesAsStrings = newOptions.map(option => option.name);
+    const newCategoriesAsStrings = newOptions?.map(option => option.name) ?? [];
 
     // if present, move phage out of the category list and into the subcategory list
     const indexOfVirusesPhage = newCategoriesAsStrings.indexOf(VIRUSES_PHAGE);
@@ -90,23 +94,18 @@ export const SamplesHeatmapCategoryDropdown = ({
   const handleRemoveCategoryFromTags = (categoryToRemove: string) => {
     // The filter tags get labeled as 'Phage' instead of as 'Viruses - Phage', but all the other logic is based on 'Viruses - Phage'
     let updatedCategoryToRemove = categoryToRemove;
+
     if (categoryToRemove === "Phage") {
       updatedCategoryToRemove = VIRUSES_PHAGE;
     } else if (categoryToRemove === "Viruses") {
       updatedCategoryToRemove = VIRUSES_NON_PHAGE;
     }
 
-    const currentCategoriesAsStrings = sdsFormattedValue.map(
-      (c: SDSFormattedOption) => c.name,
-    );
+    const newDropdownValue = filter(opt => {
+      return opt.name !== updatedCategoryToRemove;
+    }, dropdownValue);
 
-    const indexOfCategoryToRemove = currentCategoriesAsStrings.indexOf(
-      updatedCategoryToRemove,
-    );
-    sdsFormattedValue.splice(indexOfCategoryToRemove, 1);
-
-    setSdsFormattedValue(sdsFormattedValue);
-    onApply(sdsFormattedValue);
+    saveDropdownSelectedOptions(newDropdownValue);
   };
 
   return (
@@ -115,11 +114,8 @@ export const SamplesHeatmapCategoryDropdown = ({
         label={<div className={cs.label}>Categories</div>}
         multiple
         options={categoryOptions}
-        value={sdsFormattedValue}
-        onChange={newDropdownValue => {
-          setSdsFormattedValue(newDropdownValue);
-          onApply(newDropdownValue);
-        }}
+        value={dropdownValue}
+        onChange={saveDropdownSelectedOptions}
         buttons
         buttonPosition="left"
         InputDropdownProps={{ sdsStyle: "minimal", disabled }}
@@ -130,7 +126,6 @@ export const SamplesHeatmapCategoryDropdown = ({
       />
       <SamplesHeatmapCategoryFilterTags
         selectedOptions={selectedOptions}
-        currentDropdownValue={sdsFormattedValue}
         disabled={disabled}
         handleRemoveCategoryFromTags={handleRemoveCategoryFromTags}
         convertSelectedOptionsToSdsFormattedOptions={

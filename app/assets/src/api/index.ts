@@ -120,6 +120,10 @@ const getSampleTaxons = (params: $TSFixMe, cancelToken: $TSFixMe) =>
   get("/visualizations/samples_taxons.json", {
     params,
     cancelToken,
+  }).catch((err: $TSFixMe) => {
+    if (!axios.isCancel(err)) {
+      throw err;
+    }
   });
 
 const getPathogenFlags = (params: $TSFixMe) =>

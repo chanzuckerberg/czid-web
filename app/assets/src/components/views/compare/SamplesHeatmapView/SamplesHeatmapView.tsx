@@ -7,9 +7,11 @@ import {
   difference,
   find,
   flatten,
+  forEach,
   get,
   intersection,
   isEmpty,
+  isEqual,
   keys,
   map,
   omit,
@@ -1734,10 +1736,27 @@ class SamplesHeatmapView extends React.Component<
   });
 
   handleSelectedOptionsChange = (newOptions: $TSFixMe) => {
+    const { selectedOptions } = this.state;
     const { allowedFeatures = [] } = this.context || {};
     const useHeatmapES = allowedFeatures.includes(
       HEATMAP_ELASTICSEARCH_FEATURE,
     );
+
+    // don't refetch if options have not actually changed
+    if (!newOptions) return;
+    let haveOptionsChanged = false;
+
+    forEach(key => {
+      const newValue = newOptions[key];
+      const storedValue = selectedOptions[key];
+
+      if (!isEqual(storedValue, newValue)) {
+        haveOptionsChanged = true;
+        return false; // break out of the loop, there's already a match
+      }
+    }, Object.keys(newOptions));
+
+    if (!haveOptionsChanged) return;
 
     // When using heatmap ES, all filtering operations happen on the backend
     let frontendFilters = [];
