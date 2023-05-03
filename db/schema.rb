@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_25_180118) do
+ActiveRecord::Schema.define(version: 2023_05_01_155301) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -148,10 +148,17 @@ ActiveRecord::Schema.define(version: 2023_04_25_180118) do
 
   create_table "citations", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.string "key", null: false, comment: "Key used to identify the citation (ie. niaid_2020)."
-    t.string "footnote", null: false, comment: "Use MLA footnote citation style."
+    t.text "footnote", null: false, comment: "Use MLA footnote citation style."
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["key"], name: "index_citations_on_key", unique: true
+  end
+
+  create_table "citations_pathogen_list_versions", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "citation_id", null: false
+    t.bigint "pathogen_list_version_id", null: false
+    t.index ["citation_id"], name: "index_citation_pathogen_list_version_on_citation_id"
+    t.index ["pathogen_list_version_id"], name: "index_citation_pathogen_list_version_on_pathogen_list_version_id"
   end
 
   create_table "contigs", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -214,9 +221,9 @@ ActiveRecord::Schema.define(version: 2023_04_25_180118) do
     t.bigint "user_id", comment: "The user that created the host genome. Values previous to 2020-02 may be NULL."
     t.string "s3_minimap2_dna_index_path", comment: "The path to the index file to be used in the pipeline by minimap2 for host filtering DNA samples"
     t.string "s3_minimap2_rna_index_path", comment: "The path to the index file to be used in the pipeline by minimap2 for host filtering RNA samples"
-    t.string "s3_hisat2_index_path", default: "s3://czid-public-references/host_filter/ercc/20221031/hisat2_index_tar/ercc.hisat2.tar", null: false, comment: "The path to the index file to be used in the pipeline by hisat2 for host filtering."
-    t.string "s3_kallisto_index_path", default: "s3://czid-public-references/host_filter/ercc/20221031/kallisto_idx/ercc.kallisto.idx", null: false, comment: "The path to the index file to be used in the pipeline by kallisto for host filtering."
-    t.string "s3_bowtie2_index_path_v2", default: "s3://czid-public-references/host_filter/ercc/20221031/bowtie2_index_tar/ercc.bowtie2.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie2 for host filtering."
+    t.string "s3_hisat2_index_path", default: "s3://czid-public-references/host_filter/ercc/20221031/hisat2_index_tar/ercc.hisat2.tar", comment: "The path to the index file to be used in the pipeline by hisat2 for host filtering."
+    t.string "s3_kallisto_index_path", default: "s3://czid-public-references/host_filter/ercc/20221031/kallisto_idx/ercc.kallisto.idx", comment: "The path to the index file to be used in the pipeline by kallisto for host filtering."
+    t.string "s3_bowtie2_index_path_v2", default: "s3://czid-public-references/host_filter/ercc/20221031/bowtie2_index_tar/ercc.bowtie2.tar", comment: "The path to the index file to be used in the pipeline by bowtie2 for host filtering."
     t.string "s3_original_transcripts_gtf_index_path", comment: "The path to the index file to be used in the pipeline by kallisto for host filtering. Used to generate host gene counts"
     t.index ["name"], name: "index_host_genomes_on_name", unique: true
     t.index ["user_id"], name: "index_host_genomes_on_user_id"

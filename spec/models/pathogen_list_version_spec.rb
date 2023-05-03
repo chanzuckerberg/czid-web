@@ -13,10 +13,7 @@ describe PathogenListVersion, type: :model do
     end
 
     it "should return the correct, unique footnotes" do
-      pathogen_a = create(:pathogen, citation_id: @citation.id, tax_id: 1)
-      pathogen_b = create(:pathogen, citation_id: @citation.id, tax_id: 2)
-      @list_version.pathogens << pathogen_a
-      @list_version.pathogens << pathogen_b
+      @list_version.citations << @citation
       expect(@list_version.fetch_citation_footnotes).to eq([@citation.footnote])
     end
   end
@@ -27,8 +24,8 @@ describe PathogenListVersion, type: :model do
     end
 
     it "should return the correct pathogens information" do
-      pathogen_a = create(:pathogen, citation_id: @citation.id, tax_id: 1)
-      pathogen_b = create(:pathogen, citation_id: @citation.id, tax_id: 2)
+      pathogen_a = create(:pathogen, tax_id: 1)
+      pathogen_b = create(:pathogen, tax_id: 2)
       species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", superkingdom_name: "superkingdom_a")
       species_b = create(:taxon_lineage, tax_name: "species a", taxid: 2, species_taxid: 2, species_name: "species b", superkingdom_name: "superkingdom_b")
       @list_version.pathogens << pathogen_a
@@ -57,8 +54,8 @@ describe PathogenListVersion, type: :model do
     end
 
     it "should return the correct pathogen names" do
-      pathogen_a = create(:pathogen, citation_id: @citation.id, tax_id: 1)
-      pathogen_b = create(:pathogen, citation_id: @citation.id, tax_id: 2)
+      pathogen_a = create(:pathogen, tax_id: 1)
+      pathogen_b = create(:pathogen, tax_id: 2)
       species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", superkingdom_name: "superkingdom_a")
       species_b = create(:taxon_lineage, tax_name: "species a", taxid: 2, species_taxid: 2, species_name: "species b", superkingdom_name: "superkingdom_b")
       @list_version.pathogens << pathogen_a

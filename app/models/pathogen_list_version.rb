@@ -1,10 +1,10 @@
 class PathogenListVersion < ApplicationRecord
   has_and_belongs_to_many :pathogens
+  has_and_belongs_to_many :citations
   belongs_to :pathogen_list
 
   def fetch_citation_footnotes
-    citation_ids = pathogens.pluck(:citation_id)
-    Citation.find(citation_ids).pluck(:footnote).uniq
+    citations.pluck(:footnote).uniq
   end
 
   # Returns a list of pathogens, where each pathogen contains the following info:

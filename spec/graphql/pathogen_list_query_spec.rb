@@ -7,8 +7,8 @@ RSpec.describe GraphqlController, type: :request do
       @citation = create(:citation, key: "test_source", footnote: "test_footnote")
       @species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", superkingdom_name: "superkingdom_a")
       @species_b = create(:taxon_lineage, tax_name: "species b", taxid: 2, species_taxid: 2, species_name: "species b", superkingdom_name: "superkingdom_b")
-      @pathogen_a = create(:pathogen, citation_id: @citation.id, tax_id: @species_a.taxid)
-      @pathogen_b = create(:pathogen, citation_id: @citation.id, tax_id: @species_b.taxid)
+      @pathogen_a = create(:pathogen, tax_id: @species_a.taxid)
+      @pathogen_b = create(:pathogen, tax_id: @species_b.taxid)
     end
 
     query = <<-GRAPHQL

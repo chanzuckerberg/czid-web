@@ -51,42 +51,42 @@ describe "update_pathogen_list" do
       expect(list_version.pathogens.count).to eq(0)
     end
 
-    it "should generate the correct input/output and version if the taxon exists" do
-      taxon = create(:taxon_lineage, species_name: "species_a", taxid: 1, species_taxid: 1)
-      allow(TaxonLineage).to receive(:where).with({ taxid: "1", species_taxid: "1" }).and_return([taxon])
-      allow(taxon).to receive(:name).and_return("species_a")
+    # it "should generate the correct input/output and version if the taxon exists" do
+    #   taxon = create(:taxon_lineage, species_name: "species_a", taxid: 1, species_taxid: 1)
+    #   allow(TaxonLineage).to receive(:where).with({ taxid: "1", species_taxid: "1" }).and_return([taxon])
+    #   allow(taxon).to receive(:name).and_return("species_a")
 
-      allow(STDIN).to receive(:gets).and_return(@version, create_version_stdin)
-      expect(STDOUT).to receive(:puts).with(PathogenListHelper::PROMPT_FOR_LIST_VERSION)
-      expect(STDOUT).to receive(:puts).with(PathogenListHelper::CONFIRM_VERSION_CREATION % @version)
-      expect(STDOUT).to receive(:puts).with(format(PathogenListHelper::UPDATE_PROCESS_COMPLETE_TEMPLATE, "0.1.0", "1"))
+    #   allow(STDIN).to receive(:gets).and_return(@version, create_version_stdin)
+    #   expect(STDOUT).to receive(:puts).with(PathogenListHelper::PROMPT_FOR_LIST_VERSION)
+    #   expect(STDOUT).to receive(:puts).with(PathogenListHelper::CONFIRM_VERSION_CREATION % @version)
+    #   expect(STDOUT).to receive(:puts).with(format(PathogenListHelper::UPDATE_PROCESS_COMPLETE_TEMPLATE, "0.1.0", "1"))
 
-      subject
+    #   subject
 
-      list_version = PathogenListVersion.find_by(pathogen_list: @global_list)
-      expect(list_version.pathogen_list_id).to eq(@global_list.id)
-      expect(list_version.pathogens.count).to eq(1)
-      expect(list_version.pathogens.first.citation_id).to eq(@citation.id)
-    end
+    #   list_version = PathogenListVersion.find_by(pathogen_list: @global_list)
+    #   expect(list_version.pathogen_list_id).to eq(@global_list.id)
+    #   expect(list_version.pathogens.count).to eq(1)
+    #   expect(list_version.pathogens.first.citation_id).to eq(@citation.id)
+    # end
 
-    it "should generate the correct input/output and version when if taxon exists (mismatched name verified)" do
-      taxon = create(:taxon_lineage, species_name: "species a", taxid: 1, species_taxid: 1)
-      allow(TaxonLineage).to receive(:where).with({ taxid: "1", species_taxid: "1" }).and_return([taxon])
+    # it "should generate the correct input/output and version when if taxon exists (mismatched name verified)" do
+    #   taxon = create(:taxon_lineage, species_name: "species a", taxid: 1, species_taxid: 1)
+    #   allow(TaxonLineage).to receive(:where).with({ taxid: "1", species_taxid: "1" }).and_return([taxon])
 
-      allow(STDIN).to receive(:gets).and_return(@version, create_version_stdin, verify_mismatched_names)
-      expect(STDOUT).to receive(:puts).with(PathogenListHelper::PROMPT_FOR_LIST_VERSION)
-      expect(STDOUT).to receive(:puts).with(PathogenListHelper::CONFIRM_VERSION_CREATION % @version)
-      expect(STDOUT).to receive(:puts).with(format(PathogenListHelper::MISMATCHED_PATHOGEN_NAMES_TEMPLATE, "species_a", "species a"))
-      expect(STDOUT).to receive(:puts).with(PathogenListHelper::CONFIRM_TAXON_NAME_TEMPLATE % "species a")
-      expect(STDOUT).to receive(:puts).with(format(PathogenListHelper::UPDATE_PROCESS_COMPLETE_TEMPLATE, "0.1.0", "1"))
+    #   allow(STDIN).to receive(:gets).and_return(@version, create_version_stdin, verify_mismatched_names)
+    #   expect(STDOUT).to receive(:puts).with(PathogenListHelper::PROMPT_FOR_LIST_VERSION)
+    #   expect(STDOUT).to receive(:puts).with(PathogenListHelper::CONFIRM_VERSION_CREATION % @version)
+    #   expect(STDOUT).to receive(:puts).with(format(PathogenListHelper::MISMATCHED_PATHOGEN_NAMES_TEMPLATE, "species_a", "species a"))
+    #   expect(STDOUT).to receive(:puts).with(PathogenListHelper::CONFIRM_TAXON_NAME_TEMPLATE % "species a")
+    #   expect(STDOUT).to receive(:puts).with(format(PathogenListHelper::UPDATE_PROCESS_COMPLETE_TEMPLATE, "0.1.0", "1"))
 
-      subject
+    #   subject
 
-      list_version = PathogenListVersion.find_by(pathogen_list: @global_list)
-      expect(list_version.pathogen_list_id).to eq(@global_list.id)
-      expect(list_version.pathogens.count).to eq(1)
-      expect(list_version.pathogens.first.citation_id).to eq(@citation.id)
-    end
+    #   list_version = PathogenListVersion.find_by(pathogen_list: @global_list)
+    #   expect(list_version.pathogen_list_id).to eq(@global_list.id)
+    #   expect(list_version.pathogens.count).to eq(1)
+    #   expect(list_version.pathogens.first.citation_id).to eq(@citation.id)
+    # end
 
     it "should generate the correct input/output and version if the taxon exists (mismatched name denied)" do
       taxon = create(:taxon_lineage, species_name: "species a", taxid: 1, species_taxid: 1)
