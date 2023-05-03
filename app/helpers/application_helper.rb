@@ -42,7 +42,6 @@ module ApplicationHelper
       userEmail: current_user && current_user.email,
       userSettings: current_user && current_user.viewable_user_settings,
       userSignedIn: current_user.present?,
-      profileCompleted: current_user && !current_user.profile_form_version.zero?,
     }
   end
 

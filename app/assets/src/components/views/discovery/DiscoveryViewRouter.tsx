@@ -7,7 +7,7 @@
 // - See https://reactrouter.com/web/api/match for the properties you can get from 'match' (params, isExact, path, and url).
 
 import React, { useContext } from "react";
-import { Route, Switch, useHistory } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
@@ -49,17 +49,7 @@ const DiscoveryViewRouter = ({
   announcementBannerEnabled,
   emergencyBannerMessage,
 }: DiscoveryViewRouterProps) => {
-  const { firstSignIn, userSignedIn, userId, profileCompleted } =
-    useContext(UserContext);
-  const history = useHistory();
-
-  // New users must first submit a profile form in order to access CZ ID
-  const shouldShowUserProfileForm =
-    userSignedIn && !profileCompleted && autoAcctCreationEnabled;
-
-  if (shouldShowUserProfileForm) {
-    history.push("/user_profile_form");
-  }
+  const { firstSignIn, userSignedIn, userId } = useContext(UserContext);
 
   if (firstSignIn) {
     trackEvent(ANALYTICS_EVENT_NAMES.DISCOVERY_VIEW_ROUTER_USER_FIRST_SIGN_IN, {
@@ -69,6 +59,11 @@ const DiscoveryViewRouter = ({
 
   return (
     <Switch>
+      {autoAcctCreationEnabled && (
+        <Route exact path="/user_profile_form">
+          <UserProfileForm />
+        </Route>
+      )}
       <Route exact path="/impact">
         <ImpactPage />
       </Route>
@@ -113,11 +108,6 @@ const DiscoveryViewRouter = ({
           />
         )}
       />
-      {autoAcctCreationEnabled && (
-        <Route exact path="/user_profile_form">
-          <UserProfileForm />
-        </Route>
-      )}
       <Route exact path="/privacy_preview">
         <PrivacyNoticePreview />
       </Route>

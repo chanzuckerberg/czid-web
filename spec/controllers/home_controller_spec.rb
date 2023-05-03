@@ -4,6 +4,34 @@ require "support/authorization_examples"
 RSpec.describe HomeController, type: :controller do
   create_users
 
+  describe '#check_profile_form_completion' do
+    context 'when the current user has not completed the profile form' do
+      let(:user) { create(:user, profile_form_version: 0) }
+
+      before do
+        sign_in(user)
+        get :index
+      end
+
+      it 'redirects to the profile form page' do
+        expect(response).to redirect_to(user_profile_form_path)
+      end
+    end
+
+    context 'when the current user has completed the profile form' do
+      let(:user) { create(:user, profile_form_version: 1) }
+
+      before do
+        sign_in(user)
+        get :index
+      end
+
+      it 'redirects to my_data' do
+        expect(response).to redirect_to(my_data_path)
+      end
+    end
+  end
+
   context "non signed-in user" do
     describe "GET landing" do
       it "returns the landing page" do

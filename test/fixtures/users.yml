@@ -5,17 +5,21 @@ admin_one:
   name: Admin User One
   role: 1
   allowed_features: "[\"pipeline_viz\"]"
+  profile_form_version: 1
 
 regular_user:
   email: email2@example.com
   name: User Two
+  profile_form_version: 1
 
 joe:
   email: joe@gmail.com
   name: User Three
   allowed_features: "[\"pipeline_viz\"]"
+  profile_form_version: 1
 
 admin:
   email: admin@example.com
   name: Admin User
   role: 1
+  profile_form_version: 1

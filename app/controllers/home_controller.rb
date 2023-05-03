@@ -2,6 +2,7 @@ class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required, except: [:landing, :sign_up, :maintenance, :page_not_found]
   before_action :admin_required, only: [:all_data, :admin_settings, :set_workflow_version]
+  before_action :check_profile_form_completion, except: [:landing, :sign_up, :maintenance, :page_not_found, :user_profile_form]
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance, :page_not_found]
   skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
   power :projects, except: [:landing, :sign_up, :maintenance, :page_not_found]
@@ -48,6 +49,13 @@ class HomeController < ApplicationController
     else
       @show_landing_header = true
       render 'page_not_found'
+    end
+  end
+
+  def check_profile_form_completion
+    # new users must first submit a profile form in order to access CZ ID
+    if current_user && current_user.profile_form_version.zero?
+      redirect_to user_profile_form_path
     end
   end
 
