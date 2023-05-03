@@ -185,6 +185,7 @@ export const PrimaryHeaderControls = ({
 
   const renderDownloadDropdown = () => {
     switch (workflow) {
+      case WORKFLOWS.LONG_READ_MNGS.value:
       case WORKFLOWS.SHORT_READ_MNGS.value: {
         return (
           runIsLoaded && (
