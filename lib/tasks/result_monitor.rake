@@ -52,7 +52,7 @@ class MonitorPipelineResults
   def self.fail_stalled_uploads!
     samples = Sample.current_stalled_local_uploads(18.hours)
     unless samples.empty?
-      Rails.logger.error(
+      LogUtil.log_message(
         "UploadFailedEvent: Failed to upload local samples after 18 hours #{samples.pluck(:id)}"
       )
       WorkflowRun.handle_sample_upload_failure(samples)
