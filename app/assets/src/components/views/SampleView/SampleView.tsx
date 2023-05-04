@@ -574,9 +574,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const { allowedFeatures = [] } = this.context || {};
     const { currentTab, selectedOptions, pipelineRun, pipelineVersion } =
       this.state;
-
-    // On consensus-genome-only or amr-only report pages, pipelineRun is undefined and data is fetched via fetchWorkflowRunResults
-    if (isUndefined(pipelineRun)) return;
+    // On consensus-genome-only or amr-only report pages,
+    // pipelineRun is undefined and data is fetched via fetchWorkflowRunResults
+    // Also if the mngs upload failed, set loading to false so it can show the appropriate error message
+    if (isUndefined(pipelineRun)) {
+      this.setState({ loadingReport: false });
+      return;
+    }
 
     const backgroundIdUsed = backgroundId || selectedOptions.background;
     const mergeNtNr =
@@ -995,7 +999,10 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         updateSelectedOptions = false;
         this.setState({ sharedWithNoBackground: false, reportData: [] }, () => {
           // if there are no mngs runs, we do not need to update the background
-          if (!hasMngsRuns(this.state.sample)) return;
+          if (!hasMngsRuns(this.state.sample)) {
+            this.setState({ loadingReport: false });
+            return;
+          }
           this.fetchSampleReportData({
             backgroundId: newSelectedOptions.background,
           })
