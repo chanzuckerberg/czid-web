@@ -38,15 +38,19 @@ help: ## display help for this makefile
 local-init: .env.localdev ## Set up a local dev environment
 	@export $$(cat .env.localdev); \
 	if [ "$$(uname -s)" == "Darwin" ]; then \
-	    ./bin/setup-macos; \
+		./bin/setup-macos; \
 	else \
-	    ./bin/setup-linux; \
+		./bin/setup-linux; \
 	fi
 
 
 .PHONY: local-migrate
 local-migrate: .env.localdev ## Set up a local dev environment
 	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rake db:migrate:with_data'
+
+.PHONY: local-db-drop
+local-db-drop: .env.localdev ## Wipe out the local db for a fresh start
+	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rake db:drop'
 
 .PHONY: local-import-staging-data
 local-import-staging-data: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!

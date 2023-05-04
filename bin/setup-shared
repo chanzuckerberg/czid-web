@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # multi-platform compatible setup script to be shared by platform specific setup scripts
 
 gem install bundler --conservative
@@ -13,14 +14,23 @@ echo "== Starting DB =="
 aws-oidc exec -- docker-compose up -d db
 sleep 10
 
-echo "== Initializing DB =="
-aws-oidc exec -- docker-compose run --rm web rake db:drop db:create db:migrate:with_data db:seed
+echo "== Syncing DB =="
+if aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web rake db:exists; then
+    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web rake db:migrate
+else
+    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web rake db:create db:migrate:with_data
+    # aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=development web rake db:seed
+fi
+if aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:exists; then
+    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:migrate
+else
+    aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:create db:migrate:with_data
+    # aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:seed
+fi
 
-echo "== Initializing test DB =="
-aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:drop db:create db:migrate:with_data db:seed
 
 echo "== Bringing up all services =="
-aws-oidc exec -- docker-compose up -d db redis web resque resque_result_monitor resque_pipeline_monitor elasticsearch
+aws-oidc exec -- docker-compose up -d db redis web resque resque-result-monitor resque-pipeline-monitor elasticsearch
 sleep 10
 
 echo "== Creating ES indices =="
