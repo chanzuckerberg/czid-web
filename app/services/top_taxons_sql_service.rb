@@ -42,9 +42,15 @@ class TopTaxonsSqlService
 
   private
 
+  # Note (Vince, May2023): short_read_mngs and long_read_mngs are roughly the
+  # same, but have some critical differences around backgrounds. For ont_v1,
+  # backgrounds are not supported for long-read, so the associated table of
+  # taxon_summaries is not JOINed nor do we SELECT any columns that would come
+  # from it. If/when we support backgrounds for long-read, the branching for
+  # how the SQL query comes together will need to be updated.
   def fetch_top_taxons
     select_clause = select_sql_clause()
-    background_clause = background_sql_clause()
+    join_background_clause = join_background_sql_clause()
     tax_level_clause = tax_level_sql_clause()
     categories_clause = category_sql_clause()
     phage_clause = phage_sql_clause()
@@ -54,11 +60,7 @@ class TopTaxonsSqlService
     #{select_clause}
     FROM taxon_counts
     LEFT OUTER JOIN pipeline_runs pr ON pipeline_run_id = pr.id
-    LEFT OUTER JOIN taxon_summaries ON
-      #{background_clause}
-      taxon_counts.count_type = taxon_summaries.count_type      AND
-      taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-      taxon_counts.tax_id     = taxon_summaries.tax_id
+    #{join_background_clause}
     WHERE
       pipeline_run_id IN (#{@pr_id_to_sample_id.keys.join(',')})
       AND genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
@@ -118,6 +120,8 @@ class TopTaxonsSqlService
         #{count_per_million_sql} AS rpm,
         #{zscore_sql} AS zscore"
     elsif @workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
+      # Does not contain any columns that come from taxon_summaries table.
+      # See note about backgrounds and long-read above at `fetch_top_taxons`.
       select_clause = "SELECT
         pipeline_run_id,
         taxon_counts.tax_id,
@@ -139,11 +143,23 @@ class TopTaxonsSqlService
     select_clause
   end
 
-  def background_sql_clause
-    if @background_id.present?
-      background_clause = "#{@background_id.to_i}   = taxon_summaries.background_id   AND"
+  # short_read_mngs can pull background info, gets it from taxon_summaries.
+  # The way this service is invoked, we should always have a `background_id`
+  # for short-read. If we add long-read support for backgrounds in the future
+  # and it requires us to tweak how this JOIN clause works, BE CAREFUL. The
+  # four columns that form the JOIN's ON condition match up to a multi-column
+  # index on taxon_summaries (background_id, tax_id, count_type, tax_level).
+  # If you remove a column, it could majorly impact query performance since
+  # taxon_summaries is a very big table in Prod. (Vince, May2023)
+  def join_background_sql_clause
+    if @workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
+      join_background_clause = "    LEFT OUTER JOIN taxon_summaries ON
+      #{@background_id.to_i}  = taxon_summaries.background_id   AND
+      taxon_counts.count_type = taxon_summaries.count_type      AND
+      taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+      taxon_counts.tax_id     = taxon_summaries.tax_id"
     end
-    background_clause
+    join_background_clause
   end
 
   def category_sql_clause
