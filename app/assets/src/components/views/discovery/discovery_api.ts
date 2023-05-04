@@ -177,6 +177,7 @@ const processConsensusGenomeWorkflowRun = (cgWorkflowRun: $TSFixMe) => {
   return {
     medakaModel: getInput(["medaka_model"]),
     technology: getInput(["technology"]),
+    creation_source: getInput(["creation_source"]),
     wetlabProtocol: formatWetlabProtocol(getInput(["wetlab_protocol"])),
     referenceAccession: {
       accessionName: getInput(["accession_name"]),

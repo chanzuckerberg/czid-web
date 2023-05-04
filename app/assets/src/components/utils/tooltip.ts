@@ -106,6 +106,11 @@ export const FIELDS_METADATA = {
     label: "Sequencing Platform",
     tooltip: "The sequencing technology used for read generation.",
   },
+  creationSource: {
+    label: "Creation Source",
+    tooltip:
+      "Specifies where the consensus genome (CG) pipeline was initiated.",
+  },
   referenceAccession: {
     label: "Reference Accession",
     tooltip: "The reference to which the non-host reads were aligned.",

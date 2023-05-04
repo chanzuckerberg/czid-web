@@ -175,6 +175,7 @@ const SamplesView = forwardRef(function SamplesView(
   const [nextcladeModalOpen, setNextcladeModalOpen] = useState(false);
   const [metadataFields, setMetadataFields] = useState<MetadataType[]>([]);
   const [loading, setLoading] = useState(true);
+
   /*
   We need to keep track of samples that have been created from the web app so the user doesn't
   create more than one AMR workflow run by clicking the BulkKickoffAmr trigger more than once.

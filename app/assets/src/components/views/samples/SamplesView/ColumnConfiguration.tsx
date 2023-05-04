@@ -1,4 +1,7 @@
-import { get, merge } from "lodash/fp";
+import { camelCase, get, merge } from "lodash/fp";
+import { useContext } from "react";
+import { UserContext } from "~/components/common/UserContext";
+import { WGS_CG_UPLOAD_FEATURE } from "~/components/utils/features";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import {
@@ -183,6 +186,8 @@ const computeMngsColumns = ({ basicIcon, metadataFields, workflow }) => {
 };
 
 const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
   const fixedColumns = [
     {
       dataKey: "sample",
@@ -343,10 +348,20 @@ const computeConsensusGenomeColumns = ({ basicIcon, metadataFields }) => {
     },
   ];
 
+  // TODO (phoenix) remove this check when we enable WGS
+  if (allowedFeatures.includes(WGS_CG_UPLOAD_FEATURE)) {
+    fixedColumns.push({
+      dataKey: "creation_source",
+      label: "Creation Source",
+      flexGrow: 1,
+      className: cs.basicCell,
+    });
+  }
+
   const columns = [...fixedColumns, ...computeMetadataColumns(metadataFields)];
 
   for (const col of columns) {
-    const dataKey = col["dataKey"];
+    const dataKey = camelCase(col["dataKey"]);
     if (
       Object.prototype.hasOwnProperty.call(SHARED_SAMPLE_TABLE_COLUMNS, dataKey)
     ) {
