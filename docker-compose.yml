@@ -157,10 +157,7 @@ services:
       - heatmap-elasticsearch
       - shoryuken
     environment:
-      <<: *web-variables
-      <<: *aws-variables
-      <<: *auth0-variables
-      <<: *env-variables
+      <<: [*web-variables, *aws-variables, *auth0-variables, *env-variables]
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3001"
   resque:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
@@ -175,8 +172,7 @@ services:
       - db
       - redis
     environment:
-      <<: *web-variables
-      <<: *aws-variables
+      <<: [*web-variables, *aws-variables]
     command: bundle exec "COUNT=5 rake resque:workers"
   resque-scheduler:
     # See config/resque_schedule.yml for usages.
@@ -192,8 +188,7 @@ services:
       - db
       - redis
     environment:
-      <<: *web-variables
-      <<: *aws-variables
+      <<: [*web-variables, *aws-variables]
     command: bundle exec "rake resque:scheduler"
   resque-result-monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
@@ -208,8 +203,7 @@ services:
       - db
       - redis
     environment:
-      <<: *web-variables
-      <<: *aws-variables
+      <<: [*web-variables, *aws-variables]
     command: bundle exec "rake result_monitor"
   resque-pipeline-monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
@@ -224,8 +218,7 @@ services:
       - db
       - redis
     environment:
-      <<: *web-variables
-      <<: *aws-variables
+      <<: [*web-variables, *aws-variables]
     command: bundle exec "rake pipeline_monitor"
   shoryuken:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:latest
@@ -237,8 +230,7 @@ services:
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
     environment:
-      <<: *web-variables
-      <<: *aws-variables
+      <<: [*web-variables, *aws-variables]
       SFN_NOTIFICATIONS_QUEUE_ARN:
     command: bundle exec "shoryuken -R -C config/shoryuken.yml"
   concurrency-lambda:
