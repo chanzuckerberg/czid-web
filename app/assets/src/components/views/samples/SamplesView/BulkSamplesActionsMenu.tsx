@@ -29,7 +29,9 @@ const BulkSamplesActionsMenu = ({
   const { allowedFeatures } = userContext || {};
 
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
-  const hasAmr = allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE);
+  const hasAmr =
+    handleBulkKickoffAmr &&
+    allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE);
 
   const disableMenu = !hasBulkDeletion && noObjectsSelected;
 

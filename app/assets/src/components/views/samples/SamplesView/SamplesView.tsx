@@ -70,6 +70,7 @@ import {
   WORKFLOWS,
   WORKFLOW_ENTITIES,
 } from "~utils/workflows";
+import { DISCOVERY_DOMAIN_PUBLIC } from "../../discovery/discovery_api";
 import { BulkDeleteModal } from "./BulkDeleteModal";
 import { BulkDeleteTrigger } from "./BulkDeleteTrigger";
 import BulkSamplesActionsMenu from "./BulkSamplesActionsMenu";
@@ -107,6 +108,7 @@ const SamplesView = forwardRef(function SamplesView(
     activeColumns = DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW[SHORT_READ_MNGS_VALUE],
     currentDisplay = "table",
     currentTab,
+    domain,
     filters,
     filtersSidebarOpen,
     handleNewAmrCreationsFromMngs,
@@ -706,7 +708,9 @@ const SamplesView = forwardRef(function SamplesView(
     return (
       <BulkSamplesActionsMenu
         noObjectsSelected={size(selectedObjects) === 0}
-        handleBulkKickoffAmr={handleBulkKickoffAmr}
+        handleBulkKickoffAmr={
+          domain !== DISCOVERY_DOMAIN_PUBLIC ? handleBulkKickoffAmr : null
+        }
         handleClickPhyloTree={handleClickPhyloTree}
       />
     );
