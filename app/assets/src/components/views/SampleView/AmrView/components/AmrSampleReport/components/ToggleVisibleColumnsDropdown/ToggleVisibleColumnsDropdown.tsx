@@ -1,6 +1,11 @@
 import { Column, Table } from "@tanstack/react-table";
-import { ButtonIcon, DefaultDropdownMenuOption, DropdownMenu } from "czifui";
-import React, { useMemo, useState } from "react";
+import {
+  ButtonIcon,
+  DefaultDropdownMenuOption,
+  DropdownMenu,
+  Tooltip,
+} from "czifui";
+import React, { useEffect, useState } from "react";
 import {
   ColumnSection,
   COLUMN_ID_TO_NAME,
@@ -31,16 +36,19 @@ export const ToggleVisibleColumnsDropdown = ({
   table,
 }: ToggleVisibleColumnsDropdownProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [dropdownValue, setDropdownValue] =
+    useState<FormattedDropdownOption[]>();
+
   const handleAnchorClick = (event: React.MouseEvent<HTMLElement>) => {
-    if (open) {
-      setOpen(false);
+    if (isOpen) {
+      setIsOpen(false);
       if (anchorEl) {
         anchorEl.focus();
       }
     } else {
       setAnchorEl(event.currentTarget);
-      setOpen(true);
+      setIsOpen(true);
     }
   };
 
@@ -48,7 +56,7 @@ export const ToggleVisibleColumnsDropdown = ({
   const allColumns = table.getAllLeafColumns();
   const dropdownOptions: FormattedDropdownOption[] = [];
   allColumns.forEach(column => {
-    if (column.id === "gene" || column.id === "dropdown") {
+    if (column.id === "gene") {
       return;
     }
     dropdownOptions.push(formatDropdownOption(column));
@@ -57,30 +65,25 @@ export const ToggleVisibleColumnsDropdown = ({
   // Get the visible columns from react-table - this is the source of truth
   // This returns a new object every time.
   const visibleColumns = table.getVisibleLeafColumns();
-
-  // Convert visibleColumns to a list of FormattedDropdownOptions to pass to the DropdownMenu
-  const dropdownValue = useMemo(() => {
-    const newDropdownValue: FormattedDropdownOption[] = [];
+  useEffect(() => {
+    // Convert visibleColumns to a list of FormattedDropdownOptions to pass to the DropdownMenu
+    const dropdownValue = [];
     [...visibleColumns].slice(1).forEach((column: Column<any, unknown>) => {
-      newDropdownValue.push(formatDropdownOption(column));
+      dropdownValue.push(formatDropdownOption(column));
     });
-    return newDropdownValue;
+    setDropdownValue(dropdownValue);
   }, [visibleColumns]);
-
-  // Keep track of the changes that have happened while the menu is open
-  const [pendingOptions, setPendingOptions] =
-    useState<FormattedDropdownOption[]>(dropdownValue);
 
   const onChange = (
     _: React.ChangeEvent<unknown>,
     options: FormattedDropdownOption[],
   ) => {
-    setPendingOptions(options);
+    handleApply(options);
   };
 
-  const handleClickAway = () => {
+  const handleApply = (options: FormattedDropdownOption[]) => {
     // Apply the changes by updating the visibility of the react-table columns
-    const selectedColumnIds = pendingOptions.map(option => {
+    const selectedColumnIds = options.map(option => {
       return COLUMN_ID_TO_NAME.revGet(option.name);
     });
     dropdownOptions.forEach(option => {
@@ -98,28 +101,48 @@ export const ToggleVisibleColumnsDropdown = ({
         column?.toggleVisibility(false);
       }
     });
+    // TODO: This is an anti-pattern updating local state manually. Can we remove this
+    // and use the react-table state instead?
+    setDropdownValue(options);
+  };
 
+  const handleClickAway = () => {
     // Close the DropdownMenu
-    setOpen(false);
-    if (anchorEl) {
-      anchorEl.focus();
+    setIsOpen(false);
+  };
+
+  const handleKeyEscape = (event: React.KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setIsOpen(false);
+      if (anchorEl) {
+        anchorEl.focus();
+      }
     }
   };
 
   return (
     <>
-      <ButtonIcon
-        onClick={handleAnchorClick}
-        sdsIcon="plusCircle"
-        sdsSize="small"
-      />
+      <Tooltip
+        title="Show or hide columns"
+        sdsStyle="dark"
+        placement="top-end"
+        width="default"
+      >
+        <ButtonIcon
+          onClick={handleAnchorClick}
+          sdsIcon="plusCircle"
+          sdsSize="small"
+          sdsType="tertiary"
+        />
+      </Tooltip>
       <DropdownMenu
-        open={open}
+        open={isOpen}
         anchorEl={anchorEl}
         onChange={onChange}
         onClickAway={handleClickAway}
+        onKeyDown={handleKeyEscape}
         options={dropdownOptions}
-        value={pendingOptions}
+        value={dropdownValue}
         multiple
         groupBy={(option: DefaultDropdownMenuOption) =>
           option.section as string
@@ -132,9 +155,9 @@ export const ToggleVisibleColumnsDropdown = ({
                 {
                   <ToggleAllButton
                     dropdownOptions={dropdownOptions}
-                    pendingOptions={pendingOptions}
+                    dropdownValue={dropdownValue}
                     section={params.group as ColumnSection}
-                    setPendingOptions={setPendingOptions}
+                    setPendingOptions={handleApply}
                   />
                 }
               </div>

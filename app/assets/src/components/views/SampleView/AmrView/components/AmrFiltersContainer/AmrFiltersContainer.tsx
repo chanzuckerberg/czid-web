@@ -165,7 +165,6 @@ export const AmrFiltersContainer = ({
         type,
       };
     }, filters);
-
     setDataFilters(newFilters);
   };
 

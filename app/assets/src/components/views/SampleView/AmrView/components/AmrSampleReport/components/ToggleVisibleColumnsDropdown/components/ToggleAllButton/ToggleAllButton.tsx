@@ -9,26 +9,26 @@ import { FormattedDropdownOption } from "../../ToggleVisibleColumnsDropdown";
 
 interface ToggleAllButtonProps {
   dropdownOptions: FormattedDropdownOption[];
-  pendingOptions: FormattedDropdownOption[];
+  dropdownValue: FormattedDropdownOption[];
   section: ColumnSection;
   setPendingOptions: (options: FormattedDropdownOption[]) => void;
 }
 
 export const ToggleAllButton = ({
   dropdownOptions,
-  pendingOptions,
+  dropdownValue,
   section,
   setPendingOptions,
 }: ToggleAllButtonProps) => {
   const sectionColumnIds = SECTION_TO_COLUMN_IDS.get(section);
   const isAllVisible = sectionColumnIds.every(columnId => {
     const columnName = COLUMN_ID_TO_NAME.get(columnId);
-    return !!pendingOptions.find(option => option.name === columnName);
+    return !!dropdownValue.find(option => option.name === columnName);
   });
 
   // Show or Hide all columns in a section
   const toggleAllColumnsInSection = (section: ColumnSection, show: boolean) => {
-    const otherSectionOptions = pendingOptions.filter(options => {
+    const otherSectionOptions = dropdownValue.filter(options => {
       const optionColumnId = COLUMN_ID_TO_NAME.revGet(options.name);
       const optionSection = SECTION_TO_COLUMN_IDS.revGet(optionColumnId);
       return optionSection !== section;

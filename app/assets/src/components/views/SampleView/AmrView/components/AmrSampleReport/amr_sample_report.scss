@@ -3,4 +3,28 @@
 .reportWrapper {
   margin-top: $sds-spaces-xl;
   height: 100%;
+
+  display: flex;
+  flex-direction: row;
+}
+
+.dropdownWrapper {
+  align-self: start;
+  padding: $sds-spaces-xxl $sds-spaces-m 16px;
+  border-bottom: $sds-borders-gray-300;
+}
+
+.tableWrapper {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+
+  overflow-x: clip;
+  div {
+    div {
+      // Note this has to be !important in order to override styles from React Virtuoso
+      position: inherit !important;
+    }
+  }
 }

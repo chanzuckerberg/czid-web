@@ -5,6 +5,7 @@ import {
   getSortedRowModel,
   RowSelectionState,
   SortingState,
+  Table as TableType,
   TableOptions,
   useReactTable,
 } from "@tanstack/react-table";
@@ -24,6 +25,7 @@ interface TableProps<T> {
   initialSortKey?: string;
   isInitialSortDescending?: boolean;
   isLoading?: boolean;
+  setTableReference?: (table: TableType<T>) => void;
   uniqueIdentifier: keyof T;
   // If you want to override the default row component, you can pass in a custom one here.
   tableRowComponent?: React.ComponentType<TableRowProps>;
@@ -52,6 +54,7 @@ export const Table = <T,>({
   isLoading,
   checkedRows = [],
   onSetCheckedRows,
+  setTableReference,
   uniqueIdentifier,
   tableRowComponent,
   ...props
@@ -84,7 +87,7 @@ export const Table = <T,>({
   }, [tableData]);
 
   // initialize the table
-  const table = useReactTable({
+  const table: TableType<T> = useReactTable({
     data,
     defaultColumn: {
       minSize: 50,
@@ -107,6 +110,12 @@ export const Table = <T,>({
     onSortingChange: setSorting,
     ...props,
   });
+
+  useEffect(() => {
+    if (setTableReference) {
+      setTableReference(table);
+    }
+  }, [table]);
 
   // CHECKED ROW MGMT //
   // this is slightly an anti-pattern, but unfortunately because of the way react table

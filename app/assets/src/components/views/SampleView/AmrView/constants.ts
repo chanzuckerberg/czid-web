@@ -7,7 +7,6 @@ export enum ColumnSection {
   GENE_INFO = "Gene Info",
   CONTIGS = "Contigs",
   READS = "Reads",
-  DROPDOWN = "Dropdown",
 }
 
 export enum ColumnId {
@@ -16,7 +15,6 @@ export enum ColumnId {
   CONTIG_SPECIES = "contigSpecies",
   CONTIGS = "contigs",
   CUTOFF = "cutoff",
-  DROPDOWN = "dropdown",
   DRUG_CLASS = "drugClass",
   GENE_FAMILY = "geneFamily",
   MECHANISM = "mechanism",
@@ -69,5 +67,4 @@ export const SECTION_TO_COLUMN_IDS = new TwoWayKeyListMap({
     ColumnId.READ_DEPTH_PER_MILLION,
     ColumnId.READ_SPECIES,
   ],
-  [ColumnSection.DROPDOWN]: [ColumnId.DROPDOWN],
 });
