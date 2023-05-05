@@ -590,6 +590,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     this.setState({ loadingReport: true });
     trackEvent("PipelineSampleReport_sample_viewed", {
       sampleId,
+      workflow: currentTab,
     });
     try {
       const rawReportData: RawReportData = await getSampleReportData({
