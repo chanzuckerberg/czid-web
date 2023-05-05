@@ -23,6 +23,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const [loadingResults, setLoadingResults] = useState(false);
+  const [hideFilters, setHideFilters] = useState(true);
   const [reportTableData, setReportTableData] =
     useState<IdMap<AmrResult>>(null);
   const [dataFilterFunc, setDataFilterFunc] =
@@ -60,12 +61,15 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
           <AmrFiltersContainer
             setActiveFilters={setActiveFilters}
             setDataFilterFunc={setDataFilterFunc}
+            hideFilters={hideFilters}
+            setHideFilters={setHideFilters}
           />
           <AmrSampleReport
             reportTableData={displayedRows}
             sample={sample}
             workflowRun={workflowRun}
             setDetailsSidebarGeneName={setDetailsSidebarGeneName}
+            hideFilters={hideFilters}
           />
         </>
       );

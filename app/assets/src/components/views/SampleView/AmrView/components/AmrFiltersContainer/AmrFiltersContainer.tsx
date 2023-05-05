@@ -18,6 +18,8 @@ import {
 interface AmrFiltersContainerProps {
   setDataFilterFunc: (filterFunc: any) => void;
   setActiveFilters: (activeFilters: FilterType[]) => void;
+  hideFilters: boolean;
+  setHideFilters: (hideFilters: boolean) => void;
 }
 
 const THRESHOLD_FILTER_INIT = thresholdFilterOptionColumnIds.reduce(
@@ -97,10 +99,11 @@ const applyFilter = (data: AmrResult[], dataFilter: FilterType) => {
 export const AmrFiltersContainer = ({
   setActiveFilters,
   setDataFilterFunc,
+  hideFilters,
+  setHideFilters,
 }: AmrFiltersContainerProps) => {
-  const [hideFilters, setHideFilters] = useState(true);
   // If filters are hidden, set the width of the FilterPanel to 65px, otherwise set it to 200px
-  const drawerWidth = hideFilters ? 65 : 200;
+  const drawerWidth = hideFilters ? 50 : 200;
 
   const [dataFilters, setDataFilters] = useState<FiltersType>(DATA_FILTER_INIT);
 

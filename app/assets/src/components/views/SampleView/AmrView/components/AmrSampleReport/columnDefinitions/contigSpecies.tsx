@@ -9,6 +9,7 @@ import { memo } from "~/components/utils/memo";
 import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
 import cs from "./column_definitions.scss";
+import { CONTIGS_SPECIES_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const contigSpeciesColumn: ColumnDef<AmrResult, any> = {
   id: "contigSpecies",
@@ -20,6 +21,7 @@ export const contigSpeciesColumn: ColumnDef<AmrResult, any> = {
         className={rowStyles.contigsColumnGroup}
         header={header}
         style={generateWidthStyles(column)}
+        tooltipStrings={CONTIGS_SPECIES_COLUMN_TOOLTIP_STRINGS}
       >
         <div className={cs.headerWithTagContainer}>
           <span>Contig Species</span>

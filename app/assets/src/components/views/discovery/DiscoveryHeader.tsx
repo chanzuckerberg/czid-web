@@ -124,13 +124,15 @@ const DiscoveryHeader = ({
 
   return (
     <div className={cs.header}>
-      <FilterButtonWithCounter
-        isDisabled={disableSidebars}
-        filterCounter={filterCount}
-        onFilterToggle={onFilterToggle}
-        popupDisabledSubtitle="Not available on this tab"
-        showFilters={showFilters}
-      />
+      <div className={cs.filterButtonContainer}>
+        <FilterButtonWithCounter
+          isDisabled={disableSidebars}
+          filterCounter={filterCount}
+          onFilterToggle={onFilterToggle}
+          popupDisabledSubtitle="Not available on this tab"
+          showFilters={showFilters}
+        />
+      </div>
       <div className={cs.searchContainer}>
         {/* TODO(ihan): enable search box for snapshot view */}
         {domain !== "snapshot" && (

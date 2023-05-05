@@ -1,6 +1,18 @@
 @import "~czifui/dist/variables";
 
-.reportWrapper {
+.reportWrapperFiltersOpen {
+  position: relative;
+  left: 200px;
+  margin-top: $sds-spaces-xl;
+  height: 100%;
+
+  display: flex;
+  flex-direction: row;
+}
+
+.reportWrapperFiltersClosed {
+  position: relative;
+  left: 65px;
   margin-top: $sds-spaces-xl;
   height: 100%;
 

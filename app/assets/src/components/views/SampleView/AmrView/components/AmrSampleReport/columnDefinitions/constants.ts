@@ -27,7 +27,7 @@ export const GENE_FAMILY_COLUMN_TOOLTIP_STRINGS = {
 };
 export const DRUG_CLASS_COLUMN_TOOLTIP_STRINGS = {
   regularText: "Drug class this AMR gene confers resistance to.",
-  boldText: "Gene Family",
+  boldText: "Drug Class",
   link: {
     href: GENES_COLUMN_GROUP_TOOLTIP_LINK_HREF,
     linkText: TOOLTIP_LINK_TEXT,
@@ -36,7 +36,7 @@ export const DRUG_CLASS_COLUMN_TOOLTIP_STRINGS = {
 export const HIGH_LEVEL_DRUG_CLASS_COLUMN_TOOLTIP_STRINGS = {
   regularText:
     "Antibiotic family classified based on mechanism of action, chemical structure or spectrum of activity.",
-  boldText: "Drug Class",
+  boldText: "High Level Drug Class",
   link: {
     href: GENES_COLUMN_GROUP_TOOLTIP_LINK_HREF,
     linkText: TOOLTIP_LINK_TEXT,
@@ -134,7 +134,7 @@ export const READS_SPECIES_COLUMN_TOOLTIP_STRINGS = {
 };
 export const READS_DPM_COLUMN_TOOLTIP_STRINGS = {
   regularText:
-    "Number of reads mapped to gene in CARD, divided by gene length, per million reads sequenced.",
+    "Number of bases mapped to gene in CARD, divided by gene length, per million reads sequenced.",
   boldText: "Reads dPM",
   link: {
     href: READS_COLUMN_GROUP_TOOLTIP_LINK_HREF,

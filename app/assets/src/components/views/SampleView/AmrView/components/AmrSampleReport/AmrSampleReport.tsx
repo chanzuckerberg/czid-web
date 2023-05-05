@@ -34,11 +34,13 @@ interface AmrSampleReportProps {
   sample: Sample;
   workflowRun: WorkflowRun;
   setDetailsSidebarGeneName: (geneName: string | null) => void;
+  hideFilters: boolean;
 }
 
 export const AmrSampleReport = ({
   reportTableData,
   setDetailsSidebarGeneName,
+  hideFilters,
 }: AmrSampleReportProps) => {
   // Keep the react-table instance in state to pass between the table component and the dropdown component
   const [table, setTable] = React.useState<TableType<AmrResult> | null>(null);
@@ -75,7 +77,13 @@ export const AmrSampleReport = ({
   );
 
   return (
-    <div className={cs.reportWrapper}>
+    <div
+      className={
+        hideFilters
+          ? cs.reportWrapperFiltersClosed
+          : cs.reportWrapperFiltersOpen
+      }
+    >
       <div className={cs.tableWrapper}>
         <Table<AmrResult>
           columns={columns}
