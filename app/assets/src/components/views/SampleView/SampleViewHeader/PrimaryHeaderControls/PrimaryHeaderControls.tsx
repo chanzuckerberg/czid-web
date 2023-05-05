@@ -171,6 +171,10 @@ export const PrimaryHeaderControls = ({
         }
         break;
       case WORKFLOWS.CONSENSUS_GENOME.value:
+        if (succeeded) {
+          return renderDownloadAll(workflow);
+        }
+        break;
       case WORKFLOWS.AMR.value:
         if (succeeded) {
           if (allowedFeatures.includes(AMR_V2_FEATURE)) {
