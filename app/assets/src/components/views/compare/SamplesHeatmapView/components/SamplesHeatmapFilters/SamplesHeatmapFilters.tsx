@@ -388,6 +388,9 @@ const SamplesHeatmapFilters = ({
         <div className={cs.taxonSliderContainer}>
           {renderTaxonsPerSampleSlider()}
         </div>
+        <div className={cs.viewOptionsDropdownContainer}>
+          {renderSpecificityFilter()}
+        </div>
       </div>
       <Divider />
       <div className={cs.lowerFilterSection}>
@@ -424,9 +427,6 @@ const SamplesHeatmapFilters = ({
         </div>
         <div className={cs.viewOptionsDropdownContainer}>
           {renderScaleSelect()}
-        </div>
-        <div className={cs.viewOptionsDropdownContainer}>
-          {renderSpecificityFilter()}
         </div>
       </div>
     </div>
