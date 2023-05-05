@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { activeAmrFiltersVar } from "~/cache/initialCache";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
 import { ThresholdFilterData } from "~/interface/dropdown";
 import { COLUMN_ID_TO_NAME } from "../../../../constants";
@@ -67,6 +68,10 @@ export const AmrThresholdFilters = ({
   const handleApply = (filterData: ThresholdFilterData[]) => {
     setThresholdFilters(filterData);
     updateThresholdFilters(convertThresholdFilters(filterData));
+    activeAmrFiltersVar({
+      ...activeAmrFiltersVar(),
+      thresholdFilters: filterData,
+    });
   };
 
   return (

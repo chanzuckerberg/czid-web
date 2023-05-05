@@ -20,11 +20,11 @@ export enum ColumnId {
   MECHANISM = "mechanism",
   MODEL = "model",
   READ_COVERAGE_DEPTH = "readCoverageDepth",
-  READ_DEPTH_PER_MILLION = "readDepthPerMillion",
+  READ_DEPTH_PER_MILLION = "dpm",
   READ_COVERAGE_BREADTH = "readCoverageBreadth",
   READ_SPECIES = "readSpecies",
   READS = "reads",
-  READS_PER_MILLION = "readsPerMillion",
+  READS_PER_MILLION = "rpm",
 }
 
 export const COLUMN_ID_TO_NAME = new TwoWayKeyStringMap({

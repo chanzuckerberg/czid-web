@@ -20,6 +20,7 @@ import {
   Taxon,
 } from "~/interface/shared";
 import { BlastModalInfo } from "../components/views/blast/constants";
+import { ThresholdFilterData } from "./dropdown";
 
 export interface SampleViewProps {
   sampleId?: number;
@@ -146,6 +147,10 @@ export interface FilterSelections {
   categories:
     | { categories: string[]; subcategories: { Viruses: string[] } }
     | Record<string, never>;
+}
+
+export interface AmrFilterSelections {
+  thresholdFilters: ThresholdFilterData[];
 }
 
 export type SampleReportViewMode = "table" | "tree";

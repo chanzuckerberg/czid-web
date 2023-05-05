@@ -192,7 +192,7 @@ export const PrimaryHeaderControls = ({
       case WORKFLOWS.LONG_READ_MNGS.value:
       case WORKFLOWS.SHORT_READ_MNGS.value: {
         return (
-          runIsLoaded && (
+          succeeded && (
             <MngsDownloadDropdown
               className={cs.controlElement}
               backgroundId={backgroundId}
@@ -211,15 +211,11 @@ export const PrimaryHeaderControls = ({
 
       case WORKFLOWS.AMR.value: {
         return (
-          runIsLoaded && (
+          succeeded && (
             <AmrDownloadDropdown
               className={cs.controlElement}
               backgroundId={backgroundId}
               currentTab={currentTab}
-              getDownloadReportTableWithAppliedFiltersLink={
-                getDownloadReportTableWithAppliedFiltersLink
-              }
-              hasAppliedFilters={hasAppliedFilters}
               workflowRun={currentRun as WorkflowRun}
               sample={sample}
               view={view}

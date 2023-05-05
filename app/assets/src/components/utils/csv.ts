@@ -1,6 +1,8 @@
 import {
+  at,
   find,
   flatten,
+  forEach,
   get,
   getOr,
   has,
@@ -13,8 +15,15 @@ import {
 import Papa from "papaparse";
 import { CATEGORIES } from "~/components/ui/labels/PathogenLabel";
 import { labelToVal, WORKFLOWS } from "~/components/utils/workflows";
-import { FilterSelections } from "~/interface/sampleView";
+import { ThresholdFilterData } from "~/interface/dropdown";
+import { AmrFilterSelections, FilterSelections } from "~/interface/sampleView";
 import { Entries } from "~/interface/shared";
+import { countActiveFilters } from "../views/SampleView/AmrView/components/AmrFiltersContainer/utils";
+import { AmrResult } from "../views/SampleView/AmrView/components/AmrSampleReport/types";
+import {
+  ColumnSection,
+  SECTION_TO_COLUMN_IDS,
+} from "../views/SampleView/AmrView/constants";
 import {
   BACKGROUND_FIELDS,
   TAXON_COUNT_TYPE_METRICS,
@@ -25,6 +34,7 @@ import {
   hasAppliedFilters,
 } from "../views/SampleView/setup";
 import { logError } from "./logUtil";
+import { IdMap } from "./objectUtil";
 
 // Assumes that the CSV has headers.
 export const parseCSVBlob = (blob: string) => {
@@ -232,7 +242,66 @@ const _addPathogenFlagColumns = (datum, withMultiFlags) => {
   });
 };
 
-export const computeReportTableValuesForCSV = (
+// The order of these column headers is important for the CSV as this is the order that the columns will appear.
+const AMR_CSV_COLUMN_HEADERS = [
+  ...SECTION_TO_COLUMN_IDS.get(ColumnSection.GENE_INFO),
+  ...SECTION_TO_COLUMN_IDS.get(ColumnSection.CONTIGS),
+  ...SECTION_TO_COLUMN_IDS.get(ColumnSection.READS),
+];
+
+export const computeAmrReportTableValuesForCSV = ({
+  activeFilters,
+  displayedRows,
+}: {
+  activeFilters: AmrFilterSelections;
+  displayedRows: IdMap<AmrResult>;
+}) => {
+  const csvRows = [];
+  const csvHeaders = AMR_CSV_COLUMN_HEADERS;
+
+  forEach((row: AmrResult) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore-next-line - running into a lodash type error with `at`
+    csvRows.push(sanitizeCSVRow(at(csvHeaders, row)).join());
+  }, Object.values(displayedRows));
+
+  const activeFiltersRow = generateCSVRowForActiveFilters(activeFilters);
+  csvRows.push(activeFiltersRow);
+  return [[csvHeaders.join()], csvRows];
+};
+
+// The active filters row is added to the end of the CSV which describes the filters that were applied to the report
+// e.g. 2 Filters Applied: | Thresholds: | rPM (reads per million) >= 1 | Number of Contigs >= 1
+const generateCSVRowForActiveFilters = (activeFilters: AmrFilterSelections) => {
+  const numberOfFilters = countActiveFilters(activeFilters);
+  const filterStatement = `${numberOfFilters} Filter${
+    numberOfFilters > 1 ? "s" : ""
+  } Applied:`;
+  const filterRow = [filterStatement];
+
+  const entries = Object.entries(activeFilters) as Entries<AmrFilterSelections>;
+  for (const [filterType, filters] of entries) {
+    if (filterType === "thresholdFilters") {
+      const thresholdFilters = filters.reduce(
+        (result: string[], threshold: ThresholdFilterData) => {
+          result.push(
+            `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`,
+          );
+          return result;
+        },
+        [],
+      );
+
+      if (!isEmpty(thresholdFilters)) {
+        filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
+      }
+    }
+  }
+
+  return [sanitizeCSVRow(filterRow).join()];
+};
+
+export const computeMngsReportTableValuesForCSV = (
   filteredReportData,
   selectedOptions,
   backgrounds,

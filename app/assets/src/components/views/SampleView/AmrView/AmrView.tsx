@@ -1,15 +1,24 @@
+import { useReactiveVar } from "@apollo/client";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
 import { withAnalytics } from "~/api/analytics";
+import {
+  activeAmrFiltersVar,
+  amrReportTableDownloadWithAppliedFiltersLinkVar,
+} from "~/cache/initialCache";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
+import {
+  computeAmrReportTableValuesForCSV,
+  createCSVObjectURL,
+} from "~/components/utils/csv";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V2_FEATURE } from "~/components/utils/features";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import SampleReportContent from "../SampleReportContent";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
-import { FilterType } from "./components/AmrFiltersContainer/types";
+import { countActiveFilters } from "./components/AmrFiltersContainer/utils";
 import { AmrOutputDownloadView } from "./components/AmrOutputDownloadView";
 import { AmrSampleReport } from "./components/AmrSampleReport";
 import { AmrResult } from "./components/AmrSampleReport/types";
@@ -28,7 +37,9 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     useState<IdMap<AmrResult>>(null);
   const [dataFilterFunc, setDataFilterFunc] =
     useState<(data: AmrResult[]) => IdMap<AmrResult>>();
-  const [, setActiveFilters] = useState<FilterType[]>([]);
+  const [detailsSidebarGeneName, setDetailsSidebarGeneName] = useState<
+    string | null
+  >(null);
 
   // Apply the active filters to get the rows to display
   const displayedRows = useMemo(() => {
@@ -50,16 +61,31 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     fetchResults();
   }, []);
 
-  const [detailsSidebarGeneName, setDetailsSidebarGeneName] = useState<
-    string | null
-  >(null);
+  const activeFilterSelections = useReactiveVar(activeAmrFiltersVar);
+  useEffect(() => {
+    generateReportWithAppliedFiltersDownloadLink();
+  }, [displayedRows]);
+
+  const generateReportWithAppliedFiltersDownloadLink = () => {
+    const numOfActiveAmrFilters = countActiveFilters(activeFilterSelections);
+    if (numOfActiveAmrFilters === 0) {
+      amrReportTableDownloadWithAppliedFiltersLinkVar(null);
+    } else {
+      const [csvHeaders, csvRows] = computeAmrReportTableValuesForCSV({
+        displayedRows,
+        activeFilters: activeFilterSelections,
+      });
+
+      const link = createCSVObjectURL(csvHeaders, csvRows);
+      amrReportTableDownloadWithAppliedFiltersLinkVar(link);
+    }
+  };
 
   const renderResults = () => {
     if (allowedFeatures.includes(AMR_V2_FEATURE)) {
       return (
         <>
           <AmrFiltersContainer
-            setActiveFilters={setActiveFilters}
             setDataFilterFunc={setDataFilterFunc}
             hideFilters={hideFilters}
             setHideFilters={setHideFilters}

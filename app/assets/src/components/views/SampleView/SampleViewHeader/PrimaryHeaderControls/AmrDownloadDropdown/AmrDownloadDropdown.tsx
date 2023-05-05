@@ -1,4 +1,6 @@
+import { useReactiveVar } from "@apollo/client";
 import React from "react";
+import { amrReportTableDownloadWithAppliedFiltersLinkVar } from "~/cache/initialCache";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
@@ -13,8 +15,6 @@ interface AmrDownloadDropdownProps {
   backgroundId?: number;
   className?: string;
   currentTab?: string;
-  getDownloadReportTableWithAppliedFiltersLink?: $TSFixMeFunction;
-  hasAppliedFilters?: boolean;
   workflowRun?: WorkflowRun;
   sample?: Sample;
   view?: string;
@@ -22,11 +22,13 @@ interface AmrDownloadDropdownProps {
 
 const AmrDownloadDropdown = ({
   className,
-  getDownloadReportTableWithAppliedFiltersLink,
-  hasAppliedFilters,
   workflowRun,
   sample,
 }: AmrDownloadDropdownProps) => {
+  const amrReportTableDownloadWithAppliedFiltersLink = useReactiveVar(
+    amrReportTableDownloadWithAppliedFiltersLinkVar,
+  );
+
   const downloadCSV = () => {
     location.href = `/workflow_runs/${workflowRun.id}/amr_report_downloads?downloadType=report_csv`;
   };
@@ -38,7 +40,7 @@ const AmrDownloadDropdown = ({
         break;
       case "download_csv_with_filters":
         triggerFileDownload({
-          downloadUrl: getDownloadReportTableWithAppliedFiltersLink(),
+          downloadUrl: amrReportTableDownloadWithAppliedFiltersLink,
           fileName: `${sample.name}_amr_report_with_applied_filters.csv`,
         });
         break;
@@ -83,7 +85,7 @@ const AmrDownloadDropdown = ({
     {
       text: "Download Report Table with Applied Filters (.csv)",
       value: "download_csv_with_filters",
-      disabled: !hasAppliedFilters || true, // TODO - remove this once this download is implemented
+      disabled: !amrReportTableDownloadWithAppliedFiltersLink,
     },
     ...getAmrDownloadDropdownOptions(), // other four downloads
   ];

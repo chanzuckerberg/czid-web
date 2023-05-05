@@ -52,7 +52,7 @@ import DeprecatedAmrView from "~/components/DeprecatedAmrView";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import {
-  computeReportTableValuesForCSV,
+  computeMngsReportTableValuesForCSV,
   createCSVObjectURL,
 } from "~/components/utils/csv";
 import {
@@ -1613,7 +1613,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const includePathogenFlags = allowedFeatures.includes(
       MULTITAG_PATHOGENS_FEATURE,
     );
-    const [csvHeaders, csvRows] = computeReportTableValuesForCSV(
+    const [csvHeaders, csvRows] = computeMngsReportTableValuesForCSV(
       this.state.filteredReportData,
       this.state.selectedOptions,
       this.state.backgrounds,

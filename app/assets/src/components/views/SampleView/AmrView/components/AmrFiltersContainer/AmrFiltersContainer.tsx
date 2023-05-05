@@ -1,5 +1,7 @@
+import { useReactiveVar } from "@apollo/client";
 import { filter, forEach } from "lodash/fp";
 import React, { useEffect, useState } from "react";
+import { activeAmrFiltersVar } from "~/cache/initialCache";
 import FilterPanel from "~/components/layout/FilterPanel";
 import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
 import { ColumnId } from "../../constants";
@@ -14,10 +16,10 @@ import {
   TypeFilterType,
   UpdateThresholdFiltersType,
 } from "./types";
+import { countActiveFilters } from "./utils";
 
 interface AmrFiltersContainerProps {
   setDataFilterFunc: (filterFunc: any) => void;
-  setActiveFilters: (activeFilters: FilterType[]) => void;
   hideFilters: boolean;
   setHideFilters: (hideFilters: boolean) => void;
 }
@@ -97,7 +99,6 @@ const applyFilter = (data: AmrResult[], dataFilter: FilterType) => {
 };
 
 export const AmrFiltersContainer = ({
-  setActiveFilters,
   setDataFilterFunc,
   hideFilters,
   setHideFilters,
@@ -124,33 +125,6 @@ export const AmrFiltersContainer = ({
 
     setDataFilterFunc(wrappedFilterFunc);
   }, [dataFilters, setDataFilterFunc]);
-
-  // Keep track of which filters are active and how many are active - this will be included with
-  // the csv download of filtered data
-  useEffect(() => {
-    const activeFilters = filter(f => {
-      const { params, type } = f;
-      let hasDefinedParam = false;
-
-      type keyType = keyof FilterParamsType;
-      const keys = Object.keys(params) as keyType[];
-
-      forEach(k => {
-        const param = params[k];
-        const isActive =
-          param && type === TypeFilterType.MULTIPLE
-            ? (param as string[]).length > 0
-            : param;
-
-        if (isActive) {
-          hasDefinedParam = true;
-        }
-      }, keys);
-      return hasDefinedParam;
-    }, dataFilters);
-
-    setActiveFilters(activeFilters);
-  }, [dataFilters]);
 
   // Generic update function that will be used by the more-specific update functions below
   // NOTE: there is only one filterKey for each filter type. The threshold filters will be
@@ -184,6 +158,9 @@ export const AmrFiltersContainer = ({
     updateDataFilters(filtersList);
   };
 
+  const activeAmrFilters = useReactiveVar(activeAmrFiltersVar);
+  const numOfActiveAmrFilters = countActiveFilters(activeAmrFilters);
+
   return (
     <FilterPanel
       // The filter panel should always be present, the only things that should be hidden are the filters themselves.
@@ -191,7 +168,7 @@ export const AmrFiltersContainer = ({
       content={
         <div className={cs.filtersContainer}>
           <FilterButtonWithCounter
-            filterCounter={0}
+            filterCounter={numOfActiveAmrFilters}
             onFilterToggle={() => setHideFilters(!hideFilters)}
             showFilters={!hideFilters}
           />
