@@ -6,6 +6,8 @@ class SfnCgPipelineDispatchService
   include Callable
   include ParameterSanitization
 
+  # This is a special empty primer file that provides some quality/length filtering for cg samples
+  # dispatched with no primer file or wetlab protocol.
   NA_PRIMER_FILE = "na_primers.bed".freeze
 
   class SfnArnMissingError < StandardError
@@ -239,7 +241,8 @@ class SfnCgPipelineDispatchService
                           {
                             ref_fasta: File.join(@sample.sample_input_s3_path, ref_fasta_name),
                             ref_accession_id: @workflow_run.inputs&.[]("reference_accession"),
-                            primer_bed: File.join(@sample.sample_input_s3_path, primer_bed_name),
+                            # Default to empty primer file if the user does not provide a primer bed file (optional input)
+                            primer_bed: File.join(@sample.sample_input_s3_path, primer_bed_name) || "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{NA_PRIMER_FILE}",
                             # This option filters all except SARS-CoV-2 at the moment:
                             filter_reads: false,
                           }
@@ -253,9 +256,7 @@ class SfnCgPipelineDispatchService
                             ref_accession_id: sanitize_accession_id(@workflow_run.inputs&.[]("accession_id")),
                             # This option filters all except SARS-CoV-2 at the moment:
                             filter_reads: false,
-                            # This is a special empty primer file b/c the user doesn't specify a
-                            # wetlab protocol from mngs samples but we still want some quality/
-                            # length filtering:
+                            # Use empty primer file b/c the user does not specify a wetlab protocol when dispatching cg samples from an mngs report
                             primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{NA_PRIMER_FILE}",
                           }
                         end

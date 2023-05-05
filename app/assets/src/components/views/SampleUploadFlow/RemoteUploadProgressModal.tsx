@@ -27,13 +27,15 @@ const BASESPACE_SAMPLE_FIELDS = [
 const NUM_FAILED_SAMPLES_TO_DISPLAY = 3;
 
 interface RemoteUploadProgressModalProps {
-  samples?: SampleFromApi[];
   adminOptions: Record<string, string>;
+  bedFile?: File;
   clearlabs?: boolean;
   medakaModel?: string;
   metadata?: Record<string, any>;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
+  refSeqFile?: File;
+  samples?: SampleFromApi[];
   skipSampleProcessing?: boolean;
   technology?: string;
   uploadType: string;
@@ -44,12 +46,14 @@ interface RemoteUploadProgressModalProps {
 
 const RemoteUploadProgressModal = ({
   adminOptions,
+  bedFile,
   clearlabs,
   technology,
   medakaModel,
   metadata,
   onUploadComplete,
   project,
+  refSeqFile,
   samples,
   skipSampleProcessing,
   uploadType,
@@ -86,9 +90,11 @@ const RemoteUploadProgressModal = ({
 
     const samplesWithFlags = addFlagsToSamples({
       adminOptions,
+      bedFileName: bedFile?.name,
       clearlabs,
       medakaModel,
       useStepFunctionPipeline,
+      refSeqFileName: refSeqFile?.name,
       samples: samplesToFlag,
       skipSampleProcessing,
       technology,

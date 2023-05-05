@@ -1070,7 +1070,9 @@ class UploadSampleStep extends React.Component<
   handleContinue = async () => {
     const { onUploadSamples } = this.props;
     const {
+      bedFile,
       currentTab,
+      refSeqFile,
       selectedTechnology,
       selectedMedakaModel,
       selectedGuppyBasecallerSetting,
@@ -1100,14 +1102,20 @@ class UploadSampleStep extends React.Component<
 
       onUploadSamples({
         samples,
-        clearlabs: usedClearLabs,
-        technology: selectedTechnology,
-        medakaModel: selectedMedakaModel,
-        guppyBasecallerSetting: selectedGuppyBasecallerSetting,
         project: selectedProject,
+        technology: selectedTechnology,
         uploadType: currentTab,
-        wetlabProtocol: selectedWetlabProtocol,
         workflows: selectedWorkflows,
+        // mNGS Nanopore only inputs
+        guppyBasecallerSetting: selectedGuppyBasecallerSetting,
+        // WGS only inputs
+        bedFile,
+        refSeqFile,
+        // Covid CG only inputs
+        wetlabProtocol: selectedWetlabProtocol,
+        // CG Nanopore only inputs
+        clearlabs: usedClearLabs,
+        medakaModel: selectedMedakaModel,
       });
     }
 
@@ -1185,11 +1193,9 @@ class UploadSampleStep extends React.Component<
   isValid = () => {
     const {
       currentTab,
-      refSeqFile,
       selectedGuppyBasecallerSetting,
       selectedTechnology,
       selectedProject,
-      selectedTaxon,
       selectedWetlabProtocol,
       validatingSamples,
       localSamples,
@@ -1234,7 +1240,9 @@ class UploadSampleStep extends React.Component<
     } else if (
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value)
     ) {
-      workflowsValid = !!refSeqFile && !!selectedTaxon;
+      // TODO: Disable Pre-Upload Checks while Taxon seletion logic is WIP
+      // workflowsValid = !!refSeqFile && !!selectedTaxon;
+      workflowsValid = true;
     }
 
     // Note: we currently only run validation checks on locally uploaded samples

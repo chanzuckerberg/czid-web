@@ -89,6 +89,8 @@ export const ALLOWED_UPLOAD_WORKFLOWS_BY_TECHNOLOGY = {
   },
 };
 
+// Mapping of UPLOAD_WORKFLOW and TECHNOLOGY selected by the user in the sample upload flow
+// to the WORKFLOW that should be dispatched to in the backend
 export const WORKFLOWS_BY_UPLOAD_SELECTIONS = {
   [UPLOAD_WORKFLOWS.MNGS.value]: {
     [ILLUMINA]: WORKFLOWS.SHORT_READ_MNGS.value,
@@ -104,7 +106,7 @@ export const WORKFLOWS_BY_UPLOAD_SELECTIONS = {
     [NANOPORE]: WORKFLOWS.CONSENSUS_GENOME.value,
   },
   [UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value]: {
-    [NO_TECHNOLOGY_SELECTED]: WORKFLOWS.CONSENSUS_GENOME.value,
+    [ILLUMINA]: WORKFLOWS.CONSENSUS_GENOME.value,
   },
 };
 

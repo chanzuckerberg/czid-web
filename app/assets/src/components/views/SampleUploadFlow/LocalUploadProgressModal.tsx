@@ -41,33 +41,37 @@ import UploadConfirmationModal from "./UploadConfirmationModal";
 import UploadProgressModalSampleList from "./UploadProgressModalSampleList";
 
 interface LocalUploadProgressModalProps {
-  samples?: SampleFromApi[];
   adminOptions: Record<string, string>;
+  bedFile?: File;
   clearlabs?: boolean;
+  guppyBasecallerSetting: string;
   medakaModel?: string;
   metadata?: Record<string, any>;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
+  refSeqFile?: File;
+  samples?: SampleFromApi[];
   skipSampleProcessing?: boolean;
   technology?: string;
   uploadType: string;
   useStepFunctionPipeline?: boolean;
   wetlabProtocol?: string;
   workflows?: Set<$TSFixMe>;
-  guppyBasecallerSetting: string;
 }
 
 const LocalUploadProgressModal = ({
   adminOptions,
+  bedFile,
   clearlabs,
   guppyBasecallerSetting,
-  technology,
   medakaModel,
   metadata,
   onUploadComplete,
   project,
+  refSeqFile,
   samples,
   skipSampleProcessing,
+  technology,
   uploadType,
   useStepFunctionPipeline,
   wetlabProtocol,
@@ -107,11 +111,13 @@ const LocalUploadProgressModal = ({
   const initiateLocalUpload = async () => {
     const samplesToUpload = addFlagsToSamples({
       adminOptions,
+      bedFileName: bedFile?.name,
       clearlabs,
       guppyBasecallerSetting,
       medakaModel,
       samples,
       useStepFunctionPipeline,
+      refSeqFileName: refSeqFile?.name,
       skipSampleProcessing,
       technology,
       workflows,

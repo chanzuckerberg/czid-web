@@ -5,33 +5,37 @@ import LocalUploadProgressModal from "./LocalUploadProgressModal";
 import RemoteUploadProgressModal from "./RemoteUploadProgressModal";
 
 interface UploadProgressModalProps {
-  samples?: SampleFromApi[];
   adminOptions: Record<string, string>;
+  bedFile?: File;
   clearlabs?: boolean;
+  guppyBasecallerSetting: string;
   medakaModel?: string;
   metadata?: MetadataBasic;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
+  refSeqFile?: File;
+  samples?: SampleFromApi[];
   skipSampleProcessing?: boolean;
   technology?: string;
   uploadType: string;
   useStepFunctionPipeline?: boolean;
   wetlabProtocol?: string;
   workflows?: Set<string>;
-  guppyBasecallerSetting: string;
 }
 
 const UploadProgressModal = ({
   adminOptions,
+  bedFile,
   clearlabs,
   guppyBasecallerSetting,
-  technology,
   medakaModel,
   metadata,
   onUploadComplete,
   project,
+  refSeqFile,
   samples,
   skipSampleProcessing,
+  technology,
   uploadType,
   useStepFunctionPipeline,
   wetlabProtocol,
@@ -49,6 +53,7 @@ const UploadProgressModal = ({
       {uploadType === "local" ? (
         <LocalUploadProgressModal
           adminOptions={adminOptions}
+          bedFile={bedFile}
           clearlabs={clearlabs}
           guppyBasecallerSetting={guppyBasecallerSetting}
           technology={technology}
@@ -56,6 +61,7 @@ const UploadProgressModal = ({
           metadata={processMetadataRows(metadata.rows)}
           onUploadComplete={onUploadComplete}
           project={project}
+          refSeqFile={refSeqFile}
           samples={samples}
           skipSampleProcessing={skipSampleProcessing}
           uploadType={uploadType}
@@ -66,12 +72,14 @@ const UploadProgressModal = ({
       ) : (
         <RemoteUploadProgressModal
           adminOptions={adminOptions}
+          bedFile={bedFile}
           clearlabs={clearlabs}
           technology={technology}
           medakaModel={medakaModel}
           metadata={processMetadataRows(metadata.rows)}
           onUploadComplete={onUploadComplete}
           project={project}
+          refSeqFile={refSeqFile}
           samples={samples}
           skipSampleProcessing={skipSampleProcessing}
           uploadType={uploadType}

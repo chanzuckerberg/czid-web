@@ -49,7 +49,9 @@ interface ReviewStepProps {
     rows?: Record<string, any>[];
   };
   pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
+  bedFile?: File;
   project?: Project;
+  refSeqFile?: File;
   samples?: SampleFromApi[];
   uploadType: string;
   hostGenomes?: HostGenome[];
@@ -615,6 +617,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     } = this.state;
 
     const {
+      bedFile,
       clearlabs,
       guppyBasecallerSetting,
       technology,
@@ -622,6 +625,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
       metadata,
       onUploadComplete,
       originalHostGenomes,
+      refSeqFile,
       project,
       samples,
       uploadType,
@@ -681,6 +685,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
           {showUploadModal && (
             <UploadProgressModal
               adminOptions={adminOptions}
+              bedFile={bedFile}
               clearlabs={clearlabs}
               guppyBasecallerSetting={guppyBasecallerSetting}
               technology={technology}
@@ -688,6 +693,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
               metadata={metadata}
               onUploadComplete={onUploadComplete}
               project={project}
+              refSeqFile={refSeqFile}
               samples={samples}
               skipSampleProcessing={skipSampleProcessing}
               uploadType={uploadType}

@@ -35,6 +35,8 @@ interface SampleUploadFlowState {
   uploadType: "remote" | "local" | "";
   project: Project;
   sampleNamesToFiles: $TSFixMeUnknown;
+  bedFile?: File;
+  refSeqFile?: File;
   clearlabs: boolean;
   guppyBasecallerSetting?: string;
   medakaModel: string;
@@ -62,6 +64,8 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     uploadType: "", // remote or local
     project: null,
     sampleNamesToFiles: null, // Needed for local samples.
+    bedFile: null, // Optional for WGS samples.
+    refSeqFile: null, // Needed for WGS samples.
     // Metadata upload information
     clearlabs: false,
     guppyBasecallerSetting: null,
@@ -91,11 +95,13 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   };
 
   handleUploadSamples = ({
+    bedFile,
     clearlabs,
     technology,
     project,
     guppyBasecallerSetting,
     medakaModel,
+    refSeqFile,
     sampleNamesToFiles,
     samples,
     uploadType,
@@ -103,12 +109,14 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     workflows,
   }: Partial<SampleUploadFlowState>) => {
     this.setState({
+      bedFile,
       clearlabs,
       technology,
       currentStep: "uploadMetadata",
       guppyBasecallerSetting,
       medakaModel,
       project,
+      refSeqFile,
       sampleNamesToFiles,
       samples,
       stepsEnabled: set("uploadMetadata", true, this.state.stepsEnabled),
@@ -265,11 +273,11 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
         )}
         {this.state.samples && this.state.metadata && (
           <ReviewStep
+            bedFile={this.state.bedFile}
             clearlabs={this.state.clearlabs}
-            technology={this.state.technology}
-            medakaModel={this.state.medakaModel}
-            hostGenomes={this.state.hostGenomes}
             guppyBasecallerSetting={this.state.guppyBasecallerSetting}
+            hostGenomes={this.state.hostGenomes}
+            medakaModel={this.state.medakaModel}
             metadata={this.state.metadata}
             onStepSelect={this.handleStepSelect}
             onUploadComplete={this.onUploadComplete}
@@ -277,9 +285,11 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
             originalHostGenomes={this.props.hostGenomes}
             pipelineVersions={pipelineVersions}
             project={this.state.project}
+            refSeqFile={this.state.refSeqFile}
             // @ts-expect-error Property 'sampleNamesToFiles' does not exist on type
             sampleNamesToFiles={this.state.sampleNamesToFiles}
             samples={this.state.samples}
+            technology={this.state.technology}
             uploadType={this.state.uploadType}
             visible={this.state.currentStep === "review"}
             wetlabProtocol={wetlabProtocol}

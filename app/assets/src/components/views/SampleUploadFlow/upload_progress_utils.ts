@@ -1,16 +1,18 @@
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
-import { WORKFLOWS } from "~/components/utils/workflows";
 import {
   NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_OPTIONS,
+  UPLOAD_WORKFLOWS,
   WORKFLOWS_BY_UPLOAD_SELECTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
 import { SampleFromApi } from "~/interface/shared";
 
 interface addFlagsToSamplesProps {
   adminOptions: Record<string, string>;
+  bedFileName?: string;
   clearlabs: boolean;
   medakaModel: string;
+  refSeqFileName?: string;
   samples: Partial<SampleFromApi>[];
   skipSampleProcessing: boolean;
   technology: string;
@@ -23,9 +25,11 @@ interface addFlagsToSamplesProps {
 // Add flags selected by the user in the upload review Step
 export const addFlagsToSamples = ({
   adminOptions,
+  bedFileName,
   clearlabs,
   guppyBasecallerSetting,
   medakaModel,
+  refSeqFileName,
   samples,
   useStepFunctionPipeline,
   skipSampleProcessing,
@@ -48,28 +52,41 @@ export const addFlagsToSamples = ({
     workflow => WORKFLOWS_BY_UPLOAD_SELECTIONS[workflow][selectedTechnology],
   );
 
-  const isLongReadMngs = workflowsConverted.includes(
-    WORKFLOWS.LONG_READ_MNGS.value,
+  const isMetagenomics = workflows.has(UPLOAD_WORKFLOWS.MNGS.value);
+  const isCovidConsensusGenome = workflows.has(
+    UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value,
   );
-  const isConsensusGenomeNanopore =
-    workflowsConverted.includes(WORKFLOWS.CONSENSUS_GENOME.value) &&
-    technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
-
+  const isViralConensusGenome = workflows.has(
+    UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
+  );
+  const isNanopore = technology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE;
   return samples.map(sample => ({
     ...sample,
-    do_not_process: skipSampleProcessing,
-    ...(isConsensusGenomeNanopore && {
-      clearlabs,
-      medaka_model: medakaModel,
-    }),
-    ...(isLongReadMngs && {
-      guppy_basecaller_setting: guppyBasecallerSetting,
-    }),
-    pipeline_execution_strategy: pipelineExecutionStrategy,
-    technology,
-    wetlab_protocol: wetlabProtocol,
-    workflows: workflowsConverted,
     ...adminOptions,
+    technology,
+    do_not_process: skipSampleProcessing,
+    pipeline_execution_strategy: pipelineExecutionStrategy,
+    workflows: workflowsConverted,
+    // Add mNGS specific fields
+    ...(isMetagenomics &&
+      isNanopore && {
+        guppy_basecaller_setting: guppyBasecallerSetting,
+      }),
+    // Add Viral CG specific fields
+    ...(isViralConensusGenome && {
+      ref_fasta: refSeqFileName,
+      ...(bedFileName && {
+        primer_bed: bedFileName,
+      }),
+    }),
+    // Add Covid CG specific fields
+    ...(isCovidConsensusGenome && {
+      wetlab_protocol: wetlabProtocol,
+      ...(isNanopore && {
+        clearlabs,
+        medaka_model: medakaModel,
+      }),
+    }),
   }));
 };
 

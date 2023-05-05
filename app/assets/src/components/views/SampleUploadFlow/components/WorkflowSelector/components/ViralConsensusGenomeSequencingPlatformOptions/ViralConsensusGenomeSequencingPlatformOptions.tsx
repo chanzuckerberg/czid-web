@@ -84,7 +84,7 @@ const ViralConsensusGenomeSequencingPlatformOptions = ({
           />
         ) : (
           <UploadButton
-            fileTypes={[".fasta"]}
+            fileTypes={[".fasta", ".fa", "fasta.gz", ".fa.gz"]}
             onFileChanged={onRefSeqFileChanged}
           />
         )}
@@ -104,7 +104,10 @@ const ViralConsensusGenomeSequencingPlatformOptions = ({
             onFileChanged={onBedFileChanged}
           />
         ) : (
-          <UploadButton fileTypes={[".bed"]} onFileChanged={onBedFileChanged} />
+          <UploadButton
+            fileTypes={[".bed", ".bed.gz"]}
+            onFileChanged={onBedFileChanged}
+          />
         )}
       </div>
     </div>
