@@ -4,7 +4,6 @@
 
 .fileName {
   @include font-body-xs;
-  margin-top: $sds-spaces-m;
   margin-bottom: $sds-spaces-m;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -18,4 +17,8 @@
   fill: $sds-color-error-400 !important;
   margin-bottom: -$sds-spaces-xxxs;
   margin-left: $sds-spaces-xs;
+}
+
+.checkbox {
+  height: $sds-spaces-xl;
 }

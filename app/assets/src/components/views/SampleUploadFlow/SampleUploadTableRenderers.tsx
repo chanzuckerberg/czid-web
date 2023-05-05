@@ -107,7 +107,7 @@ export default class SampleUploadTableRenderers extends React.Component {
                 PRE_UPLOAD_CHECK_FEATURE,
               ) ? (
                 <Checkbox
-                  className={selectableCellClassName}
+                  className={cx(selectableCellClassName, cs.checkbox)}
                   checked={selected.has(cellData.id)}
                   onChange={onSelectRow}
                   value={disabled ? -1 : cellData.id}
@@ -116,7 +116,7 @@ export default class SampleUploadTableRenderers extends React.Component {
                 />
               ) : finishedValidating ? (
                 <Checkbox
-                  className={selectableCellClassName}
+                  className={cx(selectableCellClassName, cs.checkbox)}
                   checked={selected.has(cellData.id)}
                   onChange={onSelectRow}
                   value={disabled ? -1 : cellData.id}

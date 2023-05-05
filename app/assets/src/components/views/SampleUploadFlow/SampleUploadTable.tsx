@@ -147,6 +147,8 @@ export default class SampleUploadTable extends React.Component<SampleUploadTable
       }
     }
 
+    rowProps.style.alignItems = "start";
+    rowProps.style.paddingTop = "10px";
     return defaultTableRowRenderer(rowProps);
   };
 

@@ -66,7 +66,18 @@ export const sortResultsByMatch = (result: { name: string }, query: string) => {
   return name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
 };
 
+// Remove Illumina/ONT lanes from file names (whether the name includes an extension or not)
 export const removeLaneFromName = (name: string) => {
+  // ONT file name pattern: ABC_pass_barcode_123, ABC_pass_barcode_123.fastq, ABC_pass_barcode_123.fastq.gz
+  // See https://jex.im/regulex/#!flags=&re=.*_pass_.*(_%5B0-9%5D%2B(%5C.fastq(%5C.gz)%3F)%3F%24)
+  const matchONT = name.match(/.*_pass_.*(_[0-9]+(\.fastq(\.gz)?)?$)/);
+  if (matchONT) {
+    // Only remove match (group $1) from end of file name, in case it's present in many places.
+    // Replace it with the file extension (group $2), if any.
+    return name.replace(new RegExp(matchONT[1] + "$"), matchONT[2] || "");
+  }
+
+  // Illumina file name pattern: ABC_L001, ABC_L001.fastq
   return name.replace(/_L00[1-8]/, "");
 };
 
