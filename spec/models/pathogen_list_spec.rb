@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe PathogenList, type: :model do
   context "#parse_pathogen_list_csv" do
-    subject { PathogenList.parse_pathogen_list_csv("test_bucket", "test_filepath") }
+    subject { PathogenList.parse_input_file_csv("test_bucket", "test_filepath", ["Species", "taxID"]) }
 
     before do
       @mock_aws_clients = {
@@ -16,8 +16,8 @@ RSpec.describe PathogenList, type: :model do
 
     it "should raise an error if required headers are missing" do
       missing_header_csv = CSV.generate do |csv|
-        csv << ["Species", "taxID", "Source"]
-        csv << ["species_a", "1", "test_source"]
+        csv << ["taxID"]
+        csv << ["1"]
       end
       pathogens = CSV.parse(missing_header_csv, headers: true)
       allow(CSV).to receive(:parse).and_return(pathogens)
@@ -27,8 +27,8 @@ RSpec.describe PathogenList, type: :model do
 
     it "should return the correct pathogens if required headers present" do
       test_csv = CSV.generate do |csv|
-        csv << ["Species", "taxID", "Source", "Footnote"]
-        csv << ["species_a", "1", "test_source", "test_footnote"]
+        csv << ["Species", "taxID"]
+        csv << ["species_a", "1"]
       end
 
       pathogens = CSV.parse(test_csv, headers: true)
