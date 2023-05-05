@@ -778,7 +778,7 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     if (totalWorkflowCount === 1) {
       // if there is only one workflow run, navigate to the project page
       addSampleDeleteFlagToSessionStorage(sample?.name);
-      location.href = `/home?project_id=${sample.project_id}`;
+      location.replace(`/home?project_id=${sample.project_id}`);
       return;
     }
 
