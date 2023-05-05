@@ -2,8 +2,8 @@ import { ColumnId } from "../../constants";
 
 // These are in order for the threshold filter dropdown
 export const thresholdFilterOptionColumnIds = [
-  ColumnId.CUTOFF,
   ColumnId.CONTIGS,
+  ColumnId.CUTOFF,
   ColumnId.CONTIG_COVERAGE_BREADTH,
   ColumnId.CONTIG_PERCENT_ID,
   ColumnId.READS,

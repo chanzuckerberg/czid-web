@@ -35,7 +35,7 @@ export const contigPercentIdColumn: ColumnDef<AmrResult, any> = {
       value = NO_CONTENT_FALLBACK;
     } else {
       // Parse the string to a number, round it to the hundredths place and convert it back to a string.
-      value = `${Math.round(parseFloat(rawValue) * 100) / 100} %`;
+      value = `${Math.round(parseFloat(rawValue) * 100) / 100}`;
     }
 
     return (

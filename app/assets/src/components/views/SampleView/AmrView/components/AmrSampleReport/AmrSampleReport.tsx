@@ -56,8 +56,8 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
         !!reportTableData && Object.keys(reportTableData).length,
       ),
       getContigsColumnGroup([
-        cutoffColumn,
         contigsColumn,
+        cutoffColumn,
         contigPercentCoverageColumn,
         contigPercentIdColumn,
         contigSpeciesColumn,

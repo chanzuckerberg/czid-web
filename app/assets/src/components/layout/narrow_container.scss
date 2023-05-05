@@ -5,7 +5,7 @@
   // Since there is no min-margin property we set max-width to 2xmin_margin and
   // ensure the min margin by removing the margin width from the actual width of
   // the component (i.e. 100% - 2xmin_margin)
-  max-width: calc(1600px + 2 * $narrow-container-margin);
+  max-width: $narrow-container-width;
   margin: 0 auto;
   width: calc(100% - #{2 * $narrow-container-margin});
 

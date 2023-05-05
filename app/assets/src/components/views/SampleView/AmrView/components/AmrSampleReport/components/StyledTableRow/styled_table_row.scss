@@ -25,3 +25,10 @@
 .styledTableRow > .readsColumnGroup ~ .readsColumnGroup {
   border: none;
 }
+
+// Styles for all styleTableRow elements
+.styledTableRow {
+  &:hover {
+    background-color: $sds-color-gray-100;
+  }
+}
