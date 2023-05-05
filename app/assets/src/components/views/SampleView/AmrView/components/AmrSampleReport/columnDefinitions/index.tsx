@@ -6,7 +6,6 @@ export { contigSpeciesColumn } from "./contigSpecies";
 export { cutoffColumn } from "./cutoff";
 export { dropdownColumnGroup } from "./dropdownColumnGroup";
 export { drugClassColumn } from "./drugClass";
-export { geneColumn } from "./gene";
 export { geneFamilyColumn } from "./geneFamily";
 export { getGeneInfoColumnGroup } from "./geneInfoColumnGroup";
 export { mechanismColumn } from "./mechanism";

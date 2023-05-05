@@ -1,0 +1,12 @@
+@import "~czifui/dist/variables";
+
+.geneCellWrapper {
+  justify-content: "left";
+  font: $sds-font-body-s-600-font;
+  word-break: break-word;
+}
+
+.hoveredGeneName {
+  color: $sds-color-primary-400;
+  padding-right: $sds-spaces-xs;
+}

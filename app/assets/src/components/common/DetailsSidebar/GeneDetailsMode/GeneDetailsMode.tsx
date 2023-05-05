@@ -26,6 +26,7 @@ export interface OntologyType {
 }
 
 const GeneDetailsMode = ({ geneName }: GDMProps) => {
+  const safeGeneName = geneName.replace(/[^a-zA-Z0-9-]/g, "").toLowerCase();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [wasCardEntryFound, setWasCardEntryFound] = useState<boolean>(false);
   const [wasOntologyInfoFound, setWasOntologyInfoFound] =
@@ -48,11 +49,11 @@ const GeneDetailsMode = ({ geneName }: GDMProps) => {
     setIsLoading(true);
     setWasCardEntryFound(false);
 
-    getGeneInfo(geneName);
-  }, [geneName]);
+    getGeneInfo(safeGeneName);
+  }, [safeGeneName]);
 
-  const getGeneInfo = async (geneName: string) => {
-    const newOntology = await getOntology(geneName);
+  const getGeneInfo = async (safeGeneName: string) => {
+    const newOntology = await getOntology(safeGeneName);
     const ontologyInfoFound = newOntology.error === "";
     // all the CARD accessions we are interested in ar 7 in length.
     const cardEntryFound = newOntology.accession.length === 7;

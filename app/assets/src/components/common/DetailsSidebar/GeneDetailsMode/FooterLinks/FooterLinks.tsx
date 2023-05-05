@@ -29,23 +29,28 @@ const FooterLinks = ({
   return (
     <>
       {sources.map(source => {
-        return (
-          <li className={cs.link} key={source}>
-            <a
-              href={generateLinkTo({ geneName, ontology, source })}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() =>
-                trackEvent("GeneDetailsMode_footer-link_clicked", {
-                  destination: source,
-                  geneName,
-                })
-              }
-            >
-              {source}
-            </a>
-          </li>
-        );
+        const href = generateLinkTo({ geneName, ontology, source });
+        if (!href) {
+          return null;
+        } else {
+          return (
+            <li className={cs.link} key={source}>
+              <a
+                href={generateLinkTo({ geneName, ontology, source })}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  trackEvent("GeneDetailsMode_footer-link_clicked", {
+                    destination: source,
+                    geneName,
+                  })
+                }
+              >
+                {source}
+              </a>
+            </li>
+          );
+        }
       })}
     </>
   );

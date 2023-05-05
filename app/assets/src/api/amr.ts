@@ -8,7 +8,7 @@ export const getAMRCounts = (sampleIds: $TSFixMe) =>
   });
 
 export const getOntology = (geneName: $TSFixMe) =>
-  get("amr_heatmap/fetch_ontology.json", {
+  get("/amr_ontology/fetch_ontology.json", {
     params: {
       geneName,
     },

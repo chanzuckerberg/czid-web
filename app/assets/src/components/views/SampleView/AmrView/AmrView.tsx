@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
+import { withAnalytics } from "~/api/analytics";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V2_FEATURE } from "~/components/utils/features";
@@ -47,6 +49,10 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     fetchResults();
   }, []);
 
+  const [detailsSidebarGeneName, setDetailsSidebarGeneName] = useState<
+    string | null
+  >(null);
+
   const renderResults = () => {
     if (allowedFeatures.includes(AMR_V2_FEATURE)) {
       return (
@@ -59,6 +65,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
             reportTableData={displayedRows}
             sample={sample}
             workflowRun={workflowRun}
+            setDetailsSidebarGeneName={setDetailsSidebarGeneName}
           />
         </>
       );
@@ -86,6 +93,19 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
           loading: "AmrView_amr-doc-link_clicked",
         }}
       />
+      {allowedFeatures.includes(AMR_V2_FEATURE) && (
+        <DetailsSidebar
+          visible={Boolean(detailsSidebarGeneName)}
+          mode="geneDetails"
+          onClose={() =>
+            withAnalytics(
+              setDetailsSidebarGeneName(null),
+              "AmrView_details-sidebar_closed",
+            )
+          }
+          params={{ geneName: detailsSidebarGeneName }}
+        />
+      )}
     </>
   );
 };

@@ -33,7 +33,7 @@ export const generateLinkTo = ({
 
   switch (source) {
     case Sources.CARD: {
-      return `${Urls.CARD_ARO}${accession}`;
+      return accession ? `${Urls.CARD_ARO}${accession}` : null;
     }
     case Sources.OWL: {
       return `${Urls.CARD_OWL}`;
@@ -48,7 +48,9 @@ export const generateLinkTo = ({
       return `${Urls.NCBI_REF_GENE}${geneName}`;
     }
     case Sources.GENBANK_NUCCORE: {
-      return `${Urls.GENBANK_NUCCORE}${genbankAccession}`;
+      return genbankAccession
+        ? `${Urls.GENBANK_NUCCORE}${genbankAccession}`
+        : null;
     }
     default: {
       return "";

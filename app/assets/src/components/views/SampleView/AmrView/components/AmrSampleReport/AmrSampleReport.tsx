@@ -12,7 +12,6 @@ import {
   cutoffColumn,
   dropdownColumnGroup,
   drugClassColumn,
-  geneColumn,
   geneFamilyColumn,
   getReadsColumnGroup,
   mechanismColumn,
@@ -25,6 +24,7 @@ import {
   readsPerMillionColumn,
 } from "./columnDefinitions";
 import { getContigsColumnGroup } from "./columnDefinitions/contigsColumnGroup";
+import { getGeneColumn } from "./columnDefinitions/geneColumn";
 import { getGeneInfoColumnGroup } from "./columnDefinitions/geneInfoColumnGroup";
 import { StyledTableRow } from "./components/StyledTableRow";
 import { AmrResult } from "./types";
@@ -33,9 +33,13 @@ interface AmrSampleReportProps {
   reportTableData: IdMap<AmrResult>;
   sample: Sample;
   workflowRun: WorkflowRun;
+  setDetailsSidebarGeneName: (geneName: string | null) => void;
 }
 
-export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
+export const AmrSampleReport = ({
+  reportTableData,
+  setDetailsSidebarGeneName,
+}: AmrSampleReportProps) => {
   // This file will include state representing visible rows
   // The headers
   // The table
@@ -47,7 +51,7 @@ export const AmrSampleReport = ({ reportTableData }: AmrSampleReportProps) => {
     () => [
       getGeneInfoColumnGroup(
         [
-          geneColumn,
+          getGeneColumn(setDetailsSidebarGeneName),
           geneFamilyColumn,
           drugClassColumn,
           mechanismColumn,

@@ -178,7 +178,7 @@ Rails.application.routes.draw do
   put 'visualizations/:id', to: 'visualizations#update'
 
   get 'amr_heatmap/amr_counts.json', to: 'amr_heatmap#amr_counts'
-  get 'amr_heatmap/fetch_ontology.json', to: 'amr_heatmap#fetch_ontology'
+  get 'amr_ontology/fetch_ontology.json', to: 'amr_ontology#fetch_ontology'
   get 'amr_heatmap', to: 'amr_heatmap#index'
 
   get 'basespace/oauth', to: 'basespace#oauth'
