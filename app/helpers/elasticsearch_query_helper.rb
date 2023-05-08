@@ -743,7 +743,7 @@ module ElasticsearchQueryHelper
     if ENV['INDEXING_LAMBDA_MODE'] == 'local'
       local_lambda_host = {
         "taxon-indexing-concurrency-manager-#{LAMBDA_ENV}" => ENV['LOCAL_TAXON_INDEXING_URL'],
-        "taxon-indexing-eviction-lambda-#{LAMBDA_ENV}-evict_expired_taxons" => ENV['LOCAL_EVICTION_URL'],
+        "taxon-indexing-eviction-lambda-#{LAMBDA_ENV}-evict_selected_taxons" => ENV['LOCAL_EVICTION_URL'],
       }[function_name]
       begin
         response = HTTP.post("http://#{local_lambda_host}/2015-03-31/functions/function/invocations", json: payload)
@@ -771,7 +771,7 @@ module ElasticsearchQueryHelper
       attempts ||= 1
       resp = invoke_lambda(function_name, payload)
       if resp["status_code"] != 200 || !resp["function_error"].nil?
-        raise "#{function_name} invocation failure"
+        raise "#{function_name} invocation failed with status_code: #{resp['status_code']}, function_error: #{resp['function_error']}"
       end
     rescue StandardError => error
       LogUtil.log_error("#{function_name} invocation failure", exception: error)
@@ -815,7 +815,7 @@ module ElasticsearchQueryHelper
     #   ],
     #   "selected_pipeline_run_ids"=>[29202] # the list of pipeline_run_ids that were passed in
     # }
-    function_name = "taxon-indexing-eviction-lambda-#{LAMBDA_ENV}-evict_expired_taxons"
+    function_name = "taxon-indexing-eviction-lambda-#{LAMBDA_ENV}-evict_selected_taxons"
     payload = {
       pipeline_run_ids: pipeline_run_ids,
     }
