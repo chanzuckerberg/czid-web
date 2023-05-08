@@ -87,44 +87,6 @@ class Project < ApplicationRecord
     where(id: sorted_project_ids).order(Arel.sql("field(projects.id, #{sorted_project_ids.join ','})"))
   }
 
-  def csv_dir(user_id)
-    path = "/app/tmp/report_csvs/#{id}/#{user_id}"
-    sanitize_path(path)
-  end
-
-  def tar_filename
-    "#{name.downcase.gsub(/\W/, '-')}_reports.tar.gz"
-  end
-
-  def report_tar(user_id)
-    path = "#{csv_dir(user_id)}/#{tar_filename}"
-    sanitize_path(path)
-  end
-
-  def report_tar_s3(user_id)
-    "s3://#{SAMPLES_BUCKET_NAME}/project_report_archives/#{id}/user-#{user_id}/#{tar_filename}"
-  end
-
-  def host_gene_counts_tar_filename
-    cleaned_project_name + '_host-gene-counts.tar.gz'
-  end
-
-  def host_gene_counts_tar_s3(user_id)
-    "s3://#{SAMPLES_BUCKET_NAME}/host_gene_count_archives/#{id}/user-#{user_id}/#{host_gene_counts_tar_filename}"
-  end
-
-  def host_gene_count_dir(user_id)
-    "/app/tmp/host-gene-counts/#{id}/#{user_id}"
-  end
-
-  def host_gene_counts_tar(user_id)
-    "#{host_gene_count_dir(user_id)}/#{host_gene_counts_tar_filename}"
-  end
-
-  def sanitize_path(path)
-    return path unless path != File.expand_path(path)
-  end
-
   # Disable samples function. have to go through power
   alias samples_unsafe samples
   def samples
@@ -133,51 +95,6 @@ class Project < ApplicationRecord
 
   def cleaned_project_name
     name.downcase.split(' ').join('_')
-  end
-
-  def host_gene_counts_from_params(params)
-    user_id = params["user_id"]
-    current_power = Power.new(User.find(user_id))
-    samples = current_power.project_samples(self)
-    output_dir = host_gene_count_dir(user_id)
-    work_dir = "#{output_dir}/workdir"
-    Syscall.run("rm", "-rf", output_dir)
-    Syscall.run("mkdir", "-p", work_dir)
-    output_file = host_gene_counts_tar(user_id)
-    samples.each do |sample|
-      sample_name = "#{sample.name.gsub(/\W/, '-')}_#{sample.id}"
-      _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab")
-      next unless status.exitstatus.zero?
-
-      Syscall.run("aws", "s3", "cp", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab", "#{work_dir}/#{sample_name}")
-    end
-    Syscall.run_in_dir(work_dir, "tar", "cvzf", output_file, ".")
-    Syscall.run("aws", "s3", "cp", output_file, host_gene_counts_tar_s3(user_id))
-    Syscall.run("rm", "-rf", output_dir)
-  end
-
-  def bulk_report_csvs_from_params(params)
-    user_id = params["user_id"]
-    current_power = Power.new(User.find(user_id))
-    user_csv_dir = csv_dir(user_id)
-    Syscall.run("rm", "-rf", user_csv_dir)
-    Syscall.run("mkdir", "-p", user_csv_dir)
-    samples_to_download = current_power.project_samples(self)
-    selected_sample_ids = (params["sampleIds"] || "").split(",").map(&:to_i)
-    samples_to_download = samples_to_download.where(id: selected_sample_ids) unless selected_sample_ids.empty?
-    sample_names_used = []
-    samples_to_download.each do |sample|
-      csv_data = report_csv_from_params(sample, params)
-      clean_sample_name = sample.name.gsub(/\W/, "-")
-      used_before = sample_names_used.include? clean_sample_name
-      sample_names_used << clean_sample_name
-      clean_sample_name += "_#{sample.id}" if used_before
-      filename = "#{user_csv_dir}/#{clean_sample_name}.csv"
-      File.write(filename, csv_data)
-    end
-    Syscall.run_in_dir(user_csv_dir, "tar", "cvzf", tar_filename, ".")
-    Syscall.run("aws", "s3", "cp", report_tar(user_id), report_tar_s3(user_id))
-    Syscall.run("rm", "-rf", user_csv_dir)
   end
 
   # search is used by ES

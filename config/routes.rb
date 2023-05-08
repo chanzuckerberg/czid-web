@@ -126,12 +126,6 @@ Rails.application.routes.draw do
 
   resources :projects do
     member do
-      get :make_project_reports_csv
-      get :project_reports_csv_status
-      get :send_project_reports_csv
-      get :make_host_gene_counts
-      get :host_gene_counts_status
-      get :send_host_gene_counts
       get :all_users
       get :validate_project_name
 

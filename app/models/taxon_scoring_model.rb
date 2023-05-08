@@ -48,7 +48,6 @@ class TaxonScoringModel < ApplicationRecord
   MATH_FUNCTIONS = %w[log10 sqrt].freeze
 
   DEFAULT_MODEL_NAME = 'aggregate_score'.freeze
-  # DEFAULT_MODEL_NAME = 'kat_m1'.freeze
   MODEL_TYPE_LINEAR = 'linear'.freeze # Default
   MODEL_TYPE_LOGISTIC = 'logistic'.freeze
   LOGISTIC_SCALING_FACTOR = 1000
