@@ -2,22 +2,33 @@
 
 .reportWrapperFiltersOpen {
   position: relative;
-  left: 200px;
   margin-top: $sds-spaces-xl;
   height: 100%;
-
   display: flex;
   flex-direction: row;
+  left: 150px;
+  @media screen and (max-width: 1770px) {
+    left: 200px;
+  }
 }
 
 .reportWrapperFiltersClosed {
   position: relative;
-  left: 65px;
   margin-top: $sds-spaces-xl;
   height: 100%;
-
   display: flex;
   flex-direction: row;
+  @media screen and (max-width: 1770px) {
+    // Create a smooth transition between the two screen sizes
+    // Between 1635px and 1770px, the left position should be a
+    // number between 0 and 75px. When the screen is exactly 1635px,
+    // this calculation will result in 75px, and when the screen is
+    // exactly 1770px, this calculation will result in 0px.
+    left: calc((1770px - 100vw) * 75 / (1770 - 1635));
+  }
+  @media screen and (max-width: 1635px) {
+    left: 75px;
+  }
 }
 
 .dropdownWrapper {

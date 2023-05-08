@@ -3,8 +3,7 @@
 @import "~czifui/dist/variables";
 
 .tabs {
-  height: 30px;
-  padding-bottom: $sds-spaces-m;
+  padding-bottom: $sds-spaces-xs;
 
   .tab {
     @include font-header-s;

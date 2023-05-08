@@ -6,13 +6,13 @@
 .pipelineVersionSelectContainer {
   padding-left: $sds-spaces-xxxs;
   margin-left: $sds-spaces-s;
-  margin-right: $sds-spaces-s;
   display: inline-flex;
   align-items: center;
 
   .pipelineVersion {
     @include font-body-xxxs;
     color: $sds-color-gray-500;
+    margin-right: $sds-spaces-xxs;
   }
 
   .pipelineVersionDropdown {
