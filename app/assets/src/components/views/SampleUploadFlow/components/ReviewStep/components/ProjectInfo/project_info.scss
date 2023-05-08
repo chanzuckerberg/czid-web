@@ -1,0 +1,45 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+@import "~/components/views/SampleUploadFlow/components/ReviewStep/review_step.scss";
+
+.icon {
+  margin-right: $sds-spaces-l;
+}
+
+.publicAccess {
+  @include font-body-s;
+  color: $sds-color-gray-600;
+  margin-left: $sds-spaces-m;
+}
+
+.descriptionContainer {
+  @include font-body-s;
+  color: $sds-color-gray-500;
+  white-space: pre-wrap;
+  margin: $sds-spaces-m 0;
+}
+
+.showHide {
+  @include font-body-xxxs;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-top: 5px;
+  margin-bottom: $sds-spaces-m;
+  color: $sds-color-primary-400;
+  cursor: pointer;
+}
+
+.existingSamples {
+  @include font-body-xs;
+  color: $sds-color-gray-500;
+}
+
+.truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+}

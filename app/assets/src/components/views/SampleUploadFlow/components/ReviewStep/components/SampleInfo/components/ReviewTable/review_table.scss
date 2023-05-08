@@ -1,0 +1,22 @@
+@import "~czifui/dist/variables";
+@import "~styles/themes/typography";
+
+.sampleName {
+  @include font-header-s;
+}
+
+.files {
+  padding: $sds-spaces-m 0;
+}
+
+.file {
+  padding: 5px 0;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}

@@ -1,0 +1,1 @@
+export { ReviewTable } from "./ReviewTable";

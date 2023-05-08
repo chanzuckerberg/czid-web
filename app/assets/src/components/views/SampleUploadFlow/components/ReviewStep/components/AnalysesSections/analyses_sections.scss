@@ -1,0 +1,30 @@
+@import "~styles/themes/colors";
+@import "~czifui/dist/variables";
+@import "~styles/themes/typography";
+
+@import "~/components/views/SampleUploadFlow/components/ReviewStep/review_step.scss";
+
+.icon {
+  margin-right: $sds-spaces-l;
+}
+
+.analysisTypeContent {
+  display: flex;
+  margin-top: $sds-spaces-l;
+
+  .item {
+    min-width: 180px;
+    margin-right: $sds-spaces-xl;
+    color: $sds-color-gray-500;
+    flex: 1 0 0;
+
+    .subheader {
+      @include font-header-s;
+      margin-bottom: $sds-spaces-xs;
+    }
+
+    .description {
+      @include font-body-s;
+    }
+  }
+}

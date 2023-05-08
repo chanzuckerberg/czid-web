@@ -25,7 +25,7 @@ import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
-import { DataHeaders } from "~/components/views/SampleUploadFlow/components/ReviewStep/types";
+import { DataHeaders } from "~/components/views/SampleUploadFlow/components/ReviewStep/components/SampleInfo/components/ReviewTable/types";
 import DataTable from "~/components/visualizations/table/DataTable";
 import {
   LocationObject,

@@ -1,0 +1,18 @@
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+@import "~/components/views/SampleUploadFlow/components/ReviewStep/review_step.scss";
+
+.sectionContainer {
+  margin-top: 50px;
+}
+
+.tableScrollWrapper {
+  overflow: auto;
+  max-height: 450px;
+
+  .loadingMsg {
+    @include font-body-s;
+    margin-top: $sds-spaces-m;
+  }
+}

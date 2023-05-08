@@ -9,12 +9,14 @@ import {
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import {
   HostGenome,
+  MetadataBasic,
   Project,
   ProjectPipelineVersions,
   SampleFromApi,
 } from "~/interface/shared";
 import { ReviewStep } from "./components/ReviewStep";
 import UploadSampleStep from "./components/UploadSampleStep/UploadSampleStep";
+import { Technology, UploadWorkflows } from "./constants";
 import cs from "./sample_upload_flow.scss";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 import UploadMetadataStep from "./UploadMetadataStep";
@@ -29,7 +31,7 @@ interface SampleUploadFlowProps {
 }
 
 interface SampleUploadFlowState {
-  workflows: Set<string>;
+  workflows: Set<UploadWorkflows>;
   currentStep: string;
   samples?: SampleFromApi[];
   uploadType: "remote" | "local" | "";
@@ -40,13 +42,10 @@ interface SampleUploadFlowState {
   clearlabs: boolean;
   guppyBasecallerSetting?: string;
   medakaModel: string;
-  metadata?: {
-    headers?: string[];
-    rows?: Record<string, any>[];
-  };
+  metadata?: MetadataBasic;
   metadataIssues: $TSFixMeUnknown;
   pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
-  technology?: string;
+  technology?: Technology;
   stepsEnabled: {
     uploadSamples: boolean;
     uploadMetadata: boolean;
@@ -80,7 +79,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
       review: false,
     },
     hostGenomes: [], // set on metadata upload
-    workflows: new Set(),
+    workflows: new Set() as Set<UploadWorkflows>,
     wetlabProtocol: null,
   };
 
@@ -286,8 +285,6 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
             pipelineVersions={pipelineVersions}
             project={this.state.project}
             refSeqFile={this.state.refSeqFile}
-            // @ts-expect-error Property 'sampleNamesToFiles' does not exist on type
-            sampleNamesToFiles={this.state.sampleNamesToFiles}
             samples={this.state.samples}
             technology={this.state.technology}
             uploadType={this.state.uploadType}

@@ -1,4 +1,3 @@
-// TODO (mlila): generally, check permutations of feature flags
 import cx from "classnames";
 import {
   Icon,
