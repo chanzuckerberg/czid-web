@@ -1,3 +1,4 @@
+import { Tooltip } from "czifui";
 import React, { useState } from "react";
 import cs from "./gene_cell.scss";
 
@@ -25,23 +26,25 @@ export const GeneCell = ({
   };
 
   return (
-    <div
-      className={cs.geneCellWrapper}
-      onMouseEnter={() => handleMouseEnter()}
-      onMouseLeave={() => handleMouseLeave()}
-    >
-      <div className={isHovered ? cs.hoveredGeneName : null}>
-        <span
-          role="button"
-          tabIndex={0}
-          onClick={() => handleGeneNameClick()}
-          onKeyDown={() => handleGeneNameClick()}
-        >
-          {geneName}
-        </span>
+    <Tooltip title={geneName} sdsStyle="dark" arrow>
+      <div
+        className={cs.geneCellWrapper}
+        onMouseEnter={() => handleMouseEnter()}
+        onMouseLeave={() => handleMouseLeave()}
+      >
+        <div className={isHovered ? cs.hoveredGeneName : null}>
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={() => handleGeneNameClick()}
+            onKeyDown={() => handleGeneNameClick()}
+          >
+            {geneName}
+          </span>
 
-        {/* Once we're ready to add gene downloads, add that icon button inline right here */}
+          {/* Once we're ready to add gene downloads, add that icon button inline right here */}
+        </div>
       </div>
-    </div>
+    </Tooltip>
   );
 };
