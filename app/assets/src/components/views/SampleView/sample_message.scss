@@ -40,6 +40,16 @@
         color: $sds-color-error-400;
       }
 
+      &.success {
+        background-color: $sds-color-success-200;
+        color: $sds-color-success-600;
+
+        .icon {
+          fill: $sds-color-success-400;
+          font-size: 20px;
+        }
+      }
+
       &.inProgress {
         background-color: $sds-color-primary-200;
         color: $sds-color-primary-400;

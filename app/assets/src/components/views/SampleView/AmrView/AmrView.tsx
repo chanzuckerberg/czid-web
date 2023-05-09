@@ -1,4 +1,5 @@
 import { useReactiveVar } from "@apollo/client";
+import { get } from "lodash/fp";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
 import { withAnalytics } from "~/api/analytics";
@@ -19,6 +20,7 @@ import Sample, { WorkflowRun } from "~/interface/sample";
 import SampleReportContent from "../SampleReportContent";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";
+import AmrNullResult from "./components/AmrNullResult";
 import { AmrOutputDownloadView } from "./components/AmrOutputDownloadView";
 import { AmrSampleReport } from "./components/AmrSampleReport";
 import { AmrResult } from "./components/AmrSampleReport/types";
@@ -40,6 +42,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   const [detailsSidebarGeneName, setDetailsSidebarGeneName] = useState<
     string | null
   >(null);
+  const [shouldShowNullResult, setShouldShowNullResult] = useState(false);
 
   // Apply the active filters to get the rows to display
   const displayedRows = useMemo(() => {
@@ -60,6 +63,14 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
 
     fetchResults();
   }, []);
+
+  useEffect(() => {
+    const loadedValidSample =
+      !loadingResults && get("status", workflowRun) === "SUCCEEDED";
+    const resultIsNull =
+      reportTableData === null || Object.keys(reportTableData).length === 0;
+    setShouldShowNullResult(loadedValidSample && resultIsNull);
+  }, [loadingResults, reportTableData]);
 
   const activeFilterSelections = useReactiveVar(activeAmrFiltersVar);
   useEffect(() => {
@@ -106,7 +117,9 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     }
   };
 
-  return (
+  return shouldShowNullResult ? (
+    <AmrNullResult />
+  ) : (
     <>
       <SampleReportContent
         renderResults={renderResults}
