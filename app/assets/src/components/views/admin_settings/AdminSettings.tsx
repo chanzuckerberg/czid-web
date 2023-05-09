@@ -23,11 +23,13 @@ interface WorkflowType {
 }
 
 const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
+  const { userEmail } = useContext(UserContext) ?? {};
+
   const [requestResult, setRequestResult] = useState<string>("");
   const [launchedFeatureList, setLaunchedFeatureList] = useState<string[]>([]);
   const [allowedFeatureList, setAllowedFeatureList] = useState<string[]>([]);
   const [featureFlagUsersList, setFeatureFlagUsersList] = useState<Set<string>>(
-    new Set(),
+    new Set([userEmail]),
   );
   const [featureFlag, setFeatureFlag] = useState<string>("");
   const [featureFlagMsgResponse, setFeatureFlagMsgResponse] = useState<
@@ -159,7 +161,6 @@ const AdminSettingsView = ({ workflows }: AdminSettingsProps) => {
     const unlaunchedFeatures = featuresList
       .filter(feature => !launchedFeatureList?.includes(feature))
       .sort();
-    const { userEmail } = useContext(UserContext) ?? {};
 
     return (
       <div className={cs.addFeatureFlagContainer}>
