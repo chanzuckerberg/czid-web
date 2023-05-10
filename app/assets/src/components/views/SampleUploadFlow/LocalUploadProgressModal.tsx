@@ -41,6 +41,8 @@ import UploadConfirmationModal from "./UploadConfirmationModal";
 import UploadProgressModalSampleList from "./UploadProgressModalSampleList";
 
 interface LocalUploadProgressModalProps {
+  accessionId?: string;
+  accessionName?: string;
   adminOptions: Record<string, string>;
   bedFile?: File;
   clearlabs?: boolean;
@@ -60,6 +62,8 @@ interface LocalUploadProgressModalProps {
 }
 
 const LocalUploadProgressModal = ({
+  accessionId,
+  accessionName,
   adminOptions,
   bedFile,
   clearlabs,
@@ -110,6 +114,8 @@ const LocalUploadProgressModal = ({
 
   const initiateLocalUpload = async () => {
     const samplesToUpload = addFlagsToSamples({
+      accessionId,
+      accessionName,
       adminOptions,
       bedFileName: bedFile?.name,
       clearlabs,

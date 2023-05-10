@@ -1,3 +1,4 @@
+import Aioli from "@biowasm/aioli";
 import cx from "classnames";
 import { Tab, Tabs, Tooltip } from "czifui";
 import {
@@ -61,17 +62,14 @@ import {
   DEFAULT_MEDAKA_MODEL_OPTION,
   DEFAULT_NANOPORE_WETLAB_OPTION,
   LOCAL_UPLOAD,
-  MISMATCH_FORMAT_ERROR,
   NO_TECHNOLOGY_SELECTED,
   REMOTE_UPLOAD,
   SELECT_ID_KEY,
   SEQUENCING_TECHNOLOGY_OPTIONS,
-  UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
   UploadWorkflows,
   UPLOAD_WORKFLOWS,
 } from "../../constants";
 import LocalSampleFileUpload from "../../LocalSampleFileUpload";
-import PreUploadQCCheck from "../../PreUploadQCCheck";
 import RemoteSampleFileUpload from "../../RemoteSampleFileUpload";
 import cs from "../../sample_upload_flow.scss";
 import SampleUploadTable, {
@@ -83,6 +81,12 @@ import {
   removeLaneFromName,
 } from "../../utils";
 import { WorkflowSelector } from "../WorkflowSelector";
+import { PreUploadQCCheck } from "./components/PreUploadQCCheck";
+import {
+  MISMATCH_FORMAT_ERROR,
+  NCBI_GENBANK_REF_SEQ_HEADER_REGEX,
+  UNSUPPORTED_UPLOAD_OPTION_TOOLTIP,
+} from "./constants";
 import {
   SamplesKeyType,
   SamplesRecord,
@@ -91,6 +95,7 @@ import {
   UploadSampleStepProps,
   UploadSampleStepState,
 } from "./types";
+import { getReadNames } from "./utils";
 
 const LOCAL_UPLOAD_LABEL = "Upload from Your Computer";
 const REMOTE_UPLOAD_LABEL = "Upload from S3";
@@ -104,10 +109,13 @@ class UploadSampleStep extends React.Component<
 > {
   _window: $TSFixMeUnknown;
   state = {
+    accessionId: null,
+    accessionName: null,
     basespaceAccessToken: null,
     basespaceSamples: [],
     basespaceSelectedSampleIds: new Set() as Set<string>,
     bedFile: null,
+    CLI: null,
     refSeqFile: null,
     createProjectOpen: false,
     currentTab: LOCAL_UPLOAD as SampleUploadType,
@@ -166,6 +174,20 @@ class UploadSampleStep extends React.Component<
 
     // Clear all URL params.
     window.history.replaceState({}, document.title, location.pathname);
+
+    // Initialize CLI, which is used to call bioinformatics tools for PreUploadQC checks (biowasm, etc...)
+    // and Reference Sequence file-parsing
+    const pathToAssets = `${location.origin}/assets`;
+    const CLI = await new Aioli([
+      {
+        tool: "htslib",
+        program: "htsfile",
+        version: "1.10",
+        urlPrefix: pathToAssets,
+      },
+      { tool: "seqtk", version: "1.3", urlPrefix: pathToAssets },
+    ]);
+    this.setState({ CLI });
   }
 
   componentWillUnmount() {
@@ -600,9 +622,40 @@ class UploadSampleStep extends React.Component<
     this.setState({ bedFile: newFile });
   };
 
-  handleRefSeqFileChanged = (newFile?: File) => {
+  parseRefSeqHeader = async (refSeqFile: File) => {
+    const { CLI } = this.state;
+    const nullAccessionData = [null, null];
+
+    // Verify the file contains a RefSeq header
+    const refSeqNameArr = await getReadNames(CLI, refSeqFile);
+    if (!refSeqNameArr || refSeqNameArr.length !== 1) return nullAccessionData;
+    const refSeqName = refSeqNameArr[0];
+
+    // Verify the RefSeq header matchs NCBI GenBank's format
+    const matchArr = refSeqName.match(NCBI_GENBANK_REF_SEQ_HEADER_REGEX);
+    if (!matchArr) return nullAccessionData;
+
+    // Return accession data
+    const accessionId = matchArr[1];
+    const accessionName = matchArr[2];
+    return [accessionId, accessionName];
+  };
+
+  handleRefSeqFileChanged = async (newFile?: File) => {
     this.props.onDirty();
-    this.setState({ refSeqFile: newFile });
+
+    if (newFile) {
+      const [accessionId, accessionName] = await this.parseRefSeqHeader(
+        newFile,
+      );
+      this.setState({ accessionId, accessionName, refSeqFile: newFile });
+    } else {
+      this.setState({
+        accessionId: null,
+        accessionName: null,
+        refSeqFile: null,
+      });
+    }
   };
 
   handleTaxonChange = (newTaxon: TaxonOption) => {
@@ -1070,6 +1123,8 @@ class UploadSampleStep extends React.Component<
   handleContinue = async () => {
     const { onUploadSamples } = this.props;
     const {
+      accessionId,
+      accessionName,
       bedFile,
       currentTab,
       refSeqFile,
@@ -1109,6 +1164,8 @@ class UploadSampleStep extends React.Component<
         // mNGS Nanopore only inputs
         guppyBasecallerSetting: selectedGuppyBasecallerSetting,
         // WGS only inputs
+        accessionId,
+        accessionName,
         bedFile,
         refSeqFile,
         // Covid CG only inputs
@@ -1445,6 +1502,7 @@ class UploadSampleStep extends React.Component<
     const {
       bedFile,
       refSeqFile,
+      CLI,
       currentTab,
       enabledWorkflows,
       selectedMedakaModel,
@@ -1572,6 +1630,7 @@ class UploadSampleStep extends React.Component<
               <PreUploadQCCheck
                 samples={localSamples}
                 changeState={this.handleValidatedFilesChange}
+                CLI={CLI}
                 handleSampleDeselect={this.handleInvalidSample}
                 sequenceTechnology={this.getSequenceTechnology()}
               />

@@ -371,35 +371,6 @@ export const MEDAKA_MODEL_OPTIONS = {
   },
 };
 
-// Note that the Illumina regex only matches the beginning of the read to support both Casava 1.8 and older read names
-export const REGEX_READ_ILLUMINA =
-  /^@[a-zA-Z0-9]+:[0-9]+:[a-zA-Z0-9-]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+/i;
-export const REGEX_READ_NANOPORE =
-  /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
-
-export const MEGABYTE = 1000000;
-export const SUCCESS_MESSAGE = "Success";
-export const INVALID_FASTA_FASTQ = "Invalid FASTA or FASTQ ";
-export const MISMATCH_SEQUENCING_PLATFORM = "Mismatch sequencing platform";
-export const TRUNCATED_FILE = "Truncated File";
-export const PAIRED_END_MISMATCHED = "Paired End Mismatched";
-export const DUPLICATE_ID = "Duplicated Read Ids inFASTA files";
-export const NO_VALID_SAMPLES = "No valid Samples";
-export const DUPLICATE_ID_ERROR =
-  "This file has duplicate IDs. Please make sure all read IDs are unique.";
-export const INVALID_FASTA_FASTQ_ERROR =
-  "This is not valid FASTA or FASTQ file. Please make sure your file is either a FASTA or FASTQ. ";
-export const TRUNCATED_FILE_ERROR =
-  "This file is truncated. Please make sure your FASTQ file is subsampled to a number of lines divisible by 4.";
-export const MISMATCH_FORMAT_ERROR =
-  "This file does not match the sequencing technology selected. Please make sure that you have selected the correct sequencing technology for this file.";
-export const MISMATCH_FILES_ERROR =
-  "R1 and R2 files are paired-end mismatched. Please make sure that R1 and R2 files reads match up.";
-export const UNSUPPORTED_UPLOAD_OPTION_TOOLTIP =
-  "This upload option is not supported for this pipeline.";
-export const R1CHECK = "_R1";
-export const R2CHECK = "_R2";
-export const AIOLI_LIBRARIES = ["htslib/htsfile/1.10", "seqtk/1.3"];
 export const LOCAL_UPLOAD = "local";
 export const REMOTE_UPLOAD = "remote";
 export const BASESPACE_UPLOAD = "basespace";

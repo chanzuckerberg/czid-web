@@ -27,6 +27,8 @@ const BASESPACE_SAMPLE_FIELDS = [
 const NUM_FAILED_SAMPLES_TO_DISPLAY = 3;
 
 interface RemoteUploadProgressModalProps {
+  accessionId?: string;
+  accessionName?: string;
   adminOptions: Record<string, string>;
   bedFile?: File;
   clearlabs?: boolean;
@@ -45,6 +47,8 @@ interface RemoteUploadProgressModalProps {
 }
 
 const RemoteUploadProgressModal = ({
+  accessionId,
+  accessionName,
   adminOptions,
   bedFile,
   clearlabs,
@@ -89,6 +93,8 @@ const RemoteUploadProgressModal = ({
     }
 
     const samplesWithFlags = addFlagsToSamples({
+      accessionId,
+      accessionName,
       adminOptions,
       bedFileName: bedFile?.name,
       clearlabs,

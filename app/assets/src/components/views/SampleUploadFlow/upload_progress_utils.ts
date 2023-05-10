@@ -8,6 +8,8 @@ import {
 import { SampleFromApi } from "~/interface/shared";
 
 interface addFlagsToSamplesProps {
+  accessionId?: string;
+  accessionName?: string;
   adminOptions: Record<string, string>;
   bedFileName?: string;
   clearlabs: boolean;
@@ -24,6 +26,8 @@ interface addFlagsToSamplesProps {
 
 // Add flags selected by the user in the upload review Step
 export const addFlagsToSamples = ({
+  accessionId,
+  accessionName,
   adminOptions,
   bedFileName,
   clearlabs,
@@ -75,6 +79,8 @@ export const addFlagsToSamples = ({
     // Add Viral CG specific fields
     ...(isViralConensusGenome && {
       ref_fasta: refSeqFileName,
+      ...(accessionId && { accession_id: accessionId }),
+      ...(accessionName && { accession_name: accessionName }),
       ...(bedFileName && {
         primer_bed: bedFileName,
       }),

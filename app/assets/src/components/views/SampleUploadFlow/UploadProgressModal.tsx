@@ -5,6 +5,8 @@ import LocalUploadProgressModal from "./LocalUploadProgressModal";
 import RemoteUploadProgressModal from "./RemoteUploadProgressModal";
 
 interface UploadProgressModalProps {
+  accessionId?: string;
+  accessionName?: string;
   adminOptions: Record<string, string>;
   bedFile?: File;
   clearlabs?: boolean;
@@ -24,6 +26,8 @@ interface UploadProgressModalProps {
 }
 
 const UploadProgressModal = ({
+  accessionId,
+  accessionName,
   adminOptions,
   bedFile,
   clearlabs,
@@ -52,6 +56,8 @@ const UploadProgressModal = ({
     <>
       {uploadType === "local" ? (
         <LocalUploadProgressModal
+          accessionId={accessionId}
+          accessionName={accessionName}
           adminOptions={adminOptions}
           bedFile={bedFile}
           clearlabs={clearlabs}
@@ -71,6 +77,8 @@ const UploadProgressModal = ({
         />
       ) : (
         <RemoteUploadProgressModal
+          accessionId={accessionId}
+          accessionName={accessionName}
           adminOptions={adminOptions}
           bedFile={bedFile}
           clearlabs={clearlabs}

@@ -31,6 +31,8 @@ interface SampleUploadFlowProps {
 }
 
 interface SampleUploadFlowState {
+  accessionId?: string;
+  accessionName?: string;
   workflows: Set<UploadWorkflows>;
   currentStep: string;
   samples?: SampleFromApi[];
@@ -63,6 +65,8 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     uploadType: "", // remote or local
     project: null,
     sampleNamesToFiles: null, // Needed for local samples.
+    accessionId: null, // Optional for WGS samples.
+    accessionName: null, // Optional for WGS samples.
     bedFile: null, // Optional for WGS samples.
     refSeqFile: null, // Needed for WGS samples.
     // Metadata upload information
@@ -94,6 +98,8 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   };
 
   handleUploadSamples = ({
+    accessionId,
+    accessionName,
     bedFile,
     clearlabs,
     technology,
@@ -108,6 +114,8 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     workflows,
   }: Partial<SampleUploadFlowState>) => {
     this.setState({
+      accessionId,
+      accessionName,
       bedFile,
       clearlabs,
       technology,

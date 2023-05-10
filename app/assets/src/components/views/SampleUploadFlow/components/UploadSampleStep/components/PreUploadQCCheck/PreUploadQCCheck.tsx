@@ -1,21 +1,23 @@
-import Aioli from "@biowasm/aioli";
 import { flatten, isEmpty } from "lodash/fp";
 import { nanoid } from "nanoid";
 import React, { useEffect, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import {
+  ILLUMINA,
+  NANOPORE,
+} from "~/components/views/SampleUploadFlow/constants";
 import { SampleFromApi as Sample } from "~/interface/shared";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import {
   DUPLICATE_ID,
   DUPLICATE_ID_ERROR,
-  ILLUMINA,
   INVALID_FASTA_FASTQ,
   INVALID_FASTA_FASTQ_ERROR,
+  MAX_READS_TO_CHECK,
   MEGABYTE,
   MISMATCH_FILES_ERROR,
   MISMATCH_SEQUENCING_PLATFORM,
-  NANOPORE,
   NO_VALID_SAMPLES,
   PAIRED_END_MISMATCHED,
   R1CHECK,
@@ -24,26 +26,25 @@ import {
   REGEX_READ_NANOPORE,
   TRUNCATED_FILE,
   TRUNCATED_FILE_ERROR,
-} from "./constants";
+} from "../../constants";
+import { getFileType, getReadNames, sliceFile } from "../../utils";
 import cs from "./pre_upload_qc_check.scss";
 
 interface PreUploadQCCheckProps {
   samples?: Sample[];
   changeState?: $TSFixMeFunction;
+  CLI: $TSFixMe;
   handleSampleDeselect?: $TSFixMeFunction;
   sequenceTechnology?: string;
 }
 
-const MAX_READS_TO_CHECK = 100;
-
 const PreUploadQCCheck = ({
   samples,
   changeState,
+  CLI,
   handleSampleDeselect,
   sequenceTechnology,
 }: PreUploadQCCheckProps) => {
-  // CLI is used for calling some of the bioinformatics tools for PreUploadQC checks (biowasm, etc...)
-  let CLI: $TSFixMe;
   // Set for files that did not pass validateFileType
   const [invalidFiles, setInvalidFiles] = useState<Set<File>>(new Set());
   // Set for files that did not pass validateFASTADuplicates
@@ -62,18 +63,6 @@ const PreUploadQCCheck = ({
 
   // Add libraries to CLI and mount each file
   const initializeCLI = async () => {
-    const pathToAssets = `${location.origin}/assets`;
-
-    CLI = await new Aioli([
-      {
-        tool: "htslib",
-        program: "htsfile",
-        version: "1.10",
-        urlPrefix: pathToAssets,
-      },
-      { tool: "seqtk", version: "1.3", urlPrefix: pathToAssets },
-    ]);
-
     // For each sample, extract all the files the user wants to upload, and mount them
     const files = flatten(samples.map(s => Object.values(s.files)));
     await CLI.mount(files);
@@ -137,7 +126,7 @@ const PreUploadQCCheck = ({
   const validateFileType = async (file: File) => {
     try {
       // Will return either "FASTA text", "FASTQ sequence text", or "unknown text"
-      const fileType = await CLI.exec(`htsfile ${file.name}`);
+      const fileType = await getFileType(CLI, file);
 
       // If htsfile doens't recognize it, it's a not a valid FASTA/FASTQ
       if (fileType.includes(UNKNOWN_FILE_TYPE) && !invalidFiles.has(file)) {
@@ -158,7 +147,7 @@ const PreUploadQCCheck = ({
   const validateFASTADuplicates = async (file: File) => {
     try {
       // Check for duplicate FASTA IDs
-      const readNames = await getReadNames(file);
+      const readNames = await getReadNames(CLI, file);
       const readNamesUnique = new Set(readNames);
       if (readNames.length !== readNamesUnique.size) {
         setDuplicateIds(dup => new Set([...dup, file]));
@@ -182,7 +171,7 @@ const PreUploadQCCheck = ({
     try {
       // Get the last megabyte of the file
       const byteStart = Math.max(0, file.size - MEGABYTE);
-      const fastqContents = await sliceFile(file, byteStart, file.size);
+      const fastqContents = await sliceFile(CLI, file, byteStart, file.size);
 
       // Extract the last four lines, i.e. last FASTQ record of the file
       const fileContents = await fastqContents.text();
@@ -221,7 +210,7 @@ const PreUploadQCCheck = ({
   const validateFASTQReads = async (file: File) => {
     try {
       // Check whether read names are Illumina or Nanopore
-      const fastqReadNames = await getReadNames(file);
+      const fastqReadNames = await getReadNames(CLI, file);
       const isIllumina = fastqReadNames.every(d => REGEX_READ_ILLUMINA.test(d));
       if (isIllumina) return ILLUMINA;
       const isNanopore = fastqReadNames.every(d => REGEX_READ_NANOPORE.test(d));
@@ -243,8 +232,8 @@ const PreUploadQCCheck = ({
       }
 
       // Get read names
-      const fastqReadNamesR1 = await getReadNames(fileR1);
-      const fastqReadNamesR2 = await getReadNames(fileR2);
+      const fastqReadNamesR1 = await getReadNames(CLI, fileR1);
+      const fastqReadNamesR2 = await getReadNames(CLI, fileR2);
 
       // Iterate through read names until find a mismatch
       const count = Math.min(
@@ -306,26 +295,6 @@ const PreUploadQCCheck = ({
     }
   };
 
-  // Retrieve read names in first 1MB of a FASTA or FASTQ file
-  const getReadNames = async (file: File) => {
-    // Get first 1MB of file (we go through seqtk to ensure .gz support).
-    // Note: `-A` forces FASTA output (so this function can be used with FASTQ files too),
-    // and `-l0` forces FASTA/FASTQ output to be single line.
-    const fileSlice = await sliceFile(file, 0, MEGABYTE);
-    const fastaContents = await CLI.exec(`seqtk seq -A -l0 ${fileSlice.name}`);
-
-    // Extract read names
-    const fileType = await validateFileType(file);
-    return fastaContents
-      .split("\n")
-      .filter((line: string) => line.startsWith(">"))
-      .slice(0, MAX_READS_TO_CHECK)
-      .map(name => {
-        if (fileType.includes(FASTQ_FILE_TYPE)) return "@" + name.substring(1);
-        return name;
-      });
-  };
-
   // Find difference between string, returns characters that are in str2 that are not in str1
   const findDiff = (str1: string, str2: string) => {
     let diff = "";
@@ -333,17 +302,6 @@ const PreUploadQCCheck = ({
       if (val !== str1.charAt(i)) diff += val;
     });
     return diff;
-  };
-
-  // Slice a File object, create a new File, and mount it on to filesystem
-  const sliceFile = async (file: File, start: number, end: number) => {
-    // Take a slice of the file and make it into a new file
-    const blob = file.slice(start, end);
-    const fileSlice = new File([blob], `${file.name}.${nanoid()}.slice`);
-
-    // Mount it so you can run CLI commands on the file
-    await CLI.mount(fileSlice);
-    return fileSlice;
   };
 
   // Run each validation check for each file
@@ -631,4 +589,4 @@ const PreUploadQCCheck = ({
   );
 };
 
-export default PreUploadQCCheck;
+export { PreUploadQCCheck };

@@ -24,25 +24,27 @@ import { SampleInfo } from "./components/SampleInfo";
 import cs from "./review_step.scss";
 
 interface ReviewStepProps {
-  metadata?: MetadataBasic;
-  pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
+  accessionId?: string;
+  accessionName?: string;
+  admin?: boolean;
   bedFile?: File;
+  clearlabs?: boolean;
+  guppyBasecallerSetting?: string;
+  hostGenomes?: HostGenome[];
+  medakaModel?: string;
+  metadata?: MetadataBasic;
+  // Triggers when we start or stop uploading. Lets the parent know to disable header link.
+  onUploadComplete: $TSFixMeFunction;
+  onUploadStatusChange?: $TSFixMeFunction;
+  onStepSelect?: $TSFixMeFunction;
+  originalHostGenomes?: HostGenome[];
+  pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
   project?: Project;
   refSeqFile?: File;
   samples?: SampleFromApi[];
   uploadType: string;
-  hostGenomes?: HostGenome[];
-  originalHostGenomes?: HostGenome[];
   visible?: boolean;
-  // Triggers when we start or stop uploading. Lets the parent know to disable header link.
-  onUploadStatusChange?: $TSFixMeFunction;
-  onStepSelect?: $TSFixMeFunction;
-  onUploadComplete: $TSFixMeFunction;
-  admin?: boolean;
-  clearlabs?: boolean;
   technology?: Technology;
-  medakaModel?: string;
-  guppyBasecallerSetting?: string;
   workflows?: Set<UploadWorkflows>;
   wetlabProtocol?: string;
 }
@@ -122,6 +124,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     } = this.state;
 
     const {
+      accessionId,
+      accessionName,
       bedFile,
       clearlabs,
       guppyBasecallerSetting,
@@ -233,6 +237,8 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
           )}
           {showUploadModal && (
             <UploadProgressModal
+              accessionId={accessionId}
+              accessionName={accessionName}
               adminOptions={adminOptions}
               bedFile={bedFile}
               clearlabs={clearlabs}

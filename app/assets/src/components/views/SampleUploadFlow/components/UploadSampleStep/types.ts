@@ -22,10 +22,13 @@ export interface UploadSampleStepProps {
 }
 
 export interface UploadSampleStepState {
+  accessionId: string;
+  accessionName: string;
   basespaceAccessToken: $TSFixMe;
   basespaceSamples: $TSFixMe[];
   basespaceSelectedSampleIds: Set<string>;
   bedFile: File;
+  CLI: $TSFixMe;
   createProjectOpen: boolean;
   currentTab: SampleUploadType;
   enabledWorkflows: UploadWorkflows[];
