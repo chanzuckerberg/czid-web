@@ -73,5 +73,14 @@ class CheckSoftDeletedData
         phylo_tree_ng_ids: deleted_phylo_tree_ng.pluck(:id)
       )
     end
+
+    deleted_bulk_downloads = BulkDownload.where("deleted_at < ?", Time.now.utc - DELAY)
+    unless deleted_bulk_downloads.empty?
+      LogUtil.log_error(
+        "Soft deleted bulk downloads found in database",
+        exception: SoftDeletedDataError.new,
+        bulk_download_ids: deleted_bulk_downloads.pluck(:id)
+      )
+    end
   end
 end
