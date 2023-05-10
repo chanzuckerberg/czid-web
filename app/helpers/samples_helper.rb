@@ -191,9 +191,13 @@ module SamplesHelper
     }
 
     if pipeline_run.technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
-      # "idseq_dedup" required for backwards compatibility
-      dedup_step = job_stats_hash["czid_dedup_out"] ? "czid_dedup" : "idseq_dedup"
-      steps = ["star", "trimmomatic", "priceseq", dedup_step]
+      if pipeline_version_uses_new_host_filtering_stage(pipeline_run.pipeline_version)
+        steps = ["bowtie2_ercc_filtered", "fastp", "bowtie2_host_filtered", "hisat2_host_filtered", "czid_dedup"]
+      else
+        # "idseq_dedup" required for backwards compatibility
+        dedup_step = job_stats_hash["czid_dedup_out"] ? "czid_dedup" : "idseq_dedup"
+        steps = ["star", "trimmomatic", "priceseq", dedup_step]
+      end
       reads_or_bases = "reads"
       out_suffix = "_out"
     elsif pipeline_run.technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]

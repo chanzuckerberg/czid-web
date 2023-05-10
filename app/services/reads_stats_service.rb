@@ -15,6 +15,7 @@ class ReadsStatsService
   FASTP_LOW_COMPLEXITY_READS = "fastp_low_complexity_reads".freeze
 
   MODERN_HOST_FILTER_STEP_NAME_TO_JOB_STAT_TASK_NAME = {
+    "ercc_bowtie2_filter" => "bowtie2_ercc_filtered_out",
     "fastp_qc" => "fastp_out",
     "bowtie2_filter" => "bowtie2_host_filtered_out",
     "hisat2_filter" => "hisat2_host_filtered_out",
@@ -96,7 +97,9 @@ class ReadsStatsService
 
           if fastp_index
             ordered_tasks.delete_at(fastp_index)
-            ordered_tasks.insert(fastp_index, ERCC)
+            # v8.1 samples need to have ERCCs manually inserted into the step order becuase theyre calculated after quality filtering as part of the bowtie2 host filtering step.
+            # v8.2 samples have ERCCs automatically inserted into the step order because the ERCCs are calculated before quality filtering in it's own pipeline step.
+            !pipeline_version_calculates_erccs_before_quality_filtering(representative_run.pipeline_version) && ordered_tasks.insert(fastp_index, ERCC)
             ordered_tasks.insert(fastp_index, FASTP_LOW_COMPLEXITY_READS)
             ordered_tasks.insert(fastp_index, FASTP_TOO_SHORT_READS)
             ordered_tasks.insert(fastp_index, FASTP_LOW_QUALITY_READS)

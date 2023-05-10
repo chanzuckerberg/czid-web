@@ -8,6 +8,7 @@ module PipelineRunsHelper
       "stage" => "Filter out host reads and conduct quality control.",
       "steps" => {
         "validate_input_out" => "Validates input files are .fastq format; truncates to 75 million fragments",
+        "bowtie2_ercc_filtered_out" => "Removes ERCCs",
         "fastp_out" => "Removes low quality bases, short reads, and low complexity reads",
         "kallisto" => "Generates host gene counts",
         "bowtie2_host_filtered_out" => "Implements primary step for subtracting host reads",
@@ -312,6 +313,7 @@ module PipelineRunsHelper
   COVERAGE_VIZ_PIPELINE_VERSION = '3.6'.freeze
   NEW_HOST_FILTERING_PIPELINE_VERSION = '8'.freeze
   BOWTIE2_ERCC_READS_PIPELINE_VERSION = "8.1".freeze
+  BOWTIE2_ERCC_READS_BEFORE_QUALITY_FILTERING_PIPELINE_VERSION = "8.2".freeze
 
   def pipeline_version_at_least(pipeline_version, test_version)
     unless pipeline_version
@@ -343,6 +345,10 @@ module PipelineRunsHelper
 
   def pipeline_version_uses_bowtie2_to_calculate_ercc_reads(pipeline_version)
     pipeline_version_at_least(pipeline_version, BOWTIE2_ERCC_READS_PIPELINE_VERSION)
+  end
+
+  def pipeline_version_calculates_erccs_before_quality_filtering(pipeline_version)
+    pipeline_version_at_least(pipeline_version, BOWTIE2_ERCC_READS_BEFORE_QUALITY_FILTERING_PIPELINE_VERSION)
   end
 
   def pipeline_version_has_assembly(pipeline_version)

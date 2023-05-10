@@ -45,6 +45,7 @@ class SfnPipelineDataService
     PipelineRunStage::HOST_FILTERING_STAGE_NAME => {
       "RunValidateInput" => "validate_input_out",
       "fastp_qc" => "fastp_out",
+      "ercc_bowtie2_filter" => "bowtie2_ercc_filtered_out",
       "kallisto" => "kallisto",
       "bowtie2_filter" => "bowtie2_host_filtered_out",
       "hisat2_filter" => "hisat2_host_filtered_out",

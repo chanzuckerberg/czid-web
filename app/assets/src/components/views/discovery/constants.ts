@@ -36,6 +36,8 @@ export const HUMAN_READABLE_STEP_NAMES = {
   "Fastp Low Quality Reads": "Filter low quality",
   "Fastp Low Complexity Reads": "Filter low complexity",
   "Fastp Too Short Reads": "Filter length",
+  "Ercc Bowtie2 Filter": "ERCC",
+  Ercc: "ERCC",
 };
 export const MIN_NUM_BINS = 10;
 export const MIN_BIN_WIDTH = {

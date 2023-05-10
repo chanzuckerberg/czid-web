@@ -2089,7 +2089,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def load_qc_percent(job_stats_hash)
-    if technology == TECHNOLOGY_INPUT[:nanopore]
+    if technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
       quality_filtered_stats = job_stats_hash['quality_filtered_reads']
       validated_stats = job_stats_hash['validated_reads']
       update!(qc_percent: calculate_qc_percent(validated_stats['reads_after'], quality_filtered_stats['reads_after'])) unless quality_filtered_stats.nil? || validated_stats.nil? || validated_stats['reads_after'].zero?
@@ -2099,8 +2099,11 @@ class PipelineRun < ApplicationRecord
 
       fastp_stats = job_stats_hash['fastp_out']
       validate_input_stats = job_stats_hash['validate_input_out']
+      bowtie2_ercc_stats = job_stats_hash['bowtie2_ercc_filtered_out']
 
-      if pipeline_version_uses_new_host_filtering_stage(pipeline_version)
+      if pipeline_version_calculates_erccs_before_quality_filtering(pipeline_version)
+        update!(qc_percent: (100.0 * fastp_stats['reads_after']) / bowtie2_ercc_stats['reads_after']) unless fastp_stats.nil? || bowtie2_ercc_stats.nil? || bowtie2_ercc_stats['reads_after'].zero?
+      elsif pipeline_version_uses_new_host_filtering_stage(pipeline_version)
         update!(qc_percent: (100.0 * fastp_stats['reads_after']) / validate_input_stats['reads_after']) unless fastp_stats.nil? || validate_input_stats.nil? || validate_input_stats['reads_after'].zero?
       else
         update!(qc_percent: (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after']) unless priceseqfilter_stats.nil? || star_stats.nil? || star_stats['reads_after'].zero?

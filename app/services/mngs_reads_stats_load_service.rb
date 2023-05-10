@@ -49,20 +49,20 @@ class MngsReadsStatsLoadService
       end
     end
 
-    total = all_counts.detect { |entry| entry.value?("fastqs") }
-    if pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version) && total
-      all_counts += fetch_fastp_qc_counts(prefix, total[:reads_after])
+    bowtie2_ercc_filtered = all_counts.detect { |entry| entry.value?("bowtie2_ercc_filtered_out") }
+    if pipeline_version_uses_new_host_filtering_stage(@pipeline_run.pipeline_version) && bowtie2_ercc_filtered
+      all_counts += fetch_fastp_qc_counts(prefix, bowtie2_ercc_filtered[:reads_after]&.to_i || 0)
     end
     all_counts
   end
 
-  def fetch_fastp_qc_counts(s3_prefix, total_reads)
+  def fetch_fastp_qc_counts(s3_prefix, reads_after_bowtie2_ercc_filtering)
     fastp_qc_counts = []
     bucket = ENV['SAMPLES_BUCKET_NAME']
     resp = AwsClient[:s3].get_object(bucket: bucket, key: "#{s3_prefix}/#{PipelineRun::FASTP_JSON_FILE}")
     contents = JSON.parse(resp.body.read)["filtering_result"]
 
-    reads_after_quality = total_reads - contents["low_quality_reads"]
+    reads_after_quality = reads_after_bowtie2_ercc_filtering - contents["low_quality_reads"]
     reads_after_length = reads_after_quality - (contents["too_short_reads"] + contents["too_long_reads"])
     reads_after_complexity = reads_after_length - (contents["low_complexity_reads"] + contents["too_many_N_reads"])
 
