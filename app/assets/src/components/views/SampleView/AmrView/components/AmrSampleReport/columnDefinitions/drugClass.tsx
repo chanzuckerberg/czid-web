@@ -10,7 +10,6 @@ export const drugClassColumn: ColumnDef<AmrResult, any> = {
   id: "drugClass",
   accessorKey: "drugClass",
   size: 200,
-  maxSize: 200,
   header: function drugClassHeader({ header, column }) {
     return (
       <SortableHeader

@@ -14,7 +14,6 @@ import { READS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const readsColumn: ColumnDef<AmrResult, any> = {
   id: "reads",
   accessorKey: "reads",
-  size: 85,
   header: function readsHeader({ header, column }) {
     return (
       <SortableHeader

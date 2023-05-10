@@ -12,7 +12,6 @@ import { CONTIGS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const contigsColumn: ColumnDef<AmrResult, any> = {
   id: "contigs",
   accessorKey: "contigs",
-  size: 85,
   header: function contigsHeader({ header, column }) {
     return (
       <SortableHeader

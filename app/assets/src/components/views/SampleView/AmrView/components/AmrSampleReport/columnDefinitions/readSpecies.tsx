@@ -18,6 +18,7 @@ export const readSpeciesColumn: ColumnDef<AmrResult, any> = {
   id: "readSpecies",
   accessorKey: "readSpecies",
   size: 200,
+  minSize: 200,
   header: function readSpeciesHeader({ header, column }) {
     return (
       <SortableHeader

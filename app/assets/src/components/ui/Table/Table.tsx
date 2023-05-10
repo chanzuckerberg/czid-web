@@ -8,6 +8,7 @@ import {
   Table as TableType,
   TableOptions,
   useReactTable,
+  VisibilityTableState,
 } from "@tanstack/react-table";
 import { TableRow, TableRowProps } from "czifui";
 import { isEqual, map } from "lodash";
@@ -23,6 +24,7 @@ interface TableProps<T> {
   columns: ColumnDef<T, any>[];
   tableData: IdMap<T> | undefined;
   initialSortKey?: string;
+  initialVisibilityState: VisibilityTableState;
   isInitialSortDescending?: boolean;
   isLoading?: boolean;
   setTableReference?: (table: TableType<T>) => void;
@@ -50,6 +52,7 @@ export const Table = <T,>({
   columns,
   tableData,
   initialSortKey,
+  initialVisibilityState,
   isInitialSortDescending,
   isLoading,
   checkedRows = [],
@@ -102,6 +105,7 @@ export const Table = <T,>({
     getCoreRowModel: getCoreRowModel(),
     getRowId: r => r[uniqueIdentifier], // use the cz ge object id instead of a default react table id
     getSortedRowModel: getSortedRowModel(),
+    initialState: initialVisibilityState,
     state: {
       rowSelection,
       sorting,

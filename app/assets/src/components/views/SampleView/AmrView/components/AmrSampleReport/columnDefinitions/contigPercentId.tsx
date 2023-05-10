@@ -14,7 +14,6 @@ import { CONTIGS_PERCENT_IDENTITY_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const contigPercentIdColumn: ColumnDef<AmrResult, any> = {
   id: "contigPercentId",
   accessorKey: "contigPercentId",
-  size: 85,
   header: function contigPercentIdHeader({ header, column }) {
     return (
       <SortableHeader

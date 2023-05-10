@@ -10,7 +10,6 @@ import { CUTOFF_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const cutoffColumn: ColumnDef<AmrResult, any> = {
   id: "cutoff",
   accessorKey: "cutoff",
-  size: 85,
   header: function cutoffHeader({ header, column }) {
     return (
       <SortableHeader

@@ -1,8 +1,10 @@
+import { cx } from "@emotion/css";
 import { ColumnDef, Table as TableType } from "@tanstack/react-table";
 import React, { useMemo } from "react";
 import { Table } from "~/components/ui/Table";
 import { IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
+import { ColumnId } from "../../constants";
 import cs from "./amr_sample_report.scss";
 import {
   contigPercentCoverageColumn,
@@ -36,6 +38,14 @@ interface AmrSampleReportProps {
   setDetailsSidebarGeneName: (geneName: string | null) => void;
   hideFilters: boolean;
 }
+
+const initialVisibilityState = {
+  columnVisibility: {
+    [ColumnId.GENE_FAMILY]: false,
+    [ColumnId.CONTIG_SPECIES]: false,
+    [ColumnId.READ_SPECIES]: false,
+  },
+};
 
 export const AmrSampleReport = ({
   reportTableData,
@@ -80,14 +90,15 @@ export const AmrSampleReport = ({
     <div
       className={
         hideFilters
-          ? cs.reportWrapperFiltersClosed
-          : cs.reportWrapperFiltersOpen
+          ? cx(cs.reportWrapper, cs.reportWrapperFiltersClosed)
+          : cx(cs.reportWrapper, cs.reportWrapperFiltersOpen)
       }
     >
       <div className={cs.tableWrapper}>
         <Table<AmrResult>
           columns={columns}
           initialSortKey="gene"
+          initialVisibilityState={initialVisibilityState}
           isInitialSortDescending={false}
           setTableReference={setTable}
           tableData={reportTableData}

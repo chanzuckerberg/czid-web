@@ -18,6 +18,7 @@ export const contigSpeciesColumn: ColumnDef<AmrResult, any> = {
   id: "contigSpecies",
   accessorKey: "contigSpecies",
   size: 200,
+  minSize: 200,
   header: function contigSpeciesHeader({ header, column }) {
     return (
       <SortableHeader

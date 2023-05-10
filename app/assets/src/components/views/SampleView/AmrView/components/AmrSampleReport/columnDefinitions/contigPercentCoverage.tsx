@@ -14,7 +14,6 @@ import { CONTIGS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
   id: "contigCoverageBreadth",
   accessorKey: "contigCoverageBreadth",
-  size: 85,
   header: function contigPercentCoverageHeader({ header, column }) {
     return (
       <SortableHeader

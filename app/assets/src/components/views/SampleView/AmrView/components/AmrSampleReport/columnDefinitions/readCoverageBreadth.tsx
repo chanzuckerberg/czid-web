@@ -12,7 +12,6 @@ import { READS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const readCoverageBreadthColumn: ColumnDef<AmrResult, any> = {
   id: "readCoverageBreadth",
   accessorKey: "readCoverageBreadth",
-  size: 85,
   header: function readCoverageBreadthHeader({ header, column }) {
     return (
       <SortableHeader

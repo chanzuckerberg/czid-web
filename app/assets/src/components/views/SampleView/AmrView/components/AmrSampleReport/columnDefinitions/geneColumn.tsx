@@ -12,6 +12,7 @@ export function getGeneColumn(
     id: "gene",
     accessorKey: "gene",
     size: 120,
+    minSize: 120,
     maxSize: 120,
     header: function geneHeader({ header, column }) {
       return (

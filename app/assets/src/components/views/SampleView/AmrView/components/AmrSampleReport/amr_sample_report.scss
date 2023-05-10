@@ -1,33 +1,53 @@
 @import "~czifui/dist/variables";
 
-.reportWrapperFiltersOpen {
+.reportWrapper {
   position: relative;
   margin-top: $sds-spaces-xl;
   height: 100%;
   display: flex;
   flex-direction: row;
+}
+
+.reportWrapperFiltersOpen {
   left: 150px;
+  width: calc(100% - 150px);
   @media screen and (max-width: 1770px) {
-    left: 200px;
+    --filtersOpenLeftShift: calc(
+      150px + (1770px - 100vw) * (225 - 150) / (1770 - 1635)
+    );
+    // Create a smooth transition between the two screen sizes
+    // Between 1635px and 1770px, the left position should be a
+    // number between 150px and 225px. When the screen is exactly 1635px,
+    // this calculation will result in 225px, and when the screen is
+    // exactly 1770px, this calculation will result in 150px.
+    left: var(--filtersOpenLeftShift);
+
+    // Shifting this container right makes the view/hide columns button not show.
+    // We need to adjust the width by the same amount we shifted left.
+    width: calc(100% - var(--filtersOpenLeftShift));
+  }
+  @media screen and (max-width: 1635px) {
+    left: 225px;
+    width: calc(100% - 225px);
   }
 }
 
 .reportWrapperFiltersClosed {
-  position: relative;
-  margin-top: $sds-spaces-xl;
-  height: 100%;
-  display: flex;
-  flex-direction: row;
+  left: 0;
+  width: 100%;
   @media screen and (max-width: 1770px) {
+    --filtersClosedLeftShift: calc((1770px - 100vw) * 75 / (1770 - 1635));
     // Create a smooth transition between the two screen sizes
     // Between 1635px and 1770px, the left position should be a
     // number between 0 and 75px. When the screen is exactly 1635px,
     // this calculation will result in 75px, and when the screen is
     // exactly 1770px, this calculation will result in 0px.
-    left: calc((1770px - 100vw) * 75 / (1770 - 1635));
+    left: var(--filtersClosedLeftShift);
+    width: calc(100% - var(--filtersClosedLeftShift));
   }
   @media screen and (max-width: 1635px) {
     left: 75px;
+    width: calc(100% - 75px);
   }
 }
 

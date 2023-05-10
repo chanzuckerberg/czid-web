@@ -16,6 +16,7 @@ export enum ColumnId {
   CONTIGS = "contigs",
   CUTOFF = "cutoff",
   DRUG_CLASS = "drugClass",
+  GENE = "gene",
   GENE_FAMILY = "geneFamily",
   MECHANISM = "mechanism",
   MODEL = "model",
@@ -33,6 +34,7 @@ export const COLUMN_ID_TO_NAME = new TwoWayKeyStringMap({
   [ColumnId.CONTIG_SPECIES]: "Contig Species",
   [ColumnId.CONTIGS]: "Number of Contigs",
   [ColumnId.CUTOFF]: "Cutoff",
+  [ColumnId.GENE]: "Gene",
   [ColumnId.DRUG_CLASS]: "Drug Class",
   [ColumnId.GENE_FAMILY]: "Gene Family",
   [ColumnId.MECHANISM]: "Mechanism",
@@ -47,6 +49,7 @@ export const COLUMN_ID_TO_NAME = new TwoWayKeyStringMap({
 
 export const SECTION_TO_COLUMN_IDS = new TwoWayKeyListMap({
   [ColumnSection.GENE_INFO]: [
+    ColumnId.GENE,
     ColumnId.DRUG_CLASS,
     ColumnId.GENE_FAMILY,
     ColumnId.MECHANISM,

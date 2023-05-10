@@ -12,7 +12,6 @@ import { READS_DPM_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const readDepthPerMillionColumn: ColumnDef<AmrResult, any> = {
   id: "dpm",
   accessorKey: "dpm",
-  size: 85,
   header: function readDepthPerMillionHeader({ header, column }) {
     return (
       <SortableHeader

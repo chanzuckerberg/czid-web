@@ -10,7 +10,7 @@ export const geneFamilyColumn: ColumnDef<AmrResult, any> = {
   id: "geneFamily",
   accessorKey: "geneFamily",
   size: 200,
-  maxSize: 200,
+  minSize: 200,
   header: function geneFamilyHeader({ header, column }) {
     return (
       <SortableHeader

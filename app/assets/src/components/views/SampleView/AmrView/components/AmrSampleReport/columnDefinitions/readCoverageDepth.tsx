@@ -12,7 +12,6 @@ import { READS_COVERAGE_DEPTH_TOOLTIP_STRINGS } from "./constants";
 export const readCoverageDepthColumn: ColumnDef<AmrResult, any> = {
   id: "readCoverageDepth",
   accessorKey: "readCoverageDepth",
-  size: 100,
   header: function readCoverageDepthHeader({ header, column }) {
     return (
       <SortableHeader
