@@ -325,7 +325,7 @@ class PipelineRun < ApplicationRecord
   def self.deletable(user)
     # Note: the `or` statement is because ONT runs with failed uploads do not have `finalized = 1`,
     # so they otherwise can't be deleted (Illumina runs that failed to upload don't create a PipelineRun record).
-    scope = joins(:sample).where(finalized: 1).or(where(samples: { upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED }))
+    scope = joins(:sample).where(finalized: 1).or(where.not(samples: { upload_error: nil }))
 
     unless user.admin?
       scope = scope.where(samples: { user_id: user.id })

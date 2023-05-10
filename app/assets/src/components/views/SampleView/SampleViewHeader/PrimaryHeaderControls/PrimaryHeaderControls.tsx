@@ -86,7 +86,10 @@ export const PrimaryHeaderControls = ({
   const readyToInteract = (workflow: WORKFLOW_VALUES) => {
     if (!isMngsWorkflow(workflow) && currentRun) {
       return true;
-    } else if (isMngsWorkflow(workflow) && runIsLoaded) {
+    } else if (
+      isMngsWorkflow(workflow) &&
+      (runIsLoaded || sample?.upload_error)
+    ) {
       return true;
     } else {
       return false;
@@ -325,10 +328,7 @@ export const PrimaryHeaderControls = ({
           workflow={workflow}
           deleteId={isMngsWorkflow(workflow) ? sample?.id : currentRun?.id}
           onDeleteRunSuccess={onDeleteRunSuccess}
-          runFinalized={
-            currentRun?.run_finalized ||
-            sample?.upload_error === "LOCAL_UPLOAD_FAILED"
-          }
+          runFinalized={currentRun?.run_finalized || !!sample?.upload_error}
           userOwnsRun={userId === sample?.user_id}
           redirectOnSuccess={redirectOnSuccess}
         />
