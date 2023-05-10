@@ -78,23 +78,26 @@ export const PrimaryHeaderControls = ({
     admin: userIsAdmin,
     userId,
   } = useContext(UserContext) || {};
-  const succeeded = get("status", currentRun) === "SUCCEEDED";
-  const runIsLoaded = !isEmpty(reportMetadata);
+
   const hasBulkDeletion = allowedFeatures.includes(BULK_DELETION_FEATURE);
   const sampleDeletable = sample?.sample_deletable;
 
-  const readyToInteract = (workflow: WORKFLOW_VALUES) => {
-    if (!isMngsWorkflow(workflow) && currentRun) {
-      return true;
-    } else if (
-      isMngsWorkflow(workflow) &&
-      (runIsLoaded || sample?.upload_error)
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  };
+  // We can't delete samples if they are pipeline runs with no metadata
+  let currentRunLoaded = !!currentRun;
+  if (isMngsWorkflow(workflow)) {
+    currentRunLoaded = !isEmpty(reportMetadata);
+  }
+
+  /* For mNGS pipelineRuns, we can't download or share samples
+  if the report metadata is null (captured by `currentRunLoaded`).
+
+  For CG or AMR workflowRuns, we can't download or share samples
+  that didn't succeed.
+  */
+  let readyToDownload = currentRunLoaded;
+  if (!isMngsWorkflow(workflow)) {
+    readyToDownload = get("status", currentRun) === "SUCCEEDED";
+  }
 
   const onDownloadAll = (eventName: "amr" | "consensus-genome") => {
     openUrl(getWorkflowRunZipLink(currentRun.id));
@@ -123,7 +126,7 @@ export const PrimaryHeaderControls = ({
 
   const renderDownloadAll = (workflow: "amr" | "consensus-genome") => {
     return (
-      succeeded && (
+      readyToDownload && (
         <DownloadButton
           className={cs.controlElement}
           text="Download All"
@@ -138,14 +141,14 @@ export const PrimaryHeaderControls = ({
     switch (workflow) {
       case WORKFLOWS.LONG_READ_MNGS.value:
       case WORKFLOWS.SHORT_READ_MNGS.value:
-        if (!!reportMetadata.reportReady && currentRun) {
+        if (readyToDownload && reportMetadata.reportReady) {
           return renderDownloadDropdown();
         } else if (!isEmpty(reportMetadata) && editable && sampleDeletable) {
           return renderDeleteSampleButton();
         }
         break;
       case WORKFLOWS.CONSENSUS_GENOME.value:
-        if (succeeded) {
+        if (readyToDownload) {
           return renderDownloadAll(workflow);
         } else if (
           editable &&
@@ -156,7 +159,7 @@ export const PrimaryHeaderControls = ({
         }
         break;
       case WORKFLOWS.AMR.value:
-        if (succeeded) {
+        if (readyToDownload) {
           return renderDownloadAll(workflow);
         }
         break;
@@ -166,25 +169,22 @@ export const PrimaryHeaderControls = ({
   const renderDownloadButtonUpdated = () => {
     // created `renderDownloadButtonUpdated` to change the logic of the delete sample button behind the feature flag
     // this will eventually replace renderDownloadButton for all users
+    if (!readyToDownload) {
+      return;
+    }
     switch (workflow) {
       case WORKFLOWS.LONG_READ_MNGS.value:
       case WORKFLOWS.SHORT_READ_MNGS.value:
-        if (!!reportMetadata.reportReady && currentRun) {
-          return renderDownloadDropdown();
-        }
+        return renderDownloadDropdown();
         break;
       case WORKFLOWS.CONSENSUS_GENOME.value:
-        if (succeeded) {
-          return renderDownloadAll(workflow);
-        }
+        return renderDownloadAll(workflow);
         break;
       case WORKFLOWS.AMR.value:
-        if (succeeded) {
-          if (allowedFeatures.includes(AMR_V2_FEATURE)) {
-            return renderDownloadDropdown();
-          } else {
-            return renderDownloadAll(workflow);
-          }
+        if (allowedFeatures.includes(AMR_V2_FEATURE)) {
+          return renderDownloadDropdown();
+        } else {
+          return renderDownloadAll(workflow);
         }
         break;
     }
@@ -195,35 +195,31 @@ export const PrimaryHeaderControls = ({
       case WORKFLOWS.LONG_READ_MNGS.value:
       case WORKFLOWS.SHORT_READ_MNGS.value: {
         return (
-          succeeded && (
-            <MngsDownloadDropdown
-              className={cs.controlElement}
-              backgroundId={backgroundId}
-              currentTab={currentTab}
-              getDownloadReportTableWithAppliedFiltersLink={
-                getDownloadReportTableWithAppliedFiltersLink
-              }
-              hasAppliedFilters={hasAppliedFilters}
-              pipelineRun={currentRun as PipelineRun}
-              sample={sample}
-              view={view}
-            />
-          )
+          <MngsDownloadDropdown
+            className={cs.controlElement}
+            backgroundId={backgroundId}
+            currentTab={currentTab}
+            getDownloadReportTableWithAppliedFiltersLink={
+              getDownloadReportTableWithAppliedFiltersLink
+            }
+            hasAppliedFilters={hasAppliedFilters}
+            pipelineRun={currentRun as PipelineRun}
+            sample={sample}
+            view={view}
+          />
         );
       }
 
       case WORKFLOWS.AMR.value: {
         return (
-          succeeded && (
-            <AmrDownloadDropdown
-              className={cs.controlElement}
-              backgroundId={backgroundId}
-              currentTab={currentTab}
-              workflowRun={currentRun as WorkflowRun}
-              sample={sample}
-              view={view}
-            />
-          )
+          <AmrDownloadDropdown
+            className={cs.controlElement}
+            backgroundId={backgroundId}
+            currentTab={currentTab}
+            workflowRun={currentRun as WorkflowRun}
+            sample={sample}
+            view={view}
+          />
         );
       }
     }
@@ -263,15 +259,13 @@ export const PrimaryHeaderControls = ({
     };
 
     return (
-      runIsLoaded && (
-        <HelpButton
-          className={cs.controlElement}
-          onClick={showAppcue({
-            flowId: appCueFlowId[workflow],
-            analyticEventName: anaylticsEventName[workflow],
-          })}
-        />
-      )
+      <HelpButton
+        className={cs.controlElement}
+        onClick={showAppcue({
+          flowId: appCueFlowId[workflow],
+          analyticEventName: anaylticsEventName[workflow],
+        })}
+      />
     );
   };
 
@@ -302,9 +296,9 @@ export const PrimaryHeaderControls = ({
     switch (workflow) {
       case WORKFLOWS.LONG_READ_MNGS.value:
       case WORKFLOWS.SHORT_READ_MNGS.value:
-        return runIsLoaded && <ShareButtonPopUp onShareClick={onShareClick} />;
+        return <ShareButtonPopUp onShareClick={onShareClick} />;
       case WORKFLOWS.CONSENSUS_GENOME.value:
-        return succeeded && <ShareButtonPopUp onShareClick={onShareClick} />;
+        return <ShareButtonPopUp onShareClick={onShareClick} />;
       case WORKFLOWS.AMR.value:
         return (
           allowedFeatures.includes(AMR_V2_FEATURE) && (
@@ -319,9 +313,10 @@ export const PrimaryHeaderControls = ({
   const renderOverflowMenu = () => {
     const redirectOnSuccess =
       sample && [...sample.pipeline_runs, ...sample.workflow_runs].length === 1;
+    const readyToDelete = currentRunLoaded || sample?.upload_error;
     return (
       hasBulkDeletion &&
-      readyToInteract(workflow) &&
+      readyToDelete &&
       currentTab !== TABS.AMR_DEPRECATED && (
         <OverflowMenu
           className={cs.controlElement}
