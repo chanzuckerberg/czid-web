@@ -1143,9 +1143,11 @@ class UploadSampleStep extends React.Component<
       currentTab,
       localSamples,
       refSeqFile,
+      selectedGuppyBasecallerSetting,
       selectedProject,
       selectedTaxon,
       selectedTechnology,
+      selectedWetlabProtocol,
       selectedWorkflows,
     } = this.state;
     const { allowedFeatures } = this.context || {};
@@ -1166,17 +1168,33 @@ class UploadSampleStep extends React.Component<
     }
 
     if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.MNGS.value) &&
+      allowedFeatures.includes(ONT_V1_FEATURE) &&
+      selectedTechnology === SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE &&
+      !selectedGuppyBasecallerSetting
+    ) {
+      return "Please select a basecaller to continue";
+    }
+
+    if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value) &&
+      !selectedWetlabProtocol
+    ) {
+      return "Please select a wetlab protocol to continue";
+    }
+
+    if (
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value) &&
       !selectedTaxon
     ) {
-      return "Please select a taxon to continue.";
+      return "Please select a taxon to continue";
     }
 
     if (
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value) &&
       !refSeqFile
     ) {
-      return "Please upload a reference sequence to continue.";
+      return "Please upload a reference sequence to continue";
     }
 
     if (size(this.getSelectedSamples(currentTab)) < 1) {
