@@ -129,8 +129,6 @@ Rails.application.routes.draw do
       get :all_users
       get :validate_project_name
 
-      put :add_favorite
-      put :remove_favorite
       put :update_project_visibility
       put :add_user
       put :update

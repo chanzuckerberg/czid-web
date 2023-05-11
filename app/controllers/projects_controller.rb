@@ -15,7 +15,7 @@ class ProjectsController < ApplicationController
   #
   ##########################################
 
-  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :project_pipeline_versions, :validate_project_name, :validate_sample_names].freeze
+  READ_ACTIONS = [:show, :project_pipeline_versions, :validate_project_name, :validate_sample_names].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility, :upload_metadata, :validate_metadata_csv].freeze
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
   TOKEN_AUTH_METHODS = [:index, :create, :validate_sample_names].freeze
@@ -364,17 +364,6 @@ class ProjectsController < ApplicationController
 
   # GET /projects/1/edit
   def edit
-  end
-
-  def add_favorite
-    remove_favorite
-    current_user.favorites << @project
-  end
-
-  def remove_favorite
-    if current_user.favorites.include? @project
-      current_user.favorites.delete(@project)
-    end
   end
 
   # POST /projects

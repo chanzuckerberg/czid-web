@@ -106,14 +106,12 @@ def must_have_children
       # :amr_counts,
       # :contigs
     ],
-    # :User => %i[samples favorite_projects favorites visualizations phylo_trees],
+    # :User => %i[samples visualizations phylo_trees],
     Background: [:taxon_summaries],
     Project: [
       # need to use unsafe method to keep with access control
       :samples_unsafe,
       # :samples,
-      # :favorite_projects,
-      # :favorited_by,
       # :phylo_trees
     ],
     Sample: [
@@ -137,7 +135,6 @@ def must_have_parents
     Background: [:project],
     Contig: [:pipeline_run],
     ErccCount: [:pipeline_run],
-    FavoriteProject: [:project, :user],
     JobStat: [:pipeline_run],
     # :Location => %i[country state subdivision city],
     Metadatum: [

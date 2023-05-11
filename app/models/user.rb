@@ -19,8 +19,6 @@ class User < ApplicationRecord
   # All one-to-many assocs are counter cached for per-user analytics.
   # See traits_for_analytics.
   has_many :samples, dependent: :destroy
-  has_many :favorite_projects, dependent: :destroy
-  has_many :favorites, through: :favorite_projects, source: :project, dependent: :destroy
   has_many :visualizations, dependent: :destroy
   has_many :phylo_trees, dependent: :destroy
   has_many :phylo_tree_ngs, dependent: :destroy
@@ -249,8 +247,6 @@ class User < ApplicationRecord
         # https://segment.com/docs/destinations/google-analytics/#custom-dimensions
         has_projects: !projects.empty?,
         has_samples: !samples.empty?,
-        has_favorite_projects: !favorite_projects.empty?,
-        has_favorites: !favorites.empty?,
         has_visualizations: !visualizations.empty?,
         has_phylo_trees: !phylo_trees.empty?,
         # Segment special fields
@@ -271,8 +267,6 @@ class User < ApplicationRecord
           czi_user: czi_user?,
           projects: projects.size, # projects counter is NOT cached because has_and_belongs_to_many
           samples: samples.size,
-          favorite_projects: favorite_projects.size,
-          favorites: favorites.size,
           visualizations: visualizations.size,
           phylo_trees: phylo_trees.size,
           firstName: first_name,

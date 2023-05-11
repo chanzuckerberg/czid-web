@@ -11,8 +11,6 @@ class Project < ApplicationRecord
 
   has_and_belongs_to_many :users
   has_many :samples, dependent: :destroy
-  has_many :favorite_projects, dependent: :destroy
-  has_many :favorited_by, through: :favorite_projects, source: :user
   has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :restrict_with_exception
   has_many :persisted_backgrounds, dependent: :destroy
   # TODO: Pick dependent behavior for background

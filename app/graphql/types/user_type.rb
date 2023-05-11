@@ -15,8 +15,6 @@ module Types
     # field :phylo_trees_count, Int, null: false
     # field :visualizations_count, Int, null: false
     # field :samples_count, Int, null: false
-    # field :favorite_projects_count, Int, null: false
-    # field :favorites_count, Int, null: false
     # field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     # field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
     # field :sign_in_count, Int, null: false
