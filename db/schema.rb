@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_11_203409) do
+ActiveRecord::Schema.define(version: 2023_05_11_214326) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -239,6 +239,7 @@ ActiveRecord::Schema.define(version: 2023_05_11_203409) do
     t.text "source"
     t.text "parts"
     t.string "upload_client"
+    t.string "file_type", comment: "Type of input file (e.g. sample FASTQ, primer bed file, etc.)"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
