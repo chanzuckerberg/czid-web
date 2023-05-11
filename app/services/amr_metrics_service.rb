@@ -9,6 +9,7 @@ class AmrMetricsService
   COUNT_PRICESEQ_OUT = "priceseq_out_count".freeze
   COUNT_STAR_OUT = "star_out_count".freeze
 
+  COUNT_BOWTIE2_ERCC_FILTERED_OUT = "bowtie2_ercc_filtered_out_count".freeze
   COUNT_FASTP_OUT = "fastp_out_count".freeze
   COUNT_BOWTIE2_HOST_FILTERED_OUT = "bowtie2_host_filtered_out_count".freeze
   COUNT_HISAT2_HOST_FILTERED_OUT = "hisat2_host_filtered_out_count".freeze
@@ -28,6 +29,7 @@ class AmrMetricsService
 
   MODERN_COUNTS = [
     COUNT_INPUT_READ,
+    COUNT_BOWTIE2_ERCC_FILTERED_OUT,
     COUNT_FASTP_OUT,
     COUNT_CZID_DEDUP_OUT,
     COUNT_SUBSAMPLED_OUT,
@@ -46,7 +48,7 @@ class AmrMetricsService
     COUNT_HISAT2_HUMAN_FILTERED_OUT,
   ].freeze
 
-  MODERN_ERCC_FILE = "kallisto_ERCC_counts_tsv".freeze
+  MODERN_ERCC_FILE = "bowtie2_ERCC_counts_tsv".freeze
   HOST_FILTER_STAGE_NAME = "host_filter_stage".freeze
   ERCC_FILE = "output_gene_file".freeze
   MODERN_INSERT_SIZE_METRICS = "insert_size_metrics".freeze
@@ -166,9 +168,9 @@ class AmrMetricsService
   end
 
   def retrieve_modern_passed_qc(counts)
-    return unless counts["fastp_out"] && counts["validate_input_out"]
+    return unless counts["fastp_out"] && counts["bowtie2_ercc_filtered_out"]
 
-    (100.0 * counts["fastp_out"]) / counts["validate_input_out"]
+    (100.0 * counts["fastp_out"]) / counts["bowtie2_ercc_filtered_out"]
   end
 
   def retrieve_passed_qc(counts)
