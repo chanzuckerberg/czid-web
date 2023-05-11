@@ -1452,7 +1452,7 @@ class SamplesController < ApplicationController
   # DELETE /samples/1
   # DELETE /samples/1.json
   def destroy
-    # Will also delete from job_stats, ercc_counts, backgrounds_pipeline_runs, pipeline_runs, input_files, and backgrounds_samples
+    # Will also delete from job_stats, ercc_counts, backgrounds_pipeline_runs, pipeline_runs, input_files
     deletable = @sample.deletable?(current_user)
     success = false
     project = @sample.project

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_01_155301) do
+ActiveRecord::Schema.define(version: 2023_05_08_234914) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -106,13 +106,6 @@ ActiveRecord::Schema.define(version: 2023_05_01_155301) do
     t.bigint "pipeline_run_id"
     t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
     t.index ["pipeline_run_id"], name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
-  end
-
-  create_table "backgrounds_samples", id: false, charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.bigint "background_id", null: false
-    t.bigint "sample_id", null: false
-    t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
-    t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
   create_table "bulk_downloads", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -953,8 +946,6 @@ ActiveRecord::Schema.define(version: 2023_05_01_155301) do
   add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
   add_foreign_key "backgrounds_pipeline_runs", "backgrounds", name: "backgrounds_pipeline_runs_background_id_fk"
   add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
-  add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
-  add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
   add_foreign_key "bulk_downloads", "users"
   add_foreign_key "bulk_downloads_pipeline_runs", "bulk_downloads", name: "bulk_downloads_pipeline_runs_bulk_download_id_fk"
   add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
