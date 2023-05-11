@@ -9,8 +9,8 @@ import { MECHANISMS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const mechanismColumn: ColumnDef<AmrResult, any> = {
   id: "mechanism",
   accessorKey: "mechanism",
-  size: 200,
-  minSize: 200,
+  size: 120,
+  minSize: 120,
   header: function mechanismHeader({ header, column }) {
     return (
       <SortableHeader

@@ -16,3 +16,10 @@ export const generateHeaderWidthStyles = (
     width: `${header.getSize()}px`,
   };
 };
+
+export const generateSlimWidthStyles = () => {
+  return {
+    width: "unset",
+    minWidth: "unset",
+  };
+};

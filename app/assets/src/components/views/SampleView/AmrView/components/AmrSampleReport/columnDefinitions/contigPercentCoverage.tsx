@@ -4,7 +4,7 @@ import { CellBasic } from "czifui";
 import React from "react";
 import { SortableHeader } from "~/components/ui/Table/components/SortableHeader";
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";
-import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
+import { generateSlimWidthStyles } from "~/components/ui/Table/tableUtils";
 import { memo } from "~/components/utils/memo";
 import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
@@ -14,12 +14,12 @@ import { CONTIGS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
   id: "contigCoverageBreadth",
   accessorKey: "contigCoverageBreadth",
-  header: function contigPercentCoverageHeader({ header, column }) {
+  header: function contigPercentCoverageHeader({ header }) {
     return (
       <SortableHeader
         className={cx(cs.rightAlignedHeader, rowStyles.contigsColumnGroup)}
         header={header}
-        style={generateWidthStyles(column)}
+        style={generateSlimWidthStyles()}
         tooltipStrings={CONTIGS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS}
       >
         %Cov
@@ -41,7 +41,7 @@ export const contigPercentCoverageColumn: ColumnDef<AmrResult, any> = {
       <CellBasic
         className={cx(cs.rightAlignedCell, rowStyles.contigsColumnGroup)}
         key={cell.id}
-        style={generateWidthStyles(cell.column)}
+        style={generateSlimWidthStyles()}
         shouldTextWrap
         primaryText={value}
         primaryTextWrapLineCount={2}

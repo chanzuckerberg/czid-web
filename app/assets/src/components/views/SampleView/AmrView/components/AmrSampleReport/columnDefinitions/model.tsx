@@ -9,8 +9,8 @@ import { MODEL_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const modelColumn: ColumnDef<AmrResult, any> = {
   id: "model",
   accessorKey: "model",
-  size: 200,
-  minSize: 200,
+  size: 110,
+  minSize: 110,
   header: function modelHeader({ header, column }) {
     return (
       <SortableHeader
