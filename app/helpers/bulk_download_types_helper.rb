@@ -61,7 +61,7 @@ module BulkDownloadTypesHelper
       type: AMR_RESULTS_BULK_DOWNLOAD,
       display_name: "Antimicrobial Resistance Results",
       file_type_display: ".tar.gz",
-      description: "Includes the AMR Report, Combined AMR Metrics Summary, Contigs, Non-host reads, and raw outputs from CARD RGI. Learn More.",
+      description: "Includes AMR Report, Comprehensive AMR Metrics, intermediate files and raw outputs from CARD RGI.",
       category: "reports",
       execution_type: ECS_EXECUTION_TYPE,
       workflows: [WorkflowRun::WORKFLOW[:amr]],
