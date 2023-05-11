@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_09_231448) do
+ActiveRecord::Schema.define(version: 2023_05_11_203409) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -828,15 +828,6 @@ ActiveRecord::Schema.define(version: 2023_05_09_231448) do
     t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end", unique: true
     t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end", unique: true
     t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
-  end
-
-  create_table "taxon_scoring_models", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.string "name"
-    t.text "model_json"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "model_type"
-    t.index ["name"], name: "index_taxon_scoring_models_on_name", unique: true
   end
 
   create_table "taxon_summaries", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
