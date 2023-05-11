@@ -1,8 +1,7 @@
 import { cx } from "@emotion/css";
 import { PopoverProps } from "@mui/material";
 import { Button, Icon, Menu, MenuItem, Tooltip } from "czifui";
-import React, { useContext, useState } from "react";
-import { UserContext } from "~/components/common/UserContext";
+import React, { useState } from "react";
 import {
   getShorthandFromWorkflow,
   WORKFLOW_VALUES,
@@ -27,7 +26,6 @@ export const OverflowMenu = ({
   runFinalized: boolean;
   userOwnsRun: boolean;
 }) => {
-  const { admin: userIsAdmin } = useContext(UserContext) || {};
   const [menuAnchorEl, setMenuAnchorEl] =
     useState<PopoverProps["anchorEl"]>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
@@ -40,7 +38,7 @@ export const OverflowMenu = ({
     setMenuAnchorEl(null);
   };
 
-  const deleteDisabled = !(userIsAdmin || userOwnsRun) || !runFinalized;
+  const deleteDisabled = !(userOwnsRun && runFinalized);
 
   const renderDeleteRunMenuItem = () => {
     let deleteRunMenuItem = (
@@ -63,10 +61,9 @@ export const OverflowMenu = ({
       </MenuItem>
     );
     if (deleteDisabled) {
-      const tooltipText =
-        userIsAdmin || userOwnsRun
-          ? !runFinalized && "You can only delete runs that are completed."
-          : "Only the user that initiated the run can perform this action.";
+      const tooltipText = userOwnsRun
+        ? !runFinalized && "You can only delete runs that are completed."
+        : "Only the user that initiated the run can perform this action.";
 
       deleteRunMenuItem = (
         <Tooltip arrow placement="top" title={tooltipText}>

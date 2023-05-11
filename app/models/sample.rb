@@ -320,11 +320,7 @@ class Sample < ApplicationRecord
   end
 
   def self.owned_by_user(user)
-    if user.admin?
-      all
-    else
-      where(user_id: user.id)
-    end
+    where(user_id: user.id)
   end
 
   def end_path(key, n = 1)
@@ -862,7 +858,7 @@ class Sample < ApplicationRecord
   end
 
   def deletable?(user)
-    uploaded_sample = user.admin? || user_id == user.id
+    uploaded_sample = user_id == user.id
     all_prs_failed = pipeline_runs.all?(&:report_failed?)
     all_wrs_failed = workflow_runs.all? { |wr| wr.status == WorkflowRun::STATUS[:failed] }
 
