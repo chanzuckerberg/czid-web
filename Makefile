@@ -48,6 +48,18 @@ local-init: .env.localdev ## Set up a local dev environment
 local-migrate: .env.localdev ## Set up a local dev environment
 	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rake db:migrate:with_data'
 
+.PHONY: local-migrate-down
+local-migrate-down: .env.localdev ## revert a migration; Useage: make local-migrate-down version=319487398
+	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rails db:migrate:down VERSION=$(version)'
+
+.PHONY: local-generate-migration
+local-generate-migration: .env.localdev ## Generate a migration; Useage: make local-generate-migration migration_name=backpopulate_data
+	$(docker_compose) run web rails generate migration $(migration_name)
+	
+.PHONY: local-generate-data-migration
+local-generate-data-migration: .env.localdev ## Generate a data migration; Usage: make local-generate-data-migration migration_name=backpopulate_data
+	$(docker_compose) run web rails generate data_migration $(migration_name)
+
 .PHONY: local-db-drop
 local-db-drop: .env.localdev ## Wipe out the local db for a fresh start
 	$(docker_compose) run --rm web sh -c 'bin/rails db:environment:set RAILS_ENV=development && rake db:drop'

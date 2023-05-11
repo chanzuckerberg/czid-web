@@ -115,8 +115,9 @@ class SfnCgPipelineDispatchService
 
   def creation_source
     if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+      # CG kickoff is not available through mNGS nanopore report
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
-    elsif (ref_fasta_input || @workflow_run.inputs&.[]("reference_accession")) && primer_bed_input
+    elsif ref_fasta_input || @workflow_run.inputs&.[]("reference_accession")
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:viral_cg_upload]
     elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
       return ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload]
@@ -150,13 +151,6 @@ class SfnCgPipelineDispatchService
     ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
     if ref_fasta_name
       @sample.input_files.find { |i| i.name != ref_fasta_name }
-    end
-  end
-
-  def primer_bed_input
-    primer_bed_name = @workflow_run.inputs&.[]("primer_bed")
-    if primer_bed_name
-      @sample.input_files.find { |i| i.name != primer_bed_name }
     end
   end
 
