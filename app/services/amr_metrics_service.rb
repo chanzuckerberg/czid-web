@@ -194,7 +194,7 @@ class AmrMetricsService
 
   def retrieve_modern_passed_filters(counts)
     # "Passed filters" is the same thing as "adjusted remaining reads"
-    counts["czid_dedup_out"]
+    counts["subsampled_out"]
   end
 
   def retrieve_passed_filters(counts)
