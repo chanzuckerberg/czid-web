@@ -1,7 +1,7 @@
 import cx from "classnames";
 import React from "react";
 
-const IconCovidVirusXLarge = ({ className }: { className: string }) => {
+const IconCovidVirusXLarge = ({ className }: { className?: string }) => {
   return (
     <svg
       className={cx(className)}

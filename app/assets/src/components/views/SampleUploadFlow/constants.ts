@@ -1,3 +1,5 @@
+import { IconNameToSizes } from "czifui";
+import { IconCovidVirusXLarge } from "~/components/ui/icons";
 import { WORKFLOWS } from "~/components/utils/workflows";
 
 export const NO_TARGET_PROJECT_ERROR =
@@ -10,7 +12,14 @@ export const ILLUMINA = "Illumina";
 export const NANOPORE = "ONT";
 export const NO_TECHNOLOGY_SELECTED = "noTechnologySelected";
 
-export const UPLOAD_WORKFLOWS = {
+export const UPLOAD_WORKFLOWS: {
+  [key: string]: {
+    label: string;
+    value: UploadWorkflows;
+    icon?: keyof IconNameToSizes;
+    customIcon?(props: any): JSX.Element; // a function that returns an icon component instance; ie: a component def
+  };
+} = {
   MNGS: {
     label: "Metagenomics" as const,
     value: "mngs" as const,
@@ -24,7 +33,7 @@ export const UPLOAD_WORKFLOWS = {
   COVID_CONSENSUS_GENOME: {
     label: "SARS-CoV-2 Consensus Genome" as const,
     value: "covid-consensus-genome" as const,
-    icon: "virus" as const, // TODO (mlila): remove this once custom icon added to Review page
+    customIcon: IconCovidVirusXLarge,
   },
   AMR: {
     label: "Antimicrobial Resistance" as const,

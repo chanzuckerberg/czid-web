@@ -153,6 +153,8 @@
       background-color: $sds-color-gray-100;
       overflow-x: auto;
       overflow-y: hidden;
+      display: flex;
+      justify-content: center;
     }
   }
 }

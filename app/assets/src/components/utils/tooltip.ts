@@ -86,7 +86,7 @@ export const FIELDS_METADATA = {
       "The percentage of the accession that is covered by at least one read or contig.",
   },
   referenceNCBIEntry: {
-    label: "Reference NCBI Entry",
+    label: "Reference NCBI",
     tooltip: "The NCBI Genbank entry for the reference accession.",
   },
   referenceLength: {

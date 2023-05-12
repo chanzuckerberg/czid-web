@@ -195,7 +195,7 @@ const ConsensusGenomeView = ({
         hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
         labelsBold: true,
         labelsLarge: true,
-        labelX: "Reference Accession",
+        labelX: "Reference Sequence",
         labelY: "Coverage (SymLog)",
         labelXSubtext: subtext,
         labelYHorizontalOffset: 30,

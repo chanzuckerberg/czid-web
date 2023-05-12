@@ -64,7 +64,12 @@ const AnalysesSections = ({
     <>
       {map(workflow => {
         const workflowKey = UPLOAD_WORKFLOW_KEY_FOR_VALUE[workflow];
-        const workflowDisplayName = UPLOAD_WORKFLOWS[workflowKey].label;
+        const {
+          customIcon: CustomIcon,
+          icon,
+          label: workflowDisplayName,
+        } = UPLOAD_WORKFLOWS[workflowKey];
+
         const workflowIsBeta =
           workflow === UPLOAD_WORKFLOWS.AMR.value &&
           !allowedFeatures.includes(AMR_V2_FEATURE);
@@ -87,12 +92,11 @@ const AnalysesSections = ({
         return (
           <div className={cs.section}>
             <div className={cs.icon}>
-              <Icon
-                // TODO (mlila): need to add option for custom icon here
-                sdsIcon={UPLOAD_WORKFLOWS[workflowKey].icon}
-                sdsSize="xl"
-                sdsType="static"
-              />
+              {CustomIcon ? (
+                <CustomIcon />
+              ) : (
+                <Icon sdsIcon={icon} sdsSize="xl" sdsType="static" />
+              )}
             </div>
             <div className={cs.text}>
               <div className={cs.header}>
@@ -120,7 +124,6 @@ const AnalysesSections = ({
                     medakaModel={medakaModel}
                     technology={technology}
                     wetlabProtocol={wetlabProtocol}
-                    workflows={workflows}
                   />
                 )}
                 {workflow === UPLOAD_WORKFLOWS.MNGS.value && (
