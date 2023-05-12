@@ -625,12 +625,15 @@ const SamplesView = forwardRef(function SamplesView(
     });
   };
 
+  const AMR_PIPELINE_LABEL = allowedFeatures.includes(AMR_V2_FEATURE)
+    ? " Antimicrobial Resistance "
+    : " Antimicrobial Resistance (Beta) ";
+
   const renderAmrPipelineBulkKickedOffNotification = () => {
     const renderAmrNotification = (onClose: () => void) => (
       <Notification displayStyle="elevated" type="info" onClose={onClose}>
         <div className={cs.amrNotification}>
-          We&apos;ve started running your samples on the Antimicrobial
-          Resistance (Beta) pipeline. To view your samples, visit the{" "}
+          {`We've started running your samples on the ${AMR_PIPELINE_LABEL} pipeline. To view your samples, visit the`}{" "}
           {/* TODO: When the user clicks this AMR link, it should switch to the AMR tab */}
           <div className={cs.amrTab}>Antimicrobial Resistance</div> tab.
         </div>
@@ -645,9 +648,6 @@ const SamplesView = forwardRef(function SamplesView(
   const renderIneligibleSamplesForBulkKickoffAmrNotification = (
     invalidSampleNames: string[],
   ) => {
-    const AMR_PIPELINE_LABEL = allowedFeatures.includes(AMR_V2_FEATURE)
-      ? " Antimicrobial Resistance "
-      : " Antimicrobial Resistance (Beta) ";
     const header = (
       <div>
         <span className={cs.highlight}>

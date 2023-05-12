@@ -43,6 +43,10 @@ const BulkSamplesActionsMenu = ({
     setMenuAnchorEl(null);
   };
 
+  const runAmrPipelineLabel = allowedFeatures.includes(AMR_V2_FEATURE)
+    ? "Run Antimicrobial Resistance Pipeline"
+    : "Run Antimicrobial Resistance Pipeline (Beta)";
+
   const renderBulkKickoffAmr = () => {
     let bulkKickoffAmrMenuItem = (
       <MenuItem
@@ -64,7 +68,7 @@ const BulkSamplesActionsMenu = ({
               <Icon sdsIcon={"bacteria"} sdsSize="xs" sdsType="static" />
             </div>
           )}
-          <span>{"Run Antimicrobial Resistance Pipeline (Beta)"}</span>
+          <span>{runAmrPipelineLabel}</span>
         </div>
       </MenuItem>
     );
@@ -107,11 +111,7 @@ const BulkSamplesActionsMenu = ({
       <ToolbarButtonIcon
         className={cs.action}
         icon="dotsHorizontal"
-        popupText={
-          hasBulkDeletion
-            ? "More Actions"
-            : "Run Antimicrobial Resistance Pipeline (Beta)"
-        }
+        popupText={hasBulkDeletion ? "More Actions" : runAmrPipelineLabel}
         popupSubtitle={disableMenu ? "Select at least 1 sample" : ""}
         disabled={disableMenu}
         onClick={openActionsMenu}
