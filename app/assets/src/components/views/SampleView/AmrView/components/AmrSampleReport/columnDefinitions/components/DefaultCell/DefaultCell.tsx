@@ -3,10 +3,7 @@ import { Cell, Getter } from "@tanstack/react-table";
 import { CellBasic } from "czifui";
 import React from "react";
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";
-import {
-  generateSlimWidthStyles,
-  generateWidthStyles,
-} from "~/components/ui/Table/tableUtils";
+import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { memo } from "~/components/utils/memo";
 import { AmrResult } from "../../../types";
 import cs from "../../column_definitions.scss";
@@ -24,11 +21,6 @@ export enum Align {
   RIGHT = "right",
 }
 
-export enum SlimWidth {
-  SLIM = "slim",
-  STANDARD = "standard",
-}
-
 interface DefaultCellProps {
   cell: Cell<AmrResult, any>;
   getValue: Getter<any>;
@@ -37,7 +29,6 @@ interface DefaultCellProps {
 export const getDefaultCell = (
   align?: Align,
   headerGroupClassName?: string,
-  slimWidth: SlimWidth = SlimWidth.STANDARD,
 ) => {
   // If align is not passed in, default to left alignment
   const alignClassName =
@@ -50,11 +41,7 @@ export const getDefaultCell = (
     return (
       <CellBasic
         className={cx(alignClassName, headerGroupClassName)}
-        style={
-          slimWidth === SlimWidth.SLIM
-            ? generateSlimWidthStyles()
-            : generateWidthStyles(cell.column)
-        }
+        style={generateWidthStyles(cell.column)}
         key={cell.id}
         primaryText={formattedValue || NO_CONTENT_FALLBACK}
         shouldTextWrap

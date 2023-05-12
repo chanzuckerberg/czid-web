@@ -4,7 +4,7 @@ import { CellBasic } from "czifui";
 import React from "react";
 import { SortableHeader } from "~/components/ui/Table/components/SortableHeader";
 import { NO_CONTENT_FALLBACK } from "~/components/ui/Table/constants";
-import { generateSlimWidthStyles } from "~/components/ui/Table/tableUtils";
+import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { memo } from "~/components/utils/memo";
 import rowStyles from "../components/StyledTableRow/styled_table_row.scss";
 import { AmrResult } from "../types";
@@ -14,12 +14,13 @@ import { READS_COLUMN_TOOLTIP_STRINGS } from "./constants";
 export const readsColumn: ColumnDef<AmrResult, any> = {
   id: "reads",
   accessorKey: "reads",
-  header: function readsHeader({ header }) {
+  size: 82,
+  header: function readsHeader({ header, column }) {
     return (
       <SortableHeader
         className={cx(cs.rightAlignedHeader, rowStyles.readsColumnGroup)}
         header={header}
-        style={generateSlimWidthStyles()}
+        style={generateWidthStyles(column)}
         tooltipStrings={READS_COLUMN_TOOLTIP_STRINGS}
       >
         Reads
@@ -41,7 +42,7 @@ export const readsColumn: ColumnDef<AmrResult, any> = {
       <CellBasic
         className={cx(cs.rightAlignedCell, rowStyles.readsColumnGroup)}
         key={cell.id}
-        style={generateSlimWidthStyles()}
+        style={generateWidthStyles(cell.column)}
         shouldTextWrap
         primaryText={value}
         primaryTextWrapLineCount={2}

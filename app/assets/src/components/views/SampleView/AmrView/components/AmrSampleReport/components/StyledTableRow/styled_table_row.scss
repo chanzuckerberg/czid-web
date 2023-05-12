@@ -10,7 +10,7 @@
 // except for the first one
 // Remove the border
 .styledTableRow > .contigsColumnGroup ~ .contigsColumnGroup {
-  border: none;
+  border-left: none;
 }
 
 // Select all elements with readsColumnGroup class inside of styledTableRow
@@ -23,12 +23,16 @@
 // except for the first one
 // Remove the border
 .styledTableRow > .readsColumnGroup ~ .readsColumnGroup {
-  border: none;
+  border-left: none;
 }
 
 // Styles for all styleTableRow elements
 .styledTableRow {
   &:hover {
     background-color: $sds-color-gray-100;
+  }
+  th {
+    border-bottom: $sds-borders-gray-300;
+    min-width: unset;
   }
 }

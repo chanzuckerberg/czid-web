@@ -6,6 +6,7 @@ export const generateWidthStyles = (
 ): CSSProperties => {
   return {
     width: `${column.getSize()}px`,
+    maxWidth: `${column.getSize()}px`,
   };
 };
 
@@ -14,12 +15,5 @@ export const generateHeaderWidthStyles = (
 ): CSSProperties => {
   return {
     width: `${header.getSize()}px`,
-  };
-};
-
-export const generateSlimWidthStyles = () => {
-  return {
-    width: "unset",
-    minWidth: "unset",
   };
 };
