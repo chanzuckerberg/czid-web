@@ -20,6 +20,7 @@ export function getGeneColumn(
           header={header}
           style={generateWidthStyles(column)}
           tooltipStrings={GENE_COLUMN_TOOLTIP_STRINGS}
+          isSortDefaultDesc={false}
         >
           Gene
         </SortableHeader>

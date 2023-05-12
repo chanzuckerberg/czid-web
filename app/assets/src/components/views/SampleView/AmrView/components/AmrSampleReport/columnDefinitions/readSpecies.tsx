@@ -26,6 +26,7 @@ export const readSpeciesColumn: ColumnDef<AmrResult, any> = {
         header={header}
         style={generateWidthStyles(column)}
         tooltipStrings={READS_SPECIES_COLUMN_TOOLTIP_STRINGS}
+        isSortDefaultDesc={false}
       >
         <div className={cs.headerWithTagContainer}>
           <span>Read Species</span>

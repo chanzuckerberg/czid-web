@@ -10,3 +10,9 @@
     overflow: hidden;
   }
 }
+
+.active {
+  span {
+    color: $sds-color-primary-400;
+  }
+}

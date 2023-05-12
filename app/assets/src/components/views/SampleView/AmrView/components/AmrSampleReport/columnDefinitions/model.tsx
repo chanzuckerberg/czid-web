@@ -17,6 +17,7 @@ export const modelColumn: ColumnDef<AmrResult, any> = {
         header={header}
         style={generateWidthStyles(column)}
         tooltipStrings={MODEL_COLUMN_TOOLTIP_STRINGS}
+        isSortDefaultDesc={false}
       >
         Model
       </SortableHeader>

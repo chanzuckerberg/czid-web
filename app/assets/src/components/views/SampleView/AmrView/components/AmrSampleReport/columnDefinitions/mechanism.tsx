@@ -17,6 +17,7 @@ export const mechanismColumn: ColumnDef<AmrResult, any> = {
         header={header}
         style={generateWidthStyles(column)}
         tooltipStrings={MECHANISMS_COLUMN_TOOLTIP_STRINGS}
+        isSortDefaultDesc={false}
       >
         Mechanism
       </SortableHeader>

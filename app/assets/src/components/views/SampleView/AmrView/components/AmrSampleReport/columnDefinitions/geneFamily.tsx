@@ -17,6 +17,7 @@ export const geneFamilyColumn: ColumnDef<AmrResult, any> = {
         header={header}
         style={generateWidthStyles(column)}
         tooltipStrings={GENE_FAMILY_COLUMN_TOOLTIP_STRINGS}
+        isSortDefaultDesc={false}
       >
         Gene Family
       </SortableHeader>

@@ -12,6 +12,7 @@ interface SortableProps {
   children: ReactNode | string;
   tooltipStrings?: TooltipTextType;
   style?: CSSProperties;
+  isSortDefaultDesc?: boolean;
 }
 
 export const SortableHeader = ({
@@ -19,22 +20,33 @@ export const SortableHeader = ({
   header,
   children,
   tooltipStrings,
+  isSortDefaultDesc = true,
   ...props
 }: SortableProps): JSX.Element => {
-  const { getCanSort, getIsSorted, getToggleSortingHandler } = header.column;
+  const { getCanSort, getIsSorted, toggleSorting } = header.column;
 
   const sortable = getCanSort();
   const sortDirection = getIsSorted() || undefined;
-  const onClick = getToggleSortingHandler();
+  const isActive = Boolean(sortDirection);
+
+  // If it's sorted in descending order, we want to sort by ascending order
+  // If the column is already sorted in ascending order, we want to switch to descending
+  // If the column is not active the new sort will follow the isSortDefaultDesc prop
+  const onClick = () => {
+    const isCurrentSortDesc = sortDirection === "desc";
+    const isNewSortDesc = isActive ? !isCurrentSortDesc : isSortDefaultDesc;
+    toggleSorting(isNewSortDesc);
+  };
+
   const shouldShowTooltip = Boolean(tooltipStrings);
 
   return (
     <CellHeader
-      className={cx(cs.wrapper, className)}
+      className={cx(cs.wrapper, isActive && cs.active, className)}
       key={header.id}
       onClick={onClick}
       direction={sortDirection}
-      active={Boolean(sortDirection)}
+      active={isActive}
       hideSortIcon={!sortable}
       shouldShowTooltipOnHover={shouldShowTooltip}
       tooltipProps={{

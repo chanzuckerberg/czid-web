@@ -16,6 +16,7 @@ export const drugClassColumn: ColumnDef<AmrResult, any> = {
         header={header}
         style={generateWidthStyles(column)}
         tooltipStrings={DRUG_CLASS_COLUMN_TOOLTIP_STRINGS}
+        isSortDefaultDesc={false}
       >
         Drug Class
       </SortableHeader>
