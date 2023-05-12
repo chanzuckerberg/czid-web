@@ -1,14 +1,19 @@
 import { useReactiveVar } from "@apollo/client";
+import cx from "classnames";
+import { Tooltip } from "czifui";
 import React from "react";
+import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import { amrReportTableDownloadWithAppliedFiltersLinkVar } from "~/cache/initialCache";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logError } from "~/components/utils/logUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
+import cs from "./amr_download_dropdown.scss";
 import {
-  getAmrDownloadDropdownOptions,
+  DownloadOptions,
   getAmrDownloadLink,
   logDownloadOption,
+  NONHOST_DOWNLOADS_TOOLTIP,
 } from "./amrDownloadUtils";
 
 interface AmrDownloadDropdownProps {
@@ -77,6 +82,9 @@ const AmrDownloadDropdown = ({
     });
   };
 
+  const workflowVersion = parseFloat(workflowRun?.wdl_version ?? "0");
+  const isOldPipeline = workflowVersion < 1.1;
+
   const downloadOptions = [
     {
       text: "Download Report Table (.csv)",
@@ -87,13 +95,67 @@ const AmrDownloadDropdown = ({
       value: "download_csv_with_filters",
       disabled: !amrReportTableDownloadWithAppliedFiltersLink,
     },
-    ...getAmrDownloadDropdownOptions(), // other four downloads
+    {
+      text: DownloadOptions.NON_HOST_READS_LABEL,
+      value: DownloadOptions.NON_HOST_READS_LABEL,
+      disabled: isOldPipeline,
+      tooltipText: NONHOST_DOWNLOADS_TOOLTIP,
+    },
+    {
+      text: DownloadOptions.NON_HOST_CONTIGS_LABEL,
+      value: DownloadOptions.NON_HOST_CONTIGS_LABEL,
+      disabled: isOldPipeline,
+      tooltipText: NONHOST_DOWNLOADS_TOOLTIP,
+    },
+    {
+      text: DownloadOptions.COMPREHENSIVE_AMR_METRICS_LABEL,
+      value: DownloadOptions.COMPREHENSIVE_AMR_METRICS_LABEL,
+    },
+    {
+      text: DownloadOptions.INTERMEDIATE_FILES_LABEL,
+      value: DownloadOptions.INTERMEDIATE_FILES_LABEL,
+    },
   ];
+
+  const getDownloadOptionItems = () => {
+    const options = [];
+    downloadOptions.forEach(({ text, value, disabled, tooltipText }) => {
+      options.push(createDropdownOption(text, value, disabled, tooltipText));
+    });
+    return options;
+  };
+
+  const createDropdownOption = (
+    text: string,
+    value: string,
+    disabled: boolean,
+    tooltipText: string,
+  ) => {
+    let dropdownItem = (
+      <BaseDropdown.Item
+        key={value}
+        onClick={() => handleDownload(value)}
+        className={cx(cs.item, disabled && cs.disabledItem)}
+        disabled={disabled}
+      >
+        {text}
+      </BaseDropdown.Item>
+    );
+
+    if (disabled && tooltipText) {
+      dropdownItem = (
+        <Tooltip arrow placement="top" title={tooltipText}>
+          <span>{dropdownItem}</span>
+        </Tooltip>
+      );
+    }
+    return dropdownItem;
+  };
 
   return (
     <DownloadButtonDropdown
       className={className}
-      options={downloadOptions}
+      items={getDownloadOptionItems()}
       onClick={handleDownload}
       direction="left"
     />

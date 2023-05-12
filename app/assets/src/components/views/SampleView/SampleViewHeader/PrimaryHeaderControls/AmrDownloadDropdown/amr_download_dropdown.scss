@@ -1,0 +1,29 @@
+@import "~czifui/dist/variables";
+
+.disabledItem {
+  cursor: default;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.item {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  /* Overwrite semantic ui */
+  padding-left: $sds-spaces-l !important;
+  padding-right: $sds-spaces-l !important;
+  color: black !important;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $sds-color-gray-200;
+  }
+
+  &.active {
+    font-weight: bold;
+  }
+}

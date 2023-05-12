@@ -1,38 +1,21 @@
 import { trackEvent } from "~/api/analytics";
 import Sample, { WorkflowRun } from "~/interface/sample";
 
+export const NONHOST_DOWNLOADS_TOOLTIP =
+  "Download this file from Intermediate Files (.zip) for samples run before pipeline version 1.1.";
+
 const NON_HOST_READS_LABEL = "Download Non-Host Reads (.fasta)";
 const NON_HOST_CONTIGS_LABEL = "Download Non-Host Contigs (.fasta)";
 const COMPREHENSIVE_AMR_METRICS_LABEL =
   "Download Comprehensive AMR Metrics File (.tsv)";
 const INTERMEDIATE_FILES_LABEL = "Download Intermediate Files (.zip)";
 
-const downloadOptionLabels = [
-  NON_HOST_READS_LABEL,
-  NON_HOST_CONTIGS_LABEL,
-  COMPREHENSIVE_AMR_METRICS_LABEL,
-  INTERMEDIATE_FILES_LABEL,
-];
-
-const implementedDownloadOptions = [
-  COMPREHENSIVE_AMR_METRICS_LABEL,
-  INTERMEDIATE_FILES_LABEL,
-  NON_HOST_READS_LABEL,
-  NON_HOST_CONTIGS_LABEL,
-];
-
-// Convert download option labels to dropdown options.
-export const getAmrDownloadDropdownOptions = (): Array<{
-  text: string;
-  value: string;
-  disabled: boolean;
-}> => {
-  return downloadOptionLabels.map(option => ({
-    text: option,
-    value: option,
-    disabled: !implementedDownloadOptions.includes(option),
-  }));
-};
+export enum DownloadOptions {
+  NON_HOST_READS_LABEL = "Download Non-Host Reads (.fasta)",
+  NON_HOST_CONTIGS_LABEL = "Download Non-Host Contigs (.fasta)",
+  COMPREHENSIVE_AMR_METRICS_LABEL = "Download Comprehensive AMR Metrics File (.tsv)",
+  INTERMEDIATE_FILES_LABEL = "Download Intermediate Files (.zip)",
+}
 
 const generateDownloadUrl = (workflowRunId: number, downloadType: string) =>
   `/workflow_runs/${workflowRunId}/amr_report_downloads?downloadType=${downloadType}`;

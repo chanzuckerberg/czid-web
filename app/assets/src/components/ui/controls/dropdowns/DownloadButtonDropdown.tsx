@@ -2,11 +2,18 @@ import { Icon } from "czifui";
 import React from "react";
 import ButtonDropdown from "./ButtonDropdown";
 
+interface OptionType {
+  text: string | JSX.Element;
+  value: string | number;
+  suboptions?: OptionType[];
+  disabled?: boolean;
+}
+
 interface DownloadButtonDropdown {
   className?: string;
   disabled?: boolean;
   items?: React.ReactNode[];
-  options: $TSFixMe[];
+  options?: OptionType[];
   onClick: $TSFixMeFunction;
   direction?: "left" | "right";
 }
