@@ -3,6 +3,7 @@ import { get, keyBy } from "lodash/fp";
 import React from "react";
 import { trackEvent, withAnalytics } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
+import { TaxonOption } from "~/components/common/filters/types";
 import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
@@ -17,6 +18,7 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import { Technology, UploadWorkflows, UPLOAD_WORKFLOWS } from "../../constants";
 import HostOrganismMessage from "../../HostOrganismMessage";
 import UploadProgressModal from "../../UploadProgressModal";
+import { RefSeqAccessionDataType } from "../UploadSampleStep/types";
 import { AnalysesSections } from "./components/AnalysesSections";
 import { ProjectInfo } from "./components/ProjectInfo";
 import { ReviewHeader } from "./components/ReviewHeader";
@@ -24,8 +26,6 @@ import { SampleInfo } from "./components/SampleInfo";
 import cs from "./review_step.scss";
 
 interface ReviewStepProps {
-  accessionId?: string;
-  accessionName?: string;
   admin?: boolean;
   bedFile?: File;
   clearlabs?: boolean;
@@ -40,7 +40,9 @@ interface ReviewStepProps {
   originalHostGenomes?: HostGenome[];
   pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
   project?: Project;
+  refSeqAccession?: RefSeqAccessionDataType;
   refSeqFile?: File;
+  refSeqTaxon?: TaxonOption;
   samples?: SampleFromApi[];
   uploadType: string;
   visible?: boolean;
@@ -124,8 +126,6 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     } = this.state;
 
     const {
-      accessionId,
-      accessionName,
       bedFile,
       clearlabs,
       guppyBasecallerSetting,
@@ -136,7 +136,9 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
       onUploadComplete,
       originalHostGenomes,
       pipelineVersions,
+      refSeqAccession,
       refSeqFile,
+      refSeqTaxon,
       project,
       samples,
       uploadType,
@@ -237,8 +239,6 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
           )}
           {showUploadModal && (
             <UploadProgressModal
-              accessionId={accessionId}
-              accessionName={accessionName}
               adminOptions={adminOptions}
               bedFile={bedFile}
               clearlabs={clearlabs}
@@ -248,7 +248,9 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
               metadata={metadata}
               onUploadComplete={onUploadComplete}
               project={project}
+              refSeqAccession={refSeqAccession}
               refSeqFile={refSeqFile}
+              refSeqTaxon={refSeqTaxon}
               samples={samples}
               skipSampleProcessing={skipSampleProcessing}
               uploadType={uploadType}

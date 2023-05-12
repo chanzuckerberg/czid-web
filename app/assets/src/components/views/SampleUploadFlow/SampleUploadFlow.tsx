@@ -2,6 +2,7 @@ import cx from "classnames";
 import { find, flow, get, min, omit, set, without } from "lodash/fp";
 import React from "react";
 import { getProjectPipelineVersions } from "~/api";
+import { TaxonOption } from "~/components/common/filters/types";
 import {
   FIELDS_THAT_HAVE_MAX_INPUT,
   HOST_GENOME_SYNONYMS,
@@ -15,6 +16,7 @@ import {
   SampleFromApi,
 } from "~/interface/shared";
 import { ReviewStep } from "./components/ReviewStep";
+import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
 import UploadSampleStep from "./components/UploadSampleStep/UploadSampleStep";
 import { Technology, UploadWorkflows } from "./constants";
 import cs from "./sample_upload_flow.scss";
@@ -31,8 +33,6 @@ interface SampleUploadFlowProps {
 }
 
 interface SampleUploadFlowState {
-  accessionId?: string;
-  accessionName?: string;
   workflows: Set<UploadWorkflows>;
   currentStep: string;
   samples?: SampleFromApi[];
@@ -40,7 +40,9 @@ interface SampleUploadFlowState {
   project: Project;
   sampleNamesToFiles: $TSFixMeUnknown;
   bedFile?: File;
+  refSeqAccession?: RefSeqAccessionDataType;
   refSeqFile?: File;
+  refSeqTaxon?: TaxonOption;
   clearlabs: boolean;
   guppyBasecallerSetting?: string;
   medakaModel: string;
@@ -65,10 +67,10 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     uploadType: "", // remote or local
     project: null,
     sampleNamesToFiles: null, // Needed for local samples.
-    accessionId: null, // Optional for WGS samples.
-    accessionName: null, // Optional for WGS samples.
     bedFile: null, // Optional for WGS samples.
+    refSeqAccession: null, // Optional for WGS samples.
     refSeqFile: null, // Needed for WGS samples.
+    refSeqTaxon: null, // Needed for WGS samples.
     // Metadata upload information
     clearlabs: false,
     guppyBasecallerSetting: null,
@@ -98,15 +100,15 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   };
 
   handleUploadSamples = ({
-    accessionId,
-    accessionName,
     bedFile,
     clearlabs,
     technology,
     project,
     guppyBasecallerSetting,
     medakaModel,
+    refSeqAccession,
     refSeqFile,
+    refSeqTaxon,
     sampleNamesToFiles,
     samples,
     uploadType,
@@ -114,8 +116,6 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     workflows,
   }: Partial<SampleUploadFlowState>) => {
     this.setState({
-      accessionId,
-      accessionName,
       bedFile,
       clearlabs,
       technology,
@@ -123,7 +123,9 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
       guppyBasecallerSetting,
       medakaModel,
       project,
+      refSeqAccession,
       refSeqFile,
+      refSeqTaxon,
       sampleNamesToFiles,
       samples,
       stepsEnabled: set("uploadMetadata", true, this.state.stepsEnabled),
@@ -292,7 +294,9 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
             originalHostGenomes={this.props.hostGenomes}
             pipelineVersions={pipelineVersions}
             project={this.state.project}
+            refSeqAccession={this.state.refSeqAccession}
             refSeqFile={this.state.refSeqFile}
+            refSeqTaxon={this.state.refSeqTaxon}
             samples={this.state.samples}
             technology={this.state.technology}
             uploadType={this.state.uploadType}

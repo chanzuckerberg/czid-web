@@ -22,8 +22,6 @@ export interface UploadSampleStepProps {
 }
 
 export interface UploadSampleStepState {
-  accessionId: string;
-  accessionName: string;
   basespaceAccessToken: $TSFixMe;
   basespaceSamples: $TSFixMe[];
   basespaceSelectedSampleIds: Set<string>;
@@ -36,6 +34,7 @@ export interface UploadSampleStepState {
   localSelectedSampleIds: Set<string>;
   projects: $TSFixMe[];
   refSeqFile: File;
+  refSeqAccession: RefSeqAccessionDataType;
   remoteSamples: $TSFixMe[];
   remoteSelectedSampleIds: Set<string>;
   removedLocalFiles: $TSFixMe[];
@@ -68,3 +67,8 @@ export type SamplesKeyType =
   | "remoteSamples";
 
 export type SamplesRecord = Record<SamplesKeyType, $TSFixMe[]>;
+
+export type RefSeqAccessionDataType = {
+  id: string;
+  name: string;
+};

@@ -66,6 +66,7 @@ import {
   REMOTE_UPLOAD,
   SELECT_ID_KEY,
   SEQUENCING_TECHNOLOGY_OPTIONS,
+  UNKNOWN_TAXON_OPTION,
   UploadWorkflows,
   UPLOAD_WORKFLOWS,
 } from "../../constants";
@@ -109,14 +110,13 @@ class UploadSampleStep extends React.Component<
 > {
   _window: $TSFixMeUnknown;
   state = {
-    accessionId: null,
-    accessionName: null,
     basespaceAccessToken: null,
     basespaceSamples: [],
     basespaceSelectedSampleIds: new Set() as Set<string>,
     bedFile: null,
     CLI: null,
     refSeqFile: null,
+    refSeqAccession: null,
     createProjectOpen: false,
     currentTab: LOCAL_UPLOAD as SampleUploadType,
     // enable all workflows on first load
@@ -648,13 +648,13 @@ class UploadSampleStep extends React.Component<
       const [accessionId, accessionName] = await this.parseRefSeqHeader(
         newFile,
       );
-      this.setState({ accessionId, accessionName, refSeqFile: newFile });
+      const accession =
+        accessionId && accessionName
+          ? { id: accessionId, name: accessionName }
+          : null;
+      this.setState({ refSeqAccession: accession, refSeqFile: newFile });
     } else {
-      this.setState({
-        accessionId: null,
-        accessionName: null,
-        refSeqFile: null,
-      });
+      this.setState({ refSeqFile: null });
     }
   };
 
@@ -1123,11 +1123,11 @@ class UploadSampleStep extends React.Component<
   handleContinue = async () => {
     const { onUploadSamples } = this.props;
     const {
-      accessionId,
-      accessionName,
       bedFile,
       currentTab,
+      refSeqAccession,
       refSeqFile,
+      selectedTaxon,
       selectedTechnology,
       selectedMedakaModel,
       selectedGuppyBasecallerSetting,
@@ -1155,6 +1155,9 @@ class UploadSampleStep extends React.Component<
         samples = validatedSamples;
       }
 
+      const isSelectedTaxonUnknown =
+        selectedTaxon?.name === UNKNOWN_TAXON_OPTION.name;
+
       onUploadSamples({
         samples,
         project: selectedProject,
@@ -1164,10 +1167,10 @@ class UploadSampleStep extends React.Component<
         // mNGS Nanopore only inputs
         guppyBasecallerSetting: selectedGuppyBasecallerSetting,
         // WGS only inputs
-        accessionId,
-        accessionName,
         bedFile,
+        refSeqAccession,
         refSeqFile,
+        refSeqTaxon: isSelectedTaxonUnknown ? null : selectedTaxon,
         // Covid CG only inputs
         wetlabProtocol: selectedWetlabProtocol,
         // CG Nanopore only inputs

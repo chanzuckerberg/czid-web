@@ -1,12 +1,12 @@
 import { flow, keyBy, mapValues, omit } from "lodash/fp";
 import React from "react";
+import { TaxonOption } from "~/components/common/filters/types";
 import { MetadataBasic, Project, SampleFromApi } from "~/interface/shared";
+import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
 import LocalUploadProgressModal from "./LocalUploadProgressModal";
 import RemoteUploadProgressModal from "./RemoteUploadProgressModal";
 
 interface UploadProgressModalProps {
-  accessionId?: string;
-  accessionName?: string;
   adminOptions: Record<string, string>;
   bedFile?: File;
   clearlabs?: boolean;
@@ -15,7 +15,9 @@ interface UploadProgressModalProps {
   metadata?: MetadataBasic;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
+  refSeqAccession?: RefSeqAccessionDataType;
   refSeqFile?: File;
+  refSeqTaxon?: TaxonOption;
   samples?: SampleFromApi[];
   skipSampleProcessing?: boolean;
   technology?: string;
@@ -26,8 +28,6 @@ interface UploadProgressModalProps {
 }
 
 const UploadProgressModal = ({
-  accessionId,
-  accessionName,
   adminOptions,
   bedFile,
   clearlabs,
@@ -36,7 +36,9 @@ const UploadProgressModal = ({
   metadata,
   onUploadComplete,
   project,
+  refSeqAccession,
   refSeqFile,
+  refSeqTaxon,
   samples,
   skipSampleProcessing,
   technology,
@@ -56,8 +58,6 @@ const UploadProgressModal = ({
     <>
       {uploadType === "local" ? (
         <LocalUploadProgressModal
-          accessionId={accessionId}
-          accessionName={accessionName}
           adminOptions={adminOptions}
           bedFile={bedFile}
           clearlabs={clearlabs}
@@ -67,7 +67,9 @@ const UploadProgressModal = ({
           metadata={processMetadataRows(metadata.rows)}
           onUploadComplete={onUploadComplete}
           project={project}
+          refSeqAccession={refSeqAccession}
           refSeqFile={refSeqFile}
+          refSeqTaxon={refSeqTaxon}
           samples={samples}
           skipSampleProcessing={skipSampleProcessing}
           uploadType={uploadType}
@@ -77,8 +79,6 @@ const UploadProgressModal = ({
         />
       ) : (
         <RemoteUploadProgressModal
-          accessionId={accessionId}
-          accessionName={accessionName}
           adminOptions={adminOptions}
           bedFile={bedFile}
           clearlabs={clearlabs}
@@ -87,7 +87,9 @@ const UploadProgressModal = ({
           metadata={processMetadataRows(metadata.rows)}
           onUploadComplete={onUploadComplete}
           project={project}
+          refSeqAccession={refSeqAccession}
           refSeqFile={refSeqFile}
+          refSeqTaxon={refSeqTaxon}
           samples={samples}
           skipSampleProcessing={skipSampleProcessing}
           uploadType={uploadType}

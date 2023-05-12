@@ -25,12 +25,14 @@ import {
   initiateBulkUploadLocalWithMetadata,
   startUploadHeartbeat,
 } from "~/api/upload";
+import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
 import { Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import Notification from "~ui/notifications/Notification";
+import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
 import cs from "./upload_progress_modal.scss";
 import {
   addFlagsToSamples,
@@ -41,8 +43,6 @@ import UploadConfirmationModal from "./UploadConfirmationModal";
 import UploadProgressModalSampleList from "./UploadProgressModalSampleList";
 
 interface LocalUploadProgressModalProps {
-  accessionId?: string;
-  accessionName?: string;
   adminOptions: Record<string, string>;
   bedFile?: File;
   clearlabs?: boolean;
@@ -51,7 +51,9 @@ interface LocalUploadProgressModalProps {
   metadata?: Record<string, any>;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
+  refSeqAccession: RefSeqAccessionDataType;
   refSeqFile?: File;
+  refSeqTaxon?: TaxonOption;
   samples?: SampleFromApi[];
   skipSampleProcessing?: boolean;
   technology?: string;
@@ -62,8 +64,6 @@ interface LocalUploadProgressModalProps {
 }
 
 const LocalUploadProgressModal = ({
-  accessionId,
-  accessionName,
   adminOptions,
   bedFile,
   clearlabs,
@@ -72,7 +72,9 @@ const LocalUploadProgressModal = ({
   metadata,
   onUploadComplete,
   project,
+  refSeqAccession,
   refSeqFile,
+  refSeqTaxon,
   samples,
   skipSampleProcessing,
   technology,
@@ -114,8 +116,6 @@ const LocalUploadProgressModal = ({
 
   const initiateLocalUpload = async () => {
     const samplesToUpload = addFlagsToSamples({
-      accessionId,
-      accessionName,
       adminOptions,
       bedFileName: bedFile?.name,
       clearlabs,
@@ -123,7 +123,9 @@ const LocalUploadProgressModal = ({
       medakaModel,
       samples,
       useStepFunctionPipeline,
+      refSeqAccession,
       refSeqFileName: refSeqFile?.name,
+      refSeqTaxon,
       skipSampleProcessing,
       technology,
       workflows,

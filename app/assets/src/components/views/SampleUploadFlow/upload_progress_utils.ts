@@ -1,4 +1,5 @@
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
+import { TaxonOption } from "~/components/common/filters/types";
 import {
   NO_TECHNOLOGY_SELECTED,
   SEQUENCING_TECHNOLOGY_OPTIONS,
@@ -6,15 +7,16 @@ import {
   WORKFLOWS_BY_UPLOAD_SELECTIONS,
 } from "~/components/views/SampleUploadFlow/constants";
 import { SampleFromApi } from "~/interface/shared";
+import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
 
 interface addFlagsToSamplesProps {
-  accessionId?: string;
-  accessionName?: string;
   adminOptions: Record<string, string>;
   bedFileName?: string;
   clearlabs: boolean;
   medakaModel: string;
+  refSeqAccession?: RefSeqAccessionDataType;
   refSeqFileName?: string;
+  refSeqTaxon?: TaxonOption;
   samples: Partial<SampleFromApi>[];
   skipSampleProcessing: boolean;
   technology: string;
@@ -26,14 +28,14 @@ interface addFlagsToSamplesProps {
 
 // Add flags selected by the user in the upload review Step
 export const addFlagsToSamples = ({
-  accessionId,
-  accessionName,
   adminOptions,
   bedFileName,
   clearlabs,
   guppyBasecallerSetting,
   medakaModel,
+  refSeqAccession,
   refSeqFileName,
+  refSeqTaxon,
   samples,
   useStepFunctionPipeline,
   skipSampleProcessing,
@@ -79,8 +81,14 @@ export const addFlagsToSamples = ({
     // Add Viral CG specific fields
     ...(isViralConensusGenome && {
       ref_fasta: refSeqFileName,
-      ...(accessionId && { accession_id: accessionId }),
-      ...(accessionName && { accession_name: accessionName }),
+      ...(refSeqAccession && {
+        accession_id: refSeqAccession.id,
+        accession_name: refSeqAccession.name,
+      }),
+      ...(refSeqTaxon && {
+        taxon_id: refSeqTaxon.id,
+        taxon_name: refSeqTaxon.name,
+      }),
       ...(bedFileName && {
         primer_bed: bedFileName,
       }),

@@ -552,7 +552,7 @@ class SamplesController < ApplicationController
         # the actual elasticsearch query returns no results when the query is empty
         filtered_taxa_results = nil
         if query.present?
-          filtered_taxa_results = taxa_results.select { |result| result[:title].downcase.include?(query) }
+          filtered_taxa_results = taxa_results.select { |result| result[:title].downcase.include?(query.downcase) }
         end
 
         # the actual elasticsearch query does not return the "Taxon" object when there are no results
@@ -563,6 +563,7 @@ class SamplesController < ApplicationController
           }
         end
       else
+        # TODO: remove constrained_samples filter for WGS sample upload flow use-case
         taxon_list = taxon_search(query, ["species", "genus"], samples: constrained_samples)
         unless taxon_list.empty?
           results["Taxon"] = {

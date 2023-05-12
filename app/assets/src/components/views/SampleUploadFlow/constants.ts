@@ -144,6 +144,12 @@ export const GUPPY_BASECALLER_SETTINGS = [
   },
 ];
 
+// "Unknown" option provided in UploadTaxonFilter during the WGS sample upload flow
+export const UNKNOWN_TAXON_OPTION = {
+  id: null,
+  name: "Unknown",
+};
+
 export const CG_WETLAB_DISPLAY_NAMES = {
   ampliseq: "AmpliSeq",
   artic_short_amplicons: "ARTIC v3 - Short Amplicons (275 bp)",

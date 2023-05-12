@@ -236,7 +236,7 @@ class SfnCgPipelineDispatchService
                             ref_fasta: File.join(@sample.sample_input_s3_path, ref_fasta_name),
                             ref_accession_id: @workflow_run.inputs&.[]("reference_accession"),
                             # Default to empty primer file if the user does not provide a primer bed file (optional input)
-                            primer_bed: File.join(@sample.sample_input_s3_path, primer_bed_name) || "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{NA_PRIMER_FILE}",
+                            primer_bed: primer_bed_name ? File.join(@sample.sample_input_s3_path, primer_bed_name) : "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{NA_PRIMER_FILE}",
                             # This option filters all except SARS-CoV-2 at the moment:
                             filter_reads: false,
                           }

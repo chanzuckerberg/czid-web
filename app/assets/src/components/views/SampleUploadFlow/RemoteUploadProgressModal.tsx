@@ -7,12 +7,14 @@ import {
   withAnalytics,
 } from "~/api/analytics";
 import { bulkUploadBasespace, bulkUploadRemote } from "~/api/upload";
+import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
 import { Project, SampleFromApi } from "~/interface/shared";
 import Modal from "~ui/containers/Modal";
 import { IconSuccess } from "~ui/icons";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
+import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
 import cs from "./upload_progress_modal.scss";
 import { addFlagsToSamples, redirectToProject } from "./upload_progress_utils";
 
@@ -27,8 +29,6 @@ const BASESPACE_SAMPLE_FIELDS = [
 const NUM_FAILED_SAMPLES_TO_DISPLAY = 3;
 
 interface RemoteUploadProgressModalProps {
-  accessionId?: string;
-  accessionName?: string;
   adminOptions: Record<string, string>;
   bedFile?: File;
   clearlabs?: boolean;
@@ -36,7 +36,9 @@ interface RemoteUploadProgressModalProps {
   metadata?: Record<string, any>;
   onUploadComplete: $TSFixMeFunction;
   project?: Project;
+  refSeqAccession?: RefSeqAccessionDataType;
   refSeqFile?: File;
+  refSeqTaxon?: TaxonOption;
   samples?: SampleFromApi[];
   skipSampleProcessing?: boolean;
   technology?: string;
@@ -47,8 +49,6 @@ interface RemoteUploadProgressModalProps {
 }
 
 const RemoteUploadProgressModal = ({
-  accessionId,
-  accessionName,
   adminOptions,
   bedFile,
   clearlabs,
@@ -57,7 +57,9 @@ const RemoteUploadProgressModal = ({
   metadata,
   onUploadComplete,
   project,
+  refSeqAccession,
   refSeqFile,
+  refSeqTaxon,
   samples,
   skipSampleProcessing,
   uploadType,
@@ -93,14 +95,14 @@ const RemoteUploadProgressModal = ({
     }
 
     const samplesWithFlags = addFlagsToSamples({
-      accessionId,
-      accessionName,
       adminOptions,
       bedFileName: bedFile?.name,
       clearlabs,
       medakaModel,
       useStepFunctionPipeline,
+      refSeqAccession,
       refSeqFileName: refSeqFile?.name,
+      refSeqTaxon,
       samples: samplesToFlag,
       skipSampleProcessing,
       technology,

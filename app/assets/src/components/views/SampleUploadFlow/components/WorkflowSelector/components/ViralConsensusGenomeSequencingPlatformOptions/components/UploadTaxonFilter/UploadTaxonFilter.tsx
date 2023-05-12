@@ -1,11 +1,12 @@
 import { Dropdown, DropdownPopper, LoadingIndicator } from "czifui";
-import { debounce, get, unionBy } from "lodash/fp";
+import { debounce, get } from "lodash/fp";
 import React, { useEffect, useMemo, useState } from "react";
 import { getSearchSuggestions } from "~/api";
 import {
   TaxonOption,
   TaxonSearchResult,
 } from "~/components/common/filters/types";
+import { UNKNOWN_TAXON_OPTION } from "~/components/views/SampleUploadFlow/constants";
 import cs from "./upload_taxon_filter.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 600;
@@ -28,25 +29,22 @@ const StyledDropdownPopper = (props: any) => {
   );
 };
 
-const UNKNOWN_TAXON = {
-  id: null,
-  name: "Unknown",
-};
-
 const UploadTaxonFilter = ({
   selectedTaxon,
   onChange,
 }: UploadTaxonFilterProps) => {
-  const [options, setOptions] = useState<TaxonOption[]>();
+  const [options, setOptions] = useState<TaxonOption[]>(
+    selectedTaxon ? [selectedTaxon] : [],
+  );
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [noOptionsText, setNoOptionsText] = useState("");
 
   useEffect(() => {
     // ensure the "unknown" taxon option is always available
     if (!options) {
-      setOptions([UNKNOWN_TAXON]);
-    } else if (!options.includes(UNKNOWN_TAXON)) {
-      setOptions([...options, UNKNOWN_TAXON]);
+      setOptions([UNKNOWN_TAXON_OPTION]);
+    } else if (!options.includes(UNKNOWN_TAXON_OPTION)) {
+      setOptions([...options, UNKNOWN_TAXON_OPTION]);
     }
   }, [options]);
 
@@ -60,8 +58,7 @@ const UploadTaxonFilter = ({
   const getTaxaOptionsForQuery = async (query: string) => {
     const searchResults = await getSearchSuggestions({
       query,
-      categories: ["virus"],
-      domain: "upload",
+      categories: ["taxon"],
     });
 
     // elasticsearch returns an empty object if there are no results
@@ -94,7 +91,7 @@ const UploadTaxonFilter = ({
           newOptions = await getTaxaOptionsForQuery(query);
         }
 
-        setOptions(unionBy("id", newOptions, [selectedTaxon]));
+        setOptions(newOptions);
         setNoOptionsText(noOptionsText);
         setOptionsLoading(false);
 
@@ -121,7 +118,7 @@ const UploadTaxonFilter = ({
     // long running search results replace an empty search
     if (value?.length < MIN_SEARCH_LENGTH) {
       setNoOptionsText("");
-      setOptions([selectedTaxon]);
+      selectedTaxon && setOptions([selectedTaxon]);
       setOptionsLoading(false);
     }
 
