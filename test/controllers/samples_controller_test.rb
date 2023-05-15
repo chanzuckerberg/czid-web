@@ -61,12 +61,14 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
         name: "RR004_water_2_S23_R1_001.fastq.gz",
         source_type: "local",
         upload_client: "web",
+        file_type: "fastq",
       },
       {
         source: "RR004_water_2_S23_R2_001.fastq.gz",
         name: "RR004_water_2_S23_R2_001.fastq.gz",
         source_type: "local",
         upload_client: "web",
+        file_type: "fastq",
       },
     ]
     assert_difference('Sample.count') do

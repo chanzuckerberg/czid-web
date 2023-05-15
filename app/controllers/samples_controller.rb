@@ -1732,7 +1732,7 @@ class SamplesController < ApplicationController
                                :do_not_process, :pipeline_execution_strategy, :wetlab_protocol,
                                :share_id, :technology, :medaka_model, :vadr_options, :clearlabs,
                                :ref_fasta, :primer_bed, :guppy_basecaller_setting, :alignment_config_name,
-                               { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts, :upload_client] },]
+                               { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts, :upload_client, :file_type] },]
     permitted_sample_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :subsample, :max_input_fragments]) if current_user.admin?
 
     new_params = params.permit(samples: permitted_sample_params)
@@ -1745,7 +1745,7 @@ class SamplesController < ApplicationController
                         :search, :basespace_dataset_id, :basespace_access_token, :client,
                         :do_not_process, :pipeline_execution_strategy, :clearlabs, :technology, :medaka_model, :wetlab_protocol,
                         :share_id, :ref_fasta, :primer_bed, :alignment_config_name,
-                        { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts, :upload_client] },]
+                        { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts, :upload_client, :file_type] },]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :subsample, :max_input_fragments]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
   end

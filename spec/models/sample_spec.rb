@@ -121,7 +121,7 @@ describe Sample, type: :model do
         expect(@sample).to receive(:kickoff_pipeline).exactly(0).times
         # Check that the proper error message is logged.
         expect(LogUtil).to receive(:log_error).with(
-          "SampleUploadFailedEvent: Validation failed: Input files have identical read 1 source and read 2 source",
+          "SampleUploadFailedEvent: Validation failed: Input fastqs have identical read 1 source and read 2 source",
           hash_including(basespace_access_token: "fake_access_token", basespace_dataset_id: "fake_dataset_id")
         ).exactly(1).times
 
@@ -132,7 +132,7 @@ describe Sample, type: :model do
         expect(@sample.input_files.length).to be 0
       end
 
-      it "runs the input file checks and fails if Basespace returns more than two input files" do
+      it "runs the input file checks and fails if Basespace returns more than two input fastqs" do
         expect(@sample).to receive(:files_for_basespace_dataset).exactly(1).times.and_return([
                                                                                                {
                                                                                                  name: file_one_name,
@@ -155,7 +155,7 @@ describe Sample, type: :model do
         expect(@sample).to receive(:kickoff_pipeline).exactly(0).times
         # Check that the proper error message is logged.
         expect(LogUtil).to receive(:log_error).with(
-          "SampleUploadFailedEvent: Validation failed: Input files invalid number (3)",
+          "SampleUploadFailedEvent: Validation failed: Input fastqs invalid number (3)",
           hash_including(basespace_access_token: "fake_access_token", basespace_dataset_id: "fake_dataset_id")
         ).exactly(1).times
 

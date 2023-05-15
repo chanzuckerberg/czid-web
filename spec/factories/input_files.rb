@@ -4,5 +4,6 @@ FactoryBot.define do
     sequence(:source) { |n| "file.#{n}.fastq.gz" }
     source_type { "local" }
     upload_client { "web" }
+    file_type { "fastq" }
   end
 end

@@ -397,3 +397,9 @@ export type UploadWorkflows =
   | "amr"
   | "covid-consensus-genome"
   | "viral-consensus-genome";
+
+export const INPUT_FILE_TYPES = {
+  FASTQ: "fastq",
+  PRIMER_BED: "primer_bed",
+  REFERENCE_SEQUENCE: "reference_sequence",
+};

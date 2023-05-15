@@ -7,6 +7,10 @@ class InputFile < ApplicationRecord
   FILE_REGEX = /\A[A-Za-z0-9_][-.A-Za-z0-9_]{0,119}\.(fastq|fq|fastq.gz|fq.gz|fasta|fa|fasta.gz|fa.gz|bed|bed.gz)\z/.freeze
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
 
+  FILE_TYPE_FASTQ = 'fastq'.freeze
+  FILE_TYPE_PRIMER_BED = 'primer_bed'.freeze
+  FILE_TYPE_REFERENCE_SEQUENCE = "reference_sequence".freeze
+
   SOURCE_TYPE_LOCAL = 'local'.freeze
   SOURCE_TYPE_S3 = 's3'.freeze
   SOURCE_TYPE_BASESPACE = 'basespace'.freeze
@@ -58,7 +62,7 @@ class InputFile < ApplicationRecord
     S3Util.latest_multipart_upload(ENV['SAMPLES_BUCKET_NAME'], file_path)
   end
 
-  def file_type
+  def file_extension
     FILE_REGEX.match(name)[1] if FILE_REGEX.match(name)
   end
 

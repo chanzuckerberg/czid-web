@@ -311,7 +311,8 @@ module SamplesHelper
       samples[name][:input_files_attributes][read_idx] = { name: file_name,
                                                            source: "s3://#{s3_bucket_name}/#{s3_entry}",
                                                            source_type: InputFile::SOURCE_TYPE_S3,
-                                                           upload_client: InputFile::UPLOAD_CLIENT_WEB, }
+                                                           upload_client: InputFile::UPLOAD_CLIENT_WEB,
+                                                           file_type: InputFile::FILE_TYPE_FASTQ, }
     end
 
     sample_list = []

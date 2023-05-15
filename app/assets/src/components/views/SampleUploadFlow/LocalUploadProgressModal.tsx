@@ -35,6 +35,7 @@ import Notification from "~ui/notifications/Notification";
 import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
 import cs from "./upload_progress_modal.scss";
 import {
+  addAdditionalInputFilesToSamples,
   addFlagsToSamples,
   logUploadStepError,
   redirectToProject,
@@ -132,6 +133,13 @@ const LocalUploadProgressModal = ({
       wetlabProtocol,
     });
 
+    addAdditionalInputFilesToSamples({
+      samples: samplesToUpload,
+      bedFile,
+      refSeqFile,
+    });
+
+    // Create the samples in the db; this does NOT upload files to s3
     const createdSamples = await initiateBulkUploadLocalWithMetadata({
       samples: samplesToUpload,
       metadata,
@@ -164,24 +172,32 @@ const LocalUploadProgressModal = ({
     });
 
     setLocallyCreatedSamples(createdSamples);
+    // For each sample, upload sample.input_files to s3
+    // Also handles the upload progress bar for each sample
     await uploadSamples(createdSamples);
   };
 
   const uploadSamples = async (samples: $TSFixMe) => {
+    // Ping a heartbeat periodically to say the browser is actively uploading the samples.
     const heartbeatInterval = await startUploadHeartbeat(map("id", samples));
 
     await Promise.all(
       samples.map(async (sample: $TSFixMe) => {
         try {
+          // Get the credentials for the sample
           const s3ClientForSample = await getS3Client(sample);
+          // Set the upload percentage for the sample to 0
           updateSampleUploadPercentage(sample.name, 0);
 
           await Promise.all(
             sample.input_files.map(async (inputFile: $TSFixMe) => {
+              // Upload the input file to s3
+              // Also updates the upload percentage for the sample
               await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
             }),
           );
 
+          // Update the sample upload status (success or error)
           await completeSampleUpload({
             sample,
             onSampleUploadSuccess: (sample: $TSFixMe) => {

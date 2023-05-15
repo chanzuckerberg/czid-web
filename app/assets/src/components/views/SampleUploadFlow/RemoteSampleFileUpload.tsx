@@ -85,7 +85,7 @@ class RemoteSampleFileUpload extends React.Component<RemoteSampleFileUploadProps
         bulkPath: this.state.remoteS3Path,
       });
 
-      // Remove any nil files from input_file_attributes.
+      // Remove any nil files from input_files_attributes.
       // This happens when there is an R2 file without an R1 file.
       newSamples = newSamples.samples.map((sample: $TSFixMe) => ({
         ...sample,

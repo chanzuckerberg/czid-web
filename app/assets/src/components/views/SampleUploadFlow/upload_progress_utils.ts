@@ -8,6 +8,7 @@ import {
 } from "~/components/views/SampleUploadFlow/constants";
 import { SampleFromApi } from "~/interface/shared";
 import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
+import { INPUT_FILE_TYPES } from "./constants";
 
 interface addFlagsToSamplesProps {
   adminOptions: Record<string, string>;
@@ -102,6 +103,60 @@ export const addFlagsToSamples = ({
       }),
     }),
   }));
+};
+
+interface addAdditionalInputFilesToSamplesProps {
+  bedFile?: File;
+  refSeqFile?: File;
+  samples: Partial<SampleFromApi>[];
+}
+
+// Create InputFiles for the bedFile and refSeqFile for **each** sample
+// i.e. sample.input_files will return actual input fastqs + bedFile + refSeqFile
+export const addAdditionalInputFilesToSamples = ({
+  samples,
+  bedFile,
+  refSeqFile,
+}: addAdditionalInputFilesToSamplesProps) => {
+  if (bedFile) {
+    samples.forEach(sample => {
+      if (sample.input_files_attributes === undefined) {
+        sample.input_files_attributes = [];
+      }
+      sample.input_files_attributes.push({
+        concatenated: [],
+        source_type: "local",
+        source: bedFile.name,
+        parts: bedFile.name,
+        upload_client: "web",
+        file_type: INPUT_FILE_TYPES.PRIMER_BED,
+      });
+      if (sample.files === undefined) {
+        sample.files = {};
+      }
+      sample.files[bedFile.name] = bedFile;
+    });
+  }
+  if (refSeqFile) {
+    samples.forEach(sample => {
+      if (sample.input_files_attributes === undefined) {
+        sample.input_files_attributes = [];
+      }
+      sample.input_files_attributes.push({
+        concatenated: [],
+        source_type: "local",
+        source: refSeqFile.name,
+        parts: refSeqFile.name,
+        upload_client: "web",
+        file_type: INPUT_FILE_TYPES.REFERENCE_SEQUENCE,
+      });
+      if (sample.files === undefined) {
+        sample.files = {};
+      }
+      sample.files[refSeqFile.name] = refSeqFile;
+    });
+  }
+  return samples;
 };
 
 export const logUploadStepError = ({

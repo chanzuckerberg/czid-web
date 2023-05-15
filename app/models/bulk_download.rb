@@ -407,10 +407,10 @@ class BulkDownload < ApplicationRecord
           # Include the project id because the cleaned project names might have duplicates as well.
           if sample.initial_workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
             "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-              "original_R#{input_file_index + 1}.#{input_file.file_type}"
+              "original_R#{input_file_index + 1}.#{input_file.file_extension}"
           else
             "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-                "original.#{input_file.file_type}"
+                "original.#{input_file.file_extension}"
           end
         end
       end.flatten

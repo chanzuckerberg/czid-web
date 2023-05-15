@@ -25,6 +25,7 @@ import {
 import { Project, SampleFromApi } from "~/interface/shared";
 import FilePicker from "~ui/controls/FilePicker";
 import { sampleNameFromFileName } from "~utils/sample";
+import { INPUT_FILE_TYPES } from "./constants";
 import cs from "./sample_upload_flow.scss";
 
 // @ts-expect-error working with Lodash types
@@ -68,8 +69,9 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
           source: file.name,
           parts: file.name,
           upload_client: "web",
+          file_type: INPUT_FILE_TYPES.FASTQ,
         })),
-        // Store the files keyed by name for easy de-duping. These files are associated with the input_file_attributes.
+        // Store the files keyed by name for easy de-duping. These files are associated with the input_files_attributes.
         files: keyBy("name", files),
         status: "created",
         client: "web",

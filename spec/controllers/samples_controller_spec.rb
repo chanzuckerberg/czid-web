@@ -725,6 +725,7 @@ RSpec.describe SamplesController, type: :controller do
         input_file.parts = "test.fasta"
         input_file.source_type = "local"
         input_file.upload_client = "cli"
+        input_file.file_type = "fastq"
         @sample = create(:sample, project: @project, name: "Test Sample One", input_files: [input_file], user: @joe)
         other_user = create(:user)
         unowned_project = create(:project, users: [other_user])

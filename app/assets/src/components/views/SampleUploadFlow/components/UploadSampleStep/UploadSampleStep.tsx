@@ -206,6 +206,8 @@ class UploadSampleStep extends React.Component<
     data: { basespaceAccessToken: any };
   }) => {
     const {
+      bedFile,
+      refSeqFile,
       selectedProject,
       selectedMedakaModel,
       selectedTechnology,
@@ -243,14 +245,19 @@ class UploadSampleStep extends React.Component<
       samplesWithToken = validatedSamples;
 
       this.props.onUploadSamples({
-        clearlabs: usedClearLabs,
-        project: selectedProject,
-        medakaModel: selectedMedakaModel,
         samples: samplesWithToken,
+        project: selectedProject,
         technology: selectedTechnology,
         uploadType: BASESPACE_UPLOAD,
-        wetlabProtocol: selectedWetlabProtocol,
         workflows: selectedWorkflows,
+        // WGS only inputs
+        bedFile,
+        refSeqFile,
+        // Covid CG only inputs
+        wetlabProtocol: selectedWetlabProtocol,
+        // CG Nanopore only inputs
+        clearlabs: usedClearLabs,
+        medakaModel: selectedMedakaModel,
       });
     }
   };

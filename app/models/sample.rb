@@ -226,7 +226,7 @@ class Sample < ApplicationRecord
   end
 
   def fasta_input?
-    ["fasta", "fa", "fasta.gz", "fa.gz"].include?(input_files[0].file_type)
+    ["fasta", "fa", "fasta.gz", "fa.gz"].include?(input_files[0].file_extension)
   end
 
   def pipeline_run_by_version(pipeline_version)
@@ -244,18 +244,19 @@ class Sample < ApplicationRecord
   validates_associated :input_files
 
   def input_files_checks
+    input_fastqs = input_files.select { |file| file.file_type == InputFile::FILE_TYPE_FASTQ }
     # validate that we have the correct number of input files
-    errors.add(:input_files, "invalid number (#{input_files.size})") unless
+    errors.add(:input_fastqs, "invalid number (#{input_fastqs.size})") unless
       # we can have up to 4 input files, input fasta R1 + R2, a primer bed for consensus genomes,
       #  and a reference fasta for consensus genomes. We currently don't support this from basespace
-      uploaded_from_basespace? ? input_files.size.between?(0, 2) : input_files.size.between?(1, 4)
+      uploaded_from_basespace? ? input_fastqs.size.between?(0, 2) : input_fastqs.size.between?(1, 4)
 
-    # validate that both input files have the same source_type and file_type
-    if input_files.length == 2
-      errors.add(:input_files, "have different source types") unless input_files[0].source_type == input_files[1].source_type
-      errors.add(:input_files, "have different file formats") unless input_files[0].file_type == input_files[1].file_type
-      if input_files[0].source == input_files[1].source
-        errors.add(:input_files, "have identical read 1 source and read 2 source")
+    # validate that both input files have the same source_type and file_extension
+    if input_fastqs.length == 2
+      errors.add(:input_fastqs, "have different source types") unless input_fastqs[0].source_type == input_fastqs[1].source_type
+      errors.add(:input_fastqs, "have different file formats") unless input_fastqs[0].file_extension == input_fastqs[1].file_extension
+      if input_fastqs[0].source == input_fastqs[1].source
+        errors.add(:input_fastqs, "have identical read 1 source and read 2 source")
       end
     end
   end
@@ -401,7 +402,8 @@ class Sample < ApplicationRecord
     # The AppConfig setting is the max file size in gigabytes; default 100; multiply by 10^9 to get bytes
     s3_upload_file_size_limit = (get_app_config(AppConfig::S3_SAMPLE_UPLOAD_FILE_SIZE_LIMIT) || 100).to_i
     max_file_size = s3_upload_file_size_limit * (10**9)
-    input_files.each do |input_file|
+    input_fastqs = input_files.select { |file| file.file_type == InputFile::FILE_TYPE_FASTQ }
+    input_fastqs.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
       # get bucket and key
@@ -536,7 +538,8 @@ class Sample < ApplicationRecord
         name: file[:name],
         source_type: InputFile::SOURCE_TYPE_BASESPACE,
         source: file[:source_path],
-        upload_client: InputFile::UPLOAD_CLIENT_WEB
+        upload_client: InputFile::UPLOAD_CLIENT_WEB,
+        file_type: InputFile::FILE_TYPE_FASTQ
       )
 
       input_files << input_file

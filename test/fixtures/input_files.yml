@@ -6,6 +6,7 @@ one:
   source_type: local
   source: file1.fastq.gz
   upload_client: web
+  file_type: fastq
 
 two:
   name: file2.fastq.gz
@@ -13,6 +14,7 @@ two:
   source_type: local
   source: file2.fastq.gz
   upload_client: web
+  file_type: fastq
 
 three:
   name: file3.fastq.gz
@@ -20,6 +22,7 @@ three:
   source_type: local
   source: file3.fastq.gz
   upload_client: web
+  file_type: fastq
 
 four:
   name: file4.fastq.gz
@@ -27,6 +30,7 @@ four:
   source_type: local
   source: file4.fastq.gz
   upload_client: web
+  file_type: fastq
 
 expired_sample_file_1:
   name: file3.fastq.gz
@@ -34,6 +38,7 @@ expired_sample_file_1:
   source_type: local
   source: file3.fastq.gz
   upload_client: web
+  file_type: fastq
 
 expired_sample_file_2:
   name: file4.fastq.gz
@@ -41,6 +46,7 @@ expired_sample_file_2:
   source_type: local
   source: file4.fastq.gz
   upload_client: web
+  file_type: fastq
 
 public_sample_file_1:
   name: file3.fastq.gz
@@ -48,6 +54,7 @@ public_sample_file_1:
   source_type: local
   source: file3.fastq.gz
   upload_client: web
+  file_type: fastq
 
 public_sample_file_2:
   name: file4.fastq.gz
@@ -55,6 +62,7 @@ public_sample_file_2:
   source_type: local
   source: file4.fastq.gz
   upload_client: web
+  file_type: fastq
 
 joe_sample_file_1:
   name: file3.fastq.gz
@@ -62,6 +70,7 @@ joe_sample_file_1:
   source_type: local
   source: file3.fastq.gz
   upload_client: web
+  file_type: fastq
 
 joe_sample_file_2:
   name: file4.fastq.gz
@@ -69,6 +78,7 @@ joe_sample_file_2:
   source_type: local
   source: file4.fastq.gz
   upload_client: web
+  file_type: fastq
 
 RR004_file_1:
   name: RR004_R1.fastq.gz
@@ -76,6 +86,7 @@ RR004_file_1:
   source_type: local
   source: RR004_R1.fastq.gz
   upload_client: web
+  file_type: fastq
 
 RR004_file_2:
   name: RR004_R2.fastq.gz
@@ -83,3 +94,4 @@ RR004_file_2:
   source_type: local
   source: RR004_R2.fastq.gz
   upload_client: web
+  file_type: fastq

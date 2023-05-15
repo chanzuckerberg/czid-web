@@ -16,6 +16,7 @@ RSpec.describe SamplesHelper, type: :helper do
       input_file.parts = "test.fasta"
       input_file.source_type = "local"
       input_file.upload_client = "cli"
+      input_file.file_type = "fastq"
       @sample_one = create(:sample, project: @project, name: "Test Sample", input_files: [input_file])
 
       allow(ENV).to receive(:[]).and_call_original
@@ -161,12 +162,14 @@ RSpec.describe SamplesHelper, type: :helper do
               "source": "fake_source_R1_001.fastq.gz",
               "parts": "fake_source_R1_001.fastq.gz",
               "upload_client": "web",
+              "file_type": "fastq",
             },
             {
               "source_type": "local",
               "source": "fake_source_R2_001.fastq.gz",
               "parts": "fake_source_R2_001.fastq.gz",
               "upload_client": "web",
+              "file_type": "fastq",
             },
           ]
         end

@@ -224,6 +224,7 @@ export interface SampleFromApi {
     source_type?: string;
     name?: string;
     upload_client?: string;
+    file_type: string;
   }[];
   finishedValidating?: boolean;
   isValid?: boolean;

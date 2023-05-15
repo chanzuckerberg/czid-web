@@ -1,12 +1,18 @@
+import { ChecksumAlgorithm, S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import cx from "classnames";
-import { map, pick, size, take } from "lodash/fp";
+import { find, get, map, pick, size, take } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import {
   ANALYTICS_EVENT_NAMES,
   trackEvent,
   withAnalytics,
 } from "~/api/analytics";
-import { bulkUploadBasespace, bulkUploadRemote } from "~/api/upload";
+import {
+  bulkUploadBasespace,
+  bulkUploadRemote,
+  getUploadCredentials,
+} from "~/api/upload";
 import { TaxonOption } from "~/components/common/filters/types";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logError } from "~/components/utils/logUtil";
@@ -16,7 +22,11 @@ import { IconSuccess } from "~ui/icons";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
 import cs from "./upload_progress_modal.scss";
-import { addFlagsToSamples, redirectToProject } from "./upload_progress_utils";
+import {
+  addAdditionalInputFilesToSamples,
+  addFlagsToSamples,
+  redirectToProject,
+} from "./upload_progress_utils";
 
 const BASESPACE_SAMPLE_FIELDS = [
   "name",
@@ -110,18 +120,41 @@ const RemoteUploadProgressModal = ({
       wetlabProtocol,
     });
 
+    const includeAdditionalInputFiles = bedFile || refSeqFile;
+    if (includeAdditionalInputFiles) {
+      addAdditionalInputFilesToSamples({
+        samples: samplesWithFlags,
+        bedFile,
+        refSeqFile,
+      });
+    }
+
     setSamplesToUpload(samplesWithFlags);
 
     let response: {
       errored_sample_names: $TSFixMeUnknown[];
       errors: $TSFixMeUnknown[];
       sample_ids: $TSFixMeUnknown[];
+      samples: $TSFixMeUnknown[];
     };
     try {
       response = await bulkUploadFn({
         samples: samplesWithFlags,
         metadata,
       });
+      if (includeAdditionalInputFiles) {
+        // The samples created from the network response (response.samples) contain information about the sample itself (metadata),
+        // but do not contain the files that need to be upload to S3.
+        // We need to fetch the files from samplesWithFlags and copy them over to response.samples
+        response.samples.forEach(
+          (createdSample: $TSFixMe) =>
+            (createdSample["filesToUpload"] = get(
+              "files",
+              find({ name: createdSample.name }, samplesWithFlags),
+            )),
+        );
+        await uploadSamples(response.samples);
+      }
     } catch (error) {
       logError({
         message: `UploadProgressModal: ${bulkUploadFnName} error`,
@@ -165,6 +198,86 @@ const RemoteUploadProgressModal = ({
         },
       );
     }
+  };
+
+  const uploadSamples = async (samples: $TSFixMe) => {
+    // Note that unlike LocalUploadProgressModal, we don't track the progress of the uploads.
+    await Promise.all(
+      samples.map(async (sample: $TSFixMe) => {
+        try {
+          // Get the credentials for the sample
+          const s3ClientForSample = await getS3Client(sample);
+
+          await Promise.all(
+            sample.input_files.map(async (inputFile: $TSFixMe) => {
+              // Upload the additional input files to s3
+              // The sample FASTQS from Basespace or S3 will be uploaded by the backend.
+              if (Object.keys(sample.filesToUpload).includes(inputFile.name)) {
+                await uploadInputFileToS3(sample, inputFile, s3ClientForSample);
+              }
+            }),
+          );
+        } catch (e) {
+          logError({
+            message:
+              "UploadProgressModal: Upload error to s3 occurred for additional input file of remote sample",
+            details: {
+              sample,
+              e,
+            },
+          });
+        }
+      }),
+    );
+  };
+
+  const getS3Client = async (sample: $TSFixMe) => {
+    const credentials = await getUploadCredentials(sample.id);
+    const {
+      access_key_id: accessKeyId,
+      aws_region: region,
+      expiration,
+      secret_access_key: secretAccessKey,
+      session_token: sessionToken,
+    } = credentials;
+
+    return new S3Client({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+        sessionToken,
+        expiration,
+      },
+      useAccelerateEndpoint: true,
+    });
+  };
+
+  const uploadInputFileToS3 = async (
+    sample: $TSFixMe,
+    inputFile: $TSFixMe,
+    s3Client: $TSFixMe,
+  ) => {
+    const {
+      name: fileName,
+      s3_bucket: s3Bucket,
+      s3_file_path: s3Key,
+    } = inputFile;
+
+    const body = sample.filesToUpload[fileName];
+    const uploadParams = {
+      Bucket: s3Bucket,
+      Key: s3Key,
+      Body: body,
+      ChecksumAlgorithm: ChecksumAlgorithm.SHA256,
+    };
+
+    const fileUpload = new Upload({
+      client: s3Client,
+      params: uploadParams,
+    });
+
+    await fileUpload.done();
   };
 
   const getNumFailedSamples = () => failedSampleNames.length;

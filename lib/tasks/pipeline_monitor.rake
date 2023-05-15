@@ -103,6 +103,7 @@ class CheckPipelineRuns
         source: s3_path + "/" + fq,
         source_type: InputFile::SOURCE_TYPE_S3,
         upload_client: InputFile::UPLOAD_CLIENT_INTERNAL,
+        file_type: InputFile::FILE_TYPE_FASTQ,
       }
     end
 
