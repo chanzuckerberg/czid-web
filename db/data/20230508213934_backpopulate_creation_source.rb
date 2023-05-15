@@ -2,7 +2,7 @@
 
 class BackpopulateCreationSource < ActiveRecord::Migration[6.1]
   def up
-    ConsensusGenomeWorkflowRun.all.each do |cg_workflow_run|
+    WorkflowRun.consensus_genomes.all.each do |cg_workflow_run|
       inputs = JSON.parse(cg_workflow_run.inputs_json.presence || '{}')
       inputs[:creation_source] = get_creation_source(cg_workflow_run.sample, cg_workflow_run)
       cg_workflow_run.update(inputs_json: inputs.to_json)
@@ -10,7 +10,7 @@ class BackpopulateCreationSource < ActiveRecord::Migration[6.1]
   end
 
   def down
-    ConsensusGenomeWorkflowRun.all.each do |cg_workflow_run|
+    WorkflowRun.consensus_genomes.all.each do |cg_workflow_run|
       inputs = JSON.parse(cg_workflow_run.inputs_json.presence || '{}')
       inputs[:creation_source] = nil
       cg_workflow_run.update(inputs_json: inputs.to_json)
