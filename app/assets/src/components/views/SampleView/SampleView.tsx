@@ -762,9 +762,13 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     const workflowCount = getWorkflowCount(sample);
     const workflow = labelToVal(currentTab);
 
-    const status = isMngsWorkflow(workflow)
-      ? reportMetadata.pipelineRunStatus
-      : workflowRun?.status ?? "no workflow run status";
+    let status: string;
+    if (isMngsWorkflow(workflow)) {
+      status = reportMetadata.pipelineRunStatus ?? "upload_failed";
+    } else {
+      status = workflowRun?.status ?? "no workflow run status";
+    }
+
     trackEvent("SampleView_single_run_deleted", {
       workflow: workflow,
       runStatus: status.toLowerCase(),
@@ -776,8 +780,9 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       (a, b) => a + b,
       0,
     );
-    if (totalWorkflowCount === 1) {
-      // if there is only one workflow run, navigate to the project page
+    if (totalWorkflowCount <= 1) {
+      // if there is only one or zero workflow run(s), navigate to the project page
+      // zero workflow runs happens for failed short read mNGS uploads
       addSampleDeleteFlagToSessionStorage(sample?.name);
       location.replace(`/home?project_id=${sample.project_id}`);
       return;
