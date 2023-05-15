@@ -281,24 +281,22 @@ class SamplesHeatmapVis extends React.Component<
   generateHeatmapCaptions = () => {
     const { thresholdFilters } = this.props;
 
-    const numFilters = size(thresholdFilters);
+    let caption =
+      "Non-conforming cells have been hidden or grayed out. Taxa that are not present in the sample are represented by white cells.";
 
-    if (numFilters === 0) {
-      return [];
+    const numFilters = size(thresholdFilters);
+    if (numFilters > 0) {
+      const filterStrings = map(
+        filter => `${filter.metricDisplay} ${filter.operator} ${filter.value}`,
+        thresholdFilters,
+      );
+      caption =
+        `${numFilters} filter${
+          numFilters > 1 ? "s were" : " was"
+        } applied to the above heatmap: ${filterStrings.join(", ")}.` + caption;
     }
 
-    const filterStrings = map(
-      filter => `${filter.metricDisplay} ${filter.operator} ${filter.value}`,
-      thresholdFilters,
-    );
-
-    const fullString = `${numFilters} filter${
-      numFilters > 1 ? "s were" : " was"
-    } applied to the above heatmap: ${filterStrings.join(", ")}.
-      Non-conforming cells have been hidden or grayed out.
-      Taxa that are not present in the sample are represented by white cells.`;
-
-    return splitIntoMultipleLines(fullString, CAPTION_LINE_WIDTH);
+    return splitIntoMultipleLines(caption, CAPTION_LINE_WIDTH);
   };
 
   // Update tooltip contents and location when hover over a data/metadata node
