@@ -117,7 +117,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
     }
   };
 
-  return shouldShowNullResult ? (
+  return allowedFeatures.includes(AMR_V2_FEATURE) && shouldShowNullResult ? (
     <AmrNullResult />
   ) : (
     <>
