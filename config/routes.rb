@@ -16,7 +16,8 @@ Rails.application.routes.draw do
     mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql"
   end
   post "/graphql", to: "graphql#execute"
-  resources :backgrounds do
+  # It's unclear what it would mean to update a background, so we disallow.
+  resources :backgrounds, except: [:edit, :update] do
     get :show_taxon_dist, on: :member
   end
 

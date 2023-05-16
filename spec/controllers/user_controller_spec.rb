@@ -236,16 +236,6 @@ RSpec.describe UsersController, type: :request do
       assert_redirected_to root_url
     end
 
-    it " background -non admin shouldnt should get edit" do
-      get edit_background_url(@background)
-      assert_redirected_to root_url
-    end
-
-    it " background -non admin shouldnt update " do
-      put background_url @background, params: { background: { name: "abc xyz" } }
-      assert_redirected_to root_url
-    end
-
     it " background -non admin shouldnt destroy " do
       delete background_url(@background)
       assert_redirected_to root_url

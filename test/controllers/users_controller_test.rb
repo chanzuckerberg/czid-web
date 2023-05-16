@@ -82,16 +82,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
   end
 
-  test ' background -non admin shouldnt should get edit' do
-    get edit_background_url(@background)
-    assert_redirected_to root_url
-  end
-
-  test ' background -non admin shouldnt update ' do
-    put background_url @background, params: { background: { name: "abc xyz" } }
-    assert_redirected_to root_url
-  end
-
   test ' background -non admin shouldnt destroy ' do
     delete background_url(@background)
     assert_redirected_to root_url

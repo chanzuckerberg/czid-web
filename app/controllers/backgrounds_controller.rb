@@ -1,9 +1,7 @@
 class BackgroundsController < ApplicationController
-  include BackgroundsHelper
-
   before_action :login_required
   before_action :admin_required, except: [:create, :show_taxon_dist, :index]
-  before_action :set_background, only: [:show, :edit, :update, :destroy, :show_taxon_dist]
+  before_action :set_background, only: [:show, :destroy, :show_taxon_dist]
 
   # GET /backgrounds
   # GET /backgrounds.json
@@ -53,8 +51,10 @@ class BackgroundsController < ApplicationController
   end
 
   # GET /backgrounds/1/edit
-  def edit
-  end
+  # NOTE -- Vince, May 2023: We do not currently support `edit` of backgrounds
+  # See the related `update` for more details on this.
+  # def edit
+  # end
 
   # POST /backgrounds
   # POST /backgrounds.json
@@ -94,29 +94,17 @@ class BackgroundsController < ApplicationController
 
   # PATCH/PUT /backgrounds/1
   # PATCH/PUT /backgrounds/1.json
-  def update
-    current_data = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } }])
-    current_data_full_string = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } },
-                                                             :taxon_summaries,])
-    background_changed = assign_attributes_and_has_changed?(background_params)
-    if background_changed
-      s3_archive_successful, s3_backup_path = archive_background_to_s3(current_data_full_string)
-      db_archive_successful = archive_background_to_db(current_data, s3_backup_path)
-      update_successful = db_archive_successful && s3_archive_successful ? @background.save : false # this triggers recomputation of @background's taxon_summaries if archiving was successful
-    else
-      update_successful = true
-      @background.save # recompute
-    end
-    respond_to do |format|
-      if update_successful
-        format.html { redirect_to @background, notice: 'Background was successfully updated.' }
-        format.json { render :show, status: :ok, location: @background }
-      else
-        format.html { render :edit }
-        format.json { render json: @background.errors, status: :unprocessable_entity }
-      end
-    end
-  end
+  # NOTE -- Vince, May 2023: We do not support `update` of backgrounds.
+  # In the past, we allowed a background to be updated, but it's unclear what
+  # the motivation was there and the functionality wasn't used for ~5 years.
+  # From a comp bio perspective, it's unclear what we would want an update
+  # process to look like exactly, so we've just removed it entirely.
+  # If we decide we want this functionality again in the future, you will
+  # need to update `routes.rb` to remove the `except` on this aspect of the
+  # resource. You may also want to re-enable `edit` method too: if so, you'll
+  # also need to make a sensible `edit.html.erb` template depending on intent.
+  # def update
+  # end
 
   # DELETE /backgrounds/1
   # DELETE /backgrounds/1.json
