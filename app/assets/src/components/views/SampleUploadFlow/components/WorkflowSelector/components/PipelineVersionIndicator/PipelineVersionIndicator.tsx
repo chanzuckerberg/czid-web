@@ -1,6 +1,8 @@
+import cx from "classnames";
 import { Icon, Tooltip } from "czifui";
 import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import commonStyles from "../../workflow_selector.scss";
 import cs from "./pipeline_version_indicator.scss";
 
 interface PipelineVersionIndicatorProps {
@@ -24,7 +26,7 @@ export const PipelineVersionIndicator = ({
   );
 
   return (
-    <div className={cs.wrapper}>
+    <div className={cx(cs.wrapper, commonStyles.item)}>
       <div className={cs.headerRow}>
         <h5 className={cs.header}>Pipeline Version:</h5>
         <Tooltip
