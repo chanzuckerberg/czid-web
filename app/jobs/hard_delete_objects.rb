@@ -42,12 +42,17 @@ class HardDeleteObjects
       raise "Not all ids correspond to deletable objects"
     end
 
-    # Remove any data from Elasticsearch before hard deleting samples/runs
+    # Try to remove any data from Elasticsearch before hard deleting samples/runs.
+    # This sometimes fails, so we have a backup lambda running daily that deletes
+    # data from Elasticsearch that is not present in MySQL.
     if !Rails.env.test? && objects.present? && [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]].include?(workflow)
       begin
         ElasticsearchQueryHelper.call_taxon_eviction_lambda(objects.pluck(:id))
-      rescue StandardError
-        raise "Could not delete data from Elasticsearch"
+      rescue StandardError => e
+        LogUtil.log_error(
+          "Bulk Deletion Error: Error deleting data from Elasticsearch",
+          exception: e
+        )
       end
     end
 
