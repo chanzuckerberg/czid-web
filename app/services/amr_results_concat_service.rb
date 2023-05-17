@@ -66,7 +66,7 @@ class AmrResultsConcatService
   def get_output_file_contents(wr)
     s3_path = wr.output_path(AmrWorkflowRun::OUTPUT_REPORT)
     content = S3Util.get_s3_file(s3_path)
-    raise S3FileNotFound, s3_path if content.blank?
+    raise S3FileNotFound, s3_path unless content
 
     return content
   end
