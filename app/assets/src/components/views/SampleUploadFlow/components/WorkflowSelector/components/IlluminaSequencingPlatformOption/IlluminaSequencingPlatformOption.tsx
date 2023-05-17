@@ -4,8 +4,12 @@ import {
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   MNGS_ILLUMINA_PIPELINE_GITHUB_LINK,
 } from "~/components/utils/documentationLinks";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import cs from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../constants";
+import {
+  PIPELINE_HELP_LINKS,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
+} from "../../../../constants";
 import { SequencingPlatformOption } from "../SequencingPlatformOption";
 import { WetlabSelector } from "../WetlabSelector";
 
@@ -61,6 +65,11 @@ const IlluminaSequencingPlatformOption = ({
       }
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.ILLUMINA}
       pipelineVersion={pipelineVersion}
+      pipelineHelpLink={
+        !isCg
+          ? PIPELINE_HELP_LINKS[WORKFLOWS.SHORT_READ_MNGS.value]
+          : PIPELINE_HELP_LINKS[WORKFLOWS.CONSENSUS_GENOME.value]
+      }
     />
   );
 };

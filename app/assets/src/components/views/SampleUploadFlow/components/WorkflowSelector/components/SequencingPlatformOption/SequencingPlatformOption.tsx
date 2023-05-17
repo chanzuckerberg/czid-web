@@ -16,6 +16,7 @@ interface SequencingPlatformOptionProps {
   isSelected: boolean;
   onClick(): void;
   pipelineVersion?: string;
+  pipelineHelpLink: string;
   technologyName: string;
   technologyDetails: ReactNode;
   testId: string;
@@ -31,6 +32,7 @@ const SequencingPlatformOption = ({
   isSelected,
   onClick,
   pipelineVersion,
+  pipelineHelpLink,
   technologyName,
   technologyDetails,
   testId,
@@ -99,7 +101,10 @@ const SequencingPlatformOption = ({
           {isSelected && (
             <div className={commonStyles.technologyContent}>
               {technologyDetails}
-              <PipelineVersionIndicator version={pipelineVersion} />
+              <PipelineVersionIndicator
+                pipelineHelpLink={pipelineHelpLink}
+                version={pipelineVersion}
+              />
             </div>
           )}
         </div>

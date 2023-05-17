@@ -1,7 +1,11 @@
 import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { ARTIC_PIPELINE_LINK } from "~/components/utils/documentationLinks";
-import { SEQUENCING_TECHNOLOGY_OPTIONS } from "../../../../../../constants";
+import { WORKFLOWS } from "~/components/utils/workflows";
+import {
+  PIPELINE_HELP_LINKS,
+  SEQUENCING_TECHNOLOGY_OPTIONS,
+} from "../../../../../../constants";
 import { SequencingPlatformOption } from "../../../SequencingPlatformOption";
 import { ConsensusGenomeNanoporeSettings } from "./components/ConsensusGenomeNanoporeSettings";
 
@@ -61,6 +65,7 @@ const ConsensusGenomeWithNanopore = ({
       testId={SEQUENCING_TECHNOLOGY_OPTIONS.NANOPORE}
       tooltipText={tooltipText}
       pipelineVersion={pipelineVersion}
+      pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.CONSENSUS_GENOME.value]}
     />
   );
 };

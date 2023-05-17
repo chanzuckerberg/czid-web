@@ -1,5 +1,11 @@
 import { IconNameToSizes } from "czifui";
 import { IconCovidVirusXLarge } from "~/components/ui/icons";
+import {
+  AMR_PIPELINE_HELP_LINK,
+  CG_PIPELINE_HELP_LINK,
+  ILLUMINA_MNGS_PIPELINE_HELP_LINK,
+  NANOPORE_MNGS_PIPELINE_HELP_LINK,
+} from "~/components/utils/documentationLinks";
 import { WORKFLOWS } from "~/components/utils/workflows";
 
 export const NO_TARGET_PROJECT_ERROR =
@@ -389,6 +395,13 @@ export const MEDAKA_MODEL_OPTIONS = {
 export const LOCAL_UPLOAD = "local";
 export const REMOTE_UPLOAD = "remote";
 export const BASESPACE_UPLOAD = "basespace";
+
+export const PIPELINE_HELP_LINKS = {
+  [WORKFLOWS.SHORT_READ_MNGS.value]: ILLUMINA_MNGS_PIPELINE_HELP_LINK,
+  [WORKFLOWS.LONG_READ_MNGS.value]: NANOPORE_MNGS_PIPELINE_HELP_LINK,
+  [WORKFLOWS.CONSENSUS_GENOME.value]: CG_PIPELINE_HELP_LINK,
+  [WORKFLOWS.AMR.value]: AMR_PIPELINE_HELP_LINK,
+};
 
 // TYPES
 export type Technology = "Illumina" | "ONT";

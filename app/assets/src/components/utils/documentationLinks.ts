@@ -44,8 +44,10 @@ export const BLAST_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/4429814631572-Confirm-hits-using-BLASTN";
 export const BULK_DOWNLOAD_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360042575714-Initiate-a-Bulk-Download";
+export const AMR_BULK_DOWNLOAD_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15312677287316-Download-AMR-Results-Data#AMR-Results-bulk-download";
 export const AMR_HELP_LINK =
-  "https://docs.google.com/document/d/16qYFrijM3XgafTkodKtDGVOZDRY4D_TMBWix_hzZLvw/edit?usp=sharing";
+  "https://chanzuckerberg.zendesk.com/hc/en-us/categories/15001531592980-Antimicrobial-Resistance-Analysis";
 export const AMR_EXISTING_SAMPLES_LINK =
   "https://docs.google.com/document/d/12a_0PQcTRbB-0JC1SMjhLvdQzhBF2Z0TZseFkoH-aRI/edit#bookmark=id.lqgywt4vgvg3";
 export const AMR_DEPRECATED_HELP_LINK =
@@ -56,8 +58,14 @@ export const CONCAT_FILES_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360051806072-How-to-concatenate-files";
 export const PROJECT_SHARING_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-Data-through-the-Web-App#Project-Sharing";
-export const PIPELINE_HELP_LINK =
+export const ILLUMINA_MNGS_PIPELINE_HELP_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790554-Pipeline-Details#pipeline-intro";
+export const NANOPORE_MNGS_PIPELINE_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13756558532884-CZ-ID-Pipeline-Overview#mNGS-Nanopore-overview";
+export const AMR_PIPELINE_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/15091031482644-AMR-Pipeline-Workflow";
+export const CG_PIPELINE_HELP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/13785499135124-SARS-CoV-2-Pipeline";
 export const TOTAL_READ_HELP_LINK = {
   url: "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360053758913-Sample-QC#Total-Reads",
   header: "Do my samples have enough total reads?",

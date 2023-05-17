@@ -15,6 +15,7 @@ import {
   BASESPACE_UPLOAD,
   LOCAL_UPLOAD,
   NANOPORE,
+  PIPELINE_HELP_LINKS,
   REMOTE_UPLOAD,
   SEQUENCING_TECHNOLOGY_OPTIONS,
   Technology,
@@ -174,6 +175,7 @@ const WorkflowSelector = ({
           sequencingPlatformOptions={
             <div className={cs.technologyContent}>
               <PipelineVersionIndicator
+                pipelineHelpLink={PIPELINE_HELP_LINKS[WORKFLOWS.AMR.value]}
                 version={projectPipelineVersions?.[WORKFLOWS.AMR.value]}
               />
             </div>

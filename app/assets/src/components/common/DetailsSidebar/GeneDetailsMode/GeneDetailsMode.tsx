@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getOntology } from "~/api/amr";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { FooterLinks } from "./FooterLinks";
 import cs from "./gene_details_mode.scss";
 import { Ontology } from "./Ontology";
@@ -72,7 +73,7 @@ const GeneDetailsMode = ({ geneName }: GDMProps) => {
     );
   }
 
-  const { error, label } = ontology;
+  const { label } = ontology;
 
   return (
     <div className={cs.content}>
@@ -81,7 +82,13 @@ const GeneDetailsMode = ({ geneName }: GDMProps) => {
         {wasOntologyInfoFound ? (
           <Ontology geneName={geneName} ontology={ontology} />
         ) : (
-          <div className={cs.cardLicense}>{error}</div>
+          <div className={cs.cardLicense}>
+            Learn more about {geneName} by searching on{" "}
+            <ExternalLink href="https://card.mcmaster.ca/browse">
+              CARD
+            </ExternalLink>
+            .
+          </div>
         )}
         <div className={cs.subtitle}>Links</div>
         <div className={cs.linksSection}>
