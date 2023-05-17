@@ -127,6 +127,7 @@ export const ToggleVisibleColumnsDropdown = ({
         sdsStyle="dark"
         placement="top-end"
         width="default"
+        arrow
       >
         <ButtonIcon
           onClick={handleAnchorClick}

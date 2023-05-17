@@ -60,7 +60,7 @@ export const MODEL_COLUMN_TOOLTIP_STRINGS = {
   },
 };
 export const CUTOFF_COLUMN_TOOLTIP_STRINGS = {
-  regularText: `Cutoff used to detect AMR-associated contigs based on a “Perfect” and “Strict” match paradigm that uses curated BLASTP bit-scores.`,
+  regularText: `Cutoff used to detect AMR gene and contig matches based on a "Perfect", "Strict", and "Loose" paradigm that uses curated BLASTP bit-scores. "Nudged" specifies Loose matches that have at least 95% identity.`,
   boldText: "Cutoff",
   link: {
     href: CONTIGS_COLUMN_GROUP_TOOLTIP_LINK_HREF,
@@ -77,7 +77,7 @@ export const CONTIGS_COLUMN_TOOLTIP_STRINGS = {
 };
 export const CONTIGS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS = {
   regularText: "Percentage of gene covered by contig sequence(s).",
-  boldText: "Contig % Cov",
+  boldText: "Contigs % Coverage",
   link: {
     href: CONTIGS_COLUMN_GROUP_TOOLTIP_LINK_HREF,
     linkText: TOOLTIP_LINK_TEXT,
@@ -85,7 +85,7 @@ export const CONTIGS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS = {
 };
 export const CONTIGS_PERCENT_IDENTITY_COLUMN_TOOLTIP_STRINGS = {
   regularText: "Average percent identity of contig(s) aligning to AMR gene.",
-  boldText: "Contig % Id",
+  boldText: "Contigs % Identity",
   link: {
     href: CONTIGS_COLUMN_GROUP_TOOLTIP_LINK_HREF,
     linkText: TOOLTIP_LINK_TEXT,
@@ -93,7 +93,7 @@ export const CONTIGS_PERCENT_IDENTITY_COLUMN_TOOLTIP_STRINGS = {
 };
 export const CONTIGS_SPECIES_COLUMN_TOOLTIP_STRINGS = {
   regularText: "Pathogen-of-origin prediction based on alignment to CARD.",
-  boldText: "Contig Species",
+  boldText: "Contigs Species",
   link: {
     href: CONTIGS_COLUMN_GROUP_TOOLTIP_LINK_HREF,
     linkText: TOOLTIP_LINK_TEXT,
@@ -109,7 +109,7 @@ export const READS_COLUMN_TOOLTIP_STRINGS = {
 };
 export const READS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS = {
   regularText: "Percentage of gene covered by read(s).",
-  boldText: "Reads % Cov",
+  boldText: "Reads % Coverage",
   link: {
     href: READS_COLUMN_GROUP_TOOLTIP_LINK_HREF,
     linkText: TOOLTIP_LINK_TEXT,
@@ -117,7 +117,7 @@ export const READS_PERCENT_COVERAGE_COLUMN_TOOLTIP_STRINGS = {
 };
 export const READS_COVERAGE_DEPTH_TOOLTIP_STRINGS = {
   regularText: "Average depth of reads aligned across gene.",
-  boldText: "Reads Cov Depth",
+  boldText: "Reads Coverage Depth",
   link: {
     href: READS_COLUMN_GROUP_TOOLTIP_LINK_HREF,
     linkText: TOOLTIP_LINK_TEXT,

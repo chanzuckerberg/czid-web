@@ -8,6 +8,7 @@ import { UpdateThresholdFiltersType } from "../../types";
 
 interface AmrThresholdFiltersProps {
   updateThresholdFilters: (filtersData: UpdateThresholdFiltersType) => void;
+  hideFilters: boolean;
 }
 
 /*
@@ -60,6 +61,7 @@ const convertThresholdFilters = (
 
 export const AmrThresholdFilters = ({
   updateThresholdFilters,
+  hideFilters,
 }: AmrThresholdFiltersProps) => {
   const [thresholdFilters, setThresholdFilters] = useState<
     ThresholdFilterData[]
@@ -75,14 +77,16 @@ export const AmrThresholdFilters = ({
   };
 
   return (
-    <ThresholdFilterSDS
-      selectedThresholds={thresholdFilters}
-      onApply={handleApply}
-      disabled={false}
-      metricOptions={thresholdFilterOptionColumnIds.map(columnId => ({
-        text: COLUMN_ID_TO_NAME.get(columnId),
-        value: columnId,
-      }))}
-    />
+    !hideFilters && (
+      <ThresholdFilterSDS
+        selectedThresholds={thresholdFilters}
+        onApply={handleApply}
+        disabled={hideFilters}
+        metricOptions={thresholdFilterOptionColumnIds.map(columnId => ({
+          text: COLUMN_ID_TO_NAME.get(columnId),
+          value: columnId,
+        }))}
+      />
+    )
   );
 };

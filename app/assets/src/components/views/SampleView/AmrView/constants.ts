@@ -29,9 +29,9 @@ export enum ColumnId {
 }
 
 export const COLUMN_ID_TO_NAME = new TwoWayKeyStringMap({
-  [ColumnId.CONTIG_COVERAGE_BREADTH]: "Contig Coverage Breadth",
-  [ColumnId.CONTIG_PERCENT_ID]: "Contig %id",
-  [ColumnId.CONTIG_SPECIES]: "Contig Species",
+  [ColumnId.CONTIG_COVERAGE_BREADTH]: "Contigs % Coverage",
+  [ColumnId.CONTIG_PERCENT_ID]: "Contigs % Identity",
+  [ColumnId.CONTIG_SPECIES]: "Contigs Species",
   [ColumnId.CONTIGS]: "Number of Contigs",
   [ColumnId.CUTOFF]: "Cutoff",
   [ColumnId.GENE]: "Gene",
@@ -40,11 +40,11 @@ export const COLUMN_ID_TO_NAME = new TwoWayKeyStringMap({
   [ColumnId.MECHANISM]: "Mechanism",
   [ColumnId.MODEL]: "Model",
   [ColumnId.READ_COVERAGE_DEPTH]: "Reads Coverage Depth",
-  [ColumnId.READ_DEPTH_PER_MILLION]: "dPM (Depth per million)",
-  [ColumnId.READ_COVERAGE_BREADTH]: "Read Coverage Breadth",
-  [ColumnId.READ_SPECIES]: "Read Species",
-  [ColumnId.READS]: "r (Number of reads)",
-  [ColumnId.READS_PER_MILLION]: "rPM (Reads per million)",
+  [ColumnId.READ_DEPTH_PER_MILLION]: "dPM (Depth per Million)",
+  [ColumnId.READ_COVERAGE_BREADTH]: "Reads % Coverage",
+  [ColumnId.READ_SPECIES]: "Reads Species",
+  [ColumnId.READS]: "Number of Reads",
+  [ColumnId.READS_PER_MILLION]: "rPM (Reads per Million)",
 });
 
 export const SECTION_TO_COLUMN_IDS = new TwoWayKeyListMap({

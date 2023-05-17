@@ -11,6 +11,7 @@ interface FilterButtonWithCounterProps {
   showFilters: boolean;
   isDisabled?: boolean;
   popupDisabledSubtitle?: string;
+  popupPosition?: "top left" | "bottom center";
 }
 
 export const FilterButtonWithCounter = ({
@@ -19,6 +20,7 @@ export const FilterButtonWithCounter = ({
   onFilterToggle,
   showFilters,
   popupDisabledSubtitle = "Not available",
+  popupPosition,
 }: FilterButtonWithCounterProps) => {
   return (
     <div
@@ -57,7 +59,7 @@ export const FilterButtonWithCounter = ({
         basic={false}
         mouseEnterDelay={600}
         mouseLeaveDelay={200}
-        position={isDisabled ? "top left" : "bottom center"}
+        position={popupPosition || (isDisabled ? "top left" : "bottom center")}
       />
     </div>
   );

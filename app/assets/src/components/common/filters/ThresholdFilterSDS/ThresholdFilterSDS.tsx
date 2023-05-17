@@ -143,7 +143,7 @@ export const ThresholdFilterSDS = ({
         />
         <DropdownPopper
           anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
+          open={Boolean(anchorEl) && !disabled}
           placement="bottom-start"
         >
           <div className={cs.filterContainer}>

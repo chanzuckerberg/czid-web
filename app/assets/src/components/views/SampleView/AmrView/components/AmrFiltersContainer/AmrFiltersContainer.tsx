@@ -171,11 +171,13 @@ export const AmrFiltersContainer = ({
             filterCounter={numOfActiveAmrFilters}
             onFilterToggle={() => setHideFilters(!hideFilters)}
             showFilters={!hideFilters}
+            popupPosition="top left"
           />
           <div className={hideFilters && cs.hideFilters}>
             <div className={cs.filters}>
               <h2 className={cs.sectionTitle}>Filters</h2>
               <AmrThresholdFilters
+                hideFilters={hideFilters}
                 updateThresholdFilters={updateThresholdFilters}
               />
             </div>
