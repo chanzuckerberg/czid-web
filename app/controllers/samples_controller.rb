@@ -563,8 +563,9 @@ class SamplesController < ApplicationController
           }
         end
       else
-        # TODO: remove constrained_samples filter for WGS sample upload flow use-case
-        taxon_list = taxon_search(query, ["species", "genus"], samples: constrained_samples)
+        # If no domain is specified, do not filter by constrained_samples
+        taxon_list = domain.present? ? taxon_search(query, ["species", "genus"], samples: constrained_samples) : taxon_search(query, ["species", "genus"])
+
         unless taxon_list.empty?
           results["Taxon"] = {
             "name" => "Taxon",
