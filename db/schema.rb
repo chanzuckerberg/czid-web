@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_11_214326) do
+ActiveRecord::Schema.define(version: 2023_05_17_221204) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -79,14 +79,6 @@ ActiveRecord::Schema.define(version: 2023_05_11_214326) do
     t.string "key"
     t.text "value"
     t.index ["key"], name: "index_app_configs_on_key", unique: true
-  end
-
-  create_table "archived_backgrounds", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.bigint "archive_of"
-    t.text "data"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "s3_backup_path"
   end
 
   create_table "backgrounds", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
