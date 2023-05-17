@@ -1,0 +1,12 @@
+# Each line is a file pattern followed by one or more owners.
+# For information about the structure and syntax of the
+# CODEOWNERS file, please see
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#example-of-a-codeowners-file
+app/assets/ @chanzuckerberg/frontend-best-practices
+stories/ @chanzuckerberg/frontend-best-practices
+webpack.* @chanzuckerberg/frontend-best-practices
+package.json @chanzuckerberg/frontend-best-practices
+*.tsx @chanzuckerberg/frontend-best-practices
+*.ts @chanzuckerberg/frontend-best-practices
+*.js @chanzuckerberg/frontend-best-practices
+e2e
