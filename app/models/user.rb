@@ -14,6 +14,25 @@ class User < ApplicationRecord
 
   before_create { self.salt ||= SecureRandom.base58(24) }
 
+  # Tell rails to ignore these columns since they have been dropped from the db.
+  # This is really just to keep the CI tests happy, since all migrations are run
+  # in every CI run and one in particular calls User.all, which Rails was
+  # translating into SQL queries that referenced nonexistent columns.
+  # This is probably some sort of cache issue, and hopefully we can eliminate
+  # these lines in about three months or so.
+  # See also https://api.rubyonrails.org/classes/ActiveRecord/ModelSchema/ClassMethods.html#method-i-ignored_columns-3D
+  # - Lucia 2023-05-17
+  self.ignored_columns = [
+    :authentication_token,
+    :authentication_token_encrypted,
+    :encrypted_password,
+    :favorite_projects_count,
+    :favorites_count,
+    :remember_created_at,
+    :reset_password_sent_at,
+    :reset_password_token,
+  ]
+
   # NOTE: counter_cache is not supported for has_and_belongs_to_many.
   has_and_belongs_to_many :projects
   # All one-to-many assocs are counter cached for per-user analytics.
