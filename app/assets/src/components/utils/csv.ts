@@ -266,15 +266,15 @@ export const computeAmrReportTableValuesForCSV = ({
   }, Object.values(displayedRows));
 
   const activeFiltersRow = generateCSVRowForActiveFilters(activeFilters);
-  csvRows.push(activeFiltersRow);
-  return [[csvHeaders.join()], csvRows];
+  const csvHeaderRow = csvHeaders.join();
+  return [[[activeFiltersRow, csvHeaderRow].join("\n")], csvRows];
 };
 
 // The active filters row is added to the end of the CSV which describes the filters that were applied to the report
 // e.g. 2 Filters Applied: | Thresholds: | rPM (reads per million) >= 1 | Number of Contigs >= 1
 const generateCSVRowForActiveFilters = (activeFilters: AmrFilterSelections) => {
   const numberOfFilters = countActiveFilters(activeFilters);
-  const filterStatement = `${numberOfFilters} Filter${
+  const filterStatement = `# ${numberOfFilters} Filter${
     numberOfFilters > 1 ? "s" : ""
   } Applied:`;
   const filterRow = [filterStatement];
