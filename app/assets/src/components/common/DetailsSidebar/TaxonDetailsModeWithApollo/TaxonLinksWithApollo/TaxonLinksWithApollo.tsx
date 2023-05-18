@@ -8,23 +8,24 @@ import cs from "./taxon_links.scss";
 export const TaxonLinksWithApollo = ({
   taxonId,
   parentTaxonId,
+  taxonName,
 }: {
   taxonId: number;
   parentTaxonId: number;
+  taxonName: string;
 }) => {
-  const { wikiUrl, title } = federationClient.readFragment({
-    id: initalCache.identify({
-      __typename: "TaxonDescription",
-      taxId: taxonId,
-    }),
-    fragment: gql`
-      fragment TaxonLinkInfo on TaxonDescription {
-        title
-        wikiUrl
-      }
-    `,
-  });
-
+  const { wikiUrl } =
+    federationClient.readFragment({
+      id: initalCache.identify({
+        __typename: "TaxonDescription",
+        taxId: taxonId,
+      }),
+      fragment: gql`
+        fragment TaxonLinkInfo on TaxonDescription {
+          wikiUrl
+        }
+      `,
+    }) || {};
   const renderLink = (source: string, label: string) => {
     let url = null;
 
@@ -33,10 +34,10 @@ export const TaxonLinksWithApollo = ({
         url = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${taxonId}`;
         break;
       case "google":
-        url = `http://www.google.com/search?q=${title}`;
+        url = `http://www.google.com/search?q=${taxonName}`;
         break;
       case "pubmed":
-        url = `https://www.ncbi.nlm.nih.gov/pubmed/?term=${title}`;
+        url = `https://www.ncbi.nlm.nih.gov/pubmed/?term=${taxonName}`;
         break;
       case "wikipedia":
         url = wikiUrl;
@@ -53,7 +54,7 @@ export const TaxonLinksWithApollo = ({
           source,
           url,
           taxonId,
-          taxonName: title,
+          taxonName: taxonName,
           parentTaxonId,
         }}
       >

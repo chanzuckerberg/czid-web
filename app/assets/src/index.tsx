@@ -1,4 +1,4 @@
-import { ApolloClient, ApolloProvider } from "@apollo/client";
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import * as Sentry from "@sentry/react";
@@ -51,15 +51,17 @@ contextKeys.forEach(key => {
   }
 });
 
-// Initialize Apollo
+// Initialize Apollo for Rails Client
+// This will be the default client passed in through the ApolloProvider
+// It is used for all native GraphQL queries and mutations in the Rails app (e.g. app/graphql)
+// TODO: (smccanny): delete this once rails and graphql are integrated under a single client
 export const apolloClient = new ApolloClient({
   uri: "/graphql",
-  cache: initalCache,
-  typeDefs,
+  cache: new InMemoryCache(),
 });
 
-// TODO: (smccanny): delete this once the servers are integrated either under the federated server or in the front end
-// federated Apollo client for testing
+// Initialize federated Apollo client with graphql endpoints
+// Use this client for all federated queries and mutations (e.g. czid-graphql-federation-server)
 export const federationClient = new ApolloClient({
   uri: "/graphqlfed",
   cache: initalCache,

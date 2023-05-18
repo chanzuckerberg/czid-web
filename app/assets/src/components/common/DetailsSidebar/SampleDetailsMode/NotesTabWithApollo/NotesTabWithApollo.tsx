@@ -1,12 +1,12 @@
+import { useQuery } from "@apollo/client";
 import React, { useEffect, useState } from "react";
 import Textarea from "~/components/ui/controls/Textarea";
-import { useSimpleQuery } from "~/customHooks/useSimpleQuery";
+import { federationClient } from "~/index";
 import { QueryResult } from "../../../QueryResult";
 import MetadataSection from "../MetadataSection";
 import cs from "../sample_details_mode.scss";
 import { GET_SAMPLE_NOTES } from "./queries";
 import useNotesMutation from "./useSampleNotesMutation";
-
 interface NotesTabProps {
   sampleId: number;
   editable: boolean;
@@ -16,13 +16,14 @@ export const NotesTabWithApollo = ({ sampleId, editable }: NotesTabProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inProgessNotes, setInProgessNotes] = useState<string>("");
 
-  const { loading, error, data } = useSimpleQuery(GET_SAMPLE_NOTES, {
-    sampleId,
+  const { loading, error, data } = useQuery(GET_SAMPLE_NOTES, {
+    variables: { sampleId },
+    // TODO: (smccanny): delete this once rails and graphql are integrated under a single client
+    client: federationClient,
   });
 
   const { updateSampleNotes, isSavePending, isSaveError } = useNotesMutation();
-
-  const savedNotes = data?.sample?.sampleNotes;
+  const savedNotes = data?.sample?.sampleNotes || "";
   const notesEmpty = !savedNotes || savedNotes.length === 0;
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import Histogram, {
   HISTOGRAM_SCALE,
 } from "~/components/visualizations/Histogram";
+import { federationClient } from "~/index";
 import { Background } from "~/interface/shared/specific";
 import { GET_TAXON_DISTRIBUTION } from "../queries";
 import { TaxonValuesType } from "../TaxonDetailsModeWithApollo";
@@ -34,6 +35,8 @@ export const TaxonHistogramWithApollo = ({
       backgroundId: background.id,
       taxId: taxonId,
     },
+    // TODO: (smccanny): delete this once rails and graphql are integrated under a single client
+    client: federationClient,
   });
 
   if (error) {

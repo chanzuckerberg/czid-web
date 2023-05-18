@@ -1,5 +1,6 @@
 import { gql, useMutation } from "@apollo/client";
 import { getCsrfToken } from "~/api/utils";
+import { federationClient } from "~/index";
 
 const UPDATE_SAMPLE_NOTES = gql`
   mutation UpdateSampleNotes(
@@ -12,7 +13,7 @@ const UPDATE_SAMPLE_NOTES = gql`
       value: $value
       authenticityToken: $authenticityToken
     ) {
-      data {
+      sample {
         sampleNotes
         id
       }
@@ -24,7 +25,10 @@ const UPDATE_SAMPLE_NOTES = gql`
 `;
 
 export default function useNotesMutation() {
-  const [updateNotes, { loading, error }] = useMutation(UPDATE_SAMPLE_NOTES);
+  const [updateNotes, { loading, error }] = useMutation(UPDATE_SAMPLE_NOTES, {
+    // TODO: (smccanny): delete this once rails and graphql are integrated under a single client
+    client: federationClient,
+  });
   const updateSampleNotes = (sampleId: number, value: string) => {
     return updateNotes({
       variables: {

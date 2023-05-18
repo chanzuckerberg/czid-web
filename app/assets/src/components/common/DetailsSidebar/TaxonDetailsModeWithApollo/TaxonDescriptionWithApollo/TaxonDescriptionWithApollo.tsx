@@ -1,9 +1,10 @@
-import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import cx from "classnames";
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
-import { initalCache } from "~/cache";
+import { QueryResult } from "~/components/common/QueryResult";
 import { federationClient } from "~/index";
+import { GET_TAXON_DESCRIPTION } from "../queries";
 import { WikipediaLicenseWithApollo } from "../WikipediaLicenseWithApollo";
 import cs from "./taxon_description.scss";
 
@@ -11,18 +12,24 @@ const COLLAPSED_HEIGHT = 120;
 
 interface TaxonDescriptionProps {
   taxonId: number;
-  taxonList: number[];
+  taxonIdList: number[];
 }
 
 export const TaxonDescriptionWithApollo = ({
   taxonId,
-  taxonList,
+  taxonIdList,
 }: TaxonDescriptionProps) => {
   const taxonDescriptionRef: LegacyRef<HTMLDivElement> = useRef(null);
 
   const [isTall, setIsTall] = useState<boolean>(false);
   const [shouldCollapse, setShouldCollapse] = useState<boolean>(true);
-  const isParent = taxonList[1] === taxonId;
+  const isParent = taxonIdList[1] === taxonId;
+
+  const { loading, error, data } = useQuery(GET_TAXON_DESCRIPTION, {
+    variables: { taxonIdList },
+    // TODO: (smccanny): delete this once rails and graphql are integrated under a single client
+    client: federationClient,
+  });
 
   useEffect(() => {
     if (
@@ -31,64 +38,47 @@ export const TaxonDescriptionWithApollo = ({
     ) {
       setIsTall(true);
     }
-  }, [taxonDescriptionRef?.current?.clientHeight, isTall]);
+  }, [taxonDescriptionRef?.current?.clientHeight, isTall, data]);
 
-  const { summary, title, wikiUrl } = federationClient.readFragment({
-    id: initalCache.identify({
-      __typename: "TaxonDescription",
-      taxId: taxonId,
-    }),
-    fragment: gql`
-      fragment SingleTaxonDescription on TaxonDescription {
-        summary
-        title
-        wikiUrl
-      }
-    `,
-  });
-
-  const { title: nonParentTitle } = federationClient.readFragment({
-    id: initalCache.identify({
-      __typename: "TaxonDescription",
-      taxId: taxonList[0],
-    }),
-    fragment: gql`
-      fragment TaxonName on TaxonDescription {
-        title
-      }
-    `,
-  });
-
+  const index = isParent || taxonIdList.length === 1 ? 0 : 1;
+  const { title, summary, wikiUrl } = data?.taxonDescription[index] || {};
   const handleShowMore = withAnalytics(
     () => setShouldCollapse(false),
     `TaxonDetailsMode_show-more${
       isParent && "-parent"
     }-description-link_clicked`,
     {
-      taxonId: taxonList[0],
-      parentTaxonId: taxonList[1],
-      taxonName: isParent ? title : nonParentTitle,
+      taxonId: taxonIdList[0],
+      parentTaxonId: taxonIdList[1],
+      taxonName: isParent ? title : data?.taxonDescription[1]?.title,
     },
   );
 
   if (!summary) return null;
 
   return (
-    <section>
-      <div className={cs.subtitle}>
-        {!isParent ? "Description" : `Genus: ${title}`}
-      </div>
-      <div className={cx(cs.text, shouldCollapse && cs.collapsed)}>
-        <div ref={taxonDescriptionRef} data-testid={"taxon-description"}>
-          {summary}
-          <WikipediaLicenseWithApollo taxonName={title} wikiUrl={wikiUrl} />
+    <QueryResult
+      loading={loading}
+      loadingType={"none"}
+      error={error}
+      data={data}
+    >
+      <section>
+        <div className={cs.subtitle}>
+          {!isParent ? "Description" : `Genus: ${title}`}
         </div>
-      </div>
-      {shouldCollapse && isTall && (
-        <button className={cs.expandLink} onClick={handleShowMore}>
-          Show More
-        </button>
-      )}
-    </section>
+        <div className={cx(cs.text, shouldCollapse && cs.collapsed)}>
+          <div ref={taxonDescriptionRef} data-testid={"taxon-description"}>
+            {summary}
+            <WikipediaLicenseWithApollo taxonName={title} wikiUrl={wikiUrl} />
+          </div>
+        </div>
+        {shouldCollapse && isTall && (
+          <button className={cs.expandLink} onClick={handleShowMore}>
+            Show More
+          </button>
+        )}
+      </section>
+    </QueryResult>
   );
 };
