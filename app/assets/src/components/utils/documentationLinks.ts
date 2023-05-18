@@ -24,7 +24,9 @@ export const CG_ILLUMINA_PIPELINE_GITHUB_LINK =
 export const MNGS_ILLUMINA_PIPELINE_GITHUB_LINK =
   "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/short-read-mngs";
 export const MNGS_NANOPORE_PIPELINE_GITHUB_LINK =
-  "https://github.com/chanzuckerberg/czid-workflows/blob/main/workflows/long-read-mngs/run.wdl";
+  "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/long-read-mngs";
+export const AMR_PIPELINE_GITHUB_LINK =
+  "https://github.com/chanzuckerberg/czid-workflows/tree/main/workflows/amr";
 export const PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK =
   "https://help.czid.org/hc/en-us/articles/360058195412";
 export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =

@@ -15,7 +15,7 @@ import commonStyles from "~/components/views/SampleUploadFlow/components/Workflo
 import cs from "./analysis_type.scss";
 
 interface AnalysisTypeProps {
-  description: string;
+  description: ReactNode;
   customIcon?: ReactNode;
   isBeta?: boolean;
   isDisabled: boolean;
