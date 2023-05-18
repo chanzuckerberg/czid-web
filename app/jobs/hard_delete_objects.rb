@@ -1,9 +1,10 @@
 class HardDeleteObjects
   extend InstrumentedJob
   # TODO: consider setting a max batch size to avoid having a super long job clogging up the queue
-  # TODO: add retries
 
   @queue = :hard_delete_objects
+  DELETION_ATTEMPTS = 2 # retry deletion of object in case we hit a random deadlock
+  RETRY_DELAY_SECONDS = 20
 
   # object ids are pipeline run ids or workflow run ids
   def self.perform(object_ids, sample_ids, workflow, user_id)
@@ -58,7 +59,7 @@ class HardDeleteObjects
 
     hard_delete_runs(objects, user, workflow) if objects.present?
 
-    hard_delete_samples(samples_to_delete, user) if samples_to_delete.present?
+    hard_delete_samples(samples_to_delete, user, workflow) if samples_to_delete.present?
   end
 
   def self.hard_delete_runs(objects, user, workflow)
@@ -75,16 +76,8 @@ class HardDeleteObjects
                    ).as_json
 
     objects.each do |object|
-      object.destroy!
-      deleted_object_ids << object.id
-    rescue StandardError => e
-      # If there's an error deleting one of the runs, log error to sentry but don't raise it
-      LogUtil.log_error(
-        "Bulk Deletion Error: Error destroying run.",
-        exception: e,
-        object_id: object.id,
-        workflow: workflow
-      )
+      object_id = delete_object_with_retries(object, workflow)
+      deleted_object_ids << object.id if object_id.present?
     end
 
     successful_deleted_objects_info = objects_info.select { |object| deleted_object_ids.include?(object["id"]) }
@@ -106,7 +99,7 @@ class HardDeleteObjects
     end
   end
 
-  def self.hard_delete_samples(samples_to_delete, user)
+  def self.hard_delete_samples(samples_to_delete, user, workflow)
     # destroy samples with no remaining runs (should have non-nil deleted_at)
     # double check pipeline/workflow runs in case any of them failed to delete
     deleted_sample_ids = []
@@ -120,17 +113,8 @@ class HardDeleteObjects
 
     samples_to_delete.each do |sample|
       if sample.pipeline_runs.non_deprecated.count == 0 && sample.workflow_runs.non_deprecated.count == 0
-        begin
-          sample.destroy!
-          deleted_sample_ids << sample.id
-        rescue StandardError => e
-          # Log error to sentry but don't raise it
-          LogUtil.log_error(
-            "Bulk Deletion Error: Could not destroy sample.",
-            exception: e,
-            sample_id: sample.id
-          )
-        end
+        sample_id = delete_object_with_retries(sample, workflow)
+        deleted_sample_ids << sample_id if sample_id.present?
       end
     end
 
@@ -148,6 +132,26 @@ class HardDeleteObjects
           project_id: sample_info["project_id"],
         }
       )
+    end
+  end
+
+  def self.delete_object_with_retries(object, workflow)
+    (1..DELETION_ATTEMPTS).each do |attempt_number|
+      object.destroy!
+      return object.id
+    rescue StandardError => e
+      if attempt_number == DELETION_ATTEMPTS
+        LogUtil.log_error(
+          "Bulk Deletion Error: Failed to destroy #{object.class.name} after #{DELETION_ATTEMPTS} attempts.",
+          exception: e,
+          object_id: object.id,
+          workflow: workflow
+        )
+        return nil
+      else
+        sleep(RETRY_DELAY_SECONDS)
+        LogUtil.log_message("Failed to destroy #{object.class.name} after #{attempt_number} attempts, retrying", exception: e)
+      end
     end
   end
 end

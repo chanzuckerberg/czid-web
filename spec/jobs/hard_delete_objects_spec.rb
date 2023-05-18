@@ -92,11 +92,15 @@ RSpec.describe HardDeleteObjects, type: :job do
         expect { @sample2.reload }.not_to raise_error
       end
 
-      it "logs to cloudwatch if error occurs when destroying pipeline run" do
+      it "logs to cloudwatch twice if error occurs when destroying pipeline run" do
         object_ids = [@pr1.id]
         sample_ids = [@sample1.id]
         allow_any_instance_of(PipelineRun).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
-        expect(LogUtil).to receive(:log_error)
+        expect(LogUtil).to receive(:log_message).with("Failed to destroy PipelineRun after 1 attempts, retrying", exception: ActiveRecord::RecordNotDestroyed)
+        expect(LogUtil).to receive(:log_error).with("Bulk Deletion Error: Failed to destroy PipelineRun after 2 attempts.",
+                                                    exception: ActiveRecord::RecordNotDestroyed,
+                                                    object_id: @pr1.id,
+                                                    workflow: short_read_mngs)
 
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
         expect { @pr1.reload }.not_to raise_error
@@ -106,7 +110,11 @@ RSpec.describe HardDeleteObjects, type: :job do
         object_ids = [@pr1.id]
         sample_ids = [@sample1.id]
         allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
-        expect(LogUtil).to receive(:log_error)
+        expect(LogUtil).to receive(:log_message).with("Failed to destroy Sample after 1 attempts, retrying", exception: ActiveRecord::RecordNotDestroyed)
+        expect(LogUtil).to receive(:log_error).with("Bulk Deletion Error: Failed to destroy Sample after 2 attempts.",
+                                                    exception: ActiveRecord::RecordNotDestroyed,
+                                                    object_id: @sample1.id,
+                                                    workflow: short_read_mngs)
 
         HardDeleteObjects.perform(object_ids, sample_ids, short_read_mngs, @joe.id)
         expect { @sample1.reload }.not_to raise_error
@@ -277,7 +285,11 @@ RSpec.describe HardDeleteObjects, type: :job do
         object_ids = [@wr1.id]
         sample_ids = [@sample1.id]
         allow_any_instance_of(WorkflowRun).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
-        expect(LogUtil).to receive(:log_error)
+        expect(LogUtil).to receive(:log_message).with("Failed to destroy WorkflowRun after 1 attempts, retrying", exception: ActiveRecord::RecordNotDestroyed)
+        expect(LogUtil).to receive(:log_error).with("Bulk Deletion Error: Failed to destroy WorkflowRun after 2 attempts.",
+                                                    exception: ActiveRecord::RecordNotDestroyed,
+                                                    object_id: @wr1.id,
+                                                    workflow: consensus_genome)
 
         HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
         expect { @wr1.reload }.not_to raise_error
@@ -287,7 +299,11 @@ RSpec.describe HardDeleteObjects, type: :job do
         object_ids = [@wr1.id]
         sample_ids = [@sample1.id]
         allow_any_instance_of(Sample).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
-        expect(LogUtil).to receive(:log_error)
+        expect(LogUtil).to receive(:log_message).with("Failed to destroy Sample after 1 attempts, retrying", exception: ActiveRecord::RecordNotDestroyed)
+        expect(LogUtil).to receive(:log_error).with("Bulk Deletion Error: Failed to destroy Sample after 2 attempts.",
+                                                    exception: ActiveRecord::RecordNotDestroyed,
+                                                    object_id: @sample1.id,
+                                                    workflow: consensus_genome)
 
         HardDeleteObjects.perform(object_ids, sample_ids, consensus_genome, @joe.id)
         expect { @sample1.reload }.not_to raise_error
