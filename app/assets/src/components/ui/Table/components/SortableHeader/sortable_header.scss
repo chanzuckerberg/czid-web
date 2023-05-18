@@ -2,17 +2,26 @@
 
 .wrapper {
   background-color: $sds-color-gray-white;
+  color: $sds-color-gray-500;
+  &:hover {
+    color: $sds-color-gray-black;
+    svg {
+      fill: $sds-color-gray-black;
+    }
+  }
   span {
     font: $sds-font-header-s-600-font;
-    color: $sds-color-gray-500;
-    text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
   }
 }
 
 .active {
-  span {
-    color: $sds-color-primary-400;
+  color: $sds-color-primary-400;
+  &:hover {
+    color: $sds-color-primary-500;
+    svg {
+      fill: $sds-color-primary-500;
+    }
   }
 }
