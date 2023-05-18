@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_17_221204) do
+ActiveRecord::Schema.define(version: 2023_05_18_111030) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -182,15 +182,6 @@ ActiveRecord::Schema.define(version: 2023_05_17_221204) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "name"], name: "index_ercc_counts_on_pipeline_run_id_and_name", unique: true
-  end
-
-  create_table "favorite_projects", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
-    t.bigint "project_id"
-    t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["project_id"], name: "index_favorite_projects_on_project_id"
-    t.index ["user_id"], name: "index_favorite_projects_on_user_id"
   end
 
   create_table "host_genomes", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
@@ -861,8 +852,6 @@ ActiveRecord::Schema.define(version: 2023_05_17_221204) do
     t.text "allowed_features"
     t.string "institution", limit: 100
     t.integer "samples_count", default: 0, null: false
-    t.integer "favorite_projects_count", default: 0, null: false
-    t.integer "favorites_count", default: 0, null: false
     t.integer "visualizations_count", default: 0, null: false
     t.integer "phylo_trees_count", default: 0, null: false
     t.bigint "created_by_user_id", comment: "The user_id that created/invited this user."
@@ -924,8 +913,6 @@ ActiveRecord::Schema.define(version: 2023_05_17_221204) do
   add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
   add_foreign_key "bulk_downloads_workflow_runs", "bulk_downloads", name: "bulk_downloads_workflow_runs_bulk_download_id_fk"
   add_foreign_key "bulk_downloads_workflow_runs", "workflow_runs", name: "bulk_downloads_workflow_runs_workflow_run_id_fk"
-  add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
-  add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
   add_foreign_key "host_genomes", "users"
   add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"
   add_foreign_key "host_genomes_metadata_fields", "metadata_fields", name: "host_genomes_metadata_fields_metadata_field_id_fk"
