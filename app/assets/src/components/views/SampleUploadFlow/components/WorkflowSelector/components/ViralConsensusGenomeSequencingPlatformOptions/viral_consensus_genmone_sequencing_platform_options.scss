@@ -5,9 +5,3 @@
   @include font-header-xxs;
   color: $sds-color-gray-500;
 }
-
-.dropdown {
-  & button {
-    max-width: 200px;
-  }
-}

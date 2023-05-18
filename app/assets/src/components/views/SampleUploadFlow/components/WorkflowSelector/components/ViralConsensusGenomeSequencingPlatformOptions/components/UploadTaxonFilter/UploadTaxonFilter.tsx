@@ -70,11 +70,17 @@ const UploadTaxonFilter = ({
     return taxonResults
       ? taxonResults
           .filter((result: TaxonSearchResult) => result.taxid > 0)
-          .map((result: TaxonSearchResult) => ({
-            id: result.taxid,
-            name: result.title,
-            level: result.level,
-          }))
+          .map((result: TaxonSearchResult) => {
+            const { taxid, title, description, level } = result;
+            const levelLabel = level ? ` (${level})` : "";
+
+            return {
+              id: taxid,
+              name: `${title}${levelLabel}`,
+              details: description ?? "unknown",
+            };
+          })
+          .sort((a, b) => (a.name > b.name ? 1 : -1))
       : [];
   };
 

@@ -1284,6 +1284,8 @@ class UploadSampleStep extends React.Component<
       selectedWetlabProtocol,
       validatingSamples,
       localSamples,
+      refSeqFile,
+      selectedTaxon,
     } = this.state;
     const { allowedFeatures } = this.context || {};
 
@@ -1325,9 +1327,7 @@ class UploadSampleStep extends React.Component<
     } else if (
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value)
     ) {
-      // TODO: Disable Pre-Upload Checks while Taxon seletion logic is WIP
-      // workflowsValid = !!refSeqFile && !!selectedTaxon;
-      workflowsValid = true;
+      workflowsValid = !!refSeqFile && !!selectedTaxon;
     }
 
     // Note: we currently only run validation checks on locally uploaded samples

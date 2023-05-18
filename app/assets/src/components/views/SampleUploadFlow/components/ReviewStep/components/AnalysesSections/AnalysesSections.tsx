@@ -21,14 +21,18 @@ import { Project, ProjectPipelineVersions } from "~/interface/shared";
 import cs from "./analyses_sections.scss";
 import { CGAnalysisSection } from "./components/CGAnalysisSection/CGAnalysisSection";
 import { MNGSAnalysisSection } from "./components/MNGSAnalysisSection";
+import { WGSAnalysisSection } from "./components/WGSAnalysisSection";
 
 interface AnalysesSectionsType {
+  bedFile: string;
   clearlabs: boolean;
   guppyBasecallerSetting: string;
   medakaModel: string;
   wetlabProtocol: string;
   pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
   project: Project;
+  refSeqFile: string;
+  refSeqTaxon: string;
   technology: Technology;
   workflows: Set<UploadWorkflows>;
 }
@@ -48,11 +52,14 @@ const getWorkflowSectionOrder = workflows => {
 };
 
 const AnalysesSections = ({
+  bedFile,
   clearlabs,
   guppyBasecallerSetting,
   medakaModel,
   pipelineVersions,
   project,
+  refSeqFile,
+  refSeqTaxon,
   technology,
   wetlabProtocol,
   workflows,
@@ -130,6 +137,13 @@ const AnalysesSections = ({
                   <MNGSAnalysisSection
                     technology={technology}
                     guppyBasecallerSetting={guppyBasecallerSetting}
+                  />
+                )}
+                {workflow === UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value && (
+                  <WGSAnalysisSection
+                    taxon={refSeqTaxon}
+                    refSeqFile={refSeqFile}
+                    bedFile={bedFile}
                   />
                 )}
                 <div className={cs.item}>

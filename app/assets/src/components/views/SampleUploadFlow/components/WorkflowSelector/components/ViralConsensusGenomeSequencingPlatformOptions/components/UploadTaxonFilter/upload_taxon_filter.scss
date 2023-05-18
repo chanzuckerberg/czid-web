@@ -7,6 +7,15 @@ $FILTER_WIDTH: 200px;
 .dropdown {
   width: $FILTER_WIDTH;
   margin-bottom: 0px !important;
+  background-color: white;
+
+  &:hover {
+    background-color: white;
+  }
+
+  & button {
+    max-width: 200px;
+  }
 }
 
 .dropdownPopper {

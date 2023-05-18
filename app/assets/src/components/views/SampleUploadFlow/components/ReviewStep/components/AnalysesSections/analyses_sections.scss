@@ -11,20 +11,20 @@
 .analysisTypeContent {
   display: flex;
   margin-top: $sds-spaces-l;
+}
 
-  .item {
-    min-width: 180px;
-    margin-right: $sds-spaces-xl;
-    color: $sds-color-gray-500;
-    flex: 1 0 0;
+.item {
+  min-width: 180px;
+  margin-right: $sds-spaces-xl;
+  color: $sds-color-gray-500;
+  flex: 1 0 0;
 
-    .subheader {
-      @include font-header-s;
-      margin-bottom: $sds-spaces-xs;
-    }
+  .subheader {
+    @include font-header-s;
+    margin-bottom: $sds-spaces-xs;
+  }
 
-    .description {
-      @include font-body-s;
-    }
+  .description {
+    @include font-body-s;
   }
 }
