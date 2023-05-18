@@ -11,7 +11,7 @@ import cs from "./column_definitions.scss";
 import {
   getFormattedValueAsString,
   shouldShowTooltip,
-} from "./components/value_format_utils";
+} from "./components/valueFormatUtils";
 import { CONTIGS_SPECIES_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const contigSpeciesColumn: ColumnDef<AmrResult, any> = {

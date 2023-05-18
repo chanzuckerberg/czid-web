@@ -10,7 +10,7 @@ import cs from "../../column_definitions.scss";
 import {
   getFormattedValueAsString,
   shouldShowTooltip,
-} from "../value_format_utils";
+} from "../valueFormatUtils";
 
 // * This file should not be changed unless you intend the change the basic default behavior
 // * for all cells in the table. If you need a cell to do something other than this, consider
