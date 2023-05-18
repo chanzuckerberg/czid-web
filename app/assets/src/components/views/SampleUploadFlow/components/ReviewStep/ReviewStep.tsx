@@ -178,9 +178,9 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
               medakaModel={medakaModel}
               wetlabProtocol={wetlabProtocol}
               guppyBasecallerSetting={guppyBasecallerSetting}
-              refSeqTaxon={refSeqTaxon.name}
-              refSeqFile={refSeqFile.name}
-              bedFile={bedFile.name}
+              refSeqTaxon={refSeqTaxon?.name}
+              refSeqFile={refSeqFile?.name}
+              bedFile={bedFile?.name}
             />
           </div>
           <SampleInfo
