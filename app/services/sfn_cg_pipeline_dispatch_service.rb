@@ -239,6 +239,9 @@ class SfnCgPipelineDispatchService
                             primer_bed: primer_bed_name ? File.join(@sample.sample_input_s3_path, primer_bed_name) : "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{NA_PRIMER_FILE}",
                             # This option filters all except SARS-CoV-2 at the moment:
                             filter_reads: false,
+                            # signal to workflow that we want to include the refseq and bedfile in zipoutputs
+                            output_refseq: true,
+                            output_bed: !primer_bed_name.empty?,
                           }
                         elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina]
                           {
