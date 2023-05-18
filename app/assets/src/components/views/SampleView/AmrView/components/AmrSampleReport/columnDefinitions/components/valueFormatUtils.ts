@@ -55,8 +55,8 @@ export const sortCutoffColumnFn = (a, b) => {
   // sometimes we get a string of multiple cutoff values, separated by semicolons
   const aVal: string = a.getValue("cutoff") || NO_CONTENT_FALLBACK;
   const bVal: string = b.getValue("cutoff") || NO_CONTENT_FALLBACK;
-  const aVals = aVal.toLowerCase().split(";");
-  const bVals = bVal.toLowerCase().split(";");
+  const aVals = aVal.split(";");
+  const bVals = bVal.split(";");
 
   // iterate through each value in preferred order until we find one that differentiates the two
   for (let idx = 0; idx < cutoffValueOrder.length; idx++) {
