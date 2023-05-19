@@ -137,6 +137,7 @@ export const ToggleVisibleColumnsDropdown = ({
         />
       </Tooltip>
       <DropdownMenu
+        title="Select Columns"
         open={isOpen}
         anchorEl={anchorEl}
         onChange={onChange}
