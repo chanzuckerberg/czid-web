@@ -1,0 +1,48 @@
+name: Scheduled releases + deploys to staging
+# Scheduled releases + deploys to staging on Tuesday, Wednesday, Friday @ 11am PT
+# Regular release + deployments occur M/Thu @11am PT so no need to run this action on those days
+
+on:
+  schedule:
+    # Visit https://crontab.guru/#0_11_*_*_2,3,5 for more info on cron schedule expressions.
+    - cron: '0 11 * * 2,3,5' # Tuesday, Wednesday, Friday @ 11am PT
+
+env:
+  AWS_DEFAULT_OUTPUT: json
+  AWS_REGION: us-west-2
+  DEBIAN_FRONTEND: noninteractive
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+  # GITHUB_TOKEN is provided by Actions and can create deployment objects, but these objects won't trigger workflows.
+  # A separate token, bound to a specific developer with access to the repo, is required to create GitHub deployment
+  # objects that can trigger a deployment workflow. The secret for this token (with repo_deployment scope) is created in
+  # https://github.com/settings/tokens and can be managed in https://github.com/chanzuckerberg/idseq/settings/secrets.
+  GH_DEPLOY_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
+  GH_CLI_VERSION: 0.11.1
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+jobs:
+  release-staging:
+    runs-on: [self-hosted, idseq-dev]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # Number of commits to fetch. 0 indicates all history for all branches and tags.
+          fetch-depth: '0'
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: |
+            ${{ secrets.GH_SSH_KEY }}
+      - name: Release staging
+        run: ./bin/deploy_automation/release_staging.sh
+
+  deploy-staging:
+    needs: [release-staging]
+    uses: ./.github/workflows/reusable-deploy-workflow.yml
+    with:
+      source: staging
+      destination: staging
+      developer_name: "Github Actions"
+      deployment_reason: "Automated deployment of main to staging"

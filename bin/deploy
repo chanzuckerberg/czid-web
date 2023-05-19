@@ -43,26 +43,112 @@ def notify_slack(env, image, stage, deployed_by = nil, deployment_reason = nil)
   slack_hook = slack_secret["SecretString"]
   if slack_hook
     if stage=="start"
-      message = "Starting to deploy #{image} to #{env}.\n" + "   - refs: #{tags_and_branches(image).join(', ')}"
-      message += "\n   - deployed_by: #{deployed_by}" if deployed_by
-      message += "\n   - deployment_reason: #{deployment_reason}" if deployment_reason
-      post_slack_message({"icon_emoji": ":ghost:", "text": message}, slack_hook)
+      refs = tags_and_branches(image).join(', ')
+      message = prepare_deploy_starting_slack_message(image, env, deployed_by, deployment_reason, refs)
+      post_slack_message(message, slack_hook)
     elsif stage=="end"
-      post_slack_message({"icon_emoji": ":sharkdance:", "text": "Finished deploying #{image} to #{env}."}, slack_hook)
+      message = prepare_simple_slack_message("Finished deploying #{image} to #{env}.")
+      post_slack_message(message, slack_hook)
       if env=="staging"
-        post_slack_message({"icon_emoji": ":sharkdance:", "text": "Please test your changes listed at https://go.czi.team/idseq-release-checkoff"}, slack_hook)
+        message = prepare_simple_slack_message("Please test your changes listed at https://go.czi.team/idseq-release-checkoff")
+        post_slack_message(message, slack_hook)
       end
     elsif stage=="failure"
-      post_slack_message({"icon_emoji": ":sob:", "text": "deploy of #{image} to #{env} failed"}, slack_hook)
+      message = prepare_simple_slack_message("Deploy of #{image} to #{env} failed.")
+      post_slack_message(message, slack_hook)
     end
   else
     puts "Unable to get Slack hook from AWS Secrets Manager. Please check your configuration."
   end
 end
 
-def post_slack_message(payload, slack_hook)
-  puts "Post slack message: #{payload}"
-  puts `curl -sS -X POST --data-urlencode payload=#{Shellwords.escape(JSON.dump(payload))} #{slack_hook}`
+def prepare_simple_slack_message(text)
+  {
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "#{text}",
+        }
+      }
+    ]
+  }
+end
+
+def prepare_deploy_starting_slack_message(source, destination, deployed_by, deployment_reason, refs)
+  # Slack guide on building rich messages: https://api.slack.com/messaging/composing/layouts
+  {
+    "blocks": [
+      {
+        "type": "header",
+        "text": {
+          "type": "plain_text",
+          "text": "Deployment :rocket:",
+          "emoji": true
+        }
+      },
+      {
+        "type": "section",
+        "fields": [
+          {
+            "type": "plain_text",
+            "text": "Starting deployment"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "fields": [
+        {
+            "type": "mrkdwn",
+            "text": "*Source*:\n#{source}"
+          },
+          {
+            "type": "mrkdwn",
+            "text": "*Destination*:\n#{destination}"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "fields": [
+          {
+            "type": "mrkdwn",
+            "text": "*Deployed by:*\n#{deployed_by}"
+          },
+          {
+            "type": "mrkdwn",
+            "text": "*Reason:*\n#{deployment_reason}"
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "fields": [
+          {
+            "type": "mrkdwn",
+            "text": "*Refs:*\n#{refs}"
+          }
+        ]
+      },
+      {
+        "type": "context",
+        "elements": [
+          {
+            "type": "plain_text",
+            "text": "Automated by Github Actions",
+            "emoji": true
+          }
+        ]
+      }
+    ]
+  }
+end
+
+def post_slack_message(message, slack_hook)
+  puts "Post slack message: #{message}"
+  puts `curl -sS -X POST --data-urlencode payload=#{Shellwords.escape(JSON.dump(message))} #{slack_hook}`
 end
 
 def tags_and_branches(image)
