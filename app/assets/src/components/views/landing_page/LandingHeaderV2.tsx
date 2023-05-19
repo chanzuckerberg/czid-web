@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import AnnouncementBanner from "~/components/common/AnnouncementBanner";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import IconMobileNavClose from "~/components/ui/icons/IconMobileNavClose";
+import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { CZIDLogoReversed } from "~ui/icons";
 import cs from "./LandingHeaderV2.scss";
 
@@ -33,14 +34,14 @@ const LandingHeaderV2 = ({
         message={emergencyBannerMessage}
       />
       <AnnouncementBanner
-        id="ont"
+        id="amr"
         visible={announcementBannerEnabled}
         message={
           <>
             {
-              "New! You can now run Nanopore sequencing data through CZ ID's metagenomic pipeline. "
+              "New! CZ ID users can now detect and analyze antimicrobial resistance genes in sequencing data. "
             }
-            <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/13830756964372-Upload-Nanopore-Data-">
+            <ExternalLink href={AMR_HELP_LINK}>
               <span
                 style={{
                   color: "white",
