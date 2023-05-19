@@ -244,7 +244,11 @@ class Sample < ApplicationRecord
   validates_associated :input_files
 
   def input_files_checks
-    input_fastqs = input_files.select { |file| file.file_type == InputFile::FILE_TYPE_FASTQ }
+    # TODO: This is a temporary fix for [CZID-7886], that reverts the input_files check to the previous behavior.
+    # Once the file_type backfill in [CZID-7835] is complete, we can uncomment the following line:
+    # input_fastqs = input_files.select { |file| file.file_type == InputFile::FILE_TYPE_FASTQ }
+    input_fastqs = input_files
+
     # validate that we have the correct number of input files
     errors.add(:input_fastqs, "invalid number (#{input_fastqs.size})") unless
       # we can have up to 4 input files, input fasta R1 + R2, a primer bed for consensus genomes,
