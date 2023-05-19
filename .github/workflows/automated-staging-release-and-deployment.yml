@@ -4,8 +4,10 @@ name: Scheduled releases + deploys to staging
 
 on:
   schedule:
-    # Visit https://crontab.guru/#0_11_*_*_2,3,5 for more info on cron schedule expressions.
-    - cron: '0 11 * * 2,3,5' # Tuesday, Wednesday, Friday @ 11am PT
+    # Visit https://crontab.guru for more info on cron schedule expressions.
+    # The default timezone of GitHub Actions is Coordinated Universal Time (UTC).
+    # UTC is 7 hours ahead of PT, so 11am PT is 6pm UTC (1800 military time).
+    - cron: '0 18 * * 2,3,5' # Tuesday, Wednesday, Friday @ 11am PT
 
 env:
   AWS_DEFAULT_OUTPUT: json
