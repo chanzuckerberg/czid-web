@@ -26,7 +26,6 @@
 
     .filterLabel {
       @include font-caps-xxxs;
-      color: $sds-color-gray-500;
     }
 
     .tags {
@@ -62,4 +61,10 @@
 
 .styledMinimal {
   padding-left: 0;
+
+  color: $sds-color-gray-500;
+
+  :disabled {
+    color: $sds-color-gray-300;
+  }
 }

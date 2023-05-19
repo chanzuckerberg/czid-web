@@ -203,6 +203,7 @@ export const processAMRWorkflowRun = (
     );
 
     return {
+      analysisType: { text: workflow },
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: { text: pipelineVersion },
@@ -210,13 +211,14 @@ export const processAMRWorkflowRun = (
       lastProcessedAt: { text: lastProcessedAt },
       totalReads: { text: numberWithCommas(totalReads) },
       totalErccReads: { text: numberWithCommas(totalErccReads) },
-      nonHostReads: { text: nonHostReads },
+      nonhostReads: { text: nonHostReads },
       qcPercent: { text: qcPercent },
       compressionRatio: { text: compressionRatio },
       meanInsertSize: { text: meanInsertSize },
     };
   } else {
     return {
+      analysisType: { text: workflow },
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: { text: pipelineVersion },

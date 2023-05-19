@@ -58,13 +58,14 @@ export interface MngsPipelineInfo {
 }
 
 export interface AmrPipelineTabInfo {
+  analysisType: { text: WORKFLOW_LABELS };
   workflow: { text: WORKFLOW_LABELS };
   technology: { text: string };
   pipelineVersion: { text: string };
   cardDatabaseVersion?: { text: string };
   totalReads?: { text: string };
   totalErccReads?: { text: string };
-  nonHostReads?: { text: string };
+  nonhostReads?: { text: string };
   qcPercent?: { text: string };
   compressionRatio?: { text: string };
   meanInsertSize?: { text: string };
