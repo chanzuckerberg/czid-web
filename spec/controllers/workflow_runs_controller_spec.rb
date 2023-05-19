@@ -901,8 +901,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
       before do
         project = create(:project, users: [@joe])
         @sample1 = create(:sample, name: "Joe's good sample", project: project, user: @joe)
-        @workflow_run1 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded], inputs_json: { taxon_name: "fake taxon" }.to_json)
-        @workflow_run2 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded], inputs_json: { taxon_name: "fake taxon" }.to_json)
+        @workflow_run1 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded], inputs_json: { taxon_name: "fake taxon", creation_source: "mNGS Report" }.to_json)
+        @workflow_run2 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded], inputs_json: { taxon_name: "fake taxon", creation_source: "mNGS Report" }.to_json)
       end
 
       it "should return additional workflow information" do
@@ -916,6 +916,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           "name" => @sample1.name,
           "projectId" => @sample1.project_id,
           "taxonName" => "fake taxon",
+          "creationSource" => "mNGS Report",
           "userId" => @joe.id,
         }
         workflow_run2_info = {
@@ -923,6 +924,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           "name" => @sample1.name,
           "projectId" => @sample1.project_id,
           "taxonName" => "fake taxon",
+          "creationSource" => "mNGS Report",
           "userId" => @joe.id,
         }
 

@@ -148,6 +148,7 @@ class WorkflowRunsController < ApplicationController
         name: workflow_run.name,
         projectId: workflow_run.project_id,
         taxonName: JSON.parse(workflow_run.inputs_json)["taxon_name"],
+        creationSource: JSON.parse(workflow_run.inputs_json)["creation_source"],
         userId: workflow_run.user_id, }
     end
 
