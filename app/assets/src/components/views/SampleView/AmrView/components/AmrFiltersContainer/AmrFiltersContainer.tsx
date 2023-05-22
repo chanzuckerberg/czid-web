@@ -66,16 +66,17 @@ const applyFilter = (data: AmrResult[], dataFilter: FilterType) => {
 
   switch (type) {
     case TypeFilterType.THRESHOLD:
-      if (!lowerBound && !upperBound) return data;
+      // lowerBound (or upperBound) === 0 is a valid value, so we need to check if it is undefined rather than falsy
+      if (lowerBound === undefined && upperBound === undefined) return data;
 
       return filter(d => {
         const value = transform ? transform(d) : d;
 
         // Check each row of the data to see if it passes this threshold filter
         const doesPassFilterCheckLowerBound =
-          !lowerBound || value >= lowerBound;
+          lowerBound === undefined || value >= lowerBound;
         const doesPassFilterCheckUpperBound =
-          !upperBound || value <= upperBound;
+          upperBound === undefined || value <= upperBound;
 
         return doesPassFilterCheckLowerBound && doesPassFilterCheckUpperBound;
       }, data);
