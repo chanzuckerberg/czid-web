@@ -745,15 +745,18 @@ class PipelineRun < ApplicationRecord
 
       species_taxid_nt = lineage_json.dig(TaxonCount::COUNT_TYPE_NT, 0) || nil
       species_taxid_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_NR, 0) || nil
-      species_taxid_merged_nt_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_MERGED, 0) || nil
       genus_taxid_nt = lineage_json.dig(TaxonCount::COUNT_TYPE_NT, 1) || nil
       genus_taxid_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_NR, 1) || nil
-      genus_taxid_merged_nt_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_MERGED, 1) || nil
 
+      # Set the merged_NT_NR values to nil because this feature is not in use.
+      # We will revisit this in the future so we don't want to remove the existing
+      # code/db model, but we do want to stop taking up space in the DB. When we do
+      # revisit this feature, we'll likely update how we calculate this score, so
+      # we'll need to recompute all these numbers anyway.
       {
         name: header, sequence: sequence, read_count: read_count, base_count: base_count, lineage_json: lineage_json.to_json,
-        species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr, species_taxid_merged_nt_nr: species_taxid_merged_nt_nr,
-        genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr, genus_taxid_merged_nt_nr: genus_taxid_merged_nt_nr,
+        species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr, species_taxid_merged_nt_nr: nil,
+        genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr, genus_taxid_merged_nt_nr: nil,
       }
     end
 
@@ -890,7 +893,12 @@ class PipelineRun < ApplicationRecord
       tcnt.delete "unique_count"
       tcnt.delete "nonunique_count"
       # TODO:  Better family support.
-      acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
+      # Don't import merged_NT_NR for now since we don't use that feature yet.
+      # We will revisit this in the future so we don't want to remove the existing
+      # code/db model, but we do want to stop taking up space in the DB. When we do
+      # revisit this feature, we'll likely update how we calculate this score, so
+      # we'll need to recompute all these numbers anyway.
+      tcnt["count_type"] != TaxonCount::COUNT_TYPE_MERGED && acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
     end
     # Set created_at and updated_at
     current_time = Time.now.utc # to match TaxonLineage date range comparison
