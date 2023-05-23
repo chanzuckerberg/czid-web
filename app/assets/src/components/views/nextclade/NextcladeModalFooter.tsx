@@ -14,7 +14,7 @@ interface NextcladeModalFooterProps {
   loading?: boolean;
   message?: string;
   onClick?: $TSFixMeFunction;
-  nonSarsCov2SampleNames?: string[];
+  samplesNotSentToNextclade?: string[];
   type?: "warning" | "error" | "success" | "info";
   validationError?: string;
 }
@@ -24,7 +24,7 @@ const NextcladeModalFooter = ({
   invalidSampleNames,
   loading,
   onClick,
-  nonSarsCov2SampleNames,
+  samplesNotSentToNextclade,
   validationError,
 }: NextcladeModalFooterProps) => {
   const renderAccordionNotification = ({
@@ -123,14 +123,14 @@ const NextcladeModalFooter = ({
   };
 
   const renderNonSARSCov2Warning = () => {
-    if (!loading && nonSarsCov2SampleNames.length > 0) {
+    if (!loading && samplesNotSentToNextclade.length > 0) {
       return renderAccordionNotification({
-        message: `${nonSarsCov2SampleNames.length} consensus genome${
-          nonSarsCov2SampleNames.length > 1 ? "s" : ""
+        message: `${samplesNotSentToNextclade.length} consensus genome${
+          samplesNotSentToNextclade.length > 1 ? "s" : ""
         } won't be sent to Nextclade`,
         description:
           ", because Nextclade only accepts SARS-CoV-2 genomes currently:",
-        list: nonSarsCov2SampleNames,
+        list: samplesNotSentToNextclade,
       });
     }
   };

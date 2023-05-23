@@ -31,6 +31,7 @@ export const WORKFLOW_TRIGGERS = {
 };
 
 export const SARS_COV_2 = "Severe acute respiratory syndrome coronavirus 2";
+export const WGS = "Viral CG Upload";
 
 export enum PipelineRunStatuses {
   Failed = "failed",

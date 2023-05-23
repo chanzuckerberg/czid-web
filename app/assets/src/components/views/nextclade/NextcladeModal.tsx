@@ -1,6 +1,6 @@
 import cx from "classnames";
 import { Icon } from "czifui";
-import { difference, size } from "lodash/fp";
+import { difference } from "lodash/fp";
 import React from "react";
 import { PopupProps } from "semantic-ui-react";
 import { createConsensusGenomeCladeExport, getWorkflowRunsInfo } from "~/api";
@@ -13,7 +13,10 @@ import {
   NEXTCLADE_APP_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
 } from "~/components/utils/documentationLinks";
-import { SARS_COV_2 } from "~/components/views/samples/SamplesView/constants";
+import {
+  SARS_COV_2,
+  WGS,
+} from "~/components/views/samples/SamplesView/constants";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
@@ -36,7 +39,7 @@ interface NextcladeModalState {
   invalidSampleNames: $TSFixMe[];
   loading: boolean;
   loadingResults: boolean;
-  nonSarsCov2SampleNames: $TSFixMe[];
+  samplesNotSentToNextclade: $TSFixMe[];
   projectIds: $TSFixMe[];
   referenceTree: $TSFixMe;
   selectedTreeType: string;
@@ -59,7 +62,7 @@ export default class NextcladeModal extends React.Component<
       invalidSampleNames: [],
       loading: true,
       loadingResults: false,
-      nonSarsCov2SampleNames: [],
+      samplesNotSentToNextclade: [],
       projectIds: [],
       referenceTree: null,
       selectedTreeType: "global",
@@ -87,15 +90,17 @@ export default class NextcladeModal extends React.Component<
 
     const projectIds = workflowRunInfo.map(workflow => workflow.projectId);
 
-    const nonSarsCov2SampleNames = workflowRunInfo
-      .filter(cg => cg.taxonName !== SARS_COV_2)
+    // WGS samples cannot be sent to nextclade, and other cg uploads can only
+    // be sent if they are SC2 samples, even if they are uploaded via cli
+    const samplesNotSentToNextclade = workflowRunInfo
+      .filter(cg => cg.taxonName !== SARS_COV_2 || cg.creationSource === WGS)
       .map(cg => cg.name);
 
     this.setState(
       {
         invalidSampleNames,
         loading: false,
-        nonSarsCov2SampleNames,
+        samplesNotSentToNextclade,
         validationError: error,
         validWorkflowRunIds: new Set(validIds),
         validWorkflowInfo: workflowRunInfo,
@@ -279,12 +284,15 @@ export default class NextcladeModal extends React.Component<
       invalidSampleNames,
       loading,
       loadingResults,
-      nonSarsCov2SampleNames,
+      samplesNotSentToNextclade,
       referenceTree,
       validationError,
       validWorkflowRunIds,
       selectedTreeType,
     } = this.state;
+
+    const sentToNextcladeCount =
+      selectedIds.size - samplesNotSentToNextclade.length;
 
     return (
       <Modal narrow open={open} tall onClose={onClose}>
@@ -299,8 +307,8 @@ export default class NextcladeModal extends React.Component<
               })}
             </div>
             <div className={cs.tagline}>
-              {size(selectedIds)} Consensus Genome
-              {size(selectedIds) !== 1 ? "s" : ""} selected
+              {sentToNextcladeCount} Consensus Genome
+              {sentToNextcladeCount !== 1 ? "s" : ""} selected
             </div>
           </div>
           <div className={cs.nextcladeDescription}>
@@ -349,7 +357,7 @@ export default class NextcladeModal extends React.Component<
               onClick={this.handleConfirmationModalOpen}
               invalidSampleNames={invalidSampleNames}
               loading={loading}
-              nonSarsCov2SampleNames={nonSarsCov2SampleNames}
+              samplesNotSentToNextclade={samplesNotSentToNextclade}
               validationError={validationError}
               hasValidIds={validWorkflowRunIds && validWorkflowRunIds.size > 0}
             />

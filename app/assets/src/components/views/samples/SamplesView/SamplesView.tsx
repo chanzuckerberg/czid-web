@@ -84,6 +84,7 @@ import {
   SARS_COV_2,
   TRIGGERS,
   UPLOAD_FAILED,
+  WGS,
   WORKFLOW_TRIGGERS,
 } from "./constants";
 import cs from "./samples_view.scss";
@@ -475,8 +476,9 @@ const SamplesView = forwardRef(function SamplesView(
     );
   };
 
-  const getSarsCov2Count = () => {
+  const getSendToNextcladeCount = () => {
     return selectedObjects
+      .filter(obj => obj.creation_source !== WGS)
       .map(object => get(["referenceAccession", "taxonName"], object))
       .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);
@@ -484,13 +486,13 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderNextcladeTrigger = () => {
-    const sarsCov2Count = getSarsCov2Count();
+    const sendToNextcladeCount = getSendToNextcladeCount();
 
     const getPopupSubtitle = () => {
-      if (sarsCov2Count > MAX_NEXTCLADE_SAMPLES) {
+      if (sendToNextcladeCount > MAX_NEXTCLADE_SAMPLES) {
         return `Select at most ${MAX_NEXTCLADE_SAMPLES} SARS-CoV-2 samples`;
-      } else if (sarsCov2Count === 0) {
-        return "Select at least 1 SARS-CoV-2 sample";
+      } else if (sendToNextcladeCount === 0) {
+        return "Select at least 1 SARS-CoV-2 sample that has not been run through the General Viral Consensus Genome analysis pipeline";
       } else {
         return "";
       }
@@ -501,7 +503,10 @@ const SamplesView = forwardRef(function SamplesView(
         icon="treeDendogram"
         popupText="Nextclade"
         popupSubtitle={getPopupSubtitle()}
-        disabled={sarsCov2Count === 0 || sarsCov2Count > MAX_NEXTCLADE_SAMPLES}
+        disabled={
+          sendToNextcladeCount === 0 ||
+          sendToNextcladeCount > MAX_NEXTCLADE_SAMPLES
+        }
         onClick={withAnalytics(
           () => setNextcladeModalOpen(true),
           "SamplesView_nextclade-modal-open_clicked",
@@ -511,14 +516,14 @@ const SamplesView = forwardRef(function SamplesView(
   };
 
   const renderGenEpiTrigger = () => {
-    const sarsCov2Count = getSarsCov2Count();
+    const sendToNextcladeCount = getSendToNextcladeCount();
 
     if (!allowedFeatures.includes("genepi")) {
       return;
     }
 
     const getPopupSubtitle = () => {
-      if (sarsCov2Count === 0) {
+      if (sendToNextcladeCount === 0) {
         return "Select at least 1 SARS-CoV-2 sample";
       } else {
         return "";
@@ -533,7 +538,7 @@ const SamplesView = forwardRef(function SamplesView(
         icon="share"
         popupText="Send samples to CZ Gen Epi"
         popupSubtitle={getPopupSubtitle()}
-        disabled={sarsCov2Count === 0}
+        disabled={sendToNextcladeCount === 0}
       />
     );
   };
