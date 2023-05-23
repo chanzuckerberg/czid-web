@@ -4,11 +4,18 @@ import { SortableHeader } from "~/components/ui/Table/components/SortableHeader"
 import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { AmrResult } from "../types";
 import { getDefaultCell } from "./components/DefaultCell";
+import {
+  getFormattedCompoundString,
+  sortStringOrFallback,
+} from "./components/valueFormatUtils";
 import { GENE_FAMILY_COLUMN_TOOLTIP_STRINGS } from "./constants";
 
 export const geneFamilyColumn: ColumnDef<AmrResult, any> = {
   id: "geneFamily",
-  accessorKey: "geneFamily",
+  accessorFn: function geneFamilyAccessor(row): string {
+    return getFormattedCompoundString(row.geneFamily);
+  },
+  sortingFn: sortStringOrFallback,
   size: 200,
   minSize: 200,
   header: function geneFamilyHeader({ header, column }) {

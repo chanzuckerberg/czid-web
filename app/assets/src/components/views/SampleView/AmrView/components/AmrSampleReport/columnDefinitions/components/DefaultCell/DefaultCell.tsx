@@ -7,10 +7,7 @@ import { generateWidthStyles } from "~/components/ui/Table/tableUtils";
 import { memo } from "~/components/utils/memo";
 import { AmrResult } from "../../../types";
 import cs from "../../column_definitions.scss";
-import {
-  getFormattedValueAsString,
-  shouldShowTooltip,
-} from "../valueFormatUtils";
+import { shouldShowTooltip } from "../valueFormatUtils";
 
 // * This file should not be changed unless you intend the change the basic default behavior
 // * for all cells in the table. If you need a cell to do something other than this, consider
@@ -35,18 +32,17 @@ export const getDefaultCell = (
     align === Align.RIGHT ? cs.rightAlignedCell : cs.leftAlignedCell;
 
   function defaultCell({ getValue, cell }: DefaultCellProps): JSX.Element {
-    const rawValue = getValue();
-    const formattedValue = getFormattedValueAsString(rawValue);
+    const value = getValue();
 
     return (
       <CellBasic
         className={cx(alignClassName, headerGroupClassName)}
         style={generateWidthStyles(cell.column)}
         key={cell.id}
-        primaryText={formattedValue || NO_CONTENT_FALLBACK}
+        primaryText={value || NO_CONTENT_FALLBACK}
         shouldTextWrap
         primaryTextWrapLineCount={2}
-        shouldShowTooltipOnHover={shouldShowTooltip(formattedValue)}
+        shouldShowTooltipOnHover={shouldShowTooltip(value)}
       />
     );
   }

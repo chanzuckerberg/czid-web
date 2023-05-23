@@ -2,6 +2,7 @@ export interface AmrResult {
   contigCoverageBreadth: string | null;
   contigPercentId: string | null;
   contigs: string | null;
+  contigSpecies: string | null;
   cutoff: string | null;
   dpm: number | null;
   drugClass: string | null;
@@ -12,5 +13,6 @@ export interface AmrResult {
   readCoverageBreadth: string | null;
   readCoverageDepth: string | null;
   reads: string | null;
+  readSpecies: string | null;
   rpm: number | null;
 }

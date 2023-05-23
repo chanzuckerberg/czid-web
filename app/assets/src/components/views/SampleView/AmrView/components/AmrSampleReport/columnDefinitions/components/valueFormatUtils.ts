@@ -8,6 +8,7 @@ export const shouldShowTooltip = value => {
   return !canValueBeNumber(value) && value !== NO_CONTENT_FALLBACK;
 };
 
+/* Start Cutoff column helpers */
 type cutoffValueType = "Perfect" | "Strict" | "Nudged" | "-";
 const cutoffValueOrder: cutoffValueType[] = [
   "Perfect",
@@ -69,16 +70,14 @@ export const sortCutoffColumnFn = (a, b) => {
   }
   return 0;
 };
+/* End Cutoff column helpers */
 
-// We get a lot of different kinds of values from the API, all of which need to
-// end up as strings in the table. This function handles all the different cases.
-export const getFormattedValueAsString = (
-  rawValue: string | number | null | undefined,
+// Some of the table fields are compound strings. We want to split them, alphabetize them, and rejoin them.
+// If the value is not a string, return the same value. This is the value that is used for sorting.
+export const getFormattedCompoundString = (
+  rawValue: string | null | undefined,
 ) => {
-  if (!rawValue) {
-    // return placeholder string if value is false-y
-    return NO_CONTENT_FALLBACK;
-  } else if (typeof rawValue === "string" && !canValueBeNumber(rawValue)) {
+  if (typeof rawValue === "string" && !canValueBeNumber(rawValue)) {
     // if the value is a string which is not numerical, check for
     // compound strings separated by semicolons and sort them.
     // returns the original string if it is not compound
@@ -87,7 +86,29 @@ export const getFormattedValueAsString = (
 
     return valueParts.filter(value => value.length > 0).join("; ");
   } else {
-    // cast numbers as strings
-    return String(rawValue);
+    return rawValue;
   }
+};
+
+export const sortStringOrFallback = (aRow, bRow, columnId) => {
+  const a = aRow.getValue(columnId);
+  const b = bRow.getValue(columnId);
+
+  // sort a real value before a fallback value
+  if (b === null) {
+    return -1;
+  } else if (a === null) {
+    return 1;
+  }
+  // if neither are a fallback value, sort them alphabetically (ignore case)
+  const aLower = a.toLowerCase();
+  const bLower = b.toLowerCase();
+  if (aLower < bLower) {
+    return -1;
+  } else if (aLower > bLower) {
+    return 1;
+  }
+
+  // Otherwise the values are equal
+  return 0;
 };
