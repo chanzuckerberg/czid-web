@@ -33,21 +33,48 @@ module SamplesHelper
     end
   end
 
-  def get_attributes_illumina_or_ont(technology)
+  def get_samples_list_csv_attributes(pipeline_run_versions, technology)
+    csv_attributes = []
+    shared_attributes = %w[
+      sample_name uploader upload_date overall_job_status runtime_seconds
+      total_reads passed_filters passed_filters_percent host_organism notes
+    ]
+
     if technology == PipelineRun::TECHNOLOGY_INPUT[:illumina]
-      %w[sample_name uploader upload_date overall_job_status runtime_seconds
-         total_reads passed_filters passed_filters_percent total_ercc_reads
-         subsampled_fraction quality_control compression_ratio reads_after_star
-         reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup
-         reads_after_idseq_dedup reads_after_czid_dedup host_organism notes
-         insert_size_median insert_size_mode insert_size_median_absolute_deviation
-         insert_size_min insert_size_max insert_size_mean
-         insert_size_standard_deviation insert_size_read_pairs]
+      short_read_mngs_attributes = %w[total_ercc_reads subsampled_fraction quality_control compression_ratio]
+      old_host_filtering_attributes = %w[
+        reads_after_star reads_after_trimmomatic reads_after_priceseq
+        reads_after_cdhitdup reads_after_idseq_dedup reads_after_czid_dedup
+      ]
+      modern_host_filtering_attributes = %w[
+        reads_after_bowtie2_ercc_filtered reads_after_fastp reads_after_bowtie2_host_filtered
+        reads_after_hisat2_host_filtered reads_after_czid_dedup
+      ]
+      insert_size_metrics_attributes = %w[
+        insert_size_median insert_size_mode insert_size_median_absolute_deviation
+        insert_size_min insert_size_max insert_size_mean
+        insert_size_standard_deviation insert_size_read_pairs
+      ]
+
+      csv_attributes = shared_attributes + short_read_mngs_attributes
+
+      if pipeline_run_versions.present?
+        # If a CSV contains samples that use both the old and new host filtering stages, we need to include both sets of attributes.
+        # Otherwise, we can just include the attributes for the host filtering stage that was used for all samples.
+        host_filtering_attributes = []
+        host_filtering_attributes += modern_host_filtering_attributes if pipeline_run_versions&.any? { |version| version.to_f >= PipelineRunsHelper::BOWTIE2_ERCC_READS_BEFORE_QUALITY_FILTERING_PIPELINE_VERSION.to_f }
+        host_filtering_attributes += old_host_filtering_attributes if pipeline_run_versions&.any? { |version| version.to_f < PipelineRunsHelper::BOWTIE2_ERCC_READS_BEFORE_QUALITY_FILTERING_PIPELINE_VERSION.to_f }
+      else
+        host_filtering_attributes = modern_host_filtering_attributes + old_host_filtering_attributes
+      end
+
+      csv_attributes += host_filtering_attributes
+      csv_attributes += insert_size_metrics_attributes
     elsif technology == PipelineRun::TECHNOLOGY_INPUT[:nanopore]
-      %w[sample_name uploader upload_date overall_job_status runtime_seconds
-         total_reads total_bases passed_filters passed_filters_percent
-         subsampled_fraction_bases bases_after_quality_filter_percent bases_after_quality_filter
-         bases_after_minimap2_host_filtering host_organism notes]
+      long_read_mngs_attributes = %w[total_bases passed_filters passed_filters_percent
+                                     subsampled_fraction_bases bases_after_quality_filter_percent bases_after_quality_filter
+                                     bases_after_minimap2_host_filtering]
+      csv_attributes = shared_attributes + long_read_mngs_attributes
     #  TODO: Uncomment and include the following read_length stats once they are available.
     #  read_length_median read_length_mode read_length_median_absolute_deviation
     #  read_length_min read_length_max read_length_mean
@@ -55,6 +82,7 @@ module SamplesHelper
     else
       raise "Unknown technology"
     end
+    csv_attributes
   end
 
   def insert_size_metric_hash(pr)
@@ -84,6 +112,11 @@ module SamplesHelper
       reads_after_idseq_dedup: summary_stats[:reads_after_idseq_dedup] || '',
       reads_after_czid_dedup: summary_stats[:reads_after_czid_dedup] || '',
       passed_filters_percent: summary_stats[:percent_remaining] ? summary_stats[:percent_remaining].round(3) : '',
+
+      reads_after_bowtie2_ercc_filtered: summary_stats[:reads_after_bowtie2_ercc_filtered] || '',
+      reads_after_fastp: summary_stats[:reads_after_fastp] || '',
+      reads_after_bowtie2_host_filtered: summary_stats[:reads_after_bowtie2_host_filtered] || '',
+      reads_after_hisat2_host_filtered: summary_stats[:reads_after_hisat2_host_filtered] || '',
     }
   end
 
@@ -115,8 +148,9 @@ module SamplesHelper
   def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false, technology: PipelineRun::TECHNOLOGY_INPUT[:illumina])
     formatted_samples = format_samples(samples, selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
 
+    pipeline_run_versions = selected_pipeline_runs_by_sample_id&.values&.map(&:pipeline_version)&.uniq
     # reads_after_cdhitdup required for backwards compatibility
-    attributes = get_attributes_illumina_or_ont(technology)
+    attributes = get_samples_list_csv_attributes(pipeline_run_versions, technology)
 
     if include_all_metadata
       metadata_fields = MetadataHelper.get_unique_metadata_fields_for_samples(samples)
