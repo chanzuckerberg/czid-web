@@ -674,15 +674,17 @@ class Sample < ApplicationRecord
     # the pipeline run / workflow run creation is rolled back, leaving the sample in a weird waiting state.
     # TODO: Support retry status on WorkflowRuns
     amr_wrs_to_dispatch = workflow_runs.where(status: WorkflowRun::STATUS[:created], workflow: WorkflowRun::WORKFLOW[:amr])
+    cg_wrs_to_dispatch =  workflow_runs.where(status: WorkflowRun::STATUS[:created], workflow: WorkflowRun::WORKFLOW[:consensus_genome])
     if transient_status == STATUS_RETRY_PR && pr
       pr.retry
     elsif initial_workflow == WorkflowRun::WORKFLOW[:consensus_genome]
-      workflow_runs.where(status: WorkflowRun::STATUS[:created], workflow: WorkflowRun::WORKFLOW[:consensus_genome]).all.map(&:dispatch)
+      cg_wrs_to_dispatch.all.map(&:dispatch)
     elsif initial_workflow == WorkflowRun::WORKFLOW[:amr]
       amr_wrs_to_dispatch.all.map(&:dispatch)
     elsif initial_workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
       kickoff_pipeline
       amr_wrs_to_dispatch.all.map(&:dispatch) unless amr_wrs_to_dispatch.empty?
+      cg_wrs_to_dispatch.all.map(&:dispatch) unless cg_wrs_to_dispatch.empty?
     elsif initial_workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
       if transient_status == STATUS_RERUN
         # If we're rerunning an existing long read mngs sample, we need to create a new pipeline run to dispatch.

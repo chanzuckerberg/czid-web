@@ -125,6 +125,79 @@ RSpec.describe "Sample request", type: :request do
           workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
         }
 
+        @sample_params_wgs = {
+          client: "web",
+          host_genome_id: hg.id,
+          host_genome_name: hg.name,
+          technology: illumina_technology,
+          input_files_attributes: [
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              upload_client: "web",
+              file_type: "fastq",
+            },
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              upload_client: "web",
+              file_type: "fastq",
+            },
+            {
+              source_type: "local",
+              source: "primer.bed",
+              parts: "primer.bed",
+              upload_client: "web",
+              file_type: "primer_bed",
+            },
+            {
+              source_type: "local",
+              source: "ref.fasta",
+              parts: "ref.fasta",
+              upload_client: "web",
+              file_type: "reference_sequence",
+            },
+          ],
+          length: 2,
+          name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",
+          project_id: @project.id,
+          do_not_process: false,
+          primer_bed: "primer.bed",
+          ref_fasta: "ref.fasta",
+          taxon_name: "generic virus",
+          workflows: [WorkflowRun::WORKFLOW[:consensus_genome], WorkflowRun::WORKFLOW[:short_read_mngs]],
+        }
+
+        @sample_params_sc2_cg = {
+          client: "web",
+          host_genome_id: hg.id,
+          host_genome_name: hg.name,
+          technology: illumina_technology,
+          input_files_attributes: [
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              upload_client: "web",
+              file_type: "fastq",
+            },
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              upload_client: "web",
+              file_type: "fastq",
+            },
+          ],
+          length: 2,
+          name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",
+          project_id: @project.id,
+          do_not_process: false,
+          workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
+        }
+
         @metadata_params = {
           "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17" => {
             "sex" => "Female",
@@ -173,6 +246,67 @@ RSpec.describe "Sample request", type: :request do
         test_sample = Sample.find(sample_id)
         expect(test_sample.status).to eq(Sample::STATUS_CREATED)
         expect(test_sample.pipeline_execution_strategy).to eq(nil)
+      end
+
+      it "should successfully save CG WGS workflow_runs with the correct inputs_json" do
+        @sample_params_wgs[:workflows] = [WorkflowRun::WORKFLOW[:consensus_genome]]
+        post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params_wgs], metadata: @metadata_params, client: @client_params, format: :json }
+        expect(response.content_type).to include("application/json")
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+
+        sample_id = json_response["sample_ids"][0]
+        test_sample = Sample.find(sample_id)
+        expect(test_sample.status).to eq(Sample::STATUS_CREATED)
+        expect(test_sample.pipeline_execution_strategy).to eq(nil)
+
+        workflow_run = WorkflowRun.find_by(sample_id: sample_id)
+        inputs_json = JSON.parse(workflow_run.inputs_json)
+        expect(inputs_json["primer_bed"] == "primer.bed")
+        expect(inputs_json["ref_fasta"] == "ref.fasta")
+        expect(inputs_json["taxon_name"] == "generic virus")
+      end
+
+      it "should successfully kickoff mNGS and WGS together" do
+        @sample_params_wgs[:workflows] = [WorkflowRun::WORKFLOW[:consensus_genome], WorkflowRun::WORKFLOW[:short_read_mngs]]
+        post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params_wgs], metadata: @metadata_params, client: @client_params, format: :json }
+
+        expect(response.content_type).to include("application/json")
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+
+        sample_id = json_response["sample_ids"][0]
+        test_sample = Sample.find(sample_id)
+        expect(test_sample.status).to eq(Sample::STATUS_CREATED)
+        expect(test_sample.pipeline_execution_strategy).to eq(nil)
+
+        workflow_run = WorkflowRun.find_by(sample_id: sample_id)
+        # check that initial workflow has been set to short-read-mngs and that workflow is consensus-genome
+
+        expect(test_sample.initial_workflow == "short-read-mngs")
+        expect(workflow_run.workflow == "consensus-genome")
+      end
+
+      it "should successfully kickoff SC2 CG workflow runs and set the correct inputs_json" do
+        post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params_sc2_cg], metadata: @metadata_params, client: @client_params, format: :json }
+
+        expect(response.content_type).to include("application/json")
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        sample_id = json_response["sample_ids"][0]
+
+        test_sample = Sample.find(sample_id)
+        expect(test_sample.status).to eq(Sample::STATUS_CREATED)
+        expect(test_sample.pipeline_execution_strategy).to eq(nil)
+        workflow_run = WorkflowRun.find_by(sample_id: sample_id)
+
+        expect(workflow_run.workflow == "consensus-genome")
+        inputs_json = JSON.parse(workflow_run.inputs_json)
+        expect(inputs_json["accession_id"] == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID)
+        expect(inputs_json["accession_name"] == "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome")
+        expect(inputs_json["taxon_id"] == 2_697_049)
+        expect(inputs_json["taxon_name"] == "Severe acute respiratory syndrome coronavirus 2")
+        expect(inputs_json["technology"] == illumina_technology)
       end
 
       it "should properly add the pipeline_execution_strategy flag, step_function, to the pipeline run when no flag is passed" do

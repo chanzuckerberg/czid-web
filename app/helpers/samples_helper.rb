@@ -644,15 +644,25 @@ module SamplesHelper
 
       if sample_attributes[:workflows].present?
         workflows = sample_attributes.delete(:workflows)
-        # TODO: Remove initial_workflow in the future, since users can now upload a sample with multiple workflows specified
-        # For AMR v1, we'll set the initial worklow to short-read-mngs if the user has selected short-read-mngs and amr together, otherwise get the only workflow in the workflows array.
-        # The user can only select mNGS and AMR to be uploaded at once as of 9/9/2022
+        # TODO: Remove initial_workflow in the future, since users can now
+        # upload a sample with multiple workflows specified
+        # For AMR v1 and WGS (CG), we'll set the initial worklow to short-read-mngs
+        # if the user has selected short-read-mngs and either amr or CG together,
+        # otherwise get the only workflow in the workflows array.
+        # The user can only select mNGS and either AMR or CG to be uploaded at once as of 5/16/2023
         # This is not the ideal solution so we should remove initial_workflow in the future.
-        sample_attributes[:initial_workflow] = workflows.include?(WorkflowRun::WORKFLOW[:short_read_mngs]) && workflows.include?(WorkflowRun::WORKFLOW[:amr]) ? WorkflowRun::WORKFLOW[:short_read_mngs] : workflows[0]
+        initial_workflow = if workflows.include?(WorkflowRun::WORKFLOW[:short_read_mngs]) && (
+          workflows.include?(WorkflowRun::WORKFLOW[:amr]) ||
+          workflows.include?(WorkflowRun::WORKFLOW[:consensus_genome])
+        )
+                             WorkflowRun::WORKFLOW[:short_read_mngs]
+                           else
+                             workflows[0]
+                           end
+        sample_attributes[:initial_workflow] = initial_workflow
         # Remove short-read-mngs from the workflows array so we don't create a WorkflowRun with a workflow of short_reads_mngs
         workflows.delete(WorkflowRun::WORKFLOW[:short_read_mngs]) if workflows.include?(WorkflowRun::WORKFLOW[:short_read_mngs])
       end
-
       technology = sample_attributes.delete(:technology) if sample_attributes.key?(:technology)
 
       if workflows&.include?(WorkflowRun::WORKFLOW[:consensus_genome]) && technology.nil?
@@ -676,6 +686,18 @@ module SamplesHelper
 
       if sample_attributes.key?(:accession_id)
         accession_id = sample_attributes.delete(:accession_id)
+      end
+
+      if sample_attributes.key?(:accession_name)
+        accession_name = sample_attributes.delete(:accession_name)
+      end
+
+      if sample_attributes.key?(:taxon_id)
+        taxon_id = sample_attributes.delete(:taxon_id)
+      end
+
+      if sample_attributes.key?(:taxon_name)
+        taxon_name = sample_attributes.delete(:taxon_name)
       end
 
       if sample_attributes.key?(:ref_fasta)
@@ -724,28 +746,49 @@ module SamplesHelper
       if should_attempt_to_save_sample && sample && sample.save
         samples << sample
 
-        workflows&.each do |workflow|
-          if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
-            # Temporarily hardcode inputs_json's taxon info as sars-cov-2 for samples uploaded from FE via regular upload flow
-            # TODO: Generalize taxon info in inputs_json when FE uploader is modified to specify a taxon upon creating a consensus genome
-            inputs_json = {}.tap do |h|
-              h[:accession_id] = accession_id || ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
-              h[:accession_name] = "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome"
-              h[:taxon_id] = 2_697_049
-              h[:taxon_name] = "Severe acute respiratory syndrome coronavirus 2"
-              h[:technology] = technology
-              h[:wetlab_protocol] = wetlab_protocol
-              h[:ref_fasta] = ref_fasta
-              h[:primer_bed] = primer_bed
+        base_inputs_json = {}.tap do |h|
+          h[:accession_id] = accession_id
+          h[:accession_name] = accession_name
+          h[:taxon_id] = taxon_id
+          h[:taxon_name] = taxon_name
+          h[:technology] = technology
+        end
 
-              if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
-                h[:clearlabs] = clearlabs
-                h[:medaka_model] = medaka_model
-                h[:vadr_options] = vadr_options
-              end
-            end
+        inputs_json_cg_sc2 = {}.tap do |h|
+          # Temporarily hardcode inputs_json's taxon info as sars-cov-2 for samples uploaded from FE via regular upload flow
+          h[:accession_id] = ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
+          h[:accession_name] = "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome"
+          h[:taxon_id] = 2_697_049
+          h[:taxon_name] = "Severe acute respiratory syndrome coronavirus 2"
+          h[:technology] = technology
+          h[:wetlab_protocol] = wetlab_protocol
+
+          if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+            h[:clearlabs] = clearlabs
+            h[:medaka_model] = medaka_model
+            h[:vadr_options] = vadr_options
           end
+        end
 
+        # copy over the base inputs_json for WGS
+        inputs_json_wgs = base_inputs_json.dup
+        inputs_json_wgs[:ref_fasta] = ref_fasta
+        inputs_json_wgs[:primer_bed] = primer_bed
+
+        workflows&.each do |workflow|
+          inputs_json = if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
+                          if ref_fasta.nil?
+                            # signals SC2 (WGS - general viral case requires ref_file)
+                            # TODO: replace this with the creation_source parameter once it's passed in from the FE
+                            inputs_json_cg_sc2
+                          else
+                            # General Viral WGS case
+                            inputs_json_wgs
+                          end
+                        else
+                          # other workflows (not CG)
+                          base_inputs_json
+                        end
           if workflow == WorkflowRun::WORKFLOW[:long_read_mngs]
             pr = PipelineRun.new(
               sample: sample,

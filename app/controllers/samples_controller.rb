@@ -1732,7 +1732,7 @@ class SamplesController < ApplicationController
                                :basespace_dataset_id, :basespace_access_token, :skip_cache,
                                :do_not_process, :pipeline_execution_strategy, :wetlab_protocol,
                                :share_id, :technology, :medaka_model, :vadr_options, :clearlabs,
-                               :ref_fasta, :primer_bed, :guppy_basecaller_setting, :alignment_config_name,
+                               :ref_fasta, :primer_bed, :guppy_basecaller_setting, :alignment_config_name, :taxon_id, :taxon_name, :accession_id, :accession_name,
                                { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts, :upload_client, :file_type] },]
     permitted_sample_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :subsample, :max_input_fragments]) if current_user.admin?
 

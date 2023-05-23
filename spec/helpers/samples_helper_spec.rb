@@ -285,7 +285,6 @@ RSpec.describe SamplesHelper, type: :helper do
           expect(created_sample.bulk_mode).to eq(nil)
           expect(created_sample.uploaded_from_basespace).to eq(0)
           expect(created_sample.user).to eq(@joe)
-
           expect(created_workflow_run.inputs.keys).to eq([
                                                            "accession_id",
                                                            "accession_name",
@@ -293,8 +292,6 @@ RSpec.describe SamplesHelper, type: :helper do
                                                            "taxon_name",
                                                            "technology",
                                                            "wetlab_protocol",
-                                                           "ref_fasta",
-                                                           "primer_bed",
                                                            "clearlabs",
                                                            "medaka_model",
                                                            "vadr_options",
