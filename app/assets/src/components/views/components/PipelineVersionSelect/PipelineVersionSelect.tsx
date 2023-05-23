@@ -4,6 +4,7 @@ import React from "react";
 import { Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
+import { usesLatestCardDbVersion } from "~/components/utils/pipeline_versions";
 import { findInWorkflows, WORKFLOWS } from "~/components/utils/workflows";
 import { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
@@ -64,7 +65,13 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
     if (!shouldIncludeDatabaseVersion) return "";
     let dbVersion = get("version.alignment_db", currentRun);
     if (workflowType === "amr") {
-      dbVersion = "CARD DB: 3.2.3";
+      const workflowRunUsesLatestCardDbVersion = usesLatestCardDbVersion(
+        currentRun[versionKey],
+      );
+      const cardDbVersion = workflowRunUsesLatestCardDbVersion
+        ? "3.2.6"
+        : "3.2.3";
+      dbVersion = `CARD DB: ${cardDbVersion}`;
     }
     return dbVersion ? `${dbVersion} | ` : "";
   };

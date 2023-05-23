@@ -48,3 +48,8 @@ export const isPipelineFeatureAvailable = (
 ) => {
   return pipelineVersionAtLeast(pipelineVersion, MINIMUM_VERSIONS[feature]);
 };
+
+// Checks if the AMR workflow run uses the latest CARD DB version (as of 5/23/23)
+export const usesLatestCardDbVersion = pipelineVersion => {
+  return pipelineVersionAtLeast(pipelineVersion, "1.2.4");
+};

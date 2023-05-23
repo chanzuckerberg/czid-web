@@ -1,5 +1,6 @@
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 import moment from "moment";
+import { usesLatestCardDbVersion } from "~/components/utils/pipeline_versions";
 import {
   WORKFLOWS,
   WORKFLOW_KEY_FOR_VALUE,
@@ -173,6 +174,10 @@ export const processAMRWorkflowRun = (
   const workflow = WORKFLOWS[workflowKey].label;
   const lastProcessedAt = moment(executedAt).format(YYYY_MM_DD);
 
+  const workflowRunUsesLatestCardDbVersion =
+    usesLatestCardDbVersion(pipelineVersion);
+  const cardDbVersion = workflowRunUsesLatestCardDbVersion ? "3.2.6" : "3.2.3";
+
   if (qualityMetrics) {
     const {
       total_reads: totalReads,
@@ -207,7 +212,7 @@ export const processAMRWorkflowRun = (
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: { text: pipelineVersion },
-      cardDatabaseVersion: { text: "3.2.3" }, // Currently the only version for AMR
+      cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
       totalReads: { text: numberWithCommas(totalReads) },
       totalErccReads: { text: numberWithCommas(totalErccReads) },
@@ -222,6 +227,7 @@ export const processAMRWorkflowRun = (
       workflow: { text: workflow },
       technology: { text: ILLUMINA }, // Currently the only supported technology for AMR
       pipelineVersion: { text: pipelineVersion },
+      cardDatabaseVersion: { text: cardDbVersion },
       lastProcessedAt: { text: lastProcessedAt },
     };
   }
