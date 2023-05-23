@@ -70,7 +70,6 @@ import {
   isPipelineFeatureAvailable,
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
-import { sampleErrorInfo } from "~/components/utils/sample";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import {
   findInWorkflows,
@@ -80,13 +79,11 @@ import {
 } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
-import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import {
   getAllGeneraPathogenCounts,
   getGeneraPathogenCounts,
 } from "~/helpers/taxon";
 import { copyShortUrlToClipboard } from "~/helpers/url";
-import { IconAlertType } from "~/interface/icon";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import {
   AmrDeprectatedData,
@@ -101,18 +98,17 @@ import {
 } from "~/interface/sampleView";
 import { Background, Taxon } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
-import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { WORKFLOW_VALUES } from "../../utils/workflows";
 import { BlastModalInfo } from "../blast/constants";
 import { AmrView } from "./AmrView";
+import { SampleViewMessage } from "./components/SampleViewMessage";
 import {
   GENUS_LEVEL_INDEX,
   KEY_SAMPLE_VIEW_OPTIONS,
   KEY_SELECTED_OPTIONS_BACKGROUND,
   LOCAL_STORAGE_FIELDS,
   NOTIFICATION_TYPES,
-  ONT_PIPELINE_RUNNING_STATUS,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
   SUCCEEDED_STATE,
@@ -134,7 +130,6 @@ import { showNotification } from "./notifications";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import ReportViewSelector from "./ReportViewSelector";
-import csSampleMessage from "./sample_message.scss";
 import cs from "./sample_view.scss";
 import { SampleViewHeader } from "./SampleViewHeader";
 import SampleViewModals from "./SampleViewModals";
@@ -1500,94 +1495,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     }
   };
 
-  renderSampleMessage = () => {
-    const { currentTab, loadingReport, pipelineRun, reportMetadata, sample } =
-      this.state;
-    const { snapshotShareId } = this.props;
-    const { pipelineRunStatus, jobStatus } = reportMetadata;
-    let status: string,
-      message: string,
-      subtitle: string,
-      linkText: string,
-      type: IconAlertType,
-      link: string,
-      icon: JSX.Element;
-    // Error messages were previously sent from the server in the reportMetadata,
-    // but after the switch to SFN are now sent as part of the sample's information.
-    // Try to extract the error messages from the sample if possible, then try the
-    // reportMetadata for older samples.
-    const errorMessage =
-      sample && sample.error_message
-        ? sample.error_message
-        : reportMetadata.errorMessage;
-    const knownUserError =
-      sample && sample.known_user_error
-        ? sample.known_user_error
-        : reportMetadata.knownUserError;
-
-    if (loadingReport) {
-      status = "Loading";
-      message = "Loading report data.";
-      icon = <IconLoading className={csSampleMessage.icon} />;
-      type = "inProgress";
-    } else if (
-      pipelineRunStatus === "WAITING" &&
-      sample &&
-      !sample.upload_error
-    ) {
-      // Note that the pipeline status "WAITING" is obtained from the API at `app/services/pipeline_report_service.rb`
-      status = "IN PROGRESS";
-      message =
-        currentTab === TABS.LONG_READ_MNGS
-          ? ONT_PIPELINE_RUNNING_STATUS
-          : jobStatus;
-      icon = <IconLoading className={csSampleMessage.icon} />;
-      type = "inProgress";
-      if (pipelineRun && pipelineRun.pipeline_version) {
-        linkText = "View Pipeline Visualization";
-        link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.pipeline_version}`;
-      }
-    } else {
-      // Some kind of error or warning has occurred.
-      if (sample) {
-        // If an upload error occurred, the pipeline run might not exist so
-        // only try to set these fields if the pipeline run started.
-        if (pipelineRun) {
-          pipelineRun.known_user_error = knownUserError;
-          pipelineRun.error_message = errorMessage;
-        }
-        ({ status, message, subtitle, linkText, type, link } = sampleErrorInfo({
-          sample,
-          pipelineRun,
-        }));
-      }
-      icon = <IconAlert className={csSampleMessage.icon} type={type} />;
-    }
-    // Hide sample message links on snapshot pages.
-    if (snapshotShareId) {
-      link = "";
-      linkText = "";
-    }
-
-    return (
-      <SampleMessage
-        icon={icon}
-        link={link}
-        linkText={linkText}
-        message={message}
-        subtitle={subtitle}
-        status={status}
-        type={type}
-        onClick={() =>
-          trackEvent(
-            ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED,
-            { status },
-          )
-        }
-      />
-    );
-  };
-
   handleViewClick = ({ view }: { view: SampleReportViewMode }) => {
     trackEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
     this.setState({ view }, () => {
@@ -1796,7 +1703,16 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       );
     } else {
       // The report is either in progress or encountered an error.
-      return this.renderSampleMessage();
+      return (
+        <SampleViewMessage
+          currentTab={currentTab}
+          loadingReport={loadingReport}
+          pipelineRun={pipelineRun}
+          reportMetadata={reportMetadata}
+          sample={sample}
+          snapshotShareId={snapshotShareId}
+        />
+      );
     }
   };
 

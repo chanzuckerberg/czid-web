@@ -17,6 +17,10 @@ test.describe("Pipeline Viz View tests", () => {
     await page.getByText("Accept All Cookies").click();
   });
 
+  test("Should render the Pipeline Version Select", async ({ page }) => {
+    await expect(page.getByTestId("pipeline-version-select")).toBeVisible();
+  });
+
   test("Should open sidebar on click", async ({ page }) => {
     await page.mouse.click(450, 450);
     await expect(page.getByTestId("details-sidebar")).toBeVisible();

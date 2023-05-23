@@ -7,7 +7,7 @@ import {
   WORKFLOWS,
   WORKFLOW_VALUES,
 } from "~/components/utils/workflows";
-import PipelineVersionSelect from "~/components/views/components/PipelineVersionSelect";
+import { PipelineVersionSelect } from "~/components/views/components/PipelineVersionSelect";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import { PipelineRun } from "~/interface/shared";
 import cs from "./secondary_header_controls.scss";

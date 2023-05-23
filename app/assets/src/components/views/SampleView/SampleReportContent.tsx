@@ -1,12 +1,11 @@
 import React from "react";
-import { trackEvent } from "~/api/analytics";
 import { IconAlert, IconLoading } from "~/components/ui/icons";
 import { sampleErrorInfo } from "~/components/utils/sample";
+import { SampleMessage } from "~/components/views/components/SampleMessage";
+import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import cs from "./consensus_genome_view.scss";
 import { CREATED_STATE, RUNNING_STATE, SUCCEEDED_STATE } from "./constants";
-import csSampleMessage from "./sample_message.scss";
-import SampleMessage from "./SampleMessage";
 
 export interface SampleReportContentProps {
   loadingResults: boolean;
@@ -59,7 +58,7 @@ const SampleReportContent = ({
           message={loadingInfo.message}
           status={"IN PROGRESS"}
           type={"inProgress"}
-          onClick={() => trackEvent(eventNames.loading)}
+          analyticsEventName={eventNames?.loading}
         />
       );
     } else if (!sample.upload_error && workflowRun.status === CREATED_STATE) {
@@ -88,7 +87,7 @@ const SampleReportContent = ({
           message={message}
           status={status}
           type={type}
-          onClick={() => trackEvent(eventNames.error)}
+          analyticsEventName={eventNames?.error}
         />
       );
     }

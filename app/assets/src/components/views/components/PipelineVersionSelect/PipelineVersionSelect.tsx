@@ -89,7 +89,10 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
           position={"top center"}
           inverted={false}
           trigger={
-            <span className={cs.pipelineVersion}>
+            <span
+              className={cs.pipelineVersion}
+              data-testid="pipeline-version-select"
+            >
               {getWorkflowVersionString()}
             </span>
           }
@@ -135,6 +138,7 @@ export const PipelineVersionSelect = (props: PipelineVersionSelectProps) => {
               onChange={(version: string) => onPipelineVersionSelect(version)}
               smallArrow={true}
               arrowInsideTrigger={false}
+              data-testid="pipeline-version-select"
             />
           }
         />

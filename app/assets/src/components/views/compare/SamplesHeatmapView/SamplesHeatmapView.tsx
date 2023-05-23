@@ -64,8 +64,8 @@ import {
 import { WORKFLOWS } from "~/components/utils/workflows";
 import HeatmapCreationModal from "~/components/views/compare/HeatmapCreationModal";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
+import { SampleMessage } from "~/components/views/components/SampleMessage";
 import { URL_FIELDS } from "~/components/views/SampleView/constants";
-import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";

@@ -29,9 +29,9 @@ import {
   MAIL_TO_HELP_LINK,
   PHYLO_TREE_LINK,
 } from "~/components/utils/documentationLinks";
+import { SampleMessage } from "~/components/views/components/SampleMessage";
+import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
 import PairwiseDistanceMatrixErrorModal from "~/components/views/phylo_tree/PairwiseDistanceMatrixErrorModal";
-import csSampleMessage from "~/components/views/SampleView/sample_message.scss";
-import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import {
   copyShortUrlToClipboard,
   getURLParamString,
@@ -457,10 +457,8 @@ class PhyloTreeListView extends React.Component<
           message="Sorry, we were unable to compute a phylogenetic tree."
           status="Tree Failed"
           type="error"
-          onClick={() =>
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED,
-            )
+          analyticsEventName={
+            ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED
           }
         />
       );
@@ -481,10 +479,8 @@ class PhyloTreeListView extends React.Component<
           status="Generating Tree"
           subtitle="Hang tight and grab a cup of coffee while we generate your tree!"
           type="inProgress"
-          onClick={() =>
-            trackEvent(
-              ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED,
-            )
+          analyticsEventName={
+            ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_IN_PROGRESS_LINK_CLICKED
           }
         />
       );
