@@ -39,12 +39,21 @@ const generateUrlToSampleView = ({
     ? find({ value: workflow }, values(WORKFLOWS)).label
     : null;
   const snapshotSharePrefix = snapshotShareId ? `/pub/${snapshotShareId}` : "";
+
+  /* we don't want to persist the default background to the sample report
+  we intentionally do not have a default there because it leads to misinterpretation
+  if the user isn't intentional about which background they're using
+  */
+  const defaultBackgroundId = 26;
+  if (tempSelectedOptions?.background === defaultBackgroundId) {
+    tempSelectedOptions.background = null;
+  }
+
   const queryString = `${urlParser.stringify({
     ...(tempSelectedOptions && { tempSelectedOptions }),
     currentTab,
     workflowRunId,
   })}`;
-
   return `${snapshotSharePrefix}/samples/${sampleId}${
     queryString === "" ? "" : `?${queryString}`
   }`;
