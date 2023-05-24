@@ -2,6 +2,27 @@
 @import "~czifui/dist/variables";
 
 .filtersContainer {
+  max-width: 200px;
+  z-index: 2;
+  position: absolute;
+  top: 155px; // height of the page headers
+  left: 0px;
+  width: fit-content;
+  height: 100%;
+}
+
+.filtersContent {
+  height: 100%;
+  padding: $sds-spaces-l;
+  border-right: 1px solid $sds-color-gray-200;
+}
+
+.filtersContentClosed {
+  width: 70px;
+}
+
+.filtersContentOpen {
+  width: 200px;
 }
 
 .hideFilters {

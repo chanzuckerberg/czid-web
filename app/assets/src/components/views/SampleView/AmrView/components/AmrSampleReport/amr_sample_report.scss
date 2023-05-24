@@ -11,7 +11,6 @@
 .reportWrapperFiltersOpen {
   left: 0;
   width: 100%;
-  overflow: clip;
   @media screen and (max-width: 2100px) {
     --filtersOpenLeftShift: calc((2100px - 100vw) * (225) / (2100 - 1635));
     // Create a smooth transition between the two screen sizes
@@ -34,7 +33,6 @@
 .reportWrapperFiltersClosed {
   left: 0;
   width: 100%;
-  overflow: clip;
   @media screen and (max-width: 1770px) {
     --filtersClosedLeftShift: calc((1770px - 100vw) * 75 / (1770 - 1635));
     // Create a smooth transition between the two screen sizes

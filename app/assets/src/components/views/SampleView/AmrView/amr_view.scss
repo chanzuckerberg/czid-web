@@ -3,3 +3,10 @@
 .tableContainer {
   margin-top: $sds-spaces-xl;
 }
+
+.resultsContainer {
+  width: 100%;
+  // add 40px to enable scrolling on the page juuuuust far enough
+  // to hide the page header but not the table headers
+  height: calc(100% + 40px);
+}

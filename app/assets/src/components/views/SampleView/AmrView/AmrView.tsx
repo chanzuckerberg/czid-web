@@ -18,6 +18,7 @@ import { AMR_V2_FEATURE } from "~/components/utils/features";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
 import SampleReportContent from "../SampleReportContent";
+import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";
 import AmrNullResult from "./components/AmrNullResult";
@@ -95,7 +96,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   const renderResults = () => {
     if (allowedFeatures.includes(AMR_V2_FEATURE)) {
       return (
-        <>
+        <div className={cs.resultsContainer}>
           <AmrFiltersContainer
             setDataFilterFunc={setDataFilterFunc}
             hideFilters={hideFilters}
@@ -108,7 +109,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
             setDetailsSidebarGeneName={setDetailsSidebarGeneName}
             hideFilters={hideFilters}
           />
-        </>
+        </div>
       );
     } else {
       return (

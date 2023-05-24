@@ -3,6 +3,10 @@
 @import "~styles/themes/elements";
 @import "~czifui/dist/variables";
 
+.filtersAndHeatmapContainer {
+  display: flex;
+}
+
 .heatmap {
   margin-top: -$header-margin-bottom;
 

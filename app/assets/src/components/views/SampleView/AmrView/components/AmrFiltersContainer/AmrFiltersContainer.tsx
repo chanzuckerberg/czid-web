@@ -1,8 +1,8 @@
 import { useReactiveVar } from "@apollo/client";
+import { cx } from "@emotion/css";
 import { filter, forEach } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 import { activeAmrFiltersVar } from "~/cache/initialCache";
-import FilterPanel from "~/components/layout/FilterPanel";
 import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
 import { ColumnId } from "../../constants";
 import { AmrResult } from "../AmrSampleReport/types";
@@ -104,9 +104,6 @@ export const AmrFiltersContainer = ({
   hideFilters,
   setHideFilters,
 }: AmrFiltersContainerProps) => {
-  // If filters are hidden, set the width of the FilterPanel to 65px, otherwise set it to 200px
-  const drawerWidth = hideFilters ? 50 : 200;
-
   const [dataFilters, setDataFilters] = useState<FiltersType>(DATA_FILTER_INIT);
 
   // set the data filter function (using setDataFilterFunc callback) based on the current dataFilters
@@ -163,30 +160,29 @@ export const AmrFiltersContainer = ({
   const numOfActiveAmrFilters = countActiveFilters(activeAmrFilters);
 
   return (
-    <FilterPanel
-      // The filter panel should always be present, the only things that should be hidden are the filters themselves.
-      hideFilters={false}
-      content={
-        <div className={cs.filtersContainer}>
-          <FilterButtonWithCounter
-            filterCounter={numOfActiveAmrFilters}
-            onFilterToggle={() => setHideFilters(!hideFilters)}
-            showFilters={!hideFilters}
-            popupPosition="top left"
-          />
-          <div className={hideFilters && cs.hideFilters}>
-            <div className={cs.filters}>
-              <h2 className={cs.sectionTitle}>Filters</h2>
-              <AmrThresholdFilters
-                hideFilters={hideFilters}
-                updateThresholdFilters={updateThresholdFilters}
-              />
-            </div>
+    <div className={cs.filtersContainer}>
+      <div
+        className={cx(
+          cs.filtersContent,
+          hideFilters ? cs.filtersContentClosed : cs.filtersContentOpen,
+        )}
+      >
+        <FilterButtonWithCounter
+          filterCounter={numOfActiveAmrFilters}
+          onFilterToggle={() => setHideFilters(!hideFilters)}
+          showFilters={!hideFilters}
+          popupPosition="top left"
+        />
+        <div className={hideFilters && cs.hideFilters}>
+          <div className={cs.filters}>
+            <h2 className={cs.sectionTitle}>Filters</h2>
+            <AmrThresholdFilters
+              hideFilters={hideFilters}
+              updateThresholdFilters={updateThresholdFilters}
+            />
           </div>
         </div>
-      }
-      anchorPosition="left"
-      customDrawerWidth={drawerWidth}
-    />
+      </div>
+    </div>
   );
 };

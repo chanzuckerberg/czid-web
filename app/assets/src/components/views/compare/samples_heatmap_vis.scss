@@ -4,6 +4,8 @@
 @import "~czifui/dist/variables";
 
 .samplesHeatmapVis {
+  width: 100%;
+
   .plusMinusControl {
     z-index: 1;
     position: absolute;
@@ -19,41 +21,15 @@
     }
   }
 
-  .heatmapLayoutAnchor {
-    overflow: hidden;
-    // the headers above are 135px tall
-    height: calc(100vh - 135px);
-    display: flex;
-    justify-content: left;
-  }
-
-  .newHeatmapContainerFiltersOpen {
+  .newHeatmapContainer {
     position: relative;
-    // the legend and 'showing x our of x taxa' text are 60px tall
-    top: 45px;
-    // the filters are 214px wide
-    left: 214px;
-    height: calc(100% - 65px);
-    overflow: auto;
-    margin-left: $sds-spaces-l;
-    margin-top: $sds-spaces-l;
-    width: calc(100% - 228px);
-
-    svg {
-      display: block;
-      margin: 0 auto;
-    }
-  }
-
-  .newHeatmapContainerFiltersClosed {
-    position: relative;
-    // the legend and 'showing x our of x taxa' text are 60px tall
+    // the legend and 'showing x our of x taxa' text are 45px tall
     top: 45px;
     height: calc(100% - 65px);
-    overflow: auto;
     margin-left: $sds-spaces-l;
     margin-top: $sds-spaces-l;
     width: calc(100% - 14px);
+    min-width: 500px;
 
     svg {
       display: block;
@@ -63,7 +39,7 @@
 
   // TODO - smb - remove this old scss class once we're ready to remove the feature flag
   .heatmapContainer {
-    overflow: hidden;
+    // overflow: hidden;
     // Set the height so the heatmap takes up the rest of the screen.
     // 358px is the height of the elements above the heatmapContainer.
     // We set it to less that the height of the elements so that the

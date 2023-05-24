@@ -1831,7 +1831,7 @@ class SamplesHeatmapView extends React.Component<
             options={this.getControlOptions()}
           />
         )}
-        <div>
+        <div className={cs.filtersAndHeatmapContainer}>
           {useNewFilters && (
             <FilterPanel
               hideFilters={this.state.hideFilters}
@@ -1961,7 +1961,6 @@ class SamplesHeatmapView extends React.Component<
           sampleSortType={this.state.selectedOptions.sampleSortType}
           fullScreen={this.state.hideFilters}
           taxaSortType={this.state.selectedOptions.taxaSortType}
-          hideFilters={this.state.hideFilters}
         />
       </ErrorBoundary>
     );

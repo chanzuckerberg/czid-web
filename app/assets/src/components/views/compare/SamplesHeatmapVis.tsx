@@ -62,7 +62,6 @@ interface SamplesHeatmapVisProps {
   sampleSortType?: string;
   fullScreen?: boolean;
   taxaSortType?: string;
-  hideFilters?: boolean;
 }
 
 interface SamplesHeatmapVisState {
@@ -671,20 +670,13 @@ class SamplesHeatmapVis extends React.Component<
           className={cs.plusMinusControl}
         />
 
-        {/* anchor div here just to prevent the rest of the elements on the page (header, filters) from scrolling when the heatmap is scrolled */}
         {useNewFilters && (
-          <div className={cs.heatmapLayoutAnchor}>
-            <div
-              className={
-                this.props.hideFilters
-                  ? cs.newHeatmapContainerFiltersClosed
-                  : cs.newHeatmapContainerFiltersOpen
-              }
-              ref={container => {
-                this.heatmapContainer = container;
-              }}
-            />
-          </div>
+          <div
+            className={cs.newHeatmapContainer}
+            ref={container => {
+              this.heatmapContainer = container;
+            }}
+          />
         )}
         {!useNewFilters && (
           <div
