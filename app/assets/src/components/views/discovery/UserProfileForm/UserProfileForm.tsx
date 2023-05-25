@@ -17,6 +17,7 @@ import InstitutionFormField from "./components/InstitutionFormField";
 import NameField from "./components/NameField";
 import SequencingExpertiseFormField from "./components/SequencingExpertiseFormField";
 import {
+  REGEX_NAME_FAILED_TOOLTIP_TEXT,
   SUBMIT_BUTTON_DISABLED_TOOLTIP_TEXT,
   USER_PROFILE_FORM_VERSION,
 } from "./constants";
@@ -40,6 +41,7 @@ export function UserProfileForm() {
   const [country, setCountry] = useState<string>("");
   const [worldBankIncome, setWorldBankIncome] = useState<string>("");
   const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(true);
+
   const areRequiredFieldsFilled = () => {
     return (
       !isEmpty(firstName) &&
@@ -51,8 +53,23 @@ export function UserProfileForm() {
     );
   };
 
+  // check that firstName and lastName only contain letters, apostrophes, dashes, or spaces
+  const nameRegex = /^[- 'a-zA-ZÀ-ÖØ-öø-ÿ]+$/;
+  const checkRegexNameCheckIsFailing = () => {
+    // check that firstName and lastName are not empty and that they match the name regex
+    if (firstName && lastName) {
+      const matchingFirstName = Boolean(firstName.match(nameRegex));
+      const matchingLastName = Boolean(lastName.match(nameRegex));
+      if (!matchingFirstName || !matchingLastName) {
+        return true;
+      }
+    }
+  };
+
   useEffect(() => {
-    setIsSubmitDisabled(!areRequiredFieldsFilled());
+    setIsSubmitDisabled(
+      checkRegexNameCheckIsFailing() || !areRequiredFieldsFilled(),
+    );
   }, [
     firstName,
     lastName,
@@ -122,7 +139,11 @@ export function UserProfileForm() {
         <Tooltip
           arrow
           placement="top"
-          title={SUBMIT_BUTTON_DISABLED_TOOLTIP_TEXT}
+          title={
+            !areRequiredFieldsFilled()
+              ? SUBMIT_BUTTON_DISABLED_TOOLTIP_TEXT
+              : REGEX_NAME_FAILED_TOOLTIP_TEXT
+          }
         >
           <span>{button}</span>
         </Tooltip>
