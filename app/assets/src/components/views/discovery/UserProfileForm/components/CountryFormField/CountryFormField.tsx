@@ -51,10 +51,18 @@ export function CountryFormField({
     reason: string,
   ) => {
     if (reason === "input") {
-      setInputValue(value);
+      setInputValueFromCountryName(value);
       fetchCountries(value);
     } else if (reason === "clear") {
       setInputValue("");
+    }
+  };
+
+  const setInputValueFromCountryName = (countryName: string) => {
+    if (countries.includes(countryName)) {
+      setInputValue(countryName);
+    } else {
+      setInputValue(null);
     }
   };
 
@@ -69,21 +77,15 @@ export function CountryFormField({
           className={cs.autocomplete}
           size={"small"}
           fullWidth={false}
-          freeSolo={true}
           disablePortal
           options={countries}
           value={inputValue}
           onChange={(_: any, value: any) => {
-            setInputValue(value);
+            setInputValueFromCountryName(value);
           }}
           onInputChange={handleInputChange}
           renderInput={params => (
-            <TextField
-              {...params}
-              value={inputValue}
-              placeholder="Choose Country"
-              onChange={event => setInputValue(event.target.value)}
-            />
+            <TextField {...params} placeholder="Choose Country" />
           )}
         />
       </div>
