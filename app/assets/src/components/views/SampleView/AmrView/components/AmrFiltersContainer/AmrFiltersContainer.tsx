@@ -1,19 +1,23 @@
 import { useReactiveVar } from "@apollo/client";
 import { cx } from "@emotion/css";
-import { filter, forEach } from "lodash/fp";
-import React, { useEffect, useState } from "react";
-import { activeAmrFiltersVar } from "~/cache/initialCache";
+import { filter, forEach, map, split, trim } from "lodash/fp";
+import React, { useContext, useEffect, useState } from "react";
+import { activeAmrFiltersVar, amrDrugClassesVar } from "~/cache/initialCache";
+import { UserContext } from "~/components/common/UserContext";
 import { FilterButtonWithCounter } from "~/components/ui/controls/buttons/FilterButtonWithCounter";
+import { AMR_V3_FEATURE } from "~/components/utils/features";
 import { ColumnId } from "../../constants";
 import { AmrResult } from "../AmrSampleReport/types";
 import cs from "./amr_filters_container.scss";
 import { AmrThresholdFilters } from "./components/AmrThresholdFilters";
+import { DrugClassFilter } from "./components/DrugClassFilter";
 import { thresholdFilterOptionColumnIds } from "./constants";
 import {
   FilterParamsType,
   FiltersType,
   FilterType,
   TypeFilterType,
+  UpdateMultipleFilterType,
   UpdateThresholdFiltersType,
 } from "./types";
 import { countActiveFilters } from "./utils";
@@ -51,10 +55,22 @@ const THRESHOLD_FILTER_INIT = thresholdFilterOptionColumnIds.reduce(
   {},
 );
 
+const DRUG_CLASS_FILTER_INIT = {
+  [ColumnId.DRUG_CLASS]: {
+    key: ColumnId.DRUG_CLASS,
+    params: {
+      multiSelected: [],
+    },
+    transform: (d: AmrResult) => map(trim, split(";", d.drugClass)),
+    type: TypeFilterType.MULTIPLE,
+  },
+};
+
 // * `key` should be the ColumnId of the column you are filtering on
 // Merge inital values for additional filters here
 const DATA_FILTER_INIT: FiltersType = {
   ...THRESHOLD_FILTER_INIT,
+  ...DRUG_CLASS_FILTER_INIT,
 };
 
 const applyFilter = (data: AmrResult[], dataFilter: FilterType) => {
@@ -81,11 +97,13 @@ const applyFilter = (data: AmrResult[], dataFilter: FilterType) => {
         return doesPassFilterCheckLowerBound && doesPassFilterCheckUpperBound;
       }, data);
     case TypeFilterType.MULTIPLE:
-      if (multiSelected.length === 0) return data;
+      if (!multiSelected || multiSelected.length === 0) return data;
 
       return filter(d => {
         const value = transform ? transform(d) : d;
-        return multiSelected.includes(value);
+        return multiSelected.some((selected: string) =>
+          value.includes(selected),
+        );
       }, data);
     case TypeFilterType.SINGLE:
       if (!selected) return data;
@@ -104,6 +122,7 @@ export const AmrFiltersContainer = ({
   hideFilters,
   setHideFilters,
 }: AmrFiltersContainerProps) => {
+  const { allowedFeatures } = useContext(UserContext) || {};
   const [dataFilters, setDataFilters] = useState<FiltersType>(DATA_FILTER_INIT);
 
   // set the data filter function (using setDataFilterFunc callback) based on the current dataFilters
@@ -156,8 +175,22 @@ export const AmrFiltersContainer = ({
     updateDataFilters(filtersList);
   };
 
+  const updateDrugClassFilter = (filtersData: UpdateMultipleFilterType) => {
+    const { multiSelected } = filtersData;
+
+    updateDataFilters([
+      {
+        filterKey: ColumnId.DRUG_CLASS,
+        params: {
+          multiSelected,
+        },
+      },
+    ]);
+  };
+
   const activeAmrFilters = useReactiveVar(activeAmrFiltersVar);
   const numOfActiveAmrFilters = countActiveFilters(activeAmrFilters);
+  const drugClassList = useReactiveVar(amrDrugClassesVar);
 
   return (
     <div className={cs.filtersContainer}>
@@ -180,6 +213,15 @@ export const AmrFiltersContainer = ({
               hideFilters={hideFilters}
               updateThresholdFilters={updateThresholdFilters}
             />
+            {allowedFeatures.includes(AMR_V3_FEATURE) && (
+              <DrugClassFilter
+                hideFilters={hideFilters}
+                drugClassOptions={
+                  drugClassList?.map(drugClass => ({ name: drugClass })) ?? []
+                }
+                onDrugClassChange={updateDrugClassFilter}
+              />
+            )}
           </div>
         </div>
       </div>

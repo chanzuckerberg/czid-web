@@ -64,10 +64,7 @@ export const sanitizeCSVRow = (row: string[]) => {
       } else if (isString(val)) {
         return escapeFormulae(val);
       } else {
-        logError({
-          message: "CSV Util: Invalid sanitization of value",
-          details: { val, row },
-        });
+        return "";
       }
     });
   } else {
@@ -294,6 +291,20 @@ const generateCSVRowForActiveFilters = (activeFilters: AmrFilterSelections) => {
 
       if (!isEmpty(thresholdFilters)) {
         filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
+      }
+    }
+
+    if (filterType === "drugClassFilters") {
+      const drugClassFilters = filters.reduce(
+        (result: string[], drugClass: string) => {
+          result.push(drugClass);
+          return result;
+        },
+        [],
+      );
+
+      if (!isEmpty(drugClassFilters)) {
+        filterRow.push(`Drug Classes:, ${drugClassFilters.join()}`);
       }
     }
   }

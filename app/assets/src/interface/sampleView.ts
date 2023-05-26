@@ -151,6 +151,7 @@ export interface FilterSelections {
 
 export interface AmrFilterSelections {
   thresholdFilters: ThresholdFilterData[];
+  drugClassFilters: string[];
 }
 
 export type SampleReportViewMode = "table" | "tree";

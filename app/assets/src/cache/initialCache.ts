@@ -10,6 +10,7 @@ export const selectedBulkDownloadVar = makeVar<{
 export const amrReportTableDownloadWithAppliedFiltersLinkVar =
   makeVar<string>(null);
 export const activeAmrFiltersVar = makeVar<AmrFilterSelections>(null);
+export const amrDrugClassesVar = makeVar<string[]>(null);
 
 export const initalCache = new InMemoryCache({
   typePolicies: {

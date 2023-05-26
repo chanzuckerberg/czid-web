@@ -19,6 +19,7 @@ export const ANNOTATION_FILTER_FEATURE = "annotation_filter";
 export const BLAST_V1_FEATURE = "blast_v1";
 export const AMR_V1_FEATURE = "amr_v1";
 export const AMR_V2_FEATURE = "amr_v2";
+export const AMR_V3_FEATURE = "amr_v3";
 // ONT_V1_FEATURE enables the Beta ONT pipeline
 export const ONT_V1_FEATURE = "ont_v1";
 // ONT_V1_HARD_LAUNCH_FEATURE removes Beta labels on the ONT pipeline and will be enabled for the hard launch

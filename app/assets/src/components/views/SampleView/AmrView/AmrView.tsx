@@ -1,10 +1,11 @@
 import { useReactiveVar } from "@apollo/client";
-import { get } from "lodash/fp";
+import { forEach, get, trim } from "lodash/fp";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { getWorkflowRunResults } from "~/api";
 import { withAnalytics } from "~/api/analytics";
 import {
   activeAmrFiltersVar,
+  amrDrugClassesVar,
   amrReportTableDownloadWithAppliedFiltersLinkVar,
 } from "~/cache/initialCache";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -59,6 +60,7 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
       const reportDataRaw = await getWorkflowRunResults(workflowRun.id);
       const reportData = camelize(reportDataRaw);
       setReportTableData(reportData.reportTableData);
+      setDrugClassesReactiveVar(reportData.reportTableData);
       setLoadingResults(false);
     };
 
@@ -77,6 +79,20 @@ export const AmrView = ({ workflowRun, sample }: AmrViewProps) => {
   useEffect(() => {
     generateReportWithAppliedFiltersDownloadLink();
   }, [displayedRows]);
+
+  const setDrugClassesReactiveVar = reportTableData => {
+    const drugClasses = new Set<string>();
+    forEach((row: AmrResult) => {
+      const { drugClass } = row;
+      if (drugClass) {
+        // A drug class can have multiple values separated by ";"
+        drugClass.split(";").forEach((drugClass: string) => {
+          drugClasses.add(trim(drugClass));
+        });
+      }
+    }, reportTableData);
+    amrDrugClassesVar(Array.from(drugClasses));
+  };
 
   const generateReportWithAppliedFiltersDownloadLink = () => {
     const numOfActiveAmrFilters = countActiveFilters(activeFilterSelections);

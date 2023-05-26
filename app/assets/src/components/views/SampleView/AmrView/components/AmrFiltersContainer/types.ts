@@ -32,3 +32,8 @@ type UpdateThresholdFilterType = {
 export type UpdateThresholdFiltersType = {
   [filterKey in ColumnId]?: UpdateThresholdFilterType;
 };
+
+export type UpdateMultipleFilterType = {
+  filterKey: ColumnId;
+  multiSelected: string[];
+};

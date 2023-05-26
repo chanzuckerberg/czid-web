@@ -6,3 +6,15 @@
   letter-spacing: 1px;
   text-transform: uppercase;
 }
+
+.drugClassFilter {
+  :global(.MuiButtonBase-root.MuiChip-root) {
+    margin: 0 $sds-spaces-xs $sds-spaces-xs $sds-spaces-xs;
+    padding: $sds-spaces-xs $sds-spaces-s;
+
+    :global(.MuiChip-label) {
+      font: $sds-font-body-xxxs-400-font;
+      color: $sds-color-gray-white;
+    }
+  }
+}
