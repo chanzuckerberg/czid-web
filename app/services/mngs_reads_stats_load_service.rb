@@ -59,7 +59,8 @@ class MngsReadsStatsLoadService
   def fetch_fastp_qc_counts(s3_prefix, reads_after_bowtie2_ercc_filtering)
     fastp_qc_counts = []
     bucket = ENV['SAMPLES_BUCKET_NAME']
-    resp = AwsClient[:s3].get_object(bucket: bucket, key: "#{s3_prefix}/#{PipelineRun::FASTP_JSON_FILE}")
+    key = "#{s3_prefix}/#{PipelineRun::FASTP_JSON_FILE}"
+    resp = AwsClient[:s3].get_object(bucket: bucket, key: key)
     contents = JSON.parse(resp.body.read)["filtering_result"]
 
     reads_after_quality = reads_after_bowtie2_ercc_filtering - contents["low_quality_reads"]
