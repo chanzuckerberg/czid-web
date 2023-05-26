@@ -294,13 +294,11 @@ RSpec.describe SamplesHelper, type: :helper do
                                                            "wetlab_protocol",
                                                            "clearlabs",
                                                            "medaka_model",
-                                                           "vadr_options",
                                                          ])
 
           expect(created_workflow_run.inputs&.[]("wetlab_protocol")).to eq(ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic])
           expect(created_workflow_run.inputs&.[]("technology")).to eq(ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore])
           expect(created_workflow_run.inputs&.[]("medaka_model")).to eq(ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL)
-          expect(created_workflow_run.inputs&.[]("vadr_options")).to eq(ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS)
         end
 
         it "fails if technology is not provided with consensus genome workflow runs" do

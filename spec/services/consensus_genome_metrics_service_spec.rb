@@ -42,13 +42,6 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
     }
   end
 
-  let(:vadr_data) do
-    "#seq  seq           seq                                      sub                           seq    mdl         num                     sub   score  diff/  seq   \n#idx  name          len  p/f   ant  model1     grp1          grp1          score  sc/nt    cov    cov  bias  hits  str  model2  grp2  grp2   diff     nt  alerts\n#---  ----------  -----  ----  ---  ---------  ------------  ----------  -------  -----  -----  -----  ----  ----  ---  ------  ----  ----  -----  -----  ------\n1     sample1_41  29862  FAIL  yes  NC_045512  Sarbecovirus  SARS-CoV-2  55099.0  1.845  1.000  0.998     0     1    +  -       -     -         -      -  N_AT_START(ambgnt5s),N_AT_END(ambgnt3s),LOW_SIMILARITY_START(lowsim5s)\n"
-  end
-  let(:vadr_formatted) do
-    { vadr_pass_fail: "FAIL" }
-  end
-
   let(:consolidated_data) do
     {
       gc_percent: 38.0,
@@ -99,10 +92,9 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
     context "when the accession id IS for SARS-CoV-2" do
       subject { ConsensusGenomeMetricsService.new(workflow_run_corona) }
 
-      it "fetches the primary metrics, quast metrics, and VADR metrics" do
+      it "fetches the primary metrics and quast metrics" do
         expect(subject).to receive(:add_primary_metrics)
         expect(subject).to receive(:add_quast_metrics)
-        expect(subject).to receive(:add_vadr_metrics)
 
         subject.send(:generate)
       end
@@ -110,7 +102,6 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
       it "handles the error when the output is not available" do
         expect(workflow_run_corona).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_STATS).and_return(stats_data)
         expect(workflow_run_corona).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_QUAST).and_return(quast_data)
-        expect(workflow_run_corona).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_VADR_QUALITY).and_raise(SfnExecution::OutputNotFoundError.new("fake_key", ["available_keys"]))
 
         expect(subject.send(:generate)).to eq(consolidated_data)
       end
@@ -143,14 +134,6 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
       expect(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_QUAST).and_return(quast_data)
 
       expect { subject.send(:add_quast_metrics, {}) }.to raise_error(NoMethodError)
-    end
-  end
-
-  describe "#add_vadr_metrics" do
-    it "correctly formats the quast metrics" do
-      expect(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_VADR_QUALITY).and_return(vadr_data)
-
-      expect(subject.send(:add_vadr_metrics, {})).to eq(vadr_formatted)
     end
   end
 end

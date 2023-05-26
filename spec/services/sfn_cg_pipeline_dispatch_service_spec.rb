@@ -16,7 +16,6 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
   let(:test_workflow_name) { WorkflowRun::WORKFLOW[:consensus_genome] }
   let(:fake_wdl_version) { "10.0.0" }
   let(:medaka_model) { ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL }
-  let(:vadr_options) { ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS }
   let(:illumina_technology) { ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina] }
   let(:nanopore_technology) { ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore] }
   let(:fake_states_client) do
@@ -434,7 +433,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                    workflow: test_workflow_name,
                    status: WorkflowRun::STATUS[:created],
                    sample: sample,
-                   inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                   inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
           end
 
           it "correctly stores the creation source" do
@@ -450,7 +449,6 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                     apply_length_filter: true,
                     technology: nanopore_technology,
                     medaka_model: medaka_model,
-                    vadr_options: vadr_options,
                     primer_set: "nCoV-2019/V3",
                   },
                 },
@@ -464,7 +462,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                      workflow: test_workflow_name,
                      status: WorkflowRun::STATUS[:created],
                      sample: sample,
-                     inputs_json: { clearlabs: true, technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                     inputs_json: { clearlabs: true, technology: nanopore_technology, medaka_model: medaka_model, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
             end
 
             it "returns sfn input containing correct sfn parameters" do
@@ -475,7 +473,6 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                       apply_length_filter: false,
                       technology: nanopore_technology,
                       medaka_model: medaka_model,
-                      vadr_options: vadr_options,
                       primer_set: "nCoV-2019/V3",
                     },
                   },
@@ -490,7 +487,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                      workflow: test_workflow_name,
                      status: WorkflowRun::STATUS[:created],
                      sample: sample,
-                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
 
               it "returns sfn input with Midnight primer set"
               expect(subject).to include_json(
@@ -500,7 +497,6 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                       apply_length_filter: true,
                       technology: nanopore_technology,
                       medaka_model: medaka_model,
-                      vadr_options: vadr_options,
                       primer_set: "nCoV-2019/V1200",
                     },
                   },
@@ -515,7 +511,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                      workflow: test_workflow_name,
                      status: WorkflowRun::STATUS[:created],
                      sample: sample,
-                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
 
               it "returns sfn input with artic v4 primer set"
               expect(subject).to include_json(
@@ -525,7 +521,6 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                       apply_length_filter: true,
                       technology: nanopore_technology,
                       medaka_model: medaka_model,
-                      vadr_options: vadr_options,
                       primer_set: "nCoV-2019/V4",
                     },
                   },
@@ -540,7 +535,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                      workflow: test_workflow_name,
                      status: WorkflowRun::STATUS[:created],
                      sample: sample,
-                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:varskip] }.to_json)
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:varskip] }.to_json)
 
               it "returns sfn input with varskip primer set"
               expect(subject).to include_json(
@@ -550,7 +545,6 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                       apply_length_filter: true,
                       technology: nanopore_technology,
                       medaka_model: medaka_model,
-                      vadr_options: vadr_options,
                       primer_set: "NEB_VarSkip/V1a",
                     },
                   },
@@ -565,7 +559,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                      workflow: test_workflow_name,
                      status: WorkflowRun::STATUS[:created],
                      sample: sample,
-                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
             end
 
             it "throws an error" do
@@ -579,7 +573,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                      workflow: test_workflow_name,
                      status: WorkflowRun::STATUS[:created],
                      sample: sample,
-                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
+                     inputs_json: { technology: nanopore_technology, medaka_model: medaka_model }.to_json)
             end
 
             it "throws an error" do
@@ -593,7 +587,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                      workflow: test_workflow_name,
                      status: WorkflowRun::STATUS[:created],
                      sample: sample,
-                     inputs_json: { medaka_model: medaka_model, vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                     inputs_json: { medaka_model: medaka_model, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
             end
 
             it "fails with TechnologyMissingError" do
@@ -607,7 +601,7 @@ RSpec.describe SfnCgPipelineDispatchService, type: :service do
                      workflow: test_workflow_name,
                      status: WorkflowRun::STATUS[:created],
                      sample: sample,
-                     inputs_json: { technology: nanopore_technology, medaka_model: "invalid option", vadr_options: vadr_options, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                     inputs_json: { technology: nanopore_technology, medaka_model: "invalid option", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
             end
 
             it "fails with InvalidMedakaModelError" do

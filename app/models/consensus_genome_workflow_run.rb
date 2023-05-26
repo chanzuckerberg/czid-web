@@ -14,7 +14,6 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   OUTPUT_DEPTHS = "consensus_genome.compute_stats_out_sam_depths".freeze
   OUTPUT_QUAST = "consensus_genome.quast_out_quast_tsv".freeze
   OUTPUT_STATS = "consensus_genome.compute_stats_out_output_stats".freeze
-  OUTPUT_VADR_QUALITY = "consensus_genome.vadr_quality_out".freeze
   OUTPUT_ZIP = "consensus_genome.zip_outputs_out_output_zip".freeze
 
   SARS_COV_2_ACCESSION_ID = "MN908947.3".freeze
@@ -70,8 +69,6 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     "r941_prom_variant_g322",
     "r941_prom_variant_g360",
   ].freeze
-  # Never interpolate user input into DEFAULT_VADR_OPTIONS to prevent command injection.
-  DEFAULT_VADR_OPTIONS = "-s -r --nomisc --mkey NC_045512 --lowsim5term 2 --lowsim3term 2 --fstlowthr 0.0 --alt_fail lowscore,fsthicnf,fstlocnf".freeze
 
   CREATION_SOURCE = {
     sars_cov_2_upload: "SARS-CoV-2 Upload",
