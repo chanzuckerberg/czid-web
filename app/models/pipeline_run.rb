@@ -472,7 +472,7 @@ class PipelineRun < ApplicationRecord
     end
     update(ercc_counts_attributes: ercc_counts_array)
     total_ercc_reads = ercc_counts_array.pluck(:count).sum
-    total_ercc_reads *= sample.input_files.count unless pipeline_version_uses_bowtie2_to_calculate_ercc_reads(pipeline_version)
+    total_ercc_reads *= sample.input_files.fastq.count unless pipeline_version_uses_bowtie2_to_calculate_ercc_reads(pipeline_version)
 
     update(total_ercc_reads: total_ercc_reads)
   end
@@ -588,7 +588,7 @@ class PipelineRun < ApplicationRecord
         "#{postprocess_output_s3_path}/#{prefix}nonhost_R1.#{input_file_ext}",
       ]
 
-      if sample.input_files.length == 2
+      if sample.input_files.fastq.length == 2
         files << "#{postprocess_output_s3_path}/#{prefix}nonhost_R2.#{input_file_ext}"
       end
     else
@@ -1595,7 +1595,7 @@ class PipelineRun < ApplicationRecord
     res = adjusted_remaining_reads
     if subsample
       # Ex: max of 1,000,000 or 2,000,000 reads
-      max_reads = subsample * sample.input_files.count
+      max_reads = subsample * sample.input_files.fastq.count
       if adjusted_remaining_reads > max_reads
         res = max_reads
       end

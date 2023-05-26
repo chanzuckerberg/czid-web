@@ -10,6 +10,12 @@ class InputFile < ApplicationRecord
   FILE_TYPE_FASTQ = 'fastq'.freeze
   FILE_TYPE_PRIMER_BED = 'primer_bed'.freeze
   FILE_TYPE_REFERENCE_SEQUENCE = "reference_sequence".freeze
+  # Historically, we have allowed fasta input files for short-read-mngs samples.
+  # These short-read-mngs input fastas have been backfilled as FILE_TYPE_FASTQ,
+  # which means they will be treated as fastq files but will contain a fasta file_extension.
+  scope :fastq, -> { where(file_type: FILE_TYPE_FASTQ) }
+  scope :primer_bed, -> { where(file_type: FILE_TYPE_PRIMER_BED) }
+  scope :reference_sequence, -> { where(file_type: FILE_TYPE_REFERENCE_SEQUENCE) }
 
   SOURCE_TYPE_LOCAL = 'local'.freeze
   SOURCE_TYPE_S3 = 's3'.freeze
@@ -50,6 +56,8 @@ class InputFile < ApplicationRecord
     end
   end
 
+  # As of May 2023, this file path will, in addition to storing fastq files,
+  # also store reference sequences and primer bed files.
   def file_path
     File.join(sample.sample_path, 'fastqs', name)
   end

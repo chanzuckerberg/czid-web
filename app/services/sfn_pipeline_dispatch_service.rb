@@ -68,11 +68,11 @@ class SfnPipelineDispatchService
   def new_host_filtering_inputs
     hg = @sample.host_genome
     {
-      fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
-      fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+      fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[0].name),
+      fastqs_1: @sample.input_files.fastq[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[1].name) : nil,
       nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
 
-      adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
+      adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files.fastq[1] ? "paired-end" : "single-end"],
 
       host_genome: hg.name.downcase,
       bowtie2_index_tar: hg.s3_bowtie2_index_path_v2,
@@ -100,12 +100,12 @@ class SfnPipelineDispatchService
                       new_host_filtering_inputs
                     else
                       {
-                        fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
-                        fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+                        fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[0].name),
+                        fastqs_1: @sample.input_files.fastq[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[1].name) : nil,
                         file_ext: @sample.fasta_input? ? "fasta" : "fastq",
                         nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
                         host_genome: @sample.host_genome_name.downcase,
-                        adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
+                        adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files.fastq[1] ? "paired-end" : "single-end"],
                         star_genome: @sample.host_genome.s3_star_index_path,
                         bowtie2_genome: @sample.host_genome.s3_bowtie2_index_path,
                         human_star_genome: HostGenome.find_by(name: "Human").s3_star_index_path,
@@ -132,8 +132,8 @@ class SfnPipelineDispatchService
                       use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
                       deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
                     }, Experimental: {
-                      fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
-                      fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+                      fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[0].name),
+                      fastqs_1: @sample.input_files.fastq[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files.fastq[1].name) : nil,
                       nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
                       nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
                       file_ext: @sample.fasta_input? ? "fasta" : "fastq",

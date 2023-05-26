@@ -96,7 +96,7 @@ RSpec.describe SfnLongReadMngsPipelineDispatchService, type: :service do
             sfn_input_json: {
               Input: {
                 Run: {
-                  input_fastq: format(s3_sample_input_files_path, sample_id: @sample.id, project_id: @project.id, input_file_name: @sample.input_files[0].source),
+                  input_fastq: format(s3_sample_input_files_path, sample_id: @sample.id, project_id: @project.id, input_file_name: @sample.input_files.fastq[0].source),
                 },
               },
             }

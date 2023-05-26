@@ -2,7 +2,7 @@
 class TransferBasespaceFiles
   extend InstrumentedJob
 
-  @queue = :transfer_basespace_files
+  @queue = :transfer_basespace_fastq_files
 
   # sample_id is the id of the sample we are uploading files to.
   # basespace_dataset_id is the id of dataset from basespace we are uploading samples from.
@@ -11,7 +11,7 @@ class TransferBasespaceFiles
   def self.perform(sample_id, basespace_dataset_id, basespace_access_token)
     Rails.logger.info("Start TransferBasespaceFiles for sample id #{sample_id}")
     sample = Sample.find(sample_id)
-    sample.transfer_basespace_files(basespace_dataset_id, basespace_access_token)
+    sample.transfer_basespace_fastq_files(basespace_dataset_id, basespace_access_token)
 
     # If ALL samples relying on this access token are done transferring files, revoke the access token.
     samples_remaining = Sample.where(basespace_access_token: basespace_access_token, status: Sample::STATUS_CREATED)

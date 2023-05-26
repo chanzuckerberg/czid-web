@@ -397,20 +397,31 @@ class BulkDownload < ApplicationRecord
 
       download_src_urls = samples_ordered.map(&:input_file_s3_paths).flatten
 
+      # File output name notes:
       # We use the sample name in the output file names (instead of the original input file names)
-      # because the sample name is what's visible to the user.
-      # Also, there might be duplicates between the original file names.
+      # because the sample name is what's visible on the UI and because the original file names might be non-unique.
+      # We include the project id because the cleaned project names might be non-unique.
       download_tar_names = samples_ordered.map do |sample|
-        # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
-        # Nanopore samples will only have one input file.
-        sample.input_files.map.with_index do |input_file, input_file_index|
-          # Include the project id because the cleaned project names might have duplicates as well.
-          if sample.initial_workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
+        input_fastq_index = 0
+        sample.input_files.map do |input_file|
+          if input_file.file_type == InputFile::FILE_TYPE_FASTQ
+            if sample.input_files.fastq.count < 2
+              # Single-end sample
+              "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+                  "original.#{input_file.file_extension}"
+            else
+              # Paired-end sample
+              # We assume that the first input fastq file is R1 and the second input fastq file is R2. This is the convention that the pipeline follows.
+              input_fastq_index += 1
+              "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+                "original_R#{input_fastq_index}.#{input_file.file_extension}"
+            end
+          elsif input_file.file_type == InputFile::FILE_TYPE_REFERENCE_SEQUENCE
             "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-              "original_R#{input_file_index + 1}.#{input_file.file_extension}"
-          else
+              "original_reference_sequence.#{input_file.file_extension}"
+          elsif input_file.file_type == InputFile::FILE_TYPE_PRIMER_BED
             "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-                "original.#{input_file.file_extension}"
+              "original_primer.#{input_file.file_extension}"
           end
         end
       end.flatten

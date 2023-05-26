@@ -147,6 +147,7 @@ class SfnCgPipelineDispatchService
     end
   end
 
+  # TODO: Replace this with InputFile scopes (ie. reference_sequence), once the CLI is updated to store file_type
   def ref_fasta_input
     ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
     if ref_fasta_name
@@ -216,9 +217,10 @@ class SfnCgPipelineDispatchService
   end
 
   def generate_wdl_input
+    # TODO: Replace this with InputFile scopes (ie. fastq), once the CLI is updated to store file_type
     ref_fasta_name = @workflow_run.inputs&.[]("ref_fasta")
     primer_bed_name = @workflow_run.inputs&.[]("primer_bed")
-    input_fastas = @sample.input_files.filter { |i| i.name != ref_fasta_name && i.name != primer_bed_name }
+    input_fastqs = @sample.input_files.filter { |i| i.name != ref_fasta_name && i.name != primer_bed_name }
 
     # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
     additional_inputs = if creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
@@ -259,8 +261,8 @@ class SfnCgPipelineDispatchService
 
     run_inputs = {
       docker_image_id: retrieve_docker_image_id,
-      fastqs_0: File.join(@sample.sample_input_s3_path, input_fastas[0].name),
-      fastqs_1: input_fastas[1] ? File.join(@sample.sample_input_s3_path, input_fastas[1].name) : nil,
+      fastqs_0: File.join(@sample.sample_input_s3_path, input_fastqs[0].name),
+      fastqs_1: input_fastqs[1] ? File.join(@sample.sample_input_s3_path, input_fastqs[1].name) : nil,
       sample: @sample.name.tr(" ", "_"),
       ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
       kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",

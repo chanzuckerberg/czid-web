@@ -119,8 +119,8 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
           sfn_input_json: {
             Input: {
               HostFilter: {
-                fastqs_0: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
-                fastqs_1: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
+                fastqs_0: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files.fastq[0].source),
+                fastqs_1: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files.fastq[1].source),
               },
             },
           }

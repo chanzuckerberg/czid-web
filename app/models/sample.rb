@@ -244,18 +244,15 @@ class Sample < ApplicationRecord
   validates_associated :input_files
 
   def input_files_checks
-    # TODO: This is a temporary fix for [CZID-7886], that reverts the input_files check to the previous behavior.
-    # Once the file_type backfill in [CZID-7835] is complete, we can uncomment the following line:
-    # input_fastqs = input_files.select { |file| file.file_type == InputFile::FILE_TYPE_FASTQ }
-    input_fastqs = input_files
+    input_fastqs = input_files.select { |file| file.file_type == InputFile::FILE_TYPE_FASTQ }
 
-    # validate that we have the correct number of input files
+    # validate that we have the correct number of input fastq files
     errors.add(:input_fastqs, "invalid number (#{input_fastqs.size})") unless
       # we can have up to 4 input files, input fasta R1 + R2, a primer bed for consensus genomes,
       #  and a reference fasta for consensus genomes. We currently don't support this from basespace
       uploaded_from_basespace? ? input_fastqs.size.between?(0, 2) : input_fastqs.size.between?(1, 4)
 
-    # validate that both input files have the same source_type and file_extension
+    # validate that both input fastq files have the same source_type and file_extension
     if input_fastqs.length == 2
       errors.add(:input_fastqs, "have different source types") unless input_fastqs[0].source_type == input_fastqs[1].source_type
       errors.add(:input_fastqs, "have different file formats") unless input_fastqs[0].file_extension == input_fastqs[1].file_extension
@@ -397,7 +394,7 @@ class Sample < ApplicationRecord
     end
   end
 
-  def initiate_s3_cp(unlimited_size = false)
+  def initiate_fastq_files_s3_cp(unlimited_size = false)
     return unless status == STATUS_CREATED
 
     self.upload_error = nil
@@ -406,7 +403,7 @@ class Sample < ApplicationRecord
     # The AppConfig setting is the max file size in gigabytes; default 100; multiply by 10^9 to get bytes
     s3_upload_file_size_limit = (get_app_config(AppConfig::S3_SAMPLE_UPLOAD_FILE_SIZE_LIMIT) || 100).to_i
     max_file_size = s3_upload_file_size_limit * (10**9)
-    input_fastqs = input_files.select { |file| file.file_type == InputFile::FILE_TYPE_FASTQ }
+    input_fastqs = input_files.fastq
     input_fastqs.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
@@ -474,11 +471,11 @@ class Sample < ApplicationRecord
     save!
   end
 
-  # Uploads input files from basespace for this sample.
+  # Uploads input fastq files from basespace for this sample.
   # basespace_dataset_id is the id of the dataset from basespace we are uploading samples from.
   #   A dataset is a basespace concept meaning a collection of one or more related files (such as paired fastq files)
   # basespace_access_token is the access token that authorizes us to download these files.
-  def transfer_basespace_files(basespace_dataset_id, basespace_access_token)
+  def transfer_basespace_fastq_files(basespace_dataset_id, basespace_access_token)
     # Only continue if the sample status is CREATED and not yet UPLOADED.
     return unless status == STATUS_CREATED
 

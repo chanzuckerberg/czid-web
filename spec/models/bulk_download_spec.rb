@@ -146,6 +146,56 @@ describe BulkDownload, type: :model do
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
 
+    it "returns the correct task command for original_input_file download type for samples with additional (non-fastq) input files" do
+      reference_sequence_file1 = create(:local_web_reference_sequence_input_file, sample: @sample_one)
+      primer_bed_file1 = create(:local_web_primer_bed_input_file, sample: @sample_one)
+      @sample_one.input_files += [reference_sequence_file1, primer_bed_file1]
+
+      reference_sequence_file2 = create(:local_web_reference_sequence_input_file, sample: @sample_two)
+      primer_bed_file2 = create(:local_web_primer_bed_input_file, sample: @sample_two)
+      @sample_two.input_files += [reference_sequence_file2, primer_bed_file2]
+
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
+                                @sample_one.first_pipeline_run.id,
+                                @sample_two.first_pipeline_run.id,
+                              ])
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[0].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[1].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[2].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[3].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[2].name}",
+        "s3://czi-infectious-disease-development-samples/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[3].name}",
+        "--tar-names",
+        get_expected_tar_name(@project, @sample_one, "original_R1.fastq.gz"),
+        get_expected_tar_name(@project, @sample_one, "original_R2.fastq.gz"),
+        get_expected_tar_name(@project, @sample_one, "original_reference_sequence.fasta.gz"),
+        get_expected_tar_name(@project, @sample_one, "original_primer.bed.gz"),
+        get_expected_tar_name(@project, @sample_two, "original_R1.fastq.gz"),
+        get_expected_tar_name(@project, @sample_two, "original_R2.fastq.gz"),
+        get_expected_tar_name(@project, @sample_two, "original_reference_sequence.fasta.gz"),
+        get_expected_tar_name(@project, @sample_two, "original_primer.bed.gz"),
+        "--dest-url",
+        "s3://czi-infectious-disease-development-samples/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
+        "--progress-delay",
+        15,
+        "--success-url",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://czid.org/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
+
     it "returns the correct task command for unmapped_reads download type" do
       @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::UNMAPPED_READS_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,

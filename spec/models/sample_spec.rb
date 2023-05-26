@@ -37,7 +37,7 @@ describe Sample, type: :model do
   let(:amr) { WorkflowRun::WORKFLOW[:amr] }
   let(:nanopore) { PipelineRun::TECHNOLOGY_INPUT[:nanopore] }
 
-  context "#transfer_basespace_files" do
+  context "#transfer_basespace_fastq_files" do
     before do
       project = create(:public_project)
       create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
@@ -51,7 +51,7 @@ describe Sample, type: :model do
         expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(2).times.and_return(true)
         expect(@sample).to receive(:kickoff_pipeline).exactly(1).times
 
-        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+        @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
 
         expect(@sample.status).to eq(Sample::STATUS_CHECKED)
         expect(@sample.upload_error).to eq(nil)
@@ -77,7 +77,7 @@ describe Sample, type: :model do
         expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(1).times.and_return(true)
         expect(@sample).to receive(:kickoff_pipeline).exactly(1).times
 
-        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+        @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
 
         expect(@sample.status).to eq(Sample::STATUS_CHECKED)
         expect(@sample.upload_error).to eq(nil)
@@ -96,7 +96,7 @@ describe Sample, type: :model do
 
         @sample.status = Sample::STATUS_UPLOADED
 
-        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+        @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
 
         expect(@sample.status).to eq(Sample::STATUS_UPLOADED)
         expect(@sample.upload_error).to eq(nil)
@@ -125,7 +125,7 @@ describe Sample, type: :model do
           hash_including(basespace_access_token: "fake_access_token", basespace_dataset_id: "fake_dataset_id")
         ).exactly(1).times
 
-        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+        @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
 
         expect(@sample.status).to eq(Sample::STATUS_CHECKED)
         expect(@sample.upload_error).to eq(Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED)
@@ -159,7 +159,7 @@ describe Sample, type: :model do
           hash_including(basespace_access_token: "fake_access_token", basespace_dataset_id: "fake_dataset_id")
         ).exactly(1).times
 
-        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+        @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
 
         expect(@sample.status).to eq(Sample::STATUS_CHECKED)
         expect(@sample.upload_error).to eq(Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED)
@@ -179,7 +179,7 @@ describe Sample, type: :model do
           hash_including(basespace_access_token: "fake_access_token", basespace_dataset_id: "fake_dataset_id")
         ).exactly(1).times
 
-        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+        @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
 
         expect(@sample.status).to eq(Sample::STATUS_CHECKED)
         expect(@sample.upload_error).to eq(Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED)
@@ -199,7 +199,7 @@ describe Sample, type: :model do
           hash_including(basespace_access_token: "fake_access_token", basespace_dataset_id: "fake_dataset_id")
         ).exactly(1).times
 
-        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+        @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
 
         expect(@sample.status).to eq(Sample::STATUS_CHECKED)
         expect(@sample.upload_error).to eq(Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED)
@@ -222,7 +222,7 @@ describe Sample, type: :model do
           hash_including(basespace_access_token: "fake_access_token", basespace_dataset_id: "fake_dataset_id")
         ).exactly(1).times
 
-        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+        @sample.transfer_basespace_fastq_files(fake_dataset_id, fake_access_token)
 
         expect(@sample.status).to eq(Sample::STATUS_CHECKED)
         expect(@sample.upload_error).to eq(Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED)

@@ -41,13 +41,29 @@ function showhide(id) {
     <strong class="failed"><%= @sample.upload_error %></strong>
   </p>
 <% end %>
-<% if @sample.input_files.present? %>
+<% if @sample.input_files.fastq.present? %>
   <p>
-    <strong>Input files:</strong>
-    <%= @sample.input_files&.[](0)&.source_type %>
-    <%= "(#{@sample.input_files&.[](0)&.upload_client})" %>
-    [<%= @sample.input_files&.[](0)&.source %>,
-    <%= @sample.input_files&.[](1)&.source %>]
+    <strong>Input fastq files:</strong>
+    <%= @sample.input_files.fastq&.[](0)&.source_type %>
+    <%= "(#{@sample.input_files.fastq&.[](0)&.upload_client})" %>
+    [<%= @sample.input_files.fastq&.[](0)&.source %>,
+    <%= @sample.input_files.fastq&.[](1)&.source %>]
+  </p>
+<% end %>
+<% if @sample.input_files.reference_sequence.present? %>
+  <p>
+    <strong>Input reference sequence file:</strong>
+    <%= @sample.input_files.reference_sequence&.[](0)&.source_type %>
+    <%= "(#{@sample.input_files.reference_sequence&.[](0)&.upload_client})" %>
+    [<%= @sample.input_files.reference_sequence&.[](0)&.source %>]
+  </p>
+<% end %>
+<% if @sample.input_files.primer_bed.present? %>
+  <p>
+    <strong>Input primer bed file:</strong>
+    <%= @sample.input_files.primer_bed&.[](0)&.source_type %>
+    <%= "(#{@sample.input_files.primer_bed&.[](0)&.upload_client})" %>
+    [<%= @sample.input_files.primer_bed&.[](0)&.source %>]
   </p>
 <% end %>
 
