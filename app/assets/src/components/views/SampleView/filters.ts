@@ -8,7 +8,6 @@ import {
   map,
   snakeCase,
   some,
-  sum,
   values,
 } from "lodash/fp";
 import { METRIC_DECIMAL_PLACES, TABS } from "./constants";
@@ -241,26 +240,4 @@ export const filterReportData = ({
   });
 
   return filteredData;
-};
-
-export const countFilters = (currentTab, selectedOptions) => {
-  const {
-    categories,
-    thresholdsShortReads,
-    thresholdsLongReads,
-    taxa,
-    annotations,
-  } = selectedOptions;
-
-  const numThresholdsFilters =
-    currentTab === TABS.SHORT_READ_MNGS
-      ? thresholdsShortReads.length
-      : thresholdsLongReads.length;
-
-  let numFilters = taxa.length;
-  numFilters += numThresholdsFilters;
-  numFilters += annotations.length;
-  numFilters += (categories.categories || []).length;
-  numFilters += sum(map(v => v.length, values(categories.subcategories || {})));
-  return numFilters;
 };

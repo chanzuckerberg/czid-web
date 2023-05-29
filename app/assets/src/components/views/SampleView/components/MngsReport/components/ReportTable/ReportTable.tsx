@@ -42,9 +42,10 @@ import {
   BlastData,
   ColumnProps,
   CurrentTabSample,
+  PickConsensusGenomeData,
   SortFunctionsParams,
 } from "~/interface/sampleView";
-import { AnnotationType, ConsensusGenomeData, Taxon } from "~/interface/shared";
+import { AnnotationType, Taxon } from "~/interface/shared";
 import {
   ANNOTATION_HIT,
   ANNOTATION_INCONCLUSIVE,
@@ -57,8 +58,8 @@ import {
   TABS,
   TAX_LEVEL_GENUS,
   TAX_LEVEL_SPECIES,
-} from "./constants";
-import HoverActions from "./HoverActions";
+} from "../../../../constants";
+import HoverActions from "../../../../HoverActions";
 import cs from "./report_table.scss";
 
 // Values for null values when sorting ascending and descending
@@ -70,11 +71,6 @@ const TAX_LEVEL_INDICES = {
   species: 1,
   genus: 2,
 };
-
-export type PickConsensusGenomeData = Pick<
-  ConsensusGenomeData,
-  "percentIdentity" | "taxId" | "taxName"
->;
 
 interface ReportTableProps {
   data?: Taxon[];
@@ -1248,7 +1244,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
     const readsPerMillionKey =
       currentTab === TABS.SHORT_READ_MNGS ? "rpm" : "bpm";
     return (
-      <>
+      <div className={cs.reportTable}>
         <Table
           cellClassName={cs.cell}
           columns={this.columns}
@@ -1281,7 +1277,7 @@ class ReportTable extends React.Component<ReportTableProps, ReportTableState> {
             )}
           </UserContext.Consumer>
         )}
-      </>
+      </div>
     );
   }
 }

@@ -6,7 +6,7 @@ import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import { MULTITAG_PATHOGENS_FEATURE } from "~/components/utils/features";
 import TidyTree from "~/components/visualizations/TidyTree";
 import { Taxon } from "~/interface/shared";
-import { TABS, TREE_VIZ_TOOLTIP_METRICS } from "./constants";
+import { TABS, TREE_VIZ_TOOLTIP_METRICS } from "../../../../constants";
 
 // @ts-expect-error working with Lodash Types
 const mapWithKeys = map.convert({ cap: false });

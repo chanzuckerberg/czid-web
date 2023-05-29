@@ -75,6 +75,7 @@ test.describe("Sample report filter test", () => {
     await expect(page.locator(FILTER_TAG)).toBeVisible();
     await expect(page.locator(FILTER_RESULT)).toHaveText(KLEBSIELLA);
   });
+
   test(`Should be able to filter by Category name`, async ({ page }) => {
     await page
       .locator(FILTER_HEADERS)
@@ -103,7 +104,23 @@ test.describe("Sample report filter test", () => {
       await expect(
         page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`),
       ).toBeVisible();
+      // test Remove filter x button
+      await page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`).getByTestId("remove-filter").click();
+      await expect(
+        page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`),
+      ).not.toBeVisible();
     }
+
+    for (let i = 0; i < drop_down.length; i++) {
+      await expect(page.locator(drop_down[i])).toBeVisible();
+      await page.locator(drop_down[i]).click();
+    }
+    // test Stats bar
+    await expect(page.getByTestId("stats-info")).not.toBeEmpty();
+
+    // test Clear Filters button
+    await page.getByTestId("clear-filters-button").click();
+    await expect(page.getByTestId("filter-tag")).toHaveCount(0);
   });
 
   test(`Should be able to filter by Threshold`, async ({ page }) => {
@@ -168,6 +185,7 @@ test.describe("Sample report filter test", () => {
       .locator(FILTER_HEADERS)
       .locator(ANNOTATION_TEXT)
       .click();
+
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
       ANNOTATION_FILTERS.includes(drop_down[i]);
@@ -177,6 +195,7 @@ test.describe("Sample report filter test", () => {
       .locator(FILTER_HEADERS)
       .locator(ANNOTATION_TEXT)
       .click();
+
     // Verify Threshold filter are applied
     for (let i = 0; i < drop_down.length; i++) {
       await page

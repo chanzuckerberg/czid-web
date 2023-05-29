@@ -18,6 +18,7 @@ const FilterTag = ({ text, onClose, disabled, className }: FilterTagProps) => {
       {onClose && (
         <IconCloseSmall
           className={cs.closeIcon}
+          data-testid="remove-filter"
           onClick={() => {
             if (!disabled) onClose();
           }}
@@ -31,6 +32,7 @@ const FilterTag = ({ text, onClose, disabled, className }: FilterTagProps) => {
       className={cx(cs.filterTag, className, disabled ? "disabled" : "")}
       size="tiny"
       text={labelText}
+      data-testid="filter-tag"
     />
   );
 };

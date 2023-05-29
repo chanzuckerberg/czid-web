@@ -1,7 +1,7 @@
 // These are the buttons that appear on a Report table row when hovered.
 import cx from "classnames";
 import { ButtonIcon, IconNameToSizes } from "czifui";
-import { filter, pick, size } from "lodash/fp";
+import { filter, kebabCase, pick, size } from "lodash/fp";
 import React, { useContext, useState } from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
@@ -17,7 +17,7 @@ import {
   isPipelineFeatureAvailable,
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
-import { BlastData } from "~/interface/sampleView";
+import { BlastData, PickConsensusGenomeData } from "~/interface/sampleView";
 import {
   DOWNLOAD_CONTIGS,
   DOWNLOAD_READS,
@@ -26,7 +26,6 @@ import {
   TAX_LEVEL_SPECIES,
 } from "./constants";
 import cs from "./hover_actions.scss";
-import { PickConsensusGenomeData } from "./ReportTable";
 
 interface HoverActionsProps {
   className?: string;
@@ -318,7 +317,7 @@ const HoverActions = ({
     enabled: boolean;
     handleClick: $TSFixMeFunction;
     params: object;
-    count: $TSFixMeUnknown;
+    count: number;
     options?: {
       text: string;
       value: string;
@@ -347,6 +346,7 @@ const HoverActions = ({
           sdsIcon={hoverAction.iconName}
           onClick={onClickFunction}
           disabled={!hoverAction.enabled}
+          data-testid={`hover-action-${kebabCase(hoverAction.key)}`}
         />
         {count}
       </div>
@@ -412,6 +412,7 @@ const HoverActions = ({
         cs.hoverActions,
         showHoverActions ? cs.hoverActionsDropdown : className,
       )}
+      data-testid="hover-actions"
     >
       {getHoverActions().map((hoverAction, key) => (
         <span key={key}>{renderHoverAction(hoverAction)}</span>

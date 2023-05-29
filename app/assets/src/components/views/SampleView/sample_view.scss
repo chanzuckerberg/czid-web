@@ -17,53 +17,6 @@
   flex: 0 0 auto;
 }
 
-.reportViewContainer {
-  flex: 1 0 auto;
-  display: flex;
-  flex-direction: column;
-  margin-top: $sds-spaces-xl;
-
-  .reportFilters {
-    flex: 0 0 auto;
-  }
-
-  .reportTable {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-  }
-
-  .reportHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .statsRow {
-      font: $sds-font-body-s-400-font;
-      color: $sds-color-gray-500;
-
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-
-      .statsRowFilterInfo {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        .clearAllFilters {
-          flex: 0 0 auto;
-          margin-left: $sds-spaces-s;
-        }
-      }
-    }
-
-    .reportViewSelector {
-      flex: 0 0 auto;
-    }
-  }
-}
-
 .highlight {
   @include font-header-xs;
 }

@@ -1,11 +1,9 @@
-import { Button } from "czifui";
 import deepEqual from "fast-deep-equal";
 import {
   compact,
   filter,
   find,
   get,
-  groupBy,
   head,
   isEmpty,
   isNil,
@@ -17,8 +15,6 @@ import {
   merge,
   omit,
   pick,
-  pull,
-  set,
   uniq,
 } from "lodash/fp";
 import React from "react";
@@ -88,6 +84,7 @@ import Sample, { WorkflowRun } from "~/interface/sample";
 import {
   AmrDeprectatedData,
   BlastData,
+  ConsensusGenomeClick,
   ConsensusGenomeParams,
   CurrentTabSample,
   FilterSelections,
@@ -102,7 +99,7 @@ import StatusLabel from "~ui/labels/StatusLabel";
 import { WORKFLOW_VALUES } from "../../utils/workflows";
 import { BlastModalInfo } from "../blast/constants";
 import { AmrView } from "./AmrView";
-import { SampleViewMessage } from "./components/SampleViewMessage";
+import { MngsReport } from "./components/MngsReport";
 import {
   GENUS_LEVEL_INDEX,
   KEY_SAMPLE_VIEW_OPTIONS,
@@ -121,15 +118,10 @@ import {
 import DetailsSidebarSwitcher from "./DetailSidebarSwitcher";
 import {
   adjustMetricPrecision,
-  countFilters,
   filterReportData,
   setDisplayName,
 } from "./filters";
-import { filteredMessage, renderReportInfo } from "./messages";
 import { showNotification } from "./notifications";
-import ReportFilters from "./ReportFilters";
-import ReportTable from "./ReportTable";
-import ReportViewSelector from "./ReportViewSelector";
 import cs from "./sample_view.scss";
 import { SampleViewHeader } from "./SampleViewHeader";
 import SampleViewModals from "./SampleViewModals";
@@ -140,8 +132,10 @@ import {
   hasAppliedFilters,
   hasMngsRuns,
 } from "./setup";
-import TaxonTreeVis from "./TaxonTreeVis";
-import { addSampleDeleteFlagToSessionStorage } from "./utils";
+import {
+  addSampleDeleteFlagToSessionStorage,
+  getConsensusGenomeData,
+} from "./utils";
 
 // @ts-expect-error working with Lodash types
 const mapValuesWithKey = mapValues.convert({ cap: false });
@@ -913,38 +907,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     );
   };
 
-  handleFilterRemoved = ({
-    key,
-    subpath,
-    value,
-  }: {
-    subpath?: string;
-    key: string;
-    value: $TSFixMe;
-  }) => {
-    const { selectedOptions } = this.state;
-    const newSelectedOptions = { ...selectedOptions };
-    switch (key) {
-      case "taxa":
-      case "thresholdsShortReads":
-      case "thresholdsLongReads":
-      case "annotations":
-        newSelectedOptions[key] = pull(value, newSelectedOptions[key]);
-        break;
-      case "categories":
-        newSelectedOptions.categories = set(
-          subpath,
-          pull(value, get(subpath, newSelectedOptions.categories)),
-          newSelectedOptions.categories,
-        );
-        break;
-      default:
-        return;
-    }
-
-    this.refreshDataFromOptionsChange({ key, newSelectedOptions });
-  };
-
   handleCoverageVizClick = (newCoverageVizParams: CoverageVizParamsRaw) => {
     const { coverageVizParams, coverageVizVisible } = this.state;
     if (!newCoverageVizParams.taxId) {
@@ -1159,15 +1121,12 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     percentIdentity,
     taxId,
     taxName,
-  }: Pick<
-    SampleViewState["consensusGenomeData"],
-    "percentIdentity" | "taxId" | "taxName"
-  >) => {
-    const { coverageVizDataByTaxon } = this.state;
+  }: ConsensusGenomeClick) => {
+    const { coverageVizDataByTaxon, sample } = this.state;
 
     const accessionData = get(taxId, coverageVizDataByTaxon);
     const usedAccessions = uniq(
-      map("inputs.accession_id", get(taxId, this.getConsensusGenomeData())),
+      map("inputs.accession_id", get(taxId, getConsensusGenomeData(sample))),
     );
     this.setState({
       consensusGenomeData: {
@@ -1186,11 +1145,8 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     percentIdentity,
     taxId,
     taxName,
-  }: Pick<
-    SampleViewState["consensusGenomeData"],
-    "percentIdentity" | "taxId" | "taxName"
-  >) => {
-    const previousRuns = get(taxId, this.getConsensusGenomeData());
+  }: ConsensusGenomeClick) => {
+    const previousRuns = get(taxId, getConsensusGenomeData(this.state.sample));
     this.setState({
       consensusGenomePreviousParams: {
         percentIdentity,
@@ -1200,10 +1156,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
       },
       consensusGenomePreviousModalVisible: true,
     });
-  };
-
-  handleAnnotationUpdate = () => {
-    this.fetchSampleReportData();
   };
 
   handleBlastClick = ({
@@ -1536,17 +1488,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     return createCSVObjectURL(csvHeaders, csvRows);
   };
 
-  getConsensusGenomeData = () => {
-    // Mapping of taxids to WorkflowRuns
-    return groupBy(
-      "inputs.taxon_id",
-      filter(
-        { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
-        get("workflow_runs", this.state.sample),
-      ),
-    );
-  };
-
   handleShareClick = () => {
     const { sample } = this.state;
     // Ensure Share recipient sees report with the same options:
@@ -1576,144 +1517,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
         ? { blastV1ContigsModalVisible: true }
         : { blastV1ReadsModalVisible: true }),
     });
-  };
-
-  renderReport = ({ displayMergedNtNrValue = false } = {}) => {
-    const {
-      backgrounds,
-      currentTab,
-      enableMassNormalizedBackgrounds,
-      filteredReportData,
-      lineageData,
-      loadingReport,
-      ownedBackgrounds,
-      otherBackgrounds,
-      pipelineRun,
-      project,
-      reportData,
-      reportMetadata,
-      sample,
-      selectedOptions,
-      view,
-    } = this.state;
-    const { snapshotShareId } = this.props;
-
-    // TODO(omar): Do users want to filter by SourceDB if MergedNTNR is successful?
-    // reportReady is true if the pipeline run hasn't failed and is report-ready
-    // (might still be running Experimental, but at least taxon_counts has been loaded).
-    if (reportMetadata.reportReady) {
-      return (
-        <div className={cs.reportViewContainer}>
-          <div className={cs.reportFilters}>
-            <ReportFilters
-              backgrounds={backgrounds}
-              loadingReport={loadingReport}
-              ownedBackgrounds={ownedBackgrounds}
-              otherBackgrounds={otherBackgrounds}
-              shouldDisableFilters={displayMergedNtNrValue}
-              onFilterChanged={this.handleOptionChanged}
-              onFilterRemoved={this.handleFilterRemoved}
-              sampleId={sample && sample.id}
-              selected={selectedOptions}
-              view={view}
-              enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
-              snapshotShareId={snapshotShareId}
-              currentTab={currentTab}
-            />
-          </div>
-          <div className={cs.reportHeader}>
-            <div className={cs.statsRow}>
-              {renderReportInfo(currentTab, reportMetadata)}
-              <div className={cs.statsRowFilterInfo}>
-                {filteredMessage(currentTab, filteredReportData, reportData)}
-                {!!countFilters(currentTab, selectedOptions) && (
-                  <span className={cs.clearAllFilters}>
-                    <Button
-                      sdsStyle="minimal"
-                      sdsType="secondary"
-                      onClick={this.clearAllFilters}
-                    >
-                      Clear Filters
-                    </Button>
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className={cs.reportViewSelector}>
-              <ReportViewSelector
-                view={view}
-                onViewClick={this.handleViewClick}
-              />
-            </div>
-          </div>
-          {view === "table" && (
-            <div className={cs.reportTable}>
-              <ReportTable
-                alignVizAvailable={
-                  !!(reportMetadata && reportMetadata.alignVizAvailable)
-                }
-                consensusGenomeData={this.getConsensusGenomeData()}
-                consensusGenomeEnabled={sample && sample.editable}
-                currentTab={currentTab}
-                data={filteredReportData}
-                displayMergedNtNrValue={displayMergedNtNrValue}
-                displayNoBackground={isNil(selectedOptions.background)}
-                fastaDownloadEnabled={
-                  !!(reportMetadata && reportMetadata.hasByteRanges)
-                }
-                initialDbType={displayMergedNtNrValue ? "merged_nt_nr" : "nt"}
-                onAnnotationUpdate={this.handleAnnotationUpdate}
-                onBlastClick={this.handleBlastClick}
-                onConsensusGenomeClick={this.handleConsensusGenomeClick}
-                onCoverageVizClick={this.handleCoverageVizClick}
-                onPreviousConsensusGenomeClick={
-                  this.handlePreviousConsensusGenomeClick
-                }
-                onTaxonNameClick={withAnalytics(
-                  this.handleTaxonClick,
-                  "PipelineSampleReport_taxon-sidebar-link_clicked",
-                )}
-                phyloTreeAllowed={sample ? sample.editable : false}
-                pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
-                pipelineRunId={pipelineRun && pipelineRun.id}
-                projectId={project && project.id}
-                projectName={project && project.name}
-                sampleId={sample && sample.id}
-                snapshotShareId={snapshotShareId}
-              />
-            </div>
-          )}
-          {view === "tree" && filteredReportData.length > 0 && (
-            <div>
-              <TaxonTreeVis
-                lineage={lineageData}
-                metric={
-                  currentTab === TABS.SHORT_READ_MNGS
-                    ? selectedOptions.metricShortReads
-                    : selectedOptions.metricLongReads
-                }
-                nameType={selectedOptions.nameType}
-                onTaxonClick={this.handleTaxonClick}
-                taxa={filteredReportData}
-                currentTab={currentTab}
-              />
-            </div>
-          )}
-        </div>
-      );
-    } else {
-      // The report is either in progress or encountered an error.
-      return (
-        <SampleViewMessage
-          currentTab={currentTab}
-          loadingReport={loadingReport}
-          pipelineRun={pipelineRun}
-          reportMetadata={reportMetadata}
-          sample={sample}
-          snapshotShareId={snapshotShareId}
-        />
-      );
-    }
   };
 
   renderConsensusGenomeView = () => {
@@ -1819,10 +1622,42 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               </div>
             )}
           </div>
-          {currentTab === TABS.SHORT_READ_MNGS && this.renderReport()}
-          {currentTab === TABS.LONG_READ_MNGS && this.renderReport()}
-          {currentTab === TABS.MERGED_NT_NR &&
-            this.renderReport({ displayMergedNtNrValue: true })}
+          {(currentTab === TABS.SHORT_READ_MNGS ||
+            currentTab === TABS.LONG_READ_MNGS ||
+            currentTab === TABS.MERGED_NT_NR) && (
+            <MngsReport
+              backgrounds={backgrounds}
+              currentTab={currentTab}
+              clearAllFilters={this.clearAllFilters}
+              enableMassNormalizedBackgrounds={
+                this.state.enableMassNormalizedBackgrounds
+              }
+              filteredReportData={this.state.filteredReportData}
+              handleAnnotationUpdate={this.fetchSampleReportData}
+              handleBlastClick={this.handleBlastClick}
+              handleConsensusGenomeClick={this.handleConsensusGenomeClick}
+              handleCoverageVizClick={this.handleCoverageVizClick}
+              handlePreviousConsensusGenomeClick={
+                this.handlePreviousConsensusGenomeClick
+              }
+              handleOptionChanged={this.handleOptionChanged}
+              handleTaxonClick={this.handleTaxonClick}
+              handleViewClick={this.handleViewClick}
+              refreshDataFromOptionsChange={this.refreshDataFromOptionsChange}
+              lineageData={this.state.lineageData}
+              loadingReport={this.state.loadingReport}
+              ownedBackgrounds={this.state.ownedBackgrounds}
+              otherBackgrounds={this.state.otherBackgrounds}
+              pipelineRun={pipelineRun}
+              project={project}
+              reportData={this.state.reportData}
+              reportMetadata={reportMetadata}
+              sample={sample}
+              selectedOptions={selectedOptions}
+              snapshotShareId={snapshotShareId}
+              view={view}
+            />
+          )}
           {currentTab === TABS.AMR_DEPRECATED && amrDeprecatedData && (
             <DeprecatedAmrView amr={amrDeprecatedData} />
           )}

@@ -3,6 +3,12 @@
 @import "~styles/themes/typography";
 @import "~czifui/dist/variables";
 
+.reportTable {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
 .header {
   @include font-header-xs;
 

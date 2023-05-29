@@ -1,0 +1,24 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.statsRow {
+  font: $sds-font-body-s-400-font;
+  color: $sds-color-gray-500;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  .statsRowFilterInfo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .clearAllFilters {
+      flex: 0 0 auto;
+      margin-left: $sds-spaces-s;
+    }
+  }
+}

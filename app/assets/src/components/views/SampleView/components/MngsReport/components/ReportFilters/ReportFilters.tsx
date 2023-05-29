@@ -2,8 +2,11 @@ import {
   filter,
   flatten,
   forEach,
+  get,
   getOr,
   map,
+  pull,
+  set,
   transform,
   values,
 } from "lodash/fp";
@@ -32,7 +35,12 @@ import { Background } from "~/interface/shared/specific";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import FilterTag from "~ui/controls/FilterTag";
 import SearchBox from "~ui/controls/SearchBox";
-import { CATEGORIES, TABS, THRESHOLDS, TREE_METRICS } from "./constants";
+import {
+  CATEGORIES,
+  TABS,
+  THRESHOLDS,
+  TREE_METRICS,
+} from "../../../../constants";
 import cs from "./report_filters.scss";
 
 interface ReportFiltersProps {
@@ -48,37 +56,32 @@ interface ReportFiltersProps {
     subpath?: string;
     value: unknown;
   }) => void;
-  onFilterRemoved?: ({
-    key,
-    subpath,
-    value,
-  }: {
-    key: string;
-    subpath?: string;
-    value: unknown;
-  }) => void;
   otherBackgrounds?: Background[];
   ownedBackgrounds?: Background[];
   sampleId?: number;
   selected?: FilterSelections;
   view?: SampleReportViewMode;
   enableMassNormalizedBackgrounds?: boolean;
+  refreshDataFromOptionsChange: (x: {
+    key: string;
+    newSelectedOptions: FilterSelections;
+  }) => void;
   shouldDisableFilters?: boolean;
   showBackgroundFilter?: boolean;
   snapshotShareId?: string;
 }
 
-const ReportFilters = ({
+export const ReportFilters = ({
   backgrounds,
   currentTab,
   loadingReport,
   onFilterChanged,
-  onFilterRemoved,
   otherBackgrounds,
   ownedBackgrounds,
   sampleId,
   selected,
   view,
+  refreshDataFromOptionsChange,
   enableMassNormalizedBackgrounds,
   shouldDisableFilters,
   snapshotShareId,
@@ -86,7 +89,36 @@ const ReportFilters = ({
   const userContext = useContext(UserContext);
   const { allowedFeatures } = userContext || {};
   const showBackgroundFilter = currentTab === TABS.SHORT_READ_MNGS;
+  const handleFilterRemove = ({
+    key,
+    subpath,
+    value,
+  }: {
+    key: string;
+    subpath?: string;
+    value: $TSFixMe;
+  }) => {
+    const newSelectedOptions = { ...selected };
+    switch (key) {
+      case "taxa":
+      case "thresholdsShortReads":
+      case "thresholdsLongReads":
+      case "annotations":
+        newSelectedOptions[key] = pull(value, newSelectedOptions[key]);
+        break;
+      case "categories":
+        newSelectedOptions.categories = set(
+          subpath,
+          pull(value, get(subpath, newSelectedOptions.categories)),
+          newSelectedOptions.categories,
+        );
+        break;
+      default:
+        return;
+    }
 
+    refreshDataFromOptionsChange({ key, newSelectedOptions });
+  };
   const handleFilterChange = ({
     key,
     value,
@@ -117,7 +149,7 @@ const ReportFilters = ({
       value,
       sampleId,
     });
-    onFilterRemoved({ key, subpath, value });
+    handleFilterRemove({ key, subpath, value });
   };
 
   const renderFilterTag = ({
@@ -228,7 +260,7 @@ const ReportFilters = ({
       : selected.thresholdsLongReads;
 
   return (
-    <>
+    <div className={cs.reportFilters}>
       <div className={cs.filterList}>
         {/* TODO(ihan): expose the Taxon search box */}
         {!snapshotShareId && (
@@ -446,8 +478,6 @@ const ReportFilters = ({
           )}
         </div>
       )}
-    </>
+    </div>
   );
 };
-
-export default ReportFilters;

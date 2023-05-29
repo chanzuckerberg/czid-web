@@ -142,6 +142,7 @@ export default class ConsensusGenomeCreationModal extends React.Component<
           onClose,
           ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_CLOSED,
         )}
+        data-test-id="consensus-genome-modal"
       >
         <div className={cs.title}>Generate Consensus Genome</div>
         <div className={cs.description}>

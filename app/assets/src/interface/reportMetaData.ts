@@ -9,6 +9,7 @@ export default interface ReportMetadata {
   reportReady?: boolean;
   preSubsamplingCount?: number;
   postSubsamplingCount?: number;
+  truncatedReadsCount?: number;
   taxonWhitelisted?: boolean;
   backgroundId?: number;
 }

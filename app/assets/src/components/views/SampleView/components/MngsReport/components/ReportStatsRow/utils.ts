@@ -1,24 +1,31 @@
-import { compact } from "lodash/fp";
-import { TABS } from "./constants";
+import { compact, map, sum, values } from "lodash/fp";
+import { TABS } from "~/components/views/SampleView/constants";
+import ReportMetadata from "~/interface/reportMetaData";
+import { CurrentTabSample, FilterSelections } from "~/interface/sampleView";
+import { Taxon } from "~/interface/shared";
 
-const countReportRows = (currentTab, filteredReportData, reportData) => {
+const countReportRows = (
+  currentTab: CurrentTabSample,
+  filteredReportData: Taxon[],
+  reportData: Taxon[],
+) => {
   let total = 0;
   let filtered = 0;
   if (currentTab === TABS.MERGED_NT_NR) {
-    reportData.forEach((genusRow: $TSFixMe) => {
+    reportData.forEach(genusRow => {
       if (genusRow["merged_nt_nr"]) {
         total += 1;
-        genusRow.species.forEach((speciesRow: $TSFixMe) => {
+        genusRow.species.forEach(speciesRow => {
           if (speciesRow["merged_nt_nr"]) {
             total += 1;
           }
         });
       }
     });
-    filteredReportData.forEach((genusRow: $TSFixMe) => {
+    filteredReportData.forEach(genusRow => {
       if (genusRow["merged_nt_nr"]) {
         filtered += 1;
-        genusRow.filteredSpecies.forEach((speciesRow: $TSFixMe) => {
+        genusRow.filteredSpecies.forEach(speciesRow => {
           if (speciesRow["merged_nt_nr"]) {
             filtered += 1;
           }
@@ -28,7 +35,7 @@ const countReportRows = (currentTab, filteredReportData, reportData) => {
   } else {
     total = reportData.length;
     filtered = filteredReportData.length;
-    reportData.forEach((genusRow: $TSFixMe) => {
+    reportData.forEach(genusRow => {
       total += genusRow.species.length;
       filtered += genusRow.filteredSpecies.length;
     });
@@ -37,7 +44,11 @@ const countReportRows = (currentTab, filteredReportData, reportData) => {
   return { total, filtered };
 };
 
-export const filteredMessage = (currentTab, filteredReportData, reportData) => {
+export const filteredMessage = (
+  currentTab: CurrentTabSample,
+  filteredReportData: Taxon[],
+  reportData: Taxon[],
+) => {
   const { total, filtered } = countReportRows(
     currentTab,
     filteredReportData,
@@ -49,16 +60,16 @@ export const filteredMessage = (currentTab, filteredReportData, reportData) => {
     : `${total} rows `;
 };
 
-export const truncatedMessage = truncatedReadsCount => {
+const truncatedMessage = (truncatedReadsCount: number) => {
   return (
     truncatedReadsCount &&
     `Initial input was truncated to ${truncatedReadsCount} reads. `
   );
 };
 
-export const subsamplingReadsMessage = (
-  preSubsamplingCount,
-  postSubsamplingCount,
+const subsamplingReadsMessage = (
+  preSubsamplingCount: number,
+  postSubsamplingCount: number,
 ) => {
   return (
     preSubsamplingCount &&
@@ -69,9 +80,9 @@ export const subsamplingReadsMessage = (
   );
 };
 
-export const subsamplingBasesMessage = (
-  preSubsamplingCount,
-  postSubsamplingCount,
+const subsamplingBasesMessage = (
+  preSubsamplingCount: number,
+  postSubsamplingCount: number,
 ) => {
   return (
     preSubsamplingCount &&
@@ -82,14 +93,17 @@ export const subsamplingBasesMessage = (
   );
 };
 
-export const whitelistedMessage = taxonWhitelisted => {
+const whitelistedMessage = (taxonWhitelisted: boolean) => {
   return (
     taxonWhitelisted &&
     `Report was processed with a whitelist filter of respiratory pathogens. `
   );
 };
 
-export const renderReportInfo = (currentTab, reportMetadata) => {
+export const renderReportInfo = (
+  currentTab: CurrentTabSample,
+  reportMetadata: ReportMetadata,
+) => {
   if (currentTab === TABS.SHORT_READ_MNGS) {
     const {
       truncatedReadsCount,
@@ -116,4 +130,29 @@ export const renderReportInfo = (currentTab, reportMetadata) => {
       return reportInfoMsg;
     }, "");
   }
+};
+
+export const countFilters = (
+  currentTab: CurrentTabSample,
+  selectedOptions: FilterSelections,
+) => {
+  const {
+    categories,
+    thresholdsShortReads,
+    thresholdsLongReads,
+    taxa,
+    annotations,
+  } = selectedOptions;
+
+  const numThresholdsFilters =
+    currentTab === TABS.SHORT_READ_MNGS
+      ? thresholdsShortReads.length
+      : thresholdsLongReads.length;
+
+  let numFilters = taxa.length;
+  numFilters += numThresholdsFilters;
+  numFilters += annotations.length;
+  numFilters += (categories.categories || []).length;
+  numFilters += sum(map(v => v.length, values(categories.subcategories || {})));
+  return numFilters;
 };

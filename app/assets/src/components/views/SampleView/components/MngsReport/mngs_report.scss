@@ -1,0 +1,21 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~czifui/dist/variables";
+
+.reportViewContainer {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  margin-top: $sds-spaces-xl;
+
+  .reportFilters {
+    flex: 0 0 auto;
+  }
+
+  .reportHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

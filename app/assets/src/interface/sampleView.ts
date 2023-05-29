@@ -215,3 +215,13 @@ export interface SortFunctionsParams {
   data: Taxon[];
   sortDirection: "asc" | "desc";
 }
+
+export type ConsensusGenomeClick = Pick<
+  SampleViewState["consensusGenomeData"],
+  "percentIdentity" | "taxId" | "taxName"
+>;
+
+export type PickConsensusGenomeData = Pick<
+  ConsensusGenomeData,
+  "percentIdentity" | "taxId" | "taxName"
+>;
