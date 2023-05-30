@@ -55,7 +55,7 @@ local-migrate-down: .env.localdev ## revert a migration; Useage: make local-migr
 .PHONY: local-generate-migration
 local-generate-migration: .env.localdev ## Generate a migration; Useage: make local-generate-migration migration_name=backpopulate_data
 	$(docker_compose) run web rails generate migration $(migration_name)
-	
+
 .PHONY: local-generate-data-migration
 local-generate-data-migration: .env.localdev ## Generate a data migration; Usage: make local-generate-data-migration migration_name=backpopulate_data
 	$(docker_compose) run web rails generate data_migration $(migration_name)
@@ -76,7 +76,7 @@ local-import-staging-data: .env.localdev ## Import staging data into the local m
 	    '--ignore-table=idseq_staging._new_taxid_lineages '\
 	    '--ignore-table=idseq_staging._new_taxon_lineages '\
 	    '--ignore-table=idseq_staging.contigs '\
-	    '--ignore-table=idseq_staging.taxon_counts '\
+			'--ignore-table=idseq_staging.taxon_counts '\
 	    '--ignore-table=idseq_staging.taxon_lineages_new '\
 	    '--ignore-table=idseq_staging.taxon_lineages_old '\
 	    '-h $$RDS_ADDRESS -u $$DB_USERNAME --password=$$DB_PASSWORD idseq_staging '\
@@ -94,6 +94,10 @@ local-start: .env.localdev ## Start localdev containers or refresh credentials
 .PHONY: local-stop
 local-stop: .env.localdev ## Stop localdev containers
 	$(docker_compose_simple) stop
+
+.PHONY: local-console
+local-console: .env.localdev ## Get a bash shell on local host
+	$(docker_compose) exec web bash
 
 .PHONY: local-dbconsole
 local-dbconsole: .env.localdev ## Get a shell on the local mysql db

@@ -148,6 +148,7 @@ services:
       - ./coverage:/app/coverage
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
+      - ./graphql_schema:/app/graphql_schema
     ports:
       - 3001:3001
     depends_on:
@@ -243,7 +244,7 @@ services:
       - LOCAL_LAMBDA_ENDPOINT=indexing-lambda:8080
       - CONCURRENCY=1 # containerized lambdas cannot run concurrently
     ports:
-      - 9090:8080    
+      - 9090:8080
   indexing-lambda:
     # image built from idseq repo main branch
     # for other versions, clone idseq repo, build image locally and change image to `indexing-lambda:local`
