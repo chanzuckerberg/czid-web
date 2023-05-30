@@ -242,7 +242,7 @@ class SfnCgPipelineDispatchService
                             filter_reads: false,
                             # signal to workflow that we want to include the refseq and bedfile in zipoutputs
                             output_refseq: true,
-                            output_bed: !primer_bed_name.empty?,
+                            output_bed: primer_bed_name.present?,
                           }
                         elsif creation_source == ConsensusGenomeWorkflowRun::CREATION_SOURCE[:sars_cov_2_upload] && technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina]
                           {
