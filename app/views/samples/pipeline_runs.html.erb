@@ -171,6 +171,9 @@ function showhide(id) {
           </tr>
         <% end %>
         <tr>
+          <td colspan="5"> <%= pipeline_run.id %> - S3 Path - <%= pipeline_run.sfn_results_path %> </td>
+        </tr>
+        <tr>
           <td>&nbsp;</td>
         </tr>
       <% end %>
