@@ -31,7 +31,13 @@
   &:hover {
     background-color: $sds-color-gray-100;
   }
+
   th {
+    border-bottom: 2px solid $sds-color-gray-300;
+    min-width: unset;
+  }
+
+  td {
     border-bottom: $sds-borders-gray-300;
     min-width: unset;
   }
