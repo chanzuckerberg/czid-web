@@ -1,8 +1,29 @@
 @import "~czifui/dist/variables";
 
+.geneCell {
+  display: flex;
+  align-items: center;
+
+  &:hover .downloadIcon {
+    display: inline-block;
+  }
+
+  .downloadIcon {
+    display: none;
+    margin-left: $sds-spaces-xs;
+  }
+
+  // when a user opens the dropdown and then mouses away,
+  // this keeps the dropdown open even when the user is no longer hovering
+  .showHoverActions {
+    display: inline-block;
+  }
+}
+
 .geneNameButton {
   font: $sds-font-body-s-600-font;
   display: flex;
   justify-content: flex-start;
   text-align: left;
+  min-width: 0;
 }

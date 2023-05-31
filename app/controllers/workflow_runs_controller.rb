@@ -3,7 +3,7 @@ class WorkflowRunsController < ApplicationController
   include ParameterSanitization
   include PipelineOutputsHelper
 
-  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :amr_report_downloads]
+  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :amr_report_downloads, :amr_gene_level_downloads]
   before_action :admin_required, only: [:rerun]
 
   MAX_PAGE_SIZE = 100
@@ -299,6 +299,25 @@ class WorkflowRunsController < ApplicationController
         )
       end
     end
+  end
+
+  def amr_gene_level_downloads
+    permitted_params = params.permit(:downloadType, :geneId, :geneName)
+    download_type = permitted_params[:downloadType]
+    gene_id = permitted_params[:geneId]
+    gene_name = permitted_params[:geneName]
+    case download_type
+    when "download-contigs"
+      file = @workflow_run.download_gene_level_contigs(gene_id)
+    when "download-reads"
+      file = @workflow_run.download_gene_level_reads(gene_id)
+    else
+      render(
+        json: { status: "Output not found" },
+        status: :not_found
+      )
+    end
+    send_file(file, filename: "amr-#{download_type}-#{gene_name}.fasta")
   end
 
   private

@@ -10,7 +10,7 @@ import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSideb
 import { UserContext } from "~/components/common/UserContext";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
-import { BLAST_V1_FEATURE } from "~/components/utils/features";
+import { AMR_V3_FEATURE, BLAST_V1_FEATURE } from "~/components/utils/features";
 import {
   CONSENSUS_GENOME_FEATURE,
   COVERAGE_VIZ_FEATURE,
@@ -240,12 +240,16 @@ const HoverActions = ({
       iconName: "download",
       options: [
         {
-          text: "Contigs FASTA",
+          text: allowedFeatures.includes(AMR_V3_FEATURE)
+            ? "Contigs (.fasta)"
+            : "Contigs FASTA",
           value: DOWNLOAD_CONTIGS,
           disabled: !contigVizEnabled,
         },
         {
-          text: "Reads FASTA",
+          text: allowedFeatures.includes(AMR_V3_FEATURE)
+            ? "Reads (.fasta)"
+            : "Reads FASTA",
           value: DOWNLOAD_READS,
           disabled: !fastaEnabled,
         },

@@ -51,6 +51,7 @@ export const AmrSampleReport = ({
   reportTableData,
   setDetailsSidebarGeneName,
   hideFilters,
+  workflowRun,
 }: AmrSampleReportProps) => {
   // Keep the react-table instance in state to pass between the table component and the dropdown component
   const [table, setTable] = React.useState<TableType<AmrResult> | null>(null);
@@ -59,7 +60,7 @@ export const AmrSampleReport = ({
     () => [
       getGeneInfoColumnGroup(
         [
-          getGeneColumn(setDetailsSidebarGeneName),
+          getGeneColumn(setDetailsSidebarGeneName, workflowRun.id),
           geneFamilyColumn,
           drugClassColumn,
           mechanismColumn,

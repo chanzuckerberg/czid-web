@@ -1,4 +1,5 @@
 import { trackEvent } from "~/api/analytics";
+import { getURLParamString } from "~/helpers/url";
 import Sample, { WorkflowRun } from "~/interface/sample";
 
 export const NONHOST_DOWNLOADS_TOOLTIP =
@@ -72,4 +73,18 @@ export const logDownloadOption = ({
       .toLowerCase()}_clicked`,
     details,
   );
+};
+
+export const downloadAmrGeneLevelData = (
+  downloadType: string,
+  geneId: string,
+  geneName: string,
+  workflowRunId: number,
+) => {
+  const params = getURLParamString({
+    downloadType: downloadType,
+    geneId: geneId,
+    geneName: geneName,
+  });
+  location.href = `/workflow_runs/${workflowRunId}/amr_gene_level_downloads?${params}`;
 };
