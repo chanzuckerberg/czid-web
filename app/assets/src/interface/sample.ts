@@ -12,6 +12,7 @@ export interface WorkflowRun {
   inputs?: {
     accession_id: string;
     accession_name: string;
+    ref_fasta: string;
     taxon_id: number;
     taxon_name: string;
     technology: string;

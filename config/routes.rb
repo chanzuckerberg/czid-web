@@ -279,6 +279,7 @@ Rails.application.routes.draw do
       get :zip_link
       get :amr_report_downloads
       get :amr_gene_level_downloads
+      get :cg_report_downloads
 
       put :rerun
     end

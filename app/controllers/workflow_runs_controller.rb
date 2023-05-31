@@ -3,7 +3,7 @@ class WorkflowRunsController < ApplicationController
   include ParameterSanitization
   include PipelineOutputsHelper
 
-  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :amr_report_downloads, :amr_gene_level_downloads]
+  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link, :amr_report_downloads, :amr_gene_level_downloads, :cg_report_downloads]
   before_action :admin_required, only: [:rerun]
 
   MAX_PAGE_SIZE = 100
@@ -318,6 +318,36 @@ class WorkflowRunsController < ApplicationController
       )
     end
     send_file(file, filename: "amr-#{download_type}-#{gene_name}.fasta")
+  end
+
+  def cg_report_downloads
+    permitted_params = params.permit(:downloadType)
+    download_type = permitted_params[:downloadType]
+    sample_name = @workflow_run.sample.name
+
+    case download_type
+    when "ref_fasta"
+      s3_path = @workflow_run.sample.input_files.reference_sequence[0].s3_path
+      filename = @workflow_run.inputs&.[]("ref_fasta")
+    else
+      render(
+        json: { status: "File not found" },
+        status: :not_found
+      )
+    end
+
+    if s3_path.present? && filename.present?
+      presigned_url = get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_#{@workflow_run.id}_#{filename}")
+
+      if presigned_url
+        redirect_to presigned_url
+      else
+        render(
+          json: { status: "File not available" },
+          status: :not_found
+        )
+      end
+    end
   end
 
   private
