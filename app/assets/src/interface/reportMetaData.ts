@@ -1,3 +1,8 @@
+export enum PipelineRunStatus {
+  SUCCEEDED = "SUCCEEDED",
+  FAILED = "FAILED",
+  WAITING = "WAITING",
+}
 export default interface ReportMetadata {
   knownUserError?: string;
   errorMessage?: string;
@@ -5,7 +10,7 @@ export default interface ReportMetadata {
   hasByteRanges?: boolean;
   hasErrors?: boolean;
   jobStatus?: string;
-  pipelineRunStatus?: string;
+  pipelineRunStatus?: PipelineRunStatus;
   reportReady?: boolean;
   preSubsamplingCount?: number;
   postSubsamplingCount?: number;

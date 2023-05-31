@@ -386,4 +386,4 @@ export const KEY_TAXON_SELECTED = `${KEY_TAXON}Selected`;
 export const KEY_TAXON_THRESHOLDS_SELECTED = "taxonThresholdsSelected";
 export const KEY_ANNOTATIONS_SELECTED = "annotationsSelected";
 
-export const ONT_PIPELINE_RUNNING_STATUS = "Running Pipeline Steps";
+export const ONT_PIPELINE_RUNNING_STATUS_MESSAGE = "Running Pipeline Steps";

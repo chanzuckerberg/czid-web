@@ -44,6 +44,15 @@ export interface ThresholdFilterShape {
   value: number;
 }
 
+export enum SampleStatus {
+  COMPLETE_ISSUE = "COMPLETE - ISSUE",
+  IN_PROGRESS = "IN PROGRESS",
+  INCOMPLETE_ISSUE = "INCOMPLETE - ISSUE",
+  LOADING = "Loading", // This is used for analytics, so leaving the casing as is
+  PROCESSING_SKIPPED = "PROCESSING SKIPPED",
+  SAMPLE_FAILED = "SAMPLE FAILED",
+}
+
 export default interface Sample {
   error_message?: string;
   known_user_error?: string;
@@ -66,5 +75,5 @@ export default interface Sample {
     name: string;
   };
   project_id: number;
-  status: string;
+  status: SampleStatus;
 }

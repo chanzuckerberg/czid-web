@@ -5,11 +5,11 @@ import { sampleErrorInfo } from "~/components/utils/sample";
 import { SampleMessage } from "~/components/views/components/SampleMessage";
 import csSampleMessage from "~/components/views/components/SampleMessage/sample_message.scss";
 import { IconAlertType } from "~/interface/icon";
-import ReportMetadata from "~/interface/reportMetaData";
-import Sample from "~/interface/sample";
+import ReportMetadata, { PipelineRunStatus } from "~/interface/reportMetaData";
+import Sample, { SampleStatus } from "~/interface/sample";
 import { CurrentTabSample } from "~/interface/sampleView";
 import { PipelineRun } from "~/interface/shared";
-import { ONT_PIPELINE_RUNNING_STATUS, TABS } from "../../constants";
+import { ONT_PIPELINE_RUNNING_STATUS_MESSAGE, TABS } from "../../constants";
 
 interface SampleViewMessageProps {
   currentTab: CurrentTabSample;
@@ -29,7 +29,7 @@ export const SampleViewMessage = ({
   snapshotShareId,
 }: SampleViewMessageProps) => {
   const { pipelineRunStatus, jobStatus } = reportMetadata;
-  let status: string,
+  let status: SampleStatus,
     message: string,
     subtitle: string,
     linkText: string,
@@ -40,39 +40,37 @@ export const SampleViewMessage = ({
   // but after the switch to SFN are now sent as part of the sample's information.
   // Try to extract the error messages from the sample if possible, then try the
   // reportMetadata for older samples.
-  const errorMessage =
-    sample && sample.error_message
-      ? sample.error_message
-      : reportMetadata.errorMessage;
+  const errorMessage = sample?.error_message || reportMetadata?.errorMessage;
   const knownUserError =
-    sample && sample.known_user_error
-      ? sample.known_user_error
-      : reportMetadata.knownUserError;
+    sample?.known_user_error || reportMetadata?.knownUserError;
 
+  // If the data is still loading from the backend, show a loading message.
   if (loadingReport) {
-    status = "Loading";
+    status = SampleStatus.LOADING;
     message = "Loading report data.";
     icon = <IconLoading className={csSampleMessage.icon} />;
     type = "inProgress";
   } else if (
-    pipelineRunStatus === "WAITING" &&
+    // Else if the data has loaded from the backend, but the pipeline is still running,
+    // let the user know that the pipeline is in progress.
+    pipelineRunStatus === PipelineRunStatus.WAITING &&
     sample &&
     !sample.upload_error
   ) {
     // Note that the pipeline status "WAITING" is obtained from the API at `app/services/pipeline_report_service.rb`
-    status = "IN PROGRESS";
+    status = SampleStatus.IN_PROGRESS;
     message =
       currentTab === TABS.LONG_READ_MNGS
-        ? ONT_PIPELINE_RUNNING_STATUS
+        ? ONT_PIPELINE_RUNNING_STATUS_MESSAGE
         : jobStatus;
     icon = <IconLoading className={csSampleMessage.icon} />;
     type = "inProgress";
-    if (pipelineRun && pipelineRun.pipeline_version) {
+    if (pipelineRun?.pipeline_version) {
       linkText = "View Pipeline Visualization";
       link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.pipeline_version}`;
     }
   } else {
-    // Some kind of error or warning has occurred.
+    // Else the data loaded, but there is some kind of error or warning to display.
     if (sample) {
       // If an upload error occurred, the pipeline run might not exist so
       // only try to set these fields if the pipeline run started.
