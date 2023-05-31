@@ -5,10 +5,14 @@ import {
   SEARCH_PUBLIC,
 } from "../constants/common.const";
 import {
+  BULK_DELETE_MODAL,
+  DELETE_DISABLED_TOOLTIP,
+  DELETE_RUN_MENUITEM,
   DOWNLOADS,
   ERCC,
   HOST_INFO,
   INFECTION_INFO,
+  OVERFLOW_BUTTON,
   PIPELINE_INFO,
   READS_REMAINING,
   SAMPLE_INFO,
@@ -180,4 +184,49 @@ export async function goToUrl(page: Page, url) {
   } catch (error) {
     await page.goto(url);
   }
+}
+
+export async function verifyDeleteAvailable(
+  page: Page,
+  workflowShorthand: string,
+  workflowName: string,
+) {
+  // verify overflow button visible
+  const overflowButton = page.getByTestId(OVERFLOW_BUTTON);
+  await expect(overflowButton).toBeVisible();
+  await overflowButton.click();
+
+  // dropdown text should be visible
+  const dropdownText = page.getByText(`Delete ${workflowShorthand} run`);
+  await expect(dropdownText).toBeVisible();
+  const dropdownItem = page.getByTestId(DELETE_RUN_MENUITEM);
+  await expect(dropdownItem).toBeEnabled();
+  await dropdownItem.click();
+
+  // verify modal opens
+  const modal = page.getByTestId(BULK_DELETE_MODAL);
+  await expect(modal).toContainText(
+    `Are you sure you want to delete 1 ${workflowName} run?`,
+  );
+}
+
+export async function verifyDeleteDisabled(
+  page: Page,
+  workflowShorthand: string,
+) {
+  // verify overflow button visible
+  const overflowButton = page.getByTestId(OVERFLOW_BUTTON);
+  await expect(overflowButton).toBeVisible();
+  await overflowButton.click();
+
+  // dropdown text should be visible
+  const dropdownText = page.getByText(`Delete ${workflowShorthand} run`);
+  await expect(dropdownText).toBeVisible();
+
+  const dropdownItem = page.getByTestId(DELETE_RUN_MENUITEM);
+  await expect(dropdownItem).toBeDisabled();
+
+  // tooltip should be visible over dropdown option
+  await dropdownItem.hover({ force: true }); // use force because tooltip intercepts focus
+  await expect(page.getByTestId(DELETE_DISABLED_TOOLTIP)).toBeVisible();
 }

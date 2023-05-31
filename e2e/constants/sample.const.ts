@@ -188,3 +188,8 @@ export const READ_SPECIFICITY = 'text="Read Specificity:"';
 export const ANNOTATION_TEXT = 'text="Annotation"';
 export const FULL_LIST = 'text="full list"';
 export const PATHOGEN_LIST_URL = "/pathogen_list";
+
+export const OVERFLOW_BUTTON = "overflow-btn";
+export const BULK_DELETE_MODAL = "bulk-delete-modal";
+export const DELETE_RUN_MENUITEM = "delete-run-menuitem";
+export const DELETE_DISABLED_TOOLTIP = "delete-disabled-tooltip";

@@ -100,19 +100,4 @@ test.describe("Bulk delete samples", () => {
       await expect(notif).toContainText("Please try again.");
     },
   );
-
-  test.fixme(
-    "Should not allow delete from the public view",
-    async ({ page }) => {
-      page.goto(publicPage);
-
-      // wait for actions to load
-      page.getByTestId("sample-view-actions");
-
-      // verify icon does not appear
-      const trashIcon = page.getByTestId("bulk-delete-trigger");
-      const numIcons = await trashIcon.count();
-      expect(numIcons).toBe(0);
-    },
-  );
 });

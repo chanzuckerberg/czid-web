@@ -48,6 +48,7 @@ export const OverflowMenu = ({
           closeActionsMenu();
           setIsBulkDeleteModalOpen(true);
         }}
+        data-testid="delete-run-menuitem"
       >
         <div className={cx(cs.dropdownItem, deleteDisabled && cs.iconDisabled)}>
           <Icon
@@ -66,7 +67,12 @@ export const OverflowMenu = ({
         : "Only the user that initiated the run can perform this action.";
 
       deleteRunMenuItem = (
-        <Tooltip arrow placement="top" title={tooltipText}>
+        <Tooltip
+          arrow
+          placement="top"
+          title={tooltipText}
+          data-testid="delete-disabled-tooltip"
+        >
           <span>{deleteRunMenuItem}</span>
         </Tooltip>
       );
@@ -84,6 +90,7 @@ export const OverflowMenu = ({
           <Icon sdsIcon="dotsHorizontal" sdsSize="l" sdsType="button" />
         }
         onClick={openActionsMenu}
+        data-testid="overflow-btn"
       />
       <Menu
         anchorEl={menuAnchorEl}
