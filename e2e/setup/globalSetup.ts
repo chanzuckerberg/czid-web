@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
 import { chromium, expect, FullConfig } from "@playwright/test";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 import { tag } from "../constants/common.const";
 import { login } from "../utils/login";
 
@@ -23,7 +23,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
   const password = process.env.CZID_PASSWORD;
 
   if (!checkCookies()) {
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({ headless: false });
     const page = await browser.newPage();
     await Promise.all([
       page.goto(`${process.env.BASEURL}`, { waitUntil: "networkidle" }),

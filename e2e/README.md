@@ -44,12 +44,9 @@ Where `environment` is `staging`, `local`, `sandbox`
 https://docs.github.com/en/actions/managing-workflow-runs/downloading-workflow-artifacts
 
 # some useful commands
+## stop services
+aws-oidc exec -- docker-compose  down
 ## run migration
-aws-oidc exec -- docker-compose run web rails db:migrate db:seed
-## add user locally
-aws-oidc exec -- docker-compose run web rails c
-User.create(name: "CZ ID Test Account", role: 0, email:"czid-e2e@chanzuckerberg.com")
-# seeding data
-aws-oidc exec -- docker-compose run web rails db:migrate db:seed
+aws-oidc exec -- docker-compose run web rails db:drop db:migrate db:seed
 ## start service
 aws-oidc exec -- docker-compose  up
