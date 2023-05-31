@@ -34,6 +34,8 @@ export const initiateBulkUploadLocalWithMetadata = async ({
   // Only upload these fields from the sample.
   const processedSamples = map(
     pick([
+      "accession_id",
+      "accession_name",
       "alignment_config_name",
       "alignment_scalability",
       "clearlabs",
@@ -51,6 +53,8 @@ export const initiateBulkUploadLocalWithMetadata = async ({
       "primer_bed",
       "project_id",
       "ref_fasta",
+      "taxon_id",
+      "taxon_name",
       "s3_preload_result_path",
       "subsample",
       "technology",
