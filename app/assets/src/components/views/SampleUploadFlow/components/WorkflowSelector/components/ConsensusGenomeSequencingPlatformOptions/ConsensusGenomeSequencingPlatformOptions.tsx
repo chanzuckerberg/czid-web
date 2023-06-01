@@ -53,36 +53,36 @@ const ConsensusGenomeSequencingPlatformOptions = ({
     >
       <div className={cx(cs.title, cs.technologyTitle)}>
         Sequencing Platform:
-        <div className={cs.technologyOptions}>
-          <IlluminaSequencingPlatformOption
-            isCg
-            isSelected={selectedTechnology === ILLUMINA}
-            onClick={() => onTechnologyToggle(CG, ILLUMINA)}
-            pipelineVersion={
-              projectPipelineVersions?.[WORKFLOWS.CONSENSUS_GENOME.value]
-            }
-            onWetlabProtocolChange={onWetlabProtocolChange}
-          />
-          <ConsensusGenomeWithNanopore
-            isDisabled={shouldDisableSequencingPlatformOption(
-              currentTab,
-              NANOPORE,
-              CG,
-            )}
-            isSelected={selectedTechnology === NANOPORE}
-            isS3UploadEnabled={isS3UploadEnabled}
-            onClick={() => onTechnologyToggle(CG, NANOPORE)}
-            onClearLabsChange={onClearLabsChange}
-            onMedakaModelChange={onMedakaModelChange}
-            selectedMedakaModel={selectedMedakaModel}
-            usedClearLabs={usedClearLabs}
-            selectedWetlabProtocol={selectedWetlabProtocol}
-            onWetlabProtocolChange={onWetlabProtocolChange}
-            pipelineVersion={
-              projectPipelineVersions?.[WORKFLOWS.CONSENSUS_GENOME.value]
-            }
-          />
-        </div>
+      </div>
+      <div className={cs.technologyOptions}>
+        <IlluminaSequencingPlatformOption
+          isCg
+          isSelected={selectedTechnology === ILLUMINA}
+          onClick={() => onTechnologyToggle(CG, ILLUMINA)}
+          pipelineVersion={
+            projectPipelineVersions?.[WORKFLOWS.CONSENSUS_GENOME.value]
+          }
+          onWetlabProtocolChange={onWetlabProtocolChange}
+        />
+        <ConsensusGenomeWithNanopore
+          isDisabled={shouldDisableSequencingPlatformOption(
+            currentTab,
+            NANOPORE,
+            CG,
+          )}
+          isSelected={selectedTechnology === NANOPORE}
+          isS3UploadEnabled={isS3UploadEnabled}
+          onClick={() => onTechnologyToggle(CG, NANOPORE)}
+          onClearLabsChange={onClearLabsChange}
+          onMedakaModelChange={onMedakaModelChange}
+          selectedMedakaModel={selectedMedakaModel}
+          usedClearLabs={usedClearLabs}
+          selectedWetlabProtocol={selectedWetlabProtocol}
+          onWetlabProtocolChange={onWetlabProtocolChange}
+          pipelineVersion={
+            projectPipelineVersions?.[WORKFLOWS.CONSENSUS_GENOME.value]
+          }
+        />
       </div>
     </button>
   );

@@ -1,4 +1,4 @@
-import { ButtonIcon } from "czifui";
+import { TagFilter } from "czifui";
 import React from "react";
 import cs from "./uploaded_file_name.scss";
 
@@ -12,15 +12,12 @@ const UploadedFileName = ({
   onFileChanged,
 }: UploadedFileNameProps) => (
   <div className={cs.uploadedFileName}>
-    <span>{fileName}</span>
-    <ButtonIcon
+    <TagFilter
       aria-label="Close"
-      sdsType="tertiary"
-      sdsSize="small"
       // The intention of this button is to remove the file data from state. As such, we must
       // explicitly call without arguments here, otherwise the click event will be set as the file content.
-      onClick={() => onFileChanged()}
-      sdsIcon="xMark"
+      onDelete={() => onFileChanged()}
+      label={fileName}
     />
   </div>
 );

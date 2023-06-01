@@ -7,8 +7,13 @@ export const METRIC_COLUMNS = [
   [
     {
       key: "referenceNCBIEntry",
-      name: "Reference NCBI",
+      name: "NCBI Reference",
       tooltip: "The NCBI Genbank entry for the reference accession.",
+    },
+    {
+      key: "customReference",
+      name: "Custom Reference",
+      tooltip: "The custom reference you uploaded with this sample.",
     },
     {
       key: "referenceLength",

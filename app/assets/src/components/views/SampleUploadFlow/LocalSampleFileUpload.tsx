@@ -155,7 +155,7 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
     return (
       <div className={cs.localFileUpload}>
         <div className={cs.label}>
-          Upload Your Input Files
+          Select Input Files
           <span className={cs.infoLink} onClick={this.toggleInfo}>
             {this.state.showInfo ? "Hide" : "More"} Info
           </span>

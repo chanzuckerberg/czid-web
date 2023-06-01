@@ -98,9 +98,9 @@ import {
 } from "./types";
 import { getReadNames } from "./utils";
 
-const LOCAL_UPLOAD_LABEL = "Upload from Your Computer";
-const REMOTE_UPLOAD_LABEL = "Upload from S3";
-const BASESPACE_UPLOAD_LABEL = "Upload from Basespace";
+const LOCAL_UPLOAD_LABEL = "Your Computer";
+const REMOTE_UPLOAD_LABEL = "S3";
+const BASESPACE_UPLOAD_LABEL = "Basespace";
 
 const UPLOADSAMPLESTEP_SAMPLE_CHANGED = "UploadSampleStep_sample_changed";
 
@@ -1605,7 +1605,7 @@ class UploadSampleStep extends React.Component<
             usedClearLabs={usedClearLabs}
           />
           <div className={cs.fileUpload}>
-            <div className={cs.title}>Upload Files</div>
+            <div className={cs.title}>Select Files</div>
             {this.renderUploadTabs()}
             {this.renderUploadTabContent()}
           </div>

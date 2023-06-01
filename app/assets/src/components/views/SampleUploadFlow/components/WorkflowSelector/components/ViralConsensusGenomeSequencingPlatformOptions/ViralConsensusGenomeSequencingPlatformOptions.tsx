@@ -32,16 +32,17 @@ const ViralConsensusGenomeSequencingPlatformOptions = ({
       Upload reference sequence (fasta format) you would like to map the reads
       against to create a consensus genome.{" "}
       <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/14783973727636-Upload-Consensus-Genome-Data-through-the-Web-App#reference-sequence">
-        Learn more
+        Learn More
       </ExternalLink>
     </div>
   );
 
   const bedFileTooltip = (
     <div>
-      Upload a primer BED file to soft clip amplicon-based data.{" "}
+      Upload a primer BED file to soft clip amplicon-based data.
+      <br />
       <ExternalLink href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/14783973727636-Upload-Consensus-Genome-Data-through-the-Web-App#trim-primers">
-        Learn more
+        Learn More
       </ExternalLink>
     </div>
   );

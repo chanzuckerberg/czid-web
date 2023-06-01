@@ -16,7 +16,7 @@
   border-radius: $sds-corners-corner-m;
   cursor: pointer;
   display: flex;
-  padding: $sds-spaces-l;
+  padding: $sds-spaces-l $sds-spaces-l $sds-spaces-xl $sds-spaces-l;
   margin-bottom: $sds-spaces-xs;
   width: 100%;
 
@@ -74,18 +74,17 @@
 .technologyContent {
   display: flex;
   flex-wrap: wrap;
-  margin-top: $sds-spaces-l;
 }
 
 .item {
   display: flex;
   flex-direction: column;
   min-width: 160px;
-  margin-right: $sds-spaces-xl;
+  margin-right: 100px;
+  margin-top: $sds-spaces-l;
 
-  @media (max-width: 992px) {
-    // lg breakpoint
-    margin-top: $sds-spaces-l;
+  @media (max-width: 1200px) {
+    flex: 1 1 160px;
   }
 }
 
@@ -115,4 +114,10 @@
   path {
     fill: $sds-color-gray-200;
   }
+}
+
+.optionText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }

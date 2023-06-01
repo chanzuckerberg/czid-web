@@ -1,9 +1,12 @@
 import cx from "classnames";
+import { Button, Icon } from "czifui";
 import { camelCase, find, get, getOr, isEmpty, isNil, size } from "lodash/fp";
 import memoize from "memoize-one";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { trackEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import { UserContext } from "~/components/common/UserContext";
+import { WGS_CG_UPLOAD_FEATURE } from "~/components/utils/features";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
@@ -27,7 +30,6 @@ import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
 import {
   CG_HISTOGRAM_FILL_COLOR,
   CG_HISTOGRAM_HOVER_FILL_COLOR,
-  CG_VIEW_METRIC_COLUMNS,
   RUNNING_STATE,
   SARS_COV_2_ACCESSION_ID,
 } from "./constants";
@@ -50,6 +52,9 @@ const ConsensusGenomeView = ({
   workflowRun,
   workflowRunResults,
 }: ConsensusGenomeViewProps) => {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
+
   const coverageVizContainerRef = useRef();
   const [histogramTooltipData, setHistogramTooltipData] = useState(null);
   const [histogramTooltipLocation, setHistogramTooltipLocation] =
@@ -57,6 +62,7 @@ const ConsensusGenomeView = ({
   const consensusGenomeWorkflowRuns = sample.workflow_runs.filter(
     run => run.workflow === WORKFLOWS.CONSENSUS_GENOME.value,
   );
+
   useEffect(() => {
     if (
       !isNil(coverageVizContainerRef.current) &&
@@ -186,7 +192,12 @@ const ConsensusGenomeView = ({
           length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
         }),
       );
-      const subtext = `${workflowRunResults.taxon_info.accession_id} - ${workflowRunResults.taxon_info.accession_name}`;
+
+      const accessionName =
+        workflowRunResults.taxon_info.accession_id ?? "Unknown accession";
+      const taxonName =
+        workflowRunResults.taxon_info.accession_name ?? "Unknown taxon";
+      const subtext = `${accessionName} - ${taxonName}`;
 
       new Histogram(coverageVizContainerRef.current, [coverageVizData], {
         barOpacity: 1,
@@ -258,8 +269,30 @@ const ConsensusGenomeView = ({
       />
     );
 
+    if (!allowedFeatures.includes(WGS_CG_UPLOAD_FEATURE)) {
+      return {
+        referenceNCBIEntry,
+        referenceLength: totalLength,
+        coverageDepth: `${coverageDepth.toFixed(1)}x`,
+        coverageBreadth: formatPercent(coverageBreadth),
+      };
+    }
+
+    const customReference = (
+      <Button sdsType="secondary" sdsStyle="minimal" isAllCaps>
+        <Icon sdsIcon="download" sdsSize="s" sdsType="interactive" />
+        <span className={cs.downloadLink}>Download</span>
+      </Button>
+    );
+
     return {
-      referenceNCBIEntry,
+      ...(accessionId
+        ? {
+            referenceNCBIEntry,
+          }
+        : {
+            customReference,
+          }),
       referenceLength: totalLength,
       coverageDepth: `${coverageDepth.toFixed(1)}x`,
       coverageBreadth: formatPercent(coverageBreadth),
@@ -267,6 +300,8 @@ const ConsensusGenomeView = ({
   };
 
   const renderCoverageView = () => {
+    const { accession_id: accessionId } = workflowRunResults.taxon_info;
+
     const helpLink = (
       <ExternalLink
         href={computeHelpLink()}
@@ -277,6 +312,19 @@ const ConsensusGenomeView = ({
     );
 
     const metrics = getAccessionMetrics();
+
+    const CG_VIEW_METRIC_COLUMNS = [
+      accessionId ? "referenceNCBIEntry" : "customReference",
+      "referenceLength",
+      "coverageDepth",
+      "coverageBreadth",
+    ].map(key => [
+      {
+        key,
+        ...FIELDS_METADATA[key],
+      },
+    ]);
+
     return (
       <div className={cs.section}>
         <div className={cs.title}>

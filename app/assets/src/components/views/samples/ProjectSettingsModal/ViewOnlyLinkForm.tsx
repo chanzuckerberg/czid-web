@@ -284,7 +284,7 @@ class ViewOnlyLinkForm extends React.Component<
         <List
           listClassName={cs.conditionList}
           listItems={[
-            "Upload samples",
+            "Select samples",
             "Edit metadata",
             "Download non-host reads/ contigs or unmapped reads",
           ]}

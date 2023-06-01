@@ -3,5 +3,6 @@
 
 .optional {
   @include font-header-xxs;
+  font-weight: 500;
   color: $sds-color-gray-500;
 }

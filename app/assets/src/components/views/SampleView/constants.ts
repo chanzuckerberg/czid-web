@@ -1,5 +1,4 @@
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { FIELDS_METADATA } from "~utils/tooltip";
 
 export const SPECIES_LEVEL_INDEX = 1;
 export const GENUS_LEVEL_INDEX = 2;
@@ -24,18 +23,6 @@ export const URL_FIELDS = {
   currentTab: "string",
   workflowRunId: "number",
 };
-
-export const CG_VIEW_METRIC_COLUMNS = [
-  "referenceNCBIEntry",
-  "referenceLength",
-  "coverageDepth",
-  "coverageBreadth",
-].map(key => [
-  {
-    key,
-    ...FIELDS_METADATA[key],
-  },
-]);
 
 export const CG_HISTOGRAM_FILL_COLOR = "#A9BDFC";
 export const CG_HISTOGRAM_HOVER_FILL_COLOR = "#3867FA";

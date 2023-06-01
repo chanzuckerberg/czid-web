@@ -46,32 +46,32 @@ const MetagenomicsSequencingPlatformOptions = ({
     >
       <div className={cx(cs.title, cs.technologyTitle)}>
         Sequencing Platform:
-        <div className={cs.technologyOptions}>
-          <IlluminaSequencingPlatformOption
-            isCg={false}
-            isSelected={selectedTechnology === ILLUMINA}
-            onClick={() => onTechnologyToggle(MNGS, ILLUMINA)}
-            selectedWetlabProtocol={selectedWetlabProtocol}
-            onWetlabProtocolChange={onWetlabProtocolChange}
-            pipelineVersion={
-              projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value]
-            }
-          />
-          <MetagenomicsWithNanopore
-            isDisabled={shouldDisableSequencingPlatformOption(
-              currentTab,
-              NANOPORE,
-              MNGS,
-            )}
-            isSelected={selectedTechnology === NANOPORE}
-            onClick={() => onTechnologyToggle(MNGS, NANOPORE)}
-            selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
-            onChangeGuppyBasecallerSetting={onChangeGuppyBasecallerSetting}
-            pipelineVersion={
-              projectPipelineVersions?.[WORKFLOWS.LONG_READ_MNGS.value]
-            }
-          />
-        </div>
+      </div>
+      <div className={cs.technologyOptions}>
+        <IlluminaSequencingPlatformOption
+          isCg={false}
+          isSelected={selectedTechnology === ILLUMINA}
+          onClick={() => onTechnologyToggle(MNGS, ILLUMINA)}
+          selectedWetlabProtocol={selectedWetlabProtocol}
+          onWetlabProtocolChange={onWetlabProtocolChange}
+          pipelineVersion={
+            projectPipelineVersions?.[WORKFLOWS.SHORT_READ_MNGS.value]
+          }
+        />
+        <MetagenomicsWithNanopore
+          isDisabled={shouldDisableSequencingPlatformOption(
+            currentTab,
+            NANOPORE,
+            MNGS,
+          )}
+          isSelected={selectedTechnology === NANOPORE}
+          onClick={() => onTechnologyToggle(MNGS, NANOPORE)}
+          selectedGuppyBasecallerSetting={selectedGuppyBasecallerSetting}
+          onChangeGuppyBasecallerSetting={onChangeGuppyBasecallerSetting}
+          pipelineVersion={
+            projectPipelineVersions?.[WORKFLOWS.LONG_READ_MNGS.value]
+          }
+        />
       </div>
     </button>
   );

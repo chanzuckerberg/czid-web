@@ -66,7 +66,7 @@ local-db-drop: .env.localdev ## Wipe out the local db for a fresh start
 
 .PHONY: local-import-staging-data
 local-import-staging-data: .env.localdev ## Import staging data into the local mysql db. This takes about an hour!!
-	@if [ -e .database_imported ]; then echo "The database is already populated - please run 'rm .database.imported' and try again if you really want to replace it."; exit 1; fi
+	@if [ -e .database_imported ]; then echo "The database is already populated - please run 'rm .database_imported' and try again if you really want to replace it."; exit 1; fi
 	if [ ! -e idseq_development.sql.gz ]; then \
 	    $(docker_compose_simple) exec web mysqldump -h db -u root idseq_development | gzip -c > idseq_development.sql.gz; \
 	fi

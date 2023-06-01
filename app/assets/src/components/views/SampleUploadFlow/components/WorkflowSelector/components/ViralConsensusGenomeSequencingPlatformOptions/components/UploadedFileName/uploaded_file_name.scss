@@ -2,14 +2,23 @@
 @import "~czifui/dist/variables";
 
 .uploadedFileName {
-  @include font-body-xs;
+  :global(.MuiChip-root) {
+    background-color: $sds-color-gray-200;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
 
-  background-color: $sds-color-gray-200;
-  height: 34px;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 $sds-spaces-m;
-  align-items: center;
-  border-radius: $sds-corners-corner-m;
+    &:hover {
+      background-color: $sds-color-gray-200;
+    }
+
+    :global(.MuiChip-label) {
+      @include font-body-xs;
+      color: black;
+    }
+
+    :global(svg) {
+      fill: black;
+    }
+  }
 }

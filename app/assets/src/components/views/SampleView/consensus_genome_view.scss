@@ -131,19 +131,17 @@
           background-color: $sds-color-gray-100;
         }
 
-        .label,
         .value {
-          flex: 1 1 0;
+          @include font-body-xxs;
+          display: flex;
+          justify-content: center;
+          flex: 1 1 auto;
           min-width: 0;
           cursor: default;
         }
 
         .label {
           @include font-header-xxs;
-        }
-
-        .value {
-          @include font-body-xxs;
         }
       }
     }
@@ -197,4 +195,8 @@
 
 .iconAlert {
   width: $icon-l;
+}
+
+.downloadLink {
+  margin-left: $sds-spaces-xxs;
 }

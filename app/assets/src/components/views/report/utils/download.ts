@@ -86,6 +86,10 @@ export const getDownloadLinks = (sampleId: $TSFixMe, pipelineRun: $TSFixMe) => {
   }));
 };
 
+export const getWorkflowRefAccessionFileLink = (workflowRunId: number) => {
+  return `/workflow_runs/${workflowRunId}/cg_report_downloads?downloadType=ref_fasta`;
+};
+
 export const getWorkflowRunZipLink = (workflowRunId: number) => {
   return `/workflow_runs/${workflowRunId}/zip_link`;
 };
