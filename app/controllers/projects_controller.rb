@@ -119,14 +119,20 @@ class ProjectsController < ApplicationController
           creator_id = Arel.sql("creators_projects.id AS creator_id")
           mngs_runs_count = Arel.sql("COUNT(DISTINCT CASE WHEN samples.initial_workflow='#{WorkflowRun::WORKFLOW[:short_read_mngs]}' THEN samples.id ELSE NULL END) AS mngs_runs_count")
           cg_runs_count = Arel.sql("COUNT(DISTINCT (CASE
-                                      WHEN workflow_runs.workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' AND workflow_runs.deprecated = false THEN workflow_runs.id
+                                      WHEN workflow_runs.workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' AND workflow_runs.deprecated = false AND workflow_runs.deleted_at IS NULL THEN workflow_runs.id
                                       WHEN samples.initial_workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' THEN samples.id
                                       ELSE NULL
                                     END)
                           ) AS cg_runs_count")
+          amr_runs_count = Arel.sql("COUNT(DISTINCT (CASE
+                                      WHEN workflow_runs.workflow = '#{WorkflowRun::WORKFLOW[:amr]}' AND workflow_runs.deprecated = false AND workflow_runs.deleted_at IS NULL THEN workflow_runs.id
+                                      WHEN samples.initial_workflow = '#{WorkflowRun::WORKFLOW[:amr]}' THEN samples.id
+                                      ELSE NULL
+                                    END)
+                            ) AS amr_runs_count")
 
           attrs = [
-            *basic_attributes, group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator, creator_id, mngs_runs_count, cg_runs_count,
+            *basic_attributes, group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator, creator_id, mngs_runs_count, cg_runs_count, amr_runs_count,
           ]
           names = attrs.map { |attr| attr.split(' AS ').last }
           name_email = ["name", "email"]
@@ -149,8 +155,8 @@ class ProjectsController < ApplicationController
               # rename all JS instances of "tissue".
               project_hash["tissues"] = project_hash["sample_types"]
 
-              project_hash["sample_counts"] = project_hash.slice("number_of_samples", "mngs_runs_count", "cg_runs_count")
-              project_hash.except("sample_types", "number_of_samples", "mngs_runs_count", "cg_runs_count")
+              project_hash["sample_counts"] = project_hash.slice("number_of_samples", "mngs_runs_count", "cg_runs_count", "amr_runs_count")
+              project_hash.except("sample_types", "number_of_samples", "mngs_runs_count", "cg_runs_count", "amr_runs_count")
             end),
             all_projects_ids: (projects.pluck(:id).uniq if list_all_project_ids),
           }.compact

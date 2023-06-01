@@ -509,15 +509,17 @@ RSpec.describe ProjectsController, type: :controller do
                   host_genome_name: "Human",
                   user: extra_users[0],
                   metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
-                  number_of_workflow_runs: 5,
+                  number_of_cg_workflow_runs: 5,
+                  number_of_amr_workflow_runs: 1,
                   number_of_pipeline_runs: 1,
                 },
                 {
                   host_genome_name: "Mosquito",
                   user: @user,
                   metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" },
-                  number_of_workflow_runs: 1,
+                  number_of_cg_workflow_runs: 1,
                   number_of_pipeline_runs: 1,
+                  number_of_amr_workflow_runs: 1,
                 },
               ]
             )
@@ -540,6 +542,7 @@ RSpec.describe ProjectsController, type: :controller do
                                                        number_of_samples: 2,
                                                        mngs_runs_count: 2,
                                                        cg_runs_count: 6,
+                                                       amr_runs_count: 2,
                                                      }.as_json,
                                                      hosts: ["Human", "Mosquito"],
                                                      tissues: ["Serum", "Water"],

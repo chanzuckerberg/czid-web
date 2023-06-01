@@ -4,6 +4,7 @@ import { at, get, isNil } from "lodash/fp";
 import moment from "moment";
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
+import { AMR_V3_FEATURE } from "~/components/utils/features";
 import { numberWithCommas } from "~/helpers/strings";
 import StatusLabel from "~ui/labels/StatusLabel";
 // CSS file must be loaded after any elements you might want to override
@@ -70,16 +71,27 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderSampleCounts = ({ cellData: counts }) => {
-    const [numberOfSamples, mngsAnalysisRunsCount, cgAnlaysisRunsCount] = at(
-      ["number_of_samples", "mngs_runs_count", "cg_runs_count"],
+  static renderSampleCounts = ({ cellData: counts, allowedFeatures }) => {
+    const [
+      numberOfSamples,
+      mngsAnalysisRunsCount,
+      cgAnlaysisRunsCount,
+      amrAnalysisRunsCount,
+    ] = at(
+      [
+        "number_of_samples",
+        "mngs_runs_count",
+        "cg_runs_count",
+        "amr_runs_count",
+      ],
       counts,
     );
 
     const hasAllCounts =
       !isNil(numberOfSamples) &&
       !isNil(mngsAnalysisRunsCount) &&
-      !isNil(cgAnlaysisRunsCount);
+      !isNil(cgAnlaysisRunsCount) &&
+      !isNil(amrAnalysisRunsCount);
     return (
       hasAllCounts && (
         <div className={cs.counts}>
@@ -94,6 +106,9 @@ class TableRenderers extends React.Component {
             data-testid="nmgs-cg-sample-counts"
           >
             {`${mngsAnalysisRunsCount} mNGS`} | {`${cgAnlaysisRunsCount} CG`}
+            {allowedFeatures.includes(AMR_V3_FEATURE)
+              ? ` | ${amrAnalysisRunsCount} AMR`
+              : ""}
           </div>
         </div>
       )

@@ -37,9 +37,9 @@ FactoryBot.define do
 
     after :create do |project, options|
       options.samples_data.each do |sample_data|
-        number_of_pipeline_runs, number_of_workflow_runs = sample_data.values_at(:number_of_pipeline_runs, :number_of_workflow_runs)
+        number_of_pipeline_runs, number_of_cg_workflow_runs, number_of_amr_workflow_runs = sample_data.values_at(:number_of_pipeline_runs, :number_of_cg_workflow_runs, :number_of_amr_workflow_runs)
 
-        sample_data = sample_data.except(:number_of_pipeline_runs, :number_of_workflow_runs)
+        sample_data = sample_data.except(:number_of_pipeline_runs, :number_of_cg_workflow_runs, :number_of_amr_workflow_runs)
         s = create(:sample, project: project, **sample_data)
 
         if number_of_pipeline_runs.present?
@@ -48,9 +48,15 @@ FactoryBot.define do
           end
         end
 
-        if number_of_workflow_runs.present?
-          number_of_workflow_runs.times do
-            create(:workflow_run, sample_id: s.id)
+        if number_of_cg_workflow_runs.present?
+          number_of_cg_workflow_runs.times do
+            create(:workflow_run, sample_id: s.id, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+          end
+        end
+
+        if number_of_amr_workflow_runs.present?
+          number_of_amr_workflow_runs.times do
+            create(:workflow_run, sample_id: s.id, workflow: WorkflowRun::WORKFLOW[:amr])
           end
         end
       end

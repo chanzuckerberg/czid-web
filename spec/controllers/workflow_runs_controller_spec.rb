@@ -108,14 +108,14 @@ RSpec.describe WorkflowRunsController, type: :controller do
                        user: @user,
                        host_genome_name: "Human",
                        metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
-                       number_of_workflow_runs: 3,
+                       number_of_cg_workflow_runs: 3,
                        sample_notes: "these are some sample notes",
                        name: "Test Sample 1",
                      },
                    ]),
-            create(:project, users: [other_user, @user], samples_data: [{ user: @user, number_of_workflow_runs: 3 }]),
-            create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 2 }]),
-            create(:project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 1 }]),
+            create(:project, users: [other_user, @user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 3 }]),
+            create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 2 }]),
+            create(:project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 1 }]),
           ]
 
           other_user_project = create(:project, users: [other_user])
@@ -261,21 +261,21 @@ RSpec.describe WorkflowRunsController, type: :controller do
                        user: @user,
                        host_genome_name: "Human",
                        metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
-                       number_of_workflow_runs: 3,
+                       number_of_cg_workflow_runs: 3,
                        sample_notes: "these are some sample notes",
                        name: "Test Sample 1",
                      },
                    ]),
             create(:public_project),
-            create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 1 }]),
-            create(:public_project, users: [other_user], samples_data: [{ user: other_user, number_of_workflow_runs: 4 }]),
+            create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 1 }]),
+            create(:public_project, users: [other_user], samples_data: [{ user: other_user, number_of_cg_workflow_runs: 4 }]),
           ]
 
           private_project = create(:project, users: [other_user, @user])
           private_sample = create(:sample, project: private_project)
           @private_workflow_run = create(:workflow_run, sample: private_sample)
-          create(:project, users: [other_user, @user], samples_data: [{ user: @user, number_of_workflow_runs: 3 }])
-          create(:project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 1 }])
+          create(:project, users: [other_user, @user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 3 }])
+          create(:project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 1 }])
           create(:project, users: [other_user])
           create(:project)
 
@@ -372,14 +372,14 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                      user: @user,
                                      host_genome_name: "Bear",
                                      metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
-                                     number_of_workflow_runs: 4,
+                                     number_of_cg_workflow_runs: 4,
                                      name: "Test Sample 6",
                                    },
                                    {
                                      user: @user,
                                      host_genome_name: "Cow",
                                      metadata_fields: { collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab" },
-                                     number_of_workflow_runs: 1,
+                                     number_of_cg_workflow_runs: 1,
                                      name: "Test Sample 7",
                                    },
                                  ])
@@ -388,7 +388,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                      user: @user,
                                      host_genome_name: "Mosquito",
                                      metadata_fields: { collection_location: "Los Angeles, USA", sample_type: "Brain" },
-                                     number_of_workflow_runs: 2,
+                                     number_of_cg_workflow_runs: 2,
                                      name: "Test Sample 8",
                                    },
                                  ])
@@ -398,7 +398,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                      user: @user,
                                      host_genome_name: "Koala",
                                      metadata_fields: { collection_location: "Indio, USA", sample_type: "CSF" },
-                                     number_of_workflow_runs: 3,
+                                     number_of_cg_workflow_runs: 3,
                                      name: "Test Sample 9",
                                    },
                                  ])
@@ -695,10 +695,10 @@ RSpec.describe WorkflowRunsController, type: :controller do
           before do
             other_user = create(:user)
             my_projects = [
-              create(:project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 3 }]),
-              create(:project, users: [other_user, @user], samples_data: [{ user: @user, number_of_workflow_runs: 3 }]),
-              create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 2 }]),
-              create(:project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 1 }]),
+              create(:project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 3 }]),
+              create(:project, users: [other_user, @user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 3 }]),
+              create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 2 }]),
+              create(:project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 1 }]),
             ]
 
             create(:project, users: [other_user])
@@ -736,14 +736,14 @@ RSpec.describe WorkflowRunsController, type: :controller do
           before do
             other_user = create(:user)
             public_projects = [
-              create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 2 }]),
+              create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 2 }]),
               create(:public_project),
-              create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 1 }]),
-              create(:public_project, users: [other_user], samples_data: [{ user: other_user, number_of_workflow_runs: 4 }]),
+              create(:public_project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 1 }]),
+              create(:public_project, users: [other_user], samples_data: [{ user: other_user, number_of_cg_workflow_runs: 4 }]),
             ]
 
-            create(:project, users: [other_user, @user], samples_data: [{ user: @user, number_of_workflow_runs: 3 }])
-            create(:project, users: [@user], samples_data: [{ user: @user, number_of_workflow_runs: 1 }])
+            create(:project, users: [other_user, @user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 3 }])
+            create(:project, users: [@user], samples_data: [{ user: @user, number_of_cg_workflow_runs: 1 }])
             create(:project, users: [other_user])
             create(:project)
 

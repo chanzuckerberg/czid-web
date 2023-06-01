@@ -3,6 +3,7 @@ import { merge, pick } from "lodash/fp";
 import React from "react";
 import { SortDirectionType } from "react-virtualized";
 import { trackEvent } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
@@ -19,7 +20,6 @@ import {
 import cs from "./projects_view.scss";
 
 interface ProjectsViewProps {
-  allowedFeatures?: $TSFixMe[];
   currentDisplay: string;
   currentTab: string;
   filteredProjectCount?: number;
@@ -94,7 +94,11 @@ class ProjectsView extends React.Component<ProjectsViewProps> {
         dataKey: "sample_counts",
         label: "Counts",
         width: 140,
-        cellRenderer: TableRenderers.renderSampleCounts,
+        cellRenderer: ({ cellData }) =>
+          TableRenderers.renderSampleCounts({
+            cellData,
+            allowedFeatures: this.context?.allowedFeatures || [],
+          }),
       },
     ];
 
@@ -293,3 +297,4 @@ ProjectsView.defaultProps = {
 };
 
 export default ProjectsView;
+ProjectsView.contextType = UserContext;

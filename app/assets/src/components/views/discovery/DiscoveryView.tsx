@@ -2344,7 +2344,6 @@ class DiscoveryView extends React.Component<
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <ProjectsView
-                allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
                 filteredProjectCount={filteredProjectCount}
