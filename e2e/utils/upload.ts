@@ -1,4 +1,6 @@
 import { expect, Page } from "@playwright/test";
+import { kebabCase } from "lodash/fp";
+import path from "path";
 import {
   ACCEPT_ALL_COOKIES,
   ANALYSIS_TYPE,
@@ -11,7 +13,6 @@ import {
   HOST_GENUS_SPECIES,
   HOST_ORGANISM,
   HOST_SEX,
-  INFECTION_CLASS,
   ISOLATE,
   KNOWN_ORGANISM,
   RNA_DNA,
@@ -20,13 +21,27 @@ import {
   SELECT_PROJECT,
   START_UPLOAD,
   UPLOAD_METADATA,
+  WORKFLOWS,
 } from "../constants/common.const";
 import { Metadata } from "../types/metadata";
-import { findByTextRole, pressKey, selectFile } from "../utils/page";
+import { findByTextRole, pressKey } from "../utils/page";
 import { getFixture } from "./common";
 import { getMetadataField } from "./selectors";
 
 const metadataFieldFixture = getFixture("metadata_fields");
+const REF_FILENAME = "consensus_papilloma.fa";
+
+export const uploadRefSequence = async page => {
+  const REF_FILE = `./fixtures/reference_sequences/${REF_FILENAME}`;
+  const [refSeqFileChooser] = await Promise.all([
+    // It is important to call waitForEvent before click to set up waiting.
+    page.waitForEvent("filechooser"),
+    // Opens the file chooser.
+    page.getByTestId("reference-sequence-file-upload").click(),
+  ]);
+  await page.waitForTimeout(2000);
+  await refSeqFileChooser.setFiles(path.resolve(REF_FILE));
+};
 
 export async function uploadSampleFiles(
   page: Page,
@@ -45,17 +60,46 @@ export async function uploadSampleFiles(
   await page.getByText(projectName).click();
 
   // select analysis type
-  const analysisTypeId = analysisType.toLowerCase().replace(/ /g, "-");
-  await page.getByTestId(`${ANALYSIS_TYPE}-${analysisTypeId}`).click();
-  if (analysisTypeId === "metagenomics") {
+  const analysisTypeId = `${ANALYSIS_TYPE}-${kebabCase(analysisType)}`;
+  const wgsWorkflowOption = await page.getByTestId(analysisTypeId);
+  wgsWorkflowOption.click();
+
+  if (analysisType === WORKFLOWS.MNGS) {
     await page
-      .getByTestId("sequencing-technology-Illumina") // todo: needs to be parametrized
+      .getByTestId("sequencing-technology-Illumina") // todo: needs to be parameterized
       .click();
   }
 
+  if (analysisType === WORKFLOWS.WGS) {
+    // choose a taxon name
+    const taxonFilter = await page.getByTestId("upload-taxon-filter");
+    await taxonFilter.click();
+    await page.getByText("Unknown").click();
+
+    // upload a reference sequence
+    await uploadRefSequence(page);
+
+    // ensure filename displayed
+    expect(wgsWorkflowOption).toContainText(REF_FILENAME);
+
+    // test file can be removed
+    await wgsWorkflowOption.getByTestId("clear-uploaded-file-button").click();
+    expect(wgsWorkflowOption).not.toContainText(REF_FILENAME);
+
+    // upload a reference sequence again
+    await uploadRefSequence(page);
+  }
+
   // select files
-  await selectFile(page, `${FIXTURE_DIR}/${sampleFiles}`);
-  await page.getByText(ACCEPT_ALL_COOKIES).click();
+  const fileInputSelector = "[data-testid='drop-sample-files'] input";
+  const filePath = path.resolve(`${FIXTURE_DIR}/${sampleFiles}`);
+  await page.setInputFiles(fileInputSelector, filePath);
+
+  const cookieBanner = page.getByText(ACCEPT_ALL_COOKIES);
+  if ((await cookieBanner.count()) > 0) {
+    await cookieBanner.click();
+  }
+
   await page.getByText(CONTINUE).click();
 
   // wait for page and file data to be imported
@@ -66,17 +110,16 @@ export async function fillMetadata(
   page: Page,
   metaData: Metadata,
 ): Promise<any> {
+  const inputSelector = 'input[type="text"]';
+
   // host organism
   await page
-    .locator('input[type="text"]')
+    .locator(inputSelector)
     .nth(0)
     .fill(String(metaData[HOST_ORGANISM]));
 
   // sample type
-  await page
-    .locator('input[type="text"]')
-    .nth(1)
-    .fill(String(metaData[SAMPLE_TYPE]));
+  await page.locator(inputSelector).nth(1).fill(String(metaData[SAMPLE_TYPE]));
 
   // water control
   if (metaData["Water Control"] === "Yes") {
@@ -85,7 +128,7 @@ export async function fillMetadata(
   }
   // collection date
   await page
-    .locator('input[type="text"]')
+    .locator(inputSelector)
     .nth(2)
     .fill(metaData[COLLECTION_DATE] as string);
 
@@ -108,7 +151,7 @@ export async function fillMetadata(
 
   // first add optional columns so they can be filled
   const optionalFields: Array<string> =
-    metadataFieldFixture["allOptinalFields"];
+    metadataFieldFixture["allOptionalFields"];
   // clicking the + icon
   await page.getByTestId("select-columns").click();
   const items = page.locator(COLUMN_SELECTOR);
@@ -132,14 +175,14 @@ export async function fillMetadata(
 
   // known organism
   await page
-    .locator('input[type="text"]')
+    .locator(inputSelector)
     .nth(4)
     .fill(metaData[KNOWN_ORGANISM] as string);
 
   // infection class
   const infectionClass = "infection_class";
   await page.locator(getMetadataField(infectionClass)).click();
-  await page.getByText(metaData[INFECTION_CLASS] as string).click();
+  await page.getByRole("option", { name: "Unknown" }).click();
 
   // host age
   await page
@@ -149,7 +192,7 @@ export async function fillMetadata(
 
   // detection method
   await page
-    .locator('input[type="text"]')
+    .locator(inputSelector)
     .nth(5)
     .fill(metaData["Detection Method"] as string);
 
@@ -181,18 +224,12 @@ export async function fillMetadata(
 
   // diseases and conditions
   await page
-    .locator('input[type="text"]')
+    .locator(inputSelector)
     .nth(6)
     .fill(String(metaData[DISEASES_CONDITIONS]));
 
   // click continue button
-  const continueButtonIndex = 0;
-  await page
-    // .getByText(CONTINUE)
-    // .nth(continueButtonIndex)
-    .locator(".continueButton-2Bayh")
-    .nth(1)
-    .click();
+  await page.locator(".continueButton-2Bayh").nth(1).click();
 }
 
 export async function submitUpload(page: Page): Promise<any> {

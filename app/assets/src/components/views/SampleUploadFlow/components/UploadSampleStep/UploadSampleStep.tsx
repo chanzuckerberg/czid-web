@@ -1658,7 +1658,7 @@ class UploadSampleStep extends React.Component<
             disabled={this.isValid()}
             position="top center"
             trigger={
-              <span>
+              <span data-testid="upload-continue-button">
                 <PrimaryButton
                   className={cs.continueButton}
                   disabled={!this.isValid()}
@@ -1668,7 +1668,9 @@ class UploadSampleStep extends React.Component<
               </span>
             }
           >
-            {this.handleContinueButtonTooltip()}
+            <span data-testid="upload-continue-tooltip">
+              {this.handleContinueButtonTooltip()}
+            </span>
           </BasicPopup>
           <a href="/home">
             <SecondaryButton

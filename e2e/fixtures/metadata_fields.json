@@ -6,7 +6,7 @@
     "Collection Date",
     "Collection Location"
   ],
-  "allOptinalFields": [
+  "allOptionalFields": [
     "Host Sex",
     "Known Organism",
     "Infection Class",

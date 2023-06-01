@@ -86,7 +86,7 @@ export function generateMetadata(sampleName: string): Metadata {
  * @returns Metadata object
  */
 export function setOptionalMetadataAttribute(data: Metadata): Metadata {
-  const allOptionalFields = optionalFieldFixture["allOptinalFields"];
+  const allOptionalFields = optionalFieldFixture["allOptionalFields"];
   for (const field of allOptionalFields) {
     if (!excludedFields?.includes(field)) {
       const attribute = field as string;

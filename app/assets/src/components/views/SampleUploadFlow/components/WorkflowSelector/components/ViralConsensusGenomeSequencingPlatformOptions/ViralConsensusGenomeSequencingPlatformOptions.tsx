@@ -87,6 +87,7 @@ const ViralConsensusGenomeSequencingPlatformOptions = ({
           <UploadButton
             fileTypes={[".fasta", ".fa", "fasta.gz", ".fa.gz"]}
             onFileChanged={onRefSeqFileChanged}
+            data-testid="reference-sequence-file-upload"
           />
         )}
       </div>

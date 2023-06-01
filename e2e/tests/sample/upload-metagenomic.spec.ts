@@ -1,7 +1,12 @@
 import { expect, test } from "@playwright/test";
 import dotenv from "dotenv";
 import path from "path";
-import { CONTINUE, GO_TO_PROJECT, LOADED } from "../../constants/common.const";
+import {
+  CONTINUE,
+  GO_TO_PROJECT,
+  LOADED,
+  WORKFLOWS,
+} from "../../constants/common.const";
 import { Metadata } from "../../types/metadata";
 import { generateMetadataFile, getMetadata } from "../../utils/mockData";
 import { fileChooser } from "../../utils/page";
@@ -26,7 +31,7 @@ const defaults: Metadata = {
   "Ct Value": 97,
 };
 
-const sampleType = "Metagenomics";
+const sampleType = WORKFLOWS.MNGS;
 const projectName = "New QA Project";
 const sampleFiles = ["RR004_water_2_S23A_R1_001.fastq"];
 // These tests verify user is able to upload metadata samples manually and via csv file.

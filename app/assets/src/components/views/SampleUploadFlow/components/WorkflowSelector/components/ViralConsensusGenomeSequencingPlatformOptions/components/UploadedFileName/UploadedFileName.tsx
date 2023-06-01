@@ -16,6 +16,8 @@ const UploadedFileName = ({
       aria-label="Close"
       // The intention of this button is to remove the file data from state. As such, we must
       // explicitly call without arguments here, otherwise the click event will be set as the file content.
+
+      data-testid="clear-uploaded-file-button"
       onDelete={() => onFileChanged()}
       label={fileName}
     />

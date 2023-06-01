@@ -33,18 +33,19 @@ const ProjectSelect = ({
     onChange(find({ id: projectId }, projects));
   };
   return (
-    <SubtextDropdown
-      fluid
-      options={getOptions()}
-      onChange={(val: number) => onProjectChange(val)}
-      initialSelectedValue={value}
-      placeholder="Select project"
-      search
-      disabled={disabled}
-      erred={erred}
-      showSelectedItemSubtext={showSelectedItemSubtext}
-      data-testid="select-project"
-    />
+    <span data-testid="select-project">
+      <SubtextDropdown
+        fluid
+        options={getOptions()}
+        onChange={(val: number) => onProjectChange(val)}
+        initialSelectedValue={value}
+        placeholder="Select project"
+        search
+        disabled={disabled}
+        erred={erred}
+        showSelectedItemSubtext={showSelectedItemSubtext}
+      />
+    </span>
   );
 };
 

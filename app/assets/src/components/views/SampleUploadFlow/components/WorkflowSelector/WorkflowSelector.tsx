@@ -163,6 +163,7 @@ const WorkflowSelector = ({
           />
         }
         sdsIcon={UPLOAD_WORKFLOWS.MNGS.icon}
+        testKey={UPLOAD_WORKFLOWS.MNGS.value}
         title={UPLOAD_WORKFLOWS.MNGS.label}
       />
       {allowedFeatures.includes(AMR_V1_FEATURE || AMR_V2_FEATURE) && (
@@ -182,6 +183,7 @@ const WorkflowSelector = ({
           onClick={() => onWorkflowToggle(UPLOAD_WORKFLOWS.AMR.value)}
           isSelected={selectedWorkflows.has(UPLOAD_WORKFLOWS.AMR.value)}
           sdsIcon={UPLOAD_WORKFLOWS.AMR.icon}
+          testKey={UPLOAD_WORKFLOWS.AMR.value}
           title={UPLOAD_WORKFLOWS.AMR.label}
           sequencingPlatformOptions={
             <div className={cs.technologyContent}>
@@ -209,6 +211,7 @@ const WorkflowSelector = ({
             UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value,
           )}
           sdsIcon={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.icon}
+          testKey={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value}
           title={UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.label}
           sequencingPlatformOptions={
             <ViralConsensusGenomeSequencingPlatformOptions
@@ -257,6 +260,7 @@ const WorkflowSelector = ({
             }
           />
         }
+        testKey={UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value}
         title={UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.label}
       />
     </div>

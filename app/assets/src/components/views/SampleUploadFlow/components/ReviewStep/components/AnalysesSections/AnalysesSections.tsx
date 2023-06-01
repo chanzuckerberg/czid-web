@@ -68,7 +68,7 @@ const AnalysesSections = ({
   const { allowedFeatures } = userContext ?? {};
 
   return (
-    <>
+    <div data-testid="upload-input-review">
       {map(workflow => {
         const workflowKey = UPLOAD_WORKFLOW_KEY_FOR_VALUE[workflow];
         const {
@@ -155,7 +155,7 @@ const AnalysesSections = ({
           </div>
         );
       }, getWorkflowSectionOrder(workflows))}
-    </>
+    </div>
   );
 };
 

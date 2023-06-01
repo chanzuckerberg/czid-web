@@ -6,12 +6,12 @@ import {
   InputRadio,
   Tooltip,
 } from "czifui";
-import { kebabCase } from "lodash/fp";
 import React, { ReactNode, useContext } from "react";
 import { UserContext } from "~/components/common/UserContext";
 import StatusLabel from "~/components/ui/labels/StatusLabel";
 import { AMR_V1_FEATURE, AMR_V2_FEATURE } from "~/components/utils/features";
 import commonStyles from "~/components/views/SampleUploadFlow/components/WorkflowSelector/workflow_selector.scss";
+import { UploadWorkflows } from "~/components/views/SampleUploadFlow/constants";
 import cs from "./analysis_type.scss";
 
 interface AnalysisTypeProps {
@@ -23,6 +23,7 @@ interface AnalysisTypeProps {
   onClick(): void;
   sequencingPlatformOptions?: ReactNode | null;
   sdsIcon?: keyof IconNameToSizes;
+  testKey: UploadWorkflows;
   title: string;
 }
 
@@ -35,6 +36,7 @@ const AnalysisType = ({
   onClick,
   sequencingPlatformOptions = null,
   sdsIcon,
+  testKey,
   title,
 }: AnalysisTypeProps) => {
   const userContext = useContext(UserContext);
@@ -71,7 +73,7 @@ const AnalysisType = ({
       )}
       onClick={() => (isDisabled ? null : onClick())}
       key={title}
-      data-testid={`analysis-type-${kebabCase(title)}`}
+      data-testid={`analysis-type-${testKey}`}
     >
       <Tooltip
         classes={{ arrow: cs.tooltipArrow }}

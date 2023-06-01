@@ -103,3 +103,10 @@ export const TEST_PROJECTS: Record<string, string> = {
   STAGING: "floo Neptunium",
   PROD: "floo Neptunium",
 };
+
+export const WORKFLOWS = {
+  MNGS: "mngs",
+  WGS: "viral-consensus-genome",
+  AMR: "amr",
+  SC2: "covid-consensus-genome",
+};

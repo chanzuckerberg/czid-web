@@ -158,6 +158,7 @@ const UploadTaxonFilter = ({
           option.id === value.id,
       }}
       PopperComponent={StyledDropdownPopper}
+      data-testid="upload-taxon-filter"
     />
   );
 };

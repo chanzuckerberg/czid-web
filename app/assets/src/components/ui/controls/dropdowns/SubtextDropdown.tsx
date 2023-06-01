@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { kebabCase } from "lodash/fp";
 import React from "react";
 import { DropdownProps } from "semantic-ui-react";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -33,9 +34,7 @@ class SubtextDropdown extends React.Component<SubtextDropdownProps> {
           }
         }}
         className={cx(cs.option, option.disabled && cs.disabledOption)}
-        data-testid={`dropdown-${option.text
-          .replace("/ /g", "")
-          .toLowerCase()}`}
+        data-testid={`dropdown-${kebabCase(option.text)}`}
       >
         <div className={cs.optionText}>{option.text}</div>
         <div className={cs.optionSubtext}>{option.subtext}</div>
