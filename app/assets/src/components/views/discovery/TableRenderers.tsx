@@ -273,28 +273,36 @@ class TableRenderers extends React.Component {
     const referenceAccessionId = get("referenceAccessionId", cellData);
     const taxonName = get("taxonName", cellData);
 
+    const accessionContent = () => {
+      if (referenceAccessionId && accessionName) {
+        return `${referenceAccessionId} - ${accessionName}`;
+      } else if (referenceAccessionId && !accessionName) {
+        return referenceAccessionId;
+      } else if (!referenceAccessionId && accessionName) {
+        return accessionName;
+      } else {
+        return <div className={cs.missingAccessionContent}>&mdash;</div>;
+      }
+    };
+
+    const taxonContent = () => {
+      return (
+        taxonName ?? <div className={cs.missingAccessionContent}>&mdash;</div>
+      );
+    };
+
     const content = (
       <div>
-        <div className={cs.title}>
-          {referenceAccessionId} - {accessionName}
-        </div>
-        <div className={cs.details}>{taxonName}</div>
+        <div className={cs.title}>{accessionContent()}</div>
+        <div className={cs.details}>{taxonContent()}</div>
       </div>
     );
 
     return (
       <BasicPopup
         basic={false}
-        trigger={
-          <div className={cs.referenceAccession}>
-            {referenceAccessionId && content}
-          </div>
-        }
-        content={
-          <div className={cs.referenceAccessionTooltip}>
-            {referenceAccessionId && content}
-          </div>
-        }
+        trigger={<div className={cs.referenceAccession}>{content}</div>}
+        content={<div className={cs.referenceAccessionTooltip}>{content}</div>}
       />
     );
   };
