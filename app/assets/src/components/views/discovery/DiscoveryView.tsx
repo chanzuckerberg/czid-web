@@ -73,6 +73,7 @@ import {
   DEFAULT_ACTIVE_COLUMNS_BY_WORKFLOW,
   DEFAULT_SORTED_COLUMN_BY_TAB,
 } from "~/components/views/samples/SamplesView/ColumnConfiguration";
+import { loadState } from "~/helpers/storage";
 import {
   Conditions,
   ConfigForWorkflow,
@@ -204,11 +205,8 @@ class DiscoveryView extends React.Component<
     });
 
     const urlState = this.urlParser.parse(location.search);
-    const sessionState = this.loadState(
-      sessionStorage,
-      KEY_DISCOVERY_VIEW_OPTIONS,
-    );
-    const localState = this.loadState(localStorage, KEY_DISCOVERY_VIEW_OPTIONS);
+    const sessionState = loadState(sessionStorage, KEY_DISCOVERY_VIEW_OPTIONS);
+    const localState = loadState(localStorage, KEY_DISCOVERY_VIEW_OPTIONS);
 
     const projectIdToUpdate = projectId || urlState.projectId;
     // If the projectId was passed as props or is in the URL, update the projectIds in the redux state via the updateProjectIds action creator
@@ -513,17 +511,6 @@ class DiscoveryView extends React.Component<
     };
   };
 
-  loadState = (store: Storage, key: string) => {
-    try {
-      return JSON.parse(store.getItem(key)) || {};
-    } catch (e) {
-      // Avoid possible bad transient state related crash
-      // eslint-disable-next-line no-console
-      console.warn(`Bad state: ${e}`);
-    }
-    return {};
-  };
-
   overwriteCGDefaultActiveColumns({
     stateObject,
   }: {
@@ -558,7 +545,7 @@ class DiscoveryView extends React.Component<
     orderBy: string | undefined;
     orderDirection: SortDirectionType | undefined;
   } => {
-    const sessionState = this.loadState(sessionStorage, "DiscoveryViewOptions");
+    const sessionState = loadState(sessionStorage, "DiscoveryViewOptions");
     const orderBy = sessionState[`${getOrderByKeyFor(tab, workflow)}`];
     const orderDirection = sessionState[`${getOrderDirKeyFor(tab, workflow)}`];
     return { orderBy, orderDirection };
@@ -579,12 +566,12 @@ class DiscoveryView extends React.Component<
     const { domain, snapshotShareId, updateDiscoveryProjectId } = this.props;
     const { currentTab, orderBy, orderDirection } = this.state;
 
-    const { updatedAt: updatedAtFromLocalStorage } = this.loadState(
+    const { updatedAt: updatedAtFromLocalStorage } = loadState(
       localStorage,
       "DiscoveryViewOptions",
     );
 
-    const currentSessionStorageState = this.loadState(
+    const currentSessionStorageState = loadState(
       sessionStorage,
       "DiscoveryViewOptions",
     );

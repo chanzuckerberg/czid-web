@@ -3,8 +3,12 @@ import { ColumnDef, Table as TableType } from "@tanstack/react-table";
 import React, { useMemo } from "react";
 import { Table } from "~/components/ui/Table";
 import { IdMap } from "~/components/utils/objectUtil";
+import { loadState } from "~/helpers/storage";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import { ColumnId } from "../../constants";
+import {
+  ColumnId,
+  LOCAL_STORAGE_AMR_COLUMN_VISIBILITY_KEY,
+} from "../../constants";
 import cs from "./amr_sample_report.scss";
 import {
   contigPercentCoverageColumn,
@@ -39,11 +43,14 @@ interface AmrSampleReportProps {
   hideFilters: boolean;
 }
 
+const { columnVisibility: columnVisibilityLocalStorage } =
+  loadState(localStorage, LOCAL_STORAGE_AMR_COLUMN_VISIBILITY_KEY) || {};
 const initialVisibilityState = {
   columnVisibility: {
     [ColumnId.GENE_FAMILY]: false,
     [ColumnId.CONTIG_SPECIES]: false,
     [ColumnId.READ_SPECIES]: false,
+    ...columnVisibilityLocalStorage,
   },
 };
 

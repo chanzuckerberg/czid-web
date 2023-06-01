@@ -5,10 +5,14 @@ import {
   DropdownMenu,
   Tooltip,
 } from "czifui";
+import { difference } from "lodash/fp";
 import React, { useEffect, useState } from "react";
+import { setState } from "~/helpers/storage";
 import {
+  ColumnId,
   ColumnSection,
   COLUMN_ID_TO_NAME,
+  LOCAL_STORAGE_AMR_COLUMN_VISIBILITY_KEY,
   SECTION_TO_COLUMN_IDS,
 } from "../../../../constants";
 import { AmrResult } from "../../types";
@@ -81,6 +85,23 @@ export const ToggleVisibleColumnsDropdown = ({
     handleApply(options);
   };
 
+  const persistColumnVisibilityToLocalStorage = (
+    selectedColumnIds: string[],
+  ) => {
+    const allColumns = Object.values(ColumnId);
+    const columnsAlwaysPresent = [ColumnId.GENE];
+
+    setState(localStorage, LOCAL_STORAGE_AMR_COLUMN_VISIBILITY_KEY, {
+      columnVisibility: difference(allColumns, columnsAlwaysPresent).reduce(
+        (obj, columnId) => ({
+          ...obj,
+          [columnId]: selectedColumnIds.includes(columnId),
+        }),
+        {},
+      ),
+    });
+  };
+
   const handleApply = (options: FormattedDropdownOption[]) => {
     // Apply the changes by updating the visibility of the react-table columns
     const selectedColumnIds = options.map(option => {
@@ -104,6 +125,7 @@ export const ToggleVisibleColumnsDropdown = ({
     // TODO: This is an anti-pattern updating local state manually. Can we remove this
     // and use the react-table state instead?
     setDropdownValue(options);
+    persistColumnVisibilityToLocalStorage(selectedColumnIds);
   };
 
   const handleClickAway = () => {

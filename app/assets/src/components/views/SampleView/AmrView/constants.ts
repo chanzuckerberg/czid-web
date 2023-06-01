@@ -71,3 +71,5 @@ export const SECTION_TO_COLUMN_IDS = new TwoWayKeyListMap({
     ColumnId.READ_SPECIES,
   ],
 });
+
+export const LOCAL_STORAGE_AMR_COLUMN_VISIBILITY_KEY = "amrColumnVisibility";
