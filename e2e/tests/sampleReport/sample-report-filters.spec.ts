@@ -57,7 +57,7 @@ test.describe("Sample report filter test", () => {
       ]);
       await newPage.waitForLoadState();
       const link = COLUMN_HEADER_PROP[n[i]]["url"];
-      newPage.url().includes(link);
+      expect(newPage.url().includes(link)).toBeTruthy();
       await newPage.close();
       await page
         .locator(COLUMNS_LABEL)
@@ -104,8 +104,9 @@ test.describe("Sample report filter test", () => {
       await expect(
         page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`),
       ).toBeVisible();
+
       // test Remove filter x button
-      await page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`).getByTestId("remove-filter").click();
+      await page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`).getByTestId("x-close-icon").click();
       await expect(
         page.locator(FILTER_TAG).locator(`text="${filter_tag[i]}"`),
       ).not.toBeVisible();
@@ -119,7 +120,7 @@ test.describe("Sample report filter test", () => {
     await expect(page.getByTestId("stats-info")).not.toBeEmpty();
 
     // test Clear Filters button
-    await page.getByTestId("clear-filters-button").click();
+    await page.locator(`text="Clear Filters"`).click();
     await expect(page.getByTestId("filter-tag")).toHaveCount(0);
   });
 
@@ -136,7 +137,7 @@ test.describe("Sample report filter test", () => {
     // Verify drop down contains required elements
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
-      THRESHOLD_FILTERS.includes(drop_down[i]);
+      expect(THRESHOLD_FILTERS.includes(drop_down[i])).toBeTruthy();
     }
     await page
       .locator(FILTER_HEADERS)
@@ -176,7 +177,7 @@ test.describe("Sample report filter test", () => {
       .click();
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
-      READ_SPECIFICITY_FILTERS.includes(drop_down[i]);
+      expect(READ_SPECIFICITY_FILTERS.includes(drop_down[i])).toBeTruthy();
     }
   });
 
@@ -188,7 +189,7 @@ test.describe("Sample report filter test", () => {
 
     const drop_down = await page.locator(FILTERS_DROPDOWN).allInnerTexts();
     for (let i = 0; i < drop_down.length; i++) {
-      ANNOTATION_FILTERS.includes(drop_down[i]);
+      expect(ANNOTATION_FILTERS.includes(drop_down[i])).toBeTruthy();
     }
 
     await page

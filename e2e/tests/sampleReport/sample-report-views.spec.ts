@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { VIEWS, FILTER_RESULT, TREE_NODES } from "../../constants/sample.const";
+import { FILTER_RESULT, TREE_NODES } from "../../constants/sample.const";
 
 const sampleId = 25307;
 // These tests verify the ui displayed on the treeview for the sample report page
@@ -12,12 +12,12 @@ test.describe("Sample report view test", () => {
 
     // navigate to table view
     await page
-      .locator(VIEWS)
+      .getByTestId("report-view-selector")
       .nth(0)
       .click();
     await expect(page.locator(FILTER_RESULT).nth(0)).toBeVisible();
     await page
-      .locator(VIEWS)
+      .getByTestId("report-view-selector")
       .nth(1)
       .click();
     await expect(page.locator(TREE_NODES).nth(0)).toBeVisible();

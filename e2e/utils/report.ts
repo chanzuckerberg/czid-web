@@ -5,6 +5,7 @@ import {
   SEARCH_PUBLIC,
 } from "../constants/common.const";
 import {
+  BASES_REMAINING,
   BULK_DELETE_MODAL,
   DELETE_DISABLED_TOOLTIP,
   DELETE_RUN_MENUITEM,
@@ -38,6 +39,13 @@ export const metadataSectionTitles: Record<string, any> = {
 export const pipelineSectionTitles: Record<string, any> = {
   pipelinesInfo: PIPELINE_INFO,
   readsRemaining: READS_REMAINING,
+  erccSpikeInCounts: ERCC,
+  downloads: DOWNLOADS,
+};
+
+export const pipelineSectionTitlesLongReads: Record<string, any> = {
+  pipelinesInfo: PIPELINE_INFO,
+  readsRemaining: BASES_REMAINING,
   erccSpikeInCounts: ERCC,
   downloads: DOWNLOADS,
 };

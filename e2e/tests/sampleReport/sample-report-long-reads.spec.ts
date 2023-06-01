@@ -5,10 +5,10 @@ import {
 } from "../../constants/sample.const";
 import {
   metadataSectionTitles,
-  pipelineSectionTitles,
+  pipelineSectionTitlesLongReads,
   verifySectionTitles,
 } from "../../utils/report";
-const sampleId = 25307;
+const sampleId = 26022;
 
 // These tests verify the ui displayed on the Table  for the sample report page
 test.describe("Sample report tests", () => {
@@ -43,6 +43,6 @@ test.describe("Sample report tests", () => {
 
       // verify pipeline section titles
       await page.getByTestId("pipelines").click();
-      await verifySectionTitles(page, pipelineSectionTitles);
+      await verifySectionTitles(page, pipelineSectionTitlesLongReads);
     });
   });

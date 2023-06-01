@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const sampleId = 26124;
+const sampleId = 25745;
 
 test.describe("Hover Actions on Sample Report", () => {
   test.beforeEach(async ({ page }) => {
@@ -17,12 +17,12 @@ test.describe("Hover Actions on Sample Report", () => {
       .click();
 
     // expand taxon parent
-    await page.locator("expand-taxon-parent").nth(0).click();
+    await page.getByTestId("expand-taxon-parent").first().click();
     // hover on taxon name
-    await page.getByText("Betacoronavirus 1").hover();
+    await page.getByText("Rhinovirus C").hover();
 
     // click on that taxon's CG icon
-    await page.getByTestId("hover-action-consensus-genome-694003").click();
-    expect(await page.getByTestId("consensus-genome-modal")).toBeVisible();
+    await page.getByTestId("hover-action-consensus-genome-463676").click();
+    expect(await page.getByTestId("consensus-genome-modal").hover()).toBeTruthy();
   });
 });

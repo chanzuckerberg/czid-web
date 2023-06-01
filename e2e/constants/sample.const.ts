@@ -86,6 +86,7 @@ export const SEQUENCING_INFO = "Sequencing Info";
 
 export const PIPELINE_INFO = "Pipeline Info";
 export const READS_REMAINING = "Reads Remaining";
+export const BASES_REMAINING = "Bases Remaining";
 export const ERCC = "ERCC Spike-In Counts";
 export const DOWNLOADS = "Downloads";
 

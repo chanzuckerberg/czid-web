@@ -14,7 +14,7 @@ export const ReportViewSelector = ({
   onViewClick,
 }: ReportViewSelectorProps) => {
   return (
-    <div className={cs.reportViewSelector}>
+    <div className={cs.reportViewSelector} data-testid={"report-view-selector"}>
       <Menu icon floated="right">
         <Popup
           trigger={
