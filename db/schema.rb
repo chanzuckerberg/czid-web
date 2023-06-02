@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_18_111030) do
+ActiveRecord::Schema.define(version: 2023_06_01_224433) do
 
   create_table "accession_coverage_stats", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false, comment: "The id of the pipeline run the coverage stats were generated from"
@@ -893,6 +893,7 @@ ActiveRecord::Schema.define(version: 2023_05_18_111030) do
     t.integer "time_to_finalized", comment: "Seconds from executed_at to marked as finished with processing."
     t.text "error_message"
     t.datetime "deleted_at", comment: "When the user triggered deletion of the workflow run"
+    t.bigint "user_id", comment: "The ID of the user who kicked off the workflow run"
     t.index ["created_at"], name: "index_workflow_runs_on_created_at"
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
