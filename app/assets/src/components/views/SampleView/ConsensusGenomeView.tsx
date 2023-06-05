@@ -192,12 +192,18 @@ const ConsensusGenomeView = ({
           length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
         }),
       );
-
-      const accessionName =
+      const accessionID =
         workflowRunResults.taxon_info.accession_id ?? "Unknown accession";
-      const taxonName =
-        workflowRunResults.taxon_info.accession_name ?? "Unknown taxon";
-      const subtext = `${accessionName} - ${taxonName}`;
+      let taxonName = "";
+      // accessionName for WGS could not exist, if so fall back to taxonName
+      if (workflowRunResults.taxon_info.accession_name) {
+        taxonName = workflowRunResults.taxon_info.accession_name;
+      } else if (workflowRunResults.taxon_info.taxon_name) {
+        taxonName = workflowRunResults.taxon_info.taxon_name;
+      } else {
+        taxonName = "Unknown taxon";
+      }
+      const subtext = `${accessionID} - ${taxonName}`;
 
       new Histogram(coverageVizContainerRef.current, [coverageVizData], {
         barOpacity: 1,
