@@ -17,7 +17,7 @@ class InputFileTest < ActiveSupport::TestCase
   end
 
   test "validate name format" do
-    invalid_names = ['.fastq', 'a .fastq.gz', 'a/b.fastq.gz']
+    invalid_names = ['.fastq', 'a{.fastq.gz', 'a/b.fastq.gz']
     invalid_names.each do |name|
       file = InputFile.new(source_type: 'local', source: 'file1.fastq.gz', upload_client: 'web')
       file.name = name
