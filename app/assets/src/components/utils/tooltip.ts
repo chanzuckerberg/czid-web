@@ -36,7 +36,7 @@ export const getTooltipStyle = (
 // - Don't add fields unless they are consistent everywhere (e.g. same label and tooltip in all places, but not same className).
 // - Use camelCase key names.
 export const FIELDS_METADATA = {
-  totalReadsCG: {
+  totalReadsCg: {
     label: "Total Reads",
     tooltip:
       "The total number of single-end reads uploaded. Each end of the paired-end reads count as one read.",

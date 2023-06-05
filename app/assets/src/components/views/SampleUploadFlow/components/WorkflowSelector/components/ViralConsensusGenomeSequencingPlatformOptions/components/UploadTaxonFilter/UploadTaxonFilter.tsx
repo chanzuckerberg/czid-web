@@ -1,3 +1,4 @@
+import cx from "classnames";
 import { Dropdown, DropdownPopper, LoadingIndicator } from "czifui";
 import { debounce, get } from "lodash/fp";
 import React, { useEffect, useMemo, useState } from "react";
@@ -135,7 +136,7 @@ const UploadTaxonFilter = ({
 
   return (
     <Dropdown
-      className={cs.dropdown}
+      className={cx(cs.dropdown, selectedTaxon && cs.userInput)}
       InputDropdownProps={{
         label,
         intent: "default",

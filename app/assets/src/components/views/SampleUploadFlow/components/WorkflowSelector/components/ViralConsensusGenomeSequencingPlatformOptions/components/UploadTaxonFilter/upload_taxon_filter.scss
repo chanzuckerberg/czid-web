@@ -23,3 +23,10 @@ $FILTER_WIDTH: 200px;
   width: fit-content;
   margin-top: $sds-spaces-xs;
 }
+
+/* // TODO (mlila): remove this once SDS refactors dropdown */
+.userInput {
+  :global(.styled-label) {
+    color: black;
+  }
+}

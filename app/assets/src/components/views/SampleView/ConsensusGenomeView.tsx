@@ -8,6 +8,7 @@ import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import { WGS_CG_UPLOAD_FEATURE } from "~/components/utils/features";
 import { formatPercent } from "~/components/utils/format";
+import { openUrlInNewTab } from "~/components/utils/links";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import Histogram, {
@@ -25,6 +26,7 @@ import {
   VIRAL_CONSENSUS_GENOME_DOC_LINK,
 } from "~utils/documentationLinks";
 import { FIELDS_METADATA } from "~utils/tooltip";
+import { getWorkflowRefAccessionFileLink } from "../report/utils/download";
 import cs from "./consensus_genome_view.scss";
 import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
 import {
@@ -241,6 +243,11 @@ const ConsensusGenomeView = ({
     }
   };
 
+  const downloadCustomRefFile = () => {
+    const fileLocation = getWorkflowRefAccessionFileLink(workflowRun.id);
+    openUrlInNewTab(fileLocation);
+  };
+
   const getAccessionMetrics = () => {
     const {
       accession_id: accessionId,
@@ -285,7 +292,12 @@ const ConsensusGenomeView = ({
     }
 
     const customReference = (
-      <Button sdsType="secondary" sdsStyle="minimal" isAllCaps>
+      <Button
+        sdsType="secondary"
+        sdsStyle="minimal"
+        isAllCaps
+        onClick={downloadCustomRefFile}
+      >
         <Icon sdsIcon="download" sdsSize="s" sdsType="interactive" />
         <span className={cs.downloadLink}>Download</span>
       </Button>
