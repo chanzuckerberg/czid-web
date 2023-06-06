@@ -1218,7 +1218,6 @@ class UploadSampleStep extends React.Component<
       selectedWorkflows,
     } = this.state;
     const { allowedFeatures } = this.context || {};
-
     // Note: we currently only run validation checks on locally uploaded samples
     if (
       currentTab === LOCAL_UPLOAD &&
@@ -1264,6 +1263,19 @@ class UploadSampleStep extends React.Component<
       return "Please upload a reference sequence to continue";
     }
 
+    if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value) &&
+      !this.isRefSeqFileNameValid()
+    ) {
+      return "Reference file name can only contain letters, numbers, dashes, spaces, parenthesis and underscores";
+    }
+
+    if (
+      this.isWorkflowSelected(UPLOAD_WORKFLOWS.COVID_CONSENSUS_GENOME.value) &&
+      !this.isBedFileNameValid()
+    ) {
+      return "Bed file name can only contain letters, numbers, dashes, spaces, parenthesis and underscores";
+    }
     if (size(this.getSelectedSamples(currentTab)) < 1) {
       return "Please select a sample to continue";
     }
@@ -1272,6 +1284,23 @@ class UploadSampleStep extends React.Component<
   isWorkflowSelected = (workflow: UploadWorkflows) => {
     const { selectedWorkflows } = this.state;
     return selectedWorkflows.has(workflow);
+  };
+
+  isBedFileNameValid = () => {
+    const { bedFile } = this.state;
+    if (!bedFile) return true; // bedfile is optional, so if it's blank it's valid
+    // regex pulled from app/models/input_file.rb
+    const bedNameRegex =
+      /[A-Za-z0-9_][-.A-Za-z0-9_(?<!^)\s()]{0,119}\.(bed|bed.gz)/;
+    return bedNameRegex.test(bedFile.name);
+  };
+  isRefSeqFileNameValid = () => {
+    const { refSeqFile } = this.state;
+    if (!refSeqFile) return false;
+    // regex pulled from app/models/input_file.rb
+    const referenceNameRegex =
+      /[A-Za-z0-9_][-.A-Za-z0-9_(?<!^)\s()]{0,119}\.(fastq|fq|fastq.gz|fq.gz|fasta|fa|fasta.gz|fa.gz)/;
+    return referenceNameRegex.test(refSeqFile.name);
   };
 
   // Whether the current user input is valid. Determines whether the Continue button is enabled.
@@ -1328,6 +1357,9 @@ class UploadSampleStep extends React.Component<
       this.isWorkflowSelected(UPLOAD_WORKFLOWS.VIRAL_CONSENSUS_GENOME.value)
     ) {
       workflowsValid = !!refSeqFile && !!selectedTaxon;
+      if (!this.isBedFileNameValid() || !this.isRefSeqFileNameValid()) {
+        workflowsValid = false;
+      }
     }
 
     // Note: we currently only run validation checks on locally uploaded samples
