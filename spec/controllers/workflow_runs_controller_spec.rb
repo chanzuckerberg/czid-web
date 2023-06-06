@@ -642,10 +642,12 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                          initial_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
               @deleting_wr = create(:workflow_run,
                                     sample: @sample1,
+                                    user_id: @user.id,
                                     workflow: WorkflowRun::WORKFLOW[:consensus_genome],
                                     status: WorkflowRun::STATUS[:succeeded])
               @non_deleting_wr = create(:workflow_run,
                                         sample: @sample1,
+                                        user_id: @user.id,
                                         workflow: WorkflowRun::WORKFLOW[:consensus_genome],
                                         status: WorkflowRun::STATUS[:succeeded],
                                         deleted_at: nil)

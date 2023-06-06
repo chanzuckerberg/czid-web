@@ -1062,8 +1062,8 @@ RSpec.describe SamplesController, type: :controller do
 
       context "when workflow is CG/AMR and workflow run ids are passed in" do
         before do
-          @completed_wr = create(:workflow_run, sample: @sample1, workflow: "consensus-genome", status: WorkflowRun::STATUS[:succeeded])
-          @in_prog_wr = create(:workflow_run, sample: @sample2, workflow: "consensus-genome", status: WorkflowRun::STATUS[:running])
+          @completed_wr = create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: "consensus-genome", status: WorkflowRun::STATUS[:succeeded])
+          @in_prog_wr = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: "consensus-genome", status: WorkflowRun::STATUS[:running])
           @workflow_run_ids = [@completed_wr.id, @in_prog_wr.id]
         end
 

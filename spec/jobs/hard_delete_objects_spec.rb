@@ -33,7 +33,7 @@ RSpec.describe HardDeleteObjects, type: :job do
                       finalized: 1,
                       sfn_execution_arn: fake_sfn_execution_arn,
                       deleted_at: 5.minutes.ago)
-        @wr2 = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+        @wr2 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
 
         @phylo_tree = create(:phylo_tree, user_id: @joe.id, name: "Test Phylo Tree", pipeline_runs: [@pr1, @pr2])
         @phylo_tree_ng = create(:phylo_tree_ng, user_id: @joe.id, name: "Test Phylo Tree Ng", pipeline_runs: [@pr1, @pr2], s3_output_prefix: "s3://fake_bucket/fake/path")
@@ -223,11 +223,11 @@ RSpec.describe HardDeleteObjects, type: :job do
       before do
         @project = create(:project, users: [@joe])
         @sample1 = create(:sample, project: @project, user: @joe, name: "Joe sample 1", deleted_at: 5.minutes.ago)
-        @wr1 = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
+        @wr1 = create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
 
         @sample2 = create(:sample, project: @project, user: @joe, name: "Joe sample 2")
-        @wr2 = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
-        @wr3 = create(:workflow_run, sample: @sample2, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+        @wr2 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
+        @wr3 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
       end
 
       it "raises error if both sample ids and object ids are empty" do

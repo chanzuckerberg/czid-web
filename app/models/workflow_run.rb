@@ -45,6 +45,7 @@ class WorkflowRun < ApplicationRecord
   extend ParameterSanitization
 
   belongs_to :sample
+  belongs_to :user
   has_and_belongs_to_many :bulk_downloads
 
   before_destroy :cleanup_relations
@@ -348,7 +349,7 @@ class WorkflowRun < ApplicationRecord
     raise RerunDeprecatedWorkflowError if deprecated?
 
     update!(deprecated: true)
-    sample.create_and_dispatch_workflow_run(workflow, rerun_from: id, inputs_json: inputs_json)
+    sample.create_and_dispatch_workflow_run(workflow, user_id, rerun_from: id, inputs_json: inputs_json)
   end
 
   # Generic misc inputs from inputs_json database field

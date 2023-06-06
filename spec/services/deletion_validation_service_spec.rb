@@ -161,29 +161,29 @@ RSpec.describe DeletionValidationService, type: :service do
     before do
       @project = create(:project, users: [@joe, @admin])
       @joe_sample1 = create(:sample, project: @project, user: @joe, name: "Joe sample 1")
-      @completed_joe_wr1 = create(:workflow_run, sample: @joe_sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+      @completed_joe_wr1 = create(:workflow_run, sample: @joe_sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
 
       @joe_sample2 = create(:sample, project: @project, user: @joe, name: "Joe sample 2")
-      @failed_joe_wr = create(:workflow_run, sample: @joe_sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
+      @failed_joe_wr = create(:workflow_run, sample: @joe_sample2, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
 
       @joe_sample3 = create(:sample, project: @project, user: @joe, name: "Joe sample 3")
-      @in_prog_joe_wr = create(:workflow_run, sample: @joe_sample3, workflow: consensus_genome, status: WorkflowRun::STATUS[:running])
+      @in_prog_joe_wr = create(:workflow_run, sample: @joe_sample3, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:running])
 
       @joe_rerun_sample = create(:sample, project: @project, user: @joe, name: "Joe rerun sample")
-      @deprecated_wr = create(:workflow_run, sample: @joe_rerun_sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deprecated: true)
-      @rerun_wr = create(:workflow_run, sample: @joe_rerun_sample, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deprecated: false)
+      @deprecated_wr = create(:workflow_run, sample: @joe_rerun_sample, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deprecated: true)
+      @rerun_wr = create(:workflow_run, sample: @joe_rerun_sample, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deprecated: false)
 
       @joe_sample4 = create(:sample, project: @project, user: @joe, name: "Joe sample 4")
-      @amr_wr = create(:workflow_run, sample: @joe_sample4, workflow: WorkflowRun::WORKFLOW[:amr], status: WorkflowRun::STATUS[:succeeded])
+      @amr_wr = create(:workflow_run, sample: @joe_sample4, user_id: @joe.id, workflow: WorkflowRun::WORKFLOW[:amr], status: WorkflowRun::STATUS[:succeeded])
 
       @joe_sample5 = create(:sample, project: @project, user: @joe, name: "Joe sample 5", upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED)
-      @historical_failed_upload_wr = create(:workflow_run, sample: @joe_sample5, workflow: consensus_genome, status: WorkflowRun::STATUS[:created])
+      @historical_failed_upload_wr = create(:workflow_run, sample: @joe_sample5, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:created])
 
       @admin_sample1 = create(:sample, project: @project, user: @admin, name: "Admin sample 1")
-      @completed_admin_wr = create(:workflow_run, sample: @admin_sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+      @completed_admin_wr = create(:workflow_run, sample: @admin_sample1, user_id: @admin.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
 
       @admin_sample2 = create(:sample, project: @project, user: @admin, name: "Admin sample 2")
-      @in_prog_admin_wr = create(:workflow_run, sample: @admin_sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:running])
+      @in_prog_admin_wr = create(:workflow_run, sample: @admin_sample2, user_id: @admin.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:running])
 
       @workflow_run_ids = [
         @completed_joe_wr1.id,
@@ -196,7 +196,7 @@ RSpec.describe DeletionValidationService, type: :service do
         @historical_failed_upload_wr.id,
       ]
 
-      @completed_joe_wr2 = create(:workflow_run, sample: @joe_sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+      @completed_joe_wr2 = create(:workflow_run, sample: @joe_sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
     end
 
     context "when user is not an admin" do

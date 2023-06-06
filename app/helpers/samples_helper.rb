@@ -830,7 +830,7 @@ module SamplesHelper
             pr.save!
           else
             # Creating all the workflow runs and importing them later triggers a race condition and the first few samples don't kickoff.
-            wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json&.to_json)
+            wr = WorkflowRun.new(sample: sample, workflow: workflow, user_id: user.id, inputs_json: inputs_json&.to_json)
             wr.save!
           end
         end
@@ -1011,7 +1011,7 @@ module SamplesHelper
         WorkflowRun.where(sample_id: sample_ids_filtered, workflow: workflow).update_all(deprecated: true, updated_at: Time.current)
         WorkflowRun.insert_all!(
           sample_ids_filtered.map do |id|
-            { sample_id: id, workflow: workflow, created_at: Time.current, updated_at: Time.current, inputs_json: inputs_json }
+            { sample_id: id, workflow: workflow, created_at: Time.current, updated_at: Time.current, user_id: current_user.id, inputs_json: inputs_json }
           end
         )
       end

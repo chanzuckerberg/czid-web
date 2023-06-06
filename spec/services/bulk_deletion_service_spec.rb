@@ -246,8 +246,8 @@ RSpec.describe BulkDeletionService, type: :service do
     context "when the initial workflow is short read mNGS" do
       context "when the sample has CG and AMR runs" do
         before do
-          create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
-          create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+          create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+          create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
         end
 
         it "sets the initial workflow to CG" do
@@ -277,7 +277,7 @@ RSpec.describe BulkDeletionService, type: :service do
 
       context "when the sample has an AMR run and no CG runs" do
         before do
-          create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+          create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
         end
 
         it "sets the initial workflow to AMR" do
@@ -345,8 +345,8 @@ RSpec.describe BulkDeletionService, type: :service do
 
       context "when the sample has CG runs and AMR runs" do
         before do
-          create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
-          create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+          create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+          create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
         end
 
         it "sets the initial workflow to CG" do
@@ -376,7 +376,7 @@ RSpec.describe BulkDeletionService, type: :service do
 
       context "when the sample has AMR runs and no CG runs" do
         before do
-          create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+          create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
         end
 
         it "sets the initial workflow to AMR" do
@@ -436,13 +436,13 @@ RSpec.describe BulkDeletionService, type: :service do
     before do
       @project = create(:project, users: [@joe, @admin])
       @sample1 = create(:sample, project: @project, user: @joe, name: "Joe sample 1", initial_workflow: consensus_genome)
-      @completed_wr = create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+      @completed_wr = create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
 
       @sample2 = create(:sample, project: @project, user: @joe, name: "Joe sample 2", initial_workflow: consensus_genome)
-      @failed_wr = create(:workflow_run, sample: @sample2, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
+      @failed_wr = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:failed])
 
       @sample3 = create(:sample, project: @project, user: @joe, name: "Joe sample 3", initial_workflow: amr)
-      @completed_amr_wr = create(:workflow_run, sample: @sample3, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+      @completed_amr_wr = create(:workflow_run, sample: @sample3, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
     end
 
     it "returns deletable workflow run ids and sample ids for workflow runs" do
@@ -504,7 +504,7 @@ RSpec.describe BulkDeletionService, type: :service do
     context "when CG runs are deleted and the initial workflow is CG" do
       context "when the sample has more CG runs" do
         before do
-          create(:workflow_run, sample: @sample1, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
+          create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
         end
 
         it "maintains an initial workflow of CG" do
@@ -534,7 +534,7 @@ RSpec.describe BulkDeletionService, type: :service do
 
       context "when the sample has AMR runs" do
         before do
-          create(:workflow_run, sample: @sample1, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
+          create(:workflow_run, sample: @sample1, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
         end
 
         it "sets the initial workflow to AMR" do

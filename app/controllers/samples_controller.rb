@@ -1545,7 +1545,7 @@ class SamplesController < ApplicationController
   def kickoff_workflow
     workflow = collection_params[:workflow]
     inputs_json = collection_params[:inputs_json].to_json
-    @sample.create_and_dispatch_workflow_run(workflow, inputs_json: inputs_json)
+    @sample.create_and_dispatch_workflow_run(workflow, current_user.id, inputs_json: inputs_json)
     render json: @sample.workflow_runs_info
   end
 
