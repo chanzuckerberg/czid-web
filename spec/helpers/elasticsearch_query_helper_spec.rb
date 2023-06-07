@@ -2,21 +2,6 @@ require "rails_helper"
 require "webmock/rspec"
 
 RSpec.describe ElasticsearchQueryHelper, type: :helper do
-  describe "#query_es" do
-    it "should return columns and rows" do
-      req_body = "{\"query\":\"select * from scored_taxon_counts\", \"fetch_size\": #{ElasticsearchQueryHelper::DEFAULT_QUERY_FETCH_SIZE} }"
-      req_resp = { "schema" => [{ "name" => "alignment_length", "type" => "float" }, { "name" => "superkingdom_taxid", "type" => "long" }, { "name" => "counts", "type" => "long" }, { "name" => "count_type", "type" => "text" }, { "name" => "e_value", "type" => "float" }, { "name" => "zscore", "type" => "long" }, { "name" => "background_id", "type" => "long" }, { "name" => "is_phage", "type" => "long" }, { "name" => "rpm", "type" => "float" }, { "name" => "tax_id", "type" => "long" }, { "name" => "tax_level", "type" => "long" }, { "name" => "family_taxid", "type" => "long" }, { "name" => "stdev_mass_normalized", "type" => "long" }, { "name" => "mean", "type" => "float" }, { "name" => "name", "type" => "text" }, { "name" => "percent_identity", "type" => "float" }, { "name" => "pipeline_run_id", "type" => "long" }, { "name" => "rank", "type" => "long" }, { "name" => "mean_mass_normalized", "type" => "long" }, { "name" => "genus_taxid", "type" => "long" }, { "name" => "stdev", "type" => "float" }], "datarows" => [[27_564.7, 2, 1_919_486, "NT", -291.3165, 99, 26, 0, 646_855.7, 561, 2, 543, nil, 7.01386, "Escherichia", 99.9543, 27_441, 1, nil, 561, 38.484]], "total" => 1, "size" => 1, "status" => 200 }
-      resp = Elasticsearch::Transport::Transport::Response.new(@headers = { "content-type" => "application/json;" }, req_resp)
-      expect(ElasticsearchQueryHelper).to receive(:es_sql_rest_call).with(req_body).and_return(resp)
-      columns, es_records = ElasticsearchQueryHelper.query_es("select * from scored_taxon_counts")
-      expect(columns.size).to eq 21
-      expect(es_records.size).to eq 1
-      expect(columns).to include("zscore", "pipeline_run_id", "rpm", "background_id", "rank")
-      expect(es_records[0][5]).to eq 99 # zscore check
-      expect(es_records[0][6]).to eq 26 # background_id check
-    end
-  end
-
   describe "#build_categories_filter_clause" do
     it "should return valid categories if phage is true and categories are blank " do
       categories_clause = ElasticsearchQueryHelper.build_categories_filter_clause([], true)

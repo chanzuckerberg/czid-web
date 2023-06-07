@@ -688,43 +688,45 @@ module ElasticsearchQueryHelper
     return parse_es_response(response)
   end
 
-  # Hit ES REST API to fetch query result and loop through the result unless cursor is not present in the response
-  # Since ES is returning 10_000 records at a time
-  def self.query_es(es_query)
-    es_records = []
-    columns = []
-    es_query = es_query.gsub(/[\r\n]+/, "")
-    req_body = "{\"query\":\"#{es_query}\", \"fetch_size\": #{DEFAULT_QUERY_FETCH_SIZE} }"
-    loop do
-      response = es_sql_rest_call(req_body)
-      if response.nil?
-        return [], []
-      end
-
-      if response.body["schema"].present?
-        response.body["schema"].each do |col|
-          columns << col["name"]
-        end
-      end
-      if response.body["datarows"].present?
-        es_records += response.body["datarows"]
-      end
-      req_body = "{\"cursor\":\"#{response.body['cursor']}\"}"
-      break if response.body["cursor"].blank?
+  def self.find_complete_pipeline_runs(background_id, pipeline_run_ids)
+    # ES won't return pages larger than 10_000. Since the query will at most return the number of pipeline_run_ids
+    # that we pass in, we can pre-batch the queries so that they will always be under 10_000
+    if pipeline_run_ids.size > 10_000
+      split_index = pipeline_run_ids.size / 2
+      left_half_complete_pipeline_runs = find_complete_pipeline_runs(background_id, pipeline_run_ids[0..(split_index - 1)])
+      right_half_complete_pipeline_runs = find_complete_pipeline_runs(background_id, pipeline_run_ids[split_index..-1])
+      return left_half_complete_pipeline_runs + right_half_complete_pipeline_runs
     end
-    return columns, es_records
-  end
 
-  # Perform REST API request to ES
-  def self.es_sql_rest_call(request_body)
-    begin
-      response = ES_CLIENT.perform_request("POST", "_opendistro/_sql", {}, request_body, {})
-      return response
-    rescue StandardError => e
-      LogUtil.log_error("unable to fetch heatmap data from elasticsearch: #{e}", exception: e)
-      raise e
-    end
-    return nil
+    search_body = {
+      "_source": "pipeline_run_id",
+      "size": 10_000, # the number of results will not be higher than 10_000 thanks to the batching done above
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "terms": {
+                "pipeline_run_id": pipeline_run_ids,
+              },
+            },
+            {
+              "term": {
+                "background_id": background_id,
+              },
+            },
+            {
+              "term": {
+                "is_complete": true,
+              },
+            },
+          ],
+        },
+      },
+    }
+
+    response = ES_CLIENT.search(index: "pipeline_runs", body: search_body)
+    complete_pipeline_runs = response["hits"]["hits"].map { |doc| doc["_source"]["pipeline_run_id"] }
+    return complete_pipeline_runs
   end
 
   # Query ES index to check if background and pipeline run ids are present
@@ -733,8 +735,7 @@ module ElasticsearchQueryHelper
       return []
     end
 
-    pipeline_runs_in_es_query = "SELECT DISTINCT pipeline_run_id FROM pipeline_runs WHERE is_complete = true AND background_id=#{background_id} AND pipeline_run_id in (#{pipeline_run_ids.join(',')})"
-    _columns, pipelines_in_es = query_es(pipeline_runs_in_es_query)
+    pipelines_in_es = find_complete_pipeline_runs(background_id, pipeline_run_ids)
     missing_pipeline_run_ids = pipeline_run_ids - pipelines_in_es.flatten
     return missing_pipeline_run_ids.flatten
   end
@@ -771,7 +772,7 @@ module ElasticsearchQueryHelper
       attempts ||= 1
       resp = invoke_lambda(function_name, payload)
       if resp["status_code"] != 200 || !resp["function_error"].nil?
-        raise "#{function_name} invocation failed with status_code: #{resp['status_code']}, function_error: #{resp['function_error']}"
+        raise "#{function_name} invocation failed with status_code: #{resp['status_code']}, function_error: #{resp.payload.string}"
       end
     rescue StandardError => error
       LogUtil.log_error("#{function_name} invocation failure", exception: error)
@@ -798,7 +799,7 @@ module ElasticsearchQueryHelper
     # they can retry. All indexing jobs must succeed before the heatmap can be rendered.
     if failure_count > 0
       LogUtil.log_error("Some taxon indexing jobs failed", exception: resp_payload)
-      raise "Some taxon indexing jobs failed"
+      raise "Some taxon indexing jobs failed: #{resp_payload}"
     end
   end
 
