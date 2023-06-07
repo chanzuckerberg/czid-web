@@ -263,6 +263,7 @@ export interface SelectedOptions {
   dataScaleIdx?: number;
   taxonsPerSample?: number;
   presets?: string[];
+  taxonTags?: string[];
 }
 
 export interface Subcategories {

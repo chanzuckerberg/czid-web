@@ -1,14 +1,18 @@
 import { Icon } from "czifui";
-import React from "react";
+import React, { useContext } from "react";
 import { Popup } from "semantic-ui-react";
 import { trackEvent } from "~/api/analytics";
 import ThresholdFilterSDS from "~/components/common/filters/ThresholdFilterSDS";
+import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
+import Link from "~/components/ui/controls/Link";
+import { HEATMAP_PATHOGEN_FLAGGING_FEATURE } from "~/components/utils/features";
 import { SelectedOptions, Subcategories } from "~/interface/shared";
 import SamplesHeatmapBackgroundDropdown from "./components/SamplesHeatmapBackgroundDropdown";
 import SamplesHeatmapCategoryDropdown from "./components/SamplesHeatmapCategoryDropdown";
 import SamplesHeatmapPresetTooltip from "./components/SamplesHeatmapPresetTooltip";
 import SamplesHeatmapTaxonSlider from "./components/SamplesHeatmapTaxonSlider";
+import SamplesHeatmapTaxonTagCheckbox from "./components/SamplesHeatmapTaxonTagCheckbox";
 import SamplesHeatmapViewOptionsDropdown from "./components/SamplesHeatmapViewOptionsDropdown";
 import cs from "./samples_heatmap_filters.scss";
 import { optionsToSDSFormat } from "./samplesHeatmapFilterUtils";
@@ -70,6 +74,9 @@ const SamplesHeatmapFilters = ({
   selectedOptions,
   onSelectedOptionsChange,
 }: SamplesHeatmapFiltersPropsType) => {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
+
   const onTaxonLevelChange = (taxonLevel: SDSFormattedOption) => {
     const value = taxonLevel.value;
     if (selectedOptions.species === value) {
@@ -391,6 +398,28 @@ const SamplesHeatmapFilters = ({
         <div className={cs.viewOptionsDropdownContainer}>
           {renderSpecificityFilter()}
         </div>
+        {allowedFeatures.includes(HEATMAP_PATHOGEN_FLAGGING_FEATURE) && (
+          <div className={cs.taxonTagsContainer}>
+            <span className={cs.filterTitle}>Taxon Tags</span>
+            <SamplesHeatmapTaxonTagCheckbox
+              label={"Known Pathogens"}
+              value={"pathogens"}
+              selectedOptions={selectedOptions}
+              onSelectedOptionsChange={onSelectedOptionsChange}
+              showInfoIcon={true}
+              infoIconTooltipContent={
+                <span>
+                  Organism with known human pathogenicity. See the{" "}
+                  <Link external href="https://czid.org/pathogen_list">
+                    full list
+                  </Link>{" "}
+                  of pathogens.
+                </span>
+              }
+              disabled={loading || !data}
+            />
+          </div>
+        )}
       </div>
       <Divider />
       <div className={cs.lowerFilterSection}>

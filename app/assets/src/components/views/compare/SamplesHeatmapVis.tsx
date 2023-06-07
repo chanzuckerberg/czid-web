@@ -169,6 +169,8 @@ class SamplesHeatmapVis extends React.Component<
         shouldSortRows: this.props.taxaSortType === "genus", // else cluster
         // Shrink to fit the viewport width
         maxWidth: this.heatmapContainer.offsetWidth,
+        // TODO - smb - For now, we don't want to show the pathogen flags outlines - unclear which flag to put this behind
+        shouldShowPathogenFlagsOutlines: false,
       },
     );
     this.heatmap.start();

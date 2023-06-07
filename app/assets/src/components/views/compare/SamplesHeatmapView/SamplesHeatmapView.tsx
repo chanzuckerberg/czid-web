@@ -224,6 +224,7 @@ class SamplesHeatmapView extends React.Component<
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 10),
         readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1),
         presets: this.urlParams.presets || [],
+        taxonTags: this.urlParams.taxonTags || [],
       },
       heatmapCreationModalOpen: false,
       downloadModalOpen: false,
@@ -364,6 +365,9 @@ class SamplesHeatmapView extends React.Component<
     // consider the cases where variables can be passed as array string
     if (typeof urlParams.sampleIds === "string") {
       urlParams.sampleIds = urlParams.sampleIds.split(",");
+    }
+    if (typeof urlParams.taxonTags === "string") {
+      urlParams.taxonTags = urlParams.taxonTags.split(",");
     }
     if (typeof urlParams.addedTaxonIds === "string") {
       // @ts-expect-error ts-migrate(2322) FIXME: Type 'Set<number>' is not assignable to type 'stri... Remove this comment to see the full error message
@@ -1238,6 +1242,7 @@ class SamplesHeatmapView extends React.Component<
       categories,
       subcategories,
       species, // 0 for genus mode, 1 for species mode
+      // taxonTags,
     } = this.state.selectedOptions;
     const phageSelected =
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
