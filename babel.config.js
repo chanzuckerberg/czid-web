@@ -1,7 +1,5 @@
-const { babelOptimizerPlugin } = require("@graphql-codegen/client-preset");
-
 module.exports = {
-  plugins: ["@emotion", transformImports(), [babelOptimizerPlugin, { artifactDirectory: "./app/assets/src/gql/", gqlTagName: "graphql" }]],
+  plugins: ["@emotion", transformImports()],
 };
 
 function transformImports() {

@@ -1,6 +1,6 @@
-import { graphql } from "~/gql/generated/gql";
+import { gql } from "@apollo/client";
 
-export const GET_TAXON_DESCRIPTION = graphql(`
+export const GET_TAXON_DESCRIPTION = gql`
   query TaxonDescription($taxonIdList: [Int!]) {
     taxonDescription(taxonIdList: $taxonIdList) {
       summary
@@ -9,10 +9,10 @@ export const GET_TAXON_DESCRIPTION = graphql(`
       wikiUrl
     }
   }
-`);
+`;
 
-export const GET_TAXON_DISTRIBUTION = graphql(`
-  query TaxonDistribution($backgroundId: Int!, $taxId: Int!) {
+export const GET_TAXON_DISTRIBUTION = gql`
+  query TaxonDescription($backgroundId: Int!, $taxId: Int!) {
     taxonDist(backgroundId: $backgroundId, taxId: $taxId) {
       mergedNtNr {
         mean
@@ -34,4 +34,4 @@ export const GET_TAXON_DISTRIBUTION = graphql(`
       }
     }
   }
-`);
+`;

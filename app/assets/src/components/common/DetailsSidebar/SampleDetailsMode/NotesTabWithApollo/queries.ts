@@ -1,6 +1,6 @@
-import { graphql } from "~/gql/generated/gql";
+import { gql } from "@apollo/client";
 
-export const GET_SAMPLE_NOTES = graphql(`
+export const GET_SAMPLE_NOTES = gql`
   query GetSample($sampleId: Int!) {
     sample(sampleId: $sampleId) {
       id
@@ -8,4 +8,4 @@ export const GET_SAMPLE_NOTES = graphql(`
       sampleNotes
     }
   }
-`);
+`;
