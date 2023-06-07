@@ -1,8 +1,9 @@
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { getCsrfToken } from "~/api/utils";
+import { graphql } from "~/gql/generated/gql";
 import { federationClient } from "~/index";
 
-const UPDATE_SAMPLE_NOTES = gql`
+const UPDATE_SAMPLE_NOTES = graphql(`
   mutation UpdateSampleNotes(
     $sampleId: Int!
     $value: String!
@@ -17,12 +18,11 @@ const UPDATE_SAMPLE_NOTES = gql`
         sampleNotes
         id
       }
-      status
       message
       errors
     }
   }
-`;
+`);
 
 export default function useNotesMutation() {
   const [updateNotes, { loading, error }] = useMutation(UPDATE_SAMPLE_NOTES, {

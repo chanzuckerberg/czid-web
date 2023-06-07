@@ -10,7 +10,8 @@
     "test": "jest",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "type-check": "tsc -p ./app/assets/tsconfig.json --noemit"
+    "type-check": "tsc -p ./app/assets/tsconfig.json --noemit",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "jest": {
     "setupTestFrameworkScriptFile": "./enzyme_config.js"
@@ -43,6 +44,9 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.16.7",
     "@babel/register": "^7.13.16",
+    "@graphql-codegen/add": "^4.0.1",
+    "@graphql-codegen/cli": "^3.3.1",
+    "@graphql-codegen/client-preset": "^3.0.1",
     "@storybook/addon-actions": "^6.3.8",
     "@storybook/addon-essentials": "^6.5.16",
     "@storybook/addon-links": "^6.3.8",
@@ -64,7 +68,7 @@
     "babel-plugin-transform-replace-object-assign": "^2.0.0",
     "css-loader": "^3.4.2",
     "cssnano": "^4.1.11",
-    "depcheck": "^1.4.2",
+    "depcheck": "^1.4.3",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "eslint": "^7.1.0",
@@ -138,7 +142,7 @@
     "deep-object-diff": "^1.1.0",
     "fast-deep-equal": "^2.0.1",
     "font-awesome": "^4.7.0",
-    "graphql": "^16.3.0",
+    "graphql": "^16.6.0",
     "lodash": "^4.17.19",
     "memoize-one": "^5.2.1",
     "mini-css-extract-plugin": "^0.4.1",
