@@ -1,0 +1,4 @@
+<!-- Global site tag for Plausible analytics -->
+<% if ENV["PLAUSIBLE_ID"] %>
+  <script defer data-domain="<%= ENV["PLAUSIBLE_ID"] %>" src="https://plausible.io/js/<%= Rails.env.development? ? "script.local.js" : "script.js" %>"></script>
+<% end %>

@@ -20,6 +20,7 @@ x-web-variables: &web-variables
   ? ID_SEQ_ENVS_THAT_CAN_SCALE
   ? LOCATION_IQ_API_KEY
   ? MAPTILER_API_KEY
+  ? PLAUSIBLE_ID
   ? RACK_ENV
   ? RAILS_ENV
   ? SEGMENT_JS_ID
