@@ -1,8 +1,9 @@
-// Note that the Illumina regex only matches the beginning of the read to support both Casava 1.8 and older read names
+// The Illumina regex only matches the beginning of the read to support both Casava 1.8 and older read names
 export const REGEX_READ_ILLUMINA =
-  /^@[a-zA-Z0-9]+:[0-9]+:[a-zA-Z0-9-]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+/i;
+  /^@[a-z0-9]+:[0-9]+:[a-z0-9-]+:[0-9]+:[0-9]+:[0-9]+:[0-9]+/i;
+// The Nanopore regex only matches the beginning of the read to support reads with tags such as run_id and barcode
 export const REGEX_READ_NANOPORE =
-  /^@[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[4][a-fA-F0-9]{3}-[89ABab][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$/i;
+  /^@[a-f0-9]{8}-[a-f0-9]{4}-[4][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i;
 
 export const MAX_READS_TO_CHECK = 100;
 export const MEGABYTE = 1000000;

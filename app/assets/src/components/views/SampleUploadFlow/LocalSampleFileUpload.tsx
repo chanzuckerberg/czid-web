@@ -19,6 +19,7 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import List from "~/components/ui/List";
 import { CONCAT_FILES_HELP_LINK } from "~/components/utils/documentationLinks";
 import {
+  ONT_AUTO_CONCAT,
   ONT_V1_FEATURE,
   PRE_UPLOAD_CHECK_FEATURE,
 } from "~/components/utils/features";
@@ -179,9 +180,19 @@ class LocalSampleFileUpload extends React.Component<LocalSampleFileUploadProps> 
                 `Paired files must be labeled with "_R1" or
                 "_R2" at the end of the basename.`,
                 <>
-                  Multiple lane FASTQ files (Illumina) for one sample will be
-                  automatically concatenated. To learn how to concatenate
-                  Nanopore FASTQ files before upload,{" "}
+                  {(allowedFeatures.includes(ONT_AUTO_CONCAT) && (
+                    <>
+                      Multiple FASTQ files for a single metagenomic sample will
+                      be automatically concatenated. To learn more about
+                      concatenation,{" "}
+                    </>
+                  )) || (
+                    <>
+                      Multiple lane FASTQ files (Illumina) for one sample will
+                      be automatically concatenated. To learn how to concatenate
+                      Nanopore FASTQ files before upload,{" "}
+                    </>
+                  )}
                   <ExternalLink href={CONCAT_FILES_HELP_LINK}>
                     click here
                   </ExternalLink>

@@ -50,6 +50,7 @@ import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import {
   AMR_V1_FEATURE,
   AMR_V2_FEATURE,
+  ONT_AUTO_CONCAT,
   ONT_V1_FEATURE,
   PRE_UPLOAD_CHECK_FEATURE,
 } from "~/components/utils/features";
@@ -235,7 +236,11 @@ class UploadSampleStep extends React.Component<
       );
 
       // @ts-expect-error ts-migrate(2740) FIXME: Type '{}' is missing the following properties from... Remove this comment to see the full error message
-      samplesWithToken = groupSamplesByLane(samplesWithToken, BASESPACE_UPLOAD);
+      samplesWithToken = groupSamplesByLane({
+        samples: samplesWithToken,
+        sampleType: BASESPACE_UPLOAD,
+        hasLaneConcatONT: false, // Basespace is Illumina's cloud, so ONT concatenation is disabled
+      });
 
       // Validate names of grouped samples after concatenation (need to do this
       // even if it's a group that only contains 1 dataset ID).
@@ -737,9 +742,16 @@ class UploadSampleStep extends React.Component<
   getSampleDataForUploadTable = (
     sampleType: SampleUploadType,
   ): SampleForUploadTable[] | Record<string, unknown> => {
+    const { allowedFeatures = [] } = this.context || {};
+    const hasLaneConcatONT = allowedFeatures.includes(ONT_AUTO_CONCAT);
+
     if (sampleType === BASESPACE_UPLOAD)
       // Show how lanes will be concatenated
-      return groupSamplesByLane(this.state.basespaceSamples, BASESPACE_UPLOAD);
+      return groupSamplesByLane({
+        samples: this.state.basespaceSamples,
+        sampleType: BASESPACE_UPLOAD,
+        hasLaneConcatONT: false, // Basespace is Illumina's cloud, so ONT concatenation is disabled
+      });
 
     if (sampleType === REMOTE_UPLOAD || sampleType === LOCAL_UPLOAD) {
       const samplesKey = this.getSamplesKey(sampleType);
@@ -749,7 +761,11 @@ class UploadSampleStep extends React.Component<
       // If applicable, also add information from the preupload QC checks.
       if (sampleType === LOCAL_UPLOAD) {
         const sampleInfo = [];
-        const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
+        const groups = groupSamplesByLane({
+          samples,
+          sampleType: LOCAL_UPLOAD,
+          hasLaneConcatONT,
+        });
 
         for (const group in groups) {
           // Map errors/validation checks to each fileName
@@ -782,7 +798,7 @@ class UploadSampleStep extends React.Component<
             file_names_R2: groups[group].filesR2.map(
               (file: $TSFixMe) => file.name,
             ),
-            name: removeLaneFromName(pairedFiles[0].name),
+            name: removeLaneFromName(pairedFiles[0].name, hasLaneConcatONT),
             // If we concatenate samples 1 through 4, the selectId = "1,2,3,4"
             [SELECT_ID_KEY]: pairedFiles
               .map((file: $TSFixMe) => file[SELECT_ID_KEY])
@@ -1143,6 +1159,8 @@ class UploadSampleStep extends React.Component<
       selectedWetlabProtocol,
       usedClearLabs,
     } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+    const hasLaneConcatONT = allowedFeatures.includes(ONT_AUTO_CONCAT);
 
     if (currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
@@ -1151,7 +1169,11 @@ class UploadSampleStep extends React.Component<
 
       // Provide concatenated lane files for next upload step
       if (currentTab === LOCAL_UPLOAD) {
-        const groups = groupSamplesByLane(samples, LOCAL_UPLOAD);
+        const groups = groupSamplesByLane({
+          samples,
+          sampleType: LOCAL_UPLOAD,
+          hasLaneConcatONT,
+        });
         // @ts-expect-error ts-migrate(2339) FIXME: Property 'concatenated' does not exist on type 'ne... Remove this comment to see the full error message
         samples = map(group => group.concatenated, groups);
         // Validate names of grouped samples after concatenation (need to do this

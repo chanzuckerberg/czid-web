@@ -11,6 +11,9 @@ const mappedModuleAliases = Object.entries(webpackConfig.resolve.alias)
     return acc;
   }, {});
 
+// This is needed, otherwise Jest gives an error when it tries importing css/scss files.
+mappedModuleAliases["\\.(css|scss)$"] = "jest/__mocks__/styleMock.ts";
+
 module.exports = {
   verbose: true,
   moduleNameMapper: mappedModuleAliases,

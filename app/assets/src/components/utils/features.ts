@@ -32,3 +32,4 @@ export const BULK_DELETION_FEATURE = "bulk_deletion";
 export const HEATMAP_FILTERS_LEFT_FEATURE = "left_heatmap_filters";
 export const WGS_CG_UPLOAD_FEATURE = "wgs_cg_upload";
 export const APOLLO_CLIENT_STATE_MANAGEMENT = "apollo_client";
+export const ONT_AUTO_CONCAT = "ont_auto_concat";
