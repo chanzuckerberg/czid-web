@@ -4,7 +4,7 @@ require 'open3'
 class InputFile < ApplicationRecord
   belongs_to :sample
 
-  FILE_REGEX = /\A[A-Za-z0-9_][-.A-Za-z0-9_(?<!^)\s\(\)]{0,119}\.(fastq|fq|fastq.gz|fq.gz|fasta|fa|fasta.gz|fa.gz|bed|bed.gz)\z/.freeze
+  FILE_REGEX = /\A[A-Za-z0-9_][-.A-Za-z0-9_\(\)]{0,119}\.(fastq|fq|fastq.gz|fq.gz|fasta|fa|fasta.gz|fa.gz|bed|bed.gz)\z/.freeze
 
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
 
