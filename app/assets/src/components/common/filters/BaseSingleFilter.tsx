@@ -1,3 +1,4 @@
+import { kebabCase } from "lodash/fp";
 import React from "react";
 import { BareDropdown as Dropdown } from "~ui/controls/dropdowns";
 import { FilterOption } from "./BaseMultipleFilter";
@@ -11,7 +12,11 @@ const BaseSingleFilter = ({
 }: BaseSingleFilterProps) => {
   return (
     <Dropdown
-      trigger={<div className={cs.filterLabel}>{label}</div>}
+      trigger={
+        <div data-testid={kebabCase(label)} className={cs.filterLabel}>
+          {label}
+        </div>
+      }
       menuLabel={`Select ${label}`}
       options={options}
       onChange={onChange}

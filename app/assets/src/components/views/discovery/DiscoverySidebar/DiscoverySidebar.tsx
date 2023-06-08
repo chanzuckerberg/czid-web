@@ -335,7 +335,11 @@ export default class DiscoverySidebar extends React.Component<
             bottomContentPadding
             key={dataKey}
             open={this.hasData()}
-            header={<div className={cs.title}>Overall</div>}
+            header={
+              <div data-testid="overall-sidebar" className={cs.title}>
+                Overall
+              </div>
+            }
           >
             <div className={cx(cs.hasBackground, cs.statsRow)}>
               <dl className={cs.dataList}>
@@ -387,7 +391,11 @@ export default class DiscoverySidebar extends React.Component<
             className={cs.metadataSection}
             bottomContentPadding
             open={this.hasData()}
-            header={<div className={cs.title}>Date created</div>}
+            header={
+              <div data-testid="date-created-sidebar" className={cs.title}>
+                Date created
+              </div>
+            }
           >
             <div>{this.buildDateHistogram("time")}</div>
           </Accordion>
@@ -398,7 +406,11 @@ export default class DiscoverySidebar extends React.Component<
             className={cs.metadataSection}
             bottomContentPadding
             open={this.hasData()}
-            header={<div className={cs.title}>Metadata</div>}
+            header={
+              <div data-testid="metadata-sidebar" className={cs.title}>
+                Metadata
+              </div>
+            }
           >
             <div className={cs.hasBackground}>
               <span className={cs.rowLabel}>Host</span>

@@ -1,3 +1,4 @@
+import { kebabCase } from "lodash/fp";
 import React from "react";
 import { MultipleDropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
@@ -14,7 +15,11 @@ const BaseMultipleFilter = ({
       search
       fluid
       arrowInsideTrigger={false}
-      trigger={<div className={cs.filterLabel}>{label}</div>}
+      trigger={
+        <div data-testid={kebabCase(label)} className={cs.filterLabel}>
+          {label}
+        </div>
+      }
       menuLabel={`Select ${label}`}
       options={options}
       value={selected}

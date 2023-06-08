@@ -1,4 +1,5 @@
 import cx from "classnames";
+import { kebabCase } from "lodash/fp";
 import React from "react";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import IconChartSmall from "~ui/icons/IconChartSmall";
@@ -29,6 +30,7 @@ const DiscoveryViewToggle = ({
       <Menu compact className={cs.switcherMenu}>
         {displays.map(display => (
           <MenuItem
+            data-testid={`${kebabCase(display)}-view}`}
             className={cs.menuItem}
             active={currentDisplay === display}
             onClick={() => onDisplaySwitch(display)}

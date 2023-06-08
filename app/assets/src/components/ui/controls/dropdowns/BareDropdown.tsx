@@ -17,6 +17,7 @@ import {
   get,
   identity,
   isEmpty,
+  kebabCase,
   map,
   nth,
   omit,
@@ -390,6 +391,7 @@ class BareDropdown extends React.Component<
             className={cs.searchContainer}
           >
             <Input
+              data-testid={kebabCase(menuLabel)}
               fluid
               className={cs.searchInput}
               icon={<IconSearch className={cs.searchInputIcon} />}

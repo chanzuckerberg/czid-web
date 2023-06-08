@@ -34,7 +34,11 @@ const TaxonFilter = ({
     <AsyncMultipleDropdown
       // @ts-expect-error Property 'arrowInsideTrigger' does not exist on type
       arrowInsideTrigger={false}
-      trigger={<div className={cs.filterLabel}>Taxon</div>}
+      trigger={
+        <div data-testid="taxon" className={cs.filterLabel}>
+          Taxon
+        </div>
+      }
       menuLabel="Select Taxon"
       selectedOptions={selectedOptions}
       onFilterChange={handleFilterChange}
