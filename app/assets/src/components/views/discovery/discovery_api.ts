@@ -260,6 +260,8 @@ const processRawWorkflowRun = (workflowRun: $TSFixMe) => {
       ),
       user: getSampleField(["uploader", "name"]),
       userId: getSampleField(["uploader", "id"]),
+      userNameWhoInitiatedWorkflowRun: workflowRun?.runner?.name,
+      userIdWhoInitiatedWorkflowRun: workflowRun?.runner?.id,
     },
     host: getSampleField(["info", "host_genome_name"]),
     notes: getSampleField(["info", "sample_notes"]),

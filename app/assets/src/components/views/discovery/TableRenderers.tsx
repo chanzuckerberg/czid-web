@@ -193,8 +193,10 @@ class TableRenderers extends React.Component {
           )}
           {sample ? (
             <div className={cs.sampleDetails}>
-              <span className={cs.user}>{sample.user}</span>|
-              <span className={cs.project}>{sample.project}</span>
+              <span className={cs.user}>
+                {sample?.userNameWhoInitiatedWorkflowRun || sample.user}
+              </span>
+              |<span className={cs.project}>{sample.project}</span>
             </div>
           ) : (
             <div className={cs.sampleDetails} />

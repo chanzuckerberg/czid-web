@@ -143,6 +143,8 @@ export interface BaseRun {
     userId: number;
     pipelineRunFinalized: number;
     pipelineRunStatus: string;
+    userNameWhoInitiatedWorkflowRun?: string;
+    userIdWhoInitiatedWorkflowRun?: number;
   };
   sample_type: string;
   water_control: string;
