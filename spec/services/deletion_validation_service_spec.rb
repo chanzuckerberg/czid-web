@@ -60,6 +60,10 @@ RSpec.describe DeletionValidationService, type: :service do
                                            user: @joe,
                                            name: "failed upload Illumina mNGS sample",
                                            upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED)
+      @joe_stalled_upload = create(:sample, project: @project,
+                                            user: @joe,
+                                            name: "stalled upload Illumina mNGS sample",
+                                            upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED)
 
       @admin_complete_sample = create(:sample, project: @project, user: @admin,
                                                name: "completed admin Illumina mNGS sample",
@@ -76,6 +80,7 @@ RSpec.describe DeletionValidationService, type: :service do
         @admin_in_prog_sample.id,
         @joe_rerun_sample.id,
         @joe_failed_upload.id,
+        @joe_stalled_upload.id,
       ]
     end
 
@@ -120,6 +125,10 @@ RSpec.describe DeletionValidationService, type: :service do
 
       it "allows deletion of samples that failed to upload (no pipeline runs)" do
         expect(@validate_sample_response[:valid_ids]).to include(@joe_failed_upload.id)
+      end
+
+      it "does not allow deletion of samples with upload stalled" do
+        expect(@validate_sample_response[:invalid_sample_ids]).to include(@joe_stalled_upload.id)
       end
     end
 
@@ -179,6 +188,9 @@ RSpec.describe DeletionValidationService, type: :service do
       @joe_sample5 = create(:sample, project: @project, user: @joe, name: "Joe sample 5", upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED)
       @historical_failed_upload_wr = create(:workflow_run, sample: @joe_sample5, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:created])
 
+      @joe_stalled_upload = create(:sample, project: @project, user: @joe, name: "Joe sample 6", upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED)
+      @stalled_upload_wr = create(:workflow_run, sample: @joe_stalled_upload, workflow: consensus_genome, status: WorkflowRun::STATUS[:created])
+
       @admin_sample1 = create(:sample, project: @project, user: @admin, name: "Admin sample 1")
       @completed_admin_wr = create(:workflow_run, sample: @admin_sample1, user_id: @admin.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
 
@@ -194,6 +206,7 @@ RSpec.describe DeletionValidationService, type: :service do
         @amr_wr.id,
         @rerun_wr.id,
         @historical_failed_upload_wr.id,
+        @stalled_upload_wr.id,
       ]
 
       @completed_joe_wr2 = create(:workflow_run, sample: @joe_sample1, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded])
@@ -240,6 +253,11 @@ RSpec.describe DeletionValidationService, type: :service do
       it "allows deletion of historical CG samples that failed to upload" do
         expect(@validate_wr_response[:valid_ids]).to include(@historical_failed_upload_wr.id)
         expect(@validate_wr_response[:invalid_sample_ids]).not_to include(@historical_failed_upload_wr.sample_id)
+      end
+
+      it "does not allow deletion of workflow runs for samples with upload stalled" do
+        expect(@validate_wr_response[:valid_ids]).not_to include(@stalled_upload_wr.id)
+        expect(@validate_wr_response[:invalid_sample_ids]).to include(@joe_stalled_upload.id)
       end
     end
 

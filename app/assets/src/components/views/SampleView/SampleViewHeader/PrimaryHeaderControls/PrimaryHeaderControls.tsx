@@ -23,6 +23,10 @@ import {
   WORKFLOW_VALUES,
 } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
+import {
+  FINALIZED_SAMPLE_UPLOAD_ERRORS,
+  SampleUploadErrors,
+} from "~/components/views/samples/constants";
 import { parseUrlParams } from "~/helpers/url";
 import ReportMetadata from "~/interface/reportMetaData";
 import Sample, { WorkflowRun } from "~/interface/sample";
@@ -323,7 +327,12 @@ export const PrimaryHeaderControls = ({
           workflow={workflow}
           deleteId={isMngsWorkflow(workflow) ? sample?.id : currentRun?.id}
           onDeleteRunSuccess={onDeleteRunSuccess}
-          runFinalized={currentRun?.run_finalized || !!sample?.upload_error}
+          runFinalized={
+            currentRun?.run_finalized ||
+            FINALIZED_SAMPLE_UPLOAD_ERRORS.includes(
+              sample?.upload_error as SampleUploadErrors,
+            )
+          }
           userOwnsRun={userId === sample?.user_id}
           redirectOnSuccess={redirectOnSuccess}
         />

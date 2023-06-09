@@ -39,12 +39,6 @@ RSpec.describe HardDeleteObjects, type: :job do
         @phylo_tree_ng = create(:phylo_tree_ng, user_id: @joe.id, name: "Test Phylo Tree Ng", pipeline_runs: [@pr1, @pr2], s3_output_prefix: "s3://fake_bucket/fake/path")
       end
 
-      it "raises error if both sample ids and object ids are empty" do
-        expect do
-          HardDeleteObjects.perform([], [], short_read_mngs, @joe.id)
-        end.to raise_error("No runs or samples to delete")
-      end
-
       it "raises error if no deletable runs or samples are found" do
         object_ids = [-1]
         sample_ids = [-1]
@@ -228,12 +222,6 @@ RSpec.describe HardDeleteObjects, type: :job do
         @sample2 = create(:sample, project: @project, user: @joe, name: "Joe sample 2")
         @wr2 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: consensus_genome, status: WorkflowRun::STATUS[:succeeded], deleted_at: 5.minutes.ago)
         @wr3 = create(:workflow_run, sample: @sample2, user_id: @joe.id, workflow: amr, status: WorkflowRun::STATUS[:succeeded])
-      end
-
-      it "raises error if both sample ids and object ids are empty" do
-        expect do
-          HardDeleteObjects.perform([], [], consensus_genome, @joe.id)
-        end.to raise_error("No runs or samples to delete")
       end
 
       it "raises error if no deletable objects are found" do

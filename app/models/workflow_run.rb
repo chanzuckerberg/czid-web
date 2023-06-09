@@ -371,7 +371,7 @@ class WorkflowRun < ApplicationRecord
 
   def self.deletable(user)
     scope = joins(:sample).where(status: [STATUS[:failed], STATUS[:succeeded], STATUS[:succeeded_with_issue]])
-                          .or(where.not(samples: { upload_error: nil }))
+                          .or(where(samples: { upload_error: Sample::FINALIZED_UPLOAD_ERRORS }))
     scope = scope.where(samples: { user_id: user.id })
     scope
   end

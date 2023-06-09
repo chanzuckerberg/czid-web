@@ -131,7 +131,14 @@ class BulkDeletionService
     end
 
     ids_to_hard_delete = deletable_objects.pluck(:id)
-    Resque.enqueue(HardDeleteObjects, ids_to_hard_delete, soft_deleted_sample_ids, workflow, user.id)
+    if ids_to_hard_delete.empty? && soft_deleted_sample_ids.empty?
+      LogUtil.log_message("No runs or samples to hard delete.",
+                          sample_count_by_workflow: count_by_workflow,
+                          object_ids: object_ids,
+                          workflow_deleted: workflow)
+    else
+      Resque.enqueue(HardDeleteObjects, ids_to_hard_delete, soft_deleted_sample_ids, workflow, user.id)
+    end
 
     return {
       deleted_run_ids: ids_to_hard_delete,

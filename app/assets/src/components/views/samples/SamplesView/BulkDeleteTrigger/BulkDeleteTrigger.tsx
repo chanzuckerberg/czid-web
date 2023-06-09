@@ -44,6 +44,8 @@ const BulkDeleteTrigger = ({
     if (!filteredSamples) return false;
 
     // Allow deletion if a sample failed to upload
+    // Upload error returned by the backend is nil if the upload has stalled
+    // so this section will correctly not allow it to be deleted
     const uploadErrors = compact(
       filteredSamples.map(object => get(["sample", "uploadError"], object)),
     );

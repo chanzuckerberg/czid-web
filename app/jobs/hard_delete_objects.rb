@@ -27,10 +27,6 @@ class HardDeleteObjects
     user = User.find(user_id)
     current_power = Power.new(user)
 
-    if object_ids.empty? && sample_ids.empty?
-      raise "No runs or samples to delete"
-    end
-
     objects = if [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]].include?(workflow)
                 current_power.deletable_pipeline_runs.where(id: object_ids)
               else
@@ -43,20 +39,8 @@ class HardDeleteObjects
       raise "Not all ids correspond to deletable objects"
     end
 
-    # Try to remove any data from Elasticsearch before hard deleting samples/runs.
-    # This sometimes fails, so we have a backup lambda running daily that deletes
-    # data from Elasticsearch that is not present in MySQL.
-    if !Rails.env.test? && objects.present? && [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:long_read_mngs]].include?(workflow)
-      begin
-        ElasticsearchQueryHelper.call_taxon_eviction_lambda(objects.pluck(:id))
-      rescue StandardError => e
-        LogUtil.log_error(
-          "Bulk Deletion Error: Error deleting data from Elasticsearch",
-          exception: e
-        )
-      end
-    end
-
+    # note: we have a scheduled lambda that cleans up taxa from ES for
+    # pipeline runs no longer in the database
     hard_delete_runs(objects, user, workflow) if objects.present?
 
     hard_delete_samples(samples_to_delete, user, workflow) if samples_to_delete.present?
