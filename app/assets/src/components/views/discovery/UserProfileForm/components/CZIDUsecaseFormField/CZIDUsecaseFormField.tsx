@@ -55,7 +55,11 @@ export function CZIDUsecaseFormField({
 
       <div className={cs.optionsContainer}>
         {CZID_USECASE_OPTIONS.map(option => (
-          <div className={cs.option} key={option}>
+          <div
+            className={cs.option}
+            key={option}
+            data-testid={"czid-usecase-checkbox"}
+          >
             <Checkbox
               checkBoxValue={option}
               isSelectionDisabled={

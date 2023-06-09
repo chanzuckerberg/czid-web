@@ -129,6 +129,7 @@ export function UserProfileForm() {
           },
         )}
         disabled={isSubmitDisabled}
+        data-testid="complete-setup-btn"
       >
         Complete Setup
       </Button>

@@ -36,7 +36,11 @@ export function SequencingExpertiseFormField({
           const expertiseOptionLabel =
             expertiseOption.text || expertiseOption.subtext;
           return (
-            <label key={index} className={cs.label}>
+            <label
+              key={index}
+              className={cs.label}
+              data-testid={"expertise-option"}
+            >
               <InputRadio
                 label={expertiseOptionLabel}
                 value="expertiseOption"
