@@ -12,7 +12,7 @@ export const GET_TAXON_DESCRIPTION = gql`
 `;
 
 export const GET_TAXON_DISTRIBUTION = gql`
-  query TaxonDescription($backgroundId: Int!, $taxId: Int!) {
+  query TaxonDistribution($backgroundId: Int!, $taxId: Int!) {
     taxonDist(backgroundId: $backgroundId, taxId: $taxId) {
       mergedNtNr {
         mean

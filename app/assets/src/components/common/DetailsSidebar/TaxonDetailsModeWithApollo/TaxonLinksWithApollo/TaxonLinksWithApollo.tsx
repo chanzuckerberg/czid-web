@@ -26,6 +26,7 @@ export const TaxonLinksWithApollo = ({
         }
       `,
     }) || {};
+
   const renderLink = (source: string, label: string) => {
     let url = null;
 

@@ -7,6 +7,7 @@ import Histogram, {
 } from "~/components/visualizations/Histogram";
 import { federationClient } from "~/index";
 import { Background } from "~/interface/shared/specific";
+import { HISTOGRAM_PREFIX } from "../constants";
 import { GET_TAXON_DISTRIBUTION } from "../queries";
 import { TaxonValuesType } from "../TaxonDetailsModeWithApollo";
 import cs from "./taxon_histogram.scss";
@@ -15,12 +16,14 @@ interface TaxonHistogramProps {
   background: Background;
   taxonId: number;
   taxonValues: TaxonValuesType;
+  reportLoadingStatus: (isLoading: boolean, id: string) => void;
 }
 
 export const TaxonHistogramWithApollo = ({
   background,
   taxonId,
   taxonValues,
+  reportLoadingStatus,
 }: TaxonHistogramProps) => {
   const [shouldShowHistogram, setShouldShowHistogram] =
     useState<boolean>(false);
@@ -30,7 +33,7 @@ export const TaxonHistogramWithApollo = ({
   const histogramContainerRef: LegacyRef<HTMLDivElement> = useRef(null);
   let histogram: Histogram = null;
 
-  const { error, data } = useQuery(GET_TAXON_DISTRIBUTION, {
+  const { loading, error, data } = useQuery(GET_TAXON_DISTRIBUTION, {
     variables: {
       backgroundId: background.id,
       taxId: taxonId,
@@ -84,6 +87,10 @@ export const TaxonHistogramWithApollo = ({
   useEffect(() => {
     if (shouldShowHistogram) renderHistogram();
   }, [shouldShowHistogram]);
+
+  useEffect(() => {
+    reportLoadingStatus(loading, `${HISTOGRAM_PREFIX}${taxonId}`);
+  }, [loading]);
 
   if (!shouldShowHistogram) return null;
 

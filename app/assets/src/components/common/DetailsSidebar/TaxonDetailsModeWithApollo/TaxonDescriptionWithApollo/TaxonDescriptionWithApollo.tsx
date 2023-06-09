@@ -2,22 +2,23 @@ import { useQuery } from "@apollo/client";
 import cx from "classnames";
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { withAnalytics } from "~/api/analytics";
-import { QueryResult } from "~/components/common/QueryResult";
 import { federationClient } from "~/index";
+import { DESCRIPTION_PREFIX } from "../constants";
 import { GET_TAXON_DESCRIPTION } from "../queries";
 import { WikipediaLicenseWithApollo } from "../WikipediaLicenseWithApollo";
 import cs from "./taxon_description.scss";
 
 const COLLAPSED_HEIGHT = 120;
-
 interface TaxonDescriptionProps {
   taxonId: number;
   taxonIdList: number[];
+  reportLoadingStatus: (isLoading: boolean, id: string) => void;
 }
 
 export const TaxonDescriptionWithApollo = ({
   taxonId,
   taxonIdList,
+  reportLoadingStatus,
 }: TaxonDescriptionProps) => {
   const taxonDescriptionRef: LegacyRef<HTMLDivElement> = useRef(null);
 
@@ -53,32 +54,31 @@ export const TaxonDescriptionWithApollo = ({
       taxonName: isParent ? title : data?.taxonDescription[1]?.title,
     },
   );
+  const descriptionId = `${DESCRIPTION_PREFIX}${taxonIdList[0]}`;
 
+  useEffect(() => {
+    reportLoadingStatus(loading, descriptionId);
+  }, [loading]);
+
+  if (error) console.error("Unable to retrieve taxon description", error);
   if (!summary) return null;
 
   return (
-    <QueryResult
-      loading={loading}
-      loadingType={"none"}
-      error={error}
-      data={data}
-    >
-      <section>
-        <div className={cs.subtitle}>
-          {!isParent ? "Description" : `Genus: ${title}`}
+    <section>
+      <div className={cs.subtitle}>
+        {!isParent ? "Description" : `Genus: ${title}`}
+      </div>
+      <div className={cx(cs.text, shouldCollapse && cs.collapsed)}>
+        <div ref={taxonDescriptionRef} data-testid={"taxon-description"}>
+          {summary}
+          <WikipediaLicenseWithApollo taxonName={title} wikiUrl={wikiUrl} />
         </div>
-        <div className={cx(cs.text, shouldCollapse && cs.collapsed)}>
-          <div ref={taxonDescriptionRef} data-testid={"taxon-description"}>
-            {summary}
-            <WikipediaLicenseWithApollo taxonName={title} wikiUrl={wikiUrl} />
-          </div>
-        </div>
-        {shouldCollapse && isTall && (
-          <button className={cs.expandLink} onClick={handleShowMore}>
-            Show More
-          </button>
-        )}
-      </section>
-    </QueryResult>
+      </div>
+      {shouldCollapse && isTall && (
+        <button className={cs.expandLink} onClick={handleShowMore}>
+          Show More
+        </button>
+      )}
+    </section>
   );
 };
