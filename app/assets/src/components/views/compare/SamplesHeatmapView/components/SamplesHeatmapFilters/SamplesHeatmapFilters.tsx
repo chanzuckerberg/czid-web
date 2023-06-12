@@ -400,10 +400,10 @@ const SamplesHeatmapFilters = ({
         </div>
         {allowedFeatures.includes(HEATMAP_PATHOGEN_FLAGGING_FEATURE) && (
           <div className={cs.taxonTagsContainer}>
-            <span className={cs.filterTitle}>Taxon Tags</span>
+            <span className={cs.filterTitle}>Pathogen Tags</span>
             <SamplesHeatmapTaxonTagCheckbox
               label={"Known Pathogens"}
-              value={"pathogens"}
+              value={"known_pathogens"}
               selectedOptions={selectedOptions}
               onSelectedOptionsChange={onSelectedOptionsChange}
               showInfoIcon={true}

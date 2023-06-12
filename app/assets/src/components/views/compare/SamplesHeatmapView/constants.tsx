@@ -21,6 +21,7 @@ export const HEATMAP_FILTERS = [
   "categories",
   "subcategories",
   "taxonsPerSample",
+  "taxonTags",
 ];
 
 export const HEATMAP_DOWNLOAD_CATEGORIES = ["reports", "images"];

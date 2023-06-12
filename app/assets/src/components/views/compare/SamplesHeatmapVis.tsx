@@ -130,7 +130,6 @@ class SamplesHeatmapVis extends React.Component<
         rowLabels: this.extractTaxonLabels(),
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
         values: this.props.data[this.props.metric],
-        pathogenFlags: this.props.pathogenFlagsData,
       },
       {
         customColorCallback: this.colorScale,
@@ -169,8 +168,6 @@ class SamplesHeatmapVis extends React.Component<
         shouldSortRows: this.props.taxaSortType === "genus", // else cluster
         // Shrink to fit the viewport width
         maxWidth: this.heatmapContainer.offsetWidth,
-        // TODO - smb - For now, we don't want to show the pathogen flags outlines - unclear which flag to put this behind
-        shouldShowPathogenFlagsOutlines: false,
       },
     );
     this.heatmap.start();

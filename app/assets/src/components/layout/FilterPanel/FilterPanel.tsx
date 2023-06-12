@@ -44,7 +44,7 @@ const StyledFilterPanel = styled(Drawer)<DrawerProps>(() => ({
     right: "0px",
     width: "fit-content",
     boxSizing: "border-box",
-    padding: "14px", // TODO - smb - make this sds-l
+    padding: "14px",
   },
   "& .MuiDrawer-paperAnchorLeft": {
     borderRight: `1px solid ${defaultTheme.palette.grey[200]}`,

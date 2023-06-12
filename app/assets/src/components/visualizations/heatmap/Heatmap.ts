@@ -44,7 +44,6 @@ export interface HeatmapData {
     pinned: boolean;
   }[];
   values: RowWithIndex[];
-  pathogenFlags?: string[][][];
 }
 
 type RowWithIndex = number[] & { idx?: number };
@@ -351,7 +350,6 @@ export default class Heatmap {
           rowIndex: i,
           columnIndex: j,
           value: this.data.values[i][j],
-          pathogenFlags: this.data.pathogenFlags?.[i]?.[j] ?? [],
         });
       }
     }
@@ -1508,65 +1506,6 @@ export default class Heatmap {
       .on("mouseleave", this.handleCellMouseLeave)
       .on("click", this.handleCellClick);
     applyFormat(cellsEnter);
-
-    // Pathogen Flags hacky outlines
-    if (this.options.shouldShowPathogenFlagsOutlines) {
-      const applySize = (nodes: $TSFixMe) => {
-        return nodes
-          .attr("width", this.cell.width - 2)
-          .attr("height", this.cell.height - 2)
-          .attr(
-            "x",
-            (d: $TSFixMe) =>
-              this.columnLabels[d.columnIndex].pos * this.cell.width + 1,
-          )
-          .attr(
-            "y",
-            (d: $TSFixMe) => this.cellYPosition(this.rowLabels[d.rowIndex]) + 1,
-          );
-      };
-
-      // need two layers to get the dashed outlines for lcrp + divergent
-      const pathogenFlagOutlinesLayer1 = applySize(
-        cells.enter().append("rect"),
-      );
-      const pathogenFlagOutlinesLayer2 = applySize(
-        cells.enter().append("rect"),
-      );
-
-      // apply the first layer, prioritizing lcrp
-      pathogenFlagOutlinesLayer1
-        .style("stroke", (d: $TSFixMe) => {
-          if (d.pathogenFlags?.includes("lcrp")) {
-            return "black";
-          } else if (d.pathogenFlags?.includes("divergent")) {
-            return "purple";
-          } else if (d.pathogenFlags?.includes("knownPathogen")) {
-            return "blue";
-          } else {
-            return "none";
-          }
-        })
-        .style("stroke-width", "5px")
-        .style("fill", "none");
-
-      // if divergent is also present, apply the second dashed layer
-      pathogenFlagOutlinesLayer2
-        .style("stroke", (d: $TSFixMe) => {
-          if (
-            d.pathogenFlags?.includes("lcrp") &&
-            d.pathogenFlags?.includes("divergent")
-          ) {
-            return "purple";
-          } else {
-            return "none";
-          }
-        })
-        .style("stroke-width", "5px")
-        .style("stroke-dasharray", "20,20")
-        .style("fill", "none");
-      // end of pathogen flags hacky outlines
-    }
   }
 
   renderRowLabels() {
