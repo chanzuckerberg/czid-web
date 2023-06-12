@@ -17,9 +17,10 @@ const DeleteSampleModalText = ({ workflow }: { workflow: WORKFLOW_VALUES }) => (
       <ListItem>
         Any bulk download files that contain the deleted runs.
       </ListItem>
-      {/* This bullet point should be removed once amr_v1 feature is out of beta */}
       {workflow === WORKFLOWS.SHORT_READ_MNGS.value && (
-        <ListItem>Any associated AMR reports.</ListItem>
+        <ListItem>
+          Any associated AMR reports labeled &quot;deprecated&quot;.
+        </ListItem>
       )}
     </List>
     <div>Here is how other artifacts will be affected:</div>
