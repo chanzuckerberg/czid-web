@@ -74,14 +74,14 @@ export const removeLaneFromName = (name: string, hasLaneConcatONT: boolean) => {
     // that don't show up in the output of `.match()`.
     const patterns = [
       // Example: ABC_pass_barcode_1.fastq, ABC_pass_barcode_2.fastq
-      // Diagram: https://jex.im/regulex/#!flags=i&re=(.*_pass_.*)_%5B0-9%5D%2B(%5C.fastq(%5C.gz)%3F)%3F%24
-      /(.*_pass_.*)_[0-9]+(\.fastq(\.gz)?)?$/i,
+      // Diagram: https://jex.im/regulex/#!flags=i&re=(.*_pass_.*)_%5B0-9%5D%2B((%3F%3A%5C.fastq%7C%5C.fq)(%5C.gz)%3F)%3F%24
+      /(.*_pass_.*)_[0-9]+((?:\.fastq|\.fq)(\.gz)?)?$/i,
 
       // Example 1: fastq_runid_b29e1e8d5b_1.fastq, fastq_runid_b29e1e8d5b_2.fastq
       // Example 2: fastq_runid_b29e1e8d5b_1_1.fastq, fastq_runid_b29e1e8d5b_2_1.fastq
       // Example 3: barcode01_fastq_runid_438c130_1_0-0005.fastq, barcode01_fastq_runid_438c130_2_0-00041.fastq
-      // Diagram: https://jex.im/regulex/#!flags=i&re=(.*fastq_runid_%5Ba-z0-9%5D%2B)_%5B0-9%5D%2B(%3F%3A%5B0-9a-z_%5C-%5D%2B)%3F(%5C.fastq(%5C.gz)%3F)%3F%24
-      /(.*fastq_runid_[a-z0-9]+)_[0-9]+(?:[0-9a-z_-]+)?(\.fastq(\.gz)?)?$/i,
+      // Diagram: https://jex.im/regulex/#!flags=i&re=(.*fastq_runid_%5Ba-z0-9%5D%2B)_%5B0-9%5D%2B(%3F%3A%5B0-9a-z_-%5D%2B)%3F((%3F%3A%5C.fastq%7C%5C.fq)(%5C.gz)%3F)%3F%24
+      /(.*fastq_runid_[a-z0-9]+)_[0-9]+(?:[0-9a-z_-]+)?((?:\.fastq|\.fq)(\.gz)?)?$/i,
     ];
 
     // If any pattern matches, return name + extension
