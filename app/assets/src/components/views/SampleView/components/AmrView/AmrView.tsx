@@ -18,7 +18,7 @@ import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { AMR_V2_FEATURE } from "~/components/utils/features";
 import { camelize, IdMap } from "~/components/utils/objectUtil";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import SampleReportContent from "../SampleReportContent";
+import SampleReportContent from "../../SampleReportContent";
 import cs from "./amr_view.scss";
 import { AmrFiltersContainer } from "./components/AmrFiltersContainer";
 import { countActiveFilters } from "./components/AmrFiltersContainer/utils";

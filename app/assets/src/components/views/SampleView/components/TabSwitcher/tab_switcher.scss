@@ -1,0 +1,27 @@
+@import "~czifui/dist/variables";
+
+.divider {
+  height: 3px;
+  background-color: $sds-color-gray-200;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.dividerContainer {
+  height: 2px;
+  padding: 30px 0;
+}
+
+.tabs {
+  .statusLabel {
+    margin-left: $sds-spaces-xs;
+    // To center without offsetting "indicator" line
+    margin-top: $sds-spaces-xxxs;
+    vertical-align: text-top;
+  }
+}
+
+.tabsContainer {
+  flex: 0 0 auto;
+}

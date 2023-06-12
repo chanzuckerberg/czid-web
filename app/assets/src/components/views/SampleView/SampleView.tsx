@@ -1,6 +1,5 @@
 import deepEqual from "fast-deep-equal";
 import {
-  compact,
   filter,
   find,
   get,
@@ -44,21 +43,15 @@ import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSideb
 import { CoverageVizParamsRaw } from "~/components/common/CoverageVizBottomSidebar/types";
 import { getCoverageVizParams } from "~/components/common/CoverageVizBottomSidebar/utils";
 import { UserContext } from "~/components/common/UserContext";
-import DeprecatedAmrView from "~/components/DeprecatedAmrView";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import Tabs from "~/components/ui/controls/Tabs";
 import {
   computeMngsReportTableValuesForCSV,
   createCSVObjectURL,
 } from "~/components/utils/csv";
 import {
-  AMR_DEPRECATED_FEATURE,
-  AMR_V1_FEATURE,
-  AMR_V2_FEATURE,
   BLAST_V1_FEATURE,
   MERGED_NT_NR_FEATURE,
   MULTITAG_PATHOGENS_FEATURE,
-  ONT_V1_FEATURE,
 } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import {
@@ -74,7 +67,6 @@ import {
   WORKFLOWS,
 } from "~/components/utils/workflows";
 import { SEQUENCING_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
-import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import {
   getAllGeneraPathogenCounts,
   getGeneraPathogenCounts,
@@ -95,11 +87,10 @@ import {
 } from "~/interface/sampleView";
 import { Background, Taxon } from "~/interface/shared";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
-import StatusLabel from "~ui/labels/StatusLabel";
 import { WORKFLOW_VALUES } from "../../utils/workflows";
 import { BlastModalInfo } from "../blast/constants";
-import { AmrView } from "./AmrView";
-import { MngsReport } from "./components/MngsReport";
+import { ReportPanel } from "./components/ReportPanel";
+import { TabSwitcher } from "./components/TabSwitcher";
 import {
   GENUS_LEVEL_INDEX,
   KEY_SAMPLE_VIEW_OPTIONS,
@@ -1024,18 +1015,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     }
   };
 
-  toggleSidebar = ({ mode }: { mode: "sampleDetails" | "taxonDetails" }) => {
-    const { sidebarMode, sidebarVisible } = this.state;
-    if (sidebarVisible && sidebarMode === mode) {
-      this.setState({ sidebarVisible: false });
-    } else {
-      this.setState({
-        sidebarMode: mode,
-        sidebarVisible: true,
-      });
-    }
-  };
-
   handleTaxonClick = (clickedTaxonData: Taxon) => {
     const { sidebarMode, sidebarVisible, sidebarTaxonData } = this.state;
 
@@ -1371,82 +1350,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     }
   };
 
-  computeWorkflowTabs = () => {
-    const { reportMetadata, sample } = this.state;
-    const { allowedFeatures = [] } = this.context || {};
-
-    /* customLabel field was added for long read mNGS
-    because the display name does not match the label field passed in the URL
-    from DiscoveryView. If another tab is added that needs a customized display name,
-    we should think about adding a config to handle tab logic and rendering. */
-    const customTab = (
-      value: string,
-      status: string,
-      customLabel?: string,
-    ) => ({
-      value: value,
-      label: (
-        <>
-          {customLabel || value}
-          <StatusLabel
-            className={cs.statusLabel}
-            inline
-            status={status}
-            type="beta"
-          />
-        </>
-      ),
-    });
-
-    const mergedNtNrTab = customTab(TABS.MERGED_NT_NR, "Prototype");
-    const amrBetaTab = customTab(TABS.AMR, "Beta");
-    const ontTab = customTab(
-      TABS.LONG_READ_MNGS,
-      "Beta",
-      WORKFLOWS.LONG_READ_MNGS.pluralizedLabel,
-    );
-
-    const {
-      [WORKFLOWS.SHORT_READ_MNGS.value]: shortReadMngs,
-      [WORKFLOWS.LONG_READ_MNGS.value]: longReadMngs,
-      [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
-      [WORKFLOWS.AMR.value]: amr,
-    } = getWorkflowCount(sample);
-
-    // only show deprecated label on old AMR tab to users who have the new AMR feature enabled
-    const deprecatedAmrLabel = allowedFeatures.includes(
-      AMR_V1_FEATURE || AMR_V2_FEATURE,
-    )
-      ? allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
-        reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
-        TABS.AMR_DEPRECATED
-      : allowedFeatures.includes(AMR_DEPRECATED_FEATURE) &&
-        reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
-        TABS.AMR;
-
-    const workflowTabs = compact([
-      shortReadMngs && TABS.SHORT_READ_MNGS,
-      longReadMngs && allowedFeatures.includes(ONT_V1_FEATURE) && ontTab,
-      shortReadMngs &&
-        allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
-        mergedNtNrTab,
-      shortReadMngs && deprecatedAmrLabel,
-      allowedFeatures.includes(AMR_V1_FEATURE) &&
-        !allowedFeatures.includes(AMR_V2_FEATURE) &&
-        amr &&
-        amrBetaTab,
-      allowedFeatures.includes(AMR_V2_FEATURE) && amr && TABS.AMR,
-      cg && TABS.CONSENSUS_GENOME,
-    ]);
-    if (isEmpty(workflowTabs)) {
-      return [
-        WORKFLOWS[findInWorkflows(sample.initial_workflow, "value")]?.label,
-      ];
-    } else {
-      return workflowTabs;
-    }
-  };
-
   handleViewClick = ({ view }: { view: SampleReportViewMode }) => {
     trackEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
     this.setState({ view }, () => {
@@ -1519,31 +1422,6 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
     });
   };
 
-  renderConsensusGenomeView = () => {
-    return (
-      this.state.sample && (
-        <ConsensusGenomeView
-          onWorkflowRunSelect={this.handleWorkflowRunSelect}
-          sample={this.state.sample}
-          loadingResults={this.state.loadingWorkflowRunResults}
-          workflowRun={this.getCurrentRun() as WorkflowRun}
-          workflowRunResults={this.state.workflowRunResults}
-        />
-      )
-    );
-  };
-
-  renderAmrView = () => {
-    return (
-      this.state.sample && (
-        <AmrView
-          sample={this.state.sample}
-          workflowRun={this.getCurrentRun() as WorkflowRun}
-        />
-      )
-    );
-  };
-
   render() {
     const {
       amrDeprecatedData,
@@ -1608,62 +1486,48 @@ class SampleView extends React.Component<SampleViewProps, SampleViewState> {
               onDeleteRunSuccess={this.handleDeleteCurrentRun}
             />
           </div>
-          <div className={cs.tabsContainer}>
-            {sample && this.computeWorkflowTabs().length ? (
-              <Tabs
-                className={cs.tabs}
-                tabs={this.computeWorkflowTabs()}
-                value={currentTab}
-                onChange={this.handleTabChange}
-              />
-            ) : (
-              <div className={cs.dividerContainer}>
-                <div className={cs.divider} />
-              </div>
-            )}
-          </div>
-          {(currentTab === TABS.SHORT_READ_MNGS ||
-            currentTab === TABS.LONG_READ_MNGS ||
-            currentTab === TABS.MERGED_NT_NR) && (
-            <MngsReport
-              backgrounds={backgrounds}
-              currentTab={currentTab}
-              clearAllFilters={this.clearAllFilters}
-              enableMassNormalizedBackgrounds={
-                this.state.enableMassNormalizedBackgrounds
-              }
-              filteredReportData={this.state.filteredReportData}
-              handleAnnotationUpdate={this.fetchSampleReportData}
-              handleBlastClick={this.handleBlastClick}
-              handleConsensusGenomeClick={this.handleConsensusGenomeClick}
-              handleCoverageVizClick={this.handleCoverageVizClick}
-              handlePreviousConsensusGenomeClick={
-                this.handlePreviousConsensusGenomeClick
-              }
-              handleOptionChanged={this.handleOptionChanged}
-              handleTaxonClick={this.handleTaxonClick}
-              handleViewClick={this.handleViewClick}
-              refreshDataFromOptionsChange={this.refreshDataFromOptionsChange}
-              lineageData={this.state.lineageData}
-              loadingReport={this.state.loadingReport}
-              ownedBackgrounds={this.state.ownedBackgrounds}
-              otherBackgrounds={this.state.otherBackgrounds}
-              pipelineRun={pipelineRun}
-              project={project}
-              reportData={this.state.reportData}
-              reportMetadata={reportMetadata}
-              sample={sample}
-              selectedOptions={selectedOptions}
-              snapshotShareId={snapshotShareId}
-              view={view}
-            />
-          )}
-          {currentTab === TABS.AMR_DEPRECATED && amrDeprecatedData && (
-            <DeprecatedAmrView amr={amrDeprecatedData} />
-          )}
-          {currentTab === TABS.AMR && this.renderAmrView()}
-          {currentTab === TABS.CONSENSUS_GENOME &&
-            this.renderConsensusGenomeView()}
+          <TabSwitcher
+            currentTab={currentTab}
+            handleTabChange={this.handleTabChange}
+            reportMetadata={reportMetadata}
+            sample={sample}
+          />
+          <ReportPanel
+            amrDeprecatedData={amrDeprecatedData}
+            backgrounds={backgrounds}
+            currentTab={currentTab}
+            currentRun={this.getCurrentRun()}
+            clearAllFilters={this.clearAllFilters}
+            enableMassNormalizedBackgrounds={
+              this.state.enableMassNormalizedBackgrounds
+            }
+            filteredReportData={this.state.filteredReportData}
+            handleAnnotationUpdate={this.fetchSampleReportData}
+            handleBlastClick={this.handleBlastClick}
+            handleConsensusGenomeClick={this.handleConsensusGenomeClick}
+            handleCoverageVizClick={this.handleCoverageVizClick}
+            handlePreviousConsensusGenomeClick={
+              this.handlePreviousConsensusGenomeClick
+            }
+            handleOptionChanged={this.handleOptionChanged}
+            handleTaxonClick={this.handleTaxonClick}
+            handleViewClick={this.handleViewClick}
+            handleWorkflowRunSelect={this.handleWorkflowRunSelect}
+            refreshDataFromOptionsChange={this.refreshDataFromOptionsChange}
+            lineageData={this.state.lineageData}
+            loadingReport={this.state.loadingReport}
+            loadingWorkflowRunResults={this.state.loadingWorkflowRunResults}
+            ownedBackgrounds={this.state.ownedBackgrounds}
+            otherBackgrounds={this.state.otherBackgrounds}
+            project={project}
+            reportData={this.state.reportData}
+            reportMetadata={reportMetadata}
+            sample={sample}
+            selectedOptions={selectedOptions}
+            snapshotShareId={snapshotShareId}
+            view={view}
+            workflowRunResults={this.state.workflowRunResults}
+          />
         </NarrowContainer>
         {sample && (
           <DetailsSidebarSwitcher

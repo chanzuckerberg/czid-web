@@ -5,8 +5,8 @@ import { trackEvent } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { AMR_HELP_LINK } from "~/components/utils/documentationLinks";
 import { openUrl } from "~/components/utils/links";
+import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import Sample, { WorkflowRun } from "~/interface/sample";
-import { getWorkflowRunZipLink } from "../../../../report/utils/download";
 import cs from "./amr_output_download_view.scss";
 
 interface AmrOutputDownloadViewProps {

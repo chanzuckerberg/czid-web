@@ -18,12 +18,12 @@ import { labelToVal, WORKFLOWS } from "~/components/utils/workflows";
 import { ThresholdFilterData } from "~/interface/dropdown";
 import { AmrFilterSelections, FilterSelections } from "~/interface/sampleView";
 import { Entries } from "~/interface/shared";
-import { countActiveFilters } from "../views/SampleView/AmrView/components/AmrFiltersContainer/utils";
-import { AmrResult } from "../views/SampleView/AmrView/components/AmrSampleReport/types";
+import { countActiveFilters } from "../views/SampleView/components/AmrView/components/AmrFiltersContainer/utils";
+import { AmrResult } from "../views/SampleView/components/AmrView/components/AmrSampleReport/types";
 import {
   ColumnSection,
   SECTION_TO_COLUMN_IDS,
-} from "../views/SampleView/AmrView/constants";
+} from "../views/SampleView/components/AmrView/constants";
 import {
   BACKGROUND_FIELDS,
   TAXON_COUNT_TYPE_METRICS,
