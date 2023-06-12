@@ -93,7 +93,7 @@
       "files": ["*.ts", "*.tsx"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
-        "project": ["app/assets/tsconfig.json", "e2e/tsconfig.json"]
+        "project": ["app/assets/tsconfig.json", "e2e/tsconfig.json", "./tsconfig.json"]
       },
       "plugins": ["@typescript-eslint/eslint-plugin"],
       "rules": {

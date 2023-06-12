@@ -5,6 +5,7 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import Histogram, {
   HISTOGRAM_SCALE,
 } from "~/components/visualizations/Histogram";
+import { TaxonDistributionQuery } from "~/gql/generated/graphql";
 import { federationClient } from "~/index";
 import { Background } from "~/interface/shared/specific";
 import { HISTOGRAM_PREFIX } from "../constants";
@@ -48,9 +49,7 @@ export const TaxonHistogramWithApollo = ({
     console.error("Unable to retrieve background info", error);
   }
 
-  const evaluateData = (data: {
-    taxonDist?: { nt: { rpmList: number[] }; nr: { rpmList: number[] } };
-  }) => {
+  const evaluateData = (data: TaxonDistributionQuery) => {
     const dist = data?.taxonDist;
     if (dist?.nt?.rpmList && dist?.nr?.rpmList) {
       const rpmSeries = [dist.nt.rpmList, dist.nr.rpmList];

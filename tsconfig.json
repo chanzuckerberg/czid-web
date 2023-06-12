@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "importHelpers": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": false,
+    "jsx": "react",
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    "outDir": "build",
+    "removeComments": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strictNullChecks": false,
+    "target": "esnext",
+    "baseUrl": "src",
+    "paths": {
+      "src/*": [
+        "./src/*",
+      ],
+      "~/*": ["./*"],
+      "~ui/*": ["./components/ui/*"],
+      "~utils/*": ["./components/utils/*"],
+      "styles/*": ["./styles/*"],
+      "e2e": ["./e2e/*.ts|json"],
+    }
+  },
+  "include": [
+    "./codegen.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
