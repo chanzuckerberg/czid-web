@@ -1,42 +1,46 @@
 import cx from "classnames";
-import { startCase } from "lodash/fp";
+import { find } from "lodash/fp";
 import React from "react";
 import { trackEvent } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { Project, SampleFromApi } from "~/interface/shared";
+import { UploadStepType } from "~/interface/upload";
 import Label from "~ui/labels/Label";
 import cs from "./sample_upload_flow.scss";
 
 const MENU_OPTIONS = [
   {
     text: "Samples",
-    step: "uploadSamples",
+    step: UploadStepType.SampleStep,
+    title: "Select Samples",
   },
   {
     text: "Metadata",
-    step: "uploadMetadata",
+    step: UploadStepType.MetadataStep,
+    title: "Upload Metadata",
   },
   {
     text: "Review",
-    step: "review",
+    step: UploadStepType.ReviewStep,
+    title: "Review",
   },
 ];
 
 interface SampleUploadFlowHeaderProps {
-  currentStep: string;
+  currentStep: UploadStepType;
   samples?: SampleFromApi[];
   project?: Project;
-  onStepSelect: $TSFixMeFunction;
-  stepsEnabled?: Record<string, boolean>;
+  onStepSelect(UploadStepType): void;
+  stepsEnabled?: Record<UploadStepType, boolean>;
 }
 
 class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps> {
-  isStepEnabled = (step: string) => {
+  isStepEnabled = (step: UploadStepType) => {
     return this.props.stepsEnabled[step];
   };
 
-  onStepSelect = (step: string) => {
+  onStepSelect = (step: UploadStepType) => {
     if (this.isStepEnabled(step)) {
       this.props.onStepSelect(step);
     }
@@ -44,13 +48,15 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
 
   render() {
     const { currentStep } = this.props;
+    const { title } = find(opt => currentStep === opt.step, MENU_OPTIONS);
+
     return (
       <div className={cs.headerWrapper}>
         <NarrowContainer>
           <div className={cs.sampleUploadFlowHeader}>
             <div className={cs.titleContainer}>
-              <div className={cs.title}>{startCase(currentStep)}</div>
-              {currentStep === "uploadSamples" && (
+              <div className={cs.title}>{title}</div>
+              {currentStep === UploadStepType.SampleStep && (
                 <div className={cs.subtitle}>
                   Rather use our command-line interface?
                   <ExternalLink
@@ -61,13 +67,13 @@ class SampleUploadFlowHeader extends React.Component<SampleUploadFlowHeaderProps
                   </ExternalLink>
                 </div>
               )}
-              {currentStep === "uploadMetadata" && (
+              {currentStep === UploadStepType.MetadataStep && (
                 <div className={cs.subtitle}>
                   This metadata will provide context around your samples and
                   results in CZ ID.
                 </div>
               )}
-              {currentStep === "review" && (
+              {currentStep === UploadStepType.ReviewStep && (
                 <div className={cs.subtitle}>
                   Uploading {this.props.samples.length} samples to{" "}
                   {this.props.project.name}

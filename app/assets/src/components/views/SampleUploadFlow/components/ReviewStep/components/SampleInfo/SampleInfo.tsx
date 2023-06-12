@@ -8,6 +8,7 @@ import {
   Project,
   SampleFromApi,
 } from "~/interface/shared";
+import { UploadStepType } from "~/interface/upload";
 import AdminUploadOptions from "./components/AdminUploadOptions/AdminUploadOptions";
 import { ReviewTable } from "./components/ReviewTable";
 import cs from "./sample_info.scss";
@@ -49,7 +50,7 @@ const SampleInfo = ({
           <div
             className={cs.link}
             onClick={() => {
-              onLinkClick("uploadSamples");
+              onLinkClick(UploadStepType.SampleStep);
               trackEvent("ReviewStep_edit-samples-link_clicked", {
                 projectId: id,
                 projectName: name,
@@ -63,7 +64,7 @@ const SampleInfo = ({
           <div
             className={cs.link}
             onClick={() => {
-              onLinkClick("uploadMetadata");
+              onLinkClick(UploadStepType.MetadataStep);
               trackEvent("ReviewStep_edit-metadata-link_clicked", {
                 projectId: id,
                 projectName: name,

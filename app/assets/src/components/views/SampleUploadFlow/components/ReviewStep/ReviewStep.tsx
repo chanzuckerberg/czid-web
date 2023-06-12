@@ -13,6 +13,7 @@ import {
   ProjectPipelineVersions,
   SampleFromApi,
 } from "~/interface/shared";
+import { UploadStepType } from "~/interface/upload";
 import Checkbox from "~ui/controls/Checkbox";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { Technology, UploadWorkflows, UPLOAD_WORKFLOWS } from "../../constants";
@@ -36,7 +37,7 @@ interface ReviewStepProps {
   // Triggers when we start or stop uploading. Lets the parent know to disable header link.
   onUploadComplete: $TSFixMeFunction;
   onUploadStatusChange?: $TSFixMeFunction;
-  onStepSelect?: $TSFixMeFunction;
+  onStepSelect?(UploadStepType): void;
   originalHostGenomes?: HostGenome[];
   pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
   project?: Project;
@@ -94,7 +95,7 @@ class ReviewStep extends React.Component<ReviewStepProps, ReviewStepState> {
     this.setState({});
   };
 
-  onLinkClick = (link: string) => {
+  onLinkClick = (link: UploadStepType) => {
     const areLinksEnabled = !this.state.showUploadModal;
 
     if (areLinksEnabled) {

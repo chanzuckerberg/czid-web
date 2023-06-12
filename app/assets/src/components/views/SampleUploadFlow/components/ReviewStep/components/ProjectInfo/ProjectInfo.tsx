@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { trackEvent } from "~/api/analytics";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import { Project } from "~/interface/shared";
+import { UploadStepType } from "~/interface/upload";
 import cs from "./project_info.scss";
 
 interface ProjectTypeProps {
@@ -49,7 +50,7 @@ const ProjectInfo = ({
           <div
             className={cs.link}
             onClick={() => {
-              onLinkClick("uploadSamples");
+              onLinkClick(UploadStepType.SampleStep);
               trackEvent("ReviewStep_edit-project-link_clicked", {
                 projectId: id,
                 projectName: name,

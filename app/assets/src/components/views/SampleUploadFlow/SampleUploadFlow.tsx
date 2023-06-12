@@ -15,6 +15,7 @@ import {
   ProjectPipelineVersions,
   SampleFromApi,
 } from "~/interface/shared";
+import { UploadStepType } from "~/interface/upload";
 import { ReviewStep } from "./components/ReviewStep";
 import { RefSeqAccessionDataType } from "./components/UploadSampleStep/types";
 import UploadSampleStep from "./components/UploadSampleStep/UploadSampleStep";
@@ -34,7 +35,7 @@ interface SampleUploadFlowProps {
 
 interface SampleUploadFlowState {
   workflows: Set<UploadWorkflows>;
-  currentStep: string;
+  currentStep: UploadStepType;
   samples?: SampleFromApi[];
   uploadType: "remote" | "local" | "";
   project: Project;
@@ -51,9 +52,9 @@ interface SampleUploadFlowState {
   pipelineVersions: { [projectId: string]: ProjectPipelineVersions };
   technology?: Technology;
   stepsEnabled: {
-    uploadSamples: boolean;
-    uploadMetadata: boolean;
-    review: boolean;
+    [UploadStepType.SampleStep]: boolean;
+    [UploadStepType.MetadataStep]: boolean;
+    [UploadStepType.ReviewStep]: boolean;
   };
   hostGenomes: HostGenome[];
   wetlabProtocol?: string;
@@ -61,7 +62,7 @@ interface SampleUploadFlowState {
 
 class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   state: SampleUploadFlowState = {
-    currentStep: "uploadSamples",
+    currentStep: UploadStepType.SampleStep,
     // Sample upload information
     samples: null,
     uploadType: "", // remote or local
@@ -80,9 +81,9 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     pipelineVersions: {} as { [projectId: string]: ProjectPipelineVersions },
     technology: null,
     stepsEnabled: {
-      uploadSamples: true,
-      uploadMetadata: false,
-      review: false,
+      [UploadStepType.SampleStep]: true,
+      [UploadStepType.MetadataStep]: false,
+      [UploadStepType.ReviewStep]: false,
     },
     hostGenomes: [], // set on metadata upload
     workflows: new Set() as Set<UploadWorkflows>,
@@ -119,7 +120,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
       bedFile,
       clearlabs,
       technology,
-      currentStep: "uploadMetadata",
+      currentStep: UploadStepType.MetadataStep,
       guppyBasecallerSetting,
       medakaModel,
       project,
@@ -128,7 +129,11 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
       refSeqTaxon,
       sampleNamesToFiles,
       samples,
-      stepsEnabled: set("uploadMetadata", true, this.state.stepsEnabled),
+      stepsEnabled: set(
+        UploadStepType.MetadataStep,
+        true,
+        this.state.stepsEnabled,
+      ),
       uploadType,
       wetlabProtocol,
       workflows,
@@ -202,8 +207,12 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
       samples: newSamples,
       metadata: newMetadata,
       metadataIssues: issues,
-      currentStep: "review",
-      stepsEnabled: set("review", true, this.state.stepsEnabled),
+      currentStep: UploadStepType.ReviewStep,
+      stepsEnabled: set(
+        UploadStepType.ReviewStep,
+        true,
+        this.state.stepsEnabled,
+      ),
       hostGenomes: updatedHostGenomes,
     });
   };
@@ -211,9 +220,9 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   samplesChanged = () => {
     this.setState({
       stepsEnabled: {
-        uploadSamples: true,
-        uploadMetadata: false,
-        review: false,
+        [UploadStepType.SampleStep]: true,
+        [UploadStepType.MetadataStep]: false,
+        [UploadStepType.ReviewStep]: false,
       },
     });
   };
@@ -221,9 +230,9 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   metadataChanged = () => {
     this.setState({
       stepsEnabled: {
-        uploadSamples: true,
-        uploadMetadata: true,
-        review: false,
+        [UploadStepType.SampleStep]: true,
+        [UploadStepType.MetadataStep]: true,
+        [UploadStepType.ReviewStep]: false,
       },
     });
   };
@@ -244,7 +253,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
     }));
   };
 
-  handleStepSelect = (step: string) => {
+  handleStepSelect = (step: UploadStepType) => {
     this.setState({
       currentStep: step,
     });
@@ -259,7 +268,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
         <UploadSampleStep
           onDirty={this.samplesChanged}
           onUploadSamples={this.handleUploadSamples}
-          visible={this.state.currentStep === "uploadSamples"}
+          visible={this.state.currentStep === UploadStepType.SampleStep}
           basespaceClientId={this.props.basespaceClientId}
           basespaceOauthRedirectUri={this.props.basespaceOauthRedirectUri}
           admin={this.props.admin}
@@ -275,7 +284,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
             samples={this.state.samples}
             // @ts-expect-error Property 'name' is optional in type this.state.project but required in UploadMetadataStep
             project={this.state.project}
-            visible={this.state.currentStep === "uploadMetadata"}
+            visible={this.state.currentStep === UploadStepType.MetadataStep}
             onDirty={this.metadataChanged}
             workflows={workflows}
           />
@@ -300,7 +309,7 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
             samples={this.state.samples}
             technology={this.state.technology}
             uploadType={this.state.uploadType}
-            visible={this.state.currentStep === "review"}
+            visible={this.state.currentStep === UploadStepType.ReviewStep}
             wetlabProtocol={wetlabProtocol}
             workflows={workflows}
           />
@@ -312,9 +321,9 @@ class SampleUploadFlow extends React.Component<SampleUploadFlowProps> {
   onUploadStatusChange = (uploadStatus: boolean) => {
     this.setState({
       stepsEnabled: {
-        uploadSamples: !uploadStatus,
-        uploadMetadata: !uploadStatus,
-        review: !uploadStatus,
+        [UploadStepType.SampleStep]: !uploadStatus,
+        [UploadStepType.MetadataStep]: !uploadStatus,
+        [UploadStepType.ReviewStep]: !uploadStatus,
       },
     });
   };

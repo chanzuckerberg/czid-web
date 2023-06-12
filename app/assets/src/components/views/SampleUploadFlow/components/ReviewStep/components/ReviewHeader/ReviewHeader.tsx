@@ -3,6 +3,7 @@ import React from "react";
 import { ANALYTICS_EVENT_NAMES, trackEvent } from "~/api/analytics";
 import cs from "~/components/views/SampleUploadFlow/components/ReviewStep/review_step.scss";
 import { Project } from "~/interface/shared";
+import { UploadStepType } from "~/interface/upload";
 
 interface ReviewHeaderType {
   areLinksEnabled: boolean;
@@ -23,7 +24,7 @@ const ReviewHeader = ({
       <div
         className={cs.link}
         onClick={() => {
-          onLinkClick("uploadSamples");
+          onLinkClick(UploadStepType.SampleStep);
           trackEvent(
             ANALYTICS_EVENT_NAMES.REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED,
             {
