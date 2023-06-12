@@ -367,7 +367,7 @@ class TableRenderers extends React.Component {
   static formatPercentage = value => {
     if (!value) return value;
     const rounded = TableRenderers.formatNumber(value);
-    return rounded < 0.01 ? "<0.01%" : `${rounded}%`;
+    return rounded < 0.01 ? "<0.01%" : `${Math.min(100, rounded)}%`;
   };
 
   static formatDuration = runtime => {

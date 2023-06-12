@@ -54,6 +54,7 @@ import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreat
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
+import { CreationSource } from "~/interface/sample";
 import {
   PipelineTypeRun,
   SamplesViewHandle,
@@ -84,7 +85,6 @@ import {
   SARS_COV_2,
   TRIGGERS,
   UPLOAD_FAILED,
-  WGS,
   WORKFLOW_TRIGGERS,
 } from "./constants";
 import cs from "./samples_view.scss";
@@ -478,7 +478,7 @@ const SamplesView = forwardRef(function SamplesView(
 
   const getSendToNextcladeCount = () => {
     return selectedObjects
-      .filter(obj => obj.creation_source !== WGS)
+      .filter(obj => obj.creation_source !== CreationSource.WGS)
       .map(object => get(["referenceAccession", "taxonName"], object))
       .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);

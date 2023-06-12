@@ -199,4 +199,11 @@
 
 .downloadLink {
   margin-left: $sds-spaces-xxs;
+  margin-top: $sds-spaces-xxxs;
+}
+
+.customReference {
+  &:hover {
+    color: $sds-color-primary-400;
+  }
 }

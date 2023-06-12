@@ -38,8 +38,7 @@ export const getTooltipStyle = (
 export const FIELDS_METADATA = {
   totalReadsCg: {
     label: "Total Reads",
-    tooltip:
-      "The total number of single-end reads uploaded. Each end of the paired-end reads count as one read.",
+    tooltip: "The total number of reads after human read removal.",
   },
   gcPercent: {
     label: "GC Content",

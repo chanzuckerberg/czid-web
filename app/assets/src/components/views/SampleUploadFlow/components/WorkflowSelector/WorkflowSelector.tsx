@@ -175,7 +175,16 @@ const WorkflowSelector = ({
               supports Illumina. You can also run the AMR pipeline from within
               an existing project by selecting previously uploaded mNGS samples.
               You can check out the AMR pipeline on Github{" "}
-              <ExternalLink href={AMR_PIPELINE_GITHUB_LINK}>here</ExternalLink>.
+              {shouldDisableWorkflow(UPLOAD_WORKFLOWS.AMR.value) ? (
+                "here."
+              ) : (
+                <>
+                  <ExternalLink href={AMR_PIPELINE_GITHUB_LINK}>
+                    here
+                  </ExternalLink>
+                  .
+                </>
+              )}
             </>
           }
           isBeta={!allowedFeatures.includes(AMR_V2_FEATURE)}

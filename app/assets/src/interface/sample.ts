@@ -12,6 +12,7 @@ export interface WorkflowRun {
   inputs?: {
     accession_id: string;
     accession_name: string;
+    creation_source: CreationSource;
     ref_fasta: string;
     taxon_id: number;
     taxon_name: string;
@@ -77,4 +78,10 @@ export default interface Sample {
   };
   project_id: number;
   status: SampleStatus;
+}
+
+export enum CreationSource {
+  COVID = "SARS-CoV-2 Upload",
+  WGS = "Viral CG Upload",
+  MNGS = "mNGS Report",
 }

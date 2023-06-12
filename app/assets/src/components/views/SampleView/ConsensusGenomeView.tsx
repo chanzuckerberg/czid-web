@@ -16,7 +16,7 @@ import Histogram, {
 } from "~/components/visualizations/Histogram";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
-import Sample, { WorkflowRun } from "~/interface/sample";
+import Sample, { CreationSource, WorkflowRun } from "~/interface/sample";
 import { WorkflowRunResults } from "~/interface/sampleView";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
@@ -194,18 +194,20 @@ const ConsensusGenomeView = ({
           length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
         }),
       );
+
       const accessionID =
         workflowRunResults.taxon_info.accession_id ?? "Unknown accession";
-      let taxonName = "";
+
       // accessionName for WGS could not exist, if so fall back to taxonName
-      if (workflowRunResults.taxon_info.accession_name) {
-        taxonName = workflowRunResults.taxon_info.accession_name;
-      } else if (workflowRunResults.taxon_info.taxon_name) {
-        taxonName = workflowRunResults.taxon_info.taxon_name;
-      } else {
-        taxonName = "Unknown taxon";
-      }
-      const subtext = `${accessionID} - ${taxonName}`;
+      const taxonName =
+        workflowRunResults.taxon_info.accession_name ??
+        workflowRunResults.taxon_info.taxon_name ??
+        "Unknown taxon";
+
+      const { creation_source: creationSource, ref_fasta: refFasta } =
+        workflowRun.inputs ?? {};
+      const isWGS = creationSource === CreationSource.WGS;
+      const subtext = isWGS ? refFasta : `${accessionID} - ${taxonName}`;
 
       new Histogram(coverageVizContainerRef.current, [coverageVizData], {
         barOpacity: 1,
@@ -297,8 +299,9 @@ const ConsensusGenomeView = ({
         sdsStyle="minimal"
         isAllCaps
         onClick={downloadCustomRefFile}
+        className={cs.customReference}
       >
-        <Icon sdsIcon="download" sdsSize="s" sdsType="interactive" />
+        <Icon sdsIcon="download" sdsSize="xs" sdsType="button" />
         <span className={cs.downloadLink}>Download</span>
       </Button>
     );

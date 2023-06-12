@@ -13,10 +13,8 @@ import {
   NEXTCLADE_APP_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
 } from "~/components/utils/documentationLinks";
-import {
-  SARS_COV_2,
-  WGS,
-} from "~/components/views/samples/SamplesView/constants";
+import { SARS_COV_2 } from "~/components/views/samples/SamplesView/constants";
+import { CreationSource } from "~/interface/sample";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
@@ -93,7 +91,11 @@ export default class NextcladeModal extends React.Component<
     // WGS samples cannot be sent to nextclade, and other cg uploads can only
     // be sent if they are SC2 samples, even if they are uploaded via cli
     const samplesNotSentToNextclade = workflowRunInfo
-      .filter(cg => cg.taxonName !== SARS_COV_2 || cg.creationSource === WGS)
+      .filter(
+        cg =>
+          cg.taxonName !== SARS_COV_2 ||
+          cg.creationSource === CreationSource.WGS,
+      )
       .map(cg => cg.name);
 
     this.setState(
